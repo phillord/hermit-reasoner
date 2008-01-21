@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl 'http://www.w3.org/2002/07/owl#'>
+    <!ENTITY xsd 'http://www.w3.org/2001/XMLSchema#'>
+]>
+
+<rdf:RDF
+    xml:base="http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine"
+    xmlns:a="http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+
+<owl:Ontology rdf:about=""/>
+
+<owl:Class rdf:ID="Chianti">
+    <rdfs:subClassOf>
+        <owl:Restriction>
+            <owl:onProperty rdf:resource="#hasSugar"/>
+            <owl:hasValue rdf:resource="#Dry"/>
+        </owl:Restriction>
+    </rdfs:subClassOf>
+</owl:Class>
+
+<owl:ObjectProperty rdf:ID="hasSugar"/>
+
+</rdf:RDF>

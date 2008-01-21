@@ -1,0 +1,3 @@
+atLeast(1 a:s a:c)(X) :- a:s(X,Y), q:0(Y)
+a:d(X) :- a:r(X,Y), q:0(Y)
+q:0(X) :- a:s(X,Y), a:c(Y)

@@ -1,0 +1,157 @@
+package org.semanticweb.HermiT.hierarchy;
+
+import java.util.Set;
+import java.util.HashSet;
+import java.util.TreeSet;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.io.Serializable;
+
+import org.semanticweb.HermiT.model.*;
+import org.semanticweb.HermiT.tableau.*;
+
+/**
+ * A subsumption checker that uses the tableau to perform the check.
+ */
+public class TableauSubsumptionChecker implements SubsumptionHierarchy.SubsumptionChecker,Serializable {
+    private static final long serialVersionUID=-2023801882010561315L;
+
+    protected final Tableau m_tableau;
+    protected final Set<String> m_allAtomicClasses;
+    protected final Map<AtomicConcept,AtomicConceptInfo> m_atomicConceptInfos;
+
+    public TableauSubsumptionChecker(Tableau tableau) {
+        m_tableau=tableau;
+        m_allAtomicClasses=new TreeSet<String>();
+        for (AtomicConcept atomicConcept : m_tableau.getDLOntology().getAllAtomicConcepts())
+            if (!atomicConcept.getURI().startsWith("internal:"))
+                m_allAtomicClasses.add(atomicConcept.getURI());
+        m_atomicConceptInfos=new HashMap<AtomicConcept,AtomicConceptInfo>();
+    }
+    public Set<String> getAllAtomicClasses() {
+        return m_allAtomicClasses;
+    }
+    public boolean isSatisfiable(String conceptName) {
+        AtomicConcept concept=AtomicConcept.create(conceptName);
+        AtomicConceptInfo atomicConceptInfo=getAtomicConceptInfo(concept);
+        if (atomicConceptInfo.m_isSatisfiable==null) {
+            boolean isSatisfiable=m_tableau.isSatisfiable(concept);
+            atomicConceptInfo.m_isSatisfiable=(isSatisfiable ? Boolean.TRUE : Boolean.FALSE);
+            if (isSatisfiable) {
+                updateKnownSubsumers(concept);
+                updatePossibleSubsumers();
+            }
+        }
+        return atomicConceptInfo.m_isSatisfiable;
+    }
+    public boolean isSubsumedBy(String subconceptName,String superconceptName) {
+        AtomicConcept subconcept=AtomicConcept.create(subconceptName);
+        AtomicConcept superconcept=AtomicConcept.create(superconceptName);
+        if (AtomicConcept.THING.equals(superconcept))
+            return true;
+        if (AtomicConcept.NOTHING.equals(superconcept))
+            return false;
+        AtomicConceptInfo subconceptInfo=getAtomicConceptInfo(subconcept);
+        if (subconceptInfo.isKnownSubsumer(superconcept))
+            return true;
+        else if (subconceptInfo.isKnownNotSubsumer(superconcept))
+            return false;
+        else if (!m_tableau.isDeterministic()) {
+            boolean isSubsumedBy=m_tableau.isSubsumedBy(subconcept,superconcept);
+            if (!isSubsumedBy) {
+                subconceptInfo.m_isSatisfiable=Boolean.TRUE;
+                updateKnownSubsumers(subconcept);
+                updatePossibleSubsumers();
+            }
+            else {
+                subconceptInfo.addKnownSubsumer(superconcept);
+            }
+            return isSubsumedBy;
+        }
+        else {
+            isSatisfiable(subconceptName);
+            assert subconceptInfo.m_allSubsumersKnown;
+            return subconceptInfo.isKnownSubsumer(superconcept);
+        }
+    }
+    protected void updateKnownSubsumers(AtomicConcept subconcept) {
+        Node checkedNode=m_tableau.getCheckedNode().getCanonicalNode();
+        AtomicConceptInfo subconceptInfo=getAtomicConceptInfo(subconcept);
+        for (Concept concept : checkedNode.getPositiveLabel()) {
+            if (concept instanceof AtomicConcept) {
+                DependencySet dependencySet=m_tableau.getExtensionManager().getConceptAssertionDependencySet(concept,checkedNode);
+                if (dependencySet.isEmpty())
+                    subconceptInfo.addKnownSubsumer((AtomicConcept)concept);
+            }
+        }
+        if (m_tableau.isCurrentModelDeterministic())
+            subconceptInfo.setAllSubsumersKnown();
+    }
+    protected void updatePossibleSubsumers() {
+        ExtensionTable.Retrieval retrieval=m_tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,false },ExtensionTable.View.TOTAL);
+        retrieval.open();
+        Object[] tupleBuffer=retrieval.getTupleBuffer();
+        while (!retrieval.afterLast()) {
+            Object conceptObject=tupleBuffer[0];
+            if (conceptObject instanceof AtomicConcept) {
+                AtomicConcept atomicConcept=(AtomicConcept)conceptObject;
+                Node node=(Node)tupleBuffer[1];
+                if (!node.isBlocked())
+                    getAtomicConceptInfo(atomicConcept).updatePossibleSubsumers(node.getPositiveLabel());
+            }
+            retrieval.next();
+        }
+    }
+    protected AtomicConceptInfo getAtomicConceptInfo(AtomicConcept atomicConcept) {
+        AtomicConceptInfo result=m_atomicConceptInfos.get(atomicConcept);
+        if (result==null) {
+            result=new AtomicConceptInfo();
+            m_atomicConceptInfos.put(atomicConcept,result);
+        }
+        return result;
+    }
+    
+    protected static final class AtomicConceptInfo implements Serializable {
+        private static final long serialVersionUID=2370809671193223969L;
+
+        protected Boolean m_isSatisfiable;
+        protected Set<AtomicConcept> m_knownSubsumers;
+        protected Set<AtomicConcept> m_possibleSubsumers;
+        protected boolean m_allSubsumersKnown;
+        
+        public boolean isKnownSubsumer(AtomicConcept potentialSubsumer) {
+            return m_knownSubsumers!=null && m_knownSubsumers.contains(potentialSubsumer);
+        }
+        public void addKnownSubsumer(AtomicConcept atomicConcept) {
+            if (m_knownSubsumers==null)
+                m_knownSubsumers=new HashSet<AtomicConcept>();
+            m_knownSubsumers.add(atomicConcept);
+        }
+        public void setAllSubsumersKnown() {
+            m_allSubsumersKnown=true;
+            m_possibleSubsumers=m_knownSubsumers;
+        }
+        public boolean isKnownNotSubsumer(AtomicConcept potentialSubsumer) {
+            return (!isKnownSubsumer(potentialSubsumer) && m_allSubsumersKnown) || (m_possibleSubsumers!=null && !m_possibleSubsumers.contains(potentialSubsumer));
+        }
+        public void updatePossibleSubsumers(Set<Concept> positiveLabel) {
+            if (!m_allSubsumersKnown) {
+                if (m_possibleSubsumers==null) {
+                    m_possibleSubsumers=new HashSet<AtomicConcept>();
+                    for (Concept concept : positiveLabel)
+                        if (concept instanceof AtomicConcept)
+                            m_possibleSubsumers.add((AtomicConcept)concept);
+                }
+                else {
+                    Iterator<AtomicConcept> iterator=m_possibleSubsumers.iterator();
+                    while (iterator.hasNext()) {
+                        AtomicConcept atomicConcept=iterator.next();
+                        if (!positiveLabel.contains(atomicConcept))
+                            iterator.remove();
+                    }
+                }
+            }
+        }
+    }
+}
