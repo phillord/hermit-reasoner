@@ -8,8 +8,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Collections;
 
-import org.semanticweb.kaon2.util.*;
-
 /**
  * This interface contains some well-known namespaces.
  */
@@ -51,7 +49,7 @@ public class Namespaces implements Serializable {
         s_wellKnownNamespaces.put("swrlb",SWRLB_NS);
         s_wellKnownNamespaces.put("swrlx",SWRLX_NS);
         s_wellKnownNamespaces.put("ruleml",RULEML_NS);
-        s_wellKnownNamespaces.put(KAON2Version.PRODUCT_NS,KAON2_NS);
+        s_wellKnownNamespaces.put("kaon2",KAON2_NS);
     }
     /** The set of reserved namespaces and prefixes. */
     protected static final Set<String> s_reservedPrefixes=new HashSet<String>();

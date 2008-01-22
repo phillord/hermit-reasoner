@@ -118,7 +118,7 @@ public class SubsumptionHierarchy implements Set<SubsumptionHierarchyNode>,Seria
         Set<SubsumptionHierarchyNode> topSet=new HashSet<SubsumptionHierarchyNode>();
         Set<SubsumptionHierarchyNode> visited=new HashSet<SubsumptionHierarchyNode>();
         Map<String,SubsumptionType> subsumptionCache=new HashMap<String,SubsumptionType>();
-        topSearch(newClassURI,(SubsumptionHierarchyNode)getNodeFor(AtomicConcept.THING.getURI()),subsumptionChecker,topSet,visited,subsumptionCache);
+        topSearch(newClassURI,getNodeFor(AtomicConcept.THING.getURI()),subsumptionChecker,topSet,visited,subsumptionCache);
         if (topSet.size()==1) {
             SubsumptionHierarchyNode node=topSet.iterator().next();
             if (subsumptionChecker.isSubsumedBy(node.m_representativeURI,newClassURI)) {
@@ -130,7 +130,7 @@ public class SubsumptionHierarchy implements Set<SubsumptionHierarchyNode>,Seria
         Set<SubsumptionHierarchyNode> bottomSet=new HashSet<SubsumptionHierarchyNode>();
         visited.clear();
         subsumptionCache.clear();
-        bottomSearch(newClassURI,(SubsumptionHierarchyNode)getNodeFor(AtomicConcept.NOTHING.getURI()),subsumptionChecker,bottomSet,visited,subsumptionCache);
+        bottomSearch(newClassURI,getNodeFor(AtomicConcept.NOTHING.getURI()),subsumptionChecker,bottomSet,visited,subsumptionCache);
         SubsumptionHierarchyNode newNode=getNodeForEx(newClassURI);
         for (SubsumptionHierarchyNode topNode : topSet) {
             topNode.m_childNodes.removeAll(bottomSet);
@@ -147,11 +147,10 @@ public class SubsumptionHierarchy implements Set<SubsumptionHierarchyNode>,Seria
         visited.add(current);
         List<SubsumptionHierarchyNode> toExamine=null;
         for (SubsumptionHierarchyNode child : current.m_childNodes) {
-            SubsumptionHierarchyNode childStub=(SubsumptionHierarchyNode)child;
-            if (topSubsumes(childStub.m_representativeURI,newClassURI,subsumptionChecker,subsumptionCache)) {
+            if (topSubsumes(child.m_representativeURI,newClassURI,subsumptionChecker,subsumptionCache)) {
                 if (toExamine==null)
                     toExamine=new LinkedList<SubsumptionHierarchyNode>();
-                toExamine.add(childStub);
+                toExamine.add(child);
             }
         }
         if (toExamine==null)
@@ -183,11 +182,10 @@ public class SubsumptionHierarchy implements Set<SubsumptionHierarchyNode>,Seria
         visited.add(current);
         List<SubsumptionHierarchyNode> toExamine=null;
         for (SubsumptionHierarchyNode child : current.m_parentNodes) {
-            SubsumptionHierarchyNode childStub=(SubsumptionHierarchyNode)child;
-            if (bottomSubsumes(newClassURI,childStub.m_representativeURI,subsumptionChecker,subsumptionCache)) {
+            if (bottomSubsumes(newClassURI,child.m_representativeURI,subsumptionChecker,subsumptionCache)) {
                 if (toExamine==null)
                     toExamine=new LinkedList<SubsumptionHierarchyNode>();
-                toExamine.add(childStub);
+                toExamine.add(child);
             }
         }
         if (toExamine==null)
