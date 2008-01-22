@@ -17,14 +17,14 @@ public class RunHermiT {
 //        System.setOut(new java.io.PrintStream(new java.io.FileOutputStream("c:\\temp\\transcript.txt"),true));
         
         HermiT hermit=new HermiT();
-//        hermit.setExistentialsType(HermiT.ExistentialsType.INDIVIDUAL_REUSE);
+        hermit.setExistentialsType(HermiT.ExistentialsType.INDIVIDUAL_REUSE);
         hermit.setTimingOn();
 //        hermit.setDebuggingOn(true);
 
 //        hermit.loadOntology("file:/C:/Temp/galen-module1-no-functionality.owl");
 //        hermit.loadOntology("file:/C:/Work/ontologies/GALEN/galen-module1.owl");
 //        hermit.loadOntology("file:/C:/Temp/full-galen-no-functionality.owl");
-        hermit.loadOntology("file:/C:/Work/ontologies/GALEN/galen-ians-full-undoctored.owl");
+//        hermit.loadOntology("file:/C:/Work/ontologies/GALEN/galen-ians-full-undoctored.owl");
 //        hermit.loadOntology("file:/C:/Work/ontologies/GALEN/galen-ians-full-doctored.owl");
 //        hermit.loadOntology("file:/C:/Work/My%20Papers/2007/Representing%20and%20Reasoning%20about%20Structured%20Objects%20in%20OWL/ontologies/galen-ians-full-undoctored-modified.owl");
 //        hermit.loadOntology("file:/C:/Work/My%20Papers/2007/Representing%20and%20Reasoning%20about%20Structured%20Objects%20in%20OWL/ontologies/fma-module2.owl");
@@ -39,7 +39,7 @@ public class RunHermiT {
 //        System.out.println("Number of atomic concepts: "+hermit.getDLOntology().getAllAtomicConcepts().size());
 //        System.out.println(hermit.getDLOntology().toString(hermit.getNamespaces()));
         
-//        hermit.loadDLOntology(new java.io.File("C:\\Temp\\galen-module1.ser"));
+        hermit.loadDLOntology(new java.io.File("C:\\Temp\\galen-module1.ser"));
 //        hermit.getDLOntology().save(new java.io.File("C:\\Temp\\galen-module1.ser"));
 //        hermit.save(new java.io.File("C:\\Temp\\galen-ians-full-undoctored.ser"));
 //        hermit=HermiT.load(new java.io.File("C:\\Temp\\galen-ians-full-undoctored-good-run.ser"));
@@ -52,7 +52,7 @@ public class RunHermiT {
 //        hermit.isSubsumedBy("http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteLoire","http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FrenchWine");
 
         /* These are the hard tests in 'galen-ians-full-undoctored.owl'. They require backtracking in the presence of individual reuse. */
-//        hermit.isSubsumedBy("http://www.co-ode.org/ontologies/galen#AbdominalCavity","http://www.co-ode.org/ontologies/galen#ActualCavity");
+        hermit.isSubsumedBy("http://www.co-ode.org/ontologies/galen#AbdominalCavity","http://www.co-ode.org/ontologies/galen#ActualCavity");
 //        hermit.isSubsumedBy("http://www.co-ode.org/ontologies/galen#AbdominalAorta","http://www.co-ode.org/ontologies/galen#ArteryWhichHasLaterality");
 //        hermit.isSubsumedBy("http://www.co-ode.org/ontologies/galen#AlcoholicGastritis","http://www.co-ode.org/ontologies/galen#Duodenitis");
 //        hermit.isSubsumedBy("http://www.co-ode.org/ontologies/galen#CapsuleOfKnee","http://www.co-ode.org/ontologies/galen#JointCapsule");
@@ -67,7 +67,7 @@ public class RunHermiT {
 //        hermit.isSatisfiable("http://www.co-ode.org/ontologies/galen#AcuteErosionOfStomach");
 //        hermit.isSatisfiable("http://www.co-ode.org/ontologies/galen#AnteriorCruciateLigament");
         
-        subsumptionHierarchy=hermit.getSubsumptionHierarchy();
+//        subsumptionHierarchy=hermit.getSubsumptionHierarchy();
 
         long duration=System.currentTimeMillis()-start;
         System.out.println("The reasoning task took "+duration+" ms");

@@ -119,7 +119,10 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
     protected DLOntology getDLOntology() throws Exception {
         Clausification clausification=new Clausification();
         Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
-        return clausification.clausify(m_ontology,true,noDescriptionGraphs);
+        return clausification.clausify(shouldPrepareForNIRule(),m_ontology,true,noDescriptionGraphs);
+    }
+    protected boolean shouldPrepareForNIRule() {
+        return false;
     }
     protected Tableau getTableau() throws Exception {
         DLOntology dlOntology=getDLOntology();

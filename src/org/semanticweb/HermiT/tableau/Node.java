@@ -118,7 +118,10 @@ public final class Node implements Serializable {
         m_blockingObject=blockingObject;
     }
     public boolean isMerged() {
-        return m_mergedInto!=null;
+        return m_nodeState==NodeState.MERGED;
+    }
+    public boolean isPruned() {
+        return m_nodeState==NodeState.PRUNED;
     }
     public boolean isInTableau() {
         return m_nodeState==NodeState.IN_TABLEAU;

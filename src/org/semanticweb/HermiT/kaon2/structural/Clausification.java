@@ -22,12 +22,12 @@ public class Clausification {
     protected static final org.semanticweb.HermiT.model.Variable X=org.semanticweb.HermiT.model.Variable.create("X");
     protected static final org.semanticweb.HermiT.model.Variable Y=org.semanticweb.HermiT.model.Variable.create("Y");
 
-    public DLOntology clausify(Ontology ontology,boolean processTransitivity,Collection<DescriptionGraph> descriptionGraphs) throws KAON2Exception {
+    public DLOntology clausify(boolean prepareForNIRule,Ontology ontology,boolean processTransitivity,Collection<DescriptionGraph> descriptionGraphs) throws KAON2Exception {
         Normalization normalization=new Normalization(processTransitivity);
         normalization.processOntology(ontology);
-        return clausify(ontology.getOntologyURI(),normalization.getConceptInclusions(),normalization.getNormalObjectPropertyInclusions(),normalization.getInverseObjectPropertyInclusions(),normalization.getFacts(),descriptionGraphs,normalization.getRules());
+        return clausify(prepareForNIRule,ontology.getOntologyURI(),normalization.getConceptInclusions(),normalization.getNormalObjectPropertyInclusions(),normalization.getInverseObjectPropertyInclusions(),normalization.getFacts(),descriptionGraphs,normalization.getRules());
     }
-    public DLOntology clausify(String ontologyURI,Collection<Description[]> conceptInclusions,Collection<ObjectPropertyExpression[]> normalObjectPropertyInclusions,Collection<ObjectPropertyExpression[]> inverseObjectPropertyInclusions,Collection<Fact> facts,Collection<DescriptionGraph> descriptionGraphs,Collection<Rule> additionalRules) throws KAON2Exception {
+    public DLOntology clausify(boolean prepareForNIRule,String ontologyURI,Collection<Description[]> conceptInclusions,Collection<ObjectPropertyExpression[]> normalObjectPropertyInclusions,Collection<ObjectPropertyExpression[]> inverseObjectPropertyInclusions,Collection<Fact> facts,Collection<DescriptionGraph> descriptionGraphs,Collection<Rule> additionalRules) throws KAON2Exception {
         DetermineExpressivity determineExpressivity=new DetermineExpressivity();
         for (Description[] inclusion : conceptInclusions)
             for (Description description : inclusion)
@@ -59,7 +59,7 @@ public class Clausification {
             DLClause dlClause=DLClause.create(new Atom[][] { { superRoleAtom } },new Atom[] { subRoleAtom });
             dlClauses.add(dlClause);
         }
-        Clausifier clausifier=new Clausifier(positiveFacts,determineExpressivity.m_hasAtMostRestrictions && determineExpressivity.m_hasInverseRoles && determineExpressivity.m_hasNominals);
+        Clausifier clausifier=new Clausifier(positiveFacts,determineExpressivity.m_hasAtMostRestrictions && determineExpressivity.m_hasInverseRoles && (determineExpressivity.m_hasNominals || prepareForNIRule));
         for (Description[] inclusion : conceptInclusions) {
             for (Description description : inclusion)
                 description.accept(clausifier);

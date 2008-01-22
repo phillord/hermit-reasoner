@@ -15,7 +15,7 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
         m_directBlockingChecker=directBlockingChecker;
         m_blockingCache=blockingCache;
     }
-    public void setTableau(Tableau tableau) {
+    public void initialize(Tableau tableau) {
         m_tableau=tableau;
     }
     public void clear() {

@@ -23,7 +23,7 @@ public class CreationOrderStrategy implements ExistentialsExpansionStrategy,Seri
         m_extensionManager=m_tableau.getExtensionManager();
         m_existentialExpansionManager=m_tableau.getExistentialExpansionManager();
         m_descriptionGraphManager=m_tableau.getDescriptionGraphManager();
-        m_blockingStrategy.setTableau(m_tableau);
+        m_blockingStrategy.initialize(m_tableau);
     }
     public void clear() {
         m_blockingStrategy.clear();

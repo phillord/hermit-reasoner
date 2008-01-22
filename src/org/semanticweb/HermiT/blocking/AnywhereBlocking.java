@@ -19,7 +19,7 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
         m_blockingCache=blockingCache;
         m_currentModelCache=new BlockingCache(directBlockingChecker);
     }
-    public void setTableau(Tableau tableau) {
+    public void initialize(Tableau tableau) {
         m_tableau=tableau;
     }
     public void clear() {

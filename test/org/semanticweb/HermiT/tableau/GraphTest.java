@@ -179,7 +179,7 @@ public class GraphTest extends AbstractOntologyTest {
     }
     protected DLOntology getDLOntology() throws Exception {
         Clausification clausification=new Clausification();
-        return clausification.clausify(m_ontology,true,m_descriptionGraphs);
+        return clausification.clausify(shouldPrepareForNIRule(),m_ontology,true,m_descriptionGraphs);
     }
     protected static DescriptionGraph G(String[] vertexAtomicConcepts,DescriptionGraph.Edge[] edges,String[] startAtomicConcepts) {
         AtomicConcept[] atomicConceptsByVertices=new AtomicConcept[vertexAtomicConcepts.length];

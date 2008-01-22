@@ -99,7 +99,7 @@ public class HermiT implements Serializable {
     public void loadKAON2Ontology(Ontology ontology) throws KAON2Exception {
         Clausification clausification=new Clausification();
         Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
-        DLOntology dlOntology=clausification.clausify(ontology,true,noDescriptionGraphs);
+        DLOntology dlOntology=clausification.clausify(m_existentialsType==ExistentialsType.INDIVIDUAL_REUSE,ontology,true,noDescriptionGraphs);
         loadDLOntology(dlOntology);
     }
     public void loadDLOntology(File file) throws Exception {
@@ -147,53 +147,51 @@ public class HermiT implements Serializable {
             break;
         }
 
+        DirectBlockingChecker directBlockingChecker=null;
+        switch (m_directBlockingType) {
+        case OPTIMAL:
+            directBlockingChecker=(m_dlOntology.hasAtMostRestrictions() && m_dlOntology.hasInverseRoles() ? PairWiseDirectBlockingChecker.INSTANCE : EqualityDirectBlockingChecker.INSTANCE);
+            break;
+        case EQUALITY:
+            directBlockingChecker=EqualityDirectBlockingChecker.INSTANCE;
+            break;
+        case PAIR_WISE:
+            directBlockingChecker=PairWiseDirectBlockingChecker.INSTANCE;
+            break;
+        }
+        
+        BlockingCache blockingCache=null;
+        if (!dlOntology.hasNominals()) {
+            switch (m_blockingCacheType) {
+            case CACHED:
+                blockingCache=new BlockingCache(directBlockingChecker);
+                break;
+            case NOT_CACHED:
+                blockingCache=null;
+                break;
+            }
+        }
+        
+        BlockingStrategy blockingStrategy=null;
+        switch (m_blockingType) {
+        case ANCESTOR:
+            blockingStrategy=new AncestorBlocking(directBlockingChecker,blockingCache);
+            break;
+        case ANYWHERE:
+            blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingCache);
+            break;
+        }
+        
         ExistentialsExpansionStrategy existentialsExpansionStrategy=null;
         switch (m_existentialsType) {
         case CREATION_ORDER:
-            {
-                DirectBlockingChecker directBlockingChecker=null;
-                switch (m_directBlockingType) {
-                case OPTIMAL:
-                    directBlockingChecker=(m_dlOntology.hasAtMostRestrictions() && m_dlOntology.hasInverseRoles() ? PairWiseDirectBlockingChecker.INSTANCE : EqualityDirectBlockingChecker.INSTANCE);
-                    break;
-                case EQUALITY:
-                    directBlockingChecker=EqualityDirectBlockingChecker.INSTANCE;
-                    break;
-                case PAIR_WISE:
-                    directBlockingChecker=PairWiseDirectBlockingChecker.INSTANCE;
-                    break;
-                }
-                
-                BlockingCache blockingCache=null;
-                if (!dlOntology.hasNominals()) {
-                    switch (m_blockingCacheType) {
-                    case CACHED:
-                        blockingCache=new BlockingCache(directBlockingChecker);
-                        break;
-                    case NOT_CACHED:
-                        blockingCache=null;
-                        break;
-                    }
-                }
-                
-                BlockingStrategy blockingStrategy=null;
-                switch (m_blockingType) {
-                case ANCESTOR:
-                    blockingStrategy=new AncestorBlocking(directBlockingChecker,blockingCache);
-                    break;
-                case ANYWHERE:
-                    blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingCache);
-                    break;
-                }
-                
-                existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
-            }
+            existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
             break;
         case EL:
-            existentialsExpansionStrategy=new IndividualReuseStrategy(true);
+            existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,true);
             break;
         case INDIVIDUAL_REUSE:
-            existentialsExpansionStrategy=new IndividualReuseStrategy(false);
+            existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,false);
             break;
         }
 

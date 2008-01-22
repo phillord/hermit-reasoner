@@ -177,6 +177,8 @@ public final class ExistentialExpansionManager implements Serializable {
     public boolean tryFunctionalExpansion(AtLeastAbstractRoleConcept atLeastAbstractRoleConcept,Node forNode) {
         if (atLeastAbstractRoleConcept.getNumber()==1) {
             if (getFunctionalExpansionNode(atLeastAbstractRoleConcept.getOnAbstractRole(),forNode,m_auxiliaryTuple)) {
+                if (m_tableau.m_tableauMonitor!=null)
+                    m_tableau.m_tableauMonitor.existentialExpansionStarted(atLeastAbstractRoleConcept,forNode);
                 Node functionalityNode=(Node)m_auxiliaryTuple[0];
                 DependencySet roleAssertionDependencySet=(DependencySet)m_auxiliaryTuple[1];
                 DependencySet existentialDependencySet=m_extensionManager.getConceptAssertionDependencySet(atLeastAbstractRoleConcept,forNode);
@@ -202,47 +204,55 @@ public final class ExistentialExpansionManager implements Serializable {
                     m_extensionManager.addRoleAssertion(atLeastAbstractRoleConcept.getOnAbstractRole(),forNode,functionalityNode,unionDependencySet);
                     m_extensionManager.addConceptAssertion(atLeastAbstractRoleConcept.getToConcept(),functionalityNode,unionDependencySet);
                 }
+                if (m_tableau.m_tableauMonitor!=null)
+                    m_tableau.m_tableauMonitor.existentialExpansionFinished(atLeastAbstractRoleConcept,forNode);
                 return true;
             }
         }
         else if (atLeastAbstractRoleConcept.getNumber()>1 && m_functionalAbstractRoles.containsKey(atLeastAbstractRoleConcept.getOnAbstractRole())) {
+            if (m_tableau.m_tableauMonitor!=null)
+                m_tableau.m_tableauMonitor.existentialExpansionStarted(atLeastAbstractRoleConcept,forNode);
             DependencySet existentialDependencySet=m_extensionManager.getConceptAssertionDependencySet(atLeastAbstractRoleConcept,forNode);
             m_extensionManager.setClash(existentialDependencySet);
-            if (m_tableau.m_tableauMonitor!=null)
+            if (m_tableau.m_tableauMonitor!=null) {
                 m_tableau.m_tableauMonitor.clashDetected(new Object[] { atLeastAbstractRoleConcept,forNode });
+                m_tableau.m_tableauMonitor.existentialExpansionFinished(atLeastAbstractRoleConcept,forNode);
+            }
             return true;
         }
         return false;
     }
-    public void expand(AtLeastAbstractRoleConcept atLeastAbstractRoleConcept,Node forNode) {
+    public void doNormalExpansion(AtLeastAbstractRoleConcept atLeastAbstractRoleConcept,Node forNode) {
         if (m_tableau.m_tableauMonitor!=null)
             m_tableau.m_tableauMonitor.existentialExpansionStarted(atLeastAbstractRoleConcept,forNode);
-        if (!tryFunctionalExpansion(atLeastAbstractRoleConcept,forNode)) {
-            DependencySet existentialDependencySet=m_extensionManager.getConceptAssertionDependencySet(atLeastAbstractRoleConcept,forNode);
-            int cardinality=atLeastAbstractRoleConcept.getNumber();
-            if (cardinality==1) {
+        DependencySet existentialDependencySet=m_extensionManager.getConceptAssertionDependencySet(atLeastAbstractRoleConcept,forNode);
+        int cardinality=atLeastAbstractRoleConcept.getNumber();
+        if (cardinality==1) {
+            Node newNode=m_tableau.createNewTreeNode(forNode,existentialDependencySet);
+            m_extensionManager.addRoleAssertion(atLeastAbstractRoleConcept.getOnAbstractRole(),forNode,newNode,existentialDependencySet);
+            m_extensionManager.addConceptAssertion(atLeastAbstractRoleConcept.getToConcept(),newNode,existentialDependencySet);
+        }
+        else {
+            m_auxiliaryNodes1.clear();
+            for (int index=0;index<cardinality;index++) {
                 Node newNode=m_tableau.createNewTreeNode(forNode,existentialDependencySet);
                 m_extensionManager.addRoleAssertion(atLeastAbstractRoleConcept.getOnAbstractRole(),forNode,newNode,existentialDependencySet);
                 m_extensionManager.addConceptAssertion(atLeastAbstractRoleConcept.getToConcept(),newNode,existentialDependencySet);
+                m_auxiliaryNodes1.add(newNode);
             }
-            else {
-                m_auxiliaryNodes1.clear();
-                for (int index=0;index<cardinality;index++) {
-                    Node newNode=m_tableau.createNewTreeNode(forNode,existentialDependencySet);
-                    m_extensionManager.addRoleAssertion(atLeastAbstractRoleConcept.getOnAbstractRole(),forNode,newNode,existentialDependencySet);
-                    m_extensionManager.addConceptAssertion(atLeastAbstractRoleConcept.getToConcept(),newNode,existentialDependencySet);
-                    m_auxiliaryNodes1.add(newNode);
-                }
-                for (int outerIndex=0;outerIndex<cardinality;outerIndex++) {
-                    Node outerNode=m_auxiliaryNodes1.get(outerIndex);
-                    for (int innerIndex=outerIndex+1;innerIndex<cardinality;innerIndex++)
-                        m_extensionManager.addAssertion(Inequality.INSTANCE,outerNode,m_auxiliaryNodes1.get(innerIndex),existentialDependencySet);
-                }
-                m_auxiliaryNodes1.clear();
+            for (int outerIndex=0;outerIndex<cardinality;outerIndex++) {
+                Node outerNode=m_auxiliaryNodes1.get(outerIndex);
+                for (int innerIndex=outerIndex+1;innerIndex<cardinality;innerIndex++)
+                    m_extensionManager.addAssertion(Inequality.INSTANCE,outerNode,m_auxiliaryNodes1.get(innerIndex),existentialDependencySet);
             }
+            m_auxiliaryNodes1.clear();
         }
         if (m_tableau.m_tableauMonitor!=null)
             m_tableau.m_tableauMonitor.existentialExpansionFinished(atLeastAbstractRoleConcept,forNode);
+    }
+    public void expand(AtLeastAbstractRoleConcept atLeastAbstractRoleConcept,Node forNode) {
+        if (!tryFunctionalExpansion(atLeastAbstractRoleConcept,forNode))
+            doNormalExpansion(atLeastAbstractRoleConcept,forNode);
     }
     protected Map<AbstractRole,AbstractRole[]> buildFunctionalRoles() {
         Set<AbstractRole> functionalRoles=new HashSet<AbstractRole>();

@@ -90,6 +90,6 @@ public class SyntacticClassifier {
         Ontology ontology=connection.openOntology(ontologyURI,new HashMap<String,Object>());
         Clausification clausification=new Clausification();
         Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
-        return clausification.clausify(ontology,true,noDescriptionGraphs);
+        return clausification.clausify(false,ontology,true,noDescriptionGraphs);
     }
 }
