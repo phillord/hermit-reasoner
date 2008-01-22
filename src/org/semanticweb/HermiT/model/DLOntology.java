@@ -33,17 +33,19 @@ public class DLOntology implements Serializable {
     protected final boolean m_hasInverseRoles;
     protected final boolean m_hasAtMostRestrictions;
     protected final boolean m_hasNominals;
+    protected final boolean m_canUseNIRule;
     protected final boolean m_isHorn;
     protected final Set<AtomicConcept> m_allAtomicConcepts;
     protected final Set<DescriptionGraph> m_allDescriptionGraphs;
 
-    public DLOntology(String ontologyURI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts,boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals) {
+    public DLOntology(String ontologyURI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts,boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,boolean canUseNIRule) {
         m_ontologyURI=ontologyURI;
         m_dlClauses=dlClauses;
         m_positiveFacts=positiveFacts;
         m_negativeFacts=negativeFacts;
         m_hasInverseRoles=hasInverseRoles;
         m_hasAtMostRestrictions=hasAtMostRestrictions;
+        m_canUseNIRule=canUseNIRule;
         m_hasNominals=hasNominals;
         m_allAtomicConcepts=new TreeSet<AtomicConcept>(AtomicConceptComparator.INSTANCE);
         m_allDescriptionGraphs=new HashSet<DescriptionGraph>();
@@ -108,6 +110,9 @@ public class DLOntology implements Serializable {
     }
     public boolean hasNominals() {
         return m_hasNominals;
+    }
+    public boolean canUseNIRule() {
+        return m_canUseNIRule;
     }
     public boolean isHorn() {
         return m_isHorn;

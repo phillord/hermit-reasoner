@@ -21,7 +21,7 @@ public abstract class AbstractHermiTTest extends TestCase {
     static {
         Set<DLClause> dlClauses=Collections.emptySet();
         Set<Atom> atoms=Collections.emptySet();
-        EMPTY_DL_ONTOLOGY=new DLOntology("opaque:test",dlClauses,atoms,atoms,false,false,false);
+        EMPTY_DL_ONTOLOGY=new DLOntology("opaque:test",dlClauses,atoms,atoms,false,false,false,false);
     }
 
     public AbstractHermiTTest(String name) {

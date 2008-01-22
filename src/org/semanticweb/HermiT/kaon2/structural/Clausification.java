@@ -59,7 +59,8 @@ public class Clausification {
             DLClause dlClause=DLClause.create(new Atom[][] { { superRoleAtom } },new Atom[] { subRoleAtom });
             dlClauses.add(dlClause);
         }
-        Clausifier clausifier=new Clausifier(positiveFacts,determineExpressivity.m_hasAtMostRestrictions && determineExpressivity.m_hasInverseRoles && (determineExpressivity.m_hasNominals || prepareForNIRule));
+        boolean shouldUseNIRule=determineExpressivity.m_hasAtMostRestrictions && determineExpressivity.m_hasInverseRoles && (determineExpressivity.m_hasNominals || prepareForNIRule);
+        Clausifier clausifier=new Clausifier(positiveFacts,shouldUseNIRule);
         for (Description[] inclusion : conceptInclusions) {
             for (Description description : inclusion)
                 description.accept(clausifier);
@@ -74,7 +75,7 @@ public class Clausification {
             descriptionGraph.produceStartDLClauses(dlClauses);
         for (Rule rule : additionalRules)
             dlClauses.add(convertRule(rule));
-        return new DLOntology(ontologyURI,dlClauses,positiveFacts,negativeFacts,determineExpressivity.m_hasInverseRoles,determineExpressivity.m_hasAtMostRestrictions,determineExpressivity.m_hasNominals);
+        return new DLOntology(ontologyURI,dlClauses,positiveFacts,negativeFacts,determineExpressivity.m_hasInverseRoles,determineExpressivity.m_hasAtMostRestrictions,determineExpressivity.m_hasNominals,shouldUseNIRule);
     }
     protected static Atom getAbstractRoleAtom(ObjectPropertyExpression objectProperty,org.semanticweb.HermiT.model.Term first,org.semanticweb.HermiT.model.Term second) {
         objectProperty=objectProperty.getSimplified();

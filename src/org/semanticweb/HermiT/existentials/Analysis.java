@@ -141,7 +141,7 @@ public class Analysis {
     protected ExtensionTable buildExtensionTable(Map<AtomicConcept,Node> representativeNodes,Map<Node,AtomicConcept> conceptForNode,Map<NodePair,Node> arcCauses) {
         Set<DLClause> noDLClauses=Collections.emptySet();
         Set<Atom> noAtoms=Collections.emptySet();
-        DLOntology emptyDLOntology=new DLOntology("nothing",noDLClauses,noAtoms,noAtoms,false,false,false);
+        DLOntology emptyDLOntology=new DLOntology("nothing",noDLClauses,noAtoms,noAtoms,false,false,false,false);
         Tableau tableau=new Tableau(null,new CreationOrderStrategy(null),new MostRecentDisjunctionProcessingStrategy(),emptyDLOntology);
         ExtensionTable extensionTable=new ExtensionTableWithTupleIndexes(tableau,tableau.getExtensionManager(),3,false,new TupleIndex[] { new TupleIndex(new int[] { 0,1,2 }) });
         DependencySet emptySet=tableau.getDependencySetFactory().emptySet();
