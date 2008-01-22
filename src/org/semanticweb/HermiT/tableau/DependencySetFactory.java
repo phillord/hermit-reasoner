@@ -16,6 +16,9 @@ public final class DependencySetFactory implements Serializable {
         m_emptySet=new DependencySet(null,-1,null);
         clear();
     }
+    public int size() {
+        return m_entries.length*4+m_size*20;
+    }
     public void clear() {
         m_emptySet.m_nextEntry=null;
         m_entries=new DependencySet[16];

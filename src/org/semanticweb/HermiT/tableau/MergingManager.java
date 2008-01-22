@@ -38,9 +38,12 @@ public final class MergingManager {
         else if (node0.isGloballyUnique() || node1.isGloballyUnique()) {
             m_extensionManager.m_clashDependencySet=dependencySet;
             if (m_tableauMonitor!=null) {
-                Object[] auxiliaryTuple1=new Object[] { Equality.INSTANCE,node0,node1 };
-                Object[] auxiliaryTuple2=new Object[] { Inequality.INSTANCE,node0,node1 };
-                m_tableauMonitor.clashDetected(auxiliaryTuple1,auxiliaryTuple2);
+                if (m_tableauMonitor!=null)
+                    m_tableauMonitor.mergeStarted(node0,node1);
+                Object[] auxiliaryTuple=new Object[] { Equality.INSTANCE,node0,node1 };
+                m_tableauMonitor.clashDetected(auxiliaryTuple);
+                if (m_tableauMonitor!=null)
+                    m_tableauMonitor.mergeFinished(node0,node1);
             }
             return true;
         }

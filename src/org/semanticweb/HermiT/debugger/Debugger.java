@@ -725,19 +725,24 @@ public class Debugger extends TableauMonitorForwarder {
         boolean add=true;
         for (int index=1;index<commandLine.length;index++) {
             String argument=commandLine[index];
+            WaitOption waitOption=null;
             if ("+".equals(argument))
                 add=true;
             else if ("-".equals(argument))
                 add=false;
             else if ("gexists".equals(argument))
-                modifyWaitOptions(WaitOption.GRAPH_EXPANSION,add);
+                waitOption=WaitOption.GRAPH_EXPANSION;
             else if ("exists".equals(argument))
-                modifyWaitOptions(WaitOption.EXISTENTIAL_EXPANSION,add);
+                waitOption=WaitOption.EXISTENTIAL_EXPANSION;
             else if ("clash".equals(argument))
-                modifyWaitOptions(WaitOption.CLASH,add);
+                waitOption=WaitOption.CLASH;
             else {
                 m_output.println("Invalid wait option '"+argument+"'.");
                 return;
+            }
+            if (waitOption!=null) {
+                modifyWaitOptions(waitOption,add);
+                m_output.println("Will "+(add ? "" : "not")+"wait for "+waitOption+".");
             }
         }
     }

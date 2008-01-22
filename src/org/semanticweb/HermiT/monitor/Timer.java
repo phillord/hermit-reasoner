@@ -81,6 +81,20 @@ public class Timer extends TableauMonitorAdapter {
                 System.out.print(m_numberOfBacktrackings);
             }
             System.out.println();
+            System.out.print("    Binary table size:   ");
+            System.out.print(m_tableau.getExtensionManager().getBinaryExtensionTable().size()/1000);
+            System.out.print("kb    Ternary table size: ");
+            System.out.print(m_tableau.getExtensionManager().getTernaryExtensionTable().size()/1000);
+            System.out.print("kb    Dependency set factory size: ");
+            System.out.print(m_tableau.getDependencySetFactory().size()/1000);
+            System.out.println("kb");
+            System.out.print("    Concept set factory: ");
+            System.out.print(m_tableau.getConceptSetFactory().size()/1000);
+            System.out.print("kb    Role set factory:   ");
+            System.out.print(m_tableau.getAtomicAbstractRoleSetFactory().size()/1000);
+            System.out.print("kb    Existential set factory:   ");
+            System.out.print(m_tableau.getExistentialConceptSetFactory().size()/1000);
+            System.out.println("kb");
             m_lastStatusTime=System.currentTimeMillis();
         }
     }

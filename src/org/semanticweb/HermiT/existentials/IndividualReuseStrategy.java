@@ -1,14 +1,12 @@
 package org.semanticweb.HermiT.existentials;
 
-//import java.util.List;
-//import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
 import java.io.Serializable;
 
-import org.semanticweb.HermiT.blocking.BlockingStrategy;
+import org.semanticweb.HermiT.blocking.*;
 import org.semanticweb.HermiT.model.*;
 import org.semanticweb.HermiT.tableau.*;
 
@@ -18,9 +16,7 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
     protected final BlockingStrategy m_blockingStrategy;
     protected final boolean m_isDeterministic;
     protected final Map<AtomicConcept,Node> m_existentialNodes;
-    protected final Set<AtomicConcept> m_dontReueseConceptsThisRun;
     protected final Set<AtomicConcept> m_dontReueseConceptsEver;
-//    protected final List<Node> m_newNodes;
     protected Tableau m_tableau;
     protected ExtensionManager m_extensionManager;
     protected ExistentialExpansionManager m_existentialExpansionManager;
@@ -29,9 +25,7 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
         m_blockingStrategy=blockingStrategy;
         m_isDeterministic=isDeterministic;
         m_existentialNodes=new HashMap<AtomicConcept,Node>();
-        m_dontReueseConceptsThisRun=new HashSet<AtomicConcept>();
         m_dontReueseConceptsEver=new HashSet<AtomicConcept>();
-//        m_newNodes=new ArrayList<Node>();
     }
     public void intialize(Tableau tableau) {
         m_tableau=tableau;
@@ -42,7 +36,6 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
     }
     public void clear() {
         m_existentialNodes.clear();
-        m_dontReueseConceptsThisRun.clear();
         m_blockingStrategy.clear();
     }
     public boolean expandExistentials() {
@@ -92,7 +85,7 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
         AtomicConcept toAtomicConcept=(AtomicConcept)atLeastAbstractRoleConcept.getToConcept();
         Node existentialNode=m_existentialNodes.get(toAtomicConcept);
         if (existentialNode==null) {
-            existentialNode=m_tableau.createNewNodeRaw(null,NodeType.ROOT_NODE,Node.GLOBALLY_UNIQUE_NODE);
+            existentialNode=m_tableau.createNewNodeRaw(null,NodeType.ROOT_NODE,0);
             m_existentialNodes.put(toAtomicConcept,existentialNode);
         }
         if (!existentialNode.isInTableau()) {
@@ -104,32 +97,13 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
         if (m_tableau.getTableauMonitor()!=null)
             m_tableau.getTableauMonitor().existentialExpansionFinished(atLeastAbstractRoleConcept,node);
     }
-/*    protected void expandNoReuse(AtLeastAbstractRoleConcept atLeastAbstractRoleConcept,Node node) {
-        DependencySet dependencySet=m_extensionManager.getConceptAssertionDependencySet(atLeastAbstractRoleConcept,node);
-        int cardinality=atLeastAbstractRoleConcept.getNumber();
-        if (cardinality==1) {
-            Node newNode=m_tableau.createNewRootNode(dependencySet,node.getTreeDepth()+1);
-            m_extensionManager.addRoleAssertion(atLeastAbstractRoleConcept.getOnAbstractRole(),node,newNode,dependencySet);
-            m_extensionManager.addConceptAssertion(atLeastAbstractRoleConcept.getToConcept(),newNode,dependencySet);
-        }
-        else {
-            m_newNodes.clear();
-            for (int index=0;index<cardinality;index++) {
-                Node newNode=m_tableau.createNewRootNode(dependencySet,node.getTreeDepth()+1);
-                m_extensionManager.addRoleAssertion(atLeastAbstractRoleConcept.getOnAbstractRole(),node,newNode,dependencySet);
-                m_extensionManager.addConceptAssertion(atLeastAbstractRoleConcept.getToConcept(),newNode,dependencySet);
-                m_newNodes.add(newNode);
-            }
-            for (int outerIndex=0;outerIndex<cardinality;outerIndex++) {
-                Node outerNode=m_newNodes.get(outerIndex);
-                for (int innerIndex=outerIndex+1;innerIndex<cardinality;innerIndex++)
-                    m_extensionManager.addAssertion(Inequality.INSTANCE,outerNode,m_newNodes.get(innerIndex),dependencySet);
-            }
-            m_newNodes.clear();
-        }
-    }*/
     protected boolean shoudReuse(AtomicConcept toConcept) {
-        return !m_dontReueseConceptsEver.contains(toConcept) && !m_dontReueseConceptsThisRun.contains(toConcept);
+        if (!toConcept.getURI().startsWith("internal:") && !m_dontReueseConceptsEver.contains(toConcept)) {
+            Node node=m_existentialNodes.get(toConcept);
+            return node==null || !node.isMerged();
+        }
+        else
+            return false;
     }
     public void nodeWillChange(Node node) {
         m_blockingStrategy.nodeWillChange(node);
@@ -139,7 +113,9 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
     public void backtrack() {
     }
     public void modelFound() {
-        m_dontReueseConceptsEver.addAll(m_dontReueseConceptsThisRun);
+        for (Map.Entry<AtomicConcept,Node> entry : m_existentialNodes.entrySet())
+            if (entry.getValue().isMerged())
+                m_dontReueseConceptsEver.add(entry.getKey());
     }
     public boolean isDeterministic() {
         return m_isDeterministic;
@@ -163,11 +139,10 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
             m_node=node;
         }
         public void startNextChoice(Tableau tableau,DependencySet clashDepdendencySet) {
-            m_dontReueseConceptsThisRun.add((AtomicConcept)m_existential.getToConcept());
             DependencySet dependencySet=m_tableau.getDependencySetFactory().removeBranchingPoint(clashDepdendencySet,m_level);
             if (m_tableau.getTableauMonitor()!=null)
                 m_tableau.getTableauMonitor().existentialExpansionStarted(m_existential,m_node);
-            Node existentialNode=tableau.createNewGraphNode(m_node,dependencySet);
+            Node existentialNode=tableau.createNewRootNode(dependencySet,0);
             m_extensionManager.addConceptAssertion(m_existential.getToConcept(),existentialNode,dependencySet);
             m_extensionManager.addRoleAssertion(m_existential.getOnAbstractRole(),m_node,existentialNode,dependencySet);
             if (m_tableau.getTableauMonitor()!=null)

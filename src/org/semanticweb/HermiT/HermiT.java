@@ -64,6 +64,9 @@ public class HermiT implements Serializable {
         setExistentialsType(ExistentialsType.CREATION_ORDER);
         setDisjunctionType(DisjunctionType.MOST_RECENT_FIRST);
     }
+    public TableauMonitorType getTableauMonitorType() {
+        return m_tableauMonitorType;
+    }
     public void setTableauMonitorType(TableauMonitorType tableauMonitorType) {
         m_tableauMonitorType=tableauMonitorType;
     }
@@ -73,17 +76,32 @@ public class HermiT implements Serializable {
     public void setDebuggingOn(boolean historyOn) {
         m_tableauMonitorType=(historyOn ? TableauMonitorType.DEBUGGER_HISTORY_ON : TableauMonitorType.DEBUGGER_NO_HISTORY);
     }
+    public DirectBlockingType getDirectBlockingType() {
+        return m_directBlockingType;
+    }
     public void setDirectBlockingType(DirectBlockingType directBlockingType) {
         m_directBlockingType=directBlockingType;
+    }
+    public BlockingType getBlockingType() {
+        return m_blockingType;
     }
     public void setBlockingType(BlockingType blockingType) {
         m_blockingType=blockingType;
     }
+    public BlockingCacheType getBlockingCacheType() {
+        return m_blockingCacheType;
+    }
     public void setBlockingCacheType(BlockingCacheType blockingCacheType) {
         m_blockingCacheType=blockingCacheType;
     }
+    public ExistentialsType getExistentialsType() {
+        return m_existentialsType;
+    }
     public void setExistentialsType(ExistentialsType existentialsType) {
         m_existentialsType=existentialsType;
+    }
+    public DisjunctionType getDisjunctionType() {
+        return m_disjunctionType;
     }
     public void setDisjunctionType(DisjunctionType disjunctionType) {
         m_disjunctionType=disjunctionType;

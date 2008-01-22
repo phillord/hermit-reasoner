@@ -22,7 +22,7 @@ public class RunHermiT {
 //        hermit.setDebuggingOn(true);
 
 //        hermit.loadOntology("file:/C:/Temp/galen-module1-no-functionality.owl");
-//        hermit.loadOntology("file:/C:/Work/ontologies/GALEN/galen-module1.owl");
+        hermit.loadOntology("file:/C:/Work/ontologies/GALEN/galen-module1.owl");
 //        hermit.loadOntology("file:/C:/Temp/full-galen-no-functionality.owl");
 //        hermit.loadOntology("file:/C:/Work/ontologies/GALEN/galen-ians-full-undoctored.owl");
 //        hermit.loadOntology("file:/C:/Work/ontologies/GALEN/galen-ians-full-doctored.owl");
@@ -36,17 +36,20 @@ public class RunHermiT {
 //        hermit.loadDLOntology(new java.io.File("C:\\Temp\\graphs\\galen-ians-full-undoctored-modified-concrete.ser"));
 //        hermit.loadDLOntology(new java.io.File("C:\\Temp\\FMA-Full-concrete.ser"));
 
-//        System.out.println("Number of atomic concepts: "+hermit.getDLOntology().getAllAtomicConcepts().size());
-//        System.out.println(hermit.getDLOntology().toString(hermit.getNamespaces()));
-        
-        hermit.loadDLOntology(new java.io.File("C:\\Temp\\galen-module1.ser"));
+//        hermit.loadDLOntology(new java.io.File("C:\\Temp\\galen-module1.ser"));
 //        hermit.getDLOntology().save(new java.io.File("C:\\Temp\\galen-module1.ser"));
 //        hermit.save(new java.io.File("C:\\Temp\\galen-ians-full-undoctored.ser"));
 //        hermit=HermiT.load(new java.io.File("C:\\Temp\\galen-ians-full-undoctored-good-run.ser"));
 //        hermit=HermiT.load(new java.io.File("C:\\Temp\\galen-ians-full-undoctored-bad-run.ser"));
+
+        PrintWriter printWriter=new PrintWriter("c:\\temp\\rules.txt");
+        printWriter.println(hermit.getDLOntology().toString(hermit.getNamespaces()));
+        printWriter.close();
         
-        System.out.print("Press something to start...");
-        pause();
+        if (hermit.getTableauMonitorType()!=HermiT.TableauMonitorType.DEBUGGER_HISTORY_ON && hermit.getTableauMonitorType()!=HermiT.TableauMonitorType.DEBUGGER_NO_HISTORY) {
+            System.out.print("Press something to start...");
+            pause();
+        }
         long start=System.currentTimeMillis();
 
 //        hermit.isSubsumedBy("http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteLoire","http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FrenchWine");
@@ -75,8 +78,10 @@ public class RunHermiT {
         if (subsumptionHierarchy!=null)
             hermit.printFlattenedHierarchy(new PrintWriter("c:\\Temp\\out.txt"),subsumptionHierarchy);
 
-        System.out.println("Press something to end...");
-        pause();
+        if (hermit.getTableauMonitorType()!=HermiT.TableauMonitorType.DEBUGGER_HISTORY_ON && hermit.getTableauMonitorType()!=HermiT.TableauMonitorType.DEBUGGER_NO_HISTORY) {
+            System.out.println("Press something to end...");
+            pause();
+        }
     }
     public static void pause() {
         try {
