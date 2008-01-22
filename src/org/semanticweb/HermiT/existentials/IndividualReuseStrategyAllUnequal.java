@@ -6,25 +6,27 @@ import java.util.Set;
 import java.util.HashSet;
 import java.io.Serializable;
 
-import org.semanticweb.HermiT.blocking.*;
+import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.model.*;
 import org.semanticweb.HermiT.tableau.*;
 
-public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Serializable {
+public class IndividualReuseStrategyAllUnequal implements ExistentialsExpansionStrategy,Serializable {
     private static final long serialVersionUID=-7373787507623860081L;
     
     protected final BlockingStrategy m_blockingStrategy;
     protected final boolean m_isDeterministic;
     protected final Map<AtomicConcept,Node> m_existentialNodes;
+    protected final Set<AtomicConcept> m_dontReueseConceptsThisRun;
     protected final Set<AtomicConcept> m_dontReueseConceptsEver;
     protected Tableau m_tableau;
     protected ExtensionManager m_extensionManager;
     protected ExistentialExpansionManager m_existentialExpansionManager;
     
-    public IndividualReuseStrategy(BlockingStrategy blockingStrategy,boolean isDeterministic) {
+    public IndividualReuseStrategyAllUnequal(BlockingStrategy blockingStrategy,boolean isDeterministic) {
         m_blockingStrategy=blockingStrategy;
         m_isDeterministic=isDeterministic;
         m_existentialNodes=new HashMap<AtomicConcept,Node>();
+        m_dontReueseConceptsThisRun=new HashSet<AtomicConcept>();
         m_dontReueseConceptsEver=new HashSet<AtomicConcept>();
     }
     public void intialize(Tableau tableau) {
@@ -36,6 +38,7 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
     }
     public void clear() {
         m_existentialNodes.clear();
+        m_dontReueseConceptsThisRun.clear();
         m_blockingStrategy.clear();
     }
     public boolean expandExistentials() {
@@ -85,7 +88,7 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
         AtomicConcept toAtomicConcept=(AtomicConcept)atLeastAbstractRoleConcept.getToConcept();
         Node existentialNode=m_existentialNodes.get(toAtomicConcept);
         if (existentialNode==null) {
-            existentialNode=m_tableau.createNewNodeRaw(null,NodeType.ROOT_NODE,0);
+            existentialNode=m_tableau.createNewNodeRaw(null,NodeType.ROOT_NODE,Node.GLOBALLY_UNIQUE_NODE);
             m_existentialNodes.put(toAtomicConcept,existentialNode);
         }
         if (!existentialNode.isInTableau()) {
@@ -98,12 +101,7 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
             m_tableau.getTableauMonitor().existentialExpansionFinished(atLeastAbstractRoleConcept,node);
     }
     protected boolean shoudReuse(AtomicConcept toConcept) {
-        if (!toConcept.getURI().startsWith("internal:") && !m_dontReueseConceptsEver.contains(toConcept)) {
-            Node node=m_existentialNodes.get(toConcept);
-            return node==null || !node.isMerged();
-        }
-        else
-            return false;
+        return !toConcept.getURI().startsWith("internal:") && !m_dontReueseConceptsEver.contains(toConcept) && !m_dontReueseConceptsThisRun.contains(toConcept);
     }
     public void nodeWillChange(Node node) {
         m_blockingStrategy.nodeWillChange(node);
@@ -113,9 +111,7 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
     public void backtrack() {
     }
     public void modelFound() {
-        for (Map.Entry<AtomicConcept,Node> entry : m_existentialNodes.entrySet())
-            if (entry.getValue().isMerged())
-                m_dontReueseConceptsEver.add(entry.getKey());
+        m_dontReueseConceptsEver.addAll(m_dontReueseConceptsThisRun);
     }
     public boolean isDeterministic() {
         return m_isDeterministic;
@@ -139,6 +135,7 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
             m_node=node;
         }
         public void startNextChoice(Tableau tableau,DependencySet clashDepdendencySet) {
+            m_dontReueseConceptsThisRun.add((AtomicConcept)m_existential.getToConcept());
             DependencySet dependencySet=m_tableau.getDependencySetFactory().removeBranchingPoint(clashDepdendencySet,m_level);
             if (m_tableau.getTableauMonitor()!=null)
                 m_tableau.getTableauMonitor().existentialExpansionStarted(m_existential,m_node);
