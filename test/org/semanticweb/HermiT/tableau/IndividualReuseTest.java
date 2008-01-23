@@ -5,11 +5,7 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.kaon2.structural.*;
 import org.semanticweb.HermiT.model.*;
-import org.semanticweb.HermiT.blocking.AnywhereBlocking;
-import org.semanticweb.HermiT.blocking.BlockingCache;
-import org.semanticweb.HermiT.blocking.BlockingStrategy;
-import org.semanticweb.HermiT.blocking.DirectBlockingChecker;
-import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
+import org.semanticweb.HermiT.blocking.*;
 import org.semanticweb.HermiT.disjunction.*;
 import org.semanticweb.HermiT.existentials.*;
 
@@ -17,15 +13,6 @@ public class IndividualReuseTest extends ReasonerTest {
 
     public IndividualReuseTest(String name) {
         super(name);
-    }
-    public void testIanT5() {
-        // requires blocking!
-    }
-    public void testIanT9() {
-        // requires blocking!
-    }
-    public void testHeinsohnTBox3Modified() {
-        // requires blocking
     }
     protected Tableau getTableau() throws Exception {
         Clausification clausification=new Clausification();

@@ -2,6 +2,8 @@ package org.semanticweb.HermiT.tableau;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 
 import org.semanticweb.HermiT.model.*;
 import org.semanticweb.HermiT.monitor.*;
@@ -10,19 +12,20 @@ public final class MergingManager {
     protected final Tableau m_tableau;
     protected final TableauMonitor m_tableauMonitor;
     protected final ExtensionManager m_extensionManager;
-    protected final DependencySetFactory m_dependencySetFactory;
     protected final ExtensionTable.Retrieval m_binaryExtensionTableSearch1Bound;
     protected final ExtensionTable.Retrieval m_ternaryExtensionTableSearch1Bound;
     protected final ExtensionTable.Retrieval m_ternaryExtensionTableSearch2Bound;
     protected final Object[] m_binaryAuxiliaryTuple;
     protected final Object[] m_ternaryAuxiliaryTuple;
     protected final Map<DescriptionGraph,Object[]> m_descriptionGraphTuples;
+    protected final List<DependencySet[]> m_dependencySetBuffers;
+    protected final DependencySet[] m_dependencySetBuffer1;
+    protected final DependencySet[] m_dependencySetBuffer2;
     
     public MergingManager(Tableau tableau) {
         m_tableau=tableau;
         m_tableauMonitor=m_tableau.m_tableauMonitor;
         m_extensionManager=m_tableau.getExtensionManager();
-        m_dependencySetFactory=m_tableau.getDependencySetFactory();
         m_binaryExtensionTableSearch1Bound=m_extensionManager.m_binaryExtensionTable.createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
         m_ternaryExtensionTableSearch1Bound=m_extensionManager.m_ternaryExtensionTable.createRetrieval(new boolean[] { false,true,false },ExtensionTable.View.TOTAL);
         m_ternaryExtensionTableSearch2Bound=m_extensionManager.m_ternaryExtensionTable.createRetrieval(new boolean[] { false,false,true },ExtensionTable.View.TOTAL);
@@ -31,12 +34,27 @@ public final class MergingManager {
         m_descriptionGraphTuples=new HashMap<DescriptionGraph,Object[]>();
         for (DescriptionGraph descriptionGraph : m_tableau.getDLOntology().getAllDescriptionGraphs())
             m_descriptionGraphTuples.put(descriptionGraph,new Object[descriptionGraph.getNumberOfVertices()+1]);
+        m_dependencySetBuffers=new ArrayList<DependencySet[]>();
+        m_dependencySetBuffer1=new DependencySet[1];
+        m_dependencySetBuffer2=new DependencySet[2];
+    }
+    public void clear() {
+        m_dependencySetBuffers.clear();
     }
     public boolean mergeNodes(Node node0,Node node1,DependencySet dependencySet) {
+        m_dependencySetBuffer1[0]=dependencySet;
+        return mergeNodes(node0,node1,m_dependencySetBuffer1);
+    }
+    public boolean mergeNodes(Node node0,Node node1,DependencySet dependencySet1,DependencySet dependencySet2) {
+        m_dependencySetBuffer2[0]=dependencySet1;
+        m_dependencySetBuffer2[1]=dependencySet2;
+        return mergeNodes(node0,node1,m_dependencySetBuffer2);
+    }
+    public boolean mergeNodes(Node node0,Node node1,DependencySet[] dependencySets) {
         if (!node0.isInTableau() || !node1.isInTableau() || node0==node1)
             return false;
         else if (node0.isGloballyUnique() || node1.isGloballyUnique()) {
-            m_extensionManager.m_clashDependencySet=dependencySet;
+            m_extensionManager.setClash(dependencySets);
             if (m_tableauMonitor!=null) {
                 if (m_tableauMonitor!=null)
                     m_tableauMonitor.mergeStarted(node0,node1);
@@ -106,6 +124,12 @@ public final class MergingManager {
                 }
                 node=nextNode;
             }
+            // Create a buffer for dependency sets
+            int requiredBufferLength=dependencySets.length+1;
+            while (requiredBufferLength>=m_dependencySetBuffers.size())
+                m_dependencySetBuffers.add(new DependencySet[m_dependencySetBuffers.size()]);
+            DependencySet[] dependencySetBuffer=m_dependencySetBuffers.get(requiredBufferLength);
+            System.arraycopy(dependencySets,0,dependencySetBuffer,1,dependencySets.length);
             // Copy all unary assertions
             m_binaryAuxiliaryTuple[1]=mergeInto;
             m_binaryExtensionTableSearch1Bound.getBindingsBuffer()[1]=mergeFrom;
@@ -115,7 +139,8 @@ public final class MergingManager {
                 m_binaryAuxiliaryTuple[0]=tupleBuffer[0];
                 if (m_tableauMonitor!=null)
                     m_tableauMonitor.mergeFactStarted(mergeFrom,mergeInto,tupleBuffer,m_binaryAuxiliaryTuple);
-                m_extensionManager.addTuple(m_binaryAuxiliaryTuple,m_dependencySetFactory.unionWith(dependencySet,m_binaryExtensionTableSearch1Bound.getDependencySet()));
+                dependencySetBuffer[0]=m_binaryExtensionTableSearch1Bound.getDependencySet();
+                m_extensionManager.addTuple(m_binaryAuxiliaryTuple,dependencySetBuffer);
                 if (m_tableauMonitor!=null)
                     m_tableauMonitor.mergeFactFinished(mergeFrom,mergeInto,tupleBuffer,m_binaryAuxiliaryTuple);
                 m_binaryExtensionTableSearch1Bound.next();
@@ -130,7 +155,8 @@ public final class MergingManager {
                 m_ternaryAuxiliaryTuple[2]=(tupleBuffer[2]==mergeFrom ? mergeInto : tupleBuffer[2]);
                 if (m_tableauMonitor!=null)
                     m_tableauMonitor.mergeFactStarted(mergeFrom,mergeInto,tupleBuffer,m_ternaryAuxiliaryTuple);
-                m_extensionManager.addTuple(m_ternaryAuxiliaryTuple,m_dependencySetFactory.unionWith(dependencySet,m_ternaryExtensionTableSearch1Bound.getDependencySet()));
+                dependencySetBuffer[0]=m_ternaryExtensionTableSearch1Bound.getDependencySet();
+                m_extensionManager.addTuple(m_ternaryAuxiliaryTuple,dependencySetBuffer);
                 if (m_tableauMonitor!=null)
                     m_tableauMonitor.mergeFactFinished(mergeFrom,mergeInto,tupleBuffer,m_ternaryAuxiliaryTuple);
                 m_ternaryExtensionTableSearch1Bound.next();
@@ -145,7 +171,8 @@ public final class MergingManager {
                 m_ternaryAuxiliaryTuple[1]=(tupleBuffer[1]==mergeFrom ? mergeInto : tupleBuffer[1]);
                 if (m_tableauMonitor!=null)
                     m_tableauMonitor.mergeFactStarted(mergeFrom,mergeInto,tupleBuffer,m_ternaryAuxiliaryTuple);
-                m_extensionManager.addTuple(m_ternaryAuxiliaryTuple,m_dependencySetFactory.unionWith(dependencySet,m_ternaryExtensionTableSearch2Bound.getDependencySet()));
+                dependencySetBuffer[0]=m_ternaryExtensionTableSearch2Bound.getDependencySet();
+                m_extensionManager.addTuple(m_ternaryAuxiliaryTuple,dependencySetBuffer);
                 if (m_tableauMonitor!=null)
                     m_tableauMonitor.mergeFactFinished(mergeFrom,mergeInto,tupleBuffer,m_ternaryAuxiliaryTuple);
                 m_ternaryExtensionTableSearch2Bound.next();
@@ -167,12 +194,14 @@ public final class MergingManager {
                                 System.arraycopy(auxiliaryTuple,0,sourceTuple,0,auxiliaryTuple.length);
                                 m_tableauMonitor.mergeFactStarted(mergeFrom,mergeInto,sourceTuple,auxiliaryTuple);
                                 auxiliaryTuple[occurrence.m_position]=mergeInto;
-                                m_extensionManager.addTuple(auxiliaryTuple,m_dependencySetFactory.unionWith(dependencySet,graphExtensionTable.getDependencySet(tupleIndex)));
+                                dependencySetBuffer[0]=graphExtensionTable.getDependencySet(tupleIndex);
+                                m_extensionManager.addTuple(auxiliaryTuple,dependencySetBuffer);
                                 m_tableauMonitor.mergeFactFinished(mergeFrom,mergeInto,sourceTuple,auxiliaryTuple);
                             }
                             else {
                                 auxiliaryTuple[occurrence.m_position]=mergeInto;
-                                m_extensionManager.addTuple(auxiliaryTuple,m_dependencySetFactory.unionWith(dependencySet,graphExtensionTable.getDependencySet(tupleIndex)));
+                                dependencySetBuffer[0]=graphExtensionTable.getDependencySet(tupleIndex);
+                                m_extensionManager.addTuple(auxiliaryTuple,dependencySetBuffer);
                             }
                         }
                         occurrence=occurrence.m_next;

@@ -32,4 +32,17 @@ public final class DependencySet implements Serializable {
     public int getMaximumBranchingPoint() {
         return m_branchingPoint;
     }
+    public String toString() {
+        StringBuffer buffer=new StringBuffer();
+        buffer.append("{ ");
+        DependencySet dependencySet=this;
+        while (dependencySet.m_branchingPoint!=-1) {
+            buffer.append(dependencySet.m_branchingPoint);
+            if (dependencySet.m_rest.m_branchingPoint!=-1)
+                buffer.append(',');
+            dependencySet=dependencySet.m_rest;
+        }
+        buffer.append(" }");
+        return buffer.toString();
+    }
 }

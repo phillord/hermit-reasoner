@@ -21,6 +21,8 @@ public final class ExtensionManager {
     protected final Object[] m_ternaryAuxiliaryTupleAdd;
     protected final Map<DescriptionGraph,Object[]> m_descriptionGraphTuplesContains;
     protected final Map<DescriptionGraph,Object[]> m_descriptionGraphTuplesAdd;
+    protected final DependencySet[] m_dependencySetBuffer1;
+    protected final DependencySet[] m_dependencySetBuffer2;
     protected DependencySet m_clashDependencySet;
     protected boolean m_addActive;
 
@@ -68,6 +70,8 @@ public final class ExtensionManager {
             m_descriptionGraphTuplesContains.put(descriptionGraph,new Object[descriptionGraph.getNumberOfVertices()+1]);
             m_descriptionGraphTuplesAdd.put(descriptionGraph,new Object[descriptionGraph.getNumberOfVertices()+1]);
         }
+        m_dependencySetBuffer1=new DependencySet[1];
+        m_dependencySetBuffer2=new DependencySet[2];
     }
     public void clear() {
         for (int index=m_allExtensionTablesArray.length-1;index>=0;--index)
@@ -101,8 +105,17 @@ public final class ExtensionManager {
     public Collection<ExtensionTable> getExtensionTables() {
         return m_extensionTablesByArity.values();
     }
+    public void clearClash() {
+        m_clashDependencySet=null;
+    }
     public void setClash(DependencySet clashDependencySet) {
         m_clashDependencySet=clashDependencySet;
+    }
+    public void setClash(DependencySet dependencySet1,DependencySet dependencySet2) {
+        m_clashDependencySet=m_dependencySetFactory.unionWith(dependencySet1,dependencySet2);
+    }
+    public void setClash(DependencySet[] dependencySets) {
+        m_clashDependencySet=m_dependencySetFactory.unionSets(dependencySets);
     }
     public DependencySet getClashDependencySet() {
         return m_clashDependencySet;
@@ -239,40 +252,76 @@ public final class ExtensionManager {
             return getExtensionTable(tuple.length).getDependencySet(tuple);
     }
     public boolean addConceptAssertion(Concept concept,Node node,DependencySet dependencySet) {
+        m_dependencySetBuffer1[0]=dependencySet;
+        return addConceptAssertion(concept,node,m_dependencySetBuffer1);
+    }
+    public boolean addConceptAssertion(Concept concept,Node node,DependencySet dependencySet1,DependencySet dependencySet2) {
+        m_dependencySetBuffer2[0]=dependencySet1;
+        m_dependencySetBuffer2[1]=dependencySet2;
+        return addConceptAssertion(concept,node,m_dependencySetBuffer2);
+    }
+    public boolean addConceptAssertion(Concept concept,Node node,DependencySet[] dependencySets) {
         if (m_addActive)
             throw new IllegalStateException("ExtensionManager is not reentrant.");
         m_addActive=true;
         try {
             m_binaryAuxiliaryTupleAdd[0]=concept;
             m_binaryAuxiliaryTupleAdd[1]=node;
-            return m_binaryExtensionTable.addTuple(m_binaryAuxiliaryTupleAdd,dependencySet);
+            return m_binaryExtensionTable.addTuple(m_binaryAuxiliaryTupleAdd,dependencySets);
         }
         finally {
             m_addActive=false;
         }
     }
     public boolean addRoleAssertion(AbstractRole abstractRole,Node nodeFrom,Node nodeTo,DependencySet dependencySet) {
+        m_dependencySetBuffer1[0]=dependencySet;
+        return addRoleAssertion(abstractRole,nodeFrom,nodeTo,m_dependencySetBuffer1);
+    }
+    public boolean addRoleAssertion(AbstractRole abstractRole,Node nodeFrom,Node nodeTo,DependencySet dependencySet1,DependencySet dependencySet2) {
+        m_dependencySetBuffer2[0]=dependencySet1;
+        m_dependencySetBuffer2[1]=dependencySet2;
+        return addRoleAssertion(abstractRole,nodeFrom,nodeTo,m_dependencySetBuffer2);
+    }
+    public boolean addRoleAssertion(AbstractRole abstractRole,Node nodeFrom,Node nodeTo,DependencySet[] dependencySets) {
         if (abstractRole instanceof AtomicAbstractRole)
-            return addAssertion((AtomicAbstractRole)abstractRole,nodeFrom,nodeTo,dependencySet);
+            return addAssertion((AtomicAbstractRole)abstractRole,nodeFrom,nodeTo,dependencySets);
         else
-            return addAssertion(((InverseAbstractRole)abstractRole).getInverseOf(),nodeTo,nodeFrom,dependencySet);
+            return addAssertion(((InverseAbstractRole)abstractRole).getInverseOf(),nodeTo,nodeFrom,dependencySets);
     }
     public boolean addAssertion(DLPredicate dlPredicate,Node node,DependencySet dependencySet) {
+        m_dependencySetBuffer1[0]=dependencySet;
+        return addAssertion(dlPredicate,node,m_dependencySetBuffer1);
+    }
+    public boolean addAssertion(DLPredicate dlPredicate,Node node,DependencySet dependencySet1,DependencySet dependencySet2) {
+        m_dependencySetBuffer2[0]=dependencySet1;
+        m_dependencySetBuffer2[1]=dependencySet2;
+        return addAssertion(dlPredicate,node,m_dependencySetBuffer2);
+    }
+    public boolean addAssertion(DLPredicate dlPredicate,Node node,DependencySet[] dependencySets) {
         if (m_addActive)
             throw new IllegalStateException("ExtensionManager is not reentrant.");
         m_addActive=true;
         try {
             m_binaryAuxiliaryTupleAdd[0]=dlPredicate;
             m_binaryAuxiliaryTupleAdd[1]=node;
-            return m_binaryExtensionTable.addTuple(m_binaryAuxiliaryTupleAdd,dependencySet);
+            return m_binaryExtensionTable.addTuple(m_binaryAuxiliaryTupleAdd,dependencySets);
         }
         finally {
             m_addActive=false;
         }
     }
     public boolean addAssertion(DLPredicate dlPredicate,Node node0,Node node1,DependencySet dependencySet) {
+        m_dependencySetBuffer1[0]=dependencySet;
+        return addAssertion(dlPredicate,node0,node1,m_dependencySetBuffer1);
+    }
+    public boolean addAssertion(DLPredicate dlPredicate,Node node0,Node node1,DependencySet dependencySet1,DependencySet dependencySet2) {
+        m_dependencySetBuffer2[0]=dependencySet1;
+        m_dependencySetBuffer2[1]=dependencySet2;
+        return addAssertion(dlPredicate,node0,node1,m_dependencySetBuffer2);
+    }
+    public boolean addAssertion(DLPredicate dlPredicate,Node node0,Node node1,DependencySet[] dependencySets) {
         if (Equality.INSTANCE.equals(dlPredicate))
-            return m_tableau.m_mergingManager.mergeNodes(node0,node1,dependencySet);
+            return m_tableau.m_mergingManager.mergeNodes(node0,node1,dependencySets);
         else {
             if (m_addActive)
                 throw new IllegalStateException("ExtensionManager is not reentrant.");
@@ -281,7 +330,7 @@ public final class ExtensionManager {
                 m_ternaryAuxiliaryTupleAdd[0]=dlPredicate;
                 m_ternaryAuxiliaryTupleAdd[1]=node0;
                 m_ternaryAuxiliaryTupleAdd[2]=node1;
-                return m_ternaryExtensionTable.addTuple(m_ternaryAuxiliaryTupleAdd,dependencySet);
+                return m_ternaryExtensionTable.addTuple(m_ternaryAuxiliaryTupleAdd,dependencySets);
             }
             finally {
                 m_addActive=false;
@@ -289,8 +338,17 @@ public final class ExtensionManager {
         }
     }
     public boolean addAssertion(DLPredicate dlPredicate,Node[] nodes,DependencySet dependencySet) {
+        m_dependencySetBuffer1[0]=dependencySet;
+        return addAssertion(dlPredicate,nodes,m_dependencySetBuffer1);
+    }
+    public boolean addAssertion(DLPredicate dlPredicate,Node[] nodes,DependencySet dependencySet1,DependencySet dependencySet2) {
+        m_dependencySetBuffer2[0]=dependencySet1;
+        m_dependencySetBuffer2[1]=dependencySet2;
+        return addAssertion(dlPredicate,nodes,m_dependencySetBuffer2);
+    }
+    public boolean addAssertion(DLPredicate dlPredicate,Node[] nodes,DependencySet[] dependencySets) {
         if (Equality.INSTANCE.equals(dlPredicate))
-            return m_tableau.m_mergingManager.mergeNodes(nodes[0],nodes[1],dependencySet);
+            return m_tableau.m_mergingManager.mergeNodes(nodes[0],nodes[1],dependencySets);
         else {
             if (m_addActive)
                 throw new IllegalStateException("ExtensionManager is not reentrant.");
@@ -311,7 +369,7 @@ public final class ExtensionManager {
                 }
                 auxiliaryTuple[0]=dlPredicate;
                 System.arraycopy(nodes,0,auxiliaryTuple,1,dlPredicate.getArity());
-                return extensionTable.addTuple(auxiliaryTuple,dependencySet);
+                return extensionTable.addTuple(auxiliaryTuple,dependencySets);
             }
             finally {
                 m_addActive=false;
@@ -319,19 +377,28 @@ public final class ExtensionManager {
         }
     }
     public boolean addTuple(Object[] tuple,DependencySet dependencySet) {
+        m_dependencySetBuffer1[0]=dependencySet;
+        return addTuple(tuple,m_dependencySetBuffer1);
+    }
+    public boolean addTuple(Object[] tuple,DependencySet dependencySet1,DependencySet dependencySet2) {
+        m_dependencySetBuffer2[0]=dependencySet1;
+        m_dependencySetBuffer2[1]=dependencySet2;
+        return addTuple(tuple,m_dependencySetBuffer2);
+    }
+    public boolean addTuple(Object[] tuple,DependencySet[] dependencySets) {
         if (tuple.length==0) {
             boolean result=(m_clashDependencySet==null);
-            m_clashDependencySet=dependencySet;
+            setClash(m_dependencySetFactory.unionSets(dependencySets));
             return result;
         }
         else if (Equality.INSTANCE.equals(tuple[0]))
-            return m_tableau.m_mergingManager.mergeNodes((Node)tuple[1],(Node)tuple[2],dependencySet);
+            return m_tableau.m_mergingManager.mergeNodes((Node)tuple[1],(Node)tuple[2],dependencySets);
         else {
             if (m_addActive)
                 throw new IllegalStateException("ExtensionManager is not reentrant.");
             m_addActive=true;
             try {
-                return getExtensionTable(tuple.length).addTuple(tuple,dependencySet);
+                return getExtensionTable(tuple.length).addTuple(tuple,dependencySets);
             }
             finally {
                 m_addActive=false;

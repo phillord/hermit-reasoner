@@ -18,7 +18,7 @@ public class FirstAtomTupleConsumer implements TupleConsumer,Serializable {
         m_inputTuple=new Object[inputArity];
         m_outputTuple=new Object[m_outputTupleCopy.length];
     }
-    public void consumeTuple(Object[] tuple,DependencySet dependencySet) {
+    public void consumeTuple(Object[] tuple,DependencySet[] dependencySets) {
         System.arraycopy(tuple,0,m_inputTuple,0,tuple.length);
         for (int setIndex=m_checkEqualInInput.length-1;setIndex>=0;--setIndex) {
             int[] checkEqualUnboundInRetrieval=m_checkEqualInInput[setIndex];
@@ -27,6 +27,6 @@ public class FirstAtomTupleConsumer implements TupleConsumer,Serializable {
         }
         for (int index=m_outputTupleCopy.length-1;index>=0;--index)
             m_outputTuple[index]=tuple[m_outputTupleCopy[index]];
-        m_tupleConsumer.consumeTuple(m_outputTuple,dependencySet);
+        m_tupleConsumer.consumeTuple(m_outputTuple,dependencySets);
     }
 }

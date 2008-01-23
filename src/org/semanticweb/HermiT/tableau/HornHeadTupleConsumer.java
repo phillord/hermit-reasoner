@@ -17,9 +17,9 @@ public class HornHeadTupleConsumer implements TupleConsumer,Serializable {
         m_tuple=new Object[m_argumentIndices.length+1];
         m_tuple[0]=dlPredicate;
     }
-    public void consumeTuple(Object[] tuple,DependencySet dependencySet) {
+    public void consumeTuple(Object[] tuple,DependencySet[] dependencySets) {
         for (int argumentIndex=0;argumentIndex<m_argumentIndices.length;argumentIndex++)
             m_tuple[argumentIndex+1]=tuple[m_argumentIndices[argumentIndex]];
-        m_extensionManager.addTuple(m_tuple,dependencySet);
+        m_extensionManager.addTuple(m_tuple,dependencySets);
     }
 }

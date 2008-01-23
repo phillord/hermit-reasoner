@@ -59,9 +59,8 @@ public final class DescriptionGraphManager implements Serializable {
                                 else {
                                     DependencySet firstSet=graphExtensionTable.getDependencySet(firstValidOccurrence.m_tupleIndex);
                                     DependencySet secondSet=graphExtensionTable.getDependencySet(occurrence.m_tupleIndex);
-                                    DependencySet union=m_tableau.m_dependencySetFactory.unionWith(firstSet,secondSet);
                                     if (firstValidOccurrence.m_position!=occurrence.m_position) {
-                                        m_extensionManager.setClash(union);
+                                        m_extensionManager.setClash(firstSet,secondSet);
                                         if (m_tableauMonitor!=null) {
                                             Object[] graph1=new Object[descriptionGraph.getArity()+1];
                                             graphExtensionTable.retrieveTuple(graph1,firstValidOccurrence.m_tupleIndex);
@@ -77,14 +76,14 @@ public final class DescriptionGraphManager implements Serializable {
                                             Node nodeSecond=(Node)graphExtensionTable.getTupleObject(tupleIndex,index);
                                             if (nodeFirst!=nodeSecond) {
                                                 if (m_tableauMonitor==null)
-                                                    m_mergingManager.mergeNodes(nodeFirst,nodeSecond,union);
+                                                    m_mergingManager.mergeNodes(nodeFirst,nodeSecond,firstSet,secondSet);
                                                 else {
                                                     Object[] graph1=new Object[descriptionGraph.getArity()+1];
                                                     graphExtensionTable.retrieveTuple(graph1,firstValidOccurrence.m_tupleIndex);
                                                     Object[] graph2=new Object[descriptionGraph.getArity()+1];
                                                     graphExtensionTable.retrieveTuple(graph2,tupleIndex);
                                                     m_tableauMonitor.mergeGraphsStarted(graph1,graph2,index);
-                                                    m_mergingManager.mergeNodes(nodeFirst,nodeSecond,union);
+                                                    m_mergingManager.mergeNodes(nodeFirst,nodeSecond,firstSet,secondSet);
                                                     m_tableauMonitor.mergeGraphsFinished(graph1,graph2,index);
                                                 }
                                                 return true;

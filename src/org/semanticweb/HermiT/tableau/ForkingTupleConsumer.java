@@ -10,8 +10,8 @@ public class ForkingTupleConsumer implements TupleConsumer,Serializable {
     public ForkingTupleConsumer(TupleConsumer[] tupleConsumers) {
         m_tupleConsumers=tupleConsumers;
     }
-    public void consumeTuple(Object[] tuple,DependencySet dependencySet) {
+    public void consumeTuple(Object[] tuple,DependencySet[] dependencySets) {
         for (int tupleConsumerIndex=m_tupleConsumers.length-1;tupleConsumerIndex>=0;--tupleConsumerIndex)
-            m_tupleConsumers[tupleConsumerIndex].consumeTuple(tuple,dependencySet);
+            m_tupleConsumers[tupleConsumerIndex].consumeTuple(tuple,dependencySets);
     }
 }

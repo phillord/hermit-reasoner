@@ -182,9 +182,8 @@ public final class ExistentialExpansionManager implements Serializable {
                 Node functionalityNode=(Node)m_auxiliaryTuple[0];
                 DependencySet roleAssertionDependencySet=(DependencySet)m_auxiliaryTuple[1];
                 DependencySet existentialDependencySet=m_extensionManager.getConceptAssertionDependencySet(atLeastAbstractRoleConcept,forNode);
-                DependencySet unionDependencySet=m_tableau.m_dependencySetFactory.unionWith(existentialDependencySet,roleAssertionDependencySet);
                 if (functionalityNode.isGloballyUnique()) {
-                    m_extensionManager.setClash(unionDependencySet);
+                    m_extensionManager.setClash(existentialDependencySet,roleAssertionDependencySet);
                     if (m_tableau.m_tableauMonitor!=null) {
                         Object[] roleTuple=new Object[3];
                         if (atLeastAbstractRoleConcept.getOnAbstractRole() instanceof AtomicAbstractRole) {
@@ -201,8 +200,8 @@ public final class ExistentialExpansionManager implements Serializable {
                     }
                 }
                 else {
-                    m_extensionManager.addRoleAssertion(atLeastAbstractRoleConcept.getOnAbstractRole(),forNode,functionalityNode,unionDependencySet);
-                    m_extensionManager.addConceptAssertion(atLeastAbstractRoleConcept.getToConcept(),functionalityNode,unionDependencySet);
+                    m_extensionManager.addRoleAssertion(atLeastAbstractRoleConcept.getOnAbstractRole(),forNode,functionalityNode,existentialDependencySet,roleAssertionDependencySet);
+                    m_extensionManager.addConceptAssertion(atLeastAbstractRoleConcept.getToConcept(),functionalityNode,existentialDependencySet,roleAssertionDependencySet);
                 }
                 if (m_tableau.m_tableauMonitor!=null)
                     m_tableau.m_tableauMonitor.existentialExpansionFinished(atLeastAbstractRoleConcept,forNode);

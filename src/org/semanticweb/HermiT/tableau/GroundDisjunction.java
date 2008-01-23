@@ -56,9 +56,9 @@ public class GroundDisjunction implements Serializable {
         DLPredicate dlPredicate=getDLPredicate(disjunctIndex);
         switch (dlPredicate.getArity()) {
         case 1:
-            return tableau.getExtensionManager().addConceptAssertion((Concept)dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),tableau.getDependencySetFactory().unionWith(m_dependencySet,choicePointDependencySet));
+            return tableau.getExtensionManager().addConceptAssertion((Concept)dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),m_dependencySet,choicePointDependencySet);
         case 2:
-            return tableau.getExtensionManager().addAssertion(dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),getArgument(disjunctIndex,1).getCanonicalNode(),tableau.getDependencySetFactory().unionWith(m_dependencySet,choicePointDependencySet));
+            return tableau.getExtensionManager().addAssertion(dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),getArgument(disjunctIndex,1).getCanonicalNode(),m_dependencySet,choicePointDependencySet);
         default:
             throw new IllegalStateException("Unsupported predicate arity.");
         }

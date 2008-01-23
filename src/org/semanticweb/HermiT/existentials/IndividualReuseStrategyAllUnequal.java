@@ -139,7 +139,7 @@ public class IndividualReuseStrategyAllUnequal implements ExistentialsExpansionS
             DependencySet dependencySet=m_tableau.getDependencySetFactory().removeBranchingPoint(clashDepdendencySet,m_level);
             if (m_tableau.getTableauMonitor()!=null)
                 m_tableau.getTableauMonitor().existentialExpansionStarted(m_existential,m_node);
-            Node existentialNode=tableau.createNewGraphNode(m_node,dependencySet);
+            Node existentialNode=tableau.createNewTreeNode(m_node,dependencySet);
             m_extensionManager.addConceptAssertion(m_existential.getToConcept(),existentialNode,dependencySet);
             m_extensionManager.addRoleAssertion(m_existential.getOnAbstractRole(),m_node,existentialNode,dependencySet);
             if (m_tableau.getTableauMonitor()!=null)

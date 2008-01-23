@@ -18,18 +18,18 @@ public class ExtensionTableWithFullIndex extends ExtensionTable {
     public int size() {
         return m_tupleTable.size()+m_tupleTableFullIndex.size();
     }
-    public boolean addTuple(Object[] tuple,DependencySet dependencySet) {
+    public boolean addTuple(Object[] tuple,DependencySet[] dependencySets) {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.addFactStarted(tuple);
         if (isTupleValid(tuple) && (m_tableau.m_needsThingExtension || !AtomicConcept.THING.equals(tuple[0]))) {
             int firstFreeTupleIndex=m_tupleTable.getFirstFreeTupleIndex();
             if (m_tupleTableFullIndex.addTuple(tuple,firstFreeTupleIndex)==firstFreeTupleIndex) {
                 m_tupleTable.addTuple(tuple);
-                m_dependencySetManager.setDependencySet(firstFreeTupleIndex,dependencySet);
+                m_dependencySetManager.setDependencySet(firstFreeTupleIndex,dependencySets);
                 m_afterDeltaNewTupleIndex=m_tupleTable.getFirstFreeTupleIndex();
                 if (m_tableauMonitor!=null)
                     m_tableauMonitor.addFactFinished(tuple,true);
-                postAdd(tuple,dependencySet,firstFreeTupleIndex);
+                postAdd(tuple,dependencySets,firstFreeTupleIndex);
                 return true;
             }
         }

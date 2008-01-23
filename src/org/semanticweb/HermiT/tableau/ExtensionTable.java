@@ -26,7 +26,7 @@ public abstract class ExtensionTable implements Serializable {
         m_extensionManager=extensionManager;
         m_tupleArity=tupleArity;
         m_tupleTable=new TupleTable(m_tupleArity+(needsDependencySets ? 1 : 0));
-        m_dependencySetManager=needsDependencySets ? new LastObjectDependencySetManager() : new DeterministicDependencySetManager(this);
+        m_dependencySetManager=needsDependencySets ? new LastObjectDependencySetManager(this) : new DeterministicDependencySetManager(this);
         m_binaryAuxiliaryTuple=new Object[2];
         m_indicesByBranchingPoint=new int[2*3];
     }
@@ -43,8 +43,8 @@ public abstract class ExtensionTable implements Serializable {
     public DependencySet getDependencySet(int tupleIndex) {
         return m_dependencySetManager.getDependencySet(tupleIndex);
     }
-    public abstract boolean addTuple(Object[] tuple,DependencySet dependencySet);
-    protected void postAdd(Object[] tuple,DependencySet dependencySet,int tupleIndex) {
+    public abstract boolean addTuple(Object[] tuple,DependencySet[] dependencySets);
+    protected void postAdd(Object[] tuple,DependencySet[] dependencySets,int tupleIndex) {
         Object dlPredicateObject=tuple[0];
         if (dlPredicateObject instanceof Concept) {
             Node node=(Node)tuple[1];
@@ -56,13 +56,13 @@ public abstract class ExtensionTable implements Serializable {
                     m_binaryAuxiliaryTuple[0]=negatedConcept;
                     m_binaryAuxiliaryTuple[1]=node;
                     DependencySet positiveFactDependencySet=getDependencySet(m_binaryAuxiliaryTuple);
-                    m_extensionManager.setClash(m_tableau.getDependencySetFactory().unionWith(dependencySet,positiveFactDependencySet));
+                    m_extensionManager.setClash(m_tableau.getDependencySetFactory().unionSetsPlusOne(positiveFactDependencySet,dependencySets));
                     if (m_tableauMonitor!=null)
                         m_tableauMonitor.clashDetected(tuple,m_binaryAuxiliaryTuple);
                 }
             }
             else if (AtomicConcept.NOTHING.equals(dlPredicateObject)) {
-                m_extensionManager.setClash(dependencySet);
+                m_extensionManager.setClash(m_tableau.getDependencySetFactory().unionSets(dependencySets));
                 if (m_tableauMonitor!=null)
                     m_tableauMonitor.clashDetected(tuple);
             }
@@ -73,7 +73,7 @@ public abstract class ExtensionTable implements Serializable {
                     m_binaryAuxiliaryTuple[0]=AtomicNegationConcept.create((AtomicConcept)concept);
                     m_binaryAuxiliaryTuple[1]=node;
                     DependencySet negativeFactDependencySet=getDependencySet(m_binaryAuxiliaryTuple);
-                    m_extensionManager.setClash(m_tableau.getDependencySetFactory().unionWith(dependencySet,negativeFactDependencySet));
+                    m_extensionManager.setClash(m_tableau.getDependencySetFactory().unionSetsPlusOne(negativeFactDependencySet,dependencySets));
                     if (m_tableauMonitor!=null)
                         m_tableauMonitor.clashDetected(tuple,m_binaryAuxiliaryTuple);
                 }
@@ -98,7 +98,7 @@ public abstract class ExtensionTable implements Serializable {
             m_tableau.m_existentialsExpansionStrategy.nodeWillChange((Node)tuple[1]);
             m_tableau.m_existentialsExpansionStrategy.nodeWillChange((Node)tuple[2]);
             if (tuple[1]==tuple[2]) {
-                m_extensionManager.setClash(dependencySet);
+                m_extensionManager.setClash(m_tableau.getDependencySetFactory().unionSets(dependencySets));
                 if (m_tableauMonitor!=null)
                     m_tableauMonitor.clashDetected(tuple);
             }
@@ -188,6 +188,7 @@ public abstract class ExtensionTable implements Serializable {
                 node.removeOccurrenceInTuple(descriptionGraph,tupleIndex,position);
             }
         }
+        m_dependencySetManager.forgetDependencySet(tupleIndex);
         if (m_tableauMonitor!=null)
             m_tableauMonitor.tupleRemoved(tuple);
     }
@@ -319,7 +320,8 @@ public abstract class ExtensionTable implements Serializable {
 
     protected static interface DependencySetManager {
         DependencySet getDependencySet(int tupleIndex);
-        void setDependencySet(int tupleIndex,DependencySet dependencySet);
+        void setDependencySet(int tupleIndex,DependencySet[] dependencySets);
+        void forgetDependencySet(int tupleIndex);
     }
 
     protected static class DeterministicDependencySetManager implements DependencySetManager,Serializable {
@@ -333,18 +335,28 @@ public abstract class ExtensionTable implements Serializable {
         public DependencySet getDependencySet(int tupleIndex) {
             return m_emptySet;
         }
-        public void setDependencySet(int tupleIndex,DependencySet dependencySet) {
+        public void setDependencySet(int tupleIndex,DependencySet[] dependencySets) {
+        }
+        public void forgetDependencySet(int tupleIndex) {
         }
     }
 
     protected class LastObjectDependencySetManager implements DependencySetManager,Serializable {
         private static final long serialVersionUID=-8097612469749016470L;
 
+        protected final DependencySetFactory m_dependencySetFactory;
+        
+        public LastObjectDependencySetManager(ExtensionTable extensionTable) {
+            m_dependencySetFactory=extensionTable.m_tableau.getDependencySetFactory();
+        }
         public DependencySet getDependencySet(int tupleIndex) {
             return (DependencySet)m_tupleTable.getTupleObject(tupleIndex,m_tupleArity);
         }
-        public void setDependencySet(int tupleIndex,DependencySet dependencySet) {
-            m_tupleTable.setTupleObject(tupleIndex,m_tupleArity,dependencySet);
+        public void setDependencySet(int tupleIndex,DependencySet[] dependencySets) {
+            m_tupleTable.setTupleObject(tupleIndex,m_tupleArity,m_dependencySetFactory.unionSets(dependencySets));
+        }
+        public void forgetDependencySet(int tupleIndex) {
+            m_tupleTable.setTupleObject(tupleIndex,m_tupleArity,null);
         }
     }
 }

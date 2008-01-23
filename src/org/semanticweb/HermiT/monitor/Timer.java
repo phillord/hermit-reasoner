@@ -1,7 +1,7 @@
 package org.semanticweb.HermiT.monitor;
 
 import org.semanticweb.HermiT.model.*;
-import org.semanticweb.HermiT.tableau.BranchingPoint;
+import org.semanticweb.HermiT.tableau.*;
 
 public class Timer extends TableauMonitorAdapter {
     private static final long serialVersionUID=-8144444618897251350L;

@@ -126,6 +126,7 @@ public final class Tableau implements Serializable {
         m_currentBranchingPoint++;
         m_dependencySetFactory.clear();
         m_extensionManager.clear();
+        m_mergingManager.clear();
         m_nominalIntroductionManager.clear();
         m_descriptionGraphManager.clear();
         m_isCurrentModelDeterministic=true;
@@ -388,7 +389,7 @@ public final class Tableau implements Serializable {
         // backtrack extensions
         m_extensionManager.backtrack();
         // finish 
-        m_extensionManager.setClash(null);
+        m_extensionManager.clearClash();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.backtrackToFinished(branchingPoint);
     }

@@ -1,11 +1,14 @@
 package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
+import java.util.List;
+import java.util.ArrayList;
 
 public final class DependencySetFactory implements Serializable {
     private static final long serialVersionUID=8632867055646817311L;
 
     protected final IntegerArray m_mergeArray;
+    protected final List<DependencySet> m_mergeSets;
     protected final DependencySet m_emptySet;
     protected DependencySet[] m_entries;
     protected int m_size;
@@ -13,6 +16,7 @@ public final class DependencySetFactory implements Serializable {
 
     public DependencySetFactory() {
         m_mergeArray=new IntegerArray();
+        m_mergeSets=new ArrayList<DependencySet>();
         m_emptySet=new DependencySet(null,-1,null);
         clear();
     }
@@ -128,6 +132,66 @@ public final class DependencySetFactory implements Serializable {
             result=getNextDepdendencySet(result,m_mergeArray.get(index));
         return result;
     }
+    public DependencySet unionSetsPlusOne(DependencySet set,DependencySet[] sets) {
+        if (sets.length==0)
+            return set;
+        m_mergeSets.clear();
+        m_mergeSets.add(set);
+        for (DependencySet set1 : sets)
+            m_mergeSets.add(set1);
+        return unionSetsInternal();
+    }
+    public DependencySet unionSets(DependencySet[] sets) {
+        if (sets.length==1)
+            return sets[0];
+        m_mergeSets.clear();
+        for (DependencySet set : sets)
+            m_mergeSets.add(set);
+        return unionSetsInternal();
+    }
+    protected DependencySet unionSetsInternal() {
+        int numberOfSets=m_mergeSets.size();
+        m_mergeArray.clear();
+        while (true) {
+            DependencySet firstSet=m_mergeSets.get(0);
+            int maximal=firstSet.m_branchingPoint;
+            int maximalIndex=0;
+            boolean hasEquals=false;
+            boolean allAreEqual=true;
+            for (int index=1;index<numberOfSets;index++) {
+                DependencySet dependencySet=m_mergeSets.get(index);
+                int branchingPoint=dependencySet.m_branchingPoint;
+                if (branchingPoint>maximal) {
+                    maximal=branchingPoint;
+                    hasEquals=false;
+                    maximalIndex=index;
+                }
+                else if (branchingPoint==maximal)
+                    hasEquals=true;
+                if (dependencySet!=firstSet)
+                    allAreEqual=false;
+            }
+            if (allAreEqual)
+                break;
+            m_mergeArray.add(maximal);
+            if (hasEquals) {
+                for (int index=0;index<numberOfSets;index++) {
+                    DependencySet dependencySet=m_mergeSets.get(index);
+                    if (dependencySet.m_branchingPoint==maximal)
+                        m_mergeSets.set(index,dependencySet.m_rest);
+                }
+            }
+            else {
+                DependencySet dependencySet=m_mergeSets.get(maximalIndex);
+                m_mergeSets.set(maximalIndex,dependencySet.m_rest);
+            }
+        }
+        DependencySet result=m_mergeSets.get(0);
+        for (int index=m_mergeArray.size()-1;index>=0;--index)
+            result=getNextDepdendencySet(result,m_mergeArray.get(index));
+        m_mergeSets.clear();
+        return result;
+    }
     
     protected static final class IntegerArray implements Serializable {
         private static final long serialVersionUID=7070190530381846058L;
@@ -156,5 +220,33 @@ public final class DependencySetFactory implements Serializable {
             }
             m_elements[m_size++]=element;
         }
+    }
+    
+    public void doStats(ExtensionManager extensionManager) {
+        java.util.Set<DependencySet> unusedSets=new java.util.HashSet<DependencySet>();
+        for (int index=m_entries.length-1;index>=0;--index) {
+            DependencySet ds=m_entries[index];
+            while (ds!=null) {
+                unusedSets.add(ds);
+                ds=ds.m_rest;
+            }
+        }
+        ExtensionTable.Retrieval retrieval=extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { false,false },ExtensionTable.View.TOTAL);
+        retrieval.open();
+        while (!retrieval.afterLast()) {
+            DependencySet ds=retrieval.getDependencySet();
+            while (unusedSets.remove(ds))
+                ds=ds.m_rest;
+            retrieval.next();
+        }
+        retrieval=extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { false,false,false },ExtensionTable.View.TOTAL);
+        retrieval.open();
+        while (!retrieval.afterLast()) {
+            DependencySet ds=retrieval.getDependencySet();
+            while (unusedSets.remove(ds))
+                ds=ds.m_rest;
+            retrieval.next();
+        }
+        System.out.println("  Factory contains "+m_size+" dependency sets. Of that, "+unusedSets.size()+" sets are not used in the extensions.");
     }
 }
