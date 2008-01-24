@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.semanticweb.HermiT.blocking.*;
-import org.semanticweb.HermiT.disjunction.*;
 import org.semanticweb.HermiT.existentials.*;
 import org.semanticweb.HermiT.model.*;
 
@@ -36,7 +35,7 @@ public class MergeTest extends AbstractHermiTTest {
         BlockingCache blockingCache=new BlockingCache(PairWiseDirectBlockingChecker.INSTANCE);
         BlockingStrategy blockingStrategy=new AnywhereBlocking(PairWiseDirectBlockingChecker.INSTANCE,blockingCache);
         ExistentialsExpansionStrategy existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
-        m_tableau=new Tableau(null,existentialsExpansionStrategy,new MostRecentDisjunctionProcessingStrategy(),TEST_DL_ONTOLOGY);
+        m_tableau=new Tableau(null,existentialsExpansionStrategy,TEST_DL_ONTOLOGY);
         m_extensionManager=m_tableau.getExtensionManager();
     }
     public void testMergeAndBacktrack() {

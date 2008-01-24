@@ -27,7 +27,6 @@ import org.semanticweb.kaon2.api.Ontology;
 import org.semanticweb.HermiT.kaon2.structural.*;
 import org.semanticweb.HermiT.model.*;
 import org.semanticweb.HermiT.monitor.*;
-import org.semanticweb.HermiT.disjunction.*;
 import org.semanticweb.HermiT.existentials.*;
 import org.semanticweb.HermiT.blocking.*;
 import org.semanticweb.HermiT.tableau.*;
@@ -42,7 +41,6 @@ public class HermiT implements Serializable {
     public static enum BlockingType { ANYWHERE,ANCESTOR };
     public static enum BlockingCacheType { CACHED,NOT_CACHED };
     public static enum ExistentialsType { CREATION_ORDER,EL,INDIVIDUAL_REUSE };
-    public static enum DisjunctionType { MOST_RECENT_FIRST };
 
     protected DLOntology m_dlOntology;
     protected Namespaces m_namespaces;
@@ -51,7 +49,6 @@ public class HermiT implements Serializable {
     protected BlockingType m_blockingType;
     protected BlockingCacheType m_blockingCacheType;
     protected ExistentialsType m_existentialsType;
-    protected DisjunctionType m_disjunctionType;
     protected Tableau m_tableau;
     protected TableauSubsumptionChecker m_subsumptionChecker;
 
@@ -62,7 +59,6 @@ public class HermiT implements Serializable {
         setBlockingType(BlockingType.ANYWHERE);
         setBlockingCacheType(BlockingCacheType.CACHED);
         setExistentialsType(ExistentialsType.CREATION_ORDER);
-        setDisjunctionType(DisjunctionType.MOST_RECENT_FIRST);
     }
     public TableauMonitorType getTableauMonitorType() {
         return m_tableauMonitorType;
@@ -99,12 +95,6 @@ public class HermiT implements Serializable {
     }
     public void setExistentialsType(ExistentialsType existentialsType) {
         m_existentialsType=existentialsType;
-    }
-    public DisjunctionType getDisjunctionType() {
-        return m_disjunctionType;
-    }
-    public void setDisjunctionType(DisjunctionType disjunctionType) {
-        m_disjunctionType=disjunctionType;
     }
     public void loadOntology(String physicalURI) throws KAON2Exception,InterruptedException {
         DefaultOntologyResolver resolver=new DefaultOntologyResolver();
@@ -215,15 +205,8 @@ public class HermiT implements Serializable {
             existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,false);
             break;
         }
-
-        DisjunctionProcessingStrategy disjunctionProcessingStrategy=null;
-        switch (m_disjunctionType) {
-        case MOST_RECENT_FIRST:
-            disjunctionProcessingStrategy=new MostRecentDisjunctionProcessingStrategy();
-            break;
-        }
         
-        m_tableau=new Tableau(tableauMonitor,existentialsExpansionStrategy,disjunctionProcessingStrategy,m_dlOntology);
+        m_tableau=new Tableau(tableauMonitor,existentialsExpansionStrategy,m_dlOntology);
         m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
     }
     public DLOntology getDLOntology() {

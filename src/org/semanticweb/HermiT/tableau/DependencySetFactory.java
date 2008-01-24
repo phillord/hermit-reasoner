@@ -20,13 +20,14 @@ public final class DependencySetFactory implements Serializable {
         m_mergeArray=new IntegerArray();
         m_mergeSets=new ArrayList<DependencySet>();
         m_emptySet=new DependencySet();
-        m_emptySet.m_usageCounter=1;
         clear();
     }
     public int size() {
         return m_entries.length*4+m_size*20;
     }
     public void clear() {
+        m_mergeArray.clear();
+        m_mergeSets.clear();
         m_emptySet.m_nextEntry=null;
         m_emptySet.m_usageCounter=1;
         m_emptySet.m_previousUnusedSet=null;

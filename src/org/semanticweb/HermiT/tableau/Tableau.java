@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.io.Serializable;
 
 import org.semanticweb.HermiT.model.*;
-import org.semanticweb.HermiT.disjunction.*;
 import org.semanticweb.HermiT.existentials.*;
 import org.semanticweb.HermiT.monitor.*;
 
@@ -14,7 +13,6 @@ public final class Tableau implements Serializable {
 
     protected final TableauMonitor m_tableauMonitor;
     protected final ExistentialsExpansionStrategy m_existentialsExpansionStrategy;
-    protected final DisjunctionProcessingStrategy m_disjunctionProcessingStrategy;
     protected final DLOntology m_dlOntology;
     protected final DependencySetFactory m_dependencySetFactory;
     protected final SetFactory<Concept> m_conceptSetFactory;
@@ -36,17 +34,15 @@ public final class Tableau implements Serializable {
     protected int m_numberOfMergedOrPrunedNodes;
     protected Node m_lastChangedNode;
     protected Node.NodeEvent m_lastChangedNodeEvent;
+    protected GroundDisjunction m_firstGroundDisjunction;
     protected GroundDisjunction m_firstUnprocessedGroundDisjunction;
-    protected GroundDisjunction m_lastUnprocessedGroundDisjunction;
-    protected GroundDisjunction m_lastProcessedGroundDisjunction;
     protected int m_lastNodeID;
     protected int m_lastOrderPosition;
     protected Node m_checkedNode;
 
-    public Tableau(TableauMonitor tableauMonitor,ExistentialsExpansionStrategy existentialsExpansionStrategy,DisjunctionProcessingStrategy disjunctionProcessingStrategy,DLOntology dlOntology) {
+    public Tableau(TableauMonitor tableauMonitor,ExistentialsExpansionStrategy existentialsExpansionStrategy,DLOntology dlOntology) {
         m_tableauMonitor=tableauMonitor;
         m_existentialsExpansionStrategy=existentialsExpansionStrategy;
-        m_disjunctionProcessingStrategy=disjunctionProcessingStrategy;
         m_dlOntology=dlOntology;
         m_dependencySetFactory=new DependencySetFactory();
         m_conceptSetFactory=new SetFactory<Concept>();
@@ -114,9 +110,8 @@ public final class Tableau implements Serializable {
         m_numberOfMergedOrPrunedNodes=0;
         m_lastChangedNode=null;
         m_lastChangedNodeEvent=null;
+        m_firstGroundDisjunction=null;
         m_firstUnprocessedGroundDisjunction=null;
-        m_lastUnprocessedGroundDisjunction=null;
-        m_lastProcessedGroundDisjunction=null;
         m_lastNodeID=0;
         m_lastOrderPosition=0;
         m_checkedNode=null;
@@ -162,10 +157,10 @@ public final class Tableau implements Serializable {
                 return true;
         if (!m_extensionManager.containsClash()) {
             while (m_firstUnprocessedGroundDisjunction!=null) {
-                GroundDisjunction groundDisjunction=m_disjunctionProcessingStrategy.pickUnprocessedGroundDisjunction(this);
+                GroundDisjunction groundDisjunction=m_firstUnprocessedGroundDisjunction;
                 if (m_tableauMonitor!=null)
                     m_tableauMonitor.processGroundDisjunctionStarted(groundDisjunction);
-                processUnprocessedGroundDisjunction(groundDisjunction);
+                m_firstUnprocessedGroundDisjunction=groundDisjunction.m_previousGroundDisjunction;
                 if (!groundDisjunction.isSatisfied(this)) {
                     BranchingPoint branchingPoint=new DisjunctionBranchingPoint(this,groundDisjunction);
                     pushBranchingPoint(branchingPoint);
@@ -297,49 +292,16 @@ public final class Tableau implements Serializable {
     public int getNumberOfMergedOrPrunedNodes() {
         return m_numberOfMergedOrPrunedNodes;
     }
-    public GroundDisjunction getFirstUnprocessedGroundDisjunction() {
-        return m_firstUnprocessedGroundDisjunction;
-    }
-    public GroundDisjunction getLastUnprocessedGroundDisjunction() {
-        return m_lastUnprocessedGroundDisjunction;
-    }
-    public void addUnprocessedGroundDisjunction(GroundDisjunction groundDisjunction) {
-        assert groundDisjunction.m_nextProcessedGroundDisjunction==null : "Internal error: ground disjunction has already been processed.";
-        if (m_lastUnprocessedGroundDisjunction==null)
+    public void addGroundDisjunction(GroundDisjunction groundDisjunction) {
+        groundDisjunction.m_nextGroundDisjunction=m_firstGroundDisjunction;
+        groundDisjunction.m_previousGroundDisjunction=null;
+        if (m_firstGroundDisjunction!=null)
+            m_firstGroundDisjunction.m_previousGroundDisjunction=groundDisjunction;
+        m_firstGroundDisjunction=groundDisjunction;
+        if (m_firstUnprocessedGroundDisjunction==null)
             m_firstUnprocessedGroundDisjunction=groundDisjunction;
-        else
-            m_lastUnprocessedGroundDisjunction.m_nextUnprocessedGroundDisjunction=groundDisjunction;
-        groundDisjunction.m_previousUnprocessedGroundDisjunction=m_lastUnprocessedGroundDisjunction;
-        groundDisjunction.m_nextUnprocessedGroundDisjunction=null;
-        m_lastUnprocessedGroundDisjunction=groundDisjunction;
         if (m_tableauMonitor!=null)
             m_tableauMonitor.groundDisjunctionDerived(groundDisjunction);
-    }
-    public void processUnprocessedGroundDisjunction(GroundDisjunction groundDisjunction) {
-        assert groundDisjunction.m_nextProcessedGroundDisjunction==null : "Internal error: ground disjunction has already been processed.";
-        if (groundDisjunction.m_previousUnprocessedGroundDisjunction==null)
-            m_firstUnprocessedGroundDisjunction=groundDisjunction.m_nextUnprocessedGroundDisjunction;
-        else
-            groundDisjunction.m_previousUnprocessedGroundDisjunction.m_nextUnprocessedGroundDisjunction=groundDisjunction.m_nextUnprocessedGroundDisjunction;
-        if (groundDisjunction.m_nextUnprocessedGroundDisjunction==null)
-            m_lastUnprocessedGroundDisjunction=groundDisjunction.m_previousUnprocessedGroundDisjunction;
-        else
-            groundDisjunction.m_nextUnprocessedGroundDisjunction.m_previousUnprocessedGroundDisjunction=groundDisjunction.m_previousUnprocessedGroundDisjunction;
-        groundDisjunction.m_nextProcessedGroundDisjunction=m_lastProcessedGroundDisjunction;
-        m_lastProcessedGroundDisjunction=groundDisjunction;
-    }
-    protected void backtrackGroundDisjunctionProcessing(GroundDisjunction groundDisjunction) {
-        assert m_lastProcessedGroundDisjunction==groundDisjunction : "Internal error: ground disjunctions cannot be unprocessed out-of-order.";
-        if (groundDisjunction.m_previousUnprocessedGroundDisjunction==null)
-            m_firstUnprocessedGroundDisjunction=groundDisjunction;
-        else
-            groundDisjunction.m_previousUnprocessedGroundDisjunction.m_nextUnprocessedGroundDisjunction=groundDisjunction;
-        if (groundDisjunction.m_nextUnprocessedGroundDisjunction==null)
-            m_lastUnprocessedGroundDisjunction=groundDisjunction;
-        else
-            groundDisjunction.m_nextUnprocessedGroundDisjunction.m_previousUnprocessedGroundDisjunction=groundDisjunction;
-        m_lastProcessedGroundDisjunction=groundDisjunction.m_nextProcessedGroundDisjunction;
-        groundDisjunction.m_nextProcessedGroundDisjunction=null;
     }
     public void pushBranchingPoint(BranchingPoint branchingPoint) {
         assert m_currentBranchingPoint+1==branchingPoint.m_level;
@@ -368,15 +330,16 @@ public final class Tableau implements Serializable {
         for (int index=m_currentBranchingPoint+1;index<=newCurrentBrancingPoint;index++)
             m_branchingPoints[index]=null;
         m_currentBranchingPoint=newCurrentBrancingPoint;
-        // backtrack ground disjunctions
-        GroundDisjunction lastProcessedGroundDisjunctionShouldBe=branchingPoint.m_lastProcessedGroundDisjunction;
-        while (m_lastProcessedGroundDisjunction!=lastProcessedGroundDisjunctionShouldBe)
-            backtrackGroundDisjunctionProcessing(m_lastProcessedGroundDisjunction);
-        m_lastUnprocessedGroundDisjunction=branchingPoint.m_lastUnprocessedGroundDisjunction;
-        if (m_lastUnprocessedGroundDisjunction==null)
-            m_firstUnprocessedGroundDisjunction=null;
-        else
-            m_lastUnprocessedGroundDisjunction.m_nextUnprocessedGroundDisjunction=null;
+        // backtrack processed ground disjunctions
+        m_firstUnprocessedGroundDisjunction=branchingPoint.m_firstUnprocessedGroundDisjunction;
+        // backtrack added ground disjunctions
+        GroundDisjunction firstGroundDisjunctionShouldBe=branchingPoint.m_firstGroundDisjunction;
+        while (m_firstGroundDisjunction!=firstGroundDisjunctionShouldBe) {
+            m_firstGroundDisjunction.destroy(this);
+            m_firstGroundDisjunction=m_firstGroundDisjunction.m_nextGroundDisjunction;
+        }
+        if (m_firstGroundDisjunction!=null)
+            m_firstGroundDisjunction.m_previousGroundDisjunction=null;
         // backtrack node changed
         Node lastChangedNodeShouldBe=branchingPoint.m_lastChangedNode;
         Node.NodeEvent lastChangedNodeEventShouldBe=branchingPoint.m_lastChangedNodeEvent;

@@ -6,7 +6,6 @@ import java.util.Set;
 import org.semanticweb.HermiT.kaon2.structural.*;
 import org.semanticweb.HermiT.model.*;
 import org.semanticweb.HermiT.blocking.*;
-import org.semanticweb.HermiT.disjunction.*;
 import org.semanticweb.HermiT.existentials.*;
 
 public class IndividualReuseTest extends ReasonerTest {
@@ -22,7 +21,6 @@ public class IndividualReuseTest extends ReasonerTest {
         BlockingCache blockingCache=new BlockingCache(directBlockingChecker);
         BlockingStrategy blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingCache);
         ExistentialsExpansionStrategy existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,false);
-        DisjunctionProcessingStrategy disjunctionProcessingStrategy=new MostRecentDisjunctionProcessingStrategy();
-        return new Tableau(null,existentialsExpansionStrategy,disjunctionProcessingStrategy,dlOntology);
+        return new Tableau(null,existentialsExpansionStrategy,dlOntology);
     }
 }

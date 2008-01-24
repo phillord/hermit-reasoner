@@ -35,6 +35,6 @@ public class DisjunctiveHeadTupleConsumer implements TupleConsumer,Serializable 
             arguments[argumentIndex]=(Node)tuple[m_copyTupleToArguments[argumentIndex]];
         GroundDisjunction groundDisjunction=new GroundDisjunction(m_tableau,m_headDLPredicates,m_disjunctStart,arguments,m_tableau.m_dependencySetFactory.unionSets(dependencySets));
         if (!groundDisjunction.isSatisfied(m_tableau))
-            m_tableau.addUnprocessedGroundDisjunction(groundDisjunction);
+            m_tableau.addGroundDisjunction(groundDisjunction);
     }
 }

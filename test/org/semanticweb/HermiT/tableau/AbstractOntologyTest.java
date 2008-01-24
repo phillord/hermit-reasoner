@@ -9,7 +9,6 @@ import org.semanticweb.kaon2.api.owl.elements.*;
 
 import org.semanticweb.HermiT.kaon2.structural.*;
 import org.semanticweb.HermiT.blocking.*;
-import org.semanticweb.HermiT.disjunction.*;
 import org.semanticweb.HermiT.existentials.*;
 import org.semanticweb.HermiT.model.*;
 import org.semanticweb.HermiT.monitor.*;
@@ -130,8 +129,7 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
         BlockingCache blockingCache=new BlockingCache(directBlockingChecker);
         BlockingStrategy blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingCache);
         ExistentialsExpansionStrategy existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
-        DisjunctionProcessingStrategy disjunctionProcessingStrategy=new MostRecentDisjunctionProcessingStrategy();
-        return new Tableau(getTableauMonitor(),existentialsExpansionStrategy,disjunctionProcessingStrategy,dlOntology);
+        return new Tableau(getTableauMonitor(),existentialsExpansionStrategy,dlOntology);
     }
     protected TableauMonitor getTableauMonitor() {
         return null;

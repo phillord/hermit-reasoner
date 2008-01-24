@@ -7,25 +7,22 @@ import org.semanticweb.HermiT.model.*;
 public class GroundDisjunction implements Serializable {
     private static final long serialVersionUID=6245673952732442673L;
 
-    protected final Tableau m_tableau;
     protected final DLPredicate[] m_dlPredicates;
     protected final int[] m_disjunctStart;
     protected final Node[] m_arguments;
     protected final DependencySet m_dependencySet;
-    protected GroundDisjunction m_previousUnprocessedGroundDisjunction;
-    protected GroundDisjunction m_nextUnprocessedGroundDisjunction;
-    protected GroundDisjunction m_nextProcessedGroundDisjunction;
+    protected GroundDisjunction m_previousGroundDisjunction;
+    protected GroundDisjunction m_nextGroundDisjunction;
 
     public GroundDisjunction(Tableau tableau,DLPredicate[] dlPredicates,int[] disjunctStart,Node[] arguments,DependencySet dependencySet) {
-        m_tableau=tableau;
         m_dlPredicates=dlPredicates;
         m_disjunctStart=disjunctStart;
         m_arguments=arguments;
         m_dependencySet=dependencySet;
-        m_tableau.m_dependencySetFactory.addUsage(m_dependencySet);
+        tableau.m_dependencySetFactory.addUsage(m_dependencySet);
     }
-    protected void finalize() {
-        m_tableau.m_dependencySetFactory.removeUsage(m_dependencySet);
+    public void destroy(Tableau tableau) {
+        tableau.m_dependencySetFactory.removeUsage(m_dependencySet);
     }
     public int getNumberOfDisjuncts() {
         return m_dlPredicates.length;
