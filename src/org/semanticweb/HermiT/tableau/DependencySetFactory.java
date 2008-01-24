@@ -10,6 +10,8 @@ public final class DependencySetFactory implements Serializable {
     protected final IntegerArray m_mergeArray;
     protected final List<DependencySet> m_mergeSets;
     protected final DependencySet m_emptySet;
+    protected DependencySet m_firstUnusedSet;
+    protected DependencySet m_firstDestroyedSet;
     protected DependencySet[] m_entries;
     protected int m_size;
     protected int m_resizeThreshold;
@@ -17,7 +19,8 @@ public final class DependencySetFactory implements Serializable {
     public DependencySetFactory() {
         m_mergeArray=new IntegerArray();
         m_mergeSets=new ArrayList<DependencySet>();
-        m_emptySet=new DependencySet(null,-1,null);
+        m_emptySet=new DependencySet();
+        m_emptySet.m_usageCounter=1;
         clear();
     }
     public int size() {
@@ -25,16 +28,31 @@ public final class DependencySetFactory implements Serializable {
     }
     public void clear() {
         m_emptySet.m_nextEntry=null;
+        m_emptySet.m_usageCounter=1;
+        m_emptySet.m_previousUnusedSet=null;
+        m_emptySet.m_nextUnusedSet=null;
+        m_firstUnusedSet=null;
+        m_firstDestroyedSet=null;
         m_entries=new DependencySet[16];
         m_size=0;
         m_resizeThreshold=(int)(m_entries.length*0.75);
     }
+    public void cleanUp() {
+        while (m_firstUnusedSet!=null)
+            destroyDependencySet(m_firstUnusedSet);
+    }
     public DependencySet emptySet() {
         return m_emptySet;
     }
+    public void addUsage(DependencySet dependencySet) {
+        incrementUsageCounter(dependencySet);
+    }
+    public void removeUsage(DependencySet dependencySet) {
+        decrementUsageCounter(dependencySet);
+    }
     public DependencySet addBranchingPoint(DependencySet dependencySet,int branchingPoint) {
         if (branchingPoint>dependencySet.m_branchingPoint)
-            return getNextDepdendencySet(dependencySet,branchingPoint);
+            return getDepdendencySet(dependencySet,branchingPoint);
         else if (branchingPoint==dependencySet.m_branchingPoint)
             return dependencySet;
         else {
@@ -47,28 +65,108 @@ public final class DependencySetFactory implements Serializable {
             if (branchingPoint==rest.m_branchingPoint)
                 return dependencySet;
             else {
-                rest=getNextDepdendencySet(rest,branchingPoint);
+                rest=getDepdendencySet(rest,branchingPoint);
                 for (int index=m_mergeArray.size()-1;index>=0;--index)
-                    rest=getNextDepdendencySet(rest,m_mergeArray.get(index));
+                    rest=getDepdendencySet(rest,m_mergeArray.get(index));
                 return rest;
             }
         }
     }
-    protected DependencySet getNextDepdendencySet(DependencySet dependencySet,int branchingPoint) {
-        int index=(dependencySet.hashCode()+branchingPoint) & (m_entries.length-1);
-        DependencySet nextSet=m_entries[index];
-        while (nextSet!=null) {
-            if (nextSet.m_rest==dependencySet && nextSet.m_branchingPoint==branchingPoint)
-                return nextSet;
-            nextSet=nextSet.m_nextEntry;
+    protected DependencySet getDepdendencySet(DependencySet rest,int branchingPoint) {
+        int index=(rest.hashCode()+branchingPoint) & (m_entries.length-1);
+        DependencySet dependencySet=m_entries[index];
+        while (dependencySet!=null) {
+            if (dependencySet.m_rest==rest && dependencySet.m_branchingPoint==branchingPoint)
+                return dependencySet;
+            dependencySet=dependencySet.m_nextEntry;
         }
-        nextSet=new DependencySet(dependencySet,branchingPoint,m_entries[index]);
-        m_entries[index]=nextSet;
-        m_size++;
+        dependencySet=createDependencySet(rest,branchingPoint);
+        dependencySet.m_nextEntry=m_entries[index];
+        m_entries[index]=dependencySet;
         if (m_size>=m_resizeThreshold)
             resizeEntries();
-        return nextSet;
+        return dependencySet;
     }
+    protected DependencySet createDependencySet(DependencySet rest,int branchingPoint) {
+        DependencySet newSet;
+        if (m_firstDestroyedSet==null)
+            newSet=new DependencySet();
+        else {
+            newSet=m_firstDestroyedSet;
+            m_firstDestroyedSet=m_firstDestroyedSet.m_nextEntry;
+        }
+        newSet.m_rest=rest;
+        newSet.m_branchingPoint=branchingPoint;
+        newSet.m_usageCounter=0;
+        incrementUsageCounter(newSet.m_rest);
+        addToUnusedList(newSet);
+        m_size++;
+        return newSet;
+    }
+    protected void destroyDependencySet(DependencySet dependencySet) {
+        assert dependencySet.m_branchingPoint>=0;
+        assert dependencySet.m_usageCounter==0;
+        assert dependencySet.m_rest.m_usageCounter>0;
+        removeFromUnusedList(dependencySet);
+        decrementUsageCounter(dependencySet.m_rest);
+        removeFromEntries(dependencySet);
+        dependencySet.m_rest=null;
+        dependencySet.m_branchingPoint=-2;
+        dependencySet.m_nextEntry=m_firstDestroyedSet;
+        m_firstDestroyedSet=dependencySet;
+        m_size--;
+    }
+    protected void removeFromEntries(DependencySet dependencySet) {
+        int index=(dependencySet.m_rest.hashCode()+dependencySet.m_branchingPoint) & (m_entries.length-1);
+        DependencySet lastEntry=null;
+        DependencySet entry=m_entries[index];
+        while (entry!=null) {
+            if (entry==dependencySet) {
+                if (lastEntry==null)
+                    m_entries[index]=dependencySet.m_nextEntry;
+                else
+                    lastEntry.m_nextEntry=dependencySet.m_nextEntry;
+                return;
+            }
+            lastEntry=entry;
+            entry=entry.m_nextEntry;
+        }
+        throw new IllegalStateException("Internal error: dependency set not found in the entry table.");
+    }
+    protected void incrementUsageCounter(DependencySet dependencySet) {
+        assert dependencySet.m_branchingPoint>=-1;
+        if (dependencySet.m_usageCounter==0)
+            removeFromUnusedList(dependencySet);
+        dependencySet.m_usageCounter++;
+    }
+    protected void decrementUsageCounter(DependencySet dependencySet) {
+        assert dependencySet.m_usageCounter>0;
+        assert dependencySet.m_previousUnusedSet==null;
+        assert dependencySet.m_nextUnusedSet==null;
+        dependencySet.m_usageCounter--;
+        if (dependencySet.m_usageCounter==0)
+            addToUnusedList(dependencySet);
+    }
+    protected void removeFromUnusedList(DependencySet dependencySet) {
+        if (dependencySet.m_previousUnusedSet!=null)
+            dependencySet.m_previousUnusedSet.m_nextUnusedSet=dependencySet.m_nextUnusedSet;
+        else
+            m_firstUnusedSet=dependencySet.m_nextUnusedSet;
+        if (dependencySet.m_nextUnusedSet!=null)
+            dependencySet.m_nextUnusedSet.m_previousUnusedSet=dependencySet.m_previousUnusedSet;
+        dependencySet.m_previousUnusedSet=null;
+        dependencySet.m_nextUnusedSet=null;
+        assert m_firstUnusedSet==null || m_firstUnusedSet.m_usageCounter==0;
+    }
+    protected void addToUnusedList(DependencySet dependencySet) {
+        dependencySet.m_previousUnusedSet=null;
+        dependencySet.m_nextUnusedSet=m_firstUnusedSet;
+        if (m_firstUnusedSet!=null)
+            m_firstUnusedSet.m_previousUnusedSet=dependencySet;
+        m_firstUnusedSet=dependencySet;
+        assert m_firstUnusedSet==null || m_firstUnusedSet.m_usageCounter==0;
+    }
+    
     protected void resizeEntries() {
         int newLength=m_entries.length*2;
         int newLengthMinusOne=newLength-1;
@@ -103,7 +201,7 @@ public final class DependencySetFactory implements Serializable {
             else {
                 rest=rest.m_rest;
                 for (int index=m_mergeArray.size()-1;index>=0;--index)
-                    rest=getNextDepdendencySet(rest,m_mergeArray.get(index));
+                    rest=getDepdendencySet(rest,m_mergeArray.get(index));
                 return rest;
             }
         }
@@ -129,7 +227,7 @@ public final class DependencySetFactory implements Serializable {
         }
         DependencySet result=set1;
         for (int index=m_mergeArray.size()-1;index>=0;--index)
-            result=getNextDepdendencySet(result,m_mergeArray.get(index));
+            result=getDepdendencySet(result,m_mergeArray.get(index));
         return result;
     }
     public DependencySet unionSetsPlusOne(DependencySet set,DependencySet[] sets) {
@@ -188,7 +286,7 @@ public final class DependencySetFactory implements Serializable {
         }
         DependencySet result=m_mergeSets.get(0);
         for (int index=m_mergeArray.size()-1;index>=0;--index)
-            result=getNextDepdendencySet(result,m_mergeArray.get(index));
+            result=getDepdendencySet(result,m_mergeArray.get(index));
         m_mergeSets.clear();
         return result;
     }
@@ -223,30 +321,19 @@ public final class DependencySetFactory implements Serializable {
     }
     
     public void doStats(ExtensionManager extensionManager) {
-        java.util.Set<DependencySet> unusedSets=new java.util.HashSet<DependencySet>();
-        for (int index=m_entries.length-1;index>=0;--index) {
-            DependencySet ds=m_entries[index];
+        java.util.Set<DependencySet> usedSets=new java.util.HashSet<DependencySet>();
+        loadDS(usedSets,extensionManager.getBinaryExtensionTable());
+        loadDS(usedSets,extensionManager.getTernaryExtensionTable());
+        System.out.println("  Factory contains "+m_size+" dependency sets. Of that, "+usedSets.size()+" sets are used in the extensions.");
+    }
+    protected void loadDS(java.util.Set<DependencySet> set,ExtensionTable extensionTable) {
+        int max=extensionTable.m_afterDeltaNewTupleIndex;
+        for (int index=0;index<max;index++) {
+            DependencySet ds=extensionTable.m_dependencySetManager.getDependencySet(index);
             while (ds!=null) {
-                unusedSets.add(ds);
+                set.add(ds);
                 ds=ds.m_rest;
             }
         }
-        ExtensionTable.Retrieval retrieval=extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { false,false },ExtensionTable.View.TOTAL);
-        retrieval.open();
-        while (!retrieval.afterLast()) {
-            DependencySet ds=retrieval.getDependencySet();
-            while (unusedSets.remove(ds))
-                ds=ds.m_rest;
-            retrieval.next();
-        }
-        retrieval=extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { false,false,false },ExtensionTable.View.TOTAL);
-        retrieval.open();
-        while (!retrieval.afterLast()) {
-            DependencySet ds=retrieval.getDependencySet();
-            while (unusedSets.remove(ds))
-                ds=ds.m_rest;
-            retrieval.next();
-        }
-        System.out.println("  Factory contains "+m_size+" dependency sets. Of that, "+unusedSets.size()+" sets are not used in the extensions.");
     }
 }

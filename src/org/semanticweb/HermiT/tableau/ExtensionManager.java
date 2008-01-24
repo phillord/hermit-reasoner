@@ -106,16 +106,20 @@ public final class ExtensionManager {
         return m_extensionTablesByArity.values();
     }
     public void clearClash() {
-        m_clashDependencySet=null;
+        setClash((DependencySet)null);
     }
     public void setClash(DependencySet clashDependencySet) {
+        if (m_clashDependencySet!=null)
+            m_dependencySetFactory.removeUsage(m_clashDependencySet);
         m_clashDependencySet=clashDependencySet;
+        if (m_clashDependencySet!=null)
+            m_dependencySetFactory.addUsage(m_clashDependencySet);
     }
     public void setClash(DependencySet dependencySet1,DependencySet dependencySet2) {
-        m_clashDependencySet=m_dependencySetFactory.unionWith(dependencySet1,dependencySet2);
+        setClash(m_dependencySetFactory.unionWith(dependencySet1,dependencySet2));
     }
     public void setClash(DependencySet[] dependencySets) {
-        m_clashDependencySet=m_dependencySetFactory.unionSets(dependencySets);
+        setClash(m_clashDependencySet=m_dependencySetFactory.unionSets(dependencySets));
     }
     public DependencySet getClashDependencySet() {
         return m_clashDependencySet;

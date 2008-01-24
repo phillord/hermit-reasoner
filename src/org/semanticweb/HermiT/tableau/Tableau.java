@@ -196,6 +196,7 @@ public final class Tableau implements Serializable {
             branchingPoint.startNextChoice(this,clashDependencySet);
             if (m_tableauMonitor!=null)
                 m_tableauMonitor.startNextBranchingPointFinished(branchingPoint);
+            m_dependencySetFactory.cleanUp();
             return true;
         }
         return false;
@@ -359,7 +360,7 @@ public final class Tableau implements Serializable {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.pushBranchingPointFinished(branchingPoint);
     }
-    public void backtrackTo(int newCurrentBrancingPoint) {
+    protected void backtrackTo(int newCurrentBrancingPoint) {
         BranchingPoint branchingPoint=m_branchingPoints[newCurrentBrancingPoint];
         if (m_tableauMonitor!=null)
             m_tableauMonitor.backtrackToStarted(branchingPoint);

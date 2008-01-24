@@ -5,14 +5,19 @@ import java.io.Serializable;
 public final class DependencySet implements Serializable {
     private static final long serialVersionUID=353039301123337446L;
 
-    protected final DependencySet m_rest;
-    protected final int m_branchingPoint;
+    protected DependencySet m_rest;
+    protected int m_branchingPoint;
     protected DependencySet m_nextEntry;
+    protected int m_usageCounter;
+    protected DependencySet m_previousUnusedSet;
+    protected DependencySet m_nextUnusedSet;
     
-    protected DependencySet(DependencySet rest,int branchingPoint,DependencySet nextEntry) {
-        m_rest=rest;
-        m_branchingPoint=branchingPoint;
-        m_nextEntry=nextEntry;
+    protected DependencySet() {
+        m_rest=null;
+        m_branchingPoint=-1;
+        m_nextEntry=null;
+        m_usageCounter=0;
+        m_nextUnusedSet=null;
     }
     public boolean containsBranchingPoint(int branchingPoint) {
         DependencySet set=this;

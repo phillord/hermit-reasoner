@@ -353,10 +353,15 @@ public abstract class ExtensionTable implements Serializable {
             return (DependencySet)m_tupleTable.getTupleObject(tupleIndex,m_tupleArity);
         }
         public void setDependencySet(int tupleIndex,DependencySet[] dependencySets) {
-            m_tupleTable.setTupleObject(tupleIndex,m_tupleArity,m_dependencySetFactory.unionSets(dependencySets));
+            assert m_tupleTable.getTupleObject(tupleIndex,m_tupleArity)==null;
+            DependencySet dependencySet=m_dependencySetFactory.unionSets(dependencySets);
+            m_tupleTable.setTupleObject(tupleIndex,m_tupleArity,dependencySet);
+            m_dependencySetFactory.addUsage(dependencySet);
         }
         public void forgetDependencySet(int tupleIndex) {
+            DependencySet dependencySet=(DependencySet)m_tupleTable.getTupleObject(tupleIndex,m_tupleArity);
             m_tupleTable.setTupleObject(tupleIndex,m_tupleArity,null);
+            m_dependencySetFactory.removeUsage(dependencySet);
         }
     }
 }
