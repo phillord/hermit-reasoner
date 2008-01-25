@@ -10,7 +10,7 @@ public class GroundDisjunction implements Serializable {
     protected final DLPredicate[] m_dlPredicates;
     protected final int[] m_disjunctStart;
     protected final Node[] m_arguments;
-    protected final DependencySet m_dependencySet;
+    protected DependencySet m_dependencySet;
     protected GroundDisjunction m_previousGroundDisjunction;
     protected GroundDisjunction m_nextGroundDisjunction;
 
@@ -23,6 +23,7 @@ public class GroundDisjunction implements Serializable {
     }
     public void destroy(Tableau tableau) {
         tableau.m_dependencySetFactory.removeUsage(m_dependencySet);
+        m_dependencySet=null;
     }
     public int getNumberOfDisjuncts() {
         return m_dlPredicates.length;
@@ -59,9 +60,9 @@ public class GroundDisjunction implements Serializable {
         DLPredicate dlPredicate=getDLPredicate(disjunctIndex);
         switch (dlPredicate.getArity()) {
         case 1:
-            return tableau.getExtensionManager().addConceptAssertion((Concept)dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),m_dependencySet,choicePointDependencySet);
+            return tableau.getExtensionManager().addConceptAssertion((Concept)dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),choicePointDependencySet);
         case 2:
-            return tableau.getExtensionManager().addAssertion(dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),getArgument(disjunctIndex,1).getCanonicalNode(),m_dependencySet,choicePointDependencySet);
+            return tableau.getExtensionManager().addAssertion(dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),getArgument(disjunctIndex,1).getCanonicalNode(),choicePointDependencySet);
         default:
             throw new IllegalStateException("Unsupported predicate arity.");
         }
