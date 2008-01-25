@@ -162,15 +162,19 @@ public final class Tableau implements Serializable {
                     m_tableauMonitor.processGroundDisjunctionStarted(groundDisjunction);
                 m_firstUnprocessedGroundDisjunction=groundDisjunction.m_previousGroundDisjunction;
                 if (!groundDisjunction.isSatisfied(this)) {
-                    BranchingPoint branchingPoint=new DisjunctionBranchingPoint(this,groundDisjunction);
-                    pushBranchingPoint(branchingPoint);
+                    DependencySet dependencySet=groundDisjunction.getDependencySet();
+                    if (groundDisjunction.getNumberOfDisjuncts()>1) {
+                        BranchingPoint branchingPoint=new DisjunctionBranchingPoint(this,groundDisjunction);
+                        pushBranchingPoint(branchingPoint);
+                        dependencySet=m_dependencySetFactory.addBranchingPoint(dependencySet,branchingPoint.getLevel());
+                    }
                     if (m_tableauMonitor!=null)
-                        m_tableauMonitor.startNextBranchingPointStarted(branchingPoint);
-                    branchingPoint.startNextChoice(this,null);
-                    if (m_tableauMonitor!=null)
-                        m_tableauMonitor.startNextBranchingPointFinished(branchingPoint);
-                    if (m_tableauMonitor!=null)
+                        m_tableauMonitor.disjunctProcessingStarted(groundDisjunction,0);
+                    groundDisjunction.addDisjunctToTableau(this,0,dependencySet);
+                    if (m_tableauMonitor!=null) {
+                        m_tableauMonitor.disjunctProcessingFinished(groundDisjunction,0);
                         m_tableauMonitor.processGroundDisjunctionFinished(groundDisjunction);
+                    }
                     return true;
                 }
                 else {

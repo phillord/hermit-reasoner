@@ -11,24 +11,16 @@ public class DisjunctionBranchingPoint extends BranchingPoint {
     public DisjunctionBranchingPoint(Tableau tableau,GroundDisjunction groundDisjunction) {
         super(tableau);
         m_groundDisjunction=groundDisjunction;
-        m_currentDisjunctIndex=-1;
+        m_currentDisjunctIndex=0;
     }
     public void startNextChoice(Tableau tableau,DependencySet clashDependencySet) {
         m_currentDisjunctIndex++;
-        assert m_currentDisjunctIndex<m_groundDisjunction.getNumberOfDisjuncts() : "Unsuspected end of disjunction.";
+        assert m_currentDisjunctIndex<m_groundDisjunction.getNumberOfDisjuncts();
         if (tableau.m_tableauMonitor!=null)
             tableau.m_tableauMonitor.disjunctProcessingStarted(m_groundDisjunction,m_currentDisjunctIndex);
-        DependencySet dependencySet;
-        if (m_currentDisjunctIndex==0) {
-            dependencySet=m_groundDisjunction.m_dependencySet;
-            if (m_currentDisjunctIndex!=m_groundDisjunction.getNumberOfDisjuncts()-1)
-                dependencySet=tableau.getDependencySetFactory().addBranchingPoint(dependencySet,m_level);
-        }
-        else {
-            dependencySet=clashDependencySet;
-            if (m_currentDisjunctIndex==m_groundDisjunction.getNumberOfDisjuncts()-1)
-                dependencySet=tableau.getDependencySetFactory().removeBranchingPoint(dependencySet,m_level);
-        }
+        DependencySet dependencySet=clashDependencySet;
+        if (m_currentDisjunctIndex==m_groundDisjunction.getNumberOfDisjuncts()-1)
+            dependencySet=tableau.getDependencySetFactory().removeBranchingPoint(dependencySet,m_level);
         for (int previousDisjunctIndex=0;previousDisjunctIndex<m_currentDisjunctIndex;previousDisjunctIndex++) {
             DLPredicate dlPredicate=m_groundDisjunction.getDLPredicate(previousDisjunctIndex);
             if (Equality.INSTANCE.equals(dlPredicate))
