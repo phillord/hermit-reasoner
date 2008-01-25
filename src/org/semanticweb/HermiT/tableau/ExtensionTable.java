@@ -140,8 +140,11 @@ public abstract class ExtensionTable implements Serializable {
     public void backtrack() {
         int start=m_tableau.getCurrentBranchingPoint().m_level*3;
         int newAfterDeltaNewTupleIndex=m_indicesByBranchingPoint[start+2];
-        for (int tupleIndex=m_afterDeltaNewTupleIndex-1;tupleIndex>=newAfterDeltaNewTupleIndex;--tupleIndex)
+        for (int tupleIndex=m_afterDeltaNewTupleIndex-1;tupleIndex>=newAfterDeltaNewTupleIndex;--tupleIndex) {
             removeTuple(tupleIndex);
+            m_dependencySetManager.forgetDependencySet(tupleIndex);
+            m_tupleTable.nullifyTuple(tupleIndex);
+        }
         m_tupleTable.truncate(newAfterDeltaNewTupleIndex);
         m_afterExtensionOldTupleIndex=m_indicesByBranchingPoint[start];
         m_afterExtensionThisTupleIndex=m_indicesByBranchingPoint[start+1];
@@ -188,7 +191,6 @@ public abstract class ExtensionTable implements Serializable {
                 node.removeOccurrenceInTuple(descriptionGraph,tupleIndex,position);
             }
         }
-        m_dependencySetManager.forgetDependencySet(tupleIndex);
         if (m_tableauMonitor!=null)
             m_tableauMonitor.tupleRemoved(tuple);
     }
@@ -359,7 +361,6 @@ public abstract class ExtensionTable implements Serializable {
         }
         public void forgetDependencySet(int tupleIndex) {
             DependencySet dependencySet=(DependencySet)m_tupleTable.getTupleObject(tupleIndex,m_tupleArity);
-            m_tupleTable.setTupleObject(tupleIndex,m_tupleArity,null);
             m_dependencySetFactory.removeUsage(dependencySet);
         }
     }

@@ -106,6 +106,7 @@ public final class TupleIndex implements Serializable {
                     m_buckets[bucketIndex]=nextChild+BUCKET_OFFSET;
                 else
                     m_trieNodeManager.setTrieNodeComponent(previousChild,TRIE_NODE_NEXT_ENTRY,nextChild);
+                m_trieNodeManager.deleteTrieNode(trieNode);
                 return;
             }
             previousChild=child;
@@ -263,6 +264,7 @@ public final class TupleIndex implements Serializable {
         }
         public void deleteTrieNode(int trieNode) {
             setTrieNodeComponent(trieNode,TRIE_NODE_NEXT_SIBLING,m_firstFreeTrieNode);
+            setTrieNodeObject(trieNode,null);
             m_firstFreeTrieNode=trieNode;
         }
     }

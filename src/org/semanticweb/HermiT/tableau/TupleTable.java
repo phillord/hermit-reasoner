@@ -62,6 +62,9 @@ public final class TupleTable implements Serializable {
     public void truncate(int newFirstFreeTupleIndex) {
         m_firstFreeTupleIndex=newFirstFreeTupleIndex;
     }
+    public void nullifyTuple(int tupleIndex) {
+        m_pages[tupleIndex / PAGE_SIZE].nullifyTuple((tupleIndex % PAGE_SIZE)*m_arity);
+    }
     public void clear() {
         m_firstFreeTupleIndex=0;
     }
@@ -82,6 +85,10 @@ public final class TupleTable implements Serializable {
         }
         public void retrieveTuple(int tupleStartIndex,Object[] tupleBuffer) {
             System.arraycopy(m_objects,tupleStartIndex,tupleBuffer,0,tupleBuffer.length);
+        }
+        public void nullifyTuple(int tupleStartIndex) {
+            for (int index=0;index<m_arity;index++)
+                m_objects[tupleStartIndex+index]=null;
         }
         public boolean tupleEquals(Object[] tupleBuffer,int tupleStartIndex,int compareLength) {
             int sourceIndex=compareLength-1;
