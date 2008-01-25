@@ -119,7 +119,7 @@ public final class ExtensionManager {
         setClash(m_dependencySetFactory.unionWith(dependencySet1,dependencySet2));
     }
     public void setClash(DependencySet[] dependencySets) {
-        setClash(m_clashDependencySet=m_dependencySetFactory.unionSets(dependencySets));
+        setClash(m_dependencySetFactory.unionSets(dependencySets));
     }
     public DependencySet getClashDependencySet() {
         return m_clashDependencySet;

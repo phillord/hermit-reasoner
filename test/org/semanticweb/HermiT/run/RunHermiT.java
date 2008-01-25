@@ -61,6 +61,7 @@ public class RunHermiT {
 //        hermit.isSubsumedBy("http://www.co-ode.org/ontologies/galen#CapsuleOfKnee","http://www.co-ode.org/ontologies/galen#JointCapsule");
 //        hermit.isSubsumedBy("http://www.co-ode.org/ontologies/galen#RenalAbscess","http://www.co-ode.org/ontologies/galen#ActualCavity");
 //        hermit.isSubsumedBy("http://www.co-ode.org/ontologies/galen#RightBundleBranchBlock","http://www.co-ode.org/ontologies/galen#LeftBundleBranchBlock");
+        hermit.isSubsumedBy("http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Anjou","http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FullBodiedWine");
 
 
 //        hermit.isSatisfiable("http://www.co-ode.org/ontologies/galen#Abdomen");
@@ -70,7 +71,7 @@ public class RunHermiT {
 //        hermit.isSatisfiable("http://www.co-ode.org/ontologies/galen#AcuteErosionOfStomach");
 //        hermit.isSatisfiable("http://www.co-ode.org/ontologies/galen#AnteriorCruciateLigament");
         
-        subsumptionHierarchy=hermit.getSubsumptionHierarchy();
+//        subsumptionHierarchy=hermit.getSubsumptionHierarchy();
 
         long duration=System.currentTimeMillis()-start;
         System.out.println("The reasoning task took "+duration+" ms");
