@@ -66,20 +66,20 @@ public class Timer extends TableauMonitorAdapter {
                 System.out.println();
             long duartionSoFar=current-m_problemStartTime;
             System.out.print(duartionSoFar);
-            System.out.print(" ms: allocated nodes nodes: ");
+            System.out.print(" ms: allocated nodes: ");
             System.out.print(m_tableau.getNumberOfAllocatedNodes());
-            System.out.print("    created nodes: ");
+            System.out.print("    used nodes: ");
             System.out.print(m_tableau.getNumberOfCreatedNodes());
-            System.out.print("    nodes in tableau: ");
+            System.out.print("    in tableau: ");
             System.out.print(m_tableau.getNumberOfNodesInTableau());
             if (m_tableau.getNumberOfMergedOrPrunedNodes()>0) {
-                System.out.print("    merged or pruned nodes: ");
+                System.out.print("    merged/pruned: ");
                 System.out.print(m_tableau.getNumberOfMergedOrPrunedNodes());
             }
-            System.out.print("    current branching point: ");
+            System.out.print("    branching point: ");
             System.out.print(m_tableau.getCurrentBranchingPoint().getLevel());
             if (m_numberOfBacktrackings>0) {
-                System.out.print("    backtrackings so far: ");
+                System.out.print("    backtrackings: ");
                 System.out.print(m_numberOfBacktrackings);
             }
             System.out.println();

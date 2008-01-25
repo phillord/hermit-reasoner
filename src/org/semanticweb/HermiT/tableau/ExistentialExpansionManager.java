@@ -275,8 +275,20 @@ public final class ExistentialExpansionManager implements Serializable {
                 roleHierarchy.addInclusion(atomicAbstractRole,atomicAbstractRole);
                 roleHierarchy.addInclusion(atomicAbstractRole.getInverseRole(),atomicAbstractRole.getInverseRole());
             }
+            else if (dlClause.isGuardedFunctionalityAxiom()) {
+                AtomicAbstractRole atomicAbstractRole=(AtomicAbstractRole)dlClause.getBodyAtom(1).getDLPredicate();
+                functionalRoles.add(atomicAbstractRole);
+                roleHierarchy.addInclusion(atomicAbstractRole,atomicAbstractRole);
+                roleHierarchy.addInclusion(atomicAbstractRole.getInverseRole(),atomicAbstractRole.getInverseRole());
+            }
             else if (dlClause.isInverseFunctionalityAxiom()) {
                 AtomicAbstractRole atomicAbstractRole=(AtomicAbstractRole)dlClause.getBodyAtom(0).getDLPredicate();
+                functionalRoles.add(atomicAbstractRole.getInverseRole());
+                roleHierarchy.addInclusion(atomicAbstractRole,atomicAbstractRole);
+                roleHierarchy.addInclusion(atomicAbstractRole.getInverseRole(),atomicAbstractRole.getInverseRole());
+            }
+            else if (dlClause.isGuardedInverseFunctionalityAxiom()) {
+                AtomicAbstractRole atomicAbstractRole=(AtomicAbstractRole)dlClause.getBodyAtom(1).getDLPredicate();
                 functionalRoles.add(atomicAbstractRole.getInverseRole());
                 roleHierarchy.addInclusion(atomicAbstractRole,atomicAbstractRole);
                 roleHierarchy.addInclusion(atomicAbstractRole.getInverseRole(),atomicAbstractRole.getInverseRole());
