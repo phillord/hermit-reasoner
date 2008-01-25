@@ -1,5 +1,6 @@
 package org.semanticweb.HermiT.tableau;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
@@ -8,7 +9,9 @@ import java.util.ArrayList;
 import org.semanticweb.HermiT.model.*;
 import org.semanticweb.HermiT.monitor.*;
 
-public final class MergingManager {
+public final class MergingManager implements Serializable {
+    private static final long serialVersionUID=-8404748898127176927L;
+
     protected final Tableau m_tableau;
     protected final TableauMonitor m_tableauMonitor;
     protected final ExtensionManager m_extensionManager;
