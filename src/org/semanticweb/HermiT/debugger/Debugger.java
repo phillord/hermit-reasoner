@@ -796,26 +796,26 @@ public class Debugger extends TableauMonitorForwarder {
     public void isSatisfiableStarted(AtomicConcept atomicConcept) {
         super.isSatisfiableStarted(atomicConcept);
         if (m_singlestep) {
-            m_output.println("Will check whether '"+atomicConcept.getURI()+"' is satisfiable.");
+            m_output.println("Will check whether '"+m_namespaces.abbreviateAsNamespace(atomicConcept.getURI())+"' is satisfiable.");
             mainLoop();
         }
     }
     public void isSatisfiableFinished(AtomicConcept atomicConcept,boolean result) {
         super.isSatisfiableFinished(atomicConcept,result);
-        m_output.println("'"+atomicConcept.getURI()+"' is "+(result ? " " : "not ")+"satisfiable.");
+        m_output.println("'"+m_namespaces.abbreviateAsNamespace(atomicConcept.getURI())+"' is "+(result ? "" : "not ")+"satisfiable.");
         mainLoop();
         dispose();
     }
     public void isSubsumedByStarted(AtomicConcept subconcept,AtomicConcept superconcept) {
         super.isSubsumedByStarted(subconcept,superconcept);
         if (m_singlestep) {
-            m_output.println("Will check whether '"+subconcept.getURI()+"' is subsumed by '"+superconcept.getURI()+"'.");
+            m_output.println("Will check whether '"+m_namespaces.abbreviateAsNamespace(subconcept.getURI())+"' is subsumed by '"+m_namespaces.abbreviateAsNamespace(superconcept.getURI())+"'.");
             mainLoop();
         }
     }
     public void isSubsumedByFinished(AtomicConcept subconcept,AtomicConcept superconcept,boolean result) {
         super.isSubsumedByFinished(subconcept,superconcept,result);
-        m_output.println("'"+subconcept.getURI()+"' is "+(result ? " " : "not ")+"subsumed by '"+superconcept.getURI()+"'.");
+        m_output.println("'"+m_namespaces.abbreviateAsNamespace(subconcept.getURI())+"' is "+(result ? "" : "not ")+"subsumed by '"+m_namespaces.abbreviateAsNamespace(superconcept.getURI())+"'.");
         mainLoop();
         dispose();
     }
@@ -828,7 +828,7 @@ public class Debugger extends TableauMonitorForwarder {
     }
     public void isABoxSatisfiableFinished(boolean result) {
         super.isABoxSatisfiableFinished(result);
-        m_output.println("ABox is "+(result ? " " : "not ")+"satisfiable...");
+        m_output.println("ABox is "+(result ? "" : "not ")+"satisfiable...");
         mainLoop();
         dispose();
     }
