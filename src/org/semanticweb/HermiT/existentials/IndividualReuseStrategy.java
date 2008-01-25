@@ -15,8 +15,12 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
     
     protected final BlockingStrategy m_blockingStrategy;
     protected final boolean m_isDeterministic;
-    protected final Map<AtomicConcept,Node> m_existentialNodes;
+    protected final Map<AtomicConcept,NodeBranchingPointPair> m_reusedNodes;
+    protected final Set<AtomicConcept> m_dontReueseConceptsThisRun;
     protected final Set<AtomicConcept> m_dontReueseConceptsEver;
+    protected final TupleTable m_reuseBacktrackingTable;
+    protected final Object[] m_auxiliaryBuffer;
+    protected int[] m_indicesByBranchingPoint;
     protected Tableau m_tableau;
     protected ExtensionManager m_extensionManager;
     protected ExistentialExpansionManager m_existentialExpansionManager;
@@ -24,8 +28,12 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
     public IndividualReuseStrategy(BlockingStrategy blockingStrategy,boolean isDeterministic) {
         m_blockingStrategy=blockingStrategy;
         m_isDeterministic=isDeterministic;
-        m_existentialNodes=new HashMap<AtomicConcept,Node>();
+        m_reusedNodes=new HashMap<AtomicConcept,NodeBranchingPointPair>();
+        m_dontReueseConceptsThisRun=new HashSet<AtomicConcept>();
         m_dontReueseConceptsEver=new HashSet<AtomicConcept>();
+        m_reuseBacktrackingTable=new TupleTable(1);
+        m_auxiliaryBuffer=new Object[1];
+        m_indicesByBranchingPoint=new int[10];
     }
     public void intialize(Tableau tableau) {
         m_tableau=tableau;
@@ -35,7 +43,9 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
         m_blockingStrategy.initialize(tableau);
     }
     public void clear() {
-        m_existentialNodes.clear();
+        m_reusedNodes.clear();
+        m_reuseBacktrackingTable.clear();
+        m_indicesByBranchingPoint[m_tableau.getCurrentBranchingPoint().getLevel()]=m_reuseBacktrackingTable.getFirstFreeTupleIndex();
         m_blockingStrategy.clear();
     }
     public boolean expandExistentials() {
@@ -77,52 +87,68 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
         if (m_tableau.getTableauMonitor()!=null)
             m_tableau.getTableauMonitor().existentialExpansionStarted(atLeastAbstractRoleConcept,node);
         DependencySet dependencySet=m_extensionManager.getConceptAssertionDependencySet(atLeastAbstractRoleConcept,node);
-        if (!m_isDeterministic) {
-            BranchingPoint branchingPoint=new IndividualResueBranchingPoint(m_tableau,atLeastAbstractRoleConcept,node);
-            m_tableau.pushBranchingPoint(branchingPoint);
-            dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,branchingPoint.getLevel());
-        }
         AtomicConcept toAtomicConcept=(AtomicConcept)atLeastAbstractRoleConcept.getToConcept();
-        Node existentialNode=m_existentialNodes.get(toAtomicConcept);
-        if (existentialNode==null) {
-            existentialNode=m_tableau.createNewNodeRaw(null,NodeType.ROOT_NODE,0);
-            m_existentialNodes.put(toAtomicConcept,existentialNode);
-        }
-        if (!existentialNode.isInTableau()) {
-            assert !existentialNode.isMerged() && !existentialNode.isPruned();
-            m_tableau.insertIntoTableau(existentialNode,dependencySet);
+        Node existentialNode;
+        NodeBranchingPointPair reuseInfo=m_reusedNodes.get(toAtomicConcept);
+        if (reuseInfo==null) {
+            if (!m_isDeterministic) {
+                BranchingPoint branchingPoint=new IndividualResueBranchingPoint(m_tableau,atLeastAbstractRoleConcept,node);
+                m_tableau.pushBranchingPoint(branchingPoint);
+                dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,branchingPoint.getLevel());
+            }
+            existentialNode=m_tableau.createNewRootNode(dependencySet,Node.GLOBALLY_UNIQUE_NODE);
+            reuseInfo=new NodeBranchingPointPair(existentialNode,m_tableau.getCurrentBranchingPoint().getLevel());
+            m_reusedNodes.put(toAtomicConcept,reuseInfo);
             m_extensionManager.addConceptAssertion(toAtomicConcept,existentialNode,dependencySet);
+            m_auxiliaryBuffer[0]=toAtomicConcept;
+            m_reuseBacktrackingTable.addTuple(m_auxiliaryBuffer);
+        }
+        else {
+            dependencySet=reuseInfo.m_node.addCacnonicalNodeDependencySet(dependencySet);
+            existentialNode=reuseInfo.m_node.getCanonicalNode();
+            dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,reuseInfo.m_branchingPoint);
         }
         m_extensionManager.addRoleAssertion(atLeastAbstractRoleConcept.getOnAbstractRole(),node,existentialNode,dependencySet);
         if (m_tableau.getTableauMonitor()!=null)
             m_tableau.getTableauMonitor().existentialExpansionFinished(atLeastAbstractRoleConcept,node);
     }
     protected boolean shoudReuse(AtomicConcept toConcept) {
-        if (!toConcept.getURI().startsWith("internal:") && !m_dontReueseConceptsEver.contains(toConcept)) {
-            Node node=m_existentialNodes.get(toConcept);
-            return node==null || !node.isMerged();
-        }
-        else
-            return false;
+        return !toConcept.getURI().startsWith("internal:") && !m_dontReueseConceptsThisRun.contains(toConcept) && !m_dontReueseConceptsEver.contains(toConcept);
     }
     public void nodeWillChange(Node node) {
         m_blockingStrategy.nodeWillChange(node);
     }
     public void branchingPointPushed() {
+        int start=m_tableau.getCurrentBranchingPoint().getLevel();
+        int requiredSize=start+1;
+        if (requiredSize>m_indicesByBranchingPoint.length) {
+            int newSize=m_indicesByBranchingPoint.length*3/2;
+            while (requiredSize>newSize)
+                newSize=newSize*3/2;
+            int[] newIndicesByBranchingPoint=new int[newSize];
+            System.arraycopy(m_indicesByBranchingPoint,0,newIndicesByBranchingPoint,0,m_indicesByBranchingPoint.length);
+            m_indicesByBranchingPoint=newIndicesByBranchingPoint;
+        }
+        m_indicesByBranchingPoint[start]=m_reuseBacktrackingTable.getFirstFreeTupleIndex();
     }
     public void backtrack() {
+        int requiredFirstFreeTupleIndex=m_indicesByBranchingPoint[m_tableau.getCurrentBranchingPoint().getLevel()];
+        for (int index=m_reuseBacktrackingTable.getFirstFreeTupleIndex()-1;index>=requiredFirstFreeTupleIndex;--index) {
+            AtomicConcept reuseConcept=(AtomicConcept)m_reuseBacktrackingTable.getTupleObject(index,0);
+            Object result=m_reusedNodes.remove(reuseConcept);
+            assert result!=null;
+        }
+        m_reuseBacktrackingTable.truncate(requiredFirstFreeTupleIndex);
     }
     public void modelFound() {
-        for (Map.Entry<AtomicConcept,Node> entry : m_existentialNodes.entrySet())
-            if (entry.getValue().isMerged())
-                m_dontReueseConceptsEver.add(entry.getKey());
+        m_dontReueseConceptsEver.addAll(m_dontReueseConceptsThisRun);
     }
     public boolean isDeterministic() {
         return m_isDeterministic;
     }
     public AtomicConcept getConceptForNode(Node node) {
-        for (Map.Entry<AtomicConcept,Node> entry : m_existentialNodes.entrySet())
-            if (entry.getValue()==node)
+        for (Map.Entry<AtomicConcept,NodeBranchingPointPair> entry : m_reusedNodes.entrySet())
+            if (entry.getValue().m_node==node)
                 return entry.getKey();
         return null;
     }
@@ -139,6 +165,7 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
             m_node=node;
         }
         public void startNextChoice(Tableau tableau,DependencySet clashDepdendencySet) {
+            m_dontReueseConceptsThisRun.add((AtomicConcept)m_existential.getToConcept());
             DependencySet dependencySet=m_tableau.getDependencySetFactory().removeBranchingPoint(clashDepdendencySet,m_level);
             if (m_tableau.getTableauMonitor()!=null)
                 m_tableau.getTableauMonitor().existentialExpansionStarted(m_existential,m_node);
@@ -147,6 +174,16 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
             m_extensionManager.addRoleAssertion(m_existential.getOnAbstractRole(),m_node,existentialNode,dependencySet);
             if (m_tableau.getTableauMonitor()!=null)
                 m_tableau.getTableauMonitor().existentialExpansionFinished(m_existential,m_node);
+        }
+    }
+    
+    protected static class NodeBranchingPointPair {
+        protected final Node m_node;
+        protected final int m_branchingPoint;
+        
+        public NodeBranchingPointPair(Node node,int branchingPoint) {
+            m_node=node;
+            m_branchingPoint=branchingPoint;
         }
     }
 }

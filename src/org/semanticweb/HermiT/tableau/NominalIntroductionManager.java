@@ -88,8 +88,10 @@ public final class NominalIntroductionManager implements Serializable {
                     dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,branchingPoint.getLevel());
                 }
                 if (!newRootNode.isInTableau()) {
-                    if (newRootNode.isMerged())
+                    if (newRootNode.isMerged()) {
+                        dependencySet=newRootNode.addCacnonicalNodeDependencySet(dependencySet);
                         newRootNode=newRootNode.getCanonicalNode();
+                    }
                     else
                         m_tableau.insertIntoTableau(newRootNode,dependencySet);
                     assert newRootNode.isInTableau() : "The target of nominal introduction should be in the tableau.";
@@ -103,8 +105,10 @@ public final class NominalIntroductionManager implements Serializable {
         Node[] result=m_newRoots.get(key);
         if (result==null) {
             result=new Node[atMost.getCaridnality()];
-            for (int index=0;index<result.length;index++)
+            for (int index=0;index<result.length;index++) {
                 result[index]=m_tableau.createNewNodeRaw(null,NodeType.ROOT_NODE,0);
+                result[index].m_externalUsageCounter++;
+            }
             m_newRoots.put(key,result);
         }
         return result;
@@ -256,8 +260,10 @@ public final class NominalIntroductionManager implements Serializable {
                 dependencySet=tableau.getDependencySetFactory().removeBranchingPoint(dependencySet,m_level);
             Node newRootNode=m_newRoots[m_currentRootNode];
             if (!newRootNode.isInTableau()) {
-                if (newRootNode.isMerged())
+                if (newRootNode.isMerged()) {
+                    dependencySet=newRootNode.addCacnonicalNodeDependencySet(dependencySet);
                     newRootNode=newRootNode.getCanonicalNode();
+                }
                 else
                     m_tableau.insertIntoTableau(newRootNode,dependencySet);
                 assert newRootNode.isInTableau() : "The target of nominal introduction should be in the tableau.";

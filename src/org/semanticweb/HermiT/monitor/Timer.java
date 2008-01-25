@@ -66,7 +66,9 @@ public class Timer extends TableauMonitorAdapter {
                 System.out.println();
             long duartionSoFar=current-m_problemStartTime;
             System.out.print(duartionSoFar);
-            System.out.print(" ms: created nodes: ");
+            System.out.print(" ms: allocated nodes nodes: ");
+            System.out.print(m_tableau.getNumberOfAllocatedNodes());
+            System.out.print("    created nodes: ");
             System.out.print(m_tableau.getNumberOfCreatedNodes());
             System.out.print("    nodes in tableau: ");
             System.out.print(m_tableau.getNumberOfNodesInTableau());

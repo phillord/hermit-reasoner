@@ -57,12 +57,16 @@ public class GroundDisjunction implements Serializable {
         return false;
     }
     public boolean addDisjunctToTableau(Tableau tableau,int disjunctIndex,DependencySet choicePointDependencySet) {
+        DependencySet dependencySet=choicePointDependencySet;
         DLPredicate dlPredicate=getDLPredicate(disjunctIndex);
         switch (dlPredicate.getArity()) {
         case 1:
-            return tableau.getExtensionManager().addConceptAssertion((Concept)dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),choicePointDependencySet);
+            dependencySet=getArgument(disjunctIndex,0).addCacnonicalNodeDependencySet(dependencySet);
+            return tableau.getExtensionManager().addConceptAssertion((Concept)dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),dependencySet);
         case 2:
-            return tableau.getExtensionManager().addAssertion(dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),getArgument(disjunctIndex,1).getCanonicalNode(),choicePointDependencySet);
+            dependencySet=getArgument(disjunctIndex,0).addCacnonicalNodeDependencySet(dependencySet);
+            dependencySet=getArgument(disjunctIndex,1).addCacnonicalNodeDependencySet(dependencySet);
+            return tableau.getExtensionManager().addAssertion(dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),getArgument(disjunctIndex,1).getCanonicalNode(),dependencySet);
         default:
             throw new IllegalStateException("Unsupported predicate arity.");
         }

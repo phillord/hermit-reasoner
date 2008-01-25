@@ -209,7 +209,7 @@ public final class MergingManager {
                 }
             }
             // Now finally merge the nodes
-            mergeFrom.mergeInto(mergeInto);
+            mergeFrom.mergeInto(mergeInto,m_tableau.m_dependencySetFactory.unionSets(dependencySetBuffer));
             if (m_tableauMonitor!=null)
                 m_tableauMonitor.mergeFinished(node0,node1);
             return true;

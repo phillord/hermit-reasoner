@@ -30,6 +30,7 @@ public final class Tableau implements Serializable {
     protected boolean m_isCurrentModelDeterministic;
     protected Node m_firstTableauNode;
     protected Node m_lastTableauNode;
+    protected Node m_firstFreeNode;
     protected int m_numberOfNodesInTableau;
     protected int m_numberOfMergedOrPrunedNodes;
     protected Node m_lastChangedNode;
@@ -37,6 +38,7 @@ public final class Tableau implements Serializable {
     protected GroundDisjunction m_firstGroundDisjunction;
     protected GroundDisjunction m_firstUnprocessedGroundDisjunction;
     protected int m_lastNodeID;
+    protected int m_allocatedNodes;
     protected int m_lastOrderPosition;
     protected Node m_checkedNode;
 
@@ -104,6 +106,7 @@ public final class Tableau implements Serializable {
         return m_descriptionGraphManager;
     }
     public void clear() {
+        m_firstFreeNode=null;
         m_firstTableauNode=null;
         m_lastTableauNode=null;
         m_numberOfNodesInTableau=0;
@@ -113,6 +116,7 @@ public final class Tableau implements Serializable {
         m_firstGroundDisjunction=null;
         m_firstUnprocessedGroundDisjunction=null;
         m_lastNodeID=0;
+        m_allocatedNodes=0;
         m_lastOrderPosition=0;
         m_checkedNode=null;
         m_branchingPoints=new BranchingPoint[2];
@@ -331,7 +335,7 @@ public final class Tableau implements Serializable {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.backtrackToStarted(branchingPoint);
         // backtrack the list of branching points
-        for (int index=m_currentBranchingPoint+1;index<=newCurrentBrancingPoint;index++)
+        for (int index=newCurrentBrancingPoint+1;index<=m_currentBranchingPoint;index++)
             m_branchingPoints[index]=null;
         m_currentBranchingPoint=newCurrentBrancingPoint;
         // backtrack processed ground disjunctions
@@ -344,11 +348,6 @@ public final class Tableau implements Serializable {
         }
         if (m_firstGroundDisjunction!=null)
             m_firstGroundDisjunction.m_previousGroundDisjunction=null;
-        // backtrack node changed
-        Node lastChangedNodeShouldBe=branchingPoint.m_lastChangedNode;
-        Node.NodeEvent lastChangedNodeEventShouldBe=branchingPoint.m_lastChangedNodeEvent;
-        while (lastChangedNodeShouldBe!=m_lastChangedNode || lastChangedNodeEventShouldBe!=m_lastChangedNodeEvent)
-            m_lastChangedNode.backtrackNodeChange();
         // backtrack existentials
         m_existentialsExpansionStrategy.backtrack();
         m_existentialExpasionManager.backtrack();
@@ -356,6 +355,11 @@ public final class Tableau implements Serializable {
         m_nominalIntroductionManager.backtrack();
         // backtrack extensions
         m_extensionManager.backtrack();
+        // backtrack node changes
+        Node lastChangedNodeShouldBe=branchingPoint.m_lastChangedNode;
+        Node.NodeEvent lastChangedNodeEventShouldBe=branchingPoint.m_lastChangedNodeEvent;
+        while (lastChangedNodeShouldBe!=m_lastChangedNode || lastChangedNodeEventShouldBe!=m_lastChangedNodeEvent)
+            m_lastChangedNode.backtrackNodeChange();
         // finish 
         m_extensionManager.clearClash();
         if (m_tableauMonitor!=null)
@@ -377,7 +381,17 @@ public final class Tableau implements Serializable {
         return node;
     }
     public Node createNewNodeRaw(Node parent,NodeType nodeType,int treeDepth) {
-        return new Node(this,++m_lastNodeID,parent,nodeType,treeDepth);
+        Node node;
+        if (m_firstFreeNode==null) {
+            node=new Node(this);
+            m_allocatedNodes++;
+        }
+        else {
+            node=m_firstFreeNode;
+            m_firstFreeNode=m_firstFreeNode.m_nextTableauNode;
+        }
+        node.initialize(++m_lastNodeID,parent,nodeType,treeDepth);
+        return node;
     }
     public void insertIntoTableau(Node node,DependencySet dependencySet) {
         node.insertIntoTableau();
@@ -385,6 +399,9 @@ public final class Tableau implements Serializable {
     }
     public int getNumberOfCreatedNodes() {
         return m_lastNodeID;
+    }
+    public int getNumberOfAllocatedNodes() {
+        return m_allocatedNodes;
     }
     public Node getNode(int nodeID) {
         Node node=m_lastChangedNode;
