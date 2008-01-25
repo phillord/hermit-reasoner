@@ -320,21 +320,4 @@ public final class DependencySetFactory implements Serializable {
             m_elements[m_size++]=element;
         }
     }
-    
-    public void doStats(ExtensionManager extensionManager) {
-        java.util.Set<DependencySet> usedSets=new java.util.HashSet<DependencySet>();
-        loadDS(usedSets,extensionManager.getBinaryExtensionTable());
-        loadDS(usedSets,extensionManager.getTernaryExtensionTable());
-        System.out.println("  Factory contains "+m_size+" dependency sets. Of that, "+usedSets.size()+" sets are used in the extensions.");
-    }
-    protected void loadDS(java.util.Set<DependencySet> set,ExtensionTable extensionTable) {
-        int max=extensionTable.m_afterDeltaNewTupleIndex;
-        for (int index=0;index<max;index++) {
-            DependencySet ds=extensionTable.m_dependencySetManager.getDependencySet(index);
-            while (ds!=null) {
-                set.add(ds);
-                ds=ds.m_rest;
-            }
-        }
-    }
 }
