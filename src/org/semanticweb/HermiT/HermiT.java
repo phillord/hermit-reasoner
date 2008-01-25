@@ -120,7 +120,7 @@ public class HermiT implements Serializable {
         }
     }
     public void loadDLOntology(DLOntology dlOntology) throws IllegalArgumentException {
-        if (!dlOntology.canUseNIRule() && m_existentialsType==ExistentialsType.INDIVIDUAL_REUSE)
+        if (!dlOntology.canUseNIRule() && dlOntology.hasAtMostRestrictions() && dlOntology.hasInverseRoles() && m_existentialsType==ExistentialsType.INDIVIDUAL_REUSE)
             throw new IllegalArgumentException("The supplied DL-onyology is not compatible with the individual reuse strategy.");
             
         Namespaces namespaces=new Namespaces();
