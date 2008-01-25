@@ -78,7 +78,7 @@ public class DLClause implements Serializable {
             headConjunctions=m_headConjunctions;
         return DLClause.create(headConjunctions,bodyAtoms);
     }
-    public boolean isConceptInclusionClause() {
+    public boolean isConceptInclusion() {
         if (getBodyLength()==1 && getHeadLength()==1 && getHeadConjunctionLength(0)==1) {
             if (getBodyAtom(0).getDLPredicate() instanceof AtomicConcept && getHeadAtom(0,0).getDLPredicate() instanceof Concept) {
                 Variable x=getBodyAtom(0).getArgumentVariable(0);
