@@ -96,7 +96,7 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
                 m_tableau.pushBranchingPoint(branchingPoint);
                 dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,branchingPoint.getLevel());
             }
-            existentialNode=m_tableau.createNewRootNode(dependencySet,Node.GLOBALLY_UNIQUE_NODE);
+            existentialNode=m_tableau.createNewRootNode(dependencySet,0);
             reuseInfo=new NodeBranchingPointPair(existentialNode,m_tableau.getCurrentBranchingPoint().getLevel());
             m_reusedNodes.put(toAtomicConcept,reuseInfo);
             m_extensionManager.addConceptAssertion(toAtomicConcept,existentialNode,dependencySet);
