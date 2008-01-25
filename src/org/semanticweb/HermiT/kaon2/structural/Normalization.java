@@ -153,20 +153,8 @@ public class Normalization {
                 ObjectPropertyMember objectPropertyMember=(ObjectPropertyMember)fact;
                 m_facts.add(KAON2Manager.factory().objectPropertyMember(objectPropertyMember.getObjectProperty().getSimplified(),objectPropertyMember.getSourceIndividual(),objectPropertyMember.getTargetIndividual()));
             }
-            else if (fact instanceof SameIndividual) {
-                SameIndividual sameIndividual=(SameIndividual)fact;
-                Individual[] individuals=new Individual[sameIndividual.getIndividuals().size()];
-                sameIndividual.getIndividuals().toArray(individuals);
-                for (int i=0;i<individuals.length-1;i++) 
-                    m_facts.add(KAON2Manager.factory().sameIndividual(individuals[i],individuals[i+1]));
-            }
-            else if (fact instanceof DifferentIndividuals) {
-                DifferentIndividuals differentIndividuals=(DifferentIndividuals)fact;
-                Individual[] individuals=new Individual[differentIndividuals.getIndividuals().size()];
-                differentIndividuals.getIndividuals().toArray(individuals);
-                for (int i=0;i<individuals.length;i++)
-                    for (int j=i+1;j<individuals.length;j++) 
-                        m_facts.add(KAON2Manager.factory().differentIndividuals(individuals[i],individuals[i+1]));
+            else if (fact instanceof SameIndividual || fact instanceof DifferentIndividuals) {
+                m_facts.add(fact);
             }
             else if (!(fact instanceof EntityAnnotation))
                 throw new KAON2Exception("Unsupported type of fact encountered.");
