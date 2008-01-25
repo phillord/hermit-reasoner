@@ -1,10 +1,11 @@
 package org.semanticweb.HermiT.tableau;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 import java.util.HashMap;
-import java.net.URL;
-import java.io.InputStream;
+import java.io.CharArrayWriter;
+import java.io.PrintWriter;
 
 import org.semanticweb.kaon2.api.*;
 import org.semanticweb.kaon2.api.owl.elements.*;
@@ -14,6 +15,7 @@ import org.semanticweb.HermiT.blocking.*;
 import org.semanticweb.HermiT.existentials.*;
 import org.semanticweb.HermiT.model.*;
 import org.semanticweb.HermiT.monitor.*;
+import org.semanticweb.HermiT.hierarchy.*;
 
 public abstract class AbstractOntologyTest extends AbstractHermiTTest {
     protected Ontology m_ontology;
@@ -117,6 +119,36 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
                 m_ontology.removeAxiom(axiom);
         }
     }
+    protected void assertSubsumptionHierarchy(String controlResource) throws Exception {
+        String fromOntology=getSubsumptionHierarcyAsText();
+        String fromResource=getResourceText(controlResource);
+        assertEquals(fromResource,fromOntology);
+    }
+    protected String getSubsumptionHierarcyAsText() throws Exception {
+        SubsumptionHierarchy subsumptionHierarchy=getSubsumptionHierarchy();
+        Map<String,Set<String>> flattenedHierarchy=subsumptionHierarchy.getFlattenedHierarchy();
+        org.semanticweb.HermiT.Namespaces namespaces=new org.semanticweb.HermiT.Namespaces();
+        namespaces.registerPrefix("a",m_ontology.getOntologyURI()+"#");
+        namespaces.registerInternalPrefixes(m_ontology.getOntologyURI());
+        CharArrayWriter buffer=new CharArrayWriter();
+        PrintWriter output=new PrintWriter(buffer);
+        for (Map.Entry<String,Set<String>> entry : flattenedHierarchy.entrySet()) {
+            output.println(namespaces.abbreviateAsNamespace(entry.getKey()));
+            for (String owlClassURI : entry.getValue()) {
+                output.print("    ");
+                output.println(namespaces.abbreviateAsNamespace(owlClassURI));
+            }
+            output.println("-----------------------------------------------");
+        }
+        output.println("! THE END !");
+        output.flush();
+        return buffer.toString();
+    }
+    protected SubsumptionHierarchy getSubsumptionHierarchy() throws Exception {
+        Tableau tableau=getTableau();
+        SubsumptionHierarchy.SubsumptionChecker checker=new TableauSubsumptionChecker(tableau);
+        return new SubsumptionHierarchy(checker);
+    }
     protected DLOntology getDLOntology() throws Exception {
         Clausification clausification=new Clausification();
         Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
@@ -145,13 +177,6 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
         m_ontology.removeAxiom(axiom);
     }
     protected void loadResource(String resource) throws Exception {
-        URL url=getClass().getResource(resource);
-        InputStream inputStream=url.openStream();
-        try {
-            m_ontology.importContentsFrom(inputStream,url.toString(),null);
-        }
-        finally {
-            inputStream.close();
-        }
+        m_ontology=getOntologyFromResource(resource);
     }
 }

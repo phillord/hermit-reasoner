@@ -2,6 +2,8 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.CharArrayWriter;
+import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Set;
 import java.util.HashSet;
@@ -54,6 +56,23 @@ public abstract class AbstractHermiTTest extends TestCase {
             reader.close();
         }
         return strings;
+    }
+    protected String getResourceText(String resourceName) throws Exception {
+        CharArrayWriter buffer=new CharArrayWriter();
+        PrintWriter output=new PrintWriter(buffer);
+        BufferedReader reader=new BufferedReader(new InputStreamReader(getClass().getResource(resourceName).openStream()));
+        try {
+            String line=reader.readLine();
+            while (line!=null) {
+                output.println(line);
+                line=reader.readLine();
+            }
+        }
+        finally {
+            reader.close();
+        }
+        output.flush();
+        return buffer.toString();
     }
     protected void assertEquals(Set<Axiom> axioms,String controlResourceName) throws Exception {
         Set<Axiom> controlAxioms=getAxioms(controlResourceName);

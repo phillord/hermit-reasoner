@@ -459,4 +459,12 @@ public class ReasonerTest extends AbstractOntologyTest {
         loadResource("res/dependency-disjuntion-merging-bug.xml");
         assertSubsumedBy("http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Anjou","http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FullBodiedWine",false);
     }
+    public void testWineNoDataProperties() throws Exception {
+        loadResource("res/wine-no-data-properties.xml");
+        assertSubsumptionHierarchy("res/wine-no-data-properties.xml.txt");
+    }
+    public void testGalenIansFullUndoctored() throws Exception {
+        loadResource("res/galen-ians-full-undoctored.xml");
+        assertSubsumptionHierarchy("res/galen-ians-full-undoctored.xml.txt");
+    }
 }
