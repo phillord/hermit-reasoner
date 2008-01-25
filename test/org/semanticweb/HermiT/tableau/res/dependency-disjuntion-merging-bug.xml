@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl 'http://www.w3.org/2002/07/owl#'>
+]>
+
+<rdf:RDF
+    xml:base="http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine"
+    xmlns:a="http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+
+<owl:Ontology rdf:about=""/>
+
+<owl:Class rdf:ID="Anjou">
+    <rdfs:subClassOf>
+        <owl:Restriction>
+            <owl:onProperty rdf:resource="#hasBody"/>
+            <owl:hasValue rdf:resource="#Light"/>
+        </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="#Wine"/>
+</owl:Class>
+
+<owl:Class rdf:ID="CabernetSauvignon">
+    <rdfs:subClassOf>
+        <owl:Restriction>
+            <owl:onProperty rdf:resource="#hasBody"/>
+            <owl:allValuesFrom>
+                <owl:Class>
+                    <owl:oneOf rdf:parseType="Collection">
+                        <owl:Thing rdf:about="#Medium"/>
+                        <owl:Thing rdf:about="#Full"/>
+                    </owl:oneOf>
+                </owl:Class>
+            </owl:allValuesFrom>
+        </owl:Restriction>
+    </rdfs:subClassOf>
+    <owl:equivalentClass>
+        <owl:Class>
+            <owl:intersectionOf rdf:parseType="Collection">
+                <owl:Class rdf:about="#Wine"/>
+                <owl:Restriction>
+                    <owl:onProperty rdf:resource="#madeFromGrape"/>
+                    <owl:hasValue rdf:resource="#CabernetSauvignonGrape"/>
+                </owl:Restriction>
+                <owl:Restriction>
+                    <owl:onProperty rdf:resource="#madeFromGrape"/>
+                    <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:maxCardinality>
+                </owl:Restriction>
+            </owl:intersectionOf>
+        </owl:Class>
+    </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class>
+    <owl:intersectionOf rdf:parseType="Collection">
+        <owl:Class rdf:about="#Wine"/>
+        <owl:Restriction>
+            <owl:onProperty rdf:resource="#hasBody"/>
+            <owl:hasValue rdf:resource="#Full"/>
+        </owl:Restriction>
+    </owl:intersectionOf>
+    <rdfs:subClassOf rdf:resource="#FullBodiedWine"/>
+</owl:Class>
+
+<owl:Class rdf:ID="StEmilion">
+    <rdfs:subClassOf>
+        <owl:Restriction>
+            <owl:onProperty rdf:resource="#madeFromGrape"/>
+            <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:maxCardinality>
+        </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+        <owl:Restriction>
+            <owl:onProperty rdf:resource="#madeFromGrape"/>
+            <owl:hasValue rdf:resource="#CabernetSauvignonGrape"/>
+        </owl:Restriction>
+    </rdfs:subClassOf>
+</owl:Class>
+
+<owl:Class rdf:ID="Wine">
+    <rdfs:subClassOf>
+        <owl:Restriction>
+            <owl:onProperty rdf:resource="#hasBody"/>
+            <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:cardinality>
+        </owl:Restriction>
+    </rdfs:subClassOf>
+</owl:Class>
+
+<owl:Class rdf:ID="WineBody">
+    <owl:equivalentClass>
+        <owl:Class>
+            <owl:oneOf rdf:parseType="Collection">
+                <owl:Thing rdf:about="#Light"/>
+                <owl:Thing rdf:about="#Medium"/>
+                <owl:Thing rdf:about="#Full"/>
+            </owl:oneOf>
+        </owl:Class>
+    </owl:equivalentClass>
+</owl:Class>
+
+<owl:ObjectProperty rdf:ID="hasBody">
+    <rdfs:range rdf:resource="#WineBody"/>
+</owl:ObjectProperty>
+
+<owl:ObjectProperty rdf:ID="madeFromGrape">
+    <rdfs:domain rdf:resource="#Wine"/>
+</owl:ObjectProperty>
+
+<a:StEmilion rdf:ID="ChateauChevalBlancStEmilion"/>
+
+<rdf:Description rdf:ID="Full"/>
+<owl:AllDifferent>
+    <owl:distinctMembers rdf:parseType="Collection">
+        <owl:Thing rdf:about="#Light"/>
+        <owl:Thing rdf:about="#Medium"/>
+        <owl:Thing rdf:about="#Full"/>
+    </owl:distinctMembers>
+</owl:AllDifferent>
+
+</rdf:RDF>

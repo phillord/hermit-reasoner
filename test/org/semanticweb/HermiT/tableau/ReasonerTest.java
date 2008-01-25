@@ -455,4 +455,8 @@ public class ReasonerTest extends AbstractOntologyTest {
         assertInstanceOf("[atLeast 1 [inv S] [not A]]","n",true);
         assertInstanceOf("[atLeast 2 [inv S] [not A]]","n",false);
     }
+    public void testDependencyDisjunctionMergingBug() throws Exception {
+        loadResource("res/dependency-disjuntion-merging-bug.xml");
+        assertSubsumedBy("http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Anjou","http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FullBodiedWine",false);
+    }
 }

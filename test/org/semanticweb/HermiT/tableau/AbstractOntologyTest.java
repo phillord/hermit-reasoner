@@ -3,6 +3,8 @@ package org.semanticweb.HermiT.tableau;
 import java.util.Collections;
 import java.util.Set;
 import java.util.HashMap;
+import java.net.URL;
+import java.io.InputStream;
 
 import org.semanticweb.kaon2.api.*;
 import org.semanticweb.kaon2.api.owl.elements.*;
@@ -141,5 +143,15 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
     protected void removeAxiom(String axiomString) throws Exception {
         Axiom axiom=KAON2Manager.factory().axiom(axiomString,Namespaces.INSTANCE);
         m_ontology.removeAxiom(axiom);
+    }
+    protected void loadResource(String resource) throws Exception {
+        URL url=getClass().getResource(resource);
+        InputStream inputStream=url.openStream();
+        try {
+            m_ontology.importContentsFrom(inputStream,url.toString(),null);
+        }
+        finally {
+            inputStream.close();
+        }
     }
 }
