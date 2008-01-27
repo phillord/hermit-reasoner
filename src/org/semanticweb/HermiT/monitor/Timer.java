@@ -60,47 +60,49 @@ public class Timer extends TableauMonitorAdapter {
         printTime(duration);
     }
     public void iterationStarted() {
-        long current=System.currentTimeMillis();
-        if (current-m_lastStatusTime>30000) {
+        if (System.currentTimeMillis()-m_lastStatusTime>30000) {
             if (m_lastStatusTime==m_problemStartTime)
                 System.out.println();
-            long duartionSoFar=current-m_problemStartTime;
-            System.out.print(duartionSoFar);
-            System.out.print(" ms: allocated nodes: ");
-            System.out.print(m_tableau.getNumberOfAllocatedNodes());
-            System.out.print("    used nodes: ");
-            System.out.print(m_tableau.getNumberOfCreatedNodes());
-            System.out.print("    in tableau: ");
-            System.out.print(m_tableau.getNumberOfNodesInTableau());
-            if (m_tableau.getNumberOfMergedOrPrunedNodes()>0) {
-                System.out.print("    merged/pruned: ");
-                System.out.print(m_tableau.getNumberOfMergedOrPrunedNodes());
-            }
-            System.out.print("    branching point: ");
-            System.out.print(m_tableau.getCurrentBranchingPoint().getLevel());
-            if (m_numberOfBacktrackings>0) {
-                System.out.print("    backtrackings: ");
-                System.out.print(m_numberOfBacktrackings);
-            }
-            System.out.println();
-            System.out.print("    Binary table size:   ");
-            System.out.print(m_tableau.getExtensionManager().getBinaryExtensionTable().size()/1000);
-            System.out.print("kb    Ternary table size: ");
-            System.out.print(m_tableau.getExtensionManager().getTernaryExtensionTable().size()/1000);
-            System.out.print("kb    Dependency set factory size: ");
-            System.out.print(m_tableau.getDependencySetFactory().size()/1000);
-            System.out.println("kb");
-            System.out.print("    Concept set factory: ");
-            System.out.print(m_tableau.getConceptSetFactory().size()/1000);
-            System.out.print("kb    Role set factory:   ");
-            System.out.print(m_tableau.getAtomicAbstractRoleSetFactory().size()/1000);
-            System.out.print("kb    Existential set factory:   ");
-            System.out.print(m_tableau.getExistentialConceptSetFactory().size()/1000);
-            System.out.println("kb");
+            doStatistics();
             m_lastStatusTime=System.currentTimeMillis();
         }
     }
     public void backtrackToFinished(BranchingPoint newCurrentBrancingPoint) {
         m_numberOfBacktrackings++;
+    }
+    protected void doStatistics() {
+        long duartionSoFar=System.currentTimeMillis()-m_problemStartTime;
+        System.out.print(duartionSoFar);
+        System.out.print(" ms: allocated nodes: ");
+        System.out.print(m_tableau.getNumberOfAllocatedNodes());
+        System.out.print("    used nodes: ");
+        System.out.print(m_tableau.getNumberOfCreatedNodes());
+        System.out.print("    in tableau: ");
+        System.out.print(m_tableau.getNumberOfNodesInTableau());
+        if (m_tableau.getNumberOfMergedOrPrunedNodes()>0) {
+            System.out.print("    merged/pruned: ");
+            System.out.print(m_tableau.getNumberOfMergedOrPrunedNodes());
+        }
+        System.out.print("    branching point: ");
+        System.out.print(m_tableau.getCurrentBranchingPoint().getLevel());
+        if (m_numberOfBacktrackings>0) {
+            System.out.print("    backtrackings: ");
+            System.out.print(m_numberOfBacktrackings);
+        }
+        System.out.println();
+        System.out.print("    Binary table size:   ");
+        System.out.print(m_tableau.getExtensionManager().getBinaryExtensionTable().size()/1000);
+        System.out.print("kb    Ternary table size: ");
+        System.out.print(m_tableau.getExtensionManager().getTernaryExtensionTable().size()/1000);
+        System.out.print("kb    Dependency set factory size: ");
+        System.out.print(m_tableau.getDependencySetFactory().size()/1000);
+        System.out.println("kb");
+        System.out.print("    Concept set factory: ");
+        System.out.print(m_tableau.getConceptSetFactory().size()/1000);
+        System.out.print("kb    Role set factory:   ");
+        System.out.print(m_tableau.getAtomicAbstractRoleSetFactory().size()/1000);
+        System.out.print("kb    Existential set factory:   ");
+        System.out.print(m_tableau.getExistentialConceptSetFactory().size()/1000);
+        System.out.println("kb");
     }
 }

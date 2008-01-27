@@ -36,7 +36,7 @@ import org.semanticweb.HermiT.debugger.*;
 public class HermiT implements Serializable {
     private static final long serialVersionUID=-8277117863937974032L;
 
-    public static enum TableauMonitorType { NONE,TIMING,DEBUGGER_NO_HISTORY,DEBUGGER_HISTORY_ON };
+    public static enum TableauMonitorType { NONE,TIMING,TIMING_WITH_PAUSE,DEBUGGER_NO_HISTORY,DEBUGGER_HISTORY_ON };
     public static enum DirectBlockingType { PAIR_WISE,EQUALITY,OPTIMAL };
     public static enum BlockingType { ANYWHERE,ANCESTOR };
     public static enum BlockingCacheType { CACHED,NOT_CACHED };
@@ -68,6 +68,9 @@ public class HermiT implements Serializable {
     }
     public void setTimingOn() {
         m_tableauMonitorType=TableauMonitorType.TIMING;
+    }
+    public void setTimingWithPauseOn() {
+        m_tableauMonitorType=TableauMonitorType.TIMING_WITH_PAUSE;
     }
     public void setDebuggingOn(boolean historyOn) {
         m_tableauMonitorType=(historyOn ? TableauMonitorType.DEBUGGER_HISTORY_ON : TableauMonitorType.DEBUGGER_NO_HISTORY);
@@ -149,6 +152,9 @@ public class HermiT implements Serializable {
             break;
         case TIMING:
             tableauMonitor=new Timer();
+            break;
+        case TIMING_WITH_PAUSE:
+            tableauMonitor=new TimerWithPause();
             break;
         case DEBUGGER_HISTORY_ON:
             tableauMonitor=new Debugger(m_namespaces,true);
