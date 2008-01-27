@@ -30,7 +30,7 @@ public abstract class ExtensionTable implements Serializable {
         m_binaryAuxiliaryTuple=new Object[2];
         m_indicesByBranchingPoint=new int[2*3];
     }
-    public abstract int size();
+    public abstract int sizeInMemory();
     public int getArity() {
         return m_tupleArity;
     }
@@ -204,15 +204,15 @@ public abstract class ExtensionTable implements Serializable {
         m_indicesByBranchingPoint[start+1]=m_afterExtensionThisTupleIndex;
         m_indicesByBranchingPoint[start+2]=m_afterDeltaNewTupleIndex;
     }
-    public boolean isTupleValid(Object[] tuple) {
+    public boolean isTupleActive(Object[] tuple) {
         for (int objectIndex=m_tupleArity-1;objectIndex>0;--objectIndex)
-            if (!((Node)tuple[objectIndex]).isInTableau())
+            if (!((Node)tuple[objectIndex]).isActive())
                 return false;
         return true;
     }
-    public boolean isTupleValid(int tupleIndex) {
+    public boolean isTupleActive(int tupleIndex) {
         for (int objectIndex=m_tupleArity-1;objectIndex>0;--objectIndex)
-            if (!((Node)m_tupleTable.getTupleObject(tupleIndex,objectIndex)).isInTableau())
+            if (!((Node)m_tupleTable.getTupleObject(tupleIndex,objectIndex)).isActive())
                 return false;
         return true;
     }
@@ -290,7 +290,7 @@ public abstract class ExtensionTable implements Serializable {
             }
             while (m_currentTupleIndex<m_afterLastTupleIndex) {
                 m_tupleTable.retrieveTuple(m_tupleBuffer,m_currentTupleIndex);
-                if (isTupleValid())
+                if (isTupleActive())
                     return;
                 m_currentTupleIndex++;
             }
@@ -303,14 +303,14 @@ public abstract class ExtensionTable implements Serializable {
                 m_currentTupleIndex++;
                 while (m_currentTupleIndex<m_afterLastTupleIndex) {
                     m_tupleTable.retrieveTuple(m_tupleBuffer,m_currentTupleIndex);
-                    if (isTupleValid())
+                    if (isTupleActive())
                         return;
                     m_currentTupleIndex++;
                 }
             }
         }
-        protected boolean isTupleValid() {
-            if (!ExtensionTable.this.isTupleValid(m_tupleBuffer))
+        protected boolean isTupleActive() {
+            if (!ExtensionTable.this.isTupleActive(m_tupleBuffer))
                 return false;
             if (m_checkTupleSelection)
                 for (int index=m_bindingPattern.length-1;index>=0;--index)

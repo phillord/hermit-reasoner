@@ -17,27 +17,14 @@ public class Timer extends TableauMonitorAdapter {
         m_problemStartTime=System.currentTimeMillis();
         m_lastStatusTime=m_problemStartTime;
     }
-    protected void printTime(long duration) {
-        System.out.print("    Number of created nodes: ");
-        System.out.print(m_tableau.getNumberOfCreatedNodes());
-        System.out.print("    Overall time: ");
-        System.out.print(duration);
-        System.out.print(" ms");
-        if (m_numberOfBacktrackings>0) {
-            System.out.print("    Total backtrackings: ");
-            System.out.print(m_numberOfBacktrackings);
-        }
-        System.out.println();
-    }
     public void isSatisfiableStarted(AtomicConcept atomicConcept) {
         System.out.print("Testing "+atomicConcept.getURI()+" ...");
         System.out.flush();
         start();
     }
     public void isSatisfiableFinished(AtomicConcept atomicConcept,boolean result) {
-        long duration=System.currentTimeMillis()-m_problemStartTime;
         System.out.println(result ? "YES" : "NO");
-        printTime(duration);
+        doStatistics();
     }
     public void isSubsumedByStarted(AtomicConcept subconcept,AtomicConcept superconcept) {
         System.out.print("Testing "+subconcept.getURI()+" ==> "+superconcept.getURI()+" ...");
@@ -45,9 +32,8 @@ public class Timer extends TableauMonitorAdapter {
         start();
     }
     public void isSubsumedByFinished(AtomicConcept subconcept,AtomicConcept superconcept,boolean result) {
-        long duration=System.currentTimeMillis()-m_problemStartTime;
         System.out.println(result ? "YES" : "NO");
-        printTime(duration);
+        doStatistics();
     }
     public void isABoxSatisfiableStarted() {
         System.out.print("Testing ABox satisfiability ...");
@@ -55,9 +41,8 @@ public class Timer extends TableauMonitorAdapter {
         start();
     }
     public void isABoxSatisfiableFinished(boolean result) {
-        long duration=System.currentTimeMillis()-m_problemStartTime;
         System.out.println(result ? "YES" : "NO");
-        printTime(duration);
+        doStatistics();
     }
     public void iterationStarted() {
         if (System.currentTimeMillis()-m_lastStatusTime>30000) {
@@ -76,7 +61,7 @@ public class Timer extends TableauMonitorAdapter {
         System.out.print(" ms: allocated nodes: ");
         System.out.print(m_tableau.getNumberOfAllocatedNodes());
         System.out.print("    used nodes: ");
-        System.out.print(m_tableau.getNumberOfCreatedNodes());
+        System.out.print(m_tableau.getNumberOfNodeCreations());
         System.out.print("    in tableau: ");
         System.out.print(m_tableau.getNumberOfNodesInTableau());
         if (m_tableau.getNumberOfMergedOrPrunedNodes()>0) {
@@ -91,11 +76,11 @@ public class Timer extends TableauMonitorAdapter {
         }
         System.out.println();
         System.out.print("    Binary table size:   ");
-        System.out.print(m_tableau.getExtensionManager().getBinaryExtensionTable().size()/1000);
+        System.out.print(m_tableau.getExtensionManager().getBinaryExtensionTable().sizeInMemory()/1000);
         System.out.print("kb    Ternary table size: ");
-        System.out.print(m_tableau.getExtensionManager().getTernaryExtensionTable().size()/1000);
+        System.out.print(m_tableau.getExtensionManager().getTernaryExtensionTable().sizeInMemory()/1000);
         System.out.print("kb    Dependency set factory size: ");
-        System.out.print(m_tableau.getDependencySetFactory().size()/1000);
+        System.out.print(m_tableau.getDependencySetFactory().sizeInMemory()/1000);
         System.out.println("kb");
         System.out.print("    Concept set factory: ");
         System.out.print(m_tableau.getConceptSetFactory().size()/1000);

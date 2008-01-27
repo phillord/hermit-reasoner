@@ -11,24 +11,22 @@ public final class Node implements Serializable {
     private static final long serialVersionUID=-2549229429321484690L;
 
     public static final int GLOBALLY_UNIQUE_NODE=-1;
-    public static enum NodeState { NOWHERE,IN_TABLEAU,MERGED,PRUNED }
-    protected static enum NodeEvent { INSERTED_INTO_TALBEAU,MERGED,PRUNED }
+    public static enum NodeState { ACTIVE,MERGED,PRUNED }
     
     protected final Tableau m_tableau;
-    protected int m_externalUsageCounter;
     protected int m_nodeID;
+    protected NodeState m_nodeState;
     protected Node m_parent;
     protected NodeType m_nodeType;
     protected int m_treeDepth;
-    protected int m_orderPosition;
     protected Set<Concept> m_positiveLabel;
     protected Set<Concept> m_negativeLabel;
     protected Set<AtomicAbstractRole> m_fromParentLabel;
     protected Set<AtomicAbstractRole> m_toParentLabel;
     protected Set<ExistentialConcept> m_unprocessedExistentials;
-    protected Node m_nextTableauNode;
     protected Node m_previousTableauNode;
-    protected NodeState m_nodeState;
+    protected Node m_nextTableauNode;
+    protected Node m_previousMergedOrPrunedNode;
     protected Node m_mergedInto;
     protected DependencySet m_mergedIntoDependencySet;
     protected Node m_blocker;
@@ -38,10 +36,6 @@ public final class Node implements Serializable {
     protected boolean m_occursInDescriptionGraphsDirty;
     protected int m_numberOfNIAssertionsFromNode;
     protected int m_numberOfNIAssertionsToNode;
-    protected Node m_previousChangedNodeForInsert;
-    protected NodeEvent m_previousChangedNodeEventForInsert;
-    protected Node m_previousChangedNodeForRemove;
-    protected NodeEvent m_previousChangedNodeEventForRemove;
     
     public Node(Tableau tableau) {
         m_tableau=tableau;
@@ -55,6 +49,7 @@ public final class Node implements Serializable {
         assert m_toParentLabel==null;
         assert m_unprocessedExistentials==null;
         m_nodeID=nodeID;
+        m_nodeState=NodeState.ACTIVE;
         m_parent=parent;
         m_nodeType=nodeType;
         m_treeDepth=treeDepth;
@@ -68,9 +63,9 @@ public final class Node implements Serializable {
         m_tableau.m_atomicAbstractRoleSetFactory.addReference(m_toParentLabel);
         m_unprocessedExistentials=m_tableau.m_existentialConceptSetFactory.emptySet();
         m_tableau.m_existentialConceptSetFactory.addReference(m_unprocessedExistentials);
-        m_nextTableauNode=null;
         m_previousTableauNode=null;
-        m_nodeState=NodeState.NOWHERE;
+        m_nextTableauNode=null;
+        m_previousMergedOrPrunedNode=null;
         m_mergedInto=null;
         m_mergedIntoDependencySet=null;
         m_blocker=null;
@@ -80,10 +75,6 @@ public final class Node implements Serializable {
         m_occursInDescriptionGraphsDirty=false;
         m_numberOfNIAssertionsFromNode=0;
         m_numberOfNIAssertionsToNode=0;
-        m_previousChangedNodeForInsert=null;
-        m_previousChangedNodeEventForInsert=null;
-        m_previousChangedNodeForRemove=null;
-        m_previousChangedNodeEventForRemove=null;
     }
     protected void destroy() {
         m_tableau.m_conceptSetFactory.removeReference(m_positiveLabel);
@@ -92,6 +83,7 @@ public final class Node implements Serializable {
         m_tableau.m_atomicAbstractRoleSetFactory.removeReference(m_toParentLabel);
         m_tableau.m_existentialConceptSetFactory.removeReference(m_unprocessedExistentials);
         m_nodeID=-1;
+        m_nodeState=null;
         m_parent=null;
         m_nodeType=null;
         m_positiveLabel=null;
@@ -99,9 +91,9 @@ public final class Node implements Serializable {
         m_fromParentLabel=null;
         m_toParentLabel=null;
         m_unprocessedExistentials=null;
-        m_nextTableauNode=null;
         m_previousTableauNode=null;
-        m_nodeState=null;
+        m_nextTableauNode=null;
+        m_previousMergedOrPrunedNode=null;
         m_mergedInto=null;
         if (m_mergedIntoDependencySet!=null) {
             m_tableau.m_dependencySetFactory.removeUsage(m_mergedIntoDependencySet);
@@ -110,10 +102,6 @@ public final class Node implements Serializable {
         m_blocker=null;
         m_blockingObject=null;
         m_occursInDescriptionGraphs=null;
-        m_previousChangedNodeForInsert=null;
-        m_previousChangedNodeEventForInsert=null;
-        m_previousChangedNodeForRemove=null;
-        m_previousChangedNodeEventForRemove=null;
     }
     protected void finalize() {
         if (m_positiveLabel!=null)
@@ -155,9 +143,6 @@ public final class Node implements Serializable {
     public int getTreeDepth() {
         return m_treeDepth;
     }
-    public int getOrderPosition() {
-        return m_orderPosition;
-    }
     public boolean isBlocked() {
         return m_blocker!=null;
     }
@@ -180,20 +165,34 @@ public final class Node implements Serializable {
     public void setBlockingObject(Object blockingObject) {
         m_blockingObject=blockingObject;
     }
+    public boolean isActive() {
+        return m_nodeState==NodeState.ACTIVE;
+    }
     public boolean isMerged() {
         return m_nodeState==NodeState.MERGED;
     }
     public boolean isPruned() {
         return m_nodeState==NodeState.PRUNED;
     }
-    public boolean isInTableau() {
-        return m_nodeState==NodeState.IN_TABLEAU;
+    public Node getPreviousTableauNode() {
+        return m_previousTableauNode;
     }
     public Node getNextTableauNode() {
         return m_nextTableauNode;
     }
-    public Node getPreviousTableauNode() {
-        return m_previousTableauNode;
+    public Node getCanonicalNode() {
+        Node result=this;
+        while (result.m_mergedInto!=null)
+            result=result.m_mergedInto;
+        return result;
+    }
+    public DependencySet addCacnonicalNodeDependencySet(DependencySet dependencySet) {
+        Node result=this;
+        while (result.m_mergedInto!=null) {
+            dependencySet=m_tableau.m_dependencySetFactory.unionWith(dependencySet,result.m_mergedIntoDependencySet);
+            result=result.m_mergedInto;
+        }
+        return dependencySet;
     }
     public Set<Concept> getPositiveLabel() {
         return m_positiveLabel;
@@ -275,152 +274,6 @@ public final class Node implements Serializable {
         m_tableau.m_existentialConceptSetFactory.addReference(newUnprocessedExistentials);
         m_tableau.m_existentialConceptSetFactory.removeReference(m_unprocessedExistentials);
         m_unprocessedExistentials=newUnprocessedExistentials;
-    }
-    public void insertIntoTableau() {
-        assert m_nodeID!=-1;
-        assert m_nodeState==NodeState.NOWHERE;
-        m_tableau.m_existentialsExpansionStrategy.nodeWillChange(this);
-        m_nodeState=NodeState.IN_TABLEAU;
-        m_orderPosition=(++m_tableau.m_lastOrderPosition);
-        // Update the node list
-        m_nextTableauNode=null;
-        m_previousTableauNode=m_tableau.m_lastTableauNode;
-        if (m_tableau.m_firstTableauNode==null)
-            m_tableau.m_firstTableauNode=this;
-        else
-            m_tableau.m_lastTableauNode.m_nextTableauNode=this;
-        m_tableau.m_lastTableauNode=this;
-        m_tableau.m_numberOfNodesInTableau++;
-        // Update the change list
-        m_previousChangedNodeForInsert=m_tableau.m_lastChangedNode;
-        m_previousChangedNodeEventForInsert=m_tableau.m_lastChangedNodeEvent;
-        m_tableau.m_lastChangedNode=this;
-        m_tableau.m_lastChangedNodeEvent=NodeEvent.INSERTED_INTO_TALBEAU;
-    }
-    public void mergeInto(Node mergeInto,DependencySet dependencySet) {
-        assert m_nodeState==NodeState.IN_TABLEAU;
-        assert m_mergedInto==null;
-        assert m_mergedIntoDependencySet==null;
-        m_tableau.m_existentialsExpansionStrategy.nodeWillChange(this);
-        m_mergedInto=mergeInto;
-        m_mergedIntoDependencySet=dependencySet;
-        m_tableau.m_dependencySetFactory.addUsage(m_mergedIntoDependencySet);
-        m_nodeState=NodeState.MERGED;
-        // Update the node list
-        if (m_previousTableauNode==null)
-            m_tableau.m_firstTableauNode=m_nextTableauNode;
-        else
-            m_previousTableauNode.m_nextTableauNode=m_nextTableauNode;
-        if (m_nextTableauNode==null)
-            m_tableau.m_lastTableauNode=m_previousTableauNode;
-        else
-            m_nextTableauNode.m_previousTableauNode=m_previousTableauNode;
-        m_tableau.m_numberOfNodesInTableau--;
-        m_tableau.m_numberOfMergedOrPrunedNodes++;
-        // Update the change list
-        m_previousChangedNodeForRemove=m_tableau.m_lastChangedNode;
-        m_previousChangedNodeEventForRemove=m_tableau.m_lastChangedNodeEvent;
-        m_tableau.m_lastChangedNode=this;
-        m_tableau.m_lastChangedNodeEvent=NodeEvent.MERGED;
-    }
-    public void prune() {
-        assert m_nodeState==NodeState.IN_TABLEAU;
-        assert m_mergedInto==null;
-        assert m_mergedIntoDependencySet==null;
-        m_tableau.m_existentialsExpansionStrategy.nodeWillChange(this);
-        m_nodeState=NodeState.PRUNED;
-        // Update the node list
-        if (m_previousTableauNode==null)
-            m_tableau.m_firstTableauNode=m_nextTableauNode;
-        else
-            m_previousTableauNode.m_nextTableauNode=m_nextTableauNode;
-        if (m_nextTableauNode==null)
-            m_tableau.m_lastTableauNode=m_previousTableauNode;
-        else
-            m_nextTableauNode.m_previousTableauNode=m_previousTableauNode;
-        m_tableau.m_numberOfNodesInTableau--;
-        m_tableau.m_numberOfMergedOrPrunedNodes++;
-        // update the change list
-        m_previousChangedNodeForRemove=m_tableau.m_lastChangedNode;
-        m_previousChangedNodeEventForRemove=m_tableau.m_lastChangedNodeEvent;
-        m_tableau.m_lastChangedNode=this;
-        m_tableau.m_lastChangedNodeEvent=NodeEvent.PRUNED;
-    }
-    public void backtrackNodeChange() {
-        assert m_tableau.m_lastChangedNode==this;
-        m_tableau.m_existentialsExpansionStrategy.nodeWillChange(this);
-        NodeEvent nodeEvent=m_tableau.m_lastChangedNodeEvent;
-        m_occursInDescriptionGraphsDirty=true;
-        if (nodeEvent==NodeEvent.INSERTED_INTO_TALBEAU) {
-            assert m_nodeState==NodeState.IN_TABLEAU;
-            assert m_mergedInto==null;
-            assert m_mergedIntoDependencySet==null;
-            m_nodeState=NodeState.NOWHERE;
-            m_orderPosition=-1;
-            // Update the node list
-            if (m_previousTableauNode==null)
-                m_tableau.m_firstTableauNode=m_nextTableauNode;
-            else
-                m_previousTableauNode.m_nextTableauNode=m_nextTableauNode;
-            if (m_nextTableauNode==null)
-                m_tableau.m_lastTableauNode=m_previousTableauNode;
-            else
-                m_nextTableauNode.m_previousTableauNode=m_previousTableauNode;
-            m_tableau.m_numberOfNodesInTableau--;
-            m_previousTableauNode=null;
-            m_nextTableauNode=null;
-            // Update the change list
-            m_tableau.m_lastChangedNode=m_previousChangedNodeForInsert;
-            m_tableau.m_lastChangedNodeEvent=m_previousChangedNodeEventForInsert;
-            m_previousChangedNodeForInsert=null;
-            m_previousChangedNodeEventForInsert=null;
-            if (m_externalUsageCounter==0) {
-                destroy();
-                m_nextTableauNode=m_tableau.m_firstFreeNode;
-                m_tableau.m_firstFreeNode=this;
-            }
-        }
-        else {
-            assert m_nodeState==NodeState.MERGED || m_nodeState==NodeState.PRUNED;
-            assert m_nodeState!=NodeState.MERGED || (m_mergedInto!=null && m_mergedIntoDependencySet!=null);
-            assert m_nodeState!=NodeState.PRUNED || (m_mergedInto==null && m_mergedIntoDependencySet==null);
-            if (m_nodeState==NodeState.MERGED) {
-                m_tableau.m_dependencySetFactory.removeUsage(m_mergedIntoDependencySet);
-                m_mergedInto=null;
-                m_mergedIntoDependencySet=null;
-            }
-            m_nodeState=NodeState.IN_TABLEAU;
-            // Update the node list
-            if (m_previousTableauNode==null)
-                m_tableau.m_firstTableauNode=this;
-            else
-                m_previousTableauNode.m_nextTableauNode=this;
-            if (m_nextTableauNode==null)
-                m_tableau.m_lastTableauNode=this;
-            else
-                m_nextTableauNode.m_previousTableauNode=this;
-            m_tableau.m_numberOfNodesInTableau++;
-            m_tableau.m_numberOfMergedOrPrunedNodes--;
-            // Update the change list
-            m_tableau.m_lastChangedNode=m_previousChangedNodeForRemove;
-            m_tableau.m_lastChangedNodeEvent=m_previousChangedNodeEventForRemove;
-            m_previousChangedNodeForRemove=null;
-            m_previousChangedNodeEventForRemove=null;
-        }
-    }
-    public Node getCanonicalNode() {
-        Node result=this;
-        while (result.m_mergedInto!=null)
-            result=result.m_mergedInto;
-        return result;
-    }
-    public DependencySet addCacnonicalNodeDependencySet(DependencySet dependencySet) {
-        Node result=this;
-        while (result.m_mergedInto!=null) {
-            dependencySet=m_tableau.m_dependencySetFactory.unionWith(dependencySet,result.m_mergedIntoDependencySet);
-            result=result.m_mergedInto;
-        }
-        return dependencySet;
     }
     public Occurrence addOccurenceInGraph(DescriptionGraph descriptionGraph,int position,int tupleIndex) {
         if (m_occursInDescriptionGraphs==null)

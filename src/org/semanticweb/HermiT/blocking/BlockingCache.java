@@ -105,7 +105,6 @@ public class BlockingCache implements Serializable {
         protected final Node m_node;
         protected final int m_hashCode;
         protected CacheEntry m_nextEntry;
-        public CacheEntry m_nextBlocker;
 
         public CacheEntry(Node node,int hashCode,CacheEntry nextEntry) {
             m_node=node;

@@ -23,20 +23,22 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
     public void computeBlocking() {
         Node node=m_tableau.getFirstTableauNode();
         while (node!=null) {
-            Node parent=node.getParent();
-            if (parent==null)
-                node.setBlocked(null,false);
-            else if (parent.isBlocked())
-                node.setBlocked(parent.getBlocker(),false);
-            else if (m_blockingCache!=null) {
-                Node blocker=m_blockingCache.getBlocker(node);
-                if (blocker==null)
-                    checkParentBlocking(node);
+            if (node.isActive()) {
+                Node parent=node.getParent();
+                if (parent==null)
+                    node.setBlocked(null,false);
+                else if (parent.isBlocked())
+                    node.setBlocked(parent.getBlocker(),false);
+                else if (m_blockingCache!=null) {
+                    Node blocker=m_blockingCache.getBlocker(node);
+                    if (blocker==null)
+                        checkParentBlocking(node);
+                    else
+                        node.setBlocked(blocker,true);
+                }
                 else
-                    node.setBlocked(blocker,true);
+                    checkParentBlocking(node);
             }
-            else
-                checkParentBlocking(node);
             node=node.getNextTableauNode();
         }
     }
@@ -51,6 +53,8 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
         }
     }
     public void nodeWillChange(Node node) {
+    }
+    public void nodeWillBeDestroyed(Node node) {
     }
     public void modelFound() {
         if (m_blockingCache!=null) {

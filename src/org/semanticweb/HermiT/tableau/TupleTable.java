@@ -22,11 +22,11 @@ public final class TupleTable implements Serializable {
         m_tupleCapacity=m_numberOfPages*PAGE_SIZE;
         m_firstFreeTupleIndex=0;
     }
-    public int size() {
+    public int sizeInMemory() {
         int size=m_pages.length*4;
         for (int i=m_pages.length-1;i>=0;--i)
             if (m_pages[i]!=null)
-                size+=m_pages[i].size();
+                size+=m_pages[i].sizeInMemory();
         return size;
     }
     public int getFirstFreeTupleIndex() {
@@ -77,7 +77,7 @@ public final class TupleTable implements Serializable {
         public Page() {
             m_objects=new Object[m_arity*PAGE_SIZE];
         }
-        public int size() {
+        public int sizeInMemory() {
             return m_objects.length*4;
         }
         public void storeTuple(int tupleStartIndex,Object[] tupleBuffer) {

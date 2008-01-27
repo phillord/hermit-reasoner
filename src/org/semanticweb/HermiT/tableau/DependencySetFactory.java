@@ -22,7 +22,7 @@ public final class DependencySetFactory implements Serializable {
         m_emptySet=new DependencySet();
         clear();
     }
-    public int size() {
+    public int sizeInMemory() {
         return m_entries.length*4+m_size*20;
     }
     public void clear() {

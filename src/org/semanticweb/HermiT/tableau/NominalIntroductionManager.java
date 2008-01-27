@@ -1,7 +1,5 @@
 package org.semanticweb.HermiT.tableau;
 
-import java.util.Map;
-import java.util.HashMap;
 import java.io.Serializable;
 
 import org.semanticweb.HermiT.model.*;
@@ -16,9 +14,11 @@ public final class NominalIntroductionManager implements Serializable {
     protected final Tableau m_tableau;
     protected final ExtensionManager m_extensionManager;
     protected final MergingManager m_mergingManager;
-    protected final Map<RootAtMostPair,Node[]> m_newRoots;
     protected final TupleTable m_targets;
-    protected final Object[] m_buffer;
+    protected final Object[] m_bufferForTarget;
+    protected final TupleTable m_newRootNodesTable;
+    protected final TupleTableFullIndex m_newRootNodesIndex;
+    protected final Object[] m_bufferForRootNodes;
     protected final ExtensionTable.Retrieval m_ternaryExtensionTableSearch1Bound;
     protected final ExtensionTable.Retrieval m_ternaryExtensionTableSearch2Bound;
     protected final ExtensionTable.Retrieval m_ternaryExtensionTableSearch01Bound;
@@ -30,9 +30,11 @@ public final class NominalIntroductionManager implements Serializable {
         m_tableau=tableau;
         m_extensionManager=m_tableau.getExtensionManager();
         m_mergingManager=m_tableau.getMergingManager();
-        m_newRoots=new HashMap<RootAtMostPair,Node[]>();
         m_targets=new TupleTable(3);
-        m_buffer=new Object[3];
+        m_bufferForTarget=new Object[3];
+        m_newRootNodesTable=new TupleTable(4);
+        m_newRootNodesIndex=new TupleTableFullIndex(m_newRootNodesTable,3);
+        m_bufferForRootNodes=new Object[4];
         m_ternaryExtensionTableSearch1Bound=m_extensionManager.m_ternaryExtensionTable.createRetrieval(new boolean[] { false,true,false },ExtensionTable.View.TOTAL);
         m_ternaryExtensionTableSearch2Bound=m_extensionManager.m_ternaryExtensionTable.createRetrieval(new boolean[] { false,false,true },ExtensionTable.View.TOTAL);
         m_ternaryExtensionTableSearch01Bound=m_extensionManager.m_ternaryExtensionTable.createRetrieval(new boolean[] { true,true,false },ExtensionTable.View.TOTAL);
@@ -41,17 +43,20 @@ public final class NominalIntroductionManager implements Serializable {
         m_firstUnprocessedTarget=0;
     }
     public void clear() {
-        for (int index=m_buffer.length-1;index>=0;--index)
-            m_buffer[index]=null;
-        m_newRoots.clear();
         m_targets.clear();
+        for (int index=m_bufferForTarget.length-1;index>=0;--index)
+            m_bufferForTarget[index]=null;
+        m_newRootNodesTable.clear();
+        m_newRootNodesIndex.clear();
+        for (int index=m_bufferForRootNodes.length-1;index>=0;--index)
+            m_bufferForRootNodes[index]=null;
         m_firstUnprocessedTarget=0;
         m_indicesByBranchingPoint[m_tableau.getCurrentBranchingPoint().getLevel()]=m_firstUnprocessedTarget;
         m_indicesByBranchingPoint[m_tableau.getCurrentBranchingPoint().getLevel()+1]=m_targets.getFirstFreeTupleIndex();
     }
     public void branchingPointPushed() {
-        int start=m_tableau.getCurrentBranchingPoint().getLevel()*2;
-        int requiredSize=start+2;
+        int start=m_tableau.getCurrentBranchingPoint().getLevel()*3;
+        int requiredSize=start+3;
         if (requiredSize>m_indicesByBranchingPoint.length) {
             int newSize=m_indicesByBranchingPoint.length*3/2;
             while (requiredSize>newSize)
@@ -62,56 +67,58 @@ public final class NominalIntroductionManager implements Serializable {
         }
         m_indicesByBranchingPoint[start]=m_firstUnprocessedTarget;
         m_indicesByBranchingPoint[start+1]=m_targets.getFirstFreeTupleIndex();
+        m_indicesByBranchingPoint[start+2]=m_newRootNodesTable.getFirstFreeTupleIndex();
     }
     public void backtrack() {
-        int start=m_tableau.getCurrentBranchingPoint().getLevel()*2;
+        int start=m_tableau.getCurrentBranchingPoint().getLevel()*3;
         m_firstUnprocessedTarget=m_indicesByBranchingPoint[start];
         m_targets.truncate(m_indicesByBranchingPoint[start+1]);
+        int firstFreeNewRootNodeShouldBe=m_indicesByBranchingPoint[start+2];
+        for (int tupleIndex=m_newRootNodesTable.getFirstFreeTupleIndex()-1;tupleIndex>=firstFreeNewRootNodeShouldBe;--tupleIndex)
+            m_newRootNodesIndex.removeTuple(tupleIndex);
+        m_newRootNodesTable.truncate(firstFreeNewRootNodeShouldBe);
     }
     public void processTargets() {
         while (m_firstUnprocessedTarget<m_targets.getFirstFreeTupleIndex()) {
-            m_targets.retrieveTuple(m_buffer,m_firstUnprocessedTarget);
-            Node rootNode=(Node)m_buffer[ROOT_NODE];
-            Node treeNode=(Node)m_buffer[TREE_NODE];
+            m_targets.retrieveTuple(m_bufferForTarget,m_firstUnprocessedTarget);
+            Node rootNode=(Node)m_bufferForTarget[ROOT_NODE];
+            Node treeNode=(Node)m_bufferForTarget[TREE_NODE];
             m_firstUnprocessedTarget++;
-            if (rootNode.isInTableau() && treeNode.isInTableau()) {
-                AtMostAbstractRoleGuard atMost=(AtMostAbstractRoleGuard)m_buffer[AT_MOST_CONCEPT];
-                Node[] newRoots=getRootsFor(rootNode,atMost);
-                Node newRootNode=newRoots[0];
-                DependencySet dependencySet=m_extensionManager.getConceptAssertionDependencySet(atMost,rootNode);
-                dependencySet=m_tableau.getDependencySetFactory().unionWith(dependencySet,m_extensionManager.getRoleAssertionDependencySet(atMost.getOnAbstractRole(),rootNode,treeNode));
-                if (!AtomicConcept.THING.equals(atMost.getToAtomicConcept()))
-                    dependencySet=m_tableau.getDependencySetFactory().unionWith(dependencySet,m_extensionManager.getConceptAssertionDependencySet(atMost.getToAtomicConcept(),treeNode));
-                if (atMost.getCaridnality()>1) {
-                    BranchingPoint branchingPoint=new NominalIntroductionBranchingPoint(m_tableau,treeNode,newRoots);
+            if (rootNode.isActive() && treeNode.isActive()) {
+                AtMostAbstractRoleGuard atMostAbstractRoleGuard=(AtMostAbstractRoleGuard)m_bufferForTarget[AT_MOST_CONCEPT];
+                DependencySet dependencySet=m_extensionManager.getConceptAssertionDependencySet(atMostAbstractRoleGuard,rootNode);
+                dependencySet=m_tableau.getDependencySetFactory().unionWith(dependencySet,m_extensionManager.getRoleAssertionDependencySet(atMostAbstractRoleGuard.getOnAbstractRole(),rootNode,treeNode));
+                if (!AtomicConcept.THING.equals(atMostAbstractRoleGuard.getToAtomicConcept()))
+                    dependencySet=m_tableau.getDependencySetFactory().unionWith(dependencySet,m_extensionManager.getConceptAssertionDependencySet(atMostAbstractRoleGuard.getToAtomicConcept(),treeNode));
+                if (atMostAbstractRoleGuard.getCaridnality()>1) {
+                    BranchingPoint branchingPoint=new NominalIntroductionBranchingPoint(m_tableau,rootNode,treeNode,atMostAbstractRoleGuard);
                     m_tableau.pushBranchingPoint(branchingPoint);
                     dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,branchingPoint.getLevel());
                 }
-                if (!newRootNode.isInTableau()) {
-                    if (newRootNode.isMerged()) {
-                        dependencySet=newRootNode.addCacnonicalNodeDependencySet(dependencySet);
-                        newRootNode=newRootNode.getCanonicalNode();
-                    }
-                    else
-                        m_tableau.insertIntoTableau(newRootNode,dependencySet);
-                    assert newRootNode.isInTableau() : "The target of nominal introduction should be in the tableau.";
+                Node newRootNode=getRootNodeFor(dependencySet,rootNode,atMostAbstractRoleGuard,1);
+                if (!newRootNode.isActive()) {
+                    assert newRootNode.isMerged();
+                    dependencySet=newRootNode.addCacnonicalNodeDependencySet(dependencySet);
+                    newRootNode=newRootNode.getCanonicalNode();
                 }
                 m_mergingManager.mergeNodes(treeNode,newRootNode,dependencySet);
             }
         }
     }
-    protected Node[] getRootsFor(Node rootNode,AtMostAbstractRoleGuard atMost) {
-        RootAtMostPair key=new RootAtMostPair(rootNode,atMost);
-        Node[] result=m_newRoots.get(key);
-        if (result==null) {
-            result=new Node[atMost.getCaridnality()];
-            for (int index=0;index<result.length;index++) {
-                result[index]=m_tableau.createNewNodeRaw(null,NodeType.ROOT_NODE,0);
-                result[index].m_externalUsageCounter++;
-            }
-            m_newRoots.put(key,result);
+    protected Node getRootNodeFor(DependencySet dependencySet,Node rootNode,AtMostAbstractRoleGuard atMostAbstractRoleGuard,int number) {
+        m_bufferForRootNodes[0]=rootNode;
+        m_bufferForRootNodes[1]=atMostAbstractRoleGuard;
+        m_bufferForRootNodes[2]=number;
+        int tupleIndex=m_newRootNodesIndex.getTupleIndex(m_bufferForRootNodes);
+        if (tupleIndex==-1) {
+            Node newRootNode=m_tableau.createNewRootNode(dependencySet,0);
+            m_bufferForRootNodes[3]=newRootNode;
+            m_newRootNodesIndex.addTuple(m_bufferForRootNodes,m_newRootNodesTable.getFirstFreeTupleIndex());
+            m_newRootNodesTable.addTuple(m_bufferForRootNodes);
+            return newRootNode;
         }
-        return result;
+        else
+            return (Node)m_newRootNodesTable.getTupleObject(tupleIndex,3);
     }
     public void addNonnegativeConceptAssertion(Concept concept,Node node) {
         if (node.getNodeType()==NodeType.ROOT_NODE && concept instanceof AtMostAbstractRoleGuard) {
@@ -214,59 +221,38 @@ public final class NominalIntroductionManager implements Serializable {
         }
     }
     protected void addTarget(Node rootNode,Node treeNode,AtMostAbstractRoleGuard atMost) {
-        m_buffer[ROOT_NODE]=rootNode;
-        m_buffer[TREE_NODE]=treeNode;
-        m_buffer[AT_MOST_CONCEPT]=atMost;
-        m_targets.addTuple(m_buffer);
+        m_bufferForTarget[ROOT_NODE]=rootNode;
+        m_bufferForTarget[TREE_NODE]=treeNode;
+        m_bufferForTarget[AT_MOST_CONCEPT]=atMost;
+        m_targets.addTuple(m_bufferForTarget);
     }
     
-    protected static final class RootAtMostPair {
-        public final Node m_rootNode;
-        public final AtMostAbstractRoleGuard m_atMost;
-        
-        public RootAtMostPair(Node rootNode,AtMostAbstractRoleGuard atMost) {
-            m_rootNode=rootNode;
-            m_atMost=atMost;
-        }
-        public int hashCode() {
-            return m_rootNode.hashCode()+m_atMost.hashCode();
-        }
-        public boolean equals(Object that) {
-            RootAtMostPair thatPair=(RootAtMostPair)that;
-            return m_rootNode==thatPair.m_rootNode && m_atMost.equals(thatPair.m_atMost);
-        }
-    }
-    
-    protected static class NominalIntroductionBranchingPoint extends BranchingPoint {
+    protected class NominalIntroductionBranchingPoint extends BranchingPoint {
         private static final long serialVersionUID=6678113479704184263L;
 
-        protected final Tableau m_tableau;
+        protected final Node m_rootNode;
         protected final Node m_treeNode;
-        protected final Node[] m_newRoots;
+        protected final AtMostAbstractRoleGuard m_atMostAbstractRoleGuard;
         protected int m_currentRootNode;
         
-        public NominalIntroductionBranchingPoint(Tableau tableau,Node treeNode,Node[] newRoots) {
+        public NominalIntroductionBranchingPoint(Tableau tableau,Node rootNode,Node treeNode,AtMostAbstractRoleGuard atMostAbstractRoleGuard) {
             super(tableau);
-            m_tableau=tableau;
+            m_rootNode=rootNode;
             m_treeNode=treeNode;
-            m_newRoots=newRoots;
-            m_currentRootNode=0; // This reflects the assumption that the first merge is performed from the NominalIntroductionManager
+            m_atMostAbstractRoleGuard=atMostAbstractRoleGuard;
+            m_currentRootNode=1; // This reflects the assumption that the first merge is performed from the NominalIntroductionManager
         }
         public void startNextChoice(Tableau tableau,DependencySet clashDepdendencySet) {
             m_currentRootNode++;
-            assert m_currentRootNode<m_newRoots.length : "Unsuspected end of new root nodes.";
+            assert m_currentRootNode<=m_atMostAbstractRoleGuard.getCaridnality();
             DependencySet dependencySet=clashDepdendencySet;
-            if (m_currentRootNode==m_newRoots.length-1)
+            if (m_currentRootNode==m_atMostAbstractRoleGuard.getCaridnality())
                 dependencySet=tableau.getDependencySetFactory().removeBranchingPoint(dependencySet,m_level);
-            Node newRootNode=m_newRoots[m_currentRootNode];
-            if (!newRootNode.isInTableau()) {
-                if (newRootNode.isMerged()) {
-                    dependencySet=newRootNode.addCacnonicalNodeDependencySet(dependencySet);
-                    newRootNode=newRootNode.getCanonicalNode();
-                }
-                else
-                    m_tableau.insertIntoTableau(newRootNode,dependencySet);
-                assert newRootNode.isInTableau() : "The target of nominal introduction should be in the tableau.";
+            Node newRootNode=getRootNodeFor(dependencySet,m_rootNode,m_atMostAbstractRoleGuard,m_currentRootNode);
+            if (!newRootNode.isActive()) {
+                assert newRootNode.isMerged();
+                dependencySet=newRootNode.addCacnonicalNodeDependencySet(dependencySet);
+                newRootNode=newRootNode.getCanonicalNode();
             }
             m_tableau.m_mergingManager.mergeNodes(m_treeNode,newRootNode,dependencySet);
         }

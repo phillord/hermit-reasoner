@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
 import java.io.Serializable;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
 import org.semanticweb.HermiT.blocking.*;
 import org.semanticweb.HermiT.model.*;
@@ -40,6 +43,7 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
         m_extensionManager=m_tableau.getExtensionManager();
         m_existentialExpansionManager=m_tableau.getExistentialExpansionManager();
         m_dontReueseConceptsEver.clear();
+//        loadNotReusedConcepts("c:\\Temp\\dont-reuse.txt");
         m_blockingStrategy.initialize(tableau);
     }
     public void clear() {
@@ -52,7 +56,7 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
         m_blockingStrategy.computeBlocking();
         Node node=m_tableau.getFirstTableauNode();
         while (node!=null) {
-            if (!node.isBlocked() && node.hasUnprocessedExistentials()) {
+            if (node.isActive() && !node.isBlocked() && node.hasUnprocessedExistentials()) {
                 while (node.hasUnprocessedExistentials()) {
                     ExistentialConcept existentialConcept=node.getSomeUnprocessedExistential();
                     if (existentialConcept instanceof AtLeastAbstractRoleConcept) {
@@ -118,6 +122,9 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
     public void nodeWillChange(Node node) {
         m_blockingStrategy.nodeWillChange(node);
     }
+    public void nodeWillBeDestroyed(Node node) {
+        m_blockingStrategy.nodeWillBeDestroyed(node);
+    }
     public void branchingPointPushed() {
         int start=m_tableau.getCurrentBranchingPoint().getLevel();
         int requiredSize=start+1;
@@ -152,6 +159,24 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
                 return entry.getKey();
         return null;
     }
+    protected void loadNotReusedConcepts(String fileName) {
+        try {
+            BufferedReader reader=new BufferedReader(new FileReader(fileName));
+            try {
+                String line=reader.readLine();
+                while (line!=null) {
+                    m_dontReueseConceptsEver.add(AtomicConcept.create(line));
+                    line=reader.readLine();
+                }
+            }
+            finally {
+                reader.close();
+            }
+        }
+        catch (IOException e) {
+            throw new RuntimeException("Can't read the nonreused concepts.",e);
+        }
+    }
     
     protected class IndividualResueBranchingPoint extends BranchingPoint {
         private static final long serialVersionUID=-5715836252258022216L;
@@ -169,7 +194,7 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
             DependencySet dependencySet=m_tableau.getDependencySetFactory().removeBranchingPoint(clashDepdendencySet,m_level);
             if (m_tableau.getTableauMonitor()!=null)
                 m_tableau.getTableauMonitor().existentialExpansionStarted(m_existential,m_node);
-            Node existentialNode=tableau.createNewTreeNode(m_node,dependencySet);
+            Node existentialNode=tableau.createNewTreeNode(dependencySet,m_node);
             m_extensionManager.addConceptAssertion(m_existential.getToConcept(),existentialNode,dependencySet);
             m_extensionManager.addRoleAssertion(m_existential.getOnAbstractRole(),m_node,existentialNode,dependencySet);
             if (m_tableau.getTableauMonitor()!=null)

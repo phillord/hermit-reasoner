@@ -42,10 +42,10 @@ public class MergeTest extends AbstractHermiTTest {
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
         Node a=m_tableau.createNewRootNode(emptySet,0);
         Node b=m_tableau.createNewRootNode(emptySet,0);
-        Node a1=m_tableau.createNewTreeNode(a,emptySet);
-        Node a2=m_tableau.createNewTreeNode(a,emptySet);
-        Node a11=m_tableau.createNewTreeNode(a1,emptySet);
-        Node a12=m_tableau.createNewTreeNode(a1,emptySet);
+        Node a1=m_tableau.createNewTreeNode(emptySet,a);
+        Node a2=m_tableau.createNewTreeNode(emptySet,a);
+        Node a11=m_tableau.createNewTreeNode(emptySet,a1);
+        Node a12=m_tableau.createNewTreeNode(emptySet,a1);
 
         m_extensionManager.addAssertion(R,a,a1,emptySet);
         m_extensionManager.addAssertion(R,a,a2,emptySet);
@@ -78,8 +78,8 @@ public class MergeTest extends AbstractHermiTTest {
         
         assertTrue(a1.isMerged());
         assertSame(a1.getCanonicalNode(),a2);
-        assertFalse(a11.isInTableau());
-        assertFalse(a12.isInTableau());
+        assertFalse(a11.isActive());
+        assertFalse(a12.isActive());
         
         assertRetrieval(m_extensionManager.getTernaryExtensionTable(),T(R,null,null),ExtensionTable.View.TOTAL,new Object[][] { T(R,a,a2),T(R,a2,b) });
         assertRetrieval(m_extensionManager.getBinaryExtensionTable(),T(A,null),ExtensionTable.View.TOTAL,new Object[][] { T(A,a2) });
@@ -93,8 +93,8 @@ public class MergeTest extends AbstractHermiTTest {
 
         assertFalse(a1.isMerged());
         assertSame(a1.getCanonicalNode(),a1);
-        assertTrue(a11.isInTableau());
-        assertTrue(a12.isInTableau());
+        assertTrue(a11.isActive());
+        assertTrue(a12.isActive());
         
         assertRetrieval(m_extensionManager.getTernaryExtensionTable(),T(R,null,null),ExtensionTable.View.TOTAL,new Object[][] { T(R,a,a1),T(R,a1,a11),T(R,a1,a12),T(R,a1,b),T(R,a,a2) });
         assertRetrieval(m_extensionManager.getBinaryExtensionTable(),T(A,null),ExtensionTable.View.TOTAL,new Object[][] { T(A,a1),T(A,a11),T(A,a12) });

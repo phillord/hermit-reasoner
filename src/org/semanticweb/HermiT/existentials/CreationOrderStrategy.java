@@ -32,7 +32,7 @@ public class CreationOrderStrategy implements ExistentialsExpansionStrategy,Seri
         m_blockingStrategy.computeBlocking();
         Node node=m_tableau.getFirstTableauNode();
         while (node!=null) {
-            if (!node.isBlocked() && node.hasUnprocessedExistentials()) {
+            if (node.isActive() && !node.isBlocked() && node.hasUnprocessedExistentials()) {
                 while (node.hasUnprocessedExistentials()) {
                     ExistentialConcept existentialConcept=node.getSomeUnprocessedExistential();
                     if (existentialConcept instanceof AtLeastAbstractRoleConcept) {
@@ -65,6 +65,9 @@ public class CreationOrderStrategy implements ExistentialsExpansionStrategy,Seri
     }
     public void nodeWillChange(Node node) {
         m_blockingStrategy.nodeWillChange(node);
+    }
+    public void nodeWillBeDestroyed(Node node) {
+        m_blockingStrategy.nodeWillBeDestroyed(node);
     }
     public void branchingPointPushed() {
     }

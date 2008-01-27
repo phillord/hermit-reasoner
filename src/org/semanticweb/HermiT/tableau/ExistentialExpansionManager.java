@@ -227,14 +227,14 @@ public final class ExistentialExpansionManager implements Serializable {
         DependencySet existentialDependencySet=m_extensionManager.getConceptAssertionDependencySet(atLeastAbstractRoleConcept,forNode);
         int cardinality=atLeastAbstractRoleConcept.getNumber();
         if (cardinality==1) {
-            Node newNode=m_tableau.createNewTreeNode(forNode,existentialDependencySet);
+            Node newNode=m_tableau.createNewTreeNode(existentialDependencySet,forNode);
             m_extensionManager.addRoleAssertion(atLeastAbstractRoleConcept.getOnAbstractRole(),forNode,newNode,existentialDependencySet);
             m_extensionManager.addConceptAssertion(atLeastAbstractRoleConcept.getToConcept(),newNode,existentialDependencySet);
         }
         else {
             m_auxiliaryNodes1.clear();
             for (int index=0;index<cardinality;index++) {
-                Node newNode=m_tableau.createNewTreeNode(forNode,existentialDependencySet);
+                Node newNode=m_tableau.createNewTreeNode(existentialDependencySet,forNode);
                 m_extensionManager.addRoleAssertion(atLeastAbstractRoleConcept.getOnAbstractRole(),forNode,newNode,existentialDependencySet);
                 m_extensionManager.addConceptAssertion(atLeastAbstractRoleConcept.getToConcept(),newNode,existentialDependencySet);
                 m_auxiliaryNodes1.add(newNode);
@@ -276,7 +276,7 @@ public final class ExistentialExpansionManager implements Serializable {
                 roleHierarchy.addInclusion(atomicAbstractRole.getInverseRole(),atomicAbstractRole.getInverseRole());
             }
             else if (dlClause.isGuardedFunctionalityAxiom()) {
-                AtomicAbstractRole atomicAbstractRole=(AtomicAbstractRole)dlClause.getBodyAtom(1).getDLPredicate();
+                AtomicAbstractRole atomicAbstractRole=(AtomicAbstractRole)dlClause.getBodyAtom(0).getDLPredicate();
                 functionalRoles.add(atomicAbstractRole);
                 roleHierarchy.addInclusion(atomicAbstractRole,atomicAbstractRole);
                 roleHierarchy.addInclusion(atomicAbstractRole.getInverseRole(),atomicAbstractRole.getInverseRole());
@@ -288,7 +288,7 @@ public final class ExistentialExpansionManager implements Serializable {
                 roleHierarchy.addInclusion(atomicAbstractRole.getInverseRole(),atomicAbstractRole.getInverseRole());
             }
             else if (dlClause.isGuardedInverseFunctionalityAxiom()) {
-                AtomicAbstractRole atomicAbstractRole=(AtomicAbstractRole)dlClause.getBodyAtom(1).getDLPredicate();
+                AtomicAbstractRole atomicAbstractRole=(AtomicAbstractRole)dlClause.getBodyAtom(0).getDLPredicate();
                 functionalRoles.add(atomicAbstractRole.getInverseRole());
                 roleHierarchy.addInclusion(atomicAbstractRole,atomicAbstractRole);
                 roleHierarchy.addInclusion(atomicAbstractRole.getInverseRole(),atomicAbstractRole.getInverseRole());

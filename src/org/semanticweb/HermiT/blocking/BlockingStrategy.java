@@ -7,5 +7,6 @@ public interface BlockingStrategy {
     void clear();
     void computeBlocking();
     void nodeWillChange(Node node);
+    void nodeWillBeDestroyed(Node node);
     void modelFound();
 }

@@ -25,7 +25,7 @@ public final class TupleIndex implements Serializable {
         m_bucketsLengthMinusOne=m_buckets.length-1;
         m_resizeThreshold=(int)(m_buckets.length*LOAD_FACTOR);
     }
-    public int size() {
+    public int sizeInMemoy() {
         return m_buckets.length*4+m_trieNodeManager.size();
     }
     public int[] getIndexingSequence() {

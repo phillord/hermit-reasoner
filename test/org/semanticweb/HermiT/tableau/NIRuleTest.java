@@ -46,9 +46,9 @@ public class NIRuleTest extends AbstractHermiTTest {
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
         Node a=m_tableau.createNewRootNode(emptySet,0);
         Node b=m_tableau.createNewRootNode(emptySet,0);
-        Node b1=m_tableau.createNewTreeNode(b,emptySet);
-        Node b11=m_tableau.createNewTreeNode(b1,emptySet);
-        Node b111=m_tableau.createNewTreeNode(b11,emptySet);
+        Node b1=m_tableau.createNewTreeNode(emptySet,b);
+        Node b11=m_tableau.createNewTreeNode(emptySet,b1);
+        Node b111=m_tableau.createNewTreeNode(emptySet,b11);
         
         m_extensionManager.addAssertion(AT_MOST_TWO_R_A,a,emptySet);
         m_extensionManager.addAssertion(S,b,b1,emptySet);
@@ -68,18 +68,15 @@ public class NIRuleTest extends AbstractHermiTTest {
         // The following call should trigger the creation of the first branching point for the NI-rule
         assertTrue(m_tableau.doIteration());
 
-        Node[] newRoots=m_manager.getRootsFor(a,AT_MOST_TWO_R_A);
-        Node newRoot1=newRoots[0];
-        Node newRoot2=newRoots[1];
-        assertTrue(newRoot1.isInTableau());
-        assertFalse(newRoot2.isInTableau());
-        assertNull(newRoot2.m_previousTableauNode);
-        assertNull(newRoot2.m_nextTableauNode);
+        Node newRoot1=getRootNodeFor(a,AT_MOST_TWO_R_A,1);
+        Node newRoot2=getRootNodeFor(a,AT_MOST_TWO_R_A,2);
+        assertTrue(newRoot1.isActive());
+        assertNull(newRoot2);
 
-        assertFalse(b11.isInTableau());
+        assertFalse(b11.isActive());
         assertSame(newRoot1,b11.getCanonicalNode());
 
-        assertFalse(b111.isInTableau());
+        assertFalse(b111.isActive());
         assertFalse(m_extensionManager.containsAssertion(S,b11,b111));
 
         assertTrue(m_extensionManager.containsAssertion(S,b1,newRoot1));
@@ -96,14 +93,12 @@ public class NIRuleTest extends AbstractHermiTTest {
         // Since this is the last choice point, the dependency sets will not contain the current branching point 1.
         assertTrue(m_tableau.doIteration());
         
-        assertFalse(newRoot1.isInTableau());
-        assertNull(newRoot1.m_previousTableauNode);
-        assertNull(newRoot1.m_nextTableauNode);
-        assertTrue(newRoot2.isInTableau());
+        newRoot1=getRootNodeFor(a,AT_MOST_TWO_R_A,1);
+        assertNull(newRoot1);
         
-        assertFalse(m_extensionManager.containsAssertion(S,b1,newRoot1));
-        assertFalse(m_extensionManager.containsAssertion(R,a,newRoot1));
-
+        newRoot2=getRootNodeFor(a,AT_MOST_TWO_R_A,2);
+        assertTrue(newRoot2.isActive());
+        
         assertTrue(m_extensionManager.containsAssertion(S,b1,newRoot2));
         assertDependencySet(m_extensionManager.getAssertionDependencySet(S,b1,newRoot2));
 
@@ -126,7 +121,7 @@ public class NIRuleTest extends AbstractHermiTTest {
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
         Node a=m_tableau.createNewRootNode(emptySet,0);
         Node b=m_tableau.createNewRootNode(emptySet,0);
-        Node b1=m_tableau.createNewTreeNode(b,emptySet);
+        Node b1=m_tableau.createNewTreeNode(emptySet,b);
         
         m_extensionManager.addAssertion(AT_MOST_ONE_R_A,a,emptySet);
         m_extensionManager.addAssertion(S,b,b1,emptySet);
@@ -136,11 +131,10 @@ public class NIRuleTest extends AbstractHermiTTest {
         // The following call should trigger the NI-rule, which is deterministic in this case.
         assertTrue(m_tableau.doIteration());
 
-        Node[] newRoots=m_manager.getRootsFor(a,AT_MOST_ONE_R_A);
-        Node newRoot1=newRoots[0];
-        assertTrue(newRoot1.isInTableau());
+        Node newRoot1=getRootNodeFor(a,AT_MOST_ONE_R_A,1);
+        assertTrue(newRoot1.isActive());
         
-        assertFalse(b1.isInTableau());
+        assertFalse(b1.isActive());
         assertSame(newRoot1,b1.getCanonicalNode());
 
         assertTrue(m_extensionManager.containsAssertion(S,b,newRoot1));
@@ -156,7 +150,7 @@ public class NIRuleTest extends AbstractHermiTTest {
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
         Node a=m_tableau.createNewRootNode(emptySet,0);
         Node b=m_tableau.createNewRootNode(emptySet,0);
-        Node b1=m_tableau.createNewTreeNode(b,emptySet);
+        Node b1=m_tableau.createNewTreeNode(emptySet,b);
         
         // This test is the same as the previous one, with the difference in the order in which the assertions are added to the tableau.
         // This actually exercises different parts of the NominalIntroductionManager code. The net effect, however, should be the same
@@ -168,11 +162,10 @@ public class NIRuleTest extends AbstractHermiTTest {
         // The following call should trigger the NI-rule, which is deterministic in this case.
         assertTrue(m_tableau.doIteration());
 
-        Node[] newRoots=m_manager.getRootsFor(a,AT_MOST_ONE_R_A);
-        Node newRoot1=newRoots[0];
-        assertTrue(newRoot1.isInTableau());
+        Node newRoot1=getRootNodeFor(a,AT_MOST_ONE_R_A,1);
+        assertTrue(newRoot1.isActive());
         
-        assertFalse(b1.isInTableau());
+        assertFalse(b1.isActive());
         assertSame(newRoot1,b1.getCanonicalNode());
 
         assertTrue(m_extensionManager.containsAssertion(S,b,newRoot1));
@@ -188,7 +181,7 @@ public class NIRuleTest extends AbstractHermiTTest {
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
         Node a=m_tableau.createNewRootNode(emptySet,0);
         Node b=m_tableau.createNewRootNode(emptySet,0);
-        Node b1=m_tableau.createNewTreeNode(b,emptySet);
+        Node b1=m_tableau.createNewTreeNode(emptySet,b);
         
         // The following test puts two at-most guards on a; hence, there are two possible ways in which
         // the NI-rule could be applied.
@@ -201,23 +194,14 @@ public class NIRuleTest extends AbstractHermiTTest {
         // The following call should trigger the NI-rule, which is deterministic in this case.
         assertTrue(m_tableau.doIteration());
 
-        Node[] newRootsForOne=m_manager.m_newRoots.get(new NominalIntroductionManager.RootAtMostPair(a,AT_MOST_ONE_R_A));
-        Node[] newRootsForTwo=m_manager.m_newRoots.get(new NominalIntroductionManager.RootAtMostPair(a,AT_MOST_TWO_R_A));
-        Node newRoot=null;
+        Node newRoot1=getRootNodeFor(a,AT_MOST_ONE_R_A,1);
+        Node newRoot2=getRootNodeFor(a,AT_MOST_TWO_R_A,1);
+        assertTrue(newRoot1!=null || newRoot2!=null);
+        assertTrue((newRoot1==null && newRoot2!=null) || (newRoot1!=null && newRoot2==null));
+        Node newRoot=(newRoot1!=null ? newRoot1 : newRoot2);
         
-        if (newRootsForOne==null) {
-            assertNotNull(newRootsForTwo);
-            newRoot=newRootsForTwo[0];
-        }
-        else if (newRootsForTwo==null) {
-            assertNotNull(newRootsForOne);
-            newRoot=newRootsForOne[0];
-        }
-        else
-            fail("The NI-rule has not been triggered.");
-        
-        assertTrue(newRoot.isInTableau());
-        assertFalse(b1.isInTableau());
+        assertTrue(newRoot.isActive());
+        assertFalse(b1.isActive());
         assertSame(newRoot,b1.getCanonicalNode());
         assertTrue(m_extensionManager.containsAssertion(S,b,newRoot));
         assertTrue(m_extensionManager.containsAssertion(R,a,newRoot));
@@ -226,7 +210,7 @@ public class NIRuleTest extends AbstractHermiTTest {
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
         Node a=m_tableau.createNewRootNode(emptySet,0);
         Node b=m_tableau.createNewRootNode(emptySet,0);
-        Node b1=m_tableau.createNewTreeNode(b,emptySet);
+        Node b1=m_tableau.createNewTreeNode(emptySet,b);
         
         // We now test triggering the rule using guards with inverse roles.
         m_extensionManager.addAssertion(AT_MOST_ONE_INV_R_A,a,emptySet);
@@ -237,11 +221,10 @@ public class NIRuleTest extends AbstractHermiTTest {
         // The following call should trigger the NI-rule, which is deterministic in this case.
         assertTrue(m_tableau.doIteration());
 
-        Node[] newRoots=m_manager.getRootsFor(a,AT_MOST_ONE_INV_R_A);
-        Node newRoot1=newRoots[0];
-        assertTrue(newRoot1.isInTableau());
+        Node newRoot1=getRootNodeFor(a,AT_MOST_ONE_INV_R_A,1);
+        assertTrue(newRoot1.isActive());
         
-        assertFalse(b1.isInTableau());
+        assertFalse(b1.isActive());
         assertSame(newRoot1,b1.getCanonicalNode());
 
         assertTrue(m_extensionManager.containsAssertion(S,b,newRoot1));
@@ -257,7 +240,7 @@ public class NIRuleTest extends AbstractHermiTTest {
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
         Node a=m_tableau.createNewRootNode(emptySet,0);
         Node b=m_tableau.createNewRootNode(emptySet,0);
-        Node b1=m_tableau.createNewTreeNode(b,emptySet);
+        Node b1=m_tableau.createNewTreeNode(emptySet,b);
         
         // This test is the same as the previous one, save for the fact that it triggers the rule in different way.
         m_extensionManager.addAssertion(AT_MOST_ONE_INV_R_A,a,emptySet);
@@ -268,11 +251,10 @@ public class NIRuleTest extends AbstractHermiTTest {
         // The following call should trigger the NI-rule, which is deterministic in this case.
         assertTrue(m_tableau.doIteration());
 
-        Node[] newRoots=m_manager.getRootsFor(a,AT_MOST_ONE_INV_R_A);
-        Node newRoot1=newRoots[0];
-        assertTrue(newRoot1.isInTableau());
+        Node newRoot1=getRootNodeFor(a,AT_MOST_ONE_INV_R_A,1);
+        assertTrue(newRoot1.isActive());
         
-        assertFalse(b1.isInTableau());
+        assertFalse(b1.isActive());
         assertSame(newRoot1,b1.getCanonicalNode());
 
         assertTrue(m_extensionManager.containsAssertion(S,b,newRoot1));
@@ -288,7 +270,7 @@ public class NIRuleTest extends AbstractHermiTTest {
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
         Node a=m_tableau.createNewRootNode(emptySet,0);
         Node b=m_tableau.createNewRootNode(emptySet,0);
-        Node b1=m_tableau.createNewTreeNode(b,emptySet);
+        Node b1=m_tableau.createNewTreeNode(emptySet,b);
         
         // This test is the same as the previous one, save for the fact that it triggers the rule in different way.
         m_extensionManager.addAssertion(S,b,b1,emptySet);
@@ -299,11 +281,10 @@ public class NIRuleTest extends AbstractHermiTTest {
         // The following call should trigger the NI-rule, which is deterministic in this case.
         assertTrue(m_tableau.doIteration());
 
-        Node[] newRoots=m_manager.getRootsFor(a,AT_MOST_ONE_INV_R_A);
-        Node newRoot1=newRoots[0];
-        assertTrue(newRoot1.isInTableau());
+        Node newRoot1=getRootNodeFor(a,AT_MOST_ONE_INV_R_A,1);
+        assertTrue(newRoot1.isActive());
         
-        assertFalse(b1.isInTableau());
+        assertFalse(b1.isActive());
         assertSame(newRoot1,b1.getCanonicalNode());
 
         assertTrue(m_extensionManager.containsAssertion(S,b,newRoot1));
@@ -319,11 +300,11 @@ public class NIRuleTest extends AbstractHermiTTest {
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
         Node a=m_tableau.createNewRootNode(emptySet,0);
         Node b=m_tableau.createNewRootNode(emptySet,0);
-        Node b1=m_tableau.createNewTreeNode(b,emptySet);
+        Node b1=m_tableau.createNewTreeNode(emptySet,b);
 
         Node c=m_tableau.createNewRootNode(emptySet,0);
         Node d=m_tableau.createNewRootNode(emptySet,0);
-        Node d1=m_tableau.createNewTreeNode(d,emptySet);
+        Node d1=m_tableau.createNewTreeNode(emptySet,d);
 
         // This test checks backtracking of the NI-rule and the NominalIntroductionManager.
 
@@ -333,9 +314,9 @@ public class NIRuleTest extends AbstractHermiTTest {
         m_extensionManager.addAssertion(R,a,b1,emptySet);
         m_extensionManager.addAssertion(A,b1,emptySet);
         assertTrue(m_tableau.doIteration());
-        Node new1=m_manager.getRootsFor(a,AT_MOST_TWO_R_A)[0];
+        Node new1=getRootNodeFor(a,AT_MOST_TWO_R_A,1);
         
-        assertTrue(new1.isInTableau());
+        assertTrue(new1.isActive());
         assertTrue(m_extensionManager.containsAssertion(S,b,new1));
         assertDependencySet(m_extensionManager.getAssertionDependencySet(S,b,new1),0);
         assertTrue(m_extensionManager.containsAssertion(R,a,new1));
@@ -347,9 +328,9 @@ public class NIRuleTest extends AbstractHermiTTest {
         m_extensionManager.addAssertion(R,c,d1,emptySet);
         m_extensionManager.addAssertion(A,d1,emptySet);
         assertTrue(m_tableau.doIteration());
-        Node new2=m_manager.getRootsFor(c,AT_MOST_TWO_R_A)[0];
+        Node new2=getRootNodeFor(c,AT_MOST_TWO_R_A,1);
 
-        assertTrue(new2.isInTableau());
+        assertTrue(new2.isActive());
         assertTrue(m_extensionManager.containsAssertion(S,d,new2));
         assertDependencySet(m_extensionManager.getAssertionDependencySet(S,d,new2),1);
         assertTrue(m_extensionManager.containsAssertion(R,c,new2));
@@ -359,9 +340,8 @@ public class NIRuleTest extends AbstractHermiTTest {
         m_extensionManager.addConceptAssertion(NEG_A,new1,emptySet);
         assertTrue(m_tableau.doIteration());
         
-        assertFalse(new2.isInTableau());
-        assertNull(new2.m_previousTableauNode);
-        assertNull(new2.m_nextTableauNode);
+        assertFalse(new2.isActive());
+        assertNull(new2.getNextTableauNode());
         assertFalse(m_extensionManager.containsAssertion(S,d,new2));
         assertFalse(m_extensionManager.containsAssertion(R,c,new2));
         
@@ -372,7 +352,7 @@ public class NIRuleTest extends AbstractHermiTTest {
         assertTrue(m_tableau.doIteration());
         assertFalse(m_tableau.doIteration());
         
-        assertFalse(new2.isInTableau());
+        assertFalse(new2.isActive());
         
         // We now again cause the NI-rule to be applied to c.
         m_extensionManager.addAssertion(AT_MOST_TWO_R_A,c,emptySet);
@@ -380,7 +360,7 @@ public class NIRuleTest extends AbstractHermiTTest {
         m_extensionManager.addAssertion(R,c,d1,emptySet);
         m_extensionManager.addAssertion(A,d1,emptySet);
         assertTrue(m_tableau.doIteration());
-        Node new2second=m_manager.getRootsFor(c,AT_MOST_TWO_R_A)[0];
+        Node new2second=getRootNodeFor(c,AT_MOST_TWO_R_A,1);
         
         assertSame(new2,new2second);
     }
@@ -388,11 +368,11 @@ public class NIRuleTest extends AbstractHermiTTest {
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
         Node a=m_tableau.createNewRootNode(emptySet,0);
         Node b=m_tableau.createNewRootNode(emptySet,0);
-        Node b1=m_tableau.createNewTreeNode(b,emptySet);
+        Node b1=m_tableau.createNewTreeNode(emptySet,b);
 
         Node c=m_tableau.createNewRootNode(emptySet,0);
         Node d=m_tableau.createNewRootNode(emptySet,0);
-        Node d1=m_tableau.createNewTreeNode(d,emptySet);
+        Node d1=m_tableau.createNewTreeNode(emptySet,d);
 
         // This test is similar to the previous one, but the order of the events is different.
 
@@ -411,15 +391,15 @@ public class NIRuleTest extends AbstractHermiTTest {
         // in the order in which NI-rule conditions were detected.
         assertTrue(m_tableau.doIteration());
 
-        Node new1=m_manager.getRootsFor(a,AT_MOST_TWO_R_A)[0];
-        assertTrue(new1.isInTableau());
+        Node new1=getRootNodeFor(a,AT_MOST_TWO_R_A,1);
+        assertTrue(new1.isActive());
         assertTrue(m_extensionManager.containsAssertion(S,b,new1));
         assertDependencySet(m_extensionManager.getAssertionDependencySet(S,b,new1),0);
         assertTrue(m_extensionManager.containsAssertion(R,a,new1));
         assertDependencySet(m_extensionManager.getAssertionDependencySet(R,a,new1),0);
 
-        Node new2=m_manager.getRootsFor(c,AT_MOST_TWO_R_A)[0];
-        assertTrue(new2.isInTableau());
+        Node new2=getRootNodeFor(c,AT_MOST_TWO_R_A,1);
+        assertTrue(new2.isActive());
         assertTrue(m_extensionManager.containsAssertion(S,d,new2));
         assertDependencySet(m_extensionManager.getAssertionDependencySet(S,d,new2),1);
         assertTrue(m_extensionManager.containsAssertion(R,c,new2));
@@ -429,29 +409,72 @@ public class NIRuleTest extends AbstractHermiTTest {
         m_extensionManager.addConceptAssertion(NEG_A,new1,emptySet);
         assertTrue(m_tableau.doIteration());
         
-        Node new1later=m_manager.getRootsFor(a,AT_MOST_TWO_R_A)[1];
-        assertFalse(new1.isInTableau());
-        assertTrue(new1later.isInTableau());
+        new1=getRootNodeFor(a,AT_MOST_TWO_R_A,2);
+        assertTrue(new1.isActive());
         
         // The second individual should still be applicable.
         assertEquals(2,m_manager.m_targets.getFirstFreeTupleIndex());
         assertEquals(1,m_manager.m_firstUnprocessedTarget);
-        assertFalse(new2.isInTableau());
+        assertFalse(new2.isActive());
         assertFalse(m_extensionManager.containsAssertion(S,d,new2));
         assertFalse(m_extensionManager.containsAssertion(R,c,new2));
         
         // Process now the second individual.
         assertTrue(m_tableau.doIteration());
         
-        assertTrue(new2.isInTableau());
+        assertTrue(new2.isActive());
         assertTrue(m_extensionManager.containsAssertion(S,d,new2));
         assertTrue(m_extensionManager.containsAssertion(R,c,new2));
     }
-    
+    public void testNIRule10() {
+        DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
+        Node a=m_tableau.createNewRootNode(emptySet,0);
+        Node b=m_tableau.createNewRootNode(emptySet,0);
+        Node b1=m_tableau.createNewTreeNode(emptySet,b);
+        Node c=m_tableau.createNewRootNode(emptySet,0);
+        Node c1=m_tableau.createNewTreeNode(emptySet,c);
+
+        m_extensionManager.addAssertion(AT_MOST_TWO_R_A,a,emptySet);
+        m_extensionManager.addAssertion(S,b,b1,emptySet);
+        m_extensionManager.addAssertion(A,b1,emptySet);
+        m_extensionManager.addAssertion(R,a,b1,emptySet);
+        m_extensionManager.addAssertion(S,c,c1,emptySet);
+        m_extensionManager.addAssertion(A,c1,emptySet);
+        m_extensionManager.addAssertion(R,a,c1,emptySet);
+
+        // This now triggers the NI-rule.
+        assertTrue(m_tableau.doIteration());
+        
+        Node new1=getRootNodeFor(a,AT_MOST_TWO_R_A,1);
+        Node new2=getRootNodeFor(a,AT_MOST_TWO_R_A,2);
+        assertTrue(m_extensionManager.containsAssertion(R,a,new1));
+        assertTrue(m_extensionManager.containsAssertion(S,b,new1));
+        assertTrue(m_extensionManager.containsAssertion(S,c,new1));
+        assertNull(new2);
+        
+        // This will ensure backtracking our of the choice for c1
+        m_extensionManager.addConceptAssertion(NEG_A,new1,m_tableau.getDependencySetFactory().addBranchingPoint(emptySet,m_tableau.getCurrentBranchingPoint().getLevel()));
+        assertTrue(m_tableau.doIteration());
+        
+        new1=getRootNodeFor(a,AT_MOST_TWO_R_A,1);
+        assertTrue(m_extensionManager.containsAssertion(R,a,new1));
+        assertTrue(m_extensionManager.containsAssertion(S,b,new1));
+
+        new2=getRootNodeFor(a,AT_MOST_TWO_R_A,2);
+        assertTrue(m_extensionManager.containsAssertion(R,a,new2));
+        assertTrue(m_extensionManager.containsAssertion(S,c,new2));
+    }
     protected void assertDependencySet(DependencySet dependencySet,int... requiredBranchingPoints) {
         DependencySet control=m_tableau.getDependencySetFactory().emptySet();
         for (int branchingPoint : requiredBranchingPoints)
             control=m_tableau.getDependencySetFactory().addBranchingPoint(control,branchingPoint);
         assertTrue(dependencySet.isSameAs(control));
+    }
+    protected Node getRootNodeFor(Node rootNode,AtMostAbstractRoleGuard atMostAbstractRoleGuard,int index) {
+        int tupleIndex=m_manager.m_newRootNodesIndex.getTupleIndex(new Object[] { rootNode,atMostAbstractRoleGuard,index });
+        if (tupleIndex==-1)
+            return null;
+        else
+            return (Node)m_manager.m_newRootNodesTable.getTupleObject(tupleIndex,3);
     }
 }

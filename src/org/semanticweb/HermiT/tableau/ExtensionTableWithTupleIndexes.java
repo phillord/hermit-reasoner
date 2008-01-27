@@ -15,16 +15,16 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
         m_tupleIndexes=tupleIndexes;
         m_auxiliaryTuple=new Object[m_tupleArity];
     }
-    public int size() {
-        int size=m_tupleTable.size();
+    public int sizeInMemory() {
+        int size=m_tupleTable.sizeInMemory();
         for (int i=m_tupleIndexes.length-1;i>=0;--i)
-            size+=m_tupleIndexes[i].size();
+            size+=m_tupleIndexes[i].sizeInMemoy();
         return size;
     }
     public boolean addTuple(Object[] tuple,DependencySet[] dependencySets) {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.addFactStarted(tuple);
-        if (isTupleValid(tuple) && (m_tableau.m_needsThingExtension || !AtomicConcept.THING.equals(tuple[0]))) {
+        if (isTupleActive(tuple) && (m_tableau.m_needsThingExtension || !AtomicConcept.THING.equals(tuple[0]))) {
             int firstFreeTupleIndex=m_tupleTable.getFirstFreeTupleIndex();
             if (m_tupleIndexes[0].addTuple(tuple,firstFreeTupleIndex)) {
                 for (int index=1;index<m_tupleIndexes.length;index++)
@@ -44,7 +44,7 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
     }
     public boolean containsTuple(Object[] tuple) {
         int tupleIndex=m_tupleIndexes[0].getTupleIndex(tuple);
-        return tupleIndex!=-1 && isTupleValid(tupleIndex);
+        return tupleIndex!=-1 && isTupleActive(tupleIndex);
     }
     public DependencySet getDependencySet(Object[] tuple) {
         int tupleIndex=m_tupleIndexes[0].getTupleIndex(tuple);
@@ -197,7 +197,7 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
             m_afterLast=true;
         }
         protected boolean isTupleValid() {
-            if (!ExtensionTableWithTupleIndexes.this.isTupleValid(m_tupleBuffer))
+            if (!ExtensionTableWithTupleIndexes.this.isTupleActive(m_tupleBuffer))
                 return false;
             if (m_checkTupleSelection)
                 for (int index=m_bindingPattern.length-1;index>=0;--index)

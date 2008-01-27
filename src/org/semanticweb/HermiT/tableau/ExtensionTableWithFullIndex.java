@@ -15,13 +15,13 @@ public class ExtensionTableWithFullIndex extends ExtensionTable {
         m_tupleTableFullIndex=new TupleTableFullIndex(m_tupleTable,m_tupleArity);
         m_auxiliaryTuple=new Object[m_tupleArity];
     }
-    public int size() {
-        return m_tupleTable.size()+m_tupleTableFullIndex.size();
+    public int sizeInMemory() {
+        return m_tupleTable.sizeInMemory()+m_tupleTableFullIndex.sizeInMemory();
     }
     public boolean addTuple(Object[] tuple,DependencySet[] dependencySets) {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.addFactStarted(tuple);
-        if (isTupleValid(tuple) && (m_tableau.m_needsThingExtension || !AtomicConcept.THING.equals(tuple[0]))) {
+        if (isTupleActive(tuple) && (m_tableau.m_needsThingExtension || !AtomicConcept.THING.equals(tuple[0]))) {
             int firstFreeTupleIndex=m_tupleTable.getFirstFreeTupleIndex();
             if (m_tupleTableFullIndex.addTuple(tuple,firstFreeTupleIndex)==firstFreeTupleIndex) {
                 m_tupleTable.addTuple(tuple);
@@ -39,7 +39,7 @@ public class ExtensionTableWithFullIndex extends ExtensionTable {
     }
     public boolean containsTuple(Object[] tuple) {
         int tupleIndex=m_tupleTableFullIndex.getTupleIndex(tuple);
-        return tupleIndex!=-1 && isTupleValid(tupleIndex);
+        return tupleIndex!=-1 && isTupleActive(tupleIndex);
     }
     public DependencySet getDependencySet(Object[] tuple) {
         int tupleIndex=m_tupleTableFullIndex.getTupleIndex(tuple);
@@ -126,7 +126,7 @@ public class ExtensionTableWithFullIndex extends ExtensionTable {
             }
             if (m_currentTupleIndex!=-1) {
                 m_tupleTable.retrieveTuple(m_tupleBuffer,m_currentTupleIndex);
-                if (!isTupleValid(m_tupleBuffer))
+                if (!isTupleActive(m_tupleBuffer))
                     m_currentTupleIndex=-1;
             }
         }

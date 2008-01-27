@@ -54,7 +54,7 @@ public final class MergingManager implements Serializable {
         return mergeNodes(node0,node1,m_dependencySetBuffer2);
     }
     public boolean mergeNodes(Node node0,Node node1,DependencySet[] dependencySets) {
-        if (!node0.isInTableau() || !node1.isInTableau() || node0==node1)
+        if (!node0.isActive() || !node1.isActive() || node0==node1)
             return false;
         else if (node0.isGloballyUnique() || node1.isGloballyUnique()) {
             m_extensionManager.setClash(dependencySets);
@@ -119,13 +119,12 @@ public final class MergingManager implements Serializable {
             // and delete them it their parent is not in tableau or if it is the mergeFrom node.
             Node node=mergeFrom;
             while (node!=null) {
-                Node nextNode=node.getNextTableauNode();
-                if (node.getNodeType()!=NodeType.ROOT_NODE && (!node.getParent().isInTableau() || node.getParent()==mergeFrom)) {
+                if (node.isActive() && node.getNodeType()!=NodeType.ROOT_NODE && (!node.getParent().isActive() || node.getParent()==mergeFrom)) {
                     if (m_tableauMonitor!=null)
                         m_tableauMonitor.nodePruned(node);
-                    node.prune();
+                    m_tableau.pruneNode(node);
                 }
-                node=nextNode;
+                node=node.getNextTableauNode();
             }
             // Create a buffer for dependency sets
             int requiredBufferLength=dependencySets.length+1;
@@ -191,7 +190,7 @@ public final class MergingManager implements Serializable {
                     while (occurrence!=null) {
                         int tupleIndex=occurrence.m_tupleIndex;
                         graphExtensionTable.retrieveTuple(auxiliaryTuple,tupleIndex);
-                        if (graphExtensionTable.isTupleValid(auxiliaryTuple)) {
+                        if (graphExtensionTable.isTupleActive(auxiliaryTuple)) {
                             if (m_tableauMonitor!=null) {
                                 Object[] sourceTuple=new Object[descriptionGraph.getNumberOfVertices()+1];
                                 System.arraycopy(auxiliaryTuple,0,sourceTuple,0,auxiliaryTuple.length);
@@ -212,7 +211,7 @@ public final class MergingManager implements Serializable {
                 }
             }
             // Now finally merge the nodes
-            mergeFrom.mergeInto(mergeInto,m_tableau.m_dependencySetFactory.unionSets(dependencySetBuffer));
+            m_tableau.mergeNode(mergeFrom,mergeInto,m_tableau.m_dependencySetFactory.unionSets(dependencySetBuffer));
             if (m_tableauMonitor!=null)
                 m_tableauMonitor.mergeFinished(node0,node1);
             return true;

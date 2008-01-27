@@ -22,7 +22,7 @@ public class TupleTableFullIndex implements Serializable {
         m_buckets=new int[16];
         m_resizeThreshold=(int)(m_buckets.length*LOAD_FACTOR);
     }
-    public int size() {
+    public int sizeInMemory() {
         return m_buckets.length*4+m_entryManager.size();
     }
     public void clear() {

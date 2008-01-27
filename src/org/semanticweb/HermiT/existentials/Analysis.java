@@ -13,28 +13,43 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import org.semanticweb.kaon2.api.DefaultOntologyResolver;
+import org.semanticweb.kaon2.api.KAON2Connection;
+import org.semanticweb.kaon2.api.KAON2Manager;
+import org.semanticweb.kaon2.api.Ontology;
+
+import org.semanticweb.HermiT.blocking.*;
+import org.semanticweb.HermiT.kaon2.structural.*;
 import org.semanticweb.HermiT.model.*;
 import org.semanticweb.HermiT.tableau.*;
 
 public class Analysis {
     protected final DLOntology m_dlOntology;
     protected final Set<AtomicConcept> m_dontReuseConcepts;
+    protected final Set<AtomicConcept> m_graphConcepts;
+    protected final Set<AtomicAbstractRole> m_functionalRoles;
+    protected final ObjectHierarchy<Concept> m_conceptHierarchy;
+    protected final ObjectHierarchy<AbstractRole> m_roleHierarchy;
+    protected final Map<AtomicConcept,Node> m_representativeNodes;
+    protected final Map<Node,AtomicConcept> m_conceptForNode;
+    protected final Map<NodePair,Node> m_arcCauses;
+    protected final ExtensionTable m_extensionTable;
     
     public Analysis(DLOntology dlOntology) {
         m_dlOntology=dlOntology;
         m_dontReuseConcepts=new TreeSet<AtomicConcept>(DLOntology.AtomicConceptComparator.INSTANCE);
-        Set<AtomicAbstractRole> functionalRoles=new HashSet<AtomicAbstractRole>();
-        EntityHierarchy<Concept> conceptHierarchy=new EntityHierarchy<Concept>();
-        EntityHierarchy<AbstractRole> roleHierarchy=new EntityHierarchy<AbstractRole>();
-        buildApproximation(conceptHierarchy,roleHierarchy,functionalRoles);
-        excludeLeafConcepts(conceptHierarchy);
-        Map<NodePair,Node> arcCauses=new HashMap<NodePair,Node>();
-        Map<AtomicConcept,Node> representativeNodes=new HashMap<AtomicConcept,Node>();
-        Map<Node,AtomicConcept> conceptForNode=new HashMap<Node,AtomicConcept>();
-        ExtensionTable extensionTable=buildExtensionTable(representativeNodes,conceptForNode,arcCauses);
-        applyHierarchy(extensionTable,conceptHierarchy,roleHierarchy,functionalRoles,representativeNodes,conceptForNode,arcCauses);
+        m_graphConcepts=new HashSet<AtomicConcept>();
+        m_functionalRoles=new HashSet<AtomicAbstractRole>();
+        m_conceptHierarchy=new ObjectHierarchy<Concept>();
+        m_roleHierarchy=new ObjectHierarchy<AbstractRole>();
+        analyzeDLOntology();
+        m_representativeNodes=new HashMap<AtomicConcept,Node>();
+        m_conceptForNode=new HashMap<Node,AtomicConcept>();
+        m_arcCauses=new HashMap<NodePair,Node>();
+        m_extensionTable=buildExtensionTable();
+        applyHierarchy();
         int tuplesToprocess=0;
-        ExtensionTable.Retrieval retrieval1=extensionTable.createRetrieval(new boolean[] { false,false,false },ExtensionTable.View.TOTAL);
+        ExtensionTable.Retrieval retrieval1=m_extensionTable.createRetrieval(new boolean[] { false,false,false },ExtensionTable.View.TOTAL);
         retrieval1.open();
         while (!retrieval1.afterLast()) {
             tuplesToprocess++;
@@ -48,25 +63,25 @@ public class Analysis {
             processedTuples++;
             Node centralNode=(Node)retrieval1.getTupleBuffer()[1];
             Node leafNode1=(Node)retrieval1.getTupleBuffer()[2];
-            ExtensionTable.Retrieval retrieval2=extensionTable.createRetrieval(new boolean[] { true,true,false },ExtensionTable.View.TOTAL);
+            ExtensionTable.Retrieval retrieval2=m_extensionTable.createRetrieval(new boolean[] { true,true,false },ExtensionTable.View.TOTAL);
             retrieval2.getBindingsBuffer()[0]=retrieval1.getTupleBuffer()[0];
             retrieval2.getBindingsBuffer()[1]=centralNode;
             retrieval2.open();
             while (!retrieval2.afterLast()) {
                 Node leafNode2=(Node)retrieval2.getTupleBuffer()[2];
                 if (leafNode1.getNodeID()<leafNode2.getNodeID()) {
-                    Node cause1=arcCauses.get(new NodePair(centralNode,leafNode1));
+                    Node cause1=m_arcCauses.get(new NodePair(centralNode,leafNode1));
                     if (cause1==centralNode)
-                        dontReuseConceptDueToMerging(conceptForNode.get(leafNode1));
+                        dontReuseConceptDueToMerging(m_conceptForNode.get(leafNode1));
                     else if (cause1==leafNode1)
-                        dontReuseConceptDueToMerging(conceptForNode.get(centralNode));
+                        dontReuseConceptDueToMerging(m_conceptForNode.get(centralNode));
                     else
                         throw new IllegalStateException();
-                    Node cause2=arcCauses.get(new NodePair(centralNode,leafNode2));
+                    Node cause2=m_arcCauses.get(new NodePair(centralNode,leafNode2));
                     if (cause2==centralNode)
-                        dontReuseConceptDueToMerging(conceptForNode.get(leafNode2));
+                        dontReuseConceptDueToMerging(m_conceptForNode.get(leafNode2));
                     else if (cause2==leafNode2)
-                        dontReuseConceptDueToMerging(conceptForNode.get(centralNode));
+                        dontReuseConceptDueToMerging(m_conceptForNode.get(centralNode));
                     else
                         throw new IllegalStateException();
                 }
@@ -85,178 +100,99 @@ public class Analysis {
     protected void dontReuseConcept(AtomicConcept atomicConcept) {
         m_dontReuseConcepts.add(atomicConcept);
     }
-    protected void applyHierarchy(ExtensionTable extensionTable,EntityHierarchy<Concept> conceptHierarchy,EntityHierarchy<AbstractRole> roleHierarchy,Set<AtomicAbstractRole> functionalRoles,Map<AtomicConcept,Node> representativeNodes,Map<Node,AtomicConcept> conceptForNode,Map<NodePair,Node> arcCauses) {
+    protected void applyHierarchy() {
         Object[] buffer=new Object[3];
-        Map<AbstractRole,Set<AbstractRole>> allSuperroles=roleHierarchy.getSuperentities();
         int done=0;
-        for (Map.Entry<Node,AtomicConcept> entry : conceptForNode.entrySet()) {
+        for (Map.Entry<Node,AtomicConcept> entry : m_conceptForNode.entrySet()) {
             Node node=entry.getKey();
-            Set<EntityInfo<Concept>> allSuperconcepts=conceptHierarchy.getEntityInfo(entry.getValue()).getAllSuperentities();
-            for (EntityInfo<Concept> superconcept : allSuperconcepts)
-                if (superconcept.m_entity instanceof AtLeastAbstractRoleConcept) {
-                    AtLeastAbstractRoleConcept existentialConcept=(AtLeastAbstractRoleConcept)superconcept.m_entity;
+            Set<Concept> allSuperconcepts=m_conceptHierarchy.getAllSuperobjects(entry.getValue());
+            for (Concept superconcept : allSuperconcepts) {
+                if (superconcept instanceof AtLeastAbstractRoleConcept) {
+                    AtLeastAbstractRoleConcept existentialConcept=(AtLeastAbstractRoleConcept)superconcept;
                     AtomicConcept toConcept=(AtomicConcept)existentialConcept.getToConcept();
-                    Node toNode=representativeNodes.get(toConcept);
-                    if (toNode!=null) {
-                        Set<AbstractRole> superroles=allSuperroles.get(existentialConcept.getOnAbstractRole());
-                        if (superroles==null) {
-                            superroles=new HashSet<AbstractRole>();
-                            superroles.add(existentialConcept.getOnAbstractRole());
-                            allSuperroles.put(existentialConcept.getOnAbstractRole(),superroles);
-                        }
-                        boolean change=false;
-                        for (AbstractRole onAbstractRole : superroles) {
-                            if (onAbstractRole instanceof AtomicAbstractRole) {
-                                if (functionalRoles.contains(onAbstractRole)) {
-                                    buffer[0]=onAbstractRole;
-                                    buffer[1]=node;
-                                    buffer[2]=toNode;
-                                    if (extensionTable.addTuple(buffer,null))
-                                        change=true;
-                                }
-                            }
-                            else if (onAbstractRole instanceof InverseAbstractRole) {
-                                AtomicAbstractRole inverseAbstractRole=((InverseAbstractRole)onAbstractRole).getInverseOf();
-                                if (functionalRoles.contains(inverseAbstractRole)) {
-                                    buffer[0]=inverseAbstractRole;
-                                    buffer[1]=toNode;
-                                    buffer[2]=node;
-                                    if (extensionTable.addTuple(buffer,null))
-                                        change=true;
-                                }
+                    Node toNode=m_representativeNodes.get(toConcept);
+                    Set<AbstractRole> superroles=m_roleHierarchy.getAllSuperobjects(existentialConcept.getOnAbstractRole());
+                    superroles.add(existentialConcept.getOnAbstractRole());
+                    boolean change=false;
+                    for (AbstractRole onAbstractRole : superroles) {
+                        if (onAbstractRole instanceof AtomicAbstractRole) {
+                            if (m_functionalRoles.contains(onAbstractRole)) {
+                                buffer[0]=onAbstractRole;
+                                buffer[1]=node;
+                                buffer[2]=toNode;
+                                if (m_extensionTable.addTuple(buffer,null))
+                                    change=true;
                             }
                         }
-                        if (change) {
-                            arcCauses.put(new NodePair(node,toNode),node);
-                            arcCauses.put(new NodePair(toNode,node),node);
+                        else if (onAbstractRole instanceof InverseAbstractRole) {
+                            AtomicAbstractRole inverseAbstractRole=((InverseAbstractRole)onAbstractRole).getInverseOf();
+                            if (m_functionalRoles.contains(inverseAbstractRole)) {
+                                buffer[0]=inverseAbstractRole;
+                                buffer[1]=toNode;
+                                buffer[2]=node;
+                                if (m_extensionTable.addTuple(buffer,null))
+                                    change=true;
+                            }
                         }
                     }
+                    if (change) {
+                        m_arcCauses.put(new NodePair(node,toNode),node);
+                        m_arcCauses.put(new NodePair(toNode,node),node);
+                    }
                 }
+            }
             done++;
             if ((done % 1000)==0)
                 System.out.println(done+" nodes done");
         }
     }
-    protected ExtensionTable buildExtensionTable(Map<AtomicConcept,Node> representativeNodes,Map<Node,AtomicConcept> conceptForNode,Map<NodePair,Node> arcCauses) {
+    protected ExtensionTable buildExtensionTable() {
         Set<DLClause> noDLClauses=Collections.emptySet();
         Set<Atom> noAtoms=Collections.emptySet();
         DLOntology emptyDLOntology=new DLOntology("nothing",noDLClauses,noAtoms,noAtoms,false,false,false,false);
-        Tableau tableau=new Tableau(null,new CreationOrderStrategy(null),emptyDLOntology);
+        Tableau tableau=new Tableau(null,new CreationOrderStrategy(new AnywhereBlocking(PairWiseDirectBlockingChecker.INSTANCE,null)),emptyDLOntology);
         ExtensionTable extensionTable=new ExtensionTableWithTupleIndexes(tableau,tableau.getExtensionManager(),3,false,new TupleIndex[] { new TupleIndex(new int[] { 0,1,2 }) });
         DependencySet emptySet=tableau.getDependencySetFactory().emptySet();
-        for (AtomicConcept atomicConcept : m_dlOntology.getAllAtomicConcepts())
-            if (!m_dontReuseConcepts.contains(atomicConcept)) {
-                Node node=tableau.createNewRootNode(emptySet,0);
-                representativeNodes.put(atomicConcept,node);
-                conceptForNode.put(node,atomicConcept);
-            }
+        for (AtomicConcept atomicConcept : m_graphConcepts) {
+            Node node=tableau.createNewRootNode(emptySet,0);
+            m_representativeNodes.put(atomicConcept,node);
+            m_conceptForNode.put(node,atomicConcept);
+        }
         return extensionTable;
     }
-    protected void buildApproximation(EntityHierarchy<Concept> conceptHierarchy,EntityHierarchy<AbstractRole> roleHierarchy,Set<AtomicAbstractRole> functionalRoles) {
-        for (AtomicConcept atomicConcept : m_dlOntology.getAllAtomicConcepts()) {
-            if (atomicConcept.getURI().startsWith("internal:"))
-                dontReuseConcept(atomicConcept);
-            else
-                conceptHierarchy.getEntityInfo(atomicConcept);
-        }
+    protected void analyzeDLOntology() {
         for (DLClause dlClause : m_dlOntology.getDLClauses()) {
-            if (isInverseRoleClause(dlClause)) {
+            if (dlClause.isRoleInverseInclusion()) {
                 AtomicAbstractRole subrole=(AtomicAbstractRole)dlClause.getBodyAtom(0).getDLPredicate();
                 AtomicAbstractRole superrole=(AtomicAbstractRole)dlClause.getHeadAtom(0,0).getDLPredicate();
-                roleHierarchy.addSubsumption(subrole,superrole.getInverseRole());
-                roleHierarchy.addSubsumption(subrole.getInverseRole(),superrole);
+                m_roleHierarchy.addInclusion(subrole,superrole.getInverseRole());
+                m_roleHierarchy.addInclusion(subrole.getInverseRole(),superrole);
             }
-            else if (isRoleHierarchyClause(dlClause)) {
+            else if (dlClause.isRoleInclusion()) {
                 AtomicAbstractRole subrole=(AtomicAbstractRole)dlClause.getBodyAtom(0).getDLPredicate();
                 AtomicAbstractRole superrole=(AtomicAbstractRole)dlClause.getHeadAtom(0,0).getDLPredicate();
-                roleHierarchy.addSubsumption(subrole,superrole);
-                roleHierarchy.addSubsumption(subrole.getInverseRole(),superrole.getInverseRole());
+                m_roleHierarchy.addInclusion(subrole,superrole);
+                m_roleHierarchy.addInclusion(subrole.getInverseRole(),superrole.getInverseRole());
             }
-            else if (isFunctionalityClause(dlClause)) {
+            else if (dlClause.isFunctionalityAxiom()) {
                 AtomicAbstractRole functionalRole=(AtomicAbstractRole)dlClause.getBodyAtom(0).getDLPredicate();
-                functionalRoles.add(functionalRole);
+                m_functionalRoles.add(functionalRole);
             }
-            else if (isConceptInclusionClause(dlClause)) {
+            else if (dlClause.isConceptInclusion()) {
                 AtomicConcept bodyConcept=(AtomicConcept)dlClause.getBodyAtom(0).getDLPredicate();
                 Concept headConcept=(Concept)dlClause.getHeadAtom(0,0).getDLPredicate();
-                if (!m_dontReuseConcepts.contains(bodyConcept) && (!(headConcept instanceof AtomicConcept) || !m_dontReuseConcepts.contains(headConcept)))
-                    conceptHierarchy.addSubsumption(bodyConcept,headConcept);
+                m_conceptHierarchy.addInclusion(bodyConcept,headConcept);
             }
-        }
-    }
-    protected boolean isAtomicOrExistentialToAtomic(DLPredicate dlPredicate) {
-        if (dlPredicate instanceof AtomicConcept)
-            return true;
-        else if (dlPredicate instanceof AtLeastAbstractRoleConcept) {
-            AtLeastAbstractRoleConcept atLeastAbstractRoleConcept=(AtLeastAbstractRoleConcept)dlPredicate;
-            return atLeastAbstractRoleConcept.getNumber()==1 && atLeastAbstractRoleConcept.getToConcept() instanceof AtomicConcept;
-        }
-        else
-            return false;
-    }
-    protected boolean isConceptInclusionClause(DLClause dlClause) {
-        if (dlClause.getBodyLength()==1 && dlClause.getHeadLength()==1 && dlClause.getHeadConjunctionLength(0)==1) {
-            if (dlClause.getBodyAtom(0).getDLPredicate() instanceof AtomicConcept && dlClause.getHeadAtom(0,0).getDLPredicate() instanceof Concept) {
-                Variable x=dlClause.getBodyAtom(0).getArgumentVariable(0);
-                Variable headX=dlClause.getHeadAtom(0,0).getArgumentVariable(0);
-                if (x!=null && x.equals(headX))
-                    return true;
-            }
-        }
-        return false;
-    }
-    protected boolean isRoleHierarchyClause(DLClause dlClause) {
-        if (dlClause.getBodyLength()==1 && dlClause.getHeadLength()==1 && dlClause.getHeadConjunctionLength(0)==1) {
-            if (dlClause.getBodyAtom(0).getDLPredicate() instanceof AtomicAbstractRole && dlClause.getHeadAtom(0,0).getDLPredicate() instanceof AtomicAbstractRole) {
-                Variable x=dlClause.getBodyAtom(0).getArgumentVariable(0);
-                Variable y=dlClause.getBodyAtom(0).getArgumentVariable(1);
-                Variable headX=dlClause.getHeadAtom(0,0).getArgumentVariable(0);
-                Variable headY=dlClause.getHeadAtom(0,0).getArgumentVariable(1);
-                if (x!=null && y!=null && !x.equals(y) && x.equals(headX) && y.equals(headY))
-                    return true;
-            }
-        }
-        return false;
-    }
-    protected boolean isInverseRoleClause(DLClause dlClause) {
-        if (dlClause.getBodyLength()==1 && dlClause.getHeadLength()==1 && dlClause.getHeadConjunctionLength(0)==1) {
-            if (dlClause.getBodyAtom(0).getDLPredicate() instanceof AtomicAbstractRole && dlClause.getHeadAtom(0,0).getDLPredicate() instanceof AtomicAbstractRole) {
-                Variable x=dlClause.getBodyAtom(0).getArgumentVariable(0);
-                Variable y=dlClause.getBodyAtom(0).getArgumentVariable(1);
-                Variable headX=dlClause.getHeadAtom(0,0).getArgumentVariable(0);
-                Variable headY=dlClause.getHeadAtom(0,0).getArgumentVariable(1);
-                if (x!=null && y!=null && !x.equals(y) && x.equals(headY) && y.equals(headX))
-                    return true;
-            }
-        }
-        return false;
-    }
-    protected boolean isFunctionalityClause(DLClause dlClause) {
-        if (dlClause.getBodyLength()==2 && dlClause.getHeadLength()==1 && dlClause.getHeadConjunctionLength(0)==1) {
-            DLPredicate atomicAbstractRole=dlClause.getBodyAtom(0).getDLPredicate();
-            if (atomicAbstractRole instanceof AtomicAbstractRole) {
-                if (dlClause.getBodyAtom(1).getDLPredicate().equals(atomicAbstractRole) && dlClause.getHeadAtom(0,0).getDLPredicate().equals(Equality.INSTANCE)) {
-                    Variable x=dlClause.getBodyAtom(0).getArgumentVariable(0);
-                    if (x!=null && x.equals(dlClause.getBodyAtom(1).getArgument(0))) {
-                        Variable y1=dlClause.getBodyAtom(0).getArgumentVariable(1);
-                        Variable y2=dlClause.getBodyAtom(1).getArgumentVariable(1);
-                        Variable headY1=dlClause.getHeadAtom(0,0).getArgumentVariable(0);
-                        Variable headY2=dlClause.getHeadAtom(0,0).getArgumentVariable(1);
-                        if (y1!=null && y2!=null && !y1.equals(y2) && headY1!=null && headY2!=null && ((y1.equals(headY1) && y2.equals(headY2)) || (y1.equals(headY2) && y2.equals(headY1))))
-                            return true;
+            for (int i=0;i<dlClause.getHeadLength();i++)
+                for (int j=0;j<dlClause.getHeadConjunctionLength(i);j++) {
+                    DLPredicate dlPredicate=dlClause.getHeadAtom(i,j).getDLPredicate();
+                    if (dlPredicate instanceof AtLeastAbstractRoleConcept) {
+                        Concept toConcept=((AtLeastAbstractRoleConcept)dlPredicate).getToConcept();
+                        if (toConcept instanceof AtomicConcept)
+                            m_graphConcepts.add((AtomicConcept)toConcept);
                     }
                 }
-            }
         }
-        return false;
-    }
-    protected void excludeLeafConcepts(EntityHierarchy<Concept> conceptHierarchy) {
-        for (EntityInfo<Concept> conceptInfo : conceptHierarchy.m_entityInfos.values())
-            if (conceptInfo.m_entity instanceof AtomicConcept) {
-                for (EntityInfo<Concept> superconceptInfo : conceptInfo.m_superentityInfos)
-                    if (superconceptInfo.m_entity instanceof AtomicConcept)
-                        dontReuseConcept((AtomicConcept)superconceptInfo.m_entity);
-            }
     }
     public void save(File reuseConcepts,File dontReuseConcepts) throws IOException {
         PrintWriter dontReuseWriter=new PrintWriter(new FileWriter(dontReuseConcepts));
@@ -304,35 +240,6 @@ public class Analysis {
         }
     }
 
-    protected static class EntityHierarchy<T> {
-        protected final Map<T,EntityInfo<T>> m_entityInfos;
-        
-        public EntityHierarchy() {
-            m_entityInfos=new HashMap<T,EntityInfo<T>>();
-        }
-        public void addSubsumption(T subentity,T superentity) {
-            getEntityInfo(subentity).m_superentityInfos.add(getEntityInfo(superentity));
-        }
-        protected EntityInfo<T> getEntityInfo(T entity) {
-            EntityInfo<T> entityInfo=m_entityInfos.get(entity);
-            if (entityInfo==null) {
-                entityInfo=new EntityInfo<T>(entity);
-                m_entityInfos.put(entity,entityInfo);
-            }
-            return entityInfo;
-        }
-        public Map<T,Set<T>> getSuperentities() {
-            Map<T,Set<T>> result=new HashMap<T,Set<T>>();
-            for (EntityInfo<T> entityInfo : m_entityInfos.values()) {
-                Set<T> superentities=new HashSet<T>();
-                result.put(entityInfo.m_entity,superentities);
-                for (EntityInfo<T> superentityInfo : entityInfo.getAllSuperentities())
-                    superentities.add(superentityInfo.m_entity);
-            }
-            return result;
-        }
-    }
-    
     protected static class NodePair {
         protected final Node m_first;
         protected final Node m_second;
@@ -355,8 +262,21 @@ public class Analysis {
     }
     
     public static void main(String[] args) throws Exception {
-        DLOntology dlOntology=DLOntology.load(new File("c:\\Temp\\galen-module1.ser"));
+//        String physicalURI="file:/C:/Work/ontologies/GALEN/galen-ians-full-undoctored.owl";
+        String physicalURI="file:/C:/Work/ontologies/GALEN/galen-module1.owl";
+        
+        DLOntology dlOntology=loadDLOntology(physicalURI);
         Analysis analysis=new Analysis(dlOntology);
         analysis.save(new File("c:\\Temp\\reuse.txt"),new File("c:\\Temp\\dont-reuse.txt"));
+    }
+    protected static DLOntology loadDLOntology(String physicalURI) throws Exception {
+        DefaultOntologyResolver resolver=new DefaultOntologyResolver();
+        String ontologyURI=resolver.registerOntology(physicalURI);
+        KAON2Connection connection=KAON2Manager.newConnection();
+        connection.setOntologyResolver(resolver);
+        Ontology ontology=connection.openOntology(ontologyURI,new HashMap<String,Object>());
+        Clausification clausification=new Clausification();
+        Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
+        return clausification.clausify(false,ontology,true,noDescriptionGraphs);
     }
 }

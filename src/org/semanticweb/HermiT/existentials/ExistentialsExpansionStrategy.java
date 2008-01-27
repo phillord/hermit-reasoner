@@ -7,6 +7,7 @@ public interface ExistentialsExpansionStrategy {
     void clear();
     boolean expandExistentials();
     void nodeWillChange(Node node);
+    void nodeWillBeDestroyed(Node node);
     void branchingPointPushed();
     void backtrack();
     void modelFound();

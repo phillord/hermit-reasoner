@@ -44,7 +44,7 @@ public final class DescriptionGraphManager implements Serializable {
             return false;
         Node node=m_tableau.getFirstTableauNode();
         while (node!=null) {
-            if (node.isInTableau() && node.m_occursInDescriptionGraphs!=null && node.m_occursInDescriptionGraphsDirty) {
+            if (node.isActive() && node.m_occursInDescriptionGraphs!=null && node.m_occursInDescriptionGraphsDirty) {
                 for (Map.Entry<DescriptionGraph,Node.Occurrence> entry : node.m_occursInDescriptionGraphs.entrySet()) {
                     Node.Occurrence occurrence=entry.getValue();
                     if (occurrence!=null && occurrence.m_next!=null) {
@@ -53,7 +53,7 @@ public final class DescriptionGraphManager implements Serializable {
                         ExtensionTable graphExtensionTable=m_extensionManager.getExtensionTable(descriptionGraph.getArity()+1);
                         while (occurrence!=null) {
                             int tupleIndex=occurrence.m_tupleIndex;
-                            if (graphExtensionTable.isTupleValid(tupleIndex)) {
+                            if (graphExtensionTable.isTupleActive(tupleIndex)) {
                                 if (firstValidOccurrence==null)
                                     firstValidOccurrence=occurrence;
                                 else {
@@ -98,7 +98,7 @@ public final class DescriptionGraphManager implements Serializable {
                 }
                 node.m_occursInDescriptionGraphsDirty=false;
             }
-            node=node.m_nextTableauNode;
+            node=node.getNextTableauNode();
         }
         return false;
     }   

@@ -7,6 +7,7 @@ import java.io.Serializable;
 import org.semanticweb.HermiT.model.*;
 import org.semanticweb.HermiT.existentials.*;
 import org.semanticweb.HermiT.monitor.*;
+import org.semanticweb.HermiT.tableau.Node.NodeState;
 
 public final class Tableau implements Serializable {
     private static final long serialVersionUID=-28982363158925221L;
@@ -28,18 +29,16 @@ public final class Tableau implements Serializable {
     protected BranchingPoint[] m_branchingPoints;
     protected int m_currentBranchingPoint;
     protected boolean m_isCurrentModelDeterministic;
-    protected Node m_firstTableauNode;
-    protected Node m_lastTableauNode;
-    protected Node m_firstFreeNode;
+    protected int m_allocatedNodes;
     protected int m_numberOfNodesInTableau;
     protected int m_numberOfMergedOrPrunedNodes;
-    protected Node m_lastChangedNode;
-    protected Node.NodeEvent m_lastChangedNodeEvent;
+    protected int m_numberOfNodeCreations;
+    protected Node m_firstFreeNode;
+    protected Node m_firstTableauNode;
+    protected Node m_lastTableauNode;
+    protected Node m_lastMergedOrPrunedNode;
     protected GroundDisjunction m_firstGroundDisjunction;
     protected GroundDisjunction m_firstUnprocessedGroundDisjunction;
-    protected int m_lastNodeID;
-    protected int m_allocatedNodes;
-    protected int m_lastOrderPosition;
     protected Node m_checkedNode;
 
     public Tableau(TableauMonitor tableauMonitor,ExistentialsExpansionStrategy existentialsExpansionStrategy,DLOntology dlOntology) {
@@ -106,18 +105,16 @@ public final class Tableau implements Serializable {
         return m_descriptionGraphManager;
     }
     public void clear() {
+        m_allocatedNodes=0;
+        m_numberOfNodesInTableau=0;
+        m_numberOfMergedOrPrunedNodes=0;
+        m_numberOfNodeCreations=0;
         m_firstFreeNode=null;
         m_firstTableauNode=null;
         m_lastTableauNode=null;
-        m_numberOfNodesInTableau=0;
-        m_numberOfMergedOrPrunedNodes=0;
-        m_lastChangedNode=null;
-        m_lastChangedNodeEvent=null;
+        m_lastMergedOrPrunedNode=null;
         m_firstGroundDisjunction=null;
         m_firstUnprocessedGroundDisjunction=null;
-        m_lastNodeID=0;
-        m_allocatedNodes=0;
-        m_lastOrderPosition=0;
         m_checkedNode=null;
         m_branchingPoints=new BranchingPoint[2];
         m_currentBranchingPoint=-1; // The constructor of BranchingPoint depends on this value  
@@ -288,18 +285,6 @@ public final class Tableau implements Serializable {
     public BranchingPoint getCurrentBranchingPoint() {
         return m_branchingPoints[m_currentBranchingPoint];
     }
-    public Node getFirstTableauNode() {
-        return m_firstTableauNode;
-    }
-    public Node getLastTableauNode() {
-        return m_lastTableauNode;
-    }
-    public int getNumberOfNodesInTableau() {
-        return m_numberOfNodesInTableau;
-    }
-    public int getNumberOfMergedOrPrunedNodes() {
-        return m_numberOfMergedOrPrunedNodes;
-    }
     public void addGroundDisjunction(GroundDisjunction groundDisjunction) {
         groundDisjunction.m_nextGroundDisjunction=m_firstGroundDisjunction;
         groundDisjunction.m_previousGroundDisjunction=null;
@@ -355,32 +340,29 @@ public final class Tableau implements Serializable {
         m_nominalIntroductionManager.backtrack();
         // backtrack extensions
         m_extensionManager.backtrack();
-        // backtrack node changes
-        Node lastChangedNodeShouldBe=branchingPoint.m_lastChangedNode;
-        Node.NodeEvent lastChangedNodeEventShouldBe=branchingPoint.m_lastChangedNodeEvent;
-        while (lastChangedNodeShouldBe!=m_lastChangedNode || lastChangedNodeEventShouldBe!=m_lastChangedNodeEvent)
-            m_lastChangedNode.backtrackNodeChange();
+        // backtrack node merges/prunes
+        Node lastMergedOrPrunedNodeShouldBe=branchingPoint.m_lastMergedOrPrunedNode;
+        while (m_lastMergedOrPrunedNode!=lastMergedOrPrunedNodeShouldBe)
+            backtrackLastMergedOrPrunedNode();
+        // backtrack node change list
+        Node lastTableauNodeShouldBe=branchingPoint.m_lastTableauNode;
+        while (lastTableauNodeShouldBe!=m_lastTableauNode)
+            destroyLastTableauNode();
         // finish 
         m_extensionManager.clearClash();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.backtrackToFinished(branchingPoint);
     }
     public Node createNewRootNode(DependencySet dependencySet,int treeDepth) {
-        Node node=createNewNodeRaw(null,NodeType.ROOT_NODE,treeDepth);
-        insertIntoTableau(node,dependencySet);
-        return node;
+        return createNewNodeRaw(dependencySet,null,NodeType.ROOT_NODE,treeDepth);
     }
-    public Node createNewTreeNode(Node parent,DependencySet dependencySet) {
-        Node node=createNewNodeRaw(parent,NodeType.TREE_NODE,parent.getTreeDepth()+1);
-        insertIntoTableau(node,dependencySet);
-        return node;
+    public Node createNewTreeNode(DependencySet dependencySet,Node parent) {
+        return createNewNodeRaw(dependencySet,parent,NodeType.TREE_NODE,parent.getTreeDepth()+1);
     }
     public Node createNewGraphNode(Node parent,DependencySet dependencySet) {
-        Node node=createNewNodeRaw(parent,NodeType.GRAPH_NODE,parent.getTreeDepth());
-        insertIntoTableau(node,dependencySet);
-        return node;
+        return createNewNodeRaw(dependencySet,parent,NodeType.GRAPH_NODE,parent.getTreeDepth());
     }
-    public Node createNewNodeRaw(Node parent,NodeType nodeType,int treeDepth) {
+    public Node createNewNodeRaw(DependencySet dependencySet,Node parent,NodeType nodeType,int treeDepth) {
         Node node;
         if (m_firstFreeNode==null) {
             node=new Node(this);
@@ -390,37 +372,100 @@ public final class Tableau implements Serializable {
             node=m_firstFreeNode;
             m_firstFreeNode=m_firstFreeNode.m_nextTableauNode;
         }
-        node.initialize(++m_lastNodeID,parent,nodeType,treeDepth);
+        assert node.m_nodeID==-1;
+        assert node.m_nodeState==null;
+        node.initialize(++m_numberOfNodesInTableau,parent,nodeType,treeDepth);
+        node.m_previousTableauNode=m_lastTableauNode;
+        if (m_lastTableauNode==null)
+            m_firstTableauNode=node;
+        else
+            m_lastTableauNode.m_nextTableauNode=node;
+        m_lastTableauNode=node;
+        m_existentialsExpansionStrategy.nodeWillChange(node);
+        m_extensionManager.addConceptAssertion(AtomicConcept.THING,node,dependencySet);
+        m_numberOfNodeCreations++;
         return node;
     }
-    public void insertIntoTableau(Node node,DependencySet dependencySet) {
-        node.insertIntoTableau();
-        m_extensionManager.addConceptAssertion(AtomicConcept.THING,node,dependencySet);
+    public void mergeNode(Node node,Node mergeInto,DependencySet dependencySet) {
+        assert node.m_nodeState==Node.NodeState.ACTIVE;
+        assert node.m_mergedInto==null;
+        assert node.m_mergedIntoDependencySet==null;
+        assert node.m_previousMergedOrPrunedNode==null;
+        m_existentialsExpansionStrategy.nodeWillChange(node);
+        node.m_mergedInto=mergeInto;
+        node.m_mergedIntoDependencySet=dependencySet;
+        m_dependencySetFactory.addUsage(node.m_mergedIntoDependencySet);
+        node.m_nodeState=NodeState.MERGED;
+        node.m_previousMergedOrPrunedNode=m_lastMergedOrPrunedNode;
+        m_lastMergedOrPrunedNode=node;
+        m_numberOfMergedOrPrunedNodes++;
     }
-    public int getNumberOfCreatedNodes() {
-        return m_lastNodeID;
+    public void pruneNode(Node node) {
+        assert node.m_nodeState==Node.NodeState.ACTIVE;
+        assert node.m_mergedInto==null;
+        assert node.m_mergedIntoDependencySet==null;
+        assert node.m_previousMergedOrPrunedNode==null;
+        m_existentialsExpansionStrategy.nodeWillChange(node);
+        node.m_nodeState=NodeState.PRUNED;
+        node.m_previousMergedOrPrunedNode=m_lastMergedOrPrunedNode;
+        m_lastMergedOrPrunedNode=node;
+        m_numberOfMergedOrPrunedNodes++;
+    }
+    protected void backtrackLastMergedOrPrunedNode() {
+        Node node=m_lastMergedOrPrunedNode;
+        assert (node.m_nodeState==Node.NodeState.MERGED && node.m_mergedInto!=null && node.m_mergedInto!=null) || (node.m_nodeState==Node.NodeState.PRUNED && node.m_mergedInto==null && node.m_mergedInto==null);
+        m_existentialsExpansionStrategy.nodeWillChange(node);
+        if (node.m_nodeState==Node.NodeState.MERGED) {
+            m_dependencySetFactory.removeUsage(node.m_mergedIntoDependencySet);
+            node.m_mergedInto=null;
+            node.m_mergedIntoDependencySet=null;
+        }
+        node.m_nodeState=Node.NodeState.ACTIVE;
+        m_lastMergedOrPrunedNode=node.m_previousMergedOrPrunedNode;
+        node.m_previousMergedOrPrunedNode=null;
+        m_numberOfMergedOrPrunedNodes--;
+    }
+    protected void destroyLastTableauNode() {
+        Node node=m_lastTableauNode;
+        assert node.m_nodeState==Node.NodeState.ACTIVE;
+        assert node.m_mergedInto==null;
+        assert node.m_mergedIntoDependencySet==null;
+        assert node.m_previousMergedOrPrunedNode==null;
+        m_existentialsExpansionStrategy.nodeWillBeDestroyed(node);
+        if (node.m_previousTableauNode==null)
+            m_firstTableauNode=null;
+        else
+            node.m_previousTableauNode.m_nextTableauNode=null;
+        m_lastTableauNode=node.m_previousTableauNode;
+        node.destroy();
+        node.m_nextTableauNode=m_firstFreeNode;
+        m_firstFreeNode=node;
+        m_numberOfNodesInTableau--;
+    }
+    public int getNumberOfNodeCreations() {
+        return m_numberOfNodeCreations;
+    }
+    public Node getFirstTableauNode() {
+        return m_firstTableauNode;
+    }
+    public Node getLastTableauNode() {
+        return m_lastTableauNode;
     }
     public int getNumberOfAllocatedNodes() {
         return m_allocatedNodes;
     }
+    public int getNumberOfNodesInTableau() {
+        return m_numberOfNodesInTableau;
+    }
+    public int getNumberOfMergedOrPrunedNodes() {
+        return m_numberOfMergedOrPrunedNodes;
+    }
     public Node getNode(int nodeID) {
-        Node node=m_lastChangedNode;
-        Node.NodeEvent nodeEvent=m_lastChangedNodeEvent;
+        Node node=m_firstTableauNode;
         while (node!=null) {
             if (node.getNodeID()==nodeID)
                 return node;
-            Node previousNode;
-            Node.NodeEvent previousNodeEvent;
-            if (nodeEvent==Node.NodeEvent.INSERTED_INTO_TALBEAU) {
-                previousNode=node.m_previousChangedNodeForInsert;
-                previousNodeEvent=node.m_previousChangedNodeEventForInsert;
-            }
-            else {
-                previousNode=node.m_previousChangedNodeForRemove;
-                previousNodeEvent=node.m_previousChangedNodeEventForRemove;
-            }
-            node=previousNode;
-            nodeEvent=previousNodeEvent;
+            node=node.getNextTableauNode();
         }
         return null;
     }
@@ -428,11 +473,9 @@ public final class Tableau implements Serializable {
         Node node=m_firstTableauNode;
         int numberOfNodesInTableau=0;
         while (node!=null) {
-            if (!node.isInTableau())
-                throw new IllegalStateException("A node is encountered in the node list which is not in the tableau.");
             if (node.m_previousTableauNode==null) {
                 if (m_firstTableauNode!=node)
-                    throw new IllegalStateException("First tableau node is point wrongly.");
+                    throw new IllegalStateException("First tableau node is pointing wrongly.");
             }
             else {
                 if (node.m_previousTableauNode.m_nextTableauNode!=node)
@@ -440,7 +483,7 @@ public final class Tableau implements Serializable {
             }
             if (node.m_nextTableauNode==null) {
                 if (m_lastTableauNode!=node)
-                    throw new IllegalStateException("Last tableau node is point wrongly.");
+                    throw new IllegalStateException("Last tableau node is pointing wrongly.");
             }
             else {
                 if (node.m_nextTableauNode.m_previousTableauNode!=node)
