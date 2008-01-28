@@ -116,7 +116,16 @@ public abstract class ExtensionTable implements Serializable {
         }
     }
     public abstract boolean containsTuple(Object[] tuple);
-    public abstract Retrieval createRetrieval(boolean[] bindingPattern,View extensionView);
+    public Retrieval createRetrieval(boolean[] bindingPattern,View extensionView) {
+        int[] bindingPositions=new int[bindingPattern.length];
+        for (int index=0;index<bindingPattern.length;index++)
+            if (bindingPattern[index])
+                bindingPositions[index]=index;
+            else
+                bindingPositions[index]=-1;
+        return createRetrieval(bindingPositions,new Object[bindingPattern.length],extensionView);
+    }
+    public abstract Retrieval createRetrieval(int[] bindingPositions,Object[] bindingsBuffer,View extensionView);
     public abstract PermanentDependencySet getDependencySet(Object[] tuple);
     public boolean propagateDeltaNew() {
         boolean deltaNewNotEmpty=(m_afterExtensionThisTupleIndex!=m_afterDeltaNewTupleIndex);
@@ -215,7 +224,7 @@ public abstract class ExtensionTable implements Serializable {
     public static interface Retrieval {
         ExtensionTable getExtensionTable();
         View getExtensionView();
-        boolean[] getBindingPattern();
+        int[] getBindingPositions();
         Object[] getBindingsBuffer();
         Object[] getTupleBuffer();
         DependencySet getDependencySet();
@@ -228,22 +237,22 @@ public abstract class ExtensionTable implements Serializable {
         private static final long serialVersionUID=6395072458663267969L;
 
         protected final ExtensionTable.View m_extensionView;
-        protected final boolean[] m_bindingPattern;
-        protected final boolean m_checkTupleSelection;
+        protected final int[] m_bindingPositions;
         protected final Object[] m_bindingsBuffer;
+        protected final boolean m_checkTupleSelection;
         protected final Object[] m_tupleBuffer;
         protected int m_currentTupleIndex;
         protected int m_afterLastTupleIndex;
 
-        public UnindexedRetrieval(ExtensionTable.View extensionView,boolean[] bindingPattern) {
+        public UnindexedRetrieval(int[] bindingPositions,Object[] bindingsBuffer,ExtensionTable.View extensionView) {
+            m_bindingPositions=bindingPositions;
             m_extensionView=extensionView;
-            m_bindingPattern=bindingPattern;
+            m_bindingsBuffer=bindingsBuffer;
             int numberOfBoundPositions=0;
-            for (int index=m_bindingPattern.length-1;index>=0;--index)
-                if (m_bindingPattern[index])
+            for (int index=m_bindingPositions.length-1;index>=0;--index)
+                if (m_bindingPositions[index]!=-1)
                     numberOfBoundPositions++;
             m_checkTupleSelection=(numberOfBoundPositions>0);
-            m_bindingsBuffer=new Object[m_tupleArity];
             m_tupleBuffer=new Object[m_tupleArity];
         }
         public ExtensionTable getExtensionTable() {
@@ -252,8 +261,8 @@ public abstract class ExtensionTable implements Serializable {
         public ExtensionTable.View getExtensionView() {
             return m_extensionView;
         }
-        public boolean[] getBindingPattern() {
-            return m_bindingPattern;
+        public int[] getBindingPositions() {
+            return m_bindingPositions;
         }
         public Object[] getBindingsBuffer() {
             return m_bindingsBuffer;
@@ -308,8 +317,8 @@ public abstract class ExtensionTable implements Serializable {
             if (!ExtensionTable.this.isTupleActive(m_tupleBuffer))
                 return false;
             if (m_checkTupleSelection)
-                for (int index=m_bindingPattern.length-1;index>=0;--index)
-                    if (m_bindingPattern[index] && !m_tupleBuffer[index].equals(m_bindingsBuffer[index]))
+                for (int index=m_bindingPositions.length-1;index>=0;--index)
+                    if (m_bindingPositions[index]!=-1 && !m_tupleBuffer[index].equals(m_bindingsBuffer[m_bindingPositions[index]]))
                         return false;
             return true;
         }

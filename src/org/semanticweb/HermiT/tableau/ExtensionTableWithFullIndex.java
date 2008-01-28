@@ -48,15 +48,15 @@ public class ExtensionTableWithFullIndex extends ExtensionTable {
         else
             return m_dependencySetManager.getDependencySet(tupleIndex);
     }
-    public Retrieval createRetrieval(boolean[] bindingPattern,View extensionView) {
+    public Retrieval createRetrieval(int[] bindingPositions,Object[] bindingsBuffer,View extensionView) {
         int numberOfBindings=0;
         for (int index=m_tupleArity-1;index>=0;--index)
-            if (bindingPattern[index])
+            if (bindingPositions[index]!=-1)
                 numberOfBindings++;
         if (numberOfBindings==m_tupleArity)
-            return new IndexedRetrieval(extensionView,bindingPattern);
+            return new IndexedRetrieval(bindingPositions,bindingsBuffer,extensionView);
         else
-            return new UnindexedRetrieval(extensionView,bindingPattern);
+            return new UnindexedRetrieval(bindingPositions,bindingsBuffer,extensionView);
     }
     protected void removeTuple(int tupleIndex) {
         m_tupleTableFullIndex.removeTuple(tupleIndex);
@@ -71,16 +71,18 @@ public class ExtensionTableWithFullIndex extends ExtensionTable {
     protected class IndexedRetrieval implements Retrieval,Serializable {
         private static final long serialVersionUID=5984560476970027366L;
 
-        protected final ExtensionTable.View m_extensionView;
-        protected final boolean[] m_bindingPattern;
+        protected final int[] m_bindingPositions;
         protected final Object[] m_bindingsBuffer;
+        protected final ExtensionTable.View m_extensionView;
+        protected final Object[] m_reorderedBindingsBuffer;
         protected final Object[] m_tupleBuffer;
         protected int m_currentTupleIndex;
 
-        public IndexedRetrieval(ExtensionTable.View extensionView,boolean[] bindingPattern) {
-            m_extensionView=extensionView;
-            m_bindingPattern=bindingPattern;
+        public IndexedRetrieval(int[] bindingPositions,Object[] bindingsBuffer,View extensionView) {
+            m_bindingPositions=bindingPositions;
             m_bindingsBuffer=new Object[m_tupleArity];
+            m_extensionView=extensionView;
+            m_reorderedBindingsBuffer=new Object[m_tupleArity];
             m_tupleBuffer=new Object[m_tupleArity];
         }
         public ExtensionTable getExtensionTable() {
@@ -89,8 +91,8 @@ public class ExtensionTableWithFullIndex extends ExtensionTable {
         public ExtensionTable.View getExtensionView() {
             return m_extensionView;
         }
-        public boolean[] getBindingPattern() {
-            return m_bindingPattern;
+        public int[] getBindingPositions() {
+            return m_bindingPositions;
         }
         public Object[] getBindingsBuffer() {
             return m_bindingsBuffer;
@@ -105,7 +107,9 @@ public class ExtensionTableWithFullIndex extends ExtensionTable {
                 return m_dependencySetManager.getDependencySet(m_currentTupleIndex);
         }
         public void open() {
-            m_currentTupleIndex=m_tupleTableFullIndex.getTupleIndex(m_bindingsBuffer);
+            for (int index=m_bindingPositions.length-1;index>=0;--index)
+                m_reorderedBindingsBuffer[index]=m_bindingsBuffer[m_bindingPositions[index]];
+            m_currentTupleIndex=m_tupleTableFullIndex.getTupleIndex(m_reorderedBindingsBuffer);
             switch (m_extensionView) {
             case EXTENSION_THIS:
                 if (!(0<=m_currentTupleIndex && m_currentTupleIndex<m_afterExtensionThisTupleIndex))
