@@ -74,7 +74,7 @@ public final class MergingManager implements Serializable {
             Node mergeFrom;
             Node mergeInto;
             if (node0.getNodeType()==NodeType.ROOT_NODE && node1.getNodeType()==NodeType.ROOT_NODE) {
-                if (node0.m_positiveLabel.size()>node1.m_positiveLabel.size()) {
+                if (node0.getPositiveLabelSize()>node1.getPositiveLabelSize()) {
                     mergeFrom=node1;
                     mergeInto=node0;
                 }
@@ -100,7 +100,7 @@ public final class MergingManager implements Serializable {
                 mergeInto=node0;
             }
             else if (node0.m_parent==node1.m_parent) {
-                if (node0.m_positiveLabel.size()>node1.m_positiveLabel.size()) {
+                if (node0.getPositiveLabelSize()>node1.getPositiveLabelSize()) {
                     mergeFrom=node1;
                     mergeInto=node0;
                 }

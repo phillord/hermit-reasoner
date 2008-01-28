@@ -32,8 +32,9 @@ public class MergeTest extends AbstractHermiTTest {
         super(name);
     }
     protected void setUp() {
-        BlockingCache blockingCache=new BlockingCache(PairWiseDirectBlockingChecker.INSTANCE);
-        BlockingStrategy blockingStrategy=new AnywhereBlocking(PairWiseDirectBlockingChecker.INSTANCE,blockingCache);
+        DirectBlockingChecker directBlockingChecker=new PairWiseDirectBlockingChecker();
+        BlockingCache blockingCache=new BlockingCache(directBlockingChecker);
+        BlockingStrategy blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingCache);
         ExistentialsExpansionStrategy existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
         m_tableau=new Tableau(null,existentialsExpansionStrategy,TEST_DL_ONTOLOGY);
         m_extensionManager=m_tableau.getExtensionManager();
@@ -73,8 +74,7 @@ public class MergeTest extends AbstractHermiTTest {
         m_extensionManager.addAssertion(Equality.INSTANCE,a1,a2,emptySet);
         
         assertTrue(m_extensionManager.containsClash());
-        assertContainsAll(a2.getPositiveLabel(),A,EXISTS_NEG_A,B,C,D);
-        assertContainsAll(a2.getNegativeLabel(),A);
+        assertLabel(a2,A,EXISTS_NEG_A,B,C,D,NEG_A);
         
         assertTrue(a1.isMerged());
         assertSame(a1.getCanonicalNode(),a2);
@@ -88,8 +88,7 @@ public class MergeTest extends AbstractHermiTTest {
         m_tableau.backtrackTo(bp.getLevel());
         
         assertFalse(m_extensionManager.containsClash());
-        assertContainsAll(a2.getPositiveLabel(),B,C,D);
-        assertContainsAll(a2.getNegativeLabel(),A);
+        assertLabel(a2,B,C,D,NEG_A);
 
         assertFalse(a1.isMerged());
         assertSame(a1.getCanonicalNode(),a1);
@@ -112,5 +111,10 @@ public class MergeTest extends AbstractHermiTTest {
 
         assertFalse(m_extensionManager.containsClash());
         assertRetrieval(m_extensionManager.getTernaryExtensionTable(),T(Inequality.INSTANCE,null,null),ExtensionTable.View.TOTAL,NO_TUPLES);
+    }
+    protected void assertLabel(Node node,Concept... concepts) {
+        assertEquals(concepts.length,node.getPositiveLabelSize()+node.getNegativeLabelSize());
+        for (Concept concept : concepts)
+            assertTrue(m_tableau.getExtensionManager().containsConceptAssertion(concept,node));
     }
 }

@@ -21,12 +21,12 @@ public class ProbingHashSet<E> implements Set<E>,Serializable {
     }
     public ProbingHashSet(int expectedSize) {
         m_table=new Object[getClosestBiggerTwoPover(expectedSize)];
-        m_resizeThreshold=(int)(0.6*m_table.length);
+        m_resizeThreshold=(int)Math.ceil(0.6*m_table.length);
         m_size=0;
     }
     protected ProbingHashSet(boolean dummy,int exactSize) {
         m_table=new Object[exactSize];
-        m_resizeThreshold=(int)(0.6*exactSize);
+        m_resizeThreshold=(int)Math.ceil(0.6*exactSize);
         m_size=0;
     }
     public static int getClosestBiggerTwoPover(int number) {
@@ -102,7 +102,7 @@ public class ProbingHashSet<E> implements Set<E>,Serializable {
     protected void resize() {
         Object[] oldTable=m_table;
         m_table=new Object[m_table.length*2];
-        m_resizeThreshold=(int)(0.6*m_table.length);
+        m_resizeThreshold=(int)Math.ceil(0.6*m_table.length);
         m_size=0;
         for (int index=0;index<oldTable.length;index++)
             if (oldTable[index]!=null)

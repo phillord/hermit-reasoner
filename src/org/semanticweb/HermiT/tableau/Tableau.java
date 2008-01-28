@@ -2,6 +2,8 @@ package org.semanticweb.HermiT.tableau;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 import java.io.Serializable;
 
 import org.semanticweb.HermiT.model.*;
@@ -16,16 +18,15 @@ public final class Tableau implements Serializable {
     protected final ExistentialsExpansionStrategy m_existentialsExpansionStrategy;
     protected final DLOntology m_dlOntology;
     protected final DependencySetFactory m_dependencySetFactory;
-    protected final SetFactory<Concept> m_conceptSetFactory;
-    protected final SetFactory<ExistentialConcept> m_existentialConceptSetFactory;
-    protected final SetFactory<AtomicAbstractRole> m_atomicAbstractRoleSetFactory;
     protected final ExtensionManager m_extensionManager;
+    protected final LabelManager m_labelManager;
     protected final HyperresolutionManager m_hyperresolutionManager;
     protected final MergingManager m_mergingManager;
     protected final ExistentialExpansionManager m_existentialExpasionManager;
     protected final NominalIntroductionManager m_nominalIntroductionManager;
     protected final DescriptionGraphManager m_descriptionGraphManager;
     protected final boolean m_needsThingExtension;
+    protected final List<List<ExistentialConcept>> m_existentialConceptsBuffers;
     protected BranchingPoint[] m_branchingPoints;
     protected int m_currentBranchingPoint;
     protected boolean m_isCurrentModelDeterministic;
@@ -46,10 +47,8 @@ public final class Tableau implements Serializable {
         m_existentialsExpansionStrategy=existentialsExpansionStrategy;
         m_dlOntology=dlOntology;
         m_dependencySetFactory=new DependencySetFactory();
-        m_conceptSetFactory=new SetFactory<Concept>();
-        m_existentialConceptSetFactory=new SetFactory<ExistentialConcept>();
-        m_atomicAbstractRoleSetFactory=new SetFactory<AtomicAbstractRole>();
         m_extensionManager=new ExtensionManager(this);
+        m_labelManager=new LabelManager(this);
         m_hyperresolutionManager=new HyperresolutionManager(this);
         m_mergingManager=new MergingManager(this);
         m_existentialExpasionManager=new ExistentialExpansionManager(this);
@@ -57,6 +56,7 @@ public final class Tableau implements Serializable {
         m_descriptionGraphManager=new DescriptionGraphManager(this);
         m_existentialsExpansionStrategy.intialize(this);
         m_needsThingExtension=m_hyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING);
+        m_existentialConceptsBuffers=new ArrayList<List<ExistentialConcept>>();
         m_branchingPoints=new BranchingPoint[2];
         m_currentBranchingPoint=-1;
         if (m_tableauMonitor!=null)
@@ -77,17 +77,11 @@ public final class Tableau implements Serializable {
     public DependencySetFactory getDependencySetFactory() {
         return m_dependencySetFactory;
     }
-    public SetFactory<Concept> getConceptSetFactory() {
-        return m_conceptSetFactory;
-    }
-    public SetFactory<ExistentialConcept> getExistentialConceptSetFactory() {
-        return m_existentialConceptSetFactory;
-    }
-    public SetFactory<AtomicAbstractRole> getAtomicAbstractRoleSetFactory() {
-        return m_atomicAbstractRoleSetFactory;
-    }
     public ExtensionManager getExtensionManager() {
         return m_extensionManager;
+    }
+    public LabelManager getLabelManager() {
+        return m_labelManager;
     }
     public HyperresolutionManager getHyperresolutionManager() {
         return m_hyperresolutionManager;
@@ -127,6 +121,7 @@ public final class Tableau implements Serializable {
         m_descriptionGraphManager.clear();
         m_isCurrentModelDeterministic=true;
         m_existentialsExpansionStrategy.clear();
+        m_existentialConceptsBuffers.clear();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.tableauCleared();
     }
@@ -468,6 +463,16 @@ public final class Tableau implements Serializable {
             node=node.getNextTableauNode();
         }
         return null;
+    }
+    protected List<ExistentialConcept> getExistentialConceptsBuffer() {
+        if (m_existentialConceptsBuffers.isEmpty())
+            return new ArrayList<ExistentialConcept>();
+        else
+            return m_existentialConceptsBuffers.remove(m_existentialConceptsBuffers.size()-1);
+    }
+    protected void putExistentialConceptsBuffer(List<ExistentialConcept> buffer) {
+        assert buffer.isEmpty();
+        m_existentialConceptsBuffers.add(buffer);
     }
     protected void checkTableauList() {
         Node node=m_firstTableauNode;

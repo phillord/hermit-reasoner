@@ -20,7 +20,7 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
             blocker.getToParentLabel()==blocked.getToParentLabel();
     }
     public int blockingHashCode(Node node) {
-        return node.getPositiveLabel().hashCode()+node.getParent().getPositiveLabel().hashCode()+node.getFromParentLabel().hashCode()+node.getToParentLabel().hashCode();
+        return node.getPositiveLabelHashCode()+node.getParent().getPositiveLabelHashCode()+node.getFromParentLabelHashCode()+node.getToParentLabelHashCode();
     }
     public boolean canBeBlocker(Node node) {
         return node.getNodeType()==NodeType.TREE_NODE;

@@ -167,13 +167,13 @@ public class HermiT implements Serializable {
         DirectBlockingChecker directBlockingChecker=null;
         switch (m_directBlockingType) {
         case OPTIMAL:
-            directBlockingChecker=(m_dlOntology.hasAtMostRestrictions() && m_dlOntology.hasInverseRoles() ? PairWiseDirectBlockingChecker.INSTANCE : EqualityDirectBlockingChecker.INSTANCE);
+            directBlockingChecker=(m_dlOntology.hasAtMostRestrictions() && m_dlOntology.hasInverseRoles() ? new PairWiseDirectBlockingChecker() : new EqualityDirectBlockingChecker());
             break;
         case EQUALITY:
-            directBlockingChecker=EqualityDirectBlockingChecker.INSTANCE;
+            directBlockingChecker=new EqualityDirectBlockingChecker();
             break;
         case PAIR_WISE:
-            directBlockingChecker=PairWiseDirectBlockingChecker.INSTANCE;
+            directBlockingChecker=new PairWiseDirectBlockingChecker();
             break;
         }
         

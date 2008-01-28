@@ -50,15 +50,16 @@ public abstract class ExtensionTable implements Serializable {
             Node node=(Node)tuple[1];
             m_tableau.m_existentialsExpansionStrategy.assertionAdded((Concept)dlPredicateObject,node);
             if (dlPredicateObject instanceof AtomicNegationConcept) {
-                AtomicConcept negatedConcept=((AtomicNegationConcept)dlPredicateObject).getNegatedAtomicConcept();
-                node.addToNegativeLabel(negatedConcept);
-                if (node.m_positiveLabel.contains(negatedConcept)) {
-                    m_binaryAuxiliaryTuple[0]=negatedConcept;
+                node.addToNegativeLabel();
+                if (node.getPositiveLabelSize()>0) {
+                    m_binaryAuxiliaryTuple[0]=((AtomicNegationConcept)dlPredicateObject).getNegatedAtomicConcept();
                     m_binaryAuxiliaryTuple[1]=node;
-                    DependencySet positiveFactDependencySet=getDependencySet(m_binaryAuxiliaryTuple);
-                    m_extensionManager.setClash(m_tableau.getDependencySetFactory().unionSetsPlusOne(positiveFactDependencySet,dependencySets));
-                    if (m_tableauMonitor!=null)
-                        m_tableauMonitor.clashDetected(tuple,m_binaryAuxiliaryTuple);
+                    if (containsTuple(m_binaryAuxiliaryTuple)) {
+                        DependencySet positiveFactDependencySet=getDependencySet(m_binaryAuxiliaryTuple);
+                        m_extensionManager.setClash(m_tableau.getDependencySetFactory().unionSetsPlusOne(positiveFactDependencySet,dependencySets));
+                        if (m_tableauMonitor!=null)
+                            m_tableauMonitor.clashDetected(tuple,m_binaryAuxiliaryTuple);
+                    }
                 }
             }
             else if (AtomicConcept.NOTHING.equals(dlPredicateObject)) {
@@ -69,13 +70,15 @@ public abstract class ExtensionTable implements Serializable {
             else if (dlPredicateObject instanceof Concept) {
                 Concept concept=(Concept)dlPredicateObject;
                 node.addToPositiveLabel(concept);
-                if (node.m_negativeLabel.contains(concept)) {
+                if (concept instanceof AtomicConcept && node.getNegativeLabelSize()>0) {
                     m_binaryAuxiliaryTuple[0]=AtomicNegationConcept.create((AtomicConcept)concept);
                     m_binaryAuxiliaryTuple[1]=node;
-                    DependencySet negativeFactDependencySet=getDependencySet(m_binaryAuxiliaryTuple);
-                    m_extensionManager.setClash(m_tableau.getDependencySetFactory().unionSetsPlusOne(negativeFactDependencySet,dependencySets));
-                    if (m_tableauMonitor!=null)
-                        m_tableauMonitor.clashDetected(tuple,m_binaryAuxiliaryTuple);
+                    if (containsTuple(m_binaryAuxiliaryTuple)) {
+                        DependencySet negativeFactDependencySet=getDependencySet(m_binaryAuxiliaryTuple);
+                        m_extensionManager.setClash(m_tableau.getDependencySetFactory().unionSetsPlusOne(negativeFactDependencySet,dependencySets));
+                        if (m_tableauMonitor!=null)
+                            m_tableauMonitor.clashDetected(tuple,m_binaryAuxiliaryTuple);
+                    }
                 }
                 if (dlPredicateObject instanceof ExistentialConcept)
                     node.addToUnprocessedExistentials((ExistentialConcept)dlPredicateObject);
@@ -152,10 +155,8 @@ public abstract class ExtensionTable implements Serializable {
         if (dlPredicateObject instanceof Concept) {
             Node node=(Node)tuple[1];
             m_tableau.m_existentialsExpansionStrategy.assertionRemoved((Concept)dlPredicateObject,node);
-            if (dlPredicateObject instanceof AtomicNegationConcept) {
-                AtomicConcept negatedConcept=((AtomicNegationConcept)dlPredicateObject).getNegatedAtomicConcept();
-                node.removeFromNegativeLabel(negatedConcept);
-            }
+            if (dlPredicateObject instanceof AtomicNegationConcept)
+                node.removeFromNegativeLabel();
             else if (dlPredicateObject instanceof Concept) {
                 Concept concept=(Concept)dlPredicateObject;
                 node.removeFromPositiveLabel(concept);

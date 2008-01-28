@@ -16,7 +16,7 @@ public class EqualityDirectBlockingChecker implements DirectBlockingChecker,Seri
             blocker.getPositiveLabel()==blocked.getPositiveLabel();
     }
     public int blockingHashCode(Node node) {
-        return node.getPositiveLabel().hashCode();
+        return node.getPositiveLabelHashCode();
     }
     public boolean canBeBlocker(Node node) {
         return node.getNodeType()==NodeType.TREE_NODE;

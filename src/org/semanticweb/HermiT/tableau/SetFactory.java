@@ -1,6 +1,7 @@
 package org.semanticweb.HermiT.tableau;
 
 import java.util.Set;
+import java.util.List;
 import java.io.Serializable;
 
 /**
@@ -46,6 +47,29 @@ public class SetFactory<E> implements Serializable {
     }
     public Set<E> emptySet() {
         return m_emptySet;
+    }
+    public Set<E> getSet(List<E> elements) {
+        int hashCode=0;
+        for (int index=elements.size()-1;index>=0;--index)
+            hashCode+=elements.get(index).hashCode();
+        int index=getIndexFor(hashCode,m_entries.length);
+        Entry<E> entry=m_entries[index];
+        while (entry!=null) {
+            if (hashCode==entry.m_hashCode && entry.equalsTo(elements))
+                return entry;
+            entry=entry.m_nextEntry;
+        }
+        entry=getEntry(elements.size());
+        entry.initialize(elements,hashCode);
+        entry.m_previousEntry=null;
+        entry.m_nextEntry=m_entries[index];
+        if (entry.m_nextEntry!=null)
+            entry.m_nextEntry.m_previousEntry=entry;
+        m_entries[index]=entry;
+        m_size++;
+        if (m_size>m_resizeThreshold)
+            resize();
+        return entry;
     }
     public Set<E> addElement(Set<E> set,E element) {
         Entry<E> setEntry=(Entry<E>)set;
@@ -127,7 +151,9 @@ public class SetFactory<E> implements Serializable {
         entry.m_previousEntry=null;
     }
     protected Entry<E> getEntry(int size) {
-        int requiredSize=(int)(size/0.6)+1;
+        int requiredSize=(int)Math.ceil(size/0.6+1);
+        while (Math.ceil(requiredSize*0.6)<=size)
+            requiredSize+=2;
         int sizePowerTwo=1;
         int power=0;
         while (sizePowerTwo<requiredSize) {
@@ -166,6 +192,14 @@ public class SetFactory<E> implements Serializable {
             super(false,exactSize);
             m_power=power;
             m_hashCode=0;
+        }
+        public void initialize(List<T> elements,int hashCode) {
+            for (int index=0;index<m_table.length;index++)
+                m_table[index]=null;
+            m_size=0;
+            for (int index=elements.size()-1;index>=0;--index)
+                super.add(elements.get(index));
+            m_hashCode=hashCode;
         }
         public void initializeAndAdd(Entry<T> that,T object) {
             if (m_table.length==that.m_table.length) {
@@ -218,6 +252,14 @@ public class SetFactory<E> implements Serializable {
                 return false;
             if (!containsAll(that))
                 return false;
+            return true;
+        }
+        public boolean equalsTo(List<T> elements) {
+            if (m_size!=elements.size())
+                return false;
+            for (int index=elements.size()-1;index>=0;--index)
+                if (!contains(elements.get(index)))
+                    return false;
             return true;
         }
         public boolean equalsToEntryMinusNonmemberObject(Entry<T> that,T object) {

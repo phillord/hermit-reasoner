@@ -82,12 +82,10 @@ public class Timer extends TableauMonitorAdapter {
         System.out.print("kb    Dependency set factory size: ");
         System.out.print(m_tableau.getDependencySetFactory().sizeInMemory()/1000);
         System.out.println("kb");
-        System.out.print("    Concept set factory: ");
-        System.out.print(m_tableau.getConceptSetFactory().size()/1000);
-        System.out.print("kb    Role set factory:   ");
-        System.out.print(m_tableau.getAtomicAbstractRoleSetFactory().size()/1000);
-        System.out.print("kb    Existential set factory:   ");
-        System.out.print(m_tableau.getExistentialConceptSetFactory().size()/1000);
+        System.out.print("    Concept factory size: ");
+        System.out.print(m_tableau.getLabelManager().getConceptSetFactory().size()/1000);
+        System.out.print("kb    Atomic role factory size: ");
+        System.out.print(m_tableau.getLabelManager().getAtomicAbstractRoleSetFactory().size()/1000);
         System.out.println("kb");
     }
 }

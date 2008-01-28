@@ -45,7 +45,7 @@ public final class ExtensionManager implements Serializable {
             }
         };
         m_extensionTablesByArity.put(new Integer(2),m_binaryExtensionTable);
-        m_ternaryExtensionTable=new ExtensionTableWithTupleIndexes(m_tableau,this,3,!m_tableau.isDeterministic(),new TupleIndex[] { new TupleIndex(new int[] { 1,0,2 }),new TupleIndex(new int[] { 2,0,1 }) }) {
+        m_ternaryExtensionTable=new ExtensionTableWithTupleIndexes(m_tableau,this,3,!m_tableau.isDeterministic(),new TupleIndex[] { new TupleIndex(new int[] { 1,0,2 }),new TupleIndex(new int[] { 2,0,1 }),new TupleIndex(new int[] { 1,2,0 }) }) {
             private static final long serialVersionUID=-731201626401421877L;
 
             public boolean isTupleActive(Object[] tuple) {

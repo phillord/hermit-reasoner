@@ -18,7 +18,7 @@ public class RunHermiT {
         
         HermiT hermit=new HermiT();
 //        hermit.setBlockingCacheType(HermiT.BlockingCacheType.NOT_CACHED);
-//        hermit.setExistentialsType(HermiT.ExistentialsType.INDIVIDUAL_REUSE);
+        hermit.setExistentialsType(HermiT.ExistentialsType.INDIVIDUAL_REUSE);
         hermit.setTimingOn();
 //        hermit.setTimingWithPauseOn();
 //        hermit.setDebuggingOn(false);
@@ -26,8 +26,8 @@ public class RunHermiT {
 
 //        hermit.loadOntology("file:/C:/Temp/full-galen-no-functionality.owl");
 //        hermit.loadOntology("file:/C:/Temp/galen-module1-no-functionality.owl");
-//        hermit.loadOntology("file:/C:/Work/ontologies/GALEN/galen-module1.owl");
-        hermit.loadOntology("file:/C:/Work/ontologies/GALEN/galen-ians-full-undoctored.owl");
+        hermit.loadOntology("file:/C:/Work/ontologies/GALEN/galen-module1.owl");
+//        hermit.loadOntology("file:/C:/Work/ontologies/GALEN/galen-ians-full-undoctored.owl");
 //        hermit.loadOntology("file:/C:/Work/ontologies/GALEN/galen-ians-full-doctored.owl");
 //        hermit.loadOntology("file:/C:/Work/My%20Papers/2007/Representing%20and%20Reasoning%20about%20Structured%20Objects%20in%20OWL/ontologies/galen-ians-full-undoctored-modified.owl");
 //        hermit.loadOntology("file:/C:/Work/My%20Papers/2007/Representing%20and%20Reasoning%20about%20Structured%20Objects%20in%20OWL/ontologies/fma-module2.owl");
