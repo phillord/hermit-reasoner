@@ -24,7 +24,7 @@ public class SetFactory<E> implements Serializable {
         m_size=0;
         m_resizeThreshold=(int)(0.75*m_entries.length);
     }
-    public int size() {
+    public int sizeInMemory() {
         int size=m_unusedEntries.length*4+m_entries.length*4;
         for (int i=m_unusedEntries.length-1;i>=0;--i)
             if (m_unusedEntries[i]!=null)
