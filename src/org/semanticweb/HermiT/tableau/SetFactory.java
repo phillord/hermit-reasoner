@@ -1,5 +1,8 @@
 package org.semanticweb.HermiT.tableau;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.List;
 import java.io.Serializable;
@@ -11,27 +14,35 @@ import java.io.Serializable;
 public class SetFactory<E> implements Serializable {
     private static final long serialVersionUID=7071071962187693657L;
 
-    protected final Entry[] m_unusedEntries;
     protected final Entry<E> m_emptySet;
+    protected Entry[] m_unusedEntries;
     protected Entry[] m_entries;
     protected int m_size;
     protected int m_resizeThreshold;
 
     public SetFactory() {
+        m_emptySet=new Entry<E>(0);
         m_unusedEntries=new Entry[32];
-        m_emptySet=new Entry<E>(0,1);
         m_entries=new Entry[16];
         m_size=0;
         m_resizeThreshold=(int)(0.75*m_entries.length);
     }
     public int sizeInMemory() {
         int size=m_unusedEntries.length*4+m_entries.length*4;
-        for (int i=m_unusedEntries.length-1;i>=0;--i)
-            if (m_unusedEntries[i]!=null)
-                size+=m_unusedEntries[i].m_table.length*4+7*4;
-        for (int i=m_entries.length-1;i>=0;--i)
-            if (m_entries[i]!=null)
-                size+=m_entries[i].m_table.length*4+7*4;
+        for (int i=m_unusedEntries.length-1;i>=0;--i) {
+            Entry entry=m_unusedEntries[i];
+            while (entry!=null) {
+                size+=entry.m_table.length*4+6*4;
+                entry=entry.m_nextEntry;
+            }
+        }
+        for (int i=m_entries.length-1;i>=0;--i) {
+            Entry entry=m_entries[i];
+            while (entry!=null) {
+                size+=entry.m_table.length*4+6*4;
+                entry=entry.m_nextEntry;
+            }
+        }
         return size;
     }
     public void addReference(Set<E> set) {
@@ -61,56 +72,6 @@ public class SetFactory<E> implements Serializable {
         }
         entry=getEntry(elements.size());
         entry.initialize(elements,hashCode);
-        entry.m_previousEntry=null;
-        entry.m_nextEntry=m_entries[index];
-        if (entry.m_nextEntry!=null)
-            entry.m_nextEntry.m_previousEntry=entry;
-        m_entries[index]=entry;
-        m_size++;
-        if (m_size>m_resizeThreshold)
-            resize();
-        return entry;
-    }
-    public Set<E> addElement(Set<E> set,E element) {
-        Entry<E> setEntry=(Entry<E>)set;
-        if (setEntry.contains(element))
-            return setEntry;
-        int hashCode=setEntry.m_hashCode+element.hashCode();
-        int index=getIndexFor(hashCode,m_entries.length);
-        Entry<E> entry=m_entries[index];
-        while (entry!=null) {
-            if (hashCode==entry.m_hashCode && entry.equalsToEntryPlusNonmemberObject(setEntry,element))
-                return entry;
-            entry=entry.m_nextEntry;
-        }
-        entry=getEntry(setEntry.size()+1);
-        entry.initializeAndAdd(setEntry,element);
-        entry.m_previousEntry=null;
-        entry.m_nextEntry=m_entries[index];
-        if (entry.m_nextEntry!=null)
-            entry.m_nextEntry.m_previousEntry=entry;
-        m_entries[index]=entry;
-        m_size++;
-        if (m_size>m_resizeThreshold)
-            resize();
-        return entry;
-    }
-    public Set<E> removeElement(Set<E> set,E element) {
-        Entry<E> setEntry=(Entry<E>)set;
-        if (!setEntry.contains(element))
-            return setEntry;
-        if (setEntry.size()==1)
-            return m_emptySet;
-        int hashCode=setEntry.m_hashCode-element.hashCode();
-        int index=getIndexFor(hashCode,m_entries.length);
-        Entry<E> entry=m_entries[index];
-        while (entry!=null) {
-            if (hashCode==entry.m_hashCode && entry.equalsToEntryMinusNonmemberObject(setEntry,element))
-                return entry;
-            entry=entry.m_nextEntry;
-        }
-        entry=getEntry(setEntry.size()-1);
-        entry.initializeAndRemove(setEntry,element);
         entry.m_previousEntry=null;
         entry.m_nextEntry=m_entries[index];
         if (entry.m_nextEntry!=null)
@@ -151,129 +112,129 @@ public class SetFactory<E> implements Serializable {
         entry.m_previousEntry=null;
     }
     protected Entry<E> getEntry(int size) {
-        int requiredSize=(int)Math.ceil(size/0.6+1);
-        while (Math.ceil(requiredSize*0.6)<=size)
-            requiredSize+=2;
-        int sizePowerTwo=1;
-        int power=0;
-        while (sizePowerTwo<requiredSize) {
-            sizePowerTwo*=2;
-            power++;
+        if (size>=m_unusedEntries.length) {
+            int newSize=m_unusedEntries.length;
+            while (newSize<=size)
+                newSize=newSize*3/2;
+            Entry[] newUnusedEntries=new Entry[newSize];
+            System.arraycopy(m_unusedEntries,0,newUnusedEntries,0,m_unusedEntries.length);
+            m_unusedEntries=newUnusedEntries;
         }
-        Entry<E> entry=m_unusedEntries[power];
+        Entry<E> entry=m_unusedEntries[size];
         if (entry==null)
-            return new Entry<E>(power,sizePowerTwo);
+            return new Entry<E>(size);
         else {
-            m_unusedEntries[power]=entry.m_nextEntry;
+            m_unusedEntries[size]=entry.m_nextEntry;
             entry.m_nextEntry=null;
             return entry;
         }
     }
     protected void leaveEntry(Entry<E> entry) {
-        entry.m_nextEntry=m_unusedEntries[entry.m_power];
+        entry.m_nextEntry=m_unusedEntries[entry.size()];
         entry.m_previousEntry=null;
-        m_unusedEntries[entry.m_power]=entry;
+        m_unusedEntries[entry.size()]=entry;
     }
     protected static int getIndexFor(int hashCode,int tableLength) {
         return hashCode & (tableLength-1);
     }
     
     @SuppressWarnings("unchecked")
-    protected static class Entry<T> extends ProbingHashSet<T> {
+    protected static class Entry<T> implements Set<T> {
         private static final long serialVersionUID=-3850593656120645350L;
 
-        protected final int m_power;
+        protected T[] m_table;
         protected int m_hashCode;
         protected Entry<T> m_previousEntry;
         protected Entry<T> m_nextEntry;
         protected int m_referenceCount;
 
-        public Entry(int power,int exactSize) {
-            super(false,exactSize);
-            m_power=power;
+        public Entry(int size) {
             m_hashCode=0;
+            m_table=(T[])new Object[size];
         }
         public void initialize(List<T> elements,int hashCode) {
-            for (int index=0;index<m_table.length;index++)
-                m_table[index]=null;
-            m_size=0;
-            for (int index=elements.size()-1;index>=0;--index)
-                super.add(elements.get(index));
+            elements.toArray(m_table);
             m_hashCode=hashCode;
-        }
-        public void initializeAndAdd(Entry<T> that,T object) {
-            if (m_table.length==that.m_table.length) {
-                System.arraycopy(that.m_table,0,m_table,0,m_table.length);
-                m_size=that.m_size;
-            }
-            else {
-                for (int index=0;index<m_table.length;index++)
-                    m_table[index]=null;
-                m_size=0;
-                for (int index=0;index<that.m_table.length;index++) {
-                    Object element=that.m_table[index];
-                    if (element!=null)
-                        super.add((T)element);
-                }
-            }
-            super.add(object);
-            m_hashCode=that.m_hashCode+object.hashCode();
-        }
-        public void initializeAndRemove(Entry<T> that,T object) {
-            for (int index=0;index<m_table.length;index++)
-                m_table[index]=null;
-            m_size=0;
-            for (int index=0;index<that.m_table.length;index++) {
-                Object element=that.m_table[index];
-                if (element!=null && !element.equals(object))
-                    super.add((T)element);
-            }
-            m_hashCode=that.m_hashCode-object.hashCode();
         }
         public void clear() {
             throw new UnsupportedOperationException();
         }
-        protected void resize() {
-            throw new IllegalStateException();
-        }
         public boolean add(T object) {
             throw new UnsupportedOperationException();
         }
-        public boolean equals(Object that) {
-            return this==that;
+        public boolean equalsTo(List<T> elements) {
+            if (m_table.length!=elements.size())
+                return false;
+            for (int index=m_table.length-1;index>=0;--index)
+                if (!elements.contains(m_table[index]))
+                    return false;
+            return true;
+        }
+        public boolean addAll(Collection<? extends T> c) {
+            throw new UnsupportedOperationException();
+        }
+        public boolean contains(Object o) {
+            for (int index=0;index<m_table.length;index++)
+                if (!m_table[index].equals(o))
+                    return false;
+            return true;
+        }
+        public boolean containsAll(Collection<?> c) {
+            for (Object object : c)
+                if (!contains(object))
+                    return false;
+            return true;
+        }
+        public boolean isEmpty() {
+            return m_table.length==0;
+        }
+        public Iterator<T> iterator() {
+            return new EntryIterator();
+        }
+        public boolean remove(Object o) {
+            throw new UnsupportedOperationException();
+        }
+        public boolean removeAll(Collection<?> c) {
+            throw new UnsupportedOperationException();
+        }
+        public boolean retainAll(Collection<?> c) {
+            throw new UnsupportedOperationException();
+        }
+        public int size() {
+            return m_table.length;
+        }
+        public Object[] toArray() {
+            return m_table.clone();
+        }
+        public <E> E[] toArray(E[] a) {
+            System.arraycopy(m_table,0,a,0,m_table.length);
+            return a;
         }
         public int hashCode() {
             return m_hashCode;
         }
-        public boolean equalsToEntryPlusNonmemberObject(Entry<T> that,T object) {
-            if (m_size!=that.size()+1)
-                return false;
-            if (!contains(object))
-                return false;
-            if (!containsAll(that))
-                return false;
-            return true;
+        public boolean equals(Object that) {
+            return this==that;
         }
-        public boolean equalsTo(List<T> elements) {
-            if (m_size!=elements.size())
-                return false;
-            for (int index=elements.size()-1;index>=0;--index)
-                if (!contains(elements.get(index)))
-                    return false;
-            return true;
-        }
-        public boolean equalsToEntryMinusNonmemberObject(Entry<T> that,T object) {
-            if (m_size!=that.size()-1)
-                return false;
-            if (contains(object))
-                return false;
-            Object[] thatTable=((ProbingHashSet<?>)that).m_table;
-            for (int index=0;index<thatTable.length;index++) {
-                Object thatElement=thatTable[index];
-                if (thatElement!=null && !thatElement.equals(object) && !contains(thatElement))
-                    return false;
+        
+        protected class EntryIterator implements Iterator<T> {
+            protected int m_currentIndex;
+
+            public EntryIterator() {
+                m_currentIndex=0;
             }
-            return true;
+            public boolean hasNext() {
+                return m_currentIndex<m_table.length;
+            }
+            public T next() {
+                if (m_currentIndex>=m_table.length)
+                    throw new NoSuchElementException();
+                return m_table[m_currentIndex++];
+            }
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+            
         }
     }
 }
