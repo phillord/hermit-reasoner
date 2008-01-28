@@ -29,11 +29,11 @@ public class DisjunctiveHeadTupleConsumer implements TupleConsumer,Serializable 
                 m_copyTupleToArguments[number++]=indices[j];
         }
     }
-    public void consumeTuple(Object[] tuple,DependencySet[] dependencySets) {
+    public void consumeTuple(Object[] tuple,DependencySet dependencySet) {
         Node[] arguments=new Node[m_copyTupleToArguments.length];
         for (int argumentIndex=m_copyTupleToArguments.length-1;argumentIndex>=0;--argumentIndex)
             arguments[argumentIndex]=(Node)tuple[m_copyTupleToArguments[argumentIndex]];
-        GroundDisjunction groundDisjunction=new GroundDisjunction(m_tableau,m_headDLPredicates,m_disjunctStart,arguments,m_tableau.m_dependencySetFactory.unionSets(dependencySets));
+        GroundDisjunction groundDisjunction=new GroundDisjunction(m_tableau,m_headDLPredicates,m_disjunctStart,arguments,m_tableau.m_dependencySetFactory.getPermanent(dependencySet));
         if (!groundDisjunction.isSatisfied(m_tableau))
             m_tableau.addGroundDisjunction(groundDisjunction);
     }

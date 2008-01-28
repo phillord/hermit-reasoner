@@ -468,7 +468,7 @@ public class NIRuleTest extends AbstractHermiTTest {
         DependencySet control=m_tableau.getDependencySetFactory().emptySet();
         for (int branchingPoint : requiredBranchingPoints)
             control=m_tableau.getDependencySetFactory().addBranchingPoint(control,branchingPoint);
-        assertTrue(dependencySet.isSameAs(control));
+        assertSame(dependencySet,control);
     }
     protected Node getRootNodeFor(Node rootNode,AtMostAbstractRoleGuard atMostAbstractRoleGuard,int index) {
         int tupleIndex=m_manager.m_newRootNodesIndex.getTupleIndex(new Object[] { rootNode,atMostAbstractRoleGuard,index });

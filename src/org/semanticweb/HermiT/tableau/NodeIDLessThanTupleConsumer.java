@@ -14,10 +14,10 @@ public class NodeIDLessThanTupleConsumer implements TupleConsumer,Serializable {
         m_bindingIndexSmaller=bindingIndexSmaller;
         m_bindingIndexLarger=bindingIndexLarger;
     }
-    public void consumeTuple(Object[] tuple,DependencySet[] dependencySets) {
+    public void consumeTuple(Object[] tuple,DependencySet dependencySet) {
         Node smaller=(Node)tuple[m_bindingIndexSmaller];
         Node larger=(Node)tuple[m_bindingIndexLarger];
         if (smaller.getNodeID()<larger.getNodeID())
-            m_tupleConsumer.consumeTuple(tuple,dependencySets);
+            m_tupleConsumer.consumeTuple(tuple,dependencySet);
     }
 }

@@ -37,7 +37,7 @@ public final class Node implements Serializable {
     protected Node m_nextTableauNode;
     protected Node m_previousMergedOrPrunedNode;
     protected Node m_mergedInto;
-    protected DependencySet m_mergedIntoDependencySet;
+    protected PermanentDependencySet m_mergedIntoDependencySet;
     protected Node m_blocker;
     protected boolean m_directlyBlocked;
     protected Object m_blockingObject;
@@ -211,13 +211,14 @@ public final class Node implements Serializable {
             result=result.m_mergedInto;
         return result;
     }
-    public DependencySet addCacnonicalNodeDependencySet(DependencySet dependencySet) {
-        Node result=this;
-        while (result.m_mergedInto!=null) {
-            dependencySet=m_tableau.m_dependencySetFactory.unionWith(dependencySet,result.m_mergedIntoDependencySet);
-            result=result.m_mergedInto;
+    public PermanentDependencySet addCacnonicalNodeDependencySet(DependencySet dependencySet) {
+        PermanentDependencySet result=m_tableau.m_dependencySetFactory.getPermanent(dependencySet);
+        Node node=this;
+        while (node.m_mergedInto!=null) {
+            result=m_tableau.m_dependencySetFactory.unionWith(result,node.m_mergedIntoDependencySet);
+            node=node.m_mergedInto;
         }
-        return dependencySet;
+        return result;
     }
     public Set<Concept> getPositiveLabel() {
         if (m_positiveLabel==null) {

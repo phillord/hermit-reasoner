@@ -6,7 +6,6 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.io.Serializable;
 
 import org.semanticweb.HermiT.model.*;
@@ -41,8 +40,7 @@ public class HyperresolutionManager implements Serializable {
         }
     }
     protected void addTupleConsumer(DLPredicate deltaDLPredicate,TupleConsumer tupleConsumer,DLClause dlClause) {
-        CompiledDLClauseInfo nextTupleConsumer=new CompiledDLClauseInfo(tupleConsumer,dlClause.getBodyLength(),m_tupleConsumersByDeltaPredicate.get(deltaDLPredicate));
-        Arrays.fill(nextTupleConsumer.m_dependencySets,m_tableau.m_dependencySetFactory.emptySet());
+        CompiledDLClauseInfo nextTupleConsumer=new CompiledDLClauseInfo(tupleConsumer,m_tupleConsumersByDeltaPredicate.get(deltaDLPredicate));
         m_tupleConsumersByDeltaPredicate.put(deltaDLPredicate,nextTupleConsumer);
     }
     public boolean evaluate() {
@@ -63,8 +61,7 @@ public class HyperresolutionManager implements Serializable {
             DependencySet dependencySet=retrieval.getDependencySet();
             CompiledDLClauseInfo compiledDLClauseInfo=m_tupleConsumersByDeltaPredicate.get(tupleBuffer[0]);
             while (compiledDLClauseInfo!=null) {
-                compiledDLClauseInfo.m_dependencySets[0]=dependencySet;
-                compiledDLClauseInfo.m_tupleConsumer.consumeTuple(tupleBuffer,compiledDLClauseInfo.m_dependencySets);
+                compiledDLClauseInfo.m_tupleConsumer.consumeTuple(tupleBuffer,dependencySet);
                 compiledDLClauseInfo=compiledDLClauseInfo.m_next;
             }
             retrieval.next();
@@ -82,12 +79,10 @@ public class HyperresolutionManager implements Serializable {
         private static final long serialVersionUID=1927165256091855708L;
 
         protected final TupleConsumer m_tupleConsumer;
-        protected final DependencySet[] m_dependencySets;
         protected final CompiledDLClauseInfo m_next;
         
-        public CompiledDLClauseInfo(TupleConsumer tupleConsumer,int numberOfAtoms,CompiledDLClauseInfo next) {
+        public CompiledDLClauseInfo(TupleConsumer tupleConsumer,CompiledDLClauseInfo next) {
             m_tupleConsumer=tupleConsumer;
-            m_dependencySets=new DependencySet[numberOfAtoms];
             m_next=next;
         }
     }

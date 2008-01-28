@@ -18,7 +18,7 @@ public class DisjunctionBranchingPoint extends BranchingPoint {
         assert m_currentDisjunctIndex<m_groundDisjunction.getNumberOfDisjuncts();
         if (tableau.m_tableauMonitor!=null)
             tableau.m_tableauMonitor.disjunctProcessingStarted(m_groundDisjunction,m_currentDisjunctIndex);
-        DependencySet dependencySet=clashDependencySet;
+        PermanentDependencySet dependencySet=tableau.getDependencySetFactory().getPermanent(clashDependencySet);
         if (m_currentDisjunctIndex==m_groundDisjunction.getNumberOfDisjuncts()-1)
             dependencySet=tableau.getDependencySetFactory().removeBranchingPoint(dependencySet,m_level);
         for (int previousDisjunctIndex=0;previousDisjunctIndex<m_currentDisjunctIndex;previousDisjunctIndex++) {

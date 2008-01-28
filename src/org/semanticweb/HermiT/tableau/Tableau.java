@@ -158,7 +158,7 @@ public final class Tableau implements Serializable {
                     m_tableauMonitor.processGroundDisjunctionStarted(groundDisjunction);
                 m_firstUnprocessedGroundDisjunction=groundDisjunction.m_previousGroundDisjunction;
                 if (!groundDisjunction.isSatisfied(this)) {
-                    DependencySet dependencySet=groundDisjunction.getDependencySet();
+                    PermanentDependencySet dependencySet=groundDisjunction.getDependencySet();
                     if (groundDisjunction.getNumberOfDisjuncts()>1) {
                         BranchingPoint branchingPoint=new DisjunctionBranchingPoint(this,groundDisjunction);
                         pushBranchingPoint(branchingPoint);
@@ -388,7 +388,7 @@ public final class Tableau implements Serializable {
         assert node.m_previousMergedOrPrunedNode==null;
         m_existentialsExpansionStrategy.nodeStatusChanged(node);
         node.m_mergedInto=mergeInto;
-        node.m_mergedIntoDependencySet=dependencySet;
+        node.m_mergedIntoDependencySet=m_dependencySetFactory.getPermanent(dependencySet);
         m_dependencySetFactory.addUsage(node.m_mergedIntoDependencySet);
         node.m_nodeState=NodeState.MERGED;
         node.m_previousMergedOrPrunedNode=m_lastMergedOrPrunedNode;

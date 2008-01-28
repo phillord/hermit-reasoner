@@ -10,7 +10,7 @@ public class DependencySetTest extends AbstractHermiTTest {
         m_factory=new DependencySetFactory(); 
     }
     public void testDependencySet1() {
-        DependencySet set=m_factory.emptySet();
+        PermanentDependencySet set=m_factory.emptySet();
         assertDSEquals(set);
         assertTrue(set.isEmpty());
         set=m_factory.addBranchingPoint(set,32);
@@ -18,9 +18,9 @@ public class DependencySetTest extends AbstractHermiTTest {
         assertDSEquals(set,32);
         set=m_factory.addBranchingPoint(set,0);
         assertDSEquals(set,0,32);
-        DependencySet set2=m_factory.addBranchingPoint(m_factory.emptySet(),0);
-        assertFalse(set.isSameAs(set2));
-        assertTrue(set.isSameAs(m_factory.addBranchingPoint(set2,32)));
+        PermanentDependencySet set2=m_factory.addBranchingPoint(m_factory.emptySet(),0);
+        assertTrue(set!=set2);
+        assertSame(set,m_factory.addBranchingPoint(set2,32));
         set=m_factory.unionWith(set,m_factory.addBranchingPoint(m_factory.addBranchingPoint(set2,15),17));
         assertDSEquals(set,0,15,17,32);
         assertSame(set,m_factory.unionWith(set,m_factory.emptySet()));
@@ -34,49 +34,53 @@ public class DependencySetTest extends AbstractHermiTTest {
         assertDSEquals(set,0);
     }
     public void testDependencySet2() {
-        DependencySet set1=m_factory.emptySet();
+        PermanentDependencySet set1=m_factory.emptySet();
         set1=m_factory.addBranchingPoint(set1,10);
         set1=m_factory.addBranchingPoint(set1,3);
         set1=m_factory.addBranchingPoint(set1,1);
         set1=m_factory.addBranchingPoint(set1,14);
         assertDSEquals(set1,1,3,10,14);
         
-        DependencySet set2=m_factory.emptySet();
+        PermanentDependencySet set2=m_factory.emptySet();
         set2=m_factory.addBranchingPoint(set2,15);
         set2=m_factory.addBranchingPoint(set2,10);
         set2=m_factory.addBranchingPoint(set2,1);
         set2=m_factory.addBranchingPoint(set2,17);
         assertDSEquals(set2,1,10,15,17);
         
-        DependencySet set3=m_factory.unionWith(set1,set2);
+        PermanentDependencySet set3=m_factory.unionWith(set1,set2);
         assertDSEquals(set3,1,3,10,14,15,17);
     }
     public void testDependencySet3() {
-        DependencySet set1=m_factory.emptySet();
+        PermanentDependencySet set1=m_factory.emptySet();
         set1=m_factory.addBranchingPoint(set1,10);
         set1=m_factory.addBranchingPoint(set1,3);
         set1=m_factory.addBranchingPoint(set1,1);
         assertDSEquals(set1,1,3,10);
 
-        DependencySet set2=m_factory.emptySet();
+        PermanentDependencySet set2=m_factory.emptySet();
         set2=m_factory.addBranchingPoint(set2,14);
         set2=m_factory.addBranchingPoint(set2,3);
         set2=m_factory.addBranchingPoint(set2,1);
         set2=m_factory.addBranchingPoint(set2,17);
         assertDSEquals(set2,1,3,14,17);
 
-        DependencySet set3=m_factory.emptySet();
+        PermanentDependencySet set3=m_factory.emptySet();
         set3=m_factory.addBranchingPoint(set3,14);
         set3=m_factory.addBranchingPoint(set3,3);
         set3=m_factory.addBranchingPoint(set3,2);
         set3=m_factory.addBranchingPoint(set3,18);
         assertDSEquals(set3,2,3,14,18);
         
-        DependencySet set4=m_factory.unionSets(new DependencySet[] { set1,set2,set3 });
+        UnionDependencySet union=new UnionDependencySet(3);
+        union.getConstituents()[0]=set1;
+        union.getConstituents()[1]=set2;
+        union.getConstituents()[2]=set3;
+        PermanentDependencySet set4=m_factory.getPermanent(union);
         assertDSEquals(set4,1,2,3,10,14,17,18);
     }
-    protected static void assertDSEquals(DependencySet dependencySet,int... expectedSortedMembers) {
-        DependencySet checkSet=dependencySet;
+    protected static void assertDSEquals(PermanentDependencySet dependencySet,int... expectedSortedMembers) {
+        PermanentDependencySet checkSet=dependencySet;
         for (int index=expectedSortedMembers.length-1;index>=0;--index) {
             int expectedBranchingPoint=expectedSortedMembers[index];
             if (expectedBranchingPoint!=checkSet.m_branchingPoint) {

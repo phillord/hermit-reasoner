@@ -191,7 +191,7 @@ public class DLClauseCompiler {
                 ExtensionTable extensionTable=m_tableau.getExtensionManager().getExtensionTable(bodyAtom.getArity()+1);
                 ExtensionTable.Retrieval extensionTableRetrieval=extensionTable.createRetrieval(bindingPattern,extensionViews[bodyIndex]);
                 extensionTableRetrieval.getBindingsBuffer()[0]=bodyAtomDLPredicate;
-                tupleConsumer=new NestedLoopTupleConsumer(m_tableau,tupleConsumer,extensionTableRetrieval,copyInputToOutput,copyInputToBindings,checkEqualUnboundInRetrieval,copyRetrievedToOutput,bodyIndex);
+                tupleConsumer=new NestedLoopTupleConsumer(m_tableau,tupleConsumer,extensionTableRetrieval,copyInputToOutput,copyInputToBindings,checkEqualUnboundInRetrieval,copyRetrievedToOutput);
                 matchedTuples[bodyIndex]=extensionTableRetrieval.getTupleBuffer();
             }
             // We now swap the tuple arrays and go to the previous atom
@@ -260,9 +260,9 @@ public class DLClauseCompiler {
             m_dlClause=dlClause;
             m_matchedTuples=matchedTuples;
         }
-        public void consumeTuple(Object[] tuple,DependencySet[] dependencySets) {
+        public void consumeTuple(Object[] tuple,DependencySet dependencySet) {
             m_tableauMonitor.dlClauseMatchedStarted(m_dlClause,m_matchedTuples);
-            m_headConsumer.consumeTuple(tuple,dependencySets);
+            m_headConsumer.consumeTuple(tuple,dependencySet);
             m_tableauMonitor.dlClauseMatchedFinished(m_dlClause,m_matchedTuples);
         }
     }

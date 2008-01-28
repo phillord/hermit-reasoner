@@ -12,10 +12,10 @@ public class NestedLoopTupleConsumer implements TupleConsumer,Serializable {
     protected final int[][] m_copyInputToBindings;
     protected final int[][] m_checkEqualUnboundInRetrieval;
     protected final int[][] m_copyRetrievedToOutput;
-    protected final int m_dependencySetIndex;
     protected final Object[] m_outputTuple;
+    protected final UnionDependencySet m_binaryUnionDependencySet;
     
-    public NestedLoopTupleConsumer(Tableau tableau,TupleConsumer tupleConsumer,ExtensionTable.Retrieval extensionTableRetrieval,int[][] copyInputToOutput,int[][] copyInputToBindings,int[][] checkEqualUnboundInRetrieval,int[][] copyRetrievedToOutput,int dependencySetIndex) {
+    public NestedLoopTupleConsumer(Tableau tableau,TupleConsumer tupleConsumer,ExtensionTable.Retrieval extensionTableRetrieval,int[][] copyInputToOutput,int[][] copyInputToBindings,int[][] checkEqualUnboundInRetrieval,int[][] copyRetrievedToOutput) {
         m_tableau=tableau;
         m_tupleConsumer=tupleConsumer;
         m_extensionTableRetrieval=extensionTableRetrieval;
@@ -23,10 +23,10 @@ public class NestedLoopTupleConsumer implements TupleConsumer,Serializable {
         m_copyInputToBindings=copyInputToBindings;
         m_checkEqualUnboundInRetrieval=checkEqualUnboundInRetrieval;
         m_copyRetrievedToOutput=copyRetrievedToOutput;
-        m_dependencySetIndex=dependencySetIndex;
         m_outputTuple=new Object[m_copyInputToOutput.length+m_copyRetrievedToOutput.length];
+        m_binaryUnionDependencySet=new UnionDependencySet(2);
     }
-    public void consumeTuple(Object[] tuple,DependencySet[] dependencySets) {
+    public void consumeTuple(Object[] tuple,DependencySet dependencySet) {
         for (int index=m_copyInputToOutput.length-1;index>=0;--index)
             m_outputTuple[m_copyInputToOutput[index][1]]=tuple[m_copyInputToOutput[index][0]];
         Object[] bindingsBuffer=m_extensionTableRetrieval.getBindingsBuffer();
@@ -46,8 +46,9 @@ public class NestedLoopTupleConsumer implements TupleConsumer,Serializable {
             if (tupleCorrect) {
                 for (int index=m_copyRetrievedToOutput.length-1;index>=0;--index)
                     m_outputTuple[m_copyRetrievedToOutput[index][1]]=tupleBuffer[m_copyRetrievedToOutput[index][0]];
-                dependencySets[m_dependencySetIndex]=m_extensionTableRetrieval.getDependencySet();
-                m_tupleConsumer.consumeTuple(m_outputTuple,dependencySets);
+                m_binaryUnionDependencySet.m_dependencySets[0]=m_extensionTableRetrieval.getDependencySet();
+                m_binaryUnionDependencySet.m_dependencySets[1]=dependencySet;
+                m_tupleConsumer.consumeTuple(m_outputTuple,m_binaryUnionDependencySet);
                 if (m_copyRetrievedToOutput.length==0)
                     break;
             }

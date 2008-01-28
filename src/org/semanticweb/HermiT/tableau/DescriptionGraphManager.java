@@ -21,6 +21,7 @@ public final class DescriptionGraphManager implements Serializable {
     protected final List<Node> m_newNodes;
     protected final Map<DescriptionGraph,Object[]> m_descriptionGraphTuples;
     protected final Map<ExistsDescriptionGraph,ExtensionTable.Retrieval> m_cachedRetrievals;
+    protected final UnionDependencySet m_binaryUnionDependencySet;
     
     public DescriptionGraphManager(Tableau tableau) {
         m_tableau=tableau;
@@ -33,6 +34,7 @@ public final class DescriptionGraphManager implements Serializable {
         for (DescriptionGraph descriptionGraph : m_tableau.getDLOntology().getAllDescriptionGraphs())
             m_descriptionGraphTuples.put(descriptionGraph,new Object[descriptionGraph.getNumberOfVertices()+1]);
         m_cachedRetrievals=new HashMap<ExistsDescriptionGraph,ExtensionTable.Retrieval>();
+        m_binaryUnionDependencySet=new UnionDependencySet(2);
     }
     public void clear() {
         m_cachedRetrievals.clear();
@@ -60,7 +62,9 @@ public final class DescriptionGraphManager implements Serializable {
                                     DependencySet firstSet=graphExtensionTable.getDependencySet(firstValidOccurrence.m_tupleIndex);
                                     DependencySet secondSet=graphExtensionTable.getDependencySet(occurrence.m_tupleIndex);
                                     if (firstValidOccurrence.m_position!=occurrence.m_position) {
-                                        m_extensionManager.setClash(firstSet,secondSet);
+                                        m_binaryUnionDependencySet.m_dependencySets[0]=firstSet;
+                                        m_binaryUnionDependencySet.m_dependencySets[1]=secondSet;
+                                        m_extensionManager.setClash(m_binaryUnionDependencySet);
                                         if (m_tableauMonitor!=null) {
                                             Object[] graph1=new Object[descriptionGraph.getArity()+1];
                                             graphExtensionTable.retrieveTuple(graph1,firstValidOccurrence.m_tupleIndex);
@@ -75,15 +79,17 @@ public final class DescriptionGraphManager implements Serializable {
                                             Node nodeFirst=(Node)graphExtensionTable.getTupleObject(firstValidOccurrence.m_tupleIndex,index);
                                             Node nodeSecond=(Node)graphExtensionTable.getTupleObject(tupleIndex,index);
                                             if (nodeFirst!=nodeSecond) {
+                                                m_binaryUnionDependencySet.m_dependencySets[0]=firstSet;
+                                                m_binaryUnionDependencySet.m_dependencySets[1]=secondSet;
                                                 if (m_tableauMonitor==null)
-                                                    m_mergingManager.mergeNodes(nodeFirst,nodeSecond,firstSet,secondSet);
+                                                    m_mergingManager.mergeNodes(nodeFirst,nodeSecond,m_binaryUnionDependencySet);
                                                 else {
                                                     Object[] graph1=new Object[descriptionGraph.getArity()+1];
                                                     graphExtensionTable.retrieveTuple(graph1,firstValidOccurrence.m_tupleIndex);
                                                     Object[] graph2=new Object[descriptionGraph.getArity()+1];
                                                     graphExtensionTable.retrieveTuple(graph2,tupleIndex);
                                                     m_tableauMonitor.mergeGraphsStarted(graph1,graph2,index);
-                                                    m_mergingManager.mergeNodes(nodeFirst,nodeSecond,firstSet,secondSet);
+                                                    m_mergingManager.mergeNodes(nodeFirst,nodeSecond,m_binaryUnionDependencySet);
                                                     m_tableauMonitor.mergeGraphsFinished(graph1,graph2,index);
                                                 }
                                                 return true;

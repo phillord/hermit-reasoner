@@ -21,7 +21,7 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
             size+=m_tupleIndexes[i].sizeInMemoy();
         return size;
     }
-    public boolean addTuple(Object[] tuple,DependencySet[] dependencySets) {
+    public boolean addTuple(Object[] tuple,DependencySet dependencySet) {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.addFactStarted(tuple);
         if (isTupleActive(tuple) && (m_tableau.m_needsThingExtension || !AtomicConcept.THING.equals(tuple[0]))) {
@@ -30,11 +30,11 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
                 for (int index=1;index<m_tupleIndexes.length;index++)
                     m_tupleIndexes[index].addTuple(tuple,firstFreeTupleIndex);
                 m_tupleTable.addTuple(tuple);
-                m_dependencySetManager.setDependencySet(firstFreeTupleIndex,dependencySets);
+                m_dependencySetManager.setDependencySet(firstFreeTupleIndex,dependencySet);
                 m_afterDeltaNewTupleIndex=m_tupleTable.getFirstFreeTupleIndex();
                 if (m_tableauMonitor!=null)
                     m_tableauMonitor.addFactFinished(tuple,true);
-                postAdd(tuple,dependencySets,firstFreeTupleIndex);
+                postAdd(tuple,dependencySet,firstFreeTupleIndex);
                 return true;
             }
         }
@@ -46,7 +46,7 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
         int tupleIndex=m_tupleIndexes[0].getTupleIndex(tuple);
         return tupleIndex!=-1 && isTupleActive(tupleIndex);
     }
-    public DependencySet getDependencySet(Object[] tuple) {
+    public PermanentDependencySet getDependencySet(Object[] tuple) {
         int tupleIndex=m_tupleIndexes[0].getTupleIndex(tuple);
         if (tupleIndex==-1)
             return null;

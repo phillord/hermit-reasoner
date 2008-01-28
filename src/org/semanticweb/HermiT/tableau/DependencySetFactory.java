@@ -8,18 +8,20 @@ public final class DependencySetFactory implements Serializable {
     private static final long serialVersionUID=8632867055646817311L;
 
     protected final IntegerArray m_mergeArray;
-    protected final List<DependencySet> m_mergeSets;
-    protected final DependencySet m_emptySet;
-    protected DependencySet m_firstUnusedSet;
-    protected DependencySet m_firstDestroyedSet;
-    protected DependencySet[] m_entries;
+    protected final List<PermanentDependencySet> m_mergeSets;
+    protected final List<UnionDependencySet> m_unprocessedSets;
+    protected final PermanentDependencySet m_emptySet;
+    protected PermanentDependencySet m_firstUnusedSet;
+    protected PermanentDependencySet m_firstDestroyedSet;
+    protected PermanentDependencySet[] m_entries;
     protected int m_size;
     protected int m_resizeThreshold;
 
     public DependencySetFactory() {
         m_mergeArray=new IntegerArray();
-        m_mergeSets=new ArrayList<DependencySet>();
-        m_emptySet=new DependencySet();
+        m_mergeSets=new ArrayList<PermanentDependencySet>();
+        m_unprocessedSets=new ArrayList<UnionDependencySet>();
+        m_emptySet=new PermanentDependencySet();
         clear();
     }
     public int sizeInMemory() {
@@ -28,13 +30,14 @@ public final class DependencySetFactory implements Serializable {
     public void clear() {
         m_mergeArray.clear();
         m_mergeSets.clear();
+        m_unprocessedSets.clear();
         m_emptySet.m_nextEntry=null;
         m_emptySet.m_usageCounter=1;
         m_emptySet.m_previousUnusedSet=null;
         m_emptySet.m_nextUnusedSet=null;
         m_firstUnusedSet=null;
         m_firstDestroyedSet=null;
-        m_entries=new DependencySet[16];
+        m_entries=new PermanentDependencySet[16];
         m_size=0;
         m_resizeThreshold=(int)(m_entries.length*0.75);
     }
@@ -42,29 +45,30 @@ public final class DependencySetFactory implements Serializable {
         while (m_firstUnusedSet!=null)
             destroyDependencySet(m_firstUnusedSet);
     }
-    public DependencySet emptySet() {
+    public PermanentDependencySet emptySet() {
         return m_emptySet;
     }
-    public void addUsage(DependencySet dependencySet) {
+    public void addUsage(PermanentDependencySet dependencySet) {
         incrementUsageCounter(dependencySet);
     }
-    public void removeUsage(DependencySet dependencySet) {
+    public void removeUsage(PermanentDependencySet dependencySet) {
         decrementUsageCounter(dependencySet);
     }
-    public DependencySet addBranchingPoint(DependencySet dependencySet,int branchingPoint) {
-        if (branchingPoint>dependencySet.m_branchingPoint)
-            return getDepdendencySet(dependencySet,branchingPoint);
-        else if (branchingPoint==dependencySet.m_branchingPoint)
-            return dependencySet;
+    public PermanentDependencySet addBranchingPoint(DependencySet dependencySet,int branchingPoint) {
+        PermanentDependencySet permanentDependencySet=getPermanent(dependencySet);
+        if (branchingPoint>permanentDependencySet.m_branchingPoint)
+            return getDepdendencySet(permanentDependencySet,branchingPoint);
+        else if (branchingPoint==permanentDependencySet.m_branchingPoint)
+            return permanentDependencySet;
         else {
             m_mergeArray.clear();
-            DependencySet rest=dependencySet;
+            PermanentDependencySet rest=permanentDependencySet;
             while (branchingPoint<rest.m_branchingPoint) {
                 m_mergeArray.add(rest.m_branchingPoint);
                 rest=rest.m_rest;
             }
             if (branchingPoint==rest.m_branchingPoint)
-                return dependencySet;
+                return permanentDependencySet;
             else {
                 rest=getDepdendencySet(rest,branchingPoint);
                 for (int index=m_mergeArray.size()-1;index>=0;--index)
@@ -73,9 +77,9 @@ public final class DependencySetFactory implements Serializable {
             }
         }
     }
-    protected DependencySet getDepdendencySet(DependencySet rest,int branchingPoint) {
+    protected PermanentDependencySet getDepdendencySet(PermanentDependencySet rest,int branchingPoint) {
         int index=(rest.hashCode()+branchingPoint) & (m_entries.length-1);
-        DependencySet dependencySet=m_entries[index];
+        PermanentDependencySet dependencySet=m_entries[index];
         while (dependencySet!=null) {
             if (dependencySet.m_rest==rest && dependencySet.m_branchingPoint==branchingPoint)
                 return dependencySet;
@@ -88,10 +92,10 @@ public final class DependencySetFactory implements Serializable {
             resizeEntries();
         return dependencySet;
     }
-    protected DependencySet createDependencySet(DependencySet rest,int branchingPoint) {
-        DependencySet newSet;
+    protected PermanentDependencySet createDependencySet(PermanentDependencySet rest,int branchingPoint) {
+        PermanentDependencySet newSet;
         if (m_firstDestroyedSet==null)
-            newSet=new DependencySet();
+            newSet=new PermanentDependencySet();
         else {
             newSet=m_firstDestroyedSet;
             m_firstDestroyedSet=m_firstDestroyedSet.m_nextEntry;
@@ -104,7 +108,7 @@ public final class DependencySetFactory implements Serializable {
         m_size++;
         return newSet;
     }
-    protected void destroyDependencySet(DependencySet dependencySet) {
+    protected void destroyDependencySet(PermanentDependencySet dependencySet) {
         assert dependencySet.m_branchingPoint>=0;
         assert dependencySet.m_usageCounter==0;
         assert dependencySet.m_rest.m_usageCounter>0;
@@ -117,10 +121,10 @@ public final class DependencySetFactory implements Serializable {
         m_firstDestroyedSet=dependencySet;
         m_size--;
     }
-    protected void removeFromEntries(DependencySet dependencySet) {
+    protected void removeFromEntries(PermanentDependencySet dependencySet) {
         int index=(dependencySet.m_rest.hashCode()+dependencySet.m_branchingPoint) & (m_entries.length-1);
-        DependencySet lastEntry=null;
-        DependencySet entry=m_entries[index];
+        PermanentDependencySet lastEntry=null;
+        PermanentDependencySet entry=m_entries[index];
         while (entry!=null) {
             if (entry==dependencySet) {
                 if (lastEntry==null)
@@ -134,13 +138,13 @@ public final class DependencySetFactory implements Serializable {
         }
         throw new IllegalStateException("Internal error: dependency set not found in the entry table.");
     }
-    protected void incrementUsageCounter(DependencySet dependencySet) {
+    protected void incrementUsageCounter(PermanentDependencySet dependencySet) {
         assert dependencySet.m_branchingPoint>=-1;
         if (dependencySet.m_usageCounter==0)
             removeFromUnusedList(dependencySet);
         dependencySet.m_usageCounter++;
     }
-    protected void decrementUsageCounter(DependencySet dependencySet) {
+    protected void decrementUsageCounter(PermanentDependencySet dependencySet) {
         assert dependencySet.m_usageCounter>0;
         assert dependencySet.m_previousUnusedSet==null;
         assert dependencySet.m_nextUnusedSet==null;
@@ -148,7 +152,7 @@ public final class DependencySetFactory implements Serializable {
         if (dependencySet.m_usageCounter==0)
             addToUnusedList(dependencySet);
     }
-    protected void removeFromUnusedList(DependencySet dependencySet) {
+    protected void removeFromUnusedList(PermanentDependencySet dependencySet) {
         if (dependencySet.m_previousUnusedSet!=null)
             dependencySet.m_previousUnusedSet.m_nextUnusedSet=dependencySet.m_nextUnusedSet;
         else
@@ -159,7 +163,7 @@ public final class DependencySetFactory implements Serializable {
         dependencySet.m_nextUnusedSet=null;
         assert m_firstUnusedSet==null || m_firstUnusedSet.m_usageCounter==0;
     }
-    protected void addToUnusedList(DependencySet dependencySet) {
+    protected void addToUnusedList(PermanentDependencySet dependencySet) {
         dependencySet.m_previousUnusedSet=null;
         dependencySet.m_nextUnusedSet=m_firstUnusedSet;
         if (m_firstUnusedSet!=null)
@@ -171,11 +175,11 @@ public final class DependencySetFactory implements Serializable {
     protected void resizeEntries() {
         int newLength=m_entries.length*2;
         int newLengthMinusOne=newLength-1;
-        DependencySet[] newEntries=new DependencySet[newLength];
+        PermanentDependencySet[] newEntries=new PermanentDependencySet[newLength];
         for (int oldIndex=0;oldIndex<m_entries.length;oldIndex++) {
-            DependencySet entry=m_entries[oldIndex];
+            PermanentDependencySet entry=m_entries[oldIndex];
             while (entry!=null) {
-                DependencySet nextEntry=entry.m_nextEntry;
+                PermanentDependencySet nextEntry=entry.m_nextEntry;
                 int newIndex=(entry.m_rest.hashCode()+entry.m_branchingPoint) & newLengthMinusOne;
                 entry.m_nextEntry=newEntries[newIndex];
                 newEntries[newIndex]=entry;
@@ -185,20 +189,21 @@ public final class DependencySetFactory implements Serializable {
         m_entries=newEntries;
         m_resizeThreshold=(int)(m_entries.length*0.75);
     }
-    public DependencySet removeBranchingPoint(DependencySet dependencySet,int branchingPoint) {
-        if (branchingPoint==dependencySet.m_branchingPoint)
-            return dependencySet.m_rest;
-        else if (branchingPoint>dependencySet.m_branchingPoint)
-            return dependencySet;
+    public PermanentDependencySet removeBranchingPoint(DependencySet dependencySet,int branchingPoint) {
+        PermanentDependencySet permanentDependencySet=getPermanent(dependencySet);
+        if (branchingPoint==permanentDependencySet.m_branchingPoint)
+            return permanentDependencySet.m_rest;
+        else if (branchingPoint>permanentDependencySet.m_branchingPoint)
+            return permanentDependencySet;
         else {
             m_mergeArray.clear();
-            DependencySet rest=dependencySet;
+            PermanentDependencySet rest=permanentDependencySet;
             while (branchingPoint<rest.m_branchingPoint) {
                 m_mergeArray.add(rest.m_branchingPoint);
                 rest=rest.m_rest;
             }
             if (branchingPoint!=rest.m_branchingPoint)
-                return dependencySet;
+                return permanentDependencySet;
             else {
                 rest=rest.m_rest;
                 for (int index=m_mergeArray.size()-1;index>=0;--index)
@@ -207,59 +212,58 @@ public final class DependencySetFactory implements Serializable {
             }
         }
     }
-    public DependencySet unionWith(DependencySet set1,DependencySet set2) {
-        if (set1==set2)
-            return set1;
+    public PermanentDependencySet unionWith(DependencySet set1,DependencySet set2) {
+        PermanentDependencySet permanentSet1=getPermanent(set1);
+        PermanentDependencySet permanentSet2=getPermanent(set2);
+        if (permanentSet1==permanentSet2)
+            return permanentSet1;
         m_mergeArray.clear();
-        while (set1!=set2) {
-            if (set1.m_branchingPoint>set2.m_branchingPoint) {
-                m_mergeArray.add(set1.m_branchingPoint);
-                set1=set1.m_rest;
+        while (permanentSet1!=permanentSet2) {
+            if (permanentSet1.m_branchingPoint>permanentSet2.m_branchingPoint) {
+                m_mergeArray.add(permanentSet1.m_branchingPoint);
+                permanentSet1=permanentSet1.m_rest;
             }
-            else if (set1.m_branchingPoint<set2.m_branchingPoint) {
-                m_mergeArray.add(set2.m_branchingPoint);
-                set2=set2.m_rest;
+            else if (permanentSet1.m_branchingPoint<permanentSet2.m_branchingPoint) {
+                m_mergeArray.add(permanentSet2.m_branchingPoint);
+                permanentSet2=permanentSet2.m_rest;
             }
             else {
-                m_mergeArray.add(set1.m_branchingPoint);
-                set1=set1.m_rest;
-                set2=set2.m_rest;
+                m_mergeArray.add(permanentSet1.m_branchingPoint);
+                permanentSet1=permanentSet1.m_rest;
+                permanentSet2=permanentSet2.m_rest;
             }
         }
-        DependencySet result=set1;
+        PermanentDependencySet result=permanentSet1;
         for (int index=m_mergeArray.size()-1;index>=0;--index)
             result=getDepdendencySet(result,m_mergeArray.get(index));
         return result;
     }
-    public DependencySet unionSetsPlusOne(DependencySet set,DependencySet[] sets) {
-        if (sets.length==0)
-            return set;
+    public PermanentDependencySet getPermanent(DependencySet dependencySet) {
+        if (dependencySet instanceof PermanentDependencySet)
+            return (PermanentDependencySet)dependencySet;
+        m_unprocessedSets.clear();
         m_mergeSets.clear();
-        m_mergeSets.add(set);
-        for (DependencySet set1 : sets)
-            m_mergeSets.add(set1);
-        return unionSetsInternal();
-    }
-    public DependencySet unionSets(DependencySet[] sets) {
-        if (sets.length==1)
-            return sets[0];
-        m_mergeSets.clear();
-        for (DependencySet set : sets)
-            m_mergeSets.add(set);
-        return unionSetsInternal();
-    }
-    protected DependencySet unionSetsInternal() {
+        m_unprocessedSets.add((UnionDependencySet)dependencySet);
+        while (!m_unprocessedSets.isEmpty()) {
+            UnionDependencySet unionDependencySet=m_unprocessedSets.remove(m_unprocessedSets.size()-1);
+            for (DependencySet constituent : unionDependencySet.m_dependencySets) {
+                if (constituent instanceof UnionDependencySet)
+                    m_unprocessedSets.add((UnionDependencySet)constituent);
+                else
+                    m_mergeSets.add((PermanentDependencySet)constituent);
+            }
+        }
         int numberOfSets=m_mergeSets.size();
         m_mergeArray.clear();
         while (true) {
-            DependencySet firstSet=m_mergeSets.get(0);
+            PermanentDependencySet firstSet=m_mergeSets.get(0);
             int maximal=firstSet.m_branchingPoint;
             int maximalIndex=0;
             boolean hasEquals=false;
             boolean allAreEqual=true;
             for (int index=1;index<numberOfSets;index++) {
-                DependencySet dependencySet=m_mergeSets.get(index);
-                int branchingPoint=dependencySet.m_branchingPoint;
+                PermanentDependencySet permanentDependencySet=m_mergeSets.get(index);
+                int branchingPoint=permanentDependencySet.m_branchingPoint;
                 if (branchingPoint>maximal) {
                     maximal=branchingPoint;
                     hasEquals=false;
@@ -267,7 +271,7 @@ public final class DependencySetFactory implements Serializable {
                 }
                 else if (branchingPoint==maximal)
                     hasEquals=true;
-                if (dependencySet!=firstSet)
+                if (permanentDependencySet!=firstSet)
                     allAreEqual=false;
             }
             if (allAreEqual)
@@ -275,17 +279,17 @@ public final class DependencySetFactory implements Serializable {
             m_mergeArray.add(maximal);
             if (hasEquals) {
                 for (int index=0;index<numberOfSets;index++) {
-                    DependencySet dependencySet=m_mergeSets.get(index);
-                    if (dependencySet.m_branchingPoint==maximal)
-                        m_mergeSets.set(index,dependencySet.m_rest);
+                    PermanentDependencySet permanentDependencySet=m_mergeSets.get(index);
+                    if (permanentDependencySet.m_branchingPoint==maximal)
+                        m_mergeSets.set(index,permanentDependencySet.m_rest);
                 }
             }
             else {
-                DependencySet dependencySet=m_mergeSets.get(maximalIndex);
-                m_mergeSets.set(maximalIndex,dependencySet.m_rest);
+                PermanentDependencySet permanentDependencySet=m_mergeSets.get(maximalIndex);
+                m_mergeSets.set(maximalIndex,permanentDependencySet.m_rest);
             }
         }
-        DependencySet result=m_mergeSets.get(0);
+        PermanentDependencySet result=m_mergeSets.get(0);
         for (int index=m_mergeArray.size()-1;index>=0;--index)
             result=getDepdendencySet(result,m_mergeArray.get(index));
         m_mergeSets.clear();

@@ -12,7 +12,7 @@ public class EmptyHeadTupleConsumer implements TupleConsumer,Serializable {
     public EmptyHeadTupleConsumer(Tableau tableau) {
         m_extensionManager=tableau.getExtensionManager();
     }
-    public void consumeTuple(Object[] tuple,DependencySet[] dependencySets) {
-        m_extensionManager.addTuple(EMPTY_TUPLE,dependencySets);
+    public void consumeTuple(Object[] tuple,DependencySet dependencySet) {
+        m_extensionManager.addTuple(EMPTY_TUPLE,dependencySet);
     }
 }
