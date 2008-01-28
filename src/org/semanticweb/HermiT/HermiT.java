@@ -52,7 +52,6 @@ public class HermiT implements Serializable {
     protected Tableau m_tableau;
     protected TableauSubsumptionChecker m_subsumptionChecker;
 
-    
     public HermiT() {
         setTableauMonitorType(TableauMonitorType.NONE);
         setDirectBlockingType(DirectBlockingType.OPTIMAL);
@@ -220,6 +219,9 @@ public class HermiT implements Serializable {
     }
     public Namespaces getNamespaces() {
         return m_namespaces;
+    }
+    public Tableau getTableau() {
+        return m_tableau;
     }
     public boolean isSubsumedBy(String subconceptName,String superconceptName) {
         return m_subsumptionChecker.isSubsumedBy(subconceptName,superconceptName);
