@@ -9,8 +9,6 @@ import java.util.HashSet;
 import java.util.TreeSet;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
 import java.util.Collections;
 
 import org.semanticweb.kaon2.api.DefaultOntologyResolver;
@@ -214,32 +212,6 @@ public class Analysis {
         }
     }
     
-    protected static class EntityInfo<T> {
-        public final T m_entity;
-        public final Set<EntityInfo<T>> m_superentityInfos;
-        
-        public EntityInfo(T entity) {
-            m_entity=entity;
-            m_superentityInfos=new HashSet<EntityInfo<T>>();
-        }
-        public Set<EntityInfo<T>> getAllSuperentities() {
-            Set<EntityInfo<T>> superentities=new HashSet<EntityInfo<T>>();
-            List<EntityInfo<T>> unprocessed=new ArrayList<EntityInfo<T>>();
-            unprocessed.add(this);
-            while (!unprocessed.isEmpty()) {
-                EntityInfo<T> entityInfo=unprocessed.remove(unprocessed.size()-1);
-                superentities.add(entityInfo);
-                for (EntityInfo<T> superentityInfo : entityInfo.m_superentityInfos)
-                    if (!superentities.contains(superentityInfo))
-                        unprocessed.add(superentityInfo);
-            }
-            return superentities;
-        }
-        public String toString() {
-            return m_entity.toString();
-        }
-    }
-
     protected static class NodePair {
         protected final Node m_first;
         protected final Node m_second;
