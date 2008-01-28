@@ -667,8 +667,7 @@ public class Debugger extends TableauMonitorForwarder {
             writer.println("===========================================");
             Node searchNode=m_tableau.getFirstTableauNode();
             while (searchNode!=null) {
-                // WARNING: the == comparison is possible only because we use the concept factory!
-                if (node.getPositiveLabel()==searchNode.getPositiveLabel()) {
+                if (node.getPositiveLabel().equals(searchNode.getPositiveLabel())) {
                     writer.print("  ");
                     Printing.printPadded(writer,searchNode.getNodeID(),6);
                     writer.print("    ");
@@ -718,8 +717,7 @@ public class Debugger extends TableauMonitorForwarder {
                 writer.println("===========================================");
                 Node searchNode=m_tableau.getFirstTableauNode();
                 while (searchNode!=null) {
-                    // WARNING: the == comparison works only because we use the concept set factory.
-                    if (searchNode.getNodeType()==NodeType.TREE_NODE && node.getPositiveLabel()==searchNode.getPositiveLabel() && node.getParent().getPositiveLabel()==searchNode.getParent().getPositiveLabel() && node.getFromParentLabel()==searchNode.getFromParentLabel() && node.getToParentLabel()==searchNode.getToParentLabel()) {
+                    if (searchNode.getNodeType()==NodeType.TREE_NODE && node.getPositiveLabel().equals(searchNode.getPositiveLabel()) && node.getParent().getPositiveLabel().equals(searchNode.getParent().getPositiveLabel()) && node.getFromParentLabel().equals(searchNode.getFromParentLabel()) && node.getToParentLabel().equals(searchNode.getToParentLabel())) {
                         writer.print("  ");
                         Printing.printPadded(writer,searchNode.getNodeID(),6);
                         writer.print("    ");
