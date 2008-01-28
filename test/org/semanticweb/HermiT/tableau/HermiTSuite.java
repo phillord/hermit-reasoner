@@ -13,10 +13,10 @@ public class HermiTSuite {
         suite.addTestSuite(DLClauseEvaluationTest.class);
         suite.addTestSuite(MergeTest.class);
         suite.addTestSuite(NIRuleTest.class);
-        suite.addTestSuite(ReasonerTest.class);
-        suite.addTestSuite(IndividualReuseTest.class);
         suite.addTestSuite(TupleTableFullIndexTest.class);
         suite.addTestSuite(GraphTest.class);
+        suite.addTestSuite(ReasonerTest.class);
+        suite.addTestSuite(IndividualReuseTest.class);
         return suite;
     }
     public static void main(String... args) throws Throwable {

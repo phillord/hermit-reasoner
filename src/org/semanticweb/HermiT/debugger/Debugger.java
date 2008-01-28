@@ -1099,6 +1099,12 @@ public class Debugger extends TableauMonitorForwarder {
                     return compare(l1.getToConcept(),l2.getToConcept());
                 }
             case 3:
+                {
+                    ExistsDescriptionGraph g1=(ExistsDescriptionGraph)c1;
+                    ExistsDescriptionGraph g2=(ExistsDescriptionGraph)c2;
+                    return g1.getDescriptionGraph().getName().compareTo(g2.getDescriptionGraph().getName());
+                }
+            case 4:
                 return ((AtomicNegationConcept)c1).getNegatedAtomicConcept().getURI().compareTo(((AtomicNegationConcept)c2).getNegatedAtomicConcept().getURI());
             default:
                 throw new IllegalArgumentException();
@@ -1111,8 +1117,10 @@ public class Debugger extends TableauMonitorForwarder {
                 return 0;
             else if (c instanceof AtLeastAbstractRoleConcept)
                 return 2;
-            else if (c instanceof AtomicNegationConcept)
+            else if (c instanceof ExistsDescriptionGraph)
                 return 3;
+            else if (c instanceof AtomicNegationConcept)
+                return 4;
             else
                 throw new IllegalArgumentException();
         }

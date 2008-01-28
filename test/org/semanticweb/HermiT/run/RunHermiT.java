@@ -17,12 +17,12 @@ public class RunHermiT {
 //        System.setOut(new java.io.PrintStream(new java.io.FileOutputStream("c:\\temp\\transcript.txt"),true));
         
         HermiT hermit=new HermiT();
-        hermit.setBlockingCacheType(HermiT.BlockingCacheType.NOT_CACHED);
+//        hermit.setBlockingCacheType(HermiT.BlockingCacheType.NOT_CACHED);
 //        hermit.setExistentialsType(HermiT.ExistentialsType.INDIVIDUAL_REUSE);
         hermit.setTimingOn();
 //        hermit.setTimingWithPauseOn();
 //        hermit.setDebuggingOn(false);
-        hermit.setDebuggingOn(true);
+//        hermit.setDebuggingOn(true);
 
 //        hermit.loadOntology("file:/C:/Temp/full-galen-no-functionality.owl");
 //        hermit.loadOntology("file:/C:/Temp/galen-module1-no-functionality.owl");
