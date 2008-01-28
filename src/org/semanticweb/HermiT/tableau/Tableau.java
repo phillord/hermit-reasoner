@@ -381,7 +381,7 @@ public final class Tableau implements Serializable {
         else
             m_lastTableauNode.m_nextTableauNode=node;
         m_lastTableauNode=node;
-        m_existentialsExpansionStrategy.nodeWillChange(node);
+        m_existentialsExpansionStrategy.nodeStatusChanged(node);
         m_extensionManager.addConceptAssertion(AtomicConcept.THING,node,dependencySet);
         m_numberOfNodeCreations++;
         return node;
@@ -391,7 +391,7 @@ public final class Tableau implements Serializable {
         assert node.m_mergedInto==null;
         assert node.m_mergedIntoDependencySet==null;
         assert node.m_previousMergedOrPrunedNode==null;
-        m_existentialsExpansionStrategy.nodeWillChange(node);
+        m_existentialsExpansionStrategy.nodeStatusChanged(node);
         node.m_mergedInto=mergeInto;
         node.m_mergedIntoDependencySet=dependencySet;
         m_dependencySetFactory.addUsage(node.m_mergedIntoDependencySet);
@@ -405,7 +405,7 @@ public final class Tableau implements Serializable {
         assert node.m_mergedInto==null;
         assert node.m_mergedIntoDependencySet==null;
         assert node.m_previousMergedOrPrunedNode==null;
-        m_existentialsExpansionStrategy.nodeWillChange(node);
+        m_existentialsExpansionStrategy.nodeStatusChanged(node);
         node.m_nodeState=NodeState.PRUNED;
         node.m_previousMergedOrPrunedNode=m_lastMergedOrPrunedNode;
         m_lastMergedOrPrunedNode=node;
@@ -414,7 +414,7 @@ public final class Tableau implements Serializable {
     protected void backtrackLastMergedOrPrunedNode() {
         Node node=m_lastMergedOrPrunedNode;
         assert (node.m_nodeState==Node.NodeState.MERGED && node.m_mergedInto!=null && node.m_mergedInto!=null) || (node.m_nodeState==Node.NodeState.PRUNED && node.m_mergedInto==null && node.m_mergedInto==null);
-        m_existentialsExpansionStrategy.nodeWillChange(node);
+        m_existentialsExpansionStrategy.nodeStatusChanged(node);
         if (node.m_nodeState==Node.NodeState.MERGED) {
             m_dependencySetFactory.removeUsage(node.m_mergedIntoDependencySet);
             node.m_mergedInto=null;
@@ -431,7 +431,7 @@ public final class Tableau implements Serializable {
         assert node.m_mergedInto==null;
         assert node.m_mergedIntoDependencySet==null;
         assert node.m_previousMergedOrPrunedNode==null;
-        m_existentialsExpansionStrategy.nodeWillBeDestroyed(node);
+        m_existentialsExpansionStrategy.nodeDestroyed(node);
         if (node.m_previousTableauNode==null)
             m_firstTableauNode=null;
         else

@@ -6,6 +6,8 @@ import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.HashSet;
@@ -116,6 +118,8 @@ public class Debugger extends TableauMonitorForwarder {
                         doShowModel(parsedCommand);
                     else if ("showdlclauses".equals(command))
                         doShowDLClauses(parsedCommand);
+                    else if ("shownode".equals(command))
+                        doShowNode(parsedCommand);
                     else if ("showdgraph".equals(command))
                         doShowDescriptionGraph(parsedCommand);
                     else if ("q".equals(command))
@@ -348,6 +352,137 @@ public class Debugger extends TableauMonitorForwarder {
         showTextInWindow(buffer.toString(),"DL-clauses");
         selectConsoleWindow();
     }
+    protected void doShowNode(String[] commandLine) {
+        int nodeID;
+        try {
+            nodeID=Integer.parseInt(commandLine[1]);
+        }
+        catch (NumberFormatException e) {
+            m_output.println("Invalid ID of the first node.");
+            return;
+        }
+        Node node=m_tableau.getNode(nodeID);
+        if (node==null) {
+            m_output.println("Node with ID '"+nodeID+"' not found.");
+            return;
+        }
+        CharArrayWriter buffer=new CharArrayWriter();
+        PrintWriter writer=new PrintWriter(buffer);
+        writer.print("Node ID:   ");
+        writer.println(node.getNodeID());
+        writer.print("Parent ID: ");
+        writer.println(node.getParent()==null ? "(root ndoe)" : node.getParent().getNodeID());
+        writer.print("Status:    ");
+        if (node.isActive())
+            writer.println("active");
+        else if (node.isMerged()) {
+            writer.print("merged into node ");
+            writer.println(node.getMergedInto().getNodeID());
+        }
+        else
+            writer.println("pruned");
+        writer.print("Blocked:   ");
+        writer.println(formatBlockingStatus(node));
+
+        Set<Concept> positiveConceptLabel=new TreeSet<Concept>(ConceptComparator.INSTANCE);
+        Set<Concept> negativeConceptLabel=new TreeSet<Concept>(ConceptComparator.INSTANCE);
+        ExtensionTable.Retrieval retrieval=m_tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
+        retrieval.getBindingsBuffer()[1]=node;
+        retrieval.open();
+        while (!retrieval.afterLast()) {
+            Concept concept=(Concept)retrieval.getTupleBuffer()[0];
+            if (concept instanceof AtomicNegationConcept)
+                negativeConceptLabel.add(concept);
+            else
+                positiveConceptLabel.add(concept);
+            retrieval.next();
+        }
+        if (!positiveConceptLabel.isEmpty()) {
+            writer.print("-- Positive concept label ------------------------");
+            printConcepts(positiveConceptLabel,writer);
+        }
+        if (!negativeConceptLabel.isEmpty()) {
+            writer.print("-- Negative concept label ------------------------");
+            printConcepts(negativeConceptLabel,writer);
+        }
+
+        Map<Node,Set<AtomicAbstractRole>> outgoingEdges=new TreeMap<Node,Set<AtomicAbstractRole>>(NodeComparator.INSTANCE);
+        retrieval=m_tableau.getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,false },ExtensionTable.View.TOTAL);
+        retrieval.getBindingsBuffer()[1]=node;
+        retrieval.open();
+        while (!retrieval.afterLast()) {
+            AtomicAbstractRole atomicAbstractRole=(AtomicAbstractRole)retrieval.getTupleBuffer()[0];
+            Node toNode=(Node)retrieval.getTupleBuffer()[2];
+            Set<AtomicAbstractRole> set=outgoingEdges.get(toNode);
+            if (set==null) {
+                set=new TreeSet<AtomicAbstractRole>(AbstractRoleComparator.INSTANCE);
+                outgoingEdges.put(toNode,set);
+            }
+            set.add(atomicAbstractRole);
+            retrieval.next();
+        }
+        if (!outgoingEdges.isEmpty()) {
+            writer.println("-- Outgoing edges --------------------------------");
+            printEdgeMap(outgoingEdges,writer);
+        }
+
+        Map<Node,Set<AtomicAbstractRole>> incomingEdges=new TreeMap<Node,Set<AtomicAbstractRole>>(NodeComparator.INSTANCE);
+        retrieval=m_tableau.getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,false,true },ExtensionTable.View.TOTAL);
+        retrieval.getBindingsBuffer()[2]=node;
+        retrieval.open();
+        while (!retrieval.afterLast()) {
+            AtomicAbstractRole atomicAbstractRole=(AtomicAbstractRole)retrieval.getTupleBuffer()[0];
+            Node fromNode=(Node)retrieval.getTupleBuffer()[1];
+            Set<AtomicAbstractRole> set=incomingEdges.get(fromNode);
+            if (set==null) {
+                set=new TreeSet<AtomicAbstractRole>(AbstractRoleComparator.INSTANCE);
+                incomingEdges.put(fromNode,set);
+            }
+            set.add(atomicAbstractRole);
+            retrieval.next();
+        }
+        if (!incomingEdges.isEmpty()) {
+            writer.println("-- Incoming edges --------------------------------");
+            printEdgeMap(incomingEdges,writer);
+        }
+
+        writer.flush();
+        showTextInWindow(buffer.toString(),"Node '"+node.getNodeID()+"'");
+        selectConsoleWindow();
+    }
+    protected void printConcepts(Set<Concept> set,PrintWriter writer) {
+        int number=0;
+        for (Concept concept : set) {
+            if (number!=0)
+                writer.print(", ");
+            if ((number % 3)==0) {
+                writer.println();
+                writer.print("    ");
+            }
+            writer.print(concept.toString(m_namespaces));
+            number++;
+        }
+        writer.println();
+    }
+    protected void printEdgeMap(Map<Node,Set<AtomicAbstractRole>> map,PrintWriter writer) {
+        for (Map.Entry<Node,Set<AtomicAbstractRole>> entry : map.entrySet()) {
+            writer.print("    ");
+            writer.print(entry.getKey().getNodeID());
+            writer.print(" -->");
+            int number=0;
+            for (AtomicAbstractRole atomicAbstractRole : entry.getValue()) {
+                if (number!=0)
+                    writer.print(", ");
+                if ((number % 3)==0) {
+                    writer.println();
+                    writer.print("        ");
+                }
+                writer.print(atomicAbstractRole.toString(m_namespaces));
+                number++;
+            }
+            writer.println();
+        }
+    }
     protected void doShowDescriptionGraph(String[] commandLine) {
         if (commandLine.length<2) {
             m_output.println("Graph name is missing.");
@@ -553,9 +688,9 @@ public class Debugger extends TableauMonitorForwarder {
         if (!node.isBlocked())
             return "no";
         else if (node.isDirectlyBlocked())
-            return "directly by "+node.getBlocker().getNodeID();
+            return "directly by "+(node.getBlocker()==Node.CACHE_BLOCKER ? "signature in cache" : node.getBlocker().getNodeID());
         else
-            return "indirectly by "+node.getBlocker().getNodeID();
+            return "indirectly by "+(node.getBlocker()==Node.CACHE_BLOCKER ? "signature in cache" : node.getBlocker().getNodeID());
     }
     protected void doSearchPairWiseBlocking(String[] commandLine) {
         if (commandLine.length<2) {
@@ -910,6 +1045,84 @@ public class Debugger extends TableauMonitorForwarder {
                     return compare;
             }
             return 0;
+        }
+    }
+
+    protected static class AbstractRoleComparator implements Comparator<AbstractRole> {
+        public static final AbstractRoleComparator INSTANCE=new AbstractRoleComparator();
+
+        public int compare(AbstractRole ar1,AbstractRole ar2) {
+            int type1=getAbstractRoleType(ar1);
+            int type2=getAbstractRoleType(ar2);
+            if (type1!=type2)
+                return type1-type2;
+            if (type1==0)
+                return ((AtomicAbstractRole)ar1).getURI().compareTo(((AtomicAbstractRole)ar2).getURI());
+            else
+                return ((InverseAbstractRole)ar1).getInverseOf().getURI().compareTo(((InverseAbstractRole)ar2).getInverseOf().getURI());
+        }
+        protected int getAbstractRoleType(AbstractRole ar) {
+            if (ar instanceof AtomicAbstractRole)
+                return 0;
+            else
+                return 1;
+        }
+    }
+
+    protected static class ConceptComparator implements Comparator<Concept> {
+        public static final ConceptComparator INSTANCE=new ConceptComparator();
+        
+        public int compare(Concept c1,Concept c2) {
+            int type1=getConceptType(c1);
+            int type2=getConceptType(c2);
+            if (type1!=type2)
+                return type1-type2;
+            switch (type1) {
+            case 0:
+                return ((AtomicConcept)c1).getURI().compareTo(((AtomicConcept)c2).getURI());
+            case 1:
+                {
+                    AtMostAbstractRoleGuard g1=(AtMostAbstractRoleGuard)c1;
+                    AtMostAbstractRoleGuard g2=(AtMostAbstractRoleGuard)c2;
+                    int comparison=AbstractRoleComparator.INSTANCE.compare(g1.getOnAbstractRole(),g2.getOnAbstractRole());
+                    if (comparison!=0)
+                        return comparison;
+                    return compare(g1.getToAtomicConcept(),g2.getToAtomicConcept());
+                }
+            case 2:
+                {
+                    AtLeastAbstractRoleConcept l1=(AtLeastAbstractRoleConcept)c1;
+                    AtLeastAbstractRoleConcept l2=(AtLeastAbstractRoleConcept)c2;
+                    int comparison=AbstractRoleComparator.INSTANCE.compare(l1.getOnAbstractRole(),l2.getOnAbstractRole());
+                    if (comparison!=0)
+                        return comparison;
+                    return compare(l1.getToConcept(),l2.getToConcept());
+                }
+            case 3:
+                return ((AtomicNegationConcept)c1).getNegatedAtomicConcept().getURI().compareTo(((AtomicNegationConcept)c2).getNegatedAtomicConcept().getURI());
+            default:
+                throw new IllegalArgumentException();
+            }
+        }
+        protected int getConceptType(Concept c) {
+            if (c instanceof AtMostAbstractRoleGuard)
+                return 1;
+            else if (c instanceof AtomicConcept)
+                return 0;
+            else if (c instanceof AtLeastAbstractRoleConcept)
+                return 2;
+            else if (c instanceof AtomicNegationConcept)
+                return 3;
+            else
+                throw new IllegalArgumentException();
+        }
+    }
+    
+    protected static class NodeComparator implements Comparator<Node> {
+        public static final NodeComparator INSTANCE=new NodeComparator();
+
+        public int compare(Node o1,Node o2) {
+            return o1.getNodeID()-o2.getNodeID();
         }
     }
 }

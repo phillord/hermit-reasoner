@@ -63,11 +63,23 @@ public class CreationOrderStrategy implements ExistentialsExpansionStrategy,Seri
         }
         return false;
     }
-    public void nodeWillChange(Node node) {
-        m_blockingStrategy.nodeWillChange(node);
+    public void assertionAdded(Concept concept,Node node) {
+        m_blockingStrategy.assertionAdded(concept,node);
     }
-    public void nodeWillBeDestroyed(Node node) {
-        m_blockingStrategy.nodeWillBeDestroyed(node);
+    public void assertionRemoved(Concept concept,Node node) {
+        m_blockingStrategy.assertionRemoved(concept,node);
+    }
+    public void assertionAdded(AtomicAbstractRole atomicAbstractRole,Node nodeFrom,Node nodeTo) {
+        m_blockingStrategy.assertionAdded(atomicAbstractRole,nodeFrom,nodeTo);
+    }
+    public void assertionRemoved(AtomicAbstractRole atomicAbstractRole,Node nodeFrom,Node nodeTo) {
+        m_blockingStrategy.assertionRemoved(atomicAbstractRole,nodeFrom,nodeTo);
+    }
+    public void nodeStatusChanged(Node node) {
+        m_blockingStrategy.nodeStatusChanged(node);
+    }
+    public void nodeDestroyed(Node node) {
+        m_blockingStrategy.nodeDestroyed(node);
     }
     public void branchingPointPushed() {
     }

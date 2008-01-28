@@ -9,6 +9,7 @@ import org.semanticweb.HermiT.model.*;
 
 public final class Node implements Serializable {
     private static final long serialVersionUID=-2549229429321484690L;
+    public static final Node CACHE_BLOCKER=new Node(null);
 
     public static final int GLOBALLY_UNIQUE_NODE=-1;
     public static enum NodeState { ACTIVE,MERGED,PRUNED }
@@ -32,6 +33,7 @@ public final class Node implements Serializable {
     protected Node m_blocker;
     protected boolean m_directlyBlocked;
     protected Object m_blockingObject;
+    protected boolean m_blockingSignatureChanged;
     protected Map<DescriptionGraph,Occurrence> m_occursInDescriptionGraphs;
     protected boolean m_occursInDescriptionGraphsDirty;
     protected int m_numberOfNIAssertionsFromNode;
@@ -71,6 +73,7 @@ public final class Node implements Serializable {
         m_blocker=null;
         m_directlyBlocked=false;
         m_blockingObject=null;
+        m_blockingSignatureChanged=false;
         m_occursInDescriptionGraphs=null;
         m_occursInDescriptionGraphsDirty=false;
         m_numberOfNIAssertionsFromNode=0;
@@ -165,11 +168,20 @@ public final class Node implements Serializable {
     public void setBlockingObject(Object blockingObject) {
         m_blockingObject=blockingObject;
     }
+    public boolean getBlockingSignatureChanged() {
+        return m_blockingSignatureChanged;
+    }
+    public void setBlockingSignatureChanged(boolean blockingSignatureChanged) {
+        m_blockingSignatureChanged=blockingSignatureChanged;
+    }
     public boolean isActive() {
         return m_nodeState==NodeState.ACTIVE;
     }
     public boolean isMerged() {
         return m_nodeState==NodeState.MERGED;
+    }
+    public Node getMergedInto() {
+        return m_mergedInto;
     }
     public boolean isPruned() {
         return m_nodeState==NodeState.PRUNED;

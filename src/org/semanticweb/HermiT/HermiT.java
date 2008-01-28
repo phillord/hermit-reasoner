@@ -235,6 +235,9 @@ public class HermiT implements Serializable {
             throw new IllegalStateException("Internal error: subsumption checker threw an exception.");
         }
     }
+    public void clearSubsumptionCache() {
+        m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
+    }
     public boolean isABoxSatisfiable() {
         return m_tableau.isABoxSatisfiable();
     }

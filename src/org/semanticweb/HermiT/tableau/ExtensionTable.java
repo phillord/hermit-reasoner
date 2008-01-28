@@ -48,7 +48,7 @@ public abstract class ExtensionTable implements Serializable {
         Object dlPredicateObject=tuple[0];
         if (dlPredicateObject instanceof Concept) {
             Node node=(Node)tuple[1];
-            m_tableau.m_existentialsExpansionStrategy.nodeWillChange(node);
+            m_tableau.m_existentialsExpansionStrategy.assertionAdded((Concept)dlPredicateObject,node);
             if (dlPredicateObject instanceof AtomicNegationConcept) {
                 AtomicConcept negatedConcept=((AtomicNegationConcept)dlPredicateObject).getNegatedAtomicConcept();
                 node.addToNegativeLabel(negatedConcept);
@@ -86,8 +86,7 @@ public abstract class ExtensionTable implements Serializable {
             AtomicAbstractRole atomicAbstractRole=(AtomicAbstractRole)dlPredicateObject;
             Node node0=(Node)tuple[1];
             Node node1=(Node)tuple[2];
-            m_tableau.m_existentialsExpansionStrategy.nodeWillChange(node0);
-            m_tableau.m_existentialsExpansionStrategy.nodeWillChange(node1);
+            m_tableau.m_existentialsExpansionStrategy.assertionAdded(atomicAbstractRole,node0,node1);
             if (node0.isParentOf(node1))
                 node1.addToFromParentLabel(atomicAbstractRole);
             else if (node1.isParentOf(node0))
@@ -95,8 +94,6 @@ public abstract class ExtensionTable implements Serializable {
             m_tableau.m_nominalIntroductionManager.addAtomicAbstractRoleAssertion(atomicAbstractRole,node0,node1);
         }
         else if (Inequality.INSTANCE.equals(dlPredicateObject)) {
-            m_tableau.m_existentialsExpansionStrategy.nodeWillChange((Node)tuple[1]);
-            m_tableau.m_existentialsExpansionStrategy.nodeWillChange((Node)tuple[2]);
             if (tuple[1]==tuple[2]) {
                 m_extensionManager.setClash(m_tableau.getDependencySetFactory().unionSets(dependencySets));
                 if (m_tableauMonitor!=null)
@@ -107,7 +104,6 @@ public abstract class ExtensionTable implements Serializable {
             DescriptionGraph descriptionGraph=(DescriptionGraph)dlPredicateObject;
             for (int position=1;position<m_tupleArity;position++) {
                 Node node=(Node)tuple[position];
-                m_tableau.m_existentialsExpansionStrategy.nodeWillChange(node);
                 node.addOccurenceInGraph(descriptionGraph,position,tupleIndex);
             }
         }
@@ -155,7 +151,7 @@ public abstract class ExtensionTable implements Serializable {
         Object dlPredicateObject=tuple[0];
         if (dlPredicateObject instanceof Concept) {
             Node node=(Node)tuple[1];
-            m_tableau.m_existentialsExpansionStrategy.nodeWillChange(node);
+            m_tableau.m_existentialsExpansionStrategy.assertionRemoved((Concept)dlPredicateObject,node);
             if (dlPredicateObject instanceof AtomicNegationConcept) {
                 AtomicConcept negatedConcept=((AtomicNegationConcept)dlPredicateObject).getNegatedAtomicConcept();
                 node.removeFromNegativeLabel(negatedConcept);
@@ -171,23 +167,17 @@ public abstract class ExtensionTable implements Serializable {
             AtomicAbstractRole atomicAbstractRole=(AtomicAbstractRole)dlPredicateObject;
             Node node0=(Node)tuple[1];
             Node node1=(Node)tuple[2];
-            m_tableau.m_existentialsExpansionStrategy.nodeWillChange(node0);
-            m_tableau.m_existentialsExpansionStrategy.nodeWillChange(node1);
+            m_tableau.m_existentialsExpansionStrategy.assertionRemoved(atomicAbstractRole,node0,node1);
             if (node0.isParentOf(node1))
                 node1.removeFromFromParentLabel(atomicAbstractRole);
             else if (node1.isParentOf(node0))
                 node0.removeFromToParentLabel(atomicAbstractRole);
             m_tableau.m_nominalIntroductionManager.removeAtomicAbstractRoleAssertion(atomicAbstractRole,node0,node1);
         }
-        else if (Inequality.INSTANCE.equals(dlPredicateObject)) {
-            m_tableau.m_existentialsExpansionStrategy.nodeWillChange((Node)tuple[1]);
-            m_tableau.m_existentialsExpansionStrategy.nodeWillChange((Node)tuple[2]);
-        }
         else if (dlPredicateObject instanceof DescriptionGraph) {
             DescriptionGraph descriptionGraph=(DescriptionGraph)dlPredicateObject;
             for (int position=1;position<m_tupleArity;position++) {
                 Node node=(Node)tuple[position];
-                m_tableau.m_existentialsExpansionStrategy.nodeWillChange(node);
                 node.removeOccurrenceInTuple(descriptionGraph,tupleIndex,position);
             }
         }

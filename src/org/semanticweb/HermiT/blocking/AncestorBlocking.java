@@ -2,6 +2,7 @@ package org.semanticweb.HermiT.blocking;
 
 import java.io.Serializable;
 
+import org.semanticweb.HermiT.model.*;
 import org.semanticweb.HermiT.tableau.*;
 
 public class AncestorBlocking implements BlockingStrategy,Serializable {
@@ -28,13 +29,13 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
                 if (parent==null)
                     node.setBlocked(null,false);
                 else if (parent.isBlocked())
-                    node.setBlocked(parent.getBlocker(),false);
+                    node.setBlocked(parent,false);
                 else if (m_blockingCache!=null) {
                     Node blocker=m_blockingCache.getBlocker(node);
                     if (blocker==null)
                         checkParentBlocking(node);
                     else
-                        node.setBlocked(blocker,true);
+                        node.setBlocked(Node.CACHE_BLOCKER,true);
                 }
                 else
                     checkParentBlocking(node);
@@ -52,9 +53,17 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
             blocker=blocker.getParent();
         }
     }
-    public void nodeWillChange(Node node) {
+    public void assertionAdded(Concept concept,Node node) {
     }
-    public void nodeWillBeDestroyed(Node node) {
+    public void assertionRemoved(Concept concept,Node node) {
+    }
+    public void assertionAdded(AtomicAbstractRole atomicAbstractRole,Node nodeFrom,Node nodeTo) {
+    }
+    public void assertionRemoved(AtomicAbstractRole atomicAbstractRole,Node nodeFrom,Node nodeTo) {
+    }
+    public void nodeStatusChanged(Node node) {
+    }
+    public void nodeDestroyed(Node node) {
     }
     public void modelFound() {
         if (m_blockingCache!=null) {
