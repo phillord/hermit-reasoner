@@ -78,12 +78,17 @@ public class TableauSubsumptionChecker implements SubsumptionHierarchy.Subsumpti
     protected void updateKnownSubsumers(AtomicConcept subconcept) {
         Node checkedNode=m_tableau.getCheckedNode().getCanonicalNode();
         AtomicConceptInfo subconceptInfo=getAtomicConceptInfo(subconcept);
-        for (Concept concept : checkedNode.getPositiveLabel()) {
+        ExtensionTable.Retrieval retrieval=m_tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
+        retrieval.getBindingsBuffer()[1]=checkedNode;
+        retrieval.open();
+        while (!retrieval.afterLast()) {
+            Object concept=retrieval.getTupleBuffer()[0];
             if (concept instanceof AtomicConcept) {
-                DependencySet dependencySet=m_tableau.getExtensionManager().getConceptAssertionDependencySet(concept,checkedNode);
+                DependencySet dependencySet=m_tableau.getExtensionManager().getConceptAssertionDependencySet((AtomicConcept)concept,checkedNode);
                 if (dependencySet.isEmpty())
                     subconceptInfo.addKnownSubsumer((AtomicConcept)concept);
             }
+            retrieval.next();
         }
         if (m_tableau.isCurrentModelDeterministic())
             subconceptInfo.setAllSubsumersKnown();
@@ -98,7 +103,7 @@ public class TableauSubsumptionChecker implements SubsumptionHierarchy.Subsumpti
                 AtomicConcept atomicConcept=(AtomicConcept)conceptObject;
                 Node node=(Node)tupleBuffer[1];
                 if (!node.isBlocked())
-                    getAtomicConceptInfo(atomicConcept).updatePossibleSubsumers(node.getPositiveLabel());
+                    getAtomicConceptInfo(atomicConcept).updatePossibleSubsumers(m_tableau,node);
             }
             retrieval.next();
         }
@@ -135,19 +140,25 @@ public class TableauSubsumptionChecker implements SubsumptionHierarchy.Subsumpti
         public boolean isKnownNotSubsumer(AtomicConcept potentialSubsumer) {
             return (!isKnownSubsumer(potentialSubsumer) && m_allSubsumersKnown) || (m_possibleSubsumers!=null && !m_possibleSubsumers.contains(potentialSubsumer));
         }
-        public void updatePossibleSubsumers(Set<Concept> positiveLabel) {
+        public void updatePossibleSubsumers(Tableau tableau,Node node) {
             if (!m_allSubsumersKnown) {
                 if (m_possibleSubsumers==null) {
                     m_possibleSubsumers=new HashSet<AtomicConcept>();
-                    for (Concept concept : positiveLabel)
+                    ExtensionTable.Retrieval retrieval=tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
+                    retrieval.getBindingsBuffer()[1]=node;
+                    retrieval.open();
+                    while (!retrieval.afterLast()) {
+                        Object concept=retrieval.getTupleBuffer()[0];
                         if (concept instanceof AtomicConcept)
                             m_possibleSubsumers.add((AtomicConcept)concept);
+                        retrieval.next();
+                    }
                 }
                 else {
                     Iterator<AtomicConcept> iterator=m_possibleSubsumers.iterator();
                     while (iterator.hasNext()) {
                         AtomicConcept atomicConcept=iterator.next();
-                        if (!positiveLabel.contains(atomicConcept))
+                        if (!tableau.getExtensionManager().containsConceptAssertion(atomicConcept,node))
                             iterator.remove();
                     }
                 }
