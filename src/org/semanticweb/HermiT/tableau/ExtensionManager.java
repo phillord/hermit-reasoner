@@ -117,7 +117,7 @@ public final class ExtensionManager implements Serializable {
         if (m_clashDependencySet!=null)
             m_dependencySetFactory.addUsage(m_clashDependencySet);
     }
-    public PermanentDependencySet getClashDependencySet() {
+    public DependencySet getClashDependencySet() {
         return m_clashDependencySet;
     }
     public boolean containsClash() {
@@ -184,7 +184,7 @@ public final class ExtensionManager implements Serializable {
         else
             return getExtensionTable(tuple.length).containsTuple(tuple);
     }
-    public PermanentDependencySet getConceptAssertionDependencySet(Concept concept,Node node) {
+    public DependencySet getConceptAssertionDependencySet(Concept concept,Node node) {
         if (AtomicConcept.THING.equals(concept))
             return m_dependencySetFactory.emptySet();
         else {
@@ -193,7 +193,7 @@ public final class ExtensionManager implements Serializable {
             return m_binaryExtensionTable.getDependencySet(m_binaryAuxiliaryTupleContains);
         }
     }
-    public PermanentDependencySet getRoleAssertionDependencySet(AbstractRole abstractRole,Node nodeFrom,Node nodeTo) {
+    public DependencySet getRoleAssertionDependencySet(AbstractRole abstractRole,Node nodeFrom,Node nodeTo) {
         if (abstractRole instanceof AtomicAbstractRole) {
             m_ternaryAuxiliaryTupleContains[0]=abstractRole;
             m_ternaryAuxiliaryTupleContains[1]=nodeFrom;
@@ -206,12 +206,12 @@ public final class ExtensionManager implements Serializable {
         }
         return m_ternaryExtensionTable.getDependencySet(m_ternaryAuxiliaryTupleContains);
     }
-    public PermanentDependencySet getAssertionDependencySet(DLPredicate dlPredicate,Node node) {
+    public DependencySet getAssertionDependencySet(DLPredicate dlPredicate,Node node) {
         m_binaryAuxiliaryTupleContains[0]=dlPredicate;
         m_binaryAuxiliaryTupleContains[1]=node;
         return m_binaryExtensionTable.getDependencySet(m_binaryAuxiliaryTupleContains);
     }
-    public PermanentDependencySet getAssertionDependencySet(DLPredicate dlPredicate,Node node0,Node node1) {
+    public DependencySet getAssertionDependencySet(DLPredicate dlPredicate,Node node0,Node node1) {
         if (Equality.INSTANCE.equals(dlPredicate))
             return node0==node1 ? m_dependencySetFactory.emptySet() : null;
         else {
@@ -221,7 +221,7 @@ public final class ExtensionManager implements Serializable {
             return m_ternaryExtensionTable.getDependencySet(m_ternaryAuxiliaryTupleContains);
         }
     }
-    public PermanentDependencySet getAssertionDependencySet(DLPredicate dlPredicate,Node[] nodes) {
+    public DependencySet getAssertionDependencySet(DLPredicate dlPredicate,Node[] nodes) {
         if (Equality.INSTANCE.equals(dlPredicate))
             return nodes[0]==nodes[1] ? m_dependencySetFactory.emptySet() : null;
         else if (AtomicConcept.THING.equals(dlPredicate))
@@ -245,7 +245,7 @@ public final class ExtensionManager implements Serializable {
             return extensionTable.getDependencySet(auxiliaryTuple);
         }
     }
-    public PermanentDependencySet getTupleDependencySet(Object[] tuple) {
+    public DependencySet getTupleDependencySet(Object[] tuple) {
         if (tuple.length==0)
             return m_clashDependencySet;
         else

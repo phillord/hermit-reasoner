@@ -42,7 +42,7 @@ public abstract class ExtensionTable implements Serializable {
     public Object getTupleObject(int tupleIndex,int objectIndex) {
         return m_tupleTable.getTupleObject(tupleIndex,objectIndex);
     }
-    public PermanentDependencySet getDependencySet(int tupleIndex) {
+    public DependencySet getDependencySet(int tupleIndex) {
         return m_dependencySetManager.getDependencySet(tupleIndex);
     }
     public abstract boolean addTuple(Object[] tuple,DependencySet dependencySet);
@@ -126,7 +126,7 @@ public abstract class ExtensionTable implements Serializable {
         return createRetrieval(bindingPositions,new Object[bindingPattern.length],extensionView);
     }
     public abstract Retrieval createRetrieval(int[] bindingPositions,Object[] bindingsBuffer,View extensionView);
-    public abstract PermanentDependencySet getDependencySet(Object[] tuple);
+    public abstract DependencySet getDependencySet(Object[] tuple);
     public boolean propagateDeltaNew() {
         boolean deltaNewNotEmpty=(m_afterExtensionThisTupleIndex!=m_afterDeltaNewTupleIndex);
         m_afterExtensionOldTupleIndex=m_afterExtensionThisTupleIndex;
@@ -325,7 +325,7 @@ public abstract class ExtensionTable implements Serializable {
     }
 
     protected static interface DependencySetManager {
-        PermanentDependencySet getDependencySet(int tupleIndex);
+        DependencySet getDependencySet(int tupleIndex);
         void setDependencySet(int tupleIndex,DependencySet dependencySet);
         void forgetDependencySet(int tupleIndex);
     }
@@ -338,7 +338,7 @@ public abstract class ExtensionTable implements Serializable {
         public DeterministicDependencySetManager(ExtensionTable extensionTable) {
             m_emptySet=extensionTable.m_tableau.getDependencySetFactory().emptySet();
         }
-        public PermanentDependencySet getDependencySet(int tupleIndex) {
+        public DependencySet getDependencySet(int tupleIndex) {
             return m_emptySet;
         }
         public void setDependencySet(int tupleIndex,DependencySet dependencySet) {
@@ -355,8 +355,8 @@ public abstract class ExtensionTable implements Serializable {
         public LastObjectDependencySetManager(ExtensionTable extensionTable) {
             m_dependencySetFactory=extensionTable.m_tableau.getDependencySetFactory();
         }
-        public PermanentDependencySet getDependencySet(int tupleIndex) {
-            return (PermanentDependencySet)m_tupleTable.getTupleObject(tupleIndex,m_tupleArity);
+        public DependencySet getDependencySet(int tupleIndex) {
+            return (DependencySet)m_tupleTable.getTupleObject(tupleIndex,m_tupleArity);
         }
         public void setDependencySet(int tupleIndex,DependencySet dependencySet) {
             PermanentDependencySet permanentDependencySet=m_dependencySetFactory.getPermanent(dependencySet);

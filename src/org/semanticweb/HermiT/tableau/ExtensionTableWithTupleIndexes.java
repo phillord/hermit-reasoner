@@ -46,7 +46,7 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
         int tupleIndex=m_tupleIndexes[0].getTupleIndex(tuple);
         return tupleIndex!=-1 && isTupleActive(tupleIndex);
     }
-    public PermanentDependencySet getDependencySet(Object[] tuple) {
+    public DependencySet getDependencySet(Object[] tuple) {
         int tupleIndex=m_tupleIndexes[0].getTupleIndex(tuple);
         if (tupleIndex==-1)
             return null;
