@@ -64,10 +64,10 @@ public class TupleIndexTest extends AbstractHermiTTest {
         return m_tupleIndex.removeTuple(strings);
     }
     public void assertRetrieval(String[] selection,int[] expected) {
-        TupleIndex.Retrieval retrieval=m_tupleIndex.createRetrieval();
-        retrieval.setNumberOfSelectionPositions(selection.length);
-        for (int index=0;index<selection.length;index++)
-            retrieval.getSelectionBuffer()[index]=selection[index];
+        int[] selectionIndices=new int[selection.length];
+        for (int index=0;index<selectionIndices.length;index++)
+            selectionIndices[index]=index;
+        TupleIndex.TupleIndexRetrieval retrieval=new TupleIndex.TupleIndexRetrieval(m_tupleIndex,selection,selectionIndices);
         retrieval.open();
         boolean[] used=new boolean[expected.length];
         while (!retrieval.afterLast()) {

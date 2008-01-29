@@ -86,41 +86,27 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
             m_tupleIndexes[index].clear();
     }
 
-    protected class IndexedRetrieval implements Retrieval,Serializable {
+    protected class IndexedRetrieval extends TupleIndex.TupleIndexRetrieval implements Retrieval,Serializable {
         private static final long serialVersionUID=2180748099314801734L;
 
-        protected final TupleIndex.Retrieval m_tupleIndexRetrieval;
         protected final int[] m_bindingPositions;
-        protected final Object[] m_bindingsBuffer;
         protected final ExtensionTable.View m_extensionView;
         protected final boolean m_checkTupleSelection;
-        protected final int m_boundPrefixLength;
         protected final Object[] m_tupleBuffer;
         protected DependencySet m_dependencySet;
         protected int m_firstTupleIndex;
         protected int m_afterLastTupleIndex;
-        protected boolean m_afterLast;
 
         public IndexedRetrieval(TupleIndex tupleIndex,int[] bindingPositions,Object[] bindingsBuffer,View extensionView) {
-            m_tupleIndexRetrieval=tupleIndex.createRetrieval();
+            super(tupleIndex,bindingsBuffer,createSelectionArray(bindingPositions,tupleIndex.m_indexingSequence));
             m_bindingPositions=bindingPositions;
-            m_bindingsBuffer=bindingsBuffer;
             m_extensionView=extensionView;
             m_tupleBuffer=new Object[m_tupleArity];
-            int boundPrefixLength=0;
-            int[] indexingSequence=tupleIndex.getIndexingSequence();
-            for (int index=0;index<indexingSequence.length;index++)
-                if (m_bindingPositions[indexingSequence[index]]!=-1)
-                    boundPrefixLength++;
-                else
-                    break;
-            m_boundPrefixLength=boundPrefixLength;
-            m_tupleIndexRetrieval.setNumberOfSelectionPositions(m_boundPrefixLength);
             int numberOfBoundPositions=0;
             for (int index=m_bindingPositions.length-1;index>=0;--index)
                 if (m_bindingPositions[index]!=-1)
                     numberOfBoundPositions++;
-            m_checkTupleSelection=(numberOfBoundPositions>boundPrefixLength);
+            m_checkTupleSelection=(numberOfBoundPositions>m_selectionIndices.length);
         }
         public ExtensionTable getExtensionTable() {
             return ExtensionTableWithTupleIndexes.this;
@@ -159,14 +145,9 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
                 m_afterLastTupleIndex=m_afterDeltaNewTupleIndex;
                 break;
             }
-            Object[] selectionBuffer=m_tupleIndexRetrieval.getSelectionBuffer();
-            int[] indexingSequence=m_tupleIndexRetrieval.getIndexingSequence();
-            for (int index=0;index<m_boundPrefixLength;index++)
-                selectionBuffer[index]=m_bindingsBuffer[m_bindingPositions[indexingSequence[index]]];
-            m_tupleIndexRetrieval.open();
-            m_afterLast=false;
-            while (!m_tupleIndexRetrieval.afterLast()) {
-                int tupleIndex=m_tupleIndexRetrieval.currentTupleIndex();
+            super.open();
+            while (!afterLast()) {
+                int tupleIndex=currentTupleIndex();
                 if (m_firstTupleIndex<=tupleIndex && tupleIndex<m_afterLastTupleIndex) {
                     m_tupleTable.retrieveTuple(m_tupleBuffer,tupleIndex);
                     if (isTupleValid()) {
@@ -174,17 +155,13 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
                         return;
                     }
                 }
-                m_tupleIndexRetrieval.next();
+                super.next();
             }
-            m_afterLast=true;
-        }
-        public boolean afterLast() {
-            return m_afterLast;
         }
         public void next() {
-            m_tupleIndexRetrieval.next();
-            while (!m_tupleIndexRetrieval.afterLast()) {
-                int tupleIndex=m_tupleIndexRetrieval.currentTupleIndex();
+            super.next();
+            while (!afterLast()) {
+                int tupleIndex=currentTupleIndex();
                 if (m_firstTupleIndex<=tupleIndex && tupleIndex<m_afterLastTupleIndex) {
                     m_tupleTable.retrieveTuple(m_tupleBuffer,tupleIndex);
                     if (isTupleValid()) {
@@ -192,9 +169,8 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
                         return;
                     }
                 }
-                m_tupleIndexRetrieval.next();
+                super.next();
             }
-            m_afterLast=true;
         }
         protected boolean isTupleValid() {
             if (!ExtensionTableWithTupleIndexes.this.isTupleActive(m_tupleBuffer))
@@ -205,5 +181,17 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
                         return false;
             return true;
         }
+    }
+    protected static int[] createSelectionArray(int[] bindingPositions,int[] indexingSequence) {
+        int boundPrefixLength=0;
+        for (int index=0;index<indexingSequence.length;index++)
+            if (bindingPositions[indexingSequence[index]]!=-1)
+                boundPrefixLength++;
+            else
+                break;
+        int[] selection=new int[boundPrefixLength];
+        for (int index=0;index<boundPrefixLength;index++)
+            selection[index]=bindingPositions[indexingSequence[index]];
+        return selection;
     }
 }
