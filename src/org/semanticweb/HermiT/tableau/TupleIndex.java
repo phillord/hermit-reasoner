@@ -275,7 +275,6 @@ public final class TupleIndex implements Serializable {
         protected final Object[] m_selectionBuffer;
         protected int m_numberOfSelectionPositions;
         protected int m_retrievalRoot;
-        protected int m_retrievalRootDepth;
         protected int m_current;
         
         public Retrieval() {
@@ -292,7 +291,7 @@ public final class TupleIndex implements Serializable {
         }
         public void open() {
             int trieNode=m_root;
-            m_retrievalRootDepth=0;
+            int retrievalRootDepth=0;
             for (int position=0;position<m_numberOfSelectionPositions;position++) {
                 Object object=m_selectionBuffer[position];
                 trieNode=getChildNode(trieNode,object);
@@ -300,14 +299,13 @@ public final class TupleIndex implements Serializable {
                     m_current=-1;
                     return;
                 }
-                m_retrievalRootDepth++;
+                retrievalRootDepth++;
             }
             m_retrievalRoot=trieNode;
             if (trieNode==m_root && m_trieNodeManager.getTrieNodeComponent(m_root,TRIE_NODE_FIRST_CHILD)==-1)
                 m_current=-1;
-            else {
-                m_current=getFirstLeafTrieNodeUnder(trieNode,m_retrievalRootDepth);
-            }
+            else
+                m_current=getFirstLeafTrieNodeUnder(trieNode,retrievalRootDepth);
         }
         public boolean afterLast() {
             return m_current==-1;
