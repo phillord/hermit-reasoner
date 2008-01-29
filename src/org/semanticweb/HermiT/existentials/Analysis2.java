@@ -37,7 +37,7 @@ public class Analysis2 {
         for (DLClause dlClause : m_dlOntology.getDLClauses()) {
             if (dlClause.isConceptInclusion()) {
                 AtomicConcept bodyConcept=(AtomicConcept)dlClause.getBodyAtom(0).getDLPredicate();
-                Concept headConcept=(Concept)dlClause.getHeadAtom(0,0).getDLPredicate();
+                Concept headConcept=(Concept)dlClause.getHeadAtom(0).getDLPredicate();
                 m_conceptHierarchy.addInclusion(bodyConcept,headConcept);
             }
         }

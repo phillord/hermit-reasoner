@@ -141,7 +141,7 @@ public class HyperresolutionManager implements Serializable {
             }
             Atom[] bodyAtoms=new Atom[m_reorderedAtoms.size()];
             m_reorderedAtoms.toArray(bodyAtoms);
-            return m_dlClause.getChangedDLClause(bodyAtoms,null);
+            return m_dlClause.getChangedDLClause(null,bodyAtoms);
         }
     }
 }

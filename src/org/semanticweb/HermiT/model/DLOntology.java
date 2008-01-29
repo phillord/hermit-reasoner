@@ -58,11 +58,8 @@ public class DLOntology implements Serializable {
                 addDLPredicate(dlPredicate);
             }
             for (int headIndex=dlClause.getHeadLength()-1;headIndex>=0;--headIndex) {
-                int conjunctionLength=dlClause.getHeadConjunctionLength(headIndex);
-                for (int conjunctIndex=0;conjunctIndex<conjunctionLength;conjunctIndex++) {
-                    DLPredicate dlPredicate=dlClause.getHeadAtom(headIndex,conjunctIndex).getDLPredicate();
-                    addDLPredicate(dlPredicate);
-                }
+                DLPredicate dlPredicate=dlClause.getHeadAtom(headIndex).getDLPredicate();
+                addDLPredicate(dlPredicate);
             }
         }
         for (Atom atom : m_positiveFacts)
@@ -143,13 +140,12 @@ public class DLOntology implements Serializable {
     protected Set<AtomicConcept> getBodyOnlyAtomicConcepts() {
         Set<AtomicConcept> bodyOnlyAtomicConcepts=new HashSet<AtomicConcept>(m_allAtomicConcepts);
         for (DLClause dlClause : m_dlClauses)
-            for (int disjunctionIndex=0;disjunctionIndex<dlClause.getHeadLength();disjunctionIndex++)
-                for (int conjunctIndex=0;conjunctIndex<dlClause.getHeadConjunctionLength(disjunctionIndex);conjunctIndex++) {
-                    DLPredicate dlPredicate=dlClause.getHeadAtom(disjunctionIndex,conjunctIndex).getDLPredicate();
-                    bodyOnlyAtomicConcepts.remove(dlPredicate);
-                    if (dlPredicate instanceof AtLeastAbstractRoleConcept)
-                        bodyOnlyAtomicConcepts.remove(((AtLeastAbstractRoleConcept)dlPredicate).getToConcept());
-                }
+            for (int headIndex=0;headIndex<dlClause.getHeadLength();headIndex++) {
+                DLPredicate dlPredicate=dlClause.getHeadAtom(headIndex).getDLPredicate();
+                bodyOnlyAtomicConcepts.remove(dlPredicate);
+                if (dlPredicate instanceof AtLeastAbstractRoleConcept)
+                    bodyOnlyAtomicConcepts.remove(((AtLeastAbstractRoleConcept)dlPredicate).getToConcept());
+            }
         return bodyOnlyAtomicConcepts;
     }
     protected Set<AtomicAbstractRole> computeGraphAtomicRoles() {
@@ -175,12 +171,10 @@ public class DLOntology implements Serializable {
             if (dlPredicate instanceof AtomicAbstractRole && abstractRoles.contains(dlPredicate))
                 return true;
         }
-        for (int disjunctIndex=0;disjunctIndex<dlClause.getHeadLength();disjunctIndex++) {
-            for (int conjunctIndex=0;conjunctIndex<dlClause.getHeadConjunctionLength(disjunctIndex);conjunctIndex++) {
-                DLPredicate dlPredicate=dlClause.getHeadAtom(disjunctIndex,conjunctIndex).getDLPredicate();
-                if (dlPredicate instanceof AtomicAbstractRole && abstractRoles.contains(dlPredicate))
-                    return true;
-            }
+        for (int atomIndex=0;atomIndex<dlClause.getHeadLength();atomIndex++) {
+            DLPredicate dlPredicate=dlClause.getHeadAtom(atomIndex).getDLPredicate();
+            if (dlPredicate instanceof AtomicAbstractRole && abstractRoles.contains(dlPredicate))
+                return true;
         }
         return false;
     }
@@ -192,13 +186,11 @@ public class DLOntology implements Serializable {
                 if (abstractRoles.add((AtomicAbstractRole)dlPredicate))
                     change=true;
         }
-        for (int disjunctIndex=0;disjunctIndex<dlClause.getHeadLength();disjunctIndex++) {
-            for (int conjunctIndex=0;conjunctIndex<dlClause.getHeadConjunctionLength(disjunctIndex);conjunctIndex++) {
-                DLPredicate dlPredicate=dlClause.getHeadAtom(disjunctIndex,conjunctIndex).getDLPredicate();
-                if (dlPredicate instanceof AtomicAbstractRole)
-                    if (abstractRoles.add((AtomicAbstractRole)dlPredicate))
-                        change=true;
-            }
+        for (int atomIndex=0;atomIndex<dlClause.getHeadLength();atomIndex++) {
+            DLPredicate dlPredicate=dlClause.getHeadAtom(atomIndex).getDLPredicate();
+            if (dlPredicate instanceof AtomicAbstractRole)
+                if (abstractRoles.add((AtomicAbstractRole)dlPredicate))
+                    change=true;
         }
         return change;
     }
@@ -221,21 +213,19 @@ public class DLOntology implements Serializable {
                 }
             }
         }
-        for (int disjunctIndex=0;disjunctIndex<dlClause.getHeadLength();disjunctIndex++) {
-            for (int conjunctIndex=0;conjunctIndex<dlClause.getHeadConjunctionLength(disjunctIndex);conjunctIndex++) {
-                DLPredicate dlPredicate=dlClause.getHeadAtom(disjunctIndex,conjunctIndex).getDLPredicate();
-                if (dlPredicate instanceof AtomicAbstractRole) {
-                    if (usedRoleTypes==0)
-                        usedRoleTypes=(graphAtomicRoles.contains(dlPredicate) ? 1 : 2);
+        for (int atomIndex=0;atomIndex<dlClause.getHeadLength();atomIndex++) {
+            DLPredicate dlPredicate=dlClause.getHeadAtom(atomIndex).getDLPredicate();
+            if (dlPredicate instanceof AtomicAbstractRole) {
+                if (usedRoleTypes==0)
+                    usedRoleTypes=(graphAtomicRoles.contains(dlPredicate) ? 1 : 2);
+                else {
+                    if (usedRoleTypes==1) {
+                        if (!graphAtomicRoles.contains(dlPredicate))
+                            return 3;
+                    }
                     else {
-                        if (usedRoleTypes==1) {
-                            if (!graphAtomicRoles.contains(dlPredicate))
-                                return 3;
-                        }
-                        else {
-                            if (graphAtomicRoles.contains(dlPredicate))
-                                return 3;
-                        }
+                        if (graphAtomicRoles.contains(dlPredicate))
+                            return 3;
                     }
                 }
             }
@@ -251,18 +241,16 @@ public class DLOntology implements Serializable {
             if (!(dlPredicate instanceof AtomicAbstractRole) && !(dlPredicate instanceof AtomicConcept))
                 return false;
         }
-        for (int disjunctIndex=0;disjunctIndex<dlClause.getHeadLength();disjunctIndex++) {
-            for (int conjunctIndex=0;conjunctIndex<dlClause.getHeadConjunctionLength(disjunctIndex);conjunctIndex++) {
-                Atom atom=dlClause.getHeadAtom(disjunctIndex,conjunctIndex);
-                atom.getVariables(variables);
-                DLPredicate dlPredicate=atom.getDLPredicate();
-                if (!(dlPredicate instanceof AtomicAbstractRole) && !(dlPredicate instanceof AtomicConcept) && !(dlPredicate instanceof ExistentialConcept) && !Equality.INSTANCE.equals(dlPredicate))
+        for (int atomIndex=0;atomIndex<dlClause.getHeadLength();atomIndex++) {
+            Atom atom=dlClause.getHeadAtom(atomIndex);
+            atom.getVariables(variables);
+            DLPredicate dlPredicate=atom.getDLPredicate();
+            if (!(dlPredicate instanceof AtomicAbstractRole) && !(dlPredicate instanceof AtomicConcept) && !(dlPredicate instanceof ExistentialConcept) && !Equality.INSTANCE.equals(dlPredicate))
+                return false;
+            if (dlPredicate instanceof AtLeastAbstractRoleConcept) {
+                AtLeastAbstractRoleConcept atLeastAbstractRoleConcept=(AtLeastAbstractRoleConcept)dlPredicate;
+                if (graphAtomicRoles.contains(atLeastAbstractRoleConcept.getOnAbstractRole()))
                     return false;
-                if (dlPredicate instanceof AtLeastAbstractRoleConcept) {
-                    AtLeastAbstractRoleConcept atLeastAbstractRoleConcept=(AtLeastAbstractRoleConcept)dlPredicate;
-                    if (graphAtomicRoles.contains(atLeastAbstractRoleConcept.getOnAbstractRole()))
-                        return false;
-                }
             }
         }
         Variable X=Variable.create("X");
@@ -279,35 +267,33 @@ public class DLOntology implements Serializable {
             if (atom.getDLPredicate() instanceof AtomicAbstractRole && !isTreeRoleAtom(atom,centerVariable))
                 return false;
         }
-        for (int disjunctIndex=0;disjunctIndex<dlClause.getHeadLength();disjunctIndex++) {
-            for (int conjunctIndex=0;conjunctIndex<dlClause.getHeadConjunctionLength(disjunctIndex);conjunctIndex++) {
-                Atom atom=dlClause.getHeadAtom(disjunctIndex,conjunctIndex);
-                if (atom.getDLPredicate() instanceof AtomicAbstractRole && !isTreeRoleAtom(atom,centerVariable))
-                    return false;
-                if (Equality.INSTANCE.equals(atom.getDLPredicate())) {
-                    Variable otherVariable=null;
-                    if (centerVariable.equals(atom.getArgument(0))) {
-                        otherVariable=atom.getArgumentVariable(1);
-                        if (otherVariable==null)
-                            return false;
-                    }
-                    else if (centerVariable.equals(atom.getArgument(1))) {
-                        otherVariable=atom.getArgumentVariable(0);
-                        if (otherVariable==null)
-                            return false;
-                    }
-                    if (otherVariable!=null) {
-                        boolean found=false;
-                        for (int bodyAtomIndex=0;bodyAtomIndex<dlClause.getBodyLength();bodyAtomIndex++) {
-                            Atom bodyAtom=dlClause.getBodyAtom(bodyAtomIndex);
-                            if (bodyAtom.getArity()==1 && bodyAtom.getArgument(0).equals(otherVariable) && bodyOnlyAtomicConcepts.contains(bodyAtom.getDLPredicate())) {
-                                found=true;
-                                break;
-                            }
+        for (int atomIndex=0;atomIndex<dlClause.getHeadLength();atomIndex++) {
+            Atom atom=dlClause.getHeadAtom(atomIndex);
+            if (atom.getDLPredicate() instanceof AtomicAbstractRole && !isTreeRoleAtom(atom,centerVariable))
+                return false;
+            if (Equality.INSTANCE.equals(atom.getDLPredicate())) {
+                Variable otherVariable=null;
+                if (centerVariable.equals(atom.getArgument(0))) {
+                    otherVariable=atom.getArgumentVariable(1);
+                    if (otherVariable==null)
+                        return false;
+                }
+                else if (centerVariable.equals(atom.getArgument(1))) {
+                    otherVariable=atom.getArgumentVariable(0);
+                    if (otherVariable==null)
+                        return false;
+                }
+                if (otherVariable!=null) {
+                    boolean found=false;
+                    for (int bodyAtomIndex=0;bodyAtomIndex<dlClause.getBodyLength();bodyAtomIndex++) {
+                        Atom bodyAtom=dlClause.getBodyAtom(bodyAtomIndex);
+                        if (bodyAtom.getArity()==1 && bodyAtom.getArgument(0).equals(otherVariable) && bodyOnlyAtomicConcepts.contains(bodyAtom.getDLPredicate())) {
+                            found=true;
+                            break;
                         }
-                        if (!found)
-                            return false;
                     }
+                    if (!found)
+                        return false;
                 }
             }
         }
@@ -326,12 +312,10 @@ public class DLOntology implements Serializable {
             if (!(dlPredicate instanceof AtomicAbstractRole) && !(dlPredicate instanceof AtomicConcept))
                 return false;
         }
-        for (int disjunctIndex=0;disjunctIndex<dlClause.getHeadLength();disjunctIndex++) {
-            for (int conjunctIndex=0;conjunctIndex<dlClause.getHeadConjunctionLength(disjunctIndex);conjunctIndex++) {
-                DLPredicate dlPredicate=dlClause.getHeadAtom(disjunctIndex,conjunctIndex).getDLPredicate();
-                if (!(dlPredicate instanceof AtomicAbstractRole) && !(dlPredicate instanceof AtomicConcept) && !Equality.INSTANCE.equals(dlPredicate))
-                    return false;
-            }
+        for (int atomIndex=0;atomIndex<dlClause.getHeadLength();atomIndex++) {
+            DLPredicate dlPredicate=dlClause.getHeadAtom(atomIndex).getDLPredicate();
+            if (!(dlPredicate instanceof AtomicAbstractRole) && !(dlPredicate instanceof AtomicConcept) && !Equality.INSTANCE.equals(dlPredicate))
+                return false;
         }
         return true;
     }

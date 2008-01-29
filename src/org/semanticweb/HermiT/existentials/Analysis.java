@@ -162,13 +162,13 @@ public class Analysis {
         for (DLClause dlClause : m_dlOntology.getDLClauses()) {
             if (dlClause.isRoleInverseInclusion()) {
                 AtomicAbstractRole subrole=(AtomicAbstractRole)dlClause.getBodyAtom(0).getDLPredicate();
-                AtomicAbstractRole superrole=(AtomicAbstractRole)dlClause.getHeadAtom(0,0).getDLPredicate();
+                AtomicAbstractRole superrole=(AtomicAbstractRole)dlClause.getHeadAtom(0).getDLPredicate();
                 m_roleHierarchy.addInclusion(subrole,superrole.getInverseRole());
                 m_roleHierarchy.addInclusion(subrole.getInverseRole(),superrole);
             }
             else if (dlClause.isRoleInclusion()) {
                 AtomicAbstractRole subrole=(AtomicAbstractRole)dlClause.getBodyAtom(0).getDLPredicate();
-                AtomicAbstractRole superrole=(AtomicAbstractRole)dlClause.getHeadAtom(0,0).getDLPredicate();
+                AtomicAbstractRole superrole=(AtomicAbstractRole)dlClause.getHeadAtom(0).getDLPredicate();
                 m_roleHierarchy.addInclusion(subrole,superrole);
                 m_roleHierarchy.addInclusion(subrole.getInverseRole(),superrole.getInverseRole());
             }
@@ -178,18 +178,17 @@ public class Analysis {
             }
             else if (dlClause.isConceptInclusion()) {
                 AtomicConcept bodyConcept=(AtomicConcept)dlClause.getBodyAtom(0).getDLPredicate();
-                Concept headConcept=(Concept)dlClause.getHeadAtom(0,0).getDLPredicate();
+                Concept headConcept=(Concept)dlClause.getHeadAtom(0).getDLPredicate();
                 m_conceptHierarchy.addInclusion(bodyConcept,headConcept);
             }
-            for (int i=0;i<dlClause.getHeadLength();i++)
-                for (int j=0;j<dlClause.getHeadConjunctionLength(i);j++) {
-                    DLPredicate dlPredicate=dlClause.getHeadAtom(i,j).getDLPredicate();
-                    if (dlPredicate instanceof AtLeastAbstractRoleConcept) {
-                        Concept toConcept=((AtLeastAbstractRoleConcept)dlPredicate).getToConcept();
-                        if (toConcept instanceof AtomicConcept)
-                            m_graphConcepts.add((AtomicConcept)toConcept);
-                    }
+            for (int i=0;i<dlClause.getHeadLength();i++) {
+                DLPredicate dlPredicate=dlClause.getHeadAtom(i).getDLPredicate();
+                if (dlPredicate instanceof AtLeastAbstractRoleConcept) {
+                    Concept toConcept=((AtLeastAbstractRoleConcept)dlPredicate).getToConcept();
+                    if (toConcept instanceof AtomicConcept)
+                        m_graphConcepts.add((AtomicConcept)toConcept);
                 }
+            }
         }
     }
     public void save(File reuseConcepts,File dontReuseConcepts) throws IOException {

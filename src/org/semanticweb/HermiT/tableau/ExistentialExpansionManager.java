@@ -261,13 +261,13 @@ public final class ExistentialExpansionManager implements Serializable {
         for (DLClause dlClause : m_tableau.getDLOntology().getDLClauses()) {
             if (dlClause.isRoleInclusion()) {
                 AtomicAbstractRole subrole=(AtomicAbstractRole)dlClause.getBodyAtom(0).getDLPredicate();
-                AtomicAbstractRole superrole=(AtomicAbstractRole)dlClause.getHeadAtom(0,0).getDLPredicate();
+                AtomicAbstractRole superrole=(AtomicAbstractRole)dlClause.getHeadAtom(0).getDLPredicate();
                 roleHierarchy.addInclusion(subrole,superrole);
                 roleHierarchy.addInclusion(subrole.getInverseRole(),superrole.getInverseRole());
             }
             else if (dlClause.isRoleInverseInclusion()) {
                 AtomicAbstractRole subrole=(AtomicAbstractRole)dlClause.getBodyAtom(0).getDLPredicate();
-                AtomicAbstractRole superrole=(AtomicAbstractRole)dlClause.getHeadAtom(0,0).getDLPredicate();
+                AtomicAbstractRole superrole=(AtomicAbstractRole)dlClause.getHeadAtom(0).getDLPredicate();
                 roleHierarchy.addInclusion(subrole,superrole.getInverseRole());
                 roleHierarchy.addInclusion(subrole.getInverseRole(),superrole);
             }

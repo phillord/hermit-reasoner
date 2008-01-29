@@ -7,31 +7,25 @@ import java.util.HashSet;
 import org.semanticweb.HermiT.*;
 
 /**
- * Represents a DL clause. The body is a conjunction of atoms and the head is a disjunction of conjunctions.
+ * Represents a DL clause. The body is a conjunction of atoms and the head is a disjunction of atoms.
  */
 public class DLClause implements Serializable {
     private static final long serialVersionUID=-4513910129515151732L;
 
     public static final Atom[][] EMPTY_HEAD=new Atom[0][];
 
-    protected final Atom[][] m_headConjunctions;
+    protected final Atom[] m_headAtoms;
     protected final Atom[] m_bodyAtoms;
     
-    protected DLClause(Atom[][] headConjunctions,Atom[] bodyAtoms) {
-        m_headConjunctions=headConjunctions;
+    protected DLClause(Atom[] headAtoms,Atom[] bodyAtoms) {
+        m_headAtoms=headAtoms;
         m_bodyAtoms=bodyAtoms;
     }
     public int getHeadLength() {
-        return m_headConjunctions.length;
+        return m_headAtoms.length;
     }
-    public int getHeadConjunctionLength(int disjunctionIndex) {
-        return m_headConjunctions[disjunctionIndex].length;
-    }
-    public Atom[] getHeadConjunction(int disjunctionIndex) {
-        return m_headConjunctions[disjunctionIndex];
-    }
-    public Atom getHeadAtom(int disjunctionIndex,int conjunctIndex) {
-        return m_headConjunctions[disjunctionIndex][conjunctIndex];
+    public Atom getHeadAtom(int atomIndex) {
+        return m_headAtoms[atomIndex];
     }
     public int getBodyLength() {
         return m_bodyAtoms.length;
@@ -41,15 +35,12 @@ public class DLClause implements Serializable {
     }
     public DLClause getSafeVersion() {
         Set<Variable> variables=new HashSet<Variable>();
-        for (int disjunctionIndex=0;disjunctionIndex<m_headConjunctions.length;disjunctionIndex++) {
-            Atom[] headConjunctions=m_headConjunctions[disjunctionIndex];
-            for (int conjunctionIndex=0;conjunctionIndex<headConjunctions.length;conjunctionIndex++) {
-                Atom atom=headConjunctions[conjunctionIndex];
-                for (int argumentIndex=0;argumentIndex<atom.getArity();argumentIndex++) {
-                    Variable variable=atom.getArgumentVariable(argumentIndex);
-                    if (variable!=null)
-                        variables.add(variable);
-                }
+        for (int headIndex=0;headIndex<m_headAtoms.length;headIndex++) {
+            Atom atom=m_headAtoms[headIndex];
+            for (int argumentIndex=0;argumentIndex<atom.getArity();argumentIndex++) {
+                Variable variable=atom.getArgumentVariable(argumentIndex);
+                if (variable!=null)
+                    variables.add(variable);
             }
         }
         for (int bodyIndex=0;bodyIndex<m_bodyAtoms.length;bodyIndex++) {
@@ -68,21 +59,21 @@ public class DLClause implements Serializable {
             int index=m_bodyAtoms.length;
             for (Variable variable : variables)
                 newBodyAtoms[index++]=Atom.create(AtomicConcept.THING,variable);
-            return DLClause.create(m_headConjunctions,newBodyAtoms);
+            return DLClause.create(m_headAtoms,newBodyAtoms);
         }
     }
-    public DLClause getChangedDLClause(Atom[] bodyAtoms,Atom[][] headConjunctions) {
+    public DLClause getChangedDLClause(Atom[] headAtoms,Atom[] bodyAtoms) {
+        if (headAtoms==null)
+            headAtoms=m_headAtoms;
         if (bodyAtoms==null)
             bodyAtoms=m_bodyAtoms;
-        if (headConjunctions==null)
-            headConjunctions=m_headConjunctions;
-        return DLClause.create(headConjunctions,bodyAtoms);
+        return DLClause.create(headAtoms,bodyAtoms);
     }
     public boolean isConceptInclusion() {
-        if (getBodyLength()==1 && getHeadLength()==1 && getHeadConjunctionLength(0)==1) {
-            if (getBodyAtom(0).getDLPredicate() instanceof AtomicConcept && getHeadAtom(0,0).getDLPredicate() instanceof Concept) {
+        if (getBodyLength()==1 && getHeadLength()==1) {
+            if (getBodyAtom(0).getDLPredicate() instanceof AtomicConcept && getHeadAtom(0).getDLPredicate() instanceof Concept) {
                 Variable x=getBodyAtom(0).getArgumentVariable(0);
-                Variable headX=getHeadAtom(0,0).getArgumentVariable(0);
+                Variable headX=getHeadAtom(0).getArgumentVariable(0);
                 if (x!=null && x.equals(headX))
                     return true;
             }
@@ -90,16 +81,16 @@ public class DLClause implements Serializable {
         return false;
     }
     public boolean isFunctionalityAxiom() {
-        if (getBodyLength()==2 && getHeadLength()==1 && getHeadConjunctionLength(0)==1) {
+        if (getBodyLength()==2 && getHeadLength()==1) {
             DLPredicate atomicAbstractRole=getBodyAtom(0).getDLPredicate();
             if (atomicAbstractRole instanceof AtomicAbstractRole) {
-                if (getBodyAtom(1).getDLPredicate().equals(atomicAbstractRole) && getHeadAtom(0,0).getDLPredicate().equals(Equality.INSTANCE)) {
+                if (getBodyAtom(1).getDLPredicate().equals(atomicAbstractRole) && getHeadAtom(0).getDLPredicate().equals(Equality.INSTANCE)) {
                     Variable x=getBodyAtom(0).getArgumentVariable(0);
                     if (x!=null && x.equals(getBodyAtom(1).getArgument(0))) {
                         Variable y1=getBodyAtom(0).getArgumentVariable(1);
                         Variable y2=getBodyAtom(1).getArgumentVariable(1);
-                        Variable headY1=getHeadAtom(0,0).getArgumentVariable(0);
-                        Variable headY2=getHeadAtom(0,0).getArgumentVariable(1);
+                        Variable headY1=getHeadAtom(0).getArgumentVariable(0);
+                        Variable headY2=getHeadAtom(0).getArgumentVariable(1);
                         if (y1!=null && y2!=null && !y1.equals(y2) && headY1!=null && headY2!=null && ((y1.equals(headY1) && y2.equals(headY2)) || (y1.equals(headY2) && y2.equals(headY1))))
                             return true;
                     }
@@ -109,13 +100,13 @@ public class DLClause implements Serializable {
         return false;
     }
     public boolean isGuardedFunctionalityAxiom() {
-        if (getBodyLength()==1 && getHeadLength()==1 && getHeadConjunctionLength(0)==1) {
-            DLPredicate headDLPredicate=getHeadAtom(0,0).getDLPredicate();
+        if (getBodyLength()==1 && getHeadLength()==1) {
+            DLPredicate headDLPredicate=getHeadAtom(0).getDLPredicate();
             if (headDLPredicate instanceof AtMostAbstractRoleGuard) {
                 AtMostAbstractRoleGuard atMostAbstractRoleGuard=(AtMostAbstractRoleGuard)headDLPredicate;
                 if (atMostAbstractRoleGuard.getCaridnality()==1 && atMostAbstractRoleGuard.getToAtomicConcept().equals(AtomicConcept.THING) && atMostAbstractRoleGuard.getOnAbstractRole() instanceof AtomicAbstractRole) {
                     AtomicAbstractRole atomicAbstractRole=(AtomicAbstractRole)atMostAbstractRoleGuard.getOnAbstractRole();
-                    Variable x=getHeadAtom(0,0).getArgumentVariable(0);
+                    Variable x=getHeadAtom(0).getArgumentVariable(0);
                     Atom bodyAtom=getBodyAtom(0);
                     if (x!=null && bodyAtom.getDLPredicate().equals(atomicAbstractRole) && bodyAtom.getArgument(0).equals(x) && bodyAtom.getArgument(1) instanceof Variable && !bodyAtom.getArgument(1).equals(x))
                         return true;
@@ -125,16 +116,16 @@ public class DLClause implements Serializable {
         return false;
     }
     public boolean isInverseFunctionalityAxiom() {
-        if (getBodyLength()==2 && getHeadLength()==1 && getHeadConjunctionLength(0)==1) {
+        if (getBodyLength()==2 && getHeadLength()==1) {
             DLPredicate atomicAbstractRole=getBodyAtom(0).getDLPredicate();
             if (atomicAbstractRole instanceof AtomicAbstractRole) {
-                if (getBodyAtom(1).getDLPredicate().equals(atomicAbstractRole) && getHeadAtom(0,0).getDLPredicate().equals(Equality.INSTANCE)) {
+                if (getBodyAtom(1).getDLPredicate().equals(atomicAbstractRole) && getHeadAtom(0).getDLPredicate().equals(Equality.INSTANCE)) {
                     Variable x=getBodyAtom(0).getArgumentVariable(1);
                     if (x!=null && x.equals(getBodyAtom(1).getArgument(1))) {
                         Variable y1=getBodyAtom(0).getArgumentVariable(0);
                         Variable y2=getBodyAtom(1).getArgumentVariable(0);
-                        Variable headY1=getHeadAtom(0,0).getArgumentVariable(0);
-                        Variable headY2=getHeadAtom(0,0).getArgumentVariable(1);
+                        Variable headY1=getHeadAtom(0).getArgumentVariable(0);
+                        Variable headY2=getHeadAtom(0).getArgumentVariable(1);
                         if (y1!=null && y2!=null && !y1.equals(y2) && headY1!=null && headY2!=null && ((y1.equals(headY1) && y2.equals(headY2)) || (y1.equals(headY2) && y2.equals(headY1))))
                             return true;
                     }
@@ -144,13 +135,13 @@ public class DLClause implements Serializable {
         return false;
     }
     public boolean isGuardedInverseFunctionalityAxiom() {
-        if (getBodyLength()==1 && getHeadLength()==1 && getHeadConjunctionLength(0)==1) {
-            DLPredicate headDLPredicate=getHeadAtom(0,0).getDLPredicate();
+        if (getBodyLength()==1 && getHeadLength()==1) {
+            DLPredicate headDLPredicate=getHeadAtom(0).getDLPredicate();
             if (headDLPredicate instanceof AtMostAbstractRoleGuard) {
                 AtMostAbstractRoleGuard atMostAbstractRoleGuard=(AtMostAbstractRoleGuard)headDLPredicate;
                 if (atMostAbstractRoleGuard.getCaridnality()==1 && atMostAbstractRoleGuard.getToAtomicConcept().equals(AtomicConcept.THING) && atMostAbstractRoleGuard.getOnAbstractRole() instanceof InverseAbstractRole) {
                     AtomicAbstractRole atomicAbstractRole=((InverseAbstractRole)atMostAbstractRoleGuard.getOnAbstractRole()).getInverseOf();
-                    Variable x=getHeadAtom(0,0).getArgumentVariable(0);
+                    Variable x=getHeadAtom(0).getArgumentVariable(0);
                     Atom bodyAtom=getBodyAtom(0);
                     if (x!=null && bodyAtom.getDLPredicate().equals(atomicAbstractRole) && bodyAtom.getArgument(1).equals(x) && bodyAtom.getArgument(0) instanceof Variable && !bodyAtom.getArgument(0).equals(x))
                         return true;
@@ -160,12 +151,12 @@ public class DLClause implements Serializable {
         return false;
     }
     public boolean isRoleInclusion() {
-        if (getBodyLength()==1 && getHeadLength()==1 && getHeadConjunctionLength(0)==1) {
-            if (getBodyAtom(0).getDLPredicate() instanceof AtomicAbstractRole && getHeadAtom(0,0).getDLPredicate() instanceof AtomicAbstractRole) {
+        if (getBodyLength()==1 && getHeadLength()==1) {
+            if (getBodyAtom(0).getDLPredicate() instanceof AtomicAbstractRole && getHeadAtom(0).getDLPredicate() instanceof AtomicAbstractRole) {
                 Variable x=getBodyAtom(0).getArgumentVariable(0);
                 Variable y=getBodyAtom(0).getArgumentVariable(1);
-                Variable headX=getHeadAtom(0,0).getArgumentVariable(0);
-                Variable headY=getHeadAtom(0,0).getArgumentVariable(1);
+                Variable headX=getHeadAtom(0).getArgumentVariable(0);
+                Variable headY=getHeadAtom(0).getArgumentVariable(1);
                 if (x!=null && y!=null && !x.equals(y) && x.equals(headX) && y.equals(headY))
                     return true;
             }
@@ -173,12 +164,12 @@ public class DLClause implements Serializable {
         return false;
     }
     public boolean isRoleInverseInclusion() {
-        if (getBodyLength()==1 && getHeadLength()==1 && getHeadConjunctionLength(0)==1) {
-            if (getBodyAtom(0).getDLPredicate() instanceof AtomicAbstractRole && getHeadAtom(0,0).getDLPredicate() instanceof AtomicAbstractRole) {
+        if (getBodyLength()==1 && getHeadLength()==1) {
+            if (getBodyAtom(0).getDLPredicate() instanceof AtomicAbstractRole && getHeadAtom(0).getDLPredicate() instanceof AtomicAbstractRole) {
                 Variable x=getBodyAtom(0).getArgumentVariable(0);
                 Variable y=getBodyAtom(0).getArgumentVariable(1);
-                Variable headX=getHeadAtom(0,0).getArgumentVariable(0);
-                Variable headY=getHeadAtom(0,0).getArgumentVariable(1);
+                Variable headX=getHeadAtom(0).getArgumentVariable(0);
+                Variable headY=getHeadAtom(0).getArgumentVariable(1);
                 if (x!=null && y!=null && !x.equals(y) && x.equals(headY) && y.equals(headX))
                     return true;
             }
@@ -187,21 +178,10 @@ public class DLClause implements Serializable {
     }
     public String toString(Namespaces namespaces) {
         StringBuffer buffer=new StringBuffer();
-        for (int headConjunctionIndex=0;headConjunctionIndex<m_headConjunctions.length;headConjunctionIndex++) {
-            if (headConjunctionIndex!=0)
+        for (int headIndex=0;headIndex<m_headAtoms.length;headIndex++) {
+            if (headIndex!=0)
                 buffer.append(" v ");
-            Atom[] headConjunction=m_headConjunctions[headConjunctionIndex];
-            if (headConjunction.length==1)
-                buffer.append(headConjunction[0].toString(namespaces));
-            else {
-                buffer.append('[');
-                for (int conjunctIndex=0;conjunctIndex<headConjunction.length;conjunctIndex++) {
-                    if (conjunctIndex!=0)
-                        buffer.append(" & ");
-                    buffer.append(headConjunction[conjunctIndex].toString(namespaces));
-                }
-                buffer.append(']');
-            }
+            buffer.append(m_headAtoms[headIndex].toString(namespaces));
         }
         buffer.append(" :- ");
         for (int bodyIndex=0;bodyIndex<m_bodyAtoms.length;bodyIndex++) {
@@ -220,17 +200,11 @@ public class DLClause implements Serializable {
 
     protected static InterningManager<DLClause> s_interningManager=new InterningManager<DLClause>() {
         protected boolean equal(DLClause object1,DLClause object2) {
-            if (object1.m_headConjunctions.length!=object2.m_headConjunctions.length || object1.m_bodyAtoms.length!=object2.m_bodyAtoms.length)
+            if (object1.m_headAtoms.length!=object2.m_headAtoms.length || object1.m_bodyAtoms.length!=object2.m_bodyAtoms.length)
                 return false;
-            for (int headConjunctionIndex=object1.m_headConjunctions.length-1;headConjunctionIndex>=0;--headConjunctionIndex) {
-                Atom[] headConjunction1=object1.m_headConjunctions[headConjunctionIndex];
-                Atom[] headConjunction2=object2.m_headConjunctions[headConjunctionIndex];
-                if (headConjunction1.length!=headConjunction2.length)
+            for (int headIndex=object1.m_headAtoms.length-1;headIndex>=0;--headIndex)
+                if (object1.m_headAtoms[headIndex]!=object2.m_headAtoms[headIndex])
                     return false;
-                for (int conjunctIndex=0;conjunctIndex<headConjunction1.length;conjunctIndex++)
-                    if (headConjunction1[conjunctIndex]!=headConjunction2[conjunctIndex])
-                        return false;
-            }
             for (int bodyIndex=object1.m_bodyAtoms.length-1;bodyIndex>=0;--bodyIndex)
                 if (object1.m_bodyAtoms[bodyIndex]!=object2.m_bodyAtoms[bodyIndex])
                     return false;
@@ -238,19 +212,15 @@ public class DLClause implements Serializable {
         }
         protected int getHashCode(DLClause object) {
             int hashCode=0;
-            for (int headConjunctionIndex=object.m_headConjunctions.length-1;headConjunctionIndex>=0;--headConjunctionIndex) {
-                Atom[] headConjunction=object.m_headConjunctions[headConjunctionIndex];
-                for (int conjunctIndex=0;conjunctIndex<headConjunction.length;conjunctIndex++) {
-                    hashCode+=headConjunction[conjunctIndex].hashCode();
-                }
-            }
+            for (int headIndex=object.m_headAtoms.length-1;headIndex>=0;--headIndex)
+                hashCode+=object.m_headAtoms[headIndex].hashCode();
             for (int bodyIndex=object.m_bodyAtoms.length-1;bodyIndex>=0;--bodyIndex)
                 hashCode+=object.m_bodyAtoms[bodyIndex].hashCode();
             return hashCode;
         }
     };
     
-    public static DLClause create(Atom[][] headConjunctions,Atom[] bodyAtoms) {
-        return s_interningManager.intern(new DLClause(headConjunctions,bodyAtoms));
+    public static DLClause create(Atom[] headAtoms,Atom[] bodyAtoms) {
+        return s_interningManager.intern(new DLClause(headAtoms,bodyAtoms));
     }
 }

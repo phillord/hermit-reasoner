@@ -21,7 +21,7 @@ public class NIRuleTest extends AbstractHermiTTest {
     static {
         // One disjunctive clause is needed in order to turn on nondeterminism in the tableau.
         Variable X=Variable.create("X");
-        DLClause cl=DLClause.create(new Atom[][] { { Atom.create(A,X) },{ Atom.create(B,X) } },new Atom[] { Atom.create(B,X) });
+        DLClause cl=DLClause.create(new Atom[] { Atom.create(A,X), Atom.create(B,X) },new Atom[] { Atom.create(B,X) });
         Set<DLClause> dlClauses=Collections.singleton(cl);
         Set<Atom> atoms=Collections.emptySet();
         TEST_DL_ONTOLOGY=new DLOntology("opaque:test",dlClauses,atoms,atoms,false,false,false,true);

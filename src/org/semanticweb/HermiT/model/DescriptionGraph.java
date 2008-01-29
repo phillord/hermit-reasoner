@@ -49,10 +49,10 @@ public class DescriptionGraph implements DLPredicate,Serializable {
                 if (vertexConcept.equals(startAtomicConcept))
                     numberOfVerticesWithStartConcept++;
             int index=0;
-            Atom[][] consequent=new Atom[numberOfVerticesWithStartConcept][1];
+            Atom[] consequent=new Atom[numberOfVerticesWithStartConcept];
             for (int vertex=0;vertex<m_atomicConceptsByVertices.length;vertex++)
                 if (m_atomicConceptsByVertices[vertex].equals(startAtomicConcept))
-                    consequent[index++][0]=Atom.create(ExistsDescriptionGraph.create(this,vertex),X);
+                    consequent[index++]=Atom.create(ExistsDescriptionGraph.create(this,vertex),X);
             resultingDLClauses.add(DLClause.create(consequent,antecedent));
         }
     }

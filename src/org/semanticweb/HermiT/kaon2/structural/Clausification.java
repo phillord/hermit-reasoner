@@ -50,13 +50,13 @@ public class Clausification {
         for (ObjectPropertyExpression[] inclusion : normalObjectPropertyInclusions) {
             Atom subRoleAtom=getAbstractRoleAtom(inclusion[0],X,Y);
             Atom superRoleAtom=getAbstractRoleAtom(inclusion[1],X,Y);
-            DLClause dlClause=DLClause.create(new Atom[][] { { superRoleAtom } },new Atom[] { subRoleAtom });
+            DLClause dlClause=DLClause.create(new Atom[] { superRoleAtom },new Atom[] { subRoleAtom });
             dlClauses.add(dlClause);
         }
         for (ObjectPropertyExpression[] inclusion : inverseObjectPropertyInclusions) {
             Atom subRoleAtom=getAbstractRoleAtom(inclusion[0],X,Y);
             Atom superRoleAtom=getAbstractRoleAtom(inclusion[1],Y,X);
-            DLClause dlClause=DLClause.create(new Atom[][] { { superRoleAtom } },new Atom[] { subRoleAtom });
+            DLClause dlClause=DLClause.create(new Atom[] { superRoleAtom },new Atom[] { subRoleAtom });
             dlClauses.add(dlClause);
         }
         boolean shouldUseNIRule=determineExpressivity.m_hasAtMostRestrictions && determineExpressivity.m_hasInverseRoles && (determineExpressivity.m_hasNominals || prepareForNIRule);
@@ -74,7 +74,7 @@ public class Clausification {
         for (DescriptionGraph descriptionGraph : descriptionGraphs)
             descriptionGraph.produceStartDLClauses(dlClauses);
         for (Rule rule : additionalRules)
-            dlClauses.add(convertRule(rule));
+            convertRule(rule,dlClauses);
         return new DLOntology(ontologyURI,dlClauses,positiveFacts,negativeFacts,determineExpressivity.m_hasInverseRoles,determineExpressivity.m_hasAtMostRestrictions,determineExpressivity.m_hasNominals,shouldUseNIRule);
     }
     protected static Atom getAbstractRoleAtom(ObjectPropertyExpression objectProperty,org.semanticweb.HermiT.model.Term first,org.semanticweb.HermiT.model.Term second) {
@@ -120,22 +120,23 @@ public class Clausification {
     protected static org.semanticweb.HermiT.model.Individual getIndividual(org.semanticweb.kaon2.api.owl.elements.Individual individual) {
         return org.semanticweb.HermiT.model.Individual.create(individual.getURI());
     }
-    protected static DLClause convertRule(Rule rule) {
-        Atom[][] head;
-        if (rule.isHeadConjunctive()) {
-            head=new Atom[1][rule.getHeadLength()];
-            for (int index=0;index<rule.getHeadLength();index++)
-                head[0][index]=convertLiteral(rule.getHeadLiteral(index));
-        }
-        else {
-            head=new Atom[rule.getHeadLength()][1];
-            for (int index=0;index<rule.getHeadLength();index++)
-                head[index][0]=convertLiteral(rule.getHeadLiteral(index));
-        }
+    protected static void convertRule(Rule rule,Set<DLClause> dlClauses) {
         Atom[] body=new Atom[rule.getBodyLength()];
         for (int index=0;index<rule.getBodyLength();index++)
             body[index]=convertLiteral(rule.getBodyLiteral(index));
-        return DLClause.create(head,body);
+        if (rule.isHeadConjunctive()) {
+            for (int index=0;index<rule.getHeadLength();index++) {
+                Atom[] head=new Atom[1];
+                head[0]=convertLiteral(rule.getHeadLiteral(index));
+                dlClauses.add(DLClause.create(head,body));
+            }
+        }
+        else {
+            Atom[] head=new Atom[rule.getHeadLength()];
+            for (int index=0;index<rule.getHeadLength();index++)
+                head[index]=convertLiteral(rule.getHeadLiteral(index));
+            dlClauses.add(DLClause.create(head,body));
+        }
     }
     protected static Atom convertLiteral(Literal literal) {
         DLPredicate dlPredicate=convertPredicate(literal.getPredicate());
@@ -179,9 +180,8 @@ public class Clausification {
             m_renameAtMost=renameAtMost;
         }
         public DLClause getDLClause() {
-            Atom[][] headAtoms=new Atom[m_headAtoms.size()][1];
-            for (int index=0;index<m_headAtoms.size();index++)
-                headAtoms[index][0]=m_headAtoms.get(index);
+            Atom[] headAtoms=new Atom[m_headAtoms.size()];
+            m_headAtoms.toArray(headAtoms);
             Atom[] bodyAtoms=new Atom[m_bodyAtoms.size()];
             m_bodyAtoms.toArray(bodyAtoms);
             DLClause dlClause=DLClause.create(headAtoms,bodyAtoms);

@@ -36,9 +36,9 @@ public class SyntacticClassifier {
             m_classification.put(atomicConcept.getURI(),superclasses);
         }
         for (DLClause dlClause : dlOntology.getDLClauses()) {
-            if (dlClause.getBodyLength()==1 && dlClause.getHeadLength()==1 && dlClause.getHeadConjunctionLength(0)==1) {
+            if (dlClause.getBodyLength()==1 && dlClause.getHeadLength()==1) {
                 Atom bodyAtom=dlClause.getBodyAtom(0);
-                Atom headAtom=dlClause.getHeadAtom(0,0);
+                Atom headAtom=dlClause.getHeadAtom(0);
                 if (bodyAtom.getDLPredicate() instanceof AtomicConcept && headAtom.getDLPredicate() instanceof AtomicConcept) {
                     AtomicConcept subconcept=(AtomicConcept)bodyAtom.getDLPredicate();
                     AtomicConcept superconcept=(AtomicConcept)headAtom.getDLPredicate();

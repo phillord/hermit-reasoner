@@ -424,14 +424,12 @@ public class DLClauseEvaluator implements Serializable {
                 if (!atom.getDLPredicate().equals(NodeIDLessThan.INSTANCE))
                     numberOfRealAtoms++;
             }
-            for (int disjunctionIndex=0;disjunctionIndex<m_dlClause.getHeadLength();disjunctionIndex++) {
-                for (int conjunctIndex=0;conjunctIndex<m_dlClause.getHeadConjunctionLength(disjunctionIndex);conjunctIndex++) {
-                    Atom atom=m_dlClause.getHeadAtom(disjunctionIndex,conjunctIndex);
-                    for (int argumentIndex=0;argumentIndex<atom.getArity();argumentIndex++) {
-                        Variable variable=atom.getArgumentVariable(argumentIndex);
-                        if (variable!=null && !m_variables.contains(variable))
-                            m_variables.add(variable);
-                    }
+            for (int headIndex=0;headIndex<m_dlClause.getHeadLength();headIndex++) {
+                Atom atom=m_dlClause.getHeadAtom(headIndex);
+                for (int argumentIndex=0;argumentIndex<atom.getArity();argumentIndex++) {
+                    Variable variable=atom.getArgumentVariable(argumentIndex);
+                    if (variable!=null && !m_variables.contains(variable))
+                        m_variables.add(variable);
                 }
             }
             m_boundSoFar=new HashSet<Variable>();
@@ -526,32 +524,28 @@ public class DLClauseEvaluator implements Serializable {
             if (m_dlClause.getHeadLength()==0)
                 m_workers.add(new SetClash(m_extensionManager,m_unionDependencySet));
             else if (m_dlClause.getHeadLength()==1) {
-                for (int conjunctIndex=0;conjunctIndex<m_dlClause.getHeadConjunctionLength(0);conjunctIndex++) {
-                    Atom atom=m_dlClause.getHeadAtom(0,conjunctIndex);
-                    switch (atom.getArity()) {
-                    case 1:
-                        m_workers.add(new DeriveUnaryFact(m_extensionManager,m_valuesBuffer,m_unionDependencySet,atom.getDLPredicate(),m_variables.indexOf(atom.getArgumentVariable(0))));
-                        break;
-                    case 2:
-                        m_workers.add(new DeriveBinaryFact(m_extensionManager,m_valuesBuffer,m_unionDependencySet,atom.getDLPredicate(),m_variables.indexOf(atom.getArgumentVariable(0)),m_variables.indexOf(atom.getArgumentVariable(1))));
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Unsupported atom arity.");
-                    }
+                Atom atom=m_dlClause.getHeadAtom(0);
+                switch (atom.getArity()) {
+                case 1:
+                    m_workers.add(new DeriveUnaryFact(m_extensionManager,m_valuesBuffer,m_unionDependencySet,atom.getDLPredicate(),m_variables.indexOf(atom.getArgumentVariable(0))));
+                    break;
+                case 2:
+                    m_workers.add(new DeriveBinaryFact(m_extensionManager,m_valuesBuffer,m_unionDependencySet,atom.getDLPredicate(),m_variables.indexOf(atom.getArgumentVariable(0)),m_variables.indexOf(atom.getArgumentVariable(1))));
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported atom arity.");
                 }
             }
             else {
                 int totalNumberOfArguments=0;
-                for (int disjunctionIndex=0;disjunctionIndex<m_dlClause.getHeadLength();disjunctionIndex++) {
-                    assert m_dlClause.getHeadConjunctionLength(disjunctionIndex)==1;
-                    totalNumberOfArguments+=m_dlClause.getHeadAtom(disjunctionIndex,0).getArity();
-                }
+                for (int headIndex=0;headIndex<m_dlClause.getHeadLength();headIndex++)
+                    totalNumberOfArguments+=m_dlClause.getHeadAtom(headIndex).getArity();
                 DLPredicate[] headDLPredicates=new DLPredicate[m_dlClause.getHeadLength()];
                 int[] copyValuesToArguments=new int[totalNumberOfArguments];
                 int index=0;
-                for (int disjunctionIndex=0;disjunctionIndex<m_dlClause.getHeadLength();disjunctionIndex++) {
-                    Atom atom=m_dlClause.getHeadAtom(disjunctionIndex,0);
-                    headDLPredicates[disjunctionIndex]=atom.getDLPredicate();
+                for (int headIndex=0;headIndex<m_dlClause.getHeadLength();headIndex++) {
+                    Atom atom=m_dlClause.getHeadAtom(headIndex);
+                    headDLPredicates[headIndex]=atom.getDLPredicate();
                     for (int argumentIndex=0;argumentIndex<atom.getArity();argumentIndex++) {
                         Variable variable=atom.getArgumentVariable(argumentIndex);
                         int variableIndex=m_variables.indexOf(variable);

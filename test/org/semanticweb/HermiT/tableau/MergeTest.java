@@ -19,7 +19,7 @@ public class MergeTest extends AbstractHermiTTest {
     static {
         Variable X=Variable.create("X");
         Variable Y=Variable.create("Y");
-        DLClause cl=DLClause.create(new Atom[][] { { Atom.create(EXISTS_NEG_A,X) } },new Atom[] { Atom.create(R,X,Y),Atom.create(A,Y) });
+        DLClause cl=DLClause.create(new Atom[] { Atom.create(EXISTS_NEG_A,X) },new Atom[] { Atom.create(R,X,Y),Atom.create(A,Y) });
         Set<DLClause> dlClauses=Collections.singleton(cl);
         Set<Atom> atoms=Collections.emptySet();
         TEST_DL_ONTOLOGY=new DLOntology("opaque:test",dlClauses,atoms,atoms,false,false,false,false);
