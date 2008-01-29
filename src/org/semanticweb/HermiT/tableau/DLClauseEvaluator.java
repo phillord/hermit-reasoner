@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.HashSet;
 
 import org.semanticweb.HermiT.model.*;
+import org.semanticweb.HermiT.monitor.*;
 
 public class DLClauseEvaluator implements Serializable {
     private static final long serialVersionUID=4639844159658590456L;
@@ -20,7 +21,7 @@ public class DLClauseEvaluator implements Serializable {
     
     public DLClauseEvaluator(ExtensionManager extensionManager,DLClause dlClause,ExtensionTable.Retrieval firstAtomRetrieval) {
         m_extensionManager=extensionManager;
-        Compiler compiler=new Compiler(m_extensionManager,dlClause,firstAtomRetrieval);
+        Compiler compiler=new Compiler(this,m_extensionManager,dlClause,firstAtomRetrieval);
         m_valuesBuffer=compiler.m_valuesBuffer;
         m_unionDependencySet=compiler.m_unionDependencySet;
         m_retrievals=new ExtensionTable.Retrieval[compiler.m_retrievals.size()];
@@ -246,6 +247,44 @@ public class DLClauseEvaluator implements Serializable {
         }
     }
 
+    protected static final class CallMatchStartedOnMonitor implements Worker,Serializable {
+        private static final long serialVersionUID=8736659573939242252L;
+
+        protected final TableauMonitor m_tableauMonitor;
+        protected final DLClauseEvaluator m_dlClauseEvaluator;
+        
+        public CallMatchStartedOnMonitor(TableauMonitor tableauMonitor,DLClauseEvaluator dlClauseEvaluator) {
+            m_tableauMonitor=tableauMonitor;
+            m_dlClauseEvaluator=dlClauseEvaluator;
+        }
+        public int execute(int programCounter) {
+            m_tableauMonitor.dlClauseMatchedStarted(m_dlClauseEvaluator);
+            return programCounter+1;
+        }
+        public String toString() {
+            return "Monitor -> Match started";
+        }
+    }
+    
+    protected static final class CallMatchFinishedOnMonitor implements Worker,Serializable {
+        private static final long serialVersionUID=1046400921858176361L;
+
+        protected final TableauMonitor m_tableauMonitor;
+        protected final DLClauseEvaluator m_dlClauseEvaluator;
+        
+        public CallMatchFinishedOnMonitor(TableauMonitor tableauMonitor,DLClauseEvaluator dlClauseEvaluator) {
+            m_tableauMonitor=tableauMonitor;
+            m_dlClauseEvaluator=dlClauseEvaluator;
+        }
+        public int execute(int programCounter) {
+            m_tableauMonitor.dlClauseMatchedFinished(m_dlClauseEvaluator);
+            return programCounter+1;
+        }
+        public String toString() {
+            return "Monitor -> Match finished";
+        }
+    }
+    
     protected static final class SetClash implements Worker,Serializable {
         private static final long serialVersionUID=-4981087765064918953L;
 
@@ -358,6 +397,7 @@ public class DLClauseEvaluator implements Serializable {
     }
     
     protected static class Compiler {
+        protected final DLClauseEvaluator m_dlClauseEvalautor;
         protected final ExtensionManager m_extensionManager;
         protected final DLClause m_dlClause;
         protected final List<Variable> m_variables;
@@ -368,7 +408,8 @@ public class DLClauseEvaluator implements Serializable {
         protected final List<Worker> m_workers;
         protected final List<Integer> m_labels;
 
-        public Compiler(ExtensionManager extensionManager,DLClause dlClause,ExtensionTable.Retrieval firstAtomRetrieval) {
+        public Compiler(DLClauseEvaluator dlClauseEvalautor,ExtensionManager extensionManager,DLClause dlClause,ExtensionTable.Retrieval firstAtomRetrieval) {
+            m_dlClauseEvalautor=dlClauseEvalautor;
             m_extensionManager=extensionManager;
             m_dlClause=dlClause;
             m_variables=new ArrayList<Variable>();
@@ -480,6 +521,8 @@ public class DLClauseEvaluator implements Serializable {
             }
         }
         protected void compileHead() {
+            if (m_extensionManager.m_tableauMonitor!=null)
+                m_workers.add(new CallMatchStartedOnMonitor(m_extensionManager.m_tableauMonitor,m_dlClauseEvalautor));
             if (m_dlClause.getHeadLength()==0)
                 m_workers.add(new SetClash(m_extensionManager,m_unionDependencySet));
             else if (m_dlClause.getHeadLength()==1) {
@@ -518,6 +561,8 @@ public class DLClauseEvaluator implements Serializable {
                 }
                 m_workers.add(new DeriveDisjunction(m_valuesBuffer,m_unionDependencySet,m_extensionManager.m_tableau,headDLPredicates,copyValuesToArguments));
             }
+            if (m_extensionManager.m_tableauMonitor!=null)
+                m_workers.add(new CallMatchFinishedOnMonitor(m_extensionManager.m_tableauMonitor,m_dlClauseEvalautor));
         }
         protected void compileCheckUnboundVariableMatches(Atom atom,ExtensionTable.Retrieval retrieval,int jumpIndex) {
             for (int outerArgumentIndex=0;outerArgumentIndex<atom.getArity();outerArgumentIndex++) {
