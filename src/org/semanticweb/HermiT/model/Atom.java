@@ -49,6 +49,12 @@ public class Atom implements Serializable {
                 variables.add((Variable)argument);
         }
     }
+    public boolean containsVariable(Variable variable) {
+        for (int argumentIndex=m_arguments.length-1;argumentIndex>=0;--argumentIndex)
+            if (m_arguments[argumentIndex].equals(variable))
+                return true;
+        return false;
+    }
     public String toString(Namespaces namespaces) {
         StringBuffer buffer=new StringBuffer();
         if (s_infixPredicates.contains(m_dlPredicate)) {

@@ -14,11 +14,11 @@ public class GroundDisjunction implements Serializable {
     protected GroundDisjunction m_previousGroundDisjunction;
     protected GroundDisjunction m_nextGroundDisjunction;
 
-    public GroundDisjunction(Tableau tableau,DLPredicate[] dlPredicates,int[] disjunctStart,Node[] arguments,PermanentDependencySet dependencySet) {
+    public GroundDisjunction(Tableau tableau,DLPredicate[] dlPredicates,int[] disjunctStart,Node[] arguments,DependencySet dependencySet) {
         m_dlPredicates=dlPredicates;
         m_disjunctStart=disjunctStart;
         m_arguments=arguments;
-        m_dependencySet=dependencySet;
+        m_dependencySet=tableau.m_dependencySetFactory.getPermanent(dependencySet);
         tableau.m_dependencySetFactory.addUsage(m_dependencySet);
     }
     public void destroy(Tableau tableau) {
@@ -34,7 +34,7 @@ public class GroundDisjunction implements Serializable {
     public Node getArgument(int disjunctIndex,int argumentIndex) {
         return m_arguments[m_disjunctStart[disjunctIndex]+argumentIndex];
     }
-    public PermanentDependencySet getDependencySet() {
+    public DependencySet getDependencySet() {
         return m_dependencySet;
     }
     public boolean isSatisfied(Tableau tableau) {

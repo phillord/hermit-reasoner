@@ -24,7 +24,7 @@ import org.semanticweb.HermiT.*;
  */
 public class DLOntology implements Serializable {
     private static final long serialVersionUID=3189937959595369812L;
-    protected static final String CFRL=System.getProperty("line.separator");
+    protected static final String CRLF=System.getProperty("line.separator");
 
     protected final String m_ontologyURI;
     protected final Set<DLClause> m_dlClauses;
@@ -338,25 +338,25 @@ public class DLOntology implements Serializable {
     public String toString(Namespaces namespaces) {
         StringBuffer stringBuffer=new StringBuffer();
         stringBuffer.append("DL-clauses: [");
-        stringBuffer.append(CFRL);
+        stringBuffer.append(CRLF);
         for (DLClause dlClause : m_dlClauses) {
             stringBuffer.append("  ");
             stringBuffer.append(dlClause.toString(namespaces));
-            stringBuffer.append(CFRL);
+            stringBuffer.append(CRLF);
         }
         stringBuffer.append("]");
-        stringBuffer.append(CFRL);
+        stringBuffer.append(CRLF);
         stringBuffer.append("ABox: [");
-        stringBuffer.append(CFRL);
+        stringBuffer.append(CRLF);
         for (Atom atom : m_positiveFacts) {
             stringBuffer.append("  ");
             stringBuffer.append(atom.toString(namespaces));
-            stringBuffer.append(CFRL);
+            stringBuffer.append(CRLF);
         }
         for (Atom atom : m_negativeFacts) {
             stringBuffer.append("  !");
             stringBuffer.append(atom.toString(namespaces));
-            stringBuffer.append(CFRL);
+            stringBuffer.append(CRLF);
         }
         stringBuffer.append("]");
         return stringBuffer.toString();

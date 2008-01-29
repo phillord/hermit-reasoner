@@ -125,6 +125,22 @@ public class DLClause implements Serializable {
         return false;
     }
     public boolean isInverseFunctionalityAxiom() {
+        if (getBodyLength()==2 && getHeadLength()==1 && getHeadConjunctionLength(0)==1) {
+            DLPredicate atomicAbstractRole=getBodyAtom(0).getDLPredicate();
+            if (atomicAbstractRole instanceof AtomicAbstractRole) {
+                if (getBodyAtom(1).getDLPredicate().equals(atomicAbstractRole) && getHeadAtom(0,0).getDLPredicate().equals(Equality.INSTANCE)) {
+                    Variable x=getBodyAtom(0).getArgumentVariable(1);
+                    if (x!=null && x.equals(getBodyAtom(1).getArgument(1))) {
+                        Variable y1=getBodyAtom(0).getArgumentVariable(0);
+                        Variable y2=getBodyAtom(1).getArgumentVariable(0);
+                        Variable headY1=getHeadAtom(0,0).getArgumentVariable(0);
+                        Variable headY2=getHeadAtom(0,0).getArgumentVariable(1);
+                        if (y1!=null && y2!=null && !y1.equals(y2) && headY1!=null && headY2!=null && ((y1.equals(headY1) && y2.equals(headY2)) || (y1.equals(headY2) && y2.equals(headY1))))
+                            return true;
+                    }
+                }
+            }
+        }
         return false;
     }
     public boolean isGuardedInverseFunctionalityAxiom() {

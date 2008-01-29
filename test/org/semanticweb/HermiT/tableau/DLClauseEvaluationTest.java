@@ -28,7 +28,6 @@ public class DLClauseEvaluationTest extends AbstractHermiTTest {
 
     protected Tableau m_tableau;
     protected ExtensionManager m_extensionManager;
-    protected DLClauseCompiler m_dlClauseCompiler;
 
     public DLClauseEvaluationTest(String name) {
         super(name);
@@ -39,7 +38,6 @@ public class DLClauseEvaluationTest extends AbstractHermiTTest {
         ExistentialsExpansionStrategy existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
         m_tableau=new Tableau(null,existentialsExpansionStrategy,TEST_DL_ONTOLOGY);
         m_extensionManager=m_tableau.getExtensionManager();
-        m_dlClauseCompiler=new DLClauseCompiler(m_tableau);
     }
     public void testEvaluator() {
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();

@@ -158,7 +158,7 @@ public final class Tableau implements Serializable {
                     m_tableauMonitor.processGroundDisjunctionStarted(groundDisjunction);
                 m_firstUnprocessedGroundDisjunction=groundDisjunction.m_previousGroundDisjunction;
                 if (!groundDisjunction.isSatisfied(this)) {
-                    PermanentDependencySet dependencySet=groundDisjunction.getDependencySet();
+                    DependencySet dependencySet=groundDisjunction.getDependencySet();
                     if (groundDisjunction.getNumberOfDisjuncts()>1) {
                         BranchingPoint branchingPoint=new DisjunctionBranchingPoint(this,groundDisjunction);
                         pushBranchingPoint(branchingPoint);

@@ -13,8 +13,6 @@ import org.semanticweb.HermiT.model.*;
 public class HyperresolutionManager implements Serializable {
     private static final long serialVersionUID=-4880817508962130189L;
 
-    protected static final Node[] EMPTY_TUPLE=new Node[0];
-    
     protected final Tableau m_tableau;
     protected final ExtensionTable.Retrieval[] m_deltaOldRetrievals;
     protected final Map<DLPredicate,CompiledDLClauseInfo> m_tupleConsumersByDeltaPredicate;
@@ -27,21 +25,23 @@ public class HyperresolutionManager implements Serializable {
             ExtensionTable extensionTable=extensionManager.m_allExtensionTablesArray[index];
             m_deltaOldRetrievals[index]=extensionTable.createRetrieval(new boolean[extensionTable.getArity()],ExtensionTable.View.DELTA_OLD);
         }
-        DLClauseCompiler compiler=new DLClauseCompiler(m_tableau);
         m_tupleConsumersByDeltaPredicate=new HashMap<DLPredicate,CompiledDLClauseInfo>();
         for (DLClause dlClause : m_tableau.m_dlOntology.getDLClauses()) {
             BodyAtomsSwapper bodyAtomsSwapper=new BodyAtomsSwapper(dlClause);
-            ExtensionTable.View[] extensionViews=new ExtensionTable.View[dlClause.getBodyLength()];
             for (int bodyAtomIndex=0;bodyAtomIndex<dlClause.getBodyLength();bodyAtomIndex++) {
-                DLClause swappedDLClause=bodyAtomsSwapper.getSwappedDLClause(bodyAtomIndex,extensionViews);
-                TupleConsumer tupleConsumer=compiler.compile(swappedDLClause,extensionViews);
-                addTupleConsumer(swappedDLClause.getBodyAtom(0).getDLPredicate(),tupleConsumer,swappedDLClause);
+                DLClause swappedDLClause=bodyAtomsSwapper.getSwappedDLClause(bodyAtomIndex);
+                DLPredicate deltaDLPredicate=swappedDLClause.getBodyAtom(0).getDLPredicate();
+                ExtensionTable.Retrieval firstTableRetrieval=null;
+                for (int index=0;index<m_deltaOldRetrievals.length;index++)
+                    if (m_deltaOldRetrievals[index].getExtensionTable().getArity()==deltaDLPredicate.getArity()+1) {
+                        firstTableRetrieval=m_deltaOldRetrievals[index];
+                        break;
+                    }
+                assert firstTableRetrieval!=null;
+                CompiledDLClauseInfo nextTupleConsumer=new CompiledDLClauseInfo(extensionManager,swappedDLClause,firstTableRetrieval,m_tupleConsumersByDeltaPredicate.get(deltaDLPredicate));
+                m_tupleConsumersByDeltaPredicate.put(deltaDLPredicate,nextTupleConsumer);
             }
         }
-    }
-    protected void addTupleConsumer(DLPredicate deltaDLPredicate,TupleConsumer tupleConsumer,DLClause dlClause) {
-        CompiledDLClauseInfo nextTupleConsumer=new CompiledDLClauseInfo(tupleConsumer,m_tupleConsumersByDeltaPredicate.get(deltaDLPredicate));
-        m_tupleConsumersByDeltaPredicate.put(deltaDLPredicate,nextTupleConsumer);
     }
     public boolean evaluate() {
         m_tableau.m_nominalIntroductionManager.processTargets();
@@ -58,10 +58,9 @@ public class HyperresolutionManager implements Serializable {
         retrieval.open();
         Object[] tupleBuffer=retrieval.getTupleBuffer();
         while (!retrieval.afterLast()) {
-            DependencySet dependencySet=retrieval.getDependencySet();
             CompiledDLClauseInfo compiledDLClauseInfo=m_tupleConsumersByDeltaPredicate.get(tupleBuffer[0]);
             while (compiledDLClauseInfo!=null) {
-                compiledDLClauseInfo.m_tupleConsumer.consumeTuple(tupleBuffer,dependencySet);
+                compiledDLClauseInfo.applyDLClause();
                 compiledDLClauseInfo=compiledDLClauseInfo.m_next;
             }
             retrieval.next();
@@ -75,14 +74,13 @@ public class HyperresolutionManager implements Serializable {
         return hasChange;
     }
     
-    protected static final class CompiledDLClauseInfo implements Serializable {
-        private static final long serialVersionUID=1927165256091855708L;
+    protected static final class CompiledDLClauseInfo extends DLClauseEvaluator {
+        private static final long serialVersionUID=2873489982404000730L;
 
-        protected final TupleConsumer m_tupleConsumer;
         protected final CompiledDLClauseInfo m_next;
-        
-        public CompiledDLClauseInfo(TupleConsumer tupleConsumer,CompiledDLClauseInfo next) {
-            m_tupleConsumer=tupleConsumer;
+
+        public CompiledDLClauseInfo(ExtensionManager extensionManager,DLClause dlClause,ExtensionTable.Retrieval firstAtomRetrieval,CompiledDLClauseInfo next) {
+            super(extensionManager,dlClause,firstAtomRetrieval);
             m_next=next;
         }
     }
@@ -99,7 +97,7 @@ public class HyperresolutionManager implements Serializable {
             m_reorderedAtoms=new ArrayList<Atom>(m_dlClause.getBodyLength());
             m_boundVariables=new HashSet<Variable>();
         }
-        public DLClause getSwappedDLClause(int bodyIndex,ExtensionTable.View[] extensionViews) {
+        public DLClause getSwappedDLClause(int bodyIndex) {
             for (int index=m_usedAtoms.length-1;index>=0;--index)
                 m_usedAtoms[index]=false;
             m_reorderedAtoms.clear();
@@ -108,7 +106,6 @@ public class HyperresolutionManager implements Serializable {
             atom.getVariables(m_boundVariables);
             m_reorderedAtoms.add(atom);
             m_usedAtoms[bodyIndex]=true;
-            extensionViews[m_reorderedAtoms.size()-1]=ExtensionTable.View.DELTA_OLD;
             while (m_reorderedAtoms.size()!=m_usedAtoms.length) {
                 Atom bestAtom=null;
                 int bestAtomIndex=-1;
@@ -139,7 +136,6 @@ public class HyperresolutionManager implements Serializable {
                         }
                     }
                 m_reorderedAtoms.add(bestAtom);
-                extensionViews[m_reorderedAtoms.size()-1]=ExtensionTable.View.EXTENSION_THIS;
                 m_usedAtoms[bestAtomIndex]=true;
                 bestAtom.getVariables(m_boundVariables);
             }

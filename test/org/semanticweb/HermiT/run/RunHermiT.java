@@ -56,8 +56,6 @@ public class RunHermiT {
         }
         long start=System.currentTimeMillis();
 
-//        hermit.isSubsumedBy("http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteLoire","http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FrenchWine");
-
         /* These are the hard tests in 'galen-ians-full-undoctored.owl'. They require backtracking in the presence of individual reuse. */
 //        hermit.isSubsumedBy("http://www.co-ode.org/ontologies/galen#AbdominalCavity","http://www.co-ode.org/ontologies/galen#ActualCavity");
 //        hermit.isSubsumedBy("http://www.co-ode.org/ontologies/galen#AbdominalAorta","http://www.co-ode.org/ontologies/galen#ArteryWhichHasLaterality");
@@ -66,14 +64,15 @@ public class RunHermiT {
 //        hermit.isSubsumedBy("http://www.co-ode.org/ontologies/galen#RenalAbscess","http://www.co-ode.org/ontologies/galen#ActualCavity");
 //        hermit.isSubsumedBy("http://www.co-ode.org/ontologies/galen#RightBundleBranchBlock","http://www.co-ode.org/ontologies/galen#LeftBundleBranchBlock");
 
-//        hermit.isSatisfiable("http://www.co-ode.org/ontologies/galen#Abdomen");
+//        hermit.getTableau().isSatisfiable(org.semanticweb.HermiT.model.AtomicConcept.create("http://www.co-ode.org/ontologies/galen#Abdomen"));
+        hermit.isSatisfiable("http://www.co-ode.org/ontologies/galen#Abdomen");
 //        hermit.isSatisfiable("http://www.co-ode.org/ontologies/galen#AbdominalCavity");
 //        hermit.isSatisfiable("http://www.co-ode.org/ontologies/galen#AbdominalAorta");
 //        hermit.isSatisfiable("http://www.co-ode.org/ontologies/galen#CortexOfKidney");
 //        hermit.isSatisfiable("http://www.co-ode.org/ontologies/galen#AcuteErosionOfStomach");
 //        hermit.isSatisfiable("http://www.co-ode.org/ontologies/galen#AnteriorCruciateLigament");
       
-        subsumptionHierarchy=hermit.getSubsumptionHierarchy();
+//        subsumptionHierarchy=hermit.getSubsumptionHierarchy();
 
         long duration=System.currentTimeMillis()-start;
         System.out.println("The reasoning task took "+duration+" ms");
