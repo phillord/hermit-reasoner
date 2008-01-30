@@ -20,9 +20,9 @@
     <property name="javadocdir" value="${releasedir}/javadoc"/>
 
     <!-- structure of 3rdparty libraries -->
-    <property name="3rdpartydir" value="${projectroot}/3rdparty"/>
-    <property name="kaon2" value="${3rdpartydir}/kaon2/kaon2.jar"/>
-    <property name="junit" value="${3rdpartydir}/junit/junit-4.4.jar"/>
+    <property name="3rdpartydir" value="${projectroot}/../ThirdPartyOwlTools"/>
+    <property name="kaon2" value="${3rdpartydir}/kaon2/2008-01-14/kaon2.jar"/>
+    <property name="junit" value="${3rdpartydir}/junit/4.4/junit-4.4.jar"/>
 
     <!-- SOURCE PATHS -->
     <path id="sourcepath">
