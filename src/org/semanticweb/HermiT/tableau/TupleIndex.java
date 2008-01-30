@@ -272,54 +272,51 @@ public final class TupleIndex implements Serializable {
         protected final TupleIndex m_tupleIndex;
         protected final Object[] m_bindingsBuffer;
         protected final int[] m_selectionIndices;
-        protected int m_retrievalRoot;
-        protected int m_current;
+        protected final int m_selectionIndicesLength;
+        protected final int m_indexingSequenceLength;
+        protected int m_currentTrieNode;
         
         public TupleIndexRetrieval(TupleIndex tupleIndex,Object[] bindingsBuffer,int[] selectionIndices) {
             m_tupleIndex=tupleIndex;
             m_bindingsBuffer=bindingsBuffer;
             m_selectionIndices=selectionIndices;
+            m_selectionIndicesLength=m_selectionIndices.length;
+            m_indexingSequenceLength=tupleIndex.m_indexingSequence.length;
         }
         public void open() {
-            int trieNode=m_tupleIndex.m_root;
-            int retrievalRootDepth=0;
-            for (int position=0;position<m_selectionIndices.length;position++) {
+            m_currentTrieNode=m_tupleIndex.m_root;
+            for (int position=0;position<m_selectionIndicesLength;position++) {
                 Object object=m_bindingsBuffer[m_selectionIndices[position]];
-                trieNode=m_tupleIndex.getChildNode(trieNode,object);
-                if (trieNode==-1) {
-                    m_current=-1;
+                m_currentTrieNode=m_tupleIndex.getChildNode(m_currentTrieNode,object);
+                if (m_currentTrieNode==-1)
                     return;
-                }
-                retrievalRootDepth++;
             }
-            m_retrievalRoot=trieNode;
-            if (trieNode==m_tupleIndex.m_root && m_tupleIndex.m_trieNodeManager.getTrieNodeComponent(m_tupleIndex.m_root,TRIE_NODE_FIRST_CHILD)==-1)
-                m_current=-1;
-            else
-                m_current=getFirstLeafTrieNodeUnder(trieNode,retrievalRootDepth);
+            if (m_selectionIndicesLength==0 && m_tupleIndex.m_trieNodeManager.getTrieNodeComponent(m_tupleIndex.m_root,TRIE_NODE_FIRST_CHILD)==-1)
+                m_currentTrieNode=-1;
+            else {
+                for (int index=m_selectionIndicesLength;index<m_indexingSequenceLength;index++)
+                    m_currentTrieNode=m_tupleIndex.m_trieNodeManager.getTrieNodeComponent(m_currentTrieNode,TRIE_NODE_FIRST_CHILD);
+            }
         }
         public boolean afterLast() {
-            return m_current==-1;
+            return m_currentTrieNode==-1;
         }
         public int currentTupleIndex() {
-            return m_tupleIndex.m_trieNodeManager.getTrieNodeComponent(m_current,TRIE_NODE_TUPLE_INDEX);
+            return m_tupleIndex.m_trieNodeManager.getTrieNodeComponent(m_currentTrieNode,TRIE_NODE_TUPLE_INDEX);
         }
         public void next() {
-            int trieNode=m_current;
-            int trieNodeDepth=m_tupleIndex.m_indexingSequence.length;
-            while (trieNode!=m_retrievalRoot && m_tupleIndex.m_trieNodeManager.getTrieNodeComponent(trieNode,TRIE_NODE_NEXT_SIBLING)==-1) {
-                trieNode=m_tupleIndex.m_trieNodeManager.getTrieNodeComponent(trieNode,TRIE_NODE_PARENT);
+            int trieNodeDepth=m_indexingSequenceLength;
+            while (trieNodeDepth!=m_selectionIndicesLength && m_tupleIndex.m_trieNodeManager.getTrieNodeComponent(m_currentTrieNode,TRIE_NODE_NEXT_SIBLING)==-1) {
+                m_currentTrieNode=m_tupleIndex.m_trieNodeManager.getTrieNodeComponent(m_currentTrieNode,TRIE_NODE_PARENT);
                 trieNodeDepth--;
             }
-            if (trieNode==m_retrievalRoot)
-                m_current=-1;
-            else
-                m_current=getFirstLeafTrieNodeUnder(m_tupleIndex.m_trieNodeManager.getTrieNodeComponent(trieNode,TRIE_NODE_NEXT_SIBLING),trieNodeDepth);
-        }
-        protected int getFirstLeafTrieNodeUnder(int trieNode,int trieNodeDepth) {
-            for (int index=trieNodeDepth;index<m_tupleIndex.m_indexingSequence.length;index++)
-                trieNode=m_tupleIndex.m_trieNodeManager.getTrieNodeComponent(trieNode,TRIE_NODE_FIRST_CHILD);
-            return trieNode;
+            if (trieNodeDepth==m_selectionIndicesLength)
+                m_currentTrieNode=-1;
+            else {
+                m_currentTrieNode=m_tupleIndex.m_trieNodeManager.getTrieNodeComponent(m_currentTrieNode,TRIE_NODE_NEXT_SIBLING);
+                for (int index=trieNodeDepth;index<m_indexingSequenceLength;index++)
+                    m_currentTrieNode=m_tupleIndex.m_trieNodeManager.getTrieNodeComponent(m_currentTrieNode,TRIE_NODE_FIRST_CHILD);
+            }
         }
     }
 }
