@@ -15,7 +15,6 @@ public final class Node implements Serializable {
     protected static List<ExistentialConcept> NO_EXISTENTIALS=Collections.emptyList();
     public static final Node CACHE_BLOCKER=new Node(null);
 
-    public static final int GLOBALLY_UNIQUE_NODE=-1;
     public static enum NodeState { ACTIVE,MERGED,PRUNED }
     
     protected final Tableau m_tableau;
@@ -152,9 +151,6 @@ public final class Node implements Serializable {
     }
     public NodeType getNodeType() {
         return m_nodeType;
-    }
-    public boolean isGloballyUnique() {
-        return m_treeDepth==GLOBALLY_UNIQUE_NODE;
     }
     public int getTreeDepth() {
         return m_treeDepth;

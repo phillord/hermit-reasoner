@@ -184,27 +184,8 @@ public final class ExistentialExpansionManager implements Serializable {
                 Node functionalityNode=(Node)m_auxiliaryTuple[0];
                 m_binaryUnionDependencySet.m_dependencySets[0]=m_extensionManager.getConceptAssertionDependencySet(atLeastAbstractRoleConcept,forNode);
                 m_binaryUnionDependencySet.m_dependencySets[1]=(DependencySet)m_auxiliaryTuple[1];
-                if (functionalityNode.isGloballyUnique()) {
-                    m_extensionManager.setClash(m_binaryUnionDependencySet);
-                    if (m_tableau.m_tableauMonitor!=null) {
-                        Object[] roleTuple=new Object[3];
-                        if (atLeastAbstractRoleConcept.getOnAbstractRole() instanceof AtomicAbstractRole) {
-                            roleTuple[0]=atLeastAbstractRoleConcept.getOnAbstractRole();
-                            roleTuple[1]=forNode;
-                            roleTuple[1]=functionalityNode;
-                        }
-                        else {
-                            roleTuple[0]=((InverseAbstractRole)atLeastAbstractRoleConcept.getOnAbstractRole()).getInverseOf();
-                            roleTuple[1]=functionalityNode;
-                            roleTuple[1]=forNode;
-                        }
-                        m_tableau.m_tableauMonitor.clashDetected(new Object[] { atLeastAbstractRoleConcept,forNode },roleTuple);
-                    }
-                }
-                else {
-                    m_extensionManager.addRoleAssertion(atLeastAbstractRoleConcept.getOnAbstractRole(),forNode,functionalityNode,m_binaryUnionDependencySet);
-                    m_extensionManager.addConceptAssertion(atLeastAbstractRoleConcept.getToConcept(),functionalityNode,m_binaryUnionDependencySet);
-                }
+                m_extensionManager.addRoleAssertion(atLeastAbstractRoleConcept.getOnAbstractRole(),forNode,functionalityNode,m_binaryUnionDependencySet);
+                m_extensionManager.addConceptAssertion(atLeastAbstractRoleConcept.getToConcept(),functionalityNode,m_binaryUnionDependencySet);
                 if (m_tableau.m_tableauMonitor!=null)
                     m_tableau.m_tableauMonitor.existentialExpansionFinished(atLeastAbstractRoleConcept,forNode);
                 return true;

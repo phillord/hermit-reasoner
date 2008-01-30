@@ -40,18 +40,6 @@ public final class MergingManager implements Serializable {
     public boolean mergeNodes(Node node0,Node node1,DependencySet dependencySet) {
         if (!node0.isActive() || !node1.isActive() || node0==node1)
             return false;
-        else if (node0.isGloballyUnique() || node1.isGloballyUnique()) {
-            m_extensionManager.setClash(dependencySet);
-            if (m_tableauMonitor!=null) {
-                if (m_tableauMonitor!=null)
-                    m_tableauMonitor.mergeStarted(node0,node1);
-                Object[] auxiliaryTuple=new Object[] { Equality.INSTANCE,node0,node1 };
-                m_tableauMonitor.clashDetected(auxiliaryTuple);
-                if (m_tableauMonitor!=null)
-                    m_tableauMonitor.mergeFinished(node0,node1);
-            }
-            return true;
-        }
         else {
             if (m_tableauMonitor!=null)
                 m_tableauMonitor.mergeStarted(node0,node1);
