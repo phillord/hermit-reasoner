@@ -137,7 +137,7 @@ public class Normalization {
         for (Fact fact : ontology.createAxiomRequest(Fact.class).getAll()) {
             if (fact instanceof ClassMember) {
                 ClassMember classMember=(ClassMember)fact;
-                Description description=(Description)classMember.getDescription().getNNF().getSimplified();
+                Description description=classMember.getDescription().getNNF().getSimplified();
                 if (!isSimple(description)) {
                     Description definition=getDefinitionFor(description,alreadyExists);
                     if (!alreadyExists[0])
