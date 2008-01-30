@@ -18,16 +18,16 @@ public class RunHermiT {
         
         HermiT hermit=new HermiT();
 //        hermit.setBlockingCacheType(HermiT.BlockingCacheType.NOT_CACHED);
-//        hermit.setExistentialsType(HermiT.ExistentialsType.INDIVIDUAL_REUSE);
+        hermit.setExistentialsType(HermiT.ExistentialsType.INDIVIDUAL_REUSE);
         hermit.setTimingOn();
 //        hermit.setTimingWithPauseOn();
 //        hermit.setDebuggingOn(false);
 //        hermit.setDebuggingOn(true);
 
 //        hermit.loadOntology("file:/C:/Temp/full-galen-no-functionality.owl");
-//        hermit.loadOntology("file:/C:/Temp/galen-module1-no-functionality.owl");
+        hermit.loadOntology("file:/C:/Temp/galen-module1-no-functionality.owl");
 //        hermit.loadOntology("file:/C:/Work/ontologies/GALEN/galen-module1.owl");
-        hermit.loadOntology("file:/C:/Work/ontologies/GALEN/galen-ians-full-undoctored.owl");
+//        hermit.loadOntology("file:/C:/Work/ontologies/GALEN/galen-ians-full-undoctored.owl");
 //        hermit.loadOntology("file:/C:/Work/ontologies/GALEN/galen-ians-full-doctored.owl");
 //        hermit.loadOntology("file:/C:/Work/My%20Papers/2007/Representing%20and%20Reasoning%20about%20Structured%20Objects%20in%20OWL/ontologies/galen-ians-full-undoctored-modified.owl");
 //        hermit.loadOntology("file:/C:/Work/My%20Papers/2007/Representing%20and%20Reasoning%20about%20Structured%20Objects%20in%20OWL/ontologies/fma-module2.owl");
@@ -49,7 +49,7 @@ public class RunHermiT {
         PrintWriter printWriter=new PrintWriter("c:\\temp\\rules.txt");
         printWriter.println(hermit.getDLOntology().toString(hermit.getNamespaces()));
         printWriter.close();
-        
+
         if (hermit.getTableauMonitorType()!=HermiT.TableauMonitorType.DEBUGGER_HISTORY_ON && hermit.getTableauMonitorType()!=HermiT.TableauMonitorType.DEBUGGER_NO_HISTORY) {
             System.out.print("Press something to start...");
             pause();
@@ -64,8 +64,8 @@ public class RunHermiT {
 //        hermit.isSubsumedBy("http://www.co-ode.org/ontologies/galen#RenalAbscess","http://www.co-ode.org/ontologies/galen#ActualCavity");
 //        hermit.isSubsumedBy("http://www.co-ode.org/ontologies/galen#RightBundleBranchBlock","http://www.co-ode.org/ontologies/galen#LeftBundleBranchBlock");
 
-//        hermit.getTableau().isSatisfiable(org.semanticweb.HermiT.model.AtomicConcept.create("http://www.co-ode.org/ontologies/galen#Abdomen"));
-        hermit.isSatisfiable("http://www.co-ode.org/ontologies/galen#Abdomen");
+        hermit.getTableau().isSatisfiable(org.semanticweb.HermiT.model.AtomicConcept.create("http://www.co-ode.org/ontologies/galen#Abdomen"));
+//        hermit.isSatisfiable("http://www.co-ode.org/ontologies/galen#Abdomen");
 //        hermit.isSatisfiable("http://www.co-ode.org/ontologies/galen#AbdominalCavity");
 //        hermit.isSatisfiable("http://www.co-ode.org/ontologies/galen#AbdominalAorta");
 //        hermit.isSatisfiable("http://www.co-ode.org/ontologies/galen#CortexOfKidney");
