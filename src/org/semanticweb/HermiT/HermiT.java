@@ -37,7 +37,7 @@ public class HermiT implements Serializable {
     private static final long serialVersionUID=-8277117863937974032L;
 
     public static enum TableauMonitorType { NONE,TIMING,TIMING_WITH_PAUSE,DEBUGGER_NO_HISTORY,DEBUGGER_HISTORY_ON };
-    public static enum DirectBlockingType { PAIR_WISE,EQUALITY,OPTIMAL };
+    public static enum DirectBlockingType { PAIR_WISE,SINGLE,OPTIMAL };
     public static enum BlockingType { ANYWHERE,ANCESTOR };
     public static enum BlockingCacheType { CACHED,NOT_CACHED };
     public static enum ExistentialsType { CREATION_ORDER,EL,INDIVIDUAL_REUSE };
@@ -166,10 +166,10 @@ public class HermiT implements Serializable {
         DirectBlockingChecker directBlockingChecker=null;
         switch (m_directBlockingType) {
         case OPTIMAL:
-            directBlockingChecker=(m_dlOntology.hasAtMostRestrictions() && m_dlOntology.hasInverseRoles() ? new PairWiseDirectBlockingChecker() : new EqualityDirectBlockingChecker());
+            directBlockingChecker=(m_dlOntology.hasAtMostRestrictions() && m_dlOntology.hasInverseRoles() ? new PairWiseDirectBlockingChecker() : new SingleDirectBlockingChecker());
             break;
-        case EQUALITY:
-            directBlockingChecker=new EqualityDirectBlockingChecker();
+        case SINGLE:
+            directBlockingChecker=new SingleDirectBlockingChecker();
             break;
         case PAIR_WISE:
             directBlockingChecker=new PairWiseDirectBlockingChecker();

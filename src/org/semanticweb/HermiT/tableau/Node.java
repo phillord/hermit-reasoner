@@ -50,6 +50,9 @@ public final class Node implements Serializable {
         m_tableau=tableau;
         m_nodeID=-1;
     }
+    public Tableau getTableau() {
+        return m_tableau;
+    }
     protected void initialize(int nodeID,Node parent,NodeType nodeType,int treeDepth) {
         assert m_nodeID==-1;
         assert m_positiveLabel==null;

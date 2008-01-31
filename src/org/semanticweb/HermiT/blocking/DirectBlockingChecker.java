@@ -7,4 +7,5 @@ public interface DirectBlockingChecker {
     int blockingHashCode(Node node);
     boolean canBeBlocker(Node node);
     boolean canBeBlocked(Node node);
+    BlockingSignature getBlockingSignatureFor(Node node);
 }
