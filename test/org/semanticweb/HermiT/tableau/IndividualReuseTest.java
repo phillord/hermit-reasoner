@@ -21,8 +21,8 @@ public class IndividualReuseTest extends ReasonerTest {
         Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
         DLOntology dlOntology=clausification.clausify(true,m_ontology,true,noDescriptionGraphs);
         DirectBlockingChecker directBlockingChecker=PairWiseDirectBlockingChecker.INSTANCE;
-        BlockingCache blockingCache=new BlockingCache(directBlockingChecker);
-        BlockingStrategy blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingCache);
+        BlockingSignatureCache blockingSignatureCache=new BlockingSignatureCache(directBlockingChecker);
+        BlockingStrategy blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
         ExistentialsExpansionStrategy existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,false);
         return new Tableau(null,existentialsExpansionStrategy,dlOntology);
     }

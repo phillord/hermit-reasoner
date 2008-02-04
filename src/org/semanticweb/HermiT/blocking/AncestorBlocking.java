@@ -9,12 +9,12 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
     private static final long serialVersionUID=1075850000309773283L;
 
     protected final DirectBlockingChecker m_directBlockingChecker;
-    protected final BlockingCache m_blockingCache;
+    protected final BlockingSignatureCache m_blockingSignatureCache;
     protected Tableau m_tableau;
 
-    public AncestorBlocking(DirectBlockingChecker directBlockingChecker,BlockingCache blockingCache) {
+    public AncestorBlocking(DirectBlockingChecker directBlockingChecker,BlockingSignatureCache blockingSignatureCache) {
         m_directBlockingChecker=directBlockingChecker;
-        m_blockingCache=blockingCache;
+        m_blockingSignatureCache=blockingSignatureCache;
     }
     public void initialize(Tableau tableau) {
         m_tableau=tableau;
@@ -30,12 +30,11 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
                     node.setBlocked(null,false);
                 else if (parent.isBlocked())
                     node.setBlocked(parent,false);
-                else if (m_blockingCache!=null) {
-                    Node blocker=m_blockingCache.getBlocker(node);
-                    if (blocker==null)
-                        checkParentBlocking(node);
-                    else
+                else if (m_blockingSignatureCache!=null) {
+                    if (m_blockingSignatureCache.containsSignature(node))
                         node.setBlocked(Node.CACHE_BLOCKER,true);
+                    else
+                        checkParentBlocking(node);
                 }
                 else
                     checkParentBlocking(node);
@@ -66,12 +65,12 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
     public void nodeDestroyed(Node node) {
     }
     public void modelFound() {
-        if (m_blockingCache!=null) {
+        if (m_blockingSignatureCache!=null) {
             computeBlocking();
             Node node=m_tableau.getFirstTableauNode();
             while (node!=null) {
-                if (!node.isBlocked())
-                    m_blockingCache.addNode(node);
+                if (!node.isBlocked() && m_directBlockingChecker.canBeBlocker(node))
+                    m_blockingSignatureCache.addNode(node);
                 node=node.getNextTableauNode();
             }
         }

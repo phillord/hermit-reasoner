@@ -39,7 +39,7 @@ public class HermiT implements Serializable {
     public static enum TableauMonitorType { NONE,TIMING,TIMING_WITH_PAUSE,DEBUGGER_NO_HISTORY,DEBUGGER_HISTORY_ON };
     public static enum DirectBlockingType { PAIR_WISE,SINGLE,OPTIMAL };
     public static enum BlockingType { ANYWHERE,ANCESTOR };
-    public static enum BlockingCacheType { CACHED,NOT_CACHED };
+    public static enum BlockingSignatureCacheType { CACHED,NOT_CACHED };
     public static enum ExistentialsType { CREATION_ORDER,EL,INDIVIDUAL_REUSE };
 
     protected DLOntology m_dlOntology;
@@ -47,7 +47,7 @@ public class HermiT implements Serializable {
     protected TableauMonitorType m_tableauMonitorType;
     protected DirectBlockingType m_directBlockingType;
     protected BlockingType m_blockingType;
-    protected BlockingCacheType m_blockingCacheType;
+    protected BlockingSignatureCacheType m_blockingSignatureCacheType;
     protected ExistentialsType m_existentialsType;
     protected Tableau m_tableau;
     protected TableauSubsumptionChecker m_subsumptionChecker;
@@ -56,7 +56,7 @@ public class HermiT implements Serializable {
         setTableauMonitorType(TableauMonitorType.NONE);
         setDirectBlockingType(DirectBlockingType.OPTIMAL);
         setBlockingType(BlockingType.ANYWHERE);
-        setBlockingCacheType(BlockingCacheType.CACHED);
+        setBlockingSignatureCacheType(BlockingSignatureCacheType.CACHED);
         setExistentialsType(ExistentialsType.CREATION_ORDER);
     }
     public TableauMonitorType getTableauMonitorType() {
@@ -86,11 +86,11 @@ public class HermiT implements Serializable {
     public void setBlockingType(BlockingType blockingType) {
         m_blockingType=blockingType;
     }
-    public BlockingCacheType getBlockingCacheType() {
-        return m_blockingCacheType;
+    public BlockingSignatureCacheType getBlockingSignatureCacheType() {
+        return m_blockingSignatureCacheType;
     }
-    public void setBlockingCacheType(BlockingCacheType blockingCacheType) {
-        m_blockingCacheType=blockingCacheType;
+    public void setBlockingSignatureCacheType(BlockingSignatureCacheType blockingSignatureCacheType) {
+        m_blockingSignatureCacheType=blockingSignatureCacheType;
     }
     public ExistentialsType getExistentialsType() {
         return m_existentialsType;
@@ -176,14 +176,14 @@ public class HermiT implements Serializable {
             break;
         }
         
-        BlockingCache blockingCache=null;
+        BlockingSignatureCache blockingSignatureCache=null;
         if (!dlOntology.hasNominals()) {
-            switch (m_blockingCacheType) {
+            switch (m_blockingSignatureCacheType) {
             case CACHED:
-                blockingCache=new BlockingCache(directBlockingChecker);
+                blockingSignatureCache=new BlockingSignatureCache(directBlockingChecker);
                 break;
             case NOT_CACHED:
-                blockingCache=null;
+                blockingSignatureCache=null;
                 break;
             }
         }
@@ -191,10 +191,10 @@ public class HermiT implements Serializable {
         BlockingStrategy blockingStrategy=null;
         switch (m_blockingType) {
         case ANCESTOR:
-            blockingStrategy=new AncestorBlocking(directBlockingChecker,blockingCache);
+            blockingStrategy=new AncestorBlocking(directBlockingChecker,blockingSignatureCache);
             break;
         case ANYWHERE:
-            blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingCache);
+            blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
             break;
         }
         

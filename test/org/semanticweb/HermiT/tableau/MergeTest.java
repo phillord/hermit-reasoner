@@ -33,8 +33,8 @@ public class MergeTest extends AbstractHermiTTest {
     }
     protected void setUp() {
         DirectBlockingChecker directBlockingChecker=new PairWiseDirectBlockingChecker();
-        BlockingCache blockingCache=new BlockingCache(directBlockingChecker);
-        BlockingStrategy blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingCache);
+        BlockingSignatureCache blockingSignatureCache=new BlockingSignatureCache(directBlockingChecker);
+        BlockingStrategy blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
         ExistentialsExpansionStrategy existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
         m_tableau=new Tableau(null,existentialsExpansionStrategy,TEST_DL_ONTOLOGY);
         m_extensionManager=m_tableau.getExtensionManager();

@@ -35,8 +35,8 @@ public class NIRuleTest extends AbstractHermiTTest {
         super(name);
     }
     protected void setUp() {
-        BlockingCache blockingCache=new BlockingCache(PairWiseDirectBlockingChecker.INSTANCE);
-        BlockingStrategy blockingStrategy=new AnywhereBlocking(PairWiseDirectBlockingChecker.INSTANCE,blockingCache);
+        BlockingSignatureCache blockingSignatureCache=new BlockingSignatureCache(PairWiseDirectBlockingChecker.INSTANCE);
+        BlockingStrategy blockingStrategy=new AnywhereBlocking(PairWiseDirectBlockingChecker.INSTANCE,blockingSignatureCache);
         ExistentialsExpansionStrategy existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
         m_tableau=new Tableau(null,existentialsExpansionStrategy,TEST_DL_ONTOLOGY);
         m_extensionManager=m_tableau.getExtensionManager();

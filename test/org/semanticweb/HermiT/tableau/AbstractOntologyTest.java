@@ -160,8 +160,8 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
     protected Tableau getTableau() throws Exception {
         DLOntology dlOntology=getDLOntology();
         DirectBlockingChecker directBlockingChecker=PairWiseDirectBlockingChecker.INSTANCE;
-        BlockingCache blockingCache=new BlockingCache(directBlockingChecker);
-        BlockingStrategy blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingCache);
+        BlockingSignatureCache blockingSignatureCache=new BlockingSignatureCache(directBlockingChecker);
+        BlockingStrategy blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
         ExistentialsExpansionStrategy existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
         return new Tableau(getTableauMonitor(),existentialsExpansionStrategy,dlOntology);
     }
