@@ -1,4 +1,4 @@
-package org.semanticweb.HermiT.existentials;
+package org.semanticweb.HermiT.run;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -17,11 +17,12 @@ import org.semanticweb.kaon2.api.KAON2Manager;
 import org.semanticweb.kaon2.api.Ontology;
 
 import org.semanticweb.HermiT.blocking.*;
+import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
 import org.semanticweb.HermiT.kaon2.structural.*;
 import org.semanticweb.HermiT.model.*;
 import org.semanticweb.HermiT.tableau.*;
 
-public class Analysis {
+public class ReuseAnalysis {
     protected final DLOntology m_dlOntology;
     protected final Set<AtomicConcept> m_dontReuseConcepts;
     protected final Set<AtomicConcept> m_graphConcepts;
@@ -33,7 +34,7 @@ public class Analysis {
     protected final Map<NodePair,Node> m_arcCauses;
     protected final ExtensionTable m_extensionTable;
     
-    public Analysis(DLOntology dlOntology) {
+    public ReuseAnalysis(DLOntology dlOntology) {
         m_dlOntology=dlOntology;
         m_dontReuseConcepts=new TreeSet<AtomicConcept>(DLOntology.AtomicConceptComparator.INSTANCE);
         m_graphConcepts=new HashSet<AtomicConcept>();
@@ -237,7 +238,7 @@ public class Analysis {
         String physicalURI="file:/C:/Work/ontologies/GALEN/galen-module1.owl";
         
         DLOntology dlOntology=loadDLOntology(physicalURI);
-        Analysis analysis=new Analysis(dlOntology);
+        ReuseAnalysis analysis=new ReuseAnalysis(dlOntology);
         analysis.save(new File("c:\\Temp\\reuse.txt"),new File("c:\\Temp\\dont-reuse.txt"));
     }
     protected static DLOntology loadDLOntology(String physicalURI) throws Exception {

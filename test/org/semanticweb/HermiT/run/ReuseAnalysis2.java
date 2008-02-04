@@ -1,4 +1,4 @@
-package org.semanticweb.HermiT.existentials;
+package org.semanticweb.HermiT.run;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -18,12 +18,12 @@ import org.semanticweb.HermiT.kaon2.structural.*;
 import org.semanticweb.HermiT.model.*;
 import org.semanticweb.HermiT.tableau.*;
 
-public class Analysis2 {
+public class ReuseAnalysis2 {
     protected final DLOntology m_dlOntology;
     protected final Set<AtomicConcept> m_reuseConcepts;
     protected final ObjectHierarchy<Concept> m_conceptHierarchy;
     
-    public Analysis2(DLOntology dlOntology) {
+    public ReuseAnalysis2(DLOntology dlOntology) {
         m_dlOntology=dlOntology;
         m_reuseConcepts=new TreeSet<AtomicConcept>(DLOntology.AtomicConceptComparator.INSTANCE);
         m_conceptHierarchy=new ObjectHierarchy<Concept>();
@@ -67,7 +67,7 @@ public class Analysis2 {
         String physicalURI="file:/C:/Work/ontologies/GALEN/galen-module1.owl";
         
         DLOntology dlOntology=loadDLOntology(physicalURI);
-        Analysis2 analysis=new Analysis2(dlOntology);
+        ReuseAnalysis2 analysis=new ReuseAnalysis2(dlOntology);
         analysis.save(new File("c:\\Temp\\reuse.txt"),new File("c:\\Temp\\dont-reuse.txt"));
     }
     protected static DLOntology loadDLOntology(String physicalURI) throws Exception {
