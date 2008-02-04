@@ -301,7 +301,7 @@ public final class TupleIndex implements Serializable {
         public boolean afterLast() {
             return m_currentTrieNode==-1;
         }
-        public int currentTupleIndex() {
+        public int getCurrentTupleIndex() {
             return m_tupleIndex.m_trieNodeManager.getTrieNodeComponent(m_currentTrieNode,TRIE_NODE_TUPLE_INDEX);
         }
         public void next() {

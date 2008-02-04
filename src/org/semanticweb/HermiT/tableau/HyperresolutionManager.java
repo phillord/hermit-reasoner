@@ -10,19 +10,20 @@ import java.io.Serializable;
 
 import org.semanticweb.HermiT.model.*;
 
-public class HyperresolutionManager implements Serializable {
+public final class HyperresolutionManager implements Serializable {
     private static final long serialVersionUID=-4880817508962130189L;
 
     protected final Tableau m_tableau;
+    protected final ExtensionManager m_extensionManager;
     protected final ExtensionTable.Retrieval[] m_deltaOldRetrievals;
     protected final Map<DLPredicate,CompiledDLClauseInfo> m_tupleConsumersByDeltaPredicate;
     
     public HyperresolutionManager(Tableau tableau) {
         m_tableau=tableau;
-        ExtensionManager extensionManager=m_tableau.getExtensionManager();
-        m_deltaOldRetrievals=new ExtensionTable.Retrieval[extensionManager.m_allExtensionTablesArray.length];
-        for (int index=0;index<extensionManager.m_allExtensionTablesArray.length;index++) {
-            ExtensionTable extensionTable=extensionManager.m_allExtensionTablesArray[index];
+        m_extensionManager=m_tableau.getExtensionManager();
+        m_deltaOldRetrievals=new ExtensionTable.Retrieval[m_extensionManager.m_allExtensionTablesArray.length];
+        for (int index=0;index<m_extensionManager.m_allExtensionTablesArray.length;index++) {
+            ExtensionTable extensionTable=m_extensionManager.m_allExtensionTablesArray[index];
             m_deltaOldRetrievals[index]=extensionTable.createRetrieval(new boolean[extensionTable.getArity()],ExtensionTable.View.DELTA_OLD);
         }
         m_tupleConsumersByDeltaPredicate=new HashMap<DLPredicate,CompiledDLClauseInfo>();
@@ -38,26 +39,19 @@ public class HyperresolutionManager implements Serializable {
                         break;
                     }
                 assert firstTableRetrieval!=null;
-                CompiledDLClauseInfo nextTupleConsumer=new CompiledDLClauseInfo(extensionManager,swappedDLClause,firstTableRetrieval,m_tupleConsumersByDeltaPredicate.get(deltaDLPredicate));
+                CompiledDLClauseInfo nextTupleConsumer=new CompiledDLClauseInfo(m_extensionManager,swappedDLClause,firstTableRetrieval,m_tupleConsumersByDeltaPredicate.get(deltaDLPredicate));
                 m_tupleConsumersByDeltaPredicate.put(deltaDLPredicate,nextTupleConsumer);
             }
         }
     }
-    public boolean evaluate() {
-        m_tableau.m_nominalIntroductionManager.processTargets();
-        boolean hasChange=false;
-        while (propagateDeltaNew()) {
-            for (int index=0;index<m_deltaOldRetrievals.length;index++)
-                processDeltaOld(m_deltaOldRetrievals[index]);
-            hasChange=true;
-            m_tableau.m_nominalIntroductionManager.processTargets();
-        }
-        return hasChange;
+    public void applyDLClauses() {
+        for (int index=0;index<m_deltaOldRetrievals.length;index++)
+            processDeltaOld(m_deltaOldRetrievals[index]);
     }
     protected void processDeltaOld(ExtensionTable.Retrieval retrieval) {
         retrieval.open();
         Object[] tupleBuffer=retrieval.getTupleBuffer();
-        while (!retrieval.afterLast()) {
+        while (!retrieval.afterLast() && !m_extensionManager.containsClash()) {
             CompiledDLClauseInfo compiledDLClauseInfo=m_tupleConsumersByDeltaPredicate.get(tupleBuffer[0]);
             while (compiledDLClauseInfo!=null) {
                 compiledDLClauseInfo.applyDLClause();
@@ -66,7 +60,7 @@ public class HyperresolutionManager implements Serializable {
             retrieval.next();
         }
     }
-    protected boolean propagateDeltaNew() {
+    public boolean propagateDeltaNew() {
         boolean hasChange=false;
         for (int index=0;index<m_deltaOldRetrievals.length;index++)
             if (m_deltaOldRetrievals[index].getExtensionTable().propagateDeltaNew())

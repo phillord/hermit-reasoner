@@ -71,7 +71,7 @@ public class TupleIndexTest extends AbstractHermiTTest {
         retrieval.open();
         boolean[] used=new boolean[expected.length];
         while (!retrieval.afterLast()) {
-            int tupleIndex=retrieval.currentTupleIndex();
+            int tupleIndex=retrieval.getCurrentTupleIndex();
             boolean found=false;
             for (int index=0;index<expected.length;index++)
                 if (tupleIndex==expected[index] && !used[index]) {

@@ -137,6 +137,9 @@ public class ExtensionTableWithFullIndex extends ExtensionTable {
         public boolean afterLast() {
             return m_currentTupleIndex==-1;
         }
+        public int getCurrentTupleIndex() {
+            return m_currentTupleIndex;
+        }
         public void next() {
             m_currentTupleIndex++;
         }

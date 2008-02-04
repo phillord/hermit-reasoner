@@ -147,7 +147,7 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
             }
             super.open();
             while (!afterLast()) {
-                int tupleIndex=currentTupleIndex();
+                int tupleIndex=getCurrentTupleIndex();
                 if (m_firstTupleIndex<=tupleIndex && tupleIndex<m_afterLastTupleIndex) {
                     m_tupleTable.retrieveTuple(m_tupleBuffer,tupleIndex);
                     if (isTupleValid()) {
@@ -161,7 +161,7 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
         public void next() {
             super.next();
             while (!afterLast()) {
-                int tupleIndex=currentTupleIndex();
+                int tupleIndex=getCurrentTupleIndex();
                 if (m_firstTupleIndex<=tupleIndex && tupleIndex<m_afterLastTupleIndex) {
                     m_tupleTable.retrieveTuple(m_tupleBuffer,tupleIndex);
                     if (isTupleValid()) {

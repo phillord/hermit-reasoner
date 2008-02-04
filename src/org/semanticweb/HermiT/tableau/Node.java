@@ -1,8 +1,6 @@
 package org.semanticweb.HermiT.tableau;
 
 import java.util.Set;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Collection;
 import java.util.Collections;
@@ -41,10 +39,9 @@ public final class Node implements Serializable {
     protected boolean m_directlyBlocked;
     protected Object m_blockingObject;
     protected boolean m_blockingSignatureChanged;
-    protected Map<DescriptionGraph,Occurrence> m_occursInDescriptionGraphs;
-    protected boolean m_occursInDescriptionGraphsDirty;
     protected int m_numberOfNIAssertionsFromNode;
     protected int m_numberOfNIAssertionsToNode;
+    protected int m_firstGraphOccurrenceNode;
     
     public Node(Tableau tableau) {
         m_tableau=tableau;
@@ -82,10 +79,9 @@ public final class Node implements Serializable {
         m_directlyBlocked=false;
         m_blockingObject=null;
         m_blockingSignatureChanged=false;
-        m_occursInDescriptionGraphs=null;
-        m_occursInDescriptionGraphsDirty=false;
         m_numberOfNIAssertionsFromNode=0;
         m_numberOfNIAssertionsToNode=0;
+        m_tableau.m_descriptionGraphManager.intializeNode(this);
     }
     protected void destroy() {
         m_nodeID=-1;
@@ -119,7 +115,7 @@ public final class Node implements Serializable {
         }
         m_blocker=null;
         m_blockingObject=null;
-        m_occursInDescriptionGraphs=null;
+        m_tableau.m_descriptionGraphManager.destroyNode(this);
     }
     protected void finalize() {
         if (m_positiveLabel!=null)
@@ -334,46 +330,7 @@ public final class Node implements Serializable {
     public Collection<ExistentialConcept> getUnprocessedExistentials() {
         return m_unprocessedExistentials;
     }
-    public Occurrence addOccurenceInGraph(DescriptionGraph descriptionGraph,int position,int tupleIndex) {
-        if (m_occursInDescriptionGraphs==null)
-            m_occursInDescriptionGraphs=new HashMap<DescriptionGraph,Occurrence>();
-        Occurrence lastOccurrence=m_occursInDescriptionGraphs.get(descriptionGraph);
-        Occurrence newOccurrence=new Occurrence(position,tupleIndex,lastOccurrence);
-        m_occursInDescriptionGraphs.put(descriptionGraph,newOccurrence);
-        m_occursInDescriptionGraphsDirty=true;
-        return newOccurrence;
-    }
-    public void removeOccurrenceInTuple(DescriptionGraph descriptionGraph,int tupleIndex,int position) {
-        if (m_occursInDescriptionGraphs!=null) {
-            Occurrence lastOccurrence=null;
-            Occurrence occurrence=m_occursInDescriptionGraphs.get(descriptionGraph);
-            while (occurrence!=null) {
-                if (occurrence.m_tupleIndex==tupleIndex && occurrence.m_position==position) {
-                    if (lastOccurrence==null)
-                        m_occursInDescriptionGraphs.put(descriptionGraph,occurrence.m_next);
-                    else
-                        lastOccurrence.m_next=occurrence.m_next;
-                    return;
-                }
-                occurrence=occurrence.m_next;
-            }
-        }
-    }
     public String toString() {
         return String.valueOf(m_nodeID);
-    }
-    
-    public static class Occurrence implements Serializable {
-        private static final long serialVersionUID=-3146602839694560335L;
-
-        public final int m_position;
-        public final int m_tupleIndex;
-        public Occurrence m_next;
-        
-        public Occurrence(int position,int tupleIndex,Occurrence next) {
-            m_position=position;
-            m_tupleIndex=tupleIndex;
-            m_next=next;
-        }
     }
 }

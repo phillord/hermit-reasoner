@@ -80,7 +80,8 @@ public final class NominalIntroductionManager implements Serializable {
             m_newRootNodesIndex.removeTuple(tupleIndex);
         m_newRootNodesTable.truncate(firstFreeNewRootNodeShouldBe);
     }
-    public void processTargets() {
+    public boolean processTargets() {
+        boolean result=false;
         while (m_firstUnprocessedTarget<m_targets.getFirstFreeTupleIndex()) {
             m_targets.retrieveTuple(m_bufferForTarget,m_firstUnprocessedTarget);
             Node rootNode=(Node)m_bufferForTarget[ROOT_NODE];
@@ -104,8 +105,10 @@ public final class NominalIntroductionManager implements Serializable {
                     newRootNode=newRootNode.getCanonicalNode();
                 }
                 m_mergingManager.mergeNodes(treeNode,newRootNode,dependencySet);
+                result=true;
             }
         }
+        return result;
     }
     protected Node getRootNodeFor(DependencySet dependencySet,Node rootNode,AtMostAbstractRoleGuard atMostAbstractRoleGuard,int number) {
         m_bufferForRootNodes[0]=rootNode;

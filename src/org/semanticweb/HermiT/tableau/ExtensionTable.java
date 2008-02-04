@@ -107,13 +107,8 @@ public abstract class ExtensionTable implements Serializable {
                     m_tableauMonitor.clashDetected(tuple);
             }
         }
-        else if (dlPredicateObject instanceof DescriptionGraph) {
-            DescriptionGraph descriptionGraph=(DescriptionGraph)dlPredicateObject;
-            for (int position=1;position<m_tupleArity;position++) {
-                Node node=(Node)tuple[position];
-                node.addOccurenceInGraph(descriptionGraph,position,tupleIndex);
-            }
-        }
+        else if (dlPredicateObject instanceof DescriptionGraph)
+            m_tableau.m_descriptionGraphManager.descriptionGraphTupleAdded(tupleIndex,tuple);
     }
     public abstract boolean containsTuple(Object[] tuple);
     public Retrieval createRetrieval(boolean[] bindingPattern,View extensionView) {
@@ -188,13 +183,8 @@ public abstract class ExtensionTable implements Serializable {
                 node0.removeFromToParentLabel(atomicAbstractRole);
             m_tableau.m_nominalIntroductionManager.removeAtomicAbstractRoleAssertion(atomicAbstractRole,node0,node1);
         }
-        else if (dlPredicateObject instanceof DescriptionGraph) {
-            DescriptionGraph descriptionGraph=(DescriptionGraph)dlPredicateObject;
-            for (int position=1;position<m_tupleArity;position++) {
-                Node node=(Node)tuple[position];
-                node.removeOccurrenceInTuple(descriptionGraph,tupleIndex,position);
-            }
-        }
+        else if (dlPredicateObject instanceof DescriptionGraph)
+            m_tableau.m_descriptionGraphManager.descriptionGraphTupleRemoved(tupleIndex,tuple);
         if (m_tableauMonitor!=null)
             m_tableauMonitor.tupleRemoved(tuple);
     }
@@ -230,6 +220,7 @@ public abstract class ExtensionTable implements Serializable {
         DependencySet getDependencySet();
         void open();
         boolean afterLast();
+        int getCurrentTupleIndex();
         void next();
     }
 
@@ -301,6 +292,9 @@ public abstract class ExtensionTable implements Serializable {
         }
         public boolean afterLast() {
             return m_currentTupleIndex>=m_afterLastTupleIndex;
+        }
+        public int getCurrentTupleIndex() {
+            return m_currentTupleIndex;
         }
         public void next() {
             if (m_currentTupleIndex<m_afterLastTupleIndex) {

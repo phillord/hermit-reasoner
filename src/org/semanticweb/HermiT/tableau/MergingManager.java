@@ -1,10 +1,7 @@
 package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
-import java.util.Map;
-import java.util.HashMap;
 
-import org.semanticweb.HermiT.model.*;
 import org.semanticweb.HermiT.monitor.*;
 
 public final class MergingManager implements Serializable {
@@ -18,7 +15,6 @@ public final class MergingManager implements Serializable {
     protected final ExtensionTable.Retrieval m_ternaryExtensionTableSearch2Bound;
     protected final Object[] m_binaryAuxiliaryTuple;
     protected final Object[] m_ternaryAuxiliaryTuple;
-    protected final Map<DescriptionGraph,Object[]> m_descriptionGraphTuples;
     protected final UnionDependencySet m_binaryUnionDependencySet;
     
     public MergingManager(Tableau tableau) {
@@ -30,9 +26,6 @@ public final class MergingManager implements Serializable {
         m_ternaryExtensionTableSearch2Bound=m_extensionManager.m_ternaryExtensionTable.createRetrieval(new boolean[] { false,false,true },ExtensionTable.View.TOTAL);
         m_binaryAuxiliaryTuple=new Object[2];
         m_ternaryAuxiliaryTuple=new Object[3];
-        m_descriptionGraphTuples=new HashMap<DescriptionGraph,Object[]>();
-        for (DescriptionGraph descriptionGraph : m_tableau.getDLOntology().getAllDescriptionGraphs())
-            m_descriptionGraphTuples.put(descriptionGraph,new Object[descriptionGraph.getNumberOfVertices()+1]);
         m_binaryUnionDependencySet=new UnionDependencySet(2);
     }
     public void clear() {
@@ -147,36 +140,7 @@ public final class MergingManager implements Serializable {
                 m_ternaryExtensionTableSearch2Bound.next();
             }
             // Now merge the description graphs
-            Map<DescriptionGraph,Node.Occurrence> fromOccursInDescriptionGraphs=mergeFrom.m_occursInDescriptionGraphs;
-            if (fromOccursInDescriptionGraphs!=null && !fromOccursInDescriptionGraphs.isEmpty()) {
-                for (Map.Entry<DescriptionGraph,Node.Occurrence> entry : fromOccursInDescriptionGraphs.entrySet()) {
-                    DescriptionGraph descriptionGraph=entry.getKey();
-                    ExtensionTable graphExtensionTable=m_extensionManager.getExtensionTable(descriptionGraph.getArity()+1);
-                    Object[] auxiliaryTuple=m_descriptionGraphTuples.get(descriptionGraph);
-                    Node.Occurrence occurrence=entry.getValue();
-                    while (occurrence!=null) {
-                        int tupleIndex=occurrence.m_tupleIndex;
-                        graphExtensionTable.retrieveTuple(auxiliaryTuple,tupleIndex);
-                        if (graphExtensionTable.isTupleActive(auxiliaryTuple)) {
-                            if (m_tableauMonitor!=null) {
-                                Object[] sourceTuple=new Object[descriptionGraph.getNumberOfVertices()+1];
-                                System.arraycopy(auxiliaryTuple,0,sourceTuple,0,auxiliaryTuple.length);
-                                m_tableauMonitor.mergeFactStarted(mergeFrom,mergeInto,sourceTuple,auxiliaryTuple);
-                                auxiliaryTuple[occurrence.m_position]=mergeInto;
-                                m_binaryUnionDependencySet.m_dependencySets[0]=graphExtensionTable.getDependencySet(tupleIndex);
-                                m_extensionManager.addTuple(auxiliaryTuple,m_binaryUnionDependencySet);
-                                m_tableauMonitor.mergeFactFinished(mergeFrom,mergeInto,sourceTuple,auxiliaryTuple);
-                            }
-                            else {
-                                auxiliaryTuple[occurrence.m_position]=mergeInto;
-                                m_binaryUnionDependencySet.m_dependencySets[0]=graphExtensionTable.getDependencySet(tupleIndex);
-                                m_extensionManager.addTuple(auxiliaryTuple,m_binaryUnionDependencySet);
-                            }
-                        }
-                        occurrence=occurrence.m_next;
-                    }
-                }
-            }
+            m_tableau.m_descriptionGraphManager.mergeGraphs(mergeFrom,mergeInto,m_binaryUnionDependencySet);
             // Now finally merge the nodes
             m_tableau.mergeNode(mergeFrom,mergeInto,dependencySet);
             if (m_tableauMonitor!=null)

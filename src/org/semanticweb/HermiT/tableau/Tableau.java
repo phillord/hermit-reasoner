@@ -142,12 +142,18 @@ public final class Tableau implements Serializable {
         return !m_extensionManager.containsClash();
     }
     protected boolean doIteration() {
-        if (!m_extensionManager.containsClash())
-            if (m_descriptionGraphManager.checkGraphConstraints())
+        if (!m_extensionManager.containsClash()) {
+            m_nominalIntroductionManager.processTargets();
+            boolean hasChange=false;
+            while (m_hyperresolutionManager.propagateDeltaNew() && !m_extensionManager.containsClash()) {
+                m_descriptionGraphManager.checkGraphConstraints();
+                m_hyperresolutionManager.applyDLClauses();
+                m_nominalIntroductionManager.processTargets();
+                hasChange=true;
+            }
+            if (hasChange)
                 return true;
-        if (!m_extensionManager.containsClash())
-            if (m_hyperresolutionManager.evaluate())
-                return true;
+        }
         if (!m_extensionManager.containsClash())
             if (m_existentialsExpansionStrategy.expandExistentials())
                 return true;
