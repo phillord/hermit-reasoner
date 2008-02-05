@@ -34,8 +34,6 @@ public final class MergingManager implements Serializable {
         if (!node0.isActive() || !node1.isActive() || node0==node1)
             return false;
         else {
-            if (m_tableauMonitor!=null)
-                m_tableauMonitor.mergeStarted(node0,node1);
             Node mergeFrom;
             Node mergeInto;
             if (node0.getNodeType()==NodeType.ROOT_NODE && node1.getNodeType()==NodeType.ROOT_NODE) {
@@ -80,6 +78,8 @@ public final class MergingManager implements Serializable {
             }
             else
                 throw new IllegalStateException("Internal error: unsupported merge type.");
+            if (m_tableauMonitor!=null)
+                m_tableauMonitor.mergeStarted(mergeFrom,mergeInto);
             // Now prune the mergeFrom node. We go through all subsequent nodes (all successors of mergeFrom come after mergeFrom)
             // and delete them it their parent is not in tableau or if it is the mergeFrom node.
             Node node=mergeFrom;
@@ -144,7 +144,7 @@ public final class MergingManager implements Serializable {
             // Now finally merge the nodes
             m_tableau.mergeNode(mergeFrom,mergeInto,dependencySet);
             if (m_tableauMonitor!=null)
-                m_tableauMonitor.mergeFinished(node0,node1);
+                m_tableauMonitor.mergeFinished(mergeFrom,mergeInto);
             return true;
         }
     }

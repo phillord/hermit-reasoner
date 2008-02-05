@@ -77,9 +77,9 @@ public class TableauMonitorForwarder implements TableauMonitor,Serializable {
         if (m_forwardingOn)
             m_forwardingTargetMonitor.addFactFinished(tuple,factAdded);
     }
-    public void mergeStarted(Node node0,Node node1) {
+    public void mergeStarted(Node mergeFrom,Node mergrInto) {
         if (m_forwardingOn)
-            m_forwardingTargetMonitor.mergeStarted(node0,node1);
+            m_forwardingTargetMonitor.mergeStarted(mergeFrom,mergrInto);
     }
     public void nodePruned(Node node) {
         if (m_forwardingOn)
@@ -93,9 +93,9 @@ public class TableauMonitorForwarder implements TableauMonitor,Serializable {
         if (m_forwardingOn)
             m_forwardingTargetMonitor.mergeFactFinished(mergeFrom,mergeInto,sourceTuple,targetTuple);
     }
-    public void mergeFinished(Node node0,Node node1) {
+    public void mergeFinished(Node mergeFrom,Node mergeInto) {
         if (m_forwardingOn)
-            m_forwardingTargetMonitor.mergeFinished(node0,node1);
+            m_forwardingTargetMonitor.mergeFinished(mergeFrom,mergeInto);
     }
     public void mergeGraphsStarted(Object[] graph1,Object[] graph2,int position) {
         if (m_forwardingOn)

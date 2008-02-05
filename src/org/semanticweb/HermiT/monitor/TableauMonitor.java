@@ -20,11 +20,11 @@ public interface TableauMonitor {
     void dlClauseMatchedFinished(DLClauseEvaluator dlClauseEvaluator);
     void addFactStarted(Object[] tuple);
     void addFactFinished(Object[] tuple,boolean factAdded);
-    void mergeStarted(Node node0,Node node1);
+    void mergeStarted(Node mergeFrom,Node mergeInto);
     void nodePruned(Node node);
     void mergeFactStarted(Node mergeFrom,Node mergeInto,Object[] sourceTuple,Object[] targetTuple);
     void mergeFactFinished(Node mergeFrom,Node mergeInto,Object[] sourceTuple,Object[] targetTuple);
-    void mergeFinished(Node node0,Node node1);
+    void mergeFinished(Node mergeFrom,Node mergeInto);
     void mergeGraphsStarted(Object[] graph1,Object[] graph2,int position);
     void mergeGraphsFinished(Object[] graph1,Object[] graph2,int position);
     void clashDetected(Object[]... causes);

@@ -31,7 +31,7 @@ public class Debugger extends TableauMonitorForwarder {
 
     public static final Font s_monospacedFont=new Font("Monospaced",Font.PLAIN,12);
 
-    protected static enum WaitOption { GRAPH_EXPANSION,EXISTENTIAL_EXPANSION,CLASH };
+    protected static enum WaitOption { GRAPH_EXPANSION,EXISTENTIAL_EXPANSION,CLASH,MERGING };
     
     protected final Namespaces m_namespaces;
     protected final DerivationHistory m_derivationHistory;
@@ -869,6 +869,8 @@ public class Debugger extends TableauMonitorForwarder {
                 waitOption=WaitOption.EXISTENTIAL_EXPANSION;
             else if ("clash".equals(argument))
                 waitOption=WaitOption.CLASH;
+            else if ("merge".equals(argument))
+                waitOption=WaitOption.MERGING;
             else {
                 m_output.println("Invalid wait option '"+argument+"'.");
                 return;
