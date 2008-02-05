@@ -44,6 +44,7 @@ public class HermiT implements Serializable {
 
     protected DLOntology m_dlOntology;
     protected Namespaces m_namespaces;
+    protected TableauMonitor m_userTableauMonitor;
     protected TableauMonitorType m_tableauMonitorType;
     protected DirectBlockingType m_directBlockingType;
     protected BlockingType m_blockingType;
@@ -58,6 +59,9 @@ public class HermiT implements Serializable {
         setBlockingType(BlockingType.ANYWHERE);
         setBlockingSignatureCacheType(BlockingSignatureCacheType.CACHED);
         setExistentialsType(ExistentialsType.CREATION_ORDER);
+    }
+    public void setUserTableauMonitor(TableauMonitor userTableauMonitor) {
+        m_userTableauMonitor=userTableauMonitor;
     }
     public TableauMonitorType getTableauMonitorType() {
         return m_tableauMonitorType;
@@ -144,25 +148,33 @@ public class HermiT implements Serializable {
         m_dlOntology=dlOntology;
         m_namespaces=namespaces;
         
-        TableauMonitor tableauMonitor=null;
+        TableauMonitor wellKnownTableauMonitor=null;
         switch (m_tableauMonitorType) {
         case NONE:
-            tableauMonitor=null;
+            wellKnownTableauMonitor=null;
             break;
         case TIMING:
-            tableauMonitor=new Timer();
+            wellKnownTableauMonitor=new Timer();
             break;
         case TIMING_WITH_PAUSE:
-            tableauMonitor=new TimerWithPause();
+            wellKnownTableauMonitor=new TimerWithPause();
             break;
         case DEBUGGER_HISTORY_ON:
-            tableauMonitor=new Debugger(m_namespaces,true);
+            wellKnownTableauMonitor=new Debugger(m_namespaces,true);
             break;
         case DEBUGGER_NO_HISTORY:
-            tableauMonitor=new Debugger(m_namespaces,false);
+            wellKnownTableauMonitor=new Debugger(m_namespaces,false);
             break;
         }
 
+        TableauMonitor tableauMonitor=null;
+        if (m_userTableauMonitor==null)
+            tableauMonitor=wellKnownTableauMonitor;
+        else if (wellKnownTableauMonitor==null)
+            tableauMonitor=m_userTableauMonitor;
+        else
+            tableauMonitor=new TableauMonitorFork(wellKnownTableauMonitor,m_userTableauMonitor);
+        
         DirectBlockingChecker directBlockingChecker=null;
         switch (m_directBlockingType) {
         case OPTIMAL:
