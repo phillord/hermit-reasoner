@@ -31,7 +31,7 @@ public class Debugger extends TableauMonitorForwarder {
 
     public static final Font s_monospacedFont=new Font("Monospaced",Font.PLAIN,12);
 
-    protected static enum WaitOption { GRAPH_EXPANSION,EXISTENTIAL_EXPANSION,CLASH,MERGING };
+    protected static enum WaitOption { GRAPH_EXPANSION,EXISTENTIAL_EXPANSION,CLASH,MERGE };
     
     protected final Namespaces m_namespaces;
     protected final DerivationHistory m_derivationHistory;
@@ -138,8 +138,8 @@ public class Debugger extends TableauMonitorForwarder {
                         doSingleStep(parsedCommand);
                     else if ("bptime".equals(command))
                         doBreakpointTime(parsedCommand);
-                    else if ("wait".equals(command))
-                        doWait(parsedCommand);
+                    else if ("waitfor".equals(command))
+                        doWaitFor(parsedCommand);
                     else
                         m_output.println("Unknown command '"+command+"'.");
                 }
@@ -854,7 +854,7 @@ public class Debugger extends TableauMonitorForwarder {
         m_output.println("Breakpoint time is "+breakpointTimeSeconds+" seconds.");
         m_breakpointTime=breakpointTimeSeconds*1000;
     }
-    protected void doWait(String[] commandLine) {
+    protected void doWaitFor(String[] commandLine) {
         boolean add=true;
         for (int index=1;index<commandLine.length;index++) {
             String argument=commandLine[index];
@@ -870,7 +870,7 @@ public class Debugger extends TableauMonitorForwarder {
             else if ("clash".equals(argument))
                 waitOption=WaitOption.CLASH;
             else if ("merge".equals(argument))
-                waitOption=WaitOption.MERGING;
+                waitOption=WaitOption.MERGE;
             else {
                 m_output.println("Invalid wait option '"+argument+"'.");
                 return;
@@ -997,6 +997,14 @@ public class Debugger extends TableauMonitorForwarder {
         if (m_waitOptions.contains(WaitOption.CLASH)) {
             m_forever=false;
             m_output.println("Clash detected.");
+            mainLoop();
+        }
+    }
+    public void mergeStarted(Node mergeFrom,Node mergeInto) {
+        super.mergeStarted(mergeFrom,mergeInto);
+        if (m_waitOptions.contains(WaitOption.MERGE)) {
+            m_forever=false;
+            m_output.println("Node '"+mergeFrom.getNodeID()+"' will be merged into node '"+mergeInto.getNodeID()+"'.");
             mainLoop();
         }
     }

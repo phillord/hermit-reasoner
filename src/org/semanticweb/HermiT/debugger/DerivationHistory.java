@@ -34,21 +34,21 @@ public class DerivationHistory extends TableauMonitorAdapter {
         m_derivations.push(BaseFact.INSTANCE);
         m_mergeAtoms.clear();
     }
-    public void dlClauseMatchedStarted(DLClause dlClause,Object[][] matchedTuples) {
-        DerivationPremise[] premises=new DerivationPremise[dlClause.getBodyLength()];
+    public void dlClauseMatchedStarted(DLClauseEvaluator dlClauseEvaluator,int dlClauseIndex) {
+        DerivationPremise[] premises=new DerivationPremise[dlClauseEvaluator.getBodyLength()];
         for (int index=0;index<premises.length;index++)
-            premises[index]=new DerivationPremise(getAtom(matchedTuples[index]));
-        m_derivations.push(new DLClauseApplication(dlClause,premises));
+            premises[index]=new DerivationPremise(getAtom(dlClauseEvaluator.getTupleMatchedToBody(index)));
+        m_derivations.push(new DLClauseApplication(dlClauseEvaluator.getDLClause(dlClauseIndex),premises));
     }
-    public void dlClauseMatchedFinished(DLClause dlClause,Object[][] matchedTuples) {
+    public void dlClauseMatchedFinished(DLClauseEvaluator dlClauseEvaluator) {
         m_derivations.pop();
     }
     public void addFactFinished(Object[] tuple,boolean factAdded) {
         if (factAdded)
             addAtom(tuple);
     }
-    public void mergeStarted(Node node0,Node node1) {
-        Atom equalityAtom=addAtom(new Object[] { Equality.INSTANCE,node0,node1 });
+    public void mergeStarted(Node nodeFrom,Node nodeInto) {
+        Atom equalityAtom=addAtom(new Object[] { Equality.INSTANCE,nodeFrom,nodeInto });
         m_mergeAtoms.add(equalityAtom);
     }
     public void mergeFactStarted(Node mergeFrom,Node mergeInto,Object[] sourceTuple,Object[] targetTuple) {
@@ -57,7 +57,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
     public void mergeFactFinished(Node mergeFrom,Node mergeInto,Object[] sourceTuple,Object[] targetTuple) {
         m_derivations.pop();
     }
-    public void mergeFinished(Node node0,Node node1) {
+    public void mergeFinished(Node nodeFrom,Node nodeInto) {
         m_mergeAtoms.pop();
     }
     public void mergeGraphsStarted(Object[] graph1,Object[] graph2,int position) {

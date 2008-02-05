@@ -18,6 +18,8 @@ public class DLClauseEvaluator implements Serializable {
     protected final UnionDependencySet m_unionDependencySet;
     protected final ExtensionTable.Retrieval[] m_retrievals;
     protected final Worker[] m_workers;
+    protected final DLClause m_bodyDLClause;
+    protected final List<DLClause> m_headDLClauses;
     
     public DLClauseEvaluator(ExtensionManager extensionManager,DLClause bodyDLClause,List<DLClause> headDLClauses,ExtensionTable.Retrieval firstAtomRetrieval) {
         m_extensionManager=extensionManager;
@@ -28,6 +30,29 @@ public class DLClauseEvaluator implements Serializable {
         compiler.m_retrievals.toArray(m_retrievals);
         m_workers=new Worker[compiler.m_workers.size()];
         compiler.m_workers.toArray(m_workers);
+        m_bodyDLClause=bodyDLClause;
+        m_headDLClauses=headDLClauses;
+    }
+    public int getBodyLength() {
+        return m_bodyDLClause.getBodyLength();
+    }
+    public Atom getBodyAtom(int atomIndex) {
+        return m_bodyDLClause.getBodyAtom(atomIndex);
+    }
+    public int getNumberOfDLClauses() {
+        return m_headDLClauses.size();
+    }
+    public DLClause getDLClause(int dlClauseIndex) {
+        return m_headDLClauses.get(dlClauseIndex);
+    }
+    public int getHeadLength(int dlClauseIndex) {
+        return m_headDLClauses.get(dlClauseIndex).getHeadLength();
+    }
+    public Atom getHeadAtom(int dlClauseIndex,int atomIndex) {
+        return m_headDLClauses.get(dlClauseIndex).getHeadAtom(atomIndex);
+    }
+    public Object[] getTupleMatchedToBody(int atomIndex) {
+        return m_retrievals[atomIndex].getTupleBuffer();
     }
     public void evaluate() {
         int programCounter=0;
@@ -252,13 +277,15 @@ public class DLClauseEvaluator implements Serializable {
 
         protected final TableauMonitor m_tableauMonitor;
         protected final DLClauseEvaluator m_dlClauseEvaluator;
+        protected final int m_dlClauseIndex;
         
-        public CallMatchStartedOnMonitor(TableauMonitor tableauMonitor,DLClauseEvaluator dlClauseEvaluator) {
+        public CallMatchStartedOnMonitor(TableauMonitor tableauMonitor,DLClauseEvaluator dlClauseEvaluator,int dlClauseIndex) {
             m_tableauMonitor=tableauMonitor;
             m_dlClauseEvaluator=dlClauseEvaluator;
+            m_dlClauseIndex=dlClauseIndex;
         }
         public int execute(int programCounter) {
-            m_tableauMonitor.dlClauseMatchedStarted(m_dlClauseEvaluator);
+            m_tableauMonitor.dlClauseMatchedStarted(m_dlClauseEvaluator,m_dlClauseIndex);
             return programCounter+1;
         }
         public String toString() {
@@ -271,13 +298,15 @@ public class DLClauseEvaluator implements Serializable {
 
         protected final TableauMonitor m_tableauMonitor;
         protected final DLClauseEvaluator m_dlClauseEvaluator;
+        protected final int m_dlClauseIndex;
         
-        public CallMatchFinishedOnMonitor(TableauMonitor tableauMonitor,DLClauseEvaluator dlClauseEvaluator) {
+        public CallMatchFinishedOnMonitor(TableauMonitor tableauMonitor,DLClauseEvaluator dlClauseEvaluator,int dlClauseIndex) {
             m_tableauMonitor=tableauMonitor;
             m_dlClauseEvaluator=dlClauseEvaluator;
+            m_dlClauseIndex=dlClauseIndex;
         }
         public int execute(int programCounter) {
-            m_tableauMonitor.dlClauseMatchedFinished(m_dlClauseEvaluator);
+            m_tableauMonitor.dlClauseMatchedFinished(m_dlClauseEvaluator,m_dlClauseIndex);
             return programCounter+1;
         }
         public String toString() {
@@ -538,9 +567,9 @@ public class DLClauseEvaluator implements Serializable {
             }
         }
         protected void compileHeads() {
-            if (m_extensionManager.m_tableauMonitor!=null)
-                m_workers.add(new CallMatchStartedOnMonitor(m_extensionManager.m_tableauMonitor,m_dlClauseEvalautor));
             for (int dlClauseIndex=0;dlClauseIndex<getNumberOfHeads();dlClauseIndex++) {
+                if (m_extensionManager.m_tableauMonitor!=null)
+                    m_workers.add(new CallMatchStartedOnMonitor(m_extensionManager.m_tableauMonitor,m_dlClauseEvalautor,dlClauseIndex));
                 if (getHeadLength(dlClauseIndex)==0)
                     m_workers.add(new SetClash(m_extensionManager,m_unionDependencySet));
                 else if (getHeadLength(dlClauseIndex)==1) {
@@ -575,9 +604,9 @@ public class DLClauseEvaluator implements Serializable {
                     }
                     m_workers.add(new DeriveDisjunction(m_valuesBuffer,m_unionDependencySet,m_extensionManager.m_tableau,headDLPredicates,copyValuesToArguments));
                 }
+                if (m_extensionManager.m_tableauMonitor!=null)
+                    m_workers.add(new CallMatchFinishedOnMonitor(m_extensionManager.m_tableauMonitor,m_dlClauseEvalautor,dlClauseIndex));
             }
-            if (m_extensionManager.m_tableauMonitor!=null)
-                m_workers.add(new CallMatchFinishedOnMonitor(m_extensionManager.m_tableauMonitor,m_dlClauseEvalautor));
         }
         protected void compileCheckUnboundVariableMatches(Atom atom,ExtensionTable.Retrieval retrieval,int jumpIndex) {
             for (int outerArgumentIndex=0;outerArgumentIndex<atom.getArity();outerArgumentIndex++) {

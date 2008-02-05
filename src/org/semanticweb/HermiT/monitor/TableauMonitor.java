@@ -16,8 +16,8 @@ public interface TableauMonitor {
     void saturateFinished();
     void iterationStarted();
     void iterationFinished();
-    void dlClauseMatchedStarted(DLClauseEvaluator dlClauseEvaluator);
-    void dlClauseMatchedFinished(DLClauseEvaluator dlClauseEvaluator);
+    void dlClauseMatchedStarted(DLClauseEvaluator dlClauseEvaluator,int dlClauseIndex);
+    void dlClauseMatchedFinished(DLClauseEvaluator dlClauseEvaluator,int dlClauseIndex);
     void addFactStarted(Object[] tuple);
     void addFactFinished(Object[] tuple,boolean factAdded);
     void mergeStarted(Node mergeFrom,Node mergeInto);

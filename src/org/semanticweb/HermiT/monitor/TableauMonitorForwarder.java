@@ -61,13 +61,13 @@ public class TableauMonitorForwarder implements TableauMonitor,Serializable {
         if (m_forwardingOn)
             m_forwardingTargetMonitor.iterationFinished();
     }
-    public void dlClauseMatchedStarted(DLClauseEvaluator dlClauseEvaluator) {
+    public void dlClauseMatchedStarted(DLClauseEvaluator dlClauseEvaluator,int dlClauseIndex) {
         if (m_forwardingOn)
-            m_forwardingTargetMonitor.dlClauseMatchedStarted(dlClauseEvaluator);
+            m_forwardingTargetMonitor.dlClauseMatchedStarted(dlClauseEvaluator,dlClauseIndex);
     }
-    public void dlClauseMatchedFinished(DLClauseEvaluator dlClauseEvaluator) {
+    public void dlClauseMatchedFinished(DLClauseEvaluator dlClauseEvaluator,int dlClauseIndex) {
         if (m_forwardingOn)
-            m_forwardingTargetMonitor.dlClauseMatchedStarted(dlClauseEvaluator);
+            m_forwardingTargetMonitor.dlClauseMatchedStarted(dlClauseEvaluator,dlClauseIndex);
     }
     public void addFactStarted(Object[] tuple) {
         if (m_forwardingOn)
