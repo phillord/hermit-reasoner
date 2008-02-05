@@ -43,7 +43,7 @@ public class TableauMonitorAdapter implements TableauMonitor,Serializable  {
     }
     public void addFactFinished(Object[] tuple,boolean factAdded) {
     }
-    public void mergeStarted(Node node0,Node node1) {
+    public void mergeStarted(Node mergeFrom,Node mergeInto) {
     }
     public void nodePruned(Node node) {
     }
@@ -51,7 +51,7 @@ public class TableauMonitorAdapter implements TableauMonitor,Serializable  {
     }
     public void mergeFactFinished(Node mergeFrom,Node mergeInto,Object[] sourceTuple,Object[] targetTuple) {
     }
-    public void mergeFinished(Node node0,Node node1) {
+    public void mergeFinished(Node mergeFrom,Node mergeInto) {
     }
     public void mergeGraphsStarted(Object[] graph1,Object[] graph2,int position) {
     }
