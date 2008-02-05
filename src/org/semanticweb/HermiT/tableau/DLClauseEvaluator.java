@@ -19,9 +19,9 @@ public class DLClauseEvaluator implements Serializable {
     protected final ExtensionTable.Retrieval[] m_retrievals;
     protected final Worker[] m_workers;
     
-    public DLClauseEvaluator(ExtensionManager extensionManager,DLClause dlClause,ExtensionTable.Retrieval firstAtomRetrieval) {
+    public DLClauseEvaluator(ExtensionManager extensionManager,DLClause bodyDLClause,List<DLClause> headDLClauses,ExtensionTable.Retrieval firstAtomRetrieval) {
         m_extensionManager=extensionManager;
-        Compiler compiler=new Compiler(this,m_extensionManager,dlClause,firstAtomRetrieval);
+        DLClauseCompiler compiler=new DLClauseCompiler(this,m_extensionManager,bodyDLClause,headDLClauses,firstAtomRetrieval);
         m_valuesBuffer=compiler.m_valuesBuffer;
         m_unionDependencySet=compiler.m_unionDependencySet;
         m_retrievals=new ExtensionTable.Retrieval[compiler.m_retrievals.size()];
@@ -29,7 +29,7 @@ public class DLClauseEvaluator implements Serializable {
         m_workers=new Worker[compiler.m_workers.size()];
         compiler.m_workers.toArray(m_workers);
     }
-    public void applyDLClause() {
+    public void evaluate() {
         int programCounter=0;
         while (programCounter<m_workers.length && !m_extensionManager.containsClash())
             programCounter=m_workers[programCounter].execute(programCounter);
@@ -396,10 +396,11 @@ public class DLClauseEvaluator implements Serializable {
         }
     }
     
-    protected static class Compiler {
+    protected static final class DLClauseCompiler {
         protected final DLClauseEvaluator m_dlClauseEvalautor;
         protected final ExtensionManager m_extensionManager;
-        protected final DLClause m_dlClause;
+        protected final DLClause m_bodyDLClauses;
+        protected final List<DLClause> m_headDLClauses;
         protected final List<Variable> m_variables;
         protected final Set<Variable> m_boundSoFar;
         protected final Object[] m_valuesBuffer;
@@ -408,34 +409,37 @@ public class DLClauseEvaluator implements Serializable {
         protected final List<Worker> m_workers;
         protected final List<Integer> m_labels;
 
-        public Compiler(DLClauseEvaluator dlClauseEvalautor,ExtensionManager extensionManager,DLClause dlClause,ExtensionTable.Retrieval firstAtomRetrieval) {
+        public DLClauseCompiler(DLClauseEvaluator dlClauseEvalautor,ExtensionManager extensionManager,DLClause bodyDLClauses,List<DLClause> headDLClauses,ExtensionTable.Retrieval firstAtomRetrieval) {
             m_dlClauseEvalautor=dlClauseEvalautor;
             m_extensionManager=extensionManager;
-            m_dlClause=dlClause;
+            m_bodyDLClauses=bodyDLClauses;
+            m_headDLClauses=headDLClauses;
             m_variables=new ArrayList<Variable>();
             int numberOfRealAtoms=0;
-            for (int bodyIndex=0;bodyIndex<dlClause.getBodyLength();bodyIndex++) {
-                Atom atom=dlClause.getBodyAtom(bodyIndex);
+            for (int bodyIndex=0;bodyIndex<getBodyLength();bodyIndex++) {
+                Atom atom=getBodyAtom(bodyIndex);
                 for (int argumentIndex=0;argumentIndex<atom.getArity();argumentIndex++) {
                     Variable variable=atom.getArgumentVariable(argumentIndex);
-                    if (variable!=null && !m_variables.contains(variable) && occursInAtomsAfter(variable,dlClause,bodyIndex+1))
+                    if (variable!=null && !m_variables.contains(variable) && occursInBodyAtomsAfter(variable,bodyIndex+1))
                         m_variables.add(variable);
                 }
                 if (!atom.getDLPredicate().equals(NodeIDLessThan.INSTANCE))
                     numberOfRealAtoms++;
             }
-            for (int headIndex=0;headIndex<m_dlClause.getHeadLength();headIndex++) {
-                Atom atom=m_dlClause.getHeadAtom(headIndex);
-                for (int argumentIndex=0;argumentIndex<atom.getArity();argumentIndex++) {
-                    Variable variable=atom.getArgumentVariable(argumentIndex);
-                    if (variable!=null && !m_variables.contains(variable))
-                        m_variables.add(variable);
+            for (int dlClauseIndex=0;dlClauseIndex<getNumberOfHeads();dlClauseIndex++) {
+                for (int headIndex=0;headIndex<getHeadLength(dlClauseIndex);headIndex++) {
+                    Atom atom=getHeadAtom(dlClauseIndex,headIndex);
+                    for (int argumentIndex=0;argumentIndex<atom.getArity();argumentIndex++) {
+                        Variable variable=atom.getArgumentVariable(argumentIndex);
+                        if (variable!=null && !m_variables.contains(variable))
+                            m_variables.add(variable);
+                    }
                 }
             }
             m_boundSoFar=new HashSet<Variable>();
-            m_valuesBuffer=new Object[m_variables.size()+dlClause.getBodyLength()];
-            for (int bodyIndex=0;bodyIndex<dlClause.getBodyLength();bodyIndex++)
-                m_valuesBuffer[m_variables.size()+bodyIndex]=m_dlClause.getBodyAtom(bodyIndex).getDLPredicate();
+            m_valuesBuffer=new Object[m_variables.size()+getBodyLength()];
+            for (int bodyIndex=0;bodyIndex<getBodyLength();bodyIndex++)
+                m_valuesBuffer[m_variables.size()+bodyIndex]=getBodyAtom(bodyIndex).getDLPredicate();
             m_unionDependencySet=new UnionDependencySet(numberOfRealAtoms);
             m_retrievals=new ArrayList<ExtensionTable.Retrieval>();
             m_workers=new ArrayList<Worker>();
@@ -443,8 +447,8 @@ public class DLClauseEvaluator implements Serializable {
             m_labels.add(null);
             m_retrievals.add(firstAtomRetrieval);
             int afterRule=addLabel();
-            compileCheckUnboundVariableMatches(dlClause.getBodyAtom(0),firstAtomRetrieval,afterRule);
-            compileGenerateBindings(firstAtomRetrieval,dlClause.getBodyAtom(0));
+            compileCheckUnboundVariableMatches(getBodyAtom(0),firstAtomRetrieval,afterRule);
+            compileGenerateBindings(firstAtomRetrieval,getBodyAtom(0));
             m_workers.add(new CopyDependencySet(firstAtomRetrieval,m_unionDependencySet.getConstituents(),0));
             compileBodyAtom(1,afterRule);
             setLabelProgramCounter(afterRule);
@@ -458,17 +462,32 @@ public class DLClauseEvaluator implements Serializable {
                     }
                 }
         }
-        protected boolean occursInAtomsAfter(Variable variable,DLClause dlClause,int startIndex) {
-            for (int argumentIndex=startIndex;argumentIndex<dlClause.getBodyLength();argumentIndex++)
-                if (dlClause.getBodyAtom(argumentIndex).containsVariable(variable))
+        protected int getNumberOfHeads() {
+            return m_headDLClauses.size();
+        }
+        protected int getBodyLength() {
+            return m_bodyDLClauses.getBodyLength();
+        }
+        protected Atom getBodyAtom(int atomIndex) {
+            return m_bodyDLClauses.getBodyAtom(atomIndex);
+        }
+        protected int getHeadLength(int dlClauseIndex) {
+            return m_headDLClauses.get(dlClauseIndex).getHeadLength();
+        }
+        protected Atom getHeadAtom(int dlClauseIndex,int atomIndex) {
+            return m_headDLClauses.get(dlClauseIndex).getHeadAtom(atomIndex);
+        }
+        protected boolean occursInBodyAtomsAfter(Variable variable,int startIndex) {
+            for (int argumentIndex=startIndex;argumentIndex<getBodyLength();argumentIndex++)
+                if (getBodyAtom(argumentIndex).containsVariable(variable))
                     return true;
             return false;
         }
         protected void compileBodyAtom(int bodyAtomIndex,int lastAtomNextElement) {
-            if (bodyAtomIndex==m_dlClause.getBodyLength())
-                compileHead();
-            else if (m_dlClause.getBodyAtom(bodyAtomIndex).getDLPredicate().equals(NodeIDLessThan.INSTANCE)) {
-                Atom atom=m_dlClause.getBodyAtom(bodyAtomIndex);
+            if (bodyAtomIndex==getBodyLength())
+                compileHeads();
+            else if (getBodyAtom(bodyAtomIndex).getDLPredicate().equals(NodeIDLessThan.INSTANCE)) {
+                Atom atom=getBodyAtom(bodyAtomIndex);
                 int variable1Index=m_variables.indexOf(atom.getArgumentVariable(0));
                 int variable2Index=m_variables.indexOf(atom.getArgumentVariable(1));
                 assert variable1Index!=-1;
@@ -493,7 +512,7 @@ public class DLClauseEvaluator implements Serializable {
                 
                 int afterLoop=addLabel();
                 int nextElement=addLabel();
-                Atom atom=m_dlClause.getBodyAtom(bodyAtomIndex);
+                Atom atom=getBodyAtom(bodyAtomIndex);
                 int[] bindingPositions=new int[atom.getArity()+1];
                 bindingPositions[0]=m_variables.size()+bodyAtomIndex;
                 for (int argumentIndex=0;argumentIndex<atom.getArity();argumentIndex++) {
@@ -518,42 +537,44 @@ public class DLClauseEvaluator implements Serializable {
                 setLabelProgramCounter(afterLoop);
             }
         }
-        protected void compileHead() {
+        protected void compileHeads() {
             if (m_extensionManager.m_tableauMonitor!=null)
                 m_workers.add(new CallMatchStartedOnMonitor(m_extensionManager.m_tableauMonitor,m_dlClauseEvalautor));
-            if (m_dlClause.getHeadLength()==0)
-                m_workers.add(new SetClash(m_extensionManager,m_unionDependencySet));
-            else if (m_dlClause.getHeadLength()==1) {
-                Atom atom=m_dlClause.getHeadAtom(0);
-                switch (atom.getArity()) {
-                case 1:
-                    m_workers.add(new DeriveUnaryFact(m_extensionManager,m_valuesBuffer,m_unionDependencySet,atom.getDLPredicate(),m_variables.indexOf(atom.getArgumentVariable(0))));
-                    break;
-                case 2:
-                    m_workers.add(new DeriveBinaryFact(m_extensionManager,m_valuesBuffer,m_unionDependencySet,atom.getDLPredicate(),m_variables.indexOf(atom.getArgumentVariable(0)),m_variables.indexOf(atom.getArgumentVariable(1))));
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unsupported atom arity.");
-                }
-            }
-            else {
-                int totalNumberOfArguments=0;
-                for (int headIndex=0;headIndex<m_dlClause.getHeadLength();headIndex++)
-                    totalNumberOfArguments+=m_dlClause.getHeadAtom(headIndex).getArity();
-                DLPredicate[] headDLPredicates=new DLPredicate[m_dlClause.getHeadLength()];
-                int[] copyValuesToArguments=new int[totalNumberOfArguments];
-                int index=0;
-                for (int headIndex=0;headIndex<m_dlClause.getHeadLength();headIndex++) {
-                    Atom atom=m_dlClause.getHeadAtom(headIndex);
-                    headDLPredicates[headIndex]=atom.getDLPredicate();
-                    for (int argumentIndex=0;argumentIndex<atom.getArity();argumentIndex++) {
-                        Variable variable=atom.getArgumentVariable(argumentIndex);
-                        int variableIndex=m_variables.indexOf(variable);
-                        assert variableIndex!=-1;
-                        copyValuesToArguments[index++]=variableIndex;
+            for (int dlClauseIndex=0;dlClauseIndex<getNumberOfHeads();dlClauseIndex++) {
+                if (getHeadLength(dlClauseIndex)==0)
+                    m_workers.add(new SetClash(m_extensionManager,m_unionDependencySet));
+                else if (getHeadLength(dlClauseIndex)==1) {
+                    Atom atom=getHeadAtom(dlClauseIndex,0);
+                    switch (atom.getArity()) {
+                    case 1:
+                        m_workers.add(new DeriveUnaryFact(m_extensionManager,m_valuesBuffer,m_unionDependencySet,atom.getDLPredicate(),m_variables.indexOf(atom.getArgumentVariable(0))));
+                        break;
+                    case 2:
+                        m_workers.add(new DeriveBinaryFact(m_extensionManager,m_valuesBuffer,m_unionDependencySet,atom.getDLPredicate(),m_variables.indexOf(atom.getArgumentVariable(0)),m_variables.indexOf(atom.getArgumentVariable(1))));
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unsupported atom arity.");
                     }
                 }
-                m_workers.add(new DeriveDisjunction(m_valuesBuffer,m_unionDependencySet,m_extensionManager.m_tableau,headDLPredicates,copyValuesToArguments));
+                else {
+                    int totalNumberOfArguments=0;
+                    for (int headIndex=0;headIndex<getHeadLength(dlClauseIndex);headIndex++)
+                        totalNumberOfArguments+=getHeadAtom(dlClauseIndex,headIndex).getArity();
+                    DLPredicate[] headDLPredicates=new DLPredicate[getHeadLength(dlClauseIndex)];
+                    int[] copyValuesToArguments=new int[totalNumberOfArguments];
+                    int index=0;
+                    for (int headIndex=0;headIndex<getHeadLength(dlClauseIndex);headIndex++) {
+                        Atom atom=getHeadAtom(dlClauseIndex,headIndex);
+                        headDLPredicates[headIndex]=atom.getDLPredicate();
+                        for (int argumentIndex=0;argumentIndex<atom.getArity();argumentIndex++) {
+                            Variable variable=atom.getArgumentVariable(argumentIndex);
+                            int variableIndex=m_variables.indexOf(variable);
+                            assert variableIndex!=-1;
+                            copyValuesToArguments[index++]=variableIndex;
+                        }
+                    }
+                    m_workers.add(new DeriveDisjunction(m_valuesBuffer,m_unionDependencySet,m_extensionManager.m_tableau,headDLPredicates,copyValuesToArguments));
+                }
             }
             if (m_extensionManager.m_tableauMonitor!=null)
                 m_workers.add(new CallMatchFinishedOnMonitor(m_extensionManager.m_tableauMonitor,m_dlClauseEvalautor));

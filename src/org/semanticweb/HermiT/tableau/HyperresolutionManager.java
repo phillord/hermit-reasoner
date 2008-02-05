@@ -21,11 +21,22 @@ public final class HyperresolutionManager implements Serializable {
     public HyperresolutionManager(Tableau tableau) {
         m_tableau=tableau;
         m_extensionManager=m_tableau.getExtensionManager();
-        Map<Integer,ExtensionTable.Retrieval> retrievalsByArity=new HashMap<Integer,ExtensionTable.Retrieval>();
         m_tupleConsumersByDeltaPredicate=new HashMap<DLPredicate,CompiledDLClauseInfo>();
+        Map<Integer,ExtensionTable.Retrieval> retrievalsByArity=new HashMap<Integer,ExtensionTable.Retrieval>();
+        Map<DLClauseBodyKey,List<DLClause>> dlClausesByBody=new HashMap<DLClauseBodyKey,List<DLClause>>();
         for (DLClause dlClause : m_tableau.m_dlOntology.getDLClauses()) {
-            BodyAtomsSwapper bodyAtomsSwapper=new BodyAtomsSwapper(dlClause);
-            for (int bodyAtomIndex=0;bodyAtomIndex<dlClause.getBodyLength();bodyAtomIndex++) {
+            DLClauseBodyKey key=new DLClauseBodyKey(dlClause);
+            List<DLClause> dlClauses=dlClausesByBody.get(key);
+            if (dlClauses==null) {
+                dlClauses=new ArrayList<DLClause>();
+                dlClausesByBody.put(key,dlClauses);
+            }
+            dlClauses.add(dlClause);
+        }        
+        for (Map.Entry<DLClauseBodyKey,List<DLClause>> entry : dlClausesByBody.entrySet()) {
+            DLClause bodyDLClause=entry.getKey().m_dlClause;
+            BodyAtomsSwapper bodyAtomsSwapper=new BodyAtomsSwapper(bodyDLClause);
+            for (int bodyAtomIndex=0;bodyAtomIndex<bodyDLClause.getBodyLength();bodyAtomIndex++) {
                 DLClause swappedDLClause=bodyAtomsSwapper.getSwappedDLClause(bodyAtomIndex);
                 DLPredicate deltaDLPredicate=swappedDLClause.getBodyAtom(0).getDLPredicate();
                 Integer arity=Integer.valueOf(deltaDLPredicate.getArity()+1);
@@ -35,7 +46,7 @@ public final class HyperresolutionManager implements Serializable {
                     firstTableRetrieval=extensionTable.createRetrieval(new boolean[extensionTable.getArity()],ExtensionTable.View.DELTA_OLD);
                     retrievalsByArity.put(arity,firstTableRetrieval);
                 }
-                CompiledDLClauseInfo nextTupleConsumer=new CompiledDLClauseInfo(m_extensionManager,swappedDLClause,firstTableRetrieval,m_tupleConsumersByDeltaPredicate.get(deltaDLPredicate));
+                CompiledDLClauseInfo nextTupleConsumer=new CompiledDLClauseInfo(m_extensionManager,swappedDLClause,entry.getValue(),firstTableRetrieval,m_tupleConsumersByDeltaPredicate.get(deltaDLPredicate));
                 m_tupleConsumersByDeltaPredicate.put(deltaDLPredicate,nextTupleConsumer);
             }
         }
@@ -52,7 +63,7 @@ public final class HyperresolutionManager implements Serializable {
         while (!retrieval.afterLast() && !m_extensionManager.containsClash()) {
             CompiledDLClauseInfo compiledDLClauseInfo=m_tupleConsumersByDeltaPredicate.get(tupleBuffer[0]);
             while (compiledDLClauseInfo!=null) {
-                compiledDLClauseInfo.applyDLClause();
+                compiledDLClauseInfo.evaluate();
                 compiledDLClauseInfo=compiledDLClauseInfo.m_next;
             }
             retrieval.next();
@@ -64,8 +75,8 @@ public final class HyperresolutionManager implements Serializable {
 
         protected final CompiledDLClauseInfo m_next;
 
-        public CompiledDLClauseInfo(ExtensionManager extensionManager,DLClause dlClause,ExtensionTable.Retrieval firstAtomRetrieval,CompiledDLClauseInfo next) {
-            super(extensionManager,dlClause,firstAtomRetrieval);
+        public CompiledDLClauseInfo(ExtensionManager extensionManager,DLClause bodyDLClause,List<DLClause> headDLClauses,ExtensionTable.Retrieval firstAtomRetrieval,CompiledDLClauseInfo next) {
+            super(extensionManager,bodyDLClause,headDLClauses,firstAtomRetrieval);
             m_next=next;
         }
     }
@@ -127,6 +138,33 @@ public final class HyperresolutionManager implements Serializable {
             Atom[] bodyAtoms=new Atom[m_reorderedAtoms.size()];
             m_reorderedAtoms.toArray(bodyAtoms);
             return m_dlClause.getChangedDLClause(null,bodyAtoms);
+        }
+    }
+    
+    protected static final class DLClauseBodyKey {
+        protected final DLClause m_dlClause;
+        protected final int m_hashCode;
+        
+        public DLClauseBodyKey(DLClause dlClause) {
+            m_dlClause=dlClause;
+            int hashCode=0;
+            for (int atomIndex=0;atomIndex<m_dlClause.getBodyLength();atomIndex++)
+                hashCode+=m_dlClause.getBodyAtom(atomIndex).hashCode();
+            m_hashCode=hashCode;
+        }
+        public boolean equals(Object that) {
+            if (this==that)
+                return true;
+            DLClause thatDLClause=((DLClauseBodyKey)that).m_dlClause;
+            if (m_dlClause.getBodyLength()!=thatDLClause.getBodyLength())
+                return false;
+            for (int atomIndex=0;atomIndex<m_dlClause.getBodyLength();atomIndex++)
+                if (!m_dlClause.getBodyAtom(atomIndex).equals(thatDLClause.getBodyAtom(atomIndex)))
+                    return false;
+            return true;
+        }
+        public int hashCode() {
+            return m_hashCode;
         }
     }
 }
