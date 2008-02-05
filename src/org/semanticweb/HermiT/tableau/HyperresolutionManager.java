@@ -21,28 +21,26 @@ public final class HyperresolutionManager implements Serializable {
     public HyperresolutionManager(Tableau tableau) {
         m_tableau=tableau;
         m_extensionManager=m_tableau.getExtensionManager();
-        m_deltaOldRetrievals=new ExtensionTable.Retrieval[m_extensionManager.m_allExtensionTablesArray.length];
-        for (int index=0;index<m_extensionManager.m_allExtensionTablesArray.length;index++) {
-            ExtensionTable extensionTable=m_extensionManager.m_allExtensionTablesArray[index];
-            m_deltaOldRetrievals[index]=extensionTable.createRetrieval(new boolean[extensionTable.getArity()],ExtensionTable.View.DELTA_OLD);
-        }
+        Map<Integer,ExtensionTable.Retrieval> retrievalsByArity=new HashMap<Integer,ExtensionTable.Retrieval>();
         m_tupleConsumersByDeltaPredicate=new HashMap<DLPredicate,CompiledDLClauseInfo>();
         for (DLClause dlClause : m_tableau.m_dlOntology.getDLClauses()) {
             BodyAtomsSwapper bodyAtomsSwapper=new BodyAtomsSwapper(dlClause);
             for (int bodyAtomIndex=0;bodyAtomIndex<dlClause.getBodyLength();bodyAtomIndex++) {
                 DLClause swappedDLClause=bodyAtomsSwapper.getSwappedDLClause(bodyAtomIndex);
                 DLPredicate deltaDLPredicate=swappedDLClause.getBodyAtom(0).getDLPredicate();
-                ExtensionTable.Retrieval firstTableRetrieval=null;
-                for (int index=0;index<m_deltaOldRetrievals.length;index++)
-                    if (m_deltaOldRetrievals[index].getExtensionTable().getArity()==deltaDLPredicate.getArity()+1) {
-                        firstTableRetrieval=m_deltaOldRetrievals[index];
-                        break;
-                    }
-                assert firstTableRetrieval!=null;
+                Integer arity=Integer.valueOf(deltaDLPredicate.getArity()+1);
+                ExtensionTable.Retrieval firstTableRetrieval=retrievalsByArity.get(arity);
+                if (firstTableRetrieval==null) {
+                    ExtensionTable extensionTable=m_extensionManager.getExtensionTable(arity.intValue());
+                    firstTableRetrieval=extensionTable.createRetrieval(new boolean[extensionTable.getArity()],ExtensionTable.View.DELTA_OLD);
+                    retrievalsByArity.put(arity,firstTableRetrieval);
+                }
                 CompiledDLClauseInfo nextTupleConsumer=new CompiledDLClauseInfo(m_extensionManager,swappedDLClause,firstTableRetrieval,m_tupleConsumersByDeltaPredicate.get(deltaDLPredicate));
                 m_tupleConsumersByDeltaPredicate.put(deltaDLPredicate,nextTupleConsumer);
             }
         }
+        m_deltaOldRetrievals=new ExtensionTable.Retrieval[retrievalsByArity.size()];
+        retrievalsByArity.values().toArray(m_deltaOldRetrievals);
     }
     public void applyDLClauses() {
         for (int index=0;index<m_deltaOldRetrievals.length;index++)
@@ -59,13 +57,6 @@ public final class HyperresolutionManager implements Serializable {
             }
             retrieval.next();
         }
-    }
-    public boolean propagateDeltaNew() {
-        boolean hasChange=false;
-        for (int index=0;index<m_deltaOldRetrievals.length;index++)
-            if (m_deltaOldRetrievals[index].getExtensionTable().propagateDeltaNew())
-                hasChange=true;
-        return hasChange;
     }
     
     protected static final class CompiledDLClauseInfo extends DLClauseEvaluator {

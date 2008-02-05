@@ -145,7 +145,7 @@ public final class Tableau implements Serializable {
         if (!m_extensionManager.containsClash()) {
             m_nominalIntroductionManager.processTargets();
             boolean hasChange=false;
-            while (m_hyperresolutionManager.propagateDeltaNew() && !m_extensionManager.containsClash()) {
+            while (m_extensionManager.propagateDeltaNew() && !m_extensionManager.containsClash()) {
                 m_descriptionGraphManager.checkGraphConstraints();
                 m_hyperresolutionManager.applyDLClauses();
                 m_nominalIntroductionManager.processTargets();

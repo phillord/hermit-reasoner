@@ -104,6 +104,13 @@ public final class ExtensionManager implements Serializable {
     public Collection<ExtensionTable> getExtensionTables() {
         return m_extensionTablesByArity.values();
     }
+    public boolean propagateDeltaNew() {
+        boolean hasChange=false;
+        for (int index=0;index<m_allExtensionTablesArray.length;index++)
+            if (m_allExtensionTablesArray[index].propagateDeltaNew())
+                hasChange=true;
+        return hasChange;
+    }
     public void clearClash() {
         if (m_clashDependencySet!=null) {
             m_dependencySetFactory.removeUsage(m_clashDependencySet);
