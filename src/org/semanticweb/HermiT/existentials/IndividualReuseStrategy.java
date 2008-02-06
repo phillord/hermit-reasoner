@@ -44,6 +44,7 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
         m_existentialExpansionManager=m_tableau.getExistentialExpansionManager();
         m_dontReueseConceptsEver.clear();
 //        loadNotReusedConcepts("c:\\Temp\\dont-reuse.txt");
+//        loadReusedConcepts("c:\\Temp\\do-reuse.txt");
         m_blockingStrategy.initialize(tableau);
     }
     public void clear() {
@@ -117,7 +118,8 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
             m_tableau.getTableauMonitor().existentialExpansionFinished(atLeastAbstractRoleConcept,node);
     }
     protected boolean shoudReuse(AtomicConcept toConcept) {
-        return !toConcept.getURI().startsWith("internal:") && !m_dontReueseConceptsThisRun.contains(toConcept) && !m_dontReueseConceptsEver.contains(toConcept);
+//        return !toConcept.getURI().startsWith("internal:") && !m_dontReueseConceptsThisRun.contains(toConcept) && !m_dontReueseConceptsEver.contains(toConcept);
+        return !m_dontReueseConceptsThisRun.contains(toConcept) && !m_dontReueseConceptsEver.contains(toConcept);
     }
     public void assertionAdded(Concept concept,Node node) {
         m_blockingStrategy.assertionAdded(concept,node);
@@ -188,6 +190,28 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
         catch (IOException e) {
             throw new RuntimeException("Can't read the nonreused concepts.",e);
         }
+    }
+    protected void loadReusedConcepts(String fileName) {
+        try {
+            m_dontReueseConceptsEver.addAll(m_tableau.getDLOntology().getAllAtomicConcepts());
+            BufferedReader reader=new BufferedReader(new FileReader(fileName));
+            try {
+                String line=reader.readLine();
+                while (line!=null) {
+                    m_dontReueseConceptsEver.remove(AtomicConcept.create(line));
+                    line=reader.readLine();
+                }
+            }
+            finally {
+                reader.close();
+            }
+        }
+        catch (IOException e) {
+            throw new RuntimeException("Can't read the nonreused concepts.",e);
+        }
+    }
+    public Set<AtomicConcept> getDontReuseConceptsEver() {
+        return m_dontReueseConceptsEver;
     }
     
     protected class IndividualResueBranchingPoint extends BranchingPoint {

@@ -40,7 +40,7 @@ public class HermiT implements Serializable {
     public static enum DirectBlockingType { PAIR_WISE,SINGLE,OPTIMAL };
     public static enum BlockingType { ANYWHERE,ANCESTOR };
     public static enum BlockingSignatureCacheType { CACHED,NOT_CACHED };
-    public static enum ExistentialsType { CREATION_ORDER,EL,INDIVIDUAL_REUSE };
+    public static enum ExistentialsType { CREATION_ORDER,EL,INDIVIDUAL_REUSE,PARENT_INDIVIDUAL_REUSE };
 
     protected DLOntology m_dlOntology;
     protected Namespaces m_namespaces;
@@ -220,6 +220,9 @@ public class HermiT implements Serializable {
             break;
         case INDIVIDUAL_REUSE:
             existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,false);
+            break;
+        case PARENT_INDIVIDUAL_REUSE:
+            existentialsExpansionStrategy=new ParentIndividualReuseStrategy(blockingStrategy);
             break;
         }
         

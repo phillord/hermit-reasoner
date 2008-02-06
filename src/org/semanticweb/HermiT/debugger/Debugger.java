@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.Set;
 import java.util.TreeSet;
@@ -40,6 +41,9 @@ public class Debugger extends TableauMonitorForwarder {
     protected final PrintWriter m_output;
     protected final BufferedReader m_input;
     protected final Set<WaitOption> m_waitOptions;
+    protected final Map<Node,NodeCreationInfo> m_nodeCreationInfos;
+    protected Node m_lastExistentialNode;
+    protected ExistentialConcept m_lastExistentialConcept;
     protected Tableau m_tableau;
     protected String m_lastCommand;
     protected boolean m_forever;
@@ -68,6 +72,7 @@ public class Debugger extends TableauMonitorForwarder {
         m_mainFrame.setLocation((screenSize.width-preferredSize.width)/2,screenSize.height-100-preferredSize.height);
         m_forwardingOn=historyOn;
         m_waitOptions=new HashSet<WaitOption>();
+        m_nodeCreationInfos=new HashMap<Node,NodeCreationInfo>();
         m_forever=false;
         m_singlestep=true;
         m_breakpointTime=30000;
@@ -122,6 +127,8 @@ public class Debugger extends TableauMonitorForwarder {
                         doShowNode(parsedCommand);
                     else if ("showdgraph".equals(command))
                         doShowDescriptionGraph(parsedCommand);
+                    else if ("showsubtree".equals(command))
+                        doShowSubtree(parsedCommand);
                     else if ("q".equals(command))
                         doQuery(parsedCommand);
                     else if ("searchlabel".equals(command))
@@ -507,6 +514,25 @@ public class Debugger extends TableauMonitorForwarder {
                 return;
             }
         m_output.println("Graph '"+graphName+"' not found.");
+    }
+    protected void doShowSubtree(String[] commandLine) {
+        Node subtreeRoot=m_tableau.getCheckedNode();
+        if (commandLine.length>=2) {
+            int nodeID;
+            try {
+                nodeID=Integer.parseInt(commandLine[1]);
+            }
+            catch (NumberFormatException e) {
+                m_output.println("Invalid ID of the first node.");
+                return;
+            }
+            subtreeRoot=m_tableau.getNode(nodeID);
+            if (subtreeRoot==null) {
+                m_output.println("Node with ID '"+nodeID+"' not found.");
+                return;
+            }
+        }
+        new SubtreeViewer(this,subtreeRoot);
     }
     protected void doQuery(String[] commandLine) {
         Object[] tuple=new Object[commandLine.length-1];
@@ -974,6 +1000,12 @@ public class Debugger extends TableauMonitorForwarder {
         mainLoop();
         dispose();
     }
+    public void tableauCleared() {
+        super.tableauCleared();
+        m_nodeCreationInfos.clear();
+        m_lastExistentialNode=null;
+        m_lastExistentialConcept=null;
+    }
     public void saturateStarted() {
         super.saturateStarted();
         m_currentIteration=0;
@@ -1015,14 +1047,33 @@ public class Debugger extends TableauMonitorForwarder {
             mainLoop();
         }
     }
+    public void existentialExpansionStarted(ExistentialConcept existentialConcept,Node forNode) {
+        super.existentialExpansionStarted(existentialConcept,forNode);
+        m_lastExistentialNode=forNode;
+        m_lastExistentialConcept=existentialConcept;
+    }
     public void existentialExpansionFinished(ExistentialConcept existentialConcept,Node forNode) {
         super.existentialExpansionFinished(existentialConcept,forNode);
+        m_lastExistentialNode=null;
+        m_lastExistentialConcept=null;
         if ((existentialConcept instanceof ExistsDescriptionGraph && m_waitOptions.contains(WaitOption.GRAPH_EXPANSION)) ||
             (existentialConcept instanceof AtLeastAbstractRoleConcept && m_waitOptions.contains(WaitOption.EXISTENTIAL_EXPANSION))) {
             m_forever=false;
             m_output.println(existentialConcept.toString(m_namespaces)+" expanded for node "+forNode.getNodeID());
             mainLoop();
         }
+    }
+    public void nodeCreated(Node node) {
+        super.nodeCreated(node);
+        m_nodeCreationInfos.put(node,new NodeCreationInfo(node,m_lastExistentialNode,m_lastExistentialConcept));
+        if (m_lastExistentialNode!=null)
+            m_nodeCreationInfos.get(m_lastExistentialNode).m_children.add(node);
+    }
+    public void nodeDestroyed(Node node) {
+        super.nodeDestroyed(node);
+        NodeCreationInfo nodeCreationInfo=m_nodeCreationInfos.remove(node);
+        if (nodeCreationInfo.m_createdByNode!=null)
+            m_nodeCreationInfos.get(nodeCreationInfo.m_createdByNode).m_children.remove(node);
     }
     protected void printState() {
         int numberOfNodes=0;
@@ -1146,6 +1197,20 @@ public class Debugger extends TableauMonitorForwarder {
 
         public int compare(Node o1,Node o2) {
             return o1.getNodeID()-o2.getNodeID();
+        }
+    }
+    
+    public static class NodeCreationInfo {
+        public final Node m_node;
+        public final Node m_createdByNode;
+        public final ExistentialConcept m_createdByExistential;
+        public final List<Node> m_children;
+        
+        public NodeCreationInfo(Node node,Node createdByNode,ExistentialConcept createdByExistential) {
+            m_node=node;
+            m_createdByNode=createdByNode;
+            m_createdByExistential=createdByExistential;
+            m_children=new ArrayList<Node>(4);
         }
     }
 }
