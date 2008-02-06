@@ -173,4 +173,12 @@ public class TableauMonitorForwarder implements TableauMonitor,Serializable {
         if (m_forwardingOn)
             m_forwardingTargetMonitor.existentialSatisfied(existentialConcept,forNode);
     }
+    public void nodeCreated(Node node) {
+        if (m_forwardingOn)
+            m_forwardingTargetMonitor.nodeCreated(node);
+    }
+    public void nodeDestroyed(Node node) {
+        if (m_forwardingOn)
+            m_forwardingTargetMonitor.nodeDestroyed(node);
+    }
 }

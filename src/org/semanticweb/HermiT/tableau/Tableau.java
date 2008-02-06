@@ -383,8 +383,10 @@ public final class Tableau implements Serializable {
             m_lastTableauNode.m_nextTableauNode=node;
         m_lastTableauNode=node;
         m_existentialsExpansionStrategy.nodeStatusChanged(node);
-        m_extensionManager.addConceptAssertion(AtomicConcept.THING,node,dependencySet);
         m_numberOfNodeCreations++;
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.nodeCreated(node);
+        m_extensionManager.addConceptAssertion(AtomicConcept.THING,node,dependencySet);
         return node;
     }
     public void mergeNode(Node node,Node mergeInto,DependencySet dependencySet) {
@@ -442,6 +444,8 @@ public final class Tableau implements Serializable {
         node.m_nextTableauNode=m_firstFreeNode;
         m_firstFreeNode=node;
         m_numberOfNodesInTableau--;
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.nodeDestroyed(node);
     }
     public int getNumberOfNodeCreations() {
         return m_numberOfNodeCreations;

@@ -44,4 +44,6 @@ public interface TableauMonitor {
     void existentialExpansionStarted(ExistentialConcept existentialConcept,Node forNode);
     void existentialExpansionFinished(ExistentialConcept existentialConcept,Node forNode);
     void existentialSatisfied(ExistentialConcept existentialConcept,Node forNode);
+    void nodeCreated(Node node);
+    void nodeDestroyed(Node node);
 }

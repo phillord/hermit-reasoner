@@ -175,4 +175,12 @@ public class TableauMonitorFork implements TableauMonitor,Serializable  {
         m_first.existentialSatisfied(existentialConcept,forNode);
         m_second.existentialSatisfied(existentialConcept,forNode);
     }
+    public void nodeCreated(Node node) {
+        m_first.nodeCreated(node);
+        m_second.nodeCreated(node);
+    }
+    public void nodeDestroyed(Node node) {
+        m_first.nodeDestroyed(node);
+        m_second.nodeDestroyed(node);
+    }
 }
