@@ -19,20 +19,18 @@ public class RunHermiT {
         HermiT hermit=new HermiT();
 //        hermit.setBlockingSignatureCacheType(HermiT.BlockingSignatureCacheType.NOT_CACHED);
 //        hermit.setExistentialsType(HermiT.ExistentialsType.INDIVIDUAL_REUSE);
-        hermit.setTimingOn();
+        hermit.setExistentialsType(HermiT.ExistentialsType.PARENT_INDIVIDUAL_REUSE);
+//        hermit.setTimingOn();
 //        hermit.setTimingWithPauseOn();
 //        hermit.setDebuggingOn(false);
-//        hermit.setDebuggingOn(true);
+        hermit.setDebuggingOn(true);
 
 //        hermit.loadOntology("file:/C:/Temp/full-galen-no-functionality.owl");
 //        hermit.loadOntology("file:/C:/Temp/galen-module1-no-functionality.owl");
-//        hermit.loadOntology("file:/C:/Work/ontologies/GALEN/galen-module1.owl");
-        hermit.loadOntology("file:/C:/Work/ontologies/GALEN/galen-ians-full-undoctored.owl");
-//        hermit.loadOntology("file:/C:/Work/ontologies/GALEN/galen-ians-full-doctored.owl");
-//        hermit.loadOntology("file:/C:/Work/My%20Papers/2007/Representing%20and%20Reasoning%20about%20Structured%20Objects%20in%20OWL/ontologies/galen-ians-full-undoctored-modified.owl");
-//        hermit.loadOntology("file:/C:/Work/My%20Papers/2007/Representing%20and%20Reasoning%20about%20Structured%20Objects%20in%20OWL/ontologies/fma-module2.owl");
-//        hermit.loadOntology("file:/C:/Work/My%20Papers/2007/Representing%20and%20Reasoning%20about%20Structured%20Objects%20in%20OWL/ontologies/FMA-Full.owl");
-//        hermit.loadOntology("file:/C:/Work/ontologies/wine/wine-no-data-properties.owl");
+        hermit.loadOntology("file:/C:/Work/TestOntologies/GALEN/galen-module1.owl");
+//        hermit.loadOntology("file:/C:/Work/TestOntologies/GALEN/galen-ians-full-undoctored.owl");
+//        hermit.loadOntology("file:/C:/Work/TestOntologies/GALEN/galen-ians-full-doctored.owl");
+//        hermit.loadOntology("file:/C:/Work/TestOntologies/wine/wine-no-data-properties.owl");
 
 //        hermit.loadDLOntology(new java.io.File("C:\\Temp\\GALEN-minus-graph.ser"));
 //        hermit.loadDLOntology(new java.io.File("C:\\Temp\\FMA-minus-graph.ser"));
@@ -57,7 +55,7 @@ public class RunHermiT {
         long start=System.currentTimeMillis();
 
         /* These are the hard tests in 'galen-ians-full-undoctored.owl'. They require backtracking in the presence of individual reuse. */
-//        hermit.isSubsumedBy("http://www.co-ode.org/ontologies/galen#AbdominalCavity","http://www.co-ode.org/ontologies/galen#ActualCavity");
+        hermit.isSubsumedBy("http://www.co-ode.org/ontologies/galen#AbdominalCavity","http://www.co-ode.org/ontologies/galen#ActualCavity");
 //        hermit.isSubsumedBy("http://www.co-ode.org/ontologies/galen#AbdominalAorta","http://www.co-ode.org/ontologies/galen#ArteryWhichHasLaterality");
 //        hermit.isSubsumedBy("http://www.co-ode.org/ontologies/galen#AlcoholicGastritis","http://www.co-ode.org/ontologies/galen#Duodenitis");
 //        hermit.isSubsumedBy("http://www.co-ode.org/ontologies/galen#CapsuleOfKnee","http://www.co-ode.org/ontologies/galen#JointCapsule");
@@ -72,7 +70,7 @@ public class RunHermiT {
 //        hermit.isSatisfiable("http://www.co-ode.org/ontologies/galen#AcuteErosionOfStomach");
 //        hermit.isSatisfiable("http://www.co-ode.org/ontologies/galen#AnteriorCruciateLigament");
       
-        subsumptionHierarchy=hermit.getSubsumptionHierarchy();
+//        subsumptionHierarchy=hermit.getSubsumptionHierarchy();
 
         long duration=System.currentTimeMillis()-start;
         System.out.println("The reasoning task took "+duration+" ms");

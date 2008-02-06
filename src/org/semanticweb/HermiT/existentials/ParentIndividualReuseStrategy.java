@@ -12,14 +12,14 @@ public class ParentIndividualReuseStrategy implements ExistentialsExpansionStrat
     private static final long serialVersionUID=-7373787507623860081L;
     
     protected final BlockingStrategy m_blockingStrategy;
-    protected final Map<Node,AtomicConcept> m_conceptsForRootNodes;
+    protected final Map<Node,NodeInfo> m_rootNodeInfos;
     protected Tableau m_tableau;
     protected ExtensionManager m_extensionManager;
     protected ExistentialExpansionManager m_existentialExpansionManager;
     
     public ParentIndividualReuseStrategy(BlockingStrategy blockingStrategy) {
         m_blockingStrategy=blockingStrategy;
-        m_conceptsForRootNodes=new HashMap<Node,AtomicConcept>();
+        m_rootNodeInfos=new HashMap<Node,NodeInfo>();
     }
     public void intialize(Tableau tableau) {
         m_tableau=tableau;
@@ -29,7 +29,7 @@ public class ParentIndividualReuseStrategy implements ExistentialsExpansionStrat
     }
     public void clear() {
         m_blockingStrategy.clear();
-        m_conceptsForRootNodes.clear();
+        m_rootNodeInfos.clear();
     }
     public boolean expandExistentials() {
         m_blockingStrategy.computeBlocking();
@@ -66,12 +66,19 @@ public class ParentIndividualReuseStrategy implements ExistentialsExpansionStrat
     protected boolean expandWithReuse(AtLeastAbstractRoleConcept atLeastAbstractRoleConcept,Node node) {
         if (atLeastAbstractRoleConcept.getNumber()!=1 || node.getNodeType()!=NodeType.ROOT_NODE)
             return false;
+        Concept toConcept=atLeastAbstractRoleConcept.getToConcept();
         Node reuseTarget=node;
         while (reuseTarget!=null) {
-            AtomicConcept conceptForNode=m_conceptsForRootNodes.get(reuseTarget);
-            if (conceptForNode!=null && conceptForNode.equals(atLeastAbstractRoleConcept.getToConcept()))
+            NodeInfo nodeInfo=m_rootNodeInfos.get(reuseTarget);
+            if (nodeInfo==null) {
+                reuseTarget=null;
                 break;
-            reuseTarget=reuseTarget.getParent();
+            }
+//            if (reuseTarget.isActive() && nodeInfo.m_nodeConcept.equals(toConcept))
+//                break;
+            if (reuseTarget.isActive() && m_extensionManager.containsConceptAssertion(toConcept,reuseTarget))
+                break;
+            reuseTarget=nodeInfo.m_createdByNode;
         }
         if (m_tableau.getTableauMonitor()!=null)
             m_tableau.getTableauMonitor().existentialExpansionStarted(atLeastAbstractRoleConcept,node);
@@ -84,7 +91,7 @@ public class ParentIndividualReuseStrategy implements ExistentialsExpansionStrat
             dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,branchingPoint.getLevel());
             existentialNode=m_tableau.createNewRootNode(dependencySet,0);
             m_extensionManager.addConceptAssertion(toAtomicConcept,existentialNode,dependencySet);
-            m_conceptsForRootNodes.put(existentialNode,toAtomicConcept);
+            m_rootNodeInfos.put(existentialNode,new NodeInfo(node,toAtomicConcept));
         }
         else {
             dependencySet=reuseTarget.addCacnonicalNodeDependencySet(dependencySet);
@@ -112,7 +119,7 @@ public class ParentIndividualReuseStrategy implements ExistentialsExpansionStrat
     }
     public void nodeDestroyed(Node node) {
         m_blockingStrategy.nodeDestroyed(node);
-        m_conceptsForRootNodes.remove(node);
+        m_rootNodeInfos.remove(node);
     }
     public void branchingPointPushed() {
     }
@@ -145,6 +152,18 @@ public class ParentIndividualReuseStrategy implements ExistentialsExpansionStrat
             m_extensionManager.addRoleAssertion(m_existential.getOnAbstractRole(),m_node,existentialNode,dependencySet);
             if (m_tableau.getTableauMonitor()!=null)
                 m_tableau.getTableauMonitor().existentialExpansionFinished(m_existential,m_node);
+        }
+    }
+    
+    protected static final class NodeInfo implements Serializable {
+        private static final long serialVersionUID=-7228922712378526374L;
+
+        protected final Node m_createdByNode;
+        protected final AtomicConcept m_nodeConcept;
+        
+        public NodeInfo(Node createdByNode,AtomicConcept nodeConcept) {
+            m_createdByNode=createdByNode;
+            m_nodeConcept=nodeConcept;
         }
     }
 }

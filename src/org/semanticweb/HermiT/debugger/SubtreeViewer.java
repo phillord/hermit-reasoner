@@ -40,8 +40,7 @@ import org.semanticweb.HermiT.tableau.*;
 public class SubtreeViewer extends JFrame {
     protected final Debugger m_debugger;
     protected final SubtreeTreeModel m_subtreeTreeModel;
-    protected final JTextArea m_nodeConceptsTextArea;
-    protected final JTextArea m_nodeEdgesTextArea;
+    protected final JTextArea m_nodeInfoTextArea;
     protected final JTree m_tableauTree;
     protected final JTextField m_nodeIDField;
 
@@ -63,18 +62,13 @@ public class SubtreeViewer extends JFrame {
                     showNodeLabels((Node)selectionPath.getLastPathComponent());
             }
         });
-        m_nodeConceptsTextArea=new JTextArea();
-        m_nodeConceptsTextArea.setFont(Debugger.s_monospacedFont);
-        m_nodeEdgesTextArea=new JTextArea();
-        m_nodeEdgesTextArea.setFont(Debugger.s_monospacedFont);
+        m_nodeInfoTextArea=new JTextArea();
+        m_nodeInfoTextArea.setFont(Debugger.s_monospacedFont);
         JScrollPane modelScrollPane=new JScrollPane(m_tableauTree);
         modelScrollPane.setPreferredSize(new Dimension(600,400));
-        JScrollPane conceptLabel=new JScrollPane(m_nodeConceptsTextArea);
-        conceptLabel.setPreferredSize(new Dimension(300,200));
-        JScrollPane roleLabel=new JScrollPane(m_nodeEdgesTextArea);
-        roleLabel.setPreferredSize(new Dimension(300,200));
-        JSplitPane labelSplit=new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,conceptLabel,roleLabel);
-        JSplitPane mainSplit=new JSplitPane(JSplitPane.VERTICAL_SPLIT,modelScrollPane,labelSplit);
+        JScrollPane nodeInfoScrollPane=new JScrollPane(m_nodeInfoTextArea);
+        nodeInfoScrollPane.setPreferredSize(new Dimension(400,400));
+        JSplitPane mainSplit=new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,modelScrollPane,nodeInfoScrollPane);
         JPanel commandsPanel=new JPanel(new FlowLayout(FlowLayout.LEFT,5,3));
         commandsPanel.add(new JLabel("Node ID:"));
         m_nodeIDField=new JTextField();
@@ -139,33 +133,15 @@ public class SubtreeViewer extends JFrame {
         m_tableauTree.scrollPathToVisible(treePath);
     }
     public void showNodeLabels(Node node) {
-        if (node==null) {
-            m_nodeConceptsTextArea.setText("");
-            m_nodeEdgesTextArea.setText("");
-        }
+        if (node==null)
+            m_nodeInfoTextArea.setText("");
         else {
             CharArrayWriter buffer=new CharArrayWriter();
             PrintWriter writer=new PrintWriter(buffer);
-            writer.print("Concepts in node ");
-            writer.print(node.getNodeID());
-            writer.println(":");
-            writer.println("-----------------------");
-            writer.println();
-            m_debugger.printConceptLabel(node,writer);
+            m_debugger.printNodeData(node,writer);
             writer.flush();
-            m_nodeConceptsTextArea.setText(buffer.toString());
-            m_nodeConceptsTextArea.select(0,0);
-            buffer=new CharArrayWriter();
-            writer=new PrintWriter(buffer);
-            writer.print("Edges in node ");
-            writer.print(node.getNodeID());
-            writer.println(":");
-            writer.println("-----------------------");
-            writer.println();
-            m_debugger.printEdges(node,writer);
-            writer.flush();
-            m_nodeEdgesTextArea.setText(buffer.toString());
-            m_nodeEdgesTextArea.select(0,0);
+            m_nodeInfoTextArea.setText(buffer.toString());
+            m_nodeInfoTextArea.select(0,0);
         }
     }
 
@@ -212,6 +188,7 @@ public class SubtreeViewer extends JFrame {
     }
 
     protected static class NodeCellRenderer extends DefaultTreeCellRenderer {
+        protected static final Icon NOT_ACTIVE_ICON=new DotIcon(Color.LIGHT_GRAY);
         protected static final Icon BLOCKED_ICON=new DotIcon(Color.CYAN);
         protected static final Icon WITH_EXISTENTIALS_ICON=new DotIcon(Color.RED);
         protected static final Icon NORMAL_ICON=new DotIcon(Color.BLACK);
@@ -242,7 +219,9 @@ public class SubtreeViewer extends JFrame {
                 
             }
             super.getTreeCellRendererComponent(tree,buffer.toString(),selected,expanded,leaf,row,hasFocus);
-            if (node.isBlocked())
+            if (!node.isActive())
+                setIcon(NOT_ACTIVE_ICON);
+            else if (node.isBlocked())
                 setIcon(BLOCKED_ICON);
             else if (node.hasUnprocessedExistentials())
                 setIcon(WITH_EXISTENTIALS_ICON);

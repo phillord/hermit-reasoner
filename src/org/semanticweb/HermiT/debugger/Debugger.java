@@ -375,10 +375,16 @@ public class Debugger extends TableauMonitorForwarder {
         }
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter writer=new PrintWriter(buffer);
+        printNodeData(node,writer);
+        writer.flush();
+        showTextInWindow(buffer.toString(),"Node '"+node.getNodeID()+"'");
+        selectConsoleWindow();
+    }
+    public void printNodeData(Node node,PrintWriter writer) {
         writer.print("Node ID:   ");
         writer.println(node.getNodeID());
         writer.print("Parent ID: ");
-        writer.println(node.getParent()==null ? "(root ndoe)" : node.getParent().getNodeID());
+        writer.println(node.getParent()==null ? "(root node)" : node.getParent().getNodeID());
         writer.print("Status:    ");
         if (node.isActive())
             writer.println("active");
@@ -392,9 +398,6 @@ public class Debugger extends TableauMonitorForwarder {
         writer.println(formatBlockingStatus(node));
         printConceptLabel(node,writer);
         printEdges(node,writer);
-        writer.flush();
-        showTextInWindow(buffer.toString(),"Node '"+node.getNodeID()+"'");
-        selectConsoleWindow();
     }
     public void printConceptLabel(Node node,PrintWriter writer) {
         TreeSet<AtomicConcept> atomicConcepts=new TreeSet<AtomicConcept>(ConceptComparator.INSTANCE);
