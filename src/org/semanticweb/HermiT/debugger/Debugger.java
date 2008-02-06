@@ -390,35 +390,42 @@ public class Debugger extends TableauMonitorForwarder {
             writer.println("pruned");
         writer.print("Blocked:   ");
         writer.println(formatBlockingStatus(node));
-
-        Set<AtomicConcept> positiveAtomicConceptLabel=new TreeSet<AtomicConcept>(ConceptComparator.INSTANCE);
-        Set<ExistentialConcept> positiveExistentialConceptLabel=new TreeSet<ExistentialConcept>(ConceptComparator.INSTANCE);
-        Set<Concept> negativeConceptLabel=new TreeSet<Concept>(ConceptComparator.INSTANCE);
+        printConceptLabel(node,writer);
+        printEdges(node,writer);
+        writer.flush();
+        showTextInWindow(buffer.toString(),"Node '"+node.getNodeID()+"'");
+        selectConsoleWindow();
+    }
+    public void printConceptLabel(Node node,PrintWriter writer) {
+        TreeSet<AtomicConcept> atomicConcepts=new TreeSet<AtomicConcept>(ConceptComparator.INSTANCE);
+        TreeSet<ExistentialConcept> existentialConcepts=new TreeSet<ExistentialConcept>(ConceptComparator.INSTANCE);
+        TreeSet<AtomicNegationConcept> negativeConcepts=new TreeSet<AtomicNegationConcept>(ConceptComparator.INSTANCE);
         ExtensionTable.Retrieval retrieval=m_tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
         retrieval.getBindingsBuffer()[1]=node;
         retrieval.open();
         while (!retrieval.afterLast()) {
             Concept concept=(Concept)retrieval.getTupleBuffer()[0];
             if (concept instanceof AtomicNegationConcept)
-                negativeConceptLabel.add(concept);
+                negativeConcepts.add((AtomicNegationConcept)concept);
             else if (concept instanceof AtomicConcept)
-                positiveAtomicConceptLabel.add((AtomicConcept)concept);
+                atomicConcepts.add((AtomicConcept)concept);
             else
-                positiveExistentialConceptLabel.add((ExistentialConcept)concept);
+                existentialConcepts.add((ExistentialConcept)concept);
             retrieval.next();
         }
-        if (!positiveAtomicConceptLabel.isEmpty() || !positiveExistentialConceptLabel.isEmpty()) {
+        if (!atomicConcepts.isEmpty() || !existentialConcepts.isEmpty()) {
             writer.print("-- Positive concept label ------------------------");
-            printConcepts(positiveAtomicConceptLabel,writer,3);
-            printConcepts(positiveExistentialConceptLabel,writer,1);
+            printConcepts(atomicConcepts,writer,3);
+            printConcepts(existentialConcepts,writer,1);
         }
-        if (!negativeConceptLabel.isEmpty()) {
+        if (!negativeConcepts.isEmpty()) {
             writer.print("-- Negative concept label ------------------------");
-            printConcepts(negativeConceptLabel,writer,3);
+            printConcepts(negativeConcepts,writer,3);
         }
-
+    }
+    public void printEdges(Node node,PrintWriter writer) {
         Map<Node,Set<AtomicAbstractRole>> outgoingEdges=new TreeMap<Node,Set<AtomicAbstractRole>>(NodeComparator.INSTANCE);
-        retrieval=m_tableau.getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,false },ExtensionTable.View.TOTAL);
+        ExtensionTable.Retrieval retrieval=m_tableau.getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,false },ExtensionTable.View.TOTAL);
         retrieval.getBindingsBuffer()[1]=node;
         retrieval.open();
         while (!retrieval.afterLast()) {
@@ -456,10 +463,6 @@ public class Debugger extends TableauMonitorForwarder {
             writer.println("-- Incoming edges --------------------------------");
             printEdgeMap(incomingEdges,writer);
         }
-
-        writer.flush();
-        showTextInWindow(buffer.toString(),"Node '"+node.getNodeID()+"'");
-        selectConsoleWindow();
     }
     protected void printConcepts(Set<? extends Concept> set,PrintWriter writer,int numberInRow) {
         int number=0;

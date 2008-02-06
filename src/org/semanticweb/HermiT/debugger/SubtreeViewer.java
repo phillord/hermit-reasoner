@@ -8,6 +8,9 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.CharArrayWriter;
+import java.io.PrintWriter;
+
 import javax.swing.Icon;
 import javax.swing.JPanel;
 import javax.swing.JFrame;
@@ -15,11 +18,15 @@ import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.JTextArea;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
+import javax.swing.JSplitPane;
 import javax.swing.event.EventListenerList;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
@@ -33,6 +40,8 @@ import org.semanticweb.HermiT.tableau.*;
 public class SubtreeViewer extends JFrame {
     protected final Debugger m_debugger;
     protected final SubtreeTreeModel m_subtreeTreeModel;
+    protected final JTextArea m_nodeConceptsTextArea;
+    protected final JTextArea m_nodeEdgesTextArea;
     protected final JTree m_tableauTree;
     protected final JTextField m_nodeIDField;
 
@@ -45,8 +54,27 @@ public class SubtreeViewer extends JFrame {
         m_tableauTree.setLargeModel(true);
         m_tableauTree.setShowsRootHandles(true);
         m_tableauTree.setCellRenderer(new NodeCellRenderer(debugger));
-        JScrollPane scrollPane=new JScrollPane(m_tableauTree);
-        scrollPane.setPreferredSize(new Dimension(600,400));
+        m_tableauTree.addTreeSelectionListener(new TreeSelectionListener() {
+            public void valueChanged(TreeSelectionEvent e) {
+                TreePath selectionPath=m_tableauTree.getSelectionPath();
+                if (selectionPath==null)
+                    showNodeLabels(null);
+                else
+                    showNodeLabels((Node)selectionPath.getLastPathComponent());
+            }
+        });
+        m_nodeConceptsTextArea=new JTextArea();
+        m_nodeConceptsTextArea.setFont(Debugger.s_monospacedFont);
+        m_nodeEdgesTextArea=new JTextArea();
+        m_nodeEdgesTextArea.setFont(Debugger.s_monospacedFont);
+        JScrollPane modelScrollPane=new JScrollPane(m_tableauTree);
+        modelScrollPane.setPreferredSize(new Dimension(600,400));
+        JScrollPane conceptLabel=new JScrollPane(m_nodeConceptsTextArea);
+        conceptLabel.setPreferredSize(new Dimension(300,200));
+        JScrollPane roleLabel=new JScrollPane(m_nodeEdgesTextArea);
+        roleLabel.setPreferredSize(new Dimension(300,200));
+        JSplitPane labelSplit=new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,conceptLabel,roleLabel);
+        JSplitPane mainSplit=new JSplitPane(JSplitPane.VERTICAL_SPLIT,modelScrollPane,labelSplit);
         JPanel commandsPanel=new JPanel(new FlowLayout(FlowLayout.LEFT,5,3));
         commandsPanel.add(new JLabel("Node ID:"));
         m_nodeIDField=new JTextField();
@@ -82,7 +110,7 @@ public class SubtreeViewer extends JFrame {
         });
         commandsPanel.add(button);
         JPanel mainPanel=new JPanel(new BorderLayout());
-        mainPanel.add(scrollPane,BorderLayout.CENTER);
+        mainPanel.add(mainSplit,BorderLayout.CENTER);
         mainPanel.add(commandsPanel,BorderLayout.SOUTH);
         setContentPane(mainPanel);
         pack();
@@ -109,6 +137,36 @@ public class SubtreeViewer extends JFrame {
         m_tableauTree.expandPath(treePath);
         m_tableauTree.setSelectionPath(treePath);
         m_tableauTree.scrollPathToVisible(treePath);
+    }
+    public void showNodeLabels(Node node) {
+        if (node==null) {
+            m_nodeConceptsTextArea.setText("");
+            m_nodeEdgesTextArea.setText("");
+        }
+        else {
+            CharArrayWriter buffer=new CharArrayWriter();
+            PrintWriter writer=new PrintWriter(buffer);
+            writer.print("Concepts in node ");
+            writer.print(node.getNodeID());
+            writer.println(":");
+            writer.println("-----------------------");
+            writer.println();
+            m_debugger.printConceptLabel(node,writer);
+            writer.flush();
+            m_nodeConceptsTextArea.setText(buffer.toString());
+            m_nodeConceptsTextArea.select(0,0);
+            buffer=new CharArrayWriter();
+            writer=new PrintWriter(buffer);
+            writer.print("Edges in node ");
+            writer.print(node.getNodeID());
+            writer.println(":");
+            writer.println("-----------------------");
+            writer.println();
+            m_debugger.printEdges(node,writer);
+            writer.flush();
+            m_nodeEdgesTextArea.setText(buffer.toString());
+            m_nodeEdgesTextArea.select(0,0);
+        }
     }
 
     protected static class SubtreeTreeModel implements TreeModel {
