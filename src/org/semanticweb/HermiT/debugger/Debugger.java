@@ -384,7 +384,8 @@ public class Debugger extends TableauMonitorForwarder {
         writer.print("Blocked:   ");
         writer.println(formatBlockingStatus(node));
 
-        Set<Concept> positiveConceptLabel=new TreeSet<Concept>(ConceptComparator.INSTANCE);
+        Set<AtomicConcept> positiveAtomicConceptLabel=new TreeSet<AtomicConcept>(ConceptComparator.INSTANCE);
+        Set<ExistentialConcept> positiveExistentialConceptLabel=new TreeSet<ExistentialConcept>(ConceptComparator.INSTANCE);
         Set<Concept> negativeConceptLabel=new TreeSet<Concept>(ConceptComparator.INSTANCE);
         ExtensionTable.Retrieval retrieval=m_tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
         retrieval.getBindingsBuffer()[1]=node;
@@ -393,17 +394,20 @@ public class Debugger extends TableauMonitorForwarder {
             Concept concept=(Concept)retrieval.getTupleBuffer()[0];
             if (concept instanceof AtomicNegationConcept)
                 negativeConceptLabel.add(concept);
+            else if (concept instanceof AtomicConcept)
+                positiveAtomicConceptLabel.add((AtomicConcept)concept);
             else
-                positiveConceptLabel.add(concept);
+                positiveExistentialConceptLabel.add((ExistentialConcept)concept);
             retrieval.next();
         }
-        if (!positiveConceptLabel.isEmpty()) {
+        if (!positiveAtomicConceptLabel.isEmpty() || !positiveExistentialConceptLabel.isEmpty()) {
             writer.print("-- Positive concept label ------------------------");
-            printConcepts(positiveConceptLabel,writer);
+            printConcepts(positiveAtomicConceptLabel,writer,3);
+            printConcepts(positiveExistentialConceptLabel,writer,1);
         }
         if (!negativeConceptLabel.isEmpty()) {
             writer.print("-- Negative concept label ------------------------");
-            printConcepts(negativeConceptLabel,writer);
+            printConcepts(negativeConceptLabel,writer,3);
         }
 
         Map<Node,Set<AtomicAbstractRole>> outgoingEdges=new TreeMap<Node,Set<AtomicAbstractRole>>(NodeComparator.INSTANCE);
@@ -450,12 +454,12 @@ public class Debugger extends TableauMonitorForwarder {
         showTextInWindow(buffer.toString(),"Node '"+node.getNodeID()+"'");
         selectConsoleWindow();
     }
-    protected void printConcepts(Set<Concept> set,PrintWriter writer) {
+    protected void printConcepts(Set<? extends Concept> set,PrintWriter writer,int numberInRow) {
         int number=0;
         for (Concept concept : set) {
             if (number!=0)
                 writer.print(", ");
-            if ((number % 3)==0) {
+            if ((number % numberInRow)==0) {
                 writer.println();
                 writer.print("    ");
             }
@@ -622,23 +626,26 @@ public class Debugger extends TableauMonitorForwarder {
         m_output.println(".");
     }
     protected void doActiveNodes(String[] commandLine) {
+        int numberOfNodes=0;
         Node node=m_tableau.getFirstTableauNode();
-        List<Node> nodes=new ArrayList<Node>();
         while (node!=null) {
-            if (!node.isBlocked()) {
-                nodes.add(node);
-            }
+            if (!node.isBlocked())
+                numberOfNodes++;
             node=node.getNextTableauNode();
         }
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter writer=new PrintWriter(buffer);
-        writer.println("Active nodes ("+nodes.size()+"):");
+        writer.println("Active nodes ("+numberOfNodes+"):");
         writer.println("===========================================");
         writer.println("      ID");
         writer.println("===========================================");
-        for (Node activeNode : nodes) {
-            writer.print("  ");
-            writer.println(activeNode.getNodeID());
+        node=m_tableau.getFirstTableauNode();
+        while (node!=null) {
+            if (!node.isBlocked()) {
+                writer.print("  ");
+                writer.println(node.getNodeID());
+            }
+            node=node.getNextTableauNode();
         }
         writer.flush();
         showTextInWindow(buffer.toString(),"Active nodes");
@@ -683,7 +690,7 @@ public class Debugger extends TableauMonitorForwarder {
         else
             m_output.println("Node with ID '"+nodeID+"' not found.");
     }
-    protected static String  formatBlockingStatus(Node node) {
+    protected static String formatBlockingStatus(Node node) {
         if (!node.isBlocked())
             return "no";
         else if (node.isDirectlyBlocked())
