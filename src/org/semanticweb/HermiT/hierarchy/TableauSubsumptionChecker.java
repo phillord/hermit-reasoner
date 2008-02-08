@@ -51,7 +51,7 @@ public class TableauSubsumptionChecker implements SubsumptionHierarchy.Subsumpti
         if (AtomicConcept.THING.equals(superconcept))
             return true;
         if (AtomicConcept.NOTHING.equals(superconcept))
-            return false;
+            return !isSatisfiable(subconceptName);
         AtomicConceptInfo subconceptInfo=getAtomicConceptInfo(subconcept);
         if (subconceptInfo.isKnownSubsumer(superconcept))
             return true;

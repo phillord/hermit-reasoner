@@ -59,4 +59,7 @@ public class SubsumptionHierarchyNode implements Serializable {
         }
         return result;
     }
+    public String toString() {
+        return m_owlClasses.toString();
+    }
 }
