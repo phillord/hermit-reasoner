@@ -418,10 +418,14 @@ public class Normalization {
             return Boolean.TRUE;
         }
         public Object visit(ObjectCardinality object) {
-            if (object.isMinimumCardinality() && object.getCardinality()>0)
-                return Boolean.TRUE;
+            if (object.isMinimumCardinality()) {
+                if (object.isMaximumCardinality())
+                    return object.getCardinality()>0 ? Boolean.TRUE : object.getDescription().getComplementNNF().accept(this);
+                else
+                    return object.getCardinality()>0 ? Boolean.TRUE : Boolean.FALSE;
+            }
             else
-                return object.getComplementNNF().accept(this);
+                return object.getCardinality()>0 ? Boolean.TRUE : object.getDescription().getComplementNNF().accept(this);
         }
         public Object visit(ObjectNot object) {
             return Boolean.FALSE;
