@@ -94,16 +94,18 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
         return false;
     }
     protected boolean tryParentReuse(AtLeastAbstractRoleConcept atLeastAbstractRoleConcept,Node node) {
-        Node parent=node.getParent();
-        if (parent!=null && m_extensionManager.containsConceptAssertion(atLeastAbstractRoleConcept.getToConcept(),parent)) {
-            DependencySet dependencySet=m_extensionManager.getConceptAssertionDependencySet(atLeastAbstractRoleConcept,node);
-            if (!m_isDeterministic) {
-                BranchingPoint branchingPoint=new IndividualResueBranchingPoint(m_tableau,atLeastAbstractRoleConcept,node);
-                m_tableau.pushBranchingPoint(branchingPoint);
-                dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,branchingPoint.getLevel());
+        if (atLeastAbstractRoleConcept.getNumber()==1) {
+            Node parent=node.getParent();
+            if (parent!=null && m_extensionManager.containsConceptAssertion(atLeastAbstractRoleConcept.getToConcept(),parent)) {
+                DependencySet dependencySet=m_extensionManager.getConceptAssertionDependencySet(atLeastAbstractRoleConcept,node);
+                if (!m_isDeterministic) {
+                    BranchingPoint branchingPoint=new IndividualResueBranchingPoint(m_tableau,atLeastAbstractRoleConcept,node);
+                    m_tableau.pushBranchingPoint(branchingPoint);
+                    dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,branchingPoint.getLevel());
+                }
+                m_extensionManager.addRoleAssertion(atLeastAbstractRoleConcept.getOnAbstractRole(),node,parent,dependencySet);
+                return true;
             }
-            m_extensionManager.addRoleAssertion(atLeastAbstractRoleConcept.getOnAbstractRole(),node,parent,dependencySet);
-            return true;
         }
         return false;
     }
@@ -220,7 +222,9 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
         }
     }
     
-    protected static class NodeBranchingPointPair {
+    protected static class NodeBranchingPointPair implements Serializable {
+        private static final long serialVersionUID=427963701900451471L;
+
         protected final Node m_node;
         protected final int m_branchingPoint;
         

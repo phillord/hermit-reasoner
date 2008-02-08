@@ -489,14 +489,17 @@ public class Debugger extends TableauMonitorForwarder {
         retrieval.getBindingsBuffer()[1]=node;
         retrieval.open();
         while (!retrieval.afterLast()) {
-            AtomicAbstractRole atomicAbstractRole=(AtomicAbstractRole)retrieval.getTupleBuffer()[0];
-            Node toNode=(Node)retrieval.getTupleBuffer()[2];
-            Set<AtomicAbstractRole> set=outgoingEdges.get(toNode);
-            if (set==null) {
-                set=new TreeSet<AtomicAbstractRole>(AbstractRoleComparator.INSTANCE);
-                outgoingEdges.put(toNode,set);
+            Object atomicAbstractRoleObject=retrieval.getTupleBuffer()[0];
+            if (atomicAbstractRoleObject instanceof AtomicAbstractRole) {
+                AtomicAbstractRole atomicAbstractRole=(AtomicAbstractRole)retrieval.getTupleBuffer()[0];
+                Node toNode=(Node)retrieval.getTupleBuffer()[2];
+                Set<AtomicAbstractRole> set=outgoingEdges.get(toNode);
+                if (set==null) {
+                    set=new TreeSet<AtomicAbstractRole>(AbstractRoleComparator.INSTANCE);
+                    outgoingEdges.put(toNode,set);
+                }
+                set.add(atomicAbstractRole);
             }
-            set.add(atomicAbstractRole);
             retrieval.next();
         }
         if (!outgoingEdges.isEmpty()) {
@@ -509,14 +512,17 @@ public class Debugger extends TableauMonitorForwarder {
         retrieval.getBindingsBuffer()[2]=node;
         retrieval.open();
         while (!retrieval.afterLast()) {
-            AtomicAbstractRole atomicAbstractRole=(AtomicAbstractRole)retrieval.getTupleBuffer()[0];
-            Node fromNode=(Node)retrieval.getTupleBuffer()[1];
-            Set<AtomicAbstractRole> set=incomingEdges.get(fromNode);
-            if (set==null) {
-                set=new TreeSet<AtomicAbstractRole>(AbstractRoleComparator.INSTANCE);
-                incomingEdges.put(fromNode,set);
+            Object atomicAbstractRoleObject=retrieval.getTupleBuffer()[0];
+            if (atomicAbstractRoleObject instanceof AtomicAbstractRole) {
+                AtomicAbstractRole atomicAbstractRole=(AtomicAbstractRole)retrieval.getTupleBuffer()[0];
+                Node fromNode=(Node)retrieval.getTupleBuffer()[1];
+                Set<AtomicAbstractRole> set=incomingEdges.get(fromNode);
+                if (set==null) {
+                    set=new TreeSet<AtomicAbstractRole>(AbstractRoleComparator.INSTANCE);
+                    incomingEdges.put(fromNode,set);
+                }
+                set.add(atomicAbstractRole);
             }
-            set.add(atomicAbstractRole);
             retrieval.next();
         }
         if (!incomingEdges.isEmpty()) {

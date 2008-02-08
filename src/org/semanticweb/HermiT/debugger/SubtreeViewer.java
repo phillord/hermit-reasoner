@@ -163,13 +163,25 @@ public class SubtreeViewer extends JFrame {
             m_eventListeners.remove(TreeModelListener.class,listener);
         }
         public Object getChild(Object parent,int index) {
-            return m_debugger.m_nodeCreationInfos.get(parent).m_children.get(index);
+            Debugger.NodeCreationInfo nodeCreationInfo=m_debugger.m_nodeCreationInfos.get(parent);
+            if (nodeCreationInfo==null)
+                return null;
+            else
+                return nodeCreationInfo.m_children.get(index);
         }
         public int getChildCount(Object parent) {
-            return m_debugger.m_nodeCreationInfos.get(parent).m_children.size();
+            Debugger.NodeCreationInfo nodeCreationInfo=m_debugger.m_nodeCreationInfos.get(parent);
+            if (nodeCreationInfo==null)
+                return 0;
+            else
+                return nodeCreationInfo.m_children.size();
         }
         public int getIndexOfChild(Object parent,Object child) {
-            return m_debugger.m_nodeCreationInfos.get(parent).m_children.indexOf(child);
+            Debugger.NodeCreationInfo nodeCreationInfo=m_debugger.m_nodeCreationInfos.get(parent);
+            if (nodeCreationInfo==null)
+                return -1;
+            else
+                return nodeCreationInfo.m_children.indexOf(child);
         }
         public Object getRoot() {
             return m_root;
