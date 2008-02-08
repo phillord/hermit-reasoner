@@ -20,13 +20,13 @@ public class RunHermiT {
         
         HermiT hermit=new HermiT();
 //        hermit.setBlockingSignatureCacheType(HermiT.BlockingSignatureCacheType.NOT_CACHED);
-//        hermit.setExistentialsType(HermiT.ExistentialsType.INDIVIDUAL_REUSE);
-//        hermit.setTimingOn();
+        hermit.setExistentialsType(HermiT.ExistentialsType.INDIVIDUAL_REUSE);
+        hermit.setTimingOn();
 //        hermit.setTimingWithPauseOn();
 //        hermit.setDebuggingOn(false);
 //        hermit.setDebuggingOn(true);
 
-        hermit.loadOntology("file:/C:/Work/ontologies/pizza/pizza.owl");
+        hermit.loadOntology("file:/C:/Work/TestOntologies/DOLCE_397/dolce_all.owl");
 //        hermit.loadOntology("file:/C:/Work/ontologies/NCI/nciOncology.owl");
 //        hermit.loadOntology("file:/C:/Temp/full-galen-no-functionality.owl");
 //        hermit.loadOntology("file:/C:/Temp/galen-module1-no-functionality.owl");

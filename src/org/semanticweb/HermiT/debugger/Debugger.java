@@ -895,7 +895,7 @@ public class Debugger extends TableauMonitorForwarder {
         ExistentialsExpansionStrategy strategy=m_tableau.getExistentialsExpansionStrategy();
         if (strategy instanceof IndividualReuseStrategy) {
             IndividualReuseStrategy reuseStrategy=(IndividualReuseStrategy)strategy;
-            AtomicConcept conceptForNode=reuseStrategy.getConceptForNode(node);
+            LiteralConcept conceptForNode=reuseStrategy.getConceptForNode(node);
             m_output.print("Node '");
             m_output.print(node.getNodeID());
             m_output.print("' is ");
@@ -903,7 +903,7 @@ public class Debugger extends TableauMonitorForwarder {
                 m_output.println("not a reuse node for any concept.");
             else {
                 m_output.print("a reuse node for the '");
-                m_output.print(m_namespaces.abbreviateAsNamespace(conceptForNode.getURI()));
+                m_output.print(conceptForNode.toString(m_namespaces));
                 m_output.println("' concept.");
             }
         }

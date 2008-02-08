@@ -56,9 +56,9 @@ public class ReuseAnalysis3 extends TableauMonitorAdapter {
     public void mergeStarted(Node mergeFrom,Node mergeInto) {
         if (m_currentDLClauseEvaluator!=null) {
             Node centralNode=(Node)m_currentDLClauseEvaluator.getTupleMatchedToBody(0)[1];
-            AtomicConcept centralConcept=m_individualReuseStrategy.getConceptForNode(centralNode);
-            AtomicConcept fromConcept=m_individualReuseStrategy.getConceptForNode(mergeFrom);
-            AtomicConcept intoConcept=m_individualReuseStrategy.getConceptForNode(mergeInto);
+            AtomicConcept centralConcept=(AtomicConcept)m_individualReuseStrategy.getConceptForNode(centralNode);
+            AtomicConcept fromConcept=(AtomicConcept)m_individualReuseStrategy.getConceptForNode(mergeFrom);
+            AtomicConcept intoConcept=(AtomicConcept)m_individualReuseStrategy.getConceptForNode(mergeInto);
             if (centralConcept!=null && fromConcept!=null && intoConcept!=null) {
                 AtomicAbstractRole atomicAbstractRole=null;
                 for (int index=0;index<m_currentDLClauseEvaluator.getBodyLength();index++)
