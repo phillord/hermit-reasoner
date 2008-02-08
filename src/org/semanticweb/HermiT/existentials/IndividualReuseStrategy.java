@@ -74,10 +74,9 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
                         m_existentialExpansionManager.markExistentialProcessed(atLeastAbstractRoleConcept,node);
                         if (!isExistentialSatisfied) {
                             if (!m_existentialExpansionManager.tryFunctionalExpansion(atLeastAbstractRoleConcept,node)) 
-                                if (!tryParentReuse(atLeastAbstractRoleConcept,node)) {
+                                if (!tryParentReuse(atLeastAbstractRoleConcept,node))
                                     if (!expandWithModelReuse(atLeastAbstractRoleConcept,node))
                                         m_existentialExpansionManager.doNormalExpansion(atLeastAbstractRoleConcept,node);
-                                }
                         }
                         else {
                             if (m_tableau.getTableauMonitor()!=null)
