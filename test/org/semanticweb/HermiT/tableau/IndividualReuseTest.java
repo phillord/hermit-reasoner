@@ -1,6 +1,7 @@
 package org.semanticweb.HermiT.tableau;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Set;
 
 import org.semanticweb.HermiT.kaon2.structural.*;
@@ -24,6 +25,6 @@ public class IndividualReuseTest extends ReasonerTest {
         BlockingSignatureCache blockingSignatureCache=new BlockingSignatureCache(directBlockingChecker);
         BlockingStrategy blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
         ExistentialsExpansionStrategy existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,false);
-        return new Tableau(null,existentialsExpansionStrategy,dlOntology);
+        return new Tableau(null,existentialsExpansionStrategy,dlOntology,new HashMap<String,Object>());
     }
 }

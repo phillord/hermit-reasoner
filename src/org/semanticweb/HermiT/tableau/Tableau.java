@@ -17,6 +17,7 @@ public final class Tableau implements Serializable {
     protected final TableauMonitor m_tableauMonitor;
     protected final ExistentialsExpansionStrategy m_existentialsExpansionStrategy;
     protected final DLOntology m_dlOntology;
+    protected final Map<String,Object> m_parameters;
     protected final DependencySetFactory m_dependencySetFactory;
     protected final ExtensionManager m_extensionManager;
     protected final LabelManager m_labelManager;
@@ -42,7 +43,8 @@ public final class Tableau implements Serializable {
     protected GroundDisjunction m_firstUnprocessedGroundDisjunction;
     protected Node m_checkedNode;
 
-    public Tableau(TableauMonitor tableauMonitor,ExistentialsExpansionStrategy existentialsExpansionStrategy,DLOntology dlOntology) {
+    public Tableau(TableauMonitor tableauMonitor,ExistentialsExpansionStrategy existentialsExpansionStrategy,DLOntology dlOntology,Map<String,Object> parameters) {
+        m_parameters=parameters;
         m_tableauMonitor=tableauMonitor;
         m_existentialsExpansionStrategy=existentialsExpansionStrategy;
         m_dlOntology=dlOntology;
@@ -64,6 +66,9 @@ public final class Tableau implements Serializable {
     }
     public DLOntology getDLOntology() {
         return m_dlOntology;
+    }
+    public Map<String,Object> getParameters() {
+        return m_parameters;
     }
     public TableauMonitor getTableauMonitor() {
         return m_tableauMonitor;

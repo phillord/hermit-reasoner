@@ -1,6 +1,7 @@
 package org.semanticweb.HermiT.tableau;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Set;
 
 import org.semanticweb.HermiT.blocking.*;
@@ -38,7 +39,7 @@ public class NIRuleTest extends AbstractHermiTTest {
         BlockingSignatureCache blockingSignatureCache=new BlockingSignatureCache(PairWiseDirectBlockingChecker.INSTANCE);
         BlockingStrategy blockingStrategy=new AnywhereBlocking(PairWiseDirectBlockingChecker.INSTANCE,blockingSignatureCache);
         ExistentialsExpansionStrategy existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
-        m_tableau=new Tableau(null,existentialsExpansionStrategy,TEST_DL_ONTOLOGY);
+        m_tableau=new Tableau(null,existentialsExpansionStrategy,TEST_DL_ONTOLOGY,new HashMap<String,Object>());
         m_extensionManager=m_tableau.getExtensionManager();
         m_manager=m_tableau.getNominalIntroductionManager();
     }

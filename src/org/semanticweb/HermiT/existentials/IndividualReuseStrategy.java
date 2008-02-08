@@ -37,12 +37,20 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
         m_auxiliaryBuffer=new Object[1];
         m_indicesByBranchingPoint=new int[10];
     }
+    @SuppressWarnings("unchecked")
     public void intialize(Tableau tableau) {
         m_tableau=tableau;
         m_extensionManager=m_tableau.getExtensionManager();
         m_existentialExpansionManager=m_tableau.getExistentialExpansionManager();
+        m_doReuseConceptsAlways.clear();
         m_dontReueseConceptsEver.clear();
         m_blockingStrategy.initialize(tableau);
+        Object object=m_tableau.getParameters().get("IndividualReuseStrategy.reuseAlways");
+        if (object instanceof Set)
+            m_doReuseConceptsAlways.addAll((Set<? extends LiteralConcept>)object);
+        object=m_tableau.getParameters().get("IndividualReuseStrategy.reuseNever");
+        if (object instanceof Set)
+            m_dontReueseConceptsEver.addAll((Set<? extends LiteralConcept>)object);
     }
     public void clear() {
         m_reusedNodes.clear();

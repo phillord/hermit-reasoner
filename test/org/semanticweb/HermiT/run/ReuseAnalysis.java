@@ -149,7 +149,7 @@ public class ReuseAnalysis {
         Set<DLClause> noDLClauses=Collections.emptySet();
         Set<Atom> noAtoms=Collections.emptySet();
         DLOntology emptyDLOntology=new DLOntology("nothing",noDLClauses,noAtoms,noAtoms,false,false,false,false);
-        Tableau tableau=new Tableau(null,new CreationOrderStrategy(new AnywhereBlocking(new PairWiseDirectBlockingChecker(),null)),emptyDLOntology);
+        Tableau tableau=new Tableau(null,new CreationOrderStrategy(new AnywhereBlocking(new PairWiseDirectBlockingChecker(),null)),emptyDLOntology,new HashMap<String,Object>());
         ExtensionTable extensionTable=new ExtensionTableWithTupleIndexes(tableau,tableau.getExtensionManager(),3,false,new TupleIndex[] { new TupleIndex(new int[] { 0,1,2 }) });
         DependencySet emptySet=tableau.getDependencySetFactory().emptySet();
         for (AtomicConcept atomicConcept : m_graphConcepts) {

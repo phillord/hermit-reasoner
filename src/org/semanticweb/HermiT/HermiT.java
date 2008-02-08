@@ -1,10 +1,12 @@
 package org.semanticweb.HermiT;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -15,8 +17,9 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
 import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
 
 import org.semanticweb.kaon2.api.KAON2Exception;
 import org.semanticweb.kaon2.api.KAON2Manager;
@@ -42,6 +45,7 @@ public class HermiT implements Serializable {
     public static enum BlockingSignatureCacheType { CACHED,NOT_CACHED };
     public static enum ExistentialsType { CREATION_ORDER,EL,INDIVIDUAL_REUSE };
 
+    protected final Map<String,Object> m_parameters;
     protected DLOntology m_dlOntology;
     protected Namespaces m_namespaces;
     protected TableauMonitor m_userTableauMonitor;
@@ -54,11 +58,18 @@ public class HermiT implements Serializable {
     protected TableauSubsumptionChecker m_subsumptionChecker;
 
     public HermiT() {
+        m_parameters=new HashMap<String,Object>();
         setTableauMonitorType(TableauMonitorType.NONE);
         setDirectBlockingType(DirectBlockingType.OPTIMAL);
         setBlockingType(BlockingType.ANYWHERE);
         setBlockingSignatureCacheType(BlockingSignatureCacheType.CACHED);
         setExistentialsType(ExistentialsType.CREATION_ORDER);
+    }
+    public void setParameter(String parameterName,Object value) {
+        m_parameters.put(parameterName,value);
+    }
+    public Object getParameter(String parameterName) {
+        return m_parameters.get(parameterName);
     }
     public void setUserTableauMonitor(TableauMonitor userTableauMonitor) {
         m_userTableauMonitor=userTableauMonitor;
@@ -223,7 +234,7 @@ public class HermiT implements Serializable {
             break;
         }
         
-        m_tableau=new Tableau(tableauMonitor,existentialsExpansionStrategy,m_dlOntology);
+        m_tableau=new Tableau(tableauMonitor,existentialsExpansionStrategy,m_dlOntology,m_parameters);
         m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
     }
     public DLOntology getDLOntology() {
@@ -270,6 +281,35 @@ public class HermiT implements Serializable {
         }
         finally {
             output.flush();
+        }
+    }
+    public void setIndividualReuseStrategyReuseAlways(Set<? extends LiteralConcept> concepts) {
+        m_parameters.put("IndividualReuseStrategy.reuseAlways",concepts);
+    }
+    public void loadIndividualReuseStrategyReuseAlways(File file) throws IOException {
+        Set<AtomicConcept> concepts=loadConceptsFromFile(file);
+        setIndividualReuseStrategyReuseAlways(concepts);
+    }
+    public void setIndividualReuseStrategyReuseNever(Set<? extends LiteralConcept> concepts) {
+        m_parameters.put("IndividualReuseStrategy.reuseNever",concepts);
+    }
+    public void loadIndividualReuseStrategyReuseNever(File file) throws IOException {
+        Set<AtomicConcept> concepts=loadConceptsFromFile(file);
+        setIndividualReuseStrategyReuseNever(concepts);
+    }
+    protected Set<AtomicConcept> loadConceptsFromFile(File file) throws IOException {
+        Set<AtomicConcept> result=new HashSet<AtomicConcept>();
+        BufferedReader reader=new BufferedReader(new FileReader(file));
+        try {
+            String line=reader.readLine();
+            while (line!=null) {
+                result.add(AtomicConcept.create(line));
+                line=reader.readLine();
+            }
+            return result;
+        }
+        finally {
+            reader.close();
         }
     }
     public void save(File file) throws IOException {
