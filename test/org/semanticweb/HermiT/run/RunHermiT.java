@@ -20,7 +20,7 @@ public class RunHermiT {
         
         HermiT hermit=new HermiT();
 //        hermit.setBlockingSignatureCacheType(HermiT.BlockingSignatureCacheType.NOT_CACHED);
-        hermit.setExistentialsType(HermiT.ExistentialsType.INDIVIDUAL_REUSE);
+//        hermit.setExistentialsType(HermiT.ExistentialsType.INDIVIDUAL_REUSE);
         hermit.setTimingOn();
 //        hermit.setTimingWithPauseOn();
 //        hermit.setDebuggingOn(false);

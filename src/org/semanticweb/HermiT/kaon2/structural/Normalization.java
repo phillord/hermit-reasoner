@@ -25,6 +25,7 @@ public class Normalization {
     protected final Collection<Description[]> m_conceptInclusions;
     protected final Collection<ObjectPropertyExpression[]> m_normalObjectPropertyInclusions;
     protected final Collection<ObjectPropertyExpression[]> m_inverseObjectPropertyInclusions;
+    protected final Collection<DataPropertyExpression[]> m_normalDataPropertyInclusions;
     protected final Collection<Fact> m_facts;
     protected final Collection<Rule> m_rules;
     
@@ -35,6 +36,7 @@ public class Normalization {
         m_conceptInclusions=new ArrayList<Description[]>();
         m_normalObjectPropertyInclusions=new ArrayList<ObjectPropertyExpression[]>(); 
         m_inverseObjectPropertyInclusions=new ArrayList<ObjectPropertyExpression[]>();
+        m_normalDataPropertyInclusions=new ArrayList<DataPropertyExpression[]>();
         m_facts=new HashSet<Fact>();
         m_rules=new HashSet<Rule>();
     }
@@ -46,6 +48,9 @@ public class Normalization {
     }
     public Collection<ObjectPropertyExpression[]> getInverseObjectPropertyInclusions() {
         return m_inverseObjectPropertyInclusions;
+    }
+    public Collection<DataPropertyExpression[]> getNormalDataPropertyInclusios() {
+        return m_normalDataPropertyInclusions;
     }
     public Collection<Fact> getFacts() {
         return m_facts;
@@ -81,6 +86,19 @@ public class Normalization {
                 transitivityManager.addInclusion(objectProperties[i+1],objectProperties[i]);
                 m_normalObjectPropertyInclusions.add(new ObjectPropertyExpression[] { objectProperties[i],objectProperties[i+1] });
                 m_normalObjectPropertyInclusions.add(new ObjectPropertyExpression[] { objectProperties[i+1],objectProperties[i] });
+            }
+        }
+        for (SubDataPropertyOf axiom : ontology.createAxiomRequest(SubDataPropertyOf.class).getAll()) {
+            DataPropertyExpression subDataProperty=axiom.getSubDataProperty();
+            DataPropertyExpression superDataProperty=axiom.getSuperDataProperty();
+            m_normalDataPropertyInclusions.add(new DataPropertyExpression[] { subDataProperty,superDataProperty });
+        }
+        for (EquivalentDataProperties axiom : ontology.createAxiomRequest(EquivalentDataProperties.class).getAll()) {
+            DataPropertyExpression[] dataProperties=new DataPropertyExpression[axiom.getDataProperties().size()];
+            axiom.getDataProperties().toArray(dataProperties);
+            for (int i=0;i<dataProperties.length-1;i++) {
+                m_normalDataPropertyInclusions.add(new DataPropertyExpression[] { dataProperties[i],dataProperties[i+1] });
+                m_normalDataPropertyInclusions.add(new DataPropertyExpression[] { dataProperties[i+1],dataProperties[i] });
             }
         }
         List<Description[]> inclusions=new ArrayList<Description[]>();
@@ -124,12 +142,27 @@ public class Normalization {
                 break;
             }
         }
+        for (DataPropertyAttribute axiom : ontology.createAxiomRequest(DataPropertyAttribute.class).getAll()) {
+            switch (axiom.getAttribute()) {
+            case DataPropertyAttribute.DATA_PROPERTY_FUNCTIONAL:
+                inclusions.add(new Description[] { KAON2Manager.factory().dataCardinality(DataCardinality.MAXIMUM,1,axiom.getDataProperty(),KAON2Manager.factory().rdfsLiteral()) });
+                break;
+            }
+        }
         for (ObjectPropertyDomain axiom : ontology.createAxiomRequest(ObjectPropertyDomain.class).getAll()) {
             ObjectAll allPropertyNohting=KAON2Manager.factory().objectAll(axiom.getObjectProperty().getSimplified(),KAON2Manager.factory().nothing());
             inclusions.add(new Description[] { axiom.getDomain(),allPropertyNohting });
         }
         for (ObjectPropertyRange axiom : ontology.createAxiomRequest(ObjectPropertyRange.class).getAll()) {
             ObjectAll allPropertyRange=KAON2Manager.factory().objectAll(axiom.getObjectProperty().getSimplified(),axiom.getRange().getNNF());
+            inclusions.add(new Description[] { allPropertyRange });
+        }
+        for (DataPropertyDomain axiom : ontology.createAxiomRequest(DataPropertyDomain.class).getAll()) {
+            DataAll allPropertyNohting=KAON2Manager.factory().dataAll(KAON2Manager.factory().dataNot(KAON2Manager.factory().rdfsLiteral()),axiom.getDataProperty());
+            inclusions.add(new Description[] { axiom.getDomain(),allPropertyNohting });
+        }
+        for (DataPropertyRange axiom : ontology.createAxiomRequest(DataPropertyRange.class).getAll()) {
+            DataAll allPropertyRange=KAON2Manager.factory().dataAll(axiom.getRange().getNNF(),axiom.getDataProperty());
             inclusions.add(new Description[] { allPropertyRange });
         }
         KAON2Visitor normalizer=new NormalizationVisitor(inclusions);

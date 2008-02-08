@@ -25,9 +25,9 @@ public class Clausification {
     public DLOntology clausify(boolean prepareForNIRule,Ontology ontology,boolean processTransitivity,Collection<DescriptionGraph> descriptionGraphs) throws KAON2Exception {
         Normalization normalization=new Normalization(processTransitivity);
         normalization.processOntology(ontology);
-        return clausify(prepareForNIRule,ontology.getOntologyURI(),normalization.getConceptInclusions(),normalization.getNormalObjectPropertyInclusions(),normalization.getInverseObjectPropertyInclusions(),normalization.getFacts(),descriptionGraphs,normalization.getRules());
+        return clausify(prepareForNIRule,ontology.getOntologyURI(),normalization.getConceptInclusions(),normalization.getNormalObjectPropertyInclusions(),normalization.getInverseObjectPropertyInclusions(),normalization.getNormalDataPropertyInclusios(),normalization.getFacts(),descriptionGraphs,normalization.getRules());
     }
-    public DLOntology clausify(boolean prepareForNIRule,String ontologyURI,Collection<Description[]> conceptInclusions,Collection<ObjectPropertyExpression[]> normalObjectPropertyInclusions,Collection<ObjectPropertyExpression[]> inverseObjectPropertyInclusions,Collection<Fact> facts,Collection<DescriptionGraph> descriptionGraphs,Collection<Rule> additionalRules) throws KAON2Exception {
+    public DLOntology clausify(boolean prepareForNIRule,String ontologyURI,Collection<Description[]> conceptInclusions,Collection<ObjectPropertyExpression[]> normalObjectPropertyInclusions,Collection<ObjectPropertyExpression[]> inverseObjectPropertyInclusions,Collection<DataPropertyExpression[]> inverseDataPropertyInclusions,Collection<Fact> facts,Collection<DescriptionGraph> descriptionGraphs,Collection<Rule> additionalRules) throws KAON2Exception {
         DetermineExpressivity determineExpressivity=new DetermineExpressivity();
         for (Description[] inclusion : conceptInclusions)
             for (Description description : inclusion)
@@ -44,6 +44,8 @@ public class Clausification {
             if ((isInverse0 && isInverse1) || (!isInverse0 && !isInverse1))
                 determineExpressivity.m_hasInverseRoles=true;
         }
+        if (inverseDataPropertyInclusions.size()>0)
+            throw new IllegalArgumentException("Data properties are not supported yet.");
         Set<DLClause> dlClauses=new HashSet<DLClause>();
         Set<Atom> positiveFacts=new HashSet<Atom>();
         Set<Atom> negativeFacts=new HashSet<Atom>();
