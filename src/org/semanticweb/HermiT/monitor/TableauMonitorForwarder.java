@@ -173,6 +173,14 @@ public class TableauMonitorForwarder implements TableauMonitor,Serializable {
         if (m_forwardingOn)
             m_forwardingTargetMonitor.existentialSatisfied(existentialConcept,forNode);
     }
+    public void nominalIntorductionStarted(Node rootNode,Node treeNode,AtMostAbstractRoleGuard atMostAbstractRoleGuard) {
+        if (m_forwardingOn)
+            m_forwardingTargetMonitor.nominalIntorductionStarted(rootNode,treeNode,atMostAbstractRoleGuard);
+    }
+    public void nominalIntorductionFinished(Node rootNode,Node treeNode,AtMostAbstractRoleGuard atMostAbstractRoleGuard) {
+        if (m_forwardingOn)
+            m_forwardingTargetMonitor.nominalIntorductionFinished(rootNode,treeNode,atMostAbstractRoleGuard);
+    }
     public void nodeCreated(Node node) {
         if (m_forwardingOn)
             m_forwardingTargetMonitor.nodeCreated(node);

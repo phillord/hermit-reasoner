@@ -110,6 +110,7 @@ public class SubtreeViewer extends JFrame {
         pack();
         setLocation(200,200);
         setVisible(true);
+        m_nodeIDField.requestFocusInWindow();
     }
     public void refresh() {
         m_subtreeTreeModel.refresh();
@@ -191,7 +192,9 @@ public class SubtreeViewer extends JFrame {
         protected static final Icon NOT_ACTIVE_ICON=new DotIcon(Color.LIGHT_GRAY);
         protected static final Icon BLOCKED_ICON=new DotIcon(Color.CYAN);
         protected static final Icon WITH_EXISTENTIALS_ICON=new DotIcon(Color.RED);
-        protected static final Icon NORMAL_ICON=new DotIcon(Color.BLACK);
+        protected static final Icon ROOT_NODE_ICON=new DotIcon(Color.BLACK);
+        protected static final Icon TREE_NODE_ICON=new DotIcon(Color.GREEN);
+        protected static final Icon GRAPH_NODE_ICON=new DotIcon(Color.MAGENTA);
 
         protected final Debugger m_debugger;
         
@@ -225,8 +228,20 @@ public class SubtreeViewer extends JFrame {
                 setIcon(BLOCKED_ICON);
             else if (node.hasUnprocessedExistentials())
                 setIcon(WITH_EXISTENTIALS_ICON);
-            else
-                setIcon(NORMAL_ICON);
+            else {
+                switch (node.getNodeType()) {
+                case TREE_NODE:
+                    setIcon(TREE_NODE_ICON);
+                    break;
+                case GRAPH_NODE:
+                    setIcon(GRAPH_NODE_ICON);
+                    break;
+                case ROOT_NODE:
+                default:
+                    setIcon(ROOT_NODE_ICON);
+                    break;
+                }
+            }
             return this;
         }
     }

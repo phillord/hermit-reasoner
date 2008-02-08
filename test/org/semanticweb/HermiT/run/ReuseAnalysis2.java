@@ -28,10 +28,46 @@ public class ReuseAnalysis2 {
         m_reuseConcepts=new TreeSet<AtomicConcept>(DLOntology.AtomicConceptComparator.INSTANCE);
         m_conceptHierarchy=new ObjectHierarchy<Concept>();
         analyzeDLOntology();
-        Set<Concept> allSubconcepts=m_conceptHierarchy.getAllSubobjects(AtomicConcept.create("http://www.co-ode.org/ontologies/galen#BodyStructure"));
+        addSubconceptsToReuse("http://www.co-ode.org/ontologies/galen#BodySystem");
+        addSubconceptsToReuse("http://www.co-ode.org/ontologies/galen#BodyCavity");
+        addSubconceptsToReuse("http://www.co-ode.org/ontologies/galen#Lymphnode");
+        addSubconceptsToReuse("http://www.co-ode.org/ontologies/galen#Lobe");
+        addSubconceptsToReuse("http://www.co-ode.org/ontologies/galen#NAMEDBodyPart");
+        addSubconceptsToReuse("http://www.co-ode.org/ontologies/galen#NAMEDBodySpace");
+        addSubconceptsToReuse("http://www.co-ode.org/ontologies/galen#NAMEDArtery");
+        addSubconceptsToReuse("http://www.co-ode.org/ontologies/galen#NAMEDVein");
+        addSubconceptsToReuse("http://www.co-ode.org/ontologies/galen#NAMEDAtrium");
+        addSubconceptsToReuse("http://www.co-ode.org/ontologies/galen#NAMEDVentricle");
+        addSubconceptsToReuse("http://www.co-ode.org/ontologies/galen#NAMEDMembrane");
+        addSubconceptsToReuse("http://www.co-ode.org/ontologies/galen#NAMEDMuscle");
+        addSubconceptsToReuse("http://www.co-ode.org/ontologies/galen#NAMEDJunction");
+        addSubconceptsToReuse("http://www.co-ode.org/ontologies/galen#NAMEDOrifice");
+        addSubconceptsToReuse("http://www.co-ode.org/ontologies/galen#NAMEDNerve");
+        addSubconceptsToReuse("http://www.co-ode.org/ontologies/galen#NAMEDNervePlexus");
+        addSubconceptsToReuse("http://www.co-ode.org/ontologies/galen#NAMEDLigament");
+        addSubconceptsToReuse("http://www.co-ode.org/ontologies/galen#NAMEDInternalBodySubPart");
+        addSubconceptsToReuse("http://www.co-ode.org/ontologies/galen#NAMEDGland");
+        addSubconceptsToReuse("http://www.co-ode.org/ontologies/galen#discrete");
+        addSubconceptsToReuse("http://www.co-ode.org/ontologies/galen#normal");
+        addSubconceptsToReuse("http://www.co-ode.org/ontologies/galen#infinitelyDivisible");
+        addSubconceptsToReuse("http://www.co-ode.org/ontologies/galen#internal");
+        addSubconceptsToReuse("http://www.co-ode.org/ontologies/galen#internalSelection");
+        addSubconceptsToReuse("http://www.co-ode.org/ontologies/galen#OrganicRole");
+        addSubconceptsToReuse("http://www.co-ode.org/ontologies/galen#atLeastPaired");
+        addSubconceptsToReuse("http://www.co-ode.org/ontologies/galen#mirrorImaged");
+        
+        removeConceptToReuse("http://www.co-ode.org/ontologies/galen#CarotidBifurcation");
+        removeConceptToReuse("http://www.co-ode.org/ontologies/galen#Axon");
+        
+        System.out.println("Total number of reused concepts: "+m_reuseConcepts.size());
+    }
+    protected void addSubconceptsToReuse(String rootURI) {
+        Set<Concept> allSubconcepts=m_conceptHierarchy.getAllSubobjects(AtomicConcept.create(rootURI));
         for (Concept concept : allSubconcepts)
             m_reuseConcepts.add((AtomicConcept)concept);
-        System.out.println("Total number of reused concepts: "+m_reuseConcepts.size());
+    }
+    protected void removeConceptToReuse(String rootURI) {
+        m_reuseConcepts.remove(AtomicConcept.create(rootURI));
     }
     protected void analyzeDLOntology() {
         for (DLClause dlClause : m_dlOntology.getDLClauses()) {
@@ -64,7 +100,7 @@ public class ReuseAnalysis2 {
     
     public static void main(String[] args) throws Exception {
 //        String physicalURI="file:/C:/Work/ontologies/GALEN/galen-ians-full-undoctored.owl";
-        String physicalURI="file:/C:/Work/ontologies/GALEN/galen-module1.owl";
+        String physicalURI="file:/C:/Work/TestOntologies/GALEN/galen-module1.owl";
         
         DLOntology dlOntology=loadDLOntology(physicalURI);
         ReuseAnalysis2 analysis=new ReuseAnalysis2(dlOntology);

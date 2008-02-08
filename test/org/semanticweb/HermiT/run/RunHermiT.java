@@ -12,6 +12,8 @@ public class RunHermiT {
     public static final BufferedReader in=new BufferedReader(new InputStreamReader(System.in));
 
     public static void main(String[] args) throws Exception {
+        System.setProperty("entityExpansionLimit",String.valueOf(Integer.MAX_VALUE));
+
         SubsumptionHierarchy subsumptionHierarchy=null;
 
 //        System.setOut(new java.io.PrintStream(new java.io.FileOutputStream("c:\\temp\\transcript.txt"),true));
@@ -19,15 +21,16 @@ public class RunHermiT {
         HermiT hermit=new HermiT();
 //        hermit.setBlockingSignatureCacheType(HermiT.BlockingSignatureCacheType.NOT_CACHED);
 //        hermit.setExistentialsType(HermiT.ExistentialsType.INDIVIDUAL_REUSE);
-        hermit.setExistentialsType(HermiT.ExistentialsType.PARENT_INDIVIDUAL_REUSE);
 //        hermit.setTimingOn();
 //        hermit.setTimingWithPauseOn();
 //        hermit.setDebuggingOn(false);
-        hermit.setDebuggingOn(true);
+//        hermit.setDebuggingOn(true);
 
+        hermit.loadOntology("file:/C:/Work/ontologies/pizza/pizza.owl");
+//        hermit.loadOntology("file:/C:/Work/ontologies/NCI/nciOncology.owl");
 //        hermit.loadOntology("file:/C:/Temp/full-galen-no-functionality.owl");
 //        hermit.loadOntology("file:/C:/Temp/galen-module1-no-functionality.owl");
-        hermit.loadOntology("file:/C:/Work/TestOntologies/GALEN/galen-module1.owl");
+//        hermit.loadOntology("file:/C:/Work/TestOntologies/GALEN/galen-module1.owl");
 //        hermit.loadOntology("file:/C:/Work/TestOntologies/GALEN/galen-ians-full-undoctored.owl");
 //        hermit.loadOntology("file:/C:/Work/TestOntologies/GALEN/galen-ians-full-doctored.owl");
 //        hermit.loadOntology("file:/C:/Work/TestOntologies/wine/wine-no-data-properties.owl");
@@ -55,7 +58,7 @@ public class RunHermiT {
         long start=System.currentTimeMillis();
 
         /* These are the hard tests in 'galen-ians-full-undoctored.owl'. They require backtracking in the presence of individual reuse. */
-        hermit.isSubsumedBy("http://www.co-ode.org/ontologies/galen#AbdominalCavity","http://www.co-ode.org/ontologies/galen#ActualCavity");
+//        hermit.isSubsumedBy("http://www.co-ode.org/ontologies/galen#AbdominalCavity","http://www.co-ode.org/ontologies/galen#ActualCavity");
 //        hermit.isSubsumedBy("http://www.co-ode.org/ontologies/galen#AbdominalAorta","http://www.co-ode.org/ontologies/galen#ArteryWhichHasLaterality");
 //        hermit.isSubsumedBy("http://www.co-ode.org/ontologies/galen#AlcoholicGastritis","http://www.co-ode.org/ontologies/galen#Duodenitis");
 //        hermit.isSubsumedBy("http://www.co-ode.org/ontologies/galen#CapsuleOfKnee","http://www.co-ode.org/ontologies/galen#JointCapsule");
@@ -70,7 +73,7 @@ public class RunHermiT {
 //        hermit.isSatisfiable("http://www.co-ode.org/ontologies/galen#AcuteErosionOfStomach");
 //        hermit.isSatisfiable("http://www.co-ode.org/ontologies/galen#AnteriorCruciateLigament");
       
-//        subsumptionHierarchy=hermit.getSubsumptionHierarchy();
+        subsumptionHierarchy=hermit.getSubsumptionHierarchy();
 
         long duration=System.currentTimeMillis()-start;
         System.out.println("The reasoning task took "+duration+" ms");

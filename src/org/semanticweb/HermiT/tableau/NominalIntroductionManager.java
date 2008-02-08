@@ -89,6 +89,8 @@ public final class NominalIntroductionManager implements Serializable {
             m_firstUnprocessedTarget++;
             if (rootNode.isActive() && treeNode.isActive()) {
                 AtMostAbstractRoleGuard atMostAbstractRoleGuard=(AtMostAbstractRoleGuard)m_bufferForTarget[AT_MOST_CONCEPT];
+                if (m_tableau.m_tableauMonitor!=null)
+                    m_tableau.m_tableauMonitor.nominalIntorductionStarted(rootNode,treeNode,atMostAbstractRoleGuard);
                 DependencySet dependencySet=m_extensionManager.getConceptAssertionDependencySet(atMostAbstractRoleGuard,rootNode);
                 dependencySet=m_tableau.getDependencySetFactory().unionWith(dependencySet,m_extensionManager.getRoleAssertionDependencySet(atMostAbstractRoleGuard.getOnAbstractRole(),rootNode,treeNode));
                 if (!AtomicConcept.THING.equals(atMostAbstractRoleGuard.getToAtomicConcept()))
@@ -105,6 +107,8 @@ public final class NominalIntroductionManager implements Serializable {
                     newRootNode=newRootNode.getCanonicalNode();
                 }
                 m_mergingManager.mergeNodes(treeNode,newRootNode,dependencySet);
+                if (m_tableau.m_tableauMonitor!=null)
+                    m_tableau.m_tableauMonitor.nominalIntorductionFinished(rootNode,treeNode,atMostAbstractRoleGuard);
                 result=true;
             }
         }

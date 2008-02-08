@@ -91,6 +91,10 @@ public class TableauMonitorAdapter implements TableauMonitor,Serializable  {
     }
     public void existentialSatisfied(ExistentialConcept existentialConcept,Node forNode) {
     }
+    public void nominalIntorductionStarted(Node rootNode,Node treeNode,AtMostAbstractRoleGuard atMostAbstractRoleGuard) {
+    }
+    public void nominalIntorductionFinished(Node rootNode,Node treeNode,AtMostAbstractRoleGuard atMostAbstractRoleGuard) {
+    }
     public void nodeCreated(Node node) {
     }
     public void nodeDestroyed(Node node) {

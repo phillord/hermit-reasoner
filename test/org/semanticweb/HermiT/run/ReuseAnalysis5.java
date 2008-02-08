@@ -27,7 +27,7 @@ public class ReuseAnalysis5 extends TableauMonitorAdapter {
     public ReuseAnalysis5(String physicalURI) throws Exception {
         m_hermit=new HermiT();
         m_hermit.setUserTableauMonitor(this);
-        m_hermit.setExistentialsType(HermiT.ExistentialsType.PARENT_INDIVIDUAL_REUSE);
+        m_hermit.setExistentialsType(HermiT.ExistentialsType.INDIVIDUAL_REUSE);
         m_hermit.loadOntology(physicalURI);
         m_existentialsForNode=new HashMap<Node,AtLeastAbstractRoleConcept>();
         m_childrenForNode=new HashMap<Node,Set<Node>>();

@@ -44,6 +44,8 @@ public interface TableauMonitor {
     void existentialExpansionStarted(ExistentialConcept existentialConcept,Node forNode);
     void existentialExpansionFinished(ExistentialConcept existentialConcept,Node forNode);
     void existentialSatisfied(ExistentialConcept existentialConcept,Node forNode);
+    void nominalIntorductionStarted(Node rootNode,Node treeNode,AtMostAbstractRoleGuard atMostAbstractRoleGuard);
+    void nominalIntorductionFinished(Node rootNode,Node treeNode,AtMostAbstractRoleGuard atMostAbstractRoleGuard);
     void nodeCreated(Node node);
     void nodeDestroyed(Node node);
 }

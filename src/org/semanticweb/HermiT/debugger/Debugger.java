@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.HashSet;
 import java.util.Comparator;
+import java.util.Arrays;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Toolkit;
@@ -74,7 +75,7 @@ public class Debugger extends TableauMonitorForwarder {
         m_waitOptions=new HashSet<WaitOption>();
         m_nodeCreationInfos=new HashMap<Node,NodeCreationInfo>();
         m_forever=false;
-        m_singlestep=true;
+        m_singlestep=false;
         m_breakpointTime=30000;
         m_mainFrame.setVisible(true);
         m_output.println("Good morning Dr. Chandra. This is HAL. I'm ready for my first lesson.");
@@ -113,12 +114,12 @@ public class Debugger extends TableauMonitorForwarder {
                         doHistory(parsedCommand);
                     else if ("dertree".equals(command))
                         doDerivationTree(parsedCommand);
-                    else if ("exists".equals(command))
-                        doShowExists(parsedCommand);
                     else if ("activenodes".equals(command))
                         doActiveNodes(parsedCommand);
                     else if ("isancof".equals(command))
                         doIsAncestorOf(parsedCommand);
+                    else if ("showexists".equals(command))
+                        doShowExists(parsedCommand);
                     else if ("showmodel".equals(command))
                         doShowModel(parsedCommand);
                     else if ("showdlclauses".equals(command))
@@ -141,6 +142,10 @@ public class Debugger extends TableauMonitorForwarder {
                         doSearchPairWiseBlocking(parsedCommand);
                     else if ("rnodefor".equals(command))
                         doReuseNodeFor(parsedCommand);
+                    else if ("nodesfor".equals(command))
+                        doNodesFor(parsedCommand);
+                    else if ("originstats".equals(command))
+                        doOriginStats(parsedCommand);
                     else if ("singlestep".equals(command))
                         doSingleStep(parsedCommand);
                     else if ("bptime".equals(command))
@@ -265,6 +270,45 @@ public class Debugger extends TableauMonitorForwarder {
         else
             m_output.println("Incorrect single step mode '"+status+"'.");
     }
+    protected ExistentialConcept getStartExistential(Node node) {
+        NodeCreationInfo nodeCreationInfo=m_nodeCreationInfos.get(node);
+        if (nodeCreationInfo==null)
+            return null;
+        else
+            return nodeCreationInfo.m_createdByExistential;
+    }
+    protected void printStartExistential(Node node,PrintWriter writer) {
+        ExistentialConcept startExistential=getStartExistential(node);
+        if (startExistential==null)
+            writer.print("(root)");
+        else
+            writer.print(startExistential.toString(m_namespaces));
+    }
+    protected void doShowExists(String[] commandLine) {
+        CharArrayWriter buffer=new CharArrayWriter();
+        PrintWriter writer=new PrintWriter(buffer);
+        writer.println("Nodes with existentials");
+        writer.println("================================================================================");
+        writer.println("      ID    # Existentials    Start Existential");
+        writer.println("================================================================================");
+        Node node=m_tableau.getFirstTableauNode();
+        while (node!=null) {
+            if (node.isActive() && !node.isBlocked() && node.hasUnprocessedExistentials()) {
+                writer.print("  ");
+                Printing.printPadded(writer,node.getNodeID(),6);
+                writer.print("      ");
+                Printing.printPadded(writer,node.getUnprocessedExistentials().size(),6);
+                writer.print("        ");
+                printStartExistential(node,writer);
+                writer.println();
+            }
+            node=node.getNextTableauNode();
+        }
+        writer.println("===========================================");
+        writer.flush();
+        showTextInWindow(buffer.toString(),"Nodes with existentials");
+        selectConsoleWindow();
+    }
     protected void doShowModel(String[] commandLine) {
         Set<Object[]> facts=new TreeSet<Object[]>(FactComparator.INSTANCE);
         String title;
@@ -381,21 +425,34 @@ public class Debugger extends TableauMonitorForwarder {
         selectConsoleWindow();
     }
     public void printNodeData(Node node,PrintWriter writer) {
-        writer.print("Node ID:   ");
+        writer.print("Node ID:    ");
         writer.println(node.getNodeID());
-        writer.print("Parent ID: ");
+        writer.print("Parent ID:  ");
         writer.println(node.getParent()==null ? "(root node)" : node.getParent().getNodeID());
-        writer.print("Status:    ");
+        writer.print("Depth:      ");
+        writer.println(node.getTreeDepth());
+        writer.print("Status:     ");
         if (node.isActive())
             writer.println("active");
         else if (node.isMerged()) {
-            writer.print("merged into node ");
-            writer.println(node.getMergedInto().getNodeID());
+            Node mergeTarget=node.getMergedInto();
+            while (mergeTarget!=null) {
+                writer.print(" --> ");
+                writer.print(mergeTarget.getNodeID());
+                mergeTarget=mergeTarget.getMergedInto();
+            }
+            writer.println();
         }
         else
             writer.println("pruned");
-        writer.print("Blocked:   ");
+        writer.print("Blocked:    ");
         writer.println(formatBlockingStatus(node));
+        writer.print("Created as: ");
+        ExistentialConcept startExistential=getStartExistential(node);
+        if (!(startExistential instanceof AtLeastAbstractRoleConcept))
+            writer.println("(root)");
+        else
+            writer.println(((AtLeastAbstractRoleConcept)startExistential).getToConcept().toString(m_namespaces));
         printConceptLabel(node,writer);
         printEdges(node,writer);
     }
@@ -817,30 +874,6 @@ public class Debugger extends TableauMonitorForwarder {
         showTextInWindow(buffer.toString(),"Differences in labels of node "+node1.getNodeID()+" and "+node2.getNodeID());
         selectConsoleWindow();
     }
-
-    protected void doShowExists(String[] commandLine) {
-        CharArrayWriter buffer=new CharArrayWriter();
-        PrintWriter writer=new PrintWriter(buffer);
-        writer.println("Nodes with existentials");
-        writer.println("===========================================");
-        writer.println("      ID    Existentials");
-        writer.println("===========================================");
-        Node node=m_tableau.getFirstTableauNode();
-        while (node!=null) {
-            if (!node.isBlocked() && node.hasUnprocessedExistentials()) {
-                writer.print("  ");
-                Printing.printPadded(writer,node.getNodeID(),6);
-                writer.print("      ");
-                Printing.printPadded(writer,node.getUnprocessedExistentials().size(),6);
-                writer.println();
-            }
-            node=node.getNextTableauNode();
-        }
-        writer.println("===========================================");
-        writer.flush();
-        showTextInWindow(buffer.toString(),"Nodes with existentials");
-        selectConsoleWindow();
-    }
     protected void doReuseNodeFor(String[] commandLine) {
         if (commandLine.length<2) {
             m_output.println("Node ID is missing.");
@@ -876,6 +909,93 @@ public class Debugger extends TableauMonitorForwarder {
         }
         else
             m_output.println("Node reuse strategy is not currently in effect.");
+    }
+    protected void doNodesFor(String[] commandLine) {
+        if (commandLine.length<2) {
+            m_output.println("Concept name is missing.");
+            return;
+        }
+        String conceptName=commandLine[1];
+        AtomicConcept atomicConcept=AtomicConcept.create(m_namespaces.expandString(conceptName));
+        CharArrayWriter buffer=new CharArrayWriter();
+        PrintWriter writer=new PrintWriter(buffer);
+        writer.println("Nodes for '"+conceptName+"'");
+        writer.println("====================================================================");
+        int index=0;
+        Node node=m_tableau.getFirstTableauNode();
+        while (node!=null) {
+            ExistentialConcept existentialConcept=getStartExistential(node);
+            if (existentialConcept instanceof AtLeastAbstractRoleConcept && ((AtLeastAbstractRoleConcept)existentialConcept).getToConcept().equals(atomicConcept)) {
+                if (index!=0) {
+                    writer.print(",");
+                    if (index % 5==0)
+                        writer.println();
+                    else
+                        writer.print("  ");
+                }
+                Printing.printPadded(writer,node.getNodeID()+(node.isActive() ? "" : "*"),8);
+                index++;
+            }
+            node=node.getNextTableauNode();
+        }
+        writer.println();
+        writer.println("====================================================================");
+        writer.flush();
+        showTextInWindow(buffer.toString(),"Nodes for '"+conceptName+"'");
+        selectConsoleWindow();
+    }
+    protected void doOriginStats(String[] commandLine) {
+        Map<Concept,OriginInfo> originInfos=new HashMap<Concept,OriginInfo>();
+        Node node=m_tableau.getFirstTableauNode();
+        while (node!=null) {
+            ExistentialConcept existentialConcept=getStartExistential(node);
+            if (existentialConcept instanceof AtLeastAbstractRoleConcept) {
+                Concept toConcept=((AtLeastAbstractRoleConcept)existentialConcept).getToConcept();
+                OriginInfo originInfo=originInfos.get(toConcept);
+                if (originInfo==null) {
+                    originInfo=new OriginInfo(toConcept);
+                    originInfos.put(toConcept,originInfo);
+                }
+                originInfo.m_nodes.add(node);
+                if (!node.isActive())
+                    originInfo.m_numberOfNonactiveOccurrences++;
+            }
+            node=node.getNextTableauNode();
+        }
+        OriginInfo[] originInfosArray=new OriginInfo[originInfos.size()];
+        originInfos.values().toArray(originInfosArray);
+        Arrays.sort(originInfosArray,OriginInfoComparator.INSTANCE);
+        CharArrayWriter buffer=new CharArrayWriter();
+        PrintWriter writer=new PrintWriter(buffer);
+        writer.println("Statistics of node origins");
+        writer.println("====================================");
+        writer.println("  Occurrence    Nonactive   Concept");
+        writer.println("====================================");
+        for (OriginInfo originInfo : originInfosArray) {
+            writer.print("  ");
+            Printing.printPadded(writer,originInfo.m_nodes.size(),8);
+            writer.print("    ");
+            Printing.printPadded(writer,originInfo.m_numberOfNonactiveOccurrences,8);
+            writer.print("    ");
+            writer.print(originInfo.m_concept.toString(m_namespaces));
+            if (originInfo.m_nodes.size()<=5) {
+                writer.print("  [ ");
+                for (int index=0;index<originInfo.m_nodes.size();index++) {
+                    if (index!=0)
+                        writer.print(", ");
+                    node=originInfo.m_nodes.get(index);
+                    writer.print(node.getNodeID());
+                    if (!node.isActive())
+                        writer.print('*');
+                }
+                writer.print(" ]");
+            }
+            writer.println();
+        }
+        writer.println("====================================");
+        writer.flush();
+        showTextInWindow(buffer.toString(),"Statistics of node origins");
+        selectConsoleWindow();
     }
     protected void doBreakpointTime(String[] commandLine) {
         if (commandLine.length<2) {
@@ -916,7 +1036,7 @@ public class Debugger extends TableauMonitorForwarder {
             }
             if (waitOption!=null) {
                 modifyWaitOptions(waitOption,add);
-                m_output.println("Will "+(add ? "" : "not")+"wait for "+waitOption+".");
+                m_output.println("Will "+(add ? "" : "not ")+"wait for "+waitOption+".");
             }
         }
     }
@@ -969,10 +1089,8 @@ public class Debugger extends TableauMonitorForwarder {
     }
     public void isSatisfiableStarted(AtomicConcept atomicConcept) {
         super.isSatisfiableStarted(atomicConcept);
-        if (m_singlestep) {
-            m_output.println("Will check whether '"+m_namespaces.abbreviateAsNamespace(atomicConcept.getURI())+"' is satisfiable.");
-            mainLoop();
-        }
+        m_output.println("Will check whether '"+m_namespaces.abbreviateAsNamespace(atomicConcept.getURI())+"' is satisfiable.");
+        mainLoop();
     }
     public void isSatisfiableFinished(AtomicConcept atomicConcept,boolean result) {
         super.isSatisfiableFinished(atomicConcept,result);
@@ -982,10 +1100,8 @@ public class Debugger extends TableauMonitorForwarder {
     }
     public void isSubsumedByStarted(AtomicConcept subconcept,AtomicConcept superconcept) {
         super.isSubsumedByStarted(subconcept,superconcept);
-        if (m_singlestep) {
-            m_output.println("Will check whether '"+m_namespaces.abbreviateAsNamespace(subconcept.getURI())+"' is subsumed by '"+m_namespaces.abbreviateAsNamespace(superconcept.getURI())+"'.");
-            mainLoop();
-        }
+        m_output.println("Will check whether '"+m_namespaces.abbreviateAsNamespace(subconcept.getURI())+"' is subsumed by '"+m_namespaces.abbreviateAsNamespace(superconcept.getURI())+"'.");
+        mainLoop();
     }
     public void isSubsumedByFinished(AtomicConcept subconcept,AtomicConcept superconcept,boolean result) {
         super.isSubsumedByFinished(subconcept,superconcept,result);
@@ -995,10 +1111,8 @@ public class Debugger extends TableauMonitorForwarder {
     }
     public void isABoxSatisfiableStarted() {
         super.isABoxSatisfiableStarted();
-        if (m_singlestep) {
-            m_output.println("Will check whether ABox is satisfiable.");
-            mainLoop();
-        }
+        m_output.println("Will check whether ABox is satisfiable.");
+        mainLoop();
     }
     public void isABoxSatisfiableFinished(boolean result) {
         super.isABoxSatisfiableFinished(result);
@@ -1083,13 +1197,16 @@ public class Debugger extends TableauMonitorForwarder {
     }
     protected void printState() {
         int numberOfNodes=0;
+        int inactiveNodes=0;
         int blockedNodes=0;
         int nodesWithExistentials=0;
         int pendingExistentials=0;
         Node node=m_tableau.getFirstTableauNode();
         while (node!=null) {
             numberOfNodes++;
-            if (node.isBlocked())
+            if (!node.isActive())
+                inactiveNodes++;
+            else if (node.isBlocked())
                 blockedNodes++;
             else {
                 if (node.hasUnprocessedExistentials())
@@ -1098,7 +1215,7 @@ public class Debugger extends TableauMonitorForwarder {
             }
             node=node.getNextTableauNode();
         }
-        m_output.println("Nodes: "+numberOfNodes+"  Blocked nodes: "+blockedNodes+"  Nodes with exists: "+nodesWithExistentials+"  Pending existentials: "+pendingExistentials);
+        m_output.println("Nodes: "+numberOfNodes+"  Inactive nodes: "+inactiveNodes+"  Blocked nodes: "+blockedNodes+"  Nodes with exists: "+nodesWithExistentials+"  Pending existentials: "+pendingExistentials);
     }
     
     protected static class FactComparator implements Comparator<Object[]> {
@@ -1219,4 +1336,30 @@ public class Debugger extends TableauMonitorForwarder {
             m_children=new ArrayList<Node>(4);
         }
     }
+    
+    protected static class OriginInfo {
+        public final Concept m_concept;
+        public final List<Node> m_nodes;
+        public int m_numberOfNonactiveOccurrences;
+        
+        public OriginInfo(Concept concept) {
+            m_concept=concept;
+            m_nodes=new ArrayList<Node>();
+        }
+    }
+
+    protected static class OriginInfoComparator implements Comparator<OriginInfo> {
+        public static final OriginInfoComparator INSTANCE=new OriginInfoComparator();
+
+        public int compare(OriginInfo o1,OriginInfo o2) {
+            int comparison=o1.m_nodes.size()-o2.m_nodes.size();
+            if (comparison==0) {
+                comparison=o1.m_numberOfNonactiveOccurrences-o2.m_numberOfNonactiveOccurrences;
+                if (comparison==0)
+                    comparison=ConceptComparator.INSTANCE.compare(o1.m_concept,o2.m_concept);
+            }
+            return comparison;
+        }
+    }
+    
 }

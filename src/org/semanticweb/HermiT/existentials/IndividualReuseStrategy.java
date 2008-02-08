@@ -44,7 +44,7 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
         m_existentialExpansionManager=m_tableau.getExistentialExpansionManager();
         m_dontReueseConceptsEver.clear();
 //        loadNotReusedConcepts("c:\\Temp\\dont-reuse.txt");
-//        loadReusedConcepts("c:\\Temp\\do-reuse.txt");
+//        loadReusedConcepts("c:\\Temp\\reuse.txt");
         m_blockingStrategy.initialize(tableau);
     }
     public void clear() {
@@ -66,13 +66,14 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
                         // Mark the existential as processed BEFORE any branching takes place
                         m_existentialExpansionManager.markExistentialProcessed(atLeastAbstractRoleConcept,node);
                         if (!isExistentialSatisfied) {
-                            if (!m_existentialExpansionManager.tryFunctionalExpansion(atLeastAbstractRoleConcept,node)) {
-                                LiteralConcept toConcept=atLeastAbstractRoleConcept.getToConcept();
-                                if (toConcept instanceof AtomicConcept && shoudReuse((AtomicConcept)toConcept) && atLeastAbstractRoleConcept.getNumber()==1)
-                                    expandWithReuse(atLeastAbstractRoleConcept,node);
-                                else
-                                    m_existentialExpansionManager.doNormalExpansion(atLeastAbstractRoleConcept,node);
-                            }
+                            if (!m_existentialExpansionManager.tryFunctionalExpansion(atLeastAbstractRoleConcept,node)) 
+                                if (!tryParentReuse(atLeastAbstractRoleConcept,node)) {
+                                    LiteralConcept toConcept=atLeastAbstractRoleConcept.getToConcept();
+                                    if (toConcept instanceof AtomicConcept && shoudReuse((AtomicConcept)toConcept) && atLeastAbstractRoleConcept.getNumber()==1)
+                                        expandWithModelReuse(atLeastAbstractRoleConcept,node);
+                                    else
+                                        m_existentialExpansionManager.doNormalExpansion(atLeastAbstractRoleConcept,node);
+                                }
                         }
                         else {
                             if (m_tableau.getTableauMonitor()!=null)
@@ -88,7 +89,21 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
         }
         return false;
     }
-    protected void expandWithReuse(AtLeastAbstractRoleConcept atLeastAbstractRoleConcept,Node node) {
+    protected boolean tryParentReuse(AtLeastAbstractRoleConcept atLeastAbstractRoleConcept,Node node) {
+        Node parent=node.getParent();
+        if (parent!=null && m_extensionManager.containsConceptAssertion(atLeastAbstractRoleConcept.getToConcept(),parent)) {
+            DependencySet dependencySet=m_extensionManager.getConceptAssertionDependencySet(atLeastAbstractRoleConcept,node);
+            if (!m_isDeterministic) {
+                BranchingPoint branchingPoint=new IndividualResueBranchingPoint(m_tableau,atLeastAbstractRoleConcept,node);
+                m_tableau.pushBranchingPoint(branchingPoint);
+                dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,branchingPoint.getLevel());
+            }
+            m_extensionManager.addRoleAssertion(atLeastAbstractRoleConcept.getOnAbstractRole(),node,parent,dependencySet);
+            return true;
+        }
+        return false;
+    }
+    protected void expandWithModelReuse(AtLeastAbstractRoleConcept atLeastAbstractRoleConcept,Node node) {
         if (m_tableau.getTableauMonitor()!=null)
             m_tableau.getTableauMonitor().existentialExpansionStarted(atLeastAbstractRoleConcept,node);
         DependencySet dependencySet=m_extensionManager.getConceptAssertionDependencySet(atLeastAbstractRoleConcept,node);
@@ -118,7 +133,6 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
             m_tableau.getTableauMonitor().existentialExpansionFinished(atLeastAbstractRoleConcept,node);
     }
     protected boolean shoudReuse(AtomicConcept toConcept) {
-//        return !toConcept.getURI().startsWith("internal:") && !m_dontReueseConceptsThisRun.contains(toConcept) && !m_dontReueseConceptsEver.contains(toConcept);
         return !m_dontReueseConceptsThisRun.contains(toConcept) && !m_dontReueseConceptsEver.contains(toConcept);
     }
     public void assertionAdded(Concept concept,Node node) {

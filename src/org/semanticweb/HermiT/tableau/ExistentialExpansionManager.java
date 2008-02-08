@@ -38,6 +38,9 @@ public final class ExistentialExpansionManager implements Serializable {
         m_binaryUnionDependencySet=new UnionDependencySet(2);
         m_indicesByBranchingPoint=new int[2];
     }
+    public AbstractRole[] getEquivalentRolesDueToFunctionality(AbstractRole abstractRole) {
+        return m_functionalAbstractRoles.get(abstractRole);
+    }
     public void markExistentialProcessed(ExistentialConcept existentialConcept,Node forNode) {
         m_auxiliaryTuple[0]=existentialConcept;
         m_auxiliaryTuple[1]=forNode;
