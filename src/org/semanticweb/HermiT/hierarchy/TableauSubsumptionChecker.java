@@ -83,11 +83,8 @@ public class TableauSubsumptionChecker implements SubsumptionHierarchy.Subsumpti
         retrieval.open();
         while (!retrieval.afterLast()) {
             Object concept=retrieval.getTupleBuffer()[0];
-            if (concept instanceof AtomicConcept) {
-                DependencySet dependencySet=m_tableau.getExtensionManager().getConceptAssertionDependencySet((AtomicConcept)concept,checkedNode);
-                if (dependencySet.isEmpty())
-                    subconceptInfo.addKnownSubsumer((AtomicConcept)concept);
-            }
+            if (concept instanceof AtomicConcept && retrieval.getDependencySet().isEmpty())
+                subconceptInfo.addKnownSubsumer((AtomicConcept)concept);
             retrieval.next();
         }
         if (m_tableau.isCurrentModelDeterministic())
@@ -102,7 +99,7 @@ public class TableauSubsumptionChecker implements SubsumptionHierarchy.Subsumpti
             if (conceptObject instanceof AtomicConcept) {
                 AtomicConcept atomicConcept=(AtomicConcept)conceptObject;
                 Node node=(Node)tupleBuffer[1];
-                if (!node.isBlocked())
+                if (node.isActive() && !node.isBlocked())
                     getAtomicConceptInfo(atomicConcept).updatePossibleSubsumers(m_tableau,node);
             }
             retrieval.next();

@@ -193,7 +193,7 @@ public final class Tableau implements Serializable {
         if (m_extensionManager.containsClash()) {
             DependencySet clashDependencySet=m_extensionManager.getClashDependencySet();
             int newCurrentBranchingPoint=clashDependencySet.getMaximumBranchingPoint();
-            if (newCurrentBranchingPoint==-1)
+            if (newCurrentBranchingPoint<=0)
                 return false;
             backtrackTo(newCurrentBranchingPoint);
             BranchingPoint branchingPoint=getCurrentBranchingPoint();
@@ -231,7 +231,8 @@ public final class Tableau implements Serializable {
             loadDLOntologyABox();
         m_checkedNode=createNewRootNode(m_dependencySetFactory.emptySet(),0);
         m_extensionManager.addConceptAssertion(subconcept,m_checkedNode,m_dependencySetFactory.emptySet());
-        m_extensionManager.addConceptAssertion(AtomicNegationConcept.create(superconcept),m_checkedNode,m_dependencySetFactory.emptySet());
+        DependencySet dependencySet=m_dependencySetFactory.addBranchingPoint(m_dependencySetFactory.emptySet(),m_currentBranchingPoint);
+        m_extensionManager.addConceptAssertion(AtomicNegationConcept.create(superconcept),m_checkedNode,dependencySet);
         boolean result=!isSatisfiable();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isSubsumedByFinished(subconcept,superconcept,result);
