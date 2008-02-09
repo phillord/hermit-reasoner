@@ -1,12 +1,14 @@
 package org.semanticweb.HermiT.kaon2.structural;
 
-import java.util.Collection;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Collection;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import org.semanticweb.kaon2.api.*;
 import org.semanticweb.kaon2.api.owl.elements.*;
@@ -184,6 +186,7 @@ public class Clausification {
         public DLClause getDLClause() {
             Atom[] headAtoms=new Atom[m_headAtoms.size()];
             m_headAtoms.toArray(headAtoms);
+            Arrays.sort(headAtoms,HeadComparator.INSTANCE);
             Atom[] bodyAtoms=new Atom[m_bodyAtoms.size()];
             m_bodyAtoms.toArray(bodyAtoms);
             DLClause dlClause=DLClause.create(headAtoms,bodyAtoms);
@@ -511,6 +514,24 @@ public class Clausification {
             if (object.getAttribute()==ObjectPropertyAttribute.OBJECT_PROPERTY_FUNCTIONAL || object.getAttribute()==ObjectPropertyAttribute.OBJECT_PROPERTY_INVERSE_FUNCTIONAL)
                 m_hasAtMostRestrictions=true;
             return super.visit(object);
+        }
+    }
+    
+    protected static class HeadComparator implements Comparator<Atom> {
+        public static final HeadComparator INSTANCE=new HeadComparator();
+
+        public int compare(Atom o1,Atom o2) {
+            int type1;
+            if (o1.getDLPredicate() instanceof AtLeastAbstractRoleConcept)
+                type1=2;
+            else
+                type1=1;
+            int type2;
+            if (o2.getDLPredicate() instanceof AtLeastAbstractRoleConcept)
+                type2=2;
+            else
+                type2=1;
+            return type1-type2;
         }
     }
 }
