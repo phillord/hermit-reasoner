@@ -76,6 +76,9 @@ public class Atom implements Serializable {
         }
         return buffer.toString();
     }
+    public String toString() {
+        return toString(Namespaces.INSTANCE);
+    }
     protected Object readResolve() {
         return s_interningManager.intern(this);
     }
