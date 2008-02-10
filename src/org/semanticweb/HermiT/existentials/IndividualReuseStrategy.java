@@ -98,7 +98,7 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
             if (parent!=null && m_extensionManager.containsConceptAssertion(atLeastAbstractRoleConcept.getToConcept(),parent)) {
                 DependencySet dependencySet=m_extensionManager.getConceptAssertionDependencySet(atLeastAbstractRoleConcept,node);
                 if (!m_isDeterministic) {
-                    BranchingPoint branchingPoint=new IndividualResueBranchingPoint(m_tableau,atLeastAbstractRoleConcept,node);
+                    BranchingPoint branchingPoint=new IndividualResueBranchingPoint(m_tableau,atLeastAbstractRoleConcept,node,true);
                     m_tableau.pushBranchingPoint(branchingPoint);
                     dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,branchingPoint.getLevel());
                 }
@@ -118,7 +118,7 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
             NodeBranchingPointPair reuseInfo=m_reusedNodes.get(toConcept);
             if (reuseInfo==null) {
                 if (!m_isDeterministic) {
-                    BranchingPoint branchingPoint=new IndividualResueBranchingPoint(m_tableau,atLeastAbstractRoleConcept,node);
+                    BranchingPoint branchingPoint=new IndividualResueBranchingPoint(m_tableau,atLeastAbstractRoleConcept,node,false);
                     m_tableau.pushBranchingPoint(branchingPoint);
                     dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,branchingPoint.getLevel());
                 }
@@ -202,14 +202,17 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
 
         protected final AtLeastAbstractRoleConcept m_existential;
         protected final Node m_node;
+        protected final boolean m_wasParentReuse;
 
-        public IndividualResueBranchingPoint(Tableau tableau,AtLeastAbstractRoleConcept existential,Node node) {
+        public IndividualResueBranchingPoint(Tableau tableau,AtLeastAbstractRoleConcept existential,Node node,boolean wasParentReuse) {
             super(tableau);
             m_existential=existential;
             m_node=node;
+            m_wasParentReuse=wasParentReuse;
         }
         public void startNextChoice(Tableau tableau,DependencySet clashDepdendencySet) {
-            m_dontReueseConceptsThisRun.add(m_existential.getToConcept());
+            if (!m_wasParentReuse)
+                m_dontReueseConceptsThisRun.add(m_existential.getToConcept());
             DependencySet dependencySet=m_tableau.getDependencySetFactory().removeBranchingPoint(clashDepdendencySet,m_level);
             if (m_tableau.getTableauMonitor()!=null)
                 m_tableau.getTableauMonitor().existentialExpansionStarted(m_existential,m_node);
