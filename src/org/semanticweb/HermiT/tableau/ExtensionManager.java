@@ -32,7 +32,10 @@ public final class ExtensionManager implements Serializable {
         m_tableauMonitor=m_tableau.m_tableauMonitor;
         m_dependencySetFactory=m_tableau.m_dependencySetFactory;
         m_extensionTablesByArity=new HashMap<Integer,ExtensionTable>();
-        m_binaryExtensionTable=new ExtensionTableWithTupleIndexes(m_tableau,this,2,!m_tableau.isDeterministic(),new TupleIndex[] { new TupleIndex(new int[] { 1,0 }) }) {
+        m_binaryExtensionTable=new ExtensionTableWithTupleIndexes(m_tableau,this,2,!m_tableau.isDeterministic(),new TupleIndex[] {
+            new TupleIndex(new int[] { 1,0 }),
+            new TupleIndex(new int[] { 0,1 })
+        }) {
             private static final long serialVersionUID=1462821385000191875L;
 
             public boolean isTupleActive(Object[] tuple) {
@@ -43,7 +46,11 @@ public final class ExtensionManager implements Serializable {
             }
         };
         m_extensionTablesByArity.put(new Integer(2),m_binaryExtensionTable);
-        m_ternaryExtensionTable=new ExtensionTableWithTupleIndexes(m_tableau,this,3,!m_tableau.isDeterministic(),new TupleIndex[] { new TupleIndex(new int[] { 1,0,2 }),new TupleIndex(new int[] { 2,0,1 }),new TupleIndex(new int[] { 1,2,0 }) }) {
+        m_ternaryExtensionTable=new ExtensionTableWithTupleIndexes(m_tableau,this,3,!m_tableau.isDeterministic(),new TupleIndex[] {
+            new TupleIndex(new int[] { 0,1,2 }),
+            new TupleIndex(new int[] { 1,2,0 }),
+            new TupleIndex(new int[] { 2,0,1 })
+        }) {
             private static final long serialVersionUID=-731201626401421877L;
 
             public boolean isTupleActive(Object[] tuple) {
