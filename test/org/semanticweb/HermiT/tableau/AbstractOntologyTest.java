@@ -126,17 +126,18 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
     }
     protected String getSubsumptionHierarcyAsText() throws Exception {
         SubsumptionHierarchy subsumptionHierarchy=getSubsumptionHierarchy();
-        Map<String,Set<String>> flattenedHierarchy=subsumptionHierarchy.getFlattenedHierarchy();
+        Map<AtomicConcept,Set<AtomicConcept>> flattenedHierarchy=subsumptionHierarchy.getFlattenedHierarchy();
         org.semanticweb.HermiT.Namespaces namespaces=new org.semanticweb.HermiT.Namespaces();
         namespaces.registerPrefix("a",m_ontology.getOntologyURI()+"#");
         namespaces.registerInternalPrefixes(m_ontology.getOntologyURI());
+        namespaces.registerStandardPrefixes();
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter output=new PrintWriter(buffer);
-        for (Map.Entry<String,Set<String>> entry : flattenedHierarchy.entrySet()) {
-            output.println(namespaces.abbreviateAsNamespace(entry.getKey()));
-            for (String owlClassURI : entry.getValue()) {
+        for (Map.Entry<AtomicConcept,Set<AtomicConcept>> entry : flattenedHierarchy.entrySet()) {
+            output.println(namespaces.abbreviateAsNamespace(entry.getKey().getURI()));
+            for (AtomicConcept atomicConcept : entry.getValue()) {
                 output.print("    ");
-                output.println(namespaces.abbreviateAsNamespace(owlClassURI));
+                output.println(namespaces.abbreviateAsNamespace(atomicConcept.getURI()));
             }
             output.println("-----------------------------------------------");
         }

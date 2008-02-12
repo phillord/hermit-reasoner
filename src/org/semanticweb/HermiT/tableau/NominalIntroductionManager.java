@@ -162,17 +162,19 @@ public final class NominalIntroductionManager implements Serializable {
                 while (!m_ternaryExtensionTableSearch1Bound.afterLast()) {
                     Node rootNode=(Node)m_ternaryExtensionTableSearch1Bound.getTupleBuffer()[2];
                     if (rootNode.getNodeType()==NodeType.ROOT_NODE && !rootNode.isParentOf(node)) {
-                        AtomicAbstractRole atomicAbstractRole=(AtomicAbstractRole)m_ternaryExtensionTableSearch1Bound.getTupleBuffer()[0];
-                        m_binaryExtensionTableSearch1Bound.getBindingsBuffer()[1]=rootNode;
-                        m_binaryExtensionTableSearch1Bound.open();
-                        while (!m_binaryExtensionTableSearch1Bound.afterLast()) {
-                            Object rootNodeConcept=m_binaryExtensionTableSearch1Bound.getTupleBuffer()[0];
-                            if (rootNodeConcept instanceof AtMostAbstractRoleGuard) {
-                                AtMostAbstractRoleGuard atMost=(AtMostAbstractRoleGuard)rootNodeConcept;
-                                if (atMost.getOnAbstractRole() instanceof InverseAbstractRole && ((InverseAbstractRole)atMost.getOnAbstractRole()).getInverseOf().equals(atomicAbstractRole))
-                                    addTarget(rootNode,node,atMost);
+                        Object atomicAbstractRole=m_ternaryExtensionTableSearch1Bound.getTupleBuffer()[0];
+                        if (atomicAbstractRole instanceof AtomicAbstractRole) {
+                            m_binaryExtensionTableSearch1Bound.getBindingsBuffer()[1]=rootNode;
+                            m_binaryExtensionTableSearch1Bound.open();
+                            while (!m_binaryExtensionTableSearch1Bound.afterLast()) {
+                                Object rootNodeConcept=m_binaryExtensionTableSearch1Bound.getTupleBuffer()[0];
+                                if (rootNodeConcept instanceof AtMostAbstractRoleGuard) {
+                                    AtMostAbstractRoleGuard atMost=(AtMostAbstractRoleGuard)rootNodeConcept;
+                                    if (atMost.getOnAbstractRole() instanceof InverseAbstractRole && ((InverseAbstractRole)atMost.getOnAbstractRole()).getInverseOf().equals(atomicAbstractRole))
+                                        addTarget(rootNode,node,atMost);
+                                }
+                                m_binaryExtensionTableSearch1Bound.next();
                             }
-                            m_binaryExtensionTableSearch1Bound.next();
                         }
                     }
                     m_ternaryExtensionTableSearch1Bound.next();
@@ -184,17 +186,19 @@ public final class NominalIntroductionManager implements Serializable {
                 while (!m_ternaryExtensionTableSearch2Bound.afterLast()) {
                     Node rootNode=(Node)m_ternaryExtensionTableSearch2Bound.getTupleBuffer()[1];
                     if (rootNode.getNodeType()==NodeType.ROOT_NODE && !rootNode.isParentOf(node)) {
-                        AtomicAbstractRole atomicAbstractRole=(AtomicAbstractRole)m_ternaryExtensionTableSearch2Bound.getTupleBuffer()[0];
-                        m_binaryExtensionTableSearch1Bound.getBindingsBuffer()[1]=rootNode;
-                        m_binaryExtensionTableSearch1Bound.open();
-                        while (!m_binaryExtensionTableSearch1Bound.afterLast()) {
-                            Object rootNodeConcept=m_binaryExtensionTableSearch1Bound.getTupleBuffer()[0];
-                            if (rootNodeConcept instanceof AtMostAbstractRoleGuard) {
-                                AtMostAbstractRoleGuard atMost=(AtMostAbstractRoleGuard)rootNodeConcept;
-                                if (atMost.getOnAbstractRole().equals(atomicAbstractRole))
-                                    addTarget(rootNode,node,atMost);
+                        Object atomicAbstractRole=m_ternaryExtensionTableSearch2Bound.getTupleBuffer()[0];
+                        if (atomicAbstractRole instanceof AtomicAbstractRole) {
+                            m_binaryExtensionTableSearch1Bound.getBindingsBuffer()[1]=rootNode;
+                            m_binaryExtensionTableSearch1Bound.open();
+                            while (!m_binaryExtensionTableSearch1Bound.afterLast()) {
+                                Object rootNodeConcept=m_binaryExtensionTableSearch1Bound.getTupleBuffer()[0];
+                                if (rootNodeConcept instanceof AtMostAbstractRoleGuard) {
+                                    AtMostAbstractRoleGuard atMost=(AtMostAbstractRoleGuard)rootNodeConcept;
+                                    if (atMost.getOnAbstractRole().equals(atomicAbstractRole))
+                                        addTarget(rootNode,node,atMost);
+                                }
+                                m_binaryExtensionTableSearch1Bound.next();
                             }
-                            m_binaryExtensionTableSearch1Bound.next();
                         }
                     }
                     m_ternaryExtensionTableSearch2Bound.next();

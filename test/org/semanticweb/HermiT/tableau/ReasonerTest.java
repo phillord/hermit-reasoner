@@ -467,4 +467,12 @@ public class ReasonerTest extends AbstractOntologyTest {
         loadResource("res/galen-ians-full-undoctored.xml");
         assertSubsumptionHierarchy("res/galen-ians-full-undoctored.xml.txt");
     }
+    public void testPizza() throws Exception {
+        loadResource("res/pizza.xml");
+        assertSubsumptionHierarchy("res/pizza.xml.txt");
+    }
+    public void testPropreo() throws Exception {
+        loadResource("res/propreo.xml");
+        assertSubsumptionHierarchy("res/propreo.xml.txt");
+    }
 }

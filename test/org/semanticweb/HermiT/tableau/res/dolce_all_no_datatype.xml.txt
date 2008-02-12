@@ -1,0 +1,2203 @@
+http://www.loa-cnr.it/ontologies/Collections.owl#information-collection
+    http://www.loa-cnr.it/ontologies/Collections.owl#information-collection
+    http://www.loa-cnr.it/ontologies/Collections.owl#non-physical-collection
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collection
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Collections.owl#non-physical-collection
+    http://www.loa-cnr.it/ontologies/Collections.owl#non-physical-collection
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collection
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Collections.owl#organized-collection
+    http://www.loa-cnr.it/ontologies/Collections.owl#organized-collection
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collection
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Collections.owl#parametrized-collection
+    http://www.loa-cnr.it/ontologies/Collections.owl#parametrized-collection
+    http://www.loa-cnr.it/ontologies/Collections.owl#simple-collection
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collection
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Collections.owl#physical-plurality
+    http://www.loa-cnr.it/ontologies/Collections.owl#physical-plurality
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Collections.owl#simple-collection
+    http://www.loa-cnr.it/ontologies/Collections.owl#simple-collection
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collection
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Collections.owl#taxonomic-collection
+    http://www.loa-cnr.it/ontologies/Collections.owl#simple-collection
+    http://www.loa-cnr.it/ontologies/Collections.owl#taxonomic-collection
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collection
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Collections.owl#text-repository
+    http://www.loa-cnr.it/ontologies/Collections.owl#information-collection
+    http://www.loa-cnr.it/ontologies/Collections.owl#non-physical-collection
+    http://www.loa-cnr.it/ontologies/Collections.owl#text-repository
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collection
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Collectives.owl#biological-collective
+    http://www.loa-cnr.it/ontologies/Collections.owl#simple-collection
+    http://www.loa-cnr.it/ontologies/Collectives.owl#biological-collective
+    http://www.loa-cnr.it/ontologies/Collectives.owl#simple-collective
+    http://www.loa-cnr.it/ontologies/Collectives.owl#type-based-collective
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collection
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collective
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Collectives.owl#ecological-collective
+    http://www.loa-cnr.it/ontologies/Collections.owl#organized-collection
+    http://www.loa-cnr.it/ontologies/Collectives.owl#ecological-collective
+    http://www.loa-cnr.it/ontologies/Collectives.owl#organized-collective
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collection
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collective
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Collectives.owl#genetic-collective
+    http://www.loa-cnr.it/ontologies/Collections.owl#simple-collection
+    http://www.loa-cnr.it/ontologies/Collectives.owl#biological-collective
+    http://www.loa-cnr.it/ontologies/Collectives.owl#genetic-collective
+    http://www.loa-cnr.it/ontologies/Collectives.owl#simple-collective
+    http://www.loa-cnr.it/ontologies/Collectives.owl#type-based-collective
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collection
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collective
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Collectives.owl#intentional-collective
+    http://www.loa-cnr.it/ontologies/Collections.owl#organized-collection
+    http://www.loa-cnr.it/ontologies/Collectives.owl#intentional-collective
+    http://www.loa-cnr.it/ontologies/Collectives.owl#organized-collective
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collection
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collective
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Collectives.owl#organized-collective
+    http://www.loa-cnr.it/ontologies/Collections.owl#organized-collection
+    http://www.loa-cnr.it/ontologies/Collectives.owl#organized-collective
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collection
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collective
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Collectives.owl#simple-collective
+    http://www.loa-cnr.it/ontologies/Collections.owl#simple-collection
+    http://www.loa-cnr.it/ontologies/Collectives.owl#simple-collective
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collection
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collective
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Collectives.owl#simple-planned-collective
+    http://www.loa-cnr.it/ontologies/Collections.owl#simple-collection
+    http://www.loa-cnr.it/ontologies/Collectives.owl#simple-collective
+    http://www.loa-cnr.it/ontologies/Collectives.owl#simple-planned-collective
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collection
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collective
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Collectives.owl#social-type-collective
+    http://www.loa-cnr.it/ontologies/Collections.owl#simple-collection
+    http://www.loa-cnr.it/ontologies/Collectives.owl#simple-collective
+    http://www.loa-cnr.it/ontologies/Collectives.owl#social-type-collective
+    http://www.loa-cnr.it/ontologies/Collectives.owl#type-based-collective
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collection
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collective
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Collectives.owl#taxonomic-collective
+    http://www.loa-cnr.it/ontologies/Collections.owl#simple-collection
+    http://www.loa-cnr.it/ontologies/Collections.owl#taxonomic-collection
+    http://www.loa-cnr.it/ontologies/Collectives.owl#biological-collective
+    http://www.loa-cnr.it/ontologies/Collectives.owl#simple-collective
+    http://www.loa-cnr.it/ontologies/Collectives.owl#taxonomic-collective
+    http://www.loa-cnr.it/ontologies/Collectives.owl#type-based-collective
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collection
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collective
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Collectives.owl#type-based-collective
+    http://www.loa-cnr.it/ontologies/Collections.owl#simple-collection
+    http://www.loa-cnr.it/ontologies/Collectives.owl#simple-collective
+    http://www.loa-cnr.it/ontologies/Collectives.owl#type-based-collective
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collection
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collective
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#biological-object
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#biological-object
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#physical-body
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-physical-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#causal-role
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#causal-role
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#role
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#chemical-object
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#chemical-object
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#physical-body
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-physical-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#collection-role
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#collection-role
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#role
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#commerce-role
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#commerce-role
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#role
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-role
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#contract
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#contract
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#regulation
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#country
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#country
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#geographical-place
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#non-physical-place
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#political-geographic-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#figure
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-figure
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#creative-object
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#creative-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#information-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#feature-role
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#feature-role
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#role
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#functional-matter
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#functional-matter
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#amount-of-matter
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#geographical-object
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#geographical-object
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#physical-place
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-physical-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#geographical-place
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#geographical-place
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#non-physical-place
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#figure
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-figure
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#legal-possession-entity
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#legal-possession-entity
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#role
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-role
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#locative-role
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#locative-role
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#role
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#measurement-unit
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#measurement-unit
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#abstract
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#abstract-region
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#region
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#non-physical-place
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#non-physical-place
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#figure
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-figure
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#norm
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#norm
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#regulation
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#phase-role
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#phase-role
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#role
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#physical-body
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#physical-body
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-physical-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#physical-place
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#physical-place
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-physical-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#political-geographic-object
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#geographical-place
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#non-physical-place
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#political-geographic-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#figure
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-figure
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#principle
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#principle
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#qualitative-role
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#qualitative-role
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#role
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#rationale
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#rationale
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#spatial-feature
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#spatial-feature
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#feature
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#relevant-part
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#substance-role
+    http://www.loa-cnr.it/ontologies/CommonSenseMapping.owl#substance-role
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#role
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#abstract
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#abstract
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#abstract-quality
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#abstract-quality
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#quality
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#abstract-region
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#abstract
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#abstract-region
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#region
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#accomplishment
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#accomplishment
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#event
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#perdurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#achievement
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#achievement
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#event
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#perdurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#amount-of-matter
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#amount-of-matter
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#arbitrary-sum
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#arbitrary-sum
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#dependent-place
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#dependent-place
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#feature
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#event
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#event
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#perdurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#feature
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#feature
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#perdurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#perdurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-quality
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-quality
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#quality
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-region
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#abstract
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-region
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#region
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#process
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#perdurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#process
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#stative
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#proposition
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#abstract
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#proposition
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#quale
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#abstract
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#quale
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#region
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#quality
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#quality
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#quality-space
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#abstract
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#quality-space
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#region
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#region
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#abstract
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#region
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#relevant-part
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#feature
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#relevant-part
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#set
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#abstract
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#set
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#space-region
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#abstract
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-region
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#region
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#space-region
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatial-location_q
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-quality
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#quality
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatial-location_q
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-region
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#abstract
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-region
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#region
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#space-region
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-region
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#state
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#perdurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#state
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#stative
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#stative
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#perdurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#stative
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#temporal-location_q
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#quality
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#temporal-location_q
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#temporal-quality
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#temporal-quality
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#quality
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#temporal-quality
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#temporal-region
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#abstract
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#region
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#temporal-region
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#time-interval
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#abstract
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#region
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#temporal-region
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#time-interval
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#action
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#accomplishment
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#event
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#perdurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#action
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#activity
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#accomplishment
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#event
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#perdurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#action
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#activity
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agent
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agent
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agent-driven-role
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agent-driven-role
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#role
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agentive-figure
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agent
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agentive-figure
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#figure
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agentive-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agent
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agentive-physical-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agentive-social-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agent
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#cognitive-event
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#event
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#perdurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#cognitive-event
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#cognitive-modal-description
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#cognitive-modal-description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#modal-description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#cognitive-state
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#perdurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#state
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#stative
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#cognitive-state
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collection
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collection
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collective
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collection
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#collective
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#communication-event
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#accomplishment
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#event
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#perdurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#communication-event
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#constitutive-description
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#constitutive-description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#course
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#course
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description-role
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description-role
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#role
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#desire
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#cognitive-modal-description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#desire
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#modal-description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#figure
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#figure
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#flux
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#perdurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#process
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#stative
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#flux
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#gestalt
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#gestalt
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#theory
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#goal
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#cognitive-modal-description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#desire
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#goal
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#modal-description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#indicator
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#indicator
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#parameter
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#information-encoding-system
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#information-encoding-system
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#information-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#information-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#life-cycle
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#course
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#life-cycle
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#logical-role
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description-role
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#logical-role
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#role
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#material-artifact
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#material-artifact
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-physical-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#method
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#method
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#modal-description
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#modal-description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-figure
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#figure
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-figure
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-physical-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#parameter
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#parameter
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#path
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#course
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#path
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#phenomenon
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#accomplishment
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#event
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#perdurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#phenomenon
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#physical-phenomenon
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#accomplishment
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#event
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#perdurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#phenomenon
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#physical-phenomenon
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#physical-realization
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#physical-realization
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#plan
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#method
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#plan
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#practice
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#method
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#practice
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#project
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#method
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#project
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#rational-agent
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agent
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#rational-agent
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#rational-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agent
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agentive-physical-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#rational-agent
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#rational-physical-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#reconstructed-flux
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#perdurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#process
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#stative
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#flux
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#reconstructed-flux
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#regulation
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#regulation
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#relation
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#relation
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#theory
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#role
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#role
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#situation
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#situation
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-description
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-relationship
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-relationship
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-role
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#role
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-role
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#status
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agent-driven-role
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#role
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-role
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#status
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#symmetric-role
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#role
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#symmetric-role
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#task
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#course
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#task
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#technique
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#method
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#technique
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#theory
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#theory
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/InformationObjects.owl#classification-system
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#information-encoding-system
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#classification-system
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/InformationObjects.owl#combinatorial-system
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#information-encoding-system
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#combinatorial-system
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/InformationObjects.owl#diagrammatic-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#information-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#diagrammatic-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/InformationObjects.owl#formal-expression
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#information-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#formal-expression
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/InformationObjects.owl#formal-system
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#information-encoding-system
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#formal-system
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/InformationObjects.owl#gesturing
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#accomplishment
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#event
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#perdurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#action
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#physical-realization
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#gesturing
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#information-realization
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/InformationObjects.owl#grammar
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#information-encoding-system
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#combinatorial-system
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#grammar
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/InformationObjects.owl#grapheme
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#information-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#grapheme
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#linguistic-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/InformationObjects.owl#iconic-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#information-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#iconic-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/InformationObjects.owl#information-realization
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#physical-realization
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#information-realization
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/InformationObjects.owl#linguistic-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#information-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#linguistic-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/InformationObjects.owl#morpheme
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#information-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#linguistic-object
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#morpheme
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/InformationObjects.owl#narrative
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#narrative
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/InformationObjects.owl#phoneme
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#information-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#linguistic-object
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#phoneme
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/InformationObjects.owl#subject
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#subject
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/InformationObjects.owl#text
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#information-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#linguistic-object
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#text
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/InformationObjects.owl#voicing
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#accomplishment
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#event
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#perdurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#action
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#physical-realization
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#information-realization
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#voicing
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/InformationObjects.owl#word
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#information-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#linguistic-object
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#word
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/InformationObjects.owl#writing
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#physical-realization
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#information-realization
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#writing
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/MentalObjects.owl#mental-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/MentalObjects.owl#mental-object
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ModalDescriptions.owl#commitment
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#cognitive-modal-description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#modal-description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/ModalDescriptions.owl#commitment
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ModalDescriptions.owl#promise
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#cognitive-modal-description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#modal-description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/ModalDescriptions.owl#commitment
+    http://www.loa-cnr.it/ontologies/ModalDescriptions.owl#promise
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/ModalDescriptions.owl#responsibility
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#cognitive-modal-description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#modal-description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/ModalDescriptions.owl#commitment
+    http://www.loa-cnr.it/ontologies/ModalDescriptions.owl#responsibility
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Plans.owl#abstract-plan
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#method
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#plan
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/Plans.owl#abstract-plan
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Plans.owl#action-task
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#course
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#task
+    http://www.loa-cnr.it/ontologies/Plans.owl#action-task
+    http://www.loa-cnr.it/ontologies/Plans.owl#elementary-task
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Plans.owl#bag-task
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#course
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#task
+    http://www.loa-cnr.it/ontologies/Plans.owl#bag-task
+    http://www.loa-cnr.it/ontologies/Plans.owl#complex-task
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Plans.owl#circumstantial-plan
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#method
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#plan
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/Plans.owl#circumstantial-plan
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Plans.owl#complex-task
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#course
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#task
+    http://www.loa-cnr.it/ontologies/Plans.owl#complex-task
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Plans.owl#control-task
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#course
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#task
+    http://www.loa-cnr.it/ontologies/Plans.owl#control-task
+    http://www.loa-cnr.it/ontologies/Plans.owl#elementary-task
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Plans.owl#decision-activity
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#accomplishment
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#event
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#perdurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#action
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#activity
+    http://www.loa-cnr.it/ontologies/Plans.owl#decision-activity
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Plans.owl#decision-state
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#perdurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#state
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#stative
+    http://www.loa-cnr.it/ontologies/Plans.owl#decision-state
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Plans.owl#elementary-task
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#course
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#task
+    http://www.loa-cnr.it/ontologies/Plans.owl#elementary-task
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Plans.owl#goal-qua-main
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#cognitive-modal-description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#desire
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#goal
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#modal-description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/Plans.owl#goal-qua-main
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Plans.owl#goal-situation
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#situation
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/Plans.owl#goal-situation
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Plans.owl#information-gathering
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#accomplishment
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#event
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#perdurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#action
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#activity
+    http://www.loa-cnr.it/ontologies/Plans.owl#information-gathering
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Plans.owl#maximal-task
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#course
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#task
+    http://www.loa-cnr.it/ontologies/Plans.owl#complex-task
+    http://www.loa-cnr.it/ontologies/Plans.owl#maximal-task
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Plans.owl#plan-assessment
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#method
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#technique
+    http://www.loa-cnr.it/ontologies/Plans.owl#plan-assessment
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Plans.owl#plan-assessment-task
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#course
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#task
+    http://www.loa-cnr.it/ontologies/Plans.owl#control-task
+    http://www.loa-cnr.it/ontologies/Plans.owl#elementary-task
+    http://www.loa-cnr.it/ontologies/Plans.owl#plan-assessment-task
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Plans.owl#plan-execution
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#situation
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/Plans.owl#plan-execution
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Plans.owl#planning-activity
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#accomplishment
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#event
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#perdurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#action
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#activity
+    http://www.loa-cnr.it/ontologies/Plans.owl#planning-activity
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Plans.owl#planning-as-technique
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#method
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#technique
+    http://www.loa-cnr.it/ontologies/Plans.owl#planning-as-technique
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Plans.owl#saturated-plan
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#method
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#plan
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/Plans.owl#saturated-plan
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Plans.owl#schedule
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#course
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#task
+    http://www.loa-cnr.it/ontologies/Plans.owl#schedule
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Plans.owl#sequential-task
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#course
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#task
+    http://www.loa-cnr.it/ontologies/Plans.owl#complex-task
+    http://www.loa-cnr.it/ontologies/Plans.owl#sequential-task
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Plans.owl#subplan
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#method
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#plan
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/Plans.owl#subplan
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/SemioticCommunicationTheory.owl#communication-role
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#role
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/SemioticCommunicationTheory.owl#communication-role
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/SemioticCommunicationTheory.owl#communication-situation
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#situation
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/SemioticCommunicationTheory.owl#communication-situation
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/SemioticCommunicationTheory.owl#interpretation-situation
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#situation
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/SemioticCommunicationTheory.owl#interpretation-situation
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/SemioticCommunicationTheory.owl#language
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#information-encoding-system
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#combinatorial-system
+    http://www.loa-cnr.it/ontologies/SemioticCommunicationTheory.owl#language
+    http://www.loa-cnr.it/ontologies/SemioticCommunicationTheory.owl#semiotic-code
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/SemioticCommunicationTheory.owl#semiotic-code
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#information-encoding-system
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/InformationObjects.owl#combinatorial-system
+    http://www.loa-cnr.it/ontologies/SemioticCommunicationTheory.owl#semiotic-code
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/SemioticCommunicationTheory.owl#semiotic-role
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#concept
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#role
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/SemioticCommunicationTheory.owl#semiotic-role
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/SocialUnits.owl#institution
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agent
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agentive-figure
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#figure
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/SocialUnits.owl#institution
+    http://www.loa-cnr.it/ontologies/SocialUnits.owl#organization
+    http://www.loa-cnr.it/ontologies/SocialUnits.owl#socially-constructed-person
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/SocialUnits.owl#natural-person
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agent
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agentive-figure
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#figure
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/SocialUnits.owl#natural-person
+    http://www.loa-cnr.it/ontologies/SocialUnits.owl#socially-constructed-person
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/SocialUnits.owl#organization
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agent
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agentive-figure
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#figure
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/SocialUnits.owl#organization
+    http://www.loa-cnr.it/ontologies/SocialUnits.owl#socially-constructed-person
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/SocialUnits.owl#socially-constructed-person
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agent
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agentive-figure
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#figure
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/SocialUnits.owl#socially-constructed-person
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Systems.owl#design-object-materialization
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#situation
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/Systems.owl#design-object-materialization
+    http://www.loa-cnr.it/ontologies/Systems.owl#system-as-situation
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Systems.owl#design-specification-workflow
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#method
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#plan
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/Systems.owl#design-specification-workflow
+    http://www.loa-cnr.it/ontologies/Systems.owl#system-production-workflow
+    http://www.loa-cnr.it/ontologies/Systems.owl#workflow
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Systems.owl#functionality-specification-workflow
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#method
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#plan
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/Systems.owl#functionality-specification-workflow
+    http://www.loa-cnr.it/ontologies/Systems.owl#system-production-workflow
+    http://www.loa-cnr.it/ontologies/Systems.owl#workflow
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Systems.owl#production-workflow-execution
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#situation
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/Systems.owl#production-workflow-execution
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Systems.owl#system-as-artifact
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#material-artifact
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-physical-object
+    http://www.loa-cnr.it/ontologies/Systems.owl#system-as-artifact
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Systems.owl#system-as-description
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/Systems.owl#system-as-description
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Systems.owl#system-as-situation
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#situation
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/Systems.owl#system-as-situation
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Systems.owl#system-design
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/Systems.owl#system-as-description
+    http://www.loa-cnr.it/ontologies/Systems.owl#system-design
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Systems.owl#system-functionality
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/Systems.owl#system-as-description
+    http://www.loa-cnr.it/ontologies/Systems.owl#system-functionality
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Systems.owl#system-implementation-workflow
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#method
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#plan
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/Systems.owl#system-implementation-workflow
+    http://www.loa-cnr.it/ontologies/Systems.owl#system-production-workflow
+    http://www.loa-cnr.it/ontologies/Systems.owl#workflow
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Systems.owl#system-production-workflow
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#method
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#plan
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/Systems.owl#system-production-workflow
+    http://www.loa-cnr.it/ontologies/Systems.owl#workflow
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Systems.owl#workflow
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#description
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#method
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#plan
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/Systems.owl#workflow
+-----------------------------------------------
+http://www.loa-cnr.it/ontologies/Systems.owl#working-system-situation
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-endurant
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#non-physical-object
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular
+    http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#spatio-temporal-particular
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#non-agentive-social-object
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#situation
+    http://www.loa-cnr.it/ontologies/ExtendedDnS.owl#social-object
+    http://www.loa-cnr.it/ontologies/Systems.owl#system-as-situation
+    http://www.loa-cnr.it/ontologies/Systems.owl#working-system-situation
+-----------------------------------------------
+xsd:decimal
+    xsd:decimal
+-----------------------------------------------
+xsd:integer
+    xsd:integer
+-----------------------------------------------
+xsd:string
+    xsd:string
+-----------------------------------------------
+! THE END !

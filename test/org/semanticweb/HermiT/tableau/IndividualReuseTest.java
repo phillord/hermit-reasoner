@@ -17,6 +17,10 @@ public class IndividualReuseTest extends ReasonerTest {
     public void testGalenIansFullUndoctored() throws Exception {
         // omitted for now until we get this under control
     }
+    public void testDolceAllNoDatatype() throws Exception {
+        loadResource("res/dolce_all_no_datatype.xml");
+        assertSubsumptionHierarchy("res/dolce_all_no_datatype.xml.txt");
+    }
     protected Tableau getTableau() throws Exception {
         Clausification clausification=new Clausification();
         Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();

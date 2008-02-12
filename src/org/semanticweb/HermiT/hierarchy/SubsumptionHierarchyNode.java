@@ -6,26 +6,29 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.semanticweb.HermiT.*;
+import org.semanticweb.HermiT.model.*;
+
 /**
  * Represents a node in the hierarchy.
  */
 public class SubsumptionHierarchyNode implements Serializable {
     private static final long serialVersionUID=4922639552505751770L;
 
-    protected final String m_representativeURI;
-    protected final Set<String> m_owlClasses;
+    protected final AtomicConcept m_representativeConcept;
+    protected final Set<AtomicConcept> m_equivalentConcepts;
     protected final Set<SubsumptionHierarchyNode> m_parentNodes;
     protected final Set<SubsumptionHierarchyNode> m_childNodes;
 
-    public SubsumptionHierarchyNode(String representativeURI) {
-        m_representativeURI=representativeURI;
-        m_owlClasses=new HashSet<String>(2);
-        m_owlClasses.add(m_representativeURI);
+    public SubsumptionHierarchyNode(AtomicConcept representativeConcept) {
+        m_representativeConcept=representativeConcept;
+        m_equivalentConcepts=new HashSet<AtomicConcept>(2);
+        m_equivalentConcepts.add(m_representativeConcept);
         m_parentNodes=new HashSet<SubsumptionHierarchyNode>();
         m_childNodes=new HashSet<SubsumptionHierarchyNode>();
     }
-    public Set<String> getAtomicConcepts() {
-        return m_owlClasses;
+    public Set<AtomicConcept> getEquivalentConcepts() {
+        return m_equivalentConcepts;
     }
     public Set<SubsumptionHierarchyNode> getParentNodes() {
         return m_parentNodes;
@@ -59,7 +62,21 @@ public class SubsumptionHierarchyNode implements Serializable {
         }
         return result;
     }
+    public String toString(Namespaces namespaces) {
+        StringBuffer buffer=new StringBuffer();
+        buffer.append("{ ");
+        boolean first=true;
+        for (AtomicConcept atomicConcept : m_equivalentConcepts) {
+            if (first)
+                first=false;
+            else
+                buffer.append(", ");
+            buffer.append(atomicConcept.toString(namespaces));
+        }
+        buffer.append(" }");
+        return buffer.toString();
+    }
     public String toString() {
-        return m_owlClasses.toString();
+        return toString(Namespaces.INSTANCE);
     }
 }

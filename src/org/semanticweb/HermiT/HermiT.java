@@ -246,11 +246,17 @@ public class HermiT implements Serializable {
     public Tableau getTableau() {
         return m_tableau;
     }
+    public boolean isSubsumedBy(AtomicConcept subconcept,AtomicConcept superconcept) {
+        return m_subsumptionChecker.isSubsumedBy(subconcept,superconcept);
+    }
     public boolean isSubsumedBy(String subconceptName,String superconceptName) {
-        return m_subsumptionChecker.isSubsumedBy(subconceptName,superconceptName);
+        return isSubsumedBy(AtomicConcept.create(subconceptName),AtomicConcept.create(superconceptName));
+    }
+    public boolean isSatisfiable(AtomicConcept concept) {
+        return m_subsumptionChecker.isSatisfiable(concept);
     }
     public boolean isSatisfiable(String conceptName) {
-        return m_subsumptionChecker.isSatisfiable(conceptName);
+        return isSatisfiable(AtomicConcept.create(conceptName));
     }
     public SubsumptionHierarchy getSubsumptionHierarchy() {
         try {
@@ -267,13 +273,13 @@ public class HermiT implements Serializable {
         return m_tableau.isABoxSatisfiable();
     }
     public void printFlattenedHierarchy(PrintWriter output,SubsumptionHierarchy subsumptionHierarchy) {
-        Map<String,Set<String>> flattenedHierarchy=subsumptionHierarchy.getFlattenedHierarchy();
+        Map<AtomicConcept,Set<AtomicConcept>> flattenedHierarchy=subsumptionHierarchy.getFlattenedHierarchy();
         try {
-            for (Map.Entry<String,Set<String>> entry : flattenedHierarchy.entrySet()) {
-                output.println(m_namespaces.abbreviateAsNamespace(entry.getKey()));
-                for (String owlClassURI : entry.getValue()) {
+            for (Map.Entry<AtomicConcept,Set<AtomicConcept>> entry : flattenedHierarchy.entrySet()) {
+                output.println(m_namespaces.abbreviateAsNamespace(entry.getKey().getURI()));
+                for (AtomicConcept atomicConcept : entry.getValue()) {
                     output.print("    ");
-                    output.println(m_namespaces.abbreviateAsNamespace(owlClassURI));
+                    output.println(m_namespaces.abbreviateAsNamespace(atomicConcept.getURI()));
                 }
                 output.println("-----------------------------------------------");
             }

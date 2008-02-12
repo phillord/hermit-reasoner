@@ -2,7 +2,6 @@ package org.semanticweb.HermiT.hierarchy;
 
 import java.util.Set;
 import java.util.HashSet;
-import java.util.TreeSet;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -18,22 +17,16 @@ public class TableauSubsumptionChecker implements SubsumptionHierarchy.Subsumpti
     private static final long serialVersionUID=-2023801882010561315L;
 
     protected final Tableau m_tableau;
-    protected final Set<String> m_allAtomicClasses;
     protected final Map<AtomicConcept,AtomicConceptInfo> m_atomicConceptInfos;
 
     public TableauSubsumptionChecker(Tableau tableau) {
         m_tableau=tableau;
-        m_allAtomicClasses=new TreeSet<String>();
-        for (AtomicConcept atomicConcept : m_tableau.getDLOntology().getAllAtomicConcepts())
-            if (!atomicConcept.getURI().startsWith("internal:"))
-                m_allAtomicClasses.add(atomicConcept.getURI());
         m_atomicConceptInfos=new HashMap<AtomicConcept,AtomicConceptInfo>();
     }
-    public Set<String> getAllAtomicClasses() {
-        return m_allAtomicClasses;
+    public Set<AtomicConcept> getAllAtomicConcepts() {
+        return m_tableau.getDLOntology().getAllAtomicConcepts();
     }
-    public boolean isSatisfiable(String conceptName) {
-        AtomicConcept concept=AtomicConcept.create(conceptName);
+    public boolean isSatisfiable(AtomicConcept concept) {
         AtomicConceptInfo atomicConceptInfo=getAtomicConceptInfo(concept);
         if (atomicConceptInfo.m_isSatisfiable==null) {
             boolean isSatisfiable=m_tableau.isSatisfiable(concept);
@@ -45,13 +38,11 @@ public class TableauSubsumptionChecker implements SubsumptionHierarchy.Subsumpti
         }
         return atomicConceptInfo.m_isSatisfiable;
     }
-    public boolean isSubsumedBy(String subconceptName,String superconceptName) {
-        AtomicConcept subconcept=AtomicConcept.create(subconceptName);
-        AtomicConcept superconcept=AtomicConcept.create(superconceptName);
-        if (AtomicConcept.THING.equals(superconcept))
+    public boolean isSubsumedBy(AtomicConcept subconcept,AtomicConcept superconcept) {
+        if (AtomicConcept.THING.equals(superconcept) || AtomicConcept.NOTHING.equals(subconcept))
             return true;
-        if (AtomicConcept.NOTHING.equals(superconcept))
-            return !isSatisfiable(subconceptName);
+        else if (AtomicConcept.NOTHING.equals(superconcept))
+            return !isSatisfiable(subconcept);
         AtomicConceptInfo subconceptInfo=getAtomicConceptInfo(subconcept);
         if (subconceptInfo.isKnownSubsumer(superconcept))
             return true;
@@ -70,7 +61,7 @@ public class TableauSubsumptionChecker implements SubsumptionHierarchy.Subsumpti
             return isSubsumedBy;
         }
         else {
-            isSatisfiable(subconceptName);
+            isSatisfiable(subconcept);
             assert subconceptInfo.m_allSubsumersKnown;
             return subconceptInfo.isKnownSubsumer(superconcept);
         }
