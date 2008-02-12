@@ -30,6 +30,7 @@ public final class Tableau implements Serializable {
     protected final List<List<ExistentialConcept>> m_existentialConceptsBuffers;
     protected BranchingPoint[] m_branchingPoints;
     protected int m_currentBranchingPoint;
+    protected int m_nonbacktrackableBranchingPoint;
     protected boolean m_isCurrentModelDeterministic;
     protected int m_allocatedNodes;
     protected int m_numberOfNodesInTableau;
@@ -61,6 +62,7 @@ public final class Tableau implements Serializable {
         m_existentialConceptsBuffers=new ArrayList<List<ExistentialConcept>>();
         m_branchingPoints=new BranchingPoint[2];
         m_currentBranchingPoint=-1;
+        m_nonbacktrackableBranchingPoint=-1;
         if (m_tableauMonitor!=null)
             m_tableauMonitor.setTableau(this);
     }
@@ -116,12 +118,10 @@ public final class Tableau implements Serializable {
         m_firstUnprocessedGroundDisjunction=null;
         m_checkedNode=null;
         m_branchingPoints=new BranchingPoint[2];
-        m_currentBranchingPoint=-1; // The constructor of BranchingPoint depends on this value  
-        m_branchingPoints[0]=new BranchingPoint(this);
-        m_currentBranchingPoint++;
+        m_currentBranchingPoint=-1;
+        m_nonbacktrackableBranchingPoint=-1;
         m_dependencySetFactory.clear();
         m_extensionManager.clear();
-        m_mergingManager.clear();
         m_nominalIntroductionManager.clear();
         m_descriptionGraphManager.clear();
         m_isCurrentModelDeterministic=true;
@@ -193,7 +193,7 @@ public final class Tableau implements Serializable {
         if (m_extensionManager.containsClash()) {
             DependencySet clashDependencySet=m_extensionManager.getClashDependencySet();
             int newCurrentBranchingPoint=clashDependencySet.getMaximumBranchingPoint();
-            if (newCurrentBranchingPoint<=0)
+            if (newCurrentBranchingPoint<=m_nonbacktrackableBranchingPoint)
                 return false;
             backtrackTo(newCurrentBranchingPoint);
             BranchingPoint branchingPoint=getCurrentBranchingPoint();
@@ -231,6 +231,9 @@ public final class Tableau implements Serializable {
             loadDLOntologyABox();
         m_checkedNode=createNewRootNode(m_dependencySetFactory.emptySet(),0);
         m_extensionManager.addConceptAssertion(subconcept,m_checkedNode,m_dependencySetFactory.emptySet());
+        m_branchingPoints[0]=new BranchingPoint(this);
+        m_currentBranchingPoint++;
+        m_nonbacktrackableBranchingPoint=m_currentBranchingPoint;
         DependencySet dependencySet=m_dependencySetFactory.addBranchingPoint(m_dependencySetFactory.emptySet(),m_currentBranchingPoint);
         m_extensionManager.addConceptAssertion(AtomicNegationConcept.create(superconcept),m_checkedNode,dependencySet);
         boolean result=!isSatisfiable();
@@ -288,6 +291,9 @@ public final class Tableau implements Serializable {
     }
     public boolean isCurrentModelDeterministic() {
         return m_isCurrentModelDeterministic;
+    }
+    public int getCurrentBranchingPointLevel() {
+        return m_currentBranchingPoint;
     }
     public BranchingPoint getCurrentBranchingPoint() {
         return m_branchingPoints[m_currentBranchingPoint];

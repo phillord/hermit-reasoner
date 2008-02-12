@@ -53,8 +53,6 @@ public final class NominalIntroductionManager implements Serializable {
         for (int index=m_bufferForRootNodes.length-1;index>=0;--index)
             m_bufferForRootNodes[index]=null;
         m_firstUnprocessedTarget=0;
-        m_indicesByBranchingPoint[m_tableau.getCurrentBranchingPoint().getLevel()]=m_firstUnprocessedTarget;
-        m_indicesByBranchingPoint[m_tableau.getCurrentBranchingPoint().getLevel()+1]=m_targets.getFirstFreeTupleIndex();
     }
     public void branchingPointPushed() {
         int start=m_tableau.getCurrentBranchingPoint().getLevel()*3;

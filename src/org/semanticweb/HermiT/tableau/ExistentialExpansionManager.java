@@ -72,7 +72,6 @@ public final class ExistentialExpansionManager implements Serializable {
     }
     public void clear() {
         m_tupleTable.clear();
-        m_indicesByBranchingPoint[m_tableau.getCurrentBranchingPoint().m_level]=m_tupleTable.getFirstFreeTupleIndex();
         m_auxiliaryTuple[0]=null;
         m_auxiliaryTuple[1]=null;
     }

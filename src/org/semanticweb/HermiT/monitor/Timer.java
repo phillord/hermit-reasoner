@@ -69,7 +69,7 @@ public class Timer extends TableauMonitorAdapter {
             System.out.print(m_tableau.getNumberOfMergedOrPrunedNodes());
         }
         System.out.print("    branching point: ");
-        System.out.print(m_tableau.getCurrentBranchingPoint().getLevel());
+        System.out.print(m_tableau.getCurrentBranchingPointLevel());
         if (m_numberOfBacktrackings>0) {
             System.out.print("    backtrackings: ");
             System.out.print(m_numberOfBacktrackings);

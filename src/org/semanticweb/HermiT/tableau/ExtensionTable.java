@@ -193,10 +193,6 @@ public abstract class ExtensionTable implements Serializable {
         m_afterExtensionOldTupleIndex=0;
         m_afterExtensionThisTupleIndex=0;
         m_afterDeltaNewTupleIndex=0;
-        int start=m_tableau.getCurrentBranchingPoint().m_level*3;
-        m_indicesByBranchingPoint[start]=m_afterExtensionOldTupleIndex;
-        m_indicesByBranchingPoint[start+1]=m_afterExtensionThisTupleIndex;
-        m_indicesByBranchingPoint[start+2]=m_afterDeltaNewTupleIndex;
     }
     public boolean isTupleActive(Object[] tuple) {
         for (int objectIndex=m_tupleArity-1;objectIndex>0;--objectIndex)

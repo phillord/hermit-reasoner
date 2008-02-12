@@ -55,7 +55,6 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
     public void clear() {
         m_reusedNodes.clear();
         m_reuseBacktrackingTable.clear();
-        m_indicesByBranchingPoint[m_tableau.getCurrentBranchingPoint().getLevel()]=m_reuseBacktrackingTable.getFirstFreeTupleIndex();
         m_blockingStrategy.clear();
         m_dontReueseConceptsThisRun.clear();
         m_dontReueseConceptsThisRun.addAll(m_dontReueseConceptsEver);

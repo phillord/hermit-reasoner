@@ -28,8 +28,6 @@ public final class MergingManager implements Serializable {
         m_ternaryAuxiliaryTuple=new Object[3];
         m_binaryUnionDependencySet=new UnionDependencySet(2);
     }
-    public void clear() {
-    }
     public boolean mergeNodes(Node node0,Node node1,DependencySet dependencySet) {
         if (!node0.isActive() || !node1.isActive() || node0==node1)
             return false;
