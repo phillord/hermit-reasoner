@@ -109,6 +109,8 @@ public class IndividualReuseStrategy implements ExistentialsExpansionStrategy,Se
     }
     protected boolean expandWithModelReuse(AtLeastAbstractRoleConcept atLeastAbstractRoleConcept,Node node) {
         LiteralConcept toConcept=atLeastAbstractRoleConcept.getToConcept();
+        if ((toConcept instanceof AtomicConcept) && ((AtomicConcept)toConcept).getURI().startsWith("internal:"))
+            return false;
         if (atLeastAbstractRoleConcept.getNumber()==1 && (m_doReuseConceptsAlways.contains(toConcept) || !m_dontReueseConceptsThisRun.contains(toConcept))) {
             if (m_tableau.getTableauMonitor()!=null)
                 m_tableau.getTableauMonitor().existentialExpansionStarted(atLeastAbstractRoleConcept,node);
