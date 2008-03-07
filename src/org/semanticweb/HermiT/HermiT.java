@@ -114,17 +114,20 @@ public class HermiT implements Serializable {
         m_existentialsType=existentialsType;
     }
     public void loadOntology(String physicalURI) throws KAON2Exception,InterruptedException {
+        Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
+        loadOntology(physicalURI,noDescriptionGraphs);
+    }
+    public void loadOntology(String physicalURI,Set<DescriptionGraph> descriptionGraphs) throws KAON2Exception,InterruptedException {
         DefaultOntologyResolver resolver=new DefaultOntologyResolver();
         String ontologyURI=resolver.registerOntology(physicalURI);
         KAON2Connection connection=KAON2Manager.newConnection();
         connection.setOntologyResolver(resolver);
         Ontology ontology=connection.openOntology(ontologyURI,new HashMap<String,Object>());
-        loadKAON2Ontology(ontology);
+        loadKAON2Ontology(ontology,descriptionGraphs);
     }
-    public void loadKAON2Ontology(Ontology ontology) throws KAON2Exception {
+    public void loadKAON2Ontology(Ontology ontology,Set<DescriptionGraph> descriptionGraphs) throws KAON2Exception {
         Clausification clausification=new Clausification();
-        Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
-        DLOntology dlOntology=clausification.clausify(m_existentialsType==ExistentialsType.INDIVIDUAL_REUSE,ontology,true,noDescriptionGraphs);
+        DLOntology dlOntology=clausification.clausify(m_existentialsType==ExistentialsType.INDIVIDUAL_REUSE,ontology,true,descriptionGraphs);
         loadDLOntology(dlOntology);
     }
     public void loadDLOntology(File file) throws Exception {
