@@ -41,16 +41,21 @@ public class TableauSubsumptionChecker implements SubsumptionHierarchy.Subsumpti
     public boolean isSubsumedBy(AtomicConcept subconcept,AtomicConcept superconcept) {
         if (AtomicConcept.THING.equals(superconcept) || AtomicConcept.NOTHING.equals(subconcept))
             return true;
-        else if (AtomicConcept.NOTHING.equals(superconcept))
-            return !isSatisfiable(subconcept);
         AtomicConceptInfo subconceptInfo=getAtomicConceptInfo(subconcept);
+        if (Boolean.FALSE.equals(subconceptInfo.m_isSatisfiable))
+            return true;
+        else if (AtomicConcept.NOTHING.equals(superconcept) || (m_atomicConceptInfos.containsKey(superconcept) && Boolean.FALSE.equals(m_atomicConceptInfos.get(superconcept).m_isSatisfiable)))
+            return !isSatisfiable(subconcept);
         if (subconceptInfo.isKnownSubsumer(superconcept))
             return true;
         else if (subconceptInfo.isKnownNotSubsumer(superconcept))
             return false;
-        else if (!m_tableau.isDeterministic()) {
+        // Perform the actual satisfiability test
+        if (!m_tableau.isDeterministic()) {
             boolean isSubsumedBy=m_tableau.isSubsumedBy(subconcept,superconcept);
-            if (!isSubsumedBy) {
+            if (m_tableau.getExtensionManager().containsClash() && m_tableau.getExtensionManager().getClashDependencySet().isEmpty())
+                subconceptInfo.m_isSatisfiable=Boolean.FALSE;
+            else if (!isSubsumedBy) {
                 subconceptInfo.m_isSatisfiable=Boolean.TRUE;
                 updateKnownSubsumers(subconcept);
                 updatePossibleSubsumers();

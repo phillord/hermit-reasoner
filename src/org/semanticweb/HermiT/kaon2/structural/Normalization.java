@@ -478,6 +478,9 @@ public class Normalization {
         public Object visit(ObjectOneOf object) {
             return Boolean.TRUE;
         }
+        public Object visit(ObjectHasValue object) {
+            return Boolean.TRUE;
+        }
     }
 
     protected static class HasNumberRestrictionsVisitor extends KAON2VisitorAdapter {
