@@ -309,6 +309,9 @@ public final class Tableau implements Serializable {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.groundDisjunctionDerived(groundDisjunction);
     }
+    public GroundDisjunction getFirstUnprocessedGroundDisjunction() {
+        return m_firstUnprocessedGroundDisjunction;
+    }
     public void pushBranchingPoint(BranchingPoint branchingPoint) {
         assert m_currentBranchingPoint+1==branchingPoint.m_level;
         if (m_tableauMonitor!=null)

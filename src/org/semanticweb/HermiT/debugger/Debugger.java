@@ -118,6 +118,8 @@ public class Debugger extends TableauMonitorForwarder {
                         doActiveNodes(parsedCommand);
                     else if ("isancof".equals(command))
                         doIsAncestorOf(parsedCommand);
+                    else if ("udisjunctions".equals(command))
+                        doUnprocessedDisjunctions(parsedCommand);
                     else if ("showexists".equals(command))
                         doShowExists(parsedCommand);
                     else if ("showmodel".equals(command))
@@ -719,6 +721,40 @@ public class Debugger extends TableauMonitorForwarder {
         m_output.print("an ancestor of node ");
         m_output.print(node2.getNodeID());
         m_output.println(".");
+    }
+    protected void doUnprocessedDisjunctions(String[] commandLine) {
+        CharArrayWriter buffer=new CharArrayWriter();
+        PrintWriter writer=new PrintWriter(buffer);
+        writer.println("Unprocessed ground disjunctions");
+        writer.println("===========================================");
+        GroundDisjunction groundDisjunction=m_tableau.getFirstUnprocessedGroundDisjunction();
+        while (groundDisjunction!=null) {
+            for (int disjunctIndex=0;disjunctIndex<groundDisjunction.getNumberOfDisjuncts();disjunctIndex++) {
+                if (disjunctIndex!=0)
+                    writer.print(" v ");
+                DLPredicate dlPredicate=groundDisjunction.getDLPredicate(disjunctIndex);
+                if (Equality.INSTANCE.equals(dlPredicate)) {
+                    writer.print(groundDisjunction.getArgument(disjunctIndex,0).getNodeID());
+                    writer.print(" == ");
+                    writer.print(groundDisjunction.getArgument(disjunctIndex,1).getNodeID());
+                }
+                else {
+                    writer.print(dlPredicate.toString(m_namespaces));
+                    writer.print('(');
+                    for (int argumentIndex=0;argumentIndex<dlPredicate.getArity();argumentIndex++) {
+                        if (argumentIndex!=0)
+                            buffer.append(',');
+                        writer.print(groundDisjunction.getArgument(disjunctIndex,argumentIndex).getNodeID());
+                    }
+                    writer.print(')');
+                }
+            }
+            writer.println();
+            groundDisjunction=groundDisjunction.getPreviousGroundDisjunction();
+        }
+        writer.flush();
+        showTextInWindow(buffer.toString(),"Unprocessed ground disjunctions");
+        selectConsoleWindow();
     }
     protected void doActiveNodes(String[] commandLine) {
         int numberOfNodes=0;

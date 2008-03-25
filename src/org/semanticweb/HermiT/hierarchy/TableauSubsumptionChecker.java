@@ -26,17 +26,36 @@ public class TableauSubsumptionChecker implements SubsumptionHierarchy.Subsumpti
     public Set<AtomicConcept> getAllAtomicConcepts() {
         return m_tableau.getDLOntology().getAllAtomicConcepts();
     }
+    public boolean canGetAllSubsumersEasily() {
+        return m_tableau.isDeterministic();
+    }
+    public Set<AtomicConcept> getAllSubsumers(AtomicConcept concept) throws SubsumptionHierarchy.SubusmptionCheckerException {
+        AtomicConceptInfo conceptInfo=getAtomicConceptInfo(concept);
+        if (!conceptInfo.m_allSubsumersKnown) {
+            if (!canGetAllSubsumersEasily())
+                throw new SubsumptionHierarchy.SubusmptionCheckerException("Retrieveing all subsumers is not easy for this checker.");
+            isSatisfiable(concept,false);
+        }
+        if (conceptInfo.m_isSatisfiable)
+            return conceptInfo.m_knownSubsumers;
+        else
+            return null;
+    }
     public boolean isSatisfiable(AtomicConcept concept) {
-        AtomicConceptInfo atomicConceptInfo=getAtomicConceptInfo(concept);
-        if (atomicConceptInfo.m_isSatisfiable==null) {
+        return isSatisfiable(concept,true);
+    }
+    protected boolean isSatisfiable(AtomicConcept concept,boolean updatePossibleSubsumers) {
+        AtomicConceptInfo conceptInfo=getAtomicConceptInfo(concept);
+        if (conceptInfo.m_isSatisfiable==null) {
             boolean isSatisfiable=m_tableau.isSatisfiable(concept);
-            atomicConceptInfo.m_isSatisfiable=(isSatisfiable ? Boolean.TRUE : Boolean.FALSE);
+            conceptInfo.m_isSatisfiable=(isSatisfiable ? Boolean.TRUE : Boolean.FALSE);
             if (isSatisfiable) {
                 updateKnownSubsumers(concept);
-                updatePossibleSubsumers();
+                if (updatePossibleSubsumers)
+                    updatePossibleSubsumers();
             }
         }
-        return atomicConceptInfo.m_isSatisfiable;
+        return conceptInfo.m_isSatisfiable;
     }
     public boolean isSubsumedBy(AtomicConcept subconcept,AtomicConcept superconcept) {
         if (AtomicConcept.THING.equals(superconcept) || AtomicConcept.NOTHING.equals(subconcept))
@@ -45,7 +64,7 @@ public class TableauSubsumptionChecker implements SubsumptionHierarchy.Subsumpti
         if (Boolean.FALSE.equals(subconceptInfo.m_isSatisfiable))
             return true;
         else if (AtomicConcept.NOTHING.equals(superconcept) || (m_atomicConceptInfos.containsKey(superconcept) && Boolean.FALSE.equals(m_atomicConceptInfos.get(superconcept).m_isSatisfiable)))
-            return !isSatisfiable(subconcept);
+            return !isSatisfiable(subconcept,true);
         if (subconceptInfo.isKnownSubsumer(superconcept))
             return true;
         else if (subconceptInfo.isKnownNotSubsumer(superconcept))
@@ -66,7 +85,7 @@ public class TableauSubsumptionChecker implements SubsumptionHierarchy.Subsumpti
             return isSubsumedBy;
         }
         else {
-            isSatisfiable(subconcept);
+            isSatisfiable(subconcept,true);
             assert subconceptInfo.m_allSubsumersKnown;
             return subconceptInfo.isKnownSubsumer(superconcept);
         }

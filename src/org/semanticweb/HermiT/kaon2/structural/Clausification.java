@@ -2,6 +2,7 @@ package org.semanticweb.HermiT.kaon2.structural;
 
 import java.util.Set;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -48,7 +49,7 @@ public class Clausification {
         }
         if (inverseDataPropertyInclusions.size()>0)
             throw new IllegalArgumentException("Data properties are not supported yet.");
-        Set<DLClause> dlClauses=new HashSet<DLClause>();
+        Set<DLClause> dlClauses=new LinkedHashSet<DLClause>();
         Set<Atom> positiveFacts=new HashSet<Atom>();
         Set<Atom> negativeFacts=new HashSet<Atom>();
         for (ObjectPropertyExpression[] inclusion : normalObjectPropertyInclusions) {

@@ -21,6 +21,12 @@ public class GroundDisjunction implements Serializable {
         m_dependencySet=tableau.m_dependencySetFactory.getPermanent(dependencySet);
         tableau.m_dependencySetFactory.addUsage(m_dependencySet);
     }
+    public GroundDisjunction getPreviousGroundDisjunction() {
+        return m_previousGroundDisjunction;
+    }
+    public GroundDisjunction getNextGroundDisjunction() {
+        return m_nextGroundDisjunction;
+    }
     public void destroy(Tableau tableau) {
         tableau.m_dependencySetFactory.removeUsage(m_dependencySet);
         m_dependencySet=null;
