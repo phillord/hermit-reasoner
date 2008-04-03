@@ -54,7 +54,7 @@ public class ClausificationTest extends AbstractHermiTTest {
     }
     protected void assertDLClauses(Ontology ontology,String... control) throws Exception {
         Clausification clausification=new Clausification();
-        DLOntology dlOntology=clausification.clausify(false,ontology,true,new HashSet<DescriptionGraph>());
+        DLOntology dlOntology=clausification.clausify(false,ontology,new HashSet<DescriptionGraph>());
         Set<String> actualStrings=new HashSet<String>();
         org.semanticweb.HermiT.Namespaces namespaces=new org.semanticweb.HermiT.Namespaces();
         namespaces.registerPrefix("a",ontology.getOntologyURI()+"#");

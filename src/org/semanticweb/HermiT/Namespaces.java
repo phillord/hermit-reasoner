@@ -107,6 +107,7 @@ public class Namespaces implements Serializable {
         registerPrefix("nnq","internal:nnq#");
         registerPrefix("nom","internal:nom$"+ontologyURI+"#");
         registerPrefix("amq","internal:amq#");
+        registerPrefix("all","internal:all#");
     }
     /**
      * Registers started prefixes to this object.

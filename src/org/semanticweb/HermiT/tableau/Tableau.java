@@ -141,10 +141,14 @@ public final class Tableau implements Serializable {
             if (m_tableauMonitor!=null)
                 m_tableauMonitor.iterationFinished();
         }
-        m_existentialsExpansionStrategy.modelFound();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.saturateFinished();
-        return !m_extensionManager.containsClash();
+        if (!m_extensionManager.containsClash()) {
+            m_existentialsExpansionStrategy.modelFound();
+            return true;
+        }
+        else
+            return false;
     }
     protected boolean doIteration() {
         if (!m_extensionManager.containsClash()) {

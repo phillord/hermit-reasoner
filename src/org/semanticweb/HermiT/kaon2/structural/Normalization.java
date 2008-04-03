@@ -19,7 +19,6 @@ import org.semanticweb.kaon2.api.logic.*;
  * These concepts are then clausified in a more efficient way.
  */
 public class Normalization {
-    protected final boolean m_processTransitivity;
     protected final Map<Description,Description> m_definitions;
     protected final Map<ObjectOneOf,OWLClass> m_definitionsForNegativeNominals;
     protected final Collection<Description[]> m_conceptInclusions;
@@ -29,8 +28,7 @@ public class Normalization {
     protected final Collection<Fact> m_facts;
     protected final Collection<Rule> m_rules;
     
-    public Normalization(boolean processTransitivity) {
-        m_processTransitivity=processTransitivity;
+    public Normalization() {
         m_definitions=new HashMap<Description,Description>();
         m_definitionsForNegativeNominals=new HashMap<ObjectOneOf,OWLClass>();
         m_conceptInclusions=new ArrayList<Description[]>();
@@ -193,12 +191,12 @@ public class Normalization {
                 throw new KAON2Exception("Unsupported type of fact encountered.");
         }
         nomalizeInclusions(inclusions,normalizer,transitivityManager);
-        if (m_processTransitivity) {
-            inclusions.clear();
-            for (SubClassOf transitivityAxiom : transitivityManager.generateTransitivityAxioms()) 
-                inclusions.add(new Description[] { transitivityAxiom.getSubDescription().getComplementNNF(),transitivityAxiom.getSuperDescription().getNNF() });
-            nomalizeInclusions(inclusions,normalizer,transitivityManager);
-        }
+        // process transitivity
+        inclusions.clear();
+        for (SubClassOf transitivityAxiom : transitivityManager.generateTransitivityAxioms()) 
+            inclusions.add(new Description[] { transitivityAxiom.getSubDescription().getComplementNNF(),transitivityAxiom.getSuperDescription().getNNF() });
+        nomalizeInclusions(inclusions,normalizer,transitivityManager);
+        // add the rules
         m_rules.addAll(ontology.createAxiomRequest(Rule.class).getAll());
     }
     protected void nomalizeInclusions(List<Description[]> inclusions,KAON2Visitor normalizer,TransitivityManager transitivityManager) throws KAON2Exception {

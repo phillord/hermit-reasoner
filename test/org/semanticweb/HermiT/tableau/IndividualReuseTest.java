@@ -24,7 +24,7 @@ public class IndividualReuseTest extends ReasonerTest {
     protected Tableau getTableau() throws Exception {
         Clausification clausification=new Clausification();
         Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
-        DLOntology dlOntology=clausification.clausify(true,m_ontology,true,noDescriptionGraphs);
+        DLOntology dlOntology=clausification.clausify(true,m_ontology,noDescriptionGraphs);
         DirectBlockingChecker directBlockingChecker=PairWiseDirectBlockingChecker.INSTANCE;
         BlockingSignatureCache blockingSignatureCache=new BlockingSignatureCache(directBlockingChecker);
         BlockingStrategy blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);

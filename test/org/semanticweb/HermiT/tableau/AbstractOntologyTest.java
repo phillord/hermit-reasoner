@@ -153,7 +153,7 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
     protected DLOntology getDLOntology() throws Exception {
         Clausification clausification=new Clausification();
         Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
-        return clausification.clausify(shouldPrepareForNIRule(),m_ontology,true,noDescriptionGraphs);
+        return clausification.clausify(shouldPrepareForNIRule(),m_ontology,noDescriptionGraphs);
     }
     protected boolean shouldPrepareForNIRule() {
         return false;

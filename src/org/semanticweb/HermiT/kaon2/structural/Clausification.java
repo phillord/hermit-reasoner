@@ -25,8 +25,8 @@ public class Clausification {
     protected static final org.semanticweb.HermiT.model.Variable X=org.semanticweb.HermiT.model.Variable.create("X");
     protected static final org.semanticweb.HermiT.model.Variable Y=org.semanticweb.HermiT.model.Variable.create("Y");
 
-    public DLOntology clausify(boolean prepareForNIRule,Ontology ontology,boolean processTransitivity,Collection<DescriptionGraph> descriptionGraphs) throws KAON2Exception {
-        Normalization normalization=new Normalization(processTransitivity);
+    public DLOntology clausify(boolean prepareForNIRule,Ontology ontology,Collection<DescriptionGraph> descriptionGraphs) throws KAON2Exception {
+        Normalization normalization=new Normalization();
         normalization.processOntology(ontology);
         return clausify(prepareForNIRule,ontology.getOntologyURI(),normalization.getConceptInclusions(),normalization.getNormalObjectPropertyInclusions(),normalization.getInverseObjectPropertyInclusions(),normalization.getNormalDataPropertyInclusios(),normalization.getFacts(),descriptionGraphs,normalization.getRules());
     }

@@ -127,7 +127,7 @@ public class HermiT implements Serializable {
     }
     public void loadKAON2Ontology(Ontology ontology,Set<DescriptionGraph> descriptionGraphs) throws KAON2Exception {
         Clausification clausification=new Clausification();
-        DLOntology dlOntology=clausification.clausify(m_existentialsType==ExistentialsType.INDIVIDUAL_REUSE,ontology,true,descriptionGraphs);
+        DLOntology dlOntology=clausification.clausify(m_existentialsType==ExistentialsType.INDIVIDUAL_REUSE,ontology,descriptionGraphs);
         loadDLOntology(dlOntology);
     }
     public void loadDLOntology(File file) throws Exception {
