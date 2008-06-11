@@ -18,7 +18,7 @@ import org.semanticweb.kaon2.api.logic.*;
  * it keeps the concepts of the form \exists R.{ a_1, ..., a_n }, \forall R.{ a_1, ..., a_n }, and \forall R.\neg { a } intact.
  * These concepts are then clausified in a more efficient way.
  */
-public class Normalization {
+public class Normalization2 {
     protected final Map<Description,Description> m_definitions;
     protected final Map<ObjectOneOf,OWLClass> m_definitionsForNegativeNominals;
     protected final Collection<Description[]> m_conceptInclusions;
@@ -28,7 +28,7 @@ public class Normalization {
     protected final Collection<Fact> m_facts;
     protected final Collection<Rule> m_rules;
     
-    public Normalization() {
+    public Normalization2() {
         m_definitions=new HashMap<Description,Description>();
         m_definitionsForNegativeNominals=new HashMap<ObjectOneOf,OWLClass>();
         m_conceptInclusions=new ArrayList<Description[]>();
@@ -190,16 +190,18 @@ public class Normalization {
             else if (!(fact instanceof EntityAnnotation))
                 throw new KAON2Exception("Unsupported type of fact encountered.");
         }
-        nomalizeInclusions(inclusions,normalizer,transitivityManager);
+        nomalizeInclusions(inclusions,normalizer);
         // process transitivity
-        inclusions.clear();
-        for (SubClassOf transitivityAxiom : transitivityManager.generateTransitivityAxioms()) 
-            inclusions.add(new Description[] { transitivityAxiom.getSubDescription().getComplementNNF(),transitivityAxiom.getSuperDescription().getNNF() });
-        nomalizeInclusions(inclusions,normalizer,transitivityManager);
+        transitivityManager.transitivelyClose();
+        for (Description[] inclusion : m_conceptInclusions) {
+            for (int index=0;index<inclusion.length;index++)
+                inclusion[index]=transitivityManager.replaceDescriptionIfNecessary(inclusion[index]);
+        }
+        transitivityManager.generateTransitivityAxioms();
         // add the rules
         m_rules.addAll(ontology.createAxiomRequest(Rule.class).getAll());
     }
-    protected void nomalizeInclusions(List<Description[]> inclusions,KAON2Visitor normalizer,TransitivityManager transitivityManager) throws KAON2Exception {
+    protected void nomalizeInclusions(List<Description[]> inclusions,KAON2Visitor normalizer) throws KAON2Exception {
         while (!inclusions.isEmpty()) {
             Description simplifiedDescription=KAON2Manager.factory().objectOr(inclusions.remove(inclusions.size()-1)).getSimplified();
             if (!KAON2Manager.factory().thing().equals(simplifiedDescription)) {
@@ -208,10 +210,8 @@ public class Normalization {
                     Description[] descriptions=new Description[objectOr.getDescriptions().size()];
                     objectOr.getDescriptions().toArray(descriptions);
                     if (!distributeUnionOverAnd(descriptions,inclusions) && !optimizedNegativeOneOfTranslation(descriptions,inclusions)) {
-                        for (int index=0;index<descriptions.length;index++) {
+                        for (int index=0;index<descriptions.length;index++)
                             descriptions[index]=(Description)descriptions[index].accept(normalizer);
-                            transitivityManager.processDescription(descriptions[index]);
-                        }
                         m_conceptInclusions.add(descriptions);
                     }
                 }
@@ -222,7 +222,6 @@ public class Normalization {
                 }
                 else {
                     Description normalized=(Description)simplifiedDescription.accept(normalizer);
-                    transitivityManager.processDescription(normalized);
                     m_conceptInclusions.add(new Description[] { normalized });
                 }
             }
@@ -540,12 +539,12 @@ public class Normalization {
     protected class TransitivityManager {
         protected final Map<ObjectPropertyExpression,Set<ObjectPropertyExpression>> m_subObjectProperties;
         protected final Set<ObjectPropertyExpression> m_transitiveObjectProperties;
-        protected final Set<ObjectAll> m_relevantDescriptions;
+        protected final Map<ObjectAll,Description> m_replacedDescriptions;
 
         public TransitivityManager() {
             m_subObjectProperties=new HashMap<ObjectPropertyExpression,Set<ObjectPropertyExpression>>();
             m_transitiveObjectProperties=new HashSet<ObjectPropertyExpression>();
-            m_relevantDescriptions=new HashSet<ObjectAll>();
+            m_replacedDescriptions=new HashMap<ObjectAll,Description>();
         }
         public void addInclusion(ObjectPropertyExpression subObjectProperty,ObjectPropertyExpression superObjectProperty) {
             addInclusionEx(subObjectProperty.getSimplified(),superObjectProperty.getSimplified());
@@ -563,27 +562,45 @@ public class Normalization {
             }
             subObjectProperties.add(subObjectProperty);
         }
-        public void processDescription(Description description) {
-            if (description instanceof ObjectAll)
-                m_relevantDescriptions.add((ObjectAll)description);
-        }
-        public Set<SubClassOf> generateTransitivityAxioms() {
-            transitivelyClose();
-            Set<SubClassOf> axioms=new HashSet<SubClassOf>();
-            for (ObjectAll objectAll : m_relevantDescriptions) {
-                ObjectPropertyExpression objectProperty=objectAll.getObjectProperty().getSimplified();
-                for (ObjectPropertyExpression subObjectProperty1 : getTransitiveSubObjectProperties(objectProperty)) {
-                    ObjectAll allRC=KAON2Manager.factory().objectAll(subObjectProperty1,objectAll.getDescription());
-                    for (ObjectPropertyExpression subObjectProperty2 : getTransitiveSubObjectProperties(subObjectProperty1)) {
-                        ObjectAll allSC=KAON2Manager.factory().objectAll(subObjectProperty2,objectAll.getDescription());
-                        ObjectAll allSallC=KAON2Manager.factory().objectAll(subObjectProperty2,allSC);
-                        SubClassOf axiom=KAON2Manager.factory().subClassOf(allRC,allSallC);
-                        axioms.add(axiom);
+        public Description replaceDescriptionIfNecessary(Description description) {
+            if (description instanceof ObjectAll) {
+                ObjectAll objectAll=(ObjectAll)description;
+                ObjectPropertyExpression objectProperty=((ObjectAll)description).getObjectProperty();
+                Set<ObjectPropertyExpression> transitiveSubObjectProperties=getTransitiveSubObjectProperties(objectProperty);
+                if (!transitiveSubObjectProperties.isEmpty()) {
+                    Description replacement=getReplacementFor(objectAll);
+                    for (ObjectPropertyExpression transitiveSubObjectProperty : transitiveSubObjectProperties) {
+                        ObjectAll subObjectAll=KAON2Manager.factory().objectAll(transitiveSubObjectProperty,objectAll.getDescription());
+                        getReplacementFor(subObjectAll);
                     }
+                    return replacement;
                 }
             }
-            m_relevantDescriptions.clear();
-            return axioms;
+            return description;
+        }
+        protected Description getReplacementFor(ObjectAll objectAll) {
+            Description replacement=m_replacedDescriptions.get(objectAll);
+            if (replacement==null) {
+                replacement=KAON2Manager.factory().owlClass("internal:all#"+m_replacedDescriptions.size());
+                if (objectAll.getDescription() instanceof ObjectNot)
+                    replacement=replacement.getComplementNNF();
+                m_replacedDescriptions.put(objectAll,replacement);
+            }
+            return replacement;
+        }
+        public void generateTransitivityAxioms() {
+            for (Map.Entry<ObjectAll,Description> replacement : m_replacedDescriptions.entrySet()) {
+                m_conceptInclusions.add(new Description[] { replacement.getValue().getComplementNNF(),replacement.getKey() });
+                ObjectPropertyExpression objectProperty=replacement.getKey().getObjectProperty();
+                for (ObjectPropertyExpression transitiveSubObjectProperty : getTransitiveSubObjectProperties(objectProperty)) {
+                    ObjectAll consequentAll=KAON2Manager.factory().objectAll(transitiveSubObjectProperty,replacement.getKey().getDescription());
+                    Description consequentReplacement=m_replacedDescriptions.get(consequentAll);
+                    assert consequentReplacement!=null;
+                    ObjectAll forallConsequentReplacement=KAON2Manager.factory().objectAll(transitiveSubObjectProperty,consequentReplacement);
+                    m_conceptInclusions.add(new Description[] { replacement.getValue().getComplementNNF(),forallConsequentReplacement });
+                }
+            }
+            m_replacedDescriptions.clear();
         }
         protected void transitivelyClose() {
             boolean changed=true;
