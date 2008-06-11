@@ -18,7 +18,7 @@ import org.semanticweb.kaon2.api.logic.*;
  * it keeps the concepts of the form \exists R.{ a_1, ..., a_n }, \forall R.{ a_1, ..., a_n }, and \forall R.\neg { a } intact.
  * These concepts are then clausified in a more efficient way.
  */
-public class Normalization2 {
+public class Normalization {
     protected final Map<Description,Description> m_definitions;
     protected final Map<ObjectOneOf,OWLClass> m_definitionsForNegativeNominals;
     protected final Collection<Description[]> m_conceptInclusions;
@@ -28,7 +28,7 @@ public class Normalization2 {
     protected final Collection<Fact> m_facts;
     protected final Collection<Rule> m_rules;
     
-    public Normalization2() {
+    public Normalization() {
         m_definitions=new HashMap<Description,Description>();
         m_definitionsForNegativeNominals=new HashMap<ObjectOneOf,OWLClass>();
         m_conceptInclusions=new ArrayList<Description[]>();
