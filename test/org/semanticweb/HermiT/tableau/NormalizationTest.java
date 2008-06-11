@@ -18,7 +18,7 @@ public class NormalizationTest extends AbstractHermiTTest {
     protected Set<Axiom> getNormalizedAxioms(String resourceName) throws Exception {
         Set<Axiom> axioms=new HashSet<Axiom>();
         Ontology ontology=getOntologyFromResource(resourceName);
-        Normalization normalization=new Normalization();
+        NormalizationCrappy normalization=new NormalizationCrappy();
         normalization.processOntology(ontology);
         for (Description[] inclusion : normalization.getConceptInclusions()) {
             Description superDescription;
