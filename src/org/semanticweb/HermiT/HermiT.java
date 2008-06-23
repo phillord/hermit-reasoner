@@ -21,13 +21,19 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
 
+import org.semanticweb.HermiT.kaon2.structural.*;
 import org.semanticweb.kaon2.api.KAON2Exception;
 import org.semanticweb.kaon2.api.KAON2Manager;
 import org.semanticweb.kaon2.api.DefaultOntologyResolver;
 import org.semanticweb.kaon2.api.KAON2Connection;
 import org.semanticweb.kaon2.api.Ontology;
 
-import org.semanticweb.HermiT.kaon2.structural.*;
+import org.semanticweb.HermiT.owlapi.structural.*;
+import org.semanticweb.owl.apibinding.OWLManager;
+import org.semanticweb.owl.io.OWLXMLOntologyFormat;
+import org.semanticweb.owl.model.*;
+import java.net.URI;
+
 import org.semanticweb.HermiT.model.*;
 import org.semanticweb.HermiT.monitor.*;
 import org.semanticweb.HermiT.existentials.*;
@@ -56,6 +62,7 @@ public class HermiT implements Serializable {
     protected ExistentialsType m_existentialsType;
     protected Tableau m_tableau;
     protected TableauSubsumptionChecker m_subsumptionChecker;
+    protected boolean m_useKaon2;
 
     public HermiT() {
         m_parameters=new HashMap<String,Object>();
@@ -64,6 +71,7 @@ public class HermiT implements Serializable {
         setBlockingType(BlockingType.ANYWHERE);
         setBlockingSignatureCacheType(BlockingSignatureCacheType.CACHED);
         setExistentialsType(ExistentialsType.CREATION_ORDER);
+        m_useKaon2 = true;
     }
     public void setParameter(String parameterName,Object value) {
         m_parameters.put(parameterName,value);
@@ -113,18 +121,29 @@ public class HermiT implements Serializable {
     public void setExistentialsType(ExistentialsType existentialsType) {
         m_existentialsType=existentialsType;
     }
-    public void loadOntology(String physicalURI) throws KAON2Exception,InterruptedException {
+    public void loadOntology(String physicalURI) throws KAON2Exception,OWLException,InterruptedException {
         Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
         loadOntology(physicalURI,noDescriptionGraphs);
     }
-    public void loadOntology(String physicalURI,Set<DescriptionGraph> descriptionGraphs) throws KAON2Exception,InterruptedException {
-        DefaultOntologyResolver resolver=new DefaultOntologyResolver();
-        String ontologyURI=resolver.registerOntology(physicalURI);
-        KAON2Connection connection=KAON2Manager.newConnection();
-        connection.setOntologyResolver(resolver);
-        Ontology ontology=connection.openOntology(ontologyURI,new HashMap<String,Object>());
-        loadKAON2Ontology(ontology,descriptionGraphs);
+    public void loadOntology(String physicalURI,Set<DescriptionGraph> descriptionGraphs) throws KAON2Exception,OWLException,InterruptedException {
+        if (m_useKaon2) {
+            DefaultOntologyResolver resolver=new DefaultOntologyResolver();
+            String ontologyURI=resolver.registerOntology(physicalURI);
+            KAON2Connection connection=KAON2Manager.newConnection();
+            connection.setOntologyResolver(resolver);
+            Ontology ontology=connection.openOntology(ontologyURI,new HashMap<String,Object>());
+            loadKAON2Ontology(ontology,descriptionGraphs);
+        } else {
+		    OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+    		OWLOntology o = manager.loadOntologyFromPhysicalURI(URI.create(physicalURI));
+    		loadOwlOntology(o,manager.getOWLDataFactory(),descriptionGraphs);
+	    }
     }
+	public void loadOwlOntology(OWLOntology ontology,OWLDataFactory factory,Set<DescriptionGraph> descriptionGraphs) throws OWLException {
+		OwlClausification c = new OwlClausification();
+		DLOntology d = c.clausify(m_existentialsType==ExistentialsType.INDIVIDUAL_REUSE,ontology,factory,descriptionGraphs);
+		loadDLOntology(d);
+	}
     public void loadKAON2Ontology(Ontology ontology,Set<DescriptionGraph> descriptionGraphs) throws KAON2Exception {
         Clausification clausification=new Clausification();
         DLOntology dlOntology=clausification.clausify(m_existentialsType==ExistentialsType.INDIVIDUAL_REUSE,ontology,descriptionGraphs);
