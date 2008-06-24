@@ -1,3 +1,4 @@
+// Copyright 2008 by Oxford University; see license.txt for details
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <project name="HermiT" default="release" basedir=".">
@@ -90,8 +91,10 @@
             <classpath refid="classpath"/>
         </javadoc>
     </target>
-
+    
     <target name="release" depends="clean,jar,jarsrc,javadoc">
+        <copy file="readme.txt" tofile="${releasedir}/readme.txt"/>
+        <copy file="gpl.txt" tofile="${releasedir}/license.txt"/>
 	    <zip zipfile="${builddir}/${ant.project.name}-${builddate}.zip" basedir="${releasedir}"/>
     </target>
 

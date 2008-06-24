@@ -1,3 +1,4 @@
+// Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.kaon2.structural;
 
 import java.util.Set;
