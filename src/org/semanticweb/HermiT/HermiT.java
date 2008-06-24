@@ -30,7 +30,6 @@ import org.semanticweb.kaon2.api.Ontology;
 
 import org.semanticweb.HermiT.owlapi.structural.*;
 import org.semanticweb.owl.apibinding.OWLManager;
-import org.semanticweb.owl.io.OWLXMLOntologyFormat;
 import org.semanticweb.owl.model.*;
 import java.net.URI;
 

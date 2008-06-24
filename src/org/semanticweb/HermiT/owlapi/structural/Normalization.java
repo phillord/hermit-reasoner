@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Set;
 
 import org.semanticweb.owl.model.*;
 import org.semanticweb.owl.normalform.NegationalNormalFormConverter;
@@ -141,9 +140,9 @@ public class Normalization {
             m_inverseObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { objectProperty,objectProperty });
             // transitivityManager.addInclusion(objectProperty,objectProperty.getInverseObjectProperty().getSimplified());
         }
-		for (OWLTransitiveObjectPropertyAxiom axiom : ontology.getAxioms(AxiomType.TRANSITIVE_OBJECT_PROPERTY)) {
-            // transitivityManager.makeTransitive(axiom.getObjectProperty().getSimplified());
-		}
+/*		for (OWLTransitiveObjectPropertyAxiom axiom : ontology.getAxioms(AxiomType.TRANSITIVE_OBJECT_PROPERTY)) {
+             transitivityManager.makeTransitive(axiom.getObjectProperty().getSimplified());
+		}*/
 		for (OWLFunctionalDataPropertyAxiom axiom : ontology.getAxioms(AxiomType.FUNCTIONAL_DATA_PROPERTY)) {
         	inclusions.add(new OWLDescription[] { m_factory.getOWLDataMaxCardinalityRestriction(axiom.getProperty(), 1) });
 		}
@@ -216,7 +215,7 @@ public class Normalization {
                         inclusions.add(new OWLDescription[] { conjunct });
                 }
                 else {
-                    OWLDescription normalized=(OWLDescription)simplifiedDescription.accept(normalizer);
+                    OWLDescription normalized=simplifiedDescription.accept(normalizer);
                     m_conceptInclusions.add(new OWLDescription[] { normalized });
                 }
             }
@@ -271,7 +270,7 @@ public class Normalization {
         OWLDescription definition=m_definitions.get(description);
         if (definition==null) {
             definition=m_factory.getOWLClass(URI.create("internal:q#"+m_definitions.size()));
-            if (!(Boolean)description.accept(m_PL))
+            if (!description.accept(m_PL))
                 definition=m_factory.getOWLObjectComplementOf(definition);
             m_definitions.put(description,definition);
             alreadyExists[0]=false;

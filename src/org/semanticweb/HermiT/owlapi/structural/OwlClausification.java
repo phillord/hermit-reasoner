@@ -130,7 +130,6 @@ public class OwlClausification {
             throw new IllegalStateException("Internal error: invalid normal form.");
     }
     protected static AbstractRole getAbstractRole(OWLObjectPropertyExpression objectProperty) {
-        objectProperty=objectProperty;
         if (objectProperty instanceof OWLObjectProperty)
             return AtomicAbstractRole.create(((OWLObjectProperty)objectProperty).getURI().toString());
         else if (objectProperty instanceof OWLObjectPropertyInverse) {
