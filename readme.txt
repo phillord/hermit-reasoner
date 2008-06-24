@@ -13,5 +13,5 @@ in the file `license.txt`. An online version is available at
 
 More information about HermiT and additional licensing information is
 available at <http://www.comlab.ox.ac.uk/people/Boris.Motik/HermiT/>, or by
-contacting the Boris Motik, Rob Shearer, or Ian Horrocks at the Oxford
-University Computing Laboratory.
+contacting Boris Motik, Rob Shearer, or Ian Horrocks at the Oxford University
+Computing Laboratory.
