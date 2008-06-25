@@ -72,6 +72,14 @@ public abstract class InterningManager<E> {
     protected final int getIndexFor(int hashCode,int entriesLength) {
         return hashCode & (entriesLength-1);
     }
+    /** Returns a previously-interned version of the given object; if the object has
+        never before been interned then return null. */
+    public E getExisting(E e) {
+        for (Entry<E> i=m_entries[getIndexFor(getHashCode(e), m_entries.length)];
+             i != null; i = i.m_next) if (equal(i.get(),e)) return i.get();
+        return null;
+    }
+    
     protected void removeEntry(Entry<E> entry) {
         int index=getIndexFor(entry.m_hashCode,m_entries.length);
         Entry<E> previousEntry=null;

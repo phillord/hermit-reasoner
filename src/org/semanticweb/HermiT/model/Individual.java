@@ -36,7 +36,18 @@ public class Individual extends Term {
         }
     };
     
+    /** Returns an Individual with the given identifier. If this function
+        is called multiple times with the same identifier, then the same object
+        will be returned on each call (allowing for fast equality testing).
+        It is the caller's responsibility to normalize the given URI---this
+        function treats the argument as a raw string. */
     public static Individual create(String uri) {
         return s_interningManager.intern(new Individual(uri));
     }
+    /** If an individual has previously been constructed for this URI then return
+        it; otherwise return null. */
+    public static Individual getExisting(String uri) {
+        return s_interningManager.getExisting(new Individual(uri));
+    }
+
 }

@@ -36,8 +36,19 @@ public class AtomicConcept extends LiteralConcept implements DLPredicate {
         }
     };
     
+    /** Returns an AtomicConcept with the given identifier. If this function
+        is called multiple times with the same identifier, then the same object
+        will be returned on each call (allowing for fast equality testing).
+        It is the caller's responsibility to normalize the given URI---this
+        function treats the argument as a raw string. */
     public static AtomicConcept create(String uri) {
         return s_interningManager.intern(new AtomicConcept(uri));
+    }
+    
+    /** If an atomic concept has previously been constructed for this URI then return
+        it; otherwise return null. */
+    public static AtomicConcept getExisting(String uri) {
+        return s_interningManager.getExisting(new AtomicConcept(uri));
     }
 
     public static final AtomicConcept THING=create("http://www.w3.org/2002/07/owl#Thing");
