@@ -209,7 +209,6 @@ class SetFactory<E> implements Serializable {
         return hashCode & (tableLength-1);
     }
     
-    @SuppressWarnings("unchecked")
     protected static class Entry<T> implements Set<T> {
         private static final long serialVersionUID=-3850593656120645350L;
 

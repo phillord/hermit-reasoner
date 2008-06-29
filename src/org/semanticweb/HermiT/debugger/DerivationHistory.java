@@ -265,6 +265,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         }
     }
     
+    @SuppressWarnings("serial")
     public abstract static class Derivation implements Serializable {
         public abstract String toString(Namespaces namespaces);
         public String toString() {
