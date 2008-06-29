@@ -218,7 +218,7 @@ public class KAON2VisitorAdapter implements KAON2Visitor {
     public Object visit(Ontology object) {
         return null;
     }
-    public Object visit(KAON2Connection object) {
+    public Object visit(OntologyManager object) {
         return null;
     }
 }

@@ -32,9 +32,9 @@ public abstract class AbstractHermiTTest extends TestCase {
     protected Ontology getOntology(String physicalURI) throws Exception {
         DefaultOntologyResolver resolver=new DefaultOntologyResolver();
         String ontologyURI=resolver.registerOntology(physicalURI);
-        KAON2Connection connection=KAON2Manager.newConnection();
-        connection.setOntologyResolver(resolver);
-        return connection.openOntology(ontologyURI,new HashMap<String,Object>()); 
+        OntologyManager ontologyManager=KAON2Manager.newOntologyManager();
+        ontologyManager.setOntologyResolver(resolver);
+        return ontologyManager.openOntology(ontologyURI,new HashMap<String,Object>()); 
     }
     protected Ontology getOntologyFromResource(String resourceName) throws Exception {
         return getOntology(getClass().getResource(resourceName).toString());

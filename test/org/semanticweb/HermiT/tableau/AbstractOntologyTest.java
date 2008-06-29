@@ -24,8 +24,8 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
         super(name);
     }
     protected void setUp() throws Exception {
-        KAON2Connection connection=KAON2Manager.newConnection();
-        m_ontology=connection.createOntology("file:/c:/test/ontology.owl",new HashMap<String,Object>());
+        OntologyManager ontologyManager=KAON2Manager.newOntologyManager();
+        m_ontology=ontologyManager.createOntology("file:/c:/test/ontology.owl",new HashMap<String,Object>());
     }
     protected void tearDown() {
         m_ontology=null;

@@ -26,7 +26,7 @@ import org.semanticweb.HermiT.kaon2.structural.*;
 import org.semanticweb.kaon2.api.KAON2Exception;
 import org.semanticweb.kaon2.api.KAON2Manager;
 import org.semanticweb.kaon2.api.DefaultOntologyResolver;
-import org.semanticweb.kaon2.api.KAON2Connection;
+import org.semanticweb.kaon2.api.OntologyManager;
 import org.semanticweb.kaon2.api.Ontology;
 
 import org.semanticweb.HermiT.owlapi.structural.*;
@@ -129,9 +129,9 @@ public class HermiT implements Serializable {
         if (m_useKaon2) {
             DefaultOntologyResolver resolver=new DefaultOntologyResolver();
             String ontologyURI=resolver.registerOntology(physicalURI);
-            KAON2Connection connection=KAON2Manager.newConnection();
-            connection.setOntologyResolver(resolver);
-            Ontology ontology=connection.openOntology(ontologyURI,new HashMap<String,Object>());
+            OntologyManager ontologyManager=KAON2Manager.newOntologyManager();
+            ontologyManager.setOntologyResolver(resolver);
+            Ontology ontology=ontologyManager.openOntology(ontologyURI,new HashMap<String,Object>());
             loadKAON2Ontology(ontology,descriptionGraphs);
         } else {
 		    OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
