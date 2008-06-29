@@ -23,7 +23,7 @@
     <!-- structure of 3rdparty libraries -->
     <property name="3rdpartydir" value="${projectroot}/../ThirdPartyOwlTools"/>
     <property name="owlapi" value="${3rdpartydir}/owlapi/2.2.0/owlapi-bin.jar"/>
-    <property name="kaon2" value="${3rdpartydir}/kaon2/2008-01-14/kaon2.jar"/>
+    <property name="kaon2" value="${3rdpartydir}/kaon2/2008-06-29/kaon2.jar"/>
     <property name="junit" value="${3rdpartydir}/junit/4.4/junit-4.4.jar"/>
 
     <!-- SOURCE PATHS -->
