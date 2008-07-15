@@ -24,9 +24,6 @@ import java.util.HashSet;
 
 import org.semanticweb.HermiT.kaon2.structural.*;
 import org.semanticweb.kaon2.api.KAON2Exception;
-import org.semanticweb.kaon2.api.KAON2Manager;
-import org.semanticweb.kaon2.api.DefaultOntologyResolver;
-import org.semanticweb.kaon2.api.OntologyManager;
 import org.semanticweb.kaon2.api.Ontology;
 
 import org.semanticweb.HermiT.owlapi.structural.*;
