@@ -127,12 +127,12 @@ public class HermiT implements Serializable {
     }
     public void loadOntology(String physicalURI,Set<DescriptionGraph> descriptionGraphs) throws KAON2Exception,OWLException,InterruptedException {
         if (m_useKaon2) {
-            DefaultOntologyResolver resolver=new DefaultOntologyResolver();
-            String ontologyURI=resolver.registerOntology(physicalURI);
-            OntologyManager ontologyManager=KAON2Manager.newOntologyManager();
-            ontologyManager.setOntologyResolver(resolver);
-            Ontology ontology=ontologyManager.openOntology(ontologyURI,new HashMap<String,Object>());
-            loadKAON2Ontology(ontology,descriptionGraphs);
+            // DefaultOntologyResolver resolver=new DefaultOntologyResolver();
+            // String ontologyURI=resolver.registerOntology(physicalURI);
+            // OntologyManager ontologyManager=KAON2Manager.newOntologyManager();
+            // ontologyManager.setOntologyResolver(resolver);
+            // Ontology ontology=ontologyManager.openOntology(ontologyURI,new HashMap<String,Object>());
+            // loadKAON2Ontology(ontology,descriptionGraphs);
         } else {
 		    OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
     		OWLOntology o = manager.loadOntologyFromPhysicalURI(URI.create(physicalURI));
@@ -159,9 +159,12 @@ public class HermiT implements Serializable {
         }
     }
     public void loadDLOntology(DLOntology dlOntology) throws IllegalArgumentException {
-        if (!dlOntology.canUseNIRule() && dlOntology.hasAtMostRestrictions() && dlOntology.hasInverseRoles() && (m_existentialsType==ExistentialsType.INDIVIDUAL_REUSE))
+        if (!dlOntology.canUseNIRule() &&
+            dlOntology.hasAtMostRestrictions() &&
+            dlOntology.hasInverseRoles() &&
+            (m_existentialsType==ExistentialsType.INDIVIDUAL_REUSE)) {
             throw new IllegalArgumentException("The supplied DL-onyology is not compatible with the individual reuse strategy.");
-            
+        }
         Namespaces namespaces=new Namespaces();
         namespaces.registerStandardPrefixes();
         namespaces.registerPrefix("a",dlOntology.getOntologyURI()+"#");

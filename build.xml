@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0"?>
 <!-- Copyright 2008 by Oxford University; see license.txt for details -->
 
 <project name="HermiT" default="release" basedir=".">
@@ -7,30 +7,50 @@
     <tstamp>
         <format property="builddate" pattern="yyyy-MM-dd"/>
     </tstamp>
+    <exec outputproperty="revision" executable="svnversion">
+         <arg line="-n -c" />
+         <redirector>
+           <outputfilterchain>
+             <tokenfilter>
+                 <replaceregex pattern="^[0-9]*:" replace="0." flags="g"/>
+             </tokenfilter>
+             <tokenfilter>
+                 <replaceregex pattern="^(.*)[MS]+$" replace="0.\1" flags="g"/>
+             </tokenfilter>
+          </outputfilterchain>
+        </redirector>
+    </exec>
+    <property name="version" value="${revision}"/>
 
     <!-- structure of output files -->
     <property name="projectroot" value="."/>
     <property name="builddir" value="${projectroot}/build"/>
     <property name="classdir" value="${builddir}/class"/>
+    <property name="plugindir" value="${builddir}/plugin"/>
     <property name="testclassdir" value="${builddir}/testclass"/>
 
     <!-- structure of the release -->
     <property name="releasedir" value="${builddir}/release"/>
     <property name="HermiTjar" value="${releasedir}/${ant.project.name}.jar"/>
+    <property name="pluginjar" value="${releasedir}/${ant.project.name}-Protégé.jar"/>
     <property name="HermiTsrcjar" value="${releasedir}/${ant.project.name}.src.jar"/>
     <property name="javadocdir" value="${releasedir}/javadoc"/>
 
     <!-- structure of 3rdparty libraries -->
     <property name="3rdpartydir" value="${projectroot}/../ThirdPartyOwlTools"/>
-    <property name="owlapi" value="${3rdpartydir}/owlapi/2.2.0/owlapi-bin.jar"/>
+    <property name="owlapi" value="${3rdpartydir}/owlapi/2.2.1/owlapi-bin.jar"/>
     <property name="kaon2" value="${3rdpartydir}/kaon2/2008-06-29/kaon2.jar"/>
     <property name="junit" value="${3rdpartydir}/junit/4.4/junit-4.4.jar"/>
+    <property name="protegeapp" value="${3rdpartydir}/protege/4.0/org.protege.editor.core.application.jar"/>
+    <property name="protegeowl" value="${3rdpartydir}/protege/4.0/org.protege.editor.owl.jar"/>
 
     <!-- SOURCE PATHS -->
     <path id="sourcepath">
         <pathelement path="${projectroot}/src"/>
     </path>
-
+    <path id="pluginsourcepath">
+        <pathelement path="${projectroot}/plugin"/>
+    </path>
     <path id="testsourcepath">
         <pathelement path="${projectroot}/test"/>
     </path>
@@ -40,7 +60,12 @@
         <pathelement location="${owlapi}"/>
         <pathelement location="${kaon2}"/>
     </path>
-
+    <path id="pluginclasspath">
+        <pathelement location="${owlapi}"/>
+        <pathelement path="${HermiTjar}"/>
+        <pathelement location="${protegeapp}"/>
+        <pathelement location="${protegeowl}"/>
+    </path>
     <path id="testclasspath">
         <pathelement path="${classdir}"/>
         <pathelement location="${junit}"/>
@@ -71,9 +96,44 @@
             <manifest>
                 <attribute name="Implementation-Title" value="HermiT"/>
                 <attribute name="Implementation-Vendor" value="Oxford University"/>
-                <attribute name="Implementation-Version" value="${builddate}"/>
+                <attribute name="Implementation-Version" value="${version}"/>
             </manifest>
             <fileset dir="${classdir}"/>
+        </jar>
+    </target>
+    
+    <target name="plugin" depends="jar">
+        <mkdir dir="${plugindir}"/>
+        <javac destdir="${plugindir}" deprecation="yes">
+            <compilerarg value="-Xlint:all"/>
+            <src refid="pluginsourcepath"/>
+            <classpath refid="pluginclasspath"/>
+        </javac>
+        <copy todir="${plugindir}" file="plugin/plugin.xml">
+            <filterset>
+                <filter token="VERSION" value="${version}"/>
+            </filterset>
+        </copy>
+        <mkdir dir="${plugindir}/lib"/>
+        <copy todir="${plugindir}/lib" file="${HermiTjar}"/>
+	    <jar jarfile="${pluginjar}">
+            <manifest>
+                <attribute name="Implementation-Title" value="HermiT"/>
+                <attribute name="Implementation-Vendor" value="Oxford University"/>
+                <attribute name="Implementation-Version" value="${version}"/>
+                <attribute name="Bundle-ManifestVersion" value="2"/>
+                <attribute name="Bundle-Name" value="HermiT Reasoner"/>
+                <attribute name="Bundle-SymbolicName" value="org.semanticweb.HermiT;singleton:=true"/>
+                <attribute name="Bundle-Category" value="protege"/>
+                <attribute name="Bundle-Description" value="A plugin for the Protege OWL Editor which allows reasoning using the HermiT reasoner"/>
+                <attribute name="Bundle-DocURL" value="http://www.comlab.ox.ac.uk/people/Boris.Motik/HermiT/"/>
+                <attribute name="Bundle-Vendor" value="Boris Motik, Rob Shearer, and Ian Horrocks"/>
+                <attribute name="Bundle-Version" value="0.${revision}"/>
+                <attribute name="Bundle-Activator" value="org.protege.editor.core.plugin.DefaultPluginActivator"/>
+                <attribute name="Bundle-ClassPath" value=".,lib/HermiT.jar"/>
+                <attribute name="Require-Bundle" value="org.protege.common,org.protege.editor.core.application,org.protege.editor.owl,org.semanticweb.owl.owlapi"/>
+            </manifest>
+            <fileset dir="${plugindir}"/>
         </jar>
     </target>
     
@@ -95,7 +155,7 @@
     <target name="release" depends="clean,jar,jarsrc,javadoc">
         <copy file="readme.txt" tofile="${releasedir}/readme.txt"/>
         <copy file="gpl.txt" tofile="${releasedir}/license.txt"/>
-	    <zip zipfile="${builddir}/${ant.project.name}-${builddate}.zip" basedir="${releasedir}"/>
+	    <zip zipfile="${builddir}/${ant.project.name}-${version}.zip" basedir="${releasedir}"/>
     </target>
 
     <!-- TEST TARGETS -->

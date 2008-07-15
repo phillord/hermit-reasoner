@@ -105,6 +105,7 @@ public class OwlClausification {
     protected static Atom getAbstractRoleAtom(OWLObjectPropertyExpression objectProperty,
                                               org.semanticweb.HermiT.model.Term first,
                                               org.semanticweb.HermiT.model.Term second) {
+        objectProperty=objectProperty.getSimplified();
         if (objectProperty instanceof OWLObjectProperty) {
             AtomicAbstractRole role=AtomicAbstractRole.create(((OWLObjectProperty)objectProperty).getURI().toString());
             return Atom.create(role,new org.semanticweb.HermiT.model.Term[] { first,second });
@@ -131,6 +132,7 @@ public class OwlClausification {
             throw new IllegalStateException("Internal error: invalid normal form.");
     }
     protected static AbstractRole getAbstractRole(OWLObjectPropertyExpression objectProperty) {
+        objectProperty=objectProperty.getSimplified();
         if (objectProperty instanceof OWLObjectProperty)
             return AtomicAbstractRole.create(((OWLObjectProperty)objectProperty).getURI().toString());
         else if (objectProperty instanceof OWLObjectPropertyInverse) {
