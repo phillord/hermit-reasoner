@@ -195,7 +195,9 @@ public class Normalization {
         while (!inclusions.isEmpty()) {
             OWLDescription[] curInclusion = inclusions.remove(inclusions.size()-1);
             java.util.HashSet<OWLDescription> setInclusion = new java.util.HashSet<OWLDescription>();
-            for (int i=0; i < curInclusion.length; ++i) setInclusion.add(curInclusion[i]);
+            for (int i=0; i < curInclusion.length; ++i) {
+                setInclusion.add(curInclusion[i]);
+            }
             OWLDescription simplifiedDescription=m_factory.getOWLObjectUnionOf(setInclusion);
             if (!simplifiedDescription.isOWLThing()) {
                 if (simplifiedDescription instanceof OWLObjectUnionOf) {
@@ -211,8 +213,9 @@ public class Normalization {
                 }
                 else if (simplifiedDescription instanceof OWLObjectIntersectionOf) {
                     OWLObjectIntersectionOf objectAnd=(OWLObjectIntersectionOf)simplifiedDescription;
-                    for (OWLDescription conjunct : objectAnd.getOperands())
+                    for (OWLDescription conjunct : objectAnd.getOperands()) {
                         inclusions.add(new OWLDescription[] { conjunct });
+                    }
                 }
                 else {
                     OWLDescription normalized=simplifiedDescription.accept(normalizer);

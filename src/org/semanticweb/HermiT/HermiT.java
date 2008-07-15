@@ -49,6 +49,7 @@ public class HermiT implements Serializable {
     public static enum ExistentialsType { CREATION_ORDER,EL,INDIVIDUAL_REUSE };
 
     protected final Map<String,Object> m_parameters;
+    protected final boolean m_useKaon2;
     protected DLOntology m_dlOntology;
     protected Namespaces m_namespaces;
     protected TableauMonitor m_userTableauMonitor;
@@ -59,8 +60,7 @@ public class HermiT implements Serializable {
     protected ExistentialsType m_existentialsType;
     protected Tableau m_tableau;
     protected TableauSubsumptionChecker m_subsumptionChecker;
-    protected boolean m_useKaon2;
-
+    
     public HermiT() {
         m_parameters=new HashMap<String,Object>();
         setTableauMonitorType(TableauMonitorType.NONE);
@@ -68,7 +68,7 @@ public class HermiT implements Serializable {
         setBlockingType(BlockingType.ANYWHERE);
         setBlockingSignatureCacheType(BlockingSignatureCacheType.CACHED);
         setExistentialsType(ExistentialsType.CREATION_ORDER);
-        m_useKaon2 = true;
+        m_useKaon2=false;
     }
     public void setParameter(String parameterName,Object value) {
         m_parameters.put(parameterName,value);
