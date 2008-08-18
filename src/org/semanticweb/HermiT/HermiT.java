@@ -374,4 +374,15 @@ public class HermiT implements Serializable {
             inputStream.close();
         }
     }
+    
+    public static void main(String[] args) {
+        HermiT h = new HermiT();
+        for (String f : args) {
+            try {
+                h.loadOntology(f);
+            } catch (Exception e) {
+                e.printStackTrace(System.out);
+            }
+        }
+    }
 }

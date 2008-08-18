@@ -16,4 +16,12 @@ public abstract class AbstractRole implements Serializable {
     public String toString() {
         return toString(Namespaces.INSTANCE);        
     }
+    public static AbstractRole fromString(String s, Namespaces n) {
+        if (s.startsWith("(inv-")) {
+            return fromString(s.substring(5, s.length()-1), n).getInverseRole();
+        } else return new AtomicAbstractRole(n.expandString(s));
+    }
+    public static AbstractRole fromString(String s) {
+        return fromString(s, Namespaces.INSTANCE);
+    }
 }

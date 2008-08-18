@@ -21,7 +21,7 @@ public class InverseAbstractRole extends AbstractRole {
         return m_inverseOf;
     }
     public String toString(Namespaces namespaces) {
-        return "(inv "+m_inverseOf.toString(namespaces)+")";
+        return "(inv-"+m_inverseOf.toString(namespaces)+")";
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);

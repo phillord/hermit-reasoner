@@ -115,8 +115,7 @@ public class OwlClausification {
             AtomicAbstractRole role=AtomicAbstractRole.create(internalObjectProperty.getURI().toString());
             return Atom.create(role,new org.semanticweb.HermiT.model.Term[] { second,first });
         }
-        else
-            throw new IllegalStateException("Internal error: unsupported type of object property!");
+        else throw new IllegalStateException("Internal error: unsupported type of object property!");
     }
     protected static LiteralConcept getLiteralConcept(OWLDescription description) {
         if (description instanceof OWLClass) {

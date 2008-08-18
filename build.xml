@@ -81,8 +81,8 @@
 
     <target name="compile">
         <mkdir dir="${classdir}"/>
-        <javac destdir="${classdir}" deprecation="yes">
-            <compilerarg value="-Xlint:all"/>
+        <javac destdir="${classdir}" deprecation="yes" debug="on">
+            <compilerarg value="-Xlint:all -Xlint:-serial"/>
             <src refid="sourcepath"/>
             <classpath refid="classpath"/>
         </javac>
