@@ -26,7 +26,7 @@ public class OwlClausification {
 			       			   OWLOntology ontology,
 							   OWLDataFactory factory,
 			       			   Collection<DescriptionGraph> descriptionGraphs) throws OWLException {
-		Normalization normalization=new Normalization(factory);
+		OwlNormalization normalization=new OwlNormalization(factory);
 		normalization.processOntology(ontology);
         return clausify(prepareForNIRule,
 						ontology.getURI().toString(),
@@ -265,7 +265,7 @@ public class OwlClausification {
             OWLDescription description=object.getFiller();
             if (description instanceof OWLClass) {
                 OWLClass owlClass=(OWLClass)description;
-                if (owlClass.isOWLNothing()) {
+                if (!owlClass.isOWLNothing()) {
                     m_headAtoms.add(Atom.create(AtomicConcept.create(owlClass.getURI().toString()),new org.semanticweb.HermiT.model.Term[] { y }));
                 }
             }
