@@ -31,9 +31,8 @@ public class OwlClausification {
         return clausify(prepareForNIRule,
 						ontology.getURI().toString(),
 						normalization.getConceptInclusions(),
-						normalization.getNormalObjectPropertyInclusions(),
-						normalization.getInverseObjectPropertyInclusions(),
-						normalization.getNormalDataPropertyInclusios(),
+						normalization.getObjectPropertyInclusions(),
+						normalization.getDataPropertyInclusions(),
 						normalization.getFacts(),
 						descriptionGraphs,
 						factory);
@@ -41,9 +40,8 @@ public class OwlClausification {
     public DLOntology clausify(boolean prepareForNIRule,
                                String ontologyURI,
                                Collection<OWLDescription[]> conceptInclusions,
-                               Collection<OWLObjectPropertyExpression[]> normalObjectPropertyInclusions,
-                               Collection<OWLObjectPropertyExpression[]> inverseObjectPropertyInclusions,
-                               Collection<OWLDataPropertyExpression[]> inverseDataPropertyInclusions,
+                               Collection<OWLObjectPropertyExpression[]> objectPropertyInclusions,
+                               Collection<OWLDataPropertyExpression[]> dataPropertyInclusions,
                                Collection<OWLIndividualAxiom> facts,
                                Collection<DescriptionGraph> descriptionGraphs,
                                OWLDataFactory factory) throws OWLException {
@@ -51,32 +49,20 @@ public class OwlClausification {
         for (OWLDescription[] inclusion : conceptInclusions)
             for (OWLDescription description : inclusion)
                 description.accept(determineExpressivity);
-        for (OWLObjectPropertyExpression[] inclusion : normalObjectPropertyInclusions) {
+        for (OWLObjectPropertyExpression[] inclusion : objectPropertyInclusions) {
             boolean isInverse0=(inclusion[0] instanceof OWLObjectPropertyInverse);
             boolean isInverse1=(inclusion[1] instanceof OWLObjectPropertyInverse);
             if ((!isInverse0 && isInverse1) || (isInverse0 && !isInverse1))
                 determineExpressivity.m_hasInverseRoles=true;
         }
-        for (OWLObjectPropertyExpression[] inclusion : inverseObjectPropertyInclusions) {
-            boolean isInverse0=(inclusion[0] instanceof OWLObjectPropertyInverse);
-            boolean isInverse1=(inclusion[1] instanceof OWLObjectPropertyInverse);
-            if ((isInverse0 && isInverse1) || (!isInverse0 && !isInverse1))
-                determineExpressivity.m_hasInverseRoles=true;
-        }
-        if (inverseDataPropertyInclusions.size()>0)
+        if (dataPropertyInclusions.size()>0)
             throw new IllegalArgumentException("Data properties are not supported yet.");
         Set<DLClause> dlClauses=new LinkedHashSet<DLClause>();
         Set<Atom> positiveFacts=new HashSet<Atom>();
         Set<Atom> negativeFacts=new HashSet<Atom>();
-        for (OWLObjectPropertyExpression[] inclusion : normalObjectPropertyInclusions) {
+        for (OWLObjectPropertyExpression[] inclusion : objectPropertyInclusions) {
             Atom subRoleAtom=getAbstractRoleAtom(inclusion[0],X,Y);
             Atom superRoleAtom=getAbstractRoleAtom(inclusion[1],X,Y);
-            DLClause dlClause=DLClause.create(new Atom[] { superRoleAtom },new Atom[] { subRoleAtom });
-            dlClauses.add(dlClause);
-        }
-        for (OWLObjectPropertyExpression[] inclusion : inverseObjectPropertyInclusions) {
-            Atom subRoleAtom=getAbstractRoleAtom(inclusion[0],X,Y);
-            Atom superRoleAtom=getAbstractRoleAtom(inclusion[1],Y,X);
             DLClause dlClause=DLClause.create(new Atom[] { superRoleAtom },new Atom[] { subRoleAtom });
             dlClauses.add(dlClause);
         }
