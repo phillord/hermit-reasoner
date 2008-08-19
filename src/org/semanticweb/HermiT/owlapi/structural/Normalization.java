@@ -35,7 +35,6 @@ public class Normalization {
     protected RoleBox m_rbox;
     protected final Collection<OWLIndividualAxiom> m_facts;
 	protected final OWLDataFactory m_factory;
-    //protected final NegationalNormalFormConverter m_nnf_converter;
 	protected final PLVisitor m_PL;
     
     public Normalization(OWLDataFactory factory) {
@@ -47,7 +46,6 @@ public class Normalization {
         m_normalDataPropertyInclusions=new ArrayList<OWLDataPropertyExpression[]>();
         m_facts=new HashSet<OWLIndividualAxiom>();
 		m_factory = factory;
-        //m_nnf_converter = new NegationalNormalFormConverter(factory);
 		m_PL = new PLVisitor(this);
     }
 
@@ -84,144 +82,144 @@ public class Normalization {
         for (OWLSubClassAxiom axiom : ontology.getAxioms(AxiomType.SUBCLASS)) {
             inclusions.add(new OWLDescription[] { cnnf(axiom.getSubClass()),nnf(axiom.getSuperClass()) });
         }
-        for (OWLEquivalentClassesAxiom axiom : ontology.getAxioms(AxiomType.EQUIVALENT_CLASSES)) {
-            OWLDescription[] descriptions=new OWLDescription[axiom.getDescriptions().size()];
-            axiom.getDescriptions().toArray(descriptions);
-            for (int i=0;i<descriptions.length-1;i++) {
-                inclusions.add(new OWLDescription[] { cnnf(descriptions[i]),nnf(descriptions[i+1]) });
-                inclusions.add(new OWLDescription[] { cnnf(descriptions[i+1]),nnf(descriptions[i]) });
-            }
-        }
-        for (OWLDisjointClassesAxiom axiom : ontology.getAxioms(AxiomType.DISJOINT_CLASSES)) {
-            OWLDescription[] descriptions=new OWLDescription[axiom.getDescriptions().size()];
-            axiom.getDescriptions().toArray(descriptions);
-            for (int i=0;i<descriptions.length;i++)
-                descriptions[i]=cnnf(descriptions[i]);
-            for (int i=0;i<descriptions.length;i++)
-                for (int j=i+1;j<descriptions.length;j++)
-                    inclusions.add(new OWLDescription[] { descriptions[i],descriptions[j] });
-        }
+        // for (OWLEquivalentClassesAxiom axiom : ontology.getAxioms(AxiomType.EQUIVALENT_CLASSES)) {
+        //     OWLDescription[] descriptions=new OWLDescription[axiom.getDescriptions().size()];
+        //     axiom.getDescriptions().toArray(descriptions);
+        //     for (int i=0;i<descriptions.length-1;i++) {
+        //         inclusions.add(new OWLDescription[] { cnnf(descriptions[i]),nnf(descriptions[i+1]) });
+        //         inclusions.add(new OWLDescription[] { cnnf(descriptions[i+1]),nnf(descriptions[i]) });
+        //     }
+        // }
+        // for (OWLDisjointClassesAxiom axiom : ontology.getAxioms(AxiomType.DISJOINT_CLASSES)) {
+        //     OWLDescription[] descriptions=new OWLDescription[axiom.getDescriptions().size()];
+        //     axiom.getDescriptions().toArray(descriptions);
+        //     for (int i=0;i<descriptions.length;i++)
+        //         descriptions[i]=cnnf(descriptions[i]);
+        //     for (int i=0;i<descriptions.length;i++)
+        //         for (int j=i+1;j<descriptions.length;j++)
+        //             inclusions.add(new OWLDescription[] { descriptions[i],descriptions[j] });
+        // }
         
-        // Object property axioms:
-        RoleManager roleManager=new RoleManager();
-        for (OWLInverseObjectPropertiesAxiom axiom : ontology.getAxioms(AxiomType.INVERSE_OBJECT_PROPERTIES)) {
-            OWLObjectPropertyExpression first=axiom.getFirstProperty().getSimplified();
-            OWLObjectPropertyExpression second=axiom.getSecondProperty().getSimplified();
-            roleManager.addInclusion(first,second.getInverseProperty().getSimplified());
-            roleManager.addInclusion(second,first.getInverseProperty().getSimplified());
-            m_inverseObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { first,second  });
-            m_inverseObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { second,first  });
-        }
-        for (OWLDisjointObjectPropertiesAxiom axiom : ontology.getAxioms(AxiomType.DISJOINT_OBJECT_PROPERTIES)) {
-			throw new RuntimeException("Disjointness of properties is not supported yet.");
-        }
-        for (OWLObjectSubPropertyAxiom axiom : ontology.getAxioms(AxiomType.SUB_OBJECT_PROPERTY)) {
-            OWLObjectPropertyExpression subObjectProperty=axiom.getSubProperty().getSimplified();
-            OWLObjectPropertyExpression superObjectProperty=axiom.getSuperProperty().getSimplified();
-            roleManager.addInclusion(subObjectProperty,superObjectProperty);
-            m_normalObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { subObjectProperty,superObjectProperty });
-        }
-        for (OWLEquivalentObjectPropertiesAxiom axiom : ontology.getAxioms(AxiomType.EQUIVALENT_OBJECT_PROPERTIES)) {
-            OWLObjectPropertyExpression[] objectProperties=new OWLObjectPropertyExpression[axiom.getProperties().size()];
-            axiom.getProperties().toArray(objectProperties);
-            for (int i=0;i<objectProperties.length;i++)
-                objectProperties[i]=objectProperties[i].getSimplified();
-            for (int i=0;i<objectProperties.length-1;i++) {
-                roleManager.addInclusion(objectProperties[i],objectProperties[i+1]);
-                roleManager.addInclusion(objectProperties[i+1],objectProperties[i]);
-                m_normalObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { objectProperties[i],objectProperties[i+1] });
-                m_normalObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { objectProperties[i+1],objectProperties[i] });
-            }
-        }
-		for (OWLObjectPropertyChainSubPropertyAxiom axiom : ontology.getAxioms(AxiomType.PROPERTY_CHAIN_SUB_PROPERTY)) {
-            roleManager.makeChain(axiom.getSuperProperty(), axiom.getPropertyChain());
-        }
-		for (OWLReflexiveObjectPropertyAxiom axiom : ontology.getAxioms(AxiomType.REFLEXIVE_OBJECT_PROPERTY)) {
-			throw new RuntimeException("Reflexivity is not supported yet.");
-		    //inclusions.add(new OWLDescription[] { m_factory.getOWLObjectSelfRestriction(axiom.getProperty()) });
-	    }
-		for (OWLIrreflexiveObjectPropertyAxiom axiom : ontology.getAxioms(AxiomType.IRREFLEXIVE_OBJECT_PROPERTY)) {
-			throw new RuntimeException("Irreflexivity is not supported yet.");
-		    //inclusions.add(new OWLDescription[] { m_factory.getOWLObjectComplementOf(m_factory.getOWLObjectSelfRestriction(axiom.getProperty())) });
-	    }
-		for (OWLSymmetricObjectPropertyAxiom axiom : ontology.getAxioms(AxiomType.SYMMETRIC_OBJECT_PROPERTY)) {
-            OWLObjectPropertyExpression objectProperty=axiom.getProperty().getSimplified();
-            m_inverseObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { objectProperty,objectProperty });
-            roleManager.addInclusion(objectProperty,objectProperty.getInverseProperty().getSimplified());
-        }
-		for (OWLAntiSymmetricObjectPropertyAxiom axiom : ontology.getAxioms(AxiomType.ANTI_SYMMETRIC_OBJECT_PROPERTY)) {
-			throw new RuntimeException("Antisymmetry is not supported yet.");
-        }
-		for (OWLTransitiveObjectPropertyAxiom axiom : ontology.getAxioms(AxiomType.TRANSITIVE_OBJECT_PROPERTY)) {
-             roleManager.makeTransitive(axiom.getProperty().getSimplified());
-		}
-		for (OWLFunctionalObjectPropertyAxiom axiom : ontology.getAxioms(AxiomType.FUNCTIONAL_OBJECT_PROPERTY)) {
-        	inclusions.add(new OWLDescription[] { m_factory.getOWLObjectMaxCardinalityRestriction(axiom.getProperty().getSimplified(), 1) });
-		}
-		for (OWLInverseFunctionalObjectPropertyAxiom axiom : ontology.getAxioms(AxiomType.INVERSE_FUNCTIONAL_OBJECT_PROPERTY)) {
-        	inclusions.add(new OWLDescription[] { m_factory.getOWLObjectMaxCardinalityRestriction(m_factory.getOWLObjectPropertyInverse(axiom.getProperty().getSimplified()), 1) });
-		}
-		for (OWLObjectPropertyDomainAxiom axiom : ontology.getAxioms(AxiomType.OBJECT_PROPERTY_DOMAIN)) {
-            OWLObjectAllRestriction allPropertyNothing=m_factory.getOWLObjectAllRestriction(axiom.getProperty().getSimplified(),m_factory.getOWLNothing());
-            inclusions.add(new OWLDescription[] { axiom.getDomain(),allPropertyNothing });
-        }
-		for (OWLObjectPropertyRangeAxiom axiom : ontology.getAxioms(AxiomType.OBJECT_PROPERTY_RANGE)) {
-            OWLObjectAllRestriction allPropertyRange=m_factory.getOWLObjectAllRestriction(axiom.getProperty().getSimplified(),nnf(axiom.getRange()));
-            inclusions.add(new OWLDescription[] { allPropertyRange });
-        }
-        
-        // Data property axioms:
-		for (OWLFunctionalDataPropertyAxiom axiom : ontology.getAxioms(AxiomType.FUNCTIONAL_DATA_PROPERTY)) {
-        	inclusions.add(new OWLDescription[] { m_factory.getOWLDataMaxCardinalityRestriction(axiom.getProperty(), 1) });
-		}
-        for (OWLDataSubPropertyAxiom axiom : ontology.getAxioms(AxiomType.SUB_DATA_PROPERTY)) {
-            OWLDataPropertyExpression subDataProperty=axiom.getSubProperty();
-            OWLDataPropertyExpression superDataProperty=axiom.getSuperProperty();
-            m_normalDataPropertyInclusions.add(new OWLDataPropertyExpression[] { subDataProperty,superDataProperty });
-        }
-        for (OWLEquivalentDataPropertiesAxiom axiom : ontology.getAxioms(AxiomType.EQUIVALENT_DATA_PROPERTIES)) {
-            OWLDataPropertyExpression[] dataProperties=new OWLDataPropertyExpression[axiom.getProperties().size()];
-            axiom.getProperties().toArray(dataProperties);
-            for (int i=0;i<dataProperties.length-1;i++) {
-                m_normalDataPropertyInclusions.add(new OWLDataPropertyExpression[] { dataProperties[i],dataProperties[i+1] });
-                m_normalDataPropertyInclusions.add(new OWLDataPropertyExpression[] { dataProperties[i+1],dataProperties[i] });
-            }
-        }
-		for (OWLDataPropertyDomainAxiom axiom : ontology.getAxioms(AxiomType.DATA_PROPERTY_DOMAIN)) {
-			// Not sure whether this is the best way to get an unsatisfiable data range using the OWL API:
-			OWLDataRange dataNothing = m_factory.getOWLDataComplementOf(m_factory.getOWLDataType(URI.create("http://www.w3.org/2000/01/rdf-schema#Literal")));
-            OWLDataAllRestriction allPropertyNothing=m_factory.getOWLDataAllRestriction(axiom.getProperty(),dataNothing);
-            inclusions.add(new OWLDescription[] { axiom.getDomain(),allPropertyNothing });
-        }
-		for (OWLDataPropertyRangeAxiom axiom : ontology.getAxioms(AxiomType.DATA_PROPERTY_RANGE)) {
-            OWLDataAllRestriction allPropertyRange=m_factory.getOWLDataAllRestriction(axiom.getProperty(),axiom.getRange());
-            inclusions.add(new OWLDescription[] { allPropertyRange });
-        }
-        
-        // ABox axioms:
-        boolean[] alreadyExists=new boolean[1];
-		for (OWLClassAssertionAxiom axiom : ontology.getAxioms(AxiomType.CLASS_ASSERTION)) {
-            OWLDescription description=simplify(nnf(axiom.getDescription()));
-            if (!isSimple(description)) {
-                OWLDescription definition=getDefinitionFor(description,alreadyExists);
-                if (!alreadyExists[0])
-                    inclusions.add(new OWLDescription[] { cnnf(definition),description });
-                description=definition;
-            }
-            if (description==axiom.getDescription()) m_facts.add(axiom);
-            else m_facts.add(m_factory.getOWLClassAssertionAxiom(axiom.getIndividual(),description));
-        }
-		for (OWLObjectPropertyAssertionAxiom axiom : ontology.getAxioms(AxiomType.OBJECT_PROPERTY_ASSERTION)) {
-            m_facts.add(m_factory.getOWLObjectPropertyAssertionAxiom(axiom.getSubject(),axiom.getProperty().getSimplified(),axiom.getObject()));
-        }
-		for (OWLSameIndividualsAxiom axiom : ontology.getAxioms(AxiomType.SAME_INDIVIDUAL)) m_facts.add(axiom);
-		for (OWLDifferentIndividualsAxiom axiom : ontology.getAxioms(AxiomType.DIFFERENT_INDIVIDUALS)) m_facts.add(axiom);
+        //         // Object property axioms:
+        //         RoleManager roleManager=new RoleManager();
+        //         for (OWLInverseObjectPropertiesAxiom axiom : ontology.getAxioms(AxiomType.INVERSE_OBJECT_PROPERTIES)) {
+        //             OWLObjectPropertyExpression first=axiom.getFirstProperty().getSimplified();
+        //             OWLObjectPropertyExpression second=axiom.getSecondProperty().getSimplified();
+        //             roleManager.addInclusion(first,second.getInverseProperty().getSimplified());
+        //             roleManager.addInclusion(second,first.getInverseProperty().getSimplified());
+        //             m_inverseObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { first,second  });
+        //             m_inverseObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { second,first  });
+        //         }
+        //         for (OWLDisjointObjectPropertiesAxiom axiom : ontology.getAxioms(AxiomType.DISJOINT_OBJECT_PROPERTIES)) {
+        //  throw new RuntimeException("Disjointness of properties is not supported yet.");
+        //         }
+        //         for (OWLObjectSubPropertyAxiom axiom : ontology.getAxioms(AxiomType.SUB_OBJECT_PROPERTY)) {
+        //             OWLObjectPropertyExpression subObjectProperty=axiom.getSubProperty().getSimplified();
+        //             OWLObjectPropertyExpression superObjectProperty=axiom.getSuperProperty().getSimplified();
+        //             roleManager.addInclusion(subObjectProperty,superObjectProperty);
+        //             m_normalObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { subObjectProperty,superObjectProperty });
+        //         }
+        //         for (OWLEquivalentObjectPropertiesAxiom axiom : ontology.getAxioms(AxiomType.EQUIVALENT_OBJECT_PROPERTIES)) {
+        //             OWLObjectPropertyExpression[] objectProperties=new OWLObjectPropertyExpression[axiom.getProperties().size()];
+        //             axiom.getProperties().toArray(objectProperties);
+        //             for (int i=0;i<objectProperties.length;i++)
+        //                 objectProperties[i]=objectProperties[i].getSimplified();
+        //             for (int i=0;i<objectProperties.length-1;i++) {
+        //                 roleManager.addInclusion(objectProperties[i],objectProperties[i+1]);
+        //                 roleManager.addInclusion(objectProperties[i+1],objectProperties[i]);
+        //                 m_normalObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { objectProperties[i],objectProperties[i+1] });
+        //                 m_normalObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { objectProperties[i+1],objectProperties[i] });
+        //             }
+        //         }
+        // for (OWLObjectPropertyChainSubPropertyAxiom axiom : ontology.getAxioms(AxiomType.PROPERTY_CHAIN_SUB_PROPERTY)) {
+        //             roleManager.makeChain(axiom.getSuperProperty(), axiom.getPropertyChain());
+        //         }
+        // for (OWLReflexiveObjectPropertyAxiom axiom : ontology.getAxioms(AxiomType.REFLEXIVE_OBJECT_PROPERTY)) {
+        //  throw new RuntimeException("Reflexivity is not supported yet.");
+        //     //inclusions.add(new OWLDescription[] { m_factory.getOWLObjectSelfRestriction(axiom.getProperty()) });
+        //      }
+        // for (OWLIrreflexiveObjectPropertyAxiom axiom : ontology.getAxioms(AxiomType.IRREFLEXIVE_OBJECT_PROPERTY)) {
+        //  throw new RuntimeException("Irreflexivity is not supported yet.");
+        //     //inclusions.add(new OWLDescription[] { m_factory.getOWLObjectComplementOf(m_factory.getOWLObjectSelfRestriction(axiom.getProperty())) });
+        //      }
+        // for (OWLSymmetricObjectPropertyAxiom axiom : ontology.getAxioms(AxiomType.SYMMETRIC_OBJECT_PROPERTY)) {
+        //             OWLObjectPropertyExpression objectProperty=axiom.getProperty().getSimplified();
+        //             m_inverseObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { objectProperty,objectProperty });
+        //             roleManager.addInclusion(objectProperty,objectProperty.getInverseProperty().getSimplified());
+        //         }
+        // for (OWLAntiSymmetricObjectPropertyAxiom axiom : ontology.getAxioms(AxiomType.ANTI_SYMMETRIC_OBJECT_PROPERTY)) {
+        //  throw new RuntimeException("Antisymmetry is not supported yet.");
+        //         }
+        // for (OWLTransitiveObjectPropertyAxiom axiom : ontology.getAxioms(AxiomType.TRANSITIVE_OBJECT_PROPERTY)) {
+        //              roleManager.makeTransitive(axiom.getProperty().getSimplified());
+        // }
+        // for (OWLFunctionalObjectPropertyAxiom axiom : ontology.getAxioms(AxiomType.FUNCTIONAL_OBJECT_PROPERTY)) {
+        //          inclusions.add(new OWLDescription[] { m_factory.getOWLObjectMaxCardinalityRestriction(axiom.getProperty().getSimplified(), 1) });
+        // }
+        // for (OWLInverseFunctionalObjectPropertyAxiom axiom : ontology.getAxioms(AxiomType.INVERSE_FUNCTIONAL_OBJECT_PROPERTY)) {
+        //          inclusions.add(new OWLDescription[] { m_factory.getOWLObjectMaxCardinalityRestriction(m_factory.getOWLObjectPropertyInverse(axiom.getProperty().getSimplified()), 1) });
+        // }
+        // for (OWLObjectPropertyDomainAxiom axiom : ontology.getAxioms(AxiomType.OBJECT_PROPERTY_DOMAIN)) {
+        //             OWLObjectAllRestriction allPropertyNothing=m_factory.getOWLObjectAllRestriction(axiom.getProperty().getSimplified(),m_factory.getOWLNothing());
+        //             inclusions.add(new OWLDescription[] { axiom.getDomain(),allPropertyNothing });
+        //         }
+        // for (OWLObjectPropertyRangeAxiom axiom : ontology.getAxioms(AxiomType.OBJECT_PROPERTY_RANGE)) {
+        //             OWLObjectAllRestriction allPropertyRange=m_factory.getOWLObjectAllRestriction(axiom.getProperty().getSimplified(),nnf(axiom.getRange()));
+        //             inclusions.add(new OWLDescription[] { allPropertyRange });
+        //         }
+        //         
+        //         // Data property axioms:
+        // for (OWLFunctionalDataPropertyAxiom axiom : ontology.getAxioms(AxiomType.FUNCTIONAL_DATA_PROPERTY)) {
+        //          inclusions.add(new OWLDescription[] { m_factory.getOWLDataMaxCardinalityRestriction(axiom.getProperty(), 1) });
+        // }
+        //         for (OWLDataSubPropertyAxiom axiom : ontology.getAxioms(AxiomType.SUB_DATA_PROPERTY)) {
+        //             OWLDataPropertyExpression subDataProperty=axiom.getSubProperty();
+        //             OWLDataPropertyExpression superDataProperty=axiom.getSuperProperty();
+        //             m_normalDataPropertyInclusions.add(new OWLDataPropertyExpression[] { subDataProperty,superDataProperty });
+        //         }
+        //         for (OWLEquivalentDataPropertiesAxiom axiom : ontology.getAxioms(AxiomType.EQUIVALENT_DATA_PROPERTIES)) {
+        //             OWLDataPropertyExpression[] dataProperties=new OWLDataPropertyExpression[axiom.getProperties().size()];
+        //             axiom.getProperties().toArray(dataProperties);
+        //             for (int i=0;i<dataProperties.length-1;i++) {
+        //                 m_normalDataPropertyInclusions.add(new OWLDataPropertyExpression[] { dataProperties[i],dataProperties[i+1] });
+        //                 m_normalDataPropertyInclusions.add(new OWLDataPropertyExpression[] { dataProperties[i+1],dataProperties[i] });
+        //             }
+        //         }
+        // for (OWLDataPropertyDomainAxiom axiom : ontology.getAxioms(AxiomType.DATA_PROPERTY_DOMAIN)) {
+        //  // Not sure whether this is the best way to get an unsatisfiable data range using the OWL API:
+        //  OWLDataRange dataNothing = m_factory.getOWLDataComplementOf(m_factory.getOWLDataType(URI.create("http://www.w3.org/2000/01/rdf-schema#Literal")));
+        //             OWLDataAllRestriction allPropertyNothing=m_factory.getOWLDataAllRestriction(axiom.getProperty(),dataNothing);
+        //             inclusions.add(new OWLDescription[] { axiom.getDomain(),allPropertyNothing });
+        //         }
+        // for (OWLDataPropertyRangeAxiom axiom : ontology.getAxioms(AxiomType.DATA_PROPERTY_RANGE)) {
+        //             OWLDataAllRestriction allPropertyRange=m_factory.getOWLDataAllRestriction(axiom.getProperty(),axiom.getRange());
+        //             inclusions.add(new OWLDescription[] { allPropertyRange });
+        //         }
+        //         
+        //         // ABox axioms:
+        //         boolean[] alreadyExists=new boolean[1];
+        // for (OWLClassAssertionAxiom axiom : ontology.getAxioms(AxiomType.CLASS_ASSERTION)) {
+        //             OWLDescription description=simplify(nnf(axiom.getDescription()));
+        //             if (!isSimple(description)) {
+        //                 OWLDescription definition=getDefinitionFor(description,alreadyExists);
+        //                 if (!alreadyExists[0])
+        //                     inclusions.add(new OWLDescription[] { cnnf(definition),description });
+        //                 description=definition;
+        //             }
+        //             if (description==axiom.getDescription()) m_facts.add(axiom);
+        //             else m_facts.add(m_factory.getOWLClassAssertionAxiom(axiom.getIndividual(),description));
+        //         }
+        // for (OWLObjectPropertyAssertionAxiom axiom : ontology.getAxioms(AxiomType.OBJECT_PROPERTY_ASSERTION)) {
+        //             m_facts.add(m_factory.getOWLObjectPropertyAssertionAxiom(axiom.getSubject(),axiom.getProperty().getSimplified(),axiom.getObject()));
+        //         }
+        // for (OWLSameIndividualsAxiom axiom : ontology.getAxioms(AxiomType.SAME_INDIVIDUAL)) m_facts.add(axiom);
+        // for (OWLDifferentIndividualsAxiom axiom : ontology.getAxioms(AxiomType.DIFFERENT_INDIVIDUALS)) m_facts.add(axiom);
 
         // Everything has been collected; finish normalization:
         OWLDescriptionVisitorEx<OWLDescription> normalizer=new NormalizationVisitor(inclusions, this);
         normalizeInclusions(inclusions,normalizer);
-        m_rbox = roleManager.createRoleBox();
-        roleManager.rewriteInclusions(m_rbox, inclusions, m_factory);
+        // m_rbox = roleManager.createRoleBox();
+        // roleManager.rewriteInclusions(m_rbox, inclusions, m_factory);
     //     // process transitivity
     //     transitivityManager.transitivelyClose();
     //     for (Description[] inclusion : m_conceptInclusions) {
@@ -392,8 +390,8 @@ public class Normalization {
                 return object;
             else {
                 OWLDescription definition=getDefinitionFor(description,m_alreadyExists);
-                if (!m_alreadyExists[0])
-                    m_newInclusions.add(new OWLDescription[] { cnnf(definition),description });
+                // if (!m_alreadyExists[0])
+                //     m_newInclusions.add(new OWLDescription[] { cnnf(definition),description });
                 return m_factory.getOWLObjectSomeRestriction(object.getProperty().getSimplified(),definition);
             }
         }
@@ -401,9 +399,9 @@ public class Normalization {
             OWLObjectPropertyExpression objectProperty=object.getProperty().getSimplified();
             OWLDescription description=object.getFiller();
             OWLDescription definition=getDefinitionFor(object,m_alreadyExists);
-            if (!m_alreadyExists[0]) {
-                m_newInclusions.add(new OWLDescription[] { m_n.cnnf(definition),m_n.m_factory.getOWLObjectExactCardinalityRestriction(objectProperty,object.getCardinality(),description) });
-            }
+            // if (!m_alreadyExists[0]) {
+            //     m_newInclusions.add(new OWLDescription[] { m_n.cnnf(definition),m_n.m_factory.getOWLObjectExactCardinalityRestriction(objectProperty,object.getCardinality(),description) });
+            // }
             return definition;
         }
         public OWLDescription visit(OWLObjectMinCardinalityRestriction object) {
@@ -415,8 +413,8 @@ public class Normalization {
                 return m_n.m_factory.getOWLObjectSomeRestriction(objectProperty,description);
             } else {
                 OWLDescription definition=getDefinitionFor(description,m_alreadyExists);
-                if (!m_alreadyExists[0])
-                    m_newInclusions.add(new OWLDescription[] { m_n.cnnf(definition),description });
+                // if (!m_alreadyExists[0])
+                //     m_newInclusions.add(new OWLDescription[] { m_n.cnnf(definition),description });
                 return m_n.m_factory.getOWLObjectMinCardinalityRestriction(objectProperty,object.getCardinality(),definition);
             }
         }
@@ -429,8 +427,8 @@ public class Normalization {
             else {
                 OWLDescription complementDescription=m_n.cnnf(description);
                 OWLDescription definition=getDefinitionFor(complementDescription,m_alreadyExists);
-                if (!m_alreadyExists[0])
-                    m_newInclusions.add(new OWLDescription[] { m_n.cnnf(definition),complementDescription });
+                // if (!m_alreadyExists[0])
+                //     m_newInclusions.add(new OWLDescription[] { m_n.cnnf(definition),complementDescription });
                 return m_n.m_factory.getOWLObjectMaxCardinalityRestriction(objectProperty,object.getCardinality(),m_n.cnnf(definition));
             }
         }
@@ -438,10 +436,10 @@ public class Normalization {
             if (object.getOperand() instanceof OWLObjectOneOf) {
                 OWLObjectOneOf objectOneOf=(OWLObjectOneOf)object.getOperand();
                 OWLClass definition=getDefinitionForNegativeNominal(objectOneOf,m_alreadyExists);
-                if (!m_alreadyExists[0]) {
-                    for (OWLIndividual individual : objectOneOf.getIndividuals())
-                        m_facts.add(m_n.m_factory.getOWLClassAssertionAxiom(individual,definition));
-                }
+                // if (!m_alreadyExists[0]) {
+                //     for (OWLIndividual individual : objectOneOf.getIndividuals())
+                //         m_facts.add(m_n.m_factory.getOWLClassAssertionAxiom(individual,definition));
+                // }
                 return m_n.m_factory.getOWLObjectComplementOf(definition);
             }
             else 
@@ -452,10 +450,10 @@ public class Normalization {
         }
         public OWLDescription visit(OWLObjectIntersectionOf object) {
             OWLDescription definition=getDefinitionFor(object,m_alreadyExists);
-            if (!m_alreadyExists[0]) {
-                for (OWLDescription description : object.getOperands())
-                    m_newInclusions.add(new OWLDescription[] { m_n.cnnf(definition),description });
-            }
+            // if (!m_alreadyExists[0]) {
+            //     for (OWLDescription description : object.getOperands())
+            //         m_newInclusions.add(new OWLDescription[] { m_n.cnnf(definition),description });
+            // }
             return definition;
         }
         public OWLDescription visit(OWLObjectOneOf object) {
@@ -703,14 +701,14 @@ public class Normalization {
             }
         }
         public void rewriteInclusions(RoleBox rbox, Collection<OWLDescription[]> inclusions, OWLDataFactory factory) {
-            Collection<OWLDescription[]> newInclusions = new LinkedList<OWLDescription[]>();
-            Replacer replacer = new Replacer(rbox, factory, newInclusions);
-            for (OWLDescription[] inclusion : inclusions) {
-                for (int index = 0; index < inclusion.length; ++index) {
-                    inclusion[index] = replacer.replace(inclusion[index]);
-                }
-            }
-            inclusions.addAll(newInclusions);
+            // Collection<OWLDescription[]> newInclusions = new LinkedList<OWLDescription[]>();
+            // Replacer replacer = new Replacer(rbox, factory, newInclusions);
+            // for (OWLDescription[] inclusion : inclusions) {
+            //     for (int index = 0; index < inclusion.length; ++index) {
+            //         inclusion[index] = replacer.replace(inclusion[index]);
+            //     }
+            // }
+            // inclusions.addAll(newInclusions);
         }
     }
     

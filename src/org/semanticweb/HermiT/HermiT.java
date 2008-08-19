@@ -44,106 +44,107 @@ public class HermiT implements Serializable {
 
     public static enum TableauMonitorType { NONE,TIMING,TIMING_WITH_PAUSE,DEBUGGER_NO_HISTORY,DEBUGGER_HISTORY_ON };
     public static enum DirectBlockingType { PAIR_WISE,SINGLE,OPTIMAL };
-    public static enum BlockingType { ANYWHERE,ANCESTOR };
+    public static enum BlockingStrategyType { ANYWHERE,ANCESTOR };
     public static enum BlockingSignatureCacheType { CACHED,NOT_CACHED };
-    public static enum ExistentialsType { CREATION_ORDER,EL,INDIVIDUAL_REUSE };
+    public static enum ExistentialStrategyType { CREATION_ORDER,EL,INDIVIDUAL_REUSE };
+	public static enum ParserType { KAON2, OWLAPI };
+	public static enum SubsumptionCacheType { IMMEDIATE, JUST_IN_TIME, ON_REQUEST };
+	public static class Configuration {
+		public TableauMonitorType tableauMonitorType;
+		public DirectBlockingType directBlockingType;
+		public BlockingStrategyType blockingStrategyType;
+		public BlockingSignatureCacheType blockingSignatureCacheType;
+		public ExistentialStrategyType existentialStrategyType;
+		public ParserType parserType;
+		public SubsumptionCacheType subsumptionCacheType;
+		public final Map<String,Object> parameters;
+		public Configuration() {
+	        tableauMonitorType = TableauMonitorType.NONE;
+	        directBlockingType = DirectBlockingType.OPTIMAL;
+	        blockingStrategyType = BlockingStrategyType.ANYWHERE;
+	        blockingSignatureCacheType = BlockingSignatureCacheType.CACHED;
+	        existentialStrategyType = ExistentialStrategyType.CREATION_ORDER;
+	        parserType = ParserType.OWLAPI;
+			subsumptionCacheType = SubsumptionCacheType.IMMEDIATE;
+			parameters = new HashMap<String,Object>();
+		}
+	}
 
-    protected final Map<String,Object> m_parameters;
-    protected final boolean m_useKaon2;
+	protected final Configuration m_config;
     protected DLOntology m_dlOntology;
     protected Namespaces m_namespaces;
     protected TableauMonitor m_userTableauMonitor;
-    protected TableauMonitorType m_tableauMonitorType;
-    protected DirectBlockingType m_directBlockingType;
-    protected BlockingType m_blockingType;
-    protected BlockingSignatureCacheType m_blockingSignatureCacheType;
-    protected ExistentialsType m_existentialsType;
     protected Tableau m_tableau;
     protected TableauSubsumptionChecker m_subsumptionChecker;
     
-    public HermiT() {
-        m_parameters=new HashMap<String,Object>();
-        setTableauMonitorType(TableauMonitorType.NONE);
-        setDirectBlockingType(DirectBlockingType.OPTIMAL);
-        setBlockingType(BlockingType.ANYWHERE);
-        setBlockingSignatureCacheType(BlockingSignatureCacheType.CACHED);
-        setExistentialsType(ExistentialsType.CREATION_ORDER);
-        m_useKaon2=false;
+    public HermiT(String ontologyURI) throws KAON2Exception,OWLException,InterruptedException {
+		m_config = new Configuration();
+		loadOntology(URI.create(ontologyURI));
     }
-    public void setParameter(String parameterName,Object value) {
-        m_parameters.put(parameterName,value);
+    public HermiT(java.net.URI ontologyURI) throws KAON2Exception,OWLException,InterruptedException {
+		m_config = new Configuration();
+		loadOntology(ontologyURI);
     }
-    public Object getParameter(String parameterName) {
-        return m_parameters.get(parameterName);
+    public HermiT(java.net.URI ontologyURI, Configuration config) throws KAON2Exception,OWLException,InterruptedException {
+		m_config = config;
+		loadOntology(ontologyURI);
     }
+
+	public void buildSubsumptionCache() {
+		if (m_subsumptionChecker == null) {
+			m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
+		}
+	}
+
     public void setUserTableauMonitor(TableauMonitor userTableauMonitor) {
         m_userTableauMonitor=userTableauMonitor;
     }
-    public TableauMonitorType getTableauMonitorType() {
-        return m_tableauMonitorType;
-    }
-    public void setTableauMonitorType(TableauMonitorType tableauMonitorType) {
-        m_tableauMonitorType=tableauMonitorType;
-    }
-    public void setTimingOn() {
-        m_tableauMonitorType=TableauMonitorType.TIMING;
-    }
-    public void setTimingWithPauseOn() {
-        m_tableauMonitorType=TableauMonitorType.TIMING_WITH_PAUSE;
-    }
-    public void setDebuggingOn(boolean historyOn) {
-        m_tableauMonitorType=(historyOn ? TableauMonitorType.DEBUGGER_HISTORY_ON : TableauMonitorType.DEBUGGER_NO_HISTORY);
-    }
-    public DirectBlockingType getDirectBlockingType() {
-        return m_directBlockingType;
-    }
-    public void setDirectBlockingType(DirectBlockingType directBlockingType) {
-        m_directBlockingType=directBlockingType;
-    }
-    public BlockingType getBlockingType() {
-        return m_blockingType;
-    }
-    public void setBlockingType(BlockingType blockingType) {
-        m_blockingType=blockingType;
-    }
-    public BlockingSignatureCacheType getBlockingSignatureCacheType() {
-        return m_blockingSignatureCacheType;
-    }
-    public void setBlockingSignatureCacheType(BlockingSignatureCacheType blockingSignatureCacheType) {
-        m_blockingSignatureCacheType=blockingSignatureCacheType;
-    }
-    public ExistentialsType getExistentialsType() {
-        return m_existentialsType;
-    }
-    public void setExistentialsType(ExistentialsType existentialsType) {
-        m_existentialsType=existentialsType;
-    }
-    public void loadOntology(String physicalURI) throws KAON2Exception,OWLException,InterruptedException {
-        Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
-        loadOntology(physicalURI,noDescriptionGraphs);
-    }
-    public void loadOntology(String physicalURI,Set<DescriptionGraph> descriptionGraphs) throws KAON2Exception,OWLException,InterruptedException {
-        if (m_useKaon2) {
-            // DefaultOntologyResolver resolver=new DefaultOntologyResolver();
-            // String ontologyURI=resolver.registerOntology(physicalURI);
-            // OntologyManager ontologyManager=KAON2Manager.newOntologyManager();
-            // ontologyManager.setOntologyResolver(resolver);
-            // Ontology ontology=ontologyManager.openOntology(ontologyURI,new HashMap<String,Object>());
-            // loadKAON2Ontology(ontology,descriptionGraphs);
-        } else {
-		    OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-    		OWLOntology o = manager.loadOntologyFromPhysicalURI(URI.create(physicalURI));
-    		loadOwlOntology(o,manager.getOWLDataFactory(),descriptionGraphs);
+	public void loadOntology(String physicalURI) throws KAON2Exception,OWLException,InterruptedException {
+		loadOntology(URI.create(physicalURI), null);
+	}
+	public void loadOntology(URI physicalURI) throws KAON2Exception,OWLException,InterruptedException {
+		loadOntology(physicalURI, null);
+	}
+    public void loadOntology(String physicalURI,
+							 Set<DescriptionGraph> descriptionGraphs) throws KAON2Exception,OWLException,InterruptedException {
+		loadOntology(URI.create(physicalURI), descriptionGraphs);
+	}
+    public void loadOntology(URI physicalURI,
+							 Set<DescriptionGraph> descriptionGraphs) throws KAON2Exception,OWLException,InterruptedException {
+		if (descriptionGraphs == null) {
+			descriptionGraphs = Collections.emptySet();
+		}
+		switch (m_config.parserType) {
+         	case KAON2: {
+	            // DefaultOntologyResolver resolver=new DefaultOntologyResolver();
+	            // String ontologyURI=resolver.registerOntology(physicalURI);
+	            // OntologyManager ontologyManager=KAON2Manager.newOntologyManager();
+	            // ontologyManager.setOntologyResolver(resolver);
+	            // Ontology ontology=ontologyManager.openOntology(ontologyURI,new HashMap<String,Object>());
+	            // loadKAON2Ontology(ontology,descriptionGraphs);
+        	} break;
+			case OWLAPI: {
+			    OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+	    		OWLOntology o = manager.loadOntologyFromPhysicalURI(physicalURI);
+	    		loadOwlOntology(o, manager.getOWLDataFactory(), descriptionGraphs);
+			} break;
+			default: throw new IllegalArgumentException("unknown parser library requested");
 	    }
     }
 	public void loadOwlOntology(OWLOntology ontology,OWLDataFactory factory,Set<DescriptionGraph> descriptionGraphs) throws OWLException {
 		OwlClausification c = new OwlClausification();
-		DLOntology d = c.clausify(m_existentialsType==ExistentialsType.INDIVIDUAL_REUSE,ontology,factory,descriptionGraphs);
+		DLOntology d = c.clausify(
+			m_config.existentialStrategyType == ExistentialStrategyType.INDIVIDUAL_REUSE,
+			ontology,factory,descriptionGraphs
+		);
 		loadDLOntology(d);
 	}
     public void loadKAON2Ontology(Ontology ontology,Set<DescriptionGraph> descriptionGraphs) throws KAON2Exception {
         Clausification clausification=new Clausification();
-        DLOntology dlOntology=clausification.clausify(m_existentialsType==ExistentialsType.INDIVIDUAL_REUSE,ontology,descriptionGraphs);
+        DLOntology dlOntology=clausification.clausify(
+			m_config.existentialStrategyType == ExistentialStrategyType.INDIVIDUAL_REUSE,
+			ontology,descriptionGraphs
+		);
         loadDLOntology(dlOntology);
     }
     public void loadDLOntology(File file) throws Exception {
@@ -159,7 +160,7 @@ public class HermiT implements Serializable {
         if (!dlOntology.canUseNIRule() &&
             dlOntology.hasAtMostRestrictions() &&
             dlOntology.hasInverseRoles() &&
-            (m_existentialsType==ExistentialsType.INDIVIDUAL_REUSE)) {
+            (m_config.existentialStrategyType == ExistentialStrategyType.INDIVIDUAL_REUSE)) {
             throw new IllegalArgumentException("The supplied DL-onyology is not compatible with the individual reuse strategy.");
         }
         Namespaces namespaces=new Namespaces();
@@ -182,7 +183,7 @@ public class HermiT implements Serializable {
         m_namespaces=namespaces;
         
         TableauMonitor wellKnownTableauMonitor=null;
-        switch (m_tableauMonitorType) {
+        switch (m_config.tableauMonitorType) {
         case NONE:
             wellKnownTableauMonitor=null;
             break;
@@ -199,7 +200,7 @@ public class HermiT implements Serializable {
             wellKnownTableauMonitor=new Debugger(m_namespaces,false);
             break;
         }
-
+		
         TableauMonitor tableauMonitor=null;
         if (m_userTableauMonitor==null)
             tableauMonitor=wellKnownTableauMonitor;
@@ -209,7 +210,7 @@ public class HermiT implements Serializable {
             tableauMonitor=new TableauMonitorFork(wellKnownTableauMonitor,m_userTableauMonitor);
         
         DirectBlockingChecker directBlockingChecker=null;
-        switch (m_directBlockingType) {
+        switch (m_config.directBlockingType) {
         case OPTIMAL:
             directBlockingChecker=(m_dlOntology.hasAtMostRestrictions() && m_dlOntology.hasInverseRoles() ? new PairWiseDirectBlockingChecker() : new SingleDirectBlockingChecker());
             break;
@@ -223,7 +224,7 @@ public class HermiT implements Serializable {
         
         BlockingSignatureCache blockingSignatureCache=null;
         if (!dlOntology.hasNominals()) {
-            switch (m_blockingSignatureCacheType) {
+            switch (m_config.blockingSignatureCacheType) {
             case CACHED:
                 blockingSignatureCache=new BlockingSignatureCache(directBlockingChecker);
                 break;
@@ -234,7 +235,7 @@ public class HermiT implements Serializable {
         }
         
         BlockingStrategy blockingStrategy=null;
-        switch (m_blockingType) {
+        switch (m_config.blockingStrategyType) {
         case ANCESTOR:
             blockingStrategy=new AncestorBlocking(directBlockingChecker,blockingSignatureCache);
             break;
@@ -244,7 +245,7 @@ public class HermiT implements Serializable {
         }
         
         ExistentialsExpansionStrategy existentialsExpansionStrategy=null;
-        switch (m_existentialsType) {
+        switch (m_config.existentialStrategyType) {
         case CREATION_ORDER:
             existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
             break;
@@ -256,18 +257,20 @@ public class HermiT implements Serializable {
             break;
         }
         
-        m_tableau=new Tableau(tableauMonitor,existentialsExpansionStrategy,m_dlOntology,m_parameters);
-        m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
+        m_tableau=new Tableau(tableauMonitor,existentialsExpansionStrategy,m_dlOntology,m_config.parameters);
+        if (m_config.subsumptionCacheType == SubsumptionCacheType.IMMEDIATE) {
+			m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
+		}
     }
-    public DLOntology getDLOntology() {
-        return m_dlOntology;
-    }
+    // public DLOntology getDLOntology() {
+    //     return m_dlOntology;
+    // }
     public Namespaces getNamespaces() {
         return m_namespaces;
     }
-    public Tableau getTableau() {
-        return m_tableau;
-    }
+    // public Tableau getTableau() {
+    //     return m_tableau;
+    // }
     public boolean isSubsumedBy(AtomicConcept subconcept,AtomicConcept superconcept) {
         return m_subsumptionChecker.isSubsumedBy(subconcept,superconcept);
     }
@@ -312,14 +315,14 @@ public class HermiT implements Serializable {
         }
     }
     public void setIndividualReuseStrategyReuseAlways(Set<? extends LiteralConcept> concepts) {
-        m_parameters.put("IndividualReuseStrategy.reuseAlways",concepts);
+        m_config.parameters.put("IndividualReuseStrategy.reuseAlways",concepts);
     }
     public void loadIndividualReuseStrategyReuseAlways(File file) throws IOException {
         Set<AtomicConcept> concepts=loadConceptsFromFile(file);
         setIndividualReuseStrategyReuseAlways(concepts);
     }
     public void setIndividualReuseStrategyReuseNever(Set<? extends LiteralConcept> concepts) {
-        m_parameters.put("IndividualReuseStrategy.reuseNever",concepts);
+        m_config.parameters.put("IndividualReuseStrategy.reuseNever",concepts);
     }
     public void loadIndividualReuseStrategyReuseNever(File file) throws IOException {
         Set<AtomicConcept> concepts=loadConceptsFromFile(file);
@@ -376,10 +379,9 @@ public class HermiT implements Serializable {
     }
     
     public static void main(String[] args) {
-        HermiT h = new HermiT();
         for (String f : args) {
             try {
-                h.loadOntology(f);
+        		HermiT h = new HermiT(f);
             } catch (Exception e) {
                 e.printStackTrace(System.out);
             }
