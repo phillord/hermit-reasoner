@@ -18,6 +18,7 @@ public class HermiTSuite {
         suite.addTestSuite(TupleTableFullIndexTest.class);
         suite.addTestSuite(GraphTest.class);
         suite.addTestSuite(ReasonerTest.class);
+        suite.addTestSuite(ReasonerOWLTest.class);
         //suite.addTestSuite(IndividualReuseTest.class);
         return suite;
     }
