@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-// import org.semanticweb.HermiT.HermiT.LoaderType;
 import org.semanticweb.HermiT.blocking.AnywhereBlocking;
 import org.semanticweb.HermiT.blocking.BlockingSignatureCache;
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
@@ -53,12 +52,12 @@ public class HermiTExample {
 	}
 
     public static void printSubsumptionHierarchyAsText(String physicalURI) throws Exception {
-		HermiT hermit = new HermiT();
+		HermiT hermit = new HermiT(physicalURI);
 		//hermit.setLoaderType(LoaderType.KAON2);
-		hermit.loadOntology(physicalURI);
-		SubsumptionHierarchy subsumptionHierarchy = hermit.getSubsumptionHierarchy();
+		//hermit.loadOntology(physicalURI);
+//		SubsumptionHierarchy subsumptionHierarchy = hermit.getSubsumptionHierarchy();
 		PrintWriter output = new PrintWriter(System.out, true);
-		hermit.printFlattenedHierarchy(output, subsumptionHierarchy);
+		hermit.printSortedAncestorLists(output);
 //        
 //        Map<AtomicConcept,Set<AtomicConcept>> flattenedHierarchy=subsumptionHierarchy.getFlattenedHierarchy();
 //        org.semanticweb.HermiT.Namespaces namespaces=new org.semanticweb.HermiT.Namespaces();

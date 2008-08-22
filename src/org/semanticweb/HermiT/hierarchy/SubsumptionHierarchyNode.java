@@ -28,6 +28,9 @@ public class SubsumptionHierarchyNode implements Serializable {
         m_parentNodes=new HashSet<SubsumptionHierarchyNode>();
         m_childNodes=new HashSet<SubsumptionHierarchyNode>();
     }
+    public AtomicConcept getRepresentative() {
+        return m_representativeConcept;
+    }
     public Set<AtomicConcept> getEquivalentConcepts() {
         return m_equivalentConcepts;
     }

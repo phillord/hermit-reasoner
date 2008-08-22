@@ -10,78 +10,93 @@ import java.net.URI;
 public class HermitReasoner implements OWLReasoner {
     static final String mUriBase = "urn:hermit:kb";
 
-    HermiT mHermitButUseTheAccessFunction;
-    java.util.Set<OWLOntology> mOntologies;
-    OWLOntology mOntology;
-    OWLOntologyManager mManager;
-    OWLDataFactory mFactory;
-    int mNextKbId;
+    HermiT hermit;
+    java.util.Set<OWLOntology> ontologies;
+    OWLOntology ontology;
+    OWLOntologyManager manager;
+    OWLDataFactory factory;
+    int nextKbId;
     
-    HermitReasoner(OWLOntologyManager manager) {
-        mManager = manager;
-        mFactory = mManager.getOWLDataFactory();
-        mNextKbId = 1;
+    HermitReasoner(OWLOntologyManager inManager) {
+        manager = inManager;
+        factory = manager.getOWLDataFactory();
+        nextKbId = 1;
         clearOntologies();
-    }
-    
-    protected HermiT getHermit() {
-        try {
-            if (mHermitButUseTheAccessFunction == null) {
-                mHermitButUseTheAccessFunction = new HermiT();
-                mHermitButUseTheAccessFunction.loadOwlOntology(mOntology,mFactory,null);
-            }
-            return mHermitButUseTheAccessFunction;
-        } catch (OWLException e) {
-            throw new RuntimeException("Error classifying ontology.", e);
-        }
     }
     
     // ReasonerBase implementation:
     public void classify() {
-        getHermit();
+            System.out.println("Seeding subsumption cache...");
+        hermit.seedSubsumptionCache();
+            System.out.println("...done");
     }
+
     public void clearOntologies() {
-        mHermitButUseTheAccessFunction = null;
-        mOntologies = new java.util.HashSet<OWLOntology>();
-        mOntology = null;
+        hermit = null;
+        ontologies = new java.util.HashSet<OWLOntology>();
+        ontology = null;
     }
+
     public void dispose() {
         clearOntologies();
     }
+
     public java.util.Set<OWLOntology> getLoadedOntologies() {
-        return mOntologies;
+        return ontologies;
     }
-    public boolean isClassified() { return mHermitButUseTheAccessFunction != null; }
-    public boolean isDefined(OWLClass c)
-        { return mOntology.containsClassReference(c.getURI()); }
-    public boolean isDefined(OWLIndividual i)
-        { return mOntology.containsIndividualReference(i.getURI()); }
-    public boolean isDefined(OWLObjectProperty p)
-        { return mOntology.containsObjectPropertyReference(p.getURI()); }
-    public boolean isDefined(OWLDataProperty p)
-        { return mOntology.containsDataPropertyReference(p.getURI()); }
-    public boolean isRealised() { return false; }
-    public void loadOntologies(java.util.Set<OWLOntology> ontologies) {
+
+    public boolean isClassified() {
+		return hermit != null && hermit.isSubsumptionCacheSeeded();
+	}
+
+    public boolean isDefined(OWLClass c) {
+		return ontology.containsClassReference(c.getURI());
+	}
+    
+	public boolean isDefined(OWLIndividual i) {
+		return ontology.containsIndividualReference(i.getURI());
+	}
+
+    public boolean isDefined(OWLObjectProperty p) {
+        return ontology.containsObjectPropertyReference(p.getURI());
+    }
+
+    public boolean isDefined(OWLDataProperty p) {
+        return ontology.containsDataPropertyReference(p.getURI());
+    }
+    
+    public boolean isRealised() {
+        return false;
+    }
+    
+    public void loadOntologies(java.util.Set<OWLOntology> inOntologies) {
         try {
-            mOntologies = ontologies;
+            ontologies = inOntologies;
             URI theUri = null;
             for (OWLOntology i : ontologies) {
                 theUri = i.getURI();
                 break;
             }
-            mOntology =
+            ontology =
                 new org.semanticweb.owl.util.OWLOntologyMerger(
-                    new SetProviderFromSet(mOntologies)
-                ).createMergedOntology(mManager,theUri);// URI.create(mUriBase + String.valueOf(mNextKbId++)));
-            mHermitButUseTheAccessFunction = null;
+                    new SetProviderFromSet(ontologies)
+                ).createMergedOntology(manager,theUri);// URI.create(mUriBase + String.valueOf(mNextKbId++)));
+            HermiT.Configuration config = new HermiT.Configuration();
+            config.subsumptionCacheStrategyType = HermiT.SubsumptionCacheStrategyType.JUST_IN_TIME;
+            System.out.println("Loading ontology into HermiT...");
+            hermit = new HermiT(ontology, config);
+            System.out.println("...done");
         } catch (OWLException e) {
             throw new RuntimeException("Failed to merge ontologies.", e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Loading was interrupted.");
         }
     }
+    
     public void realise() {}
-    public void unloadOntologies(java.util.Set<OWLOntology> ontologies) {
-        mOntologies.removeAll(ontologies);
-        loadOntologies(mOntologies);
+    public void unloadOntologies(java.util.Set<OWLOntology> inOntologies) {
+        ontologies.removeAll(ontologies);
+        loadOntologies(inOntologies);
     }
 
     class SetProviderFromSet implements OWLOntologySetProvider {
@@ -96,14 +111,15 @@ public class HermitReasoner implements OWLReasoner {
         if (d.isAnonymous()) {
             throw new UnsupportedOperationException("Testing of anonymous classes is not yet supported.");
         }
-        return getHermit().isSatisfiable(d.asOWLClass().getURI().toString());
+        return hermit.isSatisfiable(d.asOWLClass().getURI().toString());
     }
+    
     // ClassReasoner implementation:
     public java.util.Set<java.util.Set<OWLClass>> getDescendantClasses(OWLDescription d) {
         if (d.isAnonymous()) {
             throw new UnsupportedOperationException("Testing of anonymous classes is not yet supported.");
         }
-        SubsumptionHierarchy hier = getHermit().getSubsumptionHierarchy();
+        SubsumptionHierarchy hier = hermit.getSubsumptionHierarchy();
         SubsumptionHierarchyNode node = hier.getNodeFor(
             AtomicConcept.create(d.asOWLClass().getURI().toString()));
         if (node == null) node = hier.thingNode();
@@ -117,18 +133,19 @@ public class HermitReasoner implements OWLReasoner {
             q.addAll(node.getChildNodes());
             java.util.Set<OWLClass> equivalents = new java.util.HashSet<OWLClass>();
             for (AtomicConcept c : node.getEquivalentConcepts()) {
-                equivalents.add(mFactory.getOWLClass(URI.create(c.getURI())));
+                equivalents.add(factory.getOWLClass(URI.create(c.getURI())));
             }
             r.add(equivalents);
             visited.add(node);
         }
         return r;
     }
+    
     public java.util.Set<java.util.Set<OWLClass>> getAncestorClasses(OWLDescription d) {
         if (d.isAnonymous()) {
             throw new UnsupportedOperationException("Testing of anonymous classes is not yet supported.");
         }
-        SubsumptionHierarchy hier = getHermit().getSubsumptionHierarchy();
+        SubsumptionHierarchy hier = hermit.getSubsumptionHierarchy();
         SubsumptionHierarchyNode node = hier.getNodeFor(
             AtomicConcept.create(d.asOWLClass().getURI().toString()));
         if (node == null) node = hier.thingNode();
@@ -142,7 +159,7 @@ public class HermitReasoner implements OWLReasoner {
             q.addAll(node.getParentNodes());
             java.util.Set<OWLClass> equivalents = new java.util.HashSet<OWLClass>();
             for (AtomicConcept c : node.getEquivalentConcepts()) {
-                equivalents.add(mFactory.getOWLClass(URI.create(c.getURI())));
+                equivalents.add(factory.getOWLClass(URI.create(c.getURI())));
             }
             r.add(equivalents);
             visited.add(node);
@@ -153,30 +170,32 @@ public class HermitReasoner implements OWLReasoner {
         if (d.isAnonymous()) {
             throw new UnsupportedOperationException("Testing of anonymous classes is not yet supported.");
         }
-        SubsumptionHierarchy hier = getHermit().getSubsumptionHierarchy();
+        SubsumptionHierarchy hier = hermit.getSubsumptionHierarchy();
         SubsumptionHierarchyNode node = hier.getNodeFor(
             AtomicConcept.create(d.asOWLClass().getURI().toString()));
         if (node == null) node = hier.thingNode();
         
         java.util.Set<OWLClass> r = new java.util.HashSet<OWLClass>();
         for (AtomicConcept c : node.getEquivalentConcepts()) {
-            r.add(mFactory.getOWLClass(URI.create(c.getURI())));
+            r.add(factory.getOWLClass(URI.create(c.getURI())));
         }
         return r;
     }
+    
     public java.util.Set<OWLClass> getInconsistentClasses() {
-        SubsumptionHierarchyNode node = getHermit().getSubsumptionHierarchy().nothingNode();        
+        SubsumptionHierarchyNode node = hermit.getSubsumptionHierarchy().nothingNode();        
         java.util.Set<OWLClass> r = new java.util.HashSet<OWLClass>();
         for (AtomicConcept c : node.getEquivalentConcepts()) {
-            r.add(mFactory.getOWLClass(URI.create(c.getURI())));
+            r.add(factory.getOWLClass(URI.create(c.getURI())));
         }
         return r;
     }
+    
     public java.util.Set<java.util.Set<OWLClass>> getSubClasses(OWLDescription d) {
         if (d.isAnonymous()) {
             throw new UnsupportedOperationException("Testing of anonymous classes is not yet supported.");
         }
-        SubsumptionHierarchy hier = getHermit().getSubsumptionHierarchy();
+        SubsumptionHierarchy hier = hermit.getSubsumptionHierarchy();
         SubsumptionHierarchyNode node = hier.getNodeFor(
             AtomicConcept.create(d.asOWLClass().getURI().toString()));
         if (node == null) node = hier.thingNode();
@@ -185,7 +204,7 @@ public class HermitReasoner implements OWLReasoner {
         for (SubsumptionHierarchyNode i : node.getChildNodes()) {
             java.util.Set<OWLClass> equivalents = new java.util.HashSet<OWLClass>();
             for (AtomicConcept c : i.getEquivalentConcepts()) {
-                equivalents.add(mFactory.getOWLClass(URI.create(c.getURI())));
+                equivalents.add(factory.getOWLClass(URI.create(c.getURI())));
             }
             r.add(equivalents);
         }
@@ -195,7 +214,7 @@ public class HermitReasoner implements OWLReasoner {
         if (d.isAnonymous()) {
             throw new UnsupportedOperationException("Testing of anonymous classes is not yet supported.");
         }
-        SubsumptionHierarchy hier = getHermit().getSubsumptionHierarchy();
+        SubsumptionHierarchy hier = hermit.getSubsumptionHierarchy();
         SubsumptionHierarchyNode node = hier.getNodeFor(
             AtomicConcept.create(d.asOWLClass().getURI().toString()));
         if (node == null) node = hier.thingNode();
@@ -204,7 +223,7 @@ public class HermitReasoner implements OWLReasoner {
         for (SubsumptionHierarchyNode i : node.getParentNodes()) {
             java.util.Set<OWLClass> equivalents = new java.util.HashSet<OWLClass>();
             for (AtomicConcept c : i.getEquivalentConcepts()) {
-                equivalents.add(mFactory.getOWLClass(URI.create(c.getURI())));
+                equivalents.add(factory.getOWLClass(URI.create(c.getURI())));
             }
             r.add(equivalents);
         }
@@ -214,13 +233,13 @@ public class HermitReasoner implements OWLReasoner {
         return isSubClassOf(c, d) && isSubClassOf(d, c);
     }
     public boolean isSubClassOf(OWLDescription subclass, OWLDescription superclass) {
-        return getHermit().isSubsumedBy(AtomicConcept.create(subclass.asOWLClass().getURI().toString()),
-                                        AtomicConcept.create(superclass.asOWLClass().getURI().toString()));
+        return hermit.isSubsumedBy(AtomicConcept.create(subclass.asOWLClass().getURI().toString()),
+                                   AtomicConcept.create(superclass.asOWLClass().getURI().toString()));
     }
     
     // ConsistencyChecker implementation:
     public boolean isConsistent(OWLOntology ignored) {
-        return getHermit().isABoxSatisfiable();
+        return hermit.isABoxSatisfiable();
     }
     
     // IndividualReasoner stubs: (not yet implemented)
