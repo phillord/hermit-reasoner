@@ -30,6 +30,8 @@ public final class Node implements Serializable {
     protected int m_fromParentLabelHashCode;
     protected Set<AtomicAbstractRole> m_toParentLabel;
     protected int m_toParentLabelHashCode;
+    protected Set<AtomicAbstractRole> m_toSelfLabel;
+    protected int m_toSelfLabelHashCode;
     protected List<ExistentialConcept> m_unprocessedExistentials;
     protected Node m_previousTableauNode;
     protected Node m_nextTableauNode;
@@ -70,6 +72,8 @@ public final class Node implements Serializable {
         m_fromParentLabelHashCode=0;
         m_toParentLabel=null;
         m_toParentLabelHashCode=0;
+        m_toSelfLabel=null;
+        m_toSelfLabelHashCode=0;
         m_unprocessedExistentials=NO_EXISTENTIALS;
         m_previousTableauNode=null;
         m_nextTableauNode=null;
@@ -101,6 +105,10 @@ public final class Node implements Serializable {
             m_tableau.m_labelManager.removeAtomicAbstractRoleSetReference(m_toParentLabel);
             m_toParentLabel=null;
         }
+        if (m_toSelfLabel!=null) {
+            m_tableau.m_labelManager.removeAtomicAbstractRoleSetReference(m_toSelfLabel);
+            m_toSelfLabel=null;
+        }
         if (m_unprocessedExistentials!=NO_EXISTENTIALS) {
             m_unprocessedExistentials.clear();
             m_tableau.putExistentialConceptsBuffer(m_unprocessedExistentials);
@@ -125,6 +133,8 @@ public final class Node implements Serializable {
             m_tableau.m_labelManager.removeAtomicAbstractRoleSetReference(m_fromParentLabel);
         if (m_toParentLabel!=null)
             m_tableau.m_labelManager.removeAtomicAbstractRoleSetReference(m_toParentLabel);
+        if (m_toSelfLabel!=null)
+            m_tableau.m_labelManager.removeAtomicAbstractRoleSetReference(m_toSelfLabel);
         if (m_unprocessedExistentials!=NO_EXISTENTIALS && m_unprocessedExistentials!=null) {
             m_unprocessedExistentials.clear();
             m_tableau.putExistentialConceptsBuffer(m_unprocessedExistentials);
@@ -301,6 +311,30 @@ public final class Node implements Serializable {
             m_toParentLabel=null;
         }
         m_toParentLabelHashCode-=atomicAbstractRole.hashCode();
+    }
+    public Set<AtomicAbstractRole> getToSelfLabel() {
+        if (m_toSelfLabel==null) {
+            m_toSelfLabel=m_tableau.m_labelManager.getEdgeLabel(this,this);
+            m_tableau.m_labelManager.addAtomicAbstractRoleSetReference(m_toSelfLabel);
+        }
+        return m_toParentLabel;
+    }
+    public int getToSelfLabelHashCode() {
+        return m_toSelfLabelHashCode;
+    }
+    protected void addToToSelfLabel(AtomicAbstractRole atomicAbstractRole) {
+        if (m_toSelfLabel!=null) {
+            m_tableau.m_labelManager.removeAtomicAbstractRoleSetReference(m_toSelfLabel);
+            m_toSelfLabel=null;
+        }
+        m_toSelfLabelHashCode+=atomicAbstractRole.hashCode();
+    }
+    protected void removeFromToSelfLabel(AtomicAbstractRole atomicAbstractRole) {
+        if (m_toSelfLabel!=null) {
+            m_tableau.m_labelManager.removeAtomicAbstractRoleSetReference(m_toSelfLabel);
+            m_toSelfLabel=null;
+        }
+        m_toSelfLabelHashCode-=atomicAbstractRole.hashCode();
     }
     protected void addToUnprocessedExistentials(ExistentialConcept existentialConcept) {
         if (m_unprocessedExistentials==NO_EXISTENTIALS) {

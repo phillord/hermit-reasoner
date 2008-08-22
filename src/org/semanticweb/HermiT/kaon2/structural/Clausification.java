@@ -1,23 +1,72 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.kaon2.structural;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
-import java.util.HashMap;
-import java.util.Collection;
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.Set;
 
-import org.semanticweb.kaon2.api.*;
-import org.semanticweb.kaon2.api.owl.elements.*;
-import org.semanticweb.kaon2.api.owl.axioms.*;
-import org.semanticweb.kaon2.api.logic.*;
-
-import org.semanticweb.HermiT.model.*;
+import org.semanticweb.HermiT.model.AbstractRole;
+import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
+import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
+import org.semanticweb.HermiT.model.Atom;
+import org.semanticweb.HermiT.model.AtomicAbstractRole;
+import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.AtomicNegationConcept;
+import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.model.DLOntology;
+import org.semanticweb.HermiT.model.DLPredicate;
+import org.semanticweb.HermiT.model.DescriptionGraph;
+import org.semanticweb.HermiT.model.Equality;
+import org.semanticweb.HermiT.model.Inequality;
+import org.semanticweb.HermiT.model.InverseAbstractRole;
+import org.semanticweb.HermiT.model.LiteralConcept;
+import org.semanticweb.HermiT.model.NodeIDLessThan;
+import org.semanticweb.kaon2.api.Fact;
+import org.semanticweb.kaon2.api.KAON2Exception;
+import org.semanticweb.kaon2.api.KAON2Manager;
+import org.semanticweb.kaon2.api.Namespaces;
+import org.semanticweb.kaon2.api.Ontology;
+import org.semanticweb.kaon2.api.logic.Literal;
+import org.semanticweb.kaon2.api.logic.Predicate;
+import org.semanticweb.kaon2.api.logic.Rule;
+import org.semanticweb.kaon2.api.owl.axioms.ClassMember;
+import org.semanticweb.kaon2.api.owl.axioms.DataPropertyMember;
+import org.semanticweb.kaon2.api.owl.axioms.DifferentIndividuals;
+import org.semanticweb.kaon2.api.owl.axioms.InverseObjectProperties;
+import org.semanticweb.kaon2.api.owl.axioms.NegativeDataPropertyMember;
+import org.semanticweb.kaon2.api.owl.axioms.NegativeObjectPropertyMember;
+import org.semanticweb.kaon2.api.owl.axioms.ObjectPropertyAttribute;
+import org.semanticweb.kaon2.api.owl.axioms.ObjectPropertyMember;
+import org.semanticweb.kaon2.api.owl.axioms.SameIndividual;
+import org.semanticweb.kaon2.api.owl.elements.DataAll;
+import org.semanticweb.kaon2.api.owl.elements.DataCardinality;
+import org.semanticweb.kaon2.api.owl.elements.DataHasValue;
+import org.semanticweb.kaon2.api.owl.elements.DataNot;
+import org.semanticweb.kaon2.api.owl.elements.DataOneOf;
+import org.semanticweb.kaon2.api.owl.elements.DataPropertyExpression;
+import org.semanticweb.kaon2.api.owl.elements.DataSome;
+import org.semanticweb.kaon2.api.owl.elements.DatatypeRestriction;
+import org.semanticweb.kaon2.api.owl.elements.Description;
+import org.semanticweb.kaon2.api.owl.elements.InverseObjectProperty;
+import org.semanticweb.kaon2.api.owl.elements.OWLClass;
+import org.semanticweb.kaon2.api.owl.elements.ObjectAll;
+import org.semanticweb.kaon2.api.owl.elements.ObjectAnd;
+import org.semanticweb.kaon2.api.owl.elements.ObjectCardinality;
+import org.semanticweb.kaon2.api.owl.elements.ObjectExistsSelf;
+import org.semanticweb.kaon2.api.owl.elements.ObjectHasValue;
+import org.semanticweb.kaon2.api.owl.elements.ObjectNot;
+import org.semanticweb.kaon2.api.owl.elements.ObjectOneOf;
+import org.semanticweb.kaon2.api.owl.elements.ObjectOr;
+import org.semanticweb.kaon2.api.owl.elements.ObjectProperty;
+import org.semanticweb.kaon2.api.owl.elements.ObjectPropertyExpression;
+import org.semanticweb.kaon2.api.owl.elements.ObjectSome;
 
 /**
  * This class implements the clausification part of the HermiT algorithm;
@@ -29,9 +78,25 @@ public class Clausification {
     public DLOntology clausify(boolean prepareForNIRule,Ontology ontology,Collection<DescriptionGraph> descriptionGraphs) throws KAON2Exception {
         Normalization normalization=new Normalization();
         normalization.processOntology(ontology);
-        return clausify(prepareForNIRule,ontology.getOntologyURI(),normalization.getConceptInclusions(),normalization.getNormalObjectPropertyInclusions(),normalization.getInverseObjectPropertyInclusions(),normalization.getNormalDataPropertyInclusios(),normalization.getFacts(),descriptionGraphs,normalization.getRules());
+        return clausify(prepareForNIRule,
+        		        ontology.getOntologyURI(),
+        		        normalization.getConceptInclusions(),
+        		        normalization.getNormalObjectPropertyInclusions(),
+        		        normalization.getInverseObjectPropertyInclusions(),
+        		        normalization.getAsymmetricObjectProperties(), 
+        		        normalization.getNormalDataPropertyInclusios(),
+        		        normalization.getFacts(),descriptionGraphs,
+        		        normalization.getRules());
     }
-    public DLOntology clausify(boolean prepareForNIRule,String ontologyURI,Collection<Description[]> conceptInclusions,Collection<ObjectPropertyExpression[]> normalObjectPropertyInclusions,Collection<ObjectPropertyExpression[]> inverseObjectPropertyInclusions,Collection<DataPropertyExpression[]> inverseDataPropertyInclusions,Collection<Fact> facts,Collection<DescriptionGraph> descriptionGraphs,Collection<Rule> additionalRules) throws KAON2Exception {
+    public DLOntology clausify(boolean prepareForNIRule,
+    		                   String ontologyURI,
+    		                   Collection<Description[]> conceptInclusions,
+    		                   Collection<ObjectPropertyExpression[]> normalObjectPropertyInclusions,
+    		                   Collection<ObjectPropertyExpression[]> inverseObjectPropertyInclusions,
+    		                   Collection<ObjectPropertyExpression> antisymmetricObjectProperties, 
+    		                   Collection<DataPropertyExpression[]> inverseDataPropertyInclusions,
+    		                   Collection<Fact> facts,Collection<DescriptionGraph> descriptionGraphs,
+    		                   Collection<Rule> additionalRules) throws KAON2Exception {
         DetermineExpressivity determineExpressivity=new DetermineExpressivity();
         for (Description[] inclusion : conceptInclusions)
             for (Description description : inclusion)
@@ -65,6 +130,12 @@ public class Clausification {
             DLClause dlClause=DLClause.create(new Atom[] { superRoleAtom },new Atom[] { subRoleAtom });
             dlClauses.add(dlClause);
         }
+        for (ObjectPropertyExpression axiom : antisymmetricObjectProperties) {
+        	Atom roleAtom=getAbstractRoleAtom(axiom,X,Y);
+            Atom inverseRoleAtom=getAbstractRoleAtom(axiom,Y,X);
+        	DLClause dlClause = DLClause.create(new Atom[] { roleAtom, inverseRoleAtom }, new Atom[] { });
+        	dlClauses.add(dlClause);
+        }
         boolean shouldUseNIRule=determineExpressivity.m_hasAtMostRestrictions && determineExpressivity.m_hasInverseRoles && (determineExpressivity.m_hasNominals || prepareForNIRule);
         Clausifier clausifier=new Clausifier(positiveFacts,shouldUseNIRule);
         for (Description[] inclusion : conceptInclusions) {
@@ -81,7 +152,15 @@ public class Clausification {
             descriptionGraph.produceStartDLClauses(dlClauses);
         for (Rule rule : additionalRules)
             convertRule(rule,dlClauses);
-        return new DLOntology(ontologyURI,dlClauses,positiveFacts,negativeFacts,determineExpressivity.m_hasInverseRoles,determineExpressivity.m_hasAtMostRestrictions,determineExpressivity.m_hasNominals,shouldUseNIRule);
+        return new DLOntology(ontologyURI,
+        		              dlClauses,
+        		              positiveFacts,
+        		              negativeFacts,
+        		              determineExpressivity.m_hasInverseRoles,
+        		              determineExpressivity.m_hasAtMostRestrictions,
+        		              determineExpressivity.m_hasNominals,
+        		              shouldUseNIRule,
+        		              determineExpressivity.m_hasReflexivity);
     }
     protected static Atom getAbstractRoleAtom(ObjectPropertyExpression objectProperty,org.semanticweb.HermiT.model.Term first,org.semanticweb.HermiT.model.Term second) {
         objectProperty=objectProperty.getSimplified();
@@ -490,6 +569,7 @@ public class Clausification {
         protected boolean m_hasAtMostRestrictions;
         protected boolean m_hasInverseRoles;
         protected boolean m_hasNominals;
+        protected boolean m_hasReflexivity = false;
         
         public Object visit(InverseObjectProperty object) {
             m_hasInverseRoles=true;

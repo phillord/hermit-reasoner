@@ -1,12 +1,12 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.BufferedInputStream;
-import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,33 +15,52 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-import org.semanticweb.HermiT.kaon2.structural.*;
+import org.semanticweb.HermiT.blocking.AncestorBlocking;
+import org.semanticweb.HermiT.blocking.AnywhereBlocking;
+import org.semanticweb.HermiT.blocking.BlockingSignatureCache;
+import org.semanticweb.HermiT.blocking.BlockingStrategy;
+import org.semanticweb.HermiT.blocking.DirectBlockingChecker;
+import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
+import org.semanticweb.HermiT.blocking.PairwiseDirectBlockingCheckerWithReflexivity;
+import org.semanticweb.HermiT.blocking.SingleDirectBlockingChecker;
+import org.semanticweb.HermiT.debugger.Debugger;
+import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
+import org.semanticweb.HermiT.existentials.ExistentialsExpansionStrategy;
+import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
+import org.semanticweb.HermiT.hierarchy.SubsumptionHierarchy;
+import org.semanticweb.HermiT.hierarchy.TableauSubsumptionChecker;
+import org.semanticweb.HermiT.kaon2.structural.Clausification;
+import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.model.DLOntology;
+import org.semanticweb.HermiT.model.DescriptionGraph;
+import org.semanticweb.HermiT.model.LiteralConcept;
+import org.semanticweb.HermiT.monitor.TableauMonitor;
+import org.semanticweb.HermiT.monitor.TableauMonitorFork;
+import org.semanticweb.HermiT.monitor.Timer;
+import org.semanticweb.HermiT.monitor.TimerWithPause;
+import org.semanticweb.HermiT.owlapi.structural.OwlClausification;
+import org.semanticweb.HermiT.tableau.Tableau;
 import org.semanticweb.kaon2.api.KAON2Exception;
 import org.semanticweb.kaon2.api.Ontology;
-
-import org.semanticweb.HermiT.owlapi.structural.*;
 import org.semanticweb.owl.apibinding.OWLManager;
-import org.semanticweb.owl.model.*;
-import java.net.URI;
-
-import org.semanticweb.HermiT.model.*;
-import org.semanticweb.HermiT.monitor.*;
-import org.semanticweb.HermiT.existentials.*;
-import org.semanticweb.HermiT.blocking.*;
-import org.semanticweb.HermiT.tableau.*;
-import org.semanticweb.HermiT.hierarchy.*;
-import org.semanticweb.HermiT.debugger.*;
+import org.semanticweb.owl.model.OWLDataFactory;
+import org.semanticweb.owl.model.OWLException;
+import org.semanticweb.owl.model.OWLOntology;
+import org.semanticweb.owl.model.OWLOntologyManager;
 
 public class HermiT implements Serializable {
-    private static final long serialVersionUID=-8277117863937974032L;
+	private static final long serialVersionUID=-8277117863937974032L;
 
+	public static enum LoaderType { KAON2, OWLAPI };
     public static enum TableauMonitorType { NONE,TIMING,TIMING_WITH_PAUSE,DEBUGGER_NO_HISTORY,DEBUGGER_HISTORY_ON };
     public static enum DirectBlockingType { PAIR_WISE,SINGLE,OPTIMAL };
     public static enum BlockingStrategyType { ANYWHERE,ANCESTOR };
@@ -50,6 +69,7 @@ public class HermiT implements Serializable {
 	public static enum ParserType { KAON2, OWLAPI };
 	public static enum SubsumptionCacheType { IMMEDIATE, JUST_IN_TIME, ON_REQUEST };
 	public static class Configuration {
+		public LoaderType loaderType;
 		public TableauMonitorType tableauMonitorType;
 		public DirectBlockingType directBlockingType;
 		public BlockingStrategyType blockingStrategyType;
@@ -59,6 +79,7 @@ public class HermiT implements Serializable {
 		public SubsumptionCacheType subsumptionCacheType;
 		public final Map<String,Object> parameters;
 		public Configuration() {
+			loaderType = LoaderType.OWLAPI;
 	        tableauMonitorType = TableauMonitorType.NONE;
 	        directBlockingType = DirectBlockingType.OPTIMAL;
 	        blockingStrategyType = BlockingStrategyType.ANYWHERE;
@@ -69,11 +90,12 @@ public class HermiT implements Serializable {
 			parameters = new HashMap<String,Object>();
 		}
 	}
-
+    
 	protected final Configuration m_config;
     protected DLOntology m_dlOntology;
     protected Namespaces m_namespaces;
     protected TableauMonitor m_userTableauMonitor;
+    protected LoaderType m_loaderType;
     protected Tableau m_tableau;
     protected TableauSubsumptionChecker m_subsumptionChecker;
     
@@ -212,13 +234,28 @@ public class HermiT implements Serializable {
         DirectBlockingChecker directBlockingChecker=null;
         switch (m_config.directBlockingType) {
         case OPTIMAL:
-            directBlockingChecker=(m_dlOntology.hasAtMostRestrictions() && m_dlOntology.hasInverseRoles() ? new PairWiseDirectBlockingChecker() : new SingleDirectBlockingChecker());
+        	if (m_dlOntology.hasAtMostRestrictions() && m_dlOntology.hasInverseRoles()) {
+        		// commented out since at the moment we only get clauses that do not require to 
+        		// check for self loops in the blocking
+//        		if (m_dlOntology.hasReflexifity()) {
+//        			directBlockingChecker = new PairwiseDirectBlockingCheckerWithReflexivity(); 
+//        		} else {
+        			directBlockingChecker = new PairWiseDirectBlockingChecker();
+//        		}
+        	} else {
+        		directBlockingChecker = new SingleDirectBlockingChecker();
+        	}
+            //directBlockingChecker=(m_dlOntology.hasAtMostRestrictions() && m_dlOntology.hasInverseRoles() ? new PairWiseDirectBlockingChecker() : new SingleDirectBlockingChecker());
             break;
         case SINGLE:
             directBlockingChecker=new SingleDirectBlockingChecker();
             break;
         case PAIR_WISE:
-            directBlockingChecker=new PairWiseDirectBlockingChecker();
+        	if (m_dlOntology.hasReflexifity()) {
+        		directBlockingChecker = new PairwiseDirectBlockingCheckerWithReflexivity();
+        	} else {
+        		directBlockingChecker = new PairWiseDirectBlockingChecker();
+        	}
             break;
         }
         

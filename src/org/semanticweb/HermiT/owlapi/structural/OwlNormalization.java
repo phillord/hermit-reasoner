@@ -1,19 +1,78 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.owlapi.structural;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import org.semanticweb.owl.model.*;
-import org.semanticweb.HermiT.model.AbstractRole;
-import org.semanticweb.HermiT.model.AtomicAbstractRole;
-import org.semanticweb.HermiT.RoleBox;
-import java.net.URI;
+import org.semanticweb.owl.model.OWLAntiSymmetricObjectPropertyAxiom;
+import org.semanticweb.owl.model.OWLAxiom;
+import org.semanticweb.owl.model.OWLAxiomAnnotationAxiom;
+import org.semanticweb.owl.model.OWLClass;
+import org.semanticweb.owl.model.OWLClassAssertionAxiom;
+import org.semanticweb.owl.model.OWLDataAllRestriction;
+import org.semanticweb.owl.model.OWLDataExactCardinalityRestriction;
+import org.semanticweb.owl.model.OWLDataFactory;
+import org.semanticweb.owl.model.OWLDataMaxCardinalityRestriction;
+import org.semanticweb.owl.model.OWLDataMinCardinalityRestriction;
+import org.semanticweb.owl.model.OWLDataPropertyAssertionAxiom;
+import org.semanticweb.owl.model.OWLDataPropertyDomainAxiom;
+import org.semanticweb.owl.model.OWLDataPropertyExpression;
+import org.semanticweb.owl.model.OWLDataPropertyRangeAxiom;
+import org.semanticweb.owl.model.OWLDataRange;
+import org.semanticweb.owl.model.OWLDataSomeRestriction;
+import org.semanticweb.owl.model.OWLDataSubPropertyAxiom;
+import org.semanticweb.owl.model.OWLDataValueRestriction;
+import org.semanticweb.owl.model.OWLDeclarationAxiom;
+import org.semanticweb.owl.model.OWLDescription;
+import org.semanticweb.owl.model.OWLDescriptionVisitorEx;
+import org.semanticweb.owl.model.OWLDifferentIndividualsAxiom;
+import org.semanticweb.owl.model.OWLDisjointClassesAxiom;
+import org.semanticweb.owl.model.OWLDisjointDataPropertiesAxiom;
+import org.semanticweb.owl.model.OWLDisjointObjectPropertiesAxiom;
+import org.semanticweb.owl.model.OWLEntityAnnotationAxiom;
+import org.semanticweb.owl.model.OWLEquivalentClassesAxiom;
+import org.semanticweb.owl.model.OWLEquivalentDataPropertiesAxiom;
+import org.semanticweb.owl.model.OWLEquivalentObjectPropertiesAxiom;
+import org.semanticweb.owl.model.OWLException;
+import org.semanticweb.owl.model.OWLFunctionalDataPropertyAxiom;
+import org.semanticweb.owl.model.OWLFunctionalObjectPropertyAxiom;
+import org.semanticweb.owl.model.OWLImportsDeclaration;
+import org.semanticweb.owl.model.OWLIndividual;
+import org.semanticweb.owl.model.OWLIndividualAxiom;
+import org.semanticweb.owl.model.OWLInverseFunctionalObjectPropertyAxiom;
+import org.semanticweb.owl.model.OWLInverseObjectPropertiesAxiom;
+import org.semanticweb.owl.model.OWLIrreflexiveObjectPropertyAxiom;
+import org.semanticweb.owl.model.OWLNegativeObjectPropertyAssertionAxiom;
+import org.semanticweb.owl.model.OWLObjectAllRestriction;
+import org.semanticweb.owl.model.OWLObjectComplementOf;
+import org.semanticweb.owl.model.OWLObjectExactCardinalityRestriction;
+import org.semanticweb.owl.model.OWLObjectIntersectionOf;
+import org.semanticweb.owl.model.OWLObjectMaxCardinalityRestriction;
+import org.semanticweb.owl.model.OWLObjectMinCardinalityRestriction;
+import org.semanticweb.owl.model.OWLObjectOneOf;
+import org.semanticweb.owl.model.OWLObjectPropertyAssertionAxiom;
+import org.semanticweb.owl.model.OWLObjectPropertyChainSubPropertyAxiom;
+import org.semanticweb.owl.model.OWLObjectPropertyDomainAxiom;
+import org.semanticweb.owl.model.OWLObjectPropertyExpression;
+import org.semanticweb.owl.model.OWLObjectPropertyRangeAxiom;
+import org.semanticweb.owl.model.OWLObjectSelfRestriction;
+import org.semanticweb.owl.model.OWLObjectSomeRestriction;
+import org.semanticweb.owl.model.OWLObjectSubPropertyAxiom;
+import org.semanticweb.owl.model.OWLObjectUnionOf;
+import org.semanticweb.owl.model.OWLObjectValueRestriction;
+import org.semanticweb.owl.model.OWLOntology;
+import org.semanticweb.owl.model.OWLOntologyAnnotationAxiom;
+import org.semanticweb.owl.model.OWLReflexiveObjectPropertyAxiom;
+import org.semanticweb.owl.model.OWLSameIndividualsAxiom;
+import org.semanticweb.owl.model.OWLSubClassAxiom;
+import org.semanticweb.owl.model.OWLSymmetricObjectPropertyAxiom;
+import org.semanticweb.owl.model.OWLTransitiveObjectPropertyAxiom;
 
 /**
  * This class implements the structural transformation from our new tableau paper. This transformation departs in the following way from the paper:
@@ -26,6 +85,11 @@ public class OwlNormalization {
     protected final Collection<OWLDescription[]> m_conceptInclusions;
     protected Collection<OWLObjectPropertyExpression[]> m_objectPropertyInclusions;
     protected final Collection<OWLDataPropertyExpression[]> m_dataPropertyInclusions;
+    protected final Set<OWLObjectPropertyExpression> m_asymmetricObjectProperties;
+    protected final Set<OWLObjectPropertyExpression> m_reflexiveObjectProperties;
+    protected final Set<OWLObjectPropertyExpression> m_irreflexiveObjectProperties;
+    protected final Set<OWLObjectPropertyExpression[]> m_disjointObjectProperties;
+    protected final Set<OWLDataPropertyExpression[]> m_disjointDataProperties;
     protected final Collection<OWLIndividualAxiom> m_facts;
     protected final OWLDataFactory m_factory;
     
@@ -35,6 +99,11 @@ public class OwlNormalization {
         m_conceptInclusions=new ArrayList<OWLDescription[]>();
         m_objectPropertyInclusions=new ArrayList<OWLObjectPropertyExpression[]>(); 
         m_dataPropertyInclusions=new ArrayList<OWLDataPropertyExpression[]>();
+        m_asymmetricObjectProperties = new HashSet<OWLObjectPropertyExpression>();
+        m_reflexiveObjectProperties = new HashSet<OWLObjectPropertyExpression>();
+        m_irreflexiveObjectProperties = new HashSet<OWLObjectPropertyExpression>();
+        m_disjointObjectProperties = new HashSet<OWLObjectPropertyExpression[]>();
+        m_disjointDataProperties = new HashSet<OWLDataPropertyExpression[]>();
         m_facts=new HashSet<OWLIndividualAxiom>();
         m_factory = factory;
     }
@@ -47,7 +116,22 @@ public class OwlNormalization {
     public Collection<OWLDataPropertyExpression[]> getDataPropertyInclusions() {
         return m_dataPropertyInclusions;
     }
-    public Collection<OWLIndividualAxiom> getFacts() {
+    public Set<OWLObjectPropertyExpression> getAsymmetricObjectProperties() {
+        return m_asymmetricObjectProperties;
+    }
+    public Set<OWLObjectPropertyExpression> getReflexiveObjectProperties() {
+		return m_reflexiveObjectProperties;
+	}
+	public Set<OWLObjectPropertyExpression> getIrreflexiveObjectProperties() {
+		return m_irreflexiveObjectProperties;
+	}
+	public Set<OWLObjectPropertyExpression[]> getDisjointObjectProperties() {
+		return m_disjointObjectProperties;
+	}
+	public Set<OWLDataPropertyExpression[]> getDisjointDataProperties() {
+		return m_disjointDataProperties;
+	}
+	public Collection<OWLIndividualAxiom> getFacts() {
         return m_facts;
     }
     protected OWLDescription simplify(OWLDescription d) {
@@ -74,6 +158,11 @@ public class OwlNormalization {
                 OWLObjectPropertyExpression subObjectProperty=axiom.getSubProperty().getSimplified();
                 OWLObjectPropertyExpression superObjectProperty=axiom.getSuperProperty().getSimplified();
                 roleManager.addInclusion(subObjectProperty,superObjectProperty);
+			} else if (untyped_axiom instanceof OWLObjectPropertyChainSubPropertyAxiom) {
+				OWLObjectPropertyChainSubPropertyAxiom axiom = (OWLObjectPropertyChainSubPropertyAxiom)(untyped_axiom);
+				List<OWLObjectPropertyExpression> objectPropertyChain = axiom.getPropertyChain();
+				OWLObjectPropertyExpression superObjectProperty = axiom.getSuperProperty().getSimplified();
+				throw new RuntimeException("Object property chains are not yet supported."); // until Rob changes this...
 			} else if (untyped_axiom instanceof OWLEquivalentObjectPropertiesAxiom) {
                 OWLEquivalentObjectPropertiesAxiom axiom = (OWLEquivalentObjectPropertiesAxiom)(untyped_axiom);
                 OWLObjectPropertyExpression[] objectProperties=new OWLObjectPropertyExpression[axiom.getProperties().size()];
@@ -152,19 +241,27 @@ public class OwlNormalization {
                 inclusions.add(new OWLDescription[] { allPropertyRange });
 			} else if (untyped_axiom instanceof OWLAntiSymmetricObjectPropertyAxiom) {
                 OWLAntiSymmetricObjectPropertyAxiom axiom = (OWLAntiSymmetricObjectPropertyAxiom)(untyped_axiom);
-			    throw new RuntimeException("OWL 2.0 role axioms are not yet supported."); // until Birte changes this...
+        		OWLObjectPropertyExpression objectProperty = axiom.getProperty().getSimplified();
+        		m_asymmetricObjectProperties.add(objectProperty);
 			} else if (untyped_axiom instanceof OWLDisjointDataPropertiesAxiom) {
                 OWLDisjointDataPropertiesAxiom axiom = (OWLDisjointDataPropertiesAxiom)(untyped_axiom);
-			    throw new RuntimeException("OWL 2.0 role axioms are not yet supported."); // until Birte changes this...
+                OWLDataPropertyExpression[] dataProperties = new OWLDataPropertyExpression[axiom.getProperties().size()];
+                axiom.getProperties().toArray(dataProperties);
 			} else if (untyped_axiom instanceof OWLDisjointObjectPropertiesAxiom) {
                 OWLDisjointObjectPropertiesAxiom axiom = (OWLDisjointObjectPropertiesAxiom)(untyped_axiom);
-			    throw new RuntimeException("OWL 2.0 role axioms are not yet supported."); // until Birte changes this...
+                OWLObjectPropertyExpression[] objectProperties = new OWLObjectPropertyExpression[axiom.getProperties().size()];
+                axiom.getProperties().toArray(objectProperties);
+                for (int i=0;i<objectProperties.length;i++)
+                    objectProperties[i]=objectProperties[i].getSimplified();
+                m_disjointObjectProperties.add(objectProperties);
 			} else if (untyped_axiom instanceof OWLIrreflexiveObjectPropertyAxiom) {
                 OWLIrreflexiveObjectPropertyAxiom axiom = (OWLIrreflexiveObjectPropertyAxiom)(untyped_axiom);
-			    throw new RuntimeException("OWL 2.0 role axioms are not yet supported."); // until Birte changes this...
+                OWLObjectPropertyExpression objectProperty = axiom.getProperty().getSimplified();
+        		m_irreflexiveObjectProperties.add(objectProperty);
 			} else if (untyped_axiom instanceof OWLReflexiveObjectPropertyAxiom) {
                 OWLReflexiveObjectPropertyAxiom axiom = (OWLReflexiveObjectPropertyAxiom)(untyped_axiom);
-			    throw new RuntimeException("OWL 2.0 role axioms are not yet supported."); // until Birte changes this...
+                OWLObjectPropertyExpression objectProperty = axiom.getProperty().getSimplified();
+        		m_reflexiveObjectProperties.add(objectProperty);
 			} else if (untyped_axiom instanceof OWLClassAssertionAxiom) {
                 OWLClassAssertionAxiom axiom = (OWLClassAssertionAxiom)(untyped_axiom);
                 OWLDescription desc=simplify(axiom.getDescription().getNNF());
@@ -182,6 +279,24 @@ public class OwlNormalization {
 			} else if (untyped_axiom instanceof OWLObjectPropertyAssertionAxiom) {
                 OWLObjectPropertyAssertionAxiom axiom = (OWLObjectPropertyAssertionAxiom)(untyped_axiom);
                 m_facts.add(m_factory.getOWLObjectPropertyAssertionAxiom(axiom.getSubject(),axiom.getProperty().getSimplified(),axiom.getObject()));
+			} else if (untyped_axiom instanceof OWLNegativeObjectPropertyAssertionAxiom) {
+				OWLNegativeObjectPropertyAssertionAxiom axiom = (OWLNegativeObjectPropertyAssertionAxiom)(untyped_axiom);
+				OWLObjectOneOf nominal = m_factory.getOWLObjectOneOf(axiom.getObject());
+				OWLDescription not_nominal = m_factory.getOWLObjectComplementOf(nominal);
+				OWLDescription restriction = m_factory.getOWLObjectAllRestriction(axiom.getProperty().getSimplified(), not_nominal);
+				OWLClassAssertionAxiom rewrittenAxiom = m_factory.getOWLClassAssertionAxiom(axiom.getSubject(), restriction);
+				OWLDescription desc=simplify(rewrittenAxiom.getDescription().getNNF());
+                if (!isSimple(desc)) {
+                    boolean[] alreadyExists=new boolean[1];
+                    OWLDescription definition=getDefinitionFor(desc,alreadyExists);
+                    if (!alreadyExists[0])
+                        inclusions.add(new OWLDescription[] { definition.getComplementNNF(),desc });
+                    desc=definition;
+                }
+                if (desc==rewrittenAxiom.getDescription())
+                    m_facts.add(axiom);
+                else
+                    m_facts.add(m_factory.getOWLClassAssertionAxiom(rewrittenAxiom.getIndividual(),desc));
 			} else if (untyped_axiom instanceof OWLSameIndividualsAxiom) {
                 OWLSameIndividualsAxiom axiom = (OWLSameIndividualsAxiom)(untyped_axiom);
                 m_facts.add(axiom);
@@ -433,9 +548,12 @@ public class OwlNormalization {
             return m_n.m_factory.getOWLObjectSomeRestriction(object.getProperty().getSimplified(),objectOneOf);
         }
         public OWLDescription visit(OWLObjectSelfRestriction object) {
-			throw new RuntimeException("Reflexivity is not supported yet.");
+        	return object;
         }
     }
+    /**
+     * checks the polarity
+     */
     protected static class PLVisitor implements OWLDescriptionVisitorEx<Boolean> {
         protected static final PLVisitor INSTANCE=new PLVisitor();
     
@@ -484,7 +602,7 @@ public class OwlNormalization {
             return Boolean.TRUE;
         }
         public Boolean visit(OWLObjectSelfRestriction object) {
-			throw new RuntimeException("Reflexivity is not supported yet.");
+        	return Boolean.TRUE;
         }
 		public Boolean visit(OWLDataAllRestriction desc) {
 			throw new RuntimeException("Datatypes are not supported yet.");

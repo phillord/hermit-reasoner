@@ -26,7 +26,11 @@ import org.semanticweb.HermiT.*;
 public class DLOntology implements Serializable {
     private static final long serialVersionUID=3189937959595369812L;
     protected static final String CRLF=System.getProperty("line.separator");
-
+    protected static final int CONTAINS_NO_ROLES = 0;
+    protected static final int CONTAINS_ONLY_GRAPH_ROLES = 1;
+    protected static final int CONTAINS_ONLY_TREE_ROLES = 2;
+    protected static final int CONTAINS_GRAPH_AND_TREE_ROLES = 3;
+        
     protected final String m_ontologyURI;
     protected final Set<DLClause> m_dlClauses;
     protected final Set<Atom> m_positiveFacts;
@@ -36,10 +40,19 @@ public class DLOntology implements Serializable {
     protected final boolean m_hasNominals;
     protected final boolean m_canUseNIRule;
     protected final boolean m_isHorn;
+    protected final boolean m_hasReflexifity;
     protected final Set<AtomicConcept> m_allAtomicConcepts;
     protected final Set<DescriptionGraph> m_allDescriptionGraphs;
 
-    public DLOntology(String ontologyURI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts,boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,boolean canUseNIRule) {
+    public DLOntology(String ontologyURI,
+    		          Set<DLClause> dlClauses,
+    		          Set<Atom> positiveFacts,
+    		          Set<Atom> negativeFacts,
+    		          boolean hasInverseRoles,
+    		          boolean hasAtMostRestrictions,
+    		          boolean hasNominals,
+    		          boolean canUseNIRule,
+    		          boolean hasReflexivity) {
         m_ontologyURI=ontologyURI;
         m_dlClauses=dlClauses;
         m_positiveFacts=positiveFacts;
@@ -48,6 +61,7 @@ public class DLOntology implements Serializable {
         m_hasAtMostRestrictions=hasAtMostRestrictions;
         m_canUseNIRule=canUseNIRule;
         m_hasNominals=hasNominals;
+        m_hasReflexifity = hasReflexivity;
         m_allAtomicConcepts=new TreeSet<AtomicConcept>(AtomicConceptComparator.INSTANCE);
         m_allDescriptionGraphs=new HashSet<DescriptionGraph>();
         boolean isHorn=true;
@@ -115,23 +129,27 @@ public class DLOntology implements Serializable {
     public boolean isHorn() {
         return m_isHorn;
     }
-    public Collection<DLClause> getNonadmissibleDLClauses() {
+    
+    public boolean hasReflexifity() {
+		return m_hasReflexifity;
+	}
+	public Collection<DLClause> getNonadmissibleDLClauses() {
         Set<AtomicConcept> bodyOnlyAtomicConcepts=getBodyOnlyAtomicConcepts();
         Collection<DLClause> nonadmissibleDLClauses=new HashSet<DLClause>();
         Set<AtomicAbstractRole> graphAtomicRoles=computeGraphAtomicRoles();
         for (DLClause dlClause : m_dlClauses) {
             int usedRoleTypes=getUsedRoleTypes(dlClause,graphAtomicRoles);
             switch (usedRoleTypes) {
-            case 0:
-            case 2:
+            case CONTAINS_NO_ROLES:
+            case CONTAINS_ONLY_TREE_ROLES:
                 if (!isTreeDLClause(dlClause,graphAtomicRoles,bodyOnlyAtomicConcepts))
                     nonadmissibleDLClauses.add(dlClause);
                 break;
-            case 1:
+            case CONTAINS_ONLY_GRAPH_ROLES:
                 if (!isGraphDLClause(dlClause))
                     nonadmissibleDLClauses.add(dlClause);
                 break;
-            case 3:
+            case CONTAINS_GRAPH_AND_TREE_ROLES:
                 nonadmissibleDLClauses.add(dlClause);
                 break;
             }
@@ -196,20 +214,20 @@ public class DLOntology implements Serializable {
         return change;
     }
     protected int getUsedRoleTypes(DLClause dlClause,Set<AtomicAbstractRole> graphAtomicRoles) {
-        int usedRoleTypes=0; // 0 - DL-clause contains no roles, 1 - DL-clause contains only graph roles, 2 - DL-clause contains only tree roles, 3 - DL-clause contains both graph and tree roles 
+        int usedRoleTypes= CONTAINS_NO_ROLES; 
         for (int atomIndex=0;atomIndex<dlClause.getBodyLength();atomIndex++) {
             DLPredicate dlPredicate=dlClause.getBodyAtom(atomIndex).getDLPredicate();
             if (dlPredicate instanceof AtomicAbstractRole) {
-                if (usedRoleTypes==0)
-                    usedRoleTypes=(graphAtomicRoles.contains(dlPredicate) ? 1 : 2);
+                if (usedRoleTypes==CONTAINS_NO_ROLES)
+                    usedRoleTypes=(graphAtomicRoles.contains(dlPredicate) ? CONTAINS_ONLY_GRAPH_ROLES : CONTAINS_ONLY_TREE_ROLES);
                 else {
-                    if (usedRoleTypes==1) {
+                    if (usedRoleTypes==CONTAINS_ONLY_GRAPH_ROLES) {
                         if (!graphAtomicRoles.contains(dlPredicate))
-                            return 3;
+                            return CONTAINS_GRAPH_AND_TREE_ROLES;
                     }
                     else {
                         if (graphAtomicRoles.contains(dlPredicate))
-                            return 3;
+                            return CONTAINS_GRAPH_AND_TREE_ROLES;
                     }
                 }
             }
@@ -217,16 +235,16 @@ public class DLOntology implements Serializable {
         for (int atomIndex=0;atomIndex<dlClause.getHeadLength();atomIndex++) {
             DLPredicate dlPredicate=dlClause.getHeadAtom(atomIndex).getDLPredicate();
             if (dlPredicate instanceof AtomicAbstractRole) {
-                if (usedRoleTypes==0)
-                    usedRoleTypes=(graphAtomicRoles.contains(dlPredicate) ? 1 : 2);
+                if (usedRoleTypes==CONTAINS_NO_ROLES)
+                    usedRoleTypes=(graphAtomicRoles.contains(dlPredicate) ? CONTAINS_ONLY_GRAPH_ROLES : CONTAINS_ONLY_TREE_ROLES);
                 else {
-                    if (usedRoleTypes==1) {
+                    if (usedRoleTypes==CONTAINS_ONLY_GRAPH_ROLES) {
                         if (!graphAtomicRoles.contains(dlPredicate))
-                            return 3;
+                            return CONTAINS_GRAPH_AND_TREE_ROLES;
                     }
                     else {
                         if (graphAtomicRoles.contains(dlPredicate))
-                            return 3;
+                            return CONTAINS_GRAPH_AND_TREE_ROLES;
                     }
                 }
             }

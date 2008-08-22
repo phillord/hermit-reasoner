@@ -61,7 +61,7 @@ public class RoleBox {
                                 s_supers = new HashSet<AbstractRole>();
                                 superRoles.put(s, s_supers);
                             }
-                            s_supers.add(r);
+                            else s_supers.add(r);
                         }
                     }
                 }
@@ -87,7 +87,7 @@ public class RoleBox {
                 r_equiv = new HashSet<AbstractRole>();
                 equivalencies.put(r.getKey(), r_equiv);
             }
-            r_equiv.add(r.getKey());
+            else r_equiv.add(r.getKey());
             for (AbstractRole s : r.getValue()) {
                 Set<AbstractRole> s_supers = superRoles.get(s);
                 if (s == r.getKey().getInverseRole() ||

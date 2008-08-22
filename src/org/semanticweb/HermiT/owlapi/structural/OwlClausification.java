@@ -1,22 +1,69 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.owlapi.structural;
 
-import java.util.Set;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
-import java.util.HashMap;
-import java.util.Collection;
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.Set;
 
-import java.net.URI;
-
-import org.semanticweb.owl.model.*;
-
-import org.semanticweb.HermiT.model.*;
+import org.semanticweb.HermiT.model.AbstractRole;
+import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
+import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
+import org.semanticweb.HermiT.model.Atom;
+import org.semanticweb.HermiT.model.AtomicAbstractRole;
+import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.AtomicNegationConcept;
+import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.model.DLOntology;
+import org.semanticweb.HermiT.model.DescriptionGraph;
+import org.semanticweb.HermiT.model.Equality;
+import org.semanticweb.HermiT.model.Inequality;
+import org.semanticweb.HermiT.model.InverseAbstractRole;
+import org.semanticweb.HermiT.model.LiteralConcept;
+import org.semanticweb.HermiT.model.NodeIDLessThan;
+import org.semanticweb.owl.model.OWLClass;
+import org.semanticweb.owl.model.OWLClassAssertionAxiom;
+import org.semanticweb.owl.model.OWLDataAllRestriction;
+import org.semanticweb.owl.model.OWLDataExactCardinalityRestriction;
+import org.semanticweb.owl.model.OWLDataFactory;
+import org.semanticweb.owl.model.OWLDataMaxCardinalityRestriction;
+import org.semanticweb.owl.model.OWLDataMinCardinalityRestriction;
+import org.semanticweb.owl.model.OWLDataPropertyAssertionAxiom;
+import org.semanticweb.owl.model.OWLDataPropertyExpression;
+import org.semanticweb.owl.model.OWLDataSomeRestriction;
+import org.semanticweb.owl.model.OWLDataValueRestriction;
+import org.semanticweb.owl.model.OWLDescription;
+import org.semanticweb.owl.model.OWLDescriptionVisitor;
+import org.semanticweb.owl.model.OWLDifferentIndividualsAxiom;
+import org.semanticweb.owl.model.OWLException;
+import org.semanticweb.owl.model.OWLIndividual;
+import org.semanticweb.owl.model.OWLIndividualAxiom;
+import org.semanticweb.owl.model.OWLNegativeDataPropertyAssertionAxiom;
+import org.semanticweb.owl.model.OWLNegativeObjectPropertyAssertionAxiom;
+import org.semanticweb.owl.model.OWLObjectAllRestriction;
+import org.semanticweb.owl.model.OWLObjectComplementOf;
+import org.semanticweb.owl.model.OWLObjectExactCardinalityRestriction;
+import org.semanticweb.owl.model.OWLObjectIntersectionOf;
+import org.semanticweb.owl.model.OWLObjectMaxCardinalityRestriction;
+import org.semanticweb.owl.model.OWLObjectMinCardinalityRestriction;
+import org.semanticweb.owl.model.OWLObjectOneOf;
+import org.semanticweb.owl.model.OWLObjectProperty;
+import org.semanticweb.owl.model.OWLObjectPropertyAssertionAxiom;
+import org.semanticweb.owl.model.OWLObjectPropertyExpression;
+import org.semanticweb.owl.model.OWLObjectPropertyInverse;
+import org.semanticweb.owl.model.OWLObjectSelfRestriction;
+import org.semanticweb.owl.model.OWLObjectSomeRestriction;
+import org.semanticweb.owl.model.OWLObjectUnionOf;
+import org.semanticweb.owl.model.OWLObjectValueRestriction;
+import org.semanticweb.owl.model.OWLOntology;
+import org.semanticweb.owl.model.OWLSameIndividualsAxiom;
 
 public class OwlClausification {
     protected static final org.semanticweb.HermiT.model.Variable X=org.semanticweb.HermiT.model.Variable.create("X");
@@ -33,6 +80,11 @@ public class OwlClausification {
 						normalization.getConceptInclusions(),
 						normalization.getObjectPropertyInclusions(),
 						normalization.getDataPropertyInclusions(),
+						normalization.getAsymmetricObjectProperties(),
+						normalization.getReflexiveObjectProperties(), 
+						normalization.getIrreflexiveObjectProperties(), 
+						normalization.getDisjointObjectProperties(),
+						normalization.getDisjointDataProperties(),
 						normalization.getFacts(),
 						descriptionGraphs,
 						factory);
@@ -42,6 +94,11 @@ public class OwlClausification {
                                Collection<OWLDescription[]> conceptInclusions,
                                Collection<OWLObjectPropertyExpression[]> objectPropertyInclusions,
                                Collection<OWLDataPropertyExpression[]> dataPropertyInclusions,
+                               Set<OWLObjectPropertyExpression> asymmetricObjectProperties,
+                               Set<OWLObjectPropertyExpression> reflexiveObjectProperties,
+                               Set<OWLObjectPropertyExpression> irreflexiveObjectProperties,
+                               Set<OWLObjectPropertyExpression[]> disjointObjectProperties,
+                               Set<OWLDataPropertyExpression[]> disjointDataProperties,
                                Collection<OWLIndividualAxiom> facts,
                                Collection<DescriptionGraph> descriptionGraphs,
                                OWLDataFactory factory) throws OWLException {
@@ -55,6 +112,8 @@ public class OwlClausification {
             if ((!isInverse0 && isInverse1) || (isInverse0 && !isInverse1))
                 determineExpressivity.m_hasInverseRoles=true;
         }
+        if (reflexiveObjectProperties.size() > 0) 
+        	determineExpressivity.m_hasReflexivity = true;
         if (dataPropertyInclusions.size()>0)
             throw new IllegalArgumentException("Data properties are not supported yet.");
         Set<DLClause> dlClauses=new LinkedHashSet<DLClause>();
@@ -66,6 +125,33 @@ public class OwlClausification {
             DLClause dlClause=DLClause.create(new Atom[] { superRoleAtom },new Atom[] { subRoleAtom });
             dlClauses.add(dlClause);
         }
+        for (OWLObjectPropertyExpression axiom : asymmetricObjectProperties) {
+        	Atom roleAtom=getAbstractRoleAtom(axiom,X,Y);
+            Atom inverseRoleAtom=getAbstractRoleAtom(axiom,Y,X);
+        	DLClause dlClause = DLClause.create(new Atom[] { }, new Atom[] { roleAtom, inverseRoleAtom });
+        	dlClauses.add(dlClause);
+        }
+        for (OWLObjectPropertyExpression axiom : reflexiveObjectProperties) {
+        	Atom roleAtom=getAbstractRoleAtom(axiom,X,X);
+        	DLClause dlClause = DLClause.create(new Atom[] { roleAtom }, new Atom[] { });
+        	dlClauses.add(dlClause);
+        }
+        for (OWLObjectPropertyExpression axiom : irreflexiveObjectProperties) {
+        	Atom roleAtom=getAbstractRoleAtom(axiom,X,X);
+        	DLClause dlClause = DLClause.create(new Atom[] { }, new Atom[] { roleAtom });
+        	dlClauses.add(dlClause);
+        }
+        for (OWLObjectPropertyExpression[] properties : disjointObjectProperties) {
+        	Atom[] atoms = new Atom[properties.length];
+            for (int i=0;i<properties.length;i++) {
+            	Atom atom = getAbstractRoleAtom(properties[i],X,Y);
+            	atoms[i] = atom;
+            }
+        	DLClause dlClause = DLClause.create(new Atom[] { }, atoms);
+        	dlClauses.add(dlClause);
+        }
+        if (disjointDataProperties.size()>0)
+            throw new IllegalArgumentException("Data properties are not supported yet.");
         boolean shouldUseNIRule=
             determineExpressivity.m_hasAtMostRestrictions &&
             determineExpressivity.m_hasInverseRoles &&
@@ -86,7 +172,8 @@ public class OwlClausification {
                               determineExpressivity.m_hasInverseRoles,
                               determineExpressivity.m_hasAtMostRestrictions,
                               determineExpressivity.m_hasNominals,
-                              shouldUseNIRule);
+                              shouldUseNIRule,
+                              determineExpressivity.m_hasReflexivity);
     }
     protected static Atom getAbstractRoleAtom(OWLObjectPropertyExpression objectProperty,
                                               org.semanticweb.HermiT.model.Term first,
@@ -295,7 +382,9 @@ public class OwlClausification {
             }
         }
         public void visit(OWLObjectSelfRestriction object) {
-            throw new IllegalArgumentException("Reflexivity is not supported yet.");
+        	OWLObjectPropertyExpression objectProperty = object.getProperty();
+            Atom roleAtom = getAbstractRoleAtom(objectProperty,X,X);
+            m_headAtoms.add(roleAtom);
         }
         public void visit(OWLObjectMinCardinalityRestriction object) {
             LiteralConcept toConcept=getLiteralConcept(object.getFiller());
@@ -349,7 +438,11 @@ public class OwlClausification {
         public void visit(OWLObjectComplementOf object) {
             OWLDescription description=object.getOperand();
             if (!(description instanceof OWLClass)) {
-                throw new IllegalStateException("Internal error: invalid normal form.");
+            	if (description instanceof OWLObjectSelfRestriction) {
+            		OWLObjectPropertyExpression objectProperty = ((OWLObjectSelfRestriction)description).getProperty();
+            		Atom roleAtom = getAbstractRoleAtom(objectProperty,X,X);
+                    m_bodyAtoms.add(roleAtom);
+            	} else throw new IllegalStateException("Internal error: invalid normal form.");
             }
             m_bodyAtoms.add(Atom.create(AtomicConcept.create(((OWLClass)description).getURI().toString()),new org.semanticweb.HermiT.model.Term[] { X }));
         }
@@ -452,7 +545,7 @@ public class OwlClausification {
             m_positiveFacts.add(getAbstractRoleAtom(object.getProperty(),getIndividual(object.getSubject()),getIndividual(object.getObject())));
         }
         public void visit(OWLNegativeObjectPropertyAssertionAxiom object) {
-            throw new IllegalArgumentException("NegativeObjectPropertyMember is not supported yet.");
+        	throw new IllegalArgumentException("Internal error: negative object property assertions should have been rewritten.");
         }
         public void visit(OWLClassAssertionAxiom object) {
             OWLDescription description=object.getDescription();
@@ -462,6 +555,12 @@ public class OwlClausification {
             } else if (description instanceof OWLObjectComplementOf && ((OWLObjectComplementOf)description).getOperand() instanceof OWLClass) {
                 AtomicConcept atomicConcept=AtomicConcept.create(((OWLClass)((OWLObjectComplementOf)description).getOperand()).getURI().toString());
                 m_negativeFacts.add(Atom.create(atomicConcept,new org.semanticweb.HermiT.model.Term[] { getIndividual(object.getIndividual()) }));
+            } else if (description instanceof OWLObjectSelfRestriction) {
+            	OWLObjectSelfRestriction selfRestriction = (OWLObjectSelfRestriction) description;
+            	m_positiveFacts.add(getAbstractRoleAtom(selfRestriction.getProperty(),getIndividual(object.getIndividual()),getIndividual(object.getIndividual())));
+            } else if(description instanceof OWLObjectComplementOf && ((OWLObjectComplementOf)description).getOperand() instanceof  OWLObjectSelfRestriction) {
+            	OWLObjectSelfRestriction selfRestriction = (OWLObjectSelfRestriction)(((OWLObjectComplementOf)description).getOperand());
+            	m_negativeFacts.add(getAbstractRoleAtom(selfRestriction.getProperty(),getIndividual(object.getIndividual()),getIndividual(object.getIndividual())));
             } else throw new IllegalStateException("Internal error: invalid normal form.");
         }
     }
@@ -470,6 +569,7 @@ public class OwlClausification {
         protected boolean m_hasAtMostRestrictions;
         protected boolean m_hasInverseRoles;
         protected boolean m_hasNominals;
+        protected boolean m_hasReflexivity;
         
         protected void checkProperty(OWLObjectPropertyExpression p) {
             if (p instanceof OWLObjectPropertyInverse) m_hasInverseRoles=true;
@@ -537,7 +637,7 @@ public class OwlClausification {
             checkProperty(object.getProperty());
         }
         public void visit(OWLObjectSelfRestriction object) {
-            throw new IllegalArgumentException("Reflexivity is not supported yet.");
+        	m_hasReflexivity = true;
         }
     }
     
