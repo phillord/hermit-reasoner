@@ -217,6 +217,15 @@ public class HermiT implements Serializable {
         );
     }
     
+    SubsumptionHierarchy getSubsumptionHierarchy() {
+        try {
+            return new SubsumptionHierarchy(m_subsumptionChecker);
+        } catch (SubsumptionHierarchy.SubusmptionCheckerException e) {
+            throw new RuntimeException(
+                "Unable to compute subsumption hierarchy.");
+        }
+    }
+    
     public Map<String, HierarchyPosition<String>> getClassTaxonomy() {
         SubsumptionHierarchy oldHierarchy;
         try {

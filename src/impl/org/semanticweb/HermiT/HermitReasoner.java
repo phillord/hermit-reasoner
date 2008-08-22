@@ -111,7 +111,7 @@ public class HermitReasoner implements OWLReasoner {
         if (d.isAnonymous()) {
             throw new UnsupportedOperationException("Testing of anonymous classes is not yet supported.");
         }
-        return hermit.isSatisfiable(d.asOWLClass().getURI().toString());
+        return hermit.isClassSatisfiable(d.asOWLClass().getURI().toString());
     }
     
     // ClassReasoner implementation:
@@ -233,13 +233,13 @@ public class HermitReasoner implements OWLReasoner {
         return isSubClassOf(c, d) && isSubClassOf(d, c);
     }
     public boolean isSubClassOf(OWLDescription subclass, OWLDescription superclass) {
-        return hermit.isSubsumedBy(AtomicConcept.create(subclass.asOWLClass().getURI().toString()),
-                                   AtomicConcept.create(superclass.asOWLClass().getURI().toString()));
+        return hermit.isClassSubsumedBy(subclass.asOWLClass().getURI().toString(),
+                                        superclass.asOWLClass().getURI().toString());
     }
     
     // ConsistencyChecker implementation:
     public boolean isConsistent(OWLOntology ignored) {
-        return hermit.isABoxSatisfiable();
+        return hermit.isConsistent();
     }
     
     // IndividualReasoner stubs: (not yet implemented)

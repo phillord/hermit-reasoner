@@ -36,6 +36,8 @@
     <property name="pluginjar" value="${releasedir}/${ant.project.name}-Protégé.jar"/>
     <property name="HermiTsrcjar" value="${releasedir}/${ant.project.name}.src.jar"/>
     <property name="javadocdir" value="${releasedir}/javadoc"/>
+    <property name="apijavadocdir" value="${releasedir}/javadoc/api"/>
+    <property name="fulljavadocdir" value="${releasedir}/javadoc/full"/>
 
     <!-- structure of 3rdparty libraries -->
     <property name="3rdpartydir" value="${projectroot}/../ThirdPartyOwlTools"/>
@@ -47,7 +49,9 @@
 
     <!-- SOURCE PATHS -->
     <path id="sourcepath">
-        <pathelement path="${projectroot}/src"/>
+        <pathelement path="${projectroot}/src/impl"/>
+        <pathelement path="${projectroot}/src/api"/>
+        <pathelement path="${projectroot}/src/cli"/>
     </path>
     <path id="pluginsourcepath">
         <pathelement path="${projectroot}/plugin"/>
@@ -150,7 +154,13 @@
     
     <target name="javadoc">
         <mkdir dir="${javadocdir}"/>
-        <javadoc sourcepathref="sourcepath" destdir="${javadocdir}" author="false" version="true" use="true">
+        <mkdir dir="${apijavadocdir}"/>
+        <javadoc sourcepath="${projectroot}/src/api" destdir="${apijavadocdir}" access="public" author="false" version="true" use="true">
+            <package name="org.semanticweb.HermiT.*"/>
+            <classpath refid="classpath"/>
+        </javadoc>
+        <mkdir dir="${fulljavadocdir}"/>
+        <javadoc sourcepathref="sourcepath" destdir="${fulljavadocdir}" access="private" author="false" version="true" use="true">
             <package name="org.semanticweb.HermiT.*"/>
             <classpath refid="classpath"/>
         </javadoc>

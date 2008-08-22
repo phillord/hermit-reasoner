@@ -31,9 +31,9 @@ public class CommandLine {
 	static protected class ClassifyAction implements Action {
 		public void run(HermiT hermit, StatusOutput status, PrintWriter output) {
 			status.log(2, "classifying...");
-			hermit.buildSubsumptionCache();
+			hermit.seedSubsumptionCache();
 			if (output != null) {
-				hermit.printFlattenedHierarchy(output, hermit.getSubsumptionHierarchy());
+				hermit.printSortedAncestorLists(output);
 			}
 		}
 	}
@@ -41,7 +41,7 @@ public class CommandLine {
 		final String conceptName;
 		public SatisfiabilityAction(String c) { conceptName = c; }
 		public void run(HermiT hermit, StatusOutput status, PrintWriter output) {
-			boolean result = hermit.isSatisfiable(conceptName);
+			boolean result = hermit.isClassSatisfiable(conceptName);
 			if (result) {
 				output.println(conceptName + (result ? " is satisfiable."
 													 : " is not satisfiable."));
