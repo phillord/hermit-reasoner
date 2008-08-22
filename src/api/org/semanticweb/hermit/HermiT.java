@@ -8,7 +8,7 @@
  * Copyright 2008 by Oxford University; see license.txt for details
  */
 
-package org.semanticweb.HermiT;
+package org.semanticweb.hermit;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

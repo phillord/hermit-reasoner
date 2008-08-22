@@ -53,6 +53,9 @@
         <pathelement path="${projectroot}/src/api"/>
         <pathelement path="${projectroot}/src/cli"/>
     </path>
+    <path id="apisourcepath">
+        <pathelement path="${projectroot}/src/api"/>
+    </path>
     <path id="pluginsourcepath">
         <pathelement path="${projectroot}/plugin"/>
     </path>
@@ -64,6 +67,11 @@
     <path id="classpath">
         <pathelement location="${owlapi}"/>
         <pathelement location="${kaon2}"/>
+    </path>
+    <path id="runclasspath">
+        <pathelement location="${owlapi}"/>
+        <pathelement location="${kaon2}"/>
+        <pathelement path="${classdir}"/>
     </path>
     <path id="pluginclasspath">
         <pathelement location="${owlapi}"/>
@@ -155,14 +163,14 @@
     <target name="javadoc">
         <mkdir dir="${javadocdir}"/>
         <mkdir dir="${apijavadocdir}"/>
-        <javadoc sourcepath="${projectroot}/src/api" destdir="${apijavadocdir}" access="public" author="false" version="true" use="true">
-            <package name="org.semanticweb.HermiT.*"/>
-            <classpath refid="classpath"/>
+        <javadoc sourcepathref="apisourcepath" destdir="${apijavadocdir}" access="public" author="false" version="true" use="true">
+            <package name="org.semanticweb.hermit.*"/>
+            <classpath refid="runclasspath"/>
         </javadoc>
         <mkdir dir="${fulljavadocdir}"/>
         <javadoc sourcepathref="sourcepath" destdir="${fulljavadocdir}" access="private" author="false" version="true" use="true">
             <package name="org.semanticweb.HermiT.*"/>
-            <classpath refid="classpath"/>
+			<classpath refid="classpath"/>
         </javadoc>
     </target>
     
