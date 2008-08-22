@@ -164,7 +164,7 @@
         <mkdir dir="${javadocdir}"/>
         <mkdir dir="${apijavadocdir}"/>
         <javadoc sourcepathref="apisourcepath" destdir="${apijavadocdir}" access="public" author="false" version="true" use="true">
-            <package name="org.semanticweb.hermit.*"/>
+            <package name="org.semanticweb.HermiT.*"/>
             <classpath refid="runclasspath"/>
         </javadoc>
         <mkdir dir="${fulljavadocdir}"/>

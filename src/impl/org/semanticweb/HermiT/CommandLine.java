@@ -1,4 +1,4 @@
-package org.semanticweb.hermit;
+package org.semanticweb.HermiT;
 
 import gnu.getopt.LongOpt;
 import gnu.getopt.Getopt;
