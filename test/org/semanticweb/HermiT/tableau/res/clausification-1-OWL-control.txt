@@ -1,0 +1,4 @@
+all:0(X) :- file:/c:/temp/test.owl#s(X,Y), all:0(Y)
+q:0(X) :- all:0(X)
+file:/c:/temp/test.owl#d(X) :- file:/c:/temp/test.owl#r(X,Y), q:0(Y)
+all:0(X) :- file:/c:/temp/test.owl#s(X,Y), file:/c:/temp/test.owl#c(Y)

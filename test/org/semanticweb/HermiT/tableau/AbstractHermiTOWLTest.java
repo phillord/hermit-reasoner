@@ -4,9 +4,9 @@ import java.io.BufferedReader;
 import java.io.CharArrayWriter;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,13 +16,12 @@ import junit.framework.TestCase;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
-import org.semanticweb.kaon2.api.Axiom;
-import org.semanticweb.kaon2.api.DefaultOntologyResolver;
-import org.semanticweb.kaon2.api.KAON2Manager;
-import org.semanticweb.kaon2.api.Ontology;
-import org.semanticweb.kaon2.api.OntologyManager;
+import org.semanticweb.owl.apibinding.OWLManager;
+import org.semanticweb.owl.model.OWLAxiom;
+import org.semanticweb.owl.model.OWLOntology;
+import org.semanticweb.owl.model.OWLOntologyManager;
 
-public abstract class AbstractHermiTTest extends TestCase {
+public abstract class AbstractHermiTOWLTest extends TestCase {
     protected static final Node[][] NO_TUPLES=new Node[0][];
     protected static final DLOntology EMPTY_DL_ONTOLOGY;
     static {
@@ -31,22 +30,44 @@ public abstract class AbstractHermiTTest extends TestCase {
         EMPTY_DL_ONTOLOGY=new DLOntology("opaque:test",dlClauses,atoms,atoms,false,false,false,false,false);
     }
 
-    public AbstractHermiTTest(String name) {
+    public AbstractHermiTOWLTest(String name) {
         super(name);
     }
-    protected Ontology getOntology(String physicalURI) throws Exception {
-        DefaultOntologyResolver resolver=new DefaultOntologyResolver();
-        String ontologyURI=resolver.registerOntology(physicalURI);
-        OntologyManager ontologyManager=KAON2Manager.newOntologyManager();
-        ontologyManager.setOntologyResolver(resolver);
-        return ontologyManager.openOntology(ontologyURI,new HashMap<String,Object>()); 
+    /**
+     * loads an ontology via the OWL API
+     * @param physicalURI the physical location of the ontology
+     * @return the ontology as an OWLAPI ontology object (not simplified, normalised or clausified)
+     * @throws Exception
+     */
+    protected OWLOntology getOWLOntology(String physicalURI) throws Exception {
+    	OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+    	URI uri = URI.create(physicalURI);
+    	OWLOntology ontology = manager.loadOntologyFromPhysicalURI(uri);
+		return ontology; 
     }
-    protected Ontology getOntologyFromResource(String resourceName) throws Exception {
-        return getOntology(getClass().getResource(resourceName).toString());
+    /**
+     * loads an ontology from a relative path via the OWL API
+     * @param resourceName the relative location of the ontology
+     * @return the ontology as an OWLAPI ontology object (not simplified, normalised or clausified)
+     * @throws Exception
+     */
+    protected OWLOntology getOWLOntologyFromResource(String resourceName) throws Exception {
+        return getOWLOntology(getClass().getResource(resourceName).toString());
     }
-    protected Set<Axiom> getAxioms(String resourceName) throws Exception {
-        return getOntologyFromResource(resourceName).createAxiomRequest().get();
+    /**
+     * loads an ontology from a relative path via the OWL API
+     * @param resourceName the resouce to load
+     * @return the set of axioms from the OWLAPI ontology
+     * @throws Exception
+     */
+    protected Set<OWLAxiom> getOWLAxiomsFromResource(String resourceName) throws Exception {
+        return getOWLOntologyFromResource(resourceName).getAxioms();
     }
+    /**
+     * @param resourceName
+     * @return each line from the loaded resource becomes a string in the returned array
+     * @throws Exception
+     */
     protected Set<String> getStrings(String resourceName) throws Exception {
         Set<String> strings=new HashSet<String>();
         BufferedReader reader=new BufferedReader(new InputStreamReader(getClass().getResource(resourceName).openStream()));
@@ -62,6 +83,11 @@ public abstract class AbstractHermiTTest extends TestCase {
         }
         return strings;
     }
+    /**
+     * @param resourceName
+     * @return the content of the loaded resource as one string
+     * @throws Exception
+     */
     protected String getResourceText(String resourceName) throws Exception {
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter output=new PrintWriter(buffer);
@@ -79,12 +105,27 @@ public abstract class AbstractHermiTTest extends TestCase {
         output.flush();
         return buffer.toString();
     }
-    protected void assertEquals(Set<Axiom> axioms,String controlResourceName) throws Exception {
-        Set<Axiom> controlAxioms=getAxioms(controlResourceName);
-        assertEquals(axioms,controlAxioms);
+    /**
+     * converts the axioms to a string via the toString method and compares it with the given string
+     * @param axioms
+     * @param controlResourceName
+     * @throws Exception
+     */
+    protected void assertEquals(Set<OWLAxiom> axioms,String controlResourceName) throws Exception {
+        String axiomsString = axioms.toString().trim();
+        String controlString = getResourceText(controlResourceName).trim();
+    	assertTrue(axiomsString.equals(controlString));
     }
+    /**
+     * prints the content of conrol set and the actual set in case they 
+     * are different and causes a JUnit test failure
+     * @param <T>
+     * @param actual
+     * @param control
+     * @throws Exception
+     */
     protected <T> void assertEquals(Set<T> actual,Set<T> control) throws Exception {
-        if (!actual.equals(control)) {
+       if (!actual.equals(control)) {
             System.out.println("Control set ("+control.size()+" elements):");
             System.out.println("------------------------------------------");
             for (T object : control)
@@ -99,6 +140,14 @@ public abstract class AbstractHermiTTest extends TestCase {
             assertTrue(false);
         }
     }
+    /**
+     * tests that the set have equal length and that the actual set contains all 
+     * objects from the control set, otherwise the test fails and the contents 
+     * of the control and the actual set are printed
+     * @param <T>
+     * @param actual
+     * @param control
+     */
     protected static <T> void assertContainsAll(Collection<T> actual,T... control) {
         try {
             assertEquals(control.length,actual.size());
@@ -119,52 +168,5 @@ public abstract class AbstractHermiTTest extends TestCase {
             System.out.flush();
             throw e;
         }
-    }
-    protected static void assertRetrieval(ExtensionTable extensionTable,Object[] searchTuple,ExtensionTable.View extensionView,Object[][] expectedTuples) {
-        boolean[] bindingPattern=new boolean[searchTuple.length];
-        for (int i=0;i<searchTuple.length;i++)
-            if (searchTuple[i]!=null)
-                bindingPattern[i]=true;
-        ExtensionTable.Retrieval retrieval=extensionTable.createRetrieval(bindingPattern,extensionView);
-        System.arraycopy(searchTuple,0,retrieval.getBindingsBuffer(),0,searchTuple.length);
-        assertRetrieval(retrieval,expectedTuples);
-    }
-
-    protected static void assertRetrieval(ExtensionTable.Retrieval retrieval,Object[][] expectedTuples) {
-        retrieval.open();
-        boolean[] consumed=new boolean[expectedTuples.length];
-        while (!retrieval.afterLast()) {
-            Object[] tupleBuffer=retrieval.getTupleBuffer();
-            boolean tupleFound=false;
-            for (int i=0;!tupleFound && i<expectedTuples.length;i++) {
-                if (!consumed[i] && tuplesEqual(tupleBuffer,expectedTuples[i])) {
-                    consumed[i]=true;
-                    tupleFound=true;
-                }
-            }
-            if (!tupleFound)
-                fail("Tuple from the retrieval not found in the expected tuples.");
-            retrieval.next();
-        }
-        for (int i=0;i<consumed.length;i++)
-            if (!consumed[i])
-                fail("Tuple from the expected list has not been seen in the retrieval.");
-    }
-    protected static void assertEquals(Object[] tuple1,Object[] tuple2) {
-        assertEquals(tuple1.length,tuple2.length);
-        for (int index=0;index<tuple1.length;index++)
-            assertEquals(tuple1[index],tuple2[index]);
-    }
-    protected static boolean tuplesEqual(Object[] tuple1,Object[] tuple2) {
-        if (tuple1.length!=tuple2.length)
-            return false;
-        for (int i=0;i<tuple1.length;i++)
-            if (!tuple1[i].equals(tuple2[i]))
-                return false;
-        return true;
-    }
-
-    protected static Object[] T(Object... nodes) {
-        return nodes;
     }
 }

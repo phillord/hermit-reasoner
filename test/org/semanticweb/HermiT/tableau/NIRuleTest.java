@@ -25,7 +25,7 @@ public class NIRuleTest extends AbstractHermiTTest {
         DLClause cl=DLClause.create(new Atom[] { Atom.create(A,X), Atom.create(B,X) },new Atom[] { Atom.create(B,X) });
         Set<DLClause> dlClauses=Collections.singleton(cl);
         Set<Atom> atoms=Collections.emptySet();
-        TEST_DL_ONTOLOGY=new DLOntology("opaque:test",dlClauses,atoms,atoms,false,false,false,true);
+        TEST_DL_ONTOLOGY=new DLOntology("opaque:test",dlClauses,atoms,atoms,false,false,false,true,false);
     }
 
     protected Tableau m_tableau;
