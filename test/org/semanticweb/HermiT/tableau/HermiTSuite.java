@@ -8,8 +8,6 @@ import org.semanticweb.HermiT.reasoner.ReasonerTest;
 public class HermiTSuite {
     public static Test suite() {
         TestSuite suite = new TestSuite("HermiT Tests");
-        suite.addTestSuite(NormalizationTest.class);
-        suite.addTestSuite(ClausificationTest.class);
         suite.addTestSuite(DependencySetTest.class);
         suite.addTestSuite(TupleIndexTest.class);
         suite.addTestSuite(DLClauseEvaluationTest.class);
