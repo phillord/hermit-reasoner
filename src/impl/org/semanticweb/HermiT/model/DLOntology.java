@@ -232,6 +232,15 @@ public class DLOntology implements Serializable {
         return change;
     }
 
+    /**
+     * Takes the set of roles that are for use in Description Graphs and detects
+     * whether clause contains no roles, only roles from the given set, only
+     * roles not from the given set or both types of roles.
+     * 
+     * @param dlClause
+     * @param graphAtomicRoles
+     * @return
+     */
     protected int getUsedRoleTypes(DLClause dlClause,
             Set<AtomicAbstractRole> graphAtomicRoles) {
         int usedRoleTypes = CONTAINS_NO_ROLES;
@@ -274,6 +283,17 @@ public class DLOntology implements Serializable {
         return usedRoleTypes;
     }
 
+    /**
+     * Tests whether the clause conforms to the properties of HT clauses, i.e.,
+     * the variables can be split into a center variable x, a set of branch
+     * variables y_i, and a set of nominal variables z_j such thatcertain
+     * conditions hold.
+     * 
+     * @param dlClause
+     * @param graphAtomicRoles
+     * @param bodyOnlyAtomicConcepts
+     * @return
+     */
     protected boolean isTreeDLClause(DLClause dlClause,
             Set<AtomicAbstractRole> graphAtomicRoles,
             Set<AtomicConcept> bodyOnlyAtomicConcepts) {
@@ -313,18 +333,26 @@ public class DLOntology implements Serializable {
         return false;
     }
 
+    /**
+     * Tests whether the given center variable is suitable.
+     * 
+     * @param dlClause
+     * @param centerVariable
+     * @param bodyOnlyAtomicConcepts
+     * @return
+     */
     protected boolean isTreeWithCenterVariable(DLClause dlClause,
             Variable centerVariable, Set<AtomicConcept> bodyOnlyAtomicConcepts) {
         for (int atomIndex = 0; atomIndex < dlClause.getBodyLength(); atomIndex++) {
             Atom atom = dlClause.getBodyAtom(atomIndex);
             if (atom.getDLPredicate() instanceof AtomicAbstractRole
-                    && !isTreeRoleAtom(atom, centerVariable))
+                    && !atom.containsVariable(centerVariable))
                 return false;
         }
         for (int atomIndex = 0; atomIndex < dlClause.getHeadLength(); atomIndex++) {
             Atom atom = dlClause.getHeadAtom(atomIndex);
             if (atom.getDLPredicate() instanceof AtomicAbstractRole
-                    && !isTreeRoleAtom(atom, centerVariable))
+                    && !atom.containsVariable(centerVariable))
                 return false;
             if (Equality.INSTANCE.equals(atom.getDLPredicate())) {
                 Variable otherVariable = null;
@@ -354,23 +382,6 @@ public class DLOntology implements Serializable {
             }
         }
         return true;
-    }
-
-    protected boolean isTreeRoleAtom(Atom atom, Variable centerVariable) {
-        // we now allow for loops for the center variable
-        if ((centerVariable.equals(atom.getArgumentVariable(0)) && atom.getArgument(1) instanceof Variable)
-                || (centerVariable.equals(atom.getArgumentVariable(1)) && atom.getArgument(0) instanceof Variable))
-            return true;
-        return false;
-        // if (centerVariable.equals(atom.getArgumentVariable(0)) &&
-        // atom.getArgument(1) instanceof Variable &&
-        // !centerVariable.equals(atom.getArgument(1)))
-        // return true;
-        // if (centerVariable.equals(atom.getArgumentVariable(1)) &&
-        // atom.getArgument(0) instanceof Variable &&
-        // !centerVariable.equals(atom.getArgument(0)))
-        // return true;
-        // return false;
     }
 
     protected boolean isGraphDLClause(DLClause dlClause) {
