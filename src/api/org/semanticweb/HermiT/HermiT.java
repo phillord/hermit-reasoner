@@ -73,6 +73,10 @@ import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
+import org.semanticweb.HermiT.util.Translator;
+import org.semanticweb.HermiT.util.TranslatedMap;
+import org.semanticweb.HermiT.hierarchy.TranslatedHierarchyPosition;
+import org.semanticweb.HermiT.hierarchy.PositionTranslator;
 
 public class HermiT implements Serializable {
 	private static final long serialVersionUID=-8277117863937974032L;
@@ -156,12 +160,14 @@ public class HermiT implements Serializable {
         
     } // end Configuration class
 
-    protected final Configuration m_config;
-    protected DLOntology m_dlOntology;
-    protected Namespaces m_namespaces;
-    protected TableauMonitor m_userTableauMonitor;
-    protected Tableau m_tableau;
-    protected TableauSubsumptionChecker m_subsumptionChecker;
+    private final Configuration m_config; // never null
+    private DLOntology m_dlOntology; // never null
+    private Namespaces m_namespaces; // never null
+    private TableauMonitor m_userTableauMonitor;
+    private Tableau m_tableau; // never null
+    private TableauSubsumptionChecker m_subsumptionChecker; // never null
+    private Map<AtomicConcept, HierarchyPosition<AtomicConcept>>
+        atomicConceptHierarchy; // may be null; use getAtomicConceptHierarchy
     
     public HermiT(String ontologyURI)
         throws KAON2Exception, OWLException, InterruptedException {
@@ -201,15 +207,13 @@ public class HermiT implements Serializable {
     }
 
     public void seedSubsumptionCache() {
-        if (m_subsumptionChecker == null) {
-            m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
-        }
+        getClassTaxonomy();
+    }
+    
+    public boolean isSubsumptionCacheSeeded() {
+        return atomicConceptHierarchy != null;
     }
 
-	public boolean isSubsumptionCacheSeeded() {
-		return m_subsumptionChecker != null;
-	}
-	
     public boolean isClassSubsumedBy(String childName,
                                      String parentName) {
         return m_subsumptionChecker.isSubsumedBy(
@@ -217,7 +221,7 @@ public class HermiT implements Serializable {
         );
     }
     
-    SubsumptionHierarchy getSubsumptionHierarchy() {
+    public SubsumptionHierarchy getSubsumptionHierarchy() {
         try {
             return new SubsumptionHierarchy(m_subsumptionChecker);
         } catch (SubsumptionHierarchy.SubusmptionCheckerException e) {
@@ -226,48 +230,90 @@ public class HermiT implements Serializable {
         }
     }
     
-    public Map<String, HierarchyPosition<String>> getClassTaxonomy() {
-        SubsumptionHierarchy oldHierarchy;
-        try {
-             oldHierarchy = new SubsumptionHierarchy(m_subsumptionChecker);
-        } catch (SubsumptionHierarchy.SubusmptionCheckerException e) {
-            throw new RuntimeException(
-                "Unable to compute subsumption hierarchy.");
-        }
-        Map<String, HierarchyPosition<String>> output =
-            new HashMap<String, HierarchyPosition<String>>();
-        Map<String, NaiveHierarchyPosition<String>> newNodes =
-            new HashMap<String, NaiveHierarchyPosition<String>>();
-        // First just create all the new hierarchy nodes:
-        for (SubsumptionHierarchyNode oldNode : oldHierarchy) {
-            NaiveHierarchyPosition<String> newNode =
-                new NaiveHierarchyPosition<String>();
-            newNodes.put(oldNode.getRepresentative().getURI(), newNode);
-            for (AtomicConcept concept : oldNode.getEquivalentConcepts()) {
-                newNode.labels.add(concept.getURI());
-                if (output.put(concept.getURI(), newNode) != null) {
-                    throw new RuntimeException("The '" + concept.getURI() +
-                        "' concept occurs in two different places" +
-                        " in the taxonomy.");
+    protected Map<AtomicConcept, HierarchyPosition<AtomicConcept>>
+        getAtomicConceptHierarchy() {
+        if (atomicConceptHierarchy == null) {
+            SubsumptionHierarchy oldHierarchy;
+            try {
+                 oldHierarchy = new SubsumptionHierarchy(m_subsumptionChecker);
+            } catch (SubsumptionHierarchy.SubusmptionCheckerException e) {
+                throw new RuntimeException(
+                    "Unable to compute subsumption hierarchy.");
+            }
+        
+            Map<AtomicConcept, HierarchyPosition<AtomicConcept>> newHierarchy =
+                new HashMap<AtomicConcept, HierarchyPosition<AtomicConcept>>();
+        
+            Map<AtomicConcept, NaiveHierarchyPosition<AtomicConcept>> newNodes
+                = new HashMap<AtomicConcept,
+                                NaiveHierarchyPosition<AtomicConcept>>();
+            // First just create all the new hierarchy nodes:
+            for (SubsumptionHierarchyNode oldNode : oldHierarchy) {
+                NaiveHierarchyPosition<AtomicConcept> newNode =
+                    new NaiveHierarchyPosition<AtomicConcept>();
+                newNodes.put(oldNode.getRepresentative(), newNode);
+                for (AtomicConcept concept : oldNode.getEquivalentConcepts()) {
+                    newNode.labels.add(concept);
+                    if (newHierarchy.put(concept, newNode) !=
+                        null) {
+                        throw new RuntimeException("The '" + concept.getURI() +
+                            "' concept occurs in two different places" +
+                            " in the taxonomy.");
+                    }
                 }
             }
-        }
-        // Now connect them together:
-        for (SubsumptionHierarchyNode oldNode : oldHierarchy) {
-            NaiveHierarchyPosition<String> newNode =
-                newNodes.get(oldNode.getRepresentative().getURI());
-            for (SubsumptionHierarchyNode parent : oldNode.getParentNodes()) {
-                newNode.parents.add(
-                    newNodes.get(parent.getRepresentative().getURI())
-                );
+            // Now connect them together:
+            for (SubsumptionHierarchyNode oldNode : oldHierarchy) {
+                NaiveHierarchyPosition<AtomicConcept> newNode =
+                    newNodes.get(oldNode.getRepresentative());
+                for (SubsumptionHierarchyNode parent
+                        : oldNode.getParentNodes()) {
+                    newNode.parents.add(
+                        newNodes.get(parent.getRepresentative())
+                    );
+                }
+                for (SubsumptionHierarchyNode child
+                        : oldNode.getChildNodes()) {
+                    newNode.children.add(
+                        newNodes.get(child.getRepresentative())
+                    );
+                }
             }
-            for (SubsumptionHierarchyNode child : oldNode.getChildNodes()) {
-                newNode.children.add(
-                    newNodes.get(child.getRepresentative().getURI())
-                );
+            // Construction finished; set our member cache:
+            atomicConceptHierarchy = newHierarchy;
+        }
+        return atomicConceptHierarchy;
+    }
+    
+    public Map<String, HierarchyPosition<String>> getClassTaxonomy() {
+        class StringTranslator implements Translator<AtomicConcept, String> {
+            public String translate(AtomicConcept c) {
+                return c.getURI();
+            }
+            public boolean equals(Object o) {
+                return o instanceof StringTranslator;
+            }
+            public int hashCode() {
+                return 0;
             }
         }
-        return output;
+        class ConceptTranslator implements Translator<Object, AtomicConcept> {
+            public AtomicConcept translate(Object o) {
+                return AtomicConcept.create(o.toString());
+            }
+            public boolean equals(Object o) {
+                return o instanceof ConceptTranslator;
+            }
+            public int hashCode() {
+                return 0;
+            }
+        }
+        return new TranslatedMap<
+                AtomicConcept, String, HierarchyPosition<AtomicConcept>,
+                HierarchyPosition<String>
+            >(getAtomicConceptHierarchy(), new StringTranslator(),
+                new ConceptTranslator(),
+                new PositionTranslator<AtomicConcept, String>(new StringTranslator()));
     }
     
     public HierarchyPosition<String>
@@ -460,6 +506,7 @@ public class HermiT implements Serializable {
         	} else {
         		directBlockingChecker = new SingleDirectBlockingChecker();
         	}
+        	break;
         case SINGLE:
             directBlockingChecker = new SingleDirectBlockingChecker();
             break;
@@ -529,9 +576,10 @@ public class HermiT implements Serializable {
                                 existentialsExpansionStrategy,
                                 m_dlOntology,
                                 m_config.parameters);
+        m_subsumptionChecker = new TableauSubsumptionChecker(m_tableau);
         if (m_config.subsumptionCacheStrategyType ==
             SubsumptionCacheStrategyType.IMMEDIATE) {
-            m_subsumptionChecker = new TableauSubsumptionChecker(m_tableau);
+            getClassTaxonomy();
         }
     }
     

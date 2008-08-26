@@ -5,7 +5,7 @@ import java.util.Set;
 import java.util.AbstractSet;
 import java.util.Iterator;
 
-class TranslatedSet<T,U> extends AbstractSet<U> {
+public class TranslatedSet<T,U> extends AbstractSet<U> {
     public Set<T> set;
     public Translator<T,U> translator;
     

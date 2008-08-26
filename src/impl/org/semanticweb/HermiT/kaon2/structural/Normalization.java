@@ -184,6 +184,7 @@ public class Normalization {
             case ObjectPropertyAttribute.OBJECT_PROPERTY_ASYMMETRIC:
             	ObjectPropertyExpression objectProperty=axiom.getObjectProperty().getSimplified();
             	m_asymmetricObjectProperties.add(objectProperty);
+            	break;
             case ObjectPropertyAttribute.OBJECT_PROPERTY_TRANSITIVE:
                 transitivityManager.makeTransitive(axiom.getObjectProperty().getSimplified());
                 break;

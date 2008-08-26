@@ -42,6 +42,7 @@ public class ReasonerTest extends AbstractOntologyTest {
         addAxiom("[subClassOf Student Person]");
         addAxiom("[subClassOf Dog Animal]");
         assertSubsumedBy("Student","Animal",true);
+        assertSubsumedBy("Student","Student",true);
         assertSubsumedBy("Animal","Student",false);
         assertSubsumedBy("Student","Dog",false);
         assertSubsumedBy("Dog","Student",false);
