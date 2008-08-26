@@ -1,0 +1,4372 @@
+a:ABI_4700_TOF_TOF_mass_spectrometer
+    a:ABI_4700_TOF_TOF_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:mass_spectrometer
+    a:material_continuant
+    a:tandem_mass_spectrometer
+    a:tandem_time_of_flight_mass_spectrometer
+-----------------------------------------------
+a:ABI_4700_TOF_TOF_ms_raw_data
+    a:ABI_4700_TOF_TOF_ms_raw_data
+    a:MS_data_collection
+    a:MS_raw_data_native_format
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:ABI_Voyager_DE_Pro_MALDI_TOF_mass_spectrometer
+    a:ABI_Voyager_DE_Pro_MALDI_TOF_mass_spectrometer
+    a:MALDI-TOF_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:mass_spectrometer
+    a:material_continuant
+-----------------------------------------------
+a:ABI_Voyager_DE_Pro_MALDI_TOF_ms_raw_data
+    a:ABI_Voyager_DE_Pro_MALDI_TOF_ms_raw_data
+    a:MS_data_collection
+    a:MS_raw_data_native_format
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Agilent_HPLC
+    a:Agilent_HPLC
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:high_performance_liquid_chromatograph
+    a:material_continuant
+-----------------------------------------------
+a:Agilent_HPLC_data_processing_application
+    a:Agilent_HPLC_data_processing_application
+    a:HPLC_data_processing_application
+    a:agent
+    a:data
+    a:data_processing_application
+    a:material_continuant
+-----------------------------------------------
+a:Agilent_mass_spectrometer_data_processing_application
+    a:Agilent_mass_spectrometer_data_processing_application
+    a:MS_data_processing_application
+    a:agent
+    a:data
+    a:data_processing_application
+    a:material_continuant
+-----------------------------------------------
+a:Applied_Bio_Systems_mass_spectrometer_data_processing_application
+    a:Applied_Bio_Systems_mass_spectrometer_data_processing_application
+    a:MS_data_processing_application
+    a:agent
+    a:data
+    a:data_processing_application
+    a:material_continuant
+-----------------------------------------------
+a:Bruker_APEX_IV_mass_spectrometer
+    a:Bruker_APEX_IV_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:fourier_transform_mass_spectrometer
+    a:hardware
+    a:mass_spectrometer
+    a:material_continuant
+    a:tandem_mass_spectrometer
+-----------------------------------------------
+a:Bruker_APEX_IV_ms_raw_data
+    a:Bruker_APEX_IV_ms_raw_data
+    a:MS_data_collection
+    a:MS_raw_data_native_format
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Bruker_APEX_Q_FT_mass_spectrometer
+    a:Bruker_APEX_Q_FT_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:hybrid_tandem_mass_spectrometer
+    a:mass_spectrometer
+    a:material_continuant
+    a:tandem_mass_spectrometer
+-----------------------------------------------
+a:Bruker_APEX_Q_FT_ms_raw_data
+    a:Bruker_APEX_Q_FT_ms_raw_data
+    a:MS_data_collection
+    a:MS_raw_data_native_format
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Bruker_BioTOF_Q_quadrupole_time_of_flight_mass_spectrometer
+    a:Bruker_BioTOF_Q_quadrupole_time_of_flight_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:mass_spectrometer
+    a:material_continuant
+    a:quadrupole_time_of_flight_mass_spectrometer
+    a:tandem_mass_spectrometer
+-----------------------------------------------
+a:Bruker_BioTOF_Q_quadrupole_time_of_flight_ms_raw_data
+    a:Bruker_BioTOF_Q_quadrupole_time_of_flight_ms_raw_data
+    a:MS_data_collection
+    a:MS_raw_data_native_format
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Bruker_Daltomics_mass_spectrometer_data_processing_application
+    a:Bruker_Daltomics_mass_spectrometer_data_processing_application
+    a:MS_data_processing_application
+    a:agent
+    a:data
+    a:data_processing_application
+    a:material_continuant
+-----------------------------------------------
+a:Bruker_ESI_source
+    a:Bruker_ESI_source
+    a:ESI_source
+    a:MS_component
+    a:MS_source
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+    a:standard_ESI_source
+-----------------------------------------------
+a:Bruker_HCT_ion_trap_mass_spectrometer
+    a:Bruker_HCT_ion_trap_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:ion_trap_mass_spectrometer
+    a:mass_spectrometer
+    a:material_continuant
+    a:tandem_mass_spectrometer
+-----------------------------------------------
+a:Bruker_HCT_ion_trap_ms_raw_data
+    a:Bruker_HCT_ion_trap_ms_raw_data
+    a:MS_data_collection
+    a:MS_raw_data_native_format
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Bruker_HCTplus_ion_trap_mass_spectrometer
+    a:Bruker_HCTplus_ion_trap_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:ion_trap_mass_spectrometer
+    a:mass_spectrometer
+    a:material_continuant
+    a:tandem_mass_spectrometer
+-----------------------------------------------
+a:Bruker_HCTplus_ion_trap_ms_raw_data
+    a:Bruker_HCTplus_ion_trap_ms_raw_data
+    a:MS_data_collection
+    a:MS_raw_data_native_format
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Bruker_autoflex_MALDI_TOF_mass_spectrometer
+    a:Bruker_autoflex_MALDI_TOF_mass_spectrometer
+    a:MALDI-TOF_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:mass_spectrometer
+    a:material_continuant
+-----------------------------------------------
+a:Bruker_autoflex_MALDI_TOF_ms_raw_data
+    a:Bruker_autoflex_MALDI_TOF_ms_raw_data
+    a:MS_data_collection
+    a:MS_raw_data_native_format
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Bruker_autoflex_TOF_TOF_mass_spectrometer
+    a:Bruker_autoflex_TOF_TOF_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:mass_spectrometer
+    a:material_continuant
+    a:tandem_mass_spectrometer
+    a:tandem_time_of_flight_mass_spectrometer
+-----------------------------------------------
+a:Bruker_autoflex_TOF_TOF_ms_raw_data
+    a:Bruker_autoflex_TOF_TOF_ms_raw_data
+    a:MS_data_collection
+    a:MS_raw_data_native_format
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Bruker_esquire4000_ion_trap_mass_spectrometer
+    a:Bruker_esquire4000_ion_trap_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:ion_trap_mass_spectrometer
+    a:mass_spectrometer
+    a:material_continuant
+    a:tandem_mass_spectrometer
+-----------------------------------------------
+a:Bruker_esquire4000_ion_trap_ms_raw_data
+    a:Bruker_esquire4000_ion_trap_ms_raw_data
+    a:MS_data_collection
+    a:MS_raw_data_native_format
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Bruker_esquire6000_ion_trap_mass_spectrometer
+    a:Bruker_esquire6000_ion_trap_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:ion_trap_mass_spectrometer
+    a:mass_spectrometer
+    a:material_continuant
+    a:tandem_mass_spectrometer
+-----------------------------------------------
+a:Bruker_esquire6000_ion_trap_ms_raw_data
+    a:Bruker_esquire6000_ion_trap_ms_raw_data
+    a:MS_data_collection
+    a:MS_raw_data_native_format
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Bruker_microQTOF_quadrupole_time_of_flight_mass_spectrometer
+    a:Bruker_microQTOF_quadrupole_time_of_flight_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:mass_spectrometer
+    a:material_continuant
+    a:quadrupole_time_of_flight_mass_spectrometer
+    a:tandem_mass_spectrometer
+-----------------------------------------------
+a:Bruker_microQTOF_quadrupole_time_of_flight_ms_raw_data
+    a:Bruker_microQTOF_quadrupole_time_of_flight_ms_raw_data
+    a:MS_data_collection
+    a:MS_raw_data_native_format
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Bruker_microflex_MALDI_TOF_mass_spectrometer
+    a:Bruker_microflex_MALDI_TOF_mass_spectrometer
+    a:MALDI-TOF_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:mass_spectrometer
+    a:material_continuant
+-----------------------------------------------
+a:Bruker_microflex_MALDI_TOF_ms_raw_data
+    a:Bruker_microflex_MALDI_TOF_ms_raw_data
+    a:MS_data_collection
+    a:MS_raw_data_native_format
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Bruker_omniflex_MALDI_TOF_mass_spectrometer
+    a:Bruker_omniflex_MALDI_TOF_mass_spectrometer
+    a:MALDI-TOF_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:mass_spectrometer
+    a:material_continuant
+-----------------------------------------------
+a:Bruker_omniflex_MALDI_TOF_ms_raw_data
+    a:Bruker_omniflex_MALDI_TOF_ms_raw_data
+    a:MS_data_collection
+    a:MS_raw_data_native_format
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Bruker_ultraflex_MALDI_TOF_mass_spectrometer
+    a:Bruker_ultraflex_MALDI_TOF_mass_spectrometer
+    a:MALDI-TOF_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:mass_spectrometer
+    a:material_continuant
+-----------------------------------------------
+a:Bruker_ultraflex_MALDI_TOF_ms_raw_data
+    a:Bruker_ultraflex_MALDI_TOF_ms_raw_data
+    a:MS_data_collection
+    a:MS_raw_data_native_format
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Bruker_ultraflex_TOF_TOF_mass_spectrometer
+    a:Bruker_ultraflex_TOF_TOF_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:mass_spectrometer
+    a:material_continuant
+    a:tandem_mass_spectrometer
+    a:tandem_time_of_flight_mass_spectrometer
+-----------------------------------------------
+a:Bruker_ultraflex_TOF_TOF_ms_raw_data
+    a:Bruker_ultraflex_TOF_TOF_ms_raw_data
+    a:MS_data_collection
+    a:MS_raw_data_native_format
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:CARBANK_ID
+    a:CARBANK_ID
+    a:data
+    a:glycan_accession_number
+    a:material_continuant
+    a:parameter
+    a:substance_accession_number
+    a:substance_identifier
+    a:substance_parameter
+-----------------------------------------------
+a:CCSD_ID
+    a:CCSD_ID
+    a:data
+    a:glycan_accession_number
+    a:material_continuant
+    a:parameter
+    a:substance_accession_number
+    a:substance_identifier
+    a:substance_parameter
+-----------------------------------------------
+a:CHEBI_ID
+    a:CHEBI_ID
+    a:data
+    a:material_continuant
+    a:parameter
+    a:substance_accession_number
+    a:substance_identifier
+    a:substance_parameter
+-----------------------------------------------
+a:DNA_molecule
+    a:DNA_molecule
+    a:chemical_entity
+    a:data
+    a:material_continuant
+    a:molecule
+-----------------------------------------------
+a:DNA_nucleotide_sequence
+    a:DNA_nucleotide_sequence
+    a:data
+    a:material_continuant
+    a:molecular_parameter
+    a:molecular_sequence
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:ESI_source
+    a:ESI_source
+    a:MS_component
+    a:MS_source
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:Electron_Multiplier_Tube_detector
+    a:Electron_Multiplier_Tube_detector
+    a:MS_component
+    a:MS_detector
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:Finnigan_ASC_ms-ms_peak_list
+    a:Finnigan_ASC_ms-ms_peak_list
+    a:MS_data_collection
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms-ms_peak_list
+    a:ms_output_data_collection
+    a:ms_processed_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Finnigan_LCQ_classic_mass_spectrometer
+    a:Finnigan_LCQ_classic_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:ion_trap_mass_spectrometer
+    a:mass_spectrometer
+    a:material_continuant
+    a:tandem_mass_spectrometer
+-----------------------------------------------
+a:Finnigan_LCQ_classic_ms_raw_data
+    a:Finnigan_LCQ_classic_ms_raw_data
+    a:MS_data_collection
+    a:MS_raw_data_native_format
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Finnigan_LTQ_FT_mass_spectrometer
+    a:Finnigan_LTQ_FT_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:hybrid_tandem_mass_spectrometer
+    a:mass_spectrometer
+    a:material_continuant
+    a:tandem_mass_spectrometer
+-----------------------------------------------
+a:Finnigan_LTQ_FT_ms_raw_data
+    a:Finnigan_LTQ_FT_ms_raw_data
+    a:MS_data_collection
+    a:MS_raw_data_native_format
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Finnigan_LTQ_linear_ion_trap_mass_spectrometer
+    a:Finnigan_LTQ_linear_ion_trap_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:ion_trap_mass_spectrometer
+    a:mass_spectrometer
+    a:material_continuant
+    a:tandem_mass_spectrometer
+-----------------------------------------------
+a:Finnigan_LTQ_linear_ion_trap_ms_raw_data
+    a:Finnigan_LTQ_linear_ion_trap_ms_raw_data
+    a:MS_data_collection
+    a:MS_raw_data_native_format
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Finnigan_Sequest_DTA_ms-ms_peak_list
+    a:Finnigan_Sequest_DTA_ms-ms_peak_list
+    a:MS_data_collection
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms-ms_peak_list
+    a:ms_output_data_collection
+    a:ms_processed_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:GPS_Explorer_application
+    a:Applied_Bio_Systems_mass_spectrometer_data_processing_application
+    a:GPS_Explorer_application
+    a:MS_data_processing_application
+    a:agent
+    a:data
+    a:data_processing_application
+    a:material_continuant
+-----------------------------------------------
+a:GycO_ID
+    a:GycO_ID
+    a:data
+    a:glycan_accession_number
+    a:material_continuant
+    a:parameter
+    a:substance_accession_number
+    a:substance_identifier
+    a:substance_parameter
+-----------------------------------------------
+a:HPLC
+    a:HPLC
+    a:biochemical_component_separation
+    a:biochemical_sample_preparation
+    a:chromatography
+    a:data
+    a:material_continuant
+    a:physical_task
+    a:sample_preparation
+    a:task
+-----------------------------------------------
+a:HPLC_analytical_scale_fraction_collector
+    a:HPLC_analytical_scale_fraction_collector
+    a:HPLC_component
+    a:HPLC_fraction_collector
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:HPLC_autosampler
+    a:HPLC_autosampler
+    a:HPLC_component
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:HPLC_buffer
+    a:HPLC_buffer
+    a:HPLC_instrumental_operating_parameter
+    a:HPLC_parameter
+    a:data
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+    a:substance_identifier
+    a:substance_parameter
+-----------------------------------------------
+a:HPLC_chromatogram
+    a:HPLC_chromatogram
+    a:HPLC_data_collection
+    a:HPLC_experimental_data_collection
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:process_associated_data_collection
+-----------------------------------------------
+a:HPLC_chromatogram_XML_format_data
+    a:HPLC_chromatogram
+    a:HPLC_chromatogram_XML_format_data
+    a:HPLC_data_collection
+    a:HPLC_experimental_data_collection
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:process_associated_data_collection
+-----------------------------------------------
+a:HPLC_chromatogram_text_format_data
+    a:HPLC_chromatogram
+    a:HPLC_chromatogram_text_format_data
+    a:HPLC_data_collection
+    a:HPLC_experimental_data_collection
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:process_associated_data_collection
+-----------------------------------------------
+a:HPLC_column
+    a:HPLC_column
+    a:HPLC_component
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:HPLC_component
+    a:HPLC_component
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:HPLC_data_collection
+    a:HPLC_data_collection
+    a:data
+    a:data_collection
+    a:material_continuant
+    a:process_associated_data_collection
+-----------------------------------------------
+a:HPLC_data_processing_application
+    a:HPLC_data_processing_application
+    a:agent
+    a:data
+    a:data_processing_application
+    a:material_continuant
+-----------------------------------------------
+a:HPLC_detection_wavelength
+    a:HPLC_detection_wavelength
+    a:HPLC_instrumental_operating_parameter
+    a:HPLC_parameter
+    a:data
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:HPLC_detector
+    a:HPLC_component
+    a:HPLC_detector
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:HPLC_detector_signal
+    a:HPLC_detector_signal
+    a:HPLC_experimentally_measured_parameter
+    a:HPLC_parameter
+    a:data
+    a:experimentally_measured_parameter
+    a:material_continuant
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:HPLC_diode_array_detector
+    a:HPLC_component
+    a:HPLC_detector
+    a:HPLC_diode_array_detector
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:HPLC_excitation_wavelength
+    a:HPLC_excitation_wavelength
+    a:HPLC_instrumental_operating_parameter
+    a:HPLC_parameter
+    a:data
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:HPLC_experimental_data_collection
+    a:HPLC_data_collection
+    a:HPLC_experimental_data_collection
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:process_associated_data_collection
+-----------------------------------------------
+a:HPLC_experimentally_measured_parameter
+    a:HPLC_experimentally_measured_parameter
+    a:HPLC_parameter
+    a:data
+    a:experimentally_measured_parameter
+    a:material_continuant
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:HPLC_flowrate
+    a:HPLC_flowrate
+    a:HPLC_instrumental_operating_parameter
+    a:HPLC_parameter
+    a:data
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:HPLC_fluorenscence_detector
+    a:HPLC_component
+    a:HPLC_detector
+    a:HPLC_fluorenscence_detector
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:HPLC_fraction_collector
+    a:HPLC_component
+    a:HPLC_fraction_collector
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:HPLC_fraction_number
+    a:HPLC_experimentally_measured_parameter
+    a:HPLC_fraction_number
+    a:HPLC_parameter
+    a:data
+    a:experimentally_measured_parameter
+    a:index_parameter
+    a:material_continuant
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:HPLC_gradient_program
+    a:HPLC_data_collection
+    a:HPLC_gradient_program
+    a:HPLC_operating_parameter_collection
+    a:data
+    a:data_collection
+    a:material_continuant
+    a:operating_parameter_collection
+    a:process_associated_data_collection
+-----------------------------------------------
+a:HPLC_gradient_time_point
+    a:HPLC_data_collection
+    a:HPLC_gradient_time_point
+    a:HPLC_operating_parameter_collection
+    a:data
+    a:data_collection
+    a:material_continuant
+    a:operating_parameter_collection
+    a:process_associated_data_collection
+-----------------------------------------------
+a:HPLC_injection_loop_volume
+    a:HPLC_injection_loop_volume
+    a:HPLC_instrumental_operating_parameter
+    a:HPLC_parameter
+    a:data
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:HPLC_instrumental_operating_parameter
+    a:HPLC_instrumental_operating_parameter
+    a:HPLC_parameter
+    a:data
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:HPLC_manual_injector
+    a:HPLC_component
+    a:HPLC_manual_injector
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:HPLC_micro_autosampler
+    a:HPLC_autosampler
+    a:HPLC_component
+    a:HPLC_micro_autosampler
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:HPLC_micro_well_plate_autosampler
+    a:HPLC_autosampler
+    a:HPLC_component
+    a:HPLC_micro_well_plate_autosampler
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:HPLC_microscale_MALDI_spotter
+    a:HPLC_component
+    a:HPLC_fraction_collector
+    a:HPLC_microscale_MALDI_spotter
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:HPLC_microscale_fraction_collector
+    a:HPLC_component
+    a:HPLC_fraction_collector
+    a:HPLC_microscale_fraction_collector
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:HPLC_multiwavelength_detector
+    a:HPLC_component
+    a:HPLC_detector
+    a:HPLC_multiwavelength_detector
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:HPLC_operating_parameter_collection
+    a:HPLC_data_collection
+    a:HPLC_operating_parameter_collection
+    a:data
+    a:data_collection
+    a:material_continuant
+    a:operating_parameter_collection
+    a:process_associated_data_collection
+-----------------------------------------------
+a:HPLC_parameter
+    a:HPLC_parameter
+    a:data
+    a:material_continuant
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:HPLC_pump
+    a:HPLC_component
+    a:HPLC_pump
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:HPLC_refractive_index_detector
+    a:HPLC_component
+    a:HPLC_detector
+    a:HPLC_refractive_index_detector
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:HPLC_standard_autosampler
+    a:HPLC_autosampler
+    a:HPLC_component
+    a:HPLC_standard_autosampler
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:HPLC_standard_well_plate_autosampler
+    a:HPLC_autosampler
+    a:HPLC_component
+    a:HPLC_standard_well_plate_autosampler
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:HPLC_time_parameter
+    a:HPLC_experimentally_measured_parameter
+    a:HPLC_instrumental_operating_parameter
+    a:HPLC_parameter
+    a:HPLC_time_parameter
+    a:data
+    a:experimentally_measured_parameter
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+    a:process_time_parameter
+    a:temporal_parameter
+-----------------------------------------------
+a:HPLC_time_signal_pair
+    a:HPLC_data_collection
+    a:HPLC_experimental_data_collection
+    a:HPLC_time_signal_pair
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:process_associated_data_collection
+-----------------------------------------------
+a:HPLC_vacuum_degasser
+    a:HPLC_component
+    a:HPLC_vacuum_degasser
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:HPLC_variable_wavelength_detector
+    a:HPLC_component
+    a:HPLC_detector
+    a:HPLC_variable_wavelength_detector
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:KEGG_ID
+    a:KEGG_ID
+    a:data
+    a:glycan_accession_number
+    a:material_continuant
+    a:parameter
+    a:substance_accession_number
+    a:substance_identifier
+    a:substance_parameter
+-----------------------------------------------
+a:LINUCS_ID
+    a:LINUCS_ID
+    a:data
+    a:glycan_accession_number
+    a:material_continuant
+    a:parameter
+    a:substance_accession_number
+    a:substance_identifier
+    a:substance_parameter
+-----------------------------------------------
+a:MALDI-TOF_mass_spectrometer
+    a:MALDI-TOF_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:mass_spectrometer
+    a:material_continuant
+-----------------------------------------------
+a:MALDI_matrix
+    a:MALDI_matrix
+    a:chemical_entity
+    a:data
+    a:material_continuant
+    a:molecular_aggregate
+-----------------------------------------------
+a:MALDI_source
+    a:MALDI_source
+    a:MS_component
+    a:MS_source
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:MS_analyzer
+    a:MS_analyzer
+    a:MS_component
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:MS_analyzer_TOF_type
+    a:MS_analyzer_TOF_type
+    a:MS_analyzer_parameter
+    a:MS_instrumental_operating_parameter
+    a:MS_parameter
+    a:data
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_analyzer_focus_mass
+    a:MS_analyzer_focus_mass
+    a:MS_analyzer_parameter
+    a:MS_instrumental_operating_parameter
+    a:MS_parameter
+    a:data
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_analyzer_interscan_delay
+    a:MS_analyzer_interscan_delay
+    a:MS_analyzer_parameter
+    a:MS_instrumental_operating_parameter
+    a:MS_parameter
+    a:data
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_analyzer_mass_range_max
+    a:MS_analyzer_mass_range_max
+    a:MS_analyzer_parameter
+    a:MS_instrumental_operating_parameter
+    a:MS_parameter
+    a:data
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_analyzer_mass_range_min
+    a:MS_analyzer_mass_range_min
+    a:MS_analyzer_parameter
+    a:MS_instrumental_operating_parameter
+    a:MS_parameter
+    a:data
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_analyzer_mode
+    a:MS_analyzer_mode
+    a:MS_analyzer_parameter
+    a:MS_instrumental_operating_parameter
+    a:MS_parameter
+    a:data
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_analyzer_parameter
+    a:MS_analyzer_parameter
+    a:MS_instrumental_operating_parameter
+    a:MS_parameter
+    a:data
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_analyzer_parameter_collection
+    a:MS_analyzer_parameter_collection
+    a:MS_data_collection
+    a:MS_instrument_setup_parameter_collection
+    a:MS_operating_parameter_collection
+    a:data
+    a:data_collection
+    a:material_continuant
+    a:operating_parameter_collection
+    a:process_associated_data_collection
+-----------------------------------------------
+a:MS_analyzer_scan_time
+    a:MS_analyzer_parameter
+    a:MS_analyzer_scan_time
+    a:MS_instrumental_operating_parameter
+    a:MS_parameter
+    a:data
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_component
+    a:MS_component
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:MS_data_collection
+    a:MS_data_collection
+    a:data
+    a:data_collection
+    a:material_continuant
+    a:process_associated_data_collection
+-----------------------------------------------
+a:MS_data_processing_application
+    a:MS_data_processing_application
+    a:agent
+    a:data
+    a:data_processing_application
+    a:material_continuant
+-----------------------------------------------
+a:MS_data_processing_parameter
+    a:MS_data_processing_parameter
+    a:MS_parameter
+    a:data
+    a:data_processing_parameter
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_data_processing_parameter_collection
+    a:MS_data_collection
+    a:MS_data_processing_parameter_collection
+    a:MS_operating_parameter_collection
+    a:data
+    a:data_collection
+    a:material_continuant
+    a:operating_parameter_collection
+    a:process_associated_data_collection
+-----------------------------------------------
+a:MS_detector
+    a:MS_component
+    a:MS_detector
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:MS_experimentally_measured_parameter
+    a:MS_experimentally_measured_parameter
+    a:MS_parameter
+    a:data
+    a:experimentally_measured_parameter
+    a:material_continuant
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_format_conversion_parameter_collection
+    a:MS_data_collection
+    a:MS_data_processing_parameter_collection
+    a:MS_format_conversion_parameter_collection
+    a:MS_operating_parameter_collection
+    a:data
+    a:data_collection
+    a:material_continuant
+    a:operating_parameter_collection
+    a:process_associated_data_collection
+-----------------------------------------------
+a:MS_instrument_setup_parameter_collection
+    a:MS_data_collection
+    a:MS_instrument_setup_parameter_collection
+    a:MS_operating_parameter_collection
+    a:data
+    a:data_collection
+    a:material_continuant
+    a:operating_parameter_collection
+    a:process_associated_data_collection
+-----------------------------------------------
+a:MS_instrumental_operating_parameter
+    a:MS_instrumental_operating_parameter
+    a:MS_parameter
+    a:data
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_maxent3_compress_value_option
+    a:MS_data_processing_parameter
+    a:MS_maxent3_compress_value_option
+    a:MS_parameter
+    a:data
+    a:data_processing_parameter
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_maxent3_iterations_per_ensemble_member_value
+    a:MS_data_processing_parameter
+    a:MS_maxent3_iterations_per_ensemble_member_value
+    a:MS_parameter
+    a:data
+    a:data_processing_parameter
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_maxent3_number_of_ensemble_members
+    a:MS_data_processing_parameter
+    a:MS_maxent3_number_of_ensemble_members
+    a:MS_parameter
+    a:data
+    a:data_processing_parameter
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_maxent3_peak_width
+    a:MS_data_processing_parameter
+    a:MS_maxent3_peak_width
+    a:MS_parameter
+    a:data
+    a:data_processing_parameter
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_maxent3_startmass
+    a:MS_data_processing_parameter
+    a:MS_maxent3_startmass
+    a:MS_parameter
+    a:data
+    a:data_processing_parameter
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_maxent3_value
+    a:MS_data_processing_parameter
+    a:MS_maxent3_value
+    a:MS_parameter
+    a:data
+    a:data_processing_parameter
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_min_peak_width_at_half_height_mass_measure_value
+    a:MS_data_processing_parameter
+    a:MS_min_peak_width_at_half_height_mass_measure_value
+    a:MS_parameter
+    a:data
+    a:data_processing_parameter
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_operating_parameter_collection
+    a:MS_data_collection
+    a:MS_operating_parameter_collection
+    a:data
+    a:data_collection
+    a:material_continuant
+    a:operating_parameter_collection
+    a:process_associated_data_collection
+-----------------------------------------------
+a:MS_parameter
+    a:MS_parameter
+    a:data
+    a:material_continuant
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_polynomial_order_mass_measure_value
+    a:MS_data_processing_parameter
+    a:MS_parameter
+    a:MS_polynomial_order_mass_measure_value
+    a:data
+    a:data_processing_parameter
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_raw_data_converted_format
+    a:MS_data_collection
+    a:MS_raw_data_converted_format
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:MS_raw_data_native_format
+    a:MS_data_collection
+    a:MS_raw_data_native_format
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:MS_scan_number
+    a:MS_experimentally_measured_parameter
+    a:MS_parameter
+    a:MS_scan_number
+    a:data
+    a:experimentally_measured_parameter
+    a:index_parameter
+    a:material_continuant
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_smooth_window_mass_measure_value
+    a:MS_data_processing_parameter
+    a:MS_parameter
+    a:MS_smooth_window_mass_measure_value
+    a:data
+    a:data_processing_parameter
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_smoothing_algorithm
+    a:MS_data_processing_parameter
+    a:MS_parameter
+    a:MS_smoothing_algorithm
+    a:data
+    a:data_processing_parameter
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_source
+    a:MS_component
+    a:MS_source
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:MS_source_ESI_capillary_voltage
+    a:MS_instrumental_operating_parameter
+    a:MS_parameter
+    a:MS_source_ESI_capillary_voltage
+    a:MS_source_ESI_parameter
+    a:MS_source_parameter
+    a:data
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_source_ESI_parameter
+    a:MS_instrumental_operating_parameter
+    a:MS_parameter
+    a:MS_source_ESI_parameter
+    a:MS_source_parameter
+    a:data
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_source_ESI_parameter_collection
+    a:MS_data_collection
+    a:MS_instrument_setup_parameter_collection
+    a:MS_operating_parameter_collection
+    a:MS_source_ESI_parameter_collection
+    a:MS_source_parameter_collection
+    a:data
+    a:data_collection
+    a:material_continuant
+    a:operating_parameter_collection
+    a:process_associated_data_collection
+-----------------------------------------------
+a:MS_source_MALDI_laser_intensity
+    a:MS_instrumental_operating_parameter
+    a:MS_parameter
+    a:MS_source_MALDI_laser_intensity
+    a:MS_source_MALDI_parameter
+    a:MS_source_parameter
+    a:data
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_source_MALDI_matrix
+    a:MS_instrumental_operating_parameter
+    a:MS_parameter
+    a:MS_source_MALDI_matrix
+    a:MS_source_MALDI_parameter
+    a:MS_source_parameter
+    a:data
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+    a:substance_identifier
+    a:substance_parameter
+-----------------------------------------------
+a:MS_source_MALDI_number_of_laser_shots
+    a:MS_instrumental_operating_parameter
+    a:MS_parameter
+    a:MS_source_MALDI_number_of_laser_shots
+    a:MS_source_MALDI_parameter
+    a:MS_source_parameter
+    a:data
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_source_MALDI_parameter
+    a:MS_instrumental_operating_parameter
+    a:MS_parameter
+    a:MS_source_MALDI_parameter
+    a:MS_source_parameter
+    a:data
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_source_MALDI_parameter_collection
+    a:MS_data_collection
+    a:MS_instrument_setup_parameter_collection
+    a:MS_operating_parameter_collection
+    a:MS_source_MALDI_parameter_collection
+    a:MS_source_parameter_collection
+    a:data
+    a:data_collection
+    a:material_continuant
+    a:operating_parameter_collection
+    a:process_associated_data_collection
+-----------------------------------------------
+a:MS_source_cone_voltage
+    a:MS_instrumental_operating_parameter
+    a:MS_parameter
+    a:MS_source_ESI_parameter
+    a:MS_source_cone_voltage
+    a:MS_source_parameter
+    a:data
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_source_parameter
+    a:MS_instrumental_operating_parameter
+    a:MS_parameter
+    a:MS_source_parameter
+    a:data
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_source_parameter_collection
+    a:MS_data_collection
+    a:MS_instrument_setup_parameter_collection
+    a:MS_operating_parameter_collection
+    a:MS_source_parameter_collection
+    a:data
+    a:data_collection
+    a:material_continuant
+    a:operating_parameter_collection
+    a:process_associated_data_collection
+-----------------------------------------------
+a:MS_spectrum_format
+    a:MS_data_processing_parameter
+    a:MS_parameter
+    a:MS_spectrum_format
+    a:data
+    a:data_processing_parameter
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:MS_time_parameter
+    a:MS_parameter
+    a:MS_time_parameter
+    a:data
+    a:material_continuant
+    a:parameter
+    a:process_associated_parameter
+    a:process_time_parameter
+    a:temporal_parameter
+-----------------------------------------------
+a:Mascot
+    a:MS_data_processing_application
+    a:Mascot
+    a:agent
+    a:data
+    a:data_processing_application
+    a:database_ms_search_application
+    a:material_continuant
+-----------------------------------------------
+a:Mascot_database_search_input_parameter_collection
+    a:Mascot_database_search_input_parameter_collection
+    a:data
+    a:data_collection
+    a:database_search_data_collection
+    a:database_search_processing_parameter_collection
+    a:material_continuant
+    a:operating_parameter_collection
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Mascot_peptide_score
+    a:Mascot_peptide_score
+    a:Mascot_score
+    a:calculated_parameter
+    a:data
+    a:material_continuant
+    a:parameter
+    a:score
+-----------------------------------------------
+a:Mascot_protein_score
+    a:Mascot_protein_score
+    a:Mascot_score
+    a:calculated_parameter
+    a:data
+    a:material_continuant
+    a:parameter
+    a:score
+-----------------------------------------------
+a:Mascot_query_number
+    a:Mascot_query_number
+    a:data
+    a:index_parameter
+    a:material_continuant
+    a:parameter
+-----------------------------------------------
+a:Mascot_score
+    a:Mascot_score
+    a:calculated_parameter
+    a:data
+    a:material_continuant
+    a:parameter
+    a:score
+-----------------------------------------------
+a:Mascot_search
+    a:Mascot_search
+    a:computational_task
+    a:data
+    a:data_classification
+    a:data_correlation
+    a:data_processing
+    a:material_continuant
+    a:statistical_analysis
+    a:task
+-----------------------------------------------
+a:Masslynx_Micromass_application
+    a:MS_data_processing_application
+    a:Masslynx_Micromass_application
+    a:Micromass_mass_spectrometer_data_processing_application
+    a:agent
+    a:data
+    a:data_processing_application
+    a:material_continuant
+-----------------------------------------------
+a:Masslynx_proteinlynx_denovo_sequencing_results_data
+    a:Masslynx_proteinlynx_denovo_sequencing_results_data
+    a:data
+    a:data_collection
+    a:denovo_sequencing_data_collection
+    a:denovo_sequencing_output_data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Micromass_MALDI_micro_MX_MALDI_TOF_mass_spectrometer
+    a:MALDI-TOF_mass_spectrometer
+    a:Micromass_MALDI_micro_MX_MALDI_TOF_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:mass_spectrometer
+    a:material_continuant
+-----------------------------------------------
+a:Micromass_MALDI_micro_MX_MALDI_TOF_ms_raw_data
+    a:MS_data_collection
+    a:MS_raw_data_native_format
+    a:Micromass_MALDI_micro_MX_MALDI_TOF_ms_raw_data
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Micromass_QTOF_2_quadrupole_time_of_flight_mass_spectrometer
+    a:Micromass_QTOF_2_quadrupole_time_of_flight_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:mass_spectrometer
+    a:material_continuant
+    a:quadrupole_time_of_flight_mass_spectrometer
+    a:tandem_mass_spectrometer
+-----------------------------------------------
+a:Micromass_QTOF_2_quadrupole_time_of_flight_ms_raw_data
+    a:MS_data_collection
+    a:MS_raw_data_native_format
+    a:Micromass_QTOF_2_quadrupole_time_of_flight_ms_raw_data
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Micromass_Q_TOF_micro_quadrupole_time_of_flight_mass_spectrometer
+    a:Micromass_Q_TOF_micro_quadrupole_time_of_flight_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:mass_spectrometer
+    a:material_continuant
+    a:quadrupole_time_of_flight_mass_spectrometer
+    a:tandem_mass_spectrometer
+-----------------------------------------------
+a:Micromass_Q_TOF_micro_quadrupole_time_of_flight_ms_raw_data
+    a:MS_data_collection
+    a:MS_raw_data_native_format
+    a:Micromass_Q_TOF_micro_quadrupole_time_of_flight_ms_raw_data
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Micromass_Q_TOF_ultima_quadrupole_time_of_flight_mass_spectrometer
+    a:Micromass_Q_TOF_ultima_quadrupole_time_of_flight_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:mass_spectrometer
+    a:material_continuant
+    a:quadrupole_time_of_flight_mass_spectrometer
+    a:tandem_mass_spectrometer
+-----------------------------------------------
+a:Micromass_Q_TOF_ultima_quadrupole_time_of_flight_ms_raw_data
+    a:MS_data_collection
+    a:MS_raw_data_native_format
+    a:Micromass_Q_TOF_ultima_quadrupole_time_of_flight_ms_raw_data
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Micromass_Quatro_micro_triple_quadrupole_mass_spectrometer
+    a:Micromass_Quatro_micro_triple_quadrupole_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:mass_spectrometer
+    a:material_continuant
+    a:tandem_mass_spectrometer
+    a:triple_quadrupole_mass_spectrometer
+-----------------------------------------------
+a:Micromass_Quatro_micro_triple_quadrupole_ms_raw_data
+    a:MS_data_collection
+    a:MS_raw_data_native_format
+    a:Micromass_Quatro_micro_triple_quadrupole_ms_raw_data
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Micromass_Quatro_premier_triple_quadrupole_mass_spectrometer
+    a:Micromass_Quatro_premier_triple_quadrupole_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:mass_spectrometer
+    a:material_continuant
+    a:tandem_mass_spectrometer
+    a:triple_quadrupole_mass_spectrometer
+-----------------------------------------------
+a:Micromass_Quatro_premier_triple_quadrupole_ms_raw_data
+    a:MS_data_collection
+    a:MS_raw_data_native_format
+    a:Micromass_Quatro_premier_triple_quadrupole_ms_raw_data
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Micromass_mass_spectrometer_data_processing_application
+    a:MS_data_processing_application
+    a:Micromass_mass_spectrometer_data_processing_application
+    a:agent
+    a:data
+    a:data_processing_application
+    a:material_continuant
+-----------------------------------------------
+a:N-glycosylation_consensus_presence
+    a:N-glycosylation_consensus_presence
+    a:data
+    a:material_continuant
+    a:molecular_parameter
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:Nano_ESI_source
+    a:ESI_source
+    a:MS_component
+    a:MS_source
+    a:Nano_ESI_source
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:PDB_accession_number
+    a:PDB_accession_number
+    a:data
+    a:material_continuant
+    a:parameter
+    a:protein_accession_number
+    a:substance_accession_number
+    a:substance_identifier
+    a:substance_parameter
+-----------------------------------------------
+a:PEAKS_denovo_sequencing_results_data
+    a:PEAKS_denovo_sequencing_results_data
+    a:data
+    a:data_collection
+    a:denovo_sequencing_data_collection
+    a:denovo_sequencing_output_data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:process_associated_data_collection
+-----------------------------------------------
+a:PerSeptive_PKS_51_ms-ms_peak_list
+    a:MS_data_collection
+    a:PerSeptive_PKS_51_ms-ms_peak_list
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms-ms_peak_list
+    a:ms_output_data_collection
+    a:ms_processed_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:ProValt_5AA_15_norm_txt_file
+    a:ProValt_5AA_15_norm_txt_file
+    a:ProValt_output_data
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:statistical_analysis_output_data_collection
+-----------------------------------------------
+a:ProValt_ALL_txt_file
+    a:ProValt_ALL_txt_file
+    a:ProValt_output_data
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:statistical_analysis_output_data_collection
+-----------------------------------------------
+a:ProValt_FINAL_notused_peptides_pep_file
+    a:ProValt_FINAL_notused_peptides_pep_file
+    a:ProValt_output_data
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:statistical_analysis_output_data_collection
+-----------------------------------------------
+a:ProValt_FINAL_pro_file
+    a:ProValt_FINAL_pro_file
+    a:ProValt_output_data
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:statistical_analysis_output_data_collection
+-----------------------------------------------
+a:ProValt_FINAL_used_peptides_pep_file
+    a:ProValt_FINAL_used_peptides_pep_file
+    a:ProValt_output_data
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:statistical_analysis_output_data_collection
+-----------------------------------------------
+a:ProValt_TcAnnotsNormNC_gtn_file
+    a:ProValt_TcAnnotsNormNC_gtn_file
+    a:ProValt_output_data
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:statistical_analysis_output_data_collection
+-----------------------------------------------
+a:ProValt_analysis
+    a:ProValt_analysis
+    a:computational_task
+    a:confidence_analysis
+    a:data
+    a:data_filtering
+    a:data_processing
+    a:data_summarization
+    a:material_continuant
+    a:statistical_analysis
+    a:task
+-----------------------------------------------
+a:ProValt_fasta_file
+    a:ProValt_fasta_file
+    a:ProValt_output_data
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:statistical_analysis_output_data_collection
+-----------------------------------------------
+a:ProValt_input_parameter_collection
+    a:ProValt_input_parameter_collection
+    a:data
+    a:data_collection
+    a:material_continuant
+    a:operating_parameter_collection
+    a:statistical_analysis_parameter_collection
+-----------------------------------------------
+a:ProValt_norm_notused_peptides_pep_file
+    a:ProValt_norm_notused_peptides_pep_file
+    a:ProValt_output_data
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:statistical_analysis_output_data_collection
+-----------------------------------------------
+a:ProValt_norm_pro_file
+    a:ProValt_norm_pro_file
+    a:ProValt_output_data
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:statistical_analysis_output_data_collection
+-----------------------------------------------
+a:ProValt_norm_used_peptides_pep_file
+    a:ProValt_norm_used_peptides_pep_file
+    a:ProValt_output_data
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:statistical_analysis_output_data_collection
+-----------------------------------------------
+a:ProValt_output_data
+    a:ProValt_output_data
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:statistical_analysis_output_data_collection
+-----------------------------------------------
+a:ProValt_report_txt_file
+    a:ProValt_output_data
+    a:ProValt_report_txt_file
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:statistical_analysis_output_data_collection
+-----------------------------------------------
+a:Proteinlynx_micromass_MALDI_data_processing_parameters_collection
+    a:MS_data_collection
+    a:MS_data_processing_parameter_collection
+    a:MS_operating_parameter_collection
+    a:Proteinlynx_micromass_MALDI_data_processing_parameters_collection
+    a:data
+    a:data_collection
+    a:material_continuant
+    a:operating_parameter_collection
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Proteinlynx_micromass_electrospray_data_processing_parameters_collection
+    a:MS_data_collection
+    a:MS_data_processing_parameter_collection
+    a:MS_operating_parameter_collection
+    a:Proteinlynx_micromass_electrospray_data_processing_parameters_collection
+    a:data
+    a:data_collection
+    a:material_continuant
+    a:operating_parameter_collection
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Proteinlynx_micromass_ms-ms_survey_data_processing_parameters_collection
+    a:MS_data_collection
+    a:MS_data_processing_parameter_collection
+    a:MS_operating_parameter_collection
+    a:Proteinlynx_micromass_ms-ms_survey_data_processing_parameters_collection
+    a:data
+    a:data_collection
+    a:material_continuant
+    a:operating_parameter_collection
+    a:process_associated_data_collection
+-----------------------------------------------
+a:REFSEQ_polynucleotide_accession_number
+    a:REFSEQ_polynucleotide_accession_number
+    a:data
+    a:material_continuant
+    a:parameter
+    a:polynucleotide_accession_number
+    a:substance_accession_number
+    a:substance_identifier
+    a:substance_parameter
+-----------------------------------------------
+a:REFSEQ_protein_accession_number
+    a:REFSEQ_protein_accession_number
+    a:data
+    a:material_continuant
+    a:parameter
+    a:protein_accession_number
+    a:substance_accession_number
+    a:substance_identifier
+    a:substance_parameter
+-----------------------------------------------
+a:RNA_nucleotide_sequence
+    a:RNA_nucleotide_sequence
+    a:data
+    a:material_continuant
+    a:molecular_parameter
+    a:molecular_sequence
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:Sciex_API_III_ms-ms_peak_list
+    a:MS_data_collection
+    a:Sciex_API_III_ms-ms_peak_list
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms-ms_peak_list
+    a:ms_output_data_collection
+    a:ms_processed_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:SemURI
+    a:SemURI
+    a:SemURI_parameter
+    a:annotation_parameter
+    a:data
+    a:material_continuant
+    a:parameter
+-----------------------------------------------
+a:SemURI_concept_ID
+    a:SemURI_concept_ID
+    a:SemURI_parameter
+    a:annotation_parameter
+    a:data
+    a:material_continuant
+    a:parameter
+-----------------------------------------------
+a:SemURI_instance_ID
+    a:SemURI_instance_ID
+    a:SemURI_parameter
+    a:annotation_parameter
+    a:data
+    a:material_continuant
+    a:parameter
+-----------------------------------------------
+a:SemURI_parameter
+    a:SemURI_parameter
+    a:annotation_parameter
+    a:data
+    a:material_continuant
+    a:parameter
+-----------------------------------------------
+a:Sequest
+    a:MS_data_processing_application
+    a:Sequest
+    a:agent
+    a:data
+    a:data_processing_application
+    a:database_ms_search_application
+    a:material_continuant
+-----------------------------------------------
+a:Sequest_database_search_input_parameter_collection
+    a:Sequest_database_search_input_parameter_collection
+    a:data
+    a:data_collection
+    a:database_search_data_collection
+    a:database_search_processing_parameter_collection
+    a:material_continuant
+    a:operating_parameter_collection
+    a:process_associated_data_collection
+-----------------------------------------------
+a:Sequest_search
+    a:Sequest_search
+    a:computational_task
+    a:data
+    a:data_classification
+    a:data_correlation
+    a:data_processing
+    a:material_continuant
+    a:statistical_analysis
+    a:task
+-----------------------------------------------
+a:Spectrum_mill_application
+    a:Agilent_mass_spectrometer_data_processing_application
+    a:MS_data_processing_application
+    a:Spectrum_mill_application
+    a:agent
+    a:data
+    a:data_processing_application
+    a:material_continuant
+-----------------------------------------------
+a:TOF_analyzer
+    a:MS_analyzer
+    a:MS_component
+    a:TOF_analyzer
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:ThermoElectron_mass_spectrometer_data_processing_application
+    a:MS_data_processing_application
+    a:ThermoElectron_mass_spectrometer_data_processing_application
+    a:agent
+    a:data
+    a:data_processing_application
+    a:material_continuant
+-----------------------------------------------
+a:ThermoFinnigan_ESI_source
+    a:ESI_source
+    a:MS_component
+    a:MS_source
+    a:ThermoFinnigan_ESI_source
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+    a:standard_ESI_source
+-----------------------------------------------
+a:Turbo_Sequest_application
+    a:MS_data_processing_application
+    a:ThermoElectron_mass_spectrometer_data_processing_application
+    a:Turbo_Sequest_application
+    a:agent
+    a:data
+    a:data_processing_application
+    a:material_continuant
+-----------------------------------------------
+a:UNIPROT_accession_number
+    a:UNIPROT_accession_number
+    a:data
+    a:material_continuant
+    a:parameter
+    a:protein_accession_number
+    a:substance_accession_number
+    a:substance_identifier
+    a:substance_parameter
+-----------------------------------------------
+a:URL_parameter
+    a:URL_parameter
+    a:annotation_parameter
+    a:data
+    a:material_continuant
+    a:parameter
+-----------------------------------------------
+a:UV_spectrometer
+    a:UV_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:material_continuant
+-----------------------------------------------
+a:Xtandem
+    a:MS_data_processing_application
+    a:Xtandem
+    a:agent
+    a:data
+    a:data_processing_application
+    a:database_ms_search_application
+    a:material_continuant
+-----------------------------------------------
+a:Xtandem_database_search_input_parameter_collection
+    a:Xtandem_database_search_input_parameter_collection
+    a:data
+    a:data_collection
+    a:database_search_data_collection
+    a:database_search_processing_parameter_collection
+    a:material_continuant
+    a:operating_parameter_collection
+    a:process_associated_data_collection
+-----------------------------------------------
+a:absolute_amount
+    a:absolute_amount
+    a:data
+    a:material_continuant
+    a:parameter
+    a:substance_amount
+    a:substance_parameter
+-----------------------------------------------
+a:absolute_mass
+    a:absolute_amount
+    a:absolute_mass
+    a:data
+    a:material_continuant
+    a:parameter
+    a:substance_amount
+    a:substance_parameter
+-----------------------------------------------
+a:absolute_volume
+    a:absolute_amount
+    a:absolute_volume
+    a:data
+    a:material_continuant
+    a:parameter
+    a:substance_amount
+    a:substance_parameter
+-----------------------------------------------
+a:agent
+    a:agent
+    a:data
+    a:material_continuant
+-----------------------------------------------
+a:amino_acid_sequence
+    a:amino_acid_sequence
+    a:data
+    a:material_continuant
+    a:molecular_parameter
+    a:molecular_sequence
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:analytical_data_simulation
+    a:analytical_data_simulation
+    a:computational_task
+    a:data
+    a:data_simulation
+    a:material_continuant
+    a:task
+-----------------------------------------------
+a:analytical_instrument
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:material_continuant
+-----------------------------------------------
+a:annotation_parameter
+    a:annotation_parameter
+    a:data
+    a:material_continuant
+    a:parameter
+-----------------------------------------------
+a:antibody_affinity_HPLC_column
+    a:HPLC_column
+    a:HPLC_component
+    a:agent
+    a:antibody_affinity_HPLC_column
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:archaea
+    a:archaea
+    a:biological_continuant
+    a:data
+    a:material_continuant
+    a:organism
+    a:procaryotic_organism
+-----------------------------------------------
+a:bacteria
+    a:bacteria
+    a:biological_continuant
+    a:data
+    a:material_continuant
+    a:organism
+    a:procaryotic_organism
+-----------------------------------------------
+a:binary_HPLC_pump
+    a:HPLC_component
+    a:HPLC_pump
+    a:agent
+    a:binary_HPLC_pump
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:biochemical_component_separation
+    a:biochemical_component_separation
+    a:biochemical_sample_preparation
+    a:data
+    a:material_continuant
+    a:physical_task
+    a:sample_preparation
+    a:task
+-----------------------------------------------
+a:biochemical_sample
+    a:biochemical_sample
+    a:chemical_entity
+    a:data
+    a:material_continuant
+    a:molecular_aggregate
+-----------------------------------------------
+a:biochemical_sample_preparation
+    a:biochemical_sample_preparation
+    a:data
+    a:material_continuant
+    a:physical_task
+    a:sample_preparation
+    a:task
+-----------------------------------------------
+a:biological_continuant
+    a:biological_continuant
+    a:data
+    a:material_continuant
+-----------------------------------------------
+a:biological_sample_preparation
+    a:biological_sample_preparation
+    a:data
+    a:material_continuant
+    a:physical_task
+    a:sample_preparation
+    a:task
+-----------------------------------------------
+a:biological_source_parameter
+    a:biological_source_parameter
+    a:data
+    a:material_continuant
+    a:parameter
+-----------------------------------------------
+a:biomolecule
+    a:biological_continuant
+    a:biomolecule
+    a:data
+    a:material_continuant
+-----------------------------------------------
+a:calculated_parameter
+    a:calculated_parameter
+    a:data
+    a:material_continuant
+    a:parameter
+-----------------------------------------------
+a:capillary_HPLC_pump
+    a:HPLC_component
+    a:HPLC_pump
+    a:agent
+    a:capillary_HPLC_pump
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:cell
+    a:biological_continuant
+    a:cell
+    a:data
+    a:material_continuant
+-----------------------------------------------
+a:cell_culture
+    a:biological_sample_preparation
+    a:cell_culture
+    a:data
+    a:material_continuant
+    a:physical_task
+    a:sample_preparation
+    a:task
+-----------------------------------------------
+a:cell_harvesting
+    a:biological_sample_preparation
+    a:cell_harvesting
+    a:data
+    a:material_continuant
+    a:physical_task
+    a:sample_preparation
+    a:task
+-----------------------------------------------
+a:chemical_abstracts_accession_number
+    a:chemical_abstracts_accession_number
+    a:data
+    a:material_continuant
+    a:parameter
+    a:substance_accession_number
+    a:substance_identifier
+    a:substance_parameter
+-----------------------------------------------
+a:chemical_agent
+    a:agent
+    a:chemical_agent
+    a:data
+    a:material_continuant
+-----------------------------------------------
+a:chemical_entity
+    a:chemical_entity
+    a:data
+    a:material_continuant
+-----------------------------------------------
+a:chromatography
+    a:biochemical_component_separation
+    a:biochemical_sample_preparation
+    a:chromatography
+    a:data
+    a:material_continuant
+    a:physical_task
+    a:sample_preparation
+    a:task
+-----------------------------------------------
+a:component_amount
+    a:component_amount
+    a:data
+    a:material_continuant
+    a:parameter
+    a:substance_amount
+    a:substance_parameter
+-----------------------------------------------
+a:components_identification
+    a:components_identification
+    a:data
+    a:hybrid_task
+    a:material_continuant
+    a:task
+-----------------------------------------------
+a:components_quantification
+    a:components_quantification
+    a:data
+    a:hybrid_task
+    a:material_continuant
+    a:task
+-----------------------------------------------
+a:computational_task
+    a:computational_task
+    a:data
+    a:material_continuant
+    a:task
+-----------------------------------------------
+a:concentration_units
+    a:concentration_units
+    a:data
+    a:material_continuant
+    a:parameter
+    a:physical_units
+-----------------------------------------------
+a:confidence_analysis
+    a:computational_task
+    a:confidence_analysis
+    a:data
+    a:data_processing
+    a:material_continuant
+    a:statistical_analysis
+    a:task
+-----------------------------------------------
+a:contour_plot
+    a:contour_plot
+    a:data
+    a:data_collection
+    a:graphical_data_representation
+    a:material_continuant
+-----------------------------------------------
+a:creation_timestamp
+    a:creation_timestamp
+    a:data
+    a:material_continuant
+    a:parameter
+    a:temporal_parameter
+    a:timestamp
+-----------------------------------------------
+a:cyclotron_analyzer
+    a:MS_analyzer
+    a:MS_component
+    a:agent
+    a:cyclotron_analyzer
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:data
+    a:data
+    a:material_continuant
+-----------------------------------------------
+a:data_classification
+    a:computational_task
+    a:data
+    a:data_classification
+    a:data_processing
+    a:material_continuant
+    a:task
+-----------------------------------------------
+a:data_collection
+    a:data
+    a:data_collection
+    a:material_continuant
+-----------------------------------------------
+a:data_correlation
+    a:computational_task
+    a:data
+    a:data_correlation
+    a:data_processing
+    a:material_continuant
+    a:statistical_analysis
+    a:task
+-----------------------------------------------
+a:data_file_URL
+    a:URL_parameter
+    a:annotation_parameter
+    a:data
+    a:data_file_URL
+    a:material_continuant
+    a:parameter
+-----------------------------------------------
+a:data_filtering
+    a:computational_task
+    a:data
+    a:data_filtering
+    a:data_processing
+    a:material_continuant
+    a:task
+-----------------------------------------------
+a:data_format_transformation
+    a:computational_task
+    a:data
+    a:data_format_transformation
+    a:data_processing
+    a:data_transformation
+    a:material_continuant
+    a:task
+-----------------------------------------------
+a:data_processing
+    a:computational_task
+    a:data
+    a:data_processing
+    a:material_continuant
+    a:task
+-----------------------------------------------
+a:data_processing_application
+    a:agent
+    a:data
+    a:data_processing_application
+    a:material_continuant
+-----------------------------------------------
+a:data_processing_parameter
+    a:data
+    a:data_processing_parameter
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+-----------------------------------------------
+a:data_simulation
+    a:computational_task
+    a:data
+    a:data_simulation
+    a:material_continuant
+    a:task
+-----------------------------------------------
+a:data_sorting
+    a:computational_task
+    a:data
+    a:data_processing
+    a:data_sorting
+    a:data_transformation
+    a:material_continuant
+    a:task
+-----------------------------------------------
+a:data_summarization
+    a:computational_task
+    a:data
+    a:data_processing
+    a:data_summarization
+    a:material_continuant
+    a:task
+-----------------------------------------------
+a:data_transformation
+    a:computational_task
+    a:data
+    a:data_processing
+    a:data_transformation
+    a:material_continuant
+    a:task
+-----------------------------------------------
+a:database_ms_search_application
+    a:MS_data_processing_application
+    a:agent
+    a:data
+    a:data_processing_application
+    a:database_ms_search_application
+    a:material_continuant
+-----------------------------------------------
+a:database_search_data_collection
+    a:data
+    a:data_collection
+    a:database_search_data_collection
+    a:material_continuant
+    a:process_associated_data_collection
+-----------------------------------------------
+a:database_search_output_data_collection
+    a:data
+    a:data_collection
+    a:database_search_data_collection
+    a:database_search_output_data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:process_associated_data_collection
+-----------------------------------------------
+a:database_search_processing_parameter_collection
+    a:data
+    a:data_collection
+    a:database_search_data_collection
+    a:database_search_processing_parameter_collection
+    a:material_continuant
+    a:operating_parameter_collection
+    a:process_associated_data_collection
+-----------------------------------------------
+a:database_search_result_Mascot_HTML_dataset
+    a:data
+    a:data_collection
+    a:database_search_data_collection
+    a:database_search_output_data_collection
+    a:database_search_result_Mascot_HTML_dataset
+    a:database_search_results_Mascot_data
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:process_associated_data_collection
+-----------------------------------------------
+a:database_search_result_Mascot_dat_dataset
+    a:data
+    a:data_collection
+    a:database_search_data_collection
+    a:database_search_output_data_collection
+    a:database_search_result_Mascot_dat_dataset
+    a:database_search_results_Mascot_data
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:process_associated_data_collection
+-----------------------------------------------
+a:database_search_result_Mascot_peptide_summary_dataset
+    a:data
+    a:data_collection
+    a:database_search_data_collection
+    a:database_search_output_data_collection
+    a:database_search_result_Mascot_HTML_dataset
+    a:database_search_result_Mascot_peptide_summary_dataset
+    a:database_search_results_Mascot_data
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:process_associated_data_collection
+-----------------------------------------------
+a:database_search_result_Mascot_protein_summary_dataset
+    a:data
+    a:data_collection
+    a:database_search_data_collection
+    a:database_search_output_data_collection
+    a:database_search_result_Mascot_HTML_dataset
+    a:database_search_result_Mascot_protein_summary_dataset
+    a:database_search_results_Mascot_data
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:process_associated_data_collection
+-----------------------------------------------
+a:database_search_result_Mascot_record
+    a:data
+    a:data_collection
+    a:database_search_data_collection
+    a:database_search_output_data_collection
+    a:database_search_result_Mascot_record
+    a:database_search_results_Mascot_data
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:process_associated_data_collection
+-----------------------------------------------
+a:database_search_results_Mascot_data
+    a:data
+    a:data_collection
+    a:database_search_data_collection
+    a:database_search_output_data_collection
+    a:database_search_results_Mascot_data
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:process_associated_data_collection
+-----------------------------------------------
+a:database_search_results_Sequest_data
+    a:data
+    a:data_collection
+    a:database_search_data_collection
+    a:database_search_output_data_collection
+    a:database_search_results_Sequest_data
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:process_associated_data_collection
+-----------------------------------------------
+a:database_search_results_Spectrum_Mill_data
+    a:data
+    a:data_collection
+    a:database_search_data_collection
+    a:database_search_output_data_collection
+    a:database_search_results_Spectrum_Mill_data
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:process_associated_data_collection
+-----------------------------------------------
+a:denovo_sequencing_data_collection
+    a:data
+    a:data_collection
+    a:denovo_sequencing_data_collection
+    a:material_continuant
+    a:process_associated_data_collection
+-----------------------------------------------
+a:denovo_sequencing_output_data_collection
+    a:data
+    a:data_collection
+    a:denovo_sequencing_data_collection
+    a:denovo_sequencing_output_data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:process_associated_data_collection
+-----------------------------------------------
+a:denovo_sequencing_processing_parameter_collection
+    a:data
+    a:data_collection
+    a:denovo_sequencing_data_collection
+    a:denovo_sequencing_processing_parameter_collection
+    a:material_continuant
+    a:operating_parameter_collection
+    a:process_associated_data_collection
+-----------------------------------------------
+a:dialysis
+    a:biochemical_component_separation
+    a:biochemical_sample_preparation
+    a:data
+    a:dialysis
+    a:material_continuant
+    a:physical_task
+    a:sample_preparation
+    a:task
+-----------------------------------------------
+a:draw_contour_plot
+    a:computational_task
+    a:data
+    a:draw_contour_plot
+    a:material_continuant
+    a:plot_data
+    a:task
+-----------------------------------------------
+a:draw_histogram
+    a:computational_task
+    a:data
+    a:draw_histogram
+    a:material_continuant
+    a:plot_data
+    a:task
+-----------------------------------------------
+a:draw_x-y-plot
+    a:computational_task
+    a:data
+    a:draw_x-y-plot
+    a:material_continuant
+    a:plot_data
+    a:task
+-----------------------------------------------
+a:electric_sector_analyzer
+    a:MS_analyzer
+    a:MS_component
+    a:agent
+    a:data
+    a:electric_sector_analyzer
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:electrical_charge_units
+    a:data
+    a:electrical_charge_units
+    a:material_continuant
+    a:parameter
+    a:physical_units
+-----------------------------------------------
+a:electrical_potential_units
+    a:data
+    a:electrical_potential_units
+    a:material_continuant
+    a:parameter
+    a:physical_units
+    a:potential_units
+-----------------------------------------------
+a:elemental_composition
+    a:data
+    a:elemental_composition
+    a:material_continuant
+    a:molecular_parameter
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:elemental_composition_calculation
+    a:computational_task
+    a:data
+    a:data_simulation
+    a:elemental_composition_calculation
+    a:material_continuant
+    a:molecular_data_simulation
+    a:task
+-----------------------------------------------
+a:encoding_format_transformation
+    a:computational_task
+    a:data
+    a:data_format_transformation
+    a:data_processing
+    a:data_transformation
+    a:encoding_format_transformation
+    a:material_continuant
+    a:task
+-----------------------------------------------
+a:enzyme
+    a:agent
+    a:biological_continuant
+    a:biomolecule
+    a:chemical_agent
+    a:chemical_entity
+    a:data
+    a:enzyme
+    a:material_continuant
+    a:molecule
+    a:protein
+-----------------------------------------------
+a:enzyme_HPLC_column
+    a:HPLC_column
+    a:HPLC_component
+    a:agent
+    a:data
+    a:enzyme_HPLC_column
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:eucaryotic_organism
+    a:biological_continuant
+    a:data
+    a:eucaryotic_organism
+    a:material_continuant
+    a:organism
+-----------------------------------------------
+a:event_timestamp
+    a:data
+    a:event_timestamp
+    a:material_continuant
+    a:parameter
+    a:temporal_parameter
+    a:timestamp
+-----------------------------------------------
+a:experimental_ion_abundance
+    a:MS_experimentally_measured_parameter
+    a:MS_parameter
+    a:data
+    a:experimental_ion_abundance
+    a:experimentally_measured_parameter
+    a:ion_abundance
+    a:ion_parameter
+    a:material_continuant
+    a:parameter
+    a:process_associated_parameter
+    a:substance_parameter
+-----------------------------------------------
+a:experimental_ion_charge
+    a:MS_experimentally_measured_parameter
+    a:MS_parameter
+    a:data
+    a:experimental_ion_charge
+    a:experimentally_measured_parameter
+    a:ion_charge
+    a:ion_parameter
+    a:material_continuant
+    a:parameter
+    a:process_associated_parameter
+    a:substance_parameter
+-----------------------------------------------
+a:experimental_isoelectric_point
+    a:data
+    a:experimental_isoelectric_point
+    a:isoelectric_point
+    a:material_continuant
+    a:molecular_parameter
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:experimental_mass_to_charge_ratio
+    a:MS_experimentally_measured_parameter
+    a:MS_parameter
+    a:data
+    a:experimental_mass_to_charge_ratio
+    a:experimentally_measured_parameter
+    a:ion_parameter
+    a:mass_to_charge_ratio
+    a:material_continuant
+    a:parameter
+    a:process_associated_parameter
+    a:substance_parameter
+-----------------------------------------------
+a:experimentally_measured_data_collection
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+-----------------------------------------------
+a:experimentally_measured_parameter
+    a:data
+    a:experimentally_measured_parameter
+    a:material_continuant
+    a:parameter
+-----------------------------------------------
+a:filtration
+    a:biochemical_component_separation
+    a:biochemical_sample_preparation
+    a:data
+    a:filtration
+    a:material_continuant
+    a:physical_task
+    a:sample_preparation
+    a:task
+-----------------------------------------------
+a:flourescence_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:flourescence_spectrometer
+    a:hardware
+    a:material_continuant
+-----------------------------------------------
+a:flowrate_units
+    a:data
+    a:flowrate_units
+    a:material_continuant
+    a:parameter
+    a:physical_units
+-----------------------------------------------
+a:fluorescence_activated_cell_sorter
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:fluorescence_activated_cell_sorter
+    a:hardware
+    a:material_continuant
+-----------------------------------------------
+a:fourier_transform_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:fourier_transform_mass_spectrometer
+    a:hardware
+    a:mass_spectrometer
+    a:material_continuant
+    a:tandem_mass_spectrometer
+-----------------------------------------------
+a:fragment_ion
+    a:chemical_entity
+    a:data
+    a:fragment_ion
+    a:ion
+    a:material_continuant
+-----------------------------------------------
+a:fragment_peptide_C_terminus_index
+    a:data
+    a:fragment_peptide_C_terminus_index
+    a:material_continuant
+    a:molecular_parameter
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:fragment_peptide_N_terminus_index
+    a:data
+    a:fragment_peptide_N_terminus_index
+    a:material_continuant
+    a:molecular_parameter
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:gel_electrophoresis_data_collection
+    a:data
+    a:data_collection
+    a:gel_electrophoresis_data_collection
+    a:material_continuant
+    a:process_associated_data_collection
+-----------------------------------------------
+a:gel_electrophoresis_experimental_data_collection
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:gel_electrophoresis_data_collection
+    a:gel_electrophoresis_experimental_data_collection
+    a:material_continuant
+    a:process_associated_data_collection
+-----------------------------------------------
+a:gel_electrophoresis_processing_parameter_collection
+    a:data
+    a:data_collection
+    a:gel_electrophoresis_data_collection
+    a:gel_electrophoresis_processing_parameter_collection
+    a:material_continuant
+    a:operating_parameter_collection
+    a:process_associated_data_collection
+-----------------------------------------------
+a:gene
+    a:chemical_entity
+    a:data
+    a:gene
+    a:material_continuant
+    a:molecular_fragment
+-----------------------------------------------
+a:glycan
+    a:biological_continuant
+    a:biomolecule
+    a:chemical_entity
+    a:data
+    a:glycan
+    a:material_continuant
+    a:molecule
+-----------------------------------------------
+a:glycan_accession_number
+    a:data
+    a:glycan_accession_number
+    a:material_continuant
+    a:parameter
+    a:substance_accession_number
+    a:substance_identifier
+    a:substance_parameter
+-----------------------------------------------
+a:glycan_structure_format_transformation
+    a:computational_task
+    a:data
+    a:data_format_transformation
+    a:data_processing
+    a:data_transformation
+    a:glycan_structure_format_transformation
+    a:material_continuant
+    a:representation_format_transformation
+    a:task
+-----------------------------------------------
+a:graphical_data_representation
+    a:data
+    a:data_collection
+    a:graphical_data_representation
+    a:material_continuant
+-----------------------------------------------
+a:hardware
+    a:agent
+    a:data
+    a:hardware
+    a:material_continuant
+-----------------------------------------------
+a:high_performance_liquid_chromatograph
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:high_performance_liquid_chromatograph
+    a:material_continuant
+-----------------------------------------------
+a:histogram
+    a:data
+    a:data_collection
+    a:graphical_data_representation
+    a:histogram
+    a:material_continuant
+-----------------------------------------------
+a:hybrid_tandem_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:hybrid_tandem_mass_spectrometer
+    a:mass_spectrometer
+    a:material_continuant
+    a:tandem_mass_spectrometer
+-----------------------------------------------
+a:hybrid_task
+    a:data
+    a:hybrid_task
+    a:material_continuant
+    a:task
+-----------------------------------------------
+a:index_parameter
+    a:data
+    a:index_parameter
+    a:material_continuant
+    a:parameter
+-----------------------------------------------
+a:inorganic_solvent_molecule
+    a:chemical_entity
+    a:data
+    a:inorganic_solvent_molecule
+    a:material_continuant
+    a:molecule
+    a:small_molecule
+    a:solvent_molecule
+-----------------------------------------------
+a:instrument_component
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+-----------------------------------------------
+a:ion
+    a:chemical_entity
+    a:data
+    a:ion
+    a:material_continuant
+-----------------------------------------------
+a:ion_abundance
+    a:data
+    a:ion_abundance
+    a:ion_parameter
+    a:material_continuant
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:ion_charge
+    a:data
+    a:ion_charge
+    a:ion_parameter
+    a:material_continuant
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:ion_experimental_chemical_mass
+    a:data
+    a:ion_experimental_chemical_mass
+    a:ion_experimental_mass
+    a:ion_mass
+    a:ion_parameter
+    a:material_continuant
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:ion_experimental_mass
+    a:data
+    a:ion_experimental_mass
+    a:ion_mass
+    a:ion_parameter
+    a:material_continuant
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:ion_experimental_monoisotopic_mass
+    a:data
+    a:ion_experimental_mass
+    a:ion_experimental_monoisotopic_mass
+    a:ion_mass
+    a:ion_parameter
+    a:material_continuant
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:ion_mass
+    a:data
+    a:ion_mass
+    a:ion_parameter
+    a:material_continuant
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:ion_parameter
+    a:data
+    a:ion_parameter
+    a:material_continuant
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:ion_theoretical_chemical_mass
+    a:data
+    a:ion_mass
+    a:ion_parameter
+    a:ion_theoretical_chemical_mass
+    a:ion_theoretical_mass
+    a:material_continuant
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:ion_theoretical_mass
+    a:data
+    a:ion_mass
+    a:ion_parameter
+    a:ion_theoretical_mass
+    a:material_continuant
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:ion_theoretical_monoisotopic_mass
+    a:data
+    a:ion_mass
+    a:ion_parameter
+    a:ion_theoretical_mass
+    a:ion_theoretical_monoisotopic_mass
+    a:material_continuant
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:ion_trap_analyzer
+    a:MS_analyzer
+    a:MS_component
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:ion_trap_analyzer
+    a:material_continuant
+-----------------------------------------------
+a:ion_trap_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:ion_trap_mass_spectrometer
+    a:mass_spectrometer
+    a:material_continuant
+    a:tandem_mass_spectrometer
+-----------------------------------------------
+a:isocratic_HPLC_pump
+    a:HPLC_component
+    a:HPLC_pump
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:isocratic_HPLC_pump
+    a:material_continuant
+-----------------------------------------------
+a:isoelectric_point
+    a:data
+    a:isoelectric_point
+    a:material_continuant
+    a:molecular_parameter
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:isotopic_distribution_calculation
+    a:analytical_data_simulation
+    a:computational_task
+    a:data
+    a:data_simulation
+    a:isotopic_distribution_calculation
+    a:material_continuant
+    a:ms_data_simulation
+    a:task
+-----------------------------------------------
+a:laser_pulse_intensity_units
+    a:data
+    a:laser_pulse_intensity_units
+    a:material_continuant
+    a:parameter
+    a:physical_units
+-----------------------------------------------
+a:lectin_affinity_HPLC_column
+    a:HPLC_column
+    a:HPLC_component
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:lectin_affinity_HPLC_column
+    a:material_continuant
+-----------------------------------------------
+a:lectin_affinity_chromatography
+    a:biochemical_component_separation
+    a:biochemical_sample_preparation
+    a:chromatography
+    a:data
+    a:lectin_affinity_chromatography
+    a:material_continuant
+    a:physical_task
+    a:sample_preparation
+    a:task
+-----------------------------------------------
+a:length_units
+    a:data
+    a:length_units
+    a:material_continuant
+    a:parameter
+    a:physical_units
+-----------------------------------------------
+a:life-cycle_form
+    a:biological_continuant
+    a:data
+    a:life-cycle_form
+    a:material_continuant
+-----------------------------------------------
+a:magnetic_sector_analyzer
+    a:MS_analyzer
+    a:MS_component
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:magnetic_sector_analyzer
+    a:material_continuant
+-----------------------------------------------
+a:manufacturer
+    a:agent
+    a:data
+    a:manufacturer
+    a:material_continuant
+-----------------------------------------------
+a:mass_percent
+    a:component_amount
+    a:data
+    a:mass_percent
+    a:material_continuant
+    a:parameter
+    a:substance_amount
+    a:substance_parameter
+-----------------------------------------------
+a:mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:mass_spectrometer
+    a:material_continuant
+-----------------------------------------------
+a:mass_to_charge_ratio
+    a:data
+    a:ion_parameter
+    a:mass_to_charge_ratio
+    a:material_continuant
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:mass_units
+    a:data
+    a:mass_units
+    a:material_continuant
+    a:parameter
+    a:physical_units
+-----------------------------------------------
+a:mass_volume_percent
+    a:component_amount
+    a:data
+    a:mass_volume_percent
+    a:material_continuant
+    a:parameter
+    a:substance_amount
+    a:substance_parameter
+-----------------------------------------------
+a:material_continuant
+    a:data
+    a:material_continuant
+-----------------------------------------------
+a:meta_data_file_URL
+    a:URL_parameter
+    a:annotation_parameter
+    a:data
+    a:material_continuant
+    a:meta_data_file_URL
+    a:parameter
+-----------------------------------------------
+a:micromass_pkl_ms-ms_peak_list
+    a:MS_data_collection
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:micromass_pkl_ms-ms_peak_list
+    a:ms-ms_peak_list
+    a:ms_output_data_collection
+    a:ms_processed_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:mixture
+    a:chemical_entity
+    a:data
+    a:material_continuant
+    a:mixture
+    a:molecular_aggregate
+-----------------------------------------------
+a:mixture_component_descriptor
+    a:data
+    a:data_collection
+    a:material_continuant
+    a:mixture_component_descriptor
+    a:substance_associated_data_collection
+-----------------------------------------------
+a:modification_timestamp
+    a:data
+    a:material_continuant
+    a:modification_timestamp
+    a:parameter
+    a:temporal_parameter
+    a:timestamp
+-----------------------------------------------
+a:molarity
+    a:component_amount
+    a:data
+    a:material_continuant
+    a:molarity
+    a:parameter
+    a:substance_amount
+    a:substance_parameter
+-----------------------------------------------
+a:mole_fraction
+    a:component_amount
+    a:data
+    a:material_continuant
+    a:mole_fraction
+    a:parameter
+    a:substance_amount
+    a:substance_parameter
+-----------------------------------------------
+a:molecular_aggregate
+    a:chemical_entity
+    a:data
+    a:material_continuant
+    a:molecular_aggregate
+-----------------------------------------------
+a:molecular_data_simulation
+    a:computational_task
+    a:data
+    a:data_simulation
+    a:material_continuant
+    a:molecular_data_simulation
+    a:task
+-----------------------------------------------
+a:molecular_description
+    a:data
+    a:material_continuant
+    a:molecular_description
+    a:molecular_parameter
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:molecular_experiemental_monoisotopic_mass
+    a:data
+    a:material_continuant
+    a:molecular_experiemental_monoisotopic_mass
+    a:molecular_experimental_mass
+    a:molecular_mass
+    a:molecular_parameter
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:molecular_experimental_chemical_mass
+    a:data
+    a:material_continuant
+    a:molecular_experimental_chemical_mass
+    a:molecular_experimental_mass
+    a:molecular_mass
+    a:molecular_parameter
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:molecular_experimental_mass
+    a:data
+    a:material_continuant
+    a:molecular_experimental_mass
+    a:molecular_mass
+    a:molecular_parameter
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:molecular_fragment
+    a:chemical_entity
+    a:data
+    a:material_continuant
+    a:molecular_fragment
+-----------------------------------------------
+a:molecular_mass
+    a:data
+    a:material_continuant
+    a:molecular_mass
+    a:molecular_parameter
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:molecular_parameter
+    a:data
+    a:material_continuant
+    a:molecular_parameter
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:molecular_sequence
+    a:data
+    a:material_continuant
+    a:molecular_parameter
+    a:molecular_sequence
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:molecular_sequence_data_collection
+    a:data
+    a:data_collection
+    a:material_continuant
+    a:molecular_sequence_data_collection
+    a:substance_associated_data_collection
+-----------------------------------------------
+a:molecular_theoretical_chemical_mass
+    a:data
+    a:material_continuant
+    a:molecular_mass
+    a:molecular_parameter
+    a:molecular_theoretical_chemical_mass
+    a:molecular_theoretical_mass
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:molecular_theoretical_mass
+    a:data
+    a:material_continuant
+    a:molecular_mass
+    a:molecular_parameter
+    a:molecular_theoretical_mass
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:molecular_theoretical_monoisotopic_mass
+    a:data
+    a:material_continuant
+    a:molecular_mass
+    a:molecular_parameter
+    a:molecular_theoretical_mass
+    a:molecular_theoretical_monoisotopic_mass
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:molecule
+    a:chemical_entity
+    a:data
+    a:material_continuant
+    a:molecule
+-----------------------------------------------
+a:ms-ms_peak_list
+    a:MS_data_collection
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms-ms_peak_list
+    a:ms_output_data_collection
+    a:ms_processed_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:ms_data_filtering
+    a:computational_task
+    a:data
+    a:data_filtering
+    a:data_processing
+    a:material_continuant
+    a:ms_data_filtering
+    a:task
+-----------------------------------------------
+a:ms_data_recording
+    a:data
+    a:material_continuant
+    a:ms_data_recording
+    a:physical_task
+    a:raw_data_recording
+    a:task
+-----------------------------------------------
+a:ms_data_simulation
+    a:analytical_data_simulation
+    a:computational_task
+    a:data
+    a:data_simulation
+    a:material_continuant
+    a:ms_data_simulation
+    a:task
+-----------------------------------------------
+a:ms_output_data_collection
+    a:MS_data_collection
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:process_associated_data_collection
+-----------------------------------------------
+a:ms_processed_data
+    a:MS_data_collection
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_processed_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:ms_raw_data
+    a:MS_data_collection
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:mzXML_ms_raw_data
+    a:MS_data_collection
+    a:MS_raw_data_converted_format
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms_output_data_collection
+    a:ms_raw_data
+    a:mzXML_ms_raw_data
+    a:process_associated_data_collection
+-----------------------------------------------
+a:mzXMLtoOther_transformation
+    a:computational_task
+    a:data
+    a:data_format_transformation
+    a:data_processing
+    a:data_transformation
+    a:encoding_format_transformation
+    a:material_continuant
+    a:mzXMLtoOther_transformation
+    a:task
+-----------------------------------------------
+a:nanoflow_HPLC_pump
+    a:HPLC_component
+    a:HPLC_pump
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+    a:nanoflow_HPLC_pump
+-----------------------------------------------
+a:normal-phase_HPLC_column
+    a:HPLC_column
+    a:HPLC_component
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+    a:normal-phase_HPLC_column
+-----------------------------------------------
+a:oligopeptide
+    a:biological_continuant
+    a:biomolecule
+    a:chemical_entity
+    a:data
+    a:material_continuant
+    a:molecule
+    a:oligopeptide
+-----------------------------------------------
+a:operating_parameter
+    a:data
+    a:material_continuant
+    a:operating_parameter
+    a:parameter
+-----------------------------------------------
+a:operating_parameter_collection
+    a:data
+    a:data_collection
+    a:material_continuant
+    a:operating_parameter_collection
+-----------------------------------------------
+a:organ
+    a:biological_continuant
+    a:data
+    a:material_continuant
+    a:organ
+-----------------------------------------------
+a:organic_solvent_molecule
+    a:chemical_entity
+    a:data
+    a:material_continuant
+    a:molecule
+    a:organic_solvent_molecule
+    a:small_molecule
+    a:small_organic_molecule
+    a:solvent_molecule
+-----------------------------------------------
+a:organism
+    a:biological_continuant
+    a:data
+    a:material_continuant
+    a:organism
+-----------------------------------------------
+a:parameter
+    a:data
+    a:material_continuant
+    a:parameter
+-----------------------------------------------
+a:parent_ion
+    a:chemical_entity
+    a:data
+    a:ion
+    a:material_continuant
+    a:parent_ion
+-----------------------------------------------
+a:peptide_modification
+    a:data
+    a:material_continuant
+    a:molecular_parameter
+    a:parameter
+    a:peptide_modification
+    a:substance_parameter
+-----------------------------------------------
+a:peptide_sequence_format_transformation
+    a:computational_task
+    a:data
+    a:data_format_transformation
+    a:data_processing
+    a:data_transformation
+    a:material_continuant
+    a:peptide_sequence_format_transformation
+    a:representation_format_transformation
+    a:task
+-----------------------------------------------
+a:person
+    a:agent
+    a:data
+    a:material_continuant
+    a:person
+-----------------------------------------------
+a:physical_task
+    a:data
+    a:material_continuant
+    a:physical_task
+    a:task
+-----------------------------------------------
+a:physical_units
+    a:data
+    a:material_continuant
+    a:parameter
+    a:physical_units
+-----------------------------------------------
+a:plot_data
+    a:computational_task
+    a:data
+    a:material_continuant
+    a:plot_data
+    a:task
+-----------------------------------------------
+a:plot_mass_spectrum_histogram
+    a:computational_task
+    a:data
+    a:draw_histogram
+    a:material_continuant
+    a:plot_data
+    a:plot_mass_spectrum_histogram
+    a:task
+-----------------------------------------------
+a:plot_raw_chromatogram
+    a:computational_task
+    a:data
+    a:draw_x-y-plot
+    a:material_continuant
+    a:plot_data
+    a:plot_raw_chromatogram
+    a:task
+-----------------------------------------------
+a:plot_raw_mass_spectrum
+    a:computational_task
+    a:data
+    a:draw_x-y-plot
+    a:material_continuant
+    a:plot_data
+    a:plot_raw_mass_spectrum
+    a:task
+-----------------------------------------------
+a:polynucleotide_accession_number
+    a:data
+    a:material_continuant
+    a:parameter
+    a:polynucleotide_accession_number
+    a:substance_accession_number
+    a:substance_identifier
+    a:substance_parameter
+-----------------------------------------------
+a:potential_units
+    a:data
+    a:material_continuant
+    a:parameter
+    a:physical_units
+    a:potential_units
+-----------------------------------------------
+a:power_units
+    a:data
+    a:material_continuant
+    a:parameter
+    a:physical_units
+    a:power_units
+-----------------------------------------------
+a:procaryotic_organism
+    a:biological_continuant
+    a:data
+    a:material_continuant
+    a:organism
+    a:procaryotic_organism
+-----------------------------------------------
+a:process_associated_data_collection
+    a:data
+    a:data_collection
+    a:material_continuant
+    a:process_associated_data_collection
+-----------------------------------------------
+a:process_associated_parameter
+    a:data
+    a:material_continuant
+    a:parameter
+    a:process_associated_parameter
+-----------------------------------------------
+a:process_time_parameter
+    a:data
+    a:material_continuant
+    a:parameter
+    a:process_associated_parameter
+    a:process_time_parameter
+    a:temporal_parameter
+-----------------------------------------------
+a:processed_gel_electrophoresis_data
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:gel_electrophoresis_data_collection
+    a:gel_electrophoresis_experimental_data_collection
+    a:material_continuant
+    a:process_associated_data_collection
+    a:processed_gel_electrophoresis_data
+-----------------------------------------------
+a:protein
+    a:biological_continuant
+    a:biomolecule
+    a:chemical_entity
+    a:data
+    a:material_continuant
+    a:molecule
+    a:protein
+-----------------------------------------------
+a:protein_accession_number
+    a:data
+    a:material_continuant
+    a:parameter
+    a:protein_accession_number
+    a:substance_accession_number
+    a:substance_identifier
+    a:substance_parameter
+-----------------------------------------------
+a:protein_sequence_database
+    a:data
+    a:data_collection
+    a:material_continuant
+    a:molecular_sequence_data_collection
+    a:protein_sequence_database
+    a:substance_associated_data_collection
+-----------------------------------------------
+a:proteolytic_enzyme
+    a:agent
+    a:biological_continuant
+    a:biomolecule
+    a:chemical_agent
+    a:chemical_entity
+    a:data
+    a:enzyme
+    a:material_continuant
+    a:molecule
+    a:protein
+    a:proteolytic_enzyme
+-----------------------------------------------
+a:pure_substance
+    a:chemical_entity
+    a:data
+    a:material_continuant
+    a:molecular_aggregate
+    a:pure_substance
+-----------------------------------------------
+a:quadrupole_analyzer
+    a:MS_analyzer
+    a:MS_component
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+    a:quadrupole_analyzer
+-----------------------------------------------
+a:quadrupole_time_of_flight_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:mass_spectrometer
+    a:material_continuant
+    a:quadrupole_time_of_flight_mass_spectrometer
+    a:tandem_mass_spectrometer
+-----------------------------------------------
+a:quantification
+    a:computational_task
+    a:data
+    a:data_processing
+    a:material_continuant
+    a:quantification
+    a:task
+-----------------------------------------------
+a:quantification_paramter
+    a:calculated_parameter
+    a:data
+    a:material_continuant
+    a:parameter
+    a:quantification_paramter
+-----------------------------------------------
+a:quaternary_HPLC_pump
+    a:HPLC_component
+    a:HPLC_pump
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+    a:quaternary_HPLC_pump
+-----------------------------------------------
+a:raw2mzXML_data_processing_parameter_collection
+    a:MS_data_collection
+    a:MS_data_processing_parameter_collection
+    a:MS_format_conversion_parameter_collection
+    a:MS_operating_parameter_collection
+    a:data
+    a:data_collection
+    a:material_continuant
+    a:operating_parameter_collection
+    a:process_associated_data_collection
+    a:raw2mzXML_data_processing_parameter_collection
+-----------------------------------------------
+a:raw2mzXML_transformation
+    a:computational_task
+    a:data
+    a:data_format_transformation
+    a:data_processing
+    a:data_transformation
+    a:encoding_format_transformation
+    a:material_continuant
+    a:raw2mzXML_transformation
+    a:task
+-----------------------------------------------
+a:raw_data_recording
+    a:data
+    a:material_continuant
+    a:physical_task
+    a:raw_data_recording
+    a:task
+-----------------------------------------------
+a:raw_gel_image_electrophoresis_data
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:gel_electrophoresis_data_collection
+    a:gel_electrophoresis_experimental_data_collection
+    a:material_continuant
+    a:process_associated_data_collection
+    a:raw_gel_image_electrophoresis_data
+-----------------------------------------------
+a:representation_format_transformation
+    a:computational_task
+    a:data
+    a:data_format_transformation
+    a:data_processing
+    a:data_transformation
+    a:material_continuant
+    a:representation_format_transformation
+    a:task
+-----------------------------------------------
+a:reversed-phase_HPLC_column
+    a:HPLC_column
+    a:HPLC_component
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+    a:reversed-phase_HPLC_column
+-----------------------------------------------
+a:salt
+    a:chemical_entity
+    a:data
+    a:material_continuant
+    a:molecule
+    a:salt
+-----------------------------------------------
+a:sample_preparation
+    a:data
+    a:material_continuant
+    a:physical_task
+    a:sample_preparation
+    a:task
+-----------------------------------------------
+a:score
+    a:calculated_parameter
+    a:data
+    a:material_continuant
+    a:parameter
+    a:score
+-----------------------------------------------
+a:search_and_replacement
+    a:computational_task
+    a:data
+    a:data_processing
+    a:data_transformation
+    a:material_continuant
+    a:search_and_replacement
+    a:task
+-----------------------------------------------
+a:size_exclusion_HPLC_column
+    a:HPLC_column
+    a:HPLC_component
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+    a:size_exclusion_HPLC_column
+-----------------------------------------------
+a:size_exclusion_chromatography
+    a:biochemical_component_separation
+    a:biochemical_sample_preparation
+    a:chromatography
+    a:data
+    a:material_continuant
+    a:physical_task
+    a:sample_preparation
+    a:size_exclusion_chromatography
+    a:task
+-----------------------------------------------
+a:small_molecule
+    a:chemical_entity
+    a:data
+    a:material_continuant
+    a:molecule
+    a:small_molecule
+-----------------------------------------------
+a:small_organic_molecule
+    a:chemical_entity
+    a:data
+    a:material_continuant
+    a:molecule
+    a:small_molecule
+    a:small_organic_molecule
+-----------------------------------------------
+a:solid_mixture
+    a:chemical_entity
+    a:data
+    a:material_continuant
+    a:mixture
+    a:molecular_aggregate
+    a:solid_mixture
+-----------------------------------------------
+a:solution
+    a:chemical_entity
+    a:data
+    a:material_continuant
+    a:mixture
+    a:molecular_aggregate
+    a:solution
+-----------------------------------------------
+a:solvent
+    a:chemical_entity
+    a:data
+    a:material_continuant
+    a:molecular_aggregate
+    a:pure_substance
+    a:solvent
+-----------------------------------------------
+a:solvent_molecule
+    a:chemical_entity
+    a:data
+    a:material_continuant
+    a:molecule
+    a:small_molecule
+    a:solvent_molecule
+-----------------------------------------------
+a:source_cell
+    a:biological_source_parameter
+    a:data
+    a:material_continuant
+    a:parameter
+    a:source_cell
+-----------------------------------------------
+a:source_life-cycle-stage
+    a:biological_source_parameter
+    a:data
+    a:material_continuant
+    a:parameter
+    a:source_life-cycle-stage
+-----------------------------------------------
+a:source_organ
+    a:biological_source_parameter
+    a:data
+    a:material_continuant
+    a:parameter
+    a:source_organ
+-----------------------------------------------
+a:source_organism
+    a:biological_source_parameter
+    a:data
+    a:material_continuant
+    a:parameter
+    a:source_organism
+-----------------------------------------------
+a:spectral_count
+    a:calculated_parameter
+    a:data
+    a:material_continuant
+    a:parameter
+    a:quantification_paramter
+    a:spectral_count
+-----------------------------------------------
+a:standard_ESI_source
+    a:ESI_source
+    a:MS_component
+    a:MS_source
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+    a:standard_ESI_source
+-----------------------------------------------
+a:statistical_analysis
+    a:computational_task
+    a:data
+    a:data_processing
+    a:material_continuant
+    a:statistical_analysis
+    a:task
+-----------------------------------------------
+a:statistical_analysis_output_data_collection
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:statistical_analysis_output_data_collection
+-----------------------------------------------
+a:statistical_analysis_parameter_collection
+    a:data
+    a:data_collection
+    a:material_continuant
+    a:operating_parameter_collection
+    a:statistical_analysis_parameter_collection
+-----------------------------------------------
+a:strong_anion_exchange_HPLC_column
+    a:HPLC_column
+    a:HPLC_component
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+    a:strong_anion_exchange_HPLC_column
+-----------------------------------------------
+a:strong_cation_exchange_HPLC_column
+    a:HPLC_column
+    a:HPLC_component
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+    a:strong_cation_exchange_HPLC_column
+-----------------------------------------------
+a:substance_accession_number
+    a:data
+    a:material_continuant
+    a:parameter
+    a:substance_accession_number
+    a:substance_identifier
+    a:substance_parameter
+-----------------------------------------------
+a:substance_amount
+    a:data
+    a:material_continuant
+    a:parameter
+    a:substance_amount
+    a:substance_parameter
+-----------------------------------------------
+a:substance_associated_data_collection
+    a:data
+    a:data_collection
+    a:material_continuant
+    a:substance_associated_data_collection
+-----------------------------------------------
+a:substance_identifier
+    a:data
+    a:material_continuant
+    a:parameter
+    a:substance_identifier
+    a:substance_parameter
+-----------------------------------------------
+a:substance_parameter
+    a:data
+    a:material_continuant
+    a:parameter
+    a:substance_parameter
+-----------------------------------------------
+a:tandem_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:mass_spectrometer
+    a:material_continuant
+    a:tandem_mass_spectrometer
+-----------------------------------------------
+a:tandem_time_of_flight_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:mass_spectrometer
+    a:material_continuant
+    a:tandem_mass_spectrometer
+    a:tandem_time_of_flight_mass_spectrometer
+-----------------------------------------------
+a:task
+    a:data
+    a:material_continuant
+    a:task
+-----------------------------------------------
+a:temporal_parameter
+    a:data
+    a:material_continuant
+    a:parameter
+    a:temporal_parameter
+-----------------------------------------------
+a:theoretical_ion_abundance
+    a:data
+    a:ion_abundance
+    a:ion_parameter
+    a:material_continuant
+    a:parameter
+    a:substance_parameter
+    a:theoretical_ion_abundance
+-----------------------------------------------
+a:theoretical_ion_charge
+    a:data
+    a:ion_charge
+    a:ion_parameter
+    a:material_continuant
+    a:parameter
+    a:substance_parameter
+    a:theoretical_ion_charge
+-----------------------------------------------
+a:theoretical_isoelectric_point
+    a:data
+    a:isoelectric_point
+    a:material_continuant
+    a:molecular_parameter
+    a:parameter
+    a:substance_parameter
+    a:theoretical_isoelectric_point
+-----------------------------------------------
+a:theoretical_mass_to_charge_ratio
+    a:data
+    a:ion_parameter
+    a:mass_to_charge_ratio
+    a:material_continuant
+    a:parameter
+    a:substance_parameter
+    a:theoretical_mass_to_charge_ratio
+-----------------------------------------------
+a:time_units
+    a:data
+    a:material_continuant
+    a:parameter
+    a:physical_units
+    a:time_units
+-----------------------------------------------
+a:timestamp
+    a:data
+    a:material_continuant
+    a:parameter
+    a:temporal_parameter
+    a:timestamp
+-----------------------------------------------
+a:tissue
+    a:biological_continuant
+    a:data
+    a:material_continuant
+    a:tissue
+-----------------------------------------------
+a:triple_quadrupole_mass_spectrometer
+    a:agent
+    a:analytical_instrument
+    a:data
+    a:hardware
+    a:mass_spectrometer
+    a:material_continuant
+    a:tandem_mass_spectrometer
+    a:triple_quadrupole_mass_spectrometer
+-----------------------------------------------
+a:trypsin
+    a:agent
+    a:biological_continuant
+    a:biomolecule
+    a:chemical_agent
+    a:chemical_entity
+    a:data
+    a:enzyme
+    a:material_continuant
+    a:molecule
+    a:protein
+    a:proteolytic_enzyme
+    a:trypsin
+-----------------------------------------------
+a:tryptic_peptide
+    a:biological_continuant
+    a:biomolecule
+    a:chemical_entity
+    a:data
+    a:material_continuant
+    a:molecule
+    a:oligopeptide
+    a:tryptic_peptide
+-----------------------------------------------
+a:volume_percent
+    a:component_amount
+    a:data
+    a:material_continuant
+    a:parameter
+    a:substance_amount
+    a:substance_parameter
+    a:volume_percent
+-----------------------------------------------
+a:volume_units
+    a:data
+    a:material_continuant
+    a:parameter
+    a:physical_units
+    a:volume_units
+-----------------------------------------------
+a:weak_anion_exchange_HPLC_column
+    a:HPLC_column
+    a:HPLC_component
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+    a:weak_anion_exchange_HPLC_column
+-----------------------------------------------
+a:weak_cation_exchange_HPLC_column
+    a:HPLC_column
+    a:HPLC_component
+    a:agent
+    a:data
+    a:hardware
+    a:instrument_component
+    a:material_continuant
+    a:weak_cation_exchange_HPLC_column
+-----------------------------------------------
+a:x-y_plot
+    a:data
+    a:data_collection
+    a:graphical_data_representation
+    a:material_continuant
+    a:x-y_plot
+-----------------------------------------------
+a:xml_ms-ms_peak_list
+    a:MS_data_collection
+    a:data
+    a:data_collection
+    a:experimentally_measured_data_collection
+    a:material_continuant
+    a:ms-ms_peak_list
+    a:ms_output_data_collection
+    a:ms_processed_data
+    a:process_associated_data_collection
+    a:xml_ms-ms_peak_list
+-----------------------------------------------
+! THE END !

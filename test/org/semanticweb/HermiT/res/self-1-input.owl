@@ -1,0 +1,13 @@
+Namespace(=<file:/c/test.owl#>)
+Namespace(rdfs=<http://www.w3.org/2000/01/rdf-schema#>)
+Namespace(owl2xml=<http://www.w3.org/2006/12/owl2-xml#>)
+Namespace(test=<file:/c/test.owl#>)
+Namespace(owl=<http://www.w3.org/2002/07/owl#>)
+Namespace(xsd=<http://www.w3.org/2001/XMLSchema#>)
+Namespace(rdf=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)
+
+
+Ontology(<file:/c/test.owl>
+  ClassAssertion(a ObjectAllValuesFrom(r owl:Nothing))
+  ClassAssertion(a ObjectExistsSelf(r))
+)

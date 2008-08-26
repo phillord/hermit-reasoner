@@ -1,0 +1,8 @@
+atLeast(1 a:r a:B2)(X) :- a:C2(X)
+atLeast(1 a:r a:C1)(X) :- a:B2(X)
+a:C1(a:a)
+a:r(X,X) :- q:1(X)
+q:1(Y) :- q:0(X), a:r(X,Y)
+q:0(a:a)
+atLeast(1 a:r a:B1)(X) :- a:C1(X)
+atLeast(1 a:r a:C2)(X) :- a:B1(X)
