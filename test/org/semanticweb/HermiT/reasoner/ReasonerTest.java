@@ -203,35 +203,74 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertSatisfiable("complex1", false);
     }
 
-    // public void testHeinsohnTBox3cIrh() throws Exception {
-    // // Tests incoherency caused by number restrictions
-    // addAxiom("[disjoint c d]");
-    // addAxiom("[equivalent a [or c d]]");
-    // assertSatisfiable(
-    // "[and [all tt a] [atLeast 3 tt] [atMost 1 tt c] [atMost 1 tt d]]",false);
-    // }
-    // public void testHeinsohnTBox3() throws Exception {
-    // // Tests incoherency caused by number restrictions and role hierarchy
-    // addAxiom("[disjoint c d e]");
-    // addAxiom("[subClassOf a [or c d]]");
-    // addAxiom("[subObjectPropertyOf r1 r]");
-    // addAxiom("[subObjectPropertyOf r2 r]");
-    // addAxiom("[subObjectPropertyOf r3 r]");
-    // addAxiom("[subObjectPropertyOf t1 tt]");
-    // addAxiom("[subObjectPropertyOf t2 tt]");
-    // addAxiom("[subObjectPropertyOf t3 tt]");
-    // assertSubsumedBy("[and [atLeast 1 r] [some r c] [some r d]]",
-    // "[atLeast 2 r]",true);
-    // assertSubsumedBy("[and [atMost 2 r] [some r c] [some r d]]",
-    // "[and [atMost 1 r c] [atMost 1 r d]]",true);
-    // assertSubsumedBy("[and [all r a] [atLeast 3 r] [atMost 1 r c]]",
-    // "[atLeast 2 r d]",true);
-    // assertSubsumedBy("[and [all r a] [atLeast 3 r] [atMost 1 r c]]",
-    // "[atLeast 2 r d]",true);
-    // assertSubsumedBy(
-    // "[and [some r1 [and [atMost 1 tt] [some t1 c]]] [some r2 [and [atMost 1 tt] [some t2 d]]] [some r3 [and [atMost 1 tt] [some t3 e]]]]"
-    // ,"[atLeast 2 r]",true);
-    // }
+    public void testHeinsohnTBox3cIrh() throws Exception {
+        // Tests incoherency caused by number restrictions
+        String axioms = "DisjointClasses(c d) "
+                + "EquivalentClasses(a ObjectUnionOf(c d))"
+                + "EquivalentClasses(complex1 ObjectIntersectionOf("
+                + "ObjectAllValuesFrom(tt a)" + "ObjectMinCardinality(3 tt)"
+                + "ObjectMaxCardinality(1 tt c)"
+                + "ObjectMaxCardinality(1 tt d)" + "))";
+        loadOntologyWithAxioms(axioms);
+        assertSatisfiable("complex1", false);
+    }
+
+    public void testHeinsohnTBox3() throws Exception {
+        // Tests incoherency caused by number restrictions and role hierarchy
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("DisjointClasses(c d e)");
+        buffer.append("SubClassOf(a ObjectUnionOf(c d))");
+        buffer.append("SubObjectPropertyOf(r1 r)");
+        buffer.append("SubObjectPropertyOf(r2 r)");
+        buffer.append("SubObjectPropertyOf(r3 r)");
+        buffer.append("SubObjectPropertyOf(t1 tt)");
+        buffer.append("SubObjectPropertyOf(t2 tt)");
+        buffer.append("SubObjectPropertyOf(t3 tt)");
+        buffer.append("EquivalentClasses(complex1a ObjectIntersectionOf(");
+        buffer.append("ObjectMinCardinality(1 r)");
+        buffer.append("ObjectSomeValuesFrom(r c)");
+        buffer.append("ObjectSomeValuesFrom(r d)))");
+        buffer.append("EquivalentClasses(complex1b ");
+        buffer.append("ObjectMinCardinality(2 r))");
+        buffer.append("EquivalentClasses(complex2a ObjectIntersectionOf(");
+        buffer.append("ObjectMaxCardinality(2 r)");
+        buffer.append("ObjectSomeValuesFrom(r c)");
+        buffer.append("ObjectSomeValuesFrom(r d)");
+        buffer.append("))");
+        buffer.append("EquivalentClasses(complex2b ObjectIntersectionOf(");
+        buffer.append("ObjectMaxCardinality(1 r c)");
+        buffer.append("ObjectMaxCardinality(1 r d)");
+        buffer.append("))");
+        buffer.append("EquivalentClasses(complex3a ObjectIntersectionOf(");
+        buffer.append("ObjectAllValuesFrom(r a)");
+        buffer.append("ObjectMinCardinality(3 r)");
+        buffer.append("ObjectMaxCardinality(1 r c)");
+        buffer.append("))");
+        buffer.append("EquivalentClasses(complex3b ");
+        buffer.append("ObjectMinCardinality(2 r d))");
+        buffer.append("EquivalentClasses(complex4a ObjectIntersectionOf(");
+        buffer.append("ObjectSomeValuesFrom(r1 ");
+        buffer.append("ObjectIntersectionOf(ObjectMaxCardinality(1 tt) ");
+        buffer.append("ObjectSomeValuesFrom(t1 c)))");
+        buffer.append("ObjectSomeValuesFrom(r2 ");
+        buffer.append("ObjectIntersectionOf(ObjectMaxCardinality(1 tt) ");
+        buffer.append("ObjectSomeValuesFrom(t2 d)))");
+        buffer.append("ObjectSomeValuesFrom(r2 ");
+        buffer.append("ObjectIntersectionOf(ObjectMaxCardinality(1 tt) ");
+        buffer.append("ObjectSomeValuesFrom(t2 d)))");
+        buffer.append("ObjectSomeValuesFrom(r3 ");
+        buffer.append("ObjectIntersectionOf(ObjectMaxCardinality(1 tt) ");
+        buffer.append("ObjectSomeValuesFrom(t3 e)))");
+        buffer.append("))");
+        buffer.append("EquivalentClasses(complex4b ");
+        buffer.append("ObjectMinCardinality(2 r))");
+        loadOntologyWithAxioms(buffer.toString());
+        // assertSubsumedBy("complex1a", "complex1b", true);
+        // assertSubsumedBy("complex2a", "complex2b", true);
+        // assertSubsumedBy("complex3a", "complex3b", true);
+        // assertSubsumedBy("complex4a", "complex4b", true);
+    }
+
     // public void testHeinsohnTBox3Modified() throws Exception {
     // addAxiom("[disjoint c d]");
     // addAxiom("[subClassOf a [atMost 2 r]]");
