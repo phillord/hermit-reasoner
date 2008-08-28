@@ -26,6 +26,7 @@
     <!-- structure of output files -->
     <property name="projectroot" value="."/>
     <property name="builddir" value="${projectroot}/build"/>
+    <property name="flattendir" value="${projectroot}/flatten"/>
     <property name="classdir" value="${builddir}/class"/>
     <property name="plugindir" value="${builddir}/plugin"/>
     <property name="testclassdir" value="${builddir}/testclass"/>
@@ -33,6 +34,7 @@
     <!-- structure of the release -->
     <property name="releasedir" value="${builddir}/release"/>
     <property name="HermiTjar" value="${releasedir}/${ant.project.name}.jar"/>
+    <property name="flatjar" value="${releasedir}/${ant.project.name}-flat.jar"/>
     <property name="pluginjar" value="${releasedir}/${ant.project.name}-Protégé.jar"/>
     <property name="HermiTsrcjar" value="${releasedir}/${ant.project.name}.src.jar"/>
     <property name="javadocdir" value="${releasedir}/javadoc"/>
@@ -101,7 +103,9 @@
             <classpath refid="classpath"/>
         </javac>
         <copy todir="${classdir}" >
-            <fileset dir="${projectroot}/src" excludes="**/*.java,**/*.html"/>
+            <fileset dir="${projectroot}/src/impl" excludes="**/*.java,**/*.html"/>
+            <fileset dir="${projectroot}/src/cli" excludes="**/*.java,**/*.html"/>
+            <fileset dir="${projectroot}/src/api" excludes="**/*.java,**/*.html"/>
         </copy>
     </target>
 
@@ -112,8 +116,23 @@
                 <attribute name="Implementation-Title" value="HermiT"/>
                 <attribute name="Implementation-Vendor" value="Oxford University"/>
                 <attribute name="Implementation-Version" value="${version}"/>
+				<attribute name="Main-Class" value="org.semanticweb.HermiT.CommandLine"/>
             </manifest>
             <fileset dir="${classdir}"/>
+			<!-- <fileset dir="flatten"/> -->
+        </jar>
+    </target>
+    <target name="flatjar" depends="compile">
+        <mkdir dir="${releasedir}"/>
+        <jar jarfile="${flatjar}">
+            <manifest>
+                <attribute name="Implementation-Title" value="HermiT"/>
+                <attribute name="Implementation-Vendor" value="Oxford University"/>
+                <attribute name="Implementation-Version" value="${version}"/>
+				<attribute name="Main-Class" value="org.semanticweb.HermiT.CommandLine"/>
+            </manifest>
+            <fileset dir="${classdir}"/>
+			<fileset dir="${flattendir}"/>
         </jar>
     </target>
     

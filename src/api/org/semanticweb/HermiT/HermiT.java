@@ -51,7 +51,6 @@ import org.semanticweb.HermiT.hierarchy.NaiveHierarchyPosition;
 import org.semanticweb.HermiT.hierarchy.SubsumptionHierarchy;
 import org.semanticweb.HermiT.hierarchy.SubsumptionHierarchyNode;
 import org.semanticweb.HermiT.hierarchy.TableauSubsumptionChecker;
-import org.semanticweb.HermiT.kaon2.structural.Clausification;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
@@ -61,18 +60,15 @@ import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.monitor.TableauMonitorFork;
 import org.semanticweb.HermiT.monitor.Timer;
 import org.semanticweb.HermiT.monitor.TimerWithPause;
-import org.semanticweb.HermiT.owlapi.structural.OwlClausification;
 import org.semanticweb.HermiT.tableau.Tableau;
-import org.semanticweb.kaon2.api.KAON2Exception;
-import org.semanticweb.kaon2.api.KAON2Manager;
-import org.semanticweb.kaon2.api.Ontology;
-import org.semanticweb.kaon2.api.OntologyManager;
-import org.semanticweb.kaon2.api.DefaultOntologyResolver;
-import org.semanticweb.owl.apibinding.OWLManager;
+
+import org.semanticweb.HermiT.owlapi.structural.OwlClausification;
 import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
+import org.semanticweb.owl.apibinding.OWLManager;
+
 import org.semanticweb.HermiT.util.Translator;
 import org.semanticweb.HermiT.util.TranslatedMap;
 import org.semanticweb.HermiT.hierarchy.TranslatedHierarchyPosition;
@@ -170,19 +166,19 @@ public class HermiT implements Serializable {
         atomicConceptHierarchy; // may be null; use getAtomicConceptHierarchy
     
     public HermiT(String ontologyURI)
-        throws KAON2Exception, OWLException, InterruptedException {
+        throws Clausifier.LoadingException, OWLException, InterruptedException {
         m_config = new Configuration();
         loadOntology(URI.create(ontologyURI));
     }
     
     public HermiT(java.net.URI ontologyURI)
-        throws KAON2Exception, OWLException, InterruptedException {
+        throws Clausifier.LoadingException, OWLException, InterruptedException {
         m_config = new Configuration();
         loadOntology(ontologyURI);
     }
     
     public HermiT(java.net.URI ontologyURI, Configuration config)
-        throws KAON2Exception, OWLException, InterruptedException {
+        throws Clausifier.LoadingException, OWLException, InterruptedException {
         m_config = config;
         loadOntology(ontologyURI);
     }
@@ -198,6 +194,11 @@ public class HermiT implements Serializable {
 
     public boolean isConsistent() {
         return m_tableau.isABoxSatisfiable();
+    }
+    
+    public boolean isClassNameDefined(String className) {
+        return m_dlOntology.getAllAtomicConcepts()
+            .contains(AtomicConcept.create(className));
     }
 
     public boolean isClassSatisfiable(String className) {
@@ -318,6 +319,11 @@ public class HermiT implements Serializable {
     
     public HierarchyPosition<String>
         getClassTaxonomyPosition(String className) {
+        if (!isClassNameDefined(className)) {
+            throw new RuntimeException(
+                "classification of new names not yet implemented"
+            );
+        }
         return getClassTaxonomy().get(className);
     }
     
@@ -352,26 +358,31 @@ public class HermiT implements Serializable {
     //     m_userTableauMonitor=userTableauMonitor;
     // }
     protected void loadOntology(URI physicalURI)
-        throws KAON2Exception, OWLException, InterruptedException {
+        throws Clausifier.LoadingException, OWLException, InterruptedException {
         loadOntology(physicalURI, null);
     }
     
     protected void loadOntology(URI physicalURI,
                                Set<DescriptionGraph> descriptionGraphs)
-        throws KAON2Exception, OWLException, InterruptedException {
+        throws Clausifier.LoadingException, OWLException, InterruptedException {
+        Clausifier clausifier = null;
         switch (m_config.parserType) {
             case KAON2: {
-                DefaultOntologyResolver resolver =
-                    new DefaultOntologyResolver();
-                String ontologyURI =
-                    resolver.registerOntology(physicalURI.toString());
-                OntologyManager ontologyManager =
-                    KAON2Manager.newOntologyManager();
-                ontologyManager.setOntologyResolver(resolver);
-                Ontology ontology =
-                    ontologyManager.openOntology
-                        (ontologyURI, new HashMap<String,Object>());
-                loadKAON2Ontology(ontology, descriptionGraphs);
+                try {
+                    clausifier = (Clausifier)
+                        Class.forName("org.semanticweb.HermiT.kaon2.Clausifier")
+                            .newInstance();
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException("Unable to load KAON2 library", e);
+                } catch (NoClassDefFoundError e) {
+                    // This seems to be the one that comes up with no KAON2 available
+                    throw new RuntimeException("Unable to load KAON2 library", e);
+                } catch (InstantiationException e) {
+                    throw new RuntimeException("Unable to load KAON2 library", e);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException("Unable to load KAON2 library", e);
+                }
+                loadDLOntology(clausifier.loadFromURI(physicalURI, null));
             } break;
             case OWLAPI: {
                 OWLOntologyManager manager =
@@ -403,20 +414,6 @@ public class HermiT implements Serializable {
         loadDLOntology(d);
     }
     
-    protected void loadKAON2Ontology(Ontology ontology,
-                                     Set<DescriptionGraph> descriptionGraphs)
-        throws KAON2Exception {
-        if (descriptionGraphs == null) {
-            descriptionGraphs = Collections.emptySet();
-        }
-        Clausification clausification=new Clausification();
-        DLOntology dlOntology = clausification.clausify(
-            m_config.existentialStrategyType ==
-                ExistentialStrategyType.INDIVIDUAL_REUSE,
-            ontology,descriptionGraphs
-        );
-        loadDLOntology(dlOntology);
-    }
     
     protected void loadDLOntology(File file) throws Exception {
         BufferedInputStream input =
@@ -441,7 +438,8 @@ public class HermiT implements Serializable {
         }
         Namespaces namespaces = new Namespaces();
         namespaces.registerStandardPrefixes();
-        namespaces.registerPrefix("a", dlOntology.getOntologyURI() + "#");
+        namespaces.setDefaultNamespace(dlOntology.getOntologyURI() + "#");
+        // namespaces.registerPrefix("a", dlOntology.getOntologyURI() + "#");
         namespaces.registerInternalPrefixes(dlOntology.getOntologyURI());
         Collection<DLClause> nonAdmissibleDLClauses =
             dlOntology.getNonadmissibleDLClauses();

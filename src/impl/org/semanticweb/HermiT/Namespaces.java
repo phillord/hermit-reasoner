@@ -296,6 +296,8 @@ public class Namespaces implements Serializable {
             String namespace=getNamespaceForPrefix(prefix);
             if (namespace!=null)
                 return namespace+string.substring(lastColonPosition+1);
+        } else {
+            return m_defaultNamespace + string;
         }
         return string;
     }
