@@ -10,6 +10,8 @@ import java.util.LinkedList;
 import java.text.BreakIterator;
 
 import java.net.URI;
+import java.util.Map;
+import java.util.HashMap;
 
 import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
 
@@ -37,7 +39,113 @@ public class CommandLine {
         return out.toString();
     }
 
-    static protected final String versionString = "HermiT version 0.5.0";
+    protected static class UsageException extends java.lang.IllegalArgumentException {
+        UsageException(String inMessage) { super(inMessage); }
+    }
+    
+    static class Option {
+        static enum Arg { NONE, OPTIONAL, REQUIRED };
+        int optChar;
+        String longStr;
+        String group;
+        Arg arg;
+        String metavar;
+        String help;
+        Option(int inChar, String inLong, String inGroup, String inHelp) {
+            optChar = inChar;
+            longStr = inLong;
+            group = inGroup;
+            arg = Arg.NONE;
+            help = inHelp;
+        }
+        Option(int inChar, String inLong, String inGroup, boolean argRequired, String inMetavar, String inHelp) {
+            optChar = inChar;
+            longStr = inLong;
+            group = inGroup;
+            arg = (argRequired ? Arg.REQUIRED : Arg.OPTIONAL);
+            metavar = inMetavar;
+            help = inHelp;
+        }
+        static LongOpt[] createLongOpts(Option[] opts) {
+            LongOpt[] out = new LongOpt[opts.length];
+            for (int i = 0; i < opts.length; ++i) {
+                out[i] = new LongOpt(opts[i].longStr,
+                    (opts[i].arg == Arg.NONE     ? LongOpt.NO_ARGUMENT :
+                     opts[i].arg == Arg.OPTIONAL ? LongOpt.OPTIONAL_ARGUMENT
+                                                 : LongOpt.REQUIRED_ARGUMENT),
+                    null, opts[i].optChar);
+            }
+            return out;
+        }
+        
+        String getLongOptExampleStr() {
+            if (longStr == null || longStr == "") return "";
+            return new String("--" + longStr + 
+                (arg == Arg.NONE        ? "" :
+                 arg == Arg.OPTIONAL    ? "[=" + metavar + "]"
+                                        : "=" + metavar));
+        }
+        
+        static String formatOptionHelp(Option[] opts) {
+            StringBuffer out = new StringBuffer();
+            int fieldWidth = 0;
+            for (Option o : opts) {
+                int curWidth = o.getLongOptExampleStr().length();
+                if (curWidth > fieldWidth) fieldWidth = curWidth;
+            }
+            String curGroup = null;
+            for (Option o : opts) {
+                if (o.group != curGroup) {
+                    curGroup = o.group;
+                    out.append(System.getProperty("line.separator"));
+                    if (o.group != null) {
+                        out.append(curGroup + ":");
+                        out.append(System.getProperty("line.separator"));
+                    }
+                }
+                if (o.optChar < 256) {
+                    out.append("  -");
+                    out.appendCodePoint(o.optChar);
+                    if (o.longStr != null && o.longStr != "") {
+                        out.append(", ");
+                    } else {
+                        out.append("  ");
+                    }
+                } else {
+                    out.append("      ");
+                }
+                int fieldLeft = fieldWidth + 1;
+                if (o.longStr != null && o.longStr != "") {
+                    String s = o.getLongOptExampleStr();
+                    out.append(s);
+                    fieldLeft -= s.length();
+                }
+                for (; fieldLeft > 0; --fieldLeft) out.append(' ');
+                out.append(breakLines(o.help, 80, 6 + fieldWidth + 1));
+                out.append(System.getProperty("line.separator"));
+            }
+            return out.toString();
+        }
+        static String formatOptionsString(Option[] opts) {
+            StringBuffer out = new StringBuffer();
+            for (Option o : opts) {
+                if (o.optChar < 256) {
+                    out.appendCodePoint(o.optChar);
+                    switch (o.arg) {
+                        case REQUIRED:
+                            out.append(":");
+                            break;
+                        case OPTIONAL:
+                            out.append("::");
+                            break;
+                        case NONE:
+                            break;
+                    }
+                }
+            }
+            return out.toString();
+        }
+    }
     
     protected static class StatusOutput {
         protected int level;
@@ -57,11 +165,28 @@ public class CommandLine {
     }
     
     static protected class ClassifyAction implements Action {
+        final String file;
+        public ClassifyAction(String fileName) {
+            file = fileName;
+        }
         public void run(HermiT hermit, Namespaces namespaces,
                         StatusOutput status, PrintWriter output) {
             status.log(2, "classifying...");
             hermit.seedSubsumptionCache();
-            if (output != null) {
+            if (file != null) {
+                if (file == "-") {
+                    output = new PrintWriter(System.out);
+                } else {
+                    java.io.FileOutputStream f;
+                    try {
+                        f = new java.io.FileOutputStream(file);
+                    } catch (java.io.FileNotFoundException e) {
+                        throw new IllegalArgumentException("unable to open " + file + " for writing");
+                    } catch (SecurityException e) {
+                        throw new IllegalArgumentException("unable to write to " + file);
+                    }
+                    output = new PrintWriter(f);
+                }
                 hermit.printSortedAncestorLists(output);
             }
         }
@@ -190,119 +315,13 @@ public class CommandLine {
         }
     }
     
-    protected static class UsageException extends java.lang.IllegalArgumentException {
-        UsageException(String inMessage) { super(inMessage); }
-    }
-    
-    static class Option {
-        static enum Arg { NONE, OPTIONAL, REQUIRED };
-        int optChar;
-        String longStr;
-        String group;
-        Arg arg;
-        String metavar;
-        String help;
-        Option(int inChar, String inLong, String inGroup, String inHelp) {
-            optChar = inChar;
-            longStr = inLong;
-            group = inGroup;
-            arg = Arg.NONE;
-            help = inHelp;
-        }
-        Option(int inChar, String inLong, String inGroup, boolean argRequired, String inMetavar, String inHelp) {
-            optChar = inChar;
-            longStr = inLong;
-            group = inGroup;
-            arg = (argRequired ? Arg.REQUIRED : Arg.OPTIONAL);
-            metavar = inMetavar;
-            help = inHelp;
-        }
-        static LongOpt[] createLongOpts(Option[] opts) {
-            LongOpt[] out = new LongOpt[opts.length];
-            for (int i = 0; i < opts.length; ++i) {
-                out[i] = new LongOpt(opts[i].longStr,
-                    (opts[i].arg == Arg.NONE     ? LongOpt.NO_ARGUMENT :
-                     opts[i].arg == Arg.OPTIONAL ? LongOpt.OPTIONAL_ARGUMENT
-                                                 : LongOpt.REQUIRED_ARGUMENT),
-                    null, opts[i].optChar);
-            }
-            return out;
-        }
-        
-        String getLongOptExampleStr() {
-            if (longStr == null || longStr == "") return "";
-            return new String("--" + longStr + 
-                (arg == Arg.NONE        ? "" :
-                 arg == Arg.OPTIONAL    ? "[=" + metavar + "]"
-                                        : "=" + metavar));
-        }
-        
-        static String formatOptionHelp(Option[] opts) {
-            StringBuffer out = new StringBuffer();
-            int fieldWidth = 0;
-            for (Option o : opts) {
-                int curWidth = o.getLongOptExampleStr().length();
-                if (curWidth > fieldWidth) fieldWidth = curWidth;
-            }
-            String curGroup = null;
-            for (Option o : opts) {
-                if (o.group != curGroup) {
-                    curGroup = o.group;
-                    out.append(System.getProperty("line.separator"));
-                    if (o.group != null) {
-                        out.append(curGroup + ":");
-                        out.append(System.getProperty("line.separator"));
-                    }
-                }
-                if (o.optChar < 256) {
-                    out.append("  -");
-                    out.appendCodePoint(o.optChar);
-                    if (o.longStr != null && o.longStr != "") {
-                        out.append(", ");
-                    } else {
-                        out.append("  ");
-                    }
-                } else {
-                    out.append("      ");
-                }
-                int fieldLeft = fieldWidth + 1;
-                if (o.longStr != null && o.longStr != "") {
-                    String s = o.getLongOptExampleStr();
-                    out.append(s);
-                    fieldLeft -= s.length();
-                }
-                for (; fieldLeft > 0; --fieldLeft) out.append(' ');
-                out.append(breakLines(o.help, 80, 6 + fieldWidth + 1));
-                out.append(System.getProperty("line.separator"));
-            }
-            return out.toString();
-        }
-        static String formatOptionsString(Option[] opts) {
-            StringBuffer out = new StringBuffer();
-            for (Option o : opts) {
-                if (o.optChar < 256) {
-                    out.appendCodePoint(o.optChar);
-                    switch (o.arg) {
-                        case REQUIRED:
-                            out.append(":");
-                            break;
-                        case OPTIONAL:
-                            out.append("::");
-                            break;
-                        case NONE:
-                            break;
-                    }
-                }
-            }
-            return out.toString();
-        }
-    }
     
     protected static final int
         kTime=1000, kDumpClauses=1001, kDumpRoleBox=1002, kOwlApi = 1003, kKaon2 = 1004,
         kDirectBlock = 1005, kBlockStrategy = 1006, kBlockCache = 1007, kExpansion = 1008, kBase = 1009,
         kParser = 1010;
     
+    static protected final String versionString = "HermiT version 0.5.0";
     protected static final String usageString = "Usage: hermit [OPTION]... URI...";
     protected static final String[] helpHeader = {
         "Perform reasoning on each OWL ontology URI.",
@@ -322,6 +341,7 @@ public class CommandLine {
     };
     protected static final String
         kMisc = "Miscellaneous", kActions = "Actions", kParsing = "Parsing and loading",
+        kNamespaces = "Namespace expansion and abbreviation",
         kAlgorithm = "Algorithm settings (expert users only!)";
     
     protected static final Option[] options = new Option[] {
@@ -341,7 +361,7 @@ public class CommandLine {
         new Option('l', "load", kActions,
                     "parse and preprocess ontologies (default action)"),
         new Option('c', "classify", kActions, false, "FILE",
-                    "classify ontology, optionally writing taxonomy to FILE"),
+                    "classify ontology, optionally writing taxonomy to FILE (use - for standard out)"),
         new Option('k', "consistency", kActions, false, "CLASS",
                     "check satisfiability of CLASS (default owl:Thing)"),
         new Option('d', "direct", kActions,
@@ -355,6 +375,12 @@ public class CommandLine {
         new Option('U', "unsatisfiable", kActions,
                     "output unsatisfiable classes (equivalent to --equivalents=owl:Nothing)"),
 
+        // FIXME the namespace class is unreliable; fix it before providing these options:
+        // new Option('N', "no-namespaces", kNamespaces,
+        //             "do not abbreviate or expand using namespaces defined in input ontology"),
+        // new Option('n', "namespace", kNamespaces, true, "NS=URI",
+        //             "use NS as an abbreviation for URI"),
+        
         // debugging and benchmarking
         // new Option("time",              Option.OPTIONAL_ARGUMENT,  null,   kTime),
         // new Option("dump-clauses",      Option.OPTIONAL_ARGUMENT,  null,   kDumpClauses),
@@ -384,13 +410,14 @@ public class CommandLine {
     public static void main(String[] argv) {
         try {
             int verbosity = 1;
+            Map<String, String> newNamespaces = new HashMap<String, String>();
             PrintWriter output = new PrintWriter(System.out);
             Collection<Action> actions = new LinkedList<Action>();
             URI base;
             HermiT.Configuration config = new HermiT.Configuration();
             config.subsumptionCacheStrategyType =
                 HermiT.SubsumptionCacheStrategyType.ON_REQUEST;
-            boolean doAll = false;
+            boolean doAll = true;
             try {
                 base = new URI("file", System.getProperty("user.dir") + "/", null);
             } catch (java.net.URISyntaxException e) {
@@ -412,10 +439,12 @@ public class CommandLine {
                         for (String s : helpHeader) System.out.println(s);
                         System.out.println(Option.formatOptionHelp(options));
                         for (String s : helpFooter) System.out.println(s);
+                        System.exit(0);
                         didSomething = true;
                     } break;
                     case 'V': {
                         System.out.println(versionString);
+                        System.exit(0);
                         didSomething = true;
                     } break;
                     case 'v': {
@@ -459,33 +488,45 @@ public class CommandLine {
                         // load is a no-op; loading happens no matter what the user asks
                     } break;
                     case 'c': {
-                        // should take argument!
-                        actions.add(new ClassifyAction());
+                        actions.add(new ClassifyAction(g.getOptarg()));
                     } break;
                     case 'k': {
                         String arg = g.getOptarg();
                         if (arg == null) {
-                            arg = "owl:Thing";
+                            arg = "http://www.w3.org/2002/07/owl#Thing";
                         }
                         actions.add(new SatisfiabilityAction(arg));
                     } break;
-                    case 'a': {
-                        doAll = true;
+                    case 'd': {
+                        doAll = false;
                     } break;
                     case 's': {
                         String arg = g.getOptarg();
                         actions.add(new SubsAction(arg, doAll));
+                        doAll = true;
                     } break;
                     case 'S': {
                         String arg = g.getOptarg();
                         actions.add(new SupersAction(arg, doAll));
+                        doAll = true;
                     } break;
                     case 'e': {
                         String arg = g.getOptarg();
                         actions.add(new EquivalentsAction(arg));
                     } break;
                     case 'U': {
-                        actions.add(new EquivalentsAction("owl:Nothing"));
+                        actions.add(new EquivalentsAction("http://www.w3.org/2002/07/owl#Nothing"));
+                    } break;
+                    case 'N': {
+                        newNamespaces.put(null, null);
+                    } break;
+                    case 'n': {
+                        String arg = g.getOptarg();
+                        int eqIndex = arg.indexOf('=');
+                        if (eqIndex == -1) {
+                            throw new IllegalArgumentException("the namespace definition '" + arg + "' is not of the form NS=URI.");
+                        }
+                        newNamespaces.put(arg.substring(0, eqIndex), arg.substring(eqIndex + 1));
                     } break;
                     case kBase : {
                         String arg = g.getOptarg();
@@ -571,6 +612,12 @@ public class CommandLine {
                     HermiT hermit = new HermiT(ont, config);
                     long loadTime = System.currentTimeMillis() - startTime;
                     status.log(2, "Loaded in " + String.valueOf(loadTime) + " msec.");
+                    Namespaces namespaces = 
+                        (newNamespaces.containsKey(null) ? new Namespaces()
+                                                         : new Namespaces(hermit.getNamespaces()));
+                    for (Map.Entry<String, String> e : newNamespaces.entrySet()) {
+                        namespaces.registerPrefix(e.getKey(), e.getValue());
+                    }
                     for (Action action : actions) {
                         status.log(2, "Doing action...");
                         startTime = System.currentTimeMillis();
@@ -590,6 +637,7 @@ public class CommandLine {
                     System.err.println("It all went pear-shaped: " + e.getMessage());
                 }
             }
+            if (!didSomething) throw new UsageException ("Nothing ontologies given.");
         } catch (UsageException e) {
             System.err.println(e.getMessage());
             System.err.println(usageString);

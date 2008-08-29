@@ -12,6 +12,10 @@ import java.util.Collections;
 /**
  * This interface contains some well-known namespaces.
  */
+ 
+// FIXME: this class requires various incantations to avoid surprising
+// exceptions---don't use it in new code unless your name is Boris.
+// (rob 2008-08-29)
 public class Namespaces implements Serializable {
     private static final long serialVersionUID=-158185482289831766L;
 
