@@ -1,8 +1,6 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.kaon2;
 
-import org.semanticweb.HermiT.Clausifier.LoadingException;
-
 import java.util.Set;
 import java.util.HashMap;
 import java.util.Collections;

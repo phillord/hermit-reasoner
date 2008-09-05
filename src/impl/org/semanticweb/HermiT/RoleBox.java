@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.LinkedList;
 
 public class RoleBox {
+    @SuppressWarnings("serial")
     static public class NotRegularException extends IllegalArgumentException {
         NotRegularException() {
             super("The given role axioms are not regular; no suitable ordering is possible.");

@@ -6,6 +6,7 @@ import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.DLOntology;
 
 public interface Clausifier {
+    @SuppressWarnings("serial")
     public class LoadingException extends Exception {
         
         public LoadingException(String message) {

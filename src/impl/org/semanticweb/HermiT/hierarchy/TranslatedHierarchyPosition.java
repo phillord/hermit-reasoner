@@ -50,10 +50,11 @@ public class TranslatedHierarchyPosition<T, U>
             (position.getDescendantPositions(), positionTranslator);
     }
     
+    @SuppressWarnings("unchecked")
     public boolean equals(Object obj) {
         if (obj instanceof TranslatedHierarchyPosition) {
-            TranslatedHierarchyPosition other =
-             (TranslatedHierarchyPosition) obj;
+            TranslatedHierarchyPosition<T, U> other =
+             (TranslatedHierarchyPosition<T, U>) obj;
             if (other.position.equals(position) &&
                 other.translator.equals(translator)) {
                 return true;

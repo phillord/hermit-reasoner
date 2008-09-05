@@ -4,7 +4,6 @@ package org.semanticweb.HermiT.util;
 import java.util.Map;
 import java.util.Set;
 import java.util.AbstractMap;
-import java.util.Iterator;
 
 public class TranslatedMap<KeyT, KeyU, ValT, ValU>
     extends AbstractMap<KeyU, ValU> {
@@ -39,6 +38,7 @@ public class TranslatedMap<KeyT, KeyU, ValT, ValU>
             public ValU setValue(ValU val) {
                 throw new UnsupportedOperationException();
             }
+            @SuppressWarnings("unchecked")
             public boolean equals(Object o) {
                 if (o instanceof Map.Entry) {
                     Map.Entry other = (Map.Entry) o;

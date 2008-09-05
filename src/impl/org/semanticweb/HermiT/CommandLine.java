@@ -39,6 +39,7 @@ public class CommandLine {
         return out.toString();
     }
 
+    @SuppressWarnings("serial")
     protected static class UsageException extends java.lang.IllegalArgumentException {
         UsageException(String inMessage) { super(inMessage); }
     }

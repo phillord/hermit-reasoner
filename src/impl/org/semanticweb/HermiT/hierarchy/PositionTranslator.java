@@ -12,9 +12,10 @@ public class PositionTranslator<T, U>
     public HierarchyPosition<U> translate(HierarchyPosition<T> inPos) {
         return new TranslatedHierarchyPosition<T, U>(inPos, translator);
     }
+    @SuppressWarnings("unchecked")
     public boolean equals(Object obj) {
         if (obj instanceof PositionTranslator
-            && ((PositionTranslator) obj).translator.equals(translator)) {
+            && ((PositionTranslator<T, U>) obj).translator.equals(translator)) {
             return true;
         } else {
             return false;

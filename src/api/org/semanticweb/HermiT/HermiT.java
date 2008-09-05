@@ -71,7 +71,6 @@ import org.semanticweb.owl.apibinding.OWLManager;
 
 import org.semanticweb.HermiT.util.Translator;
 import org.semanticweb.HermiT.util.TranslatedMap;
-import org.semanticweb.HermiT.hierarchy.TranslatedHierarchyPosition;
 import org.semanticweb.HermiT.hierarchy.PositionTranslator;
 
 public class HermiT implements Serializable {
@@ -621,16 +620,6 @@ public class HermiT implements Serializable {
             return load(inputStream);
         } finally {
             inputStream.close();
-        }
-    }
-    
-    public static void main(String[] args) {
-        for (String f : args) {
-            try {
-                HermiT h = new HermiT(f);
-            } catch (Exception e) {
-                e.printStackTrace(System.out);
-            }
         }
     }
 

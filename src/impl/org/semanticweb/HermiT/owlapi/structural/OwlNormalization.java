@@ -138,9 +138,6 @@ public class OwlNormalization {
                 OWLObjectPropertyExpression superObjectProperty = axiom.getSuperProperty().getSimplified();
                 roleManager.addInclusion(subObjectProperty, superObjectProperty);
             } else if (untyped_axiom instanceof OWLObjectPropertyChainSubPropertyAxiom) {
-                OWLObjectPropertyChainSubPropertyAxiom axiom = (OWLObjectPropertyChainSubPropertyAxiom) (untyped_axiom);
-                List<OWLObjectPropertyExpression> objectPropertyChain = axiom.getPropertyChain();
-                OWLObjectPropertyExpression superObjectProperty = axiom.getSuperProperty().getSimplified();
                 throw new RuntimeException(
                         "Object property chains are not yet supported.");
                 // until Rob changes this ...
