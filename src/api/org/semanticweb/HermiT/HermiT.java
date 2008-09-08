@@ -30,8 +30,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.semanticweb.HermiT.blocking.AncestorBlocking;
@@ -48,6 +48,7 @@ import org.semanticweb.HermiT.existentials.ExistentialsExpansionStrategy;
 import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
 import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
 import org.semanticweb.HermiT.hierarchy.NaiveHierarchyPosition;
+import org.semanticweb.HermiT.hierarchy.PositionTranslator;
 import org.semanticweb.HermiT.hierarchy.SubsumptionHierarchy;
 import org.semanticweb.HermiT.hierarchy.SubsumptionHierarchyNode;
 import org.semanticweb.HermiT.hierarchy.TableauSubsumptionChecker;
@@ -60,19 +61,25 @@ import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.monitor.TableauMonitorFork;
 import org.semanticweb.HermiT.monitor.Timer;
 import org.semanticweb.HermiT.monitor.TimerWithPause;
-import org.semanticweb.HermiT.tableau.Tableau;
-
 import org.semanticweb.HermiT.owlapi.structural.OwlClausification;
+import org.semanticweb.HermiT.tableau.Tableau;
+import org.semanticweb.HermiT.util.TranslatedMap;
+import org.semanticweb.HermiT.util.Translator;
+import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
-import org.semanticweb.owl.apibinding.OWLManager;
 
-import org.semanticweb.HermiT.util.Translator;
-import org.semanticweb.HermiT.util.TranslatedMap;
-import org.semanticweb.HermiT.hierarchy.PositionTranslator;
-
+/**
+ * HermiT.java is mainly a facade to the main Tableau class. This is also 
+ * the place where we configure everything (which parser is used to load an 
+ * ontology, which blocking type should be used, etc). If no instance of the 
+ * Configuration class (created via HermiT.Configuration() plus calls to the 
+ * methods that set the desired options) is given, suitable options will 
+ * automatically be used, e.g., the blocking type is chosen optimal for the 
+ * expressivity of the used ontology language. 
+ */
 public class HermiT implements Serializable {
 	private static final long serialVersionUID=-8277117863937974032L;
 
@@ -165,25 +172,25 @@ public class HermiT implements Serializable {
         atomicConceptHierarchy; // may be null; use getAtomicConceptHierarchy
     
     public HermiT(String ontologyURI)
-        throws Clausifier.LoadingException, OWLException, InterruptedException {
+        throws Clausifier.LoadingException, OWLException {
         m_config = new Configuration();
         loadOntology(URI.create(ontologyURI));
     }
     
     public HermiT(java.net.URI ontologyURI)
-        throws Clausifier.LoadingException, OWLException, InterruptedException {
+        throws Clausifier.LoadingException, OWLException {
         m_config = new Configuration();
         loadOntology(ontologyURI);
     }
     
     public HermiT(java.net.URI ontologyURI, Configuration config)
-        throws Clausifier.LoadingException, OWLException, InterruptedException {
+        throws Clausifier.LoadingException, OWLException {
         m_config = config;
         loadOntology(ontologyURI);
     }
     
     public HermiT(OWLOntology ontology, Configuration config)
-        throws OWLException, InterruptedException {
+        throws OWLException {
         m_config = config;
         // FIXME: do the identities of the manager and factory matter?
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -357,13 +364,13 @@ public class HermiT implements Serializable {
     //     m_userTableauMonitor=userTableauMonitor;
     // }
     protected void loadOntology(URI physicalURI)
-        throws Clausifier.LoadingException, OWLException, InterruptedException {
+        throws Clausifier.LoadingException, OWLException {
         loadOntology(physicalURI, null);
     }
     
     protected void loadOntology(URI physicalURI,
                                Set<DescriptionGraph> descriptionGraphs)
-        throws Clausifier.LoadingException, OWLException, InterruptedException {
+        throws Clausifier.LoadingException, OWLException {
         Clausifier clausifier = null;
         switch (m_config.parserType) {
             case KAON2: {

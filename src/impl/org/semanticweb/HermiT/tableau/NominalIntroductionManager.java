@@ -3,8 +3,16 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 
-import org.semanticweb.HermiT.model.*;
+import org.semanticweb.HermiT.model.AbstractRole;
+import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
+import org.semanticweb.HermiT.model.AtomicAbstractRole;
+import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.Concept;
+import org.semanticweb.HermiT.model.InverseAbstractRole;
 
+/**
+ * Implements the nominal introduction rule.
+ */
 public final class NominalIntroductionManager implements Serializable {
     private static final long serialVersionUID=5863617010809297861L;
 

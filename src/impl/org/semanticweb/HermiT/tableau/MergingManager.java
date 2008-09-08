@@ -3,8 +3,13 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 
-import org.semanticweb.HermiT.monitor.*;
+import org.semanticweb.HermiT.monitor.TableauMonitor;
 
+/**
+ * Implements the merge rule and is used whenever the merge rule needs to be 
+ * applied during the expansion of the tableau object used in the constructor 
+ * of the class. 
+ */
 public final class MergingManager implements Serializable {
     private static final long serialVersionUID=-8404748898127176927L;
 
@@ -29,6 +34,15 @@ public final class MergingManager implements Serializable {
         m_ternaryAuxiliaryTuple=new Object[3];
         m_binaryUnionDependencySet=new UnionDependencySet(2);
     }
+    /**
+     * Merges the two given nodes and adjusts the dependency set as required. It 
+     * is automatically figured out which node has to be merged into which, 
+     * i.e., the order between node0 and node1 is not important. 
+     * @param node0
+     * @param node1
+     * @param dependencySet
+     * @return
+     */
     public boolean mergeNodes(Node node0,Node node1,DependencySet dependencySet) {
         if (!node0.isActive() || !node1.isActive() || node0==node1)
             return false;

@@ -633,9 +633,6 @@ public class CommandLine {
                 } catch (org.semanticweb.owl.model.OWLException e) {
                     // FIXME this whole thing needs real exception processing
                     System.err.println("It all went pear-shaped: " + e.getMessage());
-                } catch (InterruptedException e) {
-                    // FIXME this whole thing needs real exception processing
-                    System.err.println("It all went pear-shaped: " + e.getMessage());
                 }
             }
             if (!didSomething) throw new UsageException ("Nothing ontologies given.");

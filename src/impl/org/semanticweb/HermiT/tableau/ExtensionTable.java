@@ -3,9 +3,28 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 
-import org.semanticweb.HermiT.model.*;
-import org.semanticweb.HermiT.monitor.*;
+import org.semanticweb.HermiT.model.AtomicAbstractRole;
+import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.AtomicNegationConcept;
+import org.semanticweb.HermiT.model.Concept;
+import org.semanticweb.HermiT.model.DescriptionGraph;
+import org.semanticweb.HermiT.model.ExistentialConcept;
+import org.semanticweb.HermiT.model.Inequality;
+import org.semanticweb.HermiT.monitor.TableauMonitor;
 
+/**
+ * An extension table keeps track of the assertions in the ABox during a run of 
+ * the tableau. For this purpose, it holds a binary (concept, node) and a 
+ * ternary (role, node, node) tuple table, which represent concept and role 
+ * assertions respectively. Since this is one of the most crucial parts 
+ * regarding memory usage, reusing already allocated space is the main design 
+ * goal. In case of backtracking during the expansion, we just set the pointer 
+ * to a previous entry in the table that then becomes the current one. When 
+ * merging or pruning, we leave the entries for the merged/pruned nodes in the 
+ * table so that we do not have holes in there. The tuple tables are indexed 
+ * (tries/prefix trees) to speed-up the search for matching atoms during rule 
+ * applications. 
+ */
 public abstract class ExtensionTable implements Serializable {
     private static final long serialVersionUID=-5029938218056017193L;
 
@@ -49,6 +68,15 @@ public abstract class ExtensionTable implements Serializable {
         return m_dependencySetManager.getDependencySet(tupleIndex);
     }
     public abstract boolean addTuple(Object[] tuple,DependencySet dependencySet);
+    
+    /**
+     * Performs a few tests depending on the type of the added tuple (concept, 
+     * role, inequality, description graph) to see whether adding the tuple 
+     * caused a clash.  
+     * @param tuple
+     * @param dependencySet
+     * @param tupleIndex
+     */
     protected void postAdd(Object[] tuple,DependencySet dependencySet,int tupleIndex) {
         Object dlPredicateObject=tuple[0];
         if (dlPredicateObject instanceof Concept) {

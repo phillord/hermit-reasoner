@@ -3,8 +3,13 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 
-import org.semanticweb.HermiT.model.*;
+import org.semanticweb.HermiT.model.AtomicConcept;
 
+/**
+ * This extension table is for use with binary and ternary assertions (not 
+ * description graphs). 
+ * @see ExtensionTableWithFullIndex
+ */
 public class ExtensionTableWithTupleIndexes extends ExtensionTable {
     private static final long serialVersionUID=-684536236157965372L;
 

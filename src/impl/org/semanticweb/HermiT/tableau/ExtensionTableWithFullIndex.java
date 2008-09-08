@@ -3,8 +3,13 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 
-import org.semanticweb.HermiT.model.*;
+import org.semanticweb.HermiT.model.AtomicConcept;
 
+/**
+ * This extension table is for use with Description Graphs and it supports tuple 
+ * tables with arity greater than three, but are, as a result, less efficient.
+ * @see ExtensionTableWithTupleIndexes
+ */
 public class ExtensionTableWithFullIndex extends ExtensionTable {
     private static final long serialVersionUID=2856811178050960058L;
 

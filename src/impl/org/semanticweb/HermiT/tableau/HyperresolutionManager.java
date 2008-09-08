@@ -1,16 +1,24 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.tableau;
 
-import java.util.Map;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
-import java.util.ArrayList;
-import java.io.Serializable;
+import java.util.Map;
+import java.util.Set;
 
-import org.semanticweb.HermiT.model.*;
+import org.semanticweb.HermiT.model.Atom;
+import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.model.DLPredicate;
+import org.semanticweb.HermiT.model.NodeIDLessThan;
+import org.semanticweb.HermiT.model.Term;
+import org.semanticweb.HermiT.model.Variable;
 
+/**
+ * Applies the rules during the expansion of a tableau. 
+ */
 public final class HyperresolutionManager implements Serializable {
     private static final long serialVersionUID=-4880817508962130189L;
 

@@ -2,15 +2,26 @@
 package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import org.semanticweb.HermiT.model.*;
+import org.semanticweb.HermiT.model.AbstractRole;
+import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
+import org.semanticweb.HermiT.model.AtomicAbstractRole;
+import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.model.ExistentialConcept;
+import org.semanticweb.HermiT.model.Inequality;
+import org.semanticweb.HermiT.model.InverseAbstractRole;
+import org.semanticweb.HermiT.model.LiteralConcept;
 
+/**
+ * Manages the expansion of existentials (at least restrictions in fact) in a 
+ * tableau. 
+ */
 public final class ExistentialExpansionManager implements Serializable {
     private static final long serialVersionUID=4794168582297181623L;
 
@@ -179,6 +190,17 @@ public final class ExistentialExpansionManager implements Serializable {
         }
         return false;
     }
+    /**
+     * Creates a new node in the tableau if at least concept that caused the 
+     * expansion is for cardinality 1. If it is not of cardinality 1 and the 
+     * role in the at most concept is a functional role, it sets a clash in the 
+     * extension manager. 
+     * @param atLeastAbstractRoleConcept
+     * @param forNode
+     * @return true if the at least cardinality is 1 (causes an expansion) or it 
+     * is greater than one but the role is functional (causes a clash) and false 
+     * otherwise.
+     */
     public boolean tryFunctionalExpansion(AtLeastAbstractRoleConcept atLeastAbstractRoleConcept,Node forNode) {
         if (atLeastAbstractRoleConcept.getNumber()==1) {
             if (getFunctionalExpansionNode(atLeastAbstractRoleConcept.getOnAbstractRole(),forNode,m_auxiliaryTuple)) {
@@ -207,6 +229,11 @@ public final class ExistentialExpansionManager implements Serializable {
         }
         return false;
     }
+    /**
+     * Does a normal expansion of the tableau (ABox) for an at least concept. 
+     * @param atLeastAbstractRoleConcept
+     * @param forNode
+     */
     public void doNormalExpansion(AtLeastAbstractRoleConcept atLeastAbstractRoleConcept,Node forNode) {
         if (m_tableau.m_tableauMonitor!=null)
             m_tableau.m_tableauMonitor.existentialExpansionStarted(atLeastAbstractRoleConcept,forNode);
@@ -235,6 +262,13 @@ public final class ExistentialExpansionManager implements Serializable {
         if (m_tableau.m_tableauMonitor!=null)
             m_tableau.m_tableauMonitor.existentialExpansionFinished(atLeastAbstractRoleConcept,forNode);
     }
+    /**
+     * Expands an at least concept by first trying a functional expansion (if 
+     * the cardinality is 1 or the role is functional) and a normal expansion 
+     * otherwise. 
+     * @param atLeastAbstractRoleConcept
+     * @param forNode
+     */
     public void expand(AtLeastAbstractRoleConcept atLeastAbstractRoleConcept,Node forNode) {
         if (!tryFunctionalExpansion(atLeastAbstractRoleConcept,forNode))
             doNormalExpansion(atLeastAbstractRoleConcept,forNode);

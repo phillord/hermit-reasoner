@@ -3,6 +3,10 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 
+/**
+ * The actual implementation of the tuple tables used in the ExtensionTable 
+ * class. 
+ */
 public final class TupleTable implements Serializable {
     private static final long serialVersionUID=-7712458276004062803L;
 

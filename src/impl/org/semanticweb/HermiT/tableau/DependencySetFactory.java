@@ -2,9 +2,18 @@
 package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
+/**
+ * This is the main class to work with dependency sets and returns instances of 
+ * PermanentDependencySet, which can not directly be created. Dependency sets 
+ * are either permanent (in case they are used for a longer time and more 
+ * frequently) or temporary. The temporary ones are instances of the class 
+ * UnionDependencySet and they can be created directly. If a temporary 
+ * dependency sets is used more frequently, it can be turned into a permenent 
+ * one by this factory.  
+ */
 public final class DependencySetFactory implements Serializable {
     private static final long serialVersionUID=8632867055646817311L;
 

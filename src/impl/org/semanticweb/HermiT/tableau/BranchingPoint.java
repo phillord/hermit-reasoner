@@ -3,6 +3,9 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 
+/**
+ * Represents a branching point for the tableau given to the constructor. 
+ */
 public class BranchingPoint implements Serializable {
     private static final long serialVersionUID=7306881534568051692L;
 

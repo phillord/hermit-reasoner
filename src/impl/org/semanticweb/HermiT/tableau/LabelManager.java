@@ -2,15 +2,22 @@
 package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
-import org.semanticweb.HermiT.model.*;
+import org.semanticweb.HermiT.model.AtomicAbstractRole;
+import org.semanticweb.HermiT.model.AtomicNegationConcept;
+import org.semanticweb.HermiT.model.Concept;
 
+/**
+ * This class is not used in the normal expansion of the tableau. Only at the 
+ * end of a run, it is used to persist blocking signatures to facilitate another 
+ * run on the same DLOntology. Uses a custom implementation of Hash sets. 
+ */
 public final class LabelManager implements Serializable {
     private static final long serialVersionUID=2628318450352626514L;
 

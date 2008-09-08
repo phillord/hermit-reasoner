@@ -1,17 +1,31 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.tableau;
 
-import java.util.Map;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ArrayList;
-import java.io.Serializable;
+import java.util.Map;
 
-import org.semanticweb.HermiT.model.*;
-import org.semanticweb.HermiT.existentials.*;
-import org.semanticweb.HermiT.monitor.*;
+import org.semanticweb.HermiT.existentials.ExistentialsExpansionStrategy;
+import org.semanticweb.HermiT.model.Atom;
+import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.AtomicNegationConcept;
+import org.semanticweb.HermiT.model.DLOntology;
+import org.semanticweb.HermiT.model.DLPredicate;
+import org.semanticweb.HermiT.model.ExistentialConcept;
+import org.semanticweb.HermiT.model.Individual;
+import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.tableau.Node.NodeState;
 
+/**
+ * This class coordinates the main tableau expansion for a given DLOntology (a 
+ * normalized and clausified ontology). It represents the state of a run on a 
+ * set of clauses and coordinates the extension of the ABox and also the 
+ * retraction of facts when backtracking. Before starting the expansion, the 
+ * given clauses are (for better performance) preprocessed via the 
+ * HyperresolutionManager into a compiled and executable form. 
+ */
 public final class Tableau implements Serializable {
     private static final long serialVersionUID=-28982363158925221L;
 
@@ -343,6 +357,10 @@ public final class Tableau implements Serializable {
     public GroundDisjunction getFirstUnprocessedGroundDisjunction() {
         return m_firstUnprocessedGroundDisjunction;
     }
+    /**
+     * Add a branching point in case we need to backtrack to this state. 
+     * @param branchingPoint
+     */
     public void pushBranchingPoint(BranchingPoint branchingPoint) {
         assert m_currentBranchingPoint+1==branchingPoint.m_level;
         if (m_tableauMonitor!=null)
@@ -362,6 +380,11 @@ public final class Tableau implements Serializable {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.pushBranchingPointFinished(branchingPoint);
     }
+    /**
+     * Backtrack to a certain branching point in the list of branching points 
+     * that have been set during the run. 
+     * @param newCurrentBrancingPoint
+     */
     protected void backtrackTo(int newCurrentBrancingPoint) {
         BranchingPoint branchingPoint=m_branchingPoints[newCurrentBrancingPoint];
         if (m_tableauMonitor!=null)

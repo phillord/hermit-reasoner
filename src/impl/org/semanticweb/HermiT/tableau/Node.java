@@ -1,14 +1,21 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.tableau;
 
-import java.util.Set;
-import java.util.List;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
-import java.io.Serializable;
+import java.util.List;
+import java.util.Set;
 
-import org.semanticweb.HermiT.model.*;
+import org.semanticweb.HermiT.model.AtomicAbstractRole;
+import org.semanticweb.HermiT.model.Concept;
+import org.semanticweb.HermiT.model.ExistentialConcept;
 
+/**
+ * Represents a node in the tableau. Nodes are initially active, but can be set 
+ * to merged or pruned at a later stage, which does not delete, but marks them 
+ * as inaktive. 
+ */
 public final class Node implements Serializable {
     private static final long serialVersionUID=-2549229429321484690L;
     protected static List<ExistentialConcept> NO_EXISTENTIALS=Collections.emptyList();

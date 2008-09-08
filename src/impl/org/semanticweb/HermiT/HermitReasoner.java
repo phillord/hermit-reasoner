@@ -1,11 +1,26 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT;
 
-import org.semanticweb.owl.inference.*;
-import org.semanticweb.owl.model.*;
-import org.semanticweb.HermiT.hierarchy.*;
-import org.semanticweb.HermiT.model.*;
 import java.net.URI;
+
+import org.semanticweb.HermiT.hierarchy.SubsumptionHierarchy;
+import org.semanticweb.HermiT.hierarchy.SubsumptionHierarchyNode;
+import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.owl.inference.OWLReasoner;
+import org.semanticweb.owl.model.OWLClass;
+import org.semanticweb.owl.model.OWLConstant;
+import org.semanticweb.owl.model.OWLDataFactory;
+import org.semanticweb.owl.model.OWLDataProperty;
+import org.semanticweb.owl.model.OWLDataPropertyExpression;
+import org.semanticweb.owl.model.OWLDataRange;
+import org.semanticweb.owl.model.OWLDescription;
+import org.semanticweb.owl.model.OWLException;
+import org.semanticweb.owl.model.OWLIndividual;
+import org.semanticweb.owl.model.OWLObjectProperty;
+import org.semanticweb.owl.model.OWLObjectPropertyExpression;
+import org.semanticweb.owl.model.OWLOntology;
+import org.semanticweb.owl.model.OWLOntologyManager;
+import org.semanticweb.owl.model.OWLOntologySetProvider;
 
 public class HermitReasoner implements OWLReasoner {
     static final String mUriBase = "urn:hermit:kb";
@@ -88,8 +103,6 @@ public class HermitReasoner implements OWLReasoner {
             System.out.println("...done");
         } catch (OWLException e) {
             throw new RuntimeException("Failed to merge ontologies.", e);
-        } catch (InterruptedException e) {
-            throw new RuntimeException("Loading was interrupted.");
         }
     }
     
