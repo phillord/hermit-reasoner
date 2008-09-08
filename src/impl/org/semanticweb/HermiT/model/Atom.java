@@ -45,9 +45,6 @@ public class Atom implements Serializable {
     /**
      * Returns the variable at position argumentIndex or null if that position
      * contains something other than a variable.
-     * 
-     * @param argumentIndex
-     * @return
      */
     public Variable getArgumentVariable(int argumentIndex) {
         if (m_arguments[argumentIndex] instanceof Variable)

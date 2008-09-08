@@ -11,6 +11,10 @@ import org.semanticweb.HermiT.monitor.TableauMonitor;
 import java.util.Collection;
 import java.util.ArrayList;
 
+/**
+ * Implements the common bits of an ExistentialsExpansionStrategy, leaving
+ * only actual processing of existentials in need of expansion to subclasses.
+ */
 public abstract class StrategyBase
     implements ExistentialsExpansionStrategy {
 
@@ -40,11 +44,36 @@ public abstract class StrategyBase
         blockingStrategy.clear();
     }
     
+    /**
+     * The real work of expansion is delegated to an Expander object by the
+     * expandExistentials(Expander) method.
+     */
     protected interface Expander {
+        /** 
+         * called once for each unsatisfied existential in the tableau
+         * 
+         * @return true if all expansion to be performed on the entire tableau
+         * has been completed; otherwise false
+         */
         boolean expand(AtLeastAbstractRoleConcept c, Node n);
+        
+        /**
+         * called after all calls to expand on a tableau have completed
+         * 
+         * @return true if some kind of expansion was performed; false if the
+         * tableau contained no existentials in need of expansion
+         */
         public boolean completeExpansion();
     }
     
+    /**
+     * provides a hook subclasses can use to implement their own (no-argument)
+     * expandExistentials() method. Calls e.expand(...) for each unsatisfied
+     * existential in the tableau, or until some call to e.expand returns
+     * true.
+     * 
+     * @return e.completeExpansion()
+     */
     protected boolean expandExistentials(Expander e) {
         TableauMonitor monitor = tableau.getTableauMonitor();
         blockingStrategy.computeBlocking();

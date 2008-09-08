@@ -38,10 +38,6 @@ public final class MergingManager implements Serializable {
      * Merges the two given nodes and adjusts the dependency set as required. It 
      * is automatically figured out which node has to be merged into which, 
      * i.e., the order between node0 and node1 is not important. 
-     * @param node0
-     * @param node1
-     * @param dependencySet
-     * @return
      */
     public boolean mergeNodes(Node node0,Node node1,DependencySet dependencySet) {
         if (!node0.isActive() || !node1.isActive() || node0==node1)

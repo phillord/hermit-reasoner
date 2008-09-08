@@ -236,10 +236,6 @@ public class DLOntology implements Serializable {
      * Takes the set of roles that are for use in Description Graphs and detects
      * whether clause contains no roles, only roles from the given set, only
      * roles not from the given set or both types of roles.
-     * 
-     * @param dlClause
-     * @param graphAtomicRoles
-     * @return
      */
     protected int getUsedRoleTypes(DLClause dlClause,
             Set<AtomicAbstractRole> graphAtomicRoles) {
@@ -288,11 +284,6 @@ public class DLOntology implements Serializable {
      * the variables can be split into a center variable x, a set of branch
      * variables y_i, and a set of nominal variables z_j such thatcertain
      * conditions hold.
-     * 
-     * @param dlClause
-     * @param graphAtomicRoles
-     * @param bodyOnlyAtomicConcepts
-     * @return
      */
     protected boolean isTreeDLClause(DLClause dlClause,
             Set<AtomicAbstractRole> graphAtomicRoles,
@@ -335,11 +326,6 @@ public class DLOntology implements Serializable {
 
     /**
      * Tests whether the given center variable is suitable.
-     * 
-     * @param dlClause
-     * @param centerVariable
-     * @param bodyOnlyAtomicConcepts
-     * @return
      */
     protected boolean isTreeWithCenterVariable(DLClause dlClause,
             Variable centerVariable, Set<AtomicConcept> bodyOnlyAtomicConcepts) {

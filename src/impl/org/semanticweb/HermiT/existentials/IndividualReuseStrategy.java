@@ -104,7 +104,7 @@ public class IndividualReuseStrategy
                         (atLeastAbstractRoleConcept, node);
                 if (!isDeterministic) {
                     BranchingPoint branchingPoint
-                        = new IndividualResueBranchingPoint
+                        = new IndividualReuseBranchingPoint
                             (tableau, atLeastAbstractRoleConcept, node, true);
                     tableau.pushBranchingPoint(branchingPoint);
                     dependencySet = tableau.getDependencySetFactory()
@@ -143,7 +143,7 @@ public class IndividualReuseStrategy
             if (reuseInfo == null) {
                 if (!isDeterministic) {
                     BranchingPoint branchingPoint =
-                        new IndividualResueBranchingPoint
+                        new IndividualReuseBranchingPoint
                             (tableau, atLeastAbstractRoleConcept, node, false);
                     tableau.pushBranchingPoint(branchingPoint);
                     dependencySet
@@ -235,14 +235,14 @@ public class IndividualReuseStrategy
         return dontReuseConceptsEver;
     }
     
-    protected class IndividualResueBranchingPoint extends BranchingPoint {
+    protected class IndividualReuseBranchingPoint extends BranchingPoint {
         private static final long serialVersionUID=-5715836252258022216L;
 
         protected final AtLeastAbstractRoleConcept existential;
         protected final Node node;
         protected final boolean wasParentReuse;
 
-        public IndividualResueBranchingPoint(
+        public IndividualReuseBranchingPoint(
             Tableau tableau, AtLeastAbstractRoleConcept existential,
             Node node, boolean wasParentReuse) {
             super(tableau);

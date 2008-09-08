@@ -7,6 +7,14 @@ import org.semanticweb.HermiT.model.*;
 import org.semanticweb.HermiT.tableau.*;
 import org.semanticweb.HermiT.blocking.*;
 
+/**
+ * Strategy for expanding all existentials on the oldest node in the tableau
+ * with unexpanded existentials. This usually closely approximates a
+ * breadth-first expansion. (Existentials introduced onto parent nodes as
+ * result of constraints on their children can produce newer nodes of lower
+ * depth than older nodes, which could result in slight non-breadth-first
+ * behavior.)
+ */
 public class CreationOrderStrategy extends StrategyBase implements Serializable {
     private static final long serialVersionUID=-64673639237063636L;
     StrategyBase.Expander expander;
