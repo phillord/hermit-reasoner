@@ -192,4 +192,8 @@ public class TableauMonitorFork implements TableauMonitor,Serializable  {
         m_first.nodeDestroyed(node);
         m_second.nodeDestroyed(node);
     }
+    public void setValue(String key, String value) {
+        m_first.setValue(key, value);
+        m_second.setValue(key, value);
+    }
 }

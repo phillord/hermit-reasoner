@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.semanticweb.HermiT.HermiT;
 import org.semanticweb.HermiT.model.AbstractRole;
 import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
 import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
@@ -68,31 +69,34 @@ import org.semanticweb.owl.model.OWLSameIndividualsAxiom;
 public class OwlClausification {
     protected static final org.semanticweb.HermiT.model.Variable X = org.semanticweb.HermiT.model.Variable.create("X");
     protected static final org.semanticweb.HermiT.model.Variable Y = org.semanticweb.HermiT.model.Variable.create("Y");
+    protected static final org.semanticweb.HermiT.model.Variable Z = org.semanticweb.HermiT.model.Variable.create("Z");
 
-    public DLOntology clausify(boolean prepareForNIRule, OWLOntology ontology,
+    public DLOntology clausify(HermiT.Configuration config, OWLOntology ontology,
             OWLDataFactory factory,
             Collection<DescriptionGraph> descriptionGraphs) throws OWLException {
         OwlNormalization normalization = new OwlNormalization(factory);
         normalization.processOntology(ontology);
-        return clausify(prepareForNIRule, ontology.getURI().toString(),
+        return clausify(config, ontology.getURI().toString(),
                 normalization.getConceptInclusions(),
                 normalization.getObjectPropertyInclusions(),
                 normalization.getDataPropertyInclusions(),
                 normalization.getAsymmetricObjectProperties(),
                 normalization.getReflexiveObjectProperties(),
                 normalization.getIrreflexiveObjectProperties(),
+                normalization.getTransitiveObjectProperties(),
                 normalization.getDisjointObjectProperties(),
                 normalization.getDisjointDataProperties(),
                 normalization.getFacts(), descriptionGraphs, factory);
     }
 
-    public DLOntology clausify(boolean prepareForNIRule, String ontologyURI,
+    public DLOntology clausify(HermiT.Configuration config, String ontologyURI,
             Collection<OWLDescription[]> conceptInclusions,
             Collection<OWLObjectPropertyExpression[]> objectPropertyInclusions,
             Collection<OWLDataPropertyExpression[]> dataPropertyInclusions,
             Set<OWLObjectPropertyExpression> asymmetricObjectProperties,
             Set<OWLObjectPropertyExpression> reflexiveObjectProperties,
             Set<OWLObjectPropertyExpression> irreflexiveObjectProperties,
+            Set<OWLObjectPropertyExpression> transitiveObjectProperties,
             Set<OWLObjectPropertyExpression[]> disjointObjectProperties,
             Set<OWLDataPropertyExpression[]> disjointDataProperties,
             Collection<OWLIndividualAxiom> facts,
@@ -122,6 +126,15 @@ public class OwlClausification {
             DLClause dlClause = DLClause.create(new Atom[] { superRoleAtom },
                     new Atom[] { subRoleAtom });
             dlClauses.add(dlClause);
+        }
+        if (config.clausifyTransitivity) {
+            for (OWLObjectPropertyExpression prop : transitiveObjectProperties) {
+                DLClause dlClause = DLClause.create(
+                    new Atom[] { getAbstractRoleAtom(prop, Y, Z) },
+                    new Atom[] { getAbstractRoleAtom(prop, Y, X),
+                                 getAbstractRoleAtom(prop, X, Z) });
+                dlClauses.add(dlClause);
+            }
         }
         for (OWLObjectPropertyExpression axiom : asymmetricObjectProperties) {
             Atom roleAtom = getAbstractRoleAtom(axiom, X, Y);
@@ -158,7 +171,9 @@ public class OwlClausification {
                     "Data properties are not supported yet.");
         boolean shouldUseNIRule = determineExpressivity.m_hasAtMostRestrictions
                 && determineExpressivity.m_hasInverseRoles
-                && (determineExpressivity.m_hasNominals || prepareForNIRule);
+                && (determineExpressivity.m_hasNominals ||
+                    config.existentialStrategyType ==
+                        HermiT.ExistentialStrategyType.INDIVIDUAL_REUSE);
         Clausifier clausifier = new Clausifier(positiveFacts, shouldUseNIRule,
                 factory);
         for (OWLDescription[] inclusion : conceptInclusions) {

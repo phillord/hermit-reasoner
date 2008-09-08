@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.semanticweb.HermiT.HermiT;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
@@ -97,8 +98,9 @@ public class ClausificationTest extends AbstractOWLOntologyTest {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         OWLDataFactory factory = manager.getOWLDataFactory();
         Set<DescriptionGraph> noDescriptionGraphs = Collections.emptySet();
-        DLOntology dlOntology = clausifier.clausify(false, ontology, factory,
-                noDescriptionGraphs);
+        DLOntology dlOntology
+            = clausifier.clausify(new HermiT.Configuration(),
+                ontology, factory, noDescriptionGraphs);
         Set<String> actualStrings = new HashSet<String>();
         org.semanticweb.HermiT.Namespaces namespaces = new org.semanticweb.HermiT.Namespaces();
         namespaces.registerPrefix("a", ontology.getURI() + "#");

@@ -5,7 +5,7 @@ import org.semanticweb.HermiT.model.*;
 import org.semanticweb.HermiT.tableau.*;
 
 public interface ExistentialsExpansionStrategy {
-    void intialize(Tableau tableau);
+    void initialize(Tableau tableau);
     void clear();
     boolean expandExistentials();
     void assertionAdded(Concept concept,Node node);

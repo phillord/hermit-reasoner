@@ -5,11 +5,18 @@ import java.io.Serializable;
 
 import org.semanticweb.HermiT.model.*;
 import org.semanticweb.HermiT.tableau.*;
+import java.util.Map;
+import java.util.HashMap;
 
 public class TableauMonitorAdapter implements TableauMonitor,Serializable  {
     private static final long serialVersionUID=6336033031431260208L;
 
     protected Tableau m_tableau;
+    protected Map<String, String> values;
+    
+    public TableauMonitorAdapter() {
+        values = new HashMap<String, String>();
+    }
     
     public void setTableau(Tableau tableau) {
         m_tableau=tableau;
@@ -99,5 +106,8 @@ public class TableauMonitorAdapter implements TableauMonitor,Serializable  {
     public void nodeCreated(Node node) {
     }
     public void nodeDestroyed(Node node) {
+    }
+    public void setValue(String key, String value) {
+        values.put(key, value);
     }
 }

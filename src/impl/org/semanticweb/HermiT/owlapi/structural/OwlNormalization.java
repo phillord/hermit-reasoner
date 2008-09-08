@@ -90,6 +90,7 @@ public class OwlNormalization {
     protected final Set<OWLObjectPropertyExpression> m_asymmetricObjectProperties;
     protected final Set<OWLObjectPropertyExpression> m_reflexiveObjectProperties;
     protected final Set<OWLObjectPropertyExpression> m_irreflexiveObjectProperties;
+    protected final Set<OWLObjectPropertyExpression> m_transitiveObjectProperties;
     protected final Set<OWLObjectPropertyExpression[]> m_disjointObjectProperties;
     protected final Set<OWLDataPropertyExpression[]> m_disjointDataProperties;
     protected final Collection<OWLIndividualAxiom> m_facts;
@@ -104,6 +105,7 @@ public class OwlNormalization {
         m_asymmetricObjectProperties = new HashSet<OWLObjectPropertyExpression>();
         m_reflexiveObjectProperties = new HashSet<OWLObjectPropertyExpression>();
         m_irreflexiveObjectProperties = new HashSet<OWLObjectPropertyExpression>();
+        m_transitiveObjectProperties = new HashSet<OWLObjectPropertyExpression>();
         m_disjointObjectProperties = new HashSet<OWLObjectPropertyExpression[]>();
         m_disjointDataProperties = new HashSet<OWLDataPropertyExpression[]>();
         m_facts = new HashSet<OWLIndividualAxiom>();
@@ -213,6 +215,7 @@ public class OwlNormalization {
             } else if (untyped_axiom instanceof OWLTransitiveObjectPropertyAxiom) {
                 OWLTransitiveObjectPropertyAxiom axiom = (OWLTransitiveObjectPropertyAxiom) (untyped_axiom);
                 roleManager.makeTransitive(axiom.getProperty().getSimplified());
+                m_transitiveObjectProperties.add(axiom.getProperty().getSimplified());
             } else if (untyped_axiom instanceof OWLFunctionalDataPropertyAxiom) {
                 OWLFunctionalDataPropertyAxiom axiom = (OWLFunctionalDataPropertyAxiom) (untyped_axiom);
                 inclusions.add(new OWLDescription[] { m_factory.getOWLDataMaxCardinalityRestriction(
@@ -480,6 +483,10 @@ public class OwlNormalization {
 
     public Set<OWLObjectPropertyExpression> getIrreflexiveObjectProperties() {
         return m_irreflexiveObjectProperties;
+    }
+
+    public Set<OWLObjectPropertyExpression> getTransitiveObjectProperties() {
+        return m_transitiveObjectProperties;
     }
 
     public Set<OWLObjectPropertyExpression[]> getDisjointObjectProperties() {

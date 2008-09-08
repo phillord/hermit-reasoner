@@ -14,6 +14,7 @@ import java.util.Set;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
+import org.semanticweb.HermiT.HermiT;
 import org.semanticweb.HermiT.blocking.AnywhereBlocking;
 import org.semanticweb.HermiT.blocking.BlockingSignatureCache;
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
@@ -97,8 +98,8 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         OWLDataFactory factory = manager.getOWLDataFactory();
         Set<DescriptionGraph> noDescriptionGraphs = Collections.emptySet();
-        return clausifier.clausify(false, m_ontology, factory,
-                noDescriptionGraphs);
+        return clausifier.clausify(new HermiT.Configuration(),
+            m_ontology, factory, noDescriptionGraphs);
     }
 
     protected Tableau getTableau() throws Exception {

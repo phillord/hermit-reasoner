@@ -49,4 +49,5 @@ public interface TableauMonitor {
     void nominalIntorductionFinished(Node rootNode,Node treeNode,AtMostAbstractRoleGuard atMostAbstractRoleGuard);
     void nodeCreated(Node node);
     void nodeDestroyed(Node node);
+    void setValue(String key, String value);
 }

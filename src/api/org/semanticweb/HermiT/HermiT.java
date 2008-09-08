@@ -44,6 +44,7 @@ import org.semanticweb.HermiT.blocking.PairwiseDirectBlockingCheckerWithReflexiv
 import org.semanticweb.HermiT.blocking.SingleDirectBlockingChecker;
 import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
+import org.semanticweb.HermiT.existentials.DepthFirstStrategy;
 import org.semanticweb.HermiT.existentials.ExistentialsExpansionStrategy;
 import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
 import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
@@ -93,7 +94,7 @@ public class HermiT implements Serializable {
     public static enum BlockingStrategyType { ANYWHERE, ANCESTOR };
     public static enum BlockingSignatureCacheType { CACHED, NOT_CACHED };
     public static enum ExistentialStrategyType {
-        CREATION_ORDER, EL, INDIVIDUAL_REUSE
+        CREATION_ORDER, DEPTH_FIRST, EL, INDIVIDUAL_REUSE
     };
     public static enum ParserType { KAON2, OWLAPI };
     public static enum SubsumptionCacheStrategyType {
@@ -108,6 +109,9 @@ public class HermiT implements Serializable {
         public ExistentialStrategyType existentialStrategyType;
         public ParserType parserType;
         public SubsumptionCacheStrategyType subsumptionCacheStrategyType;
+        public boolean clausifyTransitivity;
+        public boolean checkClauses;
+        public TableauMonitor monitor;
         public final Map<String,Object> parameters;
     
         public Configuration() {
@@ -119,6 +123,9 @@ public class HermiT implements Serializable {
             parserType = ParserType.OWLAPI;
             subsumptionCacheStrategyType =
                 SubsumptionCacheStrategyType.IMMEDIATE;
+            clausifyTransitivity = false;
+            checkClauses = true;
+            monitor = null;
             parameters = new HashMap<String,Object>();
         }
 
@@ -165,7 +172,6 @@ public class HermiT implements Serializable {
     private final Configuration m_config; // never null
     private DLOntology m_dlOntology; // never null
     private Namespaces m_namespaces; // never null
-    private TableauMonitor m_userTableauMonitor;
     private Tableau m_tableau; // never null
     private TableauSubsumptionChecker m_subsumptionChecker; // never null
     private Map<AtomicConcept, HierarchyPosition<AtomicConcept>>
@@ -196,6 +202,15 @@ public class HermiT implements Serializable {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         loadOwlOntology(ontology, manager.getOWLDataFactory(),
                         (Set<DescriptionGraph>) null);
+    }
+
+    public HermiT(OWLOntology ontology, Configuration config,
+                  Set<DescriptionGraph> graphs)
+        throws OWLException, InterruptedException {
+        m_config = config;
+        // FIXME: do the identities of the manager and factory matter?
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+        loadOwlOntology(ontology, manager.getOWLDataFactory(), graphs);
     }
 
     public boolean isConsistent() {
@@ -359,10 +374,6 @@ public class HermiT implements Serializable {
         }
     }
 
-
-    // public void setUserTableauMonitor(TableauMonitor userTableauMonitor) {
-    //     m_userTableauMonitor=userTableauMonitor;
-    // }
     protected void loadOntology(URI physicalURI)
         throws Clausifier.LoadingException, OWLException {
         loadOntology(physicalURI, null);
@@ -413,9 +424,7 @@ public class HermiT implements Serializable {
         }
         OwlClausification c = new OwlClausification();
         DLOntology d = c.clausify(
-            m_config.existentialStrategyType ==
-                ExistentialStrategyType.INDIVIDUAL_REUSE,
-            ontology, factory, descriptionGraphs
+            m_config, ontology, factory, descriptionGraphs
         );
         loadDLOntology(d);
     }
@@ -447,19 +456,21 @@ public class HermiT implements Serializable {
         namespaces.setDefaultNamespace(dlOntology.getOntologyURI() + "#");
         // namespaces.registerPrefix("a", dlOntology.getOntologyURI() + "#");
         namespaces.registerInternalPrefixes(dlOntology.getOntologyURI());
-        Collection<DLClause> nonAdmissibleDLClauses =
-            dlOntology.getNonadmissibleDLClauses();
-        if (!nonAdmissibleDLClauses.isEmpty()) {
-            String CRLF = System.getProperty("line.separator");
-            StringBuffer buffer = new StringBuffer();
-            buffer.append("The following DL-clauses in the DL-ontology" +
-                          " are not admissible:");
-            buffer.append(CRLF);
-            for (DLClause dlClause : nonAdmissibleDLClauses) {
-                buffer.append(dlClause.toString(namespaces));
+        if (m_config.checkClauses) {
+            Collection<DLClause> nonAdmissibleDLClauses =
+                dlOntology.getNonadmissibleDLClauses();
+            if (!nonAdmissibleDLClauses.isEmpty()) {
+                String CRLF = System.getProperty("line.separator");
+                StringBuffer buffer = new StringBuffer();
+                buffer.append("The following DL-clauses in the DL-ontology" +
+                              " are not admissible:");
                 buffer.append(CRLF);
+                for (DLClause dlClause : nonAdmissibleDLClauses) {
+                    buffer.append(dlClause.toString(namespaces));
+                    buffer.append(CRLF);
+                }
+                throw new IllegalArgumentException(buffer.toString());
             }
-            throw new IllegalArgumentException(buffer.toString());
         }
         m_dlOntology = dlOntology;
         m_namespaces = namespaces;
@@ -486,13 +497,13 @@ public class HermiT implements Serializable {
         }
         
         TableauMonitor tableauMonitor = null;
-        if (m_userTableauMonitor == null) {
+        if (m_config.monitor == null) {
             tableauMonitor = wellKnownTableauMonitor;
         } else if (wellKnownTableauMonitor == null) {
-            tableauMonitor = m_userTableauMonitor;
+            tableauMonitor = m_config.monitor;
         } else {
             tableauMonitor = new TableauMonitorFork(wellKnownTableauMonitor,
-                                                    m_userTableauMonitor);
+                                                    m_config.monitor);
         }
         
         DirectBlockingChecker directBlockingChecker = null;
@@ -563,6 +574,10 @@ public class HermiT implements Serializable {
             existentialsExpansionStrategy =
                 new CreationOrderStrategy(blockingStrategy);
             break;
+        case DEPTH_FIRST:
+            existentialsExpansionStrategy =
+                new DepthFirstStrategy(blockingStrategy);
+            break;
         case EL:
             existentialsExpansionStrategy =
                 new IndividualReuseStrategy(blockingStrategy,true);
@@ -587,6 +602,9 @@ public class HermiT implements Serializable {
         }
     }
     
+    public void outputClauses(PrintWriter output, Namespaces namespaces) {
+        output.println(m_dlOntology.toString(namespaces));
+    }
     
     public Namespaces getNamespaces() {
         return m_namespaces;

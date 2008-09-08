@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.HashMap;
 
 import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
+import org.semanticweb.HermiT.monitor.Timer;
 
 public class CommandLine {
     
@@ -165,6 +166,31 @@ public class CommandLine {
                  StatusOutput status, PrintWriter output);
     }
     
+    static protected class DumpClausesAction implements Action {
+        final String file;
+        public DumpClausesAction(String fileName) {
+            file = fileName;
+        }
+        public void run(HermiT hermit, Namespaces namespaces,
+                        StatusOutput status, PrintWriter output) {
+            if (file != null) {
+                if (file == "-") {
+                    output = new PrintWriter(System.out);
+                } else {
+                    java.io.FileOutputStream f;
+                    try {
+                        f = new java.io.FileOutputStream(file);
+                    } catch (java.io.FileNotFoundException e) {
+                        throw new IllegalArgumentException("unable to open " + file + " for writing");
+                    } catch (SecurityException e) {
+                        throw new IllegalArgumentException("unable to write to " + file);
+                    }
+                    output = new PrintWriter(f);
+                }
+            }
+            hermit.outputClauses(output, namespaces);
+        }
+    }
     static protected class ClassifyAction implements Action {
         final String file;
         public ClassifyAction(String fileName) {
@@ -320,7 +346,7 @@ public class CommandLine {
     protected static final int
         kTime=1000, kDumpClauses=1001, kDumpRoleBox=1002, kOwlApi = 1003, kKaon2 = 1004,
         kDirectBlock = 1005, kBlockStrategy = 1006, kBlockCache = 1007, kExpansion = 1008, kBase = 1009,
-        kParser = 1010;
+        kParser = 1010, kClausifyRoleBox = 1011;
     
     static protected final String versionString = "HermiT version 0.5.0";
     protected static final String usageString = "Usage: hermit [OPTION]... URI...";
@@ -343,7 +369,8 @@ public class CommandLine {
     protected static final String
         kMisc = "Miscellaneous", kActions = "Actions", kParsing = "Parsing and loading",
         kNamespaces = "Namespace expansion and abbreviation",
-        kAlgorithm = "Algorithm settings (expert users only!)";
+        kAlgorithm = "Algorithm settings (expert users only!)",
+        kInternals = "Internals and debugging (unstable)";
     
     protected static final Option[] options = new Option[] {
         // meta:
@@ -382,12 +409,6 @@ public class CommandLine {
         // new Option('n', "namespace", kNamespaces, true, "NS=URI",
         //             "use NS as an abbreviation for URI"),
         
-        // debugging and benchmarking
-        // new Option("time",              Option.OPTIONAL_ARGUMENT,  null,   kTime),
-        // new Option("dump-clauses",      Option.OPTIONAL_ARGUMENT,  null,   kDumpClauses),
-        // new Option("dump-rbox",     Option.OPTIONAL_ARGUMENT,  null,   kDumpRoleBox),
-        // parsing and loading:
-
         new Option(kBase, "base", kParsing, true, "BASE",
                     "use BASE as base for ontology URI arguments"),
         new Option(kParser, "parser", kParsing, true, "PARSER",
@@ -406,6 +427,12 @@ public class CommandLine {
                     "set use of blocking cahce to VALUE; supported values are 'on' and 'off' (default 'on')"),
         new Option(kExpansion, "expansion", kAlgorithm, true, "TYPE",
                     "use TYPE strategy for existential expansion; supported values are 'creation', 'el', and 'reuse' (default 'creation')"),
+        new Option(kClausifyRoleBox, "clausify-rolebox", kAlgorithm,
+                    "add clauses to realize transitive edges (experimental)"),
+                    
+        // internals:
+        new Option(kDumpClauses, "dump-clauses", kInternals, false, "FILE",
+                    "output DL-clauses to FILE (default stdout)"),
     };
     
     public static void main(String[] argv) {
@@ -587,6 +614,14 @@ public class CommandLine {
                             config.existentialStrategyType = HermiT.ExistentialStrategyType.INDIVIDUAL_REUSE;
                         } else throw new UsageException("unknown existential strategy type '" + arg + "'; supported values are 'creation', 'el', and 'reuse'");
                     } break;
+                    case kClausifyRoleBox : {
+                        config.clausifyTransitivity = true;
+                        config.checkClauses = false;
+                        config.existentialStrategyType = HermiT.ExistentialStrategyType.DEPTH_FIRST;
+                    } break;
+                    case kDumpClauses : {
+                        actions.add(new DumpClausesAction(g.getOptarg()));
+                    } break;
                     default : {
                         if (g.getOptopt() != 0) {
                             throw new UsageException("invalid option -- " + (char) g.getOptopt());
@@ -604,6 +639,7 @@ public class CommandLine {
                 }
             } // done processing arguments
             StatusOutput status = new StatusOutput(verbosity);
+            if (verbosity > 3) config.monitor = new Timer(new PrintWriter(System.err));
             for (URI ont : ontologies) {
                 didSomething = true;
                 status.log(2, "Processing " + ont.toString());

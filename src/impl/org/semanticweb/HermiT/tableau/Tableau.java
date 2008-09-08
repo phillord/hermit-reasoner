@@ -72,7 +72,7 @@ public final class Tableau implements Serializable {
         m_existentialExpasionManager=new ExistentialExpansionManager(this);
         m_nominalIntroductionManager=new NominalIntroductionManager(this);
         m_descriptionGraphManager=new DescriptionGraphManager(this);
-        m_existentialsExpansionStrategy.intialize(this);
+        m_existentialsExpansionStrategy.initialize(this);
         m_needsThingExtension=m_hyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING);
         m_existentialConceptsBuffers=new ArrayList<List<ExistentialConcept>>();
         m_branchingPoints=new BranchingPoint[2];
