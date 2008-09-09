@@ -30,8 +30,11 @@ import org.semanticweb.HermiT.owlapi.structural.OwlClausification;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
 import org.semanticweb.owl.apibinding.OWLManager;
+import org.semanticweb.owl.io.OWLOntologyInputSource;
+import org.semanticweb.owl.io.StringInputSource;
 import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLDataFactory;
+import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
 
@@ -221,7 +224,7 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
     }
 
     /**
-     * tests that the set have equal length and that the actual set contains all
+     * tests that the sets have equal length and that the actual set contains all
      * objects from the control set, otherwise the test fails and the contents
      * of the control and the actual set are printed
      */
@@ -245,5 +248,57 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
             System.out.flush();
             throw e;
         }
+    }
+    
+    /**
+     * tests that the set have equal length and that the actual set contains all
+     * objects from the control set, otherwise the test fails and the contents
+     * of the control and the actual set are printed
+     */
+    protected static <T> void assertContainsAll(Collection<T> actual,
+            Collection<T> control) {
+        try {
+            assertEquals(control.size(), actual.size());
+            for (T contr : control)
+                assertTrue(actual.contains(contr));
+        } catch (AssertionFailedError e) {
+            System.out.println("Control set (" + control.size() + " elements):");
+            System.out.println("------------------------------------------");
+            for (T object : control)
+                System.out.println(object.toString());
+            System.out.println("------------------------------------------");
+            System.out.println("Actual set (" + actual.size() + " elements):");
+            System.out.println("------------------------------------------");
+            for (Object object : actual)
+                System.out.println(object.toString());
+            System.out.println("------------------------------------------");
+            System.out.flush();
+            throw e;
+        }
+    }
+    /**
+     * creates and loads an OWL ontology that contains the given axioms
+     * 
+     * @param axioms
+     *            in functional style syntax
+     * @throws InterruptedException
+     * @throws OWLException
+     */
+    protected OWLOntology getOWLOntologyWithAxioms(String axioms) throws OWLException,
+            InterruptedException {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("Namespace(=<file:/c/test.owl#>)");
+        buffer.append("Namespace(rdfs=<http://www.w3.org/2000/01/rdf-schema#>)");
+        buffer.append("Namespace(owl2xml=<http://www.w3.org/2006/12/owl2-xml#>)");
+        buffer.append("Namespace(test=<file:/c/test.owl#>)");
+        buffer.append("Namespace(owl=<http://www.w3.org/2002/07/owl#>)");
+        buffer.append("Namespace(xsd=<http://www.w3.org/2001/XMLSchema#>)");
+        buffer.append("Namespace(rdf=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)");
+        buffer.append("Ontology(<file:/c/test.owl>");
+        buffer.append(axioms);
+        buffer.append(")");
+        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+        OWLOntologyInputSource input = new StringInputSource(buffer.toString());
+        return m_ontology = manager.loadOntology(input);
     }
 }

@@ -124,6 +124,10 @@ public class OwlNormalization {
      */
     public void processOntology(OWLOntology OWLOntology) throws OWLException {
         RoleManager roleManager = new RoleManager();
+        // Each entry in the inclusions list represents a disjunction of
+        // concepts, i.e., each OWLDescription in an entry contributes a
+        // disjunct. It is thus not really inclusions, but rather a disjunction
+        // of concepts that represents an inclusion axiom.
         List<OWLDescription[]> inclusions = new ArrayList<OWLDescription[]>();
         for (OWLAxiom untyped_axiom : OWLOntology.getAxioms()) {
             if (untyped_axiom instanceof OWLInverseObjectPropertiesAxiom) {
@@ -253,6 +257,7 @@ public class OwlNormalization {
                 OWLDisjointDataPropertiesAxiom axiom = (OWLDisjointDataPropertiesAxiom) (untyped_axiom);
                 OWLDataPropertyExpression[] dataProperties = new OWLDataPropertyExpression[axiom.getProperties().size()];
                 axiom.getProperties().toArray(dataProperties);
+                m_disjointDataProperties.add(dataProperties);
             } else if (untyped_axiom instanceof OWLDisjointObjectPropertiesAxiom) {
                 OWLDisjointObjectPropertiesAxiom axiom = (OWLDisjointObjectPropertiesAxiom) (untyped_axiom);
                 OWLObjectPropertyExpression[] objectProperties = new OWLObjectPropertyExpression[axiom.getProperties().size()];
@@ -332,6 +337,19 @@ public class OwlNormalization {
                 // TODO: Either actually implement datatypes, or throw an
                 // exception here!
                 System.err.println("ignoring data assertion...");
+                OWLDataPropertyAssertionAxiom axiom = (OWLDataPropertyAssertionAxiom) (untyped_axiom);
+                OWLDataRange filler = m_factory.getOWLDataOneOf(axiom.getObject());
+                OWLDataSomeRestriction restriction = m_factory.getOWLDataSomeRestriction(
+                        axiom.getProperty(), filler);
+                boolean[] alreadyExists = new boolean[1];
+                OWLDescription definition = getDefinitionFor(restriction,
+                        alreadyExists);
+                if (!alreadyExists[0]) {
+                    inclusions.add(new OWLDescription[] {
+                            definition.getComplementNNF(), restriction });
+                }
+                m_facts.add(m_factory.getOWLClassAssertionAxiom(
+                        axiom.getSubject(), definition));
             } else {
                 throw new RuntimeException("Unsupported axiom type:"
                         + untyped_axiom.getAxiomType().toString());
@@ -344,18 +362,30 @@ public class OwlNormalization {
         m_objectPropertyInclusions = roleManager.getSimpleInclusions();
     }
 
+    /**
+     * Takes an OWL description and visits it with a new SimplificationVisitor. 
+     * During the visit, trivial contradictions are replaced by bottom and 
+     * trivial tautologies are replaced with top.
+     * @param d an OWL class description
+     * @return a simplified OWL description
+     */
     protected OWLDescription simplify(OWLDescription d) {
         return d.accept(new SimplificationVisitor(m_factory));
     }
 
+    /**
+     * @param description an OWL class description
+     * @return true if description is a literal or a data range, false otherwise
+     */
     protected boolean isSimple(OWLDescription description) {
         return description instanceof OWLClass
-                || (description instanceof OWLObjectComplementOf && ((OWLObjectComplementOf) description).getOperand() instanceof OWLClass);
+                || (description instanceof OWLObjectComplementOf && ((OWLObjectComplementOf) description).getOperand() instanceof OWLClass)
+                // assuming that we do not further normalize data ranges for now
+                || (description instanceof OWLDataRange);
     }
 
     protected void nomalizeInclusions(List<OWLDescription[]> inclusions,
-            OWLDescriptionVisitorEx<OWLDescription> normalizer)
-            throws OWLException {
+            OWLDescriptionVisitorEx<OWLDescription> normalizer) {
         while (!inclusions.isEmpty()) {
             OWLDescription simplifiedDescription = simplify(m_factory.getOWLObjectUnionOf(inclusions.remove(inclusions.size() - 1)));
             if (!simplifiedDescription.isOWLThing()) {
@@ -408,6 +438,17 @@ public class OwlNormalization {
         return false;
     }
 
+    /**
+     * If exactly one of the classes in descriptions is an intersection, new 
+     * inclusions are added that each contain one intersection operand and all 
+     * the other descriptions. 
+     * @param descriptions an array of OWL class descriptions that represent a 
+     *                     disjunction of classes that originate from a GCI
+     * @param inclusions   The set of GCIs from this ontology written a 
+     *                     disjunctions 
+     * @return true if exactly one of the descriptions is an intersection and 
+     * false otherwise  
+     */
     protected boolean distributeUnionOverAnd(OWLDescription[] descriptions,
             List<OWLDescription[]> inclusions) {
         int andIndex = -1;
@@ -515,27 +556,47 @@ public class OwlNormalization {
         }
 
         public OWLDescription visit(OWLDataAllRestriction desc) {
-            throw new RuntimeException("Datatypes are not supported yet.");
-        }
-
-        public OWLDescription visit(OWLDataExactCardinalityRestriction desc) {
-            throw new RuntimeException("Datatypes are not supported yet.");
-        }
-
-        public OWLDescription visit(OWLDataMaxCardinalityRestriction desc) {
-            throw new RuntimeException("Datatypes are not supported yet.");
-        }
-
-        public OWLDescription visit(OWLDataMinCardinalityRestriction desc) {
-            throw new RuntimeException("Datatypes are not supported yet.");
+            return desc;
         }
 
         public OWLDescription visit(OWLDataSomeRestriction desc) {
-            throw new RuntimeException("Datatypes are not supported yet.");
+            return desc;
+        }
+
+        public OWLDescription visit(OWLDataExactCardinalityRestriction desc) {
+            OWLDataPropertyExpression dataProperty = desc.getProperty();
+            OWLDataRange dataRange = desc.getFiller();
+            OWLDescription definition = getDefinitionFor(desc,
+                    m_alreadyExists);
+            if (!m_alreadyExists[0]) {
+                m_newInclusions.add(new OWLDescription[] {
+                        definition.getComplementNNF(),
+                        m_n.m_factory.getOWLDataMaxCardinalityRestriction(
+                                dataProperty, desc.getCardinality(),
+                                dataRange) });
+                m_newInclusions.add(new OWLDescription[] {
+                        definition.getComplementNNF(),
+                        m_n.m_factory.getOWLDataMinCardinalityRestriction(
+                                dataProperty, desc.getCardinality(),
+                                dataRange) });
+            }
+            return definition;
+        }
+
+        public OWLDescription visit(OWLDataMaxCardinalityRestriction desc) {
+            return desc;
+        }
+
+        public OWLDescription visit(OWLDataMinCardinalityRestriction desc) {
+            if (desc.getCardinality() <= 0)
+                return m_n.m_factory.getOWLThing();
+            else return desc;
         }
 
         public OWLDescription visit(OWLDataValueRestriction desc) {
-            throw new RuntimeException("Datatypes are not supported yet.");
+            OWLDataRange dataRange = m_n.m_factory.getOWLDataOneOf(desc.getValue());
+            return m_n.m_factory.getOWLDataSomeRestriction(desc.getProperty(),
+                    dataRange);
         }
 
         public OWLDescription visit(OWLClass object) {
@@ -579,37 +640,42 @@ public class OwlNormalization {
 
         public OWLDescription visit(OWLObjectExactCardinalityRestriction object) {
             OWLObjectPropertyExpression objectProperty = object.getProperty().getSimplified();
-            OWLDescription description = object.getFiller();
+            OWLDescription filler = object.getFiller();
             OWLDescription definition = getDefinitionFor(object,
                     m_alreadyExists);
             if (!m_alreadyExists[0]) {
                 m_newInclusions.add(new OWLDescription[] {
                         definition.getComplementNNF(),
-                        m_n.m_factory.getOWLObjectExactCardinalityRestriction(
+                        m_n.m_factory.getOWLObjectMaxCardinalityRestriction(
                                 objectProperty, object.getCardinality(),
-                                description) });
+                                filler) });
+                m_newInclusions.add(new OWLDescription[] {
+                        definition.getComplementNNF(),
+                        m_n.m_factory.getOWLObjectMinCardinalityRestriction(
+                                objectProperty, object.getCardinality(),
+                                filler) });
             }
             return definition;
         }
 
         public OWLDescription visit(OWLObjectMinCardinalityRestriction object) {
             OWLObjectPropertyExpression objectProperty = object.getProperty().getSimplified();
-            OWLDescription description = object.getFiller();
+            OWLDescription filler = object.getFiller();
             if (object.getCardinality() <= 0)
                 return m_n.m_factory.getOWLThing();
-            else if (isSimple(description))
+            else if (isSimple(filler))
                 return object;
             else if (object.getCardinality() == 1
-                    && description instanceof OWLObjectOneOf) {
+                    && filler instanceof OWLObjectOneOf) {
                 // This is an optimization
                 return m_n.m_factory.getOWLObjectSomeRestriction(
-                        objectProperty, description);
+                        objectProperty, filler);
             } else {
-                OWLDescription definition = getDefinitionFor(description,
+                OWLDescription definition = getDefinitionFor(filler,
                         m_alreadyExists);
                 if (!m_alreadyExists[0])
                     m_newInclusions.add(new OWLDescription[] {
-                            definition.getComplementNNF(), description });
+                            definition.getComplementNNF(), filler });
                 return m_n.m_factory.getOWLObjectMinCardinalityRestriction(
                         objectProperty, object.getCardinality(), definition);
             }
@@ -752,27 +818,27 @@ public class OwlNormalization {
         }
 
         public Boolean visit(OWLDataAllRestriction desc) {
-            throw new RuntimeException("Datatypes are not supported yet.");
-        }
-
-        public Boolean visit(OWLDataExactCardinalityRestriction desc) {
-            throw new RuntimeException("Datatypes are not supported yet.");
-        }
-
-        public Boolean visit(OWLDataMaxCardinalityRestriction desc) {
-            throw new RuntimeException("Datatypes are not supported yet.");
-        }
-
-        public Boolean visit(OWLDataMinCardinalityRestriction desc) {
-            throw new RuntimeException("Datatypes are not supported yet.");
+            return Boolean.FALSE;
         }
 
         public Boolean visit(OWLDataSomeRestriction desc) {
-            throw new RuntimeException("Datatypes are not supported yet.");
+            return Boolean.TRUE;
+        }
+
+        public Boolean visit(OWLDataExactCardinalityRestriction desc) {
+            return Boolean.TRUE;
+        }
+
+        public Boolean visit(OWLDataMaxCardinalityRestriction desc) {
+            return Boolean.TRUE;
+        }
+
+        public Boolean visit(OWLDataMinCardinalityRestriction desc) {
+            return Boolean.TRUE;
         }
 
         public Boolean visit(OWLDataValueRestriction desc) {
-            throw new RuntimeException("Datatypes are not supported yet.");
+            return Boolean.FALSE;
         }
     }
 

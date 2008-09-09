@@ -2,5 +2,5 @@
 package org.semanticweb.HermiT.tableau;
 
 public enum NodeType {
-    ROOT_NODE,TREE_NODE,GRAPH_NODE
+    ROOT_NODE,TREE_NODE,CONCRETE_NODE,GRAPH_NODE
 }

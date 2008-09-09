@@ -41,6 +41,7 @@ public final class Tableau implements Serializable {
     protected final ExistentialExpansionManager m_existentialExpasionManager;
     protected final NominalIntroductionManager m_nominalIntroductionManager;
     protected final DescriptionGraphManager m_descriptionGraphManager;
+    protected final DatatypeManager m_datatypeManager;
     protected final boolean m_needsThingExtension;
     protected final List<List<ExistentialConcept>> m_existentialConceptsBuffers;
     protected BranchingPoint[] m_branchingPoints;
@@ -75,7 +76,8 @@ public final class Tableau implements Serializable {
         m_existentialExpasionManager=new ExistentialExpansionManager(this);
         m_nominalIntroductionManager=new NominalIntroductionManager(this);
         m_descriptionGraphManager=new DescriptionGraphManager(this);
-        m_existentialsExpansionStrategy.initialize(this);
+        m_datatypeManager=new DatatypeManager(this);
+        m_existentialsExpansionStrategy.intialize(this);
         m_needsThingExtension=m_hyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING);
         m_existentialConceptsBuffers=new ArrayList<List<ExistentialConcept>>();
         m_branchingPoints=new BranchingPoint[2];
@@ -175,7 +177,10 @@ public final class Tableau implements Serializable {
             while (m_extensionManager.propagateDeltaNew() && !m_extensionManager.containsClash()) {
                 m_descriptionGraphManager.checkGraphConstraints();
                 m_hyperresolutionManager.applyDLClauses();
-                m_nominalIntroductionManager.processTargets();
+                if (!m_extensionManager.containsClash())
+                    m_datatypeManager.checkDatatypeConstraints();
+                if (!m_extensionManager.containsClash())
+                    m_nominalIntroductionManager.processTargets();
                 hasChange=true;
             }
             if (hasChange)
@@ -432,6 +437,9 @@ public final class Tableau implements Serializable {
     public Node createNewTreeNode(DependencySet dependencySet,Node parent) {
         return createNewNodeRaw(dependencySet,parent,NodeType.TREE_NODE,parent.getTreeDepth()+1);
     }
+    public Node createNewConcreteNode(Node parent,DependencySet dependencySet) {
+        return createNewNodeRaw(dependencySet,parent,NodeType.CONCRETE_NODE,parent.getTreeDepth()+1);
+    }
     public Node createNewGraphNode(Node parent,DependencySet dependencySet) {
         return createNewNodeRaw(dependencySet,parent,NodeType.GRAPH_NODE,parent.getTreeDepth());
     }
@@ -458,7 +466,8 @@ public final class Tableau implements Serializable {
         m_numberOfNodeCreations++;
         if (m_tableauMonitor!=null)
             m_tableauMonitor.nodeCreated(node);
-        m_extensionManager.addConceptAssertion(AtomicConcept.THING,node,dependencySet);
+        if (nodeType!=NodeType.CONCRETE_NODE)
+            m_extensionManager.addConceptAssertion(AtomicConcept.THING,node,dependencySet);
         return node;
     }
     public void mergeNode(Node node,Node mergeInto,DependencySet dependencySet) {

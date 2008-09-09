@@ -10,8 +10,9 @@ public class AllTests extends TestCase {
         TestSuite suite = new TestSuite(
                 "Test for the normalization and clasification code used with the OWLAPI. ");
         // $JUnit-BEGIN$
-        suite.addTestSuite(ClausificationTest.class);
         suite.addTestSuite(NormalizationTest.class);
+        suite.addTestSuite(ClausificationTest.class);
+        suite.addTestSuite(ClausificationDatatypesTest.class);
         // $JUnit-END$
         return suite;
     }

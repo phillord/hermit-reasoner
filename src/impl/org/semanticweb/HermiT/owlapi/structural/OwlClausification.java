@@ -14,32 +14,48 @@ import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.HermiT.HermiT;
+import org.semanticweb.HermiT.Namespaces;
 import org.semanticweb.HermiT.model.AbstractRole;
 import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
+import org.semanticweb.HermiT.model.AtLeastConcreteRoleConcept;
 import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicAbstractRole;
 import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.AtomicConcreteRole;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
+import org.semanticweb.HermiT.model.DataRange;
+import org.semanticweb.HermiT.model.DatatypeRestriction;
+import org.semanticweb.HermiT.model.DatatypeRestrictionNegationConcept;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InverseAbstractRole;
 import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.model.NodeIDLessThan;
+import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLClassAssertionAxiom;
+import org.semanticweb.owl.model.OWLConstant;
 import org.semanticweb.owl.model.OWLDataAllRestriction;
+import org.semanticweb.owl.model.OWLDataComplementOf;
 import org.semanticweb.owl.model.OWLDataExactCardinalityRestriction;
 import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLDataMaxCardinalityRestriction;
 import org.semanticweb.owl.model.OWLDataMinCardinalityRestriction;
+import org.semanticweb.owl.model.OWLDataOneOf;
+import org.semanticweb.owl.model.OWLDataProperty;
 import org.semanticweb.owl.model.OWLDataPropertyAssertionAxiom;
 import org.semanticweb.owl.model.OWLDataPropertyExpression;
+import org.semanticweb.owl.model.OWLDataRange;
+import org.semanticweb.owl.model.OWLDataRangeFacetRestriction;
+import org.semanticweb.owl.model.OWLDataRangeRestriction;
 import org.semanticweb.owl.model.OWLDataSomeRestriction;
+import org.semanticweb.owl.model.OWLDataType;
 import org.semanticweb.owl.model.OWLDataValueRestriction;
+import org.semanticweb.owl.model.OWLDataVisitor;
 import org.semanticweb.owl.model.OWLDescription;
 import org.semanticweb.owl.model.OWLDescriptionVisitor;
 import org.semanticweb.owl.model.OWLDifferentIndividualsAxiom;
@@ -64,7 +80,11 @@ import org.semanticweb.owl.model.OWLObjectSomeRestriction;
 import org.semanticweb.owl.model.OWLObjectUnionOf;
 import org.semanticweb.owl.model.OWLObjectValueRestriction;
 import org.semanticweb.owl.model.OWLOntology;
+import org.semanticweb.owl.model.OWLOntologyManager;
 import org.semanticweb.owl.model.OWLSameIndividualsAxiom;
+import org.semanticweb.owl.model.OWLTypedConstant;
+import org.semanticweb.owl.model.OWLUntypedConstant;
+import org.semanticweb.owl.vocab.XSDVocabulary;
 
 public class OwlClausification {
     protected static final org.semanticweb.HermiT.model.Variable X = org.semanticweb.HermiT.model.Variable.create("X");
@@ -101,7 +121,7 @@ public class OwlClausification {
             Set<OWLDataPropertyExpression[]> disjointDataProperties,
             Collection<OWLIndividualAxiom> facts,
             Collection<DescriptionGraph> descriptionGraphs,
-            OWLDataFactory factory) throws OWLException {
+            OWLDataFactory factory) {
         DetermineExpressivity determineExpressivity = new DetermineExpressivity();
         for (OWLDescription[] inclusion : conceptInclusions)
             for (OWLDescription description : inclusion)
@@ -114,9 +134,9 @@ public class OwlClausification {
         }
         if (reflexiveObjectProperties.size() > 0)
             determineExpressivity.m_hasReflexivity = true;
-        if (dataPropertyInclusions.size() > 0)
-            throw new IllegalArgumentException(
-                    "Data properties are not supported yet.");
+        if (dataPropertyInclusions.size() > 0) {
+            determineExpressivity.m_hasDatatypes = true;
+        }
         Set<DLClause> dlClauses = new LinkedHashSet<DLClause>();
         Set<Atom> positiveFacts = new HashSet<Atom>();
         Set<Atom> negativeFacts = new HashSet<Atom>();
@@ -135,6 +155,13 @@ public class OwlClausification {
                                  getAbstractRoleAtom(prop, X, Z) });
                 dlClauses.add(dlClause);
             }
+        }
+        for (OWLDataPropertyExpression[] inclusion : dataPropertyInclusions) {
+            Atom subProp = getDataPropertyAtom(inclusion[0], X, Y);
+            Atom superProp = getDataPropertyAtom(inclusion[1], X, Y);
+            DLClause dlClause = DLClause.create(new Atom[] { superProp },
+                    new Atom[] { subProp });
+            dlClauses.add(dlClause);
         }
         for (OWLObjectPropertyExpression axiom : asymmetricObjectProperties) {
             Atom roleAtom = getAbstractRoleAtom(axiom, X, Y);
@@ -167,8 +194,7 @@ public class OwlClausification {
             }
         }
         if (disjointDataProperties.size() > 0)
-            throw new IllegalArgumentException(
-                    "Data properties are not supported yet.");
+            throw new IllegalArgumentException("Disjoint data properties are not supported yet.");
         boolean shouldUseNIRule = determineExpressivity.m_hasAtMostRestrictions
                 && determineExpressivity.m_hasInverseRoles
                 && (determineExpressivity.m_hasNominals ||
@@ -197,6 +223,15 @@ public class OwlClausification {
                 determineExpressivity.m_hasReflexivity);
     }
 
+    /**
+     * Creates an atom in the Hermit internal format such that the variables
+     * automatically reflect whether the role was an inverse role or not.
+     * 
+     * @param objectProperty
+     * @param first
+     * @param second
+     * @return
+     */
     protected static Atom getAbstractRoleAtom(
             OWLObjectPropertyExpression objectProperty,
             org.semanticweb.HermiT.model.Term first,
@@ -216,6 +251,33 @@ public class OwlClausification {
                     "Internal error: unsupported type of object property!");
     }
 
+    /**
+     * Creates a concrete role (data property) atom in the Hermit internal 
+     * format.
+     * @param dataProperty the data property/concrete role
+     * @param first its term
+     * @param second its second term
+     * @return an atom
+     */
+    protected static Atom getDataPropertyAtom(
+            OWLDataPropertyExpression dataProperty,
+            org.semanticweb.HermiT.model.Term first,
+            org.semanticweb.HermiT.model.Term second) {
+        if (dataProperty instanceof OWLDataProperty) {
+            AtomicConcreteRole property = AtomicConcreteRole.create(((OWLDataProperty) dataProperty).getURI().toString());
+            return Atom.create(property,
+                    new org.semanticweb.HermiT.model.Term[] { first, second });
+        } else
+            throw new IllegalStateException(
+                    "Internal error: unsupported type of data property!");
+    }
+
+    /**
+     * Returns an atomic concept or a negated atomic concept in the Hermit
+     * internal format, which are both LiteralConcept objects.
+     * @param description
+     * @return
+     */
     protected static LiteralConcept getLiteralConcept(OWLDescription description) {
         if (description instanceof OWLClass) {
             return AtomicConcept.create(((OWLClass) description).getURI().toString());
@@ -230,6 +292,11 @@ public class OwlClausification {
                     "Internal error: invalid normal form.");
     }
 
+    /**
+     * Creates an abstract role (object property) in the Hermit internal format.
+     * @param objectProperty the object property/abstract role
+     * @return an Abstract Role
+     */
     protected static AbstractRole getAbstractRole(
             OWLObjectPropertyExpression objectProperty) {
         objectProperty = objectProperty.getSimplified();
@@ -364,27 +431,84 @@ public class OwlClausification {
         }
 
         public void visit(OWLDataAllRestriction desc) {
-            throw new RuntimeException("Datatypes are not supported yet.");
-        }
-
-        public void visit(OWLDataExactCardinalityRestriction desc) {
-            throw new RuntimeException("Datatypes are not supported yet.");
-        }
-
-        public void visit(OWLDataMaxCardinalityRestriction desc) {
-            throw new RuntimeException("Datatypes are not supported yet.");
-        }
-
-        public void visit(OWLDataMinCardinalityRestriction desc) {
-            throw new RuntimeException("Datatypes are not supported yet.");
+            org.semanticweb.HermiT.model.Variable y = nextY();
+            m_bodyAtoms.add(getDataPropertyAtom(desc.getProperty(), X, y));
+            DataVisitor dataVisitor = new DataVisitor();
+            desc.getFiller().accept(dataVisitor);
+            for (DataRange dataRange : dataVisitor.getDataRanges()) {
+                m_headAtoms.add(Atom.create(dataRange,
+                        new org.semanticweb.HermiT.model.Term[] { y }));
+            }
         }
 
         public void visit(OWLDataSomeRestriction desc) {
-            throw new RuntimeException("Datatypes are not supported yet.");
+            OWLDataProperty dp = (OWLDataProperty) desc.getProperty();
+            AtomicConcreteRole property = AtomicConcreteRole.create(dp.getURI().toString());
+            DataVisitor dataVisitor = new DataVisitor();
+            desc.getFiller().accept(dataVisitor);
+            for (DataRange dataRange : dataVisitor.getDataRanges()) {
+                m_headAtoms.add(Atom.create(AtLeastConcreteRoleConcept.create(1, property,
+                        dataRange),
+                        new org.semanticweb.HermiT.model.Term[] { X }));
+            }
+        }
+
+        public void visit(OWLDataExactCardinalityRestriction desc) {
+            throw new IllegalStateException(
+                    "Internal error: invalid normal form.");
+        }
+
+        public void visit(OWLDataMaxCardinalityRestriction desc) {
+            //throw new RuntimeException("Cardinality restrictions are not yet supported for datatypes. ");
+            int number = desc.getCardinality();
+            OWLDataProperty dp = (OWLDataProperty) desc.getProperty();
+            DataVisitor dataVisitor = new DataVisitor();
+            desc.getFiller().accept(dataVisitor);
+            ensureYNotZero();
+            org.semanticweb.HermiT.model.Variable[] yVars = new org.semanticweb.HermiT.model.Variable[number + 1];
+            for (int i = 0; i < yVars.length; i++) {
+                yVars[i] = nextY();
+                m_bodyAtoms.add(getDataPropertyAtom(dp, X, yVars[i]));
+                boolean isBottom = false;
+                for (DataRange dataRange : dataVisitor.getDataRanges()) {
+                    DataRange negatedRange;
+                    if (dataRange instanceof DatatypeRestrictionNegationConcept) {
+                        negatedRange = ((DatatypeRestrictionNegationConcept) dataRange).getNegatedDatatypeRestriction();
+                        isBottom = ((DatatypeRestrictionNegationConcept) dataRange).isBottom();
+                    } else {
+                        negatedRange = new DatatypeRestrictionNegationConcept((DatatypeRestriction)dataRange); 
+                        isBottom = ((DatatypeRestriction)dataRange).isTop();
+                    }
+                    if (!isBottom) {
+                        m_headAtoms.add(Atom.create(negatedRange,
+                                new org.semanticweb.HermiT.model.Term[] { yVars[i] }));
+                    }
+                }
+            }
+            for (int i = 0; i < yVars.length; i++) {
+                for (int j = i + 1; j < yVars.length; j++) {
+                    m_headAtoms.add(Atom.create(Equality.INSTANCE,
+                            new org.semanticweb.HermiT.model.Term[] { yVars[i],
+                                    yVars[j] }));
+                }
+            }
+        }
+
+        public void visit(OWLDataMinCardinalityRestriction desc) {
+            int number = desc.getCardinality();
+            OWLDataProperty dp = (OWLDataProperty) desc.getProperty();
+            AtomicConcreteRole property = AtomicConcreteRole.create(((OWLDataProperty) dp).getURI().toString());
+            DataVisitor dataVisitor = new DataVisitor();
+            desc.getFiller().accept(dataVisitor);
+            for (DataRange dataRange : dataVisitor.getDataRanges()) {
+                m_headAtoms.add(Atom.create(AtLeastConcreteRoleConcept.create(number,
+                        property, dataRange),
+                        new org.semanticweb.HermiT.model.Term[] { X }));
+            }
         }
 
         public void visit(OWLDataValueRestriction desc) {
-            throw new RuntimeException("Datatypes are not supported yet.");
+            throw new RuntimeException("Invalid normal form.");
         }
 
         public void visit(OWLObjectAllRestriction object) {
@@ -628,6 +752,100 @@ public class OwlClausification {
         }
     }
 
+    // protected static class DataTypeVisitor extends OWLDa
+    protected static class DataVisitor implements OWLDataVisitor {
+        protected static OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+        protected static OWLDataFactory factory = man.getOWLDataFactory();
+        protected static OWLDataType integerDataType = factory.getOWLDataType(XSDVocabulary.INTEGER.getURI());
+        protected static OWLDataType stringDataType = factory.getOWLDataType(XSDVocabulary.STRING.getURI());
+        protected static OWLDataType booleanDataType = factory.getOWLDataType(XSDVocabulary.BOOLEAN.getURI());
+        protected static OWLDataType literalDataType = factory.getOWLDataType(URI.create(Namespaces.RDFS_NS
+                + "Literal"));
+
+        protected boolean isNegated = false;
+        protected List<DataRange> dataRanges;
+
+        public DataVisitor() {
+            dataRanges = new ArrayList<DataRange>();
+        }
+
+        public void visit(OWLDataType dataType) {
+            if (integerDataType.equals(dataType) || stringDataType.equals(dataType) || literalDataType.equals(dataType)) {
+                dataRanges.add(new DatatypeRestriction(dataType.getURI()));
+            } else {
+                throw new RuntimeException("Unsupported datatype.");
+            }
+        }
+
+        public void visit(OWLDataComplementOf dataComplementOf) {
+            OWLDataRange complementedDataRange = dataComplementOf.getDataRange();
+            complementedDataRange.accept(this);
+            List<DataRange> negatedRanges = new ArrayList<DataRange>();
+            for (DataRange range : dataRanges) {
+                if (range instanceof DatatypeRestriction) {
+                    negatedRanges.add(new DatatypeRestrictionNegationConcept((DatatypeRestriction)range));
+                } else {
+                    negatedRanges.add(((DatatypeRestrictionNegationConcept)range).getNegatedDatatypeRestriction());
+                }
+            }
+            dataRanges = negatedRanges;
+        }
+
+        public void visit(OWLDataOneOf dataOneOf) {
+            Set<OWLConstant> constants = dataOneOf.getValues();
+            for (OWLConstant constant : constants) {
+                if (constant.isTyped()) {
+                    constant.asOWLTypedConstant().accept(this);
+                }  else {
+                    throw new RuntimeException("Untyped datatype found " + constant);
+                }
+            }
+        }
+
+        public void visit(OWLDataRangeRestriction rangeRestriction) {
+            if (!rangeRestriction.getFacetRestrictions().isEmpty()) {
+                throw new RuntimeException("Facet restrictions are not yet supported");
+            } else {
+                OWLDataRange range = rangeRestriction.getDataRange();
+                range.accept(this);
+            }
+//            for (OWLDataRangeFacetRestriction facetRestriction : rangeRestriction.getFacetRestrictions()) {
+//                OWLRestrictedDataRangeFacetVocabulary facet = facetRestriction.getFacet();
+//                OWLTypedConstant constant = facetRestriction.getFacetValue();
+//                switch (facet) {
+//                case FRACTION_DIGITS: {
+////                    dataRange.addFacet(DataRange.Facets.FRACTION_DIGITS,
+////                            constant);
+//                } break;
+//                default:
+//                    throw new IllegalArgumentException("Unsupported facet.");
+//                }
+//            }
+        }
+
+        public void visit(OWLTypedConstant typedConstant) {
+            if (integerDataType.equals(typedConstant.getDataType()) || stringDataType.equals(typedConstant.getDataType())) {
+                List<String> equalsValues = new ArrayList<String>();
+                equalsValues.add(typedConstant.getLiteral());
+                dataRanges.add(new DatatypeRestriction(typedConstant.getDataType().getURI(), equalsValues));
+            } else {
+                throw new RuntimeException("Parsed typed constant of an unsupported data type " + typedConstant);
+            }
+        }
+
+        public void visit(OWLUntypedConstant untypedConstant) {
+            throw new RuntimeException("Parsed untyped constant " + untypedConstant);
+        }
+
+        public void visit(OWLDataRangeFacetRestriction facetRestriction) {
+            throw new RuntimeException("Data range facet restrictions are not yet supported. ");
+        }
+
+        public List<DataRange> getDataRanges() {
+            return dataRanges;
+        }
+    }
+
     protected static class FactClausifier extends
             org.semanticweb.owl.util.OWLAxiomVisitorAdapter {
         protected final Set<Atom> m_positiveFacts;
@@ -718,6 +936,7 @@ public class OwlClausification {
         protected boolean m_hasInverseRoles;
         protected boolean m_hasNominals;
         protected boolean m_hasReflexivity;
+        protected boolean m_hasDatatypes;
 
         protected void checkProperty(OWLObjectPropertyExpression p) {
             if (p instanceof OWLObjectPropertyInverse)
@@ -725,27 +944,27 @@ public class OwlClausification {
         }
 
         public void visit(OWLDataAllRestriction desc) {
-            throw new RuntimeException("Datatypes are not supported yet.");
+            m_hasDatatypes = true;
         }
 
         public void visit(OWLDataExactCardinalityRestriction desc) {
-            throw new RuntimeException("Datatypes are not supported yet.");
+            m_hasDatatypes = true;
         }
 
         public void visit(OWLDataMaxCardinalityRestriction desc) {
-            throw new RuntimeException("Datatypes are not supported yet.");
+            m_hasDatatypes = true;
         }
 
         public void visit(OWLDataMinCardinalityRestriction desc) {
-            throw new RuntimeException("Datatypes are not supported yet.");
+            m_hasDatatypes = true;
         }
 
         public void visit(OWLDataSomeRestriction desc) {
-            throw new RuntimeException("Datatypes are not supported yet.");
+            m_hasDatatypes = true;
         }
 
         public void visit(OWLDataValueRestriction desc) {
-            throw new RuntimeException("Datatypes are not supported yet.");
+            m_hasDatatypes = true;
         }
 
         public void visit(OWLClass object) {

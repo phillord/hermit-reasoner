@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.model.AbstractRole;
 import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
+import org.semanticweb.HermiT.model.AtLeastConcreteRoleConcept;
 import org.semanticweb.HermiT.model.AtomicAbstractRole;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.ExistentialConcept;
@@ -165,10 +166,10 @@ public final class ExistentialExpansionManager implements Serializable {
                                                     cardinality)) {
                     return permanent ? SatType.PERMANENTLY_SATISFIED
                                      : SatType.CURRENTLY_SATISFIED;
-                }
             }
-            return SatType.NOT_SATISFIED;
         }
+            return SatType.NOT_SATISFIED;
+    }
     }
     
     private boolean containsSubsetOfNUnequalNodes(Node forNode,List<Node> nodes,int startAt,List<Node> selectedNodes,int cardinality) {
@@ -362,4 +363,43 @@ public final class ExistentialExpansionManager implements Serializable {
         }
         return result;
     }
+    public boolean isSatisfied(AtLeastConcreteRoleConcept atLeastConcreteRoleConcept,Node forNode) {
+        // TODO: Write me
+        return false;
+    }
+    /**
+     * Creates a new node in the tableau if at least concept that caused the 
+     * expansion is for cardinality 1. If it is not of cardinality 1 and the 
+     * role in the at most concept is a functional role, it sets a clash in the 
+     * extension manager. 
+     * @param atLeastConcreteRoleConcept
+     * @param forNode
+     * @return true if the at least cardinality is 1 (causes an expansion) or it 
+     * is greater than one but the role is functional (causes a clash) and false 
+     * otherwise.
+     */
+    public boolean tryFunctionalExpansion(AtLeastConcreteRoleConcept atLeastConcreteRoleConcept,Node forNode) {
+        // TODO: Write me
+        return false;
+    }
+    /**
+     * Does a normal expansion of the tableau (ABox) for an at least concept. 
+     * @param atLeastConcreteRoleConcept
+     * @param forNode
+     */
+    public void doNormalExpansion(AtLeastConcreteRoleConcept atLeastConcreteRoleConcept,Node forNode) {
+        // TODO: Write me
+    }
+    /**
+     * Expands an at least concept by first trying a functional expansion (if 
+     * the cardinality is 1 or the role is functional) and a normal expansion 
+     * otherwise. 
+     * @param atLeastConcreteRoleConcept
+     * @param forNode
+     */
+    public void expand(AtLeastConcreteRoleConcept atLeastConcreteRoleConcept,Node forNode) {
+        if (!tryFunctionalExpansion(atLeastConcreteRoleConcept,forNode))
+            doNormalExpansion(atLeastConcreteRoleConcept,forNode);
+    }
+
 }
