@@ -218,6 +218,7 @@
 
     <target name="test" depends="compiletest">
         <java classname="org.semanticweb.HermiT.tableau.HermiTSuite" fork="true">
+			<jvmarg value="-enableassertions"/>
             <classpath>
          	    <pathelement location="${testclassdir}"/>
             </classpath>

@@ -84,11 +84,8 @@ public class TupleTableFullIndex implements Serializable {
     }
     public boolean removeTuple(int tupleIndex) {
         int hashCode=0;
-        Object[] objects=m_tupleTable.m_pages[tupleIndex / TupleTable.PAGE_SIZE].m_objects;
-        int targetIndex=(tupleIndex % TupleTable.PAGE_SIZE)*m_tupleTable.m_arity;
-        for (int index=m_indexedArity;index>0;--index) {
-            hashCode+=objects[targetIndex].hashCode();
-            targetIndex++;
+        for (int i = 0; i < m_indexedArity; ++i) {
+            hashCode += m_tupleTable.getTupleObject(tupleIndex, i).hashCode();
         }
         int lastEntry=-1;
         int entryIndex=getBucketIndex(hashCode,m_buckets.length);

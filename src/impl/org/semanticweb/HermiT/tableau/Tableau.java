@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.semanticweb.HermiT.existentials.ExistentialsExpansionStrategy;
+import org.semanticweb.HermiT.existentials.ExpansionStrategy;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
@@ -30,7 +30,7 @@ public final class Tableau implements Serializable {
     private static final long serialVersionUID=-28982363158925221L;
 
     protected final TableauMonitor m_tableauMonitor;
-    protected final ExistentialsExpansionStrategy m_existentialsExpansionStrategy;
+    protected final ExpansionStrategy m_existentialsExpansionStrategy;
     protected final DLOntology m_dlOntology;
     protected final Map<String,Object> m_parameters;
     protected final DependencySetFactory m_dependencySetFactory;
@@ -59,7 +59,10 @@ public final class Tableau implements Serializable {
     protected GroundDisjunction m_firstUnprocessedGroundDisjunction;
     protected Node m_checkedNode;
 
-    public Tableau(TableauMonitor tableauMonitor,ExistentialsExpansionStrategy existentialsExpansionStrategy,DLOntology dlOntology,Map<String,Object> parameters) {
+    public Tableau(TableauMonitor tableauMonitor,
+                   ExpansionStrategy existentialsExpansionStrategy,
+                   DLOntology dlOntology,
+                   Map<String, Object> parameters) {
         m_parameters=parameters;
         m_tableauMonitor=tableauMonitor;
         m_existentialsExpansionStrategy=existentialsExpansionStrategy;
@@ -90,7 +93,7 @@ public final class Tableau implements Serializable {
     public TableauMonitor getTableauMonitor() {
         return m_tableauMonitor;
     }
-    public ExistentialsExpansionStrategy getExistentialsExpansionStrategy() {
+    public ExpansionStrategy getExistentialsExpansionStrategy() {
         return m_existentialsExpansionStrategy;
     }
     public boolean isDeterministic() {
@@ -549,7 +552,7 @@ public final class Tableau implements Serializable {
         else
             return m_existentialConceptsBuffers.remove(m_existentialConceptsBuffers.size()-1);
     }
-    protected void putExistentialConceptsBuffer(List<ExistentialConcept> buffer) {
+    public void putExistentialConceptsBuffer(List<ExistentialConcept> buffer) {
         assert buffer.isEmpty();
         m_existentialConceptsBuffers.add(buffer);
     }

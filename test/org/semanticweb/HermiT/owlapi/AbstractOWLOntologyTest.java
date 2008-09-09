@@ -21,7 +21,7 @@ import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.blocking.DirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
-import org.semanticweb.HermiT.existentials.ExistentialsExpansionStrategy;
+import org.semanticweb.HermiT.existentials.ExpansionStrategy;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
@@ -109,9 +109,9 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
                 directBlockingChecker);
         BlockingStrategy blockingStrategy = new AnywhereBlocking(
                 directBlockingChecker, blockingSignatureCache);
-        ExistentialsExpansionStrategy existentialsExpansionStrategy = new CreationOrderStrategy(
+        ExpansionStrategy ExpansionStrategy = new CreationOrderStrategy(
                 blockingStrategy);
-        return new Tableau(null, existentialsExpansionStrategy, dlOntology,
+        return new Tableau(null, ExpansionStrategy, dlOntology,
                 new HashMap<String, Object>());
     }
 

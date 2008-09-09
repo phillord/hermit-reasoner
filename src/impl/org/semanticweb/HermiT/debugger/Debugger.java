@@ -935,7 +935,7 @@ public class Debugger extends TableauMonitorForwarder {
             m_output.println("Node with ID '"+nodeID+"' not found.");
             return;
         }
-        ExistentialsExpansionStrategy strategy=m_tableau.getExistentialsExpansionStrategy();
+        ExpansionStrategy strategy=m_tableau.getExistentialsExpansionStrategy();
         if (strategy instanceof IndividualReuseStrategy) {
             IndividualReuseStrategy reuseStrategy=(IndividualReuseStrategy)strategy;
             LiteralConcept conceptForNode=reuseStrategy.getConceptForNode(node);

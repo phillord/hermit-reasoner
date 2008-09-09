@@ -16,7 +16,7 @@ import java.util.ArrayList;
  * only actual processing of existentials in need of expansion to subclasses.
  */
 public abstract class StrategyBase
-    implements ExistentialsExpansionStrategy {
+    implements ExpansionStrategy {
 
     protected final BlockingStrategy blockingStrategy;
     protected Tableau tableau;

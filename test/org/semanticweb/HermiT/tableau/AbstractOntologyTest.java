@@ -13,7 +13,7 @@ import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.blocking.DirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
-import org.semanticweb.HermiT.existentials.ExistentialsExpansionStrategy;
+import org.semanticweb.HermiT.existentials.ExpansionStrategy;
 import org.semanticweb.HermiT.hierarchy.SubsumptionHierarchy;
 import org.semanticweb.HermiT.hierarchy.TableauSubsumptionChecker;
 import org.semanticweb.HermiT.kaon2.structural.Clausification;
@@ -208,9 +208,9 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
                 directBlockingChecker);
         BlockingStrategy blockingStrategy = new AnywhereBlocking(
                 directBlockingChecker, blockingSignatureCache);
-        ExistentialsExpansionStrategy existentialsExpansionStrategy = new CreationOrderStrategy(
+        ExpansionStrategy ExpansionStrategy = new CreationOrderStrategy(
                 blockingStrategy);
-        return new Tableau(getTableauMonitor(), existentialsExpansionStrategy,
+        return new Tableau(getTableauMonitor(), ExpansionStrategy,
                 dlOntology, new HashMap<String, Object>());
     }
 

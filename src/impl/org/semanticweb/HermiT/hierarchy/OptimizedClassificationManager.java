@@ -51,7 +51,7 @@ public class OptimizedClassificationManager {
         }
     }
     protected void findSCCsStartingFrom(Node node) {
-        assert m_stack.isEmpty();
+        // assert m_stack.isEmpty(); TODO: figure out what this assertion meant and whether it should work...
         node.m_index=m_index;
         node.m_lowlink=m_index;
         node.m_inStack=true;

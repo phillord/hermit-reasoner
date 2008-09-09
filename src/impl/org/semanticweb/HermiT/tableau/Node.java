@@ -18,7 +18,7 @@ import org.semanticweb.HermiT.model.ExistentialConcept;
  */
 public final class Node implements Serializable {
     private static final long serialVersionUID=-2549229429321484690L;
-    protected static List<ExistentialConcept> NO_EXISTENTIALS=Collections.emptyList();
+    private static List<ExistentialConcept> NO_EXISTENTIALS=Collections.emptyList();
     public static final Node CACHE_BLOCKER=new Node(null);
 
     public static enum NodeState { ACTIVE,MERGED,PRUNED }
@@ -39,7 +39,7 @@ public final class Node implements Serializable {
     protected int m_toParentLabelHashCode;
     protected Set<AtomicAbstractRole> m_toSelfLabel;
     protected int m_toSelfLabelHashCode;
-    protected List<ExistentialConcept> m_unprocessedExistentials;
+    private List<ExistentialConcept> m_unprocessedExistentials;
     protected Node m_previousTableauNode;
     protected Node m_nextTableauNode;
     protected Node m_previousMergedOrPrunedNode;

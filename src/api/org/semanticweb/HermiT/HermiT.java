@@ -43,9 +43,9 @@ import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.PairwiseDirectBlockingCheckerWithReflexivity;
 import org.semanticweb.HermiT.blocking.SingleDirectBlockingChecker;
 import org.semanticweb.HermiT.debugger.Debugger;
+import org.semanticweb.HermiT.existentials.ExpansionStrategy;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
 import org.semanticweb.HermiT.existentials.DepthFirstStrategy;
-import org.semanticweb.HermiT.existentials.ExistentialsExpansionStrategy;
 import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
 import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
 import org.semanticweb.HermiT.hierarchy.NaiveHierarchyPosition;
@@ -568,7 +568,7 @@ public class HermiT implements Serializable {
                 "Unknown blocking strategy type.");
         }
         
-        ExistentialsExpansionStrategy existentialsExpansionStrategy = null;
+        ExpansionStrategy existentialsExpansionStrategy = null;
         switch (m_config.existentialStrategyType) {
         case CREATION_ORDER:
             existentialsExpansionStrategy =

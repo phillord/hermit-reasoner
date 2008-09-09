@@ -19,32 +19,31 @@ import org.semanticweb.HermiT.model.InverseAbstractRole;
 import org.semanticweb.HermiT.model.LiteralConcept;
 
 /**
- * Manages the expansion of existentials (at least restrictions in fact) in a 
- * tableau. 
+ * Manages the expansion of at least restrictions in a tableau. 
  */
 public final class ExistentialExpansionManager implements Serializable {
     private static final long serialVersionUID=4794168582297181623L;
 
-    protected final Tableau m_tableau;
-    protected final ExtensionManager m_extensionManager;
+    private final Tableau m_tableau;
+    private final ExtensionManager m_extensionManager;
     
     /** Table of existentials which have already been expanded.
       * 
       * This is used in backtracking to determine what existentials need
       * to be added back to nodes.
      */
-    protected final TupleTable m_expandedExistentials;
+    private final TupleTable m_expandedExistentials;
 
     // Local caches to avoid allocating new objects:
     private final Object[] m_auxiliaryTuple;
     private final List<Node> m_auxiliaryNodes1;
     private final List<Node> m_auxiliaryNodes2;
 
-    protected final ExtensionTable.Retrieval m_ternaryExtensionTableSearch01Bound;
-    protected final ExtensionTable.Retrieval m_ternaryExtensionTableSearch02Bound;
-    protected final Map<AbstractRole,AbstractRole[]> m_functionalAbstractRoles;
-    protected final UnionDependencySet m_binaryUnionDependencySet;
-    protected int[] m_indicesByBranchingPoint;
+    private final ExtensionTable.Retrieval m_ternaryExtensionTableSearch01Bound;
+    private final ExtensionTable.Retrieval m_ternaryExtensionTableSearch02Bound;
+    private final Map<AbstractRole,AbstractRole[]> m_functionalAbstractRoles;
+    private final UnionDependencySet m_binaryUnionDependencySet;
+    private int[] m_indicesByBranchingPoint;
     
     public ExistentialExpansionManager(Tableau tableau) {
         m_tableau=tableau;
@@ -59,15 +58,14 @@ public final class ExistentialExpansionManager implements Serializable {
         m_binaryUnionDependencySet=new UnionDependencySet(2);
         m_indicesByBranchingPoint=new int[2];
     }
-    public AbstractRole[] getEquivalentRolesDueToFunctionality(AbstractRole abstractRole) {
-        return m_functionalAbstractRoles.get(abstractRole);
-    }
+
     public void markExistentialProcessed(ExistentialConcept existentialConcept,Node forNode) {
         m_auxiliaryTuple[0]=existentialConcept;
         m_auxiliaryTuple[1]=forNode;
         m_expandedExistentials.addTuple(m_auxiliaryTuple);
         forNode.removeFromUnprocessedExistentials(existentialConcept);
     }
+
     public void branchingPointPushed() {
         int start=m_tableau.getCurrentBranchingPoint().m_level;
         int requiredSize=start+1;
@@ -173,7 +171,7 @@ public final class ExistentialExpansionManager implements Serializable {
         }
     }
     
-    protected boolean containsSubsetOfNUnequalNodes(Node forNode,List<Node> nodes,int startAt,List<Node> selectedNodes,int cardinality) {
+    private boolean containsSubsetOfNUnequalNodes(Node forNode,List<Node> nodes,int startAt,List<Node> selectedNodes,int cardinality) {
         if (selectedNodes.size()==cardinality) {
             // Check the condition on safe successors (condition 3.2 of the \geq-rule)
             if (forNode.getNodeType()!=NodeType.TREE_NODE) {
@@ -199,7 +197,7 @@ public final class ExistentialExpansionManager implements Serializable {
             return false;
         }
     }
-    protected boolean getFunctionalExpansionNode(AbstractRole abstractRole,Node forNode,Object[] result) {
+    private boolean getFunctionalExpansionNode(AbstractRole abstractRole,Node forNode,Object[] result) {
         AbstractRole[] relevantAbstractRoles=m_functionalAbstractRoles.get(abstractRole);
         if (relevantAbstractRoles!=null) {
             for (AbstractRole relevantAbstractRole : relevantAbstractRoles) {
@@ -232,8 +230,6 @@ public final class ExistentialExpansionManager implements Serializable {
      * expansion is for cardinality 1. If it is not of cardinality 1 and the 
      * role in the at most concept is a functional role, it sets a clash in the 
      * extension manager. 
-     * @param atLeastAbstractRoleConcept
-     * @param forNode
      * @return true if the at least cardinality is 1 (causes an expansion) or it 
      * is greater than one but the role is functional (causes a clash) and false 
      * otherwise.
@@ -310,7 +306,7 @@ public final class ExistentialExpansionManager implements Serializable {
         if (!tryFunctionalExpansion(atLeastAbstractRoleConcept,forNode))
             doNormalExpansion(atLeastAbstractRoleConcept,forNode);
     }
-    protected Map<AbstractRole,AbstractRole[]> buildFunctionalRoles() {
+    private Map<AbstractRole,AbstractRole[]> buildFunctionalRoles() {
         Set<AbstractRole> functionalRoles=new HashSet<AbstractRole>();
         ObjectHierarchy<AbstractRole> roleHierarchy=new ObjectHierarchy<AbstractRole>();
         for (DLClause dlClause : m_tableau.getDLOntology().getDLClauses()) {

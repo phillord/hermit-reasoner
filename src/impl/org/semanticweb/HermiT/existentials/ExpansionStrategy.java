@@ -12,7 +12,7 @@ import org.semanticweb.HermiT.tableau.*;
  * are free to provide their own node-introduction implementations (but be
  * careful---it's tough to get right!)
  */
-public interface ExistentialsExpansionStrategy {
+public interface ExpansionStrategy {
     void initialize(Tableau tableau);
     void clear();
 
