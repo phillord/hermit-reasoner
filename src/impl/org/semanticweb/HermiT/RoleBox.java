@@ -1,9 +1,9 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT;
 
-import org.semanticweb.HermiT.model.AbstractRole;
-import org.semanticweb.HermiT.model.AtomicAbstractRole;
-import org.semanticweb.HermiT.model.InverseAbstractRole;
+import org.semanticweb.HermiT.model.Role;
+import org.semanticweb.HermiT.model.AtomicRole;
+import org.semanticweb.HermiT.model.InverseRole;
 
 import java.util.Collection;
 import java.util.Map;
@@ -22,19 +22,19 @@ public class RoleBox {
         }
     }
     
-    private Map<AbstractRole, AbstractRole> m_canonicalNames;
-    private Set<AbstractRole> m_symmetricRoles;
+    private Map<Role, Role> m_canonicalNames;
+    private Set<Role> m_symmetricRoles;
     
-    private Map<Integer, Map<Integer, Set<AbstractRole>>> m_transitions;
-    private Map<AbstractRole, Integer> m_initialStates;
+    private Map<Integer, Map<Integer, Set<Role>>> m_transitions;
+    private Map<Role, Integer> m_initialStates;
     private Set<Integer> m_acceptingStates;
     
-    protected AbstractRole canonical(AbstractRole r) {
-        AbstractRole out = m_canonicalNames.get(r);
+    protected Role canonical(Role r) {
+        Role out = m_canonicalNames.get(r);
         return (out == null ? r : out);
     }
     
-    public boolean isComplex(AbstractRole r) {
+    public boolean isComplex(Role r) {
         return m_initialStates.containsKey(canonical(r));
     }
     
@@ -44,23 +44,23 @@ public class RoleBox {
     *                       i.e. if R is transitive then [R, R] would be a member of the
     *                       collection associated with R.
     */
-    public RoleBox(Map<AbstractRole, Set<List<AbstractRole>>> definitions) {
-        Set<AbstractRole> complexRoles = new HashSet<AbstractRole>();
-        m_canonicalNames = new HashMap<AbstractRole, AbstractRole>();
-        m_symmetricRoles = new HashSet<AbstractRole>();
+    public RoleBox(Map<Role, Set<List<Role>>> definitions) {
+        Set<Role> complexRoles = new HashSet<Role>();
+        m_canonicalNames = new HashMap<Role, Role>();
+        m_symmetricRoles = new HashSet<Role>();
         
         // Separate simple inclusions and identify obvious complex roles:
-        Map<AbstractRole, Set<AbstractRole>> superRoles = new HashMap<AbstractRole, Set<AbstractRole>>();
-        for (AbstractRole r : definitions.keySet()) {
-            for (List<AbstractRole> rolePath : definitions.get(r)) {
+        Map<Role, Set<Role>> superRoles = new HashMap<Role, Set<Role>>();
+        for (Role r : definitions.keySet()) {
+            for (List<Role> rolePath : definitions.get(r)) {
                 if (rolePath != null) {
                     // TODO: role paths of length 0 are reflexivity?
                     if (rolePath.size() > 1) complexRoles.add(r);
                     else if (rolePath.size() == 1) {
-                        for (AbstractRole s : rolePath) {
-                            Set<AbstractRole> s_supers = superRoles.get(s);
+                        for (Role s : rolePath) {
+                            Set<Role> s_supers = superRoles.get(s);
                             if (s_supers == null) {
-                                s_supers = new HashSet<AbstractRole>();
+                                s_supers = new HashSet<Role>();
                                 superRoles.put(s, s_supers);
                             }
                             else s_supers.add(r);
@@ -70,31 +70,31 @@ public class RoleBox {
             }
         }
         // Transitively close supers:
-        Queue<AbstractRole> q;
-        for (Map.Entry<AbstractRole, Set<AbstractRole>> r : superRoles.entrySet()) {
-            q = new LinkedList<AbstractRole>(r.getValue());
+        Queue<Role> q;
+        for (Map.Entry<Role, Set<Role>> r : superRoles.entrySet()) {
+            q = new LinkedList<Role>(r.getValue());
             while (!q.isEmpty()) {
-                AbstractRole s = q.remove();
-                Set<AbstractRole> s_supers = superRoles.get(s);
-                if (s_supers != null) for (AbstractRole t : s_supers) {
+                Role s = q.remove();
+                Set<Role> s_supers = superRoles.get(s);
+                if (s_supers != null) for (Role t : s_supers) {
                     if (r.getValue().add(t)) q.add(t);
                 }
             }
         }
         // Identify role equivalence classes:
-        Map<AbstractRole, Set<AbstractRole>> equivalencies = new HashMap<AbstractRole, Set<AbstractRole>>();
-        for (Map.Entry<AbstractRole, Set<AbstractRole>> r : superRoles.entrySet()) {
-            Set<AbstractRole> r_equiv = equivalencies.get(r.getKey());
+        Map<Role, Set<Role>> equivalencies = new HashMap<Role, Set<Role>>();
+        for (Map.Entry<Role, Set<Role>> r : superRoles.entrySet()) {
+            Set<Role> r_equiv = equivalencies.get(r.getKey());
             if (r_equiv == null) {
-                r_equiv = new HashSet<AbstractRole>();
+                r_equiv = new HashSet<Role>();
                 equivalencies.put(r.getKey(), r_equiv);
             }
             else r_equiv.add(r.getKey());
-            for (AbstractRole s : r.getValue()) {
-                Set<AbstractRole> s_supers = superRoles.get(s);
-                if (s == r.getKey().getInverseRole() ||
+            for (Role s : r.getValue()) {
+                Set<Role> s_supers = superRoles.get(s);
+                if (s == r.getKey().getInverse() ||
                     (s_supers != null && s_supers.contains(r.getKey()))) {
-                    Set<AbstractRole> s_equiv = equivalencies.get(s);
+                    Set<Role> s_equiv = equivalencies.get(s);
                     if (s_equiv == null) {
                         s_equiv = r_equiv;
                         equivalencies.put(s, s_equiv);
@@ -108,58 +108,58 @@ public class RoleBox {
             }
         }
         // Pick canonical names and identify symmetric roles:
-        for (Map.Entry<AbstractRole, Set<AbstractRole>> e : equivalencies.entrySet()) {
+        for (Map.Entry<Role, Set<Role>> e : equivalencies.entrySet()) {
             // We'll end up doing this several times for each equivalence class;
             // the last key in map order will end up as the canonical name:
-            for (AbstractRole r : e.getValue()) {
+            for (Role r : e.getValue()) {
                 m_canonicalNames.put(r, e.getKey());
-                m_canonicalNames.put(r.getInverseRole(), e.getKey().getInverseRole());
-                if (e.getValue().contains(r.getInverseRole())) m_symmetricRoles.add(e.getKey());
+                m_canonicalNames.put(r.getInverse(), e.getKey().getInverse());
+                if (e.getValue().contains(r.getInverse())) m_symmetricRoles.add(e.getKey());
             }
         }
         
         // Identify complex roles:
-        q = new LinkedList<AbstractRole>(complexRoles);
+        q = new LinkedList<Role>(complexRoles);
         complexRoles.clear();
         while (!q.isEmpty()) {
-            AbstractRole r = q.remove();
+            Role r = q.remove();
             if (complexRoles.add(r)) {
                 // All super-roles are also complex (this will also get equivalents):
-                Set<AbstractRole> supers = superRoles.get(r);
+                Set<Role> supers = superRoles.get(r);
                 if (supers != null) {
-                    for (AbstractRole s : supers) q.add(s);
+                    for (Role s : supers) q.add(s);
                 }
                 // A complex role's inverse is complex:
-                q.add(r.getInverseRole());
+                q.add(r.getInverse());
             }
         }
 
         // Build a "sanitized" set of RIAs using canonical names for all roles:
-        Map<AbstractRole, Set<List<AbstractRole>>> sanitized_definitions
-             = new HashMap<AbstractRole, Set<List<AbstractRole>>>();
-        for (AbstractRole r : definitions.keySet()) {
+        Map<Role, Set<List<Role>>> sanitized_definitions
+             = new HashMap<Role, Set<List<Role>>>();
+        for (Role r : definitions.keySet()) {
             // Only bother building automata for complex roles:
             if (complexRoles.contains(r)) {
-                AbstractRole canonical_r = canonical(r);
-                boolean isInverse = (canonical_r instanceof InverseAbstractRole);
-                if (isInverse) canonical_r = canonical_r.getInverseRole();
-                assert canonical_r instanceof AtomicAbstractRole;
+                Role canonical_r = canonical(r);
+                boolean isInverse = (canonical_r instanceof InverseRole);
+                if (isInverse) canonical_r = canonical_r.getInverse();
+                assert canonical_r instanceof AtomicRole;
                 assert canonical_r == canonical(canonical_r);
-                Set<List<AbstractRole>> newDefs = sanitized_definitions.get(canonical_r);
+                Set<List<Role>> newDefs = sanitized_definitions.get(canonical_r);
                 if (newDefs == null) {
-                    newDefs = new HashSet<List<AbstractRole>>();
+                    newDefs = new HashSet<List<Role>>();
                     sanitized_definitions.put(canonical_r, newDefs);
                 }
-                for (List<AbstractRole> oldPath : definitions.get(r)) {
-                    LinkedList<AbstractRole> newPath = new LinkedList<AbstractRole>();
-                    for (AbstractRole s : oldPath) {
-                        if (isInverse) newPath.addFirst(canonical(s.getInverseRole()));
+                for (List<Role> oldPath : definitions.get(r)) {
+                    LinkedList<Role> newPath = new LinkedList<Role>();
+                    for (Role s : oldPath) {
+                        if (isInverse) newPath.addFirst(canonical(s.getInverse()));
                         else newPath.addLast(canonical(s));
                     }
                     // Only add non-tautological definitions:
                     if (!(newPath.size() == 1 && newPath.contains(canonical_r)) &&
                         // ignore symmetries as well. (we pass them explicitly)
-                        !(newPath.size() == 1 && newPath.contains(canonical_r.getInverseRole()))) {
+                        !(newPath.size() == 1 && newPath.contains(canonical_r.getInverse()))) {
                         newDefs.add(newPath);
                     }
                 }
@@ -170,33 +170,33 @@ public class RoleBox {
         RoleAutomaton a =
             RoleAutomaton.combineAutomata(RoleAutomaton.makeAutomata(sanitized_definitions, m_symmetricRoles));
         for (RoleAutomaton.Transition t : a.m_transitions) {
-            Map<Integer, Set<AbstractRole>> m = m_transitions.get(t.x.i.n);
+            Map<Integer, Set<Role>> m = m_transitions.get(t.x.i.n);
             if (m == null) {
-                m = new HashMap<Integer, Set<AbstractRole>>();
+                m = new HashMap<Integer, Set<Role>>();
                 m_transitions.put(t.x.i.n, m);
             }
-            Set<AbstractRole> s = m.get(t.x.f.n);
+            Set<Role> s = m.get(t.x.f.n);
             if (s == null) {
-                s = new HashSet<AbstractRole>();
+                s = new HashSet<Role>();
                 m.put(t.x.f.n, s);
             }
             s.add(t.r);
         }
-        m_initialStates = new HashMap<AbstractRole, Integer>();
-        for (Map.Entry<Integer, Set<AbstractRole>> e : m_transitions.get(new Integer(0)).entrySet()) {
-            for (AbstractRole r : e.getValue()) {
+        m_initialStates = new HashMap<Role, Integer>();
+        for (Map.Entry<Integer, Set<Role>> e : m_transitions.get(new Integer(0)).entrySet()) {
+            for (Role r : e.getValue()) {
                 assert !m_initialStates.containsKey(r);
                 m_initialStates.put(r, e.getKey());
             }
         }
-        for (AbstractRole r : complexRoles) assert m_initialStates.containsKey(canonical(r));
+        for (Role r : complexRoles) assert m_initialStates.containsKey(canonical(r));
         m_acceptingStates = new HashSet<Integer>();
         m_acceptingStates.add(a.finalState().n);
     }
 
     /** The callback interface for the rewriteRole method. */
     public interface RoleRewriter {
-        public void addTransition(Integer curState, AbstractRole role, Integer destState);
+        public void addTransition(Integer curState, Role role, Integer destState);
         public void finalState(Integer state);
     }
     /** Uses the provided rewriter to describe the role paths which induce a given role.
@@ -207,7 +207,7 @@ public class RoleBox {
     *
     *   @return     The initial state of the automaton for the given role.
     */
-    public Integer rewriteRole(AbstractRole role, RoleRewriter rewriter, Set<Integer> visited) {
+    public Integer rewriteRole(Role role, RoleRewriter rewriter, Set<Integer> visited) {
         assert isComplex(role);
         if (visited == null) visited = new HashSet<Integer>();
         Integer i = m_initialStates.get(role);
@@ -216,10 +216,10 @@ public class RoleBox {
         while (!q.isEmpty()) {
             Integer curState = q.remove();
             if (!visited.contains(curState)) {
-                for (Map.Entry<Integer, Set<AbstractRole>> e
+                for (Map.Entry<Integer, Set<Role>> e
                         : m_transitions.get(curState).entrySet()) {
                     q.add(e.getKey());
-                    for (AbstractRole r : e.getValue()) {
+                    for (Role r : e.getValue()) {
                         rewriter.addTransition(curState, r, e.getKey());
                     }
                     if (m_acceptingStates.contains(e.getKey())) {
@@ -251,8 +251,8 @@ class RoleAutomaton {
     }
     static final class Transition { // subclasses would break equals()
         final StatePair x; // never null
-        final AbstractRole r; // null is the epsilon transition
-        Transition(StatePair p, AbstractRole inR) {
+        final Role r; // null is the epsilon transition
+        Transition(StatePair p, Role inR) {
             assert p != null;
             x = p;
             r = inR;
@@ -275,7 +275,7 @@ class RoleAutomaton {
     State initialState() { return m_initialAndFinal.i; }
     State finalState() { return m_initialAndFinal.f; }
     void addTransition(State a, State b) { addTransition(a, null, b); }
-    void addTransition(State a, AbstractRole r, State b) {
+    void addTransition(State a, Role r, State b) {
         m_transitions.add(new Transition(new StatePair(a, b), r));
     }
     State newState() { return new State(m_nextState++); }
@@ -290,7 +290,7 @@ class RoleAutomaton {
     StatePair addMirrored(RoleAutomaton a) { // disjoint union with a "mirrored" copy of a
         Set<Transition> transitions = (this == a ? new HashSet<Transition>(a.m_transitions) : a.m_transitions);
         for (Transition t : transitions) {
-            addTransition(new State(t.x.f.n + m_nextState), (t.r != null ? t.r.getInverseRole() : null), new State(t.x.i.n + m_nextState));
+            addTransition(new State(t.x.f.n + m_nextState), (t.r != null ? t.r.getInverse() : null), new State(t.x.i.n + m_nextState));
         }
         StatePair out = new StatePair(new State(a.m_initialAndFinal.f.n + m_nextState), new State(a.m_initialAndFinal.i.n + m_nextState));
         m_nextState += a.m_nextState;
@@ -303,11 +303,11 @@ class RoleAutomaton {
         out.addTransition(s.f, out.finalState());
         return out;
     }
-    void extendTransitions(AbstractRole r, Map<AbstractRole, RoleAutomaton> automata) {
+    void extendTransitions(Role r, Map<Role, RoleAutomaton> automata) {
         // replaces simple transitions for the role R with the entire automaton associated with R
         for (Transition t : new HashSet<Transition>(m_transitions)) {
             if (t.r != null && !t.r.equals(r)) {
-                if (t.r.equals(r.getInverseRole())) throw new RuntimeException("Roles defined in terms of their own inverses are not supported.");
+                if (t.r.equals(r.getInverse())) throw new RuntimeException("Roles defined in terms of their own inverses are not supported.");
                 RoleAutomaton a = automata.get(t.r);
                 if (a != null) {
                     StatePair p = add(automata.get(t.r));
@@ -324,18 +324,18 @@ class RoleAutomaton {
         m_initialAndFinal = new StatePair(initial, newState());
         m_transitions = new HashSet<Transition>();
     }
-    static  Collection<AbstractRole>
-        orderRoles(Map<AbstractRole, Set<List<AbstractRole>>> definitions) {
+    static  Collection<Role>
+        orderRoles(Map<Role, Set<List<Role>>> definitions) {
         // Map from a role to the roles less than it:
-        Map<AbstractRole,Set<AbstractRole>>
-            greaterEdges = new HashMap<AbstractRole,Set<AbstractRole>>();
-        if (definitions.isEmpty()) return new LinkedList<AbstractRole>();
+        Map<Role,Set<Role>>
+            greaterEdges = new HashMap<Role,Set<Role>>();
+        if (definitions.isEmpty()) return new LinkedList<Role>();
         // build partial ordering:
-        for (AbstractRole r : definitions.keySet()) {
-            greaterEdges.put(r, new HashSet<AbstractRole>());
-            for (Collection<AbstractRole> word : definitions.get(r)) {
+        for (Role r : definitions.keySet()) {
+            greaterEdges.put(r, new HashSet<Role>());
+            for (Collection<Role> word : definitions.get(r)) {
                 assert word != null;
-                AbstractRole[] w = {};
+                Role[] w = {};
                 w = word.toArray(w); // not particularly elegant
                 if (!(// ignore transitivity:
                       (w.length == 2 &&
@@ -343,7 +343,7 @@ class RoleAutomaton {
                        w[1].equals(r)) ||
                       // and symmetry:
                       (w.length == 1 &&
-                       w[0].equals(r.getInverseRole())))) {
+                       w[0].equals(r.getInverse())))) {
                     int i = 0;
                     int end = w.length;
                     // Ignore head and tail recursion, but not both:
@@ -351,33 +351,33 @@ class RoleAutomaton {
                     else if (w[end-1].equals(r)) --end;
                     while (i < end) {
                         greaterEdges.get(r).add(w[i]);
-                        greaterEdges.get(r).add(w[i++].getInverseRole());
+                        greaterEdges.get(r).add(w[i++].getInverse());
                     }
                 } // end if
             } // end for w
         } // end for r
         // produce a topological sort:
-        Map<AbstractRole,Set<AbstractRole>>
-            lessEdges = new HashMap<AbstractRole,Set<AbstractRole>>();
-        Queue<AbstractRole> q = new LinkedList<AbstractRole>();
-        for (Set<AbstractRole> set : greaterEdges.values()) {
-            for (AbstractRole r : set) lessEdges.put(r, new HashSet<AbstractRole>());
+        Map<Role,Set<Role>>
+            lessEdges = new HashMap<Role,Set<Role>>();
+        Queue<Role> q = new LinkedList<Role>();
+        for (Set<Role> set : greaterEdges.values()) {
+            for (Role r : set) lessEdges.put(r, new HashSet<Role>());
         }
-        for (Map.Entry<AbstractRole, Set<AbstractRole>> e : greaterEdges.entrySet()) {
-            for (AbstractRole s : e.getValue()) lessEdges.get(s).add(e.getKey());
+        for (Map.Entry<Role, Set<Role>> e : greaterEdges.entrySet()) {
+            for (Role s : e.getValue()) lessEdges.get(s).add(e.getKey());
             if (e.getValue().isEmpty()) q.add(e.getKey());
         }
         if (q.isEmpty()) throw new RoleBox.NotRegularException();
-        LinkedList<AbstractRole> out = new LinkedList<AbstractRole>();
+        LinkedList<Role> out = new LinkedList<Role>();
         while (!q.isEmpty()) {
-            AbstractRole r = q.remove();
+            Role r = q.remove();
             out.addLast(r);
-            for (AbstractRole s : greaterEdges.get(r)) {
+            for (Role s : greaterEdges.get(r)) {
                 assert lessEdges.get(s).contains(r);
                 lessEdges.get(s).remove(r);
             }
-            Set<AbstractRole> lessE = lessEdges.get(r);
-            if (lessE != null) for (AbstractRole s : lessE) {
+            Set<Role> lessE = lessEdges.get(r);
+            if (lessE != null) for (Role s : lessE) {
                 assert greaterEdges.get(s).contains(r);
                 greaterEdges.get(s).remove(r);
                 if (greaterEdges.get(s).isEmpty()) q.add(s);
@@ -388,15 +388,15 @@ class RoleAutomaton {
         return out;
     }
 
-    static  RoleAutomaton automatonForRole(AbstractRole r, Set<List<AbstractRole>> words, boolean isSymmetric) {
+    static  RoleAutomaton automatonForRole(Role r, Set<List<Role>> words, boolean isSymmetric) {
         RoleAutomaton out = new RoleAutomaton();
         out.addTransition(out.initialState(), r, out.finalState());
-        for (Collection<AbstractRole> w : words) {
+        for (Collection<Role> w : words) {
             State a = out.newState();
-            java.util.Iterator<AbstractRole> i = w.iterator();
+            java.util.Iterator<Role> i = w.iterator();
             assert i.hasNext() : "empty role axioms are not allowed";
-            AbstractRole s = i.next();
-            assert !(r.equals(s.getInverseRole()) && !i.hasNext()) : "symmetries should have already been extracted";
+            Role s = i.next();
+            assert !(r.equals(s.getInverse()) && !i.hasNext()) : "symmetries should have already been extracted";
             if (r.equals(s)) {
                 out.addTransition(out.finalState(), a);
                 assert i.hasNext() : "tautological axioms should have been removed";
@@ -425,18 +425,18 @@ class RoleAutomaton {
         }
         return out;
     }
-    static public Map<AbstractRole, RoleAutomaton>
-        makeAutomata(Map<AbstractRole, Set<List<AbstractRole>>> definitions,
-                     Set<AbstractRole> symmetricRoles) {
-        Map<AbstractRole, RoleAutomaton> shallowAutomata = new HashMap<AbstractRole, RoleAutomaton>();
-        for (AbstractRole r : definitions.keySet()) {
+    static public Map<Role, RoleAutomaton>
+        makeAutomata(Map<Role, Set<List<Role>>> definitions,
+                     Set<Role> symmetricRoles) {
+        Map<Role, RoleAutomaton> shallowAutomata = new HashMap<Role, RoleAutomaton>();
+        for (Role r : definitions.keySet()) {
             shallowAutomata.put(r, automatonForRole(r, definitions.get(r), symmetricRoles.contains(r)));
         }
-        Map<AbstractRole, RoleAutomaton> automata = new HashMap<AbstractRole, RoleAutomaton>();
-        for (AbstractRole r : orderRoles(definitions)) {
+        Map<Role, RoleAutomaton> automata = new HashMap<Role, RoleAutomaton>();
+        for (Role r : orderRoles(definitions)) {
             shallowAutomata.get(r).extendTransitions(r, automata);
             automata.put(r, shallowAutomata.get(r));
-            automata.put(r.getInverseRole(), shallowAutomata.get(r).mirror());
+            automata.put(r.getInverse(), shallowAutomata.get(r).mirror());
         }
         return automata;
     }
@@ -447,12 +447,12 @@ class RoleAutomaton {
     *   state results in a machine which recognizes exactly the same language as the
     *   automata passed in for R.
     */
-    static public  RoleAutomaton combineAutomata(Map<AbstractRole, RoleAutomaton> automata) {
+    static public  RoleAutomaton combineAutomata(Map<Role, RoleAutomaton> automata) {
         RoleAutomaton a = new RoleAutomaton();
         int i = 1;
-        Map<AbstractRole, Integer> symbols = new HashMap<AbstractRole, Integer>();
+        Map<Role, Integer> symbols = new HashMap<Role, Integer>();
         if (automata.isEmpty()) a.addTransition(a.initialState(), a.finalState());
-        else for (AbstractRole r : automata.keySet()) {
+        else for (Role r : automata.keySet()) {
             symbols.put(r, new Integer(i++));
             StatePair p = a.add(automata.get(r));
             a.addTransition(a.initialState(), r, p.i);
@@ -466,7 +466,7 @@ class RoleAutomaton {
     // Routines for reading from and writing to the text format recognized by the AT&T finite
     // state machine library and command-line tools <http://www.research.att.com/~fsmtools/fsm/>:
     
-    RoleAutomaton(java.io.LineNumberReader input, Map<Integer, AbstractRole> symbols) throws java.io.IOException {
+    RoleAutomaton(java.io.LineNumberReader input, Map<Integer, Role> symbols) throws java.io.IOException {
         m_nextState = 0;
         m_transitions = new HashSet<Transition>();
         State initial = null;
@@ -480,30 +480,30 @@ class RoleAutomaton {
                 if (initial == null) initial = i;
                 State f = new State(java.lang.Integer.parseInt(fields[1]));
                 if (f.n >= m_nextState) m_nextState = f.n + 1;
-                AbstractRole r = symbols.get(java.lang.Integer.valueOf(fields[2]));
+                Role r = symbols.get(java.lang.Integer.valueOf(fields[2]));
                 addTransition(i, r, f);
             }
         }
     }
-    static  Map<Integer, AbstractRole> readSymbols(java.io.LineNumberReader input) throws java.io.IOException {
-        Map<Integer, AbstractRole> out = new HashMap<Integer, AbstractRole>();
+    static  Map<Integer, Role> readSymbols(java.io.LineNumberReader input) throws java.io.IOException {
+        Map<Integer, Role> out = new HashMap<Integer, Role>();
         for (String line = input.readLine(); line != null; line = input.readLine()) {
             String[] fields = line.split("\\s+");
-            out.put(new Integer(fields[1]), AbstractRole.fromString(fields[0]));
+            out.put(new Integer(fields[1]), Role.fromString(fields[0]));
         }
         return out;
     }
-    static  void writeFsmTransition(RoleAutomaton.Transition t, java.io.PrintWriter output, Map<AbstractRole, Integer> symbols) {
+    static  void writeFsmTransition(RoleAutomaton.Transition t, java.io.PrintWriter output, Map<Role, Integer> symbols) {
         output.println("" + t.x.i.n + " " + t.x.f.n + " " + (t.r == null ? "0" : symbols.get(t.r).toString()));
     }
-    static  void writeSymbols(java.io.PrintWriter output, Map<AbstractRole, Integer> symbols) {
+    static  void writeSymbols(java.io.PrintWriter output, Map<Role, Integer> symbols) {
         output.println("Symbols: ");
-        for (AbstractRole r : symbols.keySet()) {
+        for (Role r : symbols.keySet()) {
             output.println(r.toString() + " " + symbols.get(r).toString());
         }
         output.flush();
     }
-    void writeFsm(java.io.PrintWriter output, Map<AbstractRole, Integer> symbols) {
+    void writeFsm(java.io.PrintWriter output, Map<Role, Integer> symbols) {
         output.println("Automaton: ");
         // The first transition listed must have the initial state as its source:
         Transition first = null;

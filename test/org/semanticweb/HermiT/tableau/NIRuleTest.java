@@ -12,9 +12,9 @@ public class NIRuleTest extends AbstractHermiTTest {
     protected static final AtomicConcept A=AtomicConcept.create("A");
     protected static final AtomicConcept B=AtomicConcept.create("B");
     protected static final AtomicNegationConcept NEG_A=AtomicNegationConcept.create(A);
-    protected static final AtomicAbstractRole R=AtomicAbstractRole.create("R");
-    protected static final InverseAbstractRole INV_R=InverseAbstractRole.create(R);
-    protected static final AtomicAbstractRole S=AtomicAbstractRole.create("S");
+    protected static final AtomicRole R=AtomicRole.createObjectRole("R");
+    protected static final InverseRole INV_R=InverseRole.create(R);
+    protected static final AtomicRole S=AtomicRole.createObjectRole("S");
     protected static final AtMostAbstractRoleGuard AT_MOST_ONE_R_A=AtMostAbstractRoleGuard.create(1,R,A);
     protected static final AtMostAbstractRoleGuard AT_MOST_TWO_R_A=AtMostAbstractRoleGuard.create(2,R,A);
     protected static final AtMostAbstractRoleGuard AT_MOST_ONE_INV_R_A=AtMostAbstractRoleGuard.create(1,INV_R,A);

@@ -92,13 +92,13 @@ public abstract class StrategyBase
                     if (done) break;
                     if (existentialConcept instanceof
                             AtLeastAbstractRoleConcept) {
-                        AtLeastAbstractRoleConcept atLeastAbstractRoleConcept
+                        AtLeastAbstractRoleConcept atLeastAbstractConcept
                             = (AtLeastAbstractRoleConcept) existentialConcept;
                         switch (existentialExpansionManager.isSatisfied(
-                                    atLeastAbstractRoleConcept, node)) {
+                                    atLeastAbstractConcept, node)) {
                         case NOT_SATISFIED: {
                             done = e.expand(
-                                atLeastAbstractRoleConcept, node
+                                atLeastAbstractConcept, node
                             );
                         } break;
                         case PERMANENTLY_SATISFIED: {
@@ -107,7 +107,7 @@ public abstract class StrategyBase
                                     (existentialConcept, node);
                             if (monitor != null) {
                                 monitor.existentialSatisfied(
-                                    atLeastAbstractRoleConcept, node
+                                    atLeastAbstractConcept, node
                                 );
                             }
                         } break;
@@ -115,11 +115,15 @@ public abstract class StrategyBase
                             // do nothing
                             if (monitor != null) {
                                 monitor.existentialSatisfied(
-                                    atLeastAbstractRoleConcept, node
+                                    atLeastAbstractConcept, node
                                 );
                             }
                         } break;
                         }
+                    } else if (existentialConcept instanceof
+                                AtLeastConcreteRoleConcept) {
+                        existentialExpansionManager.markExistentialProcessed
+                            (existentialConcept, node);
                     } else if (existentialConcept instanceof
                                 ExistsDescriptionGraph) {
                         ExistsDescriptionGraph existsDescriptionGraph
@@ -135,7 +139,7 @@ public abstract class StrategyBase
                         existentialExpansionManager.markExistentialProcessed
                             (existentialConcept, node);
                     } else {
-                        throw new IllegalStateException("Unsupported type of existential concept in CreationOrderStrategy.");
+                        throw new IllegalStateException("Unsupported type of existential.");
                     }
                 } // end for existentialConcept
             } // end if node.isActive...
@@ -151,14 +155,14 @@ public abstract class StrategyBase
         blockingStrategy.assertionRemoved(concept, node);
     }
     
-    public void assertionAdded(AtomicAbstractRole atomicAbstractRole,
+    public void assertionAdded(AtomicRole atomicRole,
                                 Node nodeFrom, Node nodeTo) {
-        blockingStrategy.assertionAdded(atomicAbstractRole, nodeFrom, nodeTo);
+        blockingStrategy.assertionAdded(atomicRole, nodeFrom, nodeTo);
     }
     
-    public void assertionRemoved(AtomicAbstractRole atomicAbstractRole,
+    public void assertionRemoved(AtomicRole atomicRole,
                                     Node nodeFrom, Node nodeTo) {
-        blockingStrategy.assertionRemoved(atomicAbstractRole,
+        blockingStrategy.assertionRemoved(atomicRole,
                                             nodeFrom, nodeTo);
     }
     

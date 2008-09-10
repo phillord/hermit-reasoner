@@ -245,7 +245,8 @@ public class Debugger extends TableauMonitorForwarder {
         else if (predicate.startsWith("+"))
             return AtomicConcept.create(m_namespaces.expandString(predicate.substring(1)));
         else if (predicate.startsWith("-"))
-            return AtomicAbstractRole.create(m_namespaces.expandString(predicate.substring(1)));
+            // TODO: might need to create a data role here instead:
+            return AtomicRole.createObjectRole(m_namespaces.expandString(predicate.substring(1)));
         else if (predicate.startsWith("$")) {
             String graphName=m_namespaces.expandString(predicate.substring(1));
             for (DescriptionGraph descriptionGraph : m_tableau.getDLOntology().getAllDescriptionGraphs())
@@ -487,21 +488,21 @@ public class Debugger extends TableauMonitorForwarder {
         }
     }
     public void printEdges(Node node,PrintWriter writer) {
-        Map<Node,Set<AtomicAbstractRole>> outgoingEdges=new TreeMap<Node,Set<AtomicAbstractRole>>(NodeComparator.INSTANCE);
+        Map<Node,Set<AtomicRole>> outgoingEdges=new TreeMap<Node,Set<AtomicRole>>(NodeComparator.INSTANCE);
         ExtensionTable.Retrieval retrieval=m_tableau.getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,false },ExtensionTable.View.TOTAL);
         retrieval.getBindingsBuffer()[1]=node;
         retrieval.open();
         while (!retrieval.afterLast()) {
-            Object atomicAbstractRoleObject=retrieval.getTupleBuffer()[0];
-            if (atomicAbstractRoleObject instanceof AtomicAbstractRole) {
-                AtomicAbstractRole atomicAbstractRole=(AtomicAbstractRole)retrieval.getTupleBuffer()[0];
+            Object atomicRoleObject=retrieval.getTupleBuffer()[0];
+            if (atomicRoleObject instanceof AtomicRole) {
+                AtomicRole atomicRole=(AtomicRole)retrieval.getTupleBuffer()[0];
                 Node toNode=(Node)retrieval.getTupleBuffer()[2];
-                Set<AtomicAbstractRole> set=outgoingEdges.get(toNode);
+                Set<AtomicRole> set=outgoingEdges.get(toNode);
                 if (set==null) {
-                    set=new TreeSet<AtomicAbstractRole>(AbstractRoleComparator.INSTANCE);
+                    set=new TreeSet<AtomicRole>(RoleComparator.INSTANCE);
                     outgoingEdges.put(toNode,set);
                 }
-                set.add(atomicAbstractRole);
+                set.add(atomicRole);
             }
             retrieval.next();
         }
@@ -510,21 +511,21 @@ public class Debugger extends TableauMonitorForwarder {
             printEdgeMap(outgoingEdges,writer);
         }
 
-        Map<Node,Set<AtomicAbstractRole>> incomingEdges=new TreeMap<Node,Set<AtomicAbstractRole>>(NodeComparator.INSTANCE);
+        Map<Node,Set<AtomicRole>> incomingEdges=new TreeMap<Node,Set<AtomicRole>>(NodeComparator.INSTANCE);
         retrieval=m_tableau.getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,false,true },ExtensionTable.View.TOTAL);
         retrieval.getBindingsBuffer()[2]=node;
         retrieval.open();
         while (!retrieval.afterLast()) {
-            Object atomicAbstractRoleObject=retrieval.getTupleBuffer()[0];
-            if (atomicAbstractRoleObject instanceof AtomicAbstractRole) {
-                AtomicAbstractRole atomicAbstractRole=(AtomicAbstractRole)retrieval.getTupleBuffer()[0];
+            Object atomicRoleObject=retrieval.getTupleBuffer()[0];
+            if (atomicRoleObject instanceof AtomicRole) {
+                AtomicRole atomicRole=(AtomicRole)retrieval.getTupleBuffer()[0];
                 Node fromNode=(Node)retrieval.getTupleBuffer()[1];
-                Set<AtomicAbstractRole> set=incomingEdges.get(fromNode);
+                Set<AtomicRole> set=incomingEdges.get(fromNode);
                 if (set==null) {
-                    set=new TreeSet<AtomicAbstractRole>(AbstractRoleComparator.INSTANCE);
+                    set=new TreeSet<AtomicRole>(RoleComparator.INSTANCE);
                     incomingEdges.put(fromNode,set);
                 }
-                set.add(atomicAbstractRole);
+                set.add(atomicRole);
             }
             retrieval.next();
         }
@@ -547,20 +548,20 @@ public class Debugger extends TableauMonitorForwarder {
         }
         writer.println();
     }
-    protected void printEdgeMap(Map<Node,Set<AtomicAbstractRole>> map,PrintWriter writer) {
-        for (Map.Entry<Node,Set<AtomicAbstractRole>> entry : map.entrySet()) {
+    protected void printEdgeMap(Map<Node,Set<AtomicRole>> map,PrintWriter writer) {
+        for (Map.Entry<Node,Set<AtomicRole>> entry : map.entrySet()) {
             writer.print("    ");
             writer.print(entry.getKey().getNodeID());
             writer.print(" -->");
             int number=0;
-            for (AtomicAbstractRole atomicAbstractRole : entry.getValue()) {
+            for (AtomicRole atomicRole : entry.getValue()) {
                 if (number!=0)
                     writer.print(", ");
                 if ((number % 3)==0) {
                     writer.println();
                     writer.print("        ");
                 }
-                writer.print(atomicAbstractRole.toString(m_namespaces));
+                writer.print(atomicRole.toString(m_namespaces));
                 number++;
             }
             writer.println();
@@ -1280,21 +1281,21 @@ public class Debugger extends TableauMonitorForwarder {
         }
     }
 
-    protected static class AbstractRoleComparator implements Comparator<AbstractRole> {
-        public static final AbstractRoleComparator INSTANCE=new AbstractRoleComparator();
+    protected static class RoleComparator implements Comparator<Role> {
+        public static final RoleComparator INSTANCE=new RoleComparator();
 
-        public int compare(AbstractRole ar1,AbstractRole ar2) {
-            int type1=getAbstractRoleType(ar1);
-            int type2=getAbstractRoleType(ar2);
+        public int compare(Role ar1,Role ar2) {
+            int type1=getRoleType(ar1);
+            int type2=getRoleType(ar2);
             if (type1!=type2)
                 return type1-type2;
             if (type1==0)
-                return ((AtomicAbstractRole)ar1).getURI().compareTo(((AtomicAbstractRole)ar2).getURI());
+                return ((AtomicRole)ar1).getURI().compareTo(((AtomicRole)ar2).getURI());
             else
-                return ((InverseAbstractRole)ar1).getInverseOf().getURI().compareTo(((InverseAbstractRole)ar2).getInverseOf().getURI());
+                return ((InverseRole)ar1).getInverseOf().getURI().compareTo(((InverseRole)ar2).getInverseOf().getURI());
         }
-        protected int getAbstractRoleType(AbstractRole ar) {
-            if (ar instanceof AtomicAbstractRole)
+        protected int getRoleType(Role ar) {
+            if (ar instanceof AtomicRole)
                 return 0;
             else
                 return 1;
@@ -1316,7 +1317,7 @@ public class Debugger extends TableauMonitorForwarder {
                 {
                     AtMostAbstractRoleGuard g1=(AtMostAbstractRoleGuard)c1;
                     AtMostAbstractRoleGuard g2=(AtMostAbstractRoleGuard)c2;
-                    int comparison=AbstractRoleComparator.INSTANCE.compare(g1.getOnAbstractRole(),g2.getOnAbstractRole());
+                    int comparison=RoleComparator.INSTANCE.compare(g1.getOnRole(),g2.getOnRole());
                     if (comparison!=0)
                         return comparison;
                     return compare(g1.getToAtomicConcept(),g2.getToAtomicConcept());
@@ -1325,7 +1326,7 @@ public class Debugger extends TableauMonitorForwarder {
                 {
                     AtLeastAbstractRoleConcept l1=(AtLeastAbstractRoleConcept)c1;
                     AtLeastAbstractRoleConcept l2=(AtLeastAbstractRoleConcept)c2;
-                    int comparison=AbstractRoleComparator.INSTANCE.compare(l1.getOnAbstractRole(),l2.getOnAbstractRole());
+                    int comparison=RoleComparator.INSTANCE.compare(l1.getOnRole(),l2.getOnRole());
                     if (comparison!=0)
                         return comparison;
                     return compare(l1.getToConcept(),l2.getToConcept());

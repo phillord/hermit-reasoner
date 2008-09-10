@@ -268,7 +268,7 @@ public final class Tableau implements Serializable {
             m_tableauMonitor.isSubsumedByFinished(subconcept,superconcept,result);
         return result;
     }
-    // public boolean isSubsumedBy(AbstractRole subRole, AbstractRole superRole) {
+    // public boolean isSubsumedBy(Role subRole, Role superRole) {
     //     if (m_tableauMonitor!=null) {
     //         m_tableauMonitor.isSubsumedByStarted(subRole,superRole);
     //     }
@@ -437,7 +437,7 @@ public final class Tableau implements Serializable {
     public Node createNewTreeNode(DependencySet dependencySet,Node parent) {
         return createNewNodeRaw(dependencySet,parent,NodeType.TREE_NODE,parent.getTreeDepth()+1);
     }
-    public Node createNewConcreteNode(Node parent,DependencySet dependencySet) {
+    public Node createNewConcreteNode(DependencySet dependencySet,Node parent) {
         return createNewNodeRaw(dependencySet,parent,NodeType.CONCRETE_NODE,parent.getTreeDepth()+1);
     }
     public Node createNewGraphNode(Node parent,DependencySet dependencySet) {

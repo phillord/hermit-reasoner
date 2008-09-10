@@ -93,26 +93,26 @@ public class IndividualReuseStrategy
     }
 
     protected boolean tryParentReuse
-        (AtLeastAbstractRoleConcept atLeastAbstractRoleConcept, Node node) {
-        if (atLeastAbstractRoleConcept.getNumber() == 1) {
+        (AtLeastAbstractRoleConcept atLeastAbstractConcept, Node node) {
+        if (atLeastAbstractConcept.getNumber() == 1) {
             Node parent=node.getParent();
             if (parent!=null &&
                 extensionManager.containsConceptAssertion
-                    (atLeastAbstractRoleConcept.getToConcept(), parent)) {
+                    (atLeastAbstractConcept.getToConcept(), parent)) {
                 DependencySet dependencySet
                     = extensionManager.getConceptAssertionDependencySet
-                        (atLeastAbstractRoleConcept, node);
+                        (atLeastAbstractConcept, node);
                 if (!isDeterministic) {
                     BranchingPoint branchingPoint
                         = new IndividualReuseBranchingPoint
-                            (tableau, atLeastAbstractRoleConcept, node, true);
+                            (tableau, atLeastAbstractConcept, node, true);
                     tableau.pushBranchingPoint(branchingPoint);
                     dependencySet = tableau.getDependencySetFactory()
                         .addBranchingPoint
                             (dependencySet, branchingPoint.getLevel());
                 }
                 extensionManager.addRoleAssertion
-                    (atLeastAbstractRoleConcept.getOnAbstractRole(),
+                    (atLeastAbstractConcept.getOnRole(),
                         node, parent, dependencySet);
                 return true;
             }
@@ -121,30 +121,30 @@ public class IndividualReuseStrategy
     }
 
     protected boolean expandWithModelReuse
-        (AtLeastAbstractRoleConcept atLeastAbstractRoleConcept, Node node) {
-        LiteralConcept toConcept = atLeastAbstractRoleConcept.getToConcept();
+        (AtLeastAbstractRoleConcept atLeastAbstractConcept, Node node) {
+        LiteralConcept toConcept = atLeastAbstractConcept.getToConcept();
         if ((toConcept instanceof AtomicConcept) &&
             ((AtomicConcept) toConcept).getURI().startsWith("internal:")) {
             return false;
         }
-        if (atLeastAbstractRoleConcept.getNumber() == 1 &&
+        if (atLeastAbstractConcept.getNumber() == 1 &&
             (doReuseConceptsAlways.contains(toConcept) ||
              !dontReuseConceptsThisRun.contains(toConcept))) {
             if (tableau.getTableauMonitor() != null) {
                 tableau.getTableauMonitor()
                     .existentialExpansionStarted
-                        (atLeastAbstractRoleConcept, node);
+                        (atLeastAbstractConcept, node);
             }
             DependencySet dependencySet
                 = extensionManager.getConceptAssertionDependencySet
-                    (atLeastAbstractRoleConcept, node);
+                    (atLeastAbstractConcept, node);
             Node existentialNode;
             NodeBranchingPointPair reuseInfo = reusedNodes.get(toConcept);
             if (reuseInfo == null) {
                 if (!isDeterministic) {
                     BranchingPoint branchingPoint =
                         new IndividualReuseBranchingPoint
-                            (tableau, atLeastAbstractRoleConcept, node, false);
+                            (tableau, atLeastAbstractConcept, node, false);
                     tableau.pushBranchingPoint(branchingPoint);
                     dependencySet
                         = tableau.getDependencySetFactory().addBranchingPoint
@@ -167,12 +167,12 @@ public class IndividualReuseStrategy
                                         reuseInfo.branchingPoint);
             }
             extensionManager.addRoleAssertion
-                (atLeastAbstractRoleConcept.getOnAbstractRole(),
+                (atLeastAbstractConcept.getOnRole(),
                     node, existentialNode, dependencySet);
             if (tableau.getTableauMonitor() != null) {
                 tableau.getTableauMonitor()
                     .existentialExpansionFinished
-                        (atLeastAbstractRoleConcept, node);
+                        (atLeastAbstractConcept, node);
             }
             return true;
         }
@@ -268,7 +268,7 @@ public class IndividualReuseStrategy
             extensionManager.addConceptAssertion(
                 existential.getToConcept(), existentialNode, dependencySet);
             extensionManager.addRoleAssertion(
-                existential.getOnAbstractRole(), node, existentialNode,
+                existential.getOnRole(), node, existentialNode,
                 dependencySet);
             if (tableau.getTableauMonitor() != null) {
                 tableau.getTableauMonitor().existentialExpansionFinished

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import org.semanticweb.HermiT.model.AtomicAbstractRole;
+import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.Concept;
 
@@ -23,26 +23,26 @@ public final class LabelManager implements Serializable {
 
     protected final Tableau m_tableau;
     protected final SetFactory<Concept> m_conceptSetFactory;
-    protected final SetFactory<AtomicAbstractRole> m_atomicAbstractRoleSetFactory;
+    protected final SetFactory<AtomicRole> m_atomicRoleSetFactory;
     protected final ExtensionTable.Retrieval m_binaryTableSearch1Bound;
     protected final ExtensionTable.Retrieval m_ternaryTableSearch12Bound;
     protected final List<Concept> m_conceptBuffer;
-    protected final List<AtomicAbstractRole> m_atomicAbstractRoleBuffer;
+    protected final List<AtomicRole> m_atomicRoleBuffer;
     
     public LabelManager(Tableau tableau) {
         m_tableau=tableau;
         m_conceptSetFactory=new SetFactory<Concept>();
-        m_atomicAbstractRoleSetFactory=new SetFactory<AtomicAbstractRole>();
+        m_atomicRoleSetFactory=new SetFactory<AtomicRole>();
         m_binaryTableSearch1Bound=m_tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
         m_ternaryTableSearch12Bound=m_tableau.getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,true },ExtensionTable.View.TOTAL);
         m_conceptBuffer=new ArrayList<Concept>();
-        m_atomicAbstractRoleBuffer=new ArrayList<AtomicAbstractRole>(); 
+        m_atomicRoleBuffer=new ArrayList<AtomicRole>(); 
     }
     public int sizeInMemoryConceptSetFactory() {
         return m_conceptSetFactory.sizeInMemory();
     }
-    public int sizeInMemoryAtomicAbstractRoleSetFactory() {
-        return m_atomicAbstractRoleSetFactory.sizeInMemory();
+    public int sizeInMemoryAtomicRoleSetFactory() {
+        return m_atomicRoleSetFactory.sizeInMemory();
     }
     public Set<Concept> getPositiveLabel(Node node) {
         m_conceptBuffer.clear();
@@ -59,20 +59,20 @@ public final class LabelManager implements Serializable {
         m_conceptBuffer.clear();
         return result;
     }
-    public Set<AtomicAbstractRole> getEdgeLabel(Node nodeFrom,Node nodeTo) {
-        m_atomicAbstractRoleBuffer.clear();
+    public Set<AtomicRole> getEdgeLabel(Node nodeFrom,Node nodeTo) {
+        m_atomicRoleBuffer.clear();
         m_ternaryTableSearch12Bound.getBindingsBuffer()[1]=nodeFrom;
         m_ternaryTableSearch12Bound.getBindingsBuffer()[2]=nodeTo;
         m_ternaryTableSearch12Bound.open();
         Object[] tupleBuffer=m_ternaryTableSearch12Bound.getTupleBuffer();
         while (!m_ternaryTableSearch12Bound.afterLast()) {
-            Object atomicAbstractRole=tupleBuffer[0];
-            if (atomicAbstractRole instanceof AtomicAbstractRole)
-                m_atomicAbstractRoleBuffer.add((AtomicAbstractRole)atomicAbstractRole);
+            Object atomicRole=tupleBuffer[0];
+            if (atomicRole instanceof AtomicRole)
+                m_atomicRoleBuffer.add((AtomicRole)atomicRole);
             m_ternaryTableSearch12Bound.next();
         }
-        Set<AtomicAbstractRole> result=m_atomicAbstractRoleSetFactory.getSet(m_atomicAbstractRoleBuffer);
-        m_atomicAbstractRoleBuffer.clear();
+        Set<AtomicRole> result=m_atomicRoleSetFactory.getSet(m_atomicRoleBuffer);
+        m_atomicRoleBuffer.clear();
         return result;
     }
     public void addConceptSetReference(Set<Concept> set) {
@@ -81,11 +81,11 @@ public final class LabelManager implements Serializable {
     public void removeConceptSetReference(Set<Concept> set) {
         m_conceptSetFactory.removeReference(set);
     }
-    public void addAtomicAbstractRoleSetReference(Set<AtomicAbstractRole> set) {
-        m_atomicAbstractRoleSetFactory.addReference(set);
+    public void addAtomicRoleSetReference(Set<AtomicRole> set) {
+        m_atomicRoleSetFactory.addReference(set);
     }
-    public void removeAtomicAbstractRoleSetReference(Set<AtomicAbstractRole> set) {
-        m_atomicAbstractRoleSetFactory.removeReference(set);
+    public void removeAtomicRoleSetReference(Set<AtomicRole> set) {
+        m_atomicRoleSetFactory.removeReference(set);
     }
 }
 @SuppressWarnings("unchecked")

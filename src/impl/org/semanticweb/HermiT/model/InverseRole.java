@@ -6,18 +6,22 @@ import org.semanticweb.HermiT.*;
 /**
  * Represents an inverse abstract role.
  */
-public class InverseAbstractRole extends AbstractRole {
+public class InverseRole extends Role {
     private static final long serialVersionUID=3351701933728011998L;
 
-    protected final AtomicAbstractRole m_inverseOf;
+    protected final AtomicRole m_inverseOf;
     
-    public InverseAbstractRole(AtomicAbstractRole inverseOf) {
+    public InverseRole(AtomicRole inverseOf) {
         m_inverseOf=inverseOf;
     }
-    public AtomicAbstractRole getInverseOf() {
+    public boolean isRestrictedToDatatypes() {
+        return false;
+    }
+
+    public AtomicRole getInverseOf() {
         return m_inverseOf;
     }
-    public AbstractRole getInverseRole() {
+    public Role getInverse() {
         return m_inverseOf;
     }
     public String toString(Namespaces namespaces) {
@@ -27,16 +31,16 @@ public class InverseAbstractRole extends AbstractRole {
         return s_interningManager.intern(this);
     }
 
-    protected static InterningManager<InverseAbstractRole> s_interningManager=new InterningManager<InverseAbstractRole>() {
-        protected boolean equal(InverseAbstractRole object1,InverseAbstractRole object2) {
+    protected static InterningManager<InverseRole> s_interningManager=new InterningManager<InverseRole>() {
+        protected boolean equal(InverseRole object1,InverseRole object2) {
             return object1.m_inverseOf==object2.m_inverseOf;
         }
-        protected int getHashCode(InverseAbstractRole object) {
+        protected int getHashCode(InverseRole object) {
             return -object.m_inverseOf.hashCode();
         }
     };
     
-    public static InverseAbstractRole create(AtomicAbstractRole inverseOf) {
-        return s_interningManager.intern(new InverseAbstractRole(inverseOf));
+    public static InverseRole create(AtomicRole inverseOf) {
+        return s_interningManager.intern(new InverseRole(inverseOf));
     }
 }

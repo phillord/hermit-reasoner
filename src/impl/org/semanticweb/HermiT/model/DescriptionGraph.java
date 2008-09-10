@@ -80,7 +80,7 @@ public class DescriptionGraph implements DLPredicate,Serializable {
             buffer.append("  ");
             buffer.append(edge.getFromVertex());
             buffer.append(" -- ");
-            buffer.append(edge.getAtomicAbstractRole().getURI());
+            buffer.append(edge.getAtomicRole().getURI());
             buffer.append(" --> ");
             buffer.append(edge.getToVertex());
             buffer.append(CRLF);
@@ -98,17 +98,17 @@ public class DescriptionGraph implements DLPredicate,Serializable {
     public static class Edge implements Serializable {
         private static final long serialVersionUID=-2407275128459101707L;
 
-        protected final AtomicAbstractRole m_atomicAbstractRole;
+        protected final AtomicRole m_atomicRole;
         protected final int m_fromVertex;
         protected final int m_toVertex;
 
-        public Edge(AtomicAbstractRole atomicAbstractRole,int fromVertex,int toVertex) {
-            m_atomicAbstractRole=atomicAbstractRole;
+        public Edge(AtomicRole atomicRole,int fromVertex,int toVertex) {
+            m_atomicRole=atomicRole;
             m_fromVertex=fromVertex;
             m_toVertex=toVertex;
         }
-        public AtomicAbstractRole getAtomicAbstractRole() {
-            return m_atomicAbstractRole;
+        public AtomicRole getAtomicRole() {
+            return m_atomicRole;
         }
         public int getFromVertex() {
             return m_fromVertex;
@@ -117,7 +117,7 @@ public class DescriptionGraph implements DLPredicate,Serializable {
             return m_toVertex;
         }
         public int hashCode() {
-            return m_fromVertex+7*m_toVertex+11*m_atomicAbstractRole.hashCode();
+            return m_fromVertex+7*m_toVertex+11*m_atomicRole.hashCode();
         }
         public boolean equals(Object that) {
             if (this==that)
@@ -125,7 +125,7 @@ public class DescriptionGraph implements DLPredicate,Serializable {
             if (!(that instanceof Edge))
                 return false;
             Edge thatEdge=(Edge)that;
-            return m_atomicAbstractRole.equals(thatEdge.m_atomicAbstractRole) && m_fromVertex==thatEdge.m_fromVertex && m_toVertex==thatEdge.m_toVertex;
+            return m_atomicRole.equals(thatEdge.m_atomicRole) && m_fromVertex==thatEdge.m_fromVertex && m_toVertex==thatEdge.m_toVertex;
         }
     }
 }

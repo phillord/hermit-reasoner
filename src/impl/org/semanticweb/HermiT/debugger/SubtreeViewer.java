@@ -223,12 +223,12 @@ public class SubtreeViewer extends JFrame {
                 buffer.append(":(root)");
             }
             else if (existentialConcept instanceof AtLeastAbstractRoleConcept) {
-                AtLeastAbstractRoleConcept atLeastAbstractRoleConcept=(AtLeastAbstractRoleConcept)existentialConcept;
-                buffer.append(atLeastAbstractRoleConcept.getOnAbstractRole().toString(m_debugger.m_namespaces));
+                AtLeastAbstractRoleConcept atLeastAbstractConcept=(AtLeastAbstractRoleConcept)existentialConcept;
+                buffer.append(atLeastAbstractConcept.getOnRole().toString(m_debugger.m_namespaces));
                 buffer.append("  -->  ");
                 buffer.append(node.getNodeID());
                 buffer.append(":[");
-                buffer.append(atLeastAbstractRoleConcept.getToConcept().toString(m_debugger.m_namespaces));
+                buffer.append(atLeastAbstractConcept.getToConcept().toString(m_debugger.m_namespaces));
                 buffer.append("]");
             }
             else {

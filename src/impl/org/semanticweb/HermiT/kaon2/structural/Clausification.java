@@ -12,11 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.semanticweb.HermiT.model.AbstractRole;
+import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
 import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
 import org.semanticweb.HermiT.model.Atom;
-import org.semanticweb.HermiT.model.AtomicAbstractRole;
+import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.DLClause;
@@ -25,7 +25,7 @@ import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.Inequality;
-import org.semanticweb.HermiT.model.InverseAbstractRole;
+import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.model.NodeIDLessThan;
 import org.semanticweb.kaon2.api.Fact;
@@ -119,20 +119,20 @@ public class Clausification {
         Set<Atom> positiveFacts=new HashSet<Atom>();
         Set<Atom> negativeFacts=new HashSet<Atom>();
         for (ObjectPropertyExpression[] inclusion : normalObjectPropertyInclusions) {
-            Atom subRoleAtom=getAbstractRoleAtom(inclusion[0],X,Y);
-            Atom superRoleAtom=getAbstractRoleAtom(inclusion[1],X,Y);
+            Atom subRoleAtom=getRoleAtom(inclusion[0],X,Y);
+            Atom superRoleAtom=getRoleAtom(inclusion[1],X,Y);
             DLClause dlClause=DLClause.create(new Atom[] { superRoleAtom },new Atom[] { subRoleAtom });
             dlClauses.add(dlClause);
         }
         for (ObjectPropertyExpression[] inclusion : inverseObjectPropertyInclusions) {
-            Atom subRoleAtom=getAbstractRoleAtom(inclusion[0],X,Y);
-            Atom superRoleAtom=getAbstractRoleAtom(inclusion[1],Y,X);
+            Atom subRoleAtom=getRoleAtom(inclusion[0],X,Y);
+            Atom superRoleAtom=getRoleAtom(inclusion[1],Y,X);
             DLClause dlClause=DLClause.create(new Atom[] { superRoleAtom },new Atom[] { subRoleAtom });
             dlClauses.add(dlClause);
         }
         for (ObjectPropertyExpression axiom : antisymmetricObjectProperties) {
-        	Atom roleAtom=getAbstractRoleAtom(axiom,X,Y);
-            Atom inverseRoleAtom=getAbstractRoleAtom(axiom,Y,X);
+        	Atom roleAtom=getRoleAtom(axiom,X,Y);
+            Atom inverseRoleAtom=getRoleAtom(axiom,Y,X);
         	DLClause dlClause = DLClause.create(new Atom[] { roleAtom, inverseRoleAtom }, new Atom[] { });
         	dlClauses.add(dlClause);
         }
@@ -162,15 +162,15 @@ public class Clausification {
         		              shouldUseNIRule,
         		              determineExpressivity.m_hasReflexivity);
     }
-    protected static Atom getAbstractRoleAtom(ObjectPropertyExpression objectProperty,org.semanticweb.HermiT.model.Term first,org.semanticweb.HermiT.model.Term second) {
+    protected static Atom getRoleAtom(ObjectPropertyExpression objectProperty,org.semanticweb.HermiT.model.Term first,org.semanticweb.HermiT.model.Term second) {
         objectProperty=objectProperty.getSimplified();
         if (objectProperty instanceof ObjectProperty) {
-            AtomicAbstractRole role=AtomicAbstractRole.create(((ObjectProperty)objectProperty).getURI());
+            AtomicRole role=AtomicRole.createObjectRole(((ObjectProperty)objectProperty).getURI());
             return Atom.create(role,new org.semanticweb.HermiT.model.Term[] { first,second });
         }
         else if (objectProperty instanceof InverseObjectProperty) {
             ObjectProperty internalObjectProperty=(ObjectProperty)((InverseObjectProperty)objectProperty).getObjectProperty();
-            AtomicAbstractRole role=AtomicAbstractRole.create(internalObjectProperty.getURI());
+            AtomicRole role=AtomicRole.createObjectRole(internalObjectProperty.getURI());
             return Atom.create(role,new org.semanticweb.HermiT.model.Term[] { second,first });
         }
         else
@@ -189,15 +189,15 @@ public class Clausification {
         else
             throw new IllegalStateException("Internal error: invalid normal form.");
     }
-    protected static AbstractRole getAbstractRole(ObjectPropertyExpression objectProperty) {
+    protected static Role getRole(ObjectPropertyExpression objectProperty) {
         objectProperty=objectProperty.getSimplified();
         if (objectProperty instanceof ObjectProperty)
-            return AtomicAbstractRole.create(((ObjectProperty)objectProperty).getURI());
+            return AtomicRole.createObjectRole(((ObjectProperty)objectProperty).getURI());
         else if (objectProperty instanceof InverseObjectProperty) {
             ObjectPropertyExpression internal=((InverseObjectProperty)objectProperty).getObjectProperty();
             if (!(internal instanceof ObjectProperty))
                 throw new IllegalStateException("Internal error: invalid normal form.");
-            return InverseAbstractRole.create(AtomicAbstractRole.create(((ObjectProperty)internal).getURI()));
+            return InverseRole.create(AtomicRole.createObjectRole(((ObjectProperty)internal).getURI()));
         }
         else
             throw new IllegalStateException("Internal error: invalid normal form.");
@@ -238,7 +238,7 @@ public class Clausification {
         if (predicate instanceof OWLClass)
             return AtomicConcept.create(((OWLClass)predicate).getURI());
         else if (predicate instanceof ObjectProperty)
-            return AtomicAbstractRole.create(((ObjectProperty)predicate).getURI());
+            return AtomicRole.createObjectRole(((ObjectProperty)predicate).getURI());
         else if (KAON2Manager.factory().predicateSymbol(Namespaces.OWL_NS+"sameAs",2).equals(predicate))
             return Equality.INSTANCE;
         else if (KAON2Manager.factory().predicateSymbol(Namespaces.OWL_NS+"differentFrom",2).equals(predicate))
@@ -251,7 +251,7 @@ public class Clausification {
         protected final Map<AtomicConcept,AtomicConcept> m_negativeAtMostReplacements;
         protected final List<Atom> m_headAtoms;
         protected final List<Atom> m_bodyAtoms;
-        protected final Set<AtMostAbstractRoleGuard> m_atMostAbstractRoleGuards;
+        protected final Set<AtMostAbstractRoleGuard> m_atMostRoleGuards;
         protected final Set<Atom> m_positiveFacts;
         protected final boolean m_renameAtMost;
         protected int m_yIndex;
@@ -260,7 +260,7 @@ public class Clausification {
             m_negativeAtMostReplacements=new HashMap<AtomicConcept,AtomicConcept>();
             m_headAtoms=new ArrayList<Atom>();
             m_bodyAtoms=new ArrayList<Atom>();
-            m_atMostAbstractRoleGuards=new HashSet<AtMostAbstractRoleGuard>();
+            m_atMostRoleGuards=new HashSet<AtMostAbstractRoleGuard>();
             m_positiveFacts=positiveFacts;
             m_renameAtMost=renameAtMost;
         }
@@ -321,7 +321,7 @@ public class Clausification {
         }
         public Object visit(ObjectAll object) {
             org.semanticweb.HermiT.model.Variable y=nextY();
-            m_bodyAtoms.add(getAbstractRoleAtom(object.getObjectProperty(),X,y));
+            m_bodyAtoms.add(getRoleAtom(object.getObjectProperty(),X,y));
             Description description=object.getDescription();
             if (description instanceof OWLClass) {
                 OWLClass owlClass=(OWLClass)description;
@@ -362,13 +362,13 @@ public class Clausification {
                 for (org.semanticweb.kaon2.api.owl.elements.Individual individual : objectOneOf.getIndividuals()) {
                     org.semanticweb.HermiT.model.Variable y=nextY();
                     m_bodyAtoms.add(Atom.create(getConceptForNominal(individual),y));
-                    m_headAtoms.add(getAbstractRoleAtom(objectProperty,X,y));
+                    m_headAtoms.add(getRoleAtom(objectProperty,X,y));
                 }
             }
             else {
                 LiteralConcept toConcept=getLiteralConcept(description);
-                AbstractRole onAbstractRole=getAbstractRole(objectProperty);
-                m_headAtoms.add(Atom.create(AtLeastAbstractRoleConcept.create(1,onAbstractRole,toConcept),new org.semanticweb.HermiT.model.Term[] { X }));
+                Role onRole=getRole(objectProperty);
+                m_headAtoms.add(Atom.create(AtLeastAbstractRoleConcept.create(1,onRole,toConcept),new org.semanticweb.HermiT.model.Term[] { X }));
             }
             return null;
         }
@@ -380,8 +380,8 @@ public class Clausification {
             case ObjectCardinality.MINIMUM:
                 {
                     LiteralConcept toConcept=getLiteralConcept(object.getDescription());
-                    AbstractRole onAbstractRole=getAbstractRole(object.getObjectProperty());
-                    m_headAtoms.add(Atom.create(AtLeastAbstractRoleConcept.create(object.getCardinality(),onAbstractRole,toConcept),new org.semanticweb.HermiT.model.Term[] { X }));
+                    Role onRole=getRole(object.getObjectProperty());
+                    m_headAtoms.add(Atom.create(AtLeastAbstractRoleConcept.create(object.getCardinality(),onRole,toConcept),new org.semanticweb.HermiT.model.Term[] { X }));
                 }
                 break;
             case ObjectCardinality.MAXIMUM:
@@ -399,20 +399,20 @@ public class Clausification {
                     }
                     else
                          throw new IllegalStateException("invalid normal form.");
-                    AbstractRole onAbstractRole;
+                    Role onRole;
                     if (object.getObjectProperty() instanceof ObjectProperty)
-                        onAbstractRole=AtomicAbstractRole.create(((ObjectProperty)object.getObjectProperty()).getURI());
+                        onRole=AtomicRole.createObjectRole(((ObjectProperty)object.getObjectProperty()).getURI());
                     else {
                         ObjectProperty internalObjectProperty=(ObjectProperty)((InverseObjectProperty)object.getObjectProperty()).getObjectProperty();
-                        onAbstractRole=InverseAbstractRole.create(AtomicAbstractRole.create(internalObjectProperty.getURI()));
+                        onRole=InverseRole.create(AtomicRole.createObjectRole(internalObjectProperty.getURI()));
                     }
-                    AtMostAbstractRoleGuard atMostAbstractRole=AtMostAbstractRoleGuard.create(object.getCardinality(),onAbstractRole,toAtomicConcept);
-                    m_atMostAbstractRoleGuards.add(atMostAbstractRole);
-                    m_headAtoms.add(Atom.create(atMostAbstractRole,new org.semanticweb.HermiT.model.Term[] { X }));
+                    AtMostAbstractRoleGuard atMostRole=AtMostAbstractRoleGuard.create(object.getCardinality(),onRole,toAtomicConcept);
+                    m_atMostRoleGuards.add(atMostRole);
+                    m_headAtoms.add(Atom.create(atMostRole,new org.semanticweb.HermiT.model.Term[] { X }));
                     // This is an optimization that is described in the SHOIQ paper right after the clausification section.
                     // In order to prevent the application of the rule to the entire universe in some cases, R(x,y) \wedge C(y) to the body of the rule
                     org.semanticweb.HermiT.model.Variable Y=nextY();
-                    m_bodyAtoms.add(getAbstractRoleAtom(object.getObjectProperty(),X,Y));
+                    m_bodyAtoms.add(getRoleAtom(object.getObjectProperty(),X,Y));
                     if (!AtomicConcept.THING.equals(toAtomicConcept))
                         m_bodyAtoms.add(Atom.create(toAtomicConcept,Y));
                 }
@@ -450,17 +450,17 @@ public class Clausification {
             throw new IllegalStateException("Internal error: invalid normal form.");
         }
         public void clausifyAtMostStuff(Collection<DLClause> dlClauses) {
-            for (AtMostAbstractRoleGuard atMostAbstractRole : m_atMostAbstractRoleGuards) {
-                m_bodyAtoms.add(Atom.create(atMostAbstractRole,new org.semanticweb.HermiT.model.Term[] { X }));
-                AbstractRole onAbstractRole=atMostAbstractRole.getOnAbstractRole();
+            for (AtMostAbstractRoleGuard atMostRole : m_atMostRoleGuards) {
+                m_bodyAtoms.add(Atom.create(atMostRole,new org.semanticweb.HermiT.model.Term[] { X }));
+                Role onRole=atMostRole.getOnRole();
                 ObjectPropertyExpression onObjectProperty;
-                if (onAbstractRole instanceof AtomicAbstractRole)
-                    onObjectProperty=KAON2Manager.factory().objectProperty(((AtomicAbstractRole)onAbstractRole).getURI());
+                if (onRole instanceof AtomicRole)
+                    onObjectProperty=KAON2Manager.factory().objectProperty(((AtomicRole)onRole).getURI());
                 else {
-                    AtomicAbstractRole innerAbstractRole=((InverseAbstractRole)onAbstractRole).getInverseOf();
-                    onObjectProperty=KAON2Manager.factory().inverseObjectProperty(KAON2Manager.factory().objectProperty(innerAbstractRole.getURI()));
+                    AtomicRole innerRole=((InverseRole)onRole).getInverseOf();
+                    onObjectProperty=KAON2Manager.factory().inverseObjectProperty(KAON2Manager.factory().objectProperty(innerRole.getURI()));
                 }
-                addAtMostAtoms(atMostAbstractRole.getCaridnality(),onObjectProperty,KAON2Manager.factory().owlClass(atMostAbstractRole.getToAtomicConcept().getURI()));
+                addAtMostAtoms(atMostRole.getCaridnality(),onObjectProperty,KAON2Manager.factory().owlClass(atMostRole.getToAtomicConcept().getURI()));
                 DLClause dlClause=getDLClause();
                 dlClauses.add(dlClause);
             }
@@ -495,7 +495,7 @@ public class Clausification {
             org.semanticweb.HermiT.model.Variable[] yVars=new org.semanticweb.HermiT.model.Variable[number+1];
             for (int i=0;i<yVars.length;i++) {
                 yVars[i]=nextY();
-                m_bodyAtoms.add(getAbstractRoleAtom(onObjectProperty,X,yVars[i]));
+                m_bodyAtoms.add(getRoleAtom(onObjectProperty,X,yVars[i]));
                 if (atomicConcept!=null) {
                     Atom atom=Atom.create(atomicConcept,new org.semanticweb.HermiT.model.Term[] { yVars[i] });
                     if (isPositive)
@@ -543,7 +543,7 @@ public class Clausification {
             throw new IllegalArgumentException("DataPropertyMember is not supported yet.");
         }
         public Object visit(ObjectPropertyMember object) {
-            m_positiveFacts.add(getAbstractRoleAtom(object.getObjectProperty(),getIndividual(object.getSourceIndividual()),getIndividual(object.getTargetIndividual())));
+            m_positiveFacts.add(getRoleAtom(object.getObjectProperty(),getIndividual(object.getSourceIndividual()),getIndividual(object.getTargetIndividual())));
             return null;
         }
         public Object visit(NegativeObjectPropertyMember object) {

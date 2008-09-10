@@ -102,9 +102,9 @@ public class DLClause implements Serializable {
 
     public boolean isFunctionalityAxiom() {
         if (getBodyLength() == 2 && getHeadLength() == 1) {
-            DLPredicate atomicAbstractRole = getBodyAtom(0).getDLPredicate();
-            if (atomicAbstractRole instanceof AtomicAbstractRole) {
-                if (getBodyAtom(1).getDLPredicate().equals(atomicAbstractRole)
+            DLPredicate atomicRole = getBodyAtom(0).getDLPredicate();
+            if (atomicRole instanceof AtomicRole) {
+                if (getBodyAtom(1).getDLPredicate().equals(atomicRole)
                         && getHeadAtom(0).getDLPredicate().equals(
                                 Equality.INSTANCE)) {
                     Variable x = getBodyAtom(0).getArgumentVariable(0);
@@ -131,17 +131,17 @@ public class DLClause implements Serializable {
         if (getBodyLength() == 1 && getHeadLength() == 1) {
             DLPredicate headDLPredicate = getHeadAtom(0).getDLPredicate();
             if (headDLPredicate instanceof AtMostAbstractRoleGuard) {
-                AtMostAbstractRoleGuard atMostAbstractRoleGuard = (AtMostAbstractRoleGuard) headDLPredicate;
-                if (atMostAbstractRoleGuard.getCaridnality() == 1
-                        && atMostAbstractRoleGuard.getToAtomicConcept().equals(
+                AtMostAbstractRoleGuard atMostRoleGuard = (AtMostAbstractRoleGuard) headDLPredicate;
+                if (atMostRoleGuard.getCaridnality() == 1
+                        && atMostRoleGuard.getToAtomicConcept().equals(
                                 AtomicConcept.THING)
-                        && atMostAbstractRoleGuard.getOnAbstractRole() instanceof AtomicAbstractRole) {
-                    AtomicAbstractRole atomicAbstractRole = (AtomicAbstractRole) atMostAbstractRoleGuard.getOnAbstractRole();
+                        && atMostRoleGuard.getOnRole() instanceof AtomicRole) {
+                    AtomicRole atomicRole = (AtomicRole) atMostRoleGuard.getOnRole();
                     Variable x = getHeadAtom(0).getArgumentVariable(0);
                     Atom bodyAtom = getBodyAtom(0);
                     if (x != null
                             && bodyAtom.getDLPredicate().equals(
-                                    atomicAbstractRole)
+                                    atomicRole)
                             && bodyAtom.getArgument(0).equals(x)
                             && bodyAtom.getArgument(1) instanceof Variable
                             && !bodyAtom.getArgument(1).equals(x))
@@ -154,9 +154,9 @@ public class DLClause implements Serializable {
 
     public boolean isInverseFunctionalityAxiom() {
         if (getBodyLength() == 2 && getHeadLength() == 1) {
-            DLPredicate atomicAbstractRole = getBodyAtom(0).getDLPredicate();
-            if (atomicAbstractRole instanceof AtomicAbstractRole) {
-                if (getBodyAtom(1).getDLPredicate().equals(atomicAbstractRole)
+            DLPredicate atomicRole = getBodyAtom(0).getDLPredicate();
+            if (atomicRole instanceof AtomicRole) {
+                if (getBodyAtom(1).getDLPredicate().equals(atomicRole)
                         && getHeadAtom(0).getDLPredicate().equals(
                                 Equality.INSTANCE)) {
                     Variable x = getBodyAtom(0).getArgumentVariable(1);
@@ -183,17 +183,17 @@ public class DLClause implements Serializable {
         if (getBodyLength() == 1 && getHeadLength() == 1) {
             DLPredicate headDLPredicate = getHeadAtom(0).getDLPredicate();
             if (headDLPredicate instanceof AtMostAbstractRoleGuard) {
-                AtMostAbstractRoleGuard atMostAbstractRoleGuard = (AtMostAbstractRoleGuard) headDLPredicate;
-                if (atMostAbstractRoleGuard.getCaridnality() == 1
-                        && atMostAbstractRoleGuard.getToAtomicConcept().equals(
+                AtMostAbstractRoleGuard atMostRoleGuard = (AtMostAbstractRoleGuard) headDLPredicate;
+                if (atMostRoleGuard.getCaridnality() == 1
+                        && atMostRoleGuard.getToAtomicConcept().equals(
                                 AtomicConcept.THING)
-                        && atMostAbstractRoleGuard.getOnAbstractRole() instanceof InverseAbstractRole) {
-                    AtomicAbstractRole atomicAbstractRole = ((InverseAbstractRole) atMostAbstractRoleGuard.getOnAbstractRole()).getInverseOf();
+                        && atMostRoleGuard.getOnRole() instanceof InverseRole) {
+                    AtomicRole atomicRole = ((InverseRole) atMostRoleGuard.getOnRole()).getInverseOf();
                     Variable x = getHeadAtom(0).getArgumentVariable(0);
                     Atom bodyAtom = getBodyAtom(0);
                     if (x != null
                             && bodyAtom.getDLPredicate().equals(
-                                    atomicAbstractRole)
+                                    atomicRole)
                             && bodyAtom.getArgument(1).equals(x)
                             && bodyAtom.getArgument(0) instanceof Variable
                             && !bodyAtom.getArgument(0).equals(x))
@@ -206,8 +206,8 @@ public class DLClause implements Serializable {
 
     public boolean isRoleInclusion() {
         if (getBodyLength() == 1 && getHeadLength() == 1) {
-            if (getBodyAtom(0).getDLPredicate() instanceof AtomicAbstractRole
-                    && getHeadAtom(0).getDLPredicate() instanceof AtomicAbstractRole) {
+            if (getBodyAtom(0).getDLPredicate() instanceof AtomicRole
+                    && getHeadAtom(0).getDLPredicate() instanceof AtomicRole) {
                 Variable x = getBodyAtom(0).getArgumentVariable(0);
                 Variable y = getBodyAtom(0).getArgumentVariable(1);
                 Variable headX = getHeadAtom(0).getArgumentVariable(0);
@@ -222,8 +222,8 @@ public class DLClause implements Serializable {
 
     public boolean isRoleInverseInclusion() {
         if (getBodyLength() == 1 && getHeadLength() == 1) {
-            if (getBodyAtom(0).getDLPredicate() instanceof AtomicAbstractRole
-                    && getHeadAtom(0).getDLPredicate() instanceof AtomicAbstractRole) {
+            if (getBodyAtom(0).getDLPredicate() instanceof AtomicRole
+                    && getHeadAtom(0).getDLPredicate() instanceof AtomicRole) {
                 Variable x = getBodyAtom(0).getArgumentVariable(0);
                 Variable y = getBodyAtom(0).getArgumentVariable(1);
                 Variable headX = getHeadAtom(0).getArgumentVariable(0);

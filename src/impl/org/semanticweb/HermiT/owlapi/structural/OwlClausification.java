@@ -15,14 +15,13 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.HermiT;
 import org.semanticweb.HermiT.Namespaces;
-import org.semanticweb.HermiT.model.AbstractRole;
+import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
 import org.semanticweb.HermiT.model.AtLeastConcreteRoleConcept;
 import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
 import org.semanticweb.HermiT.model.Atom;
-import org.semanticweb.HermiT.model.AtomicAbstractRole;
+import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.AtomicConcept;
-import org.semanticweb.HermiT.model.AtomicConcreteRole;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
@@ -32,7 +31,7 @@ import org.semanticweb.HermiT.model.DatatypeRestrictionNegationConcept;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.Inequality;
-import org.semanticweb.HermiT.model.InverseAbstractRole;
+import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.model.NodeIDLessThan;
 import org.semanticweb.owl.apibinding.OWLManager;
@@ -141,8 +140,8 @@ public class OwlClausification {
         Set<Atom> positiveFacts = new HashSet<Atom>();
         Set<Atom> negativeFacts = new HashSet<Atom>();
         for (OWLObjectPropertyExpression[] inclusion : objectPropertyInclusions) {
-            Atom subRoleAtom = getAbstractRoleAtom(inclusion[0], X, Y);
-            Atom superRoleAtom = getAbstractRoleAtom(inclusion[1], X, Y);
+            Atom subRoleAtom = getRoleAtom(inclusion[0], X, Y);
+            Atom superRoleAtom = getRoleAtom(inclusion[1], X, Y);
             DLClause dlClause = DLClause.create(new Atom[] { superRoleAtom },
                     new Atom[] { subRoleAtom });
             dlClauses.add(dlClause);
@@ -150,9 +149,9 @@ public class OwlClausification {
         if (config.clausifyTransitivity) {
             for (OWLObjectPropertyExpression prop : transitiveObjectProperties) {
                 DLClause dlClause = DLClause.create(
-                    new Atom[] { getAbstractRoleAtom(prop, Y, Z) },
-                    new Atom[] { getAbstractRoleAtom(prop, Y, X),
-                                 getAbstractRoleAtom(prop, X, Z) });
+                    new Atom[] { getRoleAtom(prop, Y, Z) },
+                    new Atom[] { getRoleAtom(prop, Y, X),
+                                 getRoleAtom(prop, X, Z) });
                 dlClauses.add(dlClause);
             }
         }
@@ -164,20 +163,20 @@ public class OwlClausification {
             dlClauses.add(dlClause);
         }
         for (OWLObjectPropertyExpression axiom : asymmetricObjectProperties) {
-            Atom roleAtom = getAbstractRoleAtom(axiom, X, Y);
-            Atom inverseRoleAtom = getAbstractRoleAtom(axiom, Y, X);
+            Atom roleAtom = getRoleAtom(axiom, X, Y);
+            Atom inverseRoleAtom = getRoleAtom(axiom, Y, X);
             DLClause dlClause = DLClause.create(new Atom[] {}, new Atom[] {
                     roleAtom, inverseRoleAtom });
             dlClauses.add(dlClause.getSafeVersion());
         }
         for (OWLObjectPropertyExpression axiom : reflexiveObjectProperties) {
-            Atom roleAtom = getAbstractRoleAtom(axiom, X, X);
+            Atom roleAtom = getRoleAtom(axiom, X, X);
             DLClause dlClause = DLClause.create(new Atom[] { roleAtom },
                     new Atom[] {});
             dlClauses.add(dlClause.getSafeVersion());
         }
         for (OWLObjectPropertyExpression axiom : irreflexiveObjectProperties) {
-            Atom roleAtom = getAbstractRoleAtom(axiom, X, X);
+            Atom roleAtom = getRoleAtom(axiom, X, X);
             DLClause dlClause = DLClause.create(new Atom[] {},
                     new Atom[] { roleAtom });
             dlClauses.add(dlClause.getSafeVersion());
@@ -185,8 +184,8 @@ public class OwlClausification {
         for (OWLObjectPropertyExpression[] properties : disjointObjectProperties) {
             for (int i = 0; i < properties.length; i++) {
                 for (int j = i + 1; j < properties.length; j++) {
-                    Atom atom_i = getAbstractRoleAtom(properties[i], X, Y);
-                    Atom atom_j = getAbstractRoleAtom(properties[j], X, Y);
+                    Atom atom_i = getRoleAtom(properties[i], X, Y);
+                    Atom atom_j = getRoleAtom(properties[j], X, Y);
                     DLClause dlClause = DLClause.create(new Atom[] {},
                             new Atom[] { atom_i, atom_j });
                     dlClauses.add(dlClause.getSafeVersion());
@@ -232,18 +231,18 @@ public class OwlClausification {
      * @param second
      * @return
      */
-    protected static Atom getAbstractRoleAtom(
+    protected static Atom getRoleAtom(
             OWLObjectPropertyExpression objectProperty,
             org.semanticweb.HermiT.model.Term first,
             org.semanticweb.HermiT.model.Term second) {
         objectProperty = objectProperty.getSimplified();
         if (objectProperty instanceof OWLObjectProperty) {
-            AtomicAbstractRole role = AtomicAbstractRole.create(((OWLObjectProperty) objectProperty).getURI().toString());
+            AtomicRole role = AtomicRole.createObjectRole(((OWLObjectProperty) objectProperty).getURI().toString());
             return Atom.create(role, new org.semanticweb.HermiT.model.Term[] {
                     first, second });
         } else if (objectProperty instanceof OWLObjectPropertyInverse) {
             OWLObjectProperty internalObjectProperty = (OWLObjectProperty) ((OWLObjectPropertyInverse) objectProperty).getInverse();
-            AtomicAbstractRole role = AtomicAbstractRole.create(internalObjectProperty.getURI().toString());
+            AtomicRole role = AtomicRole.createObjectRole(internalObjectProperty.getURI().toString());
             return Atom.create(role, new org.semanticweb.HermiT.model.Term[] {
                     second, first });
         } else
@@ -264,7 +263,7 @@ public class OwlClausification {
             org.semanticweb.HermiT.model.Term first,
             org.semanticweb.HermiT.model.Term second) {
         if (dataProperty instanceof OWLDataProperty) {
-            AtomicConcreteRole property = AtomicConcreteRole.create(((OWLDataProperty) dataProperty).getURI().toString());
+            AtomicRole property = AtomicRole.createDataRole(((OWLDataProperty) dataProperty).getURI().toString());
             return Atom.create(property,
                     new org.semanticweb.HermiT.model.Term[] { first, second });
         } else
@@ -297,18 +296,18 @@ public class OwlClausification {
      * @param objectProperty the object property/abstract role
      * @return an Abstract Role
      */
-    protected static AbstractRole getAbstractRole(
+    protected static Role getRole(
             OWLObjectPropertyExpression objectProperty) {
         objectProperty = objectProperty.getSimplified();
         if (objectProperty instanceof OWLObjectProperty)
-            return AtomicAbstractRole.create(((OWLObjectProperty) objectProperty).getURI().toString());
+            return AtomicRole.createObjectRole(((OWLObjectProperty) objectProperty).getURI().toString());
         else if (objectProperty instanceof OWLObjectPropertyInverse) {
             OWLObjectPropertyExpression internal = ((OWLObjectPropertyInverse) objectProperty).getInverse();
             if (!(internal instanceof OWLObjectProperty)) {
                 throw new IllegalStateException(
                         "Internal error: invalid normal form.");
             }
-            return InverseAbstractRole.create(AtomicAbstractRole.create(((OWLObjectProperty) internal).getURI().toString()));
+            return InverseRole.create(AtomicRole.createObjectRole(((OWLObjectProperty) internal).getURI().toString()));
         } else
             throw new IllegalStateException(
                     "Internal error: invalid normal form.");
@@ -354,7 +353,7 @@ public class OwlClausification {
     // if (predicate instanceof OWLClass)
     // return AtomicConcept.create(((OWLClass)predicate).getURI());
     // else if (predicate instanceof ObjectProperty)
-    // return AtomicAbstractRole.create(((ObjectProperty)predicate).getURI());
+    // return AtomicRole.create(((ObjectProperty)predicate).getURI());
     // else if
     // (KAON2Manager.factory().predicateSymbol(Namespaces.OWL_NS+"sameAs"
     // ,2).equals(predicate))
@@ -371,7 +370,7 @@ public class OwlClausification {
         protected final Map<AtomicConcept, AtomicConcept> m_negativeAtMostReplacements;
         protected final List<Atom> m_headAtoms;
         protected final List<Atom> m_bodyAtoms;
-        protected final Set<AtMostAbstractRoleGuard> m_atMostAbstractRoleGuards;
+        protected final Set<AtMostAbstractRoleGuard> m_atMostRoleGuards;
         protected final Set<Atom> m_positiveFacts;
         protected final boolean m_renameAtMost;
         protected int m_yIndex;
@@ -382,7 +381,7 @@ public class OwlClausification {
             m_negativeAtMostReplacements = new HashMap<AtomicConcept, AtomicConcept>();
             m_headAtoms = new ArrayList<Atom>();
             m_bodyAtoms = new ArrayList<Atom>();
-            m_atMostAbstractRoleGuards = new HashSet<AtMostAbstractRoleGuard>();
+            m_atMostRoleGuards = new HashSet<AtMostAbstractRoleGuard>();
             m_positiveFacts = positiveFacts;
             m_renameAtMost = renameAtMost;
             m_factory = factory;
@@ -443,7 +442,7 @@ public class OwlClausification {
 
         public void visit(OWLDataSomeRestriction desc) {
             OWLDataProperty dp = (OWLDataProperty) desc.getProperty();
-            AtomicConcreteRole property = AtomicConcreteRole.create(dp.getURI().toString());
+            AtomicRole property = AtomicRole.createDataRole(dp.getURI().toString());
             DataVisitor dataVisitor = new DataVisitor();
             desc.getFiller().accept(dataVisitor);
             for (DataRange dataRange : dataVisitor.getDataRanges()) {
@@ -497,7 +496,7 @@ public class OwlClausification {
         public void visit(OWLDataMinCardinalityRestriction desc) {
             int number = desc.getCardinality();
             OWLDataProperty dp = (OWLDataProperty) desc.getProperty();
-            AtomicConcreteRole property = AtomicConcreteRole.create(((OWLDataProperty) dp).getURI().toString());
+            AtomicRole property = AtomicRole.createDataRole(((OWLDataProperty) dp).getURI().toString());
             DataVisitor dataVisitor = new DataVisitor();
             desc.getFiller().accept(dataVisitor);
             for (DataRange dataRange : dataVisitor.getDataRanges()) {
@@ -513,7 +512,7 @@ public class OwlClausification {
 
         public void visit(OWLObjectAllRestriction object) {
             org.semanticweb.HermiT.model.Variable y = nextY();
-            m_bodyAtoms.add(getAbstractRoleAtom(object.getProperty(), X, y));
+            m_bodyAtoms.add(getRoleAtom(object.getProperty(), X, y));
             OWLDescription description = object.getFiller();
             if (description instanceof OWLClass) {
                 OWLClass owlClass = (OWLClass) description;
@@ -560,28 +559,28 @@ public class OwlClausification {
                     org.semanticweb.HermiT.model.Variable y = nextY();
                     m_bodyAtoms.add(Atom.create(
                             getConceptForNominal(individual), y));
-                    m_headAtoms.add(getAbstractRoleAtom(objectProperty, X, y));
+                    m_headAtoms.add(getRoleAtom(objectProperty, X, y));
                 }
             } else {
                 LiteralConcept toConcept = getLiteralConcept(description);
-                AbstractRole onAbstractRole = getAbstractRole(objectProperty);
+                Role onRole = getRole(objectProperty);
                 m_headAtoms.add(Atom.create(AtLeastAbstractRoleConcept.create(
-                        1, onAbstractRole, toConcept),
+                        1, onRole, toConcept),
                         new org.semanticweb.HermiT.model.Term[] { X }));
             }
         }
 
         public void visit(OWLObjectSelfRestriction object) {
             OWLObjectPropertyExpression objectProperty = object.getProperty();
-            Atom roleAtom = getAbstractRoleAtom(objectProperty, X, X);
+            Atom roleAtom = getRoleAtom(objectProperty, X, X);
             m_headAtoms.add(roleAtom);
         }
 
         public void visit(OWLObjectMinCardinalityRestriction object) {
             LiteralConcept toConcept = getLiteralConcept(object.getFiller());
-            AbstractRole onAbstractRole = getAbstractRole(object.getProperty());
+            Role onRole = getRole(object.getProperty());
             m_headAtoms.add(Atom.create(AtLeastAbstractRoleConcept.create(
-                    object.getCardinality(), onAbstractRole, toConcept),
+                    object.getCardinality(), onRole, toConcept),
                     new org.semanticweb.HermiT.model.Term[] { X }));
         }
 
@@ -602,18 +601,18 @@ public class OwlClausification {
                     }
                 } else
                     throw new IllegalStateException("invalid normal form.");
-                AbstractRole onAbstractRole;
+                Role onRole;
                 if (object.getProperty() instanceof OWLObjectProperty) {
-                    onAbstractRole = AtomicAbstractRole.create(((OWLObjectProperty) object.getProperty()).getURI().toString());
+                    onRole = AtomicRole.createObjectRole(((OWLObjectProperty) object.getProperty()).getURI().toString());
                 } else {
                     OWLObjectProperty internalObjectProperty = (OWLObjectProperty) ((OWLObjectPropertyInverse) object.getProperty()).getInverse();
-                    onAbstractRole = InverseAbstractRole.create(AtomicAbstractRole.create(internalObjectProperty.getURI().toString()));
+                    onRole = InverseRole.create(AtomicRole.createObjectRole(internalObjectProperty.getURI().toString()));
                 }
-                AtMostAbstractRoleGuard atMostAbstractRole = AtMostAbstractRoleGuard.create(
-                        object.getCardinality(), onAbstractRole,
+                AtMostAbstractRoleGuard atMostRole = AtMostAbstractRoleGuard.create(
+                        object.getCardinality(), onRole,
                         toAtomicConcept);
-                m_atMostAbstractRoleGuards.add(atMostAbstractRole);
-                m_headAtoms.add(Atom.create(atMostAbstractRole,
+                m_atMostRoleGuards.add(atMostRole);
+                m_headAtoms.add(Atom.create(atMostRole,
                         new org.semanticweb.HermiT.model.Term[] { X }));
                 // This is an optimization that is described in the SHOIQ paper
                 // right after the clausification section.
@@ -621,7 +620,7 @@ public class OwlClausification {
                 // universe in some cases, R(x,y) \wedge C(y) to the body of the
                 // rule
                 org.semanticweb.HermiT.model.Variable Y = nextY();
-                m_bodyAtoms.add(getAbstractRoleAtom(object.getProperty(), X, Y));
+                m_bodyAtoms.add(getRoleAtom(object.getProperty(), X, Y));
                 if (!AtomicConcept.THING.equals(toAtomicConcept))
                     m_bodyAtoms.add(Atom.create(toAtomicConcept, Y));
             } else
@@ -653,7 +652,7 @@ public class OwlClausification {
             if (!(description instanceof OWLClass)) {
                 if (description instanceof OWLObjectSelfRestriction) {
                     OWLObjectPropertyExpression objectProperty = ((OWLObjectSelfRestriction) description).getProperty();
-                    Atom roleAtom = getAbstractRoleAtom(objectProperty, X, X);
+                    Atom roleAtom = getRoleAtom(objectProperty, X, X);
                     m_bodyAtoms.add(roleAtom);
                 } else
                     throw new IllegalStateException(
@@ -675,21 +674,21 @@ public class OwlClausification {
         }
 
         public void clausifyAtMostStuff(Collection<DLClause> dlClauses) {
-            for (AtMostAbstractRoleGuard atMostAbstractRole : m_atMostAbstractRoleGuards) {
-                m_bodyAtoms.add(Atom.create(atMostAbstractRole,
+            for (AtMostAbstractRoleGuard atMostRole : m_atMostRoleGuards) {
+                m_bodyAtoms.add(Atom.create(atMostRole,
                         new org.semanticweb.HermiT.model.Term[] { X }));
-                AbstractRole onAbstractRole = atMostAbstractRole.getOnAbstractRole();
+                Role onRole = atMostRole.getOnRole();
                 OWLObjectPropertyExpression onObjectProperty;
-                if (onAbstractRole instanceof AtomicAbstractRole) {
-                    onObjectProperty = m_factory.getOWLObjectProperty(URI.create(((AtomicAbstractRole) onAbstractRole).getURI().toString()));
+                if (onRole instanceof AtomicRole) {
+                    onObjectProperty = m_factory.getOWLObjectProperty(URI.create(((AtomicRole) onRole).getURI().toString()));
                 } else {
-                    AtomicAbstractRole innerAbstractRole = ((InverseAbstractRole) onAbstractRole).getInverseOf();
-                    onObjectProperty = m_factory.getOWLObjectPropertyInverse(m_factory.getOWLObjectProperty(URI.create(innerAbstractRole.getURI().toString())));
+                    AtomicRole innerRole = ((InverseRole) onRole).getInverseOf();
+                    onObjectProperty = m_factory.getOWLObjectPropertyInverse(m_factory.getOWLObjectProperty(URI.create(innerRole.getURI().toString())));
                 }
                 addAtMostAtoms(
-                        atMostAbstractRole.getCaridnality(),
+                        atMostRole.getCaridnality(),
                         onObjectProperty,
-                        m_factory.getOWLClass(URI.create(atMostAbstractRole.getToAtomicConcept().getURI().toString())));
+                        m_factory.getOWLClass(URI.create(atMostRole.getToAtomicConcept().getURI().toString())));
                 DLClause dlClause = getDLClause();
                 dlClauses.add(dlClause);
             }
@@ -726,7 +725,7 @@ public class OwlClausification {
             org.semanticweb.HermiT.model.Variable[] yVars = new org.semanticweb.HermiT.model.Variable[number + 1];
             for (int i = 0; i < yVars.length; i++) {
                 yVars[i] = nextY();
-                m_bodyAtoms.add(getAbstractRoleAtom(onObjectProperty, X,
+                m_bodyAtoms.add(getRoleAtom(onObjectProperty, X,
                         yVars[i]));
                 if (atomicConcept != null) {
                     Atom atom = Atom.create(
@@ -888,7 +887,7 @@ public class OwlClausification {
         }
 
         public void visit(OWLObjectPropertyAssertionAxiom object) {
-            m_positiveFacts.add(getAbstractRoleAtom(object.getProperty(),
+            m_positiveFacts.add(getRoleAtom(object.getProperty(),
                     getIndividual(object.getSubject()),
                     getIndividual(object.getObject())));
         }
@@ -913,14 +912,14 @@ public class OwlClausification {
                         new org.semanticweb.HermiT.model.Term[] { getIndividual(object.getIndividual()) }));
             } else if (description instanceof OWLObjectSelfRestriction) {
                 OWLObjectSelfRestriction selfRestriction = (OWLObjectSelfRestriction) description;
-                m_positiveFacts.add(getAbstractRoleAtom(
+                m_positiveFacts.add(getRoleAtom(
                         selfRestriction.getProperty(),
                         getIndividual(object.getIndividual()),
                         getIndividual(object.getIndividual())));
             } else if (description instanceof OWLObjectComplementOf
                     && ((OWLObjectComplementOf) description).getOperand() instanceof OWLObjectSelfRestriction) {
                 OWLObjectSelfRestriction selfRestriction = (OWLObjectSelfRestriction) (((OWLObjectComplementOf) description).getOperand());
-                m_negativeFacts.add(getAbstractRoleAtom(
+                m_negativeFacts.add(getRoleAtom(
                         selfRestriction.getProperty(),
                         getIndividual(object.getIndividual()),
                         getIndividual(object.getIndividual())));

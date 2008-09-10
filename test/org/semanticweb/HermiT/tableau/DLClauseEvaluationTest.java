@@ -9,10 +9,10 @@ import org.semanticweb.HermiT.existentials.*;
 import org.semanticweb.HermiT.model.*;
 
 public class DLClauseEvaluationTest extends AbstractHermiTTest {
-    protected static final AtomicAbstractRole R=AtomicAbstractRole.create("R");
-    protected static final AtomicAbstractRole S=AtomicAbstractRole.create("S");
-    protected static final AtomicAbstractRole T=AtomicAbstractRole.create("T");
-    protected static final AtomicAbstractRole U=AtomicAbstractRole.create("U");
+    protected static final AtomicRole R=AtomicRole.createObjectRole("R");
+    protected static final AtomicRole S=AtomicRole.createObjectRole("S");
+    protected static final AtomicRole T=AtomicRole.createObjectRole("T");
+    protected static final AtomicRole U=AtomicRole.createObjectRole("U");
     protected static final DLClause CL_1;
     protected static final DLOntology TEST_DL_ONTOLOGY;
     static {

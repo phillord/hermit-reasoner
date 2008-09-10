@@ -81,13 +81,13 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
         if (node.getNodeType()==NodeType.TREE_NODE && (concept instanceof AtomicConcept || concept instanceof ExistentialConcept))
             updateNodeChange(node);
     }
-    public void assertionAdded(AtomicAbstractRole atomicAbstractRole,Node nodeFrom,Node nodeTo) {
+    public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
         if (nodeTo.getNodeType()==NodeType.TREE_NODE && nodeFrom.isParentOf(nodeTo))
             updateNodeChange(nodeTo);
         else if (nodeFrom.getNodeType()==NodeType.TREE_NODE && nodeTo.isParentOf(nodeFrom))
             updateNodeChange(nodeFrom);
     }
-    public void assertionRemoved(AtomicAbstractRole atomicAbstractRole,Node nodeFrom,Node nodeTo) {
+    public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
         if (nodeTo.getNodeType()==NodeType.TREE_NODE && nodeFrom.isParentOf(nodeTo))
             updateNodeChange(nodeTo);
         else if (nodeFrom.getNodeType()==NodeType.TREE_NODE && nodeTo.isParentOf(nodeFrom))

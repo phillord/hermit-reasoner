@@ -71,13 +71,13 @@ public class DepthFirstStrategy extends StrategyBase implements Serializable {
         //             = node.getSomeUnprocessedExistential();
         //         if (existentialConcept
         //             instanceof AtLeastAbstractRoleConcept) {
-        //             AtLeastAbstractRoleConcept atLeastAbstractRoleConcept
+        //             AtLeastAbstractRoleConcept atLeastAbstractConcept
         //                 = (AtLeastAbstractRoleConcept) existentialConcept;
         //             switch (m_existentialExpansionManager.isSatisfied
-        //                         (atLeastAbstractRoleConcept, node)) {
+        //                         (atLeastAbstractConcept, node)) {
         //             case NOT_SATISFIED: {
         //                 m_existentialExpansionManager.expand(
-        //                     atLeastAbstractRoleConcept, node
+        //                     atLeastAbstractConcept, node
         //                 );
         //                 didSomething = true;
         //                 m_existentialExpansionManager
@@ -89,13 +89,13 @@ public class DepthFirstStrategy extends StrategyBase implements Serializable {
         //                     .markExistentialProcessed
         //                         (existentialConcept, node);
         //                 monitor.existentialSatisfied(
-        //                     atLeastAbstractRoleConcept, node
+        //                     atLeastAbstractConcept, node
         //                 );
         //             } break;
         //             case CURRENTLY_SATISFIED: {
         //                 // do nothing
         //                 monitor.existentialSatisfied(
-        //                     atLeastAbstractRoleConcept, node
+        //                     atLeastAbstractConcept, node
         //                 );
         //             } break;
         //             }

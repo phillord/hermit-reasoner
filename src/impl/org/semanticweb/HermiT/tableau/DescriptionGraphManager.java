@@ -228,7 +228,7 @@ public final class DescriptionGraphManager implements Serializable {
             m_extensionManager.addConceptAssertion(descriptionGraph.getAtomicConceptForVertex(vertex),m_newNodes.get(vertex),dependencySet);
         for (int edgeIndex=0;edgeIndex<descriptionGraph.getNumberOfEdges();edgeIndex++) {
             DescriptionGraph.Edge edge=descriptionGraph.getEdge(edgeIndex);
-            m_extensionManager.addRoleAssertion(edge.getAtomicAbstractRole(),m_newNodes.get(edge.getFromVertex()),m_newNodes.get(edge.getToVertex()),dependencySet);
+            m_extensionManager.addRoleAssertion(edge.getAtomicRole(),m_newNodes.get(edge.getFromVertex()),m_newNodes.get(edge.getToVertex()),dependencySet);
         }
         m_newNodes.clear();
         if (m_tableau.m_tableauMonitor!=null)

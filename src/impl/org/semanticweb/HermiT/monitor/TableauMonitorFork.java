@@ -176,13 +176,13 @@ public class TableauMonitorFork implements TableauMonitor,Serializable  {
         m_first.existentialSatisfied(existentialConcept,forNode);
         m_second.existentialSatisfied(existentialConcept,forNode);
     }
-    public void nominalIntorductionStarted(Node rootNode,Node treeNode,AtMostAbstractRoleGuard atMostAbstractRoleGuard) {
-        m_first.nominalIntorductionStarted(rootNode,treeNode,atMostAbstractRoleGuard);
-        m_second.nominalIntorductionStarted(rootNode,treeNode,atMostAbstractRoleGuard);
+    public void nominalIntorductionStarted(Node rootNode,Node treeNode,AtMostAbstractRoleGuard atMostRoleGuard) {
+        m_first.nominalIntorductionStarted(rootNode,treeNode,atMostRoleGuard);
+        m_second.nominalIntorductionStarted(rootNode,treeNode,atMostRoleGuard);
     }
-    public void nominalIntorductionFinished(Node rootNode,Node treeNode,AtMostAbstractRoleGuard atMostAbstractRoleGuard) {
-        m_first.nominalIntorductionFinished(rootNode,treeNode,atMostAbstractRoleGuard);
-        m_second.nominalIntorductionFinished(rootNode,treeNode,atMostAbstractRoleGuard);
+    public void nominalIntorductionFinished(Node rootNode,Node treeNode,AtMostAbstractRoleGuard atMostRoleGuard) {
+        m_first.nominalIntorductionFinished(rootNode,treeNode,atMostRoleGuard);
+        m_second.nominalIntorductionFinished(rootNode,treeNode,atMostRoleGuard);
     }
     public void nodeCreated(Node node) {
         m_first.nodeCreated(node);

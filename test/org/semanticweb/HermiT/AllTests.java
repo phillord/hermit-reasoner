@@ -11,10 +11,10 @@ public class AllTests extends TestCase {
         // $JUnit-BEGIN$
         // Tests the normalization and clausification, when loading via the
         // KAON2 API.
-        suite.addTest(org.semanticweb.HermiT.kaon2.AllTests.suite());
+//        suite.addTest(org.semanticweb.HermiT.kaon2.AllTests.suite());
         // Tests the normalization and clausification, when loading via the
         // OWLAPI.
-        suite.addTest(org.semanticweb.HermiT.owlapi.AllTests.suite());
+//        suite.addTest(org.semanticweb.HermiT.owlapi.AllTests.suite());
         // Tests Hermit as a blackbox, i.e., by only using the official
         // interface.
         suite.addTest(org.semanticweb.HermiT.reasoner.AllUnitTests.suite());
@@ -25,4 +25,10 @@ public class AllTests extends TestCase {
         // $JUnit-END$
         return suite;
     }
+    
+    public static void main(String... args) throws Throwable {
+        junit.textui.TestRunner.run(suite());
+        System.exit(0);
+    }
+
 }

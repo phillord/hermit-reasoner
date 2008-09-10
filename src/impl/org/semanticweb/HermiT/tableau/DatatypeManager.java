@@ -19,11 +19,14 @@ public class DatatypeManager {
     }
     public void checkDatatypeConstraints() {
         Object[] tupleBuffer=m_binaryExtensionTableDeltaOldRetrieval.getTupleBuffer();
-        m_binaryExtensionTableDeltaOldRetrieval.open();
-        while (!m_binaryExtensionTableDeltaOldRetrieval.afterLast()) {
-            if (tupleBuffer[0] instanceof DataRange)
+        for (m_binaryExtensionTableDeltaOldRetrieval.open();
+             !m_binaryExtensionTableDeltaOldRetrieval.afterLast();
+             m_binaryExtensionTableDeltaOldRetrieval.next()) {
+            if (tupleBuffer[0] instanceof DataRange) {
                 checkNewDatatypeAssertion((DataRange)tupleBuffer[0],(Node)tupleBuffer[1],m_binaryExtensionTableDeltaOldRetrieval.getDependencySet());
-            m_binaryExtensionTableDeltaOldRetrieval.next();
+            } else {
+                // unsatisfiable!
+            }
         }
     }
     protected void checkNewDatatypeAssertion(DataRange dataRange,Node node,DependencySet dependencySet) {

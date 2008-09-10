@@ -6,7 +6,7 @@ package org.semanticweb.HermiT.blocking;
 import java.io.Serializable;
 import java.util.Set;
 
-import org.semanticweb.HermiT.model.AtomicAbstractRole;
+import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.tableau.Node;
 
 /**
@@ -40,18 +40,18 @@ public class PairwiseDirectBlockingCheckerWithReflexivity extends
 
 		private static final long serialVersionUID = -6718642106231484602L;
 		
-        protected final Set<AtomicAbstractRole> m_toSelfLabel;
+        protected final Set<AtomicRole> m_toSelfLabel;
         protected final int m_hashCode;
         
         public PairWiseBlockingSignatureWithReflexivity(Node node) {
         	super(node);
             m_toSelfLabel=node.getToSelfLabel();
-            m_tableau.getLabelManager().addAtomicAbstractRoleSetReference(m_toSelfLabel);
+            m_tableau.getLabelManager().addAtomicRoleSetReference(m_toSelfLabel);
             m_hashCode=m_positiveLabel.hashCode()+m_parentPositiveLabel.hashCode()+m_fromParentLabel.hashCode()+m_toParentLabel.hashCode()+m_toSelfLabel.hashCode();
         }
         protected void finalize() {
             super.finalize();
-            m_tableau.getLabelManager().removeAtomicAbstractRoleSetReference(m_toSelfLabel);
+            m_tableau.getLabelManager().removeAtomicRoleSetReference(m_toSelfLabel);
         }
         public boolean blocksNode(Node node) {
             return super.blocksNode(node) && 

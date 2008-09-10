@@ -10,8 +10,8 @@ public interface BlockingStrategy {
     void computeBlocking();
     void assertionAdded(Concept concept,Node node);
     void assertionRemoved(Concept concept,Node node);
-    void assertionAdded(AtomicAbstractRole atomicAbstractRole,Node nodeFrom,Node nodeTo);
-    void assertionRemoved(AtomicAbstractRole atomicAbstractRole,Node nodeFrom,Node nodeTo);
+    void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo);
+    void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo);
     void nodeStatusChanged(Node node);
     void nodeDestroyed(Node node);
     void modelFound();

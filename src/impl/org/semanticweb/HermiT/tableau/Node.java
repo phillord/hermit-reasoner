@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import org.semanticweb.HermiT.model.AtomicAbstractRole;
+import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 
@@ -33,11 +33,11 @@ public final class Node implements Serializable {
     protected int m_positiveLabelSize;
     protected int m_positiveLabelHashCode;
     protected int m_negativeLabelSize;
-    protected Set<AtomicAbstractRole> m_fromParentLabel;
+    protected Set<AtomicRole> m_fromParentLabel;
     protected int m_fromParentLabelHashCode;
-    protected Set<AtomicAbstractRole> m_toParentLabel;
+    protected Set<AtomicRole> m_toParentLabel;
     protected int m_toParentLabelHashCode;
-    protected Set<AtomicAbstractRole> m_toSelfLabel;
+    protected Set<AtomicRole> m_toSelfLabel;
     protected int m_toSelfLabelHashCode;
     private List<ExistentialConcept> m_unprocessedExistentials;
     protected Node m_previousTableauNode;
@@ -105,15 +105,15 @@ public final class Node implements Serializable {
             m_positiveLabel=null;
         }
         if (m_fromParentLabel!=null) {
-            m_tableau.m_labelManager.removeAtomicAbstractRoleSetReference(m_fromParentLabel);
+            m_tableau.m_labelManager.removeAtomicRoleSetReference(m_fromParentLabel);
             m_fromParentLabel=null;
         }
         if (m_toParentLabel!=null) {
-            m_tableau.m_labelManager.removeAtomicAbstractRoleSetReference(m_toParentLabel);
+            m_tableau.m_labelManager.removeAtomicRoleSetReference(m_toParentLabel);
             m_toParentLabel=null;
         }
         if (m_toSelfLabel!=null) {
-            m_tableau.m_labelManager.removeAtomicAbstractRoleSetReference(m_toSelfLabel);
+            m_tableau.m_labelManager.removeAtomicRoleSetReference(m_toSelfLabel);
             m_toSelfLabel=null;
         }
         if (m_unprocessedExistentials!=NO_EXISTENTIALS) {
@@ -137,11 +137,11 @@ public final class Node implements Serializable {
         if (m_positiveLabel!=null)
             m_tableau.m_labelManager.removeConceptSetReference(m_positiveLabel);
         if (m_fromParentLabel!=null)
-            m_tableau.m_labelManager.removeAtomicAbstractRoleSetReference(m_fromParentLabel);
+            m_tableau.m_labelManager.removeAtomicRoleSetReference(m_fromParentLabel);
         if (m_toParentLabel!=null)
-            m_tableau.m_labelManager.removeAtomicAbstractRoleSetReference(m_toParentLabel);
+            m_tableau.m_labelManager.removeAtomicRoleSetReference(m_toParentLabel);
         if (m_toSelfLabel!=null)
-            m_tableau.m_labelManager.removeAtomicAbstractRoleSetReference(m_toSelfLabel);
+            m_tableau.m_labelManager.removeAtomicRoleSetReference(m_toSelfLabel);
         if (m_unprocessedExistentials!=NO_EXISTENTIALS && m_unprocessedExistentials!=null) {
             m_unprocessedExistentials.clear();
             m_tableau.putExistentialConceptsBuffer(m_unprocessedExistentials);
@@ -271,77 +271,77 @@ public final class Node implements Serializable {
     protected void removeFromNegativeLabel() {
         m_negativeLabelSize--;
     }
-    public Set<AtomicAbstractRole> getFromParentLabel() {
+    public Set<AtomicRole> getFromParentLabel() {
         if (m_fromParentLabel==null) {
             m_fromParentLabel=m_tableau.m_labelManager.getEdgeLabel(m_parent,this);
-            m_tableau.m_labelManager.addAtomicAbstractRoleSetReference(m_fromParentLabel);
+            m_tableau.m_labelManager.addAtomicRoleSetReference(m_fromParentLabel);
         }
         return m_fromParentLabel;
     }
     public int getFromParentLabelHashCode() {
         return m_fromParentLabelHashCode;
     }
-    protected void addToFromParentLabel(AtomicAbstractRole atomicAbstractRole) {
+    protected void addToFromParentLabel(AtomicRole atomicRole) {
         if (m_fromParentLabel!=null) {
-            m_tableau.m_labelManager.removeAtomicAbstractRoleSetReference(m_fromParentLabel);
+            m_tableau.m_labelManager.removeAtomicRoleSetReference(m_fromParentLabel);
             m_fromParentLabel=null;
         }
-        m_fromParentLabelHashCode+=atomicAbstractRole.hashCode();
+        m_fromParentLabelHashCode+=atomicRole.hashCode();
     }
-    protected void removeFromFromParentLabel(AtomicAbstractRole atomicAbstractRole) {
+    protected void removeFromFromParentLabel(AtomicRole atomicRole) {
         if (m_fromParentLabel!=null) {
-            m_tableau.m_labelManager.removeAtomicAbstractRoleSetReference(m_fromParentLabel);
+            m_tableau.m_labelManager.removeAtomicRoleSetReference(m_fromParentLabel);
             m_fromParentLabel=null;
         }
-        m_fromParentLabelHashCode-=atomicAbstractRole.hashCode();
+        m_fromParentLabelHashCode-=atomicRole.hashCode();
     }
-    public Set<AtomicAbstractRole> getToParentLabel() {
+    public Set<AtomicRole> getToParentLabel() {
         if (m_toParentLabel==null) {
             m_toParentLabel=m_tableau.m_labelManager.getEdgeLabel(this,m_parent);
-            m_tableau.m_labelManager.addAtomicAbstractRoleSetReference(m_toParentLabel);
+            m_tableau.m_labelManager.addAtomicRoleSetReference(m_toParentLabel);
         }
         return m_toParentLabel;
     }
     public int getToParentLabelHashCode() {
         return m_toParentLabelHashCode;
     }
-    protected void addToToParentLabel(AtomicAbstractRole atomicAbstractRole) {
+    protected void addToToParentLabel(AtomicRole atomicRole) {
         if (m_toParentLabel!=null) {
-            m_tableau.m_labelManager.removeAtomicAbstractRoleSetReference(m_toParentLabel);
+            m_tableau.m_labelManager.removeAtomicRoleSetReference(m_toParentLabel);
             m_toParentLabel=null;
         }
-        m_toParentLabelHashCode+=atomicAbstractRole.hashCode();
+        m_toParentLabelHashCode+=atomicRole.hashCode();
     }
-    protected void removeFromToParentLabel(AtomicAbstractRole atomicAbstractRole) {
+    protected void removeFromToParentLabel(AtomicRole atomicRole) {
         if (m_toParentLabel!=null) {
-            m_tableau.m_labelManager.removeAtomicAbstractRoleSetReference(m_toParentLabel);
+            m_tableau.m_labelManager.removeAtomicRoleSetReference(m_toParentLabel);
             m_toParentLabel=null;
         }
-        m_toParentLabelHashCode-=atomicAbstractRole.hashCode();
+        m_toParentLabelHashCode-=atomicRole.hashCode();
     }
-    public Set<AtomicAbstractRole> getToSelfLabel() {
+    public Set<AtomicRole> getToSelfLabel() {
         if (m_toSelfLabel==null) {
             m_toSelfLabel=m_tableau.m_labelManager.getEdgeLabel(this,this);
-            m_tableau.m_labelManager.addAtomicAbstractRoleSetReference(m_toSelfLabel);
+            m_tableau.m_labelManager.addAtomicRoleSetReference(m_toSelfLabel);
         }
         return m_toParentLabel;
     }
     public int getToSelfLabelHashCode() {
         return m_toSelfLabelHashCode;
     }
-    protected void addToToSelfLabel(AtomicAbstractRole atomicAbstractRole) {
+    protected void addToToSelfLabel(AtomicRole atomicRole) {
         if (m_toSelfLabel!=null) {
-            m_tableau.m_labelManager.removeAtomicAbstractRoleSetReference(m_toSelfLabel);
+            m_tableau.m_labelManager.removeAtomicRoleSetReference(m_toSelfLabel);
             m_toSelfLabel=null;
         }
-        m_toSelfLabelHashCode+=atomicAbstractRole.hashCode();
+        m_toSelfLabelHashCode+=atomicRole.hashCode();
     }
-    protected void removeFromToSelfLabel(AtomicAbstractRole atomicAbstractRole) {
+    protected void removeFromToSelfLabel(AtomicRole atomicRole) {
         if (m_toSelfLabel!=null) {
-            m_tableau.m_labelManager.removeAtomicAbstractRoleSetReference(m_toSelfLabel);
+            m_tableau.m_labelManager.removeAtomicRoleSetReference(m_toSelfLabel);
             m_toSelfLabel=null;
         }
-        m_toSelfLabelHashCode-=atomicAbstractRole.hashCode();
+        m_toSelfLabelHashCode-=atomicRole.hashCode();
     }
     protected void addToUnprocessedExistentials(ExistentialConcept existentialConcept) {
         assert NO_EXISTENTIALS.isEmpty();

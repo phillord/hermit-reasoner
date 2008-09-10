@@ -98,7 +98,7 @@ public class GraphTest extends AbstractOntologyTest {
         DependencySet emptySet=tableau.getDependencySetFactory().emptySet();
         Node n1=tableau.createNewRootNode(emptySet,0);
         Node n2=tableau.createNewRootNode(emptySet,0);
-        AtomicAbstractRole r=AtomicAbstractRole.create("R");
+        AtomicRole r=AtomicRole.createObjectRole("R");
         extensionManager.addTuple(new Object[] { graph,n1,n2 },emptySet);
         extensionManager.addRoleAssertion(r,n1,n2,emptySet);
         
@@ -192,7 +192,7 @@ public class GraphTest extends AbstractOntologyTest {
     }
     
     protected static DescriptionGraph.Edge E(String atomicRoleName,int from,int to) {
-        AtomicAbstractRole atomicRole=AtomicAbstractRole.create(atomicRoleName);
+        AtomicRole atomicRole=AtomicRole.createObjectRole(atomicRoleName);
         return new DescriptionGraph.Edge(atomicRole,from,to);
     }
 }

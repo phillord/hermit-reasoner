@@ -3,12 +3,12 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 
-import org.semanticweb.HermiT.model.AbstractRole;
+import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
-import org.semanticweb.HermiT.model.AtomicAbstractRole;
+import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.Concept;
-import org.semanticweb.HermiT.model.InverseAbstractRole;
+import org.semanticweb.HermiT.model.InverseRole;
 
 /**
  * Implements the nominal introduction rule.
@@ -95,19 +95,19 @@ public final class NominalIntroductionManager implements Serializable {
             Node treeNode=(Node)m_bufferForTarget[TREE_NODE];
             m_firstUnprocessedTarget++;
             if (rootNode.isActive() && treeNode.isActive()) {
-                AtMostAbstractRoleGuard atMostAbstractRoleGuard=(AtMostAbstractRoleGuard)m_bufferForTarget[AT_MOST_CONCEPT];
+                AtMostAbstractRoleGuard atMostRoleGuard=(AtMostAbstractRoleGuard)m_bufferForTarget[AT_MOST_CONCEPT];
                 if (m_tableau.m_tableauMonitor!=null)
-                    m_tableau.m_tableauMonitor.nominalIntorductionStarted(rootNode,treeNode,atMostAbstractRoleGuard);
-                DependencySet dependencySet=m_extensionManager.getConceptAssertionDependencySet(atMostAbstractRoleGuard,rootNode);
-                dependencySet=m_tableau.getDependencySetFactory().unionWith(dependencySet,m_extensionManager.getRoleAssertionDependencySet(atMostAbstractRoleGuard.getOnAbstractRole(),rootNode,treeNode));
-                if (!AtomicConcept.THING.equals(atMostAbstractRoleGuard.getToAtomicConcept()))
-                    dependencySet=m_tableau.getDependencySetFactory().unionWith(dependencySet,m_extensionManager.getConceptAssertionDependencySet(atMostAbstractRoleGuard.getToAtomicConcept(),treeNode));
-                if (atMostAbstractRoleGuard.getCaridnality()>1) {
-                    BranchingPoint branchingPoint=new NominalIntroductionBranchingPoint(m_tableau,rootNode,treeNode,atMostAbstractRoleGuard);
+                    m_tableau.m_tableauMonitor.nominalIntorductionStarted(rootNode,treeNode,atMostRoleGuard);
+                DependencySet dependencySet=m_extensionManager.getConceptAssertionDependencySet(atMostRoleGuard,rootNode);
+                dependencySet=m_tableau.getDependencySetFactory().unionWith(dependencySet,m_extensionManager.getRoleAssertionDependencySet(atMostRoleGuard.getOnRole(),rootNode,treeNode));
+                if (!AtomicConcept.THING.equals(atMostRoleGuard.getToAtomicConcept()))
+                    dependencySet=m_tableau.getDependencySetFactory().unionWith(dependencySet,m_extensionManager.getConceptAssertionDependencySet(atMostRoleGuard.getToAtomicConcept(),treeNode));
+                if (atMostRoleGuard.getCaridnality()>1) {
+                    BranchingPoint branchingPoint=new NominalIntroductionBranchingPoint(m_tableau,rootNode,treeNode,atMostRoleGuard);
                     m_tableau.pushBranchingPoint(branchingPoint);
                     dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,branchingPoint.getLevel());
                 }
-                Node newRootNode=getRootNodeFor(dependencySet,rootNode,atMostAbstractRoleGuard,1);
+                Node newRootNode=getRootNodeFor(dependencySet,rootNode,atMostRoleGuard,1);
                 if (!newRootNode.isActive()) {
                     assert newRootNode.isMerged();
                     dependencySet=newRootNode.addCacnonicalNodeDependencySet(dependencySet);
@@ -115,15 +115,15 @@ public final class NominalIntroductionManager implements Serializable {
                 }
                 m_mergingManager.mergeNodes(treeNode,newRootNode,dependencySet);
                 if (m_tableau.m_tableauMonitor!=null)
-                    m_tableau.m_tableauMonitor.nominalIntorductionFinished(rootNode,treeNode,atMostAbstractRoleGuard);
+                    m_tableau.m_tableauMonitor.nominalIntorductionFinished(rootNode,treeNode,atMostRoleGuard);
                 result=true;
             }
         }
         return result;
     }
-    protected Node getRootNodeFor(DependencySet dependencySet,Node rootNode,AtMostAbstractRoleGuard atMostAbstractRoleGuard,int number) {
+    protected Node getRootNodeFor(DependencySet dependencySet,Node rootNode,AtMostAbstractRoleGuard atMostRoleGuard,int number) {
         m_bufferForRootNodes[0]=rootNode;
-        m_bufferForRootNodes[1]=atMostAbstractRoleGuard;
+        m_bufferForRootNodes[1]=atMostRoleGuard;
         m_bufferForRootNodes[2]=number;
         int tupleIndex=m_newRootNodesIndex.getTupleIndex(m_bufferForRootNodes);
         if (tupleIndex==-1) {
@@ -139,10 +139,10 @@ public final class NominalIntroductionManager implements Serializable {
     public void addNonnegativeConceptAssertion(Concept concept,Node node) {
         if (node.getNodeType()==NodeType.ROOT_NODE && concept instanceof AtMostAbstractRoleGuard) {
             AtMostAbstractRoleGuard atMost=(AtMostAbstractRoleGuard)concept;
-            AbstractRole onAbstractRole=atMost.getOnAbstractRole();
+            Role onRole=atMost.getOnRole();
             AtomicConcept toAtomicConcept=atMost.getToAtomicConcept();
-            if (onAbstractRole instanceof AtomicAbstractRole && node.m_numberOfNIAssertionsFromNode>0) {
-                m_ternaryExtensionTableSearch01Bound.getBindingsBuffer()[0]=onAbstractRole;
+            if (onRole instanceof AtomicRole && node.m_numberOfNIAssertionsFromNode>0) {
+                m_ternaryExtensionTableSearch01Bound.getBindingsBuffer()[0]=onRole;
                 m_ternaryExtensionTableSearch01Bound.getBindingsBuffer()[1]=node;
                 m_ternaryExtensionTableSearch01Bound.open();
                 while (!m_ternaryExtensionTableSearch01Bound.afterLast()) {
@@ -152,8 +152,8 @@ public final class NominalIntroductionManager implements Serializable {
                     m_ternaryExtensionTableSearch01Bound.next();
                 }
             }
-            else if (onAbstractRole instanceof InverseAbstractRole && node.m_numberOfNIAssertionsToNode>0) {
-                m_ternaryExtensionTableSearch02Bound.getBindingsBuffer()[0]=((InverseAbstractRole)onAbstractRole).getInverseOf();
+            else if (onRole instanceof InverseRole && node.m_numberOfNIAssertionsToNode>0) {
+                m_ternaryExtensionTableSearch02Bound.getBindingsBuffer()[0]=((InverseRole)onRole).getInverseOf();
                 m_ternaryExtensionTableSearch02Bound.getBindingsBuffer()[2]=node;
                 m_ternaryExtensionTableSearch02Bound.open();
                 while (!m_ternaryExtensionTableSearch02Bound.afterLast()) {
@@ -171,15 +171,15 @@ public final class NominalIntroductionManager implements Serializable {
                 while (!m_ternaryExtensionTableSearch1Bound.afterLast()) {
                     Node rootNode=(Node)m_ternaryExtensionTableSearch1Bound.getTupleBuffer()[2];
                     if (rootNode.getNodeType()==NodeType.ROOT_NODE && !rootNode.isParentOf(node)) {
-                        Object atomicAbstractRole=m_ternaryExtensionTableSearch1Bound.getTupleBuffer()[0];
-                        if (atomicAbstractRole instanceof AtomicAbstractRole) {
+                        Object atomicRole=m_ternaryExtensionTableSearch1Bound.getTupleBuffer()[0];
+                        if (atomicRole instanceof AtomicRole) {
                             m_binaryExtensionTableSearch1Bound.getBindingsBuffer()[1]=rootNode;
                             m_binaryExtensionTableSearch1Bound.open();
                             while (!m_binaryExtensionTableSearch1Bound.afterLast()) {
                                 Object rootNodeConcept=m_binaryExtensionTableSearch1Bound.getTupleBuffer()[0];
                                 if (rootNodeConcept instanceof AtMostAbstractRoleGuard) {
                                     AtMostAbstractRoleGuard atMost=(AtMostAbstractRoleGuard)rootNodeConcept;
-                                    if (atMost.getOnAbstractRole() instanceof InverseAbstractRole && ((InverseAbstractRole)atMost.getOnAbstractRole()).getInverseOf().equals(atomicAbstractRole))
+                                    if (atMost.getOnRole() instanceof InverseRole && ((InverseRole)atMost.getOnRole()).getInverseOf().equals(atomicRole))
                                         addTarget(rootNode,node,atMost);
                                 }
                                 m_binaryExtensionTableSearch1Bound.next();
@@ -195,15 +195,15 @@ public final class NominalIntroductionManager implements Serializable {
                 while (!m_ternaryExtensionTableSearch2Bound.afterLast()) {
                     Node rootNode=(Node)m_ternaryExtensionTableSearch2Bound.getTupleBuffer()[1];
                     if (rootNode.getNodeType()==NodeType.ROOT_NODE && !rootNode.isParentOf(node)) {
-                        Object atomicAbstractRole=m_ternaryExtensionTableSearch2Bound.getTupleBuffer()[0];
-                        if (atomicAbstractRole instanceof AtomicAbstractRole) {
+                        Object atomicRole=m_ternaryExtensionTableSearch2Bound.getTupleBuffer()[0];
+                        if (atomicRole instanceof AtomicRole) {
                             m_binaryExtensionTableSearch1Bound.getBindingsBuffer()[1]=rootNode;
                             m_binaryExtensionTableSearch1Bound.open();
                             while (!m_binaryExtensionTableSearch1Bound.afterLast()) {
                                 Object rootNodeConcept=m_binaryExtensionTableSearch1Bound.getTupleBuffer()[0];
                                 if (rootNodeConcept instanceof AtMostAbstractRoleGuard) {
                                     AtMostAbstractRoleGuard atMost=(AtMostAbstractRoleGuard)rootNodeConcept;
-                                    if (atMost.getOnAbstractRole().equals(atomicAbstractRole))
+                                    if (atMost.getOnRole().equals(atomicRole))
                                         addTarget(rootNode,node,atMost);
                                 }
                                 m_binaryExtensionTableSearch1Bound.next();
@@ -215,7 +215,7 @@ public final class NominalIntroductionManager implements Serializable {
             }
         }
     }
-    public void addAtomicAbstractRoleAssertion(AtomicAbstractRole atomicAbstractRole,Node nodeFrom,Node nodeTo) {
+    public void addAtomicRoleAssertion(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
         if (nodeFrom.getNodeType()==NodeType.ROOT_NODE && nodeTo.getNodeType()==NodeType.TREE_NODE && !nodeFrom.isParentOf(nodeTo)) {
             nodeFrom.m_numberOfNIAssertionsFromNode++;
             nodeTo.m_numberOfNIAssertionsToNode++;
@@ -225,7 +225,7 @@ public final class NominalIntroductionManager implements Serializable {
                 Object concept=m_binaryExtensionTableSearch1Bound.getTupleBuffer()[0];
                 if (concept instanceof AtMostAbstractRoleGuard) {
                     AtMostAbstractRoleGuard atMost=(AtMostAbstractRoleGuard)concept;
-                    if (atMost.getOnAbstractRole().equals(atomicAbstractRole)) {
+                    if (atMost.getOnRole().equals(atomicRole)) {
                         AtomicConcept toAtomicConcept=atMost.getToAtomicConcept();
                         if (AtomicConcept.THING.equals(toAtomicConcept) || m_extensionManager.containsAssertion(toAtomicConcept,nodeTo))
                             addTarget(nodeFrom,nodeTo,atMost);
@@ -243,7 +243,7 @@ public final class NominalIntroductionManager implements Serializable {
                 Object concept=m_binaryExtensionTableSearch1Bound.getTupleBuffer()[0];
                 if (concept instanceof AtMostAbstractRoleGuard) {
                     AtMostAbstractRoleGuard atMost=(AtMostAbstractRoleGuard)concept;
-                    if (atMost.getOnAbstractRole() instanceof InverseAbstractRole && ((InverseAbstractRole)atMost.getOnAbstractRole()).getInverseOf().equals(atomicAbstractRole)) {
+                    if (atMost.getOnRole() instanceof InverseRole && ((InverseRole)atMost.getOnRole()).getInverseOf().equals(atomicRole)) {
                         AtomicConcept toAtomicConcept=atMost.getToAtomicConcept();
                         if (AtomicConcept.THING.equals(toAtomicConcept) || m_extensionManager.containsAssertion(toAtomicConcept,nodeFrom))
                             addTarget(nodeTo,nodeFrom,atMost);
@@ -253,7 +253,7 @@ public final class NominalIntroductionManager implements Serializable {
             }
         }
     }
-    public void removeAtomicAbstractRoleAssertion(AtomicAbstractRole atomicAbstractRole,Node nodeFrom,Node nodeTo) {
+    public void removeAtomicRoleAssertion(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
         if ((nodeFrom.getNodeType()==NodeType.ROOT_NODE && nodeTo.getNodeType()==NodeType.TREE_NODE && !nodeFrom.isParentOf(nodeTo)) ||
             (nodeFrom.getNodeType()==NodeType.TREE_NODE && nodeTo.getNodeType()==NodeType.ROOT_NODE && !nodeTo.isParentOf(nodeFrom))) {
             nodeFrom.m_numberOfNIAssertionsFromNode--;
@@ -272,23 +272,23 @@ public final class NominalIntroductionManager implements Serializable {
 
         protected final Node m_rootNode;
         protected final Node m_treeNode;
-        protected final AtMostAbstractRoleGuard m_atMostAbstractRoleGuard;
+        protected final AtMostAbstractRoleGuard m_atMostRoleGuard;
         protected int m_currentRootNode;
         
-        public NominalIntroductionBranchingPoint(Tableau tableau,Node rootNode,Node treeNode,AtMostAbstractRoleGuard atMostAbstractRoleGuard) {
+        public NominalIntroductionBranchingPoint(Tableau tableau,Node rootNode,Node treeNode,AtMostAbstractRoleGuard atMostRoleGuard) {
             super(tableau);
             m_rootNode=rootNode;
             m_treeNode=treeNode;
-            m_atMostAbstractRoleGuard=atMostAbstractRoleGuard;
+            m_atMostRoleGuard=atMostRoleGuard;
             m_currentRootNode=1; // This reflects the assumption that the first merge is performed from the NominalIntroductionManager
         }
         public void startNextChoice(Tableau tableau,DependencySet clashDepdendencySet) {
             m_currentRootNode++;
-            assert m_currentRootNode<=m_atMostAbstractRoleGuard.getCaridnality();
+            assert m_currentRootNode<=m_atMostRoleGuard.getCaridnality();
             DependencySet dependencySet=clashDepdendencySet;
-            if (m_currentRootNode==m_atMostAbstractRoleGuard.getCaridnality())
+            if (m_currentRootNode==m_atMostRoleGuard.getCaridnality())
                 dependencySet=tableau.getDependencySetFactory().removeBranchingPoint(dependencySet,m_level);
-            Node newRootNode=getRootNodeFor(dependencySet,m_rootNode,m_atMostAbstractRoleGuard,m_currentRootNode);
+            Node newRootNode=getRootNodeFor(dependencySet,m_rootNode,m_atMostRoleGuard,m_currentRootNode);
             if (!newRootNode.isActive()) {
                 assert newRootNode.isMerged();
                 dependencySet=newRootNode.addCacnonicalNodeDependencySet(dependencySet);

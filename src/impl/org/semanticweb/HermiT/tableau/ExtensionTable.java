@@ -3,7 +3,7 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 
-import org.semanticweb.HermiT.model.AtomicAbstractRole;
+import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.Concept;
@@ -120,16 +120,16 @@ public abstract class ExtensionTable implements Serializable {
                 m_tableau.m_nominalIntroductionManager.addNonnegativeConceptAssertion(concept,node);
             }
         }
-        else if (dlPredicateObject instanceof AtomicAbstractRole) {
-            AtomicAbstractRole atomicAbstractRole=(AtomicAbstractRole)dlPredicateObject;
+        else if (dlPredicateObject instanceof AtomicRole) {
+            AtomicRole atomicRole=(AtomicRole)dlPredicateObject;
             Node node0=(Node)tuple[1];
             Node node1=(Node)tuple[2];
-            m_tableau.m_existentialsExpansionStrategy.assertionAdded(atomicAbstractRole,node0,node1);
+            m_tableau.m_existentialsExpansionStrategy.assertionAdded(atomicRole,node0,node1);
             if (node0.isParentOf(node1))
-                node1.addToFromParentLabel(atomicAbstractRole);
+                node1.addToFromParentLabel(atomicRole);
             else if (node1.isParentOf(node0))
-                node0.addToToParentLabel(atomicAbstractRole);
-            m_tableau.m_nominalIntroductionManager.addAtomicAbstractRoleAssertion(atomicAbstractRole,node0,node1);
+                node0.addToToParentLabel(atomicRole);
+            m_tableau.m_nominalIntroductionManager.addAtomicRoleAssertion(atomicRole,node0,node1);
         }
         else if (Inequality.INSTANCE.equals(dlPredicateObject)) {
             if (tuple[1]==tuple[2]) {
@@ -203,16 +203,16 @@ public abstract class ExtensionTable implements Serializable {
                     node.removeFromUnprocessedExistentials((ExistentialConcept)dlPredicateObject);
             }
         }
-        else if (dlPredicateObject instanceof AtomicAbstractRole) {
-            AtomicAbstractRole atomicAbstractRole=(AtomicAbstractRole)dlPredicateObject;
+        else if (dlPredicateObject instanceof AtomicRole) {
+            AtomicRole atomicRole=(AtomicRole)dlPredicateObject;
             Node node0=(Node)tuple[1];
             Node node1=(Node)tuple[2];
-            m_tableau.m_existentialsExpansionStrategy.assertionRemoved(atomicAbstractRole,node0,node1);
+            m_tableau.m_existentialsExpansionStrategy.assertionRemoved(atomicRole,node0,node1);
             if (node0.isParentOf(node1))
-                node1.removeFromFromParentLabel(atomicAbstractRole);
+                node1.removeFromFromParentLabel(atomicRole);
             else if (node1.isParentOf(node0))
-                node0.removeFromToParentLabel(atomicAbstractRole);
-            m_tableau.m_nominalIntroductionManager.removeAtomicAbstractRoleAssertion(atomicAbstractRole,node0,node1);
+                node0.removeFromToParentLabel(atomicRole);
+            m_tableau.m_nominalIntroductionManager.removeAtomicRoleAssertion(atomicRole,node0,node1);
         }
         else if (dlPredicateObject instanceof DescriptionGraph)
             m_tableau.m_descriptionGraphManager.descriptionGraphTupleRemoved(tupleIndex,tuple);

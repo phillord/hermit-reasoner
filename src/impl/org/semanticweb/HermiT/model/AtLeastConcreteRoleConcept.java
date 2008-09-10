@@ -12,11 +12,14 @@ public class AtLeastConcreteRoleConcept extends ExistentialConcept implements
     private static final long serialVersionUID = -9188905009088347624L;
 
     protected final int number;
-    protected final AtomicConcreteRole onAtomicConcreteRole;
+    protected final AtomicRole onAtomicConcreteRole;
     protected final DataRange toDataRange;
 
     protected AtLeastConcreteRoleConcept(int number,
-            AtomicConcreteRole onAtomicConcreteRole, DataRange toDataRange) {
+            AtomicRole onAtomicConcreteRole, DataRange toDataRange) {
+        if (!onAtomicConcreteRole.isRestrictedToDatatypes()) {
+            throw new RuntimeException("Data restrictions on object roles are not allowed"); // but could be -rob
+        }
         this.number = number;
         this.onAtomicConcreteRole = onAtomicConcreteRole;
         this.toDataRange = toDataRange;
@@ -26,7 +29,7 @@ public class AtLeastConcreteRoleConcept extends ExistentialConcept implements
         return number;
     }
 
-    public AtomicConcreteRole getOnAtomicConcreteRole() {
+    public AtomicRole getOnAtomicConcreteRole() {
         return onAtomicConcreteRole;
     }
 
@@ -62,7 +65,7 @@ public class AtLeastConcreteRoleConcept extends ExistentialConcept implements
     };
 
     public static AtLeastConcreteRoleConcept create(int number,
-            AtomicConcreteRole onAbstractDataProperty, DataRange toDataRange) {
+            AtomicRole onAbstractDataProperty, DataRange toDataRange) {
         return s_interningManager.intern(new AtLeastConcreteRoleConcept(number,
                 onAbstractDataProperty, toDataRange));
     }

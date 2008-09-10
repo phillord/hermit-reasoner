@@ -57,9 +57,9 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
     }
     public void assertionRemoved(Concept concept,Node node) {
     }
-    public void assertionAdded(AtomicAbstractRole atomicAbstractRole,Node nodeFrom,Node nodeTo) {
+    public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
     }
-    public void assertionRemoved(AtomicAbstractRole atomicAbstractRole,Node nodeFrom,Node nodeTo) {
+    public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
     }
     public void nodeStatusChanged(Node node) {
     }

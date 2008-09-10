@@ -101,7 +101,7 @@ public class Timer extends TableauMonitorAdapter {
         output.print("    Concept factory size: ");
         output.print(m_tableau.getLabelManager().sizeInMemoryConceptSetFactory()/1000);
         output.print("kb    Atomic role factory size: ");
-        output.print(m_tableau.getLabelManager().sizeInMemoryAtomicAbstractRoleSetFactory()/1000);
+        output.print(m_tableau.getLabelManager().sizeInMemoryAtomicRoleSetFactory()/1000);
         output.println("kb");
 
         output.print("    Trivial existentials:   ");

@@ -10,6 +10,7 @@ public class AllUnitTests extends TestCase {
         TestSuite suite = new TestSuite("Unit tests for HermiT as a blackbox.");
         // $JUnit-BEGIN$
         suite.addTestSuite(ReasonerTest.class);
+        suite.addTestSuite(DatatypesTest.class);
         // $JUnit-END$
         return suite;
     }
