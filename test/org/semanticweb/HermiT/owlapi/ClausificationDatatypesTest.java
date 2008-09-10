@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.semanticweb.HermiT.HermiT;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
@@ -274,7 +275,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         OWLDataFactory factory = manager.getOWLDataFactory();
         Set<DescriptionGraph> noDescriptionGraphs = Collections.emptySet();
-        DLOntology dlOntology = clausifier.clausify(false, ontology, factory,
+        DLOntology dlOntology = clausifier.clausify(new HermiT.Configuration(), ontology, factory,
                 noDescriptionGraphs);
         Set<String> actualStrings = new HashSet<String>();
         org.semanticweb.HermiT.Namespaces namespaces = new org.semanticweb.HermiT.Namespaces();

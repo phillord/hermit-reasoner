@@ -344,6 +344,7 @@ public final class Node implements Serializable {
         m_toSelfLabelHashCode-=atomicAbstractRole.hashCode();
     }
     protected void addToUnprocessedExistentials(ExistentialConcept existentialConcept) {
+        assert NO_EXISTENTIALS.isEmpty();
         if (m_unprocessedExistentials==NO_EXISTENTIALS) {
             m_unprocessedExistentials=m_tableau.getExistentialConceptsBuffer();
             assert m_unprocessedExistentials.isEmpty();

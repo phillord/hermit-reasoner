@@ -22,17 +22,18 @@ public class RoleBox {
         }
     }
     
-    protected Map<AbstractRole, AbstractRole> m_canonicalNames;
-    protected Set<AbstractRole> m_symmetricRoles;
+    private Map<AbstractRole, AbstractRole> m_canonicalNames;
+    private Set<AbstractRole> m_symmetricRoles;
     
-    protected Map<Integer, Map<Integer, Set<AbstractRole>>> m_transitions;
-    protected Map<AbstractRole, Integer> m_initialStates;
-    protected Set<Integer> m_acceptingStates;
+    private Map<Integer, Map<Integer, Set<AbstractRole>>> m_transitions;
+    private Map<AbstractRole, Integer> m_initialStates;
+    private Set<Integer> m_acceptingStates;
     
     protected AbstractRole canonical(AbstractRole r) {
         AbstractRole out = m_canonicalNames.get(r);
         return (out == null ? r : out);
     }
+    
     public boolean isComplex(AbstractRole r) {
         return m_initialStates.containsKey(canonical(r));
     }
@@ -166,31 +167,31 @@ public class RoleBox {
         }
         
         // Build the automata and convert them to a convenient format for future use:
-        // RoleAutomaton a =
-        //     RoleAutomaton.combineAutomata(RoleAutomaton.makeAutomata(sanitized_definitions, m_symmetricRoles));
-        // for (RoleAutomaton.Transition t : a.m_transitions) {
-        //     Map<Integer, Set<AbstractRole>> m = m_transitions.get(t.x.i.n);
-        //     if (m == null) {
-        //         m = new HashMap<Integer, Set<AbstractRole>>();
-        //         m_transitions.put(t.x.i.n, m);
-        //     }
-        //     Set<AbstractRole> s = m.get(t.x.f.n);
-        //     if (s == null) {
-        //         s = new HashSet<AbstractRole>();
-        //         m.put(t.x.f.n, s);
-        //     }
-        //     s.add(t.r);
-        // }
-        // m_initialStates = new HashMap<AbstractRole, Integer>();
-        // for (Map.Entry<Integer, Set<AbstractRole>> e : m_transitions.get(new Integer(0)).entrySet()) {
-        //     for (AbstractRole r : e.getValue()) {
-        //         assert !m_initialStates.containsKey(r);
-        //         m_initialStates.put(r, e.getKey());
-        //     }
-        // }
-        // for (AbstractRole r : complexRoles) assert m_initialStates.containsKey(canonical(r));
-        // m_acceptingStates = new HashSet<Integer>();
-        // m_acceptingStates.add(a.finalState().n);
+        RoleAutomaton a =
+            RoleAutomaton.combineAutomata(RoleAutomaton.makeAutomata(sanitized_definitions, m_symmetricRoles));
+        for (RoleAutomaton.Transition t : a.m_transitions) {
+            Map<Integer, Set<AbstractRole>> m = m_transitions.get(t.x.i.n);
+            if (m == null) {
+                m = new HashMap<Integer, Set<AbstractRole>>();
+                m_transitions.put(t.x.i.n, m);
+            }
+            Set<AbstractRole> s = m.get(t.x.f.n);
+            if (s == null) {
+                s = new HashSet<AbstractRole>();
+                m.put(t.x.f.n, s);
+            }
+            s.add(t.r);
+        }
+        m_initialStates = new HashMap<AbstractRole, Integer>();
+        for (Map.Entry<Integer, Set<AbstractRole>> e : m_transitions.get(new Integer(0)).entrySet()) {
+            for (AbstractRole r : e.getValue()) {
+                assert !m_initialStates.containsKey(r);
+                m_initialStates.put(r, e.getKey());
+            }
+        }
+        for (AbstractRole r : complexRoles) assert m_initialStates.containsKey(canonical(r));
+        m_acceptingStates = new HashSet<Integer>();
+        m_acceptingStates.add(a.finalState().n);
     }
 
     /** The callback interface for the rewriteRole method. */

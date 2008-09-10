@@ -123,7 +123,7 @@ public class OwlNormalization {
      * @throws OWLException
      */
     public void processOntology(OWLOntology OWLOntology) throws OWLException {
-        RoleManager roleManager = new RoleManager();
+        RoleManager roleManager = new TransitivityManager();
         // Each entry in the inclusions list represents a disjunction of
         // concepts, i.e., each OWLDescription in an entry contributes a
         // disjunct. It is thus not really inclusions, but rather a disjunction
@@ -131,34 +131,25 @@ public class OwlNormalization {
         List<OWLDescription[]> inclusions = new ArrayList<OWLDescription[]>();
         for (OWLAxiom untyped_axiom : OWLOntology.getAxioms()) {
             if (untyped_axiom instanceof OWLInverseObjectPropertiesAxiom) {
-                OWLInverseObjectPropertiesAxiom axiom = (OWLInverseObjectPropertiesAxiom) (untyped_axiom);
-                OWLObjectPropertyExpression first = axiom.getFirstProperty().getSimplified();
-                OWLObjectPropertyExpression second = axiom.getSecondProperty().getSimplified();
-                roleManager.addInclusion(first,
-                        second.getInverseProperty().getSimplified());
-                roleManager.addInclusion(second,
-                        first.getInverseProperty().getSimplified());
+                OWLInverseObjectPropertiesAxiom axiom
+                    = (OWLInverseObjectPropertiesAxiom) untyped_axiom;
+                OWLObjectPropertyExpression first = axiom.getFirstProperty();
+                OWLObjectPropertyExpression second = axiom.getSecondProperty();
+                roleManager.addInclusion(first, second.getInverseProperty());
+                roleManager.addInclusion(second, first.getInverseProperty());
             } else if (untyped_axiom instanceof OWLObjectSubPropertyAxiom) {
-                OWLObjectSubPropertyAxiom axiom = (OWLObjectSubPropertyAxiom) (untyped_axiom);
-                OWLObjectPropertyExpression subObjectProperty = axiom.getSubProperty().getSimplified();
-                OWLObjectPropertyExpression superObjectProperty = axiom.getSuperProperty().getSimplified();
-                roleManager.addInclusion(subObjectProperty, superObjectProperty);
+                OWLObjectSubPropertyAxiom axiom
+                    = (OWLObjectSubPropertyAxiom) untyped_axiom;
+                roleManager.addInclusion(axiom.getSubProperty(),
+                                            axiom.getSuperProperty());
             } else if (untyped_axiom instanceof OWLObjectPropertyChainSubPropertyAxiom) {
-                throw new RuntimeException(
-                        "Object property chains are not yet supported.");
-                // until Rob changes this ...
+                OWLObjectPropertyChainSubPropertyAxiom axiom
+                    = (OWLObjectPropertyChainSubPropertyAxiom) untyped_axiom;
+                roleManager.addInclusion(axiom.getPropertyChain(), axiom.getSuperProperty());
             } else if (untyped_axiom instanceof OWLEquivalentObjectPropertiesAxiom) {
-                OWLEquivalentObjectPropertiesAxiom axiom = (OWLEquivalentObjectPropertiesAxiom) (untyped_axiom);
-                OWLObjectPropertyExpression[] objectProperties = new OWLObjectPropertyExpression[axiom.getProperties().size()];
-                axiom.getProperties().toArray(objectProperties);
-                for (int i = 0; i < objectProperties.length; i++)
-                    objectProperties[i] = objectProperties[i].getSimplified();
-                for (int i = 0; i < objectProperties.length - 1; i++) {
-                    roleManager.addInclusion(objectProperties[i],
-                            objectProperties[i + 1]);
-                    roleManager.addInclusion(objectProperties[i + 1],
-                            objectProperties[i]);
-                }
+                OWLEquivalentObjectPropertiesAxiom axiom
+                    = (OWLEquivalentObjectPropertiesAxiom) untyped_axiom;
+                roleManager.addEquivalence(axiom.getProperties());
             } else if (untyped_axiom instanceof OWLDataSubPropertyAxiom) {
                 OWLDataSubPropertyAxiom axiom = (OWLDataSubPropertyAxiom) (untyped_axiom);
                 OWLDataPropertyExpression subDataProperty = axiom.getSubProperty();
@@ -842,145 +833,45 @@ public class OwlNormalization {
         }
     }
 
-    protected class RoleManager {
-        protected final Map<OWLObjectPropertyExpression, Set<OWLObjectPropertyExpression>> m_subObjectProperties;
-        protected final Collection<OWLObjectPropertyExpression[]> m_toldSubObjectProperties;
-        protected final Set<OWLObjectPropertyExpression> m_transitiveObjectProperties;
-        protected final Map<OWLObjectAllRestriction, OWLDescription> m_replacedDescriptions;
-
-        public RoleManager() {
-            m_subObjectProperties = new HashMap<OWLObjectPropertyExpression, Set<OWLObjectPropertyExpression>>();
-            m_toldSubObjectProperties = new ArrayList<OWLObjectPropertyExpression[]>();
-            m_transitiveObjectProperties = new HashSet<OWLObjectPropertyExpression>();
-            m_replacedDescriptions = new HashMap<OWLObjectAllRestriction, OWLDescription>();
+    static public abstract class RoleManager {
+        public void addInclusion(OWLObjectPropertyExpression sub,
+                            OWLObjectPropertyExpression sup) {
+            List<OWLObjectPropertyExpression> chain
+                = new ArrayList<OWLObjectPropertyExpression>();
+            chain.add(sub);
+            addInclusion(chain, sup);
         }
-
-        public void addInclusion(OWLObjectPropertyExpression subObjectProperty,
-                OWLObjectPropertyExpression superObjectProperty) {
-            m_toldSubObjectProperties.add(new OWLObjectPropertyExpression[] {
-                    subObjectProperty, superObjectProperty });
-            addInclusionEx(subObjectProperty.getSimplified(),
-                    superObjectProperty.getSimplified());
-            addInclusionEx(
-                    subObjectProperty.getInverseProperty().getSimplified(),
-                    superObjectProperty.getInverseProperty().getSimplified());
-        }
-
-        public void makeTransitive(OWLObjectPropertyExpression objectProperty) {
-            m_transitiveObjectProperties.add(objectProperty.getSimplified());
-            m_transitiveObjectProperties.add(objectProperty.getInverseProperty().getSimplified());
-        }
-
-        public void rewriteConceptInclusions(
-                Collection<OWLDescription[]> inclusions, OWLDataFactory factory) {
-            transitivelyClose();
-            for (OWLDescription[] inclusion : inclusions) {
-                for (int index = 0; index < inclusion.length; index++) {
-                    inclusion[index] = replaceDescriptionIfNecessary(
-                            inclusion[index], factory);
-                }
-            }
-            for (Map.Entry<OWLObjectAllRestriction, OWLDescription> replacement : m_replacedDescriptions.entrySet()) {
-                inclusions.add(new OWLDescription[] {
-                        replacement.getValue().getComplementNNF(),
-                        replacement.getKey() });
-                OWLObjectPropertyExpression objectProperty = replacement.getKey().getProperty();
-                for (OWLObjectPropertyExpression transitiveSubObjectProperty : getTransitiveSubObjectProperties(objectProperty)) {
-                    OWLObjectAllRestriction consequentAll = factory.getOWLObjectAllRestriction(
-                            transitiveSubObjectProperty,
-                            replacement.getKey().getFiller());
-                    OWLDescription consequentReplacement = m_replacedDescriptions.get(consequentAll);
-                    assert consequentReplacement != null;
-                    OWLObjectAllRestriction forallConsequentReplacement = factory.getOWLObjectAllRestriction(
-                            transitiveSubObjectProperty, consequentReplacement);
-                    inclusions.add(new OWLDescription[] {
-                            replacement.getValue().getComplementNNF(),
-                            forallConsequentReplacement });
-                }
-            }
-            m_replacedDescriptions.clear();
-        }
-
-        public Collection<OWLObjectPropertyExpression[]> getSimpleInclusions() {
-            return m_toldSubObjectProperties;
-        }
-
-        protected void addInclusionEx(
-                OWLObjectPropertyExpression subObjectProperty,
-                OWLObjectPropertyExpression superObjectProperty) {
-            Set<OWLObjectPropertyExpression> subObjectProperties = m_subObjectProperties.get(superObjectProperty);
-            if (subObjectProperties == null) {
-                subObjectProperties = new HashSet<OWLObjectPropertyExpression>();
-                m_subObjectProperties.put(superObjectProperty,
-                        subObjectProperties);
-            }
-            subObjectProperties.add(subObjectProperty);
-        }
-
-        public OWLDescription replaceDescriptionIfNecessary(
-                OWLDescription desc, OWLDataFactory factory) {
-            if (desc instanceof OWLObjectAllRestriction) {
-                OWLObjectAllRestriction objectAll = (OWLObjectAllRestriction) desc;
-                OWLObjectPropertyExpression objectProperty = objectAll.getProperty();
-                Set<OWLObjectPropertyExpression> transitiveSubObjectProperties = getTransitiveSubObjectProperties(objectProperty);
-                if (!transitiveSubObjectProperties.isEmpty()) {
-                    OWLDescription replacement = getReplacementFor(objectAll,
-                            factory);
-                    for (OWLObjectPropertyExpression transitiveSubObjectProperty : transitiveSubObjectProperties) {
-                        OWLObjectAllRestriction subObjectAll = factory.getOWLObjectAllRestriction(
-                                transitiveSubObjectProperty,
-                                objectAll.getFiller());
-                        getReplacementFor(subObjectAll, factory);
-                    }
-                    return replacement;
-                }
-            }
-            return desc;
-        }
-
-        protected OWLDescription getReplacementFor(
-                OWLObjectAllRestriction objectAll, OWLDataFactory factory) {
-            OWLDescription replacement = m_replacedDescriptions.get(objectAll);
-            if (replacement == null) {
-                replacement = factory.getOWLClass(URI.create("internal:all#"
-                        + m_replacedDescriptions.size()));
-                if (objectAll.getFiller() instanceof OWLObjectComplementOf)
-                    replacement = replacement.getComplementNNF();
-                m_replacedDescriptions.put(objectAll, replacement);
-            }
-            return replacement;
-        }
-
-        protected void transitivelyClose() {
-            boolean changed = true;
-            List<OWLObjectPropertyExpression> temporary = new ArrayList<OWLObjectPropertyExpression>();
-            while (changed) {
-                changed = false;
-                for (Map.Entry<OWLObjectPropertyExpression, Set<OWLObjectPropertyExpression>> entry : m_subObjectProperties.entrySet()) {
-                    temporary.clear();
-                    temporary.addAll(entry.getValue());
-                    for (int i = temporary.size() - 1; i >= 0; --i) {
-                        Set<OWLObjectPropertyExpression> subObjectProperties = m_subObjectProperties.get(temporary.get(i));
-                        if (subObjectProperties != null)
-                            if (entry.getValue().addAll(subObjectProperties))
-                                changed = true;
-                    }
+        
+        public abstract void addInclusion
+            (List<OWLObjectPropertyExpression> chain,
+                OWLObjectPropertyExpression implied);
+        
+        public void addEquivalence(Set<OWLObjectPropertyExpression> props) {
+            OWLObjectPropertyExpression canonical = null;
+            for (OWLObjectPropertyExpression p : props) {
+                if (canonical == null) {
+                    canonical = p;
+                } else {
+                    addInclusion(p, canonical);
+                    addInclusion(canonical, p);
                 }
             }
         }
-
-        protected Set<OWLObjectPropertyExpression> getTransitiveSubObjectProperties(
-                OWLObjectPropertyExpression objectProperty) {
-            Set<OWLObjectPropertyExpression> result = new HashSet<OWLObjectPropertyExpression>();
-            if (m_transitiveObjectProperties.contains(objectProperty))
-                result.add(objectProperty);
-            Set<OWLObjectPropertyExpression> subObjectProperties = m_subObjectProperties.get(objectProperty);
-            if (subObjectProperties != null)
-                for (OWLObjectPropertyExpression subObjectProperty : subObjectProperties)
-                    if (m_transitiveObjectProperties.contains(subObjectProperty))
-                        result.add(subObjectProperty);
-            return result;
+        
+        public void makeTransitive(OWLObjectPropertyExpression p) {
+            List<OWLObjectPropertyExpression> chain
+                = new ArrayList<OWLObjectPropertyExpression>();
+            chain.add(p);
+            chain.add(p);
+            addInclusion(chain, p);
         }
+        
+        public abstract void rewriteConceptInclusions
+            (Collection<OWLDescription[]> inclusions,
+                OWLDataFactory factory);
+        
+        // Should get rid of this:
+        public abstract Collection<OWLObjectPropertyExpression[]> getSimpleInclusions();
     }
 
     protected static class SimplificationVisitor implements
