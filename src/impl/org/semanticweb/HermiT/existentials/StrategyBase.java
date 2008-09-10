@@ -122,6 +122,9 @@ public abstract class StrategyBase
                         }
                     } else if (existentialConcept instanceof
                                 AtLeastConcreteRoleConcept) {
+                        existentialExpansionManager.expand(
+                            (AtLeastConcreteRoleConcept) existentialConcept,
+                            node);
                         existentialExpansionManager.markExistentialProcessed
                             (existentialConcept, node);
                     } else if (existentialConcept instanceof
