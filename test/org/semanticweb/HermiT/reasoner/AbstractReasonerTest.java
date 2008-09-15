@@ -63,7 +63,9 @@ public abstract class AbstractReasonerTest extends TestCase {
      */
     protected void loadOntologyFromResource(String resourceName)
             throws Exception {
-        hermit = new HermiT(getClass().getResource(resourceName).toString());
+        HermiT.Configuration configuration = new HermiT.Configuration();
+        configuration.subsumptionCacheStrategyType = HermiT.SubsumptionCacheStrategyType.ON_REQUEST;
+        hermit = new HermiT(getClass().getResource(resourceName).toURI(), configuration);
     }
 
     /**
