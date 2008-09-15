@@ -1,0 +1,45 @@
+OWL features:
+ Datatype support
+   Basic datatype interface             Boris   2008-09-15
+     calls out to Checker class
+     clausification of integers
+   OWL 1.0 (no facets)                  Birte   2008-10-01
+   extensible framework
+   numbers, strings, and facets
+   "full" OWL 2.0 datatype support
+ Role axioms
+   (Ir)Reflexivity                      Boris   2008-09-15
+   Disjointness, antisymmetry, etc.             DONE
+   Role chains                          Rob     2008-10-01
+   Universal role                               2008-10-01
+
+Debugging and testing:
+   Datatype test cases                          2008-10-15
+   Black box testing                            2008-10-15
+   test case cleanup                    Birte
+
+Packaging and interfaces:
+   Command-line interface                       DONE
+   Expressivity interrogation           Rob
+   Role hierarchy queries               Rob     2008-10-01
+   Simple ABox queries                  Rob     2008-10-01
+   Public Namespaces interface          Rob     2008-10-01
+   OWL API complex concept queries      Rob     2008-10-01
+
+Protégé plug-in:
+   Progress bar                         Rob     2008-10-01
+   Plumb through remainder of API       Rob     2008-10-01
+   Configuration settings               Rob
+
+Supporting materials:
+   javadoc for public API                       2008-10-15
+   Web site                                     2008-10-20
+   Documentation                                2008-10-20
+   Support contact/ticketing                    2008-10-20
+   wiki?
+
+Misc:
+   Unify pairwise/reflexive blocking
+   Annotated equalities                 Boris
+   Make re-use the default?                     2008-10-15
+   Javadoc for more internal classes
