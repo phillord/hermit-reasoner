@@ -129,6 +129,8 @@ public abstract class ExtensionTable implements Serializable {
                 node1.addToFromParentLabel(atomicRole);
             else if (node1.isParentOf(node0))
                 node0.addToToParentLabel(atomicRole);
+            else if (node0==node1 && node0.getNodeType()==NodeType.TREE_NODE)
+                node0.addToToSelfLabel(atomicRole);
             m_tableau.m_nominalIntroductionManager.addAtomicRoleAssertion(atomicRole,node0,node1);
         }
         else if (Inequality.INSTANCE.equals(dlPredicateObject)) {
@@ -212,6 +214,8 @@ public abstract class ExtensionTable implements Serializable {
                 node1.removeFromFromParentLabel(atomicRole);
             else if (node1.isParentOf(node0))
                 node0.removeFromToParentLabel(atomicRole);
+            else if (node0==node1 && node0.getNodeType()==NodeType.TREE_NODE)
+                node0.removeFromToSelfLabel(atomicRole);
             m_tableau.m_nominalIntroductionManager.removeAtomicRoleAssertion(atomicRole,node0,node1);
         }
         else if (dlPredicateObject instanceof DescriptionGraph)

@@ -857,7 +857,7 @@ public class Debugger extends TableauMonitorForwarder {
                 writer.println("===========================================");
                 Node searchNode=m_tableau.getFirstTableauNode();
                 while (searchNode!=null) {
-                    if (searchNode.getNodeType()==NodeType.TREE_NODE && node.getPositiveLabel().equals(searchNode.getPositiveLabel()) && node.getParent().getPositiveLabel().equals(searchNode.getParent().getPositiveLabel()) && node.getFromParentLabel().equals(searchNode.getFromParentLabel()) && node.getToParentLabel().equals(searchNode.getToParentLabel())) {
+                    if (searchNode.getNodeType()==NodeType.TREE_NODE && node.getPositiveLabel().equals(searchNode.getPositiveLabel()) && node.getParent().getPositiveLabel().equals(searchNode.getParent().getPositiveLabel()) && node.getFromParentLabel().equals(searchNode.getFromParentLabel()) && node.getToParentLabel().equals(searchNode.getToParentLabel()) && node.getToSelfLabel().equals(searchNode.getToSelfLabel())) {
                         writer.print("  ");
                         Printing.printPadded(writer,searchNode.getNodeID(),6);
                         writer.print("    ");
