@@ -3,12 +3,10 @@ package org.semanticweb.HermiT.existentials;
 
 import java.io.Serializable;
 
-import org.semanticweb.HermiT.model.*;
-import org.semanticweb.HermiT.tableau.*;
 import org.semanticweb.HermiT.blocking.*;
-import org.semanticweb.HermiT.monitor.TableauMonitor;
 
 public class DepthFirstStrategy extends StrategyBase implements Serializable {
+    private static final long serialVersionUID=2432743066355633564L;
 
     public DepthFirstStrategy(BlockingStrategy strategy) {
         super(strategy);

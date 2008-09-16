@@ -1,8 +1,6 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.existentials;
 
-import java.io.Serializable;
-
 import org.semanticweb.HermiT.model.*;
 import org.semanticweb.HermiT.tableau.*;
 import org.semanticweb.HermiT.blocking.*;
