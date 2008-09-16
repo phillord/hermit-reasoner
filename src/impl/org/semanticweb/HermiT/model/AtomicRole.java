@@ -10,25 +10,23 @@ public class AtomicRole extends Role implements DLPredicate {
     private static final long serialVersionUID=3766087788313643809L;
 
     private final String m_uri;
-    private final boolean isDatatypeRole;
+    private final boolean m_isDatatypeRole;
     
-    protected AtomicRole(String uri, boolean isDatatypeRole) {
+    protected AtomicRole(String uri,boolean isDatatypeRole) {
         m_uri=uri;
-        this.isDatatypeRole = isDatatypeRole;
+        m_isDatatypeRole=isDatatypeRole;
     }
     public String getURI() {
         return m_uri;
     }
-
     /**
      * Check whether the role can only be applied to datatypes.
      * This is just an expedient hack; a cleaner approach would simply set the
      * ranges of object and data roles appropriately.
      */
     public boolean isRestrictedToDatatypes() {
-        return isDatatypeRole;
+        return m_isDatatypeRole;
     }
-    
     public int getArity() {
         return 2;
     }
@@ -36,9 +34,13 @@ public class AtomicRole extends Role implements DLPredicate {
         return InverseRole.create(this);
     }
     public String toString(Namespaces namespaces) {
-        String out = namespaces.abbreviateAsNamespace(m_uri);
-        if (isDatatypeRole) return out + "*";
-        else return out;
+        String out=namespaces.abbreviateAsNamespace(m_uri);
+        if (m_isDatatypeRole) {
+            return out+"*";
+        }
+        else {
+            return out;
+        }
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);
@@ -46,7 +48,7 @@ public class AtomicRole extends Role implements DLPredicate {
 
     protected static InterningManager<AtomicRole> s_interningManager=new InterningManager<AtomicRole>() {
         protected boolean equal(AtomicRole lhs, AtomicRole rhs) {
-            return lhs.m_uri.equals(rhs.m_uri) && lhs.isDatatypeRole == rhs.isDatatypeRole;
+            return lhs.m_uri.equals(rhs.m_uri) && lhs.m_isDatatypeRole==rhs.m_isDatatypeRole;
         }
         protected int getHashCode(AtomicRole object) {
             return object.m_uri.hashCode();
