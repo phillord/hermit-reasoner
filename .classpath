@@ -7,6 +7,10 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="/ThirdPartyOwlTools/kaon2/2008-06-29/kaon2.jar"/>
-	<classpathentry kind="lib" path="/ThirdPartyOwlTools/owlapi/2.2.1/owlapi-bin.jar"/>
+	<classpathentry kind="lib" path="/ThirdPartyOwlTools/owlapi/2.2.1/owlapi-bin.jar" sourcepath="/ThirdPartyOwlTools/owlapi/2.2.1/owlapi-src.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/ThirdPartyOwlTools/owlapi/2.2.1/owlapi-doc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="build/release"/>
 </classpath>
