@@ -161,9 +161,13 @@ public final class ExtensionManager implements Serializable {
         return m_ternaryExtensionTable.containsTuple(m_ternaryAuxiliaryTupleContains);
     }
     public boolean containsAssertion(DLPredicate dlPredicate,Node node) {
-        m_binaryAuxiliaryTupleContains[0]=dlPredicate;
-        m_binaryAuxiliaryTupleContains[1]=node;
-        return m_binaryExtensionTable.containsTuple(m_binaryAuxiliaryTupleContains);
+        if (AtomicConcept.THING.equals(dlPredicate))
+            return true;
+        else {
+            m_binaryAuxiliaryTupleContains[0]=dlPredicate;
+            m_binaryAuxiliaryTupleContains[1]=node;
+            return m_binaryExtensionTable.containsTuple(m_binaryAuxiliaryTupleContains);
+        }
     }
     public boolean containsAssertion(DLPredicate dlPredicate,Node node0,Node node1) {
         if (Equality.INSTANCE.equals(dlPredicate))

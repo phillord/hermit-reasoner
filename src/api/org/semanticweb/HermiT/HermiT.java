@@ -106,12 +106,12 @@ public class HermiT implements Serializable {
         IMMEDIATE,JUST_IN_TIME,ON_REQUEST
     };
 
-    private final Configuration m_configuration;            // never null
-    private DLOntology m_dlOntology;                        // never null
-    private Namespaces m_namespaces;                        // never null
-    private Tableau m_tableau;                              // never null
-    private TableauSubsumptionChecker m_subsumptionChecker; // never null
-    private Map<AtomicConcept,HierarchyPosition<AtomicConcept>> m_atomicConceptHierarchy; // may be null; use getAtomicConceptHierarchy
+    protected final Configuration m_configuration;            // never null
+    protected DLOntology m_dlOntology;                        // never null
+    protected Namespaces m_namespaces;                        // never null
+    protected Tableau m_tableau;                              // never null
+    protected TableauSubsumptionChecker m_subsumptionChecker; // never null
+    protected Map<AtomicConcept,HierarchyPosition<AtomicConcept>> m_atomicConceptHierarchy; // may be null; use getAtomicConceptHierarchy
 
     public HermiT(String ontologyURI) throws Clausifier.LoadingException,OWLException {
         m_configuration=new Configuration();
@@ -479,6 +479,10 @@ public class HermiT implements Serializable {
         return m_namespaces;
     }
 
+    public DLOntology getDLOntology() {
+        return m_dlOntology;
+    }
+    
     public void save(File file) throws IOException {
         OutputStream outputStream=new BufferedOutputStream(new FileOutputStream(file));
         try {

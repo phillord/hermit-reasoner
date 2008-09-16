@@ -19,12 +19,7 @@ import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.tableau.Node.NodeState;
 
 /**
- * This class coordinates the main tableau expansion for a given DLOntology (a 
- * normalized and clausified ontology). It represents the state of a run on a 
- * set of clauses and coordinates the extension of the ABox and also the 
- * retraction of facts when backtracking. Before starting the expansion, the 
- * given clauses are (for better performance) preprocessed via the 
- * HyperresolutionManager into a compiled and executable form. 
+ * This class coordinates the main tableau expansion for a given DLOntology (a normalized and clausified ontology). It represents the state of a run on a set of clauses and coordinates the extension of the ABox and also the retraction of facts when backtracking. Before starting the expansion, the given clauses are (for better performance) preprocessed via the HyperresolutionManager into a compiled and executable form.
  */
 public final class Tableau implements Serializable {
     private static final long serialVersionUID=-28982363158925221L;
@@ -60,10 +55,7 @@ public final class Tableau implements Serializable {
     protected GroundDisjunction m_firstUnprocessedGroundDisjunction;
     protected Node m_checkedNode;
 
-    public Tableau(TableauMonitor tableauMonitor,
-                   ExpansionStrategy existentialsExpansionStrategy,
-                   DLOntology dlOntology,
-                   Map<String, Object> parameters) {
+    public Tableau(TableauMonitor tableauMonitor,ExpansionStrategy existentialsExpansionStrategy,DLOntology dlOntology,Map<String,Object> parameters) {
         m_parameters=parameters;
         m_tableauMonitor=tableauMonitor;
         m_existentialsExpansionStrategy=existentialsExpansionStrategy;
@@ -99,7 +91,7 @@ public final class Tableau implements Serializable {
         return m_existentialsExpansionStrategy;
     }
     public boolean isDeterministic() {
-        return m_dlOntology.isHorn() && m_existentialsExpansionStrategy.isDeterministic();
+        return m_dlOntology.isHorn()&&m_existentialsExpansionStrategy.isDeterministic();
     }
     public DependencySetFactory getDependencySetFactory() {
         return m_dependencySetFactory;
@@ -174,7 +166,7 @@ public final class Tableau implements Serializable {
         if (!m_extensionManager.containsClash()) {
             m_nominalIntroductionManager.processTargets();
             boolean hasChange=false;
-            while (m_extensionManager.propagateDeltaNew() && !m_extensionManager.containsClash()) {
+            while (m_extensionManager.propagateDeltaNew()&&!m_extensionManager.containsClash()) {
                 m_descriptionGraphManager.checkGraphConstraints();
                 m_hyperresolutionManager.applyDLClauses();
                 if (!m_extensionManager.containsClash())
@@ -269,30 +261,30 @@ public final class Tableau implements Serializable {
         return result;
     }
     // public boolean isSubsumedBy(Role subRole, Role superRole) {
-    //     if (m_tableauMonitor!=null) {
-    //         m_tableauMonitor.isSubsumedByStarted(subRole,superRole);
-    //     }
-    //     clear();
-    //     if (m_dlOntology.hasNominals()) {
-    //         loadDLOntologyABox();
-    //     }
-    //     m_checkedNode =
-    //         createNewRootNode(m_dependencySetFactory.emptySet(), 0);
-    //     Node otherNode = 
-    //         createNewRootNode(m_dependencySetFactory.emptySet(), 0);
-    //     m_extensionManager.addRoleAssertion(subRole,
-    //         m_checkedNode, otherNode, m_dependencySetFactory.emptySet());
-    //     m_branchingPoints[0] = new BranchingPoint(this);
-    //     m_currentBranchingPoint++;
-    //     m_nonbacktrackableBranchingPoint = m_currentBranchingPoint;
-    //     DependencySet dependencySet =
-    //         m_dependencySetFactory.addBranchingPoint
-    //             (m_dependencySetFactory.emptySet(), m_currentBranchingPoint);
-    //     m_extensionManager.addConceptAssertion(AtomicNegationConcept.create(superconcept),m_checkedNode,dependencySet);
-    //     boolean result=!isSatisfiable();
-    //     if (m_tableauMonitor!=null)
-    //         m_tableauMonitor.isSubsumedByFinished(subconcept,superconcept,result);
-    //     return result;
+    // if (m_tableauMonitor!=null) {
+    // m_tableauMonitor.isSubsumedByStarted(subRole,superRole);
+    // }
+    // clear();
+    // if (m_dlOntology.hasNominals()) {
+    // loadDLOntologyABox();
+    // }
+    // m_checkedNode =
+    // createNewRootNode(m_dependencySetFactory.emptySet(), 0);
+    // Node otherNode =
+    // createNewRootNode(m_dependencySetFactory.emptySet(), 0);
+    // m_extensionManager.addRoleAssertion(subRole,
+    // m_checkedNode, otherNode, m_dependencySetFactory.emptySet());
+    // m_branchingPoints[0] = new BranchingPoint(this);
+    // m_currentBranchingPoint++;
+    // m_nonbacktrackableBranchingPoint = m_currentBranchingPoint;
+    // DependencySet dependencySet =
+    // m_dependencySetFactory.addBranchingPoint
+    // (m_dependencySetFactory.emptySet(), m_currentBranchingPoint);
+    // m_extensionManager.addConceptAssertion(AtomicNegationConcept.create(superconcept),m_checkedNode,dependencySet);
+    // boolean result=!isSatisfiable();
+    // if (m_tableauMonitor!=null)
+    // m_tableauMonitor.isSubsumedByFinished(subconcept,superconcept,result);
+    // return result;
     // }
     public boolean isABoxSatisfiable() {
         if (m_tableauMonitor!=null)
@@ -366,7 +358,8 @@ public final class Tableau implements Serializable {
         return m_firstUnprocessedGroundDisjunction;
     }
     /**
-     * Add a branching point in case we need to backtrack to this state. 
+     * Add a branching point in case we need to backtrack to this state.
+     * 
      * @param branchingPoint
      */
     public void pushBranchingPoint(BranchingPoint branchingPoint) {
@@ -389,8 +382,8 @@ public final class Tableau implements Serializable {
             m_tableauMonitor.pushBranchingPointFinished(branchingPoint);
     }
     /**
-     * Backtrack to a certain branching point in the list of branching points 
-     * that have been set during the run. 
+     * Backtrack to a certain branching point in the list of branching points that have been set during the run.
+     * 
      * @param newCurrentBrancingPoint
      */
     protected void backtrackTo(int newCurrentBrancingPoint) {
@@ -426,7 +419,7 @@ public final class Tableau implements Serializable {
         Node lastTableauNodeShouldBe=branchingPoint.m_lastTableauNode;
         while (lastTableauNodeShouldBe!=m_lastTableauNode)
             destroyLastTableauNode();
-        // finish 
+        // finish
         m_extensionManager.clearClash();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.backtrackToFinished(branchingPoint);
@@ -497,7 +490,7 @@ public final class Tableau implements Serializable {
     }
     protected void backtrackLastMergedOrPrunedNode() {
         Node node=m_lastMergedOrPrunedNode;
-        assert (node.m_nodeState==Node.NodeState.MERGED && node.m_mergedInto!=null && node.m_mergedInto!=null) || (node.m_nodeState==Node.NodeState.PRUNED && node.m_mergedInto==null && node.m_mergedInto==null);
+        assert (node.m_nodeState==Node.NodeState.MERGED&&node.m_mergedInto!=null&&node.m_mergedInto!=null)||(node.m_nodeState==Node.NodeState.PRUNED&&node.m_mergedInto==null&&node.m_mergedInto==null);
         m_existentialsExpansionStrategy.nodeStatusChanged(node);
         if (node.m_nodeState==Node.NodeState.MERGED) {
             m_dependencySetFactory.removeUsage(node.m_mergedIntoDependencySet);

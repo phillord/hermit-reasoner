@@ -20,18 +20,18 @@ import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.LiteralConcept;
 
 /**
- * Manages the expansion of at least restrictions in a tableau. 
+ * Manages the expansion of at least restrictions in a tableau.
  */
 public final class ExistentialExpansionManager implements Serializable {
     private static final long serialVersionUID=4794168582297181623L;
 
     private final Tableau m_tableau;
     private final ExtensionManager m_extensionManager;
-    
-    /** Table of existentials which have already been expanded.
-      * 
-      * This is used in backtracking to determine what existentials need
-      * to be added back to nodes.
+
+    /**
+     * Table of existentials which have already been expanded.
+     * 
+     * This is used in backtracking to determine what existentials need to be added back to nodes.
      */
     private final TupleTable m_expandedExistentials;
 
@@ -45,7 +45,7 @@ public final class ExistentialExpansionManager implements Serializable {
     private final Map<Role,Role[]> m_functionalRoles;
     private final UnionDependencySet m_binaryUnionDependencySet;
     private int[] m_indicesByBranchingPoint;
-    
+
     public ExistentialExpansionManager(Tableau tableau) {
         m_tableau=tableau;
         m_extensionManager=m_tableau.getExtensionManager();
@@ -96,82 +96,72 @@ public final class ExistentialExpansionManager implements Serializable {
         m_auxiliaryTuple[1]=null;
     }
 
-    public static enum SatType
-        { NOT_SATISFIED, PERMANENTLY_SATISFIED, CURRENTLY_SATISFIED };
-    public SatType isSatisfied(AtLeastAbstractRoleConcept
-                                    atLeastAbstractConcept,
-                                Node forNode) {
-        int cardinality = atLeastAbstractConcept.getNumber();
-        if (cardinality <= 0) {
+    public static enum SatType {
+        NOT_SATISFIED,PERMANENTLY_SATISFIED,CURRENTLY_SATISFIED
+    };
+    public SatType isSatisfied(AtLeastAbstractRoleConcept atLeastAbstractConcept,Node forNode) {
+        int cardinality=atLeastAbstractConcept.getNumber();
+        if (cardinality<=0) {
             return SatType.PERMANENTLY_SATISFIED;
         }
-        Role onRole
-            = atLeastAbstractConcept.getOnRole();
-        LiteralConcept toConcept
-            = atLeastAbstractConcept.getToConcept();
+        Role onRole=atLeastAbstractConcept.getOnRole();
+        LiteralConcept toConcept=atLeastAbstractConcept.getToConcept();
         ExtensionTable.Retrieval retrieval;
         int toNodeIndex;
         if (onRole instanceof AtomicRole) {
             retrieval=m_ternaryExtensionTableSearch01Bound;
-            retrieval.getBindingsBuffer()[0] = onRole;
-            retrieval.getBindingsBuffer()[1] = forNode;
-            toNodeIndex = 2;
-        } else {
-            retrieval = m_ternaryExtensionTableSearch02Bound;
-            retrieval.getBindingsBuffer()[0]
-                = ((InverseRole) onRole).getInverseOf();
-            retrieval.getBindingsBuffer()[2] = forNode;
-            toNodeIndex = 1;
+            retrieval.getBindingsBuffer()[0]=onRole;
+            retrieval.getBindingsBuffer()[1]=forNode;
+            toNodeIndex=2;
         }
-        if (cardinality == 1) {
+        else {
+            retrieval=m_ternaryExtensionTableSearch02Bound;
+            retrieval.getBindingsBuffer()[0]=((InverseRole)onRole).getInverseOf();
+            retrieval.getBindingsBuffer()[2]=forNode;
+            toNodeIndex=1;
+        }
+        if (cardinality==1) {
             retrieval.open();
-            Object[] tupleBuffer = retrieval.getTupleBuffer();
+            Object[] tupleBuffer=retrieval.getTupleBuffer();
             while (!retrieval.afterLast()) {
-                Node toNode = (Node) tupleBuffer[toNodeIndex];
-                if (m_extensionManager.containsConceptAssertion
-                        (toConcept,toNode) &&
-                    !toNode.isIndirectlyBlocked()) {
-                    if (forNode.getParent() == toNode ||
-                        toNode.getParent() == forNode) {
+                Node toNode=(Node)tupleBuffer[toNodeIndex];
+                if (m_extensionManager.containsConceptAssertion(toConcept,toNode)&&!toNode.isIndirectlyBlocked()) {
+                    if (forNode.getParent()==toNode||toNode.getParent()==forNode) {
                         return SatType.PERMANENTLY_SATISFIED;
-                    } else {
+                    }
+                    else {
                         return SatType.CURRENTLY_SATISFIED;
                     }
                 }
                 retrieval.next();
             }
             return SatType.NOT_SATISFIED;
-        } else {
+        }
+        else {
             m_auxiliaryNodes1.clear();
             retrieval.open();
-            Object[] tupleBuffer = retrieval.getTupleBuffer();
-            boolean permanent = true;
+            Object[] tupleBuffer=retrieval.getTupleBuffer();
+            boolean permanent=true;
             while (!retrieval.afterLast()) {
-                Node toNode = (Node) tupleBuffer[toNodeIndex];
-                if (m_extensionManager.containsConceptAssertion
-                        (toConcept,toNode) &&
-                    !toNode.isIndirectlyBlocked()) {
-                    if (forNode.getParent() != toNode &&
-                        toNode.getParent() != forNode) {
-                        permanent = false;
+                Node toNode=(Node)tupleBuffer[toNodeIndex];
+                if (m_extensionManager.containsConceptAssertion(toConcept,toNode)&&!toNode.isIndirectlyBlocked()) {
+                    if (forNode.getParent()!=toNode&&toNode.getParent()!=forNode) {
+                        permanent=false;
                     }
                     m_auxiliaryNodes1.add(toNode);
                 }
                 retrieval.next();
             }
-            if (m_auxiliaryNodes1.size() >= cardinality) {
+            if (m_auxiliaryNodes1.size()>=cardinality) {
                 m_auxiliaryNodes2.clear();
-                if (containsSubsetOfNUnequalNodes(forNode, m_auxiliaryNodes1,
-                                                    0, m_auxiliaryNodes2,
-                                                    cardinality)) {
-                    return permanent ? SatType.PERMANENTLY_SATISFIED
-                                     : SatType.CURRENTLY_SATISFIED;
+                if (containsSubsetOfNUnequalNodes(forNode,m_auxiliaryNodes1,0,m_auxiliaryNodes2,cardinality)) {
+                    return permanent ? SatType.PERMANENTLY_SATISFIED : SatType.CURRENTLY_SATISFIED;
+                }
             }
-        }
             return SatType.NOT_SATISFIED;
+        }
     }
-    }
-    
+
     private boolean containsSubsetOfNUnequalNodes(Node forNode,List<Node> nodes,int startAt,List<Node> selectedNodes,int cardinality) {
         if (selectedNodes.size()==cardinality) {
             // Check the condition on safe successors (condition 3.2 of the \geq-rule)
@@ -187,7 +177,7 @@ public final class ExistentialExpansionManager implements Serializable {
                 Node node=nodes.get(index);
                 for (int selectedNodeIndex=0;selectedNodeIndex<selectedNodes.size();selectedNodeIndex++) {
                     Node selectedNode=selectedNodes.get(selectedNodeIndex);
-                    if (!m_extensionManager.containsAssertion(Inequality.INSTANCE,node,selectedNode) && !m_extensionManager.containsAssertion(Inequality.INSTANCE,selectedNode,node))
+                    if (!m_extensionManager.containsAssertion(Inequality.INSTANCE,node,selectedNode)&&!m_extensionManager.containsAssertion(Inequality.INSTANCE,selectedNode,node))
                         continue outer;
                 }
                 selectedNodes.add(node);
@@ -227,13 +217,9 @@ public final class ExistentialExpansionManager implements Serializable {
         return false;
     }
     /**
-     * Creates a new node in the tableau if at least concept that caused the 
-     * expansion is for cardinality 1. If it is not of cardinality 1 and the 
-     * role in the at most concept is a functional role, it sets a clash in the 
-     * extension manager. 
-     * @return true if the at least cardinality is 1 (causes an expansion) or it 
-     * is greater than one but the role is functional (causes a clash) and false 
-     * otherwise.
+     * Creates a new node in the tableau if at least concept that caused the expansion is for cardinality 1. If it is not of cardinality 1 and the role in the at most concept is a functional role, it sets a clash in the extension manager.
+     * 
+     * @return true if the at least cardinality is 1 (causes an expansion) or it is greater than one but the role is functional (causes a clash) and false otherwise.
      */
     public boolean tryFunctionalExpansion(AtLeastAbstractRoleConcept atLeastAbstractConcept,Node forNode) {
         if (atLeastAbstractConcept.getNumber()==1) {
@@ -250,7 +236,7 @@ public final class ExistentialExpansionManager implements Serializable {
                 return true;
             }
         }
-        else if (atLeastAbstractConcept.getNumber()>1 && m_functionalRoles.containsKey(atLeastAbstractConcept.getOnRole())) {
+        else if (atLeastAbstractConcept.getNumber()>1&&m_functionalRoles.containsKey(atLeastAbstractConcept.getOnRole())) {
             if (m_tableau.m_tableauMonitor!=null)
                 m_tableau.m_tableauMonitor.existentialExpansionStarted(atLeastAbstractConcept,forNode);
             DependencySet existentialDependencySet=m_extensionManager.getConceptAssertionDependencySet(atLeastAbstractConcept,forNode);
@@ -264,7 +250,8 @@ public final class ExistentialExpansionManager implements Serializable {
         return false;
     }
     /**
-     * Does a normal expansion of the tableau (ABox) for an at least concept. 
+     * Does a normal expansion of the tableau (ABox) for an at least concept.
+     * 
      * @param atLeastAbstractConcept
      * @param forNode
      */
@@ -297,9 +284,8 @@ public final class ExistentialExpansionManager implements Serializable {
             m_tableau.m_tableauMonitor.existentialExpansionFinished(atLeastAbstractConcept,forNode);
     }
     /**
-     * Expands an at least concept by first trying a functional expansion (if 
-     * the cardinality is 1 or the role is functional) and a normal expansion 
-     * otherwise. 
+     * Expands an at least concept by first trying a functional expansion (if the cardinality is 1 or the role is functional) and a normal expansion otherwise.
+     * 
      * @param atLeastAbstractConcept
      * @param forNode
      */
@@ -308,43 +294,36 @@ public final class ExistentialExpansionManager implements Serializable {
             doNormalExpansion(atLeastAbstractConcept,forNode);
     }
     public void expand(AtLeastConcreteRoleConcept c,Node n) {
-        if (m_tableau.m_tableauMonitor != null) {
-            m_tableau.m_tableauMonitor.existentialExpansionStarted(c, n);
+        if (m_tableau.m_tableauMonitor!=null) {
+            m_tableau.m_tableauMonitor.existentialExpansionStarted(c,n);
         }
-        DependencySet existentialDependencySet
-            = m_extensionManager.getConceptAssertionDependencySet(c, n);
-        int cardinality = c.getNumber();
-        if (cardinality == 1) {
-            Node newNode = m_tableau.createNewConcreteNode
-                            (existentialDependencySet, n);
-            m_extensionManager.addRoleAssertion
-                (c.getOnAtomicConcreteRole(), n, newNode, existentialDependencySet);
-            m_extensionManager.addAssertion
-                (c.getToDataRange(), newNode, existentialDependencySet);
-        } else {
+        DependencySet existentialDependencySet=m_extensionManager.getConceptAssertionDependencySet(c,n);
+        int cardinality=c.getNumber();
+        if (cardinality==1) {
+            Node newNode=m_tableau.createNewConcreteNode(existentialDependencySet,n);
+            m_extensionManager.addRoleAssertion(c.getOnAtomicConcreteRole(),n,newNode,existentialDependencySet);
+            m_extensionManager.addAssertion(c.getToDataRange(),newNode,existentialDependencySet);
+        }
+        else {
             m_auxiliaryNodes1.clear();
-            for (int index=0; index < cardinality; ++index) {
-                Node newNode
-                    = m_tableau.createNewConcreteNode(existentialDependencySet, n);
-                m_extensionManager.addRoleAssertion
-                    (c.getOnAtomicConcreteRole(), n, newNode, existentialDependencySet);
-                m_extensionManager.addAssertion
-                    (c.getToDataRange(), newNode, existentialDependencySet);
+            for (int index=0;index<cardinality;++index) {
+                Node newNode=m_tableau.createNewConcreteNode(existentialDependencySet,n);
+                m_extensionManager.addRoleAssertion(c.getOnAtomicConcreteRole(),n,newNode,existentialDependencySet);
+                m_extensionManager.addAssertion(c.getToDataRange(),newNode,existentialDependencySet);
                 m_auxiliaryNodes1.add(newNode);
             }
-            for (int outerIndex = 0; outerIndex < cardinality; ++outerIndex) {
-                Node outerNode = m_auxiliaryNodes1.get(outerIndex);
-                for (int innerIndex = outerIndex + 1; innerIndex < cardinality; ++innerIndex) {
-                    m_extensionManager.addAssertion
-                        (Inequality.INSTANCE, outerNode, m_auxiliaryNodes1.get(innerIndex), existentialDependencySet);
+            for (int outerIndex=0;outerIndex<cardinality;++outerIndex) {
+                Node outerNode=m_auxiliaryNodes1.get(outerIndex);
+                for (int innerIndex=outerIndex+1;innerIndex<cardinality;++innerIndex) {
+                    m_extensionManager.addAssertion(Inequality.INSTANCE,outerNode,m_auxiliaryNodes1.get(innerIndex),existentialDependencySet);
                 }
             }
             m_auxiliaryNodes1.clear();
         }
         if (m_tableau.m_tableauMonitor!=null)
-            m_tableau.m_tableauMonitor.existentialExpansionFinished(c, n);
+            m_tableau.m_tableauMonitor.existentialExpansionFinished(c,n);
     }
-    
+
     private Map<Role,Role[]> buildFunctionalRoles() {
         Set<Role> functionalRoles=new HashSet<Role>();
         ObjectHierarchy<Role> roleHierarchy=new ObjectHierarchy<Role>();

@@ -19,13 +19,9 @@ public class DatatypeManager {
     }
     public void checkDatatypeConstraints() {
         Object[] tupleBuffer=m_binaryExtensionTableDeltaOldRetrieval.getTupleBuffer();
-        for (m_binaryExtensionTableDeltaOldRetrieval.open();
-             !m_binaryExtensionTableDeltaOldRetrieval.afterLast();
-             m_binaryExtensionTableDeltaOldRetrieval.next()) {
+        for (m_binaryExtensionTableDeltaOldRetrieval.open(); !m_binaryExtensionTableDeltaOldRetrieval.afterLast(); m_binaryExtensionTableDeltaOldRetrieval.next()) {
             if (tupleBuffer[0] instanceof DataRange) {
                 checkNewDatatypeAssertion((DataRange)tupleBuffer[0],(Node)tupleBuffer[1],m_binaryExtensionTableDeltaOldRetrieval.getDependencySet());
-            } else {
-                // unsatisfiable!
             }
         }
     }
@@ -45,6 +41,6 @@ public class DatatypeManager {
         }
     }
     protected boolean isCompatible(DataRange dataRange1,DataRange dataRange2) {
-        return true;
+        return dataRange1 == dataRange2;
     }
 }

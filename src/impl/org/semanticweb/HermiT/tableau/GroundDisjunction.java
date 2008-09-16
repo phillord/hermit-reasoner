@@ -50,7 +50,7 @@ public class GroundDisjunction implements Serializable {
             DLPredicate dlPredicate=getDLPredicate(disjunctIndex);
             switch (dlPredicate.getArity()) {
             case 1:
-                if (extensionManager.containsConceptAssertion((Concept)dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode()))
+                if (extensionManager.containsAssertion(dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode()))
                     return true;
                 break;
             case 2:
@@ -69,7 +69,7 @@ public class GroundDisjunction implements Serializable {
         switch (dlPredicate.getArity()) {
         case 1:
             dependencySet=getArgument(disjunctIndex,0).addCacnonicalNodeDependencySet(dependencySet);
-            return tableau.getExtensionManager().addConceptAssertion((Concept)dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),dependencySet);
+            return tableau.getExtensionManager().addAssertion(dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),dependencySet);
         case 2:
             dependencySet=getArgument(disjunctIndex,0).addCacnonicalNodeDependencySet(dependencySet);
             dependencySet=getArgument(disjunctIndex,1).addCacnonicalNodeDependencySet(dependencySet);
