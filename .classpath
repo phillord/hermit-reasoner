@@ -6,7 +6,7 @@
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/KAON2"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/OWLAPI"/>
+	<classpathentry kind="lib" path="/ThirdPartyOwlTools/kaon2/2008-06-29/kaon2.jar"/>
+	<classpathentry kind="lib" path="/ThirdPartyOwlTools/owlapi/2.2.1/owlapi-bin.jar"/>
 	<classpathentry kind="output" path="build/release"/>
 </classpath>
