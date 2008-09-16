@@ -106,69 +106,6 @@ public class HermiT implements Serializable {
         IMMEDIATE,JUST_IN_TIME,ON_REQUEST
     };
 
-    public static class Configuration {
-        public TableauMonitorType tableauMonitorType;
-        public DirectBlockingType directBlockingType;
-        public BlockingStrategyType blockingStrategyType;
-        public BlockingSignatureCacheType blockingSignatureCacheType;
-        public ExistentialStrategyType existentialStrategyType;
-        public ParserType parserType;
-        public SubsumptionCacheStrategyType subsumptionCacheStrategyType;
-        public boolean clausifyTransitivity;
-        public boolean checkClauses;
-        public TableauMonitor monitor;
-        public final Map<String,Object> parameters;
-
-        public Configuration() {
-            tableauMonitorType=TableauMonitorType.NONE;
-            directBlockingType=DirectBlockingType.OPTIMAL;
-            blockingStrategyType=BlockingStrategyType.ANYWHERE;
-            blockingSignatureCacheType=BlockingSignatureCacheType.CACHED;
-            existentialStrategyType=ExistentialStrategyType.CREATION_ORDER;
-            parserType=ParserType.OWLAPI;
-            subsumptionCacheStrategyType=SubsumptionCacheStrategyType.IMMEDIATE;
-            clausifyTransitivity=false;
-            checkClauses=true;
-            monitor=null;
-            parameters=new HashMap<String,Object>();
-        }
-
-        protected void setIndividualReuseStrategyReuseAlways(Set<? extends LiteralConcept> concepts) {
-            parameters.put("IndividualReuseStrategy.reuseAlways",concepts);
-        }
-
-        public void loadIndividualReuseStrategyReuseAlways(File file) throws IOException {
-            Set<AtomicConcept> concepts=loadConceptsFromFile(file);
-            setIndividualReuseStrategyReuseAlways(concepts);
-        }
-
-        protected void setIndividualReuseStrategyReuseNever(Set<? extends LiteralConcept> concepts) {
-            parameters.put("IndividualReuseStrategy.reuseNever",concepts);
-        }
-
-        public void loadIndividualReuseStrategyReuseNever(File file) throws IOException {
-            Set<AtomicConcept> concepts=loadConceptsFromFile(file);
-            setIndividualReuseStrategyReuseNever(concepts);
-        }
-
-        protected Set<AtomicConcept> loadConceptsFromFile(File file) throws IOException {
-            Set<AtomicConcept> result=new HashSet<AtomicConcept>();
-            BufferedReader reader=new BufferedReader(new FileReader(file));
-            try {
-                String line=reader.readLine();
-                while (line!=null) {
-                    result.add(AtomicConcept.create(line));
-                    line=reader.readLine();
-                }
-                return result;
-            }
-            finally {
-                reader.close();
-            }
-        }
-
-    } // end Configuration class
-
     private final Configuration m_configuration;            // never null
     private DLOntology m_dlOntology;                        // never null
     private Namespaces m_namespaces;                        // never null
@@ -186,12 +123,12 @@ public class HermiT implements Serializable {
         loadOntology(URI.create(ontologyURI));
     }
 
-    public HermiT(java.net.URI ontologyURI) throws Clausifier.LoadingException,OWLException {
+    public HermiT(URI ontologyURI) throws Clausifier.LoadingException,OWLException {
         m_configuration=new Configuration();
         loadOntology(ontologyURI);
     }
 
-    public HermiT(java.net.URI ontologyURI,Configuration config) throws Clausifier.LoadingException,OWLException {
+    public HermiT(URI ontologyURI,Configuration config) throws Clausifier.LoadingException,OWLException {
         m_configuration=config;
         loadOntology(ontologyURI);
     }
@@ -579,4 +516,66 @@ public class HermiT implements Serializable {
         }
     }
 
+    public static class Configuration {
+        public TableauMonitorType tableauMonitorType;
+        public DirectBlockingType directBlockingType;
+        public BlockingStrategyType blockingStrategyType;
+        public BlockingSignatureCacheType blockingSignatureCacheType;
+        public ExistentialStrategyType existentialStrategyType;
+        public ParserType parserType;
+        public SubsumptionCacheStrategyType subsumptionCacheStrategyType;
+        public boolean clausifyTransitivity;
+        public boolean checkClauses;
+        public TableauMonitor monitor;
+        public final Map<String,Object> parameters;
+
+        public Configuration() {
+            tableauMonitorType=TableauMonitorType.NONE;
+            directBlockingType=DirectBlockingType.OPTIMAL;
+            blockingStrategyType=BlockingStrategyType.ANYWHERE;
+            blockingSignatureCacheType=BlockingSignatureCacheType.CACHED;
+            existentialStrategyType=ExistentialStrategyType.CREATION_ORDER;
+            parserType=ParserType.OWLAPI;
+            subsumptionCacheStrategyType=SubsumptionCacheStrategyType.IMMEDIATE;
+            clausifyTransitivity=false;
+            checkClauses=true;
+            monitor=null;
+            parameters=new HashMap<String,Object>();
+        }
+
+        protected void setIndividualReuseStrategyReuseAlways(Set<? extends LiteralConcept> concepts) {
+            parameters.put("IndividualReuseStrategy.reuseAlways",concepts);
+        }
+
+        public void loadIndividualReuseStrategyReuseAlways(File file) throws IOException {
+            Set<AtomicConcept> concepts=loadConceptsFromFile(file);
+            setIndividualReuseStrategyReuseAlways(concepts);
+        }
+
+        protected void setIndividualReuseStrategyReuseNever(Set<? extends LiteralConcept> concepts) {
+            parameters.put("IndividualReuseStrategy.reuseNever",concepts);
+        }
+
+        public void loadIndividualReuseStrategyReuseNever(File file) throws IOException {
+            Set<AtomicConcept> concepts=loadConceptsFromFile(file);
+            setIndividualReuseStrategyReuseNever(concepts);
+        }
+
+        protected Set<AtomicConcept> loadConceptsFromFile(File file) throws IOException {
+            Set<AtomicConcept> result=new HashSet<AtomicConcept>();
+            BufferedReader reader=new BufferedReader(new FileReader(file));
+            try {
+                String line=reader.readLine();
+                while (line!=null) {
+                    result.add(AtomicConcept.create(line));
+                    line=reader.readLine();
+                }
+                return result;
+            }
+            finally {
+                reader.close();
+            }
+        }
+
+    } // end Configuration class
 }
