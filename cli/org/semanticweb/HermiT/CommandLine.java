@@ -162,12 +162,12 @@ public class CommandLine {
     }
 
     protected interface Action {
-        void run(HermiT hermit, Namespaces namespaces,
+        void run(Reasoner hermit, Namespaces namespaces,
                  StatusOutput status, PrintWriter output);
     }
     
     static protected class DumpNamespacesAction implements Action {
-        public void run(HermiT hermit, Namespaces namespaces,
+        public void run(Reasoner hermit, Namespaces namespaces,
                         StatusOutput status, PrintWriter output) {
             output.println("Namespaces:");
             for (Map.Entry<String, String> e
@@ -182,7 +182,7 @@ public class CommandLine {
         public DumpClausesAction(String fileName) {
             file = fileName;
         }
-        public void run(HermiT hermit, Namespaces namespaces,
+        public void run(Reasoner hermit, Namespaces namespaces,
                         StatusOutput status, PrintWriter output) {
             if (file != null) {
                 if (file == "-") {
@@ -207,7 +207,7 @@ public class CommandLine {
         public ClassifyAction(String fileName) {
             file = fileName;
         }
-        public void run(HermiT hermit, Namespaces namespaces,
+        public void run(Reasoner hermit, Namespaces namespaces,
                         StatusOutput status, PrintWriter output) {
             status.log(2, "classifying...");
             hermit.seedSubsumptionCache();
@@ -233,7 +233,7 @@ public class CommandLine {
     static protected class SatisfiabilityAction implements Action {
         final String conceptName;
         public SatisfiabilityAction(String c) { conceptName = c; }
-        public void run(HermiT hermit,  Namespaces namespaces,
+        public void run(Reasoner hermit,  Namespaces namespaces,
                         StatusOutput status, PrintWriter output) {
             status.log(2, "Checking satisfiability of '" + conceptName + "'");
             String conceptUri = namespaces.uriFromId(conceptName);
@@ -254,7 +254,7 @@ public class CommandLine {
             conceptName = name;
             all = getAll;
         }
-        public void run(HermiT hermit,
+        public void run(Reasoner hermit,
                         Namespaces namespaces,
                         StatusOutput status,
                         PrintWriter output) {
@@ -292,7 +292,7 @@ public class CommandLine {
             conceptName = name;
             all = getAll;
         }
-        public void run(HermiT hermit,
+        public void run(Reasoner hermit,
                         Namespaces namespaces,
                         StatusOutput status,
                         PrintWriter output) {
@@ -328,7 +328,7 @@ public class CommandLine {
         public EquivalentsAction(String name) {
             conceptName = name;
         }
-        public void run(HermiT hermit,
+        public void run(Reasoner hermit,
                         Namespaces namespaces,
                         StatusOutput status,
                         PrintWriter output) {
@@ -452,9 +452,9 @@ public class CommandLine {
             PrintWriter output = new PrintWriter(System.out);
             Collection<Action> actions = new LinkedList<Action>();
             URI base;
-            HermiT.Configuration config = new HermiT.Configuration();
+            Reasoner.Configuration config = new Reasoner.Configuration();
             config.subsumptionCacheStrategyType =
-                HermiT.SubsumptionCacheStrategyType.ON_REQUEST;
+                Reasoner.SubsumptionCacheStrategyType.ON_REQUEST;
             boolean doAll = true;
             try {
                 base = new URI("file", System.getProperty("user.dir") + "/", null);
@@ -584,57 +584,57 @@ public class CommandLine {
                     case kParser : {
                         String arg = g.getOptarg();
                         if (arg.toLowerCase() == "owlapi") {
-                            config.parserType = HermiT.ParserType.OWLAPI;
+                            config.parserType = Reasoner.ParserType.OWLAPI;
                         } else if (arg.toLowerCase() == "kaon2") {
-                            config.parserType = HermiT.ParserType.KAON2;
+                            config.parserType = Reasoner.ParserType.KAON2;
                         } else throw new UsageException("unknown parser type '" + arg + "'; supported values are 'owlapi' and 'kaon2'");
                     } break;
                     case kOwlApi : {
-                        config.parserType = HermiT.ParserType.OWLAPI;
+                        config.parserType = Reasoner.ParserType.OWLAPI;
                     } break;
                     case kKaon2 : {
-                        config.parserType = HermiT.ParserType.KAON2;
+                        config.parserType = Reasoner.ParserType.KAON2;
                     } break;
                     case kDirectBlock : {
                         String arg = g.getOptarg();
                         if (arg.toLowerCase() == "pairwise") {
-                            config.directBlockingType = HermiT.DirectBlockingType.PAIR_WISE;
+                            config.directBlockingType = Reasoner.DirectBlockingType.PAIR_WISE;
                         } else if (arg.toLowerCase() == "single") {
-                            config.directBlockingType = HermiT.DirectBlockingType.SINGLE;
+                            config.directBlockingType = Reasoner.DirectBlockingType.SINGLE;
                         } else if (arg.toLowerCase() == "optimal") {
-                            config.directBlockingType = HermiT.DirectBlockingType.OPTIMAL;
+                            config.directBlockingType = Reasoner.DirectBlockingType.OPTIMAL;
                         } else throw new UsageException("unknown direct blocking type '" + arg + "'; supported values are 'pairwise', 'single', and 'optimal'");
                     } break;
                     case kBlockStrategy : {
                         String arg = g.getOptarg();
                         if (arg.toLowerCase() == "anywhere") {
-                            config.blockingStrategyType = HermiT.BlockingStrategyType.ANYWHERE;
+                            config.blockingStrategyType = Reasoner.BlockingStrategyType.ANYWHERE;
                         } else if (arg.toLowerCase() == "ancestor") {
-                            config.blockingStrategyType = HermiT.BlockingStrategyType.ANCESTOR;
+                            config.blockingStrategyType = Reasoner.BlockingStrategyType.ANCESTOR;
                         } else throw new UsageException("unknown blocking strategy type '" + arg + "'; supported values are 'ancestor' and 'anywhere'");
                     } break;
                     case kBlockCache : {
                         String arg = g.getOptarg();
                         if (arg.toLowerCase() == "on") {
-                            config.blockingSignatureCacheType = HermiT.BlockingSignatureCacheType.CACHED;
+                            config.blockingSignatureCacheType = Reasoner.BlockingSignatureCacheType.CACHED;
                         } else if (arg.toLowerCase() == "off") {
-                            config.blockingSignatureCacheType = HermiT.BlockingSignatureCacheType.NOT_CACHED;
+                            config.blockingSignatureCacheType = Reasoner.BlockingSignatureCacheType.NOT_CACHED;
                         } else throw new UsageException("unknown blocking cache type '" + arg + "'; supported values are 'on' and 'off'");
                     } break;
                     case kExpansion : {
                         String arg = g.getOptarg();
                         if (arg.toLowerCase() == "creation") {
-                            config.existentialStrategyType = HermiT.ExistentialStrategyType.CREATION_ORDER;
+                            config.existentialStrategyType = Reasoner.ExistentialStrategyType.CREATION_ORDER;
                         } else if (arg.toLowerCase() == "el") {
-                            config.existentialStrategyType = HermiT.ExistentialStrategyType.EL;
+                            config.existentialStrategyType = Reasoner.ExistentialStrategyType.EL;
                         } else if (arg.toLowerCase() == "reuse") {
-                            config.existentialStrategyType = HermiT.ExistentialStrategyType.INDIVIDUAL_REUSE;
+                            config.existentialStrategyType = Reasoner.ExistentialStrategyType.INDIVIDUAL_REUSE;
                         } else throw new UsageException("unknown existential strategy type '" + arg + "'; supported values are 'creation', 'el', and 'reuse'");
                     } break;
                     case kClausifyRoleBox : {
                         config.clausifyTransitivity = true;
                         config.checkClauses = false;
-                        config.existentialStrategyType = HermiT.ExistentialStrategyType.DEPTH_FIRST;
+                        config.existentialStrategyType = Reasoner.ExistentialStrategyType.DEPTH_FIRST;
                     } break;
                     case kDumpClauses : {
                         actions.add(new DumpClausesAction(g.getOptarg()));
@@ -663,7 +663,7 @@ public class CommandLine {
                 status.log(2, String.valueOf(actions.size()) + " actions");
                 try {
                     long startTime = System.currentTimeMillis();
-                    HermiT hermit = new HermiT(ont, config);
+                    Reasoner hermit = new Reasoner(ont, config);
                     long loadTime = System.currentTimeMillis() - startTime;
                     status.log(2, "Loaded in " + String.valueOf(loadTime) + " msec.");
                     Namespaces namespaces = 

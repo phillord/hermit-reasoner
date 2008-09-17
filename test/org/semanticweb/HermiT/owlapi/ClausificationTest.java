@@ -10,7 +10,7 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.Namespaces;
 import org.semanticweb.HermiT.InternalNames;
-import org.semanticweb.HermiT.HermiT;
+import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
@@ -101,7 +101,7 @@ public class ClausificationTest extends AbstractOWLOntologyTest {
         OWLDataFactory factory = manager.getOWLDataFactory();
         Set<DescriptionGraph> noDescriptionGraphs = Collections.emptySet();
         DLOntology dlOntology
-            = clausifier.clausify(new HermiT.Configuration(),
+            = clausifier.clausify(new Reasoner.Configuration(),
                 ontology, factory, noDescriptionGraphs);
         Set<String> actualStrings = new HashSet<String>();
         Namespaces namespaces = InternalNames.withInternalNamespaces

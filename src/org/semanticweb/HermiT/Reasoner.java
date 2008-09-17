@@ -1,5 +1,5 @@
 /*
- * HermiT
+ * Reasoner
  * 
  * Version 0.5.0
  *
@@ -73,15 +73,19 @@ import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
 
 /**
- * HermiT.java is mainly a facade to the main Tableau class. This is also 
- * the place where we configure everything (which parser is used to load an 
- * ontology, which blocking type should be used, etc). If no instance of the 
- * Configuration class (created via HermiT.Configuration() plus calls to the 
- * methods that set the desired options) is given, suitable options will 
- * automatically be used, e.g., the blocking type is chosen optimal for the 
- * expressivity of the used ontology language. 
+ * Answers queries about the logical implications of a particular knowledge base.
+ * A Reasoner is associated with a single knowledge base, which is "loaded" when
+ * the reasoner is constructed. By default a full classification of all atomic
+ * terms in the knowledge base is also performed at this time (which can take
+ * quite a while for large or complex ontologies), but this behavior can be
+ * disabled.
+ * Internal details of the loading and reasoning algorithms can be configured
+ * in the Reasoner constructor and do not change over the lifetime of the
+ * Reasoner object---internal data structures and caches are optimized for a
+ * particular configuration. By default, HermiT will use the set of options
+ * which provide optimal performance.
  */
-public class HermiT implements Serializable {
+public class Reasoner implements Serializable {
 	private static final long serialVersionUID=-8277117863937974032L;
 
     public static enum TableauMonitorType {
@@ -177,25 +181,25 @@ public class HermiT implements Serializable {
     private Map<AtomicConcept, HierarchyPosition<AtomicConcept>>
         atomicConceptHierarchy; // may be null; use getAtomicConceptHierarchy
     
-    public HermiT(String ontologyURI)
+    public Reasoner(String ontologyURI)
         throws Clausifier.LoadingException, OWLException {
         m_config = new Configuration();
         loadOntology(URI.create(ontologyURI));
     }
     
-    public HermiT(java.net.URI ontologyURI)
+    public Reasoner(java.net.URI ontologyURI)
         throws Clausifier.LoadingException, OWLException {
         m_config = new Configuration();
         loadOntology(ontologyURI);
     }
     
-    public HermiT(java.net.URI ontologyURI, Configuration config)
+    public Reasoner(java.net.URI ontologyURI, Configuration config)
         throws Clausifier.LoadingException, OWLException {
         m_config = config;
         loadOntology(ontologyURI);
     }
     
-    public HermiT(OWLOntology ontology, Configuration config)
+    public Reasoner(OWLOntology ontology, Configuration config)
         throws OWLException {
         m_config = config;
         // FIXME: do the identities of the manager and factory matter?
@@ -204,7 +208,7 @@ public class HermiT implements Serializable {
                         (Set<DescriptionGraph>) null);
     }
 
-    public HermiT(OWLOntology ontology, Configuration config,
+    public Reasoner(OWLOntology ontology, Configuration config,
                   Set<DescriptionGraph> graphs)
         throws OWLException, InterruptedException {
         m_config = config;
@@ -217,14 +221,23 @@ public class HermiT implements Serializable {
         return m_tableau.isABoxSatisfiable();
     }
     
-    public boolean isClassNameDefined(String className) {
+    /**
+     * Return `true` iff `classUri` occured in the loaded knowledge base.
+     */
+    public boolean isClassNameDefined(String classUri) {
         return m_dlOntology.getAllAtomicConcepts()
-            .contains(AtomicConcept.create(className));
+            .contains(AtomicConcept.create(classUri));
     }
 
-    public boolean isClassSatisfiable(String className) {
+    /**
+     * Check whether `classUri` is satisfiable.
+     * Note that classes which were not defined in the input ontology
+     * are satisfiable if and only if the ontology as a whole is
+     * consistent.
+     */
+    public boolean isClassSatisfiable(String classUri) {
         return m_subsumptionChecker.isSatisfiable(
-            AtomicConcept.create(className)
+            AtomicConcept.create(classUri)
         );
     }
 
@@ -627,18 +640,18 @@ public class HermiT implements Serializable {
         objectOutputStream.flush();
     }
     
-    public static HermiT load(InputStream inputStream) throws IOException {
+    public static Reasoner load(InputStream inputStream) throws IOException {
         try {
             ObjectInputStream objectInputStream =
                 new ObjectInputStream(inputStream);
-            return (HermiT) objectInputStream.readObject();
+            return (Reasoner) objectInputStream.readObject();
         } catch (ClassNotFoundException e) {
             IOException error=new IOException();
             error.initCause(e);
             throw error;
         }
     }
-    public static HermiT load(File file) throws IOException {
+    public static Reasoner load(File file) throws IOException {
         InputStream inputStream =
             new BufferedInputStream(new FileInputStream(file));
         try {

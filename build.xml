@@ -39,6 +39,8 @@
     <property name="javadocdir" value="${releasedir}/javadoc"/>
     <property name="apijavadocdir" value="${releasedir}/javadoc/api"/>
     <property name="fulljavadocdir" value="${releasedir}/javadoc/full"/>
+    
+    <property name="src" value="${projectroot}/src/org/semanticweb/HermiT"/>
 
     <!-- structure of 3rdparty libraries -->
     <property name="3rdpartydir" value="${projectroot}/../ThirdPartyOwlTools"/>
@@ -92,8 +94,8 @@
         <mkdir dir="${classdir}"/>
         <javac destdir="${classdir}" deprecation="yes" debug="on">
             <compilerarg value="-Xlint:unchecked"/>
-			<compilerarg value="-Xlint:all"/>
-			<compilerarg value="-Xlint:-serial"/>
+            <compilerarg value="-Xlint:all"/>
+            <compilerarg value="-Xlint:-serial"/>
             <src refid="sourcepath"/>
             <classpath refid="classpath"/>
         </javac>
@@ -110,10 +112,10 @@
                 <attribute name="Implementation-Title" value="HermiT"/>
                 <attribute name="Implementation-Vendor" value="Oxford University"/>
                 <attribute name="Implementation-Version" value="${version}"/>
-				<attribute name="Main-Class" value="org.semanticweb.HermiT.CommandLine"/>
+                <attribute name="Main-Class" value="org.semanticweb.HermiT.CommandLine"/>
             </manifest>
             <fileset dir="${classdir}"/>
-			<fileset dir="${flattendir}"/>
+            <fileset dir="${flattendir}"/>
         </jar>
     </target>
     
@@ -131,7 +133,7 @@
         </copy>
         <mkdir dir="${plugindir}/lib"/>
         <copy todir="${plugindir}/lib" file="${HermiTjar}"/>
-	    <jar jarfile="${pluginjar}">
+        <jar jarfile="${pluginjar}">
             <manifest>
                 <attribute name="Implementation-Title" value="HermiT"/>
                 <attribute name="Implementation-Vendor" value="Oxford University"/>
@@ -165,21 +167,24 @@
     <target name="javadoc">
         <mkdir dir="${javadocdir}"/>
         <mkdir dir="${apijavadocdir}"/>
-        <!-- <javadoc sourcepathref="apisourcepath" destdir="${apijavadocdir}" access="public" author="false" version="true" use="true">
+        <javadoc destdir="${apijavadocdir}" access="public" author="false" version="true" use="true">
             <package name="org.semanticweb.HermiT.*"/>
             <classpath refid="runclasspath"/>
-        </javadoc> -->
+            <source file="${src}/HermiT.java"/>
+            <source file="${src}/Namespaces.java"/>
+            <source file="${src}/hierarchy/HierarchyPosition.java"/>
+        </javadoc>
         <mkdir dir="${fulljavadocdir}"/>
         <javadoc sourcepathref="sourcepath" destdir="${fulljavadocdir}" access="private" author="false" version="true" use="true">
             <package name="org.semanticweb.HermiT.*"/>
-			<classpath refid="classpath"/>
+            <classpath refid="classpath"/>
         </javadoc>
     </target>
     
     <target name="release" depends="clean,jar,jarsrc,javadoc">
         <copy file="readme.txt" tofile="${releasedir}/readme.txt"/>
         <copy file="gpl.txt" tofile="${releasedir}/license.txt"/>
-	    <zip zipfile="${builddir}/${ant.project.name}-${version}.zip" basedir="${releasedir}"/>
+        <zip zipfile="${builddir}/${ant.project.name}-${version}.zip" basedir="${releasedir}"/>
     </target>
 
     <!-- TEST TARGETS -->
@@ -199,9 +204,9 @@
 
     <target name="test" depends="compiletest">
         <java classname="org.semanticweb.HermiT.AllTests" fork="true">
-			<jvmarg value="-enableassertions"/>
+            <jvmarg value="-enableassertions"/>
             <classpath>
-         	    <pathelement location="${testclassdir}"/>
+                <pathelement location="${testclassdir}"/>
             </classpath>
             <classpath refid="classpath"/>
             <classpath refid="testclasspath"/>
@@ -213,7 +218,7 @@
     <target name="run" depends="compile,compiletest">
         <java classname="org.semanticweb.HermiT.run.RunHermiT" fork="true">
             <classpath>
-         	    <pathelement location="${testclassdir}"/>
+                <pathelement location="${testclassdir}"/>
             </classpath>
             <classpath refid="classpath"/>
             <classpath refid="testclasspath"/>

@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.semanticweb.HermiT.HermiT;
+import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.Namespaces;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
@@ -90,7 +90,7 @@ public class OwlClausification {
     protected static final org.semanticweb.HermiT.model.Variable Y = org.semanticweb.HermiT.model.Variable.create("Y");
     protected static final org.semanticweb.HermiT.model.Variable Z = org.semanticweb.HermiT.model.Variable.create("Z");
 
-    public DLOntology clausify(HermiT.Configuration config, OWLOntology ontology,
+    public DLOntology clausify(Reasoner.Configuration config, OWLOntology ontology,
             OWLDataFactory factory,
             Collection<DescriptionGraph> descriptionGraphs) throws OWLException {
         OwlNormalization normalization = new OwlNormalization(factory);
@@ -108,7 +108,7 @@ public class OwlClausification {
                 normalization.getFacts(), descriptionGraphs, factory);
     }
 
-    public DLOntology clausify(HermiT.Configuration config, String ontologyURI,
+    public DLOntology clausify(Reasoner.Configuration config, String ontologyURI,
             Collection<OWLDescription[]> conceptInclusions,
             Collection<OWLObjectPropertyExpression[]> objectPropertyInclusions,
             Collection<OWLDataPropertyExpression[]> dataPropertyInclusions,
@@ -198,7 +198,7 @@ public class OwlClausification {
                 && determineExpressivity.m_hasInverseRoles
                 && (determineExpressivity.m_hasNominals ||
                     config.existentialStrategyType ==
-                        HermiT.ExistentialStrategyType.INDIVIDUAL_REUSE);
+                        Reasoner.ExistentialStrategyType.INDIVIDUAL_REUSE);
         Clausifier clausifier = new Clausifier(positiveFacts, shouldUseNIRule,
                 factory);
         for (OWLDescription[] inclusion : conceptInclusions) {

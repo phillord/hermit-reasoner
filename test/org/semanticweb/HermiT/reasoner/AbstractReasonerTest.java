@@ -11,7 +11,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.semanticweb.HermiT.HermiT;
+import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.DLClause;
@@ -33,7 +33,7 @@ public abstract class AbstractReasonerTest extends TestCase {
         EMPTY_DL_ONTOLOGY=new DLOntology("opaque:test",dlClauses,atoms,atoms,false,false,false,false,false);
     }
     protected OWLOntology m_ontology;
-    protected HermiT hermit;
+    protected Reasoner hermit;
 
     public AbstractReasonerTest(String name) {
         super(name);
@@ -48,9 +48,9 @@ public abstract class AbstractReasonerTest extends TestCase {
      *             if the resource cannot be found or an error occurred when loading the ontology
      */
     protected void loadOntologyFromResource(String resourceName) throws Exception {
-        HermiT.Configuration configuration=new HermiT.Configuration();
-        configuration.subsumptionCacheStrategyType=HermiT.SubsumptionCacheStrategyType.ON_REQUEST;
-        hermit=new HermiT(getClass().getResource(resourceName).toURI(),configuration);
+        Reasoner.Configuration configuration=new Reasoner.Configuration();
+        configuration.subsumptionCacheStrategyType=Reasoner.SubsumptionCacheStrategyType.ON_REQUEST;
+        hermit=new Reasoner(getClass().getResource(resourceName).toURI(),configuration);
     }
 
     /**
@@ -76,7 +76,7 @@ public abstract class AbstractReasonerTest extends TestCase {
         OWLOntologyManager manager=OWLManager.createOWLOntologyManager();
         OWLOntologyInputSource input=new StringInputSource(buffer.toString());
         m_ontology=manager.loadOntology(input);
-        hermit=new HermiT(m_ontology,new HermiT.Configuration());
+        hermit=new Reasoner(m_ontology, new Reasoner.Configuration());
     }
 
     /**
@@ -132,7 +132,7 @@ public abstract class AbstractReasonerTest extends TestCase {
         Map<String,HierarchyPosition<String>> taxonomy=hermit.getClassTaxonomy();
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter output=new PrintWriter(buffer);
-        HermiT.printSortedAncestorLists(output,taxonomy);
+        Reasoner.printSortedAncestorLists(output,taxonomy);
         return buffer.toString();
     }
 

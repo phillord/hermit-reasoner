@@ -25,7 +25,7 @@ import org.semanticweb.owl.model.OWLOntologySetProvider;
 public class HermitReasoner implements OWLReasoner {
     static final String mUriBase = "urn:hermit:kb";
 
-    HermiT hermit;
+    Reasoner hermit;
     java.util.Set<OWLOntology> ontologies;
     OWLOntology ontology;
     OWLOntologyManager manager;
@@ -96,10 +96,10 @@ public class HermitReasoner implements OWLReasoner {
                 new org.semanticweb.owl.util.OWLOntologyMerger(
                     new SetProviderFromSet(ontologies)
                 ).createMergedOntology(manager,theUri);// URI.create(mUriBase + String.valueOf(mNextKbId++)));
-            HermiT.Configuration config = new HermiT.Configuration();
-            config.subsumptionCacheStrategyType = HermiT.SubsumptionCacheStrategyType.JUST_IN_TIME;
+            Reasoner.Configuration config = new Reasoner.Configuration();
+            config.subsumptionCacheStrategyType = Reasoner.SubsumptionCacheStrategyType.JUST_IN_TIME;
             System.out.println("Loading ontology into HermiT...");
-            hermit = new HermiT(ontology, config);
+            hermit = new Reasoner(ontology, config);
             System.out.println("...done");
         } catch (OWLException e) {
             throw new RuntimeException("Failed to merge ontologies.", e);
