@@ -7,48 +7,56 @@ import org.semanticweb.HermiT.*;
  * Represents an atomic role.
  */
 public class AtomicRole extends Role implements DLPredicate {
-    private static final long serialVersionUID=3766087788313643809L;
+    private static final long serialVersionUID = 3766087788313643809L;
 
     private final String m_uri;
-    private final boolean m_isDatatypeRole;
+    private final boolean isDatatypeRole;
     
     protected AtomicRole(String uri,boolean isDatatypeRole) {
-        m_uri=uri;
-        m_isDatatypeRole=isDatatypeRole;
+        m_uri = uri;
+        this.isDatatypeRole = isDatatypeRole;
     }
+    
     public String getURI() {
         return m_uri;
     }
+    
     /**
      * Check whether the role can only be applied to datatypes.
      * This is just an expedient hack; a cleaner approach would simply set the
      * ranges of object and data roles appropriately.
      */
     public boolean isRestrictedToDatatypes() {
-        return m_isDatatypeRole;
+        return isDatatypeRole;
     }
+    
     public int getArity() {
         return 2;
     }
+    
     public Role getInverse() {
         return InverseRole.create(this);
     }
+    
     public String toString(Namespaces namespaces) {
-        String out=namespaces.abbreviateAsNamespace(m_uri);
-        if (m_isDatatypeRole) {
-            return out+"*";
+        String out = namespaces.idFromUri(m_uri);
+        if (isDatatypeRole) {
+            return out + "*";
         }
         else {
             return out;
         }
     }
+    
     protected Object readResolve() {
         return s_interningManager.intern(this);
     }
 
-    protected static InterningManager<AtomicRole> s_interningManager=new InterningManager<AtomicRole>() {
+    protected static InterningManager<AtomicRole>
+        s_interningManager = new InterningManager<AtomicRole>() {
         protected boolean equal(AtomicRole lhs, AtomicRole rhs) {
-            return lhs.m_uri.equals(rhs.m_uri) && lhs.m_isDatatypeRole==rhs.m_isDatatypeRole;
+            return (lhs.m_uri.equals(rhs.m_uri) &&
+                    lhs.isDatatypeRole == rhs.isDatatypeRole);
         }
         protected int getHashCode(AtomicRole object) {
             return object.m_uri.hashCode();

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.semanticweb.HermiT.InternalNames;
 import org.semanticweb.HermiT.blocking.AnywhereBlocking;
 import org.semanticweb.HermiT.blocking.BlockingSignatureCache;
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
@@ -164,17 +165,16 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
     protected String getSubsumptionHierarchyAsText() throws Exception {
         SubsumptionHierarchy subsumptionHierarchy = getSubsumptionHierarchy();
         Map<AtomicConcept, Set<AtomicConcept>> flattenedHierarchy = subsumptionHierarchy.getFlattenedHierarchy();
-        org.semanticweb.HermiT.Namespaces namespaces = new org.semanticweb.HermiT.Namespaces();
-        namespaces.registerPrefix("a", m_ontology.getOntologyURI() + "#");
-        namespaces.registerInternalPrefixes(m_ontology.getOntologyURI());
-        namespaces.registerStandardPrefixes();
+        org.semanticweb.HermiT.Namespaces namespaces = InternalNames.withInternalNamespaces
+            (new org.semanticweb.HermiT.Namespaces(m_ontology.getOntologyURI() + "#",
+                                org.semanticweb.HermiT.Namespaces.semanticWebNamespaces));
         CharArrayWriter buffer = new CharArrayWriter();
         PrintWriter output = new PrintWriter(buffer);
         for (Map.Entry<AtomicConcept, Set<AtomicConcept>> entry : flattenedHierarchy.entrySet()) {
-            output.println(namespaces.abbreviateAsNamespace(entry.getKey().getURI()));
+            output.println(namespaces.idFromUri(entry.getKey().getURI()));
             for (AtomicConcept atomicConcept : entry.getValue()) {
                 output.print("    ");
-                output.println(namespaces.abbreviateAsNamespace(atomicConcept.getURI()));
+                output.println(namespaces.idFromUri(atomicConcept.getURI()));
             }
             output.println("-----------------------------------------------");
         }

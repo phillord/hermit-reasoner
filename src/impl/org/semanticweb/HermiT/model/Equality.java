@@ -22,7 +22,7 @@ public class Equality implements DLPredicate,Serializable {
         return "==";
     }
     public String toString() {
-        return toString(Namespaces.INSTANCE);
+        return toString(Namespaces.none);
     }
     protected Object readResolve() {
         return INSTANCE;

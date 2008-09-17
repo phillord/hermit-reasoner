@@ -393,13 +393,13 @@ public class DLOntology implements Serializable {
         return true;
     }
 
-    public String toString(Namespaces namespaces) {
+    public String toString(Namespaces ns) {
         StringBuffer stringBuffer = new StringBuffer();
         stringBuffer.append("DL-clauses: [");
         stringBuffer.append(CRLF);
         for (DLClause dlClause : m_dlClauses) {
             stringBuffer.append("  ");
-            stringBuffer.append(dlClause.toString(namespaces));
+            stringBuffer.append(dlClause.toString(ns));
             stringBuffer.append(CRLF);
         }
         stringBuffer.append("]");
@@ -408,12 +408,12 @@ public class DLOntology implements Serializable {
         stringBuffer.append(CRLF);
         for (Atom atom : m_positiveFacts) {
             stringBuffer.append("  ");
-            stringBuffer.append(atom.toString(namespaces));
+            stringBuffer.append(atom.toString(ns));
             stringBuffer.append(CRLF);
         }
         for (Atom atom : m_negativeFacts) {
             stringBuffer.append("  !");
-            stringBuffer.append(atom.toString(namespaces));
+            stringBuffer.append(atom.toString(ns));
             stringBuffer.append(CRLF);
         }
         stringBuffer.append("]");
@@ -421,7 +421,7 @@ public class DLOntology implements Serializable {
     }
 
     public String toString() {
-        return toString(Namespaces.INSTANCE);
+        return toString(Namespaces.none);
     }
 
     public void save(File file) throws IOException {

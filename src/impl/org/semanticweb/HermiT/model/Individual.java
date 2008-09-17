@@ -18,13 +18,13 @@ public class Individual extends Term {
         return m_uri;
     }
     public String toString() {
-        return toString(Namespaces.EMPTY_INSTANCE);
+        return toString(Namespaces.none);
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);
     }
     public String toString(Namespaces namespaces) {
-        return namespaces.abbreviateAsNamespace(m_uri);
+        return namespaces.idFromUri(m_uri);
     }
 
     protected static InterningManager<Individual> s_interningManager=new InterningManager<Individual>() {

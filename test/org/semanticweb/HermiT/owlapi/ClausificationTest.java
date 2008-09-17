@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.semanticweb.HermiT.Namespaces;
+import org.semanticweb.HermiT.InternalNames;
 import org.semanticweb.HermiT.HermiT;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
@@ -102,9 +104,9 @@ public class ClausificationTest extends AbstractOWLOntologyTest {
             = clausifier.clausify(new HermiT.Configuration(),
                 ontology, factory, noDescriptionGraphs);
         Set<String> actualStrings = new HashSet<String>();
-        org.semanticweb.HermiT.Namespaces namespaces = new org.semanticweb.HermiT.Namespaces();
-        namespaces.registerPrefix("a", ontology.getURI() + "#");
-        namespaces.registerInternalPrefixes(ontology.getURI().toString());
+        Namespaces namespaces = InternalNames.withInternalNamespaces
+            (new Namespaces(ontology.getURI() + "#",
+                                Namespaces.semanticWebNamespaces));
         for (DLClause dlClause : dlOntology.getDLClauses())
             actualStrings.add(dlClause.toString(namespaces));
         for (org.semanticweb.HermiT.model.Atom atom : dlOntology.getPositiveFacts())

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.semanticweb.HermiT.InternalNames;
 import org.semanticweb.HermiT.model.AtomicConcept;
 
 public class StandardClassificationManager {
@@ -34,9 +35,11 @@ public class StandardClassificationManager {
         m_subsumptionCache=new HashMap<SubsumptionHierarchyNode,SubsumptionType>();
     }
     public void buildHierarchy() throws SubsumptionHierarchy.SubusmptionCheckerException {
-        for (AtomicConcept atomicConcept : m_subsumptionChecker.getAllAtomicConcepts())
-            if (!atomicConcept.getURI().startsWith("internal:"))
+        for (AtomicConcept atomicConcept : m_subsumptionChecker.getAllAtomicConcepts()) {
+            if (!InternalNames.isInternalUri(atomicConcept.getURI())) {
                 insertConcept(atomicConcept);
+            }
+        }
     }
     protected void insertConcept(AtomicConcept atomicConcept) throws SubsumptionHierarchy.SubusmptionCheckerException {
         topSeach(atomicConcept);

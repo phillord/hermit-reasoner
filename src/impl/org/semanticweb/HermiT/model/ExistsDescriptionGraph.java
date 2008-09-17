@@ -23,10 +23,10 @@ public class ExistsDescriptionGraph extends ExistentialConcept implements DLPred
         return 1;
     }
     public String toString(Namespaces namespaces) {
-        return "exists("+namespaces.abbreviateAsNamespace(m_descriptionGraph.getName())+'|'+m_vertex+')';
+        return "exists("+namespaces.idFromUri(m_descriptionGraph.getName())+'|'+m_vertex+')';
     }
     public String toString() {
-        return toString(Namespaces.INSTANCE);
+        return toString(Namespaces.none);
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);

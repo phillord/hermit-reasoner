@@ -17,7 +17,7 @@ public abstract class Role implements Serializable {
 
     public abstract String toString(Namespaces namespaces);
     public String toString() {
-        return toString(Namespaces.INSTANCE);        
+        return toString(Namespaces.none);
     }
     public static Role fromString(String s, Namespaces n) {
         if (s.startsWith("(inv-")) {
@@ -25,13 +25,13 @@ public abstract class Role implements Serializable {
         } else {
             if (s.endsWith("*")) {
                 return AtomicRole.createDataRole(
-                    n.expandString(s.substring(0, s.length()-1)));
+                    n.uriFromId(s.substring(0, s.length()-1)));
             } else {
-                return AtomicRole.createObjectRole(n.expandString(s));
+                return AtomicRole.createObjectRole(n.uriFromId(s));
             }
         }
     }
     public static Role fromString(String s) {
-        return fromString(s, Namespaces.INSTANCE);
+        return fromString(s, Namespaces.none);
     }
 }

@@ -253,7 +253,7 @@ public class DLClause implements Serializable {
     }
 
     public String toString() {
-        return toString(Namespaces.INSTANCE);
+        return toString(Namespaces.none);
     }
 
     protected Object readResolve() {

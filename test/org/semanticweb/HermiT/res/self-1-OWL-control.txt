@@ -1,4 +1,4 @@
-not q:0(a:a)
-q:1(a:a)
-q:0(X) :- a:r(X,Y)
-a:r(X,X) :- q:1(X)
+q:1(a)
+q:0(X) :- r(X,Y)
+not q:0(a)
+r(X,X) :- q:1(X)

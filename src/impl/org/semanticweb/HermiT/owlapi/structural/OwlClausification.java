@@ -225,11 +225,6 @@ public class OwlClausification {
     /**
      * Creates an atom in the Hermit internal format such that the variables
      * automatically reflect whether the role was an inverse role or not.
-     * 
-     * @param objectProperty
-     * @param first
-     * @param second
-     * @return
      */
     protected static Atom getRoleAtom(
             OWLObjectPropertyExpression objectProperty,
@@ -274,8 +269,6 @@ public class OwlClausification {
     /**
      * Returns an atomic concept or a negated atomic concept in the Hermit
      * internal format, which are both LiteralConcept objects.
-     * @param description
-     * @return
      */
     protected static LiteralConcept getLiteralConcept(OWLDescription description) {
         if (description instanceof OWLClass) {
@@ -758,8 +751,8 @@ public class OwlClausification {
         protected static OWLDataType integerDataType = factory.getOWLDataType(XSDVocabulary.INTEGER.getURI());
         protected static OWLDataType stringDataType = factory.getOWLDataType(XSDVocabulary.STRING.getURI());
         protected static OWLDataType booleanDataType = factory.getOWLDataType(XSDVocabulary.BOOLEAN.getURI());
-        protected static OWLDataType literalDataType = factory.getOWLDataType(URI.create(Namespaces.RDFS_NS
-                + "Literal"));
+        protected static OWLDataType literalDataType = factory.getOWLDataType(URI.create(
+            "http://www.w3.org/2000/01/rdf-schema#Literal"));
 
         protected boolean isNegated = false;
         protected List<DataRange> dataRanges;

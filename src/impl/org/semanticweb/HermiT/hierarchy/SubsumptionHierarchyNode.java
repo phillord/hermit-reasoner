@@ -81,6 +81,6 @@ public class SubsumptionHierarchyNode implements Serializable {
         return buffer.toString();
     }
     public String toString() {
-        return toString(Namespaces.INSTANCE);
+        return toString(Namespaces.none);
     }
 }

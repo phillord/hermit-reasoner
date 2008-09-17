@@ -42,7 +42,7 @@ public class DatatypeRestriction extends DataRange {
     public String toString(Namespaces namespaces) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("(");
-        buffer.append(namespaces.abbreviateAsNamespace(datatypeURI.toString()));
+        buffer.append(namespaces.idFromUri(datatypeURI.toString()));
         for (String value : equalsValues) {
             buffer.append(" " + value);
         }

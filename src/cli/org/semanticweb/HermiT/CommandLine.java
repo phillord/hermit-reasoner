@@ -166,6 +166,17 @@ public class CommandLine {
                  StatusOutput status, PrintWriter output);
     }
     
+    static protected class DumpNamespacesAction implements Action {
+        public void run(HermiT hermit, Namespaces namespaces,
+                        StatusOutput status, PrintWriter output) {
+            output.println("Namespaces:");
+            for (Map.Entry<String, String> e
+                    : namespaces.getDeclarations().entrySet()) {
+                output.println("\t" + e.getKey() + "\t" + e.getValue());
+            }
+        }
+    }
+    
     static protected class DumpClausesAction implements Action {
         final String file;
         public DumpClausesAction(String fileName) {
@@ -225,12 +236,12 @@ public class CommandLine {
         public void run(HermiT hermit,  Namespaces namespaces,
                         StatusOutput status, PrintWriter output) {
             status.log(2, "Checking satisfiability of '" + conceptName + "'");
-            String expandedName = namespaces.expandString(conceptName);
-            if (!hermit.isClassNameDefined(expandedName)) {
-                status.log(0, "Warning: class '" + expandedName +
+            String conceptUri = namespaces.uriFromId(conceptName);
+            if (!hermit.isClassNameDefined(conceptUri)) {
+                status.log(0, "Warning: class '" + conceptUri +
                                 "' was not declared in the ontology.");
             }
-            boolean result = hermit.isClassSatisfiable(conceptName);
+            boolean result = hermit.isClassSatisfiable(conceptUri);
             output.println(conceptName + (result ? " is satisfiable."
                                                  : " is not satisfiable."));
         }
@@ -248,19 +259,18 @@ public class CommandLine {
                         StatusOutput status,
                         PrintWriter output) {
             status.log(2, "Finding supers of '" + conceptName + "'");
-            String expandedName = namespaces.expandString(conceptName);
-            if (!hermit.isClassNameDefined(expandedName)) {
-                status.log(0, "Warning: class '" + expandedName +
+            String conceptUri = namespaces.uriFromId(conceptName);
+            if (!hermit.isClassNameDefined(conceptUri)) {
+                status.log(0, "Warning: class '" + conceptUri +
                                 "' was not declared in the ontology.");
             }
             HierarchyPosition<String> pos =
-                hermit.getClassTaxonomyPosition(expandedName);
+                hermit.getClassTaxonomyPosition(conceptUri);
             if (all) {
                 output.println(
                     "All super-classes of '" + conceptName + "':");
                 for (String sup : pos.getAncestors()) {
-                    output.println("\t" +
-                        namespaces.abbreviateAsNamespace(sup));
+                    output.println("\t" + namespaces.idFromUri(sup));
                 }
             } else {
                 output.println(
@@ -268,8 +278,7 @@ public class CommandLine {
                 for (HierarchyPosition<String> sup
                         : pos.getParentPositions()) {
                     for (String name : sup.getEquivalents()) {
-                        output.println("\t" +
-                            namespaces.abbreviateAsNamespace(name));
+                        output.println("\t" + namespaces.idFromUri(name));
                     }
                 }
             }
@@ -288,19 +297,18 @@ public class CommandLine {
                         StatusOutput status,
                         PrintWriter output) {
             status.log(2, "Finding subs of '" + conceptName + "'");
-            String expandedName = namespaces.expandString(conceptName);
-            if (!hermit.isClassNameDefined(expandedName)) {
-                status.log(0, "Warning: class '" + expandedName +
+            String conceptUri = namespaces.uriFromId(conceptName);
+            if (!hermit.isClassNameDefined(conceptUri)) {
+                status.log(0, "Warning: class '" + conceptUri +
                                 "' was not declared in the ontology.");
             }
             HierarchyPosition<String> pos =
-                hermit.getClassTaxonomyPosition(expandedName);
+                hermit.getClassTaxonomyPosition(conceptUri);
             if (all) {
                 output.println(
                     "All sub-classes of '" + conceptName + "':");
                 for (String sub : pos.getDescendants()) {
-                    output.println("\t" +
-                        namespaces.abbreviateAsNamespace(sub));
+                    output.println("\t" + namespaces.idFromUri(sub));
                 }
             } else {
                 output.println(
@@ -308,8 +316,7 @@ public class CommandLine {
                 for (HierarchyPosition<String> sub
                         : pos.getChildPositions()) {
                     for (String name : sub.getEquivalents()) {
-                        output.println("\t" +
-                            namespaces.abbreviateAsNamespace(name));
+                        output.println("\t" + namespaces.idFromUri(name));
                     }
                 }
             }
@@ -326,18 +333,17 @@ public class CommandLine {
                         StatusOutput status,
                         PrintWriter output) {
             status.log(2, "Finding equivalents of '" + conceptName + "'");
-            String expandedName = namespaces.expandString(conceptName);
-            if (!hermit.isClassNameDefined(expandedName)) {
-                status.log(0, "Warning: class '" + expandedName +
+            String conceptUri = namespaces.uriFromId(conceptName);
+            if (!hermit.isClassNameDefined(conceptUri)) {
+                status.log(0, "Warning: class '" + conceptUri +
                                 "' was not declared in the ontology.");
             }
             HierarchyPosition<String> pos =
-                hermit.getClassTaxonomyPosition(expandedName);
+                hermit.getClassTaxonomyPosition(conceptUri);
             output.println(
                     "Classes equivalent to '" + conceptName + "':");
             for (String equiv : pos.getEquivalents()) {
-                output.println("\t" +
-                    namespaces.abbreviateAsNamespace(equiv));
+                output.println("\t" + namespaces.idFromUri(equiv));
             }
         }
     }
@@ -346,7 +352,7 @@ public class CommandLine {
     protected static final int
         kTime=1000, kDumpClauses=1001, kDumpRoleBox=1002, kOwlApi = 1003, kKaon2 = 1004,
         kDirectBlock = 1005, kBlockStrategy = 1006, kBlockCache = 1007, kExpansion = 1008, kBase = 1009,
-        kParser = 1010, kClausifyRoleBox = 1011;
+        kParser = 1010, kClausifyRoleBox = 1011, kDefaultNamespace = 1012, kDumpNamespaces = 1013;
     
     static protected final String versionString = "HermiT version 0.5.0";
     protected static final String usageString = "Usage: hermit [OPTION]... URI...";
@@ -402,12 +408,15 @@ public class CommandLine {
                     "output classes equivalent to CLASS"),
         new Option('U', "unsatisfiable", kActions,
                     "output unsatisfiable classes (equivalent to --equivalents=owl:Nothing)"),
+        new Option(kDumpNamespaces, "print-namespaces", kActions,
+                    "output namespace prefixes available for use in identifiers"),
 
-        // FIXME the namespace class is unreliable; fix it before providing these options:
-        // new Option('N', "no-namespaces", kNamespaces,
-        //             "do not abbreviate or expand using namespaces defined in input ontology"),
-        // new Option('n', "namespace", kNamespaces, true, "NS=URI",
-        //             "use NS as an abbreviation for URI"),
+        new Option('N', "no-namespaces", kNamespaces,
+                    "do not abbreviate or expand identifiers using namespaces defined in input ontology"),
+        new Option('n', "namespace", kNamespaces, true, "NS=URI",
+                    "use NS as an abbreviation for URI in identifiers"),
+        new Option(kDefaultNamespace, "namespace", kNamespaces, true, "URI",
+                    "use URI as the default identifier namespace"),
         
         new Option(kBase, "base", kParsing, true, "BASE",
                     "use BASE as base for ontology URI arguments"),
@@ -438,6 +447,7 @@ public class CommandLine {
     public static void main(String[] argv) {
         try {
             int verbosity = 1;
+            boolean ignoreOntologyNamespaces = false;
             Map<String, String> newNamespaces = new HashMap<String, String>();
             PrintWriter output = new PrintWriter(System.out);
             Collection<Action> actions = new LinkedList<Action>();
@@ -545,8 +555,11 @@ public class CommandLine {
                     case 'U': {
                         actions.add(new EquivalentsAction("http://www.w3.org/2002/07/owl#Nothing"));
                     } break;
+                    case kDumpNamespaces: {
+                        actions.add(new DumpNamespacesAction());
+                    } break;
                     case 'N': {
-                        newNamespaces.put(null, null);
+                        ignoreOntologyNamespaces = true;
                     } break;
                     case 'n': {
                         String arg = g.getOptarg();
@@ -555,6 +568,10 @@ public class CommandLine {
                             throw new IllegalArgumentException("the namespace definition '" + arg + "' is not of the form NS=URI.");
                         }
                         newNamespaces.put(arg.substring(0, eqIndex), arg.substring(eqIndex + 1));
+                    } break;
+                    case kDefaultNamespace: {
+                        String arg = g.getOptarg();
+                        newNamespaces.put("", arg);
                     } break;
                     case kBase : {
                         String arg = g.getOptarg();
@@ -650,11 +667,9 @@ public class CommandLine {
                     long loadTime = System.currentTimeMillis() - startTime;
                     status.log(2, "Loaded in " + String.valueOf(loadTime) + " msec.");
                     Namespaces namespaces = 
-                        (newNamespaces.containsKey(null) ? new Namespaces()
-                                                         : new Namespaces(hermit.getNamespaces()));
-                    for (Map.Entry<String, String> e : newNamespaces.entrySet()) {
-                        namespaces.registerPrefix(e.getKey(), e.getValue());
-                    }
+                        (ignoreOntologyNamespaces ? new Namespaces(newNamespaces)
+                                                  : new Namespaces(newNamespaces,
+                                                            hermit.getNamespaces()));
                     for (Action action : actions) {
                         status.log(2, "Doing action...");
                         startTime = System.currentTimeMillis();

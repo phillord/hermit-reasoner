@@ -243,12 +243,12 @@ public class Debugger extends TableauMonitorForwarder {
         else if ("!=".equals(predicate))
             return Inequality.INSTANCE;
         else if (predicate.startsWith("+"))
-            return AtomicConcept.create(m_namespaces.expandString(predicate.substring(1)));
+            return AtomicConcept.create(m_namespaces.uriFromId(predicate.substring(1)));
         else if (predicate.startsWith("-"))
             // TODO: might need to create a data role here instead:
-            return AtomicRole.createObjectRole(m_namespaces.expandString(predicate.substring(1)));
+            return AtomicRole.createObjectRole(m_namespaces.uriFromId(predicate.substring(1)));
         else if (predicate.startsWith("$")) {
-            String graphName=m_namespaces.expandString(predicate.substring(1));
+            String graphName=m_namespaces.uriFromId(predicate.substring(1));
             for (DescriptionGraph descriptionGraph : m_tableau.getDLOntology().getAllDescriptionGraphs())
                 if (graphName.equals(descriptionGraph.getName()))
                     return descriptionGraph;
@@ -332,7 +332,7 @@ public class Debugger extends TableauMonitorForwarder {
                 ExtensionTable.Retrieval retrieval=extensionTable.createRetrieval(bindings,ExtensionTable.View.TOTAL);
                 retrieval.getBindingsBuffer()[0]=dlPredicate;
                 loadFacts(facts,retrieval);
-                title="Assertions containing the predicate '"+m_namespaces.abbreviateAsNamespace(dlPredicate.toString())+"'.";
+                title="Assertions containing the predicate '"+m_namespaces.idFromUri(dlPredicate.toString())+"'.";
             }
             else {
                 int nodeID;
@@ -960,7 +960,7 @@ public class Debugger extends TableauMonitorForwarder {
             return;
         }
         String conceptName=commandLine[1];
-        AtomicConcept atomicConcept=AtomicConcept.create(m_namespaces.expandString(conceptName));
+        AtomicConcept atomicConcept=AtomicConcept.create(m_namespaces.uriFromId(conceptName));
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter writer=new PrintWriter(buffer);
         writer.println("Nodes for '"+conceptName+"'");
@@ -1133,23 +1133,23 @@ public class Debugger extends TableauMonitorForwarder {
     }
     public void isSatisfiableStarted(AtomicConcept atomicConcept) {
         super.isSatisfiableStarted(atomicConcept);
-        m_output.println("Will check whether '"+m_namespaces.abbreviateAsNamespace(atomicConcept.getURI())+"' is satisfiable.");
+        m_output.println("Will check whether '"+m_namespaces.idFromUri(atomicConcept.getURI())+"' is satisfiable.");
         mainLoop();
     }
     public void isSatisfiableFinished(AtomicConcept atomicConcept,boolean result) {
         super.isSatisfiableFinished(atomicConcept,result);
-        m_output.println("'"+m_namespaces.abbreviateAsNamespace(atomicConcept.getURI())+"' is "+(result ? "" : "not ")+"satisfiable.");
+        m_output.println("'"+m_namespaces.idFromUri(atomicConcept.getURI())+"' is "+(result ? "" : "not ")+"satisfiable.");
         mainLoop();
         dispose();
     }
     public void isSubsumedByStarted(AtomicConcept subconcept,AtomicConcept superconcept) {
         super.isSubsumedByStarted(subconcept,superconcept);
-        m_output.println("Will check whether '"+m_namespaces.abbreviateAsNamespace(subconcept.getURI())+"' is subsumed by '"+m_namespaces.abbreviateAsNamespace(superconcept.getURI())+"'.");
+        m_output.println("Will check whether '"+m_namespaces.idFromUri(subconcept.getURI())+"' is subsumed by '"+m_namespaces.idFromUri(superconcept.getURI())+"'.");
         mainLoop();
     }
     public void isSubsumedByFinished(AtomicConcept subconcept,AtomicConcept superconcept,boolean result) {
         super.isSubsumedByFinished(subconcept,superconcept,result);
-        m_output.println("'"+m_namespaces.abbreviateAsNamespace(subconcept.getURI())+"' is "+(result ? "" : "not ")+"subsumed by '"+m_namespaces.abbreviateAsNamespace(superconcept.getURI())+"'.");
+        m_output.println("'"+m_namespaces.idFromUri(subconcept.getURI())+"' is "+(result ? "" : "not ")+"subsumed by '"+m_namespaces.idFromUri(superconcept.getURI())+"'.");
         mainLoop();
         dispose();
     }

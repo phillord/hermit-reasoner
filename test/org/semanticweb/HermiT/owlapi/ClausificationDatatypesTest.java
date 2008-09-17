@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.semanticweb.HermiT.Namespaces;
+import org.semanticweb.HermiT.InternalNames;
 import org.semanticweb.HermiT.HermiT;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
@@ -29,7 +31,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("atLeast(1 a:hasAge* (xsd:integer 18))(X) :- a:Eighteen(X)");
+        expectedClauses.add("atLeast(1 hasAge* (xsd:integer 18))(X) :- Eighteen(X)");
         assertContainsAll(clauses, expectedClauses);
     }
 
@@ -38,7 +40,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("a:Eighteen(X) v (not(xsd:integer 18))(Y) :- a:hasAge*(X,Y)");
+        expectedClauses.add("Eighteen(X) v (not(xsd:integer 18))(Y) :- hasAge*(X,Y)");
         assertContainsAll(clauses, expectedClauses);
     }
     
@@ -47,7 +49,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("(xsd:integer)(Y) :- a:A(X), a:dp*(X,Y)");
+        expectedClauses.add("(xsd:integer)(Y) :- A(X), dp*(X,Y)");
         assertContainsAll(clauses, expectedClauses);
     }
     
@@ -56,7 +58,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("a:A(X) v atLeast(1 a:dp* (not(xsd:integer)))(X) :- owl:Thing(X)");
+        expectedClauses.add("A(X) v atLeast(1 dp* (not(xsd:integer)))(X) :- owl:Thing(X)");
         assertContainsAll(clauses, expectedClauses);
     }
     
@@ -65,7 +67,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("a:A(X) v (not(xsd:string))(Y) :- a:dp*(X,Y)");
+        expectedClauses.add("A(X) v (not(xsd:string))(Y) :- dp*(X,Y)");
         assertContainsAll(clauses, expectedClauses);
     }
     
@@ -74,7 +76,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("atLeast(1 a:dp* (xsd:string))(X) :- a:A(X)");
+        expectedClauses.add("atLeast(1 dp* (xsd:string))(X) :- A(X)");
         assertContainsAll(clauses, expectedClauses);
     }
     
@@ -83,7 +85,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("(xsd:integer 19)(Y) v (xsd:string Peter)(Y) :- a:A(X), a:dp*(X,Y)");
+        expectedClauses.add("(xsd:integer 19)(Y) v (xsd:string Peter)(Y) :- A(X), dp*(X,Y)");
         assertContainsAll(clauses, expectedClauses);
     }
     
@@ -92,7 +94,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("a:A(X) v atLeast(1 a:dp* (not(xsd:integer 18)))(X) v atLeast(1 a:dp* (not(xsd:integer 19)))(X) :- owl:Thing(X)");
+        expectedClauses.add("A(X) v atLeast(1 dp* (not(xsd:integer 18)))(X) v atLeast(1 dp* (not(xsd:integer 19)))(X) :- owl:Thing(X)");
         assertContainsAll(clauses, expectedClauses);
     }
     
@@ -101,7 +103,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("(xsd:integer 18)(Y) v (xsd:integer 19)(Y) :- a:A(X), a:dp*(X,Y)");
+        expectedClauses.add("(xsd:integer 18)(Y) v (xsd:integer 19)(Y) :- A(X), dp*(X,Y)");
         assertContainsAll(clauses, expectedClauses);
     }
     
@@ -110,7 +112,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("(not(xsd:string))(Y1) v (not(xsd:string))(Y2) v Y1 == Y2 :- a:A(X), a:dp*(X,Y1), a:dp*(X,Y2)");
+        expectedClauses.add("(not(xsd:string))(Y1) v (not(xsd:string))(Y2) v Y1 == Y2 :- A(X), dp*(X,Y1), dp*(X,Y2)");
         assertContainsAll(clauses, expectedClauses);
     }
     
@@ -119,7 +121,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("a:A(X) v atLeast(2 a:dp* (xsd:string))(X) :- owl:Thing(X)");
+        expectedClauses.add("A(X) v atLeast(2 dp* (xsd:string))(X) :- owl:Thing(X)");
         assertContainsAll(clauses, expectedClauses);
     }
     
@@ -128,7 +130,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("(not(xsd:integer))(Y1) v (not(xsd:integer))(Y2) v (not(xsd:integer))(Y3) v (not(xsd:integer))(Y4) v Y1 == Y2 v Y1 == Y3 v Y1 == Y4 v Y2 == Y3 v Y2 == Y4 v Y3 == Y4 :- a:A(X), a:dp*(X,Y1), a:dp*(X,Y2), a:dp*(X,Y3), a:dp*(X,Y4)");
+        expectedClauses.add("(not(xsd:integer))(Y1) v (not(xsd:integer))(Y2) v (not(xsd:integer))(Y3) v (not(xsd:integer))(Y4) v Y1 == Y2 v Y1 == Y3 v Y1 == Y4 v Y2 == Y3 v Y2 == Y4 v Y3 == Y4 :- A(X), dp*(X,Y1), dp*(X,Y2), dp*(X,Y3), dp*(X,Y4)");
         assertContainsAll(clauses, expectedClauses);
     }
     
@@ -137,7 +139,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("a:A(X) v atLeast(4 a:dp* (xsd:integer))(X) :- owl:Thing(X)");
+        expectedClauses.add("A(X) v atLeast(4 dp* (xsd:integer))(X) :- owl:Thing(X)");
         assertContainsAll(clauses, expectedClauses);
     }
     
@@ -146,7 +148,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("a:A(X) v (not(xsd:string))(Y1) :- a:dp*(X,Y1)");
+        expectedClauses.add("A(X) v (not(xsd:string))(Y1) :- dp*(X,Y1)");
         assertContainsAll(clauses, expectedClauses);
     }
     
@@ -155,7 +157,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("a:A(X) v (not(xsd:string))(Y1) v (not(xsd:string))(Y2) v (not(xsd:string))(Y3) v Y1 == Y2 v Y1 == Y3 v Y2 == Y3 :- a:dp*(X,Y1), a:dp*(X,Y2), a:dp*(X,Y3)");
+        expectedClauses.add("A(X) v (not(xsd:string))(Y1) v (not(xsd:string))(Y2) v (not(xsd:string))(Y3) v Y1 == Y2 v Y1 == Y3 v Y2 == Y3 :- dp*(X,Y1), dp*(X,Y2), dp*(X,Y3)");
         assertContainsAll(clauses, expectedClauses);
     }
     
@@ -164,7 +166,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("atLeast(1 a:dp* (xsd:string))(X) :- a:A(X)");
+        expectedClauses.add("atLeast(1 dp* (xsd:string))(X) :- A(X)");
         assertContainsAll(clauses, expectedClauses);
     }
     
@@ -173,7 +175,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("atLeast(5 a:dp* (xsd:string))(X) :- a:A(X)");
+        expectedClauses.add("atLeast(5 dp* (xsd:string))(X) :- A(X)");
         assertContainsAll(clauses, expectedClauses);
     }
     
@@ -182,8 +184,8 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("(not(xsd:integer))(Y1) v (not(xsd:integer))(Y2) v Y1 == Y2 :- a:A(X), a:dp*(X,Y1), a:dp*(X,Y2)");
-        expectedClauses.add("atLeast(1 a:dp* (xsd:integer))(X) :- a:A(X)");
+        expectedClauses.add("(not(xsd:integer))(Y1) v (not(xsd:integer))(Y2) v Y1 == Y2 :- A(X), dp*(X,Y1), dp*(X,Y2)");
+        expectedClauses.add("atLeast(1 dp* (xsd:integer))(X) :- A(X)");
         assertContainsAll(clauses, expectedClauses);
     }
     
@@ -192,8 +194,8 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("(not(xsd:integer))(Y1) v (not(xsd:integer))(Y2) v (not(xsd:integer))(Y3) v (not(xsd:integer))(Y4) v Y1 == Y2 v Y1 == Y3 v Y1 == Y4 v Y2 == Y3 v Y2 == Y4 v Y3 == Y4 :- a:A(X), a:dp*(X,Y1), a:dp*(X,Y2), a:dp*(X,Y3), a:dp*(X,Y4)");
-        expectedClauses.add("atLeast(3 a:dp* (xsd:integer))(X) :- a:A(X)");
+        expectedClauses.add("(not(xsd:integer))(Y1) v (not(xsd:integer))(Y2) v (not(xsd:integer))(Y3) v (not(xsd:integer))(Y4) v Y1 == Y2 v Y1 == Y3 v Y1 == Y4 v Y2 == Y3 v Y2 == Y4 v Y3 == Y4 :- A(X), dp*(X,Y1), dp*(X,Y2), dp*(X,Y3), dp*(X,Y4)");
+        expectedClauses.add("atLeast(3 dp* (xsd:integer))(X) :- A(X)");
         assertContainsAll(clauses, expectedClauses);
     }
     
@@ -202,7 +204,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("a:A(X) v atLeast(2 a:dp* (xsd:integer))(X) v (not(xsd:integer))(Y1) :- a:dp*(X,Y1)");
+        expectedClauses.add("A(X) v atLeast(2 dp* (xsd:integer))(X) v (not(xsd:integer))(Y1) :- dp*(X,Y1)");
         assertContainsAll(clauses, expectedClauses);
     }
     
@@ -211,7 +213,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("a:A(X) v atLeast(4 a:dp* (xsd:integer))(X) v (not(xsd:integer))(Y1) v (not(xsd:integer))(Y2) v (not(xsd:integer))(Y3) v Y1 == Y2 v Y1 == Y3 v Y2 == Y3 :- a:dp*(X,Y1), a:dp*(X,Y2), a:dp*(X,Y3)");
+        expectedClauses.add("A(X) v atLeast(4 dp* (xsd:integer))(X) v (not(xsd:integer))(Y1) v (not(xsd:integer))(Y2) v (not(xsd:integer))(Y3) v Y1 == Y2 v Y1 == Y3 v Y2 == Y3 :- dp*(X,Y1), dp*(X,Y2), dp*(X,Y3)");
         assertContainsAll(clauses, expectedClauses);
     }
 
@@ -278,10 +280,9 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         DLOntology dlOntology = clausifier.clausify(new HermiT.Configuration(), ontology, factory,
                 noDescriptionGraphs);
         Set<String> actualStrings = new HashSet<String>();
-        org.semanticweb.HermiT.Namespaces namespaces = new org.semanticweb.HermiT.Namespaces();
-        namespaces.registerPrefix("a", ontology.getURI() + "#");
-        namespaces.registerStandardPrefixes();
-        namespaces.registerInternalPrefixes(ontology.getURI().toString());
+        Namespaces namespaces = InternalNames.withInternalNamespaces
+            (new Namespaces(ontology.getURI() + "#",
+                                Namespaces.semanticWebNamespaces));
         for (DLClause dlClause : dlOntology.getDLClauses())
             actualStrings.add(dlClause.toString(namespaces));
         for (org.semanticweb.HermiT.model.Atom atom : dlOntology.getPositiveFacts())

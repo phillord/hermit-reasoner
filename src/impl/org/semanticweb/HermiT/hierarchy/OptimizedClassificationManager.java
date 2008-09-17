@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.Stack;
 
+import org.semanticweb.HermiT.InternalNames;
 import org.semanticweb.HermiT.model.*;
 
 /**
@@ -94,7 +95,7 @@ public class OptimizedClassificationManager {
         }
     }
     protected boolean shouldProcessConcept(AtomicConcept atomicConcept) {
-        return !atomicConcept.getURI().startsWith("internal:") && !AtomicConcept.THING.equals(atomicConcept) && !AtomicConcept.NOTHING.equals(atomicConcept);
+        return !InternalNames.isInternalUri(atomicConcept.getURI()) && !AtomicConcept.THING.equals(atomicConcept) && !AtomicConcept.NOTHING.equals(atomicConcept);
     }
     
     protected static class Node {

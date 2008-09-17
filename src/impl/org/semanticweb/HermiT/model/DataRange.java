@@ -9,6 +9,6 @@ public abstract class DataRange implements DLPredicate {
     }
     public abstract String toString(Namespaces namespaces);
     public String toString() {
-        return toString(Namespaces.INSTANCE);
+        return toString(Namespaces.none);
     }
 }

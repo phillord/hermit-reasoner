@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.semanticweb.HermiT.Namespaces;
+import org.semanticweb.HermiT.InternalNames;
 import org.semanticweb.HermiT.kaon2.structural.Clausification;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
@@ -79,9 +81,9 @@ public class ClausificationTest extends AbstractHermiTTest {
         DLOntology dlOntology = clausification.clausify(false, ontology,
                 new HashSet<DescriptionGraph>());
         Set<String> actualStrings = new HashSet<String>();
-        org.semanticweb.HermiT.Namespaces namespaces = new org.semanticweb.HermiT.Namespaces();
-        namespaces.registerPrefix("a", ontology.getOntologyURI() + "#");
-        namespaces.registerInternalPrefixes(ontology.getOntologyURI());
+        Namespaces namespaces = InternalNames.withInternalNamespaces
+            (new Namespaces(ontology.getOntologyURI() + "#",
+                                Namespaces.semanticWebNamespaces));
         for (DLClause dlClause : dlOntology.getDLClauses())
             actualStrings.add(dlClause.toString(namespaces));
         assertContainsAll(actualStrings, control);

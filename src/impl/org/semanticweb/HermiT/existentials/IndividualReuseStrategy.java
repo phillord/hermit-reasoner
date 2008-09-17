@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.HashSet;
 import java.io.Serializable;
 
+import org.semanticweb.HermiT.InternalNames;
 import org.semanticweb.HermiT.blocking.*;
 import org.semanticweb.HermiT.model.*;
 import org.semanticweb.HermiT.tableau.*;
@@ -104,9 +105,11 @@ public class IndividualReuseStrategy extends StrategyBase implements Serializabl
         return false;
     }
 
-    protected boolean expandWithModelReuse(AtLeastAbstractRoleConcept atLeastAbstractConcept,Node node) {
-        LiteralConcept toConcept=atLeastAbstractConcept.getToConcept();
-        if ((toConcept instanceof AtomicConcept)&&((AtomicConcept)toConcept).getURI().startsWith("internal:")) {
+    protected boolean expandWithModelReuse
+        (AtLeastAbstractRoleConcept atLeastAbstractConcept, Node node) {
+        LiteralConcept toConcept = atLeastAbstractConcept.getToConcept();
+        if ((toConcept instanceof AtomicConcept) &&
+            InternalNames.isInternalUri(((AtomicConcept) toConcept).getURI())) {
             return false;
         }
         if (atLeastAbstractConcept.getNumber()==1&&(doReuseConceptsAlways.contains(toConcept)||!dontReuseConceptsThisRun.contains(toConcept))) {

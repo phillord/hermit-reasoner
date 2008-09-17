@@ -1,4 +1,4 @@
- :- a:as(X,Y), a:as(Y,X)
-a:as(X,Y) :- a:r(X,Y)
-a:as(a:b,a:a)
-a:r(a:a,a:b)
+ :- as(X,Y), as(Y,X)
+as(X,Y) :- r(X,Y)
+as(b,a)
+r(a,b)

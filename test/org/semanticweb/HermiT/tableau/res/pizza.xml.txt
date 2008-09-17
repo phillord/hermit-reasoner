@@ -1,889 +1,889 @@
-a:American
-    a:American
-    a:CheeseyPizza
-    a:DomainConcept
-    a:InterestingPizza
-    a:MeatyPizza
-    a:NamedPizza
-    a:NonVegetarianPizza
-    a:Pizza
+American
+    American
+    CheeseyPizza
+    DomainConcept
+    InterestingPizza
+    MeatyPizza
+    NamedPizza
+    NonVegetarianPizza
+    Pizza
 -----------------------------------------------
-a:AmericanHot
-    a:AmericanHot
-    a:CheeseyPizza
-    a:DomainConcept
-    a:InterestingPizza
-    a:MeatyPizza
-    a:NamedPizza
-    a:NonVegetarianPizza
-    a:Pizza
-    a:SpicyPizza
-    a:SpicyPizzaEquivalent
+AmericanHot
+    AmericanHot
+    CheeseyPizza
+    DomainConcept
+    InterestingPizza
+    MeatyPizza
+    NamedPizza
+    NonVegetarianPizza
+    Pizza
+    SpicyPizza
+    SpicyPizzaEquivalent
 -----------------------------------------------
-a:AnchoviesTopping
-    a:AnchoviesTopping
-    a:DomainConcept
-    a:FishTopping
-    a:PizzaTopping
+AnchoviesTopping
+    AnchoviesTopping
+    DomainConcept
+    FishTopping
+    PizzaTopping
 -----------------------------------------------
-a:ArtichokeTopping
-    a:ArtichokeTopping
-    a:DomainConcept
-    a:PizzaTopping
-    a:VegetableTopping
-    a:VegetarianTopping
+ArtichokeTopping
+    ArtichokeTopping
+    DomainConcept
+    PizzaTopping
+    VegetableTopping
+    VegetarianTopping
 -----------------------------------------------
-a:AsparagusTopping
-    a:AsparagusTopping
-    a:DomainConcept
-    a:PizzaTopping
-    a:VegetableTopping
-    a:VegetarianTopping
+AsparagusTopping
+    AsparagusTopping
+    DomainConcept
+    PizzaTopping
+    VegetableTopping
+    VegetarianTopping
 -----------------------------------------------
-a:Cajun
-    a:Cajun
-    a:CheeseyPizza
-    a:DomainConcept
-    a:InterestingPizza
-    a:NamedPizza
-    a:NonVegetarianPizza
-    a:Pizza
-    a:SpicyPizza
-    a:SpicyPizzaEquivalent
+Cajun
+    Cajun
+    CheeseyPizza
+    DomainConcept
+    InterestingPizza
+    NamedPizza
+    NonVegetarianPizza
+    Pizza
+    SpicyPizza
+    SpicyPizzaEquivalent
 -----------------------------------------------
-a:CajunSpiceTopping
-    a:CajunSpiceTopping
-    a:DomainConcept
-    a:HerbSpiceTopping
-    a:PizzaTopping
-    a:SpicyTopping
-    a:VegetarianTopping
+CajunSpiceTopping
+    CajunSpiceTopping
+    DomainConcept
+    HerbSpiceTopping
+    PizzaTopping
+    SpicyTopping
+    VegetarianTopping
 -----------------------------------------------
-a:CaperTopping
-    a:CaperTopping
-    a:DomainConcept
-    a:PizzaTopping
-    a:VegetableTopping
-    a:VegetarianTopping
+CaperTopping
+    CaperTopping
+    DomainConcept
+    PizzaTopping
+    VegetableTopping
+    VegetarianTopping
 -----------------------------------------------
-a:Capricciosa
-    a:Capricciosa
-    a:CheeseyPizza
-    a:DomainConcept
-    a:InterestingPizza
-    a:MeatyPizza
-    a:NamedPizza
-    a:NonVegetarianPizza
-    a:Pizza
+Capricciosa
+    Capricciosa
+    CheeseyPizza
+    DomainConcept
+    InterestingPizza
+    MeatyPizza
+    NamedPizza
+    NonVegetarianPizza
+    Pizza
 -----------------------------------------------
-a:Caprina
-    a:Caprina
-    a:CheeseyPizza
-    a:DomainConcept
-    a:InterestingPizza
-    a:NamedPizza
-    a:Pizza
-    a:VegetarianPizza
-    a:VegetarianPizzaEquivalent1
-    a:VegetarianPizzaEquivalent2
+Caprina
+    Caprina
+    CheeseyPizza
+    DomainConcept
+    InterestingPizza
+    NamedPizza
+    Pizza
+    VegetarianPizza
+    VegetarianPizzaEquivalent1
+    VegetarianPizzaEquivalent2
 -----------------------------------------------
-a:CheeseTopping
-    a:CheeseTopping
-    a:DomainConcept
-    a:PizzaTopping
-    a:VegetarianTopping
+CheeseTopping
+    CheeseTopping
+    DomainConcept
+    PizzaTopping
+    VegetarianTopping
 -----------------------------------------------
-a:CheeseyPizza
-    a:CheeseyPizza
-    a:DomainConcept
-    a:Pizza
+CheeseyPizza
+    CheeseyPizza
+    DomainConcept
+    Pizza
 -----------------------------------------------
-a:CheeseyVegetableTopping
-    a:American
-    a:AmericanHot
-    a:AnchoviesTopping
-    a:ArtichokeTopping
-    a:AsparagusTopping
-    a:Cajun
-    a:CajunSpiceTopping
-    a:CaperTopping
-    a:Capricciosa
-    a:Caprina
-    a:CheeseTopping
-    a:CheeseyPizza
-    a:CheeseyVegetableTopping
-    a:ChickenTopping
-    a:Country
-    a:DeepPanBase
-    a:DomainConcept
-    a:Fiorentina
-    a:FishTopping
-    a:FourCheesesTopping
-    a:FourSeasons
-    a:FruitTopping
-    a:FruttiDiMare
-    a:GarlicTopping
-    a:Giardiniera
-    a:GoatsCheeseTopping
-    a:GorgonzolaTopping
-    a:GreenPepperTopping
-    a:HamTopping
-    a:HerbSpiceTopping
-    a:Hot
-    a:HotGreenPepperTopping
-    a:HotSpicedBeefTopping
-    a:IceCream
-    a:InterestingPizza
-    a:JalapenoPepperTopping
-    a:LaReine
-    a:LeekTopping
-    a:Margherita
-    a:MeatTopping
-    a:MeatyPizza
-    a:Medium
-    a:Mild
-    a:MixedSeafoodTopping
-    a:MozzarellaTopping
-    a:Mushroom
-    a:MushroomTopping
-    a:NamedPizza
-    a:Napoletana
-    a:NonVegetarianPizza
-    a:NutTopping
-    a:OliveTopping
-    a:OnionTopping
-    a:ParmaHamTopping
-    a:Parmense
-    a:ParmesanTopping
-    a:PeperonataTopping
-    a:PeperoniSausageTopping
-    a:PepperTopping
-    a:PetitPoisTopping
-    a:PineKernels
-    a:Pizza
-    a:PizzaBase
-    a:PizzaTopping
-    a:PolloAdAstra
-    a:PrawnsTopping
-    a:PrinceCarlo
-    a:QuattroFormaggi
-    a:RealItalianPizza
-    a:RedOnionTopping
-    a:RocketTopping
-    a:Rosa
-    a:RosemaryTopping
-    a:SauceTopping
-    a:Siciliana
-    a:SlicedTomatoTopping
-    a:SloppyGiuseppe
-    a:Soho
-    a:Spiciness
-    a:SpicyPizza
-    a:SpicyPizzaEquivalent
-    a:SpicyTopping
-    a:SpinachTopping
-    a:SultanaTopping
-    a:SundriedTomatoTopping
-    a:SweetPepperTopping
-    a:ThinAndCrispyBase
-    a:TobascoPepperSauce
-    a:TomatoTopping
-    a:UnclosedPizza
-    a:ValuePartition
-    a:VegetableTopping
-    a:VegetarianPizza
-    a:VegetarianPizzaEquivalent1
-    a:VegetarianPizzaEquivalent2
-    a:VegetarianTopping
-    a:Veneziana
+CheeseyVegetableTopping
+    American
+    AmericanHot
+    AnchoviesTopping
+    ArtichokeTopping
+    AsparagusTopping
+    Cajun
+    CajunSpiceTopping
+    CaperTopping
+    Capricciosa
+    Caprina
+    CheeseTopping
+    CheeseyPizza
+    CheeseyVegetableTopping
+    ChickenTopping
+    Country
+    DeepPanBase
+    DomainConcept
+    Fiorentina
+    FishTopping
+    FourCheesesTopping
+    FourSeasons
+    FruitTopping
+    FruttiDiMare
+    GarlicTopping
+    Giardiniera
+    GoatsCheeseTopping
+    GorgonzolaTopping
+    GreenPepperTopping
+    HamTopping
+    HerbSpiceTopping
+    Hot
+    HotGreenPepperTopping
+    HotSpicedBeefTopping
+    IceCream
+    InterestingPizza
+    JalapenoPepperTopping
+    LaReine
+    LeekTopping
+    Margherita
+    MeatTopping
+    MeatyPizza
+    Medium
+    Mild
+    MixedSeafoodTopping
+    MozzarellaTopping
+    Mushroom
+    MushroomTopping
+    NamedPizza
+    Napoletana
+    NonVegetarianPizza
+    NutTopping
+    OliveTopping
+    OnionTopping
+    ParmaHamTopping
+    Parmense
+    ParmesanTopping
+    PeperonataTopping
+    PeperoniSausageTopping
+    PepperTopping
+    PetitPoisTopping
+    PineKernels
+    Pizza
+    PizzaBase
+    PizzaTopping
+    PolloAdAstra
+    PrawnsTopping
+    PrinceCarlo
+    QuattroFormaggi
+    RealItalianPizza
+    RedOnionTopping
+    RocketTopping
+    Rosa
+    RosemaryTopping
+    SauceTopping
+    Siciliana
+    SlicedTomatoTopping
+    SloppyGiuseppe
+    Soho
+    Spiciness
+    SpicyPizza
+    SpicyPizzaEquivalent
+    SpicyTopping
+    SpinachTopping
+    SultanaTopping
+    SundriedTomatoTopping
+    SweetPepperTopping
+    ThinAndCrispyBase
+    TobascoPepperSauce
+    TomatoTopping
+    UnclosedPizza
+    ValuePartition
+    VegetableTopping
+    VegetarianPizza
+    VegetarianPizzaEquivalent1
+    VegetarianPizzaEquivalent2
+    VegetarianTopping
+    Veneziana
     owl:Nothing
 -----------------------------------------------
-a:ChickenTopping
-    a:ChickenTopping
-    a:DomainConcept
-    a:MeatTopping
-    a:PizzaTopping
+ChickenTopping
+    ChickenTopping
+    DomainConcept
+    MeatTopping
+    PizzaTopping
 -----------------------------------------------
-a:Country
-    a:Country
-    a:DomainConcept
+Country
+    Country
+    DomainConcept
 -----------------------------------------------
-a:DeepPanBase
-    a:DeepPanBase
-    a:DomainConcept
-    a:PizzaBase
+DeepPanBase
+    DeepPanBase
+    DomainConcept
+    PizzaBase
 -----------------------------------------------
-a:DomainConcept
-    a:DomainConcept
+DomainConcept
+    DomainConcept
 -----------------------------------------------
-a:Fiorentina
-    a:CheeseyPizza
-    a:DomainConcept
-    a:Fiorentina
-    a:InterestingPizza
-    a:NamedPizza
-    a:Pizza
-    a:VegetarianPizza
-    a:VegetarianPizzaEquivalent1
-    a:VegetarianPizzaEquivalent2
+Fiorentina
+    CheeseyPizza
+    DomainConcept
+    Fiorentina
+    InterestingPizza
+    NamedPizza
+    Pizza
+    VegetarianPizza
+    VegetarianPizzaEquivalent1
+    VegetarianPizzaEquivalent2
 -----------------------------------------------
-a:FishTopping
-    a:DomainConcept
-    a:FishTopping
-    a:PizzaTopping
+FishTopping
+    DomainConcept
+    FishTopping
+    PizzaTopping
 -----------------------------------------------
-a:FourCheesesTopping
-    a:CheeseTopping
-    a:DomainConcept
-    a:FourCheesesTopping
-    a:PizzaTopping
-    a:VegetarianTopping
+FourCheesesTopping
+    CheeseTopping
+    DomainConcept
+    FourCheesesTopping
+    PizzaTopping
+    VegetarianTopping
 -----------------------------------------------
-a:FourSeasons
-    a:CheeseyPizza
-    a:DomainConcept
-    a:FourSeasons
-    a:InterestingPizza
-    a:MeatyPizza
-    a:NamedPizza
-    a:NonVegetarianPizza
-    a:Pizza
+FourSeasons
+    CheeseyPizza
+    DomainConcept
+    FourSeasons
+    InterestingPizza
+    MeatyPizza
+    NamedPizza
+    NonVegetarianPizza
+    Pizza
 -----------------------------------------------
-a:FruitTopping
-    a:DomainConcept
-    a:FruitTopping
-    a:PizzaTopping
-    a:VegetarianTopping
+FruitTopping
+    DomainConcept
+    FruitTopping
+    PizzaTopping
+    VegetarianTopping
 -----------------------------------------------
-a:FruttiDiMare
-    a:DomainConcept
-    a:FruttiDiMare
-    a:InterestingPizza
-    a:NamedPizza
-    a:NonVegetarianPizza
-    a:Pizza
+FruttiDiMare
+    DomainConcept
+    FruttiDiMare
+    InterestingPizza
+    NamedPizza
+    NonVegetarianPizza
+    Pizza
 -----------------------------------------------
-a:GarlicTopping
-    a:DomainConcept
-    a:GarlicTopping
-    a:PizzaTopping
-    a:VegetableTopping
-    a:VegetarianTopping
+GarlicTopping
+    DomainConcept
+    GarlicTopping
+    PizzaTopping
+    VegetableTopping
+    VegetarianTopping
 -----------------------------------------------
-a:Giardiniera
-    a:CheeseyPizza
-    a:DomainConcept
-    a:Giardiniera
-    a:InterestingPizza
-    a:NamedPizza
-    a:Pizza
-    a:VegetarianPizza
-    a:VegetarianPizzaEquivalent1
-    a:VegetarianPizzaEquivalent2
+Giardiniera
+    CheeseyPizza
+    DomainConcept
+    Giardiniera
+    InterestingPizza
+    NamedPizza
+    Pizza
+    VegetarianPizza
+    VegetarianPizzaEquivalent1
+    VegetarianPizzaEquivalent2
 -----------------------------------------------
-a:GoatsCheeseTopping
-    a:CheeseTopping
-    a:DomainConcept
-    a:GoatsCheeseTopping
-    a:PizzaTopping
-    a:VegetarianTopping
+GoatsCheeseTopping
+    CheeseTopping
+    DomainConcept
+    GoatsCheeseTopping
+    PizzaTopping
+    VegetarianTopping
 -----------------------------------------------
-a:GorgonzolaTopping
-    a:CheeseTopping
-    a:DomainConcept
-    a:GorgonzolaTopping
-    a:PizzaTopping
-    a:VegetarianTopping
+GorgonzolaTopping
+    CheeseTopping
+    DomainConcept
+    GorgonzolaTopping
+    PizzaTopping
+    VegetarianTopping
 -----------------------------------------------
-a:GreenPepperTopping
-    a:DomainConcept
-    a:GreenPepperTopping
-    a:PepperTopping
-    a:PizzaTopping
-    a:VegetableTopping
-    a:VegetarianTopping
+GreenPepperTopping
+    DomainConcept
+    GreenPepperTopping
+    PepperTopping
+    PizzaTopping
+    VegetableTopping
+    VegetarianTopping
 -----------------------------------------------
-a:HamTopping
-    a:DomainConcept
-    a:HamTopping
-    a:MeatTopping
-    a:PizzaTopping
+HamTopping
+    DomainConcept
+    HamTopping
+    MeatTopping
+    PizzaTopping
 -----------------------------------------------
-a:HerbSpiceTopping
-    a:DomainConcept
-    a:HerbSpiceTopping
-    a:PizzaTopping
-    a:VegetarianTopping
+HerbSpiceTopping
+    DomainConcept
+    HerbSpiceTopping
+    PizzaTopping
+    VegetarianTopping
 -----------------------------------------------
-a:Hot
-    a:Hot
-    a:Spiciness
-    a:ValuePartition
+Hot
+    Hot
+    Spiciness
+    ValuePartition
 -----------------------------------------------
-a:HotGreenPepperTopping
-    a:DomainConcept
-    a:GreenPepperTopping
-    a:HotGreenPepperTopping
-    a:PepperTopping
-    a:PizzaTopping
-    a:SpicyTopping
-    a:VegetableTopping
-    a:VegetarianTopping
+HotGreenPepperTopping
+    DomainConcept
+    GreenPepperTopping
+    HotGreenPepperTopping
+    PepperTopping
+    PizzaTopping
+    SpicyTopping
+    VegetableTopping
+    VegetarianTopping
 -----------------------------------------------
-a:HotSpicedBeefTopping
-    a:DomainConcept
-    a:HotSpicedBeefTopping
-    a:MeatTopping
-    a:PizzaTopping
-    a:SpicyTopping
+HotSpicedBeefTopping
+    DomainConcept
+    HotSpicedBeefTopping
+    MeatTopping
+    PizzaTopping
+    SpicyTopping
 -----------------------------------------------
-a:IceCream
-    a:American
-    a:AmericanHot
-    a:AnchoviesTopping
-    a:ArtichokeTopping
-    a:AsparagusTopping
-    a:Cajun
-    a:CajunSpiceTopping
-    a:CaperTopping
-    a:Capricciosa
-    a:Caprina
-    a:CheeseTopping
-    a:CheeseyPizza
-    a:CheeseyVegetableTopping
-    a:ChickenTopping
-    a:Country
-    a:DeepPanBase
-    a:DomainConcept
-    a:Fiorentina
-    a:FishTopping
-    a:FourCheesesTopping
-    a:FourSeasons
-    a:FruitTopping
-    a:FruttiDiMare
-    a:GarlicTopping
-    a:Giardiniera
-    a:GoatsCheeseTopping
-    a:GorgonzolaTopping
-    a:GreenPepperTopping
-    a:HamTopping
-    a:HerbSpiceTopping
-    a:Hot
-    a:HotGreenPepperTopping
-    a:HotSpicedBeefTopping
-    a:IceCream
-    a:InterestingPizza
-    a:JalapenoPepperTopping
-    a:LaReine
-    a:LeekTopping
-    a:Margherita
-    a:MeatTopping
-    a:MeatyPizza
-    a:Medium
-    a:Mild
-    a:MixedSeafoodTopping
-    a:MozzarellaTopping
-    a:Mushroom
-    a:MushroomTopping
-    a:NamedPizza
-    a:Napoletana
-    a:NonVegetarianPizza
-    a:NutTopping
-    a:OliveTopping
-    a:OnionTopping
-    a:ParmaHamTopping
-    a:Parmense
-    a:ParmesanTopping
-    a:PeperonataTopping
-    a:PeperoniSausageTopping
-    a:PepperTopping
-    a:PetitPoisTopping
-    a:PineKernels
-    a:Pizza
-    a:PizzaBase
-    a:PizzaTopping
-    a:PolloAdAstra
-    a:PrawnsTopping
-    a:PrinceCarlo
-    a:QuattroFormaggi
-    a:RealItalianPizza
-    a:RedOnionTopping
-    a:RocketTopping
-    a:Rosa
-    a:RosemaryTopping
-    a:SauceTopping
-    a:Siciliana
-    a:SlicedTomatoTopping
-    a:SloppyGiuseppe
-    a:Soho
-    a:Spiciness
-    a:SpicyPizza
-    a:SpicyPizzaEquivalent
-    a:SpicyTopping
-    a:SpinachTopping
-    a:SultanaTopping
-    a:SundriedTomatoTopping
-    a:SweetPepperTopping
-    a:ThinAndCrispyBase
-    a:TobascoPepperSauce
-    a:TomatoTopping
-    a:UnclosedPizza
-    a:ValuePartition
-    a:VegetableTopping
-    a:VegetarianPizza
-    a:VegetarianPizzaEquivalent1
-    a:VegetarianPizzaEquivalent2
-    a:VegetarianTopping
-    a:Veneziana
+IceCream
+    American
+    AmericanHot
+    AnchoviesTopping
+    ArtichokeTopping
+    AsparagusTopping
+    Cajun
+    CajunSpiceTopping
+    CaperTopping
+    Capricciosa
+    Caprina
+    CheeseTopping
+    CheeseyPizza
+    CheeseyVegetableTopping
+    ChickenTopping
+    Country
+    DeepPanBase
+    DomainConcept
+    Fiorentina
+    FishTopping
+    FourCheesesTopping
+    FourSeasons
+    FruitTopping
+    FruttiDiMare
+    GarlicTopping
+    Giardiniera
+    GoatsCheeseTopping
+    GorgonzolaTopping
+    GreenPepperTopping
+    HamTopping
+    HerbSpiceTopping
+    Hot
+    HotGreenPepperTopping
+    HotSpicedBeefTopping
+    IceCream
+    InterestingPizza
+    JalapenoPepperTopping
+    LaReine
+    LeekTopping
+    Margherita
+    MeatTopping
+    MeatyPizza
+    Medium
+    Mild
+    MixedSeafoodTopping
+    MozzarellaTopping
+    Mushroom
+    MushroomTopping
+    NamedPizza
+    Napoletana
+    NonVegetarianPizza
+    NutTopping
+    OliveTopping
+    OnionTopping
+    ParmaHamTopping
+    Parmense
+    ParmesanTopping
+    PeperonataTopping
+    PeperoniSausageTopping
+    PepperTopping
+    PetitPoisTopping
+    PineKernels
+    Pizza
+    PizzaBase
+    PizzaTopping
+    PolloAdAstra
+    PrawnsTopping
+    PrinceCarlo
+    QuattroFormaggi
+    RealItalianPizza
+    RedOnionTopping
+    RocketTopping
+    Rosa
+    RosemaryTopping
+    SauceTopping
+    Siciliana
+    SlicedTomatoTopping
+    SloppyGiuseppe
+    Soho
+    Spiciness
+    SpicyPizza
+    SpicyPizzaEquivalent
+    SpicyTopping
+    SpinachTopping
+    SultanaTopping
+    SundriedTomatoTopping
+    SweetPepperTopping
+    ThinAndCrispyBase
+    TobascoPepperSauce
+    TomatoTopping
+    UnclosedPizza
+    ValuePartition
+    VegetableTopping
+    VegetarianPizza
+    VegetarianPizzaEquivalent1
+    VegetarianPizzaEquivalent2
+    VegetarianTopping
+    Veneziana
     owl:Nothing
 -----------------------------------------------
-a:InterestingPizza
-    a:DomainConcept
-    a:InterestingPizza
-    a:Pizza
+InterestingPizza
+    DomainConcept
+    InterestingPizza
+    Pizza
 -----------------------------------------------
-a:JalapenoPepperTopping
-    a:DomainConcept
-    a:JalapenoPepperTopping
-    a:PepperTopping
-    a:PizzaTopping
-    a:SpicyTopping
-    a:VegetableTopping
-    a:VegetarianTopping
+JalapenoPepperTopping
+    DomainConcept
+    JalapenoPepperTopping
+    PepperTopping
+    PizzaTopping
+    SpicyTopping
+    VegetableTopping
+    VegetarianTopping
 -----------------------------------------------
-a:LaReine
-    a:CheeseyPizza
-    a:DomainConcept
-    a:InterestingPizza
-    a:LaReine
-    a:MeatyPizza
-    a:NamedPizza
-    a:NonVegetarianPizza
-    a:Pizza
+LaReine
+    CheeseyPizza
+    DomainConcept
+    InterestingPizza
+    LaReine
+    MeatyPizza
+    NamedPizza
+    NonVegetarianPizza
+    Pizza
 -----------------------------------------------
-a:LeekTopping
-    a:DomainConcept
-    a:LeekTopping
-    a:PizzaTopping
-    a:VegetableTopping
-    a:VegetarianTopping
+LeekTopping
+    DomainConcept
+    LeekTopping
+    PizzaTopping
+    VegetableTopping
+    VegetarianTopping
 -----------------------------------------------
-a:Margherita
-    a:CheeseyPizza
-    a:DomainConcept
-    a:Margherita
-    a:NamedPizza
-    a:Pizza
-    a:VegetarianPizza
-    a:VegetarianPizzaEquivalent1
-    a:VegetarianPizzaEquivalent2
+Margherita
+    CheeseyPizza
+    DomainConcept
+    Margherita
+    NamedPizza
+    Pizza
+    VegetarianPizza
+    VegetarianPizzaEquivalent1
+    VegetarianPizzaEquivalent2
 -----------------------------------------------
-a:MeatTopping
-    a:DomainConcept
-    a:MeatTopping
-    a:PizzaTopping
+MeatTopping
+    DomainConcept
+    MeatTopping
+    PizzaTopping
 -----------------------------------------------
-a:MeatyPizza
-    a:DomainConcept
-    a:MeatyPizza
-    a:NonVegetarianPizza
-    a:Pizza
+MeatyPizza
+    DomainConcept
+    MeatyPizza
+    NonVegetarianPizza
+    Pizza
 -----------------------------------------------
-a:Medium
-    a:Medium
-    a:Spiciness
-    a:ValuePartition
+Medium
+    Medium
+    Spiciness
+    ValuePartition
 -----------------------------------------------
-a:Mild
-    a:Mild
-    a:Spiciness
-    a:ValuePartition
+Mild
+    Mild
+    Spiciness
+    ValuePartition
 -----------------------------------------------
-a:MixedSeafoodTopping
-    a:DomainConcept
-    a:FishTopping
-    a:MixedSeafoodTopping
-    a:PizzaTopping
+MixedSeafoodTopping
+    DomainConcept
+    FishTopping
+    MixedSeafoodTopping
+    PizzaTopping
 -----------------------------------------------
-a:MozzarellaTopping
-    a:CheeseTopping
-    a:DomainConcept
-    a:MozzarellaTopping
-    a:PizzaTopping
-    a:VegetarianTopping
+MozzarellaTopping
+    CheeseTopping
+    DomainConcept
+    MozzarellaTopping
+    PizzaTopping
+    VegetarianTopping
 -----------------------------------------------
-a:Mushroom
-    a:CheeseyPizza
-    a:DomainConcept
-    a:InterestingPizza
-    a:Mushroom
-    a:NamedPizza
-    a:Pizza
-    a:VegetarianPizza
-    a:VegetarianPizzaEquivalent1
-    a:VegetarianPizzaEquivalent2
+Mushroom
+    CheeseyPizza
+    DomainConcept
+    InterestingPizza
+    Mushroom
+    NamedPizza
+    Pizza
+    VegetarianPizza
+    VegetarianPizzaEquivalent1
+    VegetarianPizzaEquivalent2
 -----------------------------------------------
-a:MushroomTopping
-    a:DomainConcept
-    a:MushroomTopping
-    a:PizzaTopping
-    a:VegetableTopping
-    a:VegetarianTopping
+MushroomTopping
+    DomainConcept
+    MushroomTopping
+    PizzaTopping
+    VegetableTopping
+    VegetarianTopping
 -----------------------------------------------
-a:NamedPizza
-    a:DomainConcept
-    a:NamedPizza
-    a:Pizza
+NamedPizza
+    DomainConcept
+    NamedPizza
+    Pizza
 -----------------------------------------------
-a:Napoletana
-    a:CheeseyPizza
-    a:DomainConcept
-    a:InterestingPizza
-    a:NamedPizza
-    a:Napoletana
-    a:NonVegetarianPizza
-    a:Pizza
+Napoletana
+    CheeseyPizza
+    DomainConcept
+    InterestingPizza
+    NamedPizza
+    Napoletana
+    NonVegetarianPizza
+    Pizza
 -----------------------------------------------
-a:NonVegetarianPizza
-    a:DomainConcept
-    a:NonVegetarianPizza
-    a:Pizza
+NonVegetarianPizza
+    DomainConcept
+    NonVegetarianPizza
+    Pizza
 -----------------------------------------------
-a:NutTopping
-    a:DomainConcept
-    a:NutTopping
-    a:PizzaTopping
-    a:VegetarianTopping
+NutTopping
+    DomainConcept
+    NutTopping
+    PizzaTopping
+    VegetarianTopping
 -----------------------------------------------
-a:OliveTopping
-    a:DomainConcept
-    a:OliveTopping
-    a:PizzaTopping
-    a:VegetableTopping
-    a:VegetarianTopping
+OliveTopping
+    DomainConcept
+    OliveTopping
+    PizzaTopping
+    VegetableTopping
+    VegetarianTopping
 -----------------------------------------------
-a:OnionTopping
-    a:DomainConcept
-    a:OnionTopping
-    a:PizzaTopping
-    a:VegetableTopping
-    a:VegetarianTopping
+OnionTopping
+    DomainConcept
+    OnionTopping
+    PizzaTopping
+    VegetableTopping
+    VegetarianTopping
 -----------------------------------------------
-a:ParmaHamTopping
-    a:DomainConcept
-    a:HamTopping
-    a:MeatTopping
-    a:ParmaHamTopping
-    a:PizzaTopping
+ParmaHamTopping
+    DomainConcept
+    HamTopping
+    MeatTopping
+    ParmaHamTopping
+    PizzaTopping
 -----------------------------------------------
-a:Parmense
-    a:CheeseyPizza
-    a:DomainConcept
-    a:InterestingPizza
-    a:MeatyPizza
-    a:NamedPizza
-    a:NonVegetarianPizza
-    a:Parmense
-    a:Pizza
+Parmense
+    CheeseyPizza
+    DomainConcept
+    InterestingPizza
+    MeatyPizza
+    NamedPizza
+    NonVegetarianPizza
+    Parmense
+    Pizza
 -----------------------------------------------
-a:ParmesanTopping
-    a:CheeseTopping
-    a:DomainConcept
-    a:ParmesanTopping
-    a:PizzaTopping
-    a:VegetarianTopping
+ParmesanTopping
+    CheeseTopping
+    DomainConcept
+    ParmesanTopping
+    PizzaTopping
+    VegetarianTopping
 -----------------------------------------------
-a:PeperonataTopping
-    a:DomainConcept
-    a:PeperonataTopping
-    a:PepperTopping
-    a:PizzaTopping
-    a:VegetableTopping
-    a:VegetarianTopping
+PeperonataTopping
+    DomainConcept
+    PeperonataTopping
+    PepperTopping
+    PizzaTopping
+    VegetableTopping
+    VegetarianTopping
 -----------------------------------------------
-a:PeperoniSausageTopping
-    a:DomainConcept
-    a:MeatTopping
-    a:PeperoniSausageTopping
-    a:PizzaTopping
+PeperoniSausageTopping
+    DomainConcept
+    MeatTopping
+    PeperoniSausageTopping
+    PizzaTopping
 -----------------------------------------------
-a:PepperTopping
-    a:DomainConcept
-    a:PepperTopping
-    a:PizzaTopping
-    a:VegetableTopping
-    a:VegetarianTopping
+PepperTopping
+    DomainConcept
+    PepperTopping
+    PizzaTopping
+    VegetableTopping
+    VegetarianTopping
 -----------------------------------------------
-a:PetitPoisTopping
-    a:DomainConcept
-    a:PetitPoisTopping
-    a:PizzaTopping
-    a:VegetableTopping
-    a:VegetarianTopping
+PetitPoisTopping
+    DomainConcept
+    PetitPoisTopping
+    PizzaTopping
+    VegetableTopping
+    VegetarianTopping
 -----------------------------------------------
-a:PineKernels
-    a:DomainConcept
-    a:NutTopping
-    a:PineKernels
-    a:PizzaTopping
-    a:VegetarianTopping
+PineKernels
+    DomainConcept
+    NutTopping
+    PineKernels
+    PizzaTopping
+    VegetarianTopping
 -----------------------------------------------
-a:Pizza
-    a:DomainConcept
-    a:Pizza
+Pizza
+    DomainConcept
+    Pizza
 -----------------------------------------------
-a:PizzaBase
-    a:DomainConcept
-    a:PizzaBase
+PizzaBase
+    DomainConcept
+    PizzaBase
 -----------------------------------------------
-a:PizzaTopping
-    a:DomainConcept
-    a:PizzaTopping
+PizzaTopping
+    DomainConcept
+    PizzaTopping
 -----------------------------------------------
-a:PolloAdAstra
-    a:CheeseyPizza
-    a:DomainConcept
-    a:InterestingPizza
-    a:MeatyPizza
-    a:NamedPizza
-    a:NonVegetarianPizza
-    a:Pizza
-    a:PolloAdAstra
-    a:SpicyPizza
-    a:SpicyPizzaEquivalent
+PolloAdAstra
+    CheeseyPizza
+    DomainConcept
+    InterestingPizza
+    MeatyPizza
+    NamedPizza
+    NonVegetarianPizza
+    Pizza
+    PolloAdAstra
+    SpicyPizza
+    SpicyPizzaEquivalent
 -----------------------------------------------
-a:PrawnsTopping
-    a:DomainConcept
-    a:FishTopping
-    a:PizzaTopping
-    a:PrawnsTopping
+PrawnsTopping
+    DomainConcept
+    FishTopping
+    PizzaTopping
+    PrawnsTopping
 -----------------------------------------------
-a:PrinceCarlo
-    a:CheeseyPizza
-    a:DomainConcept
-    a:InterestingPizza
-    a:NamedPizza
-    a:Pizza
-    a:PrinceCarlo
-    a:VegetarianPizza
-    a:VegetarianPizzaEquivalent1
-    a:VegetarianPizzaEquivalent2
+PrinceCarlo
+    CheeseyPizza
+    DomainConcept
+    InterestingPizza
+    NamedPizza
+    Pizza
+    PrinceCarlo
+    VegetarianPizza
+    VegetarianPizzaEquivalent1
+    VegetarianPizzaEquivalent2
 -----------------------------------------------
-a:QuattroFormaggi
-    a:CheeseyPizza
-    a:DomainConcept
-    a:NamedPizza
-    a:Pizza
-    a:QuattroFormaggi
-    a:VegetarianPizza
-    a:VegetarianPizzaEquivalent1
-    a:VegetarianPizzaEquivalent2
+QuattroFormaggi
+    CheeseyPizza
+    DomainConcept
+    NamedPizza
+    Pizza
+    QuattroFormaggi
+    VegetarianPizza
+    VegetarianPizzaEquivalent1
+    VegetarianPizzaEquivalent2
 -----------------------------------------------
-a:RealItalianPizza
-    a:DomainConcept
-    a:Pizza
-    a:RealItalianPizza
+RealItalianPizza
+    DomainConcept
+    Pizza
+    RealItalianPizza
 -----------------------------------------------
-a:RedOnionTopping
-    a:DomainConcept
-    a:OnionTopping
-    a:PizzaTopping
-    a:RedOnionTopping
-    a:VegetableTopping
-    a:VegetarianTopping
+RedOnionTopping
+    DomainConcept
+    OnionTopping
+    PizzaTopping
+    RedOnionTopping
+    VegetableTopping
+    VegetarianTopping
 -----------------------------------------------
-a:RocketTopping
-    a:DomainConcept
-    a:PizzaTopping
-    a:RocketTopping
-    a:VegetableTopping
-    a:VegetarianTopping
+RocketTopping
+    DomainConcept
+    PizzaTopping
+    RocketTopping
+    VegetableTopping
+    VegetarianTopping
 -----------------------------------------------
-a:Rosa
-    a:CheeseyPizza
-    a:DomainConcept
-    a:InterestingPizza
-    a:NamedPizza
-    a:Pizza
-    a:Rosa
-    a:VegetarianPizza
-    a:VegetarianPizzaEquivalent1
-    a:VegetarianPizzaEquivalent2
+Rosa
+    CheeseyPizza
+    DomainConcept
+    InterestingPizza
+    NamedPizza
+    Pizza
+    Rosa
+    VegetarianPizza
+    VegetarianPizzaEquivalent1
+    VegetarianPizzaEquivalent2
 -----------------------------------------------
-a:RosemaryTopping
-    a:DomainConcept
-    a:HerbSpiceTopping
-    a:PizzaTopping
-    a:RosemaryTopping
-    a:VegetarianTopping
+RosemaryTopping
+    DomainConcept
+    HerbSpiceTopping
+    PizzaTopping
+    RosemaryTopping
+    VegetarianTopping
 -----------------------------------------------
-a:SauceTopping
-    a:DomainConcept
-    a:PizzaTopping
-    a:SauceTopping
-    a:VegetarianTopping
+SauceTopping
+    DomainConcept
+    PizzaTopping
+    SauceTopping
+    VegetarianTopping
 -----------------------------------------------
-a:Siciliana
-    a:CheeseyPizza
-    a:DomainConcept
-    a:InterestingPizza
-    a:MeatyPizza
-    a:NamedPizza
-    a:NonVegetarianPizza
-    a:Pizza
-    a:Siciliana
+Siciliana
+    CheeseyPizza
+    DomainConcept
+    InterestingPizza
+    MeatyPizza
+    NamedPizza
+    NonVegetarianPizza
+    Pizza
+    Siciliana
 -----------------------------------------------
-a:SlicedTomatoTopping
-    a:DomainConcept
-    a:PizzaTopping
-    a:SlicedTomatoTopping
-    a:TomatoTopping
-    a:VegetableTopping
-    a:VegetarianTopping
+SlicedTomatoTopping
+    DomainConcept
+    PizzaTopping
+    SlicedTomatoTopping
+    TomatoTopping
+    VegetableTopping
+    VegetarianTopping
 -----------------------------------------------
-a:SloppyGiuseppe
-    a:CheeseyPizza
-    a:DomainConcept
-    a:InterestingPizza
-    a:MeatyPizza
-    a:NamedPizza
-    a:NonVegetarianPizza
-    a:Pizza
-    a:SloppyGiuseppe
-    a:SpicyPizza
-    a:SpicyPizzaEquivalent
+SloppyGiuseppe
+    CheeseyPizza
+    DomainConcept
+    InterestingPizza
+    MeatyPizza
+    NamedPizza
+    NonVegetarianPizza
+    Pizza
+    SloppyGiuseppe
+    SpicyPizza
+    SpicyPizzaEquivalent
 -----------------------------------------------
-a:Soho
-    a:CheeseyPizza
-    a:DomainConcept
-    a:InterestingPizza
-    a:NamedPizza
-    a:Pizza
-    a:Soho
-    a:VegetarianPizza
-    a:VegetarianPizzaEquivalent1
-    a:VegetarianPizzaEquivalent2
+Soho
+    CheeseyPizza
+    DomainConcept
+    InterestingPizza
+    NamedPizza
+    Pizza
+    Soho
+    VegetarianPizza
+    VegetarianPizzaEquivalent1
+    VegetarianPizzaEquivalent2
 -----------------------------------------------
-a:Spiciness
-    a:Spiciness
-    a:ValuePartition
+Spiciness
+    Spiciness
+    ValuePartition
 -----------------------------------------------
-a:SpicyPizza
-    a:DomainConcept
-    a:Pizza
-    a:SpicyPizza
-    a:SpicyPizzaEquivalent
+SpicyPizza
+    DomainConcept
+    Pizza
+    SpicyPizza
+    SpicyPizzaEquivalent
 -----------------------------------------------
-a:SpicyPizzaEquivalent
-    a:DomainConcept
-    a:Pizza
-    a:SpicyPizza
-    a:SpicyPizzaEquivalent
+SpicyPizzaEquivalent
+    DomainConcept
+    Pizza
+    SpicyPizza
+    SpicyPizzaEquivalent
 -----------------------------------------------
-a:SpicyTopping
-    a:DomainConcept
-    a:PizzaTopping
-    a:SpicyTopping
+SpicyTopping
+    DomainConcept
+    PizzaTopping
+    SpicyTopping
 -----------------------------------------------
-a:SpinachTopping
-    a:DomainConcept
-    a:PizzaTopping
-    a:SpinachTopping
-    a:VegetableTopping
-    a:VegetarianTopping
+SpinachTopping
+    DomainConcept
+    PizzaTopping
+    SpinachTopping
+    VegetableTopping
+    VegetarianTopping
 -----------------------------------------------
-a:SultanaTopping
-    a:DomainConcept
-    a:FruitTopping
-    a:PizzaTopping
-    a:SultanaTopping
-    a:VegetarianTopping
+SultanaTopping
+    DomainConcept
+    FruitTopping
+    PizzaTopping
+    SultanaTopping
+    VegetarianTopping
 -----------------------------------------------
-a:SundriedTomatoTopping
-    a:DomainConcept
-    a:PizzaTopping
-    a:SundriedTomatoTopping
-    a:TomatoTopping
-    a:VegetableTopping
-    a:VegetarianTopping
+SundriedTomatoTopping
+    DomainConcept
+    PizzaTopping
+    SundriedTomatoTopping
+    TomatoTopping
+    VegetableTopping
+    VegetarianTopping
 -----------------------------------------------
-a:SweetPepperTopping
-    a:DomainConcept
-    a:PepperTopping
-    a:PizzaTopping
-    a:SweetPepperTopping
-    a:VegetableTopping
-    a:VegetarianTopping
+SweetPepperTopping
+    DomainConcept
+    PepperTopping
+    PizzaTopping
+    SweetPepperTopping
+    VegetableTopping
+    VegetarianTopping
 -----------------------------------------------
-a:ThinAndCrispyBase
-    a:DomainConcept
-    a:PizzaBase
-    a:ThinAndCrispyBase
+ThinAndCrispyBase
+    DomainConcept
+    PizzaBase
+    ThinAndCrispyBase
 -----------------------------------------------
-a:TobascoPepperSauce
-    a:DomainConcept
-    a:PizzaTopping
-    a:SauceTopping
-    a:SpicyTopping
-    a:TobascoPepperSauce
-    a:VegetarianTopping
+TobascoPepperSauce
+    DomainConcept
+    PizzaTopping
+    SauceTopping
+    SpicyTopping
+    TobascoPepperSauce
+    VegetarianTopping
 -----------------------------------------------
-a:TomatoTopping
-    a:DomainConcept
-    a:PizzaTopping
-    a:TomatoTopping
-    a:VegetableTopping
-    a:VegetarianTopping
+TomatoTopping
+    DomainConcept
+    PizzaTopping
+    TomatoTopping
+    VegetableTopping
+    VegetarianTopping
 -----------------------------------------------
-a:UnclosedPizza
-    a:CheeseyPizza
-    a:DomainConcept
-    a:NamedPizza
-    a:Pizza
-    a:UnclosedPizza
+UnclosedPizza
+    CheeseyPizza
+    DomainConcept
+    NamedPizza
+    Pizza
+    UnclosedPizza
 -----------------------------------------------
-a:ValuePartition
-    a:ValuePartition
+ValuePartition
+    ValuePartition
 -----------------------------------------------
-a:VegetableTopping
-    a:DomainConcept
-    a:PizzaTopping
-    a:VegetableTopping
-    a:VegetarianTopping
+VegetableTopping
+    DomainConcept
+    PizzaTopping
+    VegetableTopping
+    VegetarianTopping
 -----------------------------------------------
-a:VegetarianPizza
-    a:DomainConcept
-    a:Pizza
-    a:VegetarianPizza
+VegetarianPizza
+    DomainConcept
+    Pizza
+    VegetarianPizza
 -----------------------------------------------
-a:VegetarianPizzaEquivalent1
-    a:DomainConcept
-    a:Pizza
-    a:VegetarianPizza
-    a:VegetarianPizzaEquivalent1
-    a:VegetarianPizzaEquivalent2
+VegetarianPizzaEquivalent1
+    DomainConcept
+    Pizza
+    VegetarianPizza
+    VegetarianPizzaEquivalent1
+    VegetarianPizzaEquivalent2
 -----------------------------------------------
-a:VegetarianPizzaEquivalent2
-    a:DomainConcept
-    a:Pizza
-    a:VegetarianPizza
-    a:VegetarianPizzaEquivalent1
-    a:VegetarianPizzaEquivalent2
+VegetarianPizzaEquivalent2
+    DomainConcept
+    Pizza
+    VegetarianPizza
+    VegetarianPizzaEquivalent1
+    VegetarianPizzaEquivalent2
 -----------------------------------------------
-a:VegetarianTopping
-    a:DomainConcept
-    a:PizzaTopping
-    a:VegetarianTopping
+VegetarianTopping
+    DomainConcept
+    PizzaTopping
+    VegetarianTopping
 -----------------------------------------------
-a:Veneziana
-    a:CheeseyPizza
-    a:DomainConcept
-    a:InterestingPizza
-    a:NamedPizza
-    a:Pizza
-    a:VegetarianPizza
-    a:VegetarianPizzaEquivalent1
-    a:VegetarianPizzaEquivalent2
-    a:Veneziana
+Veneziana
+    CheeseyPizza
+    DomainConcept
+    InterestingPizza
+    NamedPizza
+    Pizza
+    VegetarianPizza
+    VegetarianPizzaEquivalent1
+    VegetarianPizzaEquivalent2
+    Veneziana
 -----------------------------------------------
 ! THE END !

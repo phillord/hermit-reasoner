@@ -21,7 +21,7 @@ public class AtomicConcept extends LiteralConcept implements DLPredicate {
         return 1;
     }
     public String toString(Namespaces namespaces) {
-        return namespaces.abbreviateAsNamespace(m_uri);
+        return namespaces.idFromUri(m_uri);
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);
