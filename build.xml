@@ -50,8 +50,7 @@
 
     <!-- SOURCE PATHS -->
     <path id="sourcepath">
-        <pathelement path="${projectroot}/src/impl"/>
-        <pathelement path="${projectroot}/src/api"/>
+        <pathelement path="${projectroot}/src"/>
         <pathelement path="${projectroot}/cli"/>
     </path>
     <path id="pluginsourcepath">
@@ -99,7 +98,7 @@
             <classpath refid="classpath"/>
         </javac>
         <copy todir="${classdir}" >
-            <fileset dir="${projectroot}/src/impl" excludes="**/*.java,**/*.html"/>
+            <fileset dir="${projectroot}/src" excludes="**/*.java,**/*.html"/>
             <fileset dir="${projectroot}/cli" excludes="**/*.java,**/*.html"/>
         </copy>
     </target>
