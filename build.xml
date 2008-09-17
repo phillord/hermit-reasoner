@@ -34,7 +34,6 @@
     <!-- structure of the release -->
     <property name="releasedir" value="${builddir}/release"/>
     <property name="HermiTjar" value="${releasedir}/${ant.project.name}.jar"/>
-    <property name="flatjar" value="${releasedir}/${ant.project.name}-flat.jar"/>
     <property name="pluginjar" value="${releasedir}/${ant.project.name}-Protégé.jar"/>
     <property name="HermiTsrcjar" value="${releasedir}/${ant.project.name}.src.jar"/>
     <property name="javadocdir" value="${releasedir}/javadoc"/>
@@ -54,9 +53,6 @@
         <pathelement path="${projectroot}/src/impl"/>
         <pathelement path="${projectroot}/src/api"/>
         <pathelement path="${projectroot}/cli"/>
-    </path>
-    <path id="apisourcepath">
-        <pathelement path="${projectroot}/src/api"/>
     </path>
     <path id="pluginsourcepath">
         <pathelement path="${projectroot}/plugin"/>
@@ -105,13 +101,12 @@
         <copy todir="${classdir}" >
             <fileset dir="${projectroot}/src/impl" excludes="**/*.java,**/*.html"/>
             <fileset dir="${projectroot}/cli" excludes="**/*.java,**/*.html"/>
-            <fileset dir="${projectroot}/src/api" excludes="**/*.java,**/*.html"/>
         </copy>
     </target>
 
     <target name="jar" depends="compile">
         <mkdir dir="${releasedir}"/>
-        <jar jarfile="${flatjar}">
+        <jar jarfile="${HermiTjar}">
             <manifest>
                 <attribute name="Implementation-Title" value="HermiT"/>
                 <attribute name="Implementation-Vendor" value="Oxford University"/>
@@ -171,10 +166,10 @@
     <target name="javadoc">
         <mkdir dir="${javadocdir}"/>
         <mkdir dir="${apijavadocdir}"/>
-        <javadoc sourcepathref="apisourcepath" destdir="${apijavadocdir}" access="public" author="false" version="true" use="true">
+        <!-- <javadoc sourcepathref="apisourcepath" destdir="${apijavadocdir}" access="public" author="false" version="true" use="true">
             <package name="org.semanticweb.HermiT.*"/>
             <classpath refid="runclasspath"/>
-        </javadoc>
+        </javadoc> -->
         <mkdir dir="${fulljavadocdir}"/>
         <javadoc sourcepathref="sourcepath" destdir="${fulljavadocdir}" access="private" author="false" version="true" use="true">
             <package name="org.semanticweb.HermiT.*"/>
