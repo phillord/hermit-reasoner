@@ -23,7 +23,7 @@ Packaging and interfaces:
    Expressivity interrogation           Rob
    Role hierarchy queries               Rob     2008-10-01
    Simple ABox queries                  Rob     2008-10-01
-   Public Namespaces interface          Rob     2008-10-01
+   Public Namespaces interface          Rob     2008-10-01      Implemented
    OWL API complex concept queries      Rob     2008-10-01
 
 Protégé plug-in:

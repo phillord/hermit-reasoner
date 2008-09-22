@@ -26,7 +26,7 @@
     <!-- structure of output files -->
     <property name="projectroot" value="."/>
     <property name="builddir" value="${projectroot}/build"/>
-    <property name="flattendir" value="${projectroot}/flatten"/>
+    <property name="flattendir" value="${builddir}/flatten"/>
     <property name="classdir" value="${builddir}/class"/>
     <property name="plugindir" value="${builddir}/plugin"/>
     <property name="testclassdir" value="${builddir}/testclass"/>
@@ -104,8 +104,13 @@
             <fileset dir="${projectroot}/cli" excludes="**/*.java,**/*.html"/>
         </copy>
     </target>
+    
+    <target name="flatten-owlapi">
+        <mkdir dir="${flattendir}"/>
+        <unjar src="${owlapi}" dest="${flattendir}"/>
+    </target>
 
-    <target name="jar" depends="compile">
+    <target name="jar" depends="compile,flatten-owlapi">
         <mkdir dir="${releasedir}"/>
         <jar jarfile="${HermiTjar}">
             <manifest>

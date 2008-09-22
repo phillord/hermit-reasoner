@@ -78,7 +78,7 @@ import org.semanticweb.owl.model.OWLOntologyManager;
  * the reasoner is constructed. By default a full classification of all atomic
  * terms in the knowledge base is also performed at this time (which can take
  * quite a while for large or complex ontologies), but this behavior can be
- * disabled.
+ * disabled as a part of the Reasoner configuration.
  * Internal details of the loading and reasoning algorithms can be configured
  * in the Reasoner constructor and do not change over the lifetime of the
  * Reasoner object---internal data structures and caches are optimized for a
