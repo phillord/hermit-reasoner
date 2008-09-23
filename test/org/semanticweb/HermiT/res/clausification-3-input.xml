@@ -1,68 +1,191 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
-<!DOCTYPE owl11xml:Ontology [
-    <!ENTITY xsd 'http://www.w3.org/2001/XMLSchema#'>
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY test "file:/c:/temp/test.owl#" >
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY owl2xml "http://www.w3.org/2006/12/owl2-xml#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
 ]>
 
-<owl11xml:Ontology owl11xml:ontologyURI="file:/c:/temp/test.owl"
-    xml:base="file:/c:/temp/test.owl"
-    xmlns:owl11xml="http://www.w3.org/2006/12/owl11-xml#">
 
-<owl11xml:SubClassOf>
-    <owl11xml:OWLClass owl11xml:URI="#c"/>
-    <owl11xml:ObjectSomeValuesFrom>
-        <owl11xml:ObjectProperty owl11xml:URI="#r"/>
-        <owl11xml:ObjectOneOf>
-        	<owl11xml:Individual owl11xml:URI="#i1"/>
-        	<owl11xml:Individual owl11xml:URI="#i2"/>
-        </owl11xml:ObjectOneOf>
-    </owl11xml:ObjectSomeValuesFrom>
-</owl11xml:SubClassOf>
+<rdf:RDF xmlns="file:/c:/temp/test.owl#"
+     xml:base="file:/c:/temp/test.owl"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
+     xmlns:test="file:/c:/temp/test.owl#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about=""/>
+    
 
-<owl11xml:SubClassOf>
-    <owl11xml:OWLClass owl11xml:URI="#d"/>
-    <owl11xml:ObjectUnionOf>
-	    <owl11xml:OWLClass owl11xml:URI="#e"/>
-	    <owl11xml:ObjectMaxCardinality owl11xml:cardinality="2">
-	        <owl11xml:ObjectProperty owl11xml:URI="#r"/>
-	        <owl11xml:OWLClass owl11xml:URI="#d"/>
-	    </owl11xml:ObjectMaxCardinality>
-    </owl11xml:ObjectUnionOf>
-</owl11xml:SubClassOf>
 
-<owl11xml:SubClassOf>
-    <owl11xml:OWLClass owl11xml:URI="#f"/>
-    <owl11xml:ObjectAllValuesFrom>
-        <owl11xml:ObjectProperty owl11xml:URI="#r"/>
-        <owl11xml:ObjectOneOf>
-        	<owl11xml:Individual owl11xml:URI="#i1"/>
-        	<owl11xml:Individual owl11xml:URI="#i2"/>
-        </owl11xml:ObjectOneOf>
-    </owl11xml:ObjectAllValuesFrom>
-</owl11xml:SubClassOf>
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
 
-<owl11xml:SubClassOf>
-    <owl11xml:OWLClass owl11xml:URI="#g"/>
-    <owl11xml:ObjectAllValuesFrom>
-        <owl11xml:ObjectProperty owl11xml:URI="#r"/>
-        <owl11xml:ObjectComplementOf>
-	        <owl11xml:ObjectOneOf>
-	        	<owl11xml:Individual owl11xml:URI="#i1"/>
-	        </owl11xml:ObjectOneOf>
-        </owl11xml:ObjectComplementOf>
-    </owl11xml:ObjectAllValuesFrom>
-</owl11xml:SubClassOf>
+    
 
-<owl11xml:SubClassOf>
-    <owl11xml:OWLClass owl11xml:URI="#h"/>
-    <owl11xml:ObjectAllValuesFrom>
-        <owl11xml:ObjectProperty owl11xml:URI="#r"/>
-        <owl11xml:ObjectComplementOf>
-	        <owl11xml:ObjectOneOf>
-	        	<owl11xml:Individual owl11xml:URI="#i1"/>
-	        	<owl11xml:Individual owl11xml:URI="#i2"/>
-	        </owl11xml:ObjectOneOf>
-        </owl11xml:ObjectComplementOf>
-    </owl11xml:ObjectAllValuesFrom>
-</owl11xml:SubClassOf>
 
-</owl11xml:Ontology>
+    <!-- file:/c:/temp/test.owl#r -->
+
+    <owl:ObjectProperty rdf:about="&test;r"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- file:/c:/temp/test.owl#c -->
+
+    <owl:Class rdf:about="&test;c">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&test;r"/>
+                <owl:someValuesFrom>
+                    <owl:Class>
+                        <owl:oneOf rdf:parseType="Collection">
+                            <rdf:Description rdf:about="&test;i2"/>
+                            <rdf:Description rdf:about="&test;i1"/>
+                        </owl:oneOf>
+                    </owl:Class>
+                </owl:someValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- file:/c:/temp/test.owl#d -->
+
+    <owl:Class rdf:about="&test;d">
+        <rdfs:subClassOf>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="&test;e"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="&test;r"/>
+                        <owl:onClass rdf:resource="&test;d"/>
+                        <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">2</owl:maxCardinality>
+                    </owl:Restriction>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- file:/c:/temp/test.owl#e -->
+
+    <owl:Class rdf:about="&test;e"/>
+    
+
+
+    <!-- file:/c:/temp/test.owl#f -->
+
+    <owl:Class rdf:about="&test;f">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&test;r"/>
+                <owl:allValuesFrom>
+                    <owl:Class>
+                        <owl:oneOf rdf:parseType="Collection">
+                            <rdf:Description rdf:about="&test;i2"/>
+                            <rdf:Description rdf:about="&test;i1"/>
+                        </owl:oneOf>
+                    </owl:Class>
+                </owl:allValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- file:/c:/temp/test.owl#g -->
+
+    <owl:Class rdf:about="&test;g">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&test;r"/>
+                <owl:allValuesFrom>
+                    <owl:Class>
+                        <owl:complementOf>
+                            <owl:Class>
+                                <owl:oneOf rdf:parseType="Collection">
+                                    <rdf:Description rdf:about="&test;i1"/>
+                                </owl:oneOf>
+                            </owl:Class>
+                        </owl:complementOf>
+                    </owl:Class>
+                </owl:allValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- file:/c:/temp/test.owl#h -->
+
+    <owl:Class rdf:about="&test;h">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&test;r"/>
+                <owl:allValuesFrom>
+                    <owl:Class>
+                        <owl:complementOf>
+                            <owl:Class>
+                                <owl:oneOf rdf:parseType="Collection">
+                                    <rdf:Description rdf:about="&test;i2"/>
+                                    <rdf:Description rdf:about="&test;i1"/>
+                                </owl:oneOf>
+                            </owl:Class>
+                        </owl:complementOf>
+                    </owl:Class>
+                </owl:allValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- file:/c:/temp/test.owl#i1 -->
+
+    <rdf:Description rdf:about="&test;i1"/>
+    
+
+
+    <!-- file:/c:/temp/test.owl#i2 -->
+
+    <rdf:Description rdf:about="&test;i2"/>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 2.2.1.810) http://owlapi.sourceforge.net -->
+

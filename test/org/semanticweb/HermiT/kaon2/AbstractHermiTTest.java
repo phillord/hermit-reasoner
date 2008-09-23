@@ -43,8 +43,9 @@ public abstract class AbstractHermiTTest extends TestCase {
         String ontologyURI = resolver.registerOntology(physicalURI);
         OntologyManager ontologyManager = KAON2Manager.newOntologyManager();
         ontologyManager.setOntologyResolver(resolver);
-        return ontologyManager.openOntology(ontologyURI,
+        Ontology ontology = ontologyManager.openOntology(ontologyURI,
                 new HashMap<String, Object>());
+        return ontology;
     }
 
     protected Ontology getOntologyFromResource(String resourceName)
