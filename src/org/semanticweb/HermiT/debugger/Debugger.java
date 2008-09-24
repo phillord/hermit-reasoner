@@ -1,33 +1,60 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.debugger;
 
-import java.io.PrintWriter;
-import java.io.BufferedReader;
-import java.io.CharArrayWriter;
-import java.io.IOException;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.TreeMap;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.HashSet;
-import java.util.Comparator;
-import java.util.Arrays;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Toolkit;
+import java.io.BufferedReader;
+import java.io.CharArrayWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
-import org.semanticweb.HermiT.*;
-import org.semanticweb.HermiT.model.*;
-import org.semanticweb.HermiT.monitor.*;
-import org.semanticweb.HermiT.tableau.*;
-import org.semanticweb.HermiT.existentials.*;
+import org.semanticweb.HermiT.Namespaces;
+import org.semanticweb.HermiT.existentials.ExpansionStrategy;
+import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
+import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
+import org.semanticweb.HermiT.model.AtLeastConcreteRoleConcept;
+import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
+import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.AtomicNegationConcept;
+import org.semanticweb.HermiT.model.AtomicRole;
+import org.semanticweb.HermiT.model.Concept;
+import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.model.DLPredicate;
+import org.semanticweb.HermiT.model.DataRange;
+import org.semanticweb.HermiT.model.DatatypeRestriction;
+import org.semanticweb.HermiT.model.DatatypeRestrictionNegationConcept;
+import org.semanticweb.HermiT.model.DescriptionGraph;
+import org.semanticweb.HermiT.model.Equality;
+import org.semanticweb.HermiT.model.ExistentialConcept;
+import org.semanticweb.HermiT.model.ExistsDescriptionGraph;
+import org.semanticweb.HermiT.model.Inequality;
+import org.semanticweb.HermiT.model.InverseRole;
+import org.semanticweb.HermiT.model.LiteralConcept;
+import org.semanticweb.HermiT.model.Role;
+import org.semanticweb.HermiT.monitor.TableauMonitorForwarder;
+import org.semanticweb.HermiT.tableau.ExtensionTable;
+import org.semanticweb.HermiT.tableau.GroundDisjunction;
+import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.tableau.NodeType;
+import org.semanticweb.HermiT.tableau.Tableau;
 
 public class Debugger extends TableauMonitorForwarder {
     private static final long serialVersionUID=-1061073966460686069L;
@@ -139,8 +166,6 @@ public class Debugger extends TableauMonitorForwarder {
                         doSearchLabel(parsedCommand);
                     else if ("difflabels".equals(command))
                         doDiffLabels(parsedCommand);
-                    else if ("searchpwblock".equals(command))
-                        doSearchPairWiseBlocking(parsedCommand);
                     else if ("searchpwblock".equals(command))
                         doSearchPairWiseBlocking(parsedCommand);
                     else if ("rnodefor".equals(command))
@@ -464,17 +489,29 @@ public class Debugger extends TableauMonitorForwarder {
         TreeSet<AtomicConcept> atomicConcepts=new TreeSet<AtomicConcept>(ConceptComparator.INSTANCE);
         TreeSet<ExistentialConcept> existentialConcepts=new TreeSet<ExistentialConcept>(ConceptComparator.INSTANCE);
         TreeSet<AtomicNegationConcept> negativeConcepts=new TreeSet<AtomicNegationConcept>(ConceptComparator.INSTANCE);
+        TreeSet<DatatypeRestriction> dataRanges=new TreeSet<DatatypeRestriction>(DataRangeComparator.INSTANCE);
+        TreeSet<DatatypeRestriction> negativeDataRanges=new TreeSet<DatatypeRestriction>(DataRangeComparator.INSTANCE);
         ExtensionTable.Retrieval retrieval=m_tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
         retrieval.getBindingsBuffer()[1]=node;
         retrieval.open();
         while (!retrieval.afterLast()) {
-            Concept concept=(Concept)retrieval.getTupleBuffer()[0];
-            if (concept instanceof AtomicNegationConcept)
-                negativeConcepts.add((AtomicNegationConcept)concept);
-            else if (concept instanceof AtomicConcept)
-                atomicConcepts.add((AtomicConcept)concept);
-            else
-                existentialConcepts.add((ExistentialConcept)concept);
+            Object potentialConcept=retrieval.getTupleBuffer()[0];
+            if (potentialConcept instanceof AtomicNegationConcept) {
+                negativeConcepts.add((AtomicNegationConcept)potentialConcept);
+            } else if (potentialConcept instanceof AtomicConcept) {
+                atomicConcepts.add((AtomicConcept)potentialConcept);
+            } else if (potentialConcept instanceof ExistentialConcept) {
+                existentialConcepts.add((ExistentialConcept)potentialConcept);
+            } else if (potentialConcept instanceof DescriptionGraph) {
+                // ignore description graphs here
+            } else if (potentialConcept instanceof DatatypeRestriction) {
+                dataRanges.add((DatatypeRestriction) potentialConcept);
+            } else if (potentialConcept instanceof DatatypeRestrictionNegationConcept) {
+                DatatypeRestrictionNegationConcept r = (DatatypeRestrictionNegationConcept) potentialConcept;
+                negativeDataRanges.add(r.getNegatedDatatypeRestriction());
+            } else {
+                System.err.println("Found something in the label that is not a known type!");
+            }
             retrieval.next();
         }
         if (!atomicConcepts.isEmpty() || !existentialConcepts.isEmpty()) {
@@ -484,6 +521,15 @@ public class Debugger extends TableauMonitorForwarder {
         }
         if (!negativeConcepts.isEmpty()) {
             writer.print("-- Negative concept label ------------------------");
+            printConcepts(negativeConcepts,writer,3);
+        }
+        if (!dataRanges.isEmpty()) {
+            writer.print("-- Positive data ranges label ------------------------");
+            printConcepts(atomicConcepts,writer,3);
+            printConcepts(existentialConcepts,writer,1);
+        }
+        if (!negativeDataRanges.isEmpty()) {
+            writer.print("-- Negative data ranges label ------------------------");
             printConcepts(negativeConcepts,writer,3);
         }
     }
@@ -1339,6 +1385,15 @@ public class Debugger extends TableauMonitorForwarder {
                 }
             case 4:
                 return ((AtomicNegationConcept)c1).getNegatedAtomicConcept().getURI().compareTo(((AtomicNegationConcept)c2).getNegatedAtomicConcept().getURI());
+            case 5:
+                {
+                    AtLeastConcreteRoleConcept l1=(AtLeastConcreteRoleConcept)c1;
+                    AtLeastConcreteRoleConcept l2=(AtLeastConcreteRoleConcept)c2;
+                    int comparison=RoleComparator.INSTANCE.compare(l1.getOnAtomicConcreteRole(),l2.getOnAtomicConcreteRole());
+                    if (comparison!=0)
+                        return comparison;
+                    return DataRangeComparator.INSTANCE.compare(l1.getToDataRange(), l2.getToDataRange());
+                }
             default:
                 throw new IllegalArgumentException();
             }
@@ -1354,6 +1409,54 @@ public class Debugger extends TableauMonitorForwarder {
                 return 3;
             else if (c instanceof AtomicNegationConcept)
                 return 4;
+            else if (c instanceof AtLeastConcreteRoleConcept)
+                return 5;
+            else
+                throw new IllegalArgumentException();
+        }
+    }
+    
+    protected static class DataRangeComparator implements Comparator<DataRange> {
+        public static final DataRangeComparator INSTANCE=new DataRangeComparator();
+        
+        public int compare(DataRange dr1, DataRange dr2) {
+            int type1=getDataRangeType(dr1);
+            int type2=getDataRangeType(dr2);
+            if (type1!=type2)
+                return type1-type2;
+            DatatypeRestriction r1;
+            DatatypeRestriction r2;
+            if (type1 == 1) {
+                r1 = (DatatypeRestriction) dr1;
+                r2 = (DatatypeRestriction) dr2;
+            } else {
+                r1 = ((DatatypeRestrictionNegationConcept) dr1).getNegatedDatatypeRestriction();
+                r2 = ((DatatypeRestrictionNegationConcept) dr2).getNegatedDatatypeRestriction();
+            }
+            int comparison = r1.getDatatypeURI().compareTo(r2.getDatatypeURI());
+            if (comparison!=0) return comparison;
+            List<String> values1 = r1.getEqualsValues();
+            List<String> values2 = r2.getEqualsValues();
+            Collections.sort(values1);
+            Collections.sort(values2);
+            Iterator<String> it1 = values1.iterator();
+            Iterator<String> it2 = values2.iterator();
+            while (it1.hasNext()) {
+                if (it2.hasNext()) {
+                    comparison = it1.next().compareTo(it2.next());
+                    if (comparison!=0) return comparison;
+                } else {
+                    return 1;
+                }
+            }
+            if (it2.hasNext()) return -1;
+            return 0;
+        }
+        protected int getDataRangeType(DataRange dr) {
+            if (dr instanceof DatatypeRestriction)
+                return 0;
+            else if (dr instanceof DatatypeRestrictionNegationConcept)
+                return 1;
             else
                 throw new IllegalArgumentException();
         }
