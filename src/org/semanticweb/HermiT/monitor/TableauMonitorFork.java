@@ -3,8 +3,14 @@ package org.semanticweb.HermiT.monitor;
 
 import java.io.Serializable;
 
-import org.semanticweb.HermiT.model.*;
-import org.semanticweb.HermiT.tableau.*;
+import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
+import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.ExistentialConcept;
+import org.semanticweb.HermiT.tableau.BranchingPoint;
+import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
+import org.semanticweb.HermiT.tableau.GroundDisjunction;
+import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.tableau.Tableau;
 
 public class TableauMonitorFork implements TableauMonitor,Serializable  {
     private static final long serialVersionUID=8321902665477431455L;
@@ -191,6 +197,14 @@ public class TableauMonitorFork implements TableauMonitor,Serializable  {
     public void nodeDestroyed(Node node) {
         m_first.nodeDestroyed(node);
         m_second.nodeDestroyed(node);
+    }
+    public void datatypeCheckingStarted() {
+        m_first.datatypeCheckingStarted();
+        m_second.datatypeCheckingStarted();
+    }
+    public void datatypeCheckingFinished(boolean result) {
+        m_first.datatypeCheckingFinished(result);
+        m_second.datatypeCheckingFinished(result);
     }
     public void setValue(String key, String value) {
         m_first.setValue(key, value);

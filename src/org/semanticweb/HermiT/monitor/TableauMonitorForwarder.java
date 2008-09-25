@@ -3,8 +3,14 @@ package org.semanticweb.HermiT.monitor;
 
 import java.io.Serializable;
 
-import org.semanticweb.HermiT.model.*;
-import org.semanticweb.HermiT.tableau.*;
+import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
+import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.ExistentialConcept;
+import org.semanticweb.HermiT.tableau.BranchingPoint;
+import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
+import org.semanticweb.HermiT.tableau.GroundDisjunction;
+import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.tableau.Tableau;
 
 public class TableauMonitorForwarder implements TableauMonitor,Serializable {
     private static final long serialVersionUID=-371801782567741632L;
@@ -195,4 +201,19 @@ public class TableauMonitorForwarder implements TableauMonitor,Serializable {
             m_forwardingTargetMonitor.setValue(key, value);
         }
     }
+    public void datatypeCheckingStarted() {
+        if (m_forwardingOn)
+            m_forwardingTargetMonitor.datatypeCheckingStarted();
+    }
+    public void datatypeCheckingFinished(boolean result) {
+        if (m_forwardingOn)
+            m_forwardingTargetMonitor.datatypeCheckingFinished(result);
+    }
+    public boolean isForwardingOn() {
+        return m_forwardingOn;
+    }
+    public void setForwardingOn(boolean forwardingOn) {
+        m_forwardingOn = forwardingOn;
+    }
+    
 }

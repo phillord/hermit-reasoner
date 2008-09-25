@@ -2,11 +2,17 @@
 package org.semanticweb.HermiT.monitor;
 
 import java.io.Serializable;
-
-import org.semanticweb.HermiT.model.*;
-import org.semanticweb.HermiT.tableau.*;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
+
+import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
+import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.ExistentialConcept;
+import org.semanticweb.HermiT.tableau.BranchingPoint;
+import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
+import org.semanticweb.HermiT.tableau.GroundDisjunction;
+import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.tableau.Tableau;
 
 public class TableauMonitorAdapter implements TableauMonitor,Serializable  {
     private static final long serialVersionUID=6336033031431260208L;
@@ -106,6 +112,10 @@ public class TableauMonitorAdapter implements TableauMonitor,Serializable  {
     public void nodeCreated(Node node) {
     }
     public void nodeDestroyed(Node node) {
+    }
+    public void datatypeCheckingStarted() {
+    }
+    public void datatypeCheckingFinished(boolean result) {
     }
     public void setValue(String key, String value) {
         values.put(key, value);

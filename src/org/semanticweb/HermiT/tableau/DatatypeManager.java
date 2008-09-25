@@ -22,17 +22,26 @@ public class DatatypeManager {
         m_binaryUnionDependencySet=new UnionDependencySet(2);
     }
     public void checkDatatypeConstraints() {
+        if (m_tableauMonitor != null) {
+            m_tableauMonitor.datatypeCheckingStarted();
+        }
+        boolean result = true;
         Object[] tupleBuffer=m_binaryExtensionTableDeltaOldRetrieval.getTupleBuffer();
         for (m_binaryExtensionTableDeltaOldRetrieval.open(); 
                 !m_binaryExtensionTableDeltaOldRetrieval.afterLast(); 
                 m_binaryExtensionTableDeltaOldRetrieval.next()) {
             if (tupleBuffer[0] instanceof DataRange) {
-                checkNewDatatypeAssertion((DataRange)tupleBuffer[0],(Node)tupleBuffer[1],m_binaryExtensionTableDeltaOldRetrieval.getDependencySet());
+                boolean allSatisfiable = checkNewDatatypeAssertion((DataRange)tupleBuffer[0],(Node)tupleBuffer[1],m_binaryExtensionTableDeltaOldRetrieval.getDependencySet());
+                if (!allSatisfiable) result = false;
             }
         }
+        if (m_tableauMonitor != null) {
+            m_tableauMonitor.datatypeCheckingFinished(result);
+        }
     }
-    protected void checkNewDatatypeAssertion(DataRange dataRange, 
+    protected boolean checkNewDatatypeAssertion(DataRange dataRange, 
             Node node, DependencySet dependencySet) {
+        boolean result = true;
         Object[] tupleBuffer=m_binaryExtensionTable1BoundRetrieval.getTupleBuffer();
         m_binaryExtensionTable1BoundRetrieval.getBindingsBuffer()[1]=node;
         for (m_binaryExtensionTable1BoundRetrieval.open(); 
@@ -40,15 +49,18 @@ public class DatatypeManager {
                 m_binaryExtensionTable1BoundRetrieval.next()) {
             if (!isCompatible(dataRange, (DataRange) tupleBuffer[0])) {
                 if (m_tableauMonitor != null) {
+                    result = false;
                     m_tableauMonitor.clashDetected(new Object[][] {
                             new Object[] { dataRange, node },
                             new Object[] { tupleBuffer[0], node } });
+                    m_tableauMonitor.datatypeCheckingFinished(false);
                 }
                 m_binaryUnionDependencySet.m_dependencySets[0] = dependencySet;
                 m_binaryUnionDependencySet.m_dependencySets[1] = m_binaryExtensionTable1BoundRetrieval.getDependencySet();
                 m_extensionManager.setClash(m_binaryUnionDependencySet);
             }
         }
+        return result;
     }
     protected boolean isCompatible(DataRange dataRange1, DataRange dataRange2) {
         if (dataRange1 instanceof DatatypeRestriction) {

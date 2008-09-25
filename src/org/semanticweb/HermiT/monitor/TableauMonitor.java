@@ -1,8 +1,14 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.monitor;
 
-import org.semanticweb.HermiT.model.*;
-import org.semanticweb.HermiT.tableau.*;
+import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
+import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.ExistentialConcept;
+import org.semanticweb.HermiT.tableau.BranchingPoint;
+import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
+import org.semanticweb.HermiT.tableau.GroundDisjunction;
+import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.tableau.Tableau;
 
 public interface TableauMonitor {
     void setTableau(Tableau tableau);
@@ -50,4 +56,6 @@ public interface TableauMonitor {
     void nodeCreated(Node node);
     void nodeDestroyed(Node node);
     void setValue(String key, String value);
+    void datatypeCheckingStarted();
+    void datatypeCheckingFinished(boolean result);
 }

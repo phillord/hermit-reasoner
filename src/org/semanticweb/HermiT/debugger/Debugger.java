@@ -27,6 +27,19 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
 import org.semanticweb.HermiT.Namespaces;
+import org.semanticweb.HermiT.debugger.commands.ActiveNodesCommand;
+import org.semanticweb.HermiT.debugger.commands.BreakpointTimeCommand;
+import org.semanticweb.HermiT.debugger.commands.ClearCommand;
+import org.semanticweb.HermiT.debugger.commands.ContinueCommand;
+import org.semanticweb.HermiT.debugger.commands.DerivationTreeCommand;
+import org.semanticweb.HermiT.debugger.commands.DummyCommand;
+import org.semanticweb.HermiT.debugger.commands.ExitCommand;
+import org.semanticweb.HermiT.debugger.commands.ForeverCommand;
+import org.semanticweb.HermiT.debugger.commands.HelpCommand;
+import org.semanticweb.HermiT.debugger.commands.HistoryCommand;
+import org.semanticweb.HermiT.debugger.commands.ICommand;
+import org.semanticweb.HermiT.debugger.commands.SearchLabelCommand;
+import org.semanticweb.HermiT.debugger.commands.SearchPairwiseBlockingCommand;
 import org.semanticweb.HermiT.existentials.ExpansionStrategy;
 import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
 import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
@@ -53,7 +66,6 @@ import org.semanticweb.HermiT.monitor.TableauMonitorForwarder;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.GroundDisjunction;
 import org.semanticweb.HermiT.tableau.Node;
-import org.semanticweb.HermiT.tableau.NodeType;
 import org.semanticweb.HermiT.tableau.Tableau;
 
 public class Debugger extends TableauMonitorForwarder {
@@ -61,7 +73,7 @@ public class Debugger extends TableauMonitorForwarder {
 
     public static final Font s_monospacedFont=new Font("Monospaced",Font.PLAIN,12);
 
-    protected static enum WaitOption { GRAPH_EXPANSION,EXISTENTIAL_EXPANSION,CLASH,MERGE };
+    protected static enum WaitOption { GRAPH_EXPANSION,EXISTENTIAL_EXPANSION,CONCRETE_EXPANSION,CLASH,MERGE };
     
     protected final Namespaces m_namespaces;
     protected final DerivationHistory m_derivationHistory;
@@ -125,25 +137,35 @@ public class Debugger extends TableauMonitorForwarder {
                         commandLine=m_lastCommand;
                         m_output.print("# ");
                         m_output.println(commandLine);
-                    }
-                    else
+                    } else {
                         m_lastCommand=commandLine;
+                    }
                     String[] parsedCommand=parse(commandLine);
                     String command=parsedCommand[0].toLowerCase();
-                    if ("exit".equals(command) || "quit".equals(command))
-                        doExit(parsedCommand);
+                    boolean showHelp = false;
+                    ICommand commandExecutable = new DummyCommand();
+                    if ("help".equals(command)) {
+                        showHelp = true;
+                        if (parsedCommand.length > 1) {
+                            command = parsedCommand[1].toLowerCase();
+                        }
+                    } 
+                    if ("help".equals(command))
+                        commandExecutable = new HelpCommand();
+                    else if ("exit".equals(command) || "quit".equals(command))
+                        commandExecutable = new ExitCommand();
                     else if ("c".equals(command) || "cont".equals(command))
-                        doContinue(parsedCommand);
+                        commandExecutable = new ContinueCommand(this);
                     else if ("clear".equals(command))
-                        doClear(parsedCommand);
+                        commandExecutable = new ClearCommand(this);
                     else if ("forever".equals(command))
-                        doForever(parsedCommand);
+                        commandExecutable = new ForeverCommand(this);
                     else if ("history".equals(command))
-                        doHistory(parsedCommand);
+                        commandExecutable = new HistoryCommand(this, parsedCommand);
                     else if ("dertree".equals(command))
-                        doDerivationTree(parsedCommand);
+                        commandExecutable = new DerivationTreeCommand(this, parsedCommand);
                     else if ("activenodes".equals(command))
-                        doActiveNodes(parsedCommand);
+                        commandExecutable = new ActiveNodesCommand(this, parsedCommand);
                     else if ("isancof".equals(command))
                         doIsAncestorOf(parsedCommand);
                     else if ("udisjunctions".equals(command))
@@ -163,11 +185,11 @@ public class Debugger extends TableauMonitorForwarder {
                     else if ("q".equals(command))
                         doQuery(parsedCommand);
                     else if ("searchlabel".equals(command))
-                        doSearchLabel(parsedCommand);
+                        commandExecutable = new SearchLabelCommand(this, parsedCommand);
                     else if ("difflabels".equals(command))
                         doDiffLabels(parsedCommand);
                     else if ("searchpwblock".equals(command))
-                        doSearchPairWiseBlocking(parsedCommand);
+                        commandExecutable = new SearchPairwiseBlockingCommand(this, parsedCommand);
                     else if ("rnodefor".equals(command))
                         doReuseNodeFor(parsedCommand);
                     else if ("nodesfor".equals(command))
@@ -177,11 +199,16 @@ public class Debugger extends TableauMonitorForwarder {
                     else if ("singlestep".equals(command))
                         doSingleStep(parsedCommand);
                     else if ("bptime".equals(command))
-                        doBreakpointTime(parsedCommand);
+                        commandExecutable = new BreakpointTimeCommand(this, parsedCommand);
                     else if ("waitfor".equals(command))
                         doWaitFor(parsedCommand);
                     else
                         m_output.println("Unknown command '"+command+"'.");
+                    if (showHelp) {
+                        m_output.print(commandExecutable.getHelpText());
+                    } else {
+                        commandExecutable.execute();
+                    }
                 }
             }
             m_output.flush();
@@ -190,79 +217,7 @@ public class Debugger extends TableauMonitorForwarder {
         }
         m_lastStatusMark=System.currentTimeMillis();
     }
-    protected void doExit(String[] commandLine) {
-        System.exit(0);
-    }
-    protected void doContinue(String[] commandLine) {
-        m_inMainLoop=false;
-    }
-    protected void doForever(String[] commandLine) {
-        m_inMainLoop=false;
-        m_forever=true;
-        m_singlestep=false;
-    }
-    protected void doClear(String[] commandLine) {
-        m_consoleTextArea.clear();
-    }
-    protected void doHistory(String[] commandLine) {
-        if (commandLine.length<2) {
-            m_output.println("The status is missing.");
-            return;
-        }
-        String status=commandLine[1].toLowerCase();
-        if ("on".equals(status)) {
-            m_forwardingOn=true;
-            m_output.println("Derivation history on.");
-        }
-        else if ("off".equals(status)) {
-            m_forwardingOn=false;
-            m_output.println("Derivation history off.");
-        }
-        else
-            m_output.println("Incorrect history status '"+status+"'.");
-    }
-    protected void doDerivationTree(String[] commandLine) {
-        Object[] tuple;
-        if (commandLine.length<2) {
-            m_output.println("The specification of the predicate is missing.");
-            return;
-        }
-        String predicate=commandLine[1];
-        if ("clash".equals(predicate))
-            tuple=new Object[0];
-        else {
-            tuple=new Object[commandLine.length-1];
-            tuple[0]=getDLPredicate(predicate);
-            if (tuple[0]==null){
-                m_output.println("Invalid predicate '"+predicate+"'.");
-                return;
-            }
-        }
-        for (int index=1;index<tuple.length;index++) {
-            int nodeID;
-            try {
-                nodeID=Integer.parseInt(commandLine[index+1]);
-            }
-            catch (NumberFormatException e) {
-                m_output.println("Invalid ID of the node at argument "+index+".");
-                return;
-            }
-            Node node=m_tableau.getNode(nodeID);
-            if (node==null) {
-                m_output.println("Node with ID '"+nodeID+"' not found.");
-                return;
-            }
-            tuple[index]=node;
-        }
-        DerivationHistory.Atom atom=m_derivationHistory.getAtom(tuple);
-        if (atom!=null) {
-            new DerivationViewer(m_namespaces,atom);
-            selectConsoleWindow();
-        }
-        else
-            m_output.println("Atom not found.");
-    }
-    protected DLPredicate getDLPredicate(String predicate) {
+    public DLPredicate getDLPredicate(String predicate) {
         if ("==".equals(predicate))
             return Equality.INSTANCE;
         else if ("!=".equals(predicate))
@@ -270,8 +225,9 @@ public class Debugger extends TableauMonitorForwarder {
         else if (predicate.startsWith("+"))
             return AtomicConcept.create(m_namespaces.uriFromId(predicate.substring(1)));
         else if (predicate.startsWith("-"))
-            // TODO: might need to create a data role here instead:
             return AtomicRole.createObjectRole(m_namespaces.uriFromId(predicate.substring(1)));
+        else if (predicate.startsWith("~"))
+            return AtomicRole.createDataRole(m_namespaces.uriFromId(predicate.substring(1)));
         else if (predicate.startsWith("$")) {
             String graphName=m_namespaces.uriFromId(predicate.substring(1));
             for (DescriptionGraph descriptionGraph : m_tableau.getDLOntology().getAllDescriptionGraphs())
@@ -484,6 +440,21 @@ public class Debugger extends TableauMonitorForwarder {
             writer.println(((AtLeastAbstractRoleConcept)startExistential).getToConcept().toString(m_namespaces));
         printConceptLabel(node,writer);
         printEdges(node,writer);
+    }
+    /**
+     * @param node a node in the tableau
+     * @return "no" if node is not blocked; "directly by" plus "signature in 
+     * cache" or the ID of the blocking node if the node is directly blocked; 
+     * "indirectly by" plus "signature in cache" or the ID of the blocking node 
+     * otherwise
+     */
+    protected static String formatBlockingStatus(Node node) {
+        if (!node.isBlocked())
+            return "no";
+        else if (node.isDirectlyBlocked())
+            return "directly by "+(node.getBlocker()==Node.CACHE_BLOCKER ? "signature in cache" : node.getBlocker().getNodeID());
+        else
+            return "indirectly by "+(node.getBlocker()==Node.CACHE_BLOCKER ? "signature in cache" : node.getBlocker().getNodeID());
     }
     public void printConceptLabel(Node node,PrintWriter writer) {
         TreeSet<AtomicConcept> atomicConcepts=new TreeSet<AtomicConcept>(ConceptComparator.INSTANCE);
@@ -804,122 +775,6 @@ public class Debugger extends TableauMonitorForwarder {
         showTextInWindow(buffer.toString(),"Unprocessed ground disjunctions");
         selectConsoleWindow();
     }
-    protected void doActiveNodes(String[] commandLine) {
-        int numberOfNodes=0;
-        Node node=m_tableau.getFirstTableauNode();
-        while (node!=null) {
-            if (!node.isBlocked())
-                numberOfNodes++;
-            node=node.getNextTableauNode();
-        }
-        CharArrayWriter buffer=new CharArrayWriter();
-        PrintWriter writer=new PrintWriter(buffer);
-        writer.println("Active nodes ("+numberOfNodes+"):");
-        writer.println("===========================================");
-        writer.println("      ID");
-        writer.println("===========================================");
-        node=m_tableau.getFirstTableauNode();
-        while (node!=null) {
-            if (!node.isBlocked()) {
-                writer.print("  ");
-                writer.println(node.getNodeID());
-            }
-            node=node.getNextTableauNode();
-        }
-        writer.flush();
-        showTextInWindow(buffer.toString(),"Active nodes");
-        selectConsoleWindow();
-    }
-    protected void doSearchLabel(String[] commandLine) {
-        if (commandLine.length<2) {
-            m_output.println("Node ID is missing.");
-            return;
-        }
-        int nodeID;
-        try {
-            nodeID=Integer.parseInt(commandLine[1]);
-        }
-        catch (NumberFormatException e) {
-            m_output.println("Invalid node ID.");
-            return;
-        }
-        Node node=m_tableau.getNode(nodeID);
-        if (node!=null) {
-            CharArrayWriter buffer=new CharArrayWriter();
-            PrintWriter writer=new PrintWriter(buffer);
-            writer.println("Nodes with label equal to the one of "+node.getNodeID());
-            writer.println("===========================================");
-            writer.println("      ID    Blocked");
-            writer.println("===========================================");
-            Node searchNode=m_tableau.getFirstTableauNode();
-            while (searchNode!=null) {
-                if (node.getPositiveLabel().equals(searchNode.getPositiveLabel())) {
-                    writer.print("  ");
-                    Printing.printPadded(writer,searchNode.getNodeID(),6);
-                    writer.print("    ");
-                    writer.print(formatBlockingStatus(searchNode));
-                    writer.println();
-                }
-                searchNode=searchNode.getNextTableauNode();
-            }
-            writer.flush();
-            showTextInWindow(buffer.toString(),"Nodes with label equal to the one of "+node.getNodeID());
-            selectConsoleWindow();
-        }
-        else
-            m_output.println("Node with ID '"+nodeID+"' not found.");
-    }
-    protected static String formatBlockingStatus(Node node) {
-        if (!node.isBlocked())
-            return "no";
-        else if (node.isDirectlyBlocked())
-            return "directly by "+(node.getBlocker()==Node.CACHE_BLOCKER ? "signature in cache" : node.getBlocker().getNodeID());
-        else
-            return "indirectly by "+(node.getBlocker()==Node.CACHE_BLOCKER ? "signature in cache" : node.getBlocker().getNodeID());
-    }
-    protected void doSearchPairWiseBlocking(String[] commandLine) {
-        if (commandLine.length<2) {
-            m_output.println("Node ID is missing.");
-            return;
-        }
-        int nodeID;
-        try {
-            nodeID=Integer.parseInt(commandLine[1]);
-        }
-        catch (NumberFormatException e) {
-            m_output.println("Invalid node ID.");
-            return;
-        }
-        Node node=m_tableau.getNode(nodeID);
-        if (node!=null) {
-            if (node.getNodeType()!=NodeType.TREE_NODE)
-                m_output.println("Node "+node.getNodeID()+" is not a tree node and does not have a pair-wise blocking signature.");
-            else {
-                CharArrayWriter buffer=new CharArrayWriter();
-                PrintWriter writer=new PrintWriter(buffer);
-                writer.println("Nodes with the pair-wise blocking signature of "+node.getNodeID());
-                writer.println("===========================================");
-                writer.println("      ID    Blocked");
-                writer.println("===========================================");
-                Node searchNode=m_tableau.getFirstTableauNode();
-                while (searchNode!=null) {
-                    if (searchNode.getNodeType()==NodeType.TREE_NODE && node.getPositiveLabel().equals(searchNode.getPositiveLabel()) && node.getParent().getPositiveLabel().equals(searchNode.getParent().getPositiveLabel()) && node.getFromParentLabel().equals(searchNode.getFromParentLabel()) && node.getToParentLabel().equals(searchNode.getToParentLabel()) && node.getToSelfLabel().equals(searchNode.getToSelfLabel())) {
-                        writer.print("  ");
-                        Printing.printPadded(writer,searchNode.getNodeID(),6);
-                        writer.print("    ");
-                        writer.print(formatBlockingStatus(searchNode));
-                        writer.println();
-                    }
-                    searchNode=searchNode.getNextTableauNode();
-                }
-                writer.flush();
-                showTextInWindow(buffer.toString(),"Nodes with the pair-wise blocking signature of "+node.getNodeID());
-                selectConsoleWindow();
-            }
-        }
-        else
-            m_output.println("Node with ID '"+nodeID+"' not found.");
-    }
     protected void doDiffLabels(String[] commandLine) {
         if (commandLine.length<3) {
             m_output.println("Node IDs are missing.");
@@ -1087,22 +942,7 @@ public class Debugger extends TableauMonitorForwarder {
         showTextInWindow(buffer.toString(),"Statistics of node origins");
         selectConsoleWindow();
     }
-    protected void doBreakpointTime(String[] commandLine) {
-        if (commandLine.length<2) {
-            m_output.println("Time is missing.");
-            return;
-        }
-        int breakpointTimeSeconds;
-        try {
-            breakpointTimeSeconds=Integer.parseInt(commandLine[1]);
-        }
-        catch (NumberFormatException e) {
-            m_output.println("Invalid time.");
-            return;
-        }
-        m_output.println("Breakpoint time is "+breakpointTimeSeconds+" seconds.");
-        m_breakpointTime=breakpointTimeSeconds*1000;
-    }
+
     protected void doWaitFor(String[] commandLine) {
         boolean add=true;
         for (int index=1;index<commandLine.length;index++) {
@@ -1114,6 +954,8 @@ public class Debugger extends TableauMonitorForwarder {
                 add=false;
             else if ("gexists".equals(argument))
                 waitOption=WaitOption.GRAPH_EXPANSION;
+            else if ("cexists".equals(argument))
+                waitOption=WaitOption.CONCRETE_EXPANSION;
             else if ("exists".equals(argument))
                 waitOption=WaitOption.EXISTENTIAL_EXPANSION;
             else if ("clash".equals(argument))
@@ -1136,6 +978,11 @@ public class Debugger extends TableauMonitorForwarder {
         else
             m_waitOptions.remove(waitOption);
     }
+    /**
+     * Splits a command by spaces. 
+     * @param command The command line command
+     * @return an array of strings such that each string is a word in the given command
+     */
     protected String[] parse(String command) {
         command=command.trim();
         List<String> arguments=new ArrayList<String>();
@@ -1267,7 +1114,8 @@ public class Debugger extends TableauMonitorForwarder {
         m_lastExistentialNode=null;
         m_lastExistentialConcept=null;
         if ((existentialConcept instanceof ExistsDescriptionGraph && m_waitOptions.contains(WaitOption.GRAPH_EXPANSION)) ||
-            (existentialConcept instanceof AtLeastAbstractRoleConcept && m_waitOptions.contains(WaitOption.EXISTENTIAL_EXPANSION))) {
+            (existentialConcept instanceof AtLeastAbstractRoleConcept && m_waitOptions.contains(WaitOption.EXISTENTIAL_EXPANSION)) || 
+            (existentialConcept instanceof AtLeastConcreteRoleConcept && m_waitOptions.contains(WaitOption.CONCRETE_EXPANSION))) {
             m_forever=false;
             m_output.println(existentialConcept.toString(m_namespaces)+" expanded for node "+forNode.getNodeID());
             mainLoop();
@@ -1284,6 +1132,17 @@ public class Debugger extends TableauMonitorForwarder {
         NodeCreationInfo nodeCreationInfo=m_nodeCreationInfos.remove(node);
         if (nodeCreationInfo.m_createdByNode!=null)
             m_nodeCreationInfos.get(nodeCreationInfo.m_createdByNode).m_children.remove(node);
+    }
+    public void datatypeCheckingStarted(Node node) {
+        super.datatypeCheckingStarted();
+        m_output.println("Will check whether the datatype constraints are satisfiable.");
+        mainLoop();
+    }
+    public void datatypeCheckingFinished(boolean result) {
+        super.datatypeCheckingFinished(result);
+        m_output.println("The datatype constraints are " + (result ? "" : "not ") + "satisfiable...");
+        mainLoop();
+        dispose();
     }
     protected void printState() {
         int numberOfNodes=0;
@@ -1507,6 +1366,40 @@ public class Debugger extends TableauMonitorForwarder {
             }
             return comparison;
         }
+    }
+
+    public Tableau getTableau() {
+        return m_tableau;
+    }
+    public PrintWriter getOutput() {
+        return m_output;
+    }
+    public JFrame getMainFrame() {
+        return m_mainFrame;
+    }
+    public String getLastCommand() {
+        return m_lastCommand;
+    }
+    public ConsoleTextArea getConsoleTextArea() {
+        return m_consoleTextArea;
+    }
+    public Namespaces getNamespaces() {
+        return m_namespaces;
+    }
+    public DerivationHistory getDerivationHistory() {
+        return m_derivationHistory;
+    }
+    public void setBreakpointTime(int time) {
+        m_breakpointTime = time;
+    }
+    public void setInMainLoop(boolean inMainLoop) {
+        m_inMainLoop = inMainLoop;
+    }
+    public void setForever(boolean forever) {
+        this.m_forever = forever;
+    }
+    public void setSinglestep(boolean singlestep) {
+        this.m_singlestep = singlestep;
     }
     
 }
