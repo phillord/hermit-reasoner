@@ -1,28 +1,30 @@
 // Copyright 2008 by Oxford University; see license.txt for details
-package org.semanticweb.HermiT.debugger;
+package org.semanticweb.HermiT.debugger.commands;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Graphics;
 import java.awt.Dimension;
-import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.Icon;
-import javax.swing.JPanel;
-import javax.swing.JFrame;
-import javax.swing.JScrollPane;
-import javax.swing.JTree;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import javax.swing.JTextArea;
 import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JTree;
 import javax.swing.event.EventListenerList;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
@@ -31,11 +33,12 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
-import java.util.List;
-import java.util.ArrayList;
 
-import org.semanticweb.HermiT.model.*;
-import org.semanticweb.HermiT.tableau.*;
+import org.semanticweb.HermiT.debugger.Debugger;
+import org.semanticweb.HermiT.debugger.Debugger.NodeCreationInfo;
+import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
+import org.semanticweb.HermiT.model.ExistentialConcept;
+import org.semanticweb.HermiT.tableau.Node;
 
 @SuppressWarnings("serial")
 public class SubtreeViewer extends JFrame {
@@ -87,7 +90,7 @@ public class SubtreeViewer extends JFrame {
                     JOptionPane.showMessageDialog(SubtreeViewer.this,"Invalid node ID '"+nodeIDText+"'.");
                     return;
                 }
-                Node node=m_debugger.m_tableau.getNode(nodeID);
+                Node node=m_debugger.getTableau().getNode(nodeID);
                 if (node==null) {
                     JOptionPane.showMessageDialog(SubtreeViewer.this,"Node with ID "+nodeID+" cannot be found.");
                     return;
@@ -121,7 +124,7 @@ public class SubtreeViewer extends JFrame {
         Node currentNode=node;
         while (currentNode!=null && currentNode!=m_subtreeTreeModel.getRoot()) {
             pathToRoot.add(currentNode);
-            currentNode=m_debugger.m_nodeCreationInfos.get(currentNode).m_createdByNode;
+            currentNode=m_debugger.getNodeCreationInfo(currentNode).m_createdByNode;
         }
         if (currentNode==null) {
             JOptionPane.showMessageDialog(SubtreeViewer.this,"Node with ID "+node.getNodeID()+" is not present in the shown subtree.");
@@ -163,26 +166,37 @@ public class SubtreeViewer extends JFrame {
         public void removeTreeModelListener(TreeModelListener listener) {
             m_eventListeners.remove(TreeModelListener.class,listener);
         }
-        public Object getChild(Object parent,int index) {
-            Debugger.NodeCreationInfo nodeCreationInfo=m_debugger.m_nodeCreationInfos.get(parent);
+        public Node getChild(Object parent,int index) {
+            NodeCreationInfo nodeCreationInfo = null;
+            if (parent instanceof Node) {
+                nodeCreationInfo = m_debugger.getNodeCreationInfo((Node) parent);
+            }
             if (nodeCreationInfo==null)
                 return null;
             else
                 return nodeCreationInfo.m_children.get(index);
         }
         public int getChildCount(Object parent) {
-            Debugger.NodeCreationInfo nodeCreationInfo=m_debugger.m_nodeCreationInfos.get(parent);
-            if (nodeCreationInfo==null)
+            NodeCreationInfo nodeCreationInfo = null;
+            if (parent instanceof Node) {
+                nodeCreationInfo = m_debugger.getNodeCreationInfo((Node) parent);
+            }
+            if (nodeCreationInfo==null) {
                 return 0;
-            else
+            } else {
                 return nodeCreationInfo.m_children.size();
+            }
         }
         public int getIndexOfChild(Object parent,Object child) {
-            Debugger.NodeCreationInfo nodeCreationInfo=m_debugger.m_nodeCreationInfos.get(parent);
-            if (nodeCreationInfo==null)
+            NodeCreationInfo nodeCreationInfo = null; 
+            if (parent instanceof Node) {
+                nodeCreationInfo = m_debugger.getNodeCreationInfo((Node) parent);
+            }
+            if (nodeCreationInfo==null) {
                 return -1;
-            else
+            } else {
                 return nodeCreationInfo.m_children.indexOf(child);
+            }
         }
         public Object getRoot() {
             return m_root;
@@ -217,18 +231,18 @@ public class SubtreeViewer extends JFrame {
         public Component getTreeCellRendererComponent(JTree tree,Object value,boolean selected,boolean expanded,boolean leaf,int row,boolean hasFocus) {
             Node node=(Node)value;
             StringBuffer buffer=new StringBuffer();
-            ExistentialConcept existentialConcept=m_debugger.m_nodeCreationInfos.get(node).m_createdByExistential;
+            ExistentialConcept existentialConcept=m_debugger.getNodeCreationInfo(node).m_createdByExistential;
             if (existentialConcept==null) {
                 buffer.append(node.getNodeID());
                 buffer.append(":(root)");
             }
             else if (existentialConcept instanceof AtLeastAbstractRoleConcept) {
                 AtLeastAbstractRoleConcept atLeastAbstractConcept=(AtLeastAbstractRoleConcept)existentialConcept;
-                buffer.append(atLeastAbstractConcept.getOnRole().toString(m_debugger.m_namespaces));
+                buffer.append(atLeastAbstractConcept.getOnRole().toString(m_debugger.getNamespaces()));
                 buffer.append("  -->  ");
                 buffer.append(node.getNodeID());
                 buffer.append(":[");
-                buffer.append(atLeastAbstractConcept.getToConcept().toString(m_debugger.m_namespaces));
+                buffer.append(atLeastAbstractConcept.getToConcept().toString(m_debugger.getNamespaces()));
                 buffer.append("]");
             }
             else {

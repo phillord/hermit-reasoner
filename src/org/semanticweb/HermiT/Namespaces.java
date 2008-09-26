@@ -2,14 +2,13 @@
 package org.semanticweb.HermiT;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.Comparator;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class is responsible for mapping between URIs and "identifiers", which
@@ -172,7 +171,7 @@ public class Namespaces implements Serializable {
                 }
                 return ns + id.substring(pos + 1);
             } else { // use the default namespace
-                String ns = namespaceByPrefix.get(null);
+                String ns = namespaceByPrefix.get("");
                 if (ns == null) {
                     ns = namespaceByPrefix.get("");
                 }

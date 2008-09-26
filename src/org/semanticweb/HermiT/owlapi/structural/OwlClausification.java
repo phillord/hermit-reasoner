@@ -14,15 +14,13 @@ import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Reasoner;
-import org.semanticweb.HermiT.Namespaces;
-import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
 import org.semanticweb.HermiT.model.AtLeastConcreteRoleConcept;
 import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
 import org.semanticweb.HermiT.model.Atom;
-import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
+import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DataRange;
@@ -34,6 +32,7 @@ import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.model.NodeIDLessThan;
+import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLClassAssertionAxiom;
@@ -762,7 +761,10 @@ public class OwlClausification {
         }
 
         public void visit(OWLDataType dataType) {
-            if (integerDataType.equals(dataType) || stringDataType.equals(dataType) || literalDataType.equals(dataType)) {
+            if (integerDataType.equals(dataType)
+                    || stringDataType.equals(dataType)
+                    || literalDataType.equals(dataType)
+                    || booleanDataType.equals(dataType)) {
                 dataRanges.add(new DatatypeRestriction(dataType.getURI()));
             } else {
                 throw new RuntimeException("Unsupported datatype.");
@@ -816,7 +818,9 @@ public class OwlClausification {
         }
 
         public void visit(OWLTypedConstant typedConstant) {
-            if (integerDataType.equals(typedConstant.getDataType()) || stringDataType.equals(typedConstant.getDataType())) {
+            if (integerDataType.equals(typedConstant.getDataType())
+                    || stringDataType.equals(typedConstant.getDataType())
+                    || booleanDataType.equals(typedConstant.getDataType())) {
                 List<String> equalsValues = new ArrayList<String>();
                 equalsValues.add(typedConstant.getLiteral());
                 dataRanges.add(new DatatypeRestriction(typedConstant.getDataType().getURI(), equalsValues));
@@ -869,14 +873,14 @@ public class OwlClausification {
                                     getIndividual(individuals[j]) }));
         }
 
-        public void visit(OWLDataPropertyAssertionAxiom object) {
+        public void visit(OWLDataPropertyAssertionAxiom assertion) {
             throw new IllegalArgumentException(
-                    "DataPropertyMember is not supported yet.");
+            "Internal error: data property assertions should have been rewritten into concept assertions.");
         }
 
         public void visit(OWLNegativeDataPropertyAssertionAxiom object) {
             throw new IllegalArgumentException(
-                    "DataPropertyMember is not supported yet.");
+            "Internal error: negative data property assertions should have been rewritten into concept assertions.");
         }
 
         public void visit(OWLObjectPropertyAssertionAxiom object) {

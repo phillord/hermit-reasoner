@@ -48,6 +48,7 @@ import org.semanticweb.owl.model.OWLIndividualAxiom;
 import org.semanticweb.owl.model.OWLInverseFunctionalObjectPropertyAxiom;
 import org.semanticweb.owl.model.OWLInverseObjectPropertiesAxiom;
 import org.semanticweb.owl.model.OWLIrreflexiveObjectPropertyAxiom;
+import org.semanticweb.owl.model.OWLNegativeDataPropertyAssertionAxiom;
 import org.semanticweb.owl.model.OWLNegativeObjectPropertyAssertionAxiom;
 import org.semanticweb.owl.model.OWLObjectAllRestriction;
 import org.semanticweb.owl.model.OWLObjectComplementOf;
@@ -231,10 +232,10 @@ public class OwlNormalization {
             } else if (untyped_axiom instanceof OWLDataPropertyDomainAxiom) {
                 OWLDataPropertyDomainAxiom axiom = (OWLDataPropertyDomainAxiom) (untyped_axiom);
                 OWLDataRange dataNothing = m_factory.getOWLDataComplementOf(m_factory.getOWLDataType(URI.create("http://www.w3.org/2000/01/rdf-schema#Literal")));
-                OWLDataAllRestriction allPropertyNohting = m_factory.getOWLDataAllRestriction(
+                OWLDataAllRestriction allPropertyNothing = m_factory.getOWLDataAllRestriction(
                         axiom.getProperty(), dataNothing);
                 inclusions.add(new OWLDescription[] { axiom.getDomain(),
-                        allPropertyNohting });
+                        allPropertyNothing });
             } else if (untyped_axiom instanceof OWLDataPropertyRangeAxiom) {
                 OWLDataPropertyRangeAxiom axiom = (OWLDataPropertyRangeAxiom) (untyped_axiom);
                 OWLDataAllRestriction allPropertyRange = m_factory.getOWLDataAllRestriction(
@@ -309,6 +310,21 @@ public class OwlNormalization {
                 else
                     m_facts.add(m_factory.getOWLClassAssertionAxiom(
                             rewrittenAxiom.getIndividual(), desc));
+            } else if (untyped_axiom instanceof OWLNegativeDataPropertyAssertionAxiom) {
+                OWLNegativeDataPropertyAssertionAxiom axiom = (OWLNegativeDataPropertyAssertionAxiom) (untyped_axiom);
+                OWLDataRange dataRange = m_factory.getOWLDataOneOf(axiom.getObject());
+                OWLDataRange notDataRange = m_factory.getOWLDataComplementOf(dataRange);
+                OWLDescription restriction = m_factory.getOWLDataAllRestriction(
+                        axiom.getProperty(), notDataRange);
+                boolean[] alreadyExists = new boolean[1];
+                OWLDescription definition = getDefinitionFor(restriction,
+                        alreadyExists);
+                if (!alreadyExists[0]) {
+                    inclusions.add(new OWLDescription[] {
+                            definition.getComplementNNF(), restriction });
+                }
+                m_facts.add(m_factory.getOWLClassAssertionAxiom(
+                        axiom.getSubject(), definition));
             } else if (untyped_axiom instanceof OWLSameIndividualsAxiom) {
                 OWLSameIndividualsAxiom axiom = (OWLSameIndividualsAxiom) (untyped_axiom);
                 m_facts.add(axiom);
@@ -322,12 +338,6 @@ public class OwlNormalization {
                     || untyped_axiom instanceof OWLImportsDeclaration) {
                 // do nothing; these axiom types have no effect on reasoning
             } else if (untyped_axiom instanceof OWLDataPropertyAssertionAxiom) {
-                // In a way we should throw an exception here, but we've been
-                // allowing it through
-                // for testing purposes, so just issue a warning right now.
-                // TODO: Either actually implement datatypes, or throw an
-                // exception here!
-                System.err.println("ignoring data assertion...");
                 OWLDataPropertyAssertionAxiom axiom = (OWLDataPropertyAssertionAxiom) (untyped_axiom);
                 OWLDataRange filler = m_factory.getOWLDataOneOf(axiom.getObject());
                 OWLDataSomeRestriction restriction = m_factory.getOWLDataSomeRestriction(

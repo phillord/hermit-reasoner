@@ -63,6 +63,7 @@ public class DatatypeManager {
         return result;
     }
     protected boolean isCompatible(DataRange dataRange1, DataRange dataRange2) {
+        System.out.println("Checking compatibility of " + dataRange1 + " and " + dataRange2);
         if (dataRange1 instanceof DatatypeRestriction) {
             DatatypeRestriction restr1 = (DatatypeRestriction) dataRange1;
             if (dataRange2 instanceof DatatypeRestriction) {
@@ -77,75 +78,95 @@ public class DatatypeManager {
                             // check if one of the equals values has a matching 
                             // one in the other restriction
                             if (restr2.getEqualsValues().contains(value)) {
+                                System.out.println("Check succeeded!");
                                 return true;
                             }
                         }
                     } else {
                         // at least one of the restrictions has no further 
                         // equals restriction, so we are fine
+                        System.out.println("Check succeeded!");
                         return true;
                     }
                 } 
             } else {
                 // the second range is negated
                 DatatypeRestriction restr2 = ((DatatypeRestrictionNegationConcept) dataRange2).getNegatedDatatypeRestriction();
-                if (restr1.getDatatypeURI().equals(restr2.getDatatypeURI())) {
-                    // the negated and the non-negated range are of the same 
-                    // type, e.g., integer
-                    if (!restr1.getEqualsValues().isEmpty() 
-                            && !restr2.getEqualsValues().isEmpty()) {
-                        // both have some value restrictions, e.g., equals 18
-                        for (String value : restr1.getEqualsValues()) {
-                            // check if one of the equals values has no matching 
-                            // one in the other restriction
-                            if (!restr2.getEqualsValues().contains(value)) {
-                                return true;
+                // if the negated one if top, we are screwed
+                if (!restr2.isTop()) {
+                    if (restr1.getDatatypeURI().equals(restr2.getDatatypeURI())) {
+                        // the negated and the non-negated range are of the same 
+                        // type, e.g., integer
+                        if (!restr1.getEqualsValues().isEmpty() 
+                                && !restr2.getEqualsValues().isEmpty()) {
+                            // both have some restrictions, e.g., equals 18
+                            for (String value : restr1.getEqualsValues()) {
+                                // check if one of the equals values has no matching 
+                                // one in the other restriction
+                                if (!restr2.getEqualsValues().contains(value)) {
+                                    System.out.println("Check succeeded!");
+                                    return true;
+                                }
                             }
+                        } else {
+                            // at least one of the restrictions has no further 
+                            // equals restriction, so we are fine
+                            System.out.println("Check succeeded!");
+                            return true;
                         }
                     } else {
-                        // at least one of the restrictions has no further 
-                        // equals restriction, so we are fine
+                        // the negated type is a different data range, e.g., we have 
+                        // some integer and not some string, which is fine
+                        System.out.println("Check succeeded!");
                         return true;
                     }
-                } else {
-                    // the negated type is a different data range, e.g., we have 
-                    // some integer and not some string, which is fine
-                    return true;
                 }
             }
         } else {
             DatatypeRestriction restr1 = ((DatatypeRestrictionNegationConcept) dataRange1).getNegatedDatatypeRestriction();
-            if (dataRange2 instanceof DatatypeRestriction) {
-                // only the first range is negated
-                DatatypeRestriction restr2 = (DatatypeRestriction) dataRange2; 
-                if (restr1.getDatatypeURI().equals(restr2.getDatatypeURI())) {
-                    // both are of the same type, e.g., integer
-                    if (!restr1.getEqualsValues().isEmpty() 
-                            && !restr2.getEqualsValues().isEmpty()) {
-                        // both have some value restrictions, e.g., equals 18
-                        for (String value : restr1.getEqualsValues()) {
-                            // check if one of the negated equals values has no 
-                            // matching one in the non-negated restriction
-                            if (!restr2.getEqualsValues().contains(value)) {
-                                return true;
+            // if the negated one if top, we are screwed
+            if (!restr1.isTop()) {
+                if (dataRange2 instanceof DatatypeRestriction) {
+                    // only the first range is negated
+                    DatatypeRestriction restr2 = (DatatypeRestriction) dataRange2; 
+                    if (restr1.getDatatypeURI().equals(restr2.getDatatypeURI())) {
+                        // both are of the same type, e.g., integer
+                        if (!restr1.getEqualsValues().isEmpty() 
+                                && !restr2.getEqualsValues().isEmpty()) {
+                            // both have some value restrictions, e.g., equals 18
+                            for (String value : restr1.getEqualsValues()) {
+                                // check if one of the negated equals values has no 
+                                // matching one in the non-negated restriction
+                                if (!restr2.getEqualsValues().contains(value)) {
+                                    System.out.println("Check succeeded!");
+                                    return true;
+                                }
                             }
+                        } else {
+                            // at least one of the restrictions has no further 
+                            // equals restriction, so we are fine
+                            System.out.println("Check succeeded!");
+                            return true;
                         }
                     } else {
-                        // at least one of the restrictions has no further 
-                        // equals restriction, so we are fine
+                        // the negated range has a different type, so we are fine
+                        System.out.println("Check succeeded!");
                         return true;
                     }
                 } else {
-                    // the negated range has a different type, so we are fine
-                    return true;
+                    // both ranges are negated
+                    DatatypeRestriction restr2 = ((DatatypeRestrictionNegationConcept) dataRange2).getNegatedDatatypeRestriction();
+                    // if the negated one if top, we are screwed
+                    if (!restr2.isTop()) {
+                        // this is fine since we have infinitely many values to 
+                        // choose from and an unknown data range
+                        System.out.println("Check succeeded!");
+                        return true;
+                    }
                 }
-            } else {
-                // both ranges are negated, which is fine since we have 
-                // infinitely many values to choose from and an unknown data 
-                // range
-                return true;
-            }
+            } 
         }
+        System.out.println("Check failed!");
         return false;
     }
 }

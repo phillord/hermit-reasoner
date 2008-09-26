@@ -5,11 +5,9 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.io.BufferedReader;
-import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -32,16 +30,29 @@ import org.semanticweb.HermiT.debugger.commands.BreakpointTimeCommand;
 import org.semanticweb.HermiT.debugger.commands.ClearCommand;
 import org.semanticweb.HermiT.debugger.commands.ContinueCommand;
 import org.semanticweb.HermiT.debugger.commands.DerivationTreeCommand;
+import org.semanticweb.HermiT.debugger.commands.DiffLabelsCommand;
 import org.semanticweb.HermiT.debugger.commands.DummyCommand;
 import org.semanticweb.HermiT.debugger.commands.ExitCommand;
 import org.semanticweb.HermiT.debugger.commands.ForeverCommand;
 import org.semanticweb.HermiT.debugger.commands.HelpCommand;
 import org.semanticweb.HermiT.debugger.commands.HistoryCommand;
 import org.semanticweb.HermiT.debugger.commands.ICommand;
+import org.semanticweb.HermiT.debugger.commands.IsAncestorOfCommand;
+import org.semanticweb.HermiT.debugger.commands.NodesForCommand;
+import org.semanticweb.HermiT.debugger.commands.OriginStatsCommand;
+import org.semanticweb.HermiT.debugger.commands.QueryCommand;
+import org.semanticweb.HermiT.debugger.commands.ReuseNodeForCommand;
 import org.semanticweb.HermiT.debugger.commands.SearchLabelCommand;
 import org.semanticweb.HermiT.debugger.commands.SearchPairwiseBlockingCommand;
-import org.semanticweb.HermiT.existentials.ExpansionStrategy;
-import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
+import org.semanticweb.HermiT.debugger.commands.ShowDLClausesCommand;
+import org.semanticweb.HermiT.debugger.commands.ShowDescriptionGraphCommand;
+import org.semanticweb.HermiT.debugger.commands.ShowExistsCommand;
+import org.semanticweb.HermiT.debugger.commands.ShowModelCommand;
+import org.semanticweb.HermiT.debugger.commands.ShowNodeCommand;
+import org.semanticweb.HermiT.debugger.commands.ShowSubtreeCommand;
+import org.semanticweb.HermiT.debugger.commands.SingleStepCommand;
+import org.semanticweb.HermiT.debugger.commands.UnprocessedDisjunctionsCommand;
+import org.semanticweb.HermiT.debugger.commands.WaitForCommand;
 import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
 import org.semanticweb.HermiT.model.AtLeastConcreteRoleConcept;
 import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
@@ -49,7 +60,6 @@ import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
-import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
@@ -60,11 +70,9 @@ import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.ExistsDescriptionGraph;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InverseRole;
-import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.monitor.TableauMonitorForwarder;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
-import org.semanticweb.HermiT.tableau.GroundDisjunction;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
 
@@ -73,7 +81,7 @@ public class Debugger extends TableauMonitorForwarder {
 
     public static final Font s_monospacedFont=new Font("Monospaced",Font.PLAIN,12);
 
-    protected static enum WaitOption { GRAPH_EXPANSION,EXISTENTIAL_EXPANSION,CONCRETE_EXPANSION,CLASH,MERGE };
+    public static enum WaitOption { GRAPH_EXPANSION,EXISTENTIAL_EXPANSION,CONCRETE_EXPANSION,CLASH,MERGE };
     
     protected final Namespaces m_namespaces;
     protected final DerivationHistory m_derivationHistory;
@@ -155,58 +163,60 @@ public class Debugger extends TableauMonitorForwarder {
                     else if ("exit".equals(command) || "quit".equals(command))
                         commandExecutable = new ExitCommand();
                     else if ("c".equals(command) || "cont".equals(command))
-                        commandExecutable = new ContinueCommand(this);
+                        commandExecutable = new ContinueCommand();
                     else if ("clear".equals(command))
-                        commandExecutable = new ClearCommand(this);
+                        commandExecutable = new ClearCommand();
                     else if ("forever".equals(command))
-                        commandExecutable = new ForeverCommand(this);
+                        commandExecutable = new ForeverCommand();
                     else if ("history".equals(command))
-                        commandExecutable = new HistoryCommand(this, parsedCommand);
+                        commandExecutable = new HistoryCommand();
                     else if ("dertree".equals(command))
-                        commandExecutable = new DerivationTreeCommand(this, parsedCommand);
+                        commandExecutable = new DerivationTreeCommand();
                     else if ("activenodes".equals(command))
-                        commandExecutable = new ActiveNodesCommand(this, parsedCommand);
+                        commandExecutable = new ActiveNodesCommand();
                     else if ("isancof".equals(command))
-                        doIsAncestorOf(parsedCommand);
+                        commandExecutable = new IsAncestorOfCommand();
                     else if ("udisjunctions".equals(command))
-                        doUnprocessedDisjunctions(parsedCommand);
+                        commandExecutable = new UnprocessedDisjunctionsCommand();
                     else if ("showexists".equals(command))
-                        doShowExists(parsedCommand);
+                        commandExecutable = new ShowExistsCommand();
                     else if ("showmodel".equals(command))
-                        doShowModel(parsedCommand);
+                        commandExecutable = new ShowModelCommand();
                     else if ("showdlclauses".equals(command))
-                        doShowDLClauses(parsedCommand);
+                        commandExecutable = new ShowDLClausesCommand();
                     else if ("shownode".equals(command))
-                        doShowNode(parsedCommand);
+                        commandExecutable = new ShowNodeCommand();
                     else if ("showdgraph".equals(command))
-                        doShowDescriptionGraph(parsedCommand);
+                        commandExecutable = new ShowDescriptionGraphCommand();
                     else if ("showsubtree".equals(command))
-                        doShowSubtree(parsedCommand);
-                    else if ("q".equals(command))
-                        doQuery(parsedCommand);
+                        commandExecutable = new ShowSubtreeCommand();
+                    else if ("q".equals(command) || "query".equals(command))
+                        commandExecutable = new QueryCommand();
                     else if ("searchlabel".equals(command))
-                        commandExecutable = new SearchLabelCommand(this, parsedCommand);
+                        commandExecutable = new SearchLabelCommand();
                     else if ("difflabels".equals(command))
-                        doDiffLabels(parsedCommand);
+                        commandExecutable = new DiffLabelsCommand();
                     else if ("searchpwblock".equals(command))
-                        commandExecutable = new SearchPairwiseBlockingCommand(this, parsedCommand);
+                        commandExecutable = new SearchPairwiseBlockingCommand();
                     else if ("rnodefor".equals(command))
-                        doReuseNodeFor(parsedCommand);
+                        commandExecutable = new ReuseNodeForCommand();
                     else if ("nodesfor".equals(command))
-                        doNodesFor(parsedCommand);
+                        commandExecutable = new NodesForCommand();
                     else if ("originstats".equals(command))
-                        doOriginStats(parsedCommand);
+                        commandExecutable = new OriginStatsCommand();
                     else if ("singlestep".equals(command))
-                        doSingleStep(parsedCommand);
+                        commandExecutable = new SingleStepCommand();
                     else if ("bptime".equals(command))
-                        commandExecutable = new BreakpointTimeCommand(this, parsedCommand);
+                        commandExecutable = new BreakpointTimeCommand();
                     else if ("waitfor".equals(command))
-                        doWaitFor(parsedCommand);
+                        commandExecutable = new WaitForCommand();
                     else
                         m_output.println("Unknown command '"+command+"'.");
                     if (showHelp) {
                         m_output.print(commandExecutable.getHelpText());
                     } else {
+                        commandExecutable.setArgs(parsedCommand);
+                        commandExecutable.setDebugger(this);
                         commandExecutable.execute();
                     }
                 }
@@ -238,177 +248,6 @@ public class Debugger extends TableauMonitorForwarder {
         else
             return null;
     }
-    protected void doSingleStep(String[] commandLine) {
-        if (commandLine.length<2) {
-            m_output.println("The status is missing.");
-            return;
-        }
-        String status=commandLine[1].toLowerCase();
-        if ("on".equals(status)) {
-            m_singlestep=true;
-            m_output.println("Single step mode on.");
-        }
-        else if ("off".equals(status)) {
-            m_singlestep=false;
-            m_output.println("Single step mode off.");
-        }
-        else
-            m_output.println("Incorrect single step mode '"+status+"'.");
-    }
-    protected ExistentialConcept getStartExistential(Node node) {
-        NodeCreationInfo nodeCreationInfo=m_nodeCreationInfos.get(node);
-        if (nodeCreationInfo==null)
-            return null;
-        else
-            return nodeCreationInfo.m_createdByExistential;
-    }
-    protected void printStartExistential(Node node,PrintWriter writer) {
-        ExistentialConcept startExistential=getStartExistential(node);
-        if (startExistential==null)
-            writer.print("(root)");
-        else
-            writer.print(startExistential.toString(m_namespaces));
-    }
-    protected void doShowExists(String[] commandLine) {
-        CharArrayWriter buffer=new CharArrayWriter();
-        PrintWriter writer=new PrintWriter(buffer);
-        writer.println("Nodes with existentials");
-        writer.println("================================================================================");
-        writer.println("      ID    # Existentials    Start Existential");
-        writer.println("================================================================================");
-        Node node=m_tableau.getFirstTableauNode();
-        while (node!=null) {
-            if (node.isActive() && !node.isBlocked() && node.hasUnprocessedExistentials()) {
-                writer.print("  ");
-                Printing.printPadded(writer,node.getNodeID(),6);
-                writer.print("      ");
-                Printing.printPadded(writer,node.getUnprocessedExistentials().size(),6);
-                writer.print("        ");
-                printStartExistential(node,writer);
-                writer.println();
-            }
-            node=node.getNextTableauNode();
-        }
-        writer.println("===========================================");
-        writer.flush();
-        showTextInWindow(buffer.toString(),"Nodes with existentials");
-        selectConsoleWindow();
-    }
-    protected void doShowModel(String[] commandLine) {
-        Set<Object[]> facts=new TreeSet<Object[]>(FactComparator.INSTANCE);
-        String title;
-        if (commandLine.length<2) {
-            for (ExtensionTable extensionTable : m_tableau.getExtensionManager().getExtensionTables()) {
-                ExtensionTable.Retrieval retrieval=extensionTable.createRetrieval(new boolean[extensionTable.getArity()],ExtensionTable.View.TOTAL);
-                loadFacts(facts,retrieval);
-            }
-            title="Current model";
-        }
-        else {
-            DLPredicate dlPredicate=getDLPredicate(commandLine[1]);
-            if (dlPredicate!=null) {
-                ExtensionTable extensionTable=m_tableau.getExtensionManager().getExtensionTable(dlPredicate.getArity()+1);
-                boolean[] bindings=new boolean[extensionTable.getArity()];
-                bindings[0]=true;
-                ExtensionTable.Retrieval retrieval=extensionTable.createRetrieval(bindings,ExtensionTable.View.TOTAL);
-                retrieval.getBindingsBuffer()[0]=dlPredicate;
-                loadFacts(facts,retrieval);
-                title="Assertions containing the predicate '"+m_namespaces.idFromUri(dlPredicate.toString())+"'.";
-            }
-            else {
-                int nodeID;
-                try {
-                    nodeID=Integer.parseInt(commandLine[1]);
-                }
-                catch (NumberFormatException e) {
-                    m_output.println("Invalid ID of the node.");
-                    return;
-                }
-                Node node=m_tableau.getNode(nodeID);
-                if (node==null) {
-                    m_output.println("Node with ID '"+nodeID+"' not found.");
-                    return;
-                }
-                for (ExtensionTable extensionTable : m_tableau.getExtensionManager().getExtensionTables())
-                    for (int position=0;position<extensionTable.getArity();position++) {
-                        boolean[] bindings=new boolean[extensionTable.getArity()];
-                        bindings[position]=true;
-                        ExtensionTable.Retrieval retrieval=extensionTable.createRetrieval(bindings,ExtensionTable.View.TOTAL);
-                        retrieval.getBindingsBuffer()[position]=node;
-                        loadFacts(facts,retrieval);
-                    }
-                title="Assertions containing node '"+node.getNodeID()+"'.";
-            }
-        }
-        CharArrayWriter buffer=new CharArrayWriter();
-        PrintWriter writer=new PrintWriter(buffer);
-        Object lastPredicate=null;
-        for (Object[] fact : facts) {
-            if (lastPredicate!=fact[0]) {
-                lastPredicate=fact[0];
-                writer.println();
-            }
-            writer.print(' ');
-            printFact(fact,writer);
-            writer.println();
-        }
-        writer.flush();
-        showTextInWindow(buffer.toString(),title);
-        selectConsoleWindow();
-    }
-    protected void printFact(Object[] fact,PrintWriter writer) {
-        Object dlPredicate=fact[0];
-        if (dlPredicate instanceof Concept)
-            writer.print(((Concept)dlPredicate).toString(m_namespaces));
-        else if (dlPredicate instanceof DLPredicate)
-            writer.print(((DLPredicate)dlPredicate).toString(m_namespaces));
-        else
-            throw new IllegalStateException("Internal error: invalid predicate.");
-        writer.print('[');
-        for (int position=1;position<fact.length;position++) {
-            if (position!=1)
-                writer.print(',');
-            writer.print(((Node)fact[position]).getNodeID());
-        }
-        writer.print(']');
-    }
-    protected void loadFacts(Set<Object[]> facts,ExtensionTable.Retrieval retrieval) {
-        retrieval.open();
-        while (!retrieval.afterLast()) {
-            facts.add(retrieval.getTupleBuffer().clone());
-            retrieval.next();
-        }
-    }
-    protected void doShowDLClauses(String[] commandLine) {
-        CharArrayWriter buffer=new CharArrayWriter();
-        PrintWriter writer=new PrintWriter(buffer);
-        for (DLClause dlClause : m_tableau.getDLOntology().getDLClauses())
-            writer.println(dlClause.toString(m_namespaces));
-        writer.flush();
-        showTextInWindow(buffer.toString(),"DL-clauses");
-        selectConsoleWindow();
-    }
-    protected void doShowNode(String[] commandLine) {
-        int nodeID;
-        try {
-            nodeID=Integer.parseInt(commandLine[1]);
-        }
-        catch (NumberFormatException e) {
-            m_output.println("Invalid ID of the first node.");
-            return;
-        }
-        Node node=m_tableau.getNode(nodeID);
-        if (node==null) {
-            m_output.println("Node with ID '"+nodeID+"' not found.");
-            return;
-        }
-        CharArrayWriter buffer=new CharArrayWriter();
-        PrintWriter writer=new PrintWriter(buffer);
-        printNodeData(node,writer);
-        writer.flush();
-        showTextInWindow(buffer.toString(),"Node '"+node.getNodeID()+"'");
-        selectConsoleWindow();
-    }
     public void printNodeData(Node node,PrintWriter writer) {
         writer.print("Node ID:    ");
         writer.println(node.getNodeID());
@@ -417,9 +256,9 @@ public class Debugger extends TableauMonitorForwarder {
         writer.print("Depth:      ");
         writer.println(node.getTreeDepth());
         writer.print("Status:     ");
-        if (node.isActive())
+        if (node.isActive()) {
             writer.println("active");
-        else if (node.isMerged()) {
+        } else if (node.isMerged()) {
             Node mergeTarget=node.getMergedInto();
             while (mergeTarget!=null) {
                 writer.print(" --> ");
@@ -427,17 +266,19 @@ public class Debugger extends TableauMonitorForwarder {
                 mergeTarget=mergeTarget.getMergedInto();
             }
             writer.println();
-        }
-        else
+        } else {
             writer.println("pruned");
+        }
         writer.print("Blocked:    ");
         writer.println(formatBlockingStatus(node));
         writer.print("Created as: ");
-        ExistentialConcept startExistential=getStartExistential(node);
-        if (!(startExistential instanceof AtLeastAbstractRoleConcept))
+        NodeCreationInfo nodeCreationInfo = this.getNodeCreationInfo(node);
+        ExistentialConcept startExistential = nodeCreationInfo.m_createdByExistential;
+        if (!(startExistential instanceof AtLeastAbstractRoleConcept)) {
             writer.println("(root)");
-        else
+        } else {
             writer.println(((AtLeastAbstractRoleConcept)startExistential).getToConcept().toString(m_namespaces));
+        }
         printConceptLabel(node,writer);
         printEdges(node,writer);
     }
@@ -583,400 +424,6 @@ public class Debugger extends TableauMonitorForwarder {
             }
             writer.println();
         }
-    }
-    protected void doShowDescriptionGraph(String[] commandLine) {
-        if (commandLine.length<2) {
-            m_output.println("Graph name is missing.");
-            return;
-        }
-        String graphName=commandLine[1];
-        for (DescriptionGraph descriptionGraph : m_tableau.getDLOntology().getAllDescriptionGraphs())
-            if (descriptionGraph.getName().equals(graphName)) {
-                CharArrayWriter buffer=new CharArrayWriter();
-                PrintWriter writer=new PrintWriter(buffer);
-                writer.println("===========================================");
-                writer.println("    Contents of the graph '"+graphName+"'");
-                writer.println("===========================================");
-                writer.println(descriptionGraph.getTextRepresentation());
-                writer.flush();
-                showTextInWindow(buffer.toString(),"Contents of the graph '"+graphName+"'");
-                selectConsoleWindow();
-                return;
-            }
-        m_output.println("Graph '"+graphName+"' not found.");
-    }
-    protected void doShowSubtree(String[] commandLine) {
-        Node subtreeRoot=m_tableau.getCheckedNode();
-        if (commandLine.length>=2) {
-            int nodeID;
-            try {
-                nodeID=Integer.parseInt(commandLine[1]);
-            }
-            catch (NumberFormatException e) {
-                m_output.println("Invalid ID of the first node.");
-                return;
-            }
-            subtreeRoot=m_tableau.getNode(nodeID);
-            if (subtreeRoot==null) {
-                m_output.println("Node with ID '"+nodeID+"' not found.");
-                return;
-            }
-        }
-        new SubtreeViewer(this,subtreeRoot);
-    }
-    protected void doQuery(String[] commandLine) {
-        Object[] tuple=new Object[commandLine.length-1];
-        if (tuple.length==0) {
-            if (m_tableau.getExtensionManager().containsClash())
-                m_output.println("Tableau currently contains a clash.");
-            else
-                m_output.println("Tableau currently does not contain a clash.");
-        }
-        else {
-            if ("?".equals(commandLine[1]))
-                tuple[0]=null;
-            else {
-                tuple[0]=getDLPredicate(commandLine[1]);
-                if (tuple[0]==null) {
-                    m_output.println("Invalid predicate '"+commandLine[1]+"'.");
-                    return;
-                }
-            }
-            for (int index=1;index<tuple.length;index++) {
-                String nodeIDString=commandLine[index+1];
-                if ("?".equals(nodeIDString))
-                    tuple[index]=null;
-                else {
-                    int nodeID;
-                    try {
-                        nodeID=Integer.parseInt(nodeIDString);
-                    }
-                    catch (NumberFormatException e) {
-                        m_output.println("Invalid node ID.");
-                        return;
-                    }
-                    tuple[index]=m_tableau.getNode(nodeID);
-                    if (tuple[index]==null) {
-                        m_output.println("Node with ID '"+nodeID+"' not found.");
-                        return;
-                    }
-                }
-            }
-            boolean[] boundPositions=new boolean[tuple.length];
-            for (int index=0;index<tuple.length;index++)
-                if (tuple[index]!=null)
-                    boundPositions[index]=true;
-            ExtensionTable extensionTable=m_tableau.getExtensionManager().getExtensionTable(tuple.length);
-            ExtensionTable.Retrieval retrieval=extensionTable.createRetrieval(boundPositions,ExtensionTable.View.TOTAL);
-            System.arraycopy(tuple,0,retrieval.getBindingsBuffer(),0,tuple.length);
-            retrieval.open();
-            Set<Object[]> facts=new TreeSet<Object[]>(FactComparator.INSTANCE);
-            Object[] tupleBuffer=retrieval.getTupleBuffer();
-            while (!retrieval.afterLast()) {
-                facts.add(tupleBuffer.clone());
-                retrieval.next();
-            }
-            CharArrayWriter buffer=new CharArrayWriter();
-            PrintWriter writer=new PrintWriter(buffer);
-            writer.println("===========================================");
-            StringBuffer queryName=new StringBuffer("Query: ");
-            writer.print("Query:");
-            for (int index=1;index<commandLine.length;index++) {
-                writer.print(' ');
-                writer.print(commandLine[index]);
-                queryName.append(' ');
-                queryName.append(commandLine[index]);
-            }
-            writer.println();
-            writer.println("===========================================");
-            for (Object[] fact : facts) {
-                writer.print(' ');
-                printFact(fact,writer);
-                writer.println();
-            }
-            writer.println("===========================================");
-            writer.flush();
-            showTextInWindow(buffer.toString(),queryName.toString());
-            selectConsoleWindow();
-        }
-    }
-    protected void doIsAncestorOf(String[] commandLine) {
-        if (commandLine.length<3) {
-            m_output.println("Node IDs are missing.");
-            return;
-        }
-        int nodeID1;
-        try {
-            nodeID1=Integer.parseInt(commandLine[1]);
-        }
-        catch (NumberFormatException e) {
-            m_output.println("Invalid ID of the first node.");
-            return;
-        }
-        int nodeID2;
-        try {
-            nodeID2=Integer.parseInt(commandLine[2]);
-        }
-        catch (NumberFormatException e) {
-            m_output.println("Invalid ID of the second node.");
-            return;
-        }
-        Node node1=m_tableau.getNode(nodeID1);
-        Node node2=m_tableau.getNode(nodeID2);
-        if (node1==null) {
-            m_output.println("Node with ID '"+nodeID1+"' not found.");
-            return;
-        }
-        if (node2==null) {
-            m_output.println("Node with ID '"+nodeID2+"' not found.");
-            return;
-        }
-        boolean result=node1.isAncestorOf(node2);
-        m_output.print("Node ");
-        m_output.print(node1.getNodeID());
-        m_output.print(" is ");
-        if (!result)
-            m_output.print("not ");
-        m_output.print("an ancestor of node ");
-        m_output.print(node2.getNodeID());
-        m_output.println(".");
-    }
-    protected void doUnprocessedDisjunctions(String[] commandLine) {
-        CharArrayWriter buffer=new CharArrayWriter();
-        PrintWriter writer=new PrintWriter(buffer);
-        writer.println("Unprocessed ground disjunctions");
-        writer.println("===========================================");
-        GroundDisjunction groundDisjunction=m_tableau.getFirstUnprocessedGroundDisjunction();
-        while (groundDisjunction!=null) {
-            for (int disjunctIndex=0;disjunctIndex<groundDisjunction.getNumberOfDisjuncts();disjunctIndex++) {
-                if (disjunctIndex!=0)
-                    writer.print(" v ");
-                DLPredicate dlPredicate=groundDisjunction.getDLPredicate(disjunctIndex);
-                if (Equality.INSTANCE.equals(dlPredicate)) {
-                    writer.print(groundDisjunction.getArgument(disjunctIndex,0).getNodeID());
-                    writer.print(" == ");
-                    writer.print(groundDisjunction.getArgument(disjunctIndex,1).getNodeID());
-                }
-                else {
-                    writer.print(dlPredicate.toString(m_namespaces));
-                    writer.print('(');
-                    for (int argumentIndex=0;argumentIndex<dlPredicate.getArity();argumentIndex++) {
-                        if (argumentIndex!=0)
-                            buffer.append(',');
-                        writer.print(groundDisjunction.getArgument(disjunctIndex,argumentIndex).getNodeID());
-                    }
-                    writer.print(')');
-                }
-            }
-            writer.println();
-            groundDisjunction=groundDisjunction.getPreviousGroundDisjunction();
-        }
-        writer.flush();
-        showTextInWindow(buffer.toString(),"Unprocessed ground disjunctions");
-        selectConsoleWindow();
-    }
-    protected void doDiffLabels(String[] commandLine) {
-        if (commandLine.length<3) {
-            m_output.println("Node IDs are missing.");
-            return;
-        }
-        int nodeID1;
-        try {
-            nodeID1=Integer.parseInt(commandLine[1]);
-        }
-        catch (NumberFormatException e) {
-            m_output.println("Invalid ID of the first node.");
-            return;
-        }
-        int nodeID2;
-        try {
-            nodeID2=Integer.parseInt(commandLine[2]);
-        }
-        catch (NumberFormatException e) {
-            m_output.println("Invalid ID of the second node.");
-            return;
-        }
-        Node node1=m_tableau.getNode(nodeID1);
-        Node node2=m_tableau.getNode(nodeID2);
-        if (node1==null) {
-            m_output.println("Node with ID '"+nodeID1+"' not found.");
-            return;
-        }
-        if (node2==null) {
-            m_output.println("Node with ID '"+nodeID2+"' not found.");
-            return;
-        }
-        CharArrayWriter buffer=new CharArrayWriter();
-        PrintWriter writer=new PrintWriter(buffer);
-        writer.println("Differences in labels of node "+node1.getNodeID()+" and "+node2.getNodeID());
-        writer.println("===========================================");
-        Printing.diffCollections(
-            "Concepts in the label of "+node1.getNodeID()+" but not in the label of "+node2.getNodeID(),
-            "Concepts in the label of "+node2.getNodeID()+" but not in the label of "+node1.getNodeID(),
-            writer,node1.getPositiveLabel(),node2.getPositiveLabel());
-        writer.println("===========================================");
-        writer.flush();
-        showTextInWindow(buffer.toString(),"Differences in labels of node "+node1.getNodeID()+" and "+node2.getNodeID());
-        selectConsoleWindow();
-    }
-    protected void doReuseNodeFor(String[] commandLine) {
-        if (commandLine.length<2) {
-            m_output.println("Node ID is missing.");
-            return;
-        }
-        int nodeID;
-        try {
-            nodeID=Integer.parseInt(commandLine[1]);
-        }
-        catch (NumberFormatException e) {
-            m_output.println("Invalid ID of the node.");
-            return;
-        }
-        Node node=m_tableau.getNode(nodeID);
-        if (node==null) {
-            m_output.println("Node with ID '"+nodeID+"' not found.");
-            return;
-        }
-        ExpansionStrategy strategy=m_tableau.getExistentialsExpansionStrategy();
-        if (strategy instanceof IndividualReuseStrategy) {
-            IndividualReuseStrategy reuseStrategy=(IndividualReuseStrategy)strategy;
-            LiteralConcept conceptForNode=reuseStrategy.getConceptForNode(node);
-            m_output.print("Node '");
-            m_output.print(node.getNodeID());
-            m_output.print("' is ");
-            if (conceptForNode==null)
-                m_output.println("not a reuse node for any concept.");
-            else {
-                m_output.print("a reuse node for the '");
-                m_output.print(conceptForNode.toString(m_namespaces));
-                m_output.println("' concept.");
-            }
-        }
-        else
-            m_output.println("Node reuse strategy is not currently in effect.");
-    }
-    protected void doNodesFor(String[] commandLine) {
-        if (commandLine.length<2) {
-            m_output.println("Concept name is missing.");
-            return;
-        }
-        String conceptName=commandLine[1];
-        AtomicConcept atomicConcept=AtomicConcept.create(m_namespaces.uriFromId(conceptName));
-        CharArrayWriter buffer=new CharArrayWriter();
-        PrintWriter writer=new PrintWriter(buffer);
-        writer.println("Nodes for '"+conceptName+"'");
-        writer.println("====================================================================");
-        int index=0;
-        Node node=m_tableau.getFirstTableauNode();
-        while (node!=null) {
-            ExistentialConcept existentialConcept=getStartExistential(node);
-            if (existentialConcept instanceof AtLeastAbstractRoleConcept && ((AtLeastAbstractRoleConcept)existentialConcept).getToConcept().equals(atomicConcept)) {
-                if (index!=0) {
-                    writer.print(",");
-                    if (index % 5==0)
-                        writer.println();
-                    else
-                        writer.print("  ");
-                }
-                Printing.printPadded(writer,node.getNodeID()+(node.isActive() ? "" : "*"),8);
-                index++;
-            }
-            node=node.getNextTableauNode();
-        }
-        writer.println();
-        writer.println("====================================================================");
-        writer.flush();
-        showTextInWindow(buffer.toString(),"Nodes for '"+conceptName+"'");
-        selectConsoleWindow();
-    }
-    protected void doOriginStats(String[] commandLine) {
-        Map<Concept,OriginInfo> originInfos=new HashMap<Concept,OriginInfo>();
-        Node node=m_tableau.getFirstTableauNode();
-        while (node!=null) {
-            ExistentialConcept existentialConcept=getStartExistential(node);
-            if (existentialConcept instanceof AtLeastAbstractRoleConcept) {
-                Concept toConcept=((AtLeastAbstractRoleConcept)existentialConcept).getToConcept();
-                OriginInfo originInfo=originInfos.get(toConcept);
-                if (originInfo==null) {
-                    originInfo=new OriginInfo(toConcept);
-                    originInfos.put(toConcept,originInfo);
-                }
-                originInfo.m_nodes.add(node);
-                if (!node.isActive())
-                    originInfo.m_numberOfNonactiveOccurrences++;
-            }
-            node=node.getNextTableauNode();
-        }
-        OriginInfo[] originInfosArray=new OriginInfo[originInfos.size()];
-        originInfos.values().toArray(originInfosArray);
-        Arrays.sort(originInfosArray,OriginInfoComparator.INSTANCE);
-        CharArrayWriter buffer=new CharArrayWriter();
-        PrintWriter writer=new PrintWriter(buffer);
-        writer.println("Statistics of node origins");
-        writer.println("====================================");
-        writer.println("  Occurrence    Nonactive   Concept");
-        writer.println("====================================");
-        for (OriginInfo originInfo : originInfosArray) {
-            writer.print("  ");
-            Printing.printPadded(writer,originInfo.m_nodes.size(),8);
-            writer.print("    ");
-            Printing.printPadded(writer,originInfo.m_numberOfNonactiveOccurrences,8);
-            writer.print("    ");
-            writer.print(originInfo.m_concept.toString(m_namespaces));
-            if (originInfo.m_nodes.size()<=5) {
-                writer.print("  [ ");
-                for (int index=0;index<originInfo.m_nodes.size();index++) {
-                    if (index!=0)
-                        writer.print(", ");
-                    node=originInfo.m_nodes.get(index);
-                    writer.print(node.getNodeID());
-                    if (!node.isActive())
-                        writer.print('*');
-                }
-                writer.print(" ]");
-            }
-            writer.println();
-        }
-        writer.println("====================================");
-        writer.flush();
-        showTextInWindow(buffer.toString(),"Statistics of node origins");
-        selectConsoleWindow();
-    }
-
-    protected void doWaitFor(String[] commandLine) {
-        boolean add=true;
-        for (int index=1;index<commandLine.length;index++) {
-            String argument=commandLine[index];
-            WaitOption waitOption=null;
-            if ("+".equals(argument))
-                add=true;
-            else if ("-".equals(argument))
-                add=false;
-            else if ("gexists".equals(argument))
-                waitOption=WaitOption.GRAPH_EXPANSION;
-            else if ("cexists".equals(argument))
-                waitOption=WaitOption.CONCRETE_EXPANSION;
-            else if ("exists".equals(argument))
-                waitOption=WaitOption.EXISTENTIAL_EXPANSION;
-            else if ("clash".equals(argument))
-                waitOption=WaitOption.CLASH;
-            else if ("merge".equals(argument))
-                waitOption=WaitOption.MERGE;
-            else {
-                m_output.println("Invalid wait option '"+argument+"'.");
-                return;
-            }
-            if (waitOption!=null) {
-                modifyWaitOptions(waitOption,add);
-                m_output.println("Will "+(add ? "" : "not ")+"wait for "+waitOption+".");
-            }
-        }
-    }
-    protected void modifyWaitOptions(WaitOption waitOption,boolean add) {
-        if (add)
-            m_waitOptions.add(waitOption);
-        else
-            m_waitOptions.remove(waitOption);
     }
     /**
      * Splits a command by spaces. 
@@ -1133,16 +580,13 @@ public class Debugger extends TableauMonitorForwarder {
         if (nodeCreationInfo.m_createdByNode!=null)
             m_nodeCreationInfos.get(nodeCreationInfo.m_createdByNode).m_children.remove(node);
     }
-    public void datatypeCheckingStarted(Node node) {
+    public void datatypeCheckingStarted() {
         super.datatypeCheckingStarted();
         m_output.println("Will check whether the datatype constraints are satisfiable.");
-        mainLoop();
     }
     public void datatypeCheckingFinished(boolean result) {
         super.datatypeCheckingFinished(result);
         m_output.println("The datatype constraints are " + (result ? "" : "not ") + "satisfiable...");
-        mainLoop();
-        dispose();
     }
     protected void printState() {
         int numberOfNodes=0;
@@ -1167,7 +611,7 @@ public class Debugger extends TableauMonitorForwarder {
         m_output.println("Nodes: "+numberOfNodes+"  Inactive nodes: "+inactiveNodes+"  Blocked nodes: "+blockedNodes+"  Nodes with exists: "+nodesWithExistentials+"  Pending existentials: "+pendingExistentials);
     }
     
-    protected static class FactComparator implements Comparator<Object[]> {
+    public static class FactComparator implements Comparator<Object[]> {
         public static final FactComparator INSTANCE=new FactComparator();
 
         public int compare(Object[] o1,Object[] o2) {
@@ -1207,7 +651,7 @@ public class Debugger extends TableauMonitorForwarder {
         }
     }
 
-    protected static class ConceptComparator implements Comparator<Concept> {
+    public static class ConceptComparator implements Comparator<Concept> {
         public static final ConceptComparator INSTANCE=new ConceptComparator();
         
         public int compare(Concept c1,Concept c2) {
@@ -1275,7 +719,7 @@ public class Debugger extends TableauMonitorForwarder {
         }
     }
     
-    protected static class DataRangeComparator implements Comparator<DataRange> {
+    public static class DataRangeComparator implements Comparator<DataRange> {
         public static final DataRangeComparator INSTANCE=new DataRangeComparator();
         
         public int compare(DataRange dr1, DataRange dr2) {
@@ -1321,7 +765,7 @@ public class Debugger extends TableauMonitorForwarder {
         }
     }
     
-    protected static class NodeComparator implements Comparator<Node> {
+    public static class NodeComparator implements Comparator<Node> {
         public static final NodeComparator INSTANCE=new NodeComparator();
 
         public int compare(Node o1,Node o2) {
@@ -1342,32 +786,6 @@ public class Debugger extends TableauMonitorForwarder {
             m_children=new ArrayList<Node>(4);
         }
     }
-    
-    protected static class OriginInfo {
-        public final Concept m_concept;
-        public final List<Node> m_nodes;
-        public int m_numberOfNonactiveOccurrences;
-        
-        public OriginInfo(Concept concept) {
-            m_concept=concept;
-            m_nodes=new ArrayList<Node>();
-        }
-    }
-
-    protected static class OriginInfoComparator implements Comparator<OriginInfo> {
-        public static final OriginInfoComparator INSTANCE=new OriginInfoComparator();
-
-        public int compare(OriginInfo o1,OriginInfo o2) {
-            int comparison=o1.m_nodes.size()-o2.m_nodes.size();
-            if (comparison==0) {
-                comparison=o1.m_numberOfNonactiveOccurrences-o2.m_numberOfNonactiveOccurrences;
-                if (comparison==0)
-                    comparison=ConceptComparator.INSTANCE.compare(o1.m_concept,o2.m_concept);
-            }
-            return comparison;
-        }
-    }
-
     public Tableau getTableau() {
         return m_tableau;
     }
@@ -1389,6 +807,11 @@ public class Debugger extends TableauMonitorForwarder {
     public DerivationHistory getDerivationHistory() {
         return m_derivationHistory;
     }
+    public NodeCreationInfo getNodeCreationInfo(Node node) {
+        NodeCreationInfo nodeCreationInfo = m_nodeCreationInfos.get(node);
+        return nodeCreationInfo;
+    }
+    
     public void setBreakpointTime(int time) {
         m_breakpointTime = time;
     }
@@ -1402,4 +825,10 @@ public class Debugger extends TableauMonitorForwarder {
         this.m_singlestep = singlestep;
     }
     
+    public boolean addWaitOption(WaitOption option) {
+        return this.m_waitOptions.add(option);
+    }
+    public boolean removeWaitOption(WaitOption option) {
+        return this.m_waitOptions.remove(option);
+    }
 }
