@@ -43,9 +43,9 @@ import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.PairwiseDirectBlockingCheckerWithReflexivity;
 import org.semanticweb.HermiT.blocking.SingleDirectBlockingChecker;
 import org.semanticweb.HermiT.debugger.Debugger;
-import org.semanticweb.HermiT.existentials.ExpansionStrategy;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
 import org.semanticweb.HermiT.existentials.DepthFirstStrategy;
+import org.semanticweb.HermiT.existentials.ExpansionStrategy;
 import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
 import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
 import org.semanticweb.HermiT.hierarchy.NaiveHierarchyPosition;
@@ -210,13 +210,17 @@ public class Reasoner implements Serializable {
 
     public Reasoner(OWLOntology ontology, Configuration config,
                   Set<DescriptionGraph> graphs)
-        throws OWLException, InterruptedException {
+        throws OWLException {
         m_config = config;
         // FIXME: do the identities of the manager and factory matter?
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         loadOwlOntology(ontology, manager.getOWLDataFactory(), graphs);
     }
 
+    public DLOntology getDLOntology() {
+        return m_dlOntology;
+    }
+    
     public boolean isConsistent() {
         return m_tableau.isABoxSatisfiable();
     }

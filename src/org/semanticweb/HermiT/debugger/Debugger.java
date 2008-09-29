@@ -62,8 +62,6 @@ import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.DataRange;
-import org.semanticweb.HermiT.model.DatatypeRestriction;
-import org.semanticweb.HermiT.model.DatatypeRestrictionNegationConcept;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.ExistentialConcept;
@@ -301,8 +299,7 @@ public class Debugger extends TableauMonitorForwarder {
         TreeSet<AtomicConcept> atomicConcepts=new TreeSet<AtomicConcept>(ConceptComparator.INSTANCE);
         TreeSet<ExistentialConcept> existentialConcepts=new TreeSet<ExistentialConcept>(ConceptComparator.INSTANCE);
         TreeSet<AtomicNegationConcept> negativeConcepts=new TreeSet<AtomicNegationConcept>(ConceptComparator.INSTANCE);
-        TreeSet<DatatypeRestriction> dataRanges=new TreeSet<DatatypeRestriction>(DataRangeComparator.INSTANCE);
-        TreeSet<DatatypeRestriction> negativeDataRanges=new TreeSet<DatatypeRestriction>(DataRangeComparator.INSTANCE);
+        TreeSet<DataRange> dataRanges=new TreeSet<DataRange>(DataRangeComparator.INSTANCE);
         ExtensionTable.Retrieval retrieval=m_tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
         retrieval.getBindingsBuffer()[1]=node;
         retrieval.open();
@@ -316,11 +313,8 @@ public class Debugger extends TableauMonitorForwarder {
                 existentialConcepts.add((ExistentialConcept)potentialConcept);
             } else if (potentialConcept instanceof DescriptionGraph) {
                 // ignore description graphs here
-            } else if (potentialConcept instanceof DatatypeRestriction) {
-                dataRanges.add((DatatypeRestriction) potentialConcept);
-            } else if (potentialConcept instanceof DatatypeRestrictionNegationConcept) {
-                DatatypeRestrictionNegationConcept r = (DatatypeRestrictionNegationConcept) potentialConcept;
-                negativeDataRanges.add(r.getNegatedDatatypeRestriction());
+            } else if (potentialConcept instanceof DataRange) {
+                dataRanges.add((DataRange) potentialConcept);
             } else {
                 System.err.println("Found something in the label that is not a known type!");
             }
@@ -336,13 +330,8 @@ public class Debugger extends TableauMonitorForwarder {
             printConcepts(negativeConcepts,writer,3);
         }
         if (!dataRanges.isEmpty()) {
-            writer.print("-- Positive data ranges label ------------------------");
-            printConcepts(atomicConcepts,writer,3);
-            printConcepts(existentialConcepts,writer,1);
-        }
-        if (!negativeDataRanges.isEmpty()) {
-            writer.print("-- Negative data ranges label ------------------------");
-            printConcepts(negativeConcepts,writer,3);
+            writer.print("-- Data ranges label ------------------------");
+            printDataRanges(dataRanges,writer,1);
         }
     }
     public void printEdges(Node node,PrintWriter writer) {
@@ -402,6 +391,20 @@ public class Debugger extends TableauMonitorForwarder {
                 writer.print("    ");
             }
             writer.print(concept.toString(m_namespaces));
+            number++;
+        }
+        writer.println();
+    }
+    protected void printDataRanges(Set<? extends DataRange> set,PrintWriter writer,int numberInRow) {
+        int number=0;
+        for (DataRange range : set) {
+            if (number!=0)
+                writer.print(", ");
+            if ((number % numberInRow)==0) {
+                writer.println();
+                writer.print("    ");
+            }
+            writer.print(range.toString(m_namespaces));
             number++;
         }
         writer.println();
@@ -727,19 +730,10 @@ public class Debugger extends TableauMonitorForwarder {
             int type2=getDataRangeType(dr2);
             if (type1!=type2)
                 return type1-type2;
-            DatatypeRestriction r1;
-            DatatypeRestriction r2;
-            if (type1 == 1) {
-                r1 = (DatatypeRestriction) dr1;
-                r2 = (DatatypeRestriction) dr2;
-            } else {
-                r1 = ((DatatypeRestrictionNegationConcept) dr1).getNegatedDatatypeRestriction();
-                r2 = ((DatatypeRestrictionNegationConcept) dr2).getNegatedDatatypeRestriction();
-            }
-            int comparison = r1.getDatatypeURI().compareTo(r2.getDatatypeURI());
+            int comparison = dr1.getDatatypeURI().compareTo(dr2.getDatatypeURI());
             if (comparison!=0) return comparison;
-            List<String> values1 = r1.getEqualsValues();
-            List<String> values2 = r2.getEqualsValues();
+            List<String> values1 = dr1.getEqualsValues();
+            List<String> values2 = dr2.getEqualsValues();
             Collections.sort(values1);
             Collections.sort(values2);
             Iterator<String> it1 = values1.iterator();
@@ -756,12 +750,9 @@ public class Debugger extends TableauMonitorForwarder {
             return 0;
         }
         protected int getDataRangeType(DataRange dr) {
-            if (dr instanceof DatatypeRestriction)
-                return 0;
-            else if (dr instanceof DatatypeRestrictionNegationConcept)
-                return 1;
-            else
-                throw new IllegalArgumentException();
+            int returnValue = 0;
+            if (dr.isNegated()) returnValue = 1;
+            return returnValue;
         }
     }
     

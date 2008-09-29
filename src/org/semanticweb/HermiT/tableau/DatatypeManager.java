@@ -1,8 +1,7 @@
 package org.semanticweb.HermiT.tableau;
 
 import org.semanticweb.HermiT.model.DataRange;
-import org.semanticweb.HermiT.model.DatatypeRestriction;
-import org.semanticweb.HermiT.model.DatatypeRestrictionNegationConcept;
+import org.semanticweb.HermiT.model.DataRange.Facets;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 
 public class DatatypeManager {
@@ -63,110 +62,97 @@ public class DatatypeManager {
         return result;
     }
     protected boolean isCompatible(DataRange dataRange1, DataRange dataRange2) {
-        System.out.println("Checking compatibility of " + dataRange1 + " and " + dataRange2);
-        if (dataRange1 instanceof DatatypeRestriction) {
-            DatatypeRestriction restr1 = (DatatypeRestriction) dataRange1;
-            if (dataRange2 instanceof DatatypeRestriction) {
+        //System.out.println(dataRange1 + " compatible with \n" + dataRange2);
+        if (!dataRange1.isNegated()) {
+            if (!dataRange2.isNegated()) {
                 // neither range is negated
-                DatatypeRestriction restr2 = (DatatypeRestriction) dataRange2;
-                if (restr1.getDatatypeURI().equals(restr2.getDatatypeURI())) {
+                if (dataRange1.getDatatypeURI().equals(dataRange2.getDatatypeURI())) {
                     // both are of the same type, e.g., integer
-                    if (!restr1.getEqualsValues().isEmpty() 
-                            && !restr2.getEqualsValues().isEmpty()) {
+                    if (!dataRange1.getEqualsValues().isEmpty() 
+                            && !dataRange2.getEqualsValues().isEmpty()) {
                         // both have some value restrictions, e.g., equals 18
-                        for (String value : restr1.getEqualsValues()) {
+                        for (String value : dataRange1.getEqualsValues()) {
                             // check if one of the equals values has a matching 
                             // one in the other restriction
-                            if (restr2.getEqualsValues().contains(value)) {
-                                System.out.println("Check succeeded!");
+                            if (dataRange2.getEqualsValues().contains(value)) {
                                 return true;
                             }
                         }
+                    } else if (dataRange1.supports(Facets.MIN_INCLUSIVE)) {
+                        
                     } else {
                         // at least one of the restrictions has no further 
                         // equals restriction, so we are fine
-                        System.out.println("Check succeeded!");
                         return true;
                     }
                 } 
             } else {
                 // the second range is negated
-                DatatypeRestriction restr2 = ((DatatypeRestrictionNegationConcept) dataRange2).getNegatedDatatypeRestriction();
                 // if the negated one if top, we are screwed
-                if (!restr2.isTop()) {
-                    if (restr1.getDatatypeURI().equals(restr2.getDatatypeURI())) {
+                if (!dataRange2.isTop()) {
+                    if (dataRange1.getDatatypeURI().equals(dataRange2.getDatatypeURI())) {
                         // the negated and the non-negated range are of the same 
                         // type, e.g., integer
-                        if (!restr1.getEqualsValues().isEmpty() 
-                                && !restr2.getEqualsValues().isEmpty()) {
+                        if (!dataRange1.getEqualsValues().isEmpty() 
+                                && !dataRange2.getEqualsValues().isEmpty()) {
                             // both have some restrictions, e.g., equals 18
-                            for (String value : restr1.getEqualsValues()) {
+                            for (String value : dataRange1.getEqualsValues()) {
                                 // check if one of the equals values has no matching 
                                 // one in the other restriction
-                                if (!restr2.getEqualsValues().contains(value)) {
-                                    System.out.println("Check succeeded!");
+                                if (!dataRange2.getEqualsValues().contains(value)) {
                                     return true;
                                 }
                             }
                         } else {
                             // at least one of the restrictions has no further 
                             // equals restriction, so we are fine
-                            System.out.println("Check succeeded!");
                             return true;
                         }
                     } else {
                         // the negated type is a different data range, e.g., we have 
                         // some integer and not some string, which is fine
-                        System.out.println("Check succeeded!");
                         return true;
                     }
                 }
             }
         } else {
-            DatatypeRestriction restr1 = ((DatatypeRestrictionNegationConcept) dataRange1).getNegatedDatatypeRestriction();
             // if the negated one if top, we are screwed
-            if (!restr1.isTop()) {
-                if (dataRange2 instanceof DatatypeRestriction) {
+            if (!dataRange1.isTop()) {
+                if (!dataRange2.isNegated()) {
                     // only the first range is negated
-                    DatatypeRestriction restr2 = (DatatypeRestriction) dataRange2; 
-                    if (restr1.getDatatypeURI().equals(restr2.getDatatypeURI())) {
+                    if (dataRange1.getDatatypeURI().equals(dataRange2.getDatatypeURI())) {
                         // both are of the same type, e.g., integer
-                        if (!restr1.getEqualsValues().isEmpty() 
-                                && !restr2.getEqualsValues().isEmpty()) {
+                        if (!dataRange1.getEqualsValues().isEmpty() 
+                                && !dataRange2.getEqualsValues().isEmpty()) {
                             // both have some value restrictions, e.g., equals 18
-                            for (String value : restr1.getEqualsValues()) {
+                            for (String value : dataRange1.getEqualsValues()) {
                                 // check if one of the negated equals values has no 
                                 // matching one in the non-negated restriction
-                                if (!restr2.getEqualsValues().contains(value)) {
-                                    System.out.println("Check succeeded!");
+                                if (!dataRange2.getEqualsValues().contains(value)) {
                                     return true;
                                 }
                             }
                         } else {
                             // at least one of the restrictions has no further 
                             // equals restriction, so we are fine
-                            System.out.println("Check succeeded!");
                             return true;
                         }
                     } else {
                         // the negated range has a different type, so we are fine
-                        System.out.println("Check succeeded!");
                         return true;
                     }
                 } else {
                     // both ranges are negated
-                    DatatypeRestriction restr2 = ((DatatypeRestrictionNegationConcept) dataRange2).getNegatedDatatypeRestriction();
-                    // if the negated one if top, we are screwed
-                    if (!restr2.isTop()) {
+                    // if the negated one is top, we are screwed
+                    if (!dataRange2.isTop()) {
                         // this is fine since we have infinitely many values to 
                         // choose from and an unknown data range
-                        System.out.println("Check succeeded!");
                         return true;
                     }
                 }
             } 
         }
-        System.out.println("Check failed!");
+        //System.out.println("Check failed!");
         return false;
     }
 }

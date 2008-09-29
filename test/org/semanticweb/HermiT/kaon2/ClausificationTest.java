@@ -7,8 +7,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.semanticweb.HermiT.Namespaces;
 import org.semanticweb.HermiT.InternalNames;
+import org.semanticweb.HermiT.Namespaces;
 import org.semanticweb.HermiT.kaon2.structural.Clausification;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
@@ -42,6 +42,12 @@ public class ClausificationTest extends AbstractHermiTTest {
     }
 
     public void testNominalClausification3() throws Exception {
+        // we really want the following clauses in the control set, but stupid 
+        // KAON2 cannot parse this properly, so till KAON2 is fixed, we have to 
+        // live with the artificial genid2 role that KAON2 introduces:
+        // r(Y,X) v r(Y1,X) :- c(X), nom:i2(Y), nom:i1(Y1)
+        // e(X) v (atMost 2 r d)(X) :- d(X), r(X,Y), d(Y)
+        // Y1 == Y2 v Y1 == Y3 v Y2 == Y3 :- (atMost 2 r d)(X), r(X,Y1), d(Y1), r(X,Y2), d(Y2), r(X,Y3), d(Y3), Y1 < Y2, Y2 < Y3
         assertClausification("../res/clausification-4-input.xml",
                 "../res/clausification-4-control.txt");
     }

@@ -4,8 +4,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.semanticweb.HermiT.Namespaces;
 import org.semanticweb.HermiT.InternalNames;
+import org.semanticweb.HermiT.Namespaces;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
