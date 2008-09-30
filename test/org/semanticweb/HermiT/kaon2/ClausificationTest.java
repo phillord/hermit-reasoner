@@ -92,6 +92,6 @@ public class ClausificationTest extends AbstractHermiTTest {
                                 Namespaces.semanticWebNamespaces));
         for (DLClause dlClause : dlOntology.getDLClauses())
             actualStrings.add(dlClause.toString(namespaces));
-        assertContainsAll(actualStrings, control);
+        assertContainsAll(this.getName(), actualStrings, control);
     }
 }

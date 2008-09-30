@@ -189,7 +189,8 @@ public class NormalizationTest extends AbstractOWLOntologyTest {
     
     public void testFirst() throws Exception {
         assertNormalization("../res/normalization-1-input.xml",
-                "../res/normalization-1-OWL-control.xml");
+                "../res/normalization-1-OWL-control.xml", 
+                "../res/normalization-1-OWL-control-variant.xml");
     }
 
     protected Set<OWLAxiom> getNormalizedAxioms(OWLOntology ontology) 
@@ -245,5 +246,11 @@ public class NormalizationTest extends AbstractOWLOntologyTest {
             String controlResourceName) throws Exception {
         Set<OWLAxiom> normlizedAxioms = getNormalizedAxioms(inputResourceName);
         assertEquals(normlizedAxioms, controlResourceName);
+    }
+    protected void assertNormalization(String inputResourceName,
+            String controlResourceName, 
+            String controlResourceNameVariant) throws Exception {
+        Set<OWLAxiom> normlizedAxioms = getNormalizedAxioms(inputResourceName);
+        assertEquals(normlizedAxioms, controlResourceName, controlResourceNameVariant);
     }
 }

@@ -173,6 +173,7 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
      * @throws Exception
      */
     protected String getResourceText(String resourceName) throws Exception {
+        if (resourceName == null) return null;
         CharArrayWriter buffer = new CharArrayWriter();
         PrintWriter output = new PrintWriter(buffer);
         BufferedReader reader = new BufferedReader(new InputStreamReader(
@@ -198,9 +199,59 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
             throws Exception {
         String axiomsString = axioms.toString().trim();
         String controlString = getResourceText(controlResourceName).trim();
-        assertTrue(axiomsString.equals(controlString));
+        boolean isOK = axiomsString.equals(controlString);
+        if (!isOK) {
+            System.out.println("Test " + this.getName() + " failed!");
+            System.out.println("Control string:");
+            System.out.println("------------------------------------------");
+            System.out.println(controlString);
+            System.out.println("------------------------------------------");
+            System.out.println("Actual string:");
+            System.out.println("------------------------------------------");
+            System.out.println(axiomsString);
+            System.out.println("------------------------------------------");
+            System.out.flush();
+        }
+        assertTrue(isOK);
     }
 
+    /**
+     * converts the axioms to a string via the toString method and compares it
+     * with the given string
+     */
+    protected void assertEquals(Set<OWLAxiom> axioms, 
+            String controlResourceName, 
+            String controlResourceNameVariant)
+            throws Exception {
+        String axiomsString = axioms.toString().trim();
+        String controlString = getResourceText(controlResourceName).trim();
+        boolean isOK = axiomsString.equals(controlString);
+        String controlStringVariant = "";
+        if (!isOK && controlResourceNameVariant != null) {
+            controlStringVariant = getResourceText(controlResourceNameVariant).trim();
+            isOK = axiomsString.equals(controlStringVariant);
+        }
+        if (!isOK) {
+            System.out.println("Test " + this.getName() + " failed!");
+            System.out.println("Control string:");
+            System.out.println("------------------------------------------");
+            System.out.println(controlString);
+            System.out.println("------------------------------------------");
+            if (controlResourceNameVariant != null) {
+                System.out.println("Control string (allowed variant):");
+                System.out.println("------------------------------------------");
+                System.out.println(controlStringVariant);
+                System.out.println("------------------------------------------");
+            }
+            System.out.println("Actual string:");
+            System.out.println("------------------------------------------");
+            System.out.println(axiomsString);
+            System.out.println("------------------------------------------");
+            System.out.flush();
+        }
+        assertTrue(isOK);
+    }
+    
     /**
      * prints the content of control set and the actual set in case they are
      * different and causes a JUnit test failure
@@ -208,6 +259,7 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
     protected <T> void assertEquals(Set<T> actual, Set<T> control)
             throws Exception {
         if (!actual.equals(control)) {
+            System.out.println("Test " + this.getName() + " failed!");
             System.out.println("Control set (" + control.size() + " elements):");
             System.out.println("------------------------------------------");
             for (T object : control)
@@ -228,16 +280,28 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
      * objects from the control set, otherwise the test fails and the contents
      * of the control and the actual set are printed
      */
-    protected static <T> void assertContainsAll(Collection<T> actual,
-            T... control) {
+    protected static void assertContainsAll(String testName, 
+            Collection<String> actual,
+            String[] control, String[] controlVariant) {
         try {
             assertEquals(control.length, actual.size());
-            for (int i = 0; i < control.length; i++)
-                assertTrue(actual.contains(control[i]));
+            boolean isOK = true;
+            for (int i = 0; i < control.length; i++) {
+                if (isOK) isOK = actual.contains(control[i]);
+            }
+            boolean isOKVariant = false;
+            if (controlVariant != null) {
+                isOKVariant = true;
+                for (int i = 0; i < controlVariant.length; i++) {
+                    if (isOK) isOK = actual.contains(control[i]);
+                }
+            }
+            assertTrue(isOK || isOKVariant);
         } catch (AssertionFailedError e) {
+            System.out.println("Test " + testName + " failed!");
             System.out.println("Control set (" + control.length + " elements):");
             System.out.println("------------------------------------------");
-            for (T object : control)
+            for (String object : control)
                 System.out.println(object.toString());
             System.out.println("------------------------------------------");
             System.out.println("Actual set (" + actual.size() + " elements):");
@@ -255,13 +319,15 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
      * objects from the control set, otherwise the test fails and the contents
      * of the control and the actual set are printed
      */
-    protected static <T> void assertContainsAll(Collection<T> actual,
+    protected static <T> void assertContainsAll(String testName, 
+            Collection<T> actual,
             Collection<T> control) {
         try {
             assertEquals(control.size(), actual.size());
             for (T contr : control)
                 assertTrue(actual.contains(contr));
         } catch (AssertionFailedError e) {
+            System.out.println("Test " + testName + " failed!");
             System.out.println("Control set (" + control.size() + " elements):");
             System.out.println("------------------------------------------");
             for (T object : control)

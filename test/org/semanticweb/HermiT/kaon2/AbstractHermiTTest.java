@@ -100,6 +100,7 @@ public abstract class AbstractHermiTTest extends TestCase {
     protected <T> void assertEquals(Set<T> actual, Set<T> control)
             throws Exception {
         if (!actual.equals(control)) {
+            System.out.println("Test " + this.getName() + " failed!");
             System.out.println("Control set (" + control.size() + " elements):");
             System.out.println("------------------------------------------");
             for (T object : control)
@@ -115,13 +116,15 @@ public abstract class AbstractHermiTTest extends TestCase {
         }
     }
 
-    protected static <T> void assertContainsAll(Collection<T> actual,
+    protected static <T> void assertContainsAll(String testName, 
+            Collection<T> actual,
             T... control) {
         try {
             assertEquals(control.length, actual.size());
             for (int i = 0; i < control.length; i++)
                 assertTrue(actual.contains(control[i]));
         } catch (AssertionFailedError e) {
+            System.out.println("Test " + testName + " failed!");
             System.out.println("Control set (" + control.length + " elements):");
             System.out.println("------------------------------------------");
             for (T object : control)
