@@ -686,7 +686,7 @@ public class CommandLine {
                     System.err.println("It all went pear-shaped: " + e.getMessage());
                 }
             }
-            if (!didSomething) throw new UsageException ("Nothing ontologies given.");
+            if (!didSomething) throw new UsageException ("No ontologies given.");
         } catch (UsageException e) {
             System.err.println(e.getMessage());
             System.err.println(usageString);
