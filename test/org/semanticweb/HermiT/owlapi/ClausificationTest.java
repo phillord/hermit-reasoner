@@ -64,7 +64,7 @@ public class ClausificationTest extends AbstractOWLOntologyTest {
 
     public void testExistsSelfClausification() throws Exception {
         assertClausification("../res/self-1-input.owl",
-                "../res/self-1-OWL-control.txt", null);
+                "../res/self-1-OWL-control.txt", "../res/self-1-OWL-control-variant.txt");
     }
 
     public void testExistsSelf2Clausification() throws Exception {
