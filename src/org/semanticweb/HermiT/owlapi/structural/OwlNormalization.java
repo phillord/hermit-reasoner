@@ -398,7 +398,7 @@ public class OwlNormalization {
                             && !optimizedNegativeOneOfTranslation(descriptions,
                                     inclusions)) {
                         for (int index = 0; index < descriptions.length; index++)
-                            descriptions[index] = (OWLDescription) descriptions[index].accept(normalizer);
+                            descriptions[index] = descriptions[index].accept(normalizer);
                         m_conceptInclusions.add(descriptions);
                     }
                 } else if (simplifiedDescription instanceof OWLObjectIntersectionOf) {

@@ -484,7 +484,7 @@ public class OwlClausification {
         public void visit(OWLDataMinCardinalityRestriction desc) {
             int number = desc.getCardinality();
             OWLDataProperty dp = (OWLDataProperty) desc.getProperty();
-            AtomicRole property = AtomicRole.createDataRole(((OWLDataProperty) dp).getURI().toString());
+            AtomicRole property = AtomicRole.createDataRole(dp.getURI().toString());
             DataVisitor dataVisitor = new DataVisitor();
             desc.getFiller().accept(dataVisitor);
             for (DataRange dataRange : dataVisitor.getDataRanges()) {

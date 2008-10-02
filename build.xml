@@ -49,7 +49,8 @@
     <property name="junit" value="${3rdpartydir}/junit/4.4/junit-4.4.jar"/>
     <property name="protegeapp" value="${3rdpartydir}/protege/4.0/org.protege.editor.core.application.jar"/>
     <property name="protegeowl" value="${3rdpartydir}/protege/4.0/org.protege.editor.owl.jar"/>
-
+    <property name="automaton" value="${projectroot}/lib/automaton.jar"/>
+    
     <!-- SOURCE PATHS -->
     <path id="sourcepath">
         <pathelement path="${projectroot}/src"/>
@@ -66,14 +67,17 @@
     <path id="classpath">
         <pathelement location="${owlapi}"/>
         <pathelement location="${kaon2}"/>
+        <pathelement location="${automaton}"/>
     </path>
     <path id="runclasspath">
         <pathelement location="${owlapi}"/>
         <pathelement location="${kaon2}"/>
+        <pathelement location="${automaton}"/>
         <pathelement path="${classdir}"/>
     </path>
     <path id="pluginclasspath">
         <pathelement location="${owlapi}"/>
+        <pathelement location="${automaton}"/>
         <pathelement path="${HermiTjar}"/>
         <pathelement location="${protegeapp}"/>
         <pathelement location="${protegeowl}"/>
@@ -109,8 +113,13 @@
         <mkdir dir="${flattendir}"/>
         <unjar src="${owlapi}" dest="${flattendir}"/>
     </target>
+    
+    <target name="flatten-automaton">
+        <mkdir dir="${flattendir}"/>
+        <unjar src="${automaton}" dest="${flattendir}"/>
+    </target>
 
-    <target name="jar" depends="compile,flatten-owlapi">
+    <target name="jar" depends="compile,flatten-owlapi,flatten-automaton">
         <mkdir dir="${releasedir}"/>
         <jar jarfile="${HermiTjar}">
             <manifest>
@@ -175,7 +184,7 @@
         <javadoc destdir="${apijavadocdir}" access="public" author="false" version="true" use="true">
             <package name="org.semanticweb.HermiT.*"/>
             <classpath refid="runclasspath"/>
-            <source file="${src}/HermiT.java"/>
+            <source file="${src}/Reasoner.java"/>
             <source file="${src}/Namespaces.java"/>
             <source file="${src}/hierarchy/HierarchyPosition.java"/>
         </javadoc>

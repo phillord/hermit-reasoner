@@ -1,8 +1,8 @@
 package org.semanticweb.HermiT.model;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.semanticweb.HermiT.Namespaces;
 
@@ -14,7 +14,7 @@ public class DataRange implements DLPredicate {
     };
     
     protected URI datatypeURI = URI.create("http://www.w3.org/2000/01/rdf-schema#Literal");
-    protected List<String> equalsValues = new ArrayList<String>();
+    protected Set<String> equalsValues = new HashSet<String>();
     protected boolean isNegated = false;
     
     public int getArity() {
@@ -23,10 +23,10 @@ public class DataRange implements DLPredicate {
     public URI getDatatypeURI() {
         return datatypeURI;
     }
-    public List<String> getEqualsValues() {
+    public Set<String> getEqualsValues() {
         return equalsValues;
     }
-    public void setEqualsValues(List<String> equalsValues) {
+    public void setEqualsValues(Set<String> equalsValues) {
         this.equalsValues = equalsValues;
     }
     public boolean addEqualsValue(String equalsValue) {
@@ -39,7 +39,14 @@ public class DataRange implements DLPredicate {
         return isNegated; 
     }
     public boolean isFinite() {
-        return false;
+        return isNegated;
+    }
+    /**
+     * @param n
+     * @return true if this data range has a minimal cardinality of n
+     */
+    public boolean hasMinCardinality(int n) {
+        return !isNegated;
     }
     public boolean isNegated() {
         return isNegated;

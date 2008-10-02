@@ -11,5 +11,10 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/ThirdPartyOwlTools/owlapi/2.2.1/owlapi-doc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/automaton.jar" sourcepath="lib/automaton-src.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/HermiT/lib/automaton-doc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="build/release"/>
 </classpath>
