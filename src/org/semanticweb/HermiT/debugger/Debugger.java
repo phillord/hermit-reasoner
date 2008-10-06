@@ -531,6 +531,9 @@ public class Debugger extends TableauMonitorForwarder {
     }
     public void iterationFinished() {
         super.iterationFinished();
+        if (m_singlestep) {
+            m_output.println("Iteration "+m_currentIteration+" finished...");
+        }
         if (System.currentTimeMillis()-m_lastStatusMark>m_breakpointTime) {
             printState();
             if (!m_forever)
@@ -732,8 +735,8 @@ public class Debugger extends TableauMonitorForwarder {
                 return type1-type2;
             int comparison = dr1.getDatatypeURI().compareTo(dr2.getDatatypeURI());
             if (comparison!=0) return comparison;
-            List<String> values1 = new ArrayList<String>(dr1.getEqualsValues());
-            List<String> values2 = new ArrayList<String>(dr2.getEqualsValues());
+            List<String> values1 = new ArrayList<String>(dr1.getOneOf());
+            List<String> values2 = new ArrayList<String>(dr2.getOneOf());
             Collections.sort(values1);
             Collections.sort(values2);
             Iterator<String> it1 = values1.iterator();

@@ -7,7 +7,7 @@ public class AllTests {
 
     public static Test suite() {
         TestSuite suite = new TestSuite(
-                "Test for org.semanticweb.HermiT.tableau");
+                "Test for the HermiT internals (tableau)");
         //$JUnit-BEGIN$
         suite.addTestSuite(TupleIndexTest.class);
         suite.addTestSuite(DLClauseEvaluationTest.class);

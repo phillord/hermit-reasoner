@@ -76,7 +76,9 @@ public abstract class AbstractReasonerTest extends TestCase {
         OWLOntologyManager manager=OWLManager.createOWLOntologyManager();
         OWLOntologyInputSource input=new StringInputSource(buffer.toString());
         m_ontology=manager.loadOntology(input);
-        hermit=new Reasoner(m_ontology, new Reasoner.Configuration());
+        Reasoner.Configuration configuration=new Reasoner.Configuration();
+        configuration.subsumptionCacheStrategyType=Reasoner.SubsumptionCacheStrategyType.ON_REQUEST;
+        hermit=new Reasoner(m_ontology, configuration);
     }
 
     /**

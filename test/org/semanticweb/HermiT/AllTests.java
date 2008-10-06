@@ -7,7 +7,7 @@ import junit.framework.TestSuite;
 public class AllTests extends TestCase {
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("Test for org.semanticweb.HermiT");
+        TestSuite suite = new TestSuite("All HermiT tests");
         // $JUnit-BEGIN$
         // Tests the normalization and clausification, when loading via the
         // KAON2 API.

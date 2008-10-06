@@ -847,7 +847,7 @@ public class OwlClausification {
             } else {
                 throw new RuntimeException("Parsed typed constant of an unsupported data type " + typedConstant);
             }
-            dataRange.addEqualsValue(typedConstant.getLiteral());
+            dataRange.addOneOf(typedConstant.getLiteral());
             dataRanges.add(dataRange);
         }
 
