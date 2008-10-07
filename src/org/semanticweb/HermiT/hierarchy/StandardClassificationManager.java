@@ -18,8 +18,8 @@ public class StandardClassificationManager {
     protected final SubsumptionHierarchy m_subsumptionHierarchy;
     protected final SubsumptionHierarchy.SubsumptionChecker m_subsumptionChecker;
     protected final Set<SubsumptionHierarchyNode> m_visitedNodes;
-    protected final List<SubsumptionHierarchyNode> m_topSet;
-    protected final List<SubsumptionHierarchyNode> m_bottomSet;
+    public final List<SubsumptionHierarchyNode> m_topSet;
+    public final List<SubsumptionHierarchyNode> m_bottomSet;
     protected final List<SubsumptionHierarchyNode> m_toProcess;
     protected final List<SubsumptionHierarchyNode> m_relevantBottomParents;
     protected final Map<SubsumptionHierarchyNode,SubsumptionType> m_subsumptionCache;
@@ -41,24 +41,32 @@ public class StandardClassificationManager {
             }
         }
     }
-    protected void insertConcept(AtomicConcept atomicConcept) throws SubsumptionHierarchy.SubusmptionCheckerException {
+    public void findPosition(AtomicConcept atomicConcept) throws SubsumptionHierarchy.SubusmptionCheckerException {
         topSeach(atomicConcept);
         if (m_topSet.size()==1) {
             SubsumptionHierarchyNode node=m_topSet.get(0);
             if (m_subsumptionChecker.isSubsumedBy(node.m_representativeConcept,atomicConcept)) {
-                node.m_equivalentConcepts.add(atomicConcept);
-                m_subsumptionHierarchy.m_atomicConceptsToNodes.put(atomicConcept,node);
-                return;
-            }
-            else if (node.m_childNodes.size()==1 && node.m_childNodes.contains(m_subsumptionHierarchy.m_nothingNode)) {
+                m_bottomSet.clear();
+                m_bottomSet.add(node);
+            } else if (node.m_childNodes.size()==1 && node.m_childNodes.contains(m_subsumptionHierarchy.m_nothingNode)) {
                 m_bottomSet.clear();
                 m_bottomSet.add(m_subsumptionHierarchy.m_nothingNode);
-            }
-            else
+            } else {
                 bottomSearch(atomicConcept);
-        }
-        else
+            }
+        } else {
             bottomSearch(atomicConcept);
+        }
+    }
+    
+    protected void insertConcept(AtomicConcept atomicConcept) throws SubsumptionHierarchy.SubusmptionCheckerException {
+        findPosition(atomicConcept);
+        if (m_topSet.equals(m_bottomSet)) {
+            assert m_topSet.size() == 1;
+            m_topSet.get(0).m_equivalentConcepts.add(atomicConcept);
+            m_subsumptionHierarchy.m_atomicConceptsToNodes.put(atomicConcept,m_topSet.get(0));
+            return;
+        }
         SubsumptionHierarchyNode newNode=m_subsumptionHierarchy.getNodeForEx(atomicConcept);
         for (int topIndex=0;topIndex<m_topSet.size();topIndex++) {
             SubsumptionHierarchyNode topNode=m_topSet.get(topIndex);

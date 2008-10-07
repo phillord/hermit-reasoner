@@ -97,12 +97,12 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
      * @throws Exception
      */
     protected DLOntology getDLOntology() throws Exception {
-        OwlClausification clausifier = new OwlClausification();
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         OWLDataFactory factory = manager.getOWLDataFactory();
+        OwlClausification clausifier = new OwlClausification(factory);
         Set<DescriptionGraph> noDescriptionGraphs = Collections.emptySet();
         return clausifier.clausify(new Reasoner.Configuration(),
-            m_ontology, factory, noDescriptionGraphs);
+            m_ontology, noDescriptionGraphs);
     }
 
     protected Tableau getTableau() throws Exception {

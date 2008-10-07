@@ -6,12 +6,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collection;
 
 import org.semanticweb.HermiT.existentials.ExpansionStrategy;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.DLOntology;
+import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.Individual;
@@ -31,7 +33,7 @@ public final class Tableau implements Serializable {
     protected final DependencySetFactory m_dependencySetFactory;
     protected final ExtensionManager m_extensionManager;
     protected final LabelManager m_labelManager;
-    protected final HyperresolutionManager m_hyperresolutionManager;
+    protected HyperresolutionManager m_hyperresolutionManager;
     protected final MergingManager m_mergingManager;
     protected final ExistentialExpansionManager m_existentialExpasionManager;
     protected final NominalIntroductionManager m_nominalIntroductionManager;
@@ -54,6 +56,8 @@ public final class Tableau implements Serializable {
     protected GroundDisjunction m_firstGroundDisjunction;
     protected GroundDisjunction m_firstUnprocessedGroundDisjunction;
     protected Node m_checkedNode;
+    private Collection<Atom> additionalPositiveFacts;
+    private Collection<Atom> additionalNegativeFacts;
 
     public Tableau(TableauMonitor tableauMonitor,ExpansionStrategy existentialsExpansionStrategy,DLOntology dlOntology,Map<String,Object> parameters) {
         m_parameters=parameters;
@@ -75,9 +79,40 @@ public final class Tableau implements Serializable {
         m_branchingPoints=new BranchingPoint[2];
         m_currentBranchingPoint=-1;
         m_nonbacktrackableBranchingPoint=-1;
-        if (m_tableauMonitor!=null)
+        if (m_tableauMonitor!=null) {
             m_tableauMonitor.setTableau(this);
+        }
+        additionalPositiveFacts = new ArrayList<Atom>();
+        additionalNegativeFacts = new ArrayList<Atom>();
     }
+    
+    /**
+     * Extend the tableau (semantically the ontology associated with the tableau) with
+     * the given clauses and facts which provide *only* definitions for some new
+     * atomic concept names. Do *not* pass any clauses and/or facts which may produce
+     * new subsumptions between existing atomic concepts---that would break the subsumption
+     * cache.
+     * 
+     * It would be nice to be able to pull these definitions back out again, but due to the
+     * way normalization works new definitions may depend upon old ones, so you need to keep
+     * the previous definitions any time you add new definitions. In the unlikely event that
+     * you get so many definitions that it really slows things down, you need only include
+     * all definitions when/if you need to use *any* definitions: i.e. you could keep the
+     * original HyperresolutionManager for answering queries which don't involve any complex
+     * concepts.
+     */
+    public void extendWithDefinitions(
+        Collection<DLClause> clauses,
+        Collection<Atom> positiveFacts,
+        Collection<Atom> negativeFacts) {
+        additionalPositiveFacts.addAll(positiveFacts);
+        additionalNegativeFacts.addAll(negativeFacts);
+        if (!clauses.isEmpty()) {
+            m_hyperresolutionManager =
+                new HyperresolutionManager(m_hyperresolutionManager, clauses);
+        }
+    }
+    
     public DLOntology getDLOntology() {
         return m_dlOntology;
     }
@@ -233,13 +268,15 @@ public final class Tableau implements Serializable {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isSatisfiableStarted(atomicConcept);
         clear();
-        if (m_dlOntology.hasNominals())
-            loadDLOntologyABox();
+        if (m_dlOntology.hasNominals()) {
+            loadABox();
+        }
         m_checkedNode=createNewRootNode(m_dependencySetFactory.emptySet(),0);
         m_extensionManager.addConceptAssertion(atomicConcept,m_checkedNode,m_dependencySetFactory.emptySet());
         boolean result=isSatisfiable();
-        if (m_tableauMonitor!=null)
+        if (m_tableauMonitor!=null) {
             m_tableauMonitor.isSatisfiableFinished(atomicConcept,result);
+        }
         return result;
     }
     public boolean isSubsumedBy(AtomicConcept subconcept,AtomicConcept superconcept) {
@@ -247,7 +284,7 @@ public final class Tableau implements Serializable {
             m_tableauMonitor.isSubsumedByStarted(subconcept,superconcept);
         clear();
         if (m_dlOntology.hasNominals())
-            loadDLOntologyABox();
+            loadABox();
         m_checkedNode=createNewRootNode(m_dependencySetFactory.emptySet(),0);
         m_extensionManager.addConceptAssertion(subconcept,m_checkedNode,m_dependencySetFactory.emptySet());
         m_branchingPoints[0]=new BranchingPoint(this);
@@ -290,7 +327,7 @@ public final class Tableau implements Serializable {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isABoxSatisfiableStarted();
         clear();
-        loadDLOntologyABox();
+        loadABox();
         if (m_firstTableauNode==null)
             createNewRootNode(m_dependencySetFactory.emptySet(),0); // Ensures that there is at least one individual
         boolean result=isSatisfiable();
@@ -298,34 +335,49 @@ public final class Tableau implements Serializable {
             m_tableauMonitor.isABoxSatisfiableFinished(result);
         return result;
     }
-    protected void loadDLOntologyABox() {
-        Map<Individual,Node> individualsToNodes=new HashMap<Individual,Node>();
-        for (Atom atom : m_dlOntology.getPositiveFacts()) {
-            DLPredicate dlPredicate=atom.getDLPredicate();
-            switch (dlPredicate.getArity()) {
-            case 1:
-                m_extensionManager.addAssertion(dlPredicate,getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(0)),m_dependencySetFactory.emptySet());
-                break;
-            case 2:
-                m_extensionManager.addAssertion(dlPredicate,getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(0)),getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(1)),m_dependencySetFactory.emptySet());
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported arity of positive ground atoms.");
-            }
-        }
-        for (Atom atom : m_dlOntology.getNegativeFacts()) {
-            DLPredicate dlPredicate=atom.getDLPredicate();
-            if (!(dlPredicate instanceof AtomicConcept))
-                throw new IllegalArgumentException("Unsupported type of negative fact.");
-            switch (dlPredicate.getArity()) {
-            case 1:
-                m_extensionManager.addConceptAssertion(AtomicNegationConcept.create((AtomicConcept)dlPredicate),getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(0)),m_dependencySetFactory.emptySet());
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported arity of negative ground atoms.");
-            }
+    
+    private void loadPositiveFact(Atom atom, Map<Individual,Node> individualsToNodes) {
+        DLPredicate dlPredicate=atom.getDLPredicate();
+        switch (dlPredicate.getArity()) {
+        case 1:
+            m_extensionManager.addAssertion(dlPredicate,getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(0)),m_dependencySetFactory.emptySet());
+            break;
+        case 2:
+            m_extensionManager.addAssertion(dlPredicate,getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(0)),getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(1)),m_dependencySetFactory.emptySet());
+            break;
+        default:
+            throw new IllegalArgumentException("Unsupported arity of positive ground atoms.");
         }
     }
+    
+    private void loadNegativeFact(Atom atom, Map<Individual,Node> individualsToNodes) {
+        DLPredicate dlPredicate=atom.getDLPredicate();
+        if (!(dlPredicate instanceof AtomicConcept))
+            throw new IllegalArgumentException("Unsupported type of negative fact.");
+        switch (dlPredicate.getArity()) {
+        case 1:
+            m_extensionManager.addConceptAssertion(AtomicNegationConcept.create((AtomicConcept)dlPredicate),getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(0)),m_dependencySetFactory.emptySet());
+            break;
+        default:
+            throw new IllegalArgumentException("Unsupported arity of negative ground atoms.");
+        }
+    }
+    protected void loadABox() {
+        Map<Individual,Node> individualsToNodes=new HashMap<Individual,Node>();
+        for (Atom atom : m_dlOntology.getPositiveFacts()) {
+            loadPositiveFact(atom, individualsToNodes);
+        }
+        for (Atom fact : additionalPositiveFacts) {
+            loadPositiveFact(fact, individualsToNodes);
+        }
+        for (Atom atom : m_dlOntology.getNegativeFacts()) {
+            loadNegativeFact(atom, individualsToNodes);
+        }
+        for (Atom fact : additionalNegativeFacts) {
+            loadNegativeFact(fact, individualsToNodes);
+        }
+    }
+    
     protected Node getNodeForIndividual(Map<Individual,Node> individualsToNodes,Individual individual) {
         Node node=individualsToNodes.get(individual);
         if (node==null) {

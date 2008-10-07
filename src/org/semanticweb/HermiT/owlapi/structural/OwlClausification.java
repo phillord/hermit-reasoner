@@ -91,10 +91,18 @@ public class OwlClausification {
     protected static final org.semanticweb.HermiT.model.Variable Y = org.semanticweb.HermiT.model.Variable.create("Y");
     protected static final org.semanticweb.HermiT.model.Variable Z = org.semanticweb.HermiT.model.Variable.create("Z");
 
+    private OWLDataFactory factory;
+    private OwlNormalization normalization;
+    private int amqOffset; // the number of negative at-most replacements already performed
+    
+    public OwlClausification(OWLDataFactory factory) {
+        this.factory = factory;
+        normalization = new OwlNormalization(factory);
+        amqOffset = 0;
+    }
+
     public DLOntology clausify(Reasoner.Configuration config, OWLOntology ontology,
-            OWLDataFactory factory,
             Collection<DescriptionGraph> descriptionGraphs) throws OWLException {
-        OwlNormalization normalization = new OwlNormalization(factory);
         normalization.processOntology(ontology);
         return clausify(config, ontology.getURI().toString(),
                 normalization.getConceptInclusions(),
@@ -106,10 +114,10 @@ public class OwlClausification {
                 normalization.getTransitiveObjectProperties(),
                 normalization.getDisjointObjectProperties(),
                 normalization.getDisjointDataProperties(),
-                normalization.getFacts(), descriptionGraphs, factory);
+                normalization.getFacts(), descriptionGraphs);
     }
 
-    public DLOntology clausify(Reasoner.Configuration config, String ontologyURI,
+    protected DLOntology clausify(Reasoner.Configuration config, String ontologyURI,
             Collection<OWLDescription[]> conceptInclusions,
             Collection<OWLObjectPropertyExpression[]> objectPropertyInclusions,
             Collection<OWLDataPropertyExpression[]> dataPropertyInclusions,
@@ -120,8 +128,7 @@ public class OwlClausification {
             Set<OWLObjectPropertyExpression[]> disjointObjectProperties,
             Set<OWLDataPropertyExpression[]> disjointDataProperties,
             Collection<OWLIndividualAxiom> facts,
-            Collection<DescriptionGraph> descriptionGraphs,
-            OWLDataFactory factory) {
+            Collection<DescriptionGraph> descriptionGraphs) {
         DetermineExpressivity determineExpressivity = new DetermineExpressivity();
         for (OWLDescription[] inclusion : conceptInclusions)
             for (OWLDescription description : inclusion)
@@ -200,15 +207,18 @@ public class OwlClausification {
                 && (determineExpressivity.m_hasNominals ||
                     config.existentialStrategyType ==
                         Reasoner.ExistentialStrategyType.INDIVIDUAL_REUSE);
+        if (config.prepareForExpressiveQueries) {
+            shouldUseNIRule = true;
+        }
         Clausifier clausifier = new Clausifier(positiveFacts, shouldUseNIRule,
-                factory);
+                factory, amqOffset);
         for (OWLDescription[] inclusion : conceptInclusions) {
             for (OWLDescription description : inclusion)
                 description.accept(clausifier);
             DLClause dlClause = clausifier.getDLClause();
             dlClauses.add(dlClause.getSafeVersion());
         }
-        clausifier.clausifyAtMostStuff(dlClauses);
+        amqOffset += clausifier.clausifyAtMostStuff(dlClauses);
         FactClausifier factClausifier = new FactClausifier(positiveFacts,
                 negativeFacts);
         for (OWLIndividualAxiom fact : facts)
@@ -221,6 +231,41 @@ public class OwlClausification {
                 determineExpressivity.m_hasAtMostRestrictions,
                 determineExpressivity.m_hasNominals, shouldUseNIRule,
                 determineExpressivity.m_hasReflexivity);
+    }
+    
+    /**
+     * Constructs clauses and facts which make the atomic concept returned
+     * equivalent to `desc`.
+     * 
+     * Note that we introduce new names for sub-concepts the first time they
+     * are encountered, and produce new clauses for definitions of these sub-
+     * concepts. If the same sub-concept is encountered on another occasion,
+     * the clauses defining it will *not* be reproduced, so you need to retain
+     * all clauses/facts produced by all prior definitions when working with
+     * newer definitions. -rob 2008-10-02
+     */
+    public AtomicConcept define(OWLDescription desc,
+            Set<DLClause> outClauses, Set<Atom> outPositiveFacts, Set<Atom> outNegativeFacts) {
+        List<OWLDescription[]> inclusions = new ArrayList<OWLDescription[]>();
+        Collection<OWLIndividualAxiom> assertions = new ArrayList<OWLIndividualAxiom>();
+        OWLClass outClass = normalization.define(desc, inclusions, assertions);
+        
+        Clausifier clausifier = new Clausifier(outPositiveFacts, true,
+                factory, amqOffset);
+        for (OWLDescription[] inclusion : inclusions) {
+            for (OWLDescription description : inclusion) {
+                description.accept(clausifier);
+            }
+            DLClause dlClause = clausifier.getDLClause();
+            outClauses.add(dlClause.getSafeVersion());
+        }
+        amqOffset += clausifier.clausifyAtMostStuff(outClauses);
+        FactClausifier factClausifier = new FactClausifier(outPositiveFacts,
+                outNegativeFacts);
+        for (OWLIndividualAxiom fact : assertions) {
+            fact.accept(factClausifier);
+        }
+        return AtomicConcept.create(outClass.getURI().toString());
     }
 
     /**
@@ -312,56 +357,9 @@ public class OwlClausification {
         return org.semanticweb.HermiT.model.Individual.create(individual.getURI().toString());
     }
 
-    // protected static void convertRule(Rule rule,Set<DLClause> dlClauses) {
-    // Atom[] body=new Atom[rule.getBodyLength()];
-    // for (int index=0;index<rule.getBodyLength();index++)
-    // body[index]=convertLiteral(rule.getBodyLiteral(index));
-    // if (rule.isHeadConjunctive()) {
-    // for (int index=0;index<rule.getHeadLength();index++) {
-    // Atom[] head=new Atom[1];
-    // head[0]=convertLiteral(rule.getHeadLiteral(index));
-    // dlClauses.add(DLClause.create(head,body));
-    // }
-    // }
-    // else {
-    // Atom[] head=new Atom[rule.getHeadLength()];
-    // for (int index=0;index<rule.getHeadLength();index++)
-    // head[index]=convertLiteral(rule.getHeadLiteral(index));
-    // dlClauses.add(DLClause.create(head,body));
-    // }
-    // }
-    // protected static Atom convertLiteral(Literal literal) {
-    // DLPredicate dlPredicate=convertPredicate(literal.getPredicate());
-    // org.semanticweb.HermiT.model.Term[] arguments=new
-    // org.semanticweb.HermiT.model.Term[literal.getArity()];
-    // for (int index=0;index<literal.getArity();index++) {
-    // org.semanticweb.kaon2.api.logic.Term term=literal.getArgument(index);
-    // if (!(term instanceof org.semanticweb.kaon2.api.logic.Variable))
-    // throw new IllegalArgumentException("Invalid argument term.");
-    //arguments[index]=org.semanticweb.HermiT.model.Variable.create(term.toString
-    // ());
-    // }
-    // return Atom.create(dlPredicate,arguments);
-    // }
-    // protected static DLPredicate convertPredicate(Predicate predicate) {
-    // if (predicate instanceof OWLClass)
-    // return AtomicConcept.create(((OWLClass)predicate).getURI());
-    // else if (predicate instanceof ObjectProperty)
-    // return AtomicRole.create(((ObjectProperty)predicate).getURI());
-    // else if
-    // (KAON2Manager.factory().predicateSymbol(Namespaces.OWL_NS+"sameAs"
-    // ,2).equals(predicate))
-    // return Equality.INSTANCE;
-    // else if
-    // (KAON2Manager.factory().predicateSymbol(Namespaces.OWL_NS+"differentFrom"
-    // ,2).equals(predicate))
-    // return Inequality.INSTANCE;
-    // else
-    // throw new IllegalArgumentException("Unsupported predicate.");
-    // }
-
     protected static class Clausifier implements OWLDescriptionVisitor {
         protected final Map<AtomicConcept, AtomicConcept> m_negativeAtMostReplacements;
+        private final int amqOffset; // the number of "negativeAtMostReplacements" which have already been clausified
         protected final List<Atom> m_headAtoms;
         protected final List<Atom> m_bodyAtoms;
         protected final Set<AtMostAbstractRoleGuard> m_atMostRoleGuards;
@@ -371,8 +369,9 @@ public class OwlClausification {
         protected final OWLDataFactory m_factory;
 
         public Clausifier(Set<Atom> positiveFacts, boolean renameAtMost,
-                OWLDataFactory factory) {
+                OWLDataFactory factory, int amqOffset) {
             m_negativeAtMostReplacements = new HashMap<AtomicConcept, AtomicConcept>();
+            this.amqOffset = amqOffset;
             m_headAtoms = new ArrayList<Atom>();
             m_bodyAtoms = new ArrayList<Atom>();
             m_atMostRoleGuards = new HashSet<AtMostAbstractRoleGuard>();
@@ -454,7 +453,6 @@ public class OwlClausification {
         }
 
         public void visit(OWLDataMaxCardinalityRestriction desc) {
-            //throw new RuntimeException("Cardinality restrictions are not yet supported for datatypes. ");
             int number = desc.getCardinality();
             OWLDataProperty dp = (OWLDataProperty) desc.getProperty();
             DataVisitor dataVisitor = new DataVisitor();
@@ -583,7 +581,7 @@ public class OwlClausification {
                     toAtomicConcept = m_negativeAtMostReplacements.get(originalAtomicConcept);
                     if (toAtomicConcept == null) {
                         toAtomicConcept = AtomicConcept.create("internal:amq#"
-                                + m_negativeAtMostReplacements.size());
+                                + m_negativeAtMostReplacements.size() + amqOffset);
                         m_negativeAtMostReplacements.put(originalAtomicConcept,
                                 toAtomicConcept);
                     }
@@ -661,7 +659,10 @@ public class OwlClausification {
                     "Internal error: invalid normal form.");
         }
 
-        public void clausifyAtMostStuff(Collection<DLClause> dlClauses) {
+        /**
+         * @returns the number of new "negativeAtMostReplacements" introduced
+         */
+        public int clausifyAtMostStuff(Collection<DLClause> dlClauses) {
             for (AtMostAbstractRoleGuard atMostRole : m_atMostRoleGuards) {
                 m_bodyAtoms.add(Atom.create(atMostRole,
                         new org.semanticweb.HermiT.model.Term[] { X }));
@@ -686,6 +687,7 @@ public class OwlClausification {
                 DLClause dlClause = getDLClause();
                 dlClauses.add(dlClause);
             }
+            return m_negativeAtMostReplacements.size();
         }
 
         protected void addAtMostAtoms(int number,

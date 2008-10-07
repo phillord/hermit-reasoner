@@ -102,13 +102,13 @@ public class ClausificationTest extends AbstractOWLOntologyTest {
     protected void assertDLClauses(OWLOntology ontology, 
             String[] control, 
             String[] controlVariant) throws Exception {
-        OwlClausification clausifier = new OwlClausification();
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         OWLDataFactory factory = manager.getOWLDataFactory();
+        OwlClausification clausifier = new OwlClausification(factory);
         Set<DescriptionGraph> noDescriptionGraphs = Collections.emptySet();
         DLOntology dlOntology
             = clausifier.clausify(new Reasoner.Configuration(),
-                ontology, factory, noDescriptionGraphs);
+                ontology, noDescriptionGraphs);
         Set<String> actualStrings = new HashSet<String>();
         Namespaces namespaces = InternalNames.withInternalNamespaces
             (new Namespaces(ontology.getURI() + "#",

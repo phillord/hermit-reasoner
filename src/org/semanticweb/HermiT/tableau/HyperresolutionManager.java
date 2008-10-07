@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collection;
 
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.DLClause;
@@ -24,44 +25,96 @@ public final class HyperresolutionManager implements Serializable {
 
     protected final Tableau m_tableau;
     protected final ExtensionManager m_extensionManager;
-    protected final ExtensionTable.Retrieval[] m_deltaOldRetrievals;
-    protected final Map<DLPredicate,CompiledDLClauseInfo> m_tupleConsumersByDeltaPredicate;
+    protected ExtensionTable.Retrieval[] m_deltaOldRetrievals;
+    protected final Map<DLPredicate,CompiledDLClauseInfo>
+        m_tupleConsumersByDeltaPredicate;
     
     public HyperresolutionManager(Tableau tableau) {
-        m_tableau=tableau;
-        m_extensionManager=m_tableau.getExtensionManager();
-        m_tupleConsumersByDeltaPredicate=new HashMap<DLPredicate,CompiledDLClauseInfo>();
-        Map<Integer,ExtensionTable.Retrieval> retrievalsByArity=new HashMap<Integer,ExtensionTable.Retrieval>();
-        Map<DLClauseBodyKey,List<DLClause>> dlClausesByBody=new HashMap<DLClauseBodyKey,List<DLClause>>();
-        for (DLClause dlClause : m_tableau.m_dlOntology.getDLClauses()) {
-            DLClauseBodyKey key=new DLClauseBodyKey(dlClause);
-            List<DLClause> dlClauses=dlClausesByBody.get(key);
-            if (dlClauses==null) {
-                dlClauses=new ArrayList<DLClause>();
-                dlClausesByBody.put(key,dlClauses);
+        m_tableau = tableau;
+        m_extensionManager = m_tableau.getExtensionManager();
+        m_tupleConsumersByDeltaPredicate =
+            new HashMap<DLPredicate, CompiledDLClauseInfo>();
+        Map<Integer, ExtensionTable.Retrieval> retrievalsByArity =
+            new HashMap<Integer, ExtensionTable.Retrieval>();
+        addClauses(m_tableau.m_dlOntology.getDLClauses(), retrievalsByArity);
+    }
+    
+    /**
+     * Extends an existing manager with a set of new clauses.
+     * The new manager is *not* thread-safe with respect to the original:
+     * they share a number of internal constructs. Only ever use one at a time.
+     */
+    public HyperresolutionManager(HyperresolutionManager original,
+                                    Collection<DLClause> newClauses) {
+        m_tableau = original.m_tableau;
+        m_extensionManager = original.m_extensionManager;
+        m_tupleConsumersByDeltaPredicate =
+            new HashMap<DLPredicate, CompiledDLClauseInfo>
+                (original.m_tupleConsumersByDeltaPredicate);
+        Map<Integer, ExtensionTable.Retrieval> retrievalsByArity =
+            new HashMap<Integer, ExtensionTable.Retrieval>();
+        for (ExtensionTable.Retrieval r : original.m_deltaOldRetrievals) {
+            Integer arity = new Integer(r.getExtensionTable().getArity());
+            assert !retrievalsByArity.containsKey(arity);
+            retrievalsByArity.put(arity, r);
+        }
+        addClauses(newClauses, retrievalsByArity);
+    }
+
+    private void addClauses(Collection<DLClause> clauses,
+            Map<Integer, ExtensionTable.Retrieval> retrievalsByArity) {
+        Map<DLClauseBodyKey, List<DLClause>> dlClausesByBody =
+            new HashMap<DLClauseBodyKey, List<DLClause>>();
+        for (DLClause dlClause : clauses) {
+            DLClauseBodyKey key = new DLClauseBodyKey(dlClause);
+            List<DLClause> dlClauses = dlClausesByBody.get(key);
+            if (dlClauses == null) {
+                dlClauses = new ArrayList<DLClause>();
+                dlClausesByBody.put(key, dlClauses);
             }
             dlClauses.add(dlClause);
         }        
-        for (Map.Entry<DLClauseBodyKey,List<DLClause>> entry : dlClausesByBody.entrySet()) {
-            DLClause bodyDLClause=entry.getKey().m_dlClause;
-            BodyAtomsSwapper bodyAtomsSwapper=new BodyAtomsSwapper(bodyDLClause);
-            for (int bodyAtomIndex=0;bodyAtomIndex<bodyDLClause.getBodyLength();bodyAtomIndex++) {
-                DLClause swappedDLClause=bodyAtomsSwapper.getSwappedDLClause(bodyAtomIndex);
-                DLPredicate deltaDLPredicate=swappedDLClause.getBodyAtom(0).getDLPredicate();
-                Integer arity=Integer.valueOf(deltaDLPredicate.getArity()+1);
-                ExtensionTable.Retrieval firstTableRetrieval=retrievalsByArity.get(arity);
-                if (firstTableRetrieval==null) {
-                    ExtensionTable extensionTable=m_extensionManager.getExtensionTable(arity.intValue());
-                    firstTableRetrieval=extensionTable.createRetrieval(new boolean[extensionTable.getArity()],ExtensionTable.View.DELTA_OLD);
-                    retrievalsByArity.put(arity,firstTableRetrieval);
+
+        for (Map.Entry<DLClauseBodyKey, List<DLClause>> entry
+                    : dlClausesByBody.entrySet()) {
+            DLClause bodyDLClause = entry.getKey().m_dlClause;
+            BodyAtomsSwapper bodyAtomsSwapper =
+                new BodyAtomsSwapper(bodyDLClause);
+            for (int bodyAtomIndex = 0;
+                    bodyAtomIndex < bodyDLClause.getBodyLength();
+                    ++bodyAtomIndex) {
+                DLClause swappedDLClause =
+                    bodyAtomsSwapper.getSwappedDLClause(bodyAtomIndex);
+                DLPredicate deltaDLPredicate =
+                    swappedDLClause.getBodyAtom(0).getDLPredicate();
+                Integer arity =
+                    Integer.valueOf(deltaDLPredicate.getArity() + 1);
+                ExtensionTable.Retrieval firstTableRetrieval =
+                    retrievalsByArity.get(arity);
+                if (firstTableRetrieval == null) {
+                    ExtensionTable extensionTable =
+                        m_extensionManager.getExtensionTable(arity.intValue());
+                    firstTableRetrieval =
+                        extensionTable.createRetrieval(
+                            new boolean[extensionTable.getArity()],
+                            ExtensionTable.View.DELTA_OLD);
+                    retrievalsByArity.put(arity, firstTableRetrieval);
                 }
-                CompiledDLClauseInfo nextTupleConsumer=new CompiledDLClauseInfo(m_extensionManager,swappedDLClause,entry.getValue(),firstTableRetrieval,m_tupleConsumersByDeltaPredicate.get(deltaDLPredicate));
-                m_tupleConsumersByDeltaPredicate.put(deltaDLPredicate,nextTupleConsumer);
-            }
+                CompiledDLClauseInfo nextTupleConsumer =
+                    new CompiledDLClauseInfo(m_extensionManager,
+                                                swappedDLClause,
+                                                entry.getValue(),
+                                                firstTableRetrieval,
+                        m_tupleConsumersByDeltaPredicate.get(deltaDLPredicate));
+                m_tupleConsumersByDeltaPredicate.put
+                    (deltaDLPredicate, nextTupleConsumer);
+            } // end for
         }
-        m_deltaOldRetrievals=new ExtensionTable.Retrieval[retrievalsByArity.size()];
+        m_deltaOldRetrievals =
+            new ExtensionTable.Retrieval[retrievalsByArity.size()];
         retrievalsByArity.values().toArray(m_deltaOldRetrievals);
     }
+
     public void applyDLClauses() {
         for (int index=0;index<m_deltaOldRetrievals.length;index++)
             processDeltaOld(m_deltaOldRetrievals[index]);

@@ -49,10 +49,12 @@ import org.semanticweb.HermiT.existentials.ExpansionStrategy;
 import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
 import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
 import org.semanticweb.HermiT.hierarchy.NaiveHierarchyPosition;
+import org.semanticweb.HermiT.hierarchy.TranslatedHierarchyPosition;
 import org.semanticweb.HermiT.hierarchy.PositionTranslator;
 import org.semanticweb.HermiT.hierarchy.SubsumptionHierarchy;
 import org.semanticweb.HermiT.hierarchy.SubsumptionHierarchyNode;
 import org.semanticweb.HermiT.hierarchy.TableauSubsumptionChecker;
+import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
@@ -71,6 +73,8 @@ import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
+import org.semanticweb.owl.model.OWLDescription;
+import org.semanticweb.HermiT.hierarchy.StandardClassificationManager;
 
 /**
  * Answers queries about the logical implications of a particular knowledge base.
@@ -115,6 +119,7 @@ public class Reasoner implements Serializable {
         public SubsumptionCacheStrategyType subsumptionCacheStrategyType;
         public boolean clausifyTransitivity;
         public boolean checkClauses;
+        public boolean prepareForExpressiveQueries;
         public TableauMonitor monitor;
         public final Map<String,Object> parameters;
     
@@ -129,6 +134,7 @@ public class Reasoner implements Serializable {
                 SubsumptionCacheStrategyType.IMMEDIATE;
             clausifyTransitivity = false;
             checkClauses = true;
+            prepareForExpressiveQueries = false;
             monitor = null;
             parameters = new HashMap<String,Object>();
         }
@@ -180,6 +186,10 @@ public class Reasoner implements Serializable {
     private TableauSubsumptionChecker m_subsumptionChecker; // never null
     private Map<AtomicConcept, HierarchyPosition<AtomicConcept>>
         atomicConceptHierarchy; // may be null; use getAtomicConceptHierarchy
+    private SubsumptionHierarchy oldHierarchy;
+        // only null when atomicConceptHierarchy is
+    
+    private OwlClausification clausifier; // null if loaded through KAON2
     
     public Reasoner(String ontologyURI)
         throws Clausifier.LoadingException, OWLException {
@@ -265,14 +275,14 @@ public class Reasoner implements Serializable {
             return new SubsumptionHierarchy(m_subsumptionChecker);
         } catch (SubsumptionHierarchy.SubusmptionCheckerException e) {
             throw new RuntimeException(
-                "Unable to compute subsumption hierarchy.");
+                "Unable to compute subsumption hierarchy.", e);
         }
     }
     
     protected Map<AtomicConcept, HierarchyPosition<AtomicConcept>>
         getAtomicConceptHierarchy() {
         if (atomicConceptHierarchy == null) {
-            SubsumptionHierarchy oldHierarchy;
+            assert oldHierarchy == null;
             try {
                  oldHierarchy = new SubsumptionHierarchy(m_subsumptionChecker);
             } catch (SubsumptionHierarchy.SubusmptionCheckerException e) {
@@ -324,29 +334,72 @@ public class Reasoner implements Serializable {
         return atomicConceptHierarchy;
     }
     
+    protected HierarchyPosition<AtomicConcept>
+        getPosition(AtomicConcept c) {
+        getAtomicConceptHierarchy();
+        assert oldHierarchy != null;
+        StandardClassificationManager classifier =
+            new StandardClassificationManager(oldHierarchy,
+                                                m_subsumptionChecker);
+        try {
+            classifier.findPosition(c);
+        } catch (SubsumptionHierarchy.SubusmptionCheckerException e) {
+            throw new RuntimeException(
+                "Unable to classify concept.", e);
+        }
+        if (classifier.m_topSet.equals(classifier.m_bottomSet)) {
+            assert classifier.m_topSet.size() == 1;
+            return getAtomicConceptHierarchy().get
+                        (classifier.m_topSet.get(0).getRepresentative());
+        }
+        NaiveHierarchyPosition<AtomicConcept> out =
+            new NaiveHierarchyPosition<AtomicConcept>();
+        for (SubsumptionHierarchyNode parent : classifier.m_topSet) {
+            out.parents.add(getAtomicConceptHierarchy().get(
+                                parent.getRepresentative()));
+        }
+        for (SubsumptionHierarchyNode child : classifier.m_bottomSet) {
+            out.children.add(getAtomicConceptHierarchy().get(
+                                child.getRepresentative()));
+        }
+        return out;
+    }
+    
+    protected HierarchyPosition<AtomicConcept>
+        getPosition(OWLDescription desc) {
+        Set<DLClause> clauses = new HashSet<DLClause>();
+        Set<Atom> positiveFacts = new HashSet<Atom>();
+        Set<Atom> negativeFacts = new HashSet<Atom>();
+        AtomicConcept c =
+            clausifier.define(desc, clauses, positiveFacts, negativeFacts);
+        m_tableau.extendWithDefinitions(clauses, positiveFacts, negativeFacts);
+        return getPosition(c);
+    }
+
+    static class StringTranslator implements Translator<AtomicConcept, String> {
+        public String translate(AtomicConcept c) {
+            return c.getURI();
+        }
+        public boolean equals(Object o) {
+            return o instanceof StringTranslator;
+        }
+        public int hashCode() {
+            return 0;
+        }
+    }
+    static class ConceptTranslator implements Translator<Object, AtomicConcept> {
+        public AtomicConcept translate(Object o) {
+            return AtomicConcept.create(o.toString());
+        }
+        public boolean equals(Object o) {
+            return o instanceof ConceptTranslator;
+        }
+        public int hashCode() {
+            return 0;
+        }
+    }
+
     public Map<String, HierarchyPosition<String>> getClassTaxonomy() {
-        class StringTranslator implements Translator<AtomicConcept, String> {
-            public String translate(AtomicConcept c) {
-                return c.getURI();
-            }
-            public boolean equals(Object o) {
-                return o instanceof StringTranslator;
-            }
-            public int hashCode() {
-                return 0;
-            }
-        }
-        class ConceptTranslator implements Translator<Object, AtomicConcept> {
-            public AtomicConcept translate(Object o) {
-                return AtomicConcept.create(o.toString());
-            }
-            public boolean equals(Object o) {
-                return o instanceof ConceptTranslator;
-            }
-            public int hashCode() {
-                return 0;
-            }
-        }
         return new TranslatedMap<
                 AtomicConcept, String, HierarchyPosition<AtomicConcept>,
                 HierarchyPosition<String>
@@ -359,11 +412,18 @@ public class Reasoner implements Serializable {
         getClassTaxonomyPosition(String className) {
         if (!isClassNameDefined(className)) {
             throw new RuntimeException(
-                "classification of new names not yet implemented"
+                "unrecognized class name '" + className + "'"
             );
         }
         return getClassTaxonomy().get(className);
     }
+    
+    public HierarchyPosition<String>
+        getClassTaxonomyPosition(OWLDescription description) {
+        return new TranslatedHierarchyPosition<AtomicConcept, String>(
+                    getPosition(description), new StringTranslator());
+    }
+    
     
     public void printSortedAncestorLists(PrintWriter output) {
         printSortedAncestorLists(output, getClassTaxonomy());
@@ -439,9 +499,9 @@ public class Reasoner implements Serializable {
         if (descriptionGraphs == null) {
             descriptionGraphs = Collections.emptySet();
         }
-        OwlClausification c = new OwlClausification();
-        DLOntology d = c.clausify(
-            m_config, ontology, factory, descriptionGraphs
+        clausifier = new OwlClausification(factory);
+        DLOntology d = clausifier.clausify(
+            m_config, ontology, descriptionGraphs
         );
         loadDLOntology(d);
     }
@@ -526,7 +586,10 @@ public class Reasoner implements Serializable {
         DirectBlockingChecker directBlockingChecker = null;
         switch (m_config.directBlockingType) {
         case OPTIMAL:
-            if (m_dlOntology.hasAtMostRestrictions() &&
+            if (m_config.prepareForExpressiveQueries) {
+                directBlockingChecker =
+                    new PairwiseDirectBlockingCheckerWithReflexivity();
+            } else if (m_dlOntology.hasAtMostRestrictions() &&
                 m_dlOntology.hasInverseRoles()) {
                 if (m_dlOntology.hasReflexifity()) {
         			directBlockingChecker =
