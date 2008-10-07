@@ -531,7 +531,7 @@ public class CommandLine {
                     case 'k': {
                         String arg = g.getOptarg();
                         if (arg == null) {
-                            arg = "http://www.w3.org/2002/07/owl#Thing";
+                            arg = "<http://www.w3.org/2002/07/owl#Thing>";
                         }
                         actions.add(new SatisfiabilityAction(arg));
                     } break;
@@ -553,7 +553,7 @@ public class CommandLine {
                         actions.add(new EquivalentsAction(arg));
                     } break;
                     case 'U': {
-                        actions.add(new EquivalentsAction("http://www.w3.org/2002/07/owl#Nothing"));
+                        actions.add(new EquivalentsAction("<http://www.w3.org/2002/07/owl#Nothing>"));
                     } break;
                     case kDumpNamespaces: {
                         actions.add(new DumpNamespacesAction());
