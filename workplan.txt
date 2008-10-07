@@ -22,14 +22,14 @@ Packaging and interfaces:
    Command-line interface                       DONE
    Expressivity interrogation           Rob
    Role hierarchy queries               Rob     2008-10-01
-   Simple ABox queries                  Rob     2008-10-01
+   Simple ABox queries                  Rob     2008-10-01      Implemented (inefficiently)
    Public Namespaces interface          Rob     2008-10-01      Implemented
-   OWL API complex concept queries      Rob     2008-10-01
+   OWL API complex concept queries      Rob     2008-10-01      Implemented
 
 Protégé plug-in:
    Progress bar                         Rob     2008-10-01
    Plumb through remainder of API       Rob     2008-10-01
-   Configuration settings               Rob
+   Configuration from env/file          Rob
 
 Supporting materials:
    javadoc for public API                       2008-10-15

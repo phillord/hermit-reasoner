@@ -42,6 +42,7 @@ public class DLOntology implements Serializable {
     protected final boolean m_isHorn;
     protected final boolean m_hasReflexifity;
     protected final Set<AtomicConcept> m_allAtomicConcepts;
+    protected final Set<Individual> m_allIndividuals;
     protected final Set<DescriptionGraph> m_allDescriptionGraphs;
 
     public DLOntology(String ontologyURI, Set<DLClause> dlClauses,
@@ -59,6 +60,8 @@ public class DLOntology implements Serializable {
         m_hasReflexifity = hasReflexivity;
         m_allAtomicConcepts = new TreeSet<AtomicConcept>(
                 AtomicConceptComparator.INSTANCE);
+        m_allIndividuals = new TreeSet<Individual>(
+                IndividualComparator.INSTANCE);
         m_allDescriptionGraphs = new HashSet<DescriptionGraph>();
         boolean isHorn = true;
         for (DLClause dlClause : m_dlClauses) {
@@ -73,10 +76,18 @@ public class DLOntology implements Serializable {
                 addDLPredicate(dlPredicate);
             }
         }
-        for (Atom atom : m_positiveFacts)
+        for (Atom atom : m_positiveFacts) {
             addDLPredicate(atom.getDLPredicate());
-        for (Atom atom : m_negativeFacts)
+            for (int i = 0; i < atom.getArity(); ++i) {
+                m_allIndividuals.add((Individual) atom.getArgument(i));
+            }
+        }
+        for (Atom atom : m_negativeFacts) {
             addDLPredicate(atom.getDLPredicate());
+            for (int i = 0; i < atom.getArity(); ++i) {
+                m_allIndividuals.add((Individual) atom.getArgument(i));
+            }
+        }
         m_isHorn = isHorn;
     }
 
@@ -99,6 +110,10 @@ public class DLOntology implements Serializable {
 
     public Set<AtomicConcept> getAllAtomicConcepts() {
         return m_allAtomicConcepts;
+    }
+
+    public Set<Individual> getAllIndividuals() {
+        return m_allIndividuals;
     }
 
     public Set<DescriptionGraph> getAllDescriptionGraphs() {
@@ -469,6 +484,20 @@ public class DLOntology implements Serializable {
         public static final Comparator<AtomicConcept> INSTANCE = new AtomicConceptComparator();
 
         public int compare(AtomicConcept o1, AtomicConcept o2) {
+            return o1.getURI().compareTo(o2.getURI());
+        }
+
+        protected Object readResolve() {
+            return INSTANCE;
+        }
+    }
+    
+    public static class IndividualComparator implements Serializable,
+            Comparator<Individual> {
+        private static final long serialVersionUID = 2386841732225838685L;
+        public static final Comparator<Individual> INSTANCE = new IndividualComparator();
+
+        public int compare(Individual o1, Individual o2) {
             return o1.getURI().compareTo(o2.getURI());
         }
 

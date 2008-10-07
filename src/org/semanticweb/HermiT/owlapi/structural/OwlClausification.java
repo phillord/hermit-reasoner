@@ -91,7 +91,7 @@ public class OwlClausification {
     protected static final org.semanticweb.HermiT.model.Variable Y = org.semanticweb.HermiT.model.Variable.create("Y");
     protected static final org.semanticweb.HermiT.model.Variable Z = org.semanticweb.HermiT.model.Variable.create("Z");
 
-    private OWLDataFactory factory;
+    public OWLDataFactory factory;
     private OwlNormalization normalization;
     private int amqOffset; // the number of negative at-most replacements already performed
     
@@ -660,7 +660,7 @@ public class OwlClausification {
         }
 
         /**
-         * @returns the number of new "negativeAtMostReplacements" introduced
+         * @return the number of new "negativeAtMostReplacements" introduced
          */
         public int clausifyAtMostStuff(Collection<DLClause> dlClauses) {
             for (AtMostAbstractRoleGuard atMostRole : m_atMostRoleGuards) {

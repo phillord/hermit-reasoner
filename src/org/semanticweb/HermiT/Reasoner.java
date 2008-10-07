@@ -59,6 +59,7 @@ import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
+import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.monitor.TableauMonitorFork;
@@ -67,6 +68,7 @@ import org.semanticweb.HermiT.monitor.TimerWithPause;
 import org.semanticweb.HermiT.owlapi.structural.OwlClausification;
 import org.semanticweb.HermiT.tableau.Tableau;
 import org.semanticweb.HermiT.util.TranslatedMap;
+import org.semanticweb.HermiT.util.TranslatedSet;
 import org.semanticweb.HermiT.util.Translator;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLDataFactory;
@@ -186,6 +188,8 @@ public class Reasoner implements Serializable {
     private TableauSubsumptionChecker m_subsumptionChecker; // never null
     private Map<AtomicConcept, HierarchyPosition<AtomicConcept>>
         atomicConceptHierarchy; // may be null; use getAtomicConceptHierarchy
+    private Map<AtomicConcept, Set<Individual>> realization;
+        // may be null; use getRealization
     private SubsumptionHierarchy oldHierarchy;
         // only null when atomicConceptHierarchy is
     
@@ -370,18 +374,33 @@ public class Reasoner implements Serializable {
         Set<DLClause> clauses = new HashSet<DLClause>();
         Set<Atom> positiveFacts = new HashSet<Atom>();
         Set<Atom> negativeFacts = new HashSet<Atom>();
+        if (clausifier == null) {
+            throw new RuntimeException(
+                "Complex concept queries require parsing by the OWL API.");
+        }
         AtomicConcept c =
             clausifier.define(desc, clauses, positiveFacts, negativeFacts);
         m_tableau.extendWithDefinitions(clauses, positiveFacts, negativeFacts);
         return getPosition(c);
     }
 
-    static class StringTranslator implements Translator<AtomicConcept, String> {
+    static class ConceptToString implements Translator<AtomicConcept, String> {
         public String translate(AtomicConcept c) {
             return c.getURI();
         }
         public boolean equals(Object o) {
-            return o instanceof StringTranslator;
+            return o instanceof ConceptToString;
+        }
+        public int hashCode() {
+            return 0;
+        }
+    }
+    static class IndividualToString implements Translator<Individual, String> {
+        public String translate(Individual i) {
+            return i.getURI();
+        }
+        public boolean equals(Object o) {
+            return o instanceof IndividualToString;
         }
         public int hashCode() {
             return 0;
@@ -403,9 +422,10 @@ public class Reasoner implements Serializable {
         return new TranslatedMap<
                 AtomicConcept, String, HierarchyPosition<AtomicConcept>,
                 HierarchyPosition<String>
-            >(getAtomicConceptHierarchy(), new StringTranslator(),
+            >(getAtomicConceptHierarchy(), new ConceptToString(),
                 new ConceptTranslator(),
-                new PositionTranslator<AtomicConcept, String>(new StringTranslator()));
+                new PositionTranslator<AtomicConcept, String>(
+                    new ConceptToString()));
     }
     
     public HierarchyPosition<String>
@@ -421,9 +441,94 @@ public class Reasoner implements Serializable {
     public HierarchyPosition<String>
         getClassTaxonomyPosition(OWLDescription description) {
         return new TranslatedHierarchyPosition<AtomicConcept, String>(
-                    getPosition(description), new StringTranslator());
+            getPosition(description), new ConceptToString());
     }
     
+    public HierarchyPosition<String>
+        getMemberships(String individual) {
+        if (clausifier == null) {
+            throw new RuntimeException(
+                "Individual queries require parsing by the OWL API.");
+        }
+        return getClassTaxonomyPosition(
+            clausifier.factory.getOWLObjectOneOf(
+                clausifier.factory.getOWLIndividual(URI.create(individual))));
+    }
+    
+    private Map<AtomicConcept, Set<Individual>> getRealization() {
+        if (realization == null) {
+            realization = new HashMap<AtomicConcept, Set<Individual>>();
+            for (Individual i : m_dlOntology.getAllIndividuals()) {
+                HierarchyPosition<AtomicConcept> p =
+                    getPosition(
+                        clausifier.factory.getOWLObjectOneOf(
+                            clausifier.factory.getOWLIndividual(
+                                URI.create(i.getURI()))));
+                Set<AtomicConcept> parents = p.getEquivalents();
+                if (parents.isEmpty()) {
+                    parents = new HashSet<AtomicConcept>();
+                    for (HierarchyPosition<AtomicConcept> parentPos
+                            : p.getParentPositions()) {
+                        parents.addAll(p.getEquivalents());
+                    }
+                }
+                for (AtomicConcept c : parents) {
+                    if (!realization.containsKey(c)) {
+                        realization.put(c, new HashSet<Individual>());
+                    }
+                    realization.get(c).add(i);
+                }
+            }
+        }
+        return realization;
+    }
+    
+    public Set<String> getDirectMembers(String className) {
+        return new TranslatedSet<Individual, String>(
+            getRealization().get(AtomicConcept.create(className)),
+            new IndividualToString()
+        );
+    }
+    
+    public Set<String> getMembers(String className) {
+        Set<String> out = new HashSet<String>();
+        for (AtomicConcept c :
+            getPosition(AtomicConcept.create(className)).getDescendants()) {
+            for (Individual i : getRealization().get(c)) {
+                out.add(i.getURI());
+            }
+        }
+        return out;
+    }
+    
+    public Set<String> getMembers(OWLDescription description) {
+        Set<String> out = new HashSet<String>();
+        for (AtomicConcept c :
+            getPosition(description).getDescendants()) {
+            for (Individual i : getRealization().get(c)) {
+                out.add(i.getURI());
+            }
+        }
+        return out;
+    }
+
+    public Set<String> getDirectMembers(OWLDescription description) {
+        Set<String> out = new HashSet<String>();
+        HierarchyPosition<AtomicConcept> p = getPosition(description);
+        Set<AtomicConcept> children = p.getEquivalents();
+        if (children.isEmpty()) {
+            for (HierarchyPosition<AtomicConcept> childPos
+                    : p.getChildPositions()) {
+                children.addAll(childPos.getEquivalents());
+            }
+        }
+        for (AtomicConcept c : children) {
+            for (Individual i : getRealization().get(c)) {
+                out.add(i.getURI());
+            }
+        }
+        return out;
+    }
     
     public void printSortedAncestorLists(PrintWriter output) {
         printSortedAncestorLists(output, getClassTaxonomy());
