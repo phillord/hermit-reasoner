@@ -26,6 +26,7 @@ import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.DatatypeRestrictionBoolean;
 import org.semanticweb.HermiT.model.DatatypeRestrictionInteger;
+import org.semanticweb.HermiT.model.DatatypeRestrictionLiteral;
 import org.semanticweb.HermiT.model.DatatypeRestrictionString;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Equality;
@@ -200,8 +201,19 @@ public class OwlClausification {
                 }
             }
         }
-        if (disjointDataProperties.size() > 0)
-            throw new IllegalArgumentException("Disjoint data properties are not supported yet.");
+        for (OWLDataPropertyExpression[] properties : disjointDataProperties) {
+            for (int i = 0; i < properties.length; i++) {
+                for (int j = i + 1; j < properties.length; j++) {
+                    Atom atom_i = getDataPropertyAtom(properties[i], X, Y);
+                    Atom atom_j = getDataPropertyAtom(properties[j], X, Z);
+                    Atom atom_ij = Atom.create(Inequality.create(),
+                            new org.semanticweb.HermiT.model.Term[] { Y, Z });
+                    DLClause dlClause = DLClause.create(new Atom[] { atom_ij },
+                            new Atom[] { atom_i, atom_j });
+                    dlClauses.add(dlClause.getSafeVersion());
+                }
+            }
+        }
         boolean shouldUseNIRule = determineExpressivity.m_hasAtMostRestrictions
                 && determineExpressivity.m_hasInverseRoles
                 && (determineExpressivity.m_hasNominals ||
@@ -765,7 +777,7 @@ public class OwlClausification {
             } else if (stringDataType.equals(dataType)) {
                 currentDataRange =  new DatatypeRestrictionString();
             } else if (literalDataType.equals(dataType)) {
-                currentDataRange =  new DataRange();
+                currentDataRange =  new DatatypeRestrictionLiteral();
             } else if (booleanDataType.equals(dataType)) {
                 currentDataRange =  new DatatypeRestrictionBoolean();
             } else {
@@ -799,37 +811,37 @@ public class OwlClausification {
             for (OWLDataRangeFacetRestriction facetRestriction : rangeRestriction.getFacetRestrictions()) {
                 OWLRestrictedDataRangeFacetVocabulary facetOWL = facetRestriction.getFacet();
                 OWLTypedConstant constant = facetRestriction.getFacetValue();
-                DataRange.Facets facet = null;
+                DatatypeRestrictionLiteral.Facets facet = null;
                 switch (facetOWL) {
                 case LENGTH: {
-                    facet = DataRange.Facets.LENGTH;
+                    facet = DatatypeRestrictionLiteral.Facets.LENGTH;
                 } break;
                 case MIN_INCLUSIVE: {
-                    facet = DataRange.Facets.MIN_INCLUSIVE;
+                    facet = DatatypeRestrictionLiteral.Facets.MIN_INCLUSIVE;
                 } break;
                 case MIN_EXCLUSIVE: {
-                    facet = DataRange.Facets.MIN_EXCLUSIVE;
+                    facet = DatatypeRestrictionLiteral.Facets.MIN_EXCLUSIVE;
                 } break;
                 case MAX_INCLUSIVE: {
-                    facet = DataRange.Facets.MAX_INCLUSIVE;
+                    facet = DatatypeRestrictionLiteral.Facets.MAX_INCLUSIVE;
                 } break;
                 case MAX_EXCLUSIVE: {
-                    facet = DataRange.Facets.MAX_EXCLUSIVE;
+                    facet = DatatypeRestrictionLiteral.Facets.MAX_EXCLUSIVE;
                 } break;
                 case FRACTION_DIGITS: {
-                    facet = DataRange.Facets.FRACTION_DIGITS;
+                    facet = DatatypeRestrictionLiteral.Facets.FRACTION_DIGITS;
                 } break;
                 case MAX_LENGTH: {
-                    facet = DataRange.Facets.MAX_LENGTH;
+                    facet = DatatypeRestrictionLiteral.Facets.MAX_LENGTH;
                 } break;
                 case MIN_LENGTH: {
-                    facet = DataRange.Facets.MIN_LENGTH;
+                    facet = DatatypeRestrictionLiteral.Facets.MIN_LENGTH;
                 } break;
                 case PATTERN: {
-                    facet = DataRange.Facets.PATTERN;
+                    facet = DatatypeRestrictionLiteral.Facets.PATTERN;
                 } break;
                 case TOTAL_DIGITS: {
-                    facet = DataRange.Facets.TOTAL_DIGITS;
+                    facet = DatatypeRestrictionLiteral.Facets.TOTAL_DIGITS;
                 } break;
                 default:
                     throw new IllegalArgumentException("Unsupported facet.");

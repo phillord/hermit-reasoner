@@ -1,14 +1,14 @@
 OWL features:
  Datatype support
-   Basic datatype interface             Boris   2008-09-15
+   Basic datatype interface             Boris   DONE
      calls out to Checker class
      clausification of integers
-   OWL 1.0 (no facets)                  Birte   2008-10-01
-   extensible framework
-   numbers, strings, and facets
-   "full" OWL 2.0 datatype support
+   OWL 1.0 (no facets)                  Birte   DONE
+   integers, strings, booleans, 
+   and facets                           Birte   DONE
+   "full" OWL 2.0 datatype support      Birte   OPEN
  Role axioms
-   (Ir)Reflexivity                      Boris   2008-09-15
+   (Ir)Reflexivity                      Boris   DONE
    Disjointness, antisymmetry, etc.             DONE
    Role chains                          Rob     2008-10-01
    Universal role                               2008-10-01

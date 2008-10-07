@@ -3,14 +3,14 @@ package org.semanticweb.HermiT.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.semanticweb.HermiT.Namespaces;
 import org.semanticweb.owl.vocab.XSDVocabulary;
 
-public class DatatypeRestrictionBoolean extends DataRange {
-    
-    public static enum SupportedFacets {};
-    
+public class DatatypeRestrictionBoolean extends DatatypeRestrictionLiteral {
+
     public DatatypeRestrictionBoolean() {
         this.datatypeURI = XSDVocabulary.BOOLEAN.getURI();
+        this.supportedFacets = new HashSet<Facets>();
     }
 
     public DataRange getNewInstance() {
@@ -89,5 +89,8 @@ public class DatatypeRestrictionBoolean extends DataRange {
     }
     public void addFacet(Facets facet, String value) {
         throw new IllegalArgumentException("Facets are not supported for Boolean values.");
+    }
+    public String toString(Namespaces namespaces) {
+        return super.toString(namespaces);        
     }
 }

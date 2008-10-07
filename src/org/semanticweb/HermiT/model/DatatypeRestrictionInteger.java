@@ -1,24 +1,27 @@
 package org.semanticweb.HermiT.model;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.semanticweb.HermiT.Namespaces;
 import org.semanticweb.owl.vocab.XSDVocabulary;
 
-public class DatatypeRestrictionInteger extends DataRange {
-    
-    public enum Facets {
-        MIN_INCLUSIVE, MIN_EXCLUSIVE, MAX_INCLUSIVE, MAX_EXCLUSIVE
-    };
+public class DatatypeRestrictionInteger extends DatatypeRestrictionLiteral {
     
     protected BigInteger minInclusive = null;
     protected BigInteger maxInclusive = null;
 
     public DatatypeRestrictionInteger() {
         this.datatypeURI = XSDVocabulary.INTEGER.getURI();
+        this.supportedFacets = new HashSet<Facets>(
+                Arrays.asList(new Facets[] {
+                        Facets.MIN_INCLUSIVE, Facets.MIN_EXCLUSIVE, Facets.MAX_INCLUSIVE, Facets.MAX_EXCLUSIVE
+                })
+        );
     }
     
     public DataRange getNewInstance() {
@@ -83,11 +86,19 @@ public class DatatypeRestrictionInteger extends DataRange {
     public String getSmallestAssignment() {
         if (!oneOf.isEmpty()) {
             SortedSet<String> sortedOneOfs = new TreeSet<String>(oneOf);
-            return sortedOneOfs.first();
+            for (String constant : sortedOneOfs) {
+                if (!notOneOf.contains(constant)) return sortedOneOfs.first();
+            }
+            return null;
         }
         BigInteger actualSize = maxInclusive.subtract(minInclusive);
-        if (actualSize.compareTo(BigInteger.ZERO) > 0) {
-            return minInclusive.toString();
+        if (actualSize.compareTo(BigInteger.ZERO) >= 0) {
+            BigInteger constant = minInclusive;
+            while (constant.compareTo(maxInclusive) <= 0) {
+                if (!notOneOf.contains(constant.toString())) return constant.toString();
+                constant = constant.add(BigInteger.ONE);
+            }
+            return null;
         }
         return null;
     }
@@ -111,12 +122,6 @@ public class DatatypeRestrictionInteger extends DataRange {
     }
     public boolean isBottom() {
         return !hasMinCardinality(1);
-    }
-    public boolean supports(Facets facet) {
-        for (Facets supportedFacet : Facets.values()) {
-            if (facet == supportedFacet) return true;
-        }
-        return false;
     }
     /* (non-Javadoc)
      * @see org.semanticweb.HermiT.model.DataRange#conjoinFacetsFrom(org.semanticweb.HermiT.model.DataRange)
@@ -196,5 +201,26 @@ public class DatatypeRestrictionInteger extends DataRange {
     }
     public BigInteger getMaxInclusive() {
         return maxInclusive;
+    }
+    public String toString(Namespaces namespaces) {
+        StringBuffer buffer = new StringBuffer();
+        if (isNegated) buffer.append("(not"); 
+        buffer.append("(");
+        buffer.append(namespaces.idFromUri(datatypeURI.toString()));
+        for (String value : oneOf) {
+            buffer.append(" " + value);
+        }
+        for (String value : notOneOf) {
+            buffer.append(" not " + value);
+        }
+        if (minInclusive != null) {
+            buffer.append(" >= " + minInclusive);
+        }
+        if (maxInclusive != null) {
+            buffer.append(" <= " + maxInclusive);
+        }
+        buffer.append(")");
+        if (isNegated) buffer.append(")");
+        return buffer.toString();        
     }
 }

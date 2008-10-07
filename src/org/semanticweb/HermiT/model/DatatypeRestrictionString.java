@@ -6,27 +6,29 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.semanticweb.HermiT.Namespaces;
 import org.semanticweb.owl.vocab.XSDVocabulary;
 
 import dk.brics.automaton.Automaton;
 import dk.brics.automaton.BasicOperations;
 import dk.brics.automaton.RegExp;
 
-public class DatatypeRestrictionString extends DataRange {
-    Set<Facets> supportedFacets = new HashSet<Facets>(
-            Arrays.asList(new Facets[] {
-                    Facets.LENGTH, Facets.MIN_LENGTH, Facets.MAX_LENGTH, Facets.PATTERN
-            })
-    );
-    
+public class DatatypeRestrictionString extends DatatypeRestrictionLiteral implements DataRange {
+
     protected Integer minLength = null;
     protected Integer maxLength = null;
+    protected String pattern = null;
     protected Automaton patternMatcher = null;
     protected boolean patternMatcherContainsAllFacets = false;
     protected boolean facetsChanged = false;
     
     public DatatypeRestrictionString() {
         this.datatypeURI = XSDVocabulary.STRING.getURI();
+        supportedFacets = new HashSet<Facets>(
+                Arrays.asList(new Facets[] {
+                        Facets.LENGTH, Facets.MIN_LENGTH, Facets.MAX_LENGTH, Facets.PATTERN
+                })
+        );
     }
     
     public DataRange getNewInstance() {
@@ -72,7 +74,7 @@ public class DatatypeRestrictionString extends DataRange {
             }
             for (String constant : notOneOf) {
                 tmpAutomaton = Automaton.makeString(constant);
-                patternMatcher.minus(tmpAutomaton);
+                patternMatcher = patternMatcher.minus(tmpAutomaton);
             }
             notOneOf = new HashSet<String>();
         }
@@ -148,10 +150,12 @@ public class DatatypeRestrictionString extends DataRange {
                 }
                 if (restr.getPatternMatcher() != null) {
                     if (patternMatcher == null) {
-                        patternMatcher = restr.getPatternMatcher();
+                        this.patternMatcher = restr.getPatternMatcher();
+                        this.pattern = restr.getPattern();
                     } else {
                         patternMatcher = BasicOperations.intersection(patternMatcher, 
                                 restr.getPatternMatcher());
+                        pattern = pattern + " and " + restr.getPattern();
                     }
                     facetsChanged = true;
                 }
@@ -170,9 +174,11 @@ public class DatatypeRestrictionString extends DataRange {
                 if (restr.getPatternMatcher() != null) {
                     if (patternMatcher == null) {
                         patternMatcher = restr.getPatternMatcher().complement();
+                        pattern = "not " + restr.getPattern();
                     } else {
                         patternMatcher = BasicOperations.intersection(patternMatcher, 
                                 restr.getPatternMatcher().complement());
+                        pattern = pattern + " and not " + restr.getPattern();
                     }
                     facetsChanged = true;
                 }
@@ -208,8 +214,10 @@ public class DatatypeRestrictionString extends DataRange {
         } break;
         case PATTERN: {
             RegExp regExp = new RegExp(value);
+            this.pattern = value;
             Automaton tmpAutomaton = regExp.toAutomaton();
             if (patternMatcher != null) {
+                pattern = pattern + " and " + value;
                 patternMatcher = BasicOperations.intersection(patternMatcher, 
                         tmpAutomaton);
             } else {
@@ -233,5 +241,32 @@ public class DatatypeRestrictionString extends DataRange {
     }
     public Automaton getPatternMatcher() {
         return patternMatcher;
+    }
+    public String getPattern() {
+        return pattern;
+    }
+    public String toString(Namespaces namespaces) {
+        StringBuffer buffer = new StringBuffer();
+        if (isNegated) buffer.append("(not"); 
+        buffer.append("(");
+        buffer.append(namespaces.idFromUri(datatypeURI.toString()));
+        for (String value : oneOf) {
+            buffer.append(" " + value);
+        }
+        for (String value : notOneOf) {
+            buffer.append(" not " + value);
+        }
+        if (minLength != null) {
+            buffer.append(" >= " + minLength);
+        }
+        if (maxLength != null) {
+            buffer.append(" >= " + maxLength);
+        }
+        if (pattern != null) {
+            buffer.append(" pattern=" + pattern);
+        }
+        buffer.append(")");
+        if (isNegated) buffer.append(")");
+        return buffer.toString();        
     }
 }

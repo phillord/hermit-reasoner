@@ -296,14 +296,15 @@ public class DLOntology implements Serializable {
 
     /**
      * Tests whether the clause conforms to the properties of HT clauses, i.e.,
-     * the variables can be split into a center variable x, a set of branch
-     * variables y_i, and a set of nominal variables z_j such thatcertain
+     * the variables can be split into a centre variable x, a set of branch
+     * variables y_i, and a set of nominal variables z_j such that certain
      * conditions hold.
      */
     protected boolean isTreeDLClause(DLClause dlClause,
             Set<AtomicRole> graphAtomicRoles,
             Set<AtomicConcept> bodyOnlyAtomicConcepts) {
         Set<Variable> variables = new HashSet<Variable>();
+        boolean onlyConcreteRoles = true;
         for (int atomIndex = 0; atomIndex < dlClause.getBodyLength(); atomIndex++) {
             Atom atom = dlClause.getBodyAtom(atomIndex);
             atom.getVariables(variables);
@@ -312,6 +313,9 @@ public class DLOntology implements Serializable {
                     && !(dlPredicate instanceof AtomicConcept)
                     && !dlPredicate.equals(NodeIDLessThan.INSTANCE))
                 return false;
+            if (!(dlPredicate instanceof AtomicRole && ((AtomicRole) dlPredicate).isRestrictedToDatatypes())) {
+                onlyConcreteRoles = false;
+            }
         }
         for (int atomIndex = 0; atomIndex < dlClause.getHeadLength(); atomIndex++) {
             Atom atom = dlClause.getHeadAtom(atomIndex);
@@ -321,7 +325,8 @@ public class DLOntology implements Serializable {
                     && !(dlPredicate instanceof AtomicConcept)
                     && !(dlPredicate instanceof DataRange)
                     && !(dlPredicate instanceof ExistentialConcept)
-                    && !Equality.INSTANCE.equals(dlPredicate))
+                    && !Equality.INSTANCE.equals(dlPredicate)
+                    && !(Inequality.INSTANCE.equals(dlPredicate) && onlyConcreteRoles))
                 return false;
             if (dlPredicate instanceof AtLeastAbstractRoleConcept) {
                 AtLeastAbstractRoleConcept atLeastAbstractConcept = (AtLeastAbstractRoleConcept) dlPredicate;
