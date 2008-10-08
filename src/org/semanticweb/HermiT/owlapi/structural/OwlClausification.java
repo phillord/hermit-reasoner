@@ -26,6 +26,7 @@ import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.DatatypeRestrictionBoolean;
+import org.semanticweb.HermiT.model.DatatypeRestrictionDateTime;
 import org.semanticweb.HermiT.model.DatatypeRestrictionInteger;
 import org.semanticweb.HermiT.model.DatatypeRestrictionLiteral;
 import org.semanticweb.HermiT.model.DatatypeRestrictionString;
@@ -857,11 +858,12 @@ public class OwlClausification {
     protected static class DataVisitor implements OWLDataVisitor {
         protected static OWLOntologyManager man = OWLManager.createOWLOntologyManager();
         protected static OWLDataFactory factory = man.getOWLDataFactory();
-        protected static OWLDataType integerDataType = factory.getOWLDataType(XSDVocabulary.INTEGER.getURI());
+        protected static OWLDataType integerDataType = factory.getIntegerDataType();
         protected static OWLDataType stringDataType = factory.getOWLDataType(XSDVocabulary.STRING.getURI());
         protected static OWLDataType booleanDataType = factory.getOWLDataType(XSDVocabulary.BOOLEAN.getURI());
-        protected static OWLDataType literalDataType = factory.getOWLDataType(URI.create(
-            "http://www.w3.org/2000/01/rdf-schema#Literal"));
+        protected static OWLDataType literalDataType = factory.getTopDataType();
+        protected static OWLDataType dateTimeDataType = factory.getOWLDataType(XSDVocabulary.DATE_TIME.getURI());
+        protected static OWLDataType owlDateTimeDataType = factory.getOWLDataType(URI.create("http://www.w3.org/2002/07/owl#dateTime"));
 
         protected boolean isNegated = false;
         protected List<DataRange> dataRanges;
@@ -880,6 +882,9 @@ public class OwlClausification {
                 currentDataRange =  new DatatypeRestrictionLiteral();
             } else if (booleanDataType.equals(dataType)) {
                 currentDataRange =  new DatatypeRestrictionBoolean();
+            } else if (owlDateTimeDataType.equals(dataType) 
+                    || dateTimeDataType.equals(dataType)) {
+                currentDataRange =  new DatatypeRestrictionDateTime();
             } else {
                 throw new RuntimeException("Unsupported datatype.");
             }
@@ -958,11 +963,16 @@ public class OwlClausification {
                 dataRange = new DatatypeRestrictionString();
             } else if (booleanDataType.equals(typedConstant.getDataType())) {
                 dataRange = new DatatypeRestrictionBoolean();
+            } else if (owlDateTimeDataType.equals(typedConstant.getDataType()) 
+                    || dateTimeDataType.equals(typedConstant.getDataType())) {
+                currentDataRange =  new DatatypeRestrictionDateTime();
             } else {
                 throw new RuntimeException("Parsed typed constant of an unsupported data type " + typedConstant);
             }
-            dataRange.addOneOf(typedConstant.getLiteral());
-            dataRanges.add(dataRange);
+            if (dataRange != null) {
+                dataRange.addOneOf(typedConstant.getLiteral());
+                dataRanges.add(dataRange);
+            }
         }
 
         public void visit(OWLUntypedConstant untypedConstant) {

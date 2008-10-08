@@ -102,6 +102,9 @@ public class DatatypeRestrictionString extends DatatypeRestrictionLiteral implem
         } 
         return null;
     }
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.DatatypeRestrictionLiteral#getSmallestAssignment()
+     */
     public String getSmallestAssignment() {
         if (!oneOf.isEmpty()) {
             SortedSet<String> sortedOneOfs = new TreeSet<String>(oneOf);
@@ -110,12 +113,12 @@ public class DatatypeRestrictionString extends DatatypeRestrictionLiteral implem
         compileAllFacetsIntoPattern();
         return patternMatcher.getShortestExample(true);
     }
-    public boolean accepts(String string) {
+    public boolean accepts(String constant) {
         if (!oneOf.isEmpty()) {
-            return oneOf.contains(string);
+            return oneOf.contains(constant);
         }
         compileAllFacetsIntoPattern();
-        return patternMatcher.run(string);
+        return patternMatcher.run(constant);
     }
     public boolean isTop() {
         return false; 
@@ -183,6 +186,11 @@ public class DatatypeRestrictionString extends DatatypeRestrictionLiteral implem
                     facetsChanged = true;
                 }
             }
+        } else {
+            throw new IllegalArgumentException("The given parameter is not " +
+            		"an instance of DatatypeRestrictionString. It is " +
+            		"only allowed to add facets from other String " +
+            		"datatype restrictions. ");
         }
     }
     public void addFacet(Facets facet, String value) {

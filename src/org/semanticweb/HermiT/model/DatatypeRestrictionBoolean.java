@@ -30,8 +30,12 @@ public class DatatypeRestrictionBoolean extends DatatypeRestrictionLiteral {
     }
     public boolean addOneOf(String constant) {
         boolean result = false;
-        if (constant.equals("true") || constant.equals("false")) {
+        if (constant.toLowerCase().equals("true") || constant.toLowerCase().equals("false")) {
             result = oneOf.add(constant);
+        } else {
+            // it is bottom
+            notOneOf.add("true");
+            notOneOf.add("false");
         }
         if (oneOf.size() == 2) {
             // this means it is top, so oneOfs is unnecessary
@@ -40,34 +44,46 @@ public class DatatypeRestrictionBoolean extends DatatypeRestrictionLiteral {
         return result;
     }
     public boolean hasMinCardinality(int n) {
-        if (n > 2) return false;
-        if (!oneOf.isEmpty()) {
-          return (oneOf.size() >= n);
+        if (!isNegated) { 
+            if (n > 2) return false;
+            if (!oneOf.isEmpty()) {
+              return (oneOf.size() >= n);
+            }
+            return true;
+        } else {
+            throw new RuntimeException("Can only compute minimal cardinalities for non-negated data ranges!");
         }
-        return true;
     }
     public Set<String> getEnumeration() {
-        if (!oneOf.isEmpty()) {
-            return oneOf;
+        if (!isNegated) { 
+            if (!oneOf.isEmpty()) {
+                return oneOf;
+            } else {
+                Set<String> result = new HashSet<String>();
+                result.add("true");
+                result.add("false");
+                return result;
+            }
         } else {
-            Set<String> result = new HashSet<String>();
-            result.add("true");
-            result.add("false");
-            return result;
+            throw new RuntimeException("Can only enumerate the range if it is finite and not negated!");
         }
     }
     public String getSmallestAssignment() {
-        if (!oneOf.isEmpty()) {
-            return oneOf.iterator().next();
-        }
-        if (hasMinCardinality(1)) {
-            if (notOneOf.contains("true")) {
-                return "false";
-            } else {
-                return "true";
+        if (!isNegated) { 
+            if (!oneOf.isEmpty()) {
+                return oneOf.iterator().next();
             }
+            if (hasMinCardinality(1)) {
+                if (notOneOf.contains("true")) {
+                    return "false";
+                } else {
+                    return "true";
+                }
+            }
+            return null;
+        } else {
+            throw new RuntimeException("Can only get the smallest assignment if the range is finite and not negated!");
         }
-        return null;
     }
     public boolean accepts(String constant) {
         if (!oneOf.isEmpty()) {
@@ -85,10 +101,12 @@ public class DatatypeRestrictionBoolean extends DatatypeRestrictionLiteral {
      * @see org.semanticweb.HermiT.model.DataRange#conjoinFacetsFrom(org.semanticweb.HermiT.model.DataRange)
      */
     public void conjoinFacetsFrom(DataRange range) {
-        // nothing to do for booleans
+        throw new RuntimeException("Cannot conjoin any facets to boolean " +
+        		"datatype restrictions. ");
     }
     public void addFacet(Facets facet, String value) {
-        throw new IllegalArgumentException("Facets are not supported for Boolean values.");
+        throw new IllegalArgumentException("Facets are not supported for " +
+        		"Boolean values.");
     }
     public String toString(Namespaces namespaces) {
         return super.toString(namespaces);        

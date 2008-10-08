@@ -43,14 +43,15 @@ public class DatatypeRestrictionLiteral implements DLPredicate, DataRange {
     public boolean addOneOf(String constant) {
         return oneOf.add(constant);
     }
-    public void removeOneOf(String constant) {
+    public boolean removeOneOf(String constant) {
         boolean contained = oneOf.remove(constant);
         if (contained && oneOf.isEmpty()) {
             // it does not mean it can have arbitrary values now, but rather it 
-            // is bottom if not negated and top if  negated, so we have to swap 
+            // is bottom if not negated and top if negated, so we have to swap 
             // negation values
             isNegated = !isNegated;
         }
+        return contained;
     }
     public boolean hasNonNegatedOneOf() {
         return (!isNegated && !oneOf.isEmpty());
@@ -87,6 +88,9 @@ public class DatatypeRestrictionLiteral implements DLPredicate, DataRange {
         if (isNegated) return new HashSet<String>();
         return null;
     }
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.DataRange#getSmallestAssignment()
+     */
     public String getSmallestAssignment() {
         return "";
     }
@@ -105,7 +109,8 @@ public class DatatypeRestrictionLiteral implements DLPredicate, DataRange {
      * @param range 
      */
     public void conjoinFacetsFrom(DataRange range) {
-        // nothing to do here for RDFS Literal
+        throw new RuntimeException("Cannot conjoin any facets to rdfs " +
+        "literal datatype restrictions. ");
     }
     public boolean supports(Facets facet) {
         for (Facets supportedFacet : supportedFacets) {

@@ -66,4 +66,20 @@ public class DatatypesTest extends AbstractReasonerTest {
         loadOntologyWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
+    
+    public void testDateTime() throws Exception {
+        String axioms = "SubClassOf(A DataSomeValuesFrom(dp DatatypeRestriction(xsd:dateTime minInclusive \"2008-10-08T20:44:11.656+0100\"^^xsd:dateTime))) "
+                + "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:dateTime maxInclusive \"2008-10-08T20:44:11.656+0100\"^^xsd:dateTime))) " 
+                + "ClassAssertion(a A)";
+        loadOntologyWithAxioms(axioms);
+        assertABoxSatisfiable(true);
+    }
+    
+    public void testDateTime2() throws Exception {
+        String axioms = "SubClassOf(A DataHasValue(dp \"2007-10-08T20:44:11.656+0100\"^^xsd:dateTime)) "
+                + "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:dateTime minInclusive \"2008-07-08T20:44:11.656+0100\"^^xsd:dateTime maxInclusive \"2008-10-08T20:44:11.656+0100\"^^xsd:dateTime))) " 
+                + "ClassAssertion(a A)";
+        loadOntologyWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
 }

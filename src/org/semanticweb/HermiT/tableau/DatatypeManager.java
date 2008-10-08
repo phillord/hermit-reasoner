@@ -9,12 +9,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.Inequality;
-import org.semanticweb.HermiT.model.DatatypeRestrictionLiteral.Facets;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 
 public class DatatypeManager {
@@ -143,8 +143,13 @@ public class DatatypeManager {
         for (Node node : nodeToDRs.keySet()) {
             for (DataRange dataRange : nodeToDRs.get(node)) {
                 if (dataRange.isBottom()) {
-                    setClash(node, dataRange);
-                    return false;
+                    if (tableauMonitor != null) {
+                        tableauMonitor.clashDetected(new Object[][] {
+                                new Object[] { dataRange, node } });
+                        tableauMonitor.datatypeCheckingFinished(false);
+                    }
+                    extensionManager.setClash(
+                            extensionManager.getAssertionDependencySet(dataRange, node));
                 }
             }
         }
@@ -171,117 +176,15 @@ public class DatatypeManager {
         // assignments, so we really have to check whether we can find a 
         // suitable assignment for the allowed values
         // first we partition the nodes and their data ranges
-        List<Node> nodesToBeProcessed = new ArrayList<Node>();
-        Set<Map<DataRange, Node>> partitions = new HashSet<Map<DataRange, Node>>();
-        Map<DataRange, Node> partition = new HashMap<DataRange, Node>();
-        List<Node> remainingNodes = new ArrayList<Node>(nodeToCanonicalDR.keySet());
-        while (!remainingNodes.isEmpty()) {
-            Node node = remainingNodes.get(0);
-            partition.put(nodeToCanonicalDR.get(node), node);
-            remainingNodes.remove(node);
-            if (inequalities.containsKey(node)) {
-                nodesToBeProcessed.addAll(inequalities.get(node));
-            }
-            if (inequalitiesSym.containsKey(node)) {
-                nodesToBeProcessed.addAll(inequalitiesSym.get(node));
-            }
-            while (!nodesToBeProcessed.isEmpty()) {
-                Node currentNode = nodesToBeProcessed.get(0);
-                if (nodeToCanonicalDR.containsKey(currentNode)) {
-                    partition.put(nodeToCanonicalDR.get(currentNode), currentNode);
-                    remainingNodes.remove(currentNode);
-                    // put all remaining nodes that are inequal to this one into 
-                    // the list of nodes to be processed, so that they go into 
-                    // the same partition
-                    for (Node n : remainingNodes) {
-                        if (inequalities.get(currentNode) != null 
-                                && inequalities.get(currentNode).contains(n)) {
-                            nodesToBeProcessed.add(n);
-                        }
-                        if (inequalitiesSym.get(currentNode) != null 
-                                && inequalitiesSym.get(currentNode).contains(n)) {
-                            nodesToBeProcessed.add(n);
-                        }
-                    }
-                }
-                nodesToBeProcessed.remove(currentNode);
-            }
-            partitions.add(partition);
-        }
-        for (Map<DataRange, Node> p : partitions) {
-            List<DataRange> ranges = new ArrayList<DataRange>(p.keySet());
-            Collections.sort(ranges, SetLengthComparator.INSTANCE);
-            Map<Node, String> nodeToValue = new HashMap<Node, String>();
-            Node currentNode;
-            for (DataRange currentRange : ranges) {
-                currentNode = p.get(currentRange);
-                String assignment = currentRange.getSmallestAssignment();
-                if (assignment == null) {
-                    // clash!
-                    // collect the inequalities and the ranges that made up the 
-                    // canonical data ranges in this partition and generate a 
-                    // clash
-                    int numberOfCauses = 0; 
-                    if (inequalities.containsKey(currentNode)) {
-                        numberOfCauses += inequalities.get(currentNode).size(); 
-                    }
-                    if (inequalitiesSym.containsKey(currentNode)) {
-                        numberOfCauses += inequalitiesSym.get(currentNode).size(); 
-                    }
-                    // although we are checking the canonical ranges, all the 
-                    // ranges that made up each canonical range contributes to 
-                    // the clash and we need their dependency sets
-                    for (Node node : p.values()) {
-                        numberOfCauses += nodeToDRs.get(node).size();
-                    }
-                    UnionDependencySet ds = new UnionDependencySet(numberOfCauses);
-                    Object[][] causes = new Object[numberOfCauses][];
-                    int i = 0;
-                    for (Node node : p.values()) {
-                        for (DataRange range : nodeToDRs.get(node)) {
-                            causes[i] = new Object[] { range, node };
-                            ds.m_dependencySets[i] = extensionManager.getAssertionDependencySet(range, node);
-                            i++;
-                        }
-                    }
-                    if (inequalities.get(currentNode) != null) {
-                        for (Node inequalNode : inequalities.get(currentNode)) {
-                            causes[i] = new Object[] { Inequality.INSTANCE, currentNode, inequalNode };
-                            ds.m_dependencySets[i] = extensionManager.getAssertionDependencySet(Inequality.INSTANCE, currentNode, inequalNode);
-                            i++;
-                        }
-                    }
-                    if (inequalitiesSym.get(currentNode) != null) {
-                        for (Node inequalNode : inequalitiesSym.get(currentNode)) {
-                            causes[i] = new Object[] { Inequality.INSTANCE, inequalNode, currentNode };
-                            ds.m_dependencySets[i] = extensionManager.getAssertionDependencySet(Inequality.INSTANCE, inequalNode, currentNode);
-                            i++;
-                        }
-                    }
-                    if (tableauMonitor != null) {
-                        tableauMonitor.clashDetected(causes);
-                        tableauMonitor.datatypeCheckingFinished(false);
-                    }
-                    extensionManager.setClash(ds);
-                    return false;
-                }
-                nodeToValue.put(currentNode, assignment);
-                if (inequalities.get(currentNode) != null) {
-                    for (Node inequalNode : inequalities.get(currentNode)) {
-                        if (nodeToCanonicalDR.containsKey(inequalNode)) {
-                            DataRange r = nodeToCanonicalDR.get(inequalNode);
-                            r.addNotOneOf(assignment);
-                        }
-                    }
-                }
-                if (inequalitiesSym.get(currentNode) != null) {
-                    for (Node inequalNode : inequalitiesSym.get(currentNode)) {
-                        if (nodeToCanonicalDR.containsKey(inequalNode)) {
-                            DataRange r = nodeToCanonicalDR.get(inequalNode);
-                            r.addNotOneOf(assignment);
-                        }
-                    }
-                }
+        Set<Map<DataRange, Node>> partitions = buildPartitions(
+                nodeToCanonicalDR, inequalities,  inequalitiesSym);
+
+        for (Map<DataRange, Node> partition : partitions) {
+            if (!hasAssignment(partition, 
+                               inequalities,  
+                               inequalitiesSym, 
+                               nodeToDRs)) {
+                return false;
             }
         }
         return true;
@@ -492,114 +395,182 @@ public class DatatypeManager {
         }
     }
     
+    /**
+     * Partition the set of nodes and their canonical data ranges together with 
+     * their inequalities into mutally disjoint non-empty subsets P1, ..., Pn 
+     * such that no Pi and Pj with i neq j have variables in common. 
+     * @param nodeToCanonicalDR a map from nodes to canonical data ranges
+     * @param inequalities a map from nodes to the nodes for which an inequality 
+     *        is known
+     * @param inequalitiesSym the symmetric counterpart toinequalitiesSym 
+     * @return a set of partitions such that the nodes and their data ranges in 
+     *         each partition have inequalities between them 
+     */
+    protected Set<Map<DataRange, Node>> buildPartitions(
+            Map<Node, DataRange> nodeToCanonicalDR, 
+            Map<Node, Set<Node>> inequalities, 
+            Map<Node, Set<Node>> inequalitiesSym) {
+        Set<Map<DataRange, Node>> partitions = new HashSet<Map<DataRange, Node>>();
+        Map<DataRange, Node> partition = new HashMap<DataRange, Node>();
+        List<Node> remainingNodes = new ArrayList<Node>(nodeToCanonicalDR.keySet());
+        List<Node> nodesForThisPartition = new ArrayList<Node>();
+        while (!remainingNodes.isEmpty()) {
+            Node node = remainingNodes.get(0);
+            partition.put(nodeToCanonicalDR.get(node), node);
+            remainingNodes.remove(node);
+            // nodes that are inequal to this one should go into the same 
+            // partition
+            if (inequalities.containsKey(node)) {
+                nodesForThisPartition.addAll(inequalities.get(node));
+            }
+            if (inequalitiesSym.containsKey(node)) {
+                nodesForThisPartition.addAll(inequalitiesSym.get(node));
+            }
+            while (!nodesForThisPartition.isEmpty()) {
+                Node currentNode = nodesForThisPartition.get(0);
+                if (nodeToCanonicalDR.containsKey(currentNode)) {
+                    partition.put(nodeToCanonicalDR.get(currentNode), currentNode);
+                    remainingNodes.remove(currentNode);
+                    // put all remaining nodes that are inequal to this one into 
+                    // the list of nodes to be processed, so that they go into 
+                    // the same partition
+                    for (Node n : remainingNodes) {
+                        if (inequalities.get(currentNode) != null 
+                                && inequalities.get(currentNode).contains(n)) {
+                            nodesForThisPartition.add(n);
+                        }
+                        if (inequalitiesSym.get(currentNode) != null 
+                                && inequalitiesSym.get(currentNode).contains(n)) {
+                            nodesForThisPartition.add(n);
+                        }
+                    }
+                }
+                nodesForThisPartition.remove(currentNode);
+            }
+            partitions.add(partition);
+        }
+        return partitions;
+    }
+    
+    /**
+     * Given a map from data ranges to nodes and inequalities between the nodes, 
+     * check whether there is a suitable assignment of values for the nodes that 
+     * complies with the given datatype restrictions and inequalities.  
+     * @param partition A map from data ranges to nodes such that the 
+     *        inequalities given in the next two parameters link the variables 
+     *        in the partition. 
+     * @param inequalities A map from nodes to sets of nodes for which there are 
+     *        inequalities in the extension table. 
+     * @param inequalitiesSym The symmetric counter part to the above map. 
+     * @param originalNodeToDRs A map from nodes to data ranges such that for 
+     *        each node and data range in the map, there is a corresponding 
+     *        entry in the extension table.  
+     * @return true if an assignment from values to nodes exists such that the 
+     *         datatype restrictions and the inequalities are satisfied and 
+     *         false otherwise.  
+     */
+    protected boolean hasAssignment(Map<DataRange, Node> partition, 
+            Map<Node, Set<Node>> inequalities, 
+            Map<Node, Set<Node>> inequalitiesSym, 
+            Map<Node, Set<DataRange>> originalNodeToDRs) {
+        
+        List<DataRange> ranges = new ArrayList<DataRange>(partition.keySet());
+        Collections.sort(ranges, SetLengthComparator.INSTANCE);
+        Map<Node, String> nodeToValue = new HashMap<Node, String>();
+        Node currentNode;
+        for (DataRange currentRange : ranges) {
+            currentNode = partition.get(currentRange);
+            String assignment = currentRange.getSmallestAssignment();
+            if (assignment == null) {
+                // clash!
+                // collect the inequalities and the ranges that made up the 
+                // canonical data ranges in this partition and generate a 
+                // clash
+                int numberOfCauses = 0; 
+                if (inequalities.containsKey(currentNode)) {
+                    numberOfCauses += inequalities.get(currentNode).size(); 
+                }
+                if (inequalitiesSym.containsKey(currentNode)) {
+                    numberOfCauses += inequalitiesSym.get(currentNode).size(); 
+                }
+                // although we are checking the canonical ranges, all the 
+                // ranges that made up each canonical range contributes to 
+                // the clash and we need their dependency sets
+                for (Node node : partition.values()) {
+                    numberOfCauses += originalNodeToDRs.get(node).size();
+                }
+                UnionDependencySet ds = new UnionDependencySet(numberOfCauses);
+                Object[][] causes = new Object[numberOfCauses][];
+                int i = 0;
+                for (Node node : partition.values()) {
+                    for (DataRange range : originalNodeToDRs.get(node)) {
+                        causes[i] = new Object[] { range, node };
+                        ds.m_dependencySets[i] = 
+                                extensionManager.getAssertionDependencySet(range, node);
+                        i++;
+                    }
+                }
+                if (inequalities.get(currentNode) != null) {
+                    for (Node inequalNode : inequalities.get(currentNode)) {
+                        causes[i] = new Object[] { 
+                                Inequality.INSTANCE, currentNode, inequalNode };
+                        ds.m_dependencySets[i] = 
+                                extensionManager.getAssertionDependencySet(
+                                        Inequality.INSTANCE, 
+                                        currentNode, 
+                                        inequalNode);
+                        i++;
+                    }
+                }
+                if (inequalitiesSym.get(currentNode) != null) {
+                    for (Node inequalNode : inequalitiesSym.get(currentNode)) {
+                        causes[i] = new Object[] { 
+                                Inequality.INSTANCE, inequalNode, currentNode };
+                        ds.m_dependencySets[i] = 
+                                extensionManager.getAssertionDependencySet(
+                                        Inequality.INSTANCE, 
+                                        inequalNode, 
+                                        currentNode);
+                        i++;
+                    }
+                }
+                if (tableauMonitor != null) {
+                    tableauMonitor.clashDetected(causes);
+                    tableauMonitor.datatypeCheckingFinished(false);
+                }
+                extensionManager.setClash(ds);
+                return false;
+            }
+            nodeToValue.put(currentNode, assignment);
+            if (inequalities.get(currentNode) != null) {
+                for (Node inequalNode : inequalities.get(currentNode)) {
+                    for (Entry<DataRange, Node> entry : partition.entrySet()) {
+                        if (entry.getValue() == inequalNode) {
+                            entry.getKey().addNotOneOf(assignment);
+                        }
+                    }
+                }
+            }
+            if (inequalitiesSym.get(currentNode) != null) {
+                for (Node inequalNode : inequalitiesSym.get(currentNode)) {
+                    for (Entry<DataRange, Node> entry : partition.entrySet()) {
+                        if (entry.getValue() == inequalNode) {
+                            entry.getKey().addNotOneOf(assignment);
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+    
+    /**
+     * used to sort data ranges based on the number of possible assignments
+     */
     protected static class SetLengthComparator implements Comparator<DataRange> { 
         public static Comparator<DataRange> INSTANCE = new SetLengthComparator();
         public int compare(DataRange dr1, DataRange dr2) {
             return dr1.getEnumeration().size() - dr2.getEnumeration().size(); 
         }
-    }
-    protected void setClash(Node node, DataRange dataRange) {
-        // gets called when dataRange is bottom
-        if (tableauMonitor != null) {
-            tableauMonitor.clashDetected(new Object[][] {
-                    new Object[] { dataRange, node } });
-            tableauMonitor.datatypeCheckingFinished(false);
-        }
-        extensionManager.setClash(extensionManager.getAssertionDependencySet(dataRange, node));
-    }
-    
-    protected boolean isCompatible(DataRange dataRange1, DataRange dataRange2) {
-        System.out.println(dataRange1 + " compatible with \n" + dataRange2);
-        if (!dataRange1.isNegated()) {
-            if (!dataRange2.isNegated()) {
-                // neither range is negated
-                if (dataRange1.getDatatypeURI().equals(dataRange2.getDatatypeURI())) {
-                    // both are of the same type, e.g., integer
-                    if (!dataRange1.getOneOf().isEmpty() 
-                            && !dataRange2.getOneOf().isEmpty()) {
-                        // both have some value restrictions, e.g., equals 18
-                        for (String value : dataRange1.getOneOf()) {
-                            // check if one of the equals values has a matching 
-                            // one in the other restriction
-                            if (dataRange2.getOneOf().contains(value)) {
-                                return true;
-                            }
-                        }
-                    } else if (dataRange1.supports(Facets.MIN_INCLUSIVE)) {
-                        
-                    } else {
-                        // at least one of the restrictions has no further 
-                        // equals restriction, so we are fine
-                        return true;
-                    }
-                } 
-            } else {
-                // the second range is negated
-                // if the negated one if top, we are screwed
-                if (!dataRange2.isTop()) {
-                    if (dataRange1.getDatatypeURI().equals(dataRange2.getDatatypeURI())) {
-                        // the negated and the non-negated range are of the same 
-                        // type, e.g., integer
-                        if (!dataRange1.getOneOf().isEmpty() 
-                                && !dataRange2.getOneOf().isEmpty()) {
-                            // both have some restrictions, e.g., equals 18
-                            for (String value : dataRange1.getOneOf()) {
-                                // check if one of the equals values has no matching 
-                                // one in the other restriction
-                                if (!dataRange2.getOneOf().contains(value)) {
-                                    return true;
-                                }
-                            }
-                        } else {
-                            // at least one of the restrictions has no further 
-                            // equals restriction, so we are fine
-                            return true;
-                        }
-                    } else {
-                        // the negated type is a different data range, e.g., we have 
-                        // some integer and not some string, which is fine
-                        return true;
-                    }
-                }
-            }
-        } else {
-            // if the negated one if top, we are screwed
-            if (!dataRange1.isTop()) {
-                if (!dataRange2.isNegated()) {
-                    // only the first range is negated
-                    if (dataRange1.getDatatypeURI().equals(dataRange2.getDatatypeURI())) {
-                        // both are of the same type, e.g., integer
-                        if (!dataRange1.getOneOf().isEmpty() 
-                                && !dataRange2.getOneOf().isEmpty()) {
-                            // both have some value restrictions, e.g., equals 18
-                            for (String value : dataRange1.getOneOf()) {
-                                // check if one of the negated equals values has no 
-                                // matching one in the non-negated restriction
-                                if (!dataRange2.getOneOf().contains(value)) {
-                                    return true;
-                                }
-                            }
-                        } else {
-                            // at least one of the restrictions has no further 
-                            // equals restriction, so we are fine
-                            return true;
-                        }
-                    } else {
-                        // the negated range has a different type, so we are fine
-                        return true;
-                    }
-                } else {
-                    // both ranges are negated
-                    // if the negated one is top, we are screwed
-                    if (!dataRange2.isTop()) {
-                        // this is fine since we have infinitely many values to 
-                        // choose from and an unknown data range
-                        return true;
-                    }
-                }
-            } 
-        }
-        System.out.println("Check failed!");
-        return false;
     }
 }

@@ -1,7 +1,11 @@
 package org.semanticweb.HermiT.model;
 
 import java.math.BigInteger;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.SortedSet;
@@ -10,13 +14,15 @@ import java.util.TreeSet;
 import org.semanticweb.HermiT.Namespaces;
 import org.semanticweb.owl.vocab.XSDVocabulary;
 
-public class DatatypeRestrictionInteger extends DatatypeRestrictionLiteral {
+public class DatatypeRestrictionDateTime extends DatatypeRestrictionLiteral {
     
-    protected BigInteger minInclusive = null;
-    protected BigInteger maxInclusive = null;
+    public static DateFormat dfm = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+    
+    protected Date minInclusive = null;
+    protected Date maxInclusive = null;
 
-    public DatatypeRestrictionInteger() {
-        this.datatypeURI = XSDVocabulary.INTEGER.getURI();
+    public DatatypeRestrictionDateTime() {
+        this.datatypeURI = XSDVocabulary.DATE_TIME.getURI();
         this.supportedFacets = new HashSet<Facets>(
                 Arrays.asList(new Facets[] {
                         Facets.MIN_INCLUSIVE, Facets.MIN_EXCLUSIVE, Facets.MAX_INCLUSIVE, Facets.MAX_EXCLUSIVE
@@ -25,7 +31,7 @@ public class DatatypeRestrictionInteger extends DatatypeRestrictionLiteral {
     }
     
     public DataRange getNewInstance() {
-        return new DatatypeRestrictionInteger();
+        return new DatatypeRestrictionDateTime();
     }
     
     public boolean isFinite() {
@@ -41,18 +47,25 @@ public class DatatypeRestrictionInteger extends DatatypeRestrictionLiteral {
             BigInteger nBig = new BigInteger("" + n);
             int substract = 0;
             for (String constant : notOneOf) {
-                BigInteger not = new BigInteger(constant);
-                if ((not.compareTo(maxInclusive) <= 0)
-                        && (not.compareTo(minInclusive) >= 0)) {
-                    substract++;
-                } else {
-                    removeOneOf(constant);
+                DateFormat dfm = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+                try {
+                    Date not = dfm.parse(constant);
+                    if ((not.compareTo(maxInclusive) <= 0)
+                            && (not.compareTo(minInclusive) >= 0)) {
+                        substract++;
+                    } else {
+                        removeOneOf(constant);
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
                 }
             }
-            BigInteger rangeSize = maxInclusive.subtract(minInclusive);
-            rangeSize = rangeSize.add(BigInteger.ONE);
-            rangeSize = rangeSize.subtract(new BigInteger("" + substract));
-            return (rangeSize.compareTo(nBig) >= 0);
+            BigInteger bigMinInclusive = new BigInteger("" + minInclusive.getTime());
+            BigInteger bigMaxInclusive = new BigInteger("" + maxInclusive.getTime());
+            BigInteger actualSize = bigMaxInclusive.subtract(bigMinInclusive);
+            actualSize = actualSize.add(BigInteger.ONE);
+            actualSize = actualSize.subtract(new BigInteger("" + substract));
+            return (actualSize.compareTo(nBig) >= 0);
         }
         return true;
     }
@@ -61,7 +74,9 @@ public class DatatypeRestrictionInteger extends DatatypeRestrictionLiteral {
             if (!oneOf.isEmpty()) {
                 return oneOf;
             }
-            BigInteger actualSize = maxInclusive.subtract(minInclusive);
+            BigInteger bigMinInclusive = new BigInteger("" + minInclusive.getTime());
+            BigInteger bigMaxInclusive = new BigInteger("" + maxInclusive.getTime());
+            BigInteger actualSize = bigMaxInclusive.subtract(bigMinInclusive);
             if (actualSize.compareTo(new BigInteger("" + Integer.MAX_VALUE)) > 0) {
                 System.err.println("Datatype checking produced a set with more than " + Integer.MAX_VALUE + "entries!");
                 System.err.println("I give up!");
@@ -73,10 +88,10 @@ public class DatatypeRestrictionInteger extends DatatypeRestrictionLiteral {
                     System.err.println("I'll try to handle that!");
                 }
                 Set<String> result = new HashSet<String>();
-                long lower = minInclusive.intValue();
-                long upper = maxInclusive.intValue();
+                long lower = minInclusive.getTime();
+                long upper = maxInclusive.getTime();
                 for (long i = lower; i <= upper; i++) {
-                    result.add("" + i);
+                    result.add("" + dfm.format(new Date(i)));
                 }
                 return result;
             }
@@ -91,10 +106,12 @@ public class DatatypeRestrictionInteger extends DatatypeRestrictionLiteral {
             }
             return null;
         }
-        BigInteger actualSize = maxInclusive.subtract(minInclusive);
+        BigInteger bigMinInclusive = new BigInteger("" + minInclusive.getTime());
+        BigInteger bigMaxInclusive = new BigInteger("" + maxInclusive.getTime());
+        BigInteger actualSize = bigMaxInclusive.subtract(bigMinInclusive);
         if (actualSize.compareTo(BigInteger.ZERO) >= 0) {
-            BigInteger constant = minInclusive;
-            while (constant.compareTo(maxInclusive) <= 0) {
+            BigInteger constant = bigMinInclusive;
+            while (constant.compareTo(bigMaxInclusive) <= 0) {
                 if (!notOneOf.contains(constant.toString())) return constant.toString();
                 constant = constant.add(BigInteger.ONE);
             }
@@ -107,15 +124,20 @@ public class DatatypeRestrictionInteger extends DatatypeRestrictionLiteral {
             return oneOf.contains(constant);
         }
         boolean accepted = true;
-        BigInteger intValue = new BigInteger(constant);
-        if (minInclusive != null) {
-            accepted = accepted && (minInclusive.compareTo(intValue) >= 0);
+        try {
+            Date dateValue = dfm.parse(constant);
+            if (minInclusive != null) {
+                accepted = accepted && (minInclusive.compareTo(dateValue) >= 0);
+            }
+            if (maxInclusive != null) {
+                accepted = accepted && (maxInclusive.compareTo(dateValue) <= 0);
+            }
+            accepted = accepted && !notOneOf.contains(constant);
+            return accepted; 
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
-        if (maxInclusive != null) {
-            accepted = accepted && (maxInclusive.compareTo(intValue) <= 0);
-        }
-        accepted = accepted && !notOneOf.contains(constant);
-        return accepted; 
+        return false;
     }
     public boolean isTop() {
         return false; 
@@ -126,33 +148,45 @@ public class DatatypeRestrictionInteger extends DatatypeRestrictionLiteral {
     public boolean addOneOf(String constant) {
         boolean result = false;
         try {
-            new BigInteger(constant);
+            dfm.parse(constant);
             return oneOf.add(constant);
-        } catch (NumberFormatException e) {
+        } catch (ParseException e) {
             e.printStackTrace();
         }
         return result;
     }
     public void conjoinFacetsFrom(DataRange range) {
-        if (range instanceof DatatypeRestrictionInteger) {
-            DatatypeRestrictionInteger restr = (DatatypeRestrictionInteger) range;
+        if (range instanceof DatatypeRestrictionDateTime) {
+            DatatypeRestrictionDateTime restr = (DatatypeRestrictionDateTime) range;
             if (!(isNegated ^ restr.isNegated())) {
                 // both are negated or both are not negated
                 if (restr.getMinInclusive() != null) {
-                    addFacet(Facets.MIN_INCLUSIVE, restr.getMinInclusive().toString()); 
+                    addFacet(Facets.MIN_INCLUSIVE, dfm.format(restr.getMinInclusive())); 
                 }
                 if (restr.getMaxInclusive() != null) {
-                    addFacet(Facets.MAX_INCLUSIVE, restr.getMaxInclusive().toString());
+                    addFacet(Facets.MAX_INCLUSIVE, dfm.format(restr.getMaxInclusive()));
                 }
             } else {
                 // only one is negated
                 if (restr.getMinInclusive() != null) {
-                    BigInteger newValue = restr.getMinInclusive().subtract(BigInteger.ONE);
-                    addFacet(Facets.MAX_INCLUSIVE, newValue.toString()); 
+                    Date newValue = restr.getMinInclusive();
+                    if (newValue.getTime() == Long.MIN_VALUE) {
+                        System.err.println("The date " + newValue + " is out " +
+                        "of the supported range and will be ignored. ");
+                    } else {
+                        newValue.setTime(newValue.getTime() - 1);
+                        addFacet(Facets.MAX_INCLUSIVE, dfm.format(newValue));
+                    }
                 }
                 if (restr.getMaxInclusive() != null) {
-                    BigInteger newValue = restr.getMinInclusive().add(BigInteger.ONE);
-                    addFacet(Facets.MIN_INCLUSIVE, newValue.toString());
+                    Date newValue = restr.getMinInclusive();
+                    if (newValue.getTime() == Long.MAX_VALUE) {
+                        System.err.println("The date " + newValue + " is out " +
+                        "of the supported range and will be ignored. ");
+                    } else {
+                        newValue.setTime(newValue.getTime() + 1);
+                        addFacet(Facets.MIN_INCLUSIVE, dfm.format(newValue));
+                    }
                 }
             }
         }  else {
@@ -163,60 +197,68 @@ public class DatatypeRestrictionInteger extends DatatypeRestrictionLiteral {
         }
     }
     public void addFacet(Facets facet, String value) {
-        BigInteger valueInt = null;
+        Date valueDate = null;
         try {
-            valueInt = new BigInteger(value);
-        } catch (NumberFormatException e) {
+            valueDate = dfm.parse(value);
+        } catch (ParseException e) {
             e.printStackTrace();
             return;
         }
         switch (facet) {
         case MIN_INCLUSIVE: {
             if (minInclusive != null) {
-                if (valueInt.compareTo(minInclusive) < 0) {
-                    minInclusive = valueInt;
+                if (valueDate.compareTo(minInclusive) < 0) {
+                    minInclusive = valueDate;
                 }
             } else {
-                minInclusive = valueInt;
+                minInclusive = valueDate;
             }
         } break;
         case MIN_EXCLUSIVE: {
-            valueInt = valueInt.add(BigInteger.ONE);
-            if (minInclusive != null) {
-                if (valueInt.compareTo(minInclusive) < 0) {
-                    minInclusive = valueInt;
+            if (valueDate.getTime() != Long.MAX_VALUE) {
+                valueDate.setTime(valueDate.getTime() + 1);
+                if (minInclusive != null) {
+                    if (valueDate.compareTo(minInclusive) < 0) {
+                        minInclusive = valueDate;
+                    }
+                } else {
+                    minInclusive = valueDate;
                 }
             } else {
-                minInclusive = valueInt;
+                System.err.println("The date " + value + " is out of the " +
+                		"supported range and will be ignored. ");
             }
+
         } break;
         case MAX_INCLUSIVE: {
             if (maxInclusive != null) {
-                if (valueInt.compareTo(maxInclusive) > 0) {
-                    maxInclusive = valueInt;
+                if (valueDate.compareTo(maxInclusive) > 0) {
+                    maxInclusive = valueDate;
                 }
             } else {
-                maxInclusive = valueInt;
+                maxInclusive = valueDate;
             }
         } break;
         case MAX_EXCLUSIVE:  {
-            valueInt = valueInt.subtract(BigInteger.ONE);
-            if (maxInclusive != null) {
-                if (valueInt.compareTo(maxInclusive) > 0) {
-                    maxInclusive = valueInt;
+            if (valueDate.getTime() != Long.MIN_VALUE) {
+                valueDate.setTime(valueDate.getTime() - 1);
+                if (maxInclusive != null) {
+                    if (valueDate.compareTo(maxInclusive) > 0) {
+                        maxInclusive = valueDate;
+                    }
+                } else {
+                    maxInclusive = valueDate;
                 }
-            } else {
-                maxInclusive = valueInt;
             }
         } break;
         default:
             throw new IllegalArgumentException("Unsupported facet.");
         }
     }
-    public BigInteger getMinInclusive() {
+    public Date getMinInclusive() {
         return minInclusive;
     }
-    public BigInteger getMaxInclusive() {
+    public Date getMaxInclusive() {
         return maxInclusive;
     }
     public String toString(Namespaces namespaces) {
