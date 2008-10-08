@@ -41,11 +41,15 @@ import org.semanticweb.owl.model.OWLOntologyManager;
 public abstract class AbstractOWLOntologyTest extends TestCase {
     protected static final Node[][] NO_TUPLES = new Node[0][];
     protected static final DLOntology EMPTY_DL_ONTOLOGY;
+    protected static final String[] IGNORED_CLAUSES = {
+        " :- owl:BottomDataProperty*(X,Y)",
+        " :- owl:BottomObjectProperty(X,Y)"
+    };
     static {
         Set<DLClause> dlClauses = Collections.emptySet();
         Set<Atom> atoms = Collections.emptySet();
         EMPTY_DL_ONTOLOGY = new DLOntology("opaque:test", dlClauses, atoms,
-                atoms, false, false, false, false, false);
+                atoms, null, null, null, false, false, false, false, false);
     }
     protected OWLOntology m_ontology;
 
@@ -283,6 +287,9 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
     protected static void assertContainsAll(String testName, 
             Collection<String> actual,
             String[] control, String[] controlVariant) {
+        for (String s : IGNORED_CLAUSES) {
+            actual.remove(s);
+        }
         try {
             assertEquals(control.length, actual.size());
             boolean isOK = true;
@@ -322,6 +329,9 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
     protected static <T> void assertContainsAll(String testName, 
             Collection<T> actual,
             Collection<T> control) {
+        for (String s : IGNORED_CLAUSES) {
+            actual.remove(s);
+        }
         try {
             assertEquals(control.size(), actual.size());
             for (T contr : control)

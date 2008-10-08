@@ -17,6 +17,8 @@ import org.semanticweb.owl.model.OWLDescription;
 import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLObjectComplementOf;
 
+import org.semanticweb.HermiT.util.GraphUtils;
+
 
 public class TransitivityManager extends OwlNormalization.RoleManager {
     protected final Map<OWLObjectPropertyExpression, Set<OWLObjectPropertyExpression>> m_subObjectProperties;
@@ -142,21 +144,7 @@ public class TransitivityManager extends OwlNormalization.RoleManager {
     }
 
     protected void transitivelyClose() {
-        boolean changed = true;
-        List<OWLObjectPropertyExpression> temporary = new ArrayList<OWLObjectPropertyExpression>();
-        while (changed) {
-            changed = false;
-            for (Map.Entry<OWLObjectPropertyExpression, Set<OWLObjectPropertyExpression>> entry : m_subObjectProperties.entrySet()) {
-                temporary.clear();
-                temporary.addAll(entry.getValue());
-                for (int i = temporary.size() - 1; i >= 0; --i) {
-                    Set<OWLObjectPropertyExpression> subObjectProperties = m_subObjectProperties.get(temporary.get(i));
-                    if (subObjectProperties != null)
-                        if (entry.getValue().addAll(subObjectProperties))
-                            changed = true;
-                }
-            }
-        }
+        GraphUtils.transitivelyClose(m_subObjectProperties);
     }
 
     protected Set<OWLObjectPropertyExpression> getTransitiveSubObjectProperties(

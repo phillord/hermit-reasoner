@@ -24,7 +24,8 @@ public class DLClauseEvaluationTest extends AbstractHermiTTest {
         CL_1=DLClause.create(new Atom[] { Atom.create(U,Z,W) },new Atom[] { Atom.create(R,X,Y),Atom.create(S,Y,Z),Atom.create(T,W,W) });
         Set<DLClause> dlClauses=Collections.singleton(CL_1);
         Set<Atom> atoms=Collections.emptySet();
-        TEST_DL_ONTOLOGY=new DLOntology("opaque:test",dlClauses,atoms,atoms,false,false,false,false,false);
+        TEST_DL_ONTOLOGY=new DLOntology("opaque:test",dlClauses,atoms,atoms,
+            null, null, null, false,false,false,false,false);
     }
 
     protected Tableau m_tableau;

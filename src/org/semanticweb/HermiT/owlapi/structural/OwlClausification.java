@@ -19,6 +19,7 @@ import org.semanticweb.HermiT.model.AtLeastConcreteRoleConcept;
 import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLClause;
@@ -86,6 +87,9 @@ import org.semanticweb.owl.model.OWLTypedConstant;
 import org.semanticweb.owl.model.OWLUntypedConstant;
 import org.semanticweb.owl.vocab.OWLRestrictedDataRangeFacetVocabulary;
 import org.semanticweb.owl.vocab.XSDVocabulary;
+import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
+import org.semanticweb.HermiT.hierarchy.NaiveHierarchyPosition;
+import org.semanticweb.HermiT.util.GraphUtils;
 
 public class OwlClausification {
     protected static final org.semanticweb.HermiT.model.Variable X = org.semanticweb.HermiT.model.Variable.create("X");
@@ -115,8 +119,61 @@ public class OwlClausification {
                 normalization.getTransitiveObjectProperties(),
                 normalization.getDisjointObjectProperties(),
                 normalization.getDisjointDataProperties(),
-                normalization.getFacts(), descriptionGraphs);
+                normalization.getFacts(), descriptionGraphs,
+                ontology.getReferencedClasses(),
+                ontology.getReferencedIndividuals(),
+                ontology.getReferencedDataProperties(),
+                ontology.getReferencedObjectProperties());
     }
+    
+    static protected Map<AtomicRole, HierarchyPosition<AtomicRole>>
+        buildRoleHierarchy(
+            Collection<OWLObjectPropertyExpression[]> inclusions,
+            Set<AtomicRole> objectRoles, Set<AtomicRole> dataRoles) {
+        final Map<Role, Set<Role>> subRoles = new HashMap<Role, Set<Role>>();
+        for (OWLObjectPropertyExpression[] inclusion : inclusions) {
+            Role sub = getRole(inclusion[0]);
+            Role sup = getRole(inclusion[1]);
+            Set<Role> subs = subRoles.get(sup);
+            if (subs == null) {
+                subs = new HashSet<Role>();
+                subRoles.put(sup, subs);
+            }
+            subs.add(sub);
+        }
+        
+        GraphUtils.transitivelyClose(subRoles);
+        
+        NaiveHierarchyPosition.Ordering<AtomicRole> ordering =
+            new NaiveHierarchyPosition.Ordering<AtomicRole>() {
+                public boolean less(AtomicRole sub, AtomicRole sup) {
+                    if (sup == AtomicRole.TOP_DATA_ROLE ||
+                        sup == AtomicRole.TOP_OBJECT_ROLE ||
+                        sub == AtomicRole.BOTTOM_DATA_ROLE ||
+                        sub == AtomicRole.BOTTOM_OBJECT_ROLE) {
+                        return true;
+                    }
+                    Set<Role> subs = subRoles.get(sup);
+                    if (subs == null) {
+                        return false;
+                    }
+                    return subs.contains(sub);
+                }
+            };
+        Map<AtomicRole, HierarchyPosition<AtomicRole>> hierarchy =
+            NaiveHierarchyPosition.buildHierarchy(
+                AtomicRole.TOP_OBJECT_ROLE,
+                AtomicRole.BOTTOM_OBJECT_ROLE,
+                objectRoles,
+                ordering);
+        hierarchy.putAll(NaiveHierarchyPosition.buildHierarchy(
+                            AtomicRole.TOP_DATA_ROLE,
+                            AtomicRole.BOTTOM_DATA_ROLE,
+                            objectRoles,
+                            ordering));
+        return hierarchy;
+    }
+
 
     protected DLOntology clausify(Reasoner.Configuration config, String ontologyURI,
             Collection<OWLDescription[]> conceptInclusions,
@@ -129,7 +186,11 @@ public class OwlClausification {
             Set<OWLObjectPropertyExpression[]> disjointObjectProperties,
             Set<OWLDataPropertyExpression[]> disjointDataProperties,
             Collection<OWLIndividualAxiom> facts,
-            Collection<DescriptionGraph> descriptionGraphs) {
+            Collection<DescriptionGraph> descriptionGraphs,
+            Set<OWLClass> classes,
+            Set<OWLIndividual> individuals,
+            Set<OWLDataProperty> dataProperties,
+            Set<OWLObjectProperty> objectProperties) {
         DetermineExpressivity determineExpressivity = new DetermineExpressivity();
         for (OWLDescription[] inclusion : conceptInclusions)
             for (OWLDescription description : inclusion)
@@ -201,6 +262,16 @@ public class OwlClausification {
                 }
             }
         }
+        { // make bottom roles unsatisfiable:
+            Atom bodyAtom = Atom.create(AtomicRole.BOTTOM_OBJECT_ROLE,
+                new org.semanticweb.HermiT.model.Term[] { X, Y });
+            dlClauses.add(DLClause.create(
+                new Atom[] {}, new Atom[] { bodyAtom }).getSafeVersion());
+            bodyAtom = Atom.create(AtomicRole.BOTTOM_DATA_ROLE,
+                new org.semanticweb.HermiT.model.Term[] { X, Y });
+            dlClauses.add(DLClause.create(
+                new Atom[] {}, new Atom[] { bodyAtom }).getSafeVersion());
+        }
         for (OWLDataPropertyExpression[] properties : disjointDataProperties) {
             for (int i = 0; i < properties.length; i++) {
                 for (int j = i + 1; j < properties.length; j++) {
@@ -238,8 +309,28 @@ public class OwlClausification {
         for (DescriptionGraph descriptionGraph : descriptionGraphs) {
             descriptionGraph.produceStartDLClauses(dlClauses);
         }
-        return new DLOntology(ontologyURI, dlClauses, positiveFacts,
-                negativeFacts, determineExpressivity.m_hasInverseRoles,
+        Set<AtomicConcept> atomicConcepts = new HashSet<AtomicConcept>();
+        for (OWLClass c : classes) {
+            atomicConcepts.add(AtomicConcept.create(c.getURI().toString()));
+        }
+        Set<Individual> hermitIndividuals = new HashSet<Individual>();
+        for (OWLIndividual i : individuals) {
+            hermitIndividuals.add(Individual.create(i.getURI().toString()));
+        }
+        Set<AtomicRole> objectRoles = new HashSet<AtomicRole>();
+        for (OWLObjectProperty p : objectProperties) {
+            objectRoles.add(AtomicRole.createObjectRole(p.getURI().toString()));
+        }
+        Set<AtomicRole> dataRoles = new HashSet<AtomicRole>();
+        for (OWLDataProperty p : dataProperties) {
+            dataRoles.add(AtomicRole.createDataRole(p.getURI().toString()));
+        }
+        return new DLOntology(ontologyURI,
+                dlClauses, positiveFacts, negativeFacts,
+                atomicConcepts, hermitIndividuals,
+                buildRoleHierarchy(objectPropertyInclusions,
+                                    objectRoles, dataRoles),
+                determineExpressivity.m_hasInverseRoles,
                 determineExpressivity.m_hasAtMostRestrictions,
                 determineExpressivity.m_hasNominals, shouldUseNIRule,
                 determineExpressivity.m_hasReflexivity);
@@ -279,6 +370,15 @@ public class OwlClausification {
         }
         return AtomicConcept.create(outClass.getURI().toString());
     }
+    
+    // protected static Role getRole(OWLObjectPropertyExpression p) {
+    //     p = p.getSimplified();
+    //     if (p instanceof OWLObjectProperty) {
+    //         return AtomicRole.createObjectRole(((OWLObjectProperty) objectProperty).getURI().toString());
+    //     } else if (objectProperty instanceof OWLObjectPropertyInverse) {
+    //         return InverseRole.create(getRole.p.getInverseProperty());
+    //     }
+    // }
 
     /**
      * Creates an atom in the Hermit internal format such that the variables

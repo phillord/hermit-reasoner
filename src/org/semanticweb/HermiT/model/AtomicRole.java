@@ -70,4 +70,13 @@ public class AtomicRole extends Role implements DLPredicate {
     public static AtomicRole createDataRole(String uri) {
         return s_interningManager.intern(new AtomicRole(uri, true));
     }
+    
+    public static final AtomicRole TOP_OBJECT_ROLE
+        = createObjectRole("http://www.w3.org/2002/07/owl#TopObjectProperty");
+    public static final AtomicRole BOTTOM_OBJECT_ROLE
+        = createObjectRole("http://www.w3.org/2002/07/owl#BottomObjectProperty");
+    public static final AtomicRole TOP_DATA_ROLE
+        = createDataRole("http://www.w3.org/2002/07/owl#TopDataProperty");
+    public static final AtomicRole BOTTOM_DATA_ROLE
+        = createDataRole("http://www.w3.org/2002/07/owl#BottomDataProperty");
 }

@@ -17,6 +17,9 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Map;
+import java.util.HashMap;
+import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
 
 import org.semanticweb.HermiT.Namespaces;
 
@@ -44,9 +47,14 @@ public class DLOntology implements Serializable {
     protected final Set<AtomicConcept> m_allAtomicConcepts;
     protected final Set<Individual> m_allIndividuals;
     protected final Set<DescriptionGraph> m_allDescriptionGraphs;
+    protected final Map<AtomicRole, HierarchyPosition<AtomicRole>> explicitRoleHierarchy;
 
-    public DLOntology(String ontologyURI, Set<DLClause> dlClauses,
+    public DLOntology(String ontologyURI,
+            Set<DLClause> dlClauses,
             Set<Atom> positiveFacts, Set<Atom> negativeFacts,
+            Set<AtomicConcept> atomicConcepts,
+            Set<Individual> individuals,
+            Map<AtomicRole, HierarchyPosition<AtomicRole>> explicitRoleHierarchy, // cleverer version of the set of all roles
             boolean hasInverseRoles, boolean hasAtMostRestrictions,
             boolean hasNominals, boolean canUseNIRule, boolean hasReflexivity) {
         m_ontologyURI = ontologyURI;
@@ -58,11 +66,25 @@ public class DLOntology implements Serializable {
         m_canUseNIRule = canUseNIRule;
         m_hasNominals = hasNominals;
         m_hasReflexifity = hasReflexivity;
-        m_allAtomicConcepts = new TreeSet<AtomicConcept>(
+        if (atomicConcepts == null) {
+            m_allAtomicConcepts = new TreeSet<AtomicConcept>(
                 AtomicConceptComparator.INSTANCE);
-        m_allIndividuals = new TreeSet<Individual>(
+        } else {
+            m_allAtomicConcepts = atomicConcepts;
+        }
+        if (individuals == null) {
+            m_allIndividuals = new TreeSet<Individual>(
                 IndividualComparator.INSTANCE);
+        } else {
+            m_allIndividuals = individuals;
+        }
         m_allDescriptionGraphs = new HashSet<DescriptionGraph>();
+        if (explicitRoleHierarchy == null) {
+            this.explicitRoleHierarchy
+                = new HashMap<AtomicRole, HierarchyPosition<AtomicRole>>();
+        } else {
+            this.explicitRoleHierarchy = explicitRoleHierarchy;
+        }
         boolean isHorn = true;
         for (DLClause dlClause : m_dlClauses) {
             if (dlClause.getHeadLength() > 1)

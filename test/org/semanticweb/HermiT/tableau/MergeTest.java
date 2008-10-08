@@ -23,7 +23,8 @@ public class MergeTest extends AbstractHermiTTest {
         DLClause cl=DLClause.create(new Atom[] { Atom.create(EXISTS_NEG_A,X) },new Atom[] { Atom.create(R,X,Y),Atom.create(A,Y) });
         Set<DLClause> dlClauses=Collections.singleton(cl);
         Set<Atom> atoms=Collections.emptySet();
-        TEST_DL_ONTOLOGY=new DLOntology("opaque:test",dlClauses,atoms,atoms,false,false,false,false,false);
+        TEST_DL_ONTOLOGY=new DLOntology("opaque:test",dlClauses,atoms,atoms,
+            null, null, null, false,false,false,false,false);
     }
 
     protected Tableau m_tableau;

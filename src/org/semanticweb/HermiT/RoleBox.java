@@ -4,6 +4,7 @@ package org.semanticweb.HermiT;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.InverseRole;
+import org.semanticweb.HermiT.util.GraphUtils;
 
 import java.util.Collection;
 import java.util.Map;
@@ -70,17 +71,19 @@ public class RoleBox {
             }
         }
         // Transitively close supers:
-        Queue<Role> q;
-        for (Map.Entry<Role, Set<Role>> r : superRoles.entrySet()) {
-            q = new LinkedList<Role>(r.getValue());
-            while (!q.isEmpty()) {
-                Role s = q.remove();
-                Set<Role> s_supers = superRoles.get(s);
-                if (s_supers != null) for (Role t : s_supers) {
-                    if (r.getValue().add(t)) q.add(t);
-                }
-            }
-        }
+        // Queue<Role> q;
+        // for (Map.Entry<Role, Set<Role>> r : superRoles.entrySet()) {
+        //     q = new LinkedList<Role>(r.getValue());
+        //     while (!q.isEmpty()) {
+        //         Role s = q.remove();
+        //         Set<Role> s_supers = superRoles.get(s);
+        //         if (s_supers != null) for (Role t : s_supers) {
+        //             if (r.getValue().add(t)) q.add(t);
+        //         }
+        //     }
+        // }
+        GraphUtils.transitivelyClose(superRoles);
+        
         // Identify role equivalence classes:
         Map<Role, Set<Role>> equivalencies = new HashMap<Role, Set<Role>>();
         for (Map.Entry<Role, Set<Role>> r : superRoles.entrySet()) {
@@ -119,7 +122,7 @@ public class RoleBox {
         }
         
         // Identify complex roles:
-        q = new LinkedList<Role>(complexRoles);
+        Queue<Role> q = new LinkedList<Role>(complexRoles);
         complexRoles.clear();
         while (!q.isEmpty()) {
             Role r = q.remove();
