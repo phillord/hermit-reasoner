@@ -134,35 +134,29 @@ public class DatatypeRestrictionInteger extends DatatypeRestrictionLiteral {
         return result;
     }
     public void conjoinFacetsFrom(DataRange range) {
-        if (range instanceof DatatypeRestrictionInteger) {
-            DatatypeRestrictionInteger restr = (DatatypeRestrictionInteger) range;
-            if (!(isNegated ^ restr.isNegated())) {
-                // both are negated or both are not negated
-                if (restr.getMinInclusive() != null) {
-                    addFacet(Facets.MIN_INCLUSIVE, restr.getMinInclusive().toString()); 
-                }
-                if (restr.getMaxInclusive() != null) {
-                    addFacet(Facets.MAX_INCLUSIVE, restr.getMaxInclusive().toString());
-                }
-            } else {
-                // only one is negated
-                if (restr.getMinInclusive() != null) {
-                    BigInteger newValue = restr.getMinInclusive().subtract(BigInteger.ONE);
-                    addFacet(Facets.MAX_INCLUSIVE, newValue.toString()); 
-                }
-                if (restr.getMaxInclusive() != null) {
-                    BigInteger newValue = restr.getMinInclusive().add(BigInteger.ONE);
-                    addFacet(Facets.MIN_INCLUSIVE, newValue.toString());
-                }
-            }
-        }  else {
+        if (!(range instanceof DatatypeRestrictionInteger)) {
             throw new IllegalArgumentException("The given parameter is not " +
                     "an instance of DatatypeRestrictionInteger. It is " +
                     "only allowed to add facets from other integer " +
                     "datatype restrictions. ");
         }
+        DatatypeRestrictionInteger restr = (DatatypeRestrictionInteger) range;
+        if (isNegated || restr.isNegated()) {
+            throw new RuntimeException("Cannot add facets to or from negated " +
+            		"data ranges!");
+        }
+        if (restr.getMinInclusive() != null) {
+            addFacet(Facets.MIN_INCLUSIVE, restr.getMinInclusive().toString()); 
+        }
+        if (restr.getMaxInclusive() != null) {
+            addFacet(Facets.MAX_INCLUSIVE, restr.getMaxInclusive().toString());
+        }
     }
     public void addFacet(Facets facet, String value) {
+        if (isNegated) {
+            throw new RuntimeException("Cannot add facets to or from negated " +
+            		"data ranges!");
+        }
         BigInteger valueInt = null;
         try {
             valueInt = new BigInteger(value);
@@ -173,7 +167,7 @@ public class DatatypeRestrictionInteger extends DatatypeRestrictionLiteral {
         switch (facet) {
         case MIN_INCLUSIVE: {
             if (minInclusive != null) {
-                if (valueInt.compareTo(minInclusive) < 0) {
+                if (valueInt.compareTo(minInclusive) > 0) {
                     minInclusive = valueInt;
                 }
             } else {
@@ -183,7 +177,7 @@ public class DatatypeRestrictionInteger extends DatatypeRestrictionLiteral {
         case MIN_EXCLUSIVE: {
             valueInt = valueInt.add(BigInteger.ONE);
             if (minInclusive != null) {
-                if (valueInt.compareTo(minInclusive) < 0) {
+                if (valueInt.compareTo(minInclusive) > 0) {
                     minInclusive = valueInt;
                 }
             } else {
@@ -192,7 +186,7 @@ public class DatatypeRestrictionInteger extends DatatypeRestrictionLiteral {
         } break;
         case MAX_INCLUSIVE: {
             if (maxInclusive != null) {
-                if (valueInt.compareTo(maxInclusive) > 0) {
+                if (valueInt.compareTo(maxInclusive) < 0) {
                     maxInclusive = valueInt;
                 }
             } else {
@@ -202,7 +196,7 @@ public class DatatypeRestrictionInteger extends DatatypeRestrictionLiteral {
         case MAX_EXCLUSIVE:  {
             valueInt = valueInt.subtract(BigInteger.ONE);
             if (maxInclusive != null) {
-                if (valueInt.compareTo(maxInclusive) > 0) {
+                if (valueInt.compareTo(maxInclusive) < 0) {
                     maxInclusive = valueInt;
                 }
             } else {

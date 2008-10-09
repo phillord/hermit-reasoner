@@ -14,6 +14,7 @@ import java.util.Map.Entry;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.DataRange;
+import org.semanticweb.HermiT.model.DatatypeRestrictionLiteral;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 
@@ -154,7 +155,8 @@ public class DatatypeManager {
             }
         }
         
-        // collect the inequalities and aise clash when self inequality is found 
+        // collect the inequalities and raise a clash when a self inequality is 
+        // found 
         Map<Node,Set<Node>> inequalities = new HashMap<Node,Set<Node>>();
         Map<Node,Set<Node>> inequalitiesSym = new HashMap<Node,Set<Node>>();
         boolean foundSelfInequality = fetchInequalities(nodeToDRs.keySet(), 
@@ -305,24 +307,26 @@ public class DatatypeManager {
      */
     protected DataRange getCanonicalDataRange(Set<DataRange> ranges) {
         // create a new instance of the type that the first given data range has
-        DataRange canonicalDR = ranges.iterator().next().getNewInstance();
-        // set the URI to the one of the first data range, we then expect all 
-        // ranges to have the same URI or it is a clash
-        URI uri = ((ranges.iterator()).next()).getDatatypeURI();
-        // check if all restrictions are for the same datatype
-        // for negated ranges with oneOfs, change them to unnegated ranges with 
-        // inequality values
+        DataRange canonicalDR = null; 
+        // set the URI to the one of the first positive data range, we then 
+        // expect all ranges to have the same URI or it is a clash
+        URI uri = null;
         for (DataRange range : ranges) {
-            // check URI compatibility, e.g., cannot be string and integer at the same time
-            if (!range.getDatatypeURI().equals(uri)) {
-                return null;
+            if (!range.isNegated()) {
+                if (uri == null) {
+                    uri = range.getDatatypeURI();
+                    canonicalDR = range.getNewInstance();
+                } else {
+                    if (!range.getDatatypeURI().equals(uri)) {
+                        // two non-negated ones with different URIs -> clash
+                        return null;
+                    }
+                }
             }
-            // turn oneOf values for negated data ranges into iequalities for constants
-            if (range.isNegated() && range.getOneOf().size() > 0) {
-                range.setNotOneOf(range.getOneOf());
-                range.setOneOf(new HashSet<String>());
-                range.negate();
-            }
+        }
+        if (canonicalDR == null) {
+            // only negated ranges -> trivially satisfiable
+            return new DatatypeRestrictionLiteral();
         }
         
         // now we compute one canonical data range that captures the 

@@ -157,7 +157,7 @@ public interface DataRange extends DLPredicate {
      * Checks whether constant is the String representation of a value in the 
      * data range, where the string has to be interpreted according to the 
      * datatype URI. 
-     * @param string A String representation of a constant for this data range.
+     * @param constant A String representation of a constant for this data range.
      * @return true if constant represents a value in the interpretation of this 
      *         data range and false otherwise. 
      */

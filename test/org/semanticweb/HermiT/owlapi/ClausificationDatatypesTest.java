@@ -40,10 +40,10 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("Eighteen(X) v (not(xsd:integer 18))(Y) :- hasAge*(X,Y)");
+        expectedClauses.add("Eighteen(X) v (xsd:integer not 18)(Y) :- hasAge*(X,Y)");
         assertContainsAll(this.getName(), clauses, expectedClauses);
     }
-    
+
     public void testDataPropertiesAll1() throws Exception {
         String axioms = "SubClassOf(A DataAllValuesFrom(dp xsd:integer))";
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
@@ -94,7 +94,25 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("A(X) v atLeast(1 dp* (not(xsd:integer 18)))(X) v atLeast(1 dp* (not(xsd:integer 19)))(X) :- owl:Thing(X)");
+        expectedClauses.add("A(X) v atLeast(1 dp* (xsd:integer not 18))(X) v atLeast(1 dp* (xsd:integer not 19))(X) :- owl:Thing(X)");
+        assertContainsAll(this.getName(), clauses, expectedClauses);
+    }
+    
+    public void testDataPropertiesDataOneOf3() throws Exception {
+        String axioms = "SubClassOf(DataAllValuesFrom(dp DataOneOf(\"18\"^^xsd:integer \"abc\"^^xsd:string)) A)";
+        OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
+        Set<String> clauses = getDLClauses(ontology);
+        Set<String> expectedClauses = new HashSet<String>();
+        expectedClauses.add("A(X) v atLeast(1 dp* (xsd:integer not 18))(X) v atLeast(1 dp* (xsd:string not abc))(X) :- owl:Thing(X)");
+        assertContainsAll(this.getName(), clauses, expectedClauses);
+    }
+    
+    public void testDataPropertiesDataOneOf4() throws Exception {
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"18\"^^xsd:integer \"abc\"^^xsd:string)))";
+        OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
+        Set<String> clauses = getDLClauses(ontology);
+        Set<String> expectedClauses = new HashSet<String>();
+        expectedClauses.add("(xsd:integer 18)(Y) v (xsd:string abc)(Y) :- A(X), dp*(X,Y)");
         assertContainsAll(this.getName(), clauses, expectedClauses);
     }
     
@@ -104,6 +122,16 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
         expectedClauses.add("(xsd:integer 18)(Y) v (xsd:integer 19)(Y) :- A(X), dp*(X,Y)");
+        assertContainsAll(this.getName(), clauses, expectedClauses);
+    }
+    
+    public void testDataPropertiesDataComplementOf2() throws Exception {
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataComplementOf(DataOneOf(\"18\"^^xsd:integer \"19\"^^xsd:integer))))";
+        OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
+        Set<String> clauses = getDLClauses(ontology);
+        Set<String> expectedClauses = new HashSet<String>();
+        expectedClauses.add("(xsd:integer not 18)(Y) :- A(X), dp*(X,Y)");
+        expectedClauses.add("(xsd:integer not 19)(Y) :- A(X), dp*(X,Y)");
         assertContainsAll(this.getName(), clauses, expectedClauses);
     }
     

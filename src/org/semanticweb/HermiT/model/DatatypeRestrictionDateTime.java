@@ -156,47 +156,28 @@ public class DatatypeRestrictionDateTime extends DatatypeRestrictionLiteral {
         return result;
     }
     public void conjoinFacetsFrom(DataRange range) {
-        if (range instanceof DatatypeRestrictionDateTime) {
-            DatatypeRestrictionDateTime restr = (DatatypeRestrictionDateTime) range;
-            if (!(isNegated ^ restr.isNegated())) {
-                // both are negated or both are not negated
-                if (restr.getMinInclusive() != null) {
-                    addFacet(Facets.MIN_INCLUSIVE, dfm.format(restr.getMinInclusive())); 
-                }
-                if (restr.getMaxInclusive() != null) {
-                    addFacet(Facets.MAX_INCLUSIVE, dfm.format(restr.getMaxInclusive()));
-                }
-            } else {
-                // only one is negated
-                if (restr.getMinInclusive() != null) {
-                    Date newValue = restr.getMinInclusive();
-                    if (newValue.getTime() == Long.MIN_VALUE) {
-                        System.err.println("The date " + newValue + " is out " +
-                        "of the supported range and will be ignored. ");
-                    } else {
-                        newValue.setTime(newValue.getTime() - 1);
-                        addFacet(Facets.MAX_INCLUSIVE, dfm.format(newValue));
-                    }
-                }
-                if (restr.getMaxInclusive() != null) {
-                    Date newValue = restr.getMinInclusive();
-                    if (newValue.getTime() == Long.MAX_VALUE) {
-                        System.err.println("The date " + newValue + " is out " +
-                        "of the supported range and will be ignored. ");
-                    } else {
-                        newValue.setTime(newValue.getTime() + 1);
-                        addFacet(Facets.MIN_INCLUSIVE, dfm.format(newValue));
-                    }
-                }
-            }
-        }  else {
+        if (!(range instanceof DatatypeRestrictionDateTime)) {
             throw new IllegalArgumentException("The given parameter is not " +
                     "an instance of DatatypeRestrictionInteger. It is " +
                     "only allowed to add facets from other integer " +
                     "datatype restrictions. ");
         }
+        DatatypeRestrictionDateTime restr = (DatatypeRestrictionDateTime) range;
+        if (isNegated || restr.isNegated()) {
+            throw new RuntimeException("Cannot add facets to or from negated " +
+            "data ranges!");
+        }
+        if (restr.getMinInclusive() != null) {
+            addFacet(Facets.MIN_INCLUSIVE, dfm.format(restr.getMinInclusive())); 
+        }
+        if (restr.getMaxInclusive() != null) {
+            addFacet(Facets.MAX_INCLUSIVE, dfm.format(restr.getMaxInclusive()));
+        }
     }
     public void addFacet(Facets facet, String value) {
+        if (isNegated) {
+            throw new RuntimeException("Cannot add facets to negated data ranges!");
+        }
         Date valueDate = null;
         try {
             valueDate = dfm.parse(value);

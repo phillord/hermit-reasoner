@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,11 +16,14 @@ import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLAxiomAnnotationAxiom;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLClassAssertionAxiom;
+import org.semanticweb.owl.model.OWLConstant;
 import org.semanticweb.owl.model.OWLDataAllRestriction;
+import org.semanticweb.owl.model.OWLDataComplementOf;
 import org.semanticweb.owl.model.OWLDataExactCardinalityRestriction;
 import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLDataMaxCardinalityRestriction;
 import org.semanticweb.owl.model.OWLDataMinCardinalityRestriction;
+import org.semanticweb.owl.model.OWLDataOneOf;
 import org.semanticweb.owl.model.OWLDataPropertyAssertionAxiom;
 import org.semanticweb.owl.model.OWLDataPropertyDomainAxiom;
 import org.semanticweb.owl.model.OWLDataPropertyExpression;
@@ -1062,6 +1065,21 @@ public class OwlNormalization {
         }
 
         public OWLDescription visit(OWLDataAllRestriction d) {
+            OWLDataRange range = d.getFiller();
+            if (range instanceof OWLDataComplementOf 
+                    && ((OWLDataComplementOf) range).getDataRange() instanceof OWLDataOneOf) {
+                OWLDataComplementOf compl = (OWLDataComplementOf) range;
+                OWLDataOneOf oneOf = (OWLDataOneOf) compl.getDataRange();
+                if (oneOf.getValues().size() > 1) {
+                    Set<OWLDescription> conjuncts = new HashSet<OWLDescription>();
+                    for (OWLConstant constant : oneOf.getValues()) {
+                        conjuncts.add(factory.getOWLDataAllRestriction(d.getProperty(), factory.getOWLDataComplementOf(factory.getOWLDataOneOf(constant))));
+                    }
+                    return factory.getOWLObjectIntersectionOf(conjuncts);
+                } else {
+                    return d;
+                }
+            }
             return d;
         }
 

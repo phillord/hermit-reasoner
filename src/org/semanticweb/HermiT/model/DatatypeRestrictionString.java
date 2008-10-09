@@ -139,61 +139,42 @@ public class DatatypeRestrictionString extends DatatypeRestrictionLiteral implem
      * @see org.semanticweb.HermiT.model.DataRange#conjoinFacetsFrom(org.semanticweb.HermiT.model.DataRange)
      */
     public void conjoinFacetsFrom(DataRange range) {
-        if (range instanceof DatatypeRestrictionString) {
-            DatatypeRestrictionString restr = (DatatypeRestrictionString) range;
-            if (!(isNegated ^ restr.isNegated())) {
-                // both are negated or both are not negated
-                if (restr.getMinLength() != null) {
-                    addFacet(Facets.MIN_LENGTH, restr.getMinLength().toString()); 
-                    facetsChanged = true;
-                }
-                if (restr.getMaxLength() != null) {
-                    addFacet(Facets.MAX_LENGTH, restr.getMaxLength().toString());
-                    facetsChanged = true;
-                }
-                if (restr.getPatternMatcher() != null) {
-                    if (patternMatcher == null) {
-                        this.patternMatcher = restr.getPatternMatcher();
-                        this.pattern = restr.getPattern();
-                    } else {
-                        patternMatcher = BasicOperations.intersection(patternMatcher, 
-                                restr.getPatternMatcher());
-                        pattern = pattern + " and " + restr.getPattern();
-                    }
-                    facetsChanged = true;
-                }
-            } else {
-                // only one is negated
-                if (restr.getMinLength() != null) {
-                    Integer newValue = new Integer(restr.getMinLength().intValue() - 1);
-                    addFacet(Facets.MAX_LENGTH, newValue.toString()); 
-                    facetsChanged = true;
-                }
-                if (restr.getMaxLength() != null) {
-                    Integer newValue = new Integer(restr.getMaxLength().intValue() + 1);
-                    addFacet(Facets.MIN_LENGTH, newValue.toString());
-                    facetsChanged = true;
-                }
-                if (restr.getPatternMatcher() != null) {
-                    if (patternMatcher == null) {
-                        patternMatcher = restr.getPatternMatcher().complement();
-                        pattern = "not " + restr.getPattern();
-                    } else {
-                        patternMatcher = BasicOperations.intersection(patternMatcher, 
-                                restr.getPatternMatcher().complement());
-                        pattern = pattern + " and not " + restr.getPattern();
-                    }
-                    facetsChanged = true;
-                }
-            }
-        } else {
+        if (!(range instanceof DatatypeRestrictionString)) {
             throw new IllegalArgumentException("The given parameter is not " +
-            		"an instance of DatatypeRestrictionString. It is " +
-            		"only allowed to add facets from other String " +
-            		"datatype restrictions. ");
+                    "an instance of DatatypeRestrictionString. It is " +
+                    "only allowed to add facets from other String " +
+                    "datatype restrictions. ");
+        }
+        DatatypeRestrictionString restr = (DatatypeRestrictionString) range;
+        if (isNegated || restr.isNegated()) {
+            throw new RuntimeException("Cannot add facets to or from negated " +
+            		"data ranges!");
+        }
+        if (restr.getMinLength() != null) {
+            addFacet(Facets.MIN_LENGTH, restr.getMinLength().toString()); 
+            facetsChanged = true;
+        }
+        if (restr.getMaxLength() != null) {
+            addFacet(Facets.MAX_LENGTH, restr.getMaxLength().toString());
+            facetsChanged = true;
+        }
+        if (restr.getPatternMatcher() != null) {
+            if (patternMatcher == null) {
+                this.patternMatcher = restr.getPatternMatcher();
+                this.pattern = restr.getPattern();
+            } else {
+                patternMatcher = BasicOperations.intersection(patternMatcher, 
+                        restr.getPatternMatcher());
+                pattern = pattern + " and " + restr.getPattern();
+            }
+            facetsChanged = true;
         }
     }
     public void addFacet(Facets facet, String value) {
+        if (isNegated) {
+            throw new RuntimeException("Cannot add facets to negated data " +
+            		"ranges!");
+        }
         switch (facet) {
         case LENGTH: {
             Integer valueInt = new Integer(value);

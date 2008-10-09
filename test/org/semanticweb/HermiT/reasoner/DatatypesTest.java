@@ -12,7 +12,10 @@ public class DatatypesTest extends AbstractReasonerTest {
     }
 
     public void testDatatypesUnsat2() throws Exception {
-        loadOntologyFromResource("../res/datatypes2.owl");
+        String axioms = "SubClassOf(DataHasValue(hasAge \"18\"^^xsd:integer) Eighteen) "
+                + "ClassAssertion(a DataHasValue(hasAge \"18\"^^xsd:integer)) " 
+                + "ClassAssertion(a ObjectComplementOf(Eighteen))";
+        loadOntologyWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
     
@@ -46,6 +49,24 @@ public class DatatypesTest extends AbstractReasonerTest {
                 + "ClassAssertion(a A)";
         loadOntologyWithAxioms(axioms);
         assertABoxSatisfiable(true);
+    }
+
+    public void testAllValuesFromInteger() throws Exception {
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3\"^^xsd:integer \"4\"^^xsd:integer))) " 
+                + "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"2\"^^xsd:integer \"3\"^^xsd:integer)))"
+                + "SubClassOf(A DataSomeValuesFrom(dp DatatypeRestriction(xsd:integer minInclusive \"4\"^^xsd:integer)))"
+                + "ClassAssertion(a A)";
+        loadOntologyWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+    
+    public void testAllValuesFromInteger2() throws Exception {
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3\"^^xsd:integer \"4\"^^xsd:integer))) " 
+                + "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"2\"^^xsd:integer \"3\"^^xsd:integer)))"
+                + "ClassAssertion(a A)"
+                + "ClassAssertion(a DataAllValuesFrom(dp DataComplementOf(DataOneOf(\"3\"^^xsd:integer))))";
+        loadOntologyWithAxioms(axioms);
+        assertABoxSatisfiable(false);
     }
     
     public void testDisjointDPsUnsat() throws Exception {
@@ -82,4 +103,13 @@ public class DatatypesTest extends AbstractReasonerTest {
         loadOntologyWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
+    
+//    public void testFloat1() throws Exception {
+//        // +0 and -0 are not equal 
+//        String axioms = "PropertyAssertion(Meg numberOfChildren \"+0\"^^xsd:float) "
+//                + "PropertyAssertion(Meg numberOfChildren \"-0\"^^xsd:float) " 
+//                + "FunctionalProperty(numberOfChildren)";
+//        loadOntologyWithAxioms(axioms);
+//        assertABoxSatisfiable(false);
+//    }
 }

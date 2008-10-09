@@ -88,9 +88,6 @@ public class DatatypeRestrictionLiteral implements DLPredicate, DataRange {
         if (isNegated) return new HashSet<String>();
         return null;
     }
-    /* (non-Javadoc)
-     * @see org.semanticweb.HermiT.model.DataRange#getSmallestAssignment()
-     */
     public String getSmallestAssignment() {
         return "";
     }
