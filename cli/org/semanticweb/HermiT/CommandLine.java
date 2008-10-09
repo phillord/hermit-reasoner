@@ -81,7 +81,7 @@ public class CommandLine {
         }
         
         String getLongOptExampleStr() {
-            if (longStr == null || longStr == "") return "";
+            if (longStr == null || longStr.equals("")) return "";
             return new String("--" + longStr + 
                 (arg == Arg.NONE        ? "" :
                  arg == Arg.OPTIONAL    ? "[=" + metavar + "]"
@@ -185,7 +185,7 @@ public class CommandLine {
         public void run(Reasoner hermit, Namespaces namespaces,
                         StatusOutput status, PrintWriter output) {
             if (file != null) {
-                if (file == "-") {
+                if (file.equals("-")) {
                     output = new PrintWriter(System.out);
                 } else {
                     java.io.FileOutputStream f;
@@ -212,7 +212,7 @@ public class CommandLine {
             status.log(2, "classifying...");
             hermit.seedSubsumptionCache();
             if (file != null) {
-                if (file == "-") {
+                if (file.equals("-")) {
                     output = new PrintWriter(System.out);
                 } else {
                     java.io.FileOutputStream f;
@@ -508,7 +508,7 @@ public class CommandLine {
                     case 'o': {
                         String arg = g.getOptarg();
                         if (arg == null) throw new UsageException("--output requires an argument");
-                        if (arg == "-") output = new PrintWriter(System.out);
+                        if (arg.equals("-")) output = new PrintWriter(System.out);
                         else {
                             java.io.FileOutputStream f;
                             try {
@@ -583,9 +583,9 @@ public class CommandLine {
                     } break;
                     case kParser : {
                         String arg = g.getOptarg();
-                        if (arg.toLowerCase() == "owlapi") {
+                        if (arg.toLowerCase().equals("owlapi")) {
                             config.parserType = Reasoner.ParserType.OWLAPI;
-                        } else if (arg.toLowerCase() == "kaon2") {
+                        } else if (arg.toLowerCase().equals("kaon2")) {
                             config.parserType = Reasoner.ParserType.KAON2;
                         } else throw new UsageException("unknown parser type '" + arg + "'; supported values are 'owlapi' and 'kaon2'");
                     } break;
@@ -597,37 +597,37 @@ public class CommandLine {
                     } break;
                     case kDirectBlock : {
                         String arg = g.getOptarg();
-                        if (arg.toLowerCase() == "pairwise") {
+                        if (arg.toLowerCase().equals("pairwise")) {
                             config.directBlockingType = Reasoner.DirectBlockingType.PAIR_WISE;
-                        } else if (arg.toLowerCase() == "single") {
+                        } else if (arg.toLowerCase().equals("single")) {
                             config.directBlockingType = Reasoner.DirectBlockingType.SINGLE;
-                        } else if (arg.toLowerCase() == "optimal") {
+                        } else if (arg.toLowerCase().equals("optimal")) {
                             config.directBlockingType = Reasoner.DirectBlockingType.OPTIMAL;
                         } else throw new UsageException("unknown direct blocking type '" + arg + "'; supported values are 'pairwise', 'single', and 'optimal'");
                     } break;
                     case kBlockStrategy : {
                         String arg = g.getOptarg();
-                        if (arg.toLowerCase() == "anywhere") {
+                        if (arg.toLowerCase().equals("anywhere")) {
                             config.blockingStrategyType = Reasoner.BlockingStrategyType.ANYWHERE;
-                        } else if (arg.toLowerCase() == "ancestor") {
+                        } else if (arg.toLowerCase().equals("ancestor")) {
                             config.blockingStrategyType = Reasoner.BlockingStrategyType.ANCESTOR;
                         } else throw new UsageException("unknown blocking strategy type '" + arg + "'; supported values are 'ancestor' and 'anywhere'");
                     } break;
                     case kBlockCache : {
                         String arg = g.getOptarg();
-                        if (arg.toLowerCase() == "on") {
+                        if (arg.toLowerCase().equals("on")) {
                             config.blockingSignatureCacheType = Reasoner.BlockingSignatureCacheType.CACHED;
-                        } else if (arg.toLowerCase() == "off") {
+                        } else if (arg.toLowerCase().equals("off")) {
                             config.blockingSignatureCacheType = Reasoner.BlockingSignatureCacheType.NOT_CACHED;
                         } else throw new UsageException("unknown blocking cache type '" + arg + "'; supported values are 'on' and 'off'");
                     } break;
                     case kExpansion : {
                         String arg = g.getOptarg();
-                        if (arg.toLowerCase() == "creation") {
+                        if (arg.toLowerCase().equals("creation")) {
                             config.existentialStrategyType = Reasoner.ExistentialStrategyType.CREATION_ORDER;
-                        } else if (arg.toLowerCase() == "el") {
+                        } else if (arg.toLowerCase().equals("el")) {
                             config.existentialStrategyType = Reasoner.ExistentialStrategyType.EL;
-                        } else if (arg.toLowerCase() == "reuse") {
+                        } else if (arg.toLowerCase().equals("reuse")) {
                             config.existentialStrategyType = Reasoner.ExistentialStrategyType.INDIVIDUAL_REUSE;
                         } else throw new UsageException("unknown existential strategy type '" + arg + "'; supported values are 'creation', 'el', and 'reuse'");
                     } break;
