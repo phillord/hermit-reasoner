@@ -26,12 +26,6 @@ import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
-import org.semanticweb.HermiT.model.DataRange;
-import org.semanticweb.HermiT.model.DatatypeRestrictionBoolean;
-import org.semanticweb.HermiT.model.DatatypeRestrictionDateTime;
-import org.semanticweb.HermiT.model.DatatypeRestrictionInteger;
-import org.semanticweb.HermiT.model.DatatypeRestrictionLiteral;
-import org.semanticweb.HermiT.model.DatatypeRestrictionString;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.Individual;
@@ -40,7 +34,15 @@ import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.model.NodeIDLessThan;
 import org.semanticweb.HermiT.model.Role;
-import org.semanticweb.HermiT.model.DatatypeRestrictionLiteral.Facets;
+import org.semanticweb.HermiT.model.dataranges.DataConstant;
+import org.semanticweb.HermiT.model.dataranges.DataRange;
+import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionBoolean;
+import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionDateTime;
+import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionInteger;
+import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionLiteral;
+import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionString;
+import org.semanticweb.HermiT.model.dataranges.EnumeratedDataRange;
+import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets;
 import org.semanticweb.HermiT.util.GraphUtils;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLClass;
@@ -542,11 +544,9 @@ public class OwlClausification {
             m_bodyAtoms.add(getDataPropertyAtom(desc.getProperty(), X, y));
             DataVisitor dataVisitor = new DataVisitor();
             desc.getFiller().accept(dataVisitor);
-            for (DataRange dataRange : dataVisitor.getDataRanges()) {
-                if (!dataRange.isBottom()) {
-                    m_headAtoms.add(Atom.create(dataRange,
-                            new org.semanticweb.HermiT.model.Term[] { y }));
-                }
+            if (!dataVisitor.getDataRange().isBottom()) {
+                m_headAtoms.add(Atom.create(dataVisitor.getDataRange(),
+                        new org.semanticweb.HermiT.model.Term[] { y }));
             }
         }
 
@@ -555,11 +555,9 @@ public class OwlClausification {
             AtomicRole property = AtomicRole.createDataRole(dp.getURI().toString());
             DataVisitor dataVisitor = new DataVisitor();
             desc.getFiller().accept(dataVisitor);
-            for (DataRange dataRange : dataVisitor.getDataRanges()) {
-                m_headAtoms.add(Atom.create(AtLeastConcreteRoleConcept.create(1, property,
-                        dataRange),
-                        new org.semanticweb.HermiT.model.Term[] { X }));
-            }
+            m_headAtoms.add(Atom.create(AtLeastConcreteRoleConcept.create(1, property,
+                    dataVisitor.getDataRange()),
+                    new org.semanticweb.HermiT.model.Term[] { X }));
         }
 
         public void visit(OWLDataExactCardinalityRestriction desc) {
@@ -578,11 +576,9 @@ public class OwlClausification {
             for (int i = 0; i < yVars.length; i++) {
                 yVars[i] = nextY();
                 m_bodyAtoms.add(getDataPropertyAtom(dp, X, yVars[i]));
-                for (DataRange dataRange : dataVisitor.getDataRanges()) {
-                    if (!dataRange.isBottom()) {
-                        m_headAtoms.add(Atom.create(dataRange,
-                                new org.semanticweb.HermiT.model.Term[] { yVars[i] }));
-                    }
+                if (!dataVisitor.getDataRange().isBottom()) {
+                    m_headAtoms.add(Atom.create(dataVisitor.getDataRange(),
+                            new org.semanticweb.HermiT.model.Term[] { yVars[i] }));
                 }
             }
             for (int i = 0; i < yVars.length; i++) {
@@ -600,11 +596,12 @@ public class OwlClausification {
             AtomicRole property = AtomicRole.createDataRole(dp.getURI().toString());
             DataVisitor dataVisitor = new DataVisitor();
             desc.getFiller().accept(dataVisitor);
-            for (DataRange dataRange : dataVisitor.getDataRanges()) {
-                m_headAtoms.add(Atom.create(AtLeastConcreteRoleConcept.create(number,
-                        property, dataRange),
+            m_headAtoms.add(Atom.create(
+                    AtLeastConcreteRoleConcept.create(
+                            number, 
+                            property, 
+                            dataVisitor.getDataRange()),
                         new org.semanticweb.HermiT.model.Term[] { X }));
-            }
         }
 
         public void visit(OWLDataValueRestriction desc) {
@@ -861,6 +858,18 @@ public class OwlClausification {
         protected static OWLOntologyManager man = OWLManager.createOWLOntologyManager();
         protected static OWLDataFactory factory = man.getOWLDataFactory();
         protected static OWLDataType integerDataType = factory.getIntegerDataType();
+        protected static OWLDataType nonNegatedIntegerDataType = factory.getOWLDataType(XSDVocabulary.NON_NEGATIVE_INTEGER.getURI());
+        protected static OWLDataType nonPositiveIntegerDataType = factory.getOWLDataType(XSDVocabulary.NON_POSIITIVE_INTEGER.getURI());
+        protected static OWLDataType positiveIntegerDataType = factory.getOWLDataType(XSDVocabulary.POSITIVE_INTEGER.getURI());
+        protected static OWLDataType negativeIntegerDataType = factory.getOWLDataType(XSDVocabulary.NEGATIVE_INTEGER.getURI());
+        protected static OWLDataType longDataType = factory.getOWLDataType(XSDVocabulary.LONG.getURI());
+        protected static OWLDataType intDataType = factory.getOWLDataType(XSDVocabulary.INT.getURI());
+        protected static OWLDataType shortDataType = factory.getOWLDataType(XSDVocabulary.SHORT.getURI());
+        protected static OWLDataType byteDataType = factory.getOWLDataType(XSDVocabulary.BYTE.getURI());
+        protected static OWLDataType unsignedLongDataType = factory.getOWLDataType(XSDVocabulary.UNSIGNED_LONG.getURI());
+        protected static OWLDataType unsignedIntDataType = factory.getOWLDataType(XSDVocabulary.UNSIGNED_INT.getURI());
+        protected static OWLDataType unsignedShortDataType = factory.getOWLDataType(URI.create("http://www.w3.org/2001/XMLSchema#unsignedShort"));
+        protected static OWLDataType unsignedByteDataType = factory.getOWLDataType(URI.create("http://www.w3.org/2001/XMLSchema#unsignedByte"));
         protected static OWLDataType stringDataType = factory.getOWLDataType(XSDVocabulary.STRING.getURI());
         protected static OWLDataType booleanDataType = factory.getOWLDataType(XSDVocabulary.BOOLEAN.getURI());
         protected static OWLDataType literalDataType = factory.getTopDataType();
@@ -868,32 +877,8 @@ public class OwlClausification {
         protected static OWLDataType owlDateTimeDataType = factory.getOWLDataType(URI.create("http://www.w3.org/2002/07/owl#dateTime"));
 
         protected boolean isNegated = false;
-        protected List<DataRange> dataRanges;
         protected DataRange currentDataRange;
         
-        public DataVisitor() {
-            dataRanges = new ArrayList<DataRange>();
-        }
-
-        public void visit(OWLDataType dataType) {
-            if (integerDataType.equals(dataType)) {
-                currentDataRange =  new DatatypeRestrictionInteger(); 
-            } else if (stringDataType.equals(dataType)) {
-                currentDataRange =  new DatatypeRestrictionString();
-            } else if (literalDataType.equals(dataType)) {
-                currentDataRange =  new DatatypeRestrictionLiteral();
-            } else if (booleanDataType.equals(dataType)) {
-                currentDataRange =  new DatatypeRestrictionBoolean();
-            } else if (owlDateTimeDataType.equals(dataType) 
-                    || dateTimeDataType.equals(dataType)) {
-                currentDataRange =  new DatatypeRestrictionDateTime();
-            } else {
-                throw new RuntimeException("Unsupported datatype.");
-            }
-            if (isNegated) currentDataRange.negate();
-            dataRanges.add(currentDataRange);
-        }
-
         public void visit(OWLDataComplementOf dataComplementOf) {
             OWLDataRange range = dataComplementOf.getDataRange();
             isNegated = !isNegated;
@@ -901,51 +886,43 @@ public class OwlClausification {
         }
 
         public void visit(OWLDataOneOf dataOneOf) {
-            Set<OWLConstant> constants = dataOneOf.getValues();
-//            URI uri = null;
-            for (OWLConstant constant : constants) {
+            currentDataRange = new EnumeratedDataRange();
+            if (isNegated) currentDataRange.negate();
+            for (OWLConstant constant : dataOneOf.getValues()) {
                 if (constant.isTyped()) {
                     constant.asOWLTypedConstant().accept(this);
-//                    if (isNegated 
-//                            && uri != null 
-//                            && currentDataRange != null 
-//                            && !uri.equals(currentDataRange.getDatatypeURI())) {
-//                        // trivially satisfiable
-//                        dataRanges.clear();
-//                        currentDataRange = new DatatypeRestrictionLiteral();
-//                        dataRanges.add(currentDataRange);
-//                        return;
-//                    }
                 }  else {
                     throw new RuntimeException("Untyped datatype found " + constant);
                 }
-//                if (currentDataRange != null) {
-//                    uri = currentDataRange.getDatatypeURI();
-//                }
             }
         }
         
         public void visit(OWLTypedConstant typedConstant) {
-            DataRange currentDataRange = null;
-            if (integerDataType.equals(typedConstant.getDataType())) {
-                currentDataRange = new DatatypeRestrictionInteger();
-            } else if (stringDataType.equals(typedConstant.getDataType())) {
-                currentDataRange = new DatatypeRestrictionString();
-            } else if (booleanDataType.equals(typedConstant.getDataType())) {
-                currentDataRange = new DatatypeRestrictionBoolean();
+            if (currentDataRange == null) {
+                throw new RuntimeException("Parsed constant outside of a DataOneOf. ");
+            }
+            if (integerDataType.equals(typedConstant.getDataType()) 
+                    || nonNegatedIntegerDataType.equals(typedConstant.getDataType())
+                    || nonPositiveIntegerDataType.equals(typedConstant.getDataType())
+                    || positiveIntegerDataType.equals(typedConstant.getDataType())
+                    || negativeIntegerDataType.equals(typedConstant.getDataType())
+                    || longDataType.equals(typedConstant.getDataType())
+                    || intDataType.equals(typedConstant.getDataType())
+                    || shortDataType.equals(typedConstant.getDataType())
+                    || byteDataType.equals(typedConstant.getDataType())
+                    || unsignedLongDataType.equals(typedConstant.getDataType())
+                    || unsignedIntDataType.equals(typedConstant.getDataType())
+                    || unsignedShortDataType.equals(typedConstant.getDataType())
+                    || unsignedByteDataType.equals(typedConstant.getDataType())) {
+                currentDataRange.addOneOf(new DataConstant(integerDataType.getURI(), typedConstant.getLiteral()));
+            } else if (stringDataType.equals(typedConstant.getDataType()) 
+                    || booleanDataType.equals(typedConstant.getDataType())) {
+                currentDataRange.addOneOf(new DataConstant(typedConstant.getDataType().getURI(), typedConstant.getLiteral()));
             } else if (owlDateTimeDataType.equals(typedConstant.getDataType()) 
                     || dateTimeDataType.equals(typedConstant.getDataType())) {
-                currentDataRange =  new DatatypeRestrictionDateTime();
+                currentDataRange.addOneOf(new DataConstant(dateTimeDataType.getURI(), typedConstant.getLiteral()));
             } else {
                 throw new RuntimeException("Parsed typed constant of an unsupported data type " + typedConstant);
-            }
-            if (currentDataRange != null) {
-                if (isNegated) {
-                    currentDataRange.addNotOneOf(typedConstant.getLiteral());
-                } else {
-                    currentDataRange.addOneOf(typedConstant.getLiteral());
-                }
-                dataRanges.add(currentDataRange);
             }
         }
 
@@ -957,89 +934,31 @@ public class OwlClausification {
                 String value = facetRestriction.getFacetValue().getLiteral();
                 switch (facetOWL) {
                 case LENGTH: {
-                    if (isNegated) {
-                        currentDataRange = currentDataRange.getNewInstance();
-                        BigInteger length = new BigInteger(value);
-                        currentDataRange.addFacet(Facets.MIN_LENGTH, length.add(BigInteger.ONE).toString());
-                        dataRanges.add(currentDataRange);
-                        currentDataRange = currentDataRange.getNewInstance();
-                        currentDataRange.addFacet(Facets.MAX_LENGTH, length.subtract(BigInteger.ONE).toString());
-                        dataRanges.add(currentDataRange);
-                    } else {
-                        currentDataRange.addFacet(Facets.LENGTH, value);
-                    }
+                    currentDataRange.addFacet(Facets.LENGTH, value);
                 } break;
                 case MAX_LENGTH: {
-                    if (isNegated) {
-                        currentDataRange = currentDataRange.getNewInstance();
-                        BigInteger length = new BigInteger(value);
-                        currentDataRange.addFacet(Facets.MIN_LENGTH, length.add(BigInteger.ONE).toString());
-                        dataRanges.add(currentDataRange);
-                    } else {
-                        currentDataRange.addFacet(Facets.MAX_LENGTH, value);
-                    }
+                     currentDataRange.addFacet(Facets.MAX_LENGTH, value);
                 } break;
                 case MIN_LENGTH: {
-                    if (isNegated) {
-                        currentDataRange = currentDataRange.getNewInstance();
-                        BigInteger length = new BigInteger(value);
-                        currentDataRange.addFacet(Facets.MAX_LENGTH, length.subtract(BigInteger.ONE).toString());
-                        dataRanges.add(currentDataRange);
-                    } else {
-                        currentDataRange.addFacet(Facets.MIN_LENGTH, value);
-                    }
+                     currentDataRange.addFacet(Facets.MIN_LENGTH, value);
                 } break;
                 case MIN_INCLUSIVE: {
-                    if (isNegated) {
-                        currentDataRange = currentDataRange.getNewInstance();
-                        BigInteger length = new BigInteger(value);
-                        currentDataRange.addFacet(Facets.MAX_INCLUSIVE, length.subtract(BigInteger.ONE).toString());
-                        dataRanges.add(currentDataRange);
-                    } else {
-                        currentDataRange.addFacet(Facets.MIN_INCLUSIVE, value);
-                    }
+                    currentDataRange.addFacet(Facets.MIN_INCLUSIVE, value);
                 } break;
                 case MIN_EXCLUSIVE: {
-                    if (isNegated) {
-                        currentDataRange = currentDataRange.getNewInstance();
-                        BigInteger length = new BigInteger(value);
-                        currentDataRange.addFacet(Facets.MAX_INCLUSIVE, length.toString());
-                        dataRanges.add(currentDataRange);
-                    } else {
-                        currentDataRange.addFacet(Facets.MIN_EXCLUSIVE, value);
-                    }
+                    currentDataRange.addFacet(Facets.MIN_EXCLUSIVE, value);
                 } break;
                 case MAX_INCLUSIVE: {
-                    if (isNegated) {
-                        currentDataRange = currentDataRange.getNewInstance();
-                        BigInteger length = new BigInteger(value);
-                        currentDataRange.addFacet(Facets.MIN_INCLUSIVE, length.add(BigInteger.ONE).toString());
-                        dataRanges.add(currentDataRange);
-                    } else {
-                        currentDataRange.addFacet(Facets.MAX_INCLUSIVE, value);
-                    }
+                   currentDataRange.addFacet(Facets.MAX_INCLUSIVE, value);
                 } break;
                 case MAX_EXCLUSIVE: {
-                    if (isNegated) {
-                        currentDataRange = currentDataRange.getNewInstance();
-                        BigInteger length = new BigInteger(value);
-                        currentDataRange.addFacet(Facets.MIN_INCLUSIVE, length.toString());
-                        dataRanges.add(currentDataRange);
-                    } else {
-                        currentDataRange.addFacet(Facets.MAX_EXCLUSIVE, value);
-                    }
+                    currentDataRange.addFacet(Facets.MAX_EXCLUSIVE, value);
                 } break;
 //                case FRACTION_DIGITS: {
 //                    facet = DatatypeRestrictionLiteral.Facets.FRACTION_DIGITS;
 //                } break;
                 case PATTERN: {
-                    if (isNegated) {
-                        currentDataRange = currentDataRange.getNewInstance();
-                        currentDataRange.addFacet(Facets.PATTERN, "~" + value);
-                        dataRanges.add(currentDataRange);
-                    } else {
-                        currentDataRange.addFacet(Facets.PATTERN, value);
-                    }
+                    currentDataRange.addFacet(Facets.PATTERN, value);
                 } break;
 //                case TOTAL_DIGITS: {
 //                    facet = DatatypeRestrictionLiteral.Facets.TOTAL_DIGITS;
@@ -1050,16 +969,80 @@ public class OwlClausification {
             }
         }
 
+        public void visit(OWLDataType dataType) {
+            if (integerDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionInteger(); 
+            } else if (nonNegatedIntegerDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionInteger();
+                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "0");
+            } else if (nonPositiveIntegerDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionInteger();
+                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "0");
+            } else if (positiveIntegerDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionInteger();
+                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "1");
+            } else if (negativeIntegerDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionInteger();
+                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "-1");
+            } else if (longDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionInteger();
+                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + Long.MAX_VALUE);
+                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "" + Long.MIN_VALUE); 
+            } else if (intDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionInteger();
+                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + Integer.MAX_VALUE);
+                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "" + Integer.MIN_VALUE);
+            } else if (shortDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionInteger();
+                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + Short.MAX_VALUE);
+                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "" + Short.MIN_VALUE);
+            } else if (byteDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionInteger();
+                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + Byte.MAX_VALUE);
+                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "" + Byte.MIN_VALUE);
+            } else if (unsignedLongDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionInteger();
+                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + (new BigInteger("" + Long.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
+                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "0");
+            } else if (unsignedIntDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionInteger();
+                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + (new BigInteger("" + Integer.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
+                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "0");
+            } else if (unsignedShortDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionInteger();
+                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + (new BigInteger("" + Short.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
+                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "0");
+            } else if (unsignedByteDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionInteger();
+                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + (new BigInteger("" + Byte.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
+                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "0");
+            } else if (stringDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionString();
+            } else if (literalDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionLiteral();
+            } else if (booleanDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionBoolean();
+            } else if (owlDateTimeDataType.equals(dataType) 
+                    || dateTimeDataType.equals(dataType)) {
+                currentDataRange =  new DatatypeRestrictionDateTime();
+            } else {
+                throw new RuntimeException("Unsupported datatype.");
+            }
+            if (isNegated) currentDataRange.negate();
+        }
+        
         public void visit(OWLUntypedConstant untypedConstant) {
-            throw new RuntimeException("Parsed untyped constant " + untypedConstant);
+            throw new RuntimeException("Parsed untyped constant " 
+                    + untypedConstant);
         }
 
         public void visit(OWLDataRangeFacetRestriction facetRestriction) {
-            throw new RuntimeException("Data range facet restrictions are not yet supported. ");
+            throw new RuntimeException("OWLDataRangeFacetRestriction were " +
+            		"supposed to be handled in OWLDataRangeRestriction. ");
         }
 
-        public List<DataRange> getDataRanges() {
-            return dataRanges;
+        public DataRange getDataRange() {
+            return currentDataRange;
         }
         
         public boolean isNegated() {

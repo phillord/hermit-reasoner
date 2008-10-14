@@ -20,6 +20,7 @@ import java.util.TreeSet;
 import java.util.Map;
 import java.util.HashMap;
 import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
+import org.semanticweb.HermiT.model.dataranges.DataRange;
 
 import org.semanticweb.HermiT.Namespaces;
 

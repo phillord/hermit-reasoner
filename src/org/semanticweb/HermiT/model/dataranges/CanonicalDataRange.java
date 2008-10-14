@@ -1,29 +1,34 @@
-package org.semanticweb.HermiT.model;
+package org.semanticweb.HermiT.model.dataranges;
 
+import java.math.BigInteger;
 import java.net.URI;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Namespaces;
-import org.semanticweb.HermiT.model.DatatypeRestrictionLiteral.Facets;
+import org.semanticweb.HermiT.model.DLPredicate;
+import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets;
 
 
-public interface DataRange extends DLPredicate {
+public interface CanonicalDataRange extends DLPredicate {
     
     /**
      * @return an new instance of the concrete implementation on which the 
      *         method is called
      */
-    public DataRange getNewInstance();
+    public CanonicalDataRange getNewInstance();
+    
     /* (non-Javadoc)
      * @see org.semanticweb.HermiT.model.DLPredicate#getArity()
      */
     public int getArity();
+    
     /**
      * The URI of the datatype that implements this DataRange instance 
      * @return The URI for the type of the concrete implementation for this 
      *         DataRange.   
      */
     public URI getDatatypeURI();
+    
     /**
      * Constants that are representing the allowed assignments for this datatype 
      * restriction. The strings are String representations of the datatype that 
@@ -34,14 +39,16 @@ public interface DataRange extends DLPredicate {
      *         restrictions and are to be interpreted according to the datatype 
      *         URI of the concrete implementation of the DataRange. 
      */
-    public Set<String> getOneOf();
+    public Set<DataConstant> getOneOf();
+    
     /**
      * Defines the datatype restriction in terms of a set of constants. 
      * @param oneOf A set of constants that are String representations of values 
      *        that are to be interpreted according to the datatype URI of the 
      *        concrete implementation of the DataRange 
      */
-    public void setOneOf(Set<String> oneOf);
+    public void setOneOf(Set<DataConstant> oneOf);
+    
     /**
      * Adds constant to the values that represent this data range. 
      * @param constant A constants that is a String representation of a value 
@@ -50,7 +57,8 @@ public interface DataRange extends DLPredicate {
      * @return true if the oneOf values did not already contain the given 
      *         constant and false otherwise
      */
-    public boolean addOneOf(String constant);
+    public boolean addOneOf(DataConstant constant);
+    
     /**
      * Removes constant from the values that represent this data range. 
      * @param constant A constants that is a String representation of a value 
@@ -59,7 +67,8 @@ public interface DataRange extends DLPredicate {
      * @return true if the oneOf values did contain the given constant and false 
      *         otherwise   
      */
-    public boolean removeOneOf(String constant);
+    public boolean removeOneOf(DataConstant constant);
+    
     /**
      * Convenience method to see whether this data range is non-negated and has 
      * oneOf values that represent the allowed values for this datatype 
@@ -68,6 +77,7 @@ public interface DataRange extends DLPredicate {
      *         otherwise
      */
     public boolean hasNonNegatedOneOf();
+    
     /**
      * Constants that are representing the non-allowed assignments for this 
      * datatype restriction. It is assumed that if non-allowed values are given, 
@@ -83,7 +93,7 @@ public interface DataRange extends DLPredicate {
      *         according to the datatype URI of the concrete implementation of 
      *         this DataRange. 
      */
-    public Set<String> getNotOneOf();
+    public Set<DataConstant> getNotOneOf();
     /**
      * A set of values that are not in the interpretation of this datatype 
      * restriction.  
@@ -91,7 +101,7 @@ public interface DataRange extends DLPredicate {
      *        values that are to be interpreted according to the datatype URI of 
      *        the concrete implementation of the DataRange 
      */
-    public void setNotOneOf(Set<String> notOneOf);
+    public void setNotOneOf(Set<DataConstant> notOneOf);
     /**
      * Adds constant to the values that are not allowed in this data range. 
      * @param constant A constants that is a String representation of a value 
@@ -100,7 +110,7 @@ public interface DataRange extends DLPredicate {
      * @return true if the notOneOf values did not already contain the given 
      *         constant and false otherwise
      */
-    public boolean addNotOneOf(String constant);
+    public boolean addNotOneOf(DataConstant constant);
     /**
      * Adds constants to the values that are not allowed in this data range. 
      * @param constants A set of constants that are String representations of 
@@ -109,19 +119,22 @@ public interface DataRange extends DLPredicate {
      * @return true if the set of notOneOf values did change and false 
      *         otherwise. 
      */
-    public boolean addAllToNotOneOf(Set<String> constants);
-    /**
-     * Checks whether this data range represents all data values (RDFS Literal). 
-     * @return true if the datatype URI is the one for RDFS Literal and the data 
-     *         range is not negated and false otherwise
-     */
-    public boolean isTop();
+    public boolean addAllToNotOneOf(Set<DataConstant> constants);
+
+//    /**
+//     * Checks whether this data range represents all data values (RDFS Literal). 
+//     * @return true if the datatype URI is the one for RDFS Literal and the data 
+//     *         range is not negated and false otherwise
+//     */
+//    public boolean isTop();
+    
     /**
      * Checks whether this data range cannot contain values
      * @return true if the restrictions on this data range cause the 
      *         interpretation of it to be empty and false otherwise. 
      */
     public boolean isBottom();
+    
     /**
      * Checks whether the interpretation of this data range is necessarily 
      * finite. 
@@ -129,6 +142,7 @@ public interface DataRange extends DLPredicate {
      *         otherwise. 
      */
     public boolean isFinite();
+    
     /**
      * Checks whether the interpretation of this data range consists of at least 
      * n values. 
@@ -137,6 +151,7 @@ public interface DataRange extends DLPredicate {
      *         n values and false otherwise.  
      */
     public boolean hasMinCardinality(int n);
+    
     /**
      * Compute the set of String representations of the allowed values for this 
      * data range, provided it is finite.   
@@ -145,14 +160,16 @@ public interface DataRange extends DLPredicate {
      *         DataRange and null if the interpretation of this data range is 
      *         infinite. 
      */
-    public Set<String> getEnumeration();
+    public BigInteger getEnumerationSize();
+    
     /**
      * Computes the lexicographically smallest assignment given the 
      * restrictions. 
      * @return The lexicographically smallest assignment given the restrictions 
      *         or null if none exists. 
      */
-    public String getSmallestAssignment();
+    public DataConstant getSmallestAssignment();
+    
     /**
      * Checks whether constant is the String representation of a value in the 
      * data range, where the string has to be interpreted according to the 
@@ -161,17 +178,20 @@ public interface DataRange extends DLPredicate {
      * @return true if constant represents a value in the interpretation of this 
      *         data range and false otherwise. 
      */
-    public boolean accepts(String constant);
+    public boolean accepts(DataConstant constant);
+    
     /**
      * Checks whether this data range is negated. 
      * @return true if negated and false otherwise.
      */
     public boolean isNegated();
+    
     /**
      * Negate this data range, i.e., if the range was negated it is no longer 
      * negated afterwards and if it was not negated it will be negated afterwards. 
      */
     public void negate();
+    
     /**
      * Conjoins the facet restrictions from the given data range, provided it is 
      * of the same concrete implementation, i.e., we can conjoins the facets of 
@@ -182,7 +202,8 @@ public interface DataRange extends DLPredicate {
      * @throws IllegalArgumentException if the concrete realisation of the given 
      *         data range is different from the one for this data range.  
      */
-    public void conjoinFacetsFrom(DataRange range) throws IllegalArgumentException;
+    public void conjoinFacetsFrom(CanonicalDataRange range) throws IllegalArgumentException;
+    
     /**
      * Adds a facet, if it is supported by the implementation that implements 
      * the data range. 
@@ -192,6 +213,7 @@ public interface DataRange extends DLPredicate {
      *         concrete realisation of this data range.  
      */
     public void addFacet(Facets facet, String value) throws IllegalArgumentException;
+    
     /**
      * Checks whether the given facet is supported by the concrete 
      * implementation of this data range. 
@@ -200,6 +222,7 @@ public interface DataRange extends DLPredicate {
      *         this data range and false otherwise.
      */
     public boolean supports(Facets facet);
+    
     /* (non-Javadoc)
      * @see org.semanticweb.HermiT.model.DLPredicate#toString(org.semanticweb.HermiT.Namespaces)
      */

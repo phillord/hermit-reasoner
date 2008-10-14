@@ -61,7 +61,6 @@ import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLPredicate;
-import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.ExistentialConcept;
@@ -69,6 +68,8 @@ import org.semanticweb.HermiT.model.ExistsDescriptionGraph;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Role;
+import org.semanticweb.HermiT.model.dataranges.DataConstant;
+import org.semanticweb.HermiT.model.dataranges.DataRange;
 import org.semanticweb.HermiT.monitor.TableauMonitorForwarder;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
@@ -735,12 +736,12 @@ public class Debugger extends TableauMonitorForwarder {
                 return type1-type2;
             int comparison = dr1.getDatatypeURI().compareTo(dr2.getDatatypeURI());
             if (comparison!=0) return comparison;
-            List<String> values1 = new ArrayList<String>(dr1.getOneOf());
-            List<String> values2 = new ArrayList<String>(dr2.getOneOf());
+            List<DataConstant> values1 = new ArrayList<DataConstant>(dr1.getOneOf());
+            List<DataConstant> values2 = new ArrayList<DataConstant>(dr2.getOneOf());
             Collections.sort(values1);
             Collections.sort(values2);
-            Iterator<String> it1 = values1.iterator();
-            Iterator<String> it2 = values2.iterator();
+            Iterator<DataConstant> it1 = values1.iterator();
+            Iterator<DataConstant> it2 = values2.iterator();
             while (it1.hasNext()) {
                 if (it2.hasNext()) {
                     comparison = it1.next().compareTo(it2.next());
