@@ -58,7 +58,7 @@ public class DatatypeRestrictionLiteral extends DatatypeRestriction implements D
         return null;
     }
 
-    public void conjoinFacetsFrom(CanonicalDataRange range) {
+    public void conjoinFacetsFrom(DataRange range) {
         throw new RuntimeException("Cannot conjoin any facets to RDFS " +
         "literal datatype restrictions. ");
     }

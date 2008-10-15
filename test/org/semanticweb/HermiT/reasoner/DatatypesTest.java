@@ -5,61 +5,64 @@ public class DatatypesTest extends AbstractReasonerTest {
     public DatatypesTest(String name) {
         super(name);
     }
-//    
-//    public void testDatatypesUnsat1() throws Exception {
-//        loadOntologyFromResource("../res/datatypes1.owl");
-//        assertABoxSatisfiable(false);
-//    }
-//
-//    public void testDatatypesUnsat2() throws Exception {
-//        String axioms = "SubClassOf(DataHasValue(hasAge \"18\"^^xsd:integer) Eighteen) "
-//                + "ClassAssertion(a DataHasValue(hasAge \"18\"^^xsd:integer)) " 
-//                + "ClassAssertion(a ObjectComplementOf(Eighteen))";
-//        loadOntologyWithAxioms(axioms);
-//        assertABoxSatisfiable(false);
-//    }
-//    
-//    public void testDatatypesUnsat3() throws Exception {
-//        loadOntologyFromResource("../res/datatypes3.owl");
-//        assertABoxSatisfiable(false);
-//    }
-//    
-//    public void testDatatypesUnsat4() throws Exception {
-//        loadOntologyFromResource("../res/datatypes4.owl");
-//        assertABoxSatisfiable(false);
-//    }
-//    
-//    public void testDatatypesSat1() throws Exception {
-//        loadOntologyFromResource("../res/datatypes5.owl");
-//        assertABoxSatisfiable(true);
-//    }
-//    
-//    public void testminInclMaxIncl() throws Exception {
-//        String axioms = "SubClassOf(A DataSomeValuesFrom(dp DatatypeRestriction(xsd:integer minInclusive \"18\"^^xsd:integer))) "
-//                + "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:integer maxInclusive \"10\"^^xsd:integer))) " 
-//                + "ClassAssertion(a A)";
-//        loadOntologyWithAxioms(axioms);
-//        assertABoxSatisfiable(false);
-//    }
-//    
-//    public void testDisjointDPsSatInteger() throws Exception {
-//        String axioms = "DisjointDataProperties(dp1 dp2) " 
-//                + "DataPropertyAssertion(dp1 a \"10\"^^xsd:integer)"
-//                + "SubClassOf(A DataSomeValuesFrom(dp2 DatatypeRestriction(xsd:integer minInclusive \"18\"^^xsd:integer maxInclusive \"18\"^^xsd:integer)))"
-//                + "ClassAssertion(a A)";
-//        loadOntologyWithAxioms(axioms);
-//        assertABoxSatisfiable(true);
-//    }
-//
-//    public void testAllValuesFromInteger() throws Exception {
-//        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3\"^^xsd:integer \"4\"^^xsd:integer))) " 
-//                + "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"2\"^^xsd:integer \"3\"^^xsd:integer)))"
-//                + "SubClassOf(A DataSomeValuesFrom(dp DatatypeRestriction(xsd:integer minInclusive \"4\"^^xsd:integer)))"
-//                + "ClassAssertion(a A)";
-//        loadOntologyWithAxioms(axioms);
-//        assertABoxSatisfiable(false);
-//    }
-//    
+    
+    public void testDatatypesUnsat1() throws Exception {
+        loadOntologyFromResource("../res/datatypes1.owl");
+        assertABoxSatisfiable(false);
+    }
+
+    public void testDatatypesUnsat2() throws Exception {
+        String axioms = "SubClassOf(DataHasValue(hasAge \"18\"^^xsd:integer) Eighteen) "
+                + "ClassAssertion(a DataHasValue(hasAge \"18\"^^xsd:integer)) " 
+                + "ClassAssertion(a ObjectComplementOf(Eighteen))";
+        loadOntologyWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+    
+    public void testDatatypesUnsat3() throws Exception {
+        loadOntologyFromResource("../res/datatypes3.owl");
+        assertABoxSatisfiable(false);
+    }
+    
+    public void testDatatypesUnsat4() throws Exception {
+        loadOntologyFromResource("../res/datatypes4.owl");
+        assertABoxSatisfiable(false);
+    }
+    
+    public void testDatatypesSat1() throws Exception {
+        String axioms = "SubClassOf(A DataHasValue(dp \"18\"^^xsd:integer)) "
+                + "ClassAssertion(a A) "
+                + "ClassAssertion(a DataAllValuesFrom(dp xsd:integer)) ";
+        loadOntologyWithAxioms(axioms);
+        assertABoxSatisfiable(true);
+    }
+    
+    public void testminInclMaxIncl() throws Exception {
+        String axioms = "SubClassOf(A DataSomeValuesFrom(dp DatatypeRestriction(xsd:integer minInclusive \"18\"^^xsd:integer))) "
+                + "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:integer maxInclusive \"10\"^^xsd:integer))) " 
+                + "ClassAssertion(a A)";
+        loadOntologyWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+    
+    public void testDisjointDPsSatInteger() throws Exception {
+        String axioms = "DisjointDataProperties(dp1 dp2) " 
+                + "DataPropertyAssertion(dp1 a \"10\"^^xsd:integer)"
+                + "SubClassOf(A DataSomeValuesFrom(dp2 DatatypeRestriction(xsd:integer minInclusive \"18\"^^xsd:integer maxInclusive \"18\"^^xsd:integer)))"
+                + "ClassAssertion(a A)";
+        loadOntologyWithAxioms(axioms);
+        assertABoxSatisfiable(true);
+    }
+
+    public void testAllValuesFromInteger() throws Exception {
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3\"^^xsd:integer \"4\"^^xsd:integer))) " 
+                + "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"2\"^^xsd:integer \"3\"^^xsd:integer)))"
+                + "SubClassOf(A DataSomeValuesFrom(dp DatatypeRestriction(xsd:integer minInclusive \"4\"^^xsd:integer)))"
+                + "ClassAssertion(a A)";
+        loadOntologyWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+    
     public void testAllValuesFromInteger2() throws Exception {
         String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3\"^^xsd:integer \"4\"^^xsd:integer))) " 
                 + "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"2\"^^xsd:integer \"3\"^^xsd:integer)))"

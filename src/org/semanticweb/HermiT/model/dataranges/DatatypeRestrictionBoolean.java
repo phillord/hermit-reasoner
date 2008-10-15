@@ -114,7 +114,7 @@ public class DatatypeRestrictionBoolean extends DatatypeRestriction {
         return isBottom || !hasMinCardinality(1); 
     }
     
-    public void conjoinFacetsFrom(CanonicalDataRange range) {
+    public void conjoinFacetsFrom(DataRange range) {
         throw new RuntimeException("Cannot conjoin any facets to boolean " +
         		"datatype restrictions. ");
     }

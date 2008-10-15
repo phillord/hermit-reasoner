@@ -43,7 +43,8 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
     }
     
     public boolean isFinite() {
-        return (isBottom || (!isNegated && (hasOnlyFiniteIntervals() || !oneOf.isEmpty())));
+        boolean result = isBottom || (!isNegated && (hasOnlyFiniteIntervals() || !oneOf.isEmpty()));
+        return (result);
     }
     
     public boolean hasMinCardinality(int n) {
@@ -138,6 +139,17 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
         return false; 
     }
     
+    public boolean facetsAccept(DataConstant constant) {
+        if (intervals.isEmpty()) return true;
+        BigInteger intValue = new BigInteger(constant.getValue());
+        for (Interval i : intervals) {
+            if (i.contains(intValue) && !notOneOf.contains(constant)) {
+                return true;
+            }
+        }
+        return false; 
+    }
+    
     public boolean addOneOf(DataConstant constant) {
         if (!intervals.isEmpty()) {
             throw new RuntimeException("Can only add oneOfs if no facets are present. ");
@@ -171,7 +183,7 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
         return contained;
     }
     
-    public void conjoinFacetsFrom(CanonicalDataRange range) {
+    public void conjoinFacetsFrom(DataRange range) {
         if (isNegated) {
             throw new RuntimeException("Cannot add facets to negated " +
                         "data ranges!");
@@ -189,32 +201,48 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
                         "contains more than one interval. ");
             }
             if (intervals.isEmpty()) {
-                intervals.addAll(restr.getIntervals());
+                for (Interval i : restr.getIntervals()) {
+                    if (restr.isNegated()) {
+                        if (!i.isFinite() || i.isEmpty()) {
+                            if (i.getMinIncl() != null) {
+                                intervals.add(new Interval(i.getMinIncl(), null));
+                            }
+                            if (i.getMaxIncl() != null) {
+                                intervals.add(new Interval(null, i.getMaxIncl()));
+                            }
+                        } // otherwise i is trivially satisfied
+                    } else {
+                        intervals.addAll(restr.getIntervals());
+                    }
+                }
             } else {
                 if (restr.isNegated()) {
                     Set<Interval> newIntervals = new HashSet<Interval>();
                     for (Interval i : intervals) {
                         for (Interval iNew : restr.getIntervals()) {
-                            newIntervals.addAll(i.intersectWithNegated(iNew.getMinIncl(), iNew.getMaxIncl()));
+                            if (!iNew.isFinite() || iNew.isEmpty()) {
+                                newIntervals.addAll(i.intersectWithNegated(iNew));
+                            } else {
+                                // the restrictions in restr are trivially sat
+                                newIntervals.add(i);
+                            }
                         }
                     }
                     intervals = newIntervals;
                 } else {
+                    Set<Interval> newIntervals = new HashSet<Interval>();
                     for (Interval i : intervals) {
                         for (Interval iNew : restr.getIntervals()) {
                             i.intersectWith(iNew);
+                            if (!i.isEmpty()) newIntervals.add(i);
                         }
                     }
+                    if (newIntervals.isEmpty()) {
+                        isBottom = true;
+                    } else {
+                        intervals = newIntervals;
+                    }
                 }
-            }
-            // remove empty ranges
-            Set<Interval> emptyIntervals = new HashSet<Interval>();
-            for (Interval i : intervals) {
-                if (i.isEmpty()) emptyIntervals.add(i);
-            }
-            if (!emptyIntervals.isEmpty()) {
-                intervals.removeAll(emptyIntervals);
-                if (emptyIntervals.isEmpty()) isBottom = true;
             }
         }
     }
@@ -298,48 +326,24 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
     protected void addNegatedFacet(Facets facet, BigInteger valueInt) {
         switch (facet) {
         case MIN_INCLUSIVE: {
-            boolean hasMin = false;
-            boolean isTop = false;
-            for (Interval i : intervals) {
-                if (i.getMinIncl() != null) {
-                    hasMin = true;
-                    if (i.getMinIncl().compareTo(valueInt) > 0) {
+            if (intervals.isEmpty()) {
+                intervals.add(new Interval(valueInt, null));
+            } else { 
+                for (Interval i : intervals) {
+                    if (i.getMinIncl() == null || i.getMinIncl().compareTo(valueInt) > 0) {
                         i.setMinIncl(valueInt);
                     }
-                } else {
-                    if (i.getMaxIncl().compareTo(valueInt) >= 0) {
-                        isTop = true;
-                    }
-                }
-            }
-            if (isTop) {
-                intervals.clear();
-            } else {
-                if (!hasMin) {
-                    intervals.add(new Interval(valueInt, null));
                 }
             }
         } break;
         case MAX_INCLUSIVE: {
-            boolean hasMax = false;
-            boolean isTop = false;
-            for (Interval i : intervals) {
-                if (i.getMaxIncl() != null) {
-                    hasMax = true;
-                    if (i.getMaxIncl().compareTo(valueInt) < 0) {
+            if (intervals.isEmpty()) {
+                intervals.add(new Interval(null, valueInt));
+            } else { 
+                for (Interval i : intervals) {
+                    if (i.getMaxIncl() == null || i.getMaxIncl().compareTo(valueInt) < 0) {
                         i.setMaxIncl(valueInt);
                     }
-                } else {
-                    if (i.getMinIncl().compareTo(valueInt) <= 0) {
-                        isTop = true;
-                    }
-                }
-            }
-            if (isTop) {
-                intervals.clear();
-            } else {
-                if (!hasMax) {
-                    intervals.add(new Interval(null, valueInt));
                 }
             }
         } break;
@@ -357,23 +361,25 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
         buffer.append("(");
         if (isNegated) buffer.append("not ");
         buffer.append(namespaces.idFromUri(datatypeURI.toString()));
-        boolean firstRun = true;
+        boolean notFirstRun = false;
         for (Interval i : intervals) {
+            if (notFirstRun && !isNegated) {
+                buffer.append(" or ");
+            }
             if (i.getMinIncl() != null) {
+                if (isNegated) buffer.append(" or ");
                 buffer.append(" >= " + i.getMinIncl());
             }
             if (i.getMaxIncl() != null) {
+                if (isNegated) buffer.append(" or ");
                 buffer.append(" <= " + i.getMaxIncl());
             }
-            if (!firstRun) {
-                buffer.append(" or ");
-            }
-            firstRun = false;
+            notFirstRun = true;
         }
         if (!oneOf.isEmpty()) {
             if (isNegated) buffer.append("not ");
             buffer.append(" OneOf(");
-            firstRun = true;
+            boolean firstRun = true;
             for (DataConstant constant : oneOf) {
                 if (!firstRun) {
                     buffer.append(isNegated ? " and " : " or ");
@@ -385,7 +391,7 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
         }
         if (!notOneOf.isEmpty()) {
             buffer.append(" not OneOf(");
-            firstRun = true;
+            boolean firstRun = true;
             for (DataConstant constant : notOneOf) {
                 if (!firstRun) {
                     buffer.append(isNegated ? " and " : " or ");
@@ -408,9 +414,11 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
             this.maxIncl = maxInclusive;
         }
         
-        public Set<Interval> intersectWithNegated(BigInteger minInclusive, BigInteger maxInclusive) {
+        public Set<Interval> intersectWithNegated(Interval i) {
             Set<Interval> intervals = new HashSet<Interval>();
-            if (minIncl.compareTo(maxIncl) > 0) return intervals;
+            if (this.isEmpty()) return intervals;
+            BigInteger minInclusive = i.getMinIncl();
+            BigInteger maxInclusive = i.getMaxIncl();
             if ((maxInclusive != null 
                     && maxIncl != null 
                     && maxInclusive.compareTo(maxIncl) > 0) 
@@ -443,7 +451,7 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
                 }
             }
             if (minIncl == null) {
-                minIncl = i.getMaxIncl();
+                minIncl = i.getMinIncl();
             } else {
                 if (i.getMinIncl() != null 
                         && i.getMinIncl().compareTo(minIncl) > 0) {
@@ -453,17 +461,15 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
         }
         
         public boolean isEmpty() {
-            if (minIncl == null && maxIncl == null) return true;
-            if (minIncl != null && maxIncl != null) {
-                return minIncl.compareTo(maxIncl) > 0;
-            } else return false;
+            return (minIncl != null && maxIncl != null && minIncl.compareTo(maxIncl) > 0);
         }
         
         protected boolean isEmpty(BigInteger lower, BigInteger upper) {
-            if (lower == null && upper == null) return true;
-            if (lower != null && upper != null) {
-                return lower.compareTo(upper) <= 0;
-            } else return false;
+            return (lower != null && upper != null && lower.compareTo(upper) > 0);
+        }
+        
+        public boolean isFinite() {
+            return minIncl != null && maxIncl != null;
         }
         
         public boolean contains(BigInteger integer) {

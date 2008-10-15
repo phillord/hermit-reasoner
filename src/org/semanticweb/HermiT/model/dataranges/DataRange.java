@@ -9,6 +9,12 @@ import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets;
 
 
 public interface DataRange extends DLPredicate {
+    
+    /**
+     * @return an new instance of the concrete implementation on which the 
+     *         method is called
+     */
+    public CanonicalDataRange getNewInstance();
         
     /* (non-Javadoc)
      * @see org.semanticweb.HermiT.model.DLPredicate#getArity()
@@ -33,6 +39,15 @@ public interface DataRange extends DLPredicate {
      *         URI of the concrete implementation of the DataRange. 
      */
     public Set<DataConstant> getOneOf();
+    
+    /**
+     * Convenience method to see whether this data range is non-negated and has 
+     * oneOf values that represent the allowed values for this datatype 
+     * restriction. 
+     * @return true if negated is false and oneOf is non-empty and false 
+     *         otherwise
+     */
+    public boolean hasNonNegatedOneOf();
     
     /**
      * Adds constant to the values that represent this data range. 

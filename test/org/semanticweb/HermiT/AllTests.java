@@ -4,15 +4,13 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.semanticweb.HermiT.datatypes.DatatypesTest;
-
 public class AllTests extends TestCase {
 
     public static Test suite() {
         TestSuite suite = new TestSuite("All HermiT tests");
         // $JUnit-BEGIN$
-        // Tests some internals of the datatype classes.
-        suite.addTestSuite(DatatypesTest.class);
+        // Tests the internals of the datatype classes.
+        suite.addTest(org.semanticweb.HermiT.datatypes.AllTests.suite());
         // Tests the normalization and clausification, when loading via the
         // KAON2 API.
         suite.addTest(org.semanticweb.HermiT.kaon2.AllTests.suite());

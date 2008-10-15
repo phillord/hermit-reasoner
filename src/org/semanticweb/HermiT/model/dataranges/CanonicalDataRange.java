@@ -5,22 +5,10 @@ import java.net.URI;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Namespaces;
-import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets;
 
 
-public interface CanonicalDataRange extends DLPredicate {
-    
-    /**
-     * @return an new instance of the concrete implementation on which the 
-     *         method is called
-     */
-    public CanonicalDataRange getNewInstance();
-    
-    /* (non-Javadoc)
-     * @see org.semanticweb.HermiT.model.DLPredicate#getArity()
-     */
-    public int getArity();
+public interface CanonicalDataRange {
     
     /**
      * The URI of the datatype that implements this DataRange instance 
@@ -120,13 +108,6 @@ public interface CanonicalDataRange extends DLPredicate {
      *         otherwise. 
      */
     public boolean addAllToNotOneOf(Set<DataConstant> constants);
-
-//    /**
-//     * Checks whether this data range represents all data values (RDFS Literal). 
-//     * @return true if the datatype URI is the one for RDFS Literal and the data 
-//     *         range is not negated and false otherwise
-//     */
-//    public boolean isTop();
     
     /**
      * Checks whether this data range cannot contain values
@@ -193,6 +174,14 @@ public interface CanonicalDataRange extends DLPredicate {
     public void negate();
     
     /**
+     * Checks if the constant conforms to the facets
+     * @param constant
+     * @return true if no facets are present or if facets accept constant and 
+     * false otherwise
+     */
+    public boolean facetsAccept(DataConstant constant);
+    
+    /**
      * Conjoins the facet restrictions from the given data range, provided it is 
      * of the same concrete implementation, i.e., we can conjoins the facets of 
      * an instance of DatatypeRestrictionString to another instance of 
@@ -202,7 +191,7 @@ public interface CanonicalDataRange extends DLPredicate {
      * @throws IllegalArgumentException if the concrete realisation of the given 
      *         data range is different from the one for this data range.  
      */
-    public void conjoinFacetsFrom(CanonicalDataRange range) throws IllegalArgumentException;
+    public void conjoinFacetsFrom(DataRange range) throws IllegalArgumentException;
     
     /**
      * Adds a facet, if it is supported by the implementation that implements 

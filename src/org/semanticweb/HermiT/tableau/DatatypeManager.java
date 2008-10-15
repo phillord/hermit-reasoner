@@ -12,9 +12,11 @@ import java.util.Map.Entry;
 
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLPredicate;
+import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.dataranges.CanonicalDataRange;
 import org.semanticweb.HermiT.model.dataranges.DataConstant;
+import org.semanticweb.HermiT.model.dataranges.DataRange;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionLiteral;
 import org.semanticweb.HermiT.model.dataranges.EnumeratedDataRange;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
@@ -48,7 +50,8 @@ public class DatatypeManager {
     /**
      * Checks if in the last iteration a new data range assertion has been added 
      * and if so, whether the restrictions on this newly added node and its data 
-     * range siblings are satisfiable given the asserted inequalities.  
+     * range siblings are satisfiable given the asserted equalities and 
+     * inequalities.  
      * @return true if the data range assertions are satisfiable and false 
      *         otherwise
      */
@@ -57,14 +60,14 @@ public class DatatypeManager {
             tableauMonitor.datatypeCheckingStarted();
         }
         boolean datatypesSat = true;
-        Set<CanonicalDataRange> checkedDRs = new HashSet<CanonicalDataRange>();
+        Set<DataRange> checkedDRs = new HashSet<DataRange>();
         Object[] pair = pairsDeltaOld.getTupleBuffer();
         pairsDeltaOld.open();
         while (datatypesSat && !pairsDeltaOld.afterLast()) {
-            if (pair[0] instanceof CanonicalDataRange && !checkedDRs.contains((CanonicalDataRange) pair[0])) {
+            if (pair[0] instanceof DataRange && !checkedDRs.contains((DataRange) pair[0])) {
                 // in the last saturation, we added a DataRange, so lets check 
                 // whether this caused a clash
-                Map<Node,Set<CanonicalDataRange>> nodeToDRs = fetchRelevantAssertions((Node) pair[1]);
+                Map<Node,Set<DataRange>> nodeToDRs = fetchRelevantAssertions((Node) pair[1]);
                 datatypesSat = checkDatatypeAssertionFor(nodeToDRs);
                 if (datatypesSat) {
                     // remember, which ranges we have already checked because 
@@ -96,9 +99,9 @@ public class DatatypeManager {
      *         that mapping contains all data range assertion for n1 from the 
      *         extension table. 
      */
-    protected Map<Node,Set<CanonicalDataRange>> fetchRelevantAssertions(Node initialNode) {
-        Map<Node,Set<CanonicalDataRange>> nodeToDRs = new HashMap<Node,Set<CanonicalDataRange>>();
-        Set<CanonicalDataRange> dataRanges;
+    protected Map<Node,Set<DataRange>> fetchRelevantAssertions(Node initialNode) {
+        Map<Node,Set<DataRange>> nodeToDRs = new HashMap<Node,Set<DataRange>>();
+        Set<DataRange> dataRanges;
         // find the predecessor of this node and collect all datatype 
         // successors that the predecessor has
         Object[] triple = triplesSecondBoundRetr.getTupleBuffer();
@@ -119,8 +122,8 @@ public class DatatypeManager {
                 pairsFirstBoundRetr.getBindingsBuffer()[1] = successor;
                 pairsFirstBoundRetr.open();
                 while (!pairsFirstBoundRetr.afterLast()) {
-                    dataRanges = new HashSet<CanonicalDataRange>();
-                    dataRanges.add((CanonicalDataRange) assertionsForSuccessor[0]);
+                    dataRanges = new HashSet<DataRange>();
+                    dataRanges.add((DataRange) assertionsForSuccessor[0]);
                     if (nodeToDRs.containsKey(successor)) {
                         dataRanges.addAll(nodeToDRs.get(successor));
                     }
@@ -139,11 +142,11 @@ public class DatatypeManager {
      * @param nodeToDRs a mapping from nodes to their asserted data ranges
      * @return true if a consistent assignment exists, false otherwise
      */
-    protected boolean checkDatatypeAssertionFor(Map<Node,Set<CanonicalDataRange>> nodeToDRs) {
+    protected boolean checkDatatypeAssertionFor(Map<Node,Set<DataRange>> nodeToDRs) {
         // test for trivial unsatisfiability:
         // Is there a dataRange assertion that is bottom?
         for (Node node : nodeToDRs.keySet()) {
-            for (CanonicalDataRange dataRange : nodeToDRs.get(node)) {
+            for (DataRange dataRange : nodeToDRs.get(node)) {
                 if (dataRange.isBottom()) {
                     if (tableauMonitor != null) {
                         tableauMonitor.clashDetected(new Object[][] {
@@ -156,31 +159,36 @@ public class DatatypeManager {
             }
         }
         
-        // collect the inequalities and raise a clash when a self inequality is 
-        // found 
+        // collect the equalities
+        Set<Set<Node>> equalities = new HashSet<Set<Node>>();
+        fetchEqualities(nodeToDRs.keySet(), equalities);
+        
+        // collect the inequalities and raise a clash when an inequality is 
+        // found for equivalent nodes
         Map<Node,Set<Node>> inequalities = new HashMap<Node,Set<Node>>();
         Map<Node,Set<Node>> inequalitiesSym = new HashMap<Node,Set<Node>>();
         boolean foundSelfInequality = fetchInequalities(nodeToDRs.keySet(), 
-                        inequalities, inequalitiesSym);
+                        equalities, inequalities, inequalitiesSym);
         if (foundSelfInequality) return false; // clash has been raised
         
         // conjoin all data ranges for each node into a canonical range 
         // leave the original ranges unchanged for backtracking
-        Map<Node, CanonicalDataRange> nodeToCanonicalDR = buildCanonicalRanges(nodeToDRs);
+        Map<Node, CanonicalDataRange> nodeToCanonicalDR = buildCanonicalRanges(nodeToDRs, equalities);
         if (nodeToCanonicalDR == null) {
             // found a clash while joining the ranges, clash has been raised
             return false; 
         }
         
         // take out those that have more values than needed for the inequalities
-        removeUnderRestrictedRanges(nodeToCanonicalDR, inequalities, inequalitiesSym);
+        removeUnderRestrictedRanges(nodeToCanonicalDR, equalities, 
+                inequalities, inequalitiesSym);
 
         // now we have a set of data ranges that have not enough trivial 
         // assignments, so we really have to check whether we can find a 
         // suitable assignment for the allowed values
         // first we partition the nodes and their data ranges
         Set<Map<CanonicalDataRange, Node>> partitions = buildPartitions(
-                nodeToCanonicalDR, inequalities,  inequalitiesSym);
+                nodeToCanonicalDR, equalities, inequalities, inequalitiesSym);
 
         for (Map<CanonicalDataRange, Node> partition : partitions) {
             boolean hasAssignment = hasAssignment(partition, 
@@ -193,11 +201,15 @@ public class DatatypeManager {
         }
         return true;
     }
+    
     /**
      * Given a set of nodes for which there are data range assertions in the 
-     * tableau, collect all inequalities for the nodes. If a self inequality is 
-     * found (neq node node) a clash is raised and the method return true. 
+     * tableau and the equalities between these, collect all inequalities for 
+     * the nodes. If an inequality is found (neq node1 node2) for node1 
+     * equivalent to node2 a clash is raised and the method return true. 
      * @param nodes the set of nodes for which inequalities are collected
+     * @param equalities a set of sets of nodes such that the nodes in each set 
+     *        are equivalent to each other
      * @param inequalities is a map that is initially assumed to be empty. 
      *        After running the method, it contains as keys all nodes n1 from 
      *        the given set nodes for which there is an inequality assertion of 
@@ -215,6 +227,7 @@ public class DatatypeManager {
      *         inequalities from the extension table and false otherwise
      */
     protected boolean fetchInequalities(Set<Node> nodes, 
+            Set<Set<Node>> equalities,
             Map<Node, Set<Node>> inequalities, 
             Map<Node, Set<Node>> inequalitiesSym) {
         Object[] triple = triplesZeroBoundRetr.getTupleBuffer();
@@ -223,14 +236,16 @@ public class DatatypeManager {
         while (!triplesZeroBoundRetr.afterLast()) {
             Node node1 = (Node) triple[1];
             Node node2 = (Node) triple[2];
-            if (node1.equals(node2)) {
-                if (tableauMonitor != null) {
-                    tableauMonitor.clashDetected(new Object[][] {
-                            new Object[] { Inequality.INSTANCE, node1, node2 } });
-                    tableauMonitor.datatypeCheckingFinished(false);
+            for (Set<Node> equalNodes : equalities) {
+                if (equalNodes.contains(node1) && equalNodes.contains(node2)) {
+                    if (tableauMonitor != null) {
+                        tableauMonitor.clashDetected(new Object[][] {
+                                new Object[] { Inequality.INSTANCE, node1, node2 } });
+                        tableauMonitor.datatypeCheckingFinished(false);
+                    }
+                    extensionManager.setClash(triplesZeroBoundRetr.getDependencySet());
+                    return true;
                 }
-                extensionManager.setClash(triplesZeroBoundRetr.getDependencySet());
-                return true;
             }
             if (nodes.contains(node1)) {
                 // found an inequality between datatype nodes
@@ -258,6 +273,57 @@ public class DatatypeManager {
     }
     
     /**
+     * Given a set of nodes for which there are data range assertions in the 
+     * tableau, collect all equalities for the nodes. 
+     * @param nodes The set of nodes for which equalities are collected
+     * @param equalities is a set of sets that is initially assumed to be empty. 
+     *        After running the method, it contains sets such that all the nodes 
+     *        in the set are equivalent taking into account that equality is 
+     *        reflexive, transitive and symmetric. 
+     */
+    protected void fetchEqualities(Set<Node> nodes, 
+            Set<Set<Node>> equalities) { 
+        for (Node node : nodes) {
+            Set<Node> equalNodes = new HashSet<Node>();
+            equalNodes.add(node);
+            equalities.add(equalNodes);
+        }
+        Node node1 = null;
+        Node node2 = null;
+        Set<Node> setForNode1 = null;
+        Set<Node> setForNode2 = null;
+        Object[] triple = triplesZeroBoundRetr.getTupleBuffer();
+        triplesZeroBoundRetr.getBindingsBuffer()[0] = Equality.INSTANCE;
+        triplesZeroBoundRetr.open();
+        while (!triplesZeroBoundRetr.afterLast()) {
+            node1 = (Node) triple[1];
+            if (nodes.contains(node1)) {
+                node2 = (Node) triple[2];
+                setForNode1 = null;
+                setForNode2 = null;
+                for (Set<Node> equalNodes : equalities) {
+                    if (equalNodes.contains(node1)) setForNode1 = equalNodes;
+                    if (equalNodes.contains(node2)) setForNode2 = equalNodes;
+                }
+                if (setForNode1 == null && setForNode2 == null) {
+                    setForNode1 = new HashSet<Node>();
+                    setForNode1.add(node1);
+                    setForNode1.add(node2);
+                    equalities.add(setForNode1);
+                } else if (setForNode1 == null && setForNode2 != null) {
+                    setForNode2.add(node1);
+                } else if (setForNode2 == null && setForNode1 != null) {
+                    setForNode1.add(node2);
+                } else if (setForNode1 != null && setForNode2 != null && setForNode1 != setForNode2) {
+                    setForNode1.addAll(setForNode2);
+                    equalities.remove(setForNode2);
+                }
+            }
+            triplesZeroBoundRetr.next();
+        }
+    }
+    
+    /**
      * Given a map from nodes to a set of data ranges, construct a map from 
      * nodes to data ranges such that each constructed data range captures all 
      * restrictions of the data ranges in the set for the node in the given map. 
@@ -271,30 +337,44 @@ public class DatatypeManager {
      *         restrictions of {dr_1, ..., dr_n} or null if conjoining the 
      *         ranges lead to a clash (constructed range is bottom)
      */
-    protected Map<Node, CanonicalDataRange> buildCanonicalRanges(Map<Node, Set<CanonicalDataRange>> nodeToDRs) {
+    protected Map<Node, CanonicalDataRange> buildCanonicalRanges(
+            Map<Node, Set<DataRange>> nodeToDRs, 
+            Set<Set<Node>> equalities) {
         Map<Node, CanonicalDataRange> nodeToCanonicalDR = new HashMap<Node, CanonicalDataRange>();
+        Set<Node> processedNodes = new HashSet<Node>();
         for (Node node : nodeToDRs.keySet()) {
-            CanonicalDataRange canonicalRange = getCanonicalDataRange(nodeToDRs.get(node));
-            if (canonicalRange == null || canonicalRange.isBottom()) {
-                // conjoining the restrictions led to a clash
-                int numberOfCauses = nodeToDRs.get(node).size();
-                UnionDependencySet ds = new UnionDependencySet(numberOfCauses);
-                Object[][] causes = new Object[numberOfCauses][2];
-                int i = 0;
-                for (CanonicalDataRange range : nodeToDRs.get(node)) {
-                    causes[i][0] = range;
-                    causes[i][1] = node;
-                    ds.m_dependencySets[i] = extensionManager.getAssertionDependencySet(range, node);
-                    i++;
+            if (!processedNodes.contains(node)) {
+                Set<DataRange> rangesToConjoin = new HashSet<DataRange>();
+                for (Set<Node> equalNodes : equalities) {
+                    if (equalNodes.contains(node)) {
+                        for (Node equalNode : equalNodes) {
+                            rangesToConjoin.addAll(nodeToDRs.get(equalNode));
+                        }
+                        processedNodes.addAll(equalNodes);
+                    }
                 }
-                if (tableauMonitor != null) {
-                    tableauMonitor.clashDetected(causes);
-                    tableauMonitor.datatypeCheckingFinished(false);
+                CanonicalDataRange canonicalRange = getCanonicalDataRange(rangesToConjoin);
+                if (canonicalRange == null || canonicalRange.isBottom()) {
+                    // conjoining the restrictions led to a clash
+                    int numberOfCauses = nodeToDRs.get(node).size();
+                    UnionDependencySet ds = new UnionDependencySet(numberOfCauses);
+                    Object[][] causes = new Object[numberOfCauses][2];
+                    int i = 0;
+                    for (DataRange range : nodeToDRs.get(node)) {
+                        causes[i][0] = range;
+                        causes[i][1] = node;
+                        ds.m_dependencySets[i] = extensionManager.getAssertionDependencySet(range, node);
+                        i++;
+                    }
+                    if (tableauMonitor != null) {
+                        tableauMonitor.clashDetected(causes);
+                        tableauMonitor.datatypeCheckingFinished(false);
+                    }
+                    extensionManager.setClash(ds);
+                    return null;
                 }
-                extensionManager.setClash(ds);
-                return null;
+                nodeToCanonicalDR.put(node, canonicalRange);
             }
-            nodeToCanonicalDR.put(node, canonicalRange);
         }
         return nodeToCanonicalDR;
     }
@@ -307,13 +387,13 @@ public class DatatypeManager {
      * in the given set ranges or null this is not possible due to different 
      * data types or contradiction oneOf values in the given ranges
      */
-    protected CanonicalDataRange getCanonicalDataRange(Set<CanonicalDataRange> ranges) {
+    protected CanonicalDataRange getCanonicalDataRange(Set<DataRange> ranges) {
         // create a new instance of the type that the first given data range has
         CanonicalDataRange canonicalDR = null; 
         // set the URI to the one of the first positive data range, we then 
         // expect all ranges to have the same URI or it is a clash
         boolean onlyNegated = true;
-        for (CanonicalDataRange range : ranges) {
+        for (DataRange range : ranges) {
             if (!range.isNegated()) {
                 onlyNegated = false;
                 if (range.getDatatypeURI() != null) {
@@ -342,7 +422,7 @@ public class DatatypeManager {
         Set<DataConstant> constants = null;
         if (canonicalDR == null) {
             canonicalDR = new EnumeratedDataRange();
-            for (CanonicalDataRange range : ranges) {
+            for (DataRange range : ranges) {
                 if (range.hasNonNegatedOneOf()) {
                     if (constants == null) {
                         constants = range.getOneOf();
@@ -351,8 +431,9 @@ public class DatatypeManager {
                     }
                 }
             }
+            if (constants == null || constants.isEmpty()) return null;
         } else {
-            for (CanonicalDataRange range : ranges) {
+            for (DataRange range : ranges) {
                 if (range.hasNonNegatedOneOf()) {
                     if (constants == null) {
                         constants = new HashSet<DataConstant>();
@@ -368,9 +449,9 @@ public class DatatypeManager {
             }
             if (constants != null && constants.isEmpty()) return null;
         }
-        if (constants != null) {
-            canonicalDR.setOneOf(constants);
-        }
+//        if (constants != null) {
+//            canonicalDR.setOneOf(constants);
+//        }
         
         // either we have no oneOfs (the oneOf set is empty) or all oneOfs in 
         // the set conform to the data type restriction
@@ -378,31 +459,29 @@ public class DatatypeManager {
         // if it is simply an enumeration (there are no facets) throw out those 
         // that are forbidden due to negated oneOfs and we are done
         if (canonicalDR instanceof EnumeratedDataRange) {
-            for (CanonicalDataRange range : ranges) {
+            if (constants == null) return null;
+            for (DataRange range : ranges) {
                 if (range.isNegated() && !range.getOneOf().isEmpty()) {
-                    Set<DataConstant> newOneOfs = canonicalDR.getOneOf();
-                    newOneOfs.removeAll(range.getOneOf());
+                    constants.removeAll(range.getOneOf());
                     // no possible values left
-                    if (newOneOfs.isEmpty()) return null;
-                    canonicalDR.setOneOf(newOneOfs);
+                    if (constants.isEmpty()) return null;
                 }
             }
+            canonicalDR.setOneOf(constants);
             return canonicalDR;
         }
         
         // throw out those that are forbidden due to negated oneOfs
-        if (!canonicalDR.getOneOf().isEmpty()) {
-            for (CanonicalDataRange range : ranges) {
+        if (constants != null && !constants.isEmpty()) {
+            for (DataRange range : ranges) {
                 if (range.isNegated() && !range.getOneOf().isEmpty()) {
-                    Set<DataConstant> newOneOfs = canonicalDR.getOneOf();
-                    newOneOfs.removeAll(range.getOneOf());
+                    constants.removeAll(range.getOneOf());
                     // no possible values left
-                    if (newOneOfs.isEmpty()) return null;
-                    canonicalDR.setOneOf(newOneOfs);
+                    if (constants.isEmpty()) return null;
                 }
             }
         } else {
-            for (CanonicalDataRange range : ranges) {
+            for (DataRange range : ranges) {
                 if (range.isNegated() && !range.getOneOf().isEmpty()) {
                     for (DataConstant constant : range.getOneOf()) {
                         if (constant.getDatatypeURI().equals(canonicalDR.getDatatypeURI())) {
@@ -414,30 +493,35 @@ public class DatatypeManager {
         }
 
         // lets look at the facets
-        
-        // if we have oneOfs, we make sure they conform to the facets
-        if (!canonicalDR.getOneOf().isEmpty()) {
-            for (DataConstant constant : canonicalDR.getOneOf()) {
-                for (CanonicalDataRange range : ranges) {
-                    if (!range.accepts(constant)) {
-                        canonicalDR.removeOneOf(constant);
-                        if (canonicalDR.getOneOf().isEmpty()) {
-                            // no more suitable values left
-                            return null;
-                        }
-                    }
-                }
-            }
-            return canonicalDR;
-        } else {
-            // no oneOfs, so conjoin all the facets or see if they are trivially 
-            // satisfied since the neagted range is of a different type
-            for (CanonicalDataRange range : ranges) {
-                if (canonicalDR.getDatatypeURI().equals(range.getDatatypeURI())) {
-                    canonicalDR.conjoinFacetsFrom(range);
-                }
+        for (DataRange range : ranges) {
+            if (canonicalDR.getDatatypeURI().equals(range.getDatatypeURI())) {
+                canonicalDR.conjoinFacetsFrom(range);
             }
         }
+        
+        // if we have oneOfs, we make sure they conform to the facets
+        if (constants != null && !constants.isEmpty()) {
+            for (DataConstant constant : constants) {
+                if (!canonicalDR.facetsAccept(constant)) {
+                    constants.remove(constant);
+                }
+            }
+            if (constants.isEmpty()) {
+                // no more suitable values left
+                return null;
+            }
+            canonicalDR.setOneOf(constants);
+            return canonicalDR;
+        } 
+//        else {
+//            // no oneOfs, so conjoin all the facets or see if they are trivially 
+//            // satisfied since the negated range is of a different type
+//            for (DataRange range : ranges) {
+//                if (canonicalDR.getDatatypeURI().equals(range.getDatatypeURI())) {
+//                    canonicalDR.conjoinFacetsFrom(range);
+//                }
+//            }
+//        }
         return canonicalDR;
     }
     
@@ -450,6 +534,7 @@ public class DatatypeManager {
      */
     protected void removeUnderRestrictedRanges(
             Map<Node, CanonicalDataRange> nodeToCanonicalDR, 
+            Set<Set<Node>> equalities, 
             Map<Node, Set<Node>> inequalities, 
             Map<Node, Set<Node>> inequalitiesSym) {
         boolean containedRemovable = true;
@@ -459,18 +544,31 @@ public class DatatypeManager {
             for (Node node : nodeToCanonicalDR.keySet()) {
                 CanonicalDataRange canonicalRange = nodeToCanonicalDR.get(node);
                 int numInequalNodes = 0;
-                if (inequalities.get(node) != null) {
-                    numInequalNodes = inequalities.get(node).size();
-                }
-                if (inequalitiesSym.get(node) != null) {
-                    numInequalNodes += inequalitiesSym.get(node).size();
+                for (Set<Node> equalNodes : equalities) {
+                    if (equalNodes.contains(node)) {
+                        for (Node equalNode : equalNodes) {
+                            // we assume that inequalities are added between all 
+                            // mutually different pairs of nodes, i.e., 
+                            // the assertion (>= 3 dp.DR)(n0) leads to the 
+                            // assertions: dp(n0, n1), dp(n0, n2), dp(n0, n3), 
+                            // DR(n1), DR(n2), DR(n3), !=(n1, n2), !=(n1, n3), 
+                            // !=(n2, n3), so neither of these successors can 
+                            // later be merged and thus appear in the equalities
+                            if (inequalities.get(equalNode) != null) {
+                                numInequalNodes = inequalities.get(equalNode).size();
+                            }
+                            if (inequalitiesSym.get(equalNode) != null) {
+                                numInequalNodes += inequalitiesSym.get(equalNode).size();
+                            }
+                        }
+                    }
                 }
                 if (canonicalRange.hasMinCardinality(numInequalNodes + 1)) {
                     removableNodes.add(node);
                     containedRemovable = true;
                 }
             }
-            for (Node node  : removableNodes) {
+            for (Node node : removableNodes) {
                 nodeToCanonicalDR.remove(node);
             }
             removableNodes.clear();
@@ -490,6 +588,7 @@ public class DatatypeManager {
      */
     protected Set<Map<CanonicalDataRange, Node>> buildPartitions(
             Map<Node, CanonicalDataRange> nodeToCanonicalDR, 
+            Set<Set<Node>> equalities, 
             Map<Node, Set<Node>> inequalities, 
             Map<Node, Set<Node>> inequalitiesSym) {
         Set<Map<CanonicalDataRange, Node>> partitions = new HashSet<Map<CanonicalDataRange, Node>>();
@@ -500,30 +599,44 @@ public class DatatypeManager {
             Node node = remainingNodes.get(0);
             partition.put(nodeToCanonicalDR.get(node), node);
             remainingNodes.remove(node);
-            // nodes that are inequal to this one should go into the same 
-            // partition
-            if (inequalities.containsKey(node)) {
-                nodesForThisPartition.addAll(inequalities.get(node));
-            }
-            if (inequalitiesSym.containsKey(node)) {
-                nodesForThisPartition.addAll(inequalitiesSym.get(node));
+            
+            for (Set<Node> equalNodes : equalities) {
+                if (equalNodes.contains(node)) {
+                    for (Node equalNode : equalNodes) {
+                        // nodes that are inequal to this one or one that is 
+                        // equal to this one should go into the same partition
+                        if (inequalities.containsKey(equalNode)) {
+                            nodesForThisPartition.addAll(inequalities.get(equalNode));
+                        }
+                        if (inequalitiesSym.containsKey(equalNode)) {
+                            nodesForThisPartition.addAll(inequalitiesSym.get(equalNode));
+                        }
+                    }
+                }
             }
             while (!nodesForThisPartition.isEmpty()) {
                 Node currentNode = nodesForThisPartition.get(0);
-                if (nodeToCanonicalDR.containsKey(currentNode)) {
-                    partition.put(nodeToCanonicalDR.get(currentNode), currentNode);
-                    remainingNodes.remove(currentNode);
-                    // put all remaining nodes that are inequal to this one into 
-                    // the list of nodes to be processed, so that they go into 
-                    // the same partition
-                    for (Node n : remainingNodes) {
-                        if (inequalities.get(currentNode) != null 
-                                && inequalities.get(currentNode).contains(n)) {
-                            nodesForThisPartition.add(n);
-                        }
-                        if (inequalitiesSym.get(currentNode) != null 
-                                && inequalitiesSym.get(currentNode).contains(n)) {
-                            nodesForThisPartition.add(n);
+                for (Set<Node> equalNodes : equalities) {
+                    if (equalNodes.contains(currentNode)) {
+                        // all nodes in this equivalence class are relevant
+                        for (Node equalNode : equalNodes) {
+                            if (nodeToCanonicalDR.containsKey(equalNode)) {
+                                partition.put(nodeToCanonicalDR.get(equalNode), equalNode);
+                                remainingNodes.remove(equalNode);
+                            }
+                            // put all remaining nodes that are inequal to this one into 
+                            // the list of nodes to be processed, so that they go into 
+                            // the same partition
+                            for (Node n : remainingNodes) {
+                                if (inequalities.get(equalNode) != null 
+                                        && inequalities.get(equalNode).contains(n)) {
+                                    nodesForThisPartition.add(n);
+                                }
+                                if (inequalitiesSym.get(equalNode) != null 
+                                        && inequalitiesSym.get(equalNode).contains(n)) {
+                                    nodesForThisPartition.add(n);
+                                }
+                            }
                         }
                     }
                 }
@@ -554,7 +667,7 @@ public class DatatypeManager {
     protected boolean hasAssignment(Map<CanonicalDataRange, Node> partition, 
             Map<Node, Set<Node>> inequalities, 
             Map<Node, Set<Node>> inequalitiesSym, 
-            Map<Node, Set<CanonicalDataRange>> originalNodeToDRs) {
+            Map<Node, Set<DataRange>> originalNodeToDRs) {
         
         List<CanonicalDataRange> ranges = new ArrayList<CanonicalDataRange>(partition.keySet());
         Collections.sort(ranges, SetLengthComparator.INSTANCE);
@@ -586,7 +699,7 @@ public class DatatypeManager {
                 Object[][] causes = new Object[numberOfCauses][];
                 int i = 0;
                 for (Node node : partition.values()) {
-                    for (CanonicalDataRange range : originalNodeToDRs.get(node)) {
+                    for (DataRange range : originalNodeToDRs.get(node)) {
                         causes[i] = new Object[] { range, node };
                         ds.m_dependencySets[i] = 
                                 extensionManager.getAssertionDependencySet(range, node);

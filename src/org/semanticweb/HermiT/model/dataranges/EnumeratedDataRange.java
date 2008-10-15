@@ -78,7 +78,7 @@ public class EnumeratedDataRange extends DatatypeRestriction implements DataRang
         isNegated = !isNegated;
     }
     
-    public void conjoinFacetsFrom(CanonicalDataRange range) {
+    public void conjoinFacetsFrom(DataRange range) {
         throw new RuntimeException("Cannot conjoin any facets to enumerated " +
         "ranges. ");
     }

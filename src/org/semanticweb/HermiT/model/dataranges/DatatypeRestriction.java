@@ -33,6 +33,10 @@ public abstract class DatatypeRestriction implements DataRange, CanonicalDataRan
         return oneOf;
     }
     
+    public boolean facetsAccept(DataConstant constant) {
+        return true;
+    }
+    
 //    public void setOneOf(Set<DataConstant> oneOf) {
 //        throw new RuntimeException("Should use an enumerated data range.");
 //    }

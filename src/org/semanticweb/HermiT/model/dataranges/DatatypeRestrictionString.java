@@ -139,6 +139,11 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
         return value != null ? new DataConstant(datatypeURI, value) : null;
     }
     
+    public boolean facetsAccept(DataConstant constant) {
+        compileAllFacetsIntoPattern();
+        return patternMatcher.run(constant.getValue());
+    }
+    
     public boolean accepts(DataConstant constant) {
         if (!oneOf.isEmpty()) {
             return oneOf.contains(constant);
@@ -169,7 +174,7 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
     /* (non-Javadoc)
      * @see org.semanticweb.HermiT.model.DataRange#conjoinFacetsFrom(org.semanticweb.HermiT.model.DataRange)
      */
-    public void conjoinFacetsFrom(CanonicalDataRange range) {
+    public void conjoinFacetsFrom(DataRange range) {
         if (!(range instanceof DatatypeRestrictionString)) {
             throw new IllegalArgumentException("The given parameter is not " +
                     "an instance of DatatypeRestrictionString. It is " +

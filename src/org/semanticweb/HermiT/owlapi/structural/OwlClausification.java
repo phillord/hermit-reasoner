@@ -859,7 +859,7 @@ public class OwlClausification {
         protected static OWLDataFactory factory = man.getOWLDataFactory();
         protected static OWLDataType integerDataType = factory.getIntegerDataType();
         protected static OWLDataType nonNegatedIntegerDataType = factory.getOWLDataType(XSDVocabulary.NON_NEGATIVE_INTEGER.getURI());
-        protected static OWLDataType nonPositiveIntegerDataType = factory.getOWLDataType(XSDVocabulary.NON_POSIITIVE_INTEGER.getURI());
+        protected static OWLDataType nonPositiveIntegerDataType = factory.getOWLDataType(XSDVocabulary.NON_POSITIVE_INTEGER.getURI());
         protected static OWLDataType positiveIntegerDataType = factory.getOWLDataType(XSDVocabulary.POSITIVE_INTEGER.getURI());
         protected static OWLDataType negativeIntegerDataType = factory.getOWLDataType(XSDVocabulary.NEGATIVE_INTEGER.getURI());
         protected static OWLDataType longDataType = factory.getOWLDataType(XSDVocabulary.LONG.getURI());
