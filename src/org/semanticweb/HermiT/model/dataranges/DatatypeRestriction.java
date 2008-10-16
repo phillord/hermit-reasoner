@@ -29,76 +29,108 @@ public abstract class DatatypeRestriction implements DataRange, CanonicalDataRan
         return datatypeURI;
     }
     
-    public Set<DataConstant> getOneOf() {
-        return oneOf;
-    }
-    
-    public boolean facetsAccept(DataConstant constant) {
-        return true;
-    }
-    
-//    public void setOneOf(Set<DataConstant> oneOf) {
-//        throw new RuntimeException("Should use an enumerated data range.");
-//    }
-//    
-//    public boolean addOneOf(DataConstant constant) {
-//        throw new RuntimeException("Should use an enumerated data range.");
-//    }
-//    
-//    public boolean removeOneOf(DataConstant constant) {
-//        boolean contained = oneOf.remove(constant);
-//        if (contained && oneOf.isEmpty()) {
-//            // it does not mean it can have arbitrary values now, but rather it 
-//            // is bottom if not negated and top if negated, so we have to swap 
-//            // negation values
-//            isBottom = true;
-//        }
-//        return contained;
-//    }
-    
-    public boolean hasNonNegatedOneOf() {
-        return (!isNegated && !oneOf.isEmpty());
-    }
-    
-    public Set<DataConstant> getNotOneOf() {
-        return notOneOf;
-    }
-    
-    public void setNotOneOf(Set<DataConstant> notOneOf) {
-        this.notOneOf = notOneOf;
-    }
-    
-    public boolean addNotOneOf(DataConstant constant) {
-        return notOneOf.add(constant);
-    }
-    
-    public boolean addAllToNotOneOf(Set<DataConstant> constants) {
-        return notOneOf.addAll(constants);
-    }
-    
     public boolean isNegated() {
         return isNegated;
-    }
-    
-    public boolean isBottom() {
-        if (!isBottom && !hasMinCardinality(1)) {
-            isBottom = true;
-        }
-        return isBottom;
     }
     
     public void negate() {
         isNegated = !isNegated;
     }
     
-    public boolean supports(Facets facet) {
-        for (Facets supportedFacet : supportedFacets) {
-            if (facet == supportedFacet) return true;
+    public boolean isBottom() {
+        if (!isBottom) {
+            if (!hasMinCardinality(1)) {
+                isBottom = true;
+            }
         }
-        return false;
+        return isBottom;
+    }
+    
+    public Set<DataConstant> getOneOf() {
+        return oneOf;
+    }
+    
+    public void setOneOf(Set<DataConstant> oneOf) {
+        this.oneOf = oneOf;
+    }
+    
+    public boolean addOneOf(DataConstant constant) {
+        return oneOf.add(constant);
+    }
+    
+    public void setNotOneOf(Set<DataConstant> notOneOf) {
+        this.notOneOf = notOneOf;
+    }
+    
+    public boolean notOneOf(DataConstant constant) {
+        boolean result = true;
+        if (!oneOf.isEmpty()) {
+            result = oneOf.remove(constant);
+            if (oneOf.isEmpty()) isBottom = true;
+        } else {
+            result = notOneOf.add(constant); 
+        }
+        return result;
+    }
+    
+    public boolean facetsAccept(DataConstant constant) {
+        return true;
+    }
+    
+    public boolean supports(Facets facet) {
+        return supportedFacets.contains(facet);
     }
     
     public String toString() {
         return toString(Namespaces.none);
+    }
+    
+    public String toString(Namespaces namespaces) {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("(");
+        if (datatypeURI != null) {
+            if (isNegated) buffer.append("not ");
+            buffer.append(namespaces.idFromUri(datatypeURI.toString()));
+        }
+        buffer.append(printExtraInfo(namespaces));
+        boolean firstRun = true;
+        if (!oneOf.isEmpty()) {
+            if (isNegated) buffer.append("not ");
+            buffer.append("oneOf(");
+            firstRun = true;
+            for (DataConstant constant : oneOf) {
+                if (!firstRun) {
+                    buffer.append(isNegated ? " and " : " or ");
+                    firstRun = false;
+                }
+                buffer.append(constant.toString(namespaces));
+            }
+            buffer.append(")");
+        }
+        if (!notOneOf.isEmpty()) {
+            // only in non-negated canonical ranges
+            firstRun = true;
+            buffer.append(" (");
+            for (DataConstant constant : notOneOf) {
+                if (!firstRun) {
+                    buffer.append(" and");
+                    firstRun = false;
+                }
+                buffer.append(" not " + constant.toString(namespaces));
+            }
+            buffer.append(")");
+        }
+        buffer.append(")");
+        return buffer.toString();        
+    }
+    
+    /**
+     * Can be overwritten by the sub-classes, to print something between the 
+     * datatype restriction and the list of oneOfs/notOneOfs 
+     * @return a string with extra information for the toString method, e.g., 
+     * about facet values
+     */
+    protected String printExtraInfo(Namespaces namespaces) {
+        return "";
     }
 }

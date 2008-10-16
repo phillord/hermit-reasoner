@@ -37,6 +37,10 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
         return new DatatypeRestrictionDateTime();
     }
     
+    public boolean isFinite() {
+        return (isBottom || (!isNegated && (hasOnlyFiniteIntervals() || !oneOf.isEmpty())));
+    }
+    
     protected boolean hasOnlyFiniteIntervals() {
         boolean hasOnlyFiniteIntervals = true;
         if (intervals.isEmpty()) return false;
@@ -46,221 +50,6 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
             }
         }
         return hasOnlyFiniteIntervals;
-    }
-    
-    public boolean isFinite() {
-        return (isBottom || (!isNegated && (hasOnlyFiniteIntervals() || !oneOf.isEmpty())));
-    }
-    
-    public boolean hasMinCardinality(int n) {
-        if (n <= 0) return true;
-        if (isFinite()) {
-            if (!oneOf.isEmpty()) {
-                return (oneOf.size() >= n);
-            }
-            BigInteger nBig = new BigInteger("" + n);
-            BigInteger subtract = BigInteger.ZERO;
-            BigInteger rangeSize = BigInteger.ZERO;
-            for (Interval i : intervals) {
-                rangeSize = rangeSize.add(i.getCardinality());
-            }
-            for (DataConstant constant : notOneOf) {
-                BigInteger not = new BigInteger(constant.getValue());
-                for (Interval i : intervals) {
-                    if (i.contains(not)) {
-                        subtract = subtract.subtract(BigInteger.ONE);
-                    }
-                }
-            }
-            rangeSize = rangeSize.subtract(subtract);
-            return (rangeSize.compareTo(nBig) >= 0);
-        }
-        return true;
-    }
-    
-    public BigInteger getEnumerationSize() {
-        if (isFinite()) {
-            if (!oneOf.isEmpty()) {
-                return new BigInteger("" + oneOf.size());
-            }
-            BigInteger subtract = BigInteger.ZERO;
-            BigInteger rangeSize = BigInteger.ZERO;
-            for (Interval i : intervals) {
-                rangeSize = rangeSize.add(i.getCardinality());
-            }
-            for (DataConstant constant : notOneOf) {
-                BigInteger not = new BigInteger(constant.getValue());
-                for (Interval i : intervals) {
-                    if (i.contains(not)) {
-                        subtract = subtract.subtract(BigInteger.ONE);
-                    }
-                }
-            }
-            return rangeSize.subtract(subtract);
-        } 
-        return null;
-    }
-
-    public DataConstant getSmallestAssignment() {
-        if (isFinite()) {
-            if (!oneOf.isEmpty()) {
-                SortedSet<DataConstant> sortedOneOfs = new TreeSet<DataConstant>(oneOf);
-                for (DataConstant constant : sortedOneOfs) {
-                    if (!notOneOf.contains(constant)) return constant;
-                }
-                return null;
-            }
-            SortedSet<Interval> sortedIntervals = new TreeSet<Interval>(IntervalComparator.INSTANCE);
-            sortedIntervals.addAll(intervals);
-            for (Interval i : sortedIntervals) {
-                BigInteger constant = i.getMinIncl();
-                while (constant.compareTo(i.getMaxIncl()) <= 0) {
-                    DataConstant dataConstant = new DataConstant(datatypeURI, "" + dfm.format(new Date(constant.longValue())));
-                    if (!notOneOf.contains(dataConstant)) return dataConstant;
-                    constant = constant.add(BigInteger.ONE);
-                }
-            }
-        }
-        return null;
-    }
-    
-    protected static class IntervalComparator implements Comparator<Interval> { 
-        public static Comparator<Interval> INSTANCE = new IntervalComparator();
-        public int compare(Interval i1, Interval i2) {
-            return i1.getMinIncl().compareTo(i2.getMinIncl()); 
-        }
-    }
-    
-    public boolean accepts(DataConstant constant) {
-        if (!oneOf.isEmpty()) {
-            return oneOf.contains(constant);
-        }
-        try {
-            Date dateValue = dfm.parse(constant.getValue());
-            BigInteger intValue = new BigInteger("" + dateValue.getTime());
-            for (Interval i : intervals) {
-                if (i.contains(intValue) && !notOneOf.contains(constant)) {
-                    return true;
-                }
-            }
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return false; 
-    }
-
-    public boolean addOneOf(DataConstant constant) {
-        if (!intervals.isEmpty()) {
-            throw new RuntimeException("Can only add oneOfs if no facets are present. ");
-        }
-        boolean result = false;
-        try {
-         // type check
-            dfm.parse(constant.getValue());
-            return oneOf.add(constant);
-        } catch (ParseException e1) {
-            e1.printStackTrace();
-        }
-        return result;
-    }
-    
-    public void setOneOf(Set<DataConstant> oneOf) {
-        if (!intervals.isEmpty()) {
-            throw new RuntimeException("Can only add oneOfs if no facets are present. ");
-        }
-        this.oneOf = oneOf;
-    }
-    
-    public boolean removeOneOf(DataConstant constant) {
-        boolean contained = oneOf.remove(constant);
-        if (contained && oneOf.isEmpty()) {
-            // it does not mean it can have arbitrary values now, but rather it 
-            // is bottom if not negated and top if negated, so we have to swap 
-            // negation values
-            isBottom = true;
-        }
-        return contained;
-    }
-    
-    public boolean facetsAccept(DataConstant constant) {
-        if (intervals.isEmpty()) return true;
-        Date date;
-        try {
-            date = dfm.parse(constant.getValue());
-            BigInteger intValue = new BigInteger("" + date.getTime());
-            for (Interval i : intervals) {
-                if (i.contains(intValue) && !notOneOf.contains(constant)) {
-                    return true;
-                }
-            }
-        } catch (ParseException e) {
-            return false; 
-        }
-        return false; 
-    }
-    
-    public void conjoinFacetsFrom(DataRange range) {
-        if (isNegated) {
-            throw new RuntimeException("Cannot add facets to negated " +
-                        "data ranges!");
-        }
-        if (!(range instanceof DatatypeRestrictionDateTime)) {
-            throw new IllegalArgumentException("The given parameter is not " +
-                    "an instance of DatatypeRestrictionDateTime. It is " +
-                    "only allowed to add facets from other date time " +
-                    "datatype restrictions. ");
-        }
-        if (!isBottom) {
-            DatatypeRestrictionDateTime restr = (DatatypeRestrictionDateTime) range;
-            if (restr.getIntervals().size() > 1) {
-                throw new IllegalArgumentException("The given parameter " +
-                        "contains more than one interval. ");
-            }
-            if (intervals.isEmpty()) {
-                for (Interval i : restr.getIntervals()) {
-                    if (restr.isNegated()) {
-                        if (!i.isFinite() || i.isEmpty()) {
-                            if (i.getMinIncl() != null) {
-                                intervals.add(new Interval(i.getMinIncl(), null));
-                            }
-                            if (i.getMaxIncl() != null) {
-                                intervals.add(new Interval(null, i.getMaxIncl()));
-                            }
-                        } // otherwise i is trivially satisfied
-                    } else {
-                        intervals.addAll(restr.getIntervals());
-                    }
-                }
-            } else {
-                if (restr.isNegated()) {
-                    Set<Interval> newIntervals = new HashSet<Interval>();
-                    for (Interval i : intervals) {
-                        for (Interval iNew : restr.getIntervals()) {
-                            if (!iNew.isFinite() || iNew.isEmpty()) {
-                                newIntervals.addAll(i.intersectWithNegated(iNew));
-                            } else {
-                                // the restrictions in restr are trivially sat
-                                newIntervals.add(i);
-                            }
-                        }
-                    }
-                    intervals = newIntervals;
-                } else {
-                    Set<Interval> newIntervals = new HashSet<Interval>();
-                    for (Interval i : intervals) {
-                        for (Interval iNew : restr.getIntervals()) {
-                            i.intersectWith(iNew);
-                            if (!i.isEmpty()) newIntervals.add(i);
-                        }
-                    }
-                    if (newIntervals.isEmpty()) {
-                        isBottom = true;
-                    } else {
-                        intervals = newIntervals;
-                    }
-                }
-            }
-        }
     }
     
     public void addFacet(Facets facet, String value) {
@@ -373,18 +162,190 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
             throw new IllegalArgumentException("Unsupported facet.");
         }
     }
+    
+    public boolean facetsAccept(DataConstant constant) {
+        if (!oneOf.isEmpty()) {
+            return oneOf.contains(constant);
+        }
+        if (!notOneOf.isEmpty() && notOneOf.contains(constant)) {
+            return false;
+        } 
+        if (intervals.isEmpty()) return true;
+        Date date;
+        try {
+            date = dfm.parse(constant.getValue());
+            BigInteger intValue = new BigInteger("" + date.getTime());
+            for (Interval i : intervals) {
+                if (i.contains(intValue) && !notOneOf.contains(constant)) {
+                    return true;
+                }
+            }
+        } catch (ParseException e) {
+            return false; 
+        }
+        return false; 
+    }
+    
+    public void conjoinFacetsFrom(DataRange range) {
+        if (isNegated) {
+            throw new RuntimeException("Cannot add facets to negated " +
+                        "data ranges!");
+        }
+        if (!(range instanceof DatatypeRestrictionDateTime)) {
+            throw new IllegalArgumentException("The given parameter is not " +
+                    "an instance of DatatypeRestrictionDateTime. It is " +
+                    "only allowed to add facets from other date time " +
+                    "datatype restrictions. ");
+        }
+        if (!isBottom()) {
+            DatatypeRestrictionDateTime restr = (DatatypeRestrictionDateTime) range;
+            if (restr.getIntervals().size() > 1) {
+                throw new IllegalArgumentException("The given parameter " +
+                        "contains more than one interval. ");
+            }
+            if (intervals.isEmpty()) {
+                for (Interval i : restr.getIntervals()) {
+                    if (restr.isNegated()) {
+                        if (!i.isFinite() || i.isEmpty()) {
+                            if (i.getMinIncl() != null) {
+                                intervals.add(new Interval(i.getMinIncl(), null));
+                            }
+                            if (i.getMaxIncl() != null) {
+                                intervals.add(new Interval(null, i.getMaxIncl()));
+                            }
+                        } // otherwise i is trivially satisfied
+                    } else {
+                        intervals.addAll(restr.getIntervals());
+                    }
+                }
+            } else {
+                if (restr.isNegated()) {
+                    Set<Interval> newIntervals = new HashSet<Interval>();
+                    for (Interval i : intervals) {
+                        for (Interval iNew : restr.getIntervals()) {
+                            if (!iNew.isFinite() || iNew.isEmpty()) {
+                                newIntervals.addAll(i.intersectWithNegated(iNew));
+                            } else {
+                                // the restrictions in restr are trivially sat
+                                newIntervals.add(i);
+                            }
+                        }
+                    }
+                    intervals = newIntervals;
+                } else {
+                    Set<Interval> newIntervals = new HashSet<Interval>();
+                    for (Interval i : intervals) {
+                        for (Interval iNew : restr.getIntervals()) {
+                            i.intersectWith(iNew);
+                            if (!i.isEmpty()) newIntervals.add(i);
+                        }
+                    }
+                    if (newIntervals.isEmpty()) {
+                        isBottom = true;
+                    } else {
+                        intervals = newIntervals;
+                    }
+                }
+            }
+        }
+    }
+    
+    public boolean accepts(DataConstant constant) {
+        if (!oneOf.isEmpty()) {
+            return oneOf.contains(constant);
+        }
+        try {
+            Date dateValue = dfm.parse(constant.getValue());
+            BigInteger intValue = new BigInteger("" + dateValue.getTime());
+            for (Interval i : intervals) {
+                if (i.contains(intValue) && !notOneOf.contains(constant)) {
+                    return true;
+                }
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return false; 
+    }
+    
+    public boolean hasMinCardinality(int n) {
+        if (isNegated || n <= 0) return true;
+        if (isFinite()) {
+            if (!oneOf.isEmpty()) {
+                return (oneOf.size() >= n);
+            }
+            BigInteger nBig = new BigInteger("" + n);
+            BigInteger subtract = BigInteger.ZERO;
+            BigInteger rangeSize = BigInteger.ZERO;
+            for (Interval i : intervals) {
+                rangeSize = rangeSize.add(i.getCardinality());
+            }
+            for (DataConstant constant : notOneOf) {
+                BigInteger not = new BigInteger(constant.getValue());
+                for (Interval i : intervals) {
+                    if (i.contains(not)) {
+                        subtract = subtract.subtract(BigInteger.ONE);
+                    }
+                }
+            }
+            rangeSize = rangeSize.subtract(subtract);
+            return (rangeSize.compareTo(nBig) >= 0);
+        }
+        return true;
+    }
+    
+    public BigInteger getEnumerationSize() {
+        if (isFinite()) {
+            if (!oneOf.isEmpty()) {
+                return new BigInteger("" + oneOf.size());
+            }
+            BigInteger subtract = BigInteger.ZERO;
+            BigInteger rangeSize = BigInteger.ZERO;
+            for (Interval i : intervals) {
+                rangeSize = rangeSize.add(i.getCardinality());
+            }
+            for (DataConstant constant : notOneOf) {
+                BigInteger not = new BigInteger(constant.getValue());
+                for (Interval i : intervals) {
+                    if (i.contains(not)) {
+                        subtract = subtract.subtract(BigInteger.ONE);
+                    }
+                }
+            }
+            return rangeSize.subtract(subtract);
+        } 
+        return null;
+    }
+
+    public DataConstant getSmallestAssignment() {
+        if (isFinite()) {
+            if (!oneOf.isEmpty()) {
+                SortedSet<DataConstant> sortedOneOfs = new TreeSet<DataConstant>(oneOf);
+                return sortedOneOfs.first();
+            }
+            SortedSet<Interval> sortedIntervals = new TreeSet<Interval>(IntervalComparator.INSTANCE);
+            sortedIntervals.addAll(intervals);
+            for (Interval i : sortedIntervals) {
+                BigInteger constant = i.getMinIncl();
+                while (constant.compareTo(i.getMaxIncl()) <= 0) {
+                    DataConstant dataConstant = new DataConstant(datatypeURI, "" + dfm.format(new Date(constant.longValue())));
+                    if (!notOneOf.contains(dataConstant)) return dataConstant;
+                    constant = constant.add(BigInteger.ONE);
+                }
+            }
+        }
+        return null;
+    }
+    
     public Set<Interval> getIntervals() {
         return intervals;
     }
-
-    public String toString(Namespaces namespaces) {
+    
+    protected String printExtraInfo(Namespaces namespaces) {
+        boolean firstRun = true;
         StringBuffer buffer = new StringBuffer();
-        buffer.append("(");
-        if (isNegated) buffer.append("not ");
-        buffer.append(namespaces.idFromUri(datatypeURI.toString()));
-        boolean notFirstRun = false;
         for (Interval i : intervals) {
-            if (notFirstRun && !isNegated) {
+            if (!firstRun && !isNegated) {
                 buffer.append(" or ");
             }
             if (i.getMinIncl() != null) {
@@ -395,35 +356,9 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
                 if (isNegated) buffer.append(" or ");
                 buffer.append(" <= " + dfm.format(new Date(i.getMaxIncl().longValue())));
             }
-            notFirstRun = true;
+            firstRun = false;
         }
-        if (!oneOf.isEmpty()) {
-            if (isNegated) buffer.append("not ");
-            buffer.append(" OneOf(");
-            boolean firstRun = true;
-            for (DataConstant constant : oneOf) {
-                if (!firstRun) {
-                    buffer.append(isNegated ? " and " : " or ");
-                    firstRun = false;
-                }
-                buffer.append(" " + constant);
-            }
-            buffer.append(")");
-        }
-        if (!notOneOf.isEmpty()) {
-            buffer.append(" not OneOf(");
-            boolean firstRun = true;
-            for (DataConstant constant : notOneOf) {
-                if (!firstRun) {
-                    buffer.append(isNegated ? " and " : " or ");
-                    firstRun = false;
-                }
-                buffer.append(" not " + constant);
-            }
-            buffer.append(")");
-        }
-        buffer.append(")");
-        return buffer.toString();        
+        return buffer.toString();
     }
     
     public class Interval {
@@ -544,6 +479,13 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
                 buffer.append(">= " + DatatypeRestrictionDateTime.dfm.format(new Date(maxIncl.longValue())));
             }
             return buffer.toString();
+        }
+    }
+    
+    protected static class IntervalComparator implements Comparator<Interval> { 
+        public static Comparator<Interval> INSTANCE = new IntervalComparator();
+        public int compare(Interval i1, Interval i2) {
+            return i1.getMinIncl().compareTo(i2.getMinIncl()); 
         }
     }
 }

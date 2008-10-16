@@ -4,6 +4,9 @@ import java.net.URI;
 
 import org.semanticweb.HermiT.Namespaces;
 
+import dk.brics.automaton.Automaton;
+import dk.brics.automaton.Datatypes;
+
 public class DataConstant implements Comparable<DataConstant> {
  
     protected URI datatypeURI;
@@ -70,5 +73,10 @@ public class DataConstant implements Comparable<DataConstant> {
         int result = datatypeURI.compareTo(constant.getDatatypeURI());
         if (result != 0 ) return result;
         return value.compareToIgnoreCase(constant.getValue());
+    }
+    
+    public static boolean validate(String value, String type) {
+        Automaton a = Datatypes.get(type);
+        return a.run(value);
     }
 }

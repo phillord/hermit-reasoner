@@ -3,7 +3,6 @@ package org.semanticweb.HermiT.model.dataranges;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -27,7 +26,10 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
         this.datatypeURI = XSDVocabulary.STRING.getURI();
         supportedFacets = new HashSet<Facets>(
                 Arrays.asList(new Facets[] {
-                        Facets.LENGTH, Facets.MIN_LENGTH, Facets.MAX_LENGTH, Facets.PATTERN
+                        Facets.LENGTH, 
+                        Facets.MIN_LENGTH, 
+                        Facets.MAX_LENGTH, 
+                        Facets.PATTERN
                 })
         );
     }
@@ -36,35 +38,15 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
         return new DatatypeRestrictionString();
     }
     
-    public boolean addOneOf(DataConstant constant) {
-        return oneOf.add(constant);
-    }
-    
-    public void setOneOf(Set<DataConstant> oneOf) {
-        this.oneOf = oneOf;
-    }
-    
-    public boolean removeOneOf(DataConstant constant) {
-        boolean contained = oneOf.remove(constant);
-        if (contained && oneOf.isEmpty()) {
-            // it does not mean it can have arbitrary values now, but rather it 
-            // is bottom if not negated and top if negated, so we have to swap 
-            // negation values
-            isBottom = true;
-        }
-        return contained;
-    }
-    
     public boolean isFinite() {
-        return (!isNegated && 
-                (!oneOf.isEmpty() 
-                        || !(maxLength == null))
-                        || (!(patternMatcher == null) 
-                                && patternMatcher.isFinite()));
+        compileAllFacetsIntoPattern();
+        return isBottom || (!isNegated && 
+                ((patternMatcher != null && patternMatcher.isFinite()) 
+                        || !oneOf.isEmpty()));
     }
     
     protected void compileAllFacetsIntoPattern() {
-        if (!patternMatcherContainsAllFacets || facetsChanged) {
+        if (!patternMatcherContainsAllFacets || facetsChanged || !notOneOf.isEmpty()) {
             RegExp regExp = null;
             Automaton tmpAutomaton = null;
             if (maxLength != null || minLength != null) {
@@ -103,6 +85,85 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
         facetsChanged = false;
     }
     
+    public void addFacet(Facets facet, String value) {
+        switch (facet) {
+        case LENGTH: {
+            addFacet(Facets.MIN_LENGTH, value);
+            addFacet(Facets.MAX_LENGTH, value);
+        } break;
+        case MIN_LENGTH: {
+            BigInteger valueInt = new BigInteger(value);
+            if (minLength == null || valueInt.compareTo(valueInt) > minLength.intValue()) {
+                minLength = valueInt;
+                facetsChanged = true;
+            }
+        } break;
+        case MAX_LENGTH: {
+            BigInteger valueInt = new BigInteger(value);
+            if (maxLength == null || valueInt.compareTo(valueInt)< maxLength.intValue()) {
+                maxLength = valueInt;
+                facetsChanged = true;
+            }
+        } break;
+        case PATTERN: {
+            RegExp regExp = new RegExp(value);
+            Automaton tmpAutomaton = regExp.toAutomaton();
+            if (patternMatcher != null) {
+                patternMatcher = BasicOperations.intersection(patternMatcher, 
+                        tmpAutomaton);
+            } else {
+                pattern = value;
+                patternMatcher = tmpAutomaton; 
+            }
+            facetsChanged = true;
+        } break;
+        default:
+            throw new IllegalArgumentException("The given facet is not " +
+            		"supported for this datatype.");
+        }
+    }
+    
+    public boolean facetsAccept(DataConstant constant) {
+        compileAllFacetsIntoPattern();
+        return patternMatcher.run(constant.getValue());
+    }
+    
+    public void conjoinFacetsFrom(DataRange range) {
+        if (isNegated) {
+            throw new RuntimeException("Cannot add facets to negated " +
+                        "data ranges!");
+        }
+        if (!(range instanceof DatatypeRestrictionString)) {
+            throw new IllegalArgumentException("The given parameter is not " +
+                    "an instance of DatatypeRestrictionString. It is " +
+                    "only allowed to add facets from other String " +
+                    "datatype restrictions. ");
+        }
+        DatatypeRestrictionString restr = (DatatypeRestrictionString) range;
+        if (!isBottom()) {
+            Automaton restrMatcher = restr.getPatternMatcher(); 
+            if (restrMatcher != null) {
+                if (restr.isNegated()) {
+                    restrMatcher.complement();
+                }
+                if (patternMatcher == null) {
+                    this.patternMatcher = restrMatcher;
+                } else {
+                    patternMatcher = BasicOperations.intersection(patternMatcher, 
+                            restr.getPatternMatcher());
+                }
+            }
+        }
+    }
+    
+    public boolean accepts(DataConstant constant) {
+        if (!oneOf.isEmpty()) {
+            return oneOf.contains(constant);
+        }
+        compileAllFacetsIntoPattern();
+        return patternMatcher.run(constant.getValue());
+    }
+    
     public boolean hasMinCardinality(int n) {
         if (n == 0) return true;
         if (isFinite()) {
@@ -126,9 +187,6 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
         return null;
     }
     
-    /* (non-Javadoc)
-     * @see org.semanticweb.HermiT.model.DatatypeRestrictionLiteral#getSmallestAssignment()
-     */
     public DataConstant getSmallestAssignment() {
         if (!oneOf.isEmpty()) {
             SortedSet<DataConstant> sortedOneOfs = new TreeSet<DataConstant>(oneOf);
@@ -138,198 +196,18 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
         String value = patternMatcher.getShortestExample(true);
         return value != null ? new DataConstant(datatypeURI, value) : null;
     }
-    
-    public boolean facetsAccept(DataConstant constant) {
+   
+    protected String printExtraInfo(Namespaces namespaces) {
         compileAllFacetsIntoPattern();
-        return patternMatcher.run(constant.getValue());
+        return (pattern != null) ?  pattern : "";
     }
     
-    public boolean accepts(DataConstant constant) {
-        if (!oneOf.isEmpty()) {
-            return oneOf.contains(constant);
-        }
-        compileAllFacetsIntoPattern();
-        return patternMatcher.run(constant.getValue());
-    }
-    
-    public boolean isTop() {
-        return false; 
-    }
-    
-    public boolean isBottom() {
-        return !hasMinCardinality(1);
-    }
-    
-    public void setNotOneOf(Set<DataConstant> notOneOf) {
-        super.setNotOneOf(notOneOf);
-        facetsChanged = true;
-    }
-    
-    public boolean addNotOneOf(DataConstant constant) {
-        boolean result = super.addNotOneOf(constant);
-        facetsChanged = result;
-        return result;
-    }
-    
-    /* (non-Javadoc)
-     * @see org.semanticweb.HermiT.model.DataRange#conjoinFacetsFrom(org.semanticweb.HermiT.model.DataRange)
-     */
-    public void conjoinFacetsFrom(DataRange range) {
-        if (!(range instanceof DatatypeRestrictionString)) {
-            throw new IllegalArgumentException("The given parameter is not " +
-                    "an instance of DatatypeRestrictionString. It is " +
-                    "only allowed to add facets from other String " +
-                    "datatype restrictions. ");
-        }
-        DatatypeRestrictionString restr = (DatatypeRestrictionString) range;
-        if (isNegated) {
-            throw new RuntimeException("Cannot add facets to negated " +
-            		"data ranges!");
-        }
-        if (restr.getMinLength() != null) {
-            addFacet(Facets.MIN_LENGTH, restr.getMinLength().toString()); 
-            facetsChanged = true;
-        }
-        if (restr.getMaxLength() != null) {
-            addFacet(Facets.MAX_LENGTH, restr.getMaxLength().toString());
-            facetsChanged = true;
-        }
-        if (restr.getPatternMatcher() != null) {
-            if (patternMatcher == null) {
-                this.patternMatcher = restr.getPatternMatcher();
-                this.pattern = restr.getPattern();
-            } else {
-                patternMatcher = BasicOperations.intersection(patternMatcher, 
-                        restr.getPatternMatcher());
-                pattern = pattern + " and " + restr.getPattern();
-            }
-            facetsChanged = true;
-        }
-    }
-    
-    public void addFacet(Facets facet, String value) {
-        switch (facet) {
-        case LENGTH: {
-            BigInteger valueInt = new BigInteger(value);
-            if (isNegated) {
-                addFacet(Facets.MIN_LENGTH, (valueInt.add(BigInteger.ONE)).toString());
-                addFacet(Facets.MAX_LENGTH, (valueInt.subtract(BigInteger.ONE)).toString());
-            } else {
-                if (minLength == null || valueInt.compareTo(minLength) > 0) {
-                    minLength = valueInt;
-                    facetsChanged = true;
-                }
-                if (maxLength == null || valueInt.compareTo(maxLength) < 0) {
-                    maxLength = valueInt;
-                    facetsChanged = true;
-                }
-            }
-        } break;
-        case MIN_LENGTH: {
-            BigInteger valueInt = new BigInteger(value);
-            if (isNegated) {
-                valueInt = valueInt.subtract(BigInteger.ONE);
-                if (maxLength != null) {
-                    if (valueInt.compareTo(maxLength) > 0) {
-                        maxLength = valueInt;
-                        facetsChanged = true;
-                    }
-                } else {
-                    maxLength = valueInt;
-                    facetsChanged = true;
-                }
-            } else {
-                if (minLength == null || valueInt.compareTo(valueInt) > minLength.intValue()) {
-                    minLength = valueInt;
-                    facetsChanged = true;
-                }
-            }
-        } break;
-        case MAX_LENGTH: {
-            BigInteger valueInt = new BigInteger(value);
-            if (isNegated) {
-                valueInt = valueInt.add(BigInteger.ONE);
-                if (minLength != null) {
-                    if (valueInt.compareTo(minLength) < 0) {
-                        minLength = valueInt;
-                        facetsChanged = true;
-                    }
-                } else {
-                    minLength = valueInt;
-                    facetsChanged = true;
-                }
-            } else {
-                if (maxLength == null || valueInt.compareTo(valueInt)< maxLength.intValue()) {
-                    maxLength = valueInt;
-                    facetsChanged = true;
-                }
-            }
-        } break;
-        case PATTERN: {
-            if (isNegated) {
-                RegExp regExp = new RegExp("~" + value);
-                Automaton tmpAutomaton = regExp.toAutomaton();
-                if (patternMatcher != null) {
-                    pattern = pattern + " or " + "~" + value;
-                    patternMatcher = BasicOperations.union(patternMatcher, 
-                            tmpAutomaton);
-                } else {
-                    pattern = "~" + value;
-                    patternMatcher = tmpAutomaton; 
-                }
-                facetsChanged = true;
-            } else {
-                RegExp regExp = new RegExp(value);
-                Automaton tmpAutomaton = regExp.toAutomaton();
-                if (patternMatcher != null) {
-                    pattern = pattern + " and " + value;
-                    patternMatcher = BasicOperations.intersection(patternMatcher, 
-                            tmpAutomaton);
-                } else {
-                    pattern = value;
-                    patternMatcher = tmpAutomaton; 
-                }
-                facetsChanged = true;
-            }
-        } break;
-        default:
-            String message = "The given facet is not supported for this datatype.";
-            if (supportedFacets.contains(facet)) {
-                message = "The given facet is not yet supported for this datatype.";
-            }
-            throw new IllegalArgumentException(message);
-        }
-    }
-    public BigInteger getMinLength() {
-        return minLength;
-    }
-    public BigInteger getMaxLength() {
-        return maxLength;
-    }
     public Automaton getPatternMatcher() {
+        compileAllFacetsIntoPattern();
         return patternMatcher;
     }
+    
     public String getPattern() {
         return pattern;
-    }
-    public String toString(Namespaces namespaces) {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("(");
-        if (isNegated) buffer.append("not ");
-        buffer.append(namespaces.idFromUri(datatypeURI.toString()));
-        if (minLength != null) {
-            buffer.append(isNegated ? " or " : " and ");
-            buffer.append(" >= " + minLength);
-        }
-        if (maxLength != null) {
-            buffer.append(isNegated ? " or " : " and ");
-            buffer.append(" >= " + maxLength);
-        }
-        if (pattern != null) {
-            buffer.append(isNegated ? " or " : " and ");
-            buffer.append(" pattern=" + pattern);
-        }
-        buffer.append(")");
-        return buffer.toString();        
     }
 }
