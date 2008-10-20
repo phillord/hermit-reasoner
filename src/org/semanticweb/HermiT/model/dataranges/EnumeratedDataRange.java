@@ -50,4 +50,8 @@ public class EnumeratedDataRange extends DatatypeRestriction implements DataRang
         }
         return null;
     }
+    
+    public boolean datatypeAccepts(DataConstant constant) {
+        return true;
+    }
 }

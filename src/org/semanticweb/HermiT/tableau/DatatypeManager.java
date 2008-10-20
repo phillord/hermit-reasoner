@@ -1,5 +1,6 @@
 package org.semanticweb.HermiT.tableau;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -16,9 +17,15 @@ import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.dataranges.CanonicalDataRange;
 import org.semanticweb.HermiT.model.dataranges.DataConstant;
 import org.semanticweb.HermiT.model.dataranges.DataRange;
+import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionBoolean;
+import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionDateTime;
+import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionInteger;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionLiteral;
+import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionOWLRealPlus;
+import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionString;
 import org.semanticweb.HermiT.model.dataranges.EnumeratedDataRange;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
+import org.semanticweb.owl.vocab.XSDVocabulary;
 
 public class DatatypeManager {
     protected final TableauMonitor tableauMonitor;
@@ -319,7 +326,8 @@ public class DatatypeManager {
      */
     protected CanonicalDataRange getCanonicalDataRange(Set<DataRange> ranges) {
         // create a new instance of the type that the first positive data range has
-        CanonicalDataRange canonicalDR = null; 
+        CanonicalDataRange canonicalDR = null;
+        Set<URI> uris = null; 
         // set the URI to the one of the first positive data range, we then 
         // expect all ranges to have the same URI or it is a clash
         boolean onlyNegated = true;
@@ -330,14 +338,17 @@ public class DatatypeManager {
                 onlyNegated = false;
                 if (range.getDatatypeURI() != null) {
                     // found a datatype restriction, which cannot have oneOfs
-                    if (canonicalDR == null) {
-                        canonicalDR = range.getNewInstance();
-                    } else {
-                        if (!range.getDatatypeURI().equals(canonicalDR.getDatatypeURI())) {
-                            // two non-negated ones with different URIs -> clash
-                            return null;
-                        }
-                    }
+                    if (uris == null) {
+                        uris = new HashSet<URI>();
+                        //canonicalDR = range.getNewInstance();
+                    } 
+                    uris.add(range.getDatatypeURI());
+                    //else {
+//                        if (!range.getDatatypeURI().equals(canonicalDR.getDatatypeURI())) {
+//                            // two non-negated ones with different URIs -> clash
+//                            return null;
+//                        }
+//                    }
                 } else {
                     // not a datatype restriction, so it is an enumerated range
                     if (constants == null) {
@@ -355,8 +366,8 @@ public class DatatypeManager {
         }
         if (onlyNegated) {
             // only negated ranges -> trivially satisfiable
-            return new DatatypeRestrictionLiteral();
-        }   
+            return new DatatypeRestrictionLiteral(XSDVocabulary.BOOLEAN.getURI());
+        }
         if (constants != null) {
             constants.removeAll(forbiddenConstants);
             if (constants.isEmpty()) {
@@ -364,18 +375,38 @@ public class DatatypeManager {
                 return null;
             }
         }
-        if (canonicalDR == null) {
+        if (uris == null) {
             // all ranges are enumerated ones
             if (constants == null) return null;
             canonicalDR = new EnumeratedDataRange();
             canonicalDR.setOneOf(constants);
             return canonicalDR;
         } else {
+            // find which implementation to use
+            if (DatatypeRestrictionOWLRealPlus.canHandleAll(uris)) {
+                canonicalDR = new DatatypeRestrictionOWLRealPlus(URI.create(org.semanticweb.owl.vocab.Namespaces.OWL + "realPlus"));
+                if (uris.contains(URI.create(org.semanticweb.owl.vocab.Namespaces.OWL + "real")) 
+                        || uris.contains(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "decimal"))) {
+                    forbiddenConstants.addAll(DataConstant.numericSpecials);
+                }
+            } else if (DatatypeRestrictionInteger.canHandleAll(uris)) {
+                canonicalDR = new DatatypeRestrictionInteger(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "integer"));
+            } else if (DatatypeRestrictionBoolean.canHandleAll(uris)) {
+                canonicalDR = new DatatypeRestrictionInteger(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "boolean"));
+            } else if (DatatypeRestrictionDateTime.canHandleAll(uris)) {
+                canonicalDR = new DatatypeRestrictionDateTime(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "dateTime"));
+            } else if (DatatypeRestrictionString.canHandleAll(uris)) {
+                canonicalDR = new DatatypeRestrictionString(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "string"));
+            } else if (DatatypeRestrictionLiteral.canHandleAll(uris)) {
+                canonicalDR = new DatatypeRestrictionLiteral(URI.create(org.semanticweb.owl.vocab.Namespaces.RDFS + "literal"));
+            } else {
+                return null;
+            }
             // if there are oneOf restrictions, check whether there are values 
             // that suit the datatype restriction
             if (constants != null) {
                 for (DataConstant constant : constants) {
-                    if (!constant.getDatatypeURI().equals(canonicalDR.getDatatypeURI())) {
+                    if (!canonicalDR.datatypeAccepts(constant)) {
                         constants.remove(constant);
                     }
                 }
@@ -388,7 +419,7 @@ public class DatatypeManager {
 
         // lets look at the facets
         for (DataRange range : ranges) {
-            if (canonicalDR.getDatatypeURI().equals(range.getDatatypeURI())) {
+            if (range.getDatatypeURI() != null) {
                 canonicalDR.conjoinFacetsFrom(range);
             }
         }

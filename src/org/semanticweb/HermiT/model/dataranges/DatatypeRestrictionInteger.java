@@ -1,6 +1,7 @@
 package org.semanticweb.HermiT.model.dataranges;
 
 import java.math.BigInteger;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -9,14 +10,13 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.semanticweb.HermiT.Namespaces;
-import org.semanticweb.owl.vocab.XSDVocabulary;
 
 public class DatatypeRestrictionInteger extends DatatypeRestriction {
     
-    protected Set<Interval> intervals = new HashSet<Interval>();
+    protected Set<IntegerInterval> integerIntervals = new HashSet<IntegerInterval>();
    
-    public DatatypeRestrictionInteger() {
-        this.datatypeURI = XSDVocabulary.INTEGER.getURI();
+    public DatatypeRestrictionInteger(URI datatypeURI) {
+        this.datatypeURI = datatypeURI;
         this.supportedFacets = new HashSet<Facets>(
                 Arrays.asList(new Facets[] {
                         Facets.MIN_INCLUSIVE, 
@@ -28,7 +28,7 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
     }
     
     public CanonicalDataRange getNewInstance() {
-        return new DatatypeRestrictionInteger();
+        return new DatatypeRestrictionInteger(this.datatypeURI);
     }
     
     public boolean isFinite() {
@@ -37,9 +37,9 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
     
     protected boolean hasOnlyFiniteIntervals() {
         boolean hasOnlyFiniteIntervals = true;
-        if (intervals.isEmpty()) return false;
-        for (Interval i : intervals) {
-            if (i.getMaxIncl() == null || i.getMinIncl() == null) {
+        if (integerIntervals.isEmpty()) return false;
+        for (IntegerInterval i : integerIntervals) {
+            if (i.getMax() == null || i.getMin() == null) {
                 hasOnlyFiniteIntervals = false;
             }
         }
@@ -56,95 +56,40 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
         }
         switch (facet) {
         case MIN_INCLUSIVE: {
-            if (isNegated) {
-                // not greater or equal X = smaller or equal X - 1
-                valueInt = valueInt.subtract(BigInteger.ONE);
-                addNegatedFacet(Facets.MAX_INCLUSIVE, valueInt);
+            // greater or equal X
+            if (integerIntervals.isEmpty()) {
+                integerIntervals.add(new IntegerInterval(valueInt, null));
             } else {
-                // greater or equal X
-                if (intervals.isEmpty()) {
-                    intervals.add(new Interval(valueInt, null));
-                } else {
-                    for (Interval i : intervals) {
-                        if (i.getMinIncl() == null 
-                                || i.getMinIncl().compareTo(valueInt) < 0) {
-                            i.setMinIncl(valueInt);
-                        }
-                        if (i.isEmpty()) {
-                            isBottom = true;
-                        }
+                for (IntegerInterval i : integerIntervals) {
+                    i.intersectWith(new IntegerInterval(valueInt, null));
+                    if (i.isEmpty()) {
+                        isBottom = true;
                     }
                 }
             }
         } break;
         case MIN_EXCLUSIVE: {
-            if (isNegated) {
-                // not greater 3 = smaller or equal 3
-                addNegatedFacet(Facets.MAX_INCLUSIVE, valueInt);
-            } else {
-                // greater than X = greater or equal X + 1
-                valueInt = valueInt.add(BigInteger.ONE);
-                addFacet(Facets.MIN_INCLUSIVE, valueInt.toString());
-            }
+            // greater than X = greater or equal X + 1
+            valueInt = valueInt.add(BigInteger.ONE);
+            addFacet(Facets.MIN_INCLUSIVE, valueInt.toString());
         } break;
         case MAX_INCLUSIVE: {
-            if (isNegated) {
-                // not smaller or equal X = greater or equal X - 1
-                valueInt = valueInt.add(BigInteger.ONE);
-                addNegatedFacet(Facets.MIN_INCLUSIVE, valueInt);
+            // smaller or equal X
+            if (integerIntervals.isEmpty()) {
+                integerIntervals.add(new IntegerInterval(null, valueInt));
             } else {
-                // smaller or equal X
-                if (intervals.isEmpty()) {
-                    intervals.add(new Interval(null, valueInt));
-                } else {
-                    for (Interval i : intervals) {
-                        if (i.getMaxIncl() == null 
-                                || i.getMaxIncl().compareTo(valueInt) > 0) {
-                            i.setMaxIncl(valueInt);
-                        }
-                        if (i.isEmpty()) isBottom = true;
+                for (IntegerInterval i : integerIntervals) {
+                    i.intersectWith(new IntegerInterval(null, valueInt));
+                    if (i.isEmpty()) {
+                        isBottom = true;
                     }
                 }
             }
         } break;
         case MAX_EXCLUSIVE: {
-            if (isNegated) {
-                // not smaller than X => greater or equal X
-                addNegatedFacet(Facets.MIN_INCLUSIVE, valueInt);
-            } else {
-                // smaller than X = smaller or equal X - 1 
-                valueInt = valueInt.subtract(BigInteger.ONE);
-                addFacet(Facets.MAX_INCLUSIVE, valueInt.toString());
-            }
-        } break;
-        default:
-            throw new IllegalArgumentException("Unsupported facet.");
-        }
-    }
-    
-    protected void addNegatedFacet(Facets facet, BigInteger valueInt) {
-        switch (facet) {
-        case MIN_INCLUSIVE: {
-            if (intervals.isEmpty()) {
-                intervals.add(new Interval(valueInt, null));
-            } else { 
-                for (Interval i : intervals) {
-                    if (i.getMinIncl() == null || i.getMinIncl().compareTo(valueInt) > 0) {
-                        i.setMinIncl(valueInt);
-                    }
-                }
-            }
-        } break;
-        case MAX_INCLUSIVE: {
-            if (intervals.isEmpty()) {
-                intervals.add(new Interval(null, valueInt));
-            } else { 
-                for (Interval i : intervals) {
-                    if (i.getMaxIncl() == null || i.getMaxIncl().compareTo(valueInt) < 0) {
-                        i.setMaxIncl(valueInt);
-                    }
-                }
-            }
+            // smaller than X = smaller or equal X - 1 
+            valueInt = valueInt.subtract(BigInteger.ONE);
+            addFacet(Facets.MAX_INCLUSIVE, valueInt.toString());
         } break;
         default:
             throw new IllegalArgumentException("Unsupported facet.");
@@ -158,9 +103,9 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
         if (!notOneOf.isEmpty() && notOneOf.contains(constant)) {
             return false;
         } 
-        if (intervals.isEmpty()) return true;
+        if (integerIntervals.isEmpty()) return true;
         BigInteger intValue = new BigInteger(constant.getValue());
-        for (Interval i : intervals) {
+        for (IntegerInterval i : integerIntervals) {
             if (i.contains(intValue) && !notOneOf.contains(constant)) {
                 return true;
             }
@@ -181,52 +126,62 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
         }
         if (!isBottom()) {
             DatatypeRestrictionInteger restr = (DatatypeRestrictionInteger) range;
-            if (restr.getIntervals().size() > 1) {
+            if (restr.getIntegerIntervals().size() > 1) {
                 throw new IllegalArgumentException("The given parameter " +
                         "contains more than one interval. ");
             }
-            if (intervals.isEmpty()) {
-                for (Interval i : restr.getIntervals()) {
+            if (integerIntervals.isEmpty()) {
+                for (IntegerInterval i : restr.getIntegerIntervals()) {
                     if (restr.isNegated()) {
-                        if (!i.isFinite() || i.isEmpty()) {
-                            if (i.getMinIncl() != null) {
-                                intervals.add(new Interval(i.getMinIncl(), null));
+                        if (!i.isEmpty()) {
+                            if (i.getMin() != null) {
+                                integerIntervals.add(new IntegerInterval(null, i.getMin()));
                             }
-                            if (i.getMaxIncl() != null) {
-                                intervals.add(new Interval(null, i.getMaxIncl()));
+                            if (i.getMax() != null) {
+                                integerIntervals.add(new IntegerInterval(i.getMax(), null));
                             }
-                        } // otherwise i is trivially satisfied
+                        } // otherwise i is trivially satisfied 
                     } else {
-                        intervals.addAll(restr.getIntervals());
+                        integerIntervals = restr.getIntegerIntervals();
                     }
                 }
             } else {
+                Set<IntegerInterval> newIntervals = new HashSet<IntegerInterval>();
                 if (restr.isNegated()) {
-                    Set<Interval> newIntervals = new HashSet<Interval>();
-                    for (Interval i : intervals) {
-                        for (Interval iNew : restr.getIntervals()) {
-                            if (!iNew.isFinite() || iNew.isEmpty()) {
-                                newIntervals.addAll(i.intersectWithNegated(iNew));
+                    for (IntegerInterval i : integerIntervals) {
+                        for (IntegerInterval iNew : restr.getIntegerIntervals()) {
+                            if (!iNew.isEmpty()) {
+                                if (iNew.getMin() != null) {
+                                    IntegerInterval newInterval = i.getCopy();
+                                    newInterval.intersectWith(new IntegerInterval(null, iNew.getMin().subtract(BigInteger.ONE)));
+                                    if (!newInterval.isEmpty()) {
+                                        newIntervals.add(newInterval);
+                                    }
+                                } 
+                                if (iNew.getMax() != null) {
+                                    IntegerInterval newInterval = i.getCopy();
+                                    newInterval.intersectWith(new IntegerInterval(iNew.getMax().add(BigInteger.ONE), null));
+                                    if (!newInterval.isEmpty()) {
+                                        newIntervals.add(newInterval);
+                                    }
+                                }
                             } else {
-                                // the restrictions in restr are trivially sat
                                 newIntervals.add(i);
                             }
                         }
                     }
-                    intervals = newIntervals;
                 } else {
-                    Set<Interval> newIntervals = new HashSet<Interval>();
-                    for (Interval i : intervals) {
-                        for (Interval iNew : restr.getIntervals()) {
+                    for (IntegerInterval i : integerIntervals) {
+                        for (IntegerInterval iNew : restr.getIntegerIntervals()) {
                             i.intersectWith(iNew);
                             if (!i.isEmpty()) newIntervals.add(i);
                         }
                     }
-                    if (newIntervals.isEmpty()) {
-                        isBottom = true;
-                    } else {
-                        intervals = newIntervals;
-                    }
+                }
+                if (newIntervals.isEmpty()) {
+                    isBottom = true;
+                } else {
+                    integerIntervals = newIntervals;
                 }
             }
         }
@@ -237,7 +192,7 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
             return oneOf.contains(constant);
         }
         BigInteger intValue = new BigInteger(constant.getValue());
-        for (Interval i : intervals) {
+        for (IntegerInterval i : integerIntervals) {
             if (i.contains(intValue) && !notOneOf.contains(constant)) {
                 return true;
             }
@@ -254,12 +209,12 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
             BigInteger nBig = new BigInteger("" + n);
             BigInteger subtract = BigInteger.ZERO;
             BigInteger rangeSize = BigInteger.ZERO;
-            for (Interval i : intervals) {
+            for (IntegerInterval i : integerIntervals) {
                 rangeSize = rangeSize.add(i.getCardinality());
             }
             for (DataConstant constant : notOneOf) {
                 BigInteger not = new BigInteger(constant.getValue());
-                for (Interval i : intervals) {
+                for (IntegerInterval i : integerIntervals) {
                     if (i.contains(not)) {
                         subtract = subtract.subtract(BigInteger.ONE);
                     }
@@ -278,12 +233,12 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
             }
             BigInteger subtract = BigInteger.ZERO;
             BigInteger rangeSize = BigInteger.ZERO;
-            for (Interval i : intervals) {
+            for (IntegerInterval i : integerIntervals) {
                 rangeSize = rangeSize.add(i.getCardinality());
             }
             for (DataConstant constant : notOneOf) {
                 BigInteger not = new BigInteger(constant.getValue());
-                for (Interval i : intervals) {
+                for (IntegerInterval i : integerIntervals) {
                     if (i.contains(not)) {
                         subtract = subtract.subtract(BigInteger.ONE);
                     }
@@ -300,11 +255,11 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
                 SortedSet<DataConstant> sortedOneOfs = new TreeSet<DataConstant>(oneOf);
                 return sortedOneOfs.first();
             }
-            SortedSet<Interval> sortedIntervals = new TreeSet<Interval>(IntervalComparator.INSTANCE);
-            sortedIntervals.addAll(intervals);
-            for (Interval i : sortedIntervals) {
-                BigInteger constant = i.getMinIncl();
-                while (constant.compareTo(i.getMaxIncl()) <= 0) {
+            SortedSet<IntegerInterval> sortedIntervals = new TreeSet<IntegerInterval>(IntervalComparator.INSTANCE);
+            sortedIntervals.addAll(integerIntervals);
+            for (IntegerInterval i : sortedIntervals) {
+                BigInteger constant = i.getMin();
+                while (constant.compareTo(i.getMax()) <= 0) {
                     DataConstant dataConstant = new DataConstant(datatypeURI, "" + constant);
                     if (!notOneOf.contains(dataConstant)) return dataConstant;
                     constant = constant.add(BigInteger.ONE);
@@ -314,154 +269,177 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
         return null;
     }
     
-    public Set<Interval> getIntervals() {
-        return intervals;
+    public Set<IntegerInterval> getIntegerIntervals() {
+        return integerIntervals;
     }
     
     protected String printExtraInfo(Namespaces namespaces) {
         boolean firstRun = true;
         StringBuffer buffer = new StringBuffer();
-        for (Interval i : intervals) {
+        for (IntegerInterval i : integerIntervals) {
             if (!firstRun && !isNegated) {
                 buffer.append(" or ");
             }
-            if (i.getMinIncl() != null) {
+            if (i.getMin() != null) {
                 if (isNegated) buffer.append(" or ");
-                buffer.append(" >= " + i.getMinIncl());
+                buffer.append(" >= " + i.getMin());
             }
-            if (i.getMaxIncl() != null) {
+            if (i.getMax() != null) {
                 if (isNegated) buffer.append(" or ");
-                buffer.append(" <= " + i.getMaxIncl());
+                buffer.append(" <= " + i.getMax());
             }
             firstRun = false;
         }
         return buffer.toString();
     }
     
-    public class Interval {
-        BigInteger minIncl = null;
-        BigInteger maxIncl = null;
+    public boolean datatypeAccepts(DataConstant constant) {
+        Set<URI> supportedDTs = new HashSet<URI>();
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "integer"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "nonNegativeInteger"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "nonPositiveInteger"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "positiveInteger"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "negativeInteger"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "long"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "int"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "short"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "byte"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedLong"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedInt"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedShort"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedByte"));
+        return supportedDTs.contains(constant.getDatatypeURI());
+    }
+    
+    
+    public class IntegerInterval {
+        BigInteger min = null;
+        BigInteger max = null;
         
-        public Interval(BigInteger minInclusive, BigInteger maxInclusive) {
-            this.minIncl = minInclusive;
-            this.maxIncl = maxInclusive;
+        public IntegerInterval(BigInteger minInclusive, BigInteger maxInclusive) {
+            this.min = minInclusive;
+            this.max = maxInclusive;
         }
         
-        public Set<Interval> intersectWithNegated(Interval i) {
-            Set<Interval> intervals = new HashSet<Interval>();
-            if (this.isEmpty()) return intervals;
-            BigInteger minInclusive = i.getMinIncl();
-            BigInteger maxInclusive = i.getMaxIncl();
-            if ((maxInclusive != null 
-                    && maxIncl != null 
-                    && maxInclusive.compareTo(maxIncl) > 0) 
-                    || (minInclusive != null 
-                            && minIncl != null 
-                            && minInclusive.compareTo(minIncl) < 0)) {
-                intervals.add(new Interval(minIncl, maxIncl));
-                return intervals;
-            }
-            if (minInclusive != null) {
-                if (!isEmpty(minInclusive, maxIncl)) {
-                    intervals.add(new Interval(minInclusive, maxIncl));
-                }
-            }
-            if (maxInclusive != null) {
-                if (!isEmpty(minIncl, maxInclusive)) {
-                    intervals.add(new Interval(minIncl, maxInclusive));
-                }
-            }
-            return intervals;
+        public IntegerInterval getCopy() {
+            return new IntegerInterval(min, max);
         }
         
-        public void intersectWith(Interval i) {
-            if (maxIncl == null) {
-                maxIncl = i.getMaxIncl();
+        public void intersectWith(IntegerInterval i) {
+            if (max == null) {
+                max = i.getMax();
             } else {
-                if (i.getMaxIncl() != null 
-                        && i.getMaxIncl().compareTo(maxIncl) < 0) {
-                    maxIncl = i.getMaxIncl();
+                if (i.getMax() != null 
+                        && i.getMax().compareTo(max) < 0) {
+                    max = i.getMax();
                 }
             }
-            if (minIncl == null) {
-                minIncl = i.getMinIncl();
+            if (min == null) {
+                min = i.getMin();
             } else {
-                if (i.getMinIncl() != null 
-                        && i.getMinIncl().compareTo(minIncl) > 0) {
-                    minIncl = i.getMinIncl();
+                if (i.getMin() != null 
+                        && i.getMin().compareTo(min) > 0) {
+                    min = i.getMin();
                 }
             }
         }
         
         public boolean isEmpty() {
-            return (minIncl != null && maxIncl != null && minIncl.compareTo(maxIncl) > 0);
+            return (min != null 
+                    && max != null 
+                    && min.compareTo(max) > 0);
         }
         
         protected boolean isEmpty(BigInteger lower, BigInteger upper) {
-            return (lower != null && upper != null && lower.compareTo(upper) > 0);
+            return (lower != null 
+                    && upper != null 
+                    && lower.compareTo(upper) > 0);
         }
         
         public boolean isFinite() {
-            return minIncl != null && maxIncl != null;
+            return min != null && max != null;
         }
         
         public boolean contains(BigInteger integer) {
             boolean contains = true;
-            if (minIncl != null) {
-                contains = contains && (minIncl.compareTo(integer) <= 0);
+            if (min != null) {
+                contains = contains && (min.compareTo(integer) <= 0);
             }
-            if (maxIncl != null) {
-                contains = contains && (maxIncl.compareTo(integer) >= 0);
+            if (max != null) {
+                contains = contains && (max.compareTo(integer) >= 0);
             }
             return contains;
         }
         
-        public boolean contains(Interval interval) {
-            return (minIncl.compareTo(interval.minIncl) >= 0 && maxIncl.compareTo(interval.maxIncl) <= 0);
+        public boolean contains(IntegerInterval interval) {
+            return contains(interval.getMin()) 
+                    && contains(interval.getMax());
         }
         
-        public boolean disjointWith(Interval interval) {
-            return (minIncl.compareTo(interval.maxIncl) >= 0 || maxIncl.compareTo(interval.minIncl) <= 0);
+        public boolean disjointWith(IntegerInterval interval) {
+            return (min.compareTo(interval.getMax()) >= 0 
+                    || max.compareTo(interval.getMin()) <= 0);
         }
         
         public BigInteger getCardinality() {
-            if (maxIncl.compareTo(minIncl) < 0) return BigInteger.ZERO;
-            return maxIncl.subtract(minIncl).add(BigInteger.ONE);
+            if (max.compareTo(min) < 0) return BigInteger.ZERO;
+            return max.subtract(min).add(BigInteger.ONE);
         }
 
-        public BigInteger getMinIncl() {
-            return minIncl;
+        public BigInteger getMin() {
+            return min;
         }
 
-        public void setMinIncl(BigInteger minIncl) {
-            this.minIncl = minIncl;
+        public void setMin(BigInteger min) {
+            this.min = min;
         }
 
-        public BigInteger getMaxIncl() {
-            return maxIncl;
+        public BigInteger getMax() {
+            return max;
         }
 
-        public void setMaxIncl(BigInteger maxIncl) {
-            this.maxIncl = maxIncl;
+        public void setMaxIncl(BigInteger max) {
+            this.max = max;
         }
         
         public String toString() {
             StringBuffer buffer = new StringBuffer();
-            if (minIncl != null) {
-                buffer.append(">= " + minIncl);
+            if (min != null) {
+                buffer.append(">= " + min);
             }
-            if (maxIncl != null) {
-                if (minIncl != null) buffer.append(" ");
-                buffer.append("<= " + maxIncl);
+            if (max != null) {
+                if (min != null) buffer.append(" ");
+                buffer.append("<= " + max);
             }
             return buffer.toString();
         }
     }
     
-    protected static class IntervalComparator implements Comparator<Interval> { 
-        public static Comparator<Interval> INSTANCE = new IntervalComparator();
-        public int compare(Interval i1, Interval i2) {
-            return i1.getMinIncl().compareTo(i2.getMinIncl()); 
+    protected static class IntervalComparator implements Comparator<IntegerInterval> { 
+        public static Comparator<IntegerInterval> INSTANCE = new IntervalComparator();
+        public int compare(IntegerInterval i1, IntegerInterval i2) {
+            return i1.getMin().compareTo(i2.getMin()); 
         }
+    }
+    
+    public static boolean canHandleAll(Set<URI> datatypeURIs) {
+        Set<URI> supportedDTs = new HashSet<URI>();
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.OWL + "realPlus"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.OWL + "real"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "decimal"));;
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "integer"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "nonNegativeInteger"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "nonPositiveInteger"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "positiveInteger"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "negativeInteger"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "long"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "int"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "short"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "byte"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedLong"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedInt"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedShort"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedByte"));
+        return supportedDTs.containsAll(datatypeURIs);
     }
 }

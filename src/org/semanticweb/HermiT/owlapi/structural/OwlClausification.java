@@ -1,8 +1,10 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.owlapi.structural;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -40,6 +42,7 @@ import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionBoolean;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionDateTime;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionInteger;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionLiteral;
+import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionOWLRealPlus;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionString;
 import org.semanticweb.HermiT.model.dataranges.EnumeratedDataRange;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets;
@@ -93,6 +96,7 @@ import org.semanticweb.owl.model.OWLOntologyManager;
 import org.semanticweb.owl.model.OWLSameIndividualsAxiom;
 import org.semanticweb.owl.model.OWLTypedConstant;
 import org.semanticweb.owl.model.OWLUntypedConstant;
+import org.semanticweb.owl.vocab.Namespaces;
 import org.semanticweb.owl.vocab.OWLRestrictedDataRangeFacetVocabulary;
 import org.semanticweb.owl.vocab.XSDVocabulary;
 
@@ -857,6 +861,7 @@ public class OwlClausification {
     protected static class DataVisitor implements OWLDataVisitor {
         protected static OWLOntologyManager man = OWLManager.createOWLOntologyManager();
         protected static OWLDataFactory factory = man.getOWLDataFactory();
+        protected static OWLDataType decimalDataType = factory.getOWLDataType(XSDVocabulary.DECIMAL.getURI());
         protected static OWLDataType integerDataType = factory.getIntegerDataType();
         protected static OWLDataType nonNegatedIntegerDataType = factory.getOWLDataType(XSDVocabulary.NON_NEGATIVE_INTEGER.getURI());
         protected static OWLDataType nonPositiveIntegerDataType = factory.getOWLDataType(XSDVocabulary.NON_POSITIVE_INTEGER.getURI());
@@ -868,14 +873,17 @@ public class OwlClausification {
         protected static OWLDataType byteDataType = factory.getOWLDataType(XSDVocabulary.BYTE.getURI());
         protected static OWLDataType unsignedLongDataType = factory.getOWLDataType(XSDVocabulary.UNSIGNED_LONG.getURI());
         protected static OWLDataType unsignedIntDataType = factory.getOWLDataType(XSDVocabulary.UNSIGNED_INT.getURI());
-        protected static OWLDataType unsignedShortDataType = factory.getOWLDataType(URI.create("http://www.w3.org/2001/XMLSchema#unsignedShort"));
-        protected static OWLDataType unsignedByteDataType = factory.getOWLDataType(URI.create("http://www.w3.org/2001/XMLSchema#unsignedByte"));
+        protected static OWLDataType unsignedShortDataType = factory.getOWLDataType(URI.create(Namespaces.XSD + "unsignedShort"));
+        protected static OWLDataType unsignedByteDataType = factory.getOWLDataType(URI.create(Namespaces.XSD + "unsignedByte"));
         protected static OWLDataType stringDataType = factory.getOWLDataType(XSDVocabulary.STRING.getURI());
+        protected static OWLDataType rdfTextDataType = factory.getOWLDataType(URI.create(Namespaces.RDF + "text"));
         protected static OWLDataType booleanDataType = factory.getOWLDataType(XSDVocabulary.BOOLEAN.getURI());
         protected static OWLDataType literalDataType = factory.getTopDataType();
         protected static OWLDataType dateTimeDataType = factory.getOWLDataType(XSDVocabulary.DATE_TIME.getURI());
-        protected static OWLDataType owlDateTimeDataType = factory.getOWLDataType(URI.create("http://www.w3.org/2002/07/owl#dateTime"));
-
+        protected static OWLDataType owlDateTimeDataType = factory.getOWLDataType(URI.create(Namespaces.OWL + "dateTime"));
+        protected static OWLDataType owlRealDataType = factory.getOWLDataType(URI.create(Namespaces.OWL + "real"));
+        protected static OWLDataType owlRealPlusDataType = factory.getOWLDataType(URI.create(Namespaces.OWL + "realPlus"));
+        
         protected boolean isNegated = false;
         protected DataRange currentDataRange;
         
@@ -901,29 +909,249 @@ public class OwlClausification {
             if (currentDataRange == null) {
                 throw new RuntimeException("Parsed constant outside of a DataOneOf. ");
             }
-            if (integerDataType.equals(typedConstant.getDataType()) 
-                    || nonNegatedIntegerDataType.equals(typedConstant.getDataType())
-                    || nonPositiveIntegerDataType.equals(typedConstant.getDataType())
-                    || positiveIntegerDataType.equals(typedConstant.getDataType())
-                    || negativeIntegerDataType.equals(typedConstant.getDataType())
-                    || longDataType.equals(typedConstant.getDataType())
-                    || intDataType.equals(typedConstant.getDataType())
-                    || shortDataType.equals(typedConstant.getDataType())
-                    || byteDataType.equals(typedConstant.getDataType())
-                    || unsignedLongDataType.equals(typedConstant.getDataType())
-                    || unsignedIntDataType.equals(typedConstant.getDataType())
-                    || unsignedShortDataType.equals(typedConstant.getDataType())
-                    || unsignedByteDataType.equals(typedConstant.getDataType())) {
-                currentDataRange.addOneOf(new DataConstant(integerDataType.getURI(), typedConstant.getLiteral()));
-            } else if (stringDataType.equals(typedConstant.getDataType()) 
-                    || booleanDataType.equals(typedConstant.getDataType())) {
-                currentDataRange.addOneOf(new DataConstant(typedConstant.getDataType().getURI(), typedConstant.getLiteral()));
-            } else if (owlDateTimeDataType.equals(typedConstant.getDataType()) 
-                    || dateTimeDataType.equals(typedConstant.getDataType())) {
-                currentDataRange.addOneOf(new DataConstant(dateTimeDataType.getURI(), typedConstant.getLiteral()));
+            OWLDataType dataType = typedConstant.getDataType();
+            if (owlRealDataType.equals(dataType) || owlRealPlusDataType.equals(dataType)) {
+                throw new RuntimeException("Parsed the constant " + typedConstant + " of type owl:real or owl:realPlus, but the datatypes owl:real and owl:realPlus do not have any literals. ");
+            } else if (integerDataType.equals(dataType)) {
+                try {
+                    BigInteger integer = new BigInteger(typedConstant.getLiteral());
+                    currentDataRange.addOneOf(new DataConstant(integerDataType.getURI(), integer.toString()));
+                } catch (NumberFormatException e) {
+                    throw new RuntimeException("Parsed constant " + typedConstant + " is not an integer as required. ");
+                } 
+            } else if (nonNegatedIntegerDataType.equals(dataType)) {
+                try {
+                    BigInteger nonNegative = new BigInteger(typedConstant.getLiteral());
+                    if (nonNegative.signum() < 0) {
+                        throw new NumberFormatException();
+                    }
+                    currentDataRange.addOneOf(new DataConstant(integerDataType.getURI(), nonNegative.toString()));
+                } catch (NumberFormatException e) {
+                    throw new RuntimeException("Parsed constant " + typedConstant + " is not a non-negative integer as required. ");
+                } 
+            } else if (nonPositiveIntegerDataType.equals(dataType)) {
+                try {
+                    BigInteger nonPositive = new BigInteger(typedConstant.getLiteral());
+                    if (nonPositive.signum() > 0) {
+                        throw new NumberFormatException();
+                    }
+                    currentDataRange.addOneOf(new DataConstant(integerDataType.getURI(), nonPositive.toString()));
+                } catch (NumberFormatException e) {
+                    throw new RuntimeException("Parsed constant " + typedConstant + " is not a non-positive integer as required. ");
+                } 
+            } else if (positiveIntegerDataType.equals(dataType)) {
+                try {
+                    BigInteger positive = new BigInteger(typedConstant.getLiteral());
+                    if (positive.signum() < 1) {
+                        throw new NumberFormatException();
+                    }
+                    currentDataRange.addOneOf(new DataConstant(integerDataType.getURI(), positive.toString()));
+                } catch (NumberFormatException e) {
+                    throw new RuntimeException("Parsed constant " + typedConstant + " is not a positive integer as required. ");
+                } 
+            } else if (negativeIntegerDataType.equals(dataType)) {
+                try {
+                    BigInteger negative = new BigInteger(typedConstant.getLiteral());
+                    if (negative.signum() > -1) {
+                        throw new NumberFormatException();
+                    }
+                    currentDataRange.addOneOf(new DataConstant(integerDataType.getURI(), negative.toString()));
+                } catch (NumberFormatException e) {
+                    throw new RuntimeException("Parsed constant " + typedConstant + " is not a negative integer as required. ");
+                } 
+            } else if (longDataType.equals(dataType)) {
+                try {
+                    BigInteger longType = new BigInteger(typedConstant.getLiteral());
+                    if (longType.compareTo(new BigInteger("" + Long.MAX_VALUE)) > 0 
+                            || longType.compareTo(new BigInteger("" + Long.MIN_VALUE)) < 0) {
+                        throw new NumberFormatException();
+                    }
+                    currentDataRange.addOneOf(new DataConstant(integerDataType.getURI(), longType.toString()));
+                } catch (NumberFormatException e) {
+                    throw new RuntimeException("Parsed constant " + typedConstant + " is not a long as required. ");
+                } 
+            } else if (intDataType.equals(dataType)) {
+                try {
+                    BigInteger intType = new BigInteger(typedConstant.getLiteral());
+                    if (intType.compareTo(new BigInteger("" + Integer.MAX_VALUE)) > 0 
+                            || intType.compareTo(new BigInteger("" + Integer.MIN_VALUE)) < 0) {
+                        throw new NumberFormatException();
+                    }
+                    currentDataRange.addOneOf(new DataConstant(integerDataType.getURI(), intType.toString()));
+                } catch (NumberFormatException e) {
+                    throw new RuntimeException("Parsed constant " + typedConstant + " is not an int as required. ");
+                } 
+            } else if (shortDataType.equals(dataType)) {
+                try {
+                    BigInteger shortType = new BigInteger(typedConstant.getLiteral());
+                    if (shortType.compareTo(new BigInteger("" + Short.MAX_VALUE)) > 0 
+                            || shortType.compareTo(new BigInteger("" + Short.MIN_VALUE)) < 0) {
+                        throw new NumberFormatException();
+                    }
+                    currentDataRange.addOneOf(new DataConstant(integerDataType.getURI(), shortType.toString()));
+                } catch (NumberFormatException e) {
+                    throw new RuntimeException("Parsed constant " + typedConstant + " is not a short as required. ");
+                } 
+            } else if (byteDataType.equals(dataType)) {
+                try {
+                    BigInteger byteType = new BigInteger(typedConstant.getLiteral());
+                    if (byteType.compareTo(new BigInteger("" + Byte.MAX_VALUE)) > 0 
+                            || byteType.compareTo(new BigInteger("" + Byte.MIN_VALUE)) < 0) {
+                        throw new NumberFormatException();
+                    }
+                    currentDataRange.addOneOf(new DataConstant(integerDataType.getURI(), byteType.toString()));
+                } catch (NumberFormatException e) {
+                    throw new RuntimeException("Parsed constant " + typedConstant + " is not a byte as required. ");
+                } 
+            } else if (unsignedLongDataType.equals(dataType)) {
+                try {
+                    BigInteger uLongType = new BigInteger(typedConstant.getLiteral());
+                    if (uLongType.compareTo(new BigInteger("" + Long.MAX_VALUE)) > 0 
+                            || uLongType.compareTo(BigInteger.ZERO) < 0) {
+                        throw new NumberFormatException();
+                    }
+                    currentDataRange.addOneOf(new DataConstant(integerDataType.getURI(), uLongType.toString()));
+                } catch (NumberFormatException e) {
+                    throw new RuntimeException("Parsed constant " + typedConstant + " is not an unsigned long as required. ");
+                } 
+            } else if (unsignedIntDataType.equals(dataType)) {
+                try {
+                    BigInteger uIntType = new BigInteger(typedConstant.getLiteral());
+                    if (uIntType.compareTo(new BigInteger("" + Integer.MAX_VALUE)) > 0 
+                            || uIntType.compareTo(BigInteger.ZERO) < 0) {
+                        throw new NumberFormatException();
+                    }
+                    currentDataRange.addOneOf(new DataConstant(integerDataType.getURI(), uIntType.toString()));
+                } catch (NumberFormatException e) {
+                    throw new RuntimeException("Parsed constant " + typedConstant + " is not an unsigned int as required. ");
+                } 
+            } else if (unsignedShortDataType.equals(dataType)) {
+                try {
+                    BigInteger uShortType = new BigInteger(typedConstant.getLiteral());
+                    if (uShortType.compareTo(new BigInteger("" + Short.MAX_VALUE)) > 0 
+                            || uShortType.compareTo(BigInteger.ZERO) < 0) {
+                        throw new NumberFormatException();
+                    }
+                    currentDataRange.addOneOf(new DataConstant(integerDataType.getURI(), uShortType.toString()));
+                } catch (NumberFormatException e) {
+                    throw new RuntimeException("Parsed constant " + typedConstant + " is not an unsigned short as required. ");
+                } 
+            } else if (unsignedByteDataType.equals(dataType)) {
+                try {
+                    BigInteger uByteType = new BigInteger(typedConstant.getLiteral());
+                    if (uByteType.compareTo(new BigInteger("" + Byte.MAX_VALUE)) > 0 
+                            || uByteType.compareTo(BigInteger.ZERO) < 0) {
+                        throw new NumberFormatException();
+                    }
+                    currentDataRange.addOneOf(new DataConstant(integerDataType.getURI(), uByteType.toString()));
+                } catch (NumberFormatException e) {
+                    throw new RuntimeException("Parsed constant " + typedConstant + " is not an unsigned byte as required. ");
+                } 
+            } else if (decimalDataType.equals(dataType)) {
+                try {
+                    BigDecimal dec = new BigDecimal(typedConstant.getLiteral());
+                    try {
+                        currentDataRange.addOneOf(new DataConstant(integerDataType.getURI(), dec.toBigIntegerExact().toString()));
+                    } catch (ArithmeticException e) {
+                        currentDataRange.addOneOf(new DataConstant(decimalDataType.getURI(), dec.toString()));
+                    }
+                } catch (NumberFormatException e) {
+                    throw new RuntimeException("Parsed constant " + typedConstant + " is not an unsigned byte as required. ");
+                } 
+            } else if (stringDataType.equals(dataType)) {
+                currentDataRange.addOneOf(new DataConstant(stringDataType.getURI(), typedConstant.getLiteral()));
+            } else if (rdfTextDataType.equals(dataType)) {
+                int posAt = typedConstant.getLiteral().lastIndexOf("@");
+                if (posAt < 0) {
+                    throw new RuntimeException("No @ character found in " + typedConstant + " that indicates the start of the required language tag. ");
+                }
+//                String langTag = typedConstant.getLiteral().substring(posAt+1);
+//                String text = typedConstant.getLiteral().substring(0, posAt);
+                currentDataRange.addOneOf(new DataConstant(rdfTextDataType.getURI(), typedConstant.getLiteral()));
+            } else if (literalDataType.equals(dataType)) {
+                currentDataRange.addOneOf(new DataConstant(literalDataType.getURI(), typedConstant.getLiteral()));
+            } else if (booleanDataType.equals(dataType)) {
+                if (!(typedConstant.getLiteral().equalsIgnoreCase("true") 
+                        || typedConstant.getLiteral().equalsIgnoreCase("false"))) {
+                    throw new RuntimeException("The constant " + typedConstant + " is neither true nor false, but supposed to be boolean. ");
+                } else {
+                    currentDataRange.addOneOf(new DataConstant(booleanDataType.getURI(), typedConstant.getLiteral()));
+                }
+            } else if (owlDateTimeDataType.equals(dataType) 
+                    || dateTimeDataType.equals(dataType)) {
+                try {
+                    DatatypeRestrictionDateTime.dfm.parse(typedConstant.getLiteral());
+                    currentDataRange.addOneOf(new DataConstant(dateTimeDataType.getURI(), typedConstant.getLiteral()));
+                } catch (ParseException e) {
+                    throw new RuntimeException("The constant " + typedConstant + " is supposed to be a dateTime datatype, but has an invalid format that cannot be parsed. ");
+                }
             } else {
                 throw new RuntimeException("Parsed typed constant of an unsupported data type " + typedConstant);
             }
+        }
+        
+        public void visit(OWLDataType dataType) {
+            if (owlRealDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionOWLRealPlus(owlRealDataType.getURI()); 
+            } else if (integerDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionInteger(integerDataType.getURI()); 
+            } else if (nonNegatedIntegerDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionInteger(nonNegatedIntegerDataType.getURI());
+                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "0");
+            } else if (nonPositiveIntegerDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionInteger(nonPositiveIntegerDataType.getURI());
+                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "0");
+            } else if (positiveIntegerDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionInteger(positiveIntegerDataType.getURI());
+                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "1");
+            } else if (negativeIntegerDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionInteger(negativeIntegerDataType.getURI());
+                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "-1");
+            } else if (longDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionInteger(longDataType.getURI());
+                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + Long.MAX_VALUE);
+                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "" + Long.MIN_VALUE); 
+            } else if (intDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionInteger(intDataType.getURI());
+                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + Integer.MAX_VALUE);
+                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "" + Integer.MIN_VALUE);
+            } else if (shortDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionInteger(shortDataType.getURI());
+                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + Short.MAX_VALUE);
+                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "" + Short.MIN_VALUE);
+            } else if (byteDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionInteger(byteDataType.getURI());
+                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + Byte.MAX_VALUE);
+                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "" + Byte.MIN_VALUE);
+            } else if (unsignedLongDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionInteger(unsignedLongDataType.getURI());
+                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + (new BigInteger("" + Long.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
+                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "0");
+            } else if (unsignedIntDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionInteger(unsignedIntDataType.getURI());
+                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + (new BigInteger("" + Integer.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
+                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "0");
+            } else if (unsignedShortDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionInteger(unsignedShortDataType.getURI());
+                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + (new BigInteger("" + Short.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
+                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "0");
+            } else if (unsignedByteDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionInteger(unsignedByteDataType.getURI());
+                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + (new BigInteger("" + Byte.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
+                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "0");
+            } else if (stringDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionString(stringDataType.getURI());
+            } else if (literalDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionLiteral(literalDataType.getURI());
+            } else if (booleanDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionBoolean(booleanDataType.getURI());
+            } else if (owlDateTimeDataType.equals(dataType) 
+                    || dateTimeDataType.equals(dataType)) {
+                currentDataRange =  new DatatypeRestrictionDateTime(owlDateTimeDataType.getURI());
+            } else {
+                throw new RuntimeException("Unsupported datatype.");
+            }
+            if (isNegated) currentDataRange.negate();
         }
 
         public void visit(OWLDataRangeRestriction rangeRestriction) {
@@ -969,68 +1197,6 @@ public class OwlClausification {
             }
         }
 
-        public void visit(OWLDataType dataType) {
-            if (integerDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionInteger(); 
-            } else if (nonNegatedIntegerDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionInteger();
-                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "0");
-            } else if (nonPositiveIntegerDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionInteger();
-                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "0");
-            } else if (positiveIntegerDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionInteger();
-                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "1");
-            } else if (negativeIntegerDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionInteger();
-                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "-1");
-            } else if (longDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionInteger();
-                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + Long.MAX_VALUE);
-                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "" + Long.MIN_VALUE); 
-            } else if (intDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionInteger();
-                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + Integer.MAX_VALUE);
-                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "" + Integer.MIN_VALUE);
-            } else if (shortDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionInteger();
-                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + Short.MAX_VALUE);
-                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "" + Short.MIN_VALUE);
-            } else if (byteDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionInteger();
-                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + Byte.MAX_VALUE);
-                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "" + Byte.MIN_VALUE);
-            } else if (unsignedLongDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionInteger();
-                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + (new BigInteger("" + Long.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
-                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "0");
-            } else if (unsignedIntDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionInteger();
-                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + (new BigInteger("" + Integer.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
-                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "0");
-            } else if (unsignedShortDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionInteger();
-                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + (new BigInteger("" + Short.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
-                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "0");
-            } else if (unsignedByteDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionInteger();
-                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + (new BigInteger("" + Byte.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
-                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "0");
-            } else if (stringDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionString();
-            } else if (literalDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionLiteral();
-            } else if (booleanDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionBoolean();
-            } else if (owlDateTimeDataType.equals(dataType) 
-                    || dateTimeDataType.equals(dataType)) {
-                currentDataRange =  new DatatypeRestrictionDateTime();
-            } else {
-                throw new RuntimeException("Unsupported datatype.");
-            }
-            if (isNegated) currentDataRange.negate();
-        }
-        
         public void visit(OWLUntypedConstant untypedConstant) {
             throw new RuntimeException("Parsed untyped constant " 
                     + untypedConstant);

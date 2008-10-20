@@ -1,13 +1,14 @@
 package org.semanticweb.HermiT.model.dataranges;
 
 import java.math.BigInteger;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.semanticweb.HermiT.Namespaces;
-import org.semanticweb.owl.vocab.XSDVocabulary;
 
 import dk.brics.automaton.Automaton;
 import dk.brics.automaton.BasicOperations;
@@ -22,8 +23,8 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
     protected boolean patternMatcherContainsAllFacets = false;
     protected boolean facetsChanged = false;
     
-    public DatatypeRestrictionString() {
-        this.datatypeURI = XSDVocabulary.STRING.getURI();
+    public DatatypeRestrictionString(URI datatypeURI) {
+        this.datatypeURI = datatypeURI;
         supportedFacets = new HashSet<Facets>(
                 Arrays.asList(new Facets[] {
                         Facets.LENGTH, 
@@ -35,7 +36,7 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
     }
     
     public CanonicalDataRange getNewInstance() {
-        return new DatatypeRestrictionString();
+        return new DatatypeRestrictionString(this.datatypeURI);
     }
     
     public boolean isFinite() {
@@ -209,5 +210,19 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
     
     public String getPattern() {
         return pattern;
+    }
+    
+    public boolean datatypeAccepts(DataConstant constant) {
+        Set<URI> supportedDTs = new HashSet<URI>();
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "string"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.RDF + "text"));
+        return supportedDTs.contains(constant.getDatatypeURI());
+    }
+    
+    public static boolean canHandleAll(Set<URI> datatypeURIs) {
+        Set<URI> supportedDTs = new HashSet<URI>();
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "string"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.RDF + "text"));
+        return supportedDTs.containsAll(datatypeURIs);
     }
 }

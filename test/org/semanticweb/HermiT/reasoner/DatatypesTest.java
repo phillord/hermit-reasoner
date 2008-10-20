@@ -72,6 +72,62 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertABoxSatisfiable(false);
     }
     
+    public void testAllValuesFromDifferentTypes() throws Exception {
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3\"^^xsd:integer \"4\"^^xsd:int))) " 
+                + "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"2\"^^xsd:short \"3\"^^xsd:integer)))"
+                + "ClassAssertion(a A)"
+                + "ClassAssertion(a DataSomeValuesFrom(dp DataComplementOf(DataOneOf(\"3\"^^xsd:integer))))";
+        loadOntologyWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+    
+    public void testAllValuesFromDifferentTypes3() throws Exception {
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3\"^^xsd:integer \"4\"^^xsd:int))) " 
+                + "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"2\"^^xsd:short \"3\"^^xsd:int)))"
+                + "ClassAssertion(a A)"
+                + "ClassAssertion(a DataSomeValuesFrom(dp DataOneOf(\"3\"^^xsd:integer)))";
+        loadOntologyWithAxioms(axioms);
+        assertABoxSatisfiable(true);
+    }
+    
+    public void testParsingError() throws Exception {
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3\"^^xsd:integer \"4a\"^^xsd:int))) " 
+                + "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"2\"^^xsd:short \"3\"^^xsd:integer)))"
+                + "ClassAssertion(a A)"
+                + "ClassAssertion(a DataSomeValuesFrom(dp DataComplementOf(DataOneOf(\"3\"^^xsd:integer))))";
+        boolean exceptionThrown = false;
+        try {
+            loadOntologyWithAxioms(axioms);
+        } catch (RuntimeException e) {
+            exceptionThrown = true;
+        }
+        assertTrue(exceptionThrown);
+    }
+    
+    public void testAllValuesFromDifferentTypes2() throws Exception {
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp xsd:byte)) " 
+                + "ClassAssertion(a A)"
+                + "ClassAssertion(a DataSomeValuesFrom(dp DataOneOf(\"6542145\"^^xsd:integer)))";
+        loadOntologyWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+    
+    public void testNegZero() throws Exception {
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"0\"^^xsd:integer))) " 
+                + "ClassAssertion(a A)"
+                + "ClassAssertion(a DataSomeValuesFrom(dp DataOneOf(\"-0\"^^xsd:integer)))";
+        loadOntologyWithAxioms(axioms);
+        assertABoxSatisfiable(true);
+    }
+    
+    public void testNegZero2() throws Exception {
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp owl:real)) " 
+                + "ClassAssertion(a A)"
+                + "ClassAssertion(a DataSomeValuesFrom(dp DataOneOf(\"-0\"^^xsd:integer)))";
+        loadOntologyWithAxioms(axioms);
+        assertABoxSatisfiable(true);
+    }
+    
     public void testDisjointDPsUnsat() throws Exception {
         String axioms = "DisjointDataProperties(dp1 dp2) " 
                 + "DataPropertyAssertion(dp1 a \"10\"^^xsd:integer)"
@@ -107,6 +163,22 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertABoxSatisfiable(false);
     }
     
+//    public void testNegZero2() throws Exception {
+//        String axioms = "SubClassOf(A DataAllValuesFrom(dp owl:real)) " 
+//                + "ClassAssertion(a A)"
+//                + "ClassAssertion(a DataSomeValuesFrom(dp DataOneOf(\"-0\"^^xsd:float)))";
+//        loadOntologyWithAxioms(axioms);
+//        assertABoxSatisfiable(false);
+//    }
+//    
+//  public void testNegZero2() throws Exception {
+//  String axioms = "SubClassOf(A DataAllValuesFrom(dp owl:realPlus)) " 
+//          + "ClassAssertion(a A)"
+//          + "ClassAssertion(a DataSomeValuesFrom(dp DataOneOf(\"-0\"^^xsd:float)))";
+//  loadOntologyWithAxioms(axioms);
+//  assertABoxSatisfiable(true);
+//}
+//
 //    public void testFloat1() throws Exception {
 //        // +0 and -0 are not equal 
 //        String axioms = "PropertyAssertion(Meg numberOfChildren \"+0\"^^xsd:float) "

@@ -110,6 +110,8 @@ public interface CanonicalDataRange {
      */
     public boolean accepts(DataConstant constant);
     
+    public boolean datatypeAccepts(DataConstant constant);
+    
     /**
      * Checks whether the interpretation of this data range consists of at least 
      * n values. 

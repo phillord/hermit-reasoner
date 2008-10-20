@@ -1,14 +1,21 @@
 package org.semanticweb.HermiT.model.dataranges;
 
 import java.math.BigInteger;
+import java.net.URI;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.semanticweb.HermiT.model.DLPredicate;
 
 
 public class DatatypeRestrictionLiteral extends DatatypeRestriction implements DLPredicate, DataRange {
     
+    public DatatypeRestrictionLiteral(URI datatypeURI) {
+        this.datatypeURI = datatypeURI;
+    }
+    
     public CanonicalDataRange getNewInstance() {
-        return new DatatypeRestrictionLiteral();
+        return new DatatypeRestrictionLiteral(this.datatypeURI);
     }
 
     public boolean isBottom() {
@@ -44,5 +51,17 @@ public class DatatypeRestrictionLiteral extends DatatypeRestriction implements D
     
     public DataConstant getSmallestAssignment() {
         return null;
+    }
+    
+    public boolean datatypeAccepts(DataConstant constant) {
+        Set<URI> supportedDTs = new HashSet<URI>();
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.RDFS + "literal"));
+        return supportedDTs.contains(constant.getDatatypeURI());
+    }
+    
+    public static boolean canHandleAll(Set<URI> datatypeURIs) {
+        Set<URI> supportedDTs = new HashSet<URI>();
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.RDFS + "literal"));
+        return supportedDTs.containsAll(datatypeURIs);
     }
 }

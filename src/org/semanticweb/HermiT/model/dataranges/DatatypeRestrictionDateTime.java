@@ -1,6 +1,7 @@
 package org.semanticweb.HermiT.model.dataranges;
 
 import java.math.BigInteger;
+import java.net.URI;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -13,7 +14,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.semanticweb.HermiT.Namespaces;
-import org.semanticweb.owl.vocab.XSDVocabulary;
 
 public class DatatypeRestrictionDateTime extends DatatypeRestriction {
     
@@ -21,8 +21,8 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
     
     protected Set<Interval> intervals = new HashSet<Interval>();
 
-    public DatatypeRestrictionDateTime() {
-        this.datatypeURI = XSDVocabulary.DATE_TIME.getURI();
+    public DatatypeRestrictionDateTime(URI datatypeURI) {
+        this.datatypeURI = datatypeURI;
         this.supportedFacets = new HashSet<Facets>(
                 Arrays.asList(new Facets[] {
                         Facets.MIN_INCLUSIVE, 
@@ -34,7 +34,7 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
     }
     
     public CanonicalDataRange getNewInstance() {
-        return new DatatypeRestrictionDateTime();
+        return new DatatypeRestrictionDateTime(this.datatypeURI);
     }
     
     public boolean isFinite() {
@@ -361,6 +361,20 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
         return buffer.toString();
     }
     
+    public boolean datatypeAccepts(DataConstant constant) {
+        Set<URI> supportedDTs = new HashSet<URI>();
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "dateTime"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.OWL + "dateTime"));
+        return supportedDTs.contains(constant.getDatatypeURI());
+    }
+    
+    public static boolean canHandleAll(Set<URI> datatypeURIs) {
+        Set<URI> supportedDTs = new HashSet<URI>();
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.OWL + "dateTime"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "dateTime"));
+        return supportedDTs.containsAll(datatypeURIs);
+    }
+    
     public class Interval {
         
         BigInteger minIncl = null;
@@ -418,11 +432,15 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
         }
         
         public boolean isEmpty() {
-            return (minIncl != null && maxIncl != null && minIncl.compareTo(maxIncl) > 0);
+            return (minIncl != null 
+                    && maxIncl != null 
+                    && minIncl.compareTo(maxIncl) > 0);
         }
         
         protected boolean isEmpty(BigInteger lower, BigInteger upper) {
-            return (lower != null && upper != null && lower.compareTo(upper) > 0);
+            return (lower != null 
+                    && upper != null 
+                    && lower.compareTo(upper) > 0);
         }
         
         public boolean isFinite() {
@@ -441,11 +459,13 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
         }
         
         public boolean contains(Interval interval) {
-            return (minIncl.compareTo(interval.minIncl) >= 0 && maxIncl.compareTo(interval.maxIncl) <= 0);
+            return contains(interval.getMinIncl()) 
+            && contains(interval.getMinIncl());
         }
         
         public boolean disjointWith(Interval interval) {
-            return (minIncl.compareTo(interval.maxIncl) >= 0 || maxIncl.compareTo(interval.minIncl) <= 0);
+            return (minIncl.compareTo(interval.getMaxIncl()) >= 0 
+                    || maxIncl.compareTo(interval.getMinIncl()) <= 0);
         }
         
         public BigInteger getCardinality() {
@@ -472,11 +492,13 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
         public String toString() {
             StringBuffer buffer = new StringBuffer();
             if (minIncl != null) {
-                buffer.append(">= " + DatatypeRestrictionDateTime.dfm.format(new Date(minIncl.longValue())));
+                buffer.append(">= " 
+                        + DatatypeRestrictionDateTime.dfm.format(new Date(minIncl.longValue())));
             }
             if (maxIncl != null) {
                 if (minIncl != null) buffer.append(" ");
-                buffer.append(">= " + DatatypeRestrictionDateTime.dfm.format(new Date(maxIncl.longValue())));
+                buffer.append(">= " 
+                        + DatatypeRestrictionDateTime.dfm.format(new Date(maxIncl.longValue())));
             }
             return buffer.toString();
         }

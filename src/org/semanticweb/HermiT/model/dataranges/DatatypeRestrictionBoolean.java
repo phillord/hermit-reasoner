@@ -1,7 +1,9 @@
 package org.semanticweb.HermiT.model.dataranges;
 
 import java.math.BigInteger;
+import java.net.URI;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -12,13 +14,13 @@ public class DatatypeRestrictionBoolean extends DatatypeRestriction {
     public static DataConstant TRUE = new DataConstant(XSDVocabulary.BOOLEAN.getURI(), "true");
     public static DataConstant FALSE = new DataConstant(XSDVocabulary.BOOLEAN.getURI(), "false");
     
-    public DatatypeRestrictionBoolean() {
-        this.datatypeURI = XSDVocabulary.BOOLEAN.getURI();
+    public DatatypeRestrictionBoolean(URI datatypeURI) {
+        this.datatypeURI = datatypeURI;
         this.supportedFacets = new HashSet<Facets>();
     }
 
     public CanonicalDataRange getNewInstance() {
-        return new DatatypeRestrictionBoolean();
+        return new DatatypeRestrictionBoolean(this.datatypeURI);
     }
     
     public boolean isFinite() {
@@ -79,5 +81,17 @@ public class DatatypeRestrictionBoolean extends DatatypeRestriction {
             }
         } 
         return null;
+    }
+    
+    public boolean datatypeAccepts(DataConstant constant) {
+        Set<URI> supportedDTs = new HashSet<URI>();
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "boolean"));
+        return supportedDTs.contains(constant.getDatatypeURI());
+    }
+    
+    public static boolean canHandleAll(Set<URI> datatypeURIs) {
+        Set<URI> supportedDTs = new HashSet<URI>();
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "boolean"));
+        return supportedDTs.containsAll(datatypeURIs);
     }
 }
