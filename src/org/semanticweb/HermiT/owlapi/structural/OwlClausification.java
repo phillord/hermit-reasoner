@@ -40,6 +40,7 @@ import org.semanticweb.HermiT.model.dataranges.DataConstant;
 import org.semanticweb.HermiT.model.dataranges.DataRange;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionBoolean;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionDateTime;
+import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionDouble;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionInteger;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionLiteral;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionOWLRealPlus;
@@ -862,6 +863,8 @@ public class OwlClausification {
         protected static OWLOntologyManager man = OWLManager.createOWLOntologyManager();
         protected static OWLDataFactory factory = man.getOWLDataFactory();
         protected static OWLDataType decimalDataType = factory.getOWLDataType(XSDVocabulary.DECIMAL.getURI());
+        protected static OWLDataType doubleDataType = factory.getOWLDataType(XSDVocabulary.DOUBLE.getURI());
+        protected static OWLDataType floatDataType = factory.getOWLDataType(XSDVocabulary.FLOAT.getURI());
         protected static OWLDataType integerDataType = factory.getIntegerDataType();
         protected static OWLDataType nonNegatedIntegerDataType = factory.getOWLDataType(XSDVocabulary.NON_NEGATIVE_INTEGER.getURI());
         protected static OWLDataType nonPositiveIntegerDataType = factory.getOWLDataType(XSDVocabulary.NON_POSITIVE_INTEGER.getURI());
@@ -912,6 +915,52 @@ public class OwlClausification {
             OWLDataType dataType = typedConstant.getDataType();
             if (owlRealDataType.equals(dataType) || owlRealPlusDataType.equals(dataType)) {
                 throw new RuntimeException("Parsed the constant " + typedConstant + " of type owl:real or owl:realPlus, but the datatypes owl:real and owl:realPlus do not have any literals. ");
+            } else if (decimalDataType.equals(dataType)) { 
+                try {
+                    BigDecimal literalAsBigDecimal = new BigDecimal(typedConstant.getLiteral());
+                    currentDataRange.addOneOf(new DataConstant(decimalDataType.getURI(), literalAsBigDecimal.toString()));
+                } catch (NumberFormatException e) {
+                    throw new RuntimeException("Parsed constant " + typedConstant + " is not numeric. ");
+                } 
+            } else if (doubleDataType.equals(dataType)) { 
+                if (typedConstant.getLiteral().equalsIgnoreCase("NaN") 
+                        || typedConstant.getLiteral().equalsIgnoreCase("+INF")
+                        || typedConstant.getLiteral().equalsIgnoreCase("-INF")) {
+                    currentDataRange.addOneOf(new DataConstant(doubleDataType.getURI(), typedConstant.getLiteral()));
+                }
+                try {
+                    BigDecimal literalAsBigDecimal = new BigDecimal(typedConstant.getLiteral());
+                    Double literalAsDouble = new Double(typedConstant.getLiteral());
+                    if (literalAsBigDecimal.compareTo(new BigDecimal(literalAsDouble)) != 0) {
+                        throw new RuntimeException("Parsed constant " + typedConstant + " does not represent a double. ");
+                    } else {
+                        currentDataRange.addOneOf(new DataConstant(decimalDataType.getURI(), literalAsBigDecimal.toString()));
+                    }
+                } catch (NumberFormatException e) {
+                    throw new RuntimeException("Parsed constant " + typedConstant + " is not numeric. ");
+                } 
+            } else if (floatDataType.equals(dataType)) { 
+                if (typedConstant.getLiteral().equalsIgnoreCase("NaN") 
+                        || typedConstant.getLiteral().equalsIgnoreCase("+INF")
+                        || typedConstant.getLiteral().equalsIgnoreCase("-INF")) {
+                    currentDataRange.addOneOf(new DataConstant(doubleDataType.getURI(), typedConstant.getLiteral()));
+                }
+                try {
+                    BigDecimal literalAsBigDecimal = new BigDecimal(typedConstant.getLiteral());
+                    if (literalAsBigDecimal.compareTo(new BigDecimal(Float.MAX_VALUE)) <= 0
+                        && literalAsBigDecimal.compareTo(new BigDecimal(Float.MIN_VALUE)) >= 0) {
+                        Float literalAsFloat = new Float(typedConstant.getLiteral());
+                        if (literalAsBigDecimal.compareTo(new BigDecimal(literalAsFloat)) != 0) {
+                            throw new RuntimeException("Parsed constant " + typedConstant + " does not represent a float. ");
+                        } else {
+                            currentDataRange.addOneOf(new DataConstant(doubleDataType.getURI(), literalAsBigDecimal.toString()));
+                        }
+                    } else {
+                        throw new RuntimeException("Parsed constant " + typedConstant + " does not represent a float. ");
+                    }
+                } catch (NumberFormatException e) {
+                    throw new RuntimeException("Parsed constant " + typedConstant + " is not numeric. ");
+                }  
             } else if (integerDataType.equals(dataType)) {
                 try {
                     BigInteger integer = new BigInteger(typedConstant.getLiteral());
@@ -1091,8 +1140,18 @@ public class OwlClausification {
         }
         
         public void visit(OWLDataType dataType) {
-            if (owlRealDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionOWLRealPlus(owlRealDataType.getURI()); 
+            if (owlRealPlusDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionOWLRealPlus(decimalDataType.getURI(), true); 
+            } else if (owlRealDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionOWLRealPlus(decimalDataType.getURI(), false); 
+            } else if (decimalDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionOWLRealPlus(decimalDataType.getURI(), false); 
+            } else if (doubleDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionDouble(doubleDataType.getURI()); 
+            } else if (floatDataType.equals(dataType)) {
+                currentDataRange = new DatatypeRestrictionDouble(doubleDataType.getURI()); 
+                currentDataRange.addFacet(Facets.MIN_INCLUSIVE, new String("" + Float.MIN_VALUE));
+                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, new String("" + Float.MAX_VALUE));
             } else if (integerDataType.equals(dataType)) {
                 currentDataRange = new DatatypeRestrictionInteger(integerDataType.getURI()); 
             } else if (nonNegatedIntegerDataType.equals(dataType)) {

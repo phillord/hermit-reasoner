@@ -25,7 +25,6 @@ import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionOWLRealPlus;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionString;
 import org.semanticweb.HermiT.model.dataranges.EnumeratedDataRange;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
-import org.semanticweb.owl.vocab.XSDVocabulary;
 
 public class DatatypeManager {
     protected final TableauMonitor tableauMonitor;
@@ -366,7 +365,7 @@ public class DatatypeManager {
         }
         if (onlyNegated) {
             // only negated ranges -> trivially satisfiable
-            return new DatatypeRestrictionLiteral(XSDVocabulary.BOOLEAN.getURI());
+            return new DatatypeRestrictionLiteral(URI.create(org.semanticweb.owl.vocab.Namespaces.RDFS + "literal"));
         }
         if (constants != null) {
             constants.removeAll(forbiddenConstants);
