@@ -202,18 +202,15 @@ public class DatatypeRestrictionOWLRealPlus extends DatatypeRestriction {
         return false; 
     }
     
-    public boolean hasMinCardinality(int n) {
+    public boolean hasMinCardinality(BigInteger n) {
         if (!oneOf.isEmpty()) {
-            return (oneOf.size() >= n);
+            return (n.compareTo(new BigInteger("" + oneOf.size())) >= 0);
         }
         return true;
     }
     
     public BigInteger getEnumerationSize() {
-        if (!oneOf.isEmpty()) {
-            return new BigInteger("" + oneOf.size());
-        }
-        return null;
+        return new BigInteger("" + oneOf.size());
     }
     
     public DataConstant getSmallestAssignment() {

@@ -10,7 +10,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         String axioms = "ReflexiveObjectProperty(r) "
                 + "ClassAssertion(a ObjectAllValuesFrom(r " + "owl:Nothing)) "
                 + "ClassAssertion(a owl:Thing)";
-        loadOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms, null);
         assertABoxSatisfiable(false);
     }
 
@@ -19,14 +19,14 @@ public class ReasonerTest extends AbstractReasonerTest {
                 + "ObjectPropertyAssertion(r b c) "
                 + "TransitiveObjectProperty(r) "
                 + "NegativeObjectPropertyAssertion(r a c)";
-        loadOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms, null);
         assertABoxSatisfiable(false);
     }
 
     public void testIrreflexivity() throws Exception {
         String axioms = "IrreflexiveObjectProperty(r) "
                 + "ObjectPropertyAssertion(r a a)";
-        loadOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms, null);
         assertABoxSatisfiable(false);
     }
 
@@ -34,12 +34,12 @@ public class ReasonerTest extends AbstractReasonerTest {
         String axioms = "DisjointObjectProperties(r s t) "
                 + "ObjectPropertyAssertion(r a b) "
                 + "ObjectPropertyAssertion(s a b)";
-        loadOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms, null);
         assertABoxSatisfiable(false);
         axioms = "DisjointObjectProperties(r s t) "
                 + "ObjectPropertyAssertion(r a b) "
                 + "ObjectPropertyAssertion(t a b)";
-        loadOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms, null);
         assertABoxSatisfiable(false);
     }
 
@@ -50,14 +50,14 @@ public class ReasonerTest extends AbstractReasonerTest {
                 + "ClassAssertion(a C) "
                 + "SubClassOf(C ObjectMaxCardinality(1 f)) "
                 + "SubObjectPropertyOf(r f) " + "SubObjectPropertyOf(s f)";
-        loadOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms, null);
         assertABoxSatisfiable(false);
     }
 
     public void testExistsSelf1() throws Exception {
         String axioms = "ClassAssertion(a ObjectAllValuesFrom(r "
                 + "owl:Nothing)) " + "ClassAssertion(a ObjectExistsSelf(r))";
-        loadOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms, null);
         assertABoxSatisfiable(false);
     }
 
@@ -69,7 +69,7 @@ public class ReasonerTest extends AbstractReasonerTest {
                 + "ClassAssertion(a C1) "
                 + "ClassAssertion(a ObjectAllValuesFrom(r "
                 + "ObjectExistsSelf(r)))";
-        loadOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms, null);
         assertABoxSatisfiable(true);
     }
 
@@ -78,21 +78,21 @@ public class ReasonerTest extends AbstractReasonerTest {
                 + "SubObjectPropertyOf(r as) "
                 + "ObjectPropertyAssertion(as b a) "
                 + "ObjectPropertyAssertion(r a b)";
-        loadOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms, null);
         assertABoxSatisfiable(false);
     }
 
     public void testSatisfiability1() throws Exception {
         String axioms = "ClassAssertion(a C) "
                 + "ClassAssertion(a ObjectComplementOf(C))";
-        loadOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms, null);
         assertABoxSatisfiable(false);
     }
 
     public void testSatisfiability2() throws Exception {
         String axioms = "SubClassOf(owl:Thing C) " + "SubClassOf(owl:Thing "
                 + "ObjectComplementOf(C))";
-        loadOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms, null);
         assertABoxSatisfiable(false);
     }
 
@@ -103,7 +103,7 @@ public class ReasonerTest extends AbstractReasonerTest {
                 + "ObjectSomeValuesFrom(hasParent Person)) " + "Grandchild) "
                 + "ClassAssertion(peter Person) " + "ClassAssertion(peter "
                 + "ObjectComplementOf(Grandchild))";
-        loadOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms, null);
         assertABoxSatisfiable(false);
     }
 
@@ -112,27 +112,27 @@ public class ReasonerTest extends AbstractReasonerTest {
                 + "ObjectPropertyAssertion(R a b) "
                 + "SubClassOf(owl:Thing ObjectSomeValuesFrom(R C)) "
                 + "ClassAssertion(b ObjectComplementOf(C))";
-        loadOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms, null);
         assertABoxSatisfiable(false);
     }
 
     public void testChanges() throws Exception {
         String axioms = "SubClassOf(owl:Thing C)";
-        loadOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms, null);
         assertABoxSatisfiable(true);
         axioms = "SubClassOf(owl:Thing C) "
                 + "SubClassOf(owl:Thing ObjectComplementOf(C))";
-        loadOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms, null);
         assertABoxSatisfiable(false);
         axioms = "SubClassOf(owl:Thing ObjectComplementOf(C))";
-        loadOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms, null);
         assertABoxSatisfiable(true);
     }
 
     public void testSubsumption1() throws Exception {
         String axioms = "SubClassOf(Person Animal) "
                 + "SubClassOf(Student Person) " + "SubClassOf(Dog Animal)";
-        loadOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms, null);
         assertSubsumedBy("Student", "Animal", true);
         assertSubsumedBy("Animal", "Student", false);
         assertSubsumedBy("Student", "Dog", false);
@@ -143,7 +143,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         String axioms = "SubObjectPropertyOf(R S) "
                 + "EquivalentClasses(A ObjectSomeValuesFrom(R C)) "
                 + "EquivalentClasses(B ObjectSomeValuesFrom(S C))";
-        loadOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms, null);
         assertSubsumedBy("A", "B", true);
         assertSubsumedBy("B", "A", false);
     }
@@ -152,7 +152,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         String axioms = "EquivalentObjectProperties(R S) "
                 + "EquivalentClasses(A ObjectSomeValuesFrom(R C)) "
                 + "EquivalentClasses(B ObjectSomeValuesFrom(S C))";
-        loadOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms, null);
         assertSubsumedBy("A", "B", true);
         assertSubsumedBy("B", "A", true);
     }
@@ -167,7 +167,7 @@ public class ReasonerTest extends AbstractReasonerTest {
                 + "ObjectIntersectionOf(c d)) ObjectSomeValuesFrom(r "
                 + "owl:Thing))) EquivalentClasses(complex3 "
                 + "ObjectIntersectionOf(e3 f))";
-        loadOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms, null);
         assertSatisfiable("complex1", false);
         assertSatisfiable("complex2", false);
         assertSatisfiable("complex3", false);
@@ -181,7 +181,7 @@ public class ReasonerTest extends AbstractReasonerTest {
                 + "ObjectMaxCardinality(1 r)))" + "EquivalentClasses(complex2 "
                 + "ObjectIntersectionOf(ObjectMaxCardinality(1 r) "
                 + "ObjectSomeValuesFrom(r c) ObjectSomeValuesFrom(r d)))";
-        loadOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms, null);
         assertSatisfiable("complex1", false);
         assertSatisfiable("complex2", false);
     }
@@ -199,7 +199,7 @@ public class ReasonerTest extends AbstractReasonerTest {
                 + "ObjectIntersectionOf(ObjectAllValuesFrom(t1 a) "
                 + "ObjectMinCardinality(3 t1) " + "ObjectMaxCardinality(1 r) "
                 + "ObjectMaxCardinality(1 s)))";
-        loadOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms, null);
         assertSatisfiable("complex1", false);
     }
 
@@ -211,7 +211,7 @@ public class ReasonerTest extends AbstractReasonerTest {
                 + "ObjectAllValuesFrom(tt a)" + "ObjectMinCardinality(3 tt)"
                 + "ObjectMaxCardinality(1 tt c)"
                 + "ObjectMaxCardinality(1 tt d)" + "))";
-        loadOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms, null);
         assertSatisfiable("complex1", false);
     }
 
@@ -264,7 +264,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         buffer.append("))");
         buffer.append("EquivalentClasses(complex4b ");
         buffer.append("ObjectMinCardinality(2 r))");
-        loadOntologyWithAxioms(buffer.toString());
+        loadOntologyWithAxioms(buffer.toString(), null);
         // assertSubsumedBy("complex1a", "complex1b", true);
         // assertSubsumedBy("complex2a", "complex2b", true);
         // assertSubsumedBy("complex3a", "complex3b", true);
@@ -689,7 +689,7 @@ public class ReasonerTest extends AbstractReasonerTest {
     // assertInstanceOf("[atLeast 2 [inv S] [not A]]","n",false);
     // }
     public void testDependencyDisjunctionMergingBug() throws Exception {
-        loadOntologyFromResource("../res/dependency-disjuntion-merging-bug.xml");
+        loadOntologyFromResource("../res/dependency-disjuntion-merging-bug.xml", null);
         assertSubsumedBy(
                 "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Anjou",
                 "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FullBodiedWine",

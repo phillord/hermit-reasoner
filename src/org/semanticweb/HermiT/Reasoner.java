@@ -49,11 +49,12 @@ import org.semanticweb.HermiT.existentials.ExpansionStrategy;
 import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
 import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
 import org.semanticweb.HermiT.hierarchy.NaiveHierarchyPosition;
-import org.semanticweb.HermiT.hierarchy.TranslatedHierarchyPosition;
 import org.semanticweb.HermiT.hierarchy.PositionTranslator;
+import org.semanticweb.HermiT.hierarchy.StandardClassificationManager;
 import org.semanticweb.HermiT.hierarchy.SubsumptionHierarchy;
 import org.semanticweb.HermiT.hierarchy.SubsumptionHierarchyNode;
 import org.semanticweb.HermiT.hierarchy.TableauSubsumptionChecker;
+import org.semanticweb.HermiT.hierarchy.TranslatedHierarchyPosition;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.DLClause;
@@ -72,11 +73,10 @@ import org.semanticweb.HermiT.util.TranslatedSet;
 import org.semanticweb.HermiT.util.Translator;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLDataFactory;
+import org.semanticweb.owl.model.OWLDescription;
 import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
-import org.semanticweb.owl.model.OWLDescription;
-import org.semanticweb.HermiT.hierarchy.StandardClassificationManager;
 
 /**
  * Answers queries about the logical implications of a particular knowledge base.
@@ -122,6 +122,7 @@ public class Reasoner implements Serializable {
         public boolean clausifyTransitivity;
         public boolean checkClauses;
         public boolean prepareForExpressiveQueries;
+        public boolean onlyCoreDatatypes;
         public TableauMonitor monitor;
         public final Map<String,Object> parameters;
     
@@ -137,6 +138,7 @@ public class Reasoner implements Serializable {
             clausifyTransitivity = false;
             checkClauses = true;
             prepareForExpressiveQueries = false;
+            onlyCoreDatatypes = true;
             monitor = null;
             parameters = new HashMap<String,Object>();
         }

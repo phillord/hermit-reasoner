@@ -48,9 +48,11 @@ public abstract class AbstractReasonerTest extends TestCase {
      * @throws Exception
      *             if the resource cannot be found or an error occurred when loading the ontology
      */
-    protected void loadOntologyFromResource(String resourceName) throws Exception {
-        Reasoner.Configuration configuration=new Reasoner.Configuration();
-        configuration.subsumptionCacheStrategyType=Reasoner.SubsumptionCacheStrategyType.ON_REQUEST;
+    protected void loadOntologyFromResource(String resourceName, Reasoner.Configuration configuration) throws Exception {
+        if (configuration == null) {
+            configuration=new Reasoner.Configuration();
+            configuration.subsumptionCacheStrategyType=Reasoner.SubsumptionCacheStrategyType.ON_REQUEST;
+        }
         hermit=new Reasoner(getClass().getResource(resourceName).toURI(),configuration);
     }
 
@@ -62,7 +64,8 @@ public abstract class AbstractReasonerTest extends TestCase {
      * @throws InterruptedException
      * @throws OWLException
      */
-    protected void loadOntologyWithAxioms(String axioms) throws OWLException,InterruptedException {
+    protected void loadOntologyWithAxioms(String axioms, 
+            Reasoner.Configuration configuration) throws OWLException,InterruptedException {
         StringBuffer buffer=new StringBuffer();
         buffer.append("Namespace(=<file:/c/test.owl#>)");
         buffer.append("Namespace(rdfs=<http://www.w3.org/2000/01/rdf-schema#>)");
@@ -77,8 +80,10 @@ public abstract class AbstractReasonerTest extends TestCase {
         OWLOntologyManager manager=OWLManager.createOWLOntologyManager();
         OWLOntologyInputSource input=new StringInputSource(buffer.toString());
         m_ontology=manager.loadOntology(input);
-        Reasoner.Configuration configuration=new Reasoner.Configuration();
-        configuration.subsumptionCacheStrategyType=Reasoner.SubsumptionCacheStrategyType.ON_REQUEST;
+        if (configuration == null) {
+            configuration = new Reasoner.Configuration();
+            configuration.subsumptionCacheStrategyType = Reasoner.SubsumptionCacheStrategyType.ON_REQUEST;
+        }
         hermit=new Reasoner(m_ontology, configuration);
     }
 
@@ -140,7 +145,7 @@ public abstract class AbstractReasonerTest extends TestCase {
     }
 
     protected void assertSubsumptionHierarchy(String ontologyResource,String controlResource) throws Exception {
-        loadOntologyFromResource(ontologyResource);
+        loadOntologyFromResource(ontologyResource, null);
         String taxonomy=getSubsumptionHierarchyAsText();
         String controlString=getResourceText(controlResource);
         assertEquals(taxonomy,controlString);

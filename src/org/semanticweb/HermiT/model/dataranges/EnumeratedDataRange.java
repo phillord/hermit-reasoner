@@ -34,13 +34,12 @@ public class EnumeratedDataRange extends DatatypeRestriction implements DataRang
         return oneOf.contains(constant);
     }
     
-    public boolean hasMinCardinality(int n) {
-        return oneOf.size() >= n;
+    public boolean hasMinCardinality(BigInteger n) {
+        return (n.compareTo(new BigInteger("" + oneOf.size())) <= 0);
     }
     
     public BigInteger getEnumerationSize() {
-        if (!isNegated) return new BigInteger("" + oneOf.size());
-        return null;
+        return new BigInteger("" + oneOf.size());
     }
     
     public DataConstant getSmallestAssignment() {

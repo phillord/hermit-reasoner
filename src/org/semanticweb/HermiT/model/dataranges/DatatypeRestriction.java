@@ -1,5 +1,6 @@
 package org.semanticweb.HermiT.model.dataranges;
 
+import java.math.BigInteger;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
@@ -39,7 +40,7 @@ public abstract class DatatypeRestriction implements DataRange, CanonicalDataRan
     
     public boolean isBottom() {
         if (!isBottom) {
-            if (!hasMinCardinality(1)) {
+            if (!hasMinCardinality(BigInteger.ONE)) {
                 isBottom = true;
             }
         }

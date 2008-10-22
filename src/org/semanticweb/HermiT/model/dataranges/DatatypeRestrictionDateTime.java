@@ -268,14 +268,12 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
         return false; 
     }
     
-    public boolean hasMinCardinality(int n) {
-        if (isNegated || n <= 0) return true;
+    public boolean hasMinCardinality(BigInteger n) {
+        if (isNegated || n.compareTo(BigInteger.ZERO) <= 0) return true;
         if (isFinite()) {
             if (!oneOf.isEmpty()) {
-                return (oneOf.size() >= n);
+                return (n.compareTo(new BigInteger("" + oneOf.size())) >= 0);
             }
-            BigInteger nBig = new BigInteger("" + n);
-            BigInteger subtract = BigInteger.ZERO;
             BigInteger rangeSize = BigInteger.ZERO;
             for (Interval i : intervals) {
                 rangeSize = rangeSize.add(i.getCardinality());
@@ -284,12 +282,11 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
                 BigInteger not = new BigInteger(constant.getValue());
                 for (Interval i : intervals) {
                     if (i.contains(not)) {
-                        subtract = subtract.subtract(BigInteger.ONE);
+                        rangeSize = rangeSize.subtract(BigInteger.ONE);
                     }
                 }
             }
-            rangeSize = rangeSize.subtract(subtract);
-            return (rangeSize.compareTo(nBig) >= 0);
+            return (rangeSize.compareTo(new BigInteger("" + n)) >= 0);
         }
         return true;
     }

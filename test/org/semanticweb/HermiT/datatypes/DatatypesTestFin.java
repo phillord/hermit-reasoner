@@ -9,19 +9,19 @@ import java.util.Set;
 import org.semanticweb.HermiT.model.dataranges.CanonicalDataRange;
 import org.semanticweb.HermiT.model.dataranges.DataConstant;
 import org.semanticweb.HermiT.model.dataranges.DataRange;
-import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionInteger;
+import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionIntegerFin;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets;
 import org.semanticweb.HermiT.reasoner.AbstractReasonerTest;
 import org.semanticweb.owl.vocab.XSDVocabulary;
 
-public class DatatypesTest extends AbstractReasonerTest {
+public class DatatypesTestFin extends AbstractReasonerTest {
     
     protected URI stringURI = XSDVocabulary.STRING.getURI();
     protected URI integerURI = XSDVocabulary.INTEGER.getURI();
     protected URI uIntURI = XSDVocabulary.UNSIGNED_INT.getURI();
     protected URI decimalURI = XSDVocabulary.DECIMAL.getURI();
     
-    public DatatypesTest(String name) {
+    public DatatypesTestFin(String name) {
         super(name);
     }
     
@@ -59,137 +59,132 @@ public class DatatypesTest extends AbstractReasonerTest {
     }
     
     public void testDatatypeRestrictionInteger() throws Exception {
-        DatatypeRestrictionInteger drInteger = new DatatypeRestrictionInteger(integerURI);
+        DatatypeRestrictionIntegerFin drInteger = new DatatypeRestrictionIntegerFin(integerURI);
         drInteger.addFacet(Facets.MAX_EXCLUSIVE, "3");
         assertTrue(drInteger.getIntervals().size() == 1);
-        assertFalse(drInteger.isFinite());
-        for (DatatypeRestrictionInteger.Interval i : drInteger.getIntervals()) {
-            assertTrue(i.contains(new BigInteger("2")));
-            assertFalse(i.contains(new BigInteger("3")));
+        for (DatatypeRestrictionIntegerFin.Interval i : drInteger.getIntervals()) {
+            assertTrue(i.contains(2));
+            assertFalse(i.contains(3));
         }
         drInteger.addFacet(Facets.MAX_EXCLUSIVE, "1");
         assertTrue(drInteger.getIntervals().size() == 1);
-        assertFalse(drInteger.isFinite());
-        for (DatatypeRestrictionInteger.Interval i : drInteger.getIntervals()) {
-            assertTrue(i.contains(BigInteger.ZERO));
-            assertFalse(i.contains(BigInteger.ONE));
+        for (DatatypeRestrictionIntegerFin.Interval i : drInteger.getIntervals()) {
+            assertTrue(i.contains(0));
+            assertFalse(i.contains(1));
         }
         drInteger.addFacet(Facets.MAX_EXCLUSIVE, "5");
         assertTrue(drInteger.getIntervals().size() == 1);
-        assertFalse(drInteger.isFinite());
-        for (DatatypeRestrictionInteger.Interval i : drInteger.getIntervals()) {
-            assertTrue(i.contains(BigInteger.ZERO));
-            assertFalse(i.contains(BigInteger.ONE));
+        for (DatatypeRestrictionIntegerFin.Interval i : drInteger.getIntervals()) {
+            assertTrue(i.contains(0));
+            assertFalse(i.contains(1));
         }
         drInteger.addFacet(Facets.MAX_INCLUSIVE, "-2");
         assertTrue(drInteger.getIntervals().size() == 1);
-        assertFalse(drInteger.isFinite());
-        for (DatatypeRestrictionInteger.Interval i : drInteger.getIntervals()) {
-            assertTrue(i.contains(new BigInteger("-2")));
-            assertFalse(i.contains(new BigInteger("-1")));
+        for (DatatypeRestrictionIntegerFin.Interval i : drInteger.getIntervals()) {
+            assertTrue(i.contains(-2));
+            assertFalse(i.contains(-1));
         }
         drInteger.addFacet(Facets.MAX_INCLUSIVE, "2");
         assertTrue(drInteger.getIntervals().size() == 1);
-        assertFalse(drInteger.isFinite());
-        for (DatatypeRestrictionInteger.Interval i : drInteger.getIntervals()) {
-            assertTrue(i.contains(new BigInteger("-2")));
-            assertFalse(i.contains(new BigInteger("-1")));
+        for (DatatypeRestrictionIntegerFin.Interval i : drInteger.getIntervals()) {
+            assertTrue(i.contains(-2));
+            assertFalse(i.contains(-1));
         }
         drInteger.addFacet(Facets.MIN_EXCLUSIVE, "-15");
         assertTrue(drInteger.getIntervals().size() == 1);
         assertTrue(drInteger.isFinite());
-        for (DatatypeRestrictionInteger.Interval i : drInteger.getIntervals()) {
-            assertTrue(i.contains(new BigInteger("-14")));
-            assertFalse(i.contains(new BigInteger("-15")));
-            assertFalse(i.contains(new BigInteger("-1")));
-            assertTrue(i.contains(new BigInteger("-2")));
+        for (DatatypeRestrictionIntegerFin.Interval i : drInteger.getIntervals()) {
+            assertTrue(i.contains(-14));
+            assertFalse(i.contains(-15));
+            assertFalse(i.contains(-1));
+            assertTrue(i.contains(-2));
         }
         drInteger.addFacet(Facets.MIN_EXCLUSIVE, "-10");
         assertTrue(drInteger.getIntervals().size() == 1);
         assertTrue(drInteger.isFinite());
-        for (DatatypeRestrictionInteger.Interval i : drInteger.getIntervals()) {
-            assertTrue(i.contains(new BigInteger("-9")));
-            assertFalse(i.contains(new BigInteger("-10")));
-            assertFalse(i.contains(new BigInteger("-1")));
-            assertTrue(i.contains(new BigInteger("-2")));
+        for (DatatypeRestrictionIntegerFin.Interval i : drInteger.getIntervals()) {
+            assertTrue(i.contains(-9));
+            assertFalse(i.contains(-10));
+            assertFalse(i.contains(-1));
+            assertTrue(i.contains(-2));
         }
         drInteger.addFacet(Facets.MIN_INCLUSIVE, "-2");
         assertTrue(drInteger.getIntervals().size() == 1);
         assertTrue(drInteger.isFinite());
-        for (DatatypeRestrictionInteger.Interval i : drInteger.getIntervals()) {
-            assertTrue(i.contains(new BigInteger("-2")));
-            assertFalse(i.contains(new BigInteger("-3")));
-            assertFalse(i.contains(new BigInteger("-1")));
+        for (DatatypeRestrictionIntegerFin.Interval i : drInteger.getIntervals()) {
+            assertTrue(i.contains(-2));
+            assertFalse(i.contains(-3));
+            assertFalse(i.contains(-1));
         }
     }
 
     public void testDatatypeRestrictionIntegerNegated() throws Exception {
-        DatatypeRestrictionInteger drInteger = new DatatypeRestrictionInteger(integerURI);
+        DatatypeRestrictionIntegerFin drInteger = new DatatypeRestrictionIntegerFin(integerURI);
         drInteger.negate();
         // not smaller 3 = not smaller or equal 2
         drInteger.addFacet(Facets.MAX_EXCLUSIVE, "3");
         assertTrue(drInteger.getIntervals().size() == 1);
         assertFalse(drInteger.isFinite());
-        for (DatatypeRestrictionInteger.Interval i : drInteger.getIntervals()) {
-            assertFalse(i.contains(new BigInteger("3")));
-            assertTrue(i.contains(new BigInteger("2")));
+        for (DatatypeRestrictionIntegerFin.Interval i : drInteger.getIntervals()) {
+            assertFalse(i.contains(3));
+            assertTrue(i.contains(2));
         }
         // and not smaller 1 = and not smaller or equal 0
         drInteger.addFacet(Facets.MAX_EXCLUSIVE, "1");
         assertTrue(drInteger.getIntervals().size() == 1);
         assertFalse(drInteger.isFinite());
-        for (DatatypeRestrictionInteger.Interval i : drInteger.getIntervals()) {
-            assertFalse(i.contains(new BigInteger("1")));
-            assertTrue(i.contains(new BigInteger("0")));
+        for (DatatypeRestrictionIntegerFin.Interval i : drInteger.getIntervals()) {
+            assertFalse(i.contains(1));
+            assertTrue(i.contains(0));
         }
         // and not smaller 5 = and not smaller or equal 4
         drInteger.addFacet(Facets.MAX_EXCLUSIVE, "5");
         assertTrue(drInteger.getIntervals().size() == 1);
         assertFalse(drInteger.isFinite());
-        for (DatatypeRestrictionInteger.Interval i : drInteger.getIntervals()) {
-            assertFalse(i.contains(new BigInteger("1")));
-            assertTrue(i.contains(new BigInteger("0")));
+        for (DatatypeRestrictionIntegerFin.Interval i : drInteger.getIntervals()) {
+            assertFalse(i.contains(1));
+            assertTrue(i.contains(0));
         }
         // and not smaller or equal -2
         drInteger.addFacet(Facets.MAX_INCLUSIVE, "-2");
         assertTrue(drInteger.getIntervals().size() == 1);
         assertFalse(drInteger.isFinite());
-        for (DatatypeRestrictionInteger.Interval i : drInteger.getIntervals()) {
-            assertFalse(i.contains(new BigInteger("-1")));
-            assertTrue(i.contains(new BigInteger("-2")));
+        for (DatatypeRestrictionIntegerFin.Interval i : drInteger.getIntervals()) {
+            assertFalse(i.contains(-1));
+            assertTrue(i.contains(-2));
         }
         // and not smaller or equal 2 = smaller or equal 1
         drInteger.addFacet(Facets.MAX_INCLUSIVE, "2");
         assertTrue(drInteger.getIntervals().size() == 1);
         assertFalse(drInteger.isFinite());
-        for (DatatypeRestrictionInteger.Interval i : drInteger.getIntervals()) {
-            assertFalse(i.contains(new BigInteger("-1")));
-            assertTrue(i.contains(new BigInteger("-2")));
+        for (DatatypeRestrictionIntegerFin.Interval i : drInteger.getIntervals()) {
+            assertFalse(i.contains(-1));
+            assertTrue(i.contains(-2));
         }
         // and not greater -5 = and not greater or equal -4
         drInteger.addFacet(Facets.MIN_EXCLUSIVE, "-5");
         assertTrue(drInteger.getIntervals().size() == 1);
         assertFalse(drInteger.isFinite());
-        for (DatatypeRestrictionInteger.Interval i : drInteger.getIntervals()) {
-            assertTrue(i.getMin().equals(new BigInteger("-4")));
-            assertTrue(i.getMax().equals(new BigInteger("-2")));
+        for (DatatypeRestrictionIntegerFin.Interval i : drInteger.getIntervals()) {
+            assertTrue(i.getMin() == -4);
+            assertTrue(i.getMax() == -2);
         }
         // and not greater -7 = and not greater or equal -6
         drInteger.addFacet(Facets.MIN_EXCLUSIVE, "-7");
         assertTrue(drInteger.getIntervals().size() == 1);
         assertFalse(drInteger.isFinite());
-        for (DatatypeRestrictionInteger.Interval i : drInteger.getIntervals()) {
-            assertTrue(i.getMin().equals(new BigInteger("-4")));
-            assertTrue(i.getMax().equals(new BigInteger("-2")));
+        for (DatatypeRestrictionIntegerFin.Interval i : drInteger.getIntervals()) {
+            assertTrue(i.getMin() == -4);
+            assertTrue(i.getMax() == -2);
         }
         // and not greater or equal 5
         drInteger.addFacet(Facets.MIN_INCLUSIVE, "5");
         assertTrue(drInteger.getIntervals().size() == 1);
         assertTrue(drInteger.isFinite());
         assertTrue(drInteger.isBottom());
-        for (DatatypeRestrictionInteger.Interval i : drInteger.getIntervals()) {
-            assertTrue(i.getMin().equals(new BigInteger("5")));
-            assertTrue(i.getMax().equals(new BigInteger("-2")));
+        for (DatatypeRestrictionIntegerFin.Interval i : drInteger.getIntervals()) {
+            assertTrue(i.getMin() == 5);
+            assertTrue(i.getMax() == -2);
         }
     }
     
@@ -197,45 +192,41 @@ public class DatatypesTest extends AbstractReasonerTest {
         // conjoin     |-----...
         // to             |------...
         // results in     |------...
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MIN_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.addFacet(Facets.MIN_INCLUSIVE, "9");
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
-        assertFalse(canonical.isFinite());
         assertFalse(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "9")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "10")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "10000")));
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 1);
-        assertTrue(canonical.getEnumerationSize() == null);
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 1);
     }
     
     public void testConjoinRanges2() {
         // conjoin           |-----...
         // to             |------...
         // results in        |-----...
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MIN_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.addFacet(Facets.MIN_INCLUSIVE, "15");
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
-        assertFalse(canonical.isFinite());
         assertFalse(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "14")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "15")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "10000")));
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 1);
-        assertTrue(canonical.getEnumerationSize() == null);
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 1);
     }
     
     public void testConjoinRanges3() {
         // conjoin     ...---|
         // to                   |---...
         // results in      empty
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MIN_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.addFacet(Facets.MAX_INCLUSIVE, "5");
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
@@ -250,9 +241,9 @@ public class DatatypesTest extends AbstractReasonerTest {
         // conjoin     ...----|
         // to              |----...
         // results in      |--|
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MIN_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.addFacet(Facets.MAX_INCLUSIVE, "15");
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
@@ -262,7 +253,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertFalse(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "16")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "10")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "15")));
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 1);
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 1);
         assertTrue(canonical.getEnumerationSize().equals(new BigInteger("6")));
     }
     
@@ -270,13 +261,11 @@ public class DatatypesTest extends AbstractReasonerTest {
         // conjoin     |---|
         // to                 |-------...
         // results in     empty
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MIN_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.addFacet(Facets.MIN_INCLUSIVE, "4");
         dr2.addFacet(Facets.MAX_INCLUSIVE, "8");
-        assertTrue(((CanonicalDataRange) dr2).isFinite());
-        assertFalse(((CanonicalDataRange) dr1).isFinite());
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
         assertTrue(canonical.isFinite());
@@ -285,21 +274,19 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertFalse(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "4")));
         assertFalse(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "8")));
         assertFalse(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "10")));
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 1);
-        assertTrue(canonical.getEnumerationSize().equals(new BigInteger("0")));
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 1);
+        assertTrue(canonical.getEnumerationSize().equals(BigInteger.ZERO));
     }
     
     public void testConjoinRanges6() {
         // conjoin     |-----|
         // to             |------...
         // results in     |--|
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MIN_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.addFacet(Facets.MIN_INCLUSIVE, "5");
         dr2.addFacet(Facets.MAX_INCLUSIVE, "15");
-        assertTrue(((CanonicalDataRange) dr2).isFinite());
-        assertFalse(((CanonicalDataRange) dr1).isFinite());
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
         assertTrue(canonical.isFinite());
@@ -308,7 +295,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "10")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "15")));
         assertFalse(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "16")));
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 1);
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 1);
         assertTrue(canonical.getEnumerationSize().equals(new BigInteger("6")));
     }
     
@@ -316,13 +303,11 @@ public class DatatypesTest extends AbstractReasonerTest {
         // conjoin          |---|
         // to             |------...
         // results in       |---|
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MIN_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.addFacet(Facets.MIN_INCLUSIVE, "15");
         dr2.addFacet(Facets.MAX_INCLUSIVE, "20");
-        assertTrue(((CanonicalDataRange) dr2).isFinite());
-        assertFalse(((CanonicalDataRange) dr1).isFinite());
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
         assertTrue(canonical.isFinite());
@@ -331,7 +316,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "15")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "20")));
         assertFalse(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "21")));
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 1);
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 1);
         assertTrue(canonical.getEnumerationSize().equals(new BigInteger("6")));
     }
     
@@ -339,45 +324,41 @@ public class DatatypesTest extends AbstractReasonerTest {
         // conjoin      ...-----|
         // to          ...----|
         // results in  ...----|
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MAX_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.addFacet(Facets.MAX_INCLUSIVE, "15");
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
-        assertFalse(canonical.isFinite());
         assertFalse(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "11")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "10")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "-10000")));
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 1);
-        assertTrue(canonical.getEnumerationSize() == null);
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 1);
     }
     
     public void testConjoinRangesB2() {
         // conjoin      ...----|
         // to              ...----|
         // results in   ...----|
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MAX_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.addFacet(Facets.MAX_INCLUSIVE, "15");
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
-        assertFalse(canonical.isFinite());
         assertFalse(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "11")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "10")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "-10000")));
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 1);
-        assertTrue(canonical.getEnumerationSize() == null);
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 1);
     }
     
     public void testConjoinRangesB3() {
         // conjoin             |---...
         // to          ...---|
         // results in      empty
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MAX_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.addFacet(Facets.MIN_INCLUSIVE, "15");
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
@@ -392,9 +373,9 @@ public class DatatypesTest extends AbstractReasonerTest {
         // conjoin         |---...
         // to          ...----|
         // results in      |--|
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MAX_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.addFacet(Facets.MIN_INCLUSIVE, "5");
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
@@ -404,7 +385,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertFalse(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "11")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "5")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "10")));
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 1);
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 1);
         assertTrue(canonical.getEnumerationSize().equals(new BigInteger("6")));
     }
     
@@ -412,34 +393,32 @@ public class DatatypesTest extends AbstractReasonerTest {
         // conjoin               |---|
         // to          ...----|
         // results in     empty
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MAX_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.addFacet(Facets.MIN_INCLUSIVE, "15");
         dr2.addFacet(Facets.MAX_INCLUSIVE, "20");
         assertTrue(((CanonicalDataRange) dr2).isFinite());
-        assertFalse(((CanonicalDataRange) dr1).isFinite());
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
         assertTrue(canonical.isFinite());
         assertTrue(canonical.isBottom());
         assertFalse(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "10")));
         assertFalse(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "15")));
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 1);
-        assertTrue(canonical.getEnumerationSize().equals(new BigInteger("0")));
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 1);
+        assertTrue(canonical.getEnumerationSize().equals(BigInteger.ZERO));
     }
     
     public void testConjoinRangesB6() {
         // conjoin         |-----|
         // to          ...----|
         // results in      |--|
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MAX_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.addFacet(Facets.MIN_INCLUSIVE, "5");
         dr2.addFacet(Facets.MAX_INCLUSIVE, "15");
         assertTrue(((CanonicalDataRange) dr2).isFinite());
-        assertFalse(((CanonicalDataRange) dr1).isFinite());
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
         assertTrue(canonical.isFinite());
@@ -448,7 +427,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "5")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "10")));
         assertFalse(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "11")));
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 1);
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 1);
         assertTrue(canonical.getEnumerationSize().equals(new BigInteger("6")));
     }
     
@@ -456,13 +435,12 @@ public class DatatypesTest extends AbstractReasonerTest {
         // conjoin         |---|
         // to           ...------|
         // results in      |---|
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MAX_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.addFacet(Facets.MIN_INCLUSIVE, "0");
         dr2.addFacet(Facets.MAX_INCLUSIVE, "5");
         assertTrue(((CanonicalDataRange) dr2).isFinite());
-        assertFalse(((CanonicalDataRange) dr1).isFinite());
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
         assertTrue(canonical.isFinite());
@@ -471,7 +449,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "0")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "5")));
         assertFalse(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "6")));
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 1);
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 1);
         assertTrue(canonical.getEnumerationSize().equals(new BigInteger("6")));
     }
     
@@ -479,13 +457,12 @@ public class DatatypesTest extends AbstractReasonerTest {
         // conjoin     ...---|
         // to                   |---|
         // results in      empty
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MIN_INCLUSIVE, "10");
         dr1.addFacet(Facets.MAX_INCLUSIVE, "15");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.addFacet(Facets.MAX_INCLUSIVE, "5");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
-        assertFalse(((CanonicalDataRange) dr2).isFinite());
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
         assertTrue(canonical.isFinite());
@@ -499,13 +476,12 @@ public class DatatypesTest extends AbstractReasonerTest {
         // conjoin     ...----|
         // to              |----|
         // results in      |--|
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MIN_INCLUSIVE, "10");
         dr1.addFacet(Facets.MAX_INCLUSIVE, "15");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.addFacet(Facets.MAX_INCLUSIVE, "12");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
-        assertFalse(((CanonicalDataRange) dr2).isFinite());
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
         assertTrue(canonical.isFinite());
@@ -521,13 +497,12 @@ public class DatatypesTest extends AbstractReasonerTest {
         // conjoin     ...---------|
         // to              |----|
         // results in      |----|
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MIN_INCLUSIVE, "10");
         dr1.addFacet(Facets.MAX_INCLUSIVE, "15");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.addFacet(Facets.MAX_INCLUSIVE, "20");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
-        assertFalse(((CanonicalDataRange) dr2).isFinite());
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
         assertTrue(canonical.isFinite());
@@ -543,13 +518,12 @@ public class DatatypesTest extends AbstractReasonerTest {
         // conjoin             |---...
         // to          |---|
         // results in      empty
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MIN_INCLUSIVE, "10");
         dr1.addFacet(Facets.MAX_INCLUSIVE, "15");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.addFacet(Facets.MIN_INCLUSIVE, "20");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
-        assertFalse(((CanonicalDataRange) dr2).isFinite());
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
         assertTrue(canonical.isFinite());
@@ -563,13 +537,12 @@ public class DatatypesTest extends AbstractReasonerTest {
         // conjoin         |----...
         // to          |------|
         // results in      |--|
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MIN_INCLUSIVE, "10");
         dr1.addFacet(Facets.MAX_INCLUSIVE, "15");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.addFacet(Facets.MIN_INCLUSIVE, "12");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
-        assertFalse(((CanonicalDataRange) dr2).isFinite());
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
         assertTrue(canonical.isFinite());
@@ -578,7 +551,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertFalse(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "16")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "12")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "15")));
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 1);
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 1);
         assertTrue(canonical.getEnumerationSize().equals(new BigInteger("4")));
     }
     
@@ -586,13 +559,12 @@ public class DatatypesTest extends AbstractReasonerTest {
         // conjoin         |----...
         // to          |------|
         // results in      |--|
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MIN_INCLUSIVE, "10");
         dr1.addFacet(Facets.MAX_INCLUSIVE, "15");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.addFacet(Facets.MIN_INCLUSIVE, "5");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
-        assertFalse(((CanonicalDataRange) dr2).isFinite());
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
         assertTrue(canonical.isFinite());
@@ -601,7 +573,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertFalse(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "16")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "10")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "15")));
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 1);
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 1);
         assertTrue(canonical.getEnumerationSize().equals(new BigInteger("6")));
     }
     
@@ -609,10 +581,10 @@ public class DatatypesTest extends AbstractReasonerTest {
         // conjoin            |---|
         // to          |---| 
         // results in      empty
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MIN_INCLUSIVE, "5");
         dr1.addFacet(Facets.MAX_INCLUSIVE, "9");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.addFacet(Facets.MIN_INCLUSIVE, "10");
         dr2.addFacet(Facets.MAX_INCLUSIVE, "15");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
@@ -621,18 +593,18 @@ public class DatatypesTest extends AbstractReasonerTest {
         canonical.conjoinFacetsFrom(dr2);
         assertTrue(canonical.isFinite());
         assertTrue(canonical.isBottom());
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 1);
-        assertTrue(canonical.getEnumerationSize().equals(new BigInteger("0")));
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 1);
+        assertTrue(canonical.getEnumerationSize().equals(BigInteger.ZERO));
     }
     
     public void testConjoinRangesC8() {
         // conjoin        |-----|
         // to          |-----| 
         // results in     |--|
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MIN_INCLUSIVE, "5");
         dr1.addFacet(Facets.MAX_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.addFacet(Facets.MIN_INCLUSIVE, "8");
         dr2.addFacet(Facets.MAX_INCLUSIVE, "15");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
@@ -645,7 +617,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertFalse(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "11")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "8")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "10")));
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 1);
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 1);
         assertTrue(canonical.getEnumerationSize().equals(new BigInteger("3")));
     }
     
@@ -653,10 +625,10 @@ public class DatatypesTest extends AbstractReasonerTest {
         // conjoin     |-------|
         // to            |---| 
         // results in    |---|
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MIN_INCLUSIVE, "5");
         dr1.addFacet(Facets.MAX_INCLUSIVE, "20");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.addFacet(Facets.MIN_INCLUSIVE, "10");
         dr2.addFacet(Facets.MAX_INCLUSIVE, "15");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
@@ -669,7 +641,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertFalse(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "16")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "10")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "15")));
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 1);
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 1);
         assertTrue(canonical.getEnumerationSize().equals(new BigInteger("6")));
     }
     
@@ -677,10 +649,10 @@ public class DatatypesTest extends AbstractReasonerTest {
         // conjoin        |---|
         // to          |--------| 
         // results in     |---|
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MIN_INCLUSIVE, "12");
         dr1.addFacet(Facets.MAX_INCLUSIVE, "13");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.addFacet(Facets.MIN_INCLUSIVE, "10");
         dr2.addFacet(Facets.MAX_INCLUSIVE, "15");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
@@ -693,7 +665,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertFalse(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "14")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "12")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "13")));
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 1);
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 1);
         assertTrue(canonical.getEnumerationSize().equals(new BigInteger("2")));
     }
     
@@ -701,10 +673,10 @@ public class DatatypesTest extends AbstractReasonerTest {
         // conjoin        |-----|
         // to          |-----| 
         // results in     |--|
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MIN_INCLUSIVE, "5");
         dr1.addFacet(Facets.MAX_INCLUSIVE, "15");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.addFacet(Facets.MIN_INCLUSIVE, "10");
         dr2.addFacet(Facets.MAX_INCLUSIVE, "20");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
@@ -717,7 +689,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertFalse(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "16")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "10")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "15")));
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 1);
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 1);
         assertTrue(canonical.getEnumerationSize().equals(new BigInteger("6")));
     }
     
@@ -725,10 +697,10 @@ public class DatatypesTest extends AbstractReasonerTest {
         // conjoin           |---|
         // to          |---| 
         // results in     empty
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MIN_INCLUSIVE, "5");
         dr1.addFacet(Facets.MAX_INCLUSIVE, "15");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.addFacet(Facets.MIN_INCLUSIVE, "20");
         dr2.addFacet(Facets.MAX_INCLUSIVE, "30");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
@@ -737,18 +709,18 @@ public class DatatypesTest extends AbstractReasonerTest {
         canonical.conjoinFacetsFrom(dr2);
         assertTrue(canonical.isFinite());
         assertTrue(canonical.isBottom());
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 1);
-        assertTrue(canonical.getEnumerationSize().equals(new BigInteger("0")));
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 1);
+        assertTrue(canonical.getEnumerationSize().equals(BigInteger.ZERO));
     }
     
     public void testConjoinNegRangesA1() {
         // conjoin      ...----|
         // to            |---| 
         // results in    |---|
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MIN_INCLUSIVE, "5");
         dr1.addFacet(Facets.MAX_INCLUSIVE, "15");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.negate();
         dr2.addFacet(Facets.MIN_INCLUSIVE, "20");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
@@ -761,7 +733,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertFalse(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "16")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "10")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "15")));
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 1);
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 1);
         assertTrue(canonical.getEnumerationSize().equals(new BigInteger("11")));
     }
     
@@ -769,14 +741,13 @@ public class DatatypesTest extends AbstractReasonerTest {
         // conjoin           |-----...
         // to            |-------| 
         // results in        |---|
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MIN_INCLUSIVE, "5");
         dr1.addFacet(Facets.MAX_INCLUSIVE, "15");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.negate();
         dr2.addFacet(Facets.MAX_INCLUSIVE, "10");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
-        assertFalse(((CanonicalDataRange) dr2).isFinite());
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
         assertTrue(canonical.isFinite());
@@ -785,7 +756,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertFalse(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "16")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "11")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "15")));
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 1);
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 1);
         assertTrue(canonical.getEnumerationSize().equals(new BigInteger("5")));
     }
     
@@ -793,14 +764,13 @@ public class DatatypesTest extends AbstractReasonerTest {
         // conjoin     ...---|
         // to            |-------| 
         // results in    |---|
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MIN_INCLUSIVE, "5");
         dr1.addFacet(Facets.MAX_INCLUSIVE, "15");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.negate();
         dr2.addFacet(Facets.MIN_INCLUSIVE, "10");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
-        assertFalse(((CanonicalDataRange) dr2).isFinite());
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
         assertTrue(canonical.isFinite());
@@ -809,7 +779,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertFalse(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "10")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "5")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "9")));
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 1);
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 1);
         assertTrue(canonical.getEnumerationSize().equals(new BigInteger("5")));
     }
     
@@ -818,10 +788,10 @@ public class DatatypesTest extends AbstractReasonerTest {
         // or               |-------...
         // to           |----------| 
         // results in   |----------| since the conjoined is top
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MIN_INCLUSIVE, "0");
         dr1.addFacet(Facets.MAX_INCLUSIVE, "15");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.negate();
         dr2.addFacet(Facets.MIN_INCLUSIVE, "10"); // <= 9
         dr2.addFacet(Facets.MAX_INCLUSIVE, "5"); // or >= 6 (trivially true)
@@ -834,7 +804,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertFalse(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "16")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "0")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "15")));
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 1);
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 1);
         assertTrue(canonical.getEnumerationSize().equals(new BigInteger("16")));
     }
     
@@ -843,15 +813,14 @@ public class DatatypesTest extends AbstractReasonerTest {
         // or                   |---...
         // to           |-----------| 
         // results in   |---|  |---| 
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MIN_INCLUSIVE, "0");
         dr1.addFacet(Facets.MAX_INCLUSIVE, "15");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.negate();
         dr2.addFacet(Facets.MIN_INCLUSIVE, "5"); // <= 4
         dr2.addFacet(Facets.MAX_INCLUSIVE, "10"); // or >= 11
         assertTrue(((CanonicalDataRange) dr1).isFinite());
-        assertFalse(((CanonicalDataRange) dr2).isFinite());
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
         assertTrue(canonical.isFinite());
@@ -865,7 +834,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "4")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "11")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "15")));
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 2);
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 2);
         assertTrue(canonical.getEnumerationSize().equals(new BigInteger("10")));
     }
     
@@ -877,20 +846,18 @@ public class DatatypesTest extends AbstractReasonerTest {
         // or                         |---...
         // to           |----------------| 
         // results in   |-----| |--|  |--| 
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MIN_INCLUSIVE, "0");
         dr1.addFacet(Facets.MAX_INCLUSIVE, "100");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.negate();
         dr2.addFacet(Facets.MIN_INCLUSIVE, "10"); // <= 9
         dr2.addFacet(Facets.MAX_INCLUSIVE, "20"); // or >= 21
-        DataRange dr3 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr3 = new DatatypeRestrictionIntegerFin(integerURI);
         dr3.negate();
         dr3.addFacet(Facets.MIN_INCLUSIVE, "30"); // <= 29
         dr3.addFacet(Facets.MAX_INCLUSIVE, "40"); // or >= 41
         assertTrue(((CanonicalDataRange) dr1).isFinite());
-        assertFalse(((CanonicalDataRange) dr2).isFinite());
-        assertFalse(((CanonicalDataRange) dr3).isFinite());
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
         assertTrue(canonical.isFinite());
@@ -904,7 +871,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "9")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "21")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "100")));
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 2);
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 2);
         assertTrue(canonical.getEnumerationSize().equals(new BigInteger("90")));
         canonical.conjoinFacetsFrom(dr3);
         assertTrue(canonical.isFinite());
@@ -922,7 +889,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "29")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "41")));
         assertTrue(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "100")));
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 3);
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 3);
         assertTrue(canonical.getEnumerationSize().equals(new BigInteger("79")));
     }
     
@@ -935,27 +902,26 @@ public class DatatypesTest extends AbstractReasonerTest {
         // and                   |---------|
         // to           |----------------| 
         // results in           |--|  |--| 
-        DataRange dr1 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr1 = new DatatypeRestrictionIntegerFin(integerURI);
         dr1.addFacet(Facets.MIN_INCLUSIVE, "0");
         dr1.addFacet(Facets.MAX_INCLUSIVE, "100");
-        DataRange dr2 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr2 = new DatatypeRestrictionIntegerFin(integerURI);
         dr2.negate();
         dr2.addFacet(Facets.MIN_INCLUSIVE, "10"); // <= 9
         dr2.addFacet(Facets.MAX_INCLUSIVE, "20"); // or >= 21
-        DataRange dr3 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr3 = new DatatypeRestrictionIntegerFin(integerURI);
         dr3.negate();
         dr3.addFacet(Facets.MIN_INCLUSIVE, "30"); // <= 29
         dr3.addFacet(Facets.MAX_INCLUSIVE, "40"); // or >= 41
-        DataRange dr4 = new DatatypeRestrictionInteger(integerURI);
+        DataRange dr4 = new DatatypeRestrictionIntegerFin(integerURI);
         dr4.addFacet(Facets.MIN_INCLUSIVE, "25"); // >= 25
         dr4.addFacet(Facets.MAX_INCLUSIVE, "110"); // and >= 110
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
         canonical.conjoinFacetsFrom(dr3);
         canonical.conjoinFacetsFrom(dr4);
-        assertTrue(((DatatypeRestrictionInteger)canonical).getIntervals().size() == 2);
+        assertTrue(((DatatypeRestrictionIntegerFin)canonical).getIntervals().size() == 2);
         assertTrue(canonical.isFinite());
-        assertFalse(canonical.isBottom());
         // ranges 25-29 and 41-100
         assertFalse(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "24")));
         assertFalse(canonical.accepts(new DataConstant(dr1.getDatatypeURI(), "30")));

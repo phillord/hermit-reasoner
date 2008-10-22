@@ -40,13 +40,12 @@ public class DatatypeRestrictionLiteral extends DatatypeRestriction implements D
         return isNegated;
     }
     
-    public boolean hasMinCardinality(int n) {
+    public boolean hasMinCardinality(BigInteger n) {
         return !isNegated;
     }
     
     public BigInteger getEnumerationSize() {
-        if (isNegated) return BigInteger.ZERO;
-        return null;
+        return BigInteger.ZERO;
     }
     
     public DataConstant getSmallestAssignment() {

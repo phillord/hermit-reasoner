@@ -119,7 +119,7 @@ public interface CanonicalDataRange {
      * @return true if the interpretation of this data range allows for at least 
      *         n values and false otherwise.  
      */
-    public boolean hasMinCardinality(int n);
+    public boolean hasMinCardinality(BigInteger n);
     
     /**
      * Compute the set of String representations of the allowed values for this 

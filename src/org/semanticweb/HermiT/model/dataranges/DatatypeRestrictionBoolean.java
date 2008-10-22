@@ -45,25 +45,21 @@ public class DatatypeRestrictionBoolean extends DatatypeRestriction {
                 || constant.equals(DatatypeRestrictionBoolean.FALSE)); 
     }
     
-    public boolean hasMinCardinality(int n) {
-        if (isNegated || n <= 0) return true;
-        if (n > 2) return false;
+    public boolean hasMinCardinality(BigInteger n) {
+        if (isNegated || n.compareTo(BigInteger.ZERO) <= 0) return true;
         if (!oneOf.isEmpty()) {
-            return (oneOf.size() >= n);
+            return (new BigInteger("" + oneOf.size()).compareTo(n) >= 0);
         } else {
-            return (2 - notOneOf.size()) >= n;
+            return (new BigInteger("" + 2).subtract(new BigInteger("" + notOneOf.size())).compareTo(n) >= 0);
         }
     }
     
-    public BigInteger getEnumerationSize() {
-        if (isFinite()) { 
-            if (!oneOf.isEmpty()) {
-                return new BigInteger("" + oneOf.size());
-            } else {
-                return (new BigInteger("2")).subtract(new BigInteger("" + notOneOf.size()));
-            }
-        } 
-        return null;
+    public BigInteger getEnumerationSize() { 
+        if (!oneOf.isEmpty()) {
+            return new BigInteger("" + oneOf.size());
+        } else {
+            return (new BigInteger("" + 2).subtract(new BigInteger("" + notOneOf.size())));
+        }
     }
     
     public DataConstant getSmallestAssignment() {

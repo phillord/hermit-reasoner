@@ -12,13 +12,12 @@ import java.util.TreeSet;
 
 import org.semanticweb.HermiT.Namespaces;
 
-public class DatatypeRestrictionDouble extends DatatypeRestriction {
+public class DatatypeRestrictionIntegerFin extends DatatypeRestriction {
     
     protected Set<Interval> intervals = new HashSet<Interval>();
    
-    public DatatypeRestrictionDouble(URI datatypeURI) {
+    public DatatypeRestrictionIntegerFin(URI datatypeURI) {
         this.datatypeURI = datatypeURI;
-        intervals.add(new Interval());
         this.supportedFacets = new HashSet<Facets>(
                 Arrays.asList(new Facets[] {
                         Facets.MIN_INCLUSIVE, 
@@ -30,7 +29,7 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
     }
     
     public CanonicalDataRange getNewInstance() {
-        return new DatatypeRestrictionDouble(this.datatypeURI);
+        return new DatatypeRestrictionIntegerFin(this.datatypeURI);
     }
     
     public boolean isFinite() {
@@ -42,24 +41,15 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
     }
     
     public void addFacet(Facets facet, String value) {
-        double doubleValue;
+        long longValue;
         try {
-            BigDecimal originalValue = new BigDecimal(value);
-            doubleValue = originalValue.doubleValue();
-            BigDecimal doubleValueAsBD = new BigDecimal("" + doubleValue);
-            if (facet == Facets.MIN_EXCLUSIVE || facet == Facets.MIN_INCLUSIVE) {
-                if (doubleValueAsBD.compareTo(originalValue) < 0 
-                        || (doubleValueAsBD.compareTo(originalValue) == 0 
-                                && facet == Facets.MIN_EXCLUSIVE)) {
-                    doubleValue = nextDouble(doubleValue);
-                }
+            BigDecimal bd = new BigDecimal(value);
+            if (facet == Facets.MIN_EXCLUSIVE || facet == Facets.MAX_INCLUSIVE) {
+                bd = bd.setScale(0, BigDecimal.ROUND_FLOOR);
+                longValue = bd.longValueExact();
             } else {
-                if (doubleValueAsBD.compareTo(originalValue) > 0 
-                        || (doubleValueAsBD.compareTo(originalValue) == 0 
-                                && facet == Facets.MAX_EXCLUSIVE)) {
-                    //if (d > Double.MIN_VALUE) d -= Double.MIN_NORMAL;
-                    doubleValue = previousDouble(doubleValue);
-                }
+                bd = bd.setScale(0, BigDecimal.ROUND_CEILING);
+                longValue = bd.longValueExact();
             }
         } catch (NumberFormatException e) {
             e.printStackTrace();
@@ -67,97 +57,44 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
         }
         switch (facet) {
         case MIN_INCLUSIVE: {
-            for (Interval i : intervals) {
-                i.intersectWith(new Interval(doubleValue, Double.MAX_VALUE));
-                if (i.isEmpty()) {
-                    isBottom = true;
+            // greater or equal X
+            if (intervals.isEmpty()) {
+                intervals.add(new Interval(longValue, Long.MAX_VALUE));
+            } else {
+                for (Interval i : intervals) {
+                    i.intersectWith(new Interval(longValue, Long.MAX_VALUE));
+                    if (i.isEmpty()) {
+                        isBottom = true;
+                    }
                 }
             }
         } break;
         case MIN_EXCLUSIVE: {
-            for (Interval i : intervals) {
-                i.intersectWith(new Interval(doubleValue, Double.MAX_VALUE));
-                if (i.isEmpty()) {
-                    isBottom = true;
-                }
-            }
+            // greater than X = greater or equal X + 1
+            longValue++;
+            addFacet(Facets.MIN_INCLUSIVE, "" + longValue);
         } break;
         case MAX_INCLUSIVE: {
-            for (Interval i : intervals) {
-                i.intersectWith(new Interval(Double.MIN_VALUE, doubleValue));
-                if (i.isEmpty()) {
-                    isBottom = true;
+            // smaller or equal X
+            if (intervals.isEmpty()) {
+                intervals.add(new Interval(Long.MIN_VALUE, longValue));
+            } else {
+                for (Interval i : intervals) {
+                    i.intersectWith(new Interval(Long.MIN_VALUE, longValue));
+                    if (i.isEmpty()) {
+                        isBottom = true;
+                    }
                 }
             }
         } break;
         case MAX_EXCLUSIVE: {
-            for (Interval i : intervals) {
-                i.intersectWith(new Interval(Double.MIN_VALUE, doubleValue));
-                if (i.isEmpty()) {
-                    isBottom = true;
-                }
-            }
+            // smaller than X = smaller or equal X - 1 
+            longValue--;
+            addFacet(Facets.MAX_INCLUSIVE, "" + longValue);
         } break;
         default:
             throw new IllegalArgumentException("Unsupported facet.");
         }
-    }
-    
-    protected double nextDouble(double value) {
-        long bits = Double.doubleToRawLongBits(value);
-        long magnitude = (long)(bits & 0x7fffffffffffffffl);
-        // NaN or +inf or -inf -> no successor
-        if (isNaN(bits) || magnitude == 0x7f80000000000000l) {
-            return value;
-        } else {
-            boolean positive = ((bits & 0x8000000000000000l) == 0);
-            boolean newPositive;
-            long newMagnitude;
-            if (positive) {
-                newPositive = true;
-                newMagnitude = magnitude + 1;
-            } else if (!positive && magnitude == 0) {
-                // The successor of -0 is +0
-                newPositive = true;
-                newMagnitude = 0;
-            } else { // if (!positive && magnitude!=0)
-                newPositive = false;
-                newMagnitude = magnitude - 1;
-            }
-            long newBits = newMagnitude | (newPositive ? 0 : 0x8000000000000000l);
-            return Double.longBitsToDouble(newBits);
-        }
-    }
-    
-    protected double previousDouble(double value) {
-        long bits = Double.doubleToRawLongBits(value);
-        long magnitude = (long)(bits & 0x7fffffffffffffffl);
-        // NaN or -inf or +inf -> no predeccessor
-        if (isNaN(bits) || magnitude == 0x7f80000000000000l) {
-            return value;
-        } else {
-            boolean negative = ((bits & 0x8000000000000000l) == 1);
-            boolean newNegative;
-            long newMagnitude;
-            if (negative) {
-                newNegative = true;
-                newMagnitude = magnitude - 1;
-            } else if (!negative && magnitude == 0) {
-                // The predeccessor of +0 is -0
-                newNegative = true;
-                newMagnitude = 0;
-            } else { // if (!negative && magnitude!=0)
-                newNegative = false;
-                newMagnitude = magnitude - 1;
-            }
-            long newBits = newMagnitude | (newNegative ? 0 : 0x8000000000000000l);
-            return Double.longBitsToDouble(newBits);
-        }
-    }
-    
-    protected boolean isNaN(long bits) {
-        return ((bits & 0x7f80000000000000l) == 0x7f80000000000000l) 
-                && ((bits & 0x003fffffffffffffl) != 0);
     }
     
     public boolean facetsAccept(DataConstant constant) {
@@ -168,9 +105,9 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
             return false;
         } 
         if (intervals.isEmpty()) return true;
-        double doubleValue = Double.parseDouble(constant.getValue());
+        long longValue = Long.parseLong(constant.getValue());
         for (Interval i : intervals) {
-            if (i.contains(doubleValue)) {
+            if (i.contains(longValue) && !notOneOf.contains(constant)) {
                 return true;
             }
         }
@@ -182,51 +119,51 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
             throw new RuntimeException("Cannot add facets to negated " +
                         "data ranges!");
         }
-        if (!(range instanceof DatatypeRestrictionDouble)) {
+        if (!(range instanceof DatatypeRestrictionIntegerFin)) {
             throw new IllegalArgumentException("The given parameter is not " +
                     "an instance of DatatypeRestrictionInteger. It is " +
                     "only allowed to add facets from other integer " +
                     "datatype restrictions. ");
         }
         if (!isBottom()) {
-            DatatypeRestrictionDouble restr = (DatatypeRestrictionDouble) range;
-            if (restr.getDoubleIntervals().size() > 1) {
+            DatatypeRestrictionIntegerFin restr = (DatatypeRestrictionIntegerFin) range;
+            if (restr.getIntervals().size() > 1) {
                 throw new IllegalArgumentException("The given parameter " +
                         "contains more than one interval. ");
             }
             if (intervals.isEmpty()) {
-                for (Interval i : restr.getDoubleIntervals()) {
+                for (Interval i : restr.getIntervals()) {
                     if (restr.isNegated()) {
                         if (!i.isEmpty()) {
-                            if (i.getMin() > Double.MIN_VALUE) {
-                                intervals.add(new Interval(Double.MIN_VALUE, i.getMin()));
+                            if (i.getMin() > Long.MIN_VALUE) {
+                                intervals.add(new Interval(Long.MIN_VALUE, i.getMin()));
                             }
-                            if (i.getMax() < Double.MAX_VALUE) {
-                                intervals.add(new Interval(i.getMax(), Double.MAX_VALUE));
+                            if (i.getMax() < Long.MAX_VALUE) {
+                                intervals.add(new Interval(i.getMax(), Long.MAX_VALUE));
                             }
                         } // otherwise i is trivially satisfied 
                     } else {
-                        intervals = restr.getDoubleIntervals();
+                        intervals = restr.getIntervals();
                     }
                 }
             } else {
                 Set<Interval> newIntervals = new HashSet<Interval>();
                 if (restr.isNegated()) {
                     for (Interval i : intervals) {
-                        for (Interval iNew : restr.getDoubleIntervals()) {
+                        for (Interval iNew : restr.getIntervals()) {
                             if (!iNew.isEmpty()) {
-                                if (iNew.getMin() > Double.MIN_VALUE) {
+                                if (iNew.getMin() > Long.MIN_VALUE) {
                                     Interval newInterval = i.getCopy();
-                                    double newMin = previousDouble(iNew.getMin());
-                                    newInterval.intersectWith(new Interval(Double.MIN_VALUE, newMin));
+                                    long newMin = iNew.getMin() - 1;
+                                    newInterval.intersectWith(new Interval(Long.MIN_VALUE, newMin));
                                     if (!newInterval.isEmpty()) {
                                         newIntervals.add(newInterval);
                                     }
                                 } 
-                                if (iNew.getMax() < Double.MAX_VALUE) {
+                                if (iNew.getMax() < Long.MAX_VALUE) {
                                     Interval newInterval = i.getCopy();
-                                    double newMax = nextDouble(iNew.getMax()); 
-                                    newInterval.intersectWith(new Interval(newMax, Double.MAX_VALUE));
+                                    long newMax = iNew.getMax() + 1; 
+                                    newInterval.intersectWith(new Interval(newMax, Long.MAX_VALUE));
                                     if (!newInterval.isEmpty()) {
                                         newIntervals.add(newInterval);
                                     }
@@ -238,7 +175,7 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
                     }
                 } else {
                     for (Interval i : intervals) {
-                        for (Interval iNew : restr.getDoubleIntervals()) {
+                        for (Interval iNew : restr.getIntervals()) {
                             i.intersectWith(iNew);
                             if (!i.isEmpty()) newIntervals.add(i);
                         }
@@ -257,15 +194,16 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
         if (!oneOf.isEmpty()) {
             return oneOf.contains(constant);
         }
-        double doubleValue = Double.parseDouble(constant.getValue());
+        if (notOneOf.contains(constant)) return false;
+        long longValue = Long.parseLong(constant.getValue());
         for (Interval i : intervals) {
-            if (i.contains(doubleValue) && !notOneOf.contains(constant)) {
+            if (i.contains(longValue)) {
                 return true;
             }
         }
         return false; 
     }
-
+    
     public boolean hasMinCardinality(BigInteger n) {
         if (isNegated || n.compareTo(BigInteger.ZERO) <= 0) return true;
         if (isFinite()) {
@@ -277,7 +215,7 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
                 rangeSize = rangeSize.add(i.getCardinality());
             }
             for (DataConstant constant : notOneOf) {
-                double not = Double.parseDouble(constant.getValue());
+                long not = Long.parseLong(constant.getValue());
                 for (Interval i : intervals) {
                     if (i.contains(not)) {
                         rangeSize = rangeSize.subtract(BigInteger.ONE);
@@ -298,7 +236,7 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
             rangeSize = rangeSize.add(i.getCardinality());
         }
         for (DataConstant constant : notOneOf) {
-            double not = Double.parseDouble(constant.getValue());
+            long not = Long.parseLong(constant.getValue());
             for (Interval i : intervals) {
                 if (i.contains(not)) {
                     rangeSize = rangeSize.subtract(BigInteger.ONE);
@@ -317,18 +255,18 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
             SortedSet<Interval> sortedIntervals = new TreeSet<Interval>(IntervalComparator.INSTANCE);
             sortedIntervals.addAll(intervals);
             for (Interval i : sortedIntervals) {
-                double constant = i.getMin();
+                long constant = i.getMin();
                 while (constant <= i.getMax()) {
                     DataConstant dataConstant = new DataConstant(datatypeURI, "" + constant);
                     if (!notOneOf.contains(dataConstant)) return dataConstant;
-                    constant = nextDouble(constant); 
+                    constant++;
                 }
             }
         }
         return null;
     }
     
-    public Set<Interval> getDoubleIntervals() {
+    public Set<Interval> getIntervals() {
         return intervals;
     }
     
@@ -350,23 +288,34 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
     
     public boolean datatypeAccepts(DataConstant constant) {
         Set<URI> supportedDTs = new HashSet<URI>();
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "double"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "float"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "integer"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "nonNegativeInteger"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "nonPositiveInteger"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "positiveInteger"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "negativeInteger"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "long"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "int"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "short"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "byte"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedLong"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedInt"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedShort"));
+        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedByte"));
         return supportedDTs.contains(constant.getDatatypeURI());
     }
     
     
     public class Interval {
-        double min = Double.MIN_VALUE;
-        double max = Double.MAX_VALUE;
+        long min = Long.MIN_VALUE;
+        long max = Long.MAX_VALUE;
         
         public Interval() {
             super();
         }
         
-        public Interval(double minInclusive, double maxInclusive) {
-            this.min = minInclusive;
-            this.max = maxInclusive;
+        public Interval(long min, long max) {
+            this.min = min;
+            this.max = max;
         }
         
         public Interval getCopy() {
@@ -383,107 +332,47 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
         }
         
         public boolean isEmpty() {
-            return (min > max);
+            return min > max;
         }
         
-        protected boolean isEmpty(double lower, double upper) {
-            return (lower > upper);
+        protected boolean isEmpty(long lower, long upper) {
+            return lower > upper;
         }
         
         public boolean isFinite() {
             return true;
         }
         
-        public boolean contains(double integer) {
-            return (min <= integer) && (max >= integer);
+        public boolean contains(long integer) {
+            return min <= integer && max >= integer;
         }
         
-        public boolean contains(Interval interval) {
-            return contains(interval.getMin()) 
-                    && contains(interval.getMax());
+        public boolean contains(Interval i) {
+            return contains(i.getMin()) && contains(i.getMax());
         }
         
-        public boolean disjointWith(Interval interval) {
-            return (min >= interval.getMax() || max <= interval.getMin());
+        public boolean disjointWith(Interval i) {
+            return min >= i.getMax() || max <= i.getMin();
         }
         
         public BigInteger getCardinality() {
             if (max < min) return BigInteger.ZERO;
-            // Extract the sign and magnitude from 'start'
-            long bitsStart  = Double.doubleToRawLongBits(min);
-            long bitsEnd = Double.doubleToRawLongBits(max);
-            if (isNaN(bitsStart) || isNaN(bitsEnd)) {
-                return BigInteger.ZERO;
-            }
-            boolean positiveStart = ((bitsStart & 0x8000000000000000l) == 0);
-            boolean positiveEnd = ((bitsEnd & 0x8000000000000000l) == 0);
-            long magnitudeStart = bitsStart & 0x7fffffffffffffffl;
-            long magnitudeEnd = bitsEnd & 0x7fffffffffffffffl;
-            
-            // Now determine the number of elements. This works even if either 
-            // of 'start' and 'end' is +inf or -inf.
-            if (positiveStart && positiveEnd) {
-                return new BigInteger("" + (magnitudeEnd - magnitudeStart + 1));
-            } else if (!positiveStart && !positiveEnd) {
-                return new BigInteger("" + (magnitudeStart - magnitudeEnd + 1));
-            } else if (!positiveStart && positiveEnd) {
-                // the number of values from 'start' to -0
-                BigInteger rangeSize = new BigInteger("" + (magnitudeStart + 1));
-                // the number of values from +0 to 'end'
-                rangeSize = rangeSize.add(new BigInteger("" + (magnitudeEnd + 1)));
-                return rangeSize;   
-            } else {
-                // if (positiveStart && !positiveEnd)
-                return BigInteger.ZERO;
-            }
+            return new BigInteger("" + max).subtract(new BigInteger("" + min)).add(BigInteger.ONE);
         }
 
-        protected boolean isNaN(long bits) {
-            return ((bits & 0x7f80000000000000l) == 0x7f80000000000000l) 
-                    && ((bits & 0x003fffffffffffffl) != 0);
-        }
-        
-        public boolean increaseMin() {
-            long bits = Double.doubleToRawLongBits(min);
-            long magnitude = (long)(bits & 0x7fffffffffffffffl);
-            // NaN or +inf -> no successor
-            if (isNaN(bits) || magnitude == 0x7f80000000000000l) {
-                return false;
-            } else {
-                boolean positive = ((bits & 0x8000000000000000l) == 0);
-                boolean newPositive;
-                long newMagnitude;
-                if (positive) {
-                    newPositive = true;
-                    newMagnitude = magnitude + 1;
-                } else if (!positive && magnitude == 0) {
-                    // The successor of -0 is +0
-                    newPositive = true;
-                    newMagnitude = 0;
-                } else { // if (!positive && magnitude!=0)
-                    newPositive = false;
-                    newMagnitude = magnitude - 1;
-                }
-                long newBits = newMagnitude | (newPositive ? 0 : 0x8000000000000000l);
-                double oldMin = min;
-                min = Double.longBitsToDouble(newBits);
-                return min != oldMin;
-            }
-        }
-        
-        public double getMin() {
+        public long getMin() {
             return min;
         }
 
-        public void setMin(double min) {
+        public void setMin(long min) {
             this.min = min;
         }
 
-        public double getMax() {
+        public long getMax() {
             return max;
         }
 
-        public void setMaxIncl(double max) {
+        public void setMaxIncl(long max) {
             this.max = max;
         }
         

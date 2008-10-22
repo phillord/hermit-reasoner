@@ -165,27 +165,24 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
         return patternMatcher.run(constant.getValue());
     }
     
-    public boolean hasMinCardinality(int n) {
-        if (n == 0) return true;
+    public boolean hasMinCardinality(BigInteger n) {
+        if (n.compareTo(BigInteger.ZERO) == 0) return true;
         if (isFinite()) {
             if (!oneOf.isEmpty()) {
-                return (oneOf.size() >= n);
+                return n.compareTo(new BigInteger("" + oneOf.size())) >= 0;
             }
             compileAllFacetsIntoPattern();
-            return (null == patternMatcher.getFiniteStrings(n - 1));
+            return (null == patternMatcher.getFiniteStrings(n.intValue() - 1));
         }
         return true;
     }
     
     public BigInteger getEnumerationSize() {
-        if (isFinite()) {
-            if (!oneOf.isEmpty()) {
-                return new BigInteger("" + oneOf.size());
-            }
-            compileAllFacetsIntoPattern();
-            return new BigInteger("" + patternMatcher.getFiniteStrings().size());
-        } 
-        return null;
+        if (!oneOf.isEmpty()) {
+            return new BigInteger("" + oneOf.size());
+        }
+        compileAllFacetsIntoPattern();
+        return new BigInteger("" + patternMatcher.getFiniteStrings().size());
     }
     
     public DataConstant getSmallestAssignment() {

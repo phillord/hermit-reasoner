@@ -40,8 +40,10 @@ import org.semanticweb.HermiT.model.dataranges.DataConstant;
 import org.semanticweb.HermiT.model.dataranges.DataRange;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionBoolean;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionDateTime;
+import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionDateTimeFin;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionDouble;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionInteger;
+import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionIntegerFin;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionLiteral;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionOWLRealPlus;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionString;
@@ -109,11 +111,13 @@ public class OwlClausification {
     public OWLDataFactory factory;
     private OwlNormalization normalization;
     private int amqOffset; // the number of negative at-most replacements already performed
+    protected boolean onlyCoreDatatypes;
     
     public OwlClausification(OWLDataFactory factory) {
         this.factory = factory;
         normalization = new OwlNormalization(factory);
         amqOffset = 0;
+        onlyCoreDatatypes = true;
     }
 
     public DLOntology clausify(Reasoner.Configuration config, OWLOntology ontology,
@@ -201,6 +205,7 @@ public class OwlClausification {
             Set<OWLIndividual> individuals,
             Set<OWLDataProperty> dataProperties,
             Set<OWLObjectProperty> objectProperties) {
+        onlyCoreDatatypes = config.onlyCoreDatatypes;
         DetermineExpressivity determineExpressivity = new DetermineExpressivity();
         for (OWLDescription[] inclusion : conceptInclusions)
             for (OWLDescription description : inclusion)
@@ -304,7 +309,7 @@ public class OwlClausification {
             shouldUseNIRule = true;
         }
         Clausifier clausifier = new Clausifier(positiveFacts, shouldUseNIRule,
-                factory, amqOffset);
+                factory, amqOffset, onlyCoreDatatypes);
         for (OWLDescription[] inclusion : conceptInclusions) {
             for (OWLDescription description : inclusion)
                 description.accept(clausifier);
@@ -364,7 +369,7 @@ public class OwlClausification {
         OWLClass outClass = normalization.define(desc, inclusions, assertions);
         
         Clausifier clausifier = new Clausifier(outPositiveFacts, true,
-                factory, amqOffset);
+                factory, amqOffset, onlyCoreDatatypes);
         for (OWLDescription[] inclusion : inclusions) {
             for (OWLDescription description : inclusion) {
                 description.accept(clausifier);
@@ -487,13 +492,16 @@ public class OwlClausification {
         protected final Set<AtMostAbstractRoleGuard> m_atMostRoleGuards;
         protected final Set<Atom> m_positiveFacts;
         protected final boolean m_renameAtMost;
+        protected final boolean onlyCoreDatatypes;
         protected int m_yIndex;
         protected final OWLDataFactory m_factory;
 
         public Clausifier(Set<Atom> positiveFacts, boolean renameAtMost,
-                OWLDataFactory factory, int amqOffset) {
+                OWLDataFactory factory, int amqOffset, 
+                boolean onlyCoreDatatypes) {
             m_negativeAtMostReplacements = new HashMap<AtomicConcept, AtomicConcept>();
             this.amqOffset = amqOffset;
+            this.onlyCoreDatatypes = onlyCoreDatatypes;
             m_headAtoms = new ArrayList<Atom>();
             m_bodyAtoms = new ArrayList<Atom>();
             m_atMostRoleGuards = new HashSet<AtMostAbstractRoleGuard>();
@@ -547,7 +555,7 @@ public class OwlClausification {
         public void visit(OWLDataAllRestriction desc) {
             org.semanticweb.HermiT.model.Variable y = nextY();
             m_bodyAtoms.add(getDataPropertyAtom(desc.getProperty(), X, y));
-            DataVisitor dataVisitor = new DataVisitor();
+            DataVisitor dataVisitor = new DataVisitor(onlyCoreDatatypes);
             desc.getFiller().accept(dataVisitor);
             if (!dataVisitor.getDataRange().isBottom()) {
                 m_headAtoms.add(Atom.create(dataVisitor.getDataRange(),
@@ -558,7 +566,7 @@ public class OwlClausification {
         public void visit(OWLDataSomeRestriction desc) {
             OWLDataProperty dp = (OWLDataProperty) desc.getProperty();
             AtomicRole property = AtomicRole.createDataRole(dp.getURI().toString());
-            DataVisitor dataVisitor = new DataVisitor();
+            DataVisitor dataVisitor = new DataVisitor(onlyCoreDatatypes);
             desc.getFiller().accept(dataVisitor);
             m_headAtoms.add(Atom.create(AtLeastConcreteRoleConcept.create(1, property,
                     dataVisitor.getDataRange()),
@@ -573,7 +581,7 @@ public class OwlClausification {
         public void visit(OWLDataMaxCardinalityRestriction desc) {
             int number = desc.getCardinality();
             OWLDataProperty dp = (OWLDataProperty) desc.getProperty();
-            DataVisitor dataVisitor = new DataVisitor();
+            DataVisitor dataVisitor = new DataVisitor(onlyCoreDatatypes);
             dataVisitor.negate();
             desc.getFiller().accept(dataVisitor);
             ensureYNotZero();
@@ -599,7 +607,7 @@ public class OwlClausification {
             int number = desc.getCardinality();
             OWLDataProperty dp = (OWLDataProperty) desc.getProperty();
             AtomicRole property = AtomicRole.createDataRole(dp.getURI().toString());
-            DataVisitor dataVisitor = new DataVisitor();
+            DataVisitor dataVisitor = new DataVisitor(onlyCoreDatatypes);
             desc.getFiller().accept(dataVisitor);
             m_headAtoms.add(Atom.create(
                     AtLeastConcreteRoleConcept.create(
@@ -888,7 +896,13 @@ public class OwlClausification {
         protected static OWLDataType owlRealPlusDataType = factory.getOWLDataType(URI.create(Namespaces.OWL + "realPlus"));
         
         protected boolean isNegated = false;
+        protected boolean onlyCoreDatatypes = true;
         protected DataRange currentDataRange;
+        
+        public DataVisitor(boolean onlyCoreDatatypes) {
+            super();
+            this.onlyCoreDatatypes = onlyCoreDatatypes;
+        }
         
         public void visit(OWLDataComplementOf dataComplementOf) {
             OWLDataRange range = dataComplementOf.getDataRange();
@@ -1129,7 +1143,7 @@ public class OwlClausification {
             } else if (owlDateTimeDataType.equals(dataType) 
                     || dateTimeDataType.equals(dataType)) {
                 try {
-                    DatatypeRestrictionDateTime.dfm.parse(typedConstant.getLiteral());
+                    DatatypeRestrictionDateTimeFin.dfm.parse(typedConstant.getLiteral());
                     currentDataRange.addOneOf(new DataConstant(dateTimeDataType.getURI(), typedConstant.getLiteral()));
                 } catch (ParseException e) {
                     throw new RuntimeException("The constant " + typedConstant + " is supposed to be a dateTime datatype, but has an invalid format that cannot be parsed. ");
@@ -1139,12 +1153,26 @@ public class OwlClausification {
             }
         }
         
+        protected DataRange getIntegerDataRange(URI uri) {
+            if (onlyCoreDatatypes) {
+                return new DatatypeRestrictionIntegerFin(uri);
+            } else {
+                return new DatatypeRestrictionInteger(uri);
+            }
+        }
+        
+        protected DataRange getDateTimeDataRange(URI uri) {
+            if (onlyCoreDatatypes) {
+                return new DatatypeRestrictionDateTimeFin(uri);
+            } else {
+                return new DatatypeRestrictionDateTime(uri);
+            }
+        }
+        
         public void visit(OWLDataType dataType) {
             if (owlRealPlusDataType.equals(dataType)) {
                 currentDataRange = new DatatypeRestrictionOWLRealPlus(decimalDataType.getURI(), true); 
-            } else if (owlRealDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionOWLRealPlus(decimalDataType.getURI(), false); 
-            } else if (decimalDataType.equals(dataType)) {
+            } else if (owlRealDataType.equals(dataType) || decimalDataType.equals(dataType)) {
                 currentDataRange = new DatatypeRestrictionOWLRealPlus(decimalDataType.getURI(), false); 
             } else if (doubleDataType.equals(dataType)) {
                 currentDataRange = new DatatypeRestrictionDouble(doubleDataType.getURI()); 
@@ -1153,49 +1181,49 @@ public class OwlClausification {
                 currentDataRange.addFacet(Facets.MIN_INCLUSIVE, new String("" + Float.MIN_VALUE));
                 currentDataRange.addFacet(Facets.MAX_INCLUSIVE, new String("" + Float.MAX_VALUE));
             } else if (integerDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionInteger(integerDataType.getURI()); 
+                currentDataRange = getIntegerDataRange(integerDataType.getURI()); 
             } else if (nonNegatedIntegerDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionInteger(nonNegatedIntegerDataType.getURI());
+                currentDataRange = getIntegerDataRange(nonNegatedIntegerDataType.getURI());
                 currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "0");
             } else if (nonPositiveIntegerDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionInteger(nonPositiveIntegerDataType.getURI());
+                currentDataRange = getIntegerDataRange(nonPositiveIntegerDataType.getURI());
                 currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "0");
             } else if (positiveIntegerDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionInteger(positiveIntegerDataType.getURI());
+                currentDataRange = getIntegerDataRange(positiveIntegerDataType.getURI());
                 currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "1");
             } else if (negativeIntegerDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionInteger(negativeIntegerDataType.getURI());
+                currentDataRange = getIntegerDataRange(negativeIntegerDataType.getURI());
                 currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "-1");
             } else if (longDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionInteger(longDataType.getURI());
+                currentDataRange = getIntegerDataRange(longDataType.getURI());
                 currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + Long.MAX_VALUE);
                 currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "" + Long.MIN_VALUE); 
             } else if (intDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionInteger(intDataType.getURI());
+                currentDataRange = getIntegerDataRange(intDataType.getURI());
                 currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + Integer.MAX_VALUE);
                 currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "" + Integer.MIN_VALUE);
             } else if (shortDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionInteger(shortDataType.getURI());
+                currentDataRange = getIntegerDataRange(shortDataType.getURI());
                 currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + Short.MAX_VALUE);
                 currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "" + Short.MIN_VALUE);
             } else if (byteDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionInteger(byteDataType.getURI());
+                currentDataRange = getIntegerDataRange(byteDataType.getURI());
                 currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + Byte.MAX_VALUE);
                 currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "" + Byte.MIN_VALUE);
             } else if (unsignedLongDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionInteger(unsignedLongDataType.getURI());
+                currentDataRange = getIntegerDataRange(unsignedLongDataType.getURI());
                 currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + (new BigInteger("" + Long.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
                 currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "0");
             } else if (unsignedIntDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionInteger(unsignedIntDataType.getURI());
+                currentDataRange = getIntegerDataRange(unsignedIntDataType.getURI());
                 currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + (new BigInteger("" + Integer.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
                 currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "0");
             } else if (unsignedShortDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionInteger(unsignedShortDataType.getURI());
+                currentDataRange = getIntegerDataRange(unsignedShortDataType.getURI());
                 currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + (new BigInteger("" + Short.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
                 currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "0");
             } else if (unsignedByteDataType.equals(dataType)) {
-                currentDataRange = new DatatypeRestrictionInteger(unsignedByteDataType.getURI());
+                currentDataRange = getIntegerDataRange(unsignedByteDataType.getURI());
                 currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + (new BigInteger("" + Byte.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
                 currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "0");
             } else if (stringDataType.equals(dataType)) {
@@ -1206,7 +1234,7 @@ public class OwlClausification {
                 currentDataRange = new DatatypeRestrictionBoolean(booleanDataType.getURI());
             } else if (owlDateTimeDataType.equals(dataType) 
                     || dateTimeDataType.equals(dataType)) {
-                currentDataRange =  new DatatypeRestrictionDateTime(owlDateTimeDataType.getURI());
+                currentDataRange =  getDateTimeDataRange(owlDateTimeDataType.getURI());
             } else {
                 throw new RuntimeException("Unsupported datatype.");
             }

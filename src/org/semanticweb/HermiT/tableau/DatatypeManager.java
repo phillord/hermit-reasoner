@@ -1,5 +1,6 @@
 package org.semanticweb.HermiT.tableau;
 
+import java.math.BigInteger;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,8 +19,8 @@ import org.semanticweb.HermiT.model.dataranges.CanonicalDataRange;
 import org.semanticweb.HermiT.model.dataranges.DataConstant;
 import org.semanticweb.HermiT.model.dataranges.DataRange;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionBoolean;
-import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionDateTime;
-import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionInteger;
+import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionDateTimeFin;
+import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionIntegerFin;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionLiteral;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionOWLRealPlus;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionString;
@@ -388,12 +389,12 @@ public class DatatypeManager {
                         || uris.contains(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "decimal"))) {
                     forbiddenConstants.addAll(DataConstant.numericSpecials);
                 }
-            } else if (DatatypeRestrictionInteger.canHandleAll(uris)) {
-                canonicalDR = new DatatypeRestrictionInteger(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "integer"));
+            } else if (DatatypeRestrictionIntegerFin.canHandleAll(uris)) {
+                canonicalDR = new DatatypeRestrictionIntegerFin(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "integer"));
             } else if (DatatypeRestrictionBoolean.canHandleAll(uris)) {
-                canonicalDR = new DatatypeRestrictionInteger(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "boolean"));
-            } else if (DatatypeRestrictionDateTime.canHandleAll(uris)) {
-                canonicalDR = new DatatypeRestrictionDateTime(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "dateTime"));
+                canonicalDR = new DatatypeRestrictionIntegerFin(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "boolean"));
+            } else if (DatatypeRestrictionDateTimeFin.canHandleAll(uris)) {
+                canonicalDR = new DatatypeRestrictionDateTimeFin(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "dateTime"));
             } else if (DatatypeRestrictionString.canHandleAll(uris)) {
                 canonicalDR = new DatatypeRestrictionString(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "string"));
             } else if (DatatypeRestrictionLiteral.canHandleAll(uris)) {
@@ -466,7 +467,7 @@ public class DatatypeManager {
                 if (inequalitiesSym.get(node) != null) {
                     numInequalNodes += inequalitiesSym.get(node).size();
                 }
-                if (canonicalRange.hasMinCardinality(numInequalNodes + 1)) {
+                if (canonicalRange.hasMinCardinality(new BigInteger("" + (numInequalNodes + 1)))) {
                     removableNodes.add(node);
                     containedRemovable = true;
                 }
@@ -655,7 +656,14 @@ public class DatatypeManager {
     protected static class SetLengthComparator implements Comparator<CanonicalDataRange> { 
         public static Comparator<CanonicalDataRange> INSTANCE = new SetLengthComparator();
         public int compare(CanonicalDataRange dr1, CanonicalDataRange dr2) {
-            return dr1.getEnumerationSize().subtract(dr2.getEnumerationSize()).intValue(); 
+            if (dr1.isFinite() && dr2.isFinite()) {
+                BigInteger size1 = dr1.getEnumerationSize();
+                BigInteger size2 = dr2.getEnumerationSize();
+                if (size1.equals(size2)) return 0;
+                return (size1.compareTo(size2) > 0) ? 1 : -1; 
+            } else {
+                return 0;
+            }
         }
     }
 }
