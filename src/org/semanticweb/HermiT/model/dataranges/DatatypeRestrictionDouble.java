@@ -58,7 +58,7 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
                 if (valueDec.compareTo(bd) < 0 
                         || (valueDec.compareTo(bd) == 0 
                                 && facet == Facets.MIN_EXCLUSIVE)) {
-                    if (d < Double.MAX_VALUE) d += Double.MIN_NORMAL;
+                    //if (d < Double.MAX_VALUE) d += Double.MIN_NORMAL;
                     valueDec = new BigDecimal("" + d);
                 }
             } else {
@@ -66,7 +66,7 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
                 if (valueDec.compareTo(bd) > 0 
                         || (valueDec.compareTo(bd) == 0 
                                 && facet == Facets.MAX_EXCLUSIVE)) {
-                    if (d > Double.MIN_VALUE) d -= Double.MIN_NORMAL;
+                    //if (d > Double.MIN_VALUE) d -= Double.MIN_NORMAL;
                     valueDec = new BigDecimal("" + d);
                 }
             }
@@ -170,8 +170,8 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
                                 if (iNew.getMin() != null) {
                                     DoubleInterval newInterval = i.getCopy();
                                     BigDecimal newMin = iNew.getMin(); 
-                                    if (newMin.compareTo(new BigDecimal("" + Double.MIN_VALUE)) > 0) {
-                                        newMin = newMin.subtract(new BigDecimal("" + Double.MIN_NORMAL));
+                                    if (newMin.compareTo(new BigDecimal("" + 0.01)) > 0) {//Double.MIN_VALUE
+                                        newMin = newMin.subtract(new BigDecimal("" + 0.01)); //Double.MIN_NORMAL
                                         newInterval.intersectWith(new DoubleInterval(null, newMin));
                                         if (!newInterval.isEmpty()) {
                                             newIntervals.add(newInterval);
@@ -181,8 +181,8 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
                                 if (iNew.getMax() != null) {
                                     DoubleInterval newInterval = i.getCopy();
                                     BigDecimal newMax = iNew.getMax(); 
-                                    if (newMax.compareTo(new BigDecimal("" + Double.MAX_VALUE)) < 0) {
-                                        newMax = newMax.add(new BigDecimal("" + Double.MIN_NORMAL));
+                                    if (newMax.compareTo(new BigDecimal("" + 0.01)) < 0) {//Double.MAX_VALUE
+                                        newMax = newMax.add(new BigDecimal("" + 0.01));//Double.MIN_NORMAL
                                         newInterval.intersectWith(new DoubleInterval(newMax, null));
                                         if (!newInterval.isEmpty()) {
                                             newIntervals.add(newInterval);
@@ -283,7 +283,7 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
                 while (constant.compareTo(i.getMax()) <= 0) {
                     DataConstant dataConstant = new DataConstant(datatypeURI, "" + constant);
                     if (!notOneOf.contains(dataConstant)) return dataConstant;
-                    constant = constant.add(new BigDecimal("" + Double.MIN_NORMAL));
+                    constant = constant.add(new BigDecimal("" + 0.01));//Double.MIN_NORMAL
                 }
             }
         }
