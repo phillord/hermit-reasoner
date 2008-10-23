@@ -355,12 +355,16 @@ public class Reasoner implements Serializable {
                     newNodes.get(oldNode.getRepresentative());
                 for (SubsumptionHierarchyNode parent
                         : oldNode.getParentNodes()) {
+                    assert parent != oldHierarchy.nothingNode() :
+                        "Nothing never has any children!";
                     newNode.parents.add(
                         newNodes.get(parent.getRepresentative())
                     );
                 }
                 for (SubsumptionHierarchyNode child
                         : oldNode.getChildNodes()) {
+                    assert child != oldHierarchy.thingNode() :
+                        "Thing never has any parents!";
                     newNode.children.add(
                         newNodes.get(child.getRepresentative())
                     );

@@ -70,6 +70,10 @@ public class StandardClassificationManager {
         SubsumptionHierarchyNode newNode=m_subsumptionHierarchy.getNodeForEx(atomicConcept);
         for (int topIndex=0;topIndex<m_topSet.size();topIndex++) {
             SubsumptionHierarchyNode topNode=m_topSet.get(topIndex);
+            assert newNode != m_subsumptionHierarchy.thingNode()
+                : "Thing can't have parents!";
+            assert topNode != m_subsumptionHierarchy.nothingNode()
+                : "Nothing can't be a parent";
             for (int bottomIndex=0;bottomIndex<m_bottomSet.size();bottomIndex++)
                 topNode.m_childNodes.remove(m_bottomSet.get(bottomIndex));
             topNode.m_childNodes.add(newNode);
@@ -77,6 +81,10 @@ public class StandardClassificationManager {
         }
         for (int bottomIndex=0;bottomIndex<m_bottomSet.size();bottomIndex++) {
             SubsumptionHierarchyNode bottomNode=m_bottomSet.get(bottomIndex);
+            assert newNode != m_subsumptionHierarchy.nothingNode()
+                : "Nothing can't have children";
+            assert bottomNode != m_subsumptionHierarchy.thingNode()
+                : "Thing can't be a child";
             for (int topIndex=0;topIndex<m_topSet.size();topIndex++)
                 bottomNode.m_parentNodes.remove(m_topSet.get(topIndex));
             bottomNode.m_parentNodes.add(newNode);

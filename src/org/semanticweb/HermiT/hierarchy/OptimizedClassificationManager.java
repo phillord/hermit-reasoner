@@ -41,12 +41,16 @@ public class OptimizedClassificationManager {
                 findSCCsStartingFrom(node);
         }
         for (SubsumptionHierarchyNode subsumptionHierarchyNode : m_subsumptionHierarchy.m_atomicConceptsToNodes.values()) {
-            if (subsumptionHierarchyNode.m_parentNodes.isEmpty()) {
+            if (subsumptionHierarchyNode.m_parentNodes.isEmpty() &&
+                subsumptionHierarchyNode != m_subsumptionHierarchy.thingNode()) {
                 subsumptionHierarchyNode.m_parentNodes.add(m_subsumptionHierarchy.m_thingNode);
+                m_subsumptionHierarchy.m_thingNode.m_childNodes.remove(m_subsumptionHierarchy.nothingNode());
                 m_subsumptionHierarchy.m_thingNode.m_childNodes.add(subsumptionHierarchyNode);
             }
-            if (subsumptionHierarchyNode.m_childNodes.isEmpty()) {
+            if (subsumptionHierarchyNode.m_childNodes.isEmpty() &&
+                subsumptionHierarchyNode != m_subsumptionHierarchy.nothingNode()) {
                 subsumptionHierarchyNode.m_childNodes.add(m_subsumptionHierarchy.m_nothingNode);
+                m_subsumptionHierarchy.m_nothingNode.m_parentNodes.remove(m_subsumptionHierarchy.thingNode());
                 m_subsumptionHierarchy.m_nothingNode.m_parentNodes.add(subsumptionHierarchyNode);
             }
         }

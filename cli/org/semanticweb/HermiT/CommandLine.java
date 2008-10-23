@@ -216,6 +216,7 @@ public class CommandLine {
             status.log(2, "classifying...");
             hermit.seedSubsumptionCache();
             if (file != null) {
+                status.log(2, "writing taxonomy to " + file);
                 if (file.equals("-")) {
                     output = new PrintWriter(System.out);
                 } else {

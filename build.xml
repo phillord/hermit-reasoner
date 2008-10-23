@@ -96,7 +96,7 @@
 
     <target name="compile">
         <mkdir dir="${classdir}"/>
-        <javac destdir="${classdir}" deprecation="yes" debug="off">
+        <javac destdir="${classdir}" deprecation="yes" debug="on">
             <compilerarg value="-Xlint:unchecked"/>
             <compilerarg value="-Xlint:all"/>
             <compilerarg value="-Xlint:-serial"/>
