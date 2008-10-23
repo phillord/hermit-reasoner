@@ -1,19 +1,23 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT;
 
-import gnu.getopt.LongOpt;
 import gnu.getopt.Getopt;
+import gnu.getopt.LongOpt;
 
 import java.io.PrintWriter;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.text.BreakIterator;
-
 import java.net.URI;
-import java.util.Map;
+import java.text.BreakIterator;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
+import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.monitor.Timer;
 
 public class CommandLine {
@@ -322,6 +326,75 @@ public class CommandLine {
             }
         }
     }
+    
+    static protected class AllSubsumptionsAction implements Action {
+        
+        public void run(Reasoner hermit,
+                        Namespaces namespaces,
+                        StatusOutput status,
+                        PrintWriter output) {
+            Set<String> conceptsToProcess = new HashSet<String>();
+            Set<String> conceptsDone = new HashSet<String>();
+            SortedSet<String> implications = new TreeSet<String>();
+            HierarchyPosition<String> pos;
+            pos  = hermit.getClassTaxonomyPosition(
+                    namespaces.uriFromId(AtomicConcept.THING.toString())
+            );
+            for (HierarchyPosition<String> subPos : pos.getChildPositions()) {
+                SortedSet<String> equals = new TreeSet<String>(subPos.getEquivalents());
+                String canonical;
+                if (equals.contains(AtomicConcept.NOTHING.getURI())) {
+                    canonical = AtomicConcept.NOTHING.getURI().toString();
+                } else if (!equals.contains(AtomicConcept.THING.getURI())) {
+                    canonical = equals.first();
+                    conceptsToProcess.add(canonical);                    
+                } else {
+                    System.out.println("Found OWL:THING.");
+                    canonical = null;
+                }
+                equals.remove(canonical);
+                for (String equal : equals) {
+                    implications.add("(equivalent " 
+                            + namespaces.idFromUri(canonical) + " " 
+                            + namespaces.idFromUri(equal) + ")");
+                }
+            }
+            String superConcept;
+            while (!conceptsToProcess.isEmpty()) {
+                superConcept = conceptsToProcess.iterator().next();
+                conceptsDone.add(superConcept);
+                conceptsToProcess.remove(superConcept);
+                pos  = hermit.getClassTaxonomyPosition(superConcept);
+                for (HierarchyPosition<String> subPos : pos.getChildPositions()) {
+                    SortedSet<String> equals = new TreeSet<String>(subPos.getEquivalents());
+                    String canonical = equals.first();
+                    if (!conceptsDone.contains(canonical)) {
+                        if (equals.contains(AtomicConcept.NOTHING.getURI().toString())) {
+                            canonical = AtomicConcept.NOTHING.getURI().toString();
+                            equals.remove(canonical);
+                            for (String equal : equals) {
+                                implications.add("(equivalent " 
+                                        + namespaces.idFromUri(canonical) + " " 
+                                        + namespaces.idFromUri(equal) + ")");
+                            }
+                        } else {
+                            equals.remove(canonical);
+                            conceptsToProcess.add(canonical);
+                            implications.add("(implies " 
+                                    + namespaces.idFromUri(canonical) + " " 
+                                    + namespaces.idFromUri(superConcept) + ")");
+                        }
+                    } else {
+                        System.out.println("Ups, we shouldn't be here. I blame Rob...");
+                        System.out.println("This is what we processed: " + canonical);
+                    }
+                }
+            }
+            for (String implication : implications) {
+                output.println(implication);
+            }
+        }
+    }
 
     static protected class EquivalentsAction implements Action {
         final String conceptName;
@@ -406,6 +479,8 @@ public class CommandLine {
                     "output classes subsuming CLASS (or only direct supers if following --direct)"),
         new Option('e', "equivalents", kActions, true, "CLASS",
                     "output classes equivalent to CLASS"),
+        new Option('a', "allSubs", kActions, false, "CLASS",
+                    "output each class name with its direct subclasses"),
         new Option('U', "unsatisfiable", kActions,
                     "output unsatisfiable classes (equivalent to --equivalents=owl:Nothing)"),
         new Option(kDumpNamespaces, "print-namespaces", kActions,
@@ -551,6 +626,9 @@ public class CommandLine {
                     case 'e': {
                         String arg = g.getOptarg();
                         actions.add(new EquivalentsAction(arg));
+                    } break;
+                    case 'a': {
+                        actions.add(new AllSubsumptionsAction());
                     } break;
                     case 'U': {
                         actions.add(new EquivalentsAction("<http://www.w3.org/2002/07/owl#Nothing>"));
