@@ -77,10 +77,8 @@ import org.semanticweb.owl.model.OWLDescription;
 import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
-import org.semanticweb.owl.model.OWLDescription;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLIndividual;
-import org.semanticweb.HermiT.hierarchy.StandardClassificationManager;
 
 /**
  * Answers queries about the logical implications of a particular knowledge base.
@@ -522,9 +520,8 @@ public class Reasoner implements Serializable {
                 Set<AtomicConcept> parents = p.getEquivalents();
                 if (parents.isEmpty()) {
                     parents = new HashSet<AtomicConcept>();
-                    for (HierarchyPosition<AtomicConcept> parentPos
-                            : p.getParentPositions()) {
-                        parents.addAll(p.getEquivalents());
+                    for (HierarchyPosition<AtomicConcept> parentPos : p.getParentPositions()) {
+                        parents.addAll(parentPos.getEquivalents());
                     }
                 }
                 for (AtomicConcept c : parents) {
