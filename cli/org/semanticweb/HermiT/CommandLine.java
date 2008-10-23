@@ -673,7 +673,7 @@ public class CommandLine {
                     for (Action action : actions) {
                         status.log(2, "Doing action...");
                         startTime = System.currentTimeMillis();
-                        action.run(hermit, hermit.getNamespaces(), status, output);
+                        action.run(hermit, namespaces, status, output);
                         long actionTime = System.currentTimeMillis() - startTime;
                         status.log(2, "...action completed in " + String.valueOf(actionTime) + " msec.");
                         output.flush(); 
