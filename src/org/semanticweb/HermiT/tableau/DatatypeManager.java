@@ -565,7 +565,7 @@ public class DatatypeManager {
         for (CanonicalDataRange currentRange : ranges) {
             currentNode = partition.get(currentRange);
             DataConstant assignment = currentRange.getSmallestAssignment();
-            System.out.println("DataRange " + currentRange + " of node " + currentNode + " got assigned " + assignment);
+            //System.out.println("DataRange " + currentRange + " of node " + currentNode + " got assigned " + assignment);
             if (assignment == null) {
                 // clash!
                 // collect the inequalities and the ranges that made up the 
@@ -646,7 +646,7 @@ public class DatatypeManager {
                 }
             }
         }
-        System.out.println("-----------------------");
+        //System.out.println("-----------------------");
         return true;
     }
     
