@@ -7,11 +7,12 @@ OWL features:
    integers, strings, booleans, 
    and facets                           Birte   DONE
    "full" OWL 2.0 datatype support      Birte   OPEN
+   getDataPropertyRelationships
  Role axioms
-   (Ir)Reflexivity                      Boris   DONE
+   (Ir)Reflexivity                              DONE
    Disjointness, antisymmetry, etc.             DONE
-   Role chains                          Rob     2008-10-01
-   Universal role                               2008-10-01
+   Role chains                          Rob     
+   Universal role                       Rob     
 
 Debugging and testing:
    Datatype test cases                          2008-10-15
@@ -19,17 +20,17 @@ Debugging and testing:
    test case cleanup                    Birte
 
 Packaging and interfaces:
-   Command-line interface                       DONE
-   Expressivity interrogation           Rob
-   Role hierarchy queries               Rob     2008-10-01
-   Simple ABox queries                  Rob     2008-10-01      Implemented (inefficiently)
-   Public Namespaces interface          Rob     2008-10-01      Implemented
-   OWL API complex concept queries      Rob     2008-10-01      Implemented
+   Command-line interface               Rob     DONE
+   Expressivity interrogation           
+   Role hierarchy queries               Rob     
+   Simple ABox queries                  Rob     DONE (inefficiently)
+   Public Namespaces interface          Rob     DONE
+   OWL API complex concept queries      Rob     DONE
 
 Protégé plug-in:
    Progress bar                         Rob     2008-10-01
    Plumb through remainder of API       Rob     2008-10-01
-   Configuration from env/file          Rob
+   Configuration from env/file          
 
 Supporting materials:
    javadoc for public API                       2008-10-15

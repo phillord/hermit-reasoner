@@ -129,20 +129,15 @@ public class HermitReasoner implements OWLReasoner {
         return hermit.isClassSatisfiable(d);
     }
     
-    // protected Set<Set<OWLClass>>
-    //     classSets(Set<HierarchyPosition<String>> positions) {
-    //     java.util.Set<java.util.Set<OWLClass>> r
-    //         = new java.util.HashSet<java.util.Set<OWLClass>>();
-    //     for (HierarchyPosition<String> pos : positions) {
-    //         java.util.Set<OWLClass> equivalents
-    //             = new java.util.HashSet<OWLClass>();
-    //         for (String s : pos.getEquivalents()) {
-    //             equivalents.add(factory.getOWLClass(URI.create(s)));
-    //         }
-    //         r.add(equivalents);
-    //     }
-    //     return r;        
-    // }
+    protected Set<Set<OWLClass>>
+        classSets(Set<HierarchyPosition<OWLClass>> positions) {
+        java.util.Set<java.util.Set<OWLClass>> r
+            = new java.util.HashSet<java.util.Set<OWLClass>>();
+        for (HierarchyPosition<OWLClass> pos : positions) {
+            r.add(pos.getEquivalents());
+        }
+        return r;        
+    }
 
     // ClassReasoner implementation:
     public java.util.Set<java.util.Set<OWLClass>>
@@ -156,74 +151,29 @@ public class HermitReasoner implements OWLReasoner {
     }
 
     public java.util.Set<OWLClass> getEquivalentClasses(OWLDescription d) {
-        if (d.isAnonymous()) {
-            throw new UnsupportedOperationException("Testing of anonymous classes is not yet supported.");
-        }
-        SubsumptionHierarchy hier = hermit.getSubsumptionHierarchy();
-        SubsumptionHierarchyNode node = hier.getNodeFor(
-            AtomicConcept.create(d.asOWLClass().getURI().toString()));
-        if (node == null) node = hier.thingNode();
-        
-        java.util.Set<OWLClass> r = new java.util.HashSet<OWLClass>();
-        for (AtomicConcept c : node.getEquivalentConcepts()) {
-            r.add(factory.getOWLClass(URI.create(c.getURI())));
-        }
-        return r;
+        return hermit.getPosition(d).getEquivalents();
     }
     
     public java.util.Set<OWLClass> getInconsistentClasses() {
-        SubsumptionHierarchyNode node = hermit.getSubsumptionHierarchy().nothingNode();        
-        java.util.Set<OWLClass> r = new java.util.HashSet<OWLClass>();
-        for (AtomicConcept c : node.getEquivalentConcepts()) {
-            r.add(factory.getOWLClass(URI.create(c.getURI())));
-        }
-        return r;
+        return getEquivalentClasses(
+            factory.getOWLClass(
+                URI.create("http://www.w3.org/2002/07/owl#Nothing")));
     }
     
     public java.util.Set<java.util.Set<OWLClass>> getSubClasses(OWLDescription d) {
-        if (d.isAnonymous()) {
-            throw new UnsupportedOperationException("Testing of anonymous classes is not yet supported.");
-        }
-        SubsumptionHierarchy hier = hermit.getSubsumptionHierarchy();
-        SubsumptionHierarchyNode node = hier.getNodeFor(
-            AtomicConcept.create(d.asOWLClass().getURI().toString()));
-        if (node == null) node = hier.thingNode();
-        
-        java.util.Set<java.util.Set<OWLClass>> r = new java.util.HashSet<java.util.Set<OWLClass>>();
-        for (SubsumptionHierarchyNode i : node.getChildNodes()) {
-            java.util.Set<OWLClass> equivalents = new java.util.HashSet<OWLClass>();
-            for (AtomicConcept c : i.getEquivalentConcepts()) {
-                equivalents.add(factory.getOWLClass(URI.create(c.getURI())));
-            }
-            r.add(equivalents);
-        }
-        return r;
+        return classSets(hermit.getPosition(d).getChildPositions());
     }
+    
     public java.util.Set<java.util.Set<OWLClass>> getSuperClasses(OWLDescription d) {
-        if (d.isAnonymous()) {
-            throw new UnsupportedOperationException("Testing of anonymous classes is not yet supported.");
-        }
-        SubsumptionHierarchy hier = hermit.getSubsumptionHierarchy();
-        SubsumptionHierarchyNode node = hier.getNodeFor(
-            AtomicConcept.create(d.asOWLClass().getURI().toString()));
-        if (node == null) node = hier.thingNode();
-        
-        java.util.Set<java.util.Set<OWLClass>> r = new java.util.HashSet<java.util.Set<OWLClass>>();
-        for (SubsumptionHierarchyNode i : node.getParentNodes()) {
-            java.util.Set<OWLClass> equivalents = new java.util.HashSet<OWLClass>();
-            for (AtomicConcept c : i.getEquivalentConcepts()) {
-                equivalents.add(factory.getOWLClass(URI.create(c.getURI())));
-            }
-            r.add(equivalents);
-        }
-        return r;
+        return classSets(hermit.getPosition(d).getParentPositions());
     }
+    
+
     public boolean isEquivalentClass(OWLDescription c, OWLDescription d) {
         return isSubClassOf(c, d) && isSubClassOf(d, c);
     }
     public boolean isSubClassOf(OWLDescription subclass, OWLDescription superclass) {
-        return hermit.isClassSubsumedBy(subclass.asOWLClass().getURI().toString(),
-                                        superclass.asOWLClass().getURI().toString());
+        return hermit.isSubsumedBy(subclass, superclass);
     }
     
     // ConsistencyChecker implementation:
@@ -231,25 +181,44 @@ public class HermitReasoner implements OWLReasoner {
         return hermit.isConsistent();
     }
     
-    // IndividualReasoner stubs: (not yet implemented)
+    // IndividualReasoner stubs:
     public java.util.Map<OWLDataProperty,java.util.Set<OWLConstant>> getDataPropertyRelationships(OWLIndividual individual) {
+        // TODO: implement (somehow)
         return new java.util.HashMap<OWLDataProperty,java.util.Set<OWLConstant>>();
     }
-    public java.util.Set<OWLIndividual> getIndividuals(OWLDescription clsC, boolean direct) {
-        return new java.util.HashSet<OWLIndividual>();
+    
+    public java.util.Set<OWLIndividual> getIndividuals(OWLDescription d, boolean direct) {
+        if (direct) {
+            return hermit.getDirectMembers(d);
+        } else {
+            return hermit.getMembers(d);
+        }
     }
+
     public java.util.Map<OWLObjectProperty,java.util.Set<OWLIndividual>> getObjectPropertyRelationships(OWLIndividual individual) {
         return new java.util.HashMap<OWLObjectProperty,java.util.Set<OWLIndividual>>();
     }
+    
     public java.util.Set<OWLIndividual> getRelatedIndividuals(OWLIndividual subject, OWLObjectPropertyExpression property) {
-        return new java.util.HashSet<OWLIndividual>();
+        return getIndividuals(
+            factory.getOWLObjectSomeRestriction(property.getInverseProperty(),
+                                        factory.getOWLObjectOneOf(subject)),
+            false);
     }
+    
     public java.util.Set<OWLConstant> getRelatedValues(OWLIndividual subject, OWLDataPropertyExpression property) {
+        // TODO: implement (somehow)
         return new java.util.HashSet<OWLConstant>();
     }
+
     public java.util.Set<java.util.Set<OWLClass>> getTypes(OWLIndividual individual, boolean direct) {
-        return new java.util.HashSet<java.util.Set<OWLClass>>();
+        if (direct) {
+            return classSets(hermit.getMemberships(individual).getParentPositions());
+        } else {
+            return classSets(hermit.getMemberships(individual).getAncestorPositions());
+        }
     }
+
     public boolean hasDataPropertyRelationship(OWLIndividual subject, OWLDataPropertyExpression property, OWLConstant object) {
         return false;
     }

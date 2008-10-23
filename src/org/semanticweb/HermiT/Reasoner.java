@@ -57,6 +57,7 @@ import org.semanticweb.HermiT.hierarchy.TableauSubsumptionChecker;
 import org.semanticweb.HermiT.hierarchy.TranslatedHierarchyPosition;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
@@ -74,6 +75,8 @@ import org.semanticweb.HermiT.util.Translator;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLDescription;
+import org.semanticweb.owl.model.OWLObjectProperty;
+import org.semanticweb.owl.model.OWLDataProperty;
 import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
@@ -284,11 +287,20 @@ public class Reasoner implements Serializable {
         return realization != null;
     }
 
+    protected boolean isSubsumedBy(AtomicConcept child,
+                                    AtomicConcept parent) {
+        return m_subsumptionChecker.isSubsumedBy(child, parent);
+    }
+
     public boolean isClassSubsumedBy(String childName,
                                      String parentName) {
-        return m_subsumptionChecker.isSubsumedBy(
+        return isSubsumedBy(
             AtomicConcept.create(childName), AtomicConcept.create(parentName)
         );
+    }
+    
+    public boolean isSubsumedBy(OWLDescription child, OWLDescription parent) {
+        return isSubsumedBy(define(child), define(parent));
     }
     
     public SubsumptionHierarchy getSubsumptionHierarchy() {
@@ -300,6 +312,11 @@ public class Reasoner implements Serializable {
         }
     }
     
+    protected Map<AtomicRole, HierarchyPosition<AtomicRole>>
+        getAtomicRoleHierarchy() {
+        return m_dlOntology.explicitRoleHierarchy;
+    }
+
     protected Map<AtomicConcept, HierarchyPosition<AtomicConcept>>
         getAtomicConceptHierarchy() {
         if (atomicConceptHierarchy == null) {
@@ -430,6 +447,40 @@ public class Reasoner implements Serializable {
             return 0;
         }
     }
+    static class RoleToOWLObjectProperty
+        implements Translator<AtomicRole, OWLObjectProperty> {
+        private OWLDataFactory factory;
+        RoleToOWLObjectProperty(OWLDataFactory factory) {
+            this.factory = factory;
+        }
+        public OWLObjectProperty translate(AtomicRole r) {
+            // should really ensure that r is an object, not data, role
+            return factory.getOWLObjectProperty(URI.create(r.getURI()));
+        }
+        public boolean equals(Object o) {
+            return o instanceof RoleToOWLObjectProperty;
+        }
+        public int hashCode() {
+            return 0;
+        }
+    }
+    static class RoleToOWLDataProperty
+        implements Translator<AtomicRole, OWLDataProperty> {
+        private OWLDataFactory factory;
+        RoleToOWLDataProperty(OWLDataFactory factory) {
+            this.factory = factory;
+        }
+        public OWLDataProperty translate(AtomicRole r) {
+            // should really ensure that r is a data, not object, role
+            return factory.getOWLDataProperty(URI.create(r.getURI()));
+        }
+        public boolean equals(Object o) {
+            return o instanceof RoleToOWLDataProperty;
+        }
+        public int hashCode() {
+            return 0;
+        }
+    }
     static class IndividualToString implements Translator<Individual, String> {
         public String translate(Individual i) {
             return i.getURI();
@@ -494,18 +545,30 @@ public class Reasoner implements Serializable {
             getPosition(define(description)), new ConceptToOWLClass(clausifier.factory));
     }
     
-    public HierarchyPosition<String>
-        getMemberships(String individual) {
+    protected HierarchyPosition<AtomicConcept>
+        getMemberships(Individual individual) {
         if (clausifier == null) {
             throw new RuntimeException(
                 "Individual queries require parsing by the OWL API.");
         }
-        return new TranslatedHierarchyPosition<AtomicConcept, String>(
-            getPosition(define
+        return getPosition(define
                 (clausifier.factory.getOWLObjectOneOf(
                     clausifier.factory.getOWLIndividual(
-                        URI.create(individual))))),
+                        URI.create(individual.getURI())))));
+    }
+    
+    public HierarchyPosition<String>
+        getMemberships(String individual) {
+        return new TranslatedHierarchyPosition<AtomicConcept, String>(
+            getMemberships(Individual.create(individual)),
             new ConceptToString());
+    }
+    
+    public HierarchyPosition<OWLClass>
+        getMemberships(OWLIndividual i) {
+        return new TranslatedHierarchyPosition<AtomicConcept, OWLClass>(
+            getMemberships(Individual.create(i.getURI().toString())),
+            new ConceptToOWLClass(clausifier.factory));
     }
     
     private Map<AtomicConcept, Set<Individual>> getRealization() {
