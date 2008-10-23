@@ -2,9 +2,12 @@
 package org.semanticweb.HermiT;
 
 import java.net.URI;
+import java.util.Set;
+import java.util.HashSet;
 
 import org.semanticweb.HermiT.hierarchy.SubsumptionHierarchy;
 import org.semanticweb.HermiT.hierarchy.SubsumptionHierarchyNode;
+import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.owl.inference.OWLReasoner;
 import org.semanticweb.owl.model.OWLClass;
@@ -81,7 +84,7 @@ public class HermitReasoner implements OWLReasoner {
     }
     
     public boolean isRealised() {
-        return false;
+        return hermit != null && hermit.isRealizationCached();
     }
     
     public void loadOntologies(java.util.Set<OWLOntology> inOntologies) {
@@ -106,7 +109,9 @@ public class HermitReasoner implements OWLReasoner {
         }
     }
     
-    public void realise() {}
+    public void realise() {
+        hermit.cacheRealization();
+    }
     public void unloadOntologies(java.util.Set<OWLOntology> inOntologies) {
         ontologies.removeAll(ontologies);
         loadOntologies(inOntologies);
@@ -121,64 +126,35 @@ public class HermitReasoner implements OWLReasoner {
     
     // SatisfiabilityChecker implementation:
     public boolean isSatisfiable(OWLDescription d) {
-        if (d.isAnonymous()) {
-            throw new UnsupportedOperationException("Testing of anonymous classes is not yet supported.");
-        }
-        return hermit.isClassSatisfiable(d.asOWLClass().getURI().toString());
+        return hermit.isClassSatisfiable(d);
     }
     
+    // protected Set<Set<OWLClass>>
+    //     classSets(Set<HierarchyPosition<String>> positions) {
+    //     java.util.Set<java.util.Set<OWLClass>> r
+    //         = new java.util.HashSet<java.util.Set<OWLClass>>();
+    //     for (HierarchyPosition<String> pos : positions) {
+    //         java.util.Set<OWLClass> equivalents
+    //             = new java.util.HashSet<OWLClass>();
+    //         for (String s : pos.getEquivalents()) {
+    //             equivalents.add(factory.getOWLClass(URI.create(s)));
+    //         }
+    //         r.add(equivalents);
+    //     }
+    //     return r;        
+    // }
+
     // ClassReasoner implementation:
-    public java.util.Set<java.util.Set<OWLClass>> getDescendantClasses(OWLDescription d) {
-        if (d.isAnonymous()) {
-            throw new UnsupportedOperationException("Testing of anonymous classes is not yet supported.");
-        }
-        SubsumptionHierarchy hier = hermit.getSubsumptionHierarchy();
-        SubsumptionHierarchyNode node = hier.getNodeFor(
-            AtomicConcept.create(d.asOWLClass().getURI().toString()));
-        if (node == null) node = hier.thingNode();
-        
-        java.util.Set<SubsumptionHierarchyNode> visited = new java.util.HashSet<SubsumptionHierarchyNode>();
-        // The Queue interface doesn't let us enqueue collections all at once, which seems silly:
-        java.util.LinkedList<SubsumptionHierarchyNode> q = new java.util.LinkedList<SubsumptionHierarchyNode>();
-        java.util.Set<java.util.Set<OWLClass>> r = new java.util.HashSet<java.util.Set<OWLClass>>();
-        for (; node != null; node = q.poll()) {
-            if (visited.contains(node)) continue;
-            q.addAll(node.getChildNodes());
-            java.util.Set<OWLClass> equivalents = new java.util.HashSet<OWLClass>();
-            for (AtomicConcept c : node.getEquivalentConcepts()) {
-                equivalents.add(factory.getOWLClass(URI.create(c.getURI())));
-            }
-            r.add(equivalents);
-            visited.add(node);
-        }
-        return r;
+    public java.util.Set<java.util.Set<OWLClass>>
+        getDescendantClasses(OWLDescription d) {
+        return classSets(hermit.getPosition(d).getDescendantPositions());
     }
-    
-    public java.util.Set<java.util.Set<OWLClass>> getAncestorClasses(OWLDescription d) {
-        if (d.isAnonymous()) {
-            throw new UnsupportedOperationException("Testing of anonymous classes is not yet supported.");
-        }
-        SubsumptionHierarchy hier = hermit.getSubsumptionHierarchy();
-        SubsumptionHierarchyNode node = hier.getNodeFor(
-            AtomicConcept.create(d.asOWLClass().getURI().toString()));
-        if (node == null) node = hier.thingNode();
-        
-        java.util.Set<SubsumptionHierarchyNode> visited = new java.util.HashSet<SubsumptionHierarchyNode>();
-        // The Queue interface doesn't let us enqueue collections all at once, which seems silly:
-        java.util.LinkedList<SubsumptionHierarchyNode> q = new java.util.LinkedList<SubsumptionHierarchyNode>();
-        java.util.Set<java.util.Set<OWLClass>> r = new java.util.HashSet<java.util.Set<OWLClass>>();
-        for (; node != null; node = q.poll()) {
-            if (visited.contains(node)) continue;
-            q.addAll(node.getParentNodes());
-            java.util.Set<OWLClass> equivalents = new java.util.HashSet<OWLClass>();
-            for (AtomicConcept c : node.getEquivalentConcepts()) {
-                equivalents.add(factory.getOWLClass(URI.create(c.getURI())));
-            }
-            r.add(equivalents);
-            visited.add(node);
-        }
-        return r;
+
+    public java.util.Set<java.util.Set<OWLClass>>
+        getAncestorClasses(OWLDescription d) {
+        return classSets(hermit.getPosition(d).getAncestorPositions());
     }
+
     public java.util.Set<OWLClass> getEquivalentClasses(OWLDescription d) {
         if (d.isAnonymous()) {
             throw new UnsupportedOperationException("Testing of anonymous classes is not yet supported.");
