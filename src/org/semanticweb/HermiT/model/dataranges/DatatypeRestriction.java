@@ -48,7 +48,8 @@ public abstract class DatatypeRestriction implements DataRange, CanonicalDataRan
         RDFTEXT ("3", (uris.get("rdf") + "text")),
         STRING ("31", (uris.get("xsd") + "string")),
         BOOLEAN ("4", (uris.get("xsd") + "boolean")), 
-        LITERAL ("5", (uris.get("rdfs") + "Literal"));        
+        LITERAL ("5", (uris.get("rdfs") + "Literal")),
+        ANYURI ("6", (uris.get("xsd") + "anyURI"));        
 
         private final String position;   // in a tree that indicates subsumption 
         // relationships between datatypes

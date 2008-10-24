@@ -341,11 +341,6 @@ public class CommandLine {
                     namespaces.uriFromId(AtomicConcept.THING.toString())
             );
             String canonical = null;
-            // the following two are a workaround because in some cases the 
-            // direct subconcepts contain the concept itself, although this 
-            // shouldn't be the case. 
-            Set<String> conceptsDone = new HashSet<String>();
-            boolean foundTop = false;
             for (HierarchyPosition<String> subPos : pos.getChildPositions()) {
                 equals.addAll(subPos.getEquivalents());
                 if (equals.contains(AtomicConcept.NOTHING.getURI())) {
@@ -353,46 +348,38 @@ public class CommandLine {
                 } else if (!equals.contains(AtomicConcept.THING.getURI())) {
                     canonical = equals.first();
                     conceptsToProcess.add(canonical);                    
-                } else {
-                    foundTop = true;
                 }
-                if (!foundTop) {
-                    equals.remove(canonical);
-                    for (String equal : equals) {
-                        implications.add("(equivalent " 
-                                + namespaces.idFromUri(canonical) + " " 
-                                + namespaces.idFromUri(equal) + ")");
-                    }
-                    foundTop = false; 
+                equals.remove(canonical);
+                for (String equal : equals) {
+                    implications.add("(equivalent " 
+                            + namespaces.idFromUri(canonical) + " " 
+                            + namespaces.idFromUri(equal) + ")");
                 }
                 equals.clear();
             }
             String superConcept;
             while (!conceptsToProcess.isEmpty()) {
                 superConcept = conceptsToProcess.iterator().next();
-                conceptsDone.add(superConcept);
                 conceptsToProcess.remove(superConcept);
                 pos  = hermit.getClassTaxonomyPosition(superConcept);
                 for (HierarchyPosition<String> subPos : pos.getChildPositions()) {
                     equals.addAll(subPos.getEquivalents());
                     canonical = equals.first();
-                    if (!conceptsDone.contains(canonical)) {
-                        if (equals.contains(AtomicConcept.NOTHING.getURI().toString())) {
-                            canonical = AtomicConcept.NOTHING.getURI().toString();
-                            equals.remove(canonical);
-                            for (String equal : equals) {
-                                implications.add("(equivalent " 
-                                        + namespaces.idFromUri(canonical) + " " 
-                                        + namespaces.idFromUri(equal) + ")");
-                            }
-                        } else {
-                            equals.remove(canonical);
-                            conceptsToProcess.add(canonical);
-                            implications.add("(implies " 
+                    if (equals.contains(AtomicConcept.NOTHING.getURI().toString())) {
+                        canonical = AtomicConcept.NOTHING.getURI().toString();
+                        equals.remove(canonical);
+                        for (String equal : equals) {
+                            implications.add("(equivalent " 
                                     + namespaces.idFromUri(canonical) + " " 
-                                    + namespaces.idFromUri(superConcept) + ")");
+                                    + namespaces.idFromUri(equal) + ")");
                         }
-                    } 
+                    } else {
+                        equals.remove(canonical);
+                        conceptsToProcess.add(canonical);
+                        implications.add("(implies " 
+                                + namespaces.idFromUri(canonical) + " " 
+                                + namespaces.idFromUri(superConcept) + ")");
+                    }
                     equals.clear();
                 }
             }
