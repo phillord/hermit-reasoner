@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.Set;
 
 import org.semanticweb.HermiT.model.DLPredicate;
+import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.DT;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets;
 
 
@@ -21,6 +22,13 @@ public interface DataRange extends DLPredicate {
      *         DataRange.   
      */
     public URI getDatatypeURI();
+    
+    /**
+     * The datatype implements this DataRange instance 
+     * @return The datatype for the type of the concrete implementation for this 
+     *         DataRange.   
+     */
+    public DT getDatatype();
     
     /**
      * Constants that are representing the allowed assignments for this datatype 

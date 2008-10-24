@@ -1,8 +1,6 @@
 package org.semanticweb.HermiT.model.dataranges;
 
 import java.math.BigInteger;
-import java.net.URI;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.semanticweb.HermiT.model.DLPredicate;
@@ -10,12 +8,12 @@ import org.semanticweb.HermiT.model.DLPredicate;
 
 public class DatatypeRestrictionLiteral extends DatatypeRestriction implements DLPredicate, DataRange {
     
-    public DatatypeRestrictionLiteral(URI datatypeURI) {
-        this.datatypeURI = datatypeURI;
+    public DatatypeRestrictionLiteral(DT datatype) {
+        this.datatype = datatype;
     }
     
     public CanonicalDataRange getNewInstance() {
-        return new DatatypeRestrictionLiteral(this.datatypeURI);
+        return new DatatypeRestrictionLiteral(this.datatype);
     }
 
     public boolean isBottom() {
@@ -32,8 +30,7 @@ public class DatatypeRestrictionLiteral extends DatatypeRestriction implements D
     }
     
     public void conjoinFacetsFrom(DataRange range) {
-        throw new RuntimeException("Cannot conjoin any facets to RDFS " +
-        "literal datatype restrictions. ");
+        return;
     }
     
     public boolean accepts(DataConstant constant) {
@@ -51,16 +48,12 @@ public class DatatypeRestrictionLiteral extends DatatypeRestriction implements D
     public DataConstant getSmallestAssignment() {
         return null;
     }
-    
+
     public boolean datatypeAccepts(DataConstant constant) {
-        Set<URI> supportedDTs = new HashSet<URI>();
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.RDFS + "literal"));
-        return supportedDTs.contains(constant.getDatatypeURI());
+        return DT.getSubTreeFor(DT.LITERAL).contains(constant.getDatatype());
     }
     
-    public static boolean canHandleAll(Set<URI> datatypeURIs) {
-        Set<URI> supportedDTs = new HashSet<URI>();
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.RDFS + "literal"));
-        return supportedDTs.containsAll(datatypeURIs);
+    public boolean canHandleAll(Set<DT> datatypes) {
+        return DT.getSubTreeFor(DT.LITERAL).containsAll(datatypes);
     }
 }

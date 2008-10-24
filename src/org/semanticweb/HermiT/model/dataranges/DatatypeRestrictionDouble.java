@@ -2,7 +2,6 @@ package org.semanticweb.HermiT.model.dataranges;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -16,8 +15,8 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
     
     protected Set<Interval> intervals = new HashSet<Interval>();
    
-    public DatatypeRestrictionDouble(URI datatypeURI) {
-        this.datatypeURI = datatypeURI;
+    public DatatypeRestrictionDouble(DT datatype) {
+        this.datatype = datatype;
         intervals.add(new Interval());
         this.supportedFacets = new HashSet<Facets>(
                 Arrays.asList(new Facets[] {
@@ -30,7 +29,7 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
     }
     
     public CanonicalDataRange getNewInstance() {
-        return new DatatypeRestrictionDouble(this.datatypeURI);
+        return new DatatypeRestrictionDouble(this.datatype);
     }
     
     public boolean isFinite() {
@@ -45,7 +44,7 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
         double doubleValue;
         try {
             BigDecimal originalValue = new BigDecimal(value);
-            doubleValue = originalValue.doubleValue();
+            doubleValue = Double.parseDouble(value);
             BigDecimal doubleValueAsBD = new BigDecimal("" + doubleValue);
             if (facet == Facets.MIN_EXCLUSIVE || facet == Facets.MIN_INCLUSIVE) {
                 if (doubleValueAsBD.compareTo(originalValue) < 0 
@@ -84,7 +83,7 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
         } break;
         case MAX_INCLUSIVE: {
             for (Interval i : intervals) {
-                i.intersectWith(new Interval(Double.MIN_VALUE, doubleValue));
+                i.intersectWith(new Interval(-Double.MAX_VALUE, doubleValue));
                 if (i.isEmpty()) {
                     isBottom = true;
                 }
@@ -92,7 +91,7 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
         } break;
         case MAX_EXCLUSIVE: {
             for (Interval i : intervals) {
-                i.intersectWith(new Interval(Double.MIN_VALUE, doubleValue));
+                i.intersectWith(new Interval(-Double.MAX_VALUE, doubleValue));
                 if (i.isEmpty()) {
                     isBottom = true;
                 }
@@ -103,9 +102,9 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
         }
     }
     
-    protected double nextDouble(double value) {
+    public double nextDouble(double value) {
         long bits = Double.doubleToRawLongBits(value);
-        long magnitude = (long)(bits & 0x7fffffffffffffffl);
+        long magnitude = (bits & 0x7fffffffffffffffl);
         // NaN or +inf or -inf -> no successor
         if (isNaN(bits) || magnitude == 0x7f80000000000000l) {
             return value;
@@ -129,9 +128,9 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
         }
     }
     
-    protected double previousDouble(double value) {
+    public double previousDouble(double value) {
         long bits = Double.doubleToRawLongBits(value);
-        long magnitude = (long)(bits & 0x7fffffffffffffffl);
+        long magnitude = (bits & 0x7fffffffffffffffl);
         // NaN or -inf or +inf -> no predeccessor
         if (isNaN(bits) || magnitude == 0x7f80000000000000l) {
             return value;
@@ -150,12 +149,12 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
                 newNegative = false;
                 newMagnitude = magnitude - 1;
             }
-            long newBits = newMagnitude | (newNegative ? 0 : 0x8000000000000000l);
+            long newBits = newMagnitude | (newNegative ? 0x8000000000000000l : 0);
             return Double.longBitsToDouble(newBits);
         }
     }
     
-    protected boolean isNaN(long bits) {
+    public boolean isNaN(long bits) {
         return ((bits & 0x7f80000000000000l) == 0x7f80000000000000l) 
                 && ((bits & 0x003fffffffffffffl) != 0);
     }
@@ -190,35 +189,35 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
         }
         if (!isBottom()) {
             DatatypeRestrictionDouble restr = (DatatypeRestrictionDouble) range;
-            if (restr.getDoubleIntervals().size() > 1) {
+            if (restr.getIntervals().size() > 1) {
                 throw new IllegalArgumentException("The given parameter " +
                         "contains more than one interval. ");
             }
             if (intervals.isEmpty()) {
-                for (Interval i : restr.getDoubleIntervals()) {
+                for (Interval i : restr.getIntervals()) {
                     if (restr.isNegated()) {
                         if (!i.isEmpty()) {
-                            if (i.getMin() > Double.MIN_VALUE) {
-                                intervals.add(new Interval(Double.MIN_VALUE, i.getMin()));
+                            if (i.getMin() > -Double.MAX_VALUE) {
+                                intervals.add(new Interval(-Double.MAX_VALUE, i.getMin()));
                             }
                             if (i.getMax() < Double.MAX_VALUE) {
                                 intervals.add(new Interval(i.getMax(), Double.MAX_VALUE));
                             }
                         } // otherwise i is trivially satisfied 
                     } else {
-                        intervals = restr.getDoubleIntervals();
+                        intervals = restr.getIntervals();
                     }
                 }
             } else {
                 Set<Interval> newIntervals = new HashSet<Interval>();
                 if (restr.isNegated()) {
                     for (Interval i : intervals) {
-                        for (Interval iNew : restr.getDoubleIntervals()) {
+                        for (Interval iNew : restr.getIntervals()) {
                             if (!iNew.isEmpty()) {
-                                if (iNew.getMin() > Double.MIN_VALUE) {
+                                if (iNew.getMin() > -Double.MAX_VALUE) {
                                     Interval newInterval = i.getCopy();
                                     double newMin = previousDouble(iNew.getMin());
-                                    newInterval.intersectWith(new Interval(Double.MIN_VALUE, newMin));
+                                    newInterval.intersectWith(new Interval(-Double.MAX_VALUE, newMin));
                                     if (!newInterval.isEmpty()) {
                                         newIntervals.add(newInterval);
                                     }
@@ -238,7 +237,7 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
                     }
                 } else {
                     for (Interval i : intervals) {
-                        for (Interval iNew : restr.getDoubleIntervals()) {
+                        for (Interval iNew : restr.getIntervals()) {
                             i.intersectWith(iNew);
                             if (!i.isEmpty()) newIntervals.add(i);
                         }
@@ -319,7 +318,7 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
             for (Interval i : sortedIntervals) {
                 double constant = i.getMin();
                 while (constant <= i.getMax()) {
-                    DataConstant dataConstant = new DataConstant(datatypeURI, "" + constant);
+                    DataConstant dataConstant = new DataConstant(datatype, "" + constant);
                     if (!notOneOf.contains(dataConstant)) return dataConstant;
                     constant = nextDouble(constant); 
                 }
@@ -328,7 +327,7 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
         return null;
     }
     
-    public Set<Interval> getDoubleIntervals() {
+    public Set<Interval> getIntervals() {
         return intervals;
     }
     
@@ -349,15 +348,15 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
     }
     
     public boolean datatypeAccepts(DataConstant constant) {
-        Set<URI> supportedDTs = new HashSet<URI>();
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "double"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "float"));
-        return supportedDTs.contains(constant.getDatatypeURI());
+        return DT.getSubTreeFor(DT.DOUBLE).contains(constant.getDatatype());
     }
     
+    public boolean canHandleAll(Set<DT> datatypes) {
+        return DT.getSubTreeFor(DT.OWLREALPLUS).containsAll(datatypes);
+    }
     
     public class Interval {
-        double min = Double.MIN_VALUE;
+        double min = -Double.MAX_VALUE;
         double max = Double.MAX_VALUE;
         
         public Interval() {
@@ -374,10 +373,10 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
         }
         
         public void intersectWith(Interval i) {
-            if (i.getMax() < max) {
+            if (i.getMax() < max || (isMinusZero(i.getMax()) && isPlusZero(max))) {
                 max = i.getMax();
             }
-            if (i.getMin() > min) {
+            if (i.getMin() > min || (isPlusZero(i.getMin()) && isMinusZero(min))) {
                 min = i.getMin();
             }
         }
@@ -394,8 +393,22 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
             return true;
         }
         
-        public boolean contains(double integer) {
-            return (min <= integer) && (max >= integer);
+        public boolean isMinusZero(double value) {
+            if (value != 0.0) return false;
+            long bits = Double.doubleToRawLongBits(value);
+            return ((bits & 0x7fffffffffffffffl) != bits);
+        }
+        
+        public boolean isPlusZero(double value) {
+            if (value != 0.0) return false;
+            long bits = Double.doubleToRawLongBits(value);
+            return ((bits & 0x7fffffffffffffffl) == bits);
+        }
+        
+        public boolean contains(double d) {
+            if (isPlusZero(min) && isMinusZero(d)) return false;
+            if (isMinusZero(max) && isPlusZero(d)) return false;
+            return (min <= d) && (max >= d);
         }
         
         public boolean contains(Interval interval) {
@@ -445,7 +458,7 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
         
         public boolean increaseMin() {
             long bits = Double.doubleToRawLongBits(min);
-            long magnitude = (long)(bits & 0x7fffffffffffffffl);
+            long magnitude = (bits & 0x7fffffffffffffffl);
             // NaN or +inf -> no successor
             if (isNaN(bits) || magnitude == 0x7f80000000000000l) {
                 return false;
@@ -502,26 +515,5 @@ public class DatatypeRestrictionDouble extends DatatypeRestriction {
             if (i1.getMin() == i2.getMin()) return 0;
             return (i1.getMin() - i2.getMin() > 0) ? 1 : -1;
         }
-    }
-    
-    public static boolean canHandleAll(Set<URI> datatypeURIs) {
-        Set<URI> supportedDTs = new HashSet<URI>();
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.OWL + "realPlus"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.OWL + "real"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "decimal"));;
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "integer"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "nonNegativeInteger"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "nonPositiveInteger"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "positiveInteger"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "negativeInteger"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "long"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "int"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "short"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "byte"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedLong"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedInt"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedShort"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedByte"));
-        return supportedDTs.containsAll(datatypeURIs);
     }
 }

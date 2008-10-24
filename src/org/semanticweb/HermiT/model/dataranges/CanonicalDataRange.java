@@ -4,6 +4,8 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.util.Set;
 
+import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.DT;
+
 
 public interface CanonicalDataRange {
     
@@ -13,6 +15,13 @@ public interface CanonicalDataRange {
      *         DataRange.   
      */
     public URI getDatatypeURI();
+    
+    /**
+     * The datatype implements this DataRange instance 
+     * @return The datatype for the type of the concrete implementation for this 
+     *         DataRange.   
+     */
+    public DT getDatatype();
     
     /**
      * Checks whether this data range is negated. 
@@ -110,6 +119,24 @@ public interface CanonicalDataRange {
      */
     public boolean accepts(DataConstant constant);
     
+    /**
+     * Can be used to check whether the implementation supports the given set of 
+     * datatypes, e.g., the implementation for integers supports long, 
+     * unsignedByte, etc. 
+     * @param datatypes a set of datatypes
+     * @return true if the implementation can handle all the given datatypes and 
+     * false otherwise
+     */
+    public boolean canHandleAll(Set<DT> datatypes);
+    
+    /**
+     * Can be used to check whether a given constant is in principle in the 
+     * range of this implementation. Whether it conforms to the facets is not 
+     * checked. 
+     * @param constant a constant
+     * @return true if the constant has a datatype that in principle is ok for 
+     * this datatype restriction and false otherwise
+     */
     public boolean datatypeAccepts(DataConstant constant);
     
     /**

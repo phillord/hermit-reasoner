@@ -1,7 +1,6 @@
 package org.semanticweb.HermiT.model.dataranges;
 
 import java.math.BigInteger;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -23,8 +22,8 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
     protected boolean patternMatcherContainsAllFacets = false;
     protected boolean facetsChanged = false;
     
-    public DatatypeRestrictionString(URI datatypeURI) {
-        this.datatypeURI = datatypeURI;
+    public DatatypeRestrictionString(DT datatype) {
+        this.datatype = datatype;
         supportedFacets = new HashSet<Facets>(
                 Arrays.asList(new Facets[] {
                         Facets.LENGTH, 
@@ -36,7 +35,7 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
     }
     
     public CanonicalDataRange getNewInstance() {
-        return new DatatypeRestrictionString(this.datatypeURI);
+        return new DatatypeRestrictionString(this.datatype);
     }
     
     public boolean isFinite() {
@@ -192,7 +191,7 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
         }
         compileAllFacetsIntoPattern();
         String value = patternMatcher.getShortestExample(true);
-        return value != null ? new DataConstant(datatypeURI, value) : null;
+        return value != null ? new DataConstant(datatype, value) : null;
     }
    
     protected String printExtraInfo(Namespaces namespaces) {
@@ -210,16 +209,10 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
     }
     
     public boolean datatypeAccepts(DataConstant constant) {
-        Set<URI> supportedDTs = new HashSet<URI>();
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "string"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.RDF + "text"));
-        return supportedDTs.contains(constant.getDatatypeURI());
+        return DT.getSubTreeFor(DT.RDFTEXT).contains(constant.getDatatype());
     }
     
-    public static boolean canHandleAll(Set<URI> datatypeURIs) {
-        Set<URI> supportedDTs = new HashSet<URI>();
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "string"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.RDF + "text"));
-        return supportedDTs.containsAll(datatypeURIs);
+    public boolean canHandleAll(Set<DT> datatypes) {
+        return DT.getSubTreeFor(DT.RDFTEXT).containsAll(datatypes);
     }
 }

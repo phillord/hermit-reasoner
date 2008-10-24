@@ -1,7 +1,6 @@
 package org.semanticweb.HermiT.model.dataranges;
 
 import java.math.BigInteger;
-import java.net.URI;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -21,8 +20,8 @@ public class DatatypeRestrictionDateTimeFin extends DatatypeRestriction {
     
     protected Set<Interval> intervals = new HashSet<Interval>();
 
-    public DatatypeRestrictionDateTimeFin(URI datatypeURI) {
-        this.datatypeURI = datatypeURI;
+    public DatatypeRestrictionDateTimeFin(DT datatype) {
+        this.datatype = datatype;
         this.supportedFacets = new HashSet<Facets>(
                 Arrays.asList(new Facets[] {
                         Facets.MIN_INCLUSIVE, 
@@ -34,7 +33,7 @@ public class DatatypeRestrictionDateTimeFin extends DatatypeRestriction {
     }
     
     public CanonicalDataRange getNewInstance() {
-        return new DatatypeRestrictionDateTimeFin(this.datatypeURI);
+        return new DatatypeRestrictionDateTimeFin(this.datatype);
     }
     
     public boolean isFinite() {
@@ -265,7 +264,7 @@ public class DatatypeRestrictionDateTimeFin extends DatatypeRestriction {
             for (Interval i : sortedIntervals) {
                 long constant = i.getMin();
                 while (constant <= i.getMax()) {
-                    DataConstant dataConstant = new DataConstant(datatypeURI, "" + dfm.format(new Date(constant)));
+                    DataConstant dataConstant = new DataConstant(datatype, "" + dfm.format(new Date(constant)));
                     if (!notOneOf.contains(dataConstant)) return dataConstant;
                     constant++;
                 }
@@ -295,17 +294,17 @@ public class DatatypeRestrictionDateTimeFin extends DatatypeRestriction {
     }
     
     public boolean datatypeAccepts(DataConstant constant) {
-        Set<URI> supportedDTs = new HashSet<URI>();
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "dateTime"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.OWL + "dateTime"));
-        return supportedDTs.contains(constant.getDatatypeURI());
+        Set<DT> supportedDTs = new HashSet<DT>();
+        supportedDTs.add(DT.DATETIME);
+        supportedDTs.add(DT.OWLDATETIME);
+        return supportedDTs.contains(constant.getDatatype());
     }
     
-    public static boolean canHandleAll(Set<URI> datatypeURIs) {
-        Set<URI> supportedDTs = new HashSet<URI>();
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.OWL + "dateTime"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "dateTime"));
-        return supportedDTs.containsAll(datatypeURIs);
+    public boolean canHandleAll(Set<DT> datatypes) {
+        Set<DT> supportedDTs = new HashSet<DT>();
+        supportedDTs.add(DT.DATETIME);
+        supportedDTs.add(DT.OWLDATETIME);
+        return supportedDTs.containsAll(datatypes);
     }
     
     public class Interval {

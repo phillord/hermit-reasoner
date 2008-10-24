@@ -335,30 +335,37 @@ public class CommandLine {
                         StatusOutput status,
                         PrintWriter output) {
             Set<String> conceptsToProcess = new HashSet<String>();
-            Set<String> conceptsDone = new HashSet<String>();
+            SortedSet<String> equals = new TreeSet<String>();
             SortedSet<String> implications = new TreeSet<String>();
-            HierarchyPosition<String> pos;
-            pos  = hermit.getClassTaxonomyPosition(
+            HierarchyPosition<String> pos = hermit.getClassTaxonomyPosition(
                     namespaces.uriFromId(AtomicConcept.THING.toString())
             );
+            String canonical = null;
+            // the following two are a workaround because in some cases the 
+            // direct subconcepts contain the concept itself, although this 
+            // shouldn't be the case. 
+            Set<String> conceptsDone = new HashSet<String>();
+            boolean foundTop = false;
             for (HierarchyPosition<String> subPos : pos.getChildPositions()) {
-                SortedSet<String> equals = new TreeSet<String>(subPos.getEquivalents());
-                String canonical;
+                equals.addAll(subPos.getEquivalents());
                 if (equals.contains(AtomicConcept.NOTHING.getURI())) {
                     canonical = AtomicConcept.NOTHING.getURI().toString();
                 } else if (!equals.contains(AtomicConcept.THING.getURI())) {
                     canonical = equals.first();
                     conceptsToProcess.add(canonical);                    
                 } else {
-                    System.out.println("Found OWL:THING.");
-                    canonical = null;
+                    foundTop = true;
                 }
-                equals.remove(canonical);
-                for (String equal : equals) {
-                    implications.add("(equivalent " 
-                            + namespaces.idFromUri(canonical) + " " 
-                            + namespaces.idFromUri(equal) + ")");
+                if (!foundTop) {
+                    equals.remove(canonical);
+                    for (String equal : equals) {
+                        implications.add("(equivalent " 
+                                + namespaces.idFromUri(canonical) + " " 
+                                + namespaces.idFromUri(equal) + ")");
+                    }
+                    foundTop = false; 
                 }
+                equals.clear();
             }
             String superConcept;
             while (!conceptsToProcess.isEmpty()) {
@@ -367,8 +374,8 @@ public class CommandLine {
                 conceptsToProcess.remove(superConcept);
                 pos  = hermit.getClassTaxonomyPosition(superConcept);
                 for (HierarchyPosition<String> subPos : pos.getChildPositions()) {
-                    SortedSet<String> equals = new TreeSet<String>(subPos.getEquivalents());
-                    String canonical = equals.first();
+                    equals.addAll(subPos.getEquivalents());
+                    canonical = equals.first();
                     if (!conceptsDone.contains(canonical)) {
                         if (equals.contains(AtomicConcept.NOTHING.getURI().toString())) {
                             canonical = AtomicConcept.NOTHING.getURI().toString();
@@ -385,10 +392,8 @@ public class CommandLine {
                                     + namespaces.idFromUri(canonical) + " " 
                                     + namespaces.idFromUri(superConcept) + ")");
                         }
-                    } else {
-                        System.out.println("Ups, we shouldn't be here. I blame Rob...");
-                        System.out.println("This is what we processed: " + canonical);
-                    }
+                    } 
+                    equals.clear();
                 }
             }
             for (String implication : implications) {

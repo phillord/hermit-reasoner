@@ -2,6 +2,7 @@ package org.semanticweb.HermiT.model.dataranges;
 
 import java.math.BigInteger;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -9,7 +10,7 @@ import java.util.TreeSet;
 public class EnumeratedDataRange extends DatatypeRestriction implements DataRange, CanonicalDataRange {
     
     public EnumeratedDataRange() {
-        this.datatypeURI = null;
+        this.datatype = null;
         this.supportedFacets = new HashSet<Facets>();
     }
     
@@ -52,5 +53,9 @@ public class EnumeratedDataRange extends DatatypeRestriction implements DataRang
     
     public boolean datatypeAccepts(DataConstant constant) {
         return true;
+    }
+    
+    public boolean canHandleAll(Set<DT> datatypes) {
+        return false;
     }
 }

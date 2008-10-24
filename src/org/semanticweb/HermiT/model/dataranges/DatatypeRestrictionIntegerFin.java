@@ -2,7 +2,6 @@ package org.semanticweb.HermiT.model.dataranges;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -16,8 +15,8 @@ public class DatatypeRestrictionIntegerFin extends DatatypeRestriction {
     
     protected Set<Interval> intervals = new HashSet<Interval>();
    
-    public DatatypeRestrictionIntegerFin(URI datatypeURI) {
-        this.datatypeURI = datatypeURI;
+    public DatatypeRestrictionIntegerFin(DT datatype) {
+        this.datatype = datatype;
         this.supportedFacets = new HashSet<Facets>(
                 Arrays.asList(new Facets[] {
                         Facets.MIN_INCLUSIVE, 
@@ -29,7 +28,7 @@ public class DatatypeRestrictionIntegerFin extends DatatypeRestriction {
     }
     
     public CanonicalDataRange getNewInstance() {
-        return new DatatypeRestrictionIntegerFin(this.datatypeURI);
+        return new DatatypeRestrictionIntegerFin(this.datatype);
     }
     
     public boolean isFinite() {
@@ -257,7 +256,7 @@ public class DatatypeRestrictionIntegerFin extends DatatypeRestriction {
             for (Interval i : sortedIntervals) {
                 long constant = i.getMin();
                 while (constant <= i.getMax()) {
-                    DataConstant dataConstant = new DataConstant(datatypeURI, "" + constant);
+                    DataConstant dataConstant = new DataConstant(datatype, "" + constant);
                     if (!notOneOf.contains(dataConstant)) return dataConstant;
                     constant++;
                 }
@@ -287,23 +286,12 @@ public class DatatypeRestrictionIntegerFin extends DatatypeRestriction {
     }
     
     public boolean datatypeAccepts(DataConstant constant) {
-        Set<URI> supportedDTs = new HashSet<URI>();
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "integer"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "nonNegativeInteger"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "nonPositiveInteger"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "positiveInteger"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "negativeInteger"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "long"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "int"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "short"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "byte"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedLong"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedInt"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedShort"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedByte"));
-        return supportedDTs.contains(constant.getDatatypeURI());
+        return DT.getSubTreeFor(DT.INTEGER).contains(constant.getDatatype());
     }
     
+    public boolean canHandleAll(Set<DT> datatypes) {
+        return DT.getSubTreeFor(DT.OWLREALPLUS).containsAll(datatypes);
+    }
     
     public class Interval {
         long min = Long.MIN_VALUE;
@@ -393,24 +381,4 @@ public class DatatypeRestrictionIntegerFin extends DatatypeRestriction {
         }
     }
     
-    public static boolean canHandleAll(Set<URI> datatypeURIs) {
-        Set<URI> supportedDTs = new HashSet<URI>();
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.OWL + "realPlus"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.OWL + "real"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "decimal"));;
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "integer"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "nonNegativeInteger"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "nonPositiveInteger"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "positiveInteger"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "negativeInteger"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "long"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "int"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "short"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "byte"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedLong"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedInt"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedShort"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedByte"));
-        return supportedDTs.containsAll(datatypeURIs);
-    }
 }

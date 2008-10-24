@@ -2,7 +2,9 @@ package org.semanticweb.HermiT.model.dataranges;
 
 import java.math.BigInteger;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Namespaces;
@@ -13,10 +15,86 @@ public abstract class DatatypeRestriction implements DataRange, CanonicalDataRan
     protected Set<Facets> supportedFacets = new HashSet<Facets>();
     
     public enum Facets {
-        LENGTH, MIN_LENGTH, MAX_LENGTH, PATTERN, MIN_INCLUSIVE, MIN_EXCLUSIVE, MAX_INCLUSIVE, MAX_EXCLUSIVE, TOTAL_DIGITS, FRACTION_DIGITS
+        LENGTH, MIN_LENGTH, MAX_LENGTH, 
+        PATTERN, 
+        MIN_INCLUSIVE, MIN_EXCLUSIVE, MAX_INCLUSIVE, MAX_EXCLUSIVE, 
+        TOTAL_DIGITS, FRACTION_DIGITS
     };
     
-    protected URI datatypeURI;
+    protected static final Map<String, String> uris = Namespaces.semanticWebNamespaces.getDeclarations();
+    
+    public enum DT {
+        
+        OWLREALPLUS ("1", (uris.get("owl") + "realPlus")),
+        OWLREAL ("11", (uris.get("owl") + "real")),
+        DECIMAL ("111", (uris.get("xsd") + "decimal")),
+        DOUBLE ("1111", (uris.get("xsd") + "double")),
+        FLOAT ("11111", (uris.get("xsd") + "float")),
+        INTEGER ("111111", (uris.get("xsd") + "integer")),
+        NONNEGATIVEINTEGER ("1111111", (uris.get("xsd") + "nonNegativeInteger")),
+        NONPOSITIVEINTEGER ("1111112", (uris.get("xsd") + "nonPositiveInteger")),
+        POSITIVEINTEGER ("11111111", (uris.get("xsd") + "positiveInteger")),
+        NEGATIVEINTEGER ("11111121", (uris.get("xsd") + "negativeInteger")),
+        LONG ("1111113", (uris.get("xsd") + "long")),
+        INT ("11111131", (uris.get("xsd") + "int")),
+        SHORT ("111111311", (uris.get("xsd") + "short")),
+        BYTE ("1111113111", (uris.get("xsd") + "byte")),
+        UNSIGNEDLONG ("1111114", (uris.get("xsd") + "unsignedLong")),
+        UNSIGNEDINT ("11111141", (uris.get("xsd") + "unsignedInt")),
+        UNSIGNEDSHORT ("111111411", (uris.get("xsd") + "unsignedShort")),
+        UNSIGNEDBYTE ("1111114111", (uris.get("xsd") + "unsignedByte")),
+        OWLDATETIME  ("2", (uris.get("owl") + "dateTime")), 
+        DATETIME ("21", (uris.get("xsd") + "dateTime")),
+        RDFTEXT ("3", (uris.get("rdf") + "text")),
+        STRING ("31", (uris.get("xsd") + "string")),
+        BOOLEAN ("4", (uris.get("xsd") + "boolean")), 
+        LITERAL ("5", (uris.get("rdfs") + "Literal"));        
+
+        private final String position;   // in a tree that indicates subsumption 
+        // relationships between datatypes
+        private final String uri;
+        
+        DT(String position, String uri) {
+            this.position = position;
+            this.uri = uri;
+        }
+        
+        public String getPosition() { 
+            return position; 
+        }
+        
+        public String getURIAsString() { 
+            return uri.toString(); 
+        }
+        
+        public URI getURI() {
+            return URI.create(uri);
+        }
+        
+        public static Set<DT> getSubTreeFor(DT datatype) { 
+            Set<DT> subs = new HashSet<DT>();
+            String pos = datatype.getPosition();
+            if (pos == null) {
+                subs.addAll(Arrays.asList(DT.values()));
+                return subs;
+            }
+            for (DT dt : DT.values()) {
+                if (dt.getPosition().startsWith(datatype.getPosition())) {
+                    subs.add(dt);
+                }
+            }
+            return subs; 
+        }
+        
+        public static boolean isSubOf(DT datatype1, DT datatype2) { 
+            String pos1 = datatype1.getPosition();
+            String pos2 = datatype2.getPosition();
+            if (pos1 == null || pos2 == null) return false; 
+            return pos1.startsWith(pos2) && pos1 != pos2; 
+        }
+    }
+
+    protected DT datatype;
     protected Set<DataConstant> oneOf = new HashSet<DataConstant>();
     protected Set<DataConstant> notOneOf = new HashSet<DataConstant>();
     protected boolean isNegated = false;
@@ -26,8 +104,12 @@ public abstract class DatatypeRestriction implements DataRange, CanonicalDataRan
         return 1;
     }
     
+    public DT getDatatype() {
+        return datatype;
+    }
+    
     public URI getDatatypeURI() {
-        return datatypeURI;
+        return datatype != null ? datatype.getURI() : null;
     }
     
     public boolean isNegated() {
@@ -89,9 +171,9 @@ public abstract class DatatypeRestriction implements DataRange, CanonicalDataRan
     public String toString(Namespaces namespaces) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("(");
-        if (datatypeURI != null) {
+        if (datatype != null && datatype.getURI() != null) {
             if (isNegated) buffer.append("not ");
-            buffer.append(namespaces.idFromUri(datatypeURI.toString()));
+            buffer.append(namespaces.idFromUri(datatype.getURIAsString()));
         }
         buffer.append(printExtraInfo(namespaces));
         boolean firstRun = true;
@@ -134,4 +216,5 @@ public abstract class DatatypeRestriction implements DataRange, CanonicalDataRan
     protected String printExtraInfo(Namespaces namespaces) {
         return "";
     }
+
 }

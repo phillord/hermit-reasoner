@@ -1,26 +1,23 @@
 package org.semanticweb.HermiT.model.dataranges;
 
 import java.math.BigInteger;
-import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.semanticweb.owl.vocab.XSDVocabulary;
-
 public class DatatypeRestrictionBoolean extends DatatypeRestriction {
 
-    public static DataConstant TRUE = new DataConstant(XSDVocabulary.BOOLEAN.getURI(), "true");
-    public static DataConstant FALSE = new DataConstant(XSDVocabulary.BOOLEAN.getURI(), "false");
+    public static DataConstant TRUE = new DataConstant(DT.BOOLEAN, "true");
+    public static DataConstant FALSE = new DataConstant(DT.BOOLEAN, "false");
     
-    public DatatypeRestrictionBoolean(URI datatypeURI) {
-        this.datatypeURI = datatypeURI;
+    public DatatypeRestrictionBoolean(DT datatype) {
+        this.datatype = datatype;
         this.supportedFacets = new HashSet<Facets>();
     }
 
     public CanonicalDataRange getNewInstance() {
-        return new DatatypeRestrictionBoolean(this.datatypeURI);
+        return new DatatypeRestrictionBoolean(this.datatype);
     }
     
     public boolean isFinite() {
@@ -33,8 +30,7 @@ public class DatatypeRestrictionBoolean extends DatatypeRestriction {
     }
     
     public void conjoinFacetsFrom(DataRange range) {
-        throw new RuntimeException("Cannot conjoin any facets to boolean " +
-                        "datatype restrictions. ");
+        return;
     }
     
     public boolean accepts(DataConstant constant) {
@@ -80,14 +76,10 @@ public class DatatypeRestrictionBoolean extends DatatypeRestriction {
     }
     
     public boolean datatypeAccepts(DataConstant constant) {
-        Set<URI> supportedDTs = new HashSet<URI>();
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "boolean"));
-        return supportedDTs.contains(constant.getDatatypeURI());
+        return DT.getSubTreeFor(DT.BOOLEAN).contains(constant.getDatatype());
     }
     
-    public static boolean canHandleAll(Set<URI> datatypeURIs) {
-        Set<URI> supportedDTs = new HashSet<URI>();
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "boolean"));
-        return supportedDTs.containsAll(datatypeURIs);
+    public boolean canHandleAll(Set<DT> datatypes) {
+        return DT.getSubTreeFor(DT.BOOLEAN).containsAll(datatypes);
     }
 }

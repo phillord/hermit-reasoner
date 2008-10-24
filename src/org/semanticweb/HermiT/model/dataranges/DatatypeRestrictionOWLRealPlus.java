@@ -2,7 +2,6 @@ package org.semanticweb.HermiT.model.dataranges;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -15,12 +14,12 @@ public class DatatypeRestrictionOWLRealPlus extends DatatypeRestriction {
     
     protected Set<Interval> intervals = new HashSet<Interval>();
 
-    public DatatypeRestrictionOWLRealPlus(URI datatypeURI) {
-        this(datatypeURI, true);
+    public DatatypeRestrictionOWLRealPlus(DT datatype) {
+        this(datatype, true);
     }
     
-    public DatatypeRestrictionOWLRealPlus(URI datatypeURI, boolean allowSpecials) {
-        this.datatypeURI = datatypeURI;
+    public DatatypeRestrictionOWLRealPlus(DT datatype, boolean allowSpecials) {
+        this.datatype = datatype;
         this.supportedFacets = new HashSet<Facets>(
                 Arrays.asList(new Facets[] {
                         Facets.MIN_INCLUSIVE, 
@@ -35,7 +34,7 @@ public class DatatypeRestrictionOWLRealPlus extends DatatypeRestriction {
     }
     
     public CanonicalDataRange getNewInstance() {
-        return new DatatypeRestrictionOWLRealPlus(this.datatypeURI);
+        return new DatatypeRestrictionOWLRealPlus(this.datatype);
     }
     
     public boolean isFinite() {
@@ -122,6 +121,7 @@ public class DatatypeRestrictionOWLRealPlus extends DatatypeRestriction {
             throw new RuntimeException("Cannot add facets to negated " +
                         "data ranges!");
         }
+        // allow for integer and double data ranges to be handled
         if (!(range instanceof DatatypeRestrictionOWLRealPlus)) {
             throw new IllegalArgumentException("The given parameter is not " +
                     "an instance of DatatypeRestrictionOWLReal. It is only " +
@@ -245,32 +245,16 @@ public class DatatypeRestrictionOWLRealPlus extends DatatypeRestriction {
     }
     
     public boolean datatypeAccepts(DataConstant constant) {
-        Set<URI> supportedDTs = new HashSet<URI>();
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "decimal"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "integer"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "nonNegativeInteger"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "nonPositiveInteger"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "positiveInteger"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "negativeInteger"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "long"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "int"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "short"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "byte"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedLong"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedInt"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedShort"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "unsignedByte"));
-        return supportedDTs.contains(constant.getDatatypeURI());
+        return DT.getSubTreeFor(DT.DECIMAL).contains(constant.getDatatype());
     }
     
-    public static boolean canHandleAll(Set<URI> datatypeURIs) {
-        Set<URI> supportedDTs = new HashSet<URI>();
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.OWL + "realPlus"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.OWL + "real"));
-        supportedDTs.add(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "decimal"));
-        return supportedDTs.containsAll(datatypeURIs);
+    public boolean canHandleAll(Set<DT> datatypes) {
+        Set<DT> dts = DT.getSubTreeFor(DT.OWLREALPLUS);
+        dts.removeAll(DT.getSubTreeFor(DT.DECIMAL)); 
+        dts.add(DT.DECIMAL);
+        return dts.containsAll(datatypes);
     }
-    
+   
     public class Interval {
         BigDecimal min = null;
         BigDecimal max = null;

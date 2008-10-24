@@ -1,10 +1,10 @@
 package org.semanticweb.HermiT.model.dataranges;
 
-import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Namespaces;
+import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.DT;
 
 import dk.brics.automaton.Automaton;
 import dk.brics.automaton.Datatypes;
@@ -14,34 +14,34 @@ public class DataConstant implements Comparable<DataConstant> {
     public static Set<DataConstant> numericSpecials = new HashSet<DataConstant>();
     
     static {
-        numericSpecials.add(new DataConstant(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "double"), "-0"));
-        numericSpecials.add(new DataConstant(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "double"), "NaN"));
-        numericSpecials.add(new DataConstant(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "double"), "+INF"));
-        numericSpecials.add(new DataConstant(URI.create(org.semanticweb.owl.vocab.Namespaces.XSD + "double"), "-INF"));
+        numericSpecials.add(new DataConstant(DT.DOUBLE, "-0"));
+        numericSpecials.add(new DataConstant(DT.DOUBLE, "NaN"));
+        numericSpecials.add(new DataConstant(DT.DOUBLE, "+INF"));
+        numericSpecials.add(new DataConstant(DT.DOUBLE, "-INF"));
     }
     
-    protected URI datatypeURI;
+    protected DT datatype;
     protected String value;
 
     public DataConstant() {
         super();
     }
     
-    public DataConstant(URI datatypeURI) {
-        this.datatypeURI = datatypeURI;
+    public DataConstant(DT datatype) {
+        this.datatype = datatype;
     }
     
-    public DataConstant(URI datatypeURI, String value) {
-        this.datatypeURI = datatypeURI;
+    public DataConstant(DT datatype, String value) {
+        this.datatype = datatype;
         this.value = value;
     }
     
-    public URI getDatatypeURI() {
-        return datatypeURI;
+    public DT getDatatype() {
+        return datatype;
     }
     
-    public void setDatatypeURI(URI datatypeURI) {
-        this.datatypeURI = datatypeURI;
+    public void setDatatype(DT datatype) {
+        this.datatype = datatype;
     }
 
     public String getValue() {
@@ -56,65 +56,21 @@ public class DataConstant implements Comparable<DataConstant> {
         if (this == o) return true;
         if (!(o instanceof DataConstant)) return false;
         DataConstant constant = (DataConstant) o;
-        return (datatypeURI == null ? datatypeURI == constant.getDatatypeURI() 
-                                    : datatypeURI.equals(constant.getDatatypeURI())) 
+        if (datatype != null 
+                && value != null 
+                && datatype.equals(DT.DOUBLE)
+                && value.equalsIgnoreCase("NaN")) {
+            return false;
+        }
+        return (datatype == null ? datatype == constant.getDatatype() 
+                                    : datatype.equals(constant.getDatatype())) 
                 &&  (value == null ? value == constant.getValue() 
                                    : value.equals(constant.getValue()));
     }
     
-//    public boolean equals(Object o) {
-//        if (this == o) return true;
-//        if (!(o instanceof DataConstant)) return false;
-//        DataConstant constant = (DataConstant) o;
-//        if (datatypeURI == null) {
-//            return datatypeURI == constant.getDatatypeURI();
-//        } else {
-//            if (constant.getDatatypeURI() == null) return false;
-//            Set<URI> uris = new HashSet<URI>();
-//            uris.add(datatypeURI);
-//            uris.add(constant.getDatatypeURI());
-//            if (datatypeURI.equals(constant.getDatatypeURI())) {
-//                if (value != null 
-//                        && DatatypeRestrictionInteger.canHandleAll(uris) 
-//                        && value.equalsIgnoreCase("NaN")) {
-//                    return false;
-//                } 
-//                return value == null ? value == constant.getValue() 
-//                                     : value.equals(constant.getValue());
-//            } else if (DatatypeRestrictionOWLRealPlus.canHandleAll(uris)) { 
-//                if (value != null && value.equalsIgnoreCase("NaN")) {
-//                    return false;
-//                }
-//                if ("-0".equals(value) 
-//                        && ("+0".equals(constant.getValue()) 
-//                                || "0".equals(constant.getValue()))) {
-//                    return false;
-//                }
-//                if ("+INF".equalsIgnoreCase(value) 
-//                        || "-INF".equalsIgnoreCase(value)) {
-//                    return value.equals(constant.getValue());
-//                }
-//                BigDecimal thisNum = new BigDecimal(value);
-//                BigDecimal thatNum = new BigDecimal(constant.getValue());
-//                return thisNum.compareTo(thatNum) == 0;
-//            } else if (DatatypeRestrictionInteger.canHandleAll(uris)) {
-//                BigInteger thisNum = new BigInteger(value);
-//                BigInteger thatNum = new BigInteger(constant.getValue());
-//                return thisNum.compareTo(thatNum) == 0;
-//            } else if (DatatypeRestrictionBoolean.canHandleAll(uris) 
-//                    || DatatypeRestrictionDateTime.canHandleAll(uris)
-//                    || DatatypeRestrictionString.canHandleAll(uris)
-//                    || DatatypeRestrictionLiteral.canHandleAll(uris)) {
-//                return value.equals(constant.getValue());
-//            } else {
-//                return false;
-//            }
-//        }
-//    }
-    
     public int hashCode() {
         int hashCode = 17;
-        hashCode = 23 * hashCode + (datatypeURI != null ? datatypeURI.hashCode() : 0);
+        hashCode = 23 * hashCode + (datatype != null ? datatype.getURI().hashCode() : 0);
         hashCode = 13 * hashCode + (value != null ? value.hashCode() : 0);
         return hashCode;
     }
@@ -124,16 +80,17 @@ public class DataConstant implements Comparable<DataConstant> {
     }
     
     public String toString(Namespaces namespaces) {
+        if (datatype == null) return "";
         StringBuffer buffer = new StringBuffer();
         buffer.append("(");
-        buffer.append(namespaces.idFromUri(datatypeURI.toString()));
+        buffer.append(namespaces.idFromUri(datatype.getURIAsString()));
         buffer.append(" " + value);
         buffer.append(")");
-        return buffer.toString();        
+        return buffer.toString();
     }
 
     public int compareTo(DataConstant constant) {
-        int result = datatypeURI.compareTo(constant.getDatatypeURI());
+        int result = datatype.compareTo(constant.getDatatype());
         if (result != 0 ) return result;
         return value.compareToIgnoreCase(constant.getValue());
     }

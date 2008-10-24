@@ -33,7 +33,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         String axioms = "FunctionalDataProperty(hasAge) "
             + "ClassAssertion(a DataHasValue(hasAge \"18\"^^xsd:integer)) " 
             + "ClassAssertion(a DataHasValue(hasAge \"19\"^^xsd:integer)) ";
-    loadOntologyWithAxioms(axioms, null);
+        loadOntologyWithAxioms(axioms, null);
         assertABoxSatisfiable(false);
     }
     
