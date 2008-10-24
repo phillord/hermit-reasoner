@@ -144,10 +144,21 @@ public class OwlClausification {
     
     static protected Map<AtomicRole, HierarchyPosition<AtomicRole>>
         buildRoleHierarchy(
-            Collection<OWLObjectPropertyExpression[]> inclusions,
+            Collection<OWLObjectPropertyExpression[]> objInclusions,
+            Collection<OWLDataPropertyExpression[]> dataInclusions,
             Set<AtomicRole> objectRoles, Set<AtomicRole> dataRoles) {
         final Map<Role, Set<Role>> subRoles = new HashMap<Role, Set<Role>>();
-        for (OWLObjectPropertyExpression[] inclusion : inclusions) {
+        for (OWLObjectPropertyExpression[] inclusion : objInclusions) {
+            Role sub = getRole(inclusion[0]);
+            Role sup = getRole(inclusion[1]);
+            Set<Role> subs = subRoles.get(sup);
+            if (subs == null) {
+                subs = new HashSet<Role>();
+                subRoles.put(sup, subs);
+            }
+            subs.add(sub);
+        }
+        for (OWLDataPropertyExpression[] inclusion : dataInclusions) {
             Role sub = getRole(inclusion[0]);
             Role sup = getRole(inclusion[1]);
             Set<Role> subs = subRoles.get(sup);
@@ -182,10 +193,11 @@ public class OwlClausification {
                 AtomicRole.BOTTOM_OBJECT_ROLE,
                 objectRoles,
                 ordering);
+        
         hierarchy.putAll(NaiveHierarchyPosition.buildHierarchy(
                             AtomicRole.TOP_DATA_ROLE,
                             AtomicRole.BOTTOM_DATA_ROLE,
-                            objectRoles,
+                            dataRoles,
                             ordering));
         return hierarchy;
     }
@@ -346,6 +358,7 @@ public class OwlClausification {
                 dlClauses, positiveFacts, negativeFacts,
                 atomicConcepts, hermitIndividuals,
                 buildRoleHierarchy(objectPropertyInclusions,
+                                    dataPropertyInclusions,
                                     objectRoles, dataRoles),
                 determineExpressivity.m_hasInverseRoles,
                 determineExpressivity.m_hasAtMostRestrictions,
@@ -479,6 +492,10 @@ public class OwlClausification {
         } else
             throw new IllegalStateException(
                     "Internal error: invalid normal form.");
+    }
+
+    protected static Role getRole(OWLDataPropertyExpression dataProperty) {
+        return AtomicRole.createDataRole(dataProperty.asOWLDataProperty().getURI().toString());
     }
 
     protected static org.semanticweb.HermiT.model.Individual getIndividual(

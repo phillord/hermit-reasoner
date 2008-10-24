@@ -270,6 +270,10 @@ public class Reasoner implements Serializable {
     public boolean isClassSatisfiable(OWLDescription desc) {
         return m_subsumptionChecker.isSatisfiable(define(desc));
     }
+    
+    protected boolean isAsymmetric(OWLObjectProperty p) {
+        return m_tableau.isAsymmetric(AtomicRole.createObjectRole(p.getURI().toString()));
+    }
 
     public void seedSubsumptionCache() {
         getClassTaxonomy();
@@ -339,10 +343,33 @@ public class Reasoner implements Serializable {
         return out;
     }
 
+    public HierarchyPosition<String> getPropertyHierarchyPosition(String propertyName) {
+        AtomicRole role = AtomicRole.createDataRole(propertyName);
+        if (!getAtomicRoleHierarchy().containsKey(role)) {
+            role = AtomicRole.createObjectRole(propertyName);
+        }
+        return new TranslatedHierarchyPosition<AtomicRole, String>
+            (getPosition(role), new RoleToString());
+    }
+    
     public HierarchyPosition<OWLObjectProperty> getPosition(OWLObjectProperty p) {
+        if (clausifier == null) {
+            throw new RuntimeException(
+                "OWL API queries require ontology parsing by the OWL API.");
+        }
         return new TranslatedHierarchyPosition<AtomicRole, OWLObjectProperty>(
             getPosition(AtomicRole.createObjectRole(p.getURI().toString())),
             new RoleToOWLObjectProperty(clausifier.factory));
+    }
+    
+    public HierarchyPosition<OWLDataProperty> getPosition(OWLDataProperty p) {
+        if (clausifier == null) {
+            throw new RuntimeException(
+                "OWL API queries require ontology parsing by the OWL API.");
+        }
+        return new TranslatedHierarchyPosition<AtomicRole, OWLDataProperty>(
+            getPosition(AtomicRole.createDataRole(p.getURI().toString())),
+            new RoleToOWLDataProperty(clausifier.factory));
     }
     
     protected Map<AtomicConcept, HierarchyPosition<AtomicConcept>>
@@ -464,6 +491,19 @@ public class Reasoner implements Serializable {
             return 0;
         }
     }
+    
+    static class RoleToString implements Translator<AtomicRole, String> {
+        public String translate(AtomicRole r) {
+            return r.getURI();
+        }
+        public boolean equals(Object o) {
+            return o instanceof ConceptToString;
+        }
+        public int hashCode() {
+            return 0;
+        }
+    }
+    
     static class ConceptToOWLClass implements Translator<AtomicConcept, OWLClass> {
         private OWLDataFactory factory;
         ConceptToOWLClass(OWLDataFactory factory) {

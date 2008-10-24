@@ -11,6 +11,7 @@ import java.util.Collection;
 import org.semanticweb.HermiT.existentials.ExpansionStrategy;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DLClause;
@@ -297,6 +298,27 @@ public final class Tableau implements Serializable {
             m_tableauMonitor.isSubsumedByFinished(subconcept,superconcept,result);
         return result;
     }
+    
+    public boolean isAsymmetric(AtomicRole role) {
+        clear();
+        if (m_dlOntology.hasNominals()) {
+            loadABox();
+        }
+        Node a = createNewRootNode(m_dependencySetFactory.emptySet(), 0);
+        Node b = createNewRootNode(m_dependencySetFactory.emptySet(), 0);
+        m_extensionManager.addRoleAssertion(role, a, b, m_dependencySetFactory.emptySet());
+        m_branchingPoints[0] = new BranchingPoint(this);
+        m_currentBranchingPoint++;
+        m_nonbacktrackableBranchingPoint = m_currentBranchingPoint;
+        DependencySet dependencySet =
+            m_dependencySetFactory.addBranchingPoint
+                (m_dependencySetFactory.emptySet(),
+                    m_currentBranchingPoint);
+        m_extensionManager.addRoleAssertion(role, b, a, dependencySet);
+        return !isSatisfiable();
+    }
+    
+    
     // public boolean isSubsumedBy(Role subRole, Role superRole) {
     // if (m_tableauMonitor!=null) {
     // m_tableauMonitor.isSubsumedByStarted(subRole,superRole);

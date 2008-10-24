@@ -290,6 +290,40 @@ public class CommandLine {
         }
     }
     
+    static protected class SuperRolesAction implements Action {
+        final String roleName;
+        boolean all;
+        public SuperRolesAction(String name, boolean getAll) {
+            roleName = name;
+            all = getAll;
+        }
+        public void run(Reasoner hermit,
+                        Namespaces namespaces,
+                        StatusOutput status,
+                        PrintWriter output) {
+            status.log(2, "Finding supers of '" + roleName + "'");
+            String roleUri = namespaces.uriFromId(roleName);
+            HierarchyPosition<String> pos =
+                hermit.getPropertyHierarchyPosition(roleUri);
+            if (all) {
+                output.println(
+                    "All super-properties of '" + roleName + "':");
+                for (String sup : pos.getAncestors()) {
+                    output.println("\t" + namespaces.idFromUri(sup));
+                }
+            } else {
+                output.println(
+                    "Direct super-properties of '" + roleName + "':");
+                for (HierarchyPosition<String> sup
+                        : pos.getParentPositions()) {
+                    for (String name : sup.getEquivalents()) {
+                        output.println("\t" + namespaces.idFromUri(name));
+                    }
+                }
+            }
+        }
+    }
+    
     static protected class SubsAction implements Action {
         final String conceptName;
         boolean all;
@@ -321,6 +355,40 @@ public class CommandLine {
                 for (HierarchyPosition<String> sub
                         : pos.getChildPositions()) {
                     for (String name : sub.getEquivalents()) {
+                        output.println("\t" + namespaces.idFromUri(name));
+                    }
+                }
+            }
+        }
+    }
+    
+    static protected class SubRolesAction implements Action {
+        final String roleName;
+        boolean all;
+        public SubRolesAction(String name, boolean getAll) {
+            roleName = name;
+            all = getAll;
+        }
+        public void run(Reasoner hermit,
+                        Namespaces namespaces,
+                        StatusOutput status,
+                        PrintWriter output) {
+            status.log(2, "Finding subs of '" + roleName + "'");
+            String roleUri = namespaces.uriFromId(roleName);
+            HierarchyPosition<String> pos =
+                hermit.getPropertyHierarchyPosition(roleUri);
+            if (all) {
+                output.println(
+                    "All sub-properties of '" + roleName + "':");
+                for (String sup : pos.getDescendants()) {
+                    output.println("\t" + namespaces.idFromUri(sup));
+                }
+            } else {
+                output.println(
+                    "Direct sub-properties of '" + roleName + "':");
+                for (HierarchyPosition<String> sup
+                        : pos.getChildPositions()) {
+                    for (String name : sup.getEquivalents()) {
                         output.println("\t" + namespaces.idFromUri(name));
                     }
                 }
@@ -414,11 +482,33 @@ public class CommandLine {
         }
     }
     
+    static protected class EquivalentRolesAction implements Action {
+        final String roleName;
+        public EquivalentRolesAction(String name) {
+            roleName = name;
+        }
+        public void run(Reasoner hermit,
+                        Namespaces namespaces,
+                        StatusOutput status,
+                        PrintWriter output) {
+            status.log(2, "Finding equivalents of '" + roleName + "'");
+            String roleUri = namespaces.uriFromId(roleName);
+            HierarchyPosition<String> pos =
+                hermit.getPropertyHierarchyPosition(roleUri);
+            output.println(
+                "Properties equivalent to '" + roleName + "':");
+            for (String equiv : pos.getEquivalents()) {
+                output.println("\t" + namespaces.idFromUri(equiv));
+            }
+        }
+    }
+    
     
     protected static final int
         kTime=1000, kDumpClauses=1001, kDumpRoleBox=1002, kOwlApi = 1003, kKaon2 = 1004,
         kDirectBlock = 1005, kBlockStrategy = 1006, kBlockCache = 1007, kExpansion = 1008, kBase = 1009,
-        kParser = 1010, kClausifyRoleBox = 1011, kDefaultNamespace = 1012, kDumpNamespaces = 1013;
+        kParser = 1010, kClausifyRoleBox = 1011, kDefaultNamespace = 1012, kDumpNamespaces = 1013,
+        kSuperRoles = 1014, kSubRoles = 1015, kEquivRoles = 1016;
     
     static protected final String versionString = "HermiT version 0.5.0";
     protected static final String usageString = "Usage: hermit [OPTION]... URI...";
@@ -479,6 +569,12 @@ public class CommandLine {
                     "output classes subsuming CLASS (or only direct supers if following --direct)"),
         new Option('e', "equivalents", kActions, true, "CLASS",
                     "output classes equivalent to CLASS"),
+        new Option(kSubRoles, "subproperties", kActions, true, "PROP",
+                    "output properties subsumed by PROP (or only direct subs if following --direct)"),
+        new Option(kSuperRoles, "superproperties", kActions, true, "PROP",
+                    "output properties subsuming PROP (or only direct supers if following --direct)"),
+        new Option(kEquivRoles, "equivalent-properties", kActions, true, "PROP",
+                    "output properties equivalent to PROP"),
         new Option('a', "allSubs", kActions, false, "CLASS",
                     "output each class name with its direct subclasses"),
         new Option('U', "unsatisfiable", kActions,
@@ -626,6 +722,20 @@ public class CommandLine {
                     case 'e': {
                         String arg = g.getOptarg();
                         actions.add(new EquivalentsAction(arg));
+                    } break;
+                    case kSubRoles: {
+                        String arg = g.getOptarg();
+                        actions.add(new SubRolesAction(arg, doAll));
+                        doAll = true;
+                    } break;
+                    case kSuperRoles: {
+                        String arg = g.getOptarg();
+                        actions.add(new SuperRolesAction(arg, doAll));
+                        doAll = true;
+                    } break;
+                    case kEquivRoles: {
+                        String arg = g.getOptarg();
+                        actions.add(new EquivalentRolesAction(arg));
                     } break;
                     case 'a': {
                         actions.add(new AllSubsumptionsAction());

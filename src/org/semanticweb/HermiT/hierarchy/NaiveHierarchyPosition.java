@@ -82,7 +82,7 @@ public class NaiveHierarchyPosition<T> implements HierarchyPosition<T> {
             if (visited.add(cur)) {
                 boolean foundMoreSpecific = false;
                 for (HierarchyPosition<T> child : cur.getChildPositions()) {
-                    if (cmp.less(child.getEquivalents().iterator().next(), val)) {
+                    if (cmp.less(val, child.getEquivalents().iterator().next())) {
                         foundMoreSpecific = true;
                         q.add(child);
                     }
@@ -105,7 +105,7 @@ public class NaiveHierarchyPosition<T> implements HierarchyPosition<T> {
             if (visited.add(cur)) {
                 boolean foundMoreGeneral = false;
                 for (HierarchyPosition<T> parent : cur.getParentPositions()) {
-                    if (cmp.less(val, parent.getEquivalents().iterator().next())) {
+                    if (cmp.less(parent.getEquivalents().iterator().next(), val)) {
                         foundMoreGeneral = true;
                         q.add(parent);
                     }
@@ -151,7 +151,19 @@ public class NaiveHierarchyPosition<T> implements HierarchyPosition<T> {
                 } else {
                     NaiveHierarchyPosition<T> pos = new NaiveHierarchyPosition<T>();
                     pos.parents = parents;
+                    for (HierarchyPosition<T> par : parents) {
+                        NaiveHierarchyPosition<T> p
+                            = (NaiveHierarchyPosition<T>) par;
+                        p.children.add(pos);
+                        p.children.removeAll(children);
+                    }
                     pos.children = children;
+                    for (HierarchyPosition<T> child : children) {
+                        NaiveHierarchyPosition<T> c
+                            = (NaiveHierarchyPosition<T>) child;
+                        c.parents.add(pos);
+                        c.parents.removeAll(parents);
+                    }
                     pos.labels.add(t);
                     out.put(t, pos);
                 }

@@ -9,7 +9,8 @@ import org.semanticweb.HermiT.hierarchy.SubsumptionHierarchy;
 import org.semanticweb.HermiT.hierarchy.SubsumptionHierarchyNode;
 import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
 import org.semanticweb.HermiT.model.AtomicConcept;
-import org.semanticweb.owl.inference.OWLReasoner;
+import org.semanticweb.HermiT.monitor.PluginMonitor;
+import org.semanticweb.owl.inference.MonitorableOWLReasoner;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLConstant;
 import org.semanticweb.owl.model.OWLDataFactory;
@@ -17,6 +18,7 @@ import org.semanticweb.owl.model.OWLDataProperty;
 import org.semanticweb.owl.model.OWLDataPropertyExpression;
 import org.semanticweb.owl.model.OWLDataRange;
 import org.semanticweb.owl.model.OWLDescription;
+import org.semanticweb.owl.model.OWLEntity;
 import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLObjectProperty;
@@ -24,29 +26,76 @@ import org.semanticweb.owl.model.OWLObjectPropertyExpression;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
 import org.semanticweb.owl.model.OWLOntologySetProvider;
+import org.semanticweb.owl.util.ProgressMonitor;
 
-public class HermitReasoner implements OWLReasoner {
+public class HermitReasoner implements MonitorableOWLReasoner {
     static final String mUriBase = "urn:hermit:kb";
 
     Reasoner hermit;
+    PluginMonitor monitor;
     java.util.Set<OWLOntology> ontologies;
     OWLOntology ontology;
     OWLOntologyManager manager;
     OWLDataFactory factory;
     int nextKbId;
     
+    class TaskStatus {
+        String name;
+        public TaskStatus(String name) {
+            this.name = name;
+        }
+        public TaskStatus() {}
+        public void update(ProgressMonitor m) {
+            System.out.println("updating progress monitor!");
+            if (name == null) {
+                m.setMessage("HermiT is working...");
+            } else {
+                m.setMessage(name);
+            }
+            m.setSize(100);
+            m.setProgress(50);
+        }
+    }
+    
+    TaskStatus status;
+    
     HermitReasoner(OWLOntologyManager inManager) {
         manager = inManager;
         factory = manager.getOWLDataFactory();
         nextKbId = 1;
         clearOntologies();
+        monitor = new PluginMonitor();
     }
     
+    public OWLEntity getCurrentEntity() {
+        String entUrl = monitor.curConcept();
+        if (entUrl == null) {
+            return null;
+        } else {
+            return factory.getOWLClass(URI.create(entUrl));
+        }
+    }
+    
+    public void setProgressMonitor(ProgressMonitor m) {
+        System.out.println("requested progress update...");
+        if (status != null) {
+            m.setStarted();
+            status.update(m);
+        } else {
+            m.setFinished();
+        }
+    }
+
     // ReasonerBase implementation:
     public void classify() {
+        try {
+            status = new TaskStatus("Classifying...");
             System.out.println("Seeding subsumption cache...");
-        hermit.seedSubsumptionCache();
+            hermit.seedSubsumptionCache();
             System.out.println("...done");
+        } finally {
+            status = null;
+        }
     }
 
     public void clearOntologies() {
@@ -101,16 +150,22 @@ public class HermitReasoner implements OWLReasoner {
                 ).createMergedOntology(manager,theUri);// URI.create(mUriBase + String.valueOf(mNextKbId++)));
             Reasoner.Configuration config = new Reasoner.Configuration();
             config.subsumptionCacheStrategyType = Reasoner.SubsumptionCacheStrategyType.JUST_IN_TIME;
-            System.out.println("Loading ontology into HermiT...");
-            hermit = new Reasoner(ontology, config);
-            System.out.println("...done");
+            config.monitor = monitor;
+            try {
+                status = new TaskStatus("Loading...");
+                System.out.println("Loading ontology into HermiT...");
+                hermit = new Reasoner(ontology, config);
+                System.out.println("...done");
+            } finally {
+                status = null;
+            }
         } catch (OWLException e) {
             throw new RuntimeException("Failed to merge ontologies.", e);
         }
     }
     
     public void realise() {
-        hermit.cacheRealization();
+        if (hermit != null) hermit.cacheRealization();
     }
     public void unloadOntologies(java.util.Set<OWLOntology> inOntologies) {
         ontologies.removeAll(ontologies);
@@ -126,14 +181,16 @@ public class HermitReasoner implements OWLReasoner {
     
     // SatisfiabilityChecker implementation:
     public boolean isSatisfiable(OWLDescription d) {
+        if (hermit == null) return true;
+        //System.out.println("Checking satisfiability...");
         return hermit.isClassSatisfiable(d);
     }
     
-    protected Set<Set<OWLClass>>
-        classSets(Set<HierarchyPosition<OWLClass>> positions) {
-        java.util.Set<java.util.Set<OWLClass>> r
-            = new java.util.HashSet<java.util.Set<OWLClass>>();
-        for (HierarchyPosition<OWLClass> pos : positions) {
+    protected <T> Set<Set<T>>
+        posToSets(Set<HierarchyPosition<T>> positions) {
+        java.util.Set<java.util.Set<T>> r
+            = new java.util.HashSet<java.util.Set<T>>();
+        for (HierarchyPosition<T> pos : positions) {
             r.add(pos.getEquivalents());
         }
         return r;        
@@ -142,15 +199,24 @@ public class HermitReasoner implements OWLReasoner {
     // ClassReasoner implementation:
     public java.util.Set<java.util.Set<OWLClass>>
         getDescendantClasses(OWLDescription d) {
-        return classSets(hermit.getPosition(d).getDescendantPositions());
+        if (hermit == null) {
+            return new java.util.HashSet<java.util.Set<OWLClass>>();
+        }
+        return posToSets(hermit.getPosition(d).getDescendantPositions());
     }
 
     public java.util.Set<java.util.Set<OWLClass>>
         getAncestorClasses(OWLDescription d) {
-        return classSets(hermit.getPosition(d).getAncestorPositions());
+        if (hermit == null) {
+            return new java.util.HashSet<java.util.Set<OWLClass>>();
+        }
+        return posToSets(hermit.getPosition(d).getAncestorPositions());
     }
 
     public java.util.Set<OWLClass> getEquivalentClasses(OWLDescription d) {
+        if (hermit == null) {
+            return new java.util.HashSet<OWLClass>();
+        }
         return hermit.getPosition(d).getEquivalents();
     }
     
@@ -161,23 +227,32 @@ public class HermitReasoner implements OWLReasoner {
     }
     
     public java.util.Set<java.util.Set<OWLClass>> getSubClasses(OWLDescription d) {
-        return classSets(hermit.getPosition(d).getChildPositions());
+        if (hermit == null) {
+            return new java.util.HashSet<java.util.Set<OWLClass>>();
+        }
+        return posToSets(hermit.getPosition(d).getChildPositions());
     }
     
     public java.util.Set<java.util.Set<OWLClass>> getSuperClasses(OWLDescription d) {
-        return classSets(hermit.getPosition(d).getParentPositions());
+        if (hermit == null) {
+            return new java.util.HashSet<java.util.Set<OWLClass>>();
+        }
+        return posToSets(hermit.getPosition(d).getParentPositions());
     }
     
 
     public boolean isEquivalentClass(OWLDescription c, OWLDescription d) {
+        if (hermit == null) return false;
         return isSubClassOf(c, d) && isSubClassOf(d, c);
     }
     public boolean isSubClassOf(OWLDescription subclass, OWLDescription superclass) {
+        if (hermit == null) return false;
         return hermit.isSubsumedBy(subclass, superclass);
     }
     
     // ConsistencyChecker implementation:
     public boolean isConsistent(OWLOntology ignored) {
+        if (hermit == null) return true;
         return hermit.isConsistent();
     }
     
@@ -188,6 +263,9 @@ public class HermitReasoner implements OWLReasoner {
     }
     
     public java.util.Set<OWLIndividual> getIndividuals(OWLDescription d, boolean direct) {
+        if (hermit == null) {
+            return new java.util.HashSet<OWLIndividual>();
+        }
         if (direct) {
             return hermit.getDirectMembers(d);
         } else {
@@ -212,10 +290,13 @@ public class HermitReasoner implements OWLReasoner {
     }
 
     public java.util.Set<java.util.Set<OWLClass>> getTypes(OWLIndividual individual, boolean direct) {
+        if (hermit == null) {
+            return new java.util.HashSet<java.util.Set<OWLClass>>();
+        }
         if (direct) {
-            return classSets(hermit.getMemberships(individual).getParentPositions());
+            return posToSets(hermit.getMemberships(individual).getParentPositions());
         } else {
-            return classSets(hermit.getMemberships(individual).getAncestorPositions());
+            return posToSets(hermit.getMemberships(individual).getAncestorPositions());
         }
     }
 
@@ -229,58 +310,147 @@ public class HermitReasoner implements OWLReasoner {
         return false;
     }
     
-    // PropertyReasoner stubs: (not yet implemented)
+    // PropertyReasoner interface:
     public java.util.Set<java.util.Set<OWLDataProperty>>	getAncestorProperties(OWLDataProperty property) {
-        return new java.util.HashSet<java.util.Set<OWLDataProperty>>();
+        if (hermit == null) {
+            return new java.util.HashSet<java.util.Set<OWLDataProperty>>();
+        }
+        return posToSets(hermit.getPosition(property).getAncestorPositions());
     }
+    
     public java.util.Set<java.util.Set<OWLObjectProperty>>	getAncestorProperties(OWLObjectProperty property) {
-        return new java.util.HashSet<java.util.Set<OWLObjectProperty>>();
+        if (hermit == null) {
+            return new java.util.HashSet<java.util.Set<OWLObjectProperty>>();
+        }
+        return posToSets(hermit.getPosition(property).getAncestorPositions());
     }
+    
     public java.util.Set<java.util.Set<OWLDataProperty>>	getDescendantProperties(OWLDataProperty property) {
-        return new java.util.HashSet<java.util.Set<OWLDataProperty>>();
+        if (hermit == null) {
+            return new java.util.HashSet<java.util.Set<OWLDataProperty>>();
+        }
+        return posToSets(hermit.getPosition(property).getDescendantPositions());
     }
+    
     public java.util.Set<java.util.Set<OWLObjectProperty>>	getDescendantProperties(OWLObjectProperty property) {
-        return new java.util.HashSet<java.util.Set<OWLObjectProperty>>();
+        if (hermit == null) {
+            return new java.util.HashSet<java.util.Set<OWLObjectProperty>>();
+        }
+        return posToSets(hermit.getPosition(property).getDescendantPositions());
     }
+    
     public java.util.Set<java.util.Set<OWLDescription>>	getDomains(OWLDataProperty property) {
-        return new java.util.HashSet<java.util.Set<OWLDescription>>();
+        java.util.Set<java.util.Set<OWLDescription>> out = new java.util.HashSet<java.util.Set<OWLDescription>>();
+        for (java.util.Set<OWLClass> classSet :
+            getAncestorClasses(factory.getOWLDataMinCardinalityRestriction(property, 1))) {
+            java.util.Set<OWLDescription> newSet = new java.util.HashSet<OWLDescription>();
+            for (OWLClass c : classSet) newSet.add(c);
+            out.add(newSet);
+        }
+        return out;
     }
+    
     public java.util.Set<java.util.Set<OWLDescription>>	getDomains(OWLObjectProperty property) {
-        return new java.util.HashSet<java.util.Set<OWLDescription>>();
+        java.util.Set<java.util.Set<OWLDescription>> out = new java.util.HashSet<java.util.Set<OWLDescription>>();
+        for (java.util.Set<OWLClass> classSet :
+            getAncestorClasses(factory.getOWLObjectMinCardinalityRestriction(property, 1))) {
+            java.util.Set<OWLDescription> newSet = new java.util.HashSet<OWLDescription>();
+            for (OWLClass c : classSet) newSet.add(c);
+            out.add(newSet);
+        }
+        return out;
+        //return getAncestorClasses(factory.getOWLObjectMinCardinalityRestriction(property, 1));
     }
+    
     public java.util.Set<OWLDataProperty>	getEquivalentProperties(OWLDataProperty property) {
-        return new java.util.HashSet<OWLDataProperty>();
+        if (hermit == null) {
+            return new java.util.HashSet<OWLDataProperty>();
+        }
+        return hermit.getPosition(property).getEquivalents();
     }
+    
     public java.util.Set<OWLObjectProperty>	getEquivalentProperties(OWLObjectProperty property) {
-        return new java.util.HashSet<OWLObjectProperty>();
+        if (hermit == null) {
+            return new java.util.HashSet<OWLObjectProperty>();
+        }
+        return hermit.getPosition(property).getEquivalents();
     }
+    
     public java.util.Set<java.util.Set<OWLObjectProperty>>	getInverseProperties(OWLObjectProperty property) {
+        // TODO: implement this (requires property expression classification)
         return new java.util.HashSet<java.util.Set<OWLObjectProperty>>();
     }
+    
     public java.util.Set<OWLDataRange>	getRanges(OWLDataProperty property) {
+        // TODO: implement this (somehow)
         return new java.util.HashSet<OWLDataRange>();
     }
+    
     public java.util.Set<OWLDescription>	getRanges(OWLObjectProperty property) {
-        return new java.util.HashSet<OWLDescription>();
+        java.util.Set<OWLDescription> newSet = new java.util.HashSet<OWLDescription>();
+        for (java.util.Set<OWLClass> classSet :
+            getAncestorClasses(factory.getOWLObjectMinCardinalityRestriction(property.getInverseProperty(), 1))) {
+            for (OWLClass c : classSet) newSet.add(c);
+        }
+        return newSet;
+        //return getAncestorClasses(factory.getOWLObjectMinCardinalityRestriction(property.getInverseProperty(), 1));
     }
+    
     public java.util.Set<java.util.Set<OWLDataProperty>>	getSubProperties(OWLDataProperty property) {
-        return new java.util.HashSet<java.util.Set<OWLDataProperty>>();
+        if (hermit == null) {
+            return new java.util.HashSet<java.util.Set<OWLDataProperty>>();
+        }
+        return posToSets(hermit.getPosition(property).getChildPositions());
     }
+    
     public java.util.Set<java.util.Set<OWLObjectProperty>>	getSubProperties(OWLObjectProperty property) {
-        return new java.util.HashSet<java.util.Set<OWLObjectProperty>>();
+        if (hermit == null) {
+            return new java.util.HashSet<java.util.Set<OWLObjectProperty>>();
+        }
+        return posToSets(hermit.getPosition(property).getChildPositions());
     }
+    
     public java.util.Set<java.util.Set<OWLDataProperty>>	getSuperProperties(OWLDataProperty property) {
-        return new java.util.HashSet<java.util.Set<OWLDataProperty>>();
+        if (hermit == null) {
+            return new java.util.HashSet<java.util.Set<OWLDataProperty>>();
+        }
+        return posToSets(hermit.getPosition(property).getParentPositions());
     }
+    
     public java.util.Set<java.util.Set<OWLObjectProperty>>	getSuperProperties(OWLObjectProperty property) {
-        return new java.util.HashSet<java.util.Set<OWLObjectProperty>>();
-    }      
-    public boolean	isAntiSymmetric(OWLObjectProperty property) { return false; }
-    public boolean	isFunctional(OWLDataProperty property) { return false; }
-    public boolean	isFunctional(OWLObjectProperty property) { return false; }
-    public boolean	isInverseFunctional(OWLObjectProperty property) { return false; }
-    public boolean	isIrreflexive(OWLObjectProperty property) { return false; }
-    public boolean	isReflexive(OWLObjectProperty property) { return false; }
+        if (hermit == null) {
+            return new java.util.HashSet<java.util.Set<OWLObjectProperty>>();
+        }
+        return posToSets(hermit.getPosition(property).getParentPositions());
+    }
+
+    public boolean	isFunctional(OWLDataProperty property) {
+        return !isSatisfiable(factory.getOWLDataMinCardinalityRestriction(property, 2));
+    }
+    
+    public boolean	isFunctional(OWLObjectProperty property) {
+        return !isSatisfiable(factory.getOWLObjectMinCardinalityRestriction(property, 2));
+    }
+    
+    public boolean	isInverseFunctional(OWLObjectProperty property) {
+        return !isSatisfiable(factory.getOWLObjectMinCardinalityRestriction(property.getInverseProperty(), 2));
+    }
+    
+    public boolean	isIrreflexive(OWLObjectProperty property) {
+        return !isSatisfiable(factory.getOWLObjectSelfRestriction(property));
+    }
+
+    public boolean	isReflexive(OWLObjectProperty property) {
+        return !isSatisfiable(factory.getOWLObjectComplementOf(factory.getOWLObjectSelfRestriction(property)));
+    }
+
+    public boolean	isAntiSymmetric(OWLObjectProperty property) {
+        // this function is mis-named: check Asymmetry, not Antisymmetry:
+        if (hermit == null) return false;
+        return hermit.isAsymmetric(property);
+    }
+
+    // TODO: get negative property assertions working in HermiT so that we can implement these
     public boolean	isSymmetric(OWLObjectProperty property) { return false; }
     public boolean	isTransitive(OWLObjectProperty property) { return false; }
 }
