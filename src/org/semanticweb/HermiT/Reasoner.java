@@ -316,7 +316,35 @@ public class Reasoner implements Serializable {
         getAtomicRoleHierarchy() {
         return m_dlOntology.explicitRoleHierarchy;
     }
+    
+    protected HierarchyPosition<AtomicRole> getPosition(AtomicRole r) {
+        HierarchyPosition<AtomicRole> out = getAtomicRoleHierarchy().get(r);
+        if (out == null) {
+            NaiveHierarchyPosition<AtomicRole> newPos =
+                new NaiveHierarchyPosition<AtomicRole>();
+            newPos.labels.add(r);
+            if (r.isRestrictedToDatatypes()) {
+                newPos.parents.add(getAtomicRoleHierarchy().get(
+                    AtomicRole.TOP_DATA_ROLE));
+                newPos.children.add(getAtomicRoleHierarchy().get(
+                    AtomicRole.BOTTOM_DATA_ROLE));
+            } else {
+                newPos.parents.add(getAtomicRoleHierarchy().get(
+                    AtomicRole.TOP_OBJECT_ROLE));
+                newPos.children.add(getAtomicRoleHierarchy().get(
+                    AtomicRole.BOTTOM_OBJECT_ROLE));
+            }
+            out = newPos;
+        }
+        return out;
+    }
 
+    public HierarchyPosition<OWLObjectProperty> getPosition(OWLObjectProperty p) {
+        return new TranslatedHierarchyPosition<AtomicRole, OWLObjectProperty>(
+            getPosition(AtomicRole.createObjectRole(p.getURI().toString())),
+            new RoleToOWLObjectProperty(clausifier.factory));
+    }
+    
     protected Map<AtomicConcept, HierarchyPosition<AtomicConcept>>
         getAtomicConceptHierarchy() {
         if (atomicConceptHierarchy == null) {

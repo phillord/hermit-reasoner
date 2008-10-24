@@ -43,8 +43,8 @@ public class OptimizedClassificationManager {
         for (SubsumptionHierarchyNode subsumptionHierarchyNode : m_subsumptionHierarchy.m_atomicConceptsToNodes.values()) {
             if (subsumptionHierarchyNode.m_parentNodes.isEmpty() &&
                 subsumptionHierarchyNode != m_subsumptionHierarchy.thingNode()) {
-                subsumptionHierarchyNode.m_parentNodes.add(m_subsumptionHierarchy.m_thingNode);
                 m_subsumptionHierarchy.m_thingNode.m_childNodes.remove(m_subsumptionHierarchy.nothingNode());
+                subsumptionHierarchyNode.m_parentNodes.add(m_subsumptionHierarchy.m_thingNode);
                 m_subsumptionHierarchy.m_thingNode.m_childNodes.add(subsumptionHierarchyNode);
             }
             if (subsumptionHierarchyNode.m_childNodes.isEmpty() &&

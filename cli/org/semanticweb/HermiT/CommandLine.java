@@ -432,12 +432,19 @@ public class CommandLine {
     protected static final String usageString = "Usage: hermit [OPTION]... URI...";
     protected static final String[] helpHeader = {
         "Perform reasoning on each OWL ontology URI.",
-        "Example: hermit -k http://hermit-reasoner.org/2008/test.owl",
-        "    (retrieves and checks consistency of test ontology)",
+        "Example: hermit -ds owl:Thing http://hermit-reasoner.org/2008/test.owl",
+        "    (prints direct subclasses of owl:Thing within the test ontology)",
         "",
-        "Both relative and absolute URIs can be used. Relative URIs are resolved with",
+        "Both relative and absolute ontology URIs can be used. Relative URIs are resolved with",
         "respect to the current directory (i.e. local file names are valid URIs); this",
         "behavior can be changed with the '--base' option.",
+        "",
+        "Classes and properties are identified using functional-syntax-style",
+        "identifiers: names not containing a colon are resolved against the ontology's",
+        "default namespace; otherwise the portion of the name preceding the colon is treated",
+        "as a namespace prefix. Use of namespaces can be controlled using the -n, -N, and",
+        "--namespace options. Alternatively, classes and properties can be identified with",
+        "full URIs by enclosing the URI in <angle brackets>.",
         "",
         "By default, ontologies are simply retrieved and parsed. For more interesting",
         "reasoning, set one of the -c/-k/-s/-S/-e/-U options."
