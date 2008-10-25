@@ -7,20 +7,7 @@
     <tstamp>
         <format property="builddate" pattern="yyyy-MM-dd"/>
     </tstamp>
-    <property name="revision" value="1.0"/>
-    <!--exec outputproperty="revision" executable="svnversion">
-         <arg line="-n -c" />
-         <redirector>
-           <outputfilterchain>
-             <tokenfilter>
-                 <replaceregex pattern="^[0-9]*:" replace="0." flags="g"/>
-             </tokenfilter>
-             <tokenfilter>
-                 <replaceregex pattern="^(.*)[MS]+$" replace="0.\1" flags="g"/>
-             </tokenfilter>
-          </outputfilterchain>
-        </redirector>
-    </exec-->
+    <property name="revision" value="0.9.0a"/>
     <property name="version" value="${revision}"/>
 
     <!-- structure of output files -->
@@ -157,7 +144,7 @@
                 <attribute name="Bundle-SymbolicName" value="org.semanticweb.HermiT;singleton:=true"/>
                 <attribute name="Bundle-Category" value="protege"/>
                 <attribute name="Bundle-Description" value="A plugin for the Protege OWL Editor which allows reasoning using the HermiT reasoner"/>
-                <attribute name="Bundle-DocURL" value="http://www.comlab.ox.ac.uk/people/Boris.Motik/HermiT/"/>
+                <attribute name="Bundle-DocURL" value="http://hermit-reasoner.com"/>
                 <attribute name="Bundle-Vendor" value="Boris Motik, Rob Shearer, and Ian Horrocks"/>
                 <attribute name="Bundle-Version" value="0.${revision}"/>
                 <attribute name="Bundle-Activator" value="org.protege.editor.core.plugin.DefaultPluginActivator"/>

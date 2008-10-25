@@ -57,7 +57,6 @@ public class HermitReasoner implements MonitorableOWLReasoner {
     }
     
     public void setProgressMonitor(ProgressMonitor m) {
-        System.out.println("requested progress update...");
         monitor.setMonitor(m);
     }
 
@@ -65,9 +64,9 @@ public class HermitReasoner implements MonitorableOWLReasoner {
     public void classify() {
         try {
             monitor.beginTask("Classifying...", hermit.numConceptNames());
-            System.out.println("Seeding subsumption cache...");
+            // System.out.println("Seeding subsumption cache...");
             hermit.seedSubsumptionCache();
-            System.out.println("...done");
+            // System.out.println("...done");
             } catch (PluginMonitor.Cancelled e) {
                 // ignore; if we pass it on the user gets a dialog
             } finally {
@@ -130,9 +129,9 @@ public class HermitReasoner implements MonitorableOWLReasoner {
             config.monitor = monitor;
             try {
                 monitor.beginTask("Loading...");
-                System.out.println("Loading ontology into HermiT...");
+                // System.out.println("Loading ontology into HermiT...");
                 hermit = new Reasoner(ontology, config);
-                System.out.println("...done");
+                // System.out.println("...done");
             } catch (PluginMonitor.Cancelled e) {
                 // ignore; if we pass it on the user gets a dialog
             } finally {
@@ -253,6 +252,7 @@ public class HermitReasoner implements MonitorableOWLReasoner {
     }
 
     public java.util.Map<OWLObjectProperty,java.util.Set<OWLIndividual>> getObjectPropertyRelationships(OWLIndividual individual) {
+        // TODO: implement (can be done now, but a pain in the ass)
         return new java.util.HashMap<OWLObjectProperty,java.util.Set<OWLIndividual>>();
     }
     
@@ -280,13 +280,29 @@ public class HermitReasoner implements MonitorableOWLReasoner {
     }
 
     public boolean hasDataPropertyRelationship(OWLIndividual subject, OWLDataPropertyExpression property, OWLConstant object) {
-        return false;
+        return isSubClassOf(
+            factory.getOWLObjectOneOf(subject),
+            factory.getOWLDataValueRestriction(property, object));
     }
+    
     public boolean hasObjectPropertyRelationship(OWLIndividual subject, OWLObjectPropertyExpression property, OWLIndividual object) {
-        return false;
+        return isSubClassOf(
+            factory.getOWLObjectOneOf(subject),
+            factory.getOWLObjectSomeRestriction(property, factory.getOWLObjectOneOf(object)));
     }
+
     public boolean hasType(OWLIndividual individual, OWLDescription type, boolean direct) {
-        return false;
+        if (type instanceof OWLClass && direct) {
+            for (HierarchyPosition<OWLClass> pos :
+                    hermit.getPosition(factory.getOWLObjectOneOf(individual)).getParentPositions()) {
+                if (pos.getEquivalents().contains((OWLClass) type)) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            return isSubClassOf(factory.getOWLObjectOneOf(individual), type);
+        }
     }
     
     // PropertyReasoner interface:
