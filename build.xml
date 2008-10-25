@@ -41,7 +41,6 @@
     <!-- SOURCE PATHS -->
     <path id="sourcepath">
         <pathelement path="${projectroot}/src"/>
-        <pathelement path="${projectroot}/cli"/>
     </path>
     <path id="pluginsourcepath">
         <pathelement path="${projectroot}/plugin"/>
@@ -83,11 +82,21 @@
 
     <target name="compile">
         <mkdir dir="${classdir}"/>
+        <mkdir dir="${builddir}/clisrc"/>
+        <copy todir="${builddir}/clisrc">
+            <fileset dir="${projectroot}/cli"/>
+            <filterset>
+                <filter token="VERSION" value="${version}"/>
+            </filterset>
+        </copy>
         <javac destdir="${classdir}" deprecation="yes">
             <compilerarg value="-Xlint:unchecked"/>
             <compilerarg value="-Xlint:all"/>
             <compilerarg value="-Xlint:-serial"/>
-            <src refid="sourcepath"/>
+            <src>
+                <pathelement path="${projectroot}/src"/>
+                <pathelement path="${builddir}/clisrc"/>
+            </src>
             <classpath refid="classpath"/>
         </javac>
         <copy todir="${classdir}" >

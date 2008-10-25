@@ -510,7 +510,7 @@ public class CommandLine {
         kParser = 1010, kClausifyRoleBox = 1011, kDefaultNamespace = 1012, kDumpNamespaces = 1013,
         kSuperRoles = 1014, kSubRoles = 1015, kEquivRoles = 1016, kUniversalRole = 1017;
     
-    static protected final String versionString = "HermiT version 0.5.0";
+    static protected final String versionString = "HermiT version @VERSION@";
     protected static final String usageString = "Usage: hermit [OPTION]... URI...";
     protected static final String[] helpHeader = {
         "Perform reasoning on each OWL ontology URI.",
@@ -533,7 +533,7 @@ public class CommandLine {
         "By default, ontologies are simply retrieved and parsed. For more",
         "interesting reasoning, set one of the -c/-k/-s/-S/-e/-U options."
     };
-    protected static final String[] helpFooter = {
+    protected static final String[] footer = {
         "HermiT is a product of Oxford University.",
         "Visit <http://hermit-reasoner.org> for details."
     };
@@ -651,12 +651,13 @@ public class CommandLine {
                         System.out.println(usageString);
                         for (String s : helpHeader) System.out.println(s);
                         System.out.println(Option.formatOptionHelp(options));
-                        for (String s : helpFooter) System.out.println(s);
+                        for (String s : footer) System.out.println(s);
                         System.exit(0);
                         didSomething = true;
                     } break;
                     case 'V': {
                         System.out.println(versionString);
+                        for (String s : footer) System.out.println(s);
                         System.exit(0);
                         didSomething = true;
                     } break;
