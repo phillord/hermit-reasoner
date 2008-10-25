@@ -12,6 +12,5 @@ distribution in the file `license.txt`. An online version is available at
 <http://www.gnu.org/licenses/>.
 
 More information about HermiT and additional licensing information is
-available at <http://www.comlab.ox.ac.uk/people/Boris.Motik/HermiT/>, or by
-contacting Boris Motik, Rob Shearer, or Ian Horrocks at the Oxford
-University Computing Laboratory.
+available at <http://hermit-reasoner.com>, or by contacting Boris Motik, Rob
+Shearer, or Ian Horrocks at the Oxford University Computing Laboratory.

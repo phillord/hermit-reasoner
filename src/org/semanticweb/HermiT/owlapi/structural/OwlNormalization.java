@@ -130,7 +130,7 @@ public class OwlNormalization {
      * getConceptInclusions, getAsymmetricObjectProperties, etc) can be used to
      * retrieve the normalised axioms and assertions from the ontology.
      * 
-     * @param OWLOntology
+     * @param inOntology
      *            the ontology to be normalized
      * @throws OWLException
      */

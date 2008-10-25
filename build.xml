@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0"?>
 <!-- Copyright 2008 by Oxford University; see license.txt for details -->
 
-<project name="HermiT" default="release" basedir=".">
+<project name="HermiT" default="combined" basedir=".">
 
     <!-- determine the build date -->
     <tstamp>
@@ -21,11 +21,11 @@
     <!-- structure of the release -->
     <property name="releasedir" value="${builddir}/release"/>
     <property name="HermiTjar" value="${releasedir}/${ant.project.name}.jar"/>
-    <property name="pluginjar" value="${releasedir}/${ant.project.name}-Protégé.jar"/>
-    <property name="HermiTsrcjar" value="${releasedir}/${ant.project.name}.src.jar"/>
-    <property name="javadocdir" value="${releasedir}/javadoc"/>
-    <property name="apijavadocdir" value="${releasedir}/javadoc/api"/>
-    <property name="fulljavadocdir" value="${releasedir}/javadoc/full"/>
+    <!-- <property name="pluginjar" value="${releasedir}/${ant.project.name}-Protégé.jar"/> -->
+    <property name="HermiTsrcjar" value="${releasedir}/${ant.project.name}-src.zip"/>
+    <property name="javadocdir" value="${releasedir}/javadoc/javadoc"/>
+    <property name="apijavadocdir" value="${javadocdir}/api"/>
+    <property name="fulljavadocdir" value="${javadocdir}/full"/>
     
     <property name="src" value="${projectroot}/src/org/semanticweb/HermiT"/>
 
@@ -83,7 +83,7 @@
 
     <target name="compile">
         <mkdir dir="${classdir}"/>
-        <javac destdir="${classdir}" deprecation="yes" debug="on">
+        <javac destdir="${classdir}" deprecation="yes">
             <compilerarg value="-Xlint:unchecked"/>
             <compilerarg value="-Xlint:all"/>
             <compilerarg value="-Xlint:-serial"/>
@@ -106,7 +106,7 @@
         <unjar src="${automaton}" dest="${flattendir}"/>
     </target>
 
-    <target name="jar" depends="compile,flatten-owlapi,flatten-automaton">
+    <target name="without-plugin" depends="compile,flatten-owlapi,flatten-automaton">
         <mkdir dir="${releasedir}"/>
         <jar jarfile="${HermiTjar}">
             <manifest>
@@ -120,25 +120,36 @@
         </jar>
     </target>
     
-    <target name="plugin" depends="jar">
-        <mkdir dir="${plugindir}"/>
-        <javac destdir="${plugindir}" deprecation="yes">
+    <target name="combined" depends="compile,flatten-owlapi,flatten-automaton,javadoc">
+        <mkdir dir="${releasedir}"/>
+        <javac destdir="${classdir}" deprecation="yes">
             <compilerarg value="-Xlint:all"/>
             <src refid="pluginsourcepath"/>
             <classpath refid="pluginclasspath"/>
         </javac>
-        <copy todir="${plugindir}" file="plugin/plugin.xml">
+        <copy todir="${classdir}" file="plugin/plugin.xml">
             <filterset>
                 <filter token="VERSION" value="${version}"/>
             </filterset>
         </copy>
-        <mkdir dir="${plugindir}/lib"/>
-        <copy todir="${plugindir}/lib" file="${HermiTjar}"/>
-        <jar jarfile="${pluginjar}">
+        <mkdir dir="${releasedir}/src/src"/>
+        <copy todir="${releasedir}/src/src">
+            <fileset dir="${projectroot}">
+                <exclude name="bin/**"/>
+                <exclude name="build/**"/>
+            </fileset>
+        </copy>
+        <copy file="readme.txt" tofile="${releasedir}/readme.txt">
+            <filterset>
+                <filter token="VERSION" value="${version}"/>
+            </filterset>
+        </copy>
+        <jar jarfile="${HermiTjar}">
             <manifest>
                 <attribute name="Implementation-Title" value="HermiT"/>
                 <attribute name="Implementation-Vendor" value="Oxford University"/>
                 <attribute name="Implementation-Version" value="${version}"/>
+                <attribute name="Main-Class" value="org.semanticweb.HermiT.CommandLine"/>
                 <attribute name="Bundle-ManifestVersion" value="2"/>
                 <attribute name="Bundle-Name" value="HermiT Reasoner"/>
                 <attribute name="Bundle-SymbolicName" value="org.semanticweb.HermiT;singleton:=true"/>
@@ -148,14 +159,19 @@
                 <attribute name="Bundle-Vendor" value="Boris Motik, Rob Shearer, and Ian Horrocks"/>
                 <attribute name="Bundle-Version" value="0.${revision}"/>
                 <attribute name="Bundle-Activator" value="org.protege.editor.core.plugin.DefaultPluginActivator"/>
-                <attribute name="Bundle-ClassPath" value=".,lib/HermiT.jar"/>
+                <attribute name="Bundle-ClassPath" value="."/>
                 <attribute name="Require-Bundle" value="org.protege.common,org.protege.editor.core.application,org.protege.editor.owl,org.semanticweb.owl.owlapi"/>
             </manifest>
-            <fileset dir="${plugindir}"/>
+            <fileset dir="${classdir}"/>
+            <fileset dir="${flattendir}"/>
+            <fileset dir="${releasedir}/src"/>
+            <fileset dir="${javadocdir}"/>
+            <fileset file="${releasedir}/readme.txt"/>
+            <fileset file="gpl.txt"/>
         </jar>
     </target>
     
-    <target name="jarsrc">
+    <!-- <target name="jarsrc">
         <mkdir dir="${releasedir}"/>
         <jar jarfile="${HermiTsrcjar}">
             <fileset dir="${projectroot}">
@@ -163,7 +179,7 @@
                 <exclude name="build/**"/>
             </fileset>
         </jar>
-    </target>
+    </target> -->
     
     <target name="javadoc">
         <mkdir dir="${javadocdir}"/>
@@ -182,11 +198,15 @@
         </javadoc>
     </target>
     
-    <target name="release" depends="clean,jar,jarsrc,javadoc">
-        <copy file="readme.txt" tofile="${releasedir}/readme.txt"/>
+    <!-- <target name="release" depends="clean,combined,jarsrc,javadoc">
+        <copy file="readme.txt" tofile="${releasedir}/readme.txt">
+            <filterset>
+                <filter token="VERSION" value="${version}"/>
+            </filterset>
+        </copy>
         <copy file="gpl.txt" tofile="${releasedir}/license.txt"/>
         <zip zipfile="${builddir}/${ant.project.name}-${version}.zip" basedir="${releasedir}"/>
-    </target>
+    </target> -->
 
     <!-- TEST TARGETS -->
 
