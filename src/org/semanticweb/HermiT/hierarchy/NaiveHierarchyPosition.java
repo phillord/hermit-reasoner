@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Queue;
 import java.util.LinkedList;
+import java.util.Collections;
 
 public class NaiveHierarchyPosition<T> implements HierarchyPosition<T> {
     public Set<HierarchyPosition<T>> parents;
@@ -19,7 +20,9 @@ public class NaiveHierarchyPosition<T> implements HierarchyPosition<T> {
         labels = new HashSet<T>();
     }
     public Set<T> getEquivalents() {
-        return labels;
+        // TODO: patch Protégé plugin so that we don't need this -rob 2008-10-26
+        return new HashSet<T>(labels);
+        //return Collections.unmodifiableSet(labels);
     }
     public Set<T> getAncestors() {
         Set<T> output = new HashSet<T>();
@@ -46,10 +49,10 @@ public class NaiveHierarchyPosition<T> implements HierarchyPosition<T> {
         return output;
     }
     public Set<HierarchyPosition<T>> getParentPositions() {
-        return parents;
+        return Collections.unmodifiableSet(parents);
     }
     public Set<HierarchyPosition<T>> getChildPositions() {
-        return children;
+        return Collections.unmodifiableSet(children);
     }
     public Set<HierarchyPosition<T>> getAncestorPositions() {
         Set<HierarchyPosition<T>> output = new HashSet<HierarchyPosition<T>>();
