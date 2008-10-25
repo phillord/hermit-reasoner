@@ -439,7 +439,10 @@ public class Reasoner implements Serializable {
     
     protected HierarchyPosition<AtomicConcept>
         getPosition(AtomicConcept c) {
-        getAtomicConceptHierarchy();
+        if (getAtomicConceptHierarchy().containsKey(c)) {
+            HierarchyPosition<AtomicConcept> out = getAtomicConceptHierarchy().get(c);
+            return out;
+        }
         assert oldHierarchy != null;
         StandardClassificationManager classifier =
             new StandardClassificationManager(oldHierarchy,
@@ -470,6 +473,7 @@ public class Reasoner implements Serializable {
     
     private AtomicConcept define(OWLDescription desc) {
         if (desc.isAnonymous()) {
+            // System.out.println("defining anonymous thing");
             Set<DLClause> clauses = new HashSet<DLClause>();
             Set<Atom> positiveFacts = new HashSet<Atom>();
             Set<Atom> negativeFacts = new HashSet<Atom>();
@@ -482,6 +486,7 @@ public class Reasoner implements Serializable {
             m_tableau.extendWithDefinitions(clauses, positiveFacts, negativeFacts);
             return c;
         } else {
+            // System.out.println("getting atom for " + desc.asOWLClass().toString());
             return AtomicConcept.create(desc.asOWLClass().getURI().toString());
         }
     }
