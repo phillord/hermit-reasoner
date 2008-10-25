@@ -31,6 +31,7 @@ public final class Tableau implements Serializable {
     protected final ExpansionStrategy m_existentialsExpansionStrategy;
     protected final DLOntology m_dlOntology;
     protected final Map<String,Object> m_parameters;
+    private final boolean m_makeTopRoleUniversal;
     protected final DependencySetFactory m_dependencySetFactory;
     protected final ExtensionManager m_extensionManager;
     protected final LabelManager m_labelManager;
@@ -54,14 +55,20 @@ public final class Tableau implements Serializable {
     protected Node m_firstTableauNode;
     protected Node m_lastTableauNode;
     protected Node m_lastMergedOrPrunedNode;
+    protected Node m_arbitraryOriginalNode;
     protected GroundDisjunction m_firstGroundDisjunction;
     protected GroundDisjunction m_firstUnprocessedGroundDisjunction;
     protected Node m_checkedNode;
     private Collection<Atom> additionalPositiveFacts;
     private Collection<Atom> additionalNegativeFacts;
 
-    public Tableau(TableauMonitor tableauMonitor,ExpansionStrategy existentialsExpansionStrategy,DLOntology dlOntology,Map<String,Object> parameters) {
+    public Tableau(TableauMonitor tableauMonitor,
+                    ExpansionStrategy existentialsExpansionStrategy,
+                    DLOntology dlOntology,
+                    boolean makeTopRoleUniversal,
+                    Map<String,Object> parameters) {
         m_parameters=parameters;
+        m_makeTopRoleUniversal = makeTopRoleUniversal;
         m_tableauMonitor=tableauMonitor;
         m_existentialsExpansionStrategy=existentialsExpansionStrategy;
         m_dlOntology=dlOntology;
@@ -162,6 +169,7 @@ public final class Tableau implements Serializable {
         m_firstTableauNode=null;
         m_lastTableauNode=null;
         m_lastMergedOrPrunedNode=null;
+        m_arbitraryOriginalNode=null;
         m_firstGroundDisjunction=null;
         m_firstUnprocessedGroundDisjunction=null;
         m_checkedNode=null;
@@ -272,7 +280,7 @@ public final class Tableau implements Serializable {
         if (m_dlOntology.hasNominals()) {
             loadABox();
         }
-        m_checkedNode=createNewRootNode(m_dependencySetFactory.emptySet(),0);
+        m_checkedNode=createNewOriginalNode(m_dependencySetFactory.emptySet(),0);
         m_extensionManager.addConceptAssertion(atomicConcept,m_checkedNode,m_dependencySetFactory.emptySet());
         boolean result=isSatisfiable();
         if (m_tableauMonitor!=null) {
@@ -286,7 +294,7 @@ public final class Tableau implements Serializable {
         clear();
         if (m_dlOntology.hasNominals())
             loadABox();
-        m_checkedNode=createNewRootNode(m_dependencySetFactory.emptySet(),0);
+        m_checkedNode=createNewOriginalNode(m_dependencySetFactory.emptySet(),0);
         m_extensionManager.addConceptAssertion(subconcept,m_checkedNode,m_dependencySetFactory.emptySet());
         m_branchingPoints[0]=new BranchingPoint(this);
         m_currentBranchingPoint++;
@@ -304,8 +312,8 @@ public final class Tableau implements Serializable {
         if (m_dlOntology.hasNominals()) {
             loadABox();
         }
-        Node a = createNewRootNode(m_dependencySetFactory.emptySet(), 0);
-        Node b = createNewRootNode(m_dependencySetFactory.emptySet(), 0);
+        Node a = createNewOriginalNode(m_dependencySetFactory.emptySet(), 0);
+        Node b = createNewOriginalNode(m_dependencySetFactory.emptySet(), 0);
         m_extensionManager.addRoleAssertion(role, a, b, m_dependencySetFactory.emptySet());
         m_branchingPoints[0] = new BranchingPoint(this);
         m_currentBranchingPoint++;
@@ -351,7 +359,7 @@ public final class Tableau implements Serializable {
         clear();
         loadABox();
         if (m_firstTableauNode==null)
-            createNewRootNode(m_dependencySetFactory.emptySet(),0); // Ensures that there is at least one individual
+            createNewOriginalNode(m_dependencySetFactory.emptySet(),0); // Ensures that there is at least one individual
         boolean result=isSatisfiable();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isABoxSatisfiableFinished(result);
@@ -362,10 +370,20 @@ public final class Tableau implements Serializable {
         DLPredicate dlPredicate=atom.getDLPredicate();
         switch (dlPredicate.getArity()) {
         case 1:
-            m_extensionManager.addAssertion(dlPredicate,getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(0)),m_dependencySetFactory.emptySet());
+            m_extensionManager.addAssertion(
+                dlPredicate,
+                getNodeForIndividual(individualsToNodes,
+                                        (Individual) atom.getArgument(0)),
+                m_dependencySetFactory.emptySet());
             break;
         case 2:
-            m_extensionManager.addAssertion(dlPredicate,getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(0)),getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(1)),m_dependencySetFactory.emptySet());
+            m_extensionManager.addAssertion(
+                dlPredicate,
+                getNodeForIndividual(individualsToNodes,
+                                        (Individual) atom.getArgument(0)),
+                getNodeForIndividual(individualsToNodes,
+                                        (Individual) atom.getArgument(1)),
+                m_dependencySetFactory.emptySet());
             break;
         default:
             throw new IllegalArgumentException("Unsupported arity of positive ground atoms.");
@@ -378,7 +396,11 @@ public final class Tableau implements Serializable {
             throw new IllegalArgumentException("Unsupported type of negative fact.");
         switch (dlPredicate.getArity()) {
         case 1:
-            m_extensionManager.addConceptAssertion(AtomicNegationConcept.create((AtomicConcept)dlPredicate),getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(0)),m_dependencySetFactory.emptySet());
+            m_extensionManager.addConceptAssertion(
+                AtomicNegationConcept.create((AtomicConcept) dlPredicate),
+                getNodeForIndividual(individualsToNodes,
+                                        (Individual) atom.getArgument(0)),
+                m_dependencySetFactory.emptySet());
             break;
         default:
             throw new IllegalArgumentException("Unsupported arity of negative ground atoms.");
@@ -400,10 +422,10 @@ public final class Tableau implements Serializable {
         }
     }
     
-    protected Node getNodeForIndividual(Map<Individual,Node> individualsToNodes,Individual individual) {
+    private Node getNodeForIndividual(Map<Individual,Node> individualsToNodes,Individual individual) {
         Node node=individualsToNodes.get(individual);
         if (node==null) {
-            node=createNewRootNode(m_dependencySetFactory.emptySet(),0);
+            node=createNewOriginalNode(m_dependencySetFactory.emptySet(),0);
             individualsToNodes.put(individual,node);
         }
         return node;
@@ -497,6 +519,21 @@ public final class Tableau implements Serializable {
         m_extensionManager.clearClash();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.backtrackToFinished(branchingPoint);
+    }
+    public Node createNewOriginalNode(DependencySet dependencySet,int treeDepth) {
+        Node out = createNewRootNode(dependencySet, treeDepth);
+        if (m_makeTopRoleUniversal) {
+            if (m_arbitraryOriginalNode == null) {
+                m_arbitraryOriginalNode = out;
+            } else {
+                m_extensionManager.addAssertion(
+                    AtomicRole.TOP_OBJECT_ROLE,
+                    m_arbitraryOriginalNode,
+                    out,
+                    m_dependencySetFactory.emptySet());
+            }
+        }
+        return out;
     }
     public Node createNewRootNode(DependencySet dependencySet,int treeDepth) {
         return createNewNodeRaw(dependencySet,null,NodeType.ROOT_NODE,treeDepth);

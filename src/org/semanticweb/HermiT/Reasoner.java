@@ -128,6 +128,7 @@ public class Reasoner implements Serializable {
         public boolean checkClauses;
         public boolean prepareForExpressiveQueries;
         public boolean onlyCoreDatatypes;
+        public boolean makeTopRoleUniversal;
         public TableauMonitor monitor;
         public final Map<String,Object> parameters;
     
@@ -144,6 +145,7 @@ public class Reasoner implements Serializable {
             checkClauses = true;
             prepareForExpressiveQueries = false;
             onlyCoreDatatypes = true;
+            makeTopRoleUniversal = false;
             monitor = null;
             parameters = new HashMap<String,Object>();
         }
@@ -370,6 +372,10 @@ public class Reasoner implements Serializable {
         return new TranslatedHierarchyPosition<AtomicRole, OWLDataProperty>(
             getPosition(AtomicRole.createDataRole(p.getURI().toString())),
             new RoleToOWLDataProperty(clausifier.factory));
+    }
+    
+    public int numConceptNames() {
+        return m_dlOntology.numExternalConcepts();
     }
     
     protected Map<AtomicConcept, HierarchyPosition<AtomicConcept>>
@@ -968,6 +974,7 @@ public class Reasoner implements Serializable {
         m_tableau = new Tableau(tableauMonitor,
                                 existentialsExpansionStrategy,
                                 m_dlOntology,
+                                m_config.makeTopRoleUniversal,
                                 m_config.parameters);
         m_subsumptionChecker = new TableauSubsumptionChecker(m_tableau);
         if (m_config.subsumptionCacheStrategyType ==

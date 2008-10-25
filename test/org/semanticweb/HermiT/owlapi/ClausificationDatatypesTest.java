@@ -251,7 +251,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         OWLDataFactory factory = manager.getOWLDataFactory();
         OwlNormalization normalization = new OwlNormalization(factory);
-        normalization.processOntology(ontology);
+        normalization.processOntology(new Reasoner.Configuration(), ontology);
         for (OWLDescription[] inclusion : normalization.getConceptInclusions()) {
             OWLDescription superDescription;
             if (inclusion.length == 1) {
@@ -276,7 +276,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLDataFactory factory = manager.getOWLDataFactory();
         OWLOntology ontology = getOWLOntologyFromResource(resourceName);
         OwlNormalization normalization = new OwlNormalization(factory);
-        normalization.processOntology(ontology);
+        normalization.processOntology(new Reasoner.Configuration(), ontology);
         for (OWLDescription[] inclusion : normalization.getConceptInclusions()) {
             OWLDescription superDescription;
             if (inclusion.length == 1) {

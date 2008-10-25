@@ -38,27 +38,7 @@ public class HermitReasoner implements MonitorableOWLReasoner {
     OWLOntologyManager manager;
     OWLDataFactory factory;
     int nextKbId;
-    
-    class TaskStatus {
-        String name;
-        public TaskStatus(String name) {
-            this.name = name;
-        }
-        public TaskStatus() {}
-        public void update(ProgressMonitor m) {
-            System.out.println("updating progress monitor!");
-            if (name == null) {
-                m.setMessage("HermiT is working...");
-            } else {
-                m.setMessage(name);
-            }
-            m.setSize(100);
-            m.setProgress(50);
-        }
-    }
-    
-    TaskStatus status;
-    
+        
     HermitReasoner(OWLOntologyManager inManager) {
         manager = inManager;
         factory = manager.getOWLDataFactory();
@@ -78,23 +58,20 @@ public class HermitReasoner implements MonitorableOWLReasoner {
     
     public void setProgressMonitor(ProgressMonitor m) {
         System.out.println("requested progress update...");
-        if (status != null) {
-            m.setStarted();
-            status.update(m);
-        } else {
-            m.setFinished();
-        }
+        monitor.setMonitor(m);
     }
 
     // ReasonerBase implementation:
     public void classify() {
         try {
-            status = new TaskStatus("Classifying...");
+            monitor.beginTask("Classifying...", hermit.numConceptNames());
             System.out.println("Seeding subsumption cache...");
             hermit.seedSubsumptionCache();
             System.out.println("...done");
-        } finally {
-            status = null;
+            } catch (PluginMonitor.Cancelled e) {
+                // ignore; if we pass it on the user gets a dialog
+            } finally {
+            monitor.endTask();
         }
     }
 
@@ -152,12 +129,14 @@ public class HermitReasoner implements MonitorableOWLReasoner {
             config.subsumptionCacheStrategyType = Reasoner.SubsumptionCacheStrategyType.JUST_IN_TIME;
             config.monitor = monitor;
             try {
-                status = new TaskStatus("Loading...");
+                monitor.beginTask("Loading...");
                 System.out.println("Loading ontology into HermiT...");
                 hermit = new Reasoner(ontology, config);
                 System.out.println("...done");
+            } catch (PluginMonitor.Cancelled e) {
+                // ignore; if we pass it on the user gets a dialog
             } finally {
-                status = null;
+                monitor.endTask();
             }
         } catch (OWLException e) {
             throw new RuntimeException("Failed to merge ontologies.", e);

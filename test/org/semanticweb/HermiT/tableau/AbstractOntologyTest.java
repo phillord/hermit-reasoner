@@ -211,7 +211,7 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
         ExpansionStrategy ExpansionStrategy = new CreationOrderStrategy(
                 blockingStrategy);
         return new Tableau(getTableauMonitor(), ExpansionStrategy,
-                dlOntology, new HashMap<String, Object>());
+                dlOntology, false, new HashMap<String, Object>());
     }
 
     protected TableauMonitor getTableauMonitor() {

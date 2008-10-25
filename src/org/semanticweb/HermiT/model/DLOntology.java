@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.HashMap;
 import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
 import org.semanticweb.HermiT.model.dataranges.DataRange;
+import org.semanticweb.HermiT.InternalNames;
 
 import org.semanticweb.HermiT.Namespaces;
 
@@ -49,6 +50,11 @@ public class DLOntology implements Serializable {
     protected final Set<Individual> m_allIndividuals;
     protected final Set<DescriptionGraph> m_allDescriptionGraphs;
     public final Map<AtomicRole, HierarchyPosition<AtomicRole>> explicitRoleHierarchy;
+    protected int m_numExternalConcepts;
+    
+    public int numExternalConcepts() {
+        return m_numExternalConcepts;
+    }
 
     public DLOntology(String ontologyURI,
             Set<DLClause> dlClauses,
@@ -72,6 +78,12 @@ public class DLOntology implements Serializable {
                 AtomicConceptComparator.INSTANCE);
         } else {
             m_allAtomicConcepts = atomicConcepts;
+        }
+        m_numExternalConcepts = 0;
+        for (AtomicConcept c : m_allAtomicConcepts) {
+            if (!InternalNames.isInternalUri(c.getURI())) {
+                ++m_numExternalConcepts;
+            }
         }
         if (individuals == null) {
             m_allIndividuals = new TreeSet<Individual>(

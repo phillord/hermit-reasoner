@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Iterator;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
@@ -118,7 +119,7 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
                 directBlockingChecker, blockingSignatureCache);
         ExpansionStrategy ExpansionStrategy = new CreationOrderStrategy(
                 blockingStrategy);
-        return new Tableau(null, ExpansionStrategy, dlOntology,
+        return new Tableau(null, ExpansionStrategy, dlOntology, false,
                 new HashMap<String, Object>());
     }
 
@@ -290,6 +291,13 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
         for (String s : IGNORED_CLAUSES) {
             actual.remove(s);
         }
+        for (Iterator<String> i = actual.iterator(); i.hasNext(); ) {
+            String s = i.next();
+            if (s.startsWith("owl:TopObjectProperty") ||
+                s.startsWith("owl:TopDataProperty")) {
+                i.remove();
+            }
+        }
         try {
             assertEquals(control.length, actual.size());
             boolean isOK = true;
@@ -332,6 +340,17 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
         for (String s : IGNORED_CLAUSES) {
             actual.remove(s);
         }
+        for (Iterator<T> i = actual.iterator(); i.hasNext(); ) {
+            T val = i.next();
+            if (val instanceof String) {
+                String s = (String) val;
+                if (s.startsWith("owl:TopObjectProperty") ||
+                    s.startsWith("owl:TopDataProperty")) {
+                    i.remove();
+                }
+            }
+        }
+        
         try {
             assertEquals(control.size(), actual.size());
             for (T contr : control)

@@ -508,7 +508,7 @@ public class CommandLine {
         kTime=1000, kDumpClauses=1001, kDumpRoleBox=1002, kOwlApi = 1003, kKaon2 = 1004,
         kDirectBlock = 1005, kBlockStrategy = 1006, kBlockCache = 1007, kExpansion = 1008, kBase = 1009,
         kParser = 1010, kClausifyRoleBox = 1011, kDefaultNamespace = 1012, kDumpNamespaces = 1013,
-        kSuperRoles = 1014, kSubRoles = 1015, kEquivRoles = 1016;
+        kSuperRoles = 1014, kSubRoles = 1015, kEquivRoles = 1016, kUniversalRole = 1017;
     
     static protected final String versionString = "HermiT version 0.5.0";
     protected static final String usageString = "Usage: hermit [OPTION]... URI...";
@@ -517,19 +517,21 @@ public class CommandLine {
         "Example: hermit -ds owl:Thing http://hermit-reasoner.org/2008/test.owl",
         "    (prints direct subclasses of owl:Thing within the test ontology)",
         "",
-        "Both relative and absolute ontology URIs can be used. Relative URIs are resolved with",
-        "respect to the current directory (i.e. local file names are valid URIs); this",
-        "behavior can be changed with the '--base' option.",
+        "Both relative and absolute ontology URIs can be used. Relative URIs",
+        "are resolved with respect to the current directory (i.e. local file",
+        "names are valid URIs); this behavior can be changed with the '--base'",
+        "option.",
         "",
         "Classes and properties are identified using functional-syntax-style",
-        "identifiers: names not containing a colon are resolved against the ontology's",
-        "default namespace; otherwise the portion of the name preceding the colon is treated",
-        "as a namespace prefix. Use of namespaces can be controlled using the -n, -N, and",
-        "--namespace options. Alternatively, classes and properties can be identified with",
+        "identifiers: names not containing a colon are resolved against the",
+        "ontology's default namespace; otherwise the portion of the name",
+        "preceding the colon is treated as a namespace prefix. Use of",
+        "namespaces can be controlled using the -n, -N, and --namespace",
+        "options. Alternatively, classes and properties can be identified with",
         "full URIs by enclosing the URI in <angle brackets>.",
         "",
-        "By default, ontologies are simply retrieved and parsed. For more interesting",
-        "reasoning, set one of the -c/-k/-s/-S/-e/-U options."
+        "By default, ontologies are simply retrieved and parsed. For more",
+        "interesting reasoning, set one of the -c/-k/-s/-S/-e/-U options."
     };
     protected static final String[] helpFooter = {
         "HermiT is a product of Oxford University.",
@@ -609,6 +611,8 @@ public class CommandLine {
                     "use TYPE strategy for existential expansion; supported values are 'creation', 'el', and 'reuse' (default 'creation')"),
         new Option(kClausifyRoleBox, "clausify-rolebox", kAlgorithm,
                     "add clauses to realize transitive edges (experimental)"),
+        new Option(kUniversalRole, "universal-role", kAlgorithm,
+                    "enable support for owl:TopDataProperty as the universal role"),
                     
         // internals:
         new Option(kDumpClauses, "dump-clauses", kInternals, false, "FILE",
@@ -823,6 +827,9 @@ public class CommandLine {
                         config.clausifyTransitivity = true;
                         config.checkClauses = false;
                         config.existentialStrategyType = Reasoner.ExistentialStrategyType.DEPTH_FIRST;
+                    } break;
+                    case kUniversalRole : {
+                        config.makeTopRoleUniversal = true;
                     } break;
                     case kDumpClauses : {
                         actions.add(new DumpClausesAction(g.getOptarg()));

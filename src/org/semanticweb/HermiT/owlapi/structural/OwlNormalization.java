@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.semanticweb.HermiT.model.AtomicRole;
+import org.semanticweb.HermiT.Reasoner;
+
 import org.semanticweb.owl.model.OWLAntiSymmetricObjectPropertyAxiom;
 import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLAxiomAnnotationAxiom;
@@ -24,6 +27,7 @@ import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLDataMaxCardinalityRestriction;
 import org.semanticweb.owl.model.OWLDataMinCardinalityRestriction;
 import org.semanticweb.owl.model.OWLDataOneOf;
+import org.semanticweb.owl.model.OWLDataProperty;
 import org.semanticweb.owl.model.OWLDataPropertyAssertionAxiom;
 import org.semanticweb.owl.model.OWLDataPropertyDomainAxiom;
 import org.semanticweb.owl.model.OWLDataPropertyExpression;
@@ -61,6 +65,7 @@ import org.semanticweb.owl.model.OWLObjectIntersectionOf;
 import org.semanticweb.owl.model.OWLObjectMaxCardinalityRestriction;
 import org.semanticweb.owl.model.OWLObjectMinCardinalityRestriction;
 import org.semanticweb.owl.model.OWLObjectOneOf;
+import org.semanticweb.owl.model.OWLObjectProperty;
 import org.semanticweb.owl.model.OWLObjectPropertyAssertionAxiom;
 import org.semanticweb.owl.model.OWLObjectPropertyChainSubPropertyAxiom;
 import org.semanticweb.owl.model.OWLObjectPropertyDomainAxiom;
@@ -129,13 +134,32 @@ public class OwlNormalization {
      *            the ontology to be normalized
      * @throws OWLException
      */
-    public void processOntology(OWLOntology OWLOntology) throws OWLException {
+    public void processOntology(Reasoner.Configuration config, OWLOntology inOntology) throws OWLException {
         // Each entry in the inclusions list represents a disjunction of
         // concepts, i.e., each OWLDescription in an entry contributes a
         // disjunct. It is thus not really inclusions, but rather a disjunction
         // of concepts that represents an inclusion axiom.
         List<OWLDescription[]> inclusions = new ArrayList<OWLDescription[]>();
-        for (OWLAxiom untyped_axiom : OWLOntology.getAxioms()) {
+        { // Approximate the top object and data roles
+            // TODO: make this complete (efficiently)
+            OWLObjectProperty topObjectProp =
+                m_factory.getOWLObjectProperty(URI.create(AtomicRole.TOP_OBJECT_ROLE.getURI()));
+            OWLDataProperty topDataProp =
+                m_factory.getOWLDataProperty(URI.create(AtomicRole.TOP_DATA_ROLE.getURI()));
+            for (OWLObjectProperty p : inOntology.getReferencedObjectProperties()) {
+                roleManager.addInclusion(p, topObjectProp);
+            }
+            for (OWLDataProperty p : inOntology.getReferencedDataProperties()) {
+                m_dataPropertyInclusions.add(new OWLDataPropertyExpression[] { p, topDataProp });
+            }
+            if (config.makeTopRoleUniversal) {
+                roleManager.makeTransitive(topObjectProp);
+                m_reflexiveObjectProperties.add(topObjectProp);
+                roleManager.addInclusion(topObjectProp, topObjectProp.getInverseProperty());
+            }
+        }
+        
+        for (OWLAxiom untyped_axiom : inOntology.getAxioms()) {
             if (untyped_axiom instanceof OWLInverseObjectPropertiesAxiom) {
                 OWLInverseObjectPropertiesAxiom axiom
                     = (OWLInverseObjectPropertiesAxiom) untyped_axiom;

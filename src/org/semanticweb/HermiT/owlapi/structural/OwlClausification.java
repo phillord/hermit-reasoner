@@ -124,7 +124,7 @@ public class OwlClausification {
 
     public DLOntology clausify(Reasoner.Configuration config, OWLOntology ontology,
             Collection<DescriptionGraph> descriptionGraphs) throws OWLException {
-        normalization.processOntology(ontology);
+        normalization.processOntology(config, ontology);
         return clausify(config, ontology.getURI().toString(),
                 normalization.getConceptInclusions(),
                 normalization.getObjectPropertyInclusions(),

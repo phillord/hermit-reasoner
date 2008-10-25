@@ -38,7 +38,7 @@ public class DLClauseEvaluationTest extends AbstractHermiTTest {
         BlockingSignatureCache blockingSignatureCache=new BlockingSignatureCache(PairWiseDirectBlockingChecker.INSTANCE);
         BlockingStrategy blockingStrategy=new AnywhereBlocking(PairWiseDirectBlockingChecker.INSTANCE,blockingSignatureCache);
         ExpansionStrategy ExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
-        m_tableau=new Tableau(null,ExpansionStrategy,TEST_DL_ONTOLOGY,new HashMap<String,Object>());
+        m_tableau=new Tableau(null,ExpansionStrategy,TEST_DL_ONTOLOGY,false,new HashMap<String,Object>());
         m_extensionManager=m_tableau.getExtensionManager();
     }
     public void testEvaluator() {

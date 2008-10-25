@@ -3,6 +3,7 @@ package org.semanticweb.HermiT.owlapi;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.owlapi.structural.OwlNormalization;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLAxiom;
@@ -199,7 +200,7 @@ public class NormalizationTest extends AbstractOWLOntologyTest {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         OWLDataFactory factory = manager.getOWLDataFactory();
         OwlNormalization normalization = new OwlNormalization(factory);
-        normalization.processOntology(ontology);
+        normalization.processOntology(new Reasoner.Configuration(), ontology);
         for (OWLDescription[] inclusion : normalization.getConceptInclusions()) {
             OWLDescription superDescription;
             if (inclusion.length == 1) {
@@ -224,7 +225,7 @@ public class NormalizationTest extends AbstractOWLOntologyTest {
         OWLDataFactory factory = manager.getOWLDataFactory();
         OWLOntology ontology = getOWLOntologyFromResource(resourceName);
         OwlNormalization normalization = new OwlNormalization(factory);
-        normalization.processOntology(ontology);
+        normalization.processOntology(new Reasoner.Configuration(), ontology);
         for (OWLDescription[] inclusion : normalization.getConceptInclusions()) {
             OWLDescription superDescription;
             if (inclusion.length == 1) {
