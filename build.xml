@@ -25,9 +25,9 @@
     <property name="HermiTjar" value="${releasedir}/${ant.project.name}.jar"/>
     <!-- <property name="pluginjar" value="${releasedir}/${ant.project.name}-Protégé.jar"/> -->
     <property name="HermiTsrcjar" value="${releasedir}/${ant.project.name}-src.zip"/>
-    <property name="javadocdir" value="${releasedir}/javadoc/javadoc"/>
-    <property name="apijavadocdir" value="${javadocdir}/api"/>
-    <property name="fulljavadocdir" value="${javadocdir}/full"/>
+    <property name="javadocdir" value="${releasedir}/javadoc"/>
+    <property name="apijavadocdir" value="${javadocdir}/javadoc/api"/>
+    <property name="fulljavadocdir" value="${javadocdir}/javadoc/full"/>
     
     <property name="src" value="${projectroot}/src/org/semanticweb/HermiT"/>
 
