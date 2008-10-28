@@ -10,9 +10,11 @@ import java.util.TreeSet;
 
 import org.semanticweb.HermiT.Namespaces;
 
-public class DatatypeRestrictionOWLRealPlus extends DatatypeRestriction {
+public class DatatypeRestrictionOWLRealPlus 
+        extends DatatypeRestriction 
+        implements IntegerFacet, DoubleFacet {
     
-    protected Set<Interval> intervals = new HashSet<Interval>();
+    protected Set<DecimalInterval> intervals = new HashSet<DecimalInterval>();
 
     public DatatypeRestrictionOWLRealPlus(DT datatype) {
         this(datatype, true);
@@ -56,40 +58,40 @@ public class DatatypeRestrictionOWLRealPlus extends DatatypeRestriction {
             case MIN_INCLUSIVE: {
                 // greater or equal X
                 if (intervals.isEmpty()) {
-                    intervals.add(new Interval(valueDec, null, false, true));
+                    intervals.add(new DecimalInterval(valueDec, null, false, true));
                 } else {
-                    for (Interval i : intervals) {
-                        i.intersectWith(new Interval(valueDec, null, false, true));
+                    for (DecimalInterval i : intervals) {
+                        i.intersectWith(new DecimalInterval(valueDec, null, false, true));
                     }
                 }
             } break;
             case MIN_EXCLUSIVE: {
                 // greater than X
                 if (intervals.isEmpty()) {
-                    intervals.add(new Interval(valueDec, null, true, true));
+                    intervals.add(new DecimalInterval(valueDec, null, true, true));
                 } else {
-                    for (Interval i : intervals) {
-                        i.intersectWith(new Interval(valueDec, null, true, true));
+                    for (DecimalInterval i : intervals) {
+                        i.intersectWith(new DecimalInterval(valueDec, null, true, true));
                     }
                 }
             } break;
             case MAX_INCLUSIVE: {
                 // smaller or equal X
                 if (intervals.isEmpty()) {
-                    intervals.add(new Interval(null, valueDec, true, false));
+                    intervals.add(new DecimalInterval(null, valueDec, true, false));
                 } else {
-                    for (Interval i : intervals) {
-                        i.intersectWith(new Interval(null, valueDec, true, false));
+                    for (DecimalInterval i : intervals) {
+                        i.intersectWith(new DecimalInterval(null, valueDec, true, false));
                     }
                 }
             } break;
             case MAX_EXCLUSIVE: {
                 // smaller than X
                 if (intervals.isEmpty()) {
-                    intervals.add(new Interval(null, valueDec, true, true));
+                    intervals.add(new DecimalInterval(null, valueDec, true, true));
                 } else {
-                    for (Interval i : intervals) {
-                        i.intersectWith(new Interval(null, valueDec, true, true));
+                    for (DecimalInterval i : intervals) {
+                        i.intersectWith(new DecimalInterval(null, valueDec, true, true));
                     }
                 }
             } break;
@@ -99,23 +101,6 @@ public class DatatypeRestrictionOWLRealPlus extends DatatypeRestriction {
         }
     }
     
-    public boolean facetsAccept(DataConstant constant) {
-        if (!oneOf.isEmpty()) {
-            return oneOf.contains(constant);
-        }
-        if (!notOneOf.isEmpty() && notOneOf.contains(constant)) {
-            return false;
-        } 
-        if (intervals.isEmpty()) return true;
-        BigDecimal decValue = new BigDecimal(constant.getValue());
-        for (Interval i : intervals) {
-            if (i.contains(decValue)) {
-                return true;
-            }
-        }
-        return false; 
-    }
-
     public void conjoinFacetsFrom(DataRange range) {
         if (isNegated) {
             throw new RuntimeException("Cannot add facets to negated " +
@@ -135,14 +120,14 @@ public class DatatypeRestrictionOWLRealPlus extends DatatypeRestriction {
                         "contains more than one interval. ");
             }
             if (intervals.isEmpty()) {
-                for (Interval i : restr.getIntervals()) {
+                for (DecimalInterval i : restr.getIntervals()) {
                     if (restr.isNegated()) {
                         if (!i.isEmpty()) {
                             if (i.getMin() != null) {
-                                intervals.add(new Interval(null, i.getMin(), true, !i.isOpenMin()));
+                                intervals.add(new DecimalInterval(null, i.getMin(), true, !i.isOpenMin()));
                             }
                             if (i.getMax() != null) {
-                                intervals.add(new Interval(i.getMax(), null, !i.isOpenMax(), true));
+                                intervals.add(new DecimalInterval(i.getMax(), null, !i.isOpenMax(), true));
                             }
                         } // otherwise i is trivially satisfied 
                     } else {
@@ -150,21 +135,21 @@ public class DatatypeRestrictionOWLRealPlus extends DatatypeRestriction {
                     }
                 }
             } else {
-                Set<Interval> newIntervals = new HashSet<Interval>();
+                Set<DecimalInterval> newIntervals = new HashSet<DecimalInterval>();
                 if (restr.isNegated()) {
-                    for (Interval i : intervals) {
-                        for (Interval iNew : restr.getIntervals()) {
+                    for (DecimalInterval i : intervals) {
+                        for (DecimalInterval iNew : restr.getIntervals()) {
                             if (!iNew.isEmpty()) {
                                 if (iNew.getMin() != null) {
-                                    Interval newInterval = i.getCopy();
-                                    newInterval.intersectWith(new Interval(null, iNew.getMin(), true, !iNew.isOpenMin()));
+                                    DecimalInterval newInterval = i.getCopy();
+                                    newInterval.intersectWith(new DecimalInterval(null, iNew.getMin(), true, !iNew.isOpenMin()));
                                     if (!newInterval.isEmpty()) {
                                         newIntervals.add(newInterval);
                                     }
                                 } 
                                 if (iNew.getMax() != null) {
-                                    Interval newInterval = i.getCopy();
-                                    newInterval.intersectWith(new Interval(iNew.getMax(), null, !iNew.isOpenMax(), true));
+                                    DecimalInterval newInterval = i.getCopy();
+                                    newInterval.intersectWith(new DecimalInterval(iNew.getMax(), null, !iNew.isOpenMax(), true));
                                     if (!newInterval.isEmpty()) {
                                         newIntervals.add(newInterval);
                                     }
@@ -173,8 +158,8 @@ public class DatatypeRestrictionOWLRealPlus extends DatatypeRestriction {
                         }
                     }
                 } else {
-                    for (Interval i : intervals) {
-                        for (Interval iNew : restr.getIntervals()) {
+                    for (DecimalInterval i : intervals) {
+                        for (DecimalInterval iNew : restr.getIntervals()) {
                             i.intersectWith(iNew);
                             if (!i.isEmpty()) newIntervals.add(i);
                         }
@@ -193,9 +178,13 @@ public class DatatypeRestrictionOWLRealPlus extends DatatypeRestriction {
         if (!oneOf.isEmpty()) {
             return oneOf.contains(constant);
         }
+        if (!notOneOf.isEmpty() && notOneOf.contains(constant)) {
+            return false;
+        } 
+        if (intervals.isEmpty()) return true;
         BigDecimal decValue = new BigDecimal(constant.getValue());
-        for (Interval i : intervals) {
-            if (i.contains(decValue) && !notOneOf.contains(constant)) {
+        for (DecimalInterval i : intervals) {
+            if (i.contains(decValue)) {
                 return true;
             }
         }
@@ -221,14 +210,98 @@ public class DatatypeRestrictionOWLRealPlus extends DatatypeRestriction {
         return null;
     }
     
-    public Set<Interval> getIntervals() {
+    public Set<DecimalInterval> getIntervals() {
         return intervals;
+    }
+    
+    public Set<IntegerInterval> getIntegerIntervals() {
+        Set<IntegerInterval> integerIntervals = new HashSet<IntegerInterval>();
+        if (!intervals.isEmpty()) {
+            for (DecimalInterval i : intervals) {
+                BigDecimal min = i.getMin();
+                BigDecimal max = i.getMax();
+                BigInteger minInt = null;
+                BigInteger maxInt = null;
+                Long minLong = null;
+                Long maxLong = null;
+                boolean hasBig = false;
+                if (min != null) {
+                    minInt = min.setScale(0, BigDecimal.ROUND_CEILING).toBigInteger();
+                    if (i.isOpenMin() && min.equals(new BigDecimal(minInt))) {
+                        minInt = minInt.add(BigInteger.ONE);
+                    }
+                    try {
+                        minLong = new BigDecimal(minInt).longValueExact();
+                    } catch (ArithmeticException e) {
+                        hasBig = true;
+                    }
+                }
+                if (max != null) {
+                    maxInt = max.setScale(0, BigDecimal.ROUND_FLOOR).toBigInteger();
+                    if (i.isOpenMax() && max.equals(new BigDecimal(maxInt))) {
+                        maxInt = maxInt.subtract(BigInteger.ONE);
+                    }
+                    try {
+                        maxLong = new BigDecimal(maxInt).longValueExact();
+                    } catch (ArithmeticException e) {
+                        hasBig = true;
+                    }
+                }
+                IntegerInterval iInteger = hasBig ? 
+                        new IntegerIntervalBig(minInt, maxInt) : 
+                        new IntegerIntervalFin(minLong, maxLong);
+                integerIntervals.add(iInteger);
+            }
+        }
+        return integerIntervals;
+    }
+
+    public Set<DoubleInterval> getDoubleIntervals() {
+        Set<DoubleInterval> doubleIntervals = new HashSet<DoubleInterval>();
+        if (!intervals.isEmpty()) {
+            for (DecimalInterval i : intervals) {
+                BigDecimal min = i.getMin();
+                BigDecimal max = i.getMax();
+                double minD = -Double.MAX_VALUE;
+                double maxD = Double.MAX_VALUE;
+                boolean isEmpty = false;
+                if (min.compareTo(new BigDecimal("" + Double.MIN_VALUE)) >= 0) {
+                    if (min.compareTo(new BigDecimal("" + Double.MAX_VALUE)) <= 0) {
+                        minD = min.doubleValue();
+                        if (min.compareTo(new BigDecimal("" + minD)) > 0 
+                                || (i.isOpenMin() && min.compareTo(new BigDecimal("" + minD)) == 0)) {
+                            minD = DatatypeRestrictionDouble.nextDouble(minD);
+                        }
+                    } else {
+                        isEmpty = true;
+                    }
+                } // minD = Double.Min_VALUE
+                if (max.compareTo(new BigDecimal("" + Double.MAX_VALUE)) <= 0) {
+                    if (max.compareTo(new BigDecimal("" + Double.MIN_VALUE)) >= 0) {
+                        maxD = max.doubleValue();
+                        if (max.compareTo(new BigDecimal("" + maxD)) < 0 
+                                || (i.isOpenMax() && max.compareTo(new BigDecimal("" + maxD)) == 0)) {
+                            maxD = DatatypeRestrictionDouble.previousDouble(maxD);
+                        }
+                    } else {
+                        isEmpty = true;
+                    }
+                } // maxD = Double.MAX_VALUE
+                if (isEmpty) {
+                    minD = Double.MAX_VALUE;
+                    maxD = Double.MIN_VALUE;
+                }
+                DoubleInterval iDouble = new DoubleInterval(minD, maxD);
+                doubleIntervals.add(iDouble);
+            }
+        }
+        return doubleIntervals;
     }
     
     protected String printExtraInfo(Namespaces namespaces) {
         boolean firstRun = true;
         StringBuffer buffer = new StringBuffer();
-        for (Interval i : intervals) {
+        for (DecimalInterval i : intervals) {
             if (!firstRun && !isNegated) {
                 buffer.append(" or ");
             }
@@ -253,144 +326,5 @@ public class DatatypeRestrictionOWLRealPlus extends DatatypeRestriction {
         dts.removeAll(DT.getSubTreeFor(DT.DECIMAL)); 
         dts.add(DT.DECIMAL);
         return dts.containsAll(datatypes);
-    }
-   
-    public class Interval {
-        BigDecimal min = null;
-        BigDecimal max = null;
-        boolean openMin = true;
-        boolean openMax = true;
-        
-        public Interval(BigDecimal min, BigDecimal max, 
-                boolean openMin, boolean openMax) {
-            this.min = min;
-            this.max = max;
-            this.openMin = openMin;
-            this.openMax = openMax;
-        }
-        
-        public Interval getCopy() {
-            return new Interval(min, max, openMin, openMax);
-        }
-        
-        public void intersectWith(Interval i) {
-            if (max == null) {
-                max = i.getMax();
-                openMax = i.isOpenMax();
-            } else {
-                if (i.getMax() != null) {
-                    // both not null
-                    if (i.getMax().compareTo(max) == 0 && !i.isOpenMax()) {
-                        openMax = false;
-                    } else if (i.getMax().compareTo(max) < 0) {
-                        max = i.getMax();
-                        openMax = i.isOpenMax();
-                    }
-                }
-            }
-            if (min == null) {
-                min = i.getMin();
-                openMin = i.isOpenMin();
-            } else {
-                if (i.getMin() != null) {
-                    // both not null
-                    if (i.getMin().compareTo(min) == 0 && !i.isOpenMin()) {
-                        openMin = false;
-                    } else if (i.getMin().compareTo(min) > 0) {
-                        min = i.getMin();
-                        openMin = i.isOpenMin();
-                    }
-                }
-            }
-        }
-        
-        public boolean isEmpty() {
-            return (min != null && max != null && min.compareTo(max) > 0);
-        }
-        
-        protected boolean isEmpty(BigDecimal lower, BigDecimal upper) {
-            return (lower != null && upper != null && lower.compareTo(upper) > 0);
-        }
-        
-        public boolean isFinite() {
-            return isEmpty();
-        }
-        
-        public boolean contains(BigDecimal decimal) {
-            boolean contains = true;
-            if (min != null) {
-                contains = contains 
-                        && (min.compareTo(decimal) <= 0 
-                        && (!openMin || min.compareTo(decimal) != 0));
-            }
-            if (max != null) {
-                contains = contains 
-                        && (max.compareTo(decimal) >= 0 
-                        && (!openMin || max.compareTo(decimal) != 0));
-            }
-            return contains;
-        }
-        
-        public boolean contains(Interval interval) {
-            return contains(interval.getMin()) && contains(interval.getMax());
-        }
-        
-        public boolean disjointWith(Interval interval) {
-            return (max != null && interval.getMin() != null 
-                    && (max.compareTo(interval.getMin()) < 0 
-                            || (max.compareTo(interval.getMin()) == 0 && (!openMax || !interval.isOpenMin())))) 
-            || (min != null && interval.getMax() != null 
-                    && (min.compareTo(interval.getMax()) > 0 
-                            || (min.compareTo(interval.getMax()) == 0 && (!openMin || !interval.isOpenMax()))));
-        }
-        
-        public BigDecimal getCardinality() {
-            if (isEmpty()) return BigDecimal.ZERO;
-            return null;
-        }
-
-        public BigDecimal getMin() {
-            return min;
-        }
-
-        public void setMin(BigDecimal min) {
-            this.min = min;
-        }
-
-        public BigDecimal getMax() {
-            return max;
-        }
-
-        public void setMax(BigDecimal max) {
-            this.max = max;
-        }
-        
-        public boolean isOpenMin() {
-            return openMin;
-        }
-
-        public void setOpenMin(boolean openMin) {
-            this.openMin = openMin;
-        }
-
-        public boolean isOpenMax() {
-            return openMax;
-        }
-
-        public void setOpenMax(boolean openMax) {
-            this.openMax = openMax;
-        }
-
-        public String toString() {
-            StringBuffer buffer = new StringBuffer();
-            if (min != null) {
-                buffer.append((isOpenMin() ? "> " : ">= ") + min);
-            }
-            if (max != null) {
-                if (min != null) buffer.append(" ");
-                buffer.append((isOpenMax() ? "< " : "<= ") + max);
-            }
-            return buffer.toString();
-        }
     }
 }

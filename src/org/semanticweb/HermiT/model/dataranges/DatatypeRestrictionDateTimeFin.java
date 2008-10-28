@@ -94,7 +94,7 @@ public class DatatypeRestrictionDateTimeFin extends DatatypeRestriction {
         }
     }
     
-    public boolean facetsAccept(DataConstant constant) {
+    public boolean accepts(DataConstant constant) {
         if (!oneOf.isEmpty()) {
             return oneOf.contains(constant);
         }
@@ -191,24 +191,6 @@ public class DatatypeRestrictionDateTimeFin extends DatatypeRestriction {
                 }
             }
         }
-    }
-    
-    public boolean accepts(DataConstant constant) {
-        if (!oneOf.isEmpty()) {
-            return oneOf.contains(constant);
-        }
-        try {
-            Date dateValue = dfm.parse(constant.getValue());
-            long longValue = dateValue.getTime();
-            for (Interval i : intervals) {
-                if (i.contains(longValue) && !notOneOf.contains(constant)) {
-                    return true;
-                }
-            }
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return false; 
     }
     
     public boolean hasMinCardinality(BigInteger n) {

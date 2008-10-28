@@ -123,7 +123,10 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
         }
     }
     
-    public boolean facetsAccept(DataConstant constant) {
+    public boolean accepts(DataConstant constant) {
+        if (!oneOf.isEmpty()) {
+            return oneOf.contains(constant);
+        }
         compileAllFacetsIntoPattern();
         return patternMatcher.run(constant.getValue());
     }
@@ -154,14 +157,6 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
                 }
             }
         }
-    }
-    
-    public boolean accepts(DataConstant constant) {
-        if (!oneOf.isEmpty()) {
-            return oneOf.contains(constant);
-        }
-        compileAllFacetsIntoPattern();
-        return patternMatcher.run(constant.getValue());
     }
     
     public boolean hasMinCardinality(BigInteger n) {

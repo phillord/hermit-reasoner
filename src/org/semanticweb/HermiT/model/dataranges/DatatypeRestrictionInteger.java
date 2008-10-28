@@ -11,10 +11,10 @@ import java.util.TreeSet;
 
 import org.semanticweb.HermiT.Namespaces;
 
-public class DatatypeRestrictionInteger extends DatatypeRestriction {
+public class DatatypeRestrictionInteger extends DatatypeRestriction implements IntegerFacet {
     
-    protected Set<Interval> intervals = new HashSet<Interval>();
-   
+    protected Set<IntegerInterval> intervals = new HashSet<IntegerInterval>();
+
     public DatatypeRestrictionInteger(DT datatype) {
         this.datatype = datatype;
         this.supportedFacets = new HashSet<Facets>(
@@ -38,72 +38,64 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
     protected boolean hasOnlyFiniteIntervals() {
         boolean hasOnlyFiniteIntervals = true;
         if (intervals.isEmpty()) return false;
-        for (Interval i : intervals) {
-            if (i.getMax() == null || i.getMin() == null) {
-                hasOnlyFiniteIntervals = false;
-            }
+        for (IntegerInterval i : intervals) {
+            hasOnlyFiniteIntervals  = hasOnlyFiniteIntervals  && i.isFinite();
         }
         return hasOnlyFiniteIntervals;
     }
     
     public void addFacet(Facets facet, String value) {
-        BigInteger valueInt = null;
+        IntegerInterval iNew = null;
         try {
             BigDecimal bd = new BigDecimal(value);
             if (facet == Facets.MIN_EXCLUSIVE || facet == Facets.MAX_INCLUSIVE) {
                 bd = bd.setScale(0, BigDecimal.ROUND_FLOOR);
-                valueInt = bd.toBigInteger();
             } else {
                 bd = bd.setScale(0, BigDecimal.ROUND_CEILING);
-                valueInt = bd.toBigInteger();
+            }
+            if (facet == Facets.MIN_EXCLUSIVE) {
+                bd = bd.add(BigDecimal.ONE);
+            }
+            if (facet == Facets.MAX_EXCLUSIVE) {
+                bd = bd.subtract(BigDecimal.ONE);
+            }
+            if (facet == Facets.MIN_EXCLUSIVE 
+                    || facet == Facets.MIN_INCLUSIVE) {
+                try {
+                    iNew = new IntegerIntervalFin(bd.longValueExact(), null);
+                } catch (ArithmeticException e) {
+                    iNew = new IntegerIntervalBig(bd.toBigInteger(), null);
+                }
+            } else if (facet == Facets.MAX_EXCLUSIVE 
+                    || facet == Facets.MAX_INCLUSIVE) {
+                try {
+                    iNew = new IntegerIntervalFin(null, bd.longValueExact());
+                } catch (ArithmeticException e) {
+                    iNew = new IntegerIntervalBig(null, bd.toBigInteger());
+                }
+            } else {
+                throw new IllegalArgumentException("Unsupported facet.");
+            }
+            if (intervals.isEmpty()) {
+                intervals.add(iNew);
+            } else {
+                for (IntegerInterval i : intervals) {
+                    i = i.intersectWith(iNew);
+                    if (i.isEmpty()) {
+                        isBottom = true;
+                    } else {
+                        intervals.clear();
+                        intervals.add(i);
+                    }
+                }
             }
         } catch (NumberFormatException e) {
             e.printStackTrace();
             return;
         }
-        switch (facet) {
-        case MIN_INCLUSIVE: {
-            // greater or equal X
-            if (intervals.isEmpty()) {
-                intervals.add(new Interval(valueInt, null));
-            } else {
-                for (Interval i : intervals) {
-                    i.intersectWith(new Interval(valueInt, null));
-                    if (i.isEmpty()) {
-                        isBottom = true;
-                    }
-                }
-            }
-        } break;
-        case MIN_EXCLUSIVE: {
-            // greater than X = greater or equal X + 1
-            valueInt = valueInt.add(BigInteger.ONE);
-            addFacet(Facets.MIN_INCLUSIVE, valueInt.toString());
-        } break;
-        case MAX_INCLUSIVE: {
-            // smaller or equal X
-            if (intervals.isEmpty()) {
-                intervals.add(new Interval(null, valueInt));
-            } else {
-                for (Interval i : intervals) {
-                    i.intersectWith(new Interval(null, valueInt));
-                    if (i.isEmpty()) {
-                        isBottom = true;
-                    }
-                }
-            }
-        } break;
-        case MAX_EXCLUSIVE: {
-            // smaller than X = smaller or equal X - 1 
-            valueInt = valueInt.subtract(BigInteger.ONE);
-            addFacet(Facets.MAX_INCLUSIVE, valueInt.toString());
-        } break;
-        default:
-            throw new IllegalArgumentException("Unsupported facet.");
-        }
     }
     
-    public boolean facetsAccept(DataConstant constant) {
+    public boolean accepts(DataConstant constant) {
         if (!oneOf.isEmpty()) {
             return oneOf.contains(constant);
         }
@@ -111,11 +103,26 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
             return false;
         } 
         if (intervals.isEmpty()) return true;
-        BigInteger intValue = new BigInteger(constant.getValue());
-        for (Interval i : intervals) {
-            if (i.contains(intValue) && !notOneOf.contains(constant)) {
-                return true;
+        Number numValue = null;
+        try {
+            BigInteger valueBig = new BigInteger(constant.getValue());
+            if (IntegerIntervalFin.isLong(valueBig)) {
+                numValue = valueBig.longValue();
+                for (IntegerInterval i : intervals) {
+                    if (i.contains(numValue) && !notOneOf.contains(constant)) {
+                        return true;
+                    }
+                }
+            } else {
+                for (IntegerInterval i : intervals) {
+                    if (IntegerIntervalBig.toIntegerIntervalBig(i).contains(valueBig) 
+                            && !notOneOf.contains(constant)) {
+                        return true;
+                    }
+                }
             }
+        } catch (NumberFormatException nfe1) {
+            return false;
         }
         return false; 
     }
@@ -125,63 +132,62 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
             throw new RuntimeException("Cannot add facets to negated " +
                         "data ranges!");
         }
-        if (!(range instanceof DatatypeRestrictionInteger)) {
-            throw new IllegalArgumentException("The given parameter is not " +
-                    "an instance of DatatypeRestrictionInteger. It is " +
-                    "only allowed to add facets from other integer " +
-                    "datatype restrictions. ");
+        if (!(range instanceof IntegerFacet)) {
+            throw new IllegalArgumentException("The given parameter does not " +
+                    "allow for integer facets. It is only allowed to add " +
+                    "facets from other integer restrictions. ");
         }
         if (!isBottom()) {
-            DatatypeRestrictionInteger restr = (DatatypeRestrictionInteger) range;
-            if (restr.getIntervals().size() > 1) {
+            IntegerFacet restr = (IntegerFacet) range;
+            if (restr.getIntegerIntervals().size() > 1) {
                 throw new IllegalArgumentException("The given parameter " +
                         "contains more than one interval. ");
             }
             if (intervals.isEmpty()) {
-                for (Interval i : restr.getIntervals()) {
+                for (IntegerInterval i : restr.getIntegerIntervals()) {
                     if (restr.isNegated()) {
                         if (!i.isEmpty()) {
                             if (i.getMin() != null) {
-                                intervals.add(new Interval(null, i.getMin()));
+                                intervals.add(i.getInstance(null, i.getMin()));
                             }
                             if (i.getMax() != null) {
-                                intervals.add(new Interval(i.getMax(), null));
+                                intervals.add(i.getInstance(i.getMax(), null));
                             }
                         } // otherwise i is trivially satisfied 
                     } else {
-                        intervals = restr.getIntervals();
+                        intervals = restr.getIntegerIntervals();
                     }
                 }
             } else {
-                Set<Interval> newIntervals = new HashSet<Interval>();
+                Set<IntegerInterval> newIntervals = new HashSet<IntegerInterval>();
                 if (restr.isNegated()) {
-                    for (Interval i : intervals) {
-                        for (Interval iNew : restr.getIntervals()) {
-                            if (!iNew.isEmpty()) {
-                                if (iNew.getMin() != null) {
-                                    Interval newInterval = i.getCopy();
-                                    newInterval.intersectWith(new Interval(null, iNew.getMin().subtract(BigInteger.ONE)));
-                                    if (!newInterval.isEmpty()) {
-                                        newIntervals.add(newInterval);
+                    for (IntegerInterval i1 : intervals) {
+                        for (IntegerInterval i2 : restr.getIntegerIntervals()) {
+                            if (!i2.isEmpty()) {
+                                if (i2.getMin() != null) {
+                                    IntegerInterval newI = i2.getInstance(null, i2.decreasedMin());
+                                    newI = newI.intersectWith(i1);
+                                    if (!newI.isEmpty()) {
+                                        newIntervals.add(newI);
                                     }
                                 } 
-                                if (iNew.getMax() != null) {
-                                    Interval newInterval = i.getCopy();
-                                    newInterval.intersectWith(new Interval(iNew.getMax().add(BigInteger.ONE), null));
-                                    if (!newInterval.isEmpty()) {
-                                        newIntervals.add(newInterval);
+                                if (i2.getMax() != null) {
+                                    IntegerInterval newI = i2.getInstance(i2.increasedMax(), null);
+                                    newI = newI.intersectWith(i1);
+                                    if (!newI.isEmpty()) {
+                                        newIntervals.add(newI);
                                     }
                                 }
                             } else {
-                                newIntervals.add(i);
+                                newIntervals.add(i1);
                             }
                         }
                     }
                 } else {
-                    for (Interval i : intervals) {
-                        for (Interval iNew : restr.getIntervals()) {
-                            i.intersectWith(iNew);
-                            if (!i.isEmpty()) newIntervals.add(i);
+                    for (IntegerInterval i1 : intervals) {
+                        for (IntegerInterval i2 : restr.getIntegerIntervals()) {
+                            i1 = i1.intersectWith(i2);
+                            if (!i1.isEmpty()) newIntervals.add(i1);
                         }
                     }
                 }
@@ -194,18 +200,18 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
         }
     }
     
-    public boolean accepts(DataConstant constant) {
-        if (!oneOf.isEmpty()) {
-            return oneOf.contains(constant);
-        }
-        BigInteger intValue = new BigInteger(constant.getValue());
-        for (Interval i : intervals) {
-            if (i.contains(intValue) && !notOneOf.contains(constant)) {
-                return true;
-            }
-        }
-        return false; 
-    }
+//    public boolean accepts(DataConstant constant) {
+//        if (!oneOf.isEmpty()) {
+//            return oneOf.contains(constant);
+//        }
+//        BigInteger intValue = new BigInteger(constant.getValue());
+//        for (IntegerInterval i : intervals) {
+//            if (i.contains(intValue) && !notOneOf.contains(constant)) {
+//                return true;
+//            }
+//        }
+//        return false; 
+//    }
     
     public boolean hasMinCardinality(BigInteger n) {
         if (isNegated || n.compareTo(BigInteger.ZERO) <= 0) return true;
@@ -214,12 +220,13 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
                 return (n.compareTo(new BigInteger("" + oneOf.size())) >= 0);
             }
             BigInteger rangeSize = BigInteger.ZERO;
-            for (Interval i : intervals) {
+            for (IntegerInterval i : intervals) {
+                if (!i.isFinite()) return true;
                 rangeSize = rangeSize.add(i.getCardinality());
             }
             for (DataConstant constant : notOneOf) {
                 BigInteger not = new BigInteger(constant.getValue());
-                for (Interval i : intervals) {
+                for (IntegerInterval i : intervals) {
                     if (i.contains(not)) {
                         rangeSize = rangeSize.subtract(BigInteger.ONE);
                     }
@@ -236,12 +243,12 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
                 return new BigInteger("" + oneOf.size());
             }
             BigInteger rangeSize = BigInteger.ZERO;
-            for (Interval i : intervals) {
+            for (IntegerInterval i : intervals) {
                 rangeSize = rangeSize.add(i.getCardinality());
             }
             for (DataConstant constant : notOneOf) {
                 BigInteger not = new BigInteger(constant.getValue());
-                for (Interval i : intervals) {
+                for (IntegerInterval i : intervals) {
                     if (i.contains(not)) {
                         rangeSize = rangeSize.subtract(BigInteger.ONE);
                     }
@@ -258,28 +265,30 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
                 SortedSet<DataConstant> sortedOneOfs = new TreeSet<DataConstant>(oneOf);
                 return sortedOneOfs.first();
             }
-            SortedSet<Interval> sortedIntervals = new TreeSet<Interval>(IntervalComparator.INSTANCE);
-            sortedIntervals.addAll(intervals);
-            for (Interval i : sortedIntervals) {
-                BigInteger constant = i.getMin();
-                while (constant.compareTo(i.getMax()) <= 0) {
-                    DataConstant dataConstant = new DataConstant(datatype, "" + constant);
-                    if (!notOneOf.contains(dataConstant)) return dataConstant;
-                    constant = constant.add(BigInteger.ONE);
+            if (!intervals.isEmpty()) {
+                SortedSet<IntegerInterval> sortedIntervals = new TreeSet<IntegerInterval>(IntervalComparator.INSTANCE);
+                sortedIntervals.addAll(intervals);
+                for (IntegerInterval i : sortedIntervals) {
+                    BigInteger constant = new BigInteger("" + i.getMin());
+                    while (i.contains(constant)) {
+                        DataConstant dataConstant = new DataConstant(datatype, "" + constant);
+                        if (!notOneOf.contains(dataConstant)) return dataConstant;
+                        constant = constant.add(BigInteger.ONE);
+                    }
                 }
             }
         }
         return null;
     }
     
-    public Set<Interval> getIntervals() {
+    public Set<IntegerInterval> getIntegerIntervals() {
         return intervals;
     }
     
     protected String printExtraInfo(Namespaces namespaces) {
         boolean firstRun = true;
         StringBuffer buffer = new StringBuffer();
-        for (Interval i : intervals) {
+        for (IntegerInterval i : intervals) {
             if (!firstRun && !isNegated) {
                 buffer.append(" or ");
             }
@@ -304,113 +313,31 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction {
         return DT.getSubTreeFor(DT.OWLREALPLUS).containsAll(datatypes);
     }
     
-    public class Interval {
-        BigInteger min = null;
-        BigInteger max = null;
-        
-        public Interval(BigInteger minInclusive, BigInteger maxInclusive) {
-            this.min = minInclusive;
-            this.max = maxInclusive;
-        }
-        
-        public Interval getCopy() {
-            return new Interval(min, max);
-        }
-        
-        public void intersectWith(Interval i) {
-            if (max == null) {
-                max = i.getMax();
+    protected static class IntervalComparator implements Comparator<IntegerInterval> { 
+        public static Comparator<IntegerInterval> INSTANCE = new IntervalComparator();
+        public int compare(IntegerInterval i1, IntegerInterval i2) {
+            if (i1 instanceof IntegerIntervalFin && i2 instanceof IntegerIntervalFin) { 
+                IntegerIntervalFin i1Fin = (IntegerIntervalFin) i1;
+                IntegerIntervalFin i2Fin = (IntegerIntervalFin) i2;
+                if (i1Fin.getMin() == i2Fin.getMin()) return 0;
+                return (i1Fin.getMin().longValue() - i2Fin.getMin().longValue() > 0) ? 1 : -1; 
             } else {
-                if (i.getMax() != null 
-                        && i.getMax().compareTo(max) < 0) {
-                    max = i.getMax();
+                IntegerIntervalBig i1Big;
+                IntegerIntervalBig i2Big;
+                if (i1 instanceof IntegerIntervalBig) {
+                    i1Big = (IntegerIntervalBig) i1;
+                } else {
+                    i1Big = IntegerIntervalBig.toIntegerIntervalBig(i1);
                 }
-            }
-            if (min == null) {
-                min = i.getMin();
-            } else {
-                if (i.getMin() != null 
-                        && i.getMin().compareTo(min) > 0) {
-                    min = i.getMin();
+                if (i2 instanceof IntegerIntervalBig) {
+                    i2Big = (IntegerIntervalBig) i2;
+                } else {
+                    i2Big = IntegerIntervalBig.toIntegerIntervalBig(i2);
                 }
+                BigInteger min1 = (BigInteger) i1Big.getMin();
+                BigInteger min2 = (BigInteger) i2Big.getMin();
+                return min1.compareTo(min2); 
             }
-        }
-        
-        public boolean isEmpty() {
-            return (min != null 
-                    && max != null 
-                    && min.compareTo(max) > 0);
-        }
-        
-        protected boolean isEmpty(BigInteger lower, BigInteger upper) {
-            return (lower != null 
-                    && upper != null 
-                    && lower.compareTo(upper) > 0);
-        }
-        
-        public boolean isFinite() {
-            return min != null && max != null;
-        }
-        
-        public boolean contains(BigInteger integer) {
-            boolean contains = true;
-            if (min != null) {
-                contains = contains && (min.compareTo(integer) <= 0);
-            }
-            if (max != null) {
-                contains = contains && (max.compareTo(integer) >= 0);
-            }
-            return contains;
-        }
-        
-        public boolean contains(Interval interval) {
-            return contains(interval.getMin()) 
-                    && contains(interval.getMax());
-        }
-        
-        public boolean disjointWith(Interval interval) {
-            return (min.compareTo(interval.getMax()) >= 0 
-                    || max.compareTo(interval.getMin()) <= 0);
-        }
-        
-        public BigInteger getCardinality() {
-            if (max.compareTo(min) < 0) return BigInteger.ZERO;
-            return max.subtract(min).add(BigInteger.ONE);
-        }
-
-        public BigInteger getMin() {
-            return min;
-        }
-
-        public void setMin(BigInteger min) {
-            this.min = min;
-        }
-
-        public BigInteger getMax() {
-            return max;
-        }
-
-        public void setMaxIncl(BigInteger max) {
-            this.max = max;
-        }
-        
-        public String toString() {
-            StringBuffer buffer = new StringBuffer();
-            if (min != null) {
-                buffer.append(">= " + min);
-            }
-            if (max != null) {
-                if (min != null) buffer.append(" ");
-                buffer.append("<= " + max);
-            }
-            return buffer.toString();
-        }
-    }
-    
-    protected static class IntervalComparator implements Comparator<Interval> { 
-        public static Comparator<Interval> INSTANCE = new IntervalComparator();
-        public int compare(Interval i1, Interval i2) {
-            return i1.getMin().compareTo(i2.getMin()); 
         }
     }
 }

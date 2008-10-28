@@ -125,11 +125,6 @@ public class DatatypeRestrictionAnyURI extends DatatypeRestriction {
         }
     }
     
-    public boolean facetsAccept(DataConstant constant) {
-        compileAllFacetsIntoPattern();
-        return patternMatcher.run(constant.getValue());
-    }
-    
     public void conjoinFacetsFrom(DataRange range) {
         if (isNegated) {
             throw new RuntimeException("Cannot add facets to negated " +

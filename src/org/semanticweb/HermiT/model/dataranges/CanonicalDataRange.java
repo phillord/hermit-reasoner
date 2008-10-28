@@ -107,17 +107,17 @@ public interface CanonicalDataRange {
      * @return true if no facets are present or if facets accept constant and 
      * false otherwise
      */
-    public boolean facetsAccept(DataConstant constant);
-    
-    /**
-     * Checks whether constant is the String representation of a value in the 
-     * data range, where the string has to be interpreted according to the 
-     * datatype URI. 
-     * @param constant A String representation of a constant for this data range.
-     * @return true if constant represents a value in the interpretation of this 
-     *         data range and false otherwise. 
-     */
     public boolean accepts(DataConstant constant);
+    
+//    /**
+//     * Checks whether constant is the String representation of a value in the 
+//     * data range, where the string has to be interpreted according to the 
+//     * datatype URI. 
+//     * @param constant A String representation of a constant for this data range.
+//     * @return true if constant represents a value in the interpretation of this 
+//     *         data range and false otherwise. 
+//     */
+//    public boolean accepts(DataConstant constant);
     
     /**
      * Can be used to check whether the implementation supports the given set of 

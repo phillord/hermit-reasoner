@@ -403,7 +403,7 @@ public class DatatypeManager {
         // if we have oneOfs, we make sure they conform to the facets
         if (constants != null) {
             for (DataConstant constant : constants) {
-                if (!canonicalDR.facetsAccept(constant)) {
+                if (!canonicalDR.accepts(constant)) {
                     constants.remove(constant);
                 }
             }

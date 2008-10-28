@@ -162,29 +162,6 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
         }
     }
     
-    public boolean facetsAccept(DataConstant constant) {
-        if (!oneOf.isEmpty()) {
-            return oneOf.contains(constant);
-        }
-        if (!notOneOf.isEmpty() && notOneOf.contains(constant)) {
-            return false;
-        } 
-        if (intervals.isEmpty()) return true;
-        Date date;
-        try {
-            date = dfm.parse(constant.getValue());
-            BigInteger intValue = new BigInteger("" + date.getTime());
-            for (Interval i : intervals) {
-                if (i.contains(intValue) && !notOneOf.contains(constant)) {
-                    return true;
-                }
-            }
-        } catch (ParseException e) {
-            return false; 
-        }
-        return false; 
-    }
-    
     public void conjoinFacetsFrom(DataRange range) {
         if (isNegated) {
             throw new RuntimeException("Cannot add facets to negated " +
@@ -253,20 +230,25 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
         if (!oneOf.isEmpty()) {
             return oneOf.contains(constant);
         }
+        if (!notOneOf.isEmpty() && notOneOf.contains(constant)) {
+            return false;
+        } 
+        if (intervals.isEmpty()) return true;
+        Date date;
         try {
-            Date dateValue = dfm.parse(constant.getValue());
-            BigInteger intValue = new BigInteger("" + dateValue.getTime());
+            date = dfm.parse(constant.getValue());
+            BigInteger intValue = new BigInteger("" + date.getTime());
             for (Interval i : intervals) {
                 if (i.contains(intValue) && !notOneOf.contains(constant)) {
                     return true;
                 }
             }
         } catch (ParseException e) {
-            e.printStackTrace();
+            return false; 
         }
         return false; 
     }
-    
+
     public boolean hasMinCardinality(BigInteger n) {
         if (isNegated || n.compareTo(BigInteger.ZERO) <= 0) return true;
         if (isFinite()) {

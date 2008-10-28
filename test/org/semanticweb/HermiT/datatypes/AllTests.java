@@ -9,7 +9,9 @@ public class AllTests extends TestCase {
     public static Test suite() {
         TestSuite suite = new TestSuite("Tests the internals of the datatype classes.");
         // $JUnit-BEGIN$
-        suite.addTestSuite(DatatypesTestFin.class);
+        suite.addTestSuite(DataConstantTest.class);
+        suite.addTestSuite(IntegersTest.class);
+        suite.addTestSuite(DoublesTest.class);
         // $JUnit-END$
         return suite;
     }

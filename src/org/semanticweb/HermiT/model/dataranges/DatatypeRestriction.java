@@ -23,41 +23,67 @@ public abstract class DatatypeRestriction implements DataRange, CanonicalDataRan
     
     protected static final Map<String, String> uris = Namespaces.semanticWebNamespaces.getDeclarations();
     
+    public enum Impl {
+        IInteger (111), 
+        IDouble (11),
+        IDecimal (1),
+        IDateTime (2),
+        IString (3),
+        IBoolean (4), 
+        ILiteral (5), 
+        IAnyURI (6);
+        
+        private final int position;
+        
+        Impl(int position) {
+            this.position = position;
+        }
+        
+        public int getPosition() { 
+            return position; 
+        }
+    }
     public enum DT {
         
-        OWLREALPLUS ("1", (uris.get("owl") + "realPlus")),
-        OWLREAL ("11", (uris.get("owl") + "real")),
-        DECIMAL ("111", (uris.get("xsd") + "decimal")),
-        DOUBLE ("1111", (uris.get("xsd") + "double")),
-        FLOAT ("11111", (uris.get("xsd") + "float")),
-        INTEGER ("111111", (uris.get("xsd") + "integer")),
-        NONNEGATIVEINTEGER ("1111111", (uris.get("xsd") + "nonNegativeInteger")),
-        NONPOSITIVEINTEGER ("1111112", (uris.get("xsd") + "nonPositiveInteger")),
-        POSITIVEINTEGER ("11111111", (uris.get("xsd") + "positiveInteger")),
-        NEGATIVEINTEGER ("11111121", (uris.get("xsd") + "negativeInteger")),
-        LONG ("1111113", (uris.get("xsd") + "long")),
-        INT ("11111131", (uris.get("xsd") + "int")),
-        SHORT ("111111311", (uris.get("xsd") + "short")),
-        BYTE ("1111113111", (uris.get("xsd") + "byte")),
-        UNSIGNEDLONG ("1111114", (uris.get("xsd") + "unsignedLong")),
-        UNSIGNEDINT ("11111141", (uris.get("xsd") + "unsignedInt")),
-        UNSIGNEDSHORT ("111111411", (uris.get("xsd") + "unsignedShort")),
-        UNSIGNEDBYTE ("1111114111", (uris.get("xsd") + "unsignedByte")),
-        OWLDATETIME  ("2", (uris.get("owl") + "dateTime")), 
-        DATETIME ("21", (uris.get("xsd") + "dateTime")),
-        RDFTEXT ("3", (uris.get("rdf") + "text")),
-        STRING ("31", (uris.get("xsd") + "string")),
-        BOOLEAN ("4", (uris.get("xsd") + "boolean")), 
-        LITERAL ("5", (uris.get("rdfs") + "Literal")),
-        ANYURI ("6", (uris.get("xsd") + "anyURI"));        
+        OWLREALPLUS (Impl.IDecimal, "1", (uris.get("owl") + "realPlus")),
+        OWLREAL (Impl.IDecimal, "11", (uris.get("owl") + "real")),
+        DECIMAL (Impl.IDecimal, "111", (uris.get("xsd") + "decimal")),
+        DOUBLE (Impl.IDouble, "1111", (uris.get("xsd") + "double")),
+        FLOAT (Impl.IDouble, "11111", (uris.get("xsd") + "float")),
+        INTEGER (Impl.IInteger, "111111", (uris.get("xsd") + "integer")),
+        NONNEGATIVEINTEGER (Impl.IInteger, "1111111", (uris.get("xsd") + "nonNegativeInteger")),
+        NONPOSITIVEINTEGER (Impl.IInteger, "1111112", (uris.get("xsd") + "nonPositiveInteger")),
+        POSITIVEINTEGER (Impl.IInteger, "11111111", (uris.get("xsd") + "positiveInteger")),
+        NEGATIVEINTEGER (Impl.IInteger, "11111121", (uris.get("xsd") + "negativeInteger")),
+        LONG (Impl.IInteger, "1111113", (uris.get("xsd") + "long")),
+        INT (Impl.IInteger, "11111131", (uris.get("xsd") + "int")),
+        SHORT (Impl.IInteger, "111111311", (uris.get("xsd") + "short")),
+        BYTE (Impl.IInteger, "1111113111", (uris.get("xsd") + "byte")),
+        UNSIGNEDLONG (Impl.IInteger, "1111114", (uris.get("xsd") + "unsignedLong")),
+        UNSIGNEDINT (Impl.IInteger, "11111141", (uris.get("xsd") + "unsignedInt")),
+        UNSIGNEDSHORT (Impl.IInteger, "111111411", (uris.get("xsd") + "unsignedShort")),
+        UNSIGNEDBYTE (Impl.IInteger, "1111114111", (uris.get("xsd") + "unsignedByte")),
+        OWLDATETIME  (Impl.IDateTime, "2", (uris.get("owl") + "dateTime")), 
+        DATETIME (Impl.IDateTime, "21", (uris.get("xsd") + "dateTime")),
+        RDFTEXT (Impl.IString, "3", (uris.get("rdf") + "text")),
+        STRING (Impl.IString, "31", (uris.get("xsd") + "string")),
+        BOOLEAN (Impl.IBoolean, "4", (uris.get("xsd") + "boolean")), 
+        LITERAL (Impl.ILiteral, "5", (uris.get("rdfs") + "Literal")),
+        ANYURI (Impl.IAnyURI, "6", (uris.get("xsd") + "anyURI"));        
 
+        private final Impl impl;
         private final String position;   // in a tree that indicates subsumption 
         // relationships between datatypes
         private final String uri;
         
-        DT(String position, String uri) {
+        DT(Impl impl, String position, String uri) {
+            this.impl = impl;
             this.position = position;
             this.uri = uri;
+        }
+        
+        public int getImpl() { 
+            return impl.getPosition(); 
         }
         
         public String getPosition() { 
@@ -156,11 +182,7 @@ public abstract class DatatypeRestriction implements DataRange, CanonicalDataRan
         }
         return result;
     }
-    
-    public boolean facetsAccept(DataConstant constant) {
-        return true;
-    }
-    
+
     public boolean supports(Facets facet) {
         return supportedFacets.contains(facet);
     }
