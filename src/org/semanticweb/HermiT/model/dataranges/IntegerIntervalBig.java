@@ -3,8 +3,11 @@ package org.semanticweb.HermiT.model.dataranges;
 import java.math.BigInteger;
 
 public class IntegerIntervalBig implements IntegerInterval {
-    BigInteger min = null;
-    BigInteger max = null;
+    
+    public static final Number ZERO = BigInteger.ZERO;
+    
+    protected BigInteger min = null;
+    protected BigInteger max = null;
     
     public IntegerIntervalBig(BigInteger minInclusive, BigInteger maxInclusive) {
         this.min = minInclusive;
@@ -107,6 +110,10 @@ public class IntegerIntervalBig implements IntegerInterval {
     
     public Number decreasedMax() {
         return  max.subtract(BigInteger.ONE);
+    }
+    
+    public Number getZero() {
+        return ZERO;
     }
     
     public String toString() {

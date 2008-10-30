@@ -101,7 +101,6 @@ import org.semanticweb.owl.model.OWLTypedConstant;
 import org.semanticweb.owl.model.OWLUntypedConstant;
 import org.semanticweb.owl.vocab.OWLRestrictedDataRangeFacetVocabulary;
 
-import dk.brics.automaton.Automaton;
 import dk.brics.automaton.Datatypes;
 
 public class OwlClausification {
@@ -1357,8 +1356,7 @@ public class OwlClausification {
                             + "has an invalid format that cannot be parsed. ");
                 }
             } else if (dataType.equals(factory.getOWLDataType(DT.ANYURI.getURI()))) {
-                Automaton a = Datatypes.get("URI");
-                if (a.run(lit)) {
+                if (Datatypes.get("URI").run(lit)) {
                     currentDataRange.addOneOf(new DataConstant(
                             Impl.IAnyURI, DT.ANYURI, lit));
                 } else {
@@ -1366,6 +1364,30 @@ public class OwlClausification {
                             + typedConstant 
                             + " is supposed to be a URI datatype, but has a " 
                             + "format that cannot be parsed. ");
+                }
+            } else if (dataType.equals(factory.getOWLDataType(DT.BASE64BINARY.getURI()))) {
+                // values are limited to the characters a-z, A-Z, 0-9, +, /, 
+                // =, (space), \r, \n, \t, 
+                if (Datatypes.get("base64Binary").run(lit)) {
+                    currentDataRange.addOneOf(new DataConstant(
+                            Impl.IBase64Binary, DT.BASE64BINARY, lit));
+                } else {
+                    throw new RuntimeException("The constant " 
+                            + typedConstant 
+                            + " is supposed to be base64binary, but has a" 
+                            + " format that cannot be parsed. ");
+                }
+            } else if (dataType.equals(factory.getOWLDataType(DT.HEXBINARY.getURI()))) {
+                // values are limited to the characters a-z, A-Z, 0-9, +, /, 
+                // =, (space), \r, \n, \t, 
+                if (Datatypes.get("hexBinary").run(lit)) {
+                    currentDataRange.addOneOf(new DataConstant(
+                            Impl.IHexBinary, DT.HEXBINARY, lit));
+                } else {
+                    throw new RuntimeException("The constant " 
+                            + typedConstant 
+                            + " is supposed to be hexBinary, but has a" 
+                            + " format that cannot be parsed. ");
                 }
             } else {
                 throw new RuntimeException("Parsed typed constant of an " +

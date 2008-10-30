@@ -6,6 +6,10 @@ public class IntegerIntervalFin implements IntegerInterval {
     
     public static final BigInteger longMin = new BigInteger("" + Long.MIN_VALUE);
     public static final BigInteger longMax = new BigInteger("" + Long.MAX_VALUE);
+    public static final BigInteger intMin = new BigInteger("" + Integer.MIN_VALUE);
+    public static final BigInteger intMax = new BigInteger("" + Integer.MAX_VALUE);
+    
+    public static final Number ZERO = 0l;
     
     Long min = null;
     Long max = null;
@@ -79,6 +83,10 @@ public class IntegerIntervalFin implements IntegerInterval {
     
     public static boolean isLong(BigInteger i) {
         return (i.compareTo(longMin) >= 0 && i.compareTo(longMax) <= 0);
+    }
+
+    public static boolean isInt(BigInteger i) {
+        return (i.compareTo(intMin) >= 0 && i.compareTo(intMax) <= 0);
     }
     
     public boolean isEmpty() {
@@ -156,6 +164,10 @@ public class IntegerIntervalFin implements IntegerInterval {
         }
         IntegerInterval i = IntegerIntervalBig.toIntegerIntervalBig(this);
         return i.decreasedMax();
+    }
+    
+    public Number getZero() {
+        return ZERO;
     }
     
     public String toString() {

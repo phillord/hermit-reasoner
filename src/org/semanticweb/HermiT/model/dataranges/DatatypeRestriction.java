@@ -33,7 +33,9 @@ public abstract class DatatypeRestriction implements DataRange, CanonicalDataRan
         IString (3),
         IBoolean (4), 
         ILiteral (5), 
-        IAnyURI (6);
+        IAnyURI (31),
+        IBase64Binary (32), 
+        IHexBinary (33);
         
         private final int position;
         
@@ -80,7 +82,9 @@ public abstract class DatatypeRestriction implements DataRange, CanonicalDataRan
         ENTITY ("3111213", (uris.get("xsd") + "ENTITY")),
         BOOLEAN ("4", (uris.get("xsd") + "boolean")), 
         LITERAL ("5", (uris.get("rdfs") + "Literal")),
-        ANYURI ("6", (uris.get("xsd") + "anyURI"));        
+        ANYURI ("6", (uris.get("xsd") + "anyURI")),
+        HEXBINARY ("7", (uris.get("xsd") + "hexBinary")),
+        BASE64BINARY ("8", (uris.get("xsd") + "base64Binary"));
 
         private final String position;   // in a tree that indicates subsumption 
         // relationships between datatypes

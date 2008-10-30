@@ -29,4 +29,6 @@ public interface IntegerInterval {
     public Number increasedMax();
     
     public Number decreasedMax();
+    
+    public Number getZero();
 }
