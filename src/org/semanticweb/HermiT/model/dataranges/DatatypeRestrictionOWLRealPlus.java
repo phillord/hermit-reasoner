@@ -106,7 +106,6 @@ public class DatatypeRestrictionOWLRealPlus
             throw new RuntimeException("Cannot add facets to negated " +
                         "data ranges!");
         }
-        // allow for integer and double data ranges to be handled
         if (!(range instanceof DatatypeRestrictionOWLRealPlus)) {
             throw new IllegalArgumentException("The given parameter is not " +
                     "an instance of DatatypeRestrictionOWLReal. It is only " +
@@ -158,17 +157,21 @@ public class DatatypeRestrictionOWLRealPlus
                         }
                     }
                 } else {
-                    for (DecimalInterval i : intervals) {
-                        for (DecimalInterval iNew : restr.getIntervals()) {
-                            i.intersectWith(iNew);
-                            if (!i.isEmpty()) newIntervals.add(i);
+                    if (restr.getIntervals().isEmpty()) {
+                        newIntervals = intervals;
+                    } else {
+                        for (DecimalInterval i1 : intervals) {
+                            for (DecimalInterval i2 : restr.getIntervals()) {
+                                i1.intersectWith(i2);
+                                if (!i1.isEmpty()) newIntervals.add(i1);
+                            }
+                        }
+                        if (newIntervals.isEmpty()) {
+                            isBottom = true;
+                        } else {
+                            intervals = newIntervals;
                         }
                     }
-                }
-                if (newIntervals.isEmpty()) {
-                    isBottom = true;
-                } else {
-                    intervals = newIntervals;
                 }
             }
         }
@@ -321,10 +324,10 @@ public class DatatypeRestrictionOWLRealPlus
         return DT.getSubTreeFor(DT.DECIMAL).contains(constant.getDatatype());
     }
     
-    public boolean canHandleAll(Set<DT> datatypes) {
+    public boolean canHandle(DT datatype) {
         Set<DT> dts = DT.getSubTreeFor(DT.OWLREALPLUS);
         dts.removeAll(DT.getSubTreeFor(DT.DECIMAL)); 
         dts.add(DT.DECIMAL);
-        return dts.containsAll(datatypes);
+        return dts.contains(datatype);
     }
 }

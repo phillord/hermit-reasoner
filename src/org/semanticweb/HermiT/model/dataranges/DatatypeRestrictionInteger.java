@@ -184,10 +184,14 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction implements I
                         }
                     }
                 } else {
-                    for (IntegerInterval i1 : intervals) {
-                        for (IntegerInterval i2 : restr.getIntegerIntervals()) {
-                            i1 = i1.intersectWith(i2);
-                            if (!i1.isEmpty()) newIntervals.add(i1);
+                    if (restr.getIntegerIntervals().isEmpty()) {
+                        newIntervals = intervals;
+                    } else {
+                        for (IntegerInterval i1 : intervals) {
+                            for (IntegerInterval i2 : restr.getIntegerIntervals()) {
+                                i1 = i1.intersectWith(i2);
+                                if (!i1.isEmpty()) newIntervals.add(i1);
+                            }
                         }
                     }
                 }
@@ -199,19 +203,6 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction implements I
             }
         }
     }
-    
-//    public boolean accepts(DataConstant constant) {
-//        if (!oneOf.isEmpty()) {
-//            return oneOf.contains(constant);
-//        }
-//        BigInteger intValue = new BigInteger(constant.getValue());
-//        for (IntegerInterval i : intervals) {
-//            if (i.contains(intValue) && !notOneOf.contains(constant)) {
-//                return true;
-//            }
-//        }
-//        return false; 
-//    }
     
     public boolean hasMinCardinality(BigInteger n) {
         if (isNegated || n.compareTo(BigInteger.ZERO) <= 0) return true;
@@ -271,7 +262,7 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction implements I
                 for (IntegerInterval i : sortedIntervals) {
                     BigInteger constant = new BigInteger("" + i.getMin());
                     while (i.contains(constant)) {
-                        DataConstant dataConstant = new DataConstant(datatype, "" + constant);
+                        DataConstant dataConstant = new DataConstant(Impl.IInteger, datatype, "" + constant);
                         if (!notOneOf.contains(dataConstant)) return dataConstant;
                         constant = constant.add(BigInteger.ONE);
                     }
@@ -309,8 +300,8 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction implements I
         return DT.getSubTreeFor(DT.INTEGER).contains(constant.getDatatype());
     }
     
-    public boolean canHandleAll(Set<DT> datatypes) {
-        return DT.getSubTreeFor(DT.OWLREALPLUS).containsAll(datatypes);
+    public boolean canHandle(DT datatype) {
+        return DT.getSubTreeFor(DT.OWLREALPLUS).contains(datatype);
     }
     
     protected static class IntervalComparator implements Comparator<IntegerInterval> { 

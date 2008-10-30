@@ -58,7 +58,6 @@ public class DatatypeRestrictionDouble
                 if (doubleValueAsBD.compareTo(originalValue) > 0 
                         || (doubleValueAsBD.compareTo(originalValue) == 0 
                                 && facet == Facets.MAX_EXCLUSIVE)) {
-                    //if (d > Double.MIN_VALUE) d -= Double.MIN_NORMAL;
                     doubleValue = DatatypeRestrictionDouble.previousDouble(doubleValue);
                 }
             }
@@ -242,10 +241,14 @@ public class DatatypeRestrictionDouble
                         }
                     }
                 } else {
-                    for (DoubleInterval i : intervals) {
-                        for (DoubleInterval iNew : restr.getDoubleIntervals()) {
-                            i.intersectWith(iNew);
-                            if (!i.isEmpty()) newIntervals.add(i);
+                    if (restr.getDoubleIntervals().isEmpty()) {
+                        newIntervals = intervals;
+                    } else {
+                        for (DoubleInterval i1 : intervals) {
+                            for (DoubleInterval i2 : restr.getDoubleIntervals()) {
+                                i1.intersectWith(i2);
+                                if (!i1.isEmpty()) newIntervals.add(i1);
+                            }
                         }
                     }
                 }
@@ -311,7 +314,7 @@ public class DatatypeRestrictionDouble
             for (DoubleInterval i : sortedIntervals) {
                 double constant = i.getMin();
                 while (constant <= i.getMax()) {
-                    DataConstant dataConstant = new DataConstant(datatype, "" + constant);
+                    DataConstant dataConstant = new DataConstant(Impl.IDouble, datatype, "" + constant);
                     if (!notOneOf.contains(dataConstant)) return dataConstant;
                     constant = DatatypeRestrictionDouble.nextDouble(constant); 
                 }
@@ -369,8 +372,8 @@ public class DatatypeRestrictionDouble
         return DT.getSubTreeFor(DT.DOUBLE).contains(constant.getDatatype());
     }
     
-    public boolean canHandleAll(Set<DT> datatypes) {
-        return DT.getSubTreeFor(DT.OWLREALPLUS).containsAll(datatypes);
+    public boolean canHandle(DT datatype) {
+        return DT.getSubTreeFor(DT.OWLREALPLUS).contains(datatype);
     }
     
     protected static class IntervalComparator implements Comparator<DoubleInterval> { 

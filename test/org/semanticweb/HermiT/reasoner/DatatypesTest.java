@@ -170,29 +170,73 @@ public class DatatypesTest extends AbstractReasonerTest {
         loadOntologyWithAxioms(axioms, null);
         assertABoxSatisfiable(false);
     }
+
+    public void testFloat1() throws Exception {
+        // +0 and -0 are not equal 
+        String axioms = "DataPropertyAssertion(numberOfChildren Meg \"+0.0\"^^xsd:float) "
+                + "DataPropertyAssertion(numberOfChildren Meg \"-0.0\"^^xsd:float) " 
+                + "FunctionalDataProperty(numberOfChildren)";
+        loadOntologyWithAxioms(axioms, null);
+        assertABoxSatisfiable(false);
+    }
     
-//    public void testNegZero2() throws Exception {
-//        String axioms = "SubClassOf(A DataAllValuesFrom(dp owl:real)) " 
-//                + "ClassAssertion(a A)"
-//                + "ClassAssertion(a DataSomeValuesFrom(dp DataOneOf(\"-0\"^^xsd:float)))";
-//        loadOntologyWithAxioms(axioms, null);
-//        assertABoxSatisfiable(false);
-//    }
-//    
-//  public void testNegZero2() throws Exception {
-//  String axioms = "SubClassOf(A DataAllValuesFrom(dp owl:realPlus)) " 
-//          + "ClassAssertion(a A)"
-//          + "ClassAssertion(a DataSomeValuesFrom(dp DataOneOf(\"-0\"^^xsd:float)))";
-//  loadOntologyWithAxioms(axioms, null);
-//  assertABoxSatisfiable(true);
-//}
-//
-//    public void testFloat1() throws Exception {
-//        // +0 and -0 are not equal 
-//        String axioms = "PropertyAssertion(Meg numberOfChildren \"+0\"^^xsd:float) "
-//                + "PropertyAssertion(Meg numberOfChildren \"-0\"^^xsd:float) " 
-//                + "FunctionalProperty(numberOfChildren)";
-//        loadOntologyWithAxioms(axioms, null);
-//        assertABoxSatisfiable(false);
-//    }
+    public void testIntPlusDecimal() throws Exception {
+        // forall dp integer >= 5 <=7
+        // forall dp decimal >=6 <=15
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:byte minInclusive \"4.5\"^^xsd:decimal maxInclusive \"7\"^^xsd:short))) "
+            + "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:decimal minInclusive \"6.0\"^^xsd:float maxInclusive \"6.8\"^^xsd:decimal))) " 
+            + "ClassAssertion(a A)";
+        loadOntologyWithAxioms(axioms, null);
+        assertABoxSatisfiable(true);
+    }
+    
+    public void testIntPlusDecimal2() throws Exception {
+        // forall dp integer >= 5 <=7
+        // forall dp decimal >=6.0 <=6.8
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:byte minInclusive \"4.5\"^^xsd:decimal maxInclusive \"7\"^^xsd:short))) "
+            + "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:decimal minInclusive \"6.0\"^^xsd:float maxInclusive \"6.8\"^^xsd:decimal))) "
+            + "SubClassOf(A DataSomeValuesFrom(dp owl:real))"
+            + "ClassAssertion(a A) "
+            + "NegativeDataPropertyAssertion(dp a \"6\"^^xsd:unsignedInt) ";
+        loadOntologyWithAxioms(axioms, null);
+        assertABoxSatisfiable(false);
+    }
+    
+    // till here created test files
+    public void testDoublePlusDecimal() throws Exception {
+        // forall dp integer >= 5 <=7.2
+        // forall dp decimal >=6.0 <=6.8
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:double minInclusive \"5\"^^xsd:byte maxInclusive \"7.2\"^^xsd:float))) "
+            + "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:decimal minInclusive \"6.0\"^^xsd:float maxInclusive \"6.8\"^^xsd:decimal))) "
+            + "SubClassOf(A DataSomeValuesFrom(dp owl:real))"
+            + "ClassAssertion(a A) "
+            + "NegativeDataPropertyAssertion(dp a \"6\"^^xsd:unsignedInt) ";
+        loadOntologyWithAxioms(axioms, null);
+        assertABoxSatisfiable(true);
+    }
+    
+    public void testDoublePlusOWLreal() throws Exception {
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp owl:real)) "
+            + "SubClassOf(A DataSomeValuesFrom(dp DataOneOf(\"-INF\"^^xsd:float \"-0\"^^xsd:integer)))"
+            + "ClassAssertion(a A) ";
+        loadOntologyWithAxioms(axioms, null);
+        assertABoxSatisfiable(true);
+    }
+    
+    public void testDoublePlusOWLreal2() throws Exception {
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp owl:real)) "
+            + "SubClassOf(A DataSomeValuesFrom(dp DataOneOf(\"-INF\"^^xsd:float \"-0\"^^xsd:integer)))"
+            + "ClassAssertion(a A) "
+            + "NegativeDataPropertyAssertion(dp a \"0\"^^xsd:unsignedInt) ";
+        loadOntologyWithAxioms(axioms, null);
+        assertABoxSatisfiable(false);
+    }
+    
+    public void testDifferentOneOfs() throws Exception {
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3.0\"^^xsd:float \"3\"^^xsd:integer)))"
+            + "ClassAssertion(a DataMinCardinality(2 dp)) "
+            + "ClassAssertion(a A) ";
+        loadOntologyWithAxioms(axioms, null);
+        assertABoxSatisfiable(false);
+    }
 }

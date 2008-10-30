@@ -85,7 +85,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("(oneOf((xsd:string Peter)(xsd:integer 19)))(Y) :- A(X), dp*(X,Y)");
+        expectedClauses.add("(oneOf((xsd:integer 19)(xsd:string Peter)))(Y) :- A(X), dp*(X,Y)");
         assertContainsAll(this.getName(), clauses, expectedClauses);
     }
     
@@ -94,7 +94,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("A(X) v atLeast(1 dp* (not oneOf((xsd:integer 19)(xsd:integer 18))))(X) :- owl:Thing(X)");
+        expectedClauses.add("A(X) v atLeast(1 dp* (not oneOf((xsd:integer 18)(xsd:integer 19))))(X) :- owl:Thing(X)");
         assertContainsAll(this.getName(), clauses, expectedClauses);
     }
     
@@ -103,7 +103,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("A(X) v atLeast(1 dp* (not oneOf((xsd:string abc)(xsd:integer 18))))(X) :- owl:Thing(X)");
+        expectedClauses.add("A(X) v atLeast(1 dp* (not oneOf((xsd:integer 18)(xsd:string abc))))(X) :- owl:Thing(X)");
         assertContainsAll(this.getName(), clauses, expectedClauses);
     }
     
@@ -112,7 +112,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("(oneOf((xsd:string abc)(xsd:integer 18)))(Y) :- A(X), dp*(X,Y)");
+        expectedClauses.add("(oneOf((xsd:integer 18)(xsd:string abc)))(Y) :- A(X), dp*(X,Y)");
         assertContainsAll(this.getName(), clauses, expectedClauses);
     }
     
@@ -121,7 +121,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
         Set<String> clauses = getDLClauses(ontology);
         Set<String> expectedClauses = new HashSet<String>();
-        expectedClauses.add("(oneOf((xsd:integer 19)(xsd:integer 18)))(Y) :- A(X), dp*(X,Y)");
+        expectedClauses.add("(oneOf((xsd:integer 18)(xsd:integer 19)))(Y) :- A(X), dp*(X,Y)");
         assertContainsAll(this.getName(), clauses, expectedClauses);
     }
     

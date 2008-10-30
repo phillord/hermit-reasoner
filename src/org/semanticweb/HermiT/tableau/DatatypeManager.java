@@ -335,16 +335,19 @@ public class DatatypeManager {
                     if (canonicalDR == null) {
                         canonicalDR = range.getNewInstance();
                     } else {
-                        boolean isSubOf = DT.isSubOf(range.getDatatype(), 
-                                canonicalDR.getDatatype());
-                        if (range.getDatatype() != canonicalDR.getDatatype() 
-                                && !isSubOf) {
+                        if (DT.isSubOf(range.getDatatype(), canonicalDR.getDatatype())) {
+                            // found a more specific implementation, 
+                            // E.g., the canonical range is implemented with 
+                            // decimals, but the new range is only for integers. 
+                            // Hence we should use the more restrictive integer 
+                            // range as the canonical range.
+                            canonicalDR = range.getNewInstance();
+                        } else if (!canonicalDR.canHandle(range.getDatatype())) {
+                            // found an incompatibility
                             return null;
                         }
-                        if (isSubOf) {
-                            canonicalDR = range.getNewInstance();
-                        }
                     }
+                    forbiddenConstants.addAll(range.getNotOneOf());
                 } else {
                     // not a datatype restriction, so it is an enumerated range
                     if (constants == null) {
@@ -381,12 +384,23 @@ public class DatatypeManager {
             // if there are oneOf restrictions, check whether there are values 
             // that suit the datatype restriction
             if (constants != null) {
+                Set<DataConstant> unsuitable = new HashSet<DataConstant>();
                 for (DataConstant constant : constants) {
                     if (!canonicalDR.datatypeAccepts(constant)) {
-                        constants.remove(constant);
+                        unsuitable.add(constant);
                     }
                 }
+                constants.removeAll(unsuitable);
                 if (constants.isEmpty()) return null;
+            }
+            if (forbiddenConstants != null) {
+                Set<DataConstant> irrelevant = new HashSet<DataConstant>();
+                for (DataConstant constant : forbiddenConstants) {
+                    if (!canonicalDR.datatypeAccepts(constant)) {
+                        irrelevant.add(constant);
+                    }
+                }
+                forbiddenConstants.removeAll(irrelevant);
             }
         }
             

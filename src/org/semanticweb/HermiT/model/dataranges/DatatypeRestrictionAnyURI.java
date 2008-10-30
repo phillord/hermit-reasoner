@@ -3,7 +3,6 @@ package org.semanticweb.HermiT.model.dataranges;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -188,7 +187,7 @@ public class DatatypeRestrictionAnyURI extends DatatypeRestriction {
         }
         compileAllFacetsIntoPattern();
         String value = patternMatcher.getShortestExample(true);
-        return value != null ? new DataConstant(datatype, value) : null;
+        return value != null ? new DataConstant(Impl.IAnyURI, datatype, value) : null;
     }
    
     protected String printExtraInfo(Namespaces namespaces) {
@@ -209,7 +208,7 @@ public class DatatypeRestrictionAnyURI extends DatatypeRestriction {
         return DT.getSubTreeFor(DT.ANYURI).contains(constant.getDatatype());
     }
     
-    public boolean canHandleAll(Set<DT> datatypes) {
-        return DT.getSubTreeFor(DT.ANYURI).containsAll(datatypes);
+    public boolean canHandle(DT datatype) {
+        return DT.getSubTreeFor(DT.ANYURI).contains(datatype);
     }
 }

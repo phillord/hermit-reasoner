@@ -56,14 +56,18 @@ public class IntegerIntervalFin implements IntegerInterval {
             Number newMax = i.getMax();
             Number newMin = i.getMin();
             if (max == null) {
-                if (i.getMax() != null) max = newMax.longValue();
+                if (i.getMax() != null) {
+                    max = newMax.longValue();
+                }
             } else {
                 if (i.getMax() != null && newMax.longValue() < max) {
                     max = newMax.longValue();
                 }
             }
             if (min == null) {
-                if (i.getMin() != null) min = newMin.longValue();
+                if (i.getMin() != null) {
+                    min = newMin.longValue();
+                }
             } else {
                 if (i.getMin() != null && newMin.longValue() > min) {
                     min = newMin.longValue();
@@ -155,10 +159,15 @@ public class IntegerIntervalFin implements IntegerInterval {
     }
     
     public String toString() {
+        if (min == null && max == null) return "";
         StringBuffer buffer = new StringBuffer();
-        buffer.append(">= " + min);
-        buffer.append(" ");
-        buffer.append("<= " + max);
+        if (min != null) {
+            buffer.append(">= " + min);
+            if (max != null) buffer.append(" ");
+        } 
+        if (max != null) {
+            buffer.append(">= " + max);
+        }
         return buffer.toString();
     }
 }

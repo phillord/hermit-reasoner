@@ -110,13 +110,14 @@ public class IntegerIntervalBig implements IntegerInterval {
     }
     
     public String toString() {
+        if (min == null && max == null) return "";
         StringBuffer buffer = new StringBuffer();
         if (min != null) {
             buffer.append(">= " + min);
-        }
+            if (max != null) buffer.append(" ");
+        } 
         if (max != null) {
-            if (min != null) buffer.append(" ");
-            buffer.append("<= " + max);
+            buffer.append(">= " + max);
         }
         return buffer.toString();
     }

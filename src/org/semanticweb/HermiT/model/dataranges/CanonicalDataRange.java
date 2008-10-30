@@ -109,16 +109,6 @@ public interface CanonicalDataRange {
      */
     public boolean accepts(DataConstant constant);
     
-//    /**
-//     * Checks whether constant is the String representation of a value in the 
-//     * data range, where the string has to be interpreted according to the 
-//     * datatype URI. 
-//     * @param constant A String representation of a constant for this data range.
-//     * @return true if constant represents a value in the interpretation of this 
-//     *         data range and false otherwise. 
-//     */
-//    public boolean accepts(DataConstant constant);
-    
     /**
      * Can be used to check whether the implementation supports the given set of 
      * datatypes, e.g., the implementation for integers supports long, 
@@ -127,7 +117,7 @@ public interface CanonicalDataRange {
      * @return true if the implementation can handle all the given datatypes and 
      * false otherwise
      */
-    public boolean canHandleAll(Set<DT> datatypes);
+    public boolean canHandle(DT datatype);
     
     /**
      * Can be used to check whether a given constant is in principle in the 

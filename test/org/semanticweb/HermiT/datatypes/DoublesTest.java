@@ -10,6 +10,7 @@ import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionOWLRealPlus;
 import org.semanticweb.HermiT.model.dataranges.DoubleInterval;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.DT;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets;
+import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Impl;
 import org.semanticweb.HermiT.reasoner.AbstractReasonerTest;
 
 public class DoublesTest extends AbstractReasonerTest {
@@ -19,8 +20,8 @@ public class DoublesTest extends AbstractReasonerTest {
     }
     
     public void testNaN() throws Exception {
-        DataConstant constant1 = new DataConstant(DT.DOUBLE, "" + Double.NaN);
-        DataConstant constant2 = new DataConstant(DT.DOUBLE, "" + new Double("NaN"));
+        DataConstant constant1 = new DataConstant(Impl.IDouble, DT.DOUBLE, "" + Double.NaN);
+        DataConstant constant2 = new DataConstant(Impl.IDouble, DT.DOUBLE, "" + new Double("NaN"));
         Double d1 = new Double(constant1.getValue());
         Double d2 = new Double(constant2.getValue());
         assertTrue(DatatypeRestrictionDouble.isNaN(d1));
@@ -136,9 +137,9 @@ public class DoublesTest extends AbstractReasonerTest {
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
         assertTrue(canonical.isFinite());
-        assertFalse(canonical.accepts(new DataConstant(dr1.getDatatype(), "9.25")));
-        assertTrue(canonical.accepts(new DataConstant(dr1.getDatatype(), "10.0")));
-        assertTrue(canonical.accepts(new DataConstant(dr1.getDatatype(), "10000.0")));
+        assertFalse(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "9.25")));
+        assertTrue(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "10.0")));
+        assertTrue(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "10000.0")));
         assertTrue(((DatatypeRestrictionDouble)canonical).getDoubleIntervals().size() == 1);
     }
     
@@ -153,9 +154,9 @@ public class DoublesTest extends AbstractReasonerTest {
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
         assertTrue(canonical.isFinite());
-        assertFalse(canonical.accepts(new DataConstant(dr1.getDatatype(), "" + DatatypeRestrictionDouble.previousDouble(15.75))));
-        assertTrue(canonical.accepts(new DataConstant(dr1.getDatatype(), "15.75")));
-        assertTrue(canonical.accepts(new DataConstant(dr1.getDatatype(), "10000.0")));
+        assertFalse(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "" + DatatypeRestrictionDouble.previousDouble(15.75))));
+        assertTrue(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "15.75")));
+        assertTrue(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "10000.0")));
         assertTrue(((DatatypeRestrictionDouble)canonical).getDoubleIntervals().size() == 1);
     }
     
@@ -171,8 +172,8 @@ public class DoublesTest extends AbstractReasonerTest {
         canonical.conjoinFacetsFrom(dr2);
         assertTrue(canonical.isFinite());
         assertTrue(canonical.isBottom());
-        assertFalse(canonical.accepts(new DataConstant(dr1.getDatatype(), "10.01")));
-        assertFalse(canonical.accepts(new DataConstant(dr1.getDatatype(), "5.74")));
+        assertFalse(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "10.01")));
+        assertFalse(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "5.74")));
         assertTrue(canonical.getEnumerationSize().equals(BigInteger.ZERO));
     }
     
@@ -189,10 +190,10 @@ public class DoublesTest extends AbstractReasonerTest {
         canonical.conjoinFacetsFrom(dr2);
         assertTrue(canonical.isFinite());
         assertFalse(canonical.isBottom());
-        assertFalse(canonical.accepts(new DataConstant(dr1.getDatatype(), "9.0")));
-        assertTrue(canonical.accepts(new DataConstant(dr1.getDatatype(), "10.0")));
-        assertTrue(canonical.accepts(new DataConstant(dr1.getDatatype(), "15.0")));
-        assertFalse(canonical.accepts(new DataConstant(dr1.getDatatype(), "16.0")));
+        assertFalse(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "9.0")));
+        assertTrue(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "10.0")));
+        assertTrue(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "15.0")));
+        assertFalse(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "16.0")));
         assertTrue(((DatatypeRestrictionDouble)canonical).getDoubleIntervals().size() == 1);
         assertTrue(canonical.getEnumerationSize() != null);
     }
@@ -213,10 +214,10 @@ public class DoublesTest extends AbstractReasonerTest {
         assertTrue(canonical.isFinite());
         assertFalse(canonical.isBottom());
         assertTrue(((DatatypeRestrictionDouble)canonical).getDoubleIntervals().size() == 1);
-        assertTrue(canonical.accepts(new DataConstant(dr1.getDatatype(), "" + DatatypeRestrictionDouble.previousDouble(10.0))));
-        assertFalse(canonical.accepts(new DataConstant(dr1.getDatatype(), "10.0")));
-        assertTrue(canonical.accepts(new DataConstant(dr1.getDatatype(), "5.0")));
-        assertFalse(canonical.accepts(new DataConstant(dr1.getDatatype(), "" + DatatypeRestrictionDouble.previousDouble(5.0))));
+        assertTrue(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "" + DatatypeRestrictionDouble.previousDouble(10.0))));
+        assertFalse(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "10.0")));
+        assertTrue(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "5.0")));
+        assertFalse(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "" + DatatypeRestrictionDouble.previousDouble(5.0))));
     }
 
     public void testConjoinNegRangesA5() {
@@ -236,14 +237,14 @@ public class DoublesTest extends AbstractReasonerTest {
         assertTrue(canonical.isFinite());
         assertFalse(canonical.isBottom());
         // ranges -4.5 - -2.22 and 10.47854 - 15.52
-        assertFalse(canonical.accepts(new DataConstant(dr1.getDatatype(), "-4.6")));
-        assertFalse(canonical.accepts(new DataConstant(dr1.getDatatype(), "-2.2")));
-        assertFalse(canonical.accepts(new DataConstant(dr1.getDatatype(), "10.47851")));
-        assertFalse(canonical.accepts(new DataConstant(dr1.getDatatype(), "15.521")));
-        assertTrue(canonical.accepts(new DataConstant(dr1.getDatatype(), "-4.5")));
-        assertTrue(canonical.accepts(new DataConstant(dr1.getDatatype(), "-2.24")));
-        assertTrue(canonical.accepts(new DataConstant(dr1.getDatatype(), "10.47854")));
-        assertTrue(canonical.accepts(new DataConstant(dr1.getDatatype(), "15.52")));
+        assertFalse(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "-4.6")));
+        assertFalse(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "-2.2")));
+        assertFalse(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "10.47851")));
+        assertFalse(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "15.521")));
+        assertTrue(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "-4.5")));
+        assertTrue(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "-2.24")));
+        assertTrue(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "10.47854")));
+        assertTrue(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "15.52")));
         assertTrue(((DatatypeRestrictionDouble)canonical).getDoubleIntervals().size() == 2);
         assertTrue(canonical.getEnumerationSize() != null);
     }
@@ -261,10 +262,10 @@ public class DoublesTest extends AbstractReasonerTest {
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2); 
         assertTrue(canonical.isFinite());
-        assertFalse(canonical.accepts(new DataConstant(dr1.getDatatype(), "0.1")));
-        assertTrue(canonical.accepts(new DataConstant(dr1.getDatatype(), "" + DatatypeRestrictionDouble.nextDouble(0.1))));
-        assertFalse(canonical.accepts(new DataConstant(dr1.getDatatype(), "4.1")));
-        assertTrue(canonical.accepts(new DataConstant(dr1.getDatatype(), "" + DatatypeRestrictionDouble.previousDouble(4.1))));
+        assertFalse(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "0.1")));
+        assertTrue(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "" + DatatypeRestrictionDouble.nextDouble(0.1))));
+        assertFalse(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "4.1")));
+        assertTrue(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "" + DatatypeRestrictionDouble.previousDouble(4.1))));
         assertTrue(((DatatypeRestrictionDouble)canonical).getDoubleIntervals().size() == 1);
     }
     
@@ -281,10 +282,10 @@ public class DoublesTest extends AbstractReasonerTest {
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2); 
         assertTrue(canonical.isFinite());
-        assertTrue(canonical.accepts(new DataConstant(dr1.getDatatype(), "0.1")));
-        assertFalse(canonical.accepts(new DataConstant(dr1.getDatatype(), "" + DatatypeRestrictionDouble.previousDouble(0.1))));
-        assertTrue(canonical.accepts(new DataConstant(dr1.getDatatype(), "4.1")));
-        assertFalse(canonical.accepts(new DataConstant(dr1.getDatatype(), "" + DatatypeRestrictionDouble.nextDouble(4.1))));
+        assertTrue(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "0.1")));
+        assertFalse(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "" + DatatypeRestrictionDouble.previousDouble(0.1))));
+        assertTrue(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "4.1")));
+        assertFalse(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "" + DatatypeRestrictionDouble.nextDouble(4.1))));
         assertTrue(((DatatypeRestrictionDouble)canonical).getDoubleIntervals().size() == 1);
     }
 }

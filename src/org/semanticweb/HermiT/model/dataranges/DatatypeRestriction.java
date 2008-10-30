@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.semanticweb.HermiT.Namespaces;
 
@@ -45,45 +47,48 @@ public abstract class DatatypeRestriction implements DataRange, CanonicalDataRan
     }
     public enum DT {
         
-        OWLREALPLUS (Impl.IDecimal, "1", (uris.get("owl") + "realPlus")),
-        OWLREAL (Impl.IDecimal, "11", (uris.get("owl") + "real")),
-        DECIMAL (Impl.IDecimal, "111", (uris.get("xsd") + "decimal")),
-        DOUBLE (Impl.IDouble, "1111", (uris.get("xsd") + "double")),
-        FLOAT (Impl.IDouble, "11111", (uris.get("xsd") + "float")),
-        INTEGER (Impl.IInteger, "111111", (uris.get("xsd") + "integer")),
-        NONNEGATIVEINTEGER (Impl.IInteger, "1111111", (uris.get("xsd") + "nonNegativeInteger")),
-        NONPOSITIVEINTEGER (Impl.IInteger, "1111112", (uris.get("xsd") + "nonPositiveInteger")),
-        POSITIVEINTEGER (Impl.IInteger, "11111111", (uris.get("xsd") + "positiveInteger")),
-        NEGATIVEINTEGER (Impl.IInteger, "11111121", (uris.get("xsd") + "negativeInteger")),
-        LONG (Impl.IInteger, "1111113", (uris.get("xsd") + "long")),
-        INT (Impl.IInteger, "11111131", (uris.get("xsd") + "int")),
-        SHORT (Impl.IInteger, "111111311", (uris.get("xsd") + "short")),
-        BYTE (Impl.IInteger, "1111113111", (uris.get("xsd") + "byte")),
-        UNSIGNEDLONG (Impl.IInteger, "1111114", (uris.get("xsd") + "unsignedLong")),
-        UNSIGNEDINT (Impl.IInteger, "11111141", (uris.get("xsd") + "unsignedInt")),
-        UNSIGNEDSHORT (Impl.IInteger, "111111411", (uris.get("xsd") + "unsignedShort")),
-        UNSIGNEDBYTE (Impl.IInteger, "1111114111", (uris.get("xsd") + "unsignedByte")),
-        OWLDATETIME  (Impl.IDateTime, "2", (uris.get("owl") + "dateTime")), 
-        DATETIME (Impl.IDateTime, "21", (uris.get("xsd") + "dateTime")),
-        RDFTEXT (Impl.IString, "3", (uris.get("rdf") + "text")),
-        STRING (Impl.IString, "31", (uris.get("xsd") + "string")),
-        BOOLEAN (Impl.IBoolean, "4", (uris.get("xsd") + "boolean")), 
-        LITERAL (Impl.ILiteral, "5", (uris.get("rdfs") + "Literal")),
-        ANYURI (Impl.IAnyURI, "6", (uris.get("xsd") + "anyURI"));        
+        OWLREALPLUS ("1", (uris.get("owl") + "realPlus")),
+        OWLREAL ("11", (uris.get("owl") + "real")),
+        DECIMAL ("111", (uris.get("xsd") + "decimal")),
+        DOUBLE ("1111", (uris.get("xsd") + "double")),
+        FLOAT ("11111", (uris.get("xsd") + "float")),
+        INTEGER ("111111", (uris.get("xsd") + "integer")),
+        NONNEGATIVEINTEGER ("1111111", (uris.get("xsd") + "nonNegativeInteger")),
+        NONPOSITIVEINTEGER ("1111112", (uris.get("xsd") + "nonPositiveInteger")),
+        POSITIVEINTEGER ("11111111", (uris.get("xsd") + "positiveInteger")),
+        NEGATIVEINTEGER ("11111121", (uris.get("xsd") + "negativeInteger")),
+        LONG ("1111113", (uris.get("xsd") + "long")),
+        INT ("11111131", (uris.get("xsd") + "int")),
+        SHORT ("111111311", (uris.get("xsd") + "short")),
+        BYTE ("1111113111", (uris.get("xsd") + "byte")),
+        UNSIGNEDLONG ("1111114", (uris.get("xsd") + "unsignedLong")),
+        UNSIGNEDINT ("11111141", (uris.get("xsd") + "unsignedInt")),
+        UNSIGNEDSHORT ("111111411", (uris.get("xsd") + "unsignedShort")),
+        UNSIGNEDBYTE ("1111114111", (uris.get("xsd") + "unsignedByte")),
+        OWLDATETIME  ("2", (uris.get("owl") + "dateTime")), 
+        DATETIME ("21", (uris.get("xsd") + "dateTime")),
+        RDFTEXT ("3", (uris.get("rdf") + "text")),
+        STRING ("31", (uris.get("xsd") + "string")),
+        NORMALIZEDSTRING ("311", (uris.get("xsd") + "normalizedString")),
+        TOKEN ("3111", (uris.get("xsd") + "token")),
+        LANGUAGE ("31111", (uris.get("xsd") + "language")),
+        NAME ("31112", (uris.get("xsd") + "Name")),
+        NMTOKEN ("31113", (uris.get("xsd") + "NMTOKEN")),
+        NCNAME ("311121", (uris.get("xsd") + "NCName")),
+        ID ("3111211", (uris.get("xsd") + "ID")),
+        IDREF ("3111212", (uris.get("xsd") + "IDREF")),
+        ENTITY ("3111213", (uris.get("xsd") + "ENTITY")),
+        BOOLEAN ("4", (uris.get("xsd") + "boolean")), 
+        LITERAL ("5", (uris.get("rdfs") + "Literal")),
+        ANYURI ("6", (uris.get("xsd") + "anyURI"));        
 
-        private final Impl impl;
         private final String position;   // in a tree that indicates subsumption 
         // relationships between datatypes
         private final String uri;
         
-        DT(Impl impl, String position, String uri) {
-            this.impl = impl;
+        DT(String position, String uri) {
             this.position = position;
             this.uri = uri;
-        }
-        
-        public int getImpl() { 
-            return impl.getPosition(); 
         }
         
         public String getPosition() { 
@@ -160,6 +165,10 @@ public abstract class DatatypeRestriction implements DataRange, CanonicalDataRan
         return oneOf;
     }
     
+    public Set<DataConstant> getNotOneOf() {
+        return notOneOf;
+    }
+    
     public void setOneOf(Set<DataConstant> oneOf) {
         this.oneOf = oneOf;
     }
@@ -204,7 +213,9 @@ public abstract class DatatypeRestriction implements DataRange, CanonicalDataRan
             if (isNegated) buffer.append("not ");
             buffer.append("oneOf(");
             firstRun = true;
-            for (DataConstant constant : oneOf) {
+            SortedSet<DataConstant> sortedOneOfs = new TreeSet<DataConstant>();
+            sortedOneOfs.addAll(oneOf);
+            for (DataConstant constant : sortedOneOfs) {
                 if (!firstRun) {
                     buffer.append(isNegated ? " and " : " or ");
                     firstRun = false;
@@ -217,7 +228,9 @@ public abstract class DatatypeRestriction implements DataRange, CanonicalDataRan
             // only in non-negated canonical ranges
             firstRun = true;
             buffer.append(" (");
-            for (DataConstant constant : notOneOf) {
+            SortedSet<DataConstant> sortedNotOneOfs = new TreeSet<DataConstant>();
+            sortedNotOneOfs.addAll(notOneOf);
+            for (DataConstant constant : sortedNotOneOfs) {
                 if (!firstRun) {
                     buffer.append(" and");
                     firstRun = false;

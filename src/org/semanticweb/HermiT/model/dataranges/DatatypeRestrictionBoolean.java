@@ -2,14 +2,13 @@ package org.semanticweb.HermiT.model.dataranges;
 
 import java.math.BigInteger;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 public class DatatypeRestrictionBoolean extends DatatypeRestriction {
 
-    public static DataConstant TRUE = new DataConstant(DT.BOOLEAN, "true");
-    public static DataConstant FALSE = new DataConstant(DT.BOOLEAN, "false");
+    public static DataConstant TRUE = new DataConstant(Impl.IBoolean, DT.BOOLEAN, "true");
+    public static DataConstant FALSE = new DataConstant(Impl.IBoolean, DT.BOOLEAN, "false");
     
     public DatatypeRestrictionBoolean(DT datatype) {
         this.datatype = datatype;
@@ -79,7 +78,7 @@ public class DatatypeRestrictionBoolean extends DatatypeRestriction {
         return DT.getSubTreeFor(DT.BOOLEAN).contains(constant.getDatatype());
     }
     
-    public boolean canHandleAll(Set<DT> datatypes) {
-        return DT.getSubTreeFor(DT.BOOLEAN).containsAll(datatypes);
+    public boolean canHandle(DT datatype) {
+        return DT.getSubTreeFor(DT.BOOLEAN).contains(datatype);
     }
 }

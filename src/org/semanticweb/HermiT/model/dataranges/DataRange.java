@@ -41,6 +41,19 @@ public interface DataRange extends DLPredicate {
      *         URI of the concrete implementation of the DataRange. 
      */
     public Set<DataConstant> getOneOf();
+    
+    /**
+     * Constants that are representing the assignments that are not allowed for 
+     * this datatype restriction. The strings are String representations of the 
+     * datatype that concretely implements the DataRange, e.g., if the concrete 
+     * implementation has URI for integers, the returned strings have to be 
+     * interpreted as integers.  
+     * @return A set of constants that are not allowed as assignment for the 
+     *         current datatype restrictions and are to be interpreted according 
+     *         to the datatype URI of the concrete implementation of the 
+     *         DataRange. 
+     */
+    public Set<DataConstant> getNotOneOf();
 
     /**
      * Adds constant to the values that represent this data range. 

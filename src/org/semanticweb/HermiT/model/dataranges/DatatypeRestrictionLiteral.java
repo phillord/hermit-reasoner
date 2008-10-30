@@ -1,7 +1,6 @@
 package org.semanticweb.HermiT.model.dataranges;
 
 import java.math.BigInteger;
-import java.util.Set;
 
 import org.semanticweb.HermiT.model.DLPredicate;
 
@@ -53,7 +52,7 @@ public class DatatypeRestrictionLiteral extends DatatypeRestriction implements D
         return DT.getSubTreeFor(DT.LITERAL).contains(constant.getDatatype());
     }
     
-    public boolean canHandleAll(Set<DT> datatypes) {
-        return DT.getSubTreeFor(DT.LITERAL).containsAll(datatypes);
+    public boolean canHandle(DT datatype) {
+        return DT.getSubTreeFor(DT.LITERAL).contains(datatype);
     }
 }
