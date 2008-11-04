@@ -16,5 +16,7 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/HermiT/lib/automaton-doc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="/ThirdPartyOwlTools/protege/4.0/org.protege.editor.owl.jar"/>
+	<classpathentry kind="lib" path="/ThirdPartyOwlTools/protege/4.0/org.protege.editor.core.application.jar"/>
 	<classpathentry kind="output" path="build/release"/>
 </classpath>

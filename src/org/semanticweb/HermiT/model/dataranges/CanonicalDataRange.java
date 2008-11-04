@@ -110,11 +110,11 @@ public interface CanonicalDataRange {
     public boolean accepts(DataConstant constant);
     
     /**
-     * Can be used to check whether the implementation supports the given set of 
-     * datatypes, e.g., the implementation for integers supports long, 
-     * unsignedByte, etc. 
-     * @param datatypes a set of datatypes
-     * @return true if the implementation can handle all the given datatypes and 
+     * Can be used to check whether the implementation supports the given 
+     * datatype, e.g., the implementation for integers can handle integers, 
+     * long, unsignedByte, etc. 
+     * @param datatype a datatype
+     * @return true if the implementation can handle the given datatype and 
      * false otherwise
      */
     public boolean canHandle(DT datatype);

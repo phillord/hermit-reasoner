@@ -906,11 +906,12 @@ public class OwlClausification {
             currentDataRange = new EnumeratedDataRange();
             if (isNegated) currentDataRange.negate();
             for (OWLConstant constant : dataOneOf.getValues()) {
-                if (constant.isTyped()) {
-                    constant.asOWLTypedConstant().accept(this);
-                }  else {
-                    throw new RuntimeException("Untyped datatype found " + constant);
-                }
+                constant.accept(this);
+//                if (constant.isTyped()) {
+//                    constant.asOWLTypedConstant().accept(this);
+//                }  else {
+//                    throw new RuntimeException("Untyped datatype found " + constant);
+//                }
             }
         }
         
@@ -1395,14 +1396,6 @@ public class OwlClausification {
             }
         }
         
-        protected DataRange getDateTimeDataRange(DT dt) {
-            if (onlyCoreDatatypes) {
-                return new DatatypeRestrictionDateTime(dt);
-            } else {
-                return new DatatypeRestrictionDateTime(dt);
-            }
-        }
-        
         public void visit(OWLDataType dataType) {
             if (dataType.equals(factory.getOWLDataType(DT.OWLREALPLUS.getURI()))) {
                 currentDataRange = new DatatypeRestrictionOWLRealPlus(DT.DECIMAL, true); 
@@ -1469,7 +1462,7 @@ public class OwlClausification {
                 currentDataRange = new DatatypeRestrictionBoolean(DT.BOOLEAN);
             } else if (dataType.equals(factory.getOWLDataType(DT.OWLDATETIME.getURI())) 
                     || dataType.equals(factory.getOWLDataType(DT.DATETIME.getURI()))) {
-                currentDataRange =  getDateTimeDataRange(DT.OWLDATETIME);
+                currentDataRange = new DatatypeRestrictionDateTime(DT.OWLDATETIME);
             } else if (dataType.equals(factory.getOWLDataType(DT.ANYURI.getURI()))) {
                 currentDataRange = new DatatypeRestrictionBoolean(DT.ANYURI);
             } else {

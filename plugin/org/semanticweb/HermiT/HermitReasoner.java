@@ -3,12 +3,8 @@ package org.semanticweb.HermiT;
 
 import java.net.URI;
 import java.util.Set;
-import java.util.HashSet;
 
-import org.semanticweb.HermiT.hierarchy.SubsumptionHierarchy;
-import org.semanticweb.HermiT.hierarchy.SubsumptionHierarchyNode;
 import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
-import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.monitor.PluginMonitor;
 import org.semanticweb.owl.inference.MonitorableOWLReasoner;
 import org.semanticweb.owl.model.OWLClass;
