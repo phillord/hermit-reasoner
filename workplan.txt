@@ -1,46 +1,33 @@
 OWL features:
  Datatype support
-   Basic datatype interface             Boris   DONE
-     calls out to Checker class
-     clausification of integers
-   OWL 1.0 (no facets)                  Birte   DONE
-   integers, strings, booleans, 
-   and facets                           Birte   DONE
-   "full" OWL 2.0 datatype support      Birte   OPEN
    getDataPropertyRelationships
  Role axioms
-   (Ir)Reflexivity                              DONE
-   Disjointness, antisymmetry, etc.             DONE
    Role chains                          Rob     
-   Universal role                       Rob     
+   Universal role (cleanup)             Rob     
 
 Debugging and testing:
-   Datatype test cases                          2008-10-15
-   Black box testing                            2008-10-15
+   Datatype test cases                  Birte
+   Black box testing                    
    test case cleanup                    Birte
+   Find Gardiner taxonomies             Rob
 
 Packaging and interfaces:
-   Command-line interface               Rob     DONE
    Expressivity interrogation           
-   Role hierarchy queries               Rob     
-   Simple ABox queries                  Rob     DONE (inefficiently)
-   Public Namespaces interface          Rob     DONE
-   OWL API complex concept queries      Rob     DONE
+   Change to LGPL                       Rob     0.9.3
 
 Protégé plug-in:
-   Progress bar                         Rob     2008-10-01
-   Plumb through remainder of API       Rob     2008-10-01
    Configuration from env/file          
+   null pointer exceptions??            Boris (to identify examples)
+   Does Protégé hang on error?          Rob
 
 Supporting materials:
-   javadoc for public API                       2008-10-15
-   Web site                                     2008-10-20
-   Documentation                                2008-10-20
-   Support contact/ticketing                    2008-10-20
+   Web site stylesheet                  Rob
+   Documentation                        
+   Support contact/ticketing            
    wiki?
 
 Misc:
    Unify pairwise/reflexive blocking
    Annotated equalities                 Boris
-   Make re-use the default?                     2008-10-15
-   Javadoc for more internal classes
+   Make re-use the default?             
+   Javadoc for more internal classes    
