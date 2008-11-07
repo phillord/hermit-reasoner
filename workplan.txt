@@ -1,12 +1,13 @@
-OWL features:
+﻿OWL features:
  Datatype support
    getDataPropertyRelationships
  Role axioms
    Role chains                          Rob     
    Universal role (cleanup)             Rob     
+   Easy Keys                            Birte
 
 Debugging and testing:
-   Datatype test cases                  Birte
+   Datatype test cases                  Birte     0.9.3
    Black box testing                    
    test case cleanup                    Birte
    Find Gardiner taxonomies             Rob

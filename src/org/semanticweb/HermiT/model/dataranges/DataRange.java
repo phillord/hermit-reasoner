@@ -1,3 +1,7 @@
+/*
+ * Copyright 2008 by Oxford University; see license.txt for details
+ */
+
 package org.semanticweb.HermiT.model.dataranges;
 
 import java.net.URI;
@@ -8,6 +12,25 @@ import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.DT;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets;
 
 
+/**
+ * The DataRange interface should be used when creating data ranges during 
+ * parsing of the ontology. It supports all methods that are required at the 
+ * time, e.g., adding facets and negation. It further allows for simple tests 
+ * that are performed by the DatatypeManager before the real satisfiability 
+ * testing, e.g., checking if the range is empty/bottom. Later in the 
+ * DatatypeManager, the interface CanonicalDataRange is used, which provides 
+ * methods for conjoining the restrictions of several data ranges into one 
+ * canonical representation. The split into two interfaces is deliberate since 
+ * some functions should not be used in arbitrary order, e.g., after conjoining 
+ * facets, adding facets might result in strange results and adding forbidden 
+ * assignments (notOneOf) should only be done by the DatatypeManager during 
+ * satisfiability checking on the canonical ranges as their values might 
+ * otherwise not be correctly handled, e.g., oneOf and notOneOf are not checked 
+ * for disjointness. Thus, using DataRange during loading and CanonicalDataRange 
+ * in the DatatypeManager makes sure that these assumptions hold as required. 
+ * 
+ * @author BGlimm
+ */
 public interface DataRange extends DLPredicate {
     
     /**

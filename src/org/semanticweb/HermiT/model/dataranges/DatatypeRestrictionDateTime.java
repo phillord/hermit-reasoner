@@ -1,3 +1,7 @@
+/*
+ * Copyright 2008 by Oxford University; see license.txt for details
+ */
+
 package org.semanticweb.HermiT.model.dataranges;
 
 import java.math.BigInteger;
@@ -13,13 +17,25 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.semanticweb.HermiT.Namespaces;
+import org.semanticweb.HermiT.model.dataranges.DataConstant.Impl;
 
+/**
+ * An implementation for dateTime datatypes.
+ * 
+ * @author BGlimm
+ */
 public class DatatypeRestrictionDateTime extends DatatypeRestriction {
     
+    private static final long serialVersionUID = 7185773970247024012L;
+
     public static DateFormat dfm = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     
     protected Set<DateTimeInterval> intervals = new HashSet<DateTimeInterval>();
 
+    /**
+     * Create a dateTime restriction, should use DT.DATETIME or DT.OWLDATETIME
+     * @param datatype a datatype (DT.DATETIME or DT.OWLDATETIME)
+     */
     public DatatypeRestrictionDateTime(DT datatype) {
         this.datatype = datatype;
         this.supportedFacets = new HashSet<Facets>(
@@ -32,14 +48,25 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
         );
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.DataRange#getNewInstance()
+     */
     public CanonicalDataRange getNewInstance() {
         return new DatatypeRestrictionDateTime(this.datatype);
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#isFinite()
+     */
     public boolean isFinite() {
         return (isBottom || (!isNegated && (hasOnlyFiniteIntervals() || !oneOf.isEmpty())));
     }
     
+    /**
+     * Determines if if all intervals are finite. 
+     * @return true if intervals are given and all intervals have a lower and an 
+     * upper bound and false otherwise. 
+     */
     protected boolean hasOnlyFiniteIntervals() {
         boolean hasOnlyFiniteIntervals = true;
         if (intervals.isEmpty()) return false;
@@ -49,6 +76,9 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
         return hasOnlyFiniteIntervals;
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.DataRange#addFacet(org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets, java.lang.String)
+     */
     public void addFacet(Facets facet, String value) {
         Long longValue =  null;
         DateTimeInterval iNew = null;
@@ -92,6 +122,9 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
         }
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#accepts(org.semanticweb.HermiT.model.dataranges.DataConstant)
+     */
     public boolean accepts(DataConstant constant) {
         if (!oneOf.isEmpty()) {
             return oneOf.contains(constant);
@@ -115,6 +148,9 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
         return false; 
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#conjoinFacetsFrom(org.semanticweb.HermiT.model.dataranges.DataRange)
+     */
     public void conjoinFacetsFrom(DataRange range) {
         if (isNegated) {
             throw new RuntimeException("Cannot add facets to negated " +
@@ -205,6 +241,9 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
         }
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#hasMinCardinality(java.math.BigInteger)
+     */
     public boolean hasMinCardinality(BigInteger n) {
         if (isNegated || n.compareTo(BigInteger.ZERO) <= 0) return true;
         if (isFinite()) {
@@ -233,6 +272,9 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
         return true;
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#getEnumerationSize()
+     */
     public BigInteger getEnumerationSize() {
         if (isFinite()) {
             if (!oneOf.isEmpty()) {
@@ -259,6 +301,9 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
         return null;
     }
 
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#getSmallestAssignment()
+     */
     public DataConstant getSmallestAssignment() {
         if (isFinite()) {
             if (!oneOf.isEmpty()) {
@@ -290,10 +335,18 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
         return null;
     }
     
+    /**
+     * Returns the intervals that describe the possible values for this 
+     * datatype. 
+     * @return a set of intervals
+     */
     public Set<DateTimeInterval> getIntervals() {
         return intervals;
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.DatatypeRestriction#printExtraInfo(org.semanticweb.HermiT.Namespaces)
+     */
     protected String printExtraInfo(Namespaces namespaces) {
         boolean firstRun = true;
         StringBuffer buffer = new StringBuffer();
@@ -314,6 +367,9 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
         return buffer.toString();
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#datatypeAccepts(org.semanticweb.HermiT.model.dataranges.DataConstant)
+     */
     public boolean datatypeAccepts(DataConstant constant) {
         Set<DT> supportedDTs = new HashSet<DT>();
         supportedDTs.add(DT.DATETIME);
@@ -321,6 +377,9 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
         return supportedDTs.contains(constant.getDatatype());
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#canHandle(org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.DT)
+     */
     public boolean canHandle(DT datatype) {
         Set<DT> supportedDTs = new HashSet<DT>();
         supportedDTs.add(DT.DATETIME);
@@ -328,8 +387,15 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
         return supportedDTs.contains(datatype);
     }
 
+    /**
+     * A comparator that can be used to order the intervals according to their 
+     * min values. We assume here that all intervals are disjoint. 
+     * @author BGlimm
+     */
     protected static class IntervalComparator implements Comparator<DateTimeInterval> { 
+        
         public static Comparator<DateTimeInterval> INSTANCE = new IntervalComparator();
+        
         public int compare(DateTimeInterval i1, DateTimeInterval i2) {
             if (i1.getMin() == i2.getMin()) return 0;
             return (i1.getMin() - i2.getMin() > 0) ? 1 : -1; 

@@ -46,9 +46,9 @@ import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionLiteral;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionOWLRealPlus;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionString;
 import org.semanticweb.HermiT.model.dataranges.EnumeratedDataRange;
+import org.semanticweb.HermiT.model.dataranges.DataConstant.Impl;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.DT;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets;
-import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Impl;
 import org.semanticweb.HermiT.util.GraphUtils;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLClass;
@@ -907,11 +907,6 @@ public class OwlClausification {
             if (isNegated) currentDataRange.negate();
             for (OWLConstant constant : dataOneOf.getValues()) {
                 constant.accept(this);
-//                if (constant.isTyped()) {
-//                    constant.asOWLTypedConstant().accept(this);
-//                }  else {
-//                    throw new RuntimeException("Untyped datatype found " + constant);
-//                }
             }
         }
         
@@ -972,25 +967,24 @@ public class OwlClausification {
                         if (literalAsBD.compareTo(new BigDecimal(Double.MAX_VALUE)) <= 0
                                 && literalAsBD.compareTo(new BigDecimal(-Double.MAX_VALUE)) >= 0) {
                             Double literalAsD = new Double(lit);
-                            if (literalAsBD.compareTo(new BigDecimal(literalAsD)) != 0) {
-                                throw new RuntimeException("Parsed constant " 
-                                        + typedConstant 
-                                        + " does not represent a double. ");
-                            } else {
-                                try {
-                                    if (literalAsD.equals(-0.0d)) throw new ArithmeticException();
-                                    lit = literalAsBD.toBigIntegerExact().toString();
-                                    currentDataRange.addOneOf(new DataConstant(
-                                            Impl.IInteger, DT.DOUBLE, lit));
-                                } catch (ArithmeticException e) {
-                                    currentDataRange.addOneOf(new DataConstant(
-                                            Impl.IDouble, DT.DOUBLE, lit));
+                            try {
+                                if (literalAsD.equals(-0.0d)) {
+                                    // -0.0 for floats is not the same as the 
+                                    // integer value 0, so handle as float in 
+                                    // the catch block
+                                    throw new ArithmeticException();
                                 }
+                                lit = literalAsBD.toBigIntegerExact().toString();
+                                currentDataRange.addOneOf(new DataConstant(
+                                        Impl.IInteger, DT.DOUBLE, lit));
+                            } catch (ArithmeticException e) {
+                                currentDataRange.addOneOf(new DataConstant(
+                                        Impl.IDouble, DT.DOUBLE, lit));
                             }
                         } else {
                             throw new RuntimeException("Parsed constant " 
                                     + typedConstant 
-                                    + " does not represent a double. ");
+                                    + " is out of the range of double. ");
                         }
                     } catch (NumberFormatException e) {
                         throw new RuntimeException("Parsed constant " 
@@ -1017,25 +1011,25 @@ public class OwlClausification {
                         if (literalAsBD.compareTo(new BigDecimal(Float.MAX_VALUE)) <= 0
                             && literalAsBD.compareTo(new BigDecimal(-Float.MAX_VALUE)) >= 0) {
                             Float literalAsF = new Float(lit);
-                            if (literalAsBD.compareTo(new BigDecimal(literalAsF)) != 0) {
-                                throw new RuntimeException("Parsed constant " 
-                                        + typedConstant 
-                                        + " does not represent a float. ");
-                            } else {
-                                try {
-                                    if (literalAsF.equals(-0.0f)) throw new ArithmeticException();
-                                    lit = literalAsBD.toBigIntegerExact().toString();
-                                    currentDataRange.addOneOf(new DataConstant(
-                                            Impl.IInteger, DT.FLOAT, lit));
-                                } catch (ArithmeticException e) {
-                                    currentDataRange.addOneOf(new DataConstant(
-                                            Impl.IDouble, DT.FLOAT, lit));
+                            try {
+                                // see if we can use the integer implementation
+                                if (literalAsF.equals(-0.0f)) {
+                                    // -0.0 for floats is not the same as the 
+                                    // integer value 0, so handle as float in 
+                                    // the catch block
+                                    throw new ArithmeticException();
                                 }
+                                lit = literalAsBD.toBigIntegerExact().toString();
+                                currentDataRange.addOneOf(new DataConstant(
+                                        Impl.IInteger, DT.FLOAT, lit));
+                            } catch (ArithmeticException e) {
+                                currentDataRange.addOneOf(new DataConstant(
+                                        Impl.IDouble, DT.FLOAT, lit));
                             }
                         } else {
                             throw new RuntimeException("Parsed constant " 
                                     + typedConstant 
-                                    + " does not represent a float. ");
+                                    + " is out of the range for floats. ");
                         }
                     } catch (NumberFormatException e) {
                         throw new RuntimeException("Parsed constant " 
@@ -1368,7 +1362,12 @@ public class OwlClausification {
                 }
             } else if (dataType.equals(factory.getOWLDataType(DT.BASE64BINARY.getURI()))) {
                 // values are limited to the characters a-z, A-Z, 0-9, +, /, 
-                // =, (space), \r, \n, \t, 
+                // and whitespace (space), \r, \n, \t plus padding =
+                // remove whitespace
+                lit = lit.replaceAll(" ", "");
+                lit = lit.replaceAll("\r", "");
+                lit = lit.replaceAll("\n", "");
+                lit = lit.replaceAll("\t", "");
                 if (Datatypes.get("base64Binary").run(lit)) {
                     currentDataRange.addOneOf(new DataConstant(
                             Impl.IBase64Binary, DT.BASE64BINARY, lit));

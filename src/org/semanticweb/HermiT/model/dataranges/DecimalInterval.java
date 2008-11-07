@@ -1,13 +1,36 @@
+/*
+ * Copyright 2008 by Oxford University; see license.txt for details
+ */
+
 package org.semanticweb.HermiT.model.dataranges;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
-public class DecimalInterval {
-    BigDecimal min = null;
-    BigDecimal max = null;
-    boolean openMin = true;
-    boolean openMax = true;
+/**
+ * The class can be used to capture decimal intervals. Such a range is always 
+ * infinite since between each to decimal values there is another one. 
+ * 
+ * @author BGlimm
+ */
+public class DecimalInterval implements Serializable {
+
+    private static final long serialVersionUID = 6886089002512160228L;
     
+    protected BigDecimal min = null;
+    protected BigDecimal max = null;
+    protected boolean openMin = true;
+    protected boolean openMax = true;
+    
+    /**
+     * Creates a decimal interval. 
+     * @param min the lower bound
+     * @param max the upper bound
+     * @param openMin if true then the interval excludes the lower bound 
+     *                otherwise it includes the lower bound
+     * @param openMax if true then the interval excludes the upper bound 
+     *                otherwise it includes the upper bound
+     */
     public DecimalInterval(BigDecimal min, BigDecimal max, 
             boolean openMin, boolean openMax) {
         this.min = min;
@@ -16,10 +39,21 @@ public class DecimalInterval {
         this.openMax = openMax;
     }
     
+    /**
+     * Creates a copy of this interval. 
+     * @return an interval object that has the same min/max/open/closed values 
+     *         as this one.
+     */
     public DecimalInterval getCopy() {
         return new DecimalInterval(min, max, openMin, openMax);
     }
     
+    /**
+     * Intersect with the given interval. After the intersection, this interval 
+     * will have min and max values that are those of the intersection and the 
+     * open/closed values are adapted accordingly. 
+     * @param i an interval
+     */
     public void intersectWith(DecimalInterval i) {
         if (max == null) {
             max = i.getMax();
@@ -51,18 +85,28 @@ public class DecimalInterval {
         }
     }
     
+    /**
+     * Tests for emptyness.
+     * @return true if the interval cannot contain values and false otherwise.  
+     */
     public boolean isEmpty() {
         return (min != null && max != null && min.compareTo(max) > 0);
     }
-    
-    protected boolean isEmpty(BigDecimal lower, BigDecimal upper) {
-        return (lower != null && upper != null && lower.compareTo(upper) > 0);
-    }
-    
+
+    /**
+     * Tests for finiteness. 
+     * @return true if the interval is finite (has min and max values not equal 
+     * to null) and false otherwise. 
+     */
     public boolean isFinite() {
         return isEmpty();
     }
     
+    /**
+     * Tests containment. 
+     * @param decimal a decimal
+     * @return true if the interval contains this decimal and false otherwise. 
+     */
     public boolean contains(BigDecimal decimal) {
         boolean contains = true;
         if (min != null) {
@@ -77,57 +121,38 @@ public class DecimalInterval {
         }
         return contains;
     }
-    
-    public boolean contains(DecimalInterval interval) {
-        return contains(interval.getMin()) && contains(interval.getMax());
-    }
-    
-    public boolean disjointWith(DecimalInterval interval) {
-        return (max != null && interval.getMin() != null 
-                && (max.compareTo(interval.getMin()) < 0 
-                        || (max.compareTo(interval.getMin()) == 0 && (!openMax || !interval.isOpenMin())))) 
-        || (min != null && interval.getMax() != null 
-                && (min.compareTo(interval.getMax()) > 0 
-                        || (min.compareTo(interval.getMax()) == 0 && (!openMin || !interval.isOpenMax()))));
-    }
-    
-    public BigDecimal getCardinality() {
-        if (isEmpty()) return BigDecimal.ZERO;
-        return null;
-    }
 
+    /**
+     * @return the minimal value for this interval
+     */
     public BigDecimal getMin() {
         return min;
     }
-
-    public void setMin(BigDecimal min) {
-        this.min = min;
-    }
-
+    
+    /**
+     * @return the maximal value for this interval
+     */
     public BigDecimal getMax() {
         return max;
     }
-
-    public void setMax(BigDecimal max) {
-        this.max = max;
-    }
     
+    /**
+     * @return true if the interval is open w.r.t. the lower bound
+     */
     public boolean isOpenMin() {
         return openMin;
     }
-
-    public void setOpenMin(boolean openMin) {
-        this.openMin = openMin;
-    }
-
+    
+    /**
+     * @return true if the interval is open w.r.t. the upper bound
+     */
     public boolean isOpenMax() {
         return openMax;
     }
 
-    public void setOpenMax(boolean openMax) {
-        this.openMax = openMax;
-    }
-
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
     public String toString() {
         StringBuffer buffer = new StringBuffer();
         if (min != null) {

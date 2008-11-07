@@ -1,3 +1,7 @@
+/*
+ * Copyright 2008 by Oxford University; see license.txt for details
+ */
+
 package org.semanticweb.HermiT.model.dataranges;
 
 import java.math.BigDecimal;
@@ -10,11 +14,29 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.semanticweb.HermiT.Namespaces;
+import org.semanticweb.HermiT.model.dataranges.DataConstant.Impl;
 
-public class DatatypeRestrictionInteger extends DatatypeRestriction implements IntegerFacet {
+/**
+ * An implementation for integer value. The implementation should also be used 
+ * for doubles and decimals that represent integer values, e.g., 3.0 is to be 
+ * treated as integer 3. The implementation uses longs for the ranges that are 
+ * defined by the facets unless the given facets cannot be captured by longs. 
+ * The implementation then switches automatically to BigIntegers.
+ * 
+ * @author BGlimm
+ */
+public class DatatypeRestrictionInteger extends DatatypeRestriction 
+        implements IntegerFacet {
+    
+    private static final long serialVersionUID = -2125671793326110719L;
     
     protected Set<IntegerInterval> intervals = new HashSet<IntegerInterval>();
 
+    /**
+     * An implementation for integers. Can handle all integer based types, e.g., 
+     * short, positiveInteger, etc. 
+     * @param datatype an integer based datatype (e.g., DT.BYTE)
+     */
     public DatatypeRestrictionInteger(DT datatype) {
         this.datatype = datatype;
         this.supportedFacets = new HashSet<Facets>(
@@ -27,14 +49,25 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction implements I
         );
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.DataRange#getNewInstance()
+     */
     public CanonicalDataRange getNewInstance() {
         return new DatatypeRestrictionInteger(this.datatype);
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#isFinite()
+     */
     public boolean isFinite() {
         return isBottom || (!isNegated && (hasOnlyFiniteIntervals() || !oneOf.isEmpty()));
     }
     
+    /**
+     * Determines if if all intervals are finite. 
+     * @return true if intervals are given and all intervals have a lower and an 
+     * upper bound and false otherwise. 
+     */
     protected boolean hasOnlyFiniteIntervals() {
         boolean hasOnlyFiniteIntervals = true;
         if (intervals.isEmpty()) return false;
@@ -44,6 +77,9 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction implements I
         return hasOnlyFiniteIntervals;
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.DataRange#addFacet(org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets, java.lang.String)
+     */
     public void addFacet(Facets facet, String value) {
         IntegerInterval iNew = null;
         try {
@@ -95,6 +131,9 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction implements I
         }
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#accepts(org.semanticweb.HermiT.model.dataranges.DataConstant)
+     */
     public boolean accepts(DataConstant constant) {
         if (!oneOf.isEmpty()) {
             return oneOf.contains(constant);
@@ -127,6 +166,9 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction implements I
         return false; 
     }
 
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#conjoinFacetsFrom(org.semanticweb.HermiT.model.dataranges.DataRange)
+     */
     public void conjoinFacetsFrom(DataRange range) {
         if (isNegated) {
             throw new RuntimeException("Cannot add facets to negated " +
@@ -165,14 +207,16 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction implements I
                         for (IntegerInterval i2 : restr.getIntegerIntervals()) {
                             if (!i2.isEmpty()) {
                                 if (i2.getMin() != null) {
-                                    IntegerInterval newI = i2.getInstance(null, i2.decreasedMin());
+                                    IntegerInterval newI 
+                                        = i2.getInstance(null, i2.decreasedMin());
                                     newI = newI.intersectWith(i1);
                                     if (!newI.isEmpty()) {
                                         newIntervals.add(newI);
                                     }
                                 } 
                                 if (i2.getMax() != null) {
-                                    IntegerInterval newI = i2.getInstance(i2.increasedMax(), null);
+                                    IntegerInterval newI 
+                                        = i2.getInstance(i2.increasedMax(), null);
                                     newI = newI.intersectWith(i1);
                                     if (!newI.isEmpty()) {
                                         newIntervals.add(newI);
@@ -204,6 +248,9 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction implements I
         }
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#hasMinCardinality(java.math.BigInteger)
+     */
     public boolean hasMinCardinality(BigInteger n) {
         if (isNegated || n.compareTo(BigInteger.ZERO) <= 0) return true;
         if (isFinite()) {
@@ -228,6 +275,9 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction implements I
         return true;
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#getEnumerationSize()
+     */
     public BigInteger getEnumerationSize() {
         if (isFinite()) {
             if (!oneOf.isEmpty()) {
@@ -250,6 +300,9 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction implements I
         return null;
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#getSmallestAssignment()
+     */
     public DataConstant getSmallestAssignment() {
         if (isFinite()) {
             if (!oneOf.isEmpty()) {
@@ -272,10 +325,16 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction implements I
         return null;
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.IntegerFacet#getIntegerIntervals()
+     */
     public Set<IntegerInterval> getIntegerIntervals() {
         return intervals;
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.DatatypeRestriction#printExtraInfo(org.semanticweb.HermiT.Namespaces)
+     */
     protected String printExtraInfo(Namespaces namespaces) {
         boolean firstRun = true;
         StringBuffer buffer = new StringBuffer();
@@ -296,14 +355,25 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction implements I
         return buffer.toString();
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#datatypeAccepts(org.semanticweb.HermiT.model.dataranges.DataConstant)
+     */
     public boolean datatypeAccepts(DataConstant constant) {
         return DT.getSubTreeFor(DT.INTEGER).contains(constant.getDatatype());
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#canHandle(org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.DT)
+     */
     public boolean canHandle(DT datatype) {
         return DT.getSubTreeFor(DT.OWLREALPLUS).contains(datatype);
     }
     
+    /**
+     * A comparator that can be used to order the intervals according to their 
+     * min values. We assume here that all intervals are disjoint. 
+     * @author BGlimm
+     */
     protected static class IntervalComparator implements Comparator<IntegerInterval> { 
         public static Comparator<IntegerInterval> INSTANCE = new IntervalComparator();
         public int compare(IntegerInterval i1, IntegerInterval i2) {

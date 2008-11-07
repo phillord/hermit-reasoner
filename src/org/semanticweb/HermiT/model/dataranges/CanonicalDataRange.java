@@ -1,3 +1,7 @@
+/*
+ * Copyright 2008 by Oxford University; see license.txt for details
+ */
+
 package org.semanticweb.HermiT.model.dataranges;
 
 import java.math.BigInteger;
@@ -7,6 +11,23 @@ import java.util.Set;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.DT;
 
 
+/**
+ * The CanonicalDataRange interface should be used in the DatatypeManager, when 
+ * creating a data range that represents all (different) restrictions that are 
+ * given for a node/variable in the tableau. It provides methods for conjoining 
+ * the restrictions of several data ranges into one canonical representation and 
+ * it has methods for determining the size of the range, possible assignments, 
+ * etc. The split into two interfaces is deliberate since some functions should 
+ * not be used in arbitrary order, e.g., after conjoining facets, adding facets 
+ * might result in strange results and adding forbidden assignments (notOneOf) 
+ * should only be done by the DatatypeManager during satisfiability checking on 
+ * the canonical ranges as their values might otherwise not be correctly 
+ * handled, e.g., oneOf and notOneOf are not checked for disjointness. Thus, 
+ * using DataRange during loading and CanonicalDataRange in the DatatypeManager 
+ * makes sure that these assumptions hold as required. 
+ * 
+ * @author BGlimm
+ */
 public interface CanonicalDataRange {
     
     /**

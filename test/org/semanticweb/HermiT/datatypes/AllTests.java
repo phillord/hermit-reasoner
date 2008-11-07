@@ -12,6 +12,7 @@ public class AllTests extends TestCase {
         suite.addTestSuite(DataConstantTest.class);
         suite.addTestSuite(IntegersTest.class);
         suite.addTestSuite(DoublesTest.class);
+        suite.addTestSuite(Base64BinaryTest.class);
         // $JUnit-END$
         return suite;
     }

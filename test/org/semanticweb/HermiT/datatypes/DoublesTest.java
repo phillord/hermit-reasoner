@@ -8,9 +8,9 @@ import org.semanticweb.HermiT.model.dataranges.DataRange;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionDouble;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionOWLRealPlus;
 import org.semanticweb.HermiT.model.dataranges.DoubleInterval;
+import org.semanticweb.HermiT.model.dataranges.DataConstant.Impl;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.DT;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets;
-import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Impl;
 import org.semanticweb.HermiT.reasoner.AbstractReasonerTest;
 
 public class DoublesTest extends AbstractReasonerTest {

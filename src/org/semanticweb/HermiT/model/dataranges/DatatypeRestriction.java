@@ -1,5 +1,10 @@
+/*
+ * Copyright 2008 by Oxford University; see license.txt for details
+ */
+
 package org.semanticweb.HermiT.model.dataranges;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.net.URI;
 import java.util.Arrays;
@@ -12,43 +17,47 @@ import java.util.TreeSet;
 import org.semanticweb.HermiT.Namespaces;
 
 
-public abstract class DatatypeRestriction implements DataRange, CanonicalDataRange {
+/**
+ * An abstract superclass of all concrete datatype restrictions. The class 
+ * implements the DLPredicate interface and provides several methods for the 
+ * DataRange and CanonicalDataRange interfaces that can be overwritten or 
+ * extended by the concrete subclasses. 
+ * @author BGlimm
+ */
+public abstract class DatatypeRestriction 
+        implements DataRange, CanonicalDataRange, Serializable {
+    
+    private static final long serialVersionUID = 524235536504588458L;
     
     protected Set<Facets> supportedFacets = new HashSet<Facets>();
     
+    /**
+     * A list of facets that are supported by at least one concrete 
+     * implementation.
+     * @author BGlimm
+     */
     public enum Facets {
         LENGTH, MIN_LENGTH, MAX_LENGTH, 
         PATTERN, 
-        MIN_INCLUSIVE, MIN_EXCLUSIVE, MAX_INCLUSIVE, MAX_EXCLUSIVE, 
-        TOTAL_DIGITS, FRACTION_DIGITS
+        MIN_INCLUSIVE, MIN_EXCLUSIVE, MAX_INCLUSIVE, MAX_EXCLUSIVE 
     };
     
     protected static final Map<String, String> uris = Namespaces.semanticWebNamespaces.getDeclarations();
     
-    public enum Impl {
-        IInteger (111), 
-        IDouble (11),
-        IDecimal (1),
-        IDateTime (2),
-        IString (3),
-        IBoolean (4), 
-        ILiteral (5), 
-        IAnyURI (31),
-        IBase64Binary (32), 
-        IHexBinary (33);
-        
-        private final int position;
-        
-        Impl(int position) {
-            this.position = position;
-        }
-        
-        public int getPosition() { 
-            return position; 
-        }
-    }
+    /**
+     * The datatypes supported by HermiT together with their URIs and a position 
+     * value. The position can be seen as a tree specified as a prefixed closed 
+     * subset of strings. This tree is used to find the most specific 
+     * restriction in the datatype manager that will then be used for the 
+     * canonical datatype and that contains the facets and restrictions of all 
+     * data range assertions for a node/variable. E.g., if we have datatype 
+     * restrictions of OWLReal, Integer, and Short for a node, then we will use 
+     * the implementation of short as a basis for the canonical restriction as 
+     * this is the most specific one.
+     *  
+     * @author BGlimm
+     */
     public enum DT {
-        
         OWLREALPLUS ("1", (uris.get("owl") + "realPlus")),
         OWLREAL ("11", (uris.get("owl") + "real")),
         DECIMAL ("111", (uris.get("xsd") + "decimal")),
@@ -86,8 +95,11 @@ public abstract class DatatypeRestriction implements DataRange, CanonicalDataRan
         HEXBINARY ("7", (uris.get("xsd") + "hexBinary")),
         BASE64BINARY ("8", (uris.get("xsd") + "base64Binary"));
 
-        private final String position;   // in a tree that indicates subsumption 
-        // relationships between datatypes
+        /**
+         * position in a tree that indicates subsumption relationships between 
+         * datatypes
+         */
+        private final String position;
         private final String uri;
         
         DT(String position, String uri) {
@@ -100,13 +112,20 @@ public abstract class DatatypeRestriction implements DataRange, CanonicalDataRan
         }
         
         public String getURIAsString() { 
-            return uri.toString(); 
+            return uri; 
         }
         
         public URI getURI() {
             return URI.create(uri);
         }
         
+        /**
+         * Return all datatypes that are more specific then the given one 
+         * according to the tree induced by the position values of the 
+         * datatypes.
+         * @param datatype a datatype
+         * @return a set of more specific datatypes
+         */
         public static Set<DT> getSubTreeFor(DT datatype) { 
             Set<DT> subs = new HashSet<DT>();
             String pos = datatype.getPosition();
@@ -122,6 +141,14 @@ public abstract class DatatypeRestriction implements DataRange, CanonicalDataRan
             return subs; 
         }
         
+        /**
+         * Determines whether the second datatype is strictly more specific than 
+         * the first one in the hierarchy induced by the position. 
+         * @param datatype1 a datatype 
+         * @param datatype2 a datatype 
+         * @return true if datatype2 is strictly more specific than datattype1 
+         * and false otherwise
+         */
         public static boolean isSubOf(DT datatype1, DT datatype2) { 
             String pos1 = datatype1.getPosition();
             String pos2 = datatype2.getPosition();
@@ -136,26 +163,44 @@ public abstract class DatatypeRestriction implements DataRange, CanonicalDataRan
     protected boolean isNegated = false;
     protected boolean isBottom = false;
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.DLPredicate#getArity()
+     */
     public int getArity() {
         return 1;
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.DataRange#getDatatype()
+     */
     public DT getDatatype() {
         return datatype;
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.DataRange#getDatatypeURI()
+     */
     public URI getDatatypeURI() {
         return datatype != null ? datatype.getURI() : null;
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.DataRange#isNegated()
+     */
     public boolean isNegated() {
         return isNegated;
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.DataRange#negate()
+     */
     public void negate() {
         isNegated = !isNegated;
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.DataRange#isBottom()
+     */
     public boolean isBottom() {
         if (!isBottom) {
             if (!hasMinCardinality(BigInteger.ONE)) {
@@ -165,26 +210,44 @@ public abstract class DatatypeRestriction implements DataRange, CanonicalDataRan
         return isBottom;
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.DataRange#getOneOf()
+     */
     public Set<DataConstant> getOneOf() {
         return oneOf;
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.DataRange#getNotOneOf()
+     */
     public Set<DataConstant> getNotOneOf() {
         return notOneOf;
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#setOneOf(java.util.Set)
+     */
     public void setOneOf(Set<DataConstant> oneOf) {
         this.oneOf = oneOf;
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.DataRange#addOneOf(org.semanticweb.HermiT.model.dataranges.DataConstant)
+     */
     public boolean addOneOf(DataConstant constant) {
         return oneOf.add(constant);
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#setNotOneOf(java.util.Set)
+     */
     public void setNotOneOf(Set<DataConstant> notOneOf) {
         this.notOneOf = notOneOf;
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#notOneOf(org.semanticweb.HermiT.model.dataranges.DataConstant)
+     */
     public boolean notOneOf(DataConstant constant) {
         boolean result = true;
         if (!oneOf.isEmpty()) {
@@ -196,14 +259,23 @@ public abstract class DatatypeRestriction implements DataRange, CanonicalDataRan
         return result;
     }
 
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.DataRange#supports(org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets)
+     */
     public boolean supports(Facets facet) {
         return supportedFacets.contains(facet);
     }
     
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
     public String toString() {
         return toString(Namespaces.none);
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.DLPredicate#toString(org.semanticweb.HermiT.Namespaces)
+     */
     public String toString(Namespaces namespaces) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("(");

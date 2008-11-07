@@ -1,3 +1,7 @@
+/*
+ * Copyright 2008 by Oxford University; see license.txt for details
+ */
+
 package org.semanticweb.HermiT.model.dataranges;
 
 import java.math.BigDecimal;
@@ -10,13 +14,20 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.semanticweb.HermiT.Namespaces;
+import org.semanticweb.HermiT.model.dataranges.DataConstant.Impl;
 
 public class DatatypeRestrictionDouble 
         extends DatatypeRestriction 
         implements DoubleFacet, IntegerFacet {
     
+    private static final long serialVersionUID = 6118099138621545215L;
+    
     protected Set<DoubleInterval> intervals = new HashSet<DoubleInterval>();
    
+    /**
+     * An implementation for doubles and floats. 
+     * @param datatype A datatype (should use DT.DOUBLE or DT.FLOAT)
+     */
     public DatatypeRestrictionDouble(DT datatype) {
         this.datatype = datatype;
         intervals.add(new DoubleInterval());
@@ -30,23 +41,45 @@ public class DatatypeRestrictionDouble
         );
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.DataRange#getNewInstance()
+     */
     public CanonicalDataRange getNewInstance() {
         return new DatatypeRestrictionDouble(this.datatype);
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#isFinite()
+     */
     public boolean isFinite() {
-        return isBottom || (!isNegated && (hasOnlyFiniteIntervals() || !oneOf.isEmpty()));
+        return !isNegated;
     }
     
-    protected boolean hasOnlyFiniteIntervals() {
-        return !intervals.isEmpty();
-    }
-    
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.DataRange#addFacet(org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets, java.lang.String)
+     */
     public void addFacet(Facets facet, String value) {
         double doubleValue;
         try {
-            BigDecimal originalValue = new BigDecimal(value);
             doubleValue = Double.parseDouble(value);
+            // if NaN is given as a facet, or min value is supposed to be +INF, 
+            // or max value is supposed to be -INF, the value space is empty
+            if (isNaN(doubleValue) || (Double.POSITIVE_INFINITY == doubleValue 
+                    && (facet == Facets.MIN_EXCLUSIVE 
+                            || facet == Facets.MIN_INCLUSIVE)) 
+                            || (Double.NEGATIVE_INFINITY == doubleValue 
+                                    && (facet == Facets.MAX_EXCLUSIVE 
+                                            || facet == Facets.MAX_INCLUSIVE))) {
+                isBottom = true;
+                return;
+            } 
+            // a min value of -INF or max value of +INF are not really 
+            // restricting the value space, ignore
+            if (Double.POSITIVE_INFINITY == doubleValue 
+                    || Double.NEGATIVE_INFINITY == doubleValue) {
+                return;
+            }
+            BigDecimal originalValue = new BigDecimal(value);
             BigDecimal doubleValueAsBD = new BigDecimal("" + doubleValue);
             if (facet == Facets.MIN_EXCLUSIVE || facet == Facets.MIN_INCLUSIVE) {
                 if (doubleValueAsBD.compareTo(originalValue) < 0 
@@ -103,6 +136,14 @@ public class DatatypeRestrictionDouble
         }
     }
     
+    /**
+     * Returns a double such that it is greater than the given one and there is 
+     * no double that is smaller than the returned one and greater than the 
+     * given one. If the given one is -0.0, then the next greater one is +0.0. 
+     * @param value a double
+     * @return the next greater double compared to the given one or the value 
+     * itself if it is NaN, +Infinity, or -Infinity
+     */
     public static double nextDouble(double value) {
         long bits = Double.doubleToRawLongBits(value);
         long magnitude = (bits & 0x7fffffffffffffffl);
@@ -130,6 +171,14 @@ public class DatatypeRestrictionDouble
         }
     }
     
+    /**
+     * Returns a double such that it is smaller than the given one and there is 
+     * no double that is greater than the returned one and smaller than the 
+     * given one. If the given one is +0.0, then the next smaller one is -0.0. 
+     * @param value a double
+     * @return the next greater double compared to the given one or the value 
+     * itself if it is NaN, +Infinity, or -Infinity
+     */
     public static double previousDouble(double value) {
         long bits = Double.doubleToRawLongBits(value);
         long magnitude = (bits & 0x7fffffffffffffffl);
@@ -157,6 +206,12 @@ public class DatatypeRestrictionDouble
         }
     }
     
+    /**
+     * Determines whether the given double is the special value NaN (not a 
+     * number). 
+     * @param value a double
+     * @return true if the given value is NaN and false otherwise
+     */
     public static boolean isNaN(double value) {
         long bits = Double.doubleToRawLongBits(value);
         boolean result = (bits & 0x7ff0000000000000l) == 0x7ff0000000000000l;
@@ -164,6 +219,9 @@ public class DatatypeRestrictionDouble
         return result;
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#accepts(org.semanticweb.HermiT.model.dataranges.DataConstant)
+     */
     public boolean accepts(DataConstant constant) {
         if (!oneOf.isEmpty()) {
             return oneOf.contains(constant);
@@ -181,6 +239,9 @@ public class DatatypeRestrictionDouble
         return false; 
     }
 
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#conjoinFacetsFrom(org.semanticweb.HermiT.model.dataranges.DataRange)
+     */
     public void conjoinFacetsFrom(DataRange range) {
         if (isNegated) {
             throw new RuntimeException("Cannot add facets to negated " +
@@ -261,6 +322,9 @@ public class DatatypeRestrictionDouble
         }
     }
 
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#hasMinCardinality(java.math.BigInteger)
+     */
     public boolean hasMinCardinality(BigInteger n) {
         if (isNegated || n.compareTo(BigInteger.ZERO) <= 0) return true;
         if (isFinite()) {
@@ -284,6 +348,9 @@ public class DatatypeRestrictionDouble
         return true;
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#getEnumerationSize()
+     */
     public BigInteger getEnumerationSize() {
         if (!oneOf.isEmpty()) {
             return new BigInteger("" + oneOf.size());
@@ -303,6 +370,9 @@ public class DatatypeRestrictionDouble
         return rangeSize;
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#getSmallestAssignment()
+     */
     public DataConstant getSmallestAssignment() {
         if (isFinite()) {
             if (!oneOf.isEmpty()) {
@@ -323,10 +393,16 @@ public class DatatypeRestrictionDouble
         return null;
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.DoubleFacet#getDoubleIntervals()
+     */
     public Set<DoubleInterval> getDoubleIntervals() {
         return intervals;
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.IntegerFacet#getIntegerIntervals()
+     */
     public Set<IntegerInterval> getIntegerIntervals() {
         Set<IntegerInterval> integerIntervals = new HashSet<IntegerInterval>();
         if (!intervals.isEmpty()) {
@@ -352,6 +428,9 @@ public class DatatypeRestrictionDouble
         return integerIntervals;
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.DatatypeRestriction#printExtraInfo(org.semanticweb.HermiT.Namespaces)
+     */
     protected String printExtraInfo(Namespaces namespaces) {
         boolean firstRun = true;
         StringBuffer buffer = new StringBuffer();
@@ -368,14 +447,25 @@ public class DatatypeRestrictionDouble
         return buffer.toString();
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#datatypeAccepts(org.semanticweb.HermiT.model.dataranges.DataConstant)
+     */
     public boolean datatypeAccepts(DataConstant constant) {
         return DT.getSubTreeFor(DT.DOUBLE).contains(constant.getDatatype());
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#canHandle(org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.DT)
+     */
     public boolean canHandle(DT datatype) {
         return DT.getSubTreeFor(DT.OWLREALPLUS).contains(datatype);
     }
     
+    /**
+     * A comparator that can be used to order the intervals according to their 
+     * min values. We assume here that all intervals are disjoint. 
+     * @author BGlimm
+     */
     protected static class IntervalComparator implements Comparator<DoubleInterval> { 
         public static Comparator<DoubleInterval> INSTANCE = new IntervalComparator();
         public int compare(DoubleInterval i1, DoubleInterval i2) {

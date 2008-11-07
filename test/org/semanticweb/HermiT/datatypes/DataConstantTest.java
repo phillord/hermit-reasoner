@@ -5,8 +5,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.semanticweb.HermiT.model.dataranges.DataConstant;
+import org.semanticweb.HermiT.model.dataranges.DataConstant.Impl;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.DT;
-import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Impl;
 import org.semanticweb.HermiT.reasoner.AbstractReasonerTest;
 
 public class DataConstantTest extends AbstractReasonerTest {
