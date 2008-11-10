@@ -12,13 +12,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
 import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
 import org.semanticweb.HermiT.model.Atom;
-import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
+import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DLPredicate;
@@ -28,6 +27,7 @@ import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.model.NodeIDLessThan;
+import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.kaon2.api.Fact;
 import org.semanticweb.kaon2.api.KAON2Exception;
 import org.semanticweb.kaon2.api.KAON2Manager;
@@ -75,7 +75,10 @@ public class Clausification {
     protected static final org.semanticweb.HermiT.model.Variable X=org.semanticweb.HermiT.model.Variable.create("X");
     protected static final org.semanticweb.HermiT.model.Variable Y=org.semanticweb.HermiT.model.Variable.create("Y");
 
-    public DLOntology clausify(boolean prepareForNIRule,Ontology ontology,Collection<DescriptionGraph> descriptionGraphs) throws KAON2Exception {
+    public DLOntology clausify(boolean prepareForNIRule, 
+            Ontology ontology, 
+            Collection<DescriptionGraph> descriptionGraphs) 
+            throws KAON2Exception {
         Normalization normalization=new Normalization();
         normalization.processOntology(ontology);
         return clausify(prepareForNIRule,
@@ -85,18 +88,21 @@ public class Clausification {
         		        normalization.getInverseObjectPropertyInclusions(),
         		        normalization.getAsymmetricObjectProperties(), 
         		        normalization.getNormalDataPropertyInclusios(),
-        		        normalization.getFacts(),descriptionGraphs,
+        		        normalization.getFacts(),
+        		        descriptionGraphs,
         		        normalization.getRules());
     }
+    
     public DLOntology clausify(boolean prepareForNIRule,
-    		                   String ontologyURI,
-    		                   Collection<Description[]> conceptInclusions,
-    		                   Collection<ObjectPropertyExpression[]> normalObjectPropertyInclusions,
-    		                   Collection<ObjectPropertyExpression[]> inverseObjectPropertyInclusions,
-    		                   Collection<ObjectPropertyExpression> antisymmetricObjectProperties, 
-    		                   Collection<DataPropertyExpression[]> inverseDataPropertyInclusions,
-    		                   Collection<Fact> facts,Collection<DescriptionGraph> descriptionGraphs,
-    		                   Collection<Rule> additionalRules) throws KAON2Exception {
+            String ontologyURI,
+            Collection<Description[]> conceptInclusions,
+            Collection<ObjectPropertyExpression[]> normalObjectPropertyInclusions,
+            Collection<ObjectPropertyExpression[]> inverseObjectPropertyInclusions,
+            Collection<ObjectPropertyExpression> asymmetricObjectProperties, 
+            Collection<DataPropertyExpression[]> dataPropertyInclusions,
+            Collection<Fact> facts,
+            Collection<DescriptionGraph> descriptionGraphs,
+            Collection<Rule> additionalRules) {
         DetermineExpressivity determineExpressivity=new DetermineExpressivity();
         for (Description[] inclusion : conceptInclusions)
             for (Description description : inclusion)
@@ -113,8 +119,9 @@ public class Clausification {
             if ((isInverse0 && isInverse1) || (!isInverse0 && !isInverse1))
                 determineExpressivity.m_hasInverseRoles=true;
         }
-        if (inverseDataPropertyInclusions.size()>0)
-            throw new IllegalArgumentException("Data properties are not supported yet.");
+        if (dataPropertyInclusions.size() > 0) {
+            determineExpressivity.m_hasDatatypes = true;
+        }
         Set<DLClause> dlClauses=new LinkedHashSet<DLClause>();
         Set<Atom> positiveFacts=new HashSet<Atom>();
         Set<Atom> negativeFacts=new HashSet<Atom>();
@@ -130,13 +137,15 @@ public class Clausification {
             DLClause dlClause=DLClause.create(new Atom[] { superRoleAtom },new Atom[] { subRoleAtom });
             dlClauses.add(dlClause);
         }
-        for (ObjectPropertyExpression axiom : antisymmetricObjectProperties) {
+        for (ObjectPropertyExpression axiom : asymmetricObjectProperties) {
         	Atom roleAtom=getRoleAtom(axiom,X,Y);
             Atom inverseRoleAtom=getRoleAtom(axiom,Y,X);
         	DLClause dlClause = DLClause.create(new Atom[] { roleAtom, inverseRoleAtom }, new Atom[] { });
         	dlClauses.add(dlClause);
         }
-        boolean shouldUseNIRule=determineExpressivity.m_hasAtMostRestrictions && determineExpressivity.m_hasInverseRoles && (determineExpressivity.m_hasNominals || prepareForNIRule);
+        boolean shouldUseNIRule = determineExpressivity.m_hasAtMostRestrictions 
+                && determineExpressivity.m_hasInverseRoles 
+                && (determineExpressivity.m_hasNominals || prepareForNIRule);
         Clausifier clausifier=new Clausifier(positiveFacts,shouldUseNIRule);
         for (Description[] inclusion : conceptInclusions) {
             for (Description description : inclusion)
@@ -163,7 +172,8 @@ public class Clausification {
         		              determineExpressivity.m_hasAtMostRestrictions,
         		              determineExpressivity.m_hasNominals,
         		              shouldUseNIRule,
-        		              determineExpressivity.m_hasReflexivity);
+        		              determineExpressivity.m_hasReflexivity, 
+        		              determineExpressivity.m_hasDatatypes);
     }
     protected static Atom getRoleAtom(ObjectPropertyExpression objectProperty,org.semanticweb.HermiT.model.Term first,org.semanticweb.HermiT.model.Term second) {
         objectProperty=objectProperty.getSimplified();
@@ -573,6 +583,7 @@ public class Clausification {
         protected boolean m_hasInverseRoles;
         protected boolean m_hasNominals;
         protected boolean m_hasReflexivity = false;
+        protected boolean m_hasDatatypes = false;
         
         public Object visit(InverseObjectProperty object) {
             m_hasInverseRoles=true;

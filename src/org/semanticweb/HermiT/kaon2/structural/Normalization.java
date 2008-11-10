@@ -251,7 +251,7 @@ public class Normalization {
         // add the rules
         m_rules.addAll(ontology.createAxiomRequest(Rule.class).getAll());
     }
-    protected void nomalizeInclusions(List<Description[]> inclusions,KAON2Visitor normalizer) throws KAON2Exception {
+    protected void nomalizeInclusions(List<Description[]> inclusions,KAON2Visitor normalizer) {
         while (!inclusions.isEmpty()) {
             Description simplifiedDescription=KAON2Manager.factory().objectOr(inclusions.remove(inclusions.size()-1)).getSimplified();
             if (!KAON2Manager.factory().thing().equals(simplifiedDescription)) {

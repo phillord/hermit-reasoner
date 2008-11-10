@@ -4,9 +4,21 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 
-import org.semanticweb.HermiT.blocking.*;
-import org.semanticweb.HermiT.existentials.*;
-import org.semanticweb.HermiT.model.*;
+import org.semanticweb.HermiT.blocking.AnywhereBlocking;
+import org.semanticweb.HermiT.blocking.BlockingSignatureCache;
+import org.semanticweb.HermiT.blocking.BlockingStrategy;
+import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
+import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
+import org.semanticweb.HermiT.existentials.ExpansionStrategy;
+import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
+import org.semanticweb.HermiT.model.Atom;
+import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.AtomicNegationConcept;
+import org.semanticweb.HermiT.model.AtomicRole;
+import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.model.DLOntology;
+import org.semanticweb.HermiT.model.InverseRole;
+import org.semanticweb.HermiT.model.Variable;
 
 public class NIRuleTest extends AbstractHermiTTest {
     protected static final AtomicConcept A=AtomicConcept.create("A");
@@ -25,8 +37,20 @@ public class NIRuleTest extends AbstractHermiTTest {
         DLClause cl=DLClause.create(new Atom[] { Atom.create(A,X), Atom.create(B,X) },new Atom[] { Atom.create(B,X) });
         Set<DLClause> dlClauses=Collections.singleton(cl);
         Set<Atom> atoms=Collections.emptySet();
-        TEST_DL_ONTOLOGY=new DLOntology("opaque:test",dlClauses,atoms,atoms,
-            null, null, null, false,false,false,true,false);
+        TEST_DL_ONTOLOGY = new DLOntology(
+                "opaque:test", // ontology_URI
+                dlClauses, // clauses
+                atoms, // positive facts
+                atoms, // negative facts 
+                null, // atomic concepts
+                null, // individuals
+                null, // role hierarchy
+                false, // hasInverseRoles
+                false, // hasAtMostRestrictions
+                false, // hasNominals
+                false, // canUseNIRule
+                false, // hasReflexivity
+                false); // hasDatatypes;
     }
 
     protected Tableau m_tableau;

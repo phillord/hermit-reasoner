@@ -3,18 +3,18 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Collection;
 
 import org.semanticweb.HermiT.existentials.ExpansionStrategy;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
-import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
-import org.semanticweb.HermiT.model.DLOntology;
+import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.Individual;
@@ -61,6 +61,7 @@ public final class Tableau implements Serializable {
     protected Node m_checkedNode;
     private Collection<Atom> additionalPositiveFacts;
     private Collection<Atom> additionalNegativeFacts;
+    protected boolean checkDatatypes = true;
 
     public Tableau(TableauMonitor tableauMonitor,
                     ExpansionStrategy existentialsExpansionStrategy,
@@ -92,6 +93,9 @@ public final class Tableau implements Serializable {
         }
         additionalPositiveFacts = new ArrayList<Atom>();
         additionalNegativeFacts = new ArrayList<Atom>();
+        // we only need to look for new DataRange tuples in doIteration() if 
+        // they can occur at all
+        checkDatatypes = m_dlOntology.hasDatatypes();
     }
     
     /**
@@ -213,8 +217,9 @@ public final class Tableau implements Serializable {
             while (m_extensionManager.propagateDeltaNew()&&!m_extensionManager.containsClash()) {
                 m_descriptionGraphManager.checkGraphConstraints();
                 m_hyperresolutionManager.applyDLClauses();
-                if (!m_extensionManager.containsClash())
+                if (checkDatatypes && !m_extensionManager.containsClash()) {
                     m_datatypeManager.checkDatatypeConstraints();
+                }
                 if (!m_extensionManager.containsClash())
                     m_nominalIntroductionManager.processTargets();
                 hasChange=true;

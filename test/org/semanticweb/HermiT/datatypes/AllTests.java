@@ -13,6 +13,7 @@ public class AllTests extends TestCase {
         suite.addTestSuite(IntegersTest.class);
         suite.addTestSuite(DoublesTest.class);
         suite.addTestSuite(Base64BinaryTest.class);
+        suite.addTestSuite(HexBinaryTest.class);
         // $JUnit-END$
         return suite;
     }

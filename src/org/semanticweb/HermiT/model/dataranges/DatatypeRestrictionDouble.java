@@ -81,18 +81,12 @@ public class DatatypeRestrictionDouble
             }
             BigDecimal originalValue = new BigDecimal(value);
             BigDecimal doubleValueAsBD = new BigDecimal("" + doubleValue);
-            if (facet == Facets.MIN_EXCLUSIVE || facet == Facets.MIN_INCLUSIVE) {
-                if (doubleValueAsBD.compareTo(originalValue) < 0 
-                        || (doubleValueAsBD.compareTo(originalValue) == 0 
-                                && facet == Facets.MIN_EXCLUSIVE)) {
-                    doubleValue = DatatypeRestrictionDouble.nextDouble(doubleValue);
-                }
-            } else {
-                if (doubleValueAsBD.compareTo(originalValue) > 0 
-                        || (doubleValueAsBD.compareTo(originalValue) == 0 
-                                && facet == Facets.MAX_EXCLUSIVE)) {
-                    doubleValue = DatatypeRestrictionDouble.previousDouble(doubleValue);
-                }
+            if (facet == Facets.MIN_EXCLUSIVE 
+                    && doubleValueAsBD.compareTo(originalValue) <= 0) {
+                doubleValue = DatatypeRestrictionDouble.nextDouble(doubleValue);
+            } else if (facet == Facets.MAX_EXCLUSIVE 
+                    && doubleValueAsBD.compareTo(originalValue) >= 0) {
+                doubleValue = DatatypeRestrictionDouble.previousDouble(doubleValue);
             }
         } catch (NumberFormatException e) {
             e.printStackTrace();
@@ -223,6 +217,20 @@ public class DatatypeRestrictionDouble
      * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#accepts(org.semanticweb.HermiT.model.dataranges.DataConstant)
      */
     public boolean accepts(DataConstant constant) {
+        if (!(constant.getImplementation() == Impl.IInteger 
+                || constant.getImplementation() == Impl.IDouble
+                || constant.getImplementation() == Impl.IDecimal)) {
+            return false;
+        }
+        String value = constant.getValue();
+        if (constant.getImplementation() == Impl.IDecimal) {
+            BigDecimal dbd = new BigDecimal(value);
+            if (dbd.compareTo(new BigDecimal("" + -Double.MAX_VALUE)) <= 0 
+                    || dbd.compareTo(new BigDecimal("" + Double.MAX_VALUE)) >= 0) {
+                return false;
+            } 
+            value = "" + dbd.doubleValue();
+        }
         if (!oneOf.isEmpty()) {
             return oneOf.contains(constant);
         }
@@ -230,7 +238,7 @@ public class DatatypeRestrictionDouble
             return false;
         } 
         if (intervals.isEmpty()) return true;
-        double doubleValue = Double.parseDouble(constant.getValue());
+        double doubleValue = Double.parseDouble(value);
         for (DoubleInterval i : intervals) {
             if (i.contains(doubleValue)) {
                 return true;

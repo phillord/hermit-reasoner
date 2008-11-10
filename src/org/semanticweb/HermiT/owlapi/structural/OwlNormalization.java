@@ -11,9 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.Reasoner;
-
+import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.owl.model.OWLAntiSymmetricObjectPropertyAxiom;
 import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLAxiomAnnotationAxiom;

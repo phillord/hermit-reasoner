@@ -28,10 +28,22 @@ public abstract class AbstractReasonerTest extends TestCase {
     protected static final Node[][] NO_TUPLES=new Node[0][];
     protected static final DLOntology EMPTY_DL_ONTOLOGY;
     static {
-        Set<DLClause> dlClauses=Collections.emptySet();
-        Set<Atom> atoms=Collections.emptySet();
-        EMPTY_DL_ONTOLOGY=new DLOntology("opaque:test",dlClauses,atoms,atoms,
-            null, null, null, false,false,false,false,false);
+        Set<DLClause> dlClauses = Collections.emptySet();
+        Set<Atom> atoms = Collections.emptySet();
+        EMPTY_DL_ONTOLOGY = new DLOntology(
+                "opaque:test", // ontology_URI
+                dlClauses, // clauses
+                atoms, // positive facts
+                atoms, // negative facts 
+                null, // atomic concepts
+                null, // individuals
+                null, // role hierarchy
+                false, // hasInverseRoles
+                false, // hasAtMostRestrictions
+                false, // hasNominals
+                false, // canUseNIRule
+                false, // hasReflexivity
+                false); // hasDatatypes
     }
     protected OWLOntology m_ontology;
     protected Reasoner hermit;

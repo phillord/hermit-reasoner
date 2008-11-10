@@ -1029,4 +1029,12 @@ public class IntegersTest extends AbstractReasonerTest {
         assertTrue(((DatatypeRestrictionInteger)canonical).getIntegerIntervals().size() == 1);
         assertTrue(canonical.getEnumerationSize().equals(new BigInteger("2")));
     }
+    
+    public void testInvalidInts() throws Exception {
+        CanonicalDataRange cdr = new DatatypeRestrictionInteger(DT.INTEGER);
+        assertFalse(cdr.accepts(new DataConstant(Impl.IDouble, DT.DECIMAL, "1.2")));
+        assertFalse(cdr.accepts(new DataConstant(Impl.IBase64Binary, DT.BASE64BINARY, "00==")));
+        assertTrue(cdr.accepts(new DataConstant(Impl.IInteger, DT.DOUBLE, "4.0")));
+        assertTrue(cdr.accepts(new DataConstant(Impl.IInteger, DT.DECIMAL, "4544556468748765468484654549876546548784654648784546547445545555545454542175418454")));
+    }
 }

@@ -1,5 +1,6 @@
 package org.semanticweb.HermiT.datatypes;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import org.semanticweb.HermiT.model.dataranges.CanonicalDataRange;
@@ -36,7 +37,7 @@ public class DoublesTest extends AbstractReasonerTest {
         assertTrue(drDouble.isFinite());
         for (DoubleInterval i : drDouble.getDoubleIntervals()) {
             assertTrue(i.contains(DatatypeRestrictionDouble.previousDouble(maxEx)));
-            assertFalse(i.contains(maxEx));
+            assertFalse(i.contains(DatatypeRestrictionDouble.nextDouble(maxEx)));
         }
         maxEx = 1.0;
         drDouble.addFacet(Facets.MAX_EXCLUSIVE, Double.toString(maxEx));
@@ -287,5 +288,14 @@ public class DoublesTest extends AbstractReasonerTest {
         assertTrue(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "4.1")));
         assertFalse(canonical.accepts(new DataConstant(Impl.IDouble, dr1.getDatatype(), "" + DatatypeRestrictionDouble.nextDouble(4.1))));
         assertTrue(((DatatypeRestrictionDouble)canonical).getDoubleIntervals().size() == 1);
+    }
+    
+    public void testAccepts() throws Exception {
+        CanonicalDataRange cdr = new DatatypeRestrictionDouble(DT.DOUBLE);
+        assertTrue(cdr.accepts(new DataConstant(Impl.IDecimal, DT.DECIMAL, "0.1")));
+        assertFalse(cdr.accepts(new DataConstant(Impl.IBase64Binary, DT.BASE64BINARY, "00==")));
+        assertFalse(cdr.accepts(new DataConstant(Impl.IDecimal, DT.DECIMAL, "" + (new BigDecimal("" + Double.MAX_VALUE)).add(BigDecimal.ONE))));
+        assertTrue(cdr.accepts(new DataConstant(Impl.IInteger, DT.INTEGER, "4")));
+        assertTrue(cdr.accepts(new DataConstant(Impl.IDouble, DT.DOUBLE, "0.2")));
     }
 }

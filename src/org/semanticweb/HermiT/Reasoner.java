@@ -127,7 +127,6 @@ public class Reasoner implements Serializable {
         public boolean clausifyTransitivity;
         public boolean checkClauses;
         public boolean prepareForExpressiveQueries;
-        public boolean onlyCoreDatatypes;
         public boolean makeTopRoleUniversal;
         public TableauMonitor monitor;
         public final Map<String,Object> parameters;
@@ -144,7 +143,6 @@ public class Reasoner implements Serializable {
             clausifyTransitivity = false;
             checkClauses = true;
             prepareForExpressiveQueries = false;
-            onlyCoreDatatypes = true;
             makeTopRoleUniversal = false;
             monitor = null;
             parameters = new HashMap<String,Object>();
@@ -995,7 +993,7 @@ public class Reasoner implements Serializable {
             throw new IllegalArgumentException(
                 "Unknown expansion strategy type.");
         }
-        
+
         m_tableau = new Tableau(tableauMonitor,
                                 existentialsExpansionStrategy,
                                 m_dlOntology,

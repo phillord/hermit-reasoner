@@ -4,9 +4,17 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 
-import org.semanticweb.HermiT.blocking.*;
-import org.semanticweb.HermiT.existentials.*;
-import org.semanticweb.HermiT.model.*;
+import org.semanticweb.HermiT.blocking.AnywhereBlocking;
+import org.semanticweb.HermiT.blocking.BlockingSignatureCache;
+import org.semanticweb.HermiT.blocking.BlockingStrategy;
+import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
+import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
+import org.semanticweb.HermiT.existentials.ExpansionStrategy;
+import org.semanticweb.HermiT.model.Atom;
+import org.semanticweb.HermiT.model.AtomicRole;
+import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.model.DLOntology;
+import org.semanticweb.HermiT.model.Variable;
 
 public class DLClauseEvaluationTest extends AbstractHermiTTest {
     protected static final AtomicRole R=AtomicRole.createObjectRole("R");
@@ -24,8 +32,20 @@ public class DLClauseEvaluationTest extends AbstractHermiTTest {
         CL_1=DLClause.create(new Atom[] { Atom.create(U,Z,W) },new Atom[] { Atom.create(R,X,Y),Atom.create(S,Y,Z),Atom.create(T,W,W) });
         Set<DLClause> dlClauses=Collections.singleton(CL_1);
         Set<Atom> atoms=Collections.emptySet();
-        TEST_DL_ONTOLOGY=new DLOntology("opaque:test",dlClauses,atoms,atoms,
-            null, null, null, false,false,false,false,false);
+        TEST_DL_ONTOLOGY = new DLOntology(
+                    "opaque:test", // ontology_URI
+                    dlClauses, // clauses
+                    atoms, // positive facts
+                    atoms, // negative facts 
+                    null, // atomic concepts
+                    null, // individuals
+                    null, // role hierarchy
+                    false, // hasInverseRoles
+                    false, // hasAtMostRestrictions
+                    false, // hasNominals
+                    false, // canUseNIRule
+                    false, // hasReflexivity
+                    false); // hasDatatypes
     }
 
     protected Tableau m_tableau;

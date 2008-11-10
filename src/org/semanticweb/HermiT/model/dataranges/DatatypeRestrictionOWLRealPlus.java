@@ -335,25 +335,27 @@ public class DatatypeRestrictionOWLRealPlus
                 double minD = -Double.MAX_VALUE;
                 double maxD = Double.MAX_VALUE;
                 boolean isEmpty = false;
-                if (min.compareTo(new BigDecimal("" + Double.MIN_VALUE)) >= 0) {
+                if (min.compareTo(new BigDecimal("" + -Double.MAX_VALUE)) >= 0) {
                     if (min.compareTo(new BigDecimal("" + Double.MAX_VALUE)) <= 0) {
                         minD = min.doubleValue();
-                        if (min.compareTo(new BigDecimal("" + minD)) > 0 
-                                || (i.isOpenMin() && min.compareTo(new BigDecimal("" + minD)) == 0)) {
+                        if (min.compareTo(new BigDecimal("" + minD)) >= 0 
+                                && i.isOpenMin()) {
                             minD = DatatypeRestrictionDouble.nextDouble(minD);
                         }
                     } else {
+                        // >= max double -> empty range
                         isEmpty = true;
                     }
                 } // minD = Double.Min_VALUE
                 if (max.compareTo(new BigDecimal("" + Double.MAX_VALUE)) <= 0) {
-                    if (max.compareTo(new BigDecimal("" + Double.MIN_VALUE)) >= 0) {
+                    if (max.compareTo(new BigDecimal("" + -Double.MAX_VALUE)) >= 0) {
                         maxD = max.doubleValue();
-                        if (max.compareTo(new BigDecimal("" + maxD)) < 0 
-                                || (i.isOpenMax() && max.compareTo(new BigDecimal("" + maxD)) == 0)) {
+                        if (max.compareTo(new BigDecimal("" + maxD)) <= 0 
+                                && i.isOpenMax()) {
                             maxD = DatatypeRestrictionDouble.previousDouble(maxD);
                         }
                     } else {
+                        // <= min double -> empty range
                         isEmpty = true;
                     }
                 } // maxD = Double.MAX_VALUE

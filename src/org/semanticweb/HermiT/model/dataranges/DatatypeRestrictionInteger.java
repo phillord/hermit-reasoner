@@ -135,6 +135,20 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction
      * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#accepts(org.semanticweb.HermiT.model.dataranges.DataConstant)
      */
     public boolean accepts(DataConstant constant) {
+        if (!(constant.getImplementation() == Impl.IInteger 
+                || constant.getImplementation() == Impl.IDouble
+                || constant.getImplementation() == Impl.IDecimal)) {
+            return false;
+        }
+        String value = constant.getValue();
+        if (constant.getImplementation() == Impl.IDecimal 
+                && !(new BigDecimal(value).scale() == 0)) {
+            return false;
+        }
+        if (constant.getImplementation() == Impl.IDouble 
+                && !(new Double(value).longValue() == new Double(value))) {
+            return false;
+        }
         if (!oneOf.isEmpty()) {
             return oneOf.contains(constant);
         }
@@ -144,18 +158,17 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction
         if (intervals.isEmpty()) return true;
         Number numValue = null;
         try {
-            BigInteger valueBig = new BigInteger(constant.getValue());
+            BigInteger valueBig = new BigInteger(value);
             if (IntegerIntervalFin.isLong(valueBig)) {
                 numValue = valueBig.longValue();
                 for (IntegerInterval i : intervals) {
-                    if (i.contains(numValue) && !notOneOf.contains(constant)) {
+                    if (i.contains(numValue)) {
                         return true;
                     }
                 }
             } else {
                 for (IntegerInterval i : intervals) {
-                    if (IntegerIntervalBig.toIntegerIntervalBig(i).contains(valueBig) 
-                            && !notOneOf.contains(constant)) {
+                    if (IntegerIntervalBig.toIntegerIntervalBig(i).contains(valueBig)) {
                         return true;
                     }
                 }

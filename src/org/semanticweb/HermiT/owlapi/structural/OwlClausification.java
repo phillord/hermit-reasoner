@@ -111,13 +111,11 @@ public class OwlClausification {
     public OWLDataFactory factory;
     private OwlNormalization normalization;
     private int amqOffset; // the number of negative at-most replacements already performed
-    protected boolean onlyCoreDatatypes;
     
     public OwlClausification(OWLDataFactory factory) {
         this.factory = factory;
         normalization = new OwlNormalization(factory);
         amqOffset = 0;
-        onlyCoreDatatypes = true;
     }
 
     public DLOntology clausify(Reasoner.Configuration config, OWLOntology ontology,
@@ -217,7 +215,6 @@ public class OwlClausification {
             Set<OWLIndividual> individuals,
             Set<OWLDataProperty> dataProperties,
             Set<OWLObjectProperty> objectProperties) {
-        onlyCoreDatatypes = config.onlyCoreDatatypes;
         DetermineExpressivity determineExpressivity = new DetermineExpressivity();
         for (OWLDescription[] inclusion : conceptInclusions)
             for (OWLDescription description : inclusion)
@@ -321,7 +318,7 @@ public class OwlClausification {
             shouldUseNIRule = true;
         }
         Clausifier clausifier = new Clausifier(positiveFacts, shouldUseNIRule,
-                factory, amqOffset, onlyCoreDatatypes);
+                factory, amqOffset);
         for (OWLDescription[] inclusion : conceptInclusions) {
             for (OWLDescription description : inclusion)
                 description.accept(clausifier);
@@ -361,7 +358,8 @@ public class OwlClausification {
                 determineExpressivity.m_hasInverseRoles,
                 determineExpressivity.m_hasAtMostRestrictions,
                 determineExpressivity.m_hasNominals, shouldUseNIRule,
-                determineExpressivity.m_hasReflexivity);
+                determineExpressivity.m_hasReflexivity, 
+                determineExpressivity.m_hasDatatypes);
     }
     
     /**
@@ -382,7 +380,7 @@ public class OwlClausification {
         OWLClass outClass = normalization.define(desc, inclusions, assertions);
         
         Clausifier clausifier = new Clausifier(outPositiveFacts, true,
-                factory, amqOffset, onlyCoreDatatypes);
+                factory, amqOffset);
         for (OWLDescription[] inclusion : inclusions) {
             for (OWLDescription description : inclusion) {
                 description.accept(clausifier);
@@ -509,16 +507,13 @@ public class OwlClausification {
         protected final Set<AtMostAbstractRoleGuard> m_atMostRoleGuards;
         protected final Set<Atom> m_positiveFacts;
         protected final boolean m_renameAtMost;
-        protected final boolean onlyCoreDatatypes;
         protected int m_yIndex;
         protected final OWLDataFactory m_factory;
 
         public Clausifier(Set<Atom> positiveFacts, boolean renameAtMost,
-                OWLDataFactory factory, int amqOffset, 
-                boolean onlyCoreDatatypes) {
+                OWLDataFactory factory, int amqOffset) {
             m_negativeAtMostReplacements = new HashMap<AtomicConcept, AtomicConcept>();
             this.amqOffset = amqOffset;
-            this.onlyCoreDatatypes = onlyCoreDatatypes;
             m_headAtoms = new ArrayList<Atom>();
             m_bodyAtoms = new ArrayList<Atom>();
             m_atMostRoleGuards = new HashSet<AtMostAbstractRoleGuard>();
@@ -572,7 +567,7 @@ public class OwlClausification {
         public void visit(OWLDataAllRestriction desc) {
             org.semanticweb.HermiT.model.Variable y = nextY();
             m_bodyAtoms.add(getDataPropertyAtom(desc.getProperty(), X, y));
-            DataVisitor dataVisitor = new DataVisitor(onlyCoreDatatypes);
+            DataVisitor dataVisitor = new DataVisitor();
             desc.getFiller().accept(dataVisitor);
             if (!dataVisitor.getDataRange().isBottom()) {
                 m_headAtoms.add(Atom.create(dataVisitor.getDataRange(),
@@ -583,7 +578,7 @@ public class OwlClausification {
         public void visit(OWLDataSomeRestriction desc) {
             OWLDataProperty dp = (OWLDataProperty) desc.getProperty();
             AtomicRole property = AtomicRole.createDataRole(dp.getURI().toString());
-            DataVisitor dataVisitor = new DataVisitor(onlyCoreDatatypes);
+            DataVisitor dataVisitor = new DataVisitor();
             desc.getFiller().accept(dataVisitor);
             m_headAtoms.add(Atom.create(AtLeastConcreteRoleConcept.create(1, property,
                     dataVisitor.getDataRange()),
@@ -598,7 +593,7 @@ public class OwlClausification {
         public void visit(OWLDataMaxCardinalityRestriction desc) {
             int number = desc.getCardinality();
             OWLDataProperty dp = (OWLDataProperty) desc.getProperty();
-            DataVisitor dataVisitor = new DataVisitor(onlyCoreDatatypes);
+            DataVisitor dataVisitor = new DataVisitor();
             dataVisitor.negate();
             desc.getFiller().accept(dataVisitor);
             ensureYNotZero();
@@ -624,7 +619,7 @@ public class OwlClausification {
             int number = desc.getCardinality();
             OWLDataProperty dp = (OWLDataProperty) desc.getProperty();
             AtomicRole property = AtomicRole.createDataRole(dp.getURI().toString());
-            DataVisitor dataVisitor = new DataVisitor(onlyCoreDatatypes);
+            DataVisitor dataVisitor = new DataVisitor();
             desc.getFiller().accept(dataVisitor);
             m_headAtoms.add(Atom.create(
                     AtLeastConcreteRoleConcept.create(
@@ -888,13 +883,7 @@ public class OwlClausification {
         protected static OWLOntologyManager man = OWLManager.createOWLOntologyManager();
         protected static OWLDataFactory factory = man.getOWLDataFactory();
         protected boolean isNegated = false;
-        protected boolean onlyCoreDatatypes = true;
         protected DataRange currentDataRange;
-        
-        public DataVisitor(boolean onlyCoreDatatypes) {
-            super();
-            this.onlyCoreDatatypes = onlyCoreDatatypes;
-        }
         
         public void visit(OWLDataComplementOf dataComplementOf) {
             OWLDataRange range = dataComplementOf.getDataRange();

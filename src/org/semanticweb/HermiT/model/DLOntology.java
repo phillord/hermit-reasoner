@@ -14,16 +14,16 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Map;
-import java.util.HashMap;
+
+import org.semanticweb.HermiT.InternalNames;
+import org.semanticweb.HermiT.Namespaces;
 import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
 import org.semanticweb.HermiT.model.dataranges.DataRange;
-import org.semanticweb.HermiT.InternalNames;
-
-import org.semanticweb.HermiT.Namespaces;
 
 /**
  * Represents a DL ontology as a set of rules.
@@ -46,6 +46,7 @@ public class DLOntology implements Serializable {
     protected final boolean m_canUseNIRule;
     protected final boolean m_isHorn;
     protected final boolean m_hasReflexifity;
+    protected final boolean m_hasDatatypes;
     protected final Set<AtomicConcept> m_allAtomicConcepts;
     protected final Set<Individual> m_allIndividuals;
     protected final Set<DescriptionGraph> m_allDescriptionGraphs;
@@ -63,7 +64,8 @@ public class DLOntology implements Serializable {
             Set<Individual> individuals,
             Map<AtomicRole, HierarchyPosition<AtomicRole>> explicitRoleHierarchy, // cleverer version of the set of all roles
             boolean hasInverseRoles, boolean hasAtMostRestrictions,
-            boolean hasNominals, boolean canUseNIRule, boolean hasReflexivity) {
+            boolean hasNominals, boolean canUseNIRule, boolean hasReflexivity, 
+            boolean hasDatatypes) {
         m_ontologyURI = ontologyURI;
         m_dlClauses = dlClauses;
         m_positiveFacts = positiveFacts;
@@ -73,6 +75,7 @@ public class DLOntology implements Serializable {
         m_canUseNIRule = canUseNIRule;
         m_hasNominals = hasNominals;
         m_hasReflexifity = hasReflexivity;
+        m_hasDatatypes = hasDatatypes;
         if (atomicConcepts == null) {
             m_allAtomicConcepts = new TreeSet<AtomicConcept>(
                 AtomicConceptComparator.INSTANCE);
@@ -189,6 +192,10 @@ public class DLOntology implements Serializable {
 
     public boolean hasReflexifity() {
         return m_hasReflexifity;
+    }
+    
+    public boolean hasDatatypes() {
+        return m_hasDatatypes;
     }
 
     public Collection<DLClause> getNonadmissibleDLClauses() {

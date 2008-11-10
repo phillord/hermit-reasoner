@@ -5,6 +5,7 @@ public class ReasonerTest extends AbstractOntologyTest {
     public ReasonerTest(String name) {
         super(name);
     }
+    
     public void testSatisfiability1() throws Exception {
         addAxiom("[classMember C a]");
         addAxiom("[classMember [not C] a]");
@@ -472,6 +473,7 @@ public class ReasonerTest extends AbstractOntologyTest {
         loadResource("res/pizza.xml");
         assertSubsumptionHierarchy("res/pizza.xml.txt");
     }
+    
 //    public void testPropreo() throws Exception {
 //        loadResource("res/propreo.xml");
 //        assertSubsumptionHierarchy("res/propreo.xml.txt");

@@ -29,6 +29,8 @@ public class DatatypeRestrictionHexBinary
     private static final long serialVersionUID = 5175603770168472124L;
     
     protected Set<IntegerInterval> intervals = new HashSet<IntegerInterval>();
+    protected Automaton patternMatcher = null;
+    protected boolean patternContainsFacets = false;
     
     /**
      * Create an instance of the datatype restriction for hex encoded binary 
@@ -45,6 +47,7 @@ public class DatatypeRestrictionHexBinary
                 })
         );
         intervals.add(new IntegerIntervalFin(0l, null));
+        patternMatcher = new RegExp("([0-9a-f][0-9a-f])*").toAutomaton();
     }
     
     /* (non-Javadoc)
@@ -82,6 +85,7 @@ public class DatatypeRestrictionHexBinary
         if (facet == Facets.LENGTH) {
             addFacet(Facets.MIN_LENGTH, value);
             addFacet(Facets.MAX_LENGTH, value);
+            return;
         }
         IntegerInterval iNew = null;
         try {
@@ -124,23 +128,62 @@ public class DatatypeRestrictionHexBinary
      * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#accepts(org.semanticweb.HermiT.model.dataranges.DataConstant)
      */
     public boolean accepts(DataConstant constant) {
-        Automaton a = new RegExp("[0-9a-f]{2}*").toAutomaton();
-        boolean validHex = a.run(constant.getValue().toLowerCase());
-        if (!validHex) return false;
+        if (!(constant.getImplementation() == Impl.IHexBinary)) {
+            return false;
+        }
         if (!oneOf.isEmpty()) {
             return oneOf.contains(constant);
         }
-        if (!notOneOf.isEmpty() && notOneOf.contains(constant)) {
-            return false;
-        } 
-        if (intervals.isEmpty()) return true;
-        String value = constant.getValue();
-        for (IntegerInterval i : intervals) {
-            if (i.contains(value.length() / 2)) {
-                return true;
+        if (patternContainsFacets) {
+            return patternMatcher.run(constant.getValue().toLowerCase());
+        } else {
+            if (!notOneOf.isEmpty() && notOneOf.contains(constant)) {
+                return false;
+            } 
+            // initial patternMatcher just checks that the value is valid hex
+            if (!patternMatcher.run(constant.getValue().toLowerCase())) {
+                return false;
+            }
+            if (intervals.isEmpty()) return true;
+            String value = constant.getValue();
+            for (IntegerInterval i : intervals) {
+                if (i.contains(value.length() / 2)) {
+                    return true;
+                }
             }
         }
         return false;
+    }
+    
+    /**
+     * Encodes the length restrictions given by the facets and the unsuitable 
+     * assignments (notOneOf) into an automaton that can then be used to 
+     * generate suitable assignments for this restriction. It is mainly a kind 
+     * of caching, so that we don't construct the automaton each time we need 
+     * assignments. 
+     */
+    protected void compileFacetsIntoPattern() {
+        if (!intervals.isEmpty()) {
+            SortedSet<IntegerInterval> sortedIntervals 
+                    = new TreeSet<IntegerInterval>(IntervalComparator.INSTANCE);
+            sortedIntervals.addAll(intervals);
+            for (IntegerInterval i : sortedIntervals) {
+                if (IntegerIntervalFin.isInt(new BigInteger("" + i.getMin())) 
+                    && IntegerIntervalFin.isInt(new BigInteger("" + i.getMax()))) {
+                    // intervals are finite since otherwise we do not generate 
+                    // assignments
+                    String pattern = "([0-9a-f][0-9a-f]){" + i.getMin() + "," + i.getMax() + "}";
+                    patternMatcher = new RegExp(pattern).toAutomaton();
+                    for (DataConstant d : notOneOf) {
+                        patternMatcher = patternMatcher.minus(Automaton.makeString(d.getValue()));
+                    }
+                } else {
+                    // numbers too big
+                    throw new RuntimeException("The range is too big to be captured by an automaton. ");
+                }
+            }
+        }
+        patternContainsFacets = true;
     }
     
     /* (non-Javadoc)
@@ -308,17 +351,37 @@ public class DatatypeRestrictionHexBinary
                     rangeSize = rangeSize.add(num);
                 }
             }
+            int minus = 0;
             for (DataConstant constant : notOneOf) {
                 String not = constant.getValue();
                 for (IntegerInterval i : intervals) {
-                    if (!i.contains(not.length() / 2)) {
-                        rangeSize = rangeSize.subtract(BigInteger.ONE);
+                    if (i.contains(not.length() / 2)) {
+                        minus++;
                     }
                 }
             }
+            rangeSize = rangeSize.subtract(new BigInteger("" + minus));
             return rangeSize;
         }
         return null;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.semanticweb.HermiT.model.dataranges.DatatypeRestriction#notOneOf(org.semanticweb.HermiT.model.dataranges.DataConstant)
+     */
+    public boolean notOneOf(DataConstant constant) {
+        boolean result = true;
+        if (!oneOf.isEmpty()) {
+            result = oneOf.remove(constant);
+            if (oneOf.isEmpty()) isBottom = true;
+        } else {
+            if (patternContainsFacets) {
+                patternMatcher = patternMatcher.minus(Automaton.makeString(constant.getValue()));
+            } else {
+                result = notOneOf.add(constant);
+            }
+        }
+        return result;
     }
     
     /* (non-Javadoc)
@@ -330,29 +393,12 @@ public class DatatypeRestrictionHexBinary
                 SortedSet<DataConstant> sortedOneOfs = new TreeSet<DataConstant>(oneOf);
                 return sortedOneOfs.first();
             }
-            if (!intervals.isEmpty()) {
-                SortedSet<IntegerInterval> sortedIntervals = new TreeSet<IntegerInterval>(IntervalComparator.INSTANCE);
-                sortedIntervals.addAll(intervals);
-                for (IntegerInterval i : sortedIntervals) {
-                    if (IntegerIntervalFin.isInt(new BigInteger("" + i.getMin())) 
-                        && IntegerIntervalFin.isInt(new BigInteger("" + i.getMax()))) {
-                        String tmpPattern = "{" + i.getMin() + "," + i.getMax() + "}";
-                        Automaton a = new RegExp("([0-9a-f]{2}*)" + tmpPattern).toAutomaton();
-                        while (!a.isEmpty()) {
-                            String value = a.getShortestExample(true);
-                            DataConstant dataConstant = new DataConstant(
-                                    Impl.IHexBinary, datatype, value);
-                            if (!notOneOf.contains(dataConstant)) {
-                                return dataConstant;
-                            }
-                            a = a.minus(Automaton.makeString(value));
-                        }
-                    } else {
-                        // numbers too big
-                        throw new RuntimeException("Too many possibilities of " +
-                        		"assigning a value to the data constant. ");
-                    }
-                }
+            if (!patternContainsFacets) {
+                compileFacetsIntoPattern();
+            }
+            while (!patternMatcher.isEmpty()) {
+                String value = patternMatcher.getShortestExample(true);
+                return new DataConstant(Impl.IHexBinary, datatype, value);
             }
         }
         return null;

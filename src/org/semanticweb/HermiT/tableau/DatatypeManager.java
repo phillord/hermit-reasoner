@@ -51,7 +51,9 @@ public class DatatypeManager {
     /**
      * Checks if in the last iteration a new data range assertion has been added 
      * and if so, whether the restrictions on this newly added node and its data 
-     * range siblings are satisfiable given the asserted inequalities.  
+     * range siblings are satisfiable given the asserted inequalities. If not, a 
+     * clash is set in the extensionManager an the tableauMonitor (if not null) 
+     * is notified accordingly. 
      * @return true if the data range assertions are satisfiable and false 
      *         otherwise
      */
@@ -157,6 +159,7 @@ public class DatatypeManager {
                     }
                     extensionManager.setClash(
                             extensionManager.getAssertionDependencySet(dataRange, node));
+                    return false; 
                 }
             }
         }

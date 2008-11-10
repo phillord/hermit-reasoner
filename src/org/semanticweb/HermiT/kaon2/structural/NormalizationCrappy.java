@@ -1,18 +1,58 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.kaon2.structural;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import org.semanticweb.kaon2.api.*;
-import org.semanticweb.kaon2.api.owl.elements.*;
-import org.semanticweb.kaon2.api.owl.axioms.*;
-import org.semanticweb.kaon2.api.logic.*;
+import org.semanticweb.kaon2.api.Fact;
+import org.semanticweb.kaon2.api.KAON2Exception;
+import org.semanticweb.kaon2.api.KAON2Manager;
+import org.semanticweb.kaon2.api.KAON2Visitor;
+import org.semanticweb.kaon2.api.Ontology;
+import org.semanticweb.kaon2.api.logic.Rule;
+import org.semanticweb.kaon2.api.owl.axioms.ClassMember;
+import org.semanticweb.kaon2.api.owl.axioms.DataPropertyAttribute;
+import org.semanticweb.kaon2.api.owl.axioms.DataPropertyDomain;
+import org.semanticweb.kaon2.api.owl.axioms.DataPropertyRange;
+import org.semanticweb.kaon2.api.owl.axioms.DifferentIndividuals;
+import org.semanticweb.kaon2.api.owl.axioms.DisjointClasses;
+import org.semanticweb.kaon2.api.owl.axioms.EntityAnnotation;
+import org.semanticweb.kaon2.api.owl.axioms.EquivalentClasses;
+import org.semanticweb.kaon2.api.owl.axioms.EquivalentDataProperties;
+import org.semanticweb.kaon2.api.owl.axioms.EquivalentObjectProperties;
+import org.semanticweb.kaon2.api.owl.axioms.InverseObjectProperties;
+import org.semanticweb.kaon2.api.owl.axioms.ObjectPropertyAttribute;
+import org.semanticweb.kaon2.api.owl.axioms.ObjectPropertyDomain;
+import org.semanticweb.kaon2.api.owl.axioms.ObjectPropertyMember;
+import org.semanticweb.kaon2.api.owl.axioms.ObjectPropertyRange;
+import org.semanticweb.kaon2.api.owl.axioms.SameIndividual;
+import org.semanticweb.kaon2.api.owl.axioms.SubClassOf;
+import org.semanticweb.kaon2.api.owl.axioms.SubDataPropertyOf;
+import org.semanticweb.kaon2.api.owl.axioms.SubObjectPropertyOf;
+import org.semanticweb.kaon2.api.owl.elements.DataAll;
+import org.semanticweb.kaon2.api.owl.elements.DataCardinality;
+import org.semanticweb.kaon2.api.owl.elements.DataHasValue;
+import org.semanticweb.kaon2.api.owl.elements.DataNot;
+import org.semanticweb.kaon2.api.owl.elements.DataOneOf;
+import org.semanticweb.kaon2.api.owl.elements.DataPropertyExpression;
+import org.semanticweb.kaon2.api.owl.elements.DataSome;
+import org.semanticweb.kaon2.api.owl.elements.Description;
+import org.semanticweb.kaon2.api.owl.elements.Individual;
+import org.semanticweb.kaon2.api.owl.elements.OWLClass;
+import org.semanticweb.kaon2.api.owl.elements.ObjectAll;
+import org.semanticweb.kaon2.api.owl.elements.ObjectAnd;
+import org.semanticweb.kaon2.api.owl.elements.ObjectCardinality;
+import org.semanticweb.kaon2.api.owl.elements.ObjectHasValue;
+import org.semanticweb.kaon2.api.owl.elements.ObjectNot;
+import org.semanticweb.kaon2.api.owl.elements.ObjectOneOf;
+import org.semanticweb.kaon2.api.owl.elements.ObjectOr;
+import org.semanticweb.kaon2.api.owl.elements.ObjectPropertyExpression;
+import org.semanticweb.kaon2.api.owl.elements.ObjectSome;
 
 /**
  * This class implements the structural transformation from our new tableau paper. This transformation departs in the following way from the paper:
@@ -200,7 +240,7 @@ public class NormalizationCrappy {
         // add the rules
         m_rules.addAll(ontology.createAxiomRequest(Rule.class).getAll());
     }
-    protected void nomalizeInclusions(List<Description[]> inclusions,KAON2Visitor normalizer,TransitivityManager transitivityManager) throws KAON2Exception {
+    protected void nomalizeInclusions(List<Description[]> inclusions,KAON2Visitor normalizer,TransitivityManager transitivityManager) {
         while (!inclusions.isEmpty()) {
             Description simplifiedDescription=KAON2Manager.factory().objectOr(inclusions.remove(inclusions.size()-1)).getSimplified();
             if (!KAON2Manager.factory().thing().equals(simplifiedDescription)) {

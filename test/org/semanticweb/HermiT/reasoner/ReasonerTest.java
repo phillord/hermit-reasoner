@@ -1,11 +1,38 @@
 package org.semanticweb.HermiT.reasoner;
 
+
 public class ReasonerTest extends AbstractReasonerTest {
 
     public ReasonerTest(String name) {
         super(name);
     }
-
+    
+//    keys are not yet supported, but should pass the following tests once implemented
+//
+//    public void testKeys() throws Exception {
+//        String axioms = "HasKey(Person hasSSN) " +
+//                        "PropertyAssertion(hasSSN Peter \"123-45-6789\") " +
+//                        "ClassAssertion(Person Peter) " +
+//                        "PropertyAssertion(hasSSN Peter_Griffin \"123-45-6789\") " +
+//                        "ClassAssertion(Person Peter_Griffin) " +
+//                        "DifferentIndividuals(Peter Peter_Griffin)";
+//        loadOntologyWithAxioms(axioms, null);
+//        assertABoxSatisfiable(false);
+//    }
+//    
+//    public void testKeys2() throws Exception {
+//        String axioms = "HasKey(Person hasSSN) " +
+//        		"ObjectPropertyAssertion(hasSSN Peter \"123-45-6789\") " +
+//        		"ClassAssertion(Person Peter) " +
+//        		"ClassAssertion(ObjectSomeValuesFrom(marriedTo " +
+//        		"ObjectIntersectionOf(Man " +
+//        		"HasValue(hasSSN \"123-45-6789\"))) " +
+//        		"Lois) " +
+//        		"SubClassOf(Man ObjectComplementOf(Person))";
+//        loadOntologyWithAxioms(axioms, null);
+//        assertABoxSatisfiable(true);
+//    }
+    
     public void testReflexivity() throws Exception {
         String axioms = "ReflexiveObjectProperty(r) "
                 + "ClassAssertion(a ObjectAllValuesFrom(r " + "owl:Nothing)) "
