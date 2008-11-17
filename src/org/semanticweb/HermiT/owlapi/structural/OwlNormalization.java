@@ -12,10 +12,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Reasoner;
+import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.owl.model.OWLAntiSymmetricObjectPropertyAxiom;
 import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLAxiomAnnotationAxiom;
+import org.semanticweb.owl.model.OWLAxiomVisitor;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLClassAssertionAxiom;
 import org.semanticweb.owl.model.OWLConstant;
@@ -42,6 +44,7 @@ import org.semanticweb.owl.model.OWLDifferentIndividualsAxiom;
 import org.semanticweb.owl.model.OWLDisjointClassesAxiom;
 import org.semanticweb.owl.model.OWLDisjointDataPropertiesAxiom;
 import org.semanticweb.owl.model.OWLDisjointObjectPropertiesAxiom;
+import org.semanticweb.owl.model.OWLDisjointUnionAxiom;
 import org.semanticweb.owl.model.OWLEntityAnnotationAxiom;
 import org.semanticweb.owl.model.OWLEquivalentClassesAxiom;
 import org.semanticweb.owl.model.OWLEquivalentDataPropertiesAxiom;
@@ -82,6 +85,7 @@ import org.semanticweb.owl.model.OWLSameIndividualsAxiom;
 import org.semanticweb.owl.model.OWLSubClassAxiom;
 import org.semanticweb.owl.model.OWLSymmetricObjectPropertyAxiom;
 import org.semanticweb.owl.model.OWLTransitiveObjectPropertyAxiom;
+import org.semanticweb.owl.model.SWRLRule;
 
 /**
  * This class implements the structural transformation from our new tableau
@@ -138,7 +142,6 @@ public class OwlNormalization {
         // concepts, i.e., each OWLDescription in an entry contributes a
         // disjunct. It is thus not really inclusions, but rather a disjunction
         // of concepts that represents an inclusion axiom.
-        List<OWLDescription[]> inclusions = new ArrayList<OWLDescription[]>();
         { // Approximate the top object and data roles
             // TODO: make this complete (efficiently)
             OWLObjectProperty topObjectProp =
@@ -157,238 +160,340 @@ public class OwlNormalization {
                 roleManager.addInclusion(topObjectProp, topObjectProp.getInverseProperty());
             }
         }
-        
+        AxiomVisitor axiomVisitor = new AxiomVisitor();
         for (OWLAxiom untyped_axiom : inOntology.getAxioms()) {
-            if (untyped_axiom instanceof OWLInverseObjectPropertiesAxiom) {
-                OWLInverseObjectPropertiesAxiom axiom
-                    = (OWLInverseObjectPropertiesAxiom) untyped_axiom;
-                OWLObjectPropertyExpression first = axiom.getFirstProperty();
-                OWLObjectPropertyExpression second = axiom.getSecondProperty();
-                roleManager.addInclusion(first, second.getInverseProperty());
-                roleManager.addInclusion(second, first.getInverseProperty());
-            } else if (untyped_axiom instanceof OWLObjectSubPropertyAxiom) {
-                OWLObjectSubPropertyAxiom axiom
-                    = (OWLObjectSubPropertyAxiom) untyped_axiom;
-                roleManager.addInclusion(axiom.getSubProperty(),
-                                            axiom.getSuperProperty());
-            } else if (untyped_axiom instanceof OWLObjectPropertyChainSubPropertyAxiom) {
-                OWLObjectPropertyChainSubPropertyAxiom axiom
-                    = (OWLObjectPropertyChainSubPropertyAxiom) untyped_axiom;
-                roleManager.addInclusion(axiom.getPropertyChain(), axiom.getSuperProperty());
-            } else if (untyped_axiom instanceof OWLEquivalentObjectPropertiesAxiom) {
-                OWLEquivalentObjectPropertiesAxiom axiom
-                    = (OWLEquivalentObjectPropertiesAxiom) untyped_axiom;
-                roleManager.addEquivalence(axiom.getProperties());
-            } else if (untyped_axiom instanceof OWLDataSubPropertyAxiom) {
-                OWLDataSubPropertyAxiom axiom = (OWLDataSubPropertyAxiom) (untyped_axiom);
-                OWLDataPropertyExpression subDataProperty = axiom.getSubProperty();
-                OWLDataPropertyExpression superDataProperty = axiom.getSuperProperty();
-                m_dataPropertyInclusions.add(new OWLDataPropertyExpression[] {
-                        subDataProperty, superDataProperty });
-            } else if (untyped_axiom instanceof OWLEquivalentDataPropertiesAxiom) {
-                OWLEquivalentDataPropertiesAxiom axiom = (OWLEquivalentDataPropertiesAxiom) (untyped_axiom);
-                OWLDataPropertyExpression[] dataProperties = new OWLDataPropertyExpression[axiom.getProperties().size()];
-                axiom.getProperties().toArray(dataProperties);
-                for (int i = 0; i < dataProperties.length - 1; i++) {
-                    m_dataPropertyInclusions.add(new OWLDataPropertyExpression[] {
-                            dataProperties[i], dataProperties[i + 1] });
-                    m_dataPropertyInclusions.add(new OWLDataPropertyExpression[] {
-                            dataProperties[i + 1], dataProperties[i] });
-                }
-            } else if (untyped_axiom instanceof OWLSubClassAxiom) {
-                OWLSubClassAxiom axiom = (OWLSubClassAxiom) (untyped_axiom);
-                inclusions.add(new OWLDescription[] {
-                        axiom.getSubClass().getComplementNNF(),
-                        axiom.getSuperClass().getNNF() });
-            } else if (untyped_axiom instanceof OWLEquivalentClassesAxiom) {
-                OWLEquivalentClassesAxiom axiom = (OWLEquivalentClassesAxiom) (untyped_axiom);
-                OWLDescription[] descriptions = new OWLDescription[axiom.getDescriptions().size()];
-                axiom.getDescriptions().toArray(descriptions);
-                for (int i = 0; i < descriptions.length - 1; i++) {
-                    inclusions.add(new OWLDescription[] {
-                            descriptions[i].getComplementNNF(),
-                            descriptions[i + 1].getNNF() });
-                    inclusions.add(new OWLDescription[] {
-                            descriptions[i + 1].getComplementNNF(),
-                            descriptions[i].getNNF() });
-                }
-            } else if (untyped_axiom instanceof OWLDisjointClassesAxiom) {
-                OWLDisjointClassesAxiom axiom = (OWLDisjointClassesAxiom) (untyped_axiom);
-                OWLDescription[] descriptions = new OWLDescription[axiom.getDescriptions().size()];
-                axiom.getDescriptions().toArray(descriptions);
-                for (int i = 0; i < descriptions.length; i++)
-                    descriptions[i] = descriptions[i].getComplementNNF();
-                for (int i = 0; i < descriptions.length; i++)
-                    for (int j = i + 1; j < descriptions.length; j++)
-                        inclusions.add(new OWLDescription[] { descriptions[i],
-                                descriptions[j] });
-            } else if (untyped_axiom instanceof OWLFunctionalObjectPropertyAxiom) {
-                OWLFunctionalObjectPropertyAxiom axiom = (OWLFunctionalObjectPropertyAxiom) (untyped_axiom);
-                inclusions.add(new OWLDescription[] { m_factory.getOWLObjectMaxCardinalityRestriction(
-                        axiom.getProperty().getSimplified(), 1) });
-            } else if (untyped_axiom instanceof OWLInverseFunctionalObjectPropertyAxiom) {
-                OWLInverseFunctionalObjectPropertyAxiom axiom = (OWLInverseFunctionalObjectPropertyAxiom) (untyped_axiom);
-                inclusions.add(new OWLDescription[] { m_factory.getOWLObjectMaxCardinalityRestriction(
-                        axiom.getProperty().getSimplified().getInverseProperty(),
-                        1) });
-            } else if (untyped_axiom instanceof OWLSymmetricObjectPropertyAxiom) {
-                OWLSymmetricObjectPropertyAxiom axiom = (OWLSymmetricObjectPropertyAxiom) (untyped_axiom);
-                OWLObjectPropertyExpression objectProperty = axiom.getProperty().getSimplified();
-                roleManager.addInclusion(objectProperty,
-                        objectProperty.getInverseProperty().getSimplified());
-            } else if (untyped_axiom instanceof OWLTransitiveObjectPropertyAxiom) {
-                OWLTransitiveObjectPropertyAxiom axiom = (OWLTransitiveObjectPropertyAxiom) (untyped_axiom);
-                roleManager.makeTransitive(axiom.getProperty().getSimplified());
-                m_transitiveObjectProperties.add(axiom.getProperty().getSimplified());
-            } else if (untyped_axiom instanceof OWLFunctionalDataPropertyAxiom) {
-                OWLFunctionalDataPropertyAxiom axiom = (OWLFunctionalDataPropertyAxiom) (untyped_axiom);
-                inclusions.add(new OWLDescription[] { m_factory.getOWLDataMaxCardinalityRestriction(
-                        axiom.getProperty(), 1) });
-            } else if (untyped_axiom instanceof OWLObjectPropertyDomainAxiom) {
-                OWLObjectPropertyDomainAxiom axiom = (OWLObjectPropertyDomainAxiom) (untyped_axiom);
-                OWLObjectAllRestriction allPropertyNohting = m_factory.getOWLObjectAllRestriction(
-                        axiom.getProperty().getSimplified(),
-                        m_factory.getOWLNothing());
-                inclusions.add(new OWLDescription[] { axiom.getDomain(),
-                        allPropertyNohting });
-            } else if (untyped_axiom instanceof OWLObjectPropertyRangeAxiom) {
-                OWLObjectPropertyRangeAxiom axiom = (OWLObjectPropertyRangeAxiom) (untyped_axiom);
-                OWLObjectAllRestriction allPropertyRange = m_factory.getOWLObjectAllRestriction(
-                        axiom.getProperty().getSimplified(),
-                        axiom.getRange().getNNF());
-                inclusions.add(new OWLDescription[] { allPropertyRange });
-            } else if (untyped_axiom instanceof OWLDataPropertyDomainAxiom) {
-                OWLDataPropertyDomainAxiom axiom = (OWLDataPropertyDomainAxiom) (untyped_axiom);
-                OWLDataRange dataNothing = m_factory.getOWLDataComplementOf(m_factory.getOWLDataType(URI.create("http://www.w3.org/2000/01/rdf-schema#Literal")));
-                OWLDataAllRestriction allPropertyNothing = m_factory.getOWLDataAllRestriction(
-                        axiom.getProperty(), dataNothing);
-                inclusions.add(new OWLDescription[] { axiom.getDomain(),
-                        allPropertyNothing });
-            } else if (untyped_axiom instanceof OWLDataPropertyRangeAxiom) {
-                OWLDataPropertyRangeAxiom axiom = (OWLDataPropertyRangeAxiom) (untyped_axiom);
-                OWLDataAllRestriction allPropertyRange = m_factory.getOWLDataAllRestriction(
-                        axiom.getProperty(), axiom.getRange());
-                inclusions.add(new OWLDescription[] { allPropertyRange });
-            } else if (untyped_axiom instanceof OWLAntiSymmetricObjectPropertyAxiom) {
-                OWLAntiSymmetricObjectPropertyAxiom axiom = (OWLAntiSymmetricObjectPropertyAxiom) (untyped_axiom);
-                OWLObjectPropertyExpression objectProperty = axiom.getProperty().getSimplified();
-                m_asymmetricObjectProperties.add(objectProperty);
-            } else if (untyped_axiom instanceof OWLDisjointDataPropertiesAxiom) {
-                OWLDisjointDataPropertiesAxiom axiom = (OWLDisjointDataPropertiesAxiom) (untyped_axiom);
-                OWLDataPropertyExpression[] dataProperties = new OWLDataPropertyExpression[axiom.getProperties().size()];
-                axiom.getProperties().toArray(dataProperties);
-                m_disjointDataProperties.add(dataProperties);
-            } else if (untyped_axiom instanceof OWLDisjointObjectPropertiesAxiom) {
-                OWLDisjointObjectPropertiesAxiom axiom = (OWLDisjointObjectPropertiesAxiom) (untyped_axiom);
-                OWLObjectPropertyExpression[] objectProperties = new OWLObjectPropertyExpression[axiom.getProperties().size()];
-                axiom.getProperties().toArray(objectProperties);
-                for (int i = 0; i < objectProperties.length; i++)
-                    objectProperties[i] = objectProperties[i].getSimplified();
-                m_disjointObjectProperties.add(objectProperties);
-            } else if (untyped_axiom instanceof OWLIrreflexiveObjectPropertyAxiom) {
-                OWLIrreflexiveObjectPropertyAxiom axiom = (OWLIrreflexiveObjectPropertyAxiom) (untyped_axiom);
-                OWLObjectPropertyExpression objectProperty = axiom.getProperty().getSimplified();
-                m_irreflexiveObjectProperties.add(objectProperty);
-            } else if (untyped_axiom instanceof OWLReflexiveObjectPropertyAxiom) {
-                OWLReflexiveObjectPropertyAxiom axiom = (OWLReflexiveObjectPropertyAxiom) (untyped_axiom);
-                OWLObjectPropertyExpression objectProperty = axiom.getProperty().getSimplified();
-                m_reflexiveObjectProperties.add(objectProperty);
-            } else if (untyped_axiom instanceof OWLClassAssertionAxiom) {
-                OWLClassAssertionAxiom axiom = (OWLClassAssertionAxiom) (untyped_axiom);
-                OWLDescription desc = simplify(axiom.getDescription().getNNF(), m_factory);
-                if (!isSimple(desc)) {
-                    boolean[] alreadyExists = new boolean[1];
-                    OWLDescription definition = getDefinitionFor(desc,
-                            alreadyExists);
-                    if (!alreadyExists[0])
-                        inclusions.add(new OWLDescription[] {
-                                definition.getComplementNNF(), desc });
-                    desc = definition;
-                }
-                if (desc == axiom.getDescription())
-                    m_facts.add(axiom);
-                else
-                    m_facts.add(m_factory.getOWLClassAssertionAxiom(
-                            axiom.getIndividual(), desc));
-            } else if (untyped_axiom instanceof OWLObjectPropertyAssertionAxiom) {
-                OWLObjectPropertyAssertionAxiom axiom = (OWLObjectPropertyAssertionAxiom) (untyped_axiom);
-                m_facts.add(m_factory.getOWLObjectPropertyAssertionAxiom(
-                        axiom.getSubject(),
-                        axiom.getProperty().getSimplified(), axiom.getObject()));
-            } else if (untyped_axiom instanceof OWLNegativeObjectPropertyAssertionAxiom) {
-                OWLNegativeObjectPropertyAssertionAxiom axiom = (OWLNegativeObjectPropertyAssertionAxiom) (untyped_axiom);
-                OWLObjectOneOf nominal = m_factory.getOWLObjectOneOf(axiom.getObject());
-                OWLDescription not_nominal = m_factory.getOWLObjectComplementOf(nominal);
-                OWLDescription restriction = m_factory.getOWLObjectAllRestriction(
-                        axiom.getProperty().getSimplified(), not_nominal);
-                OWLClassAssertionAxiom rewrittenAxiom = m_factory.getOWLClassAssertionAxiom(
-                        axiom.getSubject(), restriction);
-                OWLDescription desc = simplify(rewrittenAxiom.getDescription().getNNF(), m_factory);
-                if (!isSimple(desc)) {
-                    boolean[] alreadyExists = new boolean[1];
-                    OWLDescription definition = getDefinitionFor(desc,
-                            alreadyExists);
-                    if (!alreadyExists[0])
-                        inclusions.add(new OWLDescription[] {
-                                definition.getComplementNNF(), desc });
-                    desc = definition;
-                }
-                if (desc == rewrittenAxiom.getDescription())
-                    m_facts.add(axiom);
-                else
-                    m_facts.add(m_factory.getOWLClassAssertionAxiom(
-                            rewrittenAxiom.getIndividual(), desc));
-            } else if (untyped_axiom instanceof OWLNegativeDataPropertyAssertionAxiom) {
-                OWLNegativeDataPropertyAssertionAxiom axiom = (OWLNegativeDataPropertyAssertionAxiom) (untyped_axiom);
-                OWLDataRange dataRange = m_factory.getOWLDataOneOf(axiom.getObject());
-                OWLDataRange notDataRange = m_factory.getOWLDataComplementOf(dataRange);
-                OWLDescription restriction = m_factory.getOWLDataAllRestriction(
-                        axiom.getProperty(), notDataRange);
-                boolean[] alreadyExists = new boolean[1];
-                OWLDescription definition = getDefinitionFor(restriction,
-                        alreadyExists);
-                if (!alreadyExists[0]) {
-                    inclusions.add(new OWLDescription[] {
-                            definition.getComplementNNF(), restriction });
-                }
-                m_facts.add(m_factory.getOWLClassAssertionAxiom(
-                        axiom.getSubject(), definition));
-            } else if (untyped_axiom instanceof OWLSameIndividualsAxiom) {
-                OWLSameIndividualsAxiom axiom = (OWLSameIndividualsAxiom) (untyped_axiom);
-                m_facts.add(axiom);
-            } else if (untyped_axiom instanceof OWLDifferentIndividualsAxiom) {
-                OWLDifferentIndividualsAxiom axiom = (OWLDifferentIndividualsAxiom) (untyped_axiom);
-                m_facts.add(axiom);
-            } else if (untyped_axiom instanceof OWLAxiomAnnotationAxiom
-                    || untyped_axiom instanceof OWLEntityAnnotationAxiom
-                    || untyped_axiom instanceof OWLOntologyAnnotationAxiom
-                    || untyped_axiom instanceof OWLDeclarationAxiom
-                    || untyped_axiom instanceof OWLImportsDeclaration) {
-                // do nothing; these axiom types have no effect on reasoning
-            } else if (untyped_axiom instanceof OWLDataPropertyAssertionAxiom) {
-                OWLDataPropertyAssertionAxiom axiom = (OWLDataPropertyAssertionAxiom) (untyped_axiom);
-                OWLDataRange filler = m_factory.getOWLDataOneOf(axiom.getObject());
-                OWLDataSomeRestriction restriction = m_factory.getOWLDataSomeRestriction(
-                        axiom.getProperty(), filler);
-                boolean[] alreadyExists = new boolean[1];
-                OWLDescription definition = getDefinitionFor(restriction,
-                        alreadyExists);
-                if (!alreadyExists[0]) {
-                    inclusions.add(new OWLDescription[] {
-                            definition.getComplementNNF(), restriction });
-                }
-                m_facts.add(m_factory.getOWLClassAssertionAxiom(
-                        axiom.getSubject(), definition));
-            } else {
-                throw new RuntimeException("Unsupported axiom type:"
-                        + untyped_axiom.getAxiomType().toString());
-            }
+            // the visitor populates the member variable such as 
+            // m_reflexiveObjectProperties, m_disjointObjectProperties, etc, 
+            // collects the facts and turns equivalences and implications into 
+            // an internal set of disjunctions that is then normalised
+            untyped_axiom.accept(axiomVisitor);
         }
+        List<OWLDescription[]> inclusions = axiomVisitor.getInclusionsAsDisjunctions();
         OWLDescriptionVisitorEx<OWLDescription> normalizer = new NormalizationVisitor(
                 inclusions, this.m_factory);
         normalizeInclusions(inclusions, m_conceptInclusions, m_facts, m_factory, normalizer);
         roleManager.rewriteConceptInclusions(m_conceptInclusions, m_factory);
         m_objectPropertyInclusions = roleManager.getSimpleInclusions();
+    }
+    
+
+    protected class AxiomVisitor implements OWLAxiomVisitor {
+        
+        protected List<OWLDescription[]> inclAsDisj = new ArrayList<OWLDescription[]>();
+        
+        public void visit(OWLSubClassAxiom axiom) {
+            inclAsDisj.add(new OWLDescription[] {
+                    axiom.getSubClass().getComplementNNF(),
+                    axiom.getSuperClass().getNNF() });
+        }
+
+        public void visit(OWLNegativeObjectPropertyAssertionAxiom axiom) {
+            OWLObjectOneOf nominal = m_factory.getOWLObjectOneOf(axiom.getObject());
+            OWLDescription not_nominal = m_factory.getOWLObjectComplementOf(nominal);
+            OWLDescription restriction = m_factory.getOWLObjectAllRestriction(
+                    axiom.getProperty().getSimplified(), not_nominal);
+            OWLClassAssertionAxiom rewrittenAxiom = m_factory.getOWLClassAssertionAxiom(
+                    axiom.getSubject(), restriction);
+            OWLDescription desc = simplify(rewrittenAxiom.getDescription().getNNF(), m_factory);
+            if (!isSimple(desc)) {
+                boolean[] alreadyExists = new boolean[1];
+                OWLDescription definition = getDefinitionFor(desc,
+                        alreadyExists);
+                if (!alreadyExists[0])
+                    inclAsDisj.add(new OWLDescription[] {
+                            definition.getComplementNNF(), desc });
+                desc = definition;
+            }
+            if (desc == rewrittenAxiom.getDescription())
+                m_facts.add(axiom);
+            else
+                m_facts.add(m_factory.getOWLClassAssertionAxiom(
+                        rewrittenAxiom.getIndividual(), desc));
+        }
+
+        public void visit(OWLAntiSymmetricObjectPropertyAxiom axiom) {
+            // mis-named - rename to asymmetric as soon as possible
+            OWLObjectPropertyExpression objectProperty = axiom.getProperty().getSimplified();
+            m_asymmetricObjectProperties.add(objectProperty);
+        }
+
+        public void visit(OWLReflexiveObjectPropertyAxiom axiom) {
+            OWLObjectPropertyExpression objectProperty = axiom.getProperty().getSimplified();
+            m_reflexiveObjectProperties.add(objectProperty);
+        }
+
+        public void visit(OWLDisjointClassesAxiom axiom) {
+            OWLDescription[] descriptions = new OWLDescription[axiom.getDescriptions().size()];
+            axiom.getDescriptions().toArray(descriptions);
+            for (int i = 0; i < descriptions.length; i++)
+                descriptions[i] = descriptions[i].getComplementNNF();
+            for (int i = 0; i < descriptions.length; i++)  
+                for (int j = i + 1; j < descriptions.length; j++)
+                    inclAsDisj.add(new OWLDescription[] { descriptions[i],
+                            descriptions[j] });
+        }
+
+        public void visit(OWLDataPropertyDomainAxiom axiom) {
+            OWLDataRange dataNothing = m_factory.getOWLDataComplementOf(
+                    m_factory.getOWLDataType(
+                            URI.create(AtomicConcept.RDFS_LITERAL.getURI())));
+            OWLDataAllRestriction allPropertyNothing = m_factory.getOWLDataAllRestriction(
+                    axiom.getProperty(), dataNothing);
+            inclAsDisj.add(new OWLDescription[] { axiom.getDomain(),
+                    allPropertyNothing });
+        }
+
+        public void visit(OWLImportsDeclaration axiom) {
+            // the manager took care of imports
+        }
+
+        public void visit(OWLAxiomAnnotationAxiom axiom) {
+            // do nothing; these axiom types have no effect on reasoning
+        }
+
+        public void visit(OWLObjectPropertyDomainAxiom axiom) {
+            OWLObjectAllRestriction allPropertyNohting 
+                    = m_factory.getOWLObjectAllRestriction(
+                    axiom.getProperty().getSimplified(),
+                    m_factory.getOWLNothing());
+            inclAsDisj.add(new OWLDescription[] { axiom.getDomain(),
+                    allPropertyNohting });
+        }
+
+        public void visit(OWLEquivalentObjectPropertiesAxiom axiom) {
+            roleManager.addEquivalence(axiom.getProperties());
+        }
+
+        public void visit(OWLNegativeDataPropertyAssertionAxiom axiom) {
+            OWLDataRange dataRange = m_factory.getOWLDataOneOf(axiom.getObject());
+            OWLDataRange notDataRange = m_factory.getOWLDataComplementOf(dataRange);
+            OWLDescription restriction = m_factory.getOWLDataAllRestriction(
+                    axiom.getProperty(), notDataRange);
+            boolean[] alreadyExists = new boolean[1];
+            OWLDescription definition = getDefinitionFor(restriction,
+                    alreadyExists);
+            if (!alreadyExists[0]) {
+                inclAsDisj.add(new OWLDescription[] {
+                        definition.getComplementNNF(), restriction });
+            }
+            m_facts.add(m_factory.getOWLClassAssertionAxiom(
+                    axiom.getSubject(), definition));
+        }
+
+        public void visit(OWLDifferentIndividualsAxiom axiom) {
+            m_facts.add(axiom);
+        }
+
+        public void visit(OWLDisjointDataPropertiesAxiom axiom) {
+            OWLDataPropertyExpression[] dataProperties 
+                    = new OWLDataPropertyExpression[axiom.getProperties().size()];
+            axiom.getProperties().toArray(dataProperties);
+            m_disjointDataProperties.add(dataProperties);
+        }
+
+        public void visit(OWLDisjointObjectPropertiesAxiom axiom) {
+            OWLObjectPropertyExpression[] objectProperties 
+                    = new OWLObjectPropertyExpression[axiom.getProperties().size()];
+            axiom.getProperties().toArray(objectProperties);
+            for (int i = 0; i < objectProperties.length; i++)
+                objectProperties[i] = objectProperties[i].getSimplified();
+            m_disjointObjectProperties.add(objectProperties);
+        }
+
+        public void visit(OWLObjectPropertyRangeAxiom axiom) {
+            OWLObjectAllRestriction allPropertyRange 
+                    = m_factory.getOWLObjectAllRestriction(
+                    axiom.getProperty().getSimplified(),
+                    axiom.getRange().getNNF());
+            inclAsDisj.add(new OWLDescription[] { allPropertyRange });
+        }
+
+        public void visit(OWLObjectPropertyAssertionAxiom axiom) {
+            m_facts.add(m_factory.getOWLObjectPropertyAssertionAxiom(
+                    axiom.getSubject(),
+                    axiom.getProperty().getSimplified(), axiom.getObject()));
+        }
+
+        public void visit(OWLFunctionalObjectPropertyAxiom axiom) {
+            inclAsDisj.add(new OWLDescription[] { 
+                    m_factory.getOWLObjectMaxCardinalityRestriction(
+                    axiom.getProperty().getSimplified(), 1) });
+        }
+
+        public void visit(OWLObjectSubPropertyAxiom axiom) {
+            roleManager.addInclusion(axiom.getSubProperty(),
+                    axiom.getSuperProperty());
+        }
+
+        public void visit(OWLDisjointUnionAxiom axiom) {
+            // DisjointUnion(C CE1 ... CEn)
+            // add C implies CE1 or ... or CEn (not C or CE1 or ... or CEn)
+            Set<OWLDescription> inclusion 
+                    = new HashSet<OWLDescription>(axiom.getDescriptions());
+            inclusion.add(axiom.getOWLClass().getComplementNNF());
+            OWLDescription[] inclusionArray 
+                    = new OWLDescription[axiom.getDescriptions().size() + 1];
+            inclusion.toArray(inclusionArray);
+            inclAsDisj.add(inclusionArray);
+            // add CE1 or ... or CEn implies C ((not CE1 and ... and not CEn) or C) 
+            OWLDescription conjunction = m_factory.getOWLObjectUnionOf(
+                    axiom.getDescriptions());
+            inclAsDisj.add(new OWLDescription[] { 
+                    conjunction.getComplementNNF(), axiom.getOWLClass()});
+            // add CEi and CEj implies bottom (not CEi or not CEj) for 1 <= i < j <= n
+            OWLDescription[] descriptions 
+                    = new OWLDescription[axiom.getDescriptions().size()];
+            axiom.getDescriptions().toArray(descriptions);
+            for (int i = 0; i < descriptions.length; i++) {
+                descriptions[i] = descriptions[i].getComplementNNF();
+            }
+            for (int i = 0; i < descriptions.length; i++) { 
+                for (int j = i + 1; j < descriptions.length; j++) {
+                    inclAsDisj.add(new OWLDescription[] { descriptions[i],
+                            descriptions[j] });
+                }
+            }
+        }
+
+        public void visit(OWLDeclarationAxiom axiom) {
+            // do nothing; these axiom types have no effect on reasoning
+        }
+
+        public void visit(OWLEntityAnnotationAxiom axiom) {
+            // do nothing; these axiom types have no effect on reasoning
+        }
+
+        public void visit(OWLOntologyAnnotationAxiom axiom) {
+            // do nothing; these axiom types have no effect on reasoning
+        }
+
+        public void visit(OWLSymmetricObjectPropertyAxiom axiom) {
+            OWLObjectPropertyExpression objectProperty = axiom.getProperty().getSimplified();
+            roleManager.addInclusion(objectProperty,
+                    objectProperty.getInverseProperty().getSimplified());
+        }
+
+        public void visit(OWLDataPropertyRangeAxiom axiom) {
+            OWLDataAllRestriction allPropertyRange 
+                    = m_factory.getOWLDataAllRestriction(
+                    axiom.getProperty(), axiom.getRange());
+            inclAsDisj.add(new OWLDescription[] { allPropertyRange });
+        }
+
+        public void visit(OWLFunctionalDataPropertyAxiom axiom) {
+            inclAsDisj.add(new OWLDescription[] { m_factory.getOWLDataMaxCardinalityRestriction(
+                    axiom.getProperty(), 1) });
+        }
+
+        public void visit(OWLEquivalentDataPropertiesAxiom axiom) {
+            OWLDataPropertyExpression[] dataProperties 
+                    = new OWLDataPropertyExpression[axiom.getProperties().size()];
+            axiom.getProperties().toArray(dataProperties);
+            for (int i = 0; i < dataProperties.length - 1; i++) {
+                m_dataPropertyInclusions.add(new OWLDataPropertyExpression[] {
+                        dataProperties[i], dataProperties[i + 1] });
+                m_dataPropertyInclusions.add(new OWLDataPropertyExpression[] {
+                        dataProperties[i + 1], dataProperties[i] });
+            }
+        }
+
+        public void visit(OWLClassAssertionAxiom axiom) {
+            OWLDescription desc = simplify(axiom.getDescription().getNNF(), 
+                                           m_factory);
+            if (!isSimple(desc)) {
+                boolean[] alreadyExists = new boolean[1];
+                OWLDescription definition = getDefinitionFor(desc,
+                        alreadyExists);
+                if (!alreadyExists[0])
+                    inclAsDisj.add(new OWLDescription[] {
+                            definition.getComplementNNF(), desc });
+                desc = definition;
+            }
+            if (desc == axiom.getDescription())
+                m_facts.add(axiom);
+            else
+                m_facts.add(m_factory.getOWLClassAssertionAxiom(
+                        axiom.getIndividual(), desc));
+        }
+
+        public void visit(OWLEquivalentClassesAxiom axiom) {
+            OWLDescription[] descriptions 
+                    = new OWLDescription[axiom.getDescriptions().size()];
+            axiom.getDescriptions().toArray(descriptions);
+            for (int i = 0; i < descriptions.length - 1; i++) {
+                inclAsDisj.add(new OWLDescription[] {
+                        descriptions[i].getComplementNNF(),
+                        descriptions[i + 1].getNNF() });
+                inclAsDisj.add(new OWLDescription[] {
+                        descriptions[i + 1].getComplementNNF(),
+                        descriptions[i].getNNF() });
+            }
+        }
+
+        public void visit(OWLDataPropertyAssertionAxiom axiom) {
+            OWLDataRange filler = m_factory.getOWLDataOneOf(axiom.getObject());
+            OWLDataSomeRestriction restriction = m_factory.getOWLDataSomeRestriction(
+                    axiom.getProperty(), filler);
+            boolean[] alreadyExists = new boolean[1];
+            OWLDescription definition = getDefinitionFor(restriction,
+                    alreadyExists);
+            if (!alreadyExists[0]) {
+                inclAsDisj.add(new OWLDescription[] {
+                        definition.getComplementNNF(), restriction });
+            }
+            m_facts.add(m_factory.getOWLClassAssertionAxiom(
+                    axiom.getSubject(), definition));
+        }
+
+        public void visit(OWLTransitiveObjectPropertyAxiom axiom) {
+            roleManager.makeTransitive(axiom.getProperty().getSimplified());
+            m_transitiveObjectProperties.add(axiom.getProperty().getSimplified());
+        }
+
+        public void visit(OWLIrreflexiveObjectPropertyAxiom axiom) {
+            OWLObjectPropertyExpression objectProperty 
+                    = axiom.getProperty().getSimplified();
+            m_irreflexiveObjectProperties.add(objectProperty);
+        }
+
+        public void visit(OWLDataSubPropertyAxiom axiom) {
+            OWLDataPropertyExpression subDataProperty = axiom.getSubProperty();
+            OWLDataPropertyExpression superDataProperty = axiom.getSuperProperty();
+            m_dataPropertyInclusions.add(new OWLDataPropertyExpression[] {
+                    subDataProperty, superDataProperty });
+        }
+
+        public void visit(OWLInverseFunctionalObjectPropertyAxiom axiom) {
+            inclAsDisj.add(new OWLDescription[] { m_factory.getOWLObjectMaxCardinalityRestriction(
+                    axiom.getProperty().getSimplified().getInverseProperty(),
+                    1) });
+        }
+
+        public void visit(OWLSameIndividualsAxiom axiom) {
+            m_facts.add(axiom);
+        }
+
+        public void visit(OWLObjectPropertyChainSubPropertyAxiom axiom) {
+            roleManager.addInclusion(axiom.getPropertyChain(), 
+                    axiom.getSuperProperty());
+        }
+
+        public void visit(OWLInverseObjectPropertiesAxiom axiom) {
+            OWLObjectPropertyExpression first = axiom.getFirstProperty();
+            OWLObjectPropertyExpression second = axiom.getSecondProperty();
+            roleManager.addInclusion(first, second.getInverseProperty());
+            roleManager.addInclusion(second, first.getInverseProperty());
+        }
+
+        public void visit(SWRLRule rule) {
+            throw new RuntimeException("Parsed a SWRL rule, but SWRL rules " +
+            		"are not supported by HermiT.");
+        }
+
+        public List<OWLDescription[]> getInclusionsAsDisjunctions() {
+            return inclAsDisj;
+        }
+        
     }
     
     protected void normalize(List<OWLDescription[]> ioInclusions, Collection<OWLIndividualAxiom> ioFacts) {

@@ -17,8 +17,20 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/HermiT/lib/automaton-doc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/ThirdPartyOwlTools/protege/4.0/org.protege.editor.owl.jar"/>
-	<classpathentry kind="lib" path="/ThirdPartyOwlTools/protege/4.0/org.protege.editor.core.application.jar"/>
-	<classpathentry kind="lib" path="/ThirdPartyOwlTools/protege/4.0/org.protege.common.jar"/>
+	<classpathentry kind="lib" path="/ThirdPartyOwlTools/protege/4.0/org.protege.editor.owl.jar" sourcepath="/Users/bglimm/Downloads/Protege_4.0_beta/bundles/org.protege.editor.core.application.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="http://protege.stanford.edu/protege/4/docs/api/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/ThirdPartyOwlTools/protege/4.0/org.protege.editor.core.application.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="http://protege.stanford.edu/protege/4/docs/api"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/ThirdPartyOwlTools/protege/4.0/org.protege.common.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="http://protege.stanford.edu/protege/4/docs/api/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="build/release"/>
 </classpath>

@@ -82,6 +82,7 @@ import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLObjectProperty;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
+import org.semanticweb.owl.util.OWLOntologyMerger;
 
 /**
  * Answers queries about the logical implications of a particular knowledge base.
@@ -224,6 +225,9 @@ public class Reasoner implements Serializable {
         throws OWLException {
         m_config = config;
         // FIXME: do the identities of the manager and factory matter?
+        // @Rob: They do not matter here as long as these methods are called 
+        // from Protege only, because we already create a merged ontology that 
+        // contains also the imported ones there.  
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         loadOwlOntology(ontology, manager.getOWLDataFactory(),
                         (Set<DescriptionGraph>) null);
@@ -234,7 +238,10 @@ public class Reasoner implements Serializable {
         throws OWLException {
         m_config = config;
         // FIXME: do the identities of the manager and factory matter?
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+        // @Rob: They do not matter here as long as these methods are called 
+        // from Protege only, because we already create a merged ontology that 
+        // contains also the imported ones there. 
+        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         loadOwlOntology(ontology, manager.getOWLDataFactory(), graphs);
     }
 
@@ -802,10 +809,14 @@ public class Reasoner implements Serializable {
                 loadDLOntology(clausifier.loadFromURI(physicalURI, null));
             } break;
             case OWLAPI: {
-                OWLOntologyManager manager =
-                    OWLManager.createOWLOntologyManager();
-                OWLOntology o =
-                    manager.loadOntologyFromPhysicalURI(physicalURI);
+                OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+                // the manager loads this ontology and all the imported ones, 
+                // but keeps them as a set of separated ontologies
+                manager.loadOntologyFromPhysicalURI(physicalURI);
+                // merge all imported axioms into the main ontology
+                OWLOntology o = 
+                        new OWLOntologyMerger(manager).createMergedOntology(
+                                manager, physicalURI);
                 loadOwlOntology(o, manager.getOWLDataFactory(),
                                 descriptionGraphs);
             } break;
@@ -1031,6 +1042,14 @@ public class Reasoner implements Serializable {
         objectOutputStream.flush();
     }
     
+    /**
+     * Creates an ObjectInputStream from the given input stream and tries to 
+     * read (deserialise) a (serialised) Reasoner object from the stream. 
+     * @param inputStream an input stream that contains a Reasoner object
+     * @return the instance of Reasoner as read from the given input stream
+     * @throws IOException if an IOException occurs or if the Reasoner class 
+     *         cannot be found
+     */
     public static Reasoner load(InputStream inputStream) throws IOException {
         try {
             ObjectInputStream objectInputStream =
@@ -1042,6 +1061,14 @@ public class Reasoner implements Serializable {
             throw error;
         }
     }
+    
+    /**
+     * Tries to deserialize a Reasoner object from the given file.  
+     * @param file a file that contains the serialisation of a Reasoner object 
+     * @return the deserialzed Reasoner object
+     * @throws IOException if the file cannot be read or does not contain a 
+     *         searialized Reasoner object
+     */
     public static Reasoner load(File file) throws IOException {
         InputStream inputStream =
             new BufferedInputStream(new FileInputStream(file));

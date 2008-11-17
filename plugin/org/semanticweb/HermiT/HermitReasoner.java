@@ -109,6 +109,11 @@ public class HermitReasoner implements MonitorableOWLReasoner {
     }
     
     public void loadOntologies(java.util.Set<OWLOntology> inOntologies) {
+        // Load the given set of ontologies.
+        // The set contains already all ontologies required for the import 
+        // closure. 
+        // The manager might at this point contain more ontologies than the ones 
+        // we have to load. 
         try {
             ontologies = inOntologies;
             URI theUri = null;
@@ -142,8 +147,8 @@ public class HermitReasoner implements MonitorableOWLReasoner {
         if (hermit != null) hermit.cacheRealization();
     }
     public void unloadOntologies(java.util.Set<OWLOntology> inOntologies) {
-        ontologies.removeAll(ontologies);
-        loadOntologies(inOntologies);
+        ontologies.removeAll(inOntologies);
+        loadOntologies(ontologies);
     }
 
     class SetProviderFromSet implements OWLOntologySetProvider {
