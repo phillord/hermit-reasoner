@@ -107,7 +107,7 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
                 tmpAutomaton = Automaton.makeString(constant.getValue());
                 patternMatcher = patternMatcher.minus(tmpAutomaton);
             }
-            notOneOf = new HashSet<DataConstant>();
+            notOneOf.clear();
         }
         patternMatcherContainsAllFacets = true;
         facetsChanged = false;
@@ -124,14 +124,14 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
         } break;
         case MIN_LENGTH: {
             BigInteger valueInt = new BigInteger(value);
-            if (minLength == null || valueInt.compareTo(valueInt) > minLength.intValue()) {
+            if (minLength == null || valueInt.compareTo(minLength) > 0) {
                 minLength = valueInt;
                 facetsChanged = true;
             }
         } break;
         case MAX_LENGTH: {
             BigInteger valueInt = new BigInteger(value);
-            if (maxLength == null || valueInt.compareTo(valueInt)< maxLength.intValue()) {
+            if (maxLength == null || valueInt.compareTo(maxLength) < 0) {
                 maxLength = valueInt;
                 facetsChanged = true;
             }
@@ -158,6 +158,9 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
      * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#accepts(org.semanticweb.HermiT.model.dataranges.DataConstant)
      */
     public boolean accepts(DataConstant constant) {
+        if (constant.getImplementation() != Impl.IString) {
+            return false;
+        }
         if (!oneOf.isEmpty()) {
             return oneOf.contains(constant);
         }
@@ -219,6 +222,7 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
             return new BigInteger("" + oneOf.size());
         }
         compileAllFacetsIntoPattern();
+        if (!patternMatcher.isFinite()) return null;
         return new BigInteger("" + patternMatcher.getFiniteStrings().size());
     }
     
@@ -231,6 +235,9 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
             return sortedOneOfs.first();
         }
         compileAllFacetsIntoPattern();
+        if (!patternMatcher.isFinite()) {
+            return null;
+        }
         String value = patternMatcher.getShortestExample(true);
         return value != null ? new DataConstant(Impl.IString, datatype, value) : null;
     }

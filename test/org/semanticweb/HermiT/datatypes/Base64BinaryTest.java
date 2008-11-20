@@ -84,7 +84,7 @@ public class Base64BinaryTest extends AbstractReasonerTest {
         DataRange dr = new DatatypeRestrictionBase64Binary(DT.BASE64BINARY);
         dr.addFacet(Facets.LENGTH, "1");
         CanonicalDataRange cdr = (CanonicalDataRange) dr;
-        DataConstant c = cdr.getSmallestAssignment();
+        DataConstant c = cdr.getSmallestAssignment();        
         assertTrue(c.getValue().equals("+A=="));
         cdr.notOneOf(c);
         c = cdr.getSmallestAssignment();
@@ -112,12 +112,12 @@ public class Base64BinaryTest extends AbstractReasonerTest {
         dr.addFacet(Facets.MAX_LENGTH, "5");
         CanonicalDataRange cdr = (CanonicalDataRange) dr;
         DataConstant c = cdr.getSmallestAssignment();
-        assertTrue(c.getValue().equals("++0="));
+        assertTrue(c.getValue().equals("++++"));
         cdr.notOneOf(c);
-        DataConstant not = new DataConstant(Impl.IBase64Binary, DT.BASE64BINARY, "++4=");
+        DataConstant not = new DataConstant(Impl.IBase64Binary, DT.BASE64BINARY, "+++/");
         cdr.notOneOf(not);
         c = cdr.getSmallestAssignment();
-        assertTrue(c.getValue().equals("++8="));
+        assertTrue(c.getValue().equals("+++0"));
     }
     
     public void testInvalidBase64() throws Exception {

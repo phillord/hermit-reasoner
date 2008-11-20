@@ -271,8 +271,10 @@ public class DatatypeRestrictionOWLRealPlus
         return null;
     }
     
+
     /**
-     * @return
+     * Returns the inervals for this datatype restriction. 
+     * @return a set of decimal intervals
      */
     public Set<DecimalInterval> getIntervals() {
         return intervals;

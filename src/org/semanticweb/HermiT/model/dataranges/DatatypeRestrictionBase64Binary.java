@@ -65,11 +65,12 @@ public class DatatypeRestrictionBase64Binary
                 })
         );
         intervals.add(new IntegerIntervalFin(0l, null));
-        String threeBytes = "([A-Za-z0-9+/][A-Za-z0-9+/][A-Za-z0-9+/][A-Za-z0-9+/][A-Za-z0-9+/])";
+        String threeBytes = "([A-Za-z0-9+/][A-Za-z0-9+/][A-Za-z0-9+/][A-Za-z0-9+/])";
         String twoBytes = "([A-Za-z0-9+/][A-Za-z0-9+/][AEIMQUYcgkosw048]=)";
         String oneByte = "([A-Za-z0-9+/][AQgw]==)";
-        patternMatcher = new RegExp("((" + threeBytes + "*(" + threeBytes 
-                + "|" + twoBytes + "|" + oneByte + "))?)").toAutomaton();
+        String base64pattern = "((" + threeBytes + "*(" + threeBytes 
+        + "|" + twoBytes + "|" + oneByte + "))?)";
+        patternMatcher = new RegExp(base64pattern).toAutomaton();
     }
 
     /* (non-Javadoc)
