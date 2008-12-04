@@ -6,6 +6,7 @@ package org.semanticweb.HermiT.model.dataranges;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -21,11 +22,11 @@ import org.semanticweb.HermiT.Namespaces;
  */
 public class DatatypeRestrictionRational 
         extends DatatypeRestriction 
-        implements IntegerFacet, DoubleFacet, FloatFacet {
+        implements IntegerFacet, FloatFacet, DoubleFacet, DecimalFacet {
 
     private static final long serialVersionUID = -5733278766461283273L;
     
-    protected Set<DecimalInterval> intervals = new HashSet<DecimalInterval>();
+    protected Set<RationalInterval> intervals = new HashSet<RationalInterval>();
 
     /**
      * An implementation for owlReal and owlRealPlus. If this constructor is 
@@ -76,69 +77,58 @@ public class DatatypeRestrictionRational
      * @see org.semanticweb.HermiT.model.dataranges.DataRange#addFacet(org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets, java.lang.String)
      */
     public void addFacet(Facets facet, String value) {
-        boolean isNaN = "NaN".equalsIgnoreCase(value);
-        boolean isPlusInf = "+INF".equalsIgnoreCase(value) 
-                || "INF".equalsIgnoreCase(value) 
-                || "+Infinity".equalsIgnoreCase(value) 
-                || "Infinity".equalsIgnoreCase(value); 
-        boolean isNegInf = "-INF".equalsIgnoreCase(value) 
-                || "-Infinity".equalsIgnoreCase(value);
-        if (isNaN
-                || (isPlusInf && (facet == Facets.MIN_EXCLUSIVE || facet == Facets.MIN_INCLUSIVE))
-                || (isNegInf && (facet == Facets.MAX_EXCLUSIVE || facet == Facets.MAX_INCLUSIVE))) {
-            isBottom = true;
-            return;
-        }
-        // a min value of -INF or max value of +INF are not really 
-        // restricting the value space, ignore
-        if (isPlusInf || isNegInf) {
-            return;
-        }
         BigDecimal valueDec = null;
+        BigRational valueR = null;
         try {
-            valueDec = new BigDecimal(value);
+            valueR = BigRational.parseRational(value);
         } catch (NumberFormatException e) {
-            e.printStackTrace();
-            return;
+            // maybe it is not a rational
+            try {
+                valueDec = new BigDecimal(value);
+                valueR = BigRational.convertToRational(valueDec);
+            } catch (NumberFormatException nfe) {
+                throw new RuntimeException("The given facet restriction " 
+                        + value + " is not numeric. ");
+            }
         }
         switch (facet) {
         case MIN_INCLUSIVE: {
             // greater or equal X
             if (intervals.isEmpty()) {
-                intervals.add(new DecimalInterval(valueDec, null, false, true));
+                intervals.add(new RationalInterval(valueR, null, false, true));
             } else {
-                for (DecimalInterval i : intervals) {
-                    i.intersectWith(new DecimalInterval(valueDec, null, false, true));
+                for (RationalInterval i : intervals) {
+                    i.intersectWith(new RationalInterval(valueR, null, false, true));
                 }
             }
         } break;
         case MIN_EXCLUSIVE: {
             // greater than X
             if (intervals.isEmpty()) {
-                intervals.add(new DecimalInterval(valueDec, null, true, true));
+                intervals.add(new RationalInterval(valueR, null, true, true));
             } else {
-                for (DecimalInterval i : intervals) {
-                    i.intersectWith(new DecimalInterval(valueDec, null, true, true));
+                for (RationalInterval i : intervals) {
+                    i.intersectWith(new RationalInterval(valueR, null, true, true));
                 }
             }
         } break;
         case MAX_INCLUSIVE: {
             // smaller or equal X
             if (intervals.isEmpty()) {
-                intervals.add(new DecimalInterval(null, valueDec, true, false));
+                intervals.add(new RationalInterval(null, valueR, true, false));
             } else {
-                for (DecimalInterval i : intervals) {
-                    i.intersectWith(new DecimalInterval(null, valueDec, true, false));
+                for (RationalInterval i : intervals) {
+                    i.intersectWith(new RationalInterval(null, valueR, true, false));
                 }
             }
         } break;
         case MAX_EXCLUSIVE: {
             // smaller than X
             if (intervals.isEmpty()) {
-                intervals.add(new DecimalInterval(null, valueDec, true, true));
+                intervals.add(new RationalInterval(null, valueR, true, true));
             } else {
-                for (DecimalInterval i : intervals) {
-                    i.intersectWith(new DecimalInterval(null, valueDec, true, true));
+                for (RationalInterval i : intervals) {
+                    i.intersectWith(new RationalInterval(null, valueR, true, true));
                 }
             }
         } break;
@@ -165,14 +155,14 @@ public class DatatypeRestrictionRational
                         "contains more than one interval. ");
             }
             if (intervals.isEmpty()) {
-                for (DecimalInterval i : restr.getIntervals()) {
+                for (RationalInterval i : restr.getIntervals()) {
                     if (restr.isNegated()) {
                         if (!i.isEmpty()) {
                             if (i.getMin() != null) {
-                                intervals.add(new DecimalInterval(null, i.getMin(), true, !i.isOpenMin()));
+                                intervals.add(new RationalInterval(null, i.getMin(), true, !i.isOpenMin()));
                             }
                             if (i.getMax() != null) {
-                                intervals.add(new DecimalInterval(i.getMax(), null, !i.isOpenMax(), true));
+                                intervals.add(new RationalInterval(i.getMax(), null, !i.isOpenMax(), true));
                             }
                         } // otherwise i is trivially satisfied 
                     } else {
@@ -180,21 +170,21 @@ public class DatatypeRestrictionRational
                     }
                 }
             } else {
-                Set<DecimalInterval> newIntervals = new HashSet<DecimalInterval>();
+                Set<RationalInterval> newIntervals = new HashSet<RationalInterval>();
                 if (restr.isNegated()) {
-                    for (DecimalInterval i : intervals) {
-                        for (DecimalInterval iNew : restr.getIntervals()) {
+                    for (RationalInterval i : intervals) {
+                        for (RationalInterval iNew : restr.getIntervals()) {
                             if (!iNew.isEmpty()) {
                                 if (iNew.getMin() != null) {
-                                    DecimalInterval newInterval = i.getCopy();
-                                    newInterval.intersectWith(new DecimalInterval(null, iNew.getMin(), true, !iNew.isOpenMin()));
+                                    RationalInterval newInterval = i.getCopy();
+                                    newInterval.intersectWith(new RationalInterval(null, iNew.getMin(), true, !iNew.isOpenMin()));
                                     if (!newInterval.isEmpty()) {
                                         newIntervals.add(newInterval);
                                     }
                                 } 
                                 if (iNew.getMax() != null) {
-                                    DecimalInterval newInterval = i.getCopy();
-                                    newInterval.intersectWith(new DecimalInterval(iNew.getMax(), null, !iNew.isOpenMax(), true));
+                                    RationalInterval newInterval = i.getCopy();
+                                    newInterval.intersectWith(new RationalInterval(iNew.getMax(), null, !iNew.isOpenMax(), true));
                                     if (!newInterval.isEmpty()) {
                                         newIntervals.add(newInterval);
                                     }
@@ -206,8 +196,8 @@ public class DatatypeRestrictionRational
                     if (restr.getIntervals().isEmpty()) {
                         newIntervals = intervals;
                     } else {
-                        for (DecimalInterval i1 : intervals) {
-                            for (DecimalInterval i2 : restr.getIntervals()) {
+                        for (RationalInterval i1 : intervals) {
+                            for (RationalInterval i2 : restr.getIntervals()) {
                                 i1.intersectWith(i2);
                                 if (!i1.isEmpty()) newIntervals.add(i1);
                             }
@@ -234,9 +224,9 @@ public class DatatypeRestrictionRational
             return false;
         } 
         if (intervals.isEmpty()) return true;
-        BigDecimal decValue = new BigDecimal(constant.getValue());
-        for (DecimalInterval i : intervals) {
-            if (i.contains(decValue)) {
+        BigRational value = BigRational.parseRational(constant.getValue());
+        for (RationalInterval i : intervals) {
+            if (i.contains(value)) {
                 return true;
             }
         }
@@ -276,7 +266,7 @@ public class DatatypeRestrictionRational
      * Returns the inervals for this datatype restriction. 
      * @return a set of decimal intervals
      */
-    public Set<DecimalInterval> getIntervals() {
+    public Set<RationalInterval> getIntervals() {
         return intervals;
     }
     
@@ -286,17 +276,17 @@ public class DatatypeRestrictionRational
     public Set<IntegerInterval> getIntegerIntervals() {
         Set<IntegerInterval> integerIntervals = new HashSet<IntegerInterval>();
         if (!intervals.isEmpty()) {
-            for (DecimalInterval i : intervals) {
-                BigDecimal min = i.getMin();
-                BigDecimal max = i.getMax();
+            for (RationalInterval i : intervals) {
+                BigRational min = i.getMin();
+                BigRational max = i.getMax();
                 BigInteger minInt = null;
                 BigInteger maxInt = null;
                 Long minLong = null;
                 Long maxLong = null;
                 boolean hasBig = false;
                 if (min != null) {
-                    minInt = min.setScale(0, BigDecimal.ROUND_CEILING).toBigInteger();
-                    if (i.isOpenMin() && min.equals(new BigDecimal(minInt))) {
+                    minInt = min.integerValue(BigDecimal.ROUND_CEILING);
+                    if (i.isOpenMin() && min.equals(new BigRational(minInt, BigInteger.ONE))) {
                         minInt = minInt.add(BigInteger.ONE);
                     }
                     try {
@@ -306,7 +296,7 @@ public class DatatypeRestrictionRational
                     }
                 }
                 if (max != null) {
-                    maxInt = max.setScale(0, BigDecimal.ROUND_FLOOR).toBigInteger();
+                    maxInt = max.integerValue(BigDecimal.ROUND_FLOOR);
                     if (i.isOpenMax() && max.equals(new BigDecimal(maxInt))) {
                         maxInt = maxInt.subtract(BigInteger.ONE);
                     }
@@ -329,7 +319,7 @@ public class DatatypeRestrictionRational
      * @see org.semanticweb.HermiT.model.dataranges.DoubleFacet#hasExplicitMin()
      */
     public boolean hasExplicitMin() {
-        for (DecimalInterval i : intervals) {
+        for (RationalInterval i : intervals) {
             if (i.getMin() != null) return true;
         }
         return false;
@@ -339,28 +329,58 @@ public class DatatypeRestrictionRational
      * @see org.semanticweb.HermiT.model.dataranges.DoubleFacet#hasExplicitMax()
      */
     public boolean hasExplicitMax() {
-        for (DecimalInterval i : intervals) {
+        for (RationalInterval i : intervals) {
             if (i.getMax() != null) return true;
         }
         return false;
     }
 
+    public Set<DecimalInterval> getDecimalIntervals() {
+        Set<DecimalInterval> decimalIntervals = new HashSet<DecimalInterval>();
+        if (!intervals.isEmpty()) {
+            for (RationalInterval i : intervals) {
+                BigRational min = i.getMin();
+                BigRational max = i.getMax();
+                BigDecimal minBD = null;
+                BigDecimal maxBD = null;
+                try {
+                    minBD = min.bigDecimalValueExact();
+                } catch (ArithmeticException e) {
+                    minBD = min.bigDecimalValue(RoundingMode.CEILING);
+                }
+                try {
+                    maxBD = max.bigDecimalValueExact();
+                } catch (ArithmeticException e) {
+                    maxBD = max.bigDecimalValue(RoundingMode.FLOOR);
+                }
+                DecimalInterval iDecimal = new DecimalInterval(minBD, maxBD, i.isOpenMin(), i.isOpenMax());
+                decimalIntervals.add(iDecimal);
+            }
+        }
+        return decimalIntervals;
+    }
+    
     /* (non-Javadoc)
      * @see org.semanticweb.HermiT.model.dataranges.DoubleFacet#getDoubleIntervals()
      */
     public Set<DoubleInterval> getDoubleIntervals() {
         Set<DoubleInterval> doubleIntervals = new HashSet<DoubleInterval>();
         if (!intervals.isEmpty()) {
-            for (DecimalInterval i : intervals) {
-                BigDecimal min = i.getMin();
-                BigDecimal max = i.getMax();
-                double minD = -Double.MAX_VALUE;
-                double maxD = Double.MAX_VALUE;
+            for (RationalInterval i : intervals) {
+                BigRational min = i.getMin();
+                BigRational max = i.getMax();
+                BigRational maxDouble = BigRational.convertToRational(new BigDecimal("" + Double.MAX_VALUE));
+                BigRational minDouble = maxDouble.negate();
+                Double minD = -Double.MAX_VALUE;
+                Double maxD = Double.MAX_VALUE;
                 boolean isEmpty = false;
-                if (min.compareTo(new BigDecimal("" + -Double.MAX_VALUE)) >= 0) {
-                    if (min.compareTo(new BigDecimal("" + Double.MAX_VALUE)) <= 0) {
+                if (min.compareTo(minDouble) >= 0) {
+                    if (min.compareTo(maxDouble) <= 0) {
                         minD = min.doubleValue();
-                        if (min.compareTo(new BigDecimal("" + minD)) >= 0 
+                        if (minD.equals(Double.NEGATIVE_INFINITY)) {
+                            minD = -Double.MAX_VALUE;
+                        }
+                        if (min.compareTo(BigRational.convertToRational(new BigDecimal("" + minD))) >= 0 
                                 && i.isOpenMin()) {
                             minD = DatatypeRestrictionDouble.nextDouble(minD);
                         }
@@ -369,10 +389,13 @@ public class DatatypeRestrictionRational
                         isEmpty = true;
                     }
                 } // minD = -Double.MAX_VALUE
-                if (max.compareTo(new BigDecimal("" + Double.MAX_VALUE)) <= 0) {
-                    if (max.compareTo(new BigDecimal("" + -Double.MAX_VALUE)) >= 0) {
+                if (max.compareTo(maxDouble) <= 0) {
+                    if (max.compareTo(minDouble) >= 0) {
                         maxD = max.doubleValue();
-                        if (max.compareTo(new BigDecimal("" + maxD)) <= 0 
+                        if (maxD.equals(Double.POSITIVE_INFINITY)) {
+                            maxD = Double.MAX_VALUE;
+                        }
+                        if (max.compareTo(BigRational.convertToRational(new BigDecimal("" + maxD))) <= 0 
                                 && i.isOpenMax()) {
                             maxD = DatatypeRestrictionDouble.previousDouble(maxD);
                         }
@@ -395,16 +418,21 @@ public class DatatypeRestrictionRational
     public Set<FloatInterval> getFloatIntervals() {
         Set<FloatInterval> floatIntervals = new HashSet<FloatInterval>();
         if (!intervals.isEmpty()) {
-            for (DecimalInterval i : intervals) {
-                BigDecimal min = i.getMin();
-                BigDecimal max = i.getMax();
-                float minF = -Float.MAX_VALUE;
-                float maxF = Float.MAX_VALUE;
+            for (RationalInterval i : intervals) {
+                BigRational min = i.getMin();
+                BigRational max = i.getMax();
+                BigRational maxFloat = BigRational.convertToRational(new BigDecimal("" + Float.MAX_VALUE));
+                BigRational minFloat = maxFloat.negate();
+                Float minF = -Float.MAX_VALUE;
+                Float maxF = Float.MAX_VALUE;
                 boolean isEmpty = false;
-                if (min.compareTo(new BigDecimal("" + -Float.MAX_VALUE)) >= 0) {
-                    if (min.compareTo(new BigDecimal("" + Float.MAX_VALUE)) <= 0) {
+                if (min.compareTo(minFloat) >= 0) {
+                    if (min.compareTo(maxFloat) <= 0) {
                         minF = min.floatValue();
-                        if (min.compareTo(new BigDecimal("" + minF)) >= 0 
+                        if (minF.equals(Float.NEGATIVE_INFINITY)) {
+                            minF = -Float.MAX_VALUE;
+                        }
+                        if (min.compareTo(BigRational.convertToRational(new BigDecimal("" + minF))) >= 0 
                                 && i.isOpenMin()) {
                             minF = DatatypeRestrictionFloat.nextFloat(minF);
                         }
@@ -413,10 +441,10 @@ public class DatatypeRestrictionRational
                         isEmpty = true;
                     }
                 } // minD = -Double.MAX_VALUE
-                if (max.compareTo(new BigDecimal("" + Float.MAX_VALUE)) <= 0) {
-                    if (max.compareTo(new BigDecimal("" + -Float.MAX_VALUE)) >= 0) {
+                if (max.compareTo(maxFloat) <= 0) {
+                    if (max.compareTo(minFloat) >= 0) {
                         maxF = max.floatValue();
-                        if (max.compareTo(new BigDecimal("" + maxF)) <= 0 
+                        if (max.compareTo(BigRational.convertToRational(new BigDecimal("" + maxF))) <= 0 
                                 && i.isOpenMax()) {
                             maxF = DatatypeRestrictionFloat.previousFloat(maxF);
                         }
@@ -442,7 +470,7 @@ public class DatatypeRestrictionRational
     protected String printExtraInfo(Namespaces namespaces) {
         boolean firstRun = true;
         StringBuffer buffer = new StringBuffer();
-        for (DecimalInterval i : intervals) {
+        for (RationalInterval i : intervals) {
             if (!firstRun && !isNegated) {
                 buffer.append(" or ");
             }

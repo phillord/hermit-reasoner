@@ -21,7 +21,7 @@ import org.semanticweb.HermiT.Namespaces;
  */
 public class DatatypeRestrictionOWLRealPlus 
         extends DatatypeRestriction 
-        implements IntegerFacet, DoubleFacet, FloatFacet {
+        implements IntegerFacet, FloatFacet, DoubleFacet, DecimalFacet {
 
     private static final long serialVersionUID = -5733278766461283273L;
     
@@ -152,20 +152,19 @@ public class DatatypeRestrictionOWLRealPlus
             throw new RuntimeException("Cannot add facets to negated " +
                         "data ranges!");
         }
-        if (!(range instanceof DatatypeRestrictionOWLRealPlus)) {
+        if (!(range instanceof DecimalFacet)) {
             throw new IllegalArgumentException("The given parameter is not " +
-                    "an instance of DatatypeRestrictionOWLReal. It is only " +
-                    "allowed to add facets from other owl real datatype " +
-                    "restrictions.");
+                    "an instance of DecimalFacet. It is only " +
+                    "allowed to add facets from other decimal facets.");
         }
         if (!isBottom()) {
             DatatypeRestrictionOWLRealPlus restr = (DatatypeRestrictionOWLRealPlus) range;
-            if (restr.getIntervals().size() > 1) {
+            if (restr.getDecimalIntervals().size() > 1) {
                 throw new IllegalArgumentException("The given parameter " +
                         "contains more than one interval. ");
             }
             if (intervals.isEmpty()) {
-                for (DecimalInterval i : restr.getIntervals()) {
+                for (DecimalInterval i : restr.getDecimalIntervals()) {
                     if (restr.isNegated()) {
                         if (!i.isEmpty()) {
                             if (i.getMin() != null) {
@@ -176,14 +175,14 @@ public class DatatypeRestrictionOWLRealPlus
                             }
                         } // otherwise i is trivially satisfied 
                     } else {
-                        intervals = restr.getIntervals();
+                        intervals = restr.getDecimalIntervals();
                     }
                 }
             } else {
                 Set<DecimalInterval> newIntervals = new HashSet<DecimalInterval>();
                 if (restr.isNegated()) {
                     for (DecimalInterval i : intervals) {
-                        for (DecimalInterval iNew : restr.getIntervals()) {
+                        for (DecimalInterval iNew : restr.getDecimalIntervals()) {
                             if (!iNew.isEmpty()) {
                                 if (iNew.getMin() != null) {
                                     DecimalInterval newInterval = i.getCopy();
@@ -203,11 +202,11 @@ public class DatatypeRestrictionOWLRealPlus
                         }
                     }
                 } else {
-                    if (restr.getIntervals().isEmpty()) {
+                    if (restr.getDecimalIntervals().isEmpty()) {
                         newIntervals = intervals;
                     } else {
                         for (DecimalInterval i1 : intervals) {
-                            for (DecimalInterval i2 : restr.getIntervals()) {
+                            for (DecimalInterval i2 : restr.getDecimalIntervals()) {
                                 i1.intersectWith(i2);
                                 if (!i1.isEmpty()) newIntervals.add(i1);
                             }
@@ -276,7 +275,7 @@ public class DatatypeRestrictionOWLRealPlus
      * Returns the inervals for this datatype restriction. 
      * @return a set of decimal intervals
      */
-    public Set<DecimalInterval> getIntervals() {
+    public Set<DecimalInterval> getDecimalIntervals() {
         return intervals;
     }
     

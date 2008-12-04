@@ -289,9 +289,8 @@ public class DatatypeRestrictionDouble
         }
         if (!(range instanceof DoubleFacet)) {
             throw new IllegalArgumentException("The given parameter is not " +
-                    "an instance of DatatypeRestrictionInteger. It is " +
-                    "only allowed to add facets from other integer " +
-                    "datatype restrictions. ");
+                    "an instance of DoubleFacet. It is " +
+                    "only allowed to add other double facets. ");
         }
         if (!isBottom()) {
             DoubleFacet restr = (DoubleFacet) range;

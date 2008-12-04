@@ -2,6 +2,7 @@ package org.semanticweb.HermiT.model.dataranges;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 
 /*************************************************************************
  *  Invariants
@@ -34,7 +35,22 @@ public class BigRational extends Number implements Comparable<BigRational> {
         }
     }
     
-    public static BigRational parseRational(String s) {
+    public static BigRational convertToRational(BigDecimal decimal) {
+        BigInteger wholePart = decimal.toBigInteger();
+        BigDecimal fractionPart = decimal.subtract(new BigDecimal("" + wholePart));
+        BigInteger denominator = new BigInteger("10").pow(fractionPart.scale());
+        BigInteger numerator = wholePart.multiply(denominator);
+        numerator = numerator.add(fractionPart.scaleByPowerOfTen(fractionPart.scale()).toBigInteger());
+        return new BigRational(numerator, denominator);
+    }
+    
+    /**
+     * Parses a rational from a String
+     * @param s a String represenation of the rational (e.g., 1/3)
+     * @return the corresponding Rational object
+     * @throws NumberFormatException if s cannot be parsed into a rational
+     */
+    public static BigRational parseRational(String s) throws NumberFormatException {
         String[] tokens = s.split("/");
         if (tokens.length == 2) {
             return new BigRational(new BigInteger(tokens[0]), new BigInteger(tokens[1]));
@@ -53,6 +69,10 @@ public class BigRational extends Number implements Comparable<BigRational> {
             return false;
         }
     }
+    
+    public BigRational negate() {
+        return new BigRational(num.negate(), den);
+    }
 
     public int compareTo(BigRational r) {
         return num.multiply(r.getDenominator()).compareTo(den.multiply(r.getNumerator()));
@@ -68,14 +88,22 @@ public class BigRational extends Number implements Comparable<BigRational> {
         return this.toString().hashCode();
     }
 
-    public BigDecimal bigDecimalValue() throws ArithmeticException {
+    public BigDecimal bigDecimalValueExact() throws ArithmeticException {
         return (new BigDecimal(num)).divide(new BigDecimal(den));
+    }
+    
+    public BigDecimal bigDecimalValue(RoundingMode roundingMode) {
+        return (new BigDecimal(num)).divide(new BigDecimal(den), roundingMode);
     }
     
     public double doubleValue() {
         return (new BigDecimal(num)).divide(new BigDecimal(den)).doubleValue();
     }
 
+    public double doubleValue(int roundingMode) {
+        return (new BigDecimal(num)).divide(new BigDecimal(den), roundingMode).doubleValue();
+    }
+    
     public float floatValue() {
         return (new BigDecimal(num)).divide(new BigDecimal(den)).floatValue();
     }
@@ -84,10 +112,26 @@ public class BigRational extends Number implements Comparable<BigRational> {
         return new BigDecimal(num).divide(new BigDecimal(den)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
     }
 
+    public int intValue(int roundingMode) {
+        return new BigDecimal(num).divide(new BigDecimal(den), roundingMode).setScale(0, roundingMode).intValue();
+    }
+    
+    public BigInteger integerValue() {
+        return new BigDecimal(num).divide(new BigDecimal(den)).setScale(0, BigDecimal.ROUND_HALF_UP).toBigIntegerExact();
+    }
+
+    public BigInteger integerValue(int roundingMode) {
+        return new BigDecimal(num).divide(new BigDecimal(den), roundingMode).setScale(0, roundingMode).toBigInteger();
+    }
+    
     public long longValue() {
         return new BigDecimal(num).divide(new BigDecimal(den)).setScale(0, BigDecimal.ROUND_HALF_UP).longValue();
     }
 
+    public long longValue(int roundingMode) {
+        return new BigDecimal(num).divide(new BigDecimal(den), roundingMode).setScale(0, roundingMode).longValue();
+    }
+    
     public BigInteger getNumerator()   { 
         return num; 
     }

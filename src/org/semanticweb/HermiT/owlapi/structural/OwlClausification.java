@@ -925,7 +925,7 @@ public class OwlClausification {
                         // apparently it is not an integer
                         // see if it is finitely representable as a decimal
                         try {
-                            BigDecimal literalAsBD = literalAsBR.bigDecimalValue();
+                            BigDecimal literalAsBD = literalAsBR.bigDecimalValueExact();
                             // ok, it is at least representable as a decimal
                             // let's see if it has also an exact double representation
                             if (literalAsBD.compareTo(new BigDecimal(Double.MAX_VALUE)) <= 0

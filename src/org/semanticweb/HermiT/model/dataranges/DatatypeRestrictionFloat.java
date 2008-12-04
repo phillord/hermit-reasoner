@@ -290,9 +290,8 @@ public class DatatypeRestrictionFloat
         }
         if (!(range instanceof FloatFacet)) {
             throw new IllegalArgumentException("The given parameter is not " +
-                    "an instance of DatatypeRestrictionInteger. It is " +
-                    "only allowed to add facets from other integer " +
-                    "datatype restrictions. ");
+                    "an instance of FloatFacet. It is " +
+                    "only allowed to add facets from other float facets. ");
         }
         if (!isBottom()) {
             FloatFacet restr = (FloatFacet) range;
