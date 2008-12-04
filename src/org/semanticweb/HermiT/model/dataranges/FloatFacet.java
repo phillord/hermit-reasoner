@@ -14,12 +14,12 @@ import java.util.Set;
  * the numerical ranges in OWL are not disjoint. 
  * @author BGlimm
  */
-public interface DoubleFacet {
+public interface FloatFacet {
     
     /**
      * @return a set of double intervals
      */
-    public Set<DoubleInterval> getDoubleIntervals();
+    public Set<FloatInterval> getFloatIntervals();
     
     /**
      * @return true if the range is negated and false otherwise

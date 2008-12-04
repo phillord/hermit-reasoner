@@ -9,36 +9,36 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 /**
- * The class can be used to capture double intervals. An instantiation always 
- * represents a finite range since the number of doubles is finite. The allowed 
- * min and max values are to be in the range of doubles.
+ * The class can be used to capture float intervals. An instantiation always 
+ * represents a finite range since the number of floats is finite. The allowed 
+ * min and max values are to be in the range of floats.
  * 
  * @author BGlimm
  */
-public class DoubleInterval implements Serializable {
+public class FloatInterval implements Serializable {
 
     private static final long serialVersionUID = 9196389740657611233L;
     
-    public static final BigDecimal doubleMin = new BigDecimal("" + -Double.MAX_VALUE);
-    public static final BigDecimal doubleMax = new BigDecimal("" + Double.MAX_VALUE);
+    public static final BigDecimal floatMin = new BigDecimal("" + -Float.MAX_VALUE);
+    public static final BigDecimal floatMax = new BigDecimal("" + Float.MAX_VALUE);
     
-    protected double min = -Double.MAX_VALUE;
-    protected double max = Double.MAX_VALUE;
+    protected float min = -Float.MAX_VALUE;
+    protected float max = Float.MAX_VALUE;
     
     /**
-     * Creates a double interval with the min and max values for doubles as 
+     * Creates a float interval with the min and max values for floats as 
      * lower and upper bound respectively. 
      */
-    public DoubleInterval() {
+    public FloatInterval() {
         super();
     }
     
     /**
-     * Creates a double interval with the given min and max values. 
+     * Creates a float interval with the given min and max values. 
      * @param minInclusive the lower bound
      * @param maxInclusive the upper bound
      */
-    public DoubleInterval(double minInclusive, double maxInclusive) {
+    public FloatInterval(float minInclusive, float maxInclusive) {
         this.min = minInclusive;
         this.max = maxInclusive;
     }
@@ -48,17 +48,17 @@ public class DoubleInterval implements Serializable {
      * @return an interval object that has the same min and max values as this 
      *         one.
      */
-    public DoubleInterval getCopy() {
-        return new DoubleInterval(min, max);
+    public FloatInterval getCopy() {
+        return new FloatInterval(min, max);
     }
     
     /**
-     * Checks whether the given number is in the range of doubles.
+     * Checks whether the given number is in the range of floats.
      * @param bigDecimal a decimal
-     * @return true if the decimal is in the range of double and false otherwise
+     * @return true if the decimal is in the range of float and false otherwise
      */
-    public static boolean isDouble(BigDecimal bigDecimal) {
-        return (bigDecimal.compareTo(doubleMin) >= 0 && bigDecimal.compareTo(doubleMax) <= 0);
+    public static boolean isFloat(BigDecimal bigDecimal) {
+        return (bigDecimal.compareTo(floatMin) >= 0 && bigDecimal.compareTo(floatMax) <= 0);
     }
     
     /**
@@ -66,7 +66,7 @@ public class DoubleInterval implements Serializable {
      * will have min and max values that are those of the intersection.  
      * @param i an interval
      */
-    public void intersectWith(DoubleInterval i) {
+    public void intersectWith(FloatInterval i) {
         if (i.getMax() < max || (isMinusZero(i.getMax()) && isPlusZero(max))) {
             max = i.getMax();
         }
@@ -93,32 +93,32 @@ public class DoubleInterval implements Serializable {
     
     /**
      * Tests whether the given value is -0.0
-     * @param value a double
+     * @param value a float
      * @return true if the input is -0.0 and false otherwise
      */
-    public boolean isMinusZero(double value) {
+    public boolean isMinusZero(float value) {
         if (value != 0.0) return false;
-        long bits = Double.doubleToRawLongBits(value);
-        return ((bits & 0x7fffffffffffffffl) != bits);
+        int bits = Float.floatToRawIntBits(value);
+        return ((bits & 0x7fffffff) != bits);
     }
     
     /**
      * Tests whether the given value is +0.0
-     * @param value a double
+     * @param value a float
      * @return true if the input is +0.0 and false otherwise
      */
-    public boolean isPlusZero(double value) {
+    public boolean isPlusZero(float value) {
         if (value != 0.0) return false;
-        long bits = Double.doubleToRawLongBits(value);
-        return ((bits & 0x7fffffffffffffffl) == bits);
+        int bits = Float.floatToRawIntBits(value);
+        return ((bits & 0x7fffffff) == bits);
     }
     
     /**
      * Tests containment. 
-     * @param d a double
-     * @return true if the interval contains this double and false otherwise. 
+     * @param d a float
+     * @return true if the interval contains this float and false otherwise. 
      */
-    public boolean contains(double d) {
+    public boolean contains(float d) {
         if (isPlusZero(min) && isMinusZero(d)) return false;
         if (isMinusZero(max) && isPlusZero(d)) return false;
         return (min <= d) && (max >= d);
@@ -126,21 +126,21 @@ public class DoubleInterval implements Serializable {
 
     /**
      * Computes the size of the interval. 
-     * @return the number of double values that are contained in this interval.  
+     * @return the number of float values that are contained in this interval.  
      */
     public BigInteger getCardinality() {
         if (max < min) return BigInteger.ZERO;
         // Extract the sign and magnitude from 'start'
-        long bitsStart  = Double.doubleToRawLongBits(min);
-        long bitsEnd = Double.doubleToRawLongBits(max);
-        if (DatatypeRestrictionDouble.isNaN(min) 
-                || DatatypeRestrictionDouble.isNaN(max)) {
+        int bitsStart  = Float.floatToRawIntBits(min);
+        int bitsEnd = Float.floatToRawIntBits(max);
+        if (DatatypeRestrictionFloat.isNaN(min) 
+                || DatatypeRestrictionFloat.isNaN(max)) {
             return BigInteger.ZERO;
         }
-        boolean positiveStart = ((bitsStart & 0x8000000000000000l) == 0);
-        boolean positiveEnd = ((bitsEnd & 0x8000000000000000l) == 0);
-        long magnitudeStart = bitsStart & 0x7fffffffffffffffl;
-        long magnitudeEnd = bitsEnd & 0x7fffffffffffffffl;
+        boolean positiveStart = ((bitsStart & 0x80000000) == 0);
+        boolean positiveEnd = ((bitsEnd & 0x80000000) == 0);
+        int magnitudeStart = bitsStart & 0x7fffffff;
+        int magnitudeEnd = bitsEnd & 0x7fffffff;
         
         // Now determine the number of elements. This works even if either 
         // of 'start' and 'end' is +inf or -inf.
@@ -165,22 +165,22 @@ public class DoubleInterval implements Serializable {
      * @return true if the value was increased and false otherwise
      */
     public boolean increaseMin() {
-        double oldMin = min;
-        min = DatatypeRestrictionDouble.nextDouble(oldMin);
+        float oldMin = min;
+        min = DatatypeRestrictionFloat.nextFloat(oldMin);
         return min != oldMin;
     }
     
     /**
      * @return the minimal value for this interval
      */
-    public double getMin() {
+    public float getMin() {
         return min;
     }
 
     /**
      * @return the maximal value for this interval
      */
-    public double getMax() {
+    public float getMax() {
         return max;
     }
     

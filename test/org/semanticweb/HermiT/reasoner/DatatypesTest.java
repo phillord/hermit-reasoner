@@ -1,5 +1,6 @@
 package org.semanticweb.HermiT.reasoner;
 
+
 public class DatatypesTest extends AbstractReasonerTest {
 
     public DatatypesTest(String name) {
@@ -238,5 +239,53 @@ public class DatatypesTest extends AbstractReasonerTest {
             + "ClassAssertion(a A) ";
         loadOntologyWithAxioms(axioms, null);
         assertABoxSatisfiable(false);
+    }
+    
+    public void testOWLTestCasesCons1() throws Exception {
+        String axioms = "ClassAssertion(a DataSomeValuesFrom( dp DatatypeRestriction( " 
+            + "owl:real minExclusive \"0.0\"^^xsd:float " 
+            + "maxExclusive \"1.401298464324817e-45\"^^xsd:float)))";
+        loadOntologyWithAxioms(axioms, null);
+        assertABoxSatisfiable(true);
+    }
+
+    public void testOWLTestCasesIncons1() throws Exception {
+        String axioms = "ClassAssertion(a DataSomeValuesFrom( dp DatatypeRestriction( " 
+            + "xsd:float minExclusive \"0.0\"^^xsd:float " 
+            + "maxExclusive \"1.401298464324817e-45\"^^xsd:float)))";
+        loadOntologyWithAxioms(axioms, null);
+        assertABoxSatisfiable(false);
+    }
+
+    public void testRationals() throws Exception {
+        String axioms = "ClassAssertion(a DataAllValuesFrom(dp " 
+                + "owl:rational)) " 
+                + "ClassAssertion(a DataMinCardinality(2 dp))";
+        loadOntologyWithAxioms(axioms, null);
+        assertABoxSatisfiable(true);
+    }
+    
+    public void testRationals1() throws Exception {
+        String axioms = "ClassAssertion(a DataAllValuesFrom(dp " 
+                + "DataOneOf(\"1/2\"^^owl:rational \"0.5\"^^xsd:double)))" 
+                + "ClassAssertion(a DataMinCardinality(2 dp))";
+        loadOntologyWithAxioms(axioms, null);
+        assertABoxSatisfiable(false);
+    }
+    
+    public void testRationals2() throws Exception {
+        String axioms = "ClassAssertion(a DataAllValuesFrom(dp " 
+                + "DataOneOf(\"1/2\"^^owl:rational \"0.5\"^^xsd:double)))" 
+                + "DataPropertyAssertion(dp a \"Infinity\"^^xsd:float)";
+        loadOntologyWithAxioms(axioms, null);
+        assertABoxSatisfiable(false);
+    }
+    
+    public void testRationals3() throws Exception {
+        String axioms = "ClassAssertion(a DataAllValuesFrom(dp " 
+                + "DataOneOf(\"1/3\"^^owl:rational \"0.33333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333\"^^xsd:decimal)))" 
+                + "ClassAssertion(a DataMinCardinality(2 dp))";
+        loadOntologyWithAxioms(axioms, null);
+        assertABoxSatisfiable(true);
     }
 }

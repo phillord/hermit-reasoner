@@ -19,7 +19,7 @@ import org.semanticweb.HermiT.Namespaces;
  * 
  * @author BGlimm
  */
-public class DatatypeRestrictionOWLRealPlus 
+public class DatatypeRestrictionRational 
         extends DatatypeRestriction 
         implements IntegerFacet, DoubleFacet, FloatFacet {
 
@@ -33,7 +33,7 @@ public class DatatypeRestrictionOWLRealPlus
      * the range. 
      * @param datatype a datatype (should use DT.OWLREALPLUS)
      */
-    public DatatypeRestrictionOWLRealPlus(DT datatype) {
+    public DatatypeRestrictionRational(DT datatype) {
         this(datatype, true);
     }
     
@@ -43,7 +43,7 @@ public class DatatypeRestrictionOWLRealPlus
      * @param datatype a datatyp (should be DT.OWLREAL or DT.OWLREALPLUS)
      * @param allowSpecials if true, specials are part of the range
      */
-    public DatatypeRestrictionOWLRealPlus(DT datatype, boolean allowSpecials) {
+    public DatatypeRestrictionRational(DT datatype, boolean allowSpecials) {
         this.datatype = datatype;
         this.supportedFacets = new HashSet<Facets>(
                 Arrays.asList(new Facets[] {
@@ -62,7 +62,7 @@ public class DatatypeRestrictionOWLRealPlus
      * @see org.semanticweb.HermiT.model.dataranges.DataRange#getNewInstance()
      */
     public CanonicalDataRange getNewInstance() {
-        return new DatatypeRestrictionOWLRealPlus(this.datatype);
+        return new DatatypeRestrictionRational(this.datatype);
     }
     
     /* (non-Javadoc)
@@ -152,14 +152,14 @@ public class DatatypeRestrictionOWLRealPlus
             throw new RuntimeException("Cannot add facets to negated " +
                         "data ranges!");
         }
-        if (!(range instanceof DatatypeRestrictionOWLRealPlus)) {
+        if (!(range instanceof DatatypeRestrictionRational)) {
             throw new IllegalArgumentException("The given parameter is not " +
-                    "an instance of DatatypeRestrictionOWLReal. It is only " +
-                    "allowed to add facets from other owl real datatype " +
+                    "an instance of DatatypeRestrictionRational. It is only " +
+                    "allowed to add facets from other owl rational datatype " +
                     "restrictions.");
         }
         if (!isBottom()) {
-            DatatypeRestrictionOWLRealPlus restr = (DatatypeRestrictionOWLRealPlus) range;
+            DatatypeRestrictionRational restr = (DatatypeRestrictionRational) range;
             if (restr.getIntervals().size() > 1) {
                 throw new IllegalArgumentException("The given parameter " +
                         "contains more than one interval. ");
@@ -462,16 +462,15 @@ public class DatatypeRestrictionOWLRealPlus
      * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#datatypeAccepts(org.semanticweb.HermiT.model.dataranges.DataConstant)
      */
     public boolean datatypeAccepts(DataConstant constant) {
-        return DT.getSubTreeFor(DT.DECIMAL).contains(constant.getDatatype());
+        return DT.getSubTreeFor(DT.RATIONAL).contains(constant.getDatatype());
     }
     
     /* (non-Javadoc)
      * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#canHandle(org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.DT)
      */
     public boolean canHandle(DT datatype) {
-        Set<DT> dts = DT.getSubTreeFor(DT.OWLREALPLUS);
+        Set<DT> dts = DT.getSubTreeFor(DT.RATIONAL);
         dts.removeAll(DT.getSubTreeFor(DT.DECIMAL)); 
-        dts.add(DT.DECIMAL);
         return dts.contains(datatype);
     }
 }

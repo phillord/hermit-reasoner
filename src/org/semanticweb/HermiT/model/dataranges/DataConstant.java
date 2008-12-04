@@ -39,6 +39,10 @@ public class DataConstant implements Comparable<DataConstant>, Serializable {
         numericSpecials.add(new DataConstant(Impl.IDouble, DT.DOUBLE, "NaN"));
         numericSpecials.add(new DataConstant(Impl.IDouble, DT.DOUBLE, "+Infinity"));
         numericSpecials.add(new DataConstant(Impl.IDouble, DT.DOUBLE, "-Infinity"));
+        numericSpecials.add(new DataConstant(Impl.IFloat, DT.FLOAT, "-0.0"));
+        numericSpecials.add(new DataConstant(Impl.IFloat, DT.FLOAT, "NaN"));
+        numericSpecials.add(new DataConstant(Impl.IFloat, DT.FLOAT, "+Infinity"));
+        numericSpecials.add(new DataConstant(Impl.IFloat, DT.FLOAT, "-Infinity"));
     }
     
     /**
@@ -56,7 +60,9 @@ public class DataConstant implements Comparable<DataConstant>, Serializable {
     public enum Impl {
         IInteger, 
         IDouble,
+        IFloat, 
         IDecimal,
+        IRational, 
         IDateTime,
         IString,
         IBoolean, 
@@ -146,9 +152,17 @@ public class DataConstant implements Comparable<DataConstant>, Serializable {
         DataConstant constant = (DataConstant) o;
         if (datatype != null 
                 && value != null 
-                && datatype.equals(DT.DOUBLE)
+                && (datatype.equals(DT.DOUBLE) || datatype.equals(DT.FLOAT))
                 && value.equalsIgnoreCase("NaN")) {
             return false;
+        }
+        if (datatype != null && value != null 
+                && constant.getDatatype() != null && constant.getValue() != null
+                && (datatype.equals(DT.DOUBLE) || datatype.equals(DT.FLOAT))
+                && (constant.getDatatype().equals(DT.DOUBLE) || constant.getDatatype().equals(DT.FLOAT))
+                && ((constant.getValue().equals("Infinity") && value.equals("Infinity"))
+                || (constant.getValue().equals("-Infinity") && value.equals("-Infinity")))) {
+            return true;
         }
         return (implementation == null ? implementation == constant.getImplementation() 
                                     : implementation.equals(constant.getImplementation())) 
@@ -162,7 +176,18 @@ public class DataConstant implements Comparable<DataConstant>, Serializable {
      */
     public int hashCode() {
         int hashCode = 17;
-        hashCode = 23 * hashCode + (implementation != null ? implementation.hashCode() : 0);
+        int impl;
+        // although +Inf and -Inf can use different implementations (float and 
+        // double) they are the same
+        if (implementation != null 
+                && implementation == Impl.IFloat 
+                && value != null 
+                && (value.equals("Infinity") || value.equals("-Infinity"))) {
+            impl = Impl.IDouble.hashCode();
+        } else {
+            impl = (implementation != null ? implementation.hashCode() : 0);
+        }
+        hashCode = 23 * hashCode + impl;
         hashCode = 13 * hashCode + (value != null ? value.hashCode() : 0);
         hashCode = 17 * hashCode + (lang.hashCode());
         return hashCode;

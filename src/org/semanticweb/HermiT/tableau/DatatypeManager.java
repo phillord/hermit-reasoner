@@ -66,7 +66,7 @@ public class DatatypeManager {
         Object[] pair = pairsDeltaOld.getTupleBuffer();
         pairsDeltaOld.open();
         while (datatypesSat && !pairsDeltaOld.afterLast()) {
-            if (pair[0] instanceof DataRange && !checkedDRs.contains((DataRange) pair[0])) {
+            if (pair[0] instanceof DataRange) { //&& !checkedDRs.contains((DataRange) pair[0])) {
                 // in the last saturation, we added a DataRange, so lets check 
                 // whether this caused a clash
                 Map<Node,Set<DataRange>> nodeToDRs = fetchRelevantAssertions((Node) pair[1]);
@@ -345,7 +345,7 @@ public class DatatypeManager {
                             // Hence we should use the more restrictive integer 
                             // range as the canonical range.
                             canonicalDR = range.getNewInstance();
-                        } else if (!canonicalDR.canHandle(range.getDatatype())) {
+                        } else if (range.getDatatype() != DT.LITERAL && !canonicalDR.canHandle(range.getDatatype())) {
                             // found an incompatibility
                             return null;
                         }
@@ -412,18 +412,22 @@ public class DatatypeManager {
 
         // lets look at the facets
         for (DataRange range : ranges) {
-            if (range.getDatatypeURI() != null) {
+            if (range.getDatatypeURI() != null 
+                    && range.getDatatype() != DT.LITERAL) {
+                    // literal ranges have no facets
                 canonicalDR.conjoinFacetsFrom(range);
             }
         }
         
         // if we have oneOfs, we make sure they conform to the facets
         if (constants != null) {
+            Set<DataConstant> unsuitable = new HashSet<DataConstant>();
             for (DataConstant constant : constants) {
                 if (!canonicalDR.accepts(constant)) {
-                    constants.remove(constant);
+                    unsuitable.add(constant);
                 }
             }
+            constants.removeAll(unsuitable);
             if (constants.isEmpty()) {
                 // no more suitable values left
                 return null;
@@ -465,7 +469,7 @@ public class DatatypeManager {
                     containedRemovable = true;
                 }
             }
-            for (Node node  : removableNodes) {
+            for (Node node : removableNodes) {
                 nodeToCanonicalDR.remove(node);
             }
             removableNodes.clear();

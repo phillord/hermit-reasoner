@@ -64,13 +64,16 @@ public class DatatypeRestrictionLiteral extends DatatypeRestriction {
      * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#accepts(org.semanticweb.HermiT.model.dataranges.DataConstant)
      */
     public boolean accepts(DataConstant constant) {
-        return isNegated;
+        return !isNegated;
     }
     
     /* (non-Javadoc)
      * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#hasMinCardinality(java.math.BigInteger)
      */
     public boolean hasMinCardinality(BigInteger n) {
+        if (!oneOf.isEmpty()) {
+            return n.compareTo(new BigInteger("" + oneOf.size())) <= 0; 
+        }
         return !isNegated;
     }
     

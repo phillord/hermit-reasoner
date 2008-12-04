@@ -16,23 +16,23 @@ import java.util.TreeSet;
 import org.semanticweb.HermiT.Namespaces;
 import org.semanticweb.HermiT.model.dataranges.DataConstant.Impl;
 
-public class DatatypeRestrictionDouble 
+public class DatatypeRestrictionFloat 
         extends DatatypeRestriction 
-        implements DoubleFacet, FloatFacet, IntegerFacet {
+        implements FloatFacet, IntegerFacet {
     
     private static final long serialVersionUID = 6118099138621545215L;
     
-    protected Set<DoubleInterval> intervals = new HashSet<DoubleInterval>();
+    protected Set<FloatInterval> intervals = new HashSet<FloatInterval>();
     protected boolean hasExplicitMin = false; // excludes numeric specials
     protected boolean hasExplicitMax = false;
     
     /**
-     * An implementation for doubles and floats. 
-     * @param datatype A datatype (should use DT.DOUBLE or DT.FLOAT)
+     * An implementation for floats. 
+     * @param datatype A datatype (should use DT.FLOAT)
      */
-    public DatatypeRestrictionDouble(DT datatype) {
+    public DatatypeRestrictionFloat(DT datatype) {
         this.datatype = datatype;
-        intervals.add(new DoubleInterval());
+        intervals.add(new FloatInterval());
         this.supportedFacets = new HashSet<Facets>(
                 Arrays.asList(new Facets[] {
                         Facets.MIN_INCLUSIVE, 
@@ -47,7 +47,7 @@ public class DatatypeRestrictionDouble
      * @see org.semanticweb.HermiT.model.dataranges.DataRange#getNewInstance()
      */
     public CanonicalDataRange getNewInstance() {
-        return new DatatypeRestrictionDouble(this.datatype);
+        return new DatatypeRestrictionFloat(this.datatype);
     }
     
     /* (non-Javadoc)
@@ -66,15 +66,15 @@ public class DatatypeRestrictionDouble
         } else {
             hasExplicitMax = true;
         }
-        double doubleValue;
+        float floatValue;
         try {
-            doubleValue = Double.parseDouble(value);
+            floatValue = Float.parseFloat(value);
             // if NaN is given as a facet, or min value is supposed to be +INF, 
             // or max value is supposed to be -INF, the value space is empty
-            if (isNaN(doubleValue) || (Double.POSITIVE_INFINITY == doubleValue 
+            if (isNaN(floatValue) || (Float.POSITIVE_INFINITY == floatValue 
                     && (facet == Facets.MIN_EXCLUSIVE 
                             || facet == Facets.MIN_INCLUSIVE)) 
-                            || (Double.NEGATIVE_INFINITY == doubleValue 
+                            || (Float.NEGATIVE_INFINITY == floatValue 
                                     && (facet == Facets.MAX_EXCLUSIVE 
                                             || facet == Facets.MAX_INCLUSIVE))) {
                 isBottom = true;
@@ -82,31 +82,31 @@ public class DatatypeRestrictionDouble
             } 
             // a min value of -INF or max value of +INF are not really 
             // restricting the value space, ignore
-            if (Double.POSITIVE_INFINITY == doubleValue 
-                    || Double.NEGATIVE_INFINITY == doubleValue) {
+            if (Float.POSITIVE_INFINITY == floatValue 
+                    || Float.NEGATIVE_INFINITY == floatValue) {
                 return;
             }
             BigDecimal originalValue = new BigDecimal(value);
-            BigDecimal doubleValueAsBD = new BigDecimal("" + doubleValue);
+            BigDecimal floatValueAsBD = new BigDecimal("" + floatValue);
             if (facet == Facets.MIN_EXCLUSIVE 
-                    && doubleValueAsBD.compareTo(originalValue) <= 0) {
-                doubleValue = DatatypeRestrictionDouble.nextDouble(doubleValue);
+                    && floatValueAsBD.compareTo(originalValue) <= 0) {
+                floatValue = DatatypeRestrictionFloat.nextFloat(floatValue);
             } else if (facet == Facets.MAX_EXCLUSIVE 
-                    && doubleValueAsBD.compareTo(originalValue) >= 0) {
-                doubleValue = DatatypeRestrictionDouble.previousDouble(doubleValue);
+                    && floatValueAsBD.compareTo(originalValue) >= 0) {
+                floatValue = DatatypeRestrictionFloat.previousFloat(floatValue);
             }
         } catch (NumberFormatException e) {
-            // ok, it wasn't a double, but maybe it is a very big/small integer  
-            // or decimal, then we use the max/min for doubles
+            // ok, it wasn't a float, but maybe it is a very big/small integer  
+            // or decimal or double, then we use the max/min for floats
             try {
                 BigDecimal bd = new BigDecimal(value);
-                if ((facet == Facets.MIN_INCLUSIVE && bd.compareTo(new BigDecimal("" + Double.MAX_VALUE)) > 0) 
-                        || (facet == Facets.MIN_EXCLUSIVE && bd.compareTo(new BigDecimal("" + Double.MAX_VALUE)) >= 0)
-                        || (facet == Facets.MAX_INCLUSIVE && bd.compareTo(new BigDecimal("" + -Double.MAX_VALUE)) < 0)
-                        || (facet == Facets.MAX_EXCLUSIVE && bd.compareTo(new BigDecimal("" + -Double.MAX_VALUE)) <= 0)) {
+                if ((facet == Facets.MIN_INCLUSIVE && bd.compareTo(new BigDecimal("" + Float.MAX_VALUE)) > 0) 
+                        || (facet == Facets.MIN_EXCLUSIVE && bd.compareTo(new BigDecimal("" + Float.MAX_VALUE)) >= 0)
+                        || (facet == Facets.MAX_INCLUSIVE && bd.compareTo(new BigDecimal("" + -Float.MAX_VALUE)) < 0)
+                        || (facet == Facets.MAX_EXCLUSIVE && bd.compareTo(new BigDecimal("" + -Float.MAX_VALUE)) <= 0)) {
                     // impossible, set all intervals to empty
                     intervals.clear();
-                    intervals.add(new DoubleInterval(1.0, 0.0));
+                    intervals.add(new FloatInterval(1.0f, 0.0f));
                     isBottom = true;
                 } // else holds anyways
                 return;
@@ -117,32 +117,32 @@ public class DatatypeRestrictionDouble
         }
         switch (facet) {
         case MIN_INCLUSIVE: {
-            for (DoubleInterval i : intervals) {
-                i.intersectWith(new DoubleInterval(doubleValue, Double.MAX_VALUE));
+            for (FloatInterval i : intervals) {
+                i.intersectWith(new FloatInterval(floatValue, Float.MAX_VALUE));
                 if (i.isEmpty()) {
                     isBottom = true;
                 }
             }
         } break;
         case MIN_EXCLUSIVE: {
-            for (DoubleInterval i : intervals) {
-                i.intersectWith(new DoubleInterval(doubleValue, Double.MAX_VALUE));
+            for (FloatInterval i : intervals) {
+                i.intersectWith(new FloatInterval(floatValue, Float.MAX_VALUE));
                 if (i.isEmpty()) {
                     isBottom = true;
                 }
             }
         } break;
         case MAX_INCLUSIVE: {
-            for (DoubleInterval i : intervals) {
-                i.intersectWith(new DoubleInterval(-Double.MAX_VALUE, doubleValue));
+            for (FloatInterval i : intervals) {
+                i.intersectWith(new FloatInterval(-Float.MAX_VALUE, floatValue));
                 if (i.isEmpty()) {
                     isBottom = true;
                 }
             }
         } break;
         case MAX_EXCLUSIVE: {
-            for (DoubleInterval i : intervals) {
-                i.intersectWith(new DoubleInterval(-Double.MAX_VALUE, doubleValue));
+            for (FloatInterval i : intervals) {
+                i.intersectWith(new FloatInterval(-Float.MAX_VALUE, floatValue));
                 if (i.isEmpty()) {
                     isBottom = true;
                 }
@@ -154,24 +154,24 @@ public class DatatypeRestrictionDouble
     }
     
     /**
-     * Returns a double such that it is greater than the given one and there is 
-     * no double that is smaller than the returned one and greater than the 
+     * Returns a float such that it is greater than the given one and there is 
+     * no float that is smaller than the returned one and greater than the 
      * given one. If the given one is -0.0, then the next greater one is +0.0. 
-     * @param value a double
-     * @return the next greater double compared to the given one or the value 
+     * @param value a float
+     * @return the next greater float compared to the given one or the value 
      * itself if it is NaN, +Infinity, or -Infinity
      */
-    public static double nextDouble(double value) {
-        long bits = Double.doubleToRawLongBits(value);
-        long magnitude = (bits & 0x7fffffffffffffffl);
+    public static float nextFloat(float value) {
+        int bits = Float.floatToRawIntBits(value);
+        int magnitude = bits & 0x7fffffff;
         // NaN or +inf or -inf -> no successor
-        if (DatatypeRestrictionDouble.isNaN(value) 
-                || magnitude == 0x7f80000000000000l) {
+        if (DatatypeRestrictionFloat.isNaN(value) 
+                || magnitude == 0x7f800000) {
             return value;
         } else {
-            boolean positive = ((bits & 0x8000000000000000l) == 0);
+            boolean positive = ((bits & 0x80000000) == 0);
             boolean newPositive;
-            long newMagnitude;
+            int newMagnitude;
             if (positive) {
                 newPositive = true;
                 newMagnitude = magnitude + 1;
@@ -183,30 +183,30 @@ public class DatatypeRestrictionDouble
                 newPositive = false;
                 newMagnitude = magnitude - 1;
             }
-            long newBits = newMagnitude | (newPositive ? 0 : 0x8000000000000000l);
-            return Double.longBitsToDouble(newBits);
+            int newBits = newMagnitude | (newPositive ? 0 : 0x80000000);
+            return Float.intBitsToFloat(newBits);
         }
     }
     
     /**
-     * Returns a double such that it is smaller than the given one and there is 
-     * no double that is greater than the returned one and smaller than the 
+     * Returns a float such that it is smaller than the given one and there is 
+     * no float that is greater than the returned one and smaller than the 
      * given one. If the given one is +0.0, then the next smaller one is -0.0. 
-     * @param value a double
-     * @return the next greater double compared to the given one or the value 
+     * @param value a float
+     * @return the next greater float compared to the given one or the value 
      * itself if it is NaN, +Infinity, or -Infinity
      */
-    public static double previousDouble(double value) {
-        long bits = Double.doubleToRawLongBits(value);
-        long magnitude = (bits & 0x7fffffffffffffffl);
+    public static float previousFloat(float value) {
+        int bits = Float.floatToRawIntBits(value);
+        int magnitude = (bits & 0x7fffffff);
         // NaN or -inf or +inf -> no predeccessor
-        if (DatatypeRestrictionDouble.isNaN(value) 
-                || magnitude == 0x7f80000000000000l) {
+        if (DatatypeRestrictionFloat.isNaN(value) 
+                || magnitude == 0x7f800000) {
             return value;
         } else {
-            boolean negative = ((bits & 0x8000000000000000l) != 0);
+            boolean negative = ((bits & 0x80000000) != 0);
             boolean newNegative;
-            long newMagnitude;
+            int newMagnitude;
             if (negative) {
                 newNegative = true;
                 newMagnitude = magnitude + 1;
@@ -218,21 +218,21 @@ public class DatatypeRestrictionDouble
                 newNegative = false;
                 newMagnitude = magnitude - 1;
             }
-            long newBits = newMagnitude | (newNegative ? 0x8000000000000000l : 0);
-            return Double.longBitsToDouble(newBits);
+            int newBits = newMagnitude | (newNegative ? 0x80000000 : 0);
+            return Float.intBitsToFloat(newBits);
         }
     }
     
     /**
-     * Determines whether the given double is the special value NaN (not a 
+     * Determines whether the given float is the special value NaN (not a 
      * number). 
-     * @param value a double
+     * @param value a float
      * @return true if the given value is NaN and false otherwise
      */
-    public static boolean isNaN(double value) {
-        long bits = Double.doubleToRawLongBits(value);
-        boolean result = (bits & 0x7ff0000000000000l) == 0x7ff0000000000000l;
-        result = result && (bits & 0x000fffffffffffffl) != 0;
+    public static boolean isNaN(float value) {
+        int bits = Float.floatToRawIntBits(value);
+        boolean result = (bits & 0x7f800000) == 0x7f800000;
+        result = result && (bits & 0x003fffff) != 0;
         return result;
     }
     
@@ -241,28 +241,29 @@ public class DatatypeRestrictionDouble
      */
     public boolean accepts(DataConstant constant) {
         if (!(constant.getImplementation() == Impl.IInteger 
+                || constant.getImplementation() == Impl.IFloat
                 || constant.getImplementation() == Impl.IDouble
                 || constant.getImplementation() == Impl.IDecimal)) {
             return false;
         }
         String value = constant.getValue();
-        double doubleValue = Double.parseDouble(value);
-        if (doubleValue == Float.POSITIVE_INFINITY) {
+        float floatValue = Float.parseFloat(value);
+        if (floatValue == Float.POSITIVE_INFINITY) {
             return hasExplicitMax ? false : true; 
         }
-        if (doubleValue == Float.NEGATIVE_INFINITY) {
+        if (floatValue == Float.NEGATIVE_INFINITY) {
             return hasExplicitMin ? false : true; 
         }
-        if (isNaN(doubleValue)) {
+        if (isNaN(floatValue)) {
             return (hasExplicitMax || hasExplicitMin) ? false : true; 
         }
-        if (constant.getImplementation() == Impl.IDecimal) {
+        if (constant.getImplementation() != Impl.IFloat) {
             BigDecimal dbd = new BigDecimal(value);
-            if (dbd.compareTo(new BigDecimal("" + -Double.MAX_VALUE)) <= 0 
-                    || dbd.compareTo(new BigDecimal("" + Double.MAX_VALUE)) >= 0) {
+            if (dbd.compareTo(new BigDecimal("" + -Float.MAX_VALUE)) <= 0 
+                    || dbd.compareTo(new BigDecimal("" + Float.MAX_VALUE)) >= 0) {
                 return false;
             } 
-            value = "" + dbd.doubleValue();
+            value = "" + dbd.floatValue();
         }
         if (!oneOf.isEmpty()) {
             return oneOf.contains(constant);
@@ -271,8 +272,8 @@ public class DatatypeRestrictionDouble
             return false;
         } 
         if (intervals.isEmpty()) return true;
-        for (DoubleInterval i : intervals) {
-            if (i.contains(doubleValue)) {
+        for (FloatInterval i : intervals) {
+            if (i.contains(floatValue)) {
                 return true;
             }
         }
@@ -287,15 +288,15 @@ public class DatatypeRestrictionDouble
             throw new RuntimeException("Cannot add facets to negated " +
                         "data ranges!");
         }
-        if (!(range instanceof DoubleFacet)) {
+        if (!(range instanceof FloatFacet)) {
             throw new IllegalArgumentException("The given parameter is not " +
                     "an instance of DatatypeRestrictionInteger. It is " +
                     "only allowed to add facets from other integer " +
                     "datatype restrictions. ");
         }
         if (!isBottom()) {
-            DoubleFacet restr = (DoubleFacet) range;
-            if (restr.getDoubleIntervals().size() > 1) {
+            FloatFacet restr = (FloatFacet) range;
+            if (restr.getFloatIntervals().size() > 1) {
                 throw new IllegalArgumentException("The given parameter " +
                         "contains more than one interval. ");
             }
@@ -307,38 +308,38 @@ public class DatatypeRestrictionDouble
                 hasExplicitMin = hasExplicitMin || restr.hasExplicitMin();
             }
             if (intervals.isEmpty()) {
-                for (DoubleInterval i : restr.getDoubleIntervals()) {
+                for (FloatInterval i : restr.getFloatIntervals()) {
                     if (restr.isNegated()) {
                         if (!i.isEmpty()) {
-                            if (i.getMin() > -Double.MAX_VALUE) {
-                                intervals.add(new DoubleInterval(-Double.MAX_VALUE, i.getMin()));
+                            if (i.getMin() > -Float.MAX_VALUE) {
+                                intervals.add(new FloatInterval(-Float.MAX_VALUE, i.getMin()));
                             }
-                            if (i.getMax() < Double.MAX_VALUE) {
-                                intervals.add(new DoubleInterval(i.getMax(), Double.MAX_VALUE));
+                            if (i.getMax() < Float.MAX_VALUE) {
+                                intervals.add(new FloatInterval(i.getMax(), Float.MAX_VALUE));
                             }
                         } // otherwise i is trivially satisfied 
                     } else {
-                        intervals = restr.getDoubleIntervals();
+                        intervals = restr.getFloatIntervals();
                     }
                 }
             } else {
-                Set<DoubleInterval> newIntervals = new HashSet<DoubleInterval>();
+                Set<FloatInterval> newIntervals = new HashSet<FloatInterval>();
                 if (restr.isNegated()) {
-                    for (DoubleInterval i1 : intervals) {
-                        for (DoubleInterval i2 : restr.getDoubleIntervals()) {
+                    for (FloatInterval i1 : intervals) {
+                        for (FloatInterval i2 : restr.getFloatIntervals()) {
                             if (!i2.isEmpty()) {
-                                if (i2.getMin() > -Double.MAX_VALUE) {
-                                    DoubleInterval newInterval = i1.getCopy();
-                                    double newMin = DatatypeRestrictionDouble.previousDouble(i2.getMin());
-                                    newInterval.intersectWith(new DoubleInterval(-Double.MAX_VALUE, newMin));
+                                if (i2.getMin() > -Float.MAX_VALUE) {
+                                    FloatInterval newInterval = i1.getCopy();
+                                    float newMin = DatatypeRestrictionFloat.previousFloat(i2.getMin());
+                                    newInterval.intersectWith(new FloatInterval(-Float.MAX_VALUE, newMin));
                                     if (!newInterval.isEmpty()) {
                                         newIntervals.add(newInterval);
                                     }
                                 } 
-                                if (i2.getMax() < Double.MAX_VALUE) {
-                                    DoubleInterval newInterval = i1.getCopy();
-                                    double newMax = DatatypeRestrictionDouble.nextDouble(i2.getMax()); 
-                                    newInterval.intersectWith(new DoubleInterval(newMax, Double.MAX_VALUE));
+                                if (i2.getMax() < Float.MAX_VALUE) {
+                                    FloatInterval newInterval = i1.getCopy();
+                                    float newMax = DatatypeRestrictionFloat.nextFloat(i2.getMax()); 
+                                    newInterval.intersectWith(new FloatInterval(newMax, Float.MAX_VALUE));
                                     if (!newInterval.isEmpty()) {
                                         newIntervals.add(newInterval);
                                     }
@@ -349,11 +350,11 @@ public class DatatypeRestrictionDouble
                         }
                     }
                 } else {
-                    if (restr.getDoubleIntervals().isEmpty()) {
+                    if (restr.getFloatIntervals().isEmpty()) {
                         newIntervals = intervals;
                     } else {
-                        for (DoubleInterval i1 : intervals) {
-                            for (DoubleInterval i2 : restr.getDoubleIntervals()) {
+                        for (FloatInterval i1 : intervals) {
+                            for (FloatInterval i2 : restr.getFloatIntervals()) {
                                 i1.intersectWith(i2);
                                 if (!i1.isEmpty()) newIntervals.add(i1);
                             }
@@ -379,16 +380,16 @@ public class DatatypeRestrictionDouble
                 return (n.compareTo(new BigInteger("" + oneOf.size())) >= 0);
             }
             BigInteger rangeSize = BigInteger.ZERO;
-            for (DoubleInterval i : intervals) {
+            for (FloatInterval i : intervals) {
                 rangeSize = rangeSize.add(i.getCardinality());
             }
             // plus NaN, +Inf, -Inf
             rangeSize = rangeSize.add(new BigInteger("3"));
             for (DataConstant constant : notOneOf) {
-                double not = Double.parseDouble(constant.getValue());
-                for (DoubleInterval i : intervals) {
-                    if (i.contains(not) || DatatypeRestrictionDouble.isNaN(not) 
-                            || Double.isInfinite(not)) {
+                float not = Float.parseFloat(constant.getValue());
+                for (FloatInterval i : intervals) {
+                    if (i.contains(not) || DatatypeRestrictionFloat.isNaN(not) 
+                            || Float.isInfinite(not)) {
                         rangeSize = rangeSize.subtract(BigInteger.ONE);
                     }
                 }
@@ -407,7 +408,7 @@ public class DatatypeRestrictionDouble
             return new BigInteger("" + oneOf.size());
         }
         BigInteger rangeSize = BigInteger.ZERO;
-        for (DoubleInterval i : intervals) {
+        for (FloatInterval i : intervals) {
             rangeSize = rangeSize.add(i.getCardinality());
         }
         // plus NaN, +Inf, -Inf
@@ -417,10 +418,10 @@ public class DatatypeRestrictionDouble
         if (hasExplicitMin || hasExplicitMax) numSpecials--; // NaN impossible
         rangeSize = rangeSize.add(new BigInteger("" + numSpecials));
         for (DataConstant constant : notOneOf) {
-            double not = Double.parseDouble(constant.getValue());
-            for (DoubleInterval i : intervals) {
-                if (i.contains(not) || DatatypeRestrictionDouble.isNaN(not) 
-                        || Double.isInfinite(not)) {
+            float not = Float.parseFloat(constant.getValue());
+            for (FloatInterval i : intervals) {
+                if (i.contains(not) || DatatypeRestrictionFloat.isNaN(not) 
+                        || Float.isInfinite(not)) {
                     rangeSize = rangeSize.subtract(BigInteger.ONE);
                 }
             }
@@ -437,26 +438,26 @@ public class DatatypeRestrictionDouble
                 SortedSet<DataConstant> sortedOneOfs = new TreeSet<DataConstant>(oneOf);
                 return sortedOneOfs.first();
             }
-            DataConstant dataConstant = new DataConstant(Impl.IDouble, datatype, "Infinity");
+            DataConstant dataConstant = new DataConstant(Impl.IFloat, datatype, "Infinity");
             if (!notOneOf.contains(dataConstant) && !hasExplicitMax) {
                 return dataConstant;
             }
-            dataConstant = new DataConstant(Impl.IDouble, datatype, "-Infinity");
+            dataConstant = new DataConstant(Impl.IFloat, datatype, "-Infinity");
             if (!notOneOf.contains(dataConstant) && !hasExplicitMin) {
                 return dataConstant;
             }
-            dataConstant = new DataConstant(Impl.IDouble, datatype, "NaN");
+            dataConstant = new DataConstant(Impl.IFloat, datatype, "NaN");
             if (!notOneOf.contains(dataConstant) && !hasExplicitMax && !hasExplicitMin) {
                 return dataConstant;
             }
-            SortedSet<DoubleInterval> sortedIntervals = new TreeSet<DoubleInterval>(IntervalComparator.INSTANCE);
+            SortedSet<FloatInterval> sortedIntervals = new TreeSet<FloatInterval>(IntervalComparator.INSTANCE);
             sortedIntervals.addAll(intervals);
-            for (DoubleInterval i : sortedIntervals) {
-                double constant = i.getMin();
+            for (FloatInterval i : sortedIntervals) {
+                float constant = i.getMin();
                 while (constant <= i.getMax()) {
-                    dataConstant = new DataConstant(Impl.IDouble, datatype, "" + constant);
+                    dataConstant = new DataConstant(Impl.IFloat, datatype, "" + constant);
                     if (!notOneOf.contains(dataConstant)) return dataConstant;
-                    constant = DatatypeRestrictionDouble.nextDouble(constant); 
+                    constant = DatatypeRestrictionFloat.nextFloat(constant); 
                 }
             }
         }
@@ -464,60 +465,24 @@ public class DatatypeRestrictionDouble
     }
     
     /* (non-Javadoc)
-     * @see org.semanticweb.HermiT.model.dataranges.DoubleFacet#getDoubleIntervals()
+     * @see org.semanticweb.HermiT.model.dataranges.FloatFacet#getFloatIntervals()
      */
-    public Set<DoubleInterval> getDoubleIntervals() {
+    public Set<FloatInterval> getFloatIntervals() {
         return intervals;
     }
     
     /* (non-Javadoc)
-     * @see org.semanticweb.HermiT.model.dataranges.DoubleFacet#hasExplicitMin()
+     * @see org.semanticweb.HermiT.model.dataranges.FloatFacet#hasExplicitMin()
      */
     public boolean hasExplicitMin() {
         return hasExplicitMin;
     }
 
     /* (non-Javadoc)
-     * @see org.semanticweb.HermiT.model.dataranges.DoubleFacet#hasExplicitMax()
+     * @see org.semanticweb.HermiT.model.dataranges.FloatFacet#hasExplicitMax()
      */
     public boolean hasExplicitMax() {
         return hasExplicitMax;
-    }
-
-    public Set<FloatInterval> getFloatIntervals() {
-        Set<FloatInterval> floatIntervals = new HashSet<FloatInterval>();
-        if (!intervals.isEmpty()) {
-            for (DoubleInterval i : intervals) {
-                Double min = i.getMin();
-                Double max = i.getMax();
-                float minF = -Float.MAX_VALUE;
-                float maxF = Float.MAX_VALUE;
-                boolean isEmpty = false;
-                if (min >= -Float.MAX_VALUE) {
-                    if (min <= Float.MAX_VALUE) {
-                        minF = min.floatValue();
-                    } else {
-                        // >= max float -> empty range
-                        isEmpty = true;
-                    }
-                } // minF = -Float.MAX_VALUE
-                if (max <= Float.MAX_VALUE) {
-                    if (max >= -Float.MAX_VALUE) {
-                        maxF = max.floatValue();
-                    } else {
-                        // <= min float -> empty range
-                        isEmpty = true;
-                    }
-                } // maxF = Float.MAX_VALUE
-                if (isEmpty) {
-                    minF = Float.MAX_VALUE;
-                    maxF = Float.MIN_VALUE;
-                }
-                FloatInterval iFloat = new FloatInterval(minF, maxF);
-                floatIntervals.add(iFloat);
-            }
-        }
-        return floatIntervals;
     }
     
     /* (non-Javadoc)
@@ -526,10 +491,10 @@ public class DatatypeRestrictionDouble
     public Set<IntegerInterval> getIntegerIntervals() {
         Set<IntegerInterval> integerIntervals = new HashSet<IntegerInterval>();
         if (!intervals.isEmpty()) {
-            for (DoubleInterval i : intervals) {
+            for (FloatInterval i : intervals) {
                 IntegerInterval iInteger;
-                Double min = i.getMin();
-                Double max = i.getMax();
+                Float min = i.getMin();
+                Float max = i.getMax();
                 BigInteger minBig = new BigDecimal("" + Math.ceil(min)).toBigInteger();
                 BigInteger maxBig = new BigDecimal("" + Math.floor(max)).toBigInteger();
                 if (IntegerIntervalFin.isLong(minBig) 
@@ -554,7 +519,7 @@ public class DatatypeRestrictionDouble
     protected String printExtraInfo(Namespaces namespaces) {
         boolean firstRun = true;
         StringBuffer buffer = new StringBuffer();
-        for (DoubleInterval i : intervals) {
+        for (FloatInterval i : intervals) {
             if (!firstRun && !isNegated) {
                 buffer.append(" or ");
             }
@@ -571,7 +536,7 @@ public class DatatypeRestrictionDouble
      * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#datatypeAccepts(org.semanticweb.HermiT.model.dataranges.DataConstant)
      */
     public boolean datatypeAccepts(DataConstant constant) {
-        return DT.getSubTreeFor(DT.DOUBLE).contains(constant.getDatatype());
+        return DT.getSubTreeFor(DT.FLOAT).contains(constant.getDatatype());
     }
     
     /* (non-Javadoc)
@@ -586,9 +551,9 @@ public class DatatypeRestrictionDouble
      * min values. We assume here that all intervals are disjoint. 
      * @author BGlimm
      */
-    protected static class IntervalComparator implements Comparator<DoubleInterval> { 
-        public static Comparator<DoubleInterval> INSTANCE = new IntervalComparator();
-        public int compare(DoubleInterval i1, DoubleInterval i2) {
+    protected static class IntervalComparator implements Comparator<FloatInterval> { 
+        public static Comparator<FloatInterval> INSTANCE = new IntervalComparator();
+        public int compare(FloatInterval i1, FloatInterval i2) {
             if (i1.getMin() == i2.getMin()) return 0;
             return (i1.getMin() - i2.getMin() > 0) ? 1 : -1;
         }

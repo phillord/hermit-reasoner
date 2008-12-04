@@ -26,7 +26,6 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         super(name);
     }
     
-    
     public void testDataPropertiesHasValue1() throws Exception {
         String axioms = "SubClassOf(Eighteen DataHasValue(hasAge \"18\"^^xsd:integer))";
         OWLOntology ontology = getOWLOntologyWithAxioms(axioms);
