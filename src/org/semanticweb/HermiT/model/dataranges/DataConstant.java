@@ -35,14 +35,12 @@ public class DataConstant implements Comparable<DataConstant>, Serializable {
     public static Set<DataConstant> numericSpecials = new HashSet<DataConstant>();
     
     static {
-        numericSpecials.add(new DataConstant(Impl.IDouble, DT.DOUBLE, "-0.0"));
+        // also the specials are doubles here, they count also as floats, since 
+        // the equals methods handles this
+        numericSpecials.add(new DataConstant(Impl.IDouble, DT.DOUBLE, "-0.0")); 
         numericSpecials.add(new DataConstant(Impl.IDouble, DT.DOUBLE, "NaN"));
-        numericSpecials.add(new DataConstant(Impl.IDouble, DT.DOUBLE, "+Infinity"));
+        numericSpecials.add(new DataConstant(Impl.IDouble, DT.DOUBLE, "Infinity"));
         numericSpecials.add(new DataConstant(Impl.IDouble, DT.DOUBLE, "-Infinity"));
-        numericSpecials.add(new DataConstant(Impl.IFloat, DT.FLOAT, "-0.0"));
-        numericSpecials.add(new DataConstant(Impl.IFloat, DT.FLOAT, "NaN"));
-        numericSpecials.add(new DataConstant(Impl.IFloat, DT.FLOAT, "+Infinity"));
-        numericSpecials.add(new DataConstant(Impl.IFloat, DT.FLOAT, "-Infinity"));
     }
     
     /**
@@ -161,7 +159,8 @@ public class DataConstant implements Comparable<DataConstant>, Serializable {
                 && (datatype.equals(DT.DOUBLE) || datatype.equals(DT.FLOAT))
                 && (constant.getDatatype().equals(DT.DOUBLE) || constant.getDatatype().equals(DT.FLOAT))
                 && ((constant.getValue().equals("Infinity") && value.equals("Infinity"))
-                || (constant.getValue().equals("-Infinity") && value.equals("-Infinity")))) {
+                || (constant.getValue().equals("-Infinity") && value.equals("-Infinity"))
+                || (constant.getValue().equals("-0.0") && value.equals("-0.0")))) {
             return true;
         }
         return (implementation == null ? implementation == constant.getImplementation() 
@@ -177,12 +176,14 @@ public class DataConstant implements Comparable<DataConstant>, Serializable {
     public int hashCode() {
         int hashCode = 17;
         int impl;
-        // although +Inf and -Inf can use different implementations (float and 
-        // double) they are the same
+        // although Infinity and -Infinity can use different implementations 
+        // (float and double) they are the same
         if (implementation != null 
                 && implementation == Impl.IFloat 
                 && value != null 
-                && (value.equals("Infinity") || value.equals("-Infinity"))) {
+                && (value.equals("-0.0") 
+                        || value.equals("Infinity") 
+                        || value.equals("-Infinity"))) {
             impl = Impl.IDouble.hashCode();
         } else {
             impl = (implementation != null ? implementation.hashCode() : 0);

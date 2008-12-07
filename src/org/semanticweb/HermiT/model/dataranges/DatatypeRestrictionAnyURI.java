@@ -4,6 +4,8 @@
 
 package org.semanticweb.HermiT.model.dataranges;
 
+import org.semanticweb.HermiT.model.dataranges.DataConstant.Impl;
+
 import dk.brics.automaton.Datatypes;
 
 /**
@@ -29,7 +31,7 @@ public class DatatypeRestrictionAnyURI extends DatatypeRestrictionString {
      * @see org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionString#datatypeAccepts(org.semanticweb.HermiT.model.dataranges.DataConstant)
      */
     public boolean datatypeAccepts(DataConstant constant) {
-        return DT.getSubTreeFor(DT.ANYURI).contains(constant.getDatatype());
+        return constant.getImplementation() == Impl.IAnyURI;
     }
     
     /* (non-Javadoc)

@@ -490,7 +490,7 @@ public class DatatypeRestrictionBase64Binary
      * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#datatypeAccepts(org.semanticweb.HermiT.model.dataranges.DataConstant)
      */
     public boolean datatypeAccepts(DataConstant constant) {
-        return DT.getSubTreeFor(DT.BASE64BINARY).contains(constant.getDatatype());
+        return constant.getImplementation() == Impl.IBase64Binary;
     }
     
     /* (non-Javadoc)

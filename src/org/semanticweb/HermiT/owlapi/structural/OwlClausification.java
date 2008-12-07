@@ -1476,11 +1476,12 @@ public class OwlClausification {
         
         public void visit(OWLDataType dataType) {
             if (dataType.equals(factory.getOWLDataType(DT.OWLREALPLUS.getURI()))) {
-                currentDataRange = new DatatypeRestrictionOWLRealPlus(DT.DECIMAL, true); 
-            } else if (dataType.equals(factory.getOWLDataType(DT.OWLREAL.getURI())) 
-                    || dataType.equals(factory.getOWLDataType(DT.DECIMAL.getURI()))) {
+                currentDataRange = new DatatypeRestrictionOWLRealPlus(DT.OWLREALPLUS, true); 
+            } else if (dataType.equals(factory.getOWLDataType(DT.OWLREAL.getURI()))) {
+                currentDataRange = new DatatypeRestrictionOWLRealPlus(DT.OWLREAL, false); 
+            } else if (dataType.equals(factory.getOWLDataType(DT.DECIMAL.getURI()))) {
                 currentDataRange = new DatatypeRestrictionOWLRealPlus(DT.DECIMAL, false); 
-            }  else if (dataType.equals(factory.getOWLDataType(DT.RATIONAL.getURI()))) {
+            } else if (dataType.equals(factory.getOWLDataType(DT.RATIONAL.getURI()))) {
                 currentDataRange = new DatatypeRestrictionRational(DT.RATIONAL); 
             } else if (dataType.equals(factory.getOWLDataType(DT.DOUBLE.getURI()))) {
                 currentDataRange = new DatatypeRestrictionDouble(DT.DOUBLE); 

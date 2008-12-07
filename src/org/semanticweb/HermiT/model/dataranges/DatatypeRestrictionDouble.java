@@ -570,7 +570,9 @@ public class DatatypeRestrictionDouble
      * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#datatypeAccepts(org.semanticweb.HermiT.model.dataranges.DataConstant)
      */
     public boolean datatypeAccepts(DataConstant constant) {
-        return DT.getSubTreeFor(DT.DOUBLE).contains(constant.getDatatype());
+        return constant.getImplementation() == Impl.IDouble
+                || constant.getImplementation() == Impl.IFloat
+                || constant.getImplementation() == Impl.IInteger;
     }
     
     /* (non-Javadoc)

@@ -80,6 +80,24 @@ public class DatatypesTest extends AbstractReasonerTest {
         loadOntologyWithAxioms(axioms, null);
         assertABoxSatisfiable(false);
     }
+
+    public void testAllValuesFromMixed() throws Exception {
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3.0\"^^xsd:float \"4\"^^xsd:integer))) " 
+                + "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3.0\"^^xsd:decimal)))"
+                + "SubClassOf(A DataSomeValuesFrom(dp DatatypeRestriction(xsd:integer maxInclusive \"3\"^^xsd:short)))"
+                + "ClassAssertion(a A)";
+        loadOntologyWithAxioms(axioms, null);
+        assertABoxSatisfiable(true);
+    }
+    
+    public void testAllValuesFromMixed2() throws Exception {
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3.0\"^^xsd:double \"4\"^^xsd:integer))) " 
+                + "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"2\"^^xsd:integer \"3.0\"^^xsd:decimal)))"
+                + "ClassAssertion(a A)"
+                + "ClassAssertion(a DataSomeValuesFrom(dp DataComplementOf(DataOneOf(\"3\"^^xsd:integer))))";
+        loadOntologyWithAxioms(axioms, null);
+        assertABoxSatisfiable(false);
+    }
     
     public void testAllValuesFromDifferentTypes() throws Exception {
         String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3\"^^xsd:integer \"4\"^^xsd:int))) " 
@@ -183,10 +201,11 @@ public class DatatypesTest extends AbstractReasonerTest {
     
     public void testIntPlusDecimal() throws Exception {
         // forall dp integer >= 5 <=7
-        // forall dp decimal >=6 <=15
+        // forall dp decimal >=6 <=6.8
         String axioms = "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:byte minInclusive \"4.5\"^^xsd:decimal maxInclusive \"7\"^^xsd:short))) "
             + "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:decimal minInclusive \"6.0\"^^xsd:float maxInclusive \"6.8\"^^xsd:decimal))) " 
-            + "ClassAssertion(a A)";
+            + "ClassAssertion(a A) " 
+            + "ClassAssertion(a DataSomeValuesFrom(dp rdfs:Literal))";
         loadOntologyWithAxioms(axioms, null);
         assertABoxSatisfiable(true);
     }
@@ -202,10 +221,9 @@ public class DatatypesTest extends AbstractReasonerTest {
         loadOntologyWithAxioms(axioms, null);
         assertABoxSatisfiable(false);
     }
-    
-    // till here created test files
+
     public void testDoublePlusDecimal() throws Exception {
-        // forall dp integer >= 5 <=7.2
+        // forall dp double >= 5 <=7.2
         // forall dp decimal >=6.0 <=6.8
         String axioms = "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:double minInclusive \"5\"^^xsd:byte maxInclusive \"7.2\"^^xsd:float))) "
             + "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:decimal minInclusive \"6.0\"^^xsd:float maxInclusive \"6.8\"^^xsd:decimal))) "
@@ -273,10 +291,10 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertABoxSatisfiable(false);
     }
     
-    public void testRationals2() throws Exception {
+    public void testRealInfinity() throws Exception {
         String axioms = "ClassAssertion(a DataAllValuesFrom(dp " 
-                + "DataOneOf(\"1/2\"^^owl:rational \"0.5\"^^xsd:double)))" 
-                + "DataPropertyAssertion(dp a \"Infinity\"^^xsd:float)";
+                + "owl:real))" 
+                + "DataPropertyAssertion(dp a \"+INF\"^^xsd:float)";
         loadOntologyWithAxioms(axioms, null);
         assertABoxSatisfiable(false);
     }

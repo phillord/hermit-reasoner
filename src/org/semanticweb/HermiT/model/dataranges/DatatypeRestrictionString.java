@@ -270,7 +270,7 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
      * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#datatypeAccepts(org.semanticweb.HermiT.model.dataranges.DataConstant)
      */
     public boolean datatypeAccepts(DataConstant constant) {
-        return DT.getSubTreeFor(DT.RDFTEXT).contains(constant.getDatatype());
+        return constant.getImplementation() == Impl.IString;
     }
     
     /* (non-Javadoc)

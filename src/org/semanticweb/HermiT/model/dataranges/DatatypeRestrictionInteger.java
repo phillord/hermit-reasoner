@@ -372,7 +372,7 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction
      * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#datatypeAccepts(org.semanticweb.HermiT.model.dataranges.DataConstant)
      */
     public boolean datatypeAccepts(DataConstant constant) {
-        return DT.getSubTreeFor(DT.INTEGER).contains(constant.getDatatype());
+        return constant.getImplementation() == Impl.IInteger;
     }
     
     /* (non-Javadoc)

@@ -14,6 +14,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.semanticweb.HermiT.Namespaces;
+import org.semanticweb.HermiT.model.dataranges.DataConstant.Impl;
 
 /**
  * An implementation of owlReal and owlRealPlus datatype restrictions. 
@@ -490,7 +491,11 @@ public class DatatypeRestrictionRational
      * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#datatypeAccepts(org.semanticweb.HermiT.model.dataranges.DataConstant)
      */
     public boolean datatypeAccepts(DataConstant constant) {
-        return DT.getSubTreeFor(DT.RATIONAL).contains(constant.getDatatype());
+        return constant.getImplementation() == Impl.IRational 
+                || constant.getImplementation() == Impl.IDecimal 
+                || constant.getImplementation() == Impl.IDouble
+                || constant.getImplementation() == Impl.IFloat
+                || constant.getImplementation() == Impl.IInteger;
     }
     
     /* (non-Javadoc)

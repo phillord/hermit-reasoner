@@ -371,10 +371,7 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
      * @see org.semanticweb.HermiT.model.dataranges.CanonicalDataRange#datatypeAccepts(org.semanticweb.HermiT.model.dataranges.DataConstant)
      */
     public boolean datatypeAccepts(DataConstant constant) {
-        Set<DT> supportedDTs = new HashSet<DT>();
-        supportedDTs.add(DT.DATETIME);
-        supportedDTs.add(DT.OWLDATETIME);
-        return supportedDTs.contains(constant.getDatatype());
+        return constant.getImplementation() == Impl.IDateTime;
     }
     
     /* (non-Javadoc)
