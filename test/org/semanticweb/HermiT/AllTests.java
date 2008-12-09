@@ -24,6 +24,8 @@ public class AllTests extends TestCase {
         // These tests still rely on the KAON2 API in some places and need to be
         // adapted and properly categorized.
         suite.addTest(org.semanticweb.HermiT.tableau.AllTests.suite());
+        // Unit tests for various utility functions.
+        suite.addTest(org.semanticweb.HermiT.util.AllTests.suite());
         // $JUnit-END$
         return suite;
     }
