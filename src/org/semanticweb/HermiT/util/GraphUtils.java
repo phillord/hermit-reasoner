@@ -3,24 +3,25 @@ package org.semanticweb.HermiT.util;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.HashSet;
 
 public class GraphUtils {
     public static <T> void transitivelyClose(Map<T, Set<T>> relation) {
-        boolean changed = true;
-        List<T> temp = new ArrayList<T>();
-        while (changed) {
-            changed = false;
-            for (Map.Entry<T, Set<T>> e : relation.entrySet()) {
-                temp.clear();
-                temp.addAll(e.getValue());
-                for (int i = temp.size() - 1; i >= 0; --i) {
-                    Set<T> sub = relation.get(temp.get(i));
-                    if (sub != null) {
-                        if (e.getValue().addAll(sub)) {
-                            changed = true;
-                        }
+        // We follow the outline of Warshall's algorithm, which runs in O(n^3),
+        // but do our best to avoid the cubic blowup if we can:
+        HashSet<T> toProcess = new HashSet<T>();
+        for (Set<T> reachable : relation.values()) {
+            toProcess.clear();
+            toProcess.addAll(reachable);
+            toProcess.retainAll(relation.keySet());
+            while (!toProcess.isEmpty()) {
+                // In the worst case we end up visiting every possible value.
+                T intermediate = toProcess.iterator().next();
+                toProcess.remove(intermediate);
+                for (T fresh : relation.get(intermediate)) {
+                    if (reachable.add(fresh) &&
+                        relation.containsKey(fresh)) {
+                        toProcess.add(fresh);
                     }
                 }
             }
