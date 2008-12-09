@@ -278,11 +278,16 @@ public final class Tableau implements Serializable {
     public Node getCheckedNode() {
         return m_checkedNode;
     }
+    private boolean hasNominals() {
+        return m_dlOntology.hasNominals() ||
+                !additionalPositiveFacts.isEmpty() ||
+                !additionalNegativeFacts.isEmpty();
+    }
     public boolean isSatisfiable(AtomicConcept atomicConcept) {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isSatisfiableStarted(atomicConcept);
         clear();
-        if (m_dlOntology.hasNominals()) {
+        if (hasNominals()) {
             loadABox();
         }
         m_checkedNode=createNewOriginalNode(m_dependencySetFactory.emptySet(),0);
@@ -297,7 +302,7 @@ public final class Tableau implements Serializable {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isSubsumedByStarted(subconcept,superconcept);
         clear();
-        if (m_dlOntology.hasNominals())
+        if (hasNominals())
             loadABox();
         m_checkedNode=createNewOriginalNode(m_dependencySetFactory.emptySet(),0);
         m_extensionManager.addConceptAssertion(subconcept,m_checkedNode,m_dependencySetFactory.emptySet());
@@ -314,7 +319,7 @@ public final class Tableau implements Serializable {
     
     public boolean isAsymmetric(AtomicRole role) {
         clear();
-        if (m_dlOntology.hasNominals()) {
+        if (hasNominals()) {
             loadABox();
         }
         Node a = createNewOriginalNode(m_dependencySetFactory.emptySet(), 0);
