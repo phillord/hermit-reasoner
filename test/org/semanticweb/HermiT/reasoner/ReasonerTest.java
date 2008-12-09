@@ -1,5 +1,14 @@
 package org.semanticweb.HermiT.reasoner;
 
+import java.net.URI;
+import org.semanticweb.owl.apibinding.OWLManager;
+import org.semanticweb.owl.model.OWLClass;
+import org.semanticweb.owl.model.OWLDataFactory;
+import org.semanticweb.owl.model.OWLDescription;
+import org.semanticweb.owl.model.OWLException;
+import org.semanticweb.owl.model.OWLIndividual;
+import org.semanticweb.owl.model.OWLOntologyManager;
+
 
 public class ReasonerTest extends AbstractReasonerTest {
 
@@ -721,5 +730,20 @@ public class ReasonerTest extends AbstractReasonerTest {
                 "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Anjou",
                 "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FullBodiedWine",
                 false);
+    }
+    
+    public void testNovelNominals() throws Exception {
+        String axioms = "ClassAssertion(a C)";
+        loadOntologyWithAxioms(axioms, null);
+
+        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+        OWLDataFactory df = manager.getOWLDataFactory();
+        OWLIndividual a = df.getOWLIndividual(URI.create("file:/c/test.owl#a"));
+        OWLClass c = df.getOWLClass(URI.create("file:/c/test.owl#C"));
+        OWLDescription desc = df.getOWLObjectIntersectionOf(
+            df.getOWLObjectOneOf(a),
+            df.getOWLObjectComplementOf(c));
+
+        assertFalse(hermit.isClassSatisfiable(desc));
     }
 }
