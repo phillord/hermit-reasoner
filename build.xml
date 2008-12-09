@@ -127,7 +127,8 @@
         </jar>
     </target>
     
-    <target name="combined" depends="compile,flatten-owlapi,javadoc">
+    <target name="combined" depends="flatten-owlapi,javadoc,quick"/>
+    <target name="quick" depends="compile">
         <mkdir dir="${releasedir}"/>
         <javac destdir="${classdir}" deprecation="yes">
             <compilerarg value="-Xlint:all"/>
