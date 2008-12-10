@@ -1,4 +1,4 @@
-﻿<?xml version="1.0"?>
+<?xml version="1.0"?>
 <!-- Copyright 2008 by Oxford University; see license.txt for details -->
 
 <project name="HermiT" default="combined" basedir=".">
@@ -13,6 +13,10 @@
     <property name="revision" value="0.9.3a"/>
     <property name="version" value="${revision}"/>
 
+    <!-- general info -->
+    <property name="homepage" value="http://www.hermit-reasoner.com"/>
+    <property name="updatefile" value="${homepage}/protege/update.properties"/>
+    
     <!-- structure of output files -->
     <property name="projectroot" value="."/>
     <property name="builddir" value="${projectroot}/build"/>
@@ -126,8 +130,9 @@
             <fileset dir="${flattendir}"/>
         </jar>
     </target>
-    
+
     <target name="combined" depends="flatten-owlapi,javadoc,quick"/>
+    
     <target name="quick" depends="compile">
         <mkdir dir="${releasedir}"/>
         <javac destdir="${classdir}" deprecation="yes">
@@ -153,6 +158,12 @@
                 <filter token="VERSION" value="${version}"/>
             </filterset>
         </copy>
+        <copy file="${projectroot}/plugin/update.properties" tofile="${releasedir}/update.properties">
+            <filterset>
+                <filter token="VERSION" value="${version}"/>
+                <filter token="HOMEPAGE" value="${homepage}"/>
+            </filterset>
+        </copy>
         <jar jarfile="${HermiTjar}">
             <manifest>
                 <attribute name="Implementation-Title" value="HermiT"/>
@@ -164,12 +175,13 @@
                 <attribute name="Bundle-SymbolicName" value="org.semanticweb.HermiT;singleton:=true"/>
                 <attribute name="Bundle-Category" value="protege"/>
                 <attribute name="Bundle-Description" value="A plugin for the Protege OWL Editor which allows reasoning using the HermiT reasoner"/>
-                <attribute name="Bundle-DocURL" value="http://hermit-reasoner.com"/>
+                <attribute name="Bundle-DocURL" value="${homepage}"/>
                 <attribute name="Bundle-Vendor" value="Boris Motik, Rob Shearer, and Ian Horrocks"/>
                 <attribute name="Bundle-Version" value="0.${revision}"/>
                 <attribute name="Bundle-Activator" value="org.protege.editor.core.plugin.DefaultPluginActivator"/>
                 <attribute name="Bundle-ClassPath" value="."/>
                 <attribute name="Require-Bundle" value="org.protege.common,org.protege.editor.core.application,org.protege.editor.owl,org.semanticweb.owl.owlapi"/>
+                <attribute name="Update-Url" value="${updatefile}"/>
             </manifest>
             <fileset dir="${classdir}"/>
             <fileset dir="${flattendir}"/>
