@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.ArrayList;
 
 import org.semanticweb.HermiT.blocking.AncestorBlocking;
 import org.semanticweb.HermiT.blocking.AnywhereBlocking;
@@ -414,10 +415,17 @@ public class Reasoner implements Serializable {
         getAtomicConceptHierarchy() {
         if (atomicConceptHierarchy == null) {
             if (true) {
+                Collection<AtomicConcept> concepts
+                    = new ArrayList<AtomicConcept>();
+                for (AtomicConcept c : m_dlOntology.getAllAtomicConcepts()) {
+                    if (!InternalNames.isInternalUri(c.getURI())) {
+                        concepts.add(c);
+                    }
+                }
                 atomicConceptHierarchy =
                     classifier.buildHierarchy(AtomicConcept.THING,
                                               AtomicConcept.NOTHING,
-                                              m_dlOntology.getAllAtomicConcepts());
+                                              concepts);
             } else {
                 assert oldHierarchy == null;
                 try {

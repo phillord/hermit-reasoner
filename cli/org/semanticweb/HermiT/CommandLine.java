@@ -20,13 +20,9 @@ import java.util.TreeSet;
 import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.monitor.Timer;
+import org.semanticweb.HermiT.monitor.ReasoningOperations;
 
 public class CommandLine {
-    // set via command line arguments and used in the AllSubsumptionAction, 
-    // which outputs an ontology in functional style syntax if true and in 
-    // KRSS otherwise
-    protected static boolean useFunctionalStyleSyntax = false;
-    
     static String breakLines(String str, int lineWidth, int indent) {
         StringBuffer out = new StringBuffer();
         BreakIterator i = BreakIterator.getLineInstance();
@@ -400,213 +396,7 @@ public class CommandLine {
             }
         }
     }
-
-    protected static class Axiom implements Comparable<Axiom> {
-        protected Namespaces namespaces;
-        protected String sub;
-        protected String sup;
-        
-        public Axiom(Namespaces namespaces, String sub, String sup) {
-            this.namespaces = namespaces;
-            this.sub = sub;
-            this.sup = sup;
-        }
-
-        public int compareTo(Axiom a) {
-            if (this == a) return 0;
-            Collator col = Collator.getInstance();
-            int result = col.compare(this.sub, a.sub);
-            if (result != 0) return result;
-            result = col.compare(this.sup, a.sup);
-            if (result != 0) return result;
-            if (a instanceof Equivalence && !(this instanceof Equivalence)) {
-                return 1;
-            } else if (this instanceof Equivalence && !(a instanceof Equivalence)) {
-                return -1;
-            } else {
-                return 0;
-            }
-        }
-    }
-
-    protected static class Implication extends Axiom {
-        public Implication(Namespaces namespaces, String sub, String sup) {
-            super(namespaces, sub, sup);
-        }
-        
-        public String toString() {
-            if (useFunctionalStyleSyntax) {
-                return "  SubClassOf(" + namespaces.idFromUri(sub) + " " 
-                + namespaces.idFromUri(sup) + ")";
-            } else {
-                return "(implies " + namespaces.idFromUri(sub) + " " 
-                + namespaces.idFromUri(sup) + ")";
-            }
-        }
-    }
-
-    protected static class Equivalence extends Axiom {
-        
-        public Equivalence(Namespaces namespaces, String sub, String sup) {
-            super(namespaces, sub, sup);
-        }
-        
-        public String toString() {
-            if (useFunctionalStyleSyntax) {
-                return "  EquivalentClasses(" + namespaces.idFromUri(sub) + " " 
-                + namespaces.idFromUri(sup) + ")";
-            } else {
-                return "(equivalent " + namespaces.idFromUri(sub) + " " 
-                + namespaces.idFromUri(sup) + ")";
-            }
-        }
-    }
     
-    static protected class AllSubsumptionsAction implements Action {
-        
-        public void run(Reasoner hermit,
-                        Namespaces namespaces,
-                        StatusOutput status,
-                        PrintWriter output) {
-            
-            Map<String, HierarchyPosition<String>> taxonomy = hermit.getClassTaxonomy();
-            Map<String, Set<String>> flat = new TreeMap<String, Set<String>>(Collator.getInstance());
-            for (Map.Entry<String, HierarchyPosition<String>> e :
-                    taxonomy.entrySet()) {
-                SortedSet<String> ancestors = new TreeSet<String>(Collator.getInstance());
-                ancestors.addAll(e.getValue().getAncestors());
-                flat.put(e.getKey(), ancestors);
-            }
-            try {
-                if (useFunctionalStyleSyntax) {
-                    for (String abbr : namespaces.getDeclarations().keySet()) {
-                        String full =namespaces.getDeclarations().get(abbr); 
-                        if (!full.startsWith("internal:")) {
-                            output.println("Namespace(" + abbr + "=<" 
-                                    + full + ">)");
-                        }
-                    }
-                    output.println("Ontology(<" 
-                            + namespaces.getDeclarations().get("") + ">");
-                }
-                for (Map.Entry<String, Set<String>> e : flat.entrySet()) {
-                    for (String ancestor : e.getValue()) {
-                        if (!ancestor.equals(AtomicConcept.THING.getURI().toString())
-                                && !ancestor.equals(e.getKey())
-                                && !e.getKey().equals(AtomicConcept.NOTHING.getURI().toString())) {
-                            if (useFunctionalStyleSyntax) {
-                                output.println("  SubClassOf(" 
-                                        + namespaces.idFromUri(e.getKey()) + " " 
-                                        + namespaces.idFromUri(ancestor) + ")");
-                            } else {
-                                output.println("(implies " 
-                                        + namespaces.idFromUri(e.getKey()) + " " 
-                                        + namespaces.idFromUri(ancestor) + ")");
-                            }
-                        }
-                    }
-                }
-                if (useFunctionalStyleSyntax) {
-                    output.println(")");
-                }
-            } finally {
-                output.flush();
-            }
-        }
-//            
-//            
-//            Set<String> unprocessedConcepts = new HashSet<String>();
-//            Set<String> processedConcepts = new HashSet<String>();
-//            // sort in proper alphabetical order (not typical Java style with 
-//            // Uppercase always before lowercase)
-//            SortedSet<String> equivalentConcepts = new TreeSet<String>(Collator.getInstance());
-//            SortedSet<Axiom> axioms = new TreeSet<Axiom>();
-//            // start with getting a full classification hierarchy
-//            HierarchyPosition<String> pos = hermit.getClassTaxonomyPosition(
-//                    namespaces.uriFromId(AtomicConcept.THING.toString())
-//            );
-//            // if several classes are equivalent, then the one lowest in 
-//            // alphabetical order is the canonical one and appears fist in the 
-//            // equivalence statements
-//            // exception, if the classes are equivalent to bottom, then bottom 
-//            // is the canonical concept 
-//            String canonical = null;
-//            // go through all direct subconcepts of top
-//            for (HierarchyPosition<String> subPos : pos.getChildPositions()) {
-//                // collect the equivalent classes for the current one
-//                equivalentConcepts.addAll(subPos.getEquivalents());
-//                if (equivalentConcepts.contains(AtomicConcept.NOTHING.getURI())) {
-//                    canonical = AtomicConcept.NOTHING.getURI().toString();
-//                } else {
-//                    canonical = equivalentConcepts.first();
-//                }
-//                unprocessedConcepts.add(canonical); 
-//                equivalentConcepts.remove(canonical);
-//                processedConcepts.addAll(equivalentConcepts);
-//                for (String equal : equivalentConcepts) {
-//                    axioms.add(
-//                            new Equivalence(namespaces, canonical, equal));
-//                }
-//                equivalentConcepts.clear();
-//            }
-//            String superConcept;
-//            
-//            while (!unprocessedConcepts.isEmpty()) {
-//                superConcept = unprocessedConcepts.iterator().next();
-//                unprocessedConcepts.remove(superConcept);
-//                processedConcepts.add(superConcept);
-//                pos  = hermit.getClassTaxonomyPosition(superConcept);
-//                for (HierarchyPosition<String> subPos : pos.getChildPositions()) {
-//                    equivalentConcepts.addAll(subPos.getEquivalents());
-//                    // do not display bottom as a subconcept
-//                    if (equivalentConcepts.contains(AtomicConcept.NOTHING.getURI())) {
-//                        canonical = AtomicConcept.NOTHING.getURI().toString();
-//                    } else {
-//                        canonical = equivalentConcepts.first();
-//                    }
-//                    if (!processedConcepts.contains(canonical)) {
-//                        if (canonical.equals(AtomicConcept.NOTHING.getURI().toString())) {
-//                            processedConcepts.add(canonical);
-//                        } else {
-//                            axioms.add(new Implication(
-//                                    namespaces, canonical, superConcept));
-//                            // get further subconcepts
-//                            unprocessedConcepts.add(canonical); 
-//                        }
-//                        equivalentConcepts.remove(canonical);
-//                        processedConcepts.addAll(equivalentConcepts);
-//                        for (String equal : equivalentConcepts) {
-//                            axioms.add(new Equivalence(namespaces, 
-//                                    canonical, equal));
-//                        }
-//                    }
-//                    equivalentConcepts.clear();
-//                }
-//            }
-//            StringBuffer buffer=new StringBuffer();
-//            String lineBreak = System.getProperty("line.separator");
-//            if (useFunctionalStyleSyntax) {
-//                for (String abbr : namespaces.getDeclarations().keySet()) {
-//                    String full =namespaces.getDeclarations().get(abbr); 
-//                    if (!full.startsWith("internal:")) {
-//                    buffer.append("Namespace(" + abbr + "=<" + full + ">)" 
-//                            + lineBreak);
-//                    }
-//                }
-//                buffer.append("Ontology(<" 
-//                        + namespaces.getDeclarations().get("") + ">" 
-//                        + lineBreak);
-//            }
-//            for (Axiom axiom : axioms) {
-//                buffer.append(axiom.toString() + lineBreak);
-//            }
-//            if (useFunctionalStyleSyntax) {
-//                buffer.append(")");
-//            }
-//            output.print(buffer.toString());
-//        }
-    }
-
     static protected class EquivalentsAction implements Action {
         final String conceptName;
         public EquivalentsAction(String name) {
@@ -653,12 +443,69 @@ public class CommandLine {
         }
     }
     
-    
+    static protected class TaxonomyAction implements Action {
+        final String nothing = AtomicConcept.NOTHING.getURI().toString();
+        final String thing = AtomicConcept.THING.getURI().toString();
+        final boolean useFunctionalSyntax;
+        
+        public TaxonomyAction(boolean useFunctionalSyntax) {
+            this.useFunctionalSyntax = useFunctionalSyntax;
+        }
+        
+        String canonical(HierarchyPosition<String> pos) {
+            if (pos.getEquivalents().contains(nothing)) {
+                return nothing;
+            } else if (pos.getEquivalents().contains(thing)) {
+                return thing;
+            } else {
+                String out = null;
+                for (String s : pos.getEquivalents()) {
+                    if (out == null || s.compareTo(out) < 0) {
+                        out = s;
+                    }
+                }
+                return out;
+            }
+        }
+        
+        public void run(Reasoner hermit,
+                        Namespaces namespaces,
+                        StatusOutput status,
+                        PrintWriter output) {
+            Map<String, HierarchyPosition<String>>
+                tax = hermit.getClassTaxonomy();
+            for (String c : new TreeSet<String>(tax.keySet()))  {
+                HierarchyPosition<String> pos = tax.get(c);
+                if (c.equals(canonical(pos)) && !c.equals(nothing)) {
+                    for (String equiv :
+                            new TreeSet<String>(pos.getEquivalents())) {
+                        if (!c.equals(equiv)) {
+                            output.println("(equivalent |" + c + "| |" +
+                                                equiv + "|)");
+                        }
+                    }
+                    SortedSet<String> supers = new TreeSet<String>();
+                    for (HierarchyPosition<String> parent
+                            : pos.getParentPositions()) {
+                        if (canonical(parent) != thing) {
+                            supers.add(canonical(parent));
+                        }
+                    }
+                    for (String sup : supers) {
+                        output.println("(implies |" + c + "| |" + sup + "|)");
+                    }
+                }
+            }
+        }
+    }
+
+
     protected static final int
         kTime=1000, kDumpClauses=1001, kDumpRoleBox=1002, kOwlApi = 1003, kKaon2 = 1004,
         kDirectBlock = 1005, kBlockStrategy = 1006, kBlockCache = 1007, kExpansion = 1008, kBase = 1009,
         kParser = 1010, kClausifyRoleBox = 1011, kDefaultNamespace = 1012, kDumpNamespaces = 1013,
-        kSuperRoles = 1014, kSubRoles = 1015, kEquivRoles = 1016, kUniversalRole = 1017;
+        kSuperRoles = 1014, kSubRoles = 1015, kEquivRoles = 1016, kUniversalRole = 1017,
+        kKrssTaxonomy = 1018, kFunctionalTaxonomy = 1019;
     
     static protected final String versionString = "HermiT version @VERSION@";
     protected static final String usageString = "Usage: hermit [OPTION]... URI...";
@@ -727,17 +574,6 @@ public class CommandLine {
                     "output properties subsuming PROP (or only direct supers if following --direct)"),
         new Option(kEquivRoles, "equivalent-properties", kActions, true, "PROP",
                     "output properties equivalent to PROP"),
-        new Option('a', "allSubs", kActions, "outputs an ontology that " +
-        		"contains a set of equivalence and implication " +
-        		"axioms in KRSS syntax or in functional style syntax " +
-        		"if -f or --functional is given as an argument " +
-        		"(e.g., write -a -f) such that each class name is " +
-        		"listed with its implied/equivalent direct " +
-        		"superclass in alphabetical order"),
-       new Option('f', "functional", kActions,
-                        "use functional style syntax for the ontology that " +
-                        "contains all inferred subsumptions written by the -a " +
-                        "option"),
         new Option('U', "unsatisfiable", kActions,
                     "output unsatisfiable classes (equivalent to --equivalents=owl:Nothing)"),
         new Option(kDumpNamespaces, "print-namespaces", kActions,
@@ -776,6 +612,11 @@ public class CommandLine {
         // internals:
         new Option(kDumpClauses, "dump-clauses", kInternals, false, "FILE",
                     "output DL-clauses to FILE (default stdout)"),
+        new Option(kKrssTaxonomy, "krss-taxonomy", kInternals,
+                    "output most specific implications in KRSS format"),
+            // This one will probably become "--taxonomy" as  standard action
+        new Option(kFunctionalTaxonomy, "functional-taxonomy", kInternals,
+                    "output most specific implications in OWL functional syntax"),
     };
     
     public static void main(String[] argv) {
@@ -901,12 +742,6 @@ public class CommandLine {
                         String arg = g.getOptarg();
                         actions.add(new EquivalentRolesAction(arg));
                     } break;
-                    case 'a': {
-                        actions.add(new AllSubsumptionsAction());
-                    } break;
-                    case 'f': {
-                        useFunctionalStyleSyntax = true;
-                    } break;
                     case 'U': {
                         actions.add(new EquivalentsAction("<http://www.w3.org/2002/07/owl#Nothing>"));
                     } break;
@@ -997,6 +832,12 @@ public class CommandLine {
                     case kDumpClauses : {
                         actions.add(new DumpClausesAction(g.getOptarg()));
                     } break;
+                    case kKrssTaxonomy: {
+                        actions.add(new TaxonomyAction(false));
+                    } break;
+                    case kFunctionalTaxonomy: {
+                        actions.add(new TaxonomyAction(true));
+                    } break;
                     default : {
                         if (g.getOptopt() != 0) {
                             throw new UsageException("invalid option -- " + (char) g.getOptopt());
@@ -1014,7 +855,12 @@ public class CommandLine {
                 }
             } // done processing arguments
             StatusOutput status = new StatusOutput(verbosity);
+            ReasoningOperations opMonitor = null;
             if (verbosity > 3) config.monitor = new Timer(new PrintWriter(System.err));
+            else if (verbosity > 2) {
+                opMonitor = new ReasoningOperations();
+                config.monitor = opMonitor;
+            }
             for (URI ont : ontologies) {
                 didSomething = true;
                 status.log(2, "Processing " + ont.toString());
@@ -1034,6 +880,11 @@ public class CommandLine {
                         action.run(hermit, namespaces, status, output);
                         long actionTime = System.currentTimeMillis() - startTime;
                         status.log(2, "...action completed in " + String.valueOf(actionTime) + " msec.");
+                        if (opMonitor != null) {
+                            status.log(2, String.valueOf(opMonitor.numSatTests) + " satisfiability tests");
+                            status.log(2, String.valueOf(opMonitor.numSubsumptionTests) + " subsumption tests");
+                            status.log(2, String.valueOf(opMonitor.numConsistencyTests) + " consistency tests");
+                        }
                         output.flush(); 
                     }
                 } catch (Clausifier.LoadingException e) {
