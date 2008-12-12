@@ -10,6 +10,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.semanticweb.HermiT.model.AtomicRole;
+import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.Concept;
 
@@ -51,8 +52,9 @@ public final class LabelManager implements Serializable {
         Object[] tupleBuffer=m_binaryTableSearch1Bound.getTupleBuffer();
         while (!m_binaryTableSearch1Bound.afterLast()) {
             Object concept=tupleBuffer[0];
-            if (!(concept instanceof AtomicNegationConcept))
+            if (concept instanceof AtomicConcept) {
                 m_conceptBuffer.add((Concept)concept);
+            }
             m_binaryTableSearch1Bound.next();
         }
         Set<Concept> result=m_conceptSetFactory.getSet(m_conceptBuffer);

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.semanticweb.HermiT.model.AtomicRole;
+import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 
@@ -247,20 +248,24 @@ public final class Node implements Serializable {
         return m_positiveLabelHashCode;
     }
     protected void addToPositiveLabel(Concept concept) {
-        if (m_positiveLabel!=null) {
-            m_tableau.m_labelManager.removeConceptSetReference(m_positiveLabel);
-            m_positiveLabel=null;
+        if (concept instanceof AtomicConcept) {
+            if (m_positiveLabel!=null) {
+                m_tableau.m_labelManager.removeConceptSetReference(m_positiveLabel);
+                m_positiveLabel=null;
+            }
+            m_positiveLabelHashCode+=concept.hashCode();
+            m_positiveLabelSize++;
         }
-        m_positiveLabelHashCode+=concept.hashCode();
-        m_positiveLabelSize++;
     }
     protected void removeFromPositiveLabel(Concept concept) {
-        if (m_positiveLabel!=null) {
-            m_tableau.m_labelManager.removeConceptSetReference(m_positiveLabel);
-            m_positiveLabel=null;
+        if (concept instanceof AtomicConcept) {
+            if (m_positiveLabel!=null) {
+                m_tableau.m_labelManager.removeConceptSetReference(m_positiveLabel);
+                m_positiveLabel=null;
+            }
+            m_positiveLabelHashCode-=concept.hashCode();
+            m_positiveLabelSize--;
         }
-        m_positiveLabelHashCode-=concept.hashCode();
-        m_positiveLabelSize--;
     }
     public int getNegativeLabelSize() {
         return m_negativeLabelSize;

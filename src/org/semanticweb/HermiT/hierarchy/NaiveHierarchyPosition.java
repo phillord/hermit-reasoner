@@ -19,6 +19,20 @@ public class NaiveHierarchyPosition<T> implements HierarchyPosition<T> {
         children = new HashSet<HierarchyPosition<T>>();
         labels = new HashSet<T>();
     }
+    public NaiveHierarchyPosition(T label) {
+        parents = new HashSet<HierarchyPosition<T>>();
+        children = new HashSet<HierarchyPosition<T>>();
+        labels = new HashSet<T>();
+        labels.add(label);
+    }
+    public NaiveHierarchyPosition(T label,
+                                    Set<HierarchyPosition<T>> parents,
+                                    Set<HierarchyPosition<T>> children) {
+        this.parents = parents;
+        this.children = children;
+        labels = new HashSet<T>();
+        labels.add(label);
+    }
     public Set<T> getEquivalents() {
         // TODO: patch Protégé plugin so that we don't need this -rob 2008-10-26
         return new HashSet<T>(labels);

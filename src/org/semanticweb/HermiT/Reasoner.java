@@ -54,6 +54,8 @@ import org.semanticweb.HermiT.hierarchy.StandardClassificationManager;
 import org.semanticweb.HermiT.hierarchy.SubsumptionHierarchy;
 import org.semanticweb.HermiT.hierarchy.SubsumptionHierarchyNode;
 import org.semanticweb.HermiT.hierarchy.TableauSubsumptionChecker;
+import org.semanticweb.HermiT.hierarchy.Classifier;
+import org.semanticweb.HermiT.hierarchy.TableauFunc;
 import org.semanticweb.HermiT.hierarchy.TranslatedHierarchyPosition;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
@@ -194,12 +196,14 @@ public class Reasoner implements Serializable {
     private Namespaces namespaces; // never null
     private Tableau m_tableau; // never null
     private TableauSubsumptionChecker m_subsumptionChecker; // never null
+    private Classifier<AtomicConcept> classifier;
     private Map<AtomicConcept, HierarchyPosition<AtomicConcept>>
         atomicConceptHierarchy; // may be null; use getAtomicConceptHierarchy
+    private SubsumptionHierarchy oldHierarchy;
     private Map<AtomicConcept, Set<Individual>> realization;
         // may be null; use getRealization
-    private SubsumptionHierarchy oldHierarchy;
-        // only null when atomicConceptHierarchy is
+    // private SubsumptionHierarchy oldHierarchy;
+    //     // only null when atomicConceptHierarchy is
     
     private OwlClausification clausifier; // null if loaded through KAON2
     
@@ -263,6 +267,10 @@ public class Reasoner implements Serializable {
             classUri.equals(AtomicConcept.NOTHING.getURI());
     }
 
+    protected boolean isSatisfiable(AtomicConcept concept) {
+        return m_subsumptionChecker.isSatisfiable(concept);
+    }
+    
     /**
      * Check whether `classUri` is satisfiable.
      * Note that classes which were not defined in the input ontology
@@ -274,16 +282,15 @@ public class Reasoner implements Serializable {
         // an inconsistent ontology that they are inconsistent. Is that what we 
         // want?
         if (!m_tableau.isABoxSatisfiable()) return false;
-        return m_subsumptionChecker.isSatisfiable(
-            AtomicConcept.create(classUri)
-        );
+        return isSatisfiable(AtomicConcept.create(classUri));
     }
+    
     public boolean isClassSatisfiable(OWLDescription desc) {
         // FIXME: I added this, to make sure that HermiT says for all classes of 
         // an inconsistent ontology that they are inconsistent. Is that what we 
         // want?
         if (!m_tableau.isABoxSatisfiable()) return false;
-        return m_subsumptionChecker.isSatisfiable(define(desc));
+        return isSatisfiable(define(desc));
     }
     
     protected boolean isAsymmetric(OWLObjectProperty p) {
@@ -311,7 +318,7 @@ public class Reasoner implements Serializable {
         // FIXME: I added this, to make sure that HermiT says for all 
         // subsumptions of an inconsistent ontology that they do not hold. Is 
         // that what we want?
-        if (!m_tableau.isABoxSatisfiable()) return false;
+        if (!m_tableau.isABoxSatisfiable()) return true;
         return m_subsumptionChecker.isSubsumedBy(child, parent);
     }
 
@@ -320,7 +327,7 @@ public class Reasoner implements Serializable {
         // FIXME: I added this, to make sure that HermiT says for all 
         // subsumptions of an inconsistent ontology that they do not hold. Is 
         // that what we want?
-        if (!m_tableau.isABoxSatisfiable()) return false;
+        if (!m_tableau.isABoxSatisfiable()) return true;
         return isSubsumedBy(
             AtomicConcept.create(childName), AtomicConcept.create(parentName)
         );
@@ -330,18 +337,18 @@ public class Reasoner implements Serializable {
         // FIXME: I added this, to make sure that HermiT says for all 
         // subsumptions of an inconsistent ontology that they do not hold. Is 
         // that what we want?
-        if (!m_tableau.isABoxSatisfiable()) return false;
+        if (!m_tableau.isABoxSatisfiable()) return true;
         return isSubsumedBy(define(child), define(parent));
     }
     
-    public SubsumptionHierarchy getSubsumptionHierarchy() {
-        try {
-            return new SubsumptionHierarchy(m_subsumptionChecker);
-        } catch (SubsumptionHierarchy.SubusmptionCheckerException e) {
-            throw new RuntimeException(
-                "Unable to compute subsumption hierarchy.", e);
-        }
-    }
+    // public SubsumptionHierarchy getSubsumptionHierarchy() {
+    //     try {
+    //         return new SubsumptionHierarchy(m_subsumptionChecker);
+    //     } catch (SubsumptionHierarchy.SubusmptionCheckerException e) {
+    //         throw new RuntimeException(
+    //             "Unable to compute subsumption hierarchy.", e);
+    //     }
+    // }
     
     protected Map<AtomicRole, HierarchyPosition<AtomicRole>>
         getAtomicRoleHierarchy() {
@@ -406,94 +413,109 @@ public class Reasoner implements Serializable {
     protected Map<AtomicConcept, HierarchyPosition<AtomicConcept>>
         getAtomicConceptHierarchy() {
         if (atomicConceptHierarchy == null) {
-            assert oldHierarchy == null;
-            try {
-                 oldHierarchy = new SubsumptionHierarchy(m_subsumptionChecker);
-            } catch (SubsumptionHierarchy.SubusmptionCheckerException e) {
-                throw new RuntimeException(
-                    "Unable to compute subsumption hierarchy.");
-            }
-        
-            Map<AtomicConcept, HierarchyPosition<AtomicConcept>> newHierarchy =
-                new HashMap<AtomicConcept, HierarchyPosition<AtomicConcept>>();
-        
-            Map<AtomicConcept, NaiveHierarchyPosition<AtomicConcept>> newNodes
-                = new HashMap<AtomicConcept,
-                                NaiveHierarchyPosition<AtomicConcept>>();
-            // First just create all the new hierarchy nodes:
-            for (SubsumptionHierarchyNode oldNode : oldHierarchy) {
-                NaiveHierarchyPosition<AtomicConcept> newNode =
-                    new NaiveHierarchyPosition<AtomicConcept>();
-                newNodes.put(oldNode.getRepresentative(), newNode);
-                for (AtomicConcept concept : oldNode.getEquivalentConcepts()) {
-                    newNode.labels.add(concept);
-                    if (newHierarchy.put(concept, newNode) !=
-                        null) {
-                        throw new RuntimeException("The '" + concept.getURI() +
-                            "' concept occurs in two different places" +
-                            " in the taxonomy.");
+            if (true) {
+                atomicConceptHierarchy =
+                    classifier.buildHierarchy(AtomicConcept.THING,
+                                              AtomicConcept.NOTHING,
+                                              m_dlOntology.getAllAtomicConcepts());
+            } else {
+                assert oldHierarchy == null;
+                try {
+                     oldHierarchy = new SubsumptionHierarchy(m_subsumptionChecker);
+                } catch (SubsumptionHierarchy.SubusmptionCheckerException e) {
+                    throw new RuntimeException(
+                        "Unable to compute subsumption hierarchy.");
+                }
+                    
+                Map<AtomicConcept, HierarchyPosition<AtomicConcept>> newHierarchy =
+                    new HashMap<AtomicConcept, HierarchyPosition<AtomicConcept>>();
+                    
+                Map<AtomicConcept, NaiveHierarchyPosition<AtomicConcept>> newNodes
+                    = new HashMap<AtomicConcept,
+                                    NaiveHierarchyPosition<AtomicConcept>>();
+                // First just create all the new hierarchy nodes:
+                for (SubsumptionHierarchyNode oldNode : oldHierarchy) {
+                    NaiveHierarchyPosition<AtomicConcept> newNode =
+                        new NaiveHierarchyPosition<AtomicConcept>();
+                    newNodes.put(oldNode.getRepresentative(), newNode);
+                    for (AtomicConcept concept : oldNode.getEquivalentConcepts()) {
+                        newNode.labels.add(concept);
+                        if (newHierarchy.put(concept, newNode) !=
+                            null) {
+                            throw new RuntimeException("The '" + concept.getURI() +
+                                "' concept occurs in two different places" +
+                                " in the taxonomy.");
+                        }
                     }
                 }
-            }
-            // Now connect them together:
-            for (SubsumptionHierarchyNode oldNode : oldHierarchy) {
-                NaiveHierarchyPosition<AtomicConcept> newNode =
-                    newNodes.get(oldNode.getRepresentative());
-                for (SubsumptionHierarchyNode parent
-                        : oldNode.getParentNodes()) {
-                    assert parent != oldHierarchy.nothingNode() :
-                        "Nothing never has any children!";
-                    newNode.parents.add(
-                        newNodes.get(parent.getRepresentative())
-                    );
+                // Now connect them together:
+                for (SubsumptionHierarchyNode oldNode : oldHierarchy) {
+                    NaiveHierarchyPosition<AtomicConcept> newNode =
+                        newNodes.get(oldNode.getRepresentative());
+                    for (SubsumptionHierarchyNode parent
+                            : oldNode.getParentNodes()) {
+                        assert parent != oldHierarchy.nothingNode() :
+                            "Nothing never has any children!";
+                        newNode.parents.add(
+                            newNodes.get(parent.getRepresentative())
+                        );
+                    }
+                    for (SubsumptionHierarchyNode child
+                            : oldNode.getChildNodes()) {
+                        assert child != oldHierarchy.thingNode() :
+                            "Thing never has any parents!";
+                        newNode.children.add(
+                            newNodes.get(child.getRepresentative())
+                        );
+                    }
                 }
-                for (SubsumptionHierarchyNode child
-                        : oldNode.getChildNodes()) {
-                    assert child != oldHierarchy.thingNode() :
-                        "Thing never has any parents!";
-                    newNode.children.add(
-                        newNodes.get(child.getRepresentative())
-                    );
-                }
+                // Construction finished; set our member cache:
+                atomicConceptHierarchy = newHierarchy;
             }
-            // Construction finished; set our member cache:
-            atomicConceptHierarchy = newHierarchy;
         }
         return atomicConceptHierarchy;
     }
     
     protected HierarchyPosition<AtomicConcept>
         getPosition(AtomicConcept c) {
-        if (getAtomicConceptHierarchy().containsKey(c)) {
-            HierarchyPosition<AtomicConcept> out = getAtomicConceptHierarchy().get(c);
-            return out;
-        }
-        assert oldHierarchy != null;
-        StandardClassificationManager classifier =
-            new StandardClassificationManager(oldHierarchy,
-                                                m_subsumptionChecker);
-        try {
-            classifier.findPosition(c);
-        } catch (SubsumptionHierarchy.SubusmptionCheckerException e) {
-            throw new RuntimeException(
-                "Unable to classify concept.", e);
-        }
-        if (classifier.m_topSet.equals(classifier.m_bottomSet)) {
-            assert classifier.m_topSet.size() == 1;
-            return getAtomicConceptHierarchy().get
-                        (classifier.m_topSet.get(0).getRepresentative());
-        }
-        NaiveHierarchyPosition<AtomicConcept> out =
-            new NaiveHierarchyPosition<AtomicConcept>();
-        for (SubsumptionHierarchyNode parent : classifier.m_topSet) {
-            out.parents.add(getAtomicConceptHierarchy().get(
-                                parent.getRepresentative()));
-        }
-        for (SubsumptionHierarchyNode child : classifier.m_bottomSet) {
-            out.children.add(getAtomicConceptHierarchy().get(
-                                child.getRepresentative()));
+        HierarchyPosition<AtomicConcept> out
+            = getAtomicConceptHierarchy().get(c);
+        if (out == null) {
+            out = classifier.findPosition(c,
+                    getAtomicConceptHierarchy().get(AtomicConcept.THING),
+                    getAtomicConceptHierarchy().get(AtomicConcept.NOTHING));
         }
         return out;
+        // if (getAtomicConceptHierarchy().containsKey(c)) {
+        //     HierarchyPosition<AtomicConcept> out = getAtomicConceptHierarchy().get(c);
+        //     return out;
+        // }
+        // assert oldHierarchy != null;
+        // StandardClassificationManager classifier =
+        //     new StandardClassificationManager(oldHierarchy,
+        //                                         m_subsumptionChecker);
+        // try {
+        //     classifier.findPosition(c);
+        // } catch (SubsumptionHierarchy.SubusmptionCheckerException e) {
+        //     throw new RuntimeException(
+        //         "Unable to classify concept.", e);
+        // }
+        // if (classifier.m_topSet.equals(classifier.m_bottomSet)) {
+        //     assert classifier.m_topSet.size() == 1;
+        //     return getAtomicConceptHierarchy().get
+        //                 (classifier.m_topSet.get(0).getRepresentative());
+        // }
+        // NaiveHierarchyPosition<AtomicConcept> out =
+        //     new NaiveHierarchyPosition<AtomicConcept>();
+        // for (SubsumptionHierarchyNode parent : classifier.m_topSet) {
+        //     out.parents.add(getAtomicConceptHierarchy().get(
+        //                         parent.getRepresentative()));
+        // }
+        // for (SubsumptionHierarchyNode child : classifier.m_bottomSet) {
+        //     out.children.add(getAtomicConceptHierarchy().get(
+        //                         child.getRepresentative()));
+        // }
+        // return out;
     }
     
     private AtomicConcept define(OWLDescription desc) {
@@ -1011,6 +1033,8 @@ public class Reasoner implements Serializable {
                                 m_config.makeTopRoleUniversal,
                                 m_config.parameters);
         m_subsumptionChecker = new TableauSubsumptionChecker(m_tableau);
+        classifier = new Classifier<AtomicConcept>(
+                        new TableauFunc(m_subsumptionChecker));
         if (m_config.subsumptionCacheStrategyType ==
             SubsumptionCacheStrategyType.IMMEDIATE) {
             getClassTaxonomy();
