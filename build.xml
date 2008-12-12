@@ -134,7 +134,7 @@
         </jar>
     </target>
 
-    <target name="combined" depends="flatten-owlapi,javadoc,quick"/>
+    <target name="combined" depends="compile,flatten-owlapi,javadoc,quick"/>
     
     <target name="quick" depends="compile">
         <mkdir dir="${releasedir}"/>
