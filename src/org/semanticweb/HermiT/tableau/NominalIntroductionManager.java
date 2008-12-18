@@ -3,12 +3,12 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 
-import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
-import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.InverseRole;
+import org.semanticweb.HermiT.model.Role;
 
 /**
  * Implements the nominal introduction rule.
@@ -137,7 +137,8 @@ public final class NominalIntroductionManager implements Serializable {
             return (Node)m_newRootNodesTable.getTupleObject(tupleIndex,3);
     }
     public void addNonnegativeConceptAssertion(Concept concept,Node node) {
-        if (node.getNodeType()==NodeType.ROOT_NODE && concept instanceof AtMostAbstractRoleGuard) {
+        if ((node.getNodeType()==NodeType.NAMED_NODE || node.getNodeType()==NodeType.ROOT_NODE) 
+                && concept instanceof AtMostAbstractRoleGuard) {
             AtMostAbstractRoleGuard atMost=(AtMostAbstractRoleGuard)concept;
             Role onRole=atMost.getOnRole();
             AtomicConcept toAtomicConcept=atMost.getToAtomicConcept();
@@ -147,7 +148,10 @@ public final class NominalIntroductionManager implements Serializable {
                 m_ternaryExtensionTableSearch01Bound.open();
                 while (!m_ternaryExtensionTableSearch01Bound.afterLast()) {
                     Node treeNode=(Node)m_ternaryExtensionTableSearch01Bound.getTupleBuffer()[2];
-                    if (treeNode.getNodeType()==NodeType.TREE_NODE && !node.isParentOf(treeNode) && (AtomicConcept.THING.equals(toAtomicConcept) || m_extensionManager.containsAssertion(toAtomicConcept,treeNode)))
+                    if (treeNode.getNodeType()==NodeType.TREE_NODE 
+                            && !node.isParentOf(treeNode) 
+                            && (AtomicConcept.THING.equals(toAtomicConcept) 
+                                    || m_extensionManager.containsAssertion(toAtomicConcept,treeNode)))
                         addTarget(node,treeNode,atMost);
                     m_ternaryExtensionTableSearch01Bound.next();
                 }
@@ -170,7 +174,9 @@ public final class NominalIntroductionManager implements Serializable {
                 m_ternaryExtensionTableSearch1Bound.open();
                 while (!m_ternaryExtensionTableSearch1Bound.afterLast()) {
                     Node rootNode=(Node)m_ternaryExtensionTableSearch1Bound.getTupleBuffer()[2];
-                    if (rootNode.getNodeType()==NodeType.ROOT_NODE && !rootNode.isParentOf(node)) {
+                    if ((rootNode.getNodeType()==NodeType.NAMED_NODE 
+                            || rootNode.getNodeType()==NodeType.ROOT_NODE) 
+                            && !rootNode.isParentOf(node)) {
                         Object atomicRole=m_ternaryExtensionTableSearch1Bound.getTupleBuffer()[0];
                         if (atomicRole instanceof AtomicRole) {
                             m_binaryExtensionTableSearch1Bound.getBindingsBuffer()[1]=rootNode;
@@ -194,7 +200,9 @@ public final class NominalIntroductionManager implements Serializable {
                 m_ternaryExtensionTableSearch2Bound.open();
                 while (!m_ternaryExtensionTableSearch2Bound.afterLast()) {
                     Node rootNode=(Node)m_ternaryExtensionTableSearch2Bound.getTupleBuffer()[1];
-                    if (rootNode.getNodeType()==NodeType.ROOT_NODE && !rootNode.isParentOf(node)) {
+                    if ((rootNode.getNodeType()==NodeType.NAMED_NODE 
+                            || rootNode.getNodeType()==NodeType.ROOT_NODE) 
+                            && !rootNode.isParentOf(node)) {
                         Object atomicRole=m_ternaryExtensionTableSearch2Bound.getTupleBuffer()[0];
                         if (atomicRole instanceof AtomicRole) {
                             m_binaryExtensionTableSearch1Bound.getBindingsBuffer()[1]=rootNode;
@@ -216,7 +224,8 @@ public final class NominalIntroductionManager implements Serializable {
         }
     }
     public void addAtomicRoleAssertion(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
-        if (nodeFrom.getNodeType()==NodeType.ROOT_NODE && nodeTo.getNodeType()==NodeType.TREE_NODE && !nodeFrom.isParentOf(nodeTo)) {
+        if ((nodeFrom.getNodeType()==NodeType.NAMED_NODE || nodeFrom.getNodeType()==NodeType.ROOT_NODE) 
+                && nodeTo.getNodeType()==NodeType.TREE_NODE && !nodeFrom.isParentOf(nodeTo)) {
             nodeFrom.m_numberOfNIAssertionsFromNode++;
             nodeTo.m_numberOfNIAssertionsToNode++;
             m_binaryExtensionTableSearch1Bound.getBindingsBuffer()[1]=nodeFrom;
@@ -227,14 +236,17 @@ public final class NominalIntroductionManager implements Serializable {
                     AtMostAbstractRoleGuard atMost=(AtMostAbstractRoleGuard)concept;
                     if (atMost.getOnRole().equals(atomicRole)) {
                         AtomicConcept toAtomicConcept=atMost.getToAtomicConcept();
-                        if (AtomicConcept.THING.equals(toAtomicConcept) || m_extensionManager.containsAssertion(toAtomicConcept,nodeTo))
+                        if (AtomicConcept.THING.equals(toAtomicConcept) 
+                                || m_extensionManager.containsAssertion(toAtomicConcept,nodeTo))
                             addTarget(nodeFrom,nodeTo,atMost);
                     }
                 }
                 m_binaryExtensionTableSearch1Bound.next();
             }
         }
-        else if (nodeFrom.getNodeType()==NodeType.TREE_NODE && nodeTo.getNodeType()==NodeType.ROOT_NODE && !nodeTo.isParentOf(nodeFrom)) {
+        else if (nodeFrom.getNodeType()==NodeType.TREE_NODE 
+                && (nodeTo.getNodeType()==NodeType.NAMED_NODE || nodeTo.getNodeType()==NodeType.ROOT_NODE) 
+                && !nodeTo.isParentOf(nodeFrom)) {
             nodeFrom.m_numberOfNIAssertionsFromNode++;
             nodeTo.m_numberOfNIAssertionsToNode++;
             m_binaryExtensionTableSearch1Bound.getBindingsBuffer()[1]=nodeTo;
@@ -243,9 +255,11 @@ public final class NominalIntroductionManager implements Serializable {
                 Object concept=m_binaryExtensionTableSearch1Bound.getTupleBuffer()[0];
                 if (concept instanceof AtMostAbstractRoleGuard) {
                     AtMostAbstractRoleGuard atMost=(AtMostAbstractRoleGuard)concept;
-                    if (atMost.getOnRole() instanceof InverseRole && ((InverseRole)atMost.getOnRole()).getInverseOf().equals(atomicRole)) {
+                    if (atMost.getOnRole() instanceof InverseRole 
+                            && ((InverseRole)atMost.getOnRole()).getInverseOf().equals(atomicRole)) {
                         AtomicConcept toAtomicConcept=atMost.getToAtomicConcept();
-                        if (AtomicConcept.THING.equals(toAtomicConcept) || m_extensionManager.containsAssertion(toAtomicConcept,nodeFrom))
+                        if (AtomicConcept.THING.equals(toAtomicConcept) 
+                                || m_extensionManager.containsAssertion(toAtomicConcept,nodeFrom))
                             addTarget(nodeTo,nodeFrom,atMost);
                     }
                 }
@@ -254,8 +268,12 @@ public final class NominalIntroductionManager implements Serializable {
         }
     }
     public void removeAtomicRoleAssertion(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
-        if ((nodeFrom.getNodeType()==NodeType.ROOT_NODE && nodeTo.getNodeType()==NodeType.TREE_NODE && !nodeFrom.isParentOf(nodeTo)) ||
-            (nodeFrom.getNodeType()==NodeType.TREE_NODE && nodeTo.getNodeType()==NodeType.ROOT_NODE && !nodeTo.isParentOf(nodeFrom))) {
+        if (((nodeFrom.getNodeType()==NodeType.NAMED_NODE || nodeFrom.getNodeType()==NodeType.ROOT_NODE) 
+                        && nodeTo.getNodeType()==NodeType.TREE_NODE 
+                        && !nodeFrom.isParentOf(nodeTo)) 
+                || ((nodeTo.getNodeType()==NodeType.NAMED_NODE || nodeTo.getNodeType()==NodeType.ROOT_NODE) 
+                        &&  nodeFrom.getNodeType()==NodeType.TREE_NODE
+                        && !nodeTo.isParentOf(nodeFrom))) {
             nodeFrom.m_numberOfNIAssertionsFromNode--;
             nodeTo.m_numberOfNIAssertionsToNode--;
         }

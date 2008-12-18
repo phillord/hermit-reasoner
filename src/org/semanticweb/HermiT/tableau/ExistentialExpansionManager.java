@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
 import org.semanticweb.HermiT.model.AtLeastConcreteRoleConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
@@ -18,6 +17,7 @@ import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.LiteralConcept;
+import org.semanticweb.HermiT.model.Role;
 
 /**
  * Manages the expansion of at least restrictions in a tableau.
@@ -162,7 +162,9 @@ public final class ExistentialExpansionManager implements Serializable {
         }
     }
 
-    private boolean containsSubsetOfNUnequalNodes(Node forNode,List<Node> nodes,int startAt,List<Node> selectedNodes,int cardinality) {
+    private boolean containsSubsetOfNUnequalNodes(Node forNode,
+            List<Node> nodes, int startAt, List<Node> selectedNodes,
+            int cardinality) {
         if (selectedNodes.size()==cardinality) {
             // Check the condition on safe successors (condition 3.2 of the \geq-rule)
             if (forNode.getNodeType()!=NodeType.TREE_NODE) {
@@ -177,7 +179,8 @@ public final class ExistentialExpansionManager implements Serializable {
                 Node node=nodes.get(index);
                 for (int selectedNodeIndex=0;selectedNodeIndex<selectedNodes.size();selectedNodeIndex++) {
                     Node selectedNode=selectedNodes.get(selectedNodeIndex);
-                    if (!m_extensionManager.containsAssertion(Inequality.INSTANCE,node,selectedNode)&&!m_extensionManager.containsAssertion(Inequality.INSTANCE,selectedNode,node))
+                    if (!m_extensionManager.containsAssertion(Inequality.INSTANCE,node,selectedNode)
+                            &&!m_extensionManager.containsAssertion(Inequality.INSTANCE,selectedNode,node))
                         continue outer;
                 }
                 selectedNodes.add(node);
@@ -256,12 +259,17 @@ public final class ExistentialExpansionManager implements Serializable {
      * @param forNode
      */
     public void doNormalExpansion(AtLeastAbstractRoleConcept atLeastAbstractConcept,Node forNode) {
-        if (m_tableau.m_tableauMonitor!=null)
-            m_tableau.m_tableauMonitor.existentialExpansionStarted(atLeastAbstractConcept,forNode);
-        DependencySet existentialDependencySet=m_extensionManager.getConceptAssertionDependencySet(atLeastAbstractConcept,forNode);
+        if (m_tableau.m_tableauMonitor!=null) {
+            m_tableau.m_tableauMonitor.existentialExpansionStarted(
+                    atLeastAbstractConcept, forNode
+            );
+        }
+        DependencySet existentialDependencySet 
+                = m_extensionManager.getConceptAssertionDependencySet(
+                        atLeastAbstractConcept, forNode);
         int cardinality=atLeastAbstractConcept.getNumber();
         if (cardinality==1) {
-            Node newNode=m_tableau.createNewTreeNode(existentialDependencySet,forNode);
+            Node newNode = m_tableau.createNewTreeNode(existentialDependencySet,forNode);
             m_extensionManager.addRoleAssertion(atLeastAbstractConcept.getOnRole(),forNode,newNode,existentialDependencySet);
             m_extensionManager.addConceptAssertion(atLeastAbstractConcept.getToConcept(),newNode,existentialDependencySet);
         }

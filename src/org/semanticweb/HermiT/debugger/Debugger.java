@@ -251,6 +251,8 @@ public class Debugger extends TableauMonitorForwarder {
     public void printNodeData(Node node,PrintWriter writer) {
         writer.print("Node ID:    ");
         writer.println(node.getNodeID());
+        writer.print("Node Type:  ");
+        writer.println(node.getNodeType());
         writer.print("Parent ID:  ");
         writer.println(node.getParent()==null ? "(root node)" : node.getParent().getNodeID());
         writer.print("Depth:      ");

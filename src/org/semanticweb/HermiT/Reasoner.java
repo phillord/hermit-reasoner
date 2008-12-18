@@ -25,6 +25,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,7 +34,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.ArrayList;
 
 import org.semanticweb.HermiT.blocking.AncestorBlocking;
 import org.semanticweb.HermiT.blocking.AnywhereBlocking;
@@ -48,15 +48,14 @@ import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
 import org.semanticweb.HermiT.existentials.DepthFirstStrategy;
 import org.semanticweb.HermiT.existentials.ExpansionStrategy;
 import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
+import org.semanticweb.HermiT.hierarchy.Classifier;
 import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
 import org.semanticweb.HermiT.hierarchy.NaiveHierarchyPosition;
 import org.semanticweb.HermiT.hierarchy.PositionTranslator;
-import org.semanticweb.HermiT.hierarchy.StandardClassificationManager;
 import org.semanticweb.HermiT.hierarchy.SubsumptionHierarchy;
 import org.semanticweb.HermiT.hierarchy.SubsumptionHierarchyNode;
-import org.semanticweb.HermiT.hierarchy.TableauSubsumptionChecker;
-import org.semanticweb.HermiT.hierarchy.Classifier;
 import org.semanticweb.HermiT.hierarchy.TableauFunc;
+import org.semanticweb.HermiT.hierarchy.TableauSubsumptionChecker;
 import org.semanticweb.HermiT.hierarchy.TranslatedHierarchyPosition;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
@@ -279,23 +278,23 @@ public class Reasoner implements Serializable {
      * consistent.
      */
     public boolean isClassSatisfiable(String classUri) {
-        // FIXME: I added this, to make sure that HermiT says for all classes of 
-        // an inconsistent ontology that they are inconsistent. Is that what we 
-        // want?
+        // In an inconsistent ontology, HermiT considers all classes as 
+        // unsatisfiable. 
         if (!m_tableau.isABoxSatisfiable()) return false;
         return isSatisfiable(AtomicConcept.create(classUri));
     }
     
     public boolean isClassSatisfiable(OWLDescription desc) {
-        // FIXME: I added this, to make sure that HermiT says for all classes of 
-        // an inconsistent ontology that they are inconsistent. Is that what we 
-        // want?
+        // In an inconsistent ontology, HermiT considers all classes as 
+        // unsatisfiable. 
         if (!m_tableau.isABoxSatisfiable()) return false;
         return isSatisfiable(define(desc));
     }
     
     protected boolean isAsymmetric(OWLObjectProperty p) {
-        return m_tableau.isAsymmetric(AtomicRole.createObjectRole(p.getURI().toString()));
+        return m_tableau.isAsymmetric(
+                AtomicRole.createObjectRole(p.getURI().toString())
+        );
     }
 
     public void seedSubsumptionCache() {
@@ -316,18 +315,16 @@ public class Reasoner implements Serializable {
 
     protected boolean isSubsumedBy(AtomicConcept child,
                                     AtomicConcept parent) {
-        // FIXME: I added this, to make sure that HermiT says for all 
-        // subsumptions of an inconsistent ontology that they do not hold. Is 
-        // that what we want?
+        // For an inconsistent ontology, HermiT answers true for all 
+        // subsumptions. 
         if (!m_tableau.isABoxSatisfiable()) return true;
         return m_subsumptionChecker.isSubsumedBy(child, parent);
     }
 
     public boolean isClassSubsumedBy(String childName,
                                      String parentName) {
-        // FIXME: I added this, to make sure that HermiT says for all 
-        // subsumptions of an inconsistent ontology that they do not hold. Is 
-        // that what we want?
+        // For an inconsistent ontology, HermiT answers true for all 
+        // subsumptions. 
         if (!m_tableau.isABoxSatisfiable()) return true;
         return isSubsumedBy(
             AtomicConcept.create(childName), AtomicConcept.create(parentName)
@@ -335,9 +332,8 @@ public class Reasoner implements Serializable {
     }
     
     public boolean isSubsumedBy(OWLDescription child, OWLDescription parent) {
-        // FIXME: I added this, to make sure that HermiT says for all 
-        // subsumptions of an inconsistent ontology that they do not hold. Is 
-        // that what we want?
+        // For an inconsistent ontology, HermiT answers true for all 
+        // subsumptions. 
         if (!m_tableau.isABoxSatisfiable()) return true;
         return isSubsumedBy(define(child), define(parent));
     }

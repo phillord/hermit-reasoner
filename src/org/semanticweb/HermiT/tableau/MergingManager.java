@@ -45,43 +45,53 @@ public final class MergingManager implements Serializable {
         else {
             Node mergeFrom;
             Node mergeInto;
-            if (node0.getNodeType()==NodeType.ROOT_NODE && node1.getNodeType()==NodeType.ROOT_NODE) {
+            if ((node0.getNodeType()==NodeType.ROOT_NODE || node0.getNodeType()==NodeType.NAMED_NODE) 
+                    && (node1.getNodeType()==NodeType.ROOT_NODE || node1.getNodeType()==NodeType.NAMED_NODE)) {
+                // both nodes are root/named individual nodes
                 if (node0.getPositiveLabelSize()>node1.getPositiveLabelSize()) {
                     mergeFrom=node1;
                     mergeInto=node0;
-                }
-                else {
+                } else {
                     mergeFrom=node0;
                     mergeInto=node1;
                 }
-            }
-            else if (node0.getNodeType()==NodeType.ROOT_NODE) {
+            } else if (node0.getNodeType()==NodeType.ROOT_NODE 
+                    || node0.getNodeType()==NodeType.NAMED_NODE) {
+                // only node0 is a root/named individual node
                 mergeFrom=node1;
                 mergeInto=node0;
-            }
-            else if (node1.getNodeType()==NodeType.ROOT_NODE) {
+            } else if (node1.getNodeType()==NodeType.ROOT_NODE 
+                    || node1.getNodeType()==NodeType.NAMED_NODE) {
+                // only node1 is a root/named individual node
                 mergeFrom=node0;
                 mergeInto=node1;
-            }
-            else if (node0.m_parent.m_parent==node1) {
+            } else if (node0.m_parent.m_parent==node1) {
+                // o node1 -becomes- o node1, node0
+                // |                 |
+                // o                 o
+                // |
+                // o node0 
                 mergeFrom=node0;
                 mergeInto=node1;
-            }
-            else if (node1.m_parent.m_parent==node0) {
+            } else if (node1.m_parent.m_parent==node0) {
+                // o node0 -becomes- o node0, node1
+                // |                 |
+                // o                 o
+                // |
+                // o node1
                 mergeFrom=node1;
                 mergeInto=node0;
-            }
-            else if (node0.m_parent==node1.m_parent) {
+            } else if (node0.m_parent==node1.m_parent) {
+                // node0 and node 1 have a common parent
                 if (node0.getPositiveLabelSize()>node1.getPositiveLabelSize()) {
                     mergeFrom=node1;
                     mergeInto=node0;
-                }
-                else {
+                } else {
                     mergeFrom=node0;
                     mergeInto=node1;
                 }
-            }
-            else if (node0.getNodeType()==NodeType.GRAPH_NODE) {
+            } else if (node0.getNodeType()==NodeType.GRAPH_NODE) {
+                // graph nodes
                 mergeFrom=node0;
                 mergeInto=node1;
             }
@@ -89,11 +99,15 @@ public final class MergingManager implements Serializable {
                 throw new IllegalStateException("Internal error: unsupported merge type.");
             if (m_tableauMonitor!=null)
                 m_tableauMonitor.mergeStarted(mergeFrom,mergeInto);
-            // Now prune the mergeFrom node. We go through all subsequent nodes (all successors of mergeFrom come after mergeFrom)
-            // and delete them it their parent is not in tableau or if it is the mergeFrom node.
+            // Now prune the mergeFrom node. We go through all subsequent nodes 
+            // (all successors of mergeFrom come after mergeFrom)
+            // and delete them it their parent is not in tableau or if it is the 
+            // mergeFrom node.
             Node node=mergeFrom;
             while (node!=null) {
-                if (node.isActive() && node.getNodeType()!=NodeType.ROOT_NODE && (!node.getParent().isActive() || node.getParent()==mergeFrom)) {
+                if (node.isActive() && node.getNodeType()!=NodeType.ROOT_NODE 
+                        && node.getNodeType()!=NodeType.NAMED_NODE
+                        && (!node.getParent().isActive() || node.getParent()==mergeFrom)) {
                     if (m_tableauMonitor!=null)
                         m_tableauMonitor.nodePruned(node);
                     m_tableau.pruneNode(node);

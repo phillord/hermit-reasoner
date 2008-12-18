@@ -1,16 +1,22 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.existentials;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.semanticweb.HermiT.InternalNames;
-import org.semanticweb.HermiT.blocking.*;
-import org.semanticweb.HermiT.model.*;
-import org.semanticweb.HermiT.tableau.*;
+import org.semanticweb.HermiT.blocking.BlockingStrategy;
+import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
+import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.LiteralConcept;
+import org.semanticweb.HermiT.tableau.BranchingPoint;
+import org.semanticweb.HermiT.tableau.DependencySet;
+import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.tableau.Tableau;
+import org.semanticweb.HermiT.tableau.TupleTable;
 
 public class IndividualReuseStrategy extends StrategyBase implements Serializable {
     private static final long serialVersionUID=-7373787507623860081L;
@@ -112,7 +118,10 @@ public class IndividualReuseStrategy extends StrategyBase implements Serializabl
             InternalNames.isInternalUri(((AtomicConcept) toConcept).getURI())) {
             return false;
         }
-        if (atLeastAbstractConcept.getNumber()==1&&(doReuseConceptsAlways.contains(toConcept)||!dontReuseConceptsThisRun.contains(toConcept))) {
+        if (atLeastAbstractConcept.getNumber()==1 
+                && (doReuseConceptsAlways.contains(toConcept) 
+                        || !dontReuseConceptsThisRun.contains(toConcept))) {
+            // try reuse
             if (tableau.getTableauMonitor()!=null) {
                 tableau.getTableauMonitor().existentialExpansionStarted(atLeastAbstractConcept,node);
             }
@@ -120,11 +129,15 @@ public class IndividualReuseStrategy extends StrategyBase implements Serializabl
             Node existentialNode;
             NodeBranchingPointPair reuseInfo=reusedNodes.get(toConcept);
             if (reuseInfo==null) {
+                // no reuse possible
                 if (!isDeterministic) {
                     BranchingPoint branchingPoint=new IndividualReuseBranchingPoint(tableau,atLeastAbstractConcept,node,false);
                     tableau.pushBranchingPoint(branchingPoint);
                     dependencySet=tableau.getDependencySetFactory().addBranchingPoint(dependencySet,branchingPoint.getLevel());
                 }
+                // no idea, why we create a root node here, check if the 
+                // introduction of named nodes in addition to root nodes makes a 
+                // difference
                 existentialNode=tableau.createNewRootNode(dependencySet,0);
                 reuseInfo=new NodeBranchingPointPair(existentialNode,tableau.getCurrentBranchingPoint().getLevel());
                 reusedNodes.put(toConcept,reuseInfo);

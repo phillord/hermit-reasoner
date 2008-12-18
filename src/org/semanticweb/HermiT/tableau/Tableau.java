@@ -290,7 +290,7 @@ public final class Tableau implements Serializable {
         if (hasNominals()) {
             loadABox();
         }
-        m_checkedNode=createNewOriginalNode(m_dependencySetFactory.emptySet(),0);
+        m_checkedNode=createNewOriginalNode(NodeType.ROOT_NODE, m_dependencySetFactory.emptySet(),0);
         m_extensionManager.addConceptAssertion(atomicConcept,m_checkedNode,m_dependencySetFactory.emptySet());
         boolean result=isSatisfiable();
         if (m_tableauMonitor!=null) {
@@ -304,7 +304,7 @@ public final class Tableau implements Serializable {
         clear();
         if (hasNominals())
             loadABox();
-        m_checkedNode=createNewOriginalNode(m_dependencySetFactory.emptySet(),0);
+        m_checkedNode=createNewOriginalNode(NodeType.ROOT_NODE, m_dependencySetFactory.emptySet(),0);
         m_extensionManager.addConceptAssertion(subconcept,m_checkedNode,m_dependencySetFactory.emptySet());
         m_branchingPoints[0]=new BranchingPoint(this);
         m_currentBranchingPoint++;
@@ -322,8 +322,8 @@ public final class Tableau implements Serializable {
         if (hasNominals()) {
             loadABox();
         }
-        Node a = createNewOriginalNode(m_dependencySetFactory.emptySet(), 0);
-        Node b = createNewOriginalNode(m_dependencySetFactory.emptySet(), 0);
+        Node a = createNewOriginalNode(NodeType.ROOT_NODE, m_dependencySetFactory.emptySet(), 0);
+        Node b = createNewOriginalNode(NodeType.ROOT_NODE, m_dependencySetFactory.emptySet(), 0);
         m_extensionManager.addRoleAssertion(role, a, b, m_dependencySetFactory.emptySet());
         m_branchingPoints[0] = new BranchingPoint(this);
         m_currentBranchingPoint++;
@@ -368,8 +368,10 @@ public final class Tableau implements Serializable {
             m_tableauMonitor.isABoxSatisfiableStarted();
         clear();
         loadABox();
-        if (m_firstTableauNode==null)
-            createNewOriginalNode(m_dependencySetFactory.emptySet(),0); // Ensures that there is at least one individual
+        if (m_firstTableauNode==null) {
+            // create an artificial initial node
+            createNewOriginalNode(NodeType.ROOT_NODE, m_dependencySetFactory.emptySet(),0); // Ensures that there is at least one individual
+        }
         boolean result=isSatisfiable();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isABoxSatisfiableFinished(result);
@@ -432,10 +434,20 @@ public final class Tableau implements Serializable {
         }
     }
     
+    /**
+     * Finds the node for the named individual individual or creates a named 
+     * node if no node exists yet for individual.
+     * @param individualsToNodes a mapping from individuals to their nodes in 
+     *                           the tableau 
+     * @param individual the individual for which we want its node in the 
+     *                   tableau or a new node if there is not yet a node for it 
+     *                   in the tableau
+     * @return the node for individual in the tableau
+     */
     private Node getNodeForIndividual(Map<Individual,Node> individualsToNodes,Individual individual) {
         Node node=individualsToNodes.get(individual);
         if (node==null) {
-            node=createNewOriginalNode(m_dependencySetFactory.emptySet(),0);
+            node=createNewOriginalNode(NodeType.NAMED_NODE, m_dependencySetFactory.emptySet(),0);
             individualsToNodes.put(individual,node);
         }
         return node;
@@ -530,8 +542,26 @@ public final class Tableau implements Serializable {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.backtrackToFinished(branchingPoint);
     }
-    public Node createNewOriginalNode(DependencySet dependencySet,int treeDepth) {
-        Node out = createNewRootNode(dependencySet, treeDepth);
+    
+    /**
+     * Creates a new root node (either one that corresponds to an ABox 
+     * individual or an artificial one that we need for subsumption or 
+     * consistency testing). Make sure that if we have a universal role that 
+     * this node is connected to the initial node for the tableau (if it not the 
+     * initial one itself). 
+     * @param dependencySet should be empty for original nodes
+     * @param treeDepth should be usually 0 for original nodes 
+     * @return the created node
+     */
+    public Node createNewOriginalNode(NodeType nodeType, DependencySet dependencySet, int treeDepth) {
+        Node out;
+        if (nodeType == NodeType.ROOT_NODE) {
+            out = createNewRootNode(dependencySet, treeDepth);
+        } else if (nodeType == NodeType.NAMED_NODE) {
+            out = createNewNamedNode(dependencySet, treeDepth);
+        } else {
+            throw new RuntimeException("Can only create original nodes of type root node or named node. ");
+        }
         if (m_makeTopRoleUniversal) {
             if (m_arbitraryOriginalNode == null) {
                 m_arbitraryOriginalNode = out;
@@ -545,15 +575,50 @@ public final class Tableau implements Serializable {
         }
         return out;
     }
+    /**
+     * Create a new node that represents an individual named in the input 
+     * ontology (thus, keys have to be applied to it)
+     * @param dependencySet the dependency set for the node
+     * @param treeDepth 
+     * @return the created node
+     */
+    public Node createNewNamedNode(DependencySet dependencySet,int treeDepth) {
+        return createNewNodeRaw(dependencySet,null,NodeType.NAMED_NODE,treeDepth);
+    }
+    /**
+     * Create a new node that represents a nominal, but one that is not named in 
+     * the input ontology (thus, keys are not applicable)
+     * @param dependencySet the dependency set for the node
+     * @param treeDepth
+     * @return the created node
+     */
     public Node createNewRootNode(DependencySet dependencySet,int treeDepth) {
         return createNewNodeRaw(dependencySet,null,NodeType.ROOT_NODE,treeDepth);
     }
+    /**
+     * Create a new tree node. 
+     * @param dependencySet the dependency set for the node
+     * @param treeDepth
+     * @return the created node
+     */
     public Node createNewTreeNode(DependencySet dependencySet,Node parent) {
         return createNewNodeRaw(dependencySet,parent,NodeType.TREE_NODE,parent.getTreeDepth()+1);
     }
+    /**
+     * Create a new concrete node for datatypes. 
+     * @param dependencySet the dependency set for the node
+     * @param treeDepth
+     * @return the created node
+     */
     public Node createNewConcreteNode(DependencySet dependencySet,Node parent) {
         return createNewNodeRaw(dependencySet,parent,NodeType.CONCRETE_NODE,parent.getTreeDepth()+1);
     }
+    /**
+     * Create a new node graph node for description graphs
+     * @param dependencySet the dependency set for the node
+     * @param treeDepth
+     * @return the created node
+     */
     public Node createNewGraphNode(Node parent,DependencySet dependencySet) {
         return createNewNodeRaw(dependencySet,parent,NodeType.GRAPH_NODE,parent.getTreeDepth());
     }
@@ -584,6 +649,14 @@ public final class Tableau implements Serializable {
             m_extensionManager.addConceptAssertion(AtomicConcept.THING,node,dependencySet);
         return node;
     }
+    /**
+     * Merges node into mergeInto. We assume that concepts and roles have 
+     * already been copied from node to mergeInto. After the merge node has 
+     * state NodeState.MERGED. 
+     * @param node the node that is to be merged
+     * @param mergeInto the node we merge into
+     * @param dependencySet 
+     */
     public void mergeNode(Node node,Node mergeInto,DependencySet dependencySet) {
         assert node.m_nodeState==Node.NodeState.ACTIVE;
         assert node.m_mergedInto==null;
@@ -594,6 +667,13 @@ public final class Tableau implements Serializable {
         node.m_mergedIntoDependencySet=m_dependencySetFactory.getPermanent(dependencySet);
         m_dependencySetFactory.addUsage(node.m_mergedIntoDependencySet);
         node.m_nodeState=NodeState.MERGED;
+        if (node.m_nodeType == NodeType.NAMED_NODE 
+                && mergeInto.m_nodeType == NodeType.ROOT_NODE) {
+            // We merged a named individual node (which is also a kind of root 
+            // node, but one to which keys apply) into a root node, which means 
+            // that mergeInto becomes named and keys apply to it. 
+            mergeInto.m_nodeType = NodeType.NAMED_NODE;
+        }
         node.m_previousMergedOrPrunedNode=m_lastMergedOrPrunedNode;
         m_lastMergedOrPrunedNode=node;
         m_numberOfMergedOrPrunedNodes++;
