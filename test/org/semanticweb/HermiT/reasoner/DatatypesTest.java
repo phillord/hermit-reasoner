@@ -306,4 +306,36 @@ public class DatatypesTest extends AbstractReasonerTest {
         loadOntologyWithAxioms(axioms, null);
         assertABoxSatisfiable(true);
     }
+    
+//    public void testStringAbbreviation() throws Exception {
+//        String axioms = "ClassAssertion(a DataAllValuesFrom(dp " 
+//                + "DataOneOf(\"abc\" \"abc\"^^xsd:string)))" 
+//                + "ClassAssertion(a DataMaxCardinality(1 dp))";
+//        loadOntologyWithAxioms(axioms, null);
+//        assertABoxSatisfiable(true);
+//    }
+    
+    public void testStringAbbreviation() throws Exception {
+        String axioms = "DataPropertyAssertion(dp a \"abc\"^^xsd:string)" 
+                + "DataPropertyAssertion(dp a \"abc\")" 
+                + "ClassAssertion(a DataMaxCardinality(1 dp))";
+        loadOntologyWithAxioms(axioms, null);
+        assertABoxSatisfiable(true);
+    }
+    
+//    public void testLangAbbreviation() throws Exception {
+//        String axioms = "ClassAssertion(a DataAllValuesFrom(dp " 
+//                + "DataOneOf(\"abc@de\"^^rdf:text \"abc\"@de)))" 
+//                + "ClassAssertion(a DataMaxCardinality(1 dp))";
+//        loadOntologyWithAxioms(axioms, null);
+//        assertABoxSatisfiable(true);
+//    }
+
+    public void testLangAbbreviation() throws Exception {
+        String axioms = "DataPropertyAssertion(dp a \"abc@es\"^^rdf:text)" 
+                + "DataPropertyAssertion(dp a \"abc\"@es)" 
+                + "ClassAssertion(a DataMaxCardinality(1 dp))";
+        loadOntologyWithAxioms(axioms, null);
+        assertABoxSatisfiable(true);
+    }
 }

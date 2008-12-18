@@ -68,6 +68,7 @@ import org.semanticweb.HermiT.model.ExistsDescriptionGraph;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Role;
+import org.semanticweb.HermiT.model.dataranges.AbstractDataRange;
 import org.semanticweb.HermiT.model.dataranges.DataConstant;
 import org.semanticweb.HermiT.model.dataranges.DataRange;
 import org.semanticweb.HermiT.monitor.TableauMonitorForwarder;
@@ -726,37 +727,72 @@ public class Debugger extends TableauMonitorForwarder {
         }
     }
     
-    public static class DataRangeComparator implements Comparator<DataRange> {
+    public static class DataRangeComparator implements Comparator<AbstractDataRange> {
         public static final DataRangeComparator INSTANCE=new DataRangeComparator();
         
-        public int compare(DataRange dr1, DataRange dr2) {
-            int type1=getDataRangeType(dr1);
-            int type2=getDataRangeType(dr2);
+        public int compare(AbstractDataRange adr1, AbstractDataRange adr2) {
+            int type1=getDataRangeType(adr1);
+            int type2=getDataRangeType(adr2);
             if (type1!=type2)
                 return type1-type2;
-            int comparison = dr1.getDatatypeURI().compareTo(dr2.getDatatypeURI());
-            if (comparison!=0) return comparison;
-            List<DataConstant> values1 = new ArrayList<DataConstant>(dr1.getOneOf());
-            List<DataConstant> values2 = new ArrayList<DataConstant>(dr2.getOneOf());
-            Collections.sort(values1);
-            Collections.sort(values2);
-            Iterator<DataConstant> it1 = values1.iterator();
-            Iterator<DataConstant> it2 = values2.iterator();
-            while (it1.hasNext()) {
-                if (it2.hasNext()) {
-                    comparison = it1.next().compareTo(it2.next());
-                    if (comparison!=0) return comparison;
-                } else {
-                    return 1;
+            if (adr1 instanceof DataRange && adr2 instanceof DataRange) {
+                DataRange dr1 = (DataRange) adr1;
+                DataRange dr2 = (DataRange) adr2;
+                int comparison = dr1.getDatatypeURI().compareTo(dr2.getDatatypeURI());
+                if (comparison!=0) return comparison;
+                List<DataConstant> values1 = new ArrayList<DataConstant>(dr1.getOneOf());
+                List<DataConstant> values2 = new ArrayList<DataConstant>(dr2.getOneOf());
+                Collections.sort(values1);
+                Collections.sort(values2);
+                Iterator<DataConstant> it1 = values1.iterator();
+                Iterator<DataConstant> it2 = values2.iterator();
+                while (it1.hasNext()) {
+                    if (it2.hasNext()) {
+                        comparison = it1.next().compareTo(it2.next());
+                        if (comparison!=0) return comparison;
+                    } else {
+                        return 1;
+                    }
                 }
+                if (it2.hasNext()) return -1;
+                return 0;
+            } else if (adr1 instanceof Concept && adr2 instanceof Concept) {
+                Concept c1 = (Concept) adr1;
+                Concept c2 = (Concept) adr2;
+                return ConceptComparator.INSTANCE.compare(c1, c2);
+            } else {
+                // should not happen
+                return -1;
             }
-            if (it2.hasNext()) return -1;
-            return 0;
         }
-        protected int getDataRangeType(DataRange dr) {
-            int returnValue = 0;
-            if (dr.isNegated()) returnValue = 1;
-            return returnValue;
+        protected int getDataRangeType(AbstractDataRange dr) {
+            if (dr instanceof DataRange) {
+                int returnValue = 10;
+                if (((DataRange)dr).isNegated()) returnValue = 11;
+                return returnValue;
+            } else if (dr instanceof Concept) {
+                return getConceptType((Concept) dr);
+            } else {
+                // should not happen
+                return -1;
+            }
+        }
+        
+        protected int getConceptType(Concept c) {
+            if (c instanceof AtMostAbstractRoleGuard)
+                return 1;
+            else if (c instanceof AtomicConcept)
+                return 0;
+            else if (c instanceof AtLeastAbstractRoleConcept)
+                return 2;
+            else if (c instanceof ExistsDescriptionGraph)
+                return 3;
+            else if (c instanceof AtomicNegationConcept)
+                return 4;
+            else if (c instanceof AtLeastConcreteRoleConcept)
+                return 5;
+            else
+                throw new IllegalArgumentException();
         }
     }
     

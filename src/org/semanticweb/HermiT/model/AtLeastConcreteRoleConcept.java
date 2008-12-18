@@ -2,6 +2,7 @@
 package org.semanticweb.HermiT.model;
 
 import org.semanticweb.HermiT.Namespaces;
+import org.semanticweb.HermiT.model.dataranges.AbstractDataRange;
 import org.semanticweb.HermiT.model.dataranges.DataRange;
 
 /**
@@ -14,10 +15,10 @@ public class AtLeastConcreteRoleConcept extends ExistentialConcept implements
 
     protected final int number;
     protected final AtomicRole onAtomicConcreteRole;
-    protected final DataRange toDataRange;
+    protected final AbstractDataRange toDataRange;
 
     protected AtLeastConcreteRoleConcept(int number,
-            AtomicRole onAtomicConcreteRole, DataRange toDataRange) {
+            AtomicRole onAtomicConcreteRole, AbstractDataRange toDataRange) {
         if (!onAtomicConcreteRole.isRestrictedToDatatypes()) {
             throw new RuntimeException("Data restrictions on object roles are not allowed"); // but could be -rob
         }
@@ -34,7 +35,7 @@ public class AtLeastConcreteRoleConcept extends ExistentialConcept implements
         return onAtomicConcreteRole;
     }
 
-    public DataRange getToDataRange() {
+    public AbstractDataRange getToDataRange() {
         return toDataRange;
     }
 

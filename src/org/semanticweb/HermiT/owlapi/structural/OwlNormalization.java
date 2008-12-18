@@ -162,7 +162,7 @@ public class OwlNormalization {
         }
         AxiomVisitor axiomVisitor = new AxiomVisitor();
         for (OWLAxiom untyped_axiom : inOntology.getAxioms()) {
-            // the visitor populates the member variable such as 
+            // the visitor populates the member variables such as 
             // m_reflexiveObjectProperties, m_disjointObjectProperties, etc, 
             // collects the facts and turns equivalences and implications into 
             // an internal set of disjunctions that is then normalised
@@ -211,17 +211,35 @@ public class OwlNormalization {
                         rewrittenAxiom.getIndividual(), desc));
         }
 
+        /**
+         * Adds the property from axiom o the set of asymmetric object properties
+         * 
+         * @param axiom an asymmetry axiom
+         */
         public void visit(OWLAntiSymmetricObjectPropertyAxiom axiom) {
             // mis-named - rename to asymmetric as soon as possible
             OWLObjectPropertyExpression objectProperty = axiom.getProperty().getSimplified();
             m_asymmetricObjectProperties.add(objectProperty);
         }
-
+        
+        /**
+         * Adds the property from axiom o the set of reflexive object properties
+         * 
+         * @param axiom a reflexivity axiom
+         */
         public void visit(OWLReflexiveObjectPropertyAxiom axiom) {
             OWLObjectPropertyExpression objectProperty = axiom.getProperty().getSimplified();
             m_reflexiveObjectProperties.add(objectProperty);
         }
-
+        
+        /**
+         * For each pair of classes C_i, C_j in the axiom, add an inclusion 
+         * neg C_i or neg C_j 
+         * (equivalent to C_i implies not C_j) 
+         * (also equivalent to C_i and C_j implies bottom)
+         * 
+         * @param axiom a disjoint classes axiom
+         */
         public void visit(OWLDisjointClassesAxiom axiom) {
             OWLDescription[] descriptions = new OWLDescription[axiom.getDescriptions().size()];
             axiom.getDescriptions().toArray(descriptions);
@@ -232,7 +250,14 @@ public class OwlNormalization {
                     inclAsDisj.add(new OWLDescription[] { descriptions[i],
                             descriptions[j] });
         }
-
+        
+        /**
+         * For dp the dataproperty in the axiom and D the domain in axiom, add 
+         * the inclusion
+         * D or forall dp.bottom
+         * 
+         * @param axiom a dataproperty domain axiom
+         */
         public void visit(OWLDataPropertyDomainAxiom axiom) {
             OWLDataRange dataNothing = m_factory.getOWLDataComplementOf(
                     m_factory.getOWLDataType(
@@ -242,7 +267,13 @@ public class OwlNormalization {
             inclAsDisj.add(new OWLDescription[] { axiom.getDomain(),
                     allPropertyNothing });
         }
-
+        
+        /**
+         * ignored since we use the manager to create a merged ontology that 
+         * contains all axioms from the imports closure
+         * 
+         * @param axiom an imports statement
+         */
         public void visit(OWLImportsDeclaration axiom) {
             // the manager took care of imports
         }
