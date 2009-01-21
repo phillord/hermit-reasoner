@@ -106,6 +106,7 @@ public class OwlNormalization {
     protected final Set<OWLObjectPropertyExpression> m_transitiveObjectProperties;
     protected final Set<OWLObjectPropertyExpression[]> m_disjointObjectProperties;
     protected final Set<OWLDataPropertyExpression[]> m_disjointDataProperties;
+    protected final Set<OWLHasKeyDummy> m_hasKeys;
     protected final Collection<OWLIndividualAxiom> m_facts;
     protected final OWLDataFactory m_factory;
     protected final RoleManager roleManager;
@@ -122,6 +123,7 @@ public class OwlNormalization {
         m_transitiveObjectProperties = new HashSet<OWLObjectPropertyExpression>();
         m_disjointObjectProperties = new HashSet<OWLObjectPropertyExpression[]>();
         m_disjointDataProperties = new HashSet<OWLDataPropertyExpression[]>();
+        m_hasKeys = new HashSet<OWLHasKeyDummy>();
         m_facts = new HashSet<OWLIndividualAxiom>();
         m_factory = factory;
         roleManager = new TransitivityManager();
@@ -176,6 +178,12 @@ public class OwlNormalization {
         m_objectPropertyInclusions = roleManager.getSimpleInclusions();
     }
     
+    public void processKeys(Reasoner.Configuration config, Set<OWLHasKeyDummy> keys) throws OWLException {
+        AxiomVisitor axiomVisitor = new AxiomVisitor();
+        for (OWLHasKeyDummy key : keys) {
+            axiomVisitor.visit(key);
+        }
+    }
 
     protected class AxiomVisitor implements OWLAxiomVisitor {
         
@@ -515,6 +523,35 @@ public class OwlNormalization {
             roleManager.addInclusion(first, second.getInverseProperty());
             roleManager.addInclusion(second, first.getInverseProperty());
         }
+        
+        public void visit(OWLHasKeyDummy axiom) {
+            OWLDescription desc = simplify(axiom.getClassExpression(), 
+                    m_factory);
+            if (desc instanceof OWLDataRange) {
+                throw new RuntimeException("Parsed a data range instead of a " +
+                		"concept expression, but only concept " +
+                		"expressions can be used in an HasKey axiom.");
+            }
+            if (!isSimple(desc)) {
+                boolean[] alreadyExists = new boolean[1];
+                OWLDescription definition = getDefinitionFor(desc, alreadyExists);
+                if (!alreadyExists[0])
+                       inclAsDisj.add(new OWLDescription[] {
+                               definition.getComplementNNF(), desc });
+                desc = definition;
+            }
+            if (desc == axiom.getClassExpression()) {
+                m_hasKeys.add(axiom);
+            } else {
+                // rewrite: construct a new axiom that uses the concept 
+                // definition. 
+                OWLHasKeyDummy k = new OWLHasKeyDummy(m_factory);
+                k.setClassExpression(desc);
+                k.setObjectProperties(axiom.getObjectProperties());
+                k.setDataProperties(axiom.getDataProperties());
+                m_hasKeys.add(k);
+            }
+        }
 
         public void visit(SWRLRule rule) {
             throw new RuntimeException("Parsed a SWRL rule, but SWRL rules " +
@@ -757,6 +794,10 @@ public class OwlNormalization {
         return m_disjointDataProperties;
     }
 
+    public Set<OWLHasKeyDummy> getHasKeys() {
+        return m_hasKeys;
+    }
+    
     public Collection<OWLIndividualAxiom> getFacts() {
         return m_facts;
     }

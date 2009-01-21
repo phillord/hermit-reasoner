@@ -69,6 +69,7 @@ import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.monitor.TableauMonitorFork;
 import org.semanticweb.HermiT.monitor.Timer;
 import org.semanticweb.HermiT.monitor.TimerWithPause;
+import org.semanticweb.HermiT.owlapi.structural.OWLHasKeyDummy;
 import org.semanticweb.HermiT.owlapi.structural.OwlClausification;
 import org.semanticweb.HermiT.tableau.Tableau;
 import org.semanticweb.HermiT.util.TranslatedMap;
@@ -232,7 +233,7 @@ public class Reasoner implements Serializable {
         // @Rob: They do not matter here as long as these methods are called 
         // from Protege only, because we already create a merged ontology that 
         // contains also the imported ones there.  
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+	OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         loadOwlOntology(ontology, manager.getOWLDataFactory(),
                         (Set<DescriptionGraph>) null);
     }
@@ -247,6 +248,23 @@ public class Reasoner implements Serializable {
         // contains also the imported ones there. 
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         loadOwlOntology(ontology, manager.getOWLDataFactory(), graphs);
+    }
+    
+    /**
+     * TEST PURPOSES ONLY, till the OWL API supports keys. 
+     * @param ontology an OWL API loaded ontology
+     * @param config a reasoner configuration
+     * @param graphs description grphs
+     * @param keys some hasKey axioms (OWLHasKeyDummy instances)
+     * @throws OWLException
+     */
+    public Reasoner(OWLOntology ontology, 
+            Configuration config,
+            Set<DescriptionGraph> graphs, 
+            Set<OWLHasKeyDummy> keys) throws OWLException {
+          m_config = config;
+          OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+          loadOwlOntology(ontology, manager.getOWLDataFactory(), graphs, keys);
     }
 
     public DLOntology getDLOntology() {
@@ -866,6 +884,29 @@ public class Reasoner implements Serializable {
         loadDLOntology(d);
     }
     
+    /**
+     * TEST PURPOSES ONLY, till the OWL API supports keys. 
+     * @param ontology an OWL API loaded ontology
+     * @param factory a data factory
+     * @param dgs description graphs
+     * @param keys a set of HasKey axioms
+     * @throws OWLException
+     */
+    protected void loadOwlOntology(
+            OWLOntology ontology,
+            OWLDataFactory factory,
+            Set<DescriptionGraph> dgs, 
+            Set<OWLHasKeyDummy> keys) throws OWLException {
+        if (dgs == null) {
+            dgs = Collections.emptySet();
+        }
+        if (keys == null) {
+            keys = Collections.emptySet();
+        }
+        clausifier = new OwlClausification(factory);
+        DLOntology d = clausifier.clausifyWithKeys(m_config, ontology, dgs, keys);
+        loadDLOntology(d);
+    }
     
     protected void loadDLOntology(File file) throws Exception {
         BufferedInputStream input =

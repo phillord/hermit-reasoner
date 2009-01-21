@@ -235,6 +235,17 @@ public class DLClause implements Serializable {
         }
         return false;
     }
+    
+    /**
+     * Checks whether the cause represents a HasKey axiom. HasKey axioms clauses 
+     * are a subtype (subclass) of DLClauses and they are not admissible 
+     * according to the standard HT admissability definition.  
+     * @return false unless the object is an instance of KeyClause (which is a 
+     *               subclass of DLClause)
+     */
+    public boolean isKeyClause() {
+        return false;
+    }
 
     public String toString(Namespaces namespaces) {
         StringBuffer buffer = new StringBuffer();

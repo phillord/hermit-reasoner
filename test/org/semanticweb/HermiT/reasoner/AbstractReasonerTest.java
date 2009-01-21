@@ -16,6 +16,7 @@ import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
+import org.semanticweb.HermiT.owlapi.structural.OWLHasKeyDummy;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.io.OWLOntologyInputSource;
@@ -99,6 +100,39 @@ public abstract class AbstractReasonerTest extends TestCase {
         hermit=new Reasoner(m_ontology, configuration);
     }
 
+    /**
+     * creates and loads an ontology that contains the given axioms
+     * 
+     * @param axioms
+     *            in functional style syntax
+     * @throws InterruptedException
+     * @throws OWLException
+     */
+    protected void loadOntologyWithAxiomsAndKeys(
+            String axioms, 
+            Reasoner.Configuration configuration, 
+            Set<OWLHasKeyDummy> keys) throws OWLException,InterruptedException {
+        StringBuffer buffer=new StringBuffer();
+        buffer.append("Namespace(=<file:/c/test.owl#>)");
+        buffer.append("Namespace(rdfs=<http://www.w3.org/2000/01/rdf-schema#>)");
+        buffer.append("Namespace(owl2xml=<http://www.w3.org/2006/12/owl2-xml#>)");
+        buffer.append("Namespace(test=<file:/c/test.owl#>)");
+        buffer.append("Namespace(owl=<http://www.w3.org/2002/07/owl#>)");
+        buffer.append("Namespace(xsd=<http://www.w3.org/2001/XMLSchema#>)");
+        buffer.append("Namespace(rdf=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)");
+        buffer.append("Ontology(<file:/c/test.owl>");
+        buffer.append(axioms);
+        buffer.append(")");
+        OWLOntologyManager manager=OWLManager.createOWLOntologyManager();
+        OWLOntologyInputSource input=new StringInputSource(buffer.toString());
+        m_ontology=manager.loadOntology(input);
+        if (configuration == null) {
+            configuration = new Reasoner.Configuration();
+            configuration.subsumptionCacheStrategyType = Reasoner.SubsumptionCacheStrategyType.ON_REQUEST;
+        }
+        hermit=new Reasoner(m_ontology, configuration, null, keys);
+    }
+    
     /**
      * @param resourceName
      * @return each line from the loaded resource becomes a string in the returned array

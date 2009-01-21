@@ -9,10 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 
-import org.semanticweb.HermiT.model.AtomicRole;
-import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.dataranges.CanonicalDataRange;
 import org.semanticweb.HermiT.model.dataranges.DataConstant;
@@ -26,6 +23,7 @@ public class DatatypeManager {
     protected final TableauMonitor tableauMonitor;
     protected final ExtensionManager extensionManager;
     protected final ExtensionTable.Retrieval pairsDeltaOld;
+    protected final ExtensionTable.Retrieval triplesDeltaOld;
     protected final ExtensionTable.Retrieval triplesFirstBoundRetr;
     protected final ExtensionTable.Retrieval triplesSecondBoundRetr;
     protected final ExtensionTable.Retrieval pairsFirstBoundRetr;
@@ -37,6 +35,8 @@ public class DatatypeManager {
         extensionManager = tableau.m_extensionManager;
         // retrieval object for all the datatype assertions in the changed part of the tuple table
         pairsDeltaOld = extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[2],ExtensionTable.View.DELTA_OLD);
+        // retrieval object for all the inequality assertions in the changed part of the tuple table
+        triplesDeltaOld = extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,false,false },ExtensionTable.View.DELTA_OLD);
         // retrieval object to fetch the parent node of a data range node
         triplesFirstBoundRetr = extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,false }, ExtensionTable.View.TOTAL);
         // retrieval object to fetch the parent node of a data range node
@@ -69,8 +69,15 @@ public class DatatypeManager {
             if (pair[0] instanceof DataRange) { //&& !checkedDRs.contains((DataRange) pair[0])) {
                 // in the last saturation, we added a DataRange, so lets check 
                 // whether this caused a clash
-                Map<Node,Set<DataRange>> nodeToDRs = fetchRelevantAssertions((Node) pair[1]);
-                datatypesSat = checkDatatypeAssertionFor(nodeToDRs);
+                Map<Node, Set<Node>> inequalities = new HashMap<Node, Set<Node>>();
+                inequalities.put((Node) pair[1], new HashSet<Node>());
+                Map<Node, Set<Node>> inequalitiesSym = new HashMap<Node, Set<Node>>();
+                inequalitiesSym.put((Node) pair[1], new HashSet<Node>());
+                boolean foundSelfInequality = fetchRelevantNodes(inequalities, inequalitiesSym);
+                if (foundSelfInequality) return false;
+                
+                Map<Node,Set<DataRange>> nodeToDRs = fetchRelevantDataRanges(inequalities.keySet());
+                datatypesSat = checkDatatypeAssertionFor(nodeToDRs, inequalities, inequalitiesSym);
                 if (datatypesSat) {
                     // remember, which ranges we have already checked because 
                     // pairsDeltaOld can contain more than one data range 
@@ -84,6 +91,38 @@ public class DatatypeManager {
             }
             pairsDeltaOld.next();
         }
+        Object[] triple = triplesDeltaOld.getTupleBuffer();
+        triplesDeltaOld.getBindingsBuffer()[0]=Inequality.INSTANCE;
+        triplesDeltaOld.open();
+        while (datatypesSat && !triplesDeltaOld.afterLast()) {
+            if (((Node) triple[1]).m_nodeType == NodeType.CONCRETE_NODE 
+                    && ((Node) triple[1]).m_nodeType == NodeType.CONCRETE_NODE) { 
+                // in the last saturation, we added an inequality between 
+                // concrete nodes, so lets check whether this caused a clash
+                Map<Node, Set<Node>> inequalities = new HashMap<Node, Set<Node>>();
+                inequalities.put((Node) triple[1], new HashSet<Node>());
+                inequalities.put((Node) triple[2], new HashSet<Node>());
+                Map<Node, Set<Node>> inequalitiesSym = new HashMap<Node, Set<Node>>();
+                inequalitiesSym.put((Node) triple[1], new HashSet<Node>());
+                inequalitiesSym.put((Node) triple[2], new HashSet<Node>());
+                boolean foundSelfInequality = fetchRelevantNodes(inequalities, inequalitiesSym);
+                if (foundSelfInequality) return false;
+                
+                Map<Node,Set<DataRange>> nodeToDRs = fetchRelevantDataRanges(inequalities.keySet());
+                datatypesSat = checkDatatypeAssertionFor(nodeToDRs, inequalities, inequalitiesSym);
+                if (datatypesSat) {
+                    // remember, which ranges we have already checked because 
+                    // pairsDeltaOld can contain more than one data range 
+                    // assertion and we check not just a found assertion, but 
+                    // the all data range assertions for the node and its data 
+                    // range siblings
+                    for (Node node : nodeToDRs.keySet()) {
+                        checkedDRs.addAll(nodeToDRs.get(node));
+                    }
+                }
+            }
+            triplesDeltaOld.next();
+        }
         if (tableauMonitor != null) {
             tableauMonitor.datatypeCheckingFinished(datatypesSat);
         }
@@ -91,50 +130,108 @@ public class DatatypeManager {
     }
     
     /**
-     * Given a node that has a data range assertion in the extension table, 
-     * look up its predecessor node in the tableau (unique for data range nodes) 
-     * and collect all successors of the fond predecessor that have data range 
-     * assertions. 
-     * @param initialNode a node that has a data range assertion in the 
-     *        extension table
-     * @return A map that contains as keys the given node and its siblings from 
-     *         the tableau that also have data range assertions. For each key n1 
-     *         that mapping contains all data range assertion for n1 from the 
+     * Input are 2 maps with the nodes as keys and empty sets as values for 
+     * which we want to collect the inequalities. Afterwards the sets have keys 
+     * for all nodes that are linked to the input nodes via an inequality 
+     * (considering it is symmetric). The values in inequalities contain the 
+     * inequalities (not treating inequality as symmetric) and the values in 
+     * inequalitiesSym contain the inverse inequalities. this is needed because 
+     * when a clash is found later on, we need to reconstruct whether the 
+     * extension table contains neq n1 n2 or neq n2 n1. 
+     * If a self inequality is found (neq node node) a clash is raised and the 
+     * method return true. 
+     * @param inequalities is a map that is initially assumed to have all nodes 
+     *        we are interested in as keys but with empty sets as values. 
+     *        Whenever an inequality is found, the inequal nodes are added to 
+     *        the set and inequalities are collected for them as well. 
+     * @param inequalitiesSym is a map that is initially assumed to have all 
+     *        nodes we are interested in as keys but with empty sets as values. 
+     *        Whenever an inequality is found with one of the keys in the third 
+     *        position, the inequalities is collected. 
+     * @return true if a tuple neq n1 n1 is found while fetching the 
+     *         inequalities from the extension table and false otherwise
+     */
+    protected boolean fetchRelevantNodes(
+            Map<Node, Set<Node>> inequalities, 
+            Map<Node, Set<Node>> inequalitiesInv) {
+        Object[] triple = triplesZeroBoundRetr.getTupleBuffer();
+        triplesZeroBoundRetr.getBindingsBuffer()[0]=Inequality.INSTANCE;
+        boolean fixedPointReached = false;
+        
+        while(!fixedPointReached) {
+            triplesZeroBoundRetr.open();
+            fixedPointReached = true;
+            while (!triplesZeroBoundRetr.afterLast()) {
+                Node node1 = (Node) triple[1];
+                Node node2 = (Node) triple[2];
+                // see if it is relevant
+                if (node1.m_nodeType == NodeType.CONCRETE_NODE 
+                        && ((inequalities.containsKey(node1) 
+                                && !inequalities.get(node1).contains(node2)) 
+                                || (inequalities.containsKey(node2) 
+                                        && !inequalities.get(node2).contains(node1)))) {
+                    
+                    // self inequality found
+                    if (node1.equals(node2)) {
+                        if (tableauMonitor != null) {
+                            tableauMonitor.clashDetected(new Object[][] {
+                                    new Object[] { Inequality.INSTANCE, node1, node2 } });
+                            tableauMonitor.datatypeCheckingFinished(false);
+                        }
+                        extensionManager.setClash(triplesZeroBoundRetr.getDependencySet());
+                        return true;
+                    }
+                    if (!inequalities.containsKey(node1)) {
+                        inequalities.put(node1, new HashSet<Node>());
+                        inequalitiesInv.put(node1, new HashSet<Node>());
+                    }
+                    if (!inequalities.containsKey(node2)) {
+                        inequalities.put(node2, new HashSet<Node>());
+                        inequalitiesInv.put(node2, new HashSet<Node>());
+                    }
+                    // record the inequality
+                    if (!inequalities.get(node1).contains(node2)) {
+                        fixedPointReached = false;
+                        Set<Node> inequalNodes = inequalities.get(node1);
+                        inequalNodes.add(node2);
+                        inequalities.put(node1, inequalNodes);
+                    }
+                    // record the inverse
+                    if (!inequalitiesInv.get(node2).contains(node1)) {
+                        fixedPointReached = false;
+                        Set<Node> inequalNodes = inequalitiesInv.get(node2);
+                        inequalNodes.add(node1);
+                        inequalitiesInv.put(node2, inequalNodes);
+                    }
+                }
+                triplesZeroBoundRetr.next();
+            }
+        }
+        return false; // no self inequality
+    }
+    
+    /**
+     * Given a set of nodes, collect all data ranges from the extension table. 
+     * @param nodes a set of nodes for which data range assertions are to be 
+     *              collected from the extension table
+     * @return A map that contains as keys the given nodes and, for each key n1, 
+     *         the map contains all data range assertion for n1 from the 
      *         extension table. 
      */
-    protected Map<Node,Set<DataRange>> fetchRelevantAssertions(Node initialNode) {
+    protected Map<Node,Set<DataRange>> fetchRelevantDataRanges(Set<Node> nodes) {
         Map<Node,Set<DataRange>> nodeToDRs = new HashMap<Node,Set<DataRange>>();
         Set<DataRange> dataRanges;
-        // find the predecessor of this node and collect all datatype 
-        // successors that the predecessor has
-        Object[] triple = triplesSecondBoundRetr.getTupleBuffer();
-        triplesSecondBoundRetr.getBindingsBuffer()[2] = initialNode;
-        triplesSecondBoundRetr.open();
-        Node predecessor = (Node) triple[1];
-        
-        // collect all the data range successors for the parent node
-        triple = triplesFirstBoundRetr.getTupleBuffer();
-        triplesFirstBoundRetr.getBindingsBuffer()[1]=predecessor;
-        triplesFirstBoundRetr.open();
-        while (!triplesFirstBoundRetr.afterLast()) {
-            DLPredicate predicate = (DLPredicate) triple[0];
-            if (predicate instanceof AtomicRole 
-                    && ((AtomicRole)predicate).isRestrictedToDatatypes()) {
-                Node successor = (Node) triple[2];
-                Object[] assertionsForSuccessor = pairsFirstBoundRetr.getTupleBuffer();
-                pairsFirstBoundRetr.getBindingsBuffer()[1] = successor;
-                pairsFirstBoundRetr.open();
-                while (!pairsFirstBoundRetr.afterLast()) {
-                    dataRanges = new HashSet<DataRange>();
-                    dataRanges.add((DataRange) assertionsForSuccessor[0]);
-                    if (nodeToDRs.containsKey(successor)) {
-                        dataRanges.addAll(nodeToDRs.get(successor));
-                    }
-                    nodeToDRs.put(successor, dataRanges);
-                    pairsFirstBoundRetr.next();
-                }
+
+        for (Node node : nodes) {
+            Object[] DRsForNode = pairsFirstBoundRetr.getTupleBuffer();
+            pairsFirstBoundRetr.getBindingsBuffer()[1] = node;
+            pairsFirstBoundRetr.open();
+            dataRanges = new HashSet<DataRange>();
+            while (!pairsFirstBoundRetr.afterLast()) {
+                dataRanges.add((DataRange) DRsForNode[0]);
+                pairsFirstBoundRetr.next();
             }
-            triplesFirstBoundRetr.next();
+            nodeToDRs.put(node, dataRanges);
         }
         return nodeToDRs;
     }
@@ -146,7 +243,10 @@ public class DatatypeManager {
      * @param nodeToDRs a mapping from nodes to their asserted data ranges
      * @return true if a consistent assignment exists, false otherwise
      */
-    protected boolean checkDatatypeAssertionFor(Map<Node,Set<DataRange>> nodeToDRs) {
+    protected boolean checkDatatypeAssertionFor(
+            Map<Node,Set<DataRange>> nodeToDRs, 
+            Map<Node,Set<Node>> inequalities, 
+            Map<Node,Set<Node>> inequalitiesSym) {
         // test for trivial unsatisfiability:
         // Is there a dataRange assertion that is bottom?
         for (Node node : nodeToDRs.keySet()) {
@@ -163,107 +263,26 @@ public class DatatypeManager {
                 }
             }
         }
-        
-        // collect the inequalities and raise a clash when a self inequality is 
-        // found 
-        Map<Node,Set<Node>> inequalities = new HashMap<Node,Set<Node>>();
-        Map<Node,Set<Node>> inequalitiesSym = new HashMap<Node,Set<Node>>();
-        boolean foundSelfInequality = fetchInequalities(nodeToDRs.keySet(), 
-                        inequalities, inequalitiesSym);
-        if (foundSelfInequality) return false; // clash has been raised
-        
+
         // conjoin all data ranges for each node into a canonical range 
         // leave the original ranges unchanged for backtracking
-        Map<Node, CanonicalDataRange> nodeToCanonicalDR = buildCanonicalRanges(nodeToDRs);
-        if (nodeToCanonicalDR == null) {
+        List<Pair> CDRsToNodes = buildCanonicalRanges(nodeToDRs);
+        if (CDRsToNodes == null) {
             // found a clash while joining the ranges, clash has been raised
             return false; 
         }
         
         // take out those that have more values than needed for the inequalities
-        removeUnderRestrictedRanges(nodeToCanonicalDR, inequalities, inequalitiesSym);
+        removeUnderRestrictedRanges(CDRsToNodes, inequalities, inequalitiesSym);
 
-        // Now we have a set of data ranges that have not enough trivial 
-        // assignments, so we really have to check whether we can find a 
-        // suitable assignments for the allowed values.
-        // First we partition the nodes and their data ranges. 
-        Set<Map<CanonicalDataRange, Node>> partitions = buildPartitions(
-                nodeToCanonicalDR, inequalities, inequalitiesSym);
-
-        for (Map<CanonicalDataRange, Node> partition : partitions) {
-            boolean hasAssignment = hasAssignment(partition, 
+        boolean hasAssignment = hasAssignment(CDRsToNodes, 
                     inequalities,  
                     inequalitiesSym, 
                     nodeToDRs); 
-            if (!hasAssignment) {
-                return false;
-            }
+        if (!hasAssignment) {
+            return false;
         }
         return true;
-    }
-    
-    /**
-     * Given a set of nodes for which there are data range assertions in the 
-     * tableau, collect all inequalities for the nodes. If a self inequality is 
-     * found (neq node node) a clash is raised and the method return true. 
-     * @param nodes the set of nodes for which inequalities are collected
-     * @param inequalities is a map that is initially assumed to be empty. 
-     *        After running the method, it contains as keys all nodes n1 from 
-     *        the given set nodes for which there is an inequality assertion of 
-     *        the form neq n1 n2 in the extension table; the set of values 
-     *        for each key n1 consist of all those nodes n2 for which neq n1 n2 
-     *        is in the extension table. 
-     * @param inequalitiesSym is a map that is initially assumed to be 
-     *        empty. After running the method, it contains the symmetric 
-     *        counterpart of inequalities. I.e., it contains as keys all 
-     *        nodes n1 from the given set nodes for which there is an inequality 
-     *        assertion of the form neq n2 n1 in the extension table; the set of 
-     *        values for each key n1 consist of all those nodes n2 for which 
-     *        neq n2 n1 is in the extension table. 
-     * @return true if a tuple neq n1 n1 is found while fetching the 
-     *         inequalities from the extension table and false otherwise
-     */
-    protected boolean fetchInequalities(Set<Node> nodes, 
-            Map<Node, Set<Node>> inequalities, 
-            Map<Node, Set<Node>> inequalitiesSym) {
-        Object[] triple = triplesZeroBoundRetr.getTupleBuffer();
-        triplesZeroBoundRetr.getBindingsBuffer()[0]=Inequality.INSTANCE;
-        triplesZeroBoundRetr.open();
-        while (!triplesZeroBoundRetr.afterLast()) {
-            Node node1 = (Node) triple[1];
-            Node node2 = (Node) triple[2];
-            if (node1.equals(node2)) {
-                if (tableauMonitor != null) {
-                    tableauMonitor.clashDetected(new Object[][] {
-                            new Object[] { Inequality.INSTANCE, node1, node2 } });
-                    tableauMonitor.datatypeCheckingFinished(false);
-                }
-                extensionManager.setClash(triplesZeroBoundRetr.getDependencySet());
-                return true;
-            }
-            if (nodes.contains(node1)) {
-                // found an inequality between datatype nodes
-                // save inequalities for node1
-                Set<Node> inequalNodes = new HashSet<Node>();
-                inequalNodes.add(node2);
-                // add also all already known inequalities
-                if (inequalities.containsKey(node1)) {
-                    inequalNodes.addAll(inequalities.get(node1));
-                }
-                inequalities.put(node1, inequalNodes);
-                
-                // save inequalities for node2
-                inequalNodes = new HashSet<Node>();
-                inequalNodes.add(node1);
-                if (inequalitiesSym.containsKey(node2)) {
-                    // add also all already known inequalities
-                    inequalNodes.addAll(inequalitiesSym.get(node2));
-                }
-                inequalitiesSym.put(node2, inequalNodes);
-            }
-            triplesZeroBoundRetr.next();
-        }
-        return false;
     }
     
     /**
@@ -280,8 +299,8 @@ public class DatatypeManager {
      *         restrictions of {dr_1, ..., dr_n} or null if conjoining the 
      *         ranges lead to a clash (constructed range is bottom)
      */
-    protected Map<Node, CanonicalDataRange> buildCanonicalRanges(Map<Node, Set<DataRange>> nodeToDRs) {
-        Map<Node, CanonicalDataRange> nodeToCanonicalDR = new HashMap<Node, CanonicalDataRange>();
+    protected List<Pair> buildCanonicalRanges(Map<Node, Set<DataRange>> nodeToDRs) {
+        List<Pair> CDRsToNodes = new ArrayList<Pair>();
         for (Node node : nodeToDRs.keySet()) {
             CanonicalDataRange canonicalRange;
             if (nodeToDRs.get(node).size() > 1) {
@@ -308,9 +327,9 @@ public class DatatypeManager {
             } else {
                 canonicalRange = (CanonicalDataRange) nodeToDRs.get(node).iterator().next();
             }
-            nodeToCanonicalDR.put(node, canonicalRange);
+            CDRsToNodes.add(new Pair(canonicalRange, node));
         }
-        return nodeToCanonicalDR;
+        return CDRsToNodes;
     }
     
     /**
@@ -447,16 +466,16 @@ public class DatatypeManager {
      * @param inequalities inequalities between nodes
      * @param inequalitiesSym symmetric counterpart for the above relation
      */
-    protected void removeUnderRestrictedRanges(
-            Map<Node, CanonicalDataRange> nodeToCanonicalDR, 
+    protected void removeUnderRestrictedRanges(List<Pair> CDRsToNodes, 
             Map<Node, Set<Node>> inequalities, 
             Map<Node, Set<Node>> inequalitiesSym) {
         boolean containedRemovable = true;
-        Set<Node> removableNodes = new HashSet<Node>();
+        Set<Pair> removablePairs = new HashSet<Pair>();
         while (containedRemovable) {
             containedRemovable = false;
-            for (Node node : nodeToCanonicalDR.keySet()) {
-                CanonicalDataRange canonicalRange = nodeToCanonicalDR.get(node);
+            for (Pair pair : CDRsToNodes) {
+                CanonicalDataRange cdr = pair.getCanonicalDataRange();
+                Node node = pair.getNode();
                 int numInequalNodes = 0;
                 if (inequalities.get(node) != null) {
                     numInequalNodes = inequalities.get(node).size();
@@ -464,74 +483,72 @@ public class DatatypeManager {
                 if (inequalitiesSym.get(node) != null) {
                     numInequalNodes += inequalitiesSym.get(node).size();
                 }
-                if (canonicalRange.hasMinCardinality(new BigInteger("" + (numInequalNodes + 1)))) {
-                    removableNodes.add(node);
+                if (cdr.hasMinCardinality(new BigInteger("" + (numInequalNodes + 1)))) {
+                    removablePairs.add(pair);
                     containedRemovable = true;
                 }
             }
-            for (Node node : removableNodes) {
-                nodeToCanonicalDR.remove(node);
-            }
-            removableNodes.clear();
+            CDRsToNodes.removeAll(removablePairs);
+            removablePairs.clear();
         }
     }
     
-    /**
-     * Partition the set of nodes and their canonical data ranges together with 
-     * their inequalities into mutally disjoint non-empty subsets P1, ..., Pn 
-     * such that no Pi and Pj with i neq j have variables in common. 
-     * @param nodeToCanonicalDR a map from nodes to canonical data ranges
-     * @param inequalities a map from nodes to the nodes for which an inequality 
-     *        is known
-     * @param inequalitiesSym the symmetric counterpart toinequalitiesSym 
-     * @return a set of partitions such that the nodes and their data ranges in 
-     *         each partition have inequalities between them 
-     */
-    protected Set<Map<CanonicalDataRange, Node>> buildPartitions(
-            Map<Node, CanonicalDataRange> nodeToCanonicalDR, 
-            Map<Node, Set<Node>> inequalities, 
-            Map<Node, Set<Node>> inequalitiesSym) {
-        Set<Map<CanonicalDataRange, Node>> partitions = new HashSet<Map<CanonicalDataRange, Node>>();
-        Map<CanonicalDataRange, Node> partition = new HashMap<CanonicalDataRange, Node>();
-        List<Node> remainingNodes = new ArrayList<Node>(nodeToCanonicalDR.keySet());
-        List<Node> nodesForThisPartition = new ArrayList<Node>();
-        while (!remainingNodes.isEmpty()) {
-            Node node = remainingNodes.get(0);
-            partition.put(nodeToCanonicalDR.get(node), node);
-            remainingNodes.remove(node);
-            // nodes that are inequal to this one should go into the same 
-            // partition
-            if (inequalities.containsKey(node)) {
-                nodesForThisPartition.addAll(inequalities.get(node));
-            }
-            if (inequalitiesSym.containsKey(node)) {
-                nodesForThisPartition.addAll(inequalitiesSym.get(node));
-            }
-            while (!nodesForThisPartition.isEmpty()) {
-                Node currentNode = nodesForThisPartition.get(0);
-                if (nodeToCanonicalDR.containsKey(currentNode)) {
-                    partition.put(nodeToCanonicalDR.get(currentNode), currentNode);
-                    remainingNodes.remove(currentNode);
-                    // put all remaining nodes that are inequal to this one into 
-                    // the list of nodes to be processed, so that they go into 
-                    // the same partition
-                    for (Node n : remainingNodes) {
-                        if (inequalities.get(currentNode) != null 
-                                && inequalities.get(currentNode).contains(n)) {
-                            nodesForThisPartition.add(n);
-                        }
-                        if (inequalitiesSym.get(currentNode) != null 
-                                && inequalitiesSym.get(currentNode).contains(n)) {
-                            nodesForThisPartition.add(n);
-                        }
-                    }
-                }
-                nodesForThisPartition.remove(currentNode);
-            }
-            partitions.add(partition);
-        }
-        return partitions;
-    }
+//    /**
+//     * Partition the set of nodes and their canonical data ranges together with 
+//     * their inequalities into mutally disjoint non-empty subsets P1, ..., Pn 
+//     * such that no Pi and Pj with i neq j have variables in common. 
+//     * @param nodeToCanonicalDR a map from nodes to canonical data ranges
+//     * @param inequalities a map from nodes to the nodes for which an inequality 
+//     *        is known
+//     * @param inequalitiesSym the symmetric counterpart toinequalitiesSym 
+//     * @return a set of partitions such that the nodes and their data ranges in 
+//     *         each partition have inequalities between them 
+//     */
+//    protected Set<Map<CanonicalDataRange, Node>> buildPartitions(
+//            Map<Node, CanonicalDataRange> nodeToCanonicalDR, 
+//            Map<Node, Set<Node>> inequalities, 
+//            Map<Node, Set<Node>> inequalitiesSym) {
+//        Set<Map<CanonicalDataRange, Node>> partitions = new HashSet<Map<CanonicalDataRange, Node>>();
+//        Map<CanonicalDataRange, Node> partition = new HashMap<CanonicalDataRange, Node>();
+//        List<Node> remainingNodes = new ArrayList<Node>(nodeToCanonicalDR.keySet());
+//        List<Node> nodesForThisPartition = new ArrayList<Node>();
+//        while (!remainingNodes.isEmpty()) {
+//            Node node = remainingNodes.get(0);
+//            partition.put(nodeToCanonicalDR.get(node), node);
+//            remainingNodes.remove(node);
+//            // nodes that are inequal to this one should go into the same 
+//            // partition
+//            if (inequalities.containsKey(node)) {
+//                nodesForThisPartition.addAll(inequalities.get(node));
+//            }
+//            if (inequalitiesSym.containsKey(node)) {
+//                nodesForThisPartition.addAll(inequalitiesSym.get(node));
+//            }
+//            while (!nodesForThisPartition.isEmpty()) {
+//                Node currentNode = nodesForThisPartition.get(0);
+//                if (nodeToCanonicalDR.containsKey(currentNode)) {
+//                    partition.put(nodeToCanonicalDR.get(currentNode), currentNode);
+//                    remainingNodes.remove(currentNode);
+//                    // put all remaining nodes that are inequal to this one into 
+//                    // the list of nodes to be processed, so that they go into 
+//                    // the same partition
+//                    for (Node n : remainingNodes) {
+//                        if (inequalities.get(currentNode) != null 
+//                                && inequalities.get(currentNode).contains(n)) {
+//                            nodesForThisPartition.add(n);
+//                        }
+//                        if (inequalitiesSym.get(currentNode) != null 
+//                                && inequalitiesSym.get(currentNode).contains(n)) {
+//                            nodesForThisPartition.add(n);
+//                        }
+//                    }
+//                }
+//                nodesForThisPartition.remove(currentNode);
+//            }
+//            partitions.add(partition);
+//        }
+//        return partitions;
+//    }
     
     /**
      * Given a map from data ranges to nodes and inequalities between the nodes, 
@@ -550,17 +567,18 @@ public class DatatypeManager {
      *         datatype restrictions and the inequalities are satisfied and 
      *         false otherwise.  
      */
-    protected boolean hasAssignment(Map<CanonicalDataRange, Node> partition, 
+    protected boolean hasAssignment(List<Pair> pairs, 
             Map<Node, Set<Node>> inequalities, 
             Map<Node, Set<Node>> inequalitiesSym, 
             Map<Node, Set<DataRange>> originalNodeToDRs) {
+        Collections.sort(pairs);
         
-        List<CanonicalDataRange> ranges = new ArrayList<CanonicalDataRange>(partition.keySet());
-        Collections.sort(ranges, SetLengthComparator.INSTANCE);
         Map<Node, DataConstant> nodeToValue = new HashMap<Node, DataConstant>();
         Node currentNode;
-        for (CanonicalDataRange currentRange : ranges) {
-            currentNode = partition.get(currentRange);
+        CanonicalDataRange currentRange;
+        for (Pair pair : pairs) {
+            currentNode = pair.getNode();
+            currentRange = pair.getCanonicalDataRange();
             DataConstant assignment = currentRange.getSmallestAssignment();
             //System.out.println("DataRange " + currentRange + " of node " + currentNode + " got assigned " + assignment);
             if (assignment == null) {
@@ -578,19 +596,16 @@ public class DatatypeManager {
                 // although we are checking the canonical ranges, all the 
                 // ranges that made up each canonical range contributes to 
                 // the clash and we need their dependency sets
-                for (Node node : partition.values()) {
-                    numberOfCauses += originalNodeToDRs.get(node).size();
-                }
+                numberOfCauses += originalNodeToDRs.get(currentNode).size();
+                
                 UnionDependencySet ds = new UnionDependencySet(numberOfCauses);
                 Object[][] causes = new Object[numberOfCauses][];
                 int i = 0;
-                for (Node node : partition.values()) {
-                    for (DataRange range : originalNodeToDRs.get(node)) {
-                        causes[i] = new Object[] { range, node };
-                        ds.m_dependencySets[i] = 
-                                extensionManager.getAssertionDependencySet(range, node);
-                        i++;
-                    }
+                for (DataRange range : originalNodeToDRs.get(currentNode)) {
+                    causes[i] = new Object[] { range, currentNode };
+                    ds.m_dependencySets[i] = 
+                            extensionManager.getAssertionDependencySet(range, currentNode);
+                    i++;
                 }
                 if (inequalities.get(currentNode) != null) {
                     for (Node inequalNode : inequalities.get(currentNode)) {
@@ -624,21 +639,17 @@ public class DatatypeManager {
                 return false;
             }
             nodeToValue.put(currentNode, assignment);
-            if (inequalities.get(currentNode) != null) {
-                for (Node inequalNode : inequalities.get(currentNode)) {
-                    for (Entry<CanonicalDataRange, Node> entry : partition.entrySet()) {
-                        if (entry.getValue() == inequalNode) {
-                            entry.getKey().notOneOf(assignment);
-                        }
+            for (Node inequalNode : inequalities.get(currentNode)) {
+                for (Pair p : pairs) {
+                    if (p.getNode() == inequalNode) {
+                        p.getCanonicalDataRange().notOneOf(assignment);
                     }
                 }
             }
-            if (inequalitiesSym.get(currentNode) != null) {
-                for (Node inequalNode : inequalitiesSym.get(currentNode)) {
-                    for (Entry<CanonicalDataRange, Node> entry : partition.entrySet()) {
-                        if (entry.getValue() == inequalNode) {
-                            entry.getKey().notOneOf(assignment);
-                        }
+            for (Node inequalNode : inequalitiesSym.get(currentNode)) {
+                for (Pair p : pairs) {
+                    if (p.getNode() == inequalNode) {
+                        p.getCanonicalDataRange().notOneOf(assignment);
                     }
                 }
             }
@@ -663,4 +674,57 @@ public class DatatypeManager {
             }
         }
     }
+    
+    protected class Pair implements Comparable<Pair> {
+        private final CanonicalDataRange cdr;
+        private final Node node;
+        private transient final int hash;
+
+        public Pair(CanonicalDataRange cdr, Node node) {
+            this.cdr = cdr;
+            this.node = node;
+            hash = (cdr == null ? 0 : cdr.hashCode() * 31)
+                    + (node == null ? 0 : node.hashCode());
+        }
+
+        public CanonicalDataRange getCanonicalDataRange() {
+            return cdr;
+        }
+
+        public Node getNode() {
+            return node;
+        }
+
+        public int hashCode() {
+            return hash;
+        }
+
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || !(o instanceof Pair)) {
+                return false;
+            }
+            Pair other = (Pair) o;
+            return (cdr == null ? other.getCanonicalDataRange() == null : cdr.equals(other.getCanonicalDataRange()))
+                    && (node == null ? other.getNode() == null : node.equals(other.getNode()));
+        }
+        
+        public int compareTo(Pair pair) {
+            CanonicalDataRange cdr2 = pair.getCanonicalDataRange();
+            Node node2 = pair.getNode();
+            if (cdr.isFinite() && cdr2.isFinite()) {
+                BigInteger size1 = cdr.getEnumerationSize();
+                BigInteger size2 = cdr2.getEnumerationSize();
+                if (size1.equals(size2)) {
+                    Integer i = node.m_nodeID;
+                    return i.compareTo(node2.m_nodeID);
+                }
+                return (size1.compareTo(size2) > 0) ? 1 : -1; 
+            } else {
+                return 0;
+            }
+        }
+    } 
 }

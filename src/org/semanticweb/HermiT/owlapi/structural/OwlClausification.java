@@ -33,6 +33,7 @@ import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InverseRole;
+import org.semanticweb.HermiT.model.KeyClause;
 import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.model.NodeIDLessThan;
 import org.semanticweb.HermiT.model.Role;
@@ -121,9 +122,13 @@ public class OwlClausification {
         amqOffset = 0;
     }
 
-    public DLOntology clausify(Reasoner.Configuration config, OWLOntology ontology,
+    public DLOntology clausify(
+            Reasoner.Configuration config, 
+            OWLOntology ontology,
             Collection<DescriptionGraph> descriptionGraphs) throws OWLException {
+        
         normalization.processOntology(config, ontology);
+        
         return clausify(config, ontology.getURI().toString(),
                 normalization.getConceptInclusions(),
                 normalization.getObjectPropertyInclusions(),
@@ -134,6 +139,44 @@ public class OwlClausification {
                 normalization.getTransitiveObjectProperties(),
                 normalization.getDisjointObjectProperties(),
                 normalization.getDisjointDataProperties(),
+                normalization.getHasKeys(),
+                normalization.getFacts(), descriptionGraphs,
+                ontology.getReferencedClasses(),
+                ontology.getReferencedIndividuals(),
+                ontology.getReferencedDataProperties(),
+                ontology.getReferencedObjectProperties());
+    }
+    
+    /**
+     * Dummy function to sneak in keys. ONLY TO BE USED FOR TESTING PURPOSES, 
+     * while waiting for official OWL API support for keys. 
+     * @param config a reasoner configuration
+     * @param ontology an OWL API loaded ontology
+     * @param descriptionGraphs some description graphs
+     * @param keys some keys that are to be used during the reasoning (only 
+     *             atomic concepts are supported)
+     * @return an ontology in HermiT internal format
+     * @throws OWLException
+     */
+    public DLOntology clausifyWithKeys(Reasoner.Configuration config, 
+            OWLOntology ontology,
+            Collection<DescriptionGraph> descriptionGraphs, 
+            Set<OWLHasKeyDummy> keys) throws OWLException {
+        
+        normalization.processOntology(config, ontology);
+        normalization.processKeys(config, keys);
+        
+        return clausify(config, ontology.getURI().toString(),
+                normalization.getConceptInclusions(),
+                normalization.getObjectPropertyInclusions(),
+                normalization.getDataPropertyInclusions(),
+                normalization.getAsymmetricObjectProperties(),
+                normalization.getReflexiveObjectProperties(),
+                normalization.getIrreflexiveObjectProperties(),
+                normalization.getTransitiveObjectProperties(),
+                normalization.getDisjointObjectProperties(),
+                normalization.getDisjointDataProperties(),
+                normalization.getHasKeys(),
                 normalization.getFacts(), descriptionGraphs,
                 ontology.getReferencedClasses(),
                 ontology.getReferencedIndividuals(),
@@ -212,6 +255,7 @@ public class OwlClausification {
             Set<OWLObjectPropertyExpression> transitiveObjectProperties,
             Set<OWLObjectPropertyExpression[]> disjointObjectProperties,
             Set<OWLDataPropertyExpression[]> disjointDataProperties,
+            Set<OWLHasKeyDummy> hasKeys, 
             Collection<OWLIndividualAxiom> facts,
             Collection<DescriptionGraph> descriptionGraphs,
             Set<OWLClass> classes,
@@ -233,6 +277,8 @@ public class OwlClausification {
         if (dataPropertyInclusions.size() > 0) {
             determineExpressivity.m_hasDatatypes = true;
         }
+        if (hasKeys.size() > 0) 
+            determineExpressivity.m_hasKeys = true;
         Set<DLClause> dlClauses = new LinkedHashSet<DLClause>();
         Set<Atom> positiveFacts = new HashSet<Atom>();
         Set<Atom> negativeFacts = new HashSet<Atom>();
@@ -329,6 +375,9 @@ public class OwlClausification {
             dlClauses.add(dlClause.getSafeVersion());
         }
         amqOffset += clausifier.clausifyAtMostStuff(dlClauses);
+        for (OWLHasKeyDummy hk : hasKeys) {
+            dlClauses.add(clausifyKey(hk).getSafeVersion());
+        }
         FactClausifier factClausifier = new FactClausifier(positiveFacts,
                 negativeFacts);
         for (OWLIndividualAxiom fact : facts)
@@ -342,7 +391,14 @@ public class OwlClausification {
         }
         Set<Individual> hermitIndividuals = new HashSet<Individual>();
         for (OWLIndividual i : individuals) {
-            hermitIndividuals.add(Individual.create(i.getURI().toString()));
+            Individual ind = Individual.create(i.getURI().toString());
+            hermitIndividuals.add(ind);
+            // all named individuals are tagged with a concept, so that keys are 
+            // only applied to them
+            if (determineExpressivity.m_hasKeys) {
+                positiveFacts.add(Atom.create(AtomicConcept.INTERNAL_NAMED,
+                    new org.semanticweb.HermiT.model.Term[] { ind }));
+            }
         }
         Set<AtomicRole> objectRoles = new HashSet<AtomicRole>();
         for (OWLObjectProperty p : objectProperties) {
@@ -409,6 +465,89 @@ public class OwlClausification {
     //     }
     // }
 
+    public DLClause clausifyKey(OWLHasKeyDummy object) {
+        List<Atom> headAtoms = new ArrayList<Atom>();
+        List<Atom> bodyAtoms = new ArrayList<Atom>();
+
+        // we have two named individuals (corresponding to X1 and X2) that 
+        // might have to be equated
+        org.semanticweb.HermiT.model.Variable X2;
+        X2 = org.semanticweb.HermiT.model.Variable.create("X2");
+        headAtoms.add(Atom.create(Equality.INSTANCE, X, X2));
+        
+        // keys only work on datatypes and named individuals
+        bodyAtoms.add(Atom.create(AtomicConcept.INTERNAL_NAMED,
+                new org.semanticweb.HermiT.model.Term[] { X }));
+        bodyAtoms.add(Atom.create(AtomicConcept.INTERNAL_NAMED,
+                new org.semanticweb.HermiT.model.Term[] { X2 }));
+        
+        // the concept expression of a hasKey statement is either a concept 
+        // name or a negated concept name after normalization
+        OWLDescription description = object.getClassExpression();
+        if (description instanceof OWLClass) {
+            OWLClass owlClass = (OWLClass) description;
+            if (!owlClass.isOWLThing()) {
+                bodyAtoms.add(Atom.create(
+                        AtomicConcept.create(owlClass.getURI().toString()),
+                        new org.semanticweb.HermiT.model.Term[] { X }));
+                bodyAtoms.add(Atom.create(
+                        AtomicConcept.create(owlClass.getURI().toString()),
+                        new org.semanticweb.HermiT.model.Term[] { X2 }));
+            }
+        } else if (description instanceof OWLObjectComplementOf) {
+            OWLDescription internal = ((OWLObjectComplementOf) description).getOperand();
+            if (internal instanceof OWLClass) {
+                OWLClass owlClass = (OWLClass) internal;
+                bodyAtoms.add(Atom.create(
+                        AtomicConcept.create(owlClass.getURI().toString()),
+                        new org.semanticweb.HermiT.model.Term[] { X }));
+                bodyAtoms.add(Atom.create(
+                        AtomicConcept.create(owlClass.getURI().toString()),
+                        new org.semanticweb.HermiT.model.Term[] { X2 }));
+            } else {
+                throw new IllegalStateException(
+                        "Internal error: invalid normal form.");
+            }
+        } else {
+            throw new IllegalStateException(
+                    "Internal error: invalid normal form.");
+        }
+        
+        int y_ind = 0;
+        // object properties always go to the body
+        for (OWLObjectPropertyExpression p : object.getObjectProperties()) {
+            org.semanticweb.HermiT.model.Variable y;
+            y = org.semanticweb.HermiT.model.Variable.create("Y" + y_ind);
+            y_ind++;
+            bodyAtoms.add(getRoleAtom(p, X, y));
+            bodyAtoms.add(getRoleAtom(p, X2, y));
+            // also the key criteria are named in case of object properties
+            bodyAtoms.add(Atom.create(AtomicConcept.INTERNAL_NAMED,
+                    new org.semanticweb.HermiT.model.Term[] { y }));
+        }
+        
+        // data properties go to the body, but with different variables 
+        // the head gets an atom asserting inequality between that data values
+        for (OWLDataPropertyExpression d : object.getDataProperties()) {
+            org.semanticweb.HermiT.model.Variable y;
+            y = org.semanticweb.HermiT.model.Variable.create("Y" + y_ind);
+            y_ind++;
+            bodyAtoms.add(getDataPropertyAtom(d, X, y));
+            org.semanticweb.HermiT.model.Variable y2;
+            y2 = org.semanticweb.HermiT.model.Variable.create("Y" + y_ind);
+            y_ind++;
+            bodyAtoms.add(getDataPropertyAtom(d, X2, y2));
+            headAtoms.add(Atom.create(Inequality.INSTANCE, y, y2));
+        }
+        
+        Atom[] hAtoms = new Atom[headAtoms.size()];
+        headAtoms.toArray(hAtoms);
+        Atom[] bAtoms = new Atom[bodyAtoms.size()];
+        bodyAtoms.toArray(bAtoms);
+        DLClause clause = KeyClause.create(hAtoms, bAtoms);
+        return clause;
+    }
+    
     /**
      * Creates an atom in the Hermit internal format such that the variables
      * automatically reflect whether the role was an inverse role or not.
@@ -1714,6 +1853,7 @@ public class OwlClausification {
         protected boolean m_hasNominals;
         protected boolean m_hasReflexivity;
         protected boolean m_hasDatatypes;
+        protected boolean m_hasKeys;
 
         protected void checkProperty(OWLObjectPropertyExpression p) {
             if (p instanceof OWLObjectPropertyInverse)

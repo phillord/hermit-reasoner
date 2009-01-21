@@ -203,21 +203,25 @@ public class DLOntology implements Serializable {
         Collection<DLClause> nonadmissibleDLClauses = new HashSet<DLClause>();
         Set<AtomicRole> graphAtomicRoles = computeGraphAtomicRoles();
         for (DLClause dlClause : m_dlClauses) {
-            int usedRoleTypes = getUsedRoleTypes(dlClause, graphAtomicRoles);
-            switch (usedRoleTypes) {
-            case CONTAINS_NO_ROLES:
-            case CONTAINS_ONLY_TREE_ROLES:
-                if (!isTreeDLClause(dlClause, graphAtomicRoles,
-                        bodyOnlyAtomicConcepts))
+            // key clauses (from HasKey axioms) are not admissible according to 
+            // the standard HT admissibility rules
+            if (!(dlClause instanceof KeyClause)) {
+                int usedRoleTypes = getUsedRoleTypes(dlClause, graphAtomicRoles);
+                switch (usedRoleTypes) {
+                case CONTAINS_NO_ROLES:
+                case CONTAINS_ONLY_TREE_ROLES:
+                    if (!isTreeDLClause(dlClause, graphAtomicRoles,
+                            bodyOnlyAtomicConcepts))
+                        nonadmissibleDLClauses.add(dlClause);
+                    break;
+                case CONTAINS_ONLY_GRAPH_ROLES:
+                    if (!isGraphDLClause(dlClause))
+                        nonadmissibleDLClauses.add(dlClause);
+                    break;
+                case CONTAINS_GRAPH_AND_TREE_ROLES:
                     nonadmissibleDLClauses.add(dlClause);
-                break;
-            case CONTAINS_ONLY_GRAPH_ROLES:
-                if (!isGraphDLClause(dlClause))
-                    nonadmissibleDLClauses.add(dlClause);
-                break;
-            case CONTAINS_GRAPH_AND_TREE_ROLES:
-                nonadmissibleDLClauses.add(dlClause);
-                break;
+                    break;
+                }
             }
         }
         return nonadmissibleDLClauses;

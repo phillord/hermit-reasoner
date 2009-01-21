@@ -14,6 +14,7 @@ import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
+import org.semanticweb.HermiT.owlapi.structural.OWLHasKeyDummy;
 import org.semanticweb.HermiT.owlapi.structural.OwlClausification;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLDataFactory;
@@ -71,7 +72,35 @@ public class ClausificationTest extends AbstractOWLOntologyTest {
         assertClausification("../res/self-2-input.owl",
                 "../res/self-2-OWL-control.txt", null);
     }
-
+    
+    public void testHasKeys() throws Exception {
+        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+        OWLDataFactory factory = manager.getOWLDataFactory();
+        OwlClausification clausifier = new OwlClausification(factory);
+        DLClause clause = clausifier.clausifyKey(OWLHasKeyDummy.getDemoKey());
+        Set<String> bAtoms = new HashSet<String>();
+        bAtoms.add("<internal:Named>(X)");
+        bAtoms.add("<internal:Named>(X2)");
+        bAtoms.add("<int:C_test>(X)");
+        bAtoms.add("<int:C_test>(X2)");
+        bAtoms.add("<int:r_test>(X,Y0)");
+        bAtoms.add("<int:r_test>(X2,Y0)");
+        bAtoms.add("<internal:Named>(Y0)");
+        bAtoms.add("<int:dp_test>*(X,Y1)");
+        bAtoms.add("<int:dp_test>*(X2,Y2)");
+        assertTrue(bAtoms.size() == clause.getBodyLength());
+        for (int i = 0; i < clause.getBodyLength(); i++) {
+           assertTrue(bAtoms.contains(clause.getBodyAtom(i).toString()));    
+        }
+        Set<String> hAtoms = new HashSet<String>();
+        hAtoms.add("X == X2");
+        hAtoms.add("Y1 != Y2");
+        assertTrue(hAtoms.size() == clause.getHeadLength());
+        for (int i = 0; i < clause.getHeadLength(); i++) {
+            assertTrue(hAtoms.contains(clause.getHeadAtom(i).toString()));    
+         }
+    }
+    
     protected String[] getControl(String resource) throws Exception {
         if (resource == null) return null;
         List<String> control = new ArrayList<String>();
