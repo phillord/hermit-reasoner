@@ -66,7 +66,7 @@ public class OWLHasKeyDummy extends OWLLogicalAxiomImpl implements OWLLogicalAxi
         return null;
     }
 
-    public AxiomType getAxiomType() {
+    public AxiomType<OWLHasKeyDummy> getAxiomType() {
         return null;
     }
 

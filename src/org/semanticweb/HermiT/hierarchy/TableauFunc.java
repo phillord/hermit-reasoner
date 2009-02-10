@@ -1,7 +1,6 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.hierarchy;
 
-import org.semanticweb.HermiT.tableau.Tableau;
 import org.semanticweb.HermiT.model.AtomicConcept;
 
 public class TableauFunc implements Classifier.Function<AtomicConcept> {

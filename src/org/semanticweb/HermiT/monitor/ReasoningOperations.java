@@ -2,9 +2,6 @@
 package org.semanticweb.HermiT.monitor;
 
 import org.semanticweb.HermiT.model.*;
-import org.semanticweb.HermiT.tableau.*;
-import java.io.PrintWriter;
-import java.util.Map;
 
 public class ReasoningOperations extends TableauMonitorAdapter {
     private static final long serialVersionUID=-8144444618897251350L;

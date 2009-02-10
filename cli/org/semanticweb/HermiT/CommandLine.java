@@ -7,14 +7,11 @@ import gnu.getopt.LongOpt;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.text.BreakIterator;
-import java.text.Collator;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
