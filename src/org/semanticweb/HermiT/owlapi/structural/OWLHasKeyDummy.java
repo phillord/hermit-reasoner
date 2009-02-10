@@ -1,5 +1,6 @@
 package org.semanticweb.HermiT.owlapi.structural;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashSet;
@@ -22,7 +23,8 @@ import org.semanticweb.owl.model.OWLOntologyManager;
 
 import uk.ac.manchester.cs.owl.OWLLogicalAxiomImpl;
 
-public class OWLHasKeyDummy extends OWLLogicalAxiomImpl implements OWLLogicalAxiom {
+public class OWLHasKeyDummy extends OWLLogicalAxiomImpl implements Serializable, OWLLogicalAxiom {
+    private static final long serialVersionUID = -6013707556281398624L;
 
     public static OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
     

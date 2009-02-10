@@ -1,17 +1,21 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.hierarchy;
 
-import java.util.Collection;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Queue;
-import java.util.LinkedList;
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 
-public class Classifier<T> {
+public class Classifier<T> implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     public interface Function<T> {
         boolean doesSubsume(T parent, T child);
     }

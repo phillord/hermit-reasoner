@@ -1,6 +1,7 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.hierarchy;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,7 +13,8 @@ import java.util.Set;
 import org.semanticweb.HermiT.InternalNames;
 import org.semanticweb.HermiT.model.AtomicConcept;
 
-public class StandardClassificationManager {
+public class StandardClassificationManager implements Serializable {
+    private static final long serialVersionUID = -3348763284557840912L;
     protected static enum SubsumptionType { POSITIVE,NEGATIVE };
 
     protected final SubsumptionHierarchy m_subsumptionHierarchy;

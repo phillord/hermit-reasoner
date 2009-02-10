@@ -1,10 +1,13 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.hierarchy;
 
+import java.io.Serializable;
+
 import org.semanticweb.HermiT.util.Translator;
 
 public class PositionTranslator<T, U>
-    implements Translator<HierarchyPosition<T>, HierarchyPosition<U>> {
+    implements Serializable, Translator<HierarchyPosition<T>, HierarchyPosition<U>> {
+    private static final long serialVersionUID = -7002747276282495243L;
     Translator<T, U> translator;
     public PositionTranslator(Translator<T, U> inTranslator) {
         translator = inTranslator;

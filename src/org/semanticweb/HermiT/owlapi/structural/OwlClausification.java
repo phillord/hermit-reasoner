@@ -1,6 +1,7 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.owlapi.structural;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
@@ -107,7 +108,8 @@ import org.semanticweb.owl.vocab.OWLRestrictedDataRangeFacetVocabulary;
 
 import dk.brics.automaton.Datatypes;
 
-public class OwlClausification {
+public class OwlClausification implements Serializable {
+    private static final long serialVersionUID = 1909494208824352106L;
     protected static final org.semanticweb.HermiT.model.Variable X = org.semanticweb.HermiT.model.Variable.create("X");
     protected static final org.semanticweb.HermiT.model.Variable Y = org.semanticweb.HermiT.model.Variable.create("Y");
     protected static final org.semanticweb.HermiT.model.Variable Z = org.semanticweb.HermiT.model.Variable.create("Z");

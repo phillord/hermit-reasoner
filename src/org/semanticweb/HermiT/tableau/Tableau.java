@@ -598,7 +598,7 @@ public final class Tableau implements Serializable {
     /**
      * Create a new tree node. 
      * @param dependencySet the dependency set for the node
-     * @param treeDepth
+     * @param parent the parent of the node that is to be created
      * @return the created node
      */
     public Node createNewTreeNode(DependencySet dependencySet,Node parent) {
@@ -607,7 +607,7 @@ public final class Tableau implements Serializable {
     /**
      * Create a new concrete node for datatypes. 
      * @param dependencySet the dependency set for the node
-     * @param treeDepth
+     * @param parent the parent of the node that is to be created
      * @return the created node
      */
     public Node createNewConcreteNode(DependencySet dependencySet,Node parent) {
@@ -616,7 +616,7 @@ public final class Tableau implements Serializable {
     /**
      * Create a new node graph node for description graphs
      * @param dependencySet the dependency set for the node
-     * @param treeDepth
+     * @param parent the parent of the node that is to be created
      * @return the created node
      */
     public Node createNewGraphNode(Node parent,DependencySet dependencySet) {

@@ -1,5 +1,6 @@
 package org.semanticweb.HermiT.tableau;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,7 +20,8 @@ import org.semanticweb.HermiT.model.dataranges.EnumeratedDataRange;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.DT;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 
-public class DatatypeManager {
+public class DatatypeManager implements Serializable {
+    private static final long serialVersionUID = -5304869484553471737L;
     protected final TableauMonitor tableauMonitor;
     protected final ExtensionManager extensionManager;
     protected final ExtensionTable.Retrieval pairsDeltaOld;
@@ -144,7 +146,7 @@ public class DatatypeManager {
      *        we are interested in as keys but with empty sets as values. 
      *        Whenever an inequality is found, the inequal nodes are added to 
      *        the set and inequalities are collected for them as well. 
-     * @param inequalitiesSym is a map that is initially assumed to have all 
+     * @param inequalitiesInv is a map that is initially assumed to have all 
      *        nodes we are interested in as keys but with empty sets as values. 
      *        Whenever an inequality is found with one of the keys in the third 
      *        position, the inequalities is collected. 
@@ -462,7 +464,7 @@ public class DatatypeManager {
     /**
      * Remove those nodes and data ranges that have more than enough values to 
      * cover the inequalities. 
-     * @param nodeToCanonicalDR a map from nodes to canonical data ranges
+     * @param CDRsToNodes a map from nodes to canonical data ranges
      * @param inequalities inequalities between nodes
      * @param inequalitiesSym symmetric counterpart for the above relation
      */
@@ -554,7 +556,7 @@ public class DatatypeManager {
      * Given a map from data ranges to nodes and inequalities between the nodes, 
      * check whether there is a suitable assignment of values for the nodes that 
      * complies with the given datatype restrictions and inequalities.  
-     * @param partition A map from data ranges to nodes such that the 
+     * @param pairs A map from data ranges to nodes such that the 
      *        inequalities given in the next two parameters link the variables 
      *        in the partition. 
      * @param inequalities A map from nodes to sets of nodes for which there are 

@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 
 /**
@@ -217,7 +217,7 @@ class SetFactory<E> implements Serializable {
         return hashCode & (tableLength-1);
     }
     
-    protected static class Entry<T> implements Set<T> {
+    protected static class Entry<T> implements Serializable, Set<T> {
         private static final long serialVersionUID=-3850593656120645350L;
 
         protected T[] m_table;

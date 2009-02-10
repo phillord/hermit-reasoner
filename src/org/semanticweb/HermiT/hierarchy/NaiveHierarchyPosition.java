@@ -1,16 +1,18 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.hierarchy;
 
-import java.util.Set;
+import java.io.Serializable;
 import java.util.Collection;
-import java.util.Map;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Queue;
 import java.util.LinkedList;
-import java.util.Collections;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 
-public class NaiveHierarchyPosition<T> implements HierarchyPosition<T> {
+public class NaiveHierarchyPosition<T> implements Serializable, HierarchyPosition<T> {
+    private static final long serialVersionUID = -6509026754119112882L;
     public Set<HierarchyPosition<T>> parents;
     public Set<HierarchyPosition<T>> children;
     public Set<T> labels;

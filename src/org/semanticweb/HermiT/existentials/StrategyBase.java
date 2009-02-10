@@ -1,19 +1,29 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.existentials;
 
-import org.semanticweb.HermiT.model.*;
-import org.semanticweb.HermiT.tableau.*;
-import org.semanticweb.HermiT.blocking.*;
-import org.semanticweb.HermiT.monitor.TableauMonitor;
-
-import java.util.Collection;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+
+import org.semanticweb.HermiT.blocking.BlockingStrategy;
+import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
+import org.semanticweb.HermiT.model.AtLeastConcreteRoleConcept;
+import org.semanticweb.HermiT.model.AtomicRole;
+import org.semanticweb.HermiT.model.Concept;
+import org.semanticweb.HermiT.model.ExistentialConcept;
+import org.semanticweb.HermiT.model.ExistsDescriptionGraph;
+import org.semanticweb.HermiT.monitor.TableauMonitor;
+import org.semanticweb.HermiT.tableau.DescriptionGraphManager;
+import org.semanticweb.HermiT.tableau.ExistentialExpansionManager;
+import org.semanticweb.HermiT.tableau.ExtensionManager;
+import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.tableau.Tableau;
 
 /**
  * Implements the common bits of an ExistentialsExpansionStrategy, leaving only actual processing of existentials in need of expansion to subclasses.
  */
 public abstract class StrategyBase implements ExpansionStrategy {
-
+    private static final long serialVersionUID = 2831957929321676444L;
     protected final BlockingStrategy blockingStrategy;
     protected Tableau tableau;
     protected ExtensionManager extensionManager;
@@ -44,7 +54,7 @@ public abstract class StrategyBase implements ExpansionStrategy {
     /**
      * The real work of expansion is delegated to an Expander object by the expandExistentials(Expander) method.
      */
-    protected interface Expander {
+    protected interface Expander extends Serializable {
         /**
          * called once for each unsatisfied existential in the tableau
          * 

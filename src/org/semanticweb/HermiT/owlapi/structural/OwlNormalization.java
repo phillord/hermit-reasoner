@@ -1,6 +1,7 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.owlapi.structural;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -94,7 +95,8 @@ import org.semanticweb.owl.model.SWRLRule;
  * ..., a_n }, and \forall R.\neg { a } intact. These concepts are then
  * clausified in a more efficient way.
  */
-public class OwlNormalization {
+public class OwlNormalization implements Serializable {
+    private static final long serialVersionUID = 1696339403669197304L;
     protected final Map<OWLDescription, OWLDescription> m_definitions;
     protected final Map<OWLObjectOneOf, OWLClass> m_definitionsForNegativeNominals;
     protected final Collection<OWLDescription[]> m_conceptInclusions;
@@ -185,8 +187,9 @@ public class OwlNormalization {
         }
     }
 
-    protected class AxiomVisitor implements OWLAxiomVisitor {
+    protected class AxiomVisitor implements Serializable, OWLAxiomVisitor {
         
+        private static final long serialVersionUID = 1121574663177585806L;
         protected List<OWLDescription[]> inclAsDisj = new ArrayList<OWLDescription[]>();
         
         public void visit(OWLSubClassAxiom axiom) {
@@ -802,8 +805,9 @@ public class OwlNormalization {
         return m_facts;
     }
 
-    protected class NormalizationVisitor implements
+    protected class NormalizationVisitor implements Serializable,
             OWLDescriptionVisitorEx<OWLDescription> {
+        private static final long serialVersionUID = -1826322500216576256L;
         protected final Collection<OWLDescription[]> m_newInclusions;
         protected final boolean[] m_alreadyExists;
         OWLDataFactory factory;
@@ -1012,8 +1016,9 @@ public class OwlNormalization {
     /**
      * checks the polarity
      */
-    protected static class PLVisitor implements
+    protected static class PLVisitor implements Serializable, 
             OWLDescriptionVisitorEx<Boolean> {
+        private static final long serialVersionUID = -4945870351766793640L;
         protected static final PLVisitor INSTANCE = new PLVisitor();
 
         public Boolean visit(OWLClass object) {
@@ -1102,7 +1107,9 @@ public class OwlNormalization {
         }
     }
 
-    static public abstract class RoleManager {
+    static public abstract class RoleManager implements Serializable {
+        private static final long serialVersionUID = 1240678478039268381L;
+
         public void addInclusion(OWLObjectPropertyExpression sub,
                             OWLObjectPropertyExpression sup) {
             List<OWLObjectPropertyExpression> chain
@@ -1143,8 +1150,9 @@ public class OwlNormalization {
         public abstract Collection<OWLObjectPropertyExpression[]> getSimpleInclusions();
     }
 
-    protected static class SimplificationVisitor implements
+    protected static class SimplificationVisitor implements Serializable, 
             OWLDescriptionVisitorEx<OWLDescription> {
+        private static final long serialVersionUID = -5816087209808020534L;
         protected final OWLDataFactory factory;
 
         public SimplificationVisitor(OWLDataFactory f) {

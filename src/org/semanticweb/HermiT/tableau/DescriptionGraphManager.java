@@ -2,16 +2,17 @@
 package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import org.semanticweb.HermiT.model.*;
-import org.semanticweb.HermiT.monitor.*;
+import org.semanticweb.HermiT.model.DescriptionGraph;
+import org.semanticweb.HermiT.model.ExistsDescriptionGraph;
+import org.semanticweb.HermiT.monitor.TableauMonitor;
 
 public final class DescriptionGraphManager implements Serializable {
     private static final long serialVersionUID=4536271856850424712L;
@@ -247,7 +248,8 @@ public final class DescriptionGraphManager implements Serializable {
         node.m_firstGraphOccurrenceNode=-1;
     }
     
-    protected static class OccurrenceManager {
+    protected static class OccurrenceManager implements Serializable {
+        private static final long serialVersionUID = 7594355731105478918L;
         public static final int GRAPH_INDEX=0; 
         public static final int TUPLE_INDEX=1; 
         public static final int POSITION_IN_TUPLE=2;

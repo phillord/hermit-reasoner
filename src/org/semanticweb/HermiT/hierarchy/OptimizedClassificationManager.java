@@ -1,19 +1,21 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.hierarchy;
 
-import java.util.Map;
+import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
 import org.semanticweb.HermiT.InternalNames;
-import org.semanticweb.HermiT.model.*;
+import org.semanticweb.HermiT.model.AtomicConcept;
 
 /**
  * This class constructs the subsumption hierarchy by taking the graph of all superclass relationships and then
  * identifying the strongly connected components using Tarjan's algorithm.
  */
-public class OptimizedClassificationManager {
+public class OptimizedClassificationManager implements Serializable {
+    private static final long serialVersionUID = 3733426773718318769L;
     protected final SubsumptionHierarchy m_subsumptionHierarchy;
     protected final SubsumptionHierarchy.SubsumptionChecker m_subsumptionChecker;
     protected final Map<AtomicConcept,Node> m_nodesByConcept;
