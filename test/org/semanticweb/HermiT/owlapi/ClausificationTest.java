@@ -16,10 +16,7 @@ import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.owlapi.structural.OWLHasKeyDummy;
 import org.semanticweb.HermiT.owlapi.structural.OwlClausification;
-import org.semanticweb.owl.apibinding.OWLManager;
-import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLOntology;
-import org.semanticweb.owl.model.OWLOntologyManager;
 
 public class ClausificationTest extends AbstractOWLOntologyTest {
     static {
@@ -74,9 +71,7 @@ public class ClausificationTest extends AbstractOWLOntologyTest {
     }
     
     public void testHasKeys() throws Exception {
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        OWLDataFactory factory = manager.getOWLDataFactory();
-        OwlClausification clausifier = new OwlClausification(factory);
+        OwlClausification clausifier = new OwlClausification();
         DLClause clause = clausifier.clausifyKey(OWLHasKeyDummy.getDemoKey());
         Set<String> bAtoms = new HashSet<String>();
         bAtoms.add("<internal:Named>(X)");
@@ -131,9 +126,7 @@ public class ClausificationTest extends AbstractOWLOntologyTest {
     protected void assertDLClauses(OWLOntology ontology, 
             String[] control, 
             String[] controlVariant) throws Exception {
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        OWLDataFactory factory = manager.getOWLDataFactory();
-        OwlClausification clausifier = new OwlClausification(factory);
+        OwlClausification clausifier = new OwlClausification();
         Set<DescriptionGraph> noDescriptionGraphs = Collections.emptySet();
         DLOntology dlOntology
             = clausifier.clausify(new Reasoner.Configuration(),

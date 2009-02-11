@@ -104,6 +104,7 @@ import org.semanticweb.owl.model.OWLOntologyManager;
 import org.semanticweb.owl.model.OWLSameIndividualsAxiom;
 import org.semanticweb.owl.model.OWLTypedConstant;
 import org.semanticweb.owl.model.OWLUntypedConstant;
+import org.semanticweb.owl.util.OWLOntologyMerger;
 import org.semanticweb.owl.vocab.OWLRestrictedDataRangeFacetVocabulary;
 
 import dk.brics.automaton.Datatypes;
@@ -118,17 +119,50 @@ public class OwlClausification implements Serializable {
     private OwlNormalization normalization;
     private int amqOffset; // the number of negative at-most replacements already performed
     
-    public OwlClausification(OWLDataFactory factory) {
-        this.factory = factory;
+    public OwlClausification() {
+        this.factory = OWLManager.createOWLOntologyManager().getOWLDataFactory();
         normalization = new OwlNormalization(factory);
         amqOffset = 0;
     }
-
+    
+    public DLOntology clausify(
+            Reasoner.Configuration config, 
+            URI physicalURI,
+            Collection<DescriptionGraph> descriptionGraphs) throws OWLException {
+        
+        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+        // the manager loads this ontology and all the imported ones, 
+        // but keeps them as a set of separated ontologies
+        manager.loadOntologyFromPhysicalURI(physicalURI); 
+        // merge all imported axioms into the main ontology
+        OWLOntology ontology = 
+                new OWLOntologyMerger(manager).createMergedOntology(
+                        manager, physicalURI);
+        normalization.processOntology(config, ontology);
+        
+        return clausify(config, ontology.getURI().toString(),
+                normalization.getConceptInclusions(),
+                normalization.getObjectPropertyInclusions(),
+                normalization.getDataPropertyInclusions(),
+                normalization.getAsymmetricObjectProperties(),
+                normalization.getReflexiveObjectProperties(),
+                normalization.getIrreflexiveObjectProperties(),
+                normalization.getTransitiveObjectProperties(),
+                normalization.getDisjointObjectProperties(),
+                normalization.getDisjointDataProperties(),
+                normalization.getHasKeys(),
+                normalization.getFacts(), descriptionGraphs,
+                ontology.getReferencedClasses(),
+                ontology.getReferencedIndividuals(),
+                ontology.getReferencedDataProperties(),
+                ontology.getReferencedObjectProperties());
+    }
+    
     public DLOntology clausify(
             Reasoner.Configuration config, 
             OWLOntology ontology,
             Collection<DescriptionGraph> descriptionGraphs) throws OWLException {
-        
+
         normalization.processOntology(config, ontology);
         
         return clausify(config, ontology.getURI().toString(),

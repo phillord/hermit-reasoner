@@ -22,7 +22,7 @@ import org.semanticweb.HermiT.tableau.Tableau;
 /**
  * Implements the common bits of an ExistentialsExpansionStrategy, leaving only actual processing of existentials in need of expansion to subclasses.
  */
-public abstract class StrategyBase implements ExpansionStrategy {
+public abstract class StrategyBase implements Serializable, ExpansionStrategy {
     private static final long serialVersionUID = 2831957929321676444L;
     protected final BlockingStrategy blockingStrategy;
     protected Tableau tableau;

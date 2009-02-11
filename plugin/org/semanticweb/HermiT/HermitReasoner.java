@@ -15,7 +15,6 @@ import org.semanticweb.owl.model.OWLDataPropertyExpression;
 import org.semanticweb.owl.model.OWLDataRange;
 import org.semanticweb.owl.model.OWLDescription;
 import org.semanticweb.owl.model.OWLEntity;
-import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLObjectProperty;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
@@ -26,7 +25,7 @@ import org.semanticweb.owl.util.ProgressMonitor;
 
 public class HermitReasoner implements MonitorableOWLReasoner {
     static final String mUriBase = "urn:hermit:kb";
-
+    
     Reasoner hermit;
     PluginMonitor monitor;
     java.util.Set<OWLOntology> ontologies;
@@ -34,7 +33,7 @@ public class HermitReasoner implements MonitorableOWLReasoner {
     OWLOntologyManager manager;
     OWLDataFactory factory;
     int nextKbId;
-        
+    
     HermitReasoner(OWLOntologyManager inManager) {
         manager = inManager;
         factory = manager.getOWLDataFactory();
@@ -62,6 +61,9 @@ public class HermitReasoner implements MonitorableOWLReasoner {
             monitor.beginTask("Classifying...", hermit.numConceptNames());
             // System.out.println("Seeding subsumption cache...");
             hermit.seedSubsumptionCache();
+//            if (!hermit.isConsistent()) {
+//                throw new RuntimeException("This ontology is inconsistent. All classes are unsatisfiable. ");
+//            }
             // System.out.println("...done");
             } catch (PluginMonitor.Cancelled e) {
                 // ignore; if we pass it on the user gets a dialog
@@ -138,7 +140,7 @@ public class HermitReasoner implements MonitorableOWLReasoner {
             } finally {
                 monitor.endTask();
             }
-        } catch (OWLException e) {
+        } catch (Exception e) {
             throw new RuntimeException("Failed to merge ontologies.", e);
         }
     }

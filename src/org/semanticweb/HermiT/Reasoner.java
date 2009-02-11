@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.semanticweb.HermiT.Clausifier.LoadingException;
 import org.semanticweb.HermiT.blocking.AncestorBlocking;
 import org.semanticweb.HermiT.blocking.AnywhereBlocking;
 import org.semanticweb.HermiT.blocking.BlockingSignatureCache;
@@ -75,7 +76,6 @@ import org.semanticweb.HermiT.tableau.Tableau;
 import org.semanticweb.HermiT.util.TranslatedMap;
 import org.semanticweb.HermiT.util.TranslatedSet;
 import org.semanticweb.HermiT.util.Translator;
-import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLDataProperty;
@@ -84,8 +84,6 @@ import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLObjectProperty;
 import org.semanticweb.owl.model.OWLOntology;
-import org.semanticweb.owl.model.OWLOntologyManager;
-import org.semanticweb.owl.util.OWLOntologyMerger;
 
 /**
  * Answers queries about the logical implications of a particular knowledge base.
@@ -120,7 +118,8 @@ public class Reasoner implements Serializable {
         IMMEDIATE, JUST_IN_TIME, ON_REQUEST
     };
     
-    public static class Configuration {
+    public static class Configuration implements Serializable {
+        private static final long serialVersionUID = 7741510316249774519L;
         public TableauMonitorType tableauMonitorType;
         public DirectBlockingType directBlockingType;
         public BlockingStrategyType blockingStrategyType;
@@ -206,48 +205,37 @@ public class Reasoner implements Serializable {
     // private SubsumptionHierarchy oldHierarchy;
     //     // only null when atomicConceptHierarchy is
     
-    private OwlClausification clausifier; // null if loaded through KAON2
+    private transient OwlClausification clausifier; // null if loaded through KAON2
     
-    public Reasoner(String ontologyURI)
-        throws Clausifier.LoadingException, OWLException {
+    public Reasoner(String ontologyURI) throws IllegalArgumentException,
+            LoadingException, OWLException {
         m_config = new Configuration();
         loadOntology(URI.create(ontologyURI));
     }
     
-    public Reasoner(java.net.URI ontologyURI)
-        throws Clausifier.LoadingException, OWLException {
+    public Reasoner(java.net.URI ontologyURI) throws IllegalArgumentException,
+            LoadingException, OWLException {
         m_config = new Configuration();
         loadOntology(ontologyURI);
     }
     
     public Reasoner(java.net.URI ontologyURI, Configuration config)
-        throws Clausifier.LoadingException, OWLException {
+            throws IllegalArgumentException, LoadingException, OWLException {
         m_config = config;
         loadOntology(ontologyURI);
     }
     
     public Reasoner(OWLOntology ontology, Configuration config)
-        throws OWLException {
+            throws OWLException {
         m_config = config;
-        // FIXME: do the identities of the manager and factory matter?
-        // @Rob: They do not matter here as long as these methods are called 
-        // from Protege only, because we already create a merged ontology that 
-        // contains also the imported ones there.  
-	OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        loadOwlOntology(ontology, manager.getOWLDataFactory(),
-                        (Set<DescriptionGraph>) null);
+        loadOwlOntology(ontology, (Set<DescriptionGraph>) null);
     }
 
     public Reasoner(OWLOntology ontology, Configuration config,
                   Set<DescriptionGraph> graphs)
         throws OWLException {
         m_config = config;
-        // FIXME: do the identities of the manager and factory matter?
-        // @Rob: They do not matter here as long as these methods are called 
-        // from Protege only, because we already create a merged ontology that 
-        // contains also the imported ones there. 
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        loadOwlOntology(ontology, manager.getOWLDataFactory(), graphs);
+        loadOwlOntology(ontology, graphs);
     }
     
     /**
@@ -263,8 +251,7 @@ public class Reasoner implements Serializable {
             Set<DescriptionGraph> graphs, 
             Set<OWLHasKeyDummy> keys) throws OWLException {
           m_config = config;
-          OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-          loadOwlOntology(ontology, manager.getOWLDataFactory(), graphs, keys);
+          loadOwlOntology(ontology, graphs, keys);
     }
 
     public DLOntology getDLOntology() {
@@ -826,16 +813,16 @@ public class Reasoner implements Serializable {
     }
 
     protected void loadOntology(URI physicalURI)
-        throws Clausifier.LoadingException, OWLException {
+            throws IllegalArgumentException, LoadingException, OWLException {
         loadOntology(physicalURI, null);
     }
     
     protected void loadOntology(URI physicalURI,
-                               Set<DescriptionGraph> descriptionGraphs)
-        throws Clausifier.LoadingException, OWLException {
-        Clausifier clausifier = null;
+            Set<DescriptionGraph> descriptionGraphs)
+            throws IllegalArgumentException, LoadingException, OWLException {
         switch (m_config.parserType) {
             case KAON2: {
+                Clausifier clausifier = null;
                 try {
                     clausifier = (Clausifier)
                         Class.forName("org.semanticweb.HermiT.kaon2.Clausifier")
@@ -853,16 +840,15 @@ public class Reasoner implements Serializable {
                 loadDLOntology(clausifier.loadFromURI(physicalURI, null));
             } break;
             case OWLAPI: {
-                OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-                // the manager loads this ontology and all the imported ones, 
-                // but keeps them as a set of separated ontologies
-                manager.loadOntologyFromPhysicalURI(physicalURI);
-                // merge all imported axioms into the main ontology
-                OWLOntology o = 
-                        new OWLOntologyMerger(manager).createMergedOntology(
-                                manager, physicalURI);
-                loadOwlOntology(o, manager.getOWLDataFactory(),
-                                descriptionGraphs);
+                if (descriptionGraphs == null) {
+                    descriptionGraphs = Collections.emptySet();
+                }
+                clausifier = new OwlClausification();
+                DLOntology d = clausifier.clausify(
+                    m_config, physicalURI, descriptionGraphs
+                );
+                loadDLOntology(d);
+                
             } break;
             default:
                 throw new IllegalArgumentException(
@@ -871,13 +857,12 @@ public class Reasoner implements Serializable {
     }
     
     protected void loadOwlOntology(OWLOntology ontology,
-                                   OWLDataFactory factory,
                                    Set<DescriptionGraph> descriptionGraphs)
         throws OWLException {
         if (descriptionGraphs == null) {
             descriptionGraphs = Collections.emptySet();
         }
-        clausifier = new OwlClausification(factory);
+        clausifier = new OwlClausification();
         DLOntology d = clausifier.clausify(
             m_config, ontology, descriptionGraphs
         );
@@ -894,7 +879,6 @@ public class Reasoner implements Serializable {
      */
     protected void loadOwlOntology(
             OWLOntology ontology,
-            OWLDataFactory factory,
             Set<DescriptionGraph> dgs, 
             Set<OWLHasKeyDummy> keys) throws OWLException {
         if (dgs == null) {
@@ -903,7 +887,7 @@ public class Reasoner implements Serializable {
         if (keys == null) {
             keys = Collections.emptySet();
         }
-        clausifier = new OwlClausification(factory);
+        clausifier = new OwlClausification();
         DLOntology d = clausifier.clausifyWithKeys(m_config, ontology, dgs, keys);
         loadDLOntology(d);
     }

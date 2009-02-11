@@ -301,9 +301,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
     }
     
     protected Set<String> getDLClauses(OWLOntology ontology) throws Exception {
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        OWLDataFactory factory = manager.getOWLDataFactory();
-        OwlClausification clausifier = new OwlClausification(factory);
+        OwlClausification clausifier = new OwlClausification();
         Set<DescriptionGraph> noDescriptionGraphs = Collections.emptySet();
         DLOntology dlOntology = clausifier.clausify(new Reasoner.Configuration(), ontology,
                 noDescriptionGraphs);

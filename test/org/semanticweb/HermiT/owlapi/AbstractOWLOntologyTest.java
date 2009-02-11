@@ -34,7 +34,6 @@ import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.io.OWLOntologyInputSource;
 import org.semanticweb.owl.io.StringInputSource;
 import org.semanticweb.owl.model.OWLAxiom;
-import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
@@ -114,9 +113,7 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
      * @throws Exception
      */
     protected DLOntology getDLOntology() throws Exception {
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        OWLDataFactory factory = manager.getOWLDataFactory();
-        OwlClausification clausifier = new OwlClausification(factory);
+        OwlClausification clausifier = new OwlClausification();
         Set<DescriptionGraph> noDescriptionGraphs = Collections.emptySet();
         return clausifier.clausify(new Reasoner.Configuration(),
             m_ontology, noDescriptionGraphs);
