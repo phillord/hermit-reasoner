@@ -67,7 +67,8 @@ public class DataConstant implements Comparable<DataConstant>, Serializable {
         ILiteral, 
         IAnyURI,
         IBase64Binary, 
-        IHexBinary;
+        IHexBinary,
+        IUnkown;
     }
     
     protected DT datatype;

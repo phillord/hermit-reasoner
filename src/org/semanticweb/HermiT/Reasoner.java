@@ -872,7 +872,6 @@ public class Reasoner implements Serializable {
     /**
      * TEST PURPOSES ONLY, till the OWL API supports keys. 
      * @param ontology an OWL API loaded ontology
-     * @param factory a data factory
      * @param dgs description graphs
      * @param keys a set of HasKey axioms
      * @throws OWLException

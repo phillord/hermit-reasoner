@@ -94,7 +94,8 @@ public abstract class DatatypeRestriction
         LITERAL ("", (uris.get("rdfs") + "Literal")),
         ANYURI ("5", (uris.get("xsd") + "anyURI")),
         HEXBINARY ("6", (uris.get("xsd") + "hexBinary")),
-        BASE64BINARY ("7", (uris.get("xsd") + "base64Binary"));
+        BASE64BINARY ("7", (uris.get("xsd") + "base64Binary")),
+        UNKNOWN ("8", (uris.get("xsd") + "unknown"));
 
         /**
          * position in a tree that indicates subsumption relationships between 

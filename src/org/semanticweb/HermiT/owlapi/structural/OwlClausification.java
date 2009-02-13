@@ -50,6 +50,7 @@ import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionLiteral;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionOWLRealPlus;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionRational;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionString;
+import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionUnknown;
 import org.semanticweb.HermiT.model.dataranges.EnumeratedDataRange;
 import org.semanticweb.HermiT.model.dataranges.DataConstant.Impl;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.DT;
@@ -1644,8 +1645,20 @@ public class OwlClausification implements Serializable {
                             + " format that cannot be parsed. ");
                 }
             } else {
-                throw new RuntimeException("Parsed typed constant of an " +
-                		"unsupported data type " + typedConstant);
+                System.err.println("WARNING: ");
+                System.err.println("The type ");
+                System.err.println("    " + typedConstant.getDataType().getURI()); 
+                System.err.println("of the typed constant with literal value "); 
+                System.err.println("    " + typedConstant.getLiteral());
+                System.err.println("is not supported in HermiT and will be treated as " 
+                        + "an unknown datatype. HermiT should properly support " 
+                        + "all OWL2 datatypes. If you think this one is " 
+                        + "treated as unknown by mistake, please check that it " 
+                        + "has the correct prefix (xsd, owl or rdf) and if it does, " 
+                        + "please report this error. ");
+                System.err.println("");
+                currentConstant = new DataConstant(
+                        Impl.IUnkown, DT.UNKNOWN, lit);
             }
         }
         
@@ -1694,19 +1707,23 @@ public class OwlClausification implements Serializable {
                 currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "" + Byte.MIN_VALUE);
             } else if (dataType.equals(factory.getOWLDataType(DT.UNSIGNEDLONG.getURI()))) {
                 currentDataRange = new DatatypeRestrictionInteger(DT.UNSIGNEDLONG);
-                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + (new BigInteger("" + Long.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
+                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" 
+                        + (new BigInteger("" + Long.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
                 currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "0");
             } else if (dataType.equals(factory.getOWLDataType(DT.UNSIGNEDINT.getURI()))) {
                 currentDataRange = new DatatypeRestrictionInteger(DT.UNSIGNEDINT);
-                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + (new BigInteger("" + Integer.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
+                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" 
+                        + (new BigInteger("" + Integer.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
                 currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "0");
             } else if (dataType.equals(factory.getOWLDataType(DT.UNSIGNEDSHORT.getURI()))) {
                 currentDataRange = new DatatypeRestrictionInteger(DT.UNSIGNEDSHORT);
-                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + (new BigInteger("" + Short.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
+                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" 
+                        + (new BigInteger("" + Short.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
                 currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "0");
             } else if (dataType.equals(factory.getOWLDataType(DT.UNSIGNEDBYTE.getURI()))) {
                 currentDataRange = new DatatypeRestrictionInteger(DT.UNSIGNEDBYTE);
-                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" + (new BigInteger("" + Byte.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
+                currentDataRange.addFacet(Facets.MAX_INCLUSIVE, "" 
+                        + (new BigInteger("" + Byte.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
                 currentDataRange.addFacet(Facets.MIN_INCLUSIVE, "0");
             } else if (dataType.equals(factory.getOWLDataType(DT.STRING.getURI()))) {
                 currentDataRange = new DatatypeRestrictionString(DT.STRING);
@@ -1720,7 +1737,17 @@ public class OwlClausification implements Serializable {
             } else if (dataType.equals(factory.getOWLDataType(DT.ANYURI.getURI()))) {
                 currentDataRange = new DatatypeRestrictionBoolean(DT.ANYURI);
             } else {
-                throw new RuntimeException("Sorry, but the datatype " + dataType + " is not yet supported. Support will be added soon. ");
+                System.err.println("WARNING: ");
+                System.err.println("The datatype "); 
+                System.err.println("    " + dataType.getURI().toString()); 
+                System.err.println("is not supported in HermiT and will be " 
+                        + "treated as an unknown datatype. HermiT should " 
+                        + "properly support all OWL2 datatypes. If you think " 
+                        + "this one is treated as unknown by mistake, please " 
+                        + "check that it has the correct prefix (xsd, owl or rdf) " 
+                        + "and if it does please report this error. ");
+                System.err.println("");
+                currentDataRange = new DatatypeRestrictionUnknown(DT.UNKNOWN);
             }
             if (isNegated) currentDataRange.negate();
         }

@@ -188,9 +188,9 @@
                 <attribute name="Update-Url" value="${updatefileatefile}"/>
             </manifest>
             <fileset dir="${classdir}"/>
-            <!--<fileset dir="${flattendir}"/>-->
+            <fileset dir="${flattendir}"/>
             <fileset dir="${releasedir}/src"/>
-            <!--<fileset dir="${javadocdir}"/>-->
+            <fileset dir="${javadocdir}"/>
             <fileset file="${releasedir}/readme.txt"/>
             <fileset file="gpl.txt"/>
         </jar>
