@@ -50,7 +50,6 @@ import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionLiteral;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionOWLRealPlus;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionRational;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionString;
-import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionUnknown;
 import org.semanticweb.HermiT.model.dataranges.EnumeratedDataRange;
 import org.semanticweb.HermiT.model.dataranges.DataConstant.Impl;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.DT;
@@ -115,19 +114,19 @@ public class OwlClausification implements Serializable {
     protected static final org.semanticweb.HermiT.model.Variable X = org.semanticweb.HermiT.model.Variable.create("X");
     protected static final org.semanticweb.HermiT.model.Variable Y = org.semanticweb.HermiT.model.Variable.create("Y");
     protected static final org.semanticweb.HermiT.model.Variable Z = org.semanticweb.HermiT.model.Variable.create("Z");
-
+    protected final Reasoner.Configuration config;
     public OWLDataFactory factory;
     private OwlNormalization normalization;
     private int amqOffset; // the number of negative at-most replacements already performed
     
-    public OwlClausification() {
+    public OwlClausification(Reasoner.Configuration config) {
         this.factory = OWLManager.createOWLOntologyManager().getOWLDataFactory();
         normalization = new OwlNormalization(factory);
         amqOffset = 0;
+        this.config = config;
     }
     
     public DLOntology clausify(
-            Reasoner.Configuration config, 
             URI physicalURI,
             Collection<DescriptionGraph> descriptionGraphs) throws OWLException {
         
@@ -141,7 +140,7 @@ public class OwlClausification implements Serializable {
                         manager, physicalURI);
         normalization.processOntology(config, ontology);
         
-        return clausify(config, ontology.getURI().toString(),
+        return clausify(ontology.getURI().toString(),
                 normalization.getConceptInclusions(),
                 normalization.getObjectPropertyInclusions(),
                 normalization.getDataPropertyInclusions(),
@@ -160,13 +159,12 @@ public class OwlClausification implements Serializable {
     }
     
     public DLOntology clausify(
-            Reasoner.Configuration config, 
             OWLOntology ontology,
             Collection<DescriptionGraph> descriptionGraphs) throws OWLException {
 
         normalization.processOntology(config, ontology);
         
-        return clausify(config, ontology.getURI().toString(),
+        return clausify(ontology.getURI().toString(),
                 normalization.getConceptInclusions(),
                 normalization.getObjectPropertyInclusions(),
                 normalization.getDataPropertyInclusions(),
@@ -187,7 +185,6 @@ public class OwlClausification implements Serializable {
     /**
      * Dummy function to sneak in keys. ONLY TO BE USED FOR TESTING PURPOSES, 
      * while waiting for official OWL API support for keys. 
-     * @param config a reasoner configuration
      * @param ontology an OWL API loaded ontology
      * @param descriptionGraphs some description graphs
      * @param keys some keys that are to be used during the reasoning (only 
@@ -195,7 +192,7 @@ public class OwlClausification implements Serializable {
      * @return an ontology in HermiT internal format
      * @throws OWLException
      */
-    public DLOntology clausifyWithKeys(Reasoner.Configuration config, 
+    public DLOntology clausifyWithKeys(
             OWLOntology ontology,
             Collection<DescriptionGraph> descriptionGraphs, 
             Set<OWLHasKeyDummy> keys) throws OWLException {
@@ -203,7 +200,7 @@ public class OwlClausification implements Serializable {
         normalization.processOntology(config, ontology);
         normalization.processKeys(config, keys);
         
-        return clausify(config, ontology.getURI().toString(),
+        return clausify(ontology.getURI().toString(),
                 normalization.getConceptInclusions(),
                 normalization.getObjectPropertyInclusions(),
                 normalization.getDataPropertyInclusions(),
@@ -282,7 +279,7 @@ public class OwlClausification implements Serializable {
     }
 
 
-    protected DLOntology clausify(Reasoner.Configuration config, String ontologyURI,
+    protected DLOntology clausify(String ontologyURI,
             Collection<OWLDescription[]> conceptInclusions,
             Collection<OWLObjectPropertyExpression[]> objectPropertyInclusions,
             Collection<OWLDataPropertyExpression[]> dataPropertyInclusions,
@@ -404,7 +401,7 @@ public class OwlClausification implements Serializable {
             shouldUseNIRule = true;
         }
         Clausifier clausifier = new Clausifier(positiveFacts, shouldUseNIRule,
-                factory, amqOffset);
+                factory, amqOffset, config.ignoreUnsupportedDatatypes);
         for (OWLDescription[] inclusion : conceptInclusions) {
             for (OWLDescription description : inclusion)
                 description.accept(clausifier);
@@ -476,7 +473,7 @@ public class OwlClausification implements Serializable {
         OWLClass outClass = normalization.define(desc, inclusions, assertions);
         
         Clausifier clausifier = new Clausifier(outPositiveFacts, true,
-                factory, amqOffset);
+                factory, amqOffset, config.ignoreUnsupportedDatatypes);
         for (OWLDescription[] inclusion : inclusions) {
             for (OWLDescription description : inclusion) {
                 description.accept(clausifier);
@@ -688,9 +685,10 @@ public class OwlClausification implements Serializable {
         protected final boolean m_renameAtMost;
         protected int m_yIndex;
         protected final OWLDataFactory m_factory;
+        protected final boolean ignoreUnsupportedDatatypes;
 
         public Clausifier(Set<Atom> positiveFacts, boolean renameAtMost,
-                OWLDataFactory factory, int amqOffset) {
+                OWLDataFactory factory, int amqOffset, boolean ignoreUnsupportedDatatypes) {
             m_negativeAtMostReplacements = new HashMap<AtomicConcept, AtomicConcept>();
             this.amqOffset = amqOffset;
             m_headAtoms = new ArrayList<Atom>();
@@ -699,6 +697,7 @@ public class OwlClausification implements Serializable {
             m_positiveFacts = positiveFacts;
             m_renameAtMost = renameAtMost;
             m_factory = factory;
+            this.ignoreUnsupportedDatatypes = ignoreUnsupportedDatatypes;
         }
 
         public DLClause getDLClause() {
@@ -745,11 +744,19 @@ public class OwlClausification implements Serializable {
 
         public void visit(OWLDataAllRestriction desc) {
             org.semanticweb.HermiT.model.Variable y = nextY();
-            m_bodyAtoms.add(getDataPropertyAtom(desc.getProperty(), X, y));
-            DataVisitor dataVisitor = new DataVisitor();
+            DataVisitor dataVisitor = new DataVisitor(ignoreUnsupportedDatatypes);
             desc.getFiller().accept(dataVisitor);
-            if (!dataVisitor.getDataRange().isBottom()) {
-                m_headAtoms.add(Atom.create(dataVisitor.getDataRange(),
+            DataRange d = new DatatypeRestrictionLiteral(DT.LITERAL);
+            if (dataVisitor.getDataRange() != null){
+                m_bodyAtoms.add(getDataPropertyAtom(desc.getProperty(), X, y));
+                d = dataVisitor.getDataRange();
+                if (!d.isBottom()) {
+                    m_headAtoms.add(Atom.create(d,
+                            new org.semanticweb.HermiT.model.Term[] { y }));
+                }
+            } else {
+                m_bodyAtoms.add(getDataPropertyAtom(desc.getProperty(), X, y));
+                m_headAtoms.add(Atom.create(d,
                         new org.semanticweb.HermiT.model.Term[] { y }));
             }
         }
@@ -757,11 +764,15 @@ public class OwlClausification implements Serializable {
         public void visit(OWLDataSomeRestriction desc) {
             OWLDataProperty dp = (OWLDataProperty) desc.getProperty();
             AtomicRole property = AtomicRole.createDataRole(dp.getURI().toString());
-            DataVisitor dataVisitor = new DataVisitor();
+            DataVisitor dataVisitor = new DataVisitor(ignoreUnsupportedDatatypes);
             desc.getFiller().accept(dataVisitor);
-            m_headAtoms.add(Atom.create(AtLeastConcreteRoleConcept.create(1, property,
-                    dataVisitor.getDataRange()),
-                    new org.semanticweb.HermiT.model.Term[] { X }));
+            DataRange d = new DatatypeRestrictionLiteral(DT.LITERAL);
+            if (dataVisitor.getDataRange() != null) {
+                d = dataVisitor.getDataRange();
+            }
+            m_headAtoms.add(Atom
+                    .create(AtLeastConcreteRoleConcept.create(1, property, d),
+                            new org.semanticweb.HermiT.model.Term[] { X }));
         }
 
         public void visit(OWLDataExactCardinalityRestriction desc) {
@@ -772,24 +783,28 @@ public class OwlClausification implements Serializable {
         public void visit(OWLDataMaxCardinalityRestriction desc) {
             int number = desc.getCardinality();
             OWLDataProperty dp = (OWLDataProperty) desc.getProperty();
-            DataVisitor dataVisitor = new DataVisitor();
+            DataVisitor dataVisitor = new DataVisitor(ignoreUnsupportedDatatypes);
             dataVisitor.negate();
             desc.getFiller().accept(dataVisitor);
-            ensureYNotZero();
-            org.semanticweb.HermiT.model.Variable[] yVars = new org.semanticweb.HermiT.model.Variable[number + 1];
-            for (int i = 0; i < yVars.length; i++) {
-                yVars[i] = nextY();
-                m_bodyAtoms.add(getDataPropertyAtom(dp, X, yVars[i]));
-                if (!dataVisitor.getDataRange().isBottom()) {
-                    m_headAtoms.add(Atom.create(dataVisitor.getDataRange(),
-                            new org.semanticweb.HermiT.model.Term[] { yVars[i] }));
+            // null means we parsed an unsupported datatype and the flag to 
+            // ignore them is set, so do not add any constraints for the concept
+            if (dataVisitor.getDataRange() != null) {
+                ensureYNotZero();
+                org.semanticweb.HermiT.model.Variable[] yVars = new org.semanticweb.HermiT.model.Variable[number + 1];
+                for (int i = 0; i < yVars.length; i++) {
+                    yVars[i] = nextY();
+                    m_bodyAtoms.add(getDataPropertyAtom(dp, X, yVars[i]));
+                    if (!dataVisitor.getDataRange().isBottom()) {
+                        m_headAtoms.add(Atom.create(dataVisitor.getDataRange(),
+                                new org.semanticweb.HermiT.model.Term[] { yVars[i] }));
+                    }
                 }
-            }
-            for (int i = 0; i < yVars.length; i++) {
-                for (int j = i + 1; j < yVars.length; j++) {
-                    m_headAtoms.add(Atom.create(Equality.INSTANCE,
-                            new org.semanticweb.HermiT.model.Term[] { yVars[i],
-                                    yVars[j] }));
+                for (int i = 0; i < yVars.length; i++) {
+                    for (int j = i + 1; j < yVars.length; j++) {
+                        m_headAtoms.add(Atom.create(Equality.INSTANCE,
+                                new org.semanticweb.HermiT.model.Term[] { yVars[i],
+                                        yVars[j] }));
+                    }
                 }
             }
         }
@@ -798,13 +813,19 @@ public class OwlClausification implements Serializable {
             int number = desc.getCardinality();
             OWLDataProperty dp = (OWLDataProperty) desc.getProperty();
             AtomicRole property = AtomicRole.createDataRole(dp.getURI().toString());
-            DataVisitor dataVisitor = new DataVisitor();
+            DataVisitor dataVisitor = new DataVisitor(ignoreUnsupportedDatatypes);
             desc.getFiller().accept(dataVisitor);
+            DataRange d;
+            if (dataVisitor.getDataRange() == null) {
+                d = new DatatypeRestrictionLiteral(DT.LITERAL);
+            } else {
+                d = dataVisitor.getDataRange();
+            }
             m_headAtoms.add(Atom.create(
                     AtLeastConcreteRoleConcept.create(
                             number, 
                             property, 
-                            dataVisitor.getDataRange()),
+                            d),
                         new org.semanticweb.HermiT.model.Term[] { X }));
         }
 
@@ -1064,6 +1085,11 @@ public class OwlClausification implements Serializable {
         protected boolean isNegated = false;
         protected DataRange currentDataRange;
         protected DataConstant currentConstant;
+        protected boolean ignoreUnsupportedDatatypes;
+        
+        public DataVisitor(boolean ignoreUnsupportedDatatypes) {
+            this.ignoreUnsupportedDatatypes = ignoreUnsupportedDatatypes;
+        }
         
         public void visit(OWLDataComplementOf dataComplementOf) {
             OWLDataRange range = dataComplementOf.getDataRange();
@@ -1076,7 +1102,9 @@ public class OwlClausification implements Serializable {
             if (isNegated) currentDataRange.negate();
             for (OWLConstant constant : dataOneOf.getValues()) {
                 constant.accept(this);
-                currentDataRange.addOneOf(currentConstant);
+                if (currentConstant != null) {
+                    currentDataRange.addOneOf(currentConstant);
+                }
             }
         }
         
@@ -1645,20 +1673,31 @@ public class OwlClausification implements Serializable {
                             + " format that cannot be parsed. ");
                 }
             } else {
-                System.err.println("WARNING: ");
-                System.err.println("The type ");
-                System.err.println("    " + typedConstant.getDataType().getURI()); 
-                System.err.println("of the typed constant with literal value "); 
-                System.err.println("    " + typedConstant.getLiteral());
-                System.err.println("is not supported in HermiT and will be treated as " 
-                        + "an unknown datatype. HermiT should properly support " 
-                        + "all OWL2 datatypes. If you think this one is " 
-                        + "treated as unknown by mistake, please check that it " 
-                        + "has the correct prefix (xsd, owl or rdf) and if it does, " 
-                        + "please report this error. ");
-                System.err.println("");
-                currentConstant = new DataConstant(
-                        Impl.IUnkown, DT.UNKNOWN, lit);
+                String message = "The datatype " 
+                    + System.getProperty("line.separator") 
+                    + "    " + typedConstant.getDataType().getURI() 
+                    + System.getProperty("line.separator")
+                    + "of the typed constant with literal value "
+                    + System.getProperty("line.separator")
+                    + "    " + typedConstant.getLiteral()
+                    + System.getProperty("line.separator")
+                    + "is not supported in HermiT. HermiT should "
+                    + "properly support all OWL2 datatypes. If you think "
+                    + "this one should be supported, please "
+                    + "check that it has the correct prefix or URI "
+                    + "and case (xsd:nonNegativeInteger and not "
+                    + "xsd:NonnegativeInteger) and if it does please "
+                    + "report this error. ";
+                if (ignoreUnsupportedDatatypes) {
+                    System.err.println(message);
+                    System.err.println("The datatype will be ignored. "
+                            + System.getProperty("line.separator"));
+                    return;
+                } else {
+                    throw new RuntimeException(message);
+                }
+//                currentConstant = new DataConstant(
+//                        Impl.IUnkown, DT.UNKNOWN, lit);
             }
         }
         
@@ -1737,17 +1776,26 @@ public class OwlClausification implements Serializable {
             } else if (dataType.equals(factory.getOWLDataType(DT.ANYURI.getURI()))) {
                 currentDataRange = new DatatypeRestrictionBoolean(DT.ANYURI);
             } else {
-                System.err.println("WARNING: ");
-                System.err.println("The datatype "); 
-                System.err.println("    " + dataType.getURI().toString()); 
-                System.err.println("is not supported in HermiT and will be " 
-                        + "treated as an unknown datatype. HermiT should " 
-                        + "properly support all OWL2 datatypes. If you think " 
-                        + "this one is treated as unknown by mistake, please " 
-                        + "check that it has the correct prefix (xsd, owl or rdf) " 
-                        + "and if it does please report this error. ");
-                System.err.println("");
-                currentDataRange = new DatatypeRestrictionUnknown(DT.UNKNOWN);
+                String message = "The datatype "
+                        + System.getProperty("line.separator") + "    "
+                        + dataType.getURI().toString() 
+                        + System.getProperty("line.separator")
+                        + "is not supported in HermiT. HermiT should "
+                        + "properly support all OWL2 datatypes. If you think "
+                        + "this one should be supported, please "
+                        + "check that it has the correct prefix or URI "
+                        + "and case (xsd:nonNegativeInteger and not "
+                        + "xsd:NonnegativeInteger) and if it does please "
+                        + "report this error. ";
+                if (ignoreUnsupportedDatatypes) {
+                    System.err.println(message);
+                    System.err.println("The datatype will be ignored. "
+                            + System.getProperty("line.separator"));
+                    return;
+                } else {
+                    throw new RuntimeException(message);
+                }
+                //currentDataRange = new DatatypeRestrictionUnknown(DT.UNKNOWN);
             }
             if (isNegated) currentDataRange.negate();
         }
@@ -1755,6 +1803,7 @@ public class OwlClausification implements Serializable {
         public void visit(OWLDataRangeRestriction rangeRestriction) {
             OWLDataRange range = rangeRestriction.getDataRange();
             range.accept(this);
+            if (currentDataRange == null) return;
             for (OWLDataRangeFacetRestriction facetRestriction : rangeRestriction.getFacetRestrictions()) {
                 OWLRestrictedDataRangeFacetVocabulary facetOWL = facetRestriction.getFacet();
                 facetRestriction.getFacetValue().accept(this);

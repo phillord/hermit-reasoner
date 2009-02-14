@@ -301,9 +301,9 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
     }
     
     protected Set<String> getDLClauses(OWLOntology ontology) throws Exception {
-        OwlClausification clausifier = new OwlClausification();
+        OwlClausification clausifier = new OwlClausification(new Reasoner.Configuration());
         Set<DescriptionGraph> noDescriptionGraphs = Collections.emptySet();
-        DLOntology dlOntology = clausifier.clausify(new Reasoner.Configuration(), ontology,
+        DLOntology dlOntology = clausifier.clausify(ontology,
                 noDescriptionGraphs);
         Set<String> actualStrings = new HashSet<String>();
         Namespaces namespaces = InternalNames.withInternalNamespaces

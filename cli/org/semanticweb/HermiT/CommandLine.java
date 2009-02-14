@@ -16,8 +16,8 @@ import java.util.TreeSet;
 
 import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
 import org.semanticweb.HermiT.model.AtomicConcept;
-import org.semanticweb.HermiT.monitor.Timer;
 import org.semanticweb.HermiT.monitor.ReasoningOperations;
+import org.semanticweb.HermiT.monitor.Timer;
 
 public class CommandLine {
     static String breakLines(String str, int lineWidth, int indent) {
@@ -502,7 +502,7 @@ public class CommandLine {
         kDirectBlock = 1005, kBlockStrategy = 1006, kBlockCache = 1007, kExpansion = 1008, kBase = 1009,
         kParser = 1010, kClausifyRoleBox = 1011, kDefaultNamespace = 1012, kDumpNamespaces = 1013,
         kSuperRoles = 1014, kSubRoles = 1015, kEquivRoles = 1016, kUniversalRole = 1017,
-        kKrssTaxonomy = 1018, kFunctionalTaxonomy = 1019;
+        kKrssTaxonomy = 1018, kFunctionalTaxonomy = 1019, kIgnoreUnsupportedDatatypes = 1020;
     
     static protected final String versionString = "HermiT version @VERSION@";
     protected static final String usageString = "Usage: hermit [OPTION]... URI...";
@@ -591,6 +591,7 @@ public class CommandLine {
                     "use OWL API parser (default)"),
         new Option(kKaon2, "kaon2", kParsing,
                     "use KAON2 parser"),
+        
                     
         // algorithm tweaks:
         new Option(kDirectBlock, "block-match", kAlgorithm, true, "TYPE",
@@ -605,6 +606,8 @@ public class CommandLine {
                     "add clauses to realize transitive edges (experimental)"),
         new Option(kUniversalRole, "universal-role", kAlgorithm,
                     "enable support for owl:TopDataProperty as the universal role"),
+        new Option(kIgnoreUnsupportedDatatypes, "ignoreUnsupportedDatatypes", kAlgorithm,
+                    "ignore unsupported datatypes"),
                     
         // internals:
         new Option(kDumpClauses, "dump-clauses", kInternals, false, "FILE",
@@ -825,6 +828,9 @@ public class CommandLine {
                     } break;
                     case kUniversalRole : {
                         config.makeTopRoleUniversal = true;
+                    } break;
+                    case kIgnoreUnsupportedDatatypes : {
+                        config.ignoreUnsupportedDatatypes = true;
                     } break;
                     case kDumpClauses : {
                         actions.add(new DumpClausesAction(g.getOptarg()));

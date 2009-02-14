@@ -131,6 +131,7 @@ public class Reasoner implements Serializable {
         public boolean checkClauses;
         public boolean prepareForExpressiveQueries;
         public boolean makeTopRoleUniversal;
+        public boolean ignoreUnsupportedDatatypes;
         public TableauMonitor monitor;
         public final Map<String,Object> parameters;
     
@@ -144,6 +145,7 @@ public class Reasoner implements Serializable {
             subsumptionCacheStrategyType =
                 SubsumptionCacheStrategyType.IMMEDIATE;
             clausifyTransitivity = false;
+            ignoreUnsupportedDatatypes = false;
             checkClauses = true;
             prepareForExpressiveQueries = false;
             makeTopRoleUniversal = false;
@@ -843,10 +845,8 @@ public class Reasoner implements Serializable {
                 if (descriptionGraphs == null) {
                     descriptionGraphs = Collections.emptySet();
                 }
-                clausifier = new OwlClausification();
-                DLOntology d = clausifier.clausify(
-                    m_config, physicalURI, descriptionGraphs
-                );
+                clausifier = new OwlClausification(m_config);
+                DLOntology d = clausifier.clausify(physicalURI, descriptionGraphs);
                 loadDLOntology(d);
                 
             } break;
@@ -862,10 +862,8 @@ public class Reasoner implements Serializable {
         if (descriptionGraphs == null) {
             descriptionGraphs = Collections.emptySet();
         }
-        clausifier = new OwlClausification();
-        DLOntology d = clausifier.clausify(
-            m_config, ontology, descriptionGraphs
-        );
+        clausifier = new OwlClausification(m_config);
+        DLOntology d = clausifier.clausify(ontology, descriptionGraphs);
         loadDLOntology(d);
     }
     
@@ -886,8 +884,8 @@ public class Reasoner implements Serializable {
         if (keys == null) {
             keys = Collections.emptySet();
         }
-        clausifier = new OwlClausification();
-        DLOntology d = clausifier.clausifyWithKeys(m_config, ontology, dgs, keys);
+        clausifier = new OwlClausification(m_config);
+        DLOntology d = clausifier.clausifyWithKeys(ontology, dgs, keys);
         loadDLOntology(d);
     }
     

@@ -71,7 +71,7 @@ public class ClausificationTest extends AbstractOWLOntologyTest {
     }
     
     public void testHasKeys() throws Exception {
-        OwlClausification clausifier = new OwlClausification();
+        OwlClausification clausifier = new OwlClausification(new Reasoner.Configuration());
         DLClause clause = clausifier.clausifyKey(OWLHasKeyDummy.getDemoKey());
         Set<String> bAtoms = new HashSet<String>();
         bAtoms.add("<internal:Named>(X)");
@@ -126,11 +126,10 @@ public class ClausificationTest extends AbstractOWLOntologyTest {
     protected void assertDLClauses(OWLOntology ontology, 
             String[] control, 
             String[] controlVariant) throws Exception {
-        OwlClausification clausifier = new OwlClausification();
+        OwlClausification clausifier = new OwlClausification(new Reasoner.Configuration());
         Set<DescriptionGraph> noDescriptionGraphs = Collections.emptySet();
-        DLOntology dlOntology
-            = clausifier.clausify(new Reasoner.Configuration(),
-                ontology, noDescriptionGraphs);
+        DLOntology dlOntology = clausifier.clausify(ontology,
+                noDescriptionGraphs);
         Set<String> actualStrings = new HashSet<String>();
         Namespaces namespaces = InternalNames.withInternalNamespaces
             (new Namespaces(ontology.getURI() + "#",
