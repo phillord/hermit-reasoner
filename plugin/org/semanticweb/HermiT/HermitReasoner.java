@@ -33,6 +33,17 @@ public class HermitReasoner implements MonitorableOWLReasoner {
     OWLOntologyManager manager;
     OWLDataFactory factory;
     int nextKbId;
+    boolean tolerateUnknownDatatypes;
+    
+    HermitReasoner(OWLOntologyManager inManager,
+                   boolean tolerateUnknownDatatypes) {
+        manager = inManager;
+        factory = manager.getOWLDataFactory();
+        nextKbId = 1;
+        clearOntologies();
+        monitor = new PluginMonitor();
+        this.tolerateUnknownDatatypes = tolerateUnknownDatatypes;
+    }
     
     HermitReasoner(OWLOntologyManager inManager) {
         manager = inManager;
@@ -40,6 +51,7 @@ public class HermitReasoner implements MonitorableOWLReasoner {
         nextKbId = 1;
         clearOntologies();
         monitor = new PluginMonitor();
+        this.tolerateUnknownDatatypes = false;
     }
     
     public OWLEntity getCurrentEntity() {
@@ -130,6 +142,7 @@ public class HermitReasoner implements MonitorableOWLReasoner {
             Reasoner.Configuration config = new Reasoner.Configuration();
             config.subsumptionCacheStrategyType = Reasoner.SubsumptionCacheStrategyType.JUST_IN_TIME;
             config.monitor = monitor;
+            config.ignoreUnsupportedDatatypes = tolerateUnknownDatatypes;
             try {
                 monitor.beginTask("Loading...");
                 // System.out.println("Loading ontology into HermiT...");

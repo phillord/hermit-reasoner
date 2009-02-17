@@ -7,7 +7,9 @@ import org.semanticweb.owl.model.OWLOntologyManager;
 
 public class ReasonerFactory extends ProtegeOWLReasonerFactoryAdapter {
     public OWLReasoner createReasoner(OWLOntologyManager m) {
-        return new HermitReasoner(m);
+        // When created by Protege, tolerate datatypes by default, since
+        // there is no (easy) way to pass configuration settings:
+        return new HermitReasoner(m, true);
     }
     public void initialise() throws Exception {}
     public void dispose() throws Exception {}
