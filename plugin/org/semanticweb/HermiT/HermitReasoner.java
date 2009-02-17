@@ -35,7 +35,7 @@ public class HermitReasoner implements MonitorableOWLReasoner {
     int nextKbId;
     boolean tolerateUnknownDatatypes;
     
-    HermitReasoner(OWLOntologyManager inManager,
+    public HermitReasoner(OWLOntologyManager inManager,
                    boolean tolerateUnknownDatatypes) {
         manager = inManager;
         factory = manager.getOWLDataFactory();
@@ -45,7 +45,7 @@ public class HermitReasoner implements MonitorableOWLReasoner {
         this.tolerateUnknownDatatypes = tolerateUnknownDatatypes;
     }
     
-    HermitReasoner(OWLOntologyManager inManager) {
+    public HermitReasoner(OWLOntologyManager inManager) {
         manager = inManager;
         factory = manager.getOWLDataFactory();
         nextKbId = 1;
