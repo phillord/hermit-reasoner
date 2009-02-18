@@ -19,8 +19,9 @@ import org.semanticweb.owl.model.OWLObjectComplementOf;
 
 import org.semanticweb.HermiT.util.GraphUtils;
 
-
 public class TransitivityManager extends OwlNormalization.RoleManager {
+    private static final long serialVersionUID=-3267310119489682236L;
+
     protected final Map<OWLObjectPropertyExpression, Set<OWLObjectPropertyExpression>> m_subObjectProperties;
     protected final Collection<OWLObjectPropertyExpression[]> m_toldSubObjectProperties;
     protected final Set<OWLObjectPropertyExpression> m_transitiveObjectProperties;

@@ -31,6 +31,7 @@ public class IndividualReuseStrategy extends StrategyBase implements Serializabl
     protected int[] indicesByBranchingPoint;
     protected final boolean isDeterministic;
 
+    @SuppressWarnings("serial")
     public IndividualReuseStrategy(BlockingStrategy strategy,boolean isDeterministic) {
         super(strategy);
         this.isDeterministic=isDeterministic;
