@@ -27,31 +27,37 @@ public class HermitReasoner implements MonitorableOWLReasoner {
     static final String mUriBase = "urn:hermit:kb";
     
     Reasoner hermit;
-    PluginMonitor monitor;
+    PluginMonitor monitor = new PluginMonitor();
     java.util.Set<OWLOntology> ontologies;
     OWLOntology ontology;
     OWLOntologyManager manager;
     OWLDataFactory factory;
-    int nextKbId;
-    boolean tolerateUnknownDatatypes;
+    int nextKbId = 1;
+    boolean tolerateUnknownDatatypes = false;
+    boolean onlyAncestorBlocking = false;
     
     public HermitReasoner(OWLOntologyManager inManager,
                    boolean tolerateUnknownDatatypes) {
         manager = inManager;
         factory = manager.getOWLDataFactory();
-        nextKbId = 1;
         clearOntologies();
-        monitor = new PluginMonitor();
         this.tolerateUnknownDatatypes = tolerateUnknownDatatypes;
+    }
+    
+    public HermitReasoner(OWLOntologyManager inManager,
+                   boolean tolerateUnknownDatatypes,
+                   boolean onlyAncestorBlocking) {
+        manager = inManager;
+        factory = manager.getOWLDataFactory();
+        clearOntologies();
+        this.tolerateUnknownDatatypes = tolerateUnknownDatatypes;
+        this.onlyAncestorBlocking = onlyAncestorBlocking;
     }
     
     public HermitReasoner(OWLOntologyManager inManager) {
         manager = inManager;
         factory = manager.getOWLDataFactory();
-        nextKbId = 1;
         clearOntologies();
-        monitor = new PluginMonitor();
-        this.tolerateUnknownDatatypes = false;
     }
     
     public OWLEntity getCurrentEntity() {
@@ -143,6 +149,9 @@ public class HermitReasoner implements MonitorableOWLReasoner {
             config.subsumptionCacheStrategyType = Reasoner.SubsumptionCacheStrategyType.JUST_IN_TIME;
             config.monitor = monitor;
             config.ignoreUnsupportedDatatypes = tolerateUnknownDatatypes;
+            if (onlyAncestorBlocking) {
+                config.blockingStrategyType = Reasoner.BlockingStrategyType.ANCESTOR;
+            }
             try {
                 monitor.beginTask("Loading...");
                 // System.out.println("Loading ontology into HermiT...");

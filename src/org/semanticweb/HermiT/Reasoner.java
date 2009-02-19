@@ -76,6 +76,7 @@ import org.semanticweb.HermiT.tableau.Tableau;
 import org.semanticweb.HermiT.util.TranslatedMap;
 import org.semanticweb.HermiT.util.TranslatedSet;
 import org.semanticweb.HermiT.util.Translator;
+import org.semanticweb.HermiT.util.GraphUtils;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLDataProperty;
@@ -201,7 +202,6 @@ public class Reasoner implements Serializable {
     private Classifier<AtomicConcept> classifier;
     private Map<AtomicConcept, HierarchyPosition<AtomicConcept>>
         atomicConceptHierarchy; // may be null; use getAtomicConceptHierarchy
-    private SubsumptionHierarchy oldHierarchy;
     private Map<AtomicConcept, Set<Individual>> realization;
         // may be null; use getRealization
     // private SubsumptionHierarchy oldHierarchy;
@@ -363,8 +363,7 @@ public class Reasoner implements Serializable {
         HierarchyPosition<AtomicRole> out = getAtomicRoleHierarchy().get(r);
         if (out == null) {
             NaiveHierarchyPosition<AtomicRole> newPos =
-                new NaiveHierarchyPosition<AtomicRole>();
-            newPos.labels.add(r);
+                new NaiveHierarchyPosition<AtomicRole>(r);
             if (r.isRestrictedToDatatypes()) {
                 newPos.parents.add(getAtomicRoleHierarchy().get(
                     AtomicRole.TOP_DATA_ROLE));
@@ -417,71 +416,49 @@ public class Reasoner implements Serializable {
     protected Map<AtomicConcept, HierarchyPosition<AtomicConcept>>
         getAtomicConceptHierarchy() {
         if (atomicConceptHierarchy == null) {
-            if (true) {
-                Collection<AtomicConcept> concepts
-                    = new ArrayList<AtomicConcept>();
-                for (AtomicConcept c : m_dlOntology.getAllAtomicConcepts()) {
-                    if (!InternalNames.isInternalUri(c.getURI())) {
-                        concepts.add(c);
+            Collection<AtomicConcept> concepts = new ArrayList<AtomicConcept>();
+            concepts.add(AtomicConcept.THING);
+            concepts.add(AtomicConcept.NOTHING);
+            for (AtomicConcept c : m_dlOntology.getAllAtomicConcepts()) {
+                if (!InternalNames.isInternalUri(c.getURI())) {
+                    concepts.add(c);
+                }
+            }
+            ReasoningCache cache = new ReasoningCache();
+            cache.seed(concepts, m_tableau);
+            if (cache.allSubsumptionsKnown(concepts)) {
+                GraphUtils.Acyclic<AtomicConcept> acyc
+                    = new GraphUtils.Acyclic<AtomicConcept>(cache.knownSubsumers);
+                GraphUtils.TransAnalyzed<AtomicConcept> trans
+                    = new GraphUtils.TransAnalyzed<AtomicConcept>(acyc.graph);
+                atomicConceptHierarchy = new HashMap<AtomicConcept, HierarchyPosition<AtomicConcept>>();
+                for (AtomicConcept c : trans.reduced.keySet()) {
+                    NaiveHierarchyPosition<AtomicConcept> pos
+                        = new NaiveHierarchyPosition<AtomicConcept>(acyc.equivs.get(c));
+                    for (AtomicConcept equiv : acyc.equivs.get(c)) {
+                        assert acyc.canonical.get(equiv) == c;
+                        assert pos.labels.contains(equiv);
+                        atomicConceptHierarchy.put(equiv, pos);
                     }
                 }
+                if (!atomicConceptHierarchy.containsKey(AtomicConcept.THING)) {
+                    atomicConceptHierarchy.put(AtomicConcept.THING,
+                        new NaiveHierarchyPosition<AtomicConcept>(AtomicConcept.THING));
+                }
+                for (Map.Entry<AtomicConcept, Set<AtomicConcept>> e : trans.reduced.entrySet()) {
+                    AtomicConcept child = e.getKey();
+                    for (AtomicConcept parent : e.getValue()) {
+                        ((NaiveHierarchyPosition<AtomicConcept>) atomicConceptHierarchy.get(child))
+                            .parents.add(atomicConceptHierarchy.get(parent));
+                        ((NaiveHierarchyPosition<AtomicConcept>) atomicConceptHierarchy.get(parent))
+                            .children.add(atomicConceptHierarchy.get(child));
+                    }
+                }
+            } else {
                 atomicConceptHierarchy =
                     classifier.buildHierarchy(AtomicConcept.THING,
                                               AtomicConcept.NOTHING,
                                               concepts);
-            } else {
-                assert oldHierarchy == null;
-                try {
-                     oldHierarchy = new SubsumptionHierarchy(m_subsumptionChecker);
-                } catch (SubsumptionHierarchy.SubusmptionCheckerException e) {
-                    throw new RuntimeException(
-                        "Unable to compute subsumption hierarchy.");
-                }
-                    
-                Map<AtomicConcept, HierarchyPosition<AtomicConcept>> newHierarchy =
-                    new HashMap<AtomicConcept, HierarchyPosition<AtomicConcept>>();
-                    
-                Map<AtomicConcept, NaiveHierarchyPosition<AtomicConcept>> newNodes
-                    = new HashMap<AtomicConcept,
-                                    NaiveHierarchyPosition<AtomicConcept>>();
-                // First just create all the new hierarchy nodes:
-                for (SubsumptionHierarchyNode oldNode : oldHierarchy) {
-                    NaiveHierarchyPosition<AtomicConcept> newNode =
-                        new NaiveHierarchyPosition<AtomicConcept>();
-                    newNodes.put(oldNode.getRepresentative(), newNode);
-                    for (AtomicConcept concept : oldNode.getEquivalentConcepts()) {
-                        newNode.labels.add(concept);
-                        if (newHierarchy.put(concept, newNode) !=
-                            null) {
-                            throw new RuntimeException("The '" + concept.getURI() +
-                                "' concept occurs in two different places" +
-                                " in the taxonomy.");
-                        }
-                    }
-                }
-                // Now connect them together:
-                for (SubsumptionHierarchyNode oldNode : oldHierarchy) {
-                    NaiveHierarchyPosition<AtomicConcept> newNode =
-                        newNodes.get(oldNode.getRepresentative());
-                    for (SubsumptionHierarchyNode parent
-                            : oldNode.getParentNodes()) {
-                        assert parent != oldHierarchy.nothingNode() :
-                            "Nothing never has any children!";
-                        newNode.parents.add(
-                            newNodes.get(parent.getRepresentative())
-                        );
-                    }
-                    for (SubsumptionHierarchyNode child
-                            : oldNode.getChildNodes()) {
-                        assert child != oldHierarchy.thingNode() :
-                            "Thing never has any parents!";
-                        newNode.children.add(
-                            newNodes.get(child.getRepresentative())
-                        );
-                    }
-                }
-                // Construction finished; set our member cache:
-                atomicConceptHierarchy = newHierarchy;
             }
         }
         return atomicConceptHierarchy;
@@ -497,36 +474,6 @@ public class Reasoner implements Serializable {
                     getAtomicConceptHierarchy().get(AtomicConcept.NOTHING));
         }
         return out;
-        // if (getAtomicConceptHierarchy().containsKey(c)) {
-        //     HierarchyPosition<AtomicConcept> out = getAtomicConceptHierarchy().get(c);
-        //     return out;
-        // }
-        // assert oldHierarchy != null;
-        // StandardClassificationManager classifier =
-        //     new StandardClassificationManager(oldHierarchy,
-        //                                         m_subsumptionChecker);
-        // try {
-        //     classifier.findPosition(c);
-        // } catch (SubsumptionHierarchy.SubusmptionCheckerException e) {
-        //     throw new RuntimeException(
-        //         "Unable to classify concept.", e);
-        // }
-        // if (classifier.m_topSet.equals(classifier.m_bottomSet)) {
-        //     assert classifier.m_topSet.size() == 1;
-        //     return getAtomicConceptHierarchy().get
-        //                 (classifier.m_topSet.get(0).getRepresentative());
-        // }
-        // NaiveHierarchyPosition<AtomicConcept> out =
-        //     new NaiveHierarchyPosition<AtomicConcept>();
-        // for (SubsumptionHierarchyNode parent : classifier.m_topSet) {
-        //     out.parents.add(getAtomicConceptHierarchy().get(
-        //                         parent.getRepresentative()));
-        // }
-        // for (SubsumptionHierarchyNode child : classifier.m_bottomSet) {
-        //     out.children.add(getAtomicConceptHierarchy().get(
-        //                         child.getRepresentative()));
-        // }
-        // return out;
     }
     
     private AtomicConcept define(OWLDescription desc) {

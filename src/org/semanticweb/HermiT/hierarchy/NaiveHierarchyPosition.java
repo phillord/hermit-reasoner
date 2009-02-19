@@ -13,26 +13,21 @@ import java.util.Set;
 
 public class NaiveHierarchyPosition<T> implements Serializable, HierarchyPosition<T> {
     private static final long serialVersionUID = -6509026754119112882L;
-    public Set<HierarchyPosition<T>> parents;
-    public Set<HierarchyPosition<T>> children;
-    public Set<T> labels;
-    public NaiveHierarchyPosition() {
-        parents = new HashSet<HierarchyPosition<T>>();
-        children = new HashSet<HierarchyPosition<T>>();
-        labels = new HashSet<T>();
-    }
+    public Set<HierarchyPosition<T>> parents = new HashSet<HierarchyPosition<T>>();
+    public Set<HierarchyPosition<T>> children = new HashSet<HierarchyPosition<T>>();
+    public Set<T> labels = new HashSet<T>();
+    // public NaiveHierarchyPosition() {}
     public NaiveHierarchyPosition(T label) {
-        parents = new HashSet<HierarchyPosition<T>>();
-        children = new HashSet<HierarchyPosition<T>>();
-        labels = new HashSet<T>();
         labels.add(label);
+    }
+    public NaiveHierarchyPosition(Collection<T> labels) {
+        this.labels.addAll(labels);
     }
     public NaiveHierarchyPosition(T label,
                                     Set<HierarchyPosition<T>> parents,
                                     Set<HierarchyPosition<T>> children) {
         this.parents = parents;
         this.children = children;
-        labels = new HashSet<T>();
         labels.add(label);
     }
     public Set<T> getEquivalents() {
@@ -143,8 +138,7 @@ public class NaiveHierarchyPosition<T> implements Serializable, HierarchyPositio
             throw new RuntimeException("hierarchy top must be at least as big as hierarchy bottom");
         }
         Map<T, HierarchyPosition<T>> out = new HashMap<T, HierarchyPosition<T>>();
-        NaiveHierarchyPosition<T> top = new NaiveHierarchyPosition<T>();
-        top.labels.add(topVal);
+        NaiveHierarchyPosition<T> top = new NaiveHierarchyPosition<T>(topVal);
         out.put(topVal, top);
         if (cmp.less(topVal, botVal)) {
             top.labels.add(botVal);
@@ -154,8 +148,7 @@ public class NaiveHierarchyPosition<T> implements Serializable, HierarchyPositio
                 out.put(t, top);
             }
         } else {
-            NaiveHierarchyPosition<T> bot = new NaiveHierarchyPosition<T>();
-            bot.labels.add(botVal);
+            NaiveHierarchyPosition<T> bot = new NaiveHierarchyPosition<T>(botVal);
             out.put(botVal, bot);
             top.children.add(bot);
             bot.parents.add(top);
@@ -168,7 +161,8 @@ public class NaiveHierarchyPosition<T> implements Serializable, HierarchyPositio
                     ((NaiveHierarchyPosition<T>) pos).labels.add(t);
                     out.put(t, pos);
                 } else {
-                    NaiveHierarchyPosition<T> pos = new NaiveHierarchyPosition<T>();
+                    NaiveHierarchyPosition<T> pos = new NaiveHierarchyPosition<T>(t);
+                    out.put(t, pos);
                     pos.parents = parents;
                     for (HierarchyPosition<T> par : parents) {
                         NaiveHierarchyPosition<T> p
@@ -183,8 +177,6 @@ public class NaiveHierarchyPosition<T> implements Serializable, HierarchyPositio
                         c.parents.add(pos);
                         c.parents.removeAll(parents);
                     }
-                    pos.labels.add(t);
-                    out.put(t, pos);
                 }
             }
         }
