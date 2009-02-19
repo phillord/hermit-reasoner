@@ -53,8 +53,6 @@ import org.semanticweb.HermiT.hierarchy.Classifier;
 import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
 import org.semanticweb.HermiT.hierarchy.NaiveHierarchyPosition;
 import org.semanticweb.HermiT.hierarchy.PositionTranslator;
-import org.semanticweb.HermiT.hierarchy.SubsumptionHierarchy;
-import org.semanticweb.HermiT.hierarchy.SubsumptionHierarchyNode;
 import org.semanticweb.HermiT.hierarchy.TableauFunc;
 import org.semanticweb.HermiT.hierarchy.TableauSubsumptionChecker;
 import org.semanticweb.HermiT.hierarchy.TranslatedHierarchyPosition;

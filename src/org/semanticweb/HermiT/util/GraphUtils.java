@@ -62,6 +62,7 @@ public class GraphUtils {
                 return 0;
             }
         }
+        @SuppressWarnings("unchecked")
         public boolean equals(Object obj) {
             return (obj instanceof CompareByPosition &&
                     ((CompareByPosition) obj).positions.equals(positions));
