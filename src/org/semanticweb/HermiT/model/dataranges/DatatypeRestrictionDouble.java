@@ -69,23 +69,6 @@ public class DatatypeRestrictionDouble
         double doubleValue;
         try {
             doubleValue = Double.parseDouble(value);
-            // if NaN is given as a facet, or min value is supposed to be +INF, 
-            // or max value is supposed to be -INF, the value space is empty
-            if (isNaN(doubleValue) || (Double.POSITIVE_INFINITY == doubleValue 
-                    && (facet == Facets.MIN_EXCLUSIVE 
-                            || facet == Facets.MIN_INCLUSIVE)) 
-                            || (Double.NEGATIVE_INFINITY == doubleValue 
-                                    && (facet == Facets.MAX_EXCLUSIVE 
-                                            || facet == Facets.MAX_INCLUSIVE))) {
-                isBottom = true;
-                return;
-            } 
-            // a min value of -INF or max value of +INF are not really 
-            // restricting the value space, ignore
-            if (Double.POSITIVE_INFINITY == doubleValue 
-                    || Double.NEGATIVE_INFINITY == doubleValue) {
-                return;
-            }
             BigDecimal originalValue = new BigDecimal(value);
             BigDecimal doubleValueAsBD = new BigDecimal("" + doubleValue);
             if (facet == Facets.MIN_EXCLUSIVE 
@@ -96,25 +79,74 @@ public class DatatypeRestrictionDouble
                 doubleValue = DatatypeRestrictionDouble.previousDouble(doubleValue);
             }
         } catch (NumberFormatException e) {
-            // ok, it wasn't a double, but maybe it is a very big/small integer  
+            // it wasn't a double, so may be it was a very big/small integer  
             // or decimal, then we use the max/min for doubles
             try {
                 BigDecimal bd = new BigDecimal(value);
-                if ((facet == Facets.MIN_INCLUSIVE && bd.compareTo(new BigDecimal("" + Double.MAX_VALUE)) > 0) 
-                        || (facet == Facets.MIN_EXCLUSIVE && bd.compareTo(new BigDecimal("" + Double.MAX_VALUE)) >= 0)
-                        || (facet == Facets.MAX_INCLUSIVE && bd.compareTo(new BigDecimal("" + -Double.MAX_VALUE)) < 0)
-                        || (facet == Facets.MAX_EXCLUSIVE && bd.compareTo(new BigDecimal("" + -Double.MAX_VALUE)) <= 0)) {
+                if ((facet == Facets.MIN_INCLUSIVE 
+                        && bd.compareTo(new BigDecimal("" + Double.MAX_VALUE)) > 0) 
+                        || (facet == Facets.MIN_EXCLUSIVE 
+                        && bd.compareTo(new BigDecimal("" + Double.MAX_VALUE)) >= 0)
+                        || (facet == Facets.MAX_INCLUSIVE 
+                        && bd.compareTo(new BigDecimal("" + -Double.MAX_VALUE)) < 0)
+                        || (facet == Facets.MAX_EXCLUSIVE 
+                        && bd.compareTo(new BigDecimal("" + -Double.MAX_VALUE)) <= 0)) {
                     // impossible, set all intervals to empty
+                    hasExplicitMax = true;
+                    hasExplicitMin = true;
                     intervals.clear();
                     intervals.add(new DoubleInterval(1.0, 0.0));
                     isBottom = true;
                 } // else holds anyways
                 return;
-            } catch (NumberFormatException nfe) {
-                nfe.printStackTrace();
+            } catch (NumberFormatException nfe2) {
+                nfe2.printStackTrace();
                 return;
             }
         }
+        // if NaN is given as a facet, the value space is empty
+        if (isNaN(doubleValue)) {
+            isBottom = true;
+            return;
+        } 
+        if ((doubleValue == Double.POSITIVE_INFINITY 
+                && facet == Facets.MAX_INCLUSIVE) 
+        || (doubleValue == Double.NEGATIVE_INFINITY
+                && facet == Facets.MIN_INCLUSIVE)) {
+            return; // trivial
+        }
+        if (doubleValue == Double.POSITIVE_INFINITY 
+                && facet == Facets.MAX_EXCLUSIVE) {
+            hasExplicitMax = true;
+            return; // trivial
+        }
+        if (doubleValue == Double.NEGATIVE_INFINITY 
+                && facet == Facets.MIN_EXCLUSIVE) {
+            hasExplicitMin = true;
+            return; // trivial
+        }
+        if (doubleValue == Double.POSITIVE_INFINITY 
+                && facet == Facets.MIN_INCLUSIVE) {
+            // +INF is the only allowed value
+            hasExplicitMin = true;
+            intervals.clear();
+            intervals.add(new DoubleInterval(1.0, 0.0));
+            return; 
+        }
+        if (doubleValue == Double.NEGATIVE_INFINITY 
+                && facet == Facets.MAX_INCLUSIVE) {
+            // -INF is the only allowed value
+            hasExplicitMax = true;
+            intervals.clear();
+            intervals.add(new DoubleInterval(1.0, 0.0));
+            return; 
+        }
+        if (doubleValue == Double.POSITIVE_INFINITY 
+                || doubleValue == Double.NEGATIVE_INFINITY) {
+            // remaining cases: impossible, set all intervals to empty
+            isBottom = true;
+            return;
+        } 
         switch (facet) {
         case MIN_INCLUSIVE: {
             for (DoubleInterval i : intervals) {
@@ -247,10 +279,10 @@ public class DatatypeRestrictionDouble
         }
         String value = constant.getValue();
         double doubleValue = Double.parseDouble(value);
-        if (doubleValue == Float.POSITIVE_INFINITY) {
+        if (doubleValue == Double.POSITIVE_INFINITY) {
             return hasExplicitMax ? false : true; 
         }
-        if (doubleValue == Float.NEGATIVE_INFINITY) {
+        if (doubleValue == Double.NEGATIVE_INFINITY) {
             return hasExplicitMin ? false : true; 
         }
         if (isNaN(doubleValue)) {
@@ -378,16 +410,24 @@ public class DatatypeRestrictionDouble
                 return (n.compareTo(new BigInteger("" + oneOf.size())) >= 0);
             }
             BigInteger rangeSize = BigInteger.ZERO;
+            // +INF
+            if (!hasExplicitMax) rangeSize = rangeSize.add(BigInteger.ONE);
+            // -INF
+            if (!hasExplicitMin) rangeSize = rangeSize.add(BigInteger.ONE);
+            // NaN
+            if (!hasExplicitMax && !hasExplicitMin) {
+                rangeSize = rangeSize.add(BigInteger.ONE);
+            }
             for (DoubleInterval i : intervals) {
                 rangeSize = rangeSize.add(i.getCardinality());
             }
-            // plus NaN, +Inf, -Inf
-            rangeSize = rangeSize.add(new BigInteger("3"));
             for (DataConstant constant : notOneOf) {
                 double not = Double.parseDouble(constant.getValue());
                 for (DoubleInterval i : intervals) {
-                    if (i.contains(not) || DatatypeRestrictionDouble.isNaN(not) 
-                            || Double.isInfinite(not)) {
+                    if (i.contains(not) 
+                            || (DatatypeRestrictionDouble.isNaN(not) && !hasExplicitMax && !hasExplicitMin) 
+                            || (Double.POSITIVE_INFINITY == not && !hasExplicitMax) 
+                            || (Double.NEGATIVE_INFINITY == not && !hasExplicitMin)) {
                         rangeSize = rangeSize.subtract(BigInteger.ONE);
                     }
                 }
@@ -418,8 +458,10 @@ public class DatatypeRestrictionDouble
         for (DataConstant constant : notOneOf) {
             double not = Double.parseDouble(constant.getValue());
             for (DoubleInterval i : intervals) {
-                if (i.contains(not) || DatatypeRestrictionDouble.isNaN(not) 
-                        || Double.isInfinite(not)) {
+                if (i.contains(not) 
+                        || (DatatypeRestrictionDouble.isNaN(not) && !hasExplicitMax && !hasExplicitMin) 
+                        || (Double.POSITIVE_INFINITY == not && !hasExplicitMax) 
+                        || (Double.NEGATIVE_INFINITY == not && !hasExplicitMin)) {
                     rangeSize = rangeSize.subtract(BigInteger.ONE);
                 }
             }

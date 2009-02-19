@@ -22,7 +22,7 @@ public class WaitForCommand extends AbstractCommand implements ICommand {
             } else if (argument.startsWith("+")) {
                 argument = argument.substring(1);
             }
-            else if ("gexists".equals(argument))
+            if ("gexists".equals(argument))
                 waitOption=WaitOption.GRAPH_EXPANSION;
             else if ("cexists".equals(argument))
                 waitOption=WaitOption.CONCRETE_EXPANSION;

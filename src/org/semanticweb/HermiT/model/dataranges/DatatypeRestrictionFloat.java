@@ -379,16 +379,24 @@ public class DatatypeRestrictionFloat
                 return (n.compareTo(new BigInteger("" + oneOf.size())) >= 0);
             }
             BigInteger rangeSize = BigInteger.ZERO;
+            // +INF
+            if (!hasExplicitMax) rangeSize = rangeSize.add(BigInteger.ONE);
+            // -INF
+            if (!hasExplicitMin) rangeSize = rangeSize.add(BigInteger.ONE);
+            // NaN
+            if (!hasExplicitMax && !hasExplicitMin) {
+                rangeSize = rangeSize.add(BigInteger.ONE);
+            }
             for (FloatInterval i : intervals) {
                 rangeSize = rangeSize.add(i.getCardinality());
             }
-            // plus NaN, +Inf, -Inf
-            rangeSize = rangeSize.add(new BigInteger("3"));
             for (DataConstant constant : notOneOf) {
                 float not = Float.parseFloat(constant.getValue());
                 for (FloatInterval i : intervals) {
-                    if (i.contains(not) || DatatypeRestrictionFloat.isNaN(not) 
-                            || Float.isInfinite(not)) {
+                    if (i.contains(not) 
+                            || (DatatypeRestrictionFloat.isNaN(not) && !hasExplicitMax && !hasExplicitMin) 
+                            || (Float.POSITIVE_INFINITY == not && !hasExplicitMax) 
+                            || (Float.NEGATIVE_INFINITY == not && !hasExplicitMin)) {
                         rangeSize = rangeSize.subtract(BigInteger.ONE);
                     }
                 }
@@ -419,8 +427,10 @@ public class DatatypeRestrictionFloat
         for (DataConstant constant : notOneOf) {
             float not = Float.parseFloat(constant.getValue());
             for (FloatInterval i : intervals) {
-                if (i.contains(not) || DatatypeRestrictionFloat.isNaN(not) 
-                        || Float.isInfinite(not)) {
+                if (i.contains(not) 
+                        || (DatatypeRestrictionFloat.isNaN(not) && !hasExplicitMax && !hasExplicitMin) 
+                        || (Float.POSITIVE_INFINITY == not && !hasExplicitMax) 
+                        || (Float.NEGATIVE_INFINITY == not && !hasExplicitMin)) {
                     rangeSize = rangeSize.subtract(BigInteger.ONE);
                 }
             }

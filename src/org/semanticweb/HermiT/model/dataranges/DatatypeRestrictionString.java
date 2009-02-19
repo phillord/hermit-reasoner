@@ -165,7 +165,8 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
             return oneOf.contains(constant);
         }
         compileAllFacetsIntoPattern();
-        return patternMatcher.run(constant.getValue());
+        return (patternMatcher == null) ? true : patternMatcher.run(constant
+                .getValue());
     }
     
     /* (non-Javadoc)
@@ -222,7 +223,7 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
             return new BigInteger("" + oneOf.size());
         }
         compileAllFacetsIntoPattern();
-        if (!patternMatcher.isFinite()) return null;
+        if (patternMatcher == null || !patternMatcher.isFinite()) return null;
         return new BigInteger("" + patternMatcher.getFiniteStrings().size());
     }
     
@@ -235,7 +236,7 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
             return sortedOneOfs.first();
         }
         compileAllFacetsIntoPattern();
-        if (!patternMatcher.isFinite()) {
+        if (patternMatcher == null || !patternMatcher.isFinite()) {
             return null;
         }
         String value = patternMatcher.getShortestExample(true);
