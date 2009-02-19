@@ -16,7 +16,7 @@ public class Timer extends TableauMonitorAdapter {
     protected PrintWriter output;
     
     public Timer() {
-        output = new PrintWriter(System.err);
+        output = new PrintWriter(System.out);
     }
 
     public Timer(PrintWriter inOutput) {
