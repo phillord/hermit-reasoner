@@ -2,8 +2,6 @@
 package org.semanticweb.HermiT.monitor;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
 import org.semanticweb.HermiT.model.AtomicConcept;
@@ -18,12 +16,9 @@ public class TableauMonitorAdapter implements TableauMonitor,Serializable  {
     private static final long serialVersionUID=6336033031431260208L;
 
     protected Tableau m_tableau;
-    protected Map<String, String> values;
     
     public TableauMonitorAdapter() {
-        values = new HashMap<String, String>();
     }
-    
     public void setTableau(Tableau tableau) {
         m_tableau=tableau;
     }
@@ -116,8 +111,5 @@ public class TableauMonitorAdapter implements TableauMonitor,Serializable  {
     public void datatypeCheckingStarted() {
     }
     public void datatypeCheckingFinished(boolean result) {
-    }
-    public void setValue(String key, String value) {
-        values.put(key, value);
     }
 }

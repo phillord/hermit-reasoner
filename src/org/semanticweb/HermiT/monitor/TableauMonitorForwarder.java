@@ -196,11 +196,6 @@ public class TableauMonitorForwarder implements TableauMonitor,Serializable {
         if (m_forwardingOn)
             m_forwardingTargetMonitor.nodeDestroyed(node);
     }
-    public void setValue(String key, String value) {
-        if (m_forwardingOn) {
-            m_forwardingTargetMonitor.setValue(key, value);
-        }
-    }
     public void datatypeCheckingStarted() {
         if (m_forwardingOn)
             m_forwardingTargetMonitor.datatypeCheckingStarted();

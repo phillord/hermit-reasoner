@@ -1,10 +1,10 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.monitor;
 
+import java.io.PrintWriter;
+
 import org.semanticweb.HermiT.model.*;
 import org.semanticweb.HermiT.tableau.*;
-import java.io.PrintWriter;
-import java.util.Map;
 
 public class Timer extends TableauMonitorAdapter {
     private static final long serialVersionUID=-8144444618897251350L;
@@ -12,7 +12,6 @@ public class Timer extends TableauMonitorAdapter {
     protected long m_problemStartTime;
     protected long m_lastStatusTime;
     protected int m_numberOfBacktrackings;
-    protected int numTrivialExistentials;
     
     protected PrintWriter output;
     
@@ -66,11 +65,6 @@ public class Timer extends TableauMonitorAdapter {
     public void backtrackToFinished(BranchingPoint newCurrentBrancingPoint) {
         m_numberOfBacktrackings++;
     }
-    public void existentialSatisfied(ExistentialConcept existentialConcept,
-                                     Node forNode) {
-        ++numTrivialExistentials;
-    }
-    
     protected void doStatistics() {
         long duartionSoFar=System.currentTimeMillis()-m_problemStartTime;
         output.print(duartionSoFar);
@@ -103,14 +97,7 @@ public class Timer extends TableauMonitorAdapter {
         output.print("kb    Atomic role factory size: ");
         output.print(m_tableau.getLabelManager().sizeInMemoryAtomicRoleSetFactory()/1000);
         output.println("kb");
-
-        output.print("    Trivial existentials:   ");
-        output.print(numTrivialExistentials);
-        for (Map.Entry<String, String> e : values.entrySet()) {
-            output.print("    " + e.getKey() + ":" + e.getValue());
-        }
         output.println();
-        
         output.flush();
     }
 }

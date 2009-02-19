@@ -206,8 +206,4 @@ public class TableauMonitorFork implements TableauMonitor,Serializable  {
         m_first.datatypeCheckingFinished(result);
         m_second.datatypeCheckingFinished(result);
     }
-    public void setValue(String key, String value) {
-        m_first.setValue(key, value);
-        m_second.setValue(key, value);
-    }
 }

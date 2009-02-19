@@ -55,7 +55,6 @@ public interface TableauMonitor {
     void nominalIntorductionFinished(Node rootNode,Node treeNode,AtMostAbstractRoleGuard atMostRoleGuard);
     void nodeCreated(Node node);
     void nodeDestroyed(Node node);
-    void setValue(String key, String value);
     void datatypeCheckingStarted();
     void datatypeCheckingFinished(boolean result);
 }
