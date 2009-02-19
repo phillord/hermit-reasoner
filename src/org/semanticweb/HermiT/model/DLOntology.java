@@ -50,13 +50,9 @@ public class DLOntology implements Serializable {
     protected final Set<AtomicConcept> m_allAtomicConcepts;
     protected final Set<Individual> m_allIndividuals;
     protected final Set<DescriptionGraph> m_allDescriptionGraphs;
-    public final Map<AtomicRole, HierarchyPosition<AtomicRole>> explicitRoleHierarchy;
-    protected int m_numExternalConcepts;
+    protected final int m_numberOfExternalConcepts;
+    protected final Map<AtomicRole, HierarchyPosition<AtomicRole>> m_explicitRoleHierarchy;
     
-    public int numExternalConcepts() {
-        return m_numExternalConcepts;
-    }
-
     public DLOntology(String ontologyURI,
             Set<DLClause> dlClauses,
             Set<Atom> positiveFacts, Set<Atom> negativeFacts,
@@ -82,12 +78,13 @@ public class DLOntology implements Serializable {
         } else {
             m_allAtomicConcepts = atomicConcepts;
         }
-        m_numExternalConcepts = 0;
+        int numberOfExternalConcepts = 0;
         for (AtomicConcept c : m_allAtomicConcepts) {
             if (!InternalNames.isInternalUri(c.getURI())) {
-                ++m_numExternalConcepts;
+                numberOfExternalConcepts++;
             }
         }
+        m_numberOfExternalConcepts = numberOfExternalConcepts;
         if (individuals == null) {
             m_allIndividuals = new TreeSet<Individual>(
                 IndividualComparator.INSTANCE);
@@ -96,10 +93,10 @@ public class DLOntology implements Serializable {
         }
         m_allDescriptionGraphs = new HashSet<DescriptionGraph>();
         if (explicitRoleHierarchy == null) {
-            this.explicitRoleHierarchy
+            this.m_explicitRoleHierarchy
                 = new HashMap<AtomicRole, HierarchyPosition<AtomicRole>>();
         } else {
-            this.explicitRoleHierarchy = explicitRoleHierarchy;
+            this.m_explicitRoleHierarchy = explicitRoleHierarchy;
         }
         boolean isHorn = true;
         for (DLClause dlClause : m_dlClauses) {
@@ -150,6 +147,10 @@ public class DLOntology implements Serializable {
         return m_allAtomicConcepts;
     }
 
+    public int getNumberOfExternalConcepts() {
+        return m_numberOfExternalConcepts;
+    }
+
     public Set<Individual> getAllIndividuals() {
         return m_allIndividuals;
     }
@@ -158,6 +159,10 @@ public class DLOntology implements Serializable {
         return m_allDescriptionGraphs;
     }
 
+    public Map<AtomicRole, HierarchyPosition<AtomicRole>> getExplicitRoleHierarchy() {
+        return m_explicitRoleHierarchy;
+    }
+    
     public Set<DLClause> getDLClauses() {
         return m_dlClauses;
     }

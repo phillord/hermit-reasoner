@@ -352,9 +352,8 @@ public class Reasoner implements Serializable {
     //     }
     // }
     
-    protected Map<AtomicRole, HierarchyPosition<AtomicRole>>
-        getAtomicRoleHierarchy() {
-        return m_dlOntology.explicitRoleHierarchy;
+    protected Map<AtomicRole, HierarchyPosition<AtomicRole>> getAtomicRoleHierarchy() {
+        return m_dlOntology.getExplicitRoleHierarchy();
     }
     
     protected HierarchyPosition<AtomicRole> getPosition(AtomicRole r) {
@@ -407,8 +406,8 @@ public class Reasoner implements Serializable {
             new RoleToOWLDataProperty(clausifier.factory));
     }
     
-    public int numConceptNames() {
-        return m_dlOntology.numExternalConcepts();
+    public int getNumberOfConcepts() {
+        return m_dlOntology.getNumberOfExternalConcepts();
     }
     
     protected Map<AtomicConcept, HierarchyPosition<AtomicConcept>>

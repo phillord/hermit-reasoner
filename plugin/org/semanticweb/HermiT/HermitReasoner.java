@@ -76,7 +76,7 @@ public class HermitReasoner implements MonitorableOWLReasoner {
     // ReasonerBase implementation:
     public void classify() {
         try {
-            monitor.beginTask("Classifying...", hermit.numConceptNames());
+            monitor.beginTask("Classifying...", hermit.getNumberOfConcepts());
             // System.out.println("Seeding subsumption cache...");
             hermit.seedSubsumptionCache();
 //            if (!hermit.isConsistent()) {
