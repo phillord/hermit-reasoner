@@ -6,16 +6,17 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Comparator;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Collection;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
@@ -104,7 +105,6 @@ import org.semanticweb.owl.model.OWLOntologyManager;
 import org.semanticweb.owl.model.OWLSameIndividualsAxiom;
 import org.semanticweb.owl.model.OWLTypedConstant;
 import org.semanticweb.owl.model.OWLUntypedConstant;
-import org.semanticweb.owl.util.OWLOntologyMerger;
 import org.semanticweb.owl.vocab.OWLRestrictedDataRangeFacetVocabulary;
 
 import dk.brics.automaton.Datatypes;
@@ -127,59 +127,11 @@ public class OwlClausification implements Serializable {
     }
     
     public DLOntology clausify(
-            URI physicalURI,
-            Collection<DescriptionGraph> descriptionGraphs) throws OWLException {
-        
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        // the manager loads this ontology and all the imported ones, 
-        // but keeps them as a set of separated ontologies
-        manager.loadOntologyFromPhysicalURI(physicalURI); 
-        // merge all imported axioms into the main ontology
-        OWLOntology ontology = 
-                new OWLOntologyMerger(manager).createMergedOntology(
-                        manager, physicalURI);
-        normalization.processOntology(config, ontology);
-        
-        return clausify(ontology.getURI().toString(),
-                normalization.getConceptInclusions(),
-                normalization.getObjectPropertyInclusions(),
-                normalization.getDataPropertyInclusions(),
-                normalization.getAsymmetricObjectProperties(),
-                normalization.getReflexiveObjectProperties(),
-                normalization.getIrreflexiveObjectProperties(),
-                normalization.getTransitiveObjectProperties(),
-                normalization.getDisjointObjectProperties(),
-                normalization.getDisjointDataProperties(),
-                normalization.getHasKeys(),
-                normalization.getFacts(), descriptionGraphs,
-                ontology.getReferencedClasses(),
-                ontology.getReferencedIndividuals(),
-                ontology.getReferencedDataProperties(),
-                ontology.getReferencedObjectProperties());
-    }
-    
-    public DLOntology clausify(
+            OWLOntologyManager ontologyManager,
             OWLOntology ontology,
             Collection<DescriptionGraph> descriptionGraphs) throws OWLException {
-
-        normalization.processOntology(config, ontology);
-        
-        return clausify(ontology.getURI().toString(),
-                normalization.getConceptInclusions(),
-                normalization.getObjectPropertyInclusions(),
-                normalization.getDataPropertyInclusions(),
-                normalization.getAsymmetricObjectProperties(),
-                normalization.getReflexiveObjectProperties(),
-                normalization.getIrreflexiveObjectProperties(),
-                normalization.getTransitiveObjectProperties(),
-                normalization.getDisjointObjectProperties(),
-                normalization.getDisjointDataProperties(),
-                normalization.getHasKeys(),
-                normalization.getFacts(), descriptionGraphs,
-                ontology.getReferencedClasses(),
-                ontology.getReferencedIndividuals(),
-                ontology.getReferencedDataProperties(),
-                ontology.getReferencedObjectProperties());
+        Set<OWLHasKeyDummy> noKeys = Collections.emptySet();
+        return clausifyWithKeys(ontologyManager, ontology, descriptionGraphs, noKeys);
     }
     
     /**
@@ -193,11 +145,22 @@ public class OwlClausification implements Serializable {
      * @throws OWLException
      */
     public DLOntology clausifyWithKeys(
+            OWLOntologyManager ontologyManager,
             OWLOntology ontology,
             Collection<DescriptionGraph> descriptionGraphs, 
             Set<OWLHasKeyDummy> keys) throws OWLException {
         
-        normalization.processOntology(config, ontology);
+        Set<OWLOntology> processedOntologies = new HashSet<OWLOntology>();
+        List<OWLOntology> toProcess = new ArrayList<OWLOntology>();
+        toProcess.add(ontology);
+        while (!toProcess.isEmpty()) {
+            OWLOntology anOntology = toProcess.remove(toProcess.size() - 1);
+            processedOntologies.add(anOntology);
+            for (OWLOntology importedOntology : anOntology.getImports(ontologyManager))
+                if (!processedOntologies.contains(importedOntology))
+                    toProcess.add(importedOntology);
+            normalization.processOntology(config, anOntology);
+        }
         normalization.processKeys(config, keys);
         
         return clausify(ontology.getURI().toString(),

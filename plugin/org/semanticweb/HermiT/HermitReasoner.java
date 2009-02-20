@@ -155,7 +155,7 @@ public class HermitReasoner implements MonitorableOWLReasoner {
             try {
                 monitor.beginTask("Loading...");
                 // System.out.println("Loading ontology into HermiT...");
-                hermit = new Reasoner(ontology, config);
+                hermit = new Reasoner(config, manager, ontology);
                 // System.out.println("...done");
             } catch (PluginMonitor.Cancelled e) {
                 // ignore; if we pass it on the user gets a dialog

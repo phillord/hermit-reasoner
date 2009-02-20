@@ -335,34 +335,7 @@ public final class Tableau implements Serializable {
         m_extensionManager.addRoleAssertion(role, b, a, dependencySet);
         return !isSatisfiable();
     }
-    
-    
-    // public boolean isSubsumedBy(Role subRole, Role superRole) {
-    // if (m_tableauMonitor!=null) {
-    // m_tableauMonitor.isSubsumedByStarted(subRole,superRole);
-    // }
-    // clear();
-    // if (m_dlOntology.hasNominals()) {
-    // loadDLOntologyABox();
-    // }
-    // m_checkedNode =
-    // createNewRootNode(m_dependencySetFactory.emptySet(), 0);
-    // Node otherNode =
-    // createNewRootNode(m_dependencySetFactory.emptySet(), 0);
-    // m_extensionManager.addRoleAssertion(subRole,
-    // m_checkedNode, otherNode, m_dependencySetFactory.emptySet());
-    // m_branchingPoints[0] = new BranchingPoint(this);
-    // m_currentBranchingPoint++;
-    // m_nonbacktrackableBranchingPoint = m_currentBranchingPoint;
-    // DependencySet dependencySet =
-    // m_dependencySetFactory.addBranchingPoint
-    // (m_dependencySetFactory.emptySet(), m_currentBranchingPoint);
-    // m_extensionManager.addConceptAssertion(AtomicNegationConcept.create(superconcept),m_checkedNode,dependencySet);
-    // boolean result=!isSatisfiable();
-    // if (m_tableauMonitor!=null)
-    // m_tableauMonitor.isSubsumedByFinished(subconcept,superconcept,result);
-    // return result;
-    // }
+
     public boolean isABoxSatisfiable() {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isABoxSatisfiableStarted();

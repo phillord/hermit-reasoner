@@ -63,6 +63,7 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
                 false, // hasReflexivity
                 false); // hasDatatypes
     }
+    protected OWLOntologyManager m_ontologyManager;
     protected OWLOntology m_ontology;
 
     public AbstractOWLOntologyTest(String name) {
@@ -70,11 +71,12 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
     }
 
     protected void setUp() throws Exception {
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        m_ontology = manager.createOntology(URI.create("file:/c:/test/ontology.owl"));
+        m_ontologyManager = OWLManager.createOWLOntologyManager();
+        m_ontology = m_ontologyManager.createOntology(URI.create("file:/c:/test/ontology.owl"));
     }
 
     protected void tearDown() {
+        m_ontologyManager = null;
         m_ontology = null;
     }
 
@@ -83,15 +85,12 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
      * 
      * @param physicalURI
      *            the physical location of the ontology
-     * @return the ontology as an OWLAPI ontology object (not simplified,
-     *         normalised or clausified)
      * @throws Exception
      */
-    protected OWLOntology getOWLOntology(String physicalURI) throws Exception {
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+    protected void loadOWLOntology(String physicalURI) throws Exception {
+        m_ontologyManager = OWLManager.createOWLOntologyManager();
         URI uri = URI.create(physicalURI);
-        OWLOntology ontology = manager.loadOntologyFromPhysicalURI(uri);
-        return ontology;
+        m_ontology = m_ontologyManager.loadOntologyFromPhysicalURI(uri);
     }
 
     /**
@@ -99,13 +98,34 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
      * 
      * @param resourceName
      *            the relative location of the ontology
-     * @return the ontology as an OWLAPI ontology object (not simplified,
-     *         normalised or clausified)
      * @throws Exception
      */
-    protected OWLOntology getOWLOntologyFromResource(String resourceName)
-            throws Exception {
-        return getOWLOntology(getClass().getResource(resourceName).toString());
+    protected void loadOWLOntologyFromResource(String resourceName) throws Exception {
+        loadOWLOntology(getClass().getResource(resourceName).toString());
+    }
+
+    /**
+     * loads an OWL ontology that contains the given axioms
+     * 
+     * @param axioms in functional style syntax
+     * @throws InterruptedException
+     * @throws OWLException
+     */
+    protected void loadOWLOntologyWithAxioms(String axioms) throws OWLException, InterruptedException {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("Namespace(=<file:/c/test.owl#>)");
+        buffer.append("Namespace(rdfs=<http://www.w3.org/2000/01/rdf-schema#>)");
+        buffer.append("Namespace(owl2xml=<http://www.w3.org/2006/12/owl2-xml#>)");
+        buffer.append("Namespace(test=<file:/c/test.owl#>)");
+        buffer.append("Namespace(owl=<http://www.w3.org/2002/07/owl#>)");
+        buffer.append("Namespace(xsd=<http://www.w3.org/2001/XMLSchema#>)");
+        buffer.append("Namespace(rdf=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)");
+        buffer.append("Ontology(<file:/c/test.owl>");
+        buffer.append(axioms);
+        buffer.append(")");
+        m_ontologyManager = OWLManager.createOWLOntologyManager();
+        OWLOntologyInputSource input = new StringInputSource(buffer.toString());
+        m_ontology = m_ontologyManager.loadOntology(input);
     }
 
     /**
@@ -115,7 +135,7 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
     protected DLOntology getDLOntology() throws Exception {
         OwlClausification clausifier = new OwlClausification(new Reasoner.Configuration());
         Set<DescriptionGraph> noDescriptionGraphs = Collections.emptySet();
-        return clausifier.clausify(m_ontology, noDescriptionGraphs);
+        return clausifier.clausify(m_ontologyManager, m_ontology, noDescriptionGraphs);
     }
 
     protected Tableau getTableau() throws Exception {
@@ -129,33 +149,6 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
                 blockingStrategy);
         return new Tableau(null, ExpansionStrategy, dlOntology, false,
                 new HashMap<String, Object>());
-    }
-
-    /**
-     * loads an ontology from a relative path via the OWL API
-     * 
-     * @param resourceName
-     *            the resouce to load
-     * @return the set of axioms from the loaded ontology
-     * @throws Exception
-     */
-    protected Set<OWLAxiom> getOWLAxiomsFromResource(String resourceName)
-            throws Exception {
-        return getOWLOntologyFromResource(resourceName).getAxioms();
-    }
-
-    /**
-     * Loads an ontology via the OWL API so that it is available for the custom
-     * assert methods.
-     * 
-     * @param resource
-     *            the resource to load
-     * @throws Exception
-     *             if the resource cannot be found or an error occurred when
-     *             loading the ontology
-     */
-    protected void loadResource(String resource) throws Exception {
-        m_ontology = getOWLOntologyFromResource(resource);
     }
 
     /**
@@ -378,30 +371,5 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
             System.out.flush();
             throw e;
         }
-    }
-    /**
-     * creates and loads an OWL ontology that contains the given axioms
-     * 
-     * @param axioms
-     *            in functional style syntax
-     * @throws InterruptedException
-     * @throws OWLException
-     */
-    protected OWLOntology getOWLOntologyWithAxioms(String axioms) throws OWLException,
-            InterruptedException {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("Namespace(=<file:/c/test.owl#>)");
-        buffer.append("Namespace(rdfs=<http://www.w3.org/2000/01/rdf-schema#>)");
-        buffer.append("Namespace(owl2xml=<http://www.w3.org/2006/12/owl2-xml#>)");
-        buffer.append("Namespace(test=<file:/c/test.owl#>)");
-        buffer.append("Namespace(owl=<http://www.w3.org/2002/07/owl#>)");
-        buffer.append("Namespace(xsd=<http://www.w3.org/2001/XMLSchema#>)");
-        buffer.append("Namespace(rdf=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)");
-        buffer.append("Ontology(<file:/c/test.owl>");
-        buffer.append(axioms);
-        buffer.append(")");
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        OWLOntologyInputSource input = new StringInputSource(buffer.toString());
-        return m_ontology = manager.loadOntology(input);
     }
 }

@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.CharArrayWriter;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -29,13 +30,12 @@ public abstract class AbstractReasonerTest extends TestCase {
     protected static final Node[][] NO_TUPLES=new Node[0][];
     protected static final DLOntology EMPTY_DL_ONTOLOGY;
     static {
-        Set<DLClause> dlClauses = Collections.emptySet();
-        Set<Atom> atoms = Collections.emptySet();
-        EMPTY_DL_ONTOLOGY = new DLOntology(
-                "opaque:test", // ontology_URI
+        Set<DLClause> dlClauses=Collections.emptySet();
+        Set<Atom> atoms=Collections.emptySet();
+        EMPTY_DL_ONTOLOGY=new DLOntology("opaque:test", // ontology_URI
                 dlClauses, // clauses
                 atoms, // positive facts
-                atoms, // negative facts 
+                atoms, // negative facts
                 null, // atomic concepts
                 null, // individuals
                 null, // role hierarchy
@@ -46,11 +46,22 @@ public abstract class AbstractReasonerTest extends TestCase {
                 false, // hasReflexivity
                 false); // hasDatatypes
     }
+    protected OWLOntologyManager m_ontologyManager;
     protected OWLOntology m_ontology;
-    protected Reasoner hermit;
+    protected Reasoner m_reasoner;
 
     public AbstractReasonerTest(String name) {
         super(name);
+    }
+
+    protected void setUp() throws Exception {
+        m_ontologyManager=OWLManager.createOWLOntologyManager();
+        m_ontology=m_ontologyManager.createOntology(URI.create("file:/c:/test/ontology.owl"));
+    }
+
+    protected void tearDown() {
+        m_ontologyManager=null;
+        m_ontology=null;
     }
 
     /**
@@ -61,12 +72,12 @@ public abstract class AbstractReasonerTest extends TestCase {
      * @throws Exception
      *             if the resource cannot be found or an error occurred when loading the ontology
      */
-    protected void loadOntologyFromResource(String resourceName, Reasoner.Configuration configuration) throws Exception {
-        if (configuration == null) {
+    protected void loadOntologyFromResource(String resourceName,Reasoner.Configuration configuration) throws Exception {
+        if (configuration==null) {
             configuration=new Reasoner.Configuration();
             configuration.subsumptionCacheStrategyType=Reasoner.SubsumptionCacheStrategyType.ON_REQUEST;
         }
-        hermit=new Reasoner(getClass().getResource(resourceName).toURI(),configuration);
+        m_reasoner=new Reasoner(configuration,getClass().getResource(resourceName).toURI());
     }
 
     /**
@@ -77,8 +88,7 @@ public abstract class AbstractReasonerTest extends TestCase {
      * @throws InterruptedException
      * @throws OWLException
      */
-    protected void loadOntologyWithAxioms(String axioms, 
-            Reasoner.Configuration configuration) throws OWLException,InterruptedException {
+    protected void loadOntologyWithAxioms(String axioms,Reasoner.Configuration configuration) throws OWLException,InterruptedException {
         StringBuffer buffer=new StringBuffer();
         buffer.append("Namespace(=<file:/c/test.owl#>)");
         buffer.append("Namespace(rdfs=<http://www.w3.org/2000/01/rdf-schema#>)");
@@ -90,14 +100,14 @@ public abstract class AbstractReasonerTest extends TestCase {
         buffer.append("Ontology(<file:/c/test.owl>");
         buffer.append(axioms);
         buffer.append(")");
-        OWLOntologyManager manager=OWLManager.createOWLOntologyManager();
+        m_ontologyManager=OWLManager.createOWLOntologyManager();
         OWLOntologyInputSource input=new StringInputSource(buffer.toString());
-        m_ontology=manager.loadOntology(input);
-        if (configuration == null) {
-            configuration = new Reasoner.Configuration();
-            configuration.subsumptionCacheStrategyType = Reasoner.SubsumptionCacheStrategyType.ON_REQUEST;
+        m_ontology=m_ontologyManager.loadOntology(input);
+        if (configuration==null) {
+            configuration=new Reasoner.Configuration();
+            configuration.subsumptionCacheStrategyType=Reasoner.SubsumptionCacheStrategyType.ON_REQUEST;
         }
-        hermit=new Reasoner(m_ontology, configuration);
+        m_reasoner=new Reasoner(configuration,m_ontologyManager,m_ontology);
     }
 
     /**
@@ -108,10 +118,7 @@ public abstract class AbstractReasonerTest extends TestCase {
      * @throws InterruptedException
      * @throws OWLException
      */
-    protected void loadOntologyWithAxiomsAndKeys(
-            String axioms, 
-            Reasoner.Configuration configuration, 
-            Set<OWLHasKeyDummy> keys) throws OWLException,InterruptedException {
+    protected void loadOntologyWithAxiomsAndKeys(String axioms,Reasoner.Configuration configuration,Set<OWLHasKeyDummy> keys) throws OWLException,InterruptedException {
         StringBuffer buffer=new StringBuffer();
         buffer.append("Namespace(=<file:/c/test.owl#>)");
         buffer.append("Namespace(rdfs=<http://www.w3.org/2000/01/rdf-schema#>)");
@@ -123,16 +130,16 @@ public abstract class AbstractReasonerTest extends TestCase {
         buffer.append("Ontology(<file:/c/test.owl>");
         buffer.append(axioms);
         buffer.append(")");
-        OWLOntologyManager manager=OWLManager.createOWLOntologyManager();
+        m_ontologyManager=OWLManager.createOWLOntologyManager();
         OWLOntologyInputSource input=new StringInputSource(buffer.toString());
-        m_ontology=manager.loadOntology(input);
-        if (configuration == null) {
-            configuration = new Reasoner.Configuration();
-            configuration.subsumptionCacheStrategyType = Reasoner.SubsumptionCacheStrategyType.ON_REQUEST;
+        m_ontology=m_ontologyManager.loadOntology(input);
+        if (configuration==null) {
+            configuration=new Reasoner.Configuration();
+            configuration.subsumptionCacheStrategyType=Reasoner.SubsumptionCacheStrategyType.ON_REQUEST;
         }
-        hermit=new Reasoner(m_ontology, configuration, null, keys);
+        m_reasoner=new Reasoner(configuration,m_ontologyManager,m_ontology,null,keys);
     }
-    
+
     /**
      * @param resourceName
      * @return each line from the loaded resource becomes a string in the returned array
@@ -183,7 +190,7 @@ public abstract class AbstractReasonerTest extends TestCase {
      * @throws Exception
      */
     protected String getSubsumptionHierarchyAsText() throws Exception {
-        Map<String,HierarchyPosition<String>> taxonomy=hermit.getClassTaxonomy();
+        Map<String,HierarchyPosition<String>> taxonomy=m_reasoner.getClassTaxonomy();
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter output=new PrintWriter(buffer);
         Reasoner.printSortedAncestorLists(output,taxonomy);
@@ -191,14 +198,14 @@ public abstract class AbstractReasonerTest extends TestCase {
     }
 
     protected void assertSubsumptionHierarchy(String ontologyResource,String controlResource) throws Exception {
-        loadOntologyFromResource(ontologyResource, null);
+        loadOntologyFromResource(ontologyResource,null);
         String taxonomy=getSubsumptionHierarchyAsText();
         String controlString=getResourceText(controlResource);
         assertEquals(taxonomy,controlString);
     }
 
     protected void assertABoxSatisfiable(boolean satisfiable) throws Exception {
-        assertEquals(satisfiable,hermit.isConsistent());
+        assertEquals(satisfiable,m_reasoner.isConsistent());
     }
 
     protected void assertSubsumedBy(String subAtomicConcept,String superAtomicConcept,boolean expectedResult) throws Exception {
@@ -206,11 +213,11 @@ public abstract class AbstractReasonerTest extends TestCase {
             subAtomicConcept="file:/c/test.owl#"+subAtomicConcept;
         if (!superAtomicConcept.contains("#"))
             superAtomicConcept="file:/c/test.owl#"+superAtomicConcept;
-        boolean result=hermit.isClassSubsumedBy(subAtomicConcept,superAtomicConcept);
+        boolean result=m_reasoner.isClassSubsumedBy(subAtomicConcept,superAtomicConcept);
         assertEquals(expectedResult,result);
     }
 
     protected void assertSatisfiable(String atomicConcept,boolean satisfiable) throws Exception {
-        assertEquals(satisfiable,hermit.isClassSatisfiable("file:/c/test.owl#"+atomicConcept));
+        assertEquals(satisfiable,m_reasoner.isClassSatisfiable("file:/c/test.owl#"+atomicConcept));
     }
 }

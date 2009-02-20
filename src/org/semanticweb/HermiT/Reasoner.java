@@ -75,6 +75,8 @@ import org.semanticweb.HermiT.util.TranslatedMap;
 import org.semanticweb.HermiT.util.TranslatedSet;
 import org.semanticweb.HermiT.util.Translator;
 import org.semanticweb.HermiT.util.GraphUtils;
+import org.semanticweb.owl.apibinding.OWLManager;
+import org.semanticweb.owl.model.OWLOntologyManager;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLDataProperty;
@@ -198,60 +200,43 @@ public class Reasoner implements Serializable {
     private Tableau m_tableau; // never null
     private TableauSubsumptionChecker m_subsumptionChecker; // never null
     private Classifier<AtomicConcept> classifier;
-    private Map<AtomicConcept, HierarchyPosition<AtomicConcept>>
-        atomicConceptHierarchy; // may be null; use getAtomicConceptHierarchy
+    private Map<AtomicConcept, HierarchyPosition<AtomicConcept>> atomicConceptHierarchy; // may be null; use getAtomicConceptHierarchy
     private Map<AtomicConcept, Set<Individual>> realization;
-        // may be null; use getRealization
-    // private SubsumptionHierarchy oldHierarchy;
-    //     // only null when atomicConceptHierarchy is
     
     private transient OwlClausification clausifier; // null if loaded through KAON2
     
-    public Reasoner(String ontologyURI) throws IllegalArgumentException,
-            LoadingException, OWLException {
-        m_config = new Configuration();
-        loadOntology(URI.create(ontologyURI));
+    public Reasoner(String ontologyURI) throws IllegalArgumentException, LoadingException, OWLException {
+        this(new Configuration(), URI.create(ontologyURI));
     }
     
-    public Reasoner(java.net.URI ontologyURI) throws IllegalArgumentException,
-            LoadingException, OWLException {
-        m_config = new Configuration();
-        loadOntology(ontologyURI);
+    public Reasoner(java.net.URI ontologyURI) throws IllegalArgumentException, LoadingException, OWLException {
+        this(new Configuration(), ontologyURI);
     }
     
-    public Reasoner(java.net.URI ontologyURI, Configuration config)
-            throws IllegalArgumentException, LoadingException, OWLException {
-        m_config = config;
-        loadOntology(ontologyURI);
-    }
-    
-    public Reasoner(OWLOntology ontology, Configuration config)
-            throws OWLException {
-        m_config = config;
-        loadOwlOntology(ontology, (Set<DescriptionGraph>) null);
+    public Reasoner(Configuration config, java.net.URI ontologyURI) throws IllegalArgumentException, LoadingException, OWLException {
+        this(config, ontologyURI, (Set<DescriptionGraph>) null, (Set<OWLHasKeyDummy>) null);
     }
 
-    public Reasoner(OWLOntology ontology, Configuration config,
-                  Set<DescriptionGraph> graphs)
-        throws OWLException {
+    public Reasoner(Configuration config, java.net.URI ontologyURI, Set<DescriptionGraph> descriptionGraphs, Set<OWLHasKeyDummy> keys) throws IllegalArgumentException, LoadingException, OWLException {
         m_config = config;
-        loadOwlOntology(ontology, graphs);
+        loadOntology(ontologyURI, descriptionGraphs,keys);
     }
-    
+
+    public Reasoner(Configuration config, OWLOntologyManager ontologyManger, OWLOntology ontology) throws OWLException {
+        this(config, ontologyManger, ontology, (Set<DescriptionGraph>) null, (Set<OWLHasKeyDummy>) null);
+    }
+
     /**
      * TEST PURPOSES ONLY, till the OWL API supports keys. 
      * @param ontology an OWL API loaded ontology
      * @param config a reasoner configuration
-     * @param graphs description grphs
+     * @param descriptionGraphs description graphs
      * @param keys some hasKey axioms (OWLHasKeyDummy instances)
      * @throws OWLException
      */
-    public Reasoner(OWLOntology ontology, 
-            Configuration config,
-            Set<DescriptionGraph> graphs, 
-            Set<OWLHasKeyDummy> keys) throws OWLException {
+    public Reasoner(Configuration config, OWLOntologyManager ontologyManger, OWLOntology ontology, Set<DescriptionGraph> descriptionGraphs, Set<OWLHasKeyDummy> keys) throws OWLException {
           m_config = config;
-          loadOwlOntology(ontology, graphs, keys);
+          loadOwlOntology(ontologyManger, ontology, descriptionGraphs, keys);
     }
 
     public DLOntology getDLOntology() {
@@ -263,7 +248,7 @@ public class Reasoner implements Serializable {
     }
     
     /**
-     * Return `true` iff `classUri` occured in the loaded knowledge base.
+     * Return `true` iff `classUri` occurred in the loaded knowledge base.
      */
     public boolean isClassNameDefined(String classUri) {
         return m_dlOntology.getAllAtomicConcepts()
@@ -283,15 +268,13 @@ public class Reasoner implements Serializable {
      * consistent.
      */
     public boolean isClassSatisfiable(String classUri) {
-        // In an inconsistent ontology, HermiT considers all classes as 
-        // unsatisfiable. 
+        // In an inconsistent ontology, HermiT considers all classes as  unsatisfiable. 
         if (!m_tableau.isABoxSatisfiable()) return false;
         return isSatisfiable(AtomicConcept.create(classUri));
     }
     
     public boolean isClassSatisfiable(OWLDescription desc) {
-        // In an inconsistent ontology, HermiT considers all classes as 
-        // unsatisfiable. 
+        // In an inconsistent ontology, HermiT considers all classes as unsatisfiable. 
         if (!m_tableau.isABoxSatisfiable()) return false;
         return isSatisfiable(define(desc));
     }
@@ -320,16 +303,13 @@ public class Reasoner implements Serializable {
 
     protected boolean isSubsumedBy(AtomicConcept child,
                                     AtomicConcept parent) {
-        // For an inconsistent ontology, HermiT answers true for all 
-        // subsumptions. 
+        // For an inconsistent ontology, HermiT answers true for all subsumptions. 
         if (!m_tableau.isABoxSatisfiable()) return true;
         return m_subsumptionChecker.isSubsumedBy(child, parent);
     }
 
-    public boolean isClassSubsumedBy(String childName,
-                                     String parentName) {
-        // For an inconsistent ontology, HermiT answers true for all 
-        // subsumptions. 
+    public boolean isClassSubsumedBy(String childName, String parentName) {
+        // For an inconsistent ontology, HermiT answers true for all subsumptions. 
         if (!m_tableau.isABoxSatisfiable()) return true;
         return isSubsumedBy(
             AtomicConcept.create(childName), AtomicConcept.create(parentName)
@@ -337,20 +317,10 @@ public class Reasoner implements Serializable {
     }
     
     public boolean isSubsumedBy(OWLDescription child, OWLDescription parent) {
-        // For an inconsistent ontology, HermiT answers true for all 
-        // subsumptions. 
+        // For an inconsistent ontology, HermiT answers true for all subsumptions. 
         if (!m_tableau.isABoxSatisfiable()) return true;
         return isSubsumedBy(define(child), define(parent));
     }
-    
-    // public SubsumptionHierarchy getSubsumptionHierarchy() {
-    //     try {
-    //         return new SubsumptionHierarchy(m_subsumptionChecker);
-    //     } catch (SubsumptionHierarchy.SubusmptionCheckerException e) {
-    //         throw new RuntimeException(
-    //             "Unable to compute subsumption hierarchy.", e);
-    //     }
-    // }
     
     protected Map<AtomicRole, HierarchyPosition<AtomicRole>> getAtomicRoleHierarchy() {
         return m_dlOntology.getExplicitRoleHierarchy();
@@ -487,8 +457,8 @@ public class Reasoner implements Serializable {
                 clausifier.define(desc, clauses, positiveFacts, negativeFacts);
             m_tableau.extendWithDefinitions(clauses, positiveFacts, negativeFacts);
             return c;
-        } else {
-            // System.out.println("getting atom for " + desc.asOWLClass().toString());
+        }
+        else {
             return AtomicConcept.create(desc.asOWLClass().getURI().toString());
         }
     }
@@ -758,16 +728,10 @@ public class Reasoner implements Serializable {
         }
     }
 
-    protected void loadOntology(URI physicalURI)
-            throws IllegalArgumentException, LoadingException, OWLException {
-        loadOntology(physicalURI, null);
-    }
-    
-    protected void loadOntology(URI physicalURI,
-            Set<DescriptionGraph> descriptionGraphs)
-            throws IllegalArgumentException, LoadingException, OWLException {
+    protected void loadOntology(URI physicalURI, Set<DescriptionGraph> descriptionGraphs, Set<OWLHasKeyDummy> keys) throws IllegalArgumentException, LoadingException, OWLException {
         switch (m_config.parserType) {
-            case KAON2: {
+        case KAON2:
+            {
                 Clausifier clausifier = null;
                 try {
                     clausifier = (Clausifier)
@@ -784,31 +748,18 @@ public class Reasoner implements Serializable {
                     throw new RuntimeException("Unable to load KAON2 library", e);
                 }
                 loadDLOntology(clausifier.loadFromURI(physicalURI, null));
-            } break;
-            case OWLAPI: {
-                if (descriptionGraphs == null) {
-                    descriptionGraphs = Collections.emptySet();
-                }
-                clausifier = new OwlClausification(m_config);
-                DLOntology d = clausifier.clausify(physicalURI, descriptionGraphs);
-                loadDLOntology(d);
-                
-            } break;
-            default:
-                throw new IllegalArgumentException(
-                    "unknown parser library requested");
+            }
+            break;
+        case OWLAPI:
+            {
+                OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
+                OWLOntology ontology = ontologyManager.loadOntologyFromPhysicalURI(physicalURI); 
+                loadOwlOntology(ontologyManager, ontology, descriptionGraphs,keys);
+            }
+            break;
+        default:
+            throw new IllegalArgumentException("unknown parser library requested");
         }
-    }
-    
-    protected void loadOwlOntology(OWLOntology ontology,
-                                   Set<DescriptionGraph> descriptionGraphs)
-        throws OWLException {
-        if (descriptionGraphs == null) {
-            descriptionGraphs = Collections.emptySet();
-        }
-        clausifier = new OwlClausification(m_config);
-        DLOntology d = clausifier.clausify(ontology, descriptionGraphs);
-        loadDLOntology(d);
     }
     
     /**
@@ -818,18 +769,13 @@ public class Reasoner implements Serializable {
      * @param keys a set of HasKey axioms
      * @throws OWLException
      */
-    protected void loadOwlOntology(
-            OWLOntology ontology,
-            Set<DescriptionGraph> dgs, 
-            Set<OWLHasKeyDummy> keys) throws OWLException {
-        if (dgs == null) {
-            dgs = Collections.emptySet();
-        }
-        if (keys == null) {
+    protected void loadOwlOntology(OWLOntologyManager ontologyManager, OWLOntology ontology, Set<DescriptionGraph> descriptionGraphs, Set<OWLHasKeyDummy> keys) throws OWLException {
+        if (descriptionGraphs == null)
+            descriptionGraphs = Collections.emptySet();
+        if (keys == null)
             keys = Collections.emptySet();
-        }
         clausifier = new OwlClausification(m_config);
-        DLOntology d = clausifier.clausifyWithKeys(ontology, dgs, keys);
+        DLOntology d = clausifier.clausifyWithKeys(ontologyManager, ontology, descriptionGraphs, keys);
         loadDLOntology(d);
     }
     
