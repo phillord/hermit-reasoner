@@ -236,7 +236,7 @@ public class Reasoner implements Serializable {
      */
     public Reasoner(Configuration config, OWLOntologyManager ontologyManger, OWLOntology ontology, Set<DescriptionGraph> descriptionGraphs, Set<OWLHasKeyDummy> keys) throws OWLException {
           m_config = config;
-          loadOwlOntology(ontologyManger, ontology, descriptionGraphs, keys);
+          loadOWLOntology(ontologyManger, ontology, descriptionGraphs, keys);
     }
 
     public DLOntology getDLOntology() {
@@ -754,7 +754,7 @@ public class Reasoner implements Serializable {
             {
                 OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
                 OWLOntology ontology = ontologyManager.loadOntologyFromPhysicalURI(physicalURI); 
-                loadOwlOntology(ontologyManager, ontology, descriptionGraphs,keys);
+                loadOWLOntology(ontologyManager, ontology, descriptionGraphs,keys);
             }
             break;
         default:
@@ -769,7 +769,7 @@ public class Reasoner implements Serializable {
      * @param keys a set of HasKey axioms
      * @throws OWLException
      */
-    protected void loadOwlOntology(OWLOntologyManager ontologyManager, OWLOntology ontology, Set<DescriptionGraph> descriptionGraphs, Set<OWLHasKeyDummy> keys) throws OWLException {
+    protected void loadOWLOntology(OWLOntologyManager ontologyManager, OWLOntology ontology, Set<DescriptionGraph> descriptionGraphs, Set<OWLHasKeyDummy> keys) throws OWLException {
         if (descriptionGraphs == null)
             descriptionGraphs = Collections.emptySet();
         if (keys == null)
