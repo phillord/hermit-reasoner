@@ -133,7 +133,39 @@ public class OwlClausification implements Serializable {
         Set<OWLHasKeyDummy> noKeys = Collections.emptySet();
         return clausifyWithKeys(ontologyManager, ontology, descriptionGraphs, noKeys);
     }
-    
+
+    public DLOntology clausifyOntologiesDisregardImports(Collection<OWLOntology> ontologies,String resultingDLOntologyURI)  {
+        Set<OWLClass> allReferencedClasses=new HashSet<OWLClass>();
+        Set<OWLIndividual> allReferencedIndividuals=new HashSet<OWLIndividual>();
+        Set<OWLDataProperty> allReferencedDataProperties=new HashSet<OWLDataProperty>();
+        Set<OWLObjectProperty> allReferencedObjectProperties=new HashSet<OWLObjectProperty>();
+        for (OWLOntology ontology : ontologies) {
+            normalization.processOntology(config, ontology);
+            allReferencedClasses.addAll(ontology.getReferencedClasses());
+            allReferencedIndividuals.addAll(ontology.getReferencedIndividuals());
+            allReferencedDataProperties.addAll(ontology.getReferencedDataProperties());
+            allReferencedObjectProperties.addAll(ontology.getReferencedObjectProperties());
+        }
+        Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
+        return clausify(resultingDLOntologyURI,
+                normalization.getConceptInclusions(),
+                normalization.getObjectPropertyInclusions(),
+                normalization.getDataPropertyInclusions(),
+                normalization.getAsymmetricObjectProperties(),
+                normalization.getReflexiveObjectProperties(),
+                normalization.getIrreflexiveObjectProperties(),
+                normalization.getTransitiveObjectProperties(),
+                normalization.getDisjointObjectProperties(),
+                normalization.getDisjointDataProperties(),
+                normalization.getHasKeys(),
+                normalization.getFacts(),
+                noDescriptionGraphs,
+                allReferencedClasses,
+                allReferencedIndividuals,
+                allReferencedDataProperties,
+                allReferencedObjectProperties);
+    }
+
     /**
      * Dummy function to sneak in keys. ONLY TO BE USED FOR TESTING PURPOSES, 
      * while waiting for official OWL API support for keys. 
@@ -148,8 +180,13 @@ public class OwlClausification implements Serializable {
             OWLOntologyManager ontologyManager,
             OWLOntology ontology,
             Collection<DescriptionGraph> descriptionGraphs, 
-            Set<OWLHasKeyDummy> keys) throws OWLException {
-        
+            Set<OWLHasKeyDummy> keys) {
+
+        Set<OWLClass> allReferencedClasses=new HashSet<OWLClass>();
+        Set<OWLIndividual> allReferencedIndividuals=new HashSet<OWLIndividual>();
+        Set<OWLDataProperty> allReferencedDataProperties=new HashSet<OWLDataProperty>();
+        Set<OWLObjectProperty> allReferencedObjectProperties=new HashSet<OWLObjectProperty>();
+
         Set<OWLOntology> processedOntologies = new HashSet<OWLOntology>();
         List<OWLOntology> toProcess = new ArrayList<OWLOntology>();
         toProcess.add(ontology);
@@ -160,6 +197,10 @@ public class OwlClausification implements Serializable {
                 if (!processedOntologies.contains(importedOntology))
                     toProcess.add(importedOntology);
             normalization.processOntology(config, anOntology);
+            allReferencedClasses.addAll(ontology.getReferencedClasses());
+            allReferencedIndividuals.addAll(ontology.getReferencedIndividuals());
+            allReferencedDataProperties.addAll(ontology.getReferencedDataProperties());
+            allReferencedObjectProperties.addAll(ontology.getReferencedObjectProperties());
         }
         normalization.processKeys(config, keys);
         
@@ -175,10 +216,10 @@ public class OwlClausification implements Serializable {
                 normalization.getDisjointDataProperties(),
                 normalization.getHasKeys(),
                 normalization.getFacts(), descriptionGraphs,
-                ontology.getReferencedClasses(),
-                ontology.getReferencedIndividuals(),
-                ontology.getReferencedDataProperties(),
-                ontology.getReferencedObjectProperties());
+                allReferencedClasses,
+                allReferencedIndividuals,
+                allReferencedDataProperties,
+                allReferencedObjectProperties);
     }
     
     static protected Map<AtomicRole, HierarchyPosition<AtomicRole>>

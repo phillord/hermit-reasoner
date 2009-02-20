@@ -218,8 +218,21 @@ public class Reasoner implements Serializable {
         loadOntology(ontologyURI,descriptionGraphs,keys);
     }
 
-    public Reasoner(Configuration config,OWLOntologyManager ontologyManger,OWLOntology ontology) throws OWLException {
+    public Reasoner(Configuration config,OWLOntologyManager ontologyManger,OWLOntology ontology) {
         this(config,ontologyManger,ontology,(Set<DescriptionGraph>)null,(Set<OWLHasKeyDummy>)null);
+    }
+
+    /**
+     * Creates a reasoner that contains all axioms from the ontologies in the 'ontologies'' parameter.
+     * If any ontology in this collection contains imports, these are *NOT* traversed -- that is,
+     * the resulting ontology contains *EXACTLY* the axioms explciitly present in the supplied ontologies.
+     * The resulting DL ontology has the URI resultingDLOntologyURI.
+     */
+    public Reasoner(Configuration config,Collection<OWLOntology> ontologies,String resultingDLOntologyURI) {
+        m_config=config;
+        m_clausifier=new OwlClausification(m_config);
+        DLOntology d=m_clausifier.clausifyOntologiesDisregardImports(ontologies,resultingDLOntologyURI);
+        loadDLOntology(d);
     }
 
     /**
@@ -235,7 +248,7 @@ public class Reasoner implements Serializable {
      *            some hasKey axioms (OWLHasKeyDummy instances)
      * @throws OWLException
      */
-    public Reasoner(Configuration config,OWLOntologyManager ontologyManger,OWLOntology ontology,Set<DescriptionGraph> descriptionGraphs,Set<OWLHasKeyDummy> keys) throws OWLException {
+    public Reasoner(Configuration config,OWLOntologyManager ontologyManger,OWLOntology ontology,Set<DescriptionGraph> descriptionGraphs,Set<OWLHasKeyDummy> keys) {
         m_config=config;
         loadOWLOntology(ontologyManger,ontology,descriptionGraphs,keys);
     }
@@ -708,7 +721,7 @@ public class Reasoner implements Serializable {
      *            a set of HasKey axioms
      * @throws OWLException
      */
-    protected void loadOWLOntology(OWLOntologyManager ontologyManager,OWLOntology ontology,Set<DescriptionGraph> descriptionGraphs,Set<OWLHasKeyDummy> keys) throws OWLException {
+    protected void loadOWLOntology(OWLOntologyManager ontologyManager,OWLOntology ontology,Set<DescriptionGraph> descriptionGraphs,Set<OWLHasKeyDummy> keys) {
         if (descriptionGraphs==null)
             descriptionGraphs=Collections.emptySet();
         if (keys==null)

@@ -141,7 +141,7 @@ public class OwlNormalization implements Serializable {
      *            the ontology to be normalized
      * @throws OWLException
      */
-    public void processOntology(Reasoner.Configuration config, OWLOntology inOntology) throws OWLException {
+    public void processOntology(Reasoner.Configuration config, OWLOntology inOntology) {
         // Each entry in the inclusions list represents a disjunction of
         // concepts, i.e., each OWLDescription in an entry contributes a
         // disjunct. It is thus not really inclusions, but rather a disjunction
@@ -180,7 +180,7 @@ public class OwlNormalization implements Serializable {
         m_objectPropertyInclusions = roleManager.getSimpleInclusions();
     }
     
-    public void processKeys(Reasoner.Configuration config, Set<OWLHasKeyDummy> keys) throws OWLException {
+    public void processKeys(Reasoner.Configuration config, Set<OWLHasKeyDummy> keys) {
         AxiomVisitor axiomVisitor = new AxiomVisitor();
         for (OWLHasKeyDummy key : keys) {
             axiomVisitor.visit(key);
