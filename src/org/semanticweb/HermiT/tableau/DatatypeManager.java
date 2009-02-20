@@ -175,12 +175,11 @@ public class DatatypeManager implements Serializable {
                     
                     // self inequality found
                     if (node1.equals(node2)) {
+                        extensionManager.setClash(triplesZeroBoundRetr.getDependencySet());
                         if (tableauMonitor != null) {
-                            tableauMonitor.clashDetected(new Object[][] {
-                                    new Object[] { Inequality.INSTANCE, node1, node2 } });
+                            tableauMonitor.clashDetected(new Object[][] { new Object[] { Inequality.INSTANCE, node1, node2 } });
                             tableauMonitor.datatypeCheckingFinished(false);
                         }
-                        extensionManager.setClash(triplesZeroBoundRetr.getDependencySet());
                         return true;
                     }
                     if (!inequalities.containsKey(node1)) {
@@ -254,13 +253,11 @@ public class DatatypeManager implements Serializable {
         for (Node node : nodeToDRs.keySet()) {
             for (DataRange dataRange : nodeToDRs.get(node)) {
                 if (dataRange.isBottom()) {
+                    extensionManager.setClash(extensionManager.getAssertionDependencySet(dataRange, node));
                     if (tableauMonitor != null) {
-                        tableauMonitor.clashDetected(new Object[][] {
-                                new Object[] { dataRange, node } });
+                        tableauMonitor.clashDetected(new Object[][] { new Object[] { dataRange, node } });
                         tableauMonitor.datatypeCheckingFinished(false);
                     }
-                    extensionManager.setClash(
-                            extensionManager.getAssertionDependencySet(dataRange, node));
                     return false; 
                 }
             }
@@ -319,11 +316,11 @@ public class DatatypeManager implements Serializable {
                         ds.m_dependencySets[i] = extensionManager.getAssertionDependencySet(range, node);
                         i++;
                     }
+                    extensionManager.setClash(ds);
                     if (tableauMonitor != null) {
                         tableauMonitor.clashDetected(causes);
                         tableauMonitor.datatypeCheckingFinished(false);
                     }
-                    extensionManager.setClash(ds);
                     return null;
                 }
             } else {
@@ -633,11 +630,11 @@ public class DatatypeManager implements Serializable {
                         i++;
                     }
                 }
+                extensionManager.setClash(ds);
                 if (tableauMonitor != null) {
                     tableauMonitor.clashDetected(causes);
                     tableauMonitor.datatypeCheckingFinished(false);
                 }
-                extensionManager.setClash(ds);
                 return false;
             }
             nodeToValue.put(currentNode, assignment);
