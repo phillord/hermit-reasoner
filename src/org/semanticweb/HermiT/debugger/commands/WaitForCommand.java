@@ -32,6 +32,8 @@ public class WaitForCommand extends AbstractCommand implements ICommand {
                 waitOption=WaitOption.CLASH;
             else if ("merge".equals(argument))
                 waitOption=WaitOption.MERGE;
+            else if ("dtcheck".equals(argument))
+                waitOption=WaitOption.DATATYPE_CHECKING;
             else {
                 debugger.getOutput().println("Invalid wait option '"+argument+"'.");
                 return;

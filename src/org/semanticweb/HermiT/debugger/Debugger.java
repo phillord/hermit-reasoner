@@ -81,7 +81,7 @@ public class Debugger extends TableauMonitorForwarder {
 
     public static final Font s_monospacedFont=new Font("Monospaced",Font.PLAIN,12);
 
-    public static enum WaitOption { GRAPH_EXPANSION,EXISTENTIAL_EXPANSION,CONCRETE_EXPANSION,CLASH,MERGE };
+    public static enum WaitOption { GRAPH_EXPANSION,EXISTENTIAL_EXPANSION,CONCRETE_EXPANSION,CLASH,MERGE,DATATYPE_CHECKING };
     
     protected final Namespaces m_namespaces;
     protected final DerivationHistory m_derivationHistory;
@@ -589,6 +589,14 @@ public class Debugger extends TableauMonitorForwarder {
         NodeCreationInfo nodeCreationInfo=m_nodeCreationInfos.remove(node);
         if (nodeCreationInfo.m_createdByNode!=null)
             m_nodeCreationInfos.get(nodeCreationInfo.m_createdByNode).m_children.remove(node);
+    }
+    public void datatypeCheckingStarted() {
+        super.datatypeCheckingStarted();
+        if (m_waitOptions.contains(WaitOption.DATATYPE_CHECKING)) {
+            m_forever=false;
+            m_output.println("Will check whether the datatype constraints are satisfiable.");
+            mainLoop();
+        }
     }
     protected void printState() {
         int numberOfNodes=0;
