@@ -260,13 +260,13 @@ public class Reasoner implements Serializable {
     }
 
     /**
-     * Check whether `classUri` is satisfiable. Note that classes which were not defined in the input ontology are satisfiable if and only if the ontology as a whole is consistent.
+     * Check whether `classURI` is satisfiable. Note that classes which were not defined in the input ontology are satisfiable if and only if the ontology as a whole is consistent.
      */
-    public boolean isClassSatisfiable(String classUri) {
+    public boolean isClassSatisfiable(String classURI) {
         // In an inconsistent ontology, HermiT considers all classes as unsatisfiable.
         if (!m_tableau.isABoxSatisfiable())
             return false;
-        return isSatisfiable(AtomicConcept.create(classUri));
+        return isSatisfiable(AtomicConcept.create(classURI));
     }
 
     public boolean isClassSatisfiable(OWLDescription desc) {
