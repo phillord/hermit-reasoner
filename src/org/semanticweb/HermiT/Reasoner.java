@@ -649,11 +649,12 @@ public class Reasoner implements Serializable {
         }
         try {
             for (Map.Entry<String,Set<String>> e : flat.entrySet()) {
-                output.println("'"+e.getKey()+"' ancestors:");
+                output.println(e.getKey());
                 for (String ancestor : e.getValue()) {
-                    output.println("\t"+ancestor);
+                    output.print("    ");
+                    output.println(ancestor);
                 }
-                output.println("--------------------------------"); // 32
+                output.println("--------------------------------");
             }
             output.println("! THE END !");
         }
