@@ -715,7 +715,7 @@ public class Reasoner implements Serializable {
      * 
      * @param ontology
      *            an OWL API loaded ontology
-     * @param dgs
+     * @param descriptionGraphs
      *            description graphs
      * @param keys
      *            a set of HasKey axioms

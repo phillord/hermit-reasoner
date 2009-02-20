@@ -190,37 +190,45 @@ public class Classifier<T> implements Serializable {
         boolean trueOf(U u);
     }
     
-    protected <U> Set<U>
-        search(final Util<U> f, Collection<U> begin,
-                final Set<U> possibilities) {
-        final class Local {
-            Set<U> positives = new HashSet<U>();
-            Set<U> negatives = new HashSet<U>();
-            boolean trueOf(U pos) {
-                if (positives.contains(pos)) {
-                    return true;
-                } else if (negatives.contains(pos) ||
-                            (possibilities != null &&
-                                !possibilities.contains(pos))) {
-                    return false;
-                } else {
-                    for (U prev : f.prevs(pos)) {
-                        if (!trueOf(prev)) {
-                            negatives.add(pos);
-                            return false;
-                        }
-                    }
-                    if (f.trueOf(pos)) {
-                        positives.add(pos);
-                        return true;
-                    } else {
+    protected static final class Local<U> {
+        final Util<U> f;
+        final Set<U> possibilities;
+        
+        public Local(Util<U> f, Set<U> possibilities) {
+            this.f = f;
+            this.possibilities = possibilities;
+        }
+        
+        Set<U> positives = new HashSet<U>();
+        Set<U> negatives = new HashSet<U>();
+        boolean trueOf(U pos) {
+            if (positives.contains(pos)) {
+                return true;
+            } else if (negatives.contains(pos) ||
+                        (possibilities != null &&
+                            !possibilities.contains(pos))) {
+                return false;
+            } else {
+                for (U prev : f.prevs(pos)) {
+                    if (!trueOf(prev)) {
                         negatives.add(pos);
                         return false;
                     }
                 }
+                if (f.trueOf(pos)) {
+                    positives.add(pos);
+                    return true;
+                } else {
+                    negatives.add(pos);
+                    return false;
+                }
             }
-        };
-        final Local g = new Local();
+        }
+    };
+    protected <U> Set<U>
+        search(final Util<U> f, Collection<U> begin,
+                final Set<U> possibilities) {
+        final Local<U> g = new Local<U>(f, possibilities);
         
         Set<U> out = new HashSet<U>();
         Set<U> visited = new HashSet<U>(begin);
