@@ -617,8 +617,11 @@ public class Reasoner implements Serializable {
     public Set<String> getMembers(String className) {
         Set<String> out=new HashSet<String>();
         for (AtomicConcept c : getPosition(AtomicConcept.create(className)).getDescendants()) {
-            for (Individual i : getRealization().get(c)) {
-                out.add(i.getURI());
+            Set<Individual> realizationForConcept=getRealization().get(c);
+            if (realizationForConcept!=null) {
+                for (Individual i : realizationForConcept) {
+                    out.add(i.getURI());
+                }
             }
         }
         return out;
@@ -627,8 +630,11 @@ public class Reasoner implements Serializable {
     public Set<OWLIndividual> getMembers(OWLDescription description) {
         Set<OWLIndividual> out=new HashSet<OWLIndividual>();
         for (AtomicConcept c : getPosition(define(description)).getDescendants()) {
-            for (Individual i : getRealization().get(c)) {
-                out.add(m_clausifier.factory.getOWLIndividual(URI.create(i.getURI())));
+            Set<Individual> realizationForConcept=getRealization().get(c);
+            if (realizationForConcept!=null) {
+                for (Individual i : realizationForConcept) {
+                    out.add(m_clausifier.factory.getOWLIndividual(URI.create(i.getURI())));
+                }
             }
         }
         return out;
@@ -644,8 +650,11 @@ public class Reasoner implements Serializable {
             }
         }
         for (AtomicConcept c : children) {
-            for (Individual i : getRealization().get(c)) {
-                out.add(m_clausifier.factory.getOWLIndividual(URI.create(i.getURI())));
+            Set<Individual> realizationForConcept=getRealization().get(c);
+            if (realizationForConcept!=null) {
+                for (Individual i : realizationForConcept) {
+                    out.add(m_clausifier.factory.getOWLIndividual(URI.create(i.getURI())));
+                }
             }
         }
         return out;

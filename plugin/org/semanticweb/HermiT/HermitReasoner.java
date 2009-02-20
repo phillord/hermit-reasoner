@@ -29,7 +29,7 @@ public class HermitReasoner implements MonitorableOWLReasoner {
     protected final OWLOntologyManager manager;
     protected final boolean tolerateUnknownDatatypes;
     protected final boolean onlyAncestorBlocking;
-    protected final PluginMonitor monitor=new PluginMonitor();
+    protected final PluginMonitor monitor;
     protected final Set<OWLOntology> ontologies;
     protected final Set<OWLClass> allReferencedClasses;
     protected final Set<OWLIndividual> allReferencedIndividuals;
@@ -46,6 +46,7 @@ public class HermitReasoner implements MonitorableOWLReasoner {
     }
 
     public HermitReasoner(OWLOntologyManager inManager,boolean tolerateUnknownDatatypes,boolean onlyAncestorBlocking) {
+        monitor=new PluginMonitor();
         manager=inManager;
         ontologies=new HashSet<OWLOntology>();
         allReferencedClasses=new HashSet<OWLClass>();
@@ -95,7 +96,7 @@ public class HermitReasoner implements MonitorableOWLReasoner {
     }
 
     public Set<OWLOntology> getLoadedOntologies() {
-        return ontologies;
+        return new HashSet<OWLOntology>(ontologies);
     }
 
     public boolean isClassified() {
@@ -168,8 +169,9 @@ public class HermitReasoner implements MonitorableOWLReasoner {
             hermit.cacheRealization();
     }
     public void unloadOntologies(Set<OWLOntology> inOntologies) {
-        ontologies.removeAll(inOntologies);
-        loadOntologies(ontologies);
+        HashSet<OWLOntology> remainingOntologies=new HashSet<OWLOntology>(ontologies);
+        remainingOntologies.removeAll(inOntologies);
+        loadOntologies(remainingOntologies);
     }
 
     public boolean isSatisfiable(OWLDescription d) {
@@ -181,7 +183,8 @@ public class HermitReasoner implements MonitorableOWLReasoner {
     protected <T> Set<Set<T>> posToSets(Set<HierarchyPosition<T>> positions) {
         Set<Set<T>> r=new HashSet<Set<T>>();
         for (HierarchyPosition<T> pos : positions) {
-            r.add(pos.getEquivalents());
+            Set<T> equivalents=pos.getEquivalents();
+            r.add(new HashSet<T>(equivalents));
         }
         return r;
     }
@@ -204,7 +207,7 @@ public class HermitReasoner implements MonitorableOWLReasoner {
         if (hermit==null) {
             return new HashSet<OWLClass>();
         }
-        return hermit.getPosition(d).getEquivalents();
+        return new HashSet<OWLClass>(hermit.getPosition(d).getEquivalents());
     }
 
     public Set<OWLClass> getInconsistentClasses() {
@@ -250,11 +253,11 @@ public class HermitReasoner implements MonitorableOWLReasoner {
         if (hermit==null) {
             return new HashSet<OWLIndividual>();
         }
-        if (direct) {
-            return hermit.getDirectMembers(d);
+        else if (direct) {
+            return new HashSet<OWLIndividual>(hermit.getDirectMembers(d));
         }
         else {
-            return hermit.getMembers(d);
+            return new HashSet<OWLIndividual>(hermit.getMembers(d));
         }
     }
 
@@ -337,9 +340,7 @@ public class HermitReasoner implements MonitorableOWLReasoner {
     public Set<Set<OWLDescription>> getDomains(OWLDataProperty property) {
         Set<Set<OWLDescription>> out=new HashSet<Set<OWLDescription>>();
         for (Set<OWLClass> classSet : getAncestorClasses(manager.getOWLDataFactory().getOWLDataMinCardinalityRestriction(property,1))) {
-            Set<OWLDescription> newSet=new HashSet<OWLDescription>();
-            for (OWLClass c : classSet)
-                newSet.add(c);
+            Set<OWLDescription> newSet=new HashSet<OWLDescription>(classSet);
             out.add(newSet);
         }
         return out;
@@ -348,9 +349,7 @@ public class HermitReasoner implements MonitorableOWLReasoner {
     public Set<Set<OWLDescription>> getDomains(OWLObjectProperty property) {
         Set<Set<OWLDescription>> out=new HashSet<Set<OWLDescription>>();
         for (Set<OWLClass> classSet : getAncestorClasses(manager.getOWLDataFactory().getOWLObjectMinCardinalityRestriction(property,1))) {
-            Set<OWLDescription> newSet=new HashSet<OWLDescription>();
-            for (OWLClass c : classSet)
-                newSet.add(c);
+            Set<OWLDescription> newSet=new HashSet<OWLDescription>(classSet);
             out.add(newSet);
         }
         return out;
@@ -360,14 +359,14 @@ public class HermitReasoner implements MonitorableOWLReasoner {
         if (hermit==null) {
             return new HashSet<OWLDataProperty>();
         }
-        return hermit.getPosition(property).getEquivalents();
+        return new HashSet<OWLDataProperty>(hermit.getPosition(property).getEquivalents());
     }
 
     public Set<OWLObjectProperty> getEquivalentProperties(OWLObjectProperty property) {
         if (hermit==null) {
             return new HashSet<OWLObjectProperty>();
         }
-        return hermit.getPosition(property).getEquivalents();
+        return new HashSet<OWLObjectProperty>(hermit.getPosition(property).getEquivalents());
     }
 
     public Set<Set<OWLObjectProperty>> getInverseProperties(OWLObjectProperty property) {
@@ -383,8 +382,7 @@ public class HermitReasoner implements MonitorableOWLReasoner {
     public Set<OWLDescription> getRanges(OWLObjectProperty property) {
         Set<OWLDescription> newSet=new HashSet<OWLDescription>();
         for (Set<OWLClass> classSet : getAncestorClasses(manager.getOWLDataFactory().getOWLObjectMinCardinalityRestriction(property.getInverseProperty(),1))) {
-            for (OWLClass c : classSet)
-                newSet.add(c);
+            newSet.addAll(classSet);
         }
         return newSet;
     }
