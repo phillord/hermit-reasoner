@@ -195,11 +195,11 @@ public class Reasoner implements Serializable {
     private Namespaces namespaces; // never null
     private Tableau m_tableau; // never null
     private TableauSubsumptionChecker m_subsumptionChecker; // never null
-    private Classifier<AtomicConcept> classifier;
-    private Map<AtomicConcept,HierarchyPosition<AtomicConcept>> atomicConceptHierarchy; // may be null; use getAtomicConceptHierarchy
-    private Map<AtomicConcept,Set<Individual>> realization;
+    private Classifier<AtomicConcept> m_classifier;
+    private Map<AtomicConcept,HierarchyPosition<AtomicConcept>> m_atomicConceptHierarchy; // may be null; use getAtomicConceptHierarchy
+    private Map<AtomicConcept,Set<Individual>> m_realization;
 
-    private transient OwlClausification clausifier; // null if loaded through KAON2
+    private transient OwlClausification m_clausifier; // null if loaded through KAON2
 
     public Reasoner(String ontologyURI) throws IllegalArgumentException,LoadingException,OWLException {
         this(new Configuration(),URI.create(ontologyURI));
@@ -285,7 +285,7 @@ public class Reasoner implements Serializable {
     }
 
     public boolean isSubsumptionCacheSeeded() {
-        return atomicConceptHierarchy!=null;
+        return m_atomicConceptHierarchy!=null;
     }
 
     public void cacheRealization() {
@@ -293,7 +293,7 @@ public class Reasoner implements Serializable {
     }
 
     public boolean isRealizationCached() {
-        return realization!=null;
+        return m_realization!=null;
     }
 
     protected boolean isSubsumedBy(AtomicConcept child,AtomicConcept parent) {
@@ -347,17 +347,17 @@ public class Reasoner implements Serializable {
     }
 
     public HierarchyPosition<OWLObjectProperty> getPosition(OWLObjectProperty p) {
-        if (clausifier==null) {
+        if (m_clausifier==null) {
             throw new RuntimeException("OWL API queries require ontology parsing by the OWL API.");
         }
-        return new TranslatedHierarchyPosition<AtomicRole,OWLObjectProperty>(getPosition(AtomicRole.createObjectRole(p.getURI().toString())),new RoleToOWLObjectProperty(clausifier.factory));
+        return new TranslatedHierarchyPosition<AtomicRole,OWLObjectProperty>(getPosition(AtomicRole.createObjectRole(p.getURI().toString())),new RoleToOWLObjectProperty(m_clausifier.factory));
     }
 
     public HierarchyPosition<OWLDataProperty> getPosition(OWLDataProperty p) {
-        if (clausifier==null) {
+        if (m_clausifier==null) {
             throw new RuntimeException("OWL API queries require ontology parsing by the OWL API.");
         }
-        return new TranslatedHierarchyPosition<AtomicRole,OWLDataProperty>(getPosition(AtomicRole.createDataRole(p.getURI().toString())),new RoleToOWLDataProperty(clausifier.factory));
+        return new TranslatedHierarchyPosition<AtomicRole,OWLDataProperty>(getPosition(AtomicRole.createDataRole(p.getURI().toString())),new RoleToOWLDataProperty(m_clausifier.factory));
     }
 
     public int getNumberOfConcepts() {
@@ -365,12 +365,12 @@ public class Reasoner implements Serializable {
     }
 
     protected Map<AtomicConcept,HierarchyPosition<AtomicConcept>> getAtomicConceptHierarchy() {
-        if (atomicConceptHierarchy==null) {
+        if (m_atomicConceptHierarchy==null) {
             Collection<AtomicConcept> concepts=new ArrayList<AtomicConcept>();
             concepts.add(AtomicConcept.THING);
             concepts.add(AtomicConcept.NOTHING);
             for (AtomicConcept c : m_dlOntology.getAllAtomicConcepts()) {
-                if (!InternalNames.isInternalUri(c.getURI())) {
+                if (!InternalNames.isInternalURI(c.getURI())) {
                     concepts.add(c);
                 }
             }
@@ -379,51 +379,50 @@ public class Reasoner implements Serializable {
             if (cache.allSubsumptionsKnown(concepts)) {
                 GraphUtils.Acyclic<AtomicConcept> acyc=new GraphUtils.Acyclic<AtomicConcept>(cache.knownSubsumers);
                 GraphUtils.TransAnalyzed<AtomicConcept> trans=new GraphUtils.TransAnalyzed<AtomicConcept>(acyc.graph);
-                atomicConceptHierarchy=new HashMap<AtomicConcept,HierarchyPosition<AtomicConcept>>();
+                m_atomicConceptHierarchy=new HashMap<AtomicConcept,HierarchyPosition<AtomicConcept>>();
                 for (AtomicConcept c : trans.reduced.keySet()) {
                     NaiveHierarchyPosition<AtomicConcept> pos=new NaiveHierarchyPosition<AtomicConcept>(acyc.equivs.get(c));
                     for (AtomicConcept equiv : acyc.equivs.get(c)) {
                         assert acyc.canonical.get(equiv)==c;
                         assert pos.labels.contains(equiv);
-                        atomicConceptHierarchy.put(equiv,pos);
+                        m_atomicConceptHierarchy.put(equiv,pos);
                     }
                 }
-                if (!atomicConceptHierarchy.containsKey(AtomicConcept.THING)) {
-                    atomicConceptHierarchy.put(AtomicConcept.THING,new NaiveHierarchyPosition<AtomicConcept>(AtomicConcept.THING));
+                if (!m_atomicConceptHierarchy.containsKey(AtomicConcept.THING)) {
+                    m_atomicConceptHierarchy.put(AtomicConcept.THING,new NaiveHierarchyPosition<AtomicConcept>(AtomicConcept.THING));
                 }
                 for (Map.Entry<AtomicConcept,Set<AtomicConcept>> e : trans.reduced.entrySet()) {
                     AtomicConcept child=e.getKey();
                     for (AtomicConcept parent : e.getValue()) {
-                        ((NaiveHierarchyPosition<AtomicConcept>)atomicConceptHierarchy.get(child)).parents.add(atomicConceptHierarchy.get(parent));
-                        ((NaiveHierarchyPosition<AtomicConcept>)atomicConceptHierarchy.get(parent)).children.add(atomicConceptHierarchy.get(child));
+                        ((NaiveHierarchyPosition<AtomicConcept>)m_atomicConceptHierarchy.get(child)).parents.add(m_atomicConceptHierarchy.get(parent));
+                        ((NaiveHierarchyPosition<AtomicConcept>)m_atomicConceptHierarchy.get(parent)).children.add(m_atomicConceptHierarchy.get(child));
                     }
                 }
             }
             else {
-                atomicConceptHierarchy=classifier.buildHierarchy(AtomicConcept.THING,AtomicConcept.NOTHING,concepts);
+                m_atomicConceptHierarchy=m_classifier.buildHierarchy(AtomicConcept.THING,AtomicConcept.NOTHING,concepts);
             }
         }
-        return atomicConceptHierarchy;
+        return m_atomicConceptHierarchy;
     }
 
     protected HierarchyPosition<AtomicConcept> getPosition(AtomicConcept c) {
         HierarchyPosition<AtomicConcept> out=getAtomicConceptHierarchy().get(c);
         if (out==null) {
-            out=classifier.findPosition(c,getAtomicConceptHierarchy().get(AtomicConcept.THING),getAtomicConceptHierarchy().get(AtomicConcept.NOTHING));
+            out=m_classifier.findPosition(c,getAtomicConceptHierarchy().get(AtomicConcept.THING),getAtomicConceptHierarchy().get(AtomicConcept.NOTHING));
         }
         return out;
     }
 
     private AtomicConcept define(OWLDescription desc) {
         if (desc.isAnonymous()) {
-            // System.out.println("defining anonymous thing");
             Set<DLClause> clauses=new HashSet<DLClause>();
             Set<Atom> positiveFacts=new HashSet<Atom>();
             Set<Atom> negativeFacts=new HashSet<Atom>();
-            if (clausifier==null) {
+            if (m_clausifier==null) {
                 throw new RuntimeException("Complex concept queries require parsing by the OWL API.");
             }
-            AtomicConcept c=clausifier.define(desc,clauses,positiveFacts,negativeFacts);
+            AtomicConcept c=m_clausifier.define(desc,clauses,positiveFacts,negativeFacts);
             m_tableau.extendWithDefinitions(clauses,positiveFacts,negativeFacts);
             return c;
         }
@@ -554,17 +553,17 @@ public class Reasoner implements Serializable {
     }
 
     public HierarchyPosition<OWLClass> getPosition(OWLDescription description) {
-        if (clausifier==null) {
+        if (m_clausifier==null) {
             throw new RuntimeException("OWL API queries require ontology parsing by the OWL API.");
         }
-        return new TranslatedHierarchyPosition<AtomicConcept,OWLClass>(getPosition(define(description)),new ConceptToOWLClass(clausifier.factory));
+        return new TranslatedHierarchyPosition<AtomicConcept,OWLClass>(getPosition(define(description)),new ConceptToOWLClass(m_clausifier.factory));
     }
 
     protected HierarchyPosition<AtomicConcept> getMemberships(Individual individual) {
-        if (clausifier==null) {
+        if (m_clausifier==null) {
             throw new RuntimeException("Individual queries require parsing by the OWL API.");
         }
-        return getPosition(define(clausifier.factory.getOWLObjectOneOf(clausifier.factory.getOWLIndividual(URI.create(individual.getURI())))));
+        return getPosition(define(m_clausifier.factory.getOWLObjectOneOf(m_clausifier.factory.getOWLIndividual(URI.create(individual.getURI())))));
     }
 
     public HierarchyPosition<String> getMemberships(String individual) {
@@ -572,14 +571,14 @@ public class Reasoner implements Serializable {
     }
 
     public HierarchyPosition<OWLClass> getMemberships(OWLIndividual i) {
-        return new TranslatedHierarchyPosition<AtomicConcept,OWLClass>(getMemberships(Individual.create(i.getURI().toString())),new ConceptToOWLClass(clausifier.factory));
+        return new TranslatedHierarchyPosition<AtomicConcept,OWLClass>(getMemberships(Individual.create(i.getURI().toString())),new ConceptToOWLClass(m_clausifier.factory));
     }
 
     private Map<AtomicConcept,Set<Individual>> getRealization() {
-        if (realization==null) {
-            realization=new HashMap<AtomicConcept,Set<Individual>>();
+        if (m_realization==null) {
+            m_realization=new HashMap<AtomicConcept,Set<Individual>>();
             for (Individual i : m_dlOntology.getAllIndividuals()) {
-                HierarchyPosition<AtomicConcept> p=getPosition(define(clausifier.factory.getOWLObjectOneOf(clausifier.factory.getOWLIndividual(URI.create(i.getURI())))));
+                HierarchyPosition<AtomicConcept> p=getPosition(define(m_clausifier.factory.getOWLObjectOneOf(m_clausifier.factory.getOWLIndividual(URI.create(i.getURI())))));
                 Set<AtomicConcept> parents=p.getEquivalents();
                 if (parents.isEmpty()) {
                     parents=new HashSet<AtomicConcept>();
@@ -588,14 +587,14 @@ public class Reasoner implements Serializable {
                     }
                 }
                 for (AtomicConcept c : parents) {
-                    if (!realization.containsKey(c)) {
-                        realization.put(c,new HashSet<Individual>());
+                    if (!m_realization.containsKey(c)) {
+                        m_realization.put(c,new HashSet<Individual>());
                     }
-                    realization.get(c).add(i);
+                    m_realization.get(c).add(i);
                 }
             }
         }
-        return realization;
+        return m_realization;
     }
 
     public Set<String> getDirectMembers(String className) {
@@ -616,7 +615,7 @@ public class Reasoner implements Serializable {
         Set<OWLIndividual> out=new HashSet<OWLIndividual>();
         for (AtomicConcept c : getPosition(define(description)).getDescendants()) {
             for (Individual i : getRealization().get(c)) {
-                out.add(clausifier.factory.getOWLIndividual(URI.create(i.getURI())));
+                out.add(m_clausifier.factory.getOWLIndividual(URI.create(i.getURI())));
             }
         }
         return out;
@@ -633,7 +632,7 @@ public class Reasoner implements Serializable {
         }
         for (AtomicConcept c : children) {
             for (Individual i : getRealization().get(c)) {
-                out.add(clausifier.factory.getOWLIndividual(URI.create(i.getURI())));
+                out.add(m_clausifier.factory.getOWLIndividual(URI.create(i.getURI())));
             }
         }
         return out;
@@ -713,8 +712,8 @@ public class Reasoner implements Serializable {
             descriptionGraphs=Collections.emptySet();
         if (keys==null)
             keys=Collections.emptySet();
-        clausifier=new OwlClausification(m_config);
-        DLOntology d=clausifier.clausifyWithKeys(ontologyManager,ontology,descriptionGraphs,keys);
+        m_clausifier=new OwlClausification(m_config);
+        DLOntology d=m_clausifier.clausifyWithKeys(ontologyManager,ontology,descriptionGraphs,keys);
         loadDLOntology(d);
     }
 
@@ -862,7 +861,7 @@ public class Reasoner implements Serializable {
 
         m_tableau=new Tableau(tableauMonitor,existentialsExpansionStrategy,m_dlOntology,m_config.makeTopRoleUniversal,m_config.parameters);
         m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
-        classifier=new Classifier<AtomicConcept>(new TableauFunc(m_subsumptionChecker));
+        m_classifier=new Classifier<AtomicConcept>(new TableauFunc(m_subsumptionChecker));
         if (m_config.subsumptionCacheStrategyType==SubsumptionCacheStrategyType.IMMEDIATE) {
             getClassTaxonomy();
         }

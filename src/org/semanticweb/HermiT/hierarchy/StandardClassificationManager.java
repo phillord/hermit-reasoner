@@ -38,7 +38,7 @@ public class StandardClassificationManager implements Serializable {
     }
     public void buildHierarchy() throws SubsumptionHierarchy.SubusmptionCheckerException {
         for (AtomicConcept atomicConcept : m_subsumptionChecker.getAllAtomicConcepts()) {
-            if (!InternalNames.isInternalUri(atomicConcept.getURI())) {
+            if (!InternalNames.isInternalURI(atomicConcept.getURI())) {
                 insertConcept(atomicConcept);
             }
         }

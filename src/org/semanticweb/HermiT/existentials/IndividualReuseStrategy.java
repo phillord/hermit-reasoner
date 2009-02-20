@@ -116,7 +116,7 @@ public class IndividualReuseStrategy extends StrategyBase implements Serializabl
         (AtLeastAbstractRoleConcept atLeastAbstractConcept, Node node) {
         LiteralConcept toConcept = atLeastAbstractConcept.getToConcept();
         if ((toConcept instanceof AtomicConcept) &&
-            InternalNames.isInternalUri(((AtomicConcept) toConcept).getURI())) {
+            InternalNames.isInternalURI(((AtomicConcept) toConcept).getURI())) {
             return false;
         }
         if (atLeastAbstractConcept.getNumber()==1 

@@ -101,7 +101,7 @@ public class OptimizedClassificationManager implements Serializable {
         }
     }
     protected boolean shouldProcessConcept(AtomicConcept atomicConcept) {
-        return !InternalNames.isInternalUri(atomicConcept.getURI()) && !AtomicConcept.THING.equals(atomicConcept) && !AtomicConcept.NOTHING.equals(atomicConcept);
+        return !InternalNames.isInternalURI(atomicConcept.getURI()) && !AtomicConcept.THING.equals(atomicConcept) && !AtomicConcept.NOTHING.equals(atomicConcept);
     }
     
     protected static class Node {

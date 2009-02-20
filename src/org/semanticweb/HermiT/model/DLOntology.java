@@ -80,7 +80,7 @@ public class DLOntology implements Serializable {
         }
         int numberOfExternalConcepts = 0;
         for (AtomicConcept c : m_allAtomicConcepts) {
-            if (!InternalNames.isInternalUri(c.getURI())) {
+            if (!InternalNames.isInternalURI(c.getURI())) {
                 numberOfExternalConcepts++;
             }
         }

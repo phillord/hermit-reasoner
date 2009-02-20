@@ -4,7 +4,7 @@ package org.semanticweb.HermiT;
 import java.util.Map;
 
 public class InternalNames {
-    public static boolean isInternalUri(String uri) {
+    public static boolean isInternalURI(String uri) {
         return uri.startsWith("internal:");
     }
     
