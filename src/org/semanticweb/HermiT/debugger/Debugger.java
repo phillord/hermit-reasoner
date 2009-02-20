@@ -590,14 +590,6 @@ public class Debugger extends TableauMonitorForwarder {
         if (nodeCreationInfo.m_createdByNode!=null)
             m_nodeCreationInfos.get(nodeCreationInfo.m_createdByNode).m_children.remove(node);
     }
-    public void datatypeCheckingStarted() {
-        super.datatypeCheckingStarted();
-        m_output.println("Will check whether the datatype constraints are satisfiable.");
-    }
-    public void datatypeCheckingFinished(boolean result) {
-        super.datatypeCheckingFinished(result);
-        m_output.println("The datatype constraints are " + (result ? "" : "not ") + "satisfiable...");
-    }
     protected void printState() {
         int numberOfNodes=0;
         int inactiveNodes=0;
