@@ -27,7 +27,7 @@ import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
-import org.semanticweb.HermiT.owlapi.structural.OwlClausificationd;
+import org.semanticweb.HermiT.owlapi.structural.OWLClausification;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
 import org.semanticweb.owl.apibinding.OWLManager;
@@ -133,7 +133,7 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
      * @throws Exception
      */
     protected DLOntology getDLOntology() throws Exception {
-        OwlClausificationd clausifier = new OwlClausificationd(new Reasoner.Configuration());
+        OWLClausification clausifier = new OWLClausification(new Reasoner.Configuration());
         Set<DescriptionGraph> noDescriptionGraphs = Collections.emptySet();
         return clausifier.clausify(m_ontologyManager, m_ontology, noDescriptionGraphs);
     }

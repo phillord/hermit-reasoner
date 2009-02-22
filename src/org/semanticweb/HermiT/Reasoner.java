@@ -67,7 +67,7 @@ import org.semanticweb.HermiT.monitor.TableauMonitorFork;
 import org.semanticweb.HermiT.monitor.Timer;
 import org.semanticweb.HermiT.monitor.TimerWithPause;
 import org.semanticweb.HermiT.owlapi.structural.OWLHasKeyDummy;
-import org.semanticweb.HermiT.owlapi.structural.OwlClausificationd;
+import org.semanticweb.HermiT.owlapi.structural.OWLClausification;
 import org.semanticweb.HermiT.tableau.Tableau;
 import org.semanticweb.HermiT.util.TranslatedMap;
 import org.semanticweb.HermiT.util.TranslatedSet;
@@ -224,7 +224,7 @@ public class Reasoner implements Serializable {
      */
     public Reasoner(Configuration config,OWLOntologyManager ontologyManger,Collection<OWLOntology> ontologies,String resultingDLOntologyURI) {
         m_config=config;
-        OwlClausificationd clausifier=new OwlClausificationd(m_config);
+        OWLClausification clausifier=new OWLClausification(m_config);
         DLOntology d=clausifier.clausifyOntologiesDisregardImports(ontologyManger,ontologies,resultingDLOntologyURI);
         loadDLOntology(d);
         if (m_config.subsumptionCacheStrategyType==SubsumptionCacheStrategyType.IMMEDIATE)
@@ -609,7 +609,7 @@ public class Reasoner implements Serializable {
             descriptionGraphs=Collections.emptySet();
         if (keys==null)
             keys=Collections.emptySet();
-        OwlClausificationd clausifier=new OwlClausificationd(m_config);
+        OWLClausification clausifier=new OWLClausification(m_config);
         DLOntology d=clausifier.clausifyWithKeys(ontologyManager,ontology,descriptionGraphs,keys);
         loadDLOntology(d);
         if (m_config.subsumptionCacheStrategyType==SubsumptionCacheStrategyType.IMMEDIATE)

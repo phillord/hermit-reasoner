@@ -11,7 +11,7 @@ import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.owlapi.structural.OWLAxioms;
-import org.semanticweb.HermiT.owlapi.structural.OwlClausificationd;
+import org.semanticweb.HermiT.owlapi.structural.OWLClausification;
 import org.semanticweb.HermiT.owlapi.structural.OwlNormalization;
 import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLDescription;
@@ -270,7 +270,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
     }
 
     protected Set<String> getDLClauses() throws Exception {
-        OwlClausificationd clausifier=new OwlClausificationd(new Reasoner.Configuration());
+        OWLClausification clausifier=new OWLClausification(new Reasoner.Configuration());
         Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
         DLOntology dlOntology=clausifier.clausify(m_ontologyManager,m_ontology,noDescriptionGraphs);
         Set<String> actualStrings=new HashSet<String>();
