@@ -12,7 +12,7 @@ import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.owlapi.structural.OWLAxioms;
 import org.semanticweb.HermiT.owlapi.structural.OWLClausification;
-import org.semanticweb.HermiT.owlapi.structural.OwlNormalizationd;
+import org.semanticweb.HermiT.owlapi.structural.OWLNormalization;
 import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLDescription;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
@@ -245,7 +245,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
     protected Set<OWLAxiom> getNormalizedAxioms() throws Exception {
         Set<OWLAxiom> axioms=new HashSet<OWLAxiom>();
         OWLAxioms axiomHolder=new OWLAxioms();
-        OwlNormalizationd normalization=new OwlNormalizationd(m_ontologyManager.getOWLDataFactory(),axiomHolder);
+        OWLNormalization normalization=new OWLNormalization(m_ontologyManager.getOWLDataFactory(),axiomHolder);
         normalization.processOntology(new Reasoner.Configuration(),m_ontology);
         for (OWLDescription[] inclusion : axiomHolder.m_conceptInclusions) {
             OWLDescription superDescription;

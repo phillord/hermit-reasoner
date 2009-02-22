@@ -132,7 +132,7 @@ public class OWLClausification implements Serializable {
 
     public DLOntology clausifyOntologiesDisregardImports(OWLOntologyManager ontologyManager,Collection<OWLOntology> ontologies,String resultingDLOntologyURI)  {
         OWLAxioms axioms=new OWLAxioms();
-        OwlNormalizationd normalization = new OwlNormalizationd(ontologyManager.getOWLDataFactory(),axioms);
+        OWLNormalization normalization = new OWLNormalization(ontologyManager.getOWLDataFactory(),axioms);
         Set<OWLClass> allReferencedClasses=new HashSet<OWLClass>();
         Set<OWLIndividual> allReferencedIndividuals=new HashSet<OWLIndividual>();
         Set<OWLDataProperty> allReferencedDataProperties=new HashSet<OWLDataProperty>();
@@ -184,7 +184,7 @@ public class OWLClausification implements Serializable {
             Set<OWLHasKeyDummy> keys) {
 
         OWLAxioms axioms=new OWLAxioms();
-        OwlNormalizationd normalization = new OwlNormalizationd(ontologyManager.getOWLDataFactory(),axioms);
+        OWLNormalization normalization = new OWLNormalization(ontologyManager.getOWLDataFactory(),axioms);
         
         Set<OWLClass> allReferencedClasses=new HashSet<OWLClass>();
         Set<OWLIndividual> allReferencedIndividuals=new HashSet<OWLIndividual>();

@@ -91,7 +91,7 @@ import org.semanticweb.owl.model.SWRLRule;
 /**
  * This class implements the structural transformation from our new tableau paper. This transformation departs in the following way from the paper: it keeps the concepts of the form \exists R.{ a_1, ..., a_n }, \forall R.{ a_1, ..., a_n }, and \forall R.\neg { a } intact. These concepts are then clausified in a more efficient way.
  */
-public class OwlNormalizationd implements Serializable {
+public class OWLNormalization implements Serializable {
     private static final long serialVersionUID=1696339403669197304L;
 
     protected final OWLDataFactory m_factory;
@@ -99,7 +99,7 @@ public class OwlNormalizationd implements Serializable {
     protected final Map<OWLObjectOneOf,OWLClass> m_definitionsForNegativeNominals;
     protected final OWLAxioms m_axioms;
 
-    public OwlNormalizationd(OWLDataFactory factory,OWLAxioms axioms) {
+    public OWLNormalization(OWLDataFactory factory,OWLAxioms axioms) {
         m_factory=factory;
         m_definitions=new HashMap<OWLDescription,OWLDescription>();
         m_definitionsForNegativeNominals=new HashMap<OWLObjectOneOf,OWLClass>();

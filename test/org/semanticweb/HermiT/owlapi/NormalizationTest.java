@@ -6,7 +6,7 @@ import java.util.Set;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.owlapi.structural.OWLAxioms;
 import org.semanticweb.HermiT.owlapi.structural.OWLHasKeyDummy;
-import org.semanticweb.HermiT.owlapi.structural.OwlNormalizationd;
+import org.semanticweb.HermiT.owlapi.structural.OWLNormalization;
 import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLDescription;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
@@ -206,7 +206,7 @@ public class NormalizationTest extends AbstractOWLOntologyTest {
     protected Set<OWLAxiom> getNormalizedAxioms(Set<OWLHasKeyDummy> keys) throws Exception {
         Set<OWLAxiom> axioms=new HashSet<OWLAxiom>();
         OWLAxioms axiomHolder=new OWLAxioms();
-        OwlNormalizationd normalization=new OwlNormalizationd(m_ontologyManager.getOWLDataFactory(),axiomHolder);
+        OWLNormalization normalization=new OWLNormalization(m_ontologyManager.getOWLDataFactory(),axiomHolder);
         if (keys!=null)
             normalization.processKeys(new Reasoner.Configuration(),keys);
         normalization.processOntology(new Reasoner.Configuration(),m_ontology);
