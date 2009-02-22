@@ -132,9 +132,6 @@ public class HermitReasoner implements MonitorableOWLReasoner {
         try {
             clearOntologies();
             ontologies.addAll(inOntologies);
-            String theURI="urn:hermit:kb";
-            if (!ontologies.isEmpty())
-                theURI=ontologies.iterator().next().getURI().toString();
             for (OWLOntology ontology : ontologies) {
                 allReferencedClasses.addAll(ontology.getReferencedClasses());
                 allReferencedIndividuals.addAll(ontology.getReferencedIndividuals());
@@ -150,7 +147,7 @@ public class HermitReasoner implements MonitorableOWLReasoner {
             }
             try {
                 monitor.beginTask("Loading...");
-                hermit=new Reasoner(config,ontologies,theURI);
+                hermit=new Reasoner(config,manager,ontologies,"urn:hermit:kb");
             }
             catch (PluginMonitor.Cancelled e) {
                 // ignore; if we pass it on the user gets a dialog

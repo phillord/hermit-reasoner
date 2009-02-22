@@ -1,5 +1,4 @@
 /*
- * Reasoner
  * 
  * Version 0.5.0
  *
@@ -56,7 +55,6 @@ import org.semanticweb.HermiT.hierarchy.PositionTranslator;
 import org.semanticweb.HermiT.hierarchy.TableauFunc;
 import org.semanticweb.HermiT.hierarchy.TableauSubsumptionChecker;
 import org.semanticweb.HermiT.hierarchy.TranslatedHierarchyPosition;
-import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLClause;
@@ -129,7 +127,6 @@ public class Reasoner implements Serializable {
         public ExistentialStrategyType existentialStrategyType;
         public ParserType parserType;
         public SubsumptionCacheStrategyType subsumptionCacheStrategyType;
-        public boolean clausifyTransitivity;
         public boolean checkClauses;
         public boolean prepareForExpressiveQueries;
         public boolean makeTopRoleUniversal;
@@ -145,7 +142,6 @@ public class Reasoner implements Serializable {
             existentialStrategyType=ExistentialStrategyType.CREATION_ORDER;
             parserType=ParserType.OWLAPI;
             subsumptionCacheStrategyType=SubsumptionCacheStrategyType.IMMEDIATE;
-            clausifyTransitivity=false;
             ignoreUnsupportedDatatypes=false;
             checkClauses=true;
             prepareForExpressiveQueries=false;
@@ -192,14 +188,12 @@ public class Reasoner implements Serializable {
 
     private final Configuration m_config; // never null
     private DLOntology m_dlOntology; // never null
-    private Namespaces namespaces; // never null
+    private Namespaces m_namespaces; // never null
     private Tableau m_tableau; // never null
     private TableauSubsumptionChecker m_subsumptionChecker; // never null
     private Classifier<AtomicConcept> m_classifier;
     private Map<AtomicConcept,HierarchyPosition<AtomicConcept>> m_atomicConceptHierarchy; // may be null; use getAtomicConceptHierarchy
     private Map<AtomicConcept,Set<Individual>> m_realization;
-
-    private transient OwlClausification m_clausifier; // null if loaded through KAON2
 
     public Reasoner(String ontologyURI) throws IllegalArgumentException,LoadingException,OWLException {
         this(new Configuration(),URI.create(ontologyURI));
@@ -228,11 +222,13 @@ public class Reasoner implements Serializable {
      * the resulting ontology contains *EXACTLY* the axioms explciitly present in the supplied ontologies.
      * The resulting DL ontology has the URI resultingDLOntologyURI.
      */
-    public Reasoner(Configuration config,Collection<OWLOntology> ontologies,String resultingDLOntologyURI) {
+    public Reasoner(Configuration config,OWLOntologyManager ontologyManger,Collection<OWLOntology> ontologies,String resultingDLOntologyURI) {
         m_config=config;
-        m_clausifier=new OwlClausification(m_config);
-        DLOntology d=m_clausifier.clausifyOntologiesDisregardImports(ontologies,resultingDLOntologyURI);
+        OwlClausification clausifier=new OwlClausification(m_config);
+        DLOntology d=clausifier.clausifyOntologiesDisregardImports(ontologyManger,ontologies,resultingDLOntologyURI);
         loadDLOntology(d);
+        if (m_config.subsumptionCacheStrategyType==SubsumptionCacheStrategyType.IMMEDIATE)
+            getClassTaxonomy();
     }
 
     /**
@@ -265,11 +261,7 @@ public class Reasoner implements Serializable {
      * Return `true` iff `classUri` occurred in the loaded knowledge base.
      */
     public boolean isClassNameDefined(String classUri) {
-        return m_dlOntology.getAllAtomicConcepts().contains(AtomicConcept.create(classUri))||classUri.equals(AtomicConcept.THING.getURI())||classUri.equals(AtomicConcept.NOTHING.getURI());
-    }
-
-    protected boolean isSatisfiable(AtomicConcept concept) {
-        return m_subsumptionChecker.isSatisfiable(concept);
+        return m_dlOntology.getAllAtomicConcepts().contains(AtomicConcept.create(classUri)) || classUri.equals(AtomicConcept.THING.getURI()) || classUri.equals(AtomicConcept.NOTHING.getURI());
     }
 
     /**
@@ -279,14 +271,14 @@ public class Reasoner implements Serializable {
         // In an inconsistent ontology, HermiT considers all classes as unsatisfiable.
         if (!m_tableau.isABoxSatisfiable())
             return false;
-        return isSatisfiable(AtomicConcept.create(classURI));
+        return m_subsumptionChecker.isSatisfiable(AtomicConcept.create(classURI));
     }
 
     public boolean isClassSatisfiable(OWLDescription desc) {
         // In an inconsistent ontology, HermiT considers all classes as unsatisfiable.
         if (!m_tableau.isABoxSatisfiable())
             return false;
-        return isSatisfiable(define(desc));
+        return m_subsumptionChecker.isSatisfiable(define(desc));
     }
 
     protected boolean isAsymmetric(OWLObjectProperty p) {
@@ -309,25 +301,18 @@ public class Reasoner implements Serializable {
         return m_realization!=null;
     }
 
-    protected boolean isSubsumedBy(AtomicConcept child,AtomicConcept parent) {
-        // For an inconsistent ontology, HermiT answers true for all subsumptions.
-        if (!m_tableau.isABoxSatisfiable())
-            return true;
-        return m_subsumptionChecker.isSubsumedBy(child,parent);
-    }
-
     public boolean isClassSubsumedBy(String childName,String parentName) {
         // For an inconsistent ontology, HermiT answers true for all subsumptions.
         if (!m_tableau.isABoxSatisfiable())
             return true;
-        return isSubsumedBy(AtomicConcept.create(childName),AtomicConcept.create(parentName));
+        return m_subsumptionChecker.isSubsumedBy(AtomicConcept.create(childName),AtomicConcept.create(parentName));
     }
 
     public boolean isSubsumedBy(OWLDescription child,OWLDescription parent) {
         // For an inconsistent ontology, HermiT answers true for all subsumptions.
         if (!m_tableau.isABoxSatisfiable())
             return true;
-        return isSubsumedBy(define(child),define(parent));
+        return m_subsumptionChecker.isSubsumedBy(define(child),define(parent));
     }
 
     protected Map<AtomicRole,HierarchyPosition<AtomicRole>> getAtomicRoleHierarchy() {
@@ -360,17 +345,13 @@ public class Reasoner implements Serializable {
     }
 
     public HierarchyPosition<OWLObjectProperty> getPosition(OWLObjectProperty p) {
-        if (m_clausifier==null) {
-            throw new RuntimeException("OWL API queries require ontology parsing by the OWL API.");
-        }
-        return new TranslatedHierarchyPosition<AtomicRole,OWLObjectProperty>(getPosition(AtomicRole.createObjectRole(p.getURI().toString())),new RoleToOWLObjectProperty(m_clausifier.factory));
+        OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
+        return new TranslatedHierarchyPosition<AtomicRole,OWLObjectProperty>(getPosition(AtomicRole.createObjectRole(p.getURI().toString())),new RoleToOWLObjectProperty(factory));
     }
 
     public HierarchyPosition<OWLDataProperty> getPosition(OWLDataProperty p) {
-        if (m_clausifier==null) {
-            throw new RuntimeException("OWL API queries require ontology parsing by the OWL API.");
-        }
-        return new TranslatedHierarchyPosition<AtomicRole,OWLDataProperty>(getPosition(AtomicRole.createDataRole(p.getURI().toString())),new RoleToOWLDataProperty(m_clausifier.factory));
+        OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
+        return new TranslatedHierarchyPosition<AtomicRole,OWLDataProperty>(getPosition(AtomicRole.createDataRole(p.getURI().toString())),new RoleToOWLDataProperty(factory));
     }
 
     public int getNumberOfConcepts() {
@@ -429,19 +410,10 @@ public class Reasoner implements Serializable {
 
     private AtomicConcept define(OWLDescription desc) {
         if (desc.isAnonymous()) {
-            Set<DLClause> clauses=new HashSet<DLClause>();
-            Set<Atom> positiveFacts=new HashSet<Atom>();
-            Set<Atom> negativeFacts=new HashSet<Atom>();
-            if (m_clausifier==null) {
-                throw new RuntimeException("Complex concept queries require parsing by the OWL API.");
-            }
-            AtomicConcept c=m_clausifier.define(desc,clauses,positiveFacts,negativeFacts);
-            m_tableau.extendWithDefinitions(clauses,positiveFacts,negativeFacts);
-            return c;
+            throw new IllegalArgumentException("Complex descriptions are not supported yet.");
         }
-        else {
+        else
             return AtomicConcept.create(desc.asOWLClass().getURI().toString());
-        }
     }
 
     static class ConceptToString implements Translator<AtomicConcept,String> {
@@ -453,6 +425,403 @@ public class Reasoner implements Serializable {
         }
         public int hashCode() {
             return 0;
+        }
+    }
+
+    public Map<String,HierarchyPosition<String>> getClassTaxonomy() {
+        return new TranslatedMap<AtomicConcept,String,HierarchyPosition<AtomicConcept>,HierarchyPosition<String>>(getAtomicConceptHierarchy(),new ConceptToString(),new StringToConcept(),new PositionTranslator<AtomicConcept,String>(new ConceptToString()));
+    }
+
+    public HierarchyPosition<String> getClassTaxonomyPosition(String className) {
+        if (!isClassNameDefined(className)) {
+            throw new RuntimeException("unrecognized class name '"+className+"'");
+        }
+        return getClassTaxonomy().get(className);
+    }
+
+    public HierarchyPosition<OWLClass> getPosition(OWLDescription description) {
+        OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
+        return new TranslatedHierarchyPosition<AtomicConcept,OWLClass>(getPosition(define(description)),new ConceptToOWLClass(factory));
+    }
+
+    protected HierarchyPosition<AtomicConcept> getMemberships(Individual individual) {
+        OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
+        return getPosition(define(factory.getOWLObjectOneOf(factory.getOWLIndividual(URI.create(individual.getURI())))));
+    }
+
+    public HierarchyPosition<String> getMemberships(String individual) {
+        return new TranslatedHierarchyPosition<AtomicConcept,String>(getMemberships(Individual.create(individual)),new ConceptToString());
+    }
+
+    public HierarchyPosition<OWLClass> getMemberships(OWLIndividual i) {
+        OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
+        return new TranslatedHierarchyPosition<AtomicConcept,OWLClass>(getMemberships(Individual.create(i.getURI().toString())),new ConceptToOWLClass(factory));
+    }
+
+    private Map<AtomicConcept,Set<Individual>> getRealization() {
+        if (m_realization==null) {
+            OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
+            m_realization=new HashMap<AtomicConcept,Set<Individual>>();
+            for (Individual i : m_dlOntology.getAllIndividuals()) {
+                HierarchyPosition<AtomicConcept> p=getPosition(define(factory.getOWLObjectOneOf(factory.getOWLIndividual(URI.create(i.getURI())))));
+                Set<AtomicConcept> parents=p.getEquivalents();
+                if (parents.isEmpty()) {
+                    parents=new HashSet<AtomicConcept>();
+                    for (HierarchyPosition<AtomicConcept> parentPos : p.getParentPositions()) {
+                        parents.addAll(parentPos.getEquivalents());
+                    }
+                }
+                for (AtomicConcept c : parents) {
+                    if (!m_realization.containsKey(c)) {
+                        m_realization.put(c,new HashSet<Individual>());
+                    }
+                    m_realization.get(c).add(i);
+                }
+            }
+        }
+        return m_realization;
+    }
+
+    public Set<String> getDirectMembers(String className) {
+        return new TranslatedSet<Individual,String>(getRealization().get(AtomicConcept.create(className)),new IndividualToString());
+    }
+
+    public Set<String> getMembers(String className) {
+        Set<String> out=new HashSet<String>();
+        for (AtomicConcept c : getPosition(AtomicConcept.create(className)).getDescendants()) {
+            Set<Individual> realizationForConcept=getRealization().get(c);
+            if (realizationForConcept!=null) {
+                for (Individual i : realizationForConcept) {
+                    out.add(i.getURI());
+                }
+            }
+        }
+        return out;
+    }
+
+    public Set<OWLIndividual> getMembers(OWLDescription description) {
+        OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
+        Set<OWLIndividual> out=new HashSet<OWLIndividual>();
+        for (AtomicConcept c : getPosition(define(description)).getDescendants()) {
+            Set<Individual> realizationForConcept=getRealization().get(c);
+            if (realizationForConcept!=null) {
+                for (Individual i : realizationForConcept) {
+                    out.add(factory.getOWLIndividual(URI.create(i.getURI())));
+                }
+            }
+        }
+        return out;
+    }
+
+    public Set<OWLIndividual> getDirectMembers(OWLDescription description) {
+        OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
+        Set<OWLIndividual> out=new HashSet<OWLIndividual>();
+        HierarchyPosition<AtomicConcept> p=getPosition(define(description));
+        Set<AtomicConcept> children=p.getEquivalents();
+        if (children.isEmpty())
+            for (HierarchyPosition<AtomicConcept> childPos : p.getChildPositions())
+                children.addAll(childPos.getEquivalents());
+        for (AtomicConcept c : children) {
+            Set<Individual> realizationForConcept=getRealization().get(c);
+            if (realizationForConcept!=null)
+                for (Individual i : realizationForConcept)
+                    out.add(factory.getOWLIndividual(URI.create(i.getURI())));
+        }
+        return out;
+    }
+
+    public void printSortedAncestorLists(PrintWriter output) {
+        printSortedAncestorLists(output,getClassTaxonomy());
+    }
+
+    public static void printSortedAncestorLists(PrintWriter output,Map<String,HierarchyPosition<String>> taxonomy) {
+        Map<String,Set<String>> flat=new TreeMap<String,Set<String>>();
+        for (Map.Entry<String,HierarchyPosition<String>> e : taxonomy.entrySet()) {
+            flat.put(e.getKey(),new TreeSet<String>(e.getValue().getAncestors()));
+        }
+        try {
+            for (Map.Entry<String,Set<String>> e : flat.entrySet()) {
+                output.println(e.getKey());
+                for (String ancestor : e.getValue()) {
+                    output.print("    ");
+                    output.println(ancestor);
+                }
+                output.println("--------------------------------");
+            }
+            output.println("! THE END !");
+        }
+        finally {
+            output.flush();
+        }
+    }
+
+    protected void loadOntology(URI physicalURI,Set<DescriptionGraph> descriptionGraphs,Set<OWLHasKeyDummy> keys) throws IllegalArgumentException,LoadingException,OWLException {
+        switch (m_config.parserType) {
+        case KAON2:
+            {
+                Clausifier clausifier=null;
+                try {
+                    clausifier=(Clausifier)Class.forName("org.semanticweb.HermiT.kaon2.Clausifier").newInstance();
+                }
+                catch (ClassNotFoundException e) {
+                    throw new RuntimeException("Unable to load KAON2 library",e);
+                }
+                catch (NoClassDefFoundError e) {
+                    // This seems to be the one that comes up with no KAON2 available
+                    throw new RuntimeException("Unable to load KAON2 library",e);
+                }
+                catch (InstantiationException e) {
+                    throw new RuntimeException("Unable to load KAON2 library",e);
+                }
+                catch (IllegalAccessException e) {
+                    throw new RuntimeException("Unable to load KAON2 library",e);
+                }
+                loadDLOntology(clausifier.loadFromURI(physicalURI,null));
+                if (m_config.subsumptionCacheStrategyType==SubsumptionCacheStrategyType.IMMEDIATE)
+                    getClassTaxonomy();
+            }
+            break;
+        case OWLAPI:
+            {
+                OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
+                OWLOntology ontology=ontologyManager.loadOntologyFromPhysicalURI(physicalURI);
+                loadOWLOntology(ontologyManager,ontology,descriptionGraphs,keys);
+            }
+            break;
+        default:
+            throw new IllegalArgumentException("unknown parser library requested");
+        }
+    }
+
+    /**
+     * TEST PURPOSES ONLY, till the OWL API supports keys.
+     * 
+     * @param ontology
+     *            an OWL API loaded ontology
+     * @param descriptionGraphs
+     *            description graphs
+     * @param keys
+     *            a set of HasKey axioms
+     * @throws OWLException
+     */
+    protected void loadOWLOntology(OWLOntologyManager ontologyManager,OWLOntology ontology,Set<DescriptionGraph> descriptionGraphs,Set<OWLHasKeyDummy> keys) {
+        if (descriptionGraphs==null)
+            descriptionGraphs=Collections.emptySet();
+        if (keys==null)
+            keys=Collections.emptySet();
+        OwlClausification clausifier=new OwlClausification(m_config);
+        DLOntology d=clausifier.clausifyWithKeys(ontologyManager,ontology,descriptionGraphs,keys);
+        loadDLOntology(d);
+        if (m_config.subsumptionCacheStrategyType==SubsumptionCacheStrategyType.IMMEDIATE)
+            getClassTaxonomy();
+    }
+
+    protected void loadDLOntology(File file) throws Exception {
+        BufferedInputStream input=new BufferedInputStream(new FileInputStream(file));
+        try {
+            loadDLOntology(DLOntology.load(input));
+        }
+        finally {
+            input.close();
+        }
+        if (m_config.subsumptionCacheStrategyType==SubsumptionCacheStrategyType.IMMEDIATE)
+            getClassTaxonomy();
+    }
+
+    protected void loadDLOntology(DLOntology dlOntology) throws IllegalArgumentException {
+        if (!dlOntology.canUseNIRule() && dlOntology.hasAtMostRestrictions() && dlOntology.hasInverseRoles() && (m_config.existentialStrategyType==ExistentialStrategyType.INDIVIDUAL_REUSE))
+            throw new IllegalArgumentException("The supplied DL-onyology is not compatible with the individual reuse strategy.");
+
+        Map<String,String> namespaceDecl=new HashMap<String,String>();
+        namespaceDecl.put("",dlOntology.getOntologyURI()+"#");
+        m_namespaces=InternalNames.withInternalNamespaces(new Namespaces(namespaceDecl,Namespaces.semanticWebNamespaces));
+
+        if (m_config.checkClauses) {
+            Collection<DLClause> nonAdmissibleDLClauses=dlOntology.getNonadmissibleDLClauses();
+            if (!nonAdmissibleDLClauses.isEmpty()) {
+                String CRLF=System.getProperty("line.separator");
+                StringBuffer buffer=new StringBuffer();
+                buffer.append("The following DL-clauses in the DL-ontology"+" are not admissible:");
+                buffer.append(CRLF);
+                for (DLClause dlClause : nonAdmissibleDLClauses) {
+                    buffer.append(dlClause.toString(m_namespaces));
+                    buffer.append(CRLF);
+                }
+                throw new IllegalArgumentException(buffer.toString());
+            }
+        }
+        m_dlOntology=dlOntology;
+
+        TableauMonitor wellKnownTableauMonitor=null;
+        switch (m_config.tableauMonitorType) {
+        case NONE:
+            wellKnownTableauMonitor=null;
+            break;
+        case TIMING:
+            wellKnownTableauMonitor=new Timer();
+            break;
+        case TIMING_WITH_PAUSE:
+            wellKnownTableauMonitor=new TimerWithPause();
+            break;
+        case DEBUGGER_HISTORY_ON:
+            wellKnownTableauMonitor=new Debugger(m_namespaces,true);
+            break;
+        case DEBUGGER_NO_HISTORY:
+            wellKnownTableauMonitor=new Debugger(m_namespaces,false);
+            break;
+        default:
+            throw new IllegalArgumentException("Unknown monitor type");
+        }
+
+        TableauMonitor tableauMonitor=null;
+        if (m_config.monitor==null)
+            tableauMonitor=wellKnownTableauMonitor;
+        else if (wellKnownTableauMonitor==null)
+            tableauMonitor=m_config.monitor;
+        else
+            tableauMonitor=new TableauMonitorFork(wellKnownTableauMonitor,m_config.monitor);
+
+        DirectBlockingChecker directBlockingChecker=null;
+        switch (m_config.directBlockingType) {
+        case OPTIMAL:
+            if (m_config.prepareForExpressiveQueries) {
+                directBlockingChecker=new PairwiseDirectBlockingCheckerWithReflexivity();
+            }
+            else if (m_dlOntology.hasAtMostRestrictions() && m_dlOntology.hasInverseRoles()) {
+                if (m_dlOntology.hasReflexifity()) {
+                    directBlockingChecker=new PairwiseDirectBlockingCheckerWithReflexivity();
+                }
+                else {
+                    directBlockingChecker=new PairWiseDirectBlockingChecker();
+                }
+            }
+            else {
+                directBlockingChecker=new SingleDirectBlockingChecker();
+            }
+            break;
+        case SINGLE:
+            directBlockingChecker=new SingleDirectBlockingChecker();
+            break;
+        case PAIR_WISE:
+            directBlockingChecker=new PairWiseDirectBlockingChecker();
+            break;
+        case PAIR_WISE_REFLEXIVE:
+            directBlockingChecker=new PairwiseDirectBlockingCheckerWithReflexivity();
+            break;
+        default:
+            throw new IllegalArgumentException("Unknown direct blocking type.");
+        }
+
+        BlockingSignatureCache blockingSignatureCache=null;
+        if (!dlOntology.hasNominals()) {
+            switch (m_config.blockingSignatureCacheType) {
+            case CACHED:
+                blockingSignatureCache=new BlockingSignatureCache(directBlockingChecker);
+                break;
+            case NOT_CACHED:
+                blockingSignatureCache=null;
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown blocking cache type.");
+            }
+        }
+
+        BlockingStrategy blockingStrategy=null;
+        switch (m_config.blockingStrategyType) {
+        case ANCESTOR:
+            blockingStrategy=new AncestorBlocking(directBlockingChecker,blockingSignatureCache);
+            break;
+        case ANYWHERE:
+            blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
+            break;
+        default:
+            throw new IllegalArgumentException("Unknown blocking strategy type.");
+        }
+
+        ExpansionStrategy existentialsExpansionStrategy=null;
+        switch (m_config.existentialStrategyType) {
+        case CREATION_ORDER:
+            existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
+            break;
+        case DEPTH_FIRST:
+            existentialsExpansionStrategy=new DepthFirstStrategy(blockingStrategy);
+            break;
+        case EL:
+            existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,true);
+            break;
+        case INDIVIDUAL_REUSE:
+            existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,false);
+            break;
+        default:
+            throw new IllegalArgumentException("Unknown expansion strategy type.");
+        }
+
+        m_tableau=new Tableau(tableauMonitor,existentialsExpansionStrategy,m_dlOntology,m_config.makeTopRoleUniversal,m_config.parameters);
+        m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
+        m_classifier=new Classifier<AtomicConcept>(new TableauFunc(m_subsumptionChecker));
+    }
+
+    public void outputClauses(PrintWriter output,Namespaces namespaces) {
+        output.println(m_dlOntology.toString(namespaces));
+    }
+
+    public Namespaces getNamespaces() {
+        return m_namespaces;
+    }
+
+    public void save(File file) throws IOException {
+        OutputStream outputStream=new BufferedOutputStream(new FileOutputStream(file));
+        try {
+            save(outputStream);
+        }
+        finally {
+            outputStream.close();
+        }
+    }
+
+    public void save(OutputStream outputStream) throws IOException {
+        ObjectOutputStream objectOutputStream=new ObjectOutputStream(outputStream);
+        objectOutputStream.writeObject(this);
+        objectOutputStream.flush();
+    }
+
+    /**
+     * Creates an ObjectInputStream from the given input stream and tries to read (deserialise) a (serialised) Reasoner object from the stream.
+     * 
+     * @param inputStream
+     *            an input stream that contains a Reasoner object
+     * @return the instance of Reasoner as read from the given input stream
+     * @throws IOException
+     *             if an IOException occurs or if the Reasoner class cannot be found
+     */
+    public static Reasoner load(InputStream inputStream) throws IOException {
+        try {
+            ObjectInputStream objectInputStream=new ObjectInputStream(inputStream);
+            return (Reasoner)objectInputStream.readObject();
+        }
+        catch (ClassNotFoundException e) {
+            IOException error=new IOException();
+            error.initCause(e);
+            throw error;
+        }
+    }
+
+    /**
+     * Tries to deserialize a Reasoner object from the given file.
+     * 
+     * @param file
+     *            a file that contains the serialisation of a Reasoner object
+     * @return the deserialzed Reasoner object
+     * @throws IOException
+     *             if the file cannot be read or does not contain a searialized Reasoner object
+     */
+    public static Reasoner load(File file) throws IOException {
+        InputStream inputStream=new BufferedInputStream(new FileInputStream(file));
+        try {
+            return load(inputStream);
+        }
+        finally {
+            inputStream.close();
         }
     }
 
@@ -553,405 +922,4 @@ public class Reasoner implements Serializable {
             return 0;
         }
     }
-
-    public Map<String,HierarchyPosition<String>> getClassTaxonomy() {
-        return new TranslatedMap<AtomicConcept,String,HierarchyPosition<AtomicConcept>,HierarchyPosition<String>>(getAtomicConceptHierarchy(),new ConceptToString(),new StringToConcept(),new PositionTranslator<AtomicConcept,String>(new ConceptToString()));
-    }
-
-    public HierarchyPosition<String> getClassTaxonomyPosition(String className) {
-        if (!isClassNameDefined(className)) {
-            throw new RuntimeException("unrecognized class name '"+className+"'");
-        }
-        return getClassTaxonomy().get(className);
-    }
-
-    public HierarchyPosition<OWLClass> getPosition(OWLDescription description) {
-        if (m_clausifier==null) {
-            throw new RuntimeException("OWL API queries require ontology parsing by the OWL API.");
-        }
-        return new TranslatedHierarchyPosition<AtomicConcept,OWLClass>(getPosition(define(description)),new ConceptToOWLClass(m_clausifier.factory));
-    }
-
-    protected HierarchyPosition<AtomicConcept> getMemberships(Individual individual) {
-        if (m_clausifier==null) {
-            throw new RuntimeException("Individual queries require parsing by the OWL API.");
-        }
-        return getPosition(define(m_clausifier.factory.getOWLObjectOneOf(m_clausifier.factory.getOWLIndividual(URI.create(individual.getURI())))));
-    }
-
-    public HierarchyPosition<String> getMemberships(String individual) {
-        return new TranslatedHierarchyPosition<AtomicConcept,String>(getMemberships(Individual.create(individual)),new ConceptToString());
-    }
-
-    public HierarchyPosition<OWLClass> getMemberships(OWLIndividual i) {
-        return new TranslatedHierarchyPosition<AtomicConcept,OWLClass>(getMemberships(Individual.create(i.getURI().toString())),new ConceptToOWLClass(m_clausifier.factory));
-    }
-
-    private Map<AtomicConcept,Set<Individual>> getRealization() {
-        if (m_realization==null) {
-            m_realization=new HashMap<AtomicConcept,Set<Individual>>();
-            for (Individual i : m_dlOntology.getAllIndividuals()) {
-                HierarchyPosition<AtomicConcept> p=getPosition(define(m_clausifier.factory.getOWLObjectOneOf(m_clausifier.factory.getOWLIndividual(URI.create(i.getURI())))));
-                Set<AtomicConcept> parents=p.getEquivalents();
-                if (parents.isEmpty()) {
-                    parents=new HashSet<AtomicConcept>();
-                    for (HierarchyPosition<AtomicConcept> parentPos : p.getParentPositions()) {
-                        parents.addAll(parentPos.getEquivalents());
-                    }
-                }
-                for (AtomicConcept c : parents) {
-                    if (!m_realization.containsKey(c)) {
-                        m_realization.put(c,new HashSet<Individual>());
-                    }
-                    m_realization.get(c).add(i);
-                }
-            }
-        }
-        return m_realization;
-    }
-
-    public Set<String> getDirectMembers(String className) {
-        return new TranslatedSet<Individual,String>(getRealization().get(AtomicConcept.create(className)),new IndividualToString());
-    }
-
-    public Set<String> getMembers(String className) {
-        Set<String> out=new HashSet<String>();
-        for (AtomicConcept c : getPosition(AtomicConcept.create(className)).getDescendants()) {
-            Set<Individual> realizationForConcept=getRealization().get(c);
-            if (realizationForConcept!=null) {
-                for (Individual i : realizationForConcept) {
-                    out.add(i.getURI());
-                }
-            }
-        }
-        return out;
-    }
-
-    public Set<OWLIndividual> getMembers(OWLDescription description) {
-        Set<OWLIndividual> out=new HashSet<OWLIndividual>();
-        for (AtomicConcept c : getPosition(define(description)).getDescendants()) {
-            Set<Individual> realizationForConcept=getRealization().get(c);
-            if (realizationForConcept!=null) {
-                for (Individual i : realizationForConcept) {
-                    out.add(m_clausifier.factory.getOWLIndividual(URI.create(i.getURI())));
-                }
-            }
-        }
-        return out;
-    }
-
-    public Set<OWLIndividual> getDirectMembers(OWLDescription description) {
-        Set<OWLIndividual> out=new HashSet<OWLIndividual>();
-        HierarchyPosition<AtomicConcept> p=getPosition(define(description));
-        Set<AtomicConcept> children=p.getEquivalents();
-        if (children.isEmpty()) {
-            for (HierarchyPosition<AtomicConcept> childPos : p.getChildPositions()) {
-                children.addAll(childPos.getEquivalents());
-            }
-        }
-        for (AtomicConcept c : children) {
-            Set<Individual> realizationForConcept=getRealization().get(c);
-            if (realizationForConcept!=null) {
-                for (Individual i : realizationForConcept) {
-                    out.add(m_clausifier.factory.getOWLIndividual(URI.create(i.getURI())));
-                }
-            }
-        }
-        return out;
-    }
-
-    public void printSortedAncestorLists(PrintWriter output) {
-        printSortedAncestorLists(output,getClassTaxonomy());
-    }
-
-    public static void printSortedAncestorLists(PrintWriter output,Map<String,HierarchyPosition<String>> taxonomy) {
-        Map<String,Set<String>> flat=new TreeMap<String,Set<String>>();
-        for (Map.Entry<String,HierarchyPosition<String>> e : taxonomy.entrySet()) {
-            flat.put(e.getKey(),new TreeSet<String>(e.getValue().getAncestors()));
-        }
-        try {
-            for (Map.Entry<String,Set<String>> e : flat.entrySet()) {
-                output.println(e.getKey());
-                for (String ancestor : e.getValue()) {
-                    output.print("    ");
-                    output.println(ancestor);
-                }
-                output.println("--------------------------------");
-            }
-            output.println("! THE END !");
-        }
-        finally {
-            output.flush();
-        }
-    }
-
-    protected void loadOntology(URI physicalURI,Set<DescriptionGraph> descriptionGraphs,Set<OWLHasKeyDummy> keys) throws IllegalArgumentException,LoadingException,OWLException {
-        switch (m_config.parserType) {
-        case KAON2: {
-            Clausifier clausifier=null;
-            try {
-                clausifier=(Clausifier)Class.forName("org.semanticweb.HermiT.kaon2.Clausifier").newInstance();
-            }
-            catch (ClassNotFoundException e) {
-                throw new RuntimeException("Unable to load KAON2 library",e);
-            }
-            catch (NoClassDefFoundError e) {
-                // This seems to be the one that comes up with no KAON2 available
-                throw new RuntimeException("Unable to load KAON2 library",e);
-            }
-            catch (InstantiationException e) {
-                throw new RuntimeException("Unable to load KAON2 library",e);
-            }
-            catch (IllegalAccessException e) {
-                throw new RuntimeException("Unable to load KAON2 library",e);
-            }
-            loadDLOntology(clausifier.loadFromURI(physicalURI,null));
-        }
-            break;
-        case OWLAPI: {
-            OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
-            OWLOntology ontology=ontologyManager.loadOntologyFromPhysicalURI(physicalURI);
-            loadOWLOntology(ontologyManager,ontology,descriptionGraphs,keys);
-        }
-            break;
-        default:
-            throw new IllegalArgumentException("unknown parser library requested");
-        }
-    }
-
-    /**
-     * TEST PURPOSES ONLY, till the OWL API supports keys.
-     * 
-     * @param ontology
-     *            an OWL API loaded ontology
-     * @param descriptionGraphs
-     *            description graphs
-     * @param keys
-     *            a set of HasKey axioms
-     * @throws OWLException
-     */
-    protected void loadOWLOntology(OWLOntologyManager ontologyManager,OWLOntology ontology,Set<DescriptionGraph> descriptionGraphs,Set<OWLHasKeyDummy> keys) {
-        if (descriptionGraphs==null)
-            descriptionGraphs=Collections.emptySet();
-        if (keys==null)
-            keys=Collections.emptySet();
-        m_clausifier=new OwlClausification(m_config);
-        DLOntology d=m_clausifier.clausifyWithKeys(ontologyManager,ontology,descriptionGraphs,keys);
-        loadDLOntology(d);
-    }
-
-    protected void loadDLOntology(File file) throws Exception {
-        BufferedInputStream input=new BufferedInputStream(new FileInputStream(file));
-        try {
-            loadDLOntology(DLOntology.load(input));
-        }
-        finally {
-            input.close();
-        }
-    }
-
-    protected void loadDLOntology(DLOntology dlOntology) throws IllegalArgumentException {
-        if (!dlOntology.canUseNIRule()&&dlOntology.hasAtMostRestrictions()&&dlOntology.hasInverseRoles()&&(m_config.existentialStrategyType==ExistentialStrategyType.INDIVIDUAL_REUSE)) {
-            throw new IllegalArgumentException("The supplied DL-onyology is not compatible"+" with the individual reuse strategy.");
-        }
-
-        Map<String,String> namespaceDecl=new HashMap<String,String>();
-        namespaceDecl.put("",dlOntology.getOntologyURI()+"#");
-        namespaces=InternalNames.withInternalNamespaces(new Namespaces(namespaceDecl,Namespaces.semanticWebNamespaces));
-
-        if (m_config.checkClauses) {
-            Collection<DLClause> nonAdmissibleDLClauses=dlOntology.getNonadmissibleDLClauses();
-            if (!nonAdmissibleDLClauses.isEmpty()) {
-                String CRLF=System.getProperty("line.separator");
-                StringBuffer buffer=new StringBuffer();
-                buffer.append("The following DL-clauses in the DL-ontology"+" are not admissible:");
-                buffer.append(CRLF);
-                for (DLClause dlClause : nonAdmissibleDLClauses) {
-                    buffer.append(dlClause.toString(namespaces));
-                    buffer.append(CRLF);
-                }
-                throw new IllegalArgumentException(buffer.toString());
-            }
-        }
-        m_dlOntology=dlOntology;
-
-        TableauMonitor wellKnownTableauMonitor=null;
-        switch (m_config.tableauMonitorType) {
-        case NONE:
-            wellKnownTableauMonitor=null;
-            break;
-        case TIMING:
-            wellKnownTableauMonitor=new Timer();
-            break;
-        case TIMING_WITH_PAUSE:
-            wellKnownTableauMonitor=new TimerWithPause();
-            break;
-        case DEBUGGER_HISTORY_ON:
-            wellKnownTableauMonitor=new Debugger(namespaces,true);
-            break;
-        case DEBUGGER_NO_HISTORY:
-            wellKnownTableauMonitor=new Debugger(namespaces,false);
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown monitor type");
-        }
-
-        TableauMonitor tableauMonitor=null;
-        if (m_config.monitor==null) {
-            tableauMonitor=wellKnownTableauMonitor;
-        }
-        else if (wellKnownTableauMonitor==null) {
-            tableauMonitor=m_config.monitor;
-        }
-        else {
-            tableauMonitor=new TableauMonitorFork(wellKnownTableauMonitor,m_config.monitor);
-        }
-
-        DirectBlockingChecker directBlockingChecker=null;
-        switch (m_config.directBlockingType) {
-        case OPTIMAL:
-            if (m_config.prepareForExpressiveQueries) {
-                directBlockingChecker=new PairwiseDirectBlockingCheckerWithReflexivity();
-            }
-            else if (m_dlOntology.hasAtMostRestrictions()&&m_dlOntology.hasInverseRoles()) {
-                if (m_dlOntology.hasReflexifity()) {
-                    directBlockingChecker=new PairwiseDirectBlockingCheckerWithReflexivity();
-                }
-                else {
-                    directBlockingChecker=new PairWiseDirectBlockingChecker();
-                }
-            }
-            else {
-                directBlockingChecker=new SingleDirectBlockingChecker();
-            }
-            break;
-        case SINGLE:
-            directBlockingChecker=new SingleDirectBlockingChecker();
-            break;
-        case PAIR_WISE:
-            directBlockingChecker=new PairWiseDirectBlockingChecker();
-            break;
-        case PAIR_WISE_REFLEXIVE:
-            directBlockingChecker=new PairwiseDirectBlockingCheckerWithReflexivity();
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown direct blocking type.");
-        }
-
-        BlockingSignatureCache blockingSignatureCache=null;
-        if (!dlOntology.hasNominals()) {
-            switch (m_config.blockingSignatureCacheType) {
-            case CACHED:
-                blockingSignatureCache=new BlockingSignatureCache(directBlockingChecker);
-                break;
-            case NOT_CACHED:
-                blockingSignatureCache=null;
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown blocking cache type.");
-            }
-        }
-
-        BlockingStrategy blockingStrategy=null;
-        switch (m_config.blockingStrategyType) {
-        case ANCESTOR:
-            blockingStrategy=new AncestorBlocking(directBlockingChecker,blockingSignatureCache);
-            break;
-        case ANYWHERE:
-            blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown blocking strategy type.");
-        }
-
-        ExpansionStrategy existentialsExpansionStrategy=null;
-        switch (m_config.existentialStrategyType) {
-        case CREATION_ORDER:
-            existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
-            break;
-        case DEPTH_FIRST:
-            existentialsExpansionStrategy=new DepthFirstStrategy(blockingStrategy);
-            break;
-        case EL:
-            existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,true);
-            break;
-        case INDIVIDUAL_REUSE:
-            existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,false);
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown expansion strategy type.");
-        }
-
-        m_tableau=new Tableau(tableauMonitor,existentialsExpansionStrategy,m_dlOntology,m_config.makeTopRoleUniversal,m_config.parameters);
-        m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
-        m_classifier=new Classifier<AtomicConcept>(new TableauFunc(m_subsumptionChecker));
-        if (m_config.subsumptionCacheStrategyType==SubsumptionCacheStrategyType.IMMEDIATE) {
-            getClassTaxonomy();
-        }
-    }
-
-    public void outputClauses(PrintWriter output,Namespaces namespaces) {
-        output.println(m_dlOntology.toString(namespaces));
-    }
-
-    public Namespaces getNamespaces() {
-        return namespaces;
-    }
-
-    public void save(File file) throws IOException {
-        OutputStream outputStream=new BufferedOutputStream(new FileOutputStream(file));
-        try {
-            save(outputStream);
-        }
-        finally {
-            outputStream.close();
-        }
-    }
-
-    public void save(OutputStream outputStream) throws IOException {
-        ObjectOutputStream objectOutputStream=new ObjectOutputStream(outputStream);
-        objectOutputStream.writeObject(this);
-        objectOutputStream.flush();
-    }
-
-    /**
-     * Creates an ObjectInputStream from the given input stream and tries to read (deserialise) a (serialised) Reasoner object from the stream.
-     * 
-     * @param inputStream
-     *            an input stream that contains a Reasoner object
-     * @return the instance of Reasoner as read from the given input stream
-     * @throws IOException
-     *             if an IOException occurs or if the Reasoner class cannot be found
-     */
-    public static Reasoner load(InputStream inputStream) throws IOException {
-        try {
-            ObjectInputStream objectInputStream=new ObjectInputStream(inputStream);
-            return (Reasoner)objectInputStream.readObject();
-        }
-        catch (ClassNotFoundException e) {
-            IOException error=new IOException();
-            error.initCause(e);
-            throw error;
-        }
-    }
-
-    /**
-     * Tries to deserialize a Reasoner object from the given file.
-     * 
-     * @param file
-     *            a file that contains the serialisation of a Reasoner object
-     * @return the deserialzed Reasoner object
-     * @throws IOException
-     *             if the file cannot be read or does not contain a searialized Reasoner object
-     */
-    public static Reasoner load(File file) throws IOException {
-        InputStream inputStream=new BufferedInputStream(new FileInputStream(file));
-        try {
-            return load(inputStream);
-        }
-        finally {
-            inputStream.close();
-        }
-    }
-
 }

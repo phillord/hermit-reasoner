@@ -115,13 +115,9 @@ public class OwlClausification implements Serializable {
     protected static final org.semanticweb.HermiT.model.Variable Y = org.semanticweb.HermiT.model.Variable.create("Y");
     protected static final org.semanticweb.HermiT.model.Variable Z = org.semanticweb.HermiT.model.Variable.create("Z");
     protected final Reasoner.Configuration config;
-    public OWLDataFactory factory;
-    private OwlNormalization normalization;
     private int amqOffset; // the number of negative at-most replacements already performed
     
     public OwlClausification(Reasoner.Configuration config) {
-        this.factory = OWLManager.createOWLOntologyManager().getOWLDataFactory();
-        normalization = new OwlNormalization(factory);
         amqOffset = 0;
         this.config = config;
     }
@@ -134,7 +130,9 @@ public class OwlClausification implements Serializable {
         return clausifyWithKeys(ontologyManager, ontology, descriptionGraphs, noKeys);
     }
 
-    public DLOntology clausifyOntologiesDisregardImports(Collection<OWLOntology> ontologies,String resultingDLOntologyURI)  {
+    public DLOntology clausifyOntologiesDisregardImports(OWLOntologyManager ontologyManager,Collection<OWLOntology> ontologies,String resultingDLOntologyURI)  {
+        OWLAxioms axioms=new OWLAxioms();
+        OwlNormalization normalization = new OwlNormalization(ontologyManager.getOWLDataFactory(),axioms);
         Set<OWLClass> allReferencedClasses=new HashSet<OWLClass>();
         Set<OWLIndividual> allReferencedIndividuals=new HashSet<OWLIndividual>();
         Set<OWLDataProperty> allReferencedDataProperties=new HashSet<OWLDataProperty>();
@@ -146,19 +144,22 @@ public class OwlClausification implements Serializable {
             allReferencedDataProperties.addAll(ontology.getReferencedDataProperties());
             allReferencedObjectProperties.addAll(ontology.getReferencedObjectProperties());
         }
+        TransitivityManager transitivityManager=new TransitivityManager(ontologyManager.getOWLDataFactory());
+        transitivityManager.rewriteConceptInclusions(axioms);
         Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
-        return clausify(resultingDLOntologyURI,
-                normalization.getConceptInclusions(),
-                normalization.getObjectPropertyInclusions(),
-                normalization.getDataPropertyInclusions(),
-                normalization.getAsymmetricObjectProperties(),
-                normalization.getReflexiveObjectProperties(),
-                normalization.getIrreflexiveObjectProperties(),
-                normalization.getTransitiveObjectProperties(),
-                normalization.getDisjointObjectProperties(),
-                normalization.getDisjointDataProperties(),
-                normalization.getHasKeys(),
-                normalization.getFacts(),
+        return clausify(
+                ontologyManager.getOWLDataFactory(),
+                resultingDLOntologyURI,
+                axioms.m_conceptInclusions,
+                axioms.m_objectPropertyInclusions,
+                axioms.m_dataPropertyInclusions,
+                axioms.m_asymmetricObjectProperties,
+                axioms.m_reflexiveObjectProperties,
+                axioms.m_irreflexiveObjectProperties,
+                axioms.m_disjointObjectProperties,
+                axioms.m_disjointDataProperties,
+                axioms.m_hasKeys,
+                axioms.m_facts,
                 noDescriptionGraphs,
                 allReferencedClasses,
                 allReferencedIndividuals,
@@ -182,6 +183,9 @@ public class OwlClausification implements Serializable {
             Collection<DescriptionGraph> descriptionGraphs, 
             Set<OWLHasKeyDummy> keys) {
 
+        OWLAxioms axioms=new OWLAxioms();
+        OwlNormalization normalization = new OwlNormalization(ontologyManager.getOWLDataFactory(),axioms);
+        
         Set<OWLClass> allReferencedClasses=new HashSet<OWLClass>();
         Set<OWLIndividual> allReferencedIndividuals=new HashSet<OWLIndividual>();
         Set<OWLDataProperty> allReferencedDataProperties=new HashSet<OWLDataProperty>();
@@ -192,30 +196,35 @@ public class OwlClausification implements Serializable {
         toProcess.add(ontology);
         while (!toProcess.isEmpty()) {
             OWLOntology anOntology = toProcess.remove(toProcess.size() - 1);
-            processedOntologies.add(anOntology);
-            for (OWLOntology importedOntology : anOntology.getImports(ontologyManager))
-                if (!processedOntologies.contains(importedOntology))
-                    toProcess.add(importedOntology);
-            normalization.processOntology(config, anOntology);
-            allReferencedClasses.addAll(ontology.getReferencedClasses());
-            allReferencedIndividuals.addAll(ontology.getReferencedIndividuals());
-            allReferencedDataProperties.addAll(ontology.getReferencedDataProperties());
-            allReferencedObjectProperties.addAll(ontology.getReferencedObjectProperties());
+            if (!processedOntologies.contains(anOntology)) {
+                toProcess.addAll(anOntology.getImports(ontologyManager));
+                normalization.processOntology(config, anOntology);
+                allReferencedClasses.addAll(anOntology.getReferencedClasses());
+                allReferencedIndividuals.addAll(anOntology.getReferencedIndividuals());
+                allReferencedDataProperties.addAll(anOntology.getReferencedDataProperties());
+                allReferencedObjectProperties.addAll(anOntology.getReferencedObjectProperties());
+                processedOntologies.add(anOntology);
+            }
         }
         normalization.processKeys(config, keys);
-        
-        return clausify(ontology.getURI().toString(),
-                normalization.getConceptInclusions(),
-                normalization.getObjectPropertyInclusions(),
-                normalization.getDataPropertyInclusions(),
-                normalization.getAsymmetricObjectProperties(),
-                normalization.getReflexiveObjectProperties(),
-                normalization.getIrreflexiveObjectProperties(),
-                normalization.getTransitiveObjectProperties(),
-                normalization.getDisjointObjectProperties(),
-                normalization.getDisjointDataProperties(),
-                normalization.getHasKeys(),
-                normalization.getFacts(), descriptionGraphs,
+
+        TransitivityManager transitivityManager=new TransitivityManager(ontologyManager.getOWLDataFactory());
+        transitivityManager.rewriteConceptInclusions(axioms);
+
+        return clausify(
+                ontologyManager.getOWLDataFactory(),
+                ontology.getURI().toString(),
+                axioms.m_conceptInclusions,
+                axioms.m_objectPropertyInclusions,
+                axioms.m_dataPropertyInclusions,
+                axioms.m_asymmetricObjectProperties,
+                axioms.m_reflexiveObjectProperties,
+                axioms.m_irreflexiveObjectProperties,
+                axioms.m_disjointObjectProperties,
+                axioms.m_disjointDataProperties,
+                axioms.m_hasKeys,
+                axioms.m_facts,
+                descriptionGraphs,
                 allReferencedClasses,
                 allReferencedIndividuals,
                 allReferencedDataProperties,
@@ -283,16 +292,17 @@ public class OwlClausification implements Serializable {
     }
 
 
-    protected DLOntology clausify(String ontologyURI,
+    protected DLOntology clausify(
+            OWLDataFactory factory,
+            String ontologyURI,
             Collection<OWLDescription[]> conceptInclusions,
             Collection<OWLObjectPropertyExpression[]> objectPropertyInclusions,
             Collection<OWLDataPropertyExpression[]> dataPropertyInclusions,
             Set<OWLObjectPropertyExpression> asymmetricObjectProperties,
             Set<OWLObjectPropertyExpression> reflexiveObjectProperties,
             Set<OWLObjectPropertyExpression> irreflexiveObjectProperties,
-            Set<OWLObjectPropertyExpression> transitiveObjectProperties,
-            Set<OWLObjectPropertyExpression[]> disjointObjectProperties,
-            Set<OWLDataPropertyExpression[]> disjointDataProperties,
+            Collection<OWLObjectPropertyExpression[]> disjointObjectProperties,
+            Collection<OWLDataPropertyExpression[]> disjointDataProperties,
             Set<OWLHasKeyDummy> hasKeys, 
             Collection<OWLIndividualAxiom> facts,
             Collection<DescriptionGraph> descriptionGraphs,
@@ -326,15 +336,6 @@ public class OwlClausification implements Serializable {
             DLClause dlClause = DLClause.create(new Atom[] { superRoleAtom },
                     new Atom[] { subRoleAtom });
             dlClauses.add(dlClause);
-        }
-        if (config.clausifyTransitivity) {
-            for (OWLObjectPropertyExpression prop : transitiveObjectProperties) {
-                DLClause dlClause = DLClause.create(
-                    new Atom[] { getRoleAtom(prop, Y, Z) },
-                    new Atom[] { getRoleAtom(prop, Y, X),
-                                 getRoleAtom(prop, X, Z) });
-                dlClauses.add(dlClause);
-            }
         }
         for (OWLDataPropertyExpression[] inclusion : dataPropertyInclusions) {
             Atom subProp = getDataPropertyAtom(inclusion[0], X, Y);
@@ -459,50 +460,6 @@ public class OwlClausification implements Serializable {
                 determineExpressivity.m_hasDatatypes);
     }
     
-    /**
-     * Constructs clauses and facts which make the atomic concept returned
-     * equivalent to `desc`.
-     * 
-     * Note that we introduce new names for sub-concepts the first time they
-     * are encountered, and produce new clauses for definitions of these sub-
-     * concepts. If the same sub-concept is encountered on another occasion,
-     * the clauses defining it will *not* be reproduced, so you need to retain
-     * all clauses/facts produced by all prior definitions when working with
-     * newer definitions. -rob 2008-10-02
-     */
-    public AtomicConcept define(OWLDescription desc,
-            Set<DLClause> outClauses, Set<Atom> outPositiveFacts, Set<Atom> outNegativeFacts) {
-        List<OWLDescription[]> inclusions = new ArrayList<OWLDescription[]>();
-        Collection<OWLIndividualAxiom> assertions = new ArrayList<OWLIndividualAxiom>();
-        OWLClass outClass = normalization.define(desc, inclusions, assertions);
-        
-        Clausifier clausifier = new Clausifier(outPositiveFacts, true,
-                factory, amqOffset, config.ignoreUnsupportedDatatypes);
-        for (OWLDescription[] inclusion : inclusions) {
-            for (OWLDescription description : inclusion) {
-                description.accept(clausifier);
-            }
-            DLClause dlClause = clausifier.getDLClause();
-            outClauses.add(dlClause.getSafeVersion());
-        }
-        amqOffset += clausifier.clausifyAtMostStuff(outClauses);
-        FactClausifier factClausifier = new FactClausifier(outPositiveFacts,
-                outNegativeFacts);
-        for (OWLIndividualAxiom fact : assertions) {
-            fact.accept(factClausifier);
-        }
-        return AtomicConcept.create(outClass.getURI().toString());
-    }
-    
-    // protected static Role getRole(OWLObjectPropertyExpression p) {
-    //     p = p.getSimplified();
-    //     if (p instanceof OWLObjectProperty) {
-    //         return AtomicRole.createObjectRole(((OWLObjectProperty) objectProperty).getURI().toString());
-    //     } else if (objectProperty instanceof OWLObjectPropertyInverse) {
-    //         return InverseRole.create(getRole.p.getInverseProperty());
-    //     }
-    // }
-
     public DLClause clausifyKey(OWLHasKeyDummy object) {
         List<Atom> headAtoms = new ArrayList<Atom>();
         List<Atom> bodyAtoms = new ArrayList<Atom>();

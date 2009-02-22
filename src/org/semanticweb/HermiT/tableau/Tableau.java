@@ -3,17 +3,15 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 import org.semanticweb.HermiT.existentials.ExpansionStrategy;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
-import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.ExistentialConcept;
@@ -22,7 +20,12 @@ import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.tableau.Node.NodeState;
 
 /**
- * This class coordinates the main tableau expansion for a given DLOntology (a normalized and clausified ontology). It represents the state of a run on a set of clauses and coordinates the extension of the ABox and also the retraction of facts when backtracking. Before starting the expansion, the given clauses are (for better performance) preprocessed via the HyperresolutionManager into a compiled and executable form.
+ * This class coordinates the main tableau expansion for a given DLOntology
+ * (a normalized and clausified ontology). It represents the state of a run
+ * on a set of clauses and coordinates the extension of the ABox and also the
+ * retraction of facts when backtracking. Before starting the expansion,
+ * the given clauses are (for better performance) preprocessed via the
+ * HyperresolutionManager into a compiled and executable form.
  */
 public final class Tableau implements Serializable {
     private static final long serialVersionUID=-28982363158925221L;
@@ -31,11 +34,11 @@ public final class Tableau implements Serializable {
     protected final ExpansionStrategy m_existentialsExpansionStrategy;
     protected final DLOntology m_dlOntology;
     protected final Map<String,Object> m_parameters;
-    private final boolean m_makeTopRoleUniversal;
+    protected final boolean m_makeTopRoleUniversal;
     protected final DependencySetFactory m_dependencySetFactory;
     protected final ExtensionManager m_extensionManager;
     protected final LabelManager m_labelManager;
-    protected HyperresolutionManager m_hyperresolutionManager;
+    protected final HyperresolutionManager m_hyperresolutionManager;
     protected final MergingManager m_mergingManager;
     protected final ExistentialExpansionManager m_existentialExpasionManager;
     protected final NominalIntroductionManager m_nominalIntroductionManager;
@@ -43,6 +46,7 @@ public final class Tableau implements Serializable {
     protected final DatatypeManager m_datatypeManager;
     protected final boolean m_needsThingExtension;
     protected final List<List<ExistentialConcept>> m_existentialConceptsBuffers;
+    protected final boolean m_checkDatatypes;
     protected BranchingPoint[] m_branchingPoints;
     protected int m_currentBranchingPoint;
     protected int m_nonbacktrackableBranchingPoint;
@@ -59,17 +63,10 @@ public final class Tableau implements Serializable {
     protected GroundDisjunction m_firstGroundDisjunction;
     protected GroundDisjunction m_firstUnprocessedGroundDisjunction;
     protected Node m_checkedNode;
-    private Collection<Atom> additionalPositiveFacts;
-    private Collection<Atom> additionalNegativeFacts;
-    protected boolean checkDatatypes = true;
 
-    public Tableau(TableauMonitor tableauMonitor,
-                    ExpansionStrategy existentialsExpansionStrategy,
-                    DLOntology dlOntology,
-                    boolean makeTopRoleUniversal,
-                    Map<String,Object> parameters) {
+    public Tableau(TableauMonitor tableauMonitor,ExpansionStrategy existentialsExpansionStrategy,DLOntology dlOntology,boolean makeTopRoleUniversal,Map<String,Object> parameters) {
         m_parameters=parameters;
-        m_makeTopRoleUniversal = makeTopRoleUniversal;
+        m_makeTopRoleUniversal=makeTopRoleUniversal;
         m_tableauMonitor=tableauMonitor;
         m_existentialsExpansionStrategy=existentialsExpansionStrategy;
         m_dlOntology=dlOntology;
@@ -85,46 +82,13 @@ public final class Tableau implements Serializable {
         m_existentialsExpansionStrategy.initialize(this);
         m_needsThingExtension=m_hyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING);
         m_existentialConceptsBuffers=new ArrayList<List<ExistentialConcept>>();
+        m_checkDatatypes=m_dlOntology.hasDatatypes();
         m_branchingPoints=new BranchingPoint[2];
         m_currentBranchingPoint=-1;
         m_nonbacktrackableBranchingPoint=-1;
-        if (m_tableauMonitor!=null) {
+        if (m_tableauMonitor!=null)
             m_tableauMonitor.setTableau(this);
-        }
-        additionalPositiveFacts = new ArrayList<Atom>();
-        additionalNegativeFacts = new ArrayList<Atom>();
-        // we only need to look for new DataRange tuples in doIteration() if 
-        // they can occur at all
-        checkDatatypes = m_dlOntology.hasDatatypes();
     }
-    
-    /**
-     * Extend the tableau (semantically the ontology associated with the tableau) with
-     * the given clauses and facts which provide *only* definitions for some new
-     * atomic concept names. Do *not* pass any clauses and/or facts which may produce
-     * new subsumptions between existing atomic concepts---that would break the subsumption
-     * cache.
-     * 
-     * It would be nice to be able to pull these definitions back out again, but due to the
-     * way normalization works new definitions may depend upon old ones, so you need to keep
-     * the previous definitions any time you add new definitions. In the unlikely event that
-     * you get so many definitions that it really slows things down, you need only include
-     * all definitions when/if you need to use *any* definitions: i.e. you could keep the
-     * original HyperresolutionManager for answering queries which don't involve any complex
-     * concepts.
-     */
-    public void extendWithDefinitions(
-        Collection<DLClause> clauses,
-        Collection<Atom> positiveFacts,
-        Collection<Atom> negativeFacts) {
-        additionalPositiveFacts.addAll(positiveFacts);
-        additionalNegativeFacts.addAll(negativeFacts);
-        if (!clauses.isEmpty()) {
-            m_hyperresolutionManager =
-                new HyperresolutionManager(m_hyperresolutionManager, clauses);
-        }
-    }
-    
     public DLOntology getDLOntology() {
         return m_dlOntology;
     }
@@ -138,7 +102,7 @@ public final class Tableau implements Serializable {
         return m_existentialsExpansionStrategy;
     }
     public boolean isDeterministic() {
-        return m_dlOntology.isHorn()&&m_existentialsExpansionStrategy.isDeterministic();
+        return m_dlOntology.isHorn() && m_existentialsExpansionStrategy.isDeterministic();
     }
     public DependencySetFactory getDependencySetFactory() {
         return m_dependencySetFactory;
@@ -214,10 +178,10 @@ public final class Tableau implements Serializable {
         if (!m_extensionManager.containsClash()) {
             m_nominalIntroductionManager.processTargets();
             boolean hasChange=false;
-            while (m_extensionManager.propagateDeltaNew()&&!m_extensionManager.containsClash()) {
+            while (m_extensionManager.propagateDeltaNew() && !m_extensionManager.containsClash()) {
                 m_descriptionGraphManager.checkGraphConstraints();
                 m_hyperresolutionManager.applyDLClauses();
-                if (checkDatatypes && !m_extensionManager.containsClash()) {
+                if (m_checkDatatypes && !m_extensionManager.containsClash()) {
                     m_datatypeManager.checkDatatypeConstraints();
                 }
                 if (!m_extensionManager.containsClash())
@@ -279,9 +243,7 @@ public final class Tableau implements Serializable {
         return m_checkedNode;
     }
     private boolean hasNominals() {
-        return m_dlOntology.hasNominals() ||
-                !additionalPositiveFacts.isEmpty() ||
-                !additionalNegativeFacts.isEmpty();
+        return m_dlOntology.hasNominals();
     }
     public boolean isSatisfiable(AtomicConcept atomicConcept) {
         if (m_tableauMonitor!=null)
@@ -290,7 +252,7 @@ public final class Tableau implements Serializable {
         if (hasNominals()) {
             loadABox();
         }
-        m_checkedNode=createNewOriginalNode(NodeType.ROOT_NODE, m_dependencySetFactory.emptySet(),0);
+        m_checkedNode=createNewOriginalNode(NodeType.ROOT_NODE,m_dependencySetFactory.emptySet(),0);
         m_extensionManager.addConceptAssertion(atomicConcept,m_checkedNode,m_dependencySetFactory.emptySet());
         boolean result=isSatisfiable();
         if (m_tableauMonitor!=null) {
@@ -304,7 +266,7 @@ public final class Tableau implements Serializable {
         clear();
         if (hasNominals())
             loadABox();
-        m_checkedNode=createNewOriginalNode(NodeType.ROOT_NODE, m_dependencySetFactory.emptySet(),0);
+        m_checkedNode=createNewOriginalNode(NodeType.ROOT_NODE,m_dependencySetFactory.emptySet(),0);
         m_extensionManager.addConceptAssertion(subconcept,m_checkedNode,m_dependencySetFactory.emptySet());
         m_branchingPoints[0]=new BranchingPoint(this);
         m_currentBranchingPoint++;
@@ -316,23 +278,19 @@ public final class Tableau implements Serializable {
             m_tableauMonitor.isSubsumedByFinished(subconcept,superconcept,result);
         return result;
     }
-    
+
     public boolean isAsymmetric(AtomicRole role) {
         clear();
-        if (hasNominals()) {
+        if (hasNominals())
             loadABox();
-        }
-        Node a = createNewOriginalNode(NodeType.ROOT_NODE, m_dependencySetFactory.emptySet(), 0);
-        Node b = createNewOriginalNode(NodeType.ROOT_NODE, m_dependencySetFactory.emptySet(), 0);
-        m_extensionManager.addRoleAssertion(role, a, b, m_dependencySetFactory.emptySet());
-        m_branchingPoints[0] = new BranchingPoint(this);
+        Node a=createNewOriginalNode(NodeType.ROOT_NODE,m_dependencySetFactory.emptySet(),0);
+        Node b=createNewOriginalNode(NodeType.ROOT_NODE,m_dependencySetFactory.emptySet(),0);
+        m_extensionManager.addRoleAssertion(role,a,b,m_dependencySetFactory.emptySet());
+        m_branchingPoints[0]=new BranchingPoint(this);
         m_currentBranchingPoint++;
-        m_nonbacktrackableBranchingPoint = m_currentBranchingPoint;
-        DependencySet dependencySet =
-            m_dependencySetFactory.addBranchingPoint
-                (m_dependencySetFactory.emptySet(),
-                    m_currentBranchingPoint);
-        m_extensionManager.addRoleAssertion(role, b, a, dependencySet);
+        m_nonbacktrackableBranchingPoint=m_currentBranchingPoint;
+        DependencySet dependencySet=m_dependencySetFactory.addBranchingPoint(m_dependencySetFactory.emptySet(),m_currentBranchingPoint);
+        m_extensionManager.addRoleAssertion(role,b,a,dependencySet);
         return !isSatisfiable();
     }
 
@@ -343,49 +301,35 @@ public final class Tableau implements Serializable {
         loadABox();
         if (m_firstTableauNode==null) {
             // create an artificial initial node
-            createNewOriginalNode(NodeType.ROOT_NODE, m_dependencySetFactory.emptySet(),0); // Ensures that there is at least one individual
+            createNewOriginalNode(NodeType.ROOT_NODE,m_dependencySetFactory.emptySet(),0); // Ensures that there is at least one individual
         }
         boolean result=isSatisfiable();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isABoxSatisfiableFinished(result);
         return result;
     }
-    
-    private void loadPositiveFact(Atom atom, Map<Individual,Node> individualsToNodes) {
+
+    private void loadPositiveFact(Atom atom,Map<Individual,Node> individualsToNodes) {
         DLPredicate dlPredicate=atom.getDLPredicate();
         switch (dlPredicate.getArity()) {
         case 1:
-            m_extensionManager.addAssertion(
-                dlPredicate,
-                getNodeForIndividual(individualsToNodes,
-                                        (Individual) atom.getArgument(0)),
-                m_dependencySetFactory.emptySet());
+            m_extensionManager.addAssertion(dlPredicate,getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(0)),m_dependencySetFactory.emptySet());
             break;
         case 2:
-            m_extensionManager.addAssertion(
-                dlPredicate,
-                getNodeForIndividual(individualsToNodes,
-                                        (Individual) atom.getArgument(0)),
-                getNodeForIndividual(individualsToNodes,
-                                        (Individual) atom.getArgument(1)),
-                m_dependencySetFactory.emptySet());
+            m_extensionManager.addAssertion(dlPredicate,getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(0)),getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(1)),m_dependencySetFactory.emptySet());
             break;
         default:
             throw new IllegalArgumentException("Unsupported arity of positive ground atoms.");
         }
     }
-    
-    private void loadNegativeFact(Atom atom, Map<Individual,Node> individualsToNodes) {
+
+    private void loadNegativeFact(Atom atom,Map<Individual,Node> individualsToNodes) {
         DLPredicate dlPredicate=atom.getDLPredicate();
         if (!(dlPredicate instanceof AtomicConcept))
             throw new IllegalArgumentException("Unsupported type of negative fact.");
         switch (dlPredicate.getArity()) {
         case 1:
-            m_extensionManager.addConceptAssertion(
-                AtomicNegationConcept.create((AtomicConcept) dlPredicate),
-                getNodeForIndividual(individualsToNodes,
-                                        (Individual) atom.getArgument(0)),
-                m_dependencySetFactory.emptySet());
+            m_extensionManager.addConceptAssertion(AtomicNegationConcept.create((AtomicConcept)dlPredicate),getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(0)),m_dependencySetFactory.emptySet());
             break;
         default:
             throw new IllegalArgumentException("Unsupported arity of negative ground atoms.");
@@ -393,34 +337,25 @@ public final class Tableau implements Serializable {
     }
     protected void loadABox() {
         Map<Individual,Node> individualsToNodes=new HashMap<Individual,Node>();
-        for (Atom atom : m_dlOntology.getPositiveFacts()) {
-            loadPositiveFact(atom, individualsToNodes);
-        }
-        for (Atom fact : additionalPositiveFacts) {
-            loadPositiveFact(fact, individualsToNodes);
-        }
-        for (Atom atom : m_dlOntology.getNegativeFacts()) {
-            loadNegativeFact(atom, individualsToNodes);
-        }
-        for (Atom fact : additionalNegativeFacts) {
-            loadNegativeFact(fact, individualsToNodes);
-        }
+        for (Atom atom : m_dlOntology.getPositiveFacts())
+            loadPositiveFact(atom,individualsToNodes);
+        for (Atom atom : m_dlOntology.getNegativeFacts())
+            loadNegativeFact(atom,individualsToNodes);
     }
-    
+
     /**
-     * Finds the node for the named individual individual or creates a named 
-     * node if no node exists yet for individual.
-     * @param individualsToNodes a mapping from individuals to their nodes in 
-     *                           the tableau 
-     * @param individual the individual for which we want its node in the 
-     *                   tableau or a new node if there is not yet a node for it 
-     *                   in the tableau
+     * Finds the node for the named individual individual or creates a named node if no node exists yet for individual.
+     * 
+     * @param individualsToNodes
+     *            a mapping from individuals to their nodes in the tableau
+     * @param individual
+     *            the individual for which we want its node in the tableau or a new node if there is not yet a node for it in the tableau
      * @return the node for individual in the tableau
      */
     private Node getNodeForIndividual(Map<Individual,Node> individualsToNodes,Individual individual) {
         Node node=individualsToNodes.get(individual);
         if (node==null) {
-            node=createNewOriginalNode(NodeType.NAMED_NODE, m_dependencySetFactory.emptySet(),0);
+            node=createNewOriginalNode(NodeType.NAMED_NODE,m_dependencySetFactory.emptySet(),0);
             individualsToNodes.put(individual,node);
         }
         return node;
@@ -515,53 +450,50 @@ public final class Tableau implements Serializable {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.backtrackToFinished(branchingPoint);
     }
-    
+
     /**
-     * Creates a new root node (either one that corresponds to an ABox 
-     * individual or an artificial one that we need for subsumption or 
-     * consistency testing). Make sure that if we have a universal role that 
-     * this node is connected to the initial node for the tableau (if it not the 
-     * initial one itself). 
-     * @param dependencySet should be empty for original nodes
-     * @param treeDepth should be usually 0 for original nodes 
+     * Creates a new root node (either one that corresponds to an ABox individual or an artificial one that we need for subsumption or consistency testing). Make sure that if we have a universal role that this node is connected to the initial node for the tableau (if it not the initial one itself).
+     * 
+     * @param dependencySet
+     *            should be empty for original nodes
+     * @param treeDepth
+     *            should be usually 0 for original nodes
      * @return the created node
      */
-    public Node createNewOriginalNode(NodeType nodeType, DependencySet dependencySet, int treeDepth) {
+    public Node createNewOriginalNode(NodeType nodeType,DependencySet dependencySet,int treeDepth) {
         Node out;
-        if (nodeType == NodeType.ROOT_NODE) {
-            out = createNewRootNode(dependencySet, treeDepth);
-        } else if (nodeType == NodeType.NAMED_NODE) {
-            out = createNewNamedNode(dependencySet, treeDepth);
-        } else {
+        if (nodeType==NodeType.ROOT_NODE)
+            out=createNewRootNode(dependencySet,treeDepth);
+        else if (nodeType==NodeType.NAMED_NODE)
+            out=createNewNamedNode(dependencySet,treeDepth);
+        else
             throw new RuntimeException("Can only create original nodes of type root node or named node. ");
-        }
         if (m_makeTopRoleUniversal) {
-            if (m_arbitraryOriginalNode == null) {
-                m_arbitraryOriginalNode = out;
-            } else {
-                m_extensionManager.addAssertion(
-                    AtomicRole.TOP_OBJECT_ROLE,
-                    m_arbitraryOriginalNode,
-                    out,
-                    m_dependencySetFactory.emptySet());
+            if (m_arbitraryOriginalNode==null) {
+                m_arbitraryOriginalNode=out;
+            }
+            else {
+                m_extensionManager.addAssertion(AtomicRole.TOP_OBJECT_ROLE,m_arbitraryOriginalNode,out,m_dependencySetFactory.emptySet());
             }
         }
         return out;
     }
     /**
-     * Create a new node that represents an individual named in the input 
-     * ontology (thus, keys have to be applied to it)
-     * @param dependencySet the dependency set for the node
-     * @param treeDepth 
+     * Create a new node that represents an individual named in the input ontology (thus, keys have to be applied to it)
+     * 
+     * @param dependencySet
+     *            the dependency set for the node
+     * @param treeDepth
      * @return the created node
      */
     public Node createNewNamedNode(DependencySet dependencySet,int treeDepth) {
         return createNewNodeRaw(dependencySet,null,NodeType.NAMED_NODE,treeDepth);
     }
     /**
-     * Create a new node that represents a nominal, but one that is not named in 
-     * the input ontology (thus, keys are not applicable)
-     * @param dependencySet the dependency set for the node
+     * Create a new node that represents a nominal, but one that is not named in the input ontology (thus, keys are not applicable)
+     * 
+     * @param dependencySet
+     *            the dependency set for the node
      * @param treeDepth
      * @return the created node
      */
@@ -569,18 +501,24 @@ public final class Tableau implements Serializable {
         return createNewNodeRaw(dependencySet,null,NodeType.ROOT_NODE,treeDepth);
     }
     /**
-     * Create a new tree node. 
-     * @param dependencySet the dependency set for the node
-     * @param parent the parent of the node that is to be created
+     * Create a new tree node.
+     * 
+     * @param dependencySet
+     *            the dependency set for the node
+     * @param parent
+     *            the parent of the node that is to be created
      * @return the created node
      */
     public Node createNewTreeNode(DependencySet dependencySet,Node parent) {
         return createNewNodeRaw(dependencySet,parent,NodeType.TREE_NODE,parent.getTreeDepth()+1);
     }
     /**
-     * Create a new concrete node for datatypes. 
-     * @param dependencySet the dependency set for the node
-     * @param parent the parent of the node that is to be created
+     * Create a new concrete node for datatypes.
+     * 
+     * @param dependencySet
+     *            the dependency set for the node
+     * @param parent
+     *            the parent of the node that is to be created
      * @return the created node
      */
     public Node createNewConcreteNode(DependencySet dependencySet,Node parent) {
@@ -588,8 +526,11 @@ public final class Tableau implements Serializable {
     }
     /**
      * Create a new node graph node for description graphs
-     * @param dependencySet the dependency set for the node
-     * @param parent the parent of the node that is to be created
+     * 
+     * @param dependencySet
+     *            the dependency set for the node
+     * @param parent
+     *            the parent of the node that is to be created
      * @return the created node
      */
     public Node createNewGraphNode(Node parent,DependencySet dependencySet) {
@@ -623,12 +564,13 @@ public final class Tableau implements Serializable {
         return node;
     }
     /**
-     * Merges node into mergeInto. We assume that concepts and roles have 
-     * already been copied from node to mergeInto. After the merge node has 
-     * state NodeState.MERGED. 
-     * @param node the node that is to be merged
-     * @param mergeInto the node we merge into
-     * @param dependencySet 
+     * Merges node into mergeInto. We assume that concepts and roles have already been copied from node to mergeInto. After the merge node has state NodeState.MERGED.
+     * 
+     * @param node
+     *            the node that is to be merged
+     * @param mergeInto
+     *            the node we merge into
+     * @param dependencySet
      */
     public void mergeNode(Node node,Node mergeInto,DependencySet dependencySet) {
         assert node.m_nodeState==Node.NodeState.ACTIVE;
@@ -640,12 +582,11 @@ public final class Tableau implements Serializable {
         node.m_mergedIntoDependencySet=m_dependencySetFactory.getPermanent(dependencySet);
         m_dependencySetFactory.addUsage(node.m_mergedIntoDependencySet);
         node.m_nodeState=NodeState.MERGED;
-        if (node.m_nodeType == NodeType.NAMED_NODE 
-                && mergeInto.m_nodeType == NodeType.ROOT_NODE) {
-            // We merged a named individual node (which is also a kind of root 
-            // node, but one to which keys apply) into a root node, which means 
-            // that mergeInto becomes named and keys apply to it. 
-            mergeInto.m_nodeType = NodeType.NAMED_NODE;
+        if (node.m_nodeType==NodeType.NAMED_NODE && mergeInto.m_nodeType==NodeType.ROOT_NODE) {
+            // We merged a named individual node (which is also a kind of root
+            // node, but one to which keys apply) into a root node, which means
+            // that mergeInto becomes named and keys apply to it.
+            mergeInto.m_nodeType=NodeType.NAMED_NODE;
         }
         node.m_previousMergedOrPrunedNode=m_lastMergedOrPrunedNode;
         m_lastMergedOrPrunedNode=node;
@@ -664,7 +605,7 @@ public final class Tableau implements Serializable {
     }
     protected void backtrackLastMergedOrPrunedNode() {
         Node node=m_lastMergedOrPrunedNode;
-        assert (node.m_nodeState==Node.NodeState.MERGED&&node.m_mergedInto!=null&&node.m_mergedInto!=null)||(node.m_nodeState==Node.NodeState.PRUNED&&node.m_mergedInto==null&&node.m_mergedInto==null);
+        assert (node.m_nodeState==Node.NodeState.MERGED && node.m_mergedInto!=null && node.m_mergedInto!=null) || (node.m_nodeState==Node.NodeState.PRUNED && node.m_mergedInto==null && node.m_mergedInto==null);
         m_existentialsExpansionStrategy.nodeStatusChanged(node);
         if (node.m_nodeState==Node.NodeState.MERGED) {
             m_dependencySetFactory.removeUsage(node.m_mergedIntoDependencySet);

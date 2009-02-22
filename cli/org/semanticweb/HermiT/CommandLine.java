@@ -752,7 +752,6 @@ public class CommandLine {
                     }
                         break;
                     case kClausifyRoleBox: {
-                        config.clausifyTransitivity=true;
                         config.checkClauses=false;
                         config.existentialStrategyType=Reasoner.ExistentialStrategyType.DEPTH_FIRST;
                     }

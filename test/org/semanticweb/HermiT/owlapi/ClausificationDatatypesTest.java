@@ -10,6 +10,7 @@ import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
+import org.semanticweb.HermiT.owlapi.structural.OWLAxioms;
 import org.semanticweb.HermiT.owlapi.structural.OwlClausification;
 import org.semanticweb.HermiT.owlapi.structural.OwlNormalization;
 import org.semanticweb.owl.model.OWLAxiom;
@@ -243,9 +244,10 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
 
     protected Set<OWLAxiom> getNormalizedAxioms() throws Exception {
         Set<OWLAxiom> axioms=new HashSet<OWLAxiom>();
-        OwlNormalization normalization=new OwlNormalization(m_ontologyManager.getOWLDataFactory());
+        OWLAxioms axiomHolder=new OWLAxioms();
+        OwlNormalization normalization=new OwlNormalization(m_ontologyManager.getOWLDataFactory(),axiomHolder);
         normalization.processOntology(new Reasoner.Configuration(),m_ontology);
-        for (OWLDescription[] inclusion : normalization.getConceptInclusions()) {
+        for (OWLDescription[] inclusion : axiomHolder.m_conceptInclusions) {
             OWLDescription superDescription;
             if (inclusion.length==1) {
                 superDescription=inclusion[0];
@@ -255,9 +257,9 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
             }
             axioms.add(m_ontologyManager.getOWLDataFactory().getOWLSubClassAxiom(m_ontologyManager.getOWLDataFactory().getOWLThing(),superDescription));
         }
-        for (OWLObjectPropertyExpression[] inclusion : normalization.getObjectPropertyInclusions())
+        for (OWLObjectPropertyExpression[] inclusion : axiomHolder.m_objectPropertyInclusions)
             axioms.add(m_ontologyManager.getOWLDataFactory().getOWLSubObjectPropertyAxiom(inclusion[0],inclusion[1]));
-        axioms.addAll(normalization.getFacts());
+        axioms.addAll(axiomHolder.m_facts);
         return axioms;
     }
 
