@@ -537,7 +537,13 @@ public class Reasoner implements Serializable {
     public static void printSortedAncestorLists(PrintWriter output,Map<String,HierarchyPosition<String>> taxonomy) {
         Map<String,Set<String>> flat=new TreeMap<String,Set<String>>();
         for (Map.Entry<String,HierarchyPosition<String>> e : taxonomy.entrySet()) {
-            flat.put(e.getKey(),new TreeSet<String>(e.getValue().getAncestors()));
+            if (!e.getKey().equals("http://www.w3.org/2002/07/owl#Nothing")) {
+                Set<String> ancestors=new TreeSet<String>();
+                for (String ancestor : e.getValue().getAncestors())
+                    if (!"http://www.w3.org/2002/07/owl#Thing".equals(ancestor))
+                        ancestors.add(ancestor);
+                flat.put(e.getKey(),ancestors);
+            }
         }
         try {
             for (Map.Entry<String,Set<String>> e : flat.entrySet()) {
