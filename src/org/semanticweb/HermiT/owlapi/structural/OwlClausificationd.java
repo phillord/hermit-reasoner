@@ -109,7 +109,7 @@ import org.semanticweb.owl.vocab.OWLRestrictedDataRangeFacetVocabulary;
 
 import dk.brics.automaton.Datatypes;
 
-public class OwlClausification implements Serializable {
+public class OwlClausificationd implements Serializable {
     private static final long serialVersionUID = 1909494208824352106L;
     protected static final org.semanticweb.HermiT.model.Variable X = org.semanticweb.HermiT.model.Variable.create("X");
     protected static final org.semanticweb.HermiT.model.Variable Y = org.semanticweb.HermiT.model.Variable.create("Y");
@@ -117,7 +117,7 @@ public class OwlClausification implements Serializable {
     protected final Reasoner.Configuration config;
     private int amqOffset; // the number of negative at-most replacements already performed
     
-    public OwlClausification(Reasoner.Configuration config) {
+    public OwlClausificationd(Reasoner.Configuration config) {
         amqOffset = 0;
         this.config = config;
     }
