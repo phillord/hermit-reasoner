@@ -87,12 +87,12 @@ import org.semanticweb.owl.model.OWLOntology;
 public class Reasoner implements Serializable {
     private static final long serialVersionUID=-8277117863937974032L;
 
-    protected final Configuration m_config; // never null
-    protected final DLOntology m_dlOntology; // never null
-    protected Namespaces m_namespaces; // never null
-    protected final Tableau m_tableau; // never null
-    protected final TableauSubsumptionChecker m_subsumptionChecker; // never null
-    protected Classifier<AtomicConcept> m_classifier;
+    protected final Configuration m_config;
+    protected final DLOntology m_dlOntology;
+    protected final Namespaces m_namespaces;
+    protected final Tableau m_tableau;
+    protected final TableauSubsumptionChecker m_subsumptionChecker;
+    protected final Classifier<AtomicConcept> m_classifier;
     protected Map<AtomicConcept,HierarchyPosition<AtomicConcept>> m_atomicConceptHierarchy; // may be null; use getAtomicConceptHierarchy
     protected Map<AtomicConcept,Set<Individual>> m_realization;
 
@@ -148,6 +148,7 @@ public class Reasoner implements Serializable {
             throw new IllegalArgumentException("unknown parser library requested");
         }
         m_config=config;
+        m_namespaces=createNamespaces(m_dlOntology.getOntologyURI());
         m_tableau=createTableau(m_config,m_dlOntology);
         m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
         m_classifier=new Classifier<AtomicConcept>(new TableauFunc(m_subsumptionChecker));
@@ -165,6 +166,7 @@ public class Reasoner implements Serializable {
             keys=Collections.emptySet();
         m_config=config;
         m_dlOntology=clausifier.clausifyWithKeys(ontologyManager,ontology,descriptionGraphs,keys);
+        m_namespaces=createNamespaces(m_dlOntology.getOntologyURI());
         m_tableau=createTableau(m_config,m_dlOntology);
         m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
         m_classifier=new Classifier<AtomicConcept>(new TableauFunc(m_subsumptionChecker));
@@ -180,6 +182,7 @@ public class Reasoner implements Serializable {
         OWLClausification clausifier=new OWLClausification(config);
         m_config=config;
         m_dlOntology=clausifier.clausifyOntologiesDisregardImports(ontologyManger,ontologies,resultingDLOntologyURI);
+        m_namespaces=createNamespaces(m_dlOntology.getOntologyURI());
         m_tableau=createTableau(m_config,m_dlOntology);
         m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
         m_classifier=new Classifier<AtomicConcept>(new TableauFunc(m_subsumptionChecker));
@@ -188,6 +191,7 @@ public class Reasoner implements Serializable {
     public Reasoner(Configuration config,DLOntology dlOntology) {
         m_config=config;
         m_dlOntology=dlOntology;
+        m_namespaces=createNamespaces(m_dlOntology.getOntologyURI());
         m_tableau=createTableau(m_config,m_dlOntology);
         m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
         m_classifier=new Classifier<AtomicConcept>(new TableauFunc(m_subsumptionChecker));
@@ -196,10 +200,6 @@ public class Reasoner implements Serializable {
     protected Tableau createTableau(Configuration config,DLOntology dlOntology) throws IllegalArgumentException {
         if (!dlOntology.canUseNIRule() && dlOntology.hasAtMostRestrictions() && dlOntology.hasInverseRoles() && config.existentialStrategyType==Configuration.ExistentialStrategyType.INDIVIDUAL_REUSE)
             throw new IllegalArgumentException("The supplied DL-ontology is not compatible with the individual reuse strategy.");
-
-        Map<String,String> namespaceDecl=new HashMap<String,String>();
-        namespaceDecl.put("",dlOntology.getOntologyURI()+"#");
-        m_namespaces=InternalNames.withInternalNamespaces(new Namespaces(namespaceDecl,Namespaces.semanticWebNamespaces));
 
         if (config.checkClauses) {
             Collection<DLClause> nonAdmissibleDLClauses=dlOntology.getNonadmissibleDLClauses();
@@ -323,6 +323,13 @@ public class Reasoner implements Serializable {
         return new Tableau(tableauMonitor,existentialsExpansionStrategy,m_dlOntology,config.makeTopRoleUniversal,config.parameters);
     }
 
+    protected Namespaces createNamespaces(String ontologyURI) {
+        Map<String,String> namespaceDecl=new HashMap<String,String>();
+        namespaceDecl.put("",ontologyURI+"#");
+        return InternalNames.withInternalNamespaces(new Namespaces(namespaceDecl,Namespaces.semanticWebNamespaces));
+
+    }
+    
     public DLOntology getDLOntology() {
         return m_dlOntology;
     }
