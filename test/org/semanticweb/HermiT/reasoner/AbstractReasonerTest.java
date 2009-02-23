@@ -188,7 +188,7 @@ public abstract class AbstractReasonerTest extends TestCase {
      * @throws Exception
      */
     protected String getSubsumptionHierarchyAsText() throws Exception {
-        Map<String,HierarchyPosition<String>> taxonomy=m_reasoner.getClassTaxonomy();
+        Map<String,HierarchyPosition<String>> taxonomy=m_reasoner.getClassHierarchy();
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter output=new PrintWriter(buffer);
         Reasoner.printSortedAncestorLists(output,taxonomy);

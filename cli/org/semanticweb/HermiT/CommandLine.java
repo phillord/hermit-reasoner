@@ -206,7 +206,7 @@ public class CommandLine {
                     output=new PrintWriter(f);
                 }
             }
-            hermit.outputClauses(output,namespaces);
+            output.println(hermit.getDLOntology().toString(namespaces));
         }
     }
 
@@ -217,7 +217,7 @@ public class CommandLine {
         }
         public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
             status.log(2,"classifying...");
-            hermit.seedSubsumptionCache();
+            hermit.computeClassHierarchy();
             if (file!=null) {
                 status.log(2,"writing taxonomy to "+file);
                 if (file.equals("-")) {
@@ -270,7 +270,7 @@ public class CommandLine {
             if (!hermit.isClassNameDefined(conceptUri)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
             }
-            HierarchyPosition<String> pos=hermit.getClassTaxonomyPosition(conceptUri);
+            HierarchyPosition<String> pos=hermit.getClassHierarchyPosition(conceptUri);
             if (all) {
                 output.println("All super-classes of '"+conceptName+"':");
                 for (String sup : pos.getAncestors()) {
@@ -329,7 +329,7 @@ public class CommandLine {
             if (!hermit.isClassNameDefined(conceptUri)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
             }
-            HierarchyPosition<String> pos=hermit.getClassTaxonomyPosition(conceptUri);
+            HierarchyPosition<String> pos=hermit.getClassHierarchyPosition(conceptUri);
             if (all) {
                 output.println("All sub-classes of '"+conceptName+"':");
                 for (String sub : pos.getDescendants()) {
@@ -386,7 +386,7 @@ public class CommandLine {
             if (!hermit.isClassNameDefined(conceptUri)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
             }
-            HierarchyPosition<String> pos=hermit.getClassTaxonomyPosition(conceptUri);
+            HierarchyPosition<String> pos=hermit.getClassHierarchyPosition(conceptUri);
             output.println("Classes equivalent to '"+conceptName+"':");
             for (String equiv : pos.getEquivalents()) {
                 output.println("\t"+namespaces.idFromUri(equiv));
@@ -438,7 +438,7 @@ public class CommandLine {
         }
 
         public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
-            Map<String,HierarchyPosition<String>> tax=hermit.getClassTaxonomy();
+            Map<String,HierarchyPosition<String>> tax=hermit.getClassHierarchy();
             for (String c : new TreeSet<String>(tax.keySet())) {
                 HierarchyPosition<String> pos=tax.get(c);
                 if (c.equals(canonical(pos))&&!c.equals(nothing)) {

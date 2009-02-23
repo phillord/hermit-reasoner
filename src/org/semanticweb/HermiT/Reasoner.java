@@ -329,13 +329,15 @@ public class Reasoner implements Serializable {
         return InternalNames.withInternalNamespaces(new Namespaces(namespaceDecl,Namespaces.semanticWebNamespaces));
 
     }
+
+    // General accessor methods
     
-    public DLOntology getDLOntology() {
-        return m_dlOntology;
+    public Namespaces getNamespaces() {
+        return m_namespaces;
     }
 
-    public boolean isConsistent() {
-        return m_tableau.isABoxSatisfiable();
+    public DLOntology getDLOntology() {
+        return m_dlOntology;
     }
 
     /**
@@ -345,9 +347,14 @@ public class Reasoner implements Serializable {
         return m_dlOntology.getAllAtomicConcepts().contains(AtomicConcept.create(classUri)) || classUri.equals(AtomicConcept.THING.getURI()) || classUri.equals(AtomicConcept.NOTHING.getURI());
     }
 
-    /**
-     * Check whether `classURI` is satisfiable. Note that classes which were not defined in the input ontology are satisfiable if and only if the ontology as a whole is consistent.
-     */
+    // General inferences
+    
+    public boolean isConsistent() {
+        return m_tableau.isABoxSatisfiable();
+    }
+
+    // Concept inferences
+    
     public boolean isClassSatisfiable(String classURI) {
         // In an inconsistent ontology, HermiT considers all classes as unsatisfiable.
         if (!m_tableau.isABoxSatisfiable())
@@ -360,26 +367,6 @@ public class Reasoner implements Serializable {
         if (!m_tableau.isABoxSatisfiable())
             return false;
         return m_subsumptionChecker.isSatisfiable(define(desc));
-    }
-
-    protected boolean isAsymmetric(OWLObjectProperty p) {
-        return m_tableau.isAsymmetric(AtomicRole.createObjectRole(p.getURI().toString()));
-    }
-
-    public void seedSubsumptionCache() {
-        getClassTaxonomy();
-    }
-
-    public boolean isSubsumptionCacheSeeded() {
-        return m_atomicConceptHierarchy!=null;
-    }
-
-    public void cacheRealization() {
-        getRealization();
-    }
-
-    public boolean isRealizationCached() {
-        return m_realization!=null;
     }
 
     public boolean isClassSubsumedBy(String childName,String parentName) {
@@ -396,47 +383,29 @@ public class Reasoner implements Serializable {
         return m_subsumptionChecker.isSubsumedBy(define(child),define(parent));
     }
 
-    protected Map<AtomicRole,HierarchyPosition<AtomicRole>> getAtomicRoleHierarchy() {
-        return m_dlOntology.getExplicitRoleHierarchy();
+    // Concept hierarchy
+
+    public void computeClassHierarchy() {
+        getClassHierarchy();
     }
 
-    protected HierarchyPosition<AtomicRole> getPosition(AtomicRole r) {
-        HierarchyPosition<AtomicRole> out=getAtomicRoleHierarchy().get(r);
-        if (out==null) {
-            NaiveHierarchyPosition<AtomicRole> newPos=new NaiveHierarchyPosition<AtomicRole>(r);
-            if (r.isRestrictedToDatatypes()) {
-                newPos.parents.add(getAtomicRoleHierarchy().get(AtomicRole.TOP_DATA_ROLE));
-                newPos.children.add(getAtomicRoleHierarchy().get(AtomicRole.BOTTOM_DATA_ROLE));
-            }
-            else {
-                newPos.parents.add(getAtomicRoleHierarchy().get(AtomicRole.TOP_OBJECT_ROLE));
-                newPos.children.add(getAtomicRoleHierarchy().get(AtomicRole.BOTTOM_OBJECT_ROLE));
-            }
-            out=newPos;
-        }
-        return out;
+    public boolean isClassHierarchyComputed() {
+        return m_atomicConceptHierarchy!=null;
     }
 
-    public HierarchyPosition<String> getPropertyHierarchyPosition(String propertyName) {
-        AtomicRole role=AtomicRole.createDataRole(propertyName);
-        if (!getAtomicRoleHierarchy().containsKey(role)) {
-            role=AtomicRole.createObjectRole(propertyName);
-        }
-        return new TranslatedHierarchyPosition<AtomicRole,String>(getPosition(role),new RoleToString());
+    public Map<String,HierarchyPosition<String>> getClassHierarchy() {
+        return new TranslatedMap<AtomicConcept,String,HierarchyPosition<AtomicConcept>,HierarchyPosition<String>>(getAtomicConceptHierarchy(),new ConceptToString(),new StringToConcept(),new PositionTranslator<AtomicConcept,String>(new ConceptToString()));
     }
 
-    public HierarchyPosition<OWLObjectProperty> getPosition(OWLObjectProperty p) {
+    public HierarchyPosition<String> getClassHierarchyPosition(String className) throws IllegalArgumentException{
+        if (!isClassNameDefined(className))
+            throw new IllegalArgumentException("Class '"+className+"' does not occur in the loaded ontology.");
+        return getClassHierarchy().get(className);
+    }
+
+    public HierarchyPosition<OWLClass> getClassHierarchyPosition(OWLDescription description) {
         OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
-        return new TranslatedHierarchyPosition<AtomicRole,OWLObjectProperty>(getPosition(AtomicRole.createObjectRole(p.getURI().toString())),new RoleToOWLObjectProperty(factory));
-    }
-
-    public HierarchyPosition<OWLDataProperty> getPosition(OWLDataProperty p) {
-        OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
-        return new TranslatedHierarchyPosition<AtomicRole,OWLDataProperty>(getPosition(AtomicRole.createDataRole(p.getURI().toString())),new RoleToOWLDataProperty(factory));
-    }
-
-    public int getNumberOfConcepts() {
-        return m_dlOntology.getNumberOfExternalConcepts();
+        return new TranslatedHierarchyPosition<AtomicConcept,OWLClass>(getConceptHierarchyPosition(define(description)),new ConceptToOWLClass(factory));
     }
 
     protected Map<AtomicConcept,HierarchyPosition<AtomicConcept>> getAtomicConceptHierarchy() {
@@ -444,11 +413,9 @@ public class Reasoner implements Serializable {
             Collection<AtomicConcept> concepts=new ArrayList<AtomicConcept>();
             concepts.add(AtomicConcept.THING);
             concepts.add(AtomicConcept.NOTHING);
-            for (AtomicConcept c : m_dlOntology.getAllAtomicConcepts()) {
-                if (!InternalNames.isInternalURI(c.getURI())) {
+            for (AtomicConcept c : m_dlOntology.getAllAtomicConcepts())
+                if (!InternalNames.isInternalURI(c.getURI()))
                     concepts.add(c);
-                }
-            }
             ReasoningCache cache=new ReasoningCache();
             cache.seed(concepts,m_tableau);
             if (cache.allSubsumptionsKnown(concepts)) {
@@ -463,9 +430,8 @@ public class Reasoner implements Serializable {
                         m_atomicConceptHierarchy.put(equiv,pos);
                     }
                 }
-                if (!m_atomicConceptHierarchy.containsKey(AtomicConcept.THING)) {
+                if (!m_atomicConceptHierarchy.containsKey(AtomicConcept.THING))
                     m_atomicConceptHierarchy.put(AtomicConcept.THING,new NaiveHierarchyPosition<AtomicConcept>(AtomicConcept.THING));
-                }
                 for (Map.Entry<AtomicConcept,Set<AtomicConcept>> e : trans.reduced.entrySet()) {
                     AtomicConcept child=e.getKey();
                     for (AtomicConcept parent : e.getValue()) {
@@ -474,22 +440,20 @@ public class Reasoner implements Serializable {
                     }
                 }
             }
-            else {
+            else
                 m_atomicConceptHierarchy=m_classifier.buildHierarchy(AtomicConcept.THING,AtomicConcept.NOTHING,concepts);
-            }
         }
         return m_atomicConceptHierarchy;
     }
 
-    protected HierarchyPosition<AtomicConcept> getPosition(AtomicConcept c) {
+    protected HierarchyPosition<AtomicConcept> getConceptHierarchyPosition(AtomicConcept c) {
         HierarchyPosition<AtomicConcept> out=getAtomicConceptHierarchy().get(c);
-        if (out==null) {
+        if (out==null)
             out=m_classifier.findPosition(c,getAtomicConceptHierarchy().get(AtomicConcept.THING),getAtomicConceptHierarchy().get(AtomicConcept.NOTHING));
-        }
         return out;
     }
 
-    private AtomicConcept define(OWLDescription desc) {
+    protected AtomicConcept define(OWLDescription desc) {
         if (desc.isAnonymous()) {
             throw new IllegalArgumentException("Complex descriptions are not supported yet.");
         }
@@ -497,122 +461,8 @@ public class Reasoner implements Serializable {
             return AtomicConcept.create(desc.asOWLClass().getURI().toString());
     }
 
-    static class ConceptToString implements Translator<AtomicConcept,String> {
-        public String translate(AtomicConcept c) {
-            return c.getURI();
-        }
-        public boolean equals(Object o) {
-            return o instanceof ConceptToString;
-        }
-        public int hashCode() {
-            return 0;
-        }
-    }
-
-    public Map<String,HierarchyPosition<String>> getClassTaxonomy() {
-        return new TranslatedMap<AtomicConcept,String,HierarchyPosition<AtomicConcept>,HierarchyPosition<String>>(getAtomicConceptHierarchy(),new ConceptToString(),new StringToConcept(),new PositionTranslator<AtomicConcept,String>(new ConceptToString()));
-    }
-
-    public HierarchyPosition<String> getClassTaxonomyPosition(String className) {
-        if (!isClassNameDefined(className)) {
-            throw new RuntimeException("unrecognized class name '"+className+"'");
-        }
-        return getClassTaxonomy().get(className);
-    }
-
-    public HierarchyPosition<OWLClass> getPosition(OWLDescription description) {
-        OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
-        return new TranslatedHierarchyPosition<AtomicConcept,OWLClass>(getPosition(define(description)),new ConceptToOWLClass(factory));
-    }
-
-    protected HierarchyPosition<AtomicConcept> getMemberships(Individual individual) {
-        OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
-        return getPosition(define(factory.getOWLObjectOneOf(factory.getOWLIndividual(URI.create(individual.getURI())))));
-    }
-
-    public HierarchyPosition<String> getMemberships(String individual) {
-        return new TranslatedHierarchyPosition<AtomicConcept,String>(getMemberships(Individual.create(individual)),new ConceptToString());
-    }
-
-    public HierarchyPosition<OWLClass> getMemberships(OWLIndividual i) {
-        OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
-        return new TranslatedHierarchyPosition<AtomicConcept,OWLClass>(getMemberships(Individual.create(i.getURI().toString())),new ConceptToOWLClass(factory));
-    }
-
-    private Map<AtomicConcept,Set<Individual>> getRealization() {
-        if (m_realization==null) {
-            OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
-            m_realization=new HashMap<AtomicConcept,Set<Individual>>();
-            for (Individual i : m_dlOntology.getAllIndividuals()) {
-                HierarchyPosition<AtomicConcept> p=getPosition(define(factory.getOWLObjectOneOf(factory.getOWLIndividual(URI.create(i.getURI())))));
-                Set<AtomicConcept> parents=p.getEquivalents();
-                if (parents.isEmpty()) {
-                    parents=new HashSet<AtomicConcept>();
-                    for (HierarchyPosition<AtomicConcept> parentPos : p.getParentPositions()) {
-                        parents.addAll(parentPos.getEquivalents());
-                    }
-                }
-                for (AtomicConcept c : parents) {
-                    if (!m_realization.containsKey(c)) {
-                        m_realization.put(c,new HashSet<Individual>());
-                    }
-                    m_realization.get(c).add(i);
-                }
-            }
-        }
-        return m_realization;
-    }
-
-    public Set<String> getDirectMembers(String className) {
-        return new TranslatedSet<Individual,String>(getRealization().get(AtomicConcept.create(className)),new IndividualToString());
-    }
-
-    public Set<String> getMembers(String className) {
-        Set<String> out=new HashSet<String>();
-        for (AtomicConcept c : getPosition(AtomicConcept.create(className)).getDescendants()) {
-            Set<Individual> realizationForConcept=getRealization().get(c);
-            if (realizationForConcept!=null) {
-                for (Individual i : realizationForConcept) {
-                    out.add(i.getURI());
-                }
-            }
-        }
-        return out;
-    }
-
-    public Set<OWLIndividual> getMembers(OWLDescription description) {
-        OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
-        Set<OWLIndividual> out=new HashSet<OWLIndividual>();
-        for (AtomicConcept c : getPosition(define(description)).getDescendants()) {
-            Set<Individual> realizationForConcept=getRealization().get(c);
-            if (realizationForConcept!=null) {
-                for (Individual i : realizationForConcept) {
-                    out.add(factory.getOWLIndividual(URI.create(i.getURI())));
-                }
-            }
-        }
-        return out;
-    }
-
-    public Set<OWLIndividual> getDirectMembers(OWLDescription description) {
-        OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
-        Set<OWLIndividual> out=new HashSet<OWLIndividual>();
-        HierarchyPosition<AtomicConcept> p=getPosition(define(description));
-        Set<AtomicConcept> children=p.getEquivalents();
-        if (children.isEmpty())
-            for (HierarchyPosition<AtomicConcept> childPos : p.getChildPositions())
-                children.addAll(childPos.getEquivalents());
-        for (AtomicConcept c : children) {
-            Set<Individual> realizationForConcept=getRealization().get(c);
-            if (realizationForConcept!=null)
-                for (Individual i : realizationForConcept)
-                    out.add(factory.getOWLIndividual(URI.create(i.getURI())));
-        }
-        return out;
-    }
-
     public void printSortedAncestorLists(PrintWriter output) {
-        printSortedAncestorLists(output,getClassTaxonomy());
+        printSortedAncestorLists(output,getClassHierarchy());
     }
 
     public static void printSortedAncestorLists(PrintWriter output,Map<String,HierarchyPosition<String>> taxonomy) {
@@ -642,13 +492,157 @@ public class Reasoner implements Serializable {
         }
     }
 
-    public void outputClauses(PrintWriter output,Namespaces namespaces) {
-        output.println(m_dlOntology.toString(namespaces));
+    // Object property inferences
+    
+    public boolean isAsymmetric(OWLObjectProperty p) {
+        return m_tableau.isAsymmetric(AtomicRole.createObjectRole(p.getURI().toString()));
     }
 
-    public Namespaces getNamespaces() {
-        return m_namespaces;
+    // Property hierarchy
+    
+    public void computePropertyHierarchy() {
     }
+
+    public boolean isPropertyHierarchyComputed() {
+        return true;
+    }
+
+    public HierarchyPosition<String> getPropertyHierarchyPosition(String propertyName) {
+        AtomicRole role=AtomicRole.createDataRole(propertyName);
+        if (!getAtomicRoleHierarchy().containsKey(role)) {
+            role=AtomicRole.createObjectRole(propertyName);
+        }
+        return new TranslatedHierarchyPosition<AtomicRole,String>(getAtomicRoleHierarchyPosition(role),new RoleToString());
+    }
+
+    public HierarchyPosition<OWLObjectProperty> getPropertyHierarchyPosition(OWLObjectProperty p) {
+        OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
+        return new TranslatedHierarchyPosition<AtomicRole,OWLObjectProperty>(getAtomicRoleHierarchyPosition(AtomicRole.createObjectRole(p.getURI().toString())),new RoleToOWLObjectProperty(factory));
+    }
+
+    public HierarchyPosition<OWLDataProperty> getPropertyHierarchyPosition(OWLDataProperty p) {
+        OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
+        return new TranslatedHierarchyPosition<AtomicRole,OWLDataProperty>(getAtomicRoleHierarchyPosition(AtomicRole.createDataRole(p.getURI().toString())),new RoleToOWLDataProperty(factory));
+    }
+
+    protected Map<AtomicRole,HierarchyPosition<AtomicRole>> getAtomicRoleHierarchy() {
+        return m_dlOntology.getExplicitRoleHierarchy();
+    }
+
+    protected HierarchyPosition<AtomicRole> getAtomicRoleHierarchyPosition(AtomicRole r) {
+        HierarchyPosition<AtomicRole> out=getAtomicRoleHierarchy().get(r);
+        if (out==null) {
+            NaiveHierarchyPosition<AtomicRole> newPos=new NaiveHierarchyPosition<AtomicRole>(r);
+            if (r.isRestrictedToDatatypes()) {
+                newPos.parents.add(getAtomicRoleHierarchy().get(AtomicRole.TOP_DATA_ROLE));
+                newPos.children.add(getAtomicRoleHierarchy().get(AtomicRole.BOTTOM_DATA_ROLE));
+            }
+            else {
+                newPos.parents.add(getAtomicRoleHierarchy().get(AtomicRole.TOP_OBJECT_ROLE));
+                newPos.children.add(getAtomicRoleHierarchy().get(AtomicRole.BOTTOM_OBJECT_ROLE));
+            }
+            out=newPos;
+        }
+        return out;
+    }
+
+    // Individual inferences
+    
+    public void computeRealization() {
+        getRealization();
+    }
+
+    public boolean isRealizationComputed() {
+        return m_realization!=null;
+    }
+
+    public HierarchyPosition<String> getIndividualTypes(String individual) {
+        return new TranslatedHierarchyPosition<AtomicConcept,String>(getMemberships(Individual.create(individual)),new ConceptToString());
+    }
+
+    public HierarchyPosition<OWLClass> getIndividualTypes(OWLIndividual i) {
+        OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
+        return new TranslatedHierarchyPosition<AtomicConcept,OWLClass>(getMemberships(Individual.create(i.getURI().toString())),new ConceptToOWLClass(factory));
+    }
+
+    public Set<String> getClassInstances(String className) {
+        Set<String> out=new HashSet<String>();
+        for (AtomicConcept c : getConceptHierarchyPosition(AtomicConcept.create(className)).getDescendants()) {
+            Set<Individual> realizationForConcept=getRealization().get(c);
+            if (realizationForConcept!=null) {
+                for (Individual i : realizationForConcept) {
+                    out.add(i.getURI());
+                }
+            }
+        }
+        return out;
+    }
+
+    public Set<OWLIndividual> getClassInstances(OWLDescription description) {
+        OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
+        Set<OWLIndividual> out=new HashSet<OWLIndividual>();
+        for (AtomicConcept c : getConceptHierarchyPosition(define(description)).getDescendants()) {
+            Set<Individual> realizationForConcept=getRealization().get(c);
+            if (realizationForConcept!=null) {
+                for (Individual i : realizationForConcept) {
+                    out.add(factory.getOWLIndividual(URI.create(i.getURI())));
+                }
+            }
+        }
+        return out;
+    }
+
+    public Set<String> getClassDirectInstances(String className) {
+        return new TranslatedSet<Individual,String>(getRealization().get(AtomicConcept.create(className)),new IndividualToString());
+    }
+
+    public Set<OWLIndividual> getClassDirectInstances(OWLDescription description) {
+        OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
+        Set<OWLIndividual> out=new HashSet<OWLIndividual>();
+        HierarchyPosition<AtomicConcept> p=getConceptHierarchyPosition(define(description));
+        Set<AtomicConcept> children=p.getEquivalents();
+        if (children.isEmpty())
+            for (HierarchyPosition<AtomicConcept> childPos : p.getChildPositions())
+                children.addAll(childPos.getEquivalents());
+        for (AtomicConcept c : children) {
+            Set<Individual> realizationForConcept=getRealization().get(c);
+            if (realizationForConcept!=null)
+                for (Individual i : realizationForConcept)
+                    out.add(factory.getOWLIndividual(URI.create(i.getURI())));
+        }
+        return out;
+    }
+
+    protected Map<AtomicConcept,Set<Individual>> getRealization() {
+        if (m_realization==null) {
+            OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
+            m_realization=new HashMap<AtomicConcept,Set<Individual>>();
+            for (Individual i : m_dlOntology.getAllIndividuals()) {
+                HierarchyPosition<AtomicConcept> p=getConceptHierarchyPosition(define(factory.getOWLObjectOneOf(factory.getOWLIndividual(URI.create(i.getURI())))));
+                Set<AtomicConcept> parents=p.getEquivalents();
+                if (parents.isEmpty()) {
+                    parents=new HashSet<AtomicConcept>();
+                    for (HierarchyPosition<AtomicConcept> parentPos : p.getParentPositions()) {
+                        parents.addAll(parentPos.getEquivalents());
+                    }
+                }
+                for (AtomicConcept c : parents) {
+                    if (!m_realization.containsKey(c)) {
+                        m_realization.put(c,new HashSet<Individual>());
+                    }
+                    m_realization.get(c).add(i);
+                }
+            }
+        }
+        return m_realization;
+    }
+
+    protected HierarchyPosition<AtomicConcept> getMemberships(Individual individual) {
+        OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
+        return getConceptHierarchyPosition(define(factory.getOWLObjectOneOf(factory.getOWLIndividual(URI.create(individual.getURI())))));
+    }
+
+    // Loading and saving the Reasoner object
 
     public void save(File file) throws IOException {
         OutputStream outputStream=new BufferedOutputStream(new FileOutputStream(file));
@@ -666,16 +660,7 @@ public class Reasoner implements Serializable {
         objectOutputStream.flush();
     }
 
-    /**
-     * Creates an ObjectInputStream from the given input stream and tries to read (deserialise) a (serialised) Reasoner object from the stream.
-     * 
-     * @param inputStream
-     *            an input stream that contains a Reasoner object
-     * @return the instance of Reasoner as read from the given input stream
-     * @throws IOException
-     *             if an IOException occurs or if the Reasoner class cannot be found
-     */
-    public static Reasoner load(InputStream inputStream) throws IOException {
+    public static Reasoner loadReasoner(InputStream inputStream) throws IOException {
         try {
             ObjectInputStream objectInputStream=new ObjectInputStream(inputStream);
             return (Reasoner)objectInputStream.readObject();
@@ -687,19 +672,10 @@ public class Reasoner implements Serializable {
         }
     }
 
-    /**
-     * Tries to deserialize a Reasoner object from the given file.
-     * 
-     * @param file
-     *            a file that contains the serialisation of a Reasoner object
-     * @return the deserialzed Reasoner object
-     * @throws IOException
-     *             if the file cannot be read or does not contain a searialized Reasoner object
-     */
-    public static Reasoner load(File file) throws IOException {
+    public static Reasoner loadRasoner(File file) throws IOException {
         InputStream inputStream=new BufferedInputStream(new FileInputStream(file));
         try {
-            return load(inputStream);
+            return loadReasoner(inputStream);
         }
         finally {
             inputStream.close();
@@ -798,6 +774,18 @@ public class Reasoner implements Serializable {
         }
         public boolean equals(Object o) {
             return o instanceof OWLClassToConcept;
+        }
+        public int hashCode() {
+            return 0;
+        }
+    }
+
+    static class ConceptToString implements Translator<AtomicConcept,String> {
+        public String translate(AtomicConcept c) {
+            return c.getURI();
+        }
+        public boolean equals(Object o) {
+            return o instanceof ConceptToString;
         }
         public int hashCode() {
             return 0;
