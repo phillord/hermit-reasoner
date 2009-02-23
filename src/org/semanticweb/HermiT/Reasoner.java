@@ -58,6 +58,7 @@ import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Individual;
+import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.monitor.TableauMonitorFork;
 import org.semanticweb.HermiT.monitor.Timer;
@@ -92,7 +93,8 @@ public class Reasoner implements Serializable {
     protected final Tableau m_tableau;
     protected final TableauSubsumptionChecker m_subsumptionChecker;
     protected final Classifier<AtomicConcept> m_classifier;
-    protected Map<AtomicConcept,HierarchyPosition<AtomicConcept>> m_atomicConceptHierarchy; // may be null; use getAtomicConceptHierarchy
+    protected Map<AtomicConcept,HierarchyPosition<AtomicConcept>> m_atomicConceptHierarchy;
+    protected Map<AtomicRole,HierarchyPosition<AtomicRole>> m_atomicRoleHierarchy;
     protected Map<AtomicConcept,Set<Individual>> m_realization;
 
     public Reasoner(String ontologyURI) throws IllegalArgumentException,LoadingException,OWLException {
@@ -492,10 +494,11 @@ public class Reasoner implements Serializable {
     // Property hierarchy
     
     public void computePropertyHierarchy() {
+        getAtomicRoleHierarchy();
     }
 
     public boolean isPropertyHierarchyComputed() {
-        return true;
+        return m_atomicRoleHierarchy!=null;
     }
 
     public HierarchyPosition<String> getPropertyHierarchyPosition(String propertyName) {
@@ -517,7 +520,50 @@ public class Reasoner implements Serializable {
     }
 
     protected Map<AtomicRole,HierarchyPosition<AtomicRole>> getAtomicRoleHierarchy() {
-        return m_dlOntology.getExplicitRoleHierarchy();
+        if (m_atomicRoleHierarchy==null) {
+            final Map<Role,Set<Role>> subRoles=new HashMap<Role,Set<Role>>();
+            for (DLClause dlClause : m_dlOntology.getDLClauses()) {
+                if (dlClause.isRoleInclusion()) {
+                    Role sub=(Role)dlClause.getBodyAtom(0).getDLPredicate();
+                    Role sup=(Role)dlClause.getHeadAtom(0).getDLPredicate();
+                    addInclusion(subRoles,sub,sup);
+                    addInclusion(subRoles,sub.getInverse(),sup.getInverse());
+                }
+                else if (dlClause.isRoleInverseInclusion()) {
+                    Role sub=(Role)dlClause.getBodyAtom(0).getDLPredicate();
+                    Role sup=((Role)dlClause.getHeadAtom(0).getDLPredicate()).getInverse();
+                    addInclusion(subRoles,sub,sup);
+                    addInclusion(subRoles,sub.getInverse(),sup.getInverse());
+                }
+            }
+
+            GraphUtils.transitivelyClose(subRoles);
+
+            NaiveHierarchyPosition.Ordering<AtomicRole> ordering=new NaiveHierarchyPosition.Ordering<AtomicRole>() {
+                public boolean less(AtomicRole sub,AtomicRole sup) {
+                    if (AtomicRole.TOP_DATA_ROLE.equals(sup) || AtomicRole.TOP_OBJECT_ROLE.equals(sup) || AtomicRole.BOTTOM_DATA_ROLE.equals(sub) || AtomicRole.BOTTOM_OBJECT_ROLE.equals(sub)) {
+                        return true;
+                    }
+                    Set<Role> subs=subRoles.get(sup);
+                    if (subs==null) {
+                        return false;
+                    }
+                    return subs.contains(sub);
+                }
+            };
+            m_atomicRoleHierarchy=NaiveHierarchyPosition.buildHierarchy(AtomicRole.TOP_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE,m_dlOntology.getAllAtomicObjectRoles(),ordering);
+            m_atomicRoleHierarchy.putAll(NaiveHierarchyPosition.buildHierarchy(AtomicRole.TOP_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE,m_dlOntology.getAllAtomicDataRoles(),ordering));
+
+        }
+        return m_atomicRoleHierarchy;
+    }
+    protected static void addInclusion(Map<Role,Set<Role>> subRoles,Role sub,Role sup) {
+        Set<Role> subs=subRoles.get(sup);
+        if (subs==null) {
+            subs=new HashSet<Role>();
+            subRoles.put(sup,subs);
+        }
+        subs.add(sub);
     }
 
     protected HierarchyPosition<AtomicRole> getAtomicRoleHierarchyPosition(AtomicRole r) {

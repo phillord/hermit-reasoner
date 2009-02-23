@@ -14,15 +14,12 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
 import org.semanticweb.HermiT.InternalNames;
 import org.semanticweb.HermiT.Namespaces;
-import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
 import org.semanticweb.HermiT.model.dataranges.DataRange;
 
 /**
@@ -48,11 +45,12 @@ public class DLOntology implements Serializable {
     protected final boolean m_isHorn;
     protected final Set<AtomicConcept> m_allAtomicConcepts;
     protected final int m_numberOfExternalConcepts;
+    protected final Set<AtomicRole> m_allAtomicObjectRoles;
+    protected final Set<AtomicRole> m_allAtomicDataRoles;
     protected final Set<Individual> m_allIndividuals;
     protected final Set<DescriptionGraph> m_allDescriptionGraphs;
-    protected final Map<AtomicRole,HierarchyPosition<AtomicRole>> m_explicitRoleHierarchy;
 
-    public DLOntology(String ontologyURI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts,Set<AtomicConcept> atomicConcepts,Set<Individual> individuals,Map<AtomicRole,HierarchyPosition<AtomicRole>> explicitRoleHierarchy,boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,boolean canUseNIRule,boolean hasDatatypes) {
+    public DLOntology(String ontologyURI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts,Set<AtomicConcept> atomicConcepts,Set<AtomicRole> atomicObjectRoles,Set<AtomicRole> atomicDataRoles,Set<Individual> individuals,boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,boolean canUseNIRule,boolean hasDatatypes) {
         m_ontologyURI=ontologyURI;
         m_dlClauses=dlClauses;
         m_positiveFacts=positiveFacts;
@@ -71,15 +69,19 @@ public class DLOntology implements Serializable {
             if (!InternalNames.isInternalURI(c.getURI()))
                 numberOfExternalConcepts++;
         m_numberOfExternalConcepts=numberOfExternalConcepts;
+        if (atomicObjectRoles==null)
+            m_allAtomicObjectRoles=new TreeSet<AtomicRole>(AtomicRoleComparator.INSTANCE);
+        else
+            m_allAtomicObjectRoles=atomicObjectRoles;
+        if (atomicDataRoles==null)
+            m_allAtomicDataRoles=new TreeSet<AtomicRole>(AtomicRoleComparator.INSTANCE);
+        else
+            m_allAtomicDataRoles=atomicDataRoles;
         if (individuals==null)
             m_allIndividuals=new TreeSet<Individual>(IndividualComparator.INSTANCE);
         else
             m_allIndividuals=individuals;
         m_allDescriptionGraphs=new HashSet<DescriptionGraph>();
-        if (explicitRoleHierarchy==null)
-            m_explicitRoleHierarchy=new HashMap<AtomicRole,HierarchyPosition<AtomicRole>>();
-        else
-            m_explicitRoleHierarchy=explicitRoleHierarchy;
         boolean isHorn=true;
         for (DLClause dlClause : m_dlClauses) {
             if (dlClause.getHeadLength()>1)
@@ -134,16 +136,20 @@ public class DLOntology implements Serializable {
         return m_numberOfExternalConcepts;
     }
 
+    public Set<AtomicRole> getAllAtomicObjectRoles() {
+        return m_allAtomicObjectRoles;
+    }
+
+    public Set<AtomicRole> getAllAtomicDataRoles() {
+        return m_allAtomicDataRoles;
+    }
+
     public Set<Individual> getAllIndividuals() {
         return m_allIndividuals;
     }
 
     public Set<DescriptionGraph> getAllDescriptionGraphs() {
         return m_allDescriptionGraphs;
-    }
-
-    public Map<AtomicRole,HierarchyPosition<AtomicRole>> getExplicitRoleHierarchy() {
-        return m_explicitRoleHierarchy;
     }
 
     public Set<DLClause> getDLClauses() {
@@ -485,6 +491,19 @@ public class DLOntology implements Serializable {
         public static final Comparator<AtomicConcept> INSTANCE=new AtomicConceptComparator();
 
         public int compare(AtomicConcept o1,AtomicConcept o2) {
+            return o1.getURI().compareTo(o2.getURI());
+        }
+
+        protected Object readResolve() {
+            return INSTANCE;
+        }
+    }
+
+    public static class AtomicRoleComparator implements Serializable,Comparator<AtomicRole> {
+        private static final long serialVersionUID=3483541702854959793L;
+        public static final Comparator<AtomicRole> INSTANCE=new AtomicRoleComparator();
+
+        public int compare(AtomicRole o1,AtomicRole o2) {
             return o1.getURI().compareTo(o2.getURI());
         }
 

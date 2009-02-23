@@ -165,9 +165,10 @@ public class Clausification {
         		              dlClauses,
         		              positiveFacts,
         		              negativeFacts,
-        		              null, // concepts
-        		              null, // individuals
-        		              null, // role hierarchy
+        		              null,
+                              null,
+                              null,
+                              null,
         		              determineExpressivity.m_hasInverseRoles,
         		              determineExpressivity.m_hasAtMostRestrictions,
         		              determineExpressivity.m_hasNominals,

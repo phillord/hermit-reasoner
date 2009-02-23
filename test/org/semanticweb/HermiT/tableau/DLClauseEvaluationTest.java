@@ -38,8 +38,9 @@ public class DLClauseEvaluationTest extends AbstractHermiTTest {
                     atoms, // positive facts
                     atoms, // negative facts 
                     null, // atomic concepts
+                    null, // object roles
+                    null, // data roles
                     null, // individuals
-                    null, // role hierarchy
                     false, // hasInverseRoles
                     false, // hasAtMostRestrictions
                     false, // hasNominals
