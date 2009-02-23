@@ -45,12 +45,13 @@ public class DLOntology implements Serializable {
     protected final boolean m_isHorn;
     protected final Set<AtomicConcept> m_allAtomicConcepts;
     protected final int m_numberOfExternalConcepts;
+    protected final Set<Role> m_allTransitiveObjectRoles;
     protected final Set<AtomicRole> m_allAtomicObjectRoles;
     protected final Set<AtomicRole> m_allAtomicDataRoles;
     protected final Set<Individual> m_allIndividuals;
     protected final Set<DescriptionGraph> m_allDescriptionGraphs;
 
-    public DLOntology(String ontologyURI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts,Set<AtomicConcept> atomicConcepts,Set<AtomicRole> atomicObjectRoles,Set<AtomicRole> atomicDataRoles,Set<Individual> individuals,boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,boolean canUseNIRule,boolean hasDatatypes) {
+    public DLOntology(String ontologyURI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts,Set<AtomicConcept> atomicConcepts,Set<Role> transitiveObjectRoles,Set<AtomicRole> atomicObjectRoles,Set<AtomicRole> atomicDataRoles,Set<Individual> individuals,boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,boolean canUseNIRule,boolean hasDatatypes) {
         m_ontologyURI=ontologyURI;
         m_dlClauses=dlClauses;
         m_positiveFacts=positiveFacts;
@@ -69,6 +70,10 @@ public class DLOntology implements Serializable {
             if (!InternalNames.isInternalURI(c.getURI()))
                 numberOfExternalConcepts++;
         m_numberOfExternalConcepts=numberOfExternalConcepts;
+        if (transitiveObjectRoles==null)
+            m_allTransitiveObjectRoles=new HashSet<Role>();
+        else
+            m_allTransitiveObjectRoles=transitiveObjectRoles;
         if (atomicObjectRoles==null)
             m_allAtomicObjectRoles=new TreeSet<AtomicRole>(AtomicRoleComparator.INSTANCE);
         else
@@ -134,6 +139,10 @@ public class DLOntology implements Serializable {
 
     public int getNumberOfExternalConcepts() {
         return m_numberOfExternalConcepts;
+    }
+
+    public Set<Role> getAllTransitiveObjectRoles() {
+        return m_allTransitiveObjectRoles;
     }
 
     public Set<AtomicRole> getAllAtomicObjectRoles() {

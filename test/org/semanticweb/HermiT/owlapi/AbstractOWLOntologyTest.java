@@ -54,6 +54,7 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
                 atoms, // positive facts
                 atoms, // negative facts 
                 null, // atomic concepts
+                null, // transitive roles
                 null, // object roles
                 null, // data roles
                 null, // individuals

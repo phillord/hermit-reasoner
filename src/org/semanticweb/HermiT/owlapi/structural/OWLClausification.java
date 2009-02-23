@@ -155,6 +155,7 @@ public class OWLClausification implements Serializable {
                 axioms.m_asymmetricObjectProperties,
                 axioms.m_reflexiveObjectProperties,
                 axioms.m_irreflexiveObjectProperties,
+                axioms.m_transitiveObjectProperties,
                 axioms.m_disjointObjectProperties,
                 axioms.m_disjointDataProperties,
                 axioms.m_hasKeys,
@@ -221,6 +222,7 @@ public class OWLClausification implements Serializable {
                 axioms.m_asymmetricObjectProperties,
                 axioms.m_reflexiveObjectProperties,
                 axioms.m_irreflexiveObjectProperties,
+                axioms.m_transitiveObjectProperties,
                 axioms.m_disjointObjectProperties,
                 axioms.m_disjointDataProperties,
                 axioms.m_hasKeys,
@@ -254,6 +256,7 @@ public class OWLClausification implements Serializable {
             Set<OWLObjectPropertyExpression> asymmetricObjectProperties,
             Set<OWLObjectPropertyExpression> reflexiveObjectProperties,
             Set<OWLObjectPropertyExpression> irreflexiveObjectProperties,
+            Set<OWLObjectPropertyExpression> transitiveObjectProperties,
             Collection<OWLObjectPropertyExpression[]> disjointObjectProperties,
             Collection<OWLDataPropertyExpression[]> disjointDataProperties,
             Set<OWLHasKeyDummy> hasKeys, 
@@ -394,13 +397,24 @@ public class OWLClausification implements Serializable {
         for (OWLObjectProperty p : objectProperties) {
             objectRoles.add(AtomicRole.createObjectRole(p.getURI().toString()));
         }
+        Set<Role> transitiveObjectRoles = new HashSet<Role>();
+        for (OWLObjectPropertyExpression pe : transitiveObjectProperties) {
+            Role role;
+            if (pe instanceof OWLObjectProperty)
+                role=AtomicRole.createObjectRole(((OWLObjectProperty)pe).getURI().toString());
+            else {
+                OWLObjectPropertyInverse inv=(OWLObjectPropertyInverse)pe;
+                role=AtomicRole.createObjectRole(((OWLObjectProperty)inv.getInverse()).getURI().toString()).getInverse();
+            }
+            transitiveObjectRoles.add(role);
+        }
         Set<AtomicRole> dataRoles = new HashSet<AtomicRole>();
         for (OWLDataProperty p : dataProperties) {
             dataRoles.add(AtomicRole.createDataRole(p.getURI().toString()));
         }
         return new DLOntology(ontologyURI,
                 dlClauses, positiveFacts, negativeFacts,
-                atomicConcepts, objectRoles, dataRoles, hermitIndividuals,
+                atomicConcepts, transitiveObjectRoles, objectRoles, dataRoles, hermitIndividuals,
                 determineExpressivity.m_hasInverseRoles,
                 determineExpressivity.m_hasAtMostRestrictions,
                 determineExpressivity.m_hasNominals, shouldUseNIRule,

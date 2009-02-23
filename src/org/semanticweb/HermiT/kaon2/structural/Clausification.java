@@ -166,6 +166,7 @@ public class Clausification {
         		              positiveFacts,
         		              negativeFacts,
         		              null,
+        		              null,
                               null,
                               null,
                               null,
