@@ -316,7 +316,7 @@ public class Reasoner implements Serializable {
         return new Tableau(tableauMonitor,existentialsExpansionStrategy,dlOntology,config.parameters);
     }
 
-    protected Namespaces createNamespaces(String ontologyURI) {
+    protected static Namespaces createNamespaces(String ontologyURI) {
         Map<String,String> namespaceDecl=new HashMap<String,String>();
         namespaceDecl.put("",ontologyURI+"#");
         return InternalNames.withInternalNamespaces(new Namespaces(namespaceDecl,Namespaces.semanticWebNamespaces));
