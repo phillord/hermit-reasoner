@@ -150,7 +150,7 @@ public class Reasoner implements Serializable {
         }
         m_config=config;
         m_namespaces=createNamespaces(m_dlOntology.getOntologyURI());
-        m_tableau=createTableau(m_config,m_dlOntology);
+        m_tableau=createTableau(m_config,m_dlOntology,m_namespaces);
         m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
         m_classifier=new Classifier<AtomicConcept>(new TableauFunc(m_subsumptionChecker));
     }
@@ -168,7 +168,7 @@ public class Reasoner implements Serializable {
         m_config=config;
         m_dlOntology=clausifier.clausifyWithKeys(ontologyManager,ontology,descriptionGraphs,keys);
         m_namespaces=createNamespaces(m_dlOntology.getOntologyURI());
-        m_tableau=createTableau(m_config,m_dlOntology);
+        m_tableau=createTableau(m_config,m_dlOntology,m_namespaces);
         m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
         m_classifier=new Classifier<AtomicConcept>(new TableauFunc(m_subsumptionChecker));
     }
@@ -184,7 +184,7 @@ public class Reasoner implements Serializable {
         m_config=config;
         m_dlOntology=clausifier.clausifyOntologiesDisregardImports(ontologyManger,ontologies,resultingDLOntologyURI);
         m_namespaces=createNamespaces(m_dlOntology.getOntologyURI());
-        m_tableau=createTableau(m_config,m_dlOntology);
+        m_tableau=createTableau(m_config,m_dlOntology,m_namespaces);
         m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
         m_classifier=new Classifier<AtomicConcept>(new TableauFunc(m_subsumptionChecker));
     }
@@ -193,12 +193,12 @@ public class Reasoner implements Serializable {
         m_config=config;
         m_dlOntology=dlOntology;
         m_namespaces=createNamespaces(m_dlOntology.getOntologyURI());
-        m_tableau=createTableau(m_config,m_dlOntology);
+        m_tableau=createTableau(m_config,m_dlOntology,m_namespaces);
         m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
         m_classifier=new Classifier<AtomicConcept>(new TableauFunc(m_subsumptionChecker));
     }
 
-    protected Tableau createTableau(Configuration config,DLOntology dlOntology) throws IllegalArgumentException {
+    protected Tableau createTableau(Configuration config,DLOntology dlOntology,Namespaces namespaces) throws IllegalArgumentException {
         if (!dlOntology.canUseNIRule() && dlOntology.hasAtMostRestrictions() && dlOntology.hasInverseRoles() && config.existentialStrategyType==Configuration.ExistentialStrategyType.INDIVIDUAL_REUSE)
             throw new IllegalArgumentException("The supplied DL-ontology is not compatible with the individual reuse strategy.");
 
@@ -210,7 +210,7 @@ public class Reasoner implements Serializable {
                 buffer.append("The following DL-clauses in the DL-ontology"+" are not admissible:");
                 buffer.append(CRLF);
                 for (DLClause dlClause : nonAdmissibleDLClauses) {
-                    buffer.append(dlClause.toString(m_namespaces));
+                    buffer.append(dlClause.toString(namespaces));
                     buffer.append(CRLF);
                 }
                 throw new IllegalArgumentException(buffer.toString());
@@ -229,10 +229,10 @@ public class Reasoner implements Serializable {
             wellKnownTableauMonitor=new TimerWithPause();
             break;
         case DEBUGGER_HISTORY_ON:
-            wellKnownTableauMonitor=new Debugger(m_namespaces,true);
+            wellKnownTableauMonitor=new Debugger(namespaces,true);
             break;
         case DEBUGGER_NO_HISTORY:
-            wellKnownTableauMonitor=new Debugger(m_namespaces,false);
+            wellKnownTableauMonitor=new Debugger(namespaces,false);
             break;
         default:
             throw new IllegalArgumentException("Unknown monitor type");
@@ -252,7 +252,7 @@ public class Reasoner implements Serializable {
             if (config.prepareForExpressiveQueries) {
                 directBlockingChecker=new PairWiseDirectBlockingChecker();
             }
-            else if (m_dlOntology.hasAtMostRestrictions() && m_dlOntology.hasInverseRoles()) {
+            else if (dlOntology.hasAtMostRestrictions() && dlOntology.hasInverseRoles()) {
                 directBlockingChecker=new PairWiseDirectBlockingChecker();
             }
             else {
@@ -313,7 +313,7 @@ public class Reasoner implements Serializable {
             throw new IllegalArgumentException("Unknown expansion strategy type.");
         }
 
-        return new Tableau(tableauMonitor,existentialsExpansionStrategy,m_dlOntology,config.parameters);
+        return new Tableau(tableauMonitor,existentialsExpansionStrategy,dlOntology,config.parameters);
     }
 
     protected Namespaces createNamespaces(String ontologyURI) {
