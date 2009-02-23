@@ -29,6 +29,6 @@ public class IndividualReuseTest extends ReasonerTest {
         BlockingSignatureCache blockingSignatureCache=new BlockingSignatureCache(directBlockingChecker);
         BlockingStrategy blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
         ExpansionStrategy ExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,false);
-        return new Tableau(null,ExpansionStrategy,dlOntology,false,new HashMap<String,Object>());
+        return new Tableau(null,ExpansionStrategy,dlOntology,new HashMap<String,Object>());
     }
 }

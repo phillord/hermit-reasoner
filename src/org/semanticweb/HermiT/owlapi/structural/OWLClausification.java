@@ -144,6 +144,7 @@ public class OWLClausification implements Serializable {
             allReferencedDataProperties.addAll(ontology.getReferencedDataProperties());
             allReferencedObjectProperties.addAll(ontology.getReferencedObjectProperties());
         }
+        axiomatizeTopObjectPropertyIfNeeded(ontologyManager.getOWLDataFactory(), allReferencedObjectProperties, axioms);
         TransitivityManager transitivityManager=new TransitivityManager(ontologyManager.getOWLDataFactory());
         transitivityManager.rewriteConceptInclusions(axioms);
         Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
@@ -207,6 +208,8 @@ public class OWLClausification implements Serializable {
             }
         }
         normalization.processKeys(config, keys);
+        
+        axiomatizeTopObjectPropertyIfNeeded(ontologyManager.getOWLDataFactory(), allReferencedObjectProperties, axioms);
 
         TransitivityManager transitivityManager=new TransitivityManager(ontologyManager.getOWLDataFactory());
         transitivityManager.rewriteConceptInclusions(axioms);
@@ -231,63 +234,58 @@ public class OWLClausification implements Serializable {
                 allReferencedObjectProperties);
     }
     
-    static protected Map<AtomicRole, HierarchyPosition<AtomicRole>>
-        buildRoleHierarchy(
-            Collection<OWLObjectPropertyExpression[]> objInclusions,
-            Collection<OWLDataPropertyExpression[]> dataInclusions,
-            Set<AtomicRole> objectRoles, Set<AtomicRole> dataRoles) {
-        final Map<Role, Set<Role>> subRoles = new HashMap<Role, Set<Role>>();
+    protected void axiomatizeTopObjectPropertyIfNeeded(OWLDataFactory factory, Set<OWLObjectProperty> allReferencedObjectProperties, OWLAxioms axioms) {
+        OWLObjectProperty topObjectProperty=factory.getOWLObjectProperty(URI.create(AtomicRole.TOP_OBJECT_ROLE.getURI()));
+        if (allReferencedObjectProperties.contains(topObjectProperty)) {
+            axioms.m_transitiveObjectProperties.add(topObjectProperty);
+            axioms.m_objectPropertyInclusions.add(new OWLObjectPropertyExpression[] { topObjectProperty,topObjectProperty.getInverseProperty() });
+            OWLIndividual newIndividual=factory.getOWLIndividual(URI.create("internal:topIndividual"));
+            OWLObjectOneOf oneOfNewIndividual=factory.getOWLObjectOneOf(newIndividual);
+            OWLObjectSomeRestriction hasTopNewIndividual=factory.getOWLObjectSomeRestriction(topObjectProperty,oneOfNewIndividual);
+            axioms.m_conceptInclusions.add(new OWLDescription[] { hasTopNewIndividual });
+        }
+    }
+    
+    protected static Map<AtomicRole,HierarchyPosition<AtomicRole>> buildRoleHierarchy(Collection<OWLObjectPropertyExpression[]> objInclusions,Collection<OWLDataPropertyExpression[]> dataInclusions,Set<AtomicRole> objectRoles,Set<AtomicRole> dataRoles) {
+        final Map<Role,Set<Role>> subRoles=new HashMap<Role,Set<Role>>();
         for (OWLObjectPropertyExpression[] inclusion : objInclusions) {
-            Role sub = getRole(inclusion[0]);
-            Role sup = getRole(inclusion[1]);
-            Set<Role> subs = subRoles.get(sup);
-            if (subs == null) {
-                subs = new HashSet<Role>();
-                subRoles.put(sup, subs);
+            Role sub=getRole(inclusion[0]);
+            Role sup=getRole(inclusion[1]);
+            Set<Role> subs=subRoles.get(sup);
+            if (subs==null) {
+                subs=new HashSet<Role>();
+                subRoles.put(sup,subs);
             }
             subs.add(sub);
         }
         for (OWLDataPropertyExpression[] inclusion : dataInclusions) {
-            Role sub = getRole(inclusion[0]);
-            Role sup = getRole(inclusion[1]);
-            Set<Role> subs = subRoles.get(sup);
-            if (subs == null) {
-                subs = new HashSet<Role>();
-                subRoles.put(sup, subs);
+            Role sub=getRole(inclusion[0]);
+            Role sup=getRole(inclusion[1]);
+            Set<Role> subs=subRoles.get(sup);
+            if (subs==null) {
+                subs=new HashSet<Role>();
+                subRoles.put(sup,subs);
             }
             subs.add(sub);
         }
-        
+
         GraphUtils.transitivelyClose(subRoles);
-        
-        NaiveHierarchyPosition.Ordering<AtomicRole> ordering =
-            new NaiveHierarchyPosition.Ordering<AtomicRole>() {
-                public boolean less(AtomicRole sub, AtomicRole sup) {
-                    if (sup == AtomicRole.TOP_DATA_ROLE ||
-                        sup == AtomicRole.TOP_OBJECT_ROLE ||
-                        sub == AtomicRole.BOTTOM_DATA_ROLE ||
-                        sub == AtomicRole.BOTTOM_OBJECT_ROLE) {
-                        return true;
-                    }
-                    Set<Role> subs = subRoles.get(sup);
-                    if (subs == null) {
-                        return false;
-                    }
-                    return subs.contains(sub);
+
+        NaiveHierarchyPosition.Ordering<AtomicRole> ordering=new NaiveHierarchyPosition.Ordering<AtomicRole>() {
+            public boolean less(AtomicRole sub,AtomicRole sup) {
+                if (sup==AtomicRole.TOP_DATA_ROLE||sup==AtomicRole.TOP_OBJECT_ROLE||sub==AtomicRole.BOTTOM_DATA_ROLE||sub==AtomicRole.BOTTOM_OBJECT_ROLE) {
+                    return true;
                 }
-            };
-        Map<AtomicRole, HierarchyPosition<AtomicRole>> hierarchy =
-            NaiveHierarchyPosition.buildHierarchy(
-                AtomicRole.TOP_OBJECT_ROLE,
-                AtomicRole.BOTTOM_OBJECT_ROLE,
-                objectRoles,
-                ordering);
-        
-        hierarchy.putAll(NaiveHierarchyPosition.buildHierarchy(
-                            AtomicRole.TOP_DATA_ROLE,
-                            AtomicRole.BOTTOM_DATA_ROLE,
-                            dataRoles,
-                            ordering));
+                Set<Role> subs=subRoles.get(sup);
+                if (subs==null) {
+                    return false;
+                }
+                return subs.contains(sub);
+            }
+        };
+        Map<AtomicRole,HierarchyPosition<AtomicRole>> hierarchy=NaiveHierarchyPosition.buildHierarchy(AtomicRole.TOP_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE,objectRoles,ordering);
+
+        hierarchy.putAll(NaiveHierarchyPosition.buildHierarchy(AtomicRole.TOP_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE,dataRoles,ordering));
         return hierarchy;
     }
 

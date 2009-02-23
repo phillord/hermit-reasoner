@@ -14,7 +14,6 @@ import java.util.HashSet;
 
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.model.AtomicConcept;
-import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.owl.model.OWLAntiSymmetricObjectPropertyAxiom;
 import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLAxiomAnnotationAxiom;
@@ -29,7 +28,6 @@ import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLDataMaxCardinalityRestriction;
 import org.semanticweb.owl.model.OWLDataMinCardinalityRestriction;
 import org.semanticweb.owl.model.OWLDataOneOf;
-import org.semanticweb.owl.model.OWLDataProperty;
 import org.semanticweb.owl.model.OWLDataPropertyAssertionAxiom;
 import org.semanticweb.owl.model.OWLDataPropertyDomainAxiom;
 import org.semanticweb.owl.model.OWLDataPropertyExpression;
@@ -50,7 +48,6 @@ import org.semanticweb.owl.model.OWLEntityAnnotationAxiom;
 import org.semanticweb.owl.model.OWLEquivalentClassesAxiom;
 import org.semanticweb.owl.model.OWLEquivalentDataPropertiesAxiom;
 import org.semanticweb.owl.model.OWLEquivalentObjectPropertiesAxiom;
-import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLFunctionalDataPropertyAxiom;
 import org.semanticweb.owl.model.OWLFunctionalObjectPropertyAxiom;
 import org.semanticweb.owl.model.OWLImportsDeclaration;
@@ -68,7 +65,6 @@ import org.semanticweb.owl.model.OWLObjectIntersectionOf;
 import org.semanticweb.owl.model.OWLObjectMaxCardinalityRestriction;
 import org.semanticweb.owl.model.OWLObjectMinCardinalityRestriction;
 import org.semanticweb.owl.model.OWLObjectOneOf;
-import org.semanticweb.owl.model.OWLObjectProperty;
 import org.semanticweb.owl.model.OWLObjectPropertyAssertionAxiom;
 import org.semanticweb.owl.model.OWLObjectPropertyChainSubPropertyAxiom;
 import org.semanticweb.owl.model.OWLObjectPropertyDomainAxiom;
@@ -106,34 +102,11 @@ public class OWLNormalization implements Serializable {
         m_axioms=axioms;
     }
 
-    /**
-     * Normalizes the ontology and performs the structural transformation. After executing this method, the getter methods of this class (e.g., getConceptInclusions, getAsymmetricObjectProperties, etc) can be used to retrieve the normalized axioms and assertions from the ontology.
-     * 
-     * @param inOntology
-     *            the ontology to be normalized
-     * @throws OWLException
-     */
     public void processOntology(Configuration config,OWLOntology inOntology) {
         // Each entry in the inclusions list represents a disjunction of
         // concepts -- that is, each OWLDescription in an entry contributes a
         // disjunct. It is thus not really inclusions, but rather a disjunction
         // of concepts that represents an inclusion axiom.
-        { // Approximate the top object and data roles
-            // TODO: make this complete (efficiently)
-            OWLObjectProperty topObjectProp=m_factory.getOWLObjectProperty(URI.create(AtomicRole.TOP_OBJECT_ROLE.getURI()));
-            OWLDataProperty topDataProp=m_factory.getOWLDataProperty(URI.create(AtomicRole.TOP_DATA_ROLE.getURI()));
-            for (OWLObjectProperty p : inOntology.getReferencedObjectProperties()) {
-                addInclusion(p,topObjectProp);
-            }
-            for (OWLDataProperty p : inOntology.getReferencedDataProperties()) {
-                addInclusion(p,topDataProp);
-            }
-            if (config.makeTopRoleUniversal) {
-                makeTransitive(topObjectProp);
-                makeReflexive(topObjectProp);
-                addInclusion(topObjectProp,topObjectProp.getInverseProperty());
-            }
-        }
         AxiomVisitor axiomVisitor=new AxiomVisitor();
         for (OWLAxiom axiom : inOntology.getAxioms()) {
             // the visitor populates the member variables such as

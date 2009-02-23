@@ -147,8 +147,7 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
                 directBlockingChecker, blockingSignatureCache);
         ExpansionStrategy ExpansionStrategy = new CreationOrderStrategy(
                 blockingStrategy);
-        return new Tableau(null, ExpansionStrategy, dlOntology, false,
-                new HashMap<String, Object>());
+        return new Tableau(null, ExpansionStrategy, dlOntology, new HashMap<String, Object>());
     }
 
     /**

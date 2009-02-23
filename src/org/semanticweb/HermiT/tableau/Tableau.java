@@ -34,7 +34,6 @@ public final class Tableau implements Serializable {
     protected final ExpansionStrategy m_existentialsExpansionStrategy;
     protected final DLOntology m_dlOntology;
     protected final Map<String,Object> m_parameters;
-    protected final boolean m_makeTopRoleUniversal;
     protected final DependencySetFactory m_dependencySetFactory;
     protected final ExtensionManager m_extensionManager;
     protected final LabelManager m_labelManager;
@@ -59,14 +58,12 @@ public final class Tableau implements Serializable {
     protected Node m_firstTableauNode;
     protected Node m_lastTableauNode;
     protected Node m_lastMergedOrPrunedNode;
-    protected Node m_arbitraryOriginalNode;
     protected GroundDisjunction m_firstGroundDisjunction;
     protected GroundDisjunction m_firstUnprocessedGroundDisjunction;
     protected Node m_checkedNode;
 
-    public Tableau(TableauMonitor tableauMonitor,ExpansionStrategy existentialsExpansionStrategy,DLOntology dlOntology,boolean makeTopRoleUniversal,Map<String,Object> parameters) {
+    public Tableau(TableauMonitor tableauMonitor,ExpansionStrategy existentialsExpansionStrategy,DLOntology dlOntology,Map<String,Object> parameters) {
         m_parameters=parameters;
-        m_makeTopRoleUniversal=makeTopRoleUniversal;
         m_tableauMonitor=tableauMonitor;
         m_existentialsExpansionStrategy=existentialsExpansionStrategy;
         m_dlOntology=dlOntology;
@@ -137,7 +134,6 @@ public final class Tableau implements Serializable {
         m_firstTableauNode=null;
         m_lastTableauNode=null;
         m_lastMergedOrPrunedNode=null;
-        m_arbitraryOriginalNode=null;
         m_firstGroundDisjunction=null;
         m_firstUnprocessedGroundDisjunction=null;
         m_checkedNode=null;
@@ -468,14 +464,6 @@ public final class Tableau implements Serializable {
             out=createNewNamedNode(dependencySet,treeDepth);
         else
             throw new RuntimeException("Can only create original nodes of type root node or named node. ");
-        if (m_makeTopRoleUniversal) {
-            if (m_arbitraryOriginalNode==null) {
-                m_arbitraryOriginalNode=out;
-            }
-            else {
-                m_extensionManager.addAssertion(AtomicRole.TOP_OBJECT_ROLE,m_arbitraryOriginalNode,out,m_dependencySetFactory.emptySet());
-            }
-        }
         return out;
     }
     /**

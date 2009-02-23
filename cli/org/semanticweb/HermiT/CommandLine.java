@@ -461,7 +461,7 @@ public class CommandLine {
         }
     }
 
-    protected static final int kTime=1000,kDumpClauses=1001,kDumpRoleBox=1002,kOwlApi=1003,kKaon2=1004,kDirectBlock=1005,kBlockStrategy=1006,kBlockCache=1007,kExpansion=1008,kBase=1009,kParser=1010,kClausifyRoleBox=1011,kDefaultNamespace=1012,kDumpNamespaces=1013,kSuperRoles=1014,kSubRoles=1015,kEquivRoles=1016,kUniversalRole=1017,kKrssTaxonomy=1018,kFunctionalTaxonomy=1019,kIgnoreUnsupportedDatatypes=1020;
+    protected static final int kTime=1000,kDumpClauses=1001,kDumpRoleBox=1002,kOwlApi=1003,kKaon2=1004,kDirectBlock=1005,kBlockStrategy=1006,kBlockCache=1007,kExpansion=1008,kBase=1009,kParser=1010,kDefaultNamespace=1011,kDumpNamespaces=1012,kSuperRoles=1013,kSubRoles=1014,kEquivRoles=1015,kKrssTaxonomy=1016,kFunctionalTaxonomy=1017,kIgnoreUnsupportedDatatypes=1018;
 
     static protected final String versionString="HermiT version @VERSION@";
     protected static final String usageString="Usage: hermit [OPTION]... URI...";
@@ -484,7 +484,7 @@ public class CommandLine {
             new Option(kBase,"base",kParsing,true,"BASE","use BASE as base for ontology URI arguments"),new Option(kParser,"parser",kParsing,true,"PARSER","use PARSER for parsing; supported values are 'owlapi' and 'kaon2'"),new Option(kOwlApi,"owlapi",kParsing,"use OWL API parser (default)"),new Option(kKaon2,"kaon2",kParsing,"use KAON2 parser"),
 
             // algorithm tweaks:
-            new Option(kDirectBlock,"block-match",kAlgorithm,true,"TYPE","identify blocked nodes with TYPE blocking; supported values are 'single', 'pairwise', 'pairwise-reflexive', and 'optimal' (default 'optimal')"),new Option(kBlockStrategy,"block-strategy",kAlgorithm,true,"TYPE","search for blockers with TYPE searching; supported values are 'ancestor' and 'anywhere' (default 'anywhere')"),new Option(kBlockCache,"block-cache",kAlgorithm,true,"VALUE","set use of blocking cahce to VALUE; supported values are 'on' and 'off' (default 'on')"),new Option(kExpansion,"expansion",kAlgorithm,true,"TYPE","use TYPE strategy for existential expansion; supported values are 'creation', 'el', and 'reuse' (default 'creation')"),new Option(kClausifyRoleBox,"clausify-rolebox",kAlgorithm,"add clauses to realize transitive edges (experimental)"),new Option(kUniversalRole,"universal-role",kAlgorithm,"enable support for owl:TopDataProperty as the universal role"),
+            new Option(kDirectBlock,"block-match",kAlgorithm,true,"TYPE","identify blocked nodes with TYPE blocking; supported values are 'single', 'pairwise', 'pairwise-reflexive', and 'optimal' (default 'optimal')"),
             new Option(kIgnoreUnsupportedDatatypes,"ignoreUnsupportedDatatypes",kAlgorithm,"ignore unsupported datatypes"),
 
             // internals:
@@ -748,15 +748,6 @@ public class CommandLine {
                         }
                         else
                             throw new UsageException("unknown existential strategy type '"+arg+"'; supported values are 'creation', 'el', and 'reuse'");
-                    }
-                        break;
-                    case kClausifyRoleBox: {
-                        config.checkClauses=false;
-                        config.existentialStrategyType=Configuration.ExistentialStrategyType.DEPTH_FIRST;
-                    }
-                        break;
-                    case kUniversalRole: {
-                        config.makeTopRoleUniversal=true;
                     }
                         break;
                     case kIgnoreUnsupportedDatatypes: {

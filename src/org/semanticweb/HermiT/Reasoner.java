@@ -320,7 +320,7 @@ public class Reasoner implements Serializable {
             throw new IllegalArgumentException("Unknown expansion strategy type.");
         }
 
-        return new Tableau(tableauMonitor,existentialsExpansionStrategy,m_dlOntology,config.makeTopRoleUniversal,config.parameters);
+        return new Tableau(tableauMonitor,existentialsExpansionStrategy,m_dlOntology,config.parameters);
     }
 
     protected Namespaces createNamespaces(String ontologyURI) {

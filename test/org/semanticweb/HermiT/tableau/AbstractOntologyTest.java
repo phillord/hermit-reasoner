@@ -210,8 +210,7 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
                 directBlockingChecker, blockingSignatureCache);
         ExpansionStrategy ExpansionStrategy = new CreationOrderStrategy(
                 blockingStrategy);
-        return new Tableau(getTableauMonitor(), ExpansionStrategy,
-                dlOntology, false, new HashMap<String, Object>());
+        return new Tableau(getTableauMonitor(), ExpansionStrategy, dlOntology, new HashMap<String, Object>());
     }
 
     protected TableauMonitor getTableauMonitor() {

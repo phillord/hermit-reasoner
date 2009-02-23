@@ -65,7 +65,7 @@ public class MergeTest extends AbstractHermiTTest {
         BlockingSignatureCache blockingSignatureCache=new BlockingSignatureCache(directBlockingChecker);
         BlockingStrategy blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
         ExpansionStrategy ExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
-        m_tableau=new Tableau(null,ExpansionStrategy,TEST_DL_ONTOLOGY,false,new HashMap<String,Object>());
+        m_tableau=new Tableau(null,ExpansionStrategy,TEST_DL_ONTOLOGY,new HashMap<String,Object>());
         m_extensionManager=m_tableau.getExtensionManager();
     }
     public void testMergeAndBacktrack() {

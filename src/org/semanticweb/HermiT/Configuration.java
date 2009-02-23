@@ -51,7 +51,6 @@ public class Configuration implements Serializable {
     public Configuration.ParserType parserType;
     public boolean checkClauses;
     public boolean prepareForExpressiveQueries;
-    public boolean makeTopRoleUniversal;
     public boolean ignoreUnsupportedDatatypes;
     public TableauMonitor monitor;
     public final Map<String,Object> parameters;
@@ -66,7 +65,6 @@ public class Configuration implements Serializable {
         ignoreUnsupportedDatatypes=false;
         checkClauses=true;
         prepareForExpressiveQueries=false;
-        makeTopRoleUniversal=false;
         monitor=null;
         parameters=new HashMap<String,Object>();
     }
