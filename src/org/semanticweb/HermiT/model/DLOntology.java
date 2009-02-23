@@ -47,9 +47,9 @@ public class DLOntology implements Serializable {
     protected final boolean m_hasDatatypes;
     protected final boolean m_isHorn;
     protected final Set<AtomicConcept> m_allAtomicConcepts;
+    protected final int m_numberOfExternalConcepts;
     protected final Set<Individual> m_allIndividuals;
     protected final Set<DescriptionGraph> m_allDescriptionGraphs;
-    protected final int m_numberOfExternalConcepts;
     protected final Map<AtomicRole,HierarchyPosition<AtomicRole>> m_explicitRoleHierarchy;
 
     public DLOntology(String ontologyURI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts,Set<AtomicConcept> atomicConcepts,Set<Individual> individuals,Map<AtomicRole,HierarchyPosition<AtomicRole>> explicitRoleHierarchy,boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,boolean canUseNIRule,boolean hasDatatypes) {
