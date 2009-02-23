@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
 
-import org.semanticweb.HermiT.Reasoner;
+import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.owl.model.OWLAntiSymmetricObjectPropertyAxiom;
@@ -113,7 +113,7 @@ public class OWLNormalization implements Serializable {
      *            the ontology to be normalized
      * @throws OWLException
      */
-    public void processOntology(Reasoner.Configuration config,OWLOntology inOntology) {
+    public void processOntology(Configuration config,OWLOntology inOntology) {
         // Each entry in the inclusions list represents a disjunction of
         // concepts -- that is, each OWLDescription in an entry contributes a
         // disjunct. It is thus not really inclusions, but rather a disjunction
@@ -169,7 +169,7 @@ public class OWLNormalization implements Serializable {
     protected void makeAsymmetric(OWLObjectPropertyExpression objectPropertyExpression) {
         m_axioms.m_asymmetricObjectProperties.add(objectPropertyExpression.getSimplified());
     }
-    public void processKeys(Reasoner.Configuration config,Set<OWLHasKeyDummy> keys) {
+    public void processKeys(Configuration config,Set<OWLHasKeyDummy> keys) {
         AxiomVisitor axiomVisitor=new AxiomVisitor();
         for (OWLHasKeyDummy key : keys) {
             axiomVisitor.visit(key);

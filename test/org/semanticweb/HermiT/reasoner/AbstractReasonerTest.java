@@ -12,6 +12,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
 import org.semanticweb.HermiT.model.Atom;
@@ -72,10 +73,9 @@ public abstract class AbstractReasonerTest extends TestCase {
      * @throws Exception
      *             if the resource cannot be found or an error occurred when loading the ontology
      */
-    protected void loadOntologyFromResource(String resourceName,Reasoner.Configuration configuration) throws Exception {
+    protected void loadOntologyFromResource(String resourceName,Configuration configuration) throws Exception {
         if (configuration==null) {
-            configuration=new Reasoner.Configuration();
-            configuration.subsumptionCacheStrategyType=Reasoner.SubsumptionCacheStrategyType.ON_REQUEST;
+            configuration=new Configuration();
         }
         m_reasoner=new Reasoner(configuration,getClass().getResource(resourceName).toURI());
     }
@@ -88,7 +88,7 @@ public abstract class AbstractReasonerTest extends TestCase {
      * @throws InterruptedException
      * @throws OWLException
      */
-    protected void loadOntologyWithAxioms(String axioms,Reasoner.Configuration configuration) throws OWLException,InterruptedException {
+    protected void loadOntologyWithAxioms(String axioms,Configuration configuration) throws OWLException,InterruptedException {
         StringBuffer buffer=new StringBuffer();
         buffer.append("Namespace(=<file:/c/test.owl#>)");
         buffer.append("Namespace(rdfs=<http://www.w3.org/2000/01/rdf-schema#>)");
@@ -104,8 +104,7 @@ public abstract class AbstractReasonerTest extends TestCase {
         OWLOntologyInputSource input=new StringInputSource(buffer.toString());
         m_ontology=m_ontologyManager.loadOntology(input);
         if (configuration==null) {
-            configuration=new Reasoner.Configuration();
-            configuration.subsumptionCacheStrategyType=Reasoner.SubsumptionCacheStrategyType.ON_REQUEST;
+            configuration=new Configuration();
         }
         m_reasoner=new Reasoner(configuration,m_ontologyManager,m_ontology);
     }
@@ -118,7 +117,7 @@ public abstract class AbstractReasonerTest extends TestCase {
      * @throws InterruptedException
      * @throws OWLException
      */
-    protected void loadOntologyWithAxiomsAndKeys(String axioms,Reasoner.Configuration configuration,Set<OWLHasKeyDummy> keys) throws OWLException,InterruptedException {
+    protected void loadOntologyWithAxiomsAndKeys(String axioms,Configuration configuration,Set<OWLHasKeyDummy> keys) throws OWLException,InterruptedException {
         StringBuffer buffer=new StringBuffer();
         buffer.append("Namespace(=<file:/c/test.owl#>)");
         buffer.append("Namespace(rdfs=<http://www.w3.org/2000/01/rdf-schema#>)");
@@ -134,8 +133,7 @@ public abstract class AbstractReasonerTest extends TestCase {
         OWLOntologyInputSource input=new StringInputSource(buffer.toString());
         m_ontology=m_ontologyManager.loadOntology(input);
         if (configuration==null) {
-            configuration=new Reasoner.Configuration();
-            configuration.subsumptionCacheStrategyType=Reasoner.SubsumptionCacheStrategyType.ON_REQUEST;
+            configuration=new Configuration();
         }
         m_reasoner=new Reasoner(configuration,m_ontologyManager,m_ontology,null,keys);
     }

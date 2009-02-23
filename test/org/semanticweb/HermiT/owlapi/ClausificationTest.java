@@ -8,9 +8,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.InternalNames;
 import org.semanticweb.HermiT.Namespaces;
-import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
@@ -59,7 +59,7 @@ public class ClausificationTest extends AbstractOWLOntologyTest {
     }
 
     public void testHasKeys() throws Exception {
-        OWLClausification clausifier=new OWLClausification(new Reasoner.Configuration());
+        OWLClausification clausifier=new OWLClausification(new Configuration());
         DLClause clause=clausifier.clausifyKey(OWLHasKeyDummy.getDemoKey());
         Set<String> bAtoms=new HashSet<String>();
         bAtoms.add("<internal:Named>(X)");
@@ -110,7 +110,7 @@ public class ClausificationTest extends AbstractOWLOntologyTest {
     }
 
     protected void assertDLClauses(String[] control,String[] controlVariant) throws Exception {
-        OWLClausification clausifier=new OWLClausification(new Reasoner.Configuration());
+        OWLClausification clausifier=new OWLClausification(new Configuration());
         Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
         DLOntology dlOntology=clausifier.clausify(m_ontologyManager,m_ontology,noDescriptionGraphs);
         Set<String> actualStrings=new HashSet<String>();

@@ -18,7 +18,7 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 
-import org.semanticweb.HermiT.Reasoner;
+import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
 import org.semanticweb.HermiT.hierarchy.NaiveHierarchyPosition;
 import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
@@ -114,10 +114,10 @@ public class OWLClausification implements Serializable {
     protected static final org.semanticweb.HermiT.model.Variable X = org.semanticweb.HermiT.model.Variable.create("X");
     protected static final org.semanticweb.HermiT.model.Variable Y = org.semanticweb.HermiT.model.Variable.create("Y");
     protected static final org.semanticweb.HermiT.model.Variable Z = org.semanticweb.HermiT.model.Variable.create("Z");
-    protected final Reasoner.Configuration config;
+    protected final Configuration config;
     private int amqOffset; // the number of negative at-most replacements already performed
     
-    public OWLClausification(Reasoner.Configuration config) {
+    public OWLClausification(Configuration config) {
         amqOffset = 0;
         this.config = config;
     }
@@ -401,7 +401,7 @@ public class OWLClausification implements Serializable {
                 && determineExpressivity.m_hasInverseRoles
                 && (determineExpressivity.m_hasNominals ||
                     config.existentialStrategyType ==
-                        Reasoner.ExistentialStrategyType.INDIVIDUAL_REUSE);
+                        Configuration.ExistentialStrategyType.INDIVIDUAL_REUSE);
         if (config.prepareForExpressiveQueries) {
             shouldUseNIRule = true;
         }

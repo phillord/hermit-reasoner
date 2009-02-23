@@ -11,11 +11,9 @@ package org.semanticweb.HermiT;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -61,7 +59,6 @@ import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Individual;
-import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.monitor.TableauMonitorFork;
 import org.semanticweb.HermiT.monitor.Timer;
@@ -89,102 +86,6 @@ import org.semanticweb.owl.model.OWLOntology;
  */
 public class Reasoner implements Serializable {
     private static final long serialVersionUID=-8277117863937974032L;
-
-    public static enum TableauMonitorType {
-        NONE,TIMING,TIMING_WITH_PAUSE,DEBUGGER_NO_HISTORY,DEBUGGER_HISTORY_ON
-    };
-
-    public static enum DirectBlockingType {
-        SINGLE,PAIR_WISE,PAIR_WISE_REFLEXIVE,OPTIMAL
-    };
-
-    public static enum BlockingStrategyType {
-        ANYWHERE,ANCESTOR
-    };
-
-    public static enum BlockingSignatureCacheType {
-        CACHED,NOT_CACHED
-    };
-
-    public static enum ExistentialStrategyType {
-        CREATION_ORDER,DEPTH_FIRST,EL,INDIVIDUAL_REUSE
-    };
-
-    public static enum ParserType {
-        KAON2,OWLAPI
-    };
-
-    public static enum SubsumptionCacheStrategyType {
-        IMMEDIATE,JUST_IN_TIME,ON_REQUEST
-    };
-
-    public static class Configuration implements Serializable {
-        private static final long serialVersionUID=7741510316249774519L;
-        public TableauMonitorType tableauMonitorType;
-        public DirectBlockingType directBlockingType;
-        public BlockingStrategyType blockingStrategyType;
-        public BlockingSignatureCacheType blockingSignatureCacheType;
-        public ExistentialStrategyType existentialStrategyType;
-        public ParserType parserType;
-        public SubsumptionCacheStrategyType subsumptionCacheStrategyType;
-        public boolean checkClauses;
-        public boolean prepareForExpressiveQueries;
-        public boolean makeTopRoleUniversal;
-        public boolean ignoreUnsupportedDatatypes;
-        public TableauMonitor monitor;
-        public final Map<String,Object> parameters;
-
-        public Configuration() {
-            tableauMonitorType=TableauMonitorType.NONE;
-            directBlockingType=DirectBlockingType.OPTIMAL;
-            blockingStrategyType=BlockingStrategyType.ANYWHERE;
-            blockingSignatureCacheType=BlockingSignatureCacheType.CACHED;
-            existentialStrategyType=ExistentialStrategyType.CREATION_ORDER;
-            parserType=ParserType.OWLAPI;
-            subsumptionCacheStrategyType=SubsumptionCacheStrategyType.IMMEDIATE;
-            ignoreUnsupportedDatatypes=false;
-            checkClauses=true;
-            prepareForExpressiveQueries=false;
-            makeTopRoleUniversal=false;
-            monitor=null;
-            parameters=new HashMap<String,Object>();
-        }
-
-        protected void setIndividualReuseStrategyReuseAlways(Set<? extends LiteralConcept> concepts) {
-            parameters.put("IndividualReuseStrategy.reuseAlways",concepts);
-        }
-
-        public void loadIndividualReuseStrategyReuseAlways(File file) throws IOException {
-            Set<AtomicConcept> concepts=loadConceptsFromFile(file);
-            setIndividualReuseStrategyReuseAlways(concepts);
-        }
-
-        protected void setIndividualReuseStrategyReuseNever(Set<? extends LiteralConcept> concepts) {
-            parameters.put("IndividualReuseStrategy.reuseNever",concepts);
-        }
-
-        public void loadIndividualReuseStrategyReuseNever(File file) throws IOException {
-            Set<AtomicConcept> concepts=loadConceptsFromFile(file);
-            setIndividualReuseStrategyReuseNever(concepts);
-        }
-
-        protected Set<AtomicConcept> loadConceptsFromFile(File file) throws IOException {
-            Set<AtomicConcept> result=new HashSet<AtomicConcept>();
-            BufferedReader reader=new BufferedReader(new FileReader(file));
-            try {
-                String line=reader.readLine();
-                while (line!=null) {
-                    result.add(AtomicConcept.create(line));
-                    line=reader.readLine();
-                }
-                return result;
-            }
-            finally {
-                reader.close();
-            }
-        }
-
-    } // end Configuration class
 
     private final Configuration m_config; // never null
     private DLOntology m_dlOntology; // never null
@@ -227,8 +128,6 @@ public class Reasoner implements Serializable {
         OWLClausification clausifier=new OWLClausification(m_config);
         DLOntology d=clausifier.clausifyOntologiesDisregardImports(ontologyManger,ontologies,resultingDLOntologyURI);
         loadDLOntology(d);
-        if (m_config.subsumptionCacheStrategyType==SubsumptionCacheStrategyType.IMMEDIATE)
-            getClassTaxonomy();
     }
 
     /**
@@ -583,8 +482,6 @@ public class Reasoner implements Serializable {
                     throw new RuntimeException("Unable to load KAON2 library",e);
                 }
                 loadDLOntology(clausifier.loadFromURI(physicalURI,null));
-                if (m_config.subsumptionCacheStrategyType==SubsumptionCacheStrategyType.IMMEDIATE)
-                    getClassTaxonomy();
             }
             break;
         case OWLAPI:
@@ -618,8 +515,6 @@ public class Reasoner implements Serializable {
         OWLClausification clausifier=new OWLClausification(m_config);
         DLOntology d=clausifier.clausifyWithKeys(ontologyManager,ontology,descriptionGraphs,keys);
         loadDLOntology(d);
-        if (m_config.subsumptionCacheStrategyType==SubsumptionCacheStrategyType.IMMEDIATE)
-            getClassTaxonomy();
     }
 
     protected void loadDLOntology(File file) throws Exception {
@@ -630,12 +525,10 @@ public class Reasoner implements Serializable {
         finally {
             input.close();
         }
-        if (m_config.subsumptionCacheStrategyType==SubsumptionCacheStrategyType.IMMEDIATE)
-            getClassTaxonomy();
     }
 
     protected void loadDLOntology(DLOntology dlOntology) throws IllegalArgumentException {
-        if (!dlOntology.canUseNIRule() && dlOntology.hasAtMostRestrictions() && dlOntology.hasInverseRoles() && (m_config.existentialStrategyType==ExistentialStrategyType.INDIVIDUAL_REUSE))
+        if (!dlOntology.canUseNIRule() && dlOntology.hasAtMostRestrictions() && dlOntology.hasInverseRoles() && (m_config.existentialStrategyType==Configuration.ExistentialStrategyType.INDIVIDUAL_REUSE))
             throw new IllegalArgumentException("The supplied DL-onyology is not compatible with the individual reuse strategy.");
 
         Map<String,String> namespaceDecl=new HashMap<String,String>();

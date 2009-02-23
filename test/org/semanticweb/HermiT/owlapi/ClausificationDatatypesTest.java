@@ -4,9 +4,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.InternalNames;
 import org.semanticweb.HermiT.Namespaces;
-import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
@@ -246,7 +246,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         Set<OWLAxiom> axioms=new HashSet<OWLAxiom>();
         OWLAxioms axiomHolder=new OWLAxioms();
         OWLNormalization normalization=new OWLNormalization(m_ontologyManager.getOWLDataFactory(),axiomHolder);
-        normalization.processOntology(new Reasoner.Configuration(),m_ontology);
+        normalization.processOntology(new Configuration(),m_ontology);
         for (OWLDescription[] inclusion : axiomHolder.m_conceptInclusions) {
             OWLDescription superDescription;
             if (inclusion.length==1) {
@@ -270,7 +270,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
     }
 
     protected Set<String> getDLClauses() throws Exception {
-        OWLClausification clausifier=new OWLClausification(new Reasoner.Configuration());
+        OWLClausification clausifier=new OWLClausification(new Configuration());
         Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
         DLOntology dlOntology=clausifier.clausify(m_ontologyManager,m_ontology,noDescriptionGraphs);
         Set<String> actualStrings=new HashSet<String>();

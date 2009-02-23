@@ -500,8 +500,7 @@ public class CommandLine {
             PrintWriter output=new PrintWriter(System.out);
             Collection<Action> actions=new LinkedList<Action>();
             URI base;
-            Reasoner.Configuration config=new Reasoner.Configuration();
-            config.subsumptionCacheStrategyType=Reasoner.SubsumptionCacheStrategyType.ON_REQUEST;
+            Configuration config=new Configuration();
             boolean doAll=true;
             try {
                 base=new URI("file",System.getProperty("user.dir")+"/",null);
@@ -680,33 +679,33 @@ public class CommandLine {
                     case kParser: {
                         String arg=g.getOptarg();
                         if (arg.toLowerCase().equals("owlapi")) {
-                            config.parserType=Reasoner.ParserType.OWLAPI;
+                            config.parserType=Configuration.ParserType.OWLAPI;
                         }
                         else if (arg.toLowerCase().equals("kaon2")) {
-                            config.parserType=Reasoner.ParserType.KAON2;
+                            config.parserType=Configuration.ParserType.KAON2;
                         }
                         else
                             throw new UsageException("unknown parser type '"+arg+"'; supported values are 'owlapi' and 'kaon2'");
                     }
                         break;
                     case kOwlApi: {
-                        config.parserType=Reasoner.ParserType.OWLAPI;
+                        config.parserType=Configuration.ParserType.OWLAPI;
                     }
                         break;
                     case kKaon2: {
-                        config.parserType=Reasoner.ParserType.KAON2;
+                        config.parserType=Configuration.ParserType.KAON2;
                     }
                         break;
                     case kDirectBlock: {
                         String arg=g.getOptarg();
                         if (arg.toLowerCase().equals("pairwise")) {
-                            config.directBlockingType=Reasoner.DirectBlockingType.PAIR_WISE;
+                            config.directBlockingType=Configuration.DirectBlockingType.PAIR_WISE;
                         }
                         else if (arg.toLowerCase().equals("single")) {
-                            config.directBlockingType=Reasoner.DirectBlockingType.SINGLE;
+                            config.directBlockingType=Configuration.DirectBlockingType.SINGLE;
                         }
                         else if (arg.toLowerCase().equals("optimal")) {
-                            config.directBlockingType=Reasoner.DirectBlockingType.OPTIMAL;
+                            config.directBlockingType=Configuration.DirectBlockingType.OPTIMAL;
                         }
                         else
                             throw new UsageException("unknown direct blocking type '"+arg+"'; supported values are 'pairwise', 'single', and 'optimal'");
@@ -715,10 +714,10 @@ public class CommandLine {
                     case kBlockStrategy: {
                         String arg=g.getOptarg();
                         if (arg.toLowerCase().equals("anywhere")) {
-                            config.blockingStrategyType=Reasoner.BlockingStrategyType.ANYWHERE;
+                            config.blockingStrategyType=Configuration.BlockingStrategyType.ANYWHERE;
                         }
                         else if (arg.toLowerCase().equals("ancestor")) {
-                            config.blockingStrategyType=Reasoner.BlockingStrategyType.ANCESTOR;
+                            config.blockingStrategyType=Configuration.BlockingStrategyType.ANCESTOR;
                         }
                         else
                             throw new UsageException("unknown blocking strategy type '"+arg+"'; supported values are 'ancestor' and 'anywhere'");
@@ -727,10 +726,10 @@ public class CommandLine {
                     case kBlockCache: {
                         String arg=g.getOptarg();
                         if (arg.toLowerCase().equals("on")) {
-                            config.blockingSignatureCacheType=Reasoner.BlockingSignatureCacheType.CACHED;
+                            config.blockingSignatureCacheType=Configuration.BlockingSignatureCacheType.CACHED;
                         }
                         else if (arg.toLowerCase().equals("off")) {
-                            config.blockingSignatureCacheType=Reasoner.BlockingSignatureCacheType.NOT_CACHED;
+                            config.blockingSignatureCacheType=Configuration.BlockingSignatureCacheType.NOT_CACHED;
                         }
                         else
                             throw new UsageException("unknown blocking cache type '"+arg+"'; supported values are 'on' and 'off'");
@@ -739,13 +738,13 @@ public class CommandLine {
                     case kExpansion: {
                         String arg=g.getOptarg();
                         if (arg.toLowerCase().equals("creation")) {
-                            config.existentialStrategyType=Reasoner.ExistentialStrategyType.CREATION_ORDER;
+                            config.existentialStrategyType=Configuration.ExistentialStrategyType.CREATION_ORDER;
                         }
                         else if (arg.toLowerCase().equals("el")) {
-                            config.existentialStrategyType=Reasoner.ExistentialStrategyType.EL;
+                            config.existentialStrategyType=Configuration.ExistentialStrategyType.EL;
                         }
                         else if (arg.toLowerCase().equals("reuse")) {
-                            config.existentialStrategyType=Reasoner.ExistentialStrategyType.INDIVIDUAL_REUSE;
+                            config.existentialStrategyType=Configuration.ExistentialStrategyType.INDIVIDUAL_REUSE;
                         }
                         else
                             throw new UsageException("unknown existential strategy type '"+arg+"'; supported values are 'creation', 'el', and 'reuse'");
@@ -753,7 +752,7 @@ public class CommandLine {
                         break;
                     case kClausifyRoleBox: {
                         config.checkClauses=false;
-                        config.existentialStrategyType=Reasoner.ExistentialStrategyType.DEPTH_FIRST;
+                        config.existentialStrategyType=Configuration.ExistentialStrategyType.DEPTH_FIRST;
                     }
                         break;
                     case kUniversalRole: {

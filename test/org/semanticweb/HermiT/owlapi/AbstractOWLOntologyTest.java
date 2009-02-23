@@ -15,7 +15,7 @@ import java.util.Set;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
-import org.semanticweb.HermiT.Reasoner;
+import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.blocking.AnywhereBlocking;
 import org.semanticweb.HermiT.blocking.BlockingSignatureCache;
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
@@ -133,7 +133,7 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
      * @throws Exception
      */
     protected DLOntology getDLOntology() throws Exception {
-        OWLClausification clausifier = new OWLClausification(new Reasoner.Configuration());
+        OWLClausification clausifier = new OWLClausification(new Configuration());
         Set<DescriptionGraph> noDescriptionGraphs = Collections.emptySet();
         return clausifier.clausify(m_ontologyManager, m_ontology, noDescriptionGraphs);
     }

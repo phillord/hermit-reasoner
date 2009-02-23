@@ -138,12 +138,11 @@ public class HermitReasoner implements MonitorableOWLReasoner {
                 allReferencedDataProperties.addAll(ontology.getReferencedDataProperties());
                 allReferencedObjectProperties.addAll(ontology.getReferencedObjectProperties());
             }
-            Reasoner.Configuration config=new Reasoner.Configuration();
-            config.subsumptionCacheStrategyType=Reasoner.SubsumptionCacheStrategyType.JUST_IN_TIME;
+            Configuration config=new Configuration();
             config.monitor=monitor;
             config.ignoreUnsupportedDatatypes=tolerateUnknownDatatypes;
             if (onlyAncestorBlocking) {
-                config.blockingStrategyType=Reasoner.BlockingStrategyType.ANCESTOR;
+                config.blockingStrategyType=Configuration.BlockingStrategyType.ANCESTOR;
             }
             try {
                 monitor.beginTask("Loading...");
