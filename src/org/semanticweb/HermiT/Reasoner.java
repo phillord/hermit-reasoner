@@ -594,12 +594,12 @@ public class Reasoner implements Serializable {
     }
 
     public HierarchyPosition<String> getIndividualTypes(String individual) {
-        return new TranslatedHierarchyPosition<AtomicConcept,String>(getMemberships(Individual.create(individual)),new ConceptToString());
+        return new TranslatedHierarchyPosition<AtomicConcept,String>(getIndividualTypes(Individual.create(individual)),new ConceptToString());
     }
 
     public HierarchyPosition<OWLClass> getIndividualTypes(OWLIndividual i) {
         OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
-        return new TranslatedHierarchyPosition<AtomicConcept,OWLClass>(getMemberships(Individual.create(i.getURI().toString())),new ConceptToOWLClass(factory));
+        return new TranslatedHierarchyPosition<AtomicConcept,OWLClass>(getIndividualTypes(Individual.create(i.getURI().toString())),new ConceptToOWLClass(factory));
     }
 
     public Set<String> getClassInstances(String className) {
@@ -674,7 +674,7 @@ public class Reasoner implements Serializable {
         return m_realization;
     }
 
-    protected HierarchyPosition<AtomicConcept> getMemberships(Individual individual) {
+    protected HierarchyPosition<AtomicConcept> getIndividualTypes(Individual individual) {
         OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
         return getConceptHierarchyPosition(define(factory.getOWLObjectOneOf(factory.getOWLIndividual(URI.create(individual.getURI())))));
     }
