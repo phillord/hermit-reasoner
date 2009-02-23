@@ -23,13 +23,13 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
+import java.util.HashMap;
 import java.util.TreeMap;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.TreeSet;
 
 import org.semanticweb.HermiT.Clausifier.LoadingException;
@@ -87,14 +87,14 @@ import org.semanticweb.owl.model.OWLOntology;
 public class Reasoner implements Serializable {
     private static final long serialVersionUID=-8277117863937974032L;
 
-    private final Configuration m_config; // never null
-    private DLOntology m_dlOntology; // never null
-    private Namespaces m_namespaces; // never null
-    private Tableau m_tableau; // never null
-    private TableauSubsumptionChecker m_subsumptionChecker; // never null
-    private Classifier<AtomicConcept> m_classifier;
-    private Map<AtomicConcept,HierarchyPosition<AtomicConcept>> m_atomicConceptHierarchy; // may be null; use getAtomicConceptHierarchy
-    private Map<AtomicConcept,Set<Individual>> m_realization;
+    protected final Configuration m_config; // never null
+    protected final DLOntology m_dlOntology; // never null
+    protected Namespaces m_namespaces; // never null
+    protected final Tableau m_tableau; // never null
+    protected final TableauSubsumptionChecker m_subsumptionChecker; // never null
+    protected Classifier<AtomicConcept> m_classifier;
+    protected Map<AtomicConcept,HierarchyPosition<AtomicConcept>> m_atomicConceptHierarchy; // may be null; use getAtomicConceptHierarchy
+    protected Map<AtomicConcept,Set<Individual>> m_realization;
 
     public Reasoner(String ontologyURI) throws IllegalArgumentException,LoadingException,OWLException {
         this(new Configuration(),URI.create(ontologyURI));
@@ -109,14 +109,67 @@ public class Reasoner implements Serializable {
     }
 
     public Reasoner(Configuration config,java.net.URI ontologyURI,Set<DescriptionGraph> descriptionGraphs,Set<OWLHasKeyDummy> keys) throws IllegalArgumentException,LoadingException,OWLException {
+        if (descriptionGraphs==null)
+            descriptionGraphs=Collections.emptySet();
+        if (keys==null)
+            keys=Collections.emptySet();
+        switch (config.parserType) {
+        case KAON2:
+            {
+                Clausifier clausifier=null;
+                try {
+                    clausifier=(Clausifier)Class.forName("org.semanticweb.HermiT.kaon2.Clausifier").newInstance();
+                }
+                catch (ClassNotFoundException e) {
+                    throw new RuntimeException("Unable to load KAON2 library",e);
+                }
+                catch (NoClassDefFoundError e) {
+                    // This seems to be the one that comes up with no KAON2 available
+                    throw new RuntimeException("Unable to load KAON2 library",e);
+                }
+                catch (InstantiationException e) {
+                    throw new RuntimeException("Unable to load KAON2 library",e);
+                }
+                catch (IllegalAccessException e) {
+                    throw new RuntimeException("Unable to load KAON2 library",e);
+                }
+                m_dlOntology=clausifier.loadFromURI(ontologyURI,null);
+            }
+            break;
+        case OWLAPI:
+            {
+                OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
+                OWLOntology ontology=ontologyManager.loadOntologyFromPhysicalURI(ontologyURI);
+                OWLClausification clausifier=new OWLClausification(config);
+                m_dlOntology=clausifier.clausifyWithKeys(ontologyManager,ontology,descriptionGraphs,keys);
+            }
+            break;
+        default:
+            throw new IllegalArgumentException("unknown parser library requested");
+        }
         m_config=config;
-        loadOntology(ontologyURI,descriptionGraphs,keys);
+        m_tableau=createTableau(m_config,m_dlOntology);
+        m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
+        m_classifier=new Classifier<AtomicConcept>(new TableauFunc(m_subsumptionChecker));
     }
 
     public Reasoner(Configuration config,OWLOntologyManager ontologyManger,OWLOntology ontology) {
         this(config,ontologyManger,ontology,(Set<DescriptionGraph>)null,(Set<OWLHasKeyDummy>)null);
     }
 
+    public Reasoner(Configuration config,OWLOntologyManager ontologyManager,OWLOntology ontology,Set<DescriptionGraph> descriptionGraphs,Set<OWLHasKeyDummy> keys) {
+        OWLClausification clausifier=new OWLClausification(config);
+        if (descriptionGraphs==null)
+            descriptionGraphs=Collections.emptySet();
+        if (keys==null)
+            keys=Collections.emptySet();
+        m_config=config;
+        m_dlOntology=clausifier.clausifyWithKeys(ontologyManager,ontology,descriptionGraphs,keys);
+        m_tableau=createTableau(m_config,m_dlOntology);
+        m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
+        m_classifier=new Classifier<AtomicConcept>(new TableauFunc(m_subsumptionChecker));
+    }
+    
     /**
      * Creates a reasoner that contains all axioms from the ontologies in the 'ontologies'' parameter.
      * If any ontology in this collection contains imports, these are *NOT* traversed -- that is,
@@ -124,28 +177,150 @@ public class Reasoner implements Serializable {
      * The resulting DL ontology has the URI resultingDLOntologyURI.
      */
     public Reasoner(Configuration config,OWLOntologyManager ontologyManger,Collection<OWLOntology> ontologies,String resultingDLOntologyURI) {
+        OWLClausification clausifier=new OWLClausification(config);
         m_config=config;
-        OWLClausification clausifier=new OWLClausification(m_config);
-        DLOntology d=clausifier.clausifyOntologiesDisregardImports(ontologyManger,ontologies,resultingDLOntologyURI);
-        loadDLOntology(d);
+        m_dlOntology=clausifier.clausifyOntologiesDisregardImports(ontologyManger,ontologies,resultingDLOntologyURI);
+        m_tableau=createTableau(m_config,m_dlOntology);
+        m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
+        m_classifier=new Classifier<AtomicConcept>(new TableauFunc(m_subsumptionChecker));
     }
 
-    /**
-     * TEST PURPOSES ONLY, till the OWL API supports keys.
-     * 
-     * @param ontology
-     *            an OWL API loaded ontology
-     * @param config
-     *            a reasoner configuration
-     * @param descriptionGraphs
-     *            description graphs
-     * @param keys
-     *            some hasKey axioms (OWLHasKeyDummy instances)
-     * @throws OWLException
-     */
-    public Reasoner(Configuration config,OWLOntologyManager ontologyManger,OWLOntology ontology,Set<DescriptionGraph> descriptionGraphs,Set<OWLHasKeyDummy> keys) {
+    public Reasoner(Configuration config,DLOntology dlOntology) {
         m_config=config;
-        loadOWLOntology(ontologyManger,ontology,descriptionGraphs,keys);
+        m_dlOntology=dlOntology;
+        m_tableau=createTableau(m_config,m_dlOntology);
+        m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
+        m_classifier=new Classifier<AtomicConcept>(new TableauFunc(m_subsumptionChecker));
+    }
+
+    protected Tableau createTableau(Configuration config,DLOntology dlOntology) throws IllegalArgumentException {
+        if (!dlOntology.canUseNIRule() && dlOntology.hasAtMostRestrictions() && dlOntology.hasInverseRoles() && config.existentialStrategyType==Configuration.ExistentialStrategyType.INDIVIDUAL_REUSE)
+            throw new IllegalArgumentException("The supplied DL-ontology is not compatible with the individual reuse strategy.");
+
+        Map<String,String> namespaceDecl=new HashMap<String,String>();
+        namespaceDecl.put("",dlOntology.getOntologyURI()+"#");
+        m_namespaces=InternalNames.withInternalNamespaces(new Namespaces(namespaceDecl,Namespaces.semanticWebNamespaces));
+
+        if (config.checkClauses) {
+            Collection<DLClause> nonAdmissibleDLClauses=dlOntology.getNonadmissibleDLClauses();
+            if (!nonAdmissibleDLClauses.isEmpty()) {
+                String CRLF=System.getProperty("line.separator");
+                StringBuffer buffer=new StringBuffer();
+                buffer.append("The following DL-clauses in the DL-ontology"+" are not admissible:");
+                buffer.append(CRLF);
+                for (DLClause dlClause : nonAdmissibleDLClauses) {
+                    buffer.append(dlClause.toString(m_namespaces));
+                    buffer.append(CRLF);
+                }
+                throw new IllegalArgumentException(buffer.toString());
+            }
+        }
+
+        TableauMonitor wellKnownTableauMonitor=null;
+        switch (config.tableauMonitorType) {
+        case NONE:
+            wellKnownTableauMonitor=null;
+            break;
+        case TIMING:
+            wellKnownTableauMonitor=new Timer();
+            break;
+        case TIMING_WITH_PAUSE:
+            wellKnownTableauMonitor=new TimerWithPause();
+            break;
+        case DEBUGGER_HISTORY_ON:
+            wellKnownTableauMonitor=new Debugger(m_namespaces,true);
+            break;
+        case DEBUGGER_NO_HISTORY:
+            wellKnownTableauMonitor=new Debugger(m_namespaces,false);
+            break;
+        default:
+            throw new IllegalArgumentException("Unknown monitor type");
+        }
+
+        TableauMonitor tableauMonitor=null;
+        if (config.monitor==null)
+            tableauMonitor=wellKnownTableauMonitor;
+        else if (wellKnownTableauMonitor==null)
+            tableauMonitor=config.monitor;
+        else
+            tableauMonitor=new TableauMonitorFork(wellKnownTableauMonitor,config.monitor);
+
+        DirectBlockingChecker directBlockingChecker=null;
+        switch (config.directBlockingType) {
+        case OPTIMAL:
+            if (config.prepareForExpressiveQueries) {
+                directBlockingChecker=new PairwiseDirectBlockingCheckerWithReflexivity();
+            }
+            else if (m_dlOntology.hasAtMostRestrictions() && m_dlOntology.hasInverseRoles()) {
+                if (m_dlOntology.hasReflexifity()) {
+                    directBlockingChecker=new PairwiseDirectBlockingCheckerWithReflexivity();
+                }
+                else {
+                    directBlockingChecker=new PairWiseDirectBlockingChecker();
+                }
+            }
+            else {
+                directBlockingChecker=new SingleDirectBlockingChecker();
+            }
+            break;
+        case SINGLE:
+            directBlockingChecker=new SingleDirectBlockingChecker();
+            break;
+        case PAIR_WISE:
+            directBlockingChecker=new PairWiseDirectBlockingChecker();
+            break;
+        case PAIR_WISE_REFLEXIVE:
+            directBlockingChecker=new PairwiseDirectBlockingCheckerWithReflexivity();
+            break;
+        default:
+            throw new IllegalArgumentException("Unknown direct blocking type.");
+        }
+
+        BlockingSignatureCache blockingSignatureCache=null;
+        if (!dlOntology.hasNominals()) {
+            switch (config.blockingSignatureCacheType) {
+            case CACHED:
+                blockingSignatureCache=new BlockingSignatureCache(directBlockingChecker);
+                break;
+            case NOT_CACHED:
+                blockingSignatureCache=null;
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown blocking cache type.");
+            }
+        }
+
+        BlockingStrategy blockingStrategy=null;
+        switch (config.blockingStrategyType) {
+        case ANCESTOR:
+            blockingStrategy=new AncestorBlocking(directBlockingChecker,blockingSignatureCache);
+            break;
+        case ANYWHERE:
+            blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
+            break;
+        default:
+            throw new IllegalArgumentException("Unknown blocking strategy type.");
+        }
+
+        ExpansionStrategy existentialsExpansionStrategy=null;
+        switch (config.existentialStrategyType) {
+        case CREATION_ORDER:
+            existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
+            break;
+        case DEPTH_FIRST:
+            existentialsExpansionStrategy=new DepthFirstStrategy(blockingStrategy);
+            break;
+        case EL:
+            existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,true);
+            break;
+        case INDIVIDUAL_REUSE:
+            existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,false);
+            break;
+        default:
+            throw new IllegalArgumentException("Unknown expansion strategy type.");
+        }
+
+        return new Tableau(tableauMonitor,existentialsExpansionStrategy,m_dlOntology,config.makeTopRoleUniversal,config.parameters);
     }
 
     public DLOntology getDLOntology() {
@@ -458,206 +633,6 @@ public class Reasoner implements Serializable {
         finally {
             output.flush();
         }
-    }
-
-    protected void loadOntology(URI physicalURI,Set<DescriptionGraph> descriptionGraphs,Set<OWLHasKeyDummy> keys) throws IllegalArgumentException,LoadingException,OWLException {
-        switch (m_config.parserType) {
-        case KAON2:
-            {
-                Clausifier clausifier=null;
-                try {
-                    clausifier=(Clausifier)Class.forName("org.semanticweb.HermiT.kaon2.Clausifier").newInstance();
-                }
-                catch (ClassNotFoundException e) {
-                    throw new RuntimeException("Unable to load KAON2 library",e);
-                }
-                catch (NoClassDefFoundError e) {
-                    // This seems to be the one that comes up with no KAON2 available
-                    throw new RuntimeException("Unable to load KAON2 library",e);
-                }
-                catch (InstantiationException e) {
-                    throw new RuntimeException("Unable to load KAON2 library",e);
-                }
-                catch (IllegalAccessException e) {
-                    throw new RuntimeException("Unable to load KAON2 library",e);
-                }
-                loadDLOntology(clausifier.loadFromURI(physicalURI,null));
-            }
-            break;
-        case OWLAPI:
-            {
-                OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
-                OWLOntology ontology=ontologyManager.loadOntologyFromPhysicalURI(physicalURI);
-                loadOWLOntology(ontologyManager,ontology,descriptionGraphs,keys);
-            }
-            break;
-        default:
-            throw new IllegalArgumentException("unknown parser library requested");
-        }
-    }
-
-    /**
-     * TEST PURPOSES ONLY, till the OWL API supports keys.
-     * 
-     * @param ontology
-     *            an OWL API loaded ontology
-     * @param descriptionGraphs
-     *            description graphs
-     * @param keys
-     *            a set of HasKey axioms
-     * @throws OWLException
-     */
-    protected void loadOWLOntology(OWLOntologyManager ontologyManager,OWLOntology ontology,Set<DescriptionGraph> descriptionGraphs,Set<OWLHasKeyDummy> keys) {
-        if (descriptionGraphs==null)
-            descriptionGraphs=Collections.emptySet();
-        if (keys==null)
-            keys=Collections.emptySet();
-        OWLClausification clausifier=new OWLClausification(m_config);
-        DLOntology d=clausifier.clausifyWithKeys(ontologyManager,ontology,descriptionGraphs,keys);
-        loadDLOntology(d);
-    }
-
-    protected void loadDLOntology(File file) throws Exception {
-        BufferedInputStream input=new BufferedInputStream(new FileInputStream(file));
-        try {
-            loadDLOntology(DLOntology.load(input));
-        }
-        finally {
-            input.close();
-        }
-    }
-
-    protected void loadDLOntology(DLOntology dlOntology) throws IllegalArgumentException {
-        if (!dlOntology.canUseNIRule() && dlOntology.hasAtMostRestrictions() && dlOntology.hasInverseRoles() && (m_config.existentialStrategyType==Configuration.ExistentialStrategyType.INDIVIDUAL_REUSE))
-            throw new IllegalArgumentException("The supplied DL-onyology is not compatible with the individual reuse strategy.");
-
-        Map<String,String> namespaceDecl=new HashMap<String,String>();
-        namespaceDecl.put("",dlOntology.getOntologyURI()+"#");
-        m_namespaces=InternalNames.withInternalNamespaces(new Namespaces(namespaceDecl,Namespaces.semanticWebNamespaces));
-
-        if (m_config.checkClauses) {
-            Collection<DLClause> nonAdmissibleDLClauses=dlOntology.getNonadmissibleDLClauses();
-            if (!nonAdmissibleDLClauses.isEmpty()) {
-                String CRLF=System.getProperty("line.separator");
-                StringBuffer buffer=new StringBuffer();
-                buffer.append("The following DL-clauses in the DL-ontology"+" are not admissible:");
-                buffer.append(CRLF);
-                for (DLClause dlClause : nonAdmissibleDLClauses) {
-                    buffer.append(dlClause.toString(m_namespaces));
-                    buffer.append(CRLF);
-                }
-                throw new IllegalArgumentException(buffer.toString());
-            }
-        }
-        m_dlOntology=dlOntology;
-
-        TableauMonitor wellKnownTableauMonitor=null;
-        switch (m_config.tableauMonitorType) {
-        case NONE:
-            wellKnownTableauMonitor=null;
-            break;
-        case TIMING:
-            wellKnownTableauMonitor=new Timer();
-            break;
-        case TIMING_WITH_PAUSE:
-            wellKnownTableauMonitor=new TimerWithPause();
-            break;
-        case DEBUGGER_HISTORY_ON:
-            wellKnownTableauMonitor=new Debugger(m_namespaces,true);
-            break;
-        case DEBUGGER_NO_HISTORY:
-            wellKnownTableauMonitor=new Debugger(m_namespaces,false);
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown monitor type");
-        }
-
-        TableauMonitor tableauMonitor=null;
-        if (m_config.monitor==null)
-            tableauMonitor=wellKnownTableauMonitor;
-        else if (wellKnownTableauMonitor==null)
-            tableauMonitor=m_config.monitor;
-        else
-            tableauMonitor=new TableauMonitorFork(wellKnownTableauMonitor,m_config.monitor);
-
-        DirectBlockingChecker directBlockingChecker=null;
-        switch (m_config.directBlockingType) {
-        case OPTIMAL:
-            if (m_config.prepareForExpressiveQueries) {
-                directBlockingChecker=new PairwiseDirectBlockingCheckerWithReflexivity();
-            }
-            else if (m_dlOntology.hasAtMostRestrictions() && m_dlOntology.hasInverseRoles()) {
-                if (m_dlOntology.hasReflexifity()) {
-                    directBlockingChecker=new PairwiseDirectBlockingCheckerWithReflexivity();
-                }
-                else {
-                    directBlockingChecker=new PairWiseDirectBlockingChecker();
-                }
-            }
-            else {
-                directBlockingChecker=new SingleDirectBlockingChecker();
-            }
-            break;
-        case SINGLE:
-            directBlockingChecker=new SingleDirectBlockingChecker();
-            break;
-        case PAIR_WISE:
-            directBlockingChecker=new PairWiseDirectBlockingChecker();
-            break;
-        case PAIR_WISE_REFLEXIVE:
-            directBlockingChecker=new PairwiseDirectBlockingCheckerWithReflexivity();
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown direct blocking type.");
-        }
-
-        BlockingSignatureCache blockingSignatureCache=null;
-        if (!dlOntology.hasNominals()) {
-            switch (m_config.blockingSignatureCacheType) {
-            case CACHED:
-                blockingSignatureCache=new BlockingSignatureCache(directBlockingChecker);
-                break;
-            case NOT_CACHED:
-                blockingSignatureCache=null;
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown blocking cache type.");
-            }
-        }
-
-        BlockingStrategy blockingStrategy=null;
-        switch (m_config.blockingStrategyType) {
-        case ANCESTOR:
-            blockingStrategy=new AncestorBlocking(directBlockingChecker,blockingSignatureCache);
-            break;
-        case ANYWHERE:
-            blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown blocking strategy type.");
-        }
-
-        ExpansionStrategy existentialsExpansionStrategy=null;
-        switch (m_config.existentialStrategyType) {
-        case CREATION_ORDER:
-            existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
-            break;
-        case DEPTH_FIRST:
-            existentialsExpansionStrategy=new DepthFirstStrategy(blockingStrategy);
-            break;
-        case EL:
-            existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,true);
-            break;
-        case INDIVIDUAL_REUSE:
-            existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,false);
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown expansion strategy type.");
-        }
-
-        m_tableau=new Tableau(tableauMonitor,existentialsExpansionStrategy,m_dlOntology,m_config.makeTopRoleUniversal,m_config.parameters);
-        m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
-        m_classifier=new Classifier<AtomicConcept>(new TableauFunc(m_subsumptionChecker));
     }
 
     public void outputClauses(PrintWriter output,Namespaces namespaces) {
