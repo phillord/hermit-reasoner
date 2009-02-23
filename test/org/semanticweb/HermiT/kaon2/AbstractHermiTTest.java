@@ -42,7 +42,6 @@ public abstract class AbstractHermiTTest extends TestCase {
                 false, // hasAtMostRestrictions
                 false, // hasNominals
                 false, // canUseNIRule
-                false, // hasReflexivity
                 false); // hasDatatypes
     }
 

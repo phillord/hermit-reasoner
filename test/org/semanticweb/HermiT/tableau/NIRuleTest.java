@@ -49,7 +49,6 @@ public class NIRuleTest extends AbstractHermiTTest {
                 false, // hasAtMostRestrictions
                 false, // hasNominals
                 false, // canUseNIRule
-                false, // hasReflexivity
                 false); // hasDatatypes;
     }
 

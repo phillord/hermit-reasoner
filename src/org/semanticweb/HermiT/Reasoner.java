@@ -39,7 +39,6 @@ import org.semanticweb.HermiT.blocking.BlockingSignatureCache;
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.blocking.DirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
-import org.semanticweb.HermiT.blocking.PairwiseDirectBlockingCheckerWithReflexivity;
 import org.semanticweb.HermiT.blocking.SingleDirectBlockingChecker;
 import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
@@ -249,15 +248,10 @@ public class Reasoner implements Serializable {
         switch (config.directBlockingType) {
         case OPTIMAL:
             if (config.prepareForExpressiveQueries) {
-                directBlockingChecker=new PairwiseDirectBlockingCheckerWithReflexivity();
+                directBlockingChecker=new PairWiseDirectBlockingChecker();
             }
             else if (m_dlOntology.hasAtMostRestrictions() && m_dlOntology.hasInverseRoles()) {
-                if (m_dlOntology.hasReflexifity()) {
-                    directBlockingChecker=new PairwiseDirectBlockingCheckerWithReflexivity();
-                }
-                else {
-                    directBlockingChecker=new PairWiseDirectBlockingChecker();
-                }
+                directBlockingChecker=new PairWiseDirectBlockingChecker();
             }
             else {
                 directBlockingChecker=new SingleDirectBlockingChecker();
@@ -268,9 +262,6 @@ public class Reasoner implements Serializable {
             break;
         case PAIR_WISE:
             directBlockingChecker=new PairWiseDirectBlockingChecker();
-            break;
-        case PAIR_WISE_REFLEXIVE:
-            directBlockingChecker=new PairwiseDirectBlockingCheckerWithReflexivity();
             break;
         default:
             throw new IllegalArgumentException("Unknown direct blocking type.");

@@ -318,8 +318,6 @@ public class OWLClausification implements Serializable {
             if ((!isInverse0 && isInverse1) || (isInverse0 && !isInverse1))
                 determineExpressivity.m_hasInverseRoles = true;
         }
-        if (reflexiveObjectProperties.size() > 0)
-            determineExpressivity.m_hasReflexivity = true;
         if (dataPropertyInclusions.size() > 0) {
             determineExpressivity.m_hasDatatypes = true;
         }
@@ -454,7 +452,6 @@ public class OWLClausification implements Serializable {
                 determineExpressivity.m_hasInverseRoles,
                 determineExpressivity.m_hasAtMostRestrictions,
                 determineExpressivity.m_hasNominals, shouldUseNIRule,
-                determineExpressivity.m_hasReflexivity, 
                 determineExpressivity.m_hasDatatypes);
     }
     
@@ -1922,7 +1919,6 @@ public class OWLClausification implements Serializable {
         protected boolean m_hasAtMostRestrictions;
         protected boolean m_hasInverseRoles;
         protected boolean m_hasNominals;
-        protected boolean m_hasReflexivity;
         protected boolean m_hasDatatypes;
         protected boolean m_hasKeys;
 
@@ -2012,7 +2008,7 @@ public class OWLClausification implements Serializable {
         }
 
         public void visit(OWLObjectSelfRestriction object) {
-            m_hasReflexivity = true;
+            checkProperty(object.getProperty());
         }
     }
 

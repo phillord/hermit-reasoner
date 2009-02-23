@@ -172,7 +172,6 @@ public class Clausification {
         		              determineExpressivity.m_hasAtMostRestrictions,
         		              determineExpressivity.m_hasNominals,
         		              shouldUseNIRule,
-        		              determineExpressivity.m_hasReflexivity, 
         		              determineExpressivity.m_hasDatatypes);
     }
     protected static Atom getRoleAtom(ObjectPropertyExpression objectProperty,org.semanticweb.HermiT.model.Term first,org.semanticweb.HermiT.model.Term second) {
@@ -582,7 +581,6 @@ public class Clausification {
         protected boolean m_hasAtMostRestrictions;
         protected boolean m_hasInverseRoles;
         protected boolean m_hasNominals;
-        protected boolean m_hasReflexivity = false;
         protected boolean m_hasDatatypes = false;
         
         public Object visit(InverseObjectProperty object) {

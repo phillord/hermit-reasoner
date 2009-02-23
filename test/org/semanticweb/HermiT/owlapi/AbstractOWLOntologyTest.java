@@ -60,7 +60,6 @@ public abstract class AbstractOWLOntologyTest extends TestCase {
                 false, // hasAtMostRestrictions
                 false, // hasNominals
                 false, // canUseNIRule
-                false, // hasReflexivity
                 false); // hasDatatypes
     }
     protected OWLOntologyManager m_ontologyManager;

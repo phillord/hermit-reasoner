@@ -44,16 +44,15 @@ public class DLOntology implements Serializable {
     protected final boolean m_hasAtMostRestrictions;
     protected final boolean m_hasNominals;
     protected final boolean m_canUseNIRule;
-    protected final boolean m_isHorn;
-    protected final boolean m_hasReflexifity;
     protected final boolean m_hasDatatypes;
+    protected final boolean m_isHorn;
     protected final Set<AtomicConcept> m_allAtomicConcepts;
     protected final Set<Individual> m_allIndividuals;
     protected final Set<DescriptionGraph> m_allDescriptionGraphs;
     protected final int m_numberOfExternalConcepts;
     protected final Map<AtomicRole,HierarchyPosition<AtomicRole>> m_explicitRoleHierarchy;
 
-    public DLOntology(String ontologyURI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts,Set<AtomicConcept> atomicConcepts,Set<Individual> individuals,Map<AtomicRole,HierarchyPosition<AtomicRole>> explicitRoleHierarchy,boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,boolean canUseNIRule,boolean hasReflexivity,boolean hasDatatypes) {
+    public DLOntology(String ontologyURI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts,Set<AtomicConcept> atomicConcepts,Set<Individual> individuals,Map<AtomicRole,HierarchyPosition<AtomicRole>> explicitRoleHierarchy,boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,boolean canUseNIRule,boolean hasDatatypes) {
         m_ontologyURI=ontologyURI;
         m_dlClauses=dlClauses;
         m_positiveFacts=positiveFacts;
@@ -62,7 +61,6 @@ public class DLOntology implements Serializable {
         m_hasAtMostRestrictions=hasAtMostRestrictions;
         m_canUseNIRule=canUseNIRule;
         m_hasNominals=hasNominals;
-        m_hasReflexifity=hasReflexivity;
         m_hasDatatypes=hasDatatypes;
         if (atomicConcepts==null)
             m_allAtomicConcepts=new TreeSet<AtomicConcept>(AtomicConceptComparator.INSTANCE);
@@ -95,6 +93,7 @@ public class DLOntology implements Serializable {
                 addDLPredicate(dlPredicate);
             }
         }
+        m_isHorn=isHorn;
         for (Atom atom : m_positiveFacts) {
             addDLPredicate(atom.getDLPredicate());
             for (int i=0;i<atom.getArity();++i) {
@@ -107,7 +106,6 @@ public class DLOntology implements Serializable {
                 m_allIndividuals.add((Individual)atom.getArgument(i));
             }
         }
-        m_isHorn=isHorn;
     }
 
     protected void addDLPredicate(DLPredicate dlPredicate) {
@@ -176,16 +174,12 @@ public class DLOntology implements Serializable {
         return m_canUseNIRule;
     }
 
-    public boolean isHorn() {
-        return m_isHorn;
-    }
-
-    public boolean hasReflexifity() {
-        return m_hasReflexifity;
-    }
-
     public boolean hasDatatypes() {
         return m_hasDatatypes;
+    }
+
+    public boolean isHorn() {
+        return m_isHorn;
     }
 
     public Collection<DLClause> getNonadmissibleDLClauses() {

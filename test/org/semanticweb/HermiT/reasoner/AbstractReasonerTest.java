@@ -44,7 +44,6 @@ public abstract class AbstractReasonerTest extends TestCase {
                 false, // hasAtMostRestrictions
                 false, // hasNominals
                 false, // canUseNIRule
-                false, // hasReflexivity
                 false); // hasDatatypes
     }
     protected OWLOntologyManager m_ontologyManager;

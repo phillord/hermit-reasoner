@@ -23,7 +23,7 @@ public class Configuration implements Serializable {
     }
 
     public static enum DirectBlockingType {
-        SINGLE,PAIR_WISE,PAIR_WISE_REFLEXIVE,OPTIMAL
+        SINGLE,PAIR_WISE,OPTIMAL
     }
 
     public static enum BlockingStrategyType {
