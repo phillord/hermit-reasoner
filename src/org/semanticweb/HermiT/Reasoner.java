@@ -198,7 +198,7 @@ public class Reasoner implements Serializable {
         m_classifier=new Classifier<AtomicConcept>(new TableauFunc(m_subsumptionChecker));
     }
 
-    protected Tableau createTableau(Configuration config,DLOntology dlOntology,Namespaces namespaces) throws IllegalArgumentException {
+    protected static Tableau createTableau(Configuration config,DLOntology dlOntology,Namespaces namespaces) throws IllegalArgumentException {
         if (!dlOntology.canUseNIRule() && dlOntology.hasAtMostRestrictions() && dlOntology.hasInverseRoles() && config.existentialStrategyType==Configuration.ExistentialStrategyType.INDIVIDUAL_REUSE)
             throw new IllegalArgumentException("The supplied DL-ontology is not compatible with the individual reuse strategy.");
 
