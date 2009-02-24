@@ -131,8 +131,7 @@ public class Classifier<T> implements Serializable {
                 while (!q.isEmpty()) {
                     for (HierarchyPosition<T> pos
                             : q.remove().getChildPositions()) {
-                        if (marked.contains(pos)) {// &&
-                            // freshlyMarked.add(pos)) {
+                        if (marked.contains(pos)) {
                             freshlyMarked.add(pos);
                         } else if (visited.add(pos)) {
                             q.add(pos);
@@ -149,7 +148,7 @@ public class Classifier<T> implements Serializable {
                     }
                 }
                 marked = freshlyMarked;
-            } // end while
+            }
             Set<HierarchyPosition<T>> bots
                 = new HashSet<HierarchyPosition<T>>();
             for (HierarchyPosition<T> pos : marked) {
