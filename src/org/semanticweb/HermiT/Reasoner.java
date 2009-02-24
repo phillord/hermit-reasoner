@@ -461,6 +461,7 @@ public class Reasoner implements Serializable {
         }
         return m_atomicRoleHierarchy;
     }
+
     protected static void addInclusion(Map<Role,Set<Role>> subRoles,Role sub,Role sup) {
         Set<Role> subs=subRoles.get(sup);
         if (subs==null) {
