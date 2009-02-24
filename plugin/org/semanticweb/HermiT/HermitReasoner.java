@@ -232,7 +232,7 @@ public class HermitReasoner implements MonitorableOWLReasoner {
     public boolean isSubClassOf(OWLDescription subclass,OWLDescription superclass) {
         if (hermit==null)
             return false;
-        return hermit.isSubsumedBy(subclass,superclass);
+        return hermit.isClassSubsumedBy(subclass,superclass);
     }
 
     public boolean isConsistent(OWLOntology ignored) {

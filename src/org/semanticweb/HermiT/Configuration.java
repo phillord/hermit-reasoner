@@ -43,6 +43,7 @@ public class Configuration implements Serializable {
     }
 
     private static final long serialVersionUID=7741510316249774519L;
+
     public Configuration.TableauMonitorType tableauMonitorType;
     public Configuration.DirectBlockingType directBlockingType;
     public Configuration.BlockingStrategyType blockingStrategyType;

@@ -6,8 +6,10 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.owlapi.structural.OWLHasKeyDummy;
 import org.semanticweb.owl.apibinding.OWLManager;
-import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLDataFactory;
+import org.semanticweb.owl.model.OWLDescription;
+import org.semanticweb.owl.model.OWLClass;
+import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLDataPropertyExpression;
 
 public class ReasonerTest extends AbstractReasonerTest {
@@ -757,7 +759,7 @@ public class ReasonerTest extends AbstractReasonerTest {
     
     public void testNovelNominals() throws Exception {
         // Uncomment this once complex concept classification is supported properly
-/*        OWLDataFactory df = m_ontologyManager.getOWLDataFactory();
+        OWLDataFactory df = m_ontologyManager.getOWLDataFactory();
         String axioms = "ClassAssertion(a C)";
         loadOntologyWithAxioms(axioms, null);
         OWLIndividual a = df.getOWLIndividual(URI.create("file:/c/test.owl#a"));
@@ -766,6 +768,6 @@ public class ReasonerTest extends AbstractReasonerTest {
             df.getOWLObjectOneOf(a),
             df.getOWLObjectComplementOf(c));
 
-        assertFalse(m_reasoner.isClassSatisfiable(desc));*/
+        assertFalse(m_reasoner.isClassSatisfiable(desc));
     }
 }

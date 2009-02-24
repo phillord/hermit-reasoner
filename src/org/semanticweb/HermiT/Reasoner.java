@@ -52,20 +52,25 @@ import org.semanticweb.HermiT.hierarchy.PositionTranslator;
 import org.semanticweb.HermiT.hierarchy.TableauFunc;
 import org.semanticweb.HermiT.hierarchy.TableauSubsumptionChecker;
 import org.semanticweb.HermiT.hierarchy.TranslatedHierarchyPosition;
+import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Individual;
-import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.monitor.TableauMonitorFork;
 import org.semanticweb.HermiT.monitor.Timer;
 import org.semanticweb.HermiT.monitor.TimerWithPause;
+import org.semanticweb.HermiT.owlapi.structural.BuiltInPropertyManager;
+import org.semanticweb.HermiT.owlapi.structural.OWLAxioms;
+import org.semanticweb.HermiT.owlapi.structural.OWLAxiomsExpressivity;
 import org.semanticweb.HermiT.owlapi.structural.OWLHasKeyDummy;
 import org.semanticweb.HermiT.owlapi.structural.OWLClausification;
+import org.semanticweb.HermiT.owlapi.structural.OWLNormalization;
+import org.semanticweb.HermiT.owlapi.structural.TransitivityManager;
 import org.semanticweb.HermiT.tableau.Tableau;
 import org.semanticweb.HermiT.util.TranslatedMap;
 import org.semanticweb.HermiT.util.TranslatedSet;
@@ -82,6 +87,7 @@ import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLObjectProperty;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
+import org.semanticweb.owl.model.OWLAxiom;
 
 /**
  * Answers queries about the logical implications of a particular knowledge base. A Reasoner is associated with a single knowledge base, which is "loaded" when the reasoner is constructed. By default a full classification of all atomic terms in the knowledge base is also performed at this time (which can take quite a while for large or complex ontologies), but this behavior can be disabled as a part of the Reasoner configuration. Internal details of the loading and reasoning algorithms can be configured in the Reasoner constructor and do not change over the lifetime of the Reasoner object---internal data structures and caches are optimized for a particular configuration. By default, HermiT will use the set of options which provide optimal performance.
@@ -227,31 +233,41 @@ public class Reasoner implements Serializable {
     // Concept inferences
     
     public boolean isClassSatisfiable(String classURI) {
-        // In an inconsistent ontology, HermiT considers all classes as unsatisfiable.
-        if (!m_tableau.isABoxSatisfiable())
-            return false;
         return m_subsumptionChecker.isSatisfiable(AtomicConcept.create(classURI));
     }
 
-    public boolean isClassSatisfiable(OWLDescription desc) {
-        // In an inconsistent ontology, HermiT considers all classes as unsatisfiable.
-        if (!m_tableau.isABoxSatisfiable())
-            return false;
-        return m_subsumptionChecker.isSatisfiable(define(desc));
+    public boolean isClassSatisfiable(OWLDescription description) {
+        if (description instanceof OWLClass)
+            return isClassSatisfiable(((OWLClass)description).getURI().toString());
+        else {
+            OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
+            OWLDataFactory factory=ontologyManager.getOWLDataFactory();
+            OWLClass newClass=factory.getOWLClass(URI.create("internal:query-concept"));
+            OWLAxiom classDefinitionAxiom=factory.getOWLSubClassAxiom(newClass,description);
+            DLOntology newDLOntology=extendDLOntology(m_config,m_namespaces,"uri:urn:internal-kb",m_dlOntology,ontologyManager,classDefinitionAxiom);
+            Tableau tableau=createTableau(m_config,newDLOntology,m_namespaces);
+            return tableau.isSatisfiable(AtomicConcept.create("internal:query-concept"));
+        }
     }
 
     public boolean isClassSubsumedBy(String childName,String parentName) {
-        // For an inconsistent ontology, HermiT answers true for all subsumptions.
-        if (!m_tableau.isABoxSatisfiable())
-            return true;
         return m_subsumptionChecker.isSubsumedBy(AtomicConcept.create(childName),AtomicConcept.create(parentName));
     }
 
-    public boolean isSubsumedBy(OWLDescription child,OWLDescription parent) {
-        // For an inconsistent ontology, HermiT answers true for all subsumptions.
-        if (!m_tableau.isABoxSatisfiable())
-            return true;
-        return m_subsumptionChecker.isSubsumedBy(define(child),define(parent));
+    public boolean isClassSubsumedBy(OWLDescription subDescription,OWLDescription superDescription) {
+        if (subDescription instanceof OWLClass && superDescription instanceof OWLClass)
+            return isClassSubsumedBy(((OWLClass)subDescription).getURI().toString(),((OWLClass)superDescription).getURI().toString());
+        else {
+            OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
+            OWLDataFactory factory=ontologyManager.getOWLDataFactory();
+            OWLClass newSubConcept=factory.getOWLClass(URI.create("internal:query-subconcept"));
+            OWLAxiom subClassDefinitionAxiom=factory.getOWLSubClassAxiom(newSubConcept,subDescription);
+            OWLClass newSuperConcept=factory.getOWLClass(URI.create("internal:query-superconcept"));
+            OWLAxiom superClassDefinitionAxiom=factory.getOWLSubClassAxiom(superDescription,newSuperConcept);
+            DLOntology newDLOntology=extendDLOntology(m_config,m_namespaces,"uri:urn:internal-kb",m_dlOntology,ontologyManager,subClassDefinitionAxiom,superClassDefinitionAxiom);
+            Tableau tableau=createTableau(m_config,newDLOntology,m_namespaces);
+            return tableau.isSubsumedBy(AtomicConcept.create("internal:query-subconcept"),AtomicConcept.create("internal:query-superconcept"));
+        }
     }
 
     // Concept hierarchy
@@ -605,15 +621,10 @@ public class Reasoner implements Serializable {
         DirectBlockingChecker directBlockingChecker=null;
         switch (config.directBlockingType) {
         case OPTIMAL:
-            if (config.prepareForExpressiveQueries) {
+            if (dlOntology.hasAtMostRestrictions() && dlOntology.hasInverseRoles())
                 directBlockingChecker=new PairWiseDirectBlockingChecker();
-            }
-            else if (dlOntology.hasAtMostRestrictions() && dlOntology.hasInverseRoles()) {
-                directBlockingChecker=new PairWiseDirectBlockingChecker();
-            }
-            else {
+            else
                 directBlockingChecker=new SingleDirectBlockingChecker();
-            }
             break;
         case SINGLE:
             directBlockingChecker=new SingleDirectBlockingChecker();
@@ -672,13 +683,84 @@ public class Reasoner implements Serializable {
         return new Tableau(tableauMonitor,existentialsExpansionStrategy,dlOntology,config.parameters);
     }
 
-    protected static OWLObjectPropertyExpression getObjectPropertyExpression(OWLDataFactory factory,Role role) {
-        if (role instanceof AtomicRole)
-            return factory.getOWLObjectProperty(URI.create(((AtomicRole)role).getURI()));
-        else {
-            InverseRole inverseRole=(InverseRole)role;
-            return factory.getOWLObjectProperty(URI.create(inverseRole.getInverseOf().getURI())).getInverseProperty();
+    protected static DLOntology extendDLOntology(Configuration config,Namespaces namespaces,String resultingOntologyURI,DLOntology originalDLOntology,OWLOntologyManager ontologyManager,OWLAxiom... additionalAxioms) throws IllegalArgumentException {
+        try {
+            Set<DescriptionGraph> descriptionGraphs=Collections.emptySet();
+            OWLDataFactory factory=ontologyManager.getOWLDataFactory();
+            OWLOntology newOntology=ontologyManager.createOntology(URI.create("uri:urn:internal-kb"));
+            for (OWLAxiom axiom : additionalAxioms)
+                ontologyManager.addAxiom(newOntology,axiom);
+            OWLAxioms axioms=new OWLAxioms();
+            OWLNormalization normalization=new OWLNormalization(factory,axioms);
+            normalization.processOntology(config,newOntology);
+            if (!originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.TOP_OBJECT_ROLE)) {
+                BuiltInPropertyManager builtInPropertyManager=new BuiltInPropertyManager(factory);   
+                builtInPropertyManager.axiomatizeTopObjectPropertyIfNeeded(axioms);
+            }
+            if (!originalDLOntology.getAllTransitiveObjectRoles().isEmpty() || !axioms.m_transitiveObjectProperties.isEmpty()) {
+                TransitivityManager transitivityManager=new TransitivityManager(factory);
+                transitivityManager.prepareTransformation(axioms);
+                for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_transitiveObjectProperties)
+                    transitivityManager.makeTransitive(objectPropertyExpression);
+                for (DLClause dlClause : originalDLOntology.getDLClauses()) {
+                    if (dlClause.isRoleInclusion()) {
+                        AtomicRole subAtomicRole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
+                        AtomicRole superAtomicRole=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
+                        if (originalDLOntology.getAllAtomicObjectRoles().contains(subAtomicRole) && originalDLOntology.getAllAtomicObjectRoles().contains(superAtomicRole)) {
+                            OWLObjectProperty subObjectProperty=getObjectPropertyExpression(factory,subAtomicRole);
+                            OWLObjectProperty superObjectProperty=getObjectPropertyExpression(factory,superAtomicRole);
+                            transitivityManager.addInclusion(subObjectProperty,superObjectProperty);
+                        }
+                    }
+                    else if (dlClause.isRoleInverseInclusion()) {
+                        AtomicRole subAtomicRole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
+                        AtomicRole superAtomicRole=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
+                        if (originalDLOntology.getAllAtomicObjectRoles().contains(subAtomicRole) && originalDLOntology.getAllAtomicObjectRoles().contains(superAtomicRole)) {
+                            OWLObjectProperty subObjectProperty=getObjectPropertyExpression(factory,subAtomicRole);
+                            OWLObjectPropertyExpression superObjectPropertyExpression=getObjectPropertyExpression(factory,superAtomicRole).getInverseProperty();
+                            transitivityManager.addInclusion(subObjectProperty,superObjectPropertyExpression);
+                        }
+                    }
+                }
+                transitivityManager.rewriteConceptInclusions(axioms);
+            }
+            OWLAxiomsExpressivity axiomsExpressivity=new OWLAxiomsExpressivity(axioms);
+            axiomsExpressivity.m_hasAtMostRestrictions|=originalDLOntology.hasAtMostRestrictions();
+            axiomsExpressivity.m_hasInverseRoles|=originalDLOntology.hasInverseRoles();
+            axiomsExpressivity.m_hasNominals|=originalDLOntology.hasNominals();
+            axiomsExpressivity.m_hasDatatypes|=originalDLOntology.hasDatatypes();
+            OWLClausification clausifier=new OWLClausification(config);
+            DLOntology newDLOntology=clausifier.clausify(ontologyManager.getOWLDataFactory(),"uri:urn:internal-kb",axioms,axiomsExpressivity,descriptionGraphs);
+            
+            Set<DLClause> dlClauses=createUnion(originalDLOntology.getDLClauses(),newDLOntology.getDLClauses());
+            Set<Atom> positiveFacts=createUnion(originalDLOntology.getPositiveFacts(),newDLOntology.getPositiveFacts());
+            Set<Atom> negativeFacts=createUnion(originalDLOntology.getNegativeFacts(),newDLOntology.getNegativeFacts());
+            Set<AtomicConcept> atomicConcepts=createUnion(originalDLOntology.getAllAtomicConcepts(),newDLOntology.getAllAtomicConcepts());
+            Set<Role> transitiveObjectRoles=createUnion(originalDLOntology.getAllTransitiveObjectRoles(),newDLOntology.getAllTransitiveObjectRoles());
+            Set<AtomicRole> atomicObjectRoles=createUnion(originalDLOntology.getAllAtomicObjectRoles(),newDLOntology.getAllAtomicObjectRoles());
+            Set<AtomicRole> atomicDataRoles=createUnion(originalDLOntology.getAllAtomicDataRoles(),newDLOntology.getAllAtomicDataRoles());
+            Set<Individual> individuals=createUnion(originalDLOntology.getAllIndividuals(),newDLOntology.getAllIndividuals());
+            boolean hasInverseRoles=originalDLOntology.hasInverseRoles() || newDLOntology.hasInverseRoles();
+            boolean hasAtMostRestrictions=originalDLOntology.hasAtMostRestrictions() || newDLOntology.hasAtMostRestrictions();
+            boolean hasNominals=originalDLOntology.hasNominals() || newDLOntology.hasNominals();
+            boolean canUseNIRule=originalDLOntology.canUseNIRule() || newDLOntology.canUseNIRule();
+            boolean hasDatatypes=originalDLOntology.hasDatatypes() || newDLOntology.hasDatatypes();
+            return new DLOntology(resultingOntologyURI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,transitiveObjectRoles,atomicObjectRoles,atomicDataRoles,individuals,hasInverseRoles,hasAtMostRestrictions,hasNominals,canUseNIRule,hasDatatypes);
         }
+        catch (OWLException shouldntHappen) {
+            throw new IllegalStateException("Internal error: Unexpected OWLException.",shouldntHappen);
+        }
+    }
+    
+    protected static <T> Set<T> createUnion(Set<T> set1,Set<T> set2) {
+        Set<T> result=new HashSet<T>();
+        result.addAll(set1);
+        result.addAll(set2);
+        return result;
+    }
+    
+    protected static OWLObjectProperty getObjectPropertyExpression(OWLDataFactory factory,AtomicRole atomicRole) {
+        return factory.getOWLObjectProperty(URI.create(atomicRole.getURI()));
     }
     
     protected static Namespaces createNamespaces(String ontologyURI) {

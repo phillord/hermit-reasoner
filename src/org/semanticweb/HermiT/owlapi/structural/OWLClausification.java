@@ -151,6 +151,7 @@ public class OWLClausification implements Serializable {
         BuiltInPropertyManager builtInPropertyManager=new BuiltInPropertyManager(factory);
         builtInPropertyManager.axiomatizeTopObjectPropertyIfNeeded(axioms);
         TransitivityManager transitivityManager=new TransitivityManager(factory);
+        transitivityManager.prepareTransformation(axioms);
         transitivityManager.rewriteConceptInclusions(axioms);
         Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
         return clausify(factory,ontologyURI,axioms,noDescriptionGraphs);
@@ -158,6 +159,10 @@ public class OWLClausification implements Serializable {
 
     public DLOntology clausify(OWLDataFactory factory,String ontologyURI,OWLAxioms axioms,Set<DescriptionGraph> descriptionGraphs) {
         OWLAxiomsExpressivity axiomsExpressivity=new OWLAxiomsExpressivity(axioms);
+        return clausify(factory,ontologyURI,axioms,axiomsExpressivity,descriptionGraphs);
+    }
+   
+    public DLOntology clausify(OWLDataFactory factory,String ontologyURI,OWLAxioms axioms,OWLAxiomsExpressivity axiomsExpressivity,Set<DescriptionGraph> descriptionGraphs) {
         Set<DLClause> dlClauses=new LinkedHashSet<DLClause>();
         Set<Atom> positiveFacts=new HashSet<Atom>();
         Set<Atom> negativeFacts=new HashSet<Atom>();
@@ -248,7 +253,7 @@ public class OWLClausification implements Serializable {
             hermitIndividuals.add(ind);
             // all named individuals are tagged with a concept, so that keys are
             // only applied to them
-            if (axiomsExpressivity.m_hasKeys)
+            if (!axioms.m_hasKeys.isEmpty())
                 positiveFacts.add(Atom.create(AtomicConcept.INTERNAL_NAMED,new Term[] { ind }));
         }
         for (OWLObjectProperty p : axiomsExpressivity.m_objectProperties)

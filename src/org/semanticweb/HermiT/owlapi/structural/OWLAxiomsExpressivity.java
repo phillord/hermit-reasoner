@@ -40,7 +40,7 @@ import org.semanticweb.owl.model.OWLIndividualAxiom;
 import org.semanticweb.owl.model.OWLSameIndividualsAxiom;
 import org.semanticweb.owl.util.OWLAxiomVisitorAdapter;
 
-class OWLAxiomsExpressivity implements OWLDescriptionVisitor {
+public class OWLAxiomsExpressivity implements OWLDescriptionVisitor {
     public final Set<OWLClass> m_classes;
     public final Set<OWLObjectProperty> m_objectProperties;
     public final Set<OWLDataProperty> m_dataProperties;
@@ -49,7 +49,6 @@ class OWLAxiomsExpressivity implements OWLDescriptionVisitor {
     public boolean m_hasInverseRoles;
     public boolean m_hasNominals;
     public boolean m_hasDatatypes;
-    public boolean m_hasKeys;
 
     public OWLAxiomsExpressivity(OWLAxioms axioms) {
         m_classes=new HashSet<OWLClass>();
@@ -79,8 +78,6 @@ class OWLAxiomsExpressivity implements OWLDescriptionVisitor {
         FactVisitor factVisitor=new FactVisitor();
         for (OWLIndividualAxiom fact : axioms.m_facts)
             fact.accept(factVisitor);
-        if (axioms.m_hasKeys.size()>0)
-            m_hasKeys=true;
     }
     
     protected void visitProperty(OWLObjectPropertyExpression object) {
