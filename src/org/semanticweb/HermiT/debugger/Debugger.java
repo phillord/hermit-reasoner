@@ -65,6 +65,7 @@ import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.ExistsDescriptionGraph;
+import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Role;
@@ -507,7 +508,18 @@ public class Debugger extends TableauMonitorForwarder {
     }
     public void isABoxSatisfiableFinished(boolean result) {
         super.isABoxSatisfiableFinished(result);
-        m_output.println("ABox is "+(result ? "" : "not ")+"satisfiable...");
+        m_output.println("ABox is "+(result ? "" : "not ")+"satisfiable.");
+        mainLoop();
+        dispose();
+    }
+    public void isInstanceOfStarted(AtomicConcept concept,Individual individual) {
+        super.isInstanceOfStarted(concept,individual);
+        m_output.println("Will check whether '"+m_namespaces.idFromUri(concept.getURI())+"' is an instance of '"+m_namespaces.idFromUri(individual.getURI())+"'.");
+        mainLoop();
+    }
+    public void isInstanceOfFinished(AtomicConcept concept,Individual individual,boolean result) {
+        super.isInstanceOfFinished(concept,individual,result);
+        m_output.println("'"+m_namespaces.idFromUri(concept.getURI())+"' is "+(result ? "" : "not ")+"an instance of '"+m_namespaces.idFromUri(individual.getURI())+"'.");
         mainLoop();
         dispose();
     }

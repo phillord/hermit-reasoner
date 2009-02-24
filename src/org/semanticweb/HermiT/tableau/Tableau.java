@@ -274,7 +274,6 @@ public final class Tableau implements Serializable {
             m_tableauMonitor.isSubsumedByFinished(subconcept,superconcept,result);
         return result;
     }
-
     public boolean isAsymmetric(AtomicRole role) {
         clear();
         if (hasNominals())
@@ -289,7 +288,6 @@ public final class Tableau implements Serializable {
         m_extensionManager.addRoleAssertion(role,b,a,dependencySet);
         return !isSatisfiable();
     }
-
     public boolean isABoxSatisfiable() {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isABoxSatisfiableStarted();
@@ -304,8 +302,21 @@ public final class Tableau implements Serializable {
             m_tableauMonitor.isABoxSatisfiableFinished(result);
         return result;
     }
-
-    private void loadPositiveFact(Atom atom,Map<Individual,Node> individualsToNodes) {
+    public boolean isInstanceOf(AtomicConcept concept,Individual individual) {
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.isInstanceOfStarted(concept,individual);
+        clear();
+        Map<Individual,Node> aboxMapping=loadABox();
+        m_checkedNode=aboxMapping.get(individual);
+        if (m_checkedNode==null)
+            m_checkedNode=createNewOriginalNode(NodeType.ROOT_NODE,m_dependencySetFactory.emptySet(),0);
+        m_extensionManager.addConceptAssertion(AtomicNegationConcept.create(concept),m_checkedNode,m_dependencySetFactory.emptySet());
+        boolean result=!isSatisfiable();
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.isInstanceOfFinished(concept,individual,result);
+        return result;
+    }
+    protected void loadPositiveFact(Atom atom,Map<Individual,Node> individualsToNodes) {
         DLPredicate dlPredicate=atom.getDLPredicate();
         switch (dlPredicate.getArity()) {
         case 1:
@@ -318,8 +329,7 @@ public final class Tableau implements Serializable {
             throw new IllegalArgumentException("Unsupported arity of positive ground atoms.");
         }
     }
-
-    private void loadNegativeFact(Atom atom,Map<Individual,Node> individualsToNodes) {
+    protected void loadNegativeFact(Atom atom,Map<Individual,Node> individualsToNodes) {
         DLPredicate dlPredicate=atom.getDLPredicate();
         if (!(dlPredicate instanceof AtomicConcept))
             throw new IllegalArgumentException("Unsupported type of negative fact.");
@@ -331,24 +341,15 @@ public final class Tableau implements Serializable {
             throw new IllegalArgumentException("Unsupported arity of negative ground atoms.");
         }
     }
-    protected void loadABox() {
+    protected Map<Individual,Node> loadABox() {
         Map<Individual,Node> individualsToNodes=new HashMap<Individual,Node>();
         for (Atom atom : m_dlOntology.getPositiveFacts())
             loadPositiveFact(atom,individualsToNodes);
         for (Atom atom : m_dlOntology.getNegativeFacts())
             loadNegativeFact(atom,individualsToNodes);
+        return individualsToNodes;
     }
-
-    /**
-     * Finds the node for the named individual individual or creates a named node if no node exists yet for individual.
-     * 
-     * @param individualsToNodes
-     *            a mapping from individuals to their nodes in the tableau
-     * @param individual
-     *            the individual for which we want its node in the tableau or a new node if there is not yet a node for it in the tableau
-     * @return the node for individual in the tableau
-     */
-    private Node getNodeForIndividual(Map<Individual,Node> individualsToNodes,Individual individual) {
+    protected Node getNodeForIndividual(Map<Individual,Node> individualsToNodes,Individual individual) {
         Node node=individualsToNodes.get(individual);
         if (node==null) {
             node=createNewOriginalNode(NodeType.NAMED_NODE,m_dependencySetFactory.emptySet(),0);

@@ -6,6 +6,7 @@ import java.io.Serializable;
 import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
+import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.GroundDisjunction;
@@ -33,6 +34,10 @@ public class TableauMonitorAdapter implements TableauMonitor,Serializable  {
     public void isABoxSatisfiableStarted() {
     }
     public void isABoxSatisfiableFinished(boolean result) {
+    }
+    public void isInstanceOfStarted(AtomicConcept concept,Individual individual) {
+    }
+    public void isInstanceOfFinished(AtomicConcept concept,Individual individual,boolean result) {
     }
     public void tableauCleared() {
     }

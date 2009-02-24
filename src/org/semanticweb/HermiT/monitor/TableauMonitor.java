@@ -3,6 +3,7 @@ package org.semanticweb.HermiT.monitor;
 
 import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
 import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
@@ -18,6 +19,8 @@ public interface TableauMonitor {
     void isSubsumedByFinished(AtomicConcept subconcept,AtomicConcept superconcept,boolean result);
     void isABoxSatisfiableStarted();
     void isABoxSatisfiableFinished(boolean result);
+    void isInstanceOfStarted(AtomicConcept concept,Individual individual);
+    void isInstanceOfFinished(AtomicConcept concept,Individual individual,boolean result);
     void tableauCleared();
     void saturateStarted();
     void saturateFinished();

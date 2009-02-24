@@ -6,6 +6,7 @@ import java.io.Serializable;
 import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
+import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.GroundDisjunction;
@@ -49,6 +50,14 @@ public class TableauMonitorFork implements TableauMonitor,Serializable  {
     public void isABoxSatisfiableFinished(boolean result) {
         m_first.isABoxSatisfiableFinished(result);
         m_second.isABoxSatisfiableFinished(result);
+    }
+    public void isInstanceOfStarted(AtomicConcept concept,Individual individual) {
+        m_first.isInstanceOfStarted(concept,individual);
+        m_second.isInstanceOfStarted(concept,individual);
+    }
+    public void isInstanceOfFinished(AtomicConcept concept,Individual individual,boolean result) {
+        m_first.isInstanceOfFinished(concept,individual,result);
+        m_second.isInstanceOfFinished(concept,individual,result);
     }
     public void tableauCleared() {
         m_first.tableauCleared();

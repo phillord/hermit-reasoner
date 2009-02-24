@@ -54,6 +54,15 @@ public class Timer extends TableauMonitorAdapter {
         output.println(result ? "YES" : "NO");
         doStatistics();
     }
+    public void isInstanceOfStarted(AtomicConcept concept,Individual individual) {
+        output.print("Testing "+concept.getURI()+" : "+individual.getURI()+" ...");
+        output.flush();
+        start();
+    }
+    public void isInstanceOfFinished(AtomicConcept concept,Individual individual,boolean result) {
+        output.println(result ? "YES" : "NO");
+        doStatistics();
+    }
     public void iterationStarted() {
         if (System.currentTimeMillis()-m_lastStatusTime>30000) {
             if (m_lastStatusTime==m_problemStartTime)

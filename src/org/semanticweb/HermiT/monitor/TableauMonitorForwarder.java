@@ -6,6 +6,7 @@ import java.io.Serializable;
 import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
+import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.GroundDisjunction;
@@ -47,6 +48,14 @@ public class TableauMonitorForwarder implements TableauMonitor,Serializable {
     public void isABoxSatisfiableFinished(boolean result) {
         if (m_forwardingOn)
             m_forwardingTargetMonitor.isABoxSatisfiableFinished(result);
+    }
+    public void isInstanceOfStarted(AtomicConcept concept,Individual individual) {
+        if (m_forwardingOn)
+            m_forwardingTargetMonitor.isInstanceOfStarted(concept,individual);
+    }
+    public void isInstanceOfFinished(AtomicConcept concept,Individual individual,boolean result) {
+        if (m_forwardingOn)
+            m_forwardingTargetMonitor.isInstanceOfFinished(concept,individual,result);
     }
     public void tableauCleared() {
         if (m_forwardingOn)
