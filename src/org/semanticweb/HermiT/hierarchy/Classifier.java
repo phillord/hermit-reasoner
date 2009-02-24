@@ -159,7 +159,7 @@ public class Classifier<T> implements Serializable {
         }
     }
 
-    protected interface Util<U> {
+    public interface Util<U> {
         Set<U> nexts(U u);
         Set<U> prevs(U u);
         boolean trueOf(U u);
@@ -201,7 +201,8 @@ public class Classifier<T> implements Serializable {
             }
         }
     };
-    protected <U> Set<U> search(final Util<U> f,Collection<U> begin,final Set<U> possibilities) {
+    
+    public static <U> Set<U> search(final Util<U> f,Collection<U> begin,final Set<U> possibilities) {
         final Local<U> g=new Local<U>(f,possibilities);
 
         Set<U> out=new HashSet<U>();

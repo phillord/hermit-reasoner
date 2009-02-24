@@ -552,24 +552,38 @@ public class Reasoner implements Serializable {
 
     protected Map<AtomicConcept,Set<Individual>> getRealization() {
         if (m_realization==null) {
-            OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
             m_realization=new HashMap<AtomicConcept,Set<Individual>>();
             for (Individual individual : m_dlOntology.getAllIndividuals()) {
-                HierarchyPosition<AtomicConcept> p=getConceptHierarchyPosition(define(factory.getOWLObjectOneOf(factory.getOWLIndividual(URI.create(individual.getURI())))));
-                Set<AtomicConcept> parents=p.getEquivalents();
-                if (parents.isEmpty()) {
-                    parents=new HashSet<AtomicConcept>();
-                    for (HierarchyPosition<AtomicConcept> parentPos : p.getParentPositions())
-                        parents.addAll(parentPos.getEquivalents());
-                }
-                for (AtomicConcept atomicConcept : parents) {
-                    if (!m_realization.containsKey(atomicConcept))
-                        m_realization.put(atomicConcept,new HashSet<Individual>());
-                    m_realization.get(atomicConcept).add(individual);
+                Set<HierarchyPosition<AtomicConcept>> directSuperConceptPositions=getDirectSuperConceptPositions(individual);
+                for (HierarchyPosition<AtomicConcept> directSuperConceptPosition : directSuperConceptPositions) {
+                    for (AtomicConcept directSuperConcept : directSuperConceptPosition.getEquivalents()) {
+                        Set<Individual> individuals=m_realization.get(directSuperConcept);
+                        if (individuals==null) {
+                            individuals=new HashSet<Individual>();
+                            m_realization.put(directSuperConcept,individuals);
+                        }
+                        individuals.add(individual);
+                    }
                 }
             }
         }
         return m_realization;
+    }
+    
+    protected Set<HierarchyPosition<AtomicConcept>> getDirectSuperConceptPositions(final Individual individual) {
+        Classifier.Util<HierarchyPosition<AtomicConcept>> util=new Classifier.Util<HierarchyPosition<AtomicConcept>>() {
+            public Set<HierarchyPosition<AtomicConcept>> nexts(HierarchyPosition<AtomicConcept> u) {
+                return u.getChildPositions();
+            }
+            public Set<HierarchyPosition<AtomicConcept>> prevs(HierarchyPosition<AtomicConcept> u) {
+                return u.getParentPositions();
+            }
+            public boolean trueOf(HierarchyPosition<AtomicConcept> u) {
+                return m_tableau.isInstanceOf(u.getEquivalents().iterator().next(),individual);
+            }
+        };
+        Set<HierarchyPosition<AtomicConcept>> topPositions=Collections.singleton(getAtomicConceptHierarchy().get(AtomicConcept.THING));
+        return Classifier.search(util,topPositions,null);
     }
 
     protected HierarchyPosition<AtomicConcept> getIndividualTypes(Individual individual) {
@@ -577,6 +591,13 @@ public class Reasoner implements Serializable {
         return getConceptHierarchyPosition(define(factory.getOWLObjectOneOf(factory.getOWLIndividual(URI.create(individual.getURI())))));
     }
 
+    protected boolean isInstanceOf(AtomicConcept atomicConcept,Individual individual) {
+        if (AtomicConcept.THING.equals(atomicConcept))
+            return true;
+        else
+            return m_tableau.isInstanceOf(atomicConcept,individual);
+    }
+    
     // Various creation methods
     
     protected static Tableau createTableau(Configuration config,DLOntology dlOntology,Namespaces namespaces) throws IllegalArgumentException {

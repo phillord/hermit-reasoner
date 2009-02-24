@@ -134,10 +134,8 @@ public class OWLClausification implements Serializable {
         toProcess.add(ontology);
         while (!toProcess.isEmpty()) {
             OWLOntology anOntology=toProcess.remove(toProcess.size()-1);
-            if (!importClosure.contains(anOntology)) {
+            if (importClosure.add(anOntology))
                 toProcess.addAll(anOntology.getImports(ontologyManager));
-                importClosure.add(anOntology);
-            }
         }
         return clausifyImportClosure(ontologyManager.getOWLDataFactory(),ontology.getURI().toString(),importClosure,keys);
     }
