@@ -302,18 +302,18 @@ public final class Tableau implements Serializable {
             m_tableauMonitor.isABoxSatisfiableFinished(result);
         return result;
     }
-    public boolean isInstanceOf(AtomicConcept concept,Individual individual) {
+    public boolean isInstanceOf(AtomicConcept atomicConcept,Individual individual) {
         if (m_tableauMonitor!=null)
-            m_tableauMonitor.isInstanceOfStarted(concept,individual);
+            m_tableauMonitor.isInstanceOfStarted(atomicConcept,individual);
         clear();
         Map<Individual,Node> aboxMapping=loadABox();
         m_checkedNode=aboxMapping.get(individual);
         if (m_checkedNode==null)
             m_checkedNode=createNewOriginalNode(NodeType.ROOT_NODE,m_dependencySetFactory.emptySet(),0);
-        m_extensionManager.addConceptAssertion(AtomicNegationConcept.create(concept),m_checkedNode,m_dependencySetFactory.emptySet());
+        m_extensionManager.addConceptAssertion(AtomicNegationConcept.create(atomicConcept),m_checkedNode,m_dependencySetFactory.emptySet());
         boolean result=!isSatisfiable();
         if (m_tableauMonitor!=null)
-            m_tableauMonitor.isInstanceOfFinished(concept,individual,result);
+            m_tableauMonitor.isInstanceOfFinished(atomicConcept,individual,result);
         return result;
     }
     protected void loadPositiveFact(Atom atom,Map<Individual,Node> individualsToNodes) {
