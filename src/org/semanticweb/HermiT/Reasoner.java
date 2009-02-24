@@ -73,7 +73,6 @@ import org.semanticweb.HermiT.owlapi.structural.OWLNormalization;
 import org.semanticweb.HermiT.owlapi.structural.TransitivityManager;
 import org.semanticweb.HermiT.tableau.Tableau;
 import org.semanticweb.HermiT.util.TranslatedMap;
-import org.semanticweb.HermiT.util.TranslatedSet;
 import org.semanticweb.HermiT.util.Translator;
 import org.semanticweb.HermiT.util.GraphUtils;
 import org.semanticweb.owl.apibinding.OWLManager;
@@ -355,14 +354,6 @@ public class Reasoner implements Serializable {
         return result;
     }
 
-    protected AtomicConcept define(OWLDescription desc) {
-        if (desc.isAnonymous()) {
-            throw new IllegalArgumentException("Complex descriptions are not supported yet.");
-        }
-        else
-            return AtomicConcept.create(desc.asOWLClass().getURI().toString());
-    }
-
     public void printSortedAncestorLists(PrintWriter output) {
         printSortedAncestorLists(output,getClassHierarchy());
     }
@@ -498,19 +489,29 @@ public class Reasoner implements Serializable {
         return m_realization!=null;
     }
 
-    public HierarchyPosition<String> getIndividualTypes(String individual) {
-        return new TranslatedHierarchyPosition<AtomicConcept,String>(getIndividualTypes(Individual.create(individual)),new ConceptToString());
+    public Set<HierarchyPosition<String>> getIndividualTypes(String individual) {
+        Set<HierarchyPosition<AtomicConcept>> directSuperConceptPositions=getDirectSuperConceptPositions(Individual.create(individual));
+        Set<HierarchyPosition<String>> result=new HashSet<HierarchyPosition<String>>();
+        for (HierarchyPosition<AtomicConcept> hierarchyPosition : directSuperConceptPositions)
+            result.add(new TranslatedHierarchyPosition<AtomicConcept,String>(hierarchyPosition,new ConceptToString()));
+        return result;
     }
 
-    public HierarchyPosition<OWLClass> getIndividualTypes(OWLIndividual individual) {
+    public Set<HierarchyPosition<OWLClass>> getIndividualTypes(OWLIndividual individual) {
+        Set<HierarchyPosition<AtomicConcept>> directSuperConceptPositions=getDirectSuperConceptPositions(Individual.create(individual.getURI().toString()));
         OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
-        return new TranslatedHierarchyPosition<AtomicConcept,OWLClass>(getIndividualTypes(Individual.create(individual.getURI().toString())),new ConceptToOWLClass(factory));
+        Set<HierarchyPosition<OWLClass>> result=new HashSet<HierarchyPosition<OWLClass>>();
+        for (HierarchyPosition<AtomicConcept> hierarchyPosition : directSuperConceptPositions)
+            result.add(new TranslatedHierarchyPosition<AtomicConcept,OWLClass>(hierarchyPosition,new ConceptToOWLClass(factory)));
+        return result;
     }
 
     public Set<String> getClassInstances(String className) {
         Set<String> result=new HashSet<String>();
         for (AtomicConcept atomicConcept : getConceptHierarchyPosition(AtomicConcept.create(className)).getDescendants()) {
             Set<Individual> realizationForConcept=getRealization().get(atomicConcept);
+            // realizationForConcept could be null because of the way realization is constructed;
+            // for example, concepts that don't have direct instances are not entered into the realization at all.
             if (realizationForConcept!=null)
                 for (Individual individual : realizationForConcept)
                     result.add(individual.getURI());
@@ -519,31 +520,49 @@ public class Reasoner implements Serializable {
     }
 
     public Set<OWLIndividual> getClassInstances(OWLDescription description) {
+        HierarchyPosition<OWLClass> hierarchyPosition=getClassHierarchyPosition(description);
         OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
         Set<OWLIndividual> result=new HashSet<OWLIndividual>();
-        for (AtomicConcept atomicConcept : getConceptHierarchyPosition(define(description)).getDescendants()) {
-            Set<Individual> realizationForConcept=getRealization().get(atomicConcept);
-            if (realizationForConcept!=null)
-                for (Individual individual : realizationForConcept)
-                    result.add(factory.getOWLIndividual(URI.create(individual.getURI())));
-        }
+        loadIndividualsOfPosition(hierarchyPosition,result,factory);
+        for (HierarchyPosition<OWLClass> descendantHierarchyPosition : hierarchyPosition.getDescendantPositions())
+            loadIndividualsOfPosition(descendantHierarchyPosition,result,factory);
+        return result;
+    }
+    
+    protected void loadIndividualsOfPosition(HierarchyPosition<OWLClass> position,Set<OWLIndividual> result,OWLDataFactory factory) {
+        AtomicConcept atomicConcept=AtomicConcept.create(position.getEquivalents().iterator().next().getURI().toString());
+        Set<Individual> realizationForConcept=getRealization().get(atomicConcept);
+        // realizationForConcept could be null because of the way realization is constructed;
+        // for example, concepts that don't have direct instances are not entered into the realization at all.
+        if (realizationForConcept!=null)
+            for (Individual individual : realizationForConcept)
+                result.add(factory.getOWLIndividual(URI.create(individual.getURI())));
+    }
+    
+    public Set<String> getClassDirectInstances(String className) {
+        Set<String> result=new HashSet<String>();
+        Set<Individual> realizationForConcept=getRealization().get(AtomicConcept.create(className));
+        // realizationForConcept could be null because of the way realization is constructed;
+        // for example, concepts that don't have direct instances are not entered into the realization at all.
+        if (realizationForConcept!=null)
+            for (Individual individual : realizationForConcept)
+                result.add(individual.getURI());
         return result;
     }
 
-    public Set<String> getClassDirectInstances(String className) {
-        return new TranslatedSet<Individual,String>(getRealization().get(AtomicConcept.create(className)),new IndividualToString());
-    }
-
     public Set<OWLIndividual> getClassDirectInstances(OWLDescription description) {
+        HierarchyPosition<OWLClass> hierarchyPosition=getClassHierarchyPosition(description);
         OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
         Set<OWLIndividual> result=new HashSet<OWLIndividual>();
-        HierarchyPosition<AtomicConcept> position=getConceptHierarchyPosition(define(description));
-        Set<AtomicConcept> children=position.getEquivalents();
+        Map<AtomicConcept,Set<Individual>> realization=getRealization();
+        Set<OWLClass> children=hierarchyPosition.getEquivalents();
         if (children.isEmpty())
-            for (HierarchyPosition<AtomicConcept> childPos : position.getChildPositions())
-                children.addAll(childPos.getEquivalents());
-        for (AtomicConcept atomicConcept : children) {
-            Set<Individual> realizationForConcept=getRealization().get(atomicConcept);
+            for (HierarchyPosition<OWLClass> childPosition : hierarchyPosition.getChildPositions())
+                children.addAll(childPosition.getEquivalents());
+        for (OWLClass child : children) {
+            Set<Individual> realizationForConcept=realization.get(AtomicConcept.create(child.getURI().toString()));
+            // realizationForConcept could be null because of the way realization is constructed;
+            // for example, concepts that don't have direct instances are not entered into the realization at all.
             if (realizationForConcept!=null)
                 for (Individual individual : realizationForConcept)
                     result.add(factory.getOWLIndividual(URI.create(individual.getURI())));
@@ -580,16 +599,15 @@ public class Reasoner implements Serializable {
                 return u.getParentPositions();
             }
             public boolean trueOf(HierarchyPosition<AtomicConcept> u) {
-                return m_tableau.isInstanceOf(u.getEquivalents().iterator().next(),individual);
+                AtomicConcept atomicConcept=u.getEquivalents().iterator().next();
+                if (AtomicConcept.THING.equals(atomicConcept))
+                    return true;
+                else
+                    return m_tableau.isInstanceOf(atomicConcept,individual);
             }
         };
         Set<HierarchyPosition<AtomicConcept>> topPositions=Collections.singleton(getAtomicConceptHierarchy().get(AtomicConcept.THING));
         return Classifier.search(util,topPositions,null);
-    }
-
-    protected HierarchyPosition<AtomicConcept> getIndividualTypes(Individual individual) {
-        OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
-        return getConceptHierarchyPosition(define(factory.getOWLObjectOneOf(factory.getOWLIndividual(URI.create(individual.getURI())))));
     }
 
     protected boolean isInstanceOf(AtomicConcept atomicConcept,Individual individual) {

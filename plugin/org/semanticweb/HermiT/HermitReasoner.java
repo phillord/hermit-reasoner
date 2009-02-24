@@ -272,15 +272,19 @@ public class HermitReasoner implements MonitorableOWLReasoner {
     }
 
     public Set<Set<OWLClass>> getTypes(OWLIndividual individual,boolean direct) {
-        if (hermit==null) {
-            return new HashSet<Set<OWLClass>>();
+        Set<Set<OWLClass>> result=new HashSet<Set<OWLClass>>();
+        if (hermit!=null) {
+            Set<HierarchyPosition<OWLClass>> individualTypes=hermit.getIndividualTypes(individual);
+            for (HierarchyPosition<OWLClass> individualType : individualTypes) {
+                if (direct) {
+                    result.addAll(posToSets(individualType.getParentPositions()));
+                }
+                else {
+                    result.addAll(posToSets(individualType.getAncestorPositions()));
+                }
+            }
         }
-        if (direct) {
-            return posToSets(hermit.getIndividualTypes(individual).getParentPositions());
-        }
-        else {
-            return posToSets(hermit.getIndividualTypes(individual).getAncestorPositions());
-        }
+        return result;
     }
 
     public boolean hasDataPropertyRelationship(OWLIndividual subject,OWLDataPropertyExpression property,OWLConstant object) {
