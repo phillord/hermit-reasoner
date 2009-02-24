@@ -45,6 +45,16 @@ public class TransitivityManager {
         rewriteConceptInclusions(axioms.m_conceptInclusions);
     }
     
+    public void rewriteConceptInclusions(OWLAxioms axioms,Set<OWLObjectPropertyExpression> transitiveObjectProperties,Set<OWLObjectPropertyExpression[]> objectPropertyInclusions) {
+        for (OWLObjectPropertyExpression transitiveProperty : transitiveObjectProperties) {
+            makeTransitive(transitiveProperty);
+        }
+        for (OWLObjectPropertyExpression[] inclusion : objectPropertyInclusions) {
+            addInclusion(inclusion[0],inclusion[1]);
+        }
+        rewriteConceptInclusions(axioms.m_conceptInclusions);
+    }
+    
     protected void addInclusion(OWLObjectPropertyExpression sub,OWLObjectPropertyExpression sup) {
         sub=sub.getSimplified();
         sup=sup.getSimplified();

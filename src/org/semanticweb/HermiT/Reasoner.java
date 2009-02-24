@@ -58,6 +58,7 @@ import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Individual;
+import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.monitor.TableauMonitorFork;
@@ -72,6 +73,7 @@ import org.semanticweb.HermiT.util.Translator;
 import org.semanticweb.HermiT.util.GraphUtils;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLOntologyManager;
+import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLDataProperty;
@@ -79,7 +81,7 @@ import org.semanticweb.owl.model.OWLDescription;
 import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLObjectProperty;
-import org.semanticweb.owl.model.OWLOntology;
+import org.semanticweb.owl.model.OWLObjectPropertyExpression;
 
 /**
  * Answers queries about the logical implications of a particular knowledge base. A Reasoner is associated with a single knowledge base, which is "loaded" when the reasoner is constructed. By default a full classification of all atomic terms in the knowledge base is also performed at this time (which can take quite a while for large or complex ontologies), but this behavior can be disabled as a part of the Reasoner configuration. Internal details of the loading and reasoning algorithms can be configured in the Reasoner constructor and do not change over the lifetime of the Reasoner object---internal data structures and caches are optimized for a particular configuration. By default, HermiT will use the set of options which provide optimal performance.
@@ -177,12 +179,13 @@ public class Reasoner implements Serializable {
      * Creates a reasoner that contains all axioms from the ontologies in the 'ontologies'' parameter.
      * If any ontology in this collection contains imports, these are *NOT* traversed -- that is,
      * the resulting ontology contains *EXACTLY* the axioms explciitly present in the supplied ontologies.
-     * The resulting DL ontology has the URI resultingDLOntologyURI.
+     * The resulting DL ontology has the URI ontologyURI.
      */
-    public Reasoner(Configuration config,OWLOntologyManager ontologyManger,Collection<OWLOntology> ontologies,String resultingDLOntologyURI) {
+    public Reasoner(Configuration config,OWLOntologyManager ontologyManger,Collection<OWLOntology> importClosure,String ontologyURI) {
         OWLClausification clausifier=new OWLClausification(config);
+        Set<OWLHasKeyDummy> keys=Collections.emptySet();
         m_config=config;
-        m_dlOntology=clausifier.clausifyOntologiesDisregardImports(ontologyManger,ontologies,resultingDLOntologyURI);
+        m_dlOntology=clausifier.clausifyImportClosure(ontologyManger.getOWLDataFactory(),ontologyURI,importClosure,keys);
         m_namespaces=createNamespaces(m_dlOntology.getOntologyURI());
         m_tableau=createTableau(m_config,m_dlOntology,m_namespaces);
         m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
@@ -196,131 +199,6 @@ public class Reasoner implements Serializable {
         m_tableau=createTableau(m_config,m_dlOntology,m_namespaces);
         m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
         m_classifier=new Classifier<AtomicConcept>(new TableauFunc(m_subsumptionChecker));
-    }
-
-    protected static Tableau createTableau(Configuration config,DLOntology dlOntology,Namespaces namespaces) throws IllegalArgumentException {
-        if (!dlOntology.canUseNIRule() && dlOntology.hasAtMostRestrictions() && dlOntology.hasInverseRoles() && config.existentialStrategyType==Configuration.ExistentialStrategyType.INDIVIDUAL_REUSE)
-            throw new IllegalArgumentException("The supplied DL-ontology is not compatible with the individual reuse strategy.");
-
-        if (config.checkClauses) {
-            Collection<DLClause> nonAdmissibleDLClauses=dlOntology.getNonadmissibleDLClauses();
-            if (!nonAdmissibleDLClauses.isEmpty()) {
-                String CRLF=System.getProperty("line.separator");
-                StringBuffer buffer=new StringBuffer();
-                buffer.append("The following DL-clauses in the DL-ontology"+" are not admissible:");
-                buffer.append(CRLF);
-                for (DLClause dlClause : nonAdmissibleDLClauses) {
-                    buffer.append(dlClause.toString(namespaces));
-                    buffer.append(CRLF);
-                }
-                throw new IllegalArgumentException(buffer.toString());
-            }
-        }
-
-        TableauMonitor wellKnownTableauMonitor=null;
-        switch (config.tableauMonitorType) {
-        case NONE:
-            wellKnownTableauMonitor=null;
-            break;
-        case TIMING:
-            wellKnownTableauMonitor=new Timer();
-            break;
-        case TIMING_WITH_PAUSE:
-            wellKnownTableauMonitor=new TimerWithPause();
-            break;
-        case DEBUGGER_HISTORY_ON:
-            wellKnownTableauMonitor=new Debugger(namespaces,true);
-            break;
-        case DEBUGGER_NO_HISTORY:
-            wellKnownTableauMonitor=new Debugger(namespaces,false);
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown monitor type");
-        }
-
-        TableauMonitor tableauMonitor=null;
-        if (config.monitor==null)
-            tableauMonitor=wellKnownTableauMonitor;
-        else if (wellKnownTableauMonitor==null)
-            tableauMonitor=config.monitor;
-        else
-            tableauMonitor=new TableauMonitorFork(wellKnownTableauMonitor,config.monitor);
-
-        DirectBlockingChecker directBlockingChecker=null;
-        switch (config.directBlockingType) {
-        case OPTIMAL:
-            if (config.prepareForExpressiveQueries) {
-                directBlockingChecker=new PairWiseDirectBlockingChecker();
-            }
-            else if (dlOntology.hasAtMostRestrictions() && dlOntology.hasInverseRoles()) {
-                directBlockingChecker=new PairWiseDirectBlockingChecker();
-            }
-            else {
-                directBlockingChecker=new SingleDirectBlockingChecker();
-            }
-            break;
-        case SINGLE:
-            directBlockingChecker=new SingleDirectBlockingChecker();
-            break;
-        case PAIR_WISE:
-            directBlockingChecker=new PairWiseDirectBlockingChecker();
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown direct blocking type.");
-        }
-
-        BlockingSignatureCache blockingSignatureCache=null;
-        if (!dlOntology.hasNominals()) {
-            switch (config.blockingSignatureCacheType) {
-            case CACHED:
-                blockingSignatureCache=new BlockingSignatureCache(directBlockingChecker);
-                break;
-            case NOT_CACHED:
-                blockingSignatureCache=null;
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown blocking cache type.");
-            }
-        }
-
-        BlockingStrategy blockingStrategy=null;
-        switch (config.blockingStrategyType) {
-        case ANCESTOR:
-            blockingStrategy=new AncestorBlocking(directBlockingChecker,blockingSignatureCache);
-            break;
-        case ANYWHERE:
-            blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown blocking strategy type.");
-        }
-
-        ExpansionStrategy existentialsExpansionStrategy=null;
-        switch (config.existentialStrategyType) {
-        case CREATION_ORDER:
-            existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
-            break;
-        case DEPTH_FIRST:
-            existentialsExpansionStrategy=new DepthFirstStrategy(blockingStrategy);
-            break;
-        case EL:
-            existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,true);
-            break;
-        case INDIVIDUAL_REUSE:
-            existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,false);
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown expansion strategy type.");
-        }
-
-        return new Tableau(tableauMonitor,existentialsExpansionStrategy,dlOntology,config.parameters);
-    }
-
-    protected static Namespaces createNamespaces(String ontologyURI) {
-        Map<String,String> namespaceDecl=new HashMap<String,String>();
-        namespaceDecl.put("",ontologyURI+"#");
-        return InternalNames.withInternalNamespaces(new Namespaces(namespaceDecl,Namespaces.semanticWebNamespaces));
-
     }
 
     // General accessor methods
@@ -536,24 +414,19 @@ public class Reasoner implements Serializable {
                     addInclusion(subRoles,sub.getInverse(),sup.getInverse());
                 }
             }
-
             GraphUtils.transitivelyClose(subRoles);
-
             NaiveHierarchyPosition.Ordering<AtomicRole> ordering=new NaiveHierarchyPosition.Ordering<AtomicRole>() {
                 public boolean less(AtomicRole sub,AtomicRole sup) {
-                    if (AtomicRole.TOP_DATA_ROLE.equals(sup) || AtomicRole.TOP_OBJECT_ROLE.equals(sup) || AtomicRole.BOTTOM_DATA_ROLE.equals(sub) || AtomicRole.BOTTOM_OBJECT_ROLE.equals(sub)) {
+                    if (AtomicRole.TOP_DATA_ROLE.equals(sup) || AtomicRole.TOP_OBJECT_ROLE.equals(sup) || AtomicRole.BOTTOM_DATA_ROLE.equals(sub) || AtomicRole.BOTTOM_OBJECT_ROLE.equals(sub))
                         return true;
-                    }
                     Set<Role> subs=subRoles.get(sup);
-                    if (subs==null) {
+                    if (subs==null)
                         return false;
-                    }
                     return subs.contains(sub);
                 }
             };
             m_atomicRoleHierarchy=NaiveHierarchyPosition.buildHierarchy(AtomicRole.TOP_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE,m_dlOntology.getAllAtomicObjectRoles(),ordering);
             m_atomicRoleHierarchy.putAll(NaiveHierarchyPosition.buildHierarchy(AtomicRole.TOP_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE,m_dlOntology.getAllAtomicDataRoles(),ordering));
-
         }
         return m_atomicRoleHierarchy;
     }
@@ -679,6 +552,142 @@ public class Reasoner implements Serializable {
         return getConceptHierarchyPosition(define(factory.getOWLObjectOneOf(factory.getOWLIndividual(URI.create(individual.getURI())))));
     }
 
+    // Various creation methods
+    
+    protected static Tableau createTableau(Configuration config,DLOntology dlOntology,Namespaces namespaces) throws IllegalArgumentException {
+        if (!dlOntology.canUseNIRule() && dlOntology.hasAtMostRestrictions() && dlOntology.hasInverseRoles() && config.existentialStrategyType==Configuration.ExistentialStrategyType.INDIVIDUAL_REUSE)
+            throw new IllegalArgumentException("The supplied DL-ontology is not compatible with the individual reuse strategy.");
+
+        if (config.checkClauses) {
+            Collection<DLClause> nonAdmissibleDLClauses=dlOntology.getNonadmissibleDLClauses();
+            if (!nonAdmissibleDLClauses.isEmpty()) {
+                String CRLF=System.getProperty("line.separator");
+                StringBuffer buffer=new StringBuffer();
+                buffer.append("The following DL-clauses in the DL-ontology"+" are not admissible:");
+                buffer.append(CRLF);
+                for (DLClause dlClause : nonAdmissibleDLClauses) {
+                    buffer.append(dlClause.toString(namespaces));
+                    buffer.append(CRLF);
+                }
+                throw new IllegalArgumentException(buffer.toString());
+            }
+        }
+
+        TableauMonitor wellKnownTableauMonitor=null;
+        switch (config.tableauMonitorType) {
+        case NONE:
+            wellKnownTableauMonitor=null;
+            break;
+        case TIMING:
+            wellKnownTableauMonitor=new Timer();
+            break;
+        case TIMING_WITH_PAUSE:
+            wellKnownTableauMonitor=new TimerWithPause();
+            break;
+        case DEBUGGER_HISTORY_ON:
+            wellKnownTableauMonitor=new Debugger(namespaces,true);
+            break;
+        case DEBUGGER_NO_HISTORY:
+            wellKnownTableauMonitor=new Debugger(namespaces,false);
+            break;
+        default:
+            throw new IllegalArgumentException("Unknown monitor type");
+        }
+
+        TableauMonitor tableauMonitor=null;
+        if (config.monitor==null)
+            tableauMonitor=wellKnownTableauMonitor;
+        else if (wellKnownTableauMonitor==null)
+            tableauMonitor=config.monitor;
+        else
+            tableauMonitor=new TableauMonitorFork(wellKnownTableauMonitor,config.monitor);
+
+        DirectBlockingChecker directBlockingChecker=null;
+        switch (config.directBlockingType) {
+        case OPTIMAL:
+            if (config.prepareForExpressiveQueries) {
+                directBlockingChecker=new PairWiseDirectBlockingChecker();
+            }
+            else if (dlOntology.hasAtMostRestrictions() && dlOntology.hasInverseRoles()) {
+                directBlockingChecker=new PairWiseDirectBlockingChecker();
+            }
+            else {
+                directBlockingChecker=new SingleDirectBlockingChecker();
+            }
+            break;
+        case SINGLE:
+            directBlockingChecker=new SingleDirectBlockingChecker();
+            break;
+        case PAIR_WISE:
+            directBlockingChecker=new PairWiseDirectBlockingChecker();
+            break;
+        default:
+            throw new IllegalArgumentException("Unknown direct blocking type.");
+        }
+
+        BlockingSignatureCache blockingSignatureCache=null;
+        if (!dlOntology.hasNominals()) {
+            switch (config.blockingSignatureCacheType) {
+            case CACHED:
+                blockingSignatureCache=new BlockingSignatureCache(directBlockingChecker);
+                break;
+            case NOT_CACHED:
+                blockingSignatureCache=null;
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown blocking cache type.");
+            }
+        }
+
+        BlockingStrategy blockingStrategy=null;
+        switch (config.blockingStrategyType) {
+        case ANCESTOR:
+            blockingStrategy=new AncestorBlocking(directBlockingChecker,blockingSignatureCache);
+            break;
+        case ANYWHERE:
+            blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
+            break;
+        default:
+            throw new IllegalArgumentException("Unknown blocking strategy type.");
+        }
+
+        ExpansionStrategy existentialsExpansionStrategy=null;
+        switch (config.existentialStrategyType) {
+        case CREATION_ORDER:
+            existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
+            break;
+        case DEPTH_FIRST:
+            existentialsExpansionStrategy=new DepthFirstStrategy(blockingStrategy);
+            break;
+        case EL:
+            existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,true);
+            break;
+        case INDIVIDUAL_REUSE:
+            existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,false);
+            break;
+        default:
+            throw new IllegalArgumentException("Unknown expansion strategy type.");
+        }
+
+        return new Tableau(tableauMonitor,existentialsExpansionStrategy,dlOntology,config.parameters);
+    }
+
+    protected static OWLObjectPropertyExpression getObjectPropertyExpression(OWLDataFactory factory,Role role) {
+        if (role instanceof AtomicRole)
+            return factory.getOWLObjectProperty(URI.create(((AtomicRole)role).getURI()));
+        else {
+            InverseRole inverseRole=(InverseRole)role;
+            return factory.getOWLObjectProperty(URI.create(inverseRole.getInverseOf().getURI())).getInverseProperty();
+        }
+    }
+    
+    protected static Namespaces createNamespaces(String ontologyURI) {
+        Map<String,String> namespaceDecl=new HashMap<String,String>();
+        namespaceDecl.put("",ontologyURI+"#");
+        return InternalNames.withInternalNamespaces(new Namespaces(namespaceDecl,Namespaces.semanticWebNamespaces));
+
+    }
+    
     // Loading and saving the Reasoner object
 
     public void save(File file) throws IOException {
