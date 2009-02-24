@@ -199,10 +199,12 @@ public class OWLClausification implements Serializable {
                 }
             }
         }
-        { // make bottom roles unsatisfiable:
+        if (axioms.m_objectPropertyInclusions.contains(factory.getOWLObjectProperty(URI.create(AtomicRole.BOTTOM_OBJECT_ROLE.getURI())))) {
             Atom bodyAtom=Atom.create(AtomicRole.BOTTOM_OBJECT_ROLE,new Term[] { X,Y });
             dlClauses.add(DLClause.create(new Atom[] {},new Atom[] { bodyAtom }).getSafeVersion());
-            bodyAtom=Atom.create(AtomicRole.BOTTOM_DATA_ROLE,new Term[] { X,Y });
+        }
+        if (axioms.m_dataPropertyInclusions.contains(factory.getOWLDataProperty(URI.create(AtomicRole.BOTTOM_DATA_ROLE.getURI())))) {
+            Atom bodyAtom=Atom.create(AtomicRole.BOTTOM_DATA_ROLE,new Term[] { X,Y });
             dlClauses.add(DLClause.create(new Atom[] {},new Atom[] { bodyAtom }).getSafeVersion());
         }
         for (OWLDataPropertyExpression[] properties : axioms.m_disjointDataProperties) {
