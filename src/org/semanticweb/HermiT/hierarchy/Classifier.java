@@ -47,10 +47,6 @@ public class Classifier<T> implements Serializable {
             botPos.parents.add(topPos);
             topPos.children.add(botPos);
             for (T t : values) {
-                // System.out.println("children of top:");
-                // for (HierarchyPosition<T> c : topPos.getChildPositions()) {
-                //     System.out.println(c.getEquivalents());
-                // }
                 HierarchyPosition<T> pos = findPosition(t, topPos, botPos);
                 out.put(t, pos);
                 if (!pos.getEquivalents().contains(t)) {
