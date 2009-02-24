@@ -78,7 +78,7 @@ public class Classifier<T> implements Serializable {
         Set<HierarchyPosition<T>> supers=findDirectSupers(value,hierTop);
         Set<HierarchyPosition<T>> subs=findDirectSubs(value,hierBottom,supers);
         if (supers.equals(subs)) {
-            assert supers.size()==1&&subs.size()==1;
+            assert supers.size()==1 && subs.size()==1;
             return supers.iterator().next();
         }
         else {
@@ -102,7 +102,7 @@ public class Classifier<T> implements Serializable {
     }
 
     protected Set<HierarchyPosition<T>> findDirectSubs(final T value,HierarchyPosition<T> hierBottom,Set<HierarchyPosition<T>> supers) {
-        if (supers.size()==1&&func.doesSubsume(value,supers.iterator().next().getEquivalents().iterator().next())) {
+        if (supers.size()==1 && func.doesSubsume(value,supers.iterator().next().getEquivalents().iterator().next())) {
             return supers;
         }
         else {
@@ -135,7 +135,7 @@ public class Classifier<T> implements Serializable {
             }
             Set<HierarchyPosition<T>> bots=new HashSet<HierarchyPosition<T>>();
             for (HierarchyPosition<T> pos : marked) {
-                if (pos.getChildPositions().contains(hierBottom)&&func.doesSubsume(value,pos.getEquivalents().iterator().next())) {
+                if (pos.getChildPositions().contains(hierBottom) && func.doesSubsume(value,pos.getEquivalents().iterator().next())) {
                     bots.add(pos);
                 }
             }
@@ -180,7 +180,7 @@ public class Classifier<T> implements Serializable {
             if (positives.contains(pos)) {
                 return true;
             }
-            else if (negatives.contains(pos)||(possibilities!=null&&!possibilities.contains(pos))) {
+            else if (negatives.contains(pos) || (possibilities!=null && !possibilities.contains(pos))) {
                 return false;
             }
             else {
