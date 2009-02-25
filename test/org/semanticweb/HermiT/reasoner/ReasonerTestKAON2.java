@@ -585,23 +585,8 @@ public class ReasonerTestKAON2 extends AbstractOntologyTest {
                 false);
     }
 
-    public void testWineNoDataProperties() throws Exception {
-        loadResource("../res/wine-no-data-properties.xml");
-        assertSubsumptionHierarchy("../res/wine-no-data-properties.xml.txt");
-    }
-
-    public void testGalenIansFullUndoctored() throws Exception {
-        loadResource("../res/galen-ians-full-undoctored.xml");
-        assertSubsumptionHierarchy("../res/galen-ians-full-undoctored.xml.txt");
-    }
-
     public void testPizza() throws Exception {
         loadResource("../res/pizza.xml");
         assertSubsumptionHierarchy("../res/pizza.xml.txt");
-    }
-
-    public void testPropreo() throws Exception {
-        loadResource("../res/propreo.xml");
-        assertSubsumptionHierarchy("../res/propreo.xml.txt");
     }
 }

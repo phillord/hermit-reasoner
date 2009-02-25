@@ -11,6 +11,7 @@ public class AllUnitTests extends TestCase {
         // $JUnit-BEGIN$
         suite.addTestSuite(ReasonerTest.class);
         suite.addTestSuite(DatatypesTest.class);
+        suite.addTestSuite(ReasonerTestKAON2.class);
         // $JUnit-END$
         return suite;
     }
