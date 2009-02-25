@@ -148,15 +148,19 @@ public class ReasonerTestKAON2 extends AbstractOntologyTest {
         assertSubsumedBy("a", "b", true);
     }
 
-    public void testHeinsohnTBox4() throws Exception {
+    public void testHeinsohnTBox4a() throws Exception {
         // Tests role restrictions
-        addAxiom("[disjoint c d]");
         assertSubsumedBy("[and [all r d] [all r [or [not d] e]]]", "[all r e]",
                 true);
+    }
+
+    public void testHeinsohnTBox4b() throws Exception {
+        // Tests role restrictions
+        addAxiom("[disjoint c d]");
         assertSubsumedBy("[and [all r [or [not [atLeast 2 s]] c]] [all r d]]",
                 "[all r [atMost 1 s]]", true);
     }
-
+    
     public void testHeinsohnTBox7() throws Exception {
         // Tests inverse roles
         addAxiom("[objectInverse r r-]");

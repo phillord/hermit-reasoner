@@ -23,7 +23,9 @@ import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.io.OWLOntologyInputSource;
 import org.semanticweb.owl.io.StringInputSource;
+import org.semanticweb.owl.model.OWLDescription;
 import org.semanticweb.owl.model.OWLException;
+import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
 
@@ -215,8 +217,23 @@ public abstract class AbstractReasonerTest extends TestCase {
         boolean result=m_reasoner.isClassSubsumedBy(subAtomicConcept,superAtomicConcept);
         assertEquals(expectedResult,result);
     }
+    
+    protected void assertSubsumedBy(OWLDescription subConcept,OWLDescription superConcept,boolean expectedResult) throws Exception {
+        boolean result=m_reasoner.isClassSubsumedBy(subConcept,superConcept);
+        assertEquals(expectedResult,result);
+    }
 
     protected void assertSatisfiable(String atomicConcept,boolean satisfiable) throws Exception {
         assertEquals(satisfiable,m_reasoner.isClassSatisfiable("file:/c/test.owl#"+atomicConcept));
+    }
+    
+    protected void assertSatisfiable(OWLDescription complexConcept,boolean satisfiable) throws Exception {
+        assertEquals(satisfiable,m_reasoner.isClassSatisfiable(complexConcept));
+    }
+    
+    protected void assertInstanceOf(OWLDescription complexConcept,
+            OWLIndividual individual, boolean expectedResult) throws Exception {
+        boolean result = m_reasoner.getClassInstances(complexConcept).contains(individual);
+        assertEquals(expectedResult,result);
     }
 }
