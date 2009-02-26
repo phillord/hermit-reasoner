@@ -7,10 +7,12 @@ import java.util.Set;
 import org.semanticweb.HermiT.owlapi.structural.OWLHasKeyDummy;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLClass;
+import org.semanticweb.owl.model.OWLClassAssertionAxiom;
 import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLDataPropertyExpression;
 import org.semanticweb.owl.model.OWLDescription;
 import org.semanticweb.owl.model.OWLIndividual;
+import org.semanticweb.owl.model.OWLObjectMaxCardinalityRestriction;
 import org.semanticweb.owl.model.OWLObjectProperty;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
 
@@ -250,8 +252,7 @@ public class ReasonerTest extends AbstractReasonerTest {
     }
 
     public void testHeinsohnTBox3c() throws Exception {
-        // Tests incoherency caused by the role hierarchy and number
-        // restrictions
+        // Tests incoherency caused by the role hierarchy and number restrictions
         String axioms = "DisjointClasses(c d)"
                 + "SubClassOf(a ObjectIntersectionOf(c d))"
                 + "SubObjectPropertyOf(t1 tc)" + "SubObjectPropertyOf(t1 td)"
@@ -373,9 +374,7 @@ public class ReasonerTest extends AbstractReasonerTest {
      
       public void testHeinsohnTBox7() throws Exception {
           // Tests inverse roles
-          StringBuffer buffer = new StringBuffer();
-          buffer.append("InverseObjectProperties(r InverseObjectProperty(r))");
-          loadOntologyWithAxioms(buffer.toString(), null);
+          loadOntologyWithAxioms("", null);
           OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
           OWLDescription A = df.getOWLClass(URI.create("file:/c/test.owl#A"));
           OWLObjectProperty r = df.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
@@ -386,7 +385,6 @@ public class ReasonerTest extends AbstractReasonerTest {
       
      public void testIanT1a() throws Exception {
          StringBuffer buffer = new StringBuffer();
-         buffer.append("InverseObjectProperties(r InverseObjectProperty(r))");
          buffer.append("SubClassOf(p1 ObjectComplementOf(ObjectUnionOf(p2 p3 p4 p5)))");
          buffer.append("SubClassOf(p2 ObjectComplementOf(ObjectUnionOf(p3 p4 p5)))");
          buffer.append("SubClassOf(p3 ObjectComplementOf(ObjectUnionOf(p4 p5)))");
@@ -404,7 +402,6 @@ public class ReasonerTest extends AbstractReasonerTest {
      }
      public void testIanT1b() throws Exception {
          StringBuffer buffer = new StringBuffer();
-         buffer.append("InverseObjectProperties(r InverseObjectProperty(r))");
          buffer.append("SubClassOf(p1 ObjectComplementOf(ObjectUnionOf(p2 p3 p4 p5)))");
          buffer.append("SubClassOf(p2 ObjectComplementOf(ObjectUnionOf(p3 p4 p5)))");
          buffer.append("SubClassOf(p3 ObjectComplementOf(ObjectUnionOf(p4 p5)))");
@@ -421,7 +418,6 @@ public class ReasonerTest extends AbstractReasonerTest {
      }
      public void testIanT1c() throws Exception {
          StringBuffer buffer = new StringBuffer();
-         buffer.append("InverseObjectProperties(r InverseObjectProperty(r))");
          buffer.append("SubClassOf(p1 ObjectComplementOf(ObjectUnionOf(p2 p3 p4 p5)))");
          buffer.append("SubClassOf(p2 ObjectComplementOf(ObjectUnionOf(p3 p4 p5)))");
          buffer.append("SubClassOf(p3 ObjectComplementOf(ObjectUnionOf(p4 p5)))");
@@ -552,10 +548,10 @@ public class ReasonerTest extends AbstractReasonerTest {
      public void testIanT4() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("TransitiveObjectProperty(p)");
-         buffer.append("InverseObjectProperties(r InverseObjectProperty(r))");
-         buffer.append("InverseObjectProperties(p InverseObjectProperty(p))");
-         buffer.append("InverseObjectProperties(s InverseObjectProperty(s))");
-         buffer.append("EquivalentClasses(c ObjectAllValuesFrom(InverseObjectProperty(r) ObjectAllValuesFrom(InverseObjectProperty(p) ObjectAllValuesFrom(InverseObjectProperty(s) ObjectComplementOf(a)))))");
+         buffer.append("InverseObjectProperties(r r-)");
+         buffer.append("InverseObjectProperties(p p-)");
+         buffer.append("InverseObjectProperties(s s-)");
+         buffer.append("EquivalentClasses(c ObjectAllValuesFrom(r- ObjectAllValuesFrom(p- ObjectAllValuesFrom(s- ObjectComplementOf(a)))))");
          loadOntologyWithAxioms(buffer.toString(), null);
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
@@ -578,26 +574,26 @@ public class ReasonerTest extends AbstractReasonerTest {
          assertSatisfiable(desc,false);
      }
 
-      public void testIanT5() throws Exception {
-          StringBuffer buffer = new StringBuffer();
-          buffer.append("InverseObjectProperties(r r-)");
-          buffer.append("InverseObjectProperties(f f-)");
-          buffer.append("TransitiveObjectProperty(r)");
-          buffer.append("SubObjectPropertyOf(f r)");
-          buffer.append("FunctionalObjectProperty(f)");
-          loadOntologyWithAxioms(buffer.toString(), null);
-          
-          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
-          OWLDescription a = df.getOWLClass(URI.create("file:/c/test.owl#a"));
-          OWLObjectProperty invr = df.getOWLObjectProperty(URI.create("file:/c/test.owl#r-"));
-          OWLObjectProperty invf = df.getOWLObjectProperty(URI.create("file:/c/test.owl#f-"));
-          
-          OWLDescription desc = df.getOWLObjectIntersectionOf(
-                  df.getOWLObjectComplementOf(a), 
-                  df.getOWLObjectSomeRestriction(invf, a), 
-                  df.getOWLObjectAllRestriction(invr, df.getOWLObjectSomeRestriction(invf, a))
-              );  
-          assertSatisfiable(desc,true);
+     public void testIanT5() throws Exception {
+         StringBuffer buffer = new StringBuffer();
+         buffer.append("InverseObjectProperties(r r-)");
+         buffer.append("InverseObjectProperties(f f-)");
+         buffer.append("TransitiveObjectProperty(r)");
+         buffer.append("SubObjectPropertyOf(f r)");
+         buffer.append("FunctionalObjectProperty(f)");
+         loadOntologyWithAxioms(buffer.toString(), null);
+      
+         OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
+         OWLDescription a = df.getOWLClass(URI.create("file:/c/test.owl#a"));
+         OWLObjectProperty invr = df.getOWLObjectProperty(URI.create("file:/c/test.owl#r-"));
+         OWLObjectProperty invf = df.getOWLObjectProperty(URI.create("file:/c/test.owl#f-"));
+      
+         OWLDescription desc = df.getOWLObjectIntersectionOf(
+              df.getOWLObjectComplementOf(a), 
+              df.getOWLObjectSomeRestriction(invf, a), 
+              df.getOWLObjectAllRestriction(invr, df.getOWLObjectSomeRestriction(invf, a))
+          );  
+         assertSatisfiable(desc,true);
      }
      public void testIanT6() throws Exception {
          StringBuffer buffer = new StringBuffer();
@@ -765,13 +761,6 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(root ObjectComplementOf(ObjectSomeValuesFrom(successor- owl:Thing)))");
          buffer.append("SubClassOf(Infinite-Tree-Node ObjectIntersectionOf(node ObjectSomeValuesFrom(successor Infinite-Tree-Node)))");
          buffer.append("SubClassOf(Infinite-Tree-Root ObjectIntersectionOf(Infinite-Tree-Node root))");
-//         addAxiom("[objectInverse successor successor-]");
-//         addAxiom("[objectTransitive descendant]");
-//         addAxiom("[subObjectPropertyOf successor descendant]");
-//         addAxiom("[objectInverseFunctional successor]");
-//         addAxiom("[subClassOf root [not [some successor- owl:Thing]]]");
-//         addAxiom("[subClassOf Infinite-Tree-Node [and node [some successor Infinite-Tree-Node]]]");
-//         addAxiom("[subClassOf Infinite-Tree-Root [and Infinite-Tree-Node root]]");
          
          loadOntologyWithAxioms(buffer.toString(), null);
          assertSatisfiable("Infinite-Tree-Root",true);
@@ -782,14 +771,14 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLObjectProperty descendant = df.getOWLObjectProperty(URI.create("file:/c/test.owl#descendant"));
          OWLObjectProperty invsuccessor = df.getOWLObjectProperty(URI.create("file:/c/test.owl#successor-"));
          
-         OWLDescription desc;
-         desc = df.getOWLObjectIntersectionOf(
+         // [and Infinite-Tree-Root [all descendant [some successor- root]]]
+         OWLDescription desc =
+             df.getOWLObjectIntersectionOf(
                  itr, 
                  df.getOWLObjectAllRestriction(descendant, 
-                         df.getOWLObjectSomeRestriction(invsuccessor, root)
+                     df.getOWLObjectSomeRestriction(invsuccessor, root)
                  )
-         );
-         //[and Infinite-Tree-Root [all descendant [some successor- root]]]
+             );
          assertSatisfiable(desc,false);
      }
      public void testIanT10() throws Exception {
@@ -1097,29 +1086,26 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("TransitiveObjectProperty(r)");
          loadOntologyWithAxioms(buffer.toString(), null);
          
-//         addAxiom("[objectInverse r r-]");
-//         addAxiom("[subObjectPropertyOf r r-]");
-//         addAxiom("[objectTransitive r]");
-         
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription c = df.getOWLClass(URI.create("file:/c/test.owl#c"));
          OWLObjectProperty r = df.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
          
-         OWLDescription desc = df.getOWLObjectIntersectionOf(
+         // [and c [some r owl:Thing] [all r [not c]]]
+         OWLDescription desc =
+             df.getOWLObjectIntersectionOf(
                  c, 
                  df.getOWLObjectSomeRestriction(r, df.getOWLThing()), 
                  df.getOWLObjectAllRestriction(r, df.getOWLObjectComplementOf(c))
-         );
+             );
          assertSatisfiable(desc,false);
-//       assertSatisfiable("[and c [some r owl:Thing] [all r [not c]]]", false);
          
+         // [and c [some r [some r c]] [all r [not c]]]
          desc = df.getOWLObjectIntersectionOf(
-                 c, 
-                 df.getOWLObjectSomeRestriction(r, df.getOWLObjectSomeRestriction(r, c)), 
-                 df.getOWLObjectAllRestriction(r, df.getOWLObjectComplementOf(c))
+             c,
+             df.getOWLObjectSomeRestriction(r, df.getOWLObjectSomeRestriction(r, c)),
+             df.getOWLObjectAllRestriction(r, df.getOWLObjectComplementOf(c))
          );
          assertSatisfiable(desc,false);
-//         assertSatisfiable("[and c [some r [some r c]] [all r [not c]]]", false);
      }
      
      public void testIanBug5() throws Exception {
@@ -1129,21 +1115,18 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("TransitiveObjectProperty(r2)");
          loadOntologyWithAxioms(buffer.toString(), null);
          
-//         addAxiom("[objectTransitive r1]");
-//         addAxiom("[subObjectPropertyOf r2 r1]");
-//         addAxiom("[objectTransitive r2]");
-         
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription p = df.getOWLClass(URI.create("file:/c/test.owl#p"));
          OWLObjectProperty r1 = df.getOWLObjectProperty(URI.create("file:/c/test.owl#r1"));
          OWLObjectProperty r2 = df.getOWLObjectProperty(URI.create("file:/c/test.owl#r2"));
          
-         OWLDescription desc = df.getOWLObjectIntersectionOf(
-                 df.getOWLObjectAllRestriction(r1, p), 
+         // [and [all r1 p] [some r2 [some r1 [not p]]]]
+         OWLDescription desc =
+             df.getOWLObjectIntersectionOf(
+                 df.getOWLObjectAllRestriction(r1, p),
                  df.getOWLObjectSomeRestriction(r2, df.getOWLObjectSomeRestriction(r1, df.getOWLObjectComplementOf(p)))
-         );
+             );
          assertSatisfiable(desc,false);
-//         assertSatisfiable("[and [all r1 p] [some r2 [some r1 [not p]]]]",false);
      }
      
      public void testIanBug6() throws Exception {
@@ -1156,13 +1139,6 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubObjectPropertyOf(P S2)");
          loadOntologyWithAxioms(buffer.toString(), null);
          
-//         addAxiom("[subObjectPropertyOf S1 R]");
-//         addAxiom("[objectTransitive S1]");
-//         addAxiom("[subObjectPropertyOf S2 R]");
-//         addAxiom("[objectTransitive S2]");
-//         addAxiom("[subObjectPropertyOf P S1]");
-//         addAxiom("[subObjectPropertyOf P S2]");
-         
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription C = df.getOWLClass(URI.create("file:/c/test.owl#C"));
          OWLObjectProperty R = df.getOWLObjectProperty(URI.create("file:/c/test.owl#R"));
@@ -1170,40 +1146,41 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLObjectProperty S1 = df.getOWLObjectProperty(URI.create("file:/c/test.owl#S1"));
          OWLObjectProperty S2 = df.getOWLObjectProperty(URI.create("file:/c/test.owl#S2"));
          
-         OWLDescription desc = df.getOWLObjectIntersectionOf(
+         // [and [all R C] [some P [some S1 [not C]]]]
+         OWLDescription desc =
+             df.getOWLObjectIntersectionOf(
                  df.getOWLObjectAllRestriction(R, C), 
                  df.getOWLObjectSomeRestriction(P, df.getOWLObjectSomeRestriction(S1, df.getOWLObjectComplementOf(C)))
-         );
+             );
          assertSatisfiable(desc,false);
-         //assertSatisfiable("[and [all R C] [some P [some S1 [not C]]]]",false);
          
+         // [and [all R C] [some P [some S2 [not C]]]]
          desc = df.getOWLObjectIntersectionOf(
-                 df.getOWLObjectAllRestriction(R, C), 
-                 df.getOWLObjectSomeRestriction(P, df.getOWLObjectSomeRestriction(S2, df.getOWLObjectComplementOf(C)))
+             df.getOWLObjectAllRestriction(R, C), 
+             df.getOWLObjectSomeRestriction(P, df.getOWLObjectSomeRestriction(S2, df.getOWLObjectComplementOf(C)))
          );
          assertSatisfiable(desc,false);
-         //assertSatisfiable("[and [all R C] [some P [some S2 [not C]]]]",false);
      }
      
      public void testIanBug7() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("SubClassOf(A ObjectComplementOf(B))");
          loadOntologyWithAxioms(buffer.toString(), null);
-         //addAxiom("[subClassOf A [not B]]");
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription A = df.getOWLClass(URI.create("file:/c/test.owl#A"));
          OWLDescription B = df.getOWLClass(URI.create("file:/c/test.owl#B"));
          OWLObjectProperty r = df.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
          
-         OWLDescription desc = df.getOWLObjectIntersectionOf(
+         // [and [some r A] [atMost 1 r A] [some r B] [atMost 1 r B]]
+         OWLDescription desc =
+             df.getOWLObjectIntersectionOf(
                  df.getOWLObjectSomeRestriction(r, A), 
                  df.getOWLObjectMaxCardinalityRestriction(r, 1, A),
                  df.getOWLObjectSomeRestriction(r, B),
                  df.getOWLObjectMaxCardinalityRestriction(r, 1, B)
-         );
+             );
          assertSatisfiable(desc,true);
-         //assertSatisfiable("[and [some r A] [atMost 1 r A] [some r B] [atMost 1 r B]]",true);
      }
      public void testIanBug8() throws Exception {
          StringBuffer buffer = new StringBuffer();
@@ -1516,6 +1493,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          loadOntologyWithAxioms(buffer.toString(), null);
          assertABoxSatisfiable(true);
      }
+     
      public void testNominals3() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("SubClassOf(A ObjectSomeValuesFrom(R A)) ");
@@ -1524,15 +1502,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(B ObjectSomeValuesFrom(R B)) ");
          buffer.append("SubClassOf(B ObjectSomeValuesFrom(S ObjectOneOf(n))) ");
          buffer.append("ClassAssertion(b ObjectSomeValuesFrom(R B)) ");
-         buffer.append("ClassAssertion(n ObjectMaxCardinality(1 InverseObjectProperty(S))) ");
-         loadOntologyWithAxioms(buffer.toString(), null);
-//         addAxiom("[subClassOf A [some R A]]");
-//         addAxiom("[subClassOf A [some S [oneOf n]]]");
-//         addAxiom("[classMember [some R A] a]");
-//         addAxiom("[subClassOf B [some R B]]");
-//         addAxiom("[subClassOf B [some S [oneOf n]]]");
-//         addAxiom("[classMember [some R B] b]");
-//         addAxiom("[classMember [atMost 1 [inv S]] n]");
+         loadOntologyWithAxiomsOnly(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription A = df.getOWLClass(URI.create("file:/c/test.owl#A"));
@@ -1541,12 +1511,33 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLObjectPropertyExpression invS = df.getOWLObjectPropertyInverse(S);
          OWLObjectProperty R = df.getOWLObjectProperty(URI.create("file:/c/test.owl#R"));
          OWLIndividual n = df.getOWLIndividual(URI.create("file:/c/test.owl#n"));
+
+         // OWL API has an error: axiom
+         //     ClassAssertion(n ObjectMaxCardinality(1 InverseObjectProperty(S)))
+         // gets loaded as
+         //     ClassAssertion(n ObjectMaxCardinality(1 S))
+         // Therefore, we add this axiom manually.
+         OWLObjectMaxCardinalityRestriction atMostOneInvS = df.getOWLObjectMaxCardinalityRestriction(S.getInverseProperty(), 1);
+         OWLClassAssertionAxiom nOfAtMostOneInvS = df.getOWLClassAssertionAxiom(n, atMostOneInvS);
+         m_ontologyManager.addAxiom(m_ontology, nOfAtMostOneInvS);
          
-         OWLDescription desc = df.getOWLObjectSomeRestriction(invS, 
-                 df.getOWLObjectIntersectionOf(A, B, 
-                         df.getOWLObjectSomeRestriction(R, df.getOWLObjectIntersectionOf(A, B))));
+         createReasoner(null);
+                           
+         // [some [inv S] [and A B [some R [and A B]]]]
+         OWLDescription desc =
+             df.getOWLObjectSomeRestriction(invS, 
+                 df.getOWLObjectIntersectionOf(
+                     A,
+                     B, 
+                     df.getOWLObjectSomeRestriction(R,
+                         df.getOWLObjectIntersectionOf(
+                             A,
+                             B
+                         )
+                     )
+                 )
+             );
          
-//         assertInstanceOf("[some [inv S] [and A B [some R [and A B]]]]", "n",true);
          assertInstanceOf(desc,n,true);
      }
      
@@ -1559,18 +1550,8 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(B ObjectSomeValuesFrom(R B)) ");
          buffer.append("SubClassOf(B ObjectSomeValuesFrom(S ObjectOneOf(n))) ");
          buffer.append("ClassAssertion(b ObjectSomeValuesFrom(R B)) ");
-         buffer.append("ClassAssertion(n ObjectMaxCardinality(2 InverseObjectProperty(S))) ");
-         loadOntologyWithAxioms(buffer.toString(), null);
-         
-//         addAxiom("[disjoint A B]");
-//         addAxiom("[subClassOf A [some R A]]");
-//         addAxiom("[subClassOf A [some S [oneOf n]]]");
-//         addAxiom("[classMember [some R A] a]");
-//         addAxiom("[subClassOf B [some R B]]");
-//         addAxiom("[subClassOf B [some S [oneOf n]]]");
-//         addAxiom("[classMember [some R B] b]");
-//         addAxiom("[classMember [atMost 2 [inv S]] n]");
-         
+         loadOntologyWithAxiomsOnly(buffer.toString());
+     
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription A = df.getOWLClass(URI.create("file:/c/test.owl#A"));
          OWLDescription B = df.getOWLClass(URI.create("file:/c/test.owl#B"));
@@ -1578,17 +1559,37 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLObjectPropertyExpression invS = df.getOWLObjectPropertyInverse(S);
          OWLObjectProperty R = df.getOWLObjectProperty(URI.create("file:/c/test.owl#R"));
          OWLIndividual n = df.getOWLIndividual(URI.create("file:/c/test.owl#n"));
+
+         // OWL API has an error: axiom
+         //     ClassAssertion(n ObjectMaxCardinality(2 InverseObjectProperty(S)))
+         // gets loaded as
+         //     ClassAssertion(n ObjectMaxCardinality(2 S))
+         // Therefore, we add this axiom manually.         
+         OWLObjectMaxCardinalityRestriction atMostTwoInvS = df.getOWLObjectMaxCardinalityRestriction(S.getInverseProperty(), 2);
+         OWLClassAssertionAxiom nOfAtMostTwoInvS = df.getOWLClassAssertionAxiom(n, atMostTwoInvS);
+         m_ontologyManager.addAxiom(m_ontology, nOfAtMostTwoInvS);
          
-         OWLDescription desc = df.getOWLObjectSomeRestriction(invS, 
-                 df.getOWLObjectIntersectionOf(A, 
-                         df.getOWLObjectSomeRestriction(R, A)));
+         createReasoner(null);
+         
+         // [some [inv S] [and A [some R A]]]
+         OWLDescription desc =
+             df.getOWLObjectSomeRestriction(invS, 
+                 df.getOWLObjectIntersectionOf(
+                     A, 
+                     df.getOWLObjectSomeRestriction(R, A)
+                 )
+              );
          assertInstanceOf(desc, n, true);
-//         assertInstanceOf("[some [inv S] [and A [some R A]]]","n",true);
-         desc = df.getOWLObjectSomeRestriction(invS, 
-                 df.getOWLObjectIntersectionOf(B, 
-                         df.getOWLObjectSomeRestriction(R, B)));
+
+         // [some [inv S] [and B [some R B]]]
+         desc =
+             df.getOWLObjectSomeRestriction(invS, 
+                 df.getOWLObjectIntersectionOf(
+                     B, 
+                     df.getOWLObjectSomeRestriction(R, B)
+                 )
+             );
          assertInstanceOf(desc, n, true);
-//         assertInstanceOf("[some [inv S] [and B [some R B]]]","n",true);
      }
      
      public void testNominals5() throws Exception {
@@ -1600,17 +1601,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(B ObjectSomeValuesFrom(R B)) ");
          buffer.append("SubClassOf(B ObjectSomeValuesFrom(S ObjectOneOf(n))) ");
          buffer.append("ClassAssertion(b ObjectSomeValuesFrom(R B)) ");
-         buffer.append("ClassAssertion(n ObjectMaxCardinality(2 InverseObjectProperty(S))) ");
-         loadOntologyWithAxioms(buffer.toString(), null);
-         
-//         addAxiom("[disjoint A B]");
-//         addAxiom("[subClassOf A [some R A]]");
-//         addAxiom("[subClassOf A [some S [oneOf n]]]");
-//         addAxiom("[classMember [some R A] a]");
-//         addAxiom("[subClassOf B [some R B]]");
-//         addAxiom("[subClassOf B [some S [oneOf n]]]");
-//         addAxiom("[classMember [some R B] b]");
-//         addAxiom("[classMember [atMost 2 [inv S]] n]");
+         loadOntologyWithAxiomsOnly(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription A = df.getOWLClass(URI.create("file:/c/test.owl#A"));
@@ -1618,10 +1609,21 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLObjectProperty S = df.getOWLObjectProperty(URI.create("file:/c/test.owl#S"));
          OWLObjectPropertyExpression invS = df.getOWLObjectPropertyInverse(S);
          OWLIndividual n = df.getOWLIndividual(URI.create("file:/c/test.owl#n"));
+
+         // OWL API has an error: axiom
+         //     ClassAssertion(n ObjectMaxCardinality(2 InverseObjectProperty(S)))
+         // gets loaded as
+         //     ClassAssertion(n ObjectMaxCardinality(2 S))
+         // Therefore, we add this axiom manually.         
+         OWLObjectMaxCardinalityRestriction atMostTwoInvS = df.getOWLObjectMaxCardinalityRestriction(S.getInverseProperty(), 2);
+         OWLClassAssertionAxiom nOfAtMostTwoInvS = df.getOWLClassAssertionAxiom(n, atMostTwoInvS);
+         m_ontologyManager.addAxiom(m_ontology, nOfAtMostTwoInvS);
          
+         createReasoner(null);
+
+         // [atLeast 2 [inv S] [or A B]]
          OWLDescription desc = df.getOWLObjectMinCardinalityRestriction(invS, 2, df.getOWLObjectUnionOf(A, B));
          assertInstanceOf(desc, n, true);
-         //assertInstanceOf("[atLeast 2 [inv S] [or A B]]","n",true);
      }
      public void testNominals6() throws Exception {
          StringBuffer buffer = new StringBuffer();
@@ -1632,30 +1634,32 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(B ObjectSomeValuesFrom(R B)) ");
          buffer.append("SubClassOf(B ObjectSomeValuesFrom(S ObjectOneOf(n))) ");
          buffer.append("ClassAssertion(b ObjectSomeValuesFrom(R B)) ");
-         buffer.append("ClassAssertion(n ObjectMaxCardinality(2 InverseObjectProperty(S))) ");
-         loadOntologyWithAxioms(buffer.toString(), null);
-         
-//         addAxiom("[disjoint A B]");
-//         addAxiom("[subClassOf A [some R A]]");
-//         addAxiom("[subClassOf A [some S [oneOf n]]]");
-//         addAxiom("[classMember [some R A] a]");
-//         addAxiom("[subClassOf B [some R B]]");
-//         addAxiom("[subClassOf B [some S [oneOf n]]]");
-//         addAxiom("[classMember [some R B] b]");
-//         addAxiom("[classMember [atMost 2 [inv S]] n]");
+         loadOntologyWithAxiomsOnly(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription A = df.getOWLClass(URI.create("file:/c/test.owl#A"));
          OWLObjectProperty S = df.getOWLObjectProperty(URI.create("file:/c/test.owl#S"));
          OWLObjectPropertyExpression invS = df.getOWLObjectPropertyInverse(S);
          OWLIndividual n = df.getOWLIndividual(URI.create("file:/c/test.owl#n"));
+
+         // OWL API has an error: axiom
+         //     ClassAssertion(n ObjectMaxCardinality(2 InverseObjectProperty(S)))
+         // gets loaded as
+         //     ClassAssertion(n ObjectMaxCardinality(2 S))
+         // Therefore, we add this axiom manually.         
+         OWLObjectMaxCardinalityRestriction atMostTwoInvS = df.getOWLObjectMaxCardinalityRestriction(S.getInverseProperty(), 2);
+         OWLClassAssertionAxiom nOfAtMostTwoInvS = df.getOWLClassAssertionAxiom(n, atMostTwoInvS);
+         m_ontologyManager.addAxiom(m_ontology, nOfAtMostTwoInvS);
          
+         createReasoner(null);
+
+         // [atLeast 1 [inv S] [not A]]
          OWLDescription desc = df.getOWLObjectMinCardinalityRestriction(invS, 1, df.getOWLObjectComplementOf(A));
          assertInstanceOf(desc, n, true);
-//       assertInstanceOf("[atLeast 1 [inv S] [not A]]","n",true);
+
+         // [atLeast 2 [inv S] [not A]]
          desc = df.getOWLObjectMinCardinalityRestriction(invS, 2, df.getOWLObjectComplementOf(A));
          assertInstanceOf(desc, n, false);
-//         assertInstanceOf("[atLeast 2 [inv S] [not A]]","n",false);
      }
      
     public void testDependencyDisjunctionMergingBug() throws Exception {

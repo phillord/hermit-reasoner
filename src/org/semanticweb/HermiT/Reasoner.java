@@ -482,6 +482,24 @@ public class Reasoner implements Serializable {
 
     // Individual inferences
     
+    public boolean isInstanceOf(String classURI,String individualURI) {
+        return m_tableau.isInstanceOf(AtomicConcept.create(classURI),Individual.create(individualURI));
+    }
+    
+    public boolean isInstanceOf(OWLDescription description,OWLIndividual individual) {
+        if (description instanceof OWLClass)
+            return isInstanceOf(((OWLClass)description).getURI().toString(),individual.getURI().toString());
+        else {
+            OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
+            OWLDataFactory factory=ontologyManager.getOWLDataFactory();
+            OWLClass newClass=factory.getOWLClass(URI.create("internal:query-concept"));
+            OWLAxiom classDefinitionAxiom=factory.getOWLSubClassAxiom(description,newClass);
+            DLOntology newDLOntology=extendDLOntology(m_config,m_namespaces,"uri:urn:internal-kb",m_dlOntology,ontologyManager,classDefinitionAxiom);
+            Tableau tableau=createTableau(m_config,newDLOntology,m_namespaces);
+            return tableau.isInstanceOf(AtomicConcept.create("internal:query-concept"),Individual.create(individual.getURI().toString()));
+        }
+    }
+    
     public void computeRealization() {
         getRealization();
     }

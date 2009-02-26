@@ -82,15 +82,7 @@ public abstract class AbstractReasonerTest extends TestCase {
         m_reasoner=new Reasoner(configuration,getClass().getResource(resourceName).toURI());
     }
 
-    /**
-     * creates and loads an ontology that contains the given axioms
-     * 
-     * @param axioms
-     *            in functional style syntax
-     * @throws InterruptedException
-     * @throws OWLException
-     */
-    protected void loadOntologyWithAxioms(String axioms,Configuration configuration) throws OWLException,InterruptedException {
+    protected void loadOntologyWithAxiomsOnly(String axioms) throws OWLException,InterruptedException {
         StringBuffer buffer=new StringBuffer();
         buffer.append("Namespace(=<file:/c/test.owl#>)");
         buffer.append("Namespace(rdfs=<http://www.w3.org/2000/01/rdf-schema#>)");
@@ -105,9 +97,17 @@ public abstract class AbstractReasonerTest extends TestCase {
         m_ontologyManager=OWLManager.createOWLOntologyManager();
         OWLOntologyInputSource input=new StringInputSource(buffer.toString());
         m_ontology=m_ontologyManager.loadOntology(input);
+    }
+
+    protected void createReasoner(Configuration configuration) {
         if (configuration==null)
             configuration=new Configuration();
         m_reasoner=new Reasoner(configuration,m_ontologyManager,m_ontology);
+    }
+    
+    protected void loadOntologyWithAxioms(String axioms,Configuration configuration) throws OWLException,InterruptedException {
+        loadOntologyWithAxiomsOnly(axioms);
+        createReasoner(configuration);
     }
 
     /**
@@ -229,7 +229,7 @@ public abstract class AbstractReasonerTest extends TestCase {
     }
     
     protected void assertInstanceOf(OWLDescription complexConcept,OWLIndividual individual, boolean expectedResult) throws Exception {
-        boolean result=m_reasoner.getClassInstances(complexConcept).contains(individual);
+        boolean result=m_reasoner.isInstanceOf(complexConcept,individual);
         assertEquals(expectedResult,result);
     }
 }
