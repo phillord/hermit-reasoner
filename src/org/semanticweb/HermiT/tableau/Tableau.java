@@ -245,15 +245,13 @@ public final class Tableau implements Serializable {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isSatisfiableStarted(atomicConcept);
         clear();
-        if (hasNominals()) {
+        if (hasNominals())
             loadABox();
-        }
         m_checkedNode=createNewOriginalNode(NodeType.ROOT_NODE,m_dependencySetFactory.emptySet(),0);
         m_extensionManager.addConceptAssertion(atomicConcept,m_checkedNode,m_dependencySetFactory.emptySet());
         boolean result=isSatisfiable();
-        if (m_tableauMonitor!=null) {
+        if (m_tableauMonitor!=null)
             m_tableauMonitor.isSatisfiableFinished(atomicConcept,result);
-        }
         return result;
     }
     public boolean isSubsumedBy(AtomicConcept subconcept,AtomicConcept superconcept) {

@@ -69,7 +69,7 @@ public final class HyperresolutionManager implements Serializable {
     protected void processDeltaOld(ExtensionTable.Retrieval retrieval) {
         retrieval.open();
         Object[] tupleBuffer=retrieval.getTupleBuffer();
-        while (!retrieval.afterLast()&&!m_extensionManager.containsClash()) {
+        while (!retrieval.afterLast() && !m_extensionManager.containsClash()) {
             CompiledDLClauseInfo compiledDLClauseInfo=m_tupleConsumersByDeltaPredicate.get(tupleBuffer[0]);
             while (compiledDLClauseInfo!=null) {
                 compiledDLClauseInfo.evaluate();
@@ -130,7 +130,7 @@ public final class HyperresolutionManager implements Serializable {
                                     numberOfUnboundVariables++;
                             }
                         }
-                        if ((numberOfUnboundVariables==0||!NodeIDLessThan.INSTANCE.equals(atom.getDLPredicate()))&&(bestAtom==null||numberOfBoundVariables>numberOfBoundVariablesInBestAtom||(numberOfBoundVariables>=numberOfBoundVariablesInBestAtom&&numberOfUnboundVariables<numberOfUnboundVariablesInBestAtom))) {
+                        if ((numberOfUnboundVariables==0 || !NodeIDLessThan.INSTANCE.equals(atom.getDLPredicate())) && (bestAtom==null || numberOfBoundVariables>numberOfBoundVariablesInBestAtom || (numberOfBoundVariables>=numberOfBoundVariablesInBestAtom && numberOfUnboundVariables<numberOfUnboundVariablesInBestAtom))) {
                             bestAtom=atom;
                             numberOfBoundVariablesInBestAtom=numberOfBoundVariables;
                             numberOfUnboundVariablesInBestAtom=numberOfUnboundVariables;
