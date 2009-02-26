@@ -59,6 +59,7 @@ import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Individual;
+import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.monitor.TableauMonitorFork;
@@ -749,15 +750,17 @@ public class Reasoner implements Serializable {
             if (!originalDLOntology.getAllTransitiveObjectRoles().isEmpty() || !axioms.m_transitiveObjectProperties.isEmpty()) {
                 TransitivityManager transitivityManager=new TransitivityManager(factory);
                 transitivityManager.prepareTransformation(axioms);
-                for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_transitiveObjectProperties)
+                for (Role transitiveRole : originalDLOntology.getAllTransitiveObjectRoles()) {
+                    OWLObjectPropertyExpression objectPropertyExpression=getObjectPropertyExpression(factory,transitiveRole);
                     transitivityManager.makeTransitive(objectPropertyExpression);
+                }
                 for (DLClause dlClause : originalDLOntology.getDLClauses()) {
                     if (dlClause.isRoleInclusion()) {
                         AtomicRole subAtomicRole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                         AtomicRole superAtomicRole=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
                         if (originalDLOntology.getAllAtomicObjectRoles().contains(subAtomicRole) && originalDLOntology.getAllAtomicObjectRoles().contains(superAtomicRole)) {
-                            OWLObjectProperty subObjectProperty=getObjectPropertyExpression(factory,subAtomicRole);
-                            OWLObjectProperty superObjectProperty=getObjectPropertyExpression(factory,superAtomicRole);
+                            OWLObjectProperty subObjectProperty=getObjectProperty(factory,subAtomicRole);
+                            OWLObjectProperty superObjectProperty=getObjectProperty(factory,superAtomicRole);
                             transitivityManager.addInclusion(subObjectProperty,superObjectProperty);
                         }
                     }
@@ -765,8 +768,8 @@ public class Reasoner implements Serializable {
                         AtomicRole subAtomicRole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                         AtomicRole superAtomicRole=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
                         if (originalDLOntology.getAllAtomicObjectRoles().contains(subAtomicRole) && originalDLOntology.getAllAtomicObjectRoles().contains(superAtomicRole)) {
-                            OWLObjectProperty subObjectProperty=getObjectPropertyExpression(factory,subAtomicRole);
-                            OWLObjectPropertyExpression superObjectPropertyExpression=getObjectPropertyExpression(factory,superAtomicRole).getInverseProperty();
+                            OWLObjectProperty subObjectProperty=getObjectProperty(factory,subAtomicRole);
+                            OWLObjectPropertyExpression superObjectPropertyExpression=getObjectProperty(factory,superAtomicRole).getInverseProperty();
                             transitivityManager.addInclusion(subObjectProperty,superObjectPropertyExpression);
                         }
                     }
@@ -808,8 +811,17 @@ public class Reasoner implements Serializable {
         return result;
     }
     
-    protected static OWLObjectProperty getObjectPropertyExpression(OWLDataFactory factory,AtomicRole atomicRole) {
+    protected static OWLObjectProperty getObjectProperty(OWLDataFactory factory,AtomicRole atomicRole) {
         return factory.getOWLObjectProperty(URI.create(atomicRole.getURI()));
+    }
+    
+    protected static OWLObjectPropertyExpression getObjectPropertyExpression(OWLDataFactory factory,Role role) {
+        if (role instanceof AtomicRole)
+            return factory.getOWLObjectProperty(URI.create(((AtomicRole)role).getURI()));
+        else {
+            AtomicRole inverseOf=((InverseRole)role).getInverseOf();
+            return factory.getOWLObjectProperty(URI.create(inverseOf.getURI())).getInverseProperty();
+        }
     }
     
     protected static Namespaces createNamespaces(String ontologyURI) {

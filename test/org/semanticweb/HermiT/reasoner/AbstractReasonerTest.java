@@ -77,9 +77,8 @@ public abstract class AbstractReasonerTest extends TestCase {
      *             if the resource cannot be found or an error occurred when loading the ontology
      */
     protected void loadOntologyFromResource(String resourceName,Configuration configuration) throws Exception {
-        if (configuration==null) {
+        if (configuration==null)
             configuration=new Configuration();
-        }
         m_reasoner=new Reasoner(configuration,getClass().getResource(resourceName).toURI());
     }
 
@@ -106,9 +105,8 @@ public abstract class AbstractReasonerTest extends TestCase {
         m_ontologyManager=OWLManager.createOWLOntologyManager();
         OWLOntologyInputSource input=new StringInputSource(buffer.toString());
         m_ontology=m_ontologyManager.loadOntology(input);
-        if (configuration==null) {
+        if (configuration==null)
             configuration=new Configuration();
-        }
         m_reasoner=new Reasoner(configuration,m_ontologyManager,m_ontology);
     }
 
@@ -135,9 +133,8 @@ public abstract class AbstractReasonerTest extends TestCase {
         m_ontologyManager=OWLManager.createOWLOntologyManager();
         OWLOntologyInputSource input=new StringInputSource(buffer.toString());
         m_ontology=m_ontologyManager.loadOntology(input);
-        if (configuration==null) {
+        if (configuration==null)
             configuration=new Configuration();
-        }
         m_reasoner=new Reasoner(configuration,m_ontologyManager,m_ontology,null,keys);
     }
 
@@ -231,9 +228,8 @@ public abstract class AbstractReasonerTest extends TestCase {
         assertEquals(satisfiable,m_reasoner.isClassSatisfiable(complexConcept));
     }
     
-    protected void assertInstanceOf(OWLDescription complexConcept,
-            OWLIndividual individual, boolean expectedResult) throws Exception {
-        boolean result = m_reasoner.getClassInstances(complexConcept).contains(individual);
+    protected void assertInstanceOf(OWLDescription complexConcept,OWLIndividual individual, boolean expectedResult) throws Exception {
+        boolean result=m_reasoner.getClassInstances(complexConcept).contains(individual);
         assertEquals(expectedResult,result);
     }
 }

@@ -496,7 +496,8 @@ public class ReasonerTest extends AbstractReasonerTest {
              df.getOWLObjectSomeRestriction(r, df.getOWLObjectIntersectionOf(p1, p)), 
              df.getOWLObjectSomeRestriction(r, df.getOWLObjectIntersectionOf(p2, p)), 
              df.getOWLObjectSomeRestriction(r, df.getOWLObjectIntersectionOf(p3, p)), 
-             df.getOWLObjectMaxCardinalityRestriction(r, 3));
+             df.getOWLObjectMaxCardinalityRestriction(r, 3)
+         );
          assertSatisfiable(desc,false);
      
          desc = df.getOWLObjectIntersectionOf(
@@ -504,7 +505,8 @@ public class ReasonerTest extends AbstractReasonerTest {
              df.getOWLObjectSomeRestriction(r, p2), 
              df.getOWLObjectSomeRestriction(r, p3),
              df.getOWLObjectSomeRestriction(r, p4), 
-             df.getOWLObjectMaxCardinalityRestriction(r, 3));
+             df.getOWLObjectMaxCardinalityRestriction(r, 3)
+         );
          assertSatisfiable(desc,false);
      
          desc = df.getOWLObjectIntersectionOf(
@@ -563,15 +565,16 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLObjectProperty s = df.getOWLObjectProperty(URI.create("file:/c/test.owl#s"));
          OWLObjectProperty p = df.getOWLObjectProperty(URI.create("file:/c/test.owl#p"));
          
-         OWLDescription desc = df.getOWLObjectIntersectionOf(a, 
+         OWLDescription desc =
+             df.getOWLObjectIntersectionOf(a, 
                  df.getOWLObjectSomeRestriction(s, 
-                         df.getOWLObjectIntersectionOf(
-                                 df.getOWLObjectSomeRestriction(r, df.getOWLThing()), 
-                                 df.getOWLObjectSomeRestriction(p, df.getOWLThing()), 
-                                 df.getOWLObjectAllRestriction(r, c), 
-                                 df.getOWLObjectAllRestriction(p, df.getOWLObjectSomeRestriction(r, df.getOWLThing())), 
-                                 df.getOWLObjectAllRestriction(p, df.getOWLObjectSomeRestriction(p, df.getOWLThing())),
-                                 df.getOWLObjectAllRestriction(p, df.getOWLObjectAllRestriction(r, c)))));  
+                     df.getOWLObjectIntersectionOf(
+                         df.getOWLObjectSomeRestriction(r, df.getOWLThing()), 
+                         df.getOWLObjectSomeRestriction(p, df.getOWLThing()), 
+                         df.getOWLObjectAllRestriction(r, c), 
+                         df.getOWLObjectAllRestriction(p, df.getOWLObjectSomeRestriction(r, df.getOWLThing())), 
+                         df.getOWLObjectAllRestriction(p, df.getOWLObjectSomeRestriction(p, df.getOWLThing())),
+                         df.getOWLObjectAllRestriction(p, df.getOWLObjectAllRestriction(r, c)))));  
          assertSatisfiable(desc,false);
      }
 
@@ -613,49 +616,40 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLObjectProperty invf = df.getOWLObjectProperty(URI.create("file:/c/test.owl#f-"));
          
          OWLDescription desc = df.getOWLObjectIntersectionOf(
-                 df.getOWLObjectComplementOf(c), 
-                 df.getOWLObjectSomeRestriction(invf, d), 
-                 df.getOWLObjectAllRestriction(invr, df.getOWLObjectSomeRestriction(invf, d))
-             );  
+             df.getOWLObjectComplementOf(c), 
+             df.getOWLObjectSomeRestriction(invf, d), 
+             df.getOWLObjectAllRestriction(invr, df.getOWLObjectSomeRestriction(invf, d))
+         );  
          assertSatisfiable(desc,false);
      }
      
      public void testIanT7a() throws Exception {
-         StringBuffer buffer = new StringBuffer();
+         StringBuffer buffer=new StringBuffer();
          buffer.append("InverseObjectProperties(r r-)");
          buffer.append("InverseObjectProperties(f f-)");
          buffer.append("TransitiveObjectProperty(r)");
          buffer.append("FunctionalObjectProperty(f)");
-         //buffer.append("EquivalentClasses(Test ObjectIntersectionOf(p1 ObjectSomeValuesFrom(r ObjectSomeValuesFrom(r ObjectIntersectionOf(p1 ObjectAllValuesFrom(r- ObjectComplementOf(p1)))))))");
-         loadOntologyWithAxioms(buffer.toString(), null);
-         
-//         addAxiom("[objectInverse r r-]");
-//         addAxiom("[objectInverse f f-]");
-//         addAxiom("[objectTransitive r]");
-//         addAxiom("[objectFunctional f]");
-         
-         //assertSatisfiable("Test", false);
-         // The concept Test, if defined in the ontology, but the according OWLDescription (below) is considered satisfiable
+         loadOntologyWithAxioms(buffer.toString(),null);
 
-         OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
-         OWLDescription p1 = df.getOWLClass(URI.create("file:/c/test.owl#p1"));
-         OWLObjectProperty r = df.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
-         OWLObjectProperty invr = df.getOWLObjectProperty(URI.create("file:/c/test.owl#r-"));
-         
-         OWLDescription desc;
-         desc = df.getOWLObjectIntersectionOf(
-                 p1, 
-                 df.getOWLObjectSomeRestriction(r, 
-                         df.getOWLObjectSomeRestriction(r, 
-                                 df.getOWLObjectIntersectionOf(
-                                         p1, 
-                                         df.getOWLObjectAllRestriction(invr, 
-                                                 df.getOWLObjectComplementOf(p1)
-                                         )
-                                  )
-                          )
-                  )
-          );
+         OWLDataFactory df=OWLManager.createOWLOntologyManager().getOWLDataFactory();
+         OWLDescription p1=df.getOWLClass(URI.create("file:/c/test.owl#p1"));
+         OWLObjectProperty r=df.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
+         OWLObjectProperty invr=df.getOWLObjectProperty(URI.create("file:/c/test.owl#r-"));
+
+         OWLDescription desc=
+             df.getOWLObjectIntersectionOf(
+             p1,
+             df.getOWLObjectSomeRestriction(r,
+                 df.getOWLObjectSomeRestriction(r,
+                     df.getOWLObjectIntersectionOf(
+                         p1,
+                         df.getOWLObjectAllRestriction(invr,
+                             df.getOWLObjectComplementOf(p1)
+                         )
+                     )
+                 )
+             )
+         );
          // [and p1 [some r [some r [and p1 [all r- [not p1]]]]]]
          assertSatisfiable(desc,false);
      }
