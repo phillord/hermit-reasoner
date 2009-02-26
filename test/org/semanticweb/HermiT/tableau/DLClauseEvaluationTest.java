@@ -15,8 +15,15 @@ import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.Variable;
+import org.semanticweb.HermiT.tableau.DependencySet;
+import org.semanticweb.HermiT.tableau.ExtensionManager;
+import org.semanticweb.HermiT.tableau.ExtensionTable;
+import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.tableau.Tableau;
+import org.semanticweb.HermiT.tableau.ExtensionTable.View;
 
-public class DLClauseEvaluationTest extends AbstractHermiTTest {
+public class DLClauseEvaluationTest extends AbstractReasonerInternalsTest {
+    
     protected static final AtomicRole R=AtomicRole.createObjectRole("R");
     protected static final AtomicRole S=AtomicRole.createObjectRole("S");
     protected static final AtomicRole T=AtomicRole.createObjectRole("T");
@@ -55,6 +62,7 @@ public class DLClauseEvaluationTest extends AbstractHermiTTest {
     public DLClauseEvaluationTest(String name) {
         super(name);
     }
+    
     protected void setUp() {
         BlockingSignatureCache blockingSignatureCache=new BlockingSignatureCache(PairWiseDirectBlockingChecker.INSTANCE);
         BlockingStrategy blockingStrategy=new AnywhereBlocking(PairWiseDirectBlockingChecker.INSTANCE,blockingSignatureCache);
@@ -62,6 +70,7 @@ public class DLClauseEvaluationTest extends AbstractHermiTTest {
         m_tableau=new Tableau(null,ExpansionStrategy,TEST_DL_ONTOLOGY,new HashMap<String,Object>());
         m_extensionManager=m_tableau.getExtensionManager();
     }
+    
     public void testEvaluator() {
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
         

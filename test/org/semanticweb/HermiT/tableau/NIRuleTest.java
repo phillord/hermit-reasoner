@@ -20,7 +20,7 @@ import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Variable;
 
-public class NIRuleTest extends AbstractHermiTTest {
+public class NIRuleTest extends AbstractReasonerInternalsTest {
     protected static final AtomicConcept A=AtomicConcept.create("A");
     protected static final AtomicConcept B=AtomicConcept.create("B");
     protected static final AtomicNegationConcept NEG_A=AtomicNegationConcept.create(A);

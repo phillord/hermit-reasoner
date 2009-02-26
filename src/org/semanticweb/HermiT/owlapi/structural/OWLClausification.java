@@ -6,17 +6,17 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
 import java.text.ParseException;
-import java.util.Comparator;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Collection;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
@@ -26,12 +26,10 @@ import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
-import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Equality;
-import org.semanticweb.HermiT.model.Term;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InverseRole;
@@ -39,6 +37,8 @@ import org.semanticweb.HermiT.model.KeyClause;
 import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.model.NodeIDLessThan;
 import org.semanticweb.HermiT.model.Role;
+import org.semanticweb.HermiT.model.Term;
+import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.model.dataranges.BigRational;
 import org.semanticweb.HermiT.model.dataranges.DataConstant;
 import org.semanticweb.HermiT.model.dataranges.DataRange;
@@ -104,8 +104,8 @@ import org.semanticweb.owl.model.OWLOntologyManager;
 import org.semanticweb.owl.model.OWLSameIndividualsAxiom;
 import org.semanticweb.owl.model.OWLTypedConstant;
 import org.semanticweb.owl.model.OWLUntypedConstant;
-import org.semanticweb.owl.vocab.OWLRestrictedDataRangeFacetVocabulary;
 import org.semanticweb.owl.util.OWLAxiomVisitorAdapter;
+import org.semanticweb.owl.vocab.OWLRestrictedDataRangeFacetVocabulary;
 
 import dk.brics.automaton.Datatypes;
 
@@ -137,10 +137,10 @@ public class OWLClausification implements Serializable {
             if (importClosure.add(anOntology))
                 toProcess.addAll(anOntology.getImports(ontologyManager));
         }
-        return clausifyImportClosure(ontologyManager.getOWLDataFactory(),ontology.getURI().toString(),importClosure,keys);
+        return clausifyImportClosure(ontologyManager.getOWLDataFactory(),ontology.getURI().toString(),importClosure,descriptionGraphs,keys);
     }
 
-    public DLOntology clausifyImportClosure(OWLDataFactory factory,String ontologyURI,Collection<OWLOntology> importClosure,Set<OWLHasKeyDummy> keys) {
+    public DLOntology clausifyImportClosure(OWLDataFactory factory,String ontologyURI,Collection<OWLOntology> importClosure,Collection<DescriptionGraph> descriptionGraphs,Set<OWLHasKeyDummy> keys) {
         OWLAxioms axioms=new OWLAxioms();
         OWLNormalization normalization=new OWLNormalization(factory,axioms);
         for (OWLOntology ontology : importClosure)
@@ -151,16 +151,16 @@ public class OWLClausification implements Serializable {
         TransitivityManager transitivityManager=new TransitivityManager(factory);
         transitivityManager.prepareTransformation(axioms);
         transitivityManager.rewriteConceptInclusions(axioms);
-        Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
-        return clausify(factory,ontologyURI,axioms,noDescriptionGraphs);
+        if (descriptionGraphs == null) descriptionGraphs = Collections.emptySet();
+        return clausify(factory,ontologyURI,axioms,descriptionGraphs);
     }
 
-    public DLOntology clausify(OWLDataFactory factory,String ontologyURI,OWLAxioms axioms,Set<DescriptionGraph> descriptionGraphs) {
+    public DLOntology clausify(OWLDataFactory factory,String ontologyURI,OWLAxioms axioms,Collection<DescriptionGraph> descriptionGraphs) {
         OWLAxiomsExpressivity axiomsExpressivity=new OWLAxiomsExpressivity(axioms);
         return clausify(factory,ontologyURI,axioms,axiomsExpressivity,descriptionGraphs);
     }
    
-    public DLOntology clausify(OWLDataFactory factory,String ontologyURI,OWLAxioms axioms,OWLAxiomsExpressivity axiomsExpressivity,Set<DescriptionGraph> descriptionGraphs) {
+    public DLOntology clausify(OWLDataFactory factory,String ontologyURI,OWLAxioms axioms,OWLAxiomsExpressivity axiomsExpressivity,Collection<DescriptionGraph> descriptionGraphs) {
         Set<DLClause> dlClauses=new LinkedHashSet<DLClause>();
         Set<Atom> positiveFacts=new HashSet<Atom>();
         Set<Atom> negativeFacts=new HashSet<Atom>();

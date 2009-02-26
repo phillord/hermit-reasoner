@@ -1,7 +1,0 @@
-atLeast(1 file:/c:/temp/test.owl#s not(q:0))(X) :- file:/c:/temp/test.owl#d(X)
-internal:nom$file:/c:/temp/test.owl#i1(file:/c:/temp/test.owl#i1)
-q:0(file:/c:/temp/test.owl#i2)
-atLeast(1 file:/c:/temp/test.owl#r q:1)(X) :- file:/c:/temp/test.owl#c(X)
-q:0(file:/c:/temp/test.owl#i1)
-internal:nom$file:/c:/temp/test.owl#i2(file:/c:/temp/test.owl#i2)
-X == Y v X == Y1 :- q:1(X), internal:nom$file:/c:/temp/test.owl#i1(Y), internal:nom$file:/c:/temp/test.owl#i2(Y1)

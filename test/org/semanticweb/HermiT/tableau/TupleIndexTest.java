@@ -1,6 +1,6 @@
 package org.semanticweb.HermiT.tableau;
 
-public class TupleIndexTest extends AbstractHermiTTest {
+public class TupleIndexTest extends AbstractReasonerInternalsTest {
     protected TupleIndex m_tupleIndex;
 
     public TupleIndexTest(String name) {

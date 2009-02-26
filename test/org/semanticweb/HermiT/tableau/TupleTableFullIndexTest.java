@@ -1,6 +1,6 @@
 package org.semanticweb.HermiT.tableau;
 
-public class TupleTableFullIndexTest extends AbstractHermiTTest {
+public class TupleTableFullIndexTest extends AbstractReasonerInternalsTest {
     protected TupleTable m_tupleTable;
     protected TupleTableFullIndex m_index;
 

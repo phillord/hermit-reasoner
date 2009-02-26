@@ -23,13 +23,13 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Collection;
-import java.util.Map;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.TreeMap;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.semanticweb.HermiT.Clausifier.LoadingException;
@@ -68,17 +68,16 @@ import org.semanticweb.HermiT.monitor.TimerWithPause;
 import org.semanticweb.HermiT.owlapi.structural.BuiltInPropertyManager;
 import org.semanticweb.HermiT.owlapi.structural.OWLAxioms;
 import org.semanticweb.HermiT.owlapi.structural.OWLAxiomsExpressivity;
-import org.semanticweb.HermiT.owlapi.structural.OWLHasKeyDummy;
 import org.semanticweb.HermiT.owlapi.structural.OWLClausification;
+import org.semanticweb.HermiT.owlapi.structural.OWLHasKeyDummy;
 import org.semanticweb.HermiT.owlapi.structural.OWLNormalization;
 import org.semanticweb.HermiT.owlapi.structural.TransitivityManager;
 import org.semanticweb.HermiT.tableau.Tableau;
+import org.semanticweb.HermiT.util.GraphUtils;
 import org.semanticweb.HermiT.util.TranslatedMap;
 import org.semanticweb.HermiT.util.Translator;
-import org.semanticweb.HermiT.util.GraphUtils;
 import org.semanticweb.owl.apibinding.OWLManager;
-import org.semanticweb.owl.model.OWLOntologyManager;
-import org.semanticweb.owl.model.OWLOntology;
+import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLDataProperty;
@@ -87,7 +86,8 @@ import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLObjectProperty;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
-import org.semanticweb.owl.model.OWLAxiom;
+import org.semanticweb.owl.model.OWLOntology;
+import org.semanticweb.owl.model.OWLOntologyManager;
 
 /**
  * Answers queries about the logical implications of a particular knowledge base. A Reasoner is associated with a single knowledge base, which is "loaded" when the reasoner is constructed. By default a full classification of all atomic terms in the knowledge base is also performed at this time (which can take quite a while for large or complex ontologies), but this behavior can be disabled as a part of the Reasoner configuration. Internal details of the loading and reasoning algorithms can be configured in the Reasoner constructor and do not change over the lifetime of the Reasoner object---internal data structures and caches are optimized for a particular configuration. By default, HermiT will use the set of options which provide optimal performance.
@@ -190,8 +190,9 @@ public class Reasoner implements Serializable {
     public Reasoner(Configuration config,OWLOntologyManager ontologyManger,Collection<OWLOntology> importClosure,String ontologyURI) {
         OWLClausification clausifier=new OWLClausification(config);
         Set<OWLHasKeyDummy> keys=Collections.emptySet();
+        Set<DescriptionGraph> dgs = Collections.emptySet();
         m_config=config;
-        m_dlOntology=clausifier.clausifyImportClosure(ontologyManger.getOWLDataFactory(),ontologyURI,importClosure,keys);
+        m_dlOntology=clausifier.clausifyImportClosure(ontologyManger.getOWLDataFactory(),ontologyURI,importClosure,dgs,keys);
         m_namespaces=createNamespaces(m_dlOntology.getOntologyURI());
         m_tableau=createTableau(m_config,m_dlOntology,m_namespaces);
         m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);

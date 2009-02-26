@@ -4,7 +4,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-public class AllTests extends TestCase {
+public class AllQuickTests extends TestCase {
 
     public static Test suite() {
         TestSuite suite = new TestSuite("All HermiT tests");
@@ -19,8 +19,8 @@ public class AllTests extends TestCase {
         suite.addTest(org.semanticweb.HermiT.owlapi.AllTests.suite());
         // Tests Hermit as a blackbox, i.e., by only using the official
         // interface.
-        suite.addTest(org.semanticweb.HermiT.reasoner.AllTests.suite());
-        // Tests for the internals of the reasoner
+        suite.addTest(org.semanticweb.HermiT.reasoner.AllUnitTests.suite());
+        // Tests for the internals of the reasoner.
         suite.addTest(org.semanticweb.HermiT.tableau.AllTests.suite());
         // Unit tests for various utility functions.
         suite.addTest(org.semanticweb.HermiT.util.AllTests.suite());

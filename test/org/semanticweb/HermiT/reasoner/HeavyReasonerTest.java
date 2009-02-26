@@ -7,20 +7,22 @@ public class HeavyReasonerTest extends AbstractReasonerTest {
     }
 
     public void testWineNoDataProperties() throws Exception {
-        assertSubsumptionHierarchy("res/wine-no-data-properties.xml",
-                "res/wine-no-data-properties.xml.txt");
+        loadOntologyFromResource("../res/wine-no-data-properties.xml");
+        assertSubsumptionHierarchy("../res/wine-no-data-properties.xml.txt");
     }
 
     public void testGalenIansFullUndoctored() throws Exception {
-        assertSubsumptionHierarchy("res/galen-ians-full-undoctored.xml",
-                "res/galen-ians-full-undoctored.xml.txt");
+        loadOntologyFromResource("../res/galen-ians-full-undoctored.xml");
+        assertSubsumptionHierarchy("../res/galen-ians-full-undoctored.xml.txt");
     }
 
     public void testPizza() throws Exception {
-        assertSubsumptionHierarchy("res/pizza.xml", "res/pizza.xml.txt");
+        loadOntologyFromResource("../res/pizza.xml");
+        assertSubsumptionHierarchy("../res/pizza.xml.txt");
     }
 
     public void testPropreo() throws Exception {
-        assertSubsumptionHierarchy("res/propreo.xml", "res/propreo.xml.txt");
+        loadOntologyFromResource("../res/propreo.xml");
+        assertSubsumptionHierarchy("../res/propreo.xml.txt");
     }
 }

@@ -383,7 +383,7 @@ public final class ExtensionManager implements Serializable {
                 throw new IllegalStateException("ExtensionManager is not reentrant.");
             m_addActive=true;
             try {
-                return getExtensionTable(tuple.length).addTuple(tuple,dependencySet);
+                return getExtensionTable(tuple.length).addTuple(tuple,dependencySet); 
             }
             finally {
                 m_addActive=false;

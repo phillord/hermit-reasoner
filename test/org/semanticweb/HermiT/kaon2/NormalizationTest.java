@@ -3,6 +3,7 @@ package org.semanticweb.HermiT.kaon2;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.semanticweb.HermiT.deprecated.AbstractHermiTTest;
 import org.semanticweb.HermiT.kaon2.structural.NormalizationCrappy;
 import org.semanticweb.kaon2.api.Axiom;
 import org.semanticweb.kaon2.api.KAON2Manager;

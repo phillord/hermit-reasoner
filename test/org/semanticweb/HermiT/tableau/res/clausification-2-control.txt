@@ -1,2 +1,0 @@
-r(X,Y) v r(X,Y1) :- c(X), nom:i1(Y), nom:i2(Y1)
-atLeast(1 s not(q:0))(X) :- d(X)

@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.InternalNames;
 import org.semanticweb.HermiT.Namespaces;
+import org.semanticweb.HermiT.deprecated.AbstractHermiTTest;
 import org.semanticweb.HermiT.kaon2.structural.Clausification;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;

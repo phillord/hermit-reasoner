@@ -23,7 +23,7 @@ import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.Variable;
 
-public class MergeTest extends AbstractHermiTTest {
+public class MergeTest extends AbstractReasonerInternalsTest {
     protected static final AtomicConcept A=AtomicConcept.create("A");
     protected static final AtomicConcept B=AtomicConcept.create("B");
     protected static final AtomicConcept C=AtomicConcept.create("C");

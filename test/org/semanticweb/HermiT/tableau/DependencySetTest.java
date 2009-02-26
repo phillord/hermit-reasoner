@@ -1,5 +1,9 @@
 package org.semanticweb.HermiT.tableau;
 
+import org.semanticweb.HermiT.tableau.DependencySetFactory;
+import org.semanticweb.HermiT.tableau.PermanentDependencySet;
+import org.semanticweb.HermiT.tableau.UnionDependencySet;
+
 import junit.framework.TestCase;
 
 public class DependencySetTest extends TestCase {
