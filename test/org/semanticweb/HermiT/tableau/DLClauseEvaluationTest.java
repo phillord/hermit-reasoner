@@ -20,7 +20,6 @@ import org.semanticweb.HermiT.tableau.ExtensionManager;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
-import org.semanticweb.HermiT.tableau.ExtensionTable.View;
 
 public class DLClauseEvaluationTest extends AbstractReasonerInternalsTest {
     
