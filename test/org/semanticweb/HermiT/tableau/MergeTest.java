@@ -104,7 +104,7 @@ public class MergeTest extends AbstractReasonerInternalsTest {
         m_extensionManager.addAssertion(Equality.INSTANCE,a1,a2,emptySet);
         
         assertTrue(m_extensionManager.containsClash());
-        assertLabel(a2,A,EXISTS_NEG_A,B,C,D,NEG_A);
+        assertLabel(a2,A,B,C,D,NEG_A);
         
         assertTrue(a1.isMerged());
         assertSame(a1.getCanonicalNode(),a2);
