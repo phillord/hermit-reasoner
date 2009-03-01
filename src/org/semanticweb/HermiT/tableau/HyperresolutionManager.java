@@ -92,19 +92,26 @@ public final class HyperresolutionManager implements Serializable {
 
     protected static final class BodyAtomsSwapper {
         protected final DLClause m_dlClause;
+        protected final List<Atom> m_nodeIDComparisonAtoms;
         protected final boolean[] m_usedAtoms;
         protected final List<Atom> m_reorderedAtoms;
         protected final Set<Variable> m_boundVariables;
 
         public BodyAtomsSwapper(DLClause dlClause) {
             m_dlClause=dlClause;
+            m_nodeIDComparisonAtoms=new ArrayList<Atom>(m_dlClause.getBodyLength());
             m_usedAtoms=new boolean[m_dlClause.getBodyLength()];
             m_reorderedAtoms=new ArrayList<Atom>(m_dlClause.getBodyLength());
             m_boundVariables=new HashSet<Variable>();
         }
         public DLClause getSwappedDLClause(int bodyIndex) {
-            for (int index=m_usedAtoms.length-1;index>=0;--index)
+            m_nodeIDComparisonAtoms.clear();
+            for (int index=m_usedAtoms.length-1;index>=0;--index) {
                 m_usedAtoms[index]=false;
+                Atom atom=m_dlClause.getBodyAtom(index);
+                if (NodeIDLessThan.INSTANCE.equals(atom.getDLPredicate()))
+                    m_nodeIDComparisonAtoms.add(atom);
+            }
             m_reorderedAtoms.clear();
             m_boundVariables.clear();
             Atom atom=m_dlClause.getBodyAtom(bodyIndex);
@@ -114,36 +121,64 @@ public final class HyperresolutionManager implements Serializable {
             while (m_reorderedAtoms.size()!=m_usedAtoms.length) {
                 Atom bestAtom=null;
                 int bestAtomIndex=-1;
-                int numberOfBoundVariablesInBestAtom=0;
-                int numberOfUnboundVariablesInBestAtom=0;
+                int bestAtomGoodness=-1000;
                 for (int index=m_usedAtoms.length-1;index>=0;--index)
                     if (!m_usedAtoms[index]) {
                         atom=m_dlClause.getBodyAtom(index);
-                        int numberOfBoundVariables=0;
-                        int numberOfUnboundVariables=0;
-                        for (int argumentIndex=atom.getArity()-1;argumentIndex>=0;--argumentIndex) {
-                            Term argument=atom.getArgument(argumentIndex);
-                            if (argument instanceof Variable) {
-                                if (m_boundVariables.contains(argument))
-                                    numberOfBoundVariables++;
-                                else
-                                    numberOfUnboundVariables++;
-                            }
-                        }
-                        if ((numberOfUnboundVariables==0 || !NodeIDLessThan.INSTANCE.equals(atom.getDLPredicate())) && (bestAtom==null || numberOfBoundVariables>numberOfBoundVariablesInBestAtom || (numberOfBoundVariables>=numberOfBoundVariablesInBestAtom && numberOfUnboundVariables<numberOfUnboundVariablesInBestAtom))) {
+                        int atomGoodness=getAtomGoodness(atom);
+                        if (atomGoodness>bestAtomGoodness) {
                             bestAtom=atom;
-                            numberOfBoundVariablesInBestAtom=numberOfBoundVariables;
-                            numberOfUnboundVariablesInBestAtom=numberOfUnboundVariables;
+                            bestAtomGoodness=atomGoodness;
                             bestAtomIndex=index;
                         }
                     }
                 m_reorderedAtoms.add(bestAtom);
                 m_usedAtoms[bestAtomIndex]=true;
                 bestAtom.getVariables(m_boundVariables);
+                m_nodeIDComparisonAtoms.remove(bestAtom);
             }
             Atom[] bodyAtoms=new Atom[m_reorderedAtoms.size()];
             m_reorderedAtoms.toArray(bodyAtoms);
             return m_dlClause.getChangedDLClause(null,bodyAtoms);
+        }
+        protected int getAtomGoodness(Atom atom) {
+            if (NodeIDLessThan.INSTANCE.equals(atom.getDLPredicate())) {
+                if (m_boundVariables.contains(atom.getArgumentVariable(0)) && m_boundVariables.contains(atom.getArgumentVariable(1)))
+                    return 1000;
+                else
+                    return -2000;
+            }
+            else {
+                int numberOfBoundVariables=0;
+                int numberOfUnboundVariables=0;
+                for (int argumentIndex=atom.getArity()-1;argumentIndex>=0;--argumentIndex) {
+                    Term argument=atom.getArgument(argumentIndex);
+                    if (argument instanceof Variable) {
+                        if (m_boundVariables.contains(argument))
+                            numberOfBoundVariables++;
+                        else
+                            numberOfUnboundVariables++;
+                    }
+                }
+                int goodness=numberOfBoundVariables*100-numberOfUnboundVariables*10;
+                if (atom.getDLPredicate().getArity()==2 && numberOfUnboundVariables==1 && !m_nodeIDComparisonAtoms.isEmpty()) {
+                    Variable unboundVariable=atom.getArgumentVariable(0);
+                    if (m_boundVariables.contains(unboundVariable))
+                        unboundVariable=atom.getArgumentVariable(1);
+                    // At this point, unboundVariable must be really unbound because
+                    // we have already established that numberOfUnboundVariables==1.
+                    for (int compareAtomIndex=m_nodeIDComparisonAtoms.size()-1;compareAtomIndex>=0;--compareAtomIndex) {
+                        Atom compareAtom=m_nodeIDComparisonAtoms.get(compareAtomIndex);
+                        Variable argument0=compareAtom.getArgumentVariable(0);
+                        Variable argument1=compareAtom.getArgumentVariable(1);
+                        if ((m_boundVariables.contains(argument0) || unboundVariable.equals(argument0)) && (m_boundVariables.contains(argument1) || unboundVariable.equals(argument1))) {
+                            goodness+=5;
+                            break;
+                        }
+                    }
+                }
+                return goodness;
+            }
         }
     }
 
