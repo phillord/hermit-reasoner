@@ -334,8 +334,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertSubsumedBy("complex3a", "complex3b", true);
         assertSubsumedBy("complex4a", "complex4b", true);
     }
-
-     public void testHeinsohnTBox3Modified() throws Exception {
+    public void testHeinsohnTBox3Modified() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("DisjointClasses(C D)");
          buffer.append("SubClassOf(A ObjectMaxCardinality(2 r))");

@@ -555,9 +555,8 @@ public class OWLNormalization implements Serializable {
         OWLDescription definition=m_definitions.get(desc);
         if (definition==null || (forcePositive && !(definition instanceof OWLClass))) {
             definition=m_factory.getOWLClass(URI.create("internal:q#"+m_definitions.size()));
-            if (!forcePositive && !desc.accept(PLVisitor.INSTANCE)) {
+            if (!forcePositive && !desc.accept(PLVisitor.INSTANCE))
                 definition=m_factory.getOWLObjectComplementOf(definition);
-            }
             // TODO: it's a little ugly to switch the definition
             // to positive polarity if it would naturally be negative and
             // could make future normalization less efficient, but in practice
@@ -700,9 +699,8 @@ public class OWLNormalization implements Serializable {
         public OWLDescription visit(OWLObjectMaxCardinalityRestriction object) {
             OWLObjectPropertyExpression objectProperty=object.getProperty().getSimplified();
             OWLDescription description=object.getFiller();
-            if (object.getCardinality()<=0) {
+            if (object.getCardinality()<=0)
                 return m_factory.getOWLObjectAllRestriction(objectProperty,description.getComplementNNF()).accept(this);
-            }
             else if (isSimple(description))
                 return object;
             else {
@@ -876,9 +874,8 @@ public class OWLNormalization implements Serializable {
         public OWLDescription visit(OWLObjectMaxCardinalityRestriction d) {
             if (d.getFiller().isOWLNothing())
                 return m_factory.getOWLThing();
-            if (d.getCardinality()<=0) {
+            if (d.getCardinality()<=0)
                 return m_factory.getOWLObjectAllRestriction(d.getProperty().getSimplified(),m_factory.getOWLObjectComplementOf(d.getFiller()).accept(this));
-            }
             return m_factory.getOWLObjectMaxCardinalityRestriction(d.getProperty().getSimplified(),d.getCardinality(),d.getFiller().accept(this));
         }
 
