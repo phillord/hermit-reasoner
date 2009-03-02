@@ -10,7 +10,7 @@ import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
 import org.semanticweb.HermiT.existentials.ExpansionStrategy;
-import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
+import org.semanticweb.HermiT.model.AtMostGuard;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
@@ -27,9 +27,9 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
     protected static final AtomicRole R=AtomicRole.createObjectRole("R");
     protected static final InverseRole INV_R=InverseRole.create(R);
     protected static final AtomicRole S=AtomicRole.createObjectRole("S");
-    protected static final AtMostAbstractRoleGuard AT_MOST_ONE_R_A=AtMostAbstractRoleGuard.create(1,R,A);
-    protected static final AtMostAbstractRoleGuard AT_MOST_TWO_R_A=AtMostAbstractRoleGuard.create(2,R,A);
-    protected static final AtMostAbstractRoleGuard AT_MOST_ONE_INV_R_A=AtMostAbstractRoleGuard.create(1,INV_R,A);
+    protected static final AtMostGuard AT_MOST_ONE_R_A=AtMostGuard.create(1,R,A);
+    protected static final AtMostGuard AT_MOST_TWO_R_A=AtMostGuard.create(2,R,A);
+    protected static final AtMostGuard AT_MOST_ONE_INV_R_A=AtMostGuard.create(1,INV_R,A);
     protected static final DLOntology TEST_DL_ONTOLOGY;
     static {
         // One disjunctive clause is needed in order to turn on nondeterminism in the tableau.
@@ -497,7 +497,7 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
             control=m_tableau.getDependencySetFactory().addBranchingPoint(control,branchingPoint);
         assertSame(dependencySet,control);
     }
-    protected Node getRootNodeFor(Node rootNode,AtMostAbstractRoleGuard atMostAbstractRoleGuard,int index) {
+    protected Node getRootNodeFor(Node rootNode,AtMostGuard atMostAbstractRoleGuard,int index) {
         int tupleIndex=m_manager.m_newRootNodesIndex.getTupleIndex(new Object[] { rootNode,atMostAbstractRoleGuard,index });
         if (tupleIndex==-1)
             return null;

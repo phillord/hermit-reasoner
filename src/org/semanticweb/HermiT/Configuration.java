@@ -35,7 +35,7 @@ public class Configuration implements Serializable {
     }
 
     public static enum ExistentialStrategyType {
-        CREATION_ORDER,DEPTH_FIRST,EL,INDIVIDUAL_REUSE
+        CREATION_ORDER,EL,INDIVIDUAL_REUSE
     }
 
     public static enum ParserType {

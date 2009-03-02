@@ -167,14 +167,14 @@ public final class ExtensionManager implements Serializable {
             return m_binaryExtensionTable.containsTuple(m_binaryAuxiliaryTupleContains);
         }
     }
-    public boolean containsRoleAssertion(Role abstractRole,Node nodeFrom,Node nodeTo) {
-        if (abstractRole instanceof AtomicRole) {
-            m_ternaryAuxiliaryTupleContains[0]=abstractRole;
+    public boolean containsRoleAssertion(Role role,Node nodeFrom,Node nodeTo) {
+        if (role instanceof AtomicRole) {
+            m_ternaryAuxiliaryTupleContains[0]=role;
             m_ternaryAuxiliaryTupleContains[1]=nodeFrom;
             m_ternaryAuxiliaryTupleContains[2]=nodeTo;
         }
         else {
-            m_ternaryAuxiliaryTupleContains[0]=((InverseRole)abstractRole).getInverseOf();
+            m_ternaryAuxiliaryTupleContains[0]=((InverseRole)role).getInverseOf();
             m_ternaryAuxiliaryTupleContains[1]=nodeTo;
             m_ternaryAuxiliaryTupleContains[2]=nodeFrom;
         }
@@ -232,14 +232,14 @@ public final class ExtensionManager implements Serializable {
             return m_binaryExtensionTable.getDependencySet(m_binaryAuxiliaryTupleContains);
         }
     }
-    public DependencySet getRoleAssertionDependencySet(Role abstractRole,Node nodeFrom,Node nodeTo) {
-        if (abstractRole instanceof AtomicRole) {
-            m_ternaryAuxiliaryTupleContains[0]=abstractRole;
+    public DependencySet getRoleAssertionDependencySet(Role role,Node nodeFrom,Node nodeTo) {
+        if (role instanceof AtomicRole) {
+            m_ternaryAuxiliaryTupleContains[0]=role;
             m_ternaryAuxiliaryTupleContains[1]=nodeFrom;
             m_ternaryAuxiliaryTupleContains[2]=nodeTo;
         }
         else {
-            m_ternaryAuxiliaryTupleContains[0]=((InverseRole)abstractRole).getInverseOf();
+            m_ternaryAuxiliaryTupleContains[0]=((InverseRole)role).getInverseOf();
             m_ternaryAuxiliaryTupleContains[1]=nodeTo;
             m_ternaryAuxiliaryTupleContains[2]=nodeFrom;
         }
@@ -303,11 +303,11 @@ public final class ExtensionManager implements Serializable {
             m_addActive=false;
         }
     }
-    public boolean addRoleAssertion(Role abstractRole,Node nodeFrom,Node nodeTo,DependencySet dependencySet) {
-        if (abstractRole instanceof AtomicRole)
-            return addAssertion((AtomicRole)abstractRole,nodeFrom,nodeTo,dependencySet);
+    public boolean addRoleAssertion(Role role,Node nodeFrom,Node nodeTo,DependencySet dependencySet) {
+        if (role instanceof AtomicRole)
+            return addAssertion((AtomicRole)role,nodeFrom,nodeTo,dependencySet);
         else
-            return addAssertion(((InverseRole)abstractRole).getInverseOf(),nodeTo,nodeFrom,dependencySet);
+            return addAssertion(((InverseRole)role).getInverseOf(),nodeTo,nodeFrom,dependencySet);
     }
     public boolean addAssertion(DLPredicate dlPredicate,Node node,DependencySet dependencySet) {
         if (m_addActive)

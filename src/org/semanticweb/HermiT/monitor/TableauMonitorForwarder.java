@@ -3,7 +3,7 @@ package org.semanticweb.HermiT.monitor;
 
 import java.io.Serializable;
 
-import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
+import org.semanticweb.HermiT.model.AtMostGuard;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.Individual;
@@ -189,11 +189,11 @@ public class TableauMonitorForwarder implements TableauMonitor,Serializable {
         if (m_forwardingOn)
             m_forwardingTargetMonitor.existentialSatisfied(existentialConcept,forNode);
     }
-    public void nominalIntorductionStarted(Node rootNode,Node treeNode,AtMostAbstractRoleGuard atMostRoleGuard) {
+    public void nominalIntorductionStarted(Node rootNode,Node treeNode,AtMostGuard atMostRoleGuard) {
         if (m_forwardingOn)
             m_forwardingTargetMonitor.nominalIntorductionStarted(rootNode,treeNode,atMostRoleGuard);
     }
-    public void nominalIntorductionFinished(Node rootNode,Node treeNode,AtMostAbstractRoleGuard atMostRoleGuard) {
+    public void nominalIntorductionFinished(Node rootNode,Node treeNode,AtMostGuard atMostRoleGuard) {
         if (m_forwardingOn)
             m_forwardingTargetMonitor.nominalIntorductionFinished(rootNode,treeNode,atMostRoleGuard);
     }

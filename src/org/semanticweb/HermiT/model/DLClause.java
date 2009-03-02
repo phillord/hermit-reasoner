@@ -118,8 +118,8 @@ public class DLClause implements Serializable {
     public boolean isGuardedFunctionalityAxiom() {
         if (getBodyLength()==1&&getHeadLength()==1) {
             DLPredicate headDLPredicate=getHeadAtom(0).getDLPredicate();
-            if (headDLPredicate instanceof AtMostAbstractRoleGuard) {
-                AtMostAbstractRoleGuard atMostRoleGuard=(AtMostAbstractRoleGuard)headDLPredicate;
+            if (headDLPredicate instanceof AtMostGuard) {
+                AtMostGuard atMostRoleGuard=(AtMostGuard)headDLPredicate;
                 if (atMostRoleGuard.getCaridnality()==1&&atMostRoleGuard.getToAtomicConcept().equals(AtomicConcept.THING)&&atMostRoleGuard.getOnRole() instanceof AtomicRole) {
                     AtomicRole atomicRole=(AtomicRole)atMostRoleGuard.getOnRole();
                     Variable x=getHeadAtom(0).getArgumentVariable(0);
@@ -155,8 +155,8 @@ public class DLClause implements Serializable {
     public boolean isGuardedInverseFunctionalityAxiom() {
         if (getBodyLength()==1&&getHeadLength()==1) {
             DLPredicate headDLPredicate=getHeadAtom(0).getDLPredicate();
-            if (headDLPredicate instanceof AtMostAbstractRoleGuard) {
-                AtMostAbstractRoleGuard atMostRoleGuard=(AtMostAbstractRoleGuard)headDLPredicate;
+            if (headDLPredicate instanceof AtMostGuard) {
+                AtMostGuard atMostRoleGuard=(AtMostGuard)headDLPredicate;
                 if (atMostRoleGuard.getCaridnality()==1&&atMostRoleGuard.getToAtomicConcept().equals(AtomicConcept.THING)&&atMostRoleGuard.getOnRole() instanceof InverseRole) {
                     AtomicRole atomicRole=((InverseRole)atMostRoleGuard.getOnRole()).getInverseOf();
                     Variable x=getHeadAtom(0).getArgumentVariable(0);

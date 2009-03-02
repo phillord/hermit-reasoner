@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
-import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
+import org.semanticweb.HermiT.model.AtMostGuard;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
@@ -265,7 +265,7 @@ public class Clausification {
         protected final Map<AtomicConcept,AtomicConcept> m_negativeAtMostReplacements;
         protected final List<Atom> m_headAtoms;
         protected final List<Atom> m_bodyAtoms;
-        protected final Set<AtMostAbstractRoleGuard> m_atMostRoleGuards;
+        protected final Set<AtMostGuard> m_atMostRoleGuards;
         protected final Set<Atom> m_positiveFacts;
         protected final boolean m_renameAtMost;
         protected int m_yIndex;
@@ -274,7 +274,7 @@ public class Clausification {
             m_negativeAtMostReplacements=new HashMap<AtomicConcept,AtomicConcept>();
             m_headAtoms=new ArrayList<Atom>();
             m_bodyAtoms=new ArrayList<Atom>();
-            m_atMostRoleGuards=new HashSet<AtMostAbstractRoleGuard>();
+            m_atMostRoleGuards=new HashSet<AtMostGuard>();
             m_positiveFacts=positiveFacts;
             m_renameAtMost=renameAtMost;
         }
@@ -420,7 +420,7 @@ public class Clausification {
                         ObjectProperty internalObjectProperty=(ObjectProperty)((InverseObjectProperty)object.getObjectProperty()).getObjectProperty();
                         onRole=InverseRole.create(AtomicRole.createObjectRole(internalObjectProperty.getURI()));
                     }
-                    AtMostAbstractRoleGuard atMostRole=AtMostAbstractRoleGuard.create(object.getCardinality(),onRole,toAtomicConcept);
+                    AtMostGuard atMostRole=AtMostGuard.create(object.getCardinality(),onRole,toAtomicConcept);
                     m_atMostRoleGuards.add(atMostRole);
                     m_headAtoms.add(Atom.create(atMostRole,new org.semanticweb.HermiT.model.Term[] { X }));
                     // This is an optimization that is described in the SHOIQ paper right after the clausification section.
@@ -464,7 +464,7 @@ public class Clausification {
             throw new IllegalStateException("Internal error: invalid normal form.");
         }
         public void clausifyAtMostStuff(Collection<DLClause> dlClauses) {
-            for (AtMostAbstractRoleGuard atMostRole : m_atMostRoleGuards) {
+            for (AtMostGuard atMostRole : m_atMostRoleGuards) {
                 m_bodyAtoms.add(Atom.create(atMostRole,new org.semanticweb.HermiT.model.Term[] { X }));
                 Role onRole=atMostRole.getOnRole();
                 ObjectPropertyExpression onObjectProperty;

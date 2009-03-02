@@ -9,7 +9,6 @@ public class AllTests extends TestCase {
     public static Test suite() {
         TestSuite suite = new TestSuite("Tests for HermiT that rely on the KAON2 parser.");
         // $JUnit-BEGIN$
-        suite.addTestSuite(ReasonerTest.class);
         suite.addTestSuite(GraphTest.class);
         // $JUnit-END$
         return suite;

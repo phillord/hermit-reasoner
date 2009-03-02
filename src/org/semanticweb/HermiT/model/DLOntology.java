@@ -255,32 +255,32 @@ public class DLOntology implements Serializable {
         return graphAtomicRoles;
     }
 
-    protected boolean containsAtomicRoles(DLClause dlClause,Set<AtomicRole> abstractRoles) {
+    protected boolean containsAtomicRoles(DLClause dlClause,Set<AtomicRole> roles) {
         for (int atomIndex=0;atomIndex<dlClause.getBodyLength();atomIndex++) {
             DLPredicate dlPredicate=dlClause.getBodyAtom(atomIndex).getDLPredicate();
-            if (dlPredicate instanceof AtomicRole&&abstractRoles.contains(dlPredicate))
+            if (dlPredicate instanceof AtomicRole && roles.contains(dlPredicate))
                 return true;
         }
         for (int atomIndex=0;atomIndex<dlClause.getHeadLength();atomIndex++) {
             DLPredicate dlPredicate=dlClause.getHeadAtom(atomIndex).getDLPredicate();
-            if (dlPredicate instanceof AtomicRole&&abstractRoles.contains(dlPredicate))
+            if (dlPredicate instanceof AtomicRole && roles.contains(dlPredicate))
                 return true;
         }
         return false;
     }
 
-    protected boolean addAtomicRoles(DLClause dlClause,Set<AtomicRole> abstractRoles) {
+    protected boolean addAtomicRoles(DLClause dlClause,Set<AtomicRole> roles) {
         boolean change=false;
         for (int atomIndex=0;atomIndex<dlClause.getBodyLength();atomIndex++) {
             DLPredicate dlPredicate=dlClause.getBodyAtom(atomIndex).getDLPredicate();
             if (dlPredicate instanceof AtomicRole)
-                if (abstractRoles.add((AtomicRole)dlPredicate))
+                if (roles.add((AtomicRole)dlPredicate))
                     change=true;
         }
         for (int atomIndex=0;atomIndex<dlClause.getHeadLength();atomIndex++) {
             DLPredicate dlPredicate=dlClause.getHeadAtom(atomIndex).getDLPredicate();
             if (dlPredicate instanceof AtomicRole)
-                if (abstractRoles.add((AtomicRole)dlPredicate))
+                if (roles.add((AtomicRole)dlPredicate))
                     change=true;
         }
         return change;
@@ -338,9 +338,9 @@ public class DLOntology implements Serializable {
             Atom atom=dlClause.getBodyAtom(atomIndex);
             atom.getVariables(variables);
             DLPredicate dlPredicate=atom.getDLPredicate();
-            if (!(dlPredicate instanceof AtomicRole)&&!(dlPredicate instanceof AtomicConcept)&&!dlPredicate.equals(NodeIDLessThan.INSTANCE))
+            if (!(dlPredicate instanceof AtomicRole) && !(dlPredicate instanceof AtomicConcept) && !dlPredicate.equals(NodeIDLessThan.INSTANCE))
                 return false;
-            if (!(dlPredicate instanceof AtomicRole&&((AtomicRole)dlPredicate).isRestrictedToDatatypes())) {
+            if (!(dlPredicate instanceof AtomicRole && ((AtomicRole)dlPredicate).isRestrictedToDatatypes())) {
                 onlyConcreteRoles=false;
             }
         }
@@ -348,7 +348,7 @@ public class DLOntology implements Serializable {
             Atom atom=dlClause.getHeadAtom(atomIndex);
             atom.getVariables(variables);
             DLPredicate dlPredicate=atom.getDLPredicate();
-            if (!(dlPredicate instanceof AtomicRole)&&!(dlPredicate instanceof AtomicConcept)&&!(dlPredicate instanceof DataRange)&&!(dlPredicate instanceof ExistentialConcept)&&!Equality.INSTANCE.equals(dlPredicate)&&!(Inequality.INSTANCE.equals(dlPredicate)&&onlyConcreteRoles))
+            if (!(dlPredicate instanceof AtomicRole) && !(dlPredicate instanceof AtomicConcept) && !(dlPredicate instanceof DataRange) && !(dlPredicate instanceof ExistentialConcept) && !Equality.INSTANCE.equals(dlPredicate) && !(Inequality.INSTANCE.equals(dlPredicate) && onlyConcreteRoles))
                 return false;
             if (dlPredicate instanceof AtLeastAbstractRoleConcept) {
                 AtLeastAbstractRoleConcept atLeastAbstractConcept=(AtLeastAbstractRoleConcept)dlPredicate;
@@ -362,7 +362,7 @@ public class DLOntology implements Serializable {
             }
         }
         Variable X=Variable.create("X");
-        if (variables.contains(X)&&isTreeWithCenterVariable(dlClause,X,bodyOnlyAtomicConcepts))
+        if (variables.contains(X) && isTreeWithCenterVariable(dlClause,X,bodyOnlyAtomicConcepts))
             return true;
         for (Variable centerVariable : variables)
             if (isTreeWithCenterVariable(dlClause,centerVariable,bodyOnlyAtomicConcepts))
@@ -376,12 +376,12 @@ public class DLOntology implements Serializable {
     protected boolean isTreeWithCenterVariable(DLClause dlClause,Variable centerVariable,Set<AtomicConcept> bodyOnlyAtomicConcepts) {
         for (int atomIndex=0;atomIndex<dlClause.getBodyLength();atomIndex++) {
             Atom atom=dlClause.getBodyAtom(atomIndex);
-            if (atom.getDLPredicate() instanceof AtomicRole&&!atom.containsVariable(centerVariable))
+            if (atom.getDLPredicate() instanceof AtomicRole && !atom.containsVariable(centerVariable))
                 return false;
         }
         for (int atomIndex=0;atomIndex<dlClause.getHeadLength();atomIndex++) {
             Atom atom=dlClause.getHeadAtom(atomIndex);
-            if (atom.getDLPredicate() instanceof AtomicRole&&!atom.containsVariable(centerVariable))
+            if (atom.getDLPredicate() instanceof AtomicRole && !atom.containsVariable(centerVariable))
                 return false;
             if (Equality.INSTANCE.equals(atom.getDLPredicate())) {
                 Variable otherVariable=null;
@@ -399,7 +399,7 @@ public class DLOntology implements Serializable {
                     boolean found=false;
                     for (int bodyAtomIndex=0;bodyAtomIndex<dlClause.getBodyLength();bodyAtomIndex++) {
                         Atom bodyAtom=dlClause.getBodyAtom(bodyAtomIndex);
-                        if (bodyAtom.getArity()==1&&bodyAtom.getArgument(0).equals(otherVariable)&&bodyOnlyAtomicConcepts.contains(bodyAtom.getDLPredicate())) {
+                        if (bodyAtom.getArity()==1 && bodyAtom.getArgument(0).equals(otherVariable) && bodyOnlyAtomicConcepts.contains(bodyAtom.getDLPredicate())) {
                             found=true;
                             break;
                         }
@@ -415,12 +415,12 @@ public class DLOntology implements Serializable {
     protected boolean isGraphDLClause(DLClause dlClause) {
         for (int atomIndex=0;atomIndex<dlClause.getBodyLength();atomIndex++) {
             DLPredicate dlPredicate=dlClause.getBodyAtom(atomIndex).getDLPredicate();
-            if (!(dlPredicate instanceof AtomicRole)&&!(dlPredicate instanceof AtomicConcept))
+            if (!(dlPredicate instanceof AtomicRole) && !(dlPredicate instanceof AtomicConcept))
                 return false;
         }
         for (int atomIndex=0;atomIndex<dlClause.getHeadLength();atomIndex++) {
             DLPredicate dlPredicate=dlClause.getHeadAtom(atomIndex).getDLPredicate();
-            if (!(dlPredicate instanceof AtomicRole)&&!(dlPredicate instanceof AtomicConcept)&&!Equality.INSTANCE.equals(dlPredicate))
+            if (!(dlPredicate instanceof AtomicRole) && !(dlPredicate instanceof AtomicConcept) && !Equality.INSTANCE.equals(dlPredicate))
                 return false;
         }
         return true;

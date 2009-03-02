@@ -55,7 +55,7 @@ import org.semanticweb.HermiT.debugger.commands.UnprocessedDisjunctionsCommand;
 import org.semanticweb.HermiT.debugger.commands.WaitForCommand;
 import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
 import org.semanticweb.HermiT.model.AtLeastConcreteRoleConcept;
-import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
+import org.semanticweb.HermiT.model.AtMostGuard;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
@@ -686,8 +686,8 @@ public class Debugger extends TableauMonitorForwarder {
                 return ((AtomicConcept)c1).getURI().compareTo(((AtomicConcept)c2).getURI());
             case 1:
                 {
-                    AtMostAbstractRoleGuard g1=(AtMostAbstractRoleGuard)c1;
-                    AtMostAbstractRoleGuard g2=(AtMostAbstractRoleGuard)c2;
+                    AtMostGuard g1=(AtMostGuard)c1;
+                    AtMostGuard g2=(AtMostGuard)c2;
                     int comparison=RoleComparator.INSTANCE.compare(g1.getOnRole(),g2.getOnRole());
                     if (comparison!=0)
                         return comparison;
@@ -724,7 +724,7 @@ public class Debugger extends TableauMonitorForwarder {
             }
         }
         protected int getConceptType(Concept c) {
-            if (c instanceof AtMostAbstractRoleGuard)
+            if (c instanceof AtMostGuard)
                 return 1;
             else if (c instanceof AtomicConcept)
                 return 0;
@@ -793,7 +793,7 @@ public class Debugger extends TableauMonitorForwarder {
         }
         
         protected int getConceptType(Concept c) {
-            if (c instanceof AtMostAbstractRoleGuard)
+            if (c instanceof AtMostGuard)
                 return 1;
             else if (c instanceof AtomicConcept)
                 return 0;

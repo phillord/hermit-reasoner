@@ -1,12 +1,4 @@
-/*
- * 
- * Version 0.5.0
- *
- * 2008-08-19
- * 
- * Copyright 2008 by Oxford University; see license.txt for details
- */
-
+// Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT;
 
 import java.io.BufferedInputStream;
@@ -42,7 +34,6 @@ import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.SingleDirectBlockingChecker;
 import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
-import org.semanticweb.HermiT.existentials.DepthFirstStrategy;
 import org.semanticweb.HermiT.existentials.ExpansionStrategy;
 import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
 import org.semanticweb.HermiT.hierarchy.Classifier;
@@ -735,9 +726,6 @@ public class Reasoner implements Serializable {
         switch (config.existentialStrategyType) {
         case CREATION_ORDER:
             existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
-            break;
-        case DEPTH_FIRST:
-            existentialsExpansionStrategy=new DepthFirstStrategy(blockingStrategy);
             break;
         case EL:
             existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,true);

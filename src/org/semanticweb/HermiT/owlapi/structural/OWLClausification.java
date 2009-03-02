@@ -21,7 +21,7 @@ import java.util.Set;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
 import org.semanticweb.HermiT.model.AtLeastConcreteRoleConcept;
-import org.semanticweb.HermiT.model.AtMostAbstractRoleGuard;
+import org.semanticweb.HermiT.model.AtMostGuard;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
@@ -434,7 +434,7 @@ public class OWLClausification implements Serializable {
         private final int amqOffset; // the number of "negativeAtMostReplacements" which have already been clausified
         protected final List<Atom> m_headAtoms;
         protected final List<Atom> m_bodyAtoms;
-        protected final Set<AtMostAbstractRoleGuard> m_atMostRoleGuards;
+        protected final Set<AtMostGuard> m_atMostRoleGuards;
         protected final Set<Atom> m_positiveFacts;
         protected final boolean m_renameAtMost;
         protected int m_yIndex;
@@ -446,7 +446,7 @@ public class OWLClausification implements Serializable {
             this.amqOffset=amqOffset;
             m_headAtoms=new ArrayList<Atom>();
             m_bodyAtoms=new ArrayList<Atom>();
-            m_atMostRoleGuards=new HashSet<AtMostAbstractRoleGuard>();
+            m_atMostRoleGuards=new HashSet<AtMostGuard>();
             m_positiveFacts=positiveFacts;
             m_renameAtMost=renameAtMost;
             m_factory=factory;
@@ -660,7 +660,7 @@ public class OWLClausification implements Serializable {
                     OWLObjectProperty internalObjectProperty=(OWLObjectProperty)((OWLObjectPropertyInverse)object.getProperty()).getInverse();
                     onRole=InverseRole.create(AtomicRole.createObjectRole(internalObjectProperty.getURI().toString()));
                 }
-                AtMostAbstractRoleGuard atMostRole=AtMostAbstractRoleGuard.create(object.getCardinality(),onRole,toAtomicConcept);
+                AtMostGuard atMostRole=AtMostGuard.create(object.getCardinality(),onRole,toAtomicConcept);
                 m_atMostRoleGuards.add(atMostRole);
                 m_headAtoms.add(Atom.create(atMostRole,new Term[] { X }));
                 // This is an optimization that is described in the SHOIQ paper
@@ -720,7 +720,7 @@ public class OWLClausification implements Serializable {
          * @return the number of new "negativeAtMostReplacements" introduced
          */
         public int clausifyAtMostStuff(Collection<DLClause> dlClauses) {
-            for (AtMostAbstractRoleGuard atMostRole : m_atMostRoleGuards) {
+            for (AtMostGuard atMostRole : m_atMostRoleGuards) {
                 m_bodyAtoms.add(Atom.create(atMostRole,new Term[] { X }));
                 Role onRole=atMostRole.getOnRole();
                 OWLObjectPropertyExpression onObjectProperty;

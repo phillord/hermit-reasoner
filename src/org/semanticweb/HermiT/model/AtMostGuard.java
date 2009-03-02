@@ -6,14 +6,14 @@ import org.semanticweb.HermiT.Namespaces;
 /**
  * Represents a guard for number restrictions on abstract roles.
  */
-public class AtMostAbstractRoleGuard extends AtomicConcept {
+public class AtMostGuard extends AtomicConcept {
     private static final long serialVersionUID=7197886700065386931L;
 
     protected final int m_cardinality;
     protected final Role m_onRole;
     protected final AtomicConcept m_toAtomicConcept;
     
-    protected AtMostAbstractRoleGuard(int cardinality,Role onRole,AtomicConcept toAtomicConcept) {
+    protected AtMostGuard(int cardinality,Role onRole,AtomicConcept toAtomicConcept) {
         super("internal:(atMost "+cardinality+" "+onRole.toString()+" "+toAtomicConcept.getURI()+")");
         m_cardinality=cardinality;
         m_onRole=onRole;
@@ -35,16 +35,16 @@ public class AtMostAbstractRoleGuard extends AtomicConcept {
         return "(atMost "+m_cardinality+" "+m_onRole.toString(namespaces)+" "+m_toAtomicConcept.toString(namespaces)+")";
     }
 
-    protected static InterningManager<AtMostAbstractRoleGuard> s_interningManager=new InterningManager<AtMostAbstractRoleGuard>() {
-        protected boolean equal(AtMostAbstractRoleGuard object1,AtMostAbstractRoleGuard object2) {
+    protected static InterningManager<AtMostGuard> s_interningManager=new InterningManager<AtMostGuard>() {
+        protected boolean equal(AtMostGuard object1,AtMostGuard object2) {
             return object1.m_uri.equals(object2.m_uri);
         }
-        protected int getHashCode(AtMostAbstractRoleGuard object) {
+        protected int getHashCode(AtMostGuard object) {
             return object.m_uri.hashCode();
         }
     };
     
-    public static AtMostAbstractRoleGuard create(int cardinality,Role onRole,AtomicConcept toAtomicConcept) {
-        return s_interningManager.intern(new AtMostAbstractRoleGuard(cardinality,onRole,toAtomicConcept));
+    public static AtMostGuard create(int cardinality,Role onRole,AtomicConcept toAtomicConcept) {
+        return s_interningManager.intern(new AtMostGuard(cardinality,onRole,toAtomicConcept));
     }
 }

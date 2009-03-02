@@ -8,67 +8,50 @@ import org.semanticweb.HermiT.model.dataranges.DataRange;
 /**
  * Represents an at-least data property concept.
  */
-public class AtLeastConcreteRoleConcept extends ExistentialConcept implements
-        DLPredicate {
+public class AtLeastConcreteRoleConcept extends ExistentialConcept implements DLPredicate {
 
-    private static final long serialVersionUID = -9188905009088347624L;
+    private static final long serialVersionUID=-9188905009088347624L;
 
-    protected final int number;
-    protected final AtomicRole onAtomicConcreteRole;
-    protected final AbstractDataRange toDataRange;
+    protected final int m_number;
+    protected final AtomicRole m_onAtomicConcreteRole;
+    protected final AbstractDataRange m_toDataRange;
 
-    protected AtLeastConcreteRoleConcept(int number,
-            AtomicRole onAtomicConcreteRole, AbstractDataRange toDataRange) {
-        if (!onAtomicConcreteRole.isRestrictedToDatatypes()) {
-            throw new RuntimeException("Data restrictions on object roles are not allowed"); // but could be -rob
-        }
-        this.number = number;
-        this.onAtomicConcreteRole = onAtomicConcreteRole;
-        this.toDataRange = toDataRange;
+    protected AtLeastConcreteRoleConcept(int number,AtomicRole onAtomicConcreteRole,AbstractDataRange toDataRange) {
+        if (!onAtomicConcreteRole.isRestrictedToDatatypes())
+            throw new RuntimeException("Data restrictions on object roles are not allowed");
+        m_number=number;
+        m_onAtomicConcreteRole=onAtomicConcreteRole;
+        m_toDataRange=toDataRange;
     }
-
     public int getNumber() {
-        return number;
+        return m_number;
     }
-
     public AtomicRole getOnAtomicConcreteRole() {
-        return onAtomicConcreteRole;
+        return m_onAtomicConcreteRole;
     }
-
     public AbstractDataRange getToDataRange() {
-        return toDataRange;
+        return m_toDataRange;
     }
-
     public int getArity() {
         return 1;
     }
-
     public String toString(Namespaces namespaces) {
-        return "atLeast(" + number + ' ' + onAtomicConcreteRole.toString(namespaces)
-                + ' ' + toDataRange.toString(namespaces) + ')';
+        return "atLeast("+m_number+' '+m_onAtomicConcreteRole.toString(namespaces)+' '+m_toDataRange.toString(namespaces)+')';
     }
-
     protected Object readResolve() {
         return s_interningManager.intern(this);
     }
 
-    protected static InterningManager<AtLeastConcreteRoleConcept> s_interningManager = new InterningManager<AtLeastConcreteRoleConcept>() {
-        protected boolean equal(AtLeastConcreteRoleConcept object1,
-                AtLeastConcreteRoleConcept object2) {
-            return object1.getNumber() == object2.getNumber()
-                    && object1.getOnAtomicConcreteRole() == object2.getOnAtomicConcreteRole()
-                    && object1.getToDataRange() == object2.getToDataRange();
+    protected static InterningManager<AtLeastConcreteRoleConcept> s_interningManager=new InterningManager<AtLeastConcreteRoleConcept>() {
+        protected boolean equal(AtLeastConcreteRoleConcept object1,AtLeastConcreteRoleConcept object2) {
+            return object1.getNumber()==object2.getNumber()&&object1.getOnAtomicConcreteRole()==object2.getOnAtomicConcreteRole()&&object1.getToDataRange()==object2.getToDataRange();
         }
-
         protected int getHashCode(AtLeastConcreteRoleConcept object) {
-            return (object.getNumber() * 7 + object.getOnAtomicConcreteRole().hashCode())
-                    * 7 + object.getToDataRange().hashCode();
+            return (object.getNumber()*7+object.getOnAtomicConcreteRole().hashCode())*7+object.getToDataRange().hashCode();
         }
     };
-
-    public static AtLeastConcreteRoleConcept create(int number,
-            AtomicRole onAbstractDataProperty, DataRange toDataRange) {
-        return s_interningManager.intern(new AtLeastConcreteRoleConcept(number,
-                onAbstractDataProperty, toDataRange));
+    
+    public static AtLeastConcreteRoleConcept create(int number,AtomicRole onAbstractDataProperty,DataRange toDataRange) {
+        return s_interningManager.intern(new AtLeastConcreteRoleConcept(number,onAbstractDataProperty,toDataRange));
     }
 }
