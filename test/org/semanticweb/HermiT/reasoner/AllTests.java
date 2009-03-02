@@ -9,11 +9,9 @@ public class AllTests extends TestCase {
     public static Test suite() {
         TestSuite suite = new TestSuite("Tests for HermiT as a blackbox.");
         // $JUnit-BEGIN$
+        suite.addTest(AllQuickTests.suite());
         suite.addTestSuite(HeavyReasonerTest.class);
-        suite.addTestSuite(ReasonerTest.class);
-        suite.addTestSuite(DatatypesTest.class);
-        suite.addTestSuite(IndividualReuseTest.class);
-        suite.addTestSuite(ComplexConceptTest.class);
+        suite.addTestSuite(HeavyReasonerIndividualReuseTest.class);
         // $JUnit-END$
         return suite;
     }

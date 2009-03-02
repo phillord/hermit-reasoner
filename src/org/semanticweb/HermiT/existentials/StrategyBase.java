@@ -2,8 +2,8 @@
 package org.semanticweb.HermiT.existentials;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.ArrayList;
-import java.util.Collection;
 
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
@@ -22,80 +22,54 @@ import org.semanticweb.HermiT.tableau.Tableau;
 /**
  * Implements the common bits of an ExistentialsExpansionStrategy, leaving only actual processing of existentials in need of expansion to subclasses.
  */
-public abstract class StrategyBase implements Serializable, ExpansionStrategy {
-    private static final long serialVersionUID = 2831957929321676444L;
-    protected final BlockingStrategy blockingStrategy;
-    protected Tableau tableau;
-    protected ExtensionManager extensionManager;
-    protected ExistentialExpansionManager existentialExpansionManager;
-    protected DescriptionGraphManager descriptionGraphManager;
+public abstract class StrategyBase implements Serializable,ExpansionStrategy {
+    private static final long serialVersionUID=2831957929321676444L;
 
-    /** Cache for expandExistentials to prevent concurrent modification */
-    protected Collection<ExistentialConcept> curExistentials;
+    protected final BlockingStrategy m_blockingStrategy;
+    protected final boolean m_expandNodeAtATime;
+    protected final List<ExistentialConcept> m_processedExistentials;
+    protected Tableau m_tableau;
+    protected ExtensionManager m_extensionManager;
+    protected ExistentialExpansionManager m_existentialExpansionManager;
+    protected DescriptionGraphManager m_descriptionGraphManager;
 
-    public StrategyBase(BlockingStrategy strategy) {
-        blockingStrategy=strategy;
-        curExistentials=new ArrayList<ExistentialConcept>();
+    public StrategyBase(BlockingStrategy blockingStrategy,boolean expandNodeAtATime) {
+        m_blockingStrategy=blockingStrategy;
+        m_expandNodeAtATime=expandNodeAtATime;
+        m_processedExistentials=new ArrayList<ExistentialConcept>();
     }
-
     public void initialize(Tableau tableau) {
-        this.tableau=tableau;
-        extensionManager=tableau.getExtensionManager();
-        existentialExpansionManager=tableau.getExistentialExpansionManager();
-        descriptionGraphManager=tableau.getDescriptionGraphManager();
-        blockingStrategy.initialize(tableau);
+        m_tableau=tableau;
+        m_extensionManager=tableau.getExtensionManager();
+        m_existentialExpansionManager=tableau.getExistentialExpansionManager();
+        m_descriptionGraphManager=tableau.getDescriptionGraphManager();
+        m_blockingStrategy.initialize(tableau);
     }
-
     public void clear() {
-        blockingStrategy.clear();
-        curExistentials.clear();
+        m_blockingStrategy.clear();
+        m_processedExistentials.clear();
     }
-
-    /**
-     * The real work of expansion is delegated to an Expander object by the expandExistentials(Expander) method.
-     */
-    protected interface Expander extends Serializable {
-        /**
-         * called once for each unsatisfied existential in the tableau
-         * 
-         * @return true if all expansion to be performed on the entire tableau has been completed; otherwise false
-         */
-        boolean expand(AtLeastAbstractRoleConcept c,Node n);
-
-        /**
-         * called after all calls to expand on a tableau have completed
-         * 
-         * @return true if some kind of expansion was performed; false if the tableau contained no existentials in need of expansion
-         */
-        public boolean completeExpansion();
-    }
-
-    /**
-     * provides a hook subclasses can use to implement their own (no-argument) expandExistentials() method. Calls e.expand(...) for each unsatisfied existential in the tableau, or until some call to e.expand returns true.
-     * 
-     * @return e.completeExpansion()
-     */
-    protected boolean expandExistentials(Expander e) {
-        TableauMonitor monitor=tableau.getTableauMonitor();
-        blockingStrategy.computeBlocking();
+    public boolean expandExistentials() {
+        TableauMonitor monitor=m_tableau.getTableauMonitor();
+        m_blockingStrategy.computeBlocking();
         boolean extensionsChanged=false;
-        boolean done=false;
-        for (Node node=tableau.getFirstTableauNode(); node!=null && !done; node=node.getNextTableauNode()) {
-            if (node.isActive() && !node.isBlocked()) {
+        Node node=m_tableau.getFirstTableauNode();
+        while (node!=null && (!extensionsChanged || !m_expandNodeAtATime)) {
+            if (node.isActive() && !node.isBlocked() && node.hasUnprocessedExistentials()) {
                 // The node's set of unprocessed existentials may be changed during operation, so make a local copy to loop over.
-                curExistentials.clear();
-                curExistentials.addAll(node.getUnprocessedExistentials());
-                for (ExistentialConcept existentialConcept : curExistentials) {
-                    if (done)
-                        break;
+                m_processedExistentials.clear();
+                m_processedExistentials.addAll(node.getUnprocessedExistentials());
+                for (int index=0;index<m_processedExistentials.size();index++) {
+                    ExistentialConcept existentialConcept=m_processedExistentials.get(index);
                     if (existentialConcept instanceof AtLeastAbstractRoleConcept) {
                         AtLeastAbstractRoleConcept atLeastAbstractConcept=(AtLeastAbstractRoleConcept)existentialConcept;
-                        switch (existentialExpansionManager.isSatisfied(atLeastAbstractConcept,node)) {
+                        switch (m_existentialExpansionManager.isSatisfied(atLeastAbstractConcept,node)) {
                         case NOT_SATISFIED:
-                            done=e.expand(atLeastAbstractConcept,node);
+                            expandExistential(atLeastAbstractConcept,node);
+                            extensionsChanged=true;
                             break;
                         case PERMANENTLY_SATISFIED:
-                            existentialExpansionManager.markExistentialProcessed(existentialConcept,node);
+                            m_existentialExpansionManager.markExistentialProcessed(existentialConcept,node);
                             if (monitor!=null)
                                 monitor.existentialSatisfied(atLeastAbstractConcept,node);
                             break;
@@ -107,64 +81,57 @@ public abstract class StrategyBase implements Serializable, ExpansionStrategy {
                         }
                     }
                     else if (existentialConcept instanceof AtLeastConcreteRoleConcept) {
-                        existentialExpansionManager.expand((AtLeastConcreteRoleConcept)existentialConcept,node);
-                        existentialExpansionManager.markExistentialProcessed(existentialConcept,node);
+                        m_existentialExpansionManager.expand((AtLeastConcreteRoleConcept)existentialConcept,node);
+                        m_existentialExpansionManager.markExistentialProcessed(existentialConcept,node);
                         extensionsChanged=true;
                     }
                     else if (existentialConcept instanceof ExistsDescriptionGraph) {
                         ExistsDescriptionGraph existsDescriptionGraph=(ExistsDescriptionGraph)existentialConcept;
-                        if (!descriptionGraphManager.isSatisfied(existsDescriptionGraph,node)) {
-                            descriptionGraphManager.expand(existsDescriptionGraph,node);
+                        if (!m_descriptionGraphManager.isSatisfied(existsDescriptionGraph,node)) {
+                            m_descriptionGraphManager.expand(existsDescriptionGraph,node);
                             extensionsChanged=true;
                         }
-                        else if (monitor!=null)
-                            monitor.existentialSatisfied(existsDescriptionGraph,node);
-                        existentialExpansionManager.markExistentialProcessed(existentialConcept,node);
+                        else {
+                            if (monitor!=null)
+                                monitor.existentialSatisfied(existsDescriptionGraph,node);
+                        }
+                        m_existentialExpansionManager.markExistentialProcessed(existentialConcept,node);
                     }
-                    else {
+                    else
                         throw new IllegalStateException("Unsupported type of existential.");
-                    }
-                } // end for existentialConcept
-            } // end if node.isActive...
-        } // end for node
-        return extensionsChanged || e.completeExpansion();
+                }
+            }
+            node=node.getNextTableauNode();
+        }
+        return extensionsChanged;
     }
-
     public void assertionAdded(Concept concept,Node node) {
-        blockingStrategy.assertionAdded(concept,node);
+        m_blockingStrategy.assertionAdded(concept,node);
     }
-
     public void assertionRemoved(Concept concept,Node node) {
-        blockingStrategy.assertionRemoved(concept,node);
+        m_blockingStrategy.assertionRemoved(concept,node);
     }
-
     public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
-        blockingStrategy.assertionAdded(atomicRole,nodeFrom,nodeTo);
+        m_blockingStrategy.assertionAdded(atomicRole,nodeFrom,nodeTo);
     }
-
     public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
-        blockingStrategy.assertionRemoved(atomicRole,nodeFrom,nodeTo);
+        m_blockingStrategy.assertionRemoved(atomicRole,nodeFrom,nodeTo);
     }
-
     public void nodeStatusChanged(Node node) {
-        blockingStrategy.nodeStatusChanged(node);
+        m_blockingStrategy.nodeStatusChanged(node);
     }
-
     public void nodeDestroyed(Node node) {
-        blockingStrategy.nodeDestroyed(node);
+        m_blockingStrategy.nodeDestroyed(node);
     }
-
     public void branchingPointPushed() {
     }
-
     public void backtrack() {
     }
-
     public void modelFound() {
-        blockingStrategy.modelFound();
+        m_blockingStrategy.modelFound();
     }
-
-    public boolean isDeterministic() {
-        return true;
-    }
+    /**
+     * This method performs the actual expansion.
+     */
+    protected abstract void expandExistential(AtLeastAbstractRoleConcept atLeastAbstractRoleConcept,Node forNode);
 }

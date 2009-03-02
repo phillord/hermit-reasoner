@@ -75,63 +75,55 @@ public abstract class AbstractReasonerTest extends TestCase {
     }
 
     /**
-     * Loads an ontology via the OWL API with the standard configuration so that 
+     * Loads an ontology via the OWL API with the standard configuration so that
      * it is available for the custom assert methods.
      * 
      * @param resource
      *            the resource to load
-     * @throws URISyntaxException if the resourceName cannot be convertd into a URI
-     * @throws OWLException if there are problems during the parsing of the ontology in resourceName
-     * @throws LoadingException if the ontology cannot be loaded
-     * @throws IllegalArgumentException inappropriate argument
+     * @throws URISyntaxException
+     *             if the resourceName cannot be convertd into a URI
+     * @throws OWLException
+     *             if there are problems during the parsing of the ontology in resourceName
+     * @throws LoadingException
+     *             if the ontology cannot be loaded
+     * @throws IllegalArgumentException
+     *             inappropriate argument
      */
     protected void loadOntologyFromResource(String resourceName) throws Exception {
-        loadOntologyFromResource(new Configuration(), resourceName);
+        loadOntologyFromResource(getConfiguration(),resourceName);
     }
-    
+
     /**
      * Loads an ontology via the OWL API so that it is available for the custom assert methods.
      * 
-     * @param configuration a configuration for the reasoner instance
+     * @param configuration
+     *            a configuration for the reasoner instance
      * @param resource
      *            the resource to load
-     * @throws URISyntaxException if the resourceName cannot be convertd into a URI
-     * @throws OWLException if there are problems during the parsing of the ontology in resourceName
-     * @throws LoadingException if the ontology cannot be loaded
-     * @throws IllegalArgumentException inappropriate argument
+     * @throws URISyntaxException
+     *             if the resourceName cannot be convertd into a URI
+     * @throws OWLException
+     *             if there are problems during the parsing of the ontology in resourceName
+     * @throws LoadingException
+     *             if the ontology cannot be loaded
+     * @throws IllegalArgumentException
+     *             inappropriate argument
      */
-    protected void loadOntologyFromResource(Configuration configuration, String resourceName) throws Exception {
-        if (configuration==null) {
-            configuration=new Configuration();
-        }
+    protected void loadOntologyFromResource(Configuration configuration,String resourceName) throws Exception {
         m_reasoner=new Reasoner(configuration,getClass().getResource(resourceName).toURI());
     }
 
     /**
-     * Creates and loads an ontology that contains the given axioms. Uses the 
-     * standard configuration for the reasoner instance. Standard 
-     * namespace is "file:/c/test.owl" and that is also the URI of the ontology. 
+     * Creates and loads an ontology that contains the given axioms. Uses the standard configuration
+     * for the reasoner instance. Standard namespace is "file:/c/test.owl" and that is also the URI of the ontology.
      * 
      * @param axioms
      *            in functional style syntax
-     * @throws OWLOntologyCreationException if the ontology could not be created
+     * @throws OWLOntologyCreationException
+     *             if the ontology could not be created
      */
     protected void loadOntologyWithAxioms(String axioms) throws OWLOntologyCreationException {
-        loadOntologyWithAxiomsAndKeys(new Configuration(), axioms, null);
-    }
-    
-    /**
-     * Creates and loads an ontology that contains the given axioms and uses the 
-     * given configuration for the reasoner instance. Standard namespace is 
-     * "file:/c/test.owl" and that is also the URI of the ontology. 
-     * 
-     * @param configuration a configuration for the reasoner instance
-     * @param axioms
-     *            in functional style syntax
-     * @throws OWLOntologyCreationException if the ontology could not be created
-     */
-    protected void loadOntologyWithAxioms(Configuration configuration, String axioms) throws OWLOntologyCreationException {
-        loadOntologyWithAxiomsAndKeys(configuration, axioms, null);
+        loadOntologyWithAxiomsAndKeys(getConfiguration(),axioms,null);
     }
 
     /**
@@ -139,20 +131,26 @@ public abstract class AbstractReasonerTest extends TestCase {
      * 
      * @param axioms
      *            in functional style syntax
-     * @param keys a set of HasKey axioms (till the OWL API supports them)
-     * @throws OWLOntologyCreationException if the ontology could not be created
+     * @param keys
+     *            a set of HasKey axioms (till the OWL API supports them)
+     * @throws OWLOntologyCreationException
+     *             if the ontology could not be created
      */
     protected void loadOntologyWithAxiomsAndKeys(String axioms,Set<OWLHasKeyDummy> keys) throws OWLOntologyCreationException {
-         loadOntologyWithAxiomsAndKeys(new Configuration(),axioms,keys);
+        loadOntologyWithAxiomsAndKeys(getConfiguration(),axioms,keys);
     }
-    
+
     /**
      * creates and loads an ontology that contains the given axioms
      * 
-     * @param configuration a configuration for the reasoner instance
-     * @param axioms in functional style syntax
-     * @param keys a set of key axioms (till the OWL API supports them)
-     * @throws OWLOntologyCreationException if the ontology could not be created
+     * @param configuration
+     *            a configuration for the reasoner instance
+     * @param axioms
+     *            in functional style syntax
+     * @param keys
+     *            a set of key axioms (till the OWL API supports them)
+     * @throws OWLOntologyCreationException
+     *             if the ontology could not be created
      */
     protected void loadOntologyWithAxiomsAndKeys(Configuration configuration,String axioms,Set<OWLHasKeyDummy> keys) throws OWLOntologyCreationException {
         StringBuffer buffer=new StringBuffer();
@@ -168,12 +166,9 @@ public abstract class AbstractReasonerTest extends TestCase {
         buffer.append(")");
         OWLOntologyInputSource input=new StringInputSource(buffer.toString());
         m_ontology=m_ontologyManager.loadOntology(input);
-        if (configuration==null) {
-            configuration=new Configuration();
-        }
         m_reasoner=new Reasoner(configuration,m_ontologyManager,m_ontology,null,keys);
     }
-    
+
     protected void loadOntologyWithAxiomsOnly(String axioms) throws OWLException,InterruptedException {
         StringBuffer buffer=new StringBuffer();
         buffer.append("Namespace(=<file:/c/test.owl#>)");
@@ -191,31 +186,32 @@ public abstract class AbstractReasonerTest extends TestCase {
         m_ontology=m_ontologyManager.loadOntology(input);
     }
 
+    protected void createReasoner() {
+        createReasoner(getConfiguration());
+    }
+
     protected void createReasoner(Configuration configuration) {
-        if (configuration==null)
-            configuration=new Configuration();
         m_reasoner=new Reasoner(configuration,m_ontologyManager,m_ontology);
     }
-    
+
     protected void loadOntologyWithAxioms(String axioms,Configuration configuration) throws OWLException,InterruptedException {
         loadOntologyWithAxiomsOnly(axioms);
         createReasoner(configuration);
     }
-    
-    protected void loadOWLOntology(Configuration configuration, OWLOntology ontology, Set<DescriptionGraph> dgs) {
-        if (configuration==null) {
-            configuration=new Configuration();
-        }
-        if (dgs == null) dgs = Collections.emptySet();
-        m_reasoner=new Reasoner(configuration,m_ontologyManager, ontology, dgs, null);
+
+    protected void loadOWLOntology(Configuration configuration,OWLOntology ontology,Set<DescriptionGraph> descriptionGraphs) {
+        if (descriptionGraphs==null)
+            descriptionGraphs=Collections.emptySet();
+        m_reasoner=new Reasoner(configuration,m_ontologyManager,ontology,descriptionGraphs,null);
     }
 
     /**
-     * Loads the resource resourceName and returns a set of strings such that 
-     * each line in the input resource becomes an entry of the set.  
+     * Loads the resource resourceName and returns a set of strings such that each line in the input resource becomes an entry of the set.
+     * 
      * @param resourceName
      * @return each line from the loaded resource becomes a string in the returned array
-     * @throws IOException if the resource cannot be found
+     * @throws IOException
+     *             if the resource cannot be found
      */
     protected Set<String> getStrings(String resourceName) throws IOException {
         Set<String> strings=new HashSet<String>();
@@ -234,10 +230,12 @@ public abstract class AbstractReasonerTest extends TestCase {
     }
 
     /**
-     * Loads the resource resourceName and returns its content as a string. 
+     * Loads the resource resourceName and returns its content as a string.
+     * 
      * @param resourceName
      * @return the content of the loaded resource as one string
-     * @throws IOException if the resource cannot be found
+     * @throws IOException
+     *             if the resource cannot be found
      */
     protected String getResourceText(String resourceName) throws IOException {
         CharArrayWriter buffer=new CharArrayWriter();
@@ -258,8 +256,8 @@ public abstract class AbstractReasonerTest extends TestCase {
     }
 
     /**
-     * Returns a string with a sorted ancestor list that represents the taxonomy 
-     * of the ontology that is currently loaded in the reasoner. 
+     * Returns a string with a sorted ancestor list that represents the taxonomy of the ontology that is currently loaded in the reasoner.
+     * 
      * @return the taxonomy
      */
     protected String getSubsumptionHierarchyAsText() {
@@ -271,16 +269,22 @@ public abstract class AbstractReasonerTest extends TestCase {
     }
 
     /**
-     * Loads the ontology from ontologyResource and the string in 
-     * controlResource and compares the computed taxonomy for the ontology with 
-     * the one in the controlResource by comparing the sorted ancestor list. 
-     * @param ontologyResource the ontology
-     * @param controlResource the expected taxonomy (sorted ancestor list)
-     * @throws URISyntaxException  if the resources cannot be converted to URIs
-     * @throws OWLException if the ontology is invalid
-     * @throws LoadingException if an error occurs during loading
-     * @throws IllegalArgumentException in case of illegal arguments
-     * @throws IOException if the controlString cannot be loaded
+     * Loads the ontology from ontologyResource and the string in controlResource and compares the computed taxonomy for the ontology with the one in the controlResource by comparing the sorted ancestor list.
+     * 
+     * @param ontologyResource
+     *            the ontology
+     * @param controlResource
+     *            the expected taxonomy (sorted ancestor list)
+     * @throws URISyntaxException
+     *             if the resources cannot be converted to URIs
+     * @throws OWLException
+     *             if the ontology is invalid
+     * @throws LoadingException
+     *             if an error occurs during loading
+     * @throws IllegalArgumentException
+     *             in case of illegal arguments
+     * @throws IOException
+     *             if the controlString cannot be loaded
      */
     protected void assertSubsumptionHierarchy(String controlResource) throws Exception {
         String taxonomy=getSubsumptionHierarchyAsText();
@@ -289,22 +293,22 @@ public abstract class AbstractReasonerTest extends TestCase {
     }
 
     /**
-     * Tests whether the loaded ontology is consistent or not and asserts that 
-     * this coincides with the given parameter satisfiable.
-     * @param satisfiable if the currently loaded ontology is expected to be satisfiable 
+     * Tests whether the loaded ontology is consistent or not and asserts that this coincides with the given parameter satisfiable.
+     * 
+     * @param satisfiable
+     *            if the currently loaded ontology is expected to be satisfiable
      */
     protected void assertABoxSatisfiable(boolean satisfiable) {
         assertEquals(satisfiable,m_reasoner.isConsistent());
     }
 
     /**
-     * Tests whether the atomic concept subAtomicConcept is subsumed by the 
-     * atomic concept superAtomicConcept and asserts that this coincides with 
-     * the expected result. 
-     * @param subAtomicConcept a string that represents an atomic concept. If no 
-     *        namespace is given, file:/c/test.owl# is used as prefix 
-     * @param superAtomicConcept a string that represents an atomic concept. If 
-     *        no namespace is given, file:/c/test.owl# is used as prefix
+     * Tests whether the atomic concept subAtomicConcept is subsumed by the atomic concept superAtomicConcept and asserts that this coincides with the expected result.
+     * 
+     * @param subAtomicConcept
+     *            a string that represents an atomic concept. If no namespace is given, file:/c/test.owl# is used as prefix
+     * @param superAtomicConcept
+     *            a string that represents an atomic concept. If no namespace is given, file:/c/test.owl# is used as prefix
      * @param expectedResult
      */
     protected void assertSubsumedBy(String subAtomicConcept,String superAtomicConcept,boolean expectedResult) {
@@ -315,13 +319,12 @@ public abstract class AbstractReasonerTest extends TestCase {
         boolean result=m_reasoner.isClassSubsumedBy(subAtomicConcept,superAtomicConcept);
         assertEquals(expectedResult,result);
     }
-    
+
     /**
-     * Tests whether the possibly complex concept subConcept is subsumed by the 
-     * possibly complex concept superConcept and asserts that this coincides 
-     * with the expected result.
-     * @param subConcept  
-     * @param superConcept 
+     * Tests whether the possibly complex concept subConcept is subsumed by the possibly complex concept superConcept and asserts that this coincides with the expected result.
+     * 
+     * @param subConcept
+     * @param superConcept
      * @param expectedResult
      */
     protected void assertSubsumedBy(OWLDescription subConcept,OWLDescription superConcept,boolean expectedResult) {
@@ -330,10 +333,10 @@ public abstract class AbstractReasonerTest extends TestCase {
     }
 
     /**
-     * Tests whether the atomic concept atomicConcept is satisfiable and asserts 
-     * that this coincides with the expected result (satisfiable).
-     * @param atomicConcept a string that represents an atomic concept. If no 
-     *        namespace is given, file:/c/test.owl# is used as prefix 
+     * Tests whether the atomic concept atomicConcept is satisfiable and asserts that this coincides with the expected result (satisfiable).
+     * 
+     * @param atomicConcept
+     *            a string that represents an atomic concept. If no namespace is given, file:/c/test.owl# is used as prefix
      * @param satisfiable
      */
     protected void assertSatisfiable(String atomicConcept,boolean satisfiable) {
@@ -341,29 +344,36 @@ public abstract class AbstractReasonerTest extends TestCase {
             atomicConcept="file:/c/test.owl#"+atomicConcept;
         assertEquals(satisfiable,m_reasoner.isClassSatisfiable(atomicConcept));
     }
-    
+
     /**
-     * Tests whether the given possibly complex concept is satisfiable and 
-     * asserts that this coincides with the expected result (satisfiable).
+     * Tests whether the given possibly complex concept is satisfiable and asserts that this coincides with the expected result (satisfiable).
+     * 
      * @param concept
      * @param satisfiable
      */
     protected void assertSatisfiable(OWLDescription concept,boolean satisfiable) throws Exception {
         assertEquals(satisfiable,m_reasoner.isClassSatisfiable(concept));
     }
-    
+
     /**
-     * Tests whether the given individual is an instance of the given concept 
-     * and asserts that this coincides with the expected result. 
+     * Tests whether the given individual is an instance of the given concept and asserts that this coincides with the expected result.
+     * 
      * @param concept
      * @param individual
      * @param expectedResult
      */
-    protected void assertInstanceOf(OWLDescription concept, OWLIndividual individual, boolean expectedResult) {
+    protected void assertInstanceOf(OWLDescription concept,OWLIndividual individual,boolean expectedResult) {
         boolean result=m_reasoner.isInstanceOf(concept,individual);
         assertEquals(expectedResult,result);
     }
-    
+
+    /**
+     * Can be overridden by the subclass to provide a different configuration for the tests.
+     */
+    protected Configuration getConfiguration() {
+        return new Configuration();
+    }
+
     protected static <T> void assertContainsAll(Collection<T> actual,T... control) {
         try {
             assertEquals(control.length,actual.size());

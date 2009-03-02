@@ -21,219 +21,168 @@ import org.semanticweb.HermiT.tableau.TupleTable;
 public class IndividualReuseStrategy extends StrategyBase implements Serializable {
     private static final long serialVersionUID=-7373787507623860081L;
 
-    protected final StrategyBase.Expander expander;
-    protected final Map<LiteralConcept,NodeBranchingPointPair> reusedNodes;
-    protected final Set<LiteralConcept> doReuseConceptsAlways;
-    protected final Set<LiteralConcept> dontReuseConceptsThisRun;
-    protected final Set<LiteralConcept> dontReuseConceptsEver;
-    protected final TupleTable reuseBacktrackingTable;
-    protected final Object[] auxiliaryBuffer;
-    protected int[] indicesByBranchingPoint;
-    protected final boolean isDeterministic;
+    protected final boolean m_isDeterministic;
+    protected final Map<LiteralConcept,NodeBranchingPointPair> m_reusedNodes;
+    protected final Set<LiteralConcept> m_doReuseConceptsAlways;
+    protected final Set<LiteralConcept> m_dontReuseConceptsThisRun;
+    protected final Set<LiteralConcept> m_dontReuseConceptsEver;
+    protected final TupleTable m_reuseBacktrackingTable;
+    protected final Object[] m_auxiliaryBuffer;
+    protected int[] m_indicesByBranchingPoint;
 
-    @SuppressWarnings("serial")
     public IndividualReuseStrategy(BlockingStrategy strategy,boolean isDeterministic) {
-        super(strategy);
-        this.isDeterministic=isDeterministic;
-        reusedNodes=new HashMap<LiteralConcept,NodeBranchingPointPair>();
-        doReuseConceptsAlways=new HashSet<LiteralConcept>();
-        dontReuseConceptsThisRun=new HashSet<LiteralConcept>();
-        dontReuseConceptsEver=new HashSet<LiteralConcept>();
-        reuseBacktrackingTable=new TupleTable(1);
-        auxiliaryBuffer=new Object[1];
-        indicesByBranchingPoint=new int[10];
-        expander=new StrategyBase.Expander() {
-            protected Node expanded;
-            public boolean expand(AtLeastAbstractRoleConcept c,Node n) {
-                if (expanded==null)
-                    expanded=n;
-                else if (expanded!=n)
-                    return true;
-                // Mark existential as processed BEFORE branching takes place:
-                existentialExpansionManager.markExistentialProcessed(c,n);
-                if (!existentialExpansionManager.tryFunctionalExpansion(c,n)&&!tryParentReuse(c,n)&&!expandWithModelReuse(c,n)) {
-                    existentialExpansionManager.doNormalExpansion(c,n);
-                }
-                return false;
-            }
-            public boolean completeExpansion() {
-                if (expanded!=null) {
-                    expanded=null;
-                    return true;
-                }
-                else {
-                    return false;
-                }
-            }
-        };
+        super(strategy,true);
+        m_isDeterministic=isDeterministic;
+        m_reusedNodes=new HashMap<LiteralConcept,NodeBranchingPointPair>();
+        m_doReuseConceptsAlways=new HashSet<LiteralConcept>();
+        m_dontReuseConceptsThisRun=new HashSet<LiteralConcept>();
+        m_dontReuseConceptsEver=new HashSet<LiteralConcept>();
+        m_reuseBacktrackingTable=new TupleTable(1);
+        m_auxiliaryBuffer=new Object[1];
+        m_indicesByBranchingPoint=new int[10];
     }
-
     @SuppressWarnings("unchecked")
     public void initialize(Tableau tableau) {
         super.initialize(tableau);
-        doReuseConceptsAlways.clear();
-        dontReuseConceptsEver.clear();
+        m_doReuseConceptsAlways.clear();
+        m_dontReuseConceptsEver.clear();
         Object object=tableau.getParameters().get("IndividualReuseStrategy.reuseAlways");
-        if (object instanceof Set) {
-            doReuseConceptsAlways.addAll((Set<? extends LiteralConcept>)object);
-        }
+        if (object instanceof Set)
+            m_doReuseConceptsAlways.addAll((Set<? extends LiteralConcept>)object);
         object=tableau.getParameters().get("IndividualReuseStrategy.reuseNever");
-        if (object instanceof Set) {
-            dontReuseConceptsEver.addAll((Set<? extends LiteralConcept>)object);
-        }
+        if (object instanceof Set)
+            m_dontReuseConceptsEver.addAll((Set<? extends LiteralConcept>)object);
     }
-
     public void clear() {
         super.clear();
-        reusedNodes.clear();
-        reuseBacktrackingTable.clear();
-        dontReuseConceptsThisRun.clear();
-        dontReuseConceptsThisRun.addAll(dontReuseConceptsEver);
+        m_reusedNodes.clear();
+        m_reuseBacktrackingTable.clear();
+        m_dontReuseConceptsThisRun.clear();
+        m_dontReuseConceptsThisRun.addAll(m_dontReuseConceptsEver);
     }
-
-    public boolean expandExistentials() {
-        return expandExistentials(expander);
+    public void branchingPointPushed() {
+        int start=m_tableau.getCurrentBranchingPoint().getLevel();
+        int requiredSize=start+1;
+        if (requiredSize>m_indicesByBranchingPoint.length) {
+            int newSize=m_indicesByBranchingPoint.length*3/2;
+            while (requiredSize>newSize)
+                newSize=newSize*3/2;
+            int[] newIndicesByBranchingPoint=new int[newSize];
+            System.arraycopy(m_indicesByBranchingPoint,0,newIndicesByBranchingPoint,0,m_indicesByBranchingPoint.length);
+            m_indicesByBranchingPoint=newIndicesByBranchingPoint;
+        }
+        m_indicesByBranchingPoint[start]=m_reuseBacktrackingTable.getFirstFreeTupleIndex();
     }
-
+    public void backtrack() {
+        int requiredFirstFreeTupleIndex=m_indicesByBranchingPoint[m_tableau.getCurrentBranchingPoint().getLevel()];
+        for (int index=m_reuseBacktrackingTable.getFirstFreeTupleIndex()-1;index>=requiredFirstFreeTupleIndex;--index) {
+            LiteralConcept reuseConcept=(LiteralConcept)m_reuseBacktrackingTable.getTupleObject(index,0);
+            Object result=m_reusedNodes.remove(reuseConcept);
+            assert result!=null;
+        }
+        m_reuseBacktrackingTable.truncate(requiredFirstFreeTupleIndex);
+    }
+    public void modelFound() {
+        m_dontReuseConceptsEver.addAll(m_dontReuseConceptsThisRun);
+    }
+    public boolean isDeterministic() {
+        return m_isDeterministic;
+    }
+    public LiteralConcept getConceptForNode(Node node) {
+        for (Map.Entry<LiteralConcept,NodeBranchingPointPair> entry : m_reusedNodes.entrySet())
+            if (entry.getValue().node==node)
+                return entry.getKey();
+        return null;
+    }
+    public Set<LiteralConcept> getDontReuseConceptsEver() {
+        return m_dontReuseConceptsEver;
+    }
+    protected void expandExistential(AtLeastAbstractRoleConcept atLeastAbstractRoleConcept,Node forNode) {
+        // Mark existential as processed BEFORE branching takes place!
+        m_existentialExpansionManager.markExistentialProcessed(atLeastAbstractRoleConcept,forNode);
+        if (!m_existentialExpansionManager.tryFunctionalExpansion(atLeastAbstractRoleConcept,forNode))
+            if (!tryParentReuse(atLeastAbstractRoleConcept,forNode))
+                if (!expandWithModelReuse(atLeastAbstractRoleConcept,forNode))
+                    m_existentialExpansionManager.doNormalExpansion(atLeastAbstractRoleConcept,forNode);
+    }
     protected boolean tryParentReuse(AtLeastAbstractRoleConcept atLeastAbstractConcept,Node node) {
         if (atLeastAbstractConcept.getNumber()==1) {
             Node parent=node.getParent();
-            if (parent!=null&&extensionManager.containsConceptAssertion(atLeastAbstractConcept.getToConcept(),parent)) {
-                DependencySet dependencySet=extensionManager.getConceptAssertionDependencySet(atLeastAbstractConcept,node);
-                if (!isDeterministic) {
-                    BranchingPoint branchingPoint=new IndividualReuseBranchingPoint(tableau,atLeastAbstractConcept,node,true);
-                    tableau.pushBranchingPoint(branchingPoint);
-                    dependencySet=tableau.getDependencySetFactory().addBranchingPoint(dependencySet,branchingPoint.getLevel());
+            if (parent!=null && m_extensionManager.containsConceptAssertion(atLeastAbstractConcept.getToConcept(),parent)) {
+                DependencySet dependencySet=m_extensionManager.getConceptAssertionDependencySet(atLeastAbstractConcept,node);
+                if (!m_isDeterministic) {
+                    BranchingPoint branchingPoint=new IndividualReuseBranchingPoint(m_tableau,atLeastAbstractConcept,node,true);
+                    m_tableau.pushBranchingPoint(branchingPoint);
+                    dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,branchingPoint.getLevel());
                 }
-                extensionManager.addRoleAssertion(atLeastAbstractConcept.getOnRole(),node,parent,dependencySet);
+                m_extensionManager.addRoleAssertion(atLeastAbstractConcept.getOnRole(),node,parent,dependencySet);
                 return true;
             }
         }
         return false;
     }
-
-    protected boolean expandWithModelReuse
-        (AtLeastAbstractRoleConcept atLeastAbstractConcept, Node node) {
-        LiteralConcept toConcept = atLeastAbstractConcept.getToConcept();
-        if ((toConcept instanceof AtomicConcept) &&
-            Namespaces.isInternalURI(((AtomicConcept) toConcept).getURI())) {
+    protected boolean expandWithModelReuse(AtLeastAbstractRoleConcept atLeastAbstractConcept,Node node) {
+        LiteralConcept toConcept=atLeastAbstractConcept.getToConcept();
+        if ((toConcept instanceof AtomicConcept) && Namespaces.isInternalURI(((AtomicConcept)toConcept).getURI()))
             return false;
-        }
-        if (atLeastAbstractConcept.getNumber()==1 
-                && (doReuseConceptsAlways.contains(toConcept) 
-                        || !dontReuseConceptsThisRun.contains(toConcept))) {
-            // try reuse
-            if (tableau.getTableauMonitor()!=null) {
-                tableau.getTableauMonitor().existentialExpansionStarted(atLeastAbstractConcept,node);
-            }
-            DependencySet dependencySet=extensionManager.getConceptAssertionDependencySet(atLeastAbstractConcept,node);
+        if (atLeastAbstractConcept.getNumber()==1 && (m_doReuseConceptsAlways.contains(toConcept) || !m_dontReuseConceptsThisRun.contains(toConcept))) {
+            if (m_tableau.getTableauMonitor()!=null)
+                m_tableau.getTableauMonitor().existentialExpansionStarted(atLeastAbstractConcept,node);
+            DependencySet dependencySet=m_extensionManager.getConceptAssertionDependencySet(atLeastAbstractConcept,node);
             Node existentialNode;
-            NodeBranchingPointPair reuseInfo=reusedNodes.get(toConcept);
+            NodeBranchingPointPair reuseInfo=m_reusedNodes.get(toConcept);
             if (reuseInfo==null) {
-                // no reuse possible
-                if (!isDeterministic) {
-                    BranchingPoint branchingPoint=new IndividualReuseBranchingPoint(tableau,atLeastAbstractConcept,node,false);
-                    tableau.pushBranchingPoint(branchingPoint);
-                    dependencySet=tableau.getDependencySetFactory().addBranchingPoint(dependencySet,branchingPoint.getLevel());
+                // No existential with the target concept toConcept has been expanded.
+                if (!m_isDeterministic) {
+                    BranchingPoint branchingPoint=new IndividualReuseBranchingPoint(m_tableau,atLeastAbstractConcept,node,false);
+                    m_tableau.pushBranchingPoint(branchingPoint);
+                    dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,branchingPoint.getLevel());
                 }
-                // no idea, why we create a root node here, check if the 
-                // introduction of named nodes in addition to root nodes makes a 
-                // difference
-                existentialNode=tableau.createNewRootNode(dependencySet,0);
-                reuseInfo=new NodeBranchingPointPair(existentialNode,tableau.getCurrentBranchingPoint().getLevel());
-                reusedNodes.put(toConcept,reuseInfo);
-                extensionManager.addConceptAssertion(toConcept,existentialNode,dependencySet);
-                auxiliaryBuffer[0]=toConcept;
-                reuseBacktrackingTable.addTuple(auxiliaryBuffer);
+                // create a root node so that keys are not applicable
+                existentialNode=m_tableau.createNewRootNode(dependencySet,0);
+                reuseInfo=new NodeBranchingPointPair(existentialNode,m_tableau.getCurrentBranchingPoint().getLevel());
+                m_reusedNodes.put(toConcept,reuseInfo);
+                m_extensionManager.addConceptAssertion(toConcept,existentialNode,dependencySet);
+                m_auxiliaryBuffer[0]=toConcept;
+                m_reuseBacktrackingTable.addTuple(m_auxiliaryBuffer);
             }
             else {
                 dependencySet=reuseInfo.node.addCacnonicalNodeDependencySet(dependencySet);
                 existentialNode=reuseInfo.node.getCanonicalNode();
-                dependencySet=tableau.getDependencySetFactory().addBranchingPoint(dependencySet,reuseInfo.branchingPoint);
+                dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,reuseInfo.branchingPoint);
             }
-            extensionManager.addRoleAssertion(atLeastAbstractConcept.getOnRole(),node,existentialNode,dependencySet);
-            if (tableau.getTableauMonitor()!=null) {
-                tableau.getTableauMonitor().existentialExpansionFinished(atLeastAbstractConcept,node);
-            }
+            m_extensionManager.addRoleAssertion(atLeastAbstractConcept.getOnRole(),node,existentialNode,dependencySet);
+            if (m_tableau.getTableauMonitor()!=null)
+                m_tableau.getTableauMonitor().existentialExpansionFinished(atLeastAbstractConcept,node);
             return true;
         }
         return false;
     }
 
-    public void branchingPointPushed() {
-        int start=tableau.getCurrentBranchingPoint().getLevel();
-        int requiredSize=start+1;
-        if (requiredSize>indicesByBranchingPoint.length) {
-            int newSize=indicesByBranchingPoint.length*3/2;
-            while (requiredSize>newSize) {
-                newSize=newSize*3/2;
-            }
-            int[] newIndicesByBranchingPoint=new int[newSize];
-            System.arraycopy(indicesByBranchingPoint,0,newIndicesByBranchingPoint,0,indicesByBranchingPoint.length);
-            indicesByBranchingPoint=newIndicesByBranchingPoint;
-        }
-        indicesByBranchingPoint[start]=reuseBacktrackingTable.getFirstFreeTupleIndex();
-    }
-
-    public void backtrack() {
-        int requiredFirstFreeTupleIndex=indicesByBranchingPoint[tableau.getCurrentBranchingPoint().getLevel()];
-        for (int index=reuseBacktrackingTable.getFirstFreeTupleIndex()-1;index>=requiredFirstFreeTupleIndex;--index) {
-            LiteralConcept reuseConcept=(LiteralConcept)reuseBacktrackingTable.getTupleObject(index,0);
-            Object result=reusedNodes.remove(reuseConcept);
-            assert result!=null;
-        }
-        reuseBacktrackingTable.truncate(requiredFirstFreeTupleIndex);
-    }
-
-    public void modelFound() {
-        dontReuseConceptsEver.addAll(dontReuseConceptsThisRun);
-    }
-
-    public boolean isDeterministic() {
-        return isDeterministic;
-    }
-
-    public LiteralConcept getConceptForNode(Node node) {
-        for (Map.Entry<LiteralConcept,NodeBranchingPointPair> entry : reusedNodes.entrySet()) {
-            if (entry.getValue().node==node) {
-                return entry.getKey();
-            }
-        }
-        return null;
-    }
-
-    public Set<LiteralConcept> getDontReuseConceptsEver() {
-        return dontReuseConceptsEver;
-    }
-
     protected class IndividualReuseBranchingPoint extends BranchingPoint {
         private static final long serialVersionUID=-5715836252258022216L;
 
-        protected final AtLeastAbstractRoleConcept existential;
-        protected final Node node;
-        protected final boolean wasParentReuse;
+        protected final AtLeastAbstractRoleConcept m_existential;
+        protected final Node m_node;
+        protected final boolean m_wasParentReuse;
 
         public IndividualReuseBranchingPoint(Tableau tableau,AtLeastAbstractRoleConcept existential,Node node,boolean wasParentReuse) {
             super(tableau);
-            this.existential=existential;
-            this.node=node;
-            this.wasParentReuse=wasParentReuse;
+            m_existential=existential;
+            m_node=node;
+            m_wasParentReuse=wasParentReuse;
         }
-
         public void startNextChoice(Tableau tableau,DependencySet clashDependencySet) {
-            if (!wasParentReuse) {
-                dontReuseConceptsThisRun.add(existential.getToConcept());
-            }
+            if (!m_wasParentReuse)
+                m_dontReuseConceptsThisRun.add(m_existential.getToConcept());
             DependencySet dependencySet=tableau.getDependencySetFactory().removeBranchingPoint(clashDependencySet,m_level);
-            if (tableau.getTableauMonitor()!=null) {
-                tableau.getTableauMonitor().existentialExpansionStarted(existential,node);
-            }
-            Node existentialNode=tableau.createNewTreeNode(dependencySet,node);
-            extensionManager.addConceptAssertion(existential.getToConcept(),existentialNode,dependencySet);
-            extensionManager.addRoleAssertion(existential.getOnRole(),node,existentialNode,dependencySet);
-            if (tableau.getTableauMonitor()!=null) {
-                tableau.getTableauMonitor().existentialExpansionFinished(existential,node);
-            }
+            if (tableau.getTableauMonitor()!=null)
+                tableau.getTableauMonitor().existentialExpansionStarted(m_existential,m_node);
+            Node existentialNode=tableau.createNewTreeNode(dependencySet,m_node);
+            m_extensionManager.addConceptAssertion(m_existential.getToConcept(),existentialNode,dependencySet);
+            m_extensionManager.addRoleAssertion(m_existential.getOnRole(),m_node,existentialNode,dependencySet);
+            if (tableau.getTableauMonitor()!=null)
+                tableau.getTableauMonitor().existentialExpansionFinished(m_existential,m_node);
         }
     }
 

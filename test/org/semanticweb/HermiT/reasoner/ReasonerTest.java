@@ -346,7 +346,7 @@ public class ReasonerTest extends AbstractReasonerTest {
      }
      public void testHeinsohnTBox4a() throws Exception {
          // Tests role restrictions
-         loadOntologyWithAxioms("", null);
+         loadOntologyWithAxioms("");
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription D = df.getOWLClass(URI.create("file:/c/test.owl#D"));
          OWLDescription E = df.getOWLClass(URI.create("file:/c/test.owl#E"));
@@ -373,7 +373,7 @@ public class ReasonerTest extends AbstractReasonerTest {
      
       public void testHeinsohnTBox7() throws Exception {
           // Tests inverse roles
-          loadOntologyWithAxioms("", null);
+          loadOntologyWithAxioms("");
           OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
           OWLDescription A = df.getOWLClass(URI.create("file:/c/test.owl#A"));
           OWLObjectProperty r = df.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
@@ -624,7 +624,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("InverseObjectProperties(f f-)");
          buffer.append("TransitiveObjectProperty(r)");
          buffer.append("FunctionalObjectProperty(f)");
-         loadOntologyWithAxioms(buffer.toString(),null);
+         loadOntologyWithAxioms(buffer.toString());
 
          OWLDataFactory df=OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription p1=df.getOWLClass(URI.create("file:/c/test.owl#p1"));
@@ -1056,7 +1056,7 @@ public class ReasonerTest extends AbstractReasonerTest {
      }
      public void testIanBug3() throws Exception {
          // slow, but works!
-         loadOntologyWithAxioms("", null);
+         loadOntologyWithAxioms("");
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription a = df.getOWLClass(URI.create("file:/c/test.owl#a"));
@@ -1520,7 +1520,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLClassAssertionAxiom nOfAtMostOneInvS = df.getOWLClassAssertionAxiom(n, atMostOneInvS);
          m_ontologyManager.addAxiom(m_ontology, nOfAtMostOneInvS);
          
-         createReasoner(null);
+         createReasoner();
                            
          // [some [inv S] [and A B [some R [and A B]]]]
          OWLDescription desc =
@@ -1568,7 +1568,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLClassAssertionAxiom nOfAtMostTwoInvS = df.getOWLClassAssertionAxiom(n, atMostTwoInvS);
          m_ontologyManager.addAxiom(m_ontology, nOfAtMostTwoInvS);
          
-         createReasoner(null);
+         createReasoner();
          
          // [some [inv S] [and A [some R A]]]
          OWLDescription desc =
@@ -1618,7 +1618,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLClassAssertionAxiom nOfAtMostTwoInvS = df.getOWLClassAssertionAxiom(n, atMostTwoInvS);
          m_ontologyManager.addAxiom(m_ontology, nOfAtMostTwoInvS);
          
-         createReasoner(null);
+         createReasoner();
 
          // [atLeast 2 [inv S] [or A B]]
          OWLDescription desc = df.getOWLObjectMinCardinalityRestriction(invS, 2, df.getOWLObjectUnionOf(A, B));
@@ -1650,7 +1650,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLClassAssertionAxiom nOfAtMostTwoInvS = df.getOWLClassAssertionAxiom(n, atMostTwoInvS);
          m_ontologyManager.addAxiom(m_ontology, nOfAtMostTwoInvS);
          
-         createReasoner(null);
+         createReasoner();
 
          // [atLeast 1 [inv S] [not A]]
          OWLDescription desc = df.getOWLObjectMinCardinalityRestriction(invS, 1, df.getOWLObjectComplementOf(A));

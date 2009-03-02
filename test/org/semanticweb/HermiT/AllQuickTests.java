@@ -16,7 +16,7 @@ public class AllQuickTests extends TestCase {
         suite.addTest(org.semanticweb.HermiT.owlapi.AllTests.suite());
         // Tests Hermit as a blackbox, i.e., by only using the official
         // interface.
-        suite.addTest(org.semanticweb.HermiT.reasoner.AllUnitTests.suite());
+        suite.addTest(org.semanticweb.HermiT.reasoner.AllQuickTests.suite());
         // Tests for the internals of the reasoner.
         suite.addTest(org.semanticweb.HermiT.tableau.AllTests.suite());
         // Unit tests for various utility functions.
