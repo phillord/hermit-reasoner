@@ -29,14 +29,14 @@ public abstract class DatatypeRestriction
     
     private static final long serialVersionUID = 524235536504588458L;
     
-    protected Set<Facets> supportedFacets = new HashSet<Facets>();
+    protected Set<Facet> supportedFacets = new HashSet<Facet>();
     
     /**
      * A list of facets that are supported by at least one concrete 
      * implementation.
      * @author BGlimm
      */
-    public enum Facets {
+    public enum Facet {
         LENGTH, MIN_LENGTH, MAX_LENGTH, 
         PATTERN, 
         MIN_INCLUSIVE, MIN_EXCLUSIVE, MAX_INCLUSIVE, MAX_EXCLUSIVE 
@@ -264,7 +264,7 @@ public abstract class DatatypeRestriction
     /* (non-Javadoc)
      * @see org.semanticweb.HermiT.model.dataranges.DataRange#supports(org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets)
      */
-    public boolean supports(Facets facet) {
+    public boolean supports(Facet facet) {
         return supportedFacets.contains(facet);
     }
     

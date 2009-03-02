@@ -54,7 +54,7 @@ import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionString;
 import org.semanticweb.HermiT.model.dataranges.EnumeratedDataRange;
 import org.semanticweb.HermiT.model.dataranges.DataConstant.Impl;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.DT;
-import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets;
+import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facet;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLClassAssertionAxiom;
@@ -1346,59 +1346,59 @@ public class OWLClausification implements Serializable {
             }
             else if (dataType.equals(factory.getOWLDataType(DT.NONNEGATIVEINTEGER.getURI()))) {
                 currentDataRange=new DatatypeRestrictionInteger(DT.NONNEGATIVEINTEGER);
-                currentDataRange.addFacet(Facets.MIN_INCLUSIVE,"0");
+                currentDataRange.addFacet(Facet.MIN_INCLUSIVE,"0");
             }
             else if (dataType.equals(factory.getOWLDataType(DT.NONPOSITIVEINTEGER.getURI()))) {
                 currentDataRange=new DatatypeRestrictionInteger(DT.NONPOSITIVEINTEGER);
-                currentDataRange.addFacet(Facets.MAX_INCLUSIVE,"0");
+                currentDataRange.addFacet(Facet.MAX_INCLUSIVE,"0");
             }
             else if (dataType.equals(factory.getOWLDataType(DT.POSITIVEINTEGER.getURI()))) {
                 currentDataRange=new DatatypeRestrictionInteger(DT.POSITIVEINTEGER);
-                currentDataRange.addFacet(Facets.MIN_INCLUSIVE,"1");
+                currentDataRange.addFacet(Facet.MIN_INCLUSIVE,"1");
             }
             else if (dataType.equals(factory.getOWLDataType(DT.NEGATIVEINTEGER.getURI()))) {
                 currentDataRange=new DatatypeRestrictionInteger(DT.NEGATIVEINTEGER);
-                currentDataRange.addFacet(Facets.MAX_INCLUSIVE,"-1");
+                currentDataRange.addFacet(Facet.MAX_INCLUSIVE,"-1");
             }
             else if (dataType.equals(factory.getOWLDataType(DT.LONG.getURI()))) {
                 currentDataRange=new DatatypeRestrictionInteger(DT.LONG);
-                currentDataRange.addFacet(Facets.MAX_INCLUSIVE,""+Long.MAX_VALUE);
-                currentDataRange.addFacet(Facets.MIN_INCLUSIVE,""+Long.MIN_VALUE);
+                currentDataRange.addFacet(Facet.MAX_INCLUSIVE,""+Long.MAX_VALUE);
+                currentDataRange.addFacet(Facet.MIN_INCLUSIVE,""+Long.MIN_VALUE);
             }
             else if (dataType.equals(factory.getOWLDataType(DT.INT.getURI()))) {
                 currentDataRange=new DatatypeRestrictionInteger(DT.INT);
-                currentDataRange.addFacet(Facets.MAX_INCLUSIVE,""+Integer.MAX_VALUE);
-                currentDataRange.addFacet(Facets.MIN_INCLUSIVE,""+Integer.MIN_VALUE);
+                currentDataRange.addFacet(Facet.MAX_INCLUSIVE,""+Integer.MAX_VALUE);
+                currentDataRange.addFacet(Facet.MIN_INCLUSIVE,""+Integer.MIN_VALUE);
             }
             else if (dataType.equals(factory.getOWLDataType(DT.SHORT.getURI()))) {
                 currentDataRange=new DatatypeRestrictionInteger(DT.SHORT);
-                currentDataRange.addFacet(Facets.MAX_INCLUSIVE,""+Short.MAX_VALUE);
-                currentDataRange.addFacet(Facets.MIN_INCLUSIVE,""+Short.MIN_VALUE);
+                currentDataRange.addFacet(Facet.MAX_INCLUSIVE,""+Short.MAX_VALUE);
+                currentDataRange.addFacet(Facet.MIN_INCLUSIVE,""+Short.MIN_VALUE);
             }
             else if (dataType.equals(factory.getOWLDataType(DT.BYTE.getURI()))) {
                 currentDataRange=new DatatypeRestrictionInteger(DT.BYTE);
-                currentDataRange.addFacet(Facets.MAX_INCLUSIVE,""+Byte.MAX_VALUE);
-                currentDataRange.addFacet(Facets.MIN_INCLUSIVE,""+Byte.MIN_VALUE);
+                currentDataRange.addFacet(Facet.MAX_INCLUSIVE,""+Byte.MAX_VALUE);
+                currentDataRange.addFacet(Facet.MIN_INCLUSIVE,""+Byte.MIN_VALUE);
             }
             else if (dataType.equals(factory.getOWLDataType(DT.UNSIGNEDLONG.getURI()))) {
                 currentDataRange=new DatatypeRestrictionInteger(DT.UNSIGNEDLONG);
-                currentDataRange.addFacet(Facets.MAX_INCLUSIVE,""+(new BigInteger(""+Long.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
-                currentDataRange.addFacet(Facets.MIN_INCLUSIVE,"0");
+                currentDataRange.addFacet(Facet.MAX_INCLUSIVE,""+(new BigInteger(""+Long.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
+                currentDataRange.addFacet(Facet.MIN_INCLUSIVE,"0");
             }
             else if (dataType.equals(factory.getOWLDataType(DT.UNSIGNEDINT.getURI()))) {
                 currentDataRange=new DatatypeRestrictionInteger(DT.UNSIGNEDINT);
-                currentDataRange.addFacet(Facets.MAX_INCLUSIVE,""+(new BigInteger(""+Integer.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
-                currentDataRange.addFacet(Facets.MIN_INCLUSIVE,"0");
+                currentDataRange.addFacet(Facet.MAX_INCLUSIVE,""+(new BigInteger(""+Integer.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
+                currentDataRange.addFacet(Facet.MIN_INCLUSIVE,"0");
             }
             else if (dataType.equals(factory.getOWLDataType(DT.UNSIGNEDSHORT.getURI()))) {
                 currentDataRange=new DatatypeRestrictionInteger(DT.UNSIGNEDSHORT);
-                currentDataRange.addFacet(Facets.MAX_INCLUSIVE,""+(new BigInteger(""+Short.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
-                currentDataRange.addFacet(Facets.MIN_INCLUSIVE,"0");
+                currentDataRange.addFacet(Facet.MAX_INCLUSIVE,""+(new BigInteger(""+Short.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
+                currentDataRange.addFacet(Facet.MIN_INCLUSIVE,"0");
             }
             else if (dataType.equals(factory.getOWLDataType(DT.UNSIGNEDBYTE.getURI()))) {
                 currentDataRange=new DatatypeRestrictionInteger(DT.UNSIGNEDBYTE);
-                currentDataRange.addFacet(Facets.MAX_INCLUSIVE,""+(new BigInteger(""+Byte.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
-                currentDataRange.addFacet(Facets.MIN_INCLUSIVE,"0");
+                currentDataRange.addFacet(Facet.MAX_INCLUSIVE,""+(new BigInteger(""+Byte.MAX_VALUE)).multiply(new BigInteger("2").add(BigInteger.ONE)));
+                currentDataRange.addFacet(Facet.MIN_INCLUSIVE,"0");
             }
             else if (dataType.equals(factory.getOWLDataType(DT.STRING.getURI()))) {
                 currentDataRange=new DatatypeRestrictionString(DT.STRING);
@@ -1442,38 +1442,38 @@ public class OWLClausification implements Serializable {
                 String value=currentConstant.getValue();
                 switch (facetOWL) {
                 case LENGTH: {
-                    currentDataRange.addFacet(Facets.LENGTH,value);
+                    currentDataRange.addFacet(Facet.LENGTH,value);
                 }
                     break;
                 case MAX_LENGTH: {
-                    currentDataRange.addFacet(Facets.MAX_LENGTH,value);
+                    currentDataRange.addFacet(Facet.MAX_LENGTH,value);
                 }
                     break;
                 case MIN_LENGTH: {
-                    currentDataRange.addFacet(Facets.MIN_LENGTH,value);
+                    currentDataRange.addFacet(Facet.MIN_LENGTH,value);
                 }
                     break;
                 case MIN_INCLUSIVE: {
-                    currentDataRange.addFacet(Facets.MIN_INCLUSIVE,value);
+                    currentDataRange.addFacet(Facet.MIN_INCLUSIVE,value);
                 }
                     break;
                 case MIN_EXCLUSIVE: {
-                    currentDataRange.addFacet(Facets.MIN_EXCLUSIVE,value);
+                    currentDataRange.addFacet(Facet.MIN_EXCLUSIVE,value);
                 }
                     break;
                 case MAX_INCLUSIVE: {
-                    currentDataRange.addFacet(Facets.MAX_INCLUSIVE,value);
+                    currentDataRange.addFacet(Facet.MAX_INCLUSIVE,value);
                 }
                     break;
                 case MAX_EXCLUSIVE: {
-                    currentDataRange.addFacet(Facets.MAX_EXCLUSIVE,value);
+                    currentDataRange.addFacet(Facet.MAX_EXCLUSIVE,value);
                 }
                     break;
                 // case FRACTION_DIGITS: {
                 // facet = DatatypeRestrictionLiteral.Facets.FRACTION_DIGITS;
                 // } break;
                 case PATTERN: {
-                    currentDataRange.addFacet(Facets.PATTERN,value);
+                    currentDataRange.addFacet(Facet.PATTERN,value);
                 }
                     break;
                 // case TOTAL_DIGITS: {

@@ -39,12 +39,12 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction
      */
     public DatatypeRestrictionInteger(DT datatype) {
         this.datatype = datatype;
-        this.supportedFacets = new HashSet<Facets>(
-                Arrays.asList(new Facets[] {
-                        Facets.MIN_INCLUSIVE, 
-                        Facets.MIN_EXCLUSIVE, 
-                        Facets.MAX_INCLUSIVE, 
-                        Facets.MAX_EXCLUSIVE
+        this.supportedFacets = new HashSet<Facet>(
+                Arrays.asList(new Facet[] {
+                        Facet.MIN_INCLUSIVE, 
+                        Facet.MIN_EXCLUSIVE, 
+                        Facet.MAX_INCLUSIVE, 
+                        Facet.MAX_EXCLUSIVE
                 })
         );
     }
@@ -80,30 +80,30 @@ public class DatatypeRestrictionInteger extends DatatypeRestriction
     /* (non-Javadoc)
      * @see org.semanticweb.HermiT.model.dataranges.DataRange#addFacet(org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets, java.lang.String)
      */
-    public void addFacet(Facets facet, String value) {
+    public void addFacet(Facet facet, String value) {
         IntegerInterval iNew = null;
         try {
             BigDecimal bd = new BigDecimal(value);
-            if (facet == Facets.MIN_EXCLUSIVE || facet == Facets.MAX_INCLUSIVE) {
+            if (facet == Facet.MIN_EXCLUSIVE || facet == Facet.MAX_INCLUSIVE) {
                 bd = bd.setScale(0, BigDecimal.ROUND_FLOOR);
             } else {
                 bd = bd.setScale(0, BigDecimal.ROUND_CEILING);
             }
-            if (facet == Facets.MIN_EXCLUSIVE) {
+            if (facet == Facet.MIN_EXCLUSIVE) {
                 bd = bd.add(BigDecimal.ONE);
             }
-            if (facet == Facets.MAX_EXCLUSIVE) {
+            if (facet == Facet.MAX_EXCLUSIVE) {
                 bd = bd.subtract(BigDecimal.ONE);
             }
-            if (facet == Facets.MIN_EXCLUSIVE 
-                    || facet == Facets.MIN_INCLUSIVE) {
+            if (facet == Facet.MIN_EXCLUSIVE 
+                    || facet == Facet.MIN_INCLUSIVE) {
                 try {
                     iNew = new IntegerIntervalFin(bd.longValueExact(), null);
                 } catch (ArithmeticException e) {
                     iNew = new IntegerIntervalBig(bd.toBigInteger(), null);
                 }
-            } else if (facet == Facets.MAX_EXCLUSIVE 
-                    || facet == Facets.MAX_INCLUSIVE) {
+            } else if (facet == Facet.MAX_EXCLUSIVE 
+                    || facet == Facet.MAX_INCLUSIVE) {
                 try {
                     iNew = new IntegerIntervalFin(null, bd.longValueExact());
                 } catch (ArithmeticException e) {

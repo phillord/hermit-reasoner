@@ -24,7 +24,7 @@ public class DatatypeRestrictionUnknown extends DatatypeRestriction {
      */
     public DatatypeRestrictionUnknown(DT datatype) {
         this.datatype = datatype;
-        this.supportedFacets = new HashSet<Facets>();
+        this.supportedFacets = new HashSet<Facet>();
     }
 
     /* (non-Javadoc)
@@ -44,7 +44,7 @@ public class DatatypeRestrictionUnknown extends DatatypeRestriction {
     /* (non-Javadoc)
      * @see org.semanticweb.HermiT.model.dataranges.DataRange#addFacet(org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets, java.lang.String)
      */
-    public void addFacet(Facets facet, String value) {
+    public void addFacet(Facet facet, String value) {
         throw new IllegalArgumentException("Facets are not supported for " +
                         "unknown datatypes.");
     }

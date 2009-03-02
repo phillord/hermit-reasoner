@@ -48,7 +48,7 @@ public class DatatypeRestrictionLiteral extends DatatypeRestriction {
     /* (non-Javadoc)
      * @see org.semanticweb.HermiT.model.dataranges.DataRange#addFacet(org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets, java.lang.String)
      */
-    public void addFacet(Facets facet, String value) {
+    public void addFacet(Facet facet, String value) {
         throw new IllegalArgumentException("Facets are not supported for " +
                         "RDFS Literal.");
     }

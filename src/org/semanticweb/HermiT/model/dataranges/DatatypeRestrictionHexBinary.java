@@ -39,11 +39,11 @@ public class DatatypeRestrictionHexBinary
      */
     public DatatypeRestrictionHexBinary(DT datatype) {
         this.datatype = datatype;
-        supportedFacets = new HashSet<Facets>(
-                Arrays.asList(new Facets[] {
-                        Facets.LENGTH, 
-                        Facets.MIN_LENGTH, 
-                        Facets.MAX_LENGTH
+        supportedFacets = new HashSet<Facet>(
+                Arrays.asList(new Facet[] {
+                        Facet.LENGTH, 
+                        Facet.MIN_LENGTH, 
+                        Facet.MAX_LENGTH
                 })
         );
         intervals.add(new IntegerIntervalFin(0l, null));
@@ -81,22 +81,22 @@ public class DatatypeRestrictionHexBinary
     /* (non-Javadoc)
      * @see org.semanticweb.HermiT.model.dataranges.DataRange#addFacet(org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets, java.lang.String)
      */
-    public void addFacet(Facets facet, String value) {
-        if (facet == Facets.LENGTH) {
-            addFacet(Facets.MIN_LENGTH, value);
-            addFacet(Facets.MAX_LENGTH, value);
+    public void addFacet(Facet facet, String value) {
+        if (facet == Facet.LENGTH) {
+            addFacet(Facet.MIN_LENGTH, value);
+            addFacet(Facet.MAX_LENGTH, value);
             return;
         }
         IntegerInterval iNew = null;
         try {
             BigInteger bi = new BigInteger(value);
-            if (facet == Facets.MIN_LENGTH) {
+            if (facet == Facet.MIN_LENGTH) {
                 if (IntegerIntervalFin.isLong(bi)) {
                     iNew = new IntegerIntervalFin(bi.longValue(), null);
                 } else {
                     iNew = new IntegerIntervalBig(bi, null);
                 }
-            } else if (facet == Facets.MAX_LENGTH) {
+            } else if (facet == Facet.MAX_LENGTH) {
                 if (IntegerIntervalFin.isLong(bi)) {
                     iNew = new IntegerIntervalFin(0l, bi.longValue());
                 } else {

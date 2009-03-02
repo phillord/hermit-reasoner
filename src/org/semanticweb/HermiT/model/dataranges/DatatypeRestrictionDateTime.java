@@ -38,12 +38,12 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
      */
     public DatatypeRestrictionDateTime(DT datatype) {
         this.datatype = datatype;
-        this.supportedFacets = new HashSet<Facets>(
-                Arrays.asList(new Facets[] {
-                        Facets.MIN_INCLUSIVE, 
-                        Facets.MIN_EXCLUSIVE, 
-                        Facets.MAX_INCLUSIVE, 
-                        Facets.MAX_EXCLUSIVE
+        this.supportedFacets = new HashSet<Facet>(
+                Arrays.asList(new Facet[] {
+                        Facet.MIN_INCLUSIVE, 
+                        Facet.MIN_EXCLUSIVE, 
+                        Facet.MAX_INCLUSIVE, 
+                        Facet.MAX_EXCLUSIVE
                 })
         );
     }
@@ -79,7 +79,7 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
     /* (non-Javadoc)
      * @see org.semanticweb.HermiT.model.dataranges.DataRange#addFacet(org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets, java.lang.String)
      */
-    public void addFacet(Facets facet, String value) {
+    public void addFacet(Facet facet, String value) {
         Long longValue =  null;
         DateTimeInterval iNew = null;
         try {
@@ -88,21 +88,21 @@ public class DatatypeRestrictionDateTime extends DatatypeRestriction {
             e.printStackTrace();
             return;
         }
-        if (facet == Facets.MIN_EXCLUSIVE) {
+        if (facet == Facet.MIN_EXCLUSIVE) {
             longValue = DateTimeInterval.increase(longValue);
         }
-        if (facet == Facets.MAX_EXCLUSIVE) {
+        if (facet == Facet.MAX_EXCLUSIVE) {
             longValue = DateTimeInterval.decrease(longValue);
         }
         if (longValue == null) {
             throw new IllegalArgumentException("The value " + value + " is out of " +
             		"the supported range. ");
         }
-        if (facet == Facets.MIN_EXCLUSIVE 
-                || facet == Facets.MIN_INCLUSIVE) {
+        if (facet == Facet.MIN_EXCLUSIVE 
+                || facet == Facet.MIN_INCLUSIVE) {
             iNew = new DateTimeInterval(longValue, null);
-        } else if (facet == Facets.MAX_EXCLUSIVE 
-                || facet == Facets.MAX_INCLUSIVE) {
+        } else if (facet == Facet.MAX_EXCLUSIVE 
+                || facet == Facet.MAX_INCLUSIVE) {
             iNew = new DateTimeInterval(null, longValue);
         } else {
             throw new IllegalArgumentException("Unsupported facet.");

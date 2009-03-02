@@ -47,12 +47,12 @@ public class DatatypeRestrictionRational
      */
     public DatatypeRestrictionRational(DT datatype, boolean allowSpecials) {
         this.datatype = datatype;
-        this.supportedFacets = new HashSet<Facets>(
-                Arrays.asList(new Facets[] {
-                        Facets.MIN_INCLUSIVE, 
-                        Facets.MIN_EXCLUSIVE, 
-                        Facets.MAX_INCLUSIVE, 
-                        Facets.MAX_EXCLUSIVE
+        this.supportedFacets = new HashSet<Facet>(
+                Arrays.asList(new Facet[] {
+                        Facet.MIN_INCLUSIVE, 
+                        Facet.MIN_EXCLUSIVE, 
+                        Facet.MAX_INCLUSIVE, 
+                        Facet.MAX_EXCLUSIVE
                 })
         );
         if (!allowSpecials) {
@@ -77,7 +77,7 @@ public class DatatypeRestrictionRational
     /* (non-Javadoc)
      * @see org.semanticweb.HermiT.model.dataranges.DataRange#addFacet(org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets, java.lang.String)
      */
-    public void addFacet(Facets facet, String value) {
+    public void addFacet(Facet facet, String value) {
         BigDecimal valueDec = null;
         BigRational valueR = null;
         try {

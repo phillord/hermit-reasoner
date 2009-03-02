@@ -41,12 +41,12 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
      */
     public DatatypeRestrictionString(DT datatype) {
         this.datatype = datatype;
-        supportedFacets = new HashSet<Facets>(
-                Arrays.asList(new Facets[] {
-                        Facets.LENGTH, 
-                        Facets.MIN_LENGTH, 
-                        Facets.MAX_LENGTH, 
-                        Facets.PATTERN
+        supportedFacets = new HashSet<Facet>(
+                Arrays.asList(new Facet[] {
+                        Facet.LENGTH, 
+                        Facet.MIN_LENGTH, 
+                        Facet.MAX_LENGTH, 
+                        Facet.PATTERN
                 })
         );
     }
@@ -116,11 +116,11 @@ public class DatatypeRestrictionString extends DatatypeRestriction {
     /* (non-Javadoc)
      * @see org.semanticweb.HermiT.model.dataranges.DataRange#addFacet(org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets, java.lang.String)
      */
-    public void addFacet(Facets facet, String value) {
+    public void addFacet(Facet facet, String value) {
         switch (facet) {
         case LENGTH: {
-            addFacet(Facets.MIN_LENGTH, value);
-            addFacet(Facets.MAX_LENGTH, value);
+            addFacet(Facet.MIN_LENGTH, value);
+            addFacet(Facet.MAX_LENGTH, value);
         } break;
         case MIN_LENGTH: {
             BigInteger valueInt = new BigInteger(value);

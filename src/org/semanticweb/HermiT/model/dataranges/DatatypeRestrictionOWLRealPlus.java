@@ -46,12 +46,12 @@ public class DatatypeRestrictionOWLRealPlus
      */
     public DatatypeRestrictionOWLRealPlus(DT datatype, boolean allowSpecials) {
         this.datatype = datatype;
-        this.supportedFacets = new HashSet<Facets>(
-                Arrays.asList(new Facets[] {
-                        Facets.MIN_INCLUSIVE, 
-                        Facets.MIN_EXCLUSIVE, 
-                        Facets.MAX_INCLUSIVE, 
-                        Facets.MAX_EXCLUSIVE
+        this.supportedFacets = new HashSet<Facet>(
+                Arrays.asList(new Facet[] {
+                        Facet.MIN_INCLUSIVE, 
+                        Facet.MIN_EXCLUSIVE, 
+                        Facet.MAX_INCLUSIVE, 
+                        Facet.MAX_EXCLUSIVE
                 })
         );
         if (!allowSpecials) {
@@ -76,7 +76,7 @@ public class DatatypeRestrictionOWLRealPlus
     /* (non-Javadoc)
      * @see org.semanticweb.HermiT.model.dataranges.DataRange#addFacet(org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets, java.lang.String)
      */
-    public void addFacet(Facets facet, String value) {
+    public void addFacet(Facet facet, String value) {
         boolean isNaN = "NaN".equalsIgnoreCase(value);
         boolean isPlusInf = "+INF".equalsIgnoreCase(value) 
                 || "INF".equalsIgnoreCase(value) 
@@ -85,8 +85,8 @@ public class DatatypeRestrictionOWLRealPlus
         boolean isNegInf = "-INF".equalsIgnoreCase(value) 
                 || "-Infinity".equalsIgnoreCase(value);
         if (isNaN
-                || (isPlusInf && (facet == Facets.MIN_EXCLUSIVE || facet == Facets.MIN_INCLUSIVE))
-                || (isNegInf && (facet == Facets.MAX_EXCLUSIVE || facet == Facets.MAX_INCLUSIVE))) {
+                || (isPlusInf && (facet == Facet.MIN_EXCLUSIVE || facet == Facet.MIN_INCLUSIVE))
+                || (isNegInf && (facet == Facet.MAX_EXCLUSIVE || facet == Facet.MAX_INCLUSIVE))) {
             isBottom = true;
             return;
         }

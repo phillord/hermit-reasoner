@@ -33,12 +33,12 @@ public class DatatypeRestrictionDouble
     public DatatypeRestrictionDouble(DT datatype) {
         this.datatype = datatype;
         intervals.add(new DoubleInterval());
-        this.supportedFacets = new HashSet<Facets>(
-                Arrays.asList(new Facets[] {
-                        Facets.MIN_INCLUSIVE, 
-                        Facets.MIN_EXCLUSIVE, 
-                        Facets.MAX_INCLUSIVE, 
-                        Facets.MAX_EXCLUSIVE
+        this.supportedFacets = new HashSet<Facet>(
+                Arrays.asList(new Facet[] {
+                        Facet.MIN_INCLUSIVE, 
+                        Facet.MIN_EXCLUSIVE, 
+                        Facet.MAX_INCLUSIVE, 
+                        Facet.MAX_EXCLUSIVE
                 })
         );
     }
@@ -60,8 +60,8 @@ public class DatatypeRestrictionDouble
     /* (non-Javadoc)
      * @see org.semanticweb.HermiT.model.dataranges.DataRange#addFacet(org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets, java.lang.String)
      */
-    public void addFacet(Facets facet, String value) {
-        if (facet == Facets.MIN_EXCLUSIVE || facet == Facets.MIN_INCLUSIVE) {
+    public void addFacet(Facet facet, String value) {
+        if (facet == Facet.MIN_EXCLUSIVE || facet == Facet.MIN_INCLUSIVE) {
             hasExplicitMin = true;
         } else {
             hasExplicitMax = true;
@@ -71,10 +71,10 @@ public class DatatypeRestrictionDouble
             doubleValue = Double.parseDouble(value);
             BigDecimal originalValue = new BigDecimal(value);
             BigDecimal doubleValueAsBD = new BigDecimal("" + doubleValue);
-            if (facet == Facets.MIN_EXCLUSIVE 
+            if (facet == Facet.MIN_EXCLUSIVE 
                     && doubleValueAsBD.compareTo(originalValue) <= 0) {
                 doubleValue = DatatypeRestrictionDouble.nextDouble(doubleValue);
-            } else if (facet == Facets.MAX_EXCLUSIVE 
+            } else if (facet == Facet.MAX_EXCLUSIVE 
                     && doubleValueAsBD.compareTo(originalValue) >= 0) {
                 doubleValue = DatatypeRestrictionDouble.previousDouble(doubleValue);
             }
@@ -83,13 +83,13 @@ public class DatatypeRestrictionDouble
             // or decimal, then we use the max/min for doubles
             try {
                 BigDecimal bd = new BigDecimal(value);
-                if ((facet == Facets.MIN_INCLUSIVE 
+                if ((facet == Facet.MIN_INCLUSIVE 
                         && bd.compareTo(new BigDecimal("" + Double.MAX_VALUE)) > 0) 
-                        || (facet == Facets.MIN_EXCLUSIVE 
+                        || (facet == Facet.MIN_EXCLUSIVE 
                         && bd.compareTo(new BigDecimal("" + Double.MAX_VALUE)) >= 0)
-                        || (facet == Facets.MAX_INCLUSIVE 
+                        || (facet == Facet.MAX_INCLUSIVE 
                         && bd.compareTo(new BigDecimal("" + -Double.MAX_VALUE)) < 0)
-                        || (facet == Facets.MAX_EXCLUSIVE 
+                        || (facet == Facet.MAX_EXCLUSIVE 
                         && bd.compareTo(new BigDecimal("" + -Double.MAX_VALUE)) <= 0)) {
                     // impossible, set all intervals to empty
                     hasExplicitMax = true;
@@ -110,23 +110,23 @@ public class DatatypeRestrictionDouble
             return;
         } 
         if ((doubleValue == Double.POSITIVE_INFINITY 
-                && facet == Facets.MAX_INCLUSIVE) 
+                && facet == Facet.MAX_INCLUSIVE) 
         || (doubleValue == Double.NEGATIVE_INFINITY
-                && facet == Facets.MIN_INCLUSIVE)) {
+                && facet == Facet.MIN_INCLUSIVE)) {
             return; // trivial
         }
         if (doubleValue == Double.POSITIVE_INFINITY 
-                && facet == Facets.MAX_EXCLUSIVE) {
+                && facet == Facet.MAX_EXCLUSIVE) {
             hasExplicitMax = true;
             return; // trivial
         }
         if (doubleValue == Double.NEGATIVE_INFINITY 
-                && facet == Facets.MIN_EXCLUSIVE) {
+                && facet == Facet.MIN_EXCLUSIVE) {
             hasExplicitMin = true;
             return; // trivial
         }
         if (doubleValue == Double.POSITIVE_INFINITY 
-                && facet == Facets.MIN_INCLUSIVE) {
+                && facet == Facet.MIN_INCLUSIVE) {
             // +INF is the only allowed value
             hasExplicitMin = true;
             intervals.clear();
@@ -134,7 +134,7 @@ public class DatatypeRestrictionDouble
             return; 
         }
         if (doubleValue == Double.NEGATIVE_INFINITY 
-                && facet == Facets.MAX_INCLUSIVE) {
+                && facet == Facet.MAX_INCLUSIVE) {
             // -INF is the only allowed value
             hasExplicitMax = true;
             intervals.clear();

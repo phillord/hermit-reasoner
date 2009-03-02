@@ -8,7 +8,7 @@ import org.semanticweb.HermiT.model.dataranges.DataRange;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionHexBinary;
 import org.semanticweb.HermiT.model.dataranges.DataConstant.Impl;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.DT;
-import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets;
+import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facet;
 import org.semanticweb.HermiT.reasoner.AbstractReasonerTest;
 
 public class HexBinaryTest extends AbstractReasonerTest {
@@ -19,7 +19,7 @@ public class HexBinaryTest extends AbstractReasonerTest {
     
     public void testSize1() throws Exception {
         DataRange dr = new DatatypeRestrictionHexBinary(DT.HEXBINARY);
-        dr.addFacet(Facets.LENGTH, "1");
+        dr.addFacet(Facet.LENGTH, "1");
         CanonicalDataRange cdr = (CanonicalDataRange) dr;
         BigInteger num = cdr.getEnumerationSize();
         assertTrue(num.compareTo(new BigInteger("256")) == 0);
@@ -27,8 +27,8 @@ public class HexBinaryTest extends AbstractReasonerTest {
 
     public void testSize2() throws Exception {
         DataRange dr = new DatatypeRestrictionHexBinary(DT.HEXBINARY);
-        dr.addFacet(Facets.MIN_LENGTH, "2");
-        dr.addFacet(Facets.MAX_LENGTH, "2");
+        dr.addFacet(Facet.MIN_LENGTH, "2");
+        dr.addFacet(Facet.MAX_LENGTH, "2");
         CanonicalDataRange cdr = (CanonicalDataRange) dr;
         BigInteger num = cdr.getEnumerationSize();
         assertTrue(num.compareTo(new BigInteger("65536")) == 0);
@@ -36,8 +36,8 @@ public class HexBinaryTest extends AbstractReasonerTest {
     
     public void testSize3() throws Exception {
         DataRange dr = new DatatypeRestrictionHexBinary(DT.HEXBINARY);
-        dr.addFacet(Facets.MIN_LENGTH, "1");
-        dr.addFacet(Facets.MAX_LENGTH, "2");
+        dr.addFacet(Facet.MIN_LENGTH, "1");
+        dr.addFacet(Facet.MAX_LENGTH, "2");
         CanonicalDataRange cdr = (CanonicalDataRange) dr;
         BigInteger num = cdr.getEnumerationSize();
         assertTrue(num.compareTo(new BigInteger("" + (65536 + 256))) == 0);
@@ -45,7 +45,7 @@ public class HexBinaryTest extends AbstractReasonerTest {
     
     public void testSize4() throws Exception {
         DataRange dr = new DatatypeRestrictionHexBinary(DT.HEXBINARY);
-        dr.addFacet(Facets.MAX_LENGTH, "2");
+        dr.addFacet(Facet.MAX_LENGTH, "2");
         CanonicalDataRange cdr = (CanonicalDataRange) dr;
         BigInteger num = cdr.getEnumerationSize();
         assertTrue(num.compareTo(new BigInteger("" + (65536 + 256 + 1))) == 0);
@@ -53,7 +53,7 @@ public class HexBinaryTest extends AbstractReasonerTest {
     
     public void testSize5() throws Exception {
         DataRange dr = new DatatypeRestrictionHexBinary(DT.HEXBINARY);
-        dr.addFacet(Facets.MAX_LENGTH, "2");
+        dr.addFacet(Facet.MAX_LENGTH, "2");
         CanonicalDataRange cdr = (CanonicalDataRange) dr;
         BigInteger num = cdr.getEnumerationSize();
         assertTrue(num.compareTo(new BigInteger("" + (65536 + 256 + 1))) == 0);
@@ -61,7 +61,7 @@ public class HexBinaryTest extends AbstractReasonerTest {
     
     public void testSize6() throws Exception {
         DataRange dr = new DatatypeRestrictionHexBinary(DT.HEXBINARY);
-        dr.addFacet(Facets.MIN_LENGTH, "2");
+        dr.addFacet(Facet.MIN_LENGTH, "2");
         CanonicalDataRange cdr = (CanonicalDataRange) dr;
         BigInteger num = cdr.getEnumerationSize();
         assertTrue(num == null);
@@ -69,12 +69,12 @@ public class HexBinaryTest extends AbstractReasonerTest {
     
     public void testFacets() throws Exception {
         DataRange dr = new DatatypeRestrictionHexBinary(DT.HEXBINARY);
-        dr.addFacet(Facets.MIN_LENGTH, "1");
-        dr.addFacet(Facets.MIN_LENGTH, "2");
-        dr.addFacet(Facets.MIN_LENGTH, "0");
-        dr.addFacet(Facets.MAX_LENGTH, "10");
-        dr.addFacet(Facets.MAX_LENGTH, "2");
-        dr.addFacet(Facets.MAX_LENGTH, "5");
+        dr.addFacet(Facet.MIN_LENGTH, "1");
+        dr.addFacet(Facet.MIN_LENGTH, "2");
+        dr.addFacet(Facet.MIN_LENGTH, "0");
+        dr.addFacet(Facet.MAX_LENGTH, "10");
+        dr.addFacet(Facet.MAX_LENGTH, "2");
+        dr.addFacet(Facet.MAX_LENGTH, "5");
         CanonicalDataRange cdr = (CanonicalDataRange) dr;
         BigInteger num = cdr.getEnumerationSize();
         assertTrue(num.compareTo(new BigInteger("65536")) == 0);
@@ -82,7 +82,7 @@ public class HexBinaryTest extends AbstractReasonerTest {
     
     public void testAssignments() throws Exception {
         DataRange dr = new DatatypeRestrictionHexBinary(DT.HEXBINARY);
-        dr.addFacet(Facets.LENGTH, "1");
+        dr.addFacet(Facet.LENGTH, "1");
         CanonicalDataRange cdr = (CanonicalDataRange) dr;
         DataConstant c = cdr.getSmallestAssignment();
         assertTrue(c.getValue().equals("00"));
@@ -93,8 +93,8 @@ public class HexBinaryTest extends AbstractReasonerTest {
     
     public void testAssignments2() throws Exception {
         DataRange dr = new DatatypeRestrictionHexBinary(DT.HEXBINARY);
-        dr.addFacet(Facets.MIN_LENGTH, "1");
-        dr.addFacet(Facets.MAX_LENGTH, "1");
+        dr.addFacet(Facet.MIN_LENGTH, "1");
+        dr.addFacet(Facet.MAX_LENGTH, "1");
         CanonicalDataRange cdr = (CanonicalDataRange) dr;
         int i = 0;
         DataConstant c = cdr.getSmallestAssignment();
@@ -108,8 +108,8 @@ public class HexBinaryTest extends AbstractReasonerTest {
     
     public void testAssignments3() throws Exception {
         DataRange dr = new DatatypeRestrictionHexBinary(DT.HEXBINARY);
-        dr.addFacet(Facets.MIN_LENGTH, "1");
-        dr.addFacet(Facets.MAX_LENGTH, "5");
+        dr.addFacet(Facet.MIN_LENGTH, "1");
+        dr.addFacet(Facet.MAX_LENGTH, "5");
         CanonicalDataRange cdr = (CanonicalDataRange) dr;
         DataConstant c = cdr.getSmallestAssignment();
         assertTrue(c.getValue().equals("00"));
@@ -122,7 +122,7 @@ public class HexBinaryTest extends AbstractReasonerTest {
     
     public void testInvalidHex() throws Exception {
         CanonicalDataRange cdr = new DatatypeRestrictionHexBinary(DT.HEXBINARY);
-        ((DataRange) cdr).addFacet(Facets.MAX_LENGTH, "5");
+        ((DataRange) cdr).addFacet(Facet.MAX_LENGTH, "5");
         assertFalse(cdr.accepts(new DataConstant(Impl.IHexBinary, DT.HEXBINARY, "01a")));
         assertFalse(cdr.accepts(new DataConstant(Impl.IBase64Binary, DT.HEXBINARY, "00")));
     }

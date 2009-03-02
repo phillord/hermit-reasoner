@@ -33,12 +33,12 @@ public class DatatypeRestrictionFloat
     public DatatypeRestrictionFloat(DT datatype) {
         this.datatype = datatype;
         intervals.add(new FloatInterval());
-        this.supportedFacets = new HashSet<Facets>(
-                Arrays.asList(new Facets[] {
-                        Facets.MIN_INCLUSIVE, 
-                        Facets.MIN_EXCLUSIVE, 
-                        Facets.MAX_INCLUSIVE, 
-                        Facets.MAX_EXCLUSIVE
+        this.supportedFacets = new HashSet<Facet>(
+                Arrays.asList(new Facet[] {
+                        Facet.MIN_INCLUSIVE, 
+                        Facet.MIN_EXCLUSIVE, 
+                        Facet.MAX_INCLUSIVE, 
+                        Facet.MAX_EXCLUSIVE
                 })
         );
     }
@@ -60,8 +60,8 @@ public class DatatypeRestrictionFloat
     /* (non-Javadoc)
      * @see org.semanticweb.HermiT.model.dataranges.DataRange#addFacet(org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets, java.lang.String)
      */
-    public void addFacet(Facets facet, String value) {
-        if (facet == Facets.MIN_EXCLUSIVE || facet == Facets.MIN_INCLUSIVE) {
+    public void addFacet(Facet facet, String value) {
+        if (facet == Facet.MIN_EXCLUSIVE || facet == Facet.MIN_INCLUSIVE) {
             hasExplicitMin = true;
         } else {
             hasExplicitMax = true;
@@ -72,11 +72,11 @@ public class DatatypeRestrictionFloat
             // if NaN is given as a facet, or min value is supposed to be +INF, 
             // or max value is supposed to be -INF, the value space is empty
             if (isNaN(floatValue) || (Float.POSITIVE_INFINITY == floatValue 
-                    && (facet == Facets.MIN_EXCLUSIVE 
-                            || facet == Facets.MIN_INCLUSIVE)) 
+                    && (facet == Facet.MIN_EXCLUSIVE 
+                            || facet == Facet.MIN_INCLUSIVE)) 
                             || (Float.NEGATIVE_INFINITY == floatValue 
-                                    && (facet == Facets.MAX_EXCLUSIVE 
-                                            || facet == Facets.MAX_INCLUSIVE))) {
+                                    && (facet == Facet.MAX_EXCLUSIVE 
+                                            || facet == Facet.MAX_INCLUSIVE))) {
                 isBottom = true;
                 return;
             } 
@@ -88,10 +88,10 @@ public class DatatypeRestrictionFloat
             }
             BigDecimal originalValue = new BigDecimal(value);
             BigDecimal floatValueAsBD = new BigDecimal("" + floatValue);
-            if (facet == Facets.MIN_EXCLUSIVE 
+            if (facet == Facet.MIN_EXCLUSIVE 
                     && floatValueAsBD.compareTo(originalValue) <= 0) {
                 floatValue = DatatypeRestrictionFloat.nextFloat(floatValue);
-            } else if (facet == Facets.MAX_EXCLUSIVE 
+            } else if (facet == Facet.MAX_EXCLUSIVE 
                     && floatValueAsBD.compareTo(originalValue) >= 0) {
                 floatValue = DatatypeRestrictionFloat.previousFloat(floatValue);
             }
@@ -100,10 +100,10 @@ public class DatatypeRestrictionFloat
             // or decimal or double, then we use the max/min for floats
             try {
                 BigDecimal bd = new BigDecimal(value);
-                if ((facet == Facets.MIN_INCLUSIVE && bd.compareTo(new BigDecimal("" + Float.MAX_VALUE)) > 0) 
-                        || (facet == Facets.MIN_EXCLUSIVE && bd.compareTo(new BigDecimal("" + Float.MAX_VALUE)) >= 0)
-                        || (facet == Facets.MAX_INCLUSIVE && bd.compareTo(new BigDecimal("" + -Float.MAX_VALUE)) < 0)
-                        || (facet == Facets.MAX_EXCLUSIVE && bd.compareTo(new BigDecimal("" + -Float.MAX_VALUE)) <= 0)) {
+                if ((facet == Facet.MIN_INCLUSIVE && bd.compareTo(new BigDecimal("" + Float.MAX_VALUE)) > 0) 
+                        || (facet == Facet.MIN_EXCLUSIVE && bd.compareTo(new BigDecimal("" + Float.MAX_VALUE)) >= 0)
+                        || (facet == Facet.MAX_INCLUSIVE && bd.compareTo(new BigDecimal("" + -Float.MAX_VALUE)) < 0)
+                        || (facet == Facet.MAX_EXCLUSIVE && bd.compareTo(new BigDecimal("" + -Float.MAX_VALUE)) <= 0)) {
                     // impossible, set all intervals to empty
                     intervals.clear();
                     intervals.add(new FloatInterval(1.0f, 0.0f));

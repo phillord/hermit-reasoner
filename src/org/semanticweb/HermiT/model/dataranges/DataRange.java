@@ -8,7 +8,7 @@ import java.net.URI;
 import java.util.Set;
 
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.DT;
-import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facets;
+import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facet;
 
 
 /**
@@ -114,7 +114,7 @@ public interface DataRange extends AbstractDataRange {
      * @throws IllegalArgumentException if the facet is not supported by the 
      *         concrete realisation of this data range.  
      */
-    public void addFacet(Facets facet, String value) throws IllegalArgumentException;
+    public void addFacet(Facet facet, String value) throws IllegalArgumentException;
     
     /**
      * Checks whether the given facet is supported by the concrete 
@@ -123,5 +123,5 @@ public interface DataRange extends AbstractDataRange {
      * @return true if the facet is supported by the concrete implementation of 
      *         this data range and false otherwise.
      */
-    public boolean supports(Facets facet);
+    public boolean supports(Facet facet);
 }
