@@ -423,7 +423,7 @@ public class OWLClausification implements Serializable {
 
     protected static class Clausifier implements OWLDescriptionVisitor {
         protected final Map<AtomicConcept,AtomicConcept> m_negativeAtMostReplacements;
-        private final int amqOffset; // the number of "negativeAtMostReplacements" which have already been clausified
+        private final int m_amqOffset; // the number of "negativeAtMostReplacements" which have already been clausified
         protected final List<Atom> m_headAtoms;
         protected final List<Atom> m_bodyAtoms;
         protected final Set<AtMostGuard> m_atMostRoleGuards;
@@ -435,7 +435,7 @@ public class OWLClausification implements Serializable {
 
         public Clausifier(Set<Atom> positiveFacts,boolean renameAtMost,OWLDataFactory factory,int amqOffset,boolean ignoreUnsupportedDatatypes) {
             m_negativeAtMostReplacements=new HashMap<AtomicConcept,AtomicConcept>();
-            this.amqOffset=amqOffset;
+            this.m_amqOffset=amqOffset;
             m_headAtoms=new ArrayList<Atom>();
             m_bodyAtoms=new ArrayList<Atom>();
             m_atMostRoleGuards=new HashSet<AtMostGuard>();
@@ -637,7 +637,7 @@ public class OWLClausification implements Serializable {
                     AtomicConcept originalAtomicConcept=AtomicConcept.create(((OWLClass)((OWLObjectComplementOf)object.getFiller()).getOperand()).getURI().toString());
                     toAtomicConcept=m_negativeAtMostReplacements.get(originalAtomicConcept);
                     if (toAtomicConcept==null) {
-                        toAtomicConcept=AtomicConcept.create("internal:amq#"+m_negativeAtMostReplacements.size()+amqOffset);
+                        toAtomicConcept=AtomicConcept.create("internal:amq#"+m_negativeAtMostReplacements.size()+m_amqOffset);
                         m_negativeAtMostReplacements.put(originalAtomicConcept,toAtomicConcept);
                     }
                 }
