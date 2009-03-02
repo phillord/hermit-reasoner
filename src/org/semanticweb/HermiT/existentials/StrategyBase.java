@@ -81,16 +81,13 @@ public abstract class StrategyBase implements Serializable, ExpansionStrategy {
         boolean extensionsChanged=false;
         boolean done=false;
         for (Node node=tableau.getFirstTableauNode(); node!=null && !done; node=node.getNextTableauNode()) {
-            if (node.isActive()&&!node.isBlocked()) {
-                // The node's set of unprocessed existentials may be
-                // changed during operation, so make a local copy to
-                // loop over:
+            if (node.isActive() && !node.isBlocked()) {
+                // The node's set of unprocessed existentials may be changed during operation, so make a local copy to loop over.
                 curExistentials.clear();
                 curExistentials.addAll(node.getUnprocessedExistentials());
                 for (ExistentialConcept existentialConcept : curExistentials) {
-                    if (done) {
+                    if (done)
                         break;
-                    }
                     if (existentialConcept instanceof AtLeastAbstractRoleConcept) {
                         AtLeastAbstractRoleConcept atLeastAbstractConcept=(AtLeastAbstractRoleConcept)existentialConcept;
                         switch (existentialExpansionManager.isSatisfied(atLeastAbstractConcept,node)) {
@@ -99,15 +96,13 @@ public abstract class StrategyBase implements Serializable, ExpansionStrategy {
                             break;
                         case PERMANENTLY_SATISFIED:
                             existentialExpansionManager.markExistentialProcessed(existentialConcept,node);
-                            if (monitor!=null) {
+                            if (monitor!=null)
                                 monitor.existentialSatisfied(atLeastAbstractConcept,node);
-                            }
                             break;
                         case CURRENTLY_SATISFIED:
                             // do nothing
-                            if (monitor!=null) {
+                            if (monitor!=null)
                                 monitor.existentialSatisfied(atLeastAbstractConcept,node);
-                            }
                             break;
                         }
                     }
@@ -122,9 +117,8 @@ public abstract class StrategyBase implements Serializable, ExpansionStrategy {
                             descriptionGraphManager.expand(existsDescriptionGraph,node);
                             extensionsChanged=true;
                         }
-                        else if (monitor!=null) {
+                        else if (monitor!=null)
                             monitor.existentialSatisfied(existsDescriptionGraph,node);
-                        }
                         existentialExpansionManager.markExistentialProcessed(existentialConcept,node);
                     }
                     else {

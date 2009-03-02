@@ -38,10 +38,6 @@ public class Configuration implements Serializable {
         CREATION_ORDER,EL,INDIVIDUAL_REUSE
     }
 
-    public static enum ParserType {
-        KAON2,OWLAPI
-    }
-
     private static final long serialVersionUID=7741510316249774519L;
 
     public Configuration.TableauMonitorType tableauMonitorType;
@@ -49,7 +45,6 @@ public class Configuration implements Serializable {
     public Configuration.BlockingStrategyType blockingStrategyType;
     public Configuration.BlockingSignatureCacheType blockingSignatureCacheType;
     public Configuration.ExistentialStrategyType existentialStrategyType;
-    public Configuration.ParserType parserType;
     public boolean checkClauses;
     public boolean prepareForExpressiveQueries;
     public boolean ignoreUnsupportedDatatypes;
@@ -62,7 +57,6 @@ public class Configuration implements Serializable {
         blockingStrategyType=Configuration.BlockingStrategyType.ANYWHERE;
         blockingSignatureCacheType=Configuration.BlockingSignatureCacheType.CACHED;
         existentialStrategyType=Configuration.ExistentialStrategyType.CREATION_ORDER;
-        parserType=Configuration.ParserType.OWLAPI;
         ignoreUnsupportedDatatypes=false;
         checkClauses=true;
         prepareForExpressiveQueries=false;

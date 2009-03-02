@@ -461,7 +461,7 @@ public class CommandLine {
         }
     }
 
-    protected static final int kTime=1000,kDumpClauses=1001,kDumpRoleBox=1002,kOwlApi=1003,kKaon2=1004,kDirectBlock=1005,kBlockStrategy=1006,kBlockCache=1007,kExpansion=1008,kBase=1009,kParser=1010,kDefaultNamespace=1011,kDumpNamespaces=1012,kSuperRoles=1013,kSubRoles=1014,kEquivRoles=1015,kKrssTaxonomy=1016,kFunctionalTaxonomy=1017,kIgnoreUnsupportedDatatypes=1018;
+    protected static final int kTime=1000,kDumpClauses=1001,kDumpRoleBox=1002,kDirectBlock=1003,kBlockStrategy=1004,kBlockCache=1005,kExpansion=1006,kBase=1007,kParser=1008,kDefaultNamespace=1009,kDumpNamespaces=1010,kSuperRoles=1011,kSubRoles=1012,kEquivRoles=1013,kKrssTaxonomy=1014,kFunctionalTaxonomy=1015,kIgnoreUnsupportedDatatypes=1016;
 
     static protected final String versionString="HermiT version @VERSION@";
     protected static final String usageString="Usage: hermit [OPTION]... URI...";
@@ -480,8 +480,6 @@ public class CommandLine {
             new Option(kSuperRoles,"superproperties",kActions,true,"PROP","output properties subsuming PROP (or only direct supers if following --direct)"),new Option(kEquivRoles,"equivalent-properties",kActions,true,"PROP","output properties equivalent to PROP"),new Option('U',"unsatisfiable",kActions,"output unsatisfiable classes (equivalent to --equivalents=owl:Nothing)"),new Option(kDumpNamespaces,"print-namespaces",kActions,"output namespace prefixes available for use in identifiers"),
 
             new Option('N',"no-namespaces",kNamespaces,"do not abbreviate or expand identifiers using namespaces defined in input ontology"),new Option('n',"namespace",kNamespaces,true,"NS=URI","use NS as an abbreviation for URI in identifiers"),new Option(kDefaultNamespace,"namespace",kNamespaces,true,"URI","use URI as the default identifier namespace"),
-
-            new Option(kBase,"base",kParsing,true,"BASE","use BASE as base for ontology URI arguments"),new Option(kParser,"parser",kParsing,true,"PARSER","use PARSER for parsing; supported values are 'owlapi' and 'kaon2'"),new Option(kOwlApi,"owlapi",kParsing,"use OWL API parser (default)"),new Option(kKaon2,"kaon2",kParsing,"use KAON2 parser"),
 
             // algorithm tweaks:
             new Option(kDirectBlock,"block-match",kAlgorithm,true,"TYPE","identify blocked nodes with TYPE blocking; supported values are 'single', 'pairwise', 'pairwise-reflexive', and 'optimal' (default 'optimal')"),
@@ -676,26 +674,7 @@ public class CommandLine {
                         }
                     }
                         break;
-                    case kParser: {
-                        String arg=g.getOptarg();
-                        if (arg.toLowerCase().equals("owlapi")) {
-                            config.parserType=Configuration.ParserType.OWLAPI;
-                        }
-                        else if (arg.toLowerCase().equals("kaon2")) {
-                            config.parserType=Configuration.ParserType.KAON2;
-                        }
-                        else
-                            throw new UsageException("unknown parser type '"+arg+"'; supported values are 'owlapi' and 'kaon2'");
-                    }
-                        break;
-                    case kOwlApi: {
-                        config.parserType=Configuration.ParserType.OWLAPI;
-                    }
-                        break;
-                    case kKaon2: {
-                        config.parserType=Configuration.ParserType.KAON2;
-                    }
-                        break;
+
                     case kDirectBlock: {
                         String arg=g.getOptarg();
                         if (arg.toLowerCase().equals("pairwise")) {

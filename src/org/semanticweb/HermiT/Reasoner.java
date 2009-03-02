@@ -113,40 +113,10 @@ public class Reasoner implements Serializable {
             descriptionGraphs=Collections.emptySet();
         if (keys==null)
             keys=Collections.emptySet();
-        switch (config.parserType) {
-        case KAON2:
-            {
-                Clausifier clausifier=null;
-                try {
-                    clausifier=(Clausifier)Class.forName("org.semanticweb.HermiT.kaon2.Clausifier").newInstance();
-                }
-                catch (ClassNotFoundException e) {
-                    throw new RuntimeException("Unable to load KAON2 library",e);
-                }
-                catch (NoClassDefFoundError e) {
-                    // This seems to be the one that comes up with no KAON2 available
-                    throw new RuntimeException("Unable to load KAON2 library",e);
-                }
-                catch (InstantiationException e) {
-                    throw new RuntimeException("Unable to load KAON2 library",e);
-                }
-                catch (IllegalAccessException e) {
-                    throw new RuntimeException("Unable to load KAON2 library",e);
-                }
-                m_dlOntology=clausifier.loadFromURI(ontologyURI,null);
-            }
-            break;
-        case OWLAPI:
-            {
-                OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
-                OWLOntology ontology=ontologyManager.loadOntologyFromPhysicalURI(ontologyURI);
-                OWLClausification clausifier=new OWLClausification(config);
-                m_dlOntology=clausifier.clausifyWithKeys(ontologyManager,ontology,descriptionGraphs,keys);
-            }
-            break;
-        default:
-            throw new IllegalArgumentException("unknown parser library requested");
-        }
+        OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
+        OWLOntology ontology=ontologyManager.loadOntologyFromPhysicalURI(ontologyURI);
+        OWLClausification clausifier=new OWLClausification(config);
+        m_dlOntology=clausifier.clausifyWithKeys(ontologyManager,ontology,descriptionGraphs,keys);
         m_config=config;
         m_namespaces=createNamespaces(m_dlOntology.getOntologyURI());
         m_tableau=createTableau(m_config,m_dlOntology,m_namespaces);
