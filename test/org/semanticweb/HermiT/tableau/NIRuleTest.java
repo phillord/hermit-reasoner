@@ -24,9 +24,9 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
     protected static final AtomicConcept A=AtomicConcept.create("A");
     protected static final AtomicConcept B=AtomicConcept.create("B");
     protected static final AtomicNegationConcept NEG_A=AtomicNegationConcept.create(A);
-    protected static final AtomicRole R=AtomicRole.createObjectRole("R");
+    protected static final AtomicRole R=AtomicRole.createAtomicRole("R");
     protected static final InverseRole INV_R=InverseRole.create(R);
-    protected static final AtomicRole S=AtomicRole.createObjectRole("S");
+    protected static final AtomicRole S=AtomicRole.createAtomicRole("S");
     protected static final AtMostGuard AT_MOST_ONE_R_A=AtMostGuard.create(1,R,A);
     protected static final AtMostGuard AT_MOST_TWO_R_A=AtMostGuard.create(2,R,A);
     protected static final AtMostGuard AT_MOST_ONE_INV_R_A=AtMostGuard.create(1,INV_R,A);

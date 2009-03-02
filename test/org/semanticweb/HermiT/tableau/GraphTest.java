@@ -234,7 +234,7 @@ public class GraphTest extends AbstractReasonerInternalsTest {
     }
     
     protected static DescriptionGraph.Edge E(String atomicRoleName,int from,int to) {
-        AtomicRole atomicRole=AtomicRole.createObjectRole(atomicRoleName);
+        AtomicRole atomicRole=AtomicRole.createAtomicRole(atomicRoleName);
         return new DescriptionGraph.Edge(atomicRole,from,to);
     }
 }

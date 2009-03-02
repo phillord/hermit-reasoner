@@ -23,10 +23,10 @@ import org.semanticweb.HermiT.tableau.Tableau;
 
 public class DLClauseEvaluationTest extends AbstractReasonerInternalsTest {
     
-    protected static final AtomicRole R=AtomicRole.createObjectRole("R");
-    protected static final AtomicRole S=AtomicRole.createObjectRole("S");
-    protected static final AtomicRole T=AtomicRole.createObjectRole("T");
-    protected static final AtomicRole U=AtomicRole.createObjectRole("U");
+    protected static final AtomicRole R=AtomicRole.createAtomicRole("R");
+    protected static final AtomicRole S=AtomicRole.createAtomicRole("S");
+    protected static final AtomicRole T=AtomicRole.createAtomicRole("T");
+    protected static final AtomicRole U=AtomicRole.createAtomicRole("U");
     protected static final DLClause CL_1;
     protected static final DLOntology TEST_DL_ONTOLOGY;
     static {

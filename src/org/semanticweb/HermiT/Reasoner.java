@@ -381,7 +381,7 @@ public class Reasoner implements Serializable {
     // Object property inferences
     
     public boolean isAsymmetric(OWLObjectProperty p) {
-        return m_tableau.isAsymmetric(AtomicRole.createObjectRole(p.getURI().toString()));
+        return m_tableau.isAsymmetric(AtomicRole.createAtomicRole(p.getURI().toString()));
     }
 
     // Property hierarchy
@@ -394,22 +394,22 @@ public class Reasoner implements Serializable {
         return m_atomicRoleHierarchy!=null;
     }
 
-    public HierarchyPosition<String> getPropertyHierarchyPosition(String propertyName) {
-        AtomicRole role=AtomicRole.createDataRole(propertyName);
-        if (!getAtomicRoleHierarchy().containsKey(role)) {
-            role=AtomicRole.createObjectRole(propertyName);
-        }
-        return new TranslatedHierarchyPosition<AtomicRole,String>(getAtomicRoleHierarchyPosition(role),new RoleToString());
+    public HierarchyPosition<String> getPropertyHierarchyPosition(String propertyURI) {
+        AtomicRole atomicRole=AtomicRole.createAtomicRole(propertyURI);
+        if (m_dlOntology.getAllAtomicDataRoles().contains(atomicRole))
+            return new TranslatedHierarchyPosition<AtomicRole,String>(getAtomicRoleHierarchyPosition(AtomicRole.createAtomicRole(propertyURI),AtomicRole.TOP_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE),new RoleToString());
+        else
+            return new TranslatedHierarchyPosition<AtomicRole,String>(getAtomicRoleHierarchyPosition(AtomicRole.createAtomicRole(propertyURI),AtomicRole.TOP_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE),new RoleToString());
     }
-
+    
     public HierarchyPosition<OWLObjectProperty> getPropertyHierarchyPosition(OWLObjectProperty p) {
         OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
-        return new TranslatedHierarchyPosition<AtomicRole,OWLObjectProperty>(getAtomicRoleHierarchyPosition(AtomicRole.createObjectRole(p.getURI().toString())),new RoleToOWLObjectProperty(factory));
+        return new TranslatedHierarchyPosition<AtomicRole,OWLObjectProperty>(getAtomicRoleHierarchyPosition(AtomicRole.createAtomicRole(p.getURI().toString()),AtomicRole.TOP_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE),new RoleToOWLObjectProperty(factory));
     }
 
     public HierarchyPosition<OWLDataProperty> getPropertyHierarchyPosition(OWLDataProperty p) {
         OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
-        return new TranslatedHierarchyPosition<AtomicRole,OWLDataProperty>(getAtomicRoleHierarchyPosition(AtomicRole.createDataRole(p.getURI().toString())),new RoleToOWLDataProperty(factory));
+        return new TranslatedHierarchyPosition<AtomicRole,OWLDataProperty>(getAtomicRoleHierarchyPosition(AtomicRole.createAtomicRole(p.getURI().toString()),AtomicRole.TOP_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE),new RoleToOWLDataProperty(factory));
     }
 
     protected Map<AtomicRole,HierarchyPosition<AtomicRole>> getAtomicRoleHierarchy() {
@@ -455,18 +455,12 @@ public class Reasoner implements Serializable {
         subs.add(sub);
     }
 
-    protected HierarchyPosition<AtomicRole> getAtomicRoleHierarchyPosition(AtomicRole r) {
+    protected HierarchyPosition<AtomicRole> getAtomicRoleHierarchyPosition(AtomicRole r,AtomicRole topRole,AtomicRole bottomRole) {
         HierarchyPosition<AtomicRole> out=getAtomicRoleHierarchy().get(r);
         if (out==null) {
             NaiveHierarchyPosition<AtomicRole> newPos=new NaiveHierarchyPosition<AtomicRole>(r);
-            if (r.isRestrictedToDatatypes()) {
-                newPos.parents.add(getAtomicRoleHierarchy().get(AtomicRole.TOP_DATA_ROLE));
-                newPos.children.add(getAtomicRoleHierarchy().get(AtomicRole.BOTTOM_DATA_ROLE));
-            }
-            else {
-                newPos.parents.add(getAtomicRoleHierarchy().get(AtomicRole.TOP_OBJECT_ROLE));
-                newPos.children.add(getAtomicRoleHierarchy().get(AtomicRole.BOTTOM_OBJECT_ROLE));
-            }
+            newPos.parents.add(getAtomicRoleHierarchy().get(topRole));
+            newPos.children.add(getAtomicRoleHierarchy().get(bottomRole));
             out=newPos;
         }
         return out;

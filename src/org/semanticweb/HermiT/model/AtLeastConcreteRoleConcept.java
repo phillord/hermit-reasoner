@@ -17,8 +17,6 @@ public class AtLeastConcreteRoleConcept extends ExistentialConcept implements DL
     protected final AbstractDataRange m_toDataRange;
 
     protected AtLeastConcreteRoleConcept(int number,AtomicRole onAtomicConcreteRole,AbstractDataRange toDataRange) {
-        if (!onAtomicConcreteRole.isRestrictedToDatatypes())
-            throw new RuntimeException("Data restrictions on object roles are not allowed");
         m_number=number;
         m_onAtomicConcreteRole=onAtomicConcreteRole;
         m_toDataRange=toDataRange;

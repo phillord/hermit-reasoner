@@ -69,8 +69,8 @@ public class ClausificationTest extends AbstractOWLOntologyTest {
         bAtoms.add("<int:r_test>(X,Y0)");
         bAtoms.add("<int:r_test>(X2,Y0)");
         bAtoms.add("<internal:Named>(Y0)");
-        bAtoms.add("<int:dp_test>*(X,Y1)");
-        bAtoms.add("<int:dp_test>*(X2,Y2)");
+        bAtoms.add("<int:dp_test>(X,Y1)");
+        bAtoms.add("<int:dp_test>(X2,Y2)");
         assertTrue(bAtoms.size()==clause.getBodyLength());
         for (int i=0;i<clause.getBodyLength();i++) {
             assertTrue(bAtoms.contains(clause.getBodyAtom(i).toString()));

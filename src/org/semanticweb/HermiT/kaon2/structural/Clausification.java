@@ -179,12 +179,12 @@ public class Clausification {
     protected static Atom getRoleAtom(ObjectPropertyExpression objectProperty,org.semanticweb.HermiT.model.Term first,org.semanticweb.HermiT.model.Term second) {
         objectProperty=objectProperty.getSimplified();
         if (objectProperty instanceof ObjectProperty) {
-            AtomicRole role=AtomicRole.createObjectRole(((ObjectProperty)objectProperty).getURI());
+            AtomicRole role=AtomicRole.createAtomicRole(((ObjectProperty)objectProperty).getURI());
             return Atom.create(role,new org.semanticweb.HermiT.model.Term[] { first,second });
         }
         else if (objectProperty instanceof InverseObjectProperty) {
             ObjectProperty internalObjectProperty=(ObjectProperty)((InverseObjectProperty)objectProperty).getObjectProperty();
-            AtomicRole role=AtomicRole.createObjectRole(internalObjectProperty.getURI());
+            AtomicRole role=AtomicRole.createAtomicRole(internalObjectProperty.getURI());
             return Atom.create(role,new org.semanticweb.HermiT.model.Term[] { second,first });
         }
         else
@@ -206,12 +206,12 @@ public class Clausification {
     protected static Role getRole(ObjectPropertyExpression objectProperty) {
         objectProperty=objectProperty.getSimplified();
         if (objectProperty instanceof ObjectProperty)
-            return AtomicRole.createObjectRole(((ObjectProperty)objectProperty).getURI());
+            return AtomicRole.createAtomicRole(((ObjectProperty)objectProperty).getURI());
         else if (objectProperty instanceof InverseObjectProperty) {
             ObjectPropertyExpression internal=((InverseObjectProperty)objectProperty).getObjectProperty();
             if (!(internal instanceof ObjectProperty))
                 throw new IllegalStateException("Internal error: invalid normal form.");
-            return InverseRole.create(AtomicRole.createObjectRole(((ObjectProperty)internal).getURI()));
+            return InverseRole.create(AtomicRole.createAtomicRole(((ObjectProperty)internal).getURI()));
         }
         else
             throw new IllegalStateException("Internal error: invalid normal form.");
@@ -252,7 +252,7 @@ public class Clausification {
         if (predicate instanceof OWLClass)
             return AtomicConcept.create(((OWLClass)predicate).getURI());
         else if (predicate instanceof ObjectProperty)
-            return AtomicRole.createObjectRole(((ObjectProperty)predicate).getURI());
+            return AtomicRole.createAtomicRole(((ObjectProperty)predicate).getURI());
         else if (KAON2Manager.factory().predicateSymbol(Namespaces.OWL_NS+"sameAs",2).equals(predicate))
             return Equality.INSTANCE;
         else if (KAON2Manager.factory().predicateSymbol(Namespaces.OWL_NS+"differentFrom",2).equals(predicate))
@@ -415,10 +415,10 @@ public class Clausification {
                          throw new IllegalStateException("invalid normal form.");
                     Role onRole;
                     if (object.getObjectProperty() instanceof ObjectProperty)
-                        onRole=AtomicRole.createObjectRole(((ObjectProperty)object.getObjectProperty()).getURI());
+                        onRole=AtomicRole.createAtomicRole(((ObjectProperty)object.getObjectProperty()).getURI());
                     else {
                         ObjectProperty internalObjectProperty=(ObjectProperty)((InverseObjectProperty)object.getObjectProperty()).getObjectProperty();
-                        onRole=InverseRole.create(AtomicRole.createObjectRole(internalObjectProperty.getURI()));
+                        onRole=InverseRole.create(AtomicRole.createAtomicRole(internalObjectProperty.getURI()));
                     }
                     AtMostGuard atMostRole=AtMostGuard.create(object.getCardinality(),onRole,toAtomicConcept);
                     m_atMostRoleGuards.add(atMostRole);
