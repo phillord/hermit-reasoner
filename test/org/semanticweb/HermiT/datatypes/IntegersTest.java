@@ -2,18 +2,18 @@ package org.semanticweb.HermiT.datatypes;
 
 import java.math.BigInteger;
 
-import org.semanticweb.HermiT.model.dataranges.CanonicalDataRange;
-import org.semanticweb.HermiT.model.dataranges.DataConstant;
-import org.semanticweb.HermiT.model.dataranges.DataRange;
-import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionDouble;
-import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionInteger;
-import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionOWLRealPlus;
-import org.semanticweb.HermiT.model.dataranges.IntegerInterval;
-import org.semanticweb.HermiT.model.dataranges.IntegerIntervalBig;
-import org.semanticweb.HermiT.model.dataranges.IntegerIntervalFin;
-import org.semanticweb.HermiT.model.dataranges.DataConstant.Impl;
-import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.DT;
-import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facet;
+import org.semanticweb.HermiT.datatypes.CanonicalDataRange;
+import org.semanticweb.HermiT.datatypes.DataConstant;
+import org.semanticweb.HermiT.datatypes.DataRange;
+import org.semanticweb.HermiT.datatypes.DatatypeRestrictionDouble;
+import org.semanticweb.HermiT.datatypes.DatatypeRestrictionInteger;
+import org.semanticweb.HermiT.datatypes.DatatypeRestrictionOWLRealPlus;
+import org.semanticweb.HermiT.datatypes.IntegerInterval;
+import org.semanticweb.HermiT.datatypes.IntegerIntervalBig;
+import org.semanticweb.HermiT.datatypes.IntegerIntervalFin;
+import org.semanticweb.HermiT.datatypes.DataConstant.Impl;
+import org.semanticweb.HermiT.datatypes.DatatypeRestriction.DT;
+import org.semanticweb.HermiT.datatypes.DatatypeRestriction.Facet;
 import org.semanticweb.HermiT.reasoner.AbstractReasonerTest;
 
 public class IntegersTest extends AbstractReasonerTest {

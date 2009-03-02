@@ -11,13 +11,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.semanticweb.HermiT.datatypes.CanonicalDataRange;
+import org.semanticweb.HermiT.datatypes.DataConstant;
+import org.semanticweb.HermiT.datatypes.DataRange;
+import org.semanticweb.HermiT.datatypes.DatatypeRestrictionLiteral;
+import org.semanticweb.HermiT.datatypes.EnumeratedDataRange;
+import org.semanticweb.HermiT.datatypes.DatatypeRestriction.DT;
 import org.semanticweb.HermiT.model.Inequality;
-import org.semanticweb.HermiT.model.dataranges.CanonicalDataRange;
-import org.semanticweb.HermiT.model.dataranges.DataConstant;
-import org.semanticweb.HermiT.model.dataranges.DataRange;
-import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionLiteral;
-import org.semanticweb.HermiT.model.dataranges.EnumeratedDataRange;
-import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.DT;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 
 public class DatatypeManager implements Serializable {

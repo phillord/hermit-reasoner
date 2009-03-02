@@ -2,13 +2,13 @@ package org.semanticweb.HermiT.datatypes;
 
 import java.math.BigInteger;
 
-import org.semanticweb.HermiT.model.dataranges.CanonicalDataRange;
-import org.semanticweb.HermiT.model.dataranges.DataConstant;
-import org.semanticweb.HermiT.model.dataranges.DataRange;
-import org.semanticweb.HermiT.model.dataranges.DatatypeRestrictionHexBinary;
-import org.semanticweb.HermiT.model.dataranges.DataConstant.Impl;
-import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.DT;
-import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facet;
+import org.semanticweb.HermiT.datatypes.CanonicalDataRange;
+import org.semanticweb.HermiT.datatypes.DataConstant;
+import org.semanticweb.HermiT.datatypes.DataRange;
+import org.semanticweb.HermiT.datatypes.DatatypeRestrictionHexBinary;
+import org.semanticweb.HermiT.datatypes.DataConstant.Impl;
+import org.semanticweb.HermiT.datatypes.DatatypeRestriction.DT;
+import org.semanticweb.HermiT.datatypes.DatatypeRestriction.Facet;
 import org.semanticweb.HermiT.reasoner.AbstractReasonerTest;
 
 public class HexBinaryTest extends AbstractReasonerTest {

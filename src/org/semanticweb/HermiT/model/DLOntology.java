@@ -19,7 +19,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.semanticweb.HermiT.Namespaces;
-import org.semanticweb.HermiT.model.dataranges.DataRange;
+import org.semanticweb.HermiT.datatypes.DataRange;
 
 /**
  * Represents a DL ontology as a set of rules.

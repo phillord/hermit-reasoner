@@ -25,6 +25,8 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
 import org.semanticweb.HermiT.Namespaces;
+import org.semanticweb.HermiT.datatypes.DataConstant;
+import org.semanticweb.HermiT.datatypes.DataRange;
 import org.semanticweb.HermiT.debugger.commands.ActiveNodesCommand;
 import org.semanticweb.HermiT.debugger.commands.BreakpointTimeCommand;
 import org.semanticweb.HermiT.debugger.commands.ClearCommand;
@@ -69,8 +71,6 @@ import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Role;
-import org.semanticweb.HermiT.model.dataranges.DataConstant;
-import org.semanticweb.HermiT.model.dataranges.DataRange;
 import org.semanticweb.HermiT.monitor.TableauMonitorForwarder;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;

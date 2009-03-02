@@ -2,7 +2,7 @@
 package org.semanticweb.HermiT.model;
 
 import org.semanticweb.HermiT.Namespaces;
-import org.semanticweb.HermiT.model.dataranges.DataRange;
+import org.semanticweb.HermiT.datatypes.DataRange;
 
 /**
  * Represents an at-least data property concept.
