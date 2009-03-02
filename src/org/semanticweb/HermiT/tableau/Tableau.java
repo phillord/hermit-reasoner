@@ -247,7 +247,7 @@ public final class Tableau implements Serializable {
         clear();
         if (hasNominals())
             loadABox();
-        m_checkedNode=createNewOriginalNode(NodeType.ROOT_NODE,m_dependencySetFactory.emptySet(),0);
+        m_checkedNode=createNewRootNode(m_dependencySetFactory.emptySet());
         m_extensionManager.addConceptAssertion(atomicConcept,m_checkedNode,m_dependencySetFactory.emptySet());
         boolean result=isSatisfiable();
         if (m_tableauMonitor!=null)
@@ -260,7 +260,7 @@ public final class Tableau implements Serializable {
         clear();
         if (hasNominals())
             loadABox();
-        m_checkedNode=createNewOriginalNode(NodeType.ROOT_NODE,m_dependencySetFactory.emptySet(),0);
+        m_checkedNode=createNewRootNode(m_dependencySetFactory.emptySet());
         m_extensionManager.addConceptAssertion(subconcept,m_checkedNode,m_dependencySetFactory.emptySet());
         m_branchingPoints[0]=new BranchingPoint(this);
         m_currentBranchingPoint++;
@@ -276,8 +276,8 @@ public final class Tableau implements Serializable {
         clear();
         if (hasNominals())
             loadABox();
-        Node a=createNewOriginalNode(NodeType.ROOT_NODE,m_dependencySetFactory.emptySet(),0);
-        Node b=createNewOriginalNode(NodeType.ROOT_NODE,m_dependencySetFactory.emptySet(),0);
+        Node a=createNewRootNode(m_dependencySetFactory.emptySet());
+        Node b=createNewRootNode(m_dependencySetFactory.emptySet());
         m_extensionManager.addRoleAssertion(role,a,b,m_dependencySetFactory.emptySet());
         m_branchingPoints[0]=new BranchingPoint(this);
         m_currentBranchingPoint++;
@@ -292,8 +292,8 @@ public final class Tableau implements Serializable {
         clear();
         loadABox();
         if (m_firstTableauNode==null) {
-            // create an artificial initial node
-            createNewOriginalNode(NodeType.ROOT_NODE,m_dependencySetFactory.emptySet(),0); // Ensures that there is at least one individual
+            // Ensure that at least one individual exists.
+            createNewRootNode(m_dependencySetFactory.emptySet());
         }
         boolean result=isSatisfiable();
         if (m_tableauMonitor!=null)
@@ -307,7 +307,7 @@ public final class Tableau implements Serializable {
         Map<Individual,Node> aboxMapping=loadABox();
         m_checkedNode=aboxMapping.get(individual);
         if (m_checkedNode==null)
-            m_checkedNode=createNewOriginalNode(NodeType.ROOT_NODE,m_dependencySetFactory.emptySet(),0);
+            m_checkedNode=createNewRootNode(m_dependencySetFactory.emptySet());
         m_extensionManager.addConceptAssertion(AtomicNegationConcept.create(atomicConcept),m_checkedNode,m_dependencySetFactory.emptySet());
         boolean result=!isSatisfiable();
         if (m_tableauMonitor!=null)
@@ -350,7 +350,7 @@ public final class Tableau implements Serializable {
     protected Node getNodeForIndividual(Map<Individual,Node> individualsToNodes,Individual individual) {
         Node node=individualsToNodes.get(individual);
         if (node==null) {
-            node=createNewOriginalNode(NodeType.NAMED_NODE,m_dependencySetFactory.emptySet(),0);
+            node=createNewNamedNode(m_dependencySetFactory.emptySet());
             individualsToNodes.put(individual,node);
         }
         return node;
@@ -445,47 +445,25 @@ public final class Tableau implements Serializable {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.backtrackToFinished(branchingPoint);
     }
-
-    /**
-     * Creates a new root node (either one that corresponds to an ABox individual or an artificial one that we need for subsumption or consistency testing). Make sure that if we have a universal role that this node is connected to the initial node for the tableau (if it not the initial one itself).
-     * 
-     * @param dependencySet
-     *            should be empty for original nodes
-     * @param treeDepth
-     *            should be usually 0 for original nodes
-     * @return the created node
-     */
-    public Node createNewOriginalNode(NodeType nodeType,DependencySet dependencySet,int treeDepth) {
-        Node out;
-        if (nodeType==NodeType.ROOT_NODE)
-            out=createNewRootNode(dependencySet,treeDepth);
-        else if (nodeType==NodeType.NAMED_NODE)
-            out=createNewNamedNode(dependencySet,treeDepth);
-        else
-            throw new RuntimeException("Can only create original nodes of type root node or named node. ");
-        return out;
-    }
     /**
      * Create a new node that represents an individual named in the input ontology (thus, keys have to be applied to it)
      * 
      * @param dependencySet
      *            the dependency set for the node
-     * @param treeDepth
      * @return the created node
      */
-    public Node createNewNamedNode(DependencySet dependencySet,int treeDepth) {
-        return createNewNodeRaw(dependencySet,null,NodeType.NAMED_NODE,treeDepth);
+    public Node createNewNamedNode(DependencySet dependencySet) {
+        return createNewNodeRaw(dependencySet,null,NodeType.NAMED_NODE,0);
     }
     /**
      * Create a new node that represents a nominal, but one that is not named in the input ontology (thus, keys are not applicable)
      * 
      * @param dependencySet
      *            the dependency set for the node
-     * @param treeDepth
      * @return the created node
      */
-    public Node createNewRootNode(DependencySet dependencySet,int treeDepth) {
-        return createNewNodeRaw(dependencySet,null,NodeType.ROOT_NODE,treeDepth);
+    public Node createNewRootNode(DependencySet dependencySet) {
+        return createNewNodeRaw(dependencySet,null,NodeType.ROOT_NODE,0);
     }
     /**
      * Create a new tree node.
@@ -523,7 +501,7 @@ public final class Tableau implements Serializable {
     public Node createNewGraphNode(Node parent,DependencySet dependencySet) {
         return createNewNodeRaw(dependencySet,parent,NodeType.GRAPH_NODE,parent.getTreeDepth());
     }
-    public Node createNewNodeRaw(DependencySet dependencySet,Node parent,NodeType nodeType,int treeDepth) {
+    protected Node createNewNodeRaw(DependencySet dependencySet,Node parent,NodeType nodeType,int treeDepth) {
         Node node;
         if (m_firstFreeNode==null) {
             node=new Node(this);

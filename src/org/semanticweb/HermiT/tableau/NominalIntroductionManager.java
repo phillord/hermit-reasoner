@@ -127,7 +127,7 @@ public final class NominalIntroductionManager implements Serializable {
         m_bufferForRootNodes[2]=number;
         int tupleIndex=m_newRootNodesIndex.getTupleIndex(m_bufferForRootNodes);
         if (tupleIndex==-1) {
-            Node newRootNode=m_tableau.createNewRootNode(dependencySet,0);
+            Node newRootNode=m_tableau.createNewRootNode(dependencySet);
             m_bufferForRootNodes[3]=newRootNode;
             m_newRootNodesIndex.addTuple(m_bufferForRootNodes,m_newRootNodesTable.getFirstFreeTupleIndex());
             m_newRootNodesTable.addTuple(m_bufferForRootNodes);

@@ -71,8 +71,8 @@ public class MergeTest extends AbstractReasonerInternalsTest {
     }
     public void testMergeAndBacktrack() {
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
-        Node a=m_tableau.createNewRootNode(emptySet,0);
-        Node b=m_tableau.createNewRootNode(emptySet,0);
+        Node a=m_tableau.createNewRootNode(emptySet);
+        Node b=m_tableau.createNewRootNode(emptySet);
         Node a1=m_tableau.createNewTreeNode(emptySet,a);
         Node a2=m_tableau.createNewTreeNode(emptySet,a);
         Node a11=m_tableau.createNewTreeNode(emptySet,a1);

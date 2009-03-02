@@ -139,7 +139,7 @@ public class IndividualReuseStrategy extends StrategyBase implements Serializabl
                     dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,branchingPoint.getLevel());
                 }
                 // create a root node so that keys are not applicable
-                existentialNode=m_tableau.createNewRootNode(dependencySet,0);
+                existentialNode=m_tableau.createNewRootNode(dependencySet);
                 reuseInfo=new NodeBranchingPointPair(existentialNode,m_tableau.getCurrentBranchingPoint().getLevel());
                 m_reusedNodes.put(toConcept,reuseInfo);
                 m_extensionManager.addConceptAssertion(toConcept,existentialNode,dependencySet);

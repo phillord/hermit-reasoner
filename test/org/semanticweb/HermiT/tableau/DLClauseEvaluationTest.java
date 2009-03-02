@@ -73,11 +73,11 @@ public class DLClauseEvaluationTest extends AbstractReasonerInternalsTest {
     public void testEvaluator() {
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
         
-        Node a=m_tableau.createNewRootNode(emptySet,0);
-        Node b=m_tableau.createNewRootNode(emptySet,0);
-        Node c=m_tableau.createNewRootNode(emptySet,0);
-        Node d=m_tableau.createNewRootNode(emptySet,0);
-        Node e=m_tableau.createNewRootNode(emptySet,0);
+        Node a=m_tableau.createNewRootNode(emptySet);
+        Node b=m_tableau.createNewRootNode(emptySet);
+        Node c=m_tableau.createNewRootNode(emptySet);
+        Node d=m_tableau.createNewRootNode(emptySet);
+        Node e=m_tableau.createNewRootNode(emptySet);
         
         m_extensionManager.addRoleAssertion(R,a,b,emptySet);
         m_extensionManager.addRoleAssertion(R,a,c,emptySet);

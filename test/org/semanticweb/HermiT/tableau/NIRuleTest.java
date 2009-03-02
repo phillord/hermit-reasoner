@@ -71,8 +71,8 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
     }
     public void testNIRule1() {
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
-        Node a=m_tableau.createNewRootNode(emptySet,0);
-        Node b=m_tableau.createNewRootNode(emptySet,0);
+        Node a=m_tableau.createNewRootNode(emptySet);
+        Node b=m_tableau.createNewRootNode(emptySet);
         Node b1=m_tableau.createNewTreeNode(emptySet,b);
         Node b11=m_tableau.createNewTreeNode(emptySet,b1);
         Node b111=m_tableau.createNewTreeNode(emptySet,b11);
@@ -146,8 +146,8 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
     }
     public void testNIRule2() {
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
-        Node a=m_tableau.createNewRootNode(emptySet,0);
-        Node b=m_tableau.createNewRootNode(emptySet,0);
+        Node a=m_tableau.createNewRootNode(emptySet);
+        Node b=m_tableau.createNewRootNode(emptySet);
         Node b1=m_tableau.createNewTreeNode(emptySet,b);
         
         m_extensionManager.addAssertion(AT_MOST_ONE_R_A,a,emptySet);
@@ -175,8 +175,8 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
     }
     public void testNIRule3() {
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
-        Node a=m_tableau.createNewRootNode(emptySet,0);
-        Node b=m_tableau.createNewRootNode(emptySet,0);
+        Node a=m_tableau.createNewRootNode(emptySet);
+        Node b=m_tableau.createNewRootNode(emptySet);
         Node b1=m_tableau.createNewTreeNode(emptySet,b);
         
         // This test is the same as the previous one, with the difference in the order in which the assertions are added to the tableau.
@@ -206,8 +206,8 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
     }
     public void testNIRule4() {
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
-        Node a=m_tableau.createNewRootNode(emptySet,0);
-        Node b=m_tableau.createNewRootNode(emptySet,0);
+        Node a=m_tableau.createNewRootNode(emptySet);
+        Node b=m_tableau.createNewRootNode(emptySet);
         Node b1=m_tableau.createNewTreeNode(emptySet,b);
         
         // The following test puts two at-most guards on a; hence, there are two possible ways in which
@@ -235,8 +235,8 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
     }
     public void testNIRule5() {
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
-        Node a=m_tableau.createNewRootNode(emptySet,0);
-        Node b=m_tableau.createNewRootNode(emptySet,0);
+        Node a=m_tableau.createNewRootNode(emptySet);
+        Node b=m_tableau.createNewRootNode(emptySet);
         Node b1=m_tableau.createNewTreeNode(emptySet,b);
         
         // We now test triggering the rule using guards with inverse roles.
@@ -265,8 +265,8 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
     }
     public void testNIRule6() {
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
-        Node a=m_tableau.createNewRootNode(emptySet,0);
-        Node b=m_tableau.createNewRootNode(emptySet,0);
+        Node a=m_tableau.createNewRootNode(emptySet);
+        Node b=m_tableau.createNewRootNode(emptySet);
         Node b1=m_tableau.createNewTreeNode(emptySet,b);
         
         // This test is the same as the previous one, save for the fact that it triggers the rule in different way.
@@ -295,8 +295,8 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
     }
     public void testNIRule7() {
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
-        Node a=m_tableau.createNewRootNode(emptySet,0);
-        Node b=m_tableau.createNewRootNode(emptySet,0);
+        Node a=m_tableau.createNewRootNode(emptySet);
+        Node b=m_tableau.createNewRootNode(emptySet);
         Node b1=m_tableau.createNewTreeNode(emptySet,b);
         
         // This test is the same as the previous one, save for the fact that it triggers the rule in different way.
@@ -325,12 +325,12 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
     }
     public void testNIRule8() {
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
-        Node a=m_tableau.createNewRootNode(emptySet,0);
-        Node b=m_tableau.createNewRootNode(emptySet,0);
+        Node a=m_tableau.createNewRootNode(emptySet);
+        Node b=m_tableau.createNewRootNode(emptySet);
         Node b1=m_tableau.createNewTreeNode(emptySet,b);
 
-        Node c=m_tableau.createNewRootNode(emptySet,0);
-        Node d=m_tableau.createNewRootNode(emptySet,0);
+        Node c=m_tableau.createNewRootNode(emptySet);
+        Node d=m_tableau.createNewRootNode(emptySet);
         Node d1=m_tableau.createNewTreeNode(emptySet,d);
 
         // This test checks backtracking of the NI-rule and the NominalIntroductionManager.
@@ -393,12 +393,12 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
     }
     public void testNIRule9() {
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
-        Node a=m_tableau.createNewRootNode(emptySet,0);
-        Node b=m_tableau.createNewRootNode(emptySet,0);
+        Node a=m_tableau.createNewRootNode(emptySet);
+        Node b=m_tableau.createNewRootNode(emptySet);
         Node b1=m_tableau.createNewTreeNode(emptySet,b);
 
-        Node c=m_tableau.createNewRootNode(emptySet,0);
-        Node d=m_tableau.createNewRootNode(emptySet,0);
+        Node c=m_tableau.createNewRootNode(emptySet);
+        Node d=m_tableau.createNewRootNode(emptySet);
         Node d1=m_tableau.createNewTreeNode(emptySet,d);
 
         // This test is similar to the previous one, but the order of the events is different.
@@ -455,10 +455,10 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
     }
     public void testNIRule10() {
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
-        Node a=m_tableau.createNewRootNode(emptySet,0);
-        Node b=m_tableau.createNewRootNode(emptySet,0);
+        Node a=m_tableau.createNewRootNode(emptySet);
+        Node b=m_tableau.createNewRootNode(emptySet);
         Node b1=m_tableau.createNewTreeNode(emptySet,b);
-        Node c=m_tableau.createNewRootNode(emptySet,0);
+        Node c=m_tableau.createNewRootNode(emptySet);
         Node c1=m_tableau.createNewTreeNode(emptySet,c);
 
         m_extensionManager.addAssertion(AT_MOST_TWO_R_A,a,emptySet);
