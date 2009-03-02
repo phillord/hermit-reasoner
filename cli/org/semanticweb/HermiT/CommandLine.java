@@ -794,9 +794,6 @@ public class CommandLine {
                         output.flush();
                     }
                 }
-                catch (Clausifier.LoadingException e) {
-                    System.err.println("Loading failed: "+e.getMessage());
-                }
                 catch (org.semanticweb.owl.model.OWLException e) {
                     System.err.println("It all went pear-shaped: "+e.getMessage());
                 }

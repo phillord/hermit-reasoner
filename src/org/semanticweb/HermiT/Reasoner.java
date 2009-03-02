@@ -24,7 +24,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.semanticweb.HermiT.Clausifier.LoadingException;
 import org.semanticweb.HermiT.blocking.AncestorBlocking;
 import org.semanticweb.HermiT.blocking.AnywhereBlocking;
 import org.semanticweb.HermiT.blocking.BlockingSignatureCache;
@@ -96,19 +95,19 @@ public class Reasoner implements Serializable {
     protected Map<AtomicRole,HierarchyPosition<AtomicRole>> m_atomicRoleHierarchy;
     protected Map<AtomicConcept,Set<Individual>> m_realization;
 
-    public Reasoner(String ontologyURI) throws IllegalArgumentException,LoadingException,OWLException {
+    public Reasoner(String ontologyURI) throws IllegalArgumentException,OWLException {
         this(new Configuration(),URI.create(ontologyURI));
     }
 
-    public Reasoner(java.net.URI ontologyURI) throws IllegalArgumentException,LoadingException,OWLException {
+    public Reasoner(java.net.URI ontologyURI) throws IllegalArgumentException,OWLException {
         this(new Configuration(),ontologyURI);
     }
 
-    public Reasoner(Configuration config,java.net.URI ontologyURI) throws IllegalArgumentException,LoadingException,OWLException {
+    public Reasoner(Configuration config,java.net.URI ontologyURI) throws IllegalArgumentException,OWLException {
         this(config,ontologyURI,(Set<DescriptionGraph>)null,(Set<OWLHasKeyDummy>)null);
     }
 
-    public Reasoner(Configuration config,java.net.URI ontologyURI,Set<DescriptionGraph> descriptionGraphs,Set<OWLHasKeyDummy> keys) throws IllegalArgumentException,LoadingException,OWLException {
+    public Reasoner(Configuration config,java.net.URI ontologyURI,Set<DescriptionGraph> descriptionGraphs,Set<OWLHasKeyDummy> keys) throws IllegalArgumentException,OWLException {
         if (descriptionGraphs==null)
             descriptionGraphs=Collections.emptySet();
         if (keys==null)

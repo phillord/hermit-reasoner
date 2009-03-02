@@ -18,7 +18,6 @@ import junit.framework.TestCase;
 
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Reasoner;
-import org.semanticweb.HermiT.Clausifier.LoadingException;
 import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.DLClause;
@@ -86,7 +85,7 @@ public abstract class AbstractReasonerTest extends TestCase {
      * @throws LoadingException if the ontology cannot be loaded
      * @throws IllegalArgumentException inappropriate argument
      */
-    protected void loadOntologyFromResource(String resourceName) throws IllegalArgumentException, LoadingException, OWLException, URISyntaxException {
+    protected void loadOntologyFromResource(String resourceName) throws Exception {
         loadOntologyFromResource(new Configuration(), resourceName);
     }
     
@@ -101,7 +100,7 @@ public abstract class AbstractReasonerTest extends TestCase {
      * @throws LoadingException if the ontology cannot be loaded
      * @throws IllegalArgumentException inappropriate argument
      */
-    protected void loadOntologyFromResource(Configuration configuration, String resourceName) throws IllegalArgumentException, LoadingException, OWLException, URISyntaxException {
+    protected void loadOntologyFromResource(Configuration configuration, String resourceName) throws Exception {
         if (configuration==null) {
             configuration=new Configuration();
         }
@@ -283,7 +282,7 @@ public abstract class AbstractReasonerTest extends TestCase {
      * @throws IllegalArgumentException in case of illegal arguments
      * @throws IOException if the controlString cannot be loaded
      */
-    protected void assertSubsumptionHierarchy(String controlResource) throws IllegalArgumentException, LoadingException, OWLException, URISyntaxException, IOException {
+    protected void assertSubsumptionHierarchy(String controlResource) throws Exception {
         String taxonomy=getSubsumptionHierarchyAsText();
         String controlString=getResourceText(controlResource);
         assertEquals(taxonomy,controlString);
