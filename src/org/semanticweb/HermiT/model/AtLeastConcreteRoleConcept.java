@@ -2,7 +2,6 @@
 package org.semanticweb.HermiT.model;
 
 import org.semanticweb.HermiT.Namespaces;
-import org.semanticweb.HermiT.model.dataranges.AbstractDataRange;
 import org.semanticweb.HermiT.model.dataranges.DataRange;
 
 /**
@@ -14,9 +13,9 @@ public class AtLeastConcreteRoleConcept extends ExistentialConcept implements DL
 
     protected final int m_number;
     protected final AtomicRole m_onAtomicConcreteRole;
-    protected final AbstractDataRange m_toDataRange;
+    protected final DataRange m_toDataRange;
 
-    protected AtLeastConcreteRoleConcept(int number,AtomicRole onAtomicConcreteRole,AbstractDataRange toDataRange) {
+    protected AtLeastConcreteRoleConcept(int number,AtomicRole onAtomicConcreteRole,DataRange toDataRange) {
         m_number=number;
         m_onAtomicConcreteRole=onAtomicConcreteRole;
         m_toDataRange=toDataRange;
@@ -27,7 +26,7 @@ public class AtLeastConcreteRoleConcept extends ExistentialConcept implements DL
     public AtomicRole getOnAtomicConcreteRole() {
         return m_onAtomicConcreteRole;
     }
-    public AbstractDataRange getToDataRange() {
+    public DataRange getToDataRange() {
         return m_toDataRange;
     }
     public int getArity() {

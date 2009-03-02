@@ -69,7 +69,6 @@ import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Role;
-import org.semanticweb.HermiT.model.dataranges.AbstractDataRange;
 import org.semanticweb.HermiT.model.dataranges.DataConstant;
 import org.semanticweb.HermiT.model.dataranges.DataRange;
 import org.semanticweb.HermiT.monitor.TableauMonitorForwarder;
@@ -82,8 +81,10 @@ public class Debugger extends TableauMonitorForwarder {
 
     public static final Font s_monospacedFont=new Font("Monospaced",Font.PLAIN,12);
 
-    public static enum WaitOption { GRAPH_EXPANSION,EXISTENTIAL_EXPANSION,CONCRETE_EXPANSION,CLASH,MERGE,DATATYPE_CHECKING };
-    
+    public static enum WaitOption {
+        GRAPH_EXPANSION,EXISTENTIAL_EXPANSION,CONCRETE_EXPANSION,CLASH,MERGE,DATATYPE_CHECKING
+    };
+
     protected final Namespaces m_namespaces;
     protected final DerivationHistory m_derivationHistory;
     protected final ConsoleTextArea m_consoleTextArea;
@@ -146,76 +147,78 @@ public class Debugger extends TableauMonitorForwarder {
                         commandLine=m_lastCommand;
                         m_output.print("# ");
                         m_output.println(commandLine);
-                    } else {
+                    }
+                    else {
                         m_lastCommand=commandLine;
                     }
                     String[] parsedCommand=parse(commandLine);
                     String command=parsedCommand[0].toLowerCase();
-                    boolean showHelp = false;
-                    ICommand commandExecutable = new DummyCommand();
+                    boolean showHelp=false;
+                    ICommand commandExecutable=new DummyCommand();
                     if ("help".equals(command)) {
-                        showHelp = true;
-                        if (parsedCommand.length > 1) {
-                            command = parsedCommand[1].toLowerCase();
+                        showHelp=true;
+                        if (parsedCommand.length>1) {
+                            command=parsedCommand[1].toLowerCase();
                         }
-                    } 
+                    }
                     if ("help".equals(command))
-                        commandExecutable = new HelpCommand();
+                        commandExecutable=new HelpCommand();
                     else if ("exit".equals(command) || "quit".equals(command))
-                        commandExecutable = new ExitCommand();
+                        commandExecutable=new ExitCommand();
                     else if ("c".equals(command) || "cont".equals(command))
-                        commandExecutable = new ContinueCommand();
+                        commandExecutable=new ContinueCommand();
                     else if ("clear".equals(command))
-                        commandExecutable = new ClearCommand();
+                        commandExecutable=new ClearCommand();
                     else if ("forever".equals(command))
-                        commandExecutable = new ForeverCommand();
+                        commandExecutable=new ForeverCommand();
                     else if ("history".equals(command))
-                        commandExecutable = new HistoryCommand();
+                        commandExecutable=new HistoryCommand();
                     else if ("dertree".equals(command))
-                        commandExecutable = new DerivationTreeCommand();
+                        commandExecutable=new DerivationTreeCommand();
                     else if ("activenodes".equals(command))
-                        commandExecutable = new ActiveNodesCommand();
+                        commandExecutable=new ActiveNodesCommand();
                     else if ("isancof".equals(command))
-                        commandExecutable = new IsAncestorOfCommand();
+                        commandExecutable=new IsAncestorOfCommand();
                     else if ("udisjunctions".equals(command))
-                        commandExecutable = new UnprocessedDisjunctionsCommand();
+                        commandExecutable=new UnprocessedDisjunctionsCommand();
                     else if ("showexists".equals(command))
-                        commandExecutable = new ShowExistsCommand();
+                        commandExecutable=new ShowExistsCommand();
                     else if ("showmodel".equals(command))
-                        commandExecutable = new ShowModelCommand();
+                        commandExecutable=new ShowModelCommand();
                     else if ("showdlclauses".equals(command))
-                        commandExecutable = new ShowDLClausesCommand();
+                        commandExecutable=new ShowDLClausesCommand();
                     else if ("shownode".equals(command))
-                        commandExecutable = new ShowNodeCommand();
+                        commandExecutable=new ShowNodeCommand();
                     else if ("showdgraph".equals(command))
-                        commandExecutable = new ShowDescriptionGraphCommand();
+                        commandExecutable=new ShowDescriptionGraphCommand();
                     else if ("showsubtree".equals(command))
-                        commandExecutable = new ShowSubtreeCommand();
+                        commandExecutable=new ShowSubtreeCommand();
                     else if ("q".equals(command) || "query".equals(command))
-                        commandExecutable = new QueryCommand();
+                        commandExecutable=new QueryCommand();
                     else if ("searchlabel".equals(command))
-                        commandExecutable = new SearchLabelCommand();
+                        commandExecutable=new SearchLabelCommand();
                     else if ("difflabels".equals(command))
-                        commandExecutable = new DiffLabelsCommand();
+                        commandExecutable=new DiffLabelsCommand();
                     else if ("searchpwblock".equals(command))
-                        commandExecutable = new SearchPairwiseBlockingCommand();
+                        commandExecutable=new SearchPairwiseBlockingCommand();
                     else if ("rnodefor".equals(command))
-                        commandExecutable = new ReuseNodeForCommand();
+                        commandExecutable=new ReuseNodeForCommand();
                     else if ("nodesfor".equals(command))
-                        commandExecutable = new NodesForCommand();
+                        commandExecutable=new NodesForCommand();
                     else if ("originstats".equals(command))
-                        commandExecutable = new OriginStatsCommand();
+                        commandExecutable=new OriginStatsCommand();
                     else if ("singlestep".equals(command))
-                        commandExecutable = new SingleStepCommand();
+                        commandExecutable=new SingleStepCommand();
                     else if ("bptime".equals(command))
-                        commandExecutable = new BreakpointTimeCommand();
+                        commandExecutable=new BreakpointTimeCommand();
                     else if ("waitfor".equals(command))
-                        commandExecutable = new WaitForCommand();
+                        commandExecutable=new WaitForCommand();
                     else
                         m_output.println("Unknown command '"+command+"'.");
                     if (showHelp) {
                         m_output.print(commandExecutable.getHelpText());
-                    } else {
+                    }
+                    else {
                         commandExecutable.setArgs(parsedCommand);
                         commandExecutable.setDebugger(this);
                         commandExecutable.execute();
@@ -261,7 +264,8 @@ public class Debugger extends TableauMonitorForwarder {
         writer.print("Status:     ");
         if (node.isActive()) {
             writer.println("active");
-        } else if (node.isMerged()) {
+        }
+        else if (node.isMerged()) {
             Node mergeTarget=node.getMergedInto();
             while (mergeTarget!=null) {
                 writer.print(" --> ");
@@ -269,28 +273,28 @@ public class Debugger extends TableauMonitorForwarder {
                 mergeTarget=mergeTarget.getMergedInto();
             }
             writer.println();
-        } else {
+        }
+        else {
             writer.println("pruned");
         }
         writer.print("Blocked:    ");
         writer.println(formatBlockingStatus(node));
         writer.print("Created as: ");
-        NodeCreationInfo nodeCreationInfo = this.getNodeCreationInfo(node);
-        ExistentialConcept startExistential = nodeCreationInfo.m_createdByExistential;
+        NodeCreationInfo nodeCreationInfo=this.getNodeCreationInfo(node);
+        ExistentialConcept startExistential=nodeCreationInfo.m_createdByExistential;
         if (!(startExistential instanceof AtLeastAbstractRoleConcept)) {
             writer.println("(root)");
-        } else {
+        }
+        else {
             writer.println(((AtLeastAbstractRoleConcept)startExistential).getToConcept().toString(m_namespaces));
         }
         printConceptLabel(node,writer);
         printEdges(node,writer);
     }
     /**
-     * @param node a node in the tableau
-     * @return "no" if node is not blocked; "directly by" plus "signature in 
-     * cache" or the ID of the blocking node if the node is directly blocked; 
-     * "indirectly by" plus "signature in cache" or the ID of the blocking node 
-     * otherwise
+     * @param node
+     *            a node in the tableau
+     * @return "no" if node is not blocked; "directly by" plus "signature in cache" or the ID of the blocking node if the node is directly blocked; "indirectly by" plus "signature in cache" or the ID of the blocking node otherwise
      */
     protected static String formatBlockingStatus(Node node) {
         if (!node.isBlocked())
@@ -312,15 +316,20 @@ public class Debugger extends TableauMonitorForwarder {
             Object potentialConcept=retrieval.getTupleBuffer()[0];
             if (potentialConcept instanceof AtomicNegationConcept) {
                 negativeConcepts.add((AtomicNegationConcept)potentialConcept);
-            } else if (potentialConcept instanceof AtomicConcept) {
+            }
+            else if (potentialConcept instanceof AtomicConcept) {
                 atomicConcepts.add((AtomicConcept)potentialConcept);
-            } else if (potentialConcept instanceof ExistentialConcept) {
+            }
+            else if (potentialConcept instanceof ExistentialConcept) {
                 existentialConcepts.add((ExistentialConcept)potentialConcept);
-            } else if (potentialConcept instanceof DescriptionGraph) {
+            }
+            else if (potentialConcept instanceof DescriptionGraph) {
                 // ignore description graphs here
-            } else if (potentialConcept instanceof DataRange) {
-                dataRanges.add((DataRange) potentialConcept);
-            } else {
+            }
+            else if (potentialConcept instanceof DataRange) {
+                dataRanges.add((DataRange)potentialConcept);
+            }
+            else {
                 System.err.println("Found something in the label that is not a known type!");
             }
             retrieval.next();
@@ -391,7 +400,7 @@ public class Debugger extends TableauMonitorForwarder {
         for (Concept concept : set) {
             if (number!=0)
                 writer.print(", ");
-            if ((number % numberInRow)==0) {
+            if ((number%numberInRow)==0) {
                 writer.println();
                 writer.print("    ");
             }
@@ -405,7 +414,7 @@ public class Debugger extends TableauMonitorForwarder {
         for (DataRange range : set) {
             if (number!=0)
                 writer.print(", ");
-            if ((number % numberInRow)==0) {
+            if ((number%numberInRow)==0) {
                 writer.println();
                 writer.print("    ");
             }
@@ -423,7 +432,7 @@ public class Debugger extends TableauMonitorForwarder {
             for (AtomicRole atomicRole : entry.getValue()) {
                 if (number!=0)
                     writer.print(", ");
-                if ((number % 3)==0) {
+                if ((number%3)==0) {
                     writer.println();
                     writer.print("        ");
                 }
@@ -434,8 +443,10 @@ public class Debugger extends TableauMonitorForwarder {
         }
     }
     /**
-     * Splits a command by spaces. 
-     * @param command The command line command
+     * Splits a command by spaces.
+     * 
+     * @param command
+     *            The command line command
      * @return an array of strings such that each string is a word in the given command
      */
     protected String[] parse(String command) {
@@ -469,9 +480,9 @@ public class Debugger extends TableauMonitorForwarder {
     }
     protected void selectConsoleWindow() {
         SwingUtilities.invokeLater(new Runnable() {
-           public void run() {
-               m_mainFrame.toFront();
-           }
+            public void run() {
+                m_mainFrame.toFront();
+            }
         });
     }
 
@@ -582,9 +593,7 @@ public class Debugger extends TableauMonitorForwarder {
         super.existentialExpansionFinished(existentialConcept,forNode);
         m_lastExistentialNode=null;
         m_lastExistentialConcept=null;
-        if ((existentialConcept instanceof ExistsDescriptionGraph && m_waitOptions.contains(WaitOption.GRAPH_EXPANSION)) ||
-            (existentialConcept instanceof AtLeastAbstractRoleConcept && m_waitOptions.contains(WaitOption.EXISTENTIAL_EXPANSION)) || 
-            (existentialConcept instanceof AtLeastConcreteRoleConcept && m_waitOptions.contains(WaitOption.CONCRETE_EXPANSION))) {
+        if ((existentialConcept instanceof ExistsDescriptionGraph && m_waitOptions.contains(WaitOption.GRAPH_EXPANSION)) || (existentialConcept instanceof AtLeastAbstractRoleConcept && m_waitOptions.contains(WaitOption.EXISTENTIAL_EXPANSION)) || (existentialConcept instanceof AtLeastConcreteRoleConcept && m_waitOptions.contains(WaitOption.CONCRETE_EXPANSION))) {
             m_forever=false;
             m_output.println(existentialConcept.toString(m_namespaces)+" expanded for node "+forNode.getNodeID());
             mainLoop();
@@ -632,7 +641,7 @@ public class Debugger extends TableauMonitorForwarder {
         }
         m_output.println("Nodes: "+numberOfNodes+"  Inactive nodes: "+inactiveNodes+"  Blocked nodes: "+blockedNodes+"  Nodes with exists: "+nodesWithExistentials+"  Pending existentials: "+pendingExistentials);
     }
-    
+
     public static class FactComparator implements Comparator<Object[]> {
         public static final FactComparator INSTANCE=new FactComparator();
 
@@ -675,7 +684,7 @@ public class Debugger extends TableauMonitorForwarder {
 
     public static class ConceptComparator implements Comparator<Concept> {
         public static final ConceptComparator INSTANCE=new ConceptComparator();
-        
+
         public int compare(Concept c1,Concept c2) {
             int type1=getConceptType(c1);
             int type2=getConceptType(c2);
@@ -684,41 +693,37 @@ public class Debugger extends TableauMonitorForwarder {
             switch (type1) {
             case 0:
                 return ((AtomicConcept)c1).getURI().compareTo(((AtomicConcept)c2).getURI());
-            case 1:
-                {
-                    AtMostGuard g1=(AtMostGuard)c1;
-                    AtMostGuard g2=(AtMostGuard)c2;
-                    int comparison=RoleComparator.INSTANCE.compare(g1.getOnRole(),g2.getOnRole());
-                    if (comparison!=0)
-                        return comparison;
-                    return compare(g1.getToAtomicConcept(),g2.getToAtomicConcept());
-                }
-            case 2:
-                {
-                    AtLeastAbstractRoleConcept l1=(AtLeastAbstractRoleConcept)c1;
-                    AtLeastAbstractRoleConcept l2=(AtLeastAbstractRoleConcept)c2;
-                    int comparison=RoleComparator.INSTANCE.compare(l1.getOnRole(),l2.getOnRole());
-                    if (comparison!=0)
-                        return comparison;
-                    return compare(l1.getToConcept(),l2.getToConcept());
-                }
-            case 3:
-                {
-                    ExistsDescriptionGraph g1=(ExistsDescriptionGraph)c1;
-                    ExistsDescriptionGraph g2=(ExistsDescriptionGraph)c2;
-                    return g1.getDescriptionGraph().getName().compareTo(g2.getDescriptionGraph().getName());
-                }
+            case 1: {
+                AtMostGuard g1=(AtMostGuard)c1;
+                AtMostGuard g2=(AtMostGuard)c2;
+                int comparison=RoleComparator.INSTANCE.compare(g1.getOnRole(),g2.getOnRole());
+                if (comparison!=0)
+                    return comparison;
+                return compare(g1.getToAtomicConcept(),g2.getToAtomicConcept());
+            }
+            case 2: {
+                AtLeastAbstractRoleConcept l1=(AtLeastAbstractRoleConcept)c1;
+                AtLeastAbstractRoleConcept l2=(AtLeastAbstractRoleConcept)c2;
+                int comparison=RoleComparator.INSTANCE.compare(l1.getOnRole(),l2.getOnRole());
+                if (comparison!=0)
+                    return comparison;
+                return compare(l1.getToConcept(),l2.getToConcept());
+            }
+            case 3: {
+                ExistsDescriptionGraph g1=(ExistsDescriptionGraph)c1;
+                ExistsDescriptionGraph g2=(ExistsDescriptionGraph)c2;
+                return g1.getDescriptionGraph().getName().compareTo(g2.getDescriptionGraph().getName());
+            }
             case 4:
                 return ((AtomicNegationConcept)c1).getNegatedAtomicConcept().getURI().compareTo(((AtomicNegationConcept)c2).getNegatedAtomicConcept().getURI());
-            case 5:
-                {
-                    AtLeastConcreteRoleConcept l1=(AtLeastConcreteRoleConcept)c1;
-                    AtLeastConcreteRoleConcept l2=(AtLeastConcreteRoleConcept)c2;
-                    int comparison=RoleComparator.INSTANCE.compare(l1.getOnAtomicConcreteRole(),l2.getOnAtomicConcreteRole());
-                    if (comparison!=0)
-                        return comparison;
-                    return DataRangeComparator.INSTANCE.compare(l1.getToDataRange(), l2.getToDataRange());
-                }
+            case 5: {
+                AtLeastConcreteRoleConcept l1=(AtLeastConcreteRoleConcept)c1;
+                AtLeastConcreteRoleConcept l2=(AtLeastConcreteRoleConcept)c2;
+                int comparison=RoleComparator.INSTANCE.compare(l1.getOnAtomicConcreteRole(),l2.getOnAtomicConcreteRole());
+                if (comparison!=0)
+                    return comparison;
+                return DataRangeComparator.INSTANCE.compare(l1.getToDataRange(),l2.getToDataRange());
+            }
             default:
                 throw new IllegalArgumentException();
             }
@@ -740,58 +745,58 @@ public class Debugger extends TableauMonitorForwarder {
                 throw new IllegalArgumentException();
         }
     }
-    
-    public static class DataRangeComparator implements Comparator<AbstractDataRange> {
+
+    public static class DataRangeComparator implements Comparator<DataRange> {
         public static final DataRangeComparator INSTANCE=new DataRangeComparator();
-        
-        public int compare(AbstractDataRange adr1, AbstractDataRange adr2) {
+
+        public int compare(DataRange adr1,DataRange adr2) {
             int type1=getDataRangeType(adr1);
             int type2=getDataRangeType(adr2);
             if (type1!=type2)
                 return type1-type2;
             if (adr1 instanceof DataRange && adr2 instanceof DataRange) {
-                DataRange dr1 = (DataRange) adr1;
-                DataRange dr2 = (DataRange) adr2;
-                int comparison = dr1.getDatatypeURI().compareTo(dr2.getDatatypeURI());
-                if (comparison!=0) return comparison;
-                List<DataConstant> values1 = new ArrayList<DataConstant>(dr1.getOneOf());
-                List<DataConstant> values2 = new ArrayList<DataConstant>(dr2.getOneOf());
+                DataRange dr1=(DataRange)adr1;
+                DataRange dr2=(DataRange)adr2;
+                int comparison=dr1.getDatatypeURI().compareTo(dr2.getDatatypeURI());
+                if (comparison!=0)
+                    return comparison;
+                List<DataConstant> values1=new ArrayList<DataConstant>(dr1.getOneOf());
+                List<DataConstant> values2=new ArrayList<DataConstant>(dr2.getOneOf());
                 Collections.sort(values1);
                 Collections.sort(values2);
-                Iterator<DataConstant> it1 = values1.iterator();
-                Iterator<DataConstant> it2 = values2.iterator();
+                Iterator<DataConstant> it1=values1.iterator();
+                Iterator<DataConstant> it2=values2.iterator();
                 while (it1.hasNext()) {
                     if (it2.hasNext()) {
-                        comparison = it1.next().compareTo(it2.next());
-                        if (comparison!=0) return comparison;
-                    } else {
+                        comparison=it1.next().compareTo(it2.next());
+                        if (comparison!=0)
+                            return comparison;
+                    }
+                    else {
                         return 1;
                     }
                 }
-                if (it2.hasNext()) return -1;
+                if (it2.hasNext())
+                    return -1;
                 return 0;
-            } else if (adr1 instanceof Concept && adr2 instanceof Concept) {
-                Concept c1 = (Concept) adr1;
-                Concept c2 = (Concept) adr2;
-                return ConceptComparator.INSTANCE.compare(c1, c2);
-            } else {
+            }
+            else if (adr1 instanceof Concept && adr2 instanceof Concept) {
+                Concept c1=(Concept)adr1;
+                Concept c2=(Concept)adr2;
+                return ConceptComparator.INSTANCE.compare(c1,c2);
+            }
+            else {
                 // should not happen
                 return -1;
             }
         }
-        protected int getDataRangeType(AbstractDataRange dr) {
-            if (dr instanceof DataRange) {
-                int returnValue = 10;
-                if (((DataRange)dr).isNegated()) returnValue = 11;
-                return returnValue;
-            } else if (dr instanceof Concept) {
-                return getConceptType((Concept) dr);
-            } else {
-                // should not happen
-                return -1;
-            }
+        protected int getDataRangeType(DataRange dr) {
+            int returnValue=10;
+            if (((DataRange)dr).isNegated())
+                returnValue=11;
+            return returnValue;
         }
-        
+
         protected int getConceptType(Concept c) {
             if (c instanceof AtMostGuard)
                 return 1;
@@ -809,7 +814,7 @@ public class Debugger extends TableauMonitorForwarder {
                 throw new IllegalArgumentException();
         }
     }
-    
+
     public static class NodeComparator implements Comparator<Node> {
         public static final NodeComparator INSTANCE=new NodeComparator();
 
@@ -817,13 +822,13 @@ public class Debugger extends TableauMonitorForwarder {
             return o1.getNodeID()-o2.getNodeID();
         }
     }
-    
+
     public static class NodeCreationInfo {
         public final Node m_node;
         public final Node m_createdByNode;
         public final ExistentialConcept m_createdByExistential;
         public final List<Node> m_children;
-        
+
         public NodeCreationInfo(Node node,Node createdByNode,ExistentialConcept createdByExistential) {
             m_node=node;
             m_createdByNode=createdByNode;
@@ -853,23 +858,23 @@ public class Debugger extends TableauMonitorForwarder {
         return m_derivationHistory;
     }
     public NodeCreationInfo getNodeCreationInfo(Node node) {
-        NodeCreationInfo nodeCreationInfo = m_nodeCreationInfos.get(node);
+        NodeCreationInfo nodeCreationInfo=m_nodeCreationInfos.get(node);
         return nodeCreationInfo;
     }
-    
+
     public void setBreakpointTime(int time) {
-        m_breakpointTime = time;
+        m_breakpointTime=time;
     }
     public void setInMainLoop(boolean inMainLoop) {
-        m_inMainLoop = inMainLoop;
+        m_inMainLoop=inMainLoop;
     }
     public void setForever(boolean forever) {
-        this.m_forever = forever;
+        this.m_forever=forever;
     }
     public void setSinglestep(boolean singlestep) {
-        this.m_singlestep = singlestep;
+        this.m_singlestep=singlestep;
     }
-    
+
     public boolean addWaitOption(WaitOption option) {
         return this.m_waitOptions.add(option);
     }

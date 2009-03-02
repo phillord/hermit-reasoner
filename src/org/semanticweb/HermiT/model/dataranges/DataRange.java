@@ -7,6 +7,7 @@ package org.semanticweb.HermiT.model.dataranges;
 import java.net.URI;
 import java.util.Set;
 
+import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.DT;
 import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facet;
 
@@ -30,7 +31,7 @@ import org.semanticweb.HermiT.model.dataranges.DatatypeRestriction.Facet;
  * 
  * @author BGlimm
  */
-public interface DataRange extends AbstractDataRange {
+public interface DataRange extends DLPredicate {
     
     /**
      * @return an new instance of the concrete implementation on which the 

@@ -771,7 +771,6 @@ public class OWLClausification implements Serializable {
         }
     }
 
-    // protected static class DataTypeVisitor extends OWLDa
     protected static class DataVisitor implements OWLDataVisitor {
         protected static OWLOntologyManager man=OWLManager.createOWLOntologyManager();
         protected static OWLDataFactory factory=man.getOWLDataFactory();
