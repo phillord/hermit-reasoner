@@ -49,7 +49,7 @@ public class ReasoningCache {
                         Object obj = retrieval.getTupleBuffer()[0];
                         if (obj instanceof AtomicConcept) {
                             AtomicConcept d = (AtomicConcept) obj;
-                            if (!InternalNames.isInternalURI(d.getURI())) {
+                            if (!Namespaces.isInternalURI(d.getURI())) {
                                 if (retrieval.getDependencySet().isEmpty()) {
                                     detConcepts.add(d);
                                 } else {

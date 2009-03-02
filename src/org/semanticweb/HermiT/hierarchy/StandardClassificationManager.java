@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.semanticweb.HermiT.InternalNames;
+import org.semanticweb.HermiT.Namespaces;
 import org.semanticweb.HermiT.model.AtomicConcept;
 
 public class StandardClassificationManager implements Serializable {
@@ -38,7 +38,7 @@ public class StandardClassificationManager implements Serializable {
     }
     public void buildHierarchy() throws SubsumptionHierarchy.SubusmptionCheckerException {
         for (AtomicConcept atomicConcept : m_subsumptionChecker.getAllAtomicConcepts()) {
-            if (!InternalNames.isInternalURI(atomicConcept.getURI())) {
+            if (!Namespaces.isInternalURI(atomicConcept.getURI())) {
                 insertConcept(atomicConcept);
             }
         }

@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Configuration;
-import org.semanticweb.HermiT.InternalNames;
 import org.semanticweb.HermiT.Namespaces;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
@@ -274,7 +273,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
         DLOntology dlOntology=clausifier.clausify(m_ontologyManager,m_ontology,noDescriptionGraphs);
         Set<String> actualStrings=new HashSet<String>();
-        Namespaces namespaces=InternalNames.withInternalNamespaces(new Namespaces(m_ontology.getURI()+"#",Namespaces.semanticWebNamespaces));
+        Namespaces namespaces=Namespaces.withInternalNamespaces(new Namespaces(m_ontology.getURI()+"#",Namespaces.semanticWebNamespaces));
         for (DLClause dlClause : dlOntology.getDLClauses())
             actualStrings.add(dlClause.toString(namespaces));
         for (org.semanticweb.HermiT.model.Atom atom : dlOntology.getPositiveFacts())

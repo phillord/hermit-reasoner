@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
-import org.semanticweb.HermiT.InternalNames;
+import org.semanticweb.HermiT.Namespaces;
 import org.semanticweb.HermiT.model.AtomicConcept;
 
 /**
@@ -101,7 +101,7 @@ public class OptimizedClassificationManager implements Serializable {
         }
     }
     protected boolean shouldProcessConcept(AtomicConcept atomicConcept) {
-        return !InternalNames.isInternalURI(atomicConcept.getURI()) && !AtomicConcept.THING.equals(atomicConcept) && !AtomicConcept.NOTHING.equals(atomicConcept);
+        return !Namespaces.isInternalURI(atomicConcept.getURI()) && !AtomicConcept.THING.equals(atomicConcept) && !AtomicConcept.NOTHING.equals(atomicConcept);
     }
     
     protected static class Node {

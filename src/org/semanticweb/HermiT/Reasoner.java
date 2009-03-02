@@ -308,7 +308,7 @@ public class Reasoner implements Serializable {
             concepts.add(AtomicConcept.THING);
             concepts.add(AtomicConcept.NOTHING);
             for (AtomicConcept c : m_dlOntology.getAllAtomicConcepts())
-                if (!InternalNames.isInternalURI(c.getURI()))
+                if (!Namespaces.isInternalURI(c.getURI()))
                     concepts.add(c);
             ReasoningCache cache=new ReasoningCache();
             cache.seed(concepts,m_tableau);
@@ -828,7 +828,7 @@ public class Reasoner implements Serializable {
     protected static Namespaces createNamespaces(String ontologyURI) {
         Map<String,String> namespaceDecl=new HashMap<String,String>();
         namespaceDecl.put("",ontologyURI+"#");
-        return InternalNames.withInternalNamespaces(new Namespaces(namespaceDecl,Namespaces.semanticWebNamespaces));
+        return Namespaces.withInternalNamespaces(new Namespaces(namespaceDecl,Namespaces.semanticWebNamespaces));
 
     }
     

@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.semanticweb.HermiT.InternalNames;
 import org.semanticweb.HermiT.blocking.AnywhereBlocking;
 import org.semanticweb.HermiT.blocking.BlockingSignatureCache;
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
@@ -166,7 +165,7 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
     protected String getSubsumptionHierarchyAsText() throws Exception {
         SubsumptionHierarchy subsumptionHierarchy = getSubsumptionHierarchy();
         Map<AtomicConcept, Set<AtomicConcept>> flattenedHierarchy = subsumptionHierarchy.getFlattenedHierarchy();
-        org.semanticweb.HermiT.Namespaces namespaces = InternalNames.withInternalNamespaces
+        org.semanticweb.HermiT.Namespaces namespaces = org.semanticweb.HermiT.Namespaces.withInternalNamespaces
             (new org.semanticweb.HermiT.Namespaces(m_ontology.getOntologyURI() + "#",
                                 org.semanticweb.HermiT.Namespaces.semanticWebNamespaces));
         CharArrayWriter buffer = new CharArrayWriter();

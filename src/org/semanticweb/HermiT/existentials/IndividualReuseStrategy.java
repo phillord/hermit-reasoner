@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.semanticweb.HermiT.InternalNames;
+import org.semanticweb.HermiT.Namespaces;
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
 import org.semanticweb.HermiT.model.AtomicConcept;
@@ -116,7 +116,7 @@ public class IndividualReuseStrategy extends StrategyBase implements Serializabl
         (AtLeastAbstractRoleConcept atLeastAbstractConcept, Node node) {
         LiteralConcept toConcept = atLeastAbstractConcept.getToConcept();
         if ((toConcept instanceof AtomicConcept) &&
-            InternalNames.isInternalURI(((AtomicConcept) toConcept).getURI())) {
+            Namespaces.isInternalURI(((AtomicConcept) toConcept).getURI())) {
             return false;
         }
         if (atLeastAbstractConcept.getNumber()==1 

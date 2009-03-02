@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.semanticweb.HermiT.InternalNames;
 import org.semanticweb.HermiT.Namespaces;
 import org.semanticweb.HermiT.model.dataranges.DataRange;
 
@@ -67,7 +66,7 @@ public class DLOntology implements Serializable {
             m_allAtomicConcepts=atomicConcepts;
         int numberOfExternalConcepts=0;
         for (AtomicConcept c : m_allAtomicConcepts)
-            if (!InternalNames.isInternalURI(c.getURI()))
+            if (!Namespaces.isInternalURI(c.getURI()))
                 numberOfExternalConcepts++;
         m_numberOfExternalConcepts=numberOfExternalConcepts;
         if (transitiveObjectRoles==null)
