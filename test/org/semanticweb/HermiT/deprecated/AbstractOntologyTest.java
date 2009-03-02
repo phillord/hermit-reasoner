@@ -1,6 +1,6 @@
 package org.semanticweb.HermiT.deprecated;
 
-import java.io.CharArrayWriter;
+/*import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,16 +28,16 @@ import org.semanticweb.kaon2.api.Namespaces;
 import org.semanticweb.kaon2.api.Ontology;
 import org.semanticweb.kaon2.api.OntologyManager;
 import org.semanticweb.kaon2.api.owl.elements.Description;
-import org.semanticweb.kaon2.api.owl.elements.OWLClass;
+import org.semanticweb.kaon2.api.owl.elements.OWLClass;*/
 
 public abstract class AbstractOntologyTest extends AbstractHermiTTest {
-    protected Ontology m_ontology;
+//    protected Ontology m_ontology;
 
     public AbstractOntologyTest(String name) {
         super(name);
     }
 
-    protected void setUp() throws Exception {
+/*    protected void setUp() throws Exception {
         OntologyManager ontologyManager = KAON2Manager.newOntologyManager();
         m_ontology = ontologyManager.createOntology(
                 "file:/c:/test/ontology.owl", new HashMap<String, Object>());
@@ -231,5 +231,5 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
 
     protected void loadResource(String resource) throws Exception {
         m_ontology = getOntologyFromResource(resource);
-    }
+    }*/
 }

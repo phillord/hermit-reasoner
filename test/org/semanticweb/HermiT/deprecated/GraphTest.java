@@ -1,6 +1,6 @@
 package org.semanticweb.HermiT.deprecated;
 
-import java.util.HashSet;
+/*import java.util.HashSet;
 import java.util.Set;
 
 import org.semanticweb.HermiT.kaon2.structural.Clausification;
@@ -11,15 +11,15 @@ import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.tableau.DependencySet;
 import org.semanticweb.HermiT.tableau.ExtensionManager;
 import org.semanticweb.HermiT.tableau.Node;
-import org.semanticweb.HermiT.tableau.Tableau;
+import org.semanticweb.HermiT.tableau.Tableau;*/
 
 public class GraphTest extends AbstractOntologyTest {
-    protected Set<DescriptionGraph> m_descriptionGraphs;
+//    protected Set<DescriptionGraph> m_descriptionGraphs;
 
     public GraphTest(String name) {
         super(name);
     }
-    public void testGraphMerging() throws Exception {
+/*    public void testGraphMerging() throws Exception {
         DescriptionGraph graph=G(
             new String[] {
                 "A", // 0
@@ -201,5 +201,5 @@ public class GraphTest extends AbstractOntologyTest {
     protected static DescriptionGraph.Edge E(String atomicRoleName,int from,int to) {
         AtomicRole atomicRole=AtomicRole.createAtomicRole(atomicRoleName);
         return new DescriptionGraph.Edge(atomicRole,from,to);
-    }
+    }*/
 }

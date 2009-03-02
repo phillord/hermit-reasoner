@@ -25,44 +25,42 @@ public class AbstractReasonerInternalsTest extends AbstractReasonerTest {
     public AbstractReasonerInternalsTest(String name) {
         super(name);
     }
-    
-    protected DLOntology getDLOntology(Configuration c, Set<DescriptionGraph> dgs) throws Exception {
-        OWLClausification clausification = new OWLClausification(c);
-        if (dgs == null ) dgs = Collections.emptySet();
-        return clausification.clausify(m_ontologyManager, m_ontology, dgs);
+
+    protected DLOntology getDLOntology(Configuration c,Set<DescriptionGraph> dgs) throws Exception {
+        OWLClausification clausification=new OWLClausification(c);
+        if (dgs==null)
+            dgs=Collections.emptySet();
+        return clausification.clausify(m_ontologyManager,m_ontology,dgs);
     }
 
     protected Tableau getTableau(Set<DescriptionGraph> dgs) throws Exception {
-        Configuration c = new Configuration();
-        c.directBlockingType = Configuration.DirectBlockingType.PAIR_WISE;
-        c.blockingStrategyType = Configuration.BlockingStrategyType.ANYWHERE;
-        c.existentialStrategyType = Configuration.ExistentialStrategyType.CREATION_ORDER;
-        
-        DLOntology dlOntology = getDLOntology(c, dgs);
-        
-        DirectBlockingChecker directBlockingChecker = PairWiseDirectBlockingChecker.INSTANCE;
-        BlockingSignatureCache blockingSignatureCache = new BlockingSignatureCache(
-                directBlockingChecker);
-        BlockingStrategy blockingStrategy = new AnywhereBlocking(
-                directBlockingChecker, blockingSignatureCache);
-        ExpansionStrategy ExpansionStrategy = new CreationOrderStrategy(
-                blockingStrategy);
-        
-        return new Tableau(getTableauMonitor(), ExpansionStrategy, dlOntology, new HashMap<String, Object>());
+        Configuration c=new Configuration();
+        c.directBlockingType=Configuration.DirectBlockingType.PAIR_WISE;
+        c.blockingStrategyType=Configuration.BlockingStrategyType.ANYWHERE;
+        c.existentialStrategyType=Configuration.ExistentialStrategyType.CREATION_ORDER;
+
+        DLOntology dlOntology=getDLOntology(c,dgs);
+
+        DirectBlockingChecker directBlockingChecker=PairWiseDirectBlockingChecker.INSTANCE;
+        BlockingSignatureCache blockingSignatureCache=new BlockingSignatureCache(directBlockingChecker);
+        BlockingStrategy blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
+        ExpansionStrategy ExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
+
+        return new Tableau(getTableauMonitor(),ExpansionStrategy,dlOntology,new HashMap<String,Object>());
     }
-    
+
     protected Tableau getTableau() throws Exception {
         return getTableau(null);
     }
-    
+
     protected TableauMonitor getTableauMonitor() {
         return null;
     }
-    
+
     protected boolean shouldPrepareForNIRule() {
         return false;
     }
-    
+
     protected static void assertRetrieval(ExtensionTable extensionTable,Object[] searchTuple,ExtensionTable.View extensionView,Object[][] expectedTuples) {
         boolean[] bindingPattern=new boolean[searchTuple.length];
         for (int i=0;i<searchTuple.length;i++)
@@ -79,8 +77,8 @@ public class AbstractReasonerInternalsTest extends AbstractReasonerTest {
         while (!retrieval.afterLast()) {
             Object[] tupleBuffer=retrieval.getTupleBuffer();
             boolean tupleFound=false;
-            for (int i=0;!tupleFound && i<expectedTuples.length;i++) {
-                if (!consumed[i] && tuplesEqual(tupleBuffer,expectedTuples[i])) {
+            for (int i=0;!tupleFound&&i<expectedTuples.length;i++) {
+                if (!consumed[i]&&tuplesEqual(tupleBuffer,expectedTuples[i])) {
                     consumed[i]=true;
                     tupleFound=true;
                 }
@@ -93,13 +91,13 @@ public class AbstractReasonerInternalsTest extends AbstractReasonerTest {
             if (!consumed[i])
                 fail("Tuple from the expected list has not been seen in the retrieval.");
     }
-    
+
     protected static void assertEquals(Object[] tuple1,Object[] tuple2) {
         assertEquals(tuple1.length,tuple2.length);
         for (int index=0;index<tuple1.length;index++)
             assertEquals(tuple1[index],tuple2[index]);
     }
-    
+
     protected static boolean tuplesEqual(Object[] tuple1,Object[] tuple2) {
         if (tuple1.length!=tuple2.length)
             return false;
@@ -108,7 +106,7 @@ public class AbstractReasonerInternalsTest extends AbstractReasonerTest {
                 return false;
         return true;
     }
-    
+
     protected static Object[] T(Object... nodes) {
         return nodes;
     }

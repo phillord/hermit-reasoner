@@ -1,6 +1,6 @@
 package org.semanticweb.HermiT.deprecated;
 
-import java.io.BufferedReader;
+/*import java.io.BufferedReader;
 import java.io.CharArrayWriter;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -8,12 +8,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.Set;*/
 
-import junit.framework.AssertionFailedError;
+//import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
-import org.semanticweb.HermiT.model.Atom;
+/*import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
@@ -22,10 +22,10 @@ import org.semanticweb.kaon2.api.Axiom;
 import org.semanticweb.kaon2.api.DefaultOntologyResolver;
 import org.semanticweb.kaon2.api.KAON2Manager;
 import org.semanticweb.kaon2.api.Ontology;
-import org.semanticweb.kaon2.api.OntologyManager;
+import org.semanticweb.kaon2.api.OntologyManager;*/
 
 public abstract class AbstractHermiTTest extends TestCase {
-    protected static final Node[][] NO_TUPLES=new Node[0][];
+/*    protected static final Node[][] NO_TUPLES=new Node[0][];
     protected static final DLOntology EMPTY_DL_ONTOLOGY;
     static {
         Set<DLClause> dlClauses = Collections.emptySet();
@@ -45,12 +45,12 @@ public abstract class AbstractHermiTTest extends TestCase {
                 false, // hasNominals
                 false, // canUseNIRule
                 false); // hasDatatypes
-    }
+    }*/
 
     public AbstractHermiTTest(String name) {
         super(name);
     }
-    protected Ontology getOntology(String physicalURI) throws Exception {
+/*    protected Ontology getOntology(String physicalURI) throws Exception {
         DefaultOntologyResolver resolver=new DefaultOntologyResolver();
         String ontologyURI=resolver.registerOntology(physicalURI);
         OntologyManager ontologyManager=KAON2Manager.newOntologyManager();
@@ -184,5 +184,5 @@ public abstract class AbstractHermiTTest extends TestCase {
 
     protected static Object[] T(Object... nodes) {
         return nodes;
-    }
+    }*/
 }
