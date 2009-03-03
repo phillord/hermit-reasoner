@@ -15,9 +15,10 @@ public final class PermanentDependencySet implements DependencySet,Serializable 
     
     protected PermanentDependencySet() {
         m_rest=null;
-        m_branchingPoint=-1;
+        m_branchingPoint=-2;
         m_nextEntry=null;
         m_usageCounter=0;
+        m_previousUnusedSet=null;
         m_nextUnusedSet=null;
     }
     public boolean containsBranchingPoint(int branchingPoint) {
