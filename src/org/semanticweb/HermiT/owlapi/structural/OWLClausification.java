@@ -112,7 +112,7 @@ public class OWLClausification implements Serializable {
     protected static final Variable X=Variable.create("X");
     protected static final Variable Y=Variable.create("Y");
     protected static final Variable Z=Variable.create("Z");
-    
+
     protected final Configuration m_config;
     protected int m_amqOffset; // the number of negative at-most replacements already performed
 
@@ -149,7 +149,8 @@ public class OWLClausification implements Serializable {
         TransitivityManager transitivityManager=new TransitivityManager(factory);
         transitivityManager.prepareTransformation(axioms);
         transitivityManager.rewriteConceptInclusions(axioms);
-        if (descriptionGraphs == null) descriptionGraphs = Collections.emptySet();
+        if (descriptionGraphs==null)
+            descriptionGraphs=Collections.emptySet();
         return clausify(factory,ontologyURI,axioms,descriptionGraphs);
     }
 
@@ -157,7 +158,7 @@ public class OWLClausification implements Serializable {
         OWLAxiomsExpressivity axiomsExpressivity=new OWLAxiomsExpressivity(axioms);
         return clausify(factory,ontologyURI,axioms,axiomsExpressivity,descriptionGraphs);
     }
-   
+
     public DLOntology clausify(OWLDataFactory factory,String ontologyURI,OWLAxioms axioms,OWLAxiomsExpressivity axiomsExpressivity,Collection<DescriptionGraph> descriptionGraphs) {
         Set<DLClause> dlClauses=new LinkedHashSet<DLClause>();
         Set<Atom> positiveFacts=new HashSet<Atom>();
@@ -576,7 +577,7 @@ public class OWLClausification implements Serializable {
                     OWLClass owlClass=(OWLClass)internal;
                     m_bodyAtoms.add(Atom.create(AtomicConcept.create(owlClass.getURI().toString()),new Term[] { y }));
                 }
-                else if (internal instanceof OWLObjectOneOf&&((OWLObjectOneOf)internal).getIndividuals().size()==1) {
+                else if (internal instanceof OWLObjectOneOf && ((OWLObjectOneOf)internal).getIndividuals().size()==1) {
                     OWLObjectOneOf objectOneOf=(OWLObjectOneOf)internal;
                     OWLIndividual individual=objectOneOf.getIndividuals().iterator().next();
                     m_bodyAtoms.add(Atom.create(getConceptForNominal(individual),y));
@@ -623,7 +624,7 @@ public class OWLClausification implements Serializable {
                 AtomicConcept toAtomicConcept;
                 if (object.getFiller() instanceof OWLClass)
                     toAtomicConcept=AtomicConcept.create(((OWLClass)object.getFiller()).getURI().toString());
-                else if (object.getFiller() instanceof OWLObjectComplementOf&&((OWLObjectComplementOf)object.getFiller()).getOperand() instanceof OWLClass) {
+                else if (object.getFiller() instanceof OWLObjectComplementOf && ((OWLObjectComplementOf)object.getFiller()).getOperand() instanceof OWLClass) {
                     AtomicConcept originalAtomicConcept=AtomicConcept.create(((OWLClass)((OWLObjectComplementOf)object.getFiller()).getOperand()).getURI().toString());
                     toAtomicConcept=m_negativeAtMostReplacements.get(originalAtomicConcept);
                     if (toAtomicConcept==null) {
@@ -794,7 +795,7 @@ public class OWLClausification implements Serializable {
         public void visit(OWLTypedConstant typedConstant) {
             OWLDataType dataType=typedConstant.getDataType();
             String lit=typedConstant.getLiteral();
-            if (dataType.equals(factory.getOWLDataType(DT.OWLREAL.getURI()))||dataType.equals(factory.getOWLDataType(DT.OWLREALPLUS.getURI()))) {
+            if (dataType.equals(factory.getOWLDataType(DT.OWLREAL.getURI())) || dataType.equals(factory.getOWLDataType(DT.OWLREALPLUS.getURI()))) {
                 throw new RuntimeException("Parsed the constant "+typedConstant+" of type owl:real or owl:realPlus, "+"but the datatypes owl:real and owl:realPlus do not "+"have any literals. ");
             }
             else if (dataType.equals(factory.getOWLDataType(DT.RATIONAL.getURI()))) {
@@ -812,12 +813,12 @@ public class OWLClausification implements Serializable {
                             BigDecimal literalAsBD=literalAsBR.bigDecimalValueExact();
                             // ok, it is at least representable as a decimal
                             // let's see if it has also an exact double representation
-                            if (literalAsBD.compareTo(new BigDecimal(Double.MAX_VALUE))<=0&&literalAsBD.compareTo(new BigDecimal(-Double.MAX_VALUE))>=0) {
+                            if (literalAsBD.compareTo(new BigDecimal(Double.MAX_VALUE))<=0 && literalAsBD.compareTo(new BigDecimal(-Double.MAX_VALUE))>=0) {
                                 Double literalAsD=new Double(literalAsBD.toString());
                                 if (literalAsBD.compareTo(new BigDecimal(literalAsD))==0) {
                                     // it is representable as a double without rounding
                                     // see if it is even a float
-                                    if (literalAsBD.compareTo(new BigDecimal(Float.MAX_VALUE))<=0&&literalAsBD.compareTo(new BigDecimal(-Float.MAX_VALUE))>=0) {
+                                    if (literalAsBD.compareTo(new BigDecimal(Float.MAX_VALUE))<=0 && literalAsBD.compareTo(new BigDecimal(-Float.MAX_VALUE))>=0) {
                                         Float literalAsF=new Float(literalAsBD.toString());
                                         if (literalAsBD.compareTo(new BigDecimal(literalAsF))==0) {
                                             // it is even a float
@@ -856,14 +857,14 @@ public class OWLClausification implements Serializable {
                         currentConstant=new DataConstant(Impl.IInteger,DT.DECIMAL,lit);
                     }
                     catch (ArithmeticException e) {
-                        // apperently it is not an integer
+                        // apparently it is not an integer
                         // see if it fits into the range of doubles
-                        if (literalAsBD.compareTo(new BigDecimal(Double.MAX_VALUE))<=0&&literalAsBD.compareTo(new BigDecimal(-Double.MAX_VALUE))>=0) {
+                        if (literalAsBD.compareTo(new BigDecimal(Double.MAX_VALUE))<=0 && literalAsBD.compareTo(new BigDecimal(-Double.MAX_VALUE))>=0) {
                             Double literalAsD=new Double(lit);
                             if (literalAsBD.compareTo(new BigDecimal(literalAsD))==0) {
                                 // it is representable as a double without rounding
                                 // see if it is even a float
-                                if (literalAsBD.compareTo(new BigDecimal(Float.MAX_VALUE))<=0&&literalAsBD.compareTo(new BigDecimal(-Float.MAX_VALUE))>=0) {
+                                if (literalAsBD.compareTo(new BigDecimal(Float.MAX_VALUE))<=0 && literalAsBD.compareTo(new BigDecimal(-Float.MAX_VALUE))>=0) {
                                     Float literalAsF=new Float(lit);
                                     if (literalAsBD.compareTo(new BigDecimal(literalAsF))==0) {
                                         // it is even a float
@@ -889,20 +890,20 @@ public class OWLClausification implements Serializable {
                 }
             }
             else if (dataType.equals(factory.getOWLDataType(DT.DOUBLE.getURI()))) {
-                if (lit.trim().equalsIgnoreCase("INF")||lit.trim().equalsIgnoreCase("+INF")) {
+                if (lit.trim().equalsIgnoreCase("INF") || lit.trim().equalsIgnoreCase("+INF")) {
                     lit="Infinity";
                 }
                 if (lit.trim().equalsIgnoreCase("-INF")) {
                     lit="-Infinity";
                 }
-                if (lit.equalsIgnoreCase("NaN")||lit.equalsIgnoreCase("Infinity")||lit.equalsIgnoreCase("-Infinity")) {
+                if (lit.equalsIgnoreCase("NaN") || lit.equalsIgnoreCase("Infinity") || lit.equalsIgnoreCase("-Infinity")) {
                     currentConstant=new DataConstant(Impl.IDouble,DT.DOUBLE,""+new Double(lit));
                 }
                 else {
                     try {
                         BigDecimal literalAsBD=new BigDecimal(lit);
                         // see if it is in the allowed range
-                        if (literalAsBD.compareTo(new BigDecimal(Double.MAX_VALUE))<=0&&literalAsBD.compareTo(new BigDecimal(-Double.MAX_VALUE))>=0) {
+                        if (literalAsBD.compareTo(new BigDecimal(Double.MAX_VALUE))<=0 && literalAsBD.compareTo(new BigDecimal(-Double.MAX_VALUE))>=0) {
                             Double literalAsD=new Double(lit);
                             // see whether we can use the integer implementation
                             try {
@@ -917,7 +918,7 @@ public class OWLClausification implements Serializable {
                             }
                             catch (ArithmeticException e) {
                                 // see if we can use the float implementation
-                                if (literalAsD>=(double)-Float.MAX_VALUE&&literalAsD<=(double)Float.MAX_VALUE) {
+                                if (literalAsD>=(double)-Float.MAX_VALUE && literalAsD<=(double)Float.MAX_VALUE) {
                                     Float literalAsF=new Float(lit);
                                     // see if no rounding took place
                                     if ((double)literalAsF==literalAsD) {
@@ -942,20 +943,20 @@ public class OWLClausification implements Serializable {
                 }
             }
             else if (dataType.equals(factory.getOWLDataType(DT.FLOAT.getURI()))) {
-                if (lit.trim().equalsIgnoreCase("INF")||lit.trim().equalsIgnoreCase("+INF")) {
+                if (lit.trim().equalsIgnoreCase("INF") || lit.trim().equalsIgnoreCase("+INF")) {
                     lit="Infinity";
                 }
                 if (lit.trim().equalsIgnoreCase("-INF")) {
                     lit="-Infinity";
                 }
-                if (lit.equalsIgnoreCase("NaN")||lit.equalsIgnoreCase("Infinity")||lit.equalsIgnoreCase("-Infinity")) {
+                if (lit.equalsIgnoreCase("NaN") || lit.equalsIgnoreCase("Infinity") || lit.equalsIgnoreCase("-Infinity")) {
                     currentConstant=new DataConstant(Impl.IFloat,DT.FLOAT,""+new Float(lit));
                 }
                 else {
                     try {
                         BigDecimal literalAsBD=new BigDecimal(lit);
                         Float literalAsF=new Float(lit);
-                        if (literalAsBD.compareTo(new BigDecimal(Float.MAX_VALUE))<=0&&literalAsBD.compareTo(new BigDecimal(-Float.MAX_VALUE))>=0) {
+                        if (literalAsBD.compareTo(new BigDecimal(Float.MAX_VALUE))<=0 && literalAsBD.compareTo(new BigDecimal(-Float.MAX_VALUE))>=0) {
                             try {
                                 // see if we can use the integer implementation
                                 if (literalAsF.equals(-0.0f)) {
@@ -1040,7 +1041,7 @@ public class OWLClausification implements Serializable {
             else if (dataType.equals(factory.getOWLDataType(DT.LONG.getURI()))) {
                 try {
                     BigInteger longType=new BigInteger(lit);
-                    if (longType.compareTo(new BigInteger(""+Long.MAX_VALUE))>0||longType.compareTo(new BigInteger(""+Long.MIN_VALUE))<0) {
+                    if (longType.compareTo(new BigInteger(""+Long.MAX_VALUE))>0 || longType.compareTo(new BigInteger(""+Long.MIN_VALUE))<0) {
                         throw new NumberFormatException();
                     }
                     currentConstant=new DataConstant(Impl.IInteger,DT.LONG,longType.toString());
@@ -1052,7 +1053,7 @@ public class OWLClausification implements Serializable {
             else if (dataType.equals(factory.getOWLDataType(DT.INT.getURI()))) {
                 try {
                     BigInteger intType=new BigInteger(lit);
-                    if (intType.compareTo(new BigInteger(""+Integer.MAX_VALUE))>0||intType.compareTo(new BigInteger(""+Integer.MIN_VALUE))<0) {
+                    if (intType.compareTo(new BigInteger(""+Integer.MAX_VALUE))>0 || intType.compareTo(new BigInteger(""+Integer.MIN_VALUE))<0) {
                         throw new NumberFormatException();
                     }
                     currentConstant=new DataConstant(Impl.IInteger,DT.INT,intType.toString());
@@ -1064,7 +1065,7 @@ public class OWLClausification implements Serializable {
             else if (dataType.equals(factory.getOWLDataType(DT.SHORT.getURI()))) {
                 try {
                     BigInteger shortType=new BigInteger(lit);
-                    if (shortType.compareTo(new BigInteger(""+Short.MAX_VALUE))>0||shortType.compareTo(new BigInteger(""+Short.MIN_VALUE))<0) {
+                    if (shortType.compareTo(new BigInteger(""+Short.MAX_VALUE))>0 || shortType.compareTo(new BigInteger(""+Short.MIN_VALUE))<0) {
                         throw new NumberFormatException();
                     }
                     currentConstant=new DataConstant(Impl.IInteger,DT.SHORT,shortType.toString());
@@ -1076,7 +1077,7 @@ public class OWLClausification implements Serializable {
             else if (dataType.equals(factory.getOWLDataType(DT.BYTE.getURI()))) {
                 try {
                     BigInteger byteType=new BigInteger(lit);
-                    if (byteType.compareTo(new BigInteger(""+Byte.MAX_VALUE))>0||byteType.compareTo(new BigInteger(""+Byte.MIN_VALUE))<0) {
+                    if (byteType.compareTo(new BigInteger(""+Byte.MAX_VALUE))>0 || byteType.compareTo(new BigInteger(""+Byte.MIN_VALUE))<0) {
                         throw new NumberFormatException();
                     }
                     currentConstant=new DataConstant(Impl.IInteger,DT.BYTE,byteType.toString());
@@ -1088,7 +1089,7 @@ public class OWLClausification implements Serializable {
             else if (dataType.equals(factory.getOWLDataType(DT.UNSIGNEDLONG.getURI()))) {
                 try {
                     BigInteger uLongType=new BigInteger(lit);
-                    if (uLongType.compareTo(new BigInteger("18446744073709551615"))>0||uLongType.compareTo(BigInteger.ZERO)<0) {
+                    if (uLongType.compareTo(new BigInteger("18446744073709551615"))>0 || uLongType.compareTo(BigInteger.ZERO)<0) {
                         throw new NumberFormatException();
                     }
                     currentConstant=new DataConstant(Impl.IInteger,DT.UNSIGNEDLONG,uLongType.toString());
@@ -1100,7 +1101,7 @@ public class OWLClausification implements Serializable {
             else if (dataType.equals(factory.getOWLDataType(DT.UNSIGNEDINT.getURI()))) {
                 try {
                     BigInteger uIntType=new BigInteger(lit);
-                    if (uIntType.compareTo(new BigInteger("4294967295"))>0||uIntType.compareTo(BigInteger.ZERO)<0) {
+                    if (uIntType.compareTo(new BigInteger("4294967295"))>0 || uIntType.compareTo(BigInteger.ZERO)<0) {
                         throw new NumberFormatException();
                     }
                     currentConstant=new DataConstant(Impl.IInteger,DT.UNSIGNEDINT,uIntType.toString());
@@ -1112,7 +1113,7 @@ public class OWLClausification implements Serializable {
             else if (dataType.equals(factory.getOWLDataType(DT.UNSIGNEDSHORT.getURI()))) {
                 try {
                     BigInteger uShortType=new BigInteger(lit);
-                    if (uShortType.compareTo(new BigInteger("65535"))>0||uShortType.compareTo(BigInteger.ZERO)<0) {
+                    if (uShortType.compareTo(new BigInteger("65535"))>0 || uShortType.compareTo(BigInteger.ZERO)<0) {
                         throw new NumberFormatException();
                     }
                     currentConstant=new DataConstant(Impl.IInteger,DT.UNSIGNEDSHORT,uShortType.toString());
@@ -1124,7 +1125,7 @@ public class OWLClausification implements Serializable {
             else if (dataType.equals(factory.getOWLDataType(DT.UNSIGNEDBYTE.getURI()))) {
                 try {
                     BigInteger uByteType=new BigInteger(lit);
-                    if (uByteType.compareTo(new BigInteger("255"))>0||uByteType.compareTo(BigInteger.ZERO)<0) {
+                    if (uByteType.compareTo(new BigInteger("255"))>0 || uByteType.compareTo(BigInteger.ZERO)<0) {
                         throw new NumberFormatException();
                     }
                     currentConstant=new DataConstant(Impl.IInteger,DT.UNSIGNEDBYTE,uByteType.toString());
@@ -1147,7 +1148,7 @@ public class OWLClausification implements Serializable {
             }
             else if (dataType.equals(factory.getOWLDataType(DT.NORMALIZEDSTRING.getURI()))) {
                 // no carriage return \r, tab \t, or line feed \n
-                if (lit.indexOf("\r")==-1&&lit.indexOf("\t")==-1&&lit.indexOf("\n")==-1) {
+                if (lit.indexOf("\r")==-1 && lit.indexOf("\t")==-1 && lit.indexOf("\n")==-1) {
                     currentConstant=new DataConstant(Impl.IString,DT.NORMALIZEDSTRING,lit);
                 }
                 else {
@@ -1157,7 +1158,7 @@ public class OWLClausification implements Serializable {
             else if (dataType.equals(factory.getOWLDataType(DT.TOKEN.getURI()))) {
                 // no carriage return \r, line feed \n, tab \t, no leading or
                 // trailing spaces, no internal sequences of two or more space
-                if (lit.indexOf("\r")==-1&&lit.indexOf("\t")==-1&&lit.indexOf("\n")==-1&&lit.indexOf("  ")==-1&&!lit.startsWith(" ")&&!lit.endsWith(" ")) {
+                if (lit.indexOf("\r")==-1 && lit.indexOf("\t")==-1 && lit.indexOf("\n")==-1 && lit.indexOf("  ")==-1 && !lit.startsWith(" ") && !lit.endsWith(" ")) {
                     currentConstant=new DataConstant(Impl.IString,DT.TOKEN,lit);
                 }
                 else {
@@ -1216,7 +1217,7 @@ public class OWLClausification implements Serializable {
                 currentConstant=new DataConstant(Impl.ILiteral,DT.LITERAL,lit);
             }
             else if (dataType.equals(factory.getOWLDataType(DT.BOOLEAN.getURI()))) {
-                if (!(lit.equalsIgnoreCase("true")||lit.equalsIgnoreCase("false")||lit.equalsIgnoreCase("1")||lit.equalsIgnoreCase("0"))) {
+                if (!(lit.equalsIgnoreCase("true") || lit.equalsIgnoreCase("false") || lit.equalsIgnoreCase("1") || lit.equalsIgnoreCase("0"))) {
                     throw new RuntimeException("The constant "+typedConstant+" is neither true nor false, but supposed to be "+" boolean. ");
                 }
                 else {
@@ -1382,7 +1383,7 @@ public class OWLClausification implements Serializable {
             else if (dataType.equals(factory.getOWLDataType(DT.BOOLEAN.getURI()))) {
                 currentDataRange=new DatatypeRestrictionBoolean(DT.BOOLEAN);
             }
-            else if (dataType.equals(factory.getOWLDataType(DT.OWLDATETIME.getURI()))||dataType.equals(factory.getOWLDataType(DT.DATETIME.getURI()))) {
+            else if (dataType.equals(factory.getOWLDataType(DT.OWLDATETIME.getURI())) || dataType.equals(factory.getOWLDataType(DT.DATETIME.getURI()))) {
                 currentDataRange=new DatatypeRestrictionDateTime(DT.OWLDATETIME);
             }
             else if (dataType.equals(factory.getOWLDataType(DT.ANYURI.getURI()))) {
@@ -1515,7 +1516,7 @@ public class OWLClausification implements Serializable {
                 AtomicConcept atomicConcept=AtomicConcept.create(((OWLClass)description).getURI().toString());
                 m_positiveFacts.add(Atom.create(atomicConcept,new Term[] { getIndividual(object.getIndividual()) }));
             }
-            else if (description instanceof OWLObjectComplementOf&&((OWLObjectComplementOf)description).getOperand() instanceof OWLClass) {
+            else if (description instanceof OWLObjectComplementOf && ((OWLObjectComplementOf)description).getOperand() instanceof OWLClass) {
                 AtomicConcept atomicConcept=AtomicConcept.create(((OWLClass)((OWLObjectComplementOf)description).getOperand()).getURI().toString());
                 m_negativeFacts.add(Atom.create(atomicConcept,new Term[] { getIndividual(object.getIndividual()) }));
             }
@@ -1523,7 +1524,7 @@ public class OWLClausification implements Serializable {
                 OWLObjectSelfRestriction selfRestriction=(OWLObjectSelfRestriction)description;
                 m_positiveFacts.add(getRoleAtom(selfRestriction.getProperty(),getIndividual(object.getIndividual()),getIndividual(object.getIndividual())));
             }
-            else if (description instanceof OWLObjectComplementOf&&((OWLObjectComplementOf)description).getOperand() instanceof OWLObjectSelfRestriction) {
+            else if (description instanceof OWLObjectComplementOf && ((OWLObjectComplementOf)description).getOperand() instanceof OWLObjectSelfRestriction) {
                 OWLObjectSelfRestriction selfRestriction=(OWLObjectSelfRestriction)(((OWLObjectComplementOf)description).getOperand());
                 m_negativeFacts.add(getRoleAtom(selfRestriction.getProperty(),getIndividual(object.getIndividual()),getIndividual(object.getIndividual())));
             }

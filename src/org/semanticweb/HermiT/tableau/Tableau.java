@@ -44,6 +44,7 @@ public final class Tableau implements Serializable {
     protected final DescriptionGraphManager m_descriptionGraphManager;
     protected final DatatypeManager m_datatypeManager;
     protected final boolean m_needsThingExtension;
+    protected final boolean m_needsNamedExtension;
     protected final List<List<ExistentialConcept>> m_existentialConceptsBuffers;
     protected final boolean m_checkDatatypes;
     protected BranchingPoint[] m_branchingPoints;
@@ -78,6 +79,7 @@ public final class Tableau implements Serializable {
         m_datatypeManager=new DatatypeManager(this);
         m_existentialsExpansionStrategy.initialize(this);
         m_needsThingExtension=m_hyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING);
+        m_needsNamedExtension=m_hyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.INTERNAL_NAMED);
         m_existentialConceptsBuffers=new ArrayList<List<ExistentialConcept>>();
         m_checkDatatypes=m_dlOntology.hasDatatypes();
         m_branchingPoints=new BranchingPoint[2];
@@ -524,8 +526,11 @@ public final class Tableau implements Serializable {
         m_numberOfNodeCreations++;
         if (m_tableauMonitor!=null)
             m_tableauMonitor.nodeCreated(node);
-        if (nodeType!=NodeType.CONCRETE_NODE)
+        if (nodeType!=NodeType.CONCRETE_NODE) {
             m_extensionManager.addConceptAssertion(AtomicConcept.THING,node,dependencySet);
+            if (nodeType==NodeType.NAMED_NODE && m_needsNamedExtension)
+                m_extensionManager.addConceptAssertion(AtomicConcept.INTERNAL_NAMED,node,dependencySet);
+        }
         return node;
     }
     /**
