@@ -203,7 +203,7 @@ public class DLOntology implements Serializable {
         for (DLClause dlClause : m_dlClauses) {
             // key clauses (from HasKey axioms) are not admissible according to
             // the standard HT admissibility rules
-            if (!(dlClause instanceof KeyClause)) {
+            if (!dlClause.isKnownToBeAdmissible()) {
                 int usedRoleTypes=getUsedRoleTypes(dlClause,graphAtomicRoles);
                 switch (usedRoleTypes) {
                 case CONTAINS_NO_ROLES:

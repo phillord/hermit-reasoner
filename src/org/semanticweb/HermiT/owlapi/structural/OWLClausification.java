@@ -48,7 +48,6 @@ import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InverseRole;
-import org.semanticweb.HermiT.model.KeyClause;
 import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.model.NodeIDLessThan;
 import org.semanticweb.HermiT.model.Role;
@@ -332,7 +331,7 @@ public class OWLClausification implements Serializable {
         headAtoms.toArray(hAtoms);
         Atom[] bAtoms=new Atom[bodyAtoms.size()];
         bodyAtoms.toArray(bAtoms);
-        DLClause clause=KeyClause.create(hAtoms,bAtoms);
+        DLClause clause=DLClause.createEx(true,hAtoms,bAtoms);
         return clause;
     }
 
