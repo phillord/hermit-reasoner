@@ -229,7 +229,8 @@ public class DatatypeManager implements Serializable {
             pairsFirstBoundRetr.open();
             dataRanges = new HashSet<DataRange>();
             while (!pairsFirstBoundRetr.afterLast()) {
-                dataRanges.add((DataRange) DRsForNode[0]);
+                if (DRsForNode[0] instanceof DataRange)
+                    dataRanges.add((DataRange) DRsForNode[0]);
                 pairsFirstBoundRetr.next();
             }
             nodeToDRs.put(node, dataRanges);
