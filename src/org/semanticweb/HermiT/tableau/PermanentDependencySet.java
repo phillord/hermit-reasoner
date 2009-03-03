@@ -6,6 +6,7 @@ import java.io.Serializable;
 public final class PermanentDependencySet implements DependencySet,Serializable {
     private static final long serialVersionUID=353039301123337446L;
 
+    protected final int m_generation;
     protected PermanentDependencySet m_rest;
     protected int m_branchingPoint;
     protected PermanentDependencySet m_nextEntry;
@@ -13,7 +14,8 @@ public final class PermanentDependencySet implements DependencySet,Serializable 
     protected PermanentDependencySet m_previousUnusedSet;
     protected PermanentDependencySet m_nextUnusedSet;
     
-    protected PermanentDependencySet() {
+    protected PermanentDependencySet(int generation) {
+        m_generation=generation;
         m_rest=null;
         m_branchingPoint=-2;
         m_nextEntry=null;

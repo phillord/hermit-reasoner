@@ -11,8 +11,18 @@ import java.util.List;
  * are either permanent (in case they are used for a longer time and more 
  * frequently) or temporary. The temporary ones are instances of the class 
  * UnionDependencySet and they can be created directly. If a temporary 
- * dependency sets is used more frequently, it can be turned into a permenent 
- * one by this factory.  
+ * dependency sets is used more frequently, it can be turned into a permanent 
+ * one by this factory.
+ * 
+ * WARNING: Java has a really strange bug: the field m_firstUnusedSet
+ * sometimes mysteriously changes its value and then points to some random
+ * PermanentDependencySet object from some previous tableau run.
+ * Just to exclude the possibility of this being a programming error,
+ * this class keeps track of the "generation" in which it is used.
+ * Each time the factory is cleared, the generation is increased.
+ * Then, the generation number is used to check whether the factory
+ * is given objects from the current generation. This introduce some
+ * overhead at run-time, but we keep it for debugging purposes. 
  */
 public final class DependencySetFactory implements Serializable {
     private static final long serialVersionUID=8632867055646817311L;
@@ -20,49 +30,63 @@ public final class DependencySetFactory implements Serializable {
     protected final IntegerArray m_mergeArray;
     protected final List<PermanentDependencySet> m_mergeSets;
     protected final List<UnionDependencySet> m_unprocessedSets;
-    protected final PermanentDependencySet m_emptySet;
+    protected PermanentDependencySet m_emptySet;
     protected PermanentDependencySet m_firstUnusedSet;
     protected PermanentDependencySet m_firstDestroyedSet;
     protected PermanentDependencySet[] m_entries;
     protected int m_size;
     protected int m_resizeThreshold;
+    protected int m_generation;
 
     public DependencySetFactory() {
         m_mergeArray=new IntegerArray();
         m_mergeSets=new ArrayList<PermanentDependencySet>();
         m_unprocessedSets=new ArrayList<UnionDependencySet>();
-        m_emptySet=new PermanentDependencySet();
         clear();
     }
     public int sizeInMemory() {
         return m_entries.length*4+m_size*20;
     }
     public void clear() {
+        m_generation++;
         m_mergeArray.clear();
         m_mergeSets.clear();
         m_unprocessedSets.clear();
-        m_emptySet.m_nextEntry=null;
+        m_emptySet=new PermanentDependencySet(m_generation);
+        m_emptySet.m_branchingPoint=-1;
         m_emptySet.m_usageCounter=1;
+        m_emptySet.m_rest=null;
         m_emptySet.m_previousUnusedSet=null;
         m_emptySet.m_nextUnusedSet=null;
         m_firstUnusedSet=null;
         m_firstDestroyedSet=null;
         m_entries=new PermanentDependencySet[16];
-        m_size=0;
         m_resizeThreshold=(int)(m_entries.length*0.75);
-    }
-    public void cleanUp() {
-        while (m_firstUnusedSet!=null)
-            destroyDependencySet(m_firstUnusedSet);
+        m_size=0;
     }
     public PermanentDependencySet emptySet() {
         return m_emptySet;
     }
+    public void removeUnusedSets() {
+        while (m_firstUnusedSet!=null)
+            destroyDependencySet(m_firstUnusedSet);
+    }
     public void addUsage(PermanentDependencySet dependencySet) {
-        incrementUsageCounter(dependencySet);
+        assert dependencySet.m_generation==m_generation;
+        assert dependencySet.m_branchingPoint>=0 || dependencySet==m_emptySet;
+        if (dependencySet.m_usageCounter==0)
+            removeFromUnusedList(dependencySet);
+        dependencySet.m_usageCounter++;
     }
     public void removeUsage(PermanentDependencySet dependencySet) {
-        decrementUsageCounter(dependencySet);
+        assert dependencySet.m_generation==m_generation;
+        assert dependencySet.m_branchingPoint>=0 || dependencySet==m_emptySet;
+        assert dependencySet.m_usageCounter>0;
+        assert dependencySet.m_previousUnusedSet==null;
+        assert dependencySet.m_nextUnusedSet==null;
+        dependencySet.m_usageCounter--;
+        if (dependencySet.m_usageCounter==0)
+            addToUnusedList(dependencySet);
     }
     public PermanentDependencySet addBranchingPoint(DependencySet dependencySet,int branchingPoint) {
         PermanentDependencySet permanentDependencySet=getPermanent(dependencySet);
@@ -88,6 +112,7 @@ public final class DependencySetFactory implements Serializable {
         }
     }
     protected PermanentDependencySet getDepdendencySet(PermanentDependencySet rest,int branchingPoint) {
+        assert rest.m_generation==m_generation;
         int index=(rest.hashCode()+branchingPoint) & (m_entries.length-1);
         PermanentDependencySet dependencySet=m_entries[index];
         while (dependencySet!=null) {
@@ -103,9 +128,10 @@ public final class DependencySetFactory implements Serializable {
         return dependencySet;
     }
     protected PermanentDependencySet createDependencySet(PermanentDependencySet rest,int branchingPoint) {
+        assert rest.m_generation==m_generation;
         PermanentDependencySet newSet;
         if (m_firstDestroyedSet==null)
-            newSet=new PermanentDependencySet();
+            newSet=new PermanentDependencySet(m_generation);
         else {
             newSet=m_firstDestroyedSet;
             m_firstDestroyedSet=m_firstDestroyedSet.m_nextEntry;
@@ -113,17 +139,18 @@ public final class DependencySetFactory implements Serializable {
         newSet.m_rest=rest;
         newSet.m_branchingPoint=branchingPoint;
         newSet.m_usageCounter=0;
-        incrementUsageCounter(newSet.m_rest);
+        addUsage(newSet.m_rest);
         addToUnusedList(newSet);
         m_size++;
         return newSet;
     }
     protected void destroyDependencySet(PermanentDependencySet dependencySet) {
+        assert dependencySet.m_generation==m_generation;
         assert dependencySet.m_branchingPoint>=0;
         assert dependencySet.m_usageCounter==0;
         assert dependencySet.m_rest.m_usageCounter>0;
         removeFromUnusedList(dependencySet);
-        decrementUsageCounter(dependencySet.m_rest);
+        removeUsage(dependencySet.m_rest);
         removeFromEntries(dependencySet);
         dependencySet.m_rest=null;
         dependencySet.m_branchingPoint=-2;
@@ -132,6 +159,7 @@ public final class DependencySetFactory implements Serializable {
         m_size--;
     }
     protected void removeFromEntries(PermanentDependencySet dependencySet) {
+        assert dependencySet.m_generation==m_generation;
         int index=(dependencySet.m_rest.hashCode()+dependencySet.m_branchingPoint) & (m_entries.length-1);
         PermanentDependencySet lastEntry=null;
         PermanentDependencySet entry=m_entries[index];
@@ -146,23 +174,10 @@ public final class DependencySetFactory implements Serializable {
             lastEntry=entry;
             entry=entry.m_nextEntry;
         }
-        throw new IllegalStateException("Internal error: dependency set not found in the entry table.");
-    }
-    protected void incrementUsageCounter(PermanentDependencySet dependencySet) {
-        assert dependencySet.m_branchingPoint>=-1;
-        if (dependencySet.m_usageCounter==0)
-            removeFromUnusedList(dependencySet);
-        dependencySet.m_usageCounter++;
-    }
-    protected void decrementUsageCounter(PermanentDependencySet dependencySet) {
-        assert dependencySet.m_usageCounter>0;
-        assert dependencySet.m_previousUnusedSet==null;
-        assert dependencySet.m_nextUnusedSet==null;
-        dependencySet.m_usageCounter--;
-        if (dependencySet.m_usageCounter==0)
-            addToUnusedList(dependencySet);
+        throw new IllegalStateException("Internal error: dependency set not found in the entry table. This is caused by a really strange bug in Java. Please contact HermiT authors for more information.");
     }
     protected void removeFromUnusedList(PermanentDependencySet dependencySet) {
+        assert dependencySet.m_generation==m_generation;
         if (dependencySet.m_previousUnusedSet!=null)
             dependencySet.m_previousUnusedSet.m_nextUnusedSet=dependencySet.m_nextUnusedSet;
         else
@@ -174,6 +189,7 @@ public final class DependencySetFactory implements Serializable {
         assert m_firstUnusedSet==null || m_firstUnusedSet.m_usageCounter==0;
     }
     protected void addToUnusedList(PermanentDependencySet dependencySet) {
+        assert dependencySet.m_generation==m_generation;
         dependencySet.m_previousUnusedSet=null;
         dependencySet.m_nextUnusedSet=m_firstUnusedSet;
         if (m_firstUnusedSet!=null)
@@ -181,7 +197,6 @@ public final class DependencySetFactory implements Serializable {
         m_firstUnusedSet=dependencySet;
         assert m_firstUnusedSet==null || m_firstUnusedSet.m_usageCounter==0;
     }
-    
     protected void resizeEntries() {
         int newLength=m_entries.length*2;
         int newLengthMinusOne=newLength-1;

@@ -179,9 +179,8 @@ public final class Tableau implements Serializable {
             while (m_extensionManager.propagateDeltaNew() && !m_extensionManager.containsClash()) {
                 m_descriptionGraphManager.checkGraphConstraints();
                 m_hyperresolutionManager.applyDLClauses();
-                if (m_checkDatatypes && !m_extensionManager.containsClash()) {
+                if (m_checkDatatypes && !m_extensionManager.containsClash())
                     m_datatypeManager.checkDatatypeConstraints();
-                }
                 if (!m_extensionManager.containsClash())
                     m_nominalIntroductionManager.processTargets();
                 hasChange=true;
@@ -232,7 +231,7 @@ public final class Tableau implements Serializable {
             branchingPoint.startNextChoice(this,clashDependencySet);
             if (m_tableauMonitor!=null)
                 m_tableauMonitor.startNextBranchingPointFinished(branchingPoint);
-            m_dependencySetFactory.cleanUp();
+            m_dependencySetFactory.removeUnusedSets();
             return true;
         }
         return false;
