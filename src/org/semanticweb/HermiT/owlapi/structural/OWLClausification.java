@@ -35,8 +35,7 @@ import org.semanticweb.HermiT.datatypes.EnumeratedDataRange;
 import org.semanticweb.HermiT.datatypes.DataConstant.Impl;
 import org.semanticweb.HermiT.datatypes.DatatypeRestriction.DT;
 import org.semanticweb.HermiT.datatypes.DatatypeRestriction.Facet;
-import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
-import org.semanticweb.HermiT.model.AtLeastConcreteRoleConcept;
+import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.AtMostGuard;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
@@ -391,14 +390,6 @@ public class OWLClausification implements Serializable {
         else
             throw new IllegalStateException("Internal error: invalid normal form.");
     }
-
-    /**
-     * Creates an abstract role (object property) in the Hermit internal format.
-     * 
-     * @param objectProperty
-     *            the object property/abstract role
-     * @return an Abstract Role
-     */
     protected static Role getRole(OWLObjectPropertyExpression objectProperty) {
         objectProperty=objectProperty.getSimplified();
         if (objectProperty instanceof OWLObjectProperty)
@@ -509,7 +500,7 @@ public class OWLClausification implements Serializable {
             DataRange d=new DatatypeRestrictionLiteral(DT.LITERAL);
             if (dataVisitor.getDataRange()!=null)
                 d=dataVisitor.getDataRange();
-            m_headAtoms.add(Atom.create(AtLeastConcreteRoleConcept.create(1,property,d),new Term[] { X }));
+            m_headAtoms.add(Atom.create(AtLeastConcept.create(1,property,d),new Term[] { X }));
         }
 
         public void visit(OWLDataExactCardinalityRestriction desc) {
@@ -555,7 +546,7 @@ public class OWLClausification implements Serializable {
             else {
                 d=dataVisitor.getDataRange();
             }
-            m_headAtoms.add(Atom.create(AtLeastConcreteRoleConcept.create(number,property,d),new Term[] { X }));
+            m_headAtoms.add(Atom.create(AtLeastConcept.create(number,property,d),new Term[] { X }));
         }
 
         public void visit(OWLDataValueRestriction desc) {
@@ -612,7 +603,7 @@ public class OWLClausification implements Serializable {
             else {
                 LiteralConcept toConcept=getLiteralConcept(description);
                 Role onRole=getRole(objectProperty);
-                m_headAtoms.add(Atom.create(AtLeastAbstractRoleConcept.create(1,onRole,toConcept),new Term[] { X }));
+                m_headAtoms.add(Atom.create(AtLeastConcept.create(1,onRole,toConcept),new Term[] { X }));
             }
         }
 
@@ -625,7 +616,7 @@ public class OWLClausification implements Serializable {
         public void visit(OWLObjectMinCardinalityRestriction object) {
             LiteralConcept toConcept=getLiteralConcept(object.getFiller());
             Role onRole=getRole(object.getProperty());
-            m_headAtoms.add(Atom.create(AtLeastAbstractRoleConcept.create(object.getCardinality(),onRole,toConcept),new Term[] { X }));
+            m_headAtoms.add(Atom.create(AtLeastConcept.create(object.getCardinality(),onRole,toConcept),new Term[] { X }));
         }
 
         public void visit(OWLObjectMaxCardinalityRestriction object) {
@@ -1563,12 +1554,12 @@ public class OWLClausification implements Serializable {
 
         public int compare(Atom o1,Atom o2) {
             int type1;
-            if (o1.getDLPredicate() instanceof AtLeastAbstractRoleConcept)
+            if (o1.getDLPredicate() instanceof AtLeastConcept)
                 type1=2;
             else
                 type1=1;
             int type2;
-            if (o2.getDLPredicate() instanceof AtLeastAbstractRoleConcept)
+            if (o2.getDLPredicate() instanceof AtLeastConcept)
                 type2=2;
             else
                 type2=1;

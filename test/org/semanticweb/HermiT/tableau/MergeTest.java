@@ -11,7 +11,7 @@ import org.semanticweb.HermiT.blocking.DirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
 import org.semanticweb.HermiT.existentials.ExpansionStrategy;
-import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
+import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
@@ -30,7 +30,7 @@ public class MergeTest extends AbstractReasonerInternalsTest {
     protected static final AtomicConcept D=AtomicConcept.create("D");
     protected static final AtomicRole R=AtomicRole.createAtomicRole("R");
     protected static final AtomicNegationConcept NEG_A=AtomicNegationConcept.create(A);
-    protected static final AtLeastAbstractRoleConcept EXISTS_NEG_A=AtLeastAbstractRoleConcept.create(1,R,NEG_A);
+    protected static final AtLeastConcept EXISTS_NEG_A=AtLeastConcept.create(1,R,NEG_A);
     protected static final DLOntology TEST_DL_ONTOLOGY;
     static {
         Variable X=Variable.create("X");

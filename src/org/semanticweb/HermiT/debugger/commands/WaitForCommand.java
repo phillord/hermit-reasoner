@@ -24,8 +24,6 @@ public class WaitForCommand extends AbstractCommand implements ICommand {
             }
             if ("gexists".equals(argument))
                 waitOption=WaitOption.GRAPH_EXPANSION;
-            else if ("cexists".equals(argument))
-                waitOption=WaitOption.CONCRETE_EXPANSION;
             else if ("exists".equals(argument))
                 waitOption=WaitOption.EXISTENTIAL_EXPANSION;
             else if ("clash".equals(argument))
@@ -54,12 +52,11 @@ public class WaitForCommand extends AbstractCommand implements ICommand {
     public String getHelpText() {
         CharArrayWriter buffer = new CharArrayWriter();
         PrintWriter writer = new PrintWriter(buffer);
-        writer.println("usage: waitFor ([+|-]gexists|cexists|exists|clash|merge)+");
-        writer.println("usage example: waitFor -clash +gexists cexists");
+        writer.println("usage: waitFor ([+|-]gexists|exists|clash|merge)+");
+        writer.println("usage example: waitFor -clash +gexists");
         writer.println("Sets (+ default) or removes (-) wait options for the " +
         		"tableau expansion. Possible wait options are: ");
         writer.println("gexists - stop at the next description graph expansion");
-        writer.println("cexists - stop at the next concrete/datatype role expansion");
         writer.println("exists - stop at the next existential expansion");
         writer.println("clash - stop at the next clash");
         writer.println("merge - stop at the next merging of nodes");

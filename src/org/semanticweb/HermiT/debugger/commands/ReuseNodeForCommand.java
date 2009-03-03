@@ -5,9 +5,8 @@ import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.existentials.ExpansionStrategy;
 import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
-import org.semanticweb.HermiT.model.LiteralConcept;
+import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.tableau.Node;
-
 
 public class ReuseNodeForCommand extends AbstractCommand implements ICommand {
    
@@ -37,7 +36,7 @@ public class ReuseNodeForCommand extends AbstractCommand implements ICommand {
         ExpansionStrategy strategy=debugger.getTableau().getExistentialsExpansionStrategy();
         if (strategy instanceof IndividualReuseStrategy) {
             IndividualReuseStrategy reuseStrategy=(IndividualReuseStrategy)strategy;
-            LiteralConcept conceptForNode=reuseStrategy.getConceptForNode(node);
+            AtomicConcept conceptForNode=reuseStrategy.getConceptForNode(node);
             debugger.getOutput().print("Node '");
             debugger.getOutput().print(node.getNodeID());
             debugger.getOutput().print("' is ");

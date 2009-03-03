@@ -9,8 +9,8 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.datatypes.DatatypeRestriction.DT;
 import org.semanticweb.HermiT.datatypes.DatatypeRestriction.Facet;
+import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.model.DLPredicate;
-
 
 /**
  * The DataRange interface should be used when creating data ranges during 
@@ -31,27 +31,28 @@ import org.semanticweb.HermiT.model.DLPredicate;
  * 
  * @author BGlimm
  */
-public interface DataRange extends DLPredicate {
-    
+public abstract class DataRange extends LiteralConcept implements DLPredicate {
+    private static final long serialVersionUID=352467050584766830L;
+
     /**
      * @return an new instance of the concrete implementation on which the 
      *         method is called
      */
-    public CanonicalDataRange getNewInstance();
+    public abstract CanonicalDataRange getNewInstance();
 
     /**
      * The URI of the datatype that implements this DataRange instance 
      * @return The URI for the type of the concrete implementation for this 
      *         DataRange.   
      */
-    public URI getDatatypeURI();
+    public abstract URI getDatatypeURI();
     
     /**
      * The datatype implements this DataRange instance 
      * @return The datatype for the type of the concrete implementation for this 
      *         DataRange.   
      */
-    public DT getDatatype();
+    public abstract DT getDatatype();
     
     /**
      * Constants that are representing the allowed assignments for this datatype 
@@ -63,7 +64,7 @@ public interface DataRange extends DLPredicate {
      *         restrictions and are to be interpreted according to the datatype 
      *         URI of the concrete implementation of the DataRange. 
      */
-    public Set<DataConstant> getOneOf();
+    public abstract Set<DataConstant> getOneOf();
     
     /**
      * Constants that are representing the assignments that are not allowed for 
@@ -76,7 +77,7 @@ public interface DataRange extends DLPredicate {
      *         to the datatype URI of the concrete implementation of the 
      *         DataRange. 
      */
-    public Set<DataConstant> getNotOneOf();
+    public abstract Set<DataConstant> getNotOneOf();
 
     /**
      * Adds constant to the values that represent this data range. 
@@ -86,26 +87,26 @@ public interface DataRange extends DLPredicate {
      * @return true if the oneOf values did not already contain the given 
      *         constant and false otherwise
      */
-    public boolean addOneOf(DataConstant constant);
+    public abstract boolean addOneOf(DataConstant constant);
     
     /**
      * Checks whether this data range is negated. 
      * @return true if negated and false otherwise.
      */
-    public boolean isNegated();
+    public abstract boolean isNegated();
     
     /**
      * Negate this data range, i.e., if the range was negated it is no longer 
      * negated afterwards and if it was not negated it will be negated afterwards. 
      */
-    public void negate();
+    public abstract void negate();
     
     /**
      * Checks whether this data range cannot contain values
      * @return true if the restrictions on this data range cause the 
      *         interpretation of it to be empty and false otherwise. 
      */
-    public boolean isBottom();
+    public abstract boolean isBottom();
     
     /**
      * Adds a facet, if it is supported by the implementation that implements 
@@ -115,7 +116,7 @@ public interface DataRange extends DLPredicate {
      * @throws IllegalArgumentException if the facet is not supported by the 
      *         concrete realisation of this data range.  
      */
-    public void addFacet(Facet facet, String value) throws IllegalArgumentException;
+    public abstract void addFacet(Facet facet, String value) throws IllegalArgumentException;
     
     /**
      * Checks whether the given facet is supported by the concrete 
@@ -124,5 +125,5 @@ public interface DataRange extends DLPredicate {
      * @return true if the facet is supported by the concrete implementation of 
      *         this data range and false otherwise.
      */
-    public boolean supports(Facet facet);
+    public abstract boolean supports(Facet facet);
 }

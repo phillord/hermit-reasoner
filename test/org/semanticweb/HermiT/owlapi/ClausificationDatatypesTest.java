@@ -228,7 +228,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         loadOWLOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
-        expectedClauses.add("A(X) v atLeast(2 dp (xsd:integer))(X) v (not xsd:integer)(Y1) :- dp(X,Y1)");
+        expectedClauses.add("A(X) v (not xsd:integer)(Y1) v atLeast(2 dp (xsd:integer))(X) :- dp(X,Y1)");
         assertContainsAll(this.getName(),clauses,expectedClauses);
     }
 
@@ -237,7 +237,7 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         loadOWLOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
-        expectedClauses.add("A(X) v atLeast(4 dp (xsd:integer))(X) v (not xsd:integer)(Y1) v (not xsd:integer)(Y2) v (not xsd:integer)(Y3) v Y1 == Y2 v Y1 == Y3 v Y2 == Y3 :- dp(X,Y1), dp(X,Y2), dp(X,Y3)");
+        expectedClauses.add("A(X) v (not xsd:integer)(Y1) v (not xsd:integer)(Y2) v (not xsd:integer)(Y3) v Y1 == Y2 v Y1 == Y3 v Y2 == Y3 v atLeast(4 dp (xsd:integer))(X) :- dp(X,Y1), dp(X,Y2), dp(X,Y3)");
         assertContainsAll(this.getName(),clauses,expectedClauses);
     }
 

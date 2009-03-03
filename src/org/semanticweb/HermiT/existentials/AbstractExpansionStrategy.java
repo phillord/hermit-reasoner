@@ -6,8 +6,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
-import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
-import org.semanticweb.HermiT.model.AtLeastConcreteRoleConcept;
+import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
@@ -22,7 +21,7 @@ import org.semanticweb.HermiT.tableau.Tableau;
 /**
  * Implements the common bits of an ExistentialsExpansionStrategy, leaving only actual processing of existentials in need of expansion to subclasses.
  */
-public abstract class StrategyBase implements Serializable,ExpansionStrategy {
+public abstract class AbstractExpansionStrategy implements Serializable,ExpansionStrategy {
     private static final long serialVersionUID=2831957929321676444L;
 
     protected final BlockingStrategy m_blockingStrategy;
@@ -33,7 +32,7 @@ public abstract class StrategyBase implements Serializable,ExpansionStrategy {
     protected ExistentialExpansionManager m_existentialExpansionManager;
     protected DescriptionGraphManager m_descriptionGraphManager;
 
-    public StrategyBase(BlockingStrategy blockingStrategy,boolean expandNodeAtATime) {
+    public AbstractExpansionStrategy(BlockingStrategy blockingStrategy,boolean expandNodeAtATime) {
         m_blockingStrategy=blockingStrategy;
         m_expandNodeAtATime=expandNodeAtATime;
         m_processedExistentials=new ArrayList<ExistentialConcept>();
@@ -61,29 +60,24 @@ public abstract class StrategyBase implements Serializable,ExpansionStrategy {
                 m_processedExistentials.addAll(node.getUnprocessedExistentials());
                 for (int index=0;index<m_processedExistentials.size();index++) {
                     ExistentialConcept existentialConcept=m_processedExistentials.get(index);
-                    if (existentialConcept instanceof AtLeastAbstractRoleConcept) {
-                        AtLeastAbstractRoleConcept atLeastAbstractConcept=(AtLeastAbstractRoleConcept)existentialConcept;
-                        switch (m_existentialExpansionManager.isSatisfied(atLeastAbstractConcept,node)) {
+                    if (existentialConcept instanceof AtLeastConcept) {
+                        AtLeastConcept atLeastConcept=(AtLeastConcept)existentialConcept;
+                        switch (m_existentialExpansionManager.isSatisfied(atLeastConcept,node)) {
                         case NOT_SATISFIED:
-                            expandExistential(atLeastAbstractConcept,node);
+                            expandExistential(atLeastConcept,node);
                             extensionsChanged=true;
                             break;
                         case PERMANENTLY_SATISFIED:
                             m_existentialExpansionManager.markExistentialProcessed(existentialConcept,node);
                             if (monitor!=null)
-                                monitor.existentialSatisfied(atLeastAbstractConcept,node);
+                                monitor.existentialSatisfied(atLeastConcept,node);
                             break;
                         case CURRENTLY_SATISFIED:
                             // do nothing
                             if (monitor!=null)
-                                monitor.existentialSatisfied(atLeastAbstractConcept,node);
+                                monitor.existentialSatisfied(atLeastConcept,node);
                             break;
                         }
-                    }
-                    else if (existentialConcept instanceof AtLeastConcreteRoleConcept) {
-                        m_existentialExpansionManager.expand((AtLeastConcreteRoleConcept)existentialConcept,node);
-                        m_existentialExpansionManager.markExistentialProcessed(existentialConcept,node);
-                        extensionsChanged=true;
                     }
                     else if (existentialConcept instanceof ExistsDescriptionGraph) {
                         ExistsDescriptionGraph existsDescriptionGraph=(ExistsDescriptionGraph)existentialConcept;
@@ -133,5 +127,5 @@ public abstract class StrategyBase implements Serializable,ExpansionStrategy {
     /**
      * This method performs the actual expansion.
      */
-    protected abstract void expandExistential(AtLeastAbstractRoleConcept atLeastAbstractRoleConcept,Node forNode);
+    protected abstract void expandExistential(AtLeastConcept atLeastConcept,Node forNode);
 }

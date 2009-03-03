@@ -36,7 +36,7 @@ import javax.swing.tree.TreePath;
 
 import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.debugger.Debugger.NodeCreationInfo;
-import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
+import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.tableau.Node;
 
@@ -236,13 +236,13 @@ public class SubtreeViewer extends JFrame {
                 buffer.append(node.getNodeID());
                 buffer.append(":(root)");
             }
-            else if (existentialConcept instanceof AtLeastAbstractRoleConcept) {
-                AtLeastAbstractRoleConcept atLeastAbstractConcept=(AtLeastAbstractRoleConcept)existentialConcept;
-                buffer.append(atLeastAbstractConcept.getOnRole().toString(m_debugger.getNamespaces()));
+            else if (existentialConcept instanceof AtLeastConcept) {
+                AtLeastConcept atLeastConcept=(AtLeastConcept)existentialConcept;
+                buffer.append(atLeastConcept.getOnRole().toString(m_debugger.getNamespaces()));
                 buffer.append("  -->  ");
                 buffer.append(node.getNodeID());
                 buffer.append(":[");
-                buffer.append(atLeastAbstractConcept.getToConcept().toString(m_debugger.getNamespaces()));
+                buffer.append(atLeastConcept.getToConcept().toString(m_debugger.getNamespaces()));
                 buffer.append("]");
             }
             else {

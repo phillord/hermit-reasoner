@@ -4,7 +4,7 @@ package org.semanticweb.HermiT.model;
 import org.semanticweb.HermiT.*;
 
 /**
- * Represents an inverse abstract role.
+ * Represents an inverse role.
  */
 public class InverseRole extends Role {
     private static final long serialVersionUID=3351701933728011998L;

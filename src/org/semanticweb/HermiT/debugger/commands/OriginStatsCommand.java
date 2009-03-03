@@ -12,7 +12,7 @@ import java.util.Map;
 import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.debugger.Printing;
 import org.semanticweb.HermiT.debugger.Debugger.NodeCreationInfo;
-import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
+import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.tableau.Node;
@@ -28,8 +28,8 @@ public class OriginStatsCommand extends AbstractCommand implements ICommand {
         while (node!=null) {
             NodeCreationInfo nodeCreationInfo = debugger.getNodeCreationInfo(node);
             ExistentialConcept existentialConcept = nodeCreationInfo.m_createdByExistential;
-            if (existentialConcept instanceof AtLeastAbstractRoleConcept) {
-                Concept toConcept=((AtLeastAbstractRoleConcept)existentialConcept).getToConcept();
+            if (existentialConcept instanceof AtLeastConcept) {
+                Concept toConcept=((AtLeastConcept)existentialConcept).getToConcept();
                 OriginInfo originInfo=originInfos.get(toConcept);
                 if (originInfo==null) {
                     originInfo=new OriginInfo(toConcept);

@@ -4,7 +4,7 @@ package org.semanticweb.HermiT.model;
 import org.semanticweb.HermiT.Namespaces;
 
 /**
- * Represents a guard for number restrictions on abstract roles.
+ * Represents a guard for number restrictions on roles.
  */
 public class AtMostGuard extends AtomicConcept {
     private static final long serialVersionUID=7197886700065386931L;

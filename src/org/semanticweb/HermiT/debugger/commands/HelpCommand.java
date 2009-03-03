@@ -29,7 +29,7 @@ public class HelpCommand extends AbstractCommand implements ICommand {
         writer.println("q: see query");
         writer.println("query: prints whether there is a clash");
         writer.println("query +C|$DG|? nodeID|?: prints facts for C - concept, DG - decr. graph, ? any unary predicate");
-        writer.println("query ==|!=|-AR|~CR|? nodeID|? nodeID|?: prints facts for AR-abstract role, CR - concrete role, ? any binary predicate");
+        writer.println("query ==|!=|-R|? nodeID|? nodeID|?: prints facts for R-role, ? any binary predicate");
         writer.println("quit: see exit");
         writer.println("showExists: prints nodes with their unprocessed existentials");
         writer.println("showModel [Predicate]: print all assertions (for the predicate if given)");

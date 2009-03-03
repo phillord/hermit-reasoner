@@ -9,23 +9,22 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.Namespaces;
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
-import org.semanticweb.HermiT.model.AtLeastAbstractRoleConcept;
+import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.AtomicConcept;
-import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 import org.semanticweb.HermiT.tableau.DependencySet;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
 import org.semanticweb.HermiT.tableau.TupleTable;
 
-public class IndividualReuseStrategy extends StrategyBase implements Serializable {
+public class IndividualReuseStrategy extends AbstractExpansionStrategy implements Serializable {
     private static final long serialVersionUID=-7373787507623860081L;
 
     protected final boolean m_isDeterministic;
-    protected final Map<LiteralConcept,NodeBranchingPointPair> m_reusedNodes;
-    protected final Set<LiteralConcept> m_doReuseConceptsAlways;
-    protected final Set<LiteralConcept> m_dontReuseConceptsThisRun;
-    protected final Set<LiteralConcept> m_dontReuseConceptsEver;
+    protected final Map<AtomicConcept,NodeBranchingPointPair> m_reusedNodes;
+    protected final Set<AtomicConcept> m_doReuseConceptsAlways;
+    protected final Set<AtomicConcept> m_dontReuseConceptsThisRun;
+    protected final Set<AtomicConcept> m_dontReuseConceptsEver;
     protected final TupleTable m_reuseBacktrackingTable;
     protected final Object[] m_auxiliaryBuffer;
     protected int[] m_indicesByBranchingPoint;
@@ -33,10 +32,10 @@ public class IndividualReuseStrategy extends StrategyBase implements Serializabl
     public IndividualReuseStrategy(BlockingStrategy strategy,boolean isDeterministic) {
         super(strategy,true);
         m_isDeterministic=isDeterministic;
-        m_reusedNodes=new HashMap<LiteralConcept,NodeBranchingPointPair>();
-        m_doReuseConceptsAlways=new HashSet<LiteralConcept>();
-        m_dontReuseConceptsThisRun=new HashSet<LiteralConcept>();
-        m_dontReuseConceptsEver=new HashSet<LiteralConcept>();
+        m_reusedNodes=new HashMap<AtomicConcept,NodeBranchingPointPair>();
+        m_doReuseConceptsAlways=new HashSet<AtomicConcept>();
+        m_dontReuseConceptsThisRun=new HashSet<AtomicConcept>();
+        m_dontReuseConceptsEver=new HashSet<AtomicConcept>();
         m_reuseBacktrackingTable=new TupleTable(1);
         m_auxiliaryBuffer=new Object[1];
         m_indicesByBranchingPoint=new int[10];
@@ -48,10 +47,10 @@ public class IndividualReuseStrategy extends StrategyBase implements Serializabl
         m_dontReuseConceptsEver.clear();
         Object object=tableau.getParameters().get("IndividualReuseStrategy.reuseAlways");
         if (object instanceof Set)
-            m_doReuseConceptsAlways.addAll((Set<? extends LiteralConcept>)object);
+            m_doReuseConceptsAlways.addAll((Set<? extends AtomicConcept>)object);
         object=tableau.getParameters().get("IndividualReuseStrategy.reuseNever");
         if (object instanceof Set)
-            m_dontReuseConceptsEver.addAll((Set<? extends LiteralConcept>)object);
+            m_dontReuseConceptsEver.addAll((Set<? extends AtomicConcept>)object);
     }
     public void clear() {
         super.clear();
@@ -76,7 +75,7 @@ public class IndividualReuseStrategy extends StrategyBase implements Serializabl
     public void backtrack() {
         int requiredFirstFreeTupleIndex=m_indicesByBranchingPoint[m_tableau.getCurrentBranchingPoint().getLevel()];
         for (int index=m_reuseBacktrackingTable.getFirstFreeTupleIndex()-1;index>=requiredFirstFreeTupleIndex;--index) {
-            LiteralConcept reuseConcept=(LiteralConcept)m_reuseBacktrackingTable.getTupleObject(index,0);
+            AtomicConcept reuseConcept=(AtomicConcept)m_reuseBacktrackingTable.getTupleObject(index,0);
             Object result=m_reusedNodes.remove(reuseConcept);
             assert result!=null;
         }
@@ -88,53 +87,55 @@ public class IndividualReuseStrategy extends StrategyBase implements Serializabl
     public boolean isDeterministic() {
         return m_isDeterministic;
     }
-    public LiteralConcept getConceptForNode(Node node) {
-        for (Map.Entry<LiteralConcept,NodeBranchingPointPair> entry : m_reusedNodes.entrySet())
+    public AtomicConcept getConceptForNode(Node node) {
+        for (Map.Entry<AtomicConcept,NodeBranchingPointPair> entry : m_reusedNodes.entrySet())
             if (entry.getValue().node==node)
                 return entry.getKey();
         return null;
     }
-    public Set<LiteralConcept> getDontReuseConceptsEver() {
+    public Set<AtomicConcept> getDontReuseConceptsEver() {
         return m_dontReuseConceptsEver;
     }
-    protected void expandExistential(AtLeastAbstractRoleConcept atLeastAbstractRoleConcept,Node forNode) {
+    protected void expandExistential(AtLeastConcept atLeastConcept,Node forNode) {
         // Mark existential as processed BEFORE branching takes place!
-        m_existentialExpansionManager.markExistentialProcessed(atLeastAbstractRoleConcept,forNode);
-        if (!m_existentialExpansionManager.tryFunctionalExpansion(atLeastAbstractRoleConcept,forNode))
-            if (!tryParentReuse(atLeastAbstractRoleConcept,forNode))
-                if (!expandWithModelReuse(atLeastAbstractRoleConcept,forNode))
-                    m_existentialExpansionManager.doNormalExpansion(atLeastAbstractRoleConcept,forNode);
+        m_existentialExpansionManager.markExistentialProcessed(atLeastConcept,forNode);
+        if (!m_existentialExpansionManager.tryFunctionalExpansion(atLeastConcept,forNode))
+            if (!tryParentReuse(atLeastConcept,forNode))
+                if (!expandWithModelReuse(atLeastConcept,forNode))
+                    m_existentialExpansionManager.doNormalExpansion(atLeastConcept,forNode);
     }
-    protected boolean tryParentReuse(AtLeastAbstractRoleConcept atLeastAbstractConcept,Node node) {
-        if (atLeastAbstractConcept.getNumber()==1) {
+    protected boolean tryParentReuse(AtLeastConcept atLeastConcept,Node node) {
+        if (atLeastConcept.getNumber()==1) {
             Node parent=node.getParent();
-            if (parent!=null && m_extensionManager.containsConceptAssertion(atLeastAbstractConcept.getToConcept(),parent)) {
-                DependencySet dependencySet=m_extensionManager.getConceptAssertionDependencySet(atLeastAbstractConcept,node);
+            if (parent!=null && m_extensionManager.containsConceptAssertion(atLeastConcept.getToConcept(),parent)) {
+                DependencySet dependencySet=m_extensionManager.getConceptAssertionDependencySet(atLeastConcept,node);
                 if (!m_isDeterministic) {
-                    BranchingPoint branchingPoint=new IndividualReuseBranchingPoint(m_tableau,atLeastAbstractConcept,node,true);
+                    BranchingPoint branchingPoint=new IndividualReuseBranchingPoint(m_tableau,atLeastConcept,node,true);
                     m_tableau.pushBranchingPoint(branchingPoint);
                     dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,branchingPoint.getLevel());
                 }
-                m_extensionManager.addRoleAssertion(atLeastAbstractConcept.getOnRole(),node,parent,dependencySet);
+                m_extensionManager.addRoleAssertion(atLeastConcept.getOnRole(),node,parent,dependencySet);
                 return true;
             }
         }
         return false;
     }
-    protected boolean expandWithModelReuse(AtLeastAbstractRoleConcept atLeastAbstractConcept,Node node) {
-        LiteralConcept toConcept=atLeastAbstractConcept.getToConcept();
-        if ((toConcept instanceof AtomicConcept) && Namespaces.isInternalURI(((AtomicConcept)toConcept).getURI()))
+    protected boolean expandWithModelReuse(AtLeastConcept atLeastConcept,Node node) {
+        if (!(atLeastConcept.getToConcept() instanceof AtomicConcept))
             return false;
-        if (atLeastAbstractConcept.getNumber()==1 && (m_doReuseConceptsAlways.contains(toConcept) || !m_dontReuseConceptsThisRun.contains(toConcept))) {
+        AtomicConcept toConcept=(AtomicConcept)atLeastConcept.getToConcept();
+        if (Namespaces.isInternalURI(toConcept.getURI()))
+            return false;
+        if (atLeastConcept.getNumber()==1 && (m_doReuseConceptsAlways.contains(toConcept) || !m_dontReuseConceptsThisRun.contains(toConcept))) {
             if (m_tableau.getTableauMonitor()!=null)
-                m_tableau.getTableauMonitor().existentialExpansionStarted(atLeastAbstractConcept,node);
-            DependencySet dependencySet=m_extensionManager.getConceptAssertionDependencySet(atLeastAbstractConcept,node);
+                m_tableau.getTableauMonitor().existentialExpansionStarted(atLeastConcept,node);
+            DependencySet dependencySet=m_extensionManager.getConceptAssertionDependencySet(atLeastConcept,node);
             Node existentialNode;
             NodeBranchingPointPair reuseInfo=m_reusedNodes.get(toConcept);
             if (reuseInfo==null) {
                 // No existential with the target concept toConcept has been expanded.
                 if (!m_isDeterministic) {
-                    BranchingPoint branchingPoint=new IndividualReuseBranchingPoint(m_tableau,atLeastAbstractConcept,node,false);
+                    BranchingPoint branchingPoint=new IndividualReuseBranchingPoint(m_tableau,atLeastConcept,node,false);
                     m_tableau.pushBranchingPoint(branchingPoint);
                     dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,branchingPoint.getLevel());
                 }
@@ -151,9 +152,9 @@ public class IndividualReuseStrategy extends StrategyBase implements Serializabl
                 existentialNode=reuseInfo.node.getCanonicalNode();
                 dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,reuseInfo.branchingPoint);
             }
-            m_extensionManager.addRoleAssertion(atLeastAbstractConcept.getOnRole(),node,existentialNode,dependencySet);
+            m_extensionManager.addRoleAssertion(atLeastConcept.getOnRole(),node,existentialNode,dependencySet);
             if (m_tableau.getTableauMonitor()!=null)
-                m_tableau.getTableauMonitor().existentialExpansionFinished(atLeastAbstractConcept,node);
+                m_tableau.getTableauMonitor().existentialExpansionFinished(atLeastConcept,node);
             return true;
         }
         return false;
@@ -162,11 +163,11 @@ public class IndividualReuseStrategy extends StrategyBase implements Serializabl
     protected class IndividualReuseBranchingPoint extends BranchingPoint {
         private static final long serialVersionUID=-5715836252258022216L;
 
-        protected final AtLeastAbstractRoleConcept m_existential;
+        protected final AtLeastConcept m_existential;
         protected final Node m_node;
         protected final boolean m_wasParentReuse;
 
-        public IndividualReuseBranchingPoint(Tableau tableau,AtLeastAbstractRoleConcept existential,Node node,boolean wasParentReuse) {
+        public IndividualReuseBranchingPoint(Tableau tableau,AtLeastConcept existential,Node node,boolean wasParentReuse) {
             super(tableau);
             m_existential=existential;
             m_node=node;
@@ -174,7 +175,7 @@ public class IndividualReuseStrategy extends StrategyBase implements Serializabl
         }
         public void startNextChoice(Tableau tableau,DependencySet clashDependencySet) {
             if (!m_wasParentReuse)
-                m_dontReuseConceptsThisRun.add(m_existential.getToConcept());
+                m_dontReuseConceptsThisRun.add((AtomicConcept)m_existential.getToConcept());
             DependencySet dependencySet=tableau.getDependencySetFactory().removeBranchingPoint(clashDependencySet,m_level);
             if (tableau.getTableauMonitor()!=null)
                 tableau.getTableauMonitor().existentialExpansionStarted(m_existential,m_node);

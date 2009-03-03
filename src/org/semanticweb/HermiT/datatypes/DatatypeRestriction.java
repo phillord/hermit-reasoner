@@ -25,7 +25,7 @@ import org.semanticweb.HermiT.Namespaces;
  * @author BGlimm
  */
 public abstract class DatatypeRestriction 
-        implements DataRange, CanonicalDataRange, Serializable {
+        extends DataRange implements CanonicalDataRange, Serializable {
     
     private static final long serialVersionUID = 524235536504588458L;
     

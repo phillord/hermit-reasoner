@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.HermiT.model.AtomicConcept;
-import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 
 public class Configuration implements Serializable {
@@ -64,7 +63,7 @@ public class Configuration implements Serializable {
         parameters=new HashMap<String,Object>();
     }
 
-    protected void setIndividualReuseStrategyReuseAlways(Set<? extends LiteralConcept> concepts) {
+    protected void setIndividualReuseStrategyReuseAlways(Set<? extends AtomicConcept> concepts) {
         parameters.put("IndividualReuseStrategy.reuseAlways",concepts);
     }
 
@@ -73,7 +72,7 @@ public class Configuration implements Serializable {
         setIndividualReuseStrategyReuseAlways(concepts);
     }
 
-    protected void setIndividualReuseStrategyReuseNever(Set<? extends LiteralConcept> concepts) {
+    protected void setIndividualReuseStrategyReuseNever(Set<? extends AtomicConcept> concepts) {
         parameters.put("IndividualReuseStrategy.reuseNever",concepts);
     }
 

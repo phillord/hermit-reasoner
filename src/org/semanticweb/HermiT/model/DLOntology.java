@@ -117,8 +117,8 @@ public class DLOntology implements Serializable {
     protected void addDLPredicate(DLPredicate dlPredicate) {
         if (dlPredicate instanceof AtomicConcept)
             m_allAtomicConcepts.add((AtomicConcept)dlPredicate);
-        else if (dlPredicate instanceof AtLeastAbstractRoleConcept) {
-            LiteralConcept literalConcept=((AtLeastAbstractRoleConcept)dlPredicate).getToConcept();
+        else if (dlPredicate instanceof AtLeastConcept) {
+            LiteralConcept literalConcept=((AtLeastConcept)dlPredicate).getToConcept();
             if (literalConcept instanceof AtomicConcept)
                 m_allAtomicConcepts.add((AtomicConcept)literalConcept);
         }
@@ -230,8 +230,8 @@ public class DLOntology implements Serializable {
             for (int headIndex=0;headIndex<dlClause.getHeadLength();headIndex++) {
                 DLPredicate dlPredicate=dlClause.getHeadAtom(headIndex).getDLPredicate();
                 bodyOnlyAtomicConcepts.remove(dlPredicate);
-                if (dlPredicate instanceof AtLeastAbstractRoleConcept)
-                    bodyOnlyAtomicConcepts.remove(((AtLeastAbstractRoleConcept)dlPredicate).getToConcept());
+                if (dlPredicate instanceof AtLeastConcept)
+                    bodyOnlyAtomicConcepts.remove(((AtLeastConcept)dlPredicate).getToConcept());
             }
         return bodyOnlyAtomicConcepts;
     }
@@ -345,14 +345,9 @@ public class DLOntology implements Serializable {
             DLPredicate dlPredicate=atom.getDLPredicate();
             if (!(dlPredicate instanceof AtomicRole) && !(dlPredicate instanceof AtomicConcept) && !(dlPredicate instanceof DataRange) && !(dlPredicate instanceof ExistentialConcept) && !Equality.INSTANCE.equals(dlPredicate) && !Inequality.INSTANCE.equals(dlPredicate))
                 return false;
-            if (dlPredicate instanceof AtLeastAbstractRoleConcept) {
-                AtLeastAbstractRoleConcept atLeastAbstractConcept=(AtLeastAbstractRoleConcept)dlPredicate;
-                if (graphAtomicRoles.contains(atLeastAbstractConcept.getOnRole()))
-                    return false;
-            }
-            if (dlPredicate instanceof AtLeastConcreteRoleConcept) {
-                AtLeastConcreteRoleConcept atLeastConcreteRoleConcept=(AtLeastConcreteRoleConcept)dlPredicate;
-                if (graphAtomicRoles.contains(atLeastConcreteRoleConcept.getOnAtomicConcreteRole()))
+            else if (dlPredicate instanceof AtLeastConcept) {
+                AtLeastConcept atLeastConcept=(AtLeastConcept)dlPredicate;
+                if (graphAtomicRoles.contains(atLeastConcept.getOnRole()))
                     return false;
             }
         }

@@ -497,8 +497,8 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
             control=m_tableau.getDependencySetFactory().addBranchingPoint(control,branchingPoint);
         assertSame(dependencySet,control);
     }
-    protected Node getRootNodeFor(Node rootNode,AtMostGuard atMostAbstractRoleGuard,int index) {
-        int tupleIndex=m_manager.m_newRootNodesIndex.getTupleIndex(new Object[] { rootNode,atMostAbstractRoleGuard,index });
+    protected Node getRootNodeFor(Node rootNode,AtMostGuard atMostGuard,int index) {
+        int tupleIndex=m_manager.m_newRootNodesIndex.getTupleIndex(new Object[] { rootNode,atMostGuard,index });
         if (tupleIndex==-1)
             return null;
         else
