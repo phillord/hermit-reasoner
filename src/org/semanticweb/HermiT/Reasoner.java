@@ -293,6 +293,16 @@ public class Reasoner implements Serializable {
                         m_atomicConceptHierarchy.put(equiv,pos);
                     }
                 }
+                for (AtomicConcept c : concepts) {
+                    AtomicConcept canonicalName=acyc.canonical.get(c);
+                    NaiveHierarchyPosition<AtomicConcept> pos=(NaiveHierarchyPosition<AtomicConcept>)m_atomicConceptHierarchy.get(canonicalName);
+                    if (pos==null) {
+                        pos=new NaiveHierarchyPosition<AtomicConcept>(canonicalName);
+                        m_atomicConceptHierarchy.put(canonicalName,pos);
+                    }
+                    pos.labels.add(c);
+                    m_atomicConceptHierarchy.put(c,pos);
+                }
                 if (!m_atomicConceptHierarchy.containsKey(AtomicConcept.THING))
                     m_atomicConceptHierarchy.put(AtomicConcept.THING,new NaiveHierarchyPosition<AtomicConcept>(AtomicConcept.THING));
                 for (Map.Entry<AtomicConcept,Set<AtomicConcept>> e : trans.reduced.entrySet()) {
