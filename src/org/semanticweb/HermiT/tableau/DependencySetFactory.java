@@ -72,6 +72,7 @@ public final class DependencySetFactory implements Serializable {
         while (m_firstUnusedSet!=null && !errorDetected)
             errorDetected=destroyDependencySet(m_firstUnusedSet);
         if (errorDetected) {
+            System.err.println("Corruption of the dependency set factory due to a Java VM bug was detected!");
             m_firstUnusedSet=null;
             m_firstDestroyedSet=null;
             Runtime.getRuntime().gc();
