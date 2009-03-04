@@ -358,13 +358,13 @@ public abstract class ExtensionTable implements Serializable {
     protected static class DeterministicDependencySetManager implements DependencySetManager,Serializable {
         private static final long serialVersionUID=7982627098607954806L;
 
-        protected final PermanentDependencySet m_emptySet;
+        protected final DependencySetFactory m_dependencySetFactory;
 
         public DeterministicDependencySetManager(ExtensionTable extensionTable) {
-            m_emptySet=extensionTable.m_tableau.getDependencySetFactory().emptySet();
+            m_dependencySetFactory=extensionTable.m_tableau.getDependencySetFactory();
         }
         public DependencySet getDependencySet(int tupleIndex) {
-            return m_emptySet;
+            return m_dependencySetFactory.emptySet();
         }
         public void setDependencySet(int tupleIndex,DependencySet dependencySet) {
         }
