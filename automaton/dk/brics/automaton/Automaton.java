@@ -767,12 +767,12 @@ public class Automaton implements Serializable, Cloneable {
         return BasicAutomata.makeCharSet(set);
     }
 
-//    /** 
-//     * See {@link BasicAutomata#makeInterval(int, int, int)}.
-//     */
-//    public static Automaton makeInterval(int min, int max, int digits) throws IllegalArgumentException {
-//        return BasicAutomata.makeInterval(min, max, digits);
-//    }
+    /** 
+     * See {@link BasicAutomata#makeInterval(int, int, int)}.
+     */
+    public static Automaton makeInterval(int min, int max, int digits) throws IllegalArgumentException {
+        return BasicAutomata.makeInterval(min, max, digits);
+    }
 
     /** 
      * See {@link BasicAutomata#makeString(String)}.
@@ -781,47 +781,47 @@ public class Automaton implements Serializable, Cloneable {
         return BasicAutomata.makeString(s);
     }
 
-//    /**
-//     * See {@link BasicAutomata#makeMaxInteger(String)}.
-//     */
-//    public static Automaton makeMaxInteger(String n) {
-//        return BasicAutomata.makeMaxInteger(n);
-//    }
-//
-//    /**
-//     * See {@link BasicAutomata#makeMinInteger(String)}.
-//     */
-//    public static Automaton makeMinInteger(String n) {
-//        return BasicAutomata.makeMinInteger(n);
-//    }
-//
-//    /**
-//     * See {@link BasicAutomata#makeTotalDigits(int)}.
-//     */
-//    public static Automaton makeTotalDigits(int i) {
-//        return BasicAutomata.makeTotalDigits(i);
-//    }
-//
-//    /**
-//     * See {@link BasicAutomata#makeFractionDigits(int)}.
-//     */
-//    public static Automaton makeFractionDigits(int i) {
-//        return BasicAutomata.makeFractionDigits(i);
-//    }
-//
-//    /**
-//     * See {@link BasicAutomata#makeIntegerValue(String)}.
-//     */
-//    public static Automaton makeIntegerValue(String value) {
-//        return BasicAutomata.makeIntegerValue(value);
-//    }
-//
-//    /**
-//     * See {@link BasicAutomata#makeDecimalValue(String)}.
-//     */
-//    public static Automaton makeDecimalValue(String value) {
-//        return BasicAutomata.makeDecimalValue(value);
-//    }
+    /**
+     * See {@link BasicAutomata#makeMaxInteger(String)}.
+     */
+    public static Automaton makeMaxInteger(String n) {
+        return BasicAutomata.makeMaxInteger(n);
+    }
+
+    /**
+     * See {@link BasicAutomata#makeMinInteger(String)}.
+     */
+    public static Automaton makeMinInteger(String n) {
+        return BasicAutomata.makeMinInteger(n);
+    }
+
+    /**
+     * See {@link BasicAutomata#makeTotalDigits(int)}.
+     */
+    public static Automaton makeTotalDigits(int i) {
+        return BasicAutomata.makeTotalDigits(i);
+    }
+
+    /**
+     * See {@link BasicAutomata#makeFractionDigits(int)}.
+     */
+    public static Automaton makeFractionDigits(int i) {
+        return BasicAutomata.makeFractionDigits(i);
+    }
+
+    /**
+     * See {@link BasicAutomata#makeIntegerValue(String)}.
+     */
+    public static Automaton makeIntegerValue(String value) {
+        return BasicAutomata.makeIntegerValue(value);
+    }
+
+    /**
+     * See {@link BasicAutomata#makeDecimalValue(String)}.
+     */
+    public static Automaton makeDecimalValue(String value) {
+        return BasicAutomata.makeDecimalValue(value);
+    }
 //
 //    /**
 //     * See {@link BasicAutomata#makeStringMatcher(String)}.

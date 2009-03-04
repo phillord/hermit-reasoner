@@ -25,6 +25,7 @@
     <property name="projectroot" value="."/>
     <property name="builddir" value="${projectroot}/build"/>
     <property name="flattendir" value="${builddir}/flatten"/>
+    <property name="datatypesautomatadir" value="${builddir}/datatypesautomata"/>
     <property name="classdir" value="${builddir}/class"/>
     <property name="plugindir" value="${builddir}/plugin"/>
     <property name="testclassdir" value="${builddir}/testclass"/>
@@ -113,6 +114,13 @@
         </copy>
     </target>
     
+    <target name="buildDatatypesAutomata" depends="compile">
+        <mkdir dir="${datatypesautomatadir}"/>
+        <java classname="dk.brics.automaton.Datatypes" classpath="${classdir}">
+            <sysproperty key="dk.brics.automaton.datatypes" value="${datatypesautomatadir}"/>
+        </java>
+    </target>
+    
     <target name="flatten-owlapi">
         <mkdir dir="${flattendir}"/>
         <unjar src="${owlapi}" dest="${flattendir}"/>
@@ -132,7 +140,7 @@
         </jar>
     </target>
 
-    <target name="combined" depends="compile,flatten-owlapi,javadoc,quick"/>
+    <target name="combined" depends="compile,buildDatatypesAutomata,flatten-owlapi,javadoc,quick"/>
     
     <target name="quick" depends="compile">
         <mkdir dir="${releasedir}"/>
@@ -186,6 +194,7 @@
             </manifest>
             <fileset dir="${classdir}"/>
             <fileset dir="${flattendir}"/>
+            <fileset dir="${datatypesautomatadir}"/>
             <fileset dir="${releasedir}/src"/>
             <fileset dir="${javadocdir}"/>
             <fileset file="${releasedir}/readme.txt"/>

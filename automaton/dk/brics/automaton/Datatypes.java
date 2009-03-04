@@ -659,18 +659,18 @@ final public class Datatypes {
 		Map<String,Automaton> m = buildMap(xsdmisc);
 		putWith(xsdexps, m);
 		
-//		put(m, "UNSIGNEDLONG", Automaton.makeMaxInteger("18446744073709551615"));
-//		put(m, "UNSIGNEDINT", Automaton.makeMaxInteger("4294967295"));
-//		put(m, "UNSIGNEDSHORT", Automaton.makeMaxInteger("65535"));
-//		put(m, "UNSIGNEDBYTE", Automaton.makeMaxInteger("255"));
-//		put(m, "LONG", Automaton.makeMaxInteger("9223372036854775807"));
-//		put(m, "LONG_NEG", Automaton.makeMaxInteger("9223372036854775808"));
-//		put(m, "INT", Automaton.makeMaxInteger("2147483647"));
-//		put(m, "INT_NEG", Automaton.makeMaxInteger("2147483648"));
-//		put(m, "SHORT", Automaton.makeMaxInteger("32767"));
-//		put(m, "SHORT_NEG", Automaton.makeMaxInteger("32768"));
-//		put(m, "BYTE", Automaton.makeMaxInteger("127"));
-//		put(m, "BYTE_NEG", Automaton.makeMaxInteger("128"));
+		put(m, "UNSIGNEDLONG", Automaton.makeMaxInteger("18446744073709551615"));
+		put(m, "UNSIGNEDINT", Automaton.makeMaxInteger("4294967295"));
+		put(m, "UNSIGNEDSHORT", Automaton.makeMaxInteger("65535"));
+		put(m, "UNSIGNEDBYTE", Automaton.makeMaxInteger("255"));
+		put(m, "LONG", Automaton.makeMaxInteger("9223372036854775807"));
+		put(m, "LONG_NEG", Automaton.makeMaxInteger("9223372036854775808"));
+		put(m, "INT", Automaton.makeMaxInteger("2147483647"));
+		put(m, "INT_NEG", Automaton.makeMaxInteger("2147483648"));
+		put(m, "SHORT", Automaton.makeMaxInteger("32767"));
+		put(m, "SHORT_NEG", Automaton.makeMaxInteger("32768"));
+		put(m, "BYTE", Automaton.makeMaxInteger("127"));
+		put(m, "BYTE_NEG", Automaton.makeMaxInteger("128"));
 		
 		Map<String,Automaton> u = new HashMap<String,Automaton>();
 		u.putAll(t);
@@ -803,7 +803,7 @@ final public class Datatypes {
 		System.out.println("Building Unicode category automata...");
 		Map<String,Set<Integer>> categories = new HashMap<String,Set<Integer>>();
 		try {
-			StreamTokenizer st = new StreamTokenizer(new BufferedReader(new FileReader("src/Unicode.txt")));
+			StreamTokenizer st = new StreamTokenizer(new BufferedReader(new FileReader("automaton/Unicode.txt")));
 			st.resetSyntax();
 			st.whitespaceChars(';', ';');
 			st.whitespaceChars('\n', ' ');
