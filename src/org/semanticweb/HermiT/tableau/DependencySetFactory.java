@@ -21,8 +21,8 @@ import java.util.List;
  * this class keeps track of the "generation" in which it is used.
  * Each time the factory is cleared, the generation is increased.
  * Then, the generation number is used to check whether the factory
- * is given objects from the current generation. This introduce some
- * overhead at run-time, but we keep it for debugging purposes. 
+ * is given objects from the current generation. This is then used
+ * to detect the error and to try to fix up the internal structure of the factory. 
  */
 public final class DependencySetFactory implements Serializable {
     private static final long serialVersionUID=8632867055646817311L;
@@ -68,8 +68,57 @@ public final class DependencySetFactory implements Serializable {
         return m_emptySet;
     }
     public void removeUnusedSets() {
-        while (m_firstUnusedSet!=null)
-            destroyDependencySet(m_firstUnusedSet);
+        boolean errorDetected=false;
+        while (m_firstUnusedSet!=null && !errorDetected)
+            errorDetected=destroyDependencySet(m_firstUnusedSet);
+        if (errorDetected) {
+            m_firstUnusedSet=null;
+            Runtime.getRuntime().gc();
+            for (int index=0;index<m_entries.length;index++) {
+                PermanentDependencySet entry=m_entries[index];
+                while (entry!=null) {
+                    if (entry.m_generation!=m_generation)
+                        throw new IllegalStateException("Internal error due to a bug in Java VM: the dependency set factory is corrupt!");
+                    if (entry.m_usageCounter==0) {
+                        checkGeneration(entry);
+                        entry.m_previousUnusedSet=null;
+                        entry.m_nextUnusedSet=m_firstUnusedSet;
+                        if (m_firstUnusedSet!=null)
+                            m_firstUnusedSet.m_previousUnusedSet=entry;
+                        m_firstUnusedSet=entry;
+                    }
+                    else {
+                        entry.m_previousUnusedSet=null;
+                        entry.m_nextUnusedSet=null;
+                    }
+                    entry=entry.m_nextEntry;
+                }
+            }
+            errorDetected=false;
+            while (m_firstUnusedSet!=null && !errorDetected)
+                errorDetected=destroyDependencySet(m_firstUnusedSet);
+            if (errorDetected)
+                throw new IllegalStateException("Internal error due to a bug in Java VM: the corruption was detected for the second time in a row, so we are guving up!");
+        }
+    }
+    protected void checkGeneration(PermanentDependencySet dependencySet) {
+        while (dependencySet!=null) {
+            if (dependencySet.m_generation!=m_generation)
+                throw new IllegalStateException("Internal error due to a bug in Java VM: the dependency set factory and the actual sets are corrupt!");
+            if (!isInEntries(dependencySet))
+                throw new IllegalStateException("Internal error due to a bug in Java VM: the entries list is corrupt!");
+            dependencySet=dependencySet.m_rest;
+        }
+    }
+    protected boolean isInEntries(PermanentDependencySet dependencySet) {
+        int index=(dependencySet.m_rest.hashCode()+dependencySet.m_branchingPoint) & (m_entries.length-1);
+        PermanentDependencySet entry=m_entries[index];
+        while (entry!=null) {
+            if (entry==dependencySet)
+                return true;
+            entry=entry.m_nextEntry;
+        }
+        return false;
     }
     public void addUsage(PermanentDependencySet dependencySet) {
         assert dependencySet.m_generation==m_generation;
@@ -144,21 +193,22 @@ public final class DependencySetFactory implements Serializable {
         m_size++;
         return newSet;
     }
-    protected void destroyDependencySet(PermanentDependencySet dependencySet) {
+    protected boolean destroyDependencySet(PermanentDependencySet dependencySet) {
         assert dependencySet.m_generation==m_generation;
         assert dependencySet.m_branchingPoint>=0;
         assert dependencySet.m_usageCounter==0;
         assert dependencySet.m_rest.m_usageCounter>0;
         removeFromUnusedList(dependencySet);
         removeUsage(dependencySet.m_rest);
-        removeFromEntries(dependencySet);
+        boolean errorDetected=removeFromEntries(dependencySet);
         dependencySet.m_rest=null;
         dependencySet.m_branchingPoint=-2;
         dependencySet.m_nextEntry=m_firstDestroyedSet;
         m_firstDestroyedSet=dependencySet;
         m_size--;
+        return errorDetected;
     }
-    protected void removeFromEntries(PermanentDependencySet dependencySet) {
+    protected boolean removeFromEntries(PermanentDependencySet dependencySet) {
         assert dependencySet.m_generation==m_generation;
         int index=(dependencySet.m_rest.hashCode()+dependencySet.m_branchingPoint) & (m_entries.length-1);
         PermanentDependencySet lastEntry=null;
@@ -169,12 +219,13 @@ public final class DependencySetFactory implements Serializable {
                     m_entries[index]=dependencySet.m_nextEntry;
                 else
                     lastEntry.m_nextEntry=dependencySet.m_nextEntry;
-                return;
+                return false;
             }
             lastEntry=entry;
             entry=entry.m_nextEntry;
         }
-        throw new IllegalStateException("Internal error: dependency set not found in the entry table. This is caused by a really strange bug in Java. Please contact HermiT authors for more information.");
+        // Returning true means that we've detected an error.
+        return true;
     }
     protected void removeFromUnusedList(PermanentDependencySet dependencySet) {
         assert dependencySet.m_generation==m_generation;
