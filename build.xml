@@ -14,11 +14,10 @@
     <!-- version 0.9.1 build from revision 206 on 2008-10-26 by rob -->
     <!-- version 0.9.2 build from revision 208 on 2008-10-26 by rob -->
     <!-- version 0.9.3 build from revision 233 on 2008-12-12 by rob -->
-    <property name="revision" value="0.9.4a"/>
-    <property name="version" value="${revision}"/>
+    <property name="version" value="0.9.4"/>
 
     <!-- general info -->
-    <property name="homepage" value="http://hermit-reasoner.com"/>
+    <property name="homepage" value="http://hermit-reasoner.com/"/>
     <property name="updatefile" value="${homepage}/protege-plugin/update.properties"/>
     
     <!-- structure of output files -->
@@ -32,14 +31,10 @@
     <!-- structure of the release -->
     <property name="releasedir" value="${builddir}/release"/>
     <property name="HermiTjar" value="${releasedir}/${ant.project.name}.jar"/>
-    <!-- <property name="pluginjar" value="${releasedir}/${ant.project.name}-Protégé.jar"/> -->
-    <property name="HermiTsrcjar" value="${releasedir}/${ant.project.name}-src.zip"/>
-    <property name="javadocdir" value="${releasedir}/javadoc"/>
+    <property name="javadocdir" value="${builddir}/javadoc"/>
     <property name="apijavadocdir" value="${javadocdir}/javadoc/api"/>
     <property name="fulljavadocdir" value="${javadocdir}/javadoc/full"/>
     
-    <property name="src" value="${projectroot}/src/org/semanticweb/HermiT"/>
-
     <!-- structure of 3rdparty libraries -->
     <property name="3rdpartydir" value="${projectroot}/../ThirdPartyOwlTools"/>
     <property name="owlapi" value="${3rdpartydir}/owlapi/2.2.1/owlapi-bin.jar"/>
@@ -50,28 +45,16 @@
     <!-- SOURCE PATHS -->
     <path id="sourcepath">
         <pathelement path="${projectroot}/src"/>
-    </path>
-    <path id="pluginsourcepath">
-        <pathelement path="${projectroot}/plugin"/>
+        <pathelement path="${projectroot}/cli"/>
+        <pathelement path="${projectroot}/automaton"/>
     </path>
     <path id="testsourcepath">
         <pathelement path="${projectroot}/test"/>
-    </path>
-    <path id="automatonsourcepath">
-        <pathelement path="${projectroot}/automaton"/>
     </path>
 
     <!-- CLASS PATHS -->
     <path id="classpath">
         <pathelement location="${owlapi}"/>
-    </path>
-    <path id="runclasspath">
-        <pathelement location="${owlapi}"/>
-        <pathelement path="${classdir}"/>
-    </path>
-    <path id="pluginclasspath">
-        <pathelement location="${owlapi}"/>
-        <pathelement path="${HermiTjar}"/>
         <pathelement location="${protegeapp}"/>
         <pathelement location="${protegeowl}"/>
     </path>
@@ -79,7 +62,6 @@
         <pathelement path="${classdir}"/>
         <pathelement location="${junit}"/>
     </path>
-
 
     <!-- RELEASE TARGETS  -->
 
@@ -89,39 +71,41 @@
 
     <target name="compile">
         <mkdir dir="${classdir}"/>
-        <mkdir dir="${builddir}/clisrc"/>
-        <copy todir="${builddir}/clisrc">
-            <fileset dir="${projectroot}/cli"/>
+        <javac destdir="${classdir}" deprecation="yes">
+            <compilerarg value="-Xlint:all"/>
+            <src refid="sourcepath"/>
+            <classpath refid="classpath"/>
+        </javac>
+        <copy todir="${classdir}">
+            <fileset dir="${projectroot}/automaton" includes="**/*.aut,**/*.txt"/>
+        </copy>
+        <copy todir="${classdir}">
+            <fileset dir="${projectroot}/cli" includes="**/*.properties"/>
+        </copy>
+        <copy todir="${classdir}" file="src/plugin.xml">
             <filterset>
                 <filter token="VERSION" value="${version}"/>
             </filterset>
         </copy>
-        <javac destdir="${classdir}" deprecation="yes">
-            <compilerarg value="-Xlint:unchecked"/>
-            <compilerarg value="-Xlint:all"/>
-            <compilerarg value="-Xlint:-serial"/>
-            <src>
-                <pathelement path="${projectroot}/src"/>
-                <pathelement path="${builddir}/clisrc"/>
-            </src>
-            <src refid="automatonsourcepath"/>
-            <classpath refid="classpath"/>
-        </javac>
-        <copy todir="${classdir}" >
-            <fileset dir="${projectroot}/src" excludes="**/*.java,**/*.html"/>
-            <fileset dir="${projectroot}/cli" excludes="**/*.java,**/*.html"/>
-            <fileset dir="${projectroot}/automaton" includes="**/*.aut"/>
-        </copy>
-        <copy todir="${classdir}" file="automaton/Unicode.txt"/>
     </target>
     
-    <target name="buildDatatypesAutomata" depends="compile">
-        <java classname="dk.brics.automaton.Datatypes" classpath="${classdir}">
-            <sysproperty key="dk.brics.automaton.datatypes" value="${projectroot}/automaton"/>
-        </java>
-        <copy todir="${classdir}" >
-            <fileset dir="${projectroot}/automaton" includes="**/*.aut"/>
-        </copy>
+    <target name="javadoc">
+        <mkdir dir="${javadocdir}"/>
+        <mkdir dir="${apijavadocdir}"/>
+        <javadoc destdir="${apijavadocdir}" access="public" author="false" version="true" use="true">
+            <classpath refid="classpath"/>
+            <classpath refid="testclasspath"/>
+            <package name="org.semanticweb.HermiT.*"/>
+            <source file="${projectroot}/src/org/semanticweb/HermiT/Reasoner.java"/>
+            <source file="${projectroot}/src/org/semanticweb/HermiT/Namespaces.java"/>
+            <source file="${projectroot}/src/org/semanticweb/HermiT/hierarchy/HierarchyPosition.java"/>
+        </javadoc>
+        <mkdir dir="${fulljavadocdir}"/>
+        <javadoc sourcepathref="sourcepath" destdir="${fulljavadocdir}" access="private" author="false" version="true" use="true">
+            <classpath refid="classpath"/>
+            <classpath refid="testclasspath"/>
+            <package name="org.semanticweb.HermiT.*"/>
+        </javadoc>
     </target>
     
     <target name="flatten-owlapi">
@@ -129,50 +113,17 @@
         <unjar src="${owlapi}" dest="${flattendir}"/>
     </target>
 
-    <target name="without-plugin" depends="compile,flatten-owlapi">
-        <mkdir dir="${releasedir}"/>
-        <jar jarfile="${HermiTjar}">
-            <manifest>
-                <attribute name="Implementation-Title" value="HermiT"/>
-                <attribute name="Implementation-Vendor" value="Oxford University"/>
-                <attribute name="Implementation-Version" value="${version}"/>
-                <attribute name="Main-Class" value="org.semanticweb.HermiT.CommandLine"/>
-            </manifest>
-            <fileset dir="${classdir}"/>
-            <fileset dir="${flattendir}"/>
-        </jar>
-    </target>
-
-    <target name="combined" depends="compile,flatten-owlapi,javadoc,quick"/>
-    
     <target name="quick" depends="compile">
         <mkdir dir="${releasedir}"/>
-        <javac destdir="${classdir}" deprecation="yes">
-            <compilerarg value="-Xlint:all"/>
-            <src refid="pluginsourcepath"/>
-            <classpath refid="pluginclasspath"/>
-        </javac>
-        <copy todir="${classdir}" file="plugin/plugin.xml">
-            <filterset>
-                <filter token="VERSION" value="${version}"/>
-            </filterset>
-        </copy>
-        <mkdir dir="${releasedir}/src/src"/>
-        <copy todir="${releasedir}/src/src">
-            <fileset dir="${projectroot}">
-                <exclude name="bin/**"/>
-                <exclude name="build/**"/>
-            </fileset>
-        </copy>
-        <copy file="readme.txt" tofile="${releasedir}/readme.txt">
-            <filterset>
-                <filter token="VERSION" value="${version}"/>
-            </filterset>
-        </copy>
-        <copy file="${projectroot}/plugin/update.properties" tofile="${releasedir}/update.properties">
+        <copy file="${projectroot}/update.properties" tofile="${releasedir}/update.properties">
             <filterset>
                 <filter token="VERSION" value="${version}"/>
                 <filter token="HOMEPAGE" value="${homepage}"/>
+            </filterset>
+        </copy>
+        <copy file="${projectroot}/readme.txt" tofile="${releasedir}/readme.txt">
+            <filterset>
+                <filter token="VERSION" value="${version}"/>
             </filterset>
         </copy>
         <jar jarfile="${HermiTjar}">
@@ -187,60 +138,26 @@
                 <attribute name="Bundle-Category" value="protege"/>
                 <attribute name="Bundle-Description" value="A plugin for the Protege OWL Editor which allows reasoning using the HermiT reasoner"/>
                 <attribute name="Bundle-DocURL" value="${homepage}"/>
-                <attribute name="Bundle-Vendor" value="Boris Motik, Rob Shearer, and Ian Horrocks"/>
-                <attribute name="Bundle-Version" value="0.${revision}"/>
+                <attribute name="Bundle-Vendor" value="Boris Motik, Birte Glimm, Rob Shearer, and Ian Horrocks"/>
+                <attribute name="Bundle-Version" value="${version}"/>
                 <attribute name="Bundle-Activator" value="org.protege.editor.core.plugin.DefaultPluginActivator"/>
                 <attribute name="Bundle-ClassPath" value="."/>
                 <attribute name="Require-Bundle" value="org.protege.common,org.protege.editor.core.application,org.protege.editor.owl,org.semanticweb.owl.owlapi"/>
-                <attribute name="Update-Url" value="${updatefileatefile}"/>
+                <attribute name="Update-Url" value="${updatefile}"/>
             </manifest>
             <fileset dir="${classdir}"/>
             <fileset dir="${flattendir}"/>
-            <fileset dir="${releasedir}/src"/>
+            <zipfileset dir="${projectroot}/src" prefix="src/src"/>
+            <zipfileset dir="${projectroot}/cli" prefix="src/cli"/>
+            <zipfileset dir="${projectroot}/automaton" prefix="src/automaton"/>
             <fileset dir="${javadocdir}"/>
             <fileset file="${releasedir}/readme.txt"/>
             <fileset file="gpl.txt"/>
         </jar>
     </target>
     
-    <!-- <target name="jarsrc">
-        <mkdir dir="${releasedir}"/>
-        <jar jarfile="${HermiTsrcjar}">
-            <fileset dir="${projectroot}">
-                <exclude name="bin/**"/>
-                <exclude name="build/**"/>
-            </fileset>
-        </jar>
-    </target> -->
+    <target name="combined" depends="compile,javadoc,flatten-owlapi,quick"/>
     
-    <target name="javadoc">
-        <mkdir dir="${javadocdir}"/>
-        <mkdir dir="${apijavadocdir}"/>
-        <javadoc destdir="${apijavadocdir}" access="public" author="false" version="true" use="true">
-            <package name="org.semanticweb.HermiT.*"/>
-            <classpath refid="runclasspath"/>
-            <source file="${src}/Reasoner.java"/>
-            <source file="${src}/Namespaces.java"/>
-            <source file="${src}/hierarchy/HierarchyPosition.java"/>
-        </javadoc>
-        <mkdir dir="${fulljavadocdir}"/>
-        <javadoc sourcepathref="sourcepath" destdir="${fulljavadocdir}" access="private" author="false" version="true" use="true">
-            <classpath refid="runclasspath"/>
-            <package name="org.semanticweb.HermiT.*"/>
-            <classpath refid="classpath"/>
-        </javadoc>
-    </target>
-    
-    <!-- <target name="release" depends="clean,combined,jarsrc,javadoc">
-        <copy file="readme.txt" tofile="${releasedir}/readme.txt">
-            <filterset>
-                <filter token="VERSION" value="${version}"/>
-            </filterset>
-        </copy>
-        <copy file="gpl.txt" tofile="${releasedir}/license.txt"/>
-        <zip zipfile="${builddir}/${ant.project.name}-${version}.zip" basedir="${releasedir}"/>
-    </target> -->
-
     <!-- TEST TARGETS -->
 
     <target name="compiletest" depends="compile">
@@ -267,15 +184,14 @@
         </java>
     </target>
 
-    <!-- RUN TARGETS -->
+    <!-- AUXILIARY TARGETS -->
 
-    <target name="run" depends="compile,compiletest">
-        <java classname="org.semanticweb.HermiT.run.RunHermiT" fork="true">
-            <classpath>
-                <pathelement location="${testclassdir}"/>
-            </classpath>
-            <classpath refid="classpath"/>
-            <classpath refid="testclasspath"/>
+    <target name="build-datatypes-automata" depends="compile">
+        <delete>
+        	<fileset dir="${projectroot}/automaton" includes="*.dat"/>
+       	</delete>
+        <java classname="dk.brics.automaton.Datatypes" classpath="${classdir}">
+            <sysproperty key="dk.brics.automaton.datatypes" value="${projectroot}/automaton"/>
         </java>
     </target>
 

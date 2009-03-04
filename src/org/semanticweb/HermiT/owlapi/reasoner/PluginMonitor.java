@@ -1,9 +1,10 @@
 // Copyright 2008 by Oxford University; see license.txt for details
-package org.semanticweb.HermiT.monitor;
+package org.semanticweb.HermiT.owlapi.reasoner;
 
 import java.util.Set;
 import java.util.HashSet;
 
+import org.semanticweb.HermiT.monitor.TableauMonitorAdapter;
 import org.semanticweb.HermiT.model.AtomicConcept;
 
 public class PluginMonitor extends TableauMonitorAdapter {

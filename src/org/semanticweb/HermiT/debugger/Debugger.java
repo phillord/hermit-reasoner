@@ -762,7 +762,7 @@ public class Debugger extends TableauMonitorForwarder {
         }
         protected int getDataRangeType(DataRange dr) {
             int returnValue=10;
-            if (((DataRange)dr).isNegated())
+            if (dr.isNegated())
                 returnValue=11;
             return returnValue;
         }

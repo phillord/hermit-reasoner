@@ -1,5 +1,5 @@
 // Copyright 2008 by Oxford University; see license.txt for details
-package org.semanticweb.HermiT;
+package org.semanticweb.HermiT.owlapi.reasoner;
 
 import java.net.URI;
 import java.util.Set;
@@ -7,8 +7,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
 
+import org.semanticweb.HermiT.Reasoner;
+import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
-import org.semanticweb.HermiT.monitor.PluginMonitor;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.owl.inference.MonitorableOWLReasoner;
 import org.semanticweb.owl.model.OWLClass;
@@ -25,7 +26,7 @@ import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
 import org.semanticweb.owl.util.ProgressMonitor;
 
-public class HermitReasoner implements MonitorableOWLReasoner {
+public class HermiTReasoner implements MonitorableOWLReasoner {
     protected final OWLOntologyManager manager;
     protected final boolean tolerateUnknownDatatypes;
     protected final boolean onlyAncestorBlocking;
@@ -37,15 +38,15 @@ public class HermitReasoner implements MonitorableOWLReasoner {
     protected final Set<OWLObjectProperty> allReferencedObjectProperties;
     protected Reasoner hermit;
 
-    public HermitReasoner(OWLOntologyManager inManager) {
+    public HermiTReasoner(OWLOntologyManager inManager) {
         this(inManager,false,false);
     }
 
-    public HermitReasoner(OWLOntologyManager inManager,boolean tolerateUnknownDatatypes) {
+    public HermiTReasoner(OWLOntologyManager inManager,boolean tolerateUnknownDatatypes) {
         this(inManager,tolerateUnknownDatatypes,false);
     }
 
-    public HermitReasoner(OWLOntologyManager inManager,boolean tolerateUnknownDatatypes,boolean onlyAncestorBlocking) {
+    public HermiTReasoner(OWLOntologyManager inManager,boolean tolerateUnknownDatatypes,boolean onlyAncestorBlocking) {
         monitor=new PluginMonitor();
         manager=inManager;
         ontologies=new HashSet<OWLOntology>();

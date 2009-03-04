@@ -8,9 +8,9 @@ import java.io.PrintWriter;
 import java.net.URI;
 import java.text.BreakIterator;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -20,7 +20,8 @@ import org.semanticweb.HermiT.monitor.ReasoningOperations;
 import org.semanticweb.HermiT.monitor.Timer;
 
 public class CommandLine {
-    static String breakLines(String str,int lineWidth,int indent) {
+    
+    protected static String breakLines(String str,int lineWidth,int indent) {
         StringBuffer out=new StringBuffer();
         BreakIterator i=BreakIterator.getLineInstance();
         i.setText(str);
@@ -463,11 +464,17 @@ public class CommandLine {
 
     protected static final int kTime=1000,kDumpClauses=1001,kDumpRoleBox=1002,kDirectBlock=1003,kBlockStrategy=1004,kBlockCache=1005,kExpansion=1006,kBase=1007,kParser=1008,kDefaultNamespace=1009,kDumpNamespaces=1010,kSuperRoles=1011,kSubRoles=1012,kEquivRoles=1013,kKrssTaxonomy=1014,kFunctionalTaxonomy=1015,kIgnoreUnsupportedDatatypes=1016;
 
-    static protected final String versionString="HermiT version @VERSION@";
+    protected static final String versionString;
+    static {
+        String version=CommandLine.class.getPackage().getImplementationVersion();
+        if (version==null)
+            version="<no version set>";
+        versionString=version;
+    }
     protected static final String usageString="Usage: hermit [OPTION]... URI...";
     protected static final String[] helpHeader= { "Perform reasoning on each OWL ontology URI.","Example: hermit -ds owl:Thing http://hermit-reasoner.org/2008/test.owl","    (prints direct subclasses of owl:Thing within the test ontology)","","Both relative and absolute ontology URIs can be used. Relative URIs","are resolved with respect to the current directory (i.e. local file","names are valid URIs); this behavior can be changed with the '--base'","option.","","Classes and properties are identified using functional-syntax-style","identifiers: names not containing a colon are resolved against the","ontology's default namespace; otherwise the portion of the name","preceding the colon is treated as a namespace prefix. Use of","namespaces can be controlled using the -n, -N, and --namespace","options. Alternatively, classes and properties can be identified with","full URIs by enclosing the URI in <angle brackets>.","","By default, ontologies are simply retrieved and parsed. For more",
             "interesting reasoning, set one of the -c/-k/-s/-S/-e/-U options." };
-    protected static final String[] footer= { "HermiT is a product of Oxford University.","Visit <http://hermit-reasoner.org> for details." };
+    protected static final String[] footer= { "HermiT is a product of Oxford University.","Visit <http://hermit-reasoner.org/> for details." };
     protected static final String kMisc="Miscellaneous",kActions="Actions",kParsing="Parsing and loading",kNamespaces="Namespace expansion and abbreviation",kAlgorithm="Algorithm settings (expert users only!)",kInternals="Internals and debugging (unstable)";
 
     protected static final Option[] options=new Option[] {
