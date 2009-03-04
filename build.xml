@@ -25,7 +25,6 @@
     <property name="projectroot" value="."/>
     <property name="builddir" value="${projectroot}/build"/>
     <property name="flattendir" value="${builddir}/flatten"/>
-    <property name="datatypesautomatadir" value="${builddir}/datatypesautomata"/>
     <property name="classdir" value="${builddir}/class"/>
     <property name="plugindir" value="${builddir}/plugin"/>
     <property name="testclassdir" value="${builddir}/testclass"/>
@@ -111,14 +110,18 @@
         <copy todir="${classdir}" >
             <fileset dir="${projectroot}/src" excludes="**/*.java,**/*.html"/>
             <fileset dir="${projectroot}/cli" excludes="**/*.java,**/*.html"/>
+            <fileset dir="${projectroot}/automaton" includes="**/*.aut"/>
         </copy>
+        <copy todir="${classdir}" file="automaton/Unicode.txt"/>
     </target>
     
     <target name="buildDatatypesAutomata" depends="compile">
-        <mkdir dir="${datatypesautomatadir}"/>
         <java classname="dk.brics.automaton.Datatypes" classpath="${classdir}">
-            <sysproperty key="dk.brics.automaton.datatypes" value="${datatypesautomatadir}"/>
+            <sysproperty key="dk.brics.automaton.datatypes" value="${projectroot}/automaton"/>
         </java>
+        <copy todir="${classdir}" >
+            <fileset dir="${projectroot}/automaton" includes="**/*.aut"/>
+        </copy>
     </target>
     
     <target name="flatten-owlapi">
@@ -140,7 +143,7 @@
         </jar>
     </target>
 
-    <target name="combined" depends="compile,buildDatatypesAutomata,flatten-owlapi,javadoc,quick"/>
+    <target name="combined" depends="compile,flatten-owlapi,javadoc,quick"/>
     
     <target name="quick" depends="compile">
         <mkdir dir="${releasedir}"/>
@@ -154,7 +157,6 @@
                 <filter token="VERSION" value="${version}"/>
             </filterset>
         </copy>
-        <copy todir="${classdir}" file="automaton/Unicode.txt"/>
         <mkdir dir="${releasedir}/src/src"/>
         <copy todir="${releasedir}/src/src">
             <fileset dir="${projectroot}">
@@ -194,7 +196,6 @@
             </manifest>
             <fileset dir="${classdir}"/>
             <fileset dir="${flattendir}"/>
-            <fileset dir="${datatypesautomatadir}"/>
             <fileset dir="${releasedir}/src"/>
             <fileset dir="${javadocdir}"/>
             <fileset file="${releasedir}/readme.txt"/>
