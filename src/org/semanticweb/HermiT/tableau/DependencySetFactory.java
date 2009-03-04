@@ -186,7 +186,7 @@ public final class DependencySetFactory implements Serializable {
             dependencySet.m_nextUnusedSet.m_previousUnusedSet=dependencySet.m_previousUnusedSet;
         dependencySet.m_previousUnusedSet=null;
         dependencySet.m_nextUnusedSet=null;
-        assert m_firstUnusedSet==null || m_firstUnusedSet.m_usageCounter==0;
+        assert m_firstUnusedSet==null || (m_firstUnusedSet.m_usageCounter==0 && m_firstUnusedSet.m_generation==m_generation);
     }
     protected void addToUnusedList(PermanentDependencySet dependencySet) {
         assert dependencySet.m_generation==m_generation;
@@ -195,7 +195,7 @@ public final class DependencySetFactory implements Serializable {
         if (m_firstUnusedSet!=null)
             m_firstUnusedSet.m_previousUnusedSet=dependencySet;
         m_firstUnusedSet=dependencySet;
-        assert m_firstUnusedSet==null || m_firstUnusedSet.m_usageCounter==0;
+        assert m_firstUnusedSet==null || (m_firstUnusedSet.m_usageCounter==0 && m_firstUnusedSet.m_generation==m_generation);
     }
     protected void resizeEntries() {
         int newLength=m_entries.length*2;
