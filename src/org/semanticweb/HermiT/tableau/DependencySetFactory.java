@@ -81,8 +81,8 @@ public final class DependencySetFactory implements Serializable {
                 while (entry!=null) {
                     if (entry.m_generation!=m_generation)
                         throw new IllegalStateException("Internal error due to a bug in Java VM: the dependency set factory is corrupt!");
+                    checkGeneration(entry);
                     if (entry.m_usageCounter==0) {
-                        checkGeneration(entry);
                         entry.m_previousUnusedSet=null;
                         entry.m_nextUnusedSet=m_firstUnusedSet;
                         if (m_firstUnusedSet!=null)
