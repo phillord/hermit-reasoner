@@ -21,5 +21,5 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/ThirdPartyOwlTools/owlapi/2.2.1/owlapi-doc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="output" path="build/release"/>
+	<classpathentry kind="output" path="bin"/>
 </classpath>
