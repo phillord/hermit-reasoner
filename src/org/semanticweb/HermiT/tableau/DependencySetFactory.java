@@ -216,6 +216,7 @@ public final class DependencySetFactory implements Serializable {
     }
     public PermanentDependencySet removeBranchingPoint(DependencySet dependencySet,int branchingPoint) {
         PermanentDependencySet permanentDependencySet=getPermanent(dependencySet);
+        assert permanentDependencySet.m_generation==m_generation;
         if (branchingPoint==permanentDependencySet.m_branchingPoint)
             return permanentDependencySet.m_rest;
         else if (branchingPoint>permanentDependencySet.m_branchingPoint)
@@ -239,7 +240,9 @@ public final class DependencySetFactory implements Serializable {
     }
     public PermanentDependencySet unionWith(DependencySet set1,DependencySet set2) {
         PermanentDependencySet permanentSet1=getPermanent(set1);
+        assert permanentSet1.m_generation==m_generation;
         PermanentDependencySet permanentSet2=getPermanent(set2);
+        assert permanentSet2.m_generation==m_generation;
         if (permanentSet1==permanentSet2)
             return permanentSet1;
         m_mergeArray.clear();
@@ -274,8 +277,11 @@ public final class DependencySetFactory implements Serializable {
             for (DependencySet constituent : unionDependencySet.m_dependencySets) {
                 if (constituent instanceof UnionDependencySet)
                     m_unprocessedSets.add((UnionDependencySet)constituent);
-                else
-                    m_mergeSets.add((PermanentDependencySet)constituent);
+                else {
+                    PermanentDependencySet permanentSet=(PermanentDependencySet)constituent;
+                    assert permanentSet.m_generation==m_generation;
+                    m_mergeSets.add(permanentSet);
+                }
             }
         }
         int numberOfSets=m_mergeSets.size();
