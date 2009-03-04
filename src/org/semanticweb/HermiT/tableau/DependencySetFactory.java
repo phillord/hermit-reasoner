@@ -73,6 +73,7 @@ public final class DependencySetFactory implements Serializable {
             errorDetected=destroyDependencySet(m_firstUnusedSet);
         if (errorDetected) {
             m_firstUnusedSet=null;
+            m_firstDestroyedSet=null;
             Runtime.getRuntime().gc();
             for (int index=0;index<m_entries.length;index++) {
                 PermanentDependencySet entry=m_entries[index];
@@ -103,9 +104,7 @@ public final class DependencySetFactory implements Serializable {
     }
     protected void checkGeneration(PermanentDependencySet dependencySet) {
         while (dependencySet!=null) {
-            if (dependencySet.m_generation!=m_generation)
-                throw new IllegalStateException("Internal error due to a bug in Java VM: the dependency set factory and the actual sets are corrupt!");
-            if (!isInEntries(dependencySet))
+            if (dependencySet.m_generation!=m_generation || (dependencySet!=m_emptySet && !isInEntries(dependencySet)))
                 throw new IllegalStateException("Internal error due to a bug in Java VM: the entries list is corrupt!");
             dependencySet=dependencySet.m_rest;
         }
