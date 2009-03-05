@@ -431,13 +431,24 @@ public class DLOntology implements Serializable {
         }
         stringBuffer.append("]");
         stringBuffer.append(CRLF);
-        stringBuffer.append("DL-clauses: [");
+        stringBuffer.append("Deterministic DL-clauses: [");
         stringBuffer.append(CRLF);
-        for (DLClause dlClause : m_dlClauses) {
-            stringBuffer.append("  ");
-            stringBuffer.append(dlClause.toString(ns));
-            stringBuffer.append(CRLF);
-        }
+        for (DLClause dlClause : m_dlClauses)
+            if (dlClause.getHeadLength()<=1) {
+                stringBuffer.append("  ");
+                stringBuffer.append(dlClause.toString(ns));
+                stringBuffer.append(CRLF);
+            }
+        stringBuffer.append("]");
+        stringBuffer.append(CRLF);
+        stringBuffer.append("Disjunctive DL-clauses: [");
+        stringBuffer.append(CRLF);
+        for (DLClause dlClause : m_dlClauses)
+            if (dlClause.getHeadLength()>1) {
+                stringBuffer.append("  ");
+                stringBuffer.append(dlClause.toString(ns));
+                stringBuffer.append(CRLF);
+            }
         stringBuffer.append("]");
         stringBuffer.append(CRLF);
         stringBuffer.append("ABox: [");
