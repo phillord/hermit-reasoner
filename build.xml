@@ -32,8 +32,6 @@
     <property name="releasedir" value="${builddir}/release"/>
     <property name="HermiTjar" value="${releasedir}/${ant.project.name}.jar"/>
     <property name="javadocdir" value="${builddir}/javadoc"/>
-    <property name="apijavadocdir" value="${javadocdir}/javadoc/api"/>
-    <property name="fulljavadocdir" value="${javadocdir}/javadoc/full"/>
     
     <!-- structure of 3rdparty libraries -->
     <property name="3rdpartydir" value="${projectroot}/../ThirdPartyOwlTools"/>
@@ -45,7 +43,7 @@
     <!-- SOURCE PATHS -->
     <path id="sourcepath">
         <pathelement path="${projectroot}/src"/>
-        <pathelement path="${projectroot}/cli"/>
+        <pathelement path="${projectroot}/getopt"/>
         <pathelement path="${projectroot}/automaton"/>
     </path>
     <path id="testsourcepath">
@@ -80,7 +78,7 @@
             <fileset dir="${projectroot}/automaton" includes="**/*.aut,**/*.txt"/>
         </copy>
         <copy todir="${classdir}">
-            <fileset dir="${projectroot}/cli" includes="**/*.properties"/>
+            <fileset dir="${projectroot}/getopt" includes="**/*.properties"/>
         </copy>
         <copy todir="${classdir}" file="src/plugin.xml">
             <filterset>
@@ -91,17 +89,7 @@
     
     <target name="javadoc">
         <mkdir dir="${javadocdir}"/>
-        <mkdir dir="${apijavadocdir}"/>
-        <javadoc destdir="${apijavadocdir}" access="public" author="false" version="true" use="true">
-            <classpath refid="classpath"/>
-            <classpath refid="testclasspath"/>
-            <package name="org.semanticweb.HermiT.*"/>
-            <source file="${projectroot}/src/org/semanticweb/HermiT/Reasoner.java"/>
-            <source file="${projectroot}/src/org/semanticweb/HermiT/Namespaces.java"/>
-            <source file="${projectroot}/src/org/semanticweb/HermiT/hierarchy/HierarchyPosition.java"/>
-        </javadoc>
-        <mkdir dir="${fulljavadocdir}"/>
-        <javadoc sourcepathref="sourcepath" destdir="${fulljavadocdir}" access="private" author="false" version="true" use="true">
+        <javadoc sourcepathref="sourcepath" destdir="${javadocdir}" access="protected" author="false" version="true" use="true">
             <classpath refid="classpath"/>
             <classpath refid="testclasspath"/>
             <package name="org.semanticweb.HermiT.*"/>
@@ -147,10 +135,10 @@
             </manifest>
             <fileset dir="${classdir}"/>
             <fileset dir="${flattendir}"/>
-            <zipfileset dir="${projectroot}/src" prefix="src/src"/>
-            <zipfileset dir="${projectroot}/cli" prefix="src/cli"/>
-            <zipfileset dir="${projectroot}/automaton" prefix="src/automaton"/>
-            <fileset dir="${javadocdir}"/>
+            <zipfileset dir="${projectroot}/src" prefix="src"/>
+            <zipfileset dir="${projectroot}/getopt" prefix="src"/>
+            <zipfileset dir="${projectroot}/automaton" prefix="src"/>
+            <zipfileset dir="${javadocdir}" prefix="javadoc"/>
             <fileset file="${releasedir}/readme.txt"/>
             <fileset file="gpl.txt"/>
         </jar>
