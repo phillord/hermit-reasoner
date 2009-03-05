@@ -9,18 +9,20 @@ import org.semanticweb.HermiT.tableau.*;
 public class Timer extends TableauMonitorAdapter {
     private static final long serialVersionUID=-8144444618897251350L;
 
+    protected transient PrintWriter m_output;
     protected long m_problemStartTime;
     protected long m_lastStatusTime;
     protected int m_numberOfBacktrackings;
-    
-    protected PrintWriter output;
-    
-    public Timer() {
-        output = new PrintWriter(System.out);
-    }
 
+    public Timer() {
+        m_output=new PrintWriter(System.out);
+    }
     public Timer(PrintWriter inOutput) {
-        output = inOutput;
+        m_output=inOutput;
+    }
+    protected Object readResolve() {
+        m_output=new PrintWriter(System.out);
+        return this;
     }
     protected void start() {
         m_numberOfBacktrackings=0;
@@ -28,45 +30,45 @@ public class Timer extends TableauMonitorAdapter {
         m_lastStatusTime=m_problemStartTime;
     }
     public void isSatisfiableStarted(AtomicConcept atomicConcept) {
-        output.print("Testing "+atomicConcept.getURI()+" ...");
-        output.flush();
+        m_output.print("Testing "+atomicConcept.getURI()+" ...");
+        m_output.flush();
         start();
     }
     public void isSatisfiableFinished(AtomicConcept atomicConcept,boolean result) {
-        output.println(result ? "YES" : "NO");
+        m_output.println(result ? "YES" : "NO");
         doStatistics();
     }
     public void isSubsumedByStarted(AtomicConcept subconcept,AtomicConcept superconcept) {
-        output.print("Testing "+subconcept.getURI()+" ==> "+superconcept.getURI()+" ...");
-        output.flush();
+        m_output.print("Testing "+subconcept.getURI()+" ==> "+superconcept.getURI()+" ...");
+        m_output.flush();
         start();
     }
     public void isSubsumedByFinished(AtomicConcept subconcept,AtomicConcept superconcept,boolean result) {
-        output.println(result ? "YES" : "NO");
+        m_output.println(result ? "YES" : "NO");
         doStatistics();
     }
     public void isABoxSatisfiableStarted() {
-        output.print("Testing ABox satisfiability ...");
-        output.flush();
+        m_output.print("Testing ABox satisfiability ...");
+        m_output.flush();
         start();
     }
     public void isABoxSatisfiableFinished(boolean result) {
-        output.println(result ? "YES" : "NO");
+        m_output.println(result ? "YES" : "NO");
         doStatistics();
     }
     public void isInstanceOfStarted(AtomicConcept concept,Individual individual) {
-        output.print("Testing "+concept.getURI()+" : "+individual.getURI()+" ...");
-        output.flush();
+        m_output.print("Testing "+concept.getURI()+" : "+individual.getURI()+" ...");
+        m_output.flush();
         start();
     }
     public void isInstanceOfFinished(AtomicConcept concept,Individual individual,boolean result) {
-        output.println(result ? "YES" : "NO");
+        m_output.println(result ? "YES" : "NO");
         doStatistics();
     }
     public void iterationStarted() {
         if (System.currentTimeMillis()-m_lastStatusTime>30000) {
             if (m_lastStatusTime==m_problemStartTime)
-                output.println();
+                m_output.println();
             doStatistics();
             m_lastStatusTime=System.currentTimeMillis();
         }
@@ -76,37 +78,37 @@ public class Timer extends TableauMonitorAdapter {
     }
     protected void doStatistics() {
         long duartionSoFar=System.currentTimeMillis()-m_problemStartTime;
-        output.print(duartionSoFar);
-        output.print(" ms: allocated nodes: ");
-        output.print(m_tableau.getNumberOfAllocatedNodes());
-        output.print("    used nodes: ");
-        output.print(m_tableau.getNumberOfNodeCreations());
-        output.print("    in tableau: ");
-        output.print(m_tableau.getNumberOfNodesInTableau());
+        m_output.print(duartionSoFar);
+        m_output.print(" ms: allocated nodes: ");
+        m_output.print(m_tableau.getNumberOfAllocatedNodes());
+        m_output.print("    used nodes: ");
+        m_output.print(m_tableau.getNumberOfNodeCreations());
+        m_output.print("    in tableau: ");
+        m_output.print(m_tableau.getNumberOfNodesInTableau());
         if (m_tableau.getNumberOfMergedOrPrunedNodes()>0) {
-            output.print("    merged/pruned: ");
-            output.print(m_tableau.getNumberOfMergedOrPrunedNodes());
+            m_output.print("    merged/pruned: ");
+            m_output.print(m_tableau.getNumberOfMergedOrPrunedNodes());
         }
-        output.print("    branching point: ");
-        output.print(m_tableau.getCurrentBranchingPointLevel());
+        m_output.print("    branching point: ");
+        m_output.print(m_tableau.getCurrentBranchingPointLevel());
         if (m_numberOfBacktrackings>0) {
-            output.print("    backtrackings: ");
-            output.print(m_numberOfBacktrackings);
+            m_output.print("    backtrackings: ");
+            m_output.print(m_numberOfBacktrackings);
         }
-        output.println();
-        output.print("    Binary table size:   ");
-        output.print(m_tableau.getExtensionManager().getBinaryExtensionTable().sizeInMemory()/1000);
-        output.print("kb    Ternary table size: ");
-        output.print(m_tableau.getExtensionManager().getTernaryExtensionTable().sizeInMemory()/1000);
-        output.print("kb    Dependency set factory size: ");
-        output.print(m_tableau.getDependencySetFactory().sizeInMemory()/1000);
-        output.println("kb");
-        output.print("    Concept factory size: ");
-        output.print(m_tableau.getLabelManager().sizeInMemoryConceptSetFactory()/1000);
-        output.print("kb    Atomic role factory size: ");
-        output.print(m_tableau.getLabelManager().sizeInMemoryAtomicRoleSetFactory()/1000);
-        output.println("kb");
-        output.println();
-        output.flush();
+        m_output.println();
+        m_output.print("    Binary table size:   ");
+        m_output.print(m_tableau.getExtensionManager().getBinaryExtensionTable().sizeInMemory()/1000);
+        m_output.print("kb    Ternary table size: ");
+        m_output.print(m_tableau.getExtensionManager().getTernaryExtensionTable().sizeInMemory()/1000);
+        m_output.print("kb    Dependency set factory size: ");
+        m_output.print(m_tableau.getDependencySetFactory().sizeInMemory()/1000);
+        m_output.println("kb");
+        m_output.print("    Concept factory size: ");
+        m_output.print(m_tableau.getLabelManager().sizeInMemoryConceptSetFactory()/1000);
+        m_output.print("kb    Atomic role factory size: ");
+        m_output.print(m_tableau.getLabelManager().sizeInMemoryAtomicRoleSetFactory()/1000);
+        m_output.println("kb");
+        m_output.println();
+        m_output.flush();
     }
 }
