@@ -172,8 +172,8 @@ public final class ExistentialExpansionManager implements Serializable {
             Object[] tupleBuffer=retrieval.getTupleBuffer();
             while (!retrieval.afterLast()) {
                 Node toNode=(Node)tupleBuffer[toNodeIndex];
-                if (m_extensionManager.containsConceptAssertion(toConcept,toNode) && !toNode.isIndirectlyBlocked()) {
-                    if (forNode==toNode || forNode.getParent()==toNode || toNode.getParent()==forNode || toNode.getNodeType()==NodeType.ROOT_NODE || toNode.getNodeType()==NodeType.NAMED_NODE)
+                if (toNode.isIndirectlyBlocked() && m_extensionManager.containsConceptAssertion(toConcept,toNode)) {
+                    if (isPermanentSatisfier(forNode,toNode))
                         return SatType.PERMANENTLY_SATISFIED;
                     else
                         return SatType.CURRENTLY_SATISFIED;
@@ -186,12 +186,12 @@ public final class ExistentialExpansionManager implements Serializable {
             m_auxiliaryNodes1.clear();
             retrieval.open();
             Object[] tupleBuffer=retrieval.getTupleBuffer();
-            boolean permanent=true;
+            boolean allSatisfiersArePermanent=true;
             while (!retrieval.afterLast()) {
                 Node toNode=(Node)tupleBuffer[toNodeIndex];
-                if (m_extensionManager.containsConceptAssertion(toConcept,toNode) && !toNode.isIndirectlyBlocked()) {
-                    if (forNode.getParent()!=toNode && toNode.getParent()!=forNode)
-                        permanent=false;
+                if (!toNode.isIndirectlyBlocked() && m_extensionManager.containsConceptAssertion(toConcept,toNode)) {
+                    if (!isPermanentSatisfier(forNode,toNode))
+                        allSatisfiersArePermanent=false;
                     m_auxiliaryNodes1.add(toNode);
                 }
                 retrieval.next();
@@ -199,10 +199,14 @@ public final class ExistentialExpansionManager implements Serializable {
             if (m_auxiliaryNodes1.size()>=cardinality) {
                 m_auxiliaryNodes2.clear();
                 if (containsSubsetOfNUnequalNodes(forNode,m_auxiliaryNodes1,0,m_auxiliaryNodes2,cardinality))
-                    return permanent ? SatType.PERMANENTLY_SATISFIED : SatType.CURRENTLY_SATISFIED;
+                    return allSatisfiersArePermanent ? SatType.PERMANENTLY_SATISFIED : SatType.CURRENTLY_SATISFIED;
             }
             return SatType.NOT_SATISFIED;
         }
+    }
+    protected boolean isPermanentSatisfier(Node forNode,Node toNode) {
+        NodeType toNodeType=toNode.getNodeType();
+        return forNode==toNode || forNode.getParent()==toNode || toNode.getParent()==forNode || toNodeType==NodeType.ROOT_NODE || toNodeType==NodeType.NAMED_NODE || toNodeType==NodeType.CONCRETE_NODE;
     }
     protected boolean containsSubsetOfNUnequalNodes(Node forNode,List<Node> nodes,int startAt,List<Node> selectedNodes,int cardinality) {
         if (selectedNodes.size()==cardinality) {
