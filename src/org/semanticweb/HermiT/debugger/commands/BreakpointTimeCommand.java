@@ -3,14 +3,10 @@ package org.semanticweb.HermiT.debugger.commands;
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 
-
 public class BreakpointTimeCommand extends AbstractCommand implements ICommand {
-   
+
     /**
-     * Tries to fetch an integer that represents the time to the next breakpoint 
-     * in seconds from the arguments given to the constructor and 
-     * prints a list of nodes and their blocking status for nodes with a label 
-     * equal to the label of the node with the given ID
+     * Tries to fetch an integer that represents the time to the next breakpoint in seconds from the arguments given to the constructor and prints a list of nodes and their blocking status for nodes with a label equal to the label of the node with the given ID
      */
     public void execute() {
         if (args.length<2) {
@@ -29,11 +25,10 @@ public class BreakpointTimeCommand extends AbstractCommand implements ICommand {
         debugger.setBreakpointTime(breakpointTimeSeconds*1000);
     }
     public String getHelpText() {
-        CharArrayWriter buffer = new CharArrayWriter();
-        PrintWriter writer = new PrintWriter(buffer);
+        CharArrayWriter buffer=new CharArrayWriter();
+        PrintWriter writer=new PrintWriter(buffer);
         writer.println("usage: BreakpointTime timeInSeconds");
-        writer.println("Sets the next breakpoint time to the given time in " +
-        	       "seconds.");
+        writer.println("Sets the next breakpoint time to the given time in seconds.");
         writer.flush();
         return buffer.toString();
     }
