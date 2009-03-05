@@ -3,6 +3,7 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 
+import org.semanticweb.HermiT.*;
 import org.semanticweb.HermiT.model.*;
 
 public class GroundDisjunction implements Serializable {
@@ -78,7 +79,7 @@ public class GroundDisjunction implements Serializable {
             throw new IllegalStateException("Unsupported predicate arity.");
         }
     }
-    public String toString() {
+    public String toString(Namespaces namespaces) {
         StringBuffer buffer=new StringBuffer();
         for (int disjunctIndex=0;disjunctIndex<getNumberOfDisjuncts();disjunctIndex++) {
             if (disjunctIndex!=0)
@@ -90,7 +91,7 @@ public class GroundDisjunction implements Serializable {
                 buffer.append(getArgument(disjunctIndex,1).getNodeID());
             }
             else {
-                buffer.append(dlPredicate.toString());
+                buffer.append(dlPredicate.toString(namespaces));
                 buffer.append('(');
                 for (int argumentIndex=0;argumentIndex<dlPredicate.getArity();argumentIndex++) {
                     if (argumentIndex!=0)
@@ -101,5 +102,8 @@ public class GroundDisjunction implements Serializable {
             }
         }
         return buffer.toString();
+    }
+    public String toString() {
+        return toString(Namespaces.none);
     }
 }
