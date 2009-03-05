@@ -2,6 +2,7 @@
 package org.semanticweb.HermiT;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.ArrayList;
@@ -18,41 +19,37 @@ import java.util.regex.Pattern;
 public class Namespaces implements Serializable {
     private static final long serialVersionUID=-158185482289831766L;
 
-    /** The map of prefixes to the corresponding URI. */
+    public static final Map<String,String> semanticWebNamespaces;
+    static {
+        semanticWebNamespaces=new HashMap<String,String>();
+        semanticWebNamespaces.put("owl","http://www.w3.org/2002/07/owl#");
+        semanticWebNamespaces.put("owlx","http://www.w3.org/2003/05/owl-xml#");
+        semanticWebNamespaces.put("owl11xml","http://www.w3.org/2006/12/owl11-xml#");
+        semanticWebNamespaces.put("xsd","http://www.w3.org/2001/XMLSchema#");
+        semanticWebNamespaces.put("rdf","http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+        semanticWebNamespaces.put("rdfs","http://www.w3.org/2000/01/rdf-schema#");
+        semanticWebNamespaces.put("swrl","http://www.w3.org/2003/11/swrl#");
+        semanticWebNamespaces.put("swrlb","http://www.w3.org/2003/11/swrlb#");
+        semanticWebNamespaces.put("swrlx","http://www.w3.org/2003/11/swrlx#");
+        semanticWebNamespaces.put("ruleml","http://www.w3.org/2003/11/ruleml#");
+    }
+    @SuppressWarnings("serial")
+    public static final Namespaces none=new Namespaces() {
+        protected boolean registerNamespaceRaw(String prefix,String namespace) {
+            throw new UnsupportedOperationException("The well-known empty namespace cannot be modified.");
+        }
+    };
+
     protected final Map<String,String> m_namespaceByPrefix;
-
-    /** The map of URIs to prefixes. */
     protected final Map<String,String> m_prefixByNamespace;
+    protected Pattern m_namespaceMathingPattern;
 
-    // // Little optimization to make abbreviating fast(er):
-    protected Pattern m_prefixMathingPattern;
-
-    /**
-     * Create a new Namespaces object from a set of prefix declarations and a sequence of other Namespaces objects to copy.
-     * 
-     * If multiple prefixes are associated with the same namespace name in `declarations`, then one of the prefices will be chosen arbitrarily as the canonical abbreviation. To bind multiple prefices to the same namespace name but use the specific prefix `p` as the canonical abbreviation, first create a Namespaces object `n` defining all the prefices and then derive a new Namespaces object from `n` and declarations for the canonical prefices.
-     * 
-     * @param prefixDeclarations
-     *            map from prefixes to namespace names
-     * @param sources
-     *            other declarations to include, in order of precedence
-     */
-    public Namespaces(Map<String,String> prefixDeclarations,Namespaces... sources) {
+    public Namespaces() {
         m_namespaceByPrefix=new TreeMap<String,String>();
         m_prefixByNamespace=new TreeMap<String,String>();
-
-        // Copy backwards to preserve precedence:
-        for (int i=sources.length-1;i>=0;--i) {
-            m_namespaceByPrefix.putAll(sources[i].m_namespaceByPrefix);
-            m_prefixByNamespace.putAll(sources[i].m_prefixByNamespace);
-        }
-        // highest precedence are the new declarations:
-        for (Map.Entry<String,String> e : prefixDeclarations.entrySet()) {
-            m_namespaceByPrefix.put(e.getKey(),e.getValue());
-            m_prefixByNamespace.put(e.getValue(),e.getKey());
-        }
-
-        // Build the regex to identify namespaces in URLs:
+        buildNamespaceMatchingPattern();
+    }
+    protected void buildNamespaceMatchingPattern() {
         List<String> list=new ArrayList<String>(m_prefixByNamespace.keySet());
         // Sort the namespaces longest-first:
         Collections.sort(list,new Comparator<String>() {
@@ -62,50 +59,35 @@ public class Namespaces implements Serializable {
         });
         StringBuilder pattern=new StringBuilder("^(");
         boolean didOne=false;
-        for (String prefix : list) {
+        for (String namespace : list) {
             if (didOne)
                 pattern.append("|(");
             else {
                 pattern.append("(");
                 didOne=true;
             }
-            pattern.append(Pattern.quote(prefix));
+            pattern.append(Pattern.quote(namespace));
             pattern.append(")");
         }
         pattern.append(")");
         if (didOne)
-            m_prefixMathingPattern=Pattern.compile(pattern.toString());
+            m_namespaceMathingPattern=Pattern.compile(pattern.toString());
         else
-            m_prefixMathingPattern=null;
+            m_namespaceMathingPattern=null;
     }
-
     /**
-     * Create a new Namespaces object with declarations copied from `sources` (given in order of precedence) and using `defaultNamespace` as (surprisingly enough) a default namespace.
+     * Returns an unmodifiable map from prefixes to their namespaces.
      */
-    public Namespaces(String defaultNamespace,Namespaces... sources) {
-        this(createDefaultPrefixDeclarations(defaultNamespace),sources);
-    }
-    protected static Map<String,String> createDefaultPrefixDeclarations(String defaultNamespace) {
-        Map<String,String> result=new TreeMap<String,String>();
-        result.put("",defaultNamespace);
-        return result;
-    }
-    
-    /**
-     * Return an unmodifiable map from prefixes to their expansions. Note that there is not (currently) an API to determine the "canonical" prefix for a particular namespace name which is associated with multiple prefices. (Having multiple such prefices is probably bad practice, anyway.)
-     */
-    public Map<String,String> getDeclarations() {
+    public Map<String,String> getPrefixDeclarations() {
         return java.util.Collections.unmodifiableMap(m_namespaceByPrefix);
     }
-
     /**
-     * Abbreviate the given string, which must be a full URI.
+     * Abbreviates the given URI.
      */
-    public String idFromUri(String uri) {
-        if (m_prefixMathingPattern!=null) {
-            Matcher matcher=m_prefixMathingPattern.matcher(uri);
+    public String abbreviateURI(String uri) {
+        if (m_namespaceMathingPattern!=null) {
+            Matcher matcher=m_namespaceMathingPattern.matcher(uri);
             if (matcher.find()) {
-                assert m_prefixByNamespace.containsKey(matcher.group(1));
                 String prefix=m_prefixByNamespace.get(matcher.group(1));
                 String localPart=uri.substring(matcher.end());
                 if (prefix==null || prefix.length()==0)
@@ -116,86 +98,141 @@ public class Namespaces implements Serializable {
         }
         return "<"+uri+">";
     }
-
     /**
-     * Expand a full URI from `id`, which is of one of the following forms: `name`, where `name` is an identifier containing no colon characters, `prefix:name`, where `prefix` is a registered namespace prefix, or `&lt;uri&gt;`, where `uri` is a URI.
+     * Expands a full URI from the abbreviated one, which is of one of the following forms:
+     * 'name', where 'name' is an identifier containing no colon characters,
+     * 'prefix:name', where 'prefix' is a registered namespace prefix, or
+     * '&lt;uri&gt;', where 'uri' is a URI.
      */
-    public String uriFromId(String id) {
-        if (id.length()>0 && id.charAt(0)=='<') {
-            if (id.charAt(id.length()-1)!='>') {
-                throw new IllegalArgumentException("The string `"+id+"` is not a valid identifier; URIs must be enclosed in"+" '<' and '>'.");
-            }
-            return id.substring(1,id.length()-1);
+    public String expandAbbreviatedURI(String abbreviation) {
+        if (abbreviation.length()>0 && abbreviation.charAt(0)=='<') {
+            if (abbreviation.charAt(abbreviation.length()-1)!='>')
+                throw new IllegalArgumentException("The string '"+abbreviation+"' is not a valid abbreviation: URIs must be enclosed in '<' and '>'.");
+            return abbreviation.substring(1,abbreviation.length()-1);
         }
         else {
-            int pos=id.indexOf(':');
+            int pos=abbreviation.indexOf(':');
             if (pos!=-1) {
-                String prefix=id.substring(0,pos);
+                String prefix=abbreviation.substring(0,pos);
                 String ns=m_namespaceByPrefix.get(prefix);
                 if (ns==null) {
-                    if (prefix=="http") {
-                        throw new IllegalArgumentException("The URI `"+id+"` must be enclosed in "+"'<' and '>' to be used as an identifier.");
-                    }
-                    throw new IllegalArgumentException("The string `"+prefix+"` is not a registered namespace prefix.");
+                    // Catch the common error of not quoting URIs starting with http:
+                    if (prefix=="http")
+                        throw new IllegalArgumentException("The URI '"+abbreviation+"' must be enclosed in '<' and '>' to be used as an abbreviation.");
+                    throw new IllegalArgumentException("The string '"+prefix+"' is not a registered namespace prefix.");
                 }
-                return ns+id.substring(pos+1);
+                return ns+abbreviation.substring(pos+1);
             }
-            else { // use the default namespace
+            else {
                 String ns=m_namespaceByPrefix.get("");
-                if (ns==null) {
-                    ns=m_namespaceByPrefix.get("");
-                }
-                if (ns==null) {
-                    throw new IllegalArgumentException("The identifier `"+id+"` contains only a local name, but no default "+"namespace has been registered.");
-                }
-                return ns+id;
+                if (ns==null)
+                    throw new IllegalArgumentException("The abbreviation '"+abbreviation+"' contains only a local name, but no default namespace has been registered.");
+                return ns+abbreviation;
             }
         }
     }
-
     /**
-     * Return a set of namespaces with both the contents of `n` and prefixes for all internal concepts, including shorthands for internal nominal concepts based on the declarations from 'n'.
+     * Registers a new prefix with this namespace object. If this prefix 
+     * has already been registered, it is overwritten. If the supplied namepsace
+     * has already been registered with a different prefix, IllegalArgumentException is thrown. 
+     * 
+     * @param prefix                        the prefix to register (can be empty string)
+     * @param namespace                     the namepace for this prefix
+     * @return                              'true' if this namespace object already contained this prefix
      */
-    public static Namespaces withInternalNamespaces(Namespaces n) {
-        Map<String,String> decl=new HashMap<String,String>();
-        decl.put("q","internal:q#");
-        decl.put("nnq","internal:nnq#");
-        decl.put("amq","internal:amq#");
-        decl.put("all","internal:all#");
-        for (Map.Entry<String,String> e : n.getDeclarations().entrySet()) {
-            String prefix="nom";
-            if (e.getKey()!=null && e.getKey().length()>0) {
-                prefix=prefix+"-"+e.getKey();
-            }
-            decl.put(prefix,"internal:nom$"+e.getValue());
-        }
-        return new Namespaces(decl,n);
+    public boolean registerNamespace(String prefix,String namespace) {
+        boolean containsPrefix=registerNamespaceRaw(prefix,namespace);
+        buildNamespaceMatchingPattern();
+        return containsPrefix;
     }
-
+    protected boolean registerNamespaceRaw(String prefix,String namespace) {
+        String existingPrefix=m_prefixByNamespace.get(namespace);
+        if (existingPrefix!=null && !prefix.equals(existingPrefix))
+            throw new IllegalArgumentException("The suppllied namespace has already been registered with prefix '"+existingPrefix+"'.");
+        m_prefixByNamespace.put(namespace,prefix);
+        return m_namespaceByPrefix.put(prefix,namespace)==null;
+    }
+    /**
+     * Registers a default namespace. 
+     * 
+     * @param namespace                     the default namespace
+     * @return                              'true' if this namespace object already contained the default namespace
+     */
+    public boolean registerDefaultNamespace(String namespace) {
+        return registerNamespace("",namespace);
+    }
+    /**
+     * Checks whether the supplied prefix has been registered.
+     */
+    public boolean isPrefixRegistered(String prefix) {
+        return m_namespaceByPrefix.containsKey(prefix);
+    }
+    /**
+     * Checks whether the supplied namespace has been registered.
+     */
+    public boolean isNamespaceRegistered(String namespace) {
+        return m_prefixByNamespace.containsKey(namespace);
+    }
+    /**
+     * Registers HermiT's internal prefixes with this object.
+     * 
+     * @param individualURIs    the collection of URIs used in individuals (used for registering nominal prefixes)
+     * @return                  'true' if this namespace object already contained one of the internal prefixes
+     */
+    public boolean registerInternalNamespaces(Collection<String> individualURIs) {
+        boolean containsPrefix=false;
+        if (registerNamespaceRaw("q","internal:q#"))
+            containsPrefix=true;
+        if (registerNamespaceRaw("nnq","internal:nnq#"))
+            containsPrefix=true;
+        if (registerNamespaceRaw("amq","internal:amq#"))
+            containsPrefix=true;
+        if (registerNamespaceRaw("all","internal:all#"))
+            containsPrefix=true;
+        int individualURIsIndex=1;
+        for (String uri : individualURIs) {
+            if (registerNamespaceRaw("nom"+(individualURIsIndex==1 ? "" : String.valueOf(individualURIsIndex)),"internal:nom#"+uri))
+                containsPrefix=true;
+            individualURIsIndex++;
+        }
+        if (registerNamespaceRaw("nam","internal:nam#"))
+            containsPrefix=true;
+        if (registerNamespaceRaw("grd","internal:grd#"))
+            containsPrefix=true;
+        buildNamespaceMatchingPattern();
+        return containsPrefix;
+    }
+    /**
+     * Registers the well-known Semantic Web namespaces.
+     * 
+     * @return                  'true' if this namespace object already contained one of the well-known prefixes
+     */
+    public boolean reegisterSemanticWebPrefixes() {
+        boolean containsPrefix=false;
+        for (Map.Entry<String,String> entry : semanticWebNamespaces.entrySet())
+            if (registerNamespaceRaw(entry.getKey(),entry.getValue()))
+                containsPrefix=true;
+        buildNamespaceMatchingPattern();
+        return containsPrefix;
+    }
+    /**
+     * Registers all the prefixes from the supplied namespaces object.
+     * 
+     * @param namespaces        the object from which the prefixes are taken
+     * @return                  'true' if this namespace object already contained one of the prefixes from the supplied object
+     */
+    public boolean addPrefixes(Namespaces namespaces) {
+        boolean containsPrefix=false;
+        for (Map.Entry<String,String> entry : namespaces.m_namespaceByPrefix.entrySet())
+            if (registerNamespaceRaw(entry.getKey(),entry.getValue()))
+                containsPrefix=true;
+        buildNamespaceMatchingPattern();
+        return containsPrefix;
+    }
+    /**
+     * Determines whether the supplied URI is in the HermiT's internal namespace.
+     */
     public static boolean isInternalURI(String uri) {
         return uri.startsWith("internal:");
     }
-
-    /**
-     * Commonly-used semantic web namespaces (OWL, RDF, SWRL, etc.)
-     */
-    public static final Namespaces semanticWebNamespaces;
-    static {
-        Map<String,String> decl=new TreeMap<String,String>();
-        decl.put("owl","http://www.w3.org/2002/07/owl#");
-        decl.put("owlx","http://www.w3.org/2003/05/owl-xml#");
-        decl.put("owl11xml","http://www.w3.org/2006/12/owl11-xml#");
-        decl.put("xsd","http://www.w3.org/2001/XMLSchema#");
-        decl.put("rdf","http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-        decl.put("rdfs","http://www.w3.org/2000/01/rdf-schema#");
-        decl.put("swrl","http://www.w3.org/2003/11/swrl#");
-        decl.put("swrlb","http://www.w3.org/2003/11/swrlb#");
-        decl.put("swrlx","http://www.w3.org/2003/11/swrlx#");
-        decl.put("ruleml","http://www.w3.org/2003/11/ruleml#");
-        decl.put("kaon2","http://kaon2.semanticweb.org/internal#");
-        semanticWebNamespaces=new Namespaces(decl);
-    }
-
-    public static final Namespaces none=new Namespaces(new TreeMap<String,String>());
-
 }

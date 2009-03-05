@@ -61,13 +61,13 @@ public class ClausificationTest extends AbstractOWLOntologyTest {
         OWLClausification clausifier=new OWLClausification(new Configuration());
         DLClause clause=clausifier.clausifyKey(OWLHasKeyDummy.getDemoKey());
         Set<String> bAtoms=new HashSet<String>();
-        bAtoms.add("<internal:Named>(X)");
-        bAtoms.add("<internal:Named>(X2)");
+        bAtoms.add("<internal:nam#Named>(X)");
+        bAtoms.add("<internal:nam#Named>(X2)");
         bAtoms.add("<int:C_test>(X)");
         bAtoms.add("<int:C_test>(X2)");
         bAtoms.add("<int:r_test>(X,Y0)");
         bAtoms.add("<int:r_test>(X2,Y0)");
-        bAtoms.add("<internal:Named>(Y0)");
+        bAtoms.add("<internal:nam#Named>(Y0)");
         bAtoms.add("<int:dp_test>(X,Y1)");
         bAtoms.add("<int:dp_test>(X2,Y2)");
         assertTrue(bAtoms.size()==clause.getBodyLength());
@@ -113,7 +113,10 @@ public class ClausificationTest extends AbstractOWLOntologyTest {
         Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
         DLOntology dlOntology=clausifier.clausify(m_ontologyManager,m_ontology,noDescriptionGraphs);
         Set<String> actualStrings=new HashSet<String>();
-        Namespaces namespaces=Namespaces.withInternalNamespaces(new Namespaces(m_ontology.getURI()+"#",Namespaces.semanticWebNamespaces));
+        Namespaces namespaces=new Namespaces();
+        namespaces.reegisterSemanticWebPrefixes();
+        namespaces.registerInternalNamespaces(Collections.singleton(m_ontology.getURI()+"#"));
+        namespaces.registerDefaultNamespace(m_ontology.getURI()+"#");
         for (DLClause dlClause : dlOntology.getDLClauses())
             actualStrings.add(dlClause.toString(namespaces));
         for (org.semanticweb.HermiT.model.Atom atom : dlOntology.getPositiveFacts())

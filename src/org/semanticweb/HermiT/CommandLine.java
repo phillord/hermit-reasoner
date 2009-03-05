@@ -10,7 +10,6 @@ import java.text.BreakIterator;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -177,7 +176,7 @@ public class CommandLine {
     static protected class DumpNamespacesAction implements Action {
         public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
             output.println("Namespaces:");
-            for (Map.Entry<String,String> e : namespaces.getDeclarations().entrySet()) {
+            for (Map.Entry<String,String> e : namespaces.getPrefixDeclarations().entrySet()) {
                 output.println("\t"+e.getKey()+"\t"+e.getValue());
             }
         }
@@ -249,7 +248,7 @@ public class CommandLine {
         }
         public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
             status.log(2,"Checking satisfiability of '"+conceptName+"'");
-            String conceptUri=namespaces.uriFromId(conceptName);
+            String conceptUri=namespaces.expandAbbreviatedURI(conceptName);
             if (!hermit.isClassNameDefined(conceptUri)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
             }
@@ -267,7 +266,7 @@ public class CommandLine {
         }
         public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
             status.log(2,"Finding supers of '"+conceptName+"'");
-            String conceptUri=namespaces.uriFromId(conceptName);
+            String conceptUri=namespaces.expandAbbreviatedURI(conceptName);
             if (!hermit.isClassNameDefined(conceptUri)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
             }
@@ -275,14 +274,14 @@ public class CommandLine {
             if (all) {
                 output.println("All super-classes of '"+conceptName+"':");
                 for (String sup : pos.getAncestors()) {
-                    output.println("\t"+namespaces.idFromUri(sup));
+                    output.println("\t"+namespaces.abbreviateURI(sup));
                 }
             }
             else {
                 output.println("Direct super-classes of '"+conceptName+"':");
                 for (HierarchyPosition<String> sup : pos.getParentPositions()) {
                     for (String name : sup.getEquivalents()) {
-                        output.println("\t"+namespaces.idFromUri(name));
+                        output.println("\t"+namespaces.abbreviateURI(name));
                     }
                 }
             }
@@ -298,19 +297,19 @@ public class CommandLine {
         }
         public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
             status.log(2,"Finding supers of '"+roleName+"'");
-            String roleUri=namespaces.uriFromId(roleName);
+            String roleUri=namespaces.expandAbbreviatedURI(roleName);
             HierarchyPosition<String> pos=hermit.getPropertyHierarchyPosition(roleUri);
             if (all) {
                 output.println("All super-properties of '"+roleName+"':");
                 for (String sup : pos.getAncestors()) {
-                    output.println("\t"+namespaces.idFromUri(sup));
+                    output.println("\t"+namespaces.abbreviateURI(sup));
                 }
             }
             else {
                 output.println("Direct super-properties of '"+roleName+"':");
                 for (HierarchyPosition<String> sup : pos.getParentPositions()) {
                     for (String name : sup.getEquivalents()) {
-                        output.println("\t"+namespaces.idFromUri(name));
+                        output.println("\t"+namespaces.abbreviateURI(name));
                     }
                 }
             }
@@ -326,7 +325,7 @@ public class CommandLine {
         }
         public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
             status.log(2,"Finding subs of '"+conceptName+"'");
-            String conceptUri=namespaces.uriFromId(conceptName);
+            String conceptUri=namespaces.expandAbbreviatedURI(conceptName);
             if (!hermit.isClassNameDefined(conceptUri)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
             }
@@ -334,14 +333,14 @@ public class CommandLine {
             if (all) {
                 output.println("All sub-classes of '"+conceptName+"':");
                 for (String sub : pos.getDescendants()) {
-                    output.println("\t"+namespaces.idFromUri(sub));
+                    output.println("\t"+namespaces.abbreviateURI(sub));
                 }
             }
             else {
                 output.println("Direct sub-classes of '"+conceptName+"':");
                 for (HierarchyPosition<String> sub : pos.getChildPositions()) {
                     for (String name : sub.getEquivalents()) {
-                        output.println("\t"+namespaces.idFromUri(name));
+                        output.println("\t"+namespaces.abbreviateURI(name));
                     }
                 }
             }
@@ -357,19 +356,19 @@ public class CommandLine {
         }
         public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
             status.log(2,"Finding subs of '"+roleName+"'");
-            String roleUri=namespaces.uriFromId(roleName);
+            String roleUri=namespaces.expandAbbreviatedURI(roleName);
             HierarchyPosition<String> pos=hermit.getPropertyHierarchyPosition(roleUri);
             if (all) {
                 output.println("All sub-properties of '"+roleName+"':");
                 for (String sup : pos.getDescendants()) {
-                    output.println("\t"+namespaces.idFromUri(sup));
+                    output.println("\t"+namespaces.abbreviateURI(sup));
                 }
             }
             else {
                 output.println("Direct sub-properties of '"+roleName+"':");
                 for (HierarchyPosition<String> sup : pos.getChildPositions()) {
                     for (String name : sup.getEquivalents()) {
-                        output.println("\t"+namespaces.idFromUri(name));
+                        output.println("\t"+namespaces.abbreviateURI(name));
                     }
                 }
             }
@@ -383,14 +382,14 @@ public class CommandLine {
         }
         public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
             status.log(2,"Finding equivalents of '"+conceptName+"'");
-            String conceptUri=namespaces.uriFromId(conceptName);
+            String conceptUri=namespaces.expandAbbreviatedURI(conceptName);
             if (!hermit.isClassNameDefined(conceptUri)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
             }
             HierarchyPosition<String> pos=hermit.getClassHierarchyPosition(conceptUri);
             output.println("Classes equivalent to '"+conceptName+"':");
             for (String equiv : pos.getEquivalents()) {
-                output.println("\t"+namespaces.idFromUri(equiv));
+                output.println("\t"+namespaces.abbreviateURI(equiv));
             }
         }
     }
@@ -402,11 +401,11 @@ public class CommandLine {
         }
         public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
             status.log(2,"Finding equivalents of '"+roleName+"'");
-            String roleUri=namespaces.uriFromId(roleName);
+            String roleUri=namespaces.expandAbbreviatedURI(roleName);
             HierarchyPosition<String> pos=hermit.getPropertyHierarchyPosition(roleUri);
             output.println("Properties equivalent to '"+roleName+"':");
             for (String equiv : pos.getEquivalents()) {
-                output.println("\t"+namespaces.idFromUri(equiv));
+                output.println("\t"+namespaces.abbreviateURI(equiv));
             }
         }
     }
@@ -501,7 +500,7 @@ public class CommandLine {
         try {
             int verbosity=1;
             boolean ignoreOntologyNamespaces=false;
-            Map<String,String> newNamespaces=new HashMap<String,String>();
+            Namespaces namespaces=new Namespaces();
             PrintWriter output=new PrintWriter(System.out);
             Collection<Action> actions=new LinkedList<Action>();
             URI base;
@@ -663,12 +662,12 @@ public class CommandLine {
                         if (eqIndex==-1) {
                             throw new IllegalArgumentException("the namespace definition '"+arg+"' is not of the form NS=URI.");
                         }
-                        newNamespaces.put(arg.substring(0,eqIndex),arg.substring(eqIndex+1));
+                        namespaces.registerNamespace(arg.substring(0,eqIndex),arg.substring(eqIndex+1));
                     }
                         break;
                     case kDefaultNamespace: {
                         String arg=g.getOptarg();
-                        newNamespaces.put("",arg);
+                        namespaces.registerDefaultNamespace(arg);
                     }
                         break;
                     case kBase: {
@@ -786,7 +785,8 @@ public class CommandLine {
                     Reasoner hermit=new Reasoner(config,ont);
                     long loadTime=System.currentTimeMillis()-startTime;
                     status.log(2,"Loaded in "+String.valueOf(loadTime)+" msec.");
-                    Namespaces namespaces=(ignoreOntologyNamespaces ? new Namespaces(newNamespaces) : new Namespaces(newNamespaces,hermit.getNamespaces()));
+                    if (!ignoreOntologyNamespaces)
+                        namespaces.addPrefixes(hermit.getNamespaces());
                     for (Action action : actions) {
                         status.log(2,"Doing action...");
                         startTime=System.currentTimeMillis();

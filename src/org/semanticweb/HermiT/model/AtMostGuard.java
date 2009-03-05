@@ -14,7 +14,7 @@ public class AtMostGuard extends AtomicConcept {
     protected final AtomicConcept m_toAtomicConcept;
     
     protected AtMostGuard(int cardinality,Role onRole,AtomicConcept toAtomicConcept) {
-        super("internal:(atMost "+cardinality+" "+onRole.toString()+" "+toAtomicConcept.getURI()+")");
+        super("internal:grd#(atMost "+cardinality+" "+onRole.toString()+" "+toAtomicConcept.getURI()+")");
         m_cardinality=cardinality;
         m_onRole=onRole;
         m_toAtomicConcept=toAtomicConcept;

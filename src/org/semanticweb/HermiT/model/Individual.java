@@ -24,7 +24,7 @@ public class Individual extends Term {
         return s_interningManager.intern(this);
     }
     public String toString(Namespaces namespaces) {
-        return namespaces.idFromUri(m_uri);
+        return namespaces.abbreviateURI(m_uri);
     }
 
     protected static InterningManager<Individual> s_interningManager=new InterningManager<Individual>() {

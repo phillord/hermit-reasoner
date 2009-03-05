@@ -21,7 +21,7 @@ public class AtomicConcept extends LiteralConcept implements DLPredicate {
         return 1;
     }
     public String toString(Namespaces namespaces) {
-        return namespaces.idFromUri(m_uri);
+        return namespaces.abbreviateURI(m_uri);
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);
@@ -54,5 +54,5 @@ public class AtomicConcept extends LiteralConcept implements DLPredicate {
     public static final AtomicConcept THING=create("http://www.w3.org/2002/07/owl#Thing");
     public static final AtomicConcept NOTHING=create("http://www.w3.org/2002/07/owl#Nothing");
     public static final AtomicConcept RDFS_LITERAL=create("http://www.w3.org/2000/01/rdf-schema#Literal");
-    public static final AtomicConcept INTERNAL_NAMED=create("internal:Named");
+    public static final AtomicConcept INTERNAL_NAMED=create("internal:nam#Named");
 }

@@ -465,7 +465,7 @@ public class OWLClausification implements Serializable {
         }
 
         protected AtomicConcept getConceptForNominal(OWLIndividual individual) {
-            AtomicConcept result=AtomicConcept.create("internal:nom$"+individual.getURI().toString());
+            AtomicConcept result=AtomicConcept.create("internal:nom#"+individual.getURI().toString());
             m_positiveFacts.add(Atom.create(result,getIndividual(individual)));
             return result;
         }

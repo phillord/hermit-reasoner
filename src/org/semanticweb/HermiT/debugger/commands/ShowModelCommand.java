@@ -36,7 +36,7 @@ public class ShowModelCommand extends AbstractCommand implements ICommand {
                 ExtensionTable.Retrieval retrieval=extensionTable.createRetrieval(bindings,ExtensionTable.View.TOTAL);
                 retrieval.getBindingsBuffer()[0]=dlPredicate;
                 loadFacts(facts,retrieval);
-                title="Assertions containing the predicate '"+debugger.getNamespaces().idFromUri(dlPredicate.toString())+"'.";
+                title="Assertions containing the predicate '"+debugger.getNamespaces().abbreviateURI(dlPredicate.toString())+"'.";
             }
             else {
                 int nodeID;

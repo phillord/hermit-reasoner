@@ -212,7 +212,7 @@ public class DataConstant implements Comparable<DataConstant>, Serializable {
         if (datatype == null) return "";
         StringBuffer buffer = new StringBuffer();
         buffer.append("(");
-        buffer.append(namespaces.idFromUri(datatype.getURIAsString()));
+        buffer.append(namespaces.abbreviateURI(datatype.getURIAsString()));
         buffer.append(" " + value);
         if (lang != "") buffer.append("@" + lang);
         buffer.append(")");

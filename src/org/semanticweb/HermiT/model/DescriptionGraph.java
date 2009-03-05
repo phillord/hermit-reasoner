@@ -58,7 +58,7 @@ public class DescriptionGraph implements DLPredicate,Serializable {
         }
     }
     public String toString(Namespaces ns) {
-        return ns.idFromUri(m_name);
+        return ns.abbreviateURI(m_name);
     }
     public String toString() {
         return toString(Namespaces.none);

@@ -236,11 +236,11 @@ public class Debugger extends TableauMonitorForwarder {
         else if ("!=".equals(predicate))
             return Inequality.INSTANCE;
         else if (predicate.startsWith("+"))
-            return AtomicConcept.create(m_namespaces.uriFromId(predicate.substring(1)));
+            return AtomicConcept.create(m_namespaces.expandAbbreviatedURI(predicate.substring(1)));
         else if (predicate.startsWith("-"))
-            return AtomicRole.createAtomicRole(m_namespaces.uriFromId(predicate.substring(1)));
+            return AtomicRole.createAtomicRole(m_namespaces.expandAbbreviatedURI(predicate.substring(1)));
         else if (predicate.startsWith("$")) {
-            String graphName=m_namespaces.uriFromId(predicate.substring(1));
+            String graphName=m_namespaces.expandAbbreviatedURI(predicate.substring(1));
             for (DescriptionGraph descriptionGraph : m_tableau.getDLOntology().getAllDescriptionGraphs())
                 if (graphName.equals(descriptionGraph.getName()))
                     return descriptionGraph;
@@ -484,23 +484,23 @@ public class Debugger extends TableauMonitorForwarder {
     }
     public void isSatisfiableStarted(AtomicConcept atomicConcept) {
         super.isSatisfiableStarted(atomicConcept);
-        m_output.println("Will check whether '"+m_namespaces.idFromUri(atomicConcept.getURI())+"' is satisfiable.");
+        m_output.println("Will check whether '"+m_namespaces.abbreviateURI(atomicConcept.getURI())+"' is satisfiable.");
         mainLoop();
     }
     public void isSatisfiableFinished(AtomicConcept atomicConcept,boolean result) {
         super.isSatisfiableFinished(atomicConcept,result);
-        m_output.println("'"+m_namespaces.idFromUri(atomicConcept.getURI())+"' is "+(result ? "" : "not ")+"satisfiable.");
+        m_output.println("'"+m_namespaces.abbreviateURI(atomicConcept.getURI())+"' is "+(result ? "" : "not ")+"satisfiable.");
         mainLoop();
         dispose();
     }
     public void isSubsumedByStarted(AtomicConcept subconcept,AtomicConcept superconcept) {
         super.isSubsumedByStarted(subconcept,superconcept);
-        m_output.println("Will check whether '"+m_namespaces.idFromUri(subconcept.getURI())+"' is subsumed by '"+m_namespaces.idFromUri(superconcept.getURI())+"'.");
+        m_output.println("Will check whether '"+m_namespaces.abbreviateURI(subconcept.getURI())+"' is subsumed by '"+m_namespaces.abbreviateURI(superconcept.getURI())+"'.");
         mainLoop();
     }
     public void isSubsumedByFinished(AtomicConcept subconcept,AtomicConcept superconcept,boolean result) {
         super.isSubsumedByFinished(subconcept,superconcept,result);
-        m_output.println("'"+m_namespaces.idFromUri(subconcept.getURI())+"' is "+(result ? "" : "not ")+"subsumed by '"+m_namespaces.idFromUri(superconcept.getURI())+"'.");
+        m_output.println("'"+m_namespaces.abbreviateURI(subconcept.getURI())+"' is "+(result ? "" : "not ")+"subsumed by '"+m_namespaces.abbreviateURI(superconcept.getURI())+"'.");
         mainLoop();
         dispose();
     }
@@ -517,12 +517,12 @@ public class Debugger extends TableauMonitorForwarder {
     }
     public void isInstanceOfStarted(AtomicConcept concept,Individual individual) {
         super.isInstanceOfStarted(concept,individual);
-        m_output.println("Will check whether '"+m_namespaces.idFromUri(concept.getURI())+"' is an instance of '"+m_namespaces.idFromUri(individual.getURI())+"'.");
+        m_output.println("Will check whether '"+m_namespaces.abbreviateURI(concept.getURI())+"' is an instance of '"+m_namespaces.abbreviateURI(individual.getURI())+"'.");
         mainLoop();
     }
     public void isInstanceOfFinished(AtomicConcept concept,Individual individual,boolean result) {
         super.isInstanceOfFinished(concept,individual,result);
-        m_output.println("'"+m_namespaces.idFromUri(concept.getURI())+"' is "+(result ? "" : "not ")+"an instance of '"+m_namespaces.idFromUri(individual.getURI())+"'.");
+        m_output.println("'"+m_namespaces.abbreviateURI(concept.getURI())+"' is "+(result ? "" : "not ")+"an instance of '"+m_namespaces.abbreviateURI(individual.getURI())+"'.");
         mainLoop();
         dispose();
     }

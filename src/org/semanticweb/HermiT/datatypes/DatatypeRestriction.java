@@ -42,7 +42,7 @@ public abstract class DatatypeRestriction
         MIN_INCLUSIVE, MIN_EXCLUSIVE, MAX_INCLUSIVE, MAX_EXCLUSIVE 
     };
     
-    protected static final Map<String, String> uris = Namespaces.semanticWebNamespaces.getDeclarations();
+    protected static final Map<String, String> uris = Namespaces.semanticWebNamespaces;
     
     /**
      * The datatypes supported by HermiT together with their URIs and a position 
@@ -283,7 +283,7 @@ public abstract class DatatypeRestriction
         buffer.append("(");
         if (datatype != null && datatype.getURI() != null) {
             if (isNegated) buffer.append("not ");
-            buffer.append(namespaces.idFromUri(datatype.getURIAsString()));
+            buffer.append(namespaces.abbreviateURI(datatype.getURIAsString()));
         }
         buffer.append(printExtraInfo(namespaces));
         boolean firstRun = true;

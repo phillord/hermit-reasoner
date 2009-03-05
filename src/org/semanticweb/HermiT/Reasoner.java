@@ -117,7 +117,7 @@ public class Reasoner implements Serializable {
         OWLClausification clausifier=new OWLClausification(configuration);
         m_dlOntology=clausifier.clausifyWithKeys(ontologyManager,ontology,descriptionGraphs,keys);
         m_configuration=configuration;
-        m_namespaces=createNamespaces(m_dlOntology.getOntologyURI());
+        m_namespaces=createNamespaces(m_dlOntology);
         m_tableau=createTableau(m_configuration,m_dlOntology,m_namespaces);
         m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
         m_classifier=new Classifier<AtomicConcept>(new TableauFunc(m_subsumptionChecker));
@@ -135,7 +135,7 @@ public class Reasoner implements Serializable {
             keys=Collections.emptySet();
         m_configuration=configuration;
         m_dlOntology=clausifier.clausifyWithKeys(ontologyManager,ontology,descriptionGraphs,keys);
-        m_namespaces=createNamespaces(m_dlOntology.getOntologyURI());
+        m_namespaces=createNamespaces(m_dlOntology);
         m_tableau=createTableau(m_configuration,m_dlOntology,m_namespaces);
         m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
         m_classifier=new Classifier<AtomicConcept>(new TableauFunc(m_subsumptionChecker));
@@ -153,7 +153,7 @@ public class Reasoner implements Serializable {
         Set<DescriptionGraph> dgs = Collections.emptySet();
         m_configuration=configuration;
         m_dlOntology=clausifier.clausifyImportClosure(ontologyManger.getOWLDataFactory(),ontologyURI,importClosure,dgs,keys);
-        m_namespaces=createNamespaces(m_dlOntology.getOntologyURI());
+        m_namespaces=createNamespaces(m_dlOntology);
         m_tableau=createTableau(m_configuration,m_dlOntology,m_namespaces);
         m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
         m_classifier=new Classifier<AtomicConcept>(new TableauFunc(m_subsumptionChecker));
@@ -162,7 +162,7 @@ public class Reasoner implements Serializable {
     public Reasoner(Configuration configuration,DLOntology dlOntology) {
         m_configuration=configuration;
         m_dlOntology=dlOntology;
-        m_namespaces=createNamespaces(m_dlOntology.getOntologyURI());
+        m_namespaces=createNamespaces(m_dlOntology);
         m_tableau=createTableau(m_configuration,m_dlOntology,m_namespaces);
         m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
         m_classifier=new Classifier<AtomicConcept>(new TableauFunc(m_subsumptionChecker));
@@ -810,11 +810,48 @@ public class Reasoner implements Serializable {
         }
     }
     
-    protected static Namespaces createNamespaces(String ontologyURI) {
-        Map<String,String> namespaceDecl=new HashMap<String,String>();
-        namespaceDecl.put("",ontologyURI+"#");
-        return Namespaces.withInternalNamespaces(new Namespaces(namespaceDecl,Namespaces.semanticWebNamespaces));
-
+    protected static Namespaces createNamespaces(DLOntology dlOntology) {
+        Set<String> namespaceURIs=new HashSet<String>();
+        for (AtomicConcept concept : dlOntology.getAllAtomicConcepts())
+            addURI(concept.getURI(),namespaceURIs);
+        for (AtomicRole atomicRole : dlOntology.getAllAtomicDataRoles())
+            addURI(atomicRole.getURI(),namespaceURIs);
+        for (AtomicRole atomicRole : dlOntology.getAllAtomicObjectRoles())
+            addURI(atomicRole.getURI(),namespaceURIs);
+        for (Individual individual : dlOntology.getAllIndividuals())
+            addURI(individual.getURI(),namespaceURIs);
+        Namespaces namespaces=new Namespaces();
+        namespaces.reegisterSemanticWebPrefixes();
+        namespaces.registerInternalNamespaces(namespaceURIs);
+        namespaces.registerDefaultNamespace(dlOntology.getOntologyURI()+"#");
+        int prefixIndex=0;
+        for (String namespace : namespaceURIs)
+            if (!namespaces.isNamespaceRegistered(namespace)) {
+                String prefix=getPrefixForIndex(prefixIndex);
+                while (namespaces.isPrefixRegistered(prefix))
+                    prefix=getPrefixForIndex(++prefixIndex);
+                namespaces.registerNamespace(prefix,namespace);
+                ++prefixIndex;
+            }
+        return namespaces;
+    }
+    protected static String getPrefixForIndex(int prefixIndex) {
+        StringBuffer buffer=new StringBuffer();
+        while (prefixIndex>=26) {
+            buffer.insert(0,(char)(((int)'a')+(prefixIndex % 26)));
+            prefixIndex/=26;
+        }
+        buffer.insert(0,(char)(((int)'a')+prefixIndex));
+        return buffer.toString();
+    }
+    protected static void addURI(String uri,Set<String> namespaceURIs) {
+        if (!Namespaces.isInternalURI(uri)) {
+            int lastHash=uri.lastIndexOf('#');
+            if (lastHash!=-1) {
+                String namespaceURI=uri.substring(0,lastHash+1);
+                namespaceURIs.add(namespaceURI);
+            }
+        }
     }
     
     // Loading and saving the Reasoner object

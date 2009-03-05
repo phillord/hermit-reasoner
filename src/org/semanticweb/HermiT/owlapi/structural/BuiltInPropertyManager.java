@@ -54,7 +54,7 @@ public class BuiltInPropertyManager {
         OWLObjectProperty topObjectProperty=m_factory.getOWLObjectProperty(URI.create(AtomicRole.TOP_OBJECT_ROLE.getURI()));
         axioms.m_transitiveObjectProperties.add(topObjectProperty);
         axioms.m_objectPropertyInclusions.add(new OWLObjectPropertyExpression[] { topObjectProperty,topObjectProperty.getInverseProperty() });
-        OWLIndividual newIndividual=m_factory.getOWLIndividual(URI.create("internal:topIndividual"));
+        OWLIndividual newIndividual=m_factory.getOWLIndividual(URI.create("internal:nam#topIndividual"));
         OWLObjectOneOf oneOfNewIndividual=m_factory.getOWLObjectOneOf(newIndividual);
         OWLObjectSomeRestriction hasTopNewIndividual=m_factory.getOWLObjectSomeRestriction(topObjectProperty,oneOfNewIndividual);
         axioms.m_conceptInclusions.add(new OWLDescription[] { hasTopNewIndividual });

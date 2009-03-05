@@ -14,9 +14,10 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.HashSet;
 import java.util.TreeSet;
+import java.util.Map;
 
 import org.semanticweb.HermiT.Namespaces;
 import org.semanticweb.HermiT.datatypes.DataRange;
@@ -418,6 +419,18 @@ public class DLOntology implements Serializable {
 
     public String toString(Namespaces ns) {
         StringBuffer stringBuffer=new StringBuffer();
+        stringBuffer.append("Namespaces: [");
+        stringBuffer.append(CRLF);
+        for (Map.Entry<String,String> entry : ns.getPrefixDeclarations().entrySet()) {
+            stringBuffer.append("  ");
+            stringBuffer.append(entry.getKey());
+            stringBuffer.append(" = <");
+            stringBuffer.append(entry.getValue());
+            stringBuffer.append('>');
+            stringBuffer.append(CRLF);
+        }
+        stringBuffer.append("]");
+        stringBuffer.append(CRLF);
         stringBuffer.append("DL-clauses: [");
         stringBuffer.append(CRLF);
         for (DLClause dlClause : m_dlClauses) {

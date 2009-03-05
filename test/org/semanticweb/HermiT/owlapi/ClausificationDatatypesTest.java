@@ -273,7 +273,10 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
         DLOntology dlOntology=clausifier.clausify(m_ontologyManager,m_ontology,noDescriptionGraphs);
         Set<String> actualStrings=new HashSet<String>();
-        Namespaces namespaces=Namespaces.withInternalNamespaces(new Namespaces(m_ontology.getURI()+"#",Namespaces.semanticWebNamespaces));
+        Namespaces namespaces=new Namespaces();
+        namespaces.reegisterSemanticWebPrefixes();
+        namespaces.registerInternalNamespaces(Collections.singleton(m_ontology.getURI()+"#"));
+        namespaces.registerDefaultNamespace(m_ontology.getURI()+"#");
         for (DLClause dlClause : dlOntology.getDLClauses())
             actualStrings.add(dlClause.toString(namespaces));
         for (org.semanticweb.HermiT.model.Atom atom : dlOntology.getPositiveFacts())
