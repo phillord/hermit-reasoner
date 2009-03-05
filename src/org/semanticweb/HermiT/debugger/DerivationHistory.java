@@ -70,12 +70,16 @@ public class DerivationHistory extends TableauMonitorAdapter {
         m_derivations.pop();
     }
     public void clashDetected(Object[]... causes) {
-        DerivationPremise[] atoms=new DerivationPremise[causes.length];
-        for (int index=0;index<causes.length;index++)
-            atoms[index]=new DerivationPremise(getAtom(causes[index]));
-        m_derivations.push(new ClashDetection(atoms));
-        addAtom(EMPTY_TUPLE);
-        m_derivations.pop();
+        if (causes==null)
+            addAtom(EMPTY_TUPLE);
+        else {
+            DerivationPremise[] atoms=new DerivationPremise[causes.length];
+            for (int index=0;index<causes.length;index++)
+                atoms[index]=new DerivationPremise(getAtom(causes[index]));
+            m_derivations.push(new ClashDetection(atoms));
+            addAtom(EMPTY_TUPLE);
+            m_derivations.pop();
+        }
     }
     public void tupleRemoved(Object[] tuple) {
         m_derivedAtoms.remove(new AtomKey(tuple));

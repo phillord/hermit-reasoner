@@ -348,7 +348,7 @@ public class DLClauseEvaluator implements Serializable {
         }
         public int execute(int programCounter) {
             m_extensionManager.setClash(m_dependencySet);
-            m_tableauMonitor.clashDetected();
+            m_tableauMonitor.clashDetected((Object[][])null);
             return programCounter+1;
         }
         public String toString() {
