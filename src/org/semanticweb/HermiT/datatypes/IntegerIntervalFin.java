@@ -5,6 +5,7 @@
 package org.semanticweb.HermiT.datatypes;
 
 import java.math.BigInteger;
+import java.io.Serializable;
 
 /**
  * The class represents integer intervals and if lower or upper bounds are 
@@ -13,7 +14,7 @@ import java.math.BigInteger;
  * 
  * @author BGlimm
  */
-public class IntegerIntervalFin implements IntegerInterval {
+public class IntegerIntervalFin implements IntegerInterval,Serializable {
 
     private static final long serialVersionUID = -2266620919096621873L;
     
