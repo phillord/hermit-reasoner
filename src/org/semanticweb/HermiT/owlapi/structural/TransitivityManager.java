@@ -108,7 +108,7 @@ public class TransitivityManager {
         OWLDescription replacement=m_replacedDescriptions.get(objectAll);
         if (replacement==null) {
             replacement=m_factory.getOWLClass(URI.create("internal:all#"+m_replacedDescriptions.size()));
-            if (objectAll.getFiller() instanceof OWLObjectComplementOf)
+            if (objectAll.getFiller() instanceof OWLObjectComplementOf || objectAll.getFiller().equals(m_factory.getOWLNothing()))
                 replacement=replacement.getComplementNNF();
             m_replacedDescriptions.put(objectAll,replacement);
         }
