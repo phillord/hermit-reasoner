@@ -173,7 +173,7 @@ public final class ExistentialExpansionManager implements Serializable {
             while (!retrieval.afterLast()) {
                 Node toNode=(Node)tupleBuffer[toNodeIndex];
                 if (m_extensionManager.containsConceptAssertion(toConcept,toNode) && !toNode.isIndirectlyBlocked()) {
-                    if (forNode==toNode || forNode.getParent()==toNode || toNode.getParent()==forNode)
+                    if (forNode==toNode || forNode.getParent()==toNode || toNode.getParent()==forNode || toNode.getNodeType()==NodeType.ROOT_NODE || toNode.getNodeType()==NodeType.NAMED_NODE)
                         return SatType.PERMANENTLY_SATISFIED;
                     else
                         return SatType.CURRENTLY_SATISFIED;
