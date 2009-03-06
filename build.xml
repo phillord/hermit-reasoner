@@ -164,6 +164,7 @@
     <target name="test" depends="compiletest">
         <java classname="org.semanticweb.HermiT.AllTests" fork="true">
             <jvmarg value="-enableassertions"/>
+            <jvmarg value="-Xmx700M"/>
             <classpath>
                 <pathelement location="${testclassdir}"/>
             </classpath>
