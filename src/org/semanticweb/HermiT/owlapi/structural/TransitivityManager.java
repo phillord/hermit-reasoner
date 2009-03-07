@@ -64,15 +64,15 @@ public class TransitivityManager {
         for (OWLDescription[] inclusion : axioms.m_conceptInclusions)
             for (int index=0;index<inclusion.length;index++)
                 inclusion[index]=replaceDescriptionIfNecessary(inclusion[index]);
-        for (Map.Entry<OWLObjectAllRestriction,OWLDescription> replacement : m_replacedDescriptions.entrySet()) {
-            axioms.m_conceptInclusions.add(new OWLDescription[] { replacement.getValue().getComplementNNF(),replacement.getKey() });
-            OWLObjectPropertyExpression objectProperty=replacement.getKey().getProperty();
-            for (OWLObjectPropertyExpression transitiveSubObjectProperty : getTransitiveSubObjectProperties(objectProperty)) {
-                OWLObjectAllRestriction consequentAll=m_factory.getOWLObjectAllRestriction(transitiveSubObjectProperty,replacement.getKey().getFiller());
+        for (Map.Entry<OWLObjectAllRestriction,OWLDescription> mapping : m_replacedDescriptions.entrySet()) {
+            OWLObjectAllRestriction replacedConcept=mapping.getKey();
+            OWLDescription replacement=mapping.getValue();
+            axioms.m_conceptInclusions.add(new OWLDescription[] { replacement.getComplementNNF(),replacedConcept });
+            for (OWLObjectPropertyExpression transitiveSubObjectProperty : getTransitiveSubObjectProperties(replacedConcept.getProperty())) {
+                OWLObjectAllRestriction consequentAll=m_factory.getOWLObjectAllRestriction(transitiveSubObjectProperty,replacedConcept.getFiller());
                 OWLDescription consequentReplacement=m_replacedDescriptions.get(consequentAll);
-                assert consequentReplacement!=null;
-                OWLObjectAllRestriction forallConsequentReplacement=m_factory.getOWLObjectAllRestriction(transitiveSubObjectProperty,consequentReplacement);
-                axioms.m_conceptInclusions.add(new OWLDescription[] { replacement.getValue().getComplementNNF(),forallConsequentReplacement });
+                OWLObjectAllRestriction allConsequentReplacement=m_factory.getOWLObjectAllRestriction(transitiveSubObjectProperty,consequentReplacement);
+                axioms.m_conceptInclusions.add(new OWLDescription[] { replacement.getComplementNNF(),allConsequentReplacement });
             }
         }
         m_replacedDescriptions.clear();
