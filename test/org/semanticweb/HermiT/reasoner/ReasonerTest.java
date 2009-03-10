@@ -21,7 +21,51 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
+
+    public void testWidmann1() throws Exception {
+        String axioms = "SubClassOf(owl:Thing ObjectSomeValuesFrom(a p)) "
+                + "SubClassOf(owl:Thing ObjectSomeValuesFrom(b ObjectAllValuesFrom(a ObjectSomeValuesFrom(a ObjectComplementOf(p))))) "
+                + "InverseObjectProperties(a a-)"
+                + "InverseObjectProperties(b b-)"
+                + "SubClassOf(owl:Thing ObjectAllValuesFrom(a- ObjectAllValuesFrom(a- ObjectAllValuesFrom(b ObjectAllValuesFrom(b- p))))) ";
+        loadOntologyWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
     
+    public void testWidmann2() throws Exception {
+        // <r>q; 
+        // <r->[r-][r][r][r]p 
+        String axioms = "SubClassOf(owl:Thing ObjectSomeValuesFrom(r q)) "
+            + "InverseObjectProperties(r r-)"
+            + "SubClassOf(owl:Thing ObjectSomeValuesFrom(r- ObjectAllValuesFrom(r- ObjectAllValuesFrom(r ObjectAllValuesFrom(r ObjectAllValuesFrom(r p)))))) ";
+        loadOntologyWithAxioms(axioms);
+        
+        OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
+        OWLDescription p = df.getOWLClass(URI.create("file:/c/test.owl#p"));
+        OWLObjectProperty invr = df.getOWLObjectProperty(URI.create("file:/c/test.owl#r-"));
+
+        OWLDescription desc = df.getOWLObjectSomeRestriction(invr, df.getOWLObjectComplementOf(p));
+        assertSatisfiable(desc,false);
+    }
+    
+    public void testWidmann3() throws Exception {
+        // <r-><r>[r]<r->~p; 
+        // <r-><r>p; 
+        // <r->[r-]<r-><r->[r][r]p; 
+        // [r]<r>[r-]<r>[r-][r]p  
+        String axioms = "InverseObjectProperties(r r-)"
+            + "SubClassOf(owl:Thing ObjectSomeValuesFrom(r- ObjectSomeValuesFrom(r ObjectAllValuesFrom(r ObjectSomeValuesFrom(r- ObjectComplementOf(p)))))) "
+            + "SubClassOf(owl:Thing ObjectSomeValuesFrom(r- ObjectSomeValuesFrom(r p))) "
+            + "SubClassOf(owl:Thing ObjectSomeValuesFrom(r- ObjectAllValuesFrom(r- ObjectSomeValuesFrom(r- ObjectSomeValuesFrom(r- ObjectAllValuesFrom(r ObjectAllValuesFrom(r p))))))) "
+            + "SubClassOf(owl:Thing ObjectAllValuesFrom(r ObjectSomeValuesFrom(r ObjectAllValuesFrom(r- ObjectSomeValuesFrom(r ObjectAllValuesFrom(r- ObjectAllValuesFrom(r p))))))) ";
+        loadOntologyWithAxioms(axioms);
+        
+        assertABoxSatisfiable(false);
+        OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
+        OWLDescription desc = df.getOWLThing();
+        assertSatisfiable(desc,false); // fails because it is hard-coded in TableauSubsumptionChecker
+    }
+
     //    keys are not yet supported by the OWL API, but should pass the following tests once implemented
 
     public void testKeys() throws Exception {
