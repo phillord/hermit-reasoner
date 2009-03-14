@@ -25,7 +25,6 @@
     <property name="builddir" value="${projectroot}/build"/>
     <property name="flattendir" value="${builddir}/flatten"/>
     <property name="classdir" value="${builddir}/class"/>
-    <property name="plugindir" value="${builddir}/plugin"/>
     <property name="testclassdir" value="${builddir}/testclass"/>
 
     <!-- structure of the release -->
