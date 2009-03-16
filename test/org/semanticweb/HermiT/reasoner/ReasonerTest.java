@@ -22,6 +22,31 @@ public class ReasonerTest extends AbstractReasonerTest {
         super(name);
     }
 
+    public void testComplexConceptInstanceRetrieval() throws Exception {
+        String axioms =
+            "EquivalentClasses(a ObjectSomeValuesFrom(r b)) " +
+            "EquivalentClasses(c ObjectSomeValuesFrom(r d)) " +
+            "SubClassOf(b e) " +
+            "SubClassOf(d e) " +
+            "ClassAssertion(i1 a) "+
+            "ClassAssertion(i2 c) "+
+            "ObjectPropertyAssertion(r i3 i4) "+
+            "ClassAssertion(i4 e) ";
+        loadOntologyWithAxioms(axioms);
+
+        OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
+        OWLObjectProperty r = df.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
+        OWLClass a = df.getOWLClass(URI.create("file:/c/test.owl#a"));
+        OWLClass b = df.getOWLClass(URI.create("file:/c/test.owl#b"));
+        OWLClass e = df.getOWLClass(URI.create("file:/c/test.owl#e"));
+        OWLDescription some_r_b = df.getOWLObjectSomeRestriction(r,b);
+        OWLDescription some_r_e = df.getOWLObjectSomeRestriction(r,e);
+        assertInstancesOf(a,false,"i1");
+        assertInstancesOf(some_r_b,false,"i1");
+        assertInstancesOf(some_r_e,false,"i1","i2","i3");
+        assertInstancesOf(some_r_e,true,"i3");
+    }
+    
     public void testWidmann1() throws Exception {
         String axioms = "SubClassOf(owl:Thing ObjectSomeValuesFrom(a p)) "
                 + "SubClassOf(owl:Thing ObjectSomeValuesFrom(b ObjectAllValuesFrom(a ObjectSomeValuesFrom(a ObjectComplementOf(p))))) "
@@ -1714,7 +1739,6 @@ public class ReasonerTest extends AbstractReasonerTest {
     }
     
     public void testNovelNominals() throws Exception {
-        // Uncomment this once complex concept classification is supported properly
         OWLDataFactory df = m_ontologyManager.getOWLDataFactory();
         String axioms = "ClassAssertion(a C)";
         loadOntologyWithAxioms(axioms);

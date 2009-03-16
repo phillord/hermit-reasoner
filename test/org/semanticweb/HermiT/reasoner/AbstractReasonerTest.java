@@ -9,9 +9,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.HashSet;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
@@ -322,10 +322,6 @@ public abstract class AbstractReasonerTest extends TestCase {
 
     /**
      * Tests whether the possibly complex concept subConcept is subsumed by the possibly complex concept superConcept and asserts that this coincides with the expected result.
-     * 
-     * @param subConcept
-     * @param superConcept
-     * @param expectedResult
      */
     protected void assertSubsumedBy(OWLDescription subConcept,OWLDescription superConcept,boolean expectedResult) {
         boolean result=m_reasoner.isClassSubsumedBy(subConcept,superConcept);
@@ -334,10 +330,6 @@ public abstract class AbstractReasonerTest extends TestCase {
 
     /**
      * Tests whether the atomic concept atomicConcept is satisfiable and asserts that this coincides with the expected result (satisfiable).
-     * 
-     * @param atomicConcept
-     *            a string that represents an atomic concept. If no namespace is given, file:/c/test.owl# is used as prefix
-     * @param satisfiable
      */
     protected void assertSatisfiable(String atomicConcept,boolean satisfiable) {
         if (!atomicConcept.contains("#"))
@@ -347,9 +339,6 @@ public abstract class AbstractReasonerTest extends TestCase {
 
     /**
      * Tests whether the given possibly complex concept is satisfiable and asserts that this coincides with the expected result (satisfiable).
-     * 
-     * @param concept
-     * @param satisfiable
      */
     protected void assertSatisfiable(OWLDescription concept,boolean satisfiable) throws Exception {
         assertEquals(satisfiable,m_reasoner.isClassSatisfiable(concept));
@@ -357,14 +346,25 @@ public abstract class AbstractReasonerTest extends TestCase {
 
     /**
      * Tests whether the given individual is an instance of the given concept and asserts that this coincides with the expected result.
-     * 
-     * @param concept
-     * @param individual
-     * @param expectedResult
      */
     protected void assertInstanceOf(OWLDescription concept,OWLIndividual individual,boolean expectedResult) {
         boolean result=m_reasoner.isInstanceOf(concept,individual);
         assertEquals(expectedResult,result);
+    }
+
+    /**
+     * Tests whether the given concept has the specified individuals.
+     */
+    protected void assertInstancesOf(OWLDescription concept,boolean direct,String... expectedIndividuals) {
+        Set<OWLIndividual> actual=direct ? m_reasoner.getClassDirectInstances(concept) : m_reasoner.getClassInstances(concept);
+        Set<String> actualIndividualURIs=new HashSet<String>();
+        for (OWLIndividual individual : actual)
+            actualIndividualURIs.add(individual.getURI().toString());
+        String[] expectedModified=expectedIndividuals.clone();
+        for (int index=0;index<expectedModified.length;index++)
+            if (!expectedModified[index].contains("#"))
+                expectedModified[index]="file:/c/test.owl#"+expectedModified[index];
+        assertContainsAll(actualIndividualURIs,expectedModified);
     }
 
     /**

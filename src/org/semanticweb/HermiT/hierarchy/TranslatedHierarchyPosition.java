@@ -70,5 +70,8 @@ public class TranslatedHierarchyPosition<T, U>
     public int hashCode() {
         return position.hashCode();
     }
-    
+ 
+    public String toString() {
+        return position.toString();
+    }
 }

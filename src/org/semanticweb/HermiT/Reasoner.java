@@ -500,7 +500,7 @@ public class Reasoner implements Serializable {
         Set<String> result=new HashSet<String>();
         for (AtomicConcept atomicConcept : getConceptHierarchyPosition(AtomicConcept.create(className)).getDescendants()) {
             Set<Individual> realizationForConcept=getRealization().get(atomicConcept);
-            // realizationForConcept could be null because of the way realization is constructed;
+            // RealizationForConcept could be null because of the way realization is constructed;
             // for example, concepts that don't have direct instances are not entered into the realization at all.
             if (realizationForConcept!=null)
                 for (Individual individual : realizationForConcept)
@@ -510,19 +510,43 @@ public class Reasoner implements Serializable {
     }
 
     public Set<OWLIndividual> getClassInstances(OWLDescription description) {
-        HierarchyPosition<OWLClass> hierarchyPosition=getClassHierarchyPosition(description);
-        OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
-        Set<OWLIndividual> result=new HashSet<OWLIndividual>();
-        loadIndividualsOfPosition(hierarchyPosition,result,factory);
-        for (HierarchyPosition<OWLClass> descendantHierarchyPosition : hierarchyPosition.getDescendantPositions())
-            loadIndividualsOfPosition(descendantHierarchyPosition,result,factory);
-        return result;
+        if (description instanceof OWLClass) {
+            Set<String> individualURIs=getClassInstances(((OWLClass)description).getURI().toString());
+            OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
+            Set<OWLIndividual> result=new HashSet<OWLIndividual>();
+            for (String individualURI : individualURIs)
+                result.add(factory.getOWLIndividual(URI.create(individualURI)));
+            return result;
+        }
+        else {
+            OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
+            OWLDataFactory factory=ontologyManager.getOWLDataFactory();
+            OWLClass newClass=factory.getOWLClass(URI.create("internal:query-concept"));
+            OWLAxiom classDefinitionAxiom=factory.getOWLSubClassAxiom(description,newClass);
+            DLOntology newDLOntology=extendDLOntology(m_configuration,m_namespaces,"uri:urn:internal-kb",m_dlOntology,ontologyManager,classDefinitionAxiom);
+            Tableau tableau=createTableau(m_configuration,newDLOntology,m_namespaces);
+            AtomicConcept queryConcept=AtomicConcept.create("internal:query-concept");
+            HierarchyPosition<OWLClass> hierarchyPosition=getClassHierarchyPosition(description);
+            Set<OWLIndividual> result=new HashSet<OWLIndividual>();
+            loadIndividualsOfPosition(hierarchyPosition,result,factory);
+            for (HierarchyPosition<OWLClass> descendantHierarchyPosition : hierarchyPosition.getDescendantPositions())
+                loadIndividualsOfPosition(descendantHierarchyPosition,result,factory);
+            for (HierarchyPosition<OWLClass> parentHierarchyPosition : hierarchyPosition.getParentPositions()) {
+                AtomicConcept parentAtomicConcept=AtomicConcept.create(parentHierarchyPosition.getEquivalents().iterator().next().getURI().toString());
+                Set<Individual> realizationForParentConcept=getRealization().get(parentAtomicConcept);
+                if (realizationForParentConcept!=null)
+                    for (Individual individual : realizationForParentConcept)
+                        if (tableau.isInstanceOf(queryConcept,individual))
+                            result.add(factory.getOWLIndividual(URI.create(individual.getURI())));
+            }
+            return result;
+        }
     }
     
     protected void loadIndividualsOfPosition(HierarchyPosition<OWLClass> position,Set<OWLIndividual> result,OWLDataFactory factory) {
         AtomicConcept atomicConcept=AtomicConcept.create(position.getEquivalents().iterator().next().getURI().toString());
         Set<Individual> realizationForConcept=getRealization().get(atomicConcept);
-        // realizationForConcept could be null because of the way realization is constructed;
+        // RealizationForConcept could be null because of the way realization is constructed;
         // for example, concepts that don't have direct instances are not entered into the realization at all.
         if (realizationForConcept!=null)
             for (Individual individual : realizationForConcept)
@@ -532,7 +556,7 @@ public class Reasoner implements Serializable {
     public Set<String> getClassDirectInstances(String className) {
         Set<String> result=new HashSet<String>();
         Set<Individual> realizationForConcept=getRealization().get(AtomicConcept.create(className));
-        // realizationForConcept could be null because of the way realization is constructed;
+        // RealizationForConcept could be null because of the way realization is constructed;
         // for example, concepts that don't have direct instances are not entered into the realization at all.
         if (realizationForConcept!=null)
             for (Individual individual : realizationForConcept)
@@ -541,23 +565,35 @@ public class Reasoner implements Serializable {
     }
 
     public Set<OWLIndividual> getClassDirectInstances(OWLDescription description) {
-        HierarchyPosition<OWLClass> hierarchyPosition=getClassHierarchyPosition(description);
-        OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
-        Set<OWLIndividual> result=new HashSet<OWLIndividual>();
-        Map<AtomicConcept,Set<Individual>> realization=getRealization();
-        Set<OWLClass> children=hierarchyPosition.getEquivalents();
-        if (children.isEmpty())
-            for (HierarchyPosition<OWLClass> childPosition : hierarchyPosition.getChildPositions())
-                children.addAll(childPosition.getEquivalents());
-        for (OWLClass child : children) {
-            Set<Individual> realizationForConcept=realization.get(AtomicConcept.create(child.getURI().toString()));
-            // realizationForConcept could be null because of the way realization is constructed;
-            // for example, concepts that don't have direct instances are not entered into the realization at all.
-            if (realizationForConcept!=null)
-                for (Individual individual : realizationForConcept)
-                    result.add(factory.getOWLIndividual(URI.create(individual.getURI())));
+        if (description instanceof OWLClass) {
+            Set<String> individualURIs=getClassDirectInstances(((OWLClass)description).getURI().toString());
+            OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
+            Set<OWLIndividual> result=new HashSet<OWLIndividual>();
+            for (String individualURI : individualURIs)
+                result.add(factory.getOWLIndividual(URI.create(individualURI)));
+            return result;
         }
-        return result;
+        else {
+            OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
+            OWLDataFactory factory=ontologyManager.getOWLDataFactory();
+            OWLClass newClass=factory.getOWLClass(URI.create("internal:query-concept"));
+            OWLAxiom classDefinitionAxiom=factory.getOWLSubClassAxiom(description,newClass);
+            DLOntology newDLOntology=extendDLOntology(m_configuration,m_namespaces,"uri:urn:internal-kb",m_dlOntology,ontologyManager,classDefinitionAxiom);
+            Tableau tableau=createTableau(m_configuration,newDLOntology,m_namespaces);
+            AtomicConcept queryConcept=AtomicConcept.create("internal:query-concept");
+            HierarchyPosition<OWLClass> hierarchyPosition=getClassHierarchyPosition(description);
+            Set<OWLIndividual> result=new HashSet<OWLIndividual>();
+            loadIndividualsOfPosition(hierarchyPosition,result,factory);
+            for (HierarchyPosition<OWLClass> parentHierarchyPosition : hierarchyPosition.getParentPositions()) {
+                AtomicConcept parentAtomicConcept=AtomicConcept.create(parentHierarchyPosition.getEquivalents().iterator().next().getURI().toString());
+                Set<Individual> realizationForParentConcept=getRealization().get(parentAtomicConcept);
+                if (realizationForParentConcept!=null)
+                    for (Individual individual : realizationForParentConcept)
+                        if (tableau.isInstanceOf(queryConcept,individual))
+                            result.add(factory.getOWLIndividual(URI.create(individual.getURI())));
+            }
+            return result;
+        }
     }
 
     protected Map<AtomicConcept,Set<Individual>> getRealization() {
