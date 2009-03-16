@@ -63,7 +63,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertABoxSatisfiable(false);
         OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
         OWLDescription desc = df.getOWLThing();
-        assertSatisfiable(desc,false); // fails because it is hard-coded in TableauSubsumptionChecker
+        assertSatisfiable(desc,false);
     }
 
     //    keys are not yet supported by the OWL API, but should pass the following tests once implemented

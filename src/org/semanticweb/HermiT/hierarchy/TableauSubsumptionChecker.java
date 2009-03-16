@@ -46,9 +46,7 @@ public class TableauSubsumptionChecker implements SubsumptionHierarchy.Subsumpti
         return isSatisfiable(concept,true);
     }
     protected boolean isSatisfiable(AtomicConcept concept,boolean updatePossibleSubsumers) {
-        if (AtomicConcept.THING.equals(concept))
-            return true;
-        else if (AtomicConcept.NOTHING.equals(concept))
+        if (AtomicConcept.NOTHING.equals(concept))
             return false;
         AtomicConceptInfo conceptInfo=getAtomicConceptInfo(concept);
         if (conceptInfo.m_isSatisfiable==null) {
