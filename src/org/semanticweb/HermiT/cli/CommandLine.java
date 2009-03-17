@@ -1,5 +1,5 @@
 // Copyright 2008 by Oxford University; see license.txt for details
-package org.semanticweb.HermiT;
+package org.semanticweb.HermiT.cli;
 
 import gnu.getopt.Getopt;
 import gnu.getopt.LongOpt;
@@ -10,149 +10,27 @@ import java.text.BreakIterator;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.Set;
 
-import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
-import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.Configuration;
+import org.semanticweb.HermiT.Namespaces;
+import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.monitor.ReasoningOperations;
 import org.semanticweb.HermiT.monitor.Timer;
+import org.semanticweb.owl.apibinding.OWLManager;
+import org.semanticweb.owl.model.OWLOntologyManager;
+import org.semanticweb.owl.model.OWLOntology;
+import org.semanticweb.owl.model.OWLClass;
 
 public class CommandLine {
     
-    protected static String breakLines(String str,int lineWidth,int indent) {
-        StringBuffer out=new StringBuffer();
-        BreakIterator i=BreakIterator.getLineInstance();
-        i.setText(str);
-        int curPos=0;
-        int curLinePos=indent;
-        int next=i.first();
-        while (next!=BreakIterator.DONE) {
-            String curSpan=str.substring(curPos,next);
-            if (curLinePos+curSpan.length()>lineWidth) {
-                out.append(System.getProperty("line.separator"));
-                for (int j=0;j<indent;++j)
-                    out.append(" ");
-                curLinePos=indent;
-            }
-            out.append(curSpan);
-            curLinePos+=curSpan.length();
-            curPos=next;
-            next=i.next();
-        }
-        return out.toString();
-    }
-
     @SuppressWarnings("serial")
-    protected static class UsageException extends java.lang.IllegalArgumentException {
-        UsageException(String inMessage) {
+    protected static class UsageException extends IllegalArgumentException {
+        public UsageException(String inMessage) {
             super(inMessage);
         }
     }
 
-    static class Option {
-        static enum Arg {
-            NONE,OPTIONAL,REQUIRED
-        };
-        int optChar;
-        String longStr;
-        String group;
-        Arg arg;
-        String metavar;
-        String help;
-        Option(int inChar,String inLong,String inGroup,String inHelp) {
-            optChar=inChar;
-            longStr=inLong;
-            group=inGroup;
-            arg=Arg.NONE;
-            help=inHelp;
-        }
-        Option(int inChar,String inLong,String inGroup,boolean argRequired,String inMetavar,String inHelp) {
-            optChar=inChar;
-            longStr=inLong;
-            group=inGroup;
-            arg=(argRequired ? Arg.REQUIRED : Arg.OPTIONAL);
-            metavar=inMetavar;
-            help=inHelp;
-        }
-        static LongOpt[] createLongOpts(Option[] opts) {
-            LongOpt[] out=new LongOpt[opts.length];
-            for (int i=0;i<opts.length;++i) {
-                out[i]=new LongOpt(opts[i].longStr,(opts[i].arg==Arg.NONE ? LongOpt.NO_ARGUMENT : opts[i].arg==Arg.OPTIONAL ? LongOpt.OPTIONAL_ARGUMENT : LongOpt.REQUIRED_ARGUMENT),null,opts[i].optChar);
-            }
-            return out;
-        }
-
-        String getLongOptExampleStr() {
-            if (longStr==null||longStr.equals(""))
-                return "";
-            return new String("--"+longStr+(arg==Arg.NONE ? "" : arg==Arg.OPTIONAL ? "[="+metavar+"]" : "="+metavar));
-        }
-
-        static String formatOptionHelp(Option[] opts) {
-            StringBuffer out=new StringBuffer();
-            int fieldWidth=0;
-            for (Option o : opts) {
-                int curWidth=o.getLongOptExampleStr().length();
-                if (curWidth>fieldWidth)
-                    fieldWidth=curWidth;
-            }
-            String curGroup=null;
-            for (Option o : opts) {
-                if (o.group!=curGroup) {
-                    curGroup=o.group;
-                    out.append(System.getProperty("line.separator"));
-                    if (o.group!=null) {
-                        out.append(curGroup+":");
-                        out.append(System.getProperty("line.separator"));
-                    }
-                }
-                if (o.optChar<256) {
-                    out.append("  -");
-                    out.appendCodePoint(o.optChar);
-                    if (o.longStr!=null&&o.longStr!="") {
-                        out.append(", ");
-                    }
-                    else {
-                        out.append("  ");
-                    }
-                }
-                else {
-                    out.append("      ");
-                }
-                int fieldLeft=fieldWidth+1;
-                if (o.longStr!=null&&o.longStr!="") {
-                    String s=o.getLongOptExampleStr();
-                    out.append(s);
-                    fieldLeft-=s.length();
-                }
-                for (;fieldLeft>0;--fieldLeft)
-                    out.append(' ');
-                out.append(breakLines(o.help,80,6+fieldWidth+1));
-                out.append(System.getProperty("line.separator"));
-            }
-            return out.toString();
-        }
-        static String formatOptionsString(Option[] opts) {
-            StringBuffer out=new StringBuffer();
-            for (Option o : opts) {
-                if (o.optChar<256) {
-                    out.appendCodePoint(o.optChar);
-                    switch (o.arg) {
-                    case REQUIRED:
-                        out.append(":");
-                        break;
-                    case OPTIONAL:
-                        out.append("::");
-                        break;
-                    case NONE:
-                        break;
-                    }
-                }
-            }
-            return out.toString();
-        }
-    }
 
     protected static class StatusOutput {
         protected int level;
@@ -217,7 +95,7 @@ public class CommandLine {
         }
         public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
             status.log(2,"classifying...");
-            hermit.computeClassHierarchy();
+            hermit.classify();
             if (file!=null) {
                 status.log(2,"writing taxonomy to "+file);
                 if (file.equals("-")) {
@@ -236,7 +114,7 @@ public class CommandLine {
                     }
                     output=new PrintWriter(f);
                 }
-                hermit.printSortedAncestorLists(output);
+                hermit.printClassHierarchy(output);
             }
         }
     }
@@ -249,10 +127,11 @@ public class CommandLine {
         public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
             status.log(2,"Checking satisfiability of '"+conceptName+"'");
             String conceptUri=namespaces.expandAbbreviatedURI(conceptName);
-            if (!hermit.isClassNameDefined(conceptUri)) {
+            OWLClass owlClass=OWLManager.createOWLOntologyManager().getOWLDataFactory().getOWLClass(URI.create(conceptUri));
+            if (!hermit.isDefined(owlClass)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
             }
-            boolean result=hermit.isClassSatisfiable(conceptUri);
+            boolean result=hermit.isSatisfiable(owlClass);
             output.println(conceptName+(result ? " is satisfiable." : " is not satisfiable."));
         }
     }
@@ -267,52 +146,22 @@ public class CommandLine {
         public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
             status.log(2,"Finding supers of '"+conceptName+"'");
             String conceptUri=namespaces.expandAbbreviatedURI(conceptName);
-            if (!hermit.isClassNameDefined(conceptUri)) {
+            OWLClass owlClass=OWLManager.createOWLOntologyManager().getOWLDataFactory().getOWLClass(URI.create(conceptUri));
+            if (!hermit.isDefined(owlClass)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
             }
-            HierarchyPosition<String> pos=hermit.getClassHierarchyPosition(conceptUri);
+            Set<Set<OWLClass>> classes;
             if (all) {
+                classes=hermit.getAncestorClasses(owlClass);
                 output.println("All super-classes of '"+conceptName+"':");
-                for (String sup : pos.getAncestors()) {
-                    output.println("\t"+namespaces.abbreviateURI(sup));
-                }
             }
             else {
+                classes=hermit.getSuperClasses(owlClass);
                 output.println("Direct super-classes of '"+conceptName+"':");
-                for (HierarchyPosition<String> sup : pos.getParentPositions()) {
-                    for (String name : sup.getEquivalents()) {
-                        output.println("\t"+namespaces.abbreviateURI(name));
-                    }
-                }
             }
-        }
-    }
-
-    static protected class SuperRolesAction implements Action {
-        final String roleName;
-        boolean all;
-        public SuperRolesAction(String name,boolean getAll) {
-            roleName=name;
-            all=getAll;
-        }
-        public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
-            status.log(2,"Finding supers of '"+roleName+"'");
-            String roleUri=namespaces.expandAbbreviatedURI(roleName);
-            HierarchyPosition<String> pos=hermit.getPropertyHierarchyPosition(roleUri);
-            if (all) {
-                output.println("All super-properties of '"+roleName+"':");
-                for (String sup : pos.getAncestors()) {
-                    output.println("\t"+namespaces.abbreviateURI(sup));
-                }
-            }
-            else {
-                output.println("Direct super-properties of '"+roleName+"':");
-                for (HierarchyPosition<String> sup : pos.getParentPositions()) {
-                    for (String name : sup.getEquivalents()) {
-                        output.println("\t"+namespaces.abbreviateURI(name));
-                    }
-                }
-            }
+            for (Set<OWLClass> set : classes)
+                for (OWLClass classInSet : set)
+                    output.println("\t"+namespaces.abbreviateURI(classInSet.getURI().toString()));
         }
     }
 
@@ -326,52 +175,22 @@ public class CommandLine {
         public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
             status.log(2,"Finding subs of '"+conceptName+"'");
             String conceptUri=namespaces.expandAbbreviatedURI(conceptName);
-            if (!hermit.isClassNameDefined(conceptUri)) {
+            OWLClass owlClass=OWLManager.createOWLOntologyManager().getOWLDataFactory().getOWLClass(URI.create(conceptUri));
+            if (!hermit.isDefined(owlClass)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
             }
-            HierarchyPosition<String> pos=hermit.getClassHierarchyPosition(conceptUri);
+            Set<Set<OWLClass>> classes;
             if (all) {
+                classes=hermit.getDescendantClasses(owlClass);
                 output.println("All sub-classes of '"+conceptName+"':");
-                for (String sub : pos.getDescendants()) {
-                    output.println("\t"+namespaces.abbreviateURI(sub));
-                }
             }
             else {
+                classes=hermit.getSubClasses(owlClass);
                 output.println("Direct sub-classes of '"+conceptName+"':");
-                for (HierarchyPosition<String> sub : pos.getChildPositions()) {
-                    for (String name : sub.getEquivalents()) {
-                        output.println("\t"+namespaces.abbreviateURI(name));
-                    }
-                }
             }
-        }
-    }
-
-    static protected class SubRolesAction implements Action {
-        final String roleName;
-        boolean all;
-        public SubRolesAction(String name,boolean getAll) {
-            roleName=name;
-            all=getAll;
-        }
-        public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
-            status.log(2,"Finding subs of '"+roleName+"'");
-            String roleUri=namespaces.expandAbbreviatedURI(roleName);
-            HierarchyPosition<String> pos=hermit.getPropertyHierarchyPosition(roleUri);
-            if (all) {
-                output.println("All sub-properties of '"+roleName+"':");
-                for (String sup : pos.getDescendants()) {
-                    output.println("\t"+namespaces.abbreviateURI(sup));
-                }
-            }
-            else {
-                output.println("Direct sub-properties of '"+roleName+"':");
-                for (HierarchyPosition<String> sup : pos.getChildPositions()) {
-                    for (String name : sup.getEquivalents()) {
-                        output.println("\t"+namespaces.abbreviateURI(name));
-                    }
-                }
-            }
+            for (Set<OWLClass> set : classes)
+                for (OWLClass classInSet : set)
+                    output.println("\t"+namespaces.abbreviateURI(classInSet.getURI().toString()));
         }
     }
 
@@ -383,85 +202,41 @@ public class CommandLine {
         public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
             status.log(2,"Finding equivalents of '"+conceptName+"'");
             String conceptUri=namespaces.expandAbbreviatedURI(conceptName);
-            if (!hermit.isClassNameDefined(conceptUri)) {
+            OWLClass owlClass=OWLManager.createOWLOntologyManager().getOWLDataFactory().getOWLClass(URI.create(conceptUri));
+            if (!hermit.isDefined(owlClass)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
             }
-            HierarchyPosition<String> pos=hermit.getClassHierarchyPosition(conceptUri);
+            Set<OWLClass> classes=hermit.getEquivalentClasses(owlClass);
             output.println("Classes equivalent to '"+conceptName+"':");
-            for (String equiv : pos.getEquivalents()) {
-                output.println("\t"+namespaces.abbreviateURI(equiv));
-            }
-        }
-    }
-
-    static protected class EquivalentRolesAction implements Action {
-        final String roleName;
-        public EquivalentRolesAction(String name) {
-            roleName=name;
-        }
-        public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
-            status.log(2,"Finding equivalents of '"+roleName+"'");
-            String roleUri=namespaces.expandAbbreviatedURI(roleName);
-            HierarchyPosition<String> pos=hermit.getPropertyHierarchyPosition(roleUri);
-            output.println("Properties equivalent to '"+roleName+"':");
-            for (String equiv : pos.getEquivalents()) {
-                output.println("\t"+namespaces.abbreviateURI(equiv));
-            }
+            for (OWLClass classInSet : classes)
+                output.println("\t"+namespaces.abbreviateURI(classInSet.getURI().toString()));
         }
     }
 
     static protected class TaxonomyAction implements Action {
-        final String nothing=AtomicConcept.NOTHING.getURI().toString();
-        final String thing=AtomicConcept.THING.getURI().toString();
-        final boolean useFunctionalSyntax;
 
-        public TaxonomyAction(boolean useFunctionalSyntax) {
-            this.useFunctionalSyntax=useFunctionalSyntax;
-        }
-
-        String canonical(HierarchyPosition<String> pos) {
-            if (pos.getEquivalents().contains(nothing)) {
-                return nothing;
-            }
-            else if (pos.getEquivalents().contains(thing)) {
-                return thing;
-            }
-            else {
-                String out=null;
-                for (String s : pos.getEquivalents()) {
-                    if (out==null||s.compareTo(out)<0) {
-                        out=s;
-                    }
-                }
-                return out;
-            }
+        public TaxonomyAction() {
         }
 
         public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
-            Map<String,HierarchyPosition<String>> tax=hermit.getClassHierarchy();
-            for (String c : new TreeSet<String>(tax.keySet())) {
-                HierarchyPosition<String> pos=tax.get(c);
-                if (c.equals(canonical(pos))&&!c.equals(nothing)) {
-                    for (String equiv : new TreeSet<String>(pos.getEquivalents())) {
-                        if (!c.equals(equiv)) {
-                            output.println("(equivalent |"+c+"| |"+equiv+"|)");
-                        }
-                    }
-                    SortedSet<String> supers=new TreeSet<String>();
-                    for (HierarchyPosition<String> parent : pos.getParentPositions()) {
-                        if (canonical(parent)!=thing) {
-                            supers.add(canonical(parent));
-                        }
-                    }
-                    for (String sup : supers) {
-                        output.println("(implies |"+c+"| |"+sup+"|)");
-                    }
-                }
-            }
+            hermit.printClassHierarchy(output);
         }
     }
 
-    protected static final int kTime=1000,kDumpClauses=1001,kDumpRoleBox=1002,kDirectBlock=1003,kBlockStrategy=1004,kBlockCache=1005,kExpansion=1006,kBase=1007,kParser=1008,kDefaultNamespace=1009,kDumpNamespaces=1010,kSuperRoles=1011,kSubRoles=1012,kEquivRoles=1013,kKrssTaxonomy=1014,kFunctionalTaxonomy=1015,kIgnoreUnsupportedDatatypes=1016;
+    protected static final int
+        kTime=1000,
+        kDumpClauses=1001,
+        kDumpRoleBox=1002,
+        kDirectBlock=1003,
+        kBlockStrategy=1004,
+        kBlockCache=1005,
+        kExpansion=1006,
+        kBase=1007,
+        kParser=1008,
+        kDefaultNamespace=1009,
+        kDumpNamespaces=1010,
+        kTaxonomy=1011,
+        kIgnoreUnsupportedDatatypes=1012;
 
     protected static final String versionString;
     static {
@@ -477,24 +252,36 @@ public class CommandLine {
     protected static final String kMisc="Miscellaneous",kActions="Actions",kParsing="Parsing and loading",kNamespaces="Namespace expansion and abbreviation",kAlgorithm="Algorithm settings (expert users only!)",kInternals="Internals and debugging (unstable)";
 
     protected static final Option[] options=new Option[] {
-            // meta:
-            new Option('h',"help",kMisc,"display this help and exit"),new Option('V',"version",kMisc,"display version information and exit"),new Option('v',"verbose",kMisc,false,"AMOUNT","increase verbosity by AMOUNT levels (default 1)"),new Option('q',"quiet",kMisc,false,"AMOUNT","decrease verbosity by AMOUNT levels (default 1)"),
-            new Option('o',"output",kMisc,true,"FILE","write output to FILE"),
+        // meta:
+        new Option('h',"help",kMisc,"display this help and exit"),
+        new Option('V',"version",kMisc,"display version information and exit"),
+        new Option('v',"verbose",kMisc,false,"AMOUNT","increase verbosity by AMOUNT levels (default 1)"),
+        new Option('q',"quiet",kMisc,false,"AMOUNT","decrease verbosity by AMOUNT levels (default 1)"),
+        new Option('o',"output",kMisc,true,"FILE","write output to FILE"),
 
-            // actions:
-            new Option('l',"load",kActions,"parse and preprocess ontologies (default action)"),new Option('c',"classify",kActions,false,"FILE","classify ontology, optionally writing taxonomy to FILE (use - for standard out)"),new Option('k',"consistency",kActions,false,"CLASS","check satisfiability of CLASS (default owl:Thing)"),new Option('d',"direct",kActions,"restrict next subs/supers call to only direct sub/superclasses"),new Option('s',"subs",kActions,true,"CLASS","output classes subsumed by CLASS (or only direct subs if following --direct)"),new Option('S',"supers",kActions,true,"CLASS","output classes subsuming CLASS (or only direct supers if following --direct)"),new Option('e',"equivalents",kActions,true,"CLASS","output classes equivalent to CLASS"),new Option(kSubRoles,"subproperties",kActions,true,"PROP","output properties subsumed by PROP (or only direct subs if following --direct)"),
-            new Option(kSuperRoles,"superproperties",kActions,true,"PROP","output properties subsuming PROP (or only direct supers if following --direct)"),new Option(kEquivRoles,"equivalent-properties",kActions,true,"PROP","output properties equivalent to PROP"),new Option('U',"unsatisfiable",kActions,"output unsatisfiable classes (equivalent to --equivalents=owl:Nothing)"),new Option(kDumpNamespaces,"print-namespaces",kActions,"output namespace prefixes available for use in identifiers"),
+        // actions:
+        new Option('l',"load",kActions,"parse and preprocess ontologies (default action)"),
+        new Option('c',"classify",kActions,false,"FILE","classify ontology, optionally writing taxonomy to FILE (use - for standard out)"),
+        new Option('k',"consistency",kActions,false,"CLASS","check satisfiability of CLASS (default owl:Thing)"),
+        new Option('d',"direct",kActions,"restrict next subs/supers call to only direct sub/superclasses"),
+        new Option('s',"subs",kActions,true,"CLASS","output classes subsumed by CLASS (or only direct subs if following --direct)"),
+        new Option('S',"supers",kActions,true,"CLASS","output classes subsuming CLASS (or only direct supers if following --direct)"),
+        new Option('e',"equivalents",kActions,true,"CLASS","output classes equivalent to CLASS"),
+        new Option('U',"unsatisfiable",kActions,"output unsatisfiable classes (equivalent to --equivalents=owl:Nothing)"),
+        new Option(kDumpNamespaces,"print-namespaces",kActions,"output namespace prefixes available for use in identifiers"),
 
-            new Option('N',"no-namespaces",kNamespaces,"do not abbreviate or expand identifiers using namespaces defined in input ontology"),new Option('n',"namespace",kNamespaces,true,"NS=URI","use NS as an abbreviation for URI in identifiers"),new Option(kDefaultNamespace,"namespace",kNamespaces,true,"URI","use URI as the default identifier namespace"),
+        new Option('N',"no-namespaces",kNamespaces,"do not abbreviate or expand identifiers using namespaces defined in input ontology"),
+        new Option('n',"namespace",kNamespaces,true,"NS=URI","use NS as an abbreviation for URI in identifiers"),
+        new Option(kDefaultNamespace,"namespace",kNamespaces,true,"URI","use URI as the default identifier namespace"),
 
-            // algorithm tweaks:
-            new Option(kDirectBlock,"block-match",kAlgorithm,true,"TYPE","identify blocked nodes with TYPE blocking; supported values are 'single', 'pairwise', 'pairwise-reflexive', and 'optimal' (default 'optimal')"),
-            new Option(kIgnoreUnsupportedDatatypes,"ignoreUnsupportedDatatypes",kAlgorithm,"ignore unsupported datatypes"),
+        // algorithm tweaks:
+        new Option(kDirectBlock,"block-match",kAlgorithm,true,"TYPE","identify blocked nodes with TYPE blocking; supported values are 'single', 'pairwise', 'pairwise-reflexive', and 'optimal' (default 'optimal')"),
+        new Option(kIgnoreUnsupportedDatatypes,"ignoreUnsupportedDatatypes",kAlgorithm,"ignore unsupported datatypes"),
 
-            // internals:
-            new Option(kDumpClauses,"dump-clauses",kInternals,false,"FILE","output DL-clauses to FILE (default stdout)"),new Option(kKrssTaxonomy,"krss-taxonomy",kInternals,"output most specific implications in KRSS format"),
-            // This one will probably become "--taxonomy" as standard action
-            new Option(kFunctionalTaxonomy,"functional-taxonomy",kInternals,"output most specific implications in OWL functional syntax"), };
+        // internals:
+        new Option(kDumpClauses,"dump-clauses",kInternals,false,"FILE","output DL-clauses to FILE (default stdout)"),
+        new Option(kTaxonomy,"taxonomy",kInternals,"output the taxonomy")
+    };
 
     public static void main(String[] argv) {
         try {
@@ -627,23 +414,6 @@ public class CommandLine {
                         actions.add(new EquivalentsAction(arg));
                     }
                         break;
-                    case kSubRoles: {
-                        String arg=g.getOptarg();
-                        actions.add(new SubRolesAction(arg,doAll));
-                        doAll=true;
-                    }
-                        break;
-                    case kSuperRoles: {
-                        String arg=g.getOptarg();
-                        actions.add(new SuperRolesAction(arg,doAll));
-                        doAll=true;
-                    }
-                        break;
-                    case kEquivRoles: {
-                        String arg=g.getOptarg();
-                        actions.add(new EquivalentRolesAction(arg));
-                    }
-                        break;
                     case 'U': {
                         actions.add(new EquivalentsAction("<http://www.w3.org/2002/07/owl#Nothing>"));
                     }
@@ -743,12 +513,8 @@ public class CommandLine {
                         actions.add(new DumpClausesAction(g.getOptarg()));
                     }
                         break;
-                    case kKrssTaxonomy: {
-                        actions.add(new TaxonomyAction(false));
-                    }
-                        break;
-                    case kFunctionalTaxonomy: {
-                        actions.add(new TaxonomyAction(true));
+                    case kTaxonomy: {
+                        actions.add(new TaxonomyAction());
                     }
                         break;
                     default: {
@@ -782,9 +548,14 @@ public class CommandLine {
                 status.log(2,String.valueOf(actions.size())+" actions");
                 try {
                     long startTime=System.currentTimeMillis();
-                    Reasoner hermit=new Reasoner(config,ont);
+                    OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
+                    OWLOntology ontology=ontologyManager.loadOntologyFromPhysicalURI(ont);
+                    long parseTime=System.currentTimeMillis()-startTime;
+                    status.log(2,"Ontology parsed in "+String.valueOf(parseTime)+" msec.");
+                    startTime=System.currentTimeMillis();
+                    Reasoner hermit=new Reasoner(config,ontologyManager,ontology);
                     long loadTime=System.currentTimeMillis()-startTime;
-                    status.log(2,"Loaded in "+String.valueOf(loadTime)+" msec.");
+                    status.log(2,"Reasoner created in "+String.valueOf(loadTime)+" msec.");
                     if (!ignoreOntologyNamespaces)
                         namespaces.addPrefixes(hermit.getNamespaces());
                     for (Action action : actions) {
@@ -813,5 +584,133 @@ public class CommandLine {
             System.err.println(usageString);
             System.err.println("Try 'hermit --help' for more information.");
         }
+    }
+}
+
+enum Arg { NONE,OPTIONAL,REQUIRED }
+
+class Option {
+    protected int optChar;
+    protected String longStr;
+    protected String group;
+    protected Arg arg;
+    protected String metavar;
+    protected String help;
+    
+    public Option(int inChar,String inLong,String inGroup,String inHelp) {
+        optChar=inChar;
+        longStr=inLong;
+        group=inGroup;
+        arg=Arg.NONE;
+        help=inHelp;
+    }
+    public Option(int inChar,String inLong,String inGroup,boolean argRequired,String inMetavar,String inHelp) {
+        optChar=inChar;
+        longStr=inLong;
+        group=inGroup;
+        arg=(argRequired ? Arg.REQUIRED : Arg.OPTIONAL);
+        metavar=inMetavar;
+        help=inHelp;
+    }
+    public static LongOpt[] createLongOpts(Option[] opts) {
+        LongOpt[] out=new LongOpt[opts.length];
+        for (int i=0;i<opts.length;++i) {
+            out[i]=new LongOpt(opts[i].longStr,(opts[i].arg==Arg.NONE ? LongOpt.NO_ARGUMENT : opts[i].arg==Arg.OPTIONAL ? LongOpt.OPTIONAL_ARGUMENT : LongOpt.REQUIRED_ARGUMENT),null,opts[i].optChar);
+        }
+        return out;
+    }
+
+    public String getLongOptExampleStr() {
+        if (longStr==null||longStr.equals(""))
+            return "";
+        return new String("--"+longStr+(arg==Arg.NONE ? "" : arg==Arg.OPTIONAL ? "[="+metavar+"]" : "="+metavar));
+    }
+
+    public static String formatOptionHelp(Option[] opts) {
+        StringBuffer out=new StringBuffer();
+        int fieldWidth=0;
+        for (Option o : opts) {
+            int curWidth=o.getLongOptExampleStr().length();
+            if (curWidth>fieldWidth)
+                fieldWidth=curWidth;
+        }
+        String curGroup=null;
+        for (Option o : opts) {
+            if (o.group!=curGroup) {
+                curGroup=o.group;
+                out.append(System.getProperty("line.separator"));
+                if (o.group!=null) {
+                    out.append(curGroup+":");
+                    out.append(System.getProperty("line.separator"));
+                }
+            }
+            if (o.optChar<256) {
+                out.append("  -");
+                out.appendCodePoint(o.optChar);
+                if (o.longStr!=null&&o.longStr!="") {
+                    out.append(", ");
+                }
+                else {
+                    out.append("  ");
+                }
+            }
+            else {
+                out.append("      ");
+            }
+            int fieldLeft=fieldWidth+1;
+            if (o.longStr!=null&&o.longStr!="") {
+                String s=o.getLongOptExampleStr();
+                out.append(s);
+                fieldLeft-=s.length();
+            }
+            for (;fieldLeft>0;--fieldLeft)
+                out.append(' ');
+            out.append(breakLines(o.help,80,6+fieldWidth+1));
+            out.append(System.getProperty("line.separator"));
+        }
+        return out.toString();
+    }
+    
+    public static String formatOptionsString(Option[] opts) {
+        StringBuffer out=new StringBuffer();
+        for (Option o : opts) {
+            if (o.optChar<256) {
+                out.appendCodePoint(o.optChar);
+                switch (o.arg) {
+                case REQUIRED:
+                    out.append(":");
+                    break;
+                case OPTIONAL:
+                    out.append("::");
+                    break;
+                case NONE:
+                    break;
+                }
+            }
+        }
+        return out.toString();
+    }
+    
+    protected static String breakLines(String str,int lineWidth,int indent) {
+        StringBuffer out=new StringBuffer();
+        BreakIterator i=BreakIterator.getLineInstance();
+        i.setText(str);
+        int curPos=0;
+        int curLinePos=indent;
+        int next=i.first();
+        while (next!=BreakIterator.DONE) {
+            String curSpan=str.substring(curPos,next);
+            if (curLinePos+curSpan.length()>lineWidth) {
+                out.append(System.getProperty("line.separator"));
+                for (int j=0;j<indent;++j)
+                    out.append(" ");
+                curLinePos=indent;
+            }
+            out.append(curSpan);
+            curLinePos+=curSpan.length();
+            curPos=next;
+            next=i.next();
+        }
+        return out.toString();
     }
 }

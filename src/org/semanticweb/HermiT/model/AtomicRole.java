@@ -39,12 +39,12 @@ public class AtomicRole extends Role implements DLPredicate {
         }
     };
 
-    public static AtomicRole createAtomicRole(String uri) {
+    public static AtomicRole create(String uri) {
         return s_interningManager.intern(new AtomicRole(uri));
     }
 
-    public static final AtomicRole TOP_OBJECT_ROLE=createAtomicRole("http://www.w3.org/2002/07/owl#TopObjectProperty");
-    public static final AtomicRole BOTTOM_OBJECT_ROLE=createAtomicRole("http://www.w3.org/2002/07/owl#BottomObjectProperty");
-    public static final AtomicRole TOP_DATA_ROLE=createAtomicRole("http://www.w3.org/2002/07/owl#TopDataProperty");
-    public static final AtomicRole BOTTOM_DATA_ROLE=createAtomicRole("http://www.w3.org/2002/07/owl#BottomDataProperty");
+    public static final AtomicRole TOP_OBJECT_ROLE=create("http://www.w3.org/2002/07/owl#TopObjectProperty");
+    public static final AtomicRole BOTTOM_OBJECT_ROLE=create("http://www.w3.org/2002/07/owl#BottomObjectProperty");
+    public static final AtomicRole TOP_DATA_ROLE=create("http://www.w3.org/2002/07/owl#TopDataProperty");
+    public static final AtomicRole BOTTOM_DATA_ROLE=create("http://www.w3.org/2002/07/owl#BottomDataProperty");
 }

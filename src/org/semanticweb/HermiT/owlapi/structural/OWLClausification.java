@@ -254,13 +254,13 @@ public class OWLClausification implements Serializable {
                 positiveFacts.add(Atom.create(AtomicConcept.INTERNAL_NAMED,new Term[] { ind }));
         }
         for (OWLObjectProperty p : axiomsExpressivity.m_objectProperties)
-            objectRoles.add(AtomicRole.createAtomicRole(p.getURI().toString()));
+            objectRoles.add(AtomicRole.create(p.getURI().toString()));
         for (OWLObjectPropertyExpression pe : axioms.m_transitiveObjectProperties) {
             Role role=getRole(pe);
             transitiveObjectRoles.add(role);
         }
         for (OWLDataProperty p : axiomsExpressivity.m_dataProperties)
-            dataRoles.add(AtomicRole.createAtomicRole(p.getURI().toString()));
+            dataRoles.add(AtomicRole.create(p.getURI().toString()));
         return new DLOntology(ontologyURI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,transitiveObjectRoles,objectRoles,dataRoles,hermitIndividuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,shouldUseNIRule,axiomsExpressivity.m_hasDatatypes);
     }
 
@@ -342,12 +342,12 @@ public class OWLClausification implements Serializable {
     protected static Atom getRoleAtom(OWLObjectPropertyExpression objectProperty,Term first,Term second) {
         objectProperty=objectProperty.getSimplified();
         if (objectProperty instanceof OWLObjectProperty) {
-            AtomicRole role=AtomicRole.createAtomicRole(((OWLObjectProperty)objectProperty).getURI().toString());
+            AtomicRole role=AtomicRole.create(((OWLObjectProperty)objectProperty).getURI().toString());
             return Atom.create(role,new Term[] { first,second });
         }
         else if (objectProperty instanceof OWLObjectPropertyInverse) {
             OWLObjectProperty internalObjectProperty=(OWLObjectProperty)((OWLObjectPropertyInverse)objectProperty).getInverse();
-            AtomicRole role=AtomicRole.createAtomicRole(internalObjectProperty.getURI().toString());
+            AtomicRole role=AtomicRole.create(internalObjectProperty.getURI().toString());
             return Atom.create(role,new Term[] { second,first });
         }
         else
@@ -367,7 +367,7 @@ public class OWLClausification implements Serializable {
      */
     protected static Atom getDataPropertyAtom(OWLDataPropertyExpression dataProperty,Term first,Term second) {
         if (dataProperty instanceof OWLDataProperty) {
-            AtomicRole property=AtomicRole.createAtomicRole(((OWLDataProperty)dataProperty).getURI().toString());
+            AtomicRole property=AtomicRole.create(((OWLDataProperty)dataProperty).getURI().toString());
             return Atom.create(property,new Term[] { first,second });
         }
         else
@@ -393,19 +393,19 @@ public class OWLClausification implements Serializable {
     protected static Role getRole(OWLObjectPropertyExpression objectProperty) {
         objectProperty=objectProperty.getSimplified();
         if (objectProperty instanceof OWLObjectProperty)
-            return AtomicRole.createAtomicRole(((OWLObjectProperty)objectProperty).getURI().toString());
+            return AtomicRole.create(((OWLObjectProperty)objectProperty).getURI().toString());
         else if (objectProperty instanceof OWLObjectPropertyInverse) {
             OWLObjectPropertyExpression internal=((OWLObjectPropertyInverse)objectProperty).getInverse();
             if (!(internal instanceof OWLObjectProperty))
                 throw new IllegalStateException("Internal error: invalid normal form.");
-            return InverseRole.create(AtomicRole.createAtomicRole(((OWLObjectProperty)internal).getURI().toString()));
+            return InverseRole.create(AtomicRole.create(((OWLObjectProperty)internal).getURI().toString()));
         }
         else
             throw new IllegalStateException("Internal error: invalid normal form.");
     }
 
     protected static Role getRole(OWLDataPropertyExpression dataProperty) {
-        return AtomicRole.createAtomicRole(dataProperty.asOWLDataProperty().getURI().toString());
+        return AtomicRole.create(dataProperty.asOWLDataProperty().getURI().toString());
     }
 
     protected static Individual getIndividual(OWLIndividual individual) {
@@ -494,7 +494,7 @@ public class OWLClausification implements Serializable {
 
         public void visit(OWLDataSomeRestriction desc) {
             OWLDataProperty dp=(OWLDataProperty)desc.getProperty();
-            AtomicRole property=AtomicRole.createAtomicRole(dp.getURI().toString());
+            AtomicRole property=AtomicRole.create(dp.getURI().toString());
             DataVisitor dataVisitor=new DataVisitor(ignoreUnsupportedDatatypes);
             desc.getFiller().accept(dataVisitor);
             DataRange d=new DatatypeRestrictionLiteral(DT.LITERAL);
@@ -536,7 +536,7 @@ public class OWLClausification implements Serializable {
         public void visit(OWLDataMinCardinalityRestriction desc) {
             int number=desc.getCardinality();
             OWLDataProperty dp=(OWLDataProperty)desc.getProperty();
-            AtomicRole property=AtomicRole.createAtomicRole(dp.getURI().toString());
+            AtomicRole property=AtomicRole.create(dp.getURI().toString());
             DataVisitor dataVisitor=new DataVisitor(ignoreUnsupportedDatatypes);
             desc.getFiller().accept(dataVisitor);
             DataRange d;

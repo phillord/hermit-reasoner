@@ -21,7 +21,7 @@ public abstract class InterningManager<E> {
         m_size=0;
         m_resizeThreshold=(int)(m_entries.length*LOAD_FACTOR);
     }
-    public E intern(E object) {
+    public synchronized E intern(E object) {
         processQueue();
         int hashCode=getHashCode(object);
         int objectEntryIndex=getIndexFor(hashCode,m_entries.length);
@@ -74,7 +74,7 @@ public abstract class InterningManager<E> {
     }
     /** Returns a previously-interned version of the given object; if the object has
         never before been interned then return null. */
-    public E getExisting(E e) {
+    public synchronized E getExisting(E e) {
         for (Entry<E> i=m_entries[getIndexFor(getHashCode(e), m_entries.length)];
              i != null; i = i.m_next) if (equal(i.get(),e)) return i.get();
         return null;

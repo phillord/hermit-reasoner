@@ -1,0 +1,60 @@
+// Copyright 2008 by Oxford University; see license.txt for details
+package org.semanticweb.HermiT.hierarchy;
+
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Set;
+import java.util.HashSet;
+
+public class HierarchyNode<E> {
+    protected final Set<E> m_equivalentElements;
+    protected final Set<HierarchyNode<E>> m_parentNodes;
+    protected final Set<HierarchyNode<E>> m_childNodes;
+    
+    public HierarchyNode() {
+        m_equivalentElements=new HashSet<E>();
+        m_parentNodes=new HashSet<HierarchyNode<E>>();
+        m_childNodes=new HashSet<HierarchyNode<E>>();
+    }
+    public HierarchyNode(E element,Set<HierarchyNode<E>> parentNodes,Set<HierarchyNode<E>> childNodes) {
+        m_equivalentElements=new HashSet<E>();
+        m_equivalentElements.add(element);
+        m_parentNodes=parentNodes;
+        m_childNodes=childNodes;
+    }
+    public Set<E> getEquivalentElements() {
+        return Collections.unmodifiableSet(m_equivalentElements);
+    }
+    public Set<HierarchyNode<E>> getParentNodes() {
+        return Collections.unmodifiableSet(m_parentNodes);
+    }
+    public Set<HierarchyNode<E>> getChildNodes() {
+        return Collections.unmodifiableSet(m_childNodes);
+    }
+    public Set<HierarchyNode<E>> getAncestorNodes() {
+        Set<HierarchyNode<E>> result=new HashSet<HierarchyNode<E>>();
+        Queue<HierarchyNode<E>> toVisit=new LinkedList<HierarchyNode<E>>();
+        toVisit.add(this);
+        while (!toVisit.isEmpty()) {
+            HierarchyNode<E> current=toVisit.poll();
+            if (result.add(current))
+                toVisit.addAll(current.getParentNodes());
+        }
+        return result;
+    }
+    public Set<HierarchyNode<E>> getDescendantNodes() {
+        Set<HierarchyNode<E>> result=new HashSet<HierarchyNode<E>>();
+        Queue<HierarchyNode<E>> toVisit=new LinkedList<HierarchyNode<E>>();
+        toVisit.add(this);
+        while (!toVisit.isEmpty()) {
+            HierarchyNode<E> current=toVisit.poll();
+            if (result.add(current))
+                toVisit.addAll(current.getChildNodes());
+        }
+        return result;
+    }
+    public String toString() {
+        return m_equivalentElements.toString();
+    }
+}

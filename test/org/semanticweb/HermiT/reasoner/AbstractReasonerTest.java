@@ -9,7 +9,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 
@@ -18,7 +17,6 @@ import junit.framework.TestCase;
 
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Reasoner;
-import org.semanticweb.HermiT.hierarchy.HierarchyPosition;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
@@ -28,6 +26,7 @@ import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.io.OWLOntologyInputSource;
 import org.semanticweb.owl.io.StringInputSource;
+import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLDescription;
 import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLIndividual;
@@ -72,6 +71,7 @@ public abstract class AbstractReasonerTest extends TestCase {
     protected void tearDown() {
         m_ontologyManager=null;
         m_ontology=null;
+        m_reasoner=null;
     }
 
     /**
@@ -110,7 +110,10 @@ public abstract class AbstractReasonerTest extends TestCase {
      *             inappropriate argument
      */
     protected void loadOntologyFromResource(Configuration configuration,String resourceName) throws Exception {
-        m_reasoner=new Reasoner(configuration,getClass().getResource(resourceName).toURI());
+        URI physicalURI=getClass().getResource(resourceName).toURI();
+        m_ontologyManager=OWLManager.createOWLOntologyManager();
+        m_ontology=m_ontologyManager.loadOntologyFromPhysicalURI(physicalURI);
+        m_reasoner=new Reasoner(configuration,m_ontologyManager,m_ontology);
     }
 
     /**
@@ -261,10 +264,10 @@ public abstract class AbstractReasonerTest extends TestCase {
      * @return the taxonomy
      */
     protected String getSubsumptionHierarchyAsText() {
-        Map<String,HierarchyPosition<String>> taxonomy=m_reasoner.getClassHierarchy();
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter output=new PrintWriter(buffer);
-        Reasoner.printSortedAncestorLists(output,taxonomy);
+        m_reasoner.printClassHierarchy(output);
+        output.flush();
         return buffer.toString();
     }
 
@@ -289,7 +292,7 @@ public abstract class AbstractReasonerTest extends TestCase {
     protected void assertSubsumptionHierarchy(String controlResource) throws Exception {
         String taxonomy=getSubsumptionHierarchyAsText();
         String controlString=getResourceText(controlResource);
-        assertEquals(taxonomy,controlString);
+        assertEquals(controlString,taxonomy);
     }
 
     /**
@@ -316,7 +319,9 @@ public abstract class AbstractReasonerTest extends TestCase {
             subAtomicConcept="file:/c/test.owl#"+subAtomicConcept;
         if (!superAtomicConcept.contains("#"))
             superAtomicConcept="file:/c/test.owl#"+superAtomicConcept;
-        boolean result=m_reasoner.isClassSubsumedBy(subAtomicConcept,superAtomicConcept);
+        OWLClass subClass=m_ontologyManager.getOWLDataFactory().getOWLClass(URI.create(subAtomicConcept));
+        OWLClass superClass=m_ontologyManager.getOWLDataFactory().getOWLClass(URI.create(superAtomicConcept));
+        boolean result=m_reasoner.isSubClassOf(subClass,superClass);
         assertEquals(expectedResult,result);
     }
 
@@ -324,31 +329,33 @@ public abstract class AbstractReasonerTest extends TestCase {
      * Tests whether the possibly complex concept subConcept is subsumed by the possibly complex concept superConcept and asserts that this coincides with the expected result.
      */
     protected void assertSubsumedBy(OWLDescription subConcept,OWLDescription superConcept,boolean expectedResult) {
-        boolean result=m_reasoner.isClassSubsumedBy(subConcept,superConcept);
+        boolean result=m_reasoner.isSubClassOf(subConcept,superConcept);
         assertEquals(expectedResult,result);
     }
 
     /**
      * Tests whether the atomic concept atomicConcept is satisfiable and asserts that this coincides with the expected result (satisfiable).
      */
-    protected void assertSatisfiable(String atomicConcept,boolean satisfiable) {
+    protected void assertSatisfiable(String atomicConcept,boolean expectedResult) {
         if (!atomicConcept.contains("#"))
             atomicConcept="file:/c/test.owl#"+atomicConcept;
-        assertEquals(satisfiable,m_reasoner.isClassSatisfiable(atomicConcept));
+        OWLClass clazz=m_ontologyManager.getOWLDataFactory().getOWLClass(URI.create(atomicConcept));
+        boolean result=m_reasoner.isSatisfiable(clazz);
+        assertEquals(expectedResult,result);
     }
 
     /**
      * Tests whether the given possibly complex concept is satisfiable and asserts that this coincides with the expected result (satisfiable).
      */
     protected void assertSatisfiable(OWLDescription concept,boolean satisfiable) throws Exception {
-        assertEquals(satisfiable,m_reasoner.isClassSatisfiable(concept));
+        assertEquals(satisfiable,m_reasoner.isSatisfiable(concept));
     }
 
     /**
      * Tests whether the given individual is an instance of the given concept and asserts that this coincides with the expected result.
      */
     protected void assertInstanceOf(OWLDescription concept,OWLIndividual individual,boolean expectedResult) {
-        boolean result=m_reasoner.isInstanceOf(concept,individual);
+        boolean result=m_reasoner.hasType(individual,concept,false);
         assertEquals(expectedResult,result);
     }
 
@@ -356,7 +363,7 @@ public abstract class AbstractReasonerTest extends TestCase {
      * Tests whether the given concept has the specified individuals.
      */
     protected void assertInstancesOf(OWLDescription concept,boolean direct,String... expectedIndividuals) {
-        Set<OWLIndividual> actual=direct ? m_reasoner.getClassDirectInstances(concept) : m_reasoner.getClassInstances(concept);
+        Set<OWLIndividual> actual=m_reasoner.getIndividuals(concept,direct);
         Set<String> actualIndividualURIs=new HashSet<String>();
         for (OWLIndividual individual : actual)
             actualIndividualURIs.add(individual.getURI().toString());

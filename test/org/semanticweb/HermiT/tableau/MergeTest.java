@@ -28,7 +28,7 @@ public class MergeTest extends AbstractReasonerInternalsTest {
     protected static final AtomicConcept B=AtomicConcept.create("B");
     protected static final AtomicConcept C=AtomicConcept.create("C");
     protected static final AtomicConcept D=AtomicConcept.create("D");
-    protected static final AtomicRole R=AtomicRole.createAtomicRole("R");
+    protected static final AtomicRole R=AtomicRole.create("R");
     protected static final AtomicNegationConcept NEG_A=AtomicNegationConcept.create(A);
     protected static final AtLeastConcept EXISTS_NEG_A=AtLeastConcept.create(1,R,NEG_A);
     protected static final DLOntology TEST_DL_ONTOLOGY;

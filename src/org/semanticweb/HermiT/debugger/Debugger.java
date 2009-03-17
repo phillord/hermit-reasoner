@@ -238,7 +238,7 @@ public class Debugger extends TableauMonitorForwarder {
         else if (predicate.startsWith("+"))
             return AtomicConcept.create(m_namespaces.expandAbbreviatedURI(predicate.substring(1)));
         else if (predicate.startsWith("-"))
-            return AtomicRole.createAtomicRole(m_namespaces.expandAbbreviatedURI(predicate.substring(1)));
+            return AtomicRole.create(m_namespaces.expandAbbreviatedURI(predicate.substring(1)));
         else if (predicate.startsWith("$")) {
             String graphName=m_namespaces.expandAbbreviatedURI(predicate.substring(1));
             for (DescriptionGraph descriptionGraph : m_tableau.getDLOntology().getAllDescriptionGraphs())

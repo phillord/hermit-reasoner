@@ -118,7 +118,7 @@
                 <attribute name="Implementation-Title" value="HermiT"/>
                 <attribute name="Implementation-Vendor" value="Oxford University"/>
                 <attribute name="Implementation-Version" value="${version}"/>
-                <attribute name="Main-Class" value="org.semanticweb.HermiT.CommandLine"/>
+                <attribute name="Main-Class" value="org.semanticweb.HermiT.cli.CommandLine"/>
                 <attribute name="Bundle-ManifestVersion" value="2"/>
                 <attribute name="Bundle-Name" value="HermiT Reasoner"/>
                 <attribute name="Bundle-SymbolicName" value="org.semanticweb.HermiT;singleton:=true"/>

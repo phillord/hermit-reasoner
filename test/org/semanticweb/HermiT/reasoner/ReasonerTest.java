@@ -1748,6 +1748,6 @@ public class ReasonerTest extends AbstractReasonerTest {
             df.getOWLObjectOneOf(a),
             df.getOWLObjectComplementOf(c));
 
-        assertFalse(m_reasoner.isClassSatisfiable(desc));
+        assertFalse(m_reasoner.isSatisfiable(desc));
     }
 }

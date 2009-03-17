@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.io.Serializable;
 
 import org.semanticweb.HermiT.model.*;
 import org.semanticweb.HermiT.tableau.*;
@@ -14,9 +13,7 @@ import org.semanticweb.HermiT.tableau.*;
 /**
  * A subsumption checker that uses the tableau to perform the check.
  */
-public class TableauSubsumptionChecker implements SubsumptionHierarchy.SubsumptionChecker,Serializable {
-    private static final long serialVersionUID=-2023801882010561315L;
-
+public class TableauSubsumptionChecker {
     protected final Tableau m_tableau;
     protected final Map<AtomicConcept,AtomicConceptInfo> m_atomicConceptInfos;
 
@@ -24,23 +21,28 @@ public class TableauSubsumptionChecker implements SubsumptionHierarchy.Subsumpti
         m_tableau=tableau;
         m_atomicConceptInfos=new HashMap<AtomicConcept,AtomicConceptInfo>();
     }
-    public Set<AtomicConcept> getAllAtomicConcepts() {
-        return m_tableau.getDLOntology().getAllAtomicConcepts();
-    }
     public boolean canGetAllSubsumersEasily() {
         return m_tableau.isDeterministic();
     }
-    public Set<AtomicConcept> getAllSubsumers(AtomicConcept concept) throws SubsumptionHierarchy.SubusmptionCheckerException {
-        AtomicConceptInfo conceptInfo=getAtomicConceptInfo(concept);
-        if (!conceptInfo.m_allSubsumersKnown) {
-            if (!canGetAllSubsumersEasily())
-                throw new SubsumptionHierarchy.SubusmptionCheckerException("Retrieveing all subsumers is not easy for this checker.");
-            isSatisfiable(concept,false);
+    public Map<AtomicConcept,Set<AtomicConcept>> getAllKnownSubsumers(Set<AtomicConcept> relevantAtomicConcepts) {
+        Map<AtomicConcept,Set<AtomicConcept>> result=new HashMap<AtomicConcept,Set<AtomicConcept>>();
+        result.put(AtomicConcept.NOTHING,relevantAtomicConcepts);
+        for (AtomicConcept atomicConcept : relevantAtomicConcepts) {
+            boolean isSatisfiable=isSatisfiable(atomicConcept,false);
+            AtomicConceptInfo conceptInfo=m_atomicConceptInfos.get(atomicConcept);
+            if (isSatisfiable) {
+                if (!conceptInfo.m_allSubsumersKnown)
+                    throw new IllegalStateException("Not all subsumers are known for '"+atomicConcept.getURI()+"'.");
+                Set<AtomicConcept> subsumers=new HashSet<AtomicConcept>();
+                for (AtomicConcept subsumer : conceptInfo.m_knownSubsumers)
+                    if (relevantAtomicConcepts.contains(subsumer))
+                        subsumers.add(subsumer);
+                result.put(atomicConcept,subsumers);
+            }
+            else
+                result.put(atomicConcept,new HashSet<AtomicConcept>(relevantAtomicConcepts));
         }
-        if (conceptInfo.m_isSatisfiable)
-            return conceptInfo.m_knownSubsumers;
-        else
-            return null;
+        return result;
     }
     public boolean isSatisfiable(AtomicConcept concept) {
         return isSatisfiable(concept,true);
@@ -82,9 +84,8 @@ public class TableauSubsumptionChecker implements SubsumptionHierarchy.Subsumpti
                 updateKnownSubsumers(subconcept);
                 updatePossibleSubsumers();
             }
-            else {
+            else
                 subconceptInfo.addKnownSubsumer(superconcept);
-            }
             return isSubsumedBy;
         }
         else {
@@ -96,6 +97,7 @@ public class TableauSubsumptionChecker implements SubsumptionHierarchy.Subsumpti
     protected void updateKnownSubsumers(AtomicConcept subconcept) {
         Node checkedNode=m_tableau.getCheckedNode().getCanonicalNode();
         AtomicConceptInfo subconceptInfo=getAtomicConceptInfo(subconcept);
+        subconceptInfo.addKnownSubsumer(AtomicConcept.THING);
         ExtensionTable.Retrieval retrieval=m_tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
         retrieval.getBindingsBuffer()[1]=checkedNode;
         retrieval.open();
@@ -132,9 +134,7 @@ public class TableauSubsumptionChecker implements SubsumptionHierarchy.Subsumpti
         return result;
     }
     
-    protected static final class AtomicConceptInfo implements Serializable {
-        private static final long serialVersionUID=2370809671193223969L;
-
+    protected static final class AtomicConceptInfo {
         protected Boolean m_isSatisfiable;
         protected Set<AtomicConcept> m_knownSubsumers;
         protected Set<AtomicConcept> m_possibleSubsumers;
