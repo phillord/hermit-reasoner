@@ -1132,10 +1132,21 @@ public class Reasoner implements OWLReasoner,Serializable {
 
     public static class ReasonerFactory extends ProtegeOWLReasonerFactoryAdapter {
         
+        @SuppressWarnings("serial")
         public OWLReasoner createReasoner(OWLOntologyManager ontologyManager) {
             Configuration configuration=new Configuration();
             configuration.ignoreUnsupportedDatatypes=true;
-            return new Reasoner(configuration);
+            return new Reasoner(configuration) {
+                protected Set<OWLOntology> m_loadedOntologies;
+                
+                public void loadOntologies(Set<OWLOntology> ontologies) {
+                    super.loadOntologies(ontologies);
+                    m_loadedOntologies=ontologies;
+                }
+                public Set<OWLOntology> getLoadedOntologies() {
+                    return m_loadedOntologies;
+                }
+            };
         }
         public void initialise() {
         }
