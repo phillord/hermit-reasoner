@@ -4,7 +4,7 @@ import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.semanticweb.HermiT.owlapi.structural.OWLHasKeyDummy;
+import org.semanticweb.HermiT.structural.OWLHasKeyDummy;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLClassAssertionAxiom;

@@ -4,9 +4,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Configuration;
-import org.semanticweb.HermiT.owlapi.structural.OWLAxioms;
-import org.semanticweb.HermiT.owlapi.structural.OWLHasKeyDummy;
-import org.semanticweb.HermiT.owlapi.structural.OWLNormalization;
+import org.semanticweb.HermiT.structural.OWLAxioms;
+import org.semanticweb.HermiT.structural.OWLHasKeyDummy;
+import org.semanticweb.HermiT.structural.OWLNormalization;
 import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLDescription;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;

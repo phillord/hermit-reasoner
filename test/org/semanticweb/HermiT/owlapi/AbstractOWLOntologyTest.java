@@ -27,7 +27,7 @@ import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
-import org.semanticweb.HermiT.owlapi.structural.OWLClausification;
+import org.semanticweb.HermiT.structural.OWLClausification;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
 import org.semanticweb.owl.apibinding.OWLManager;

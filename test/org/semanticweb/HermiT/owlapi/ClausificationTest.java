@@ -13,8 +13,8 @@ import org.semanticweb.HermiT.Namespaces;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
-import org.semanticweb.HermiT.owlapi.structural.OWLHasKeyDummy;
-import org.semanticweb.HermiT.owlapi.structural.OWLClausification;
+import org.semanticweb.HermiT.structural.OWLClausification;
+import org.semanticweb.HermiT.structural.OWLHasKeyDummy;
 
 public class ClausificationTest extends AbstractOWLOntologyTest {
     static {
