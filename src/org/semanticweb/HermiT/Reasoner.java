@@ -61,7 +61,6 @@ import org.semanticweb.HermiT.structural.OWLHasKeyDummy;
 import org.semanticweb.HermiT.structural.OWLNormalization;
 import org.semanticweb.HermiT.structural.TransitivityManager;
 import org.semanticweb.HermiT.tableau.Tableau;
-import org.semanticweb.HermiT.util.GraphUtils;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLClass;
@@ -390,7 +389,9 @@ public class Reasoner implements OWLReasoner,Serializable {
 
     public void classifyObjectProperties() {
         if (m_atomicObjectRoleHierarchy==null) {
-            final Map<Role,Set<Role>> knownSubsumers=new HashMap<Role,Set<Role>>();
+            Map<Role,Set<Role>> knownSubsumers=new HashMap<Role,Set<Role>>();
+            addInclusion(knownSubsumers,AtomicRole.TOP_OBJECT_ROLE,AtomicRole.TOP_OBJECT_ROLE);
+            addInclusion(knownSubsumers,AtomicRole.BOTTOM_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE);
             for (DLClause dlClause : m_dlOntology.getDLClauses()) {
                 if (dlClause.isRoleInclusion()) {
                     AtomicRole sub=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
@@ -413,8 +414,11 @@ public class Reasoner implements OWLReasoner,Serializable {
             for (AtomicRole atomicRole : m_dlOntology.getAllAtomicObjectRoles()) {
                 allRoles.add(atomicRole);
                 allRoles.add(atomicRole.getInverse());
+                addInclusion(knownSubsumers,atomicRole,AtomicRole.TOP_OBJECT_ROLE);
+                addInclusion(knownSubsumers,atomicRole.getInverse(),AtomicRole.TOP_OBJECT_ROLE);
+                addInclusion(knownSubsumers,AtomicRole.BOTTOM_OBJECT_ROLE,atomicRole);
+                addInclusion(knownSubsumers,AtomicRole.BOTTOM_OBJECT_ROLE,atomicRole.getInverse());
             }
-            GraphUtils.transitivelyClose(knownSubsumers);
             m_atomicObjectRoleHierarchy=OptimizedHierarchyBuilder.buildHierarchy(knownSubsumers,allRoles,AtomicRole.TOP_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE);
         }
     }
@@ -501,8 +505,20 @@ public class Reasoner implements OWLReasoner,Serializable {
         return result;
     }
 
+    public Set<OWLObjectPropertyExpression> getInverseProperties(OWLObjectPropertyExpression property) {
+        return getEquivalentProperties(property.getInverseProperty());
+    }
+
+    @Deprecated
     public Set<Set<OWLObjectProperty>> getInverseProperties(OWLObjectProperty property) {
-        throw new UnsupportedOperationException();
+        Set<OWLObjectProperty> result=new HashSet<OWLObjectProperty>();
+        Set<OWLObjectPropertyExpression> equivalentToInverse=getInverseProperties((OWLObjectPropertyExpression)property);
+        for (OWLObjectPropertyExpression objectPropertyExpression : equivalentToInverse)
+            if (objectPropertyExpression instanceof OWLObjectProperty)
+                result.add((OWLObjectProperty)objectPropertyExpression);
+        Set<Set<OWLObjectProperty>> setOfSets=new HashSet<Set<OWLObjectProperty>>();
+        setOfSets.add(result);
+        return setOfSets;
     }
 
     public boolean isFunctional(OWLObjectProperty property) {
@@ -538,6 +554,7 @@ public class Reasoner implements OWLReasoner,Serializable {
     public boolean isSymmetric(OWLObjectProperty property) {
         throw new UnsupportedOperationException();
     }
+
     public boolean isTransitive(OWLObjectProperty property) {
         throw new UnsupportedOperationException();
     }
@@ -550,7 +567,9 @@ public class Reasoner implements OWLReasoner,Serializable {
     
     public void classifyDataProperties() {
         if (m_atomicDataRoleHierarchy==null) {
-            final Map<AtomicRole,Set<AtomicRole>> knownSubsumers=new HashMap<AtomicRole,Set<AtomicRole>>();
+            Map<AtomicRole,Set<AtomicRole>> knownSubsumers=new HashMap<AtomicRole,Set<AtomicRole>>();
+            addInclusion(knownSubsumers,AtomicRole.TOP_DATA_ROLE,AtomicRole.TOP_DATA_ROLE);
+            addInclusion(knownSubsumers,AtomicRole.BOTTOM_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE);
             for (DLClause dlClause : m_dlOntology.getDLClauses()) {
                 if (dlClause.isRoleInclusion()) {
                     AtomicRole sub=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
@@ -559,7 +578,10 @@ public class Reasoner implements OWLReasoner,Serializable {
                         addInclusion(knownSubsumers,sub,sup);
                 }
             }
-            GraphUtils.transitivelyClose(knownSubsumers);
+            for (AtomicRole atomicRole : m_dlOntology.getAllAtomicDataRoles()) {
+                addInclusion(knownSubsumers,atomicRole,AtomicRole.TOP_DATA_ROLE);
+                addInclusion(knownSubsumers,AtomicRole.BOTTOM_DATA_ROLE,atomicRole);
+            }
             m_atomicDataRoleHierarchy=OptimizedHierarchyBuilder.buildHierarchy(knownSubsumers,m_dlOntology.getAllAtomicDataRoles(),AtomicRole.TOP_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE);
         }
     }
@@ -1119,13 +1141,13 @@ public class Reasoner implements OWLReasoner,Serializable {
         return result;
     }
 
-    protected static <T> void addInclusion(Map<T,Set<T>> subRoles,T sub,T sup) {
-        Set<T> subs=subRoles.get(sup);
-        if (subs==null) {
-            subs=new HashSet<T>();
-            subRoles.put(sup,subs);
+    protected static <T> void addInclusion(Map<T,Set<T>> knownSubsumers,T sub,T sup) {
+        Set<T> sups=knownSubsumers.get(sub);
+        if (sups==null) {
+            sups=new HashSet<T>();
+            knownSubsumers.put(sub,sups);
         }
-        subs.add(sub);
+        sups.add(sup);
     }
     
     // The factory for the reasoner from a plugin
@@ -1145,6 +1167,24 @@ public class Reasoner implements OWLReasoner,Serializable {
                 }
                 public Set<OWLOntology> getLoadedOntologies() {
                     return m_loadedOntologies;
+                }
+                public boolean isSymmetric(OWLObjectProperty property) {
+                    return false;
+                }
+                public boolean isTransitive(OWLObjectProperty property) {
+                    return false;
+                }
+                public Set<OWLDataRange> getRanges(OWLDataProperty property) {
+                    return new HashSet<OWLDataRange>();
+                }
+                public Map<OWLObjectProperty,Set<OWLIndividual>> getObjectPropertyRelationships(OWLIndividual individual) {
+                    return new HashMap<OWLObjectProperty,Set<OWLIndividual>>();
+                }
+                public Map<OWLDataProperty,Set<OWLConstant>> getDataPropertyRelationships(OWLIndividual individual) {
+                    return new HashMap<OWLDataProperty,Set<OWLConstant>>();
+                }
+                public Set<OWLConstant> getRelatedValues(OWLIndividual subject,OWLDataPropertyExpression property) {
+                    return new HashSet<OWLConstant>();
                 }
             };
         }

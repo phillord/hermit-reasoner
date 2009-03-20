@@ -22,6 +22,65 @@ public class ReasonerTest extends AbstractReasonerTest {
         super(name);
     }
 
+    @SuppressWarnings("unchecked")
+    public void testObjectPropertyHierarchy() throws Exception {
+        String axioms =
+            "InverseObjectProperties( r1 r1i ) "+
+            "InverseObjectProperties( r2 r2i ) "+
+            "InverseObjectProperties( r3 r3i ) "+
+            "InverseObjectProperties( r4 r4i ) "+
+            "SubObjectPropertyOf( r4 r2 ) "+
+            "SubObjectPropertyOf( r4 r3 ) "+
+            "SubObjectPropertyOf( r3 r5 ) "+
+            "SubObjectPropertyOf( r5 r3 ) "+
+            "SubObjectPropertyOf( r2i r1i ) "+
+            "SubObjectPropertyOf( r3i r1i ) "+
+            "SubObjectPropertyOf( r4 r1 ) "+
+            "SubObjectPropertyOf( r6 r2 ) "+
+            "SubObjectPropertyOf( r6 r2i ) ";
+        loadOntologyWithAxioms(axioms);
+        
+        assertEquivalentObjectProperties("r1",URIs("r1",INV("r1i")));
+        assertEquivalentObjectProperties("r2",URIs("r2",INV("r2i")));
+        assertEquivalentObjectProperties("r3",URIs("r3","r5",INV("r3i")));
+        assertEquivalentObjectProperties("r4",URIs("r4",INV("r4i")));
+        assertEquivalentObjectProperties("r5",URIs("r3","r5",INV("r3i")));
+        assertEquivalentObjectProperties("r6",URIs("r6"));
+        
+        assertSuperObjectProperties("r2",EQ("r1",INV("r1i")));
+        assertSuperObjectProperties("r3",EQ("r1",INV("r1i")));
+        assertSuperObjectProperties("r4",EQ("r2",INV("r2i")),EQ("r3","r5",INV("r3i")));
+        assertSuperObjectProperties("r5",EQ("r1",INV("r1i")));
+        assertSuperObjectProperties("r6",EQ("r2",INV("r2i")),EQ("r2i",INV("r2")));
+    }
+    
+    @SuppressWarnings("unchecked")
+    public void testDataPropertyHierarchy() throws Exception {
+        String axioms =
+            "SubDataPropertyOf( r4 r2 ) "+
+            "SubDataPropertyOf( r4 r3 ) "+
+            "SubDataPropertyOf( r3 r5 ) "+
+            "SubDataPropertyOf( r5 r3 ) "+
+            "SubDataPropertyOf( r2 r1 ) "+
+            "SubDataPropertyOf( r3 r1 ) "+
+            "SubDataPropertyOf( r4 r1 ) "+
+            "SubDataPropertyOf( r6 r2 ) ";
+        loadOntologyWithAxioms(axioms);
+        
+        assertEquivalentDataProperties("r1",URIs("r1"));
+        assertEquivalentDataProperties("r2",URIs("r2"));
+        assertEquivalentDataProperties("r3",URIs("r3","r5"));
+        assertEquivalentDataProperties("r4",URIs("r4"));
+        assertEquivalentDataProperties("r5",URIs("r3","r5"));
+        assertEquivalentDataProperties("r6",URIs("r6"));
+        
+        assertSuperDataProperties("r2",EQ("r1"));
+        assertSuperDataProperties("r3",EQ("r1"));
+        assertSuperDataProperties("r4",EQ("r2"),EQ("r3","r5"));
+        assertSuperDataProperties("r5",EQ("r1"));
+        assertSuperDataProperties("r6",EQ("r2"));
+    }
+    
     public void testComplexConceptInstanceRetrieval() throws Exception {
         String axioms =
             "EquivalentClasses(a ObjectSomeValuesFrom(r b)) " +
@@ -41,10 +100,10 @@ public class ReasonerTest extends AbstractReasonerTest {
         OWLClass e = df.getOWLClass(URI.create("file:/c/test.owl#e"));
         OWLDescription some_r_b = df.getOWLObjectSomeRestriction(r,b);
         OWLDescription some_r_e = df.getOWLObjectSomeRestriction(r,e);
-        assertInstancesOf(a,false,"i1");
-        assertInstancesOf(some_r_b,false,"i1");
-        assertInstancesOf(some_r_e,false,"i1","i2","i3");
-        assertInstancesOf(some_r_e,true,"i3");
+        assertInstancesOf(a,false,URIs("i1"));
+        assertInstancesOf(some_r_b,false,URIs("i1"));
+        assertInstancesOf(some_r_e,false,URIs("i1","i2","i3"));
+        assertInstancesOf(some_r_e,true,URIs("i3"));
     }
     
     public void testWidmann1() throws Exception {

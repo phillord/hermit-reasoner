@@ -73,6 +73,13 @@ public class OWLAxiomsExpressivity implements OWLDescriptionVisitor {
             visitProperty(property);
         for (OWLObjectPropertyExpression property : axioms.m_transitiveObjectProperties)
             visitProperty(property);
+        for (OWLDataPropertyExpression[] inclusion : axioms.m_dataPropertyInclusions) {
+            visitProperty(inclusion[0]);
+            visitProperty(inclusion[1]);
+        }
+        for (OWLDataPropertyExpression[] disjoint : axioms.m_disjointDataProperties)
+            for (int index=0;index<disjoint.length;index++)
+                visitProperty(disjoint[index]);
         if (axioms.m_dataPropertyInclusions.size()>0 || axioms.m_disjointDataProperties.size()>0)
             m_hasDatatypes=true;
         FactVisitor factVisitor=new FactVisitor();

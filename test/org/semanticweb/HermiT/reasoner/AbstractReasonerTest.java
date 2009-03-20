@@ -28,6 +28,9 @@ import org.semanticweb.owl.io.OWLOntologyInputSource;
 import org.semanticweb.owl.io.StringInputSource;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLDescription;
+import org.semanticweb.owl.model.OWLDataProperty;
+import org.semanticweb.owl.model.OWLObjectProperty;
+import org.semanticweb.owl.model.OWLObjectPropertyExpression;
 import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLOntology;
@@ -368,12 +371,112 @@ public abstract class AbstractReasonerTest extends TestCase {
         for (OWLIndividual individual : actual)
             actualIndividualURIs.add(individual.getURI().toString());
         String[] expectedModified=expectedIndividuals.clone();
-        for (int index=0;index<expectedModified.length;index++)
-            if (!expectedModified[index].contains("#"))
-                expectedModified[index]="file:/c/test.owl#"+expectedModified[index];
         assertContainsAll(actualIndividualURIs,expectedModified);
     }
-
+    
+    /**
+     * Checks the superproperties of some object property.
+     */
+    protected void assertSuperObjectProperties(String objectProperty,Set<String>... control) {
+        if (!objectProperty.contains("#"))
+            objectProperty="file:/c/test.owl#"+objectProperty;
+        OWLObjectPropertyExpression ope=m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(URI.create(objectProperty));
+        Set<Set<String>> actual=setOfSetsOfOPEsToStrings(m_reasoner.getSuperProperties(ope));
+        assertContainsAll(actual,control);
+    }
+    
+    /**
+     * Checks the subproperties of some object property.
+     */
+    protected void assertSubObjectProperties(String objectProperty,Set<String>... control) {
+        if (!objectProperty.contains("#"))
+            objectProperty="file:/c/test.owl#"+objectProperty;
+        OWLObjectPropertyExpression ope=m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(URI.create(objectProperty));
+        Set<Set<String>> actual=setOfSetsOfOPEsToStrings(m_reasoner.getSubProperties(ope));
+        assertContainsAll(actual,control);
+    }
+    
+    /**
+     * Checks the equivalents of some object property.
+     */
+    protected void assertEquivalentObjectProperties(String objectProperty,String... control) {
+        if (!objectProperty.contains("#"))
+            objectProperty="file:/c/test.owl#"+objectProperty;
+        OWLObjectPropertyExpression ope=m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(URI.create(objectProperty));
+        Set<String> actual=setOfOPEsToStrings(m_reasoner.getEquivalentProperties(ope));
+        assertContainsAll(actual,control);
+    }
+    
+    /**
+     * Checks the superproperties of some data property.
+     */
+    protected void assertSuperDataProperties(String dataProperty,Set<String>... control) {
+        if (!dataProperty.contains("#"))
+            dataProperty="file:/c/test.owl#"+dataProperty;
+        OWLDataProperty dp=m_ontologyManager.getOWLDataFactory().getOWLDataProperty(URI.create(dataProperty));
+        Set<Set<String>> actual=setOfSetsOfDPsToStrings(m_reasoner.getSuperProperties(dp));
+        assertContainsAll(actual,control);
+    }
+    
+    /**
+     * Checks the subproperties of some data property.
+     */
+    protected void assertSubDataProperties(String dataProperty,Set<String>... control) {
+        if (!dataProperty.contains("#"))
+            dataProperty="file:/c/test.owl#"+dataProperty;
+        OWLDataProperty dp=m_ontologyManager.getOWLDataFactory().getOWLDataProperty(URI.create(dataProperty));
+        Set<Set<String>> actual=setOfSetsOfDPsToStrings(m_reasoner.getSubProperties(dp));
+        assertContainsAll(actual,control);
+    }
+    
+    /**
+     * Checks the equivalents of some data property.
+     */
+    protected void assertEquivalentDataProperties(String dataProperty,String... control) {
+        if (!dataProperty.contains("#"))
+            dataProperty="file:/c/test.owl#"+dataProperty;
+        OWLDataProperty dp=m_ontologyManager.getOWLDataFactory().getOWLDataProperty(URI.create(dataProperty));
+        Set<String> actual=setOfDPsToStrings(m_reasoner.getEquivalentProperties(dp));
+        assertContainsAll(actual,control);
+    }
+    
+    protected static Set<Set<String>> setOfSetsOfOPEsToStrings(Set<Set<OWLObjectPropertyExpression>> setOfSets) {
+        Set<Set<String>> result=new HashSet<Set<String>>();
+        for (Set<OWLObjectPropertyExpression> set : setOfSets) {
+            Set<String> translatedSet=setOfOPEsToStrings(set);
+            result.add(translatedSet);
+        }
+        return result;
+    }
+    
+    protected static Set<String> setOfOPEsToStrings(Set<OWLObjectPropertyExpression> set) {
+        Set<String> translatedSet=new HashSet<String>();
+        for (OWLObjectPropertyExpression ope : set)
+            if (ope instanceof OWLObjectProperty)
+                translatedSet.add(((OWLObjectProperty)ope).getURI().toString());
+            else {
+                OWLObjectProperty innerOp=ope.getNamedProperty();
+                translatedSet.add("(inv "+innerOp.getURI().toString()+")");
+            }
+        return translatedSet;
+    }    
+    
+    protected static Set<Set<String>> setOfSetsOfDPsToStrings(Set<Set<OWLDataProperty>> setOfSets) {
+        Set<Set<String>> result=new HashSet<Set<String>>();
+        for (Set<OWLDataProperty> set : setOfSets) {
+            Set<String> translatedSet=setOfDPsToStrings(set);
+            result.add(translatedSet);
+        }
+        return result;
+    }
+    
+    protected static Set<String> setOfDPsToStrings(Set<OWLDataProperty> set) {
+        Set<String> translatedSet=new HashSet<String>();
+        for (OWLDataProperty dp : set)
+            translatedSet.add(dp.getURI().toString());
+        return translatedSet;
+    }    
+    
     /**
      * Can be overridden by the subclass to provide a different configuration for the tests.
      */
@@ -401,5 +504,33 @@ public abstract class AbstractReasonerTest extends TestCase {
             System.out.flush();
             throw e;
         }
+    }
+    
+    protected static Set<String> EQ(String... args) {
+        Set<String> result=new HashSet<String>();
+        for (String arg : args) {
+            if (!arg.contains("#"))
+                arg="file:/c/test.owl#"+arg;
+            result.add(arg);
+        }
+        return result;
+    }
+
+    protected static String[] URIs(String... args) {
+        for (int index=0;index<args.length;index++)
+            args[index]=URI(args[index]);
+        return args;
+    }
+
+    protected static String URI(String arg) {
+        if (!arg.contains("#"))
+            arg="file:/c/test.owl#"+arg;
+        return arg;
+    }
+
+    protected static String INV(String arg) {
+        if (!arg.contains("#"))
+            arg="file:/c/test.owl#"+arg;
+        return "(inv "+arg+")";
     }
 }
