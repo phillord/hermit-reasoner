@@ -2,9 +2,9 @@ package org.semanticweb.HermiT.reasoner;
 
 import org.semanticweb.HermiT.Configuration;
 
-public class HeavyReasonerIndividualReuseTest extends HeavyReasonerTest {
+public class ClassificationIndividualReuseTest extends ClassificationTest {
 
-    public HeavyReasonerIndividualReuseTest(String name) {
+    public ClassificationIndividualReuseTest(String name) {
         super(name);
     }
     public void testGalenIansFullUndoctored() throws Exception {

@@ -1,8 +1,8 @@
 package org.semanticweb.HermiT.reasoner;
 
-public class HeavyReasonerTest extends AbstractReasonerTest {
+public class ClassificationTest extends AbstractReasonerTest {
 
-    public HeavyReasonerTest(String name) {
+    public ClassificationTest(String name) {
         super(name);
     }
 
