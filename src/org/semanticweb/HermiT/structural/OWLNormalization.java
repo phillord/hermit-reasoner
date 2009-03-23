@@ -102,19 +102,18 @@ public class OWLNormalization implements Serializable {
         m_axioms=axioms;
     }
 
-    public void processOntology(Configuration config,OWLOntology inOntology) {
+    public void processOntology(Configuration config,OWLOntology ontology) {
         // Each entry in the inclusions list represents a disjunction of
         // concepts -- that is, each OWLDescription in an entry contributes a
         // disjunct. It is thus not really inclusions, but rather a disjunction
         // of concepts that represents an inclusion axiom.
+        m_axioms.m_classes.addAll(ontology.getReferencedClasses());
+        m_axioms.m_objectProperties.addAll(ontology.getReferencedObjectProperties());
+        m_axioms.m_dataProperties.addAll(ontology.getReferencedDataProperties());
+        m_axioms.m_individuals.addAll(ontology.getReferencedIndividuals());
         AxiomVisitor axiomVisitor=new AxiomVisitor();
-        for (OWLAxiom axiom : inOntology.getAxioms()) {
-            // the visitor populates the member variables such as
-            // m_reflexiveObjectProperties, m_disjointObjectProperties, etc,
-            // collects the facts and turns equivalences and implications into
-            // an internal set of disjunctions that is then normalized
+        for (OWLAxiom axiom : ontology.getAxioms())
             axiom.accept(axiomVisitor);
-        }
         List<OWLDescription[]> inclusions=axiomVisitor.getInclusionsAsDisjunctions();
         normalizeInclusions(inclusions,m_axioms.m_conceptInclusions,m_axioms.m_facts);
     }

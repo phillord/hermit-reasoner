@@ -6,12 +6,20 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.ArrayList;
 
+import org.semanticweb.owl.model.OWLClass;
+import org.semanticweb.owl.model.OWLDataProperty;
 import org.semanticweb.owl.model.OWLDescription;
 import org.semanticweb.owl.model.OWLDataPropertyExpression;
+import org.semanticweb.owl.model.OWLIndividual;
+import org.semanticweb.owl.model.OWLObjectProperty;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
 import org.semanticweb.owl.model.OWLIndividualAxiom;
 
 public class OWLAxioms {
+    public final Set<OWLClass> m_classes;
+    public final Set<OWLObjectProperty> m_objectProperties;
+    public final Set<OWLDataProperty> m_dataProperties;
+    public final Set<OWLIndividual> m_individuals;
     public final Collection<OWLDescription[]> m_conceptInclusions;
     public final Collection<OWLObjectPropertyExpression[]> m_objectPropertyInclusions;
     public final Collection<OWLObjectPropertyExpression[]> m_disjointObjectProperties;
@@ -25,6 +33,10 @@ public class OWLAxioms {
     public final Set<OWLHasKeyDummy> m_hasKeys;
 
     public OWLAxioms() {
+        m_classes=new HashSet<OWLClass>();
+        m_objectProperties=new HashSet<OWLObjectProperty>();
+        m_dataProperties=new HashSet<OWLDataProperty>();
+        m_individuals=new HashSet<OWLIndividual>();
         m_conceptInclusions=new ArrayList<OWLDescription[]>();
         m_objectPropertyInclusions=new ArrayList<OWLObjectPropertyExpression[]>();
         m_disjointObjectProperties=new ArrayList<OWLObjectPropertyExpression[]>();

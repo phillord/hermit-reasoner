@@ -242,10 +242,10 @@ public class OWLClausification implements Serializable {
         Set<Role> transitiveObjectRoles=new HashSet<Role>();
         Set<AtomicRole> objectRoles=new HashSet<AtomicRole>();
         Set<AtomicRole> dataRoles=new HashSet<AtomicRole>();
-        for (OWLClass c : axiomsExpressivity.m_classes)
+        for (OWLClass c : axioms.m_classes)
             atomicConcepts.add(AtomicConcept.create(c.getURI().toString()));
         Set<Individual> hermitIndividuals=new HashSet<Individual>();
-        for (OWLIndividual i : axiomsExpressivity.m_individuals) {
+        for (OWLIndividual i : axioms.m_individuals) {
             Individual ind=Individual.create(i.getURI().toString());
             hermitIndividuals.add(ind);
             // all named individuals are tagged with a concept, so that keys are
@@ -253,13 +253,13 @@ public class OWLClausification implements Serializable {
             if (!axioms.m_hasKeys.isEmpty())
                 positiveFacts.add(Atom.create(AtomicConcept.INTERNAL_NAMED,new Term[] { ind }));
         }
-        for (OWLObjectProperty p : axiomsExpressivity.m_objectProperties)
+        for (OWLObjectProperty p : axioms.m_objectProperties)
             objectRoles.add(AtomicRole.create(p.getURI().toString()));
         for (OWLObjectPropertyExpression pe : axioms.m_transitiveObjectProperties) {
             Role role=getRole(pe);
             transitiveObjectRoles.add(role);
         }
-        for (OWLDataProperty p : axiomsExpressivity.m_dataProperties)
+        for (OWLDataProperty p : axioms.m_dataProperties)
             dataRoles.add(AtomicRole.create(p.getURI().toString()));
         return new DLOntology(ontologyURI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,transitiveObjectRoles,objectRoles,dataRoles,hermitIndividuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,shouldUseNIRule,axiomsExpressivity.m_hasDatatypes);
     }
