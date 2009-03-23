@@ -230,7 +230,7 @@ public class Reasoner implements OWLReasoner,Serializable {
                 if (!Namespaces.isInternalURI(atomicConcept.getURI()))
                     relevantAtomicConcepts.add(atomicConcept);
             if (!m_subsumptionChecker.isSatisfiable(AtomicConcept.THING))
-                m_atomicConceptHierarchy=OptimizedHierarchyBuilder.creteEmptyHierarchy(relevantAtomicConcepts,AtomicConcept.THING,AtomicConcept.NOTHING);
+                m_atomicConceptHierarchy=Hierarchy.emptyHierarchy(relevantAtomicConcepts,AtomicConcept.THING,AtomicConcept.NOTHING);
             else if (m_subsumptionChecker.canGetAllSubsumersEasily()) {
                 Map<AtomicConcept,Set<AtomicConcept>> allKnownSubsumers=m_subsumptionChecker.getAllKnownSubsumers(relevantAtomicConcepts);
                 m_atomicConceptHierarchy=OptimizedHierarchyBuilder.buildHierarchy(allKnownSubsumers,relevantAtomicConcepts,AtomicConcept.THING,AtomicConcept.NOTHING);

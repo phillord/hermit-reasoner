@@ -31,4 +31,11 @@ public class Hierarchy<E> {
     public Collection<HierarchyNode<E>> getAllNodes() {
         return Collections.unmodifiableCollection(m_nodesByElements.values());
     }
+    public static <T> Hierarchy<T> emptyHierarchy(Collection<T> elements,T topElement,T bottomElement) {
+        HierarchyNode<T> topBottomNode=new HierarchyNode<T>();
+        topBottomNode.m_equivalentElements.add(topElement);
+        topBottomNode.m_equivalentElements.add(bottomElement);
+        topBottomNode.m_equivalentElements.addAll(elements);
+        return new Hierarchy<T>(topBottomNode,topBottomNode);
+    }
 }

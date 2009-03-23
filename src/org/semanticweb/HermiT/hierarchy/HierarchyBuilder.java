@@ -17,7 +17,7 @@ public class HierarchyBuilder<E> {
     }
     public Hierarchy<E> buildHierarchy(E topElement,E bottomElement,Collection<E> elements) {
         if (m_hierarchyRelation.doesSubsume(bottomElement,topElement))
-            return OptimizedHierarchyBuilder.creteEmptyHierarchy(elements,topElement,bottomElement);
+            return Hierarchy.emptyHierarchy(elements,topElement,bottomElement);
         else {
             HierarchyNode<E> topNode=new HierarchyNode<E>();
             HierarchyNode<E> bottomNode=new HierarchyNode<E>();
