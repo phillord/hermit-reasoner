@@ -9,7 +9,6 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.AtomicConcept;
-import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 
 /**
@@ -30,7 +29,7 @@ public final class Node implements Serializable {
     protected Node m_parent;
     protected NodeType m_nodeType;
     protected int m_treeDepth;
-    protected Set<Concept> m_positiveLabel;
+    protected Set<AtomicConcept> m_positiveLabel;
     protected int m_positiveLabelSize;
     protected int m_positiveLabelHashCode;
     protected int m_negativeLabelSize;
@@ -38,8 +37,6 @@ public final class Node implements Serializable {
     protected int m_fromParentLabelHashCode;
     protected Set<AtomicRole> m_toParentLabel;
     protected int m_toParentLabelHashCode;
-    protected Set<AtomicRole> m_toSelfLabel;
-    protected int m_toSelfLabelHashCode;
     private List<ExistentialConcept> m_unprocessedExistentials;
     protected Node m_previousTableauNode;
     protected Node m_nextTableauNode;
@@ -80,8 +77,6 @@ public final class Node implements Serializable {
         m_fromParentLabelHashCode=0;
         m_toParentLabel=null;
         m_toParentLabelHashCode=0;
-        m_toSelfLabel=null;
-        m_toSelfLabelHashCode=0;
         m_unprocessedExistentials=NO_EXISTENTIALS;
         m_previousTableauNode=null;
         m_nextTableauNode=null;
@@ -102,7 +97,7 @@ public final class Node implements Serializable {
         m_parent=null;
         m_nodeType=null;
         if (m_positiveLabel!=null) {
-            m_tableau.m_labelManager.removeConceptSetReference(m_positiveLabel);
+            m_tableau.m_labelManager.removeAtomicConceptSetReference(m_positiveLabel);
             m_positiveLabel=null;
         }
         if (m_fromParentLabel!=null) {
@@ -112,10 +107,6 @@ public final class Node implements Serializable {
         if (m_toParentLabel!=null) {
             m_tableau.m_labelManager.removeAtomicRoleSetReference(m_toParentLabel);
             m_toParentLabel=null;
-        }
-        if (m_toSelfLabel!=null) {
-            m_tableau.m_labelManager.removeAtomicRoleSetReference(m_toSelfLabel);
-            m_toSelfLabel=null;
         }
         if (m_unprocessedExistentials!=NO_EXISTENTIALS) {
             m_unprocessedExistentials.clear();
@@ -136,19 +127,15 @@ public final class Node implements Serializable {
     }
     protected void finalize() {
         if (m_positiveLabel!=null)
-            m_tableau.m_labelManager.removeConceptSetReference(m_positiveLabel);
+            m_tableau.m_labelManager.removeAtomicConceptSetReference(m_positiveLabel);
         if (m_fromParentLabel!=null)
             m_tableau.m_labelManager.removeAtomicRoleSetReference(m_fromParentLabel);
         if (m_toParentLabel!=null)
             m_tableau.m_labelManager.removeAtomicRoleSetReference(m_toParentLabel);
-        if (m_toSelfLabel!=null)
-            m_tableau.m_labelManager.removeAtomicRoleSetReference(m_toSelfLabel);
         if (m_unprocessedExistentials!=NO_EXISTENTIALS && m_unprocessedExistentials!=null) {
             m_unprocessedExistentials.clear();
             m_tableau.putExistentialConceptsBuffer(m_unprocessedExistentials);
         }
-        if (m_mergedIntoDependencySet!=null)
-            m_tableau.m_dependencySetFactory.removeUsage(m_mergedIntoDependencySet);
     }
     public int getNodeID() {
         return m_nodeID;
@@ -234,7 +221,7 @@ public final class Node implements Serializable {
         }
         return result;
     }
-    public Set<Concept> getPositiveLabel() {
+    public Set<AtomicConcept> getPositiveLabel() {
         if (m_positiveLabel==null) {
             m_positiveLabel=m_tableau.m_labelManager.getPositiveLabel(this);
             m_tableau.m_labelManager.addConceptSetReference(m_positiveLabel);
@@ -247,25 +234,21 @@ public final class Node implements Serializable {
     public int getPositiveLabelHashCode() {
         return m_positiveLabelHashCode;
     }
-    protected void addToPositiveLabel(Concept concept) {
-        if (concept instanceof AtomicConcept) {
-            if (m_positiveLabel!=null) {
-                m_tableau.m_labelManager.removeConceptSetReference(m_positiveLabel);
-                m_positiveLabel=null;
-            }
-            m_positiveLabelHashCode+=concept.hashCode();
-            m_positiveLabelSize++;
+    protected void addToPositiveLabel(AtomicConcept concept) {
+        if (m_positiveLabel!=null) {
+            m_tableau.m_labelManager.removeAtomicConceptSetReference(m_positiveLabel);
+            m_positiveLabel=null;
         }
+        m_positiveLabelHashCode+=concept.hashCode();
+        m_positiveLabelSize++;
     }
-    protected void removeFromPositiveLabel(Concept concept) {
-        if (concept instanceof AtomicConcept) {
-            if (m_positiveLabel!=null) {
-                m_tableau.m_labelManager.removeConceptSetReference(m_positiveLabel);
-                m_positiveLabel=null;
-            }
-            m_positiveLabelHashCode-=concept.hashCode();
-            m_positiveLabelSize--;
+    protected void removeFromPositiveLabel(AtomicConcept concept) {
+        if (m_positiveLabel!=null) {
+            m_tableau.m_labelManager.removeAtomicConceptSetReference(m_positiveLabel);
+            m_positiveLabel=null;
         }
+        m_positiveLabelHashCode-=concept.hashCode();
+        m_positiveLabelSize--;
     }
     public int getNegativeLabelSize() {
         return m_negativeLabelSize;
@@ -323,30 +306,6 @@ public final class Node implements Serializable {
             m_toParentLabel=null;
         }
         m_toParentLabelHashCode-=atomicRole.hashCode();
-    }
-    public Set<AtomicRole> getToSelfLabel() {
-        if (m_toSelfLabel==null) {
-            m_toSelfLabel=m_tableau.m_labelManager.getEdgeLabel(this,this);
-            m_tableau.m_labelManager.addAtomicRoleSetReference(m_toSelfLabel);
-        }
-        return m_toParentLabel;
-    }
-    public int getToSelfLabelHashCode() {
-        return m_toSelfLabelHashCode;
-    }
-    protected void addToToSelfLabel(AtomicRole atomicRole) {
-        if (m_toSelfLabel!=null) {
-            m_tableau.m_labelManager.removeAtomicRoleSetReference(m_toSelfLabel);
-            m_toSelfLabel=null;
-        }
-        m_toSelfLabelHashCode+=atomicRole.hashCode();
-    }
-    protected void removeFromToSelfLabel(AtomicRole atomicRole) {
-        if (m_toSelfLabel!=null) {
-            m_tableau.m_labelManager.removeAtomicRoleSetReference(m_toSelfLabel);
-            m_toSelfLabel=null;
-        }
-        m_toSelfLabelHashCode-=atomicRole.hashCode();
     }
     protected void addToUnprocessedExistentials(ExistentialConcept existentialConcept) {
         assert NO_EXISTENTIALS.isEmpty();

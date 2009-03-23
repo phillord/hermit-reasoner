@@ -4,9 +4,11 @@ package org.semanticweb.HermiT.blocking;
 import java.io.Serializable;
 import java.util.Set;
 
+import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
-import org.semanticweb.HermiT.model.Concept;
-import org.semanticweb.HermiT.tableau.*;
+import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.tableau.NodeType;
+import org.semanticweb.HermiT.tableau.Tableau;
 
 public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Serializable {
     private static final long serialVersionUID=-8296420442452625109L;
@@ -44,8 +46,8 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         private static final long serialVersionUID=4697990424058632618L;
 
         protected final Tableau m_tableau;
-        protected final Set<Concept> m_positiveLabel;
-        protected final Set<Concept> m_parentPositiveLabel;
+        protected final Set<AtomicConcept> m_positiveLabel;
+        protected final Set<AtomicConcept> m_parentPositiveLabel;
         protected final Set<AtomicRole> m_fromParentLabel;
         protected final Set<AtomicRole> m_toParentLabel;
         protected final int m_hashCode;
@@ -67,8 +69,8 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
                 m_toParentLabel.hashCode();
         }
         protected void finalize() {
-            m_tableau.getLabelManager().removeConceptSetReference(m_positiveLabel);
-            m_tableau.getLabelManager().removeConceptSetReference(m_parentPositiveLabel);
+            m_tableau.getLabelManager().removeAtomicConceptSetReference(m_positiveLabel);
+            m_tableau.getLabelManager().removeAtomicConceptSetReference(m_parentPositiveLabel);
             m_tableau.getLabelManager().removeAtomicRoleSetReference(m_fromParentLabel);
             m_tableau.getLabelManager().removeAtomicRoleSetReference(m_toParentLabel);
         }

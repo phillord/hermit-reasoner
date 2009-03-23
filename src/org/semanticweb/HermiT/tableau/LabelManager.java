@@ -11,7 +11,6 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
-import org.semanticweb.HermiT.model.Concept;
 
 /**
  * This class is not used in the normal expansion of the tableau. Only at the 
@@ -22,20 +21,20 @@ public final class LabelManager implements Serializable {
     private static final long serialVersionUID=2628318450352626514L;
 
     protected final Tableau m_tableau;
-    protected final SetFactory<Concept> m_conceptSetFactory;
+    protected final SetFactory<AtomicConcept> m_conceptSetFactory;
     protected final SetFactory<AtomicRole> m_atomicRoleSetFactory;
     protected final ExtensionTable.Retrieval m_binaryTableSearch1Bound;
     protected final ExtensionTable.Retrieval m_ternaryTableSearch12Bound;
-    protected final List<Concept> m_conceptBuffer;
+    protected final List<AtomicConcept> m_atomicConceptBuffer;
     protected final List<AtomicRole> m_atomicRoleBuffer;
     
     public LabelManager(Tableau tableau) {
         m_tableau=tableau;
-        m_conceptSetFactory=new SetFactory<Concept>();
+        m_conceptSetFactory=new SetFactory<AtomicConcept>();
         m_atomicRoleSetFactory=new SetFactory<AtomicRole>();
         m_binaryTableSearch1Bound=m_tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
         m_ternaryTableSearch12Bound=m_tableau.getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,true },ExtensionTable.View.TOTAL);
-        m_conceptBuffer=new ArrayList<Concept>();
+        m_atomicConceptBuffer=new ArrayList<AtomicConcept>();
         m_atomicRoleBuffer=new ArrayList<AtomicRole>(); 
     }
     public int sizeInMemoryConceptSetFactory() {
@@ -44,20 +43,19 @@ public final class LabelManager implements Serializable {
     public int sizeInMemoryAtomicRoleSetFactory() {
         return m_atomicRoleSetFactory.sizeInMemory();
     }
-    public Set<Concept> getPositiveLabel(Node node) {
-        m_conceptBuffer.clear();
+    public Set<AtomicConcept> getPositiveLabel(Node node) {
+        m_atomicConceptBuffer.clear();
         m_binaryTableSearch1Bound.getBindingsBuffer()[1]=node;
         m_binaryTableSearch1Bound.open();
         Object[] tupleBuffer=m_binaryTableSearch1Bound.getTupleBuffer();
         while (!m_binaryTableSearch1Bound.afterLast()) {
             Object concept=tupleBuffer[0];
-            if (concept instanceof AtomicConcept) {
-                m_conceptBuffer.add((Concept)concept);
-            }
+            if (concept instanceof AtomicConcept)
+                m_atomicConceptBuffer.add((AtomicConcept)concept);
             m_binaryTableSearch1Bound.next();
         }
-        Set<Concept> result=m_conceptSetFactory.getSet(m_conceptBuffer);
-        m_conceptBuffer.clear();
+        Set<AtomicConcept> result=m_conceptSetFactory.getSet(m_atomicConceptBuffer);
+        m_atomicConceptBuffer.clear();
         return result;
     }
     public Set<AtomicRole> getEdgeLabel(Node nodeFrom,Node nodeTo) {
@@ -76,10 +74,10 @@ public final class LabelManager implements Serializable {
         m_atomicRoleBuffer.clear();
         return result;
     }
-    public void addConceptSetReference(Set<Concept> set) {
+    public void addConceptSetReference(Set<AtomicConcept> set) {
         m_conceptSetFactory.addReference(set);
     }
-    public void removeConceptSetReference(Set<Concept> set) {
+    public void removeAtomicConceptSetReference(Set<AtomicConcept> set) {
         m_conceptSetFactory.removeReference(set);
     }
     public void addAtomicRoleSetReference(Set<AtomicRole> set) {

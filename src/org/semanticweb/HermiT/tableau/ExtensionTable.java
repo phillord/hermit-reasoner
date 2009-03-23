@@ -102,22 +102,24 @@ public abstract class ExtensionTable implements Serializable {
                     m_tableauMonitor.clashDetected(tuple);
             }
             else if (dlPredicateObject instanceof Concept) {
-                Concept concept=(Concept)dlPredicateObject;
-                node.addToPositiveLabel(concept);
-                if (concept instanceof AtomicConcept && node.getNegativeLabelSize()>0) {
-                    m_binaryAuxiliaryTuple[0]=AtomicNegationConcept.create((AtomicConcept)concept);
-                    m_binaryAuxiliaryTuple[1]=node;
-                    if (containsTuple(m_binaryAuxiliaryTuple)) {
-                        m_binaryUnionDependencySet.m_dependencySets[0]=dependencySet;
-                        m_binaryUnionDependencySet.m_dependencySets[1]=getDependencySet(m_binaryAuxiliaryTuple);
-                        m_extensionManager.setClash(m_binaryUnionDependencySet);
-                        if (m_tableauMonitor!=null)
-                            m_tableauMonitor.clashDetected(tuple,m_binaryAuxiliaryTuple);
+                if (dlPredicateObject instanceof AtomicConcept) {
+                    AtomicConcept atomicConcept=(AtomicConcept)dlPredicateObject;
+                    node.addToPositiveLabel(atomicConcept);
+                    if (node.getNegativeLabelSize()>0) {
+                        m_binaryAuxiliaryTuple[0]=AtomicNegationConcept.create(atomicConcept);
+                        m_binaryAuxiliaryTuple[1]=node;
+                        if (containsTuple(m_binaryAuxiliaryTuple)) {
+                            m_binaryUnionDependencySet.m_dependencySets[0]=dependencySet;
+                            m_binaryUnionDependencySet.m_dependencySets[1]=getDependencySet(m_binaryAuxiliaryTuple);
+                            m_extensionManager.setClash(m_binaryUnionDependencySet);
+                            if (m_tableauMonitor!=null)
+                                m_tableauMonitor.clashDetected(tuple,m_binaryAuxiliaryTuple);
+                        }
                     }
                 }
-                if (dlPredicateObject instanceof ExistentialConcept)
+                else if (dlPredicateObject instanceof ExistentialConcept)
                     node.addToUnprocessedExistentials((ExistentialConcept)dlPredicateObject);
-                m_tableau.m_nominalIntroductionManager.addNonnegativeConceptAssertion(concept,node);
+                m_tableau.m_nominalIntroductionManager.addNonnegativeConceptAssertion((Concept)dlPredicateObject,node);
             }
         }
         else if (dlPredicateObject instanceof AtomicRole) {
@@ -129,8 +131,6 @@ public abstract class ExtensionTable implements Serializable {
                 node1.addToFromParentLabel(atomicRole);
             else if (node1.isParentOf(node0))
                 node0.addToToParentLabel(atomicRole);
-            else if (node0==node1 && node0.getNodeType()==NodeType.TREE_NODE)
-                node0.addToToSelfLabel(atomicRole);
             m_tableau.m_nominalIntroductionManager.addAtomicRoleAssertion(atomicRole,node0,node1);
         }
         else if (Inequality.INSTANCE.equals(dlPredicateObject)) {
@@ -198,12 +198,10 @@ public abstract class ExtensionTable implements Serializable {
             m_tableau.m_existentialsExpansionStrategy.assertionRemoved((Concept)dlPredicateObject,node);
             if (dlPredicateObject instanceof AtomicNegationConcept)
                 node.removeFromNegativeLabel();
-            else if (dlPredicateObject instanceof Concept) {
-                Concept concept=(Concept)dlPredicateObject;
-                node.removeFromPositiveLabel(concept);
-                if (dlPredicateObject instanceof ExistentialConcept)
-                    node.removeFromUnprocessedExistentials((ExistentialConcept)dlPredicateObject);
-            }
+            else if (dlPredicateObject instanceof AtomicConcept)
+                node.removeFromPositiveLabel((AtomicConcept)dlPredicateObject);
+            else if (dlPredicateObject instanceof ExistentialConcept)
+                node.removeFromUnprocessedExistentials((ExistentialConcept)dlPredicateObject);
         }
         else if (dlPredicateObject instanceof AtomicRole) {
             AtomicRole atomicRole=(AtomicRole)dlPredicateObject;
@@ -214,8 +212,6 @@ public abstract class ExtensionTable implements Serializable {
                 node1.removeFromFromParentLabel(atomicRole);
             else if (node1.isParentOf(node0))
                 node0.removeFromToParentLabel(atomicRole);
-            else if (node0==node1 && node0.getNodeType()==NodeType.TREE_NODE)
-                node0.removeFromToSelfLabel(atomicRole);
             m_tableau.m_nominalIntroductionManager.removeAtomicRoleAssertion(atomicRole,node0,node1);
         }
         else if (dlPredicateObject instanceof DescriptionGraph)

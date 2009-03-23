@@ -4,8 +4,10 @@ package org.semanticweb.HermiT.blocking;
 import java.io.Serializable;
 import java.util.Set;
 
-import org.semanticweb.HermiT.model.*;
-import org.semanticweb.HermiT.tableau.*;
+import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.tableau.NodeType;
+import org.semanticweb.HermiT.tableau.Tableau;
 
 public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serializable {
     private static final long serialVersionUID=9093753046859877016L;
@@ -35,7 +37,7 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
         private static final long serialVersionUID=-7349489846772132258L;
 
         protected final Tableau m_tableau;
-        protected final Set<Concept> m_positiveLabel;
+        protected final Set<AtomicConcept> m_positiveLabel;
 
         public SingleBlockingSignature(Node node) {
             m_tableau=node.getTableau();
@@ -43,7 +45,7 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
             m_tableau.getLabelManager().addConceptSetReference(m_positiveLabel);
         }
         protected void finalize() {
-            m_tableau.getLabelManager().removeConceptSetReference(m_positiveLabel);
+            m_tableau.getLabelManager().removeAtomicConceptSetReference(m_positiveLabel);
         }
         public boolean blocksNode(Node node) {
             return node.getPositiveLabel()==m_positiveLabel;
