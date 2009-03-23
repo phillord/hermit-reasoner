@@ -74,7 +74,7 @@ public final class LabelManager implements Serializable {
         m_atomicRoleBuffer.clear();
         return result;
     }
-    public void addConceptSetReference(Set<AtomicConcept> set) {
+    public void addAtomicConceptSetReference(Set<AtomicConcept> set) {
         m_conceptSetFactory.addReference(set);
     }
     public void removeAtomicConceptSetReference(Set<AtomicConcept> set) {
@@ -91,14 +91,12 @@ public final class LabelManager implements Serializable {
 class SetFactory<E> implements Serializable {
     private static final long serialVersionUID=7071071962187693657L;
 
-    protected final Entry<E> m_emptySet;
     protected Entry[] m_unusedEntries;
     protected Entry[] m_entries;
     protected int m_size;
     protected int m_resizeThreshold;
 
     public SetFactory() {
-        m_emptySet=new Entry<E>(0);
         m_unusedEntries=new Entry[32];
         m_entries=new Entry[16];
         m_size=0;
@@ -132,9 +130,6 @@ class SetFactory<E> implements Serializable {
             removeEntry(entry);
             leaveEntry(entry);
         }
-    }
-    public Set<E> emptySet() {
-        return m_emptySet;
     }
     public Set<E> getSet(List<E> elements) {
         int hashCode=0;
@@ -215,7 +210,7 @@ class SetFactory<E> implements Serializable {
         return hashCode & (tableLength-1);
     }
     
-    protected static class Entry<T> implements Serializable, Set<T> {
+    protected static class Entry<T> implements Serializable,Set<T> {
         private static final long serialVersionUID=-3850593656120645350L;
 
         protected T[] m_table;

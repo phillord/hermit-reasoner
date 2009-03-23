@@ -128,6 +128,12 @@ public final class Tableau implements Serializable {
         return m_descriptionGraphManager;
     }
     public void clear() {
+        Node node=m_firstTableauNode;
+        while (node!=null) {
+            Node nextNode=node.m_nextTableauNode;
+            node.destroy();
+            node=nextNode;
+        }
         m_allocatedNodes=0;
         m_numberOfNodesInTableau=0;
         m_numberOfMergedOrPrunedNodes=0;

@@ -15,15 +15,12 @@ public class BlockingSignatureCache implements Serializable {
 
     public BlockingSignatureCache(DirectBlockingChecker directBlockingChecker) {
         m_directBlockingChecker=directBlockingChecker;
-        clear();
-    }
-    public boolean isEmpty() {
-        return m_numberOfElements==0;
-    }
-    public void clear() {
         m_buckets=new BlockingSignature[1024];
         m_threshold=(int)(m_buckets.length*0.75);
         m_numberOfElements=0;
+    }
+    public boolean isEmpty() {
+        return m_numberOfElements==0;
     }
     public boolean addNode(Node node) {
         int hashCode=m_directBlockingChecker.blockingHashCode(node);

@@ -125,18 +125,6 @@ public final class Node implements Serializable {
         m_blockingObject=null;
         m_tableau.m_descriptionGraphManager.destroyNode(this);
     }
-    protected void finalize() {
-        if (m_positiveLabel!=null)
-            m_tableau.m_labelManager.removeAtomicConceptSetReference(m_positiveLabel);
-        if (m_fromParentLabel!=null)
-            m_tableau.m_labelManager.removeAtomicRoleSetReference(m_fromParentLabel);
-        if (m_toParentLabel!=null)
-            m_tableau.m_labelManager.removeAtomicRoleSetReference(m_toParentLabel);
-        if (m_unprocessedExistentials!=NO_EXISTENTIALS && m_unprocessedExistentials!=null) {
-            m_unprocessedExistentials.clear();
-            m_tableau.putExistentialConceptsBuffer(m_unprocessedExistentials);
-        }
-    }
     public int getNodeID() {
         return m_nodeID;
     }
@@ -224,7 +212,7 @@ public final class Node implements Serializable {
     public Set<AtomicConcept> getPositiveLabel() {
         if (m_positiveLabel==null) {
             m_positiveLabel=m_tableau.m_labelManager.getPositiveLabel(this);
-            m_tableau.m_labelManager.addConceptSetReference(m_positiveLabel);
+            m_tableau.m_labelManager.addAtomicConceptSetReference(m_positiveLabel);
         }
         return m_positiveLabel;
     }

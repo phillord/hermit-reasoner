@@ -7,7 +7,6 @@ import java.util.Set;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.NodeType;
-import org.semanticweb.HermiT.tableau.Tableau;
 
 public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serializable {
     private static final long serialVersionUID=9093753046859877016L;
@@ -36,16 +35,11 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
     protected static class SingleBlockingSignature extends BlockingSignature implements Serializable {
         private static final long serialVersionUID=-7349489846772132258L;
 
-        protected final Tableau m_tableau;
         protected final Set<AtomicConcept> m_positiveLabel;
 
         public SingleBlockingSignature(Node node) {
-            m_tableau=node.getTableau();
             m_positiveLabel=node.getPositiveLabel();
-            m_tableau.getLabelManager().addConceptSetReference(m_positiveLabel);
-        }
-        protected void finalize() {
-            m_tableau.getLabelManager().removeAtomicConceptSetReference(m_positiveLabel);
+            node.getTableau().getLabelManager().addAtomicConceptSetReference(m_positiveLabel);
         }
         public boolean blocksNode(Node node) {
             return node.getPositiveLabel()==m_positiveLabel;

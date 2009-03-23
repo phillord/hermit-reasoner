@@ -8,7 +8,7 @@ import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.NodeType;
-import org.semanticweb.HermiT.tableau.Tableau;
+import org.semanticweb.HermiT.tableau.LabelManager;
 
 public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Serializable {
     private static final long serialVersionUID=-8296420442452625109L;
@@ -45,7 +45,6 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
     protected static class PairWiseBlockingSignature extends BlockingSignature implements Serializable {
         private static final long serialVersionUID=4697990424058632618L;
 
-        protected final Tableau m_tableau;
         protected final Set<AtomicConcept> m_positiveLabel;
         protected final Set<AtomicConcept> m_parentPositiveLabel;
         protected final Set<AtomicRole> m_fromParentLabel;
@@ -53,26 +52,20 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         protected final int m_hashCode;
 
         public PairWiseBlockingSignature(Node node) {
-            m_tableau=node.getTableau();
+            LabelManager labelManager=node.getTableau().getLabelManager();
             m_positiveLabel=node.getPositiveLabel();
-            m_tableau.getLabelManager().addConceptSetReference(m_positiveLabel);
+            labelManager.addAtomicConceptSetReference(m_positiveLabel);
             m_parentPositiveLabel=node.getParent().getPositiveLabel();
-            m_tableau.getLabelManager().addConceptSetReference(m_parentPositiveLabel);
+            labelManager.addAtomicConceptSetReference(m_parentPositiveLabel);
             m_fromParentLabel=node.getFromParentLabel();
-            m_tableau.getLabelManager().addAtomicRoleSetReference(m_fromParentLabel);
+            labelManager.addAtomicRoleSetReference(m_fromParentLabel);
             m_toParentLabel=node.getToParentLabel();
-            m_tableau.getLabelManager().addAtomicRoleSetReference(m_toParentLabel);
+            labelManager.addAtomicRoleSetReference(m_toParentLabel);
             m_hashCode=
                 m_positiveLabel.hashCode()+
                 m_parentPositiveLabel.hashCode()+
                 m_fromParentLabel.hashCode()+
                 m_toParentLabel.hashCode();
-        }
-        protected void finalize() {
-            m_tableau.getLabelManager().removeAtomicConceptSetReference(m_positiveLabel);
-            m_tableau.getLabelManager().removeAtomicConceptSetReference(m_parentPositiveLabel);
-            m_tableau.getLabelManager().removeAtomicRoleSetReference(m_fromParentLabel);
-            m_tableau.getLabelManager().removeAtomicRoleSetReference(m_toParentLabel);
         }
         public boolean blocksNode(Node node) {
             return
