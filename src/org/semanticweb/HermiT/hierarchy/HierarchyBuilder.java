@@ -19,11 +19,9 @@ public class HierarchyBuilder<E> {
         if (m_hierarchyRelation.doesSubsume(bottomElement,topElement))
             return Hierarchy.emptyHierarchy(elements,topElement,bottomElement);
         else {
-            HierarchyNode<E> topNode=new HierarchyNode<E>();
-            HierarchyNode<E> bottomNode=new HierarchyNode<E>();
-            topNode.m_equivalentElements.add(topElement);
+            HierarchyNode<E> topNode=new HierarchyNode<E>(topElement);
+            HierarchyNode<E> bottomNode=new HierarchyNode<E>(bottomElement);
             topNode.m_childNodes.add(bottomNode);
-            bottomNode.m_equivalentElements.add(bottomElement);
             bottomNode.m_parentNodes.add(topNode);
             Hierarchy<E> hierarchy=new Hierarchy<E>(topNode,bottomNode);
             for (E element : elements) {
@@ -68,13 +66,13 @@ public class HierarchyBuilder<E> {
                     return u.m_parentNodes;
                 }
                 public boolean trueOf(HierarchyNode<E> u) {
-                    return m_hierarchyRelation.doesSubsume(u.m_equivalentElements.iterator().next(),element);
+                    return m_hierarchyRelation.doesSubsume(u.getRepresentative(),element);
                 }
             },Collections.singleton(topNode),null);
     }
 
     protected Set<HierarchyNode<E>> findChildren(final E element,HierarchyNode<E> bottomNode,Set<HierarchyNode<E>> parentNodes) {
-        if (parentNodes.size()==1 && m_hierarchyRelation.doesSubsume(element,parentNodes.iterator().next().m_equivalentElements.iterator().next()))
+        if (parentNodes.size()==1 && m_hierarchyRelation.doesSubsume(element,parentNodes.iterator().next().getRepresentative()))
             return parentNodes;
         else {
             // We now determine the set of nodes that are descendants of each node in parentNodes
@@ -105,7 +103,7 @@ public class HierarchyBuilder<E> {
             // Determine the subset of marked that is directly above the bottomNode and that is below the current element.
             Set<HierarchyNode<E>> aboveBottomNodes=new HashSet<HierarchyNode<E>>();
             for (HierarchyNode<E> node : marked)
-                if (node.m_childNodes.contains(bottomNode) && m_hierarchyRelation.doesSubsume(element,node.m_equivalentElements.iterator().next()))
+                if (node.m_childNodes.contains(bottomNode) && m_hierarchyRelation.doesSubsume(element,node.getRepresentative()))
                     aboveBottomNodes.add(node);
             // If this set is empty, then we omit the bottom search phase.
             if (aboveBottomNodes.isEmpty()) {
@@ -123,7 +121,7 @@ public class HierarchyBuilder<E> {
                             return u.m_childNodes;
                         }
                         public boolean trueOf(HierarchyNode<E> u) {
-                            return m_hierarchyRelation.doesSubsume(element,u.m_equivalentElements.iterator().next());
+                            return m_hierarchyRelation.doesSubsume(element,u.getRepresentative());
                         }
                     },aboveBottomNodes,marked);
             }

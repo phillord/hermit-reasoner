@@ -4369,6 +4369,26 @@ http://lsdis.cs.uga.edu/projects/glycomics/propreo#xml_ms-ms_peak_list
     http://lsdis.cs.uga.edu/projects/glycomics/propreo#process_associated_data_collection
     http://lsdis.cs.uga.edu/projects/glycomics/propreo#xml_ms-ms_peak_list
 --------------------------------
+http://www.w3.org/2001/XMLSchema#boolean
+    http://lsdis.cs.uga.edu/projects/glycomics/propreo#data
+    http://lsdis.cs.uga.edu/projects/glycomics/propreo#material_continuant
+    http://www.w3.org/2001/XMLSchema#boolean
+--------------------------------
+http://www.w3.org/2001/XMLSchema#float
+    http://lsdis.cs.uga.edu/projects/glycomics/propreo#data
+    http://lsdis.cs.uga.edu/projects/glycomics/propreo#material_continuant
+    http://www.w3.org/2001/XMLSchema#float
+--------------------------------
+http://www.w3.org/2001/XMLSchema#int
+    http://lsdis.cs.uga.edu/projects/glycomics/propreo#data
+    http://lsdis.cs.uga.edu/projects/glycomics/propreo#material_continuant
+    http://www.w3.org/2001/XMLSchema#int
+--------------------------------
+http://www.w3.org/2001/XMLSchema#string
+    http://lsdis.cs.uga.edu/projects/glycomics/propreo#data
+    http://lsdis.cs.uga.edu/projects/glycomics/propreo#material_continuant
+    http://www.w3.org/2001/XMLSchema#string
+--------------------------------
 http://www.w3.org/2002/07/owl#Thing
     http://lsdis.cs.uga.edu/projects/glycomics/propreo#data
     http://lsdis.cs.uga.edu/projects/glycomics/propreo#material_continuant

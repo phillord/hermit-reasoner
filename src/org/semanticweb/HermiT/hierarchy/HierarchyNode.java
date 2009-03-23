@@ -8,20 +8,27 @@ import java.util.Set;
 import java.util.HashSet;
 
 public class HierarchyNode<E> {
+    protected final E m_representative;
     protected final Set<E> m_equivalentElements;
     protected final Set<HierarchyNode<E>> m_parentNodes;
     protected final Set<HierarchyNode<E>> m_childNodes;
     
-    public HierarchyNode() {
+    public HierarchyNode(E representative) {
+        m_representative=representative;
         m_equivalentElements=new HashSet<E>();
+        m_equivalentElements.add(m_representative);
         m_parentNodes=new HashSet<HierarchyNode<E>>();
         m_childNodes=new HashSet<HierarchyNode<E>>();
     }
     public HierarchyNode(E element,Set<HierarchyNode<E>> parentNodes,Set<HierarchyNode<E>> childNodes) {
+        m_representative=element;
         m_equivalentElements=new HashSet<E>();
-        m_equivalentElements.add(element);
+        m_equivalentElements.add(m_representative);
         m_parentNodes=parentNodes;
         m_childNodes=childNodes;
+    }
+    public E getRepresentative() {
+        return m_representative;
     }
     public Set<E> getEquivalentElements() {
         return Collections.unmodifiableSet(m_equivalentElements);

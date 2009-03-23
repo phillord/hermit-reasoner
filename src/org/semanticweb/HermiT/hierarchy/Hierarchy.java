@@ -1,5 +1,6 @@
 package org.semanticweb.HermiT.hierarchy;
 
+import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Collection;
@@ -31,8 +32,11 @@ public class Hierarchy<E> {
     public Collection<HierarchyNode<E>> getAllNodes() {
         return Collections.unmodifiableCollection(m_nodesByElements.values());
     }
+    public Set<E> getAllElements() {
+        return Collections.unmodifiableSet(m_nodesByElements.keySet());
+    }
     public static <T> Hierarchy<T> emptyHierarchy(Collection<T> elements,T topElement,T bottomElement) {
-        HierarchyNode<T> topBottomNode=new HierarchyNode<T>();
+        HierarchyNode<T> topBottomNode=new HierarchyNode<T>(topElement);
         topBottomNode.m_equivalentElements.add(topElement);
         topBottomNode.m_equivalentElements.add(bottomElement);
         topBottomNode.m_equivalentElements.addAll(elements);
