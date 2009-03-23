@@ -52,20 +52,20 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         protected final int m_hashCode;
 
         public PairWiseBlockingSignature(Node node) {
-            LabelManager labelManager=node.getTableau().getLabelManager();
             m_positiveLabel=node.getPositiveLabel();
-            labelManager.addAtomicConceptSetReference(m_positiveLabel);
             m_parentPositiveLabel=node.getParent().getPositiveLabel();
-            labelManager.addAtomicConceptSetReference(m_parentPositiveLabel);
             m_fromParentLabel=node.getFromParentLabel();
-            labelManager.addAtomicRoleSetReference(m_fromParentLabel);
             m_toParentLabel=node.getToParentLabel();
-            labelManager.addAtomicRoleSetReference(m_toParentLabel);
             m_hashCode=
                 m_positiveLabel.hashCode()+
                 m_parentPositiveLabel.hashCode()+
                 m_fromParentLabel.hashCode()+
                 m_toParentLabel.hashCode();
+            LabelManager labelManager=node.getTableau().getLabelManager();
+            labelManager.makePermanentAtomicConceptSet(m_positiveLabel);
+            labelManager.makePermanentAtomicConceptSet(m_parentPositiveLabel);
+            labelManager.makePermanentAtomicRoleSet(m_fromParentLabel);
+            labelManager.makePermanentAtomicRoleSet(m_toParentLabel);
         }
         public boolean blocksNode(Node node) {
             return

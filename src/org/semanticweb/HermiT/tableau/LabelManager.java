@@ -20,8 +20,7 @@ import org.semanticweb.HermiT.model.AtomicRole;
 public final class LabelManager implements Serializable {
     private static final long serialVersionUID=2628318450352626514L;
 
-    protected final Tableau m_tableau;
-    protected final SetFactory<AtomicConcept> m_conceptSetFactory;
+    protected final SetFactory<AtomicConcept> m_atomicConceptSetFactory;
     protected final SetFactory<AtomicRole> m_atomicRoleSetFactory;
     protected final ExtensionTable.Retrieval m_binaryTableSearch1Bound;
     protected final ExtensionTable.Retrieval m_ternaryTableSearch12Bound;
@@ -29,16 +28,15 @@ public final class LabelManager implements Serializable {
     protected final List<AtomicRole> m_atomicRoleBuffer;
     
     public LabelManager(Tableau tableau) {
-        m_tableau=tableau;
-        m_conceptSetFactory=new SetFactory<AtomicConcept>();
+        m_atomicConceptSetFactory=new SetFactory<AtomicConcept>();
         m_atomicRoleSetFactory=new SetFactory<AtomicRole>();
-        m_binaryTableSearch1Bound=m_tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
-        m_ternaryTableSearch12Bound=m_tableau.getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,true },ExtensionTable.View.TOTAL);
+        m_binaryTableSearch1Bound=tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
+        m_ternaryTableSearch12Bound=tableau.getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,true },ExtensionTable.View.TOTAL);
         m_atomicConceptBuffer=new ArrayList<AtomicConcept>();
         m_atomicRoleBuffer=new ArrayList<AtomicRole>(); 
     }
     public int sizeInMemoryConceptSetFactory() {
-        return m_conceptSetFactory.sizeInMemory();
+        return m_atomicConceptSetFactory.sizeInMemory();
     }
     public int sizeInMemoryAtomicRoleSetFactory() {
         return m_atomicRoleSetFactory.sizeInMemory();
@@ -54,7 +52,7 @@ public final class LabelManager implements Serializable {
                 m_atomicConceptBuffer.add((AtomicConcept)concept);
             m_binaryTableSearch1Bound.next();
         }
-        Set<AtomicConcept> result=m_conceptSetFactory.getSet(m_atomicConceptBuffer);
+        Set<AtomicConcept> result=m_atomicConceptSetFactory.getSet(m_atomicConceptBuffer);
         m_atomicConceptBuffer.clear();
         return result;
     }
@@ -75,16 +73,26 @@ public final class LabelManager implements Serializable {
         return result;
     }
     public void addAtomicConceptSetReference(Set<AtomicConcept> set) {
-        m_conceptSetFactory.addReference(set);
+        m_atomicConceptSetFactory.addReference(set);
     }
     public void removeAtomicConceptSetReference(Set<AtomicConcept> set) {
-        m_conceptSetFactory.removeReference(set);
+        m_atomicConceptSetFactory.removeReference(set);
     }
     public void addAtomicRoleSetReference(Set<AtomicRole> set) {
         m_atomicRoleSetFactory.addReference(set);
     }
     public void removeAtomicRoleSetReference(Set<AtomicRole> set) {
         m_atomicRoleSetFactory.removeReference(set);
+    }
+    public void makePermanentAtomicConceptSet(Set<AtomicConcept> set) {
+        m_atomicConceptSetFactory.makePermanent(set);
+    }
+    public void makePermanentAtomicRoleSet(Set<AtomicRole> set) {
+        m_atomicRoleSetFactory.makePermanent(set);
+    }
+    public void clearNonpermanent() {
+        m_atomicConceptSetFactory.clearNonpermanent();
+        m_atomicRoleSetFactory.clearNonpermanent();
     }
 }
 @SuppressWarnings("unchecked")
@@ -101,6 +109,19 @@ class SetFactory<E> implements Serializable {
         m_entries=new Entry[16];
         m_size=0;
         m_resizeThreshold=(int)(0.75*m_entries.length);
+    }
+    public void clearNonpermanent() {
+        for (int i=m_entries.length-1;i>=0;--i) {
+            Entry entry=m_entries[i];
+            while (entry!=null) {
+                Entry nextEntry=entry.m_nextEntry;
+                if (!entry.m_permanent) {
+                    removeEntry(entry);
+                    leaveEntry(entry);
+                }
+                entry=nextEntry;
+            }
+        }
     }
     public int sizeInMemory() {
         int size=m_unusedEntries.length*4+m_entries.length*4;
@@ -126,10 +147,13 @@ class SetFactory<E> implements Serializable {
     public void removeReference(Set<E> set) {
         Entry entry=(Entry)set;
         entry.m_referenceCount--;
-        if (entry.m_referenceCount==0) {
+        if (entry.m_referenceCount==0 && !entry.m_permanent) {
             removeEntry(entry);
             leaveEntry(entry);
         }
+    }
+    public void makePermanent(Set<E> set) {
+        ((Entry)set).m_permanent=true;
     }
     public Set<E> getSet(List<E> elements) {
         int hashCode=0;
@@ -218,6 +242,7 @@ class SetFactory<E> implements Serializable {
         protected Entry<T> m_previousEntry;
         protected Entry<T> m_nextEntry;
         protected int m_referenceCount;
+        protected boolean m_permanent;
 
         public Entry(int size) {
             m_hashCode=0;

@@ -39,7 +39,7 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
 
         public SingleBlockingSignature(Node node) {
             m_positiveLabel=node.getPositiveLabel();
-            node.getTableau().getLabelManager().addAtomicConceptSetReference(m_positiveLabel);
+            node.getTableau().getLabelManager().makePermanentAtomicConceptSet(m_positiveLabel);
         }
         public boolean blocksNode(Node node) {
             return node.getPositiveLabel()==m_positiveLabel;
