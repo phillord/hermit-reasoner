@@ -39,6 +39,9 @@
     <property name="protegeapp" value="${3rdpartydir}/protege/4.0/org.protege.editor.core.application.jar"/>
     <property name="protegeowl" value="${3rdpartydir}/protege/4.0/org.protege.editor.owl.jar"/>
 
+    <!-- to generate a debug version, use -Ddebug=on argument when running ant -->
+    <property name="debug" value="off"/>
+
     <!-- SOURCE PATHS -->
     <path id="sourcepath">
         <pathelement path="${projectroot}/src"/>
@@ -68,7 +71,7 @@
 
     <target name="compile">
         <mkdir dir="${classdir}"/>
-        <javac destdir="${classdir}" deprecation="yes">
+        <javac destdir="${classdir}" deprecation="yes" debug="${debug}">
             <compilerarg value="-Xlint:all"/>
             <src refid="sourcepath"/>
             <classpath refid="classpath"/>
