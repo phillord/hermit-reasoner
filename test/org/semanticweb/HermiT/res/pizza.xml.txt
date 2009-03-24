@@ -1,891 +1,174 @@
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#American
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#American
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#InterestingPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MeatyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NamedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NonVegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#AmericanHot
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#AmericanHot
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#InterestingPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MeatyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NamedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NonVegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpicyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpicyPizzaEquivalent
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#AnchoviesTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#AnchoviesTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#FishTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ArtichokeTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ArtichokeTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#AsparagusTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#AsparagusTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Cajun
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Cajun
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#InterestingPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NamedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NonVegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpicyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpicyPizzaEquivalent
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CajunSpiceTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CajunSpiceTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#HerbSpiceTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpicyTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CaperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CaperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Capricciosa
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Capricciosa
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#InterestingPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MeatyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NamedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NonVegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Caprina
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Caprina
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#InterestingPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NamedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent1
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent2
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyVegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#American
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#AmericanHot
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#AnchoviesTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ArtichokeTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#AsparagusTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Cajun
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CajunSpiceTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CaperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Capricciosa
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Caprina
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyVegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ChickenTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Country
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DeepPanBase
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Fiorentina
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#FishTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#FourCheesesTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#FourSeasons
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#FruitTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#FruttiDiMare
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#GarlicTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Giardiniera
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#GoatsCheeseTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#GorgonzolaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#GreenPepperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#HamTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#HerbSpiceTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Hot
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#HotGreenPepperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#HotSpicedBeefTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#IceCream
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#InterestingPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#JalapenoPepperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#LaReine
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#LeekTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Margherita
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MeatTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MeatyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Medium
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Mild
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MixedSeafoodTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MozzarellaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Mushroom
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MushroomTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NamedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Napoletana
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NonVegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NutTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#OliveTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#OnionTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ParmaHamTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Parmense
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ParmesanTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PeperonataTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PeperoniSausageTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PepperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PetitPoisTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PineKernels
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaBase
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PolloAdAstra
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PrawnsTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PrinceCarlo
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#QuattroFormaggi
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#RealItalianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#RedOnionTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#RocketTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Rosa
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#RosemaryTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SauceTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Siciliana
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SlicedTomatoTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SloppyGiuseppe
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Soho
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Spiciness
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpicyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpicyPizzaEquivalent
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpicyTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpinachTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SultanaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SundriedTomatoTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SweetPepperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ThinAndCrispyBase
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#TobascoPepperSauce
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#TomatoTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#UnclosedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ValuePartition
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent1
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent2
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Veneziana
-    http://www.w3.org/2002/07/owl#Nothing
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ChickenTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ChickenTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MeatTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Country
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Country
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DeepPanBase
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DeepPanBase
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaBase
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Fiorentina
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Fiorentina
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#InterestingPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NamedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent1
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent2
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#FishTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#FishTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#FourCheesesTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#FourCheesesTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#FourSeasons
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#FourSeasons
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#InterestingPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MeatyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NamedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NonVegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#FruitTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#FruitTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#FruttiDiMare
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#FruttiDiMare
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#InterestingPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NamedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NonVegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#GarlicTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#GarlicTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Giardiniera
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Giardiniera
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#InterestingPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NamedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent1
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent2
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#GoatsCheeseTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#GoatsCheeseTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#GorgonzolaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#GorgonzolaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#GreenPepperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#GreenPepperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PepperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#HamTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#HamTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MeatTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#HerbSpiceTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#HerbSpiceTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Hot
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Hot
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Spiciness
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ValuePartition
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#HotGreenPepperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#GreenPepperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#HotGreenPepperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PepperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpicyTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#HotSpicedBeefTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#HotSpicedBeefTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MeatTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpicyTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#IceCream
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#American
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#AmericanHot
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#AnchoviesTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ArtichokeTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#AsparagusTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Cajun
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CajunSpiceTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CaperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Capricciosa
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Caprina
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyVegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ChickenTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Country
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DeepPanBase
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Fiorentina
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#FishTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#FourCheesesTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#FourSeasons
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#FruitTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#FruttiDiMare
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#GarlicTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Giardiniera
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#GoatsCheeseTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#GorgonzolaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#GreenPepperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#HamTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#HerbSpiceTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Hot
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#HotGreenPepperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#HotSpicedBeefTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#IceCream
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#InterestingPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#JalapenoPepperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#LaReine
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#LeekTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Margherita
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MeatTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MeatyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Medium
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Mild
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MixedSeafoodTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MozzarellaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Mushroom
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MushroomTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NamedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Napoletana
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NonVegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NutTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#OliveTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#OnionTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ParmaHamTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Parmense
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ParmesanTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PeperonataTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PeperoniSausageTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PepperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PetitPoisTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PineKernels
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaBase
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PolloAdAstra
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PrawnsTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PrinceCarlo
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#QuattroFormaggi
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#RealItalianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#RedOnionTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#RocketTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Rosa
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#RosemaryTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SauceTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Siciliana
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SlicedTomatoTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SloppyGiuseppe
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Soho
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Spiciness
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpicyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpicyPizzaEquivalent
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpicyTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpinachTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SultanaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SundriedTomatoTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SweetPepperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ThinAndCrispyBase
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#TobascoPepperSauce
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#TomatoTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#UnclosedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ValuePartition
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent1
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent2
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Veneziana
-    http://www.w3.org/2002/07/owl#Nothing
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#InterestingPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#InterestingPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#JalapenoPepperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#JalapenoPepperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PepperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpicyTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#LaReine
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#InterestingPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#LaReine
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MeatyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NamedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NonVegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#LeekTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#LeekTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Margherita
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Margherita
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NamedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent1
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent2
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MeatTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MeatTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MeatyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MeatyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NonVegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Medium
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Medium
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Spiciness
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ValuePartition
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Mild
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Mild
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Spiciness
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ValuePartition
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MixedSeafoodTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#FishTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MixedSeafoodTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MozzarellaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MozzarellaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Mushroom
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#InterestingPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Mushroom
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NamedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent1
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent2
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MushroomTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MushroomTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NamedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NamedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Napoletana
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#InterestingPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NamedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Napoletana
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NonVegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NonVegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NonVegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NutTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NutTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#OliveTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#OliveTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#OnionTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#OnionTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ParmaHamTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#HamTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MeatTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ParmaHamTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Parmense
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#InterestingPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MeatyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NamedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NonVegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Parmense
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ParmesanTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ParmesanTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PeperonataTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PeperonataTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PepperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PeperoniSausageTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MeatTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PeperoniSausageTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PepperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PepperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PetitPoisTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PetitPoisTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PineKernels
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NutTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PineKernels
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaBase
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaBase
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PolloAdAstra
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#InterestingPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MeatyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NamedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NonVegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PolloAdAstra
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpicyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpicyPizzaEquivalent
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PrawnsTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#FishTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PrawnsTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PrinceCarlo
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#InterestingPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NamedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PrinceCarlo
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent1
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent2
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#QuattroFormaggi
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NamedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#QuattroFormaggi
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent1
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent2
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#RealItalianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#RealItalianPizza
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#RedOnionTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#OnionTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#RedOnionTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#RocketTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#RocketTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Rosa
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#InterestingPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NamedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Rosa
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent1
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent2
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#RosemaryTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#HerbSpiceTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#RosemaryTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SauceTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SauceTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Siciliana
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#InterestingPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MeatyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NamedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NonVegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Siciliana
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SlicedTomatoTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SlicedTomatoTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#TomatoTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SloppyGiuseppe
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#InterestingPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#MeatyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NamedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NonVegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SloppyGiuseppe
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpicyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpicyPizzaEquivalent
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Soho
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#InterestingPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NamedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Soho
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent1
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent2
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Spiciness
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Spiciness
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ValuePartition
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpicyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpicyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpicyPizzaEquivalent
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpicyPizzaEquivalent
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpicyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpicyPizzaEquivalent
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpicyTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpicyTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpinachTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpinachTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SultanaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#FruitTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SultanaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SundriedTomatoTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SundriedTomatoTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#TomatoTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SweetPepperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PepperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SweetPepperTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ThinAndCrispyBase
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaBase
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ThinAndCrispyBase
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#TobascoPepperSauce
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SauceTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#SpicyTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#TobascoPepperSauce
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#TomatoTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#TomatoTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#UnclosedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NamedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#UnclosedPizza
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ValuePartition
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#ValuePartition
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetableTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizza
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent1
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent1
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent2
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent2
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent1
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent2
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#PizzaTopping
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianTopping
---------------------------------
-http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Veneziana
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#CheeseyPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#DomainConcept
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#InterestingPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#NamedPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Pizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizza
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent1
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#VegetarianPizzaEquivalent2
-    http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#Veneziana
---------------------------------
-http://www.w3.org/2002/07/owl#Thing
---------------------------------
-! THE END !
+Namespace(=<http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#>)
+Namespace(owl=<http://www.w3.org/2002/07/owl#>)
+
+Ontology(<http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#>
+
+  SubClassOf( DomainConcept owl:Thing ) Declaration( Class( DomainConcept ) )
+    SubClassOf( Country DomainConcept ) Declaration( Class( Country ) )
+    SubClassOf( Pizza DomainConcept ) Declaration( Class( Pizza ) )
+      SubClassOf( CheeseyPizza Pizza ) Declaration( Class( CheeseyPizza ) )
+        SubClassOf( American CheeseyPizza ) Declaration( Class( American ) )
+        SubClassOf( AmericanHot CheeseyPizza ) Declaration( Class( AmericanHot ) )
+        SubClassOf( Cajun CheeseyPizza ) Declaration( Class( Cajun ) )
+        SubClassOf( Capricciosa CheeseyPizza ) Declaration( Class( Capricciosa ) )
+        SubClassOf( Caprina CheeseyPizza ) Declaration( Class( Caprina ) )
+        SubClassOf( Fiorentina CheeseyPizza ) Declaration( Class( Fiorentina ) )
+        SubClassOf( FourSeasons CheeseyPizza ) Declaration( Class( FourSeasons ) )
+        SubClassOf( Giardiniera CheeseyPizza ) Declaration( Class( Giardiniera ) )
+        SubClassOf( LaReine CheeseyPizza ) Declaration( Class( LaReine ) )
+        SubClassOf( Margherita CheeseyPizza ) Declaration( Class( Margherita ) )
+        SubClassOf( Mushroom CheeseyPizza ) Declaration( Class( Mushroom ) )
+        SubClassOf( Napoletana CheeseyPizza ) Declaration( Class( Napoletana ) )
+        SubClassOf( Parmense CheeseyPizza ) Declaration( Class( Parmense ) )
+        SubClassOf( PolloAdAstra CheeseyPizza ) Declaration( Class( PolloAdAstra ) )
+        SubClassOf( PrinceCarlo CheeseyPizza ) Declaration( Class( PrinceCarlo ) )
+        SubClassOf( QuattroFormaggi CheeseyPizza ) Declaration( Class( QuattroFormaggi ) )
+        SubClassOf( Rosa CheeseyPizza ) Declaration( Class( Rosa ) )
+        SubClassOf( Siciliana CheeseyPizza ) Declaration( Class( Siciliana ) )
+        SubClassOf( SloppyGiuseppe CheeseyPizza ) Declaration( Class( SloppyGiuseppe ) )
+        SubClassOf( Soho CheeseyPizza ) Declaration( Class( Soho ) )
+        SubClassOf( UnclosedPizza CheeseyPizza ) Declaration( Class( UnclosedPizza ) )
+        SubClassOf( Veneziana CheeseyPizza ) Declaration( Class( Veneziana ) )
+      SubClassOf( InterestingPizza Pizza ) Declaration( Class( InterestingPizza ) )
+        SubClassOf( American InterestingPizza )
+        SubClassOf( AmericanHot InterestingPizza )
+        SubClassOf( Cajun InterestingPizza )
+        SubClassOf( Capricciosa InterestingPizza )
+        SubClassOf( Caprina InterestingPizza )
+        SubClassOf( Fiorentina InterestingPizza )
+        SubClassOf( FourSeasons InterestingPizza )
+        SubClassOf( FruttiDiMare InterestingPizza ) Declaration( Class( FruttiDiMare ) )
+        SubClassOf( Giardiniera InterestingPizza )
+        SubClassOf( LaReine InterestingPizza )
+        SubClassOf( Mushroom InterestingPizza )
+        SubClassOf( Napoletana InterestingPizza )
+        SubClassOf( Parmense InterestingPizza )
+        SubClassOf( PolloAdAstra InterestingPizza )
+        SubClassOf( PrinceCarlo InterestingPizza )
+        SubClassOf( Rosa InterestingPizza )
+        SubClassOf( Siciliana InterestingPizza )
+        SubClassOf( SloppyGiuseppe InterestingPizza )
+        SubClassOf( Soho InterestingPizza )
+        SubClassOf( Veneziana InterestingPizza )
+      SubClassOf( NamedPizza Pizza ) Declaration( Class( NamedPizza ) )
+        SubClassOf( American NamedPizza )
+        SubClassOf( AmericanHot NamedPizza )
+        SubClassOf( Cajun NamedPizza )
+        SubClassOf( Capricciosa NamedPizza )
+        SubClassOf( Caprina NamedPizza )
+        SubClassOf( Fiorentina NamedPizza )
+        SubClassOf( FourSeasons NamedPizza )
+        SubClassOf( FruttiDiMare NamedPizza )
+        SubClassOf( Giardiniera NamedPizza )
+        SubClassOf( LaReine NamedPizza )
+        SubClassOf( Margherita NamedPizza )
+        SubClassOf( Mushroom NamedPizza )
+        SubClassOf( Napoletana NamedPizza )
+        SubClassOf( Parmense NamedPizza )
+        SubClassOf( PolloAdAstra NamedPizza )
+        SubClassOf( PrinceCarlo NamedPizza )
+        SubClassOf( QuattroFormaggi NamedPizza )
+        SubClassOf( Rosa NamedPizza )
+        SubClassOf( Siciliana NamedPizza )
+        SubClassOf( SloppyGiuseppe NamedPizza )
+        SubClassOf( Soho NamedPizza )
+        SubClassOf( UnclosedPizza NamedPizza )
+        SubClassOf( Veneziana NamedPizza )
+      SubClassOf( NonVegetarianPizza Pizza ) Declaration( Class( NonVegetarianPizza ) )
+        SubClassOf( Cajun NonVegetarianPizza )
+        SubClassOf( FruttiDiMare NonVegetarianPizza )
+        SubClassOf( MeatyPizza NonVegetarianPizza ) Declaration( Class( MeatyPizza ) )
+          SubClassOf( American MeatyPizza )
+          SubClassOf( AmericanHot MeatyPizza )
+          SubClassOf( Capricciosa MeatyPizza )
+          SubClassOf( FourSeasons MeatyPizza )
+          SubClassOf( LaReine MeatyPizza )
+          SubClassOf( Parmense MeatyPizza )
+          SubClassOf( PolloAdAstra MeatyPizza )
+          SubClassOf( Siciliana MeatyPizza )
+          SubClassOf( SloppyGiuseppe MeatyPizza )
+        SubClassOf( Napoletana NonVegetarianPizza )
+      SubClassOf( RealItalianPizza Pizza ) Declaration( Class( RealItalianPizza ) )
+      SubClassOf( SpicyPizza Pizza ) EquivalentClasses( SpicyPizza SpicyPizzaEquivalent ) Declaration( Class( SpicyPizza ) ) Declaration( Class( SpicyPizzaEquivalent ) )
+        SubClassOf( AmericanHot SpicyPizza )
+        SubClassOf( Cajun SpicyPizza )
+        SubClassOf( PolloAdAstra SpicyPizza )
+        SubClassOf( SloppyGiuseppe SpicyPizza )
+      SubClassOf( VegetarianPizza Pizza ) Declaration( Class( VegetarianPizza ) )
+        SubClassOf( VegetarianPizzaEquivalent1 VegetarianPizza ) EquivalentClasses( VegetarianPizzaEquivalent1 VegetarianPizzaEquivalent2 ) Declaration( Class( VegetarianPizzaEquivalent1 ) ) Declaration( Class( VegetarianPizzaEquivalent2 ) )
+          SubClassOf( Caprina VegetarianPizzaEquivalent1 )
+          SubClassOf( Fiorentina VegetarianPizzaEquivalent1 )
+          SubClassOf( Giardiniera VegetarianPizzaEquivalent1 )
+          SubClassOf( Margherita VegetarianPizzaEquivalent1 )
+          SubClassOf( Mushroom VegetarianPizzaEquivalent1 )
+          SubClassOf( PrinceCarlo VegetarianPizzaEquivalent1 )
+          SubClassOf( QuattroFormaggi VegetarianPizzaEquivalent1 )
+          SubClassOf( Rosa VegetarianPizzaEquivalent1 )
+          SubClassOf( Soho VegetarianPizzaEquivalent1 )
+          SubClassOf( Veneziana VegetarianPizzaEquivalent1 )
+    SubClassOf( PizzaBase DomainConcept ) Declaration( Class( PizzaBase ) )
+      SubClassOf( DeepPanBase PizzaBase ) Declaration( Class( DeepPanBase ) )
+      SubClassOf( ThinAndCrispyBase PizzaBase ) Declaration( Class( ThinAndCrispyBase ) )
+    SubClassOf( PizzaTopping DomainConcept ) Declaration( Class( PizzaTopping ) )
+      SubClassOf( FishTopping PizzaTopping ) Declaration( Class( FishTopping ) )
+        SubClassOf( AnchoviesTopping FishTopping ) Declaration( Class( AnchoviesTopping ) )
+        SubClassOf( MixedSeafoodTopping FishTopping ) Declaration( Class( MixedSeafoodTopping ) )
+        SubClassOf( PrawnsTopping FishTopping ) Declaration( Class( PrawnsTopping ) )
+      SubClassOf( MeatTopping PizzaTopping ) Declaration( Class( MeatTopping ) )
+        SubClassOf( ChickenTopping MeatTopping ) Declaration( Class( ChickenTopping ) )
+        SubClassOf( HamTopping MeatTopping ) Declaration( Class( HamTopping ) )
+          SubClassOf( ParmaHamTopping HamTopping ) Declaration( Class( ParmaHamTopping ) )
+        SubClassOf( HotSpicedBeefTopping MeatTopping ) Declaration( Class( HotSpicedBeefTopping ) )
+        SubClassOf( PeperoniSausageTopping MeatTopping ) Declaration( Class( PeperoniSausageTopping ) )
+      SubClassOf( SpicyTopping PizzaTopping ) Declaration( Class( SpicyTopping ) )
+        SubClassOf( CajunSpiceTopping SpicyTopping ) Declaration( Class( CajunSpiceTopping ) )
+        SubClassOf( HotGreenPepperTopping SpicyTopping ) Declaration( Class( HotGreenPepperTopping ) )
+        SubClassOf( HotSpicedBeefTopping SpicyTopping )
+        SubClassOf( JalapenoPepperTopping SpicyTopping ) Declaration( Class( JalapenoPepperTopping ) )
+        SubClassOf( TobascoPepperSauce SpicyTopping ) Declaration( Class( TobascoPepperSauce ) )
+      SubClassOf( VegetarianTopping PizzaTopping ) Declaration( Class( VegetarianTopping ) )
+        SubClassOf( CheeseTopping VegetarianTopping ) Declaration( Class( CheeseTopping ) )
+          SubClassOf( FourCheesesTopping CheeseTopping ) Declaration( Class( FourCheesesTopping ) )
+          SubClassOf( GoatsCheeseTopping CheeseTopping ) Declaration( Class( GoatsCheeseTopping ) )
+          SubClassOf( GorgonzolaTopping CheeseTopping ) Declaration( Class( GorgonzolaTopping ) )
+          SubClassOf( MozzarellaTopping CheeseTopping ) Declaration( Class( MozzarellaTopping ) )
+          SubClassOf( ParmesanTopping CheeseTopping ) Declaration( Class( ParmesanTopping ) )
+        SubClassOf( FruitTopping VegetarianTopping ) Declaration( Class( FruitTopping ) )
+          SubClassOf( SultanaTopping FruitTopping ) Declaration( Class( SultanaTopping ) )
+        SubClassOf( HerbSpiceTopping VegetarianTopping ) Declaration( Class( HerbSpiceTopping ) )
+          SubClassOf( CajunSpiceTopping HerbSpiceTopping )
+          SubClassOf( RosemaryTopping HerbSpiceTopping ) Declaration( Class( RosemaryTopping ) )
+        SubClassOf( NutTopping VegetarianTopping ) Declaration( Class( NutTopping ) )
+          SubClassOf( PineKernels NutTopping ) Declaration( Class( PineKernels ) )
+        SubClassOf( SauceTopping VegetarianTopping ) Declaration( Class( SauceTopping ) )
+          SubClassOf( TobascoPepperSauce SauceTopping )
+        SubClassOf( VegetableTopping VegetarianTopping ) Declaration( Class( VegetableTopping ) )
+          SubClassOf( ArtichokeTopping VegetableTopping ) Declaration( Class( ArtichokeTopping ) )
+          SubClassOf( AsparagusTopping VegetableTopping ) Declaration( Class( AsparagusTopping ) )
+          SubClassOf( CaperTopping VegetableTopping ) Declaration( Class( CaperTopping ) )
+          SubClassOf( GarlicTopping VegetableTopping ) Declaration( Class( GarlicTopping ) )
+          SubClassOf( LeekTopping VegetableTopping ) Declaration( Class( LeekTopping ) )
+          SubClassOf( MushroomTopping VegetableTopping ) Declaration( Class( MushroomTopping ) )
+          SubClassOf( OliveTopping VegetableTopping ) Declaration( Class( OliveTopping ) )
+          SubClassOf( OnionTopping VegetableTopping ) Declaration( Class( OnionTopping ) )
+            SubClassOf( RedOnionTopping OnionTopping ) Declaration( Class( RedOnionTopping ) )
+          SubClassOf( PepperTopping VegetableTopping ) Declaration( Class( PepperTopping ) )
+            SubClassOf( GreenPepperTopping PepperTopping ) Declaration( Class( GreenPepperTopping ) )
+              SubClassOf( HotGreenPepperTopping GreenPepperTopping )
+            SubClassOf( JalapenoPepperTopping PepperTopping )
+            SubClassOf( PeperonataTopping PepperTopping ) Declaration( Class( PeperonataTopping ) )
+            SubClassOf( SweetPepperTopping PepperTopping ) Declaration( Class( SweetPepperTopping ) )
+          SubClassOf( PetitPoisTopping VegetableTopping ) Declaration( Class( PetitPoisTopping ) )
+          SubClassOf( RocketTopping VegetableTopping ) Declaration( Class( RocketTopping ) )
+          SubClassOf( SpinachTopping VegetableTopping ) Declaration( Class( SpinachTopping ) )
+          SubClassOf( TomatoTopping VegetableTopping ) Declaration( Class( TomatoTopping ) )
+            SubClassOf( SlicedTomatoTopping TomatoTopping ) Declaration( Class( SlicedTomatoTopping ) )
+            SubClassOf( SundriedTomatoTopping TomatoTopping ) Declaration( Class( SundriedTomatoTopping ) )
+  SubClassOf( ValuePartition owl:Thing ) Declaration( Class( ValuePartition ) )
+    SubClassOf( Spiciness ValuePartition ) Declaration( Class( Spiciness ) )
+      SubClassOf( Hot Spiciness ) Declaration( Class( Hot ) )
+      SubClassOf( Medium Spiciness ) Declaration( Class( Medium ) )
+      SubClassOf( Mild Spiciness ) Declaration( Class( Mild ) )
+EquivalentClasses( owl:Nothing CheeseyVegetableTopping IceCream ) Declaration( Class( CheeseyVegetableTopping ) ) Declaration( Class( IceCream ) )
+
+)

@@ -1,582 +1,114 @@
-http://www.w3.org/2002/07/owl#Thing
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#AlsatianWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#AlsatianWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FrenchWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#AmericanWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#AmericanWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Anjou
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Anjou
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FrenchWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Loire
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RoseWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Beaujolais
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Beaujolais
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryRedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FrenchWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Gamay
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedTableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#TableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Bordeaux
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Bordeaux
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FrenchWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Burgundy
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Burgundy
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FrenchWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#TableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#CabernetFranc
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#CabernetFranc
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryRedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedTableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#TableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#CabernetSauvignon
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#CabernetSauvignon
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryRedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedTableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#TableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#CaliforniaWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#AmericanWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#CaliforniaWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Chardonnay
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Chardonnay
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#CheninBlanc
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#CheninBlanc
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteNonSweetWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Chianti
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Chianti
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryRedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#ItalianWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedTableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#TableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#CotesDOr
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Burgundy
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#CotesDOr
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryRedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FrenchWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PinotNoir
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedBurgundy
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedTableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#TableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DessertWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DessertWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryRedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryRedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedTableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#TableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryRiesling
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryRiesling
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Riesling
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#TableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteNonSweetWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteTableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#TableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteNonSweetWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteTableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#TableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#EarlyHarvest
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#EarlyHarvest
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FrenchWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FrenchWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FullBodiedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FullBodiedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Gamay
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Gamay
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#GermanWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#GermanWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Grape
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Grape
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#IceWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DessertWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#IceWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#LateHarvest
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#SweetWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#ItalianWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#ItalianWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#LateHarvest
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#LateHarvest
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#SweetWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Loire
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FrenchWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Loire
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Margaux
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Bordeaux
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryRedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FrenchWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Margaux
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Medoc
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Merlot
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedBordeaux
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedTableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#TableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Medoc
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Bordeaux
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryRedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FrenchWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Medoc
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedBordeaux
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedTableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#TableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Meritage
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Meritage
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Merlot
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryRedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Merlot
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedTableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#TableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Meursault
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Burgundy
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Chardonnay
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FrenchWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FullBodiedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Meursault
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#TableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteBurgundy
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteNonSweetWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteTableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Muscadet
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FrenchWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Loire
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Muscadet
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PinotBlanc
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#TableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteLoire
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteNonSweetWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteTableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Pauillac
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Bordeaux
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#CabernetSauvignon
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryRedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FrenchWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FullBodiedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Medoc
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Pauillac
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedBordeaux
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedTableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#TableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PetiteSyrah
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryRedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PetiteSyrah
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedTableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#TableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PinotBlanc
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PinotBlanc
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PinotNoir
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PinotNoir
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Port
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FullBodiedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Port
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#SweetWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedBordeaux
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Bordeaux
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FrenchWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedBordeaux
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedBurgundy
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Burgundy
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryRedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FrenchWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PinotNoir
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedBurgundy
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedTableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#TableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedTableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryRedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedTableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#TableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Region
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Region
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Riesling
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Riesling
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RoseWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RoseWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Sancerre
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FrenchWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Loire
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Sancerre
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#SauvignonBlanc
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#SemillonOrSauvignonBlanc
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteLoire
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteNonSweetWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Sauternes
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Bordeaux
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FrenchWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#LateHarvest
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Sauternes
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#SemillonOrSauvignonBlanc
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#SweetWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteBordeaux
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#SauvignonBlanc
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#SauvignonBlanc
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#SemillonOrSauvignonBlanc
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Semillon
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Semillon
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#SemillonOrSauvignonBlanc
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#SemillonOrSauvignonBlanc
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#SemillonOrSauvignonBlanc
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#StEmilion
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Bordeaux
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#CabernetSauvignon
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryRedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FrenchWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedBordeaux
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedTableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#StEmilion
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#TableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#SweetRiesling
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DessertWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FullBodiedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Riesling
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#SweetRiesling
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#SweetWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#SweetWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#SweetWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#TableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#TableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#TexasWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#AmericanWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#TexasWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Tours
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#CheninBlanc
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FrenchWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Loire
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Tours
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteLoire
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteNonSweetWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Vintage
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Vintage
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#VintageYear
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#VintageYear
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteBordeaux
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Bordeaux
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FrenchWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#SemillonOrSauvignonBlanc
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteBordeaux
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteBurgundy
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Burgundy
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Chardonnay
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FrenchWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#TableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteBurgundy
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteNonSweetWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteTableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteLoire
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FrenchWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Loire
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteLoire
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteNonSweetWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteNonSweetWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteTableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#TableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteNonSweetWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteTableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WhiteWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WineBody
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WineBody
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WineDescriptor
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WineTaste
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WineColor
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WineColor
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WineDescriptor
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WineDescriptor
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WineDescriptor
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WineFlavor
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WineDescriptor
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WineFlavor
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WineTaste
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WineGrape
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Grape
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WineGrape
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WineSugar
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WineDescriptor
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WineSugar
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WineTaste
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WineTaste
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WineDescriptor
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#WineTaste
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Winery
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Winery
---------------------------------
-http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Zinfandel
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryRedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#DryWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#PotableLiquid
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedTableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#RedWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#TableWine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Wine
-    http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Zinfandel
---------------------------------
-! THE END !
+Namespace(=<http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#>)
+Namespace(owl=<http://www.w3.org/2002/07/owl#>)
+
+Ontology(<http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#>
+
+  SubClassOf( Grape owl:Thing ) Declaration( Class( Grape ) )
+    SubClassOf( WineGrape Grape ) Declaration( Class( WineGrape ) )
+  SubClassOf( PotableLiquid owl:Thing ) Declaration( Class( PotableLiquid ) )
+    SubClassOf( Wine PotableLiquid ) Declaration( Class( Wine ) )
+      SubClassOf( AmericanWine Wine ) Declaration( Class( AmericanWine ) )
+        SubClassOf( CaliforniaWine AmericanWine ) Declaration( Class( CaliforniaWine ) )
+        SubClassOf( TexasWine AmericanWine ) Declaration( Class( TexasWine ) )
+      SubClassOf( DessertWine Wine ) Declaration( Class( DessertWine ) )
+        SubClassOf( IceWine DessertWine ) Declaration( Class( IceWine ) )
+        SubClassOf( SweetRiesling DessertWine ) Declaration( Class( SweetRiesling ) )
+      SubClassOf( DryWine Wine ) EquivalentClasses( DryWine TableWine ) Declaration( Class( DryWine ) ) Declaration( Class( TableWine ) )
+        SubClassOf( Burgundy DryWine ) Declaration( Class( Burgundy ) )
+          SubClassOf( RedBurgundy Burgundy ) Declaration( Class( RedBurgundy ) )
+            SubClassOf( CotesDOr RedBurgundy ) Declaration( Class( CotesDOr ) )
+          SubClassOf( WhiteBurgundy Burgundy ) Declaration( Class( WhiteBurgundy ) )
+            SubClassOf( Meursault WhiteBurgundy ) Declaration( Class( Meursault ) )
+        SubClassOf( DryRedWine DryWine ) EquivalentClasses( DryRedWine RedTableWine ) Declaration( Class( DryRedWine ) ) Declaration( Class( RedTableWine ) )
+          SubClassOf( Beaujolais DryRedWine ) Declaration( Class( Beaujolais ) )
+          SubClassOf( CabernetFranc DryRedWine ) Declaration( Class( CabernetFranc ) )
+          SubClassOf( CabernetSauvignon DryRedWine ) Declaration( Class( CabernetSauvignon ) )
+            SubClassOf( Pauillac CabernetSauvignon ) Declaration( Class( Pauillac ) )
+            SubClassOf( StEmilion CabernetSauvignon ) Declaration( Class( StEmilion ) )
+          SubClassOf( Chianti DryRedWine ) Declaration( Class( Chianti ) )
+          SubClassOf( Medoc DryRedWine ) Declaration( Class( Medoc ) )
+            SubClassOf( Margaux Medoc ) Declaration( Class( Margaux ) )
+            SubClassOf( Pauillac Medoc )
+          SubClassOf( Merlot DryRedWine ) Declaration( Class( Merlot ) )
+            SubClassOf( Margaux Merlot )
+          SubClassOf( PetiteSyrah DryRedWine ) Declaration( Class( PetiteSyrah ) )
+          SubClassOf( RedBurgundy DryRedWine )
+          SubClassOf( Zinfandel DryRedWine ) Declaration( Class( Zinfandel ) )
+        SubClassOf( DryWhiteWine DryWine ) EquivalentClasses( DryWhiteWine WhiteTableWine ) Declaration( Class( DryWhiteWine ) ) Declaration( Class( WhiteTableWine ) )
+          SubClassOf( DryRiesling DryWhiteWine ) Declaration( Class( DryRiesling ) )
+          SubClassOf( Muscadet DryWhiteWine ) Declaration( Class( Muscadet ) )
+          SubClassOf( WhiteBurgundy DryWhiteWine )
+      SubClassOf( EarlyHarvest Wine ) Declaration( Class( EarlyHarvest ) )
+      SubClassOf( FrenchWine Wine ) Declaration( Class( FrenchWine ) )
+        SubClassOf( AlsatianWine FrenchWine ) Declaration( Class( AlsatianWine ) )
+        SubClassOf( Beaujolais FrenchWine )
+        SubClassOf( Bordeaux FrenchWine ) Declaration( Class( Bordeaux ) )
+          SubClassOf( RedBordeaux Bordeaux ) Declaration( Class( RedBordeaux ) )
+            SubClassOf( Medoc RedBordeaux )
+            SubClassOf( StEmilion RedBordeaux )
+          SubClassOf( WhiteBordeaux Bordeaux ) Declaration( Class( WhiteBordeaux ) )
+            SubClassOf( Sauternes WhiteBordeaux ) Declaration( Class( Sauternes ) )
+        SubClassOf( Burgundy FrenchWine )
+        SubClassOf( Loire FrenchWine ) Declaration( Class( Loire ) )
+          SubClassOf( Anjou Loire ) Declaration( Class( Anjou ) )
+          SubClassOf( WhiteLoire Loire ) Declaration( Class( WhiteLoire ) )
+            SubClassOf( Muscadet WhiteLoire )
+            SubClassOf( Sancerre WhiteLoire ) Declaration( Class( Sancerre ) )
+            SubClassOf( Tours WhiteLoire ) Declaration( Class( Tours ) )
+      SubClassOf( FullBodiedWine Wine ) Declaration( Class( FullBodiedWine ) )
+        SubClassOf( Meursault FullBodiedWine )
+        SubClassOf( Pauillac FullBodiedWine )
+        SubClassOf( Port FullBodiedWine ) Declaration( Class( Port ) )
+        SubClassOf( SweetRiesling FullBodiedWine )
+      SubClassOf( Gamay Wine ) Declaration( Class( Gamay ) )
+        SubClassOf( Beaujolais Gamay )
+      SubClassOf( GermanWine Wine ) Declaration( Class( GermanWine ) )
+      SubClassOf( ItalianWine Wine ) Declaration( Class( ItalianWine ) )
+        SubClassOf( Chianti ItalianWine )
+      SubClassOf( RedWine Wine ) Declaration( Class( RedWine ) )
+        SubClassOf( DryRedWine RedWine )
+        SubClassOf( Meritage RedWine ) Declaration( Class( Meritage ) )
+        SubClassOf( PinotNoir RedWine ) Declaration( Class( PinotNoir ) )
+          SubClassOf( RedBurgundy PinotNoir )
+        SubClassOf( Port RedWine )
+        SubClassOf( RedBordeaux RedWine )
+      SubClassOf( RoseWine Wine ) Declaration( Class( RoseWine ) )
+        SubClassOf( Anjou RoseWine )
+      SubClassOf( SweetWine Wine ) Declaration( Class( SweetWine ) )
+        SubClassOf( LateHarvest SweetWine ) Declaration( Class( LateHarvest ) )
+          SubClassOf( IceWine LateHarvest )
+          SubClassOf( Sauternes LateHarvest )
+        SubClassOf( Port SweetWine )
+        SubClassOf( SweetRiesling SweetWine )
+      SubClassOf( WhiteWine Wine ) Declaration( Class( WhiteWine ) )
+        SubClassOf( Chardonnay WhiteWine ) Declaration( Class( Chardonnay ) )
+          SubClassOf( WhiteBurgundy Chardonnay )
+        SubClassOf( IceWine WhiteWine )
+        SubClassOf( PinotBlanc WhiteWine ) Declaration( Class( PinotBlanc ) )
+          SubClassOf( Muscadet PinotBlanc )
+        SubClassOf( Riesling WhiteWine ) Declaration( Class( Riesling ) )
+          SubClassOf( DryRiesling Riesling )
+          SubClassOf( SweetRiesling Riesling )
+        SubClassOf( SemillonOrSauvignonBlanc WhiteWine ) Declaration( Class( SemillonOrSauvignonBlanc ) )
+          SubClassOf( SauvignonBlanc SemillonOrSauvignonBlanc ) Declaration( Class( SauvignonBlanc ) )
+            SubClassOf( Sancerre SauvignonBlanc )
+          SubClassOf( Semillon SemillonOrSauvignonBlanc ) Declaration( Class( Semillon ) )
+          SubClassOf( WhiteBordeaux SemillonOrSauvignonBlanc )
+        SubClassOf( WhiteLoire WhiteWine )
+        SubClassOf( WhiteNonSweetWine WhiteWine ) Declaration( Class( WhiteNonSweetWine ) )
+          SubClassOf( CheninBlanc WhiteNonSweetWine ) Declaration( Class( CheninBlanc ) )
+            SubClassOf( Tours CheninBlanc )
+          SubClassOf( DryWhiteWine WhiteNonSweetWine )
+          SubClassOf( Sancerre WhiteNonSweetWine )
+  SubClassOf( Region owl:Thing ) Declaration( Class( Region ) )
+  SubClassOf( Vintage owl:Thing ) Declaration( Class( Vintage ) )
+  SubClassOf( VintageYear owl:Thing ) Declaration( Class( VintageYear ) )
+  SubClassOf( WineDescriptor owl:Thing ) Declaration( Class( WineDescriptor ) )
+    SubClassOf( WineColor WineDescriptor ) Declaration( Class( WineColor ) )
+    SubClassOf( WineTaste WineDescriptor ) Declaration( Class( WineTaste ) )
+      SubClassOf( WineBody WineTaste ) Declaration( Class( WineBody ) )
+      SubClassOf( WineFlavor WineTaste ) Declaration( Class( WineFlavor ) )
+      SubClassOf( WineSugar WineTaste ) Declaration( Class( WineSugar ) )
+  SubClassOf( Winery owl:Thing ) Declaration( Class( Winery ) )
+
+)
