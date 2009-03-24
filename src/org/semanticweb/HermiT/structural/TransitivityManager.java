@@ -103,10 +103,9 @@ public class TransitivityManager {
         if (m_transitiveObjectProperties.contains(objectProperty))
             result.add(objectProperty);
         Set<OWLObjectPropertyExpression> subObjectProperties=m_subObjectProperties.getSuccessors(objectProperty);
-        if (subObjectProperties!=null)
-            for (OWLObjectPropertyExpression subObjectProperty : subObjectProperties)
-                if (m_transitiveObjectProperties.contains(subObjectProperty))
-                    result.add(subObjectProperty);
+        for (OWLObjectPropertyExpression subObjectProperty : subObjectProperties)
+            if (m_transitiveObjectProperties.contains(subObjectProperty))
+                result.add(subObjectProperty);
         return result;
     }
 }

@@ -9,18 +9,10 @@ public class AllTests extends TestCase {
     public static Test suite() {
         TestSuite suite = new TestSuite("All HermiT tests");
         // $JUnit-BEGIN$
-        // Tests the internals of the datatype classes.
-        suite.addTest(org.semanticweb.HermiT.datatypes.AllTests.suite());
-        // Tests the normalization and clausification, when loading via the
-        // OWLAPI.
-        suite.addTest(org.semanticweb.HermiT.owlapi.AllTests.suite());
-        // Tests Hermit as a blackbox, i.e., by only using the official
-        // interface.
-        suite.addTest(org.semanticweb.HermiT.reasoner.AllTests.suite());
-        // Tests for the internals of the reasoner
-        suite.addTest(org.semanticweb.HermiT.tableau.AllTests.suite());
-        // Unit tests for various utility functions.
-        suite.addTest(org.semanticweb.HermiT.graph.AllTests.suite());
+        // Performs all quick tests.
+        suite.addTest(org.semanticweb.HermiT.AllQuickTests.suite());
+        // Performs the heavy reasoner tests.
+        suite.addTest(org.semanticweb.HermiT.reasoner.AllHeavyTests.suite());
         // $JUnit-END$
         return suite;
     }

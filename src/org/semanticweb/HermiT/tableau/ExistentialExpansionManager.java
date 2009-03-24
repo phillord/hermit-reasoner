@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.semanticweb.HermiT.graph.Graph;
 import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.ExistentialConcept;
@@ -29,11 +30,6 @@ public final class ExistentialExpansionManager implements Serializable {
 
     private final Tableau m_tableau;
     private final ExtensionManager m_extensionManager;
-
-    /**
-     * Table of existentials which have already been expanded.
-     * It is used in backtracking to determine what existentials need to be added back to nodes.
-     */
     private final TupleTable m_expandedExistentials;
     private final Object[] m_auxiliaryTuple;
     private final List<Node> m_auxiliaryNodes1;
@@ -58,53 +54,51 @@ public final class ExistentialExpansionManager implements Serializable {
         m_indicesByBranchingPoint=new int[2];
     }
     protected Map<Role,Role[]> buildFunctionalRoles() {
+        Graph<Role> superRoleGraph=new Graph<Role>();
         Set<Role> functionalRoles=new HashSet<Role>();
-        ObjectHierarchy<Role> roleHierarchy=new ObjectHierarchy<Role>();
         for (DLClause dlClause : m_tableau.getDLOntology().getDLClauses()) {
             if (dlClause.isRoleInclusion()) {
                 AtomicRole subrole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                 AtomicRole superrole=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
-                roleHierarchy.addInclusion(subrole,superrole);
-                roleHierarchy.addInclusion(subrole.getInverse(),superrole.getInverse());
+                superRoleGraph.addEdge(subrole,superrole);
+                superRoleGraph.addEdge(subrole.getInverse(),superrole.getInverse());
             }
             else if (dlClause.isRoleInverseInclusion()) {
                 AtomicRole subrole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                 AtomicRole superrole=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
-                roleHierarchy.addInclusion(subrole,superrole.getInverse());
-                roleHierarchy.addInclusion(subrole.getInverse(),superrole);
+                superRoleGraph.addEdge(subrole,superrole.getInverse());
+                superRoleGraph.addEdge(subrole.getInverse(),superrole);
             }
             else if (dlClause.isFunctionalityAxiom()) {
                 AtomicRole atomicRole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                 functionalRoles.add(atomicRole);
-                roleHierarchy.addInclusion(atomicRole,atomicRole);
-                roleHierarchy.addInclusion(atomicRole.getInverse(),atomicRole.getInverse());
             }
             else if (dlClause.isGuardedFunctionalityAxiom()) {
                 AtomicRole atomicRole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                 functionalRoles.add(atomicRole);
-                roleHierarchy.addInclusion(atomicRole,atomicRole);
-                roleHierarchy.addInclusion(atomicRole.getInverse(),atomicRole.getInverse());
             }
             else if (dlClause.isInverseFunctionalityAxiom()) {
                 AtomicRole atomicRole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                 functionalRoles.add(atomicRole.getInverse());
-                roleHierarchy.addInclusion(atomicRole,atomicRole);
-                roleHierarchy.addInclusion(atomicRole.getInverse(),atomicRole.getInverse());
             }
             else if (dlClause.isGuardedInverseFunctionalityAxiom()) {
                 AtomicRole atomicRole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                 functionalRoles.add(atomicRole.getInverse());
-                roleHierarchy.addInclusion(atomicRole,atomicRole);
-                roleHierarchy.addInclusion(atomicRole.getInverse(),atomicRole.getInverse());
             }
         }
+        for (Role role : superRoleGraph.getElements()) {
+            superRoleGraph.addEdge(role,role);
+            superRoleGraph.addEdge(role.getInverse(),role.getInverse());
+        }
+        superRoleGraph.transitivelyClose();
+        Graph<Role> subRoleGraph=superRoleGraph.getInverse();
         Map<Role,Role[]> result=new HashMap<Role,Role[]>();
-        for (Role role : roleHierarchy.getAllObjects()) {
+        for (Role role : superRoleGraph.getElements()) {
             Set<Role> relevantRoles=new HashSet<Role>();
-            Set<Role> allSuperroles=roleHierarchy.getAllSuperobjects(role);
+            Set<Role> allSuperroles=superRoleGraph.getSuccessors(role);
             for (Role superrole : allSuperroles)
                 if (functionalRoles.contains(superrole))
-                    relevantRoles.addAll(roleHierarchy.getAllSubobjects(superrole));
+                    relevantRoles.addAll(subRoleGraph.getSuccessors(superrole));
             if (!relevantRoles.isEmpty()) {
                 Role[] relevantRolesArray=new Role[relevantRoles.size()];
                 relevantRoles.toArray(relevantRolesArray);

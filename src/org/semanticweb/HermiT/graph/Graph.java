@@ -7,11 +7,14 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class Graph<T> {
+    protected final Set<T> m_elements;
     protected final Map<T,Set<T>> m_successorsByNodes;
 
     public Graph() {
+        m_elements=new HashSet<T>();
         m_successorsByNodes=new HashMap<T,Set<T>>();
     }
     public void addEdge(T from,T to) {
@@ -21,9 +24,17 @@ public class Graph<T> {
             m_successorsByNodes.put(from,successors);
         }
         successors.add(to);
+        m_elements.add(from);
+        m_elements.add(to);
+    }
+    public Set<T> getElements() {
+        return m_elements;
     }
     public Set<T> getSuccessors(T node) {
-        return m_successorsByNodes.get(node);
+        Set<T> result=m_successorsByNodes.get(node);
+        if (result==null)
+            result=Collections.emptySet();
+        return result;
     }
     public void transitivelyClose() {
         List<T> toProcess=new ArrayList<T>();
@@ -39,5 +50,14 @@ public class Graph<T> {
                             toProcess.add(elementOnPathSuccessor);
             }
         }
+    }
+    public Graph<T> getInverse() {
+        Graph<T> result=new Graph<T>();
+        for (Map.Entry<T,Set<T>> entry : m_successorsByNodes.entrySet()) {
+            T from=entry.getKey();
+            for (T successor : entry.getValue())
+                result.addEdge(successor,from);
+        }
+        return result;
     }
 }

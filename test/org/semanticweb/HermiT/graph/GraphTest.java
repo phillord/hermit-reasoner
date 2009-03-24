@@ -3,9 +3,9 @@ package org.semanticweb.HermiT.graph;
 import org.semanticweb.HermiT.AbstractHermiTTest;
 import org.semanticweb.HermiT.graph.Graph;
 
-public class GraphUtilsTest extends AbstractHermiTTest {
+public class GraphTest extends AbstractHermiTTest {
 
-    public GraphUtilsTest(String name) {
+    public GraphTest(String name) {
         super(name);
     }
     public void testTransClosure() throws Exception {
