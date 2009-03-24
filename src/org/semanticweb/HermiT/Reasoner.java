@@ -74,7 +74,6 @@ import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLObjectProperty;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
-import org.semanticweb.owl.model.OWLObjectPropertyInverse;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
 import org.semanticweb.owl.inference.OWLReasoner;
@@ -460,11 +459,9 @@ public class Reasoner implements OWLReasoner,Serializable {
         propertyExpression=propertyExpression.getSimplified();
         Role role;
         if (propertyExpression instanceof OWLObjectProperty)
-            role=AtomicRole.create(((OWLObjectProperty)propertyExpression).getURI().toString());
-        else {
-            OWLObjectPropertyInverse inverse=(OWLObjectPropertyInverse)propertyExpression;
-            role=AtomicRole.create(((OWLObjectProperty)inverse).getURI().toString());
-        }
+            role=AtomicRole.create(propertyExpression.getNamedProperty().getURI().toString());
+        else
+            role=AtomicRole.create(propertyExpression.getNamedProperty().getURI().toString()).getInverse();
         classifyObjectProperties();
         HierarchyNode<Role> node=m_atomicObjectRoleHierarchy.getNodeForElement(role);
         if (node==null)
