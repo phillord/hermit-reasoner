@@ -20,7 +20,7 @@ public class AllQuickTests extends TestCase {
         // Tests for the internals of the reasoner.
         suite.addTest(org.semanticweb.HermiT.tableau.AllTests.suite());
         // Unit tests for various utility functions.
-        suite.addTest(org.semanticweb.HermiT.util.AllTests.suite());
+        suite.addTest(org.semanticweb.HermiT.graph.AllTests.suite());
         // $JUnit-END$
         return suite;
     }

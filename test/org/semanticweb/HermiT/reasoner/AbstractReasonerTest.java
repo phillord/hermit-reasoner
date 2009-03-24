@@ -7,14 +7,11 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.HashSet;
 
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
-
+import org.semanticweb.HermiT.AbstractHermiTTest;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.model.Atom;
@@ -37,7 +34,7 @@ import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyCreationException;
 import org.semanticweb.owl.model.OWLOntologyManager;
 
-public abstract class AbstractReasonerTest extends TestCase {
+public abstract class AbstractReasonerTest extends AbstractHermiTTest {
     protected static final Node[][] NO_TUPLES=new Node[0][];
     protected static final DLOntology EMPTY_DL_ONTOLOGY;
     static {
@@ -484,28 +481,6 @@ public abstract class AbstractReasonerTest extends TestCase {
         return new Configuration();
     }
 
-    protected static <T> void assertContainsAll(Collection<T> actual,T... control) {
-        try {
-            assertEquals(control.length,actual.size());
-            for (int i=0;i<control.length;i++)
-                assertTrue(actual.contains(control[i]));
-        }
-        catch (AssertionFailedError e) {
-            System.out.println("Control set ("+control.length+" elements):");
-            System.out.println("------------------------------------------");
-            for (T object : control)
-                System.out.println(object.toString());
-            System.out.println("------------------------------------------");
-            System.out.println("Actual set ("+actual.size()+" elements):");
-            System.out.println("------------------------------------------");
-            for (Object object : actual)
-                System.out.println(object.toString());
-            System.out.println("------------------------------------------");
-            System.out.flush();
-            throw e;
-        }
-    }
-    
     protected static Set<String> EQ(String... args) {
         Set<String> result=new HashSet<String>();
         for (String arg : args) {
