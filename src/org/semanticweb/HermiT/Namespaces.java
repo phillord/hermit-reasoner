@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.TreeMap;
@@ -19,19 +20,19 @@ import java.util.regex.Pattern;
 public class Namespaces implements Serializable {
     private static final long serialVersionUID=-158185482289831766L;
 
-    public static final Map<String,String> semanticWebNamespaces;
+    public static final Map<String,String> s_semanticWebNamespaces;
     static {
-        semanticWebNamespaces=new HashMap<String,String>();
-        semanticWebNamespaces.put("owl","http://www.w3.org/2002/07/owl#");
-        semanticWebNamespaces.put("owlx","http://www.w3.org/2003/05/owl-xml#");
-        semanticWebNamespaces.put("owl11xml","http://www.w3.org/2006/12/owl11-xml#");
-        semanticWebNamespaces.put("xsd","http://www.w3.org/2001/XMLSchema#");
-        semanticWebNamespaces.put("rdf","http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-        semanticWebNamespaces.put("rdfs","http://www.w3.org/2000/01/rdf-schema#");
-        semanticWebNamespaces.put("swrl","http://www.w3.org/2003/11/swrl#");
-        semanticWebNamespaces.put("swrlb","http://www.w3.org/2003/11/swrlb#");
-        semanticWebNamespaces.put("swrlx","http://www.w3.org/2003/11/swrlx#");
-        semanticWebNamespaces.put("ruleml","http://www.w3.org/2003/11/ruleml#");
+        s_semanticWebNamespaces=new HashMap<String,String>();
+        s_semanticWebNamespaces.put("owl","http://www.w3.org/2002/07/owl#");
+        s_semanticWebNamespaces.put("owlx","http://www.w3.org/2003/05/owl-xml#");
+        s_semanticWebNamespaces.put("owl11xml","http://www.w3.org/2006/12/owl11-xml#");
+        s_semanticWebNamespaces.put("xsd","http://www.w3.org/2001/XMLSchema#");
+        s_semanticWebNamespaces.put("rdf","http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+        s_semanticWebNamespaces.put("rdfs","http://www.w3.org/2000/01/rdf-schema#");
+        s_semanticWebNamespaces.put("swrl","http://www.w3.org/2003/11/swrl#");
+        s_semanticWebNamespaces.put("swrlb","http://www.w3.org/2003/11/swrlb#");
+        s_semanticWebNamespaces.put("swrlx","http://www.w3.org/2003/11/swrlx#");
+        s_semanticWebNamespaces.put("ruleml","http://www.w3.org/2003/11/ruleml#");
     }
     @SuppressWarnings("serial")
     public static final Namespaces none=new Namespaces() {
@@ -89,11 +90,31 @@ public class Namespaces implements Serializable {
             Matcher matcher=m_namespaceMathingPattern.matcher(uri);
             if (matcher.find()) {
                 String prefix=m_prefixByNamespace.get(matcher.group(1));
-                String localPart=uri.substring(matcher.end());
+                String localName=uri.substring(matcher.end());
                 if (prefix==null || prefix.length()==0)
-                    return localPart;
+                    return localName;
                 else
-                    return prefix+":"+localPart;
+                    return prefix+":"+localName;
+            }
+        }
+        return "<"+uri+">";
+    }
+    /**
+     * Abbreviates the given URI in a safe way.
+     */
+    public String abbreviateURISafe(String uri,Pattern localNameChecker,Set<String> prohibitedAbbreviations) {
+        if (m_namespaceMathingPattern!=null) {
+            Matcher matcher=m_namespaceMathingPattern.matcher(uri);
+            if (matcher.find()) {
+                String prefix=m_prefixByNamespace.get(matcher.group(1));
+                String localName=uri.substring(matcher.end());
+                String abbreviation;
+                if (prefix==null || prefix.length()==0)
+                    abbreviation=localName;
+                else
+                    abbreviation=prefix+":"+localName;
+                if (localNameChecker.matcher(localName).matches() && !prohibitedAbbreviations.contains(abbreviation))
+                    return abbreviation;
             }
         }
         return "<"+uri+">";
@@ -209,7 +230,7 @@ public class Namespaces implements Serializable {
      */
     public boolean reegisterSemanticWebPrefixes() {
         boolean containsPrefix=false;
-        for (Map.Entry<String,String> entry : semanticWebNamespaces.entrySet())
+        for (Map.Entry<String,String> entry : s_semanticWebNamespaces.entrySet())
             if (registerNamespaceRaw(entry.getKey(),entry.getValue()))
                 containsPrefix=true;
         buildNamespaceMatchingPattern();

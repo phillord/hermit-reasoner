@@ -42,7 +42,7 @@ public abstract class DatatypeRestriction
         MIN_INCLUSIVE, MIN_EXCLUSIVE, MAX_INCLUSIVE, MAX_EXCLUSIVE 
     };
     
-    protected static final Map<String, String> uris = Namespaces.semanticWebNamespaces;
+    protected static final Map<String, String> uris = Namespaces.s_semanticWebNamespaces;
     
     /**
      * The datatypes supported by HermiT together with their URIs and a position 

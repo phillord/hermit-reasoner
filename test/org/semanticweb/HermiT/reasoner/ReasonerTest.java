@@ -21,6 +21,42 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
+    
+    public void testConceptHierarchyPrinting1() throws Exception {
+        String axioms =
+            "SubClassOf( A B )"+
+            "SubClassOf( D A )"+
+            "SubClassOf( C B )"+
+            "SubClassOf( D C )"+
+            "SubClassOf( F D )"+
+            "SubClassOf( F E )"+
+            "SubClassOf( H E )"+
+            "SubClassOf( G owl:Nothing )"+
+            "SubClassOf( owl:Thing I )"+
+            "SubClassOf( <http://my.com/test2#J> D )"+
+            "EquivalentClasses( A <"+NS+"Class> )"+
+            "EquivalentClasses( A <"+NS+"s:local> )"+
+            "EquivalentClasses( C <http://my.com/test1#otherC> )";
+        loadOntologyWithAxioms(axioms);
+        assertSubsumptionHierarchy("../res/hierarchy-printing-1.txt");
+    }
+
+    public void testConceptHierarchyPrinting2() throws Exception {
+        String axioms =
+            "SubClassOf( A B )"+
+            "SubClassOf( D A )"+
+            "SubClassOf( C B )"+
+            "SubClassOf( D C )"+
+            "SubClassOf( F D )"+
+            "SubClassOf( F E )"+
+            "SubClassOf( H E )"+
+            "SubClassOf( <http://my.com/test2#J> D )"+
+            "EquivalentClasses( A <"+NS+"Class> )"+
+            "EquivalentClasses( A <"+NS+"s:local> )"+
+            "EquivalentClasses( C <http://my.com/test1#otherC> )";
+        loadOntologyWithAxioms(axioms);
+        assertSubsumptionHierarchy("../res/hierarchy-printing-2.txt");
+    }
 
     @SuppressWarnings("unchecked")
     public void testObjectPropertyHierarchy() throws Exception {

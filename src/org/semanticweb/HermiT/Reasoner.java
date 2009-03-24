@@ -18,12 +18,30 @@ import java.util.Collections;
 import java.util.Collection;
 import java.util.Set;
 import java.util.HashSet;
-import java.util.TreeSet;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.TreeMap;
 
 import org.protege.editor.owl.model.inference.ProtegeOWLReasonerFactoryAdapter;
+import org.semanticweb.owl.apibinding.OWLManager;
+import org.semanticweb.owl.model.OWLAxiom;
+import org.semanticweb.owl.model.OWLClass;
+import org.semanticweb.owl.model.OWLConstant;
+import org.semanticweb.owl.model.OWLDataFactory;
+import org.semanticweb.owl.model.OWLDataProperty;
+import org.semanticweb.owl.model.OWLDataPropertyExpression;
+import org.semanticweb.owl.model.OWLDataRange;
+import org.semanticweb.owl.model.OWLDescription;
+import org.semanticweb.owl.model.OWLEntity;
+import org.semanticweb.owl.model.OWLException;
+import org.semanticweb.owl.model.OWLIndividual;
+import org.semanticweb.owl.model.OWLObjectProperty;
+import org.semanticweb.owl.model.OWLObjectPropertyExpression;
+import org.semanticweb.owl.model.OWLOntology;
+import org.semanticweb.owl.model.OWLOntologyManager;
+import org.semanticweb.owl.util.ProgressMonitor;
+import org.semanticweb.owl.inference.OWLReasoner;
+import org.semanticweb.owl.inference.MonitorableOWLReasoner;
+
 import org.semanticweb.HermiT.blocking.AncestorBlocking;
 import org.semanticweb.HermiT.blocking.AnywhereBlocking;
 import org.semanticweb.HermiT.blocking.BlockingSignatureCache;
@@ -40,6 +58,7 @@ import org.semanticweb.HermiT.hierarchy.HierarchyNode;
 import org.semanticweb.HermiT.hierarchy.HierarchyBuilder;
 import org.semanticweb.HermiT.hierarchy.TableauSubsumptionChecker;
 import org.semanticweb.HermiT.hierarchy.DeterministicHierarchyBuilder;
+import org.semanticweb.HermiT.hierarchy.Concepts2FSSPrinter;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
@@ -61,25 +80,6 @@ import org.semanticweb.HermiT.structural.OWLHasKeyDummy;
 import org.semanticweb.HermiT.structural.OWLNormalization;
 import org.semanticweb.HermiT.structural.TransitivityManager;
 import org.semanticweb.HermiT.tableau.Tableau;
-import org.semanticweb.owl.apibinding.OWLManager;
-import org.semanticweb.owl.model.OWLAxiom;
-import org.semanticweb.owl.model.OWLClass;
-import org.semanticweb.owl.model.OWLConstant;
-import org.semanticweb.owl.model.OWLDataFactory;
-import org.semanticweb.owl.model.OWLDataProperty;
-import org.semanticweb.owl.model.OWLDataPropertyExpression;
-import org.semanticweb.owl.model.OWLDataRange;
-import org.semanticweb.owl.model.OWLDescription;
-import org.semanticweb.owl.model.OWLEntity;
-import org.semanticweb.owl.model.OWLException;
-import org.semanticweb.owl.model.OWLIndividual;
-import org.semanticweb.owl.model.OWLObjectProperty;
-import org.semanticweb.owl.model.OWLObjectPropertyExpression;
-import org.semanticweb.owl.model.OWLOntology;
-import org.semanticweb.owl.model.OWLOntologyManager;
-import org.semanticweb.owl.util.ProgressMonitor;
-import org.semanticweb.owl.inference.OWLReasoner;
-import org.semanticweb.owl.inference.MonitorableOWLReasoner;
 
 /**
  * Answers queries about the logical implications of a particular knowledge base. A Reasoner is associated with a single knowledge base, which is "loaded" when the reasoner is constructed. By default a full classification of all atomic terms in the knowledge base is also performed at this time (which can take quite a while for large or complex ontologies), but this behavior can be disabled as a part of the Reasoner configuration. Internal details of the loading and reasoning algorithms can be configured in the Reasoner constructor and do not change over the lifetime of the Reasoner object---internal data structures and caches are optimized for a particular configuration. By default, HermiT will use the set of options which provide optimal performance.
@@ -400,36 +400,9 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         }
     }
 
-    public void printClassHierarchy(PrintWriter output) {
+    public void printClassHierarchy(PrintWriter out) {
         classify();
-        Map<String,Set<String>> flat=new TreeMap<String,Set<String>>();
-        for (HierarchyNode<AtomicConcept> node : m_atomicConceptHierarchy.getAllNodes()) {
-            Set<String> ancestors=new TreeSet<String>();
-            for (AtomicConcept atomicConcept : node.getEquivalentElements())
-                if (!AtomicConcept.THING.equals(atomicConcept))
-                    ancestors.add(atomicConcept.getURI());
-            for (HierarchyNode<AtomicConcept> ancestorNode : node.getAncestorNodes())
-                for (AtomicConcept atomicConcept : ancestorNode.getEquivalentElements())
-                    if (!AtomicConcept.THING.equals(atomicConcept))
-                        ancestors.add(atomicConcept.getURI());
-            for (AtomicConcept atomicConcept : node.getEquivalentElements())
-                if (!AtomicConcept.NOTHING.equals(atomicConcept))
-                    flat.put(atomicConcept.getURI(),ancestors);
-        }
-        try {
-            for (Map.Entry<String,Set<String>> entry : flat.entrySet()) {
-                output.println(entry.getKey());
-                for (String ancestor : entry.getValue()) {
-                    output.print("    ");
-                    output.println(ancestor);
-                }
-                output.println("--------------------------------");
-            }
-            output.println("! THE END !");
-        }
-        finally {
-            output.flush();
-        }
+        m_atomicConceptHierarchy.print(new Concepts2FSSPrinter(out,m_dlOntology.getOntologyURI()+"#",m_atomicConceptHierarchy.getAllElements()));
     }
 
     // Object property inferences

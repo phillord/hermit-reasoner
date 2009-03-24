@@ -2,14 +2,24 @@ package org.semanticweb.HermiT.reasoner;
 
 import java.io.BufferedReader;
 import java.io.CharArrayWriter;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Set;
 import java.util.HashSet;
+
+import org.semanticweb.owl.apibinding.OWLManager;
+import org.semanticweb.owl.io.OWLOntologyInputSource;
+import org.semanticweb.owl.io.StringInputSource;
+import org.semanticweb.owl.model.OWLClass;
+import org.semanticweb.owl.model.OWLDescription;
+import org.semanticweb.owl.model.OWLDataProperty;
+import org.semanticweb.owl.model.OWLObjectProperty;
+import org.semanticweb.owl.model.OWLObjectPropertyExpression;
+import org.semanticweb.owl.model.OWLIndividual;
+import org.semanticweb.owl.model.OWLOntology;
+import org.semanticweb.owl.model.OWLOntologyManager;
 
 import org.semanticweb.HermiT.AbstractHermiTTest;
 import org.semanticweb.HermiT.Configuration;
@@ -20,23 +30,12 @@ import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.structural.OWLHasKeyDummy;
 import org.semanticweb.HermiT.tableau.Node;
-import org.semanticweb.owl.apibinding.OWLManager;
-import org.semanticweb.owl.io.OWLOntologyInputSource;
-import org.semanticweb.owl.io.StringInputSource;
-import org.semanticweb.owl.model.OWLClass;
-import org.semanticweb.owl.model.OWLDescription;
-import org.semanticweb.owl.model.OWLDataProperty;
-import org.semanticweb.owl.model.OWLObjectProperty;
-import org.semanticweb.owl.model.OWLObjectPropertyExpression;
-import org.semanticweb.owl.model.OWLException;
-import org.semanticweb.owl.model.OWLIndividual;
-import org.semanticweb.owl.model.OWLOntology;
-import org.semanticweb.owl.model.OWLOntologyCreationException;
-import org.semanticweb.owl.model.OWLOntologyManager;
 
 public abstract class AbstractReasonerTest extends AbstractHermiTTest {
     protected static final Node[][] NO_TUPLES=new Node[0][];
     protected static final DLOntology EMPTY_DL_ONTOLOGY;
+    protected static final String ONTOLOGY_URI="file:/c/test.owl";
+    protected static final String NS=ONTOLOGY_URI+"#";
     static {
         Set<DLClause> dlClauses=Collections.emptySet();
         Set<Atom> atoms=Collections.emptySet();
@@ -80,14 +79,6 @@ public abstract class AbstractReasonerTest extends AbstractHermiTTest {
      * 
      * @param resource
      *            the resource to load
-     * @throws URISyntaxException
-     *             if the resourceName cannot be convertd into a URI
-     * @throws OWLException
-     *             if there are problems during the parsing of the ontology in resourceName
-     * @throws LoadingException
-     *             if the ontology cannot be loaded
-     * @throws IllegalArgumentException
-     *             inappropriate argument
      */
     protected void loadOntologyFromResource(String resourceName) throws Exception {
         loadOntologyFromResource(getConfiguration(),resourceName);
@@ -100,14 +91,6 @@ public abstract class AbstractReasonerTest extends AbstractHermiTTest {
      *            a configuration for the reasoner instance
      * @param resource
      *            the resource to load
-     * @throws URISyntaxException
-     *             if the resourceName cannot be convertd into a URI
-     * @throws OWLException
-     *             if there are problems during the parsing of the ontology in resourceName
-     * @throws LoadingException
-     *             if the ontology cannot be loaded
-     * @throws IllegalArgumentException
-     *             inappropriate argument
      */
     protected void loadOntologyFromResource(Configuration configuration,String resourceName) throws Exception {
         URI physicalURI=getClass().getResource(resourceName).toURI();
@@ -118,14 +101,12 @@ public abstract class AbstractReasonerTest extends AbstractHermiTTest {
 
     /**
      * Creates and loads an ontology that contains the given axioms. Uses the standard configuration
-     * for the reasoner instance. Standard namespace is "file:/c/test.owl" and that is also the URI of the ontology.
+     * for the reasoner instance.
      * 
      * @param axioms
      *            in functional style syntax
-     * @throws OWLOntologyCreationException
-     *             if the ontology could not be created
      */
-    protected void loadOntologyWithAxioms(String axioms) throws OWLOntologyCreationException {
+    protected void loadOntologyWithAxioms(String axioms) throws Exception {
         loadOntologyWithAxiomsAndKeys(getConfiguration(),axioms,null);
     }
 
@@ -136,10 +117,8 @@ public abstract class AbstractReasonerTest extends AbstractHermiTTest {
      *            in functional style syntax
      * @param keys
      *            a set of HasKey axioms (till the OWL API supports them)
-     * @throws OWLOntologyCreationException
-     *             if the ontology could not be created
      */
-    protected void loadOntologyWithAxiomsAndKeys(String axioms,Set<OWLHasKeyDummy> keys) throws OWLOntologyCreationException {
+    protected void loadOntologyWithAxiomsAndKeys(String axioms,Set<OWLHasKeyDummy> keys) throws Exception {
         loadOntologyWithAxiomsAndKeys(getConfiguration(),axioms,keys);
     }
 
@@ -152,36 +131,22 @@ public abstract class AbstractReasonerTest extends AbstractHermiTTest {
      *            in functional style syntax
      * @param keys
      *            a set of key axioms (till the OWL API supports them)
-     * @throws OWLOntologyCreationException
-     *             if the ontology could not be created
      */
-    protected void loadOntologyWithAxiomsAndKeys(Configuration configuration,String axioms,Set<OWLHasKeyDummy> keys) throws OWLOntologyCreationException {
-        StringBuffer buffer=new StringBuffer();
-        buffer.append("Namespace(=<file:/c/test.owl#>)");
-        buffer.append("Namespace(rdfs=<http://www.w3.org/2000/01/rdf-schema#>)");
-        buffer.append("Namespace(owl2xml=<http://www.w3.org/2006/12/owl2-xml#>)");
-        buffer.append("Namespace(test=<file:/c/test.owl#>)");
-        buffer.append("Namespace(owl=<http://www.w3.org/2002/07/owl#>)");
-        buffer.append("Namespace(xsd=<http://www.w3.org/2001/XMLSchema#>)");
-        buffer.append("Namespace(rdf=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)");
-        buffer.append("Ontology(<file:/c/test.owl>");
-        buffer.append(axioms);
-        buffer.append(")");
-        OWLOntologyInputSource input=new StringInputSource(buffer.toString());
-        m_ontology=m_ontologyManager.loadOntology(input);
+    protected void loadOntologyWithAxiomsAndKeys(Configuration configuration,String axioms,Set<OWLHasKeyDummy> keys) throws Exception {
+        loadOntologyWithAxiomsOnly(axioms);
         m_reasoner=new Reasoner(configuration,m_ontologyManager,m_ontology,null,keys);
     }
 
-    protected void loadOntologyWithAxiomsOnly(String axioms) throws OWLException,InterruptedException {
+    protected void loadOntologyWithAxiomsOnly(String axioms) throws Exception {
         StringBuffer buffer=new StringBuffer();
-        buffer.append("Namespace(=<file:/c/test.owl#>)");
+        buffer.append("Namespace(=<"+NS+">)");
         buffer.append("Namespace(rdfs=<http://www.w3.org/2000/01/rdf-schema#>)");
         buffer.append("Namespace(owl2xml=<http://www.w3.org/2006/12/owl2-xml#>)");
-        buffer.append("Namespace(test=<file:/c/test.owl#>)");
+        buffer.append("Namespace(test=<"+NS+">)");
         buffer.append("Namespace(owl=<http://www.w3.org/2002/07/owl#>)");
         buffer.append("Namespace(xsd=<http://www.w3.org/2001/XMLSchema#>)");
         buffer.append("Namespace(rdf=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)");
-        buffer.append("Ontology(<file:/c/test.owl>");
+        buffer.append("Ontology(<"+ONTOLOGY_URI+">");
         buffer.append(axioms);
         buffer.append(")");
         m_ontologyManager=OWLManager.createOWLOntologyManager();
@@ -197,7 +162,7 @@ public abstract class AbstractReasonerTest extends AbstractHermiTTest {
         m_reasoner=new Reasoner(configuration,m_ontologyManager,m_ontology);
     }
 
-    protected void loadOntologyWithAxioms(String axioms,Configuration configuration) throws OWLException,InterruptedException {
+    protected void loadOntologyWithAxioms(String axioms,Configuration configuration) throws Exception {
         loadOntologyWithAxiomsOnly(axioms);
         createReasoner(configuration);
     }
@@ -213,10 +178,8 @@ public abstract class AbstractReasonerTest extends AbstractHermiTTest {
      * 
      * @param resourceName
      * @return each line from the loaded resource becomes a string in the returned array
-     * @throws IOException
-     *             if the resource cannot be found
      */
-    protected Set<String> getStrings(String resourceName) throws IOException {
+    protected Set<String> getStrings(String resourceName) throws Exception {
         Set<String> strings=new HashSet<String>();
         BufferedReader reader=new BufferedReader(new InputStreamReader(getClass().getResource(resourceName).openStream()));
         try {
@@ -237,10 +200,8 @@ public abstract class AbstractReasonerTest extends AbstractHermiTTest {
      * 
      * @param resourceName
      * @return the content of the loaded resource as one string
-     * @throws IOException
-     *             if the resource cannot be found
      */
-    protected String getResourceText(String resourceName) throws IOException {
+    protected String getResourceText(String resourceName) throws Exception {
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter output=new PrintWriter(buffer);
         BufferedReader reader=new BufferedReader(new InputStreamReader(getClass().getResource(resourceName).openStream()));
@@ -278,16 +239,6 @@ public abstract class AbstractReasonerTest extends AbstractHermiTTest {
      *            the ontology
      * @param controlResource
      *            the expected taxonomy (sorted ancestor list)
-     * @throws URISyntaxException
-     *             if the resources cannot be converted to URIs
-     * @throws OWLException
-     *             if the ontology is invalid
-     * @throws LoadingException
-     *             if an error occurs during loading
-     * @throws IllegalArgumentException
-     *             in case of illegal arguments
-     * @throws IOException
-     *             if the controlString cannot be loaded
      */
     protected void assertSubsumptionHierarchy(String controlResource) throws Exception {
         String taxonomy=getSubsumptionHierarchyAsText();
@@ -309,16 +260,16 @@ public abstract class AbstractReasonerTest extends AbstractHermiTTest {
      * Tests whether the atomic concept subAtomicConcept is subsumed by the atomic concept superAtomicConcept and asserts that this coincides with the expected result.
      * 
      * @param subAtomicConcept
-     *            a string that represents an atomic concept. If no namespace is given, file:/c/test.owl# is used as prefix
+     *            a string that represents an atomic concept. If no namespace is given, NS is used as prefix
      * @param superAtomicConcept
-     *            a string that represents an atomic concept. If no namespace is given, file:/c/test.owl# is used as prefix
+     *            a string that represents an atomic concept. If no namespace is given, NS is used as prefix
      * @param expectedResult
      */
     protected void assertSubsumedBy(String subAtomicConcept,String superAtomicConcept,boolean expectedResult) {
         if (!subAtomicConcept.contains("#"))
-            subAtomicConcept="file:/c/test.owl#"+subAtomicConcept;
+            subAtomicConcept=NS+subAtomicConcept;
         if (!superAtomicConcept.contains("#"))
-            superAtomicConcept="file:/c/test.owl#"+superAtomicConcept;
+            superAtomicConcept=NS+superAtomicConcept;
         OWLClass subClass=m_ontologyManager.getOWLDataFactory().getOWLClass(URI.create(subAtomicConcept));
         OWLClass superClass=m_ontologyManager.getOWLDataFactory().getOWLClass(URI.create(superAtomicConcept));
         boolean result=m_reasoner.isSubClassOf(subClass,superClass);
@@ -338,7 +289,7 @@ public abstract class AbstractReasonerTest extends AbstractHermiTTest {
      */
     protected void assertSatisfiable(String atomicConcept,boolean expectedResult) {
         if (!atomicConcept.contains("#"))
-            atomicConcept="file:/c/test.owl#"+atomicConcept;
+            atomicConcept=NS+atomicConcept;
         OWLClass clazz=m_ontologyManager.getOWLDataFactory().getOWLClass(URI.create(atomicConcept));
         boolean result=m_reasoner.isSatisfiable(clazz);
         assertEquals(expectedResult,result);
@@ -376,7 +327,7 @@ public abstract class AbstractReasonerTest extends AbstractHermiTTest {
      */
     protected void assertSuperObjectProperties(String objectProperty,Set<String>... control) {
         if (!objectProperty.contains("#"))
-            objectProperty="file:/c/test.owl#"+objectProperty;
+            objectProperty=NS+objectProperty;
         OWLObjectPropertyExpression ope=m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(URI.create(objectProperty));
         Set<Set<String>> actual=setOfSetsOfOPEsToStrings(m_reasoner.getSuperProperties(ope));
         assertContainsAll(actual,control);
@@ -387,7 +338,7 @@ public abstract class AbstractReasonerTest extends AbstractHermiTTest {
      */
     protected void assertSubObjectProperties(String objectProperty,Set<String>... control) {
         if (!objectProperty.contains("#"))
-            objectProperty="file:/c/test.owl#"+objectProperty;
+            objectProperty=NS+objectProperty;
         OWLObjectPropertyExpression ope=m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(URI.create(objectProperty));
         Set<Set<String>> actual=setOfSetsOfOPEsToStrings(m_reasoner.getSubProperties(ope));
         assertContainsAll(actual,control);
@@ -398,7 +349,7 @@ public abstract class AbstractReasonerTest extends AbstractHermiTTest {
      */
     protected void assertEquivalentObjectProperties(String objectProperty,String... control) {
         if (!objectProperty.contains("#"))
-            objectProperty="file:/c/test.owl#"+objectProperty;
+            objectProperty=NS+objectProperty;
         OWLObjectPropertyExpression ope=m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(URI.create(objectProperty));
         Set<String> actual=setOfOPEsToStrings(m_reasoner.getEquivalentProperties(ope));
         assertContainsAll(actual,control);
@@ -409,7 +360,7 @@ public abstract class AbstractReasonerTest extends AbstractHermiTTest {
      */
     protected void assertSuperDataProperties(String dataProperty,Set<String>... control) {
         if (!dataProperty.contains("#"))
-            dataProperty="file:/c/test.owl#"+dataProperty;
+            dataProperty=NS+dataProperty;
         OWLDataProperty dp=m_ontologyManager.getOWLDataFactory().getOWLDataProperty(URI.create(dataProperty));
         Set<Set<String>> actual=setOfSetsOfDPsToStrings(m_reasoner.getSuperProperties(dp));
         assertContainsAll(actual,control);
@@ -420,7 +371,7 @@ public abstract class AbstractReasonerTest extends AbstractHermiTTest {
      */
     protected void assertSubDataProperties(String dataProperty,Set<String>... control) {
         if (!dataProperty.contains("#"))
-            dataProperty="file:/c/test.owl#"+dataProperty;
+            dataProperty=NS+dataProperty;
         OWLDataProperty dp=m_ontologyManager.getOWLDataFactory().getOWLDataProperty(URI.create(dataProperty));
         Set<Set<String>> actual=setOfSetsOfDPsToStrings(m_reasoner.getSubProperties(dp));
         assertContainsAll(actual,control);
@@ -431,7 +382,7 @@ public abstract class AbstractReasonerTest extends AbstractHermiTTest {
      */
     protected void assertEquivalentDataProperties(String dataProperty,String... control) {
         if (!dataProperty.contains("#"))
-            dataProperty="file:/c/test.owl#"+dataProperty;
+            dataProperty=NS+dataProperty;
         OWLDataProperty dp=m_ontologyManager.getOWLDataFactory().getOWLDataProperty(URI.create(dataProperty));
         Set<String> actual=setOfDPsToStrings(m_reasoner.getEquivalentProperties(dp));
         assertContainsAll(actual,control);
@@ -485,7 +436,7 @@ public abstract class AbstractReasonerTest extends AbstractHermiTTest {
         Set<String> result=new HashSet<String>();
         for (String arg : args) {
             if (!arg.contains("#"))
-                arg="file:/c/test.owl#"+arg;
+                arg=NS+arg;
             result.add(arg);
         }
         return result;
@@ -499,13 +450,13 @@ public abstract class AbstractReasonerTest extends AbstractHermiTTest {
 
     protected static String URI(String arg) {
         if (!arg.contains("#"))
-            arg="file:/c/test.owl#"+arg;
+            arg=NS+arg;
         return arg;
     }
 
     protected static String INV(String arg) {
         if (!arg.contains("#"))
-            arg="file:/c/test.owl#"+arg;
+            arg=NS+arg;
         return "(inv "+arg+")";
     }
 }
