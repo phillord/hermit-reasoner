@@ -10,10 +10,12 @@ import java.util.Queue;
 import java.util.Set;
 
 public class HierarchyBuilder<E> {
-    protected Relation<E> m_hierarchyRelation;
+    protected final Relation<E> m_hierarchyRelation;
+    protected final ClassificationProgressMonitor<E> m_progressMonitor;
 
-    public HierarchyBuilder(Relation<E> hierarchyRelation) {
+    public HierarchyBuilder(Relation<E> hierarchyRelation,ClassificationProgressMonitor<E> progressMonitor) {
         m_hierarchyRelation=hierarchyRelation;
+        m_progressMonitor=progressMonitor;
     }
     public Hierarchy<E> buildHierarchy(E topElement,E bottomElement,Collection<E> elements) {
         if (m_hierarchyRelation.doesSubsume(bottomElement,topElement))
@@ -42,6 +44,8 @@ public class HierarchyBuilder<E> {
                         child.m_parentNodes.removeAll(node.m_parentNodes);
                     }
                 }
+                if (m_progressMonitor!=null)
+                    m_progressMonitor.elementClassified(element);
             }
             return hierarchy;
         }
@@ -149,16 +153,20 @@ public class HierarchyBuilder<E> {
         return result;
     }
 
-    public static interface Relation<T> {
-        boolean doesSubsume(T parent,T child);
+    public static interface Relation<U> {
+        boolean doesSubsume(U parent,U child);
     }
 
-    public interface SearchPredicate<U> {
+    public static interface SearchPredicate<U> {
         Set<U> getSuccessorElements(U u);
         Set<U> getAncestorElements(U u);
         boolean trueOf(U u);
     }
 
+    public static interface ClassificationProgressMonitor<U> {
+        void elementClassified(U element);
+    }
+    
     protected static final class SearchCache<U> {
         protected final SearchPredicate<U> m_searchPredicate;
         protected final Set<U> m_possibilities;

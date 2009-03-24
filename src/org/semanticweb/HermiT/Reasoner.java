@@ -70,18 +70,21 @@ import org.semanticweb.owl.model.OWLDataProperty;
 import org.semanticweb.owl.model.OWLDataPropertyExpression;
 import org.semanticweb.owl.model.OWLDataRange;
 import org.semanticweb.owl.model.OWLDescription;
+import org.semanticweb.owl.model.OWLEntity;
 import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLObjectProperty;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
+import org.semanticweb.owl.util.ProgressMonitor;
 import org.semanticweb.owl.inference.OWLReasoner;
+import org.semanticweb.owl.inference.MonitorableOWLReasoner;
 
 /**
  * Answers queries about the logical implications of a particular knowledge base. A Reasoner is associated with a single knowledge base, which is "loaded" when the reasoner is constructed. By default a full classification of all atomic terms in the knowledge base is also performed at this time (which can take quite a while for large or complex ontologies), but this behavior can be disabled as a part of the Reasoner configuration. Internal details of the loading and reasoning algorithms can be configured in the Reasoner constructor and do not change over the lifetime of the Reasoner object---internal data structures and caches are optimized for a particular configuration. By default, HermiT will use the set of options which provide optimal performance.
  */
-public class Reasoner implements OWLReasoner,Serializable {
+public class Reasoner implements MonitorableOWLReasoner,Serializable {
     private static final long serialVersionUID=-3511564272739622311L;
 
     protected final Configuration m_configuration;
@@ -93,6 +96,7 @@ public class Reasoner implements OWLReasoner,Serializable {
     protected Hierarchy<Role> m_atomicObjectRoleHierarchy;
     protected Hierarchy<AtomicRole> m_atomicDataRoleHierarchy;
     protected Map<AtomicConcept,Set<Individual>> m_realization;
+    protected ProgressMonitor m_progressMonitor;
 
     public Reasoner(Configuration configuration) {
         m_configuration=configuration;
@@ -180,7 +184,17 @@ public class Reasoner implements OWLReasoner,Serializable {
     public void dispose() {
         clearOntologies();
     }
-    
+
+    // Monitor interface
+
+    public OWLEntity getCurrentEntity() {
+        throw new UnsupportedOperationException();
+    }
+
+    public void setProgressMonitor(ProgressMonitor progressMonitor) {
+        m_progressMonitor=progressMonitor;
+    }
+
     // Checking the signature of the ontology
     
     public boolean isDefined(OWLClass owlClass) {
@@ -222,34 +236,62 @@ public class Reasoner implements OWLReasoner,Serializable {
 
     public void classify() {
         if (m_atomicConceptHierarchy==null) {
-            Set<AtomicConcept> relevantAtomicConcepts=new HashSet<AtomicConcept>();
-            relevantAtomicConcepts.add(AtomicConcept.THING);
-            relevantAtomicConcepts.add(AtomicConcept.NOTHING);
-            for (AtomicConcept atomicConcept : m_dlOntology.getAllAtomicConcepts())
-                if (!Namespaces.isInternalURI(atomicConcept.getURI()))
-                    relevantAtomicConcepts.add(atomicConcept);
-            if (!m_subsumptionChecker.isSatisfiable(AtomicConcept.THING))
-                m_atomicConceptHierarchy=Hierarchy.emptyHierarchy(relevantAtomicConcepts,AtomicConcept.THING,AtomicConcept.NOTHING);
-            else if (m_subsumptionChecker.canGetAllSubsumersEasily()) {
-                Map<AtomicConcept,DeterministicHierarchyBuilder.GraphNode<AtomicConcept>> allSubsumers=new HashMap<AtomicConcept,DeterministicHierarchyBuilder.GraphNode<AtomicConcept>>();
-                for (AtomicConcept atomicConcept : relevantAtomicConcepts) {
-                    Set<AtomicConcept> subsumers=m_subsumptionChecker.getAllKnownSubsumers(atomicConcept);
-                    if (subsumers==null)
-                        subsumers=relevantAtomicConcepts;
-                    allSubsumers.put(atomicConcept,new DeterministicHierarchyBuilder.GraphNode<AtomicConcept>(atomicConcept,subsumers));
+            try {
+                Set<AtomicConcept> relevantAtomicConcepts=new HashSet<AtomicConcept>();
+                relevantAtomicConcepts.add(AtomicConcept.THING);
+                relevantAtomicConcepts.add(AtomicConcept.NOTHING);
+                for (AtomicConcept atomicConcept : m_dlOntology.getAllAtomicConcepts())
+                    if (!Namespaces.isInternalURI(atomicConcept.getURI()))
+                        relevantAtomicConcepts.add(atomicConcept);
+                if (m_progressMonitor!=null) {
+                    m_progressMonitor.setSize(relevantAtomicConcepts.size());
+                    m_progressMonitor.setProgress(0);
+                    m_progressMonitor.setStarted();
                 }
-                DeterministicHierarchyBuilder<AtomicConcept> hierarchyBuilder=new DeterministicHierarchyBuilder<AtomicConcept>(allSubsumers,AtomicConcept.THING,AtomicConcept.NOTHING);
-                m_atomicConceptHierarchy=hierarchyBuilder.buildHierarchyNew();
-            }
-            if (m_atomicConceptHierarchy==null) {
-                HierarchyBuilder<AtomicConcept> hierarchyBuilder=new HierarchyBuilder<AtomicConcept>(
-                    new HierarchyBuilder.Relation<AtomicConcept>() {
-                        public boolean doesSubsume(AtomicConcept parent,AtomicConcept child) {
-                            return m_subsumptionChecker.isSubsumedBy(child,parent);
+                if (!m_subsumptionChecker.isSatisfiable(AtomicConcept.THING))
+                    m_atomicConceptHierarchy=Hierarchy.emptyHierarchy(relevantAtomicConcepts,AtomicConcept.THING,AtomicConcept.NOTHING);
+                else if (m_subsumptionChecker.canGetAllSubsumersEasily()) {
+                    Map<AtomicConcept,DeterministicHierarchyBuilder.GraphNode<AtomicConcept>> allSubsumers=new HashMap<AtomicConcept,DeterministicHierarchyBuilder.GraphNode<AtomicConcept>>();
+                    int processedConcepts=0;
+                    for (AtomicConcept atomicConcept : relevantAtomicConcepts) {
+                        Set<AtomicConcept> subsumers=m_subsumptionChecker.getAllKnownSubsumers(atomicConcept);
+                        if (subsumers==null)
+                            subsumers=relevantAtomicConcepts;
+                        allSubsumers.put(atomicConcept,new DeterministicHierarchyBuilder.GraphNode<AtomicConcept>(atomicConcept,subsumers));
+                        if (m_progressMonitor!=null) {
+                            processedConcepts++;
+                            m_progressMonitor.setProgress(processedConcepts);
                         }
                     }
-                );
-                m_atomicConceptHierarchy=hierarchyBuilder.buildHierarchy(AtomicConcept.THING,AtomicConcept.NOTHING,relevantAtomicConcepts);
+                    DeterministicHierarchyBuilder<AtomicConcept> hierarchyBuilder=new DeterministicHierarchyBuilder<AtomicConcept>(allSubsumers,AtomicConcept.THING,AtomicConcept.NOTHING);
+                    m_atomicConceptHierarchy=hierarchyBuilder.buildHierarchyNew();
+                }
+                if (m_atomicConceptHierarchy==null) {
+                    HierarchyBuilder.Relation<AtomicConcept> relation=
+                        new HierarchyBuilder.Relation<AtomicConcept>() {
+                            public boolean doesSubsume(AtomicConcept parent,AtomicConcept child) {
+                                return m_subsumptionChecker.isSubsumedBy(child,parent);
+                            }
+                        };
+                    HierarchyBuilder.ClassificationProgressMonitor<AtomicConcept> progressMonitor;
+                    if (m_progressMonitor==null)
+                        progressMonitor=null;
+                    else
+                        progressMonitor=
+                            new HierarchyBuilder.ClassificationProgressMonitor<AtomicConcept>() {
+                                protected int m_processedConcepts=0;
+                                public void elementClassified(AtomicConcept element) {
+                                    m_processedConcepts++;
+                                    m_progressMonitor.setProgress(m_processedConcepts);
+                                }
+                            };
+                    HierarchyBuilder<AtomicConcept> hierarchyBuilder=new HierarchyBuilder<AtomicConcept>(relation,progressMonitor);
+                    m_atomicConceptHierarchy=hierarchyBuilder.buildHierarchy(AtomicConcept.THING,AtomicConcept.NOTHING,relevantAtomicConcepts);
+                }
+            }
+            finally {
+                if (m_progressMonitor!=null)
+                    m_progressMonitor.setFinished();
             }
         }
     }
@@ -346,11 +388,14 @@ public class Reasoner implements OWLReasoner,Serializable {
             DLOntology newDLOntology=extendDLOntology(m_configuration,m_namespaces,"uri:urn:internal-kb",m_dlOntology,ontologyManager,classDefinitionAxiom);
             Tableau tableau=createTableau(m_configuration,newDLOntology,m_namespaces);
             final TableauSubsumptionChecker subsumptionChecker=new TableauSubsumptionChecker(tableau);
-            HierarchyBuilder<AtomicConcept> hierarchyBuilder=new HierarchyBuilder<AtomicConcept>(new HierarchyBuilder.Relation<AtomicConcept>() {
-                public boolean doesSubsume(AtomicConcept parent,AtomicConcept child) {
-                    return subsumptionChecker.isSubsumedBy(child,parent);
-                }
-            });
+            HierarchyBuilder<AtomicConcept> hierarchyBuilder=new HierarchyBuilder<AtomicConcept>(
+                new HierarchyBuilder.Relation<AtomicConcept>() {
+                    public boolean doesSubsume(AtomicConcept parent,AtomicConcept child) {
+                        return subsumptionChecker.isSubsumedBy(child,parent);
+                    }
+                },
+                null
+            );
             return hierarchyBuilder.findPosition(AtomicConcept.create("internal:query-concept"),m_atomicConceptHierarchy.getTopNode(),m_atomicConceptHierarchy.getBottomNode());
         }
     }
