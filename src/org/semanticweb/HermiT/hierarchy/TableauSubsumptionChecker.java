@@ -24,25 +24,16 @@ public class TableauSubsumptionChecker {
     public boolean canGetAllSubsumersEasily() {
         return m_tableau.isDeterministic();
     }
-    public Map<AtomicConcept,Set<AtomicConcept>> getAllKnownSubsumers(Set<AtomicConcept> relevantAtomicConcepts) {
-        Map<AtomicConcept,Set<AtomicConcept>> result=new HashMap<AtomicConcept,Set<AtomicConcept>>();
-        result.put(AtomicConcept.NOTHING,relevantAtomicConcepts);
-        for (AtomicConcept atomicConcept : relevantAtomicConcepts) {
-            boolean isSatisfiable=isSatisfiable(atomicConcept,false);
-            AtomicConceptInfo conceptInfo=m_atomicConceptInfos.get(atomicConcept);
-            if (isSatisfiable) {
-                if (!conceptInfo.m_allSubsumersKnown)
-                    throw new IllegalStateException("Not all subsumers are known for '"+atomicConcept.getURI()+"'.");
-                Set<AtomicConcept> subsumers=new HashSet<AtomicConcept>();
-                for (AtomicConcept subsumer : conceptInfo.m_knownSubsumers)
-                    if (relevantAtomicConcepts.contains(subsumer))
-                        subsumers.add(subsumer);
-                result.put(atomicConcept,subsumers);
-            }
-            else
-                result.put(atomicConcept,new HashSet<AtomicConcept>(relevantAtomicConcepts));
+    public Set<AtomicConcept> getAllKnownSubsumers(AtomicConcept atomicConcept) {
+        boolean isSatisfiable=isSatisfiable(atomicConcept,false);
+        AtomicConceptInfo conceptInfo=m_atomicConceptInfos.get(atomicConcept);
+        if (isSatisfiable) {
+            if (!conceptInfo.m_allSubsumersKnown)
+                throw new IllegalStateException("Not all subsumers are known for '"+atomicConcept.getURI()+"'.");
+            return conceptInfo.m_knownSubsumers;
         }
-        return result;
+        else
+            return null;
     }
     public boolean isSatisfiable(AtomicConcept concept) {
         return isSatisfiable(concept,true);

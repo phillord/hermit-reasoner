@@ -39,7 +39,7 @@ import org.semanticweb.HermiT.hierarchy.Hierarchy;
 import org.semanticweb.HermiT.hierarchy.HierarchyNode;
 import org.semanticweb.HermiT.hierarchy.HierarchyBuilder;
 import org.semanticweb.HermiT.hierarchy.TableauSubsumptionChecker;
-import org.semanticweb.HermiT.hierarchy.OptimizedHierarchyBuilder;
+import org.semanticweb.HermiT.hierarchy.DeterministicHierarchyBuilder;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
@@ -232,8 +232,15 @@ public class Reasoner implements OWLReasoner,Serializable {
             if (!m_subsumptionChecker.isSatisfiable(AtomicConcept.THING))
                 m_atomicConceptHierarchy=Hierarchy.emptyHierarchy(relevantAtomicConcepts,AtomicConcept.THING,AtomicConcept.NOTHING);
             else if (m_subsumptionChecker.canGetAllSubsumersEasily()) {
-                Map<AtomicConcept,Set<AtomicConcept>> allKnownSubsumers=m_subsumptionChecker.getAllKnownSubsumers(relevantAtomicConcepts);
-                m_atomicConceptHierarchy=OptimizedHierarchyBuilder.buildHierarchy(allKnownSubsumers,relevantAtomicConcepts,AtomicConcept.THING,AtomicConcept.NOTHING);
+                Map<AtomicConcept,DeterministicHierarchyBuilder.GraphNode<AtomicConcept>> allSubsumers=new HashMap<AtomicConcept,DeterministicHierarchyBuilder.GraphNode<AtomicConcept>>();
+                for (AtomicConcept atomicConcept : relevantAtomicConcepts) {
+                    Set<AtomicConcept> subsumers=m_subsumptionChecker.getAllKnownSubsumers(atomicConcept);
+                    if (subsumers==null)
+                        subsumers=relevantAtomicConcepts;
+                    allSubsumers.put(atomicConcept,new DeterministicHierarchyBuilder.GraphNode<AtomicConcept>(atomicConcept,subsumers));
+                }
+                DeterministicHierarchyBuilder<AtomicConcept> hierarchyBuilder=new DeterministicHierarchyBuilder<AtomicConcept>(allSubsumers,AtomicConcept.THING,AtomicConcept.NOTHING);
+                m_atomicConceptHierarchy=hierarchyBuilder.buildHierarchyNew();
             }
             if (m_atomicConceptHierarchy==null) {
                 HierarchyBuilder<AtomicConcept> hierarchyBuilder=new HierarchyBuilder<AtomicConcept>(
@@ -389,24 +396,24 @@ public class Reasoner implements OWLReasoner,Serializable {
 
     public void classifyObjectProperties() {
         if (m_atomicObjectRoleHierarchy==null) {
-            Map<Role,Set<Role>> knownSubsumers=new HashMap<Role,Set<Role>>();
-            addInclusion(knownSubsumers,AtomicRole.TOP_OBJECT_ROLE,AtomicRole.TOP_OBJECT_ROLE);
-            addInclusion(knownSubsumers,AtomicRole.BOTTOM_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE);
+            Map<Role,DeterministicHierarchyBuilder.GraphNode<Role>> allSubsumers=new HashMap<Role,DeterministicHierarchyBuilder.GraphNode<Role>>();
+            addInclusion(allSubsumers,AtomicRole.TOP_OBJECT_ROLE,AtomicRole.TOP_OBJECT_ROLE);
+            addInclusion(allSubsumers,AtomicRole.BOTTOM_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE);
             for (DLClause dlClause : m_dlOntology.getDLClauses()) {
                 if (dlClause.isRoleInclusion()) {
                     AtomicRole sub=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                     AtomicRole sup=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
                     if (m_dlOntology.getAllAtomicObjectRoles().contains(sub) && m_dlOntology.getAllAtomicObjectRoles().contains(sup)) {
-                        addInclusion(knownSubsumers,sub,sup);
-                        addInclusion(knownSubsumers,sub.getInverse(),sup.getInverse());
+                        addInclusion(allSubsumers,sub,sup);
+                        addInclusion(allSubsumers,sub.getInverse(),sup.getInverse());
                     }
                 }
                 else if (dlClause.isRoleInverseInclusion()) {
                     AtomicRole sub=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                     AtomicRole sup=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
                     if (m_dlOntology.getAllAtomicObjectRoles().contains(sub) && m_dlOntology.getAllAtomicObjectRoles().contains(sup)) {
-                        addInclusion(knownSubsumers,sub.getInverse(),sup);
-                        addInclusion(knownSubsumers,sub,sup.getInverse());
+                        addInclusion(allSubsumers,sub.getInverse(),sup);
+                        addInclusion(allSubsumers,sub,sup.getInverse());
                     }
                 }
             }
@@ -414,12 +421,13 @@ public class Reasoner implements OWLReasoner,Serializable {
             for (AtomicRole atomicRole : m_dlOntology.getAllAtomicObjectRoles()) {
                 allRoles.add(atomicRole);
                 allRoles.add(atomicRole.getInverse());
-                addInclusion(knownSubsumers,atomicRole,AtomicRole.TOP_OBJECT_ROLE);
-                addInclusion(knownSubsumers,atomicRole.getInverse(),AtomicRole.TOP_OBJECT_ROLE);
-                addInclusion(knownSubsumers,AtomicRole.BOTTOM_OBJECT_ROLE,atomicRole);
-                addInclusion(knownSubsumers,AtomicRole.BOTTOM_OBJECT_ROLE,atomicRole.getInverse());
+                addInclusion(allSubsumers,atomicRole,AtomicRole.TOP_OBJECT_ROLE);
+                addInclusion(allSubsumers,atomicRole.getInverse(),AtomicRole.TOP_OBJECT_ROLE);
+                addInclusion(allSubsumers,AtomicRole.BOTTOM_OBJECT_ROLE,atomicRole);
+                addInclusion(allSubsumers,AtomicRole.BOTTOM_OBJECT_ROLE,atomicRole.getInverse());
             }
-            m_atomicObjectRoleHierarchy=OptimizedHierarchyBuilder.buildHierarchy(knownSubsumers,allRoles,AtomicRole.TOP_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE);
+            DeterministicHierarchyBuilder<Role> hierarchyBuilder=new DeterministicHierarchyBuilder<Role>(allSubsumers,AtomicRole.TOP_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE);
+            m_atomicObjectRoleHierarchy=hierarchyBuilder.buildHierarchyNew();
         }
     }
     
@@ -567,22 +575,23 @@ public class Reasoner implements OWLReasoner,Serializable {
     
     public void classifyDataProperties() {
         if (m_atomicDataRoleHierarchy==null) {
-            Map<AtomicRole,Set<AtomicRole>> knownSubsumers=new HashMap<AtomicRole,Set<AtomicRole>>();
-            addInclusion(knownSubsumers,AtomicRole.TOP_DATA_ROLE,AtomicRole.TOP_DATA_ROLE);
-            addInclusion(knownSubsumers,AtomicRole.BOTTOM_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE);
+            Map<AtomicRole,DeterministicHierarchyBuilder.GraphNode<AtomicRole>> allSubsumers=new HashMap<AtomicRole,DeterministicHierarchyBuilder.GraphNode<AtomicRole>>();
+            addInclusion(allSubsumers,AtomicRole.TOP_DATA_ROLE,AtomicRole.TOP_DATA_ROLE);
+            addInclusion(allSubsumers,AtomicRole.BOTTOM_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE);
             for (DLClause dlClause : m_dlOntology.getDLClauses()) {
                 if (dlClause.isRoleInclusion()) {
                     AtomicRole sub=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                     AtomicRole sup=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
                     if (m_dlOntology.getAllAtomicDataRoles().contains(sub) && m_dlOntology.getAllAtomicDataRoles().contains(sup))
-                        addInclusion(knownSubsumers,sub,sup);
+                        addInclusion(allSubsumers,sub,sup);
                 }
             }
             for (AtomicRole atomicRole : m_dlOntology.getAllAtomicDataRoles()) {
-                addInclusion(knownSubsumers,atomicRole,AtomicRole.TOP_DATA_ROLE);
-                addInclusion(knownSubsumers,AtomicRole.BOTTOM_DATA_ROLE,atomicRole);
+                addInclusion(allSubsumers,atomicRole,AtomicRole.TOP_DATA_ROLE);
+                addInclusion(allSubsumers,AtomicRole.BOTTOM_DATA_ROLE,atomicRole);
             }
-            m_atomicDataRoleHierarchy=OptimizedHierarchyBuilder.buildHierarchy(knownSubsumers,m_dlOntology.getAllAtomicDataRoles(),AtomicRole.TOP_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE);
+            DeterministicHierarchyBuilder<AtomicRole> hierarchyBuilder=new DeterministicHierarchyBuilder<AtomicRole>(allSubsumers,AtomicRole.TOP_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE);
+            m_atomicDataRoleHierarchy=hierarchyBuilder.buildHierarchyNew();
         }
     }
     
@@ -1141,13 +1150,13 @@ public class Reasoner implements OWLReasoner,Serializable {
         return result;
     }
 
-    protected static <T> void addInclusion(Map<T,Set<T>> knownSubsumers,T sub,T sup) {
-        Set<T> sups=knownSubsumers.get(sub);
-        if (sups==null) {
-            sups=new HashSet<T>();
-            knownSubsumers.put(sub,sups);
+    protected static <T> void addInclusion(Map<T,DeterministicHierarchyBuilder.GraphNode<T>> knownSubsumers,T subElement,T supElement) {
+        DeterministicHierarchyBuilder.GraphNode<T> subGraphNode=knownSubsumers.get(subElement);
+        if (subGraphNode==null) {
+            subGraphNode=new DeterministicHierarchyBuilder.GraphNode<T>(subElement,new HashSet<T>());
+            knownSubsumers.put(subElement,subGraphNode);
         }
-        sups.add(sup);
+        subGraphNode.m_successors.add(supElement);
     }
     
     // The factory for the reasoner from a plugin
