@@ -199,7 +199,7 @@ public class DataConstant implements Comparable<DataConstant>, Serializable {
      * @see java.lang.Object#toString()
      */
     public String toString() {
-        return toString(Namespaces.none);
+        return toString(Namespaces.EMPTY);
     }
     
     /**

@@ -93,7 +93,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
     protected Tableau m_tableau;
     protected TableauSubsumptionChecker m_subsumptionChecker;
     protected Hierarchy<AtomicConcept> m_atomicConceptHierarchy;
-    protected Hierarchy<Role> m_atomicObjectRoleHierarchy;
+    protected Hierarchy<Role> m_objectRoleHierarchy;
     protected Hierarchy<AtomicRole> m_atomicDataRoleHierarchy;
     protected Map<AtomicConcept,Set<Individual>> m_realization;
     protected ProgressMonitor m_progressMonitor;
@@ -400,22 +400,14 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         }
     }
 
-    public void printClassHierarchy(PrintWriter out) {
-        classify();
-        HierarchyPrinterFSS printer=new HierarchyPrinterFSS(out,m_dlOntology.getOntologyURI()+"#",m_atomicConceptHierarchy.getAllElements());
-        printer.startPrinting();
-        printer.printAtomicConceptHierarchy(m_atomicConceptHierarchy);
-        printer.endPrinting();
-    }
-
     // Object property inferences
     
     public boolean areObjectPropertiesClassified() {
-        return m_atomicObjectRoleHierarchy!=null;
+        return m_objectRoleHierarchy!=null;
     }
 
     public void classifyObjectProperties() {
-        if (m_atomicObjectRoleHierarchy==null) {
+        if (m_objectRoleHierarchy==null) {
             Map<Role,DeterministicHierarchyBuilder.GraphNode<Role>> allSubsumers=new HashMap<Role,DeterministicHierarchyBuilder.GraphNode<Role>>();
             addInclusion(allSubsumers,AtomicRole.TOP_OBJECT_ROLE,AtomicRole.TOP_OBJECT_ROLE);
             addInclusion(allSubsumers,AtomicRole.BOTTOM_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE);
@@ -447,7 +439,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                 addInclusion(allSubsumers,AtomicRole.BOTTOM_OBJECT_ROLE,atomicRole.getInverse());
             }
             DeterministicHierarchyBuilder<Role> hierarchyBuilder=new DeterministicHierarchyBuilder<Role>(allSubsumers,AtomicRole.TOP_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE);
-            m_atomicObjectRoleHierarchy=hierarchyBuilder.buildHierarchyNew();
+            m_objectRoleHierarchy=hierarchyBuilder.buildHierarchyNew();
         }
     }
     
@@ -484,9 +476,9 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         else
             role=AtomicRole.create(propertyExpression.getNamedProperty().getURI().toString()).getInverse();
         classifyObjectProperties();
-        HierarchyNode<Role> node=m_atomicObjectRoleHierarchy.getNodeForElement(role);
+        HierarchyNode<Role> node=m_objectRoleHierarchy.getNodeForElement(role);
         if (node==null)
-            node=new HierarchyNode<Role>(role,Collections.singleton(role),Collections.singleton(m_atomicObjectRoleHierarchy.getTopNode()),Collections.singleton(m_atomicObjectRoleHierarchy.getBottomNode()));
+            node=new HierarchyNode<Role>(role,Collections.singleton(role),Collections.singleton(m_objectRoleHierarchy.getTopNode()),Collections.singleton(m_objectRoleHierarchy.getBottomNode()));
         return node;
     }
     
@@ -1040,9 +1032,9 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         namespaces.registerDefaultNamespace(dlOntology.getOntologyURI()+"#");
         int prefixIndex=0;
         for (String namespace : namespaceURIs)
-            if (!namespaces.isNamespaceRegistered(namespace)) {
+            if (namespaces.getPrefix(namespace)==null) {
                 String prefix=getPrefixForIndex(prefixIndex);
-                while (namespaces.isPrefixRegistered(prefix))
+                while (namespaces.getNamespace(prefix)!=null)
                     prefix=getPrefixForIndex(++prefixIndex);
                 namespaces.registerNamespace(prefix,namespace);
                 ++prefixIndex;
@@ -1067,7 +1059,44 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             }
         }
     }
+
+    // Hierarchy printing
     
+    public void printHierarchies(PrintWriter out,boolean classes,boolean objectProperties,boolean dataProperties) {
+        HierarchyPrinterFSS printer=new HierarchyPrinterFSS(out,m_dlOntology.getOntologyURI()+"#");
+        if (classes) {
+            classify();
+            printer.loadAtomicConceptNamespaces(m_atomicConceptHierarchy.getAllElements());
+        }
+        if (objectProperties) {
+            classifyObjectProperties();
+            printer.loadAtomicRoleNamespaces(m_dlOntology.getAllAtomicObjectRoles());
+        }
+        if (dataProperties) {
+            classifyDataProperties();
+            printer.loadAtomicRoleNamespaces(m_dlOntology.getAllAtomicDataRoles());
+        }
+        printer.startPrinting();
+        boolean atLF=true;
+        if (classes && !m_atomicConceptHierarchy.isEmpty()) {
+            printer.printAtomicConceptHierarchy(m_atomicConceptHierarchy);
+            atLF=false;
+        }
+        if (objectProperties && !m_objectRoleHierarchy.isEmpty()) {
+            if (!atLF)
+                out.println();
+            printer.printRoleHierarchy(m_objectRoleHierarchy,true);
+            atLF=false;
+        }
+        if (dataProperties && !m_atomicDataRoleHierarchy.isEmpty()) {
+            if (!atLF)
+                out.println();
+            printer.printRoleHierarchy(m_atomicDataRoleHierarchy,false);
+            atLF=false;
+        }
+        printer.endPrinting();
+    }
+
     // Loading and saving the Reasoner object
 
     public void save(File file) throws IOException {

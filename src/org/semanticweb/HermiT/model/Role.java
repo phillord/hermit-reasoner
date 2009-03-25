@@ -14,6 +14,6 @@ public abstract class Role implements Serializable {
     public abstract Role getInverse();
     public abstract String toString(Namespaces namespaces);
     public String toString() {
-        return toString(Namespaces.none);
+        return toString(Namespaces.EMPTY);
     }
 }

@@ -227,7 +227,7 @@ public abstract class AbstractReasonerTest extends AbstractHermiTTest {
     protected String getSubsumptionHierarchyAsText() {
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter output=new PrintWriter(buffer);
-        m_reasoner.printClassHierarchy(output);
+        m_reasoner.printHierarchies(output,true,false,false);
         output.flush();
         return buffer.toString();
     }

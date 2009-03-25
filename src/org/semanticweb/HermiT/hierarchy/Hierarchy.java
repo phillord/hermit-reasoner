@@ -29,6 +29,9 @@ public class Hierarchy<E> {
     public HierarchyNode<E> getBottomNode() {
         return m_bottomNode;
     }
+    public boolean isEmpty() {
+        return m_nodesByElements.size()==2 && m_topNode.m_equivalentElements.size()==1 && m_bottomNode.m_equivalentElements.size()==1;
+    }
     public HierarchyNode<E> getNodeForElement(E element) {
         return m_nodesByElements.get(element);
     }
@@ -38,7 +41,7 @@ public class Hierarchy<E> {
     public Set<E> getAllElements() {
         return Collections.unmodifiableSet(m_nodesByElements.keySet());
     }
-    public <T> Hierarchy<T> transform(Transformer<E,T> transformer,Comparator<T> comparator) {
+    public <T> Hierarchy<T> transform(Transformer<? super E,T> transformer,Comparator<T> comparator) {
         HierarchyNodeComparator<T> newNodeComparator=new HierarchyNodeComparator<T>(comparator);
         Map<HierarchyNode<E>,HierarchyNode<T>> oldToNew=new HashMap<HierarchyNode<E>,HierarchyNode<T>>();
         for (HierarchyNode<E> oldNode : m_nodesByElements.values()) {

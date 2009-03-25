@@ -23,19 +23,17 @@ public class Namespaces implements Serializable {
     public static final Map<String,String> s_semanticWebNamespaces;
     static {
         s_semanticWebNamespaces=new HashMap<String,String>();
-        s_semanticWebNamespaces.put("owl","http://www.w3.org/2002/07/owl#");
-        s_semanticWebNamespaces.put("owlx","http://www.w3.org/2003/05/owl-xml#");
-        s_semanticWebNamespaces.put("owl11xml","http://www.w3.org/2006/12/owl11-xml#");
-        s_semanticWebNamespaces.put("xsd","http://www.w3.org/2001/XMLSchema#");
         s_semanticWebNamespaces.put("rdf","http://www.w3.org/1999/02/22-rdf-syntax-ns#");
         s_semanticWebNamespaces.put("rdfs","http://www.w3.org/2000/01/rdf-schema#");
+        s_semanticWebNamespaces.put("owl","http://www.w3.org/2002/07/owl#");
+        s_semanticWebNamespaces.put("xsd","http://www.w3.org/2001/XMLSchema#");
         s_semanticWebNamespaces.put("swrl","http://www.w3.org/2003/11/swrl#");
         s_semanticWebNamespaces.put("swrlb","http://www.w3.org/2003/11/swrlb#");
         s_semanticWebNamespaces.put("swrlx","http://www.w3.org/2003/11/swrlx#");
         s_semanticWebNamespaces.put("ruleml","http://www.w3.org/2003/11/ruleml#");
     }
     @SuppressWarnings("serial")
-    public static final Namespaces none=new Namespaces() {
+    public static final Namespaces EMPTY=new Namespaces() {
         protected boolean registerNamespaceRaw(String prefix,String namespace) {
             throw new UnsupportedOperationException("The well-known empty namespace cannot be modified.");
         }
@@ -52,7 +50,7 @@ public class Namespaces implements Serializable {
     }
     protected void buildNamespaceMatchingPattern() {
         List<String> list=new ArrayList<String>(m_prefixByNamespace.keySet());
-        // Sort the namespaces longest-first:
+        // Sort the namespaces, longest first
         Collections.sort(list,new Comparator<String>() {
             public int compare(String lhs,String rhs) {
                 return rhs.length()-lhs.length();
@@ -76,15 +74,6 @@ public class Namespaces implements Serializable {
         else
             m_namespaceMathingPattern=null;
     }
-    /**
-     * Returns an unmodifiable map from prefixes to their namespaces.
-     */
-    public Map<String,String> getPrefixDeclarations() {
-        return java.util.Collections.unmodifiableMap(m_namespaceByPrefix);
-    }
-    /**
-     * Abbreviates the given URI.
-     */
     public String abbreviateURI(String uri) {
         if (m_namespaceMathingPattern!=null) {
             Matcher matcher=m_namespaceMathingPattern.matcher(uri);
@@ -100,7 +89,8 @@ public class Namespaces implements Serializable {
         return "<"+uri+">";
     }
     /**
-     * Abbreviates the given URI in a safe way.
+     * Abbreviates the given URI in a safe way. The local name must match the 'localNameChecker' pattern,
+     * and the abbreviation must not be in the set of prohibited abbreviations.
      */
     public String abbreviateURISafe(String uri,Pattern localNameChecker,Set<String> prohibitedAbbreviations) {
         if (m_namespaceMathingPattern!=null) {
@@ -152,15 +142,6 @@ public class Namespaces implements Serializable {
             }
         }
     }
-    /**
-     * Registers a new prefix with this namespace object. If this prefix 
-     * has already been registered, it is overwritten. If the supplied namepsace
-     * has already been registered with a different prefix, IllegalArgumentException is thrown. 
-     * 
-     * @param prefix                        the prefix to register (can be empty string)
-     * @param namespace                     the namepace for this prefix
-     * @return                              'true' if this namespace object already contained this prefix
-     */
     public boolean registerNamespace(String prefix,String namespace) {
         boolean containsPrefix=registerNamespaceRaw(prefix,namespace);
         buildNamespaceMatchingPattern();
@@ -173,26 +154,17 @@ public class Namespaces implements Serializable {
         m_prefixByNamespace.put(namespace,prefix);
         return m_namespaceByPrefix.put(prefix,namespace)==null;
     }
-    /**
-     * Registers a default namespace. 
-     * 
-     * @param namespace                     the default namespace
-     * @return                              'true' if this namespace object already contained the default namespace
-     */
     public boolean registerDefaultNamespace(String namespace) {
         return registerNamespace("",namespace);
     }
-    /**
-     * Checks whether the supplied prefix has been registered.
-     */
-    public boolean isPrefixRegistered(String prefix) {
-        return m_namespaceByPrefix.containsKey(prefix);
+    public Map<String,String> getNamespacesByPrefix() {
+        return java.util.Collections.unmodifiableMap(m_namespaceByPrefix);
     }
-    /**
-     * Checks whether the supplied namespace has been registered.
-     */
-    public boolean isNamespaceRegistered(String namespace) {
-        return m_prefixByNamespace.containsKey(namespace);
+    public String getNamespace(String prefix) {
+        return m_namespaceByPrefix.get(prefix);
+    }
+    public String getPrefix(String namespace) {
+        return m_prefixByNamespace.get(namespace);
     }
     /**
      * Registers HermiT's internal prefixes with this object.
@@ -202,7 +174,7 @@ public class Namespaces implements Serializable {
      */
     public boolean registerInternalNamespaces(Collection<String> individualURIs) {
         boolean containsPrefix=false;
-        if (registerNamespaceRaw("q","internal:q#"))
+        if (registerNamespaceRaw("def","internal:def#"))
             containsPrefix=true;
         if (registerNamespaceRaw("nnq","internal:nnq#"))
             containsPrefix=true;

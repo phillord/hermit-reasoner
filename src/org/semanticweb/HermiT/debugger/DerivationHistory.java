@@ -208,7 +208,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
             }
         }
         public String toString() {
-            return toString(Namespaces.none);
+            return toString(Namespaces.EMPTY);
         }
     }
     
@@ -265,7 +265,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
             return buffer.toString();
         }
         public String toString() {
-            return toString(Namespaces.none);
+            return toString(Namespaces.EMPTY);
         }
     }
     
@@ -273,7 +273,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
     public abstract static class Derivation implements Serializable {
         public abstract String toString(Namespaces namespaces);
         public String toString() {
-            return toString(Namespaces.none);
+            return toString(Namespaces.EMPTY);
         }
         public abstract int getNumberOfPremises();
         public abstract DerivationPremise getPremise(int premiseIndex);

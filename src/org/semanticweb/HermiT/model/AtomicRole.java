@@ -21,7 +21,10 @@ public class AtomicRole extends Role implements DLPredicate {
         return 2;
     }
     public Role getInverse() {
-        return InverseRole.create(this);
+        if (this==TOP_OBJECT_ROLE || this==BOTTOM_OBJECT_ROLE)
+            return this;
+        else
+            return InverseRole.create(this);
     }
     public String toString(Namespaces namespaces) {
         return namespaces.abbreviateURI(m_uri);

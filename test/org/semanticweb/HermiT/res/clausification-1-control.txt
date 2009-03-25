@@ -1,4 +1,4 @@
-q:0(X) :- all:0(X)
+def:0(X) :- all:0(X)
 all:0(X) :- s(X,Y), all:0(Y)
 all:0(X) :- s(X,Y), c(Y)
-d(X) :- r(X,Y), q:0(Y)
+d(X) :- r(X,Y), def:0(Y)

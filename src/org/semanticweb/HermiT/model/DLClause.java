@@ -41,8 +41,7 @@ public class DLClause implements Serializable {
     }
     public DLClause getSafeVersion() {
         Set<Variable> variables=new HashSet<Variable>();
-        // collect all the variables that occur in the head into the set
-        // variables
+        // collect all the variables that occur in the head into the set variables
         for (int headIndex=0;headIndex<m_headAtoms.length;headIndex++) {
             Atom atom=m_headAtoms[headIndex];
             for (int argumentIndex=0;argumentIndex<atom.getArity();argumentIndex++) {
@@ -61,6 +60,8 @@ public class DLClause implements Serializable {
                     variables.remove(variable);
             }
         }
+        if (m_headAtoms.length==0 && m_bodyAtoms.length==0)
+            variables.add(Variable.create("X"));
         if (variables.isEmpty())
             return this;
         else {
@@ -204,7 +205,7 @@ public class DLClause implements Serializable {
         return buffer.toString();
     }
     public String toString() {
-        return toString(Namespaces.none);
+        return toString(Namespaces.EMPTY);
     }
 
     public static DLClause create(Atom[] headAtoms,Atom[] bodyAtoms) {

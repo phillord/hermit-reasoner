@@ -272,7 +272,7 @@ public abstract class DatatypeRestriction
      * @see java.lang.Object#toString()
      */
     public String toString() {
-        return toString(Namespaces.none);
+        return toString(Namespaces.EMPTY);
     }
     
     /* (non-Javadoc)

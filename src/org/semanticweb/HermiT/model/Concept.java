@@ -13,6 +13,6 @@ public abstract class Concept implements Serializable {
 
     public abstract String toString(Namespaces namespaces);
     public String toString() {
-        return toString(Namespaces.none);
+        return toString(Namespaces.EMPTY);
     }
 }

@@ -54,7 +54,7 @@ public class CommandLine {
     static protected class DumpNamespacesAction implements Action {
         public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
             output.println("Namespaces:");
-            for (Map.Entry<String,String> e : namespaces.getPrefixDeclarations().entrySet()) {
+            for (Map.Entry<String,String> e : namespaces.getNamespacesByPrefix().entrySet()) {
                 output.println("\t"+e.getKey()+"\t"+e.getValue());
             }
         }
@@ -114,7 +114,7 @@ public class CommandLine {
                     }
                     output=new PrintWriter(f);
                 }
-                hermit.printClassHierarchy(output);
+                hermit.printHierarchies(output,true,false,false);
             }
         }
     }
@@ -219,7 +219,7 @@ public class CommandLine {
         }
 
         public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
-            hermit.printClassHierarchy(output);
+            hermit.printHierarchies(output,true,false,false);
         }
     }
 

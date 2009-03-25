@@ -90,7 +90,7 @@ public class Atom implements Serializable {
     }
 
     public String toString() {
-        return toString(Namespaces.none);
+        return toString(Namespaces.EMPTY);
     }
 
     protected Object readResolve() {

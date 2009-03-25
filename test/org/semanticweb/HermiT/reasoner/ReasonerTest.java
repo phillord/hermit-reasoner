@@ -36,7 +36,28 @@ public class ReasonerTest extends AbstractReasonerTest {
             "SubClassOf( <http://my.com/test2#J> D )"+
             "EquivalentClasses( A <"+NS+"Class> )"+
             "EquivalentClasses( A <"+NS+"s:local> )"+
-            "EquivalentClasses( C <http://my.com/test1#otherC> )";
+            "EquivalentClasses( C <http://my.com/test1#otherC> )"+
+            "EquivalentClasses( H <http://zzz.com/test3#K> )"+
+            
+            "InverseObjectProperties( op3 op3i ) "+
+            "SubObjectPropertyOf( owl:topObjectProperty op6 ) "+
+            "SubObjectPropertyOf( op2 op6 ) "+
+            "SubObjectPropertyOf( op3i op6 ) "+
+            "SubObjectPropertyOf( op1 op2 ) "+
+            "SubObjectPropertyOf( op1 op3i ) "+
+            "SubObjectPropertyOf( op4 op2 ) "+
+            "SubObjectPropertyOf( op5 owl:bottomObjectProperty ) "+
+
+            "SubDataPropertyOf( owl:topDataProperty dp7 ) "+
+            "SubDataPropertyOf( dp4 dp2 ) "+
+            "SubDataPropertyOf( dp4 dp3 ) "+
+            "SubDataPropertyOf( dp3 dp5 ) "+
+            "SubDataPropertyOf( dp5 dp3 ) "+
+            "SubDataPropertyOf( dp2 dp1 ) "+
+            "SubDataPropertyOf( dp3 dp1 ) "+
+            "SubDataPropertyOf( dp4 dp1 ) "+
+            "SubDataPropertyOf( dp6 dp2 ) "+
+            "SubDataPropertyOf( dp8 owl:bottomDataProperty ) ";
         loadOntologyWithAxioms(axioms);
         assertSubsumptionHierarchy("../res/hierarchy-printing-1.txt");
     }
@@ -53,9 +74,33 @@ public class ReasonerTest extends AbstractReasonerTest {
             "SubClassOf( <http://my.com/test2#J> D )"+
             "EquivalentClasses( A <"+NS+"Class> )"+
             "EquivalentClasses( A <"+NS+"s:local> )"+
-            "EquivalentClasses( C <http://my.com/test1#otherC> )";
+            "EquivalentClasses( C <http://my.com/test1#otherC> )"+
+            
+            "InverseObjectProperties( op3 op3i ) "+
+            "SubObjectPropertyOf( op2 op6 ) "+
+            "SubObjectPropertyOf( op3i op6 ) "+
+            "SubObjectPropertyOf( op1 op2 ) "+
+            "SubObjectPropertyOf( op1 op3i ) "+
+            "SubObjectPropertyOf( op4 op2 ) "+
+    
+            "SubDataPropertyOf( dp4 dp2 ) "+
+            "SubDataPropertyOf( dp4 dp3 ) "+
+            "SubDataPropertyOf( dp3 dp5 ) "+
+            "SubDataPropertyOf( dp5 dp3 ) "+
+            "SubDataPropertyOf( dp2 dp1 ) "+
+            "SubDataPropertyOf( dp3 dp1 ) "+
+            "SubDataPropertyOf( dp4 dp1 ) "+
+            "SubDataPropertyOf( dp6 dp2 ) ";
         loadOntologyWithAxioms(axioms);
         assertSubsumptionHierarchy("../res/hierarchy-printing-2.txt");
+    }
+
+    public void testConceptHierarchyPrinting3() throws Exception {
+        String axioms =
+            "SubClassOf( A B )"+
+            "SubClassOf( owl:Thing owl:Nothing )";            
+        loadOntologyWithAxioms(axioms);
+        assertSubsumptionHierarchy("../res/hierarchy-printing-3.txt");
     }
 
     @SuppressWarnings("unchecked")

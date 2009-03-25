@@ -332,6 +332,8 @@ public class DLOntology implements Serializable {
      * Tests whether the clause conforms to the properties of HT clauses, i.e., the variables can be split into a center variable x, a set of branch variables y_i, and a set of nominal variables z_j such that certain conditions hold.
      */
     protected boolean isTreeDLClause(DLClause dlClause,Set<AtomicRole> graphAtomicRoles,Set<AtomicConcept> bodyOnlyAtomicConcepts) {
+        if (dlClause.getHeadLength()==0 && dlClause.getBodyLength()==0)
+            return true;
         Set<Variable> variables=new HashSet<Variable>();
         for (int atomIndex=0;atomIndex<dlClause.getBodyLength();atomIndex++) {
             Atom atom=dlClause.getBodyAtom(atomIndex);
@@ -421,7 +423,7 @@ public class DLOntology implements Serializable {
         StringBuffer stringBuffer=new StringBuffer();
         stringBuffer.append("Namespaces: [");
         stringBuffer.append(CRLF);
-        for (Map.Entry<String,String> entry : ns.getPrefixDeclarations().entrySet()) {
+        for (Map.Entry<String,String> entry : ns.getNamespacesByPrefix().entrySet()) {
             stringBuffer.append("  ");
             stringBuffer.append(entry.getKey());
             stringBuffer.append(" = <");
@@ -468,7 +470,7 @@ public class DLOntology implements Serializable {
     }
 
     public String toString() {
-        return toString(Namespaces.none);
+        return toString(Namespaces.EMPTY);
     }
 
     public void save(File file) throws IOException {

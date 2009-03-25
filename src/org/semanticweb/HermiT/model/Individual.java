@@ -18,7 +18,7 @@ public class Individual extends Term {
         return m_uri;
     }
     public String toString() {
-        return toString(Namespaces.none);
+        return toString(Namespaces.EMPTY);
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);

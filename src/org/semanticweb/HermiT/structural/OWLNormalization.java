@@ -553,7 +553,7 @@ public class OWLNormalization implements Serializable {
     protected OWLDescription getDefinitionFor(OWLDescription desc,boolean[] alreadyExists,boolean forcePositive) {
         OWLDescription definition=m_definitions.get(desc);
         if (definition==null || (forcePositive && !(definition instanceof OWLClass))) {
-            definition=m_factory.getOWLClass(URI.create("internal:q#"+m_definitions.size()));
+            definition=m_factory.getOWLClass(URI.create("internal:def#"+m_definitions.size()));
             if (!forcePositive && !desc.accept(PLVisitor.INSTANCE))
                 definition=m_factory.getOWLObjectComplementOf(definition);
             // TODO: it's a little ugly to switch the definition

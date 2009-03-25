@@ -26,7 +26,7 @@ public class ExistsDescriptionGraph extends ExistentialConcept implements DLPred
         return "exists("+namespaces.abbreviateURI(m_descriptionGraph.getName())+'|'+m_vertex+')';
     }
     public String toString() {
-        return toString(Namespaces.none);
+        return toString(Namespaces.EMPTY);
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);

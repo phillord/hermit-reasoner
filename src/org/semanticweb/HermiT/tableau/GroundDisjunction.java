@@ -104,6 +104,6 @@ public class GroundDisjunction implements Serializable {
         return buffer.toString();
     }
     public String toString() {
-        return toString(Namespaces.none);
+        return toString(Namespaces.EMPTY);
     }
 }
