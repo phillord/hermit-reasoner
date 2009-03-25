@@ -58,7 +58,7 @@ import org.semanticweb.HermiT.hierarchy.HierarchyNode;
 import org.semanticweb.HermiT.hierarchy.HierarchyBuilder;
 import org.semanticweb.HermiT.hierarchy.TableauSubsumptionChecker;
 import org.semanticweb.HermiT.hierarchy.DeterministicHierarchyBuilder;
-import org.semanticweb.HermiT.hierarchy.Concepts2FSSPrinter;
+import org.semanticweb.HermiT.hierarchy.HierarchyPrinterFSS;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
@@ -377,7 +377,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             AtomicConcept atomicConcept=AtomicConcept.create(((OWLClass)description).getURI().toString());
             HierarchyNode<AtomicConcept> node=m_atomicConceptHierarchy.getNodeForElement(atomicConcept);
             if (node==null)
-                node=new HierarchyNode<AtomicConcept>(atomicConcept,Collections.singleton(m_atomicConceptHierarchy.getTopNode()),Collections.singleton(m_atomicConceptHierarchy.getBottomNode()));
+                node=new HierarchyNode<AtomicConcept>(atomicConcept,Collections.singleton(atomicConcept),Collections.singleton(m_atomicConceptHierarchy.getTopNode()),Collections.singleton(m_atomicConceptHierarchy.getBottomNode()));
             return node;
         }
         else {
@@ -402,7 +402,10 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
 
     public void printClassHierarchy(PrintWriter out) {
         classify();
-        m_atomicConceptHierarchy.print(new Concepts2FSSPrinter(out,m_dlOntology.getOntologyURI()+"#",m_atomicConceptHierarchy.getAllElements()));
+        HierarchyPrinterFSS printer=new HierarchyPrinterFSS(out,m_dlOntology.getOntologyURI()+"#",m_atomicConceptHierarchy.getAllElements());
+        printer.startPrinting();
+        printer.printAtomicConceptHierarchy(m_atomicConceptHierarchy);
+        printer.endPrinting();
     }
 
     // Object property inferences
@@ -483,7 +486,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         classifyObjectProperties();
         HierarchyNode<Role> node=m_atomicObjectRoleHierarchy.getNodeForElement(role);
         if (node==null)
-            node=new HierarchyNode<Role>(role,Collections.singleton(m_atomicObjectRoleHierarchy.getTopNode()),Collections.singleton(m_atomicObjectRoleHierarchy.getBottomNode()));
+            node=new HierarchyNode<Role>(role,Collections.singleton(role),Collections.singleton(m_atomicObjectRoleHierarchy.getTopNode()),Collections.singleton(m_atomicObjectRoleHierarchy.getBottomNode()));
         return node;
     }
     
@@ -640,7 +643,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         classifyDataProperties();
         HierarchyNode<AtomicRole> node=m_atomicDataRoleHierarchy.getNodeForElement(atomicRole);
         if (node==null)
-            node=new HierarchyNode<AtomicRole>(atomicRole,Collections.singleton(m_atomicDataRoleHierarchy.getTopNode()),Collections.singleton(m_atomicDataRoleHierarchy.getBottomNode()));
+            node=new HierarchyNode<AtomicRole>(atomicRole,Collections.singleton(atomicRole),Collections.singleton(m_atomicDataRoleHierarchy.getTopNode()),Collections.singleton(m_atomicDataRoleHierarchy.getBottomNode()));
         return node;
     }
     

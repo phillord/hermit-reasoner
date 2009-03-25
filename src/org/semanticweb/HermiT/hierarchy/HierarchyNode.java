@@ -20,10 +20,9 @@ public class HierarchyNode<E> {
         m_parentNodes=new HashSet<HierarchyNode<E>>();
         m_childNodes=new HashSet<HierarchyNode<E>>();
     }
-    public HierarchyNode(E element,Set<HierarchyNode<E>> parentNodes,Set<HierarchyNode<E>> childNodes) {
+    public HierarchyNode(E element,Set<E> equivalentElements,Set<HierarchyNode<E>> parentNodes,Set<HierarchyNode<E>> childNodes) {
         m_representative=element;
-        m_equivalentElements=new HashSet<E>();
-        m_equivalentElements.add(m_representative);
+        m_equivalentElements=equivalentElements;
         m_parentNodes=parentNodes;
         m_childNodes=childNodes;
     }

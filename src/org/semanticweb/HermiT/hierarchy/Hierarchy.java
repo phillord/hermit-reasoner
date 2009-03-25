@@ -2,16 +2,12 @@ package org.semanticweb.HermiT.hierarchy;
 
 import java.util.Set;
 import java.util.HashSet;
-import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.io.PrintWriter;
-
-import org.semanticweb.HermiT.Namespaces;
 
 public class Hierarchy<E> {
     protected final HierarchyNode<E> m_topNode;
@@ -42,6 +38,58 @@ public class Hierarchy<E> {
     public Set<E> getAllElements() {
         return Collections.unmodifiableSet(m_nodesByElements.keySet());
     }
+    public <T> Hierarchy<T> transform(Transformer<E,T> transformer,Comparator<T> comparator) {
+        HierarchyNodeComparator<T> newNodeComparator=new HierarchyNodeComparator<T>(comparator);
+        Map<HierarchyNode<E>,HierarchyNode<T>> oldToNew=new HashMap<HierarchyNode<E>,HierarchyNode<T>>();
+        for (HierarchyNode<E> oldNode : m_nodesByElements.values()) {
+            Set<T> newEquivalentElements;
+            Set<HierarchyNode<T>> newParentNodes;
+            Set<HierarchyNode<T>> newChildNodes;
+            if (comparator==null) {
+                newEquivalentElements=new HashSet<T>();
+                newParentNodes=new HashSet<HierarchyNode<T>>();
+                newChildNodes=new HashSet<HierarchyNode<T>>();
+            }
+            else {
+                newEquivalentElements=new TreeSet<T>(comparator);
+                newParentNodes=new TreeSet<HierarchyNode<T>>(newNodeComparator);
+                newChildNodes=new TreeSet<HierarchyNode<T>>(newNodeComparator);
+            }
+            for (E oldElement : oldNode.m_equivalentElements) {
+                T newElement=transformer.transform(oldElement);
+                newEquivalentElements.add(newElement);
+            }
+            T newRepresentative=transformer.determineRepresentative(oldNode.m_representative,newEquivalentElements);
+            HierarchyNode<T> newNode=new HierarchyNode<T>(newRepresentative,newEquivalentElements,newParentNodes,newChildNodes);
+            oldToNew.put(oldNode,newNode);
+        }
+        for (HierarchyNode<E> oldParentNode : m_nodesByElements.values()) {
+            HierarchyNode<T> newParentNode=oldToNew.get(oldParentNode);
+            for (HierarchyNode<E> oldChildNode : oldParentNode.m_childNodes) {
+                HierarchyNode<T> newChildNode=oldToNew.get(oldChildNode);
+                newParentNode.m_childNodes.add(newChildNode);
+                newChildNode.m_parentNodes.add(newParentNode);
+            }
+        }
+        HierarchyNode<T> newTopNode=oldToNew.get(m_topNode);
+        HierarchyNode<T> newBottomNode=oldToNew.get(m_bottomNode);
+        Hierarchy<T> newHierarchy=new Hierarchy<T>(newTopNode,newBottomNode);
+        for (HierarchyNode<T> newNode : oldToNew.values())
+            for (T newElement : newNode.m_equivalentElements)
+                newHierarchy.m_nodesByElements.put(newElement,newNode);
+        return newHierarchy;
+    }
+    public void traverseDepthFirst(HierarchyNodeVisitor<E> visitor) {
+        Set<HierarchyNode<E>> visited=new HashSet<HierarchyNode<E>>();
+        traverseDepthFirst(visitor,0,m_topNode,null,visited);
+    }
+    protected void traverseDepthFirst(HierarchyNodeVisitor<E> visitor,int level,HierarchyNode<E> node,HierarchyNode<E> parentNode,Set<HierarchyNode<E>> visited) {
+        boolean firstVisit=visited.add(node);
+        visitor.visit(level,node,parentNode,firstVisit);
+        if (firstVisit)
+            for (HierarchyNode<E> childNode : node.m_childNodes)
+                traverseDepthFirst(visitor,level+1,childNode,node,visited);
+    }
     public static <T> Hierarchy<T> emptyHierarchy(Collection<T> elements,T topElement,T bottomElement) {
         HierarchyNode<T> topBottomNode=new HierarchyNode<T>(topElement);
         topBottomNode.m_equivalentElements.add(topElement);
@@ -49,93 +97,24 @@ public class Hierarchy<E> {
         topBottomNode.m_equivalentElements.addAll(elements);
         return new Hierarchy<T>(topBottomNode,topBottomNode);
     }
-    public void print(Printer<E> printer) {
-        PrintNodeComparator printNodeComparator=new PrintNodeComparator(printer.getComparator());
-        Map<HierarchyNode<E>,PrintNode> nodeToPrintNode=new HashMap<HierarchyNode<E>,PrintNode>();
-        for (HierarchyNode<E> node : m_nodesByElements.values()) {
-            PrintNode printNode=new PrintNode(node,printer,printNodeComparator);
-            nodeToPrintNode.put(node,printNode);
-        }
-        for (HierarchyNode<E> node : m_nodesByElements.values()) {
-            PrintNode printNode=nodeToPrintNode.get(node);
-            for (HierarchyNode<E> childNode : node.m_childNodes) {
-                PrintNode childPrintNode=nodeToPrintNode.get(childNode);
-                printNode.m_children.add(childPrintNode);
-            }
-        }
-        for (Map.Entry<String,String> entry : printer.getNamespaces().getPrefixDeclarations().entrySet())
-            printer.getOut().println("Namespace("+entry.getKey()+"=<"+entry.getValue()+">)");
-        printer.getOut().println();
-        printer.getOut().println("Ontology(<"+printer.getNamespaces().getPrefixDeclarations().get("")+">");
-        printer.getOut().println();
-        Set<PrintNode> printed=new HashSet<PrintNode>();
-        PrintNode topPrintNode=nodeToPrintNode.get(m_topNode);
-        if (topPrintNode.m_equivalentElements.size()>1) {
-            printer.printEquivalences(topPrintNode,false);
-            printer.printDeclarations(topPrintNode);
-            printer.getOut().println();
-        }
-        for (PrintNode childPrintNode : topPrintNode.m_children)
-            print(printer,printed,childPrintNode,topPrintNode,1);
-        PrintNode bottomPrintNode=nodeToPrintNode.get(m_bottomNode);
-        if (bottomPrintNode.m_equivalentElements.size()>1) {
-            printer.printEquivalences(bottomPrintNode,false);
-            printer.printDeclarations(bottomPrintNode);
-            printer.getOut().println();
-        }
-        printer.getOut().println();
-        printer.getOut().println(")");
-    }
-    protected void print(Printer<E> printer,Set<PrintNode> printed,PrintNode printNode,PrintNode parentPrintNode,int level) {
-        for (int i=2*level;i>0;--i)
-            printer.getOut().print(' ');
-        printer.printRelation(printNode,parentPrintNode);
-        if (printed.add(printNode)) {
-            printer.printEquivalences(printNode,true);
-            printer.printDeclarations(printNode);
-            printer.getOut().println();
-            for (PrintNode childPrintNode : printNode.m_children)
-                if (childPrintNode.m_node!=m_bottomNode)
-                    print(printer,printed,childPrintNode,printNode,level+1);
-        }
-        else
-            printer.getOut().println();
-    }
-    
-    public static interface Printer<E> {
-        PrintWriter getOut();
-        String toString(E element);
-        Namespaces getNamespaces();
-        Comparator<String> getComparator();
-        void printDeclarations(PrintNode printNode);
-        void printEquivalences(PrintNode printNode,boolean precedeWithSpace);
-        void printRelation(PrintNode childNode,PrintNode parentNode);
-    }
-    
-    public static class PrintNode {
-        protected final HierarchyNode<?> m_node;
-        protected final String m_canonical;
-        protected final SortedSet<String> m_equivalentElements;
-        protected final SortedSet<PrintNode> m_children;
-        
-        public <E> PrintNode(HierarchyNode<E> node,Printer<E> printer,Comparator<PrintNode> printNodeComparator) {
-            m_node=node;
-            m_equivalentElements=new TreeSet<String>(printer.getComparator());
-            for (E element : node.m_equivalentElements)
-                m_equivalentElements.add(printer.toString(element));
-            m_canonical=m_equivalentElements.first();
-            m_children=new TreeSet<PrintNode>(printNodeComparator);
-        }
+
+    protected static interface HierarchyNodeVisitor<E> {
+        void visit(int level,HierarchyNode<E> node,HierarchyNode<E> parentNode,boolean firstVisit);
     }
 
-    protected static class PrintNodeComparator implements Comparator<PrintNode> {
-        protected final Comparator<String> m_comparator;
+    protected static interface Transformer<E,T> {
+        T transform(E element);
+        T determineRepresentative(E oldRepresentative,Set<T> newEquivalentElements);
+    }
+    
+    protected static class HierarchyNodeComparator<E> implements Comparator<HierarchyNode<E>> {
+        protected final Comparator<E> m_elementComparator;
 
-        public PrintNodeComparator(Comparator<String> comparator) {
-            m_comparator=comparator;
+        public HierarchyNodeComparator(Comparator<E> elementComparator) {
+            m_elementComparator=elementComparator;
         }
-        public int compare(PrintNode o1,PrintNode o2) {
-            return m_comparator.compare(o1.m_canonical,o2.m_canonical);
+        public int compare(HierarchyNode<E> n1,HierarchyNode<E> n2) {
+            return m_elementComparator.compare(n1.m_representative,n2.m_representative);
         }
         
     }

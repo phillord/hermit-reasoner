@@ -57,8 +57,11 @@ public class HierarchyBuilder<E> {
             assert parentNodes.size()==1 && childNodes.size()==1;
             return parentNodes.iterator().next();
         }
-        else
-            return new HierarchyNode<E>(element,parentNodes,childNodes);
+        else {
+            Set<E> equivalentElements=new HashSet<E>();
+            equivalentElements.add(element);
+            return new HierarchyNode<E>(element,equivalentElements,parentNodes,childNodes);
+        }
     }
     protected Set<HierarchyNode<E>> findParents(final E element,HierarchyNode<E> topNode) {
         return search(
