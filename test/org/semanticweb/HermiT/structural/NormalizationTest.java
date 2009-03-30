@@ -189,7 +189,7 @@ public class NormalizationTest extends AbstractStructuralTest {
 
     public void testKeys() throws Exception {
         String axioms="SubClassOf(A B)";
-        loadOWLOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms);
         Set<OWLHasKeyDummy> keys=new HashSet<OWLHasKeyDummy>();
         OWLHasKeyDummy key=OWLHasKeyDummy.getDemoKey();
         keys.add(key);
@@ -224,12 +224,12 @@ public class NormalizationTest extends AbstractStructuralTest {
     }
 
     protected void assertNormalization(String inputResourceName,String controlResourceName) throws Exception {
-        loadOWLOntologyFromResource(inputResourceName);
+        loadOntologyFromResource(inputResourceName);
         Set<OWLAxiom> normlizedAxioms=getNormalizedAxioms(null);
         assertEquals(normlizedAxioms,controlResourceName);
     }
     protected void assertNormalization(String inputResourceName,String controlResourceName,String controlResourceNameVariant) throws Exception {
-        loadOWLOntologyFromResource(inputResourceName);
+        loadOntologyFromResource(inputResourceName);
         Set<OWLAxiom> normlizedAxioms=getNormalizedAxioms(null);
         assertEquals(normlizedAxioms,controlResourceName,controlResourceNameVariant);
     }

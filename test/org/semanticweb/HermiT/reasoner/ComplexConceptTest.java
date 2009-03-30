@@ -25,7 +25,7 @@ public class ComplexConceptTest extends AbstractReasonerTest {
         buffer.append("SubClassOf(C DataHasValue(dp \"5\"^^xsd:integer))");
         buffer.append("FunctionalObjectProperty(f)");
         buffer.append("ClassAssertion(a A)");
-        loadOntologyWithAxioms(buffer.toString());
+        loadReasonerWithAxioms(buffer.toString());
         
         OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
         OWLIndividual a = df.getOWLIndividual(URI.create("file:/c/test.owl#a"));
@@ -40,7 +40,7 @@ public class ComplexConceptTest extends AbstractReasonerTest {
         StringBuffer buffer = new StringBuffer();
         buffer.append("SubClassOf(A DataAllValuesFrom(dp DataComplementOf(rdfs:Literal)))");
         buffer.append("ClassAssertion(a A)");
-        loadOntologyWithAxioms(buffer.toString());
+        loadReasonerWithAxioms(buffer.toString());
         
         OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
         OWLIndividual a = df.getOWLIndividual(URI.create("file:/c/test.owl#a"));
@@ -58,7 +58,7 @@ public class ComplexConceptTest extends AbstractReasonerTest {
         buffer.append("InverseFunctionalObjectProperty(f2)");
         buffer.append("ClassAssertion(a ObjectAllValuesFrom(f1 A))");
         buffer.append("ClassAssertion(b ObjectAllValuesFrom(f1 B))");
-        loadOntologyWithAxioms(buffer.toString());
+        loadReasonerWithAxioms(buffer.toString());
         
         OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
         OWLIndividual o = df.getOWLIndividual(URI.create("file:/c/test.owl#o"));
@@ -79,7 +79,7 @@ public class ComplexConceptTest extends AbstractReasonerTest {
         buffer.append("InverseFunctionalObjectProperty(f2)");
         buffer.append("ClassAssertion(a ObjectAllValuesFrom(f1 A))");
         buffer.append("ClassAssertion(b ObjectAllValuesFrom(f1 B))");
-        loadOntologyWithAxioms(buffer.toString());
+        loadReasonerWithAxioms(buffer.toString());
         
         OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
         OWLIndividual a = df.getOWLIndividual(URI.create("file:/c/test.owl#a"));
@@ -99,7 +99,7 @@ public class ComplexConceptTest extends AbstractReasonerTest {
         buffer.append("InverseFunctionalObjectProperty(f2)");
         buffer.append("ClassAssertion(a ObjectAllValuesFrom(f1 A))");
         buffer.append("ClassAssertion(b ObjectAllValuesFrom(f1 B))");
-        loadOntologyWithAxioms(buffer.toString());
+        loadReasonerWithAxioms(buffer.toString());
         
         assertABoxSatisfiable(false);
     }
@@ -112,7 +112,7 @@ public class ComplexConceptTest extends AbstractReasonerTest {
         buffer.append("ClassAssertion(b ObjectSomeValuesFrom(f1 ObjectSomeValuesFrom(f2 ObjectOneOf(o))))");
         buffer.append("InverseFunctionalObjectProperty(f1)");
         buffer.append("InverseFunctionalObjectProperty(f2)");
-        loadOntologyWithAxioms(buffer.toString());
+        loadReasonerWithAxioms(buffer.toString());
         
         assertABoxSatisfiable(false);
     }
@@ -122,7 +122,7 @@ public class ComplexConceptTest extends AbstractReasonerTest {
         buffer.append("ClassAssertion(a ObjectSomeValuesFrom(f B))");
         buffer.append("ObjectPropertyAssertion(f a b)");
         buffer.append("FunctionalObjectProperty(f)");
-        loadOntologyWithAxioms(buffer.toString());
+        loadReasonerWithAxioms(buffer.toString());
         
         OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
         OWLIndividual b = df.getOWLIndividual(URI.create("file:/c/test.owl#b"));
@@ -139,7 +139,7 @@ public class ComplexConceptTest extends AbstractReasonerTest {
         buffer.append("ObjectPropertyAssertion(hasSibling Matt Gemma)");
         buffer.append("SubClassOf(ObjectIntersectionOf(Person ObjectSomeValuesFrom(hasSibling Person)) Sibling)");
         buffer.append("SubClassOf(Sibling ObjectIntersectionOf(Person ObjectSomeValuesFrom(hasSibling Person)))");
-        loadOntologyWithAxioms(buffer.toString());
+        loadReasonerWithAxioms(buffer.toString());
         
         OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
         OWLIndividual matt = df.getOWLIndividual(URI.create("file:/c/test.owl#Matt"));

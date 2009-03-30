@@ -1,8 +1,6 @@
 package org.semanticweb.HermiT.reasoner;
 
-import java.io.BufferedReader;
 import java.io.CharArrayWriter;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.util.Collections;
@@ -10,23 +8,20 @@ import java.util.Set;
 import java.util.HashSet;
 
 import org.semanticweb.owl.apibinding.OWLManager;
-import org.semanticweb.owl.io.OWLOntologyInputSource;
-import org.semanticweb.owl.io.StringInputSource;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLDescription;
 import org.semanticweb.owl.model.OWLDataProperty;
 import org.semanticweb.owl.model.OWLObjectProperty;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
 import org.semanticweb.owl.model.OWLIndividual;
-import org.semanticweb.owl.model.OWLOntology;
 
-import org.semanticweb.HermiT.AbstractOWLOntologyTest;
+import org.semanticweb.HermiT.AbstractOntologyTest;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.structural.OWLHasKeyDummy;
 
-public abstract class AbstractReasonerTest extends AbstractOWLOntologyTest {
+public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     protected Reasoner m_reasoner;
 
     public AbstractReasonerTest(String name) {
@@ -38,136 +33,34 @@ public abstract class AbstractReasonerTest extends AbstractOWLOntologyTest {
         m_reasoner=null;
     }
 
-    /**
-     * Loads an ontology via the OWL API with the standard configuration so that
-     * it is available for the custom assert methods.
-     * 
-     * @param resource
-     *            the resource to load
-     */
-    protected void loadOntologyFromResource(String resourceName) throws Exception {
-        loadOntologyFromResource(getConfiguration(),resourceName);
-    }
-
-    /**
-     * Loads an ontology via the OWL API so that it is available for the custom assert methods.
-     * 
-     * @param configuration
-     *            a configuration for the reasoner instance
-     * @param resource
-     *            the resource to load
-     */
-    protected void loadOntologyFromResource(Configuration configuration,String resourceName) throws Exception {
+    protected void loadReasonerFromResource(String resourceName) throws Exception {
         URI physicalURI=getClass().getResource(resourceName).toURI();
         m_ontologyManager=OWLManager.createOWLOntologyManager();
         m_ontology=m_ontologyManager.loadOntologyFromPhysicalURI(physicalURI);
-        m_reasoner=new Reasoner(configuration,m_ontologyManager,m_ontology);
+        createReasoner();
     }
 
-    /**
-     * Creates and loads an ontology that contains the given axioms. Uses the standard configuration
-     * for the reasoner instance.
-     * 
-     * @param axioms
-     *            in functional style syntax
-     */
-    protected void loadOntologyWithAxioms(String axioms) throws Exception {
-        loadOntologyWithAxiomsAndKeys(getConfiguration(),axioms,null);
-    }
-
-    /**
-     * creates and loads an ontology that contains the given axioms
-     * 
-     * @param axioms
-     *            in functional style syntax
-     * @param keys
-     *            a set of HasKey axioms (till the OWL API supports them)
-     */
-    protected void loadOntologyWithAxiomsAndKeys(String axioms,Set<OWLHasKeyDummy> keys) throws Exception {
-        loadOntologyWithAxiomsAndKeys(getConfiguration(),axioms,keys);
-    }
-
-    /**
-     * creates and loads an ontology that contains the given axioms
-     * 
-     * @param configuration
-     *            a configuration for the reasoner instance
-     * @param axioms
-     *            in functional style syntax
-     * @param keys
-     *            a set of key axioms (till the OWL API supports them)
-     */
-    protected void loadOntologyWithAxiomsAndKeys(Configuration configuration,String axioms,Set<OWLHasKeyDummy> keys) throws Exception {
-        loadOntologyWithAxiomsOnly(axioms);
-        m_reasoner=new Reasoner(configuration,m_ontologyManager,m_ontology,null,keys);
-    }
-
-    protected void loadOntologyWithAxiomsOnly(String axioms) throws Exception {
-        StringBuffer buffer=new StringBuffer();
-        buffer.append("Namespace(=<"+NS+">)");
-        buffer.append("Namespace(rdfs=<http://www.w3.org/2000/01/rdf-schema#>)");
-        buffer.append("Namespace(owl2xml=<http://www.w3.org/2006/12/owl2-xml#>)");
-        buffer.append("Namespace(test=<"+NS+">)");
-        buffer.append("Namespace(owl=<http://www.w3.org/2002/07/owl#>)");
-        buffer.append("Namespace(xsd=<http://www.w3.org/2001/XMLSchema#>)");
-        buffer.append("Namespace(rdf=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)");
-        buffer.append("Ontology(<"+ONTOLOGY_URI+">");
-        buffer.append(axioms);
-        buffer.append(")");
-        m_ontologyManager=OWLManager.createOWLOntologyManager();
-        OWLOntologyInputSource input=new StringInputSource(buffer.toString());
-        m_ontology=m_ontologyManager.loadOntology(input);
+    protected void loadReasonerWithAxioms(String axioms) throws Exception {
+        loadOntologyWithAxioms(axioms);
+        createReasoner();
     }
 
     protected void createReasoner() {
-        createReasoner(getConfiguration());
+        createReasoner(getConfiguration(),null,null);
     }
 
-    protected void createReasoner(Configuration configuration) {
-        m_reasoner=new Reasoner(configuration,m_ontologyManager,m_ontology);
-    }
-
-    protected void loadOntologyWithAxioms(String axioms,Configuration configuration) throws Exception {
-        loadOntologyWithAxiomsOnly(axioms);
-        createReasoner(configuration);
-    }
-
-    protected void loadOWLOntology(Configuration configuration,OWLOntology ontology,Set<DescriptionGraph> descriptionGraphs) {
+    protected void createReasoner(Configuration configuration,Set<DescriptionGraph> descriptionGraphs,Set<OWLHasKeyDummy> keys) {
         if (descriptionGraphs==null)
             descriptionGraphs=Collections.emptySet();
-        m_reasoner=new Reasoner(configuration,m_ontologyManager,ontology,descriptionGraphs,null);
+        if (keys==null)
+            keys=Collections.emptySet();
+        m_reasoner=new Reasoner(configuration,m_ontologyManager,m_ontology,descriptionGraphs,keys);
     }
 
     /**
-     * Loads the resource resourceName and returns its content as a string.
-     * 
-     * @param resourceName
-     * @return the content of the loaded resource as one string
+     * Returns the class and the property hierarchies as text.
      */
-    protected String getResourceText(String resourceName) throws Exception {
-        CharArrayWriter buffer=new CharArrayWriter();
-        PrintWriter output=new PrintWriter(buffer);
-        BufferedReader reader=new BufferedReader(new InputStreamReader(getClass().getResource(resourceName).openStream()));
-        try {
-            String line=reader.readLine();
-            while (line!=null) {
-                output.println(line);
-                line=reader.readLine();
-            }
-        }
-        finally {
-            reader.close();
-        }
-        output.flush();
-        return buffer.toString();
-    }
-
-    /**
-     * Returns a string with a sorted ancestor list that represents the taxonomy of the ontology that is currently loaded in the reasoner.
-     * 
-     * @return the taxonomy
-     */
-    protected String getSubsumptionHierarchyAsText() {
+    protected String getHierarchiesAsText() {
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter output=new PrintWriter(buffer);
         m_reasoner.printHierarchies(output,true,true,true);
@@ -183,8 +76,8 @@ public abstract class AbstractReasonerTest extends AbstractOWLOntologyTest {
      * @param controlResource
      *            the expected taxonomy (sorted ancestor list)
      */
-    protected void assertSubsumptionHierarchy(String controlResource) throws Exception {
-        String taxonomy=getSubsumptionHierarchyAsText();
+    protected void assertHierarchies(String controlResource) throws Exception {
+        String taxonomy=getHierarchiesAsText();
         String controlString=getResourceText(controlResource);
         assertEquals(controlString,taxonomy);
     }

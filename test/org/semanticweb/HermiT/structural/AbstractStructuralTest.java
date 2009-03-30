@@ -4,9 +4,9 @@ import java.util.Collection;
 
 import junit.framework.AssertionFailedError;
 
-import org.semanticweb.HermiT.AbstractOWLOntologyTest;
+import org.semanticweb.HermiT.AbstractOntologyTest;
 
-public abstract class AbstractStructuralTest extends AbstractOWLOntologyTest {
+public abstract class AbstractStructuralTest extends AbstractOntologyTest {
 
     public AbstractStructuralTest(String name) {
         super(name);

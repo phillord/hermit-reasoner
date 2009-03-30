@@ -140,7 +140,7 @@ public class MergeTest extends AbstractReasonerInternalsTest {
         m_tableau.backtrackTo(bp.getLevel());
 
         assertFalse(m_extensionManager.containsClash());
-        assertRetrieval(m_extensionManager.getTernaryExtensionTable(),T(Inequality.INSTANCE,null,null),ExtensionTable.View.TOTAL,NO_TUPLES);
+        assertRetrieval(m_extensionManager.getTernaryExtensionTable(),T(Inequality.INSTANCE,null,null),ExtensionTable.View.TOTAL,new Node[0][]);
     }
     protected void assertLabel(Node node,Concept... concepts) {
         assertEquals(concepts.length,node.getPositiveLabelSize()+node.getNegativeLabelSize());

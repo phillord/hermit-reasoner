@@ -167,7 +167,7 @@ public class GraphTest extends AbstractReasonerInternalsTest {
         c.directBlockingType = Configuration.DirectBlockingType.PAIR_WISE;
         c.blockingStrategyType = Configuration.BlockingStrategyType.ANYWHERE;
         c.existentialStrategyType = Configuration.ExistentialStrategyType.CREATION_ORDER;
-        loadOWLOntology(c, m_ontology, m_descriptionGraphs);
+        createReasoner(c, m_descriptionGraphs, null);
         
 //        addAxiom("[subClassOf A [some S A]]");
 //        addAxiom("[subClassOf A [some S D]]");

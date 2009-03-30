@@ -19,7 +19,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
 
     public void testDataPropertiesHasValue1() throws Exception {
         String axioms="SubClassOf(Eighteen DataHasValue(hasAge \"18\"^^xsd:integer))";
-        loadOWLOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
         expectedClauses.add("atLeast(1 :hasAge (oneOf((xsd:integer 18))))(X) :- :Eighteen(X)");
@@ -28,7 +28,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
 
     public void testDataPropertiesHasValue2() throws Exception {
         String axioms="SubClassOf(DataHasValue(hasAge \"18\"^^xsd:integer) Eighteen)";
-        loadOWLOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
         expectedClauses.add(":Eighteen(X) v (not oneOf((xsd:integer 18)))(Y) :- :hasAge(X,Y)");
@@ -37,7 +37,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
 
     public void testDataPropertiesAll1() throws Exception {
         String axioms="SubClassOf(A DataAllValuesFrom(dp xsd:integer))";
-        loadOWLOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
         expectedClauses.add("(xsd:integer)(Y) :- :A(X), :dp(X,Y)");
@@ -46,7 +46,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
 
     public void testDataPropertiesAll2() throws Exception {
         String axioms="SubClassOf(DataAllValuesFrom(dp xsd:integer) A)";
-        loadOWLOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
         expectedClauses.add(":A(X) v atLeast(1 :dp (not xsd:integer))(X) :- owl:Thing(X)");
@@ -55,7 +55,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
 
     public void testDataPropertiesSome1() throws Exception {
         String axioms="SubClassOf(DataSomeValuesFrom(dp xsd:string) A)";
-        loadOWLOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
         expectedClauses.add(":A(X) v (not xsd:string)(Y) :- :dp(X,Y)");
@@ -64,7 +64,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
 
     public void testDataPropertiesSome2() throws Exception {
         String axioms="SubClassOf(A DataSomeValuesFrom(dp xsd:string))";
-        loadOWLOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
         expectedClauses.add("atLeast(1 :dp (xsd:string))(X) :- :A(X)");
@@ -73,7 +73,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
 
     public void testDataPropertiesDataOneOf1() throws Exception {
         String axioms="SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"Peter\"^^xsd:string \"19\"^^xsd:integer)))";
-        loadOWLOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
         expectedClauses.add("(oneOf((xsd:integer 19)(xsd:string Peter)))(Y) :- :A(X), :dp(X,Y)");
@@ -82,7 +82,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
 
     public void testDataPropertiesDataOneOf2() throws Exception {
         String axioms="SubClassOf(DataAllValuesFrom(dp DataOneOf(\"18\"^^xsd:integer \"19\"^^xsd:integer)) A)";
-        loadOWLOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
         expectedClauses.add(":A(X) v atLeast(1 :dp (not oneOf((xsd:integer 18)(xsd:integer 19))))(X) :- owl:Thing(X)");
@@ -91,7 +91,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
 
     public void testDataPropertiesDataOneOf3() throws Exception {
         String axioms="SubClassOf(DataAllValuesFrom(dp DataOneOf(\"18\"^^xsd:integer \"abc\"^^xsd:string)) A)";
-        loadOWLOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
         expectedClauses.add(":A(X) v atLeast(1 :dp (not oneOf((xsd:integer 18)(xsd:string abc))))(X) :- owl:Thing(X)");
@@ -100,7 +100,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
 
     public void testDataPropertiesDataOneOf4() throws Exception {
         String axioms="SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"18\"^^xsd:integer \"abc\"^^xsd:string)))";
-        loadOWLOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
         expectedClauses.add("(oneOf((xsd:integer 18)(xsd:string abc)))(Y) :- :A(X), :dp(X,Y)");
@@ -109,7 +109,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
 
     public void testDataPropertiesDataComplementOf1() throws Exception {
         String axioms="SubClassOf(A DataAllValuesFrom(dp DataComplementOf(DataComplementOf(DataOneOf(\"18\"^^xsd:integer \"19\"^^xsd:integer)))))";
-        loadOWLOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
         expectedClauses.add("(oneOf((xsd:integer 18)(xsd:integer 19)))(Y) :- :A(X), :dp(X,Y)");
@@ -118,7 +118,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
 
     public void testDataPropertiesDataComplementOf2() throws Exception {
         String axioms="SubClassOf(A DataAllValuesFrom(dp DataComplementOf(DataOneOf(\"18\"^^xsd:integer \"19\"^^xsd:integer))))";
-        loadOWLOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
         expectedClauses.add("(not oneOf((xsd:integer 18)))(Y) :- :A(X), :dp(X,Y)");
@@ -128,7 +128,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
 
     public void testDataPropertiesMax1() throws Exception {
         String axioms="SubClassOf(A DataMaxCardinality(1 dp xsd:string))";
-        loadOWLOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
         expectedClauses.add("(not xsd:string)(Y1) v (not xsd:string)(Y2) v Y1 == Y2 :- :A(X), :dp(X,Y1), :dp(X,Y2)");
@@ -137,7 +137,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
 
     public void testDataPropertiesMax2() throws Exception {
         String axioms="SubClassOf(DataMaxCardinality(1 dp xsd:string) A)";
-        loadOWLOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
         expectedClauses.add(":A(X) v atLeast(2 :dp (xsd:string))(X) :- owl:Thing(X)");
@@ -146,7 +146,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
 
     public void testDataPropertiesMax3() throws Exception {
         String axioms="SubClassOf(A DataMaxCardinality(3 dp xsd:integer))";
-        loadOWLOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
         expectedClauses.add("(not xsd:integer)(Y1) v (not xsd:integer)(Y2) v (not xsd:integer)(Y3) v (not xsd:integer)(Y4) v Y1 == Y2 v Y1 == Y3 v Y1 == Y4 v Y2 == Y3 v Y2 == Y4 v Y3 == Y4 :- :A(X), :dp(X,Y1), :dp(X,Y2), :dp(X,Y3), :dp(X,Y4)");
@@ -155,7 +155,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
 
     public void testDataPropertiesMax4() throws Exception {
         String axioms="SubClassOf(DataMaxCardinality(3 dp xsd:integer) A)";
-        loadOWLOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
         expectedClauses.add(":A(X) v atLeast(4 :dp (xsd:integer))(X) :- owl:Thing(X)");
@@ -164,7 +164,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
 
     public void testDataPropertiesMin1() throws Exception {
         String axioms="SubClassOf(DataMinCardinality(1 dp xsd:string) A)";
-        loadOWLOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
         expectedClauses.add(":A(X) v (not xsd:string)(Y1) :- :dp(X,Y1)");
@@ -173,7 +173,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
 
     public void testDataPropertiesMin2() throws Exception {
         String axioms="SubClassOf(DataMinCardinality(3 dp xsd:string) A)";
-        loadOWLOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
         expectedClauses.add(":A(X) v (not xsd:string)(Y1) v (not xsd:string)(Y2) v (not xsd:string)(Y3) v Y1 == Y2 v Y1 == Y3 v Y2 == Y3 :- :dp(X,Y1), :dp(X,Y2), :dp(X,Y3)");
@@ -182,7 +182,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
 
     public void testDataPropertiesMin3() throws Exception {
         String axioms="SubClassOf(A DataMinCardinality(1 dp xsd:string))";
-        loadOWLOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
         expectedClauses.add("atLeast(1 :dp (xsd:string))(X) :- :A(X)");
@@ -191,7 +191,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
 
     public void testDataPropertiesMin4() throws Exception {
         String axioms="SubClassOf(A DataMinCardinality(5 dp xsd:string))";
-        loadOWLOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
         expectedClauses.add("atLeast(5 :dp (xsd:string))(X) :- :A(X)");
@@ -200,7 +200,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
 
     public void testDataPropertiesExact1() throws Exception {
         String axioms="SubClassOf(A DataExactCardinality(1 dp xsd:integer))";
-        loadOWLOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
         expectedClauses.add("(not xsd:integer)(Y1) v (not xsd:integer)(Y2) v Y1 == Y2 :- :A(X), :dp(X,Y1), :dp(X,Y2)");
@@ -210,7 +210,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
 
     public void testDataPropertiesExact2() throws Exception {
         String axioms="SubClassOf(A DataExactCardinality(3 dp xsd:integer))";
-        loadOWLOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
         expectedClauses.add("(not xsd:integer)(Y1) v (not xsd:integer)(Y2) v (not xsd:integer)(Y3) v (not xsd:integer)(Y4) v Y1 == Y2 v Y1 == Y3 v Y1 == Y4 v Y2 == Y3 v Y2 == Y4 v Y3 == Y4 :- :A(X), :dp(X,Y1), :dp(X,Y2), :dp(X,Y3), :dp(X,Y4)");
@@ -220,7 +220,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
 
     public void testDataPropertiesExact3() throws Exception {
         String axioms="SubClassOf(DataExactCardinality(1 dp xsd:integer) A)";
-        loadOWLOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
         expectedClauses.add(":A(X) v (not xsd:integer)(Y1) v atLeast(2 :dp (xsd:integer))(X) :- :dp(X,Y1)");
@@ -229,7 +229,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
 
     public void testDataPropertiesExact4() throws Exception {
         String axioms="SubClassOf(DataExactCardinality(3 dp xsd:integer) A)";
-        loadOWLOntologyWithAxioms(axioms);
+        loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
         expectedClauses.add(":A(X) v (not xsd:integer)(Y1) v (not xsd:integer)(Y2) v (not xsd:integer)(Y3) v Y1 == Y2 v Y1 == Y3 v Y2 == Y3 v atLeast(4 :dp (xsd:integer))(X) :- :dp(X,Y1), :dp(X,Y2), :dp(X,Y3)");

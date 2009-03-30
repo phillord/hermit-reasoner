@@ -104,7 +104,7 @@ public class ClausificationTest extends AbstractStructuralTest {
     }
 
     protected void assertClausification(String ontologyResource,String controlResource,String controlResourceVariant) throws Exception {
-        loadOWLOntologyFromResource(ontologyResource);
+        loadOntologyFromResource(ontologyResource);
         assertDLClauses(getControl(controlResource),getControl(controlResourceVariant));
     }
 

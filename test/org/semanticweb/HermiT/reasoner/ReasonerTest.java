@@ -65,8 +65,8 @@ public class ReasonerTest extends AbstractReasonerTest {
             "SubDataPropertyOf( dp4 dp1 ) "+
             "SubDataPropertyOf( dp6 dp2 ) "+
             "SubDataPropertyOf( dp8 owl:bottomDataProperty ) ";
-        loadOntologyWithAxioms(axioms);
-        assertSubsumptionHierarchy("res/hierarchy-printing-1.txt");
+        loadReasonerWithAxioms(axioms);
+        assertHierarchies("res/hierarchy-printing-1.txt");
     }
 
     public void testHierarchyPrinting2() throws Exception {
@@ -98,16 +98,16 @@ public class ReasonerTest extends AbstractReasonerTest {
             "SubDataPropertyOf( dp3 dp1 ) "+
             "SubDataPropertyOf( dp4 dp1 ) "+
             "SubDataPropertyOf( dp6 dp2 ) ";
-        loadOntologyWithAxioms(axioms);
-        assertSubsumptionHierarchy("res/hierarchy-printing-2.txt");
+        loadReasonerWithAxioms(axioms);
+        assertHierarchies("res/hierarchy-printing-2.txt");
     }
 
     public void testHierarchyPrinting3() throws Exception {
         String axioms =
             "SubClassOf( A B )"+
             "SubClassOf( owl:Thing owl:Nothing )";            
-        loadOntologyWithAxioms(axioms);
-        assertSubsumptionHierarchy("res/hierarchy-printing-3.txt");
+        loadReasonerWithAxioms(axioms);
+        assertHierarchies("res/hierarchy-printing-3.txt");
     }
 
     @SuppressWarnings("unchecked")
@@ -126,7 +126,7 @@ public class ReasonerTest extends AbstractReasonerTest {
             "SubObjectPropertyOf( r4 r1 ) "+
             "SubObjectPropertyOf( r6 r2 ) "+
             "SubObjectPropertyOf( r6 r2i ) ";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         
         assertEquivalentObjectProperties("r1",URIs("r1",INV("r1i")));
         assertEquivalentObjectProperties("r2",URIs("r2",INV("r2i")));
@@ -153,7 +153,7 @@ public class ReasonerTest extends AbstractReasonerTest {
             "SubDataPropertyOf( r3 r1 ) "+
             "SubDataPropertyOf( r4 r1 ) "+
             "SubDataPropertyOf( r6 r2 ) ";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         
         assertEquivalentDataProperties("r1",URIs("r1"));
         assertEquivalentDataProperties("r2",URIs("r2"));
@@ -179,7 +179,7 @@ public class ReasonerTest extends AbstractReasonerTest {
             "ClassAssertion(i2 c) "+
             "ObjectPropertyAssertion(r i3 i4) "+
             "ClassAssertion(i4 e) ";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
 
         OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
         OWLObjectProperty r = df.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
@@ -200,7 +200,7 @@ public class ReasonerTest extends AbstractReasonerTest {
                 + "InverseObjectProperties(a a-)"
                 + "InverseObjectProperties(b b-)"
                 + "SubClassOf(owl:Thing ObjectAllValuesFrom(a- ObjectAllValuesFrom(a- ObjectAllValuesFrom(b ObjectAllValuesFrom(b- p))))) ";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
     
@@ -210,7 +210,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         String axioms = "SubClassOf(owl:Thing ObjectSomeValuesFrom(r q)) "
             + "InverseObjectProperties(r r-)"
             + "SubClassOf(owl:Thing ObjectSomeValuesFrom(r- ObjectAllValuesFrom(r- ObjectAllValuesFrom(r ObjectAllValuesFrom(r ObjectAllValuesFrom(r p)))))) ";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         
         OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
         OWLDescription p = df.getOWLClass(URI.create("file:/c/test.owl#p"));
@@ -230,7 +230,7 @@ public class ReasonerTest extends AbstractReasonerTest {
             + "SubClassOf(owl:Thing ObjectSomeValuesFrom(r- ObjectSomeValuesFrom(r p))) "
             + "SubClassOf(owl:Thing ObjectSomeValuesFrom(r- ObjectAllValuesFrom(r- ObjectSomeValuesFrom(r- ObjectSomeValuesFrom(r- ObjectAllValuesFrom(r ObjectAllValuesFrom(r p))))))) "
             + "SubClassOf(owl:Thing ObjectAllValuesFrom(r ObjectSomeValuesFrom(r ObjectAllValuesFrom(r- ObjectSomeValuesFrom(r ObjectAllValuesFrom(r- ObjectAllValuesFrom(r p))))))) ";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         
         assertABoxSatisfiable(false);
         OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
@@ -260,7 +260,8 @@ public class ReasonerTest extends AbstractReasonerTest {
         key.setDataProperties(dprops);
         Set<OWLHasKeyDummy> keys = new HashSet<OWLHasKeyDummy>();
         keys.add(key);
-        loadOntologyWithAxiomsAndKeys(axioms, keys);
+        loadOntologyWithAxioms(axioms);
+        createReasoner(getConfiguration(),null,keys);
         assertABoxSatisfiable(false);
     }
 
@@ -283,7 +284,8 @@ public class ReasonerTest extends AbstractReasonerTest {
         key.setDataProperties(dprops);
         Set<OWLHasKeyDummy> keys = new HashSet<OWLHasKeyDummy>();
         keys.add(key);
-        loadOntologyWithAxiomsAndKeys(axioms, keys);
+        loadOntologyWithAxioms(axioms);
+        createReasoner(getConfiguration(),null,keys);
         assertABoxSatisfiable(true);
     }
     
@@ -291,7 +293,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         String axioms = "ReflexiveObjectProperty(r) "
                 + "ClassAssertion(a ObjectAllValuesFrom(r " + "owl:Nothing)) "
                 + "ClassAssertion(a owl:Thing)";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
 
@@ -300,14 +302,14 @@ public class ReasonerTest extends AbstractReasonerTest {
                 + "ObjectPropertyAssertion(r b c) "
                 + "TransitiveObjectProperty(r) "
                 + "NegativeObjectPropertyAssertion(r a c)";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
 
     public void testIrreflexivity() throws Exception {
         String axioms = "IrreflexiveObjectProperty(r) "
                 + "ObjectPropertyAssertion(r a a)";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
 
@@ -315,12 +317,12 @@ public class ReasonerTest extends AbstractReasonerTest {
         String axioms = "DisjointObjectProperties(r s t) "
                 + "ObjectPropertyAssertion(r a b) "
                 + "ObjectPropertyAssertion(s a b)";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
         axioms = "DisjointObjectProperties(r s t) "
                 + "ObjectPropertyAssertion(r a b) "
                 + "ObjectPropertyAssertion(t a b)";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
 
@@ -331,14 +333,14 @@ public class ReasonerTest extends AbstractReasonerTest {
                 + "ClassAssertion(a C) "
                 + "SubClassOf(C ObjectMaxCardinality(1 f)) "
                 + "SubObjectPropertyOf(r f) " + "SubObjectPropertyOf(s f)";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
 
     public void testExistsSelf1() throws Exception {
         String axioms = "ClassAssertion(a ObjectAllValuesFrom(r "
                 + "owl:Nothing)) " + "ClassAssertion(a ObjectExistsSelf(r))";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
 
@@ -350,7 +352,7 @@ public class ReasonerTest extends AbstractReasonerTest {
                 + "ClassAssertion(a C1) "
                 + "ClassAssertion(a ObjectAllValuesFrom(r "
                 + "ObjectExistsSelf(r)))";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(true);
     }
 
@@ -359,21 +361,21 @@ public class ReasonerTest extends AbstractReasonerTest {
                 + "SubObjectPropertyOf(r as) "
                 + "ObjectPropertyAssertion(as b a) "
                 + "ObjectPropertyAssertion(r a b)";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
 
     public void testSatisfiability1() throws Exception {
         String axioms = "ClassAssertion(a C) "
                 + "ClassAssertion(a ObjectComplementOf(C))";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
 
     public void testSatisfiability2() throws Exception {
         String axioms = "SubClassOf(owl:Thing C) " + "SubClassOf(owl:Thing "
                 + "ObjectComplementOf(C))";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
 
@@ -384,7 +386,7 @@ public class ReasonerTest extends AbstractReasonerTest {
                 + "ObjectSomeValuesFrom(hasParent Person)) " + "Grandchild) "
                 + "ClassAssertion(peter Person) " + "ClassAssertion(peter "
                 + "ObjectComplementOf(Grandchild))";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
 
@@ -393,27 +395,27 @@ public class ReasonerTest extends AbstractReasonerTest {
                 + "ObjectPropertyAssertion(R a b) "
                 + "SubClassOf(owl:Thing ObjectSomeValuesFrom(R C)) "
                 + "ClassAssertion(b ObjectComplementOf(C))";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
 
     public void testChanges() throws Exception {
         String axioms = "SubClassOf(owl:Thing C)";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(true);
         axioms = "SubClassOf(owl:Thing C) "
                 + "SubClassOf(owl:Thing ObjectComplementOf(C))";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
         axioms = "SubClassOf(owl:Thing ObjectComplementOf(C))";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(true);
     }
 
     public void testSubsumption1() throws Exception {
         String axioms = "SubClassOf(Person Animal) "
                 + "SubClassOf(Student Person) " + "SubClassOf(Dog Animal)";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         assertSubsumedBy("Student", "Animal", true);
         assertSubsumedBy("Animal", "Student", false);
         assertSubsumedBy("Student", "Dog", false);
@@ -424,7 +426,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         String axioms = "SubObjectPropertyOf(R S) "
                 + "EquivalentClasses(A ObjectSomeValuesFrom(R C)) "
                 + "EquivalentClasses(B ObjectSomeValuesFrom(S C))";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         assertSubsumedBy("A", "B", true);
         assertSubsumedBy("B", "A", false);
     }
@@ -433,7 +435,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         String axioms = "EquivalentObjectProperties(R S) "
                 + "EquivalentClasses(A ObjectSomeValuesFrom(R C)) "
                 + "EquivalentClasses(B ObjectSomeValuesFrom(S C))";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         assertSubsumedBy("A", "B", true);
         assertSubsumedBy("B", "A", true);
     }
@@ -448,7 +450,7 @@ public class ReasonerTest extends AbstractReasonerTest {
                 + "ObjectIntersectionOf(c d)) ObjectSomeValuesFrom(r "
                 + "owl:Thing))) EquivalentClasses(complex3 "
                 + "ObjectIntersectionOf(e3 f))";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         assertSatisfiable("complex1", false);
         assertSatisfiable("complex2", false);
         assertSatisfiable("complex3", false);
@@ -462,7 +464,7 @@ public class ReasonerTest extends AbstractReasonerTest {
                 + "ObjectMaxCardinality(1 r)))" + "EquivalentClasses(complex2 "
                 + "ObjectIntersectionOf(ObjectMaxCardinality(1 r) "
                 + "ObjectSomeValuesFrom(r c) ObjectSomeValuesFrom(r d)))";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         assertSatisfiable("complex1", false);
         assertSatisfiable("complex2", false);
     }
@@ -479,7 +481,7 @@ public class ReasonerTest extends AbstractReasonerTest {
                 + "ObjectIntersectionOf(ObjectAllValuesFrom(t1 a) "
                 + "ObjectMinCardinality(3 t1) " + "ObjectMaxCardinality(1 r) "
                 + "ObjectMaxCardinality(1 s)))";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         assertSatisfiable("complex1", false);
     }
 
@@ -491,7 +493,7 @@ public class ReasonerTest extends AbstractReasonerTest {
                 + "ObjectAllValuesFrom(tt a)" + "ObjectMinCardinality(3 tt)"
                 + "ObjectMaxCardinality(1 tt c)"
                 + "ObjectMaxCardinality(1 tt d)" + "))";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         assertSatisfiable("complex1", false);
     }
 
@@ -544,7 +546,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         buffer.append("))");
         buffer.append("EquivalentClasses(complex4b ");
         buffer.append("ObjectMinCardinality(2 r))");
-        loadOntologyWithAxioms(buffer.toString());
+        loadReasonerWithAxioms(buffer.toString());
         assertSubsumedBy("complex1a", "complex1b", true);
         assertSubsumedBy("complex2a", "complex2b", true);
         assertSubsumedBy("complex3a", "complex3b", true);
@@ -557,12 +559,12 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(A ObjectSomeValuesFrom(r C))");
          buffer.append("SubClassOf(A ObjectSomeValuesFrom(r D))");
          buffer.append("SubClassOf(owl:Thing ObjectUnionOf(ObjectMinCardinality(2 r C) ObjectMinCardinality(2 r D) B))");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          assertSubsumedBy("A","B",true);
      }
      public void testHeinsohnTBox4a() throws Exception {
          // Tests role restrictions
-         loadOntologyWithAxioms("");
+         loadReasonerWithAxioms("");
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription D = df.getOWLClass(URI.create("file:/c/test.owl#D"));
          OWLDescription E = df.getOWLClass(URI.create("file:/c/test.owl#E"));
@@ -576,7 +578,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          // Tests role restrictions
          StringBuffer buffer = new StringBuffer();
          buffer.append("DisjointClasses(C D)");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription C = df.getOWLClass(URI.create("file:/c/test.owl#C"));
          OWLDescription D = df.getOWLClass(URI.create("file:/c/test.owl#D"));
@@ -589,7 +591,7 @@ public class ReasonerTest extends AbstractReasonerTest {
      
       public void testHeinsohnTBox7() throws Exception {
           // Tests inverse roles
-          loadOntologyWithAxioms("");
+          loadReasonerWithAxioms("");
           OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
           OWLDescription A = df.getOWLClass(URI.create("file:/c/test.owl#A"));
           OWLObjectProperty r = df.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
@@ -604,7 +606,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(p2 ObjectComplementOf(ObjectUnionOf(p3 p4 p5)))");
          buffer.append("SubClassOf(p3 ObjectComplementOf(ObjectUnionOf(p4 p5)))");
          buffer.append("SubClassOf(p4 ObjectComplementOf(p5))");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription p1 = df.getOWLClass(URI.create("file:/c/test.owl#p1"));
@@ -621,7 +623,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(p2 ObjectComplementOf(ObjectUnionOf(p3 p4 p5)))");
          buffer.append("SubClassOf(p3 ObjectComplementOf(ObjectUnionOf(p4 p5)))");
          buffer.append("SubClassOf(p4 ObjectComplementOf(p5))");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription p1 = df.getOWLClass(URI.create("file:/c/test.owl#p1"));
@@ -637,7 +639,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(p2 ObjectComplementOf(ObjectUnionOf(p3 p4 p5)))");
          buffer.append("SubClassOf(p3 ObjectComplementOf(ObjectUnionOf(p4 p5)))");
          buffer.append("SubClassOf(p4 ObjectComplementOf(p5))");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription p1 = df.getOWLClass(URI.create("file:/c/test.owl#p1"));
@@ -656,7 +658,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(p1 ObjectComplementOf(p2))");
          buffer.append("FunctionalObjectProperty(f1)");
          buffer.append("FunctionalObjectProperty(f2)");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
 
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription p1 = df.getOWLClass(URI.create("file:/c/test.owl#p1"));
@@ -678,7 +680,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(p2 ObjectComplementOf(ObjectUnionOf(p3 p4 p5)))");
          buffer.append("SubClassOf(p3 ObjectComplementOf(ObjectUnionOf(p4 p5)))");
          buffer.append("SubClassOf(p4 ObjectComplementOf(p5))");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription p = df.getOWLClass(URI.create("file:/c/test.owl#p"));
@@ -767,7 +769,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("InverseObjectProperties(p p-)");
          buffer.append("InverseObjectProperties(s s-)");
          buffer.append("EquivalentClasses(c ObjectAllValuesFrom(r- ObjectAllValuesFrom(p- ObjectAllValuesFrom(s- ObjectComplementOf(a)))))");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription a = df.getOWLClass(URI.create("file:/c/test.owl#a"));
@@ -796,7 +798,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("TransitiveObjectProperty(r)");
          buffer.append("SubObjectPropertyOf(f r)");
          buffer.append("FunctionalObjectProperty(f)");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
       
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription a = df.getOWLClass(URI.create("file:/c/test.owl#a"));
@@ -818,7 +820,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubObjectPropertyOf(f r)");
          buffer.append("FunctionalObjectProperty(f)");
          buffer.append("EquivalentClasses(d ObjectIntersectionOf(c ObjectSomeValuesFrom(f ObjectComplementOf(c))))");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription c = df.getOWLClass(URI.create("file:/c/test.owl#c"));
@@ -840,7 +842,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("InverseObjectProperties(f f-)");
          buffer.append("TransitiveObjectProperty(r)");
          buffer.append("FunctionalObjectProperty(f)");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
 
          OWLDataFactory df=OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription p1=df.getOWLClass(URI.create("file:/c/test.owl#p1"));
@@ -871,7 +873,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("InverseObjectProperties(f f-)");
          buffer.append("TransitiveObjectProperty(r)");
          buffer.append("FunctionalObjectProperty(f)");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription p1 = df.getOWLClass(URI.create("file:/c/test.owl#p1"));
@@ -906,7 +908,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("InverseObjectProperties(f f-)");
          buffer.append("TransitiveObjectProperty(r)");
          buffer.append("FunctionalObjectProperty(f)");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription p1 = df.getOWLClass(URI.create("file:/c/test.owl#p1"));
@@ -931,7 +933,7 @@ public class ReasonerTest extends AbstractReasonerTest {
      public void testIanT8a() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("InverseObjectProperties(r r-)");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription p = df.getOWLClass(URI.create("file:/c/test.owl#p"));
@@ -951,7 +953,7 @@ public class ReasonerTest extends AbstractReasonerTest {
      public void testIanT8() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("InverseObjectProperties(r r-)");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription p = df.getOWLClass(URI.create("file:/c/test.owl#p"));
@@ -977,7 +979,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(Infinite-Tree-Node ObjectIntersectionOf(node ObjectSomeValuesFrom(successor Infinite-Tree-Node)))");
          buffer.append("SubClassOf(Infinite-Tree-Root ObjectIntersectionOf(Infinite-Tree-Node root))");
          
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          assertSatisfiable("Infinite-Tree-Root",true);
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
@@ -1005,7 +1007,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("FunctionalObjectProperty(f1)");
          buffer.append("SubObjectPropertyOf(s f)");
          buffer.append("SubObjectPropertyOf(s f1)");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription p = df.getOWLClass(URI.create("file:/c/test.owl#p"));
@@ -1073,7 +1075,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          StringBuffer buffer = new StringBuffer();
          buffer.append("InverseObjectProperties(s s-)");
          buffer.append("SubObjectPropertyOf(s r)");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription p = df.getOWLClass(URI.create("file:/c/test.owl#p"));
@@ -1097,7 +1099,7 @@ public class ReasonerTest extends AbstractReasonerTest {
      public void testIanT12() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("InverseObjectProperties(r r-)");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription p = df.getOWLClass(URI.create("file:/c/test.owl#p"));
@@ -1136,7 +1138,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("EquivalentClasses(a3b ObjectUnionOf(ObjectSomeValuesFrom(r d) ObjectSomeValuesFrom(s d)))");
          buffer.append("EquivalentClasses(a3c ObjectUnionOf(ObjectSomeValuesFrom(r d) d))");
          buffer.append("EquivalentClasses(a3e ObjectSomeValuesFrom(r d))");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription a = df.getOWLClass(URI.create("file:/c/test.owl#a"));
@@ -1168,7 +1170,7 @@ public class ReasonerTest extends AbstractReasonerTest {
      public void testIanFact1() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("DisjointClasses(a b c)");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription a = df.getOWLClass(URI.create("file:/c/test.owl#a"));
@@ -1187,7 +1189,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          StringBuffer buffer = new StringBuffer();
          buffer.append("SubClassOf(c ObjectAllValuesFrom(r c))");
          buffer.append("SubClassOf(ObjectAllValuesFrom(r c) d)");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          
          assertSubsumedBy("c","d",true);
      }
@@ -1199,7 +1201,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("FunctionalObjectProperty(f3)");
          buffer.append("SubObjectPropertyOf(f3 f1)");
          buffer.append("SubObjectPropertyOf(f3 f2)");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription p1 = df.getOWLClass(URI.create("file:/c/test.owl#p1"));
@@ -1232,7 +1234,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         buffer.append("SubObjectPropertyOf(rx4a rxa)");
         buffer.append("SubObjectPropertyOf(rx4a rx2a)");
 
-        loadOntologyWithAxioms(buffer.toString());
+        loadReasonerWithAxioms(buffer.toString());
 
         OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
         OWLDescription c1 = df.getOWLClass(URI.create("file:/c/test.owl#c1"));
@@ -1259,7 +1261,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          StringBuffer buffer = new StringBuffer();
          buffer.append("EquivalentClasses(c ObjectIntersectionOf(a ObjectComplementOf(b)))");
          buffer.append("SubClassOf(a ObjectIntersectionOf(d ObjectComplementOf(c)))");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription a = df.getOWLClass(URI.create("file:/c/test.owl#a"));
@@ -1272,7 +1274,7 @@ public class ReasonerTest extends AbstractReasonerTest {
      }
      public void testIanBug3() throws Exception {
          // slow, but works!
-         loadOntologyWithAxioms("");
+         loadReasonerWithAxioms("");
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription a = df.getOWLClass(URI.create("file:/c/test.owl#a"));
@@ -1299,7 +1301,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("InverseObjectProperties(r r-)");
          buffer.append("SubObjectPropertyOf(r r-)");
          buffer.append("TransitiveObjectProperty(r)");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription c = df.getOWLClass(URI.create("file:/c/test.owl#c"));
@@ -1328,7 +1330,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("TransitiveObjectProperty(r1)");
          buffer.append("SubObjectPropertyOf(r2 r1)");
          buffer.append("TransitiveObjectProperty(r2)");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription p = df.getOWLClass(URI.create("file:/c/test.owl#p"));
@@ -1352,7 +1354,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("TransitiveObjectProperty(S2)");
          buffer.append("SubObjectPropertyOf(P S1)");
          buffer.append("SubObjectPropertyOf(P S2)");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription C = df.getOWLClass(URI.create("file:/c/test.owl#C"));
@@ -1380,7 +1382,7 @@ public class ReasonerTest extends AbstractReasonerTest {
      public void testIanBug7() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("SubClassOf(A ObjectComplementOf(B))");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription A = df.getOWLClass(URI.create("file:/c/test.owl#A"));
@@ -1402,7 +1404,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(X ObjectComplementOf(Y))");
          buffer.append("SubClassOf(A ObjectIntersectionOf(ObjectMinCardinality(1 r X) ObjectMaxCardinality(1 r X)))");
          buffer.append("SubClassOf(A ObjectIntersectionOf(ObjectMinCardinality(1 r Y) ObjectMaxCardinality(1 r Y)))");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          assertSatisfiable("A",true);
      }
      
@@ -1410,7 +1412,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          StringBuffer buffer = new StringBuffer();
          buffer.append("InverseObjectProperties(r r-)");
          buffer.append("SubClassOf(c ObjectSomeValuesFrom(r ObjectAllValuesFrom(r- ObjectComplementOf(d))))");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
 
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription c = df.getOWLClass(URI.create("file:/c/test.owl#c"));
@@ -1462,7 +1464,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          StringBuffer buffer = new StringBuffer();
          buffer.append("InverseObjectProperties(r r-)");
          buffer.append("SubClassOf(c ObjectSomeValuesFrom(r ObjectAllValuesFrom(r- d)))");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription c = df.getOWLClass(URI.create("file:/c/test.owl#c"));
@@ -1518,7 +1520,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubObjectPropertyOf(daughter child)");
          buffer.append("EquivalentClasses(A ObjectIntersectionOf(ObjectMinCardinality(2 son male) ObjectMinCardinality(2 daughter ObjectComplementOf(male))))");
          buffer.append("EquivalentClasses(B ObjectMinCardinality(4 child))");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          assertSubsumedBy("A","B",true);
      }
      
@@ -1526,7 +1528,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          StringBuffer buffer = new StringBuffer();
          buffer.append("SubClassOf(A ObjectIntersectionOf(ObjectSomeValuesFrom(R0 B) ObjectSomeValuesFrom(R1 B) ObjectSomeValuesFrom(R2 B) ObjectSomeValuesFrom(R3 B) ObjectSomeValuesFrom(R4 B) ObjectSomeValuesFrom(R5 B) ObjectSomeValuesFrom(R6 B) ObjectSomeValuesFrom(R7 B) ObjectSomeValuesFrom(R8 B) ObjectSomeValuesFrom(R9 B)))");
          buffer.append("SubClassOf(B ObjectIntersectionOf(ObjectSomeValuesFrom(R0 A) ObjectSomeValuesFrom(R1 A) ObjectSomeValuesFrom(R2 A) ObjectSomeValuesFrom(R3 A) ObjectSomeValuesFrom(R4 A) ObjectSomeValuesFrom(R5 A) ObjectSomeValuesFrom(R6 A) ObjectSomeValuesFrom(R7 A) ObjectSomeValuesFrom(R8 A) ObjectSomeValuesFrom(R9 A)))");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          assertSatisfiable("A",true);
      }
 
@@ -1535,7 +1537,7 @@ public class ReasonerTest extends AbstractReasonerTest {
           buffer.append("SubClassOf(A ObjectIntersectionOf(ObjectSomeValuesFrom(R0 B) ObjectSomeValuesFrom(R1 B) ObjectSomeValuesFrom(R2 B) ObjectSomeValuesFrom(R3 B) ObjectSomeValuesFrom(R4 B) ObjectSomeValuesFrom(R5 B) ObjectSomeValuesFrom(R6 B) ObjectSomeValuesFrom(R7 B) ObjectSomeValuesFrom(R8 B) ObjectSomeValuesFrom(R9 B)))");
           buffer.append("SubClassOf(B ObjectIntersectionOf(ObjectSomeValuesFrom(R0 C) ObjectSomeValuesFrom(R1 C) ObjectSomeValuesFrom(R2 C) ObjectSomeValuesFrom(R3 C) ObjectSomeValuesFrom(R4 C) ObjectSomeValuesFrom(R5 C) ObjectSomeValuesFrom(R6 C) ObjectSomeValuesFrom(R7 C) ObjectSomeValuesFrom(R8 C) ObjectSomeValuesFrom(R9 C)))");
           buffer.append("SubClassOf(C ObjectIntersectionOf(ObjectSomeValuesFrom(R0 A) ObjectSomeValuesFrom(R1 A) ObjectSomeValuesFrom(R2 A) ObjectSomeValuesFrom(R3 A) ObjectSomeValuesFrom(R4 A) ObjectSomeValuesFrom(R5 A) ObjectSomeValuesFrom(R6 A) ObjectSomeValuesFrom(R7 A) ObjectSomeValuesFrom(R8 A) ObjectSomeValuesFrom(R9 A)))");
-          loadOntologyWithAxioms(buffer.toString());
+          loadReasonerWithAxioms(buffer.toString());
           assertSatisfiable("A",true);
       }
      public void testIanRecursiveDefinitionTest3() throws Exception {
@@ -1544,7 +1546,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(B ObjectIntersectionOf(ObjectSomeValuesFrom(R0 C) ObjectSomeValuesFrom(R1 C) ObjectSomeValuesFrom(R2 C) ObjectSomeValuesFrom(R3 C) ObjectSomeValuesFrom(R4 C) ObjectSomeValuesFrom(R5 C) ObjectSomeValuesFrom(R6 C) ObjectSomeValuesFrom(R7 C) ObjectSomeValuesFrom(R8 C) ObjectSomeValuesFrom(R9 C)))");
          buffer.append("SubClassOf(C ObjectIntersectionOf(ObjectSomeValuesFrom(R0 D) ObjectSomeValuesFrom(R1 D) ObjectSomeValuesFrom(R2 D) ObjectSomeValuesFrom(R3 D) ObjectSomeValuesFrom(R4 D) ObjectSomeValuesFrom(R5 D) ObjectSomeValuesFrom(R6 D) ObjectSomeValuesFrom(R7 D) ObjectSomeValuesFrom(R8 D) ObjectSomeValuesFrom(R9 D)))");
          buffer.append("SubClassOf(D ObjectIntersectionOf(ObjectSomeValuesFrom(R0 A) ObjectSomeValuesFrom(R1 A) ObjectSomeValuesFrom(R2 A) ObjectSomeValuesFrom(R3 A) ObjectSomeValuesFrom(R4 A) ObjectSomeValuesFrom(R5 A) ObjectSomeValuesFrom(R6 A) ObjectSomeValuesFrom(R7 A) ObjectSomeValuesFrom(R8 A) ObjectSomeValuesFrom(R9 A)))");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          assertSatisfiable("A",true);
      }
      public void testIanBackjumping1() throws Exception {
@@ -1588,7 +1590,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(C4 ObjectSomeValuesFrom(R C2))");
          buffer.append("SubClassOf(C5 ObjectAllValuesFrom(R C3))");
          buffer.append("SubClassOf(test ObjectIntersectionOf(C1 C4 C5))");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          assertSatisfiable("test",false);
      }
      
@@ -1634,7 +1636,7 @@ public class ReasonerTest extends AbstractReasonerTest {
                         "ObjectUnionOf(A30 B30)" +
                         "ObjectUnionOf(A31 B31)" +
          		"))");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          assertSatisfiable("test",true);
      }
      public void testIanBackjumping3() throws Exception {
@@ -1681,7 +1683,7 @@ public class ReasonerTest extends AbstractReasonerTest {
                         "ObjectUnionOf(C4 C6)" +
                         "ObjectUnionOf(C5 C7)" +
                         "))"); 
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          assertSatisfiable("test",false);
      }
      
@@ -1691,7 +1693,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("ClassAssertion(b A) ");
          buffer.append("SubClassOf(A ObjectSomeValuesFrom(R A)) ");
          buffer.append("SubClassOf(A ObjectSomeValuesFrom(S ObjectOneOf(n))) ");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          assertABoxSatisfiable(true);
      }
      
@@ -1705,7 +1707,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(B ObjectSomeValuesFrom(S ObjectOneOf(n))) ");
          buffer.append("DisjointClasses(A B) ");
          buffer.append("ClassAssertion(n ObjectMaxCardinality(5 InverseObjectProperty(S))) ");
-         loadOntologyWithAxioms(buffer.toString());
+         loadReasonerWithAxioms(buffer.toString());
          assertABoxSatisfiable(true);
      }
      
@@ -1717,7 +1719,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(B ObjectSomeValuesFrom(R B)) ");
          buffer.append("SubClassOf(B ObjectSomeValuesFrom(S ObjectOneOf(n))) ");
          buffer.append("ClassAssertion(b ObjectSomeValuesFrom(R B)) ");
-         loadOntologyWithAxiomsOnly(buffer.toString());
+         loadOntologyWithAxioms(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription A = df.getOWLClass(URI.create("file:/c/test.owl#A"));
@@ -1765,7 +1767,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(B ObjectSomeValuesFrom(R B)) ");
          buffer.append("SubClassOf(B ObjectSomeValuesFrom(S ObjectOneOf(n))) ");
          buffer.append("ClassAssertion(b ObjectSomeValuesFrom(R B)) ");
-         loadOntologyWithAxiomsOnly(buffer.toString());
+         loadOntologyWithAxioms(buffer.toString());
      
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription A = df.getOWLClass(URI.create("file:/c/test.owl#A"));
@@ -1816,7 +1818,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(B ObjectSomeValuesFrom(R B)) ");
          buffer.append("SubClassOf(B ObjectSomeValuesFrom(S ObjectOneOf(n))) ");
          buffer.append("ClassAssertion(b ObjectSomeValuesFrom(R B)) ");
-         loadOntologyWithAxiomsOnly(buffer.toString());
+         loadOntologyWithAxioms(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription A = df.getOWLClass(URI.create("file:/c/test.owl#A"));
@@ -1849,7 +1851,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(B ObjectSomeValuesFrom(R B)) ");
          buffer.append("SubClassOf(B ObjectSomeValuesFrom(S ObjectOneOf(n))) ");
          buffer.append("ClassAssertion(b ObjectSomeValuesFrom(R B)) ");
-         loadOntologyWithAxiomsOnly(buffer.toString());
+         loadOntologyWithAxioms(buffer.toString());
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLDescription A = df.getOWLClass(URI.create("file:/c/test.owl#A"));
@@ -1878,7 +1880,7 @@ public class ReasonerTest extends AbstractReasonerTest {
      }
      
     public void testDependencyDisjunctionMergingBug() throws Exception {
-        loadOntologyFromResource("res/dependency-disjuntion-merging-bug.xml");
+        loadReasonerFromResource("res/dependency-disjuntion-merging-bug.xml");
         assertSubsumedBy(
                 "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#Anjou",
                 "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FullBodiedWine",
@@ -1888,7 +1890,7 @@ public class ReasonerTest extends AbstractReasonerTest {
     public void testNovelNominals() throws Exception {
         OWLDataFactory df = m_ontologyManager.getOWLDataFactory();
         String axioms = "ClassAssertion(a C)";
-        loadOntologyWithAxioms(axioms);
+        loadReasonerWithAxioms(axioms);
         OWLIndividual a = df.getOWLIndividual(URI.create("file:/c/test.owl#a"));
         OWLClass c = df.getOWLClass(URI.create("file:/c/test.owl#C"));
         OWLDescription desc = m_ontologyManager.getOWLDataFactory().getOWLObjectIntersectionOf(
