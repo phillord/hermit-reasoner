@@ -12,7 +12,7 @@ public class AllQuickTests extends TestCase {
         // Tests the internals of the datatype classes.
         suite.addTest(org.semanticweb.HermiT.datatypes.AllTests.suite());
         // Tests the normalization and clausification, when loading via the OWLAPI.
-        suite.addTest(org.semanticweb.HermiT.owlapi.AllTests.suite());
+        suite.addTest(org.semanticweb.HermiT.structural.AllTests.suite());
         // Tests Hermit as a blackbox, i.e., by only using the official interface.
         suite.addTest(org.semanticweb.HermiT.reasoner.AllQuickTests.suite());
         // Tests for the internals of the reasoner.
