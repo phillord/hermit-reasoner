@@ -1,0 +1,32 @@
+Prefix(:=<file:/c/test.owl#>)
+Prefix(a1:=<http://my.com/test1#>)
+Prefix(a2:=<http://my.com/test2#>)
+
+Ontology(<file:/c/test.owl#>
+
+  SubClassOf( :B owl:Thing ) Declaration( Class( :B ) )
+    SubClassOf( :A :B ) EquivalentClasses( :A :Class <file:/c/test.owl#s:local> ) Declaration( Class( :A ) ) Declaration( Class( :Class ) ) Declaration( Class( <file:/c/test.owl#s:local> ) )
+      SubClassOf( :D :A ) Declaration( Class( :D ) )
+        SubClassOf( :F :D ) Declaration( Class( :F ) )
+        SubClassOf( a2:J :D ) Declaration( Class( a2:J ) )
+    SubClassOf( :C :B ) EquivalentClasses( :C a1:otherC ) Declaration( Class( :C ) ) Declaration( Class( a1:otherC ) )
+      SubClassOf( :D :C )
+  SubClassOf( :E owl:Thing ) Declaration( Class( :E ) )
+    SubClassOf( :F :E )
+    SubClassOf( :H :E ) Declaration( Class( :H ) )
+
+  SubObjectPropertyOf( :op6 owl:topObjectProperty ) Declaration( ObjectProperty( :op6 ) )
+    SubObjectPropertyOf( :op2 :op6 ) Declaration( ObjectProperty( :op2 ) )
+      SubObjectPropertyOf( :op1 :op2 ) Declaration( ObjectProperty( :op1 ) )
+      SubObjectPropertyOf( :op4 :op2 ) Declaration( ObjectProperty( :op4 ) )
+    SubObjectPropertyOf( :op3i :op6 ) EquivalentObjectProperties( :op3i ObjectInverseOf( :op3 ) ) Declaration( ObjectProperty( :op3i ) )
+      SubObjectPropertyOf( :op1 :op3i )
+
+  SubDataPropertyOf( :dp1 owl:topDataProperty ) Declaration( DataProperty( :dp1 ) )
+    SubDataPropertyOf( :dp2 :dp1 ) Declaration( DataProperty( :dp2 ) )
+      SubDataPropertyOf( :dp4 :dp2 ) Declaration( DataProperty( :dp4 ) )
+      SubDataPropertyOf( :dp6 :dp2 ) Declaration( DataProperty( :dp6 ) )
+    SubDataPropertyOf( :dp3 :dp1 ) EquivalentDataProperties( :dp3 :dp5 ) Declaration( DataProperty( :dp3 ) ) Declaration( DataProperty( :dp5 ) )
+      SubDataPropertyOf( :dp4 :dp3 )
+
+)

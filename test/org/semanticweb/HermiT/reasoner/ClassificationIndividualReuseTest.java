@@ -11,8 +11,8 @@ public class ClassificationIndividualReuseTest extends ClassificationTest {
         // omitted for now until we get this under control
     }
     public void testDolceAllNoDatatype() throws Exception {
-        loadOntologyFromResource("../res/dolce_all_no_datatype.xml");
-        assertSubsumptionHierarchy("../res/dolce_all_no_datatype.xml.txt");
+        loadOntologyFromResource("res/dolce_all_no_datatype.xml");
+        assertSubsumptionHierarchy("res/dolce_all_no_datatype.xml.txt");
     }
     protected Configuration getConfiguration() {
         Configuration configuration=new Configuration();

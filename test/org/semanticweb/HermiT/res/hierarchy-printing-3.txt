@@ -1,8 +1,0 @@
-Namespace(=<file:/c/test.owl#>)
-Namespace(owl=<http://www.w3.org/2002/07/owl#>)
-
-Ontology(<file:/c/test.owl#>
-
-EquivalentClasses( owl:Nothing owl:Thing A B ) Declaration( Class( A ) ) Declaration( Class( B ) )
-
-)

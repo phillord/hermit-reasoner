@@ -64,7 +64,8 @@ public class HierarchyPrinterFSS {
                 m_prefixes.declarePrefix(prefix,prefixURI);
             }
         for (Map.Entry<String,String> entry : m_prefixes.getPrefixIRIsByPrefixName().entrySet())
-            m_out.println("Prefix("+entry.getKey()+":=<"+entry.getValue()+">)");
+            if (!"owl".equals(entry.getKey()))
+                m_out.println("Prefix("+entry.getKey()+":=<"+entry.getValue()+">)");
         m_out.println();
         m_out.println("Ontology(<"+m_prefixes.getPrefixIRIsByPrefixName().get("")+">");
         m_out.println();
@@ -92,7 +93,8 @@ public class HierarchyPrinterFSS {
         public AtomicConceptPrinter(HierarchyNode<AtomicConcept> bottomNode) {
             m_bottomNode=bottomNode;
         }
-        public void redirect(HierarchyNode<AtomicConcept>[] nodes) {
+        public boolean redirect(HierarchyNode<AtomicConcept>[] nodes) {
+            return true;
         }
         public void visit(int level,HierarchyNode<AtomicConcept> node,HierarchyNode<AtomicConcept> parentNode,boolean firstVisit) {
             if (!node.equals(m_bottomNode))
@@ -161,11 +163,15 @@ public class HierarchyPrinterFSS {
             m_hierarchy=hierarchy;
             m_objectProperties=objectProperties;
         }
-        public void redirect(HierarchyNode<Role>[] nodes) {
+        public boolean redirect(HierarchyNode<Role>[] nodes) {
             if (isInverseRoleNode(nodes[0])) {
+                HierarchyNode<Role> inverseParent=getInverseNode(nodes[1]);
+                if (inverseParent.equals(nodes[1]))
+                    return false;
                 nodes[0]=getInverseNode(nodes[0]);
-                nodes[1]=getInverseNode(nodes[1]);
+                nodes[1]=inverseParent;
             }
+            return true;
         }
         public void visit(int level,HierarchyNode<Role> node,HierarchyNode<Role> parentNode,boolean firstVisit) {
             if (!node.equals(m_hierarchy.getBottomNode()))
@@ -221,7 +227,7 @@ public class HierarchyPrinterFSS {
                                 m_out.print("ObjectProperty( ");
                             else
                                 m_out.print("DataProperty( ");
-                            m_out.print(role);
+                            print(role);
                             m_out.print(" ) )");
                             afterWS=false;
                         }
@@ -237,7 +243,7 @@ public class HierarchyPrinterFSS {
         }
         protected void print(Role role) {
             if (role instanceof AtomicRole)
-                print((AtomicRole)role);
+                m_out.print(m_prefixes.abbreviateURI(((AtomicRole)role).getURI()));
             else {
                 m_out.print("ObjectInverseOf( ");
                 print(((InverseRole)role).getInverseOf());
@@ -259,10 +265,10 @@ public class HierarchyPrinterFSS {
             int comparison=getRoleClass(role1)-getRoleClass(role2);
             if (comparison!=0)
                 return comparison;
-            comparison=getInnerAtomicRole(role1).getURI().compareTo(getInnerAtomicRole(role2).getURI());
+            comparison=getRoleDirection(role1)-getRoleDirection(role2);
             if (comparison!=0)
                 return comparison;
-            return getRoleDirection(role1)-getRoleDirection(role2);
+            return getInnerAtomicRole(role1).getURI().compareTo(getInnerAtomicRole(role2).getURI());
         }
         protected int getRoleClass(Role role) {
             if (AtomicRole.BOTTOM_OBJECT_ROLE.equals(role))

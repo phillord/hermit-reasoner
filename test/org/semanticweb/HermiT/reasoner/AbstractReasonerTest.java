@@ -170,7 +170,7 @@ public abstract class AbstractReasonerTest extends AbstractOWLOntologyTest {
     protected String getSubsumptionHierarchyAsText() {
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter output=new PrintWriter(buffer);
-        m_reasoner.printHierarchies(output,true,false,false);
+        m_reasoner.printHierarchies(output,true,true,true);
         output.flush();
         return buffer.toString();
     }

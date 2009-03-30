@@ -84,21 +84,22 @@ public class Hierarchy<E> {
     }
     @SuppressWarnings("unchecked")
     public void traverseDepthFirst(HierarchyNodeVisitor<E> visitor) {
-        HierarchyNode<E>[] buffer=new HierarchyNode[2];
+        HierarchyNode<E>[] redirectBuffer=new HierarchyNode[2];
         Set<HierarchyNode<E>> visited=new HashSet<HierarchyNode<E>>();
-        traverseDepthFirst(visitor,0,m_topNode,null,visited,buffer);
+        traverseDepthFirst(visitor,0,m_topNode,null,visited,redirectBuffer);
     }
-    protected void traverseDepthFirst(HierarchyNodeVisitor<E> visitor,int level,HierarchyNode<E> node,HierarchyNode<E> parentNode,Set<HierarchyNode<E>> visited,HierarchyNode<E>[] buffer) {
-        buffer[0]=node;
-        buffer[1]=parentNode;
-        visitor.redirect(buffer);
-        node=buffer[0];
-        parentNode=buffer[0];
-        boolean firstVisit=visited.add(node);
-        visitor.visit(level,node,parentNode,firstVisit);
-        if (firstVisit)
-            for (HierarchyNode<E> childNode : node.m_childNodes)
-                traverseDepthFirst(visitor,level+1,childNode,node,visited,buffer);
+    protected void traverseDepthFirst(HierarchyNodeVisitor<E> visitor,int level,HierarchyNode<E> node,HierarchyNode<E> parentNode,Set<HierarchyNode<E>> visited,HierarchyNode<E>[] redirectBuffer) {
+        redirectBuffer[0]=node;
+        redirectBuffer[1]=parentNode;
+        if (visitor.redirect(redirectBuffer)) {
+            node=redirectBuffer[0];
+            parentNode=redirectBuffer[1];
+            boolean firstVisit=visited.add(node);
+            visitor.visit(level,node,parentNode,firstVisit);
+            if (firstVisit)
+                for (HierarchyNode<E> childNode : node.m_childNodes)
+                    traverseDepthFirst(visitor,level+1,childNode,node,visited,redirectBuffer);
+        }
     }
     public static <T> Hierarchy<T> emptyHierarchy(Collection<T> elements,T topElement,T bottomElement) {
         HierarchyNode<T> topBottomNode=new HierarchyNode<T>(topElement);
@@ -109,7 +110,7 @@ public class Hierarchy<E> {
     }
 
     protected static interface HierarchyNodeVisitor<E> {
-        void redirect(HierarchyNode<E>[] nodes);
+        boolean redirect(HierarchyNode<E>[] nodes);
         void visit(int level,HierarchyNode<E> node,HierarchyNode<E> parentNode,boolean firstVisit);
     }
 
