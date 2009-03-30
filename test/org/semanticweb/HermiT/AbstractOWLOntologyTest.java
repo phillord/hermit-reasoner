@@ -51,7 +51,7 @@ public abstract class AbstractOWLOntologyTest extends AbstractHermiTTest {
     }
     protected void setUp() throws Exception {
         m_ontologyManager=OWLManager.createOWLOntologyManager();
-        m_ontology=m_ontologyManager.createOntology(URI.create("file:/c:/test/ontology.owl"));
+        m_ontology=m_ontologyManager.createOntology(URI.create(ONTOLOGY_URI));
     }
 
     protected void tearDown() {
@@ -68,8 +68,7 @@ public abstract class AbstractOWLOntologyTest extends AbstractHermiTTest {
      */
     protected void loadOWLOntology(String physicalURI) throws Exception {
         m_ontologyManager=OWLManager.createOWLOntologyManager();
-        URI uri=URI.create(physicalURI);
-        m_ontology=m_ontologyManager.loadOntologyFromPhysicalURI(uri);
+        m_ontology=m_ontologyManager.loadOntologyFromPhysicalURI(URI.create(physicalURI));
     }
 
     /**
@@ -133,25 +132,32 @@ public abstract class AbstractOWLOntologyTest extends AbstractHermiTTest {
     /**
      * converts the axioms to a string via the toString method and compares it with the given string
      */
-    protected void assertEquals(Set<OWLAxiom> axioms,String controlResourceName,String controlResourceNameVariant) throws Exception {
+    protected void assertEquals(Set<OWLAxiom> axioms,String controlResourceName1,String controlResourceName2) throws Exception {
         String axiomsString=axioms.toString().trim();
-        String controlString=getResourceText(controlResourceName).trim();
-        boolean isOK=axiomsString.equals(controlString);
-        String controlStringVariant="";
-        if (!isOK&&controlResourceNameVariant!=null) {
-            controlStringVariant=getResourceText(controlResourceNameVariant).trim();
-            isOK=axiomsString.equals(controlStringVariant);
+        String controlString1=null;
+        String controlString2=null;
+        boolean isOK=false;
+        if (!isOK && controlResourceName1!=null) {
+            controlString1=getResourceText(controlResourceName1).trim();
+            isOK=axiomsString.equals(controlString1);
+        }
+        axiomsString.equals(controlString1);
+        if (!isOK && controlResourceName2!=null) {
+            controlString2=getResourceText(controlResourceName2).trim();
+            isOK=axiomsString.equals(controlString2);
         }
         if (!isOK) {
             System.out.println("Test "+this.getName()+" failed!");
-            System.out.println("Control string:");
-            System.out.println("------------------------------------------");
-            System.out.println(controlString);
-            System.out.println("------------------------------------------");
-            if (controlResourceNameVariant!=null) {
-                System.out.println("Control string (allowed variant):");
+            if (controlString1!=null) {
+                System.out.println("Control string: (variant 1)");
                 System.out.println("------------------------------------------");
-                System.out.println(controlStringVariant);
+                System.out.println(controlString1);
+                System.out.println("------------------------------------------");
+            }
+            if (controlString2!=null) {
+                System.out.println("Control string (variant 2):");
+                System.out.println("------------------------------------------");
+                System.out.println(controlString2);
                 System.out.println("------------------------------------------");
             }
             System.out.println("Actual string:");

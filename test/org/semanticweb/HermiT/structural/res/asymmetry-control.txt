@@ -1,0 +1,4 @@
+ :- :as(X,Y), :as(Y,X)
+:as(X,Y) :- :r(X,Y)
+:as(:b,:a)
+:r(:a,:b)

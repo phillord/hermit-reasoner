@@ -11,7 +11,7 @@ import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLDescription;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
 
-public class NormalizationTest extends AbstractOWLAPITest {
+public class NormalizationTest extends AbstractStructuralTest {
 
     public NormalizationTest(String name) {
         super(name);
@@ -186,11 +186,6 @@ public class NormalizationTest extends AbstractOWLAPITest {
 //      assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
 //  }
 //  
-//  public void testFirst() throws Exception {
-//      assertNormalization("../res/normalization-1-input.xml",
-//              "../res/normalization-1-OWL-control.xml", 
-//              "../res/normalization-1-OWL-control-variant.xml");
-//  }
 
     public void testKeys() throws Exception {
         String axioms="SubClassOf(A B)";

@@ -1,7 +1,0 @@
-nom:i2(i2)
-X == Y v X == Y1 :- q:1(X), nom:i1(Y), nom:i2(Y1)
-atLeast(1 s not(q:0))(X) :- d(X)
-atLeast(1 r q:1)(X) :- c(X)
-q:0(i1)
-q:0(i2)
-nom:i1(i1)

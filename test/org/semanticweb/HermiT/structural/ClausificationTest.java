@@ -16,7 +16,7 @@ import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.structural.OWLClausification;
 import org.semanticweb.HermiT.structural.OWLHasKeyDummy;
 
-public class ClausificationTest extends AbstractOWLAPITest {
+public class ClausificationTest extends AbstractStructuralTest {
     static {
         System.setProperty("entityExpansionLimit",String.valueOf(Integer.MAX_VALUE));
     }
@@ -25,36 +25,36 @@ public class ClausificationTest extends AbstractOWLAPITest {
         super(name);
     }
 
-    public void testBasicClausification() throws Exception {
-        assertClausification("../res/clausification-1-input.xml","../res/clausification-1-OWL-control.txt",null);
+    public void testBasic() throws Exception {
+        assertClausification("res/basic-input.xml","res/basic-control.txt",null);
     }
 
-    public void testNominalClausification1() throws Exception {
-        assertClausification("../res/clausification-2-input.xml","../res/clausification-2-OWL-control.txt","../res/clausification-2-OWL-control-variant.txt");
+    public void testNominals1() throws Exception {
+        assertClausification("res/nominals-1-input.xml","res/nominals-1-control-1.txt","res/nominals-1-control-2.txt");
     }
 
-    public void testNominalClausification2() throws Exception {
-        assertClausification("../res/clausification-3-input.xml","../res/clausification-3-OWL-control.txt","../res/clausification-3-OWL-control-variant.txt");
+   public void testNominals2() throws Exception {
+        assertClausification("res/nominals-2-input.xml","res/nominals-2-control-1.txt","res/nominals-2-control-2.txt");
     }
 
-    public void testNominalClausification3() throws Exception {
-        assertClausification("../res/clausification-4-input.xml","../res/clausification-4-OWL-control.txt",null);
+    public void testNominals3() throws Exception {
+        assertClausification("res/nominals-3-input.xml","res/nominals-3-control.txt",null);
     }
 
-    public void testNominalClausification4() throws Exception {
-        assertClausification("../res/clausification-5-input.xml","../res/clausification-5-OWL-control.txt",null);
+    public void testNominals4() throws Exception {
+        assertClausification("res/nominals-4-input.xml","res/nominals-4-control.txt",null);
     }
 
-    public void testAsymmetryClausification() throws Exception {
-        assertClausification("../res/asymmetric-1-input.xml","../res/asymmetric-1-OWL-control.txt",null);
+    public void testAsymmetry() throws Exception {
+        assertClausification("res/asymmetry-input.xml","res/asymmetry-control.txt",null);
     }
 
-    public void testExistsSelfClausification() throws Exception {
-        assertClausification("../res/self-1-input.owl","../res/self-1-OWL-control.txt","../res/self-1-OWL-control-variant.txt");
+    public void testExistsSelf1() throws Exception {
+        assertClausification("res/exists-self-1-input.owl","res/exists-self-1-control-1.txt","res/exists-self-1-control-2.txt");
     }
 
-    public void testExistsSelf2Clausification() throws Exception {
-        assertClausification("../res/self-2-input.owl","../res/self-2-OWL-control.txt",null);
+    public void testExistsSelf2() throws Exception {
+        assertClausification("res/exists-self-2-input.owl","res/exists-self-2-control.txt",null);
     }
 
     public void testHasKeys() throws Exception {

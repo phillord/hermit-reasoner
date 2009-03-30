@@ -1,1 +1,0 @@
-hasSugar(X,Y) :- Chianti(X), nom:Dry(Y)

@@ -1,0 +1,4 @@
+:r(X,X) :- def:1(X)
+def:0(X) :- :r(X,Y)
+not def:0(:a)
+def:1(:a)

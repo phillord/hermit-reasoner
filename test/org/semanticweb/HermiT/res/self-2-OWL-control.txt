@@ -1,8 +1,0 @@
-atLeast(1 r B2)(X) :- C2(X)
-atLeast(1 r C1)(X) :- B2(X)
-C1(a)
-r(X,X) :- def:1(X)
-def:1(Y) :- def:0(X), r(X,Y)
-def:0(a)
-atLeast(1 r B1)(X) :- C1(X)
-atLeast(1 r C2)(X) :- B1(X)
