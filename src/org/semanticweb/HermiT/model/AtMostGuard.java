@@ -1,7 +1,7 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.model;
 
-import org.semanticweb.HermiT.Namespaces;
+import org.semanticweb.HermiT.Prefixes;
 
 /**
  * Represents a guard for number restrictions on roles.
@@ -31,8 +31,8 @@ public class AtMostGuard extends AtomicConcept {
     protected Object readResolve() {
         return s_interningManager.intern(this);
     }
-    public String toString(Namespaces namespaces) {
-        return "(atMost "+m_cardinality+" "+m_onRole.toString(namespaces)+" "+m_toAtomicConcept.toString(namespaces)+")";
+    public String toString(Prefixes prefixes) {
+        return "(atMost "+m_cardinality+" "+m_onRole.toString(prefixes)+" "+m_toAtomicConcept.toString(prefixes)+")";
     }
 
     protected static InterningManager<AtMostGuard> s_interningManager=new InterningManager<AtMostGuard>() {

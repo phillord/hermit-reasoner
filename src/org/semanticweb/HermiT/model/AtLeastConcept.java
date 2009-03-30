@@ -30,8 +30,8 @@ public class AtLeastConcept extends ExistentialConcept implements DLPredicate {
     public int getArity() {
         return 1;
     }
-    public String toString(Namespaces namespaces) {
-        return "atLeast("+m_number+' '+m_onRole.toString(namespaces)+' '+m_toConcept.toString(namespaces)+')';
+    public String toString(Prefixes prefixes) {
+        return "atLeast("+m_number+' '+m_onRole.toString(prefixes)+' '+m_toConcept.toString(prefixes)+')';
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);

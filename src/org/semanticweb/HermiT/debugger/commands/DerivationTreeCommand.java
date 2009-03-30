@@ -56,7 +56,7 @@ public class DerivationTreeCommand extends AbstractCommand implements ICommand {
         }
         DerivationHistory.Atom atom=debugger.getDerivationHistory().getAtom(tuple);
         if (atom!=null) {
-            new DerivationViewer(debugger.getNamespaces(),atom);
+            new DerivationViewer(debugger.getPrefixes(),atom);
             selectConsoleWindow();
         }
         else

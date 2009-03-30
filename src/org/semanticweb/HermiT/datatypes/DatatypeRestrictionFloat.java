@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.semanticweb.HermiT.Namespaces;
+import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.datatypes.DataConstant.Impl;
 
 public class DatatypeRestrictionFloat 
@@ -523,9 +523,9 @@ public class DatatypeRestrictionFloat
     }
     
     /* (non-Javadoc)
-     * @see org.semanticweb.HermiT.model.dataranges.DatatypeRestriction#printExtraInfo(org.semanticweb.HermiT.Namespaces)
+     * @see org.semanticweb.HermiT.model.dataranges.DatatypeRestriction#printExtraInfo(org.semanticweb.HermiT.Prefixes)
      */
-    protected String printExtraInfo(Namespaces namespaces) {
+    protected String printExtraInfo(Prefixes prefixes) {
         boolean firstRun = true;
         StringBuffer buffer = new StringBuffer();
         for (FloatInterval i : intervals) {

@@ -57,11 +57,11 @@ public class DescriptionGraph implements DLPredicate,Serializable {
             resultingDLClauses.add(DLClause.create(consequent,antecedent));
         }
     }
-    public String toString(Namespaces ns) {
+    public String toString(Prefixes ns) {
         return ns.abbreviateURI(m_name);
     }
     public String toString() {
-        return toString(Namespaces.EMPTY);
+        return toString(Prefixes.EMPTY);
     }
     public String getTextRepresentation() {
         StringBuffer buffer=new StringBuffer();

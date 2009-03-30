@@ -15,7 +15,7 @@ public class ShowDLClausesCommand extends AbstractCommand implements ICommand {
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter writer=new PrintWriter(buffer);
         for (DLClause dlClause : debugger.getTableau().getDLOntology().getDLClauses())
-            writer.println(dlClause.toString(debugger.getNamespaces()));
+            writer.println(dlClause.toString(debugger.getPrefixes()));
         writer.flush();
         super.showTextInWindow(buffer.toString(),"DL-clauses");
         super.selectConsoleWindow();

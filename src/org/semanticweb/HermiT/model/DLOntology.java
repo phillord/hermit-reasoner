@@ -19,7 +19,7 @@ import java.util.HashSet;
 import java.util.TreeSet;
 import java.util.Map;
 
-import org.semanticweb.HermiT.Namespaces;
+import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.datatypes.DataRange;
 
 /**
@@ -67,7 +67,7 @@ public class DLOntology implements Serializable {
             m_allAtomicConcepts=atomicConcepts;
         int numberOfExternalConcepts=0;
         for (AtomicConcept c : m_allAtomicConcepts)
-            if (!Namespaces.isInternalURI(c.getURI()))
+            if (!Prefixes.isInternalURI(c.getURI()))
                 numberOfExternalConcepts++;
         m_numberOfExternalConcepts=numberOfExternalConcepts;
         if (transitiveObjectRoles==null)
@@ -419,14 +419,14 @@ public class DLOntology implements Serializable {
         return true;
     }
 
-    public String toString(Namespaces ns) {
+    public String toString(Prefixes prefixes) {
         StringBuffer stringBuffer=new StringBuffer();
-        stringBuffer.append("Namespaces: [");
+        stringBuffer.append("Prefixes: [");
         stringBuffer.append(CRLF);
-        for (Map.Entry<String,String> entry : ns.getNamespacesByPrefix().entrySet()) {
+        for (Map.Entry<String,String> entry : prefixes.getPrefixIRIsByPrefixName().entrySet()) {
             stringBuffer.append("  ");
             stringBuffer.append(entry.getKey());
-            stringBuffer.append(" = <");
+            stringBuffer.append(": = <");
             stringBuffer.append(entry.getValue());
             stringBuffer.append('>');
             stringBuffer.append(CRLF);
@@ -438,7 +438,7 @@ public class DLOntology implements Serializable {
         for (DLClause dlClause : m_dlClauses)
             if (dlClause.getHeadLength()<=1) {
                 stringBuffer.append("  ");
-                stringBuffer.append(dlClause.toString(ns));
+                stringBuffer.append(dlClause.toString(prefixes));
                 stringBuffer.append(CRLF);
             }
         stringBuffer.append("]");
@@ -448,7 +448,7 @@ public class DLOntology implements Serializable {
         for (DLClause dlClause : m_dlClauses)
             if (dlClause.getHeadLength()>1) {
                 stringBuffer.append("  ");
-                stringBuffer.append(dlClause.toString(ns));
+                stringBuffer.append(dlClause.toString(prefixes));
                 stringBuffer.append(CRLF);
             }
         stringBuffer.append("]");
@@ -457,12 +457,12 @@ public class DLOntology implements Serializable {
         stringBuffer.append(CRLF);
         for (Atom atom : m_positiveFacts) {
             stringBuffer.append("  ");
-            stringBuffer.append(atom.toString(ns));
+            stringBuffer.append(atom.toString(prefixes));
             stringBuffer.append(CRLF);
         }
         for (Atom atom : m_negativeFacts) {
             stringBuffer.append("  !");
-            stringBuffer.append(atom.toString(ns));
+            stringBuffer.append(atom.toString(prefixes));
             stringBuffer.append(CRLF);
         }
         stringBuffer.append("]");
@@ -470,7 +470,7 @@ public class DLOntology implements Serializable {
     }
 
     public String toString() {
-        return toString(Namespaces.EMPTY);
+        return toString(Prefixes.EMPTY);
     }
 
     public void save(File file) throws IOException {

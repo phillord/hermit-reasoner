@@ -238,11 +238,11 @@ public class SubtreeViewer extends JFrame {
             }
             else if (existentialConcept instanceof AtLeastConcept) {
                 AtLeastConcept atLeastConcept=(AtLeastConcept)existentialConcept;
-                buffer.append(atLeastConcept.getOnRole().toString(m_debugger.getNamespaces()));
+                buffer.append(atLeastConcept.getOnRole().toString(m_debugger.getPrefixes()));
                 buffer.append("  -->  ");
                 buffer.append(node.getNodeID());
                 buffer.append(":[");
-                buffer.append(atLeastConcept.getToConcept().toString(m_debugger.getNamespaces()));
+                buffer.append(atLeastConcept.getToConcept().toString(m_debugger.getPrefixes()));
                 buffer.append("]");
             }
             else {

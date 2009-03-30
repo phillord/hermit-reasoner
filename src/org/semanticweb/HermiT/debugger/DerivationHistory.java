@@ -150,7 +150,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
     }
     
     protected static interface Fact extends Serializable {
-        String toString(Namespaces namespaces);
+        String toString(Prefixes prefixes);
         Derivation getDerivation();
     }
     
@@ -176,7 +176,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         public Derivation getDerivation() {
             return m_derivedBy;
         }
-        public String toString(Namespaces namespaces) {
+        public String toString(Prefixes prefixes) {
             if (m_tuple.length==0)
                 return "[ ]";
             else {
@@ -185,15 +185,15 @@ public class DerivationHistory extends TableauMonitorAdapter {
                 if (org.semanticweb.HermiT.model.Atom.s_infixPredicates.contains(dlPredicate)) {
                     buffer.append(getArgument(0).getNodeID());
                     buffer.append(' ');
-                    buffer.append(((DLPredicate)dlPredicate).toString(namespaces));
+                    buffer.append(((DLPredicate)dlPredicate).toString(prefixes));
                     buffer.append(' ');
                     buffer.append(getArgument(1).getNodeID());
                 }
                 else {
                     if (dlPredicate instanceof DLPredicate)
-                        buffer.append(((DLPredicate)dlPredicate).toString(namespaces));
+                        buffer.append(((DLPredicate)dlPredicate).toString(prefixes));
                     else if (dlPredicate instanceof Concept)
-                        buffer.append(((Concept)dlPredicate).toString(namespaces));
+                        buffer.append(((Concept)dlPredicate).toString(prefixes));
                     else
                         throw new IllegalStateException("Internal error: invalid DL-predicate.");
                     buffer.append('(');
@@ -208,7 +208,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
             }
         }
         public String toString() {
-            return toString(Namespaces.EMPTY);
+            return toString(Prefixes.EMPTY);
         }
     }
     
@@ -242,16 +242,16 @@ public class DerivationHistory extends TableauMonitorAdapter {
         public Derivation getDerivation() {
             return m_derivedBy;
         }
-        public String toString(Namespaces namespaces) {
+        public String toString(Prefixes prefixes) {
             StringBuffer buffer=new StringBuffer();
             for (int disjunctIndex=0;disjunctIndex<m_atoms.length;disjunctIndex++) {
                 if (disjunctIndex!=0)
                     buffer.append(" v ");
                 Object[] tuple=m_atoms[disjunctIndex];
                 if (tuple[0] instanceof DLPredicate)
-                    buffer.append(((DLPredicate)tuple[0]).toString(namespaces));
+                    buffer.append(((DLPredicate)tuple[0]).toString(prefixes));
                 else if (tuple[0] instanceof Concept)
-                    buffer.append(((Concept)tuple[0]).toString(namespaces));
+                    buffer.append(((Concept)tuple[0]).toString(prefixes));
                 else
                     throw new IllegalStateException("Internal error: invalid DL-predicate.");
                 buffer.append('(');
@@ -265,15 +265,15 @@ public class DerivationHistory extends TableauMonitorAdapter {
             return buffer.toString();
         }
         public String toString() {
-            return toString(Namespaces.EMPTY);
+            return toString(Prefixes.EMPTY);
         }
     }
     
     @SuppressWarnings("serial")
     public abstract static class Derivation implements Serializable {
-        public abstract String toString(Namespaces namespaces);
+        public abstract String toString(Prefixes prefixes);
         public String toString() {
-            return toString(Namespaces.EMPTY);
+            return toString(Prefixes.EMPTY);
         }
         public abstract int getNumberOfPremises();
         public abstract DerivationPremise getPremise(int premiseIndex);
@@ -314,8 +314,8 @@ public class DerivationHistory extends TableauMonitorAdapter {
         public Atom getPremiseAtom(int premiseIndex) {
             return (Atom)m_premises[premiseIndex].getFact();
         }
-        public String toString(Namespaces namespaces) {
-            return "  <--  "+m_dlClause.toString(namespaces);
+        public String toString(Prefixes prefixes) {
+            return "  <--  "+m_dlClause.toString(prefixes);
         }
     }
 
@@ -346,7 +346,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
                 throw new IndexOutOfBoundsException();
             }
         }
-        public String toString(Namespaces namespaces) {
+        public String toString(Prefixes prefixes) {
             return "  |  "+String.valueOf(m_disjunctIndex);
         }
     }
@@ -380,7 +380,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
                 throw new IndexOutOfBoundsException();
             }
         }
-        public String toString(Namespaces namespaces) {
+        public String toString(Prefixes prefixes) {
             return "   <--|   ";
         }
     }
@@ -416,7 +416,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
                 throw new IndexOutOfBoundsException();
             }
         }
-        public String toString(Namespaces namespaces) {
+        public String toString(Prefixes prefixes) {
             return "   <--G--| @ "+m_position;
         }
     }
@@ -443,7 +443,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
                 throw new IndexOutOfBoundsException();
             }
         }
-        public String toString(Namespaces namespaces) {
+        public String toString(Prefixes prefixes) {
             return " <<  EXISTS";
         }
     }
@@ -464,7 +464,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         public Atom getPremiseAtom(int premiseIndex) {
             return (Atom)m_causes[premiseIndex].getFact();
         }
-        public String toString(Namespaces namespaces) {
+        public String toString(Prefixes prefixes) {
             return "   << Clash!";
         }
     }
@@ -480,7 +480,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         public DerivationPremise getPremise(int premiseIndex) {
             throw new IndexOutOfBoundsException();
         }
-        public String toString(Namespaces namespaces) {
+        public String toString(Prefixes prefixes) {
             return ".";
         }
     }

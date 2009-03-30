@@ -26,8 +26,8 @@ public class AtomicRole extends Role implements DLPredicate {
         else
             return InverseRole.create(this);
     }
-    public String toString(Namespaces namespaces) {
-        return namespaces.abbreviateURI(m_uri);
+    public String toString(Prefixes prefixes) {
+        return prefixes.abbreviateURI(m_uri);
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);

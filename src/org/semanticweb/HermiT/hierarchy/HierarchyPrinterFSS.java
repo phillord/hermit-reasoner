@@ -6,81 +6,67 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashSet;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.regex.Pattern;
 
-import org.semanticweb.HermiT.Namespaces;
+import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.InverseRole;
 
 public class HierarchyPrinterFSS {
-    protected static final Pattern s_localNameChecker=Pattern.compile("([a-zA-Z0-9]|-|_)+");
-    protected static final Set<String> s_reservedWords=new HashSet<String>();
-    
     protected final PrintWriter m_out;
-    protected final String m_defaultNamespace;
-    protected final Set<String> m_namespaceURIs;
-    protected Namespaces m_namespaces;
+    protected final String m_defaultPrefixURI;
+    protected final Set<String> m_prefixURIs;
+    protected Prefixes m_prefixes;
     
-    public HierarchyPrinterFSS(PrintWriter out,String defaultNamespace) {
+    public HierarchyPrinterFSS(PrintWriter out,String defaultPrefixURI) {
         m_out=out;
-        m_defaultNamespace=defaultNamespace;
-        m_namespaceURIs=new TreeSet<String>();
-        m_namespaceURIs.add(defaultNamespace);
-        m_namespaceURIs.add(Namespaces.s_semanticWebNamespaces.get("owl"));
+        m_defaultPrefixURI=defaultPrefixURI;
+        m_prefixURIs=new TreeSet<String>();
+        m_prefixURIs.add(defaultPrefixURI);
+        m_prefixURIs.add(Prefixes.s_semanticWebPrefixes.get("owl"));
     }
-    public void loadAtomicConceptNamespaces(Collection<AtomicConcept> atomicConcepts) {
+    public void loadAtomicConceptPrefixURIs(Collection<AtomicConcept> atomicConcepts) {
         for (AtomicConcept atomicConcept : atomicConcepts) {
             String uri=atomicConcept.getURI();
             int hashIndex=uri.indexOf('#');
             if (hashIndex!=-1) {
-                String namespace=uri.substring(0,hashIndex+1);
+                String prefixURI=uri.substring(0,hashIndex+1);
                 String localName=uri.substring(hashIndex+1);
-                if (isSafeLocalName(localName))
-                    m_namespaceURIs.add(namespace);
+                if (Prefixes.isValidLocalName(localName))
+                    m_prefixURIs.add(prefixURI);
             }
         }
     }
-    public void loadAtomicRoleNamespaces(Collection<AtomicRole> atomicRoles) {
+    public void loadAtomicRolePrefixURIs(Collection<AtomicRole> atomicRoles) {
         for (AtomicRole atomicRole : atomicRoles) {
             String uri=atomicRole.getURI();
             int hashIndex=uri.indexOf('#');
             if (hashIndex!=-1) {
-                String namespace=uri.substring(0,hashIndex+1);
+                String prefixURI=uri.substring(0,hashIndex+1);
                 String localName=uri.substring(hashIndex+1);
-                if (isSafeLocalName(localName))
-                    m_namespaceURIs.add(namespace);
+                if (Prefixes.isValidLocalName(localName))
+                    m_prefixURIs.add(prefixURI);
             }
         }
     }
-    protected boolean isSafeLocalName(String localName) {
-        return s_localNameChecker.matcher(localName).matches() && !s_reservedWords.contains(localName);
-    }
-    public PrintWriter getOut() {
-        return m_out;
-    }
-    public Comparator<String> getComparator() {
-        return URIComparator.INSTANCE;
-    }
     public void startPrinting() {
-        String owlNamespace=Namespaces.s_semanticWebNamespaces.get("owl");
-        m_namespaces=new Namespaces();
-        m_namespaces.registerDefaultNamespace(m_defaultNamespace);
-        m_namespaces.registerNamespace("owl",owlNamespace);
+        String owlPrefixURI=Prefixes.s_semanticWebPrefixes.get("owl");
+        m_prefixes=new Prefixes();
+        m_prefixes.declareDefaultPrefix(m_defaultPrefixURI);
+        m_prefixes.declarePrefix("owl",owlPrefixURI);
         int index=1;
-        for (String namespace : m_namespaceURIs)
-            if (!m_defaultNamespace.equals(namespace) && !owlNamespace.equals(namespace)) {
+        for (String prefixURI : m_prefixURIs)
+            if (!m_defaultPrefixURI.equals(prefixURI) && !owlPrefixURI.equals(prefixURI)) {
                 String prefix="a"+(index++);
-                m_namespaces.registerNamespace(prefix,namespace);
+                m_prefixes.declarePrefix(prefix,prefixURI);
             }
-        for (Map.Entry<String,String> entry : m_namespaces.getNamespacesByPrefix().entrySet())
-            m_out.println("Namespace("+entry.getKey()+"=<"+entry.getValue()+">)");
+        for (Map.Entry<String,String> entry : m_prefixes.getPrefixIRIsByPrefixName().entrySet())
+            m_out.println("Prefix("+entry.getKey()+":=<"+entry.getValue()+">)");
         m_out.println();
-        m_out.println("Ontology(<"+m_namespaces.getNamespacesByPrefix().get("")+">");
+        m_out.println("Ontology(<"+m_prefixes.getPrefixIRIsByPrefixName().get("")+">");
         m_out.println();
     }
     public void printAtomicConceptHierarchy(Hierarchy<AtomicConcept> atomicConceptHierarchy) {
@@ -90,8 +76,8 @@ public class HierarchyPrinterFSS {
         atomicConceptPrinter.printNode(0,sortedAtomicConceptHierarchy.getBottomNode(),null,true);
     }
     public void printRoleHierarchy(Hierarchy<? extends Role> roleHierarchy,boolean objectProperties) {
-        Hierarchy<PrintableRole> sortedRoleHierarchy=roleHierarchy.transform(new Role2PrintableRoleTransformer(),PrintableRoleComparator.INSTANCE);
-        RolePrinter rolePrinter=new RolePrinter(sortedRoleHierarchy.getBottomNode(),objectProperties);
+        Hierarchy<Role> sortedRoleHierarchy=roleHierarchy.transform(new IdentityTransformer<Role>(),RoleComparator.INSTANCE);
+        RolePrinter rolePrinter=new RolePrinter(sortedRoleHierarchy,objectProperties);
         sortedRoleHierarchy.traverseDepthFirst(rolePrinter);
         rolePrinter.printNode(0,sortedRoleHierarchy.getBottomNode(),null,true);
     }
@@ -106,8 +92,10 @@ public class HierarchyPrinterFSS {
         public AtomicConceptPrinter(HierarchyNode<AtomicConcept> bottomNode) {
             m_bottomNode=bottomNode;
         }
+        public void redirect(HierarchyNode<AtomicConcept>[] nodes) {
+        }
         public void visit(int level,HierarchyNode<AtomicConcept> node,HierarchyNode<AtomicConcept> parentNode,boolean firstVisit) {
-            if (node!=m_bottomNode)
+            if (!node.equals(m_bottomNode))
                 printNode(level,node,parentNode,firstVisit);
         }
         public void printNode(int level,HierarchyNode<AtomicConcept> node,HierarchyNode<AtomicConcept> parentNode,boolean firstVisit) {
@@ -115,13 +103,12 @@ public class HierarchyPrinterFSS {
             boolean printSubClasOf=(parentNode!=null);
             boolean printEquivalences=firstVisit && equivalences.size()>1;
             boolean printDeclarations=false;
-            if (firstVisit) {
+            if (firstVisit)
                 for (AtomicConcept atomicConcept : equivalences)
                     if (needsDeclaration(atomicConcept)) {
                         printDeclarations=true;
                         break;
                     }
-            }
             if (printSubClasOf || printEquivalences || printDeclarations) {
                 for (int i=2*level;i>0;--i)
                     m_out.print(' ');
@@ -145,8 +132,8 @@ public class HierarchyPrinterFSS {
                     m_out.print(" )");
                     afterWS=false;
                 }
-                if (printDeclarations) {
-                    for (AtomicConcept atomicConcept : equivalences) {
+                if (printDeclarations)
+                    for (AtomicConcept atomicConcept : equivalences)
                         if (needsDeclaration(atomicConcept)) {
                             if (!afterWS)
                                 m_out.print(' ');
@@ -155,53 +142,46 @@ public class HierarchyPrinterFSS {
                             m_out.print(" ) )");
                             afterWS=false;
                         }
-                    }
-                }
                 m_out.println();
             }
         }
         protected void print(AtomicConcept atomicConcept) {
-            m_out.print(m_namespaces.abbreviateURISafe(atomicConcept.getURI(),s_localNameChecker,s_reservedWords));
+            m_out.print(m_prefixes.abbreviateURI(atomicConcept.getURI()));
         }
         protected boolean needsDeclaration(AtomicConcept atomicConcept) {
-            return !AtomicConcept.THING.equals(atomicConcept) && !AtomicConcept.NOTHING.equals(atomicConcept);
+            return !AtomicConcept.NOTHING.equals(atomicConcept) && !AtomicConcept.THING.equals(atomicConcept);
         }
     }
     
-    protected class IdentityTransformer<E> implements Hierarchy.Transformer<E,E> {
-
-        public E transform(E object) {
-            return object;
-        }
-        public E determineRepresentative(E oldRepresentative,Set<E> newEquivalentElements) {
-            return ((SortedSet<E>)newEquivalentElements).first();
-        }
-    }
-
-    protected class RolePrinter implements Hierarchy.HierarchyNodeVisitor<PrintableRole> {
-        protected final HierarchyNode<PrintableRole> m_bottomNode;
+    protected class RolePrinter implements Hierarchy.HierarchyNodeVisitor<Role> {
+        protected final Hierarchy<Role> m_hierarchy;
         protected final boolean m_objectProperties;
 
-        public RolePrinter(HierarchyNode<PrintableRole> bottomNode,boolean objectProperties) {
-            m_bottomNode=bottomNode;
+        public RolePrinter(Hierarchy<Role> hierarchy,boolean objectProperties) {
+            m_hierarchy=hierarchy;
             m_objectProperties=objectProperties;
         }
-        public void visit(int level,HierarchyNode<PrintableRole> node,HierarchyNode<PrintableRole> parentNode,boolean firstVisit) {
-            if (node!=m_bottomNode)
+        public void redirect(HierarchyNode<Role>[] nodes) {
+            if (isInverseRoleNode(nodes[0])) {
+                nodes[0]=getInverseNode(nodes[0]);
+                nodes[1]=getInverseNode(nodes[1]);
+            }
+        }
+        public void visit(int level,HierarchyNode<Role> node,HierarchyNode<Role> parentNode,boolean firstVisit) {
+            if (!node.equals(m_hierarchy.getBottomNode()))
                 printNode(level,node,parentNode,firstVisit);
         }
-        public void printNode(int level,HierarchyNode<PrintableRole> node,HierarchyNode<PrintableRole> parentNode,boolean firstVisit) {
-            Set<PrintableRole> equivalences=node.getEquivalentElements();
+        public void printNode(int level,HierarchyNode<Role> node,HierarchyNode<Role> parentNode,boolean firstVisit) {
+            Set<Role> equivalences=node.getEquivalentElements();
             boolean printSubPropertyOf=(parentNode!=null);
             boolean printEquivalences=firstVisit && equivalences.size()>1;
             boolean printDeclarations=false;
-            if (firstVisit) {
-                for (PrintableRole element : equivalences)
-                    if (!element.m_inverse && !element.m_uri.startsWith("owl:")) {
+            if (firstVisit)
+                for (Role role : equivalences)
+                    if (needsDeclaration(role)) {
                         printDeclarations=true;
                         break;
                     }
-            }
             if (printSubPropertyOf || printEquivalences || printDeclarations) {
                 for (int i=2*level;i>0;--i)
                     m_out.print(' ');
@@ -211,9 +191,9 @@ public class HierarchyPrinterFSS {
                         m_out.print("SubObjectPropertyOf( ");
                     else
                         m_out.print("SubDataPropertyOf( ");
-                    m_out.print(node.getRepresentative());
+                    print(node.getRepresentative());
                     m_out.print(' ');
-                    m_out.print(parentNode.getRepresentative());
+                    print(parentNode.getRepresentative());
                     m_out.print(" )");
                     afterWS=false;
                 }
@@ -224,16 +204,16 @@ public class HierarchyPrinterFSS {
                         m_out.print("EquivalentObjectProperties(");
                     else
                         m_out.print("EquivalentDataProperties(");
-                    for (PrintableRole element : equivalences) {
+                    for (Role role : equivalences) {
                         m_out.print(' ');
-                        m_out.print(element);
+                        print(role);
                     }
                     m_out.print(" )");
                     afterWS=false;
                 }
-                if (printDeclarations) {
-                    for (PrintableRole element : equivalences) {
-                        if (!element.m_inverse && !element.m_uri.startsWith("owl:")) {
+                if (printDeclarations)
+                    for (Role role : equivalences)
+                        if (needsDeclaration(role)) {
                             if (!afterWS)
                                 m_out.print(' ');
                             m_out.print("Declaration( ");
@@ -241,76 +221,69 @@ public class HierarchyPrinterFSS {
                                 m_out.print("ObjectProperty( ");
                             else
                                 m_out.print("DataProperty( ");
-                            m_out.print(element);
+                            m_out.print(role);
                             m_out.print(" ) )");
                             afterWS=false;
                         }
-                    }
-                }
                 m_out.println();
             }
         }
-    }
-    
-    protected class Role2PrintableRoleTransformer implements Hierarchy.Transformer<Role,PrintableRole> {
-
-        public PrintableRole transform(Role role) {
-            AtomicRole atomicRole;
-            boolean inverse;
-            if (role instanceof AtomicRole) {
-                atomicRole=(AtomicRole)role;
-                inverse=false;
-            }
+        protected boolean isInverseRoleNode(HierarchyNode<Role> node) {
+            return node.getRepresentative() instanceof InverseRole;
+        }
+        protected HierarchyNode<Role> getInverseNode(HierarchyNode<Role> node) {
+            Role redirectTo=node.getRepresentative().getInverse();
+            return m_hierarchy.getNodeForElement(redirectTo);
+        }
+        protected void print(Role role) {
+            if (role instanceof AtomicRole)
+                print((AtomicRole)role);
             else {
-                atomicRole=((InverseRole)role).getInverseOf();
-                inverse=true;
+                m_out.print("ObjectInverseOf( ");
+                print(((InverseRole)role).getInverseOf());
+                m_out.print(" )");
             }
-            return new PrintableRole(m_namespaces.abbreviateURISafe(atomicRole.getURI(),s_localNameChecker,s_reservedWords),inverse);
         }
-        public PrintableRole determineRepresentative(Role oldRepresentative,Set<PrintableRole> newEquivalentElements) {
-            return ((SortedSet<PrintableRole>)newEquivalentElements).first();
+        protected void print(AtomicRole atomicRole) {
+            m_out.print(m_prefixes.abbreviateURI(atomicRole.getURI()));
         }
-    }
-
-    protected static class PrintableRole {
-        protected final String m_uri;
-        protected final boolean m_inverse;
-        
-        public PrintableRole(String uri,boolean inverse) {
-            m_uri=uri;
-            m_inverse=inverse;
-        }
-        public int hashCode() {
-            return m_inverse ? m_uri.hashCode() : -m_uri.hashCode();
-        }
-        public boolean equals(Object that) {
-            if (this==that)
-                return true;
-            if (!(that instanceof PrintableRole))
-                return false;
-            PrintableRole thatRole=(PrintableRole)that;
-            return thatRole.m_uri.equals(m_uri) && thatRole.m_inverse==m_inverse;
-        }
-        public String toString() {
-            if (m_inverse)
-                return "ObjectInverseOf( "+m_uri+" )";
-            else
-                return m_uri;
+        protected boolean needsDeclaration(Role role) {
+            return !AtomicRole.BOTTOM_OBJECT_ROLE.equals(role) && !AtomicRole.TOP_OBJECT_ROLE.equals(role) && !AtomicRole.BOTTOM_DATA_ROLE.equals(role) && !AtomicRole.TOP_DATA_ROLE.equals(role) && role instanceof AtomicRole;
         }
     }
     
-    protected static class PrintableRoleComparator implements Comparator<PrintableRole> {
-        public static final PrintableRoleComparator INSTANCE=new PrintableRoleComparator();
+    protected static class RoleComparator implements Comparator<Role> {
+        public static final RoleComparator INSTANCE=new RoleComparator();
 
-        public int compare(PrintableRole printableRole1,PrintableRole printableRole2) {
-            int class1=getPrintableRoleClass(printableRole1);
-            int class2=getPrintableRoleClass(printableRole2);
-            if (class1!=class2)
-                return class1-class2;
-            return URIComparator.INSTANCE.compare(printableRole1.m_uri,printableRole2.m_uri);
+        public int compare(Role role1,Role role2) {
+            int comparison=getRoleClass(role1)-getRoleClass(role2);
+            if (comparison!=0)
+                return comparison;
+            comparison=getInnerAtomicRole(role1).getURI().compareTo(getInnerAtomicRole(role2).getURI());
+            if (comparison!=0)
+                return comparison;
+            return getRoleDirection(role1)-getRoleDirection(role2);
         }
-        protected int getPrintableRoleClass(PrintableRole printableRole) {
-            return printableRole.m_inverse ? 1 : 0;
+        protected int getRoleClass(Role role) {
+            if (AtomicRole.BOTTOM_OBJECT_ROLE.equals(role))
+                return 0;
+            else if (AtomicRole.TOP_OBJECT_ROLE.equals(role))
+                return 1;
+            else if (AtomicRole.BOTTOM_DATA_ROLE.equals(role))
+                return 2;
+            else if (AtomicRole.TOP_DATA_ROLE.equals(role))
+                return 3;
+            else
+                return 4;
+        }
+        protected AtomicRole getInnerAtomicRole(Role role) {
+            if (role instanceof AtomicRole)
+                return (AtomicRole)role;
+            else
+                return ((InverseRole)role).getInverseOf();
+        }
+        protected int getRoleDirection(Role role) {
+            return role instanceof AtomicRole ? 0 : 1;
         }
     }
     
@@ -318,125 +291,28 @@ public class HierarchyPrinterFSS {
         public static final AtomicConceptComparator INSTANCE=new AtomicConceptComparator();
     
         public int compare(AtomicConcept atomicConcept1,AtomicConcept atomicConcept2) {
-            int class1=getAtomicConceptClass(atomicConcept1);
-            int class2=getAtomicConceptClass(atomicConcept2);
-            if (class1!=class2)
-                return class1-class2;
+            int comparison=getAtomicConceptClass(atomicConcept1)-getAtomicConceptClass(atomicConcept2);
+            if (comparison!=0)
+                return comparison;
             return atomicConcept1.getURI().compareTo(atomicConcept2.getURI());
         }
         protected int getAtomicConceptClass(AtomicConcept atomicConcept) {
             if (AtomicConcept.NOTHING.equals(atomicConcept))
                 return 0;
-            if (AtomicConcept.THING.equals(atomicConcept))
+            else if (AtomicConcept.THING.equals(atomicConcept))
                 return 1;
             else
-                return 3;
+                return 2;
         }
     }
 
-    protected static class URIComparator implements Comparator<String> {
-        public static final URIComparator INSTANCE=new URIComparator();
-    
-        public int compare(String uri1,String uri2) {
-            int class1=getURIClass(uri1);
-            int class2=getURIClass(uri2);
-            if (class1!=class2)
-                return class1-class2;
-            return uri1.compareTo(uri2);
-        }
-        protected int getURIClass(String uri) {
-            if ("owl:Nothing".equals(uri))
-                return 0;
-            else if ("owl:Thing".equals(uri))
-                return 1;
-            else if ("owl:bottomObjectProperty".equals(uri))
-                return 3;
-            else if ("owl:topObjectProperty".equals(uri))
-                return 4;
-            else if ("owl:bottomDataProperty".equals(uri))
-                return 5;
-            else if ("owl:topDataProperty".equals(uri))
-                return 6;
-            return 7;
-        }
-    }
+    protected class IdentityTransformer<E> implements Hierarchy.Transformer<E,E> {
 
-    static {
-        String[] words=new String[] {
-            "Namespace",
-            "Ontology",
-            "Import",
-            "Declaration",
-            "Class",
-            "Datatype",
-            "ObjectProperty",
-            "DataProperty",
-            "AnnotationProperty",
-            "NamedIndividual",
-            "Annotation",
-            "AnnotationAssertion",
-            "SubAnnotationPropertyOf",
-            "AnnotationPropertyDomain",
-            "AnnotationPropertyRange",
-            "ObjectInverseOf",
-            "DataIntersectionOf",
-            "DataUnionOf",
-            "DataComplementOf",
-            "DataOneOf",
-            "DatatypeRestriction",
-            "ObjectIntersectionOf",
-            "ObjectUnionOf",
-            "ObjectComplementOf",
-            "ObjectOneOf",
-            "ObjectSomeValuesFrom",
-            "ObjectAllValuesFrom",
-            "ObjectHasValue",
-            "ObjectHasSelf",
-            "ObjectMinCardinality",
-            "ObjectMaxCardinality",
-            "ObjectExactCardinality",
-            "DataSomeValuesFrom",
-            "DataAllValuesFrom",
-            "DataHasValue",
-            "DataMinCardinality",
-            "DataMaxCardinality",
-            "DataExactCardinality",
-            "SubClassOf",
-            "EquivalentClasses",
-            "DisjointClasses",
-            "DisjointUnion",
-            "SubObjectPropertyOf",
-            "ObjectPropertyChain",
-            "EquivalentObjectProperties",
-            "DisjointObjectProperties",
-            "ObjectPropertyDomain",
-            "ObjectPropertyRange",
-            "InverseObjectProperties",
-            "FunctionalObjectProperty",
-            "InverseFunctionalObjectProperty",
-            "ReflexiveObjectProperty",
-            "IrreflexiveObjectProperty",
-            "SymmetricObjectProperty",
-            "AsymmetricObjectProperty",
-            "TransitiveObjectProperty",
-            "SubDataPropertyOf",
-            "EquivalentDataProperties",
-            "DisjointDataProperties",
-            "DataPropertyDomain",
-            "DataPropertyRange",
-            "FunctionalDataProperty",
-            "DatatypeDefinition",
-            "HasKey",
-            "SameIndividual",
-            "DifferentIndividuals",
-            "ClassAssertion",
-            "ObjectPropertyAssertion",
-            "NegativeObjectPropertyAssertion",
-            "DataPropertyAssertion",
-            "NegativeDataPropertyAssertion",
-
-        };
-        for (String word : words)
-            s_reservedWords.add(word);
+        public E transform(E object) {
+            return object;
+        }
+        public E determineRepresentative(E oldRepresentative,Set<E> newEquivalentElements) {
+            return ((SortedSet<E>)newEquivalentElements).first();
+        }
     }
 }

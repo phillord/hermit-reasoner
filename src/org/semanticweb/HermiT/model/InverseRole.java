@@ -24,8 +24,8 @@ public class InverseRole extends Role {
     public Role getInverse() {
         return m_inverseOf;
     }
-    public String toString(Namespaces namespaces) {
-        return "(inv-"+m_inverseOf.toString(namespaces)+")";
+    public String toString(Prefixes prefixes) {
+        return "(inv-"+m_inverseOf.toString(prefixes)+")";
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);

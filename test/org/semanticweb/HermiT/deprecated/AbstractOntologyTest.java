@@ -24,7 +24,7 @@ import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.tableau.Tableau;
 import org.semanticweb.kaon2.api.Axiom;
 import org.semanticweb.kaon2.api.KAON2Manager;
-import org.semanticweb.kaon2.api.Namespaces;
+import org.semanticweb.kaon2.api.Prefixes;
 import org.semanticweb.kaon2.api.Ontology;
 import org.semanticweb.kaon2.api.OntologyManager;
 import org.semanticweb.kaon2.api.owl.elements.Description;
@@ -50,9 +50,9 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
     protected void assertEquivalent(String string1, String string2,
             boolean result) throws Exception {
         Description description1 = KAON2Manager.factory().description(string1,
-                Namespaces.INSTANCE);
+                Prefixes.INSTANCE);
         Description description2 = KAON2Manager.factory().description(string1,
-                Namespaces.INSTANCE);
+                Prefixes.INSTANCE);
         Axiom axiom1 = null;
         Axiom axiom2 = null;
         if (!(description1 instanceof OWLClass)) {
@@ -86,9 +86,9 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
     protected void assertSubsumedBy(String subString, String superString,
             boolean result) throws Exception {
         Description subDescription = KAON2Manager.factory().description(
-                subString, Namespaces.INSTANCE);
+                subString, Prefixes.INSTANCE);
         Description superDescription = KAON2Manager.factory().description(
-                superString, Namespaces.INSTANCE);
+                superString, Prefixes.INSTANCE);
         if (subDescription instanceof OWLClass
                 && superDescription instanceof OWLClass) {
             Tableau tableau = getTableau();
@@ -115,7 +115,7 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
     protected void assertInstanceOf(String descriptionString,
             String individualString, boolean result) throws Exception {
         Description description = KAON2Manager.factory().description(
-                descriptionString, Namespaces.INSTANCE);
+                descriptionString, Prefixes.INSTANCE);
         org.semanticweb.kaon2.api.owl.elements.Individual individual = KAON2Manager.factory().individual(
                 individualString);
         Axiom axiom = KAON2Manager.factory().classMember(
@@ -137,7 +137,7 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
     protected void assertSatisfiable(String string, boolean satisfiable)
             throws Exception {
         Description description = KAON2Manager.factory().description(string,
-                Namespaces.INSTANCE);
+                Prefixes.INSTANCE);
         Axiom axiom = null;
         if (!(description instanceof OWLClass)) {
             OWLClass temp = KAON2Manager.factory().owlClass("new$class1");
@@ -165,16 +165,16 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
     protected String getSubsumptionHierarchyAsText() throws Exception {
         SubsumptionHierarchy subsumptionHierarchy = getSubsumptionHierarchy();
         Map<AtomicConcept, Set<AtomicConcept>> flattenedHierarchy = subsumptionHierarchy.getFlattenedHierarchy();
-        org.semanticweb.HermiT.Namespaces namespaces = org.semanticweb.HermiT.Namespaces.withInternalNamespaces
-            (new org.semanticweb.HermiT.Namespaces(m_ontology.getOntologyURI() + "#",
-                                org.semanticweb.HermiT.Namespaces.semanticWebNamespaces));
+        org.semanticweb.HermiT.Prefixes prefixes = org.semanticweb.HermiT.Prefixes.withInternalPrefixes
+            (new org.semanticweb.HermiT.Prefixes(m_ontology.getOntologyURI() + "#",
+                                org.semanticweb.HermiT.Prefixes.semanticWebPrefixes));
         CharArrayWriter buffer = new CharArrayWriter();
         PrintWriter output = new PrintWriter(buffer);
         for (Map.Entry<AtomicConcept, Set<AtomicConcept>> entry : flattenedHierarchy.entrySet()) {
-            output.println(namespaces.idFromUri(entry.getKey().getURI()));
+            output.println(prefixes.idFromUri(entry.getKey().getURI()));
             for (AtomicConcept atomicConcept : entry.getValue()) {
                 output.print("    ");
-                output.println(namespaces.idFromUri(atomicConcept.getURI()));
+                output.println(prefixes.idFromUri(atomicConcept.getURI()));
             }
             output.println("-----------------------------------------------");
         }
@@ -219,13 +219,13 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
 
     protected void addAxiom(String axiomString) throws Exception {
         Axiom axiom = KAON2Manager.factory().axiom(axiomString,
-                Namespaces.INSTANCE);
+                Prefixes.INSTANCE);
         m_ontology.addAxiom(axiom);
     }
 
     protected void removeAxiom(String axiomString) throws Exception {
         Axiom axiom = KAON2Manager.factory().axiom(axiomString,
-                Namespaces.INSTANCE);
+                Prefixes.INSTANCE);
         m_ontology.removeAxiom(axiom);
     }
 

@@ -18,11 +18,11 @@ public class Equality implements DLPredicate,Serializable {
     public int getArity() {
         return 2;
     }
-    public String toString(Namespaces namespaces) {
+    public String toString(Prefixes prefixes) {
         return "==";
     }
     public String toString() {
-        return toString(Namespaces.EMPTY);
+        return toString(Prefixes.EMPTY);
     }
     protected Object readResolve() {
         return INSTANCE;

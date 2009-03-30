@@ -48,7 +48,7 @@ public class ShowExistsCommand extends AbstractCommand implements ICommand {
         if (startExistential==null)
             writer.print("(root)");
         else
-            writer.print(startExistential.toString(debugger.getNamespaces()));
+            writer.print(startExistential.toString(debugger.getPrefixes()));
     }
     public String getHelpText() {
         CharArrayWriter buffer = new CharArrayWriter();

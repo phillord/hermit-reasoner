@@ -22,11 +22,11 @@ public class ExistsDescriptionGraph extends ExistentialConcept implements DLPred
     public int getArity() {
         return 1;
     }
-    public String toString(Namespaces namespaces) {
-        return "exists("+namespaces.abbreviateURI(m_descriptionGraph.getName())+'|'+m_vertex+')';
+    public String toString(Prefixes prefixes) {
+        return "exists("+prefixes.abbreviateURI(m_descriptionGraph.getName())+'|'+m_vertex+')';
     }
     public String toString() {
-        return toString(Namespaces.EMPTY);
+        return toString(Prefixes.EMPTY);
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);

@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.semanticweb.HermiT.Namespaces;
+import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.datatypes.DatatypeRestriction.DT;
 
 /**
@@ -199,20 +199,14 @@ public class DataConstant implements Comparable<DataConstant>, Serializable {
      * @see java.lang.Object#toString()
      */
     public String toString() {
-        return toString(Namespaces.EMPTY);
+        return toString(Prefixes.EMPTY);
     }
     
-    /**
-     * Returns a String representation of this constant and uses the given 
-     * namespaces to abbreviate long names. 
-     * @param namespaces namespaces with prefixes
-     * @return a String representation of this data constant
-     */
-    public String toString(Namespaces namespaces) {
+    public String toString(Prefixes prefixes) {
         if (datatype == null) return "";
         StringBuffer buffer = new StringBuffer();
         buffer.append("(");
-        buffer.append(namespaces.abbreviateURI(datatype.getURIAsString()));
+        buffer.append(prefixes.abbreviateURI(datatype.getURIAsString()));
         buffer.append(" " + value);
         if (lang != "") buffer.append("@" + lang);
         buffer.append(")");

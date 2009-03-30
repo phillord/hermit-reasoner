@@ -19,57 +19,22 @@ import org.semanticweb.owl.model.OWLObjectProperty;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
 import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLOntology;
-import org.semanticweb.owl.model.OWLOntologyManager;
 
-import org.semanticweb.HermiT.AbstractHermiTTest;
+import org.semanticweb.HermiT.AbstractOWLOntologyTest;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Reasoner;
-import org.semanticweb.HermiT.model.Atom;
-import org.semanticweb.HermiT.model.DLClause;
-import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.structural.OWLHasKeyDummy;
-import org.semanticweb.HermiT.tableau.Node;
 
-public abstract class AbstractReasonerTest extends AbstractHermiTTest {
-    protected static final Node[][] NO_TUPLES=new Node[0][];
-    protected static final DLOntology EMPTY_DL_ONTOLOGY;
-    protected static final String ONTOLOGY_URI="file:/c/test.owl";
-    protected static final String NS=ONTOLOGY_URI+"#";
-    static {
-        Set<DLClause> dlClauses=Collections.emptySet();
-        Set<Atom> atoms=Collections.emptySet();
-        EMPTY_DL_ONTOLOGY=new DLOntology("opaque:test", // ontology_URI
-                dlClauses, // clauses
-                atoms, // positive facts
-                atoms, // negative facts
-                null, // atomic concepts
-                null, // transitive roles
-                null, // object roles
-                null, // data roles
-                null, // individuals
-                false, // hasInverseRoles
-                false, // hasAtMostRestrictions
-                false, // hasNominals
-                false, // canUseNIRule
-                false); // hasDatatypes
-    }
-    protected OWLOntologyManager m_ontologyManager;
-    protected OWLOntology m_ontology;
+public abstract class AbstractReasonerTest extends AbstractOWLOntologyTest {
     protected Reasoner m_reasoner;
 
     public AbstractReasonerTest(String name) {
         super(name);
     }
 
-    protected void setUp() throws Exception {
-        m_ontologyManager=OWLManager.createOWLOntologyManager();
-        m_ontology=m_ontologyManager.createOntology(URI.create("file:/c:/test/ontology.owl"));
-    }
-
     protected void tearDown() {
-        m_ontologyManager=null;
-        m_ontology=null;
+        super.tearDown();
         m_reasoner=null;
     }
 
@@ -174,28 +139,6 @@ public abstract class AbstractReasonerTest extends AbstractHermiTTest {
     }
 
     /**
-     * Loads the resource resourceName and returns a set of strings such that each line in the input resource becomes an entry of the set.
-     * 
-     * @param resourceName
-     * @return each line from the loaded resource becomes a string in the returned array
-     */
-    protected Set<String> getStrings(String resourceName) throws Exception {
-        Set<String> strings=new HashSet<String>();
-        BufferedReader reader=new BufferedReader(new InputStreamReader(getClass().getResource(resourceName).openStream()));
-        try {
-            String line=reader.readLine();
-            while (line!=null) {
-                strings.add(line);
-                line=reader.readLine();
-            }
-        }
-        finally {
-            reader.close();
-        }
-        return strings;
-    }
-
-    /**
      * Loads the resource resourceName and returns its content as a string.
      * 
      * @param resourceName
@@ -260,9 +203,9 @@ public abstract class AbstractReasonerTest extends AbstractHermiTTest {
      * Tests whether the atomic concept subAtomicConcept is subsumed by the atomic concept superAtomicConcept and asserts that this coincides with the expected result.
      * 
      * @param subAtomicConcept
-     *            a string that represents an atomic concept. If no namespace is given, NS is used as prefix
+     *            a string that represents an atomic concept. If no prefix is given, NS is used as prefix
      * @param superAtomicConcept
-     *            a string that represents an atomic concept. If no namespace is given, NS is used as prefix
+     *            a string that represents an atomic concept. If no prefix is given, NS is used as prefix
      * @param expectedResult
      */
     protected void assertSubsumedBy(String subAtomicConcept,String superAtomicConcept,boolean expectedResult) {

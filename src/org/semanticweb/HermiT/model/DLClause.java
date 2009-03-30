@@ -5,7 +5,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.semanticweb.HermiT.Namespaces;
+import org.semanticweb.HermiT.Prefixes;
 
 /**
  * Represents a DL clause. The body is a conjunction of atoms and the head is a disjunction of atoms.
@@ -189,23 +189,23 @@ public class DLClause implements Serializable {
         }
         return false;
     }
-    public String toString(Namespaces namespaces) {
+    public String toString(Prefixes prefixes) {
         StringBuffer buffer=new StringBuffer();
         for (int headIndex=0;headIndex<m_headAtoms.length;headIndex++) {
             if (headIndex!=0)
                 buffer.append(" v ");
-            buffer.append(m_headAtoms[headIndex].toString(namespaces));
+            buffer.append(m_headAtoms[headIndex].toString(prefixes));
         }
         buffer.append(" :- ");
         for (int bodyIndex=0;bodyIndex<m_bodyAtoms.length;bodyIndex++) {
             if (bodyIndex!=0)
                 buffer.append(", ");
-            buffer.append(m_bodyAtoms[bodyIndex].toString(namespaces));
+            buffer.append(m_bodyAtoms[bodyIndex].toString(prefixes));
         }
         return buffer.toString();
     }
     public String toString() {
-        return toString(Namespaces.EMPTY);
+        return toString(Prefixes.EMPTY);
     }
 
     public static DLClause create(Atom[] headAtoms,Atom[] bodyAtoms) {

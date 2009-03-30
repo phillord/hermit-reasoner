@@ -28,14 +28,14 @@ import org.semanticweb.HermiT.*;
 
 @SuppressWarnings("serial")
 public class DerivationViewer extends JFrame {
-    protected final Namespaces m_namespaces;
+    protected final Prefixes m_prefixes;
     protected final DerivationTreeTreeModel m_derivationTreeTreeModel;
     protected final JTree m_derivationTree;
 
-    public DerivationViewer(Namespaces namespaces,DerivationHistory.Fact root) {
-        super("Derivation tree for "+root.toString(namespaces));
+    public DerivationViewer(Prefixes prefixes,DerivationHistory.Fact root) {
+        super("Derivation tree for "+root.toString(prefixes));
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        m_namespaces=namespaces;
+        m_prefixes=prefixes;
         m_derivationTreeTreeModel=new DerivationTreeTreeModel(root);
         m_derivationTree=new JTree(m_derivationTreeTreeModel);
         m_derivationTree.setLargeModel(true);
@@ -170,8 +170,8 @@ public class DerivationViewer extends JFrame {
             DerivationHistory.Fact fact=((DerivationHistory.DerivationPremise)value).getFact();
             DerivationHistory.Derivation derivation=fact.getDerivation();
             StringBuffer text=new StringBuffer();
-            text.append(fact.toString(m_namespaces));
-            text.append(derivation.toString(m_namespaces));
+            text.append(fact.toString(m_prefixes));
+            text.append(derivation.toString(m_prefixes));
             super.getTreeCellRendererComponent(tree,text.toString(),selected,expanded,leaf,row,hasFocus);
             if (derivation instanceof DerivationHistory.DLClauseApplication)
                 setIcon(DLCLAUSE_APPLICATION_ICON);

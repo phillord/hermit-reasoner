@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Configuration;
-import org.semanticweb.HermiT.Namespaces;
+import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.monitor.ReasoningOperations;
 import org.semanticweb.HermiT.monitor.Timer;
@@ -48,13 +48,13 @@ public class CommandLine {
     }
 
     protected interface Action {
-        void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output);
+        void run(Reasoner hermit,Prefixes prefixes,StatusOutput status,PrintWriter output);
     }
 
-    static protected class DumpNamespacesAction implements Action {
-        public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
-            output.println("Namespaces:");
-            for (Map.Entry<String,String> e : namespaces.getNamespacesByPrefix().entrySet()) {
+    static protected class DumpPrefixesAction implements Action {
+        public void run(Reasoner hermit,Prefixes prefixes,StatusOutput status,PrintWriter output) {
+            output.println("Prefixes:");
+            for (Map.Entry<String,String> e : prefixes.getPrefixIRIsByPrefixName().entrySet()) {
                 output.println("\t"+e.getKey()+"\t"+e.getValue());
             }
         }
@@ -65,7 +65,7 @@ public class CommandLine {
         public DumpClausesAction(String fileName) {
             file=fileName;
         }
-        public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
+        public void run(Reasoner hermit,Prefixes prefixes,StatusOutput status,PrintWriter output) {
             if (file!=null) {
                 if (file.equals("-")) {
                     output=new PrintWriter(System.out);
@@ -84,7 +84,7 @@ public class CommandLine {
                     output=new PrintWriter(f);
                 }
             }
-            output.println(hermit.getDLOntology().toString(namespaces));
+            output.println(hermit.getDLOntology().toString(prefixes));
         }
     }
 
@@ -93,7 +93,7 @@ public class CommandLine {
         public ClassifyAction(String fileName) {
             file=fileName;
         }
-        public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
+        public void run(Reasoner hermit,Prefixes prefixes,StatusOutput status,PrintWriter output) {
             status.log(2,"classifying...");
             hermit.classify();
             if (file!=null) {
@@ -124,9 +124,9 @@ public class CommandLine {
         public SatisfiabilityAction(String c) {
             conceptName=c;
         }
-        public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
+        public void run(Reasoner hermit,Prefixes prefixes,StatusOutput status,PrintWriter output) {
             status.log(2,"Checking satisfiability of '"+conceptName+"'");
-            String conceptUri=namespaces.expandAbbreviatedURI(conceptName);
+            String conceptUri=prefixes.expandAbbreviatedURI(conceptName);
             OWLClass owlClass=OWLManager.createOWLOntologyManager().getOWLDataFactory().getOWLClass(URI.create(conceptUri));
             if (!hermit.isDefined(owlClass)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
@@ -143,9 +143,9 @@ public class CommandLine {
             conceptName=name;
             all=getAll;
         }
-        public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
+        public void run(Reasoner hermit,Prefixes prefixes,StatusOutput status,PrintWriter output) {
             status.log(2,"Finding supers of '"+conceptName+"'");
-            String conceptUri=namespaces.expandAbbreviatedURI(conceptName);
+            String conceptUri=prefixes.expandAbbreviatedURI(conceptName);
             OWLClass owlClass=OWLManager.createOWLOntologyManager().getOWLDataFactory().getOWLClass(URI.create(conceptUri));
             if (!hermit.isDefined(owlClass)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
@@ -161,7 +161,7 @@ public class CommandLine {
             }
             for (Set<OWLClass> set : classes)
                 for (OWLClass classInSet : set)
-                    output.println("\t"+namespaces.abbreviateURI(classInSet.getURI().toString()));
+                    output.println("\t"+prefixes.abbreviateURI(classInSet.getURI().toString()));
         }
     }
 
@@ -172,9 +172,9 @@ public class CommandLine {
             conceptName=name;
             all=getAll;
         }
-        public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
+        public void run(Reasoner hermit,Prefixes prefixes,StatusOutput status,PrintWriter output) {
             status.log(2,"Finding subs of '"+conceptName+"'");
-            String conceptUri=namespaces.expandAbbreviatedURI(conceptName);
+            String conceptUri=prefixes.expandAbbreviatedURI(conceptName);
             OWLClass owlClass=OWLManager.createOWLOntologyManager().getOWLDataFactory().getOWLClass(URI.create(conceptUri));
             if (!hermit.isDefined(owlClass)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
@@ -190,7 +190,7 @@ public class CommandLine {
             }
             for (Set<OWLClass> set : classes)
                 for (OWLClass classInSet : set)
-                    output.println("\t"+namespaces.abbreviateURI(classInSet.getURI().toString()));
+                    output.println("\t"+prefixes.abbreviateURI(classInSet.getURI().toString()));
         }
     }
 
@@ -199,9 +199,9 @@ public class CommandLine {
         public EquivalentsAction(String name) {
             conceptName=name;
         }
-        public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
+        public void run(Reasoner hermit,Prefixes prefixes,StatusOutput status,PrintWriter output) {
             status.log(2,"Finding equivalents of '"+conceptName+"'");
-            String conceptUri=namespaces.expandAbbreviatedURI(conceptName);
+            String conceptUri=prefixes.expandAbbreviatedURI(conceptName);
             OWLClass owlClass=OWLManager.createOWLOntologyManager().getOWLDataFactory().getOWLClass(URI.create(conceptUri));
             if (!hermit.isDefined(owlClass)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
@@ -209,7 +209,7 @@ public class CommandLine {
             Set<OWLClass> classes=hermit.getEquivalentClasses(owlClass);
             output.println("Classes equivalent to '"+conceptName+"':");
             for (OWLClass classInSet : classes)
-                output.println("\t"+namespaces.abbreviateURI(classInSet.getURI().toString()));
+                output.println("\t"+prefixes.abbreviateURI(classInSet.getURI().toString()));
         }
     }
 
@@ -218,7 +218,7 @@ public class CommandLine {
         public TaxonomyAction() {
         }
 
-        public void run(Reasoner hermit,Namespaces namespaces,StatusOutput status,PrintWriter output) {
+        public void run(Reasoner hermit,Prefixes prefixes,StatusOutput status,PrintWriter output) {
             hermit.printHierarchies(output,true,false,false);
         }
     }
@@ -233,8 +233,8 @@ public class CommandLine {
         kExpansion=1006,
         kBase=1007,
         kParser=1008,
-        kDefaultNamespace=1009,
-        kDumpNamespaces=1010,
+        kDefaultPrefix=1009,
+        kDumpPrefixes=1010,
         kTaxonomy=1011,
         kIgnoreUnsupportedDatatypes=1012;
 
@@ -246,10 +246,38 @@ public class CommandLine {
         versionString=version;
     }
     protected static final String usageString="Usage: hermit [OPTION]... URI...";
-    protected static final String[] helpHeader= { "Perform reasoning on each OWL ontology URI.","Example: hermit -ds owl:Thing http://hermit-reasoner.org/2008/test.owl","    (prints direct subclasses of owl:Thing within the test ontology)","","Both relative and absolute ontology URIs can be used. Relative URIs","are resolved with respect to the current directory (i.e. local file","names are valid URIs); this behavior can be changed with the '--base'","option.","","Classes and properties are identified using functional-syntax-style","identifiers: names not containing a colon are resolved against the","ontology's default namespace; otherwise the portion of the name","preceding the colon is treated as a namespace prefix. Use of","namespaces can be controlled using the -n, -N, and --namespace","options. Alternatively, classes and properties can be identified with","full URIs by enclosing the URI in <angle brackets>.","","By default, ontologies are simply retrieved and parsed. For more",
-            "interesting reasoning, set one of the -c/-k/-s/-S/-e/-U options." };
-    protected static final String[] footer= { "HermiT is a product of Oxford University.","Visit <http://hermit-reasoner.org/> for details." };
-    protected static final String kMisc="Miscellaneous",kActions="Actions",kParsing="Parsing and loading",kNamespaces="Namespace expansion and abbreviation",kAlgorithm="Algorithm settings (expert users only!)",kInternals="Internals and debugging (unstable)";
+    protected static final String[] helpHeader={
+        "Perform reasoning on each OWL ontology URI.",
+        "Example: hermit -ds owl:Thing http://hermit-reasoner.org/2008/test.owl",
+        "    (prints direct subclasses of owl:Thing within the test ontology)",
+        "",
+        "Both relative and absolute ontology URIs can be used. Relative URIs",
+        "are resolved with respect to the current directory (i.e. local file",
+        "names are valid URIs); this behavior can be changed with the '--base'",
+        "option.",
+        "",
+        "Classes and properties are identified using functional-syntax-style",
+        "identifiers: names not containing a colon are resolved against the",
+        "ontology's default prefix; otherwise the portion of the name",
+        "preceding the colon is treated as a prefix prefix. Use of",
+        "prefixes can be controlled using the -p, -N, and --prefix",
+        "options. Alternatively, classes and properties can be identified with",
+        "full URIs by enclosing the URI in <angle brackets>.",
+        "",
+        "By default, ontologies are simply retrieved and parsed. For more",
+        "interesting reasoning, set one of the -c/-k/-s/-S/-e/-U options."
+    };
+    protected static final String[] footer={
+        "HermiT is a product of Oxford University.",
+        "Visit <http://hermit-reasoner.org/> for details."
+    };
+    protected static final String
+        kMisc="Miscellaneous",
+        kActions="Actions",
+        kParsing="Parsing and loading",
+        kPrefixes="Prefix name and IRI",
+        kAlgorithm="Algorithm settings (expert users only!)",
+        kInternals="Internals and debugging (unstable)";
 
     protected static final Option[] options=new Option[] {
         // meta:
@@ -268,11 +296,11 @@ public class CommandLine {
         new Option('S',"supers",kActions,true,"CLASS","output classes subsuming CLASS (or only direct supers if following --direct)"),
         new Option('e',"equivalents",kActions,true,"CLASS","output classes equivalent to CLASS"),
         new Option('U',"unsatisfiable",kActions,"output unsatisfiable classes (equivalent to --equivalents=owl:Nothing)"),
-        new Option(kDumpNamespaces,"print-namespaces",kActions,"output namespace prefixes available for use in identifiers"),
+        new Option(kDumpPrefixes,"print-prefixes",kActions,"output prefix names available for use in identifiers"),
 
-        new Option('N',"no-namespaces",kNamespaces,"do not abbreviate or expand identifiers using namespaces defined in input ontology"),
-        new Option('n',"namespace",kNamespaces,true,"NS=URI","use NS as an abbreviation for URI in identifiers"),
-        new Option(kDefaultNamespace,"namespace",kNamespaces,true,"URI","use URI as the default identifier namespace"),
+        new Option('N',"no-prefixes",kPrefixes,"do not abbreviate or expand identifiers using prefixes defined in input ontology"),
+        new Option('p',"prefix",kPrefixes,true,"PN=URI","use PN as an abbreviation for URI in identifiers"),
+        new Option(kDefaultPrefix,"prefix",kPrefixes,true,"URI","use URI as the default identifier prefix"),
 
         // algorithm tweaks:
         new Option(kDirectBlock,"block-match",kAlgorithm,true,"TYPE","identify blocked nodes with TYPE blocking; supported values are 'single', 'pairwise', 'pairwise-reflexive', and 'optimal' (default 'optimal')"),
@@ -286,8 +314,8 @@ public class CommandLine {
     public static void main(String[] argv) {
         try {
             int verbosity=1;
-            boolean ignoreOntologyNamespaces=false;
-            Namespaces namespaces=new Namespaces();
+            boolean ignoreOntologyPrefixes=false;
+            Prefixes prefixes=new Prefixes();
             PrintWriter output=new PrintWriter(System.out);
             Collection<Action> actions=new LinkedList<Action>();
             URI base;
@@ -418,26 +446,26 @@ public class CommandLine {
                         actions.add(new EquivalentsAction("<http://www.w3.org/2002/07/owl#Nothing>"));
                     }
                         break;
-                    case kDumpNamespaces: {
-                        actions.add(new DumpNamespacesAction());
+                    case kDumpPrefixes: {
+                        actions.add(new DumpPrefixesAction());
                     }
                         break;
                     case 'N': {
-                        ignoreOntologyNamespaces=true;
+                        ignoreOntologyPrefixes=true;
                     }
                         break;
-                    case 'n': {
+                    case 'p': {
                         String arg=g.getOptarg();
                         int eqIndex=arg.indexOf('=');
                         if (eqIndex==-1) {
-                            throw new IllegalArgumentException("the namespace definition '"+arg+"' is not of the form NS=URI.");
+                            throw new IllegalArgumentException("the prefix declaration '"+arg+"' is not of the form PN=URI.");
                         }
-                        namespaces.registerNamespace(arg.substring(0,eqIndex),arg.substring(eqIndex+1));
+                        prefixes.declarePrefix(arg.substring(0,eqIndex),arg.substring(eqIndex+1));
                     }
                         break;
-                    case kDefaultNamespace: {
+                    case kDefaultPrefix: {
                         String arg=g.getOptarg();
-                        namespaces.registerDefaultNamespace(arg);
+                        prefixes.declareDefaultPrefix(arg);
                     }
                         break;
                     case kBase: {
@@ -556,12 +584,12 @@ public class CommandLine {
                     Reasoner hermit=new Reasoner(config,ontologyManager,ontology);
                     long loadTime=System.currentTimeMillis()-startTime;
                     status.log(2,"Reasoner created in "+String.valueOf(loadTime)+" msec.");
-                    if (!ignoreOntologyNamespaces)
-                        namespaces.addPrefixes(hermit.getNamespaces());
+                    if (!ignoreOntologyPrefixes)
+                        prefixes.addPrefixes(hermit.getPrefixes());
                     for (Action action : actions) {
                         status.log(2,"Doing action...");
                         startTime=System.currentTimeMillis();
-                        action.run(hermit,namespaces,status,output);
+                        action.run(hermit,prefixes,status,output);
                         long actionTime=System.currentTimeMillis()-startTime;
                         status.log(2,"...action completed in "+String.valueOf(actionTime)+" msec.");
                         if (opMonitor!=null) {

@@ -24,7 +24,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
-import org.semanticweb.HermiT.Namespaces;
+import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.datatypes.DataConstant;
 import org.semanticweb.HermiT.datatypes.DataRange;
 import org.semanticweb.HermiT.debugger.commands.ActiveNodesCommand;
@@ -84,7 +84,7 @@ public class Debugger extends TableauMonitorForwarder {
         GRAPH_EXPANSION,EXISTENTIAL_EXPANSION,CLASH,MERGE,DATATYPE_CHECKING
     };
 
-    protected final Namespaces m_namespaces;
+    protected final Prefixes m_prefixes;
     protected final DerivationHistory m_derivationHistory;
     protected final ConsoleTextArea m_consoleTextArea;
     protected final JFrame m_mainFrame;
@@ -103,9 +103,9 @@ public class Debugger extends TableauMonitorForwarder {
     protected int m_breakpointTime;
     protected int m_currentIteration;
 
-    public Debugger(Namespaces namespaces,boolean historyOn) {
+    public Debugger(Prefixes prefixes,boolean historyOn) {
         super(new DerivationHistory());
-        m_namespaces=namespaces;
+        m_prefixes=prefixes;
         m_derivationHistory=(DerivationHistory)m_forwardingTargetMonitor;
         m_consoleTextArea=new ConsoleTextArea();
         m_consoleTextArea.setFont(s_monospacedFont);
@@ -236,11 +236,11 @@ public class Debugger extends TableauMonitorForwarder {
         else if ("!=".equals(predicate))
             return Inequality.INSTANCE;
         else if (predicate.startsWith("+"))
-            return AtomicConcept.create(m_namespaces.expandAbbreviatedURI(predicate.substring(1)));
+            return AtomicConcept.create(m_prefixes.expandAbbreviatedURI(predicate.substring(1)));
         else if (predicate.startsWith("-"))
-            return AtomicRole.create(m_namespaces.expandAbbreviatedURI(predicate.substring(1)));
+            return AtomicRole.create(m_prefixes.expandAbbreviatedURI(predicate.substring(1)));
         else if (predicate.startsWith("$")) {
-            String graphName=m_namespaces.expandAbbreviatedURI(predicate.substring(1));
+            String graphName=m_prefixes.expandAbbreviatedURI(predicate.substring(1));
             for (DescriptionGraph descriptionGraph : m_tableau.getDLOntology().getAllDescriptionGraphs())
                 if (graphName.equals(descriptionGraph.getName()))
                     return descriptionGraph;
@@ -283,7 +283,7 @@ public class Debugger extends TableauMonitorForwarder {
             writer.println("(root)");
         }
         else {
-            writer.println(((AtLeastConcept)startExistential).getToConcept().toString(m_namespaces));
+            writer.println(((AtLeastConcept)startExistential).getToConcept().toString(m_prefixes));
         }
         printConceptLabel(node,writer);
         printEdges(node,writer);
@@ -396,7 +396,7 @@ public class Debugger extends TableauMonitorForwarder {
                 writer.println();
                 writer.print("    ");
             }
-            writer.print(concept.toString(m_namespaces));
+            writer.print(concept.toString(m_prefixes));
             number++;
         }
         writer.println();
@@ -410,7 +410,7 @@ public class Debugger extends TableauMonitorForwarder {
                 writer.println();
                 writer.print("    ");
             }
-            writer.print(range.toString(m_namespaces));
+            writer.print(range.toString(m_prefixes));
             number++;
         }
         writer.println();
@@ -428,7 +428,7 @@ public class Debugger extends TableauMonitorForwarder {
                     writer.println();
                     writer.print("        ");
                 }
-                writer.print(atomicRole.toString(m_namespaces));
+                writer.print(atomicRole.toString(m_prefixes));
                 number++;
             }
             writer.println();
@@ -484,23 +484,23 @@ public class Debugger extends TableauMonitorForwarder {
     }
     public void isSatisfiableStarted(AtomicConcept atomicConcept) {
         super.isSatisfiableStarted(atomicConcept);
-        m_output.println("Will check whether '"+m_namespaces.abbreviateURI(atomicConcept.getURI())+"' is satisfiable.");
+        m_output.println("Will check whether '"+m_prefixes.abbreviateURI(atomicConcept.getURI())+"' is satisfiable.");
         mainLoop();
     }
     public void isSatisfiableFinished(AtomicConcept atomicConcept,boolean result) {
         super.isSatisfiableFinished(atomicConcept,result);
-        m_output.println("'"+m_namespaces.abbreviateURI(atomicConcept.getURI())+"' is "+(result ? "" : "not ")+"satisfiable.");
+        m_output.println("'"+m_prefixes.abbreviateURI(atomicConcept.getURI())+"' is "+(result ? "" : "not ")+"satisfiable.");
         mainLoop();
         dispose();
     }
     public void isSubsumedByStarted(AtomicConcept subconcept,AtomicConcept superconcept) {
         super.isSubsumedByStarted(subconcept,superconcept);
-        m_output.println("Will check whether '"+m_namespaces.abbreviateURI(subconcept.getURI())+"' is subsumed by '"+m_namespaces.abbreviateURI(superconcept.getURI())+"'.");
+        m_output.println("Will check whether '"+m_prefixes.abbreviateURI(subconcept.getURI())+"' is subsumed by '"+m_prefixes.abbreviateURI(superconcept.getURI())+"'.");
         mainLoop();
     }
     public void isSubsumedByFinished(AtomicConcept subconcept,AtomicConcept superconcept,boolean result) {
         super.isSubsumedByFinished(subconcept,superconcept,result);
-        m_output.println("'"+m_namespaces.abbreviateURI(subconcept.getURI())+"' is "+(result ? "" : "not ")+"subsumed by '"+m_namespaces.abbreviateURI(superconcept.getURI())+"'.");
+        m_output.println("'"+m_prefixes.abbreviateURI(subconcept.getURI())+"' is "+(result ? "" : "not ")+"subsumed by '"+m_prefixes.abbreviateURI(superconcept.getURI())+"'.");
         mainLoop();
         dispose();
     }
@@ -517,12 +517,12 @@ public class Debugger extends TableauMonitorForwarder {
     }
     public void isInstanceOfStarted(AtomicConcept concept,Individual individual) {
         super.isInstanceOfStarted(concept,individual);
-        m_output.println("Will check whether '"+m_namespaces.abbreviateURI(concept.getURI())+"' is an instance of '"+m_namespaces.abbreviateURI(individual.getURI())+"'.");
+        m_output.println("Will check whether '"+m_prefixes.abbreviateURI(concept.getURI())+"' is an instance of '"+m_prefixes.abbreviateURI(individual.getURI())+"'.");
         mainLoop();
     }
     public void isInstanceOfFinished(AtomicConcept concept,Individual individual,boolean result) {
         super.isInstanceOfFinished(concept,individual,result);
-        m_output.println("'"+m_namespaces.abbreviateURI(concept.getURI())+"' is "+(result ? "" : "not ")+"an instance of '"+m_namespaces.abbreviateURI(individual.getURI())+"'.");
+        m_output.println("'"+m_prefixes.abbreviateURI(concept.getURI())+"' is "+(result ? "" : "not ")+"an instance of '"+m_prefixes.abbreviateURI(individual.getURI())+"'.");
         mainLoop();
         dispose();
     }
@@ -587,7 +587,7 @@ public class Debugger extends TableauMonitorForwarder {
         m_lastExistentialConcept=null;
         if ((existentialConcept instanceof ExistsDescriptionGraph && m_waitOptions.contains(WaitOption.GRAPH_EXPANSION)) || (existentialConcept instanceof AtLeastConcept && m_waitOptions.contains(WaitOption.EXISTENTIAL_EXPANSION))) {
             m_forever=false;
-            m_output.println(existentialConcept.toString(m_namespaces)+" expanded for node "+forNode.getNodeID());
+            m_output.println(existentialConcept.toString(m_prefixes)+" expanded for node "+forNode.getNodeID());
             mainLoop();
         }
     }
@@ -804,8 +804,8 @@ public class Debugger extends TableauMonitorForwarder {
     public ConsoleTextArea getConsoleTextArea() {
         return m_consoleTextArea;
     }
-    public Namespaces getNamespaces() {
-        return m_namespaces;
+    public Prefixes getPrefixes() {
+        return m_prefixes;
     }
     public DerivationHistory getDerivationHistory() {
         return m_derivationHistory;

@@ -44,7 +44,7 @@ public class ReuseNodeForCommand extends AbstractCommand implements ICommand {
                 debugger.getOutput().println("not a reuse node for any concept.");
             else {
                 debugger.getOutput().print("a reuse node for the '");
-                debugger.getOutput().print(conceptForNode.toString(debugger.getNamespaces()));
+                debugger.getOutput().print(conceptForNode.toString(debugger.getPrefixes()));
                 debugger.getOutput().println("' concept.");
             }
         }

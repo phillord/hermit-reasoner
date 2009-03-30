@@ -11,5 +11,5 @@ import org.semanticweb.HermiT.*;
 public abstract class Term implements Serializable {
     private static final long serialVersionUID=-8524194708579485033L;
 
-    public abstract String toString(Namespaces namespaces);
+    public abstract String toString(Prefixes prefixes);
 }

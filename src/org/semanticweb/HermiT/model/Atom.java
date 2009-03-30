@@ -5,7 +5,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.semanticweb.HermiT.Namespaces;
+import org.semanticweb.HermiT.Prefixes;
 
 /**
  * Represents an atom in a DL clause.
@@ -68,21 +68,21 @@ public class Atom implements Serializable {
         return false;
     }
 
-    public String toString(Namespaces namespaces) {
+    public String toString(Prefixes prefixes) {
         StringBuffer buffer = new StringBuffer();
         if (s_infixPredicates.contains(m_dlPredicate)) {
-            buffer.append(m_arguments[0].toString(namespaces));
+            buffer.append(m_arguments[0].toString(prefixes));
             buffer.append(' ');
-            buffer.append(m_dlPredicate.toString(namespaces));
+            buffer.append(m_dlPredicate.toString(prefixes));
             buffer.append(' ');
-            buffer.append(m_arguments[1].toString(namespaces));
+            buffer.append(m_arguments[1].toString(prefixes));
         } else {
-            buffer.append(m_dlPredicate.toString(namespaces));
+            buffer.append(m_dlPredicate.toString(prefixes));
             buffer.append('(');
             for (int i = 0; i < m_arguments.length; i++) {
                 if (i != 0)
                     buffer.append(',');
-                buffer.append(m_arguments[i].toString(namespaces));
+                buffer.append(m_arguments[i].toString(prefixes));
             }
             buffer.append(')');
         }
@@ -90,7 +90,7 @@ public class Atom implements Serializable {
     }
 
     public String toString() {
-        return toString(Namespaces.EMPTY);
+        return toString(Prefixes.EMPTY);
     }
 
     protected Object readResolve() {

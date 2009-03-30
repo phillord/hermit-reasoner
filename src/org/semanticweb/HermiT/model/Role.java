@@ -12,8 +12,8 @@ public abstract class Role implements Serializable {
     private static final long serialVersionUID=-6487260817445541931L;
 
     public abstract Role getInverse();
-    public abstract String toString(Namespaces namespaces);
+    public abstract String toString(Prefixes prefixes);
     public String toString() {
-        return toString(Namespaces.EMPTY);
+        return toString(Prefixes.EMPTY);
     }
 }

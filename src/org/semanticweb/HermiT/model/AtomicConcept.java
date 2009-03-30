@@ -1,7 +1,7 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.model;
 
-import org.semanticweb.HermiT.Namespaces;
+import org.semanticweb.HermiT.Prefixes;
 
 /**
  * Represents an atomic concept.
@@ -20,8 +20,8 @@ public class AtomicConcept extends LiteralConcept implements DLPredicate {
     public int getArity() {
         return 1;
     }
-    public String toString(Namespaces namespaces) {
-        return namespaces.abbreviateURI(m_uri);
+    public String toString(Prefixes prefixes) {
+        return prefixes.abbreviateURI(m_uri);
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);

@@ -17,8 +17,8 @@ public class AtomicNegationConcept extends LiteralConcept {
     public AtomicConcept getNegatedAtomicConcept() {
         return m_negatedAtomicConcept;
     }
-    public String toString(Namespaces namespaces) {
-        return "not("+m_negatedAtomicConcept.toString(namespaces)+")";
+    public String toString(Prefixes prefixes) {
+        return "not("+m_negatedAtomicConcept.toString(prefixes)+")";
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);

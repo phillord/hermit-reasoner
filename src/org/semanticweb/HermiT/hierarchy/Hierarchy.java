@@ -82,16 +82,23 @@ public class Hierarchy<E> {
                 newHierarchy.m_nodesByElements.put(newElement,newNode);
         return newHierarchy;
     }
+    @SuppressWarnings("unchecked")
     public void traverseDepthFirst(HierarchyNodeVisitor<E> visitor) {
+        HierarchyNode<E>[] buffer=new HierarchyNode[2];
         Set<HierarchyNode<E>> visited=new HashSet<HierarchyNode<E>>();
-        traverseDepthFirst(visitor,0,m_topNode,null,visited);
+        traverseDepthFirst(visitor,0,m_topNode,null,visited,buffer);
     }
-    protected void traverseDepthFirst(HierarchyNodeVisitor<E> visitor,int level,HierarchyNode<E> node,HierarchyNode<E> parentNode,Set<HierarchyNode<E>> visited) {
+    protected void traverseDepthFirst(HierarchyNodeVisitor<E> visitor,int level,HierarchyNode<E> node,HierarchyNode<E> parentNode,Set<HierarchyNode<E>> visited,HierarchyNode<E>[] buffer) {
+        buffer[0]=node;
+        buffer[1]=parentNode;
+        visitor.redirect(buffer);
+        node=buffer[0];
+        parentNode=buffer[0];
         boolean firstVisit=visited.add(node);
         visitor.visit(level,node,parentNode,firstVisit);
         if (firstVisit)
             for (HierarchyNode<E> childNode : node.m_childNodes)
-                traverseDepthFirst(visitor,level+1,childNode,node,visited);
+                traverseDepthFirst(visitor,level+1,childNode,node,visited,buffer);
     }
     public static <T> Hierarchy<T> emptyHierarchy(Collection<T> elements,T topElement,T bottomElement) {
         HierarchyNode<T> topBottomNode=new HierarchyNode<T>(topElement);
@@ -102,6 +109,7 @@ public class Hierarchy<E> {
     }
 
     protected static interface HierarchyNodeVisitor<E> {
+        void redirect(HierarchyNode<E>[] nodes);
         void visit(int level,HierarchyNode<E> node,HierarchyNode<E> parentNode,boolean firstVisit);
     }
 

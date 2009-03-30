@@ -11,7 +11,7 @@ import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLDescription;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
 
-public class NormalizationTest extends AbstractOWLOntologyTest {
+public class NormalizationTest extends AbstractOWLAPITest {
 
     public NormalizationTest(String name) {
         super(name);

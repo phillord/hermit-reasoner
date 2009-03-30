@@ -20,7 +20,7 @@ public class Variable extends Term {
     public String toString() {
         return m_name;
     }
-    public String toString(Namespaces namespaces) {
+    public String toString(Prefixes prefixes) {
         return m_name;
     }
     protected Object readResolve() {

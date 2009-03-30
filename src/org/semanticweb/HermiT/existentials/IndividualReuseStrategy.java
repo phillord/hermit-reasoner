@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.semanticweb.HermiT.Namespaces;
+import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.AtomicConcept;
@@ -124,7 +124,7 @@ public class IndividualReuseStrategy extends AbstractExpansionStrategy implement
         if (!(atLeastConcept.getToConcept() instanceof AtomicConcept))
             return false;
         AtomicConcept toConcept=(AtomicConcept)atLeastConcept.getToConcept();
-        if (Namespaces.isInternalURI(toConcept.getURI()))
+        if (Prefixes.isInternalURI(toConcept.getURI()))
             return false;
         if (atLeastConcept.getNumber()==1 && (m_doReuseConceptsAlways.contains(toConcept) || !m_dontReuseConceptsThisRun.contains(toConcept))) {
             if (m_tableau.getTableauMonitor()!=null)

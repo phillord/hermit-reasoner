@@ -100,9 +100,9 @@ public class QueryCommand extends AbstractCommand implements ICommand {
     protected void printFact(Object[] fact,PrintWriter writer) {
         Object dlPredicate=fact[0];
         if (dlPredicate instanceof Concept)
-            writer.print(((Concept)dlPredicate).toString(debugger.getNamespaces()));
+            writer.print(((Concept)dlPredicate).toString(debugger.getPrefixes()));
         else if (dlPredicate instanceof DLPredicate)
-            writer.print(((DLPredicate)dlPredicate).toString(debugger.getNamespaces()));
+            writer.print(((DLPredicate)dlPredicate).toString(debugger.getPrefixes()));
         else
             throw new IllegalStateException("Internal error: invalid predicate.");
         writer.print('[');

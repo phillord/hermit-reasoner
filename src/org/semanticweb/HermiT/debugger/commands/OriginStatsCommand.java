@@ -56,7 +56,7 @@ public class OriginStatsCommand extends AbstractCommand implements ICommand {
             writer.print("    ");
             Printing.printPadded(writer,originInfo.m_numberOfNonactiveOccurrences,8);
             writer.print("    ");
-            writer.print(originInfo.m_concept.toString(debugger.getNamespaces()));
+            writer.print(originInfo.m_concept.toString(debugger.getPrefixes()));
             if (originInfo.m_nodes.size()<=5) {
                 writer.print("  [ ");
                 for (int index=0;index<originInfo.m_nodes.size();index++) {

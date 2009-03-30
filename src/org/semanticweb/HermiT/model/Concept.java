@@ -11,8 +11,8 @@ import org.semanticweb.HermiT.*;
 public abstract class Concept implements Serializable {
     private static final long serialVersionUID=-8685976675539160944L;
 
-    public abstract String toString(Namespaces namespaces);
+    public abstract String toString(Prefixes prefixes);
     public String toString() {
-        return toString(Namespaces.EMPTY);
+        return toString(Prefixes.EMPTY);
     }
 }

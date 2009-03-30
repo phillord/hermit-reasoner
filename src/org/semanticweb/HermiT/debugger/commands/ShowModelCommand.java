@@ -36,7 +36,7 @@ public class ShowModelCommand extends AbstractCommand implements ICommand {
                 ExtensionTable.Retrieval retrieval=extensionTable.createRetrieval(bindings,ExtensionTable.View.TOTAL);
                 retrieval.getBindingsBuffer()[0]=dlPredicate;
                 loadFacts(facts,retrieval);
-                title="Assertions containing the predicate '"+debugger.getNamespaces().abbreviateURI(dlPredicate.toString())+"'.";
+                title="Assertions containing the predicate '"+debugger.getPrefixes().abbreviateURI(dlPredicate.toString())+"'.";
             }
             else {
                 int nodeID;
@@ -89,9 +89,9 @@ public class ShowModelCommand extends AbstractCommand implements ICommand {
     protected void printFact(Object[] fact,PrintWriter writer) {
         Object dlPredicate=fact[0];
         if (dlPredicate instanceof Concept)
-            writer.print(((Concept)dlPredicate).toString(debugger.getNamespaces()));
+            writer.print(((Concept)dlPredicate).toString(debugger.getPrefixes()));
         else if (dlPredicate instanceof DLPredicate)
-            writer.print(((DLPredicate)dlPredicate).toString(debugger.getNamespaces()));
+            writer.print(((DLPredicate)dlPredicate).toString(debugger.getPrefixes()));
         else
             throw new IllegalStateException("Internal error: invalid predicate.");
         writer.print('[');

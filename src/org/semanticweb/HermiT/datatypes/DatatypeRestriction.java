@@ -14,7 +14,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.semanticweb.HermiT.Namespaces;
+import org.semanticweb.HermiT.Prefixes;
 
 
 /**
@@ -42,7 +42,7 @@ public abstract class DatatypeRestriction
         MIN_INCLUSIVE, MIN_EXCLUSIVE, MAX_INCLUSIVE, MAX_EXCLUSIVE 
     };
     
-    protected static final Map<String, String> uris = Namespaces.s_semanticWebNamespaces;
+    protected static final Map<String, String> uris = Prefixes.s_semanticWebPrefixes;
     
     /**
      * The datatypes supported by HermiT together with their URIs and a position 
@@ -272,20 +272,20 @@ public abstract class DatatypeRestriction
      * @see java.lang.Object#toString()
      */
     public String toString() {
-        return toString(Namespaces.EMPTY);
+        return toString(Prefixes.EMPTY);
     }
     
     /* (non-Javadoc)
-     * @see org.semanticweb.HermiT.model.DLPredicate#toString(org.semanticweb.HermiT.Namespaces)
+     * @see org.semanticweb.HermiT.model.DLPredicate#toString(org.semanticweb.HermiT.Prefixes)
      */
-    public String toString(Namespaces namespaces) {
+    public String toString(Prefixes prefixes) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("(");
         if (datatype != null && datatype.getURI() != null) {
             if (isNegated) buffer.append("not ");
-            buffer.append(namespaces.abbreviateURI(datatype.getURIAsString()));
+            buffer.append(prefixes.abbreviateURI(datatype.getURIAsString()));
         }
-        buffer.append(printExtraInfo(namespaces));
+        buffer.append(printExtraInfo(prefixes));
         boolean firstRun = true;
         if (!oneOf.isEmpty()) {
             if (isNegated) buffer.append("not ");
@@ -298,7 +298,7 @@ public abstract class DatatypeRestriction
                     buffer.append(isNegated ? " and " : " or ");
                     firstRun = false;
                 }
-                buffer.append(constant.toString(namespaces));
+                buffer.append(constant.toString(prefixes));
             }
             buffer.append(")");
         }
@@ -313,7 +313,7 @@ public abstract class DatatypeRestriction
                     buffer.append(" and");
                     firstRun = false;
                 }
-                buffer.append(" not " + constant.toString(namespaces));
+                buffer.append(" not " + constant.toString(prefixes));
             }
             buffer.append(")");
         }
@@ -327,7 +327,7 @@ public abstract class DatatypeRestriction
      * @return a string with extra information for the toString method, e.g., 
      * about facet values
      */
-    protected String printExtraInfo(Namespaces namespaces) {
+    protected String printExtraInfo(Prefixes prefixes) {
         return "";
     }
 

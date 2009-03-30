@@ -89,7 +89,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
 
     protected final Configuration m_configuration;
     protected DLOntology m_dlOntology;
-    protected Namespaces m_namespaces;
+    protected Prefixes m_prefixes;
     protected Tableau m_tableau;
     protected TableauSubsumptionChecker m_subsumptionChecker;
     protected Hierarchy<AtomicConcept> m_atomicConceptHierarchy;
@@ -124,8 +124,8 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
 
     // General accessor methods
     
-    public Namespaces getNamespaces() {
-        return m_namespaces;
+    public Prefixes getPrefixes() {
+        return m_prefixes;
     }
 
     public DLOntology getDLOntology() {
@@ -140,8 +140,8 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
 
     public void loadDLOntology(DLOntology dlOntology) {
         m_dlOntology=dlOntology;
-        m_namespaces=createNamespaces(m_dlOntology);
-        m_tableau=createTableau(m_configuration,m_dlOntology,m_namespaces);
+        m_prefixes=createPrefixes(m_dlOntology);
+        m_tableau=createTableau(m_configuration,m_dlOntology,m_prefixes);
         m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
     }
     
@@ -241,7 +241,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                 relevantAtomicConcepts.add(AtomicConcept.THING);
                 relevantAtomicConcepts.add(AtomicConcept.NOTHING);
                 for (AtomicConcept atomicConcept : m_dlOntology.getAllAtomicConcepts())
-                    if (!Namespaces.isInternalURI(atomicConcept.getURI()))
+                    if (!Prefixes.isInternalURI(atomicConcept.getURI()))
                         relevantAtomicConcepts.add(atomicConcept);
                 if (m_progressMonitor!=null) {
                     m_progressMonitor.setSize(relevantAtomicConcepts.size());
@@ -311,8 +311,8 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             OWLDataFactory factory=ontologyManager.getOWLDataFactory();
             OWLClass newClass=factory.getOWLClass(URI.create("internal:query-concept"));
             OWLAxiom classDefinitionAxiom=factory.getOWLSubClassAxiom(newClass,description);
-            DLOntology newDLOntology=extendDLOntology(m_configuration,m_namespaces,"uri:urn:internal-kb",m_dlOntology,ontologyManager,classDefinitionAxiom);
-            Tableau tableau=createTableau(m_configuration,newDLOntology,m_namespaces);
+            DLOntology newDLOntology=extendDLOntology(m_configuration,m_prefixes,"uri:urn:internal-kb",m_dlOntology,ontologyManager,classDefinitionAxiom);
+            Tableau tableau=createTableau(m_configuration,newDLOntology,m_prefixes);
             return tableau.isSatisfiable(AtomicConcept.create("internal:query-concept"));
         }
     }
@@ -330,8 +330,8 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             OWLAxiom subClassDefinitionAxiom=factory.getOWLSubClassAxiom(newSubConcept,subDescription);
             OWLClass newSuperConcept=factory.getOWLClass(URI.create("internal:query-superconcept"));
             OWLAxiom superClassDefinitionAxiom=factory.getOWLSubClassAxiom(superDescription,newSuperConcept);
-            DLOntology newDLOntology=extendDLOntology(m_configuration,m_namespaces,"uri:urn:internal-kb",m_dlOntology,ontologyManager,subClassDefinitionAxiom,superClassDefinitionAxiom);
-            Tableau tableau=createTableau(m_configuration,newDLOntology,m_namespaces);
+            DLOntology newDLOntology=extendDLOntology(m_configuration,m_prefixes,"uri:urn:internal-kb",m_dlOntology,ontologyManager,subClassDefinitionAxiom,superClassDefinitionAxiom);
+            Tableau tableau=createTableau(m_configuration,newDLOntology,m_prefixes);
             return tableau.isSubsumedBy(AtomicConcept.create("internal:query-subconcept"),AtomicConcept.create("internal:query-superconcept"));
         }
     }
@@ -385,8 +385,8 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             OWLDataFactory factory=ontologyManager.getOWLDataFactory();
             OWLClass newClass=factory.getOWLClass(URI.create("internal:query-concept"));
             OWLAxiom classDefinitionAxiom=factory.getOWLEquivalentClassesAxiom(newClass,description);
-            DLOntology newDLOntology=extendDLOntology(m_configuration,m_namespaces,"uri:urn:internal-kb",m_dlOntology,ontologyManager,classDefinitionAxiom);
-            Tableau tableau=createTableau(m_configuration,newDLOntology,m_namespaces);
+            DLOntology newDLOntology=extendDLOntology(m_configuration,m_prefixes,"uri:urn:internal-kb",m_dlOntology,ontologyManager,classDefinitionAxiom);
+            Tableau tableau=createTableau(m_configuration,newDLOntology,m_prefixes);
             final TableauSubsumptionChecker subsumptionChecker=new TableauSubsumptionChecker(tableau);
             HierarchyBuilder<AtomicConcept> hierarchyBuilder=new HierarchyBuilder<AtomicConcept>(
                 new HierarchyBuilder.Relation<AtomicConcept>() {
@@ -725,8 +725,8 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                 OWLDataFactory factory=ontologyManager.getOWLDataFactory();
                 OWLClass newClass=factory.getOWLClass(URI.create("internal:query-concept"));
                 OWLAxiom classDefinitionAxiom=factory.getOWLSubClassAxiom(type,newClass);
-                DLOntology newDLOntology=extendDLOntology(m_configuration,m_namespaces,"uri:urn:internal-kb",m_dlOntology,ontologyManager,classDefinitionAxiom);
-                Tableau tableau=createTableau(m_configuration,newDLOntology,m_namespaces);
+                DLOntology newDLOntology=extendDLOntology(m_configuration,m_prefixes,"uri:urn:internal-kb",m_dlOntology,ontologyManager,classDefinitionAxiom);
+                Tableau tableau=createTableau(m_configuration,newDLOntology,m_prefixes);
                 return tableau.isInstanceOf(AtomicConcept.create("internal:query-concept"),individual);
             }
         }
@@ -755,8 +755,8 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             OWLDataFactory factory=ontologyManager.getOWLDataFactory();
             OWLClass newClass=factory.getOWLClass(URI.create("internal:query-concept"));
             OWLAxiom classDefinitionAxiom=factory.getOWLSubClassAxiom(description,newClass);
-            DLOntology newDLOntology=extendDLOntology(m_configuration,m_namespaces,"uri:urn:internal-kb",m_dlOntology,ontologyManager,classDefinitionAxiom);
-            Tableau tableau=createTableau(m_configuration,newDLOntology,m_namespaces);
+            DLOntology newDLOntology=extendDLOntology(m_configuration,m_prefixes,"uri:urn:internal-kb",m_dlOntology,ontologyManager,classDefinitionAxiom);
+            Tableau tableau=createTableau(m_configuration,newDLOntology,m_prefixes);
             AtomicConcept queryConcept=AtomicConcept.create("internal:query-concept");
             HierarchyNode<AtomicConcept> hierarchyNode=getHierarchyNode(description);
             Set<OWLIndividual> result=new HashSet<OWLIndividual>();
@@ -815,7 +815,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
 
     // Various creation methods
     
-    protected static Tableau createTableau(Configuration config,DLOntology dlOntology,Namespaces namespaces) throws IllegalArgumentException {
+    protected static Tableau createTableau(Configuration config,DLOntology dlOntology,Prefixes prefixes) throws IllegalArgumentException {
         if (!dlOntology.canUseNIRule() && dlOntology.hasAtMostRestrictions() && dlOntology.hasInverseRoles() && config.existentialStrategyType==Configuration.ExistentialStrategyType.INDIVIDUAL_REUSE)
             throw new IllegalArgumentException("The supplied DL-ontology is not compatible with the individual reuse strategy.");
 
@@ -827,7 +827,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                 buffer.append("The following DL-clauses in the DL-ontology"+" are not admissible:");
                 buffer.append(CRLF);
                 for (DLClause dlClause : nonAdmissibleDLClauses) {
-                    buffer.append(dlClause.toString(namespaces));
+                    buffer.append(dlClause.toString(prefixes));
                     buffer.append(CRLF);
                 }
                 throw new IllegalArgumentException(buffer.toString());
@@ -846,10 +846,10 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             wellKnownTableauMonitor=new TimerWithPause();
             break;
         case DEBUGGER_HISTORY_ON:
-            wellKnownTableauMonitor=new Debugger(namespaces,true);
+            wellKnownTableauMonitor=new Debugger(prefixes,true);
             break;
         case DEBUGGER_NO_HISTORY:
-            wellKnownTableauMonitor=new Debugger(namespaces,false);
+            wellKnownTableauMonitor=new Debugger(prefixes,false);
             break;
         default:
             throw new IllegalArgumentException("Unknown monitor type");
@@ -925,7 +925,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         return new Tableau(tableauMonitor,existentialsExpansionStrategy,dlOntology,config.parameters);
     }
 
-    protected static DLOntology extendDLOntology(Configuration config,Namespaces namespaces,String resultingOntologyURI,DLOntology originalDLOntology,OWLOntologyManager ontologyManager,OWLAxiom... additionalAxioms) throws IllegalArgumentException {
+    protected static DLOntology extendDLOntology(Configuration config,Prefixes prefixes,String resultingOntologyURI,DLOntology originalDLOntology,OWLOntologyManager ontologyManager,OWLAxiom... additionalAxioms) throws IllegalArgumentException {
         try {
             Set<DescriptionGraph> descriptionGraphs=Collections.emptySet();
             OWLDataFactory factory=ontologyManager.getOWLDataFactory();
@@ -1016,30 +1016,30 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         }
     }
     
-    protected static Namespaces createNamespaces(DLOntology dlOntology) {
-        Set<String> namespaceURIs=new HashSet<String>();
+    protected static Prefixes createPrefixes(DLOntology dlOntology) {
+        Set<String> prefixURIs=new HashSet<String>();
         for (AtomicConcept concept : dlOntology.getAllAtomicConcepts())
-            addURI(concept.getURI(),namespaceURIs);
+            addURI(concept.getURI(),prefixURIs);
         for (AtomicRole atomicRole : dlOntology.getAllAtomicDataRoles())
-            addURI(atomicRole.getURI(),namespaceURIs);
+            addURI(atomicRole.getURI(),prefixURIs);
         for (AtomicRole atomicRole : dlOntology.getAllAtomicObjectRoles())
-            addURI(atomicRole.getURI(),namespaceURIs);
+            addURI(atomicRole.getURI(),prefixURIs);
         for (Individual individual : dlOntology.getAllIndividuals())
-            addURI(individual.getURI(),namespaceURIs);
-        Namespaces namespaces=new Namespaces();
-        namespaces.reegisterSemanticWebPrefixes();
-        namespaces.registerInternalNamespaces(namespaceURIs);
-        namespaces.registerDefaultNamespace(dlOntology.getOntologyURI()+"#");
+            addURI(individual.getURI(),prefixURIs);
+        Prefixes prefixes=new Prefixes();
+        prefixes.declareSemanticWebPrefixes();
+        prefixes.declareInternalPrefixes(prefixURIs);
+        prefixes.declareDefaultPrefix(dlOntology.getOntologyURI()+"#");
         int prefixIndex=0;
-        for (String namespace : namespaceURIs)
-            if (namespaces.getPrefix(namespace)==null) {
+        for (String prefixURI : prefixURIs)
+            if (prefixes.getPrefixName(prefixURI)==null) {
                 String prefix=getPrefixForIndex(prefixIndex);
-                while (namespaces.getNamespace(prefix)!=null)
+                while (prefixes.getPrefixIRI(prefix)!=null)
                     prefix=getPrefixForIndex(++prefixIndex);
-                namespaces.registerNamespace(prefix,namespace);
+                prefixes.declarePrefix(prefix,prefixURI);
                 ++prefixIndex;
             }
-        return namespaces;
+        return prefixes;
     }
     protected static String getPrefixForIndex(int prefixIndex) {
         StringBuffer buffer=new StringBuffer();
@@ -1050,12 +1050,12 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         buffer.insert(0,(char)(((int)'a')+prefixIndex));
         return buffer.toString();
     }
-    protected static void addURI(String uri,Set<String> namespaceURIs) {
-        if (!Namespaces.isInternalURI(uri)) {
+    protected static void addURI(String uri,Set<String> prefixURIs) {
+        if (!Prefixes.isInternalURI(uri)) {
             int lastHash=uri.lastIndexOf('#');
             if (lastHash!=-1) {
-                String namespaceURI=uri.substring(0,lastHash+1);
-                namespaceURIs.add(namespaceURI);
+                String prefixURI=uri.substring(0,lastHash+1);
+                prefixURIs.add(prefixURI);
             }
         }
     }
@@ -1066,15 +1066,15 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         HierarchyPrinterFSS printer=new HierarchyPrinterFSS(out,m_dlOntology.getOntologyURI()+"#");
         if (classes) {
             classify();
-            printer.loadAtomicConceptNamespaces(m_atomicConceptHierarchy.getAllElements());
+            printer.loadAtomicConceptPrefixURIs(m_atomicConceptHierarchy.getAllElements());
         }
         if (objectProperties) {
             classifyObjectProperties();
-            printer.loadAtomicRoleNamespaces(m_dlOntology.getAllAtomicObjectRoles());
+            printer.loadAtomicRolePrefixURIs(m_dlOntology.getAllAtomicObjectRoles());
         }
         if (dataProperties) {
             classifyDataProperties();
-            printer.loadAtomicRoleNamespaces(m_dlOntology.getAllAtomicDataRoles());
+            printer.loadAtomicRolePrefixURIs(m_dlOntology.getAllAtomicDataRoles());
         }
         printer.startPrinting();
         boolean atLF=true;

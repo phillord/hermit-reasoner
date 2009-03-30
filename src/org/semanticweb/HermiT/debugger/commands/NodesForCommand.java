@@ -23,7 +23,7 @@ public class NodesForCommand extends AbstractCommand implements ICommand {
             return;
         }
         String conceptName=args[1];
-        AtomicConcept atomicConcept=AtomicConcept.create(debugger.getNamespaces().expandAbbreviatedURI(conceptName));
+        AtomicConcept atomicConcept=AtomicConcept.create(debugger.getPrefixes().expandAbbreviatedURI(conceptName));
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter writer=new PrintWriter(buffer);
         writer.println("Nodes for '"+conceptName+"'");

@@ -29,7 +29,7 @@ public class UnprocessedDisjunctionsCommand extends AbstractCommand implements I
                     writer.print(groundDisjunction.getArgument(disjunctIndex,1).getNodeID());
                 }
                 else {
-                    writer.print(dlPredicate.toString(debugger.getNamespaces()));
+                    writer.print(dlPredicate.toString(debugger.getPrefixes()));
                     writer.print('(');
                     for (int argumentIndex=0;argumentIndex<dlPredicate.getArity();argumentIndex++) {
                         if (argumentIndex!=0)

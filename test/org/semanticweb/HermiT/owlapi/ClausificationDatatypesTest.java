@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Configuration;
-import org.semanticweb.HermiT.Namespaces;
+import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
@@ -16,7 +16,7 @@ import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLDescription;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
 
-public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
+public class ClausificationDatatypesTest extends AbstractOWLAPITest {
 
     public ClausificationDatatypesTest(String name) {
         super(name);
@@ -273,16 +273,16 @@ public class ClausificationDatatypesTest extends AbstractOWLOntologyTest {
         Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
         DLOntology dlOntology=clausifier.clausify(m_ontologyManager,m_ontology,noDescriptionGraphs);
         Set<String> actualStrings=new HashSet<String>();
-        Namespaces namespaces=new Namespaces();
-        namespaces.reegisterSemanticWebPrefixes();
-        namespaces.registerInternalNamespaces(Collections.singleton(m_ontology.getURI()+"#"));
-        namespaces.registerDefaultNamespace(m_ontology.getURI()+"#");
+        Prefixes prefixes=new Prefixes();
+        prefixes.declareSemanticWebPrefixes();
+        prefixes.declareInternalPrefixes(Collections.singleton(m_ontology.getURI()+"#"));
+        prefixes.declareDefaultPrefix(m_ontology.getURI()+"#");
         for (DLClause dlClause : dlOntology.getDLClauses())
-            actualStrings.add(dlClause.toString(namespaces));
+            actualStrings.add(dlClause.toString(prefixes));
         for (org.semanticweb.HermiT.model.Atom atom : dlOntology.getPositiveFacts())
-            actualStrings.add(atom.toString(namespaces));
+            actualStrings.add(atom.toString(prefixes));
         for (org.semanticweb.HermiT.model.Atom atom : dlOntology.getNegativeFacts())
-            actualStrings.add("not "+atom.toString(namespaces));
+            actualStrings.add("not "+atom.toString(prefixes));
         return actualStrings;
     }
 }
