@@ -2,18 +2,18 @@ package org.semanticweb.HermiT.datatypes;
 
 import java.math.BigInteger;
 
-import org.semanticweb.HermiT.datatypes.CanonicalDataRange;
-import org.semanticweb.HermiT.datatypes.DataConstant;
-import org.semanticweb.HermiT.datatypes.DataRange;
-import org.semanticweb.HermiT.datatypes.DatatypeRestrictionDouble;
-import org.semanticweb.HermiT.datatypes.DatatypeRestrictionInteger;
-import org.semanticweb.HermiT.datatypes.DatatypeRestrictionOWLRealPlus;
-import org.semanticweb.HermiT.datatypes.IntegerInterval;
-import org.semanticweb.HermiT.datatypes.IntegerIntervalBig;
-import org.semanticweb.HermiT.datatypes.IntegerIntervalFin;
-import org.semanticweb.HermiT.datatypes.DataConstant.Impl;
-import org.semanticweb.HermiT.datatypes.DatatypeRestriction.DT;
-import org.semanticweb.HermiT.datatypes.DatatypeRestriction.Facet;
+import org.semanticweb.HermiT.datatypes.old.CanonicalDataRange;
+import org.semanticweb.HermiT.datatypes.old.DataConstant;
+import org.semanticweb.HermiT.datatypes.old.DatatypeRestrictionDouble;
+import org.semanticweb.HermiT.datatypes.old.DatatypeRestrictionInteger;
+import org.semanticweb.HermiT.datatypes.old.DatatypeRestrictionOWLRealPlus;
+import org.semanticweb.HermiT.datatypes.old.IntegerInterval;
+import org.semanticweb.HermiT.datatypes.old.IntegerIntervalBig;
+import org.semanticweb.HermiT.datatypes.old.IntegerIntervalFin;
+import org.semanticweb.HermiT.datatypes.old.InternalDataRange;
+import org.semanticweb.HermiT.datatypes.old.DataConstant.Impl;
+import org.semanticweb.HermiT.datatypes.old.InternalDatatypeRestriction.DT;
+import org.semanticweb.HermiT.datatypes.old.InternalDatatypeRestriction.Facet;
 import org.semanticweb.HermiT.reasoner.AbstractReasonerTest;
 
 public class IntegersTest extends AbstractReasonerTest {
@@ -168,9 +168,9 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin     |-----...
         // to             |------...
         // results in     |------...
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.addFacet(Facet.MIN_INCLUSIVE, "9");
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
@@ -186,9 +186,9 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin           |-----...
         // to             |------...
         // results in        |-----...
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.addFacet(Facet.MIN_INCLUSIVE, "15");
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
@@ -204,9 +204,9 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin     ...---|
         // to                   |---...
         // results in      empty
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.addFacet(Facet.MAX_INCLUSIVE, "5");
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
@@ -221,9 +221,9 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin     ...----|
         // to              |----...
         // results in      |--|
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.addFacet(Facet.MAX_INCLUSIVE, "15");
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
@@ -241,9 +241,9 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin     |---|
         // to                 |-------...
         // results in     empty
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.addFacet(Facet.MIN_INCLUSIVE, "4");
         dr2.addFacet(Facet.MAX_INCLUSIVE, "8");
         assertTrue(((CanonicalDataRange) dr2).isFinite());
@@ -264,9 +264,9 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin     |-----|
         // to             |------...
         // results in     |--|
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.addFacet(Facet.MIN_INCLUSIVE, "5");
         dr2.addFacet(Facet.MAX_INCLUSIVE, "15");
         assertTrue(((CanonicalDataRange) dr2).isFinite());
@@ -287,9 +287,9 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin          |---|
         // to             |------...
         // results in       |---|
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.addFacet(Facet.MIN_INCLUSIVE, "15");
         dr2.addFacet(Facet.MAX_INCLUSIVE, "20");
         assertTrue(((CanonicalDataRange) dr2).isFinite());
@@ -310,9 +310,9 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin      ...-----|
         // to          ...----|
         // results in  ...----|
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MAX_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.addFacet(Facet.MAX_INCLUSIVE, "15");
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
@@ -328,9 +328,9 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin      ...----|
         // to              ...----|
         // results in   ...----|
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MAX_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.addFacet(Facet.MAX_INCLUSIVE, "15");
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
@@ -346,9 +346,9 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin             |---...
         // to          ...---|
         // results in      empty
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MAX_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.addFacet(Facet.MIN_INCLUSIVE, "15");
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
@@ -363,9 +363,9 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin         |---...
         // to          ...----|
         // results in      |--|
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MAX_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.addFacet(Facet.MIN_INCLUSIVE, "5");
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
@@ -383,9 +383,9 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin               |---|
         // to          ...----|
         // results in     empty
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MAX_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.addFacet(Facet.MIN_INCLUSIVE, "15");
         dr2.addFacet(Facet.MAX_INCLUSIVE, "20");
         assertTrue(((CanonicalDataRange) dr2).isFinite());
@@ -404,9 +404,9 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin         |-----|
         // to          ...----|
         // results in      |--|
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MAX_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.addFacet(Facet.MIN_INCLUSIVE, "5");
         dr2.addFacet(Facet.MAX_INCLUSIVE, "15");
         assertTrue(((CanonicalDataRange) dr2).isFinite());
@@ -427,9 +427,9 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin         |---|
         // to           ...------|
         // results in      |---|
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MAX_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.addFacet(Facet.MIN_INCLUSIVE, "0");
         dr2.addFacet(Facet.MAX_INCLUSIVE, "5");
         assertTrue(((CanonicalDataRange) dr2).isFinite());
@@ -450,10 +450,10 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin     ...---|
         // to                   |---|
         // results in      empty
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "10");
         dr1.addFacet(Facet.MAX_INCLUSIVE, "15");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.addFacet(Facet.MAX_INCLUSIVE, "5");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
         assertFalse(((CanonicalDataRange) dr2).isFinite());
@@ -470,10 +470,10 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin     ...----|
         // to              |----|
         // results in      |--|
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "10");
         dr1.addFacet(Facet.MAX_INCLUSIVE, "15");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.addFacet(Facet.MAX_INCLUSIVE, "12");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
         assertFalse(((CanonicalDataRange) dr2).isFinite());
@@ -492,10 +492,10 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin     ...---------|
         // to              |----|
         // results in      |----|
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "10");
         dr1.addFacet(Facet.MAX_INCLUSIVE, "15");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.addFacet(Facet.MAX_INCLUSIVE, "20");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
         assertFalse(((CanonicalDataRange) dr2).isFinite());
@@ -514,10 +514,10 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin             |---...
         // to          |---|
         // results in      empty
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "10");
         dr1.addFacet(Facet.MAX_INCLUSIVE, "15");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.addFacet(Facet.MIN_INCLUSIVE, "20");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
         assertFalse(((CanonicalDataRange) dr2).isFinite());
@@ -534,10 +534,10 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin         |----...
         // to          |------|
         // results in      |--|
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "10");
         dr1.addFacet(Facet.MAX_INCLUSIVE, "15");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.addFacet(Facet.MIN_INCLUSIVE, "12");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
         assertFalse(((CanonicalDataRange) dr2).isFinite());
@@ -557,10 +557,10 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin         |----...
         // to          |------|
         // results in      |--|
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "10");
         dr1.addFacet(Facet.MAX_INCLUSIVE, "15");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.addFacet(Facet.MIN_INCLUSIVE, "5");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
         assertFalse(((CanonicalDataRange) dr2).isFinite());
@@ -580,10 +580,10 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin            |---|
         // to          |---| 
         // results in      empty
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "5");
         dr1.addFacet(Facet.MAX_INCLUSIVE, "9");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.addFacet(Facet.MIN_INCLUSIVE, "10");
         dr2.addFacet(Facet.MAX_INCLUSIVE, "15");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
@@ -600,10 +600,10 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin        |-----|
         // to          |-----| 
         // results in     |--|
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "5");
         dr1.addFacet(Facet.MAX_INCLUSIVE, "10");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.addFacet(Facet.MIN_INCLUSIVE, "8");
         dr2.addFacet(Facet.MAX_INCLUSIVE, "15");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
@@ -624,10 +624,10 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin     |-------|
         // to            |---| 
         // results in    |---|
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "5");
         dr1.addFacet(Facet.MAX_INCLUSIVE, "20");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.addFacet(Facet.MIN_INCLUSIVE, "10");
         dr2.addFacet(Facet.MAX_INCLUSIVE, "15");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
@@ -648,10 +648,10 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin        |---|
         // to          |--------| 
         // results in     |---|
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "12");
         dr1.addFacet(Facet.MAX_INCLUSIVE, "13");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.addFacet(Facet.MIN_INCLUSIVE, "10");
         dr2.addFacet(Facet.MAX_INCLUSIVE, "15");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
@@ -672,10 +672,10 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin        |-----|
         // to          |-----| 
         // results in     |--|
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "5");
         dr1.addFacet(Facet.MAX_INCLUSIVE, "15");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.addFacet(Facet.MIN_INCLUSIVE, "10");
         dr2.addFacet(Facet.MAX_INCLUSIVE, "20");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
@@ -696,10 +696,10 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin           |---|
         // to          |---| 
         // results in     empty
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "5");
         dr1.addFacet(Facet.MAX_INCLUSIVE, "15");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.addFacet(Facet.MIN_INCLUSIVE, "20");
         dr2.addFacet(Facet.MAX_INCLUSIVE, "30");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
@@ -716,10 +716,10 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin      ...----|
         // to            |---| 
         // results in    |---|
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "5");
         dr1.addFacet(Facet.MAX_INCLUSIVE, "15");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.negate();
         dr2.addFacet(Facet.MIN_INCLUSIVE, "20");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
@@ -740,10 +740,10 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin           |-----...
         // to            |-------| 
         // results in        |---|
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "5");
         dr1.addFacet(Facet.MAX_INCLUSIVE, "15");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.negate();
         dr2.addFacet(Facet.MAX_INCLUSIVE, "10");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
@@ -764,10 +764,10 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin     ...---|
         // to            |-------| 
         // results in    |---|
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "5");
         dr1.addFacet(Facet.MAX_INCLUSIVE, "15");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.negate();
         dr2.addFacet(Facet.MIN_INCLUSIVE, "10");
         assertTrue(((CanonicalDataRange) dr1).isFinite());
@@ -789,10 +789,10 @@ public class IntegersTest extends AbstractReasonerTest {
         // or               |-------...
         // to           |----------| 
         // results in   |----------| since the conjoined is top
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "0");
         dr1.addFacet(Facet.MAX_INCLUSIVE, "15");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.negate();
         dr2.addFacet(Facet.MIN_INCLUSIVE, "10"); // <= 9
         dr2.addFacet(Facet.MAX_INCLUSIVE, "5"); // or >= 6 (trivially true)
@@ -814,10 +814,10 @@ public class IntegersTest extends AbstractReasonerTest {
         // or                   |---...
         // to           |-----------| 
         // results in   |---|  |---| 
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "0");
         dr1.addFacet(Facet.MAX_INCLUSIVE, "15");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.negate();
         dr2.addFacet(Facet.MIN_INCLUSIVE, "5"); // <= 4
         dr2.addFacet(Facet.MAX_INCLUSIVE, "10"); // or >= 11
@@ -848,14 +848,14 @@ public class IntegersTest extends AbstractReasonerTest {
         // or                         |---...
         // to           |----------------| 
         // results in   |-----| |--|  |--| 
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "0");
         dr1.addFacet(Facet.MAX_INCLUSIVE, "100");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.negate();
         dr2.addFacet(Facet.MIN_INCLUSIVE, "10"); // <= 9
         dr2.addFacet(Facet.MAX_INCLUSIVE, "20"); // or >= 21
-        DataRange dr3 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr3 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr3.negate();
         dr3.addFacet(Facet.MIN_INCLUSIVE, "30"); // <= 29
         dr3.addFacet(Facet.MAX_INCLUSIVE, "40"); // or >= 41
@@ -906,18 +906,18 @@ public class IntegersTest extends AbstractReasonerTest {
         // and                   |---------|
         // to           |----------------| 
         // results in           |--|  |--| 
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "0");
         dr1.addFacet(Facet.MAX_INCLUSIVE, "100");
-        DataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr2.negate();
         dr2.addFacet(Facet.MIN_INCLUSIVE, "10"); // <= 9
         dr2.addFacet(Facet.MAX_INCLUSIVE, "20"); // or >= 21
-        DataRange dr3 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr3 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr3.negate();
         dr3.addFacet(Facet.MIN_INCLUSIVE, "30"); // <= 29
         dr3.addFacet(Facet.MAX_INCLUSIVE, "40"); // or >= 41
-        DataRange dr4 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr4 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr4.addFacet(Facet.MIN_INCLUSIVE, "25"); // >= 25
         dr4.addFacet(Facet.MAX_INCLUSIVE, "110"); // and >= 110
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
@@ -975,9 +975,9 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin     |-----...
         // to             |------...
         // results in     |------...
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "10.0");
-        DataRange dr2 = new DatatypeRestrictionDouble(DT.DOUBLE);
+        InternalDataRange dr2 = new DatatypeRestrictionDouble(DT.DOUBLE);
         dr2.addFacet(Facet.MIN_INCLUSIVE, "11.11");
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
@@ -993,9 +993,9 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin     |-----|
         // to         |---------...
         // results in  |-----|
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "10.0");
-        DataRange dr2 = new DatatypeRestrictionDouble(DT.DOUBLE);
+        InternalDataRange dr2 = new DatatypeRestrictionDouble(DT.DOUBLE);
         dr2.addFacet(Facet.MIN_INCLUSIVE, "11.11"); // >= 12
         dr2.addFacet(Facet.MAX_EXCLUSIVE, "15.1");  // <= 15
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
@@ -1013,10 +1013,10 @@ public class IntegersTest extends AbstractReasonerTest {
         // conjoin     |-----|
         // to         |---------...
         // results in  |-----|
-        DataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
+        InternalDataRange dr1 = new DatatypeRestrictionInteger(DT.INTEGER);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "0");
         dr1.addFacet(Facet.MAX_INCLUSIVE, "5");
-        DataRange dr2 = new DatatypeRestrictionOWLRealPlus(DT.DECIMAL);
+        InternalDataRange dr2 = new DatatypeRestrictionOWLRealPlus(DT.DECIMAL);
         dr2.addFacet(Facet.MIN_INCLUSIVE, "0.1"); // >= 1
         dr2.addFacet(Facet.MAX_INCLUSIVE, "2.0");  // <= 2
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;

@@ -1,730 +1,640 @@
 package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
-import java.math.BigInteger;
+import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-import org.semanticweb.HermiT.datatypes.CanonicalDataRange;
-import org.semanticweb.HermiT.datatypes.DataConstant;
-import org.semanticweb.HermiT.datatypes.DataRange;
-import org.semanticweb.HermiT.datatypes.DatatypeRestrictionLiteral;
-import org.semanticweb.HermiT.datatypes.EnumeratedDataRange;
-import org.semanticweb.HermiT.datatypes.DatatypeRestriction.DT;
+import org.semanticweb.HermiT.Prefixes;
+import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
+import org.semanticweb.HermiT.datatypes.DatatypeRegistry;
 import org.semanticweb.HermiT.model.Inequality;
+import org.semanticweb.HermiT.model.DataRange;
+import org.semanticweb.HermiT.model.NegationDataRange;
+import org.semanticweb.HermiT.model.DatatypeRestriction;
+import org.semanticweb.HermiT.model.DataValueEnumeration;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 
 public class DatatypeManager implements Serializable {
-    private static final long serialVersionUID = -5304869484553471737L;
-    protected final TableauMonitor tableauMonitor;
-    protected final ExtensionManager extensionManager;
-    protected final ExtensionTable.Retrieval pairsDeltaOld;
-    protected final ExtensionTable.Retrieval triplesDeltaOld;
-    protected final ExtensionTable.Retrieval triplesFirstBoundRetr;
-    protected final ExtensionTable.Retrieval triplesSecondBoundRetr;
-    protected final ExtensionTable.Retrieval pairsFirstBoundRetr;
-    protected final ExtensionTable.Retrieval triplesZeroBoundRetr;
-    protected final UnionDependencySet dependencySetTwoCauses;
-    
+    private static final long serialVersionUID=-5304869484553471737L;
+
+    protected final TableauMonitor m_tableauMonitor;
+    protected final ExtensionManager m_extensionManager;
+    protected final ExtensionTable.Retrieval m_assertionsDeltaOldRetrieval;
+    protected final ExtensionTable.Retrieval m_inequalityDeltaOldRetrieval;
+    protected final ExtensionTable.Retrieval m_inequality01Retrieval;
+    protected final ExtensionTable.Retrieval m_inequality02Retrieval;
+    protected final ExtensionTable.Retrieval m_assertions1Retrieval;
+    protected final DConjunction m_conjunction;
+    protected final List<Node> m_auxiliaryNodeList;
+    protected final List<DVariable> m_auxiliaryVariableList;
+    protected final UnionDependencySet m_unionDependencySet;
+    protected final boolean[] m_newVariableAdded;
+
     public DatatypeManager(Tableau tableau) {
-        tableauMonitor = tableau.m_tableauMonitor;
-        extensionManager = tableau.m_extensionManager;
-        // retrieval object for all the datatype assertions in the changed part of the tuple table
-        pairsDeltaOld = extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[2],ExtensionTable.View.DELTA_OLD);
-        // retrieval object for all the inequality assertions in the changed part of the tuple table
-        triplesDeltaOld = extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,false,false },ExtensionTable.View.DELTA_OLD);
-        // retrieval object to fetch the parent node of a data range node
-        triplesFirstBoundRetr = extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,false }, ExtensionTable.View.TOTAL);
-        // retrieval object to fetch the parent node of a data range node
-        triplesSecondBoundRetr = extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { false,false,true }, ExtensionTable.View.TOTAL);
-        // retrieval object for all datatype assertions that use the same variable as one from the above retrieval
-        pairsFirstBoundRetr = extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
-        // retrieval object for inequalities
-        triplesZeroBoundRetr = extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,false,false },ExtensionTable.View.TOTAL);
-        dependencySetTwoCauses = new UnionDependencySet(2);
+        m_tableauMonitor=tableau.m_tableauMonitor;
+        m_extensionManager=tableau.m_extensionManager;
+        m_assertionsDeltaOldRetrieval=m_extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { false,false },ExtensionTable.View.DELTA_OLD);
+        m_inequalityDeltaOldRetrieval=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,false,false },ExtensionTable.View.DELTA_OLD);
+        m_inequalityDeltaOldRetrieval.getBindingsBuffer()[0]=Inequality.INSTANCE;
+        m_inequality01Retrieval=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,true,false },ExtensionTable.View.EXTENSION_THIS);
+        m_inequality01Retrieval.getBindingsBuffer()[0]=Inequality.INSTANCE;
+        m_inequality02Retrieval=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,false,true },ExtensionTable.View.EXTENSION_THIS);
+        m_inequality02Retrieval.getBindingsBuffer()[0]=Inequality.INSTANCE;
+        m_assertions1Retrieval=m_extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.EXTENSION_THIS);
+        m_conjunction=new DConjunction();
+        m_auxiliaryNodeList=new ArrayList<Node>();
+        m_auxiliaryVariableList=new ArrayList<DVariable>();
+        m_unionDependencySet=new UnionDependencySet(16);
+        m_newVariableAdded=new boolean[1];
     }
-    
-    /**
-     * Checks if in the last iteration a new data range assertion has been added 
-     * and if so, whether the restrictions on this newly added node and its data 
-     * range siblings are satisfiable given the asserted inequalities. If not, a 
-     * clash is set in the extensionManager an the tableauMonitor (if not null) 
-     * is notified accordingly. 
-     * @return true if the data range assertions are satisfiable and false 
-     *         otherwise
-     */
     public boolean checkDatatypeConstraints() {
-        if (tableauMonitor != null) {
-            tableauMonitor.datatypeCheckingStarted();
-        }
-        boolean datatypesSat = true;
-        Set<DataRange> checkedDRs = new HashSet<DataRange>();
-        Object[] pair = pairsDeltaOld.getTupleBuffer();
-        pairsDeltaOld.open();
-        while (datatypesSat && !pairsDeltaOld.afterLast()) {
-            if (pair[0] instanceof DataRange) { //&& !checkedDRs.contains((DataRange) pair[0])) {
-                // in the last saturation, we added a DataRange, so lets check 
-                // whether this caused a clash
-                Map<Node, Set<Node>> inequalities = new HashMap<Node, Set<Node>>();
-                inequalities.put((Node) pair[1], new HashSet<Node>());
-                Map<Node, Set<Node>> inequalitiesSym = new HashMap<Node, Set<Node>>();
-                inequalitiesSym.put((Node) pair[1], new HashSet<Node>());
-                boolean foundSelfInequality = fetchRelevantNodes(inequalities, inequalitiesSym);
-                if (foundSelfInequality) return false;
-                
-                Map<Node,Set<DataRange>> nodeToDRs = fetchRelevantDataRanges(inequalities.keySet());
-                datatypesSat = checkDatatypeAssertionFor(nodeToDRs, inequalities, inequalitiesSym);
-                if (datatypesSat) {
-                    // remember, which ranges we have already checked because 
-                    // pairsDeltaOld can contain more than one data range 
-                    // assertion and we check not just a found assertion, but 
-                    // the all data range assertions for the node and its data 
-                    // range siblings
-                    for (Node node : nodeToDRs.keySet()) {
-                        checkedDRs.addAll(nodeToDRs.get(node));
-                    }
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.datatypeCheckingStarted();
+        m_conjunction.clear();
+        Object[] tupleBuffer=m_assertionsDeltaOldRetrieval.getTupleBuffer();
+        m_assertionsDeltaOldRetrieval.open();
+        while (!m_extensionManager.containsClash() && !m_assertionsDeltaOldRetrieval.afterLast()) {
+            if (tupleBuffer[0] instanceof DataRange) {
+                // A data range was added in the last saturation step, so we check the D-conjunction hanging off of its node.
+                m_conjunction.clearActiveVariables();
+                Node node=(Node)tupleBuffer[1];
+                DVariable variable=m_conjunction.getVariableFor(node);
+                // If variable==null, this means that 'variable' has not been checked in this iteration.
+                if (variable==null) {
+                    loadNodesReachableByInequality(node);
+                    loadDataRanges();
+                    checkConjunctionSatisfiability();
                 }
             }
-            pairsDeltaOld.next();
+            m_assertionsDeltaOldRetrieval.next();
         }
-        Object[] triple = triplesDeltaOld.getTupleBuffer();
-        triplesDeltaOld.getBindingsBuffer()[0]=Inequality.INSTANCE;
-        triplesDeltaOld.open();
-        while (datatypesSat && !triplesDeltaOld.afterLast()) {
-            if (((Node) triple[1]).m_nodeType == NodeType.CONCRETE_NODE 
-                    && ((Node) triple[1]).m_nodeType == NodeType.CONCRETE_NODE) { 
-                // in the last saturation, we added an inequality between 
-                // concrete nodes, so lets check whether this caused a clash
-                Map<Node, Set<Node>> inequalities = new HashMap<Node, Set<Node>>();
-                inequalities.put((Node) triple[1], new HashSet<Node>());
-                inequalities.put((Node) triple[2], new HashSet<Node>());
-                Map<Node, Set<Node>> inequalitiesSym = new HashMap<Node, Set<Node>>();
-                inequalitiesSym.put((Node) triple[1], new HashSet<Node>());
-                inequalitiesSym.put((Node) triple[2], new HashSet<Node>());
-                boolean foundSelfInequality = fetchRelevantNodes(inequalities, inequalitiesSym);
-                if (foundSelfInequality) return false;
-                
-                Map<Node,Set<DataRange>> nodeToDRs = fetchRelevantDataRanges(inequalities.keySet());
-                datatypesSat = checkDatatypeAssertionFor(nodeToDRs, inequalities, inequalitiesSym);
-                if (datatypesSat) {
-                    // remember, which ranges we have already checked because 
-                    // pairsDeltaOld can contain more than one data range 
-                    // assertion and we check not just a found assertion, but 
-                    // the all data range assertions for the node and its data 
-                    // range siblings
-                    for (Node node : nodeToDRs.keySet()) {
-                        checkedDRs.addAll(nodeToDRs.get(node));
-                    }
+        tupleBuffer=m_inequalityDeltaOldRetrieval.getTupleBuffer();
+        m_inequalityDeltaOldRetrieval.open();
+        while (!m_extensionManager.containsClash() && !m_inequalityDeltaOldRetrieval.afterLast()) {
+            Node node1=(Node)tupleBuffer[1];
+            Node node2=(Node)tupleBuffer[2];
+            if (node1.getNodeType()==NodeType.CONCRETE_NODE && node2.getNodeType()==NodeType.CONCRETE_NODE) {
+                // An inequality between concrete was added in the last saturation step, so we check the D-conjunction hanging off of its node.
+                DVariable variable1=m_conjunction.getVariableFor(node1);
+                DVariable variable2=m_conjunction.getVariableFor(node2);
+                // If variable1==null, this means that 'node1' has not been checked in this iteration,
+                // and similarly for variable2==null.
+                if (variable1==null && variable2==null) {
+                    // It suffices to start the inequality from one of the two nodes:
+                    // loadNodesReachableByInequality(node1) will load all reachable nodes and this will include node2.
+                    loadNodesReachableByInequality(node1);
+                    loadDataRanges();
+                    checkConjunctionSatisfiability();
                 }
             }
-            triplesDeltaOld.next();
+            m_inequalityDeltaOldRetrieval.next();
         }
-        if (tableauMonitor != null) {
-            tableauMonitor.datatypeCheckingFinished(datatypesSat);
-        }
-        return datatypesSat;
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.datatypeCheckingFinished(!m_extensionManager.containsClash());
+        m_unionDependencySet.clearConstituents();
+        m_conjunction.clear();
+        m_auxiliaryNodeList.clear();
+        m_auxiliaryVariableList.clear();
+        return true;
     }
-    
-    /**
-     * Input are 2 maps with the nodes as keys and empty sets as values for 
-     * which we want to collect the inequalities. Afterwards the sets have keys 
-     * for all nodes that are linked to the input nodes via an inequality 
-     * (considering it is symmetric). The values in inequalities contain the 
-     * inequalities (not treating inequality as symmetric) and the values in 
-     * inequalitiesSym contain the inverse inequalities. this is needed because 
-     * when a clash is found later on, we need to reconstruct whether the 
-     * extension table contains neq n1 n2 or neq n2 n1. 
-     * If a self inequality is found (neq node node) a clash is raised and the 
-     * method return true. 
-     * @param inequalities is a map that is initially assumed to have all nodes 
-     *        we are interested in as keys but with empty sets as values. 
-     *        Whenever an inequality is found, the inequal nodes are added to 
-     *        the set and inequalities are collected for them as well. 
-     * @param inequalitiesInv is a map that is initially assumed to have all 
-     *        nodes we are interested in as keys but with empty sets as values. 
-     *        Whenever an inequality is found with one of the keys in the third 
-     *        position, the inequalities is collected. 
-     * @return true if a tuple neq n1 n1 is found while fetching the 
-     *         inequalities from the extension table and false otherwise
-     */
-    protected boolean fetchRelevantNodes(
-            Map<Node, Set<Node>> inequalities, 
-            Map<Node, Set<Node>> inequalitiesInv) {
-        Object[] triple = triplesZeroBoundRetr.getTupleBuffer();
-        triplesZeroBoundRetr.getBindingsBuffer()[0]=Inequality.INSTANCE;
-        boolean fixedPointReached = false;
-        
-        while(!fixedPointReached) {
-            triplesZeroBoundRetr.open();
-            fixedPointReached = true;
-            while (!triplesZeroBoundRetr.afterLast()) {
-                Node node1 = (Node) triple[1];
-                Node node2 = (Node) triple[2];
-                // see if it is relevant
-                if (node1.m_nodeType == NodeType.CONCRETE_NODE 
-                        && ((inequalities.containsKey(node1) 
-                                && !inequalities.get(node1).contains(node2)) 
-                                || (inequalities.containsKey(node2) 
-                                        && !inequalities.get(node2).contains(node1)))) {
-                    
-                    // self inequality found
-                    if (node1.equals(node2)) {
-                        extensionManager.setClash(triplesZeroBoundRetr.getDependencySet());
-                        if (tableauMonitor != null) {
-                            tableauMonitor.clashDetected(new Object[][] { new Object[] { Inequality.INSTANCE, node1, node2 } });
-                            tableauMonitor.datatypeCheckingFinished(false);
-                        }
+    protected void loadNodesReachableByInequality(Node node) {
+        m_auxiliaryNodeList.clear();
+        m_auxiliaryNodeList.add(node);
+        while (!m_auxiliaryNodeList.isEmpty()) {
+            Node reachedNode=m_auxiliaryNodeList.remove(m_auxiliaryNodeList.size()-1);
+            DVariable reachedVariable=m_conjunction.activateVariable(reachedNode,m_newVariableAdded);
+            // Look for all inequalities where reachedNode occurs in the first position.
+            m_inequality01Retrieval.getBindingsBuffer()[1]=reachedNode;
+            m_inequality01Retrieval.open();
+            Object[] tupleBuffer=m_inequality01Retrieval.getTupleBuffer();
+            while (!m_inequality01Retrieval.afterLast()) {
+                Node newNode=(Node)tupleBuffer[2];
+                DVariable newVariable=m_conjunction.activateVariable(newNode,m_newVariableAdded);
+                if (m_newVariableAdded[0])
+                    m_auxiliaryNodeList.add(newNode);
+                m_conjunction.addInequality(reachedVariable,newVariable);
+                m_inequality01Retrieval.next();
+            }
+            // Look for all inequalities where reachedNode occurs in the second position.
+            m_inequality02Retrieval.getBindingsBuffer()[2]=reachedNode;
+            m_inequality02Retrieval.open();
+            tupleBuffer=m_inequality02Retrieval.getTupleBuffer();
+            while (!m_inequality02Retrieval.afterLast()) {
+                Node newNode=(Node)tupleBuffer[1];
+                DVariable newVariable=m_conjunction.activateVariable(newNode,m_newVariableAdded);
+                if (m_newVariableAdded[0])
+                    m_auxiliaryNodeList.add(newNode);
+                m_conjunction.addInequality(newVariable,reachedVariable);
+                m_inequality02Retrieval.next();
+            }
+        }
+    }
+    protected void loadDataRanges() {
+        for (int index=m_conjunction.m_activeVariables.size()-1;index>=0;--index) {
+            DVariable variable=m_conjunction.m_activeVariables.get(index);
+            m_assertions1Retrieval.getBindingsBuffer()[1]=variable.m_node;
+            m_assertions1Retrieval.open();
+            Object[] tupleBuffer=m_assertions1Retrieval.getTupleBuffer();
+            while (!m_assertions1Retrieval.afterLast()) {
+                Object potentialDataRange=tupleBuffer[0];
+                if (potentialDataRange instanceof DataRange)
+                    addDataRange(variable,(DataRange)potentialDataRange);
+                m_assertions1Retrieval.next();
+            }
+        }
+    }
+    public void addDataRange(DVariable variable,DataRange dataRange) {
+        if (dataRange instanceof DatatypeRestriction) {
+            DatatypeRestriction datatypeRestriction=(DatatypeRestriction)dataRange;
+            variable.m_positiveDatatypeRestrictions.add(datatypeRestriction);
+            if (variable.m_mostSpecificRestriction==null)
+                variable.m_mostSpecificRestriction=datatypeRestriction;
+            else if (DatatypeRegistry.isDisjointWith(variable.m_mostSpecificRestriction.getDatatypeURI(),datatypeRestriction.getDatatypeURI())) {
+                m_unionDependencySet.clearConstituents();
+                m_unionDependencySet.addConstituent(m_extensionManager.getAssertionDependencySet(variable.m_mostSpecificRestriction,variable.m_node));
+                m_unionDependencySet.addConstituent(m_extensionManager.getAssertionDependencySet(datatypeRestriction,variable.m_node));
+                m_extensionManager.setClash(m_unionDependencySet);
+                if (m_tableauMonitor!=null) {
+                    Object[] tuple1=new Object[] { variable.m_mostSpecificRestriction,variable.m_node };
+                    Object[] tuple2=new Object[] { datatypeRestriction,variable.m_node };
+                    m_tableauMonitor.clashDetected(tuple1,tuple2);
+                }
+            }
+            else if (DatatypeRegistry.isSubsetOf(datatypeRestriction.getDatatypeURI(),variable.m_mostSpecificRestriction.getDatatypeURI()))
+                variable.m_mostSpecificRestriction=datatypeRestriction;
+        }
+        else if (dataRange instanceof DataValueEnumeration)
+            variable.m_positiveDataValueEnumerations.add((DataValueEnumeration)dataRange);
+        else if (dataRange instanceof NegationDataRange) {
+            DataRange negatedDataRange=((NegationDataRange)dataRange).getNegatedDataRange();
+            if (negatedDataRange instanceof DatatypeRestriction)
+                variable.m_negativeDatatypeRestrictions.add((DatatypeRestriction)negatedDataRange);
+            else if (negatedDataRange instanceof DataValueEnumeration) {
+                DataValueEnumeration negatedDataValueEnumeration=(DataValueEnumeration)negatedDataRange;
+                variable.m_negativeDataValueEnumerations.add(negatedDataValueEnumeration);
+                for (int index=negatedDataValueEnumeration.getNumberOfDataValues()-1;index>=0;--index)
+                    variable.addForbiddenDataValue(negatedDataValueEnumeration.getDataValue(index));
+            }
+            else
+                throw new IllegalStateException("Internal error: invalid data range.");
+        }
+        else
+            throw new IllegalStateException("Internal error: invalid data range.");
+    }
+    protected void checkConjunctionSatisfiability() {
+        List<DVariable> activeNodes=m_conjunction.m_activeVariables;
+        for (int index=activeNodes.size()-1;!m_extensionManager.containsClash() && index>=0;--index) {
+            DVariable variable=activeNodes.get(index);
+            if (!variable.m_positiveDataValueEnumerations.isEmpty())
+                normalizeAsEnumeration(variable);
+            else if (!variable.m_positiveDatatypeRestrictions.isEmpty())
+                normalizeAsValueSpaceSubset(variable);
+        }
+        if (!m_extensionManager.containsClash()) {
+            eliminateTrivialInequalities();
+            eliminateTriviallySatisfiableNodes();
+            enumerateValueSpaceSubsets();
+            if (!m_extensionManager.containsClash()) {
+                eliminateTriviallySatisfiableNodes();
+                checkAssignments();
+            }
+        }
+    }
+    protected void normalizeAsEnumeration(DVariable variable) {
+        variable.m_hasExplicitDataValues=true;
+        List<Object> explicitDataValues=variable.m_explicitDataValues;
+        List<DataValueEnumeration> positiveDataValueEnumerations=variable.m_positiveDataValueEnumerations;
+        DataValueEnumeration firstDataValueEnumeration=positiveDataValueEnumerations.get(0);
+        nextValue: for (int index=firstDataValueEnumeration.getNumberOfDataValues()-1;index>=0;--index) {
+            Object dataValue=firstDataValueEnumeration.getDataValue(index);
+            if (!variable.m_forbiddenDataValues.contains(dataValue)) {
+                for (int enumerationIndex=positiveDataValueEnumerations.size()-1;enumerationIndex>=1;--enumerationIndex)
+                    if (!positiveDataValueEnumerations.get(enumerationIndex).containsDataValue(dataValue))
+                        continue nextValue;
+                explicitDataValues.add(dataValue);
+            }
+        }
+        List<DatatypeRestriction> positiveDatatypeRestrictions=variable.m_positiveDatatypeRestrictions;
+        for (int index=positiveDatatypeRestrictions.size()-1;!explicitDataValues.isEmpty() && index>=0;--index) {
+            DatatypeRestriction positiveDatatypeRestriction=positiveDatatypeRestrictions.get(index);
+            ValueSpaceSubset valueSpaceSubset=DatatypeRegistry.createValueSpaceSubset(positiveDatatypeRestriction);
+            eliminateDataValuesUsingValueSpaceSubset(valueSpaceSubset,explicitDataValues,false);
+        }
+        List<DatatypeRestriction> negativeDatatypeRestrictions=variable.m_negativeDatatypeRestrictions;
+        for (int index=negativeDatatypeRestrictions.size()-1;!explicitDataValues.isEmpty() && index>=0;--index) {
+            DatatypeRestriction negativeDatatypeRestriction=negativeDatatypeRestrictions.get(index);
+            ValueSpaceSubset valueSpaceSubset=DatatypeRegistry.createValueSpaceSubset(negativeDatatypeRestriction);
+            eliminateDataValuesUsingValueSpaceSubset(valueSpaceSubset,explicitDataValues,true);
+        }
+        if (explicitDataValues.isEmpty())
+            setClashFor(variable);
+    }
+    protected void eliminateDataValuesUsingValueSpaceSubset(ValueSpaceSubset valueSpaceSubset,List<Object> explicitDataValues,boolean eliminateWhenValue) {
+        for (int valueIndex=explicitDataValues.size()-1;valueIndex>=0;--valueIndex) {
+            Object dataValue=explicitDataValues.get(valueIndex);
+            if (valueSpaceSubset.containsDataValue(dataValue)==eliminateWhenValue)
+                explicitDataValues.remove(valueIndex);
+        }
+    }
+    protected void normalizeAsValueSpaceSubset(DVariable variable) {
+        String mostSpecificDatatypeURI=variable.m_mostSpecificRestriction.getDatatypeURI();
+        variable.m_valueSpaceSubset=DatatypeRegistry.createValueSpaceSubset(variable.m_mostSpecificRestriction);
+        List<DatatypeRestriction> positiveDatatypeRestrictions=variable.m_positiveDatatypeRestrictions;
+        for (int index=positiveDatatypeRestrictions.size()-1;index>=0;--index) {
+            DatatypeRestriction datatypeRestriction=positiveDatatypeRestrictions.get(index);
+            if (datatypeRestriction!=variable.m_mostSpecificRestriction)
+                variable.m_valueSpaceSubset=DatatypeRegistry.conjoinWithDR(variable.m_valueSpaceSubset,datatypeRestriction);
+        }
+        List<DatatypeRestriction> negativeDatatypeRestrictions=variable.m_negativeDatatypeRestrictions;
+        for (int index=negativeDatatypeRestrictions.size()-1;index>=0;--index) {
+            DatatypeRestriction datatypeRestriction=negativeDatatypeRestrictions.get(index);
+            String datatypeRestrictionDatatypeURI=datatypeRestriction.getDatatypeURI();
+            if (!DatatypeRegistry.isDisjointWith(mostSpecificDatatypeURI,datatypeRestrictionDatatypeURI) && !DatatypeRegistry.isSubsetOf(mostSpecificDatatypeURI,datatypeRestrictionDatatypeURI))
+                variable.m_valueSpaceSubset=DatatypeRegistry.conjoinWithDRNegation(variable.m_valueSpaceSubset,datatypeRestriction);
+        }
+        if (!variable.m_valueSpaceSubset.hasCardinalityAtLeast(1))
+            setClashFor(variable);
+    }
+    protected void eliminateTrivialInequalities() {
+        for (int index1=m_conjunction.m_activeVariables.size()-1;index1>=0;--index1) {
+            DVariable variable1=m_conjunction.m_activeVariables.get(index1);
+            if (variable1.m_mostSpecificRestriction!=null) {
+                String datatypeURI1=variable1.m_mostSpecificRestriction.getDatatypeURI();
+                for (int index2=variable1.m_unequalToDirect.size()-1;index2>=0;--index2) {
+                    DVariable variable2=variable1.m_unequalToDirect.get(index2);
+                    if (variable2.m_mostSpecificRestriction!=null && DatatypeRegistry.isDisjointWith(datatypeURI1,variable2.m_mostSpecificRestriction.getDatatypeURI())) {
+                        variable1.m_unequalTo.remove(variable2);
+                        variable1.m_unequalToDirect.remove(variable2);
+                        variable2.m_unequalTo.remove(variable1);
+                        variable2.m_unequalToDirect.remove(variable1);
+                    }
+                }
+            }
+        }
+    }
+    protected void eliminateTriviallySatisfiableNodes() {
+        m_auxiliaryVariableList.clear();
+        for (int index=m_conjunction.m_activeVariables.size()-1;index>=0;--index)
+            m_auxiliaryVariableList.add(m_conjunction.m_activeVariables.get(index));
+        while (!m_auxiliaryVariableList.isEmpty()) {
+            DVariable variable=m_auxiliaryVariableList.remove(m_auxiliaryVariableList.size()-1);
+            if (variable.isObviouslySatisfiable()) {
+                for (int index=variable.m_unequalTo.size()-1;index>=0;--index) {
+                    DVariable neighborVariable=variable.m_unequalTo.get(index);
+                    neighborVariable.m_unequalTo.remove(variable);
+                    neighborVariable.m_unequalToDirect.remove(variable);
+                    if (!m_auxiliaryVariableList.contains(neighborVariable))
+                        m_auxiliaryVariableList.add(neighborVariable);
+                }
+                variable.m_unequalTo.clear();
+                variable.m_unequalToDirect.clear();
+                m_conjunction.m_activeVariables.remove(variable);
+            }
+        }
+    }
+    protected void enumerateValueSpaceSubsets() {
+        for (int index=m_conjunction.m_activeVariables.size()-1;!m_extensionManager.containsClash() && index>=0;--index) {
+            DVariable variable=m_conjunction.m_activeVariables.get(index);
+            if (variable.m_valueSpaceSubset!=null) {
+                variable.m_hasExplicitDataValues=true;
+                variable.m_valueSpaceSubset.enumerateDataValues(variable.m_explicitDataValues);
+                if (!variable.m_forbiddenDataValues.isEmpty()) {
+                    for (int valueIndex=variable.m_explicitDataValues.size()-1;valueIndex>=0;--valueIndex) {
+                        Object dataValue=variable.m_explicitDataValues.get(valueIndex);
+                        if (variable.m_forbiddenDataValues.contains(dataValue))
+                            variable.m_explicitDataValues.remove(valueIndex);
+                    }
+                }
+                variable.m_valueSpaceSubset=null;
+                if (variable.m_explicitDataValues.isEmpty())
+                    setClashFor(variable);
+            }
+        }
+    }
+    protected void checkAssignments() {
+        // This method could be further optimized to check each clique of inequalities separately.
+        // It is not expected that this is an important optimization, so we don't to it for the moment.
+        // The nodes are sorted so that we get a kind of 'join order' optimization.
+        Collections.sort(m_conjunction.m_activeVariables,SmallestEnumerationFirst.INSTANCE);
+        if (!findAssignment(0))
+            setClashFor(m_conjunction.m_activeVariables);
+    }
+    protected boolean findAssignment(int nodeIndex) {
+        if (nodeIndex==m_conjunction.m_activeVariables.size())
+            return true;
+        else {
+            DVariable variable=m_conjunction.m_activeVariables.get(nodeIndex);
+            for (int valueIndex=variable.m_explicitDataValues.size()-1;valueIndex>=0;--valueIndex) {
+                Object dataValue=variable.m_explicitDataValues.get(valueIndex);
+                if (satisfiesNeighbors(variable,dataValue)) {
+                    variable.m_dataValue=dataValue;
+                    if (findAssignment(nodeIndex+1))
                         return true;
-                    }
-                    if (!inequalities.containsKey(node1)) {
-                        inequalities.put(node1, new HashSet<Node>());
-                        inequalitiesInv.put(node1, new HashSet<Node>());
-                    }
-                    if (!inequalities.containsKey(node2)) {
-                        inequalities.put(node2, new HashSet<Node>());
-                        inequalitiesInv.put(node2, new HashSet<Node>());
-                    }
-                    // record the inequality
-                    if (!inequalities.get(node1).contains(node2)) {
-                        fixedPointReached = false;
-                        Set<Node> inequalNodes = inequalities.get(node1);
-                        inequalNodes.add(node2);
-                        inequalities.put(node1, inequalNodes);
-                    }
-                    // record the inverse
-                    if (!inequalitiesInv.get(node2).contains(node1)) {
-                        fixedPointReached = false;
-                        Set<Node> inequalNodes = inequalitiesInv.get(node2);
-                        inequalNodes.add(node1);
-                        inequalitiesInv.put(node2, inequalNodes);
-                    }
-                }
-                triplesZeroBoundRetr.next();
-            }
-        }
-        return false; // no self inequality
-    }
-    
-    /**
-     * Given a set of nodes, collect all data ranges from the extension table. 
-     * @param nodes a set of nodes for which data range assertions are to be 
-     *              collected from the extension table
-     * @return A map that contains as keys the given nodes and, for each key n1, 
-     *         the map contains all data range assertion for n1 from the 
-     *         extension table. 
-     */
-    protected Map<Node,Set<DataRange>> fetchRelevantDataRanges(Set<Node> nodes) {
-        Map<Node,Set<DataRange>> nodeToDRs = new HashMap<Node,Set<DataRange>>();
-        Set<DataRange> dataRanges;
-
-        for (Node node : nodes) {
-            Object[] DRsForNode = pairsFirstBoundRetr.getTupleBuffer();
-            pairsFirstBoundRetr.getBindingsBuffer()[1] = node;
-            pairsFirstBoundRetr.open();
-            dataRanges = new HashSet<DataRange>();
-            while (!pairsFirstBoundRetr.afterLast()) {
-                if (DRsForNode[0] instanceof DataRange)
-                    dataRanges.add((DataRange) DRsForNode[0]);
-                pairsFirstBoundRetr.next();
-            }
-            nodeToDRs.put(node, dataRanges);
-        }
-        return nodeToDRs;
-    }
-    
-    /**
-     * Given a map with nodes and data range assertions for the nodes, check 
-     * whether there is an assignment for all the data ranges that is consistent 
-     * with the restrictions on the data ranges and the inequalities
-     * @param nodeToDRs a mapping from nodes to their asserted data ranges
-     * @return true if a consistent assignment exists, false otherwise
-     */
-    protected boolean checkDatatypeAssertionFor(
-            Map<Node,Set<DataRange>> nodeToDRs, 
-            Map<Node,Set<Node>> inequalities, 
-            Map<Node,Set<Node>> inequalitiesSym) {
-        // test for trivial unsatisfiability:
-        // Is there a dataRange assertion that is bottom?
-        for (Node node : nodeToDRs.keySet()) {
-            for (DataRange dataRange : nodeToDRs.get(node)) {
-                if (dataRange.isBottom()) {
-                    extensionManager.setClash(extensionManager.getAssertionDependencySet(dataRange, node));
-                    if (tableauMonitor != null) {
-                        tableauMonitor.clashDetected(new Object[][] { new Object[] { dataRange, node } });
-                        tableauMonitor.datatypeCheckingFinished(false);
-                    }
-                    return false; 
                 }
             }
-        }
-
-        // conjoin all data ranges for each node into a canonical range 
-        // leave the original ranges unchanged for backtracking
-        List<Pair> CDRsToNodes = buildCanonicalRanges(nodeToDRs);
-        if (CDRsToNodes == null) {
-            // found a clash while joining the ranges, clash has been raised
-            return false; 
-        }
-        
-        // take out those that have more values than needed for the inequalities
-        removeUnderRestrictedRanges(CDRsToNodes, inequalities, inequalitiesSym);
-
-        boolean hasAssignment = hasAssignment(CDRsToNodes, 
-                    inequalities,  
-                    inequalitiesSym, 
-                    nodeToDRs); 
-        if (!hasAssignment) {
+            variable.m_dataValue=null;
             return false;
         }
-        return true;
     }
-    
-    /**
-     * Given a map from nodes to a set of data ranges, construct a map from 
-     * nodes to data ranges such that each constructed data range captures all 
-     * restrictions of the data ranges in the set for the node in the given map. 
-     * If any constructed canonical data range is equal to bottom, a clash is 
-     * raised and null is returned. The canonical ranges have either oneOf 
-     * values or facets (possibly empty) and notOneOfs, which are constants 
-     * unsuitable for assignment (possibly empty). 
-     * @param nodeToDRs a map from nodes to sets of data ranges 
-     *        n -> {dr_1, ..., dr_n}
-     * @return a map from nodes to data ranges n -> dr such that dr captures the 
-     *         restrictions of {dr_1, ..., dr_n} or null if conjoining the 
-     *         ranges lead to a clash (constructed range is bottom)
-     */
-    protected List<Pair> buildCanonicalRanges(Map<Node, Set<DataRange>> nodeToDRs) {
-        List<Pair> CDRsToNodes = new ArrayList<Pair>();
-        for (Node node : nodeToDRs.keySet()) {
-            CanonicalDataRange canonicalRange;
-            if (nodeToDRs.get(node).size() > 1) {
-                canonicalRange = getCanonicalDataRange(nodeToDRs.get(node));
-                if (canonicalRange == null || canonicalRange.isBottom()) {
-                    // conjoining the restrictions led to a clash
-                    int numberOfCauses = nodeToDRs.get(node).size();
-                    UnionDependencySet ds = new UnionDependencySet(numberOfCauses);
-                    Object[][] causes = new Object[numberOfCauses][2];
-                    int i = 0;
-                    for (DataRange range : nodeToDRs.get(node)) {
-                        causes[i][0] = range;
-                        causes[i][1] = node;
-                        ds.m_dependencySets[i] = extensionManager.getAssertionDependencySet(range, node);
-                        i++;
-                    }
-                    extensionManager.setClash(ds);
-                    if (tableauMonitor != null) {
-                        tableauMonitor.clashDetected(causes);
-                        tableauMonitor.datatypeCheckingFinished(false);
-                    }
-                    return null;
-                }
-            } else {
-                canonicalRange = (CanonicalDataRange) nodeToDRs.get(node).iterator().next();
-            }
-            CDRsToNodes.add(new Pair(canonicalRange, node));
-        }
-        return CDRsToNodes;
-    }
-    
-    /**
-     * Given a set of data ranges, construct a data range that captures all the 
-     * restrictions of the given ranges. 
-     * @param ranges a set of data ranges
-     * @return a data range that captures all restrictions from the data ranges 
-     *         in the given set ranges or null this is not possible due to 
-     *         different data types or contradiction oneOf values in the given 
-     *         ranges
-     */
-    protected CanonicalDataRange getCanonicalDataRange(Set<DataRange> ranges) {
-        // create a new instance of the type that the first positive data range has
-        CanonicalDataRange canonicalDR = null;
-        // set the URI to the one of the first positive data range, we then 
-        // expect all ranges to have the same URI or it is a clash
-        boolean onlyNegated = true;
-        Set<DataConstant> constants = null;
-        Set<DataConstant> forbiddenConstants = new HashSet<DataConstant>();
-        for (DataRange range : ranges) {
-            if (!range.isNegated()) {
-                onlyNegated = false;
-                if (range.getDatatype() != null) {
-                    // found a datatype restriction, which cannot have oneOfs
-                    if (canonicalDR == null) {
-                        canonicalDR = range.getNewInstance();
-                    } else {
-                        if (DT.isSubOf(range.getDatatype(), canonicalDR.getDatatype())) {
-                            // found a more specific implementation, 
-                            // E.g., the canonical range is implemented with 
-                            // decimals, but the new range is only for integers. 
-                            // Hence we should use the more restrictive integer 
-                            // range as the canonical range.
-                            canonicalDR = range.getNewInstance();
-                        } else if (range.getDatatype() != DT.LITERAL && !canonicalDR.canHandle(range.getDatatype())) {
-                            // found an incompatibility
-                            return null;
-                        }
-                    }
-                    forbiddenConstants.addAll(range.getNotOneOf());
-                } else {
-                    // not a datatype restriction, so it is an enumerated range
-                    if (constants == null) {
-                        constants = range.getOneOf();
-                    } else {
-                        constants.retainAll(range.getOneOf());
-                    }
-                }
-            } else {
-                if (!range.getOneOf().isEmpty()) {
-                    // range has notOneOfs
-                    forbiddenConstants.addAll(range.getOneOf());
-                }
-            }
-        }
-        if (onlyNegated) {
-            // only negated ranges -> trivially satisfiable
-            return new DatatypeRestrictionLiteral(DT.LITERAL);
-        }
-        if (constants != null) {
-            constants.removeAll(forbiddenConstants);
-            if (constants.isEmpty()) {
-                // we had oneOfs, but they were not compatible
-                return null;
-            }
-        }
-        if (canonicalDR == null) {
-            // all ranges are enumerated ones
-            if (constants == null) return null;
-            canonicalDR = new EnumeratedDataRange();
-            canonicalDR.setOneOf(constants);
-            return canonicalDR;
-        } else {
-            // if there are oneOf restrictions, check whether there are values 
-            // that suit the datatype restriction
-            if (constants != null) {
-                Set<DataConstant> unsuitable = new HashSet<DataConstant>();
-                for (DataConstant constant : constants) {
-                    if (!canonicalDR.datatypeAccepts(constant)) {
-                        unsuitable.add(constant);
-                    }
-                }
-                constants.removeAll(unsuitable);
-                if (constants.isEmpty()) return null;
-            }
-            if (forbiddenConstants != null) {
-                Set<DataConstant> irrelevant = new HashSet<DataConstant>();
-                for (DataConstant constant : forbiddenConstants) {
-                    if (!canonicalDR.datatypeAccepts(constant)) {
-                        irrelevant.add(constant);
-                    }
-                }
-                forbiddenConstants.removeAll(irrelevant);
-            }
-        }
-            
-        // now we compute one canonical data range that captures the 
-        // restrictions of all the data ranges for the node 
-
-        // lets look at the facets
-        for (DataRange range : ranges) {
-            if (range.getDatatypeURI() != null 
-                    && range.getDatatype() != DT.LITERAL) {
-                    // literal ranges have no facets
-                canonicalDR.conjoinFacetsFrom(range);
-            }
-        }
-        
-        // if we have oneOfs, we make sure they conform to the facets
-        if (constants != null) {
-            Set<DataConstant> unsuitable = new HashSet<DataConstant>();
-            for (DataConstant constant : constants) {
-                if (!canonicalDR.accepts(constant)) {
-                    unsuitable.add(constant);
-                }
-            }
-            constants.removeAll(unsuitable);
-            if (constants.isEmpty()) {
-                // no more suitable values left
-                return null;
-            }
-            canonicalDR.setOneOf(constants);
-            return canonicalDR;
-        } else {
-            canonicalDR.setNotOneOf(forbiddenConstants);
-            return canonicalDR;
-        }
-    }
-    
-    /**
-     * Remove those nodes and data ranges that have more than enough values to 
-     * cover the inequalities. 
-     * @param CDRsToNodes a map from nodes to canonical data ranges
-     * @param inequalities inequalities between nodes
-     * @param inequalitiesSym symmetric counterpart for the above relation
-     */
-    protected void removeUnderRestrictedRanges(List<Pair> CDRsToNodes, 
-            Map<Node, Set<Node>> inequalities, 
-            Map<Node, Set<Node>> inequalitiesSym) {
-        boolean containedRemovable = true;
-        Set<Pair> removablePairs = new HashSet<Pair>();
-        while (containedRemovable) {
-            containedRemovable = false;
-            for (Pair pair : CDRsToNodes) {
-                CanonicalDataRange cdr = pair.getCanonicalDataRange();
-                Node node = pair.getNode();
-                int numInequalNodes = 0;
-                if (inequalities.get(node) != null) {
-                    numInequalNodes = inequalities.get(node).size();
-                }
-                if (inequalitiesSym.get(node) != null) {
-                    numInequalNodes += inequalitiesSym.get(node).size();
-                }
-                if (cdr.hasMinCardinality(new BigInteger("" + (numInequalNodes + 1)))) {
-                    removablePairs.add(pair);
-                    containedRemovable = true;
-                }
-            }
-            CDRsToNodes.removeAll(removablePairs);
-            removablePairs.clear();
-        }
-    }
-    
-//    /**
-//     * Partition the set of nodes and their canonical data ranges together with 
-//     * their inequalities into mutally disjoint non-empty subsets P1, ..., Pn 
-//     * such that no Pi and Pj with i neq j have variables in common. 
-//     * @param nodeToCanonicalDR a map from nodes to canonical data ranges
-//     * @param inequalities a map from nodes to the nodes for which an inequality 
-//     *        is known
-//     * @param inequalitiesSym the symmetric counterpart toinequalitiesSym 
-//     * @return a set of partitions such that the nodes and their data ranges in 
-//     *         each partition have inequalities between them 
-//     */
-//    protected Set<Map<CanonicalDataRange, Node>> buildPartitions(
-//            Map<Node, CanonicalDataRange> nodeToCanonicalDR, 
-//            Map<Node, Set<Node>> inequalities, 
-//            Map<Node, Set<Node>> inequalitiesSym) {
-//        Set<Map<CanonicalDataRange, Node>> partitions = new HashSet<Map<CanonicalDataRange, Node>>();
-//        Map<CanonicalDataRange, Node> partition = new HashMap<CanonicalDataRange, Node>();
-//        List<Node> remainingNodes = new ArrayList<Node>(nodeToCanonicalDR.keySet());
-//        List<Node> nodesForThisPartition = new ArrayList<Node>();
-//        while (!remainingNodes.isEmpty()) {
-//            Node node = remainingNodes.get(0);
-//            partition.put(nodeToCanonicalDR.get(node), node);
-//            remainingNodes.remove(node);
-//            // nodes that are inequal to this one should go into the same 
-//            // partition
-//            if (inequalities.containsKey(node)) {
-//                nodesForThisPartition.addAll(inequalities.get(node));
-//            }
-//            if (inequalitiesSym.containsKey(node)) {
-//                nodesForThisPartition.addAll(inequalitiesSym.get(node));
-//            }
-//            while (!nodesForThisPartition.isEmpty()) {
-//                Node currentNode = nodesForThisPartition.get(0);
-//                if (nodeToCanonicalDR.containsKey(currentNode)) {
-//                    partition.put(nodeToCanonicalDR.get(currentNode), currentNode);
-//                    remainingNodes.remove(currentNode);
-//                    // put all remaining nodes that are inequal to this one into 
-//                    // the list of nodes to be processed, so that they go into 
-//                    // the same partition
-//                    for (Node n : remainingNodes) {
-//                        if (inequalities.get(currentNode) != null 
-//                                && inequalities.get(currentNode).contains(n)) {
-//                            nodesForThisPartition.add(n);
-//                        }
-//                        if (inequalitiesSym.get(currentNode) != null 
-//                                && inequalitiesSym.get(currentNode).contains(n)) {
-//                            nodesForThisPartition.add(n);
-//                        }
-//                    }
-//                }
-//                nodesForThisPartition.remove(currentNode);
-//            }
-//            partitions.add(partition);
-//        }
-//        return partitions;
-//    }
-    
-    /**
-     * Given a map from data ranges to nodes and inequalities between the nodes, 
-     * check whether there is a suitable assignment of values for the nodes that 
-     * complies with the given datatype restrictions and inequalities.  
-     * @param pairs A map from data ranges to nodes such that the 
-     *        inequalities given in the next two parameters link the variables 
-     *        in the partition. 
-     * @param inequalities A map from nodes to sets of nodes for which there are 
-     *        inequalities in the extension table. 
-     * @param inequalitiesSym The symmetric counter part to the above map. 
-     * @param originalNodeToDRs A map from nodes to data ranges such that for 
-     *        each node and data range in the map, there is a corresponding 
-     *        entry in the extension table.  
-     * @return true if an assignment from values to nodes exists such that the 
-     *         datatype restrictions and the inequalities are satisfied and 
-     *         false otherwise.  
-     */
-    protected boolean hasAssignment(List<Pair> pairs, 
-            Map<Node, Set<Node>> inequalities, 
-            Map<Node, Set<Node>> inequalitiesSym, 
-            Map<Node, Set<DataRange>> originalNodeToDRs) {
-        Collections.sort(pairs);
-        
-        Map<Node, DataConstant> nodeToValue = new HashMap<Node, DataConstant>();
-        Node currentNode;
-        CanonicalDataRange currentRange;
-        for (Pair pair : pairs) {
-            currentNode = pair.getNode();
-            currentRange = pair.getCanonicalDataRange();
-            DataConstant assignment = currentRange.getSmallestAssignment();
-            //System.out.println("DataRange " + currentRange + " of node " + currentNode + " got assigned " + assignment);
-            if (assignment == null) {
-                // clash!
-                // collect the inequalities and the ranges that made up the 
-                // canonical data ranges in this partition and generate a 
-                // clash
-                int numberOfCauses = 0; 
-                if (inequalities.containsKey(currentNode)) {
-                    numberOfCauses += inequalities.get(currentNode).size(); 
-                }
-                if (inequalitiesSym.containsKey(currentNode)) {
-                    numberOfCauses += inequalitiesSym.get(currentNode).size(); 
-                }
-                // although we are checking the canonical ranges, all the 
-                // ranges that made up each canonical range contributes to 
-                // the clash and we need their dependency sets
-                numberOfCauses += originalNodeToDRs.get(currentNode).size();
-                
-                UnionDependencySet ds = new UnionDependencySet(numberOfCauses);
-                Object[][] causes = new Object[numberOfCauses][];
-                int i = 0;
-                for (DataRange range : originalNodeToDRs.get(currentNode)) {
-                    causes[i] = new Object[] { range, currentNode };
-                    ds.m_dependencySets[i] = 
-                            extensionManager.getAssertionDependencySet(range, currentNode);
-                    i++;
-                }
-                if (inequalities.get(currentNode) != null) {
-                    for (Node inequalNode : inequalities.get(currentNode)) {
-                        causes[i] = new Object[] { 
-                                Inequality.INSTANCE, currentNode, inequalNode };
-                        ds.m_dependencySets[i] = 
-                                extensionManager.getAssertionDependencySet(
-                                        Inequality.INSTANCE, 
-                                        currentNode, 
-                                        inequalNode);
-                        i++;
-                    }
-                }
-                if (inequalitiesSym.get(currentNode) != null) {
-                    for (Node inequalNode : inequalitiesSym.get(currentNode)) {
-                        causes[i] = new Object[] { 
-                                Inequality.INSTANCE, inequalNode, currentNode };
-                        ds.m_dependencySets[i] = 
-                                extensionManager.getAssertionDependencySet(
-                                        Inequality.INSTANCE, 
-                                        inequalNode, 
-                                        currentNode);
-                        i++;
-                    }
-                }
-                extensionManager.setClash(ds);
-                if (tableauMonitor != null) {
-                    tableauMonitor.clashDetected(causes);
-                    tableauMonitor.datatypeCheckingFinished(false);
-                }
+    protected boolean satisfiesNeighbors(DVariable variable,Object dataValue) {
+        for (int neighborIndex=variable.m_unequalTo.size()-1;neighborIndex>=0;--neighborIndex) {
+            Object neighborDataValue=variable.m_unequalTo.get(neighborIndex).m_dataValue;
+            if (neighborDataValue!=null && neighborDataValue.equals(dataValue))
                 return false;
-            }
-            nodeToValue.put(currentNode, assignment);
-            for (Node inequalNode : inequalities.get(currentNode)) {
-                for (Pair p : pairs) {
-                    if (p.getNode() == inequalNode) {
-                        p.getCanonicalDataRange().notOneOf(assignment);
-                    }
-                }
-            }
-            for (Node inequalNode : inequalitiesSym.get(currentNode)) {
-                for (Pair p : pairs) {
-                    if (p.getNode() == inequalNode) {
-                        p.getCanonicalDataRange().notOneOf(assignment);
-                    }
-                }
-            }
         }
-        //System.out.println("-----------------------");
         return true;
     }
-    
-    /**
-     * used to sort data ranges based on the number of possible assignments
-     */
-    protected static class SetLengthComparator implements Comparator<CanonicalDataRange> { 
-        public static Comparator<CanonicalDataRange> INSTANCE = new SetLengthComparator();
-        public int compare(CanonicalDataRange dr1, CanonicalDataRange dr2) {
-            if (dr1.isFinite() && dr2.isFinite()) {
-                BigInteger size1 = dr1.getEnumerationSize();
-                BigInteger size2 = dr2.getEnumerationSize();
-                if (size1.equals(size2)) return 0;
-                return (size1.compareTo(size2) > 0) ? 1 : -1; 
-            } else {
-                return 0;
+    protected void setClashFor(DVariable variable) {
+        m_unionDependencySet.clearConstituents();
+        loadAssertionDependencySets(variable);
+        m_extensionManager.setClash(m_unionDependencySet);
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.clashDetected();
+    }
+    protected void setClashFor(List<DVariable> variables) {
+        m_unionDependencySet.clearConstituents();
+        for (int nodeIndex=variables.size()-1;nodeIndex>=0;--nodeIndex) {
+            DVariable variable=variables.get(nodeIndex);
+            loadAssertionDependencySets(variable);
+            for (int neighborIndex=variable.m_unequalToDirect.size()-1;neighborIndex>=0;--neighborIndex) {
+                DVariable neighborVariable=variable.m_unequalToDirect.get(neighborIndex);
+                DependencySet dependencySet=m_extensionManager.getAssertionDependencySet(Inequality.INSTANCE,variable.m_node,neighborVariable.m_node);
+                m_unionDependencySet.addConstituent(dependencySet);
             }
+        }
+        m_extensionManager.setClash(m_unionDependencySet);
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.clashDetected();
+    }
+    protected void loadAssertionDependencySets(DVariable variable) {
+        Node node=variable.m_node;
+        for (int index=variable.m_positiveDatatypeRestrictions.size()-1;index>=0;--index) {
+            DataRange dataRange=variable.m_positiveDatatypeRestrictions.get(index);
+            DependencySet dependencySet=m_extensionManager.getAssertionDependencySet(dataRange,node);
+            m_unionDependencySet.addConstituent(dependencySet);
+        }
+        for (int index=variable.m_negativeDatatypeRestrictions.size()-1;index>=0;--index) {
+            DataRange dataRange=(DataRange)variable.m_negativeDatatypeRestrictions.get(index).getNegation();
+            DependencySet dependencySet=m_extensionManager.getAssertionDependencySet(dataRange,node);
+            m_unionDependencySet.addConstituent(dependencySet);
+        }
+        for (int index=variable.m_positiveDataValueEnumerations.size()-1;index>=0;--index) {
+            DataRange dataRange=variable.m_positiveDataValueEnumerations.get(index);
+            DependencySet dependencySet=m_extensionManager.getAssertionDependencySet(dataRange,node);
+            m_unionDependencySet.addConstituent(dependencySet);
+        }
+        for (int index=variable.m_negativeDataValueEnumerations.size()-1;index>=0;--index) {
+            DataRange dataRange=(DataRange)variable.m_negativeDataValueEnumerations.get(index).getNegation();
+            DependencySet dependencySet=m_extensionManager.getAssertionDependencySet(dataRange,node);
+            m_unionDependencySet.addConstituent(dependencySet);
         }
     }
     
-    protected class Pair implements Comparable<Pair> {
-        private final CanonicalDataRange cdr;
-        private final Node node;
-        private transient final int hash;
-
-        public Pair(CanonicalDataRange cdr, Node node) {
-            this.cdr = cdr;
-            this.node = node;
-            hash = (cdr == null ? 0 : cdr.hashCode() * 31)
-                    + (node == null ? 0 : node.hashCode());
+    public static class DConjunction {
+        protected final List<DVariable> m_unusedVariables;
+        protected final List<DVariable> m_usedVariables;
+        protected final List<DVariable> m_activeVariables;
+        protected DVariable[] m_buckets;
+        protected int m_numberOfEntries;
+        protected int m_resizeThreshold;
+        
+        public DConjunction() {
+            m_unusedVariables=new ArrayList<DVariable>();
+            m_usedVariables=new ArrayList<DVariable>();
+            m_activeVariables=new ArrayList<DVariable>();
+            m_buckets=new DVariable[16];
+            m_resizeThreshold=(int)(m_buckets.length*0.75);
+            m_numberOfEntries=0;
         }
-
-        public CanonicalDataRange getCanonicalDataRange() {
-            return cdr;
+        protected void clear() {
+            for (int index=m_usedVariables.size()-1;index>=0;--index) {
+                DVariable variable=m_usedVariables.get(index);
+                variable.dispose();
+                m_unusedVariables.add(variable);
+            }
+            m_usedVariables.clear();
+            m_activeVariables.clear();
+            Arrays.fill(m_buckets,null);
+            m_numberOfEntries=0;
         }
-
-        public Node getNode() {
-            return node;
+        protected void clearActiveVariables() {
+            m_activeVariables.clear();
         }
-
-        public int hashCode() {
-            return hash;
+        public List<DVariable> getActiveVariables() {
+            return Collections.unmodifiableList(m_activeVariables);
         }
-
-        public boolean equals(Object o) {
-            if (this == o) {
+        public DVariable getVariableFor(Node node) {
+            int index=getIndexFor(node.hashCode(),m_buckets.length);
+            DVariable entry=m_buckets[index];
+            while (entry!=null) {
+                if (entry.m_node==node)
+                    return entry;
+                entry=entry.m_nextEntry;
+            }
+            return null;
+        }
+        protected DVariable activateVariable(Node node,boolean[] newVariableAdded) {
+            int index=getIndexFor(node.hashCode(),m_buckets.length);
+            DVariable entry=m_buckets[index];
+            while (entry!=null) {
+                if (entry.m_node==node) {
+                    newVariableAdded[0]=false;
+                    return entry;
+                }
+                entry=entry.m_nextEntry;
+            }
+            DVariable newVariable;
+            if (m_unusedVariables.isEmpty())
+                newVariable=new DVariable();
+            else
+                newVariable=m_unusedVariables.remove(m_unusedVariables.size()-1);
+            newVariable.m_node=node;
+            newVariable.m_nextEntry=m_buckets[index];
+            m_buckets[index]=newVariable;
+            m_numberOfEntries++;
+            if (m_numberOfEntries>=m_resizeThreshold)
+                resize(m_buckets.length*2);
+            newVariableAdded[0]=true;
+            m_usedVariables.add(newVariable);
+            m_activeVariables.add(newVariable);
+            return newVariable;
+        }
+        protected void resize(int newCapacity) {
+            DVariable[] newBuckets=new DVariable[newCapacity];
+            for (int i=0;i<m_buckets.length;i++) {
+                DVariable entry=m_buckets[i];
+                while (entry!=null) {
+                    DVariable nextEntry=entry.m_nextEntry;
+                    int newIndex=getIndexFor(entry.m_node.hashCode(),newCapacity);
+                    entry.m_nextEntry=newBuckets[newIndex];
+                    newBuckets[newIndex]=entry;
+                    entry=nextEntry;
+                }
+            }
+            m_buckets=newBuckets;
+            m_resizeThreshold=(int)(newCapacity*0.75);
+        }
+        protected void addInequality(DVariable node1,DVariable node2) {
+            if (!node1.m_unequalTo.contains(node2)) {
+                node1.m_unequalTo.add(node2);
+                node2.m_unequalTo.add(node1);
+                node1.m_unequalToDirect.add(node2);
+            }
+        }
+        public String toString() {
+            return toString(Prefixes.EMPTY);
+        }
+        public String toString(Prefixes prefixes) {
+            StringBuffer buffer=new StringBuffer();
+            boolean first=true;
+            for (int variableIndex=0;variableIndex<m_activeVariables.size();variableIndex++) {
+                if (first)
+                    first=false;
+                else
+                    buffer.append(" & ");
+                DVariable variable=m_activeVariables.get(variableIndex);
+                buffer.append(variable.toString(prefixes));
+                buffer.append('(');
+                buffer.append(')');
+                for (int neighborIndex=0;neighborIndex<variable.m_unequalToDirect.size();neighborIndex++) {
+                    buffer.append(' ');
+                    buffer.append(variableIndex);
+                    buffer.append(" != ");
+                    buffer.append(m_activeVariables.indexOf(variable.m_unequalToDirect.get(neighborIndex)));
+                }
+            }
+            return buffer.toString();
+        }
+    }
+    
+    public static class DVariable {
+        protected final List<DataValueEnumeration> m_positiveDataValueEnumerations;
+        protected final List<DataValueEnumeration> m_negativeDataValueEnumerations;
+        protected final List<DatatypeRestriction> m_positiveDatatypeRestrictions;
+        protected final List<DatatypeRestriction> m_negativeDatatypeRestrictions;
+        protected final List<DVariable> m_unequalTo;
+        protected final List<DVariable> m_unequalToDirect;
+        protected final List<Object> m_forbiddenDataValues;
+        protected final List<Object> m_explicitDataValues;
+        protected boolean m_hasExplicitDataValues;
+        protected DatatypeRestriction m_mostSpecificRestriction;
+        protected Node m_node;
+        protected DVariable m_nextEntry;
+        protected ValueSpaceSubset m_valueSpaceSubset;
+        protected Object m_dataValue;
+        
+        protected DVariable() {
+            m_positiveDataValueEnumerations=new ArrayList<DataValueEnumeration>();
+            m_negativeDataValueEnumerations=new ArrayList<DataValueEnumeration>();
+            m_positiveDatatypeRestrictions=new ArrayList<DatatypeRestriction>();
+            m_negativeDatatypeRestrictions=new ArrayList<DatatypeRestriction>();
+            m_unequalTo=new ArrayList<DVariable>();
+            m_unequalToDirect=new ArrayList<DVariable>();
+            m_forbiddenDataValues=new ArrayList<Object>();
+            m_explicitDataValues=new ArrayList<Object>();
+        }
+        protected void dispose() {
+            m_positiveDataValueEnumerations.clear();
+            m_negativeDataValueEnumerations.clear();
+            m_positiveDatatypeRestrictions.clear();
+            m_negativeDatatypeRestrictions.clear();
+            m_unequalTo.clear();
+            m_unequalToDirect.clear();
+            m_forbiddenDataValues.clear();
+            m_explicitDataValues.clear();
+            m_hasExplicitDataValues=false;
+            m_mostSpecificRestriction=null;
+            m_node=null;
+            m_nextEntry=null;
+            m_valueSpaceSubset=null;
+            m_dataValue=null;
+        }
+        protected void addForbiddenDataValue(Object forbiddenDataValue) {
+            if (!m_forbiddenDataValues.contains(forbiddenDataValue))
+                m_forbiddenDataValues.add(forbiddenDataValue);
+        }
+        protected boolean isObviouslySatisfiable() {
+            if (m_hasExplicitDataValues)
+                return m_explicitDataValues.size()>m_unequalTo.size();
+            else if (m_valueSpaceSubset!=null) {
+                int neighborCount=m_unequalTo.size()+m_forbiddenDataValues.size();
+                return m_valueSpaceSubset.hasCardinalityAtLeast(neighborCount+1);
+            }
+            else
                 return true;
+        }
+        public List<DataValueEnumeration> getPositiveDataValueEnumerations() {
+            return Collections.unmodifiableList(m_positiveDataValueEnumerations);
+        }
+        public List<DataValueEnumeration> getNegativeDataValueEnumerations() {
+            return Collections.unmodifiableList(m_negativeDataValueEnumerations);
+        }
+        public List<DatatypeRestriction> getPositiveDatatypeRestrictions() {
+            return Collections.unmodifiableList(m_positiveDatatypeRestrictions);
+        }
+        public List<DatatypeRestriction> getNegativeDatatypeRestrictions() {
+            return Collections.unmodifiableList(m_negativeDatatypeRestrictions);
+        }
+        public List<DVariable> getUnequalToDirect() {
+            return Collections.unmodifiableList(m_unequalToDirect);
+        }
+        public String toString() {
+            return toString(Prefixes.EMPTY);
+        }
+        public String toString(Prefixes prefixes) {
+            StringBuffer buffer=new StringBuffer();
+            boolean first=true;
+            buffer.append('[');
+            for (int index=0;index<m_positiveDataValueEnumerations.size();index++) {
+                if (first)
+                    first=false;
+                else
+                    buffer.append(',');
+                buffer.append(m_positiveDataValueEnumerations.get(index).toString(prefixes));
             }
-            if (o == null || !(o instanceof Pair)) {
-                return false;
+            for (int index=0;index<m_negativeDataValueEnumerations.size();index++) {
+                if (first)
+                    first=false;
+                else
+                    buffer.append(',');
+                buffer.append(m_negativeDataValueEnumerations.get(index).getNegation().toString(prefixes));
             }
-            Pair other = (Pair) o;
-            return (cdr == null ? other.getCanonicalDataRange() == null : cdr.equals(other.getCanonicalDataRange()))
-                    && (node == null ? other.getNode() == null : node.equals(other.getNode()));
+            for (int index=0;index<m_positiveDatatypeRestrictions.size();index++) {
+                if (first)
+                    first=false;
+                else
+                    buffer.append(',');
+                buffer.append(m_positiveDatatypeRestrictions.get(index).toString(prefixes));
+            }
+            for (int index=0;index<m_negativeDatatypeRestrictions.size();index++) {
+                if (first)
+                    first=false;
+                else
+                    buffer.append(',');
+                buffer.append(m_negativeDatatypeRestrictions.get(index).getNegation().toString(prefixes));
+            }
+            buffer.append(']');
+            return buffer.toString();
+        }
+    }
+
+    protected static int getIndexFor(int hashCode,int tableLength) {
+        hashCode+=~(hashCode << 9);
+        hashCode^=(hashCode >>> 14);
+        hashCode+=(hashCode << 4);
+        hashCode^=(hashCode >>> 10);
+        return hashCode & (tableLength-1);
+    }
+    
+    protected static class SmallestEnumerationFirst implements Comparator<DVariable> {
+        public static final Comparator<DVariable> INSTANCE=new SmallestEnumerationFirst();
+
+        public int compare(DVariable o1,DVariable o2) {
+            return o1.m_explicitDataValues.size()-o2.m_explicitDataValues.size();
         }
         
-        public int compareTo(Pair pair) {
-            CanonicalDataRange cdr2 = pair.getCanonicalDataRange();
-            Node node2 = pair.getNode();
-            if (cdr.isFinite() && cdr2.isFinite()) {
-                BigInteger size1 = cdr.getEnumerationSize();
-                BigInteger size2 = cdr2.getEnumerationSize();
-                if (size1.equals(size2)) {
-                    Integer i = node.m_nodeID;
-                    return i.compareTo(node2.m_nodeID);
-                }
-                return (size1.compareTo(size2) > 0) ? 1 : -1; 
-            } else {
-                return 0;
-            }
-        }
-    } 
+    }
 }

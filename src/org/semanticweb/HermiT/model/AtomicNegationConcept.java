@@ -17,6 +17,15 @@ public class AtomicNegationConcept extends LiteralConcept {
     public AtomicConcept getNegatedAtomicConcept() {
         return m_negatedAtomicConcept;
     }
+    public LiteralConcept getNegation() {
+        return m_negatedAtomicConcept;
+    }
+    public boolean isAlwaysTrue() {
+        return m_negatedAtomicConcept.isAlwaysFalse();
+    }
+    public boolean isAlwaysFalse() {
+        return m_negatedAtomicConcept.isAlwaysTrue();
+    }
     public String toString(Prefixes prefixes) {
         return "not("+m_negatedAtomicConcept.toString(prefixes)+")";
     }

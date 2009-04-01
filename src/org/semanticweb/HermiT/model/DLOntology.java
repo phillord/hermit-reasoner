@@ -20,7 +20,6 @@ import java.util.TreeSet;
 import java.util.Map;
 
 import org.semanticweb.HermiT.Prefixes;
-import org.semanticweb.HermiT.datatypes.DataRange;
 
 /**
  * Represents a DL ontology as a set of rules.

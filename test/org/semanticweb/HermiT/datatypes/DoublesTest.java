@@ -3,15 +3,15 @@ package org.semanticweb.HermiT.datatypes;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import org.semanticweb.HermiT.datatypes.CanonicalDataRange;
-import org.semanticweb.HermiT.datatypes.DataConstant;
-import org.semanticweb.HermiT.datatypes.DataRange;
-import org.semanticweb.HermiT.datatypes.DatatypeRestrictionDouble;
-import org.semanticweb.HermiT.datatypes.DatatypeRestrictionOWLRealPlus;
-import org.semanticweb.HermiT.datatypes.DoubleInterval;
-import org.semanticweb.HermiT.datatypes.DataConstant.Impl;
-import org.semanticweb.HermiT.datatypes.DatatypeRestriction.DT;
-import org.semanticweb.HermiT.datatypes.DatatypeRestriction.Facet;
+import org.semanticweb.HermiT.datatypes.old.CanonicalDataRange;
+import org.semanticweb.HermiT.datatypes.old.DataConstant;
+import org.semanticweb.HermiT.datatypes.old.DatatypeRestrictionDouble;
+import org.semanticweb.HermiT.datatypes.old.DatatypeRestrictionOWLRealPlus;
+import org.semanticweb.HermiT.datatypes.old.DoubleInterval;
+import org.semanticweb.HermiT.datatypes.old.InternalDataRange;
+import org.semanticweb.HermiT.datatypes.old.DataConstant.Impl;
+import org.semanticweb.HermiT.datatypes.old.InternalDatatypeRestriction.DT;
+import org.semanticweb.HermiT.datatypes.old.InternalDatatypeRestriction.Facet;
 import org.semanticweb.HermiT.reasoner.AbstractReasonerTest;
 
 public class DoublesTest extends AbstractReasonerTest {
@@ -112,7 +112,7 @@ public class DoublesTest extends AbstractReasonerTest {
     }
     
     public void testEnumerationSize() {
-        DataRange dr1 = new DatatypeRestrictionDouble(DT.DOUBLE);
+        InternalDataRange dr1 = new DatatypeRestrictionDouble(DT.DOUBLE);
         double dMin = 1.0;
         double d = dMin;
         for (int i = 1; i < 5; i++) {
@@ -131,9 +131,9 @@ public class DoublesTest extends AbstractReasonerTest {
         // conjoin         |------|
         // to             |-------|
         // results in      |------|
-        DataRange dr1 = new DatatypeRestrictionDouble(DT.DOUBLE);
+        InternalDataRange dr1 = new DatatypeRestrictionDouble(DT.DOUBLE);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "10.0");
-        DataRange dr2 = new DatatypeRestrictionDouble(DT.INTEGER);
+        InternalDataRange dr2 = new DatatypeRestrictionDouble(DT.INTEGER);
         dr2.addFacet(Facet.MIN_INCLUSIVE, "9.25");
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
@@ -148,9 +148,9 @@ public class DoublesTest extends AbstractReasonerTest {
         // conjoin      |-----|
         // to             |---|
         // results in     |---|
-        DataRange dr1 = new DatatypeRestrictionDouble(DT.DOUBLE);
+        InternalDataRange dr1 = new DatatypeRestrictionDouble(DT.DOUBLE);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "10.25");
-        DataRange dr2 = new DatatypeRestrictionDouble(DT.DOUBLE);
+        InternalDataRange dr2 = new DatatypeRestrictionDouble(DT.DOUBLE);
         dr2.addFacet(Facet.MIN_INCLUSIVE, "15.75");
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
@@ -165,9 +165,9 @@ public class DoublesTest extends AbstractReasonerTest {
         // conjoin     |---|
         // to                  |---|
         // results in      empty
-        DataRange dr1 = new DatatypeRestrictionDouble(DT.DOUBLE);
+        InternalDataRange dr1 = new DatatypeRestrictionDouble(DT.DOUBLE);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "10.01");
-        DataRange dr2 = new DatatypeRestrictionDouble(DT.DOUBLE);
+        InternalDataRange dr2 = new DatatypeRestrictionDouble(DT.DOUBLE);
         dr2.addFacet(Facet.MAX_INCLUSIVE, "5.74");
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
         canonical.conjoinFacetsFrom(dr2);
@@ -182,9 +182,9 @@ public class DoublesTest extends AbstractReasonerTest {
         // conjoin     |-----|
         // to             |--------|
         // results in     |--|
-        DataRange dr1 = new DatatypeRestrictionDouble(DT.DOUBLE);
+        InternalDataRange dr1 = new DatatypeRestrictionDouble(DT.DOUBLE);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "10.0");
-        DataRange dr2 = new DatatypeRestrictionDouble(DT.DOUBLE);
+        InternalDataRange dr2 = new DatatypeRestrictionDouble(DT.DOUBLE);
         dr2.addFacet(Facet.MIN_INCLUSIVE, "5.0");
         dr2.addFacet(Facet.MAX_INCLUSIVE, "15.0");
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
@@ -203,10 +203,10 @@ public class DoublesTest extends AbstractReasonerTest {
         // conjoin      ...----|
         // to            |---| 
         // results in    |---|
-        DataRange dr1 = new DatatypeRestrictionDouble(DT.DOUBLE);
+        InternalDataRange dr1 = new DatatypeRestrictionDouble(DT.DOUBLE);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "5");
         dr1.addFacet(Facet.MAX_INCLUSIVE, "15");
-        DataRange dr2 = new DatatypeRestrictionDouble(DT.DOUBLE);
+        InternalDataRange dr2 = new DatatypeRestrictionDouble(DT.DOUBLE);
         dr2.negate();
         dr2.addFacet(Facet.MIN_INCLUSIVE, "10.0");
         dr2.addFacet(Facet.MAX_INCLUSIVE, "20.0");
@@ -226,10 +226,10 @@ public class DoublesTest extends AbstractReasonerTest {
         // or                   |---...
         // to           |-----------| 
         // results in   |---|   |---| 
-        DataRange dr1 = new DatatypeRestrictionDouble(DT.DOUBLE);
+        InternalDataRange dr1 = new DatatypeRestrictionDouble(DT.DOUBLE);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "-4.5");
         dr1.addFacet(Facet.MAX_INCLUSIVE, "15.52");
-        DataRange dr2 = new DatatypeRestrictionDouble(DT.DOUBLE);
+        InternalDataRange dr2 = new DatatypeRestrictionDouble(DT.DOUBLE);
         dr2.negate();
         dr2.addFacet(Facet.MIN_EXCLUSIVE, "-2.24");
         dr2.addFacet(Facet.MAX_EXCLUSIVE, "10.47854");
@@ -254,10 +254,10 @@ public class DoublesTest extends AbstractReasonerTest {
         // conjoin     |-----|
         // to         |---------...
         // results in  |-----|
-        DataRange dr1 = new DatatypeRestrictionDouble(DT.DOUBLE);
+        InternalDataRange dr1 = new DatatypeRestrictionDouble(DT.DOUBLE);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "0.04");
         dr1.addFacet(Facet.MAX_INCLUSIVE, "5.48");
-        DataRange dr2 = new DatatypeRestrictionOWLRealPlus(DT.DECIMAL);
+        InternalDataRange dr2 = new DatatypeRestrictionOWLRealPlus(DT.DECIMAL);
         dr2.addFacet(Facet.MIN_EXCLUSIVE, "0.1");
         dr2.addFacet(Facet.MAX_EXCLUSIVE, "4.1");
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;
@@ -274,10 +274,10 @@ public class DoublesTest extends AbstractReasonerTest {
         // conjoin     |-----|
         // to         |---------...
         // results in  |-----|
-        DataRange dr1 = new DatatypeRestrictionDouble(DT.DOUBLE);
+        InternalDataRange dr1 = new DatatypeRestrictionDouble(DT.DOUBLE);
         dr1.addFacet(Facet.MIN_INCLUSIVE, "0.04");
         dr1.addFacet(Facet.MAX_INCLUSIVE, "5.48");
-        DataRange dr2 = new DatatypeRestrictionOWLRealPlus(DT.DECIMAL);
+        InternalDataRange dr2 = new DatatypeRestrictionOWLRealPlus(DT.DECIMAL);
         dr2.addFacet(Facet.MIN_INCLUSIVE, "0.1");
         dr2.addFacet(Facet.MAX_INCLUSIVE, "4.1");
         CanonicalDataRange canonical = (CanonicalDataRange) dr1;

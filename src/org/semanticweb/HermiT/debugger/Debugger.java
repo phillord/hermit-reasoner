@@ -8,11 +8,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,8 +23,6 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
 import org.semanticweb.HermiT.Prefixes;
-import org.semanticweb.HermiT.datatypes.DataConstant;
-import org.semanticweb.HermiT.datatypes.DataRange;
 import org.semanticweb.HermiT.debugger.commands.ActiveNodesCommand;
 import org.semanticweb.HermiT.debugger.commands.BreakpointTimeCommand;
 import org.semanticweb.HermiT.debugger.commands.ClearCommand;
@@ -55,12 +51,16 @@ import org.semanticweb.HermiT.debugger.commands.ShowSubtreeCommand;
 import org.semanticweb.HermiT.debugger.commands.SingleStepCommand;
 import org.semanticweb.HermiT.debugger.commands.UnprocessedDisjunctionsCommand;
 import org.semanticweb.HermiT.debugger.commands.WaitForCommand;
+import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.AtMostGuard;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
-import org.semanticweb.HermiT.model.Concept;
+import org.semanticweb.HermiT.model.DataRange;
+import org.semanticweb.HermiT.model.NegationDataRange;
+import org.semanticweb.HermiT.model.DatatypeRestriction;
+import org.semanticweb.HermiT.model.DataValueEnumeration;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Equality;
@@ -317,11 +317,11 @@ public class Debugger extends TableauMonitorForwarder {
                 atomicConcepts.add((AtomicConcept)potentialConcept);
             else if (potentialConcept instanceof ExistentialConcept)
                 existentialConcepts.add((ExistentialConcept)potentialConcept);
+            else if (potentialConcept instanceof DataRange)
+                dataRanges.add((DataRange)potentialConcept);
             else if (potentialConcept instanceof DescriptionGraph) {
                 // ignore description graphs here
             }
-            else if (potentialConcept instanceof DataRange)
-                dataRanges.add((DataRange)potentialConcept);
             else
                 throw new IllegalStateException("Found something in the label that is not a known type!");
             retrieval.next();
@@ -712,7 +712,15 @@ public class Debugger extends TableauMonitorForwarder {
             case 4:
                 return ((AtomicNegationConcept)c1).getNegatedAtomicConcept().getURI().compareTo(((AtomicNegationConcept)c2).getNegatedAtomicConcept().getURI());
             case 5:
-                return compareDataRanges((DataRange)c1,(DataRange)c2);
+                return compareDatatypeRestrictions((DatatypeRestriction)c1,(DatatypeRestriction)c2);
+            case 6:
+                return compareDataValueEnumerations((DataValueEnumeration)c1,(DataValueEnumeration)c2);
+            case 7:
+                {
+                    NegationDataRange ndr1=(NegationDataRange)c1;
+                    NegationDataRange ndr2=(NegationDataRange)c2;
+                    return compare(ndr1.getNegatedDataRange(),ndr2.getNegatedDataRange());
+                }
             default:
                 throw new IllegalArgumentException();
             }
@@ -728,43 +736,46 @@ public class Debugger extends TableauMonitorForwarder {
                 return 3;
             else if (c instanceof AtomicNegationConcept)
                 return 4;
-            else if (c instanceof DataRange)
+            else if (c instanceof DatatypeRestriction)
                 return 5;
+            else if (c instanceof DataValueEnumeration)
+                return 6;
+            else if (c instanceof NegationDataRange)
+                return 7;
             else
                 throw new IllegalArgumentException();
         }
-        protected int compareDataRanges(DataRange dr1,DataRange dr2) {
-            int type1=getDataRangeType(dr1);
-            int type2=getDataRangeType(dr2);
-            if (type1!=type2)
-                return type1-type2;
+        protected int compareDatatypeRestrictions(DatatypeRestriction dr1,DatatypeRestriction dr2) {
             int comparison=dr1.getDatatypeURI().compareTo(dr2.getDatatypeURI());
             if (comparison!=0)
                 return comparison;
-            List<DataConstant> values1=new ArrayList<DataConstant>(dr1.getOneOf());
-            List<DataConstant> values2=new ArrayList<DataConstant>(dr2.getOneOf());
-            Collections.sort(values1);
-            Collections.sort(values2);
-            Iterator<DataConstant> it1=values1.iterator();
-            Iterator<DataConstant> it2=values2.iterator();
-            while (it1.hasNext()) {
-                if (it2.hasNext()) {
-                    comparison=it1.next().compareTo(it2.next());
-                    if (comparison!=0)
-                        return comparison;
-                }
-                else
-                    return 1;
+            comparison=dr1.getNumberOfFacetRestrictions()-dr2.getNumberOfFacetRestrictions();
+            if (comparison!=0)
+                return comparison;
+            for (int index=0;index<dr1.getNumberOfFacetRestrictions();index++) {
+                comparison=dr1.getFacetURI(index).compareTo(dr2.getFacetURI(index));
+                if (comparison!=0)
+                    return comparison;
+                comparison=compareDataValues(dr1.getFacetValue(index),dr2.getFacetValue(index));
+                if (comparison!=0)
+                    return comparison;
             }
-            if (it2.hasNext())
-                return -1;
             return 0;
         }
-        protected int getDataRangeType(DataRange dr) {
-            int returnValue=10;
-            if (dr.isNegated())
-                returnValue=11;
-            return returnValue;
+        protected int compareDataValueEnumerations(DataValueEnumeration dve1,DataValueEnumeration dve2) {
+            int comparison=dve1.getNumberOfDataValues()-dve2.getNumberOfDataValues();
+            if (comparison!=0)
+                return comparison;
+            for (int index=0;index<dve1.getNumberOfDataValues();index++) {
+                comparison=compareDataValues(dve1.getDataValue(index),dve2.getDataValue(index));
+                if (comparison!=0)
+                    return comparison;
+            }
+            return 0;
+            
+        }
+        protected int compareDataValues(Object dv1,Object dv2) {
+            return dv1.toString().compareTo(dv2.toString());
         }
     }
 

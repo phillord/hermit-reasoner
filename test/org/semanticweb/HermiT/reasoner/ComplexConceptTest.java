@@ -21,8 +21,8 @@ public class ComplexConceptTest extends AbstractReasonerTest {
         StringBuffer buffer = new StringBuffer();
         buffer.append("SubClassOf(A ObjectSomeValuesFrom(f B))");
         buffer.append("SubClassOf(A ObjectSomeValuesFrom(f C))");
-        buffer.append("SubClassOf(B DataSomeValuesFrom(dp DataOneOf(\"5\"^^xsd:integer \"3\"^^xsd:positiveInteger)))");
-        buffer.append("SubClassOf(C DataHasValue(dp \"5\"^^xsd:integer))");
+        buffer.append("SubClassOf(B DataSomeValuesFrom(dp DataOneOf( \"abc\"^^xsd:string \"def\"^^xsd:string )))");
+        buffer.append("SubClassOf(C DataHasValue(dp \"abc@\"^^rdf:text))");
         buffer.append("FunctionalObjectProperty(f)");
         buffer.append("ClassAssertion(a A)");
         loadReasonerWithAxioms(buffer.toString());
@@ -32,7 +32,7 @@ public class ComplexConceptTest extends AbstractReasonerTest {
         OWLObjectProperty f = df.getOWLObjectProperty(URI.create("file:/c/test.owl#f"));
         OWLDataProperty dp = df.getOWLDataProperty(URI.create("file:/c/test.owl#dp"));
         
-        OWLDescription desc = df.getOWLObjectSomeRestriction(f, df.getOWLDataSomeRestriction(dp, df.getOWLDataOneOf(df.getOWLTypedConstant(5))));
+        OWLDescription desc = df.getOWLObjectSomeRestriction(f, df.getOWLDataSomeRestriction(dp, df.getOWLDataOneOf(df.getOWLUntypedConstant("abc"))));
         assertInstanceOf(desc, a, true);
    }
  

@@ -501,7 +501,7 @@ public class DLClauseEvaluator implements Serializable {
             int afterRule=addLabel();
             compileCheckUnboundVariableMatches(getBodyAtom(0),firstAtomRetrieval,afterRule);
             compileGenerateBindings(firstAtomRetrieval,getBodyAtom(0));
-            m_workers.add(new CopyDependencySet(firstAtomRetrieval,m_unionDependencySet.getConstituents(),0));
+            m_workers.add(new CopyDependencySet(firstAtomRetrieval,m_unionDependencySet.m_dependencySets,0));
             compileBodyAtom(1,afterRule);
             setLabelProgramCounter(afterRule);
             for (Worker worker : m_workers)
@@ -581,7 +581,7 @@ public class DLClauseEvaluator implements Serializable {
                 m_workers.add(new HasMoreRetrieval(afterLoop,retrieval));
                 compileCheckUnboundVariableMatches(atom,retrieval,nextElement);
                 compileGenerateBindings(retrieval,atom);
-                m_workers.add(new CopyDependencySet(retrieval,m_unionDependencySet.getConstituents(),m_retrievals.size()-1));
+                m_workers.add(new CopyDependencySet(retrieval,m_unionDependencySet.m_dependencySets,m_retrievals.size()-1));
                 compileBodyAtom(bodyAtomIndex+1,nextElement);
                 setLabelProgramCounter(nextElement);
                 m_workers.add(new NextRetrieval(retrieval));

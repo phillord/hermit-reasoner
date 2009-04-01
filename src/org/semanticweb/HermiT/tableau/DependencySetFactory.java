@@ -249,7 +249,8 @@ public final class DependencySetFactory implements Serializable {
         m_unprocessedSets.add((UnionDependencySet)dependencySet);
         while (!m_unprocessedSets.isEmpty()) {
             UnionDependencySet unionDependencySet=m_unprocessedSets.remove(m_unprocessedSets.size()-1);
-            for (DependencySet constituent : unionDependencySet.m_dependencySets) {
+            for (int index=0;index<unionDependencySet.m_numberOfConstituents;index++) {
+                DependencySet constituent=unionDependencySet.m_dependencySets[index];
                 if (constituent instanceof UnionDependencySet)
                     m_unprocessedSets.add((UnionDependencySet)constituent);
                 else

@@ -22,7 +22,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
-        expectedClauses.add("atLeast(1 :hasAge (oneOf((xsd:integer 18))))(X) :- :Eighteen(X)");
+        expectedClauses.add("atLeast(1 :hasAge { \"18\"^^xsd:integer })(X) :- :Eighteen(X)");
         assertContainsAll(this.getName(),clauses,expectedClauses);
     }
 
@@ -31,7 +31,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
-        expectedClauses.add(":Eighteen(X) v (not oneOf((xsd:integer 18)))(Y) :- :hasAge(X,Y)");
+        expectedClauses.add(":Eighteen(X) v not({ \"18\"^^xsd:integer })(Y) :- :hasAge(X,Y)");
         assertContainsAll(this.getName(),clauses,expectedClauses);
     }
 
@@ -40,7 +40,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
-        expectedClauses.add("(xsd:integer)(Y) :- :A(X), :dp(X,Y)");
+        expectedClauses.add("xsd:integer(Y) :- :A(X), :dp(X,Y)");
         assertContainsAll(this.getName(),clauses,expectedClauses);
     }
 
@@ -49,7 +49,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
-        expectedClauses.add(":A(X) v atLeast(1 :dp (not xsd:integer))(X) :- owl:Thing(X)");
+        expectedClauses.add(":A(X) v atLeast(1 :dp not(xsd:integer))(X) :- owl:Thing(X)");
         assertContainsAll(this.getName(),clauses,expectedClauses);
     }
 
@@ -58,7 +58,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
-        expectedClauses.add(":A(X) v (not xsd:string)(Y) :- :dp(X,Y)");
+        expectedClauses.add(":A(X) v not(xsd:string)(Y) :- :dp(X,Y)");
         assertContainsAll(this.getName(),clauses,expectedClauses);
     }
 
@@ -67,7 +67,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
-        expectedClauses.add("atLeast(1 :dp (xsd:string))(X) :- :A(X)");
+        expectedClauses.add("atLeast(1 :dp xsd:string)(X) :- :A(X)");
         assertContainsAll(this.getName(),clauses,expectedClauses);
     }
 
@@ -76,7 +76,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
-        expectedClauses.add("(oneOf((xsd:integer 19)(xsd:string Peter)))(Y) :- :A(X), :dp(X,Y)");
+        expectedClauses.add("{ \"19\"^^xsd:integer \"Peter\" }(Y) :- :A(X), :dp(X,Y)");
         assertContainsAll(this.getName(),clauses,expectedClauses);
     }
 
@@ -85,7 +85,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
-        expectedClauses.add(":A(X) v atLeast(1 :dp (not oneOf((xsd:integer 18)(xsd:integer 19))))(X) :- owl:Thing(X)");
+        expectedClauses.add(":A(X) v atLeast(1 :dp not({ \"18\"^^xsd:integer \"19\"^^xsd:integer }))(X) :- owl:Thing(X)");
         assertContainsAll(this.getName(),clauses,expectedClauses);
     }
 
@@ -94,7 +94,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
-        expectedClauses.add(":A(X) v atLeast(1 :dp (not oneOf((xsd:integer 18)(xsd:string abc))))(X) :- owl:Thing(X)");
+        expectedClauses.add(":A(X) v atLeast(1 :dp not({ \"18\"^^xsd:integer \"abc\" }))(X) :- owl:Thing(X)");
         assertContainsAll(this.getName(),clauses,expectedClauses);
     }
 
@@ -103,7 +103,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
-        expectedClauses.add("(oneOf((xsd:integer 18)(xsd:string abc)))(Y) :- :A(X), :dp(X,Y)");
+        expectedClauses.add("{ \"18\"^^xsd:integer \"abc\" }(Y) :- :A(X), :dp(X,Y)");
         assertContainsAll(this.getName(),clauses,expectedClauses);
     }
 
@@ -112,7 +112,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
-        expectedClauses.add("(oneOf((xsd:integer 18)(xsd:integer 19)))(Y) :- :A(X), :dp(X,Y)");
+        expectedClauses.add("{ \"18\"^^xsd:integer \"19\"^^xsd:integer }(Y) :- :A(X), :dp(X,Y)");
         assertContainsAll(this.getName(),clauses,expectedClauses);
     }
 
@@ -121,8 +121,8 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
-        expectedClauses.add("(not oneOf((xsd:integer 18)))(Y) :- :A(X), :dp(X,Y)");
-        expectedClauses.add("(not oneOf((xsd:integer 19)))(Y) :- :A(X), :dp(X,Y)");
+        expectedClauses.add("not({ \"18\"^^xsd:integer })(Y) :- :A(X), :dp(X,Y)");
+        expectedClauses.add("not({ \"19\"^^xsd:integer })(Y) :- :A(X), :dp(X,Y)");
         assertContainsAll(this.getName(),clauses,expectedClauses);
     }
 
@@ -131,7 +131,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
-        expectedClauses.add("(not xsd:string)(Y1) v (not xsd:string)(Y2) v Y1 == Y2 :- :A(X), :dp(X,Y1), :dp(X,Y2)");
+        expectedClauses.add("not(xsd:string)(Y1) v not(xsd:string)(Y2) v Y1 == Y2 :- :A(X), :dp(X,Y1), :dp(X,Y2)");
         assertContainsAll(this.getName(),clauses,expectedClauses);
     }
 
@@ -140,7 +140,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
-        expectedClauses.add(":A(X) v atLeast(2 :dp (xsd:string))(X) :- owl:Thing(X)");
+        expectedClauses.add(":A(X) v atLeast(2 :dp xsd:string)(X) :- owl:Thing(X)");
         assertContainsAll(this.getName(),clauses,expectedClauses);
     }
 
@@ -149,7 +149,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
-        expectedClauses.add("(not xsd:integer)(Y1) v (not xsd:integer)(Y2) v (not xsd:integer)(Y3) v (not xsd:integer)(Y4) v Y1 == Y2 v Y1 == Y3 v Y1 == Y4 v Y2 == Y3 v Y2 == Y4 v Y3 == Y4 :- :A(X), :dp(X,Y1), :dp(X,Y2), :dp(X,Y3), :dp(X,Y4)");
+        expectedClauses.add("not(xsd:integer)(Y1) v not(xsd:integer)(Y2) v not(xsd:integer)(Y3) v not(xsd:integer)(Y4) v Y1 == Y2 v Y1 == Y3 v Y1 == Y4 v Y2 == Y3 v Y2 == Y4 v Y3 == Y4 :- :A(X), :dp(X,Y1), :dp(X,Y2), :dp(X,Y3), :dp(X,Y4)");
         assertContainsAll(this.getName(),clauses,expectedClauses);
     }
 
@@ -158,7 +158,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
-        expectedClauses.add(":A(X) v atLeast(4 :dp (xsd:integer))(X) :- owl:Thing(X)");
+        expectedClauses.add(":A(X) v atLeast(4 :dp xsd:integer)(X) :- owl:Thing(X)");
         assertContainsAll(this.getName(),clauses,expectedClauses);
     }
 
@@ -167,7 +167,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
-        expectedClauses.add(":A(X) v (not xsd:string)(Y1) :- :dp(X,Y1)");
+        expectedClauses.add(":A(X) v not(xsd:string)(Y1) :- :dp(X,Y1)");
         assertContainsAll(this.getName(),clauses,expectedClauses);
     }
 
@@ -176,7 +176,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
-        expectedClauses.add(":A(X) v (not xsd:string)(Y1) v (not xsd:string)(Y2) v (not xsd:string)(Y3) v Y1 == Y2 v Y1 == Y3 v Y2 == Y3 :- :dp(X,Y1), :dp(X,Y2), :dp(X,Y3)");
+        expectedClauses.add(":A(X) v not(xsd:string)(Y1) v not(xsd:string)(Y2) v not(xsd:string)(Y3) v Y1 == Y2 v Y1 == Y3 v Y2 == Y3 :- :dp(X,Y1), :dp(X,Y2), :dp(X,Y3)");
         assertContainsAll(this.getName(),clauses,expectedClauses);
     }
 
@@ -185,7 +185,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
-        expectedClauses.add("atLeast(1 :dp (xsd:string))(X) :- :A(X)");
+        expectedClauses.add("atLeast(1 :dp xsd:string)(X) :- :A(X)");
         assertContainsAll(this.getName(),clauses,expectedClauses);
     }
 
@@ -194,7 +194,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
-        expectedClauses.add("atLeast(5 :dp (xsd:string))(X) :- :A(X)");
+        expectedClauses.add("atLeast(5 :dp xsd:string)(X) :- :A(X)");
         assertContainsAll(this.getName(),clauses,expectedClauses);
     }
 
@@ -203,8 +203,8 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
-        expectedClauses.add("(not xsd:integer)(Y1) v (not xsd:integer)(Y2) v Y1 == Y2 :- :A(X), :dp(X,Y1), :dp(X,Y2)");
-        expectedClauses.add("atLeast(1 :dp (xsd:integer))(X) :- :A(X)");
+        expectedClauses.add("not(xsd:integer)(Y1) v not(xsd:integer)(Y2) v Y1 == Y2 :- :A(X), :dp(X,Y1), :dp(X,Y2)");
+        expectedClauses.add("atLeast(1 :dp xsd:integer)(X) :- :A(X)");
         assertContainsAll(this.getName(),clauses,expectedClauses);
     }
 
@@ -213,8 +213,8 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
-        expectedClauses.add("(not xsd:integer)(Y1) v (not xsd:integer)(Y2) v (not xsd:integer)(Y3) v (not xsd:integer)(Y4) v Y1 == Y2 v Y1 == Y3 v Y1 == Y4 v Y2 == Y3 v Y2 == Y4 v Y3 == Y4 :- :A(X), :dp(X,Y1), :dp(X,Y2), :dp(X,Y3), :dp(X,Y4)");
-        expectedClauses.add("atLeast(3 :dp (xsd:integer))(X) :- :A(X)");
+        expectedClauses.add("not(xsd:integer)(Y1) v not(xsd:integer)(Y2) v not(xsd:integer)(Y3) v not(xsd:integer)(Y4) v Y1 == Y2 v Y1 == Y3 v Y1 == Y4 v Y2 == Y3 v Y2 == Y4 v Y3 == Y4 :- :A(X), :dp(X,Y1), :dp(X,Y2), :dp(X,Y3), :dp(X,Y4)");
+        expectedClauses.add("atLeast(3 :dp xsd:integer)(X) :- :A(X)");
         assertContainsAll(this.getName(),clauses,expectedClauses);
     }
 
@@ -223,7 +223,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
-        expectedClauses.add(":A(X) v (not xsd:integer)(Y1) v atLeast(2 :dp (xsd:integer))(X) :- :dp(X,Y1)");
+        expectedClauses.add(":A(X) v not(xsd:integer)(Y1) v atLeast(2 :dp xsd:integer)(X) :- :dp(X,Y1)");
         assertContainsAll(this.getName(),clauses,expectedClauses);
     }
 
@@ -232,7 +232,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         Set<String> expectedClauses=new HashSet<String>();
-        expectedClauses.add(":A(X) v (not xsd:integer)(Y1) v (not xsd:integer)(Y2) v (not xsd:integer)(Y3) v Y1 == Y2 v Y1 == Y3 v Y2 == Y3 v atLeast(4 :dp (xsd:integer))(X) :- :dp(X,Y1), :dp(X,Y2), :dp(X,Y3)");
+        expectedClauses.add(":A(X) v not(xsd:integer)(Y1) v not(xsd:integer)(Y2) v not(xsd:integer)(Y3) v Y1 == Y2 v Y1 == Y3 v Y2 == Y3 v atLeast(4 :dp xsd:integer)(X) :- :dp(X,Y1), :dp(X,Y2), :dp(X,Y3)");
         assertContainsAll(this.getName(),clauses,expectedClauses);
     }
 

@@ -22,6 +22,12 @@ public class ExistsDescriptionGraph extends ExistentialConcept implements DLPred
     public int getArity() {
         return 1;
     }
+    public boolean isAlwaysTrue() {
+        return false;
+    }
+    public boolean isAlwaysFalse() {
+        return false;
+    }
     public String toString(Prefixes prefixes) {
         return "exists("+prefixes.abbreviateURI(m_descriptionGraph.getName())+'|'+m_vertex+')';
     }

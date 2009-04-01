@@ -4,9 +4,9 @@ import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.semanticweb.HermiT.datatypes.DataConstant;
-import org.semanticweb.HermiT.datatypes.DataConstant.Impl;
-import org.semanticweb.HermiT.datatypes.DatatypeRestriction.DT;
+import org.semanticweb.HermiT.datatypes.old.DataConstant;
+import org.semanticweb.HermiT.datatypes.old.DataConstant.Impl;
+import org.semanticweb.HermiT.datatypes.old.InternalDatatypeRestriction.DT;
 import org.semanticweb.HermiT.reasoner.AbstractReasonerTest;
 
 public class DataConstantTest extends AbstractReasonerTest {

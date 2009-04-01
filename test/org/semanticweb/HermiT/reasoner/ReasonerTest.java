@@ -238,57 +238,6 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertSatisfiable(desc,false);
     }
 
-    //    keys are not yet supported by the OWL API, but should pass the following tests once implemented
-
-    public void testKeys() throws Exception {
-        String axioms = "DataPropertyAssertion(hasSSN Peter \"123-45-6789\") " +
-                        "ClassAssertion(Peter Person) " +
-                        "DataPropertyAssertion(hasSSN Peter_Griffin \"123-45-6789\") " +
-                        "ClassAssertion(Peter_Griffin Person) " +
-                        "DifferentIndividuals(Peter Peter_Griffin)";
-        //HasKey(Person hasSSN)
-        OWLHasKeyDummy key = new OWLHasKeyDummy();
-        OWLDataFactory f = OWLManager.createOWLOntologyManager().getOWLDataFactory(); 
-        OWLClass person = f.getOWLClass(new URI("file:/c/test.owl#Person"));
-        key.setClassExpression(person);
-        
-        Set<OWLDataPropertyExpression> dprops = new HashSet<OWLDataPropertyExpression>();
-        dprops.add(f.getOWLDataProperty(new URI("file:/c/test.owl#hasSSN")));
-        key.setDataProperties(dprops);
-        
-        key.setClassExpression(person);
-        key.setDataProperties(dprops);
-        Set<OWLHasKeyDummy> keys = new HashSet<OWLHasKeyDummy>();
-        keys.add(key);
-        loadOntologyWithAxioms(axioms);
-        createReasoner(getConfiguration(),null,keys);
-        assertABoxSatisfiable(false);
-    }
-
-    public void testKeys2() throws Exception {
-        String axioms = "DataPropertyAssertion(hasSSN Peter \"123-45-6789\") " +
-                "ClassAssertion(Peter Person) " +
-                "ClassAssertion(Lois ObjectSomeValuesFrom(marriedTo " +
-                "ObjectIntersectionOf(Man " +
-                "DataHasValue(hasSSN \"123-45-6789\"^^xsd:string)))) " +
-                "SubClassOf(Man ObjectComplementOf(Person))";
-        //HasKey(Person hasSSN)
-        OWLHasKeyDummy key = new OWLHasKeyDummy();
-        OWLDataFactory f = OWLManager.createOWLOntologyManager().getOWLDataFactory(); 
-        OWLClass person = f.getOWLClass(new URI("file:/c/test.owl#Person"));
-        key.setClassExpression(person);
-        Set<OWLDataPropertyExpression> dprops = new HashSet<OWLDataPropertyExpression>();
-        dprops.add(f.getOWLDataProperty(new URI("file:/c/test.owl#hasSSN")));
-        key.setDataProperties(dprops);
-        key.setClassExpression(person);
-        key.setDataProperties(dprops);
-        Set<OWLHasKeyDummy> keys = new HashSet<OWLHasKeyDummy>();
-        keys.add(key);
-        loadOntologyWithAxioms(axioms);
-        createReasoner(getConfiguration(),null,keys);
-        assertABoxSatisfiable(true);
-    }
-    
     public void testReflexivity() throws Exception {
         String axioms = "ReflexiveObjectProperty(r) "
                 + "ClassAssertion(a ObjectAllValuesFrom(r " + "owl:Nothing)) "
@@ -1898,5 +1847,54 @@ public class ReasonerTest extends AbstractReasonerTest {
             df.getOWLObjectComplementOf(c));
 
         assertFalse(m_reasoner.isSatisfiable(desc));
+    }
+
+    //    keys are not yet supported by the OWL API, but should pass the following tests once implemented
+
+    public void testKeys1() throws Exception {
+        String axioms = "DataPropertyAssertion(hasSSN Peter \"123-45-6789\") " +
+                        "ClassAssertion(Peter Person) " +
+                        "DataPropertyAssertion(hasSSN Peter_Griffin \"123-45-6789\") " +
+                        "ClassAssertion(Peter_Griffin Person) " +
+                        "DifferentIndividuals(Peter Peter_Griffin)";
+        //HasKey(Person hasSSN)
+        OWLHasKeyDummy key = new OWLHasKeyDummy();
+        OWLDataFactory f = OWLManager.createOWLOntologyManager().getOWLDataFactory(); 
+        OWLClass person = f.getOWLClass(new URI("file:/c/test.owl#Person"));
+        key.setClassExpression(person);
+        
+        Set<OWLDataPropertyExpression> dprops = new HashSet<OWLDataPropertyExpression>();
+        dprops.add(f.getOWLDataProperty(new URI("file:/c/test.owl#hasSSN")));
+        key.setDataProperties(dprops);
+        
+        key.setClassExpression(person);
+        key.setDataProperties(dprops);
+        Set<OWLHasKeyDummy> keys = new HashSet<OWLHasKeyDummy>();
+        keys.add(key);
+        loadOntologyWithAxioms(axioms);
+        createReasoner(getConfiguration(),null,keys);
+        assertABoxSatisfiable(false);
+    }
+
+    public void testKeys2() throws Exception {
+        String axioms = "DataPropertyAssertion(hasSSN Peter \"123-45-6789\") " +
+                "ClassAssertion(Peter Person) " +
+                "ClassAssertion(Lois ObjectSomeValuesFrom(marriedTo ObjectIntersectionOf(Man DataHasValue(hasSSN \"123-45-6789\"^^xsd:string)))) " +
+                "SubClassOf(Man ObjectComplementOf(Person))";
+        // HasKey(Person hasSSN)
+        OWLHasKeyDummy key = new OWLHasKeyDummy();
+        OWLDataFactory f = OWLManager.createOWLOntologyManager().getOWLDataFactory(); 
+        OWLClass person = f.getOWLClass(new URI("file:/c/test.owl#Person"));
+        key.setClassExpression(person);
+        Set<OWLDataPropertyExpression> dprops = new HashSet<OWLDataPropertyExpression>();
+        dprops.add(f.getOWLDataProperty(new URI("file:/c/test.owl#hasSSN")));
+        key.setDataProperties(dprops);
+        key.setClassExpression(person);
+        key.setDataProperties(dprops);
+        Set<OWLHasKeyDummy> keys = new HashSet<OWLHasKeyDummy>();
+        keys.add(key);
+        loadOntologyWithAxioms(axioms);
+        createReasoner(getConfiguration(),null,keys);
+        assertABoxSatisfiable(true);
     }
 }

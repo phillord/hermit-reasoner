@@ -2,13 +2,13 @@ package org.semanticweb.HermiT.datatypes;
 
 import java.math.BigInteger;
 
-import org.semanticweb.HermiT.datatypes.CanonicalDataRange;
-import org.semanticweb.HermiT.datatypes.DataConstant;
-import org.semanticweb.HermiT.datatypes.DataRange;
-import org.semanticweb.HermiT.datatypes.DatatypeRestrictionBase64Binary;
-import org.semanticweb.HermiT.datatypes.DataConstant.Impl;
-import org.semanticweb.HermiT.datatypes.DatatypeRestriction.DT;
-import org.semanticweb.HermiT.datatypes.DatatypeRestriction.Facet;
+import org.semanticweb.HermiT.datatypes.old.CanonicalDataRange;
+import org.semanticweb.HermiT.datatypes.old.DataConstant;
+import org.semanticweb.HermiT.datatypes.old.DatatypeRestrictionBase64Binary;
+import org.semanticweb.HermiT.datatypes.old.InternalDataRange;
+import org.semanticweb.HermiT.datatypes.old.DataConstant.Impl;
+import org.semanticweb.HermiT.datatypes.old.InternalDatatypeRestriction.DT;
+import org.semanticweb.HermiT.datatypes.old.InternalDatatypeRestriction.Facet;
 import org.semanticweb.HermiT.reasoner.AbstractReasonerTest;
 
 public class Base64BinaryTest extends AbstractReasonerTest {
@@ -18,7 +18,7 @@ public class Base64BinaryTest extends AbstractReasonerTest {
     }
     
     public void testSize1() throws Exception {
-        DataRange dr = new DatatypeRestrictionBase64Binary(DT.BASE64BINARY);
+        InternalDataRange dr = new DatatypeRestrictionBase64Binary(DT.BASE64BINARY);
         dr.addFacet(Facet.LENGTH, "1");
         CanonicalDataRange cdr = (CanonicalDataRange) dr;
         BigInteger num = cdr.getEnumerationSize();
@@ -26,7 +26,7 @@ public class Base64BinaryTest extends AbstractReasonerTest {
     }
 
     public void testSize2() throws Exception {
-        DataRange dr = new DatatypeRestrictionBase64Binary(DT.BASE64BINARY);
+        InternalDataRange dr = new DatatypeRestrictionBase64Binary(DT.BASE64BINARY);
         dr.addFacet(Facet.MIN_LENGTH, "2");
         dr.addFacet(Facet.MAX_LENGTH, "2");
         CanonicalDataRange cdr = (CanonicalDataRange) dr;
@@ -35,7 +35,7 @@ public class Base64BinaryTest extends AbstractReasonerTest {
     }
     
     public void testSize3() throws Exception {
-        DataRange dr = new DatatypeRestrictionBase64Binary(DT.BASE64BINARY);
+        InternalDataRange dr = new DatatypeRestrictionBase64Binary(DT.BASE64BINARY);
         dr.addFacet(Facet.MIN_LENGTH, "1");
         dr.addFacet(Facet.MAX_LENGTH, "2");
         CanonicalDataRange cdr = (CanonicalDataRange) dr;
@@ -44,7 +44,7 @@ public class Base64BinaryTest extends AbstractReasonerTest {
     }
     
     public void testSize4() throws Exception {
-        DataRange dr = new DatatypeRestrictionBase64Binary(DT.BASE64BINARY);
+        InternalDataRange dr = new DatatypeRestrictionBase64Binary(DT.BASE64BINARY);
         dr.addFacet(Facet.MAX_LENGTH, "2");
         CanonicalDataRange cdr = (CanonicalDataRange) dr;
         BigInteger num = cdr.getEnumerationSize();
@@ -52,7 +52,7 @@ public class Base64BinaryTest extends AbstractReasonerTest {
     }
     
     public void testSize5() throws Exception {
-        DataRange dr = new DatatypeRestrictionBase64Binary(DT.BASE64BINARY);
+        InternalDataRange dr = new DatatypeRestrictionBase64Binary(DT.BASE64BINARY);
         dr.addFacet(Facet.MAX_LENGTH, "2");
         CanonicalDataRange cdr = (CanonicalDataRange) dr;
         BigInteger num = cdr.getEnumerationSize();
@@ -60,7 +60,7 @@ public class Base64BinaryTest extends AbstractReasonerTest {
     }
     
     public void testSize6() throws Exception {
-        DataRange dr = new DatatypeRestrictionBase64Binary(DT.BASE64BINARY);
+        InternalDataRange dr = new DatatypeRestrictionBase64Binary(DT.BASE64BINARY);
         dr.addFacet(Facet.MIN_LENGTH, "2");
         CanonicalDataRange cdr = (CanonicalDataRange) dr;
         BigInteger num = cdr.getEnumerationSize();
@@ -68,7 +68,7 @@ public class Base64BinaryTest extends AbstractReasonerTest {
     }
     
     public void testFacets() throws Exception {
-        DataRange dr = new DatatypeRestrictionBase64Binary(DT.BASE64BINARY);
+        InternalDataRange dr = new DatatypeRestrictionBase64Binary(DT.BASE64BINARY);
         dr.addFacet(Facet.MIN_LENGTH, "1");
         dr.addFacet(Facet.MIN_LENGTH, "2");
         dr.addFacet(Facet.MIN_LENGTH, "0");
@@ -81,7 +81,7 @@ public class Base64BinaryTest extends AbstractReasonerTest {
     }
     
     public void testAssignments() throws Exception {
-        DataRange dr = new DatatypeRestrictionBase64Binary(DT.BASE64BINARY);
+        InternalDataRange dr = new DatatypeRestrictionBase64Binary(DT.BASE64BINARY);
         dr.addFacet(Facet.LENGTH, "1");
         CanonicalDataRange cdr = (CanonicalDataRange) dr;
         DataConstant c = cdr.getSmallestAssignment();        
@@ -92,7 +92,7 @@ public class Base64BinaryTest extends AbstractReasonerTest {
     }
     
     public void testAssignments2() throws Exception {
-        DataRange dr = new DatatypeRestrictionBase64Binary(DT.BASE64BINARY);
+        InternalDataRange dr = new DatatypeRestrictionBase64Binary(DT.BASE64BINARY);
         dr.addFacet(Facet.MIN_LENGTH, "1");
         dr.addFacet(Facet.MAX_LENGTH, "1");
         CanonicalDataRange cdr = (CanonicalDataRange) dr;
@@ -107,7 +107,7 @@ public class Base64BinaryTest extends AbstractReasonerTest {
     }
     
     public void testAssignments3() throws Exception {
-        DataRange dr = new DatatypeRestrictionBase64Binary(DT.BASE64BINARY);
+        InternalDataRange dr = new DatatypeRestrictionBase64Binary(DT.BASE64BINARY);
         dr.addFacet(Facet.MIN_LENGTH, "1");
         dr.addFacet(Facet.MAX_LENGTH, "5");
         CanonicalDataRange cdr = (CanonicalDataRange) dr;
@@ -122,7 +122,7 @@ public class Base64BinaryTest extends AbstractReasonerTest {
     
     public void testInvalidBase64() throws Exception {
         CanonicalDataRange cdr = new DatatypeRestrictionBase64Binary(DT.BASE64BINARY);
-        ((DataRange) cdr).addFacet(Facet.MAX_LENGTH, "5");
+        ((InternalDataRange) cdr).addFacet(Facet.MAX_LENGTH, "5");
         assertFalse(cdr.accepts(new DataConstant(Impl.IBase64Binary, DT.BASE64BINARY, "00000")));
         assertFalse(cdr.accepts(new DataConstant(Impl.IHexBinary, DT.BASE64BINARY, "00==")));
     }

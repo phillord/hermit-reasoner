@@ -44,10 +44,4 @@ public class Individual extends Term {
     public static Individual create(String uri) {
         return s_interningManager.intern(new Individual(uri));
     }
-    /** If an individual has previously been constructed for this URI then return
-        it; otherwise return null. */
-    public static Individual getExisting(String uri) {
-        return s_interningManager.getExisting(new Individual(uri));
-    }
-
 }

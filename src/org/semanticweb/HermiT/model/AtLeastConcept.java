@@ -30,6 +30,12 @@ public class AtLeastConcept extends ExistentialConcept implements DLPredicate {
     public int getArity() {
         return 1;
     }
+    public boolean isAlwaysTrue() {
+        return false;
+    }
+    public boolean isAlwaysFalse() {
+        return m_toConcept.isAlwaysFalse();
+    }
     public String toString(Prefixes prefixes) {
         return "atLeast("+m_number+' '+m_onRole.toString(prefixes)+' '+m_toConcept.toString(prefixes)+')';
     }

@@ -38,6 +38,7 @@ public class Configuration implements Serializable,Cloneable {
         CREATION_ORDER,EL,INDIVIDUAL_REUSE
     }
 
+    public WarningMonitor warningMonitor;
     public Configuration.TableauMonitorType tableauMonitorType;
     public Configuration.DirectBlockingType directBlockingType;
     public Configuration.BlockingStrategyType blockingStrategyType;
@@ -50,6 +51,7 @@ public class Configuration implements Serializable,Cloneable {
     public HashMap<String,Object> parameters;
 
     public Configuration() {
+        warningMonitor=null;
         tableauMonitorType=Configuration.TableauMonitorType.NONE;
         directBlockingType=Configuration.DirectBlockingType.OPTIMAL;
         blockingStrategyType=Configuration.BlockingStrategyType.ANYWHERE;
@@ -100,5 +102,9 @@ public class Configuration implements Serializable,Cloneable {
         catch (CloneNotSupportedException cantHappen) {
             return null;
         }
+    }
+
+    public static interface WarningMonitor {
+        void warning(String warning);
     }
 }

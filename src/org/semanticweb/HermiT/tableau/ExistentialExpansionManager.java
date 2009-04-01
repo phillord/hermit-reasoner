@@ -11,12 +11,12 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.graph.Graph;
 import org.semanticweb.HermiT.model.AtLeastConcept;
-import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.ExistentialConcept;
+import org.semanticweb.HermiT.model.LiteralConcept;
+import org.semanticweb.HermiT.model.DataRange;
+import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InverseRole;
-import org.semanticweb.HermiT.model.LiteralConcept;
-import org.semanticweb.HermiT.datatypes.DataRange;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.DLClause;
 
