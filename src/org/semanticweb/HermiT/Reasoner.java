@@ -40,6 +40,7 @@ import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
 import org.semanticweb.owl.util.ProgressMonitor;
 import org.semanticweb.owl.inference.OWLReasoner;
+import org.semanticweb.owl.inference.OWLReasonerFactory;
 import org.semanticweb.owl.inference.MonitorableOWLReasoner;
 
 import org.semanticweb.HermiT.blocking.AncestorBlocking;
@@ -1206,9 +1207,21 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         subGraphNode.m_successors.add(supElement);
     }
     
-    // The factory for the reasoner from a plugin
+    public static class ReasonerFactory implements OWLReasonerFactory {
 
-    public static class ReasonerFactory extends ProtegeOWLReasonerFactoryAdapter {
+        public OWLReasoner createReasoner(OWLOntologyManager manager) {
+            Configuration configuration=new Configuration();
+            configuration.ignoreUnsupportedDatatypes=true;
+            return new Reasoner(configuration);
+        }
+        public String getReasonerName() {
+            return getClass().getPackage().getImplementationTitle();
+        }
+    }
+   
+    // The factory for the reasoner from the Protege plug-in
+
+    public static class ProtegeReasonerFactory extends ProtegeOWLReasonerFactoryAdapter {
         
         @SuppressWarnings("serial")
         public OWLReasoner createReasoner(OWLOntologyManager ontologyManager) {
