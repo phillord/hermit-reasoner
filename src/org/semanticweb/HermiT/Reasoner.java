@@ -312,8 +312,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             OWLDataFactory factory=ontologyManager.getOWLDataFactory();
             OWLClass newClass=factory.getOWLClass(URI.create("internal:query-concept"));
             OWLAxiom classDefinitionAxiom=factory.getOWLSubClassAxiom(newClass,description);
-            DLOntology newDLOntology=extendDLOntology(m_configuration,m_prefixes,"uri:urn:internal-kb",m_dlOntology,ontologyManager,classDefinitionAxiom);
-            Tableau tableau=createTableau(m_configuration,newDLOntology,m_prefixes);
+            Tableau tableau=getTableau(ontologyManager,classDefinitionAxiom);
             return tableau.isSatisfiable(AtomicConcept.create("internal:query-concept"));
         }
     }
@@ -331,8 +330,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             OWLAxiom subClassDefinitionAxiom=factory.getOWLSubClassAxiom(newSubConcept,subDescription);
             OWLClass newSuperConcept=factory.getOWLClass(URI.create("internal:query-superconcept"));
             OWLAxiom superClassDefinitionAxiom=factory.getOWLSubClassAxiom(superDescription,newSuperConcept);
-            DLOntology newDLOntology=extendDLOntology(m_configuration,m_prefixes,"uri:urn:internal-kb",m_dlOntology,ontologyManager,subClassDefinitionAxiom,superClassDefinitionAxiom);
-            Tableau tableau=createTableau(m_configuration,newDLOntology,m_prefixes);
+            Tableau tableau=getTableau(ontologyManager,subClassDefinitionAxiom,superClassDefinitionAxiom);
             return tableau.isSubsumedBy(AtomicConcept.create("internal:query-subconcept"),AtomicConcept.create("internal:query-superconcept"));
         }
     }
@@ -386,8 +384,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             OWLDataFactory factory=ontologyManager.getOWLDataFactory();
             OWLClass newClass=factory.getOWLClass(URI.create("internal:query-concept"));
             OWLAxiom classDefinitionAxiom=factory.getOWLEquivalentClassesAxiom(newClass,description);
-            DLOntology newDLOntology=extendDLOntology(m_configuration,m_prefixes,"uri:urn:internal-kb",m_dlOntology,ontologyManager,classDefinitionAxiom);
-            Tableau tableau=createTableau(m_configuration,newDLOntology,m_prefixes);
+            Tableau tableau=getTableau(ontologyManager,classDefinitionAxiom);
             final TableauSubsumptionChecker subsumptionChecker=new TableauSubsumptionChecker(tableau);
             HierarchyBuilder<AtomicConcept> hierarchyBuilder=new HierarchyBuilder<AtomicConcept>(
                 new HierarchyBuilder.Relation<AtomicConcept>() {
@@ -726,8 +723,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                 OWLDataFactory factory=ontologyManager.getOWLDataFactory();
                 OWLClass newClass=factory.getOWLClass(URI.create("internal:query-concept"));
                 OWLAxiom classDefinitionAxiom=factory.getOWLSubClassAxiom(type,newClass);
-                DLOntology newDLOntology=extendDLOntology(m_configuration,m_prefixes,"uri:urn:internal-kb",m_dlOntology,ontologyManager,classDefinitionAxiom);
-                Tableau tableau=createTableau(m_configuration,newDLOntology,m_prefixes);
+                Tableau tableau=getTableau(ontologyManager,classDefinitionAxiom);
                 return tableau.isInstanceOf(AtomicConcept.create("internal:query-concept"),individual);
             }
         }
@@ -756,8 +752,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             OWLDataFactory factory=ontologyManager.getOWLDataFactory();
             OWLClass newClass=factory.getOWLClass(URI.create("internal:query-concept"));
             OWLAxiom classDefinitionAxiom=factory.getOWLSubClassAxiom(description,newClass);
-            DLOntology newDLOntology=extendDLOntology(m_configuration,m_prefixes,"uri:urn:internal-kb",m_dlOntology,ontologyManager,classDefinitionAxiom);
-            Tableau tableau=createTableau(m_configuration,newDLOntology,m_prefixes);
+            Tableau tableau=getTableau(ontologyManager,classDefinitionAxiom);
             AtomicConcept queryConcept=AtomicConcept.create("internal:query-concept");
             HierarchyNode<AtomicConcept> hierarchyNode=getHierarchyNode(description);
             Set<OWLIndividual> result=new HashSet<OWLIndividual>();
@@ -815,6 +810,15 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
     }
 
     // Various creation methods
+    
+    protected Tableau getTableau(OWLOntologyManager ontologyManager,OWLAxiom... additionalAxioms) throws IllegalArgumentException {
+        if (additionalAxioms==null || additionalAxioms.length==0)
+            return m_tableau;
+        else {
+            DLOntology newDLOntology=extendDLOntology(m_configuration,m_prefixes,"uri:urn:internal-kb",m_dlOntology,ontologyManager,additionalAxioms);
+            return createTableau(m_configuration,newDLOntology,m_prefixes);
+        }
+    }
     
     protected static Tableau createTableau(Configuration config,DLOntology dlOntology,Prefixes prefixes) throws IllegalArgumentException {
         if (!dlOntology.canUseNIRule() && dlOntology.hasAtMostRestrictions() && dlOntology.hasInverseRoles() && config.existentialStrategyType==Configuration.ExistentialStrategyType.INDIVIDUAL_REUSE)
@@ -1206,6 +1210,8 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         }
         subGraphNode.m_successors.add(supElement);
     }
+    
+    // The factory for reasoner the OWL API
     
     public static class ReasonerFactory implements OWLReasonerFactory {
 
