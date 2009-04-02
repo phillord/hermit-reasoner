@@ -17,20 +17,17 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
     protected static final String XSD_DOUBLE=Prefixes.s_semanticWebPrefixes.get("xsd")+"double";
     protected static final ValueSpaceSubset DOUBLE_ALL=new DoubleAll();
     protected static final ValueSpaceSubset EMPTY=new EmptyValueSpaceSubset(XSD_DOUBLE);
-    
-    protected final Set<String> m_managedDatatypeURIs;
-    protected final Set<Class<?>> m_managedDataValueClasses;
-
-    public DoubleDatatypeHandler() {
-        m_managedDatatypeURIs=Collections.singleton(XSD_DOUBLE);
-        m_managedDataValueClasses=new HashSet<Class<?>>();
-        m_managedDataValueClasses.add(Double.class);
+    protected static final Set<String> s_managedDatatypeURIs=Collections.singleton(XSD_DOUBLE);
+    protected static final Set<Class<?>> s_managedDataValueClasses=new HashSet<Class<?>>();
+    static {
+        s_managedDataValueClasses.add(Double.class);
     }
+
     public Set<String> getManagedDatatypeURIs() {
-        return m_managedDatatypeURIs;
+        return s_managedDatatypeURIs;
     }
     public Set<Class<?>> getManagedDataValueClasses() {
-        return m_managedDataValueClasses;
+        return s_managedDataValueClasses;
     }
     public String toString(Prefixes prefixes,Object dataValue) {
         String lexicalForm=((Double)dataValue).toString();

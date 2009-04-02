@@ -17,20 +17,17 @@ public class BooleanDatatypeHandler implements DatatypeHandler {
     protected static final String XSD_BOOLEAN=Prefixes.s_semanticWebPrefixes.get("xsd")+"boolean";
     protected static final ValueSpaceSubset BOOLEAN_ALL=new BooleanAll();
     protected static final ValueSpaceSubset EMPTY=new EmptyValueSpaceSubset(XSD_BOOLEAN);
-    
-    protected final Set<String> m_managedDatatypeURIs;
-    protected final Set<Class<?>> m_managedDataValueClasses;
-
-    public BooleanDatatypeHandler() {
-        m_managedDatatypeURIs=Collections.singleton(XSD_BOOLEAN);
-        m_managedDataValueClasses=new HashSet<Class<?>>();
-        m_managedDataValueClasses.add(Boolean.class);
+    protected final static Set<String> s_managedDatatypeURIs=Collections.singleton(XSD_BOOLEAN);
+    protected final static Set<Class<?>> s_managedDataValueClasses=new HashSet<Class<?>>();
+    static {
+        s_managedDataValueClasses.add(Boolean.class);
     }
+
     public Set<String> getManagedDatatypeURIs() {
-        return m_managedDatatypeURIs;
+        return s_managedDatatypeURIs;
     }
     public Set<Class<?>> getManagedDataValueClasses() {
-        return m_managedDataValueClasses;
+        return s_managedDataValueClasses;
     }
     public String toString(Prefixes prefixes,Object dataValue) {
         boolean value=((Boolean)dataValue).booleanValue();

@@ -17,21 +17,20 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
     protected static final String XSD_INTEGER=Prefixes.s_semanticWebPrefixes.get("xsd")+"integer";
     protected static final ValueSpaceSubset INTEGER_ALL=new IntegerAll();
     protected static final ValueSpaceSubset EMPTY=new EmptyValueSpaceSubset(OWL_REAL);
-    
-    protected final Set<String> m_managedDatatypeURIs;
-    protected final Set<Class<?>> m_managedDataValueClasses;
-
-    public OWLRealDatatypeHandler() {
-        m_managedDatatypeURIs=new HashSet<String>();
-        m_managedDatatypeURIs.add(XSD_INTEGER);
-        m_managedDataValueClasses=new HashSet<Class<?>>();
-        m_managedDataValueClasses.add(Integer.class);
+    protected static final Set<String> s_managedDatatypeURIs=new HashSet<String>();
+    static {
+        s_managedDatatypeURIs.add(XSD_INTEGER);
     }
+    protected static final Set<Class<?>> s_managedDataValueClasses=new HashSet<Class<?>>();
+    static {
+        s_managedDataValueClasses.add(Integer.class);
+    }
+
     public Set<String> getManagedDatatypeURIs() {
-        return m_managedDatatypeURIs;
+        return s_managedDatatypeURIs;
     }
     public Set<Class<?>> getManagedDataValueClasses() {
-        return m_managedDataValueClasses;
+        return s_managedDataValueClasses;
     }
     public String toString(Prefixes prefixes,Object dataValue) {
         assert dataValue instanceof Integer;

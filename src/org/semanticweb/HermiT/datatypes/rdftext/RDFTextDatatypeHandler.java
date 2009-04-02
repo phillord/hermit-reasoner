@@ -19,23 +19,22 @@ public class RDFTextDatatypeHandler implements DatatypeHandler {
     protected static final ValueSpaceSubset XSD_STRING_ALL=new XSDStringAll();
     protected static final ValueSpaceSubset RDF_TEXT_MINUS_XSD_STRING=new RDFTextMinusXSDString();
     protected static final ValueSpaceSubset EMPTY=new EmptyValueSpaceSubset(RDF_TEXT);
-    
-    protected final Set<String> m_managedDatatypeURIs;
-    protected final Set<Class<?>> m_managedDataValueClasses;
-
-    public RDFTextDatatypeHandler() {
-        m_managedDatatypeURIs=new HashSet<String>();
-        m_managedDatatypeURIs.add(RDF_TEXT);
-        m_managedDatatypeURIs.add(XSD_STRING);
-        m_managedDataValueClasses=new HashSet<Class<?>>();
-        m_managedDataValueClasses.add(RDFTextDataValue.class);
-        m_managedDataValueClasses.add(String.class);
+    protected static final Set<String> s_managedDatatypeURIs=new HashSet<String>();
+    static {
+        s_managedDatatypeURIs.add(RDF_TEXT);
+        s_managedDatatypeURIs.add(XSD_STRING);
     }
+    protected static final Set<Class<?>> s_managedDataValueClasses=new HashSet<Class<?>>();
+    static {
+        s_managedDataValueClasses.add(RDFTextDataValue.class);
+        s_managedDataValueClasses.add(String.class);
+    }
+
     public Set<String> getManagedDatatypeURIs() {
-        return m_managedDatatypeURIs;
+        return s_managedDatatypeURIs;
     }
     public Set<Class<?>> getManagedDataValueClasses() {
-        return m_managedDataValueClasses;
+        return s_managedDataValueClasses;
     }
     public String toString(Prefixes prefixes,Object dataValue) {
         if (dataValue instanceof String)

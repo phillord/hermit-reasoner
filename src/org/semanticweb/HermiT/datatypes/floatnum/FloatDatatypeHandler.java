@@ -17,20 +17,17 @@ public class FloatDatatypeHandler implements DatatypeHandler {
     protected static final String XSD_FLOAT=Prefixes.s_semanticWebPrefixes.get("xsd")+"float";
     protected static final ValueSpaceSubset FLOAT_ALL=new FloatAll();
     protected static final ValueSpaceSubset EMPTY=new EmptyValueSpaceSubset(XSD_FLOAT);
-    
-    protected final Set<String> m_managedDatatypeURIs;
-    protected final Set<Class<?>> m_managedDataValueClasses;
-
-    public FloatDatatypeHandler() {
-        m_managedDatatypeURIs=Collections.singleton(XSD_FLOAT);
-        m_managedDataValueClasses=new HashSet<Class<?>>();
-        m_managedDataValueClasses.add(Float.class);
+    protected static final Set<String> s_managedDatatypeURIs=Collections.singleton(XSD_FLOAT);
+    protected static final Set<Class<?>> s_managedDataValueClasses=new HashSet<Class<?>>();
+    static {
+        s_managedDataValueClasses.add(Float.class);
     }
+
     public Set<String> getManagedDatatypeURIs() {
-        return m_managedDatatypeURIs;
+        return s_managedDatatypeURIs;
     }
     public Set<Class<?>> getManagedDataValueClasses() {
-        return m_managedDataValueClasses;
+        return s_managedDataValueClasses;
     }
     public String toString(Prefixes prefixes,Object dataValue) {
         String lexicalForm=((Float)dataValue).toString();

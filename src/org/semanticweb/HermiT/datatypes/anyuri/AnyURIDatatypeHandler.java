@@ -19,20 +19,17 @@ public class AnyURIDatatypeHandler implements DatatypeHandler {
     protected static final String XSD_ANY_URI=Prefixes.s_semanticWebPrefixes.get("xsd")+"anyURI";
     protected static final ValueSpaceSubset ANY_URI_ALL=new AnyURIAll();
     protected static final ValueSpaceSubset EMPTY=new EmptyValueSpaceSubset(XSD_ANY_URI);
-    
-    protected final Set<String> m_managedDatatypeURIs;
-    protected final Set<Class<?>> m_managedDataValueClasses;
-
-    public AnyURIDatatypeHandler() {
-        m_managedDatatypeURIs=Collections.singleton(XSD_ANY_URI);
-        m_managedDataValueClasses=new HashSet<Class<?>>();
-        m_managedDataValueClasses.add(URI.class);
+    protected static final Set<String> s_managedDatatypeURIs=Collections.singleton(XSD_ANY_URI);
+    protected static final Set<Class<?>> s_managedDataValueClasses=new HashSet<Class<?>>();
+    static {
+        s_managedDataValueClasses.add(URI.class);
     }
+
     public Set<String> getManagedDatatypeURIs() {
-        return m_managedDatatypeURIs;
+        return s_managedDatatypeURIs;
     }
     public Set<Class<?>> getManagedDataValueClasses() {
-        return m_managedDataValueClasses;
+        return s_managedDataValueClasses;
     }
     public String toString(Prefixes prefixes,Object dataValue) {
         String lexicalForm=((URI)dataValue).toString();
