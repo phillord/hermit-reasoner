@@ -701,11 +701,10 @@ public class OWLClausification implements Serializable {
             }
         }
         public Object visit(OWLDataOneOf node) {
-            Object[] dataValues=new Object[node.getValues().size()];
-            int index=0;
+            Set<Object> dataValues=new HashSet<Object>();
             for (OWLConstant constant : node.getValues())
-                dataValues[index++]=constant.accept(this);
-            return DataValueEnumeration.create(dataValues);
+                dataValues.add(constant.accept(this));
+            return DataValueEnumeration.create(dataValues.toArray());
         }
         public Object visit(OWLDataComplementOf node) {
             return convertDataRange(node.getDataRange()).getNegation();

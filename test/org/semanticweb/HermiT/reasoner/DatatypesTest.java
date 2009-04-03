@@ -82,7 +82,7 @@ public class DatatypesTest extends AbstractReasonerTest {
     }
 
     public void testAllValuesFromMixed() throws Exception {
-        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3.0\"^^xsd:float \"4\"^^xsd:integer))) " 
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3.0\"^^xsd:decimal \"4\"^^xsd:integer))) " 
                 + "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3.0\"^^xsd:decimal)))"
                 + "SubClassOf(A DataSomeValuesFrom(dp DatatypeRestriction(xsd:integer maxInclusive \"3\"^^xsd:short)))"
                 + "ClassAssertion(a A)";
@@ -203,7 +203,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         // forall dp integer >= 5 <=7
         // forall dp decimal >=6 <=6.8
         String axioms = "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:byte minInclusive \"4.5\"^^xsd:decimal maxInclusive \"7\"^^xsd:short))) "
-            + "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:decimal minInclusive \"6.0\"^^xsd:float maxInclusive \"6.8\"^^xsd:decimal))) " 
+            + "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:decimal minInclusive \"6.0\"^^xsd:decimal maxInclusive \"6.8\"^^xsd:decimal))) " 
             + "ClassAssertion(a A) " 
             + "ClassAssertion(a DataSomeValuesFrom(dp rdfs:Literal))";
         loadReasonerWithAxioms(axioms);
@@ -214,7 +214,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         // forall dp integer >= 5 <=7
         // forall dp decimal >=6.0 <=6.8
         String axioms = "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:byte minInclusive \"4.5\"^^xsd:decimal maxInclusive \"7\"^^xsd:short))) "
-            + "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:decimal minInclusive \"6.0\"^^xsd:float maxInclusive \"6.8\"^^xsd:decimal))) "
+            + "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:decimal minInclusive \"6.0\"^^xsd:decimal maxInclusive \"6.8\"^^xsd:decimal))) "
             + "SubClassOf(A DataSomeValuesFrom(dp owl:real))"
             + "ClassAssertion(a A) "
             + "NegativeDataPropertyAssertion(dp a \"6\"^^xsd:unsignedInt) ";
@@ -222,11 +222,11 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertABoxSatisfiable(false);
     }
 
-    public void testDoublePlusDecimal() throws Exception {
-        // forall dp double >= 5 <=7.2
+    public void testDecimals() throws Exception {
+        // forall dp decimal >= 5 <=7.2
         // forall dp decimal >=6.0 <=6.8
-        String axioms = "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:double minInclusive \"5\"^^xsd:byte maxInclusive \"7.2\"^^xsd:float))) "
-            + "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:decimal minInclusive \"6.0\"^^xsd:float maxInclusive \"6.8\"^^xsd:decimal))) "
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:decimal minInclusive \"5\"^^xsd:byte maxInclusive \"7.2\"^^xsd:decimal))) "
+            + "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:decimal minInclusive \"6.0\"^^xsd:decimal maxInclusive \"6.8\"^^xsd:decimal))) "
             + "SubClassOf(A DataSomeValuesFrom(dp owl:real))"
             + "ClassAssertion(a A) "
             + "NegativeDataPropertyAssertion(dp a \"6\"^^xsd:unsignedInt) ";
@@ -234,17 +234,17 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertABoxSatisfiable(true);
     }
     
-    public void testDoublePlusOWLreal() throws Exception {
+    public void testDecimalPlusOWLreal() throws Exception {
         String axioms = "SubClassOf(A DataAllValuesFrom(dp owl:real)) "
-            + "SubClassOf(A DataSomeValuesFrom(dp DataOneOf(\"-INF\"^^xsd:float \"-0\"^^xsd:integer)))"
+            + "SubClassOf(A DataSomeValuesFrom(dp DataOneOf(\"-22.5\"^^xsd:decimal \"-0\"^^xsd:integer)))"
             + "ClassAssertion(a A) ";
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(true);
     }
     
-    public void testDoublePlusOWLreal2() throws Exception {
-        String axioms = "SubClassOf(A DataAllValuesFrom(dp owl:real)) "
-            + "SubClassOf(A DataSomeValuesFrom(dp DataOneOf(\"-INF\"^^xsd:float \"-0\"^^xsd:integer)))"
+    public void testDecimalPlusInteger() throws Exception {
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp xsd:integer)) "
+            + "SubClassOf(A DataSomeValuesFrom(dp DataOneOf(\"-2.2\"^^xsd:decimal \"-0\"^^xsd:integer)))"
             + "ClassAssertion(a A) "
             + "NegativeDataPropertyAssertion(dp a \"0\"^^xsd:unsignedInt) ";
         loadReasonerWithAxioms(axioms);
@@ -252,22 +252,14 @@ public class DatatypesTest extends AbstractReasonerTest {
     }
     
     public void testDifferentOneOfs() throws Exception {
-        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3.0\"^^xsd:float \"3\"^^xsd:integer)))"
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3.0\"^^xsd:decimal \"3\"^^xsd:integer)))"
             + "ClassAssertion(a DataMinCardinality(2 dp)) "
             + "ClassAssertion(a A) ";
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
     
-    public void testOWLTestCasesCons1() throws Exception {
-        String axioms = "ClassAssertion(a DataSomeValuesFrom( dp DatatypeRestriction( " 
-            + "owl:real minExclusive \"0.0\"^^xsd:float " 
-            + "maxExclusive \"1.401298464324817e-45\"^^xsd:float)))";
-        loadReasonerWithAxioms(axioms);
-        assertABoxSatisfiable(true);
-    }
-
-    public void testOWLTestCasesIncons1() throws Exception {
+    public void testFloatEnumInconsistent() throws Exception {
         String axioms = "ClassAssertion(a DataSomeValuesFrom( dp DatatypeRestriction( " 
             + "xsd:float minExclusive \"0.0\"^^xsd:float " 
             + "maxExclusive \"1.401298464324817e-45\"^^xsd:float)))";
@@ -285,21 +277,13 @@ public class DatatypesTest extends AbstractReasonerTest {
     
     public void testRationals1() throws Exception {
         String axioms = "ClassAssertion(a DataAllValuesFrom(dp " 
-                + "DataOneOf(\"1/2\"^^owl:rational \"0.5\"^^xsd:double)))" 
+                + "DataOneOf(\"1/2\"^^owl:rational \"0.5\"^^xsd:decimal)))" 
                 + "ClassAssertion(a DataMinCardinality(2 dp))";
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
     
-    public void testRealInfinity() throws Exception {
-        String axioms = "ClassAssertion(a DataAllValuesFrom(dp " 
-                + "owl:real))" 
-                + "DataPropertyAssertion(dp a \"+INF\"^^xsd:float)";
-        loadReasonerWithAxioms(axioms);
-        assertABoxSatisfiable(false);
-    }
-    
-    public void testRationals3() throws Exception {
+    public void testRationals2() throws Exception {
         String axioms = "ClassAssertion(a DataAllValuesFrom(dp " 
                 + "DataOneOf(\"1/3\"^^owl:rational \"0.33333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333\"^^xsd:decimal)))" 
                 + "ClassAssertion(a DataMinCardinality(2 dp))";
@@ -307,17 +291,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertABoxSatisfiable(true);
     }
     
-    // commented out since the OWL API does not parse this, although it should
-    // a different constructor is used in the next test, so that we can test what was intended
-//    public void testStringAbbreviation() throws Exception {
-//        String axioms = "ClassAssertion(a DataAllValuesFrom(dp " 
-//                + "DataOneOf(\"abc\" \"abc\"^^xsd:string)))" 
-//                + "ClassAssertion(a DataMaxCardinality(1 dp))";
-//        loadOntologyWithAxioms(axioms);
-//        assertABoxSatisfiable(true);
-//    }
-    
-    public void testStringAbbreviation2() throws Exception {
+    public void testStringAbbreviation() throws Exception {
         String axioms = "DataPropertyAssertion(dp a \"abc\"^^xsd:string)" 
                 + "DataPropertyAssertion(dp a \"abc\")" 
                 + "ClassAssertion(a DataMaxCardinality(1 dp))";
@@ -325,17 +299,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertABoxSatisfiable(true);
     }
     
-    // commented out since the OWL API does not parse this, although it should
-    // a different constructor is used in the next test, so that we can test what was intended
-//    public void testLangAbbreviation() throws Exception {
-//        String axioms = "ClassAssertion(a DataAllValuesFrom(dp " 
-//                + "DataOneOf(\"abc@de\"^^rdf:text \"abc\"@de)))" 
-//                + "ClassAssertion(a DataMaxCardinality(1 dp))";
-//        loadOntologyWithAxioms(axioms);
-//        assertABoxSatisfiable(true);
-//    }
-
-    public void testLangAbbreviation2() throws Exception {
+    public void testLangAbbreviation() throws Exception {
         String axioms = "DataPropertyAssertion(dp a \"abc@es\"^^rdf:text)" 
                 + "DataPropertyAssertion(dp a \"abc\"@es)" 
                 + "ClassAssertion(a DataMaxCardinality(1 dp))";

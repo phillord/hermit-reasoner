@@ -18,7 +18,7 @@ public class Individual extends Term {
         return m_uri;
     }
     public String toString() {
-        return toString(Prefixes.EMPTY);
+        return toString(Prefixes.STANDARD_PREFIXES);
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);

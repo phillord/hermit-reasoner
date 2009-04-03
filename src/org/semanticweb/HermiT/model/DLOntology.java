@@ -469,7 +469,7 @@ public class DLOntology implements Serializable {
     }
 
     public String toString() {
-        return toString(Prefixes.EMPTY);
+        return toString(Prefixes.STANDARD_PREFIXES);
     }
 
     public void save(File file) throws IOException {

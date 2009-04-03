@@ -89,7 +89,7 @@ public class Atom implements Serializable {
     }
 
     public String toString() {
-        return toString(Prefixes.EMPTY);
+        return toString(Prefixes.STANDARD_PREFIXES);
     }
 
     protected Object readResolve() {

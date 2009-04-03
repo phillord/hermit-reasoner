@@ -14,6 +14,6 @@ public abstract class Role implements Serializable {
     public abstract Role getInverse();
     public abstract String toString(Prefixes prefixes);
     public String toString() {
-        return toString(Prefixes.EMPTY);
+        return toString(Prefixes.STANDARD_PREFIXES);
     }
 }

@@ -11,9 +11,9 @@ public abstract class AbstractStructuralTest extends AbstractOntologyTest {
     public AbstractStructuralTest(String name) {
         super(name);
     }
-    /**
-     * tests that the sets have equal length and that the actual set contains all objects from the control set, otherwise the test fails and the contents of the control and the actual set are printed
-     */
+    protected static void assertContainsAll(String testName,Collection<String> actual,String[] control) {
+        assertContainsAll(testName,actual,control,null);
+    }
     protected static void assertContainsAll(String testName,Collection<String> actual,String[] controlVariant1,String[] controlVariant2) {
         try {
             assertEquals(controlVariant1.length,actual.size());
@@ -81,5 +81,9 @@ public abstract class AbstractStructuralTest extends AbstractOntologyTest {
             System.out.flush();
             throw e;
         }
+    }
+    
+    protected static String[] S(String... strings) {
+        return strings;
     }
 }

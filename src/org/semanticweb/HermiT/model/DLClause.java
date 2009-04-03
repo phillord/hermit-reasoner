@@ -205,7 +205,7 @@ public class DLClause implements Serializable {
         return buffer.toString();
     }
     public String toString() {
-        return toString(Prefixes.EMPTY);
+        return toString(Prefixes.STANDARD_PREFIXES);
     }
 
     public static DLClause create(Atom[] headAtoms,Atom[] bodyAtoms) {

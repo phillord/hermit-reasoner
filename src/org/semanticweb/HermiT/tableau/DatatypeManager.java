@@ -485,7 +485,7 @@ public class DatatypeManager implements Serializable {
             }
         }
         public String toString() {
-            return toString(Prefixes.EMPTY);
+            return toString(Prefixes.STANDARD_PREFIXES);
         }
         public String toString(Prefixes prefixes) {
             StringBuffer buffer=new StringBuffer();
@@ -582,7 +582,7 @@ public class DatatypeManager implements Serializable {
             return Collections.unmodifiableList(m_unequalToDirect);
         }
         public String toString() {
-            return toString(Prefixes.EMPTY);
+            return toString(Prefixes.STANDARD_PREFIXES);
         }
         public String toString(Prefixes prefixes) {
             StringBuffer buffer=new StringBuffer();

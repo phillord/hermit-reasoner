@@ -272,7 +272,7 @@ public abstract class InternalDatatypeRestriction
      * @see java.lang.Object#toString()
      */
     public String toString() {
-        return toString(Prefixes.EMPTY);
+        return toString(Prefixes.STANDARD_PREFIXES);
     }
     
     /* (non-Javadoc)

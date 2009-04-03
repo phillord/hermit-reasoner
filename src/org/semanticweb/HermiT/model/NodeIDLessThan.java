@@ -21,7 +21,7 @@ public class NodeIDLessThan implements DLPredicate,Serializable {
         return "<";
     }
     public String toString() {
-        return toString(Prefixes.EMPTY);
+        return toString(Prefixes.STANDARD_PREFIXES);
     }
     protected Object readResolve() {
         return INSTANCE;
