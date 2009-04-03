@@ -328,6 +328,8 @@ public final class Tableau implements Serializable {
             if (atom.getArgument(1) instanceof Individual)
                 m_extensionManager.addAssertion(dlPredicate,getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(0)),getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(1)),m_dependencySetFactory.emptySet());
             else if (atom.getArgument(1) instanceof Constant) {
+                // Must create a new node even if values are the same;
+                // otherwise, the transformation is unsound.
                 Constant constant=(Constant)atom.getArgument(1);
                 Node constantNode=createNewConcreteRootNode(m_dependencySetFactory.emptySet());
                 m_extensionManager.addAssertion(dlPredicate,getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(0)),constantNode,m_dependencySetFactory.emptySet());
