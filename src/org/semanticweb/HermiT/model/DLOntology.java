@@ -103,13 +103,17 @@ public class DLOntology implements Serializable {
         for (Atom atom : m_positiveFacts) {
             addDLPredicate(atom.getDLPredicate());
             for (int i=0;i<atom.getArity();++i) {
-                m_allIndividuals.add((Individual)atom.getArgument(i));
+                Term argument=atom.getArgument(i);
+                if (argument instanceof Individual)
+                    m_allIndividuals.add((Individual)argument);
             }
         }
         for (Atom atom : m_negativeFacts) {
             addDLPredicate(atom.getDLPredicate());
             for (int i=0;i<atom.getArity();++i) {
-                m_allIndividuals.add((Individual)atom.getArgument(i));
+                Term argument=atom.getArgument(i);
+                if (argument instanceof Individual)
+                    m_allIndividuals.add((Individual)argument);
             }
         }
     }

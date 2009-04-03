@@ -14,8 +14,10 @@ import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DLPredicate;
+import org.semanticweb.HermiT.model.DataValueEnumeration;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.Individual;
+import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.tableau.Node.NodeState;
 
@@ -323,7 +325,14 @@ public final class Tableau implements Serializable {
             m_extensionManager.addAssertion(dlPredicate,getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(0)),m_dependencySetFactory.emptySet());
             break;
         case 2:
-            m_extensionManager.addAssertion(dlPredicate,getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(0)),getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(1)),m_dependencySetFactory.emptySet());
+            if (atom.getArgument(1) instanceof Individual)
+                m_extensionManager.addAssertion(dlPredicate,getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(0)),getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(1)),m_dependencySetFactory.emptySet());
+            else if (atom.getArgument(1) instanceof Constant) {
+                Constant constant=(Constant)atom.getArgument(1);
+                Node constantNode=createNewConcreteRootNode(m_dependencySetFactory.emptySet());
+                m_extensionManager.addAssertion(dlPredicate,getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(0)),constantNode,m_dependencySetFactory.emptySet());
+                m_extensionManager.addAssertion(DataValueEnumeration.create(new Object[] { constant.getDataValue() }),constantNode,m_dependencySetFactory.emptySet());
+            }
             break;
         default:
             throw new IllegalArgumentException("Unsupported arity of positive ground atoms.");
@@ -492,6 +501,16 @@ public final class Tableau implements Serializable {
         return createNewNodeRaw(dependencySet,parent,NodeType.CONCRETE_NODE,parent.getTreeDepth()+1);
     }
     /**
+     * Create a new concrete root node for datatypes.
+     * 
+     * @param dependencySet
+     *            the dependency set for the node
+     * @return the created node
+     */
+    public Node createNewConcreteRootNode(DependencySet dependencySet) {
+        return createNewNodeRaw(dependencySet,null,NodeType.CONCRETE_ROOT_NODE,0);
+    }
+    /**
      * Create a new node graph node for description graphs
      * 
      * @param dependencySet
@@ -552,12 +571,6 @@ public final class Tableau implements Serializable {
         node.m_mergedIntoDependencySet=m_dependencySetFactory.getPermanent(dependencySet);
         m_dependencySetFactory.addUsage(node.m_mergedIntoDependencySet);
         node.m_nodeState=NodeState.MERGED;
-        if (node.m_nodeType==NodeType.NAMED_NODE && mergeInto.m_nodeType==NodeType.ROOT_NODE) {
-            // We merged a named individual node (which is also a kind of root
-            // node, but one to which keys apply) into a root node, which means
-            // that mergeInto becomes named and keys apply to it.
-            mergeInto.m_nodeType=NodeType.NAMED_NODE;
-        }
         node.m_previousMergedOrPrunedNode=m_lastMergedOrPrunedNode;
         m_lastMergedOrPrunedNode=node;
         m_numberOfMergedOrPrunedNodes++;

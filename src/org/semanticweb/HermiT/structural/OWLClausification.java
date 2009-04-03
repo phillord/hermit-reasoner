@@ -40,6 +40,7 @@ import org.semanticweb.HermiT.model.NodeIDLessThan;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.Term;
 import org.semanticweb.HermiT.model.Variable;
+import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLClassAssertionAxiom;
 import org.semanticweb.owl.model.OWLConstant;
@@ -197,7 +198,8 @@ public class OWLClausification implements Serializable {
         boolean shouldUseNIRule=axiomsExpressivity.m_hasAtMostRestrictions && axiomsExpressivity.m_hasInverseRoles && (axiomsExpressivity.m_hasNominals || m_configuration.existentialStrategyType==Configuration.ExistentialStrategyType.INDIVIDUAL_REUSE);
         if (m_configuration.prepareForExpressiveQueries)
             shouldUseNIRule=true;
-        Clausifier clausifier=new Clausifier(m_configuration.warningMonitor,positiveFacts,shouldUseNIRule,factory,m_amqOffset,m_configuration.ignoreUnsupportedDatatypes);
+        DataRangeConverter dataRangeConverter=new DataRangeConverter(m_configuration.warningMonitor,m_configuration.ignoreUnsupportedDatatypes);
+        Clausifier clausifier=new Clausifier(dataRangeConverter,positiveFacts,shouldUseNIRule,factory,m_amqOffset);
         for (OWLDescription[] inclusion : axioms.m_conceptInclusions) {
             for (OWLDescription description : inclusion)
                 description.accept(clausifier);
@@ -207,7 +209,7 @@ public class OWLClausification implements Serializable {
         m_amqOffset+=clausifier.axiomatizeAtMostGuards(dlClauses);
         for (OWLHasKeyDummy hasKey : axioms.m_hasKeys)
             dlClauses.add(clausifyKey(hasKey).getSafeVersion());
-        FactClausifier factClausifier=new FactClausifier(positiveFacts,negativeFacts);
+        FactClausifier factClausifier=new FactClausifier(dataRangeConverter,positiveFacts,negativeFacts);
         for (OWLIndividualAxiom fact : axioms.m_facts)
             fact.accept(factClausifier);
         for (DescriptionGraph descriptionGraph : descriptionGraphs)
@@ -366,11 +368,10 @@ public class OWLClausification implements Serializable {
         protected final Set<Atom> m_positiveFacts;
         protected final boolean m_renameAtMost;
         protected final OWLDataFactory m_factory;
-        protected final boolean m_ignoreUnsupportedDatatypes;
         protected int m_yIndex;
 
-        public Clausifier(Configuration.WarningMonitor warningMonitor,Set<Atom> positiveFacts,boolean renameAtMost,OWLDataFactory factory,int amqOffset,boolean ignoreUnsupportedDatatypes) {
-            m_dataRangeConverter=new DataRangeConverter(warningMonitor,ignoreUnsupportedDatatypes);
+        public Clausifier(DataRangeConverter dataRangeConverter,Set<Atom> positiveFacts,boolean renameAtMost,OWLDataFactory factory,int amqOffset) {
+            m_dataRangeConverter=dataRangeConverter;
             m_negativeAtMostReplacements=new HashMap<AtomicConcept,AtomicConcept>();
             m_amqOffset=amqOffset;
             m_headAtoms=new ArrayList<Atom>();
@@ -379,7 +380,6 @@ public class OWLClausification implements Serializable {
             m_positiveFacts=positiveFacts;
             m_renameAtMost=renameAtMost;
             m_factory=factory;
-            m_ignoreUnsupportedDatatypes=ignoreUnsupportedDatatypes;
         }
         protected DLClause getDLClause() {
             Atom[] headAtoms=new Atom[m_headAtoms.size()];
@@ -745,10 +745,12 @@ public class OWLClausification implements Serializable {
     }
 
     protected static class FactClausifier extends OWLAxiomVisitorAdapter {
+        protected final DataRangeConverter m_dataRangeConverter;
         protected final Set<Atom> m_positiveFacts;
         protected final Set<Atom> m_negativeFacts;
 
-        public FactClausifier(Set<Atom> positiveFacts,Set<Atom> negativeFacts) {
+        public FactClausifier(DataRangeConverter dataRangeConverter,Set<Atom> positiveFacts,Set<Atom> negativeFacts) {
+            m_dataRangeConverter=dataRangeConverter;
             m_positiveFacts=positiveFacts;
             m_negativeFacts=negativeFacts;
         }
@@ -793,7 +795,8 @@ public class OWLClausification implements Serializable {
             throw new IllegalArgumentException("Internal error: negative object property assertions should have been rewritten.");
         }
         public void visit(OWLDataPropertyAssertionAxiom object) {
-            throw new IllegalArgumentException("Internal error: data property assertions should have been rewritten into concept assertions.");
+            Constant targetValue=Constant.create(object.getObject().accept(m_dataRangeConverter));
+            m_positiveFacts.add(getRoleAtom(object.getProperty(),getIndividual(object.getSubject()),targetValue));
         }
         public void visit(OWLNegativeDataPropertyAssertionAxiom object) {
             throw new IllegalArgumentException("Internal error: negative data property assertions should have been rewritten into concept assertions.");

@@ -1,7 +1,6 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.structural;
 
-
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLClassAssertionAxiom;
 import org.semanticweb.owl.model.OWLNegativeObjectPropertyAssertionAxiom;
@@ -14,6 +13,7 @@ import org.semanticweb.owl.model.OWLDataMaxCardinalityRestriction;
 import org.semanticweb.owl.model.OWLDataMinCardinalityRestriction;
 import org.semanticweb.owl.model.OWLDataSomeRestriction;
 import org.semanticweb.owl.model.OWLDataValueRestriction;
+import org.semanticweb.owl.model.OWLDataPropertyAssertionAxiom;
 import org.semanticweb.owl.model.OWLDescription;
 import org.semanticweb.owl.model.OWLDescriptionVisitor;
 import org.semanticweb.owl.model.OWLObjectAllRestriction;
@@ -157,5 +157,9 @@ public class OWLAxiomsExpressivity extends OWLAxiomVisitorAdapter implements OWL
 
     public void visit(OWLNegativeObjectPropertyAssertionAxiom object) {
         visitProperty(object.getProperty());
+    }
+
+    public void visit(OWLDataPropertyAssertionAxiom object) {
+        m_hasDatatypes=true;
     }
 }

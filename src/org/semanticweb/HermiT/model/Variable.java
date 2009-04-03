@@ -18,7 +18,7 @@ public class Variable extends Term {
         return m_name;
     }
     public String toString() {
-        return m_name;
+        return toString(Prefixes.STANDARD_PREFIXES);
     }
     public String toString(Prefixes prefixes) {
         return m_name;

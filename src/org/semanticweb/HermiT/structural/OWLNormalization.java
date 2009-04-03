@@ -391,13 +391,7 @@ public class OWLNormalization implements Serializable {
         }
 
         public void visit(OWLDataPropertyAssertionAxiom axiom) {
-            OWLDataRange filler=m_factory.getOWLDataOneOf(axiom.getObject());
-            OWLDataSomeRestriction restriction=m_factory.getOWLDataSomeRestriction(axiom.getProperty(),filler);
-            OWLDescription definition=getDefinitionFor(restriction,m_alreadyExists);
-            if (!m_alreadyExists[0]) {
-                m_inclusionsAsDisjunctions.add(new OWLDescription[] { definition.getComplementNNF(),restriction });
-            }
-            addFact(m_factory.getOWLClassAssertionAxiom(axiom.getSubject(),definition));
+            addFact(axiom);
         }
 
         public void visit(OWLNegativeDataPropertyAssertionAxiom axiom) {
@@ -405,9 +399,8 @@ public class OWLNormalization implements Serializable {
             OWLDataRange notDataRange=m_factory.getOWLDataComplementOf(dataRange);
             OWLDescription restriction=m_factory.getOWLDataAllRestriction(axiom.getProperty(),notDataRange);
             OWLDescription definition=getDefinitionFor(restriction,m_alreadyExists);
-            if (!m_alreadyExists[0]) {
+            if (!m_alreadyExists[0])
                 m_inclusionsAsDisjunctions.add(new OWLDescription[] { definition.getComplementNNF(),restriction });
-            }
             addFact(m_factory.getOWLClassAssertionAxiom(axiom.getSubject(),definition));
         }
 
@@ -556,12 +549,6 @@ public class OWLNormalization implements Serializable {
             definition=m_factory.getOWLClass(URI.create("internal:def#"+m_definitions.size()));
             if (!forcePositive && !desc.accept(PLVisitor.INSTANCE))
                 definition=m_factory.getOWLObjectComplementOf(definition);
-            // TODO: it's a little ugly to switch the definition
-            // to positive polarity if it would naturally be negative and
-            // could make future normalization less efficient, but in practice
-            // we only demand positive polarity for class definitions after
-            // the main ontology has already been clausified, so it shouldn't
-            // hurt us *too* much.
             m_definitions.put(desc,definition);
             alreadyExists[0]=false;
         }

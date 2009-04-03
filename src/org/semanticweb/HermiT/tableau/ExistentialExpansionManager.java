@@ -200,7 +200,7 @@ public final class ExistentialExpansionManager implements Serializable {
     }
     protected boolean isPermanentSatisfier(Node forNode,Node toNode) {
         NodeType toNodeType=toNode.getNodeType();
-        return forNode==toNode || forNode.getParent()==toNode || toNode.getParent()==forNode || toNodeType==NodeType.ROOT_NODE || toNodeType==NodeType.NAMED_NODE || toNodeType==NodeType.CONCRETE_NODE;
+        return forNode==toNode || forNode.getParent()==toNode || toNode.getParent()==forNode || toNodeType==NodeType.ROOT_NODE || toNodeType==NodeType.NAMED_NODE || toNodeType==NodeType.CONCRETE_NODE || toNodeType==NodeType.CONCRETE_ROOT_NODE;
     }
     protected boolean containsSubsetOfNUnequalNodes(Node forNode,List<Node> nodes,int startAt,List<Node> selectedNodes,int cardinality) {
         if (selectedNodes.size()==cardinality) {

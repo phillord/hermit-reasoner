@@ -76,7 +76,7 @@ public class DatatypeManager implements Serializable {
         while (!m_extensionManager.containsClash() && !m_inequalityDeltaOldRetrieval.afterLast()) {
             Node node1=(Node)tupleBuffer[1];
             Node node2=(Node)tupleBuffer[2];
-            if (node1.getNodeType()==NodeType.CONCRETE_NODE && node2.getNodeType()==NodeType.CONCRETE_NODE) {
+            if ((node1.getNodeType()==NodeType.CONCRETE_NODE || node1.getNodeType()==NodeType.CONCRETE_ROOT_NODE) && (node2.getNodeType()==NodeType.CONCRETE_NODE || node2.getNodeType()==NodeType.CONCRETE_ROOT_NODE)) {
                 // An inequality between concrete was added in the last saturation step, so we check the D-conjunction hanging off of its node.
                 DVariable variable1=m_conjunction.getVariableFor(node1);
                 DVariable variable2=m_conjunction.getVariableFor(node2);
