@@ -56,7 +56,7 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
             String facetURI=datatypeRestriction.getFacetURI(index);
             if (!s_supportedFacetURIs.contains(facetURI))
-                throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' is not supported on datatypes derived from owl:real.");
+                throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' is not supported on xsd:double.");
             Object facetValue=datatypeRestriction.getFacetValue(index);
             if (!(facetValue instanceof Double))
                 throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' takes only doubles as values.");
@@ -138,19 +138,27 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
             String facetURI=datatypeRestriction.getFacetURI(index);
             double facetValue=(Double)datatypeRestriction.getFacetValue(index);
             if ((XSD_NS+"minInclusive").equals(facetURI)) {
+                if (DoubleInterval.areIdentical(facetValue,+0.0))
+                    facetValue=-0.0;
                 if (DoubleInterval.isSmallerEqual(lowerBoundInclusive,facetValue))
                     lowerBoundInclusive=facetValue;
             }
             else if ((XSD_NS+"minExclusive").equals(facetURI)) {
+                if (DoubleInterval.areIdentical(facetValue,-0.0))
+                    facetValue=+0.0;
                 facetValue=DoubleInterval.nextDouble(facetValue);
                 if (DoubleInterval.isSmallerEqual(lowerBoundInclusive,facetValue))
                     lowerBoundInclusive=facetValue;
             } 
             else if ((XSD_NS+"maxInclusive").equals(facetURI)) {
+                if (DoubleInterval.areIdentical(facetValue,-0.0))
+                    facetValue=+0.0;
                 if (DoubleInterval.isSmallerEqual(facetValue,upperBoundInclusive))
                     upperBoundInclusive=facetValue;
             } 
             else if ((XSD_NS+"maxExclusive").equals(facetURI)) {
+                if (DoubleInterval.areIdentical(facetValue,+0.0))
+                    facetValue=-0.0;
                 facetValue=DoubleInterval.previousDouble(facetValue);
                 if (DoubleInterval.isSmallerEqual(facetValue,upperBoundInclusive))
                     upperBoundInclusive=facetValue;
