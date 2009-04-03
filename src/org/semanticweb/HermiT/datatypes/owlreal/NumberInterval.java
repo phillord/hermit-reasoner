@@ -188,14 +188,14 @@ public class NumberInterval {
             buffer.append('\\');
             buffer.append(m_excludedRange.toString());
         }
-        if (BoundType.INCLUSIVE.equals(m_lowerBound))
+        if (BoundType.INCLUSIVE.equals(m_lowerBoundType))
             buffer.append('[');
         else
             buffer.append('<');
         buffer.append(m_lowerBound.toString());
         buffer.append("..");
         buffer.append(m_upperBound.toString());
-        if (BoundType.INCLUSIVE.equals(m_upperBound))
+        if (BoundType.INCLUSIVE.equals(m_upperBoundType))
             buffer.append(']');
         else
             buffer.append('>');
