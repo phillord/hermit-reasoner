@@ -7,6 +7,35 @@ public class DatatypesTest extends AbstractReasonerTest {
         super(name);
     }
     
+    public void testParsingError() throws Exception {
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3\"^^xsd:integer \"4a\"^^xsd:int))) " 
+                + "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"2\"^^xsd:short \"3\"^^xsd:integer)))"
+                + "ClassAssertion(a A)"
+                + "ClassAssertion(a DataSomeValuesFrom(dp DataComplementOf(DataOneOf(\"3\"^^xsd:integer))))";
+        boolean exceptionThrown = false;
+        try {
+            loadReasonerWithAxioms(axioms);
+        } catch (RuntimeException e) {
+            exceptionThrown = true;
+        }
+        assertTrue(exceptionThrown);
+    }
+    
+    public void testStringAbbreviation() throws Exception {
+        String axioms = "DataPropertyAssertion(dp a \"abc\"^^xsd:string)" 
+                + "DataPropertyAssertion(dp a \"abc\")" 
+                + "ClassAssertion(a DataMaxCardinality(1 dp))";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(true);
+    }
+    
+    public void testLangAbbreviation() throws Exception {
+        String axioms = "DataPropertyAssertion(dp a \"abc@es\"^^rdf:text)" 
+                + "DataPropertyAssertion(dp a \"abc\"@es)" 
+                + "ClassAssertion(a DataMaxCardinality(1 dp))";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(true);
+    }
     public void testDatatypesUnsat1() throws Exception {
         String axioms = "SubClassOf(A DataAllValuesFrom(dp xsd:string)) "
                 + "SubClassOf(A DataSomeValuesFrom(dp xsd:integer)) "
@@ -38,7 +67,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertABoxSatisfiable(false);
     }
     
-    public void testDatatypesSat1() throws Exception {
+    public void testDatatypesSat() throws Exception {
         String axioms = "SubClassOf(A DataHasValue(dp \"18\"^^xsd:integer)) "
                 + "ClassAssertion(a A) "
                 + "ClassAssertion(a DataAllValuesFrom(dp xsd:integer)) ";
@@ -46,113 +75,12 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertABoxSatisfiable(true);
     }
     
-    public void testminInclMaxIncl() throws Exception {
+    public void testMinInclusiveMaxInclusive() throws Exception {
         String axioms = "SubClassOf(A DataSomeValuesFrom(dp DatatypeRestriction(xsd:integer minInclusive \"18\"^^xsd:integer))) "
                 + "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:integer maxInclusive \"10\"^^xsd:integer))) " 
                 + "ClassAssertion(a A)";
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
-    }
-    
-    public void testDisjointDPsSatInteger() throws Exception {
-        String axioms = "DisjointDataProperties(dp1 dp2) " 
-                + "DataPropertyAssertion(dp1 a \"10\"^^xsd:integer)"
-                + "SubClassOf(A DataSomeValuesFrom(dp2 DatatypeRestriction(xsd:integer minInclusive \"18\"^^xsd:integer maxInclusive \"18\"^^xsd:integer)))"
-                + "ClassAssertion(a A)";
-        loadReasonerWithAxioms(axioms);
-        assertABoxSatisfiable(true);
-    }
-
-    public void testAllValuesFromInteger() throws Exception {
-        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3\"^^xsd:integer \"4\"^^xsd:integer))) " 
-                + "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"2\"^^xsd:integer \"3\"^^xsd:integer)))"
-                + "SubClassOf(A DataSomeValuesFrom(dp DatatypeRestriction(xsd:integer minInclusive \"4\"^^xsd:integer)))"
-                + "ClassAssertion(a A)";
-        loadReasonerWithAxioms(axioms);
-        assertABoxSatisfiable(false);
-    }
-    
-    public void testAllValuesFromInteger2() throws Exception {
-        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3\"^^xsd:integer \"4\"^^xsd:integer))) " 
-                + "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"2\"^^xsd:integer \"3\"^^xsd:integer)))"
-                + "ClassAssertion(a A)"
-                + "ClassAssertion(a DataSomeValuesFrom(dp DataComplementOf(DataOneOf(\"3\"^^xsd:integer))))";
-        loadReasonerWithAxioms(axioms);
-        assertABoxSatisfiable(false);
-    }
-
-    public void testAllValuesFromMixed() throws Exception {
-        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3.0\"^^xsd:decimal \"4\"^^xsd:integer))) " 
-                + "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3.0\"^^xsd:decimal)))"
-                + "SubClassOf(A DataSomeValuesFrom(dp DatatypeRestriction(xsd:integer maxInclusive \"3\"^^xsd:short)))"
-                + "ClassAssertion(a A)";
-        loadReasonerWithAxioms(axioms);
-        assertABoxSatisfiable(true);
-    }
-    
-    public void testAllValuesFromMixed2() throws Exception {
-        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3.0\"^^xsd:double \"4\"^^xsd:integer))) " 
-                + "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"2\"^^xsd:integer \"3.0\"^^xsd:decimal)))"
-                + "ClassAssertion(a A)"
-                + "ClassAssertion(a DataSomeValuesFrom(dp DataComplementOf(DataOneOf(\"3\"^^xsd:integer))))";
-        loadReasonerWithAxioms(axioms);
-        assertABoxSatisfiable(false);
-    }
-    
-    public void testAllValuesFromDifferentTypes() throws Exception {
-        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3\"^^xsd:integer \"4\"^^xsd:int))) " 
-                + "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"2\"^^xsd:short \"3\"^^xsd:integer)))"
-                + "ClassAssertion(a A)"
-                + "ClassAssertion(a DataSomeValuesFrom(dp DataComplementOf(DataOneOf(\"3\"^^xsd:integer))))";
-        loadReasonerWithAxioms(axioms);
-        assertABoxSatisfiable(false);
-    }
-    
-    public void testAllValuesFromDifferentTypes3() throws Exception {
-        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3\"^^xsd:integer \"4\"^^xsd:int))) " 
-                + "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"2\"^^xsd:short \"3\"^^xsd:int)))"
-                + "ClassAssertion(a A)"
-                + "ClassAssertion(a DataSomeValuesFrom(dp DataOneOf(\"3\"^^xsd:integer)))";
-        loadReasonerWithAxioms(axioms);
-        assertABoxSatisfiable(true);
-    }
-    
-    public void testParsingError() throws Exception {
-        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3\"^^xsd:integer \"4a\"^^xsd:int))) " 
-                + "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"2\"^^xsd:short \"3\"^^xsd:integer)))"
-                + "ClassAssertion(a A)"
-                + "ClassAssertion(a DataSomeValuesFrom(dp DataComplementOf(DataOneOf(\"3\"^^xsd:integer))))";
-        boolean exceptionThrown = false;
-        try {
-            loadReasonerWithAxioms(axioms);
-        } catch (RuntimeException e) {
-            exceptionThrown = true;
-        }
-        assertTrue(exceptionThrown);
-    }
-    
-    public void testAllValuesFromDifferentTypes2() throws Exception {
-        String axioms = "SubClassOf(A DataAllValuesFrom(dp xsd:byte)) " 
-                + "ClassAssertion(a A)"
-                + "ClassAssertion(a DataSomeValuesFrom(dp DataOneOf(\"6542145\"^^xsd:integer)))";
-        loadReasonerWithAxioms(axioms);
-        assertABoxSatisfiable(false);
-    }
-    
-    public void testNegZero() throws Exception {
-        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"0\"^^xsd:integer))) " 
-                + "ClassAssertion(a A)"
-                + "ClassAssertion(a DataSomeValuesFrom(dp DataOneOf(\"-0\"^^xsd:integer)))";
-        loadReasonerWithAxioms(axioms);
-        assertABoxSatisfiable(true);
-    }
-    
-    public void testNegZero2() throws Exception {
-        String axioms = "SubClassOf(A DataAllValuesFrom(dp owl:real)) " 
-                + "ClassAssertion(a A)"
-                + "ClassAssertion(a DataSomeValuesFrom(dp DataOneOf(\"-0\"^^xsd:integer)))";
-        loadReasonerWithAxioms(axioms);
-        assertABoxSatisfiable(true);
     }
     
     public void testDisjointDPsUnsat() throws Exception {
@@ -174,29 +102,91 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertABoxSatisfiable(false);
     }
     
-    public void testDateTime() throws Exception {
-        String axioms = "SubClassOf(A DataSomeValuesFrom(dp DatatypeRestriction(xsd:dateTime minInclusive \"2008-10-08T20:44:11.656+0100\"^^xsd:dateTime))) "
-                + "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:dateTime maxInclusive \"2008-10-08T20:44:11.656+0100\"^^xsd:dateTime))) " 
+    public void testDisjointDPsSatInteger() throws Exception {
+        String axioms = "DisjointDataProperties(dp1 dp2) " 
+                + "DataPropertyAssertion(dp1 a \"10\"^^xsd:integer)"
+                + "SubClassOf(A DataSomeValuesFrom(dp2 DatatypeRestriction(xsd:integer minInclusive \"18\"^^xsd:integer maxInclusive \"18\"^^xsd:integer)))"
+                + "ClassAssertion(a A)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(true);
+    }
+
+    public void testAllValuesFromInteger1() throws Exception {
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3\"^^xsd:integer \"4\"^^xsd:integer))) " 
+                + "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"2\"^^xsd:integer \"3\"^^xsd:integer)))"
+                + "SubClassOf(A DataSomeValuesFrom(dp DatatypeRestriction(xsd:integer minInclusive \"4\"^^xsd:integer)))"
+                + "ClassAssertion(a A)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+    
+    public void testAllValuesFromInteger2() throws Exception {
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3\"^^xsd:integer \"4\"^^xsd:integer))) " 
+                + "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"2\"^^xsd:integer \"3\"^^xsd:integer)))"
+                + "ClassAssertion(a A)"
+                + "ClassAssertion(a DataSomeValuesFrom(dp DataComplementOf(DataOneOf(\"3\"^^xsd:integer))))";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+
+    public void testAllValuesFromMixed1() throws Exception {
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3.0\"^^xsd:decimal \"4\"^^xsd:integer))) " 
+                + "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3.0\"^^xsd:decimal)))"
+                + "SubClassOf(A DataSomeValuesFrom(dp DatatypeRestriction(xsd:integer maxInclusive \"3\"^^xsd:short)))"
                 + "ClassAssertion(a A)";
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(true);
     }
     
-    public void testDateTime2() throws Exception {
-        String axioms = "SubClassOf(A DataHasValue(dp \"2007-10-08T20:44:11.656+0100\"^^xsd:dateTime)) "
-                + "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:dateTime minInclusive \"2008-07-08T20:44:11.656+0100\"^^xsd:dateTime maxInclusive \"2008-10-08T20:44:11.656+0100\"^^xsd:dateTime))) " 
-                + "ClassAssertion(a A)";
+    public void testAllValuesFromMixed2() throws Exception {
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3.0\"^^xsd:double \"4\"^^xsd:integer))) " 
+                + "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"2\"^^xsd:integer \"3.0\"^^xsd:decimal)))"
+                + "ClassAssertion(a A)"
+                + "ClassAssertion(a DataSomeValuesFrom(dp DataComplementOf(DataOneOf(\"3\"^^xsd:integer))))";
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
-
-    public void testFloat1() throws Exception {
-        // +0 and -0 are not equal 
-        String axioms = "DataPropertyAssertion(numberOfChildren Meg \"+0.0\"^^xsd:float) "
-                + "DataPropertyAssertion(numberOfChildren Meg \"-0.0\"^^xsd:float) " 
-                + "FunctionalDataProperty(numberOfChildren)";
+    
+    public void testAllValuesFromDifferentTypes1() throws Exception {
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3\"^^xsd:integer \"4\"^^xsd:int))) " 
+                + "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"2\"^^xsd:short \"3\"^^xsd:integer)))"
+                + "ClassAssertion(a A)"
+                + "ClassAssertion(a DataSomeValuesFrom(dp DataComplementOf(DataOneOf(\"3\"^^xsd:integer))))";
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
+    }
+    
+    public void testAllValuesFromDifferentTypes2() throws Exception {
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp xsd:byte)) " 
+                + "ClassAssertion(a A)"
+                + "ClassAssertion(a DataSomeValuesFrom(dp DataOneOf(\"6542145\"^^xsd:integer)))";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+    
+    public void testAllValuesFromDifferentTypes3() throws Exception {
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"3\"^^xsd:integer \"4\"^^xsd:int))) " 
+                + "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"2\"^^xsd:short \"3\"^^xsd:int)))"
+                + "ClassAssertion(a A)"
+                + "ClassAssertion(a DataSomeValuesFrom(dp DataOneOf(\"3\"^^xsd:integer)))";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(true);
+    }
+    
+    public void testNegZero1Integer() throws Exception {
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp DataOneOf(\"0\"^^xsd:integer))) " 
+                + "ClassAssertion(a A)"
+                + "ClassAssertion(a DataSomeValuesFrom(dp DataOneOf(\"-0\"^^xsd:integer)))";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(true);
+    }
+    
+    public void testNegZero2Integer() throws Exception {
+        String axioms = "SubClassOf(A DataAllValuesFrom(dp owl:real)) " 
+                + "ClassAssertion(a A)"
+                + "ClassAssertion(a DataSomeValuesFrom(dp DataOneOf(\"-0\"^^xsd:integer)))";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(true);
     }
     
     public void testIntPlusDecimal() throws Exception {
@@ -259,6 +249,15 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertABoxSatisfiable(false);
     }
     
+    public void testFloatZeros() throws Exception {
+        // +0 and -0 are not equal 
+        String axioms = "DataPropertyAssertion(numberOfChildren Meg \"+0.0\"^^xsd:float) "
+                + "DataPropertyAssertion(numberOfChildren Meg \"-0.0\"^^xsd:float) " 
+                + "FunctionalDataProperty(numberOfChildren)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+    
     public void testFloatEnumInconsistent() throws Exception {
         String axioms = "ClassAssertion(a DataSomeValuesFrom( dp DatatypeRestriction( " 
             + "xsd:float minExclusive \"0.0\"^^xsd:float " 
@@ -267,7 +266,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertABoxSatisfiable(false);
     }
 
-    public void testRationals() throws Exception {
+    public void testRationals1() throws Exception {
         String axioms = "ClassAssertion(a DataAllValuesFrom(dp " 
                 + "owl:rational)) " 
                 + "ClassAssertion(a DataMinCardinality(2 dp))";
@@ -275,7 +274,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertABoxSatisfiable(true);
     }
     
-    public void testRationals1() throws Exception {
+    public void testRationals2() throws Exception {
         String axioms = "ClassAssertion(a DataAllValuesFrom(dp " 
                 + "DataOneOf(\"1/2\"^^owl:rational \"0.5\"^^xsd:decimal)))" 
                 + "ClassAssertion(a DataMinCardinality(2 dp))";
@@ -283,7 +282,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertABoxSatisfiable(false);
     }
     
-    public void testRationals2() throws Exception {
+    public void testRationals3() throws Exception {
         String axioms = "ClassAssertion(a DataAllValuesFrom(dp " 
                 + "DataOneOf(\"1/3\"^^owl:rational \"0.33333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333\"^^xsd:decimal)))" 
                 + "ClassAssertion(a DataMinCardinality(2 dp))";
@@ -291,19 +290,19 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertABoxSatisfiable(true);
     }
     
-    public void testStringAbbreviation() throws Exception {
-        String axioms = "DataPropertyAssertion(dp a \"abc\"^^xsd:string)" 
-                + "DataPropertyAssertion(dp a \"abc\")" 
-                + "ClassAssertion(a DataMaxCardinality(1 dp))";
+    public void testDateTime1() throws Exception {
+        String axioms = "SubClassOf(A DataSomeValuesFrom(dp DatatypeRestriction(xsd:dateTime minInclusive \"2008-10-08T20:44:11.656+0100\"^^xsd:dateTime))) "
+                + "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:dateTime maxInclusive \"2008-10-08T20:44:11.656+0100\"^^xsd:dateTime))) " 
+                + "ClassAssertion(a A)";
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(true);
     }
     
-    public void testLangAbbreviation() throws Exception {
-        String axioms = "DataPropertyAssertion(dp a \"abc@es\"^^rdf:text)" 
-                + "DataPropertyAssertion(dp a \"abc\"@es)" 
-                + "ClassAssertion(a DataMaxCardinality(1 dp))";
+    public void testDateTime2() throws Exception {
+        String axioms = "SubClassOf(A DataHasValue(dp \"2007-10-08T20:44:11.656+0100\"^^xsd:dateTime)) "
+                + "SubClassOf(A DataAllValuesFrom(dp DatatypeRestriction(xsd:dateTime minInclusive \"2008-07-08T20:44:11.656+0100\"^^xsd:dateTime maxInclusive \"2008-10-08T20:44:11.656+0100\"^^xsd:dateTime))) " 
+                + "ClassAssertion(a A)";
         loadReasonerWithAxioms(axioms);
-        assertABoxSatisfiable(true);
+        assertABoxSatisfiable(false);
     }
 }

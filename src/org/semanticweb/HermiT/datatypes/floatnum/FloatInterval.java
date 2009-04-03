@@ -74,11 +74,11 @@ public class FloatInterval {
     public static float nextFloat(float value) {
         int bits=Float.floatToIntBits(value);
         int magnitude=(bits & 0x7fffffff);
-        // The successors of NaN, +INF, and -INF are these numbers themselves.
-        if (isNaN(bits) || magnitude==0x7f800000)
+        boolean positive=((bits & 0x80000000)==0);
+        // The successors of NaN and +INF are these numbers themselves.
+        if (isNaN(bits) || (magnitude==0x7f800000 && positive))
             return value;
         else {
-            boolean positive=((bits & 0x80000000)==0);
             boolean newPositive;
             int newMagnitude;
             if (positive) {
@@ -101,11 +101,11 @@ public class FloatInterval {
     public static float previousFloat(float value) {
         int bits=Float.floatToIntBits(value);
         int magnitude=(bits & 0x7fffffff);
-        // The predecessors of NaN, +INF, and -INF are these numbers themselves.
-        if (isNaN(bits) || magnitude==0x7f800000)
+        boolean positive=((bits & 0x80000000)==0);
+        // The predecessors of NaN and -INF are these numbers themselves.
+        if (isNaN(bits) || (magnitude==0x7f800000 && !positive))
             return value;
         else {
-            boolean positive=((bits & 0x80000000)==0);
             boolean newPositive;
             int newMagnitude;
             if (!positive) {

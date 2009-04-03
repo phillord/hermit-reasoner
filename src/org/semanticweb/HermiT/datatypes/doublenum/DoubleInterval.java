@@ -74,11 +74,11 @@ public class DoubleInterval {
     public static double nextDouble(double value) {
         long bits=Double.doubleToRawLongBits(value);
         long magnitude=(bits & 0x7fffffffffffffffL);
-        // The successors of NaN, +INF, and -INF are these numbers themselves.
-        if (isNaN(bits) || magnitude==0x7ff0000000000000L)
+        boolean positive=((bits & 0x8000000000000000L)==0);
+        // The successors of NaN and +INF are these numbers themselves.
+        if (isNaN(bits) || (magnitude==0x7ff0000000000000L && positive))
             return value;
         else {
-            boolean positive=((bits & 0x8000000000000000L)==0);
             boolean newPositive;
             long newMagnitude;
             if (positive) {
@@ -101,11 +101,11 @@ public class DoubleInterval {
     public static double previousDouble(double value) {
         long bits=Double.doubleToRawLongBits(value);
         long magnitude=(bits & 0x7fffffffffffffffL);
-        // The predecessors of NaN, +INF, and -INF are these numbers themselves.
-        if (isNaN(bits) || magnitude==0x7ff0000000000000L)
+        boolean positive=((bits & 0x8000000000000000L)==0);
+        // The predecessors of NaN and -INF are these numbers themselves.
+        if (isNaN(bits) || (magnitude==0x7ff0000000000000L && !positive))
             return value;
         else {
-            boolean positive=((bits & 0x8000000000000000L)==0);
             boolean newPositive;
             long newMagnitude;
             if (!positive) {
