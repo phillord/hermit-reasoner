@@ -1,6 +1,7 @@
 package org.semanticweb.HermiT.datatypes.doublenum;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Collections;
@@ -14,13 +15,21 @@ import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 import org.semanticweb.HermiT.datatypes.common.EmptyValueSpaceSubset;
 
 public class DoubleDatatypeHandler implements DatatypeHandler {
-    protected static final String XSD_DOUBLE=Prefixes.s_semanticWebPrefixes.get("xsd")+"double";
-    protected static final ValueSpaceSubset DOUBLE_ALL=new DoubleAll();
-    protected static final ValueSpaceSubset EMPTY=new EmptyValueSpaceSubset(XSD_DOUBLE);
+    protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd");
+    protected static final String XSD_DOUBLE=XSD_NS+"double";
+    protected static final ValueSpaceSubset DOUBLE_ENTIRE=new EntireDoubleSubset();
+    protected static final ValueSpaceSubset EMPTY_SUBSET=new EmptyValueSpaceSubset(XSD_DOUBLE);
     protected static final Set<String> s_managedDatatypeURIs=Collections.singleton(XSD_DOUBLE);
     protected static final Set<Class<?>> s_managedDataValueClasses=new HashSet<Class<?>>();
     static {
         s_managedDataValueClasses.add(Double.class);
+    }
+    protected static final Set<String> s_supportedFacetURIs=new HashSet<String>();
+    static {
+        s_supportedFacetURIs.add(XSD_NS+"minInclusive");
+        s_supportedFacetURIs.add(XSD_NS+"minExclusive");
+        s_supportedFacetURIs.add(XSD_NS+"maxInclusive");
+        s_supportedFacetURIs.add(XSD_NS+"maxExclusive");
     }
 
     public Set<String> getManagedDatatypeURIs() {
@@ -44,23 +53,115 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
     }
     public void validateDatatypeRestriction(DatatypeRestriction datatypeRestriction) throws UnsupportedFacetException {
         assert XSD_DOUBLE.equals(datatypeRestriction.getDatatypeURI());
-        if (datatypeRestriction.getNumberOfFacetRestrictions()>0)
-            throw new UnsupportedFacetException("xsd:double does not provide any facets.");
+        for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
+            String facetURI=datatypeRestriction.getFacetURI(index);
+            if (!s_supportedFacetURIs.contains(facetURI))
+                throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' is not supported on datatypes derived from owl:real.");
+            Object facetValue=datatypeRestriction.getFacetValue(index);
+            if (!(facetValue instanceof Double))
+                throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' takes only doubles as values.");
+        }
     }
     public ValueSpaceSubset createValueSpaceSubset(DatatypeRestriction datatypeRestriction) {
         assert XSD_DOUBLE.equals(datatypeRestriction.getDatatypeURI());
-        assert datatypeRestriction.getNumberOfFacetRestrictions()==0;
-        return DOUBLE_ALL;
+        if (datatypeRestriction.getNumberOfFacetRestrictions()==0)
+            return DOUBLE_ENTIRE;
+        DoubleInterval interval=getIntervalFor(datatypeRestriction);
+        if (interval==null)
+            return EMPTY_SUBSET;
+        else
+            return new NoNaNDoubleSubset(interval);
     }
     public ValueSpaceSubset conjoinWithDR(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
         assert XSD_DOUBLE.equals(datatypeRestriction.getDatatypeURI());
-        assert datatypeRestriction.getNumberOfFacetRestrictions()==0;
-        return DOUBLE_ALL;
+        DoubleInterval interval=getIntervalFor(datatypeRestriction);
+        if (interval==null)
+            return EMPTY_SUBSET;
+        else if (valueSpaceSubset==DOUBLE_ENTIRE)
+            return new NoNaNDoubleSubset(interval);
+        else {
+            NoNaNDoubleSubset doubleSubset=(NoNaNDoubleSubset)valueSpaceSubset;
+            List<DoubleInterval> oldIntervals=doubleSubset.m_intervals;
+            List<DoubleInterval> newIntervals=new ArrayList<DoubleInterval>();
+            for (int index=0;index<oldIntervals.size();index++) {
+                DoubleInterval oldInterval=oldIntervals.get(index);
+                DoubleInterval intersection=oldInterval.intersectWith(interval);
+                if (intersection!=null)
+                    newIntervals.add(intersection);
+            }
+            if (newIntervals.isEmpty())
+                return EMPTY_SUBSET;
+            else
+                return new NoNaNDoubleSubset(newIntervals);
+        }
     }
     public ValueSpaceSubset conjoinWithDRNegation(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
         assert XSD_DOUBLE.equals(datatypeRestriction.getDatatypeURI());
-        assert datatypeRestriction.getNumberOfFacetRestrictions()==0;
-        return EMPTY;
+        DoubleInterval interval=getIntervalFor(datatypeRestriction);
+        if (interval==null)
+            return EMPTY_SUBSET;
+        else if (valueSpaceSubset==DOUBLE_ENTIRE)
+            return new NoNaNDoubleSubset(interval);
+        else {
+            DoubleInterval complementInterval1=null;
+            if (!DoubleInterval.areIdentical(interval.m_lowerBoundInclusive,Double.NEGATIVE_INFINITY))
+                complementInterval1=new DoubleInterval(Double.NEGATIVE_INFINITY,DoubleInterval.previousDouble(interval.m_lowerBoundInclusive));
+            DoubleInterval complementInterval2=null;
+            if (!DoubleInterval.areIdentical(interval.m_upperBoundInclusive,Double.POSITIVE_INFINITY))
+                complementInterval2=new DoubleInterval(DoubleInterval.nextDouble(interval.m_upperBoundInclusive),Double.POSITIVE_INFINITY);
+            NoNaNDoubleSubset doubleSubset=(NoNaNDoubleSubset)valueSpaceSubset;
+            List<DoubleInterval> oldIntervals=doubleSubset.m_intervals;
+            List<DoubleInterval> newIntervals=new ArrayList<DoubleInterval>();
+            for (int index=0;index<oldIntervals.size();index++) {
+                DoubleInterval oldInterval=oldIntervals.get(index);
+                if (complementInterval1!=null) {
+                    DoubleInterval intersection=oldInterval.intersectWith(complementInterval1);
+                    if (intersection!=null)
+                        newIntervals.add(intersection);
+                }
+                if (complementInterval2!=null) {
+                    DoubleInterval intersection=oldInterval.intersectWith(complementInterval2);
+                    if (intersection!=null)
+                        newIntervals.add(intersection);
+                }
+            }
+            if (newIntervals.isEmpty())
+                return EMPTY_SUBSET;
+            else
+                return new NoNaNDoubleSubset(newIntervals);
+        }
+    }
+    protected DoubleInterval getIntervalFor(DatatypeRestriction datatypeRestriction) {
+        double lowerBoundInclusive=Double.NEGATIVE_INFINITY;
+        double upperBoundInclusive=Double.POSITIVE_INFINITY;
+        for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
+            String facetURI=datatypeRestriction.getFacetURI(index);
+            double facetValue=(Double)datatypeRestriction.getFacetValue(index);
+            if ((XSD_NS+"minInclusive").equals(facetURI)) {
+                if (DoubleInterval.isSmallerEqual(lowerBoundInclusive,facetValue))
+                    lowerBoundInclusive=facetValue;
+            }
+            else if ((XSD_NS+"minExclusive").equals(facetURI)) {
+                facetValue=DoubleInterval.nextDouble(facetValue);
+                if (DoubleInterval.isSmallerEqual(lowerBoundInclusive,facetValue))
+                    lowerBoundInclusive=facetValue;
+            } 
+            else if ((XSD_NS+"maxInclusive").equals(facetURI)) {
+                if (DoubleInterval.isSmallerEqual(facetValue,upperBoundInclusive))
+                    upperBoundInclusive=facetValue;
+            } 
+            else if ((XSD_NS+"maxExclusive").equals(facetURI)) {
+                facetValue=DoubleInterval.previousDouble(facetValue);
+                if (DoubleInterval.isSmallerEqual(facetValue,upperBoundInclusive))
+                    upperBoundInclusive=facetValue;
+            }
+            else
+                throw new IllegalStateException("Internal error: facet '"+facetURI+"' is not supported by xsd:double.");
+        }
+        if (DoubleInterval.isIntervalEmpty(lowerBoundInclusive,upperBoundInclusive))
+            return null;
+        else
+            return new DoubleInterval(lowerBoundInclusive,upperBoundInclusive);
     }
     public boolean isSubsetOf(String subsetDatatypeURI,String supersetDatatypeURI) {
         assert XSD_DOUBLE.equals(subsetDatatypeURI);
@@ -71,22 +172,5 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
         assert XSD_DOUBLE.equals(datatypeURI1);
         assert XSD_DOUBLE.equals(datatypeURI2);
         return false;
-    }
-
-    protected static class DoubleAll implements ValueSpaceSubset {
-
-        public String getDatatypeURI() {
-            return XSD_DOUBLE;
-        }
-        public boolean hasCardinalityAtLeast(int number) {
-            return true;
-        }
-        public boolean containsDataValue(Object dataValue) {
-            assert dataValue instanceof Double;
-            return true;
-        }
-        public void enumerateDataValues(Collection<Object> dataValues) {
-            throw new UnsupportedOperationException("You should not do this with doubles.");
-        }
     }
 }
