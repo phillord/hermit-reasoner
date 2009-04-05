@@ -14,14 +14,14 @@ public class NumberInterval {
         assert !isIntervalEmpty(baseRange,excludedRange,lowerBound,lowerBoundType,upperBound,upperBoundType);
         m_baseRange=baseRange;
         m_excludedRange=excludedRange;
-        if (NumberRange.INTEGER.equals(m_baseRange)) {
+        if (m_baseRange==NumberRange.INTEGER) {
             // For efficiency, adjust the end-points so that they fit into the INTEGER range.
             if (MinusInfinity.INSTANCE.equals(lowerBound)) {
                 m_lowerBound=lowerBound;
                 m_lowerBoundType=lowerBoundType;
             }
             else {
-                m_lowerBound=Numbers.getNearestIntegerInBound(lowerBound,Numbers.BoundaryDirection.LOWER,BoundType.INCLUSIVE.equals(lowerBoundType));
+                m_lowerBound=Numbers.getNearestIntegerInBound(lowerBound,Numbers.BoundaryDirection.LOWER,lowerBoundType==BoundType.INCLUSIVE);
                 m_lowerBoundType=BoundType.INCLUSIVE;
             }
             if (PlusInfinity.INSTANCE.equals(upperBound)) {
@@ -29,7 +29,7 @@ public class NumberInterval {
                 m_upperBoundType=upperBoundType;
             }
             else {
-                m_upperBound=Numbers.getNearestIntegerInBound(upperBound,Numbers.BoundaryDirection.UPPER,BoundType.INCLUSIVE.equals(upperBoundType));
+                m_upperBound=Numbers.getNearestIntegerInBound(upperBound,Numbers.BoundaryDirection.UPPER,upperBoundType==BoundType.INCLUSIVE);
                 m_upperBoundType=BoundType.INCLUSIVE;
             }
         }
@@ -123,10 +123,10 @@ public class NumberInterval {
         if (!NumberRange.isSubsetOf(mostSpecificRange,m_baseRange) || NumberRange.isSubsetOf(mostSpecificRange,m_excludedRange))
             return false;
         int lowerBoundComparison=Numbers.compare(m_lowerBound,number);
-        if (lowerBoundComparison>0 || (lowerBoundComparison==0 && BoundType.EXCLUSIVE.equals(m_lowerBoundType)))
+        if (lowerBoundComparison>0 || (lowerBoundComparison==0 && m_lowerBoundType==BoundType.EXCLUSIVE))
             return false;
         int upperBoundComparison=Numbers.compare(m_upperBound,number);
-        if (upperBoundComparison<0 || (upperBoundComparison==0 && BoundType.EXCLUSIVE.equals(m_upperBoundType)))
+        if (upperBoundComparison<0 || (upperBoundComparison==0 && m_upperBoundType==BoundType.EXCLUSIVE))
             return false;
         return true;
     }
@@ -161,7 +161,7 @@ public class NumberInterval {
         if (boundComparison>0)
             return true;
         else if (boundComparison==0) {
-            if (BoundType.EXCLUSIVE.equals(lowerBoundType) || BoundType.EXCLUSIVE.equals(upperBoundType) || MinusInfinity.INSTANCE.equals(lowerBound) || PlusInfinity.INSTANCE.equals(lowerBound))
+            if (lowerBoundType==BoundType.EXCLUSIVE || upperBoundType==BoundType.EXCLUSIVE || MinusInfinity.INSTANCE.equals(lowerBound) || PlusInfinity.INSTANCE.equals(lowerBound))
                 return true;
             // Both end-points are INCLUSIVE, so the cardinality is at most one
             NumberRange mostSpecificRange=NumberRange.getMostSpecificRange(lowerBound);
@@ -176,26 +176,26 @@ public class NumberInterval {
             // The base range is INTEGER; since the excluded range is a proper subset, it must be NOTHING.
             if (MinusInfinity.INSTANCE.equals(lowerBound) || PlusInfinity.INSTANCE.equals(upperBound))
                 return false;
-            Number lowerBoundInclusive=Numbers.getNearestIntegerInBound(lowerBound,Numbers.BoundaryDirection.LOWER,BoundType.INCLUSIVE.equals(lowerBoundType));
-            Number upperBoundInclusive=Numbers.getNearestIntegerInBound(lowerBound,Numbers.BoundaryDirection.UPPER,BoundType.INCLUSIVE.equals(upperBoundType));
+            Number lowerBoundInclusive=Numbers.getNearestIntegerInBound(lowerBound,Numbers.BoundaryDirection.LOWER,lowerBoundType==BoundType.INCLUSIVE);
+            Number upperBoundInclusive=Numbers.getNearestIntegerInBound(lowerBound,Numbers.BoundaryDirection.UPPER,upperBoundType==BoundType.INCLUSIVE);
             return Numbers.compare(lowerBoundInclusive,upperBoundInclusive)>0;
         }
     }
     public String toString() {
         StringBuffer buffer=new StringBuffer();
         buffer.append(m_baseRange.toString());
-        if (!NumberRange.NOTHING.equals(m_excludedRange)) {
+        if (m_excludedRange!=NumberRange.NOTHING) {
             buffer.append('\\');
             buffer.append(m_excludedRange.toString());
         }
-        if (BoundType.INCLUSIVE.equals(m_lowerBoundType))
+        if (m_lowerBoundType==BoundType.INCLUSIVE)
             buffer.append('[');
         else
             buffer.append('<');
         buffer.append(m_lowerBound.toString());
         buffer.append("..");
         buffer.append(m_upperBound.toString());
-        if (BoundType.INCLUSIVE.equals(m_upperBoundType))
+        if (m_upperBoundType==BoundType.INCLUSIVE)
             buffer.append(']');
         else
             buffer.append('>');

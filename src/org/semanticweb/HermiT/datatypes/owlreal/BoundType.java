@@ -4,7 +4,7 @@
 package org.semanticweb.HermiT.datatypes.owlreal;
 
 public enum BoundType {
-    INCLUSIVE, EXCLUSIVE;
+    INCLUSIVE,EXCLUSIVE;
 
     public BoundType getComplement() {
         return values()[1-ordinal()];
