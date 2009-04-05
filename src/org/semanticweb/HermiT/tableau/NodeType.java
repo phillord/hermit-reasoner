@@ -2,7 +2,7 @@
 package org.semanticweb.HermiT.tableau;
 
 public enum NodeType {
-    NAMED_NODE(0,false,true),ROOT_NODE(1,false,true),CONCRETE_ROOT_NODE(1,false,false),TREE_NODE(2,true,true),CONCRETE_NODE(2,true,false),GRAPH_NODE(2,true,true);
+    NAMED_NODE(0,false,true),ROOT_NODE(1,false,true),ROOT_CONSTANT_NODE(1,false,false),TREE_NODE(2,true,true),CONCRETE_NODE(2,true,false),GRAPH_NODE(2,true,true);
 
     protected final int m_mergePrecedence;
     protected final boolean m_inTreePart;

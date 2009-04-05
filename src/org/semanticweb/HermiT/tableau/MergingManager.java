@@ -100,7 +100,7 @@ public final class MergingManager implements Serializable {
             // mergeFrom node.
             Node node=mergeFrom;
             while (node!=null) {
-                if (node.isActive() && node.getNodeType()!=NodeType.ROOT_NODE && node.getNodeType()!=NodeType.NAMED_NODE && node.getNodeType()!=NodeType.CONCRETE_ROOT_NODE && (!node.getParent().isActive() || node.getParent()==mergeFrom)) {
+                if (node.isActive() && node.m_parent!=null && (!node.m_parent.isActive() || node.m_parent==mergeFrom)) {
                     if (m_tableauMonitor!=null)
                         m_tableauMonitor.nodePruned(node);
                     m_tableau.pruneNode(node);

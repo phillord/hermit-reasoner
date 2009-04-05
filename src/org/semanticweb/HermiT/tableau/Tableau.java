@@ -359,7 +359,7 @@ public final class Tableau implements Serializable {
                 node=createNewNamedNode(m_dependencySetFactory.emptySet());
             else {
                 Constant constant=(Constant)term;
-                node=createNewConcreteRootNode(m_dependencySetFactory.emptySet());
+                node=createNewRootConstantNode(m_dependencySetFactory.emptySet());
                 m_extensionManager.addAssertion(DataValueEnumeration.create(new Object[] { constant.getDataValue() }),node,m_dependencySetFactory.emptySet());
             }
             termsToNodes.put(term,node);
@@ -501,14 +501,14 @@ public final class Tableau implements Serializable {
         return createNewNodeRaw(dependencySet,parent,NodeType.CONCRETE_NODE,parent.getTreeDepth()+1);
     }
     /**
-     * Create a new concrete root node for datatypes.
+     * Create a new root constant node for datatypes.
      * 
      * @param dependencySet
      *            the dependency set for the node
      * @return the created node
      */
-    public Node createNewConcreteRootNode(DependencySet dependencySet) {
-        return createNewNodeRaw(dependencySet,null,NodeType.CONCRETE_ROOT_NODE,0);
+    public Node createNewRootConstantNode(DependencySet dependencySet) {
+        return createNewNodeRaw(dependencySet,null,NodeType.ROOT_CONSTANT_NODE,0);
     }
     /**
      * Create a new node graph node for description graphs

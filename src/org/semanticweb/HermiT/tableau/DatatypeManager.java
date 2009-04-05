@@ -76,7 +76,7 @@ public class DatatypeManager implements Serializable {
         while (!m_extensionManager.containsClash() && !m_inequalityDeltaOldRetrieval.afterLast()) {
             Node node1=(Node)tupleBuffer[1];
             Node node2=(Node)tupleBuffer[2];
-            if ((node1.getNodeType()==NodeType.CONCRETE_NODE || node1.getNodeType()==NodeType.CONCRETE_ROOT_NODE) && (node2.getNodeType()==NodeType.CONCRETE_NODE || node2.getNodeType()==NodeType.CONCRETE_ROOT_NODE)) {
+            if (!node1.getNodeType().isAbstract() && !node2.getNodeType().isAbstract()) {
                 // An inequality between concrete was added in the last saturation step, so we check the D-conjunction hanging off of its node.
                 DVariable variable1=m_conjunction.getVariableFor(node1);
                 DVariable variable2=m_conjunction.getVariableFor(node2);
@@ -99,7 +99,7 @@ public class DatatypeManager implements Serializable {
         return true;
     }
     protected void loadNodesReachableByInequality(Node node1,Node node2) {
-        if (node1.getNodeType()==NodeType.CONCRETE_ROOT_NODE) {
+        if (node1.getNodeType()==NodeType.ROOT_CONSTANT_NODE) {
             DVariable variable1=m_conjunction.activateVariable(node1,m_newVariableAdded);
             DVariable variable2=m_conjunction.activateVariable(node2,m_newVariableAdded);
             m_conjunction.addInequality(variable1,variable2);
@@ -116,7 +116,7 @@ public class DatatypeManager implements Serializable {
             DVariable reachedVariable=m_conjunction.activateVariable(reachedNode,m_newVariableAdded);
             // Concrete root nodes are assigned a particular value, so they act as "breakers" in the conjunction:
             // the nodes that are unequal to them can be analyzed independently. 
-            if (reachedNode.getNodeType()!=NodeType.CONCRETE_ROOT_NODE) {
+            if (reachedNode.getNodeType()!=NodeType.ROOT_CONSTANT_NODE) {
                 // Look for all inequalities where reachedNode occurs in the first position.
                 m_inequality01Retrieval.getBindingsBuffer()[1]=reachedNode;
                 m_inequality01Retrieval.open();
