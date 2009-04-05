@@ -83,9 +83,7 @@ public class DatatypeManager implements Serializable {
                 // If variable1==null, this means that 'node1' has not been checked in this iteration,
                 // and similarly for variable2==null.
                 if (variable1==null && variable2==null) {
-                    // It suffices to start the inequality from one of the two nodes:
-                    // loadNodesReachableByInequality(node1) will load all reachable nodes and this will include node2.
-                    loadNodesReachableByInequality(node1);
+                    loadNodesReachableByInequality(node1,node2);
                     loadDataRanges();
                     checkConjunctionSatisfiability();
                 }
@@ -100,35 +98,49 @@ public class DatatypeManager implements Serializable {
         m_auxiliaryVariableList.clear();
         return true;
     }
+    protected void loadNodesReachableByInequality(Node node1,Node node2) {
+        if (node1.getNodeType()==NodeType.CONCRETE_ROOT_NODE) {
+            DVariable variable1=m_conjunction.activateVariable(node1,m_newVariableAdded);
+            DVariable variable2=m_conjunction.activateVariable(node2,m_newVariableAdded);
+            m_conjunction.addInequality(variable1,variable2);
+            loadNodesReachableByInequality(node2);
+        }
+        else
+            loadNodesReachableByInequality(node1);
+    }
     protected void loadNodesReachableByInequality(Node node) {
         m_auxiliaryNodeList.clear();
         m_auxiliaryNodeList.add(node);
         while (!m_auxiliaryNodeList.isEmpty()) {
             Node reachedNode=m_auxiliaryNodeList.remove(m_auxiliaryNodeList.size()-1);
             DVariable reachedVariable=m_conjunction.activateVariable(reachedNode,m_newVariableAdded);
-            // Look for all inequalities where reachedNode occurs in the first position.
-            m_inequality01Retrieval.getBindingsBuffer()[1]=reachedNode;
-            m_inequality01Retrieval.open();
-            Object[] tupleBuffer=m_inequality01Retrieval.getTupleBuffer();
-            while (!m_inequality01Retrieval.afterLast()) {
-                Node newNode=(Node)tupleBuffer[2];
-                DVariable newVariable=m_conjunction.activateVariable(newNode,m_newVariableAdded);
-                if (m_newVariableAdded[0])
-                    m_auxiliaryNodeList.add(newNode);
-                m_conjunction.addInequality(reachedVariable,newVariable);
-                m_inequality01Retrieval.next();
-            }
-            // Look for all inequalities where reachedNode occurs in the second position.
-            m_inequality02Retrieval.getBindingsBuffer()[2]=reachedNode;
-            m_inequality02Retrieval.open();
-            tupleBuffer=m_inequality02Retrieval.getTupleBuffer();
-            while (!m_inequality02Retrieval.afterLast()) {
-                Node newNode=(Node)tupleBuffer[1];
-                DVariable newVariable=m_conjunction.activateVariable(newNode,m_newVariableAdded);
-                if (m_newVariableAdded[0])
-                    m_auxiliaryNodeList.add(newNode);
-                m_conjunction.addInequality(newVariable,reachedVariable);
-                m_inequality02Retrieval.next();
+            // Concrete root nodes are assigned a particular value, so they act as "breakers" in the conjunction:
+            // the nodes that are unequal to them can be analyzed independently. 
+            if (reachedNode.getNodeType()!=NodeType.CONCRETE_ROOT_NODE) {
+                // Look for all inequalities where reachedNode occurs in the first position.
+                m_inequality01Retrieval.getBindingsBuffer()[1]=reachedNode;
+                m_inequality01Retrieval.open();
+                Object[] tupleBuffer=m_inequality01Retrieval.getTupleBuffer();
+                while (!m_inequality01Retrieval.afterLast()) {
+                    Node newNode=(Node)tupleBuffer[2];
+                    DVariable newVariable=m_conjunction.activateVariable(newNode,m_newVariableAdded);
+                    if (m_newVariableAdded[0])
+                        m_auxiliaryNodeList.add(newNode);
+                    m_conjunction.addInequality(reachedVariable,newVariable);
+                    m_inequality01Retrieval.next();
+                }
+                // Look for all inequalities where reachedNode occurs in the second position.
+                m_inequality02Retrieval.getBindingsBuffer()[2]=reachedNode;
+                m_inequality02Retrieval.open();
+                tupleBuffer=m_inequality02Retrieval.getTupleBuffer();
+                while (!m_inequality02Retrieval.afterLast()) {
+                    Node newNode=(Node)tupleBuffer[1];
+                    DVariable newVariable=m_conjunction.activateVariable(newNode,m_newVariableAdded);
+                    if (m_newVariableAdded[0])
+                        m_auxiliaryNodeList.add(newNode);
+                    m_conjunction.addInequality(newVariable,reachedVariable);
+                    m_inequality02Retrieval.next();
+                }
             }
         }
     }

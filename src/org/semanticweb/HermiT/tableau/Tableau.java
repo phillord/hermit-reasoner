@@ -16,6 +16,7 @@ import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.DataValueEnumeration;
 import org.semanticweb.HermiT.model.ExistentialConcept;
+import org.semanticweb.HermiT.model.Term;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
@@ -308,7 +309,7 @@ public final class Tableau implements Serializable {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isInstanceOfStarted(atomicConcept,individual);
         clear();
-        Map<Individual,Node> aboxMapping=loadABox();
+        Map<Term,Node> aboxMapping=loadABox();
         m_checkedNode=aboxMapping.get(individual);
         if (m_checkedNode==null)
             m_checkedNode=createNewRootNode(m_dependencySetFactory.emptySet());
@@ -318,53 +319,50 @@ public final class Tableau implements Serializable {
             m_tableauMonitor.isInstanceOfFinished(atomicConcept,individual,result);
         return result;
     }
-    protected void loadPositiveFact(Atom atom,Map<Individual,Node> individualsToNodes) {
+    protected void loadPositiveFact(Atom atom,Map<Term,Node> termsToNodes) {
         DLPredicate dlPredicate=atom.getDLPredicate();
         switch (dlPredicate.getArity()) {
         case 1:
-            m_extensionManager.addAssertion(dlPredicate,getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(0)),m_dependencySetFactory.emptySet());
+            m_extensionManager.addAssertion(dlPredicate,getNodeForTerm(termsToNodes,atom.getArgument(0)),m_dependencySetFactory.emptySet());
             break;
         case 2:
-            if (atom.getArgument(1) instanceof Individual)
-                m_extensionManager.addAssertion(dlPredicate,getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(0)),getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(1)),m_dependencySetFactory.emptySet());
-            else if (atom.getArgument(1) instanceof Constant) {
-                // Must create a new node even if values are the same;
-                // otherwise, the transformation is unsound.
-                Constant constant=(Constant)atom.getArgument(1);
-                Node constantNode=createNewConcreteRootNode(m_dependencySetFactory.emptySet());
-                m_extensionManager.addAssertion(dlPredicate,getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(0)),constantNode,m_dependencySetFactory.emptySet());
-                m_extensionManager.addAssertion(DataValueEnumeration.create(new Object[] { constant.getDataValue() }),constantNode,m_dependencySetFactory.emptySet());
-            }
+            m_extensionManager.addAssertion(dlPredicate,getNodeForTerm(termsToNodes,atom.getArgument(0)),getNodeForTerm(termsToNodes,atom.getArgument(1)),m_dependencySetFactory.emptySet());
             break;
         default:
             throw new IllegalArgumentException("Unsupported arity of positive ground atoms.");
         }
     }
-    protected void loadNegativeFact(Atom atom,Map<Individual,Node> individualsToNodes) {
+    protected void loadNegativeFact(Atom atom,Map<Term,Node> termsToNodes) {
         DLPredicate dlPredicate=atom.getDLPredicate();
         if (!(dlPredicate instanceof AtomicConcept))
             throw new IllegalArgumentException("Unsupported type of negative fact.");
         switch (dlPredicate.getArity()) {
         case 1:
-            m_extensionManager.addConceptAssertion(AtomicNegationConcept.create((AtomicConcept)dlPredicate),getNodeForIndividual(individualsToNodes,(Individual)atom.getArgument(0)),m_dependencySetFactory.emptySet());
+            m_extensionManager.addConceptAssertion(AtomicNegationConcept.create((AtomicConcept)dlPredicate),getNodeForTerm(termsToNodes,atom.getArgument(0)),m_dependencySetFactory.emptySet());
             break;
         default:
             throw new IllegalArgumentException("Unsupported arity of negative ground atoms.");
         }
     }
-    protected Map<Individual,Node> loadABox() {
-        Map<Individual,Node> individualsToNodes=new HashMap<Individual,Node>();
+    protected Map<Term,Node> loadABox() {
+        Map<Term,Node> termsToNodes=new HashMap<Term,Node>();
         for (Atom atom : m_dlOntology.getPositiveFacts())
-            loadPositiveFact(atom,individualsToNodes);
+            loadPositiveFact(atom,termsToNodes);
         for (Atom atom : m_dlOntology.getNegativeFacts())
-            loadNegativeFact(atom,individualsToNodes);
-        return individualsToNodes;
+            loadNegativeFact(atom,termsToNodes);
+        return termsToNodes;
     }
-    protected Node getNodeForIndividual(Map<Individual,Node> individualsToNodes,Individual individual) {
-        Node node=individualsToNodes.get(individual);
+    protected Node getNodeForTerm(Map<Term,Node> termsToNodes,Term term) {
+        Node node=termsToNodes.get(term);
         if (node==null) {
-            node=createNewNamedNode(m_dependencySetFactory.emptySet());
-            individualsToNodes.put(individual,node);
+            if (term instanceof Individual)
+                node=createNewNamedNode(m_dependencySetFactory.emptySet());
+            else {
+                Constant constant=(Constant)term;
+                node=createNewConcreteRootNode(m_dependencySetFactory.emptySet());
+                m_extensionManager.addAssertion(DataValueEnumeration.create(new Object[] { constant.getDataValue() }),node,m_dependencySetFactory.emptySet());
+            }
+            termsToNodes.put(term,node);
         }
         return node;
     }
