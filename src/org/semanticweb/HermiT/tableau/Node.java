@@ -136,9 +136,9 @@ public final class Node implements Serializable {
     }
     public boolean isAncestorOf(Node potendialDescendant) {
         while (potendialDescendant!=null) {
+            potendialDescendant=potendialDescendant.m_parent;
             if (potendialDescendant==this)
                 return true;
-            potendialDescendant=potendialDescendant.m_parent;
         }
         return false;
     }

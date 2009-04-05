@@ -39,6 +39,7 @@ public final class MergingManager implements Serializable {
      * the order between node0 and node1 is not important.
      */
     public boolean mergeNodes(Node node0,Node node1,DependencySet dependencySet) {
+        assert node0.getNodeType().isAbstract()==node1.getNodeType().isAbstract();
         if (!node0.isActive() || !node1.isActive() || node0==node1)
             return false;
         else {
@@ -54,20 +55,23 @@ public final class MergingManager implements Serializable {
                 mergeFrom=node0;
                 mergeInto=node1;
             }
-            else if (node0.getNodeType().isInTreePart()) {
-                // Both nodes have the same precedence and are in the tree part.
-                // Merge into the predecessor. This will need further
-                // adjustment for the graph nodes.
-                if (node0.m_parent.m_parent==node1) {
-                    mergeFrom=node0;
-                    mergeInto=node1;
-                }
-                else if (node1.m_parent.m_parent==node0) {
-                    mergeFrom=node1;
-                    mergeInto=node0;
-                }
-                else if (node0.m_parent==node1.m_parent) {
-                    // node0 and node1 have a common parent so we can choose arbitrarily
+            else {
+                // Class carriers correspond to the [s] notation in the graphs paper.
+                Node node0ClassCarrier;
+                if (node0.getNodeType()==NodeType.TREE_NODE)
+                    node0ClassCarrier=node0;
+                else
+                    node0ClassCarrier=node0.m_parent;
+                Node node1ClassCarrier;
+                if (node1.getNodeType()==NodeType.TREE_NODE)
+                    node1ClassCarrier=node1;
+                else
+                    node1ClassCarrier=node1.m_parent;
+                // Watch out: node0ClassCarrier and/or node1ClassCarrier can be 'null' -- that is,
+                // 'null' plays the role of the \triangleright symbol from the graphs paper.
+                boolean canMerge0Into1=node0.m_parent==node1.m_parent || isTwoDescendantOf(node0,node1ClassCarrier);
+                boolean canMerge1Into0=node0.m_parent==node1.m_parent || isTwoDescendantOf(node1,node0ClassCarrier);
+                if (canMerge0Into1 && canMerge1Into0) { 
                     if (node0.getPositiveLabelSize()>node1.getPositiveLabelSize()) {
                         mergeFrom=node1;
                         mergeInto=node0;
@@ -77,20 +81,16 @@ public final class MergingManager implements Serializable {
                         mergeInto=node1;
                     }
                 }
-                else
-                    throw new IllegalStateException("Internal error: unsupported merge type.");
-            }
-            else {
-                // Nodes are of the same precedence and not in the tree part.
-                // We can choose arbitrarily.
-                if (node0.getPositiveLabelSize()>node1.getPositiveLabelSize()) {
-                    mergeFrom=node1;
-                    mergeInto=node0;
-                }
-                else {
+                else if (canMerge0Into1) {
                     mergeFrom=node0;
                     mergeInto=node1;
                 }
+                else if (canMerge1Into0) {
+                    mergeFrom=node1;
+                    mergeInto=node0;
+                }
+                else
+                    throw new IllegalStateException("Internal error: unsupported merge type.");
             }
             if (m_tableauMonitor!=null)
                 m_tableauMonitor.mergeStarted(mergeFrom,mergeInto);
@@ -163,5 +163,20 @@ public final class MergingManager implements Serializable {
                 m_tableauMonitor.mergeFinished(mergeFrom,mergeInto);
             return true;
         }
+    }
+    protected boolean isTwoDescendantOf(Node descendant,Node ancestor) {
+        // The method tests ancestry, but only up to two levels.
+        // Merges over more levels should not happen.
+        if (descendant!=null) {
+            Node descendantParent=descendant.m_parent;
+            if (descendantParent==ancestor)
+                return true;
+            if (descendantParent!=null) {
+                Node descendantParentParent=descendantParent.m_parent;
+                if (descendantParentParent==ancestor)
+                    return true;
+            }
+        }
+        return false;
     }
 }
