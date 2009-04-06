@@ -56,21 +56,13 @@ public final class MergingManager implements Serializable {
                 mergeInto=node1;
             }
             else {
-                // Class carriers correspond to the [s] notation in the graphs paper.
-                Node node0ClassCarrier;
-                if (node0.getNodeType()==NodeType.TREE_NODE)
-                    node0ClassCarrier=node0;
-                else
-                    node0ClassCarrier=node0.m_parent;
-                Node node1ClassCarrier;
-                if (node1.getNodeType()==NodeType.TREE_NODE)
-                    node1ClassCarrier=node1;
-                else
-                    node1ClassCarrier=node1.m_parent;
-                // Watch out: node0ClassCarrier and/or node1ClassCarrier can be 'null' -- that is,
+                // Cluster anchors correspond to the [s] notation in the graphs paper.
+                Node node0ClusterAnchor=node0.getClusterAnchor();
+                Node node1ClusterAnchor=node1.getClusterAnchor();
+                // Watch out: node0ClusterAnchor and/or node1ClusterAnchor can be 'null' -- that is,
                 // 'null' plays the role of the \triangleright symbol from the graphs paper.
-                boolean canMerge0Into1=node0.m_parent==node1.m_parent || isTwoDescendantOf(node0,node1ClassCarrier);
-                boolean canMerge1Into0=node0.m_parent==node1.m_parent || isTwoDescendantOf(node1,node0ClassCarrier);
+                boolean canMerge0Into1=node0.m_parent==node1.m_parent || isDescendantOfAtMostThreeLevels(node0,node1ClusterAnchor);
+                boolean canMerge1Into0=node0.m_parent==node1.m_parent || isDescendantOfAtMostThreeLevels(node1,node0ClusterAnchor);
                 if (canMerge0Into1 && canMerge1Into0) { 
                     if (node0.getPositiveLabelSize()>node1.getPositiveLabelSize()) {
                         mergeFrom=node1;
@@ -164,8 +156,8 @@ public final class MergingManager implements Serializable {
             return true;
         }
     }
-    protected boolean isTwoDescendantOf(Node descendant,Node ancestor) {
-        // The method tests ancestry, but only up to two levels.
+    protected boolean isDescendantOfAtMostThreeLevels(Node descendant,Node ancestor) {
+        // The method tests ancestry, but only up to three levels.
         // Merges over more levels should not happen.
         if (descendant!=null) {
             Node descendantParent=descendant.m_parent;
@@ -175,6 +167,11 @@ public final class MergingManager implements Serializable {
                 Node descendantParentParent=descendantParent.m_parent;
                 if (descendantParentParent==ancestor)
                     return true;
+                if (descendantParentParent!=null) {
+                    Node descendantParentParentParent=descendantParentParent.m_parent;
+                    if (descendantParentParentParent==ancestor)
+                        return true;
+                }
             }
         }
         return false;

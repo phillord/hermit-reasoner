@@ -140,7 +140,7 @@ public class IndividualReuseStrategy extends AbstractExpansionStrategy implement
                     dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,branchingPoint.getLevel());
                 }
                 // create a root node so that keys are not applicable
-                existentialNode=m_tableau.createNewRootNode(dependencySet);
+                existentialNode=m_tableau.createNewNINode(dependencySet);
                 reuseInfo=new NodeBranchingPointPair(existentialNode,m_tableau.getCurrentBranchingPoint().getLevel());
                 m_reusedNodes.put(toConcept,reuseInfo);
                 m_extensionManager.addConceptAssertion(toConcept,existentialNode,dependencySet);

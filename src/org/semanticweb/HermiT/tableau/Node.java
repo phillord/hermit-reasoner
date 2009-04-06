@@ -131,6 +131,15 @@ public final class Node implements Serializable {
     public Node getParent() {
         return m_parent;
     }
+    public Node getClusterAnchor() {
+        if (m_nodeType==NodeType.TREE_NODE)
+            return this;
+        else
+            return m_parent;
+    }
+    public boolean isRootNode() {
+        return m_parent==null;
+    }
     public boolean isParentOf(Node potentialChild) {
         return potentialChild.m_parent==this;
     }

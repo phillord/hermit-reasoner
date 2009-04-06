@@ -252,7 +252,7 @@ public final class Tableau implements Serializable {
         clear();
         if (hasNominals())
             loadABox();
-        m_checkedNode=createNewRootNode(m_dependencySetFactory.emptySet());
+        m_checkedNode=createNewNINode(m_dependencySetFactory.emptySet());
         m_extensionManager.addConceptAssertion(atomicConcept,m_checkedNode,m_dependencySetFactory.emptySet());
         boolean result=isSatisfiable();
         if (m_tableauMonitor!=null)
@@ -265,7 +265,7 @@ public final class Tableau implements Serializable {
         clear();
         if (hasNominals())
             loadABox();
-        m_checkedNode=createNewRootNode(m_dependencySetFactory.emptySet());
+        m_checkedNode=createNewNINode(m_dependencySetFactory.emptySet());
         m_extensionManager.addConceptAssertion(subconcept,m_checkedNode,m_dependencySetFactory.emptySet());
         m_branchingPoints[0]=new BranchingPoint(this);
         m_currentBranchingPoint++;
@@ -281,8 +281,8 @@ public final class Tableau implements Serializable {
         clear();
         if (hasNominals())
             loadABox();
-        Node a=createNewRootNode(m_dependencySetFactory.emptySet());
-        Node b=createNewRootNode(m_dependencySetFactory.emptySet());
+        Node a=createNewNINode(m_dependencySetFactory.emptySet());
+        Node b=createNewNINode(m_dependencySetFactory.emptySet());
         m_extensionManager.addRoleAssertion(role,a,b,m_dependencySetFactory.emptySet());
         m_branchingPoints[0]=new BranchingPoint(this);
         m_currentBranchingPoint++;
@@ -298,7 +298,7 @@ public final class Tableau implements Serializable {
         loadABox();
         if (m_firstTableauNode==null) {
             // Ensure that at least one individual exists.
-            createNewRootNode(m_dependencySetFactory.emptySet());
+            createNewNINode(m_dependencySetFactory.emptySet());
         }
         boolean result=isSatisfiable();
         if (m_tableauMonitor!=null)
@@ -312,7 +312,7 @@ public final class Tableau implements Serializable {
         Map<Term,Node> aboxMapping=loadABox();
         m_checkedNode=aboxMapping.get(individual);
         if (m_checkedNode==null)
-            m_checkedNode=createNewRootNode(m_dependencySetFactory.emptySet());
+            m_checkedNode=createNewNINode(m_dependencySetFactory.emptySet());
         m_extensionManager.addConceptAssertion(AtomicNegationConcept.create(atomicConcept),m_checkedNode,m_dependencySetFactory.emptySet());
         boolean result=!isSatisfiable();
         if (m_tableauMonitor!=null)
@@ -473,8 +473,8 @@ public final class Tableau implements Serializable {
      *            the dependency set for the node
      * @return the created node
      */
-    public Node createNewRootNode(DependencySet dependencySet) {
-        return createNewNodeRaw(dependencySet,null,NodeType.ROOT_NODE,0);
+    public Node createNewNINode(DependencySet dependencySet) {
+        return createNewNodeRaw(dependencySet,null,NodeType.NI_NODE,0);
     }
     /**
      * Create a new tree node.

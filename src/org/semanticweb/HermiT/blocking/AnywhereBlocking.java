@@ -74,23 +74,23 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
         }
     }
     public void assertionAdded(Concept concept,Node node) {
-        if (node.getNodeType()==NodeType.TREE_NODE && (concept instanceof AtomicConcept || concept instanceof ExistentialConcept))
+        if (concept instanceof AtomicConcept || concept instanceof ExistentialConcept)
             updateNodeChange(node);
     }
     public void assertionRemoved(Concept concept,Node node) {
-        if (node.getNodeType()==NodeType.TREE_NODE && (concept instanceof AtomicConcept || concept instanceof ExistentialConcept))
+        if (concept instanceof AtomicConcept || concept instanceof ExistentialConcept)
             updateNodeChange(node);
     }
     public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
-        if (nodeTo.getNodeType()==NodeType.TREE_NODE && nodeFrom.isParentOf(nodeTo))
+        if (nodeFrom.isParentOf(nodeTo))
             updateNodeChange(nodeTo);
-        else if (nodeFrom.getNodeType()==NodeType.TREE_NODE && nodeTo.isParentOf(nodeFrom))
+        else if (nodeTo.isParentOf(nodeFrom))
             updateNodeChange(nodeFrom);
     }
     public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
-        if (nodeTo.getNodeType()==NodeType.TREE_NODE && nodeFrom.isParentOf(nodeTo))
+        if (nodeFrom.isParentOf(nodeTo))
             updateNodeChange(nodeTo);
-        else if (nodeFrom.getNodeType()==NodeType.TREE_NODE && nodeTo.isParentOf(nodeFrom))
+        else if (nodeTo.isParentOf(nodeFrom))
             updateNodeChange(nodeFrom);
     }
     public void nodeStatusChanged(Node node) {

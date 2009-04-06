@@ -199,16 +199,14 @@ public final class ExistentialExpansionManager implements Serializable {
         }
     }
     protected boolean isPermanentSatisfier(Node forNode,Node toNode) {
-        NodeType toNodeType=toNode.getNodeType();
-        return forNode==toNode || forNode.getParent()==toNode || toNode.getParent()==forNode || toNodeType==NodeType.NAMED_NODE || toNodeType==NodeType.ROOT_NODE || toNodeType==NodeType.CONCRETE_NODE || toNodeType==NodeType.ROOT_CONSTANT_NODE;
+        return forNode==toNode || forNode.m_parent==toNode || toNode.m_parent==forNode || toNode.isRootNode();
     }
     protected boolean containsSubsetOfNUnequalNodes(Node forNode,List<Node> nodes,int startAt,List<Node> selectedNodes,int cardinality) {
         if (selectedNodes.size()==cardinality) {
             // Check the condition on safe successors (condition 3.2 of the \geq-rule)
-            if (forNode.getNodeType()!=NodeType.TREE_NODE)
-                for (int index=0;index<selectedNodes.size();index++)
-                    if (selectedNodes.get(index).isIndirectlyBlocked())
-                        return false;
+            for (int index=0;index<selectedNodes.size();index++)
+                if (selectedNodes.get(index).isIndirectlyBlocked())
+                    return false;
             return true;
         }
         else {

@@ -219,9 +219,10 @@ public class SubtreeViewer extends JFrame {
         protected static final Icon NOT_ACTIVE_ICON=new DotIcon(Color.LIGHT_GRAY);
         protected static final Icon BLOCKED_ICON=new DotIcon(Color.CYAN);
         protected static final Icon WITH_EXISTENTIALS_ICON=new DotIcon(Color.RED);
-        protected static final Icon ROOT_NODE_ICON=new DotIcon(Color.BLACK);
+        protected static final Icon NI_NODE_ICON=new DotIcon(Color.BLACK);
         protected static final Icon TREE_NODE_ICON=new DotIcon(Color.GREEN);
         protected static final Icon GRAPH_NODE_ICON=new DotIcon(Color.MAGENTA);
+        protected static final Icon CONCRETE_NODE_ICON=new DotIcon(Color.BLUE);
 
         protected final Debugger m_debugger;
         
@@ -263,9 +264,13 @@ public class SubtreeViewer extends JFrame {
                 case GRAPH_NODE:
                     setIcon(GRAPH_NODE_ICON);
                     break;
-                case ROOT_NODE:
+                case NI_NODE:
+                    setIcon(NI_NODE_ICON);
+                    break;
+                case CONCRETE_NODE:
+                case ROOT_CONSTANT_NODE:
                 default:
-                    setIcon(ROOT_NODE_ICON);
+                    setIcon(CONCRETE_NODE_ICON);
                     break;
                 }
             }

@@ -45,12 +45,12 @@ public class GraphTest extends AbstractReasonerInternalsTest {
         tableau.clear();
         ExtensionManager extensionManager=tableau.getExtensionManager();
         DependencySet emptySet=tableau.getDependencySetFactory().emptySet();
-        Node n1=tableau.createNewRootNode(emptySet);
-        Node n2=tableau.createNewRootNode(emptySet);
-        Node n3=tableau.createNewRootNode(emptySet);
-        Node n4=tableau.createNewRootNode(emptySet);
-        Node n5=tableau.createNewRootNode(emptySet);
-        Node n6=tableau.createNewRootNode(emptySet);
+        Node n1=tableau.createNewNINode(emptySet);
+        Node n2=tableau.createNewNINode(emptySet);
+        Node n3=tableau.createNewNINode(emptySet);
+        Node n4=tableau.createNewNINode(emptySet);
+        Node n5=tableau.createNewNINode(emptySet);
+        Node n6=tableau.createNewNINode(emptySet);
         AtomicConcept r=AtomicConcept.create("R");
         AtomicConcept s=AtomicConcept.create("S");
         extensionManager.addTuple(new Object[] { graph,n1,n2,n3 },emptySet);
@@ -59,7 +59,7 @@ public class GraphTest extends AbstractReasonerInternalsTest {
         extensionManager.addConceptAssertion(s,n6,emptySet);
 
         // The following tuple should make the existing two tuples to merge
-        Node n7=tableau.createNewRootNode(emptySet);
+        Node n7=tableau.createNewNINode(emptySet);
         extensionManager.addTuple(new Object[] { graph,n1,n7,n6 },emptySet);
 
         // No merging should occur automatically
