@@ -103,7 +103,8 @@ public class DatatypeManager implements Serializable {
             DVariable variable1=m_conjunction.activateVariable(node1,m_newVariableAdded);
             DVariable variable2=m_conjunction.activateVariable(node2,m_newVariableAdded);
             m_conjunction.addInequality(variable1,variable2);
-            loadNodesReachableByInequality(node2);
+            if (node2.getNodeType()!=NodeType.ROOT_CONSTANT_NODE)
+                loadNodesReachableByInequality(node2);
         }
         else
             loadNodesReachableByInequality(node1);
