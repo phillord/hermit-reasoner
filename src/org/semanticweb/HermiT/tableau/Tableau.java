@@ -513,14 +513,14 @@ public final class Tableau implements Serializable {
     /**
      * Create a new node graph node for description graphs
      * 
+     * @param parent
+     *            the parent of the node that is to be created (may be null)
      * @param dependencySet
      *            the dependency set for the node
-     * @param parent
-     *            the parent of the node that is to be created
      * @return the created node
      */
     public Node createNewGraphNode(Node parent,DependencySet dependencySet) {
-        return createNewNodeRaw(dependencySet,parent,NodeType.GRAPH_NODE,parent.getTreeDepth());
+        return createNewNodeRaw(dependencySet,parent,NodeType.GRAPH_NODE,parent==null ? 0 : parent.getTreeDepth());
     }
     protected Node createNewNodeRaw(DependencySet dependencySet,Node parent,NodeType nodeType,int treeDepth) {
         Node node;

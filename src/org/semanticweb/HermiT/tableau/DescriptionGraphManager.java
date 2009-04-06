@@ -213,7 +213,7 @@ public final class DescriptionGraphManager implements Serializable {
             if (vertex==existsDescriptionGraph.getVertex())
                 newNode=forNode;
             else
-                newNode=m_tableau.createNewGraphNode(forNode,dependencySet);
+                newNode=m_tableau.createNewGraphNode(forNode.getClusterAnchor(),dependencySet);
             m_newNodes.add(newNode);
             auxiliaryTuple[vertex+1]=newNode;
         }
