@@ -155,12 +155,12 @@ public class FloatInterval {
             int startToMinusZero=magnitudeLowerBoundInclusive+1;
             if (startToMinusZero>=argument)
                 return 0;
-            argument=(int)(argument-startToMinusZero);
+            argument=argument-startToMinusZero;
             // The number of values from +0 to 'upperBoundInclusive'.
             int plusZeroToEnd=1+magnitudeUpperBoundInclusive;
             if (plusZeroToEnd>=argument)
                 return 0;
-            return (int)(argument-plusZeroToEnd);
+            return argument-plusZeroToEnd;
         }
         else // if (positiveLowerBoundInclusive && !positiveUpperBoundInclusiev) is impossible at this point
             throw new IllegalStateException();
