@@ -66,72 +66,92 @@ public class FloatDatatypeHandler implements DatatypeHandler {
         assert XSD_FLOAT.equals(datatypeRestriction.getDatatypeURI());
         if (datatypeRestriction.getNumberOfFacetRestrictions()==0)
             return FLOAT_ENTIRE;
-        FloatInterval interval=getIntervalFor(datatypeRestriction);
-        if (interval==null)
-            return EMPTY_SUBSET;
-        else
-            return new NoNaNFloatSubset(interval);
+        else {
+            FloatInterval interval=getIntervalFor(datatypeRestriction);
+            if (interval==null)
+                return EMPTY_SUBSET;
+            else
+                return new NoNaNFloatSubset(interval);
+        }
     }
     public ValueSpaceSubset conjoinWithDR(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
         assert XSD_FLOAT.equals(datatypeRestriction.getDatatypeURI());
-        FloatInterval interval=getIntervalFor(datatypeRestriction);
-        if (interval==null)
-            return EMPTY_SUBSET;
-        else if (valueSpaceSubset==FLOAT_ENTIRE)
-            return new NoNaNFloatSubset(interval);
+        if (datatypeRestriction.getNumberOfFacetRestrictions()==0 || valueSpaceSubset==EMPTY_SUBSET)
+            return valueSpaceSubset;
         else {
-            NoNaNFloatSubset floatSubset=(NoNaNFloatSubset)valueSpaceSubset;
-            List<FloatInterval> oldIntervals=floatSubset.m_intervals;
-            List<FloatInterval> newIntervals=new ArrayList<FloatInterval>();
-            for (int index=0;index<oldIntervals.size();index++) {
-                FloatInterval oldInterval=oldIntervals.get(index);
-                FloatInterval intersection=oldInterval.intersectWith(interval);
-                if (intersection!=null)
-                    newIntervals.add(intersection);
-            }
-            if (newIntervals.isEmpty())
+            FloatInterval interval=getIntervalFor(datatypeRestriction);
+            if (interval==null)
                 return EMPTY_SUBSET;
-            else
-                return new NoNaNFloatSubset(newIntervals);
+            else if (valueSpaceSubset==FLOAT_ENTIRE)
+                return new NoNaNFloatSubset(interval);
+            else {
+                NoNaNFloatSubset floatSubset=(NoNaNFloatSubset)valueSpaceSubset;
+                List<FloatInterval> oldIntervals=floatSubset.m_intervals;
+                List<FloatInterval> newIntervals=new ArrayList<FloatInterval>();
+                for (int index=0;index<oldIntervals.size();index++) {
+                    FloatInterval oldInterval=oldIntervals.get(index);
+                    FloatInterval intersection=oldInterval.intersectWith(interval);
+                    if (intersection!=null)
+                        newIntervals.add(intersection);
+                }
+                if (newIntervals.isEmpty())
+                    return EMPTY_SUBSET;
+                else
+                    return new NoNaNFloatSubset(newIntervals);
+            }
         }
     }
     public ValueSpaceSubset conjoinWithDRNegation(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
         assert XSD_FLOAT.equals(datatypeRestriction.getDatatypeURI());
-        FloatInterval interval=getIntervalFor(datatypeRestriction);
-        if (interval==null)
+        if (datatypeRestriction.getNumberOfFacetRestrictions()==0 || valueSpaceSubset==EMPTY_SUBSET)
             return EMPTY_SUBSET;
-        else if (valueSpaceSubset==FLOAT_ENTIRE)
-            return new NoNaNFloatSubset(interval);
         else {
-            FloatInterval complementInterval1=null;
-            if (!FloatInterval.areIdentical(interval.m_lowerBoundInclusive,Float.NEGATIVE_INFINITY))
-                complementInterval1=new FloatInterval(Float.NEGATIVE_INFINITY,FloatInterval.previousFloat(interval.m_lowerBoundInclusive));
-            FloatInterval complementInterval2=null;
-            if (!FloatInterval.areIdentical(interval.m_upperBoundInclusive,Float.POSITIVE_INFINITY))
-                complementInterval2=new FloatInterval(FloatInterval.nextFloat(interval.m_upperBoundInclusive),Float.POSITIVE_INFINITY);
-            NoNaNFloatSubset floatSubset=(NoNaNFloatSubset)valueSpaceSubset;
-            List<FloatInterval> oldIntervals=floatSubset.m_intervals;
-            List<FloatInterval> newIntervals=new ArrayList<FloatInterval>();
-            for (int index=0;index<oldIntervals.size();index++) {
-                FloatInterval oldInterval=oldIntervals.get(index);
-                if (complementInterval1!=null) {
-                    FloatInterval intersection=oldInterval.intersectWith(complementInterval1);
-                    if (intersection!=null)
-                        newIntervals.add(intersection);
-                }
-                if (complementInterval2!=null) {
-                    FloatInterval intersection=oldInterval.intersectWith(complementInterval2);
-                    if (intersection!=null)
-                        newIntervals.add(intersection);
-                }
+            FloatInterval interval=getIntervalFor(datatypeRestriction);
+            if (interval==null)
+                return valueSpaceSubset;
+            else if (valueSpaceSubset==FLOAT_ENTIRE) {
+                List<FloatInterval> newIntervals=new ArrayList<FloatInterval>();
+                if (!FloatInterval.areIdentical(interval.m_lowerBoundInclusive,Float.NEGATIVE_INFINITY))
+                    newIntervals.add(new FloatInterval(Float.NEGATIVE_INFINITY,FloatInterval.previousFloat(interval.m_lowerBoundInclusive)));
+                if (!FloatInterval.areIdentical(interval.m_upperBoundInclusive,Float.POSITIVE_INFINITY))
+                    newIntervals.add(new FloatInterval(FloatInterval.nextFloat(interval.m_upperBoundInclusive),Float.POSITIVE_INFINITY));
+                if (newIntervals.isEmpty())
+                    return EMPTY_SUBSET;
+                else
+                    return new NoNaNFloatSubset(newIntervals);
             }
-            if (newIntervals.isEmpty())
-                return EMPTY_SUBSET;
-            else
-                return new NoNaNFloatSubset(newIntervals);
+            else {
+                NoNaNFloatSubset floatSubset=(NoNaNFloatSubset)valueSpaceSubset;
+                FloatInterval complementInterval1=null;
+                if (!FloatInterval.areIdentical(interval.m_lowerBoundInclusive,Float.NEGATIVE_INFINITY))
+                    complementInterval1=new FloatInterval(Float.NEGATIVE_INFINITY,FloatInterval.previousFloat(interval.m_lowerBoundInclusive));
+                FloatInterval complementInterval2=null;
+                if (!FloatInterval.areIdentical(interval.m_upperBoundInclusive,Float.POSITIVE_INFINITY))
+                    complementInterval2=new FloatInterval(FloatInterval.nextFloat(interval.m_upperBoundInclusive),Float.POSITIVE_INFINITY);
+                List<FloatInterval> oldIntervals=floatSubset.m_intervals;
+                List<FloatInterval> newIntervals=new ArrayList<FloatInterval>();
+                for (int index=0;index<oldIntervals.size();index++) {
+                    FloatInterval oldInterval=oldIntervals.get(index);
+                    if (complementInterval1!=null) {
+                        FloatInterval intersection=oldInterval.intersectWith(complementInterval1);
+                        if (intersection!=null)
+                            newIntervals.add(intersection);
+                    }
+                    if (complementInterval2!=null) {
+                        FloatInterval intersection=oldInterval.intersectWith(complementInterval2);
+                        if (intersection!=null)
+                            newIntervals.add(intersection);
+                    }
+                }
+                if (newIntervals.isEmpty())
+                    return EMPTY_SUBSET;
+                else
+                    return new NoNaNFloatSubset(newIntervals);
+            }
         }
     }
     protected FloatInterval getIntervalFor(DatatypeRestriction datatypeRestriction) {
+        assert datatypeRestriction.getNumberOfFacetRestrictions()!=0;
         float lowerBoundInclusive=Float.NEGATIVE_INFINITY;
         float upperBoundInclusive=Float.POSITIVE_INFINITY;
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {

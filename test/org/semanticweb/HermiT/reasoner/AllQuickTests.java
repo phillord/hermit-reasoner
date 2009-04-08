@@ -10,7 +10,8 @@ public class AllQuickTests extends TestCase {
         TestSuite suite = new TestSuite("Unit tests for HermiT as a blackbox -- the quick subset.");
         // $JUnit-BEGIN$
         suite.addTestSuite(DatatypesTest.class);
-        suite.addTestSuite(DatatypesNumericsTest.class);
+        suite.addTestSuite(NumericsTest.class);
+        suite.addTestSuite(FloatDoubleTest.class);
         suite.addTestSuite(ReasonerTest.class);
         suite.addTestSuite(ReasonerIndividualReuseTest.class);
         suite.addTestSuite(ComplexConceptTest.class);

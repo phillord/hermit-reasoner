@@ -183,12 +183,12 @@ public class DoubleInterval {
         long bitsValue1=Double.doubleToRawLongBits(value1);
         long bitsValue2=Double.doubleToRawLongBits(value2);
         if (isNaN(bitsValue1) || isNaN(bitsValue2))
-            return true;
+            return false;
         boolean positiveValue1=((bitsValue1 & 0x8000000000000000L)==0);
         boolean positiveValue2=((bitsValue2 & 0x8000000000000000L)==0);
         long magnitudeValue1=(bitsValue1 & 0x7fffffffffffffffL);
         long magnitudeValue2=(bitsValue2 & 0x7fffffffffffffffL);
-        return !isSmallerEqual(positiveValue1,magnitudeValue1,positiveValue2,magnitudeValue2);
+        return isSmallerEqual(positiveValue1,magnitudeValue1,positiveValue2,magnitudeValue2);
     }
     public static boolean isSmallerEqual(boolean positive1,long magnitude1,boolean positive2,long magnitude2) {
         if (positive1 && positive2)

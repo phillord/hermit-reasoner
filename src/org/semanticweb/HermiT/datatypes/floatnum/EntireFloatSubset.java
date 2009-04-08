@@ -30,4 +30,7 @@ public class EntireFloatSubset implements ValueSpaceSubset {
         }
         dataValues.add(Float.POSITIVE_INFINITY);
     }
+    public String toString() {
+        return "xsd:float";
+    }
 }

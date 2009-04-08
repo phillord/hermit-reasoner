@@ -1,9 +1,9 @@
 package org.semanticweb.HermiT.reasoner;
 
 
-public class DatatypesNumericsTest extends AbstractReasonerTest {
+public class NumericsTest extends AbstractReasonerTest {
 
-    public DatatypesNumericsTest(String name) {
+    public NumericsTest(String name) {
         super(name);
     }
     public void testIntegerRange1() throws Exception {

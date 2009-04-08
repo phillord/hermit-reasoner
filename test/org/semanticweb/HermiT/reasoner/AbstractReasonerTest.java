@@ -269,12 +269,22 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     }
 
     protected void assertDRSatisfiable(boolean value,String... parts) throws Exception {
-        assertDRSatisfiableNEQ(value,null,parts);
+        assertDRSatisfiableNEQ(value,1,null,parts);
+    }
+
+    protected void assertDRSatisfiable(boolean value,int cardinality,String... parts) throws Exception {
+        assertDRSatisfiableNEQ(value,cardinality,null,parts);
     }
 
     protected void assertDRSatisfiableNEQ(boolean value,String[] forbiddenValues,String... parts) throws Exception {
+        assertDRSatisfiableNEQ(value,1,forbiddenValues,parts);
+    }
+    
+    protected void assertDRSatisfiableNEQ(boolean value,int cardinality,String[] forbiddenValues,String... parts) throws Exception {
         StringBuffer buffer=new StringBuffer();
-        buffer.append("SubClassOf( test:A DataSomeValuesFrom( test:dp rdfs:Literal ) ) ");
+        buffer.append("SubClassOf( test:A DataMinCardinality( ");
+        buffer.append(cardinality);
+        buffer.append(" test:dp rdfs:Literal ) ) ");
         for (String part : parts) {
             buffer.append("SubClassOf( test:A DataAllValuesFrom( test:dp ");
             buffer.append(part);
@@ -373,7 +383,15 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     protected static String RAT(String num,String denom) {
         return '\"'+num+"/"+denom+"\"^^owl:rational";
     }
-    
+
+    protected static String FLT(String value) {
+        return '\"'+value+"\"^^xsd:float";
+    }
+
+    protected static String DBL(String value) {
+        return '\"'+value+"\"^^xsd:double";
+    }
+
     protected static String[] S(String... args) {
         return args;
     }

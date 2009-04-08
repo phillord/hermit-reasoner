@@ -30,4 +30,7 @@ public class EntireDoubleSubset implements ValueSpaceSubset {
         }
         dataValues.add(Double.POSITIVE_INFINITY);
     }
+    public String toString() {
+        return "xsd:double";
+    }
 }

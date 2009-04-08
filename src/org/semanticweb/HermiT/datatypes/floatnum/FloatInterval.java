@@ -183,12 +183,12 @@ public class FloatInterval {
         int bitsValue1=Float.floatToIntBits(value1);
         int bitsValue2=Float.floatToIntBits(value2);
         if (isNaN(bitsValue1) || isNaN(bitsValue2))
-            return true;
+            return false;
         boolean positiveValue1=((bitsValue1 & 0x80000000)==0);
         boolean positiveValue2=((bitsValue2 & 0x80000000)==0);
         int magnitudeValue1=(bitsValue1 & 0x7fffffff);
         int magnitudeValue2=(bitsValue2 & 0x7fffffff);
-        return !isSmallerEqual(positiveValue1,magnitudeValue1,positiveValue2,magnitudeValue2);
+        return isSmallerEqual(positiveValue1,magnitudeValue1,positiveValue2,magnitudeValue2);
     }
     public static boolean isSmallerEqual(boolean positive1,int magnitude1,boolean positive2,int magnitude2) {
         if (positive1 && positive2)

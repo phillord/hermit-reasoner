@@ -66,72 +66,92 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
         assert XSD_DOUBLE.equals(datatypeRestriction.getDatatypeURI());
         if (datatypeRestriction.getNumberOfFacetRestrictions()==0)
             return DOUBLE_ENTIRE;
-        DoubleInterval interval=getIntervalFor(datatypeRestriction);
-        if (interval==null)
-            return EMPTY_SUBSET;
-        else
-            return new NoNaNDoubleSubset(interval);
+        else {
+            DoubleInterval interval=getIntervalFor(datatypeRestriction);
+            if (interval==null)
+                return EMPTY_SUBSET;
+            else
+                return new NoNaNDoubleSubset(interval);
+        }
     }
     public ValueSpaceSubset conjoinWithDR(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
         assert XSD_DOUBLE.equals(datatypeRestriction.getDatatypeURI());
-        DoubleInterval interval=getIntervalFor(datatypeRestriction);
-        if (interval==null)
-            return EMPTY_SUBSET;
-        else if (valueSpaceSubset==DOUBLE_ENTIRE)
-            return new NoNaNDoubleSubset(interval);
+        if (datatypeRestriction.getNumberOfFacetRestrictions()==0 || valueSpaceSubset==EMPTY_SUBSET)
+            return valueSpaceSubset;
         else {
-            NoNaNDoubleSubset doubleSubset=(NoNaNDoubleSubset)valueSpaceSubset;
-            List<DoubleInterval> oldIntervals=doubleSubset.m_intervals;
-            List<DoubleInterval> newIntervals=new ArrayList<DoubleInterval>();
-            for (int index=0;index<oldIntervals.size();index++) {
-                DoubleInterval oldInterval=oldIntervals.get(index);
-                DoubleInterval intersection=oldInterval.intersectWith(interval);
-                if (intersection!=null)
-                    newIntervals.add(intersection);
-            }
-            if (newIntervals.isEmpty())
+            DoubleInterval interval=getIntervalFor(datatypeRestriction);
+            if (interval==null)
                 return EMPTY_SUBSET;
-            else
-                return new NoNaNDoubleSubset(newIntervals);
+            else if (valueSpaceSubset==DOUBLE_ENTIRE)
+                return new NoNaNDoubleSubset(interval);
+            else {
+                NoNaNDoubleSubset doubleSubset=(NoNaNDoubleSubset)valueSpaceSubset;
+                List<DoubleInterval> oldIntervals=doubleSubset.m_intervals;
+                List<DoubleInterval> newIntervals=new ArrayList<DoubleInterval>();
+                for (int index=0;index<oldIntervals.size();index++) {
+                    DoubleInterval oldInterval=oldIntervals.get(index);
+                    DoubleInterval intersection=oldInterval.intersectWith(interval);
+                    if (intersection!=null)
+                        newIntervals.add(intersection);
+                }
+                if (newIntervals.isEmpty())
+                    return EMPTY_SUBSET;
+                else
+                    return new NoNaNDoubleSubset(newIntervals);
+            }
         }
     }
     public ValueSpaceSubset conjoinWithDRNegation(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
         assert XSD_DOUBLE.equals(datatypeRestriction.getDatatypeURI());
-        DoubleInterval interval=getIntervalFor(datatypeRestriction);
-        if (interval==null)
+        if (datatypeRestriction.getNumberOfFacetRestrictions()==0 || valueSpaceSubset==EMPTY_SUBSET)
             return EMPTY_SUBSET;
-        else if (valueSpaceSubset==DOUBLE_ENTIRE)
-            return new NoNaNDoubleSubset(interval);
         else {
-            DoubleInterval complementInterval1=null;
-            if (!DoubleInterval.areIdentical(interval.m_lowerBoundInclusive,Double.NEGATIVE_INFINITY))
-                complementInterval1=new DoubleInterval(Double.NEGATIVE_INFINITY,DoubleInterval.previousDouble(interval.m_lowerBoundInclusive));
-            DoubleInterval complementInterval2=null;
-            if (!DoubleInterval.areIdentical(interval.m_upperBoundInclusive,Double.POSITIVE_INFINITY))
-                complementInterval2=new DoubleInterval(DoubleInterval.nextDouble(interval.m_upperBoundInclusive),Double.POSITIVE_INFINITY);
-            NoNaNDoubleSubset doubleSubset=(NoNaNDoubleSubset)valueSpaceSubset;
-            List<DoubleInterval> oldIntervals=doubleSubset.m_intervals;
-            List<DoubleInterval> newIntervals=new ArrayList<DoubleInterval>();
-            for (int index=0;index<oldIntervals.size();index++) {
-                DoubleInterval oldInterval=oldIntervals.get(index);
-                if (complementInterval1!=null) {
-                    DoubleInterval intersection=oldInterval.intersectWith(complementInterval1);
-                    if (intersection!=null)
-                        newIntervals.add(intersection);
-                }
-                if (complementInterval2!=null) {
-                    DoubleInterval intersection=oldInterval.intersectWith(complementInterval2);
-                    if (intersection!=null)
-                        newIntervals.add(intersection);
-                }
+            DoubleInterval interval=getIntervalFor(datatypeRestriction);
+            if (interval==null)
+                return valueSpaceSubset;
+            else if (valueSpaceSubset==DOUBLE_ENTIRE) {
+                List<DoubleInterval> newIntervals=new ArrayList<DoubleInterval>();
+                if (!DoubleInterval.areIdentical(interval.m_lowerBoundInclusive,Double.NEGATIVE_INFINITY))
+                    newIntervals.add(new DoubleInterval(Double.NEGATIVE_INFINITY,DoubleInterval.previousDouble(interval.m_lowerBoundInclusive)));
+                if (!DoubleInterval.areIdentical(interval.m_upperBoundInclusive,Double.POSITIVE_INFINITY))
+                    newIntervals.add(new DoubleInterval(DoubleInterval.nextDouble(interval.m_upperBoundInclusive),Double.POSITIVE_INFINITY));
+                if (newIntervals.isEmpty())
+                    return EMPTY_SUBSET;
+                else
+                    return new NoNaNDoubleSubset(newIntervals);
             }
-            if (newIntervals.isEmpty())
-                return EMPTY_SUBSET;
-            else
-                return new NoNaNDoubleSubset(newIntervals);
+            else {
+                NoNaNDoubleSubset doubleSubset=(NoNaNDoubleSubset)valueSpaceSubset;
+                DoubleInterval complementInterval1=null;
+                if (!DoubleInterval.areIdentical(interval.m_lowerBoundInclusive,Double.NEGATIVE_INFINITY))
+                    complementInterval1=new DoubleInterval(Double.NEGATIVE_INFINITY,DoubleInterval.previousDouble(interval.m_lowerBoundInclusive));
+                DoubleInterval complementInterval2=null;
+                if (!DoubleInterval.areIdentical(interval.m_upperBoundInclusive,Double.POSITIVE_INFINITY))
+                    complementInterval2=new DoubleInterval(DoubleInterval.nextDouble(interval.m_upperBoundInclusive),Double.POSITIVE_INFINITY);
+                List<DoubleInterval> oldIntervals=doubleSubset.m_intervals;
+                List<DoubleInterval> newIntervals=new ArrayList<DoubleInterval>();
+                for (int index=0;index<oldIntervals.size();index++) {
+                    DoubleInterval oldInterval=oldIntervals.get(index);
+                    if (complementInterval1!=null) {
+                        DoubleInterval intersection=oldInterval.intersectWith(complementInterval1);
+                        if (intersection!=null)
+                            newIntervals.add(intersection);
+                    }
+                    if (complementInterval2!=null) {
+                        DoubleInterval intersection=oldInterval.intersectWith(complementInterval2);
+                        if (intersection!=null)
+                            newIntervals.add(intersection);
+                    }
+                }
+                if (newIntervals.isEmpty())
+                    return EMPTY_SUBSET;
+                else
+                    return new NoNaNDoubleSubset(newIntervals);
+            }
         }
     }
     protected DoubleInterval getIntervalFor(DatatypeRestriction datatypeRestriction) {
+        assert datatypeRestriction.getNumberOfFacetRestrictions()!=0;
         double lowerBoundInclusive=Double.NEGATIVE_INFINITY;
         double upperBoundInclusive=Double.POSITIVE_INFINITY;
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
