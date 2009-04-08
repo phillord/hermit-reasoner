@@ -236,11 +236,11 @@ public class Numbers {
                 BigInteger bi=bd.toBigInteger();
                 if (BoundaryDirection.LOWER.equals(boundaryDirection)) {
                     if (bd.compareTo(BigDecimal.ZERO)>0)
-                        bi.add(BigInteger.ONE);
+                        bi=bi.add(BigInteger.ONE);
                 }
                 else {
                     if (bd.compareTo(BigDecimal.ZERO)<0)
-                        bi.subtract(BigInteger.ONE);
+                        bi=bi.subtract(BigInteger.ONE);
                 }
                 int biBitCount=bi.bitCount();
                 if (biBitCount<=32)
@@ -300,7 +300,7 @@ public class Numbers {
                     return (int)Math.max(((long)argument)-size,0);
             }
         case 2: {
-                BigInteger leftover=BigInteger.valueOf(argument).subtract(toBigInteger(lowerBoundInclusive,typeLowerBound)).add(toBigInteger(upperBoundInclusive,typeUpperBound)).subtract(BigInteger.ONE);
+                BigInteger leftover=BigInteger.valueOf(argument).subtract(toBigInteger(upperBoundInclusive,typeUpperBound)).add(toBigInteger(lowerBoundInclusive,typeLowerBound)).subtract(BigInteger.ONE);
                 if (leftover.compareTo(BigInteger.ZERO)<=0)
                     return 0;
                 else

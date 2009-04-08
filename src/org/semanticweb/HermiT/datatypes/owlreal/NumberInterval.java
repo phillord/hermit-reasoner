@@ -177,7 +177,7 @@ public class NumberInterval {
             if (MinusInfinity.INSTANCE.equals(lowerBound) || PlusInfinity.INSTANCE.equals(upperBound))
                 return false;
             Number lowerBoundInclusive=Numbers.getNearestIntegerInBound(lowerBound,Numbers.BoundaryDirection.LOWER,lowerBoundType==BoundType.INCLUSIVE);
-            Number upperBoundInclusive=Numbers.getNearestIntegerInBound(lowerBound,Numbers.BoundaryDirection.UPPER,upperBoundType==BoundType.INCLUSIVE);
+            Number upperBoundInclusive=Numbers.getNearestIntegerInBound(upperBound,Numbers.BoundaryDirection.UPPER,upperBoundType==BoundType.INCLUSIVE);
             return Numbers.compare(lowerBoundInclusive,upperBoundInclusive)>0;
         }
     }
@@ -193,7 +193,7 @@ public class NumberInterval {
         else
             buffer.append('<');
         buffer.append(m_lowerBound.toString());
-        buffer.append("..");
+        buffer.append(" .. ");
         buffer.append(m_upperBound.toString());
         if (m_upperBoundType==BoundType.INCLUSIVE)
             buffer.append(']');

@@ -265,7 +265,7 @@ public class DatatypeManager implements Serializable {
         for (int index=negativeDatatypeRestrictions.size()-1;index>=0;--index) {
             DatatypeRestriction datatypeRestriction=negativeDatatypeRestrictions.get(index);
             String datatypeRestrictionDatatypeURI=datatypeRestriction.getDatatypeURI();
-            if (!DatatypeRegistry.isDisjointWith(mostSpecificDatatypeURI,datatypeRestrictionDatatypeURI) && !DatatypeRegistry.isSubsetOf(mostSpecificDatatypeURI,datatypeRestrictionDatatypeURI))
+            if (!DatatypeRegistry.isDisjointWith(mostSpecificDatatypeURI,datatypeRestrictionDatatypeURI))
                 variable.m_valueSpaceSubset=DatatypeRegistry.conjoinWithDRNegation(variable.m_valueSpaceSubset,datatypeRestriction);
         }
         if (!variable.m_valueSpaceSubset.hasCardinalityAtLeast(1))
@@ -511,6 +511,7 @@ public class DatatypeManager implements Serializable {
                 DVariable variable=m_activeVariables.get(variableIndex);
                 buffer.append(variable.toString(prefixes));
                 buffer.append('(');
+                buffer.append(variableIndex);
                 buffer.append(')');
                 for (int neighborIndex=0;neighborIndex<variable.m_unequalToDirect.size();neighborIndex++) {
                     buffer.append(' ');
@@ -605,28 +606,28 @@ public class DatatypeManager implements Serializable {
                 if (first)
                     first=false;
                 else
-                    buffer.append(',');
+                    buffer.append(", ");
                 buffer.append(m_positiveDataValueEnumerations.get(index).toString(prefixes));
             }
             for (int index=0;index<m_negativeDataValueEnumerations.size();index++) {
                 if (first)
                     first=false;
                 else
-                    buffer.append(',');
+                    buffer.append(", ");
                 buffer.append(m_negativeDataValueEnumerations.get(index).getNegation().toString(prefixes));
             }
             for (int index=0;index<m_positiveDatatypeRestrictions.size();index++) {
                 if (first)
                     first=false;
                 else
-                    buffer.append(',');
+                    buffer.append(", ");
                 buffer.append(m_positiveDatatypeRestrictions.get(index).toString(prefixes));
             }
             for (int index=0;index<m_negativeDatatypeRestrictions.size();index++) {
                 if (first)
                     first=false;
                 else
-                    buffer.append(',');
+                    buffer.append(", ");
                 buffer.append(m_negativeDatatypeRestrictions.get(index).getNegation().toString(prefixes));
             }
             buffer.append(']');

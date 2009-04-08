@@ -192,7 +192,7 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
             if (!interval.m_baseRange.equals(NumberRange.REAL))
                 complementInterval2=new NumberInterval(NumberRange.REAL,interval.m_baseRange,interval.m_lowerBound,interval.m_lowerBoundType,interval.m_upperBound,interval.m_upperBoundType);
             NumberInterval complementInterval3=null;
-            if (!interval.m_upperBound.equals(MinusInfinity.INSTANCE))
+            if (!interval.m_upperBound.equals(PlusInfinity.INSTANCE))
                 complementInterval3=new NumberInterval(NumberRange.REAL,NumberRange.NOTHING,interval.m_upperBound,interval.m_upperBoundType.getComplement(),PlusInfinity.INSTANCE,BoundType.EXCLUSIVE);
             OWLRealValueSpaceSubset realSubset=(OWLRealValueSpaceSubset)valueSpaceSubset;
             List<NumberInterval> oldIntervals=realSubset.m_intervals;

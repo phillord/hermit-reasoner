@@ -268,6 +268,38 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         return new Configuration();
     }
 
+    protected void assertDRSatisfiable(boolean value,String... parts) throws Exception {
+        assertDRSatisfiableNEQ(value,null,parts);
+    }
+
+    protected void assertDRSatisfiableNEQ(boolean value,String[] forbiddenValues,String... parts) throws Exception {
+        StringBuffer buffer=new StringBuffer();
+        buffer.append("SubClassOf( test:A DataSomeValuesFrom( test:dp rdfs:Literal ) ) ");
+        for (String part : parts) {
+            buffer.append("SubClassOf( test:A DataAllValuesFrom( test:dp ");
+            buffer.append(part);
+            buffer.append(" ) ) ");
+        }
+        buffer.append("ClassAssertion( test:a test:A ) ");
+        if (forbiddenValues!=null) {
+            int index=0;
+            for (String forbiddenValue : forbiddenValues) {
+                String fvName="test:fv"+index;
+                buffer.append("DisjointDataProperties( test:dp ");
+                buffer.append(fvName);
+                buffer.append(" ) ");
+                buffer.append("DataPropertyAssertion( ");
+                buffer.append(fvName);
+                buffer.append(" test:a ");
+                buffer.append(forbiddenValue);
+                buffer.append(" ) ");
+                index++;
+            }
+        }
+        loadReasonerWithAxioms(buffer.toString());
+        assertABoxSatisfiable(value);
+    }
+
     protected static Set<String> EQ(String... args) {
         Set<String> result=new HashSet<String>();
         for (String arg : args) {
@@ -294,5 +326,55 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         if (!arg.contains("#"))
             arg=NS+arg;
         return "(inv "+arg+")";
+    }
+
+    protected static String NOT(String argument) {
+        return "DataComplementOf( "+argument+" )";
+    }
+
+    protected static String DR(String datatype,String... restrictions) {
+        StringBuffer buffer=new StringBuffer();
+        if (restrictions.length==0)
+            buffer.append(datatype);
+        else {
+            buffer.append("DatatypeRestriction( ");
+            buffer.append(datatype);
+            for (String restriction : restrictions) {
+                buffer.append(' ');
+                if (restriction.startsWith("xsd:"))
+                    buffer.append(restriction.substring(4));
+                else
+                    buffer.append(restriction);
+            }
+            buffer.append(" )");
+        }
+        return buffer.toString();
+    }
+
+    protected static String OO(String... elements) {
+        StringBuffer buffer=new StringBuffer();
+        buffer.append("DataOneOf(");
+        for (String element : elements) {
+            buffer.append(' ');
+            buffer.append(element);
+        }
+        buffer.append(" )");
+        return buffer.toString();
+    }
+
+    protected static String INT(String value) {
+        return '\"'+value+"\"^^xsd:integer";
+    }
+
+    protected static String DEC(String value) {
+        return '\"'+value+"\"^^xsd:decimal";
+    }
+
+    protected static String RAT(String num,String denom) {
+        return '\"'+num+"/"+denom+"\"^^owl:rational";
+    }
+    
+    protected static String[] S(String... args) {
+        return args;
     }
 }
