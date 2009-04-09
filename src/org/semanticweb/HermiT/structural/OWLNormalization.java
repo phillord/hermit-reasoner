@@ -5,12 +5,12 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.Set;
-import java.util.HashSet;
 
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.model.AtomicConcept;
@@ -19,7 +19,6 @@ import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLAxiomAnnotationAxiom;
 import org.semanticweb.owl.model.OWLAxiomVisitor;
 import org.semanticweb.owl.model.OWLClass;
-import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLClassAssertionAxiom;
 import org.semanticweb.owl.model.OWLConstant;
 import org.semanticweb.owl.model.OWLDataAllRestriction;
@@ -52,6 +51,7 @@ import org.semanticweb.owl.model.OWLEquivalentObjectPropertiesAxiom;
 import org.semanticweb.owl.model.OWLFunctionalDataPropertyAxiom;
 import org.semanticweb.owl.model.OWLFunctionalObjectPropertyAxiom;
 import org.semanticweb.owl.model.OWLImportsDeclaration;
+import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLIndividualAxiom;
 import org.semanticweb.owl.model.OWLInverseFunctionalObjectPropertyAxiom;
 import org.semanticweb.owl.model.OWLInverseObjectPropertiesAxiom;
@@ -330,13 +330,13 @@ public class OWLNormalization implements Serializable {
 
         public void visit(OWLDisjointUnionAxiom axiom) {
             // DisjointUnion(C CE1 ... CEn)
-            // add C implies CE1 or ... or CEn (not C or CE1 or ... or CEn)
+            // add C implies CE1 or ... or CEn, which is not C or CE1 or ... or CEn
             Set<OWLDescription> inclusion=new HashSet<OWLDescription>(axiom.getDescriptions());
             inclusion.add(axiom.getOWLClass().getComplementNNF());
             OWLDescription[] inclusionArray=new OWLDescription[axiom.getDescriptions().size()+1];
             inclusion.toArray(inclusionArray);
             m_inclusionsAsDisjunctions.add(inclusionArray);
-            // add CE1 or ... or CEn implies C ((not CE1 and ... and not CEn) or C)
+            // add CE1 or ... or CEn implies C, which is (not CE1 and ... and not CEn) or C
             OWLDescription conjunction=m_factory.getOWLObjectUnionOf(axiom.getDescriptions());
             m_inclusionsAsDisjunctions.add(new OWLDescription[] { conjunction.getComplementNNF(),axiom.getOWLClass() });
             // add CEi and CEj implies bottom (not CEi or not CEj) for 1 <= i < j <= n

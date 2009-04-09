@@ -1,16 +1,16 @@
 package org.semanticweb.HermiT.datatypes.rdftext;
 
 import java.util.Collection;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.semanticweb.HermiT.Prefixes;
-import org.semanticweb.HermiT.model.DatatypeRestriction;
 import org.semanticweb.HermiT.datatypes.DatatypeHandler;
 import org.semanticweb.HermiT.datatypes.MalformedLiteralException;
 import org.semanticweb.HermiT.datatypes.UnsupportedFacetException;
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 import org.semanticweb.HermiT.datatypes.common.EmptyValueSpaceSubset;
+import org.semanticweb.HermiT.model.DatatypeRestriction;
 
 public class RDFTextDatatypeHandler implements DatatypeHandler {
     protected static final String RDF_TEXT=Prefixes.s_semanticWebPrefixes.get("rdf")+"text";
@@ -52,7 +52,8 @@ public class RDFTextDatatypeHandler implements DatatypeHandler {
                 throw new MalformedLiteralException(lexicalForm,datatypeURI);
             String string=lexicalForm.substring(0,lastAt);
             String languageTag=lexicalForm.substring(lastAt+1);
-            if (languageTag.isEmpty())
+            // if (languageTag.isEmpty())
+            if ("".equals(languageTag)) // Birte: replaced the above so that it compiles
                 return string;
             else
                 return new RDFTextDataValue(string,languageTag);
