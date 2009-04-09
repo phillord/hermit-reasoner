@@ -3,10 +3,6 @@
 
 <project name="HermiT" default="combined" basedir=".">
 
-    <!-- determine the build date -->
-    <tstamp>
-        <format property="builddate" pattern="yyyy-MM-dd"/>
-    </tstamp>
     <!-- Note that on each released build, the ${updatefile} on the web site
          should be replaced, and the new version of the plugin should be
          posted at the (auto-generated) URL in that file. -->
@@ -18,7 +14,7 @@
 
     <!-- general info -->
     <property name="homepage" value="http://hermit-reasoner.com/"/>
-    <property name="updatefile" value="${homepage}/protege-plugin/update.properties"/>
+    <property name="updatefile" value="${homepage}/update.properties"/>
     
     <!-- structure of output files -->
     <property name="projectroot" value="."/>
@@ -184,6 +180,17 @@
         <java classname="dk.brics.automaton.Datatypes" classpath="${classdir}">
             <sysproperty key="dk.brics.automaton.datatypes" value="${projectroot}/automaton"/>
         </java>
+    </target>
+
+    <target name="publish" depends="combined">
+        <echo message="Publishing a new version of HermiT"/>
+        <input message="Enter a user name for edison:" addproperty="username" defaultvalue="${user.name}"/>
+        <input message="Enter ${username}'s password on edison: " addproperty="password"/>
+        <sshexec host="edison.comlab.ox.ac.uk" username="${username}" password="${password}" command="mkdir /data/hermit/download/${version}/" trust="yes"/>
+        <scp file="${HermiTjar}" todir="${username}:${password}@edison.comlab.ox.ac.uk:/data/hermit/download/${version}/" trust="yes"/>
+        <scp file="${updatefile}" todir="${username}:${password}@edison.comlab.ox.ac.uk:/data/hermit/" trust="yes"/>
+        <sshexec host="edison.comlab.ox.ac.uk" username="${username}" password="${password}" command="rm /data/hermit/download/current/HermiT.jar" trust="yes"/>
+        <sshexec host="edison.comlab.ox.ac.uk" username="${username}" password="${password}" command="ln -s  /data/hermit/download/${version}/HermiT.jar /data/hermit/download/current/HermiT.jar" trust="yes"/>
     </target>
 
 </project>
