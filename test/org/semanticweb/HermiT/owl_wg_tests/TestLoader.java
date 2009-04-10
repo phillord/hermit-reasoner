@@ -1,13 +1,20 @@
 package org.semanticweb.HermiT.owl_wg_tests;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import junit.framework.TestCase;
+
+import org.semanticweb.HermiT.Configuration;
+import org.semanticweb.HermiT.Reasoner;
+import org.semanticweb.HermiT.WGJunitTests;
 import org.semanticweb.owl.apibinding.OWLManager;
+import org.semanticweb.owl.inference.OWLReasonerException;
 import org.semanticweb.owl.io.StringInputSource;
+import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLConstant;
 import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLDataProperty;
@@ -18,7 +25,7 @@ import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyCreationException;
 import org.semanticweb.owl.model.OWLOntologyManager;
 
-public abstract class AbstractTest extends junit.framework.TestCase {
+public class TestLoader {
 
     protected enum Status {APPROVED, REJECTED, PROPOSED}
     protected enum Semantics {DL, FULL}
@@ -54,18 +61,20 @@ public abstract class AbstractTest extends junit.framework.TestCase {
         }
     }
     
-    protected final String identifier;
-    protected final Status status;
-    protected final EnumSet<Semantics> semantics;
-    protected final EnumSet<Semantics> notsemantics;
-    protected final OWLOntology conclusionOntology;
-    protected final OWLOntology premiseOntology;
-    protected final OWLOntology nonConclusionOntology;
+    private final OWLOntologyManager manager;
+    private final String identifier;
+    private final Status status;
+    private final EnumSet<Semantics> semantics;
+    private final EnumSet<Semantics> notsemantics;
+    private final OWLOntology conclusionOntology;
+    private final OWLOntology premiseOntology;
+    private final OWLOntology nonConclusionOntology;
     
-    protected boolean parsingError = false;
-    protected final boolean isApplicable;
+    private boolean parsingError = false;
+    private final boolean isApplicable;
     
-    public AbstractTest(OWLOntologyManager m, OWLOntology o, OWLIndividual i) throws OWLOntologyCreationException, URISyntaxException {
+    public TestLoader(OWLOntologyManager m, OWLOntology o, OWLIndividual i) {
+        manager = m;
         OWLDataFactory df = m.getOWLDataFactory();
         
         Map<OWLDataPropertyExpression, Set<OWLConstant>> dps = i.getDataPropertyValues(o);
@@ -83,7 +92,99 @@ public abstract class AbstractTest extends junit.framework.TestCase {
         isApplicable = (WGJunitTests.USE_ONLY_APPROVED_TESTS ? status == Status.APPROVED : (status != null && status != Status.REJECTED) && semantics.contains(Semantics.DL) && !notsemantics.contains(Semantics.DL));        
     }
     
-    protected String retrieveIdentifier(Map<OWLDataPropertyExpression, Set<OWLConstant>> dps, OWLDataFactory df) {
+    public TestCase loadConsistencyTest(boolean positive) {
+        if (!parsingError & isApplicable) {
+            final String type = positive ? "Consistency" : "Inconsistency";
+            TestCase test = new junit.framework.TestCase("test-" + identifier + "-" + status) {
+                public void runTest() {
+                    boolean result;
+                    RunnableHermiT t = new RunnableHermiT() {  
+                        public void run() {
+                            Reasoner hermit = new Reasoner(new Configuration(), manager, premiseOntology);
+                            consistent = hermit.isConsistent();
+                        }
+                    };
+                    t.start();
+                    try {
+                        t.join(WGJunitTests.TIMEOUT);
+                        if (!t.isAlive()) {
+                            result = t.getConsistent();
+                            if (type.equals("Consistency")) {
+                                String message = "Failure: The ontology " + premiseOntology.getURI() + " should be consistent!";
+                                assertTrue(message, result);
+                            } else {
+                                String message = "Failure: The ontology " + premiseOntology.getURI() + " should be inconsistent!";
+                                assertFalse(message, result);
+                            }
+                        } else {
+                            throw new RuntimeException("Timeout: HermiT couldn't decide whether the ontology " + premiseOntology.getURI() + " is consistent within " + WGJunitTests.TIMEOUT + "ms");
+                        }
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException("Timeout: HermiT couldn't decide whether the ontology " + premiseOntology.getURI() + " is consistent within " + WGJunitTests.TIMEOUT + "ms");
+                    }
+                }
+            };
+            return test;
+        }
+        return null;
+    }
+    
+    public Set<TestCase> loadEntailmentTest(boolean positive) {
+        if (!parsingError & isApplicable) {
+            if (positive && conclusionOntology == null) {
+                WGJunitTests.log.warning("The test " + identifier + " is an entailment test, but has no conclusion and will be ignored. ");
+            } else if (!positive && nonConclusionOntology == null) {
+                WGJunitTests.log.warning("The test " + identifier + " is a nonentailment test, but has no nonconclusion and will be ignored. ");
+            } else {
+                Set<TestCase> tests = new HashSet<TestCase>();
+                final boolean entailment = positive;
+                final OWLOntology conclusions = positive ? conclusionOntology : nonConclusionOntology;
+                int testNumber = 0;
+                for (final OWLAxiom axiom : conclusions.getLogicalAxioms()) {
+                    testNumber++;
+                    junit.framework.TestCase test = new junit.framework.TestCase("test-" + identifier + "-No-" + testNumber + "-" + status) {
+                        public void runTest() {
+                            boolean result;
+                            RunnableHermiT t = new RunnableHermiT() {  
+                                public void run() {
+                                    final Reasoner hermit = new Reasoner(new Configuration(), manager, premiseOntology);
+                                    final EntailmentChecker checker = new EntailmentChecker(hermit, manager.getOWLDataFactory());
+                                    try {
+                                        consistent = checker.isEntailed(axiom);
+                                    } catch (OWLReasonerException e) {
+                                        throw new RuntimeException("The ontology " + premiseOntology.getURI() + " caused a reasoning exception!");
+                                    }
+                                }
+                            };
+                            t.start();
+                            try {
+                                t.join(WGJunitTests.TIMEOUT);
+                                if (!t.isAlive()) {
+                                    result = t.getConsistent();
+                                    if (entailment) {
+                                        String message = "Failure: Axiom " + axiom + " should be entailed by the ontology " + premiseOntology.getURI() + "!";
+                                        assertTrue(message, result);
+                                    } else {
+                                        String message = "Failure: Axiom " + axiom + " should not be entailed by the ontology " + premiseOntology.getURI() + "!";
+                                        assertFalse(message, result);
+                                    }
+                                } else {
+                                    throw new RuntimeException("Timeout: HermiT couldn't decide whether " + axiom + " is entailed by the ontology " + premiseOntology.getURI() + " within " + WGJunitTests.TIMEOUT + "ms");
+                                }
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException("Timeout: HermiT couldn't decide whether " + axiom + " is entailed by the ontology " + premiseOntology.getURI() + " within " + WGJunitTests.TIMEOUT + "ms");
+                            }
+                        }
+                    };
+                    tests.add(test);
+                }
+                return tests;
+            }
+        }
+        return null;
+    }
+    
+    private String retrieveIdentifier(Map<OWLDataPropertyExpression, Set<OWLConstant>> dps, OWLDataFactory df) {
         Set<OWLConstant> identifiers = dps.get(df.getOWLDataProperty(URI.create(WGJunitTests.URI_BASE + "identifier")));
         if (identifiers == null || identifiers.isEmpty()) {
             WGJunitTests.log.warning("Found a test without identifier. The test will be ignored. ");
@@ -101,7 +202,7 @@ public abstract class AbstractTest extends junit.framework.TestCase {
         return identifiers.iterator().next().getLiteral();
     }
     
-    protected Status retrieveStatus(Map<OWLObjectPropertyExpression, Set<OWLIndividual>> ops, OWLDataFactory df) {
+    private Status retrieveStatus(Map<OWLObjectPropertyExpression, Set<OWLIndividual>> ops, OWLDataFactory df) {
         if (parsingError) return null;
         Set<OWLIndividual> statuses = ops.get(df.getOWLObjectProperty(URI.create(WGJunitTests.URI_BASE + "status")));
         if (statuses == null || statuses.isEmpty()) {
@@ -125,7 +226,7 @@ public abstract class AbstractTest extends junit.framework.TestCase {
         }
     }
     
-    protected EnumSet<Semantics> retrieveSemantics(Map<OWLObjectPropertyExpression, Set<OWLIndividual>> ops, OWLDataFactory df) {
+    private EnumSet<Semantics> retrieveSemantics(Map<OWLObjectPropertyExpression, Set<OWLIndividual>> ops, OWLDataFactory df) {
         EnumSet<Semantics> semantics = EnumSet.noneOf(Semantics.class); // empty set with elements of type Semantics
         if (parsingError) return semantics;
         Set<OWLIndividual> sems = ops.get(df.getOWLObjectProperty(URI.create(WGJunitTests.URI_BASE + "semantics")));
@@ -142,7 +243,7 @@ public abstract class AbstractTest extends junit.framework.TestCase {
         return semantics;
     }
     
-    protected EnumSet<Semantics> retrieveNotSemantics(Map<OWLObjectPropertyExpression, Set<OWLIndividual>> nops, OWLDataFactory df) {
+    private EnumSet<Semantics> retrieveNotSemantics(Map<OWLObjectPropertyExpression, Set<OWLIndividual>> nops, OWLDataFactory df) {
         EnumSet<Semantics> notSemantics = EnumSet.noneOf(Semantics.class); // empty set with elements of type Semantics
         if (parsingError) return notSemantics;
         Set<OWLIndividual> nsems = nops.get(df.getOWLObjectProperty(URI.create(WGJunitTests.URI_BASE + "semantics")));
@@ -159,7 +260,7 @@ public abstract class AbstractTest extends junit.framework.TestCase {
         return notSemantics;
     }
     
-    protected OWLOntology parsePremiseOntology(Map<OWLDataPropertyExpression, Set<OWLConstant>> dps, OWLOntologyManager manager, OWLDataFactory df) {
+    private OWLOntology parsePremiseOntology(Map<OWLDataPropertyExpression, Set<OWLConstant>> dps, OWLOntologyManager manager, OWLDataFactory df) {
         if (parsingError) return null;
         OWLOntology o = null;
         for (SerializationFormat f : SerializationFormat.values()) {
@@ -189,7 +290,7 @@ public abstract class AbstractTest extends junit.framework.TestCase {
         return null; // could not load any premise
     }
     
-    protected OWLOntology parseConclusionOntology(Map<OWLDataPropertyExpression, Set<OWLConstant>> dps, OWLOntologyManager manager, boolean positive) {
+    private OWLOntology parseConclusionOntology(Map<OWLDataPropertyExpression, Set<OWLConstant>> dps, OWLOntologyManager manager, boolean positive) {
         if (parsingError) return null;
         OWLOntology o = null;
         for (SerializationFormat f : SerializationFormat.values()) {
