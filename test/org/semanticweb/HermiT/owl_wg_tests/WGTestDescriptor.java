@@ -5,6 +5,8 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 
+import junit.framework.TestSuite;
+
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.io.StringInputSource;
 import org.semanticweb.owl.model.OWLConstant;
@@ -233,5 +235,16 @@ public class WGTestDescriptor {
             }
         }
         throw new InvalidWGTestException("Test "+testID+" has no conclusion ontology in a parsable format.");
+    }
+    
+    public void addTestsToSuite(TestSuite suite) {
+        if (testTypes.contains(WGTestDescriptor.TestType.CONSISTENCY))
+            suite.addTest(new ConsistencyTest(this,true));
+        if (testTypes.contains(WGTestDescriptor.TestType.INCONSISTENCY))
+            suite.addTest(new ConsistencyTest(this,false));
+        if (testTypes.contains(WGTestDescriptor.TestType.POSITIVE_ENTAILMENT))
+            suite.addTest(new EntailmentTest(this,true));
+        if (testTypes.contains(WGTestDescriptor.TestType.NEGATIVE_ENTAILMENT))
+            suite.addTest(new EntailmentTest(this,false));
     }
 }
