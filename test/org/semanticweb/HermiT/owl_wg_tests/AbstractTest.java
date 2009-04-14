@@ -63,7 +63,7 @@ public abstract class AbstractTest extends TestCase {
         }
         catch (UnsupportedDatatypeException e) {
             dumpFailureData();
-            throw e;
+            fail(e.getMessage());
         }
         finally {
             timer.stopTiming();
