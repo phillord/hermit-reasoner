@@ -4,9 +4,9 @@ import java.util.EnumSet;
 
 import junit.framework.Test;
 
-public class AllWGTests {
+public class AllWGTestsWithStatus {
     public static Test suite() throws Exception {
         WGTestRegistry wgTestRegistry=new WGTestRegistry();
-        return wgTestRegistry.createSuite(EnumSet.allOf(WGTestDescriptor.Status.class),true);
+        return wgTestRegistry.createSuite(EnumSet.allOf(WGTestDescriptor.Status.class),false);
     }
 }
