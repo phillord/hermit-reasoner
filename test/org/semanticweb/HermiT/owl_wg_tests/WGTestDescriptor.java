@@ -172,15 +172,7 @@ public class WGTestDescriptor {
         }
     }
 
-    public OWLOntology getConclusionOntology(OWLOntologyManager manager) throws InvalidWGTestException {
-        return getConclusionOntology(manager,true);
-    }
-    
-    public OWLOntology getNonConclusionOntology(OWLOntologyManager manager) throws InvalidWGTestException {
-        return getConclusionOntology(manager,false);
-    }
-    
-    protected OWLOntology getConclusionOntology(OWLOntologyManager manager,boolean positive) throws InvalidWGTestException {
+    public OWLOntology getConclusionOntology(OWLOntologyManager manager,boolean positive) throws InvalidWGTestException {
         Map<OWLDataPropertyExpression,Set<OWLConstant>> dps=testIndividual.getDataPropertyValues(testContainer);
         for (SerializationFormat f : SerializationFormat.values()) {
             Set<OWLConstant> conclusions=dps.get(positive ? f.getConclusion() : f.getNonConclusion());

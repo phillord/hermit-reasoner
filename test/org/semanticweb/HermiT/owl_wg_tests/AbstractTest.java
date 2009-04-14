@@ -1,5 +1,10 @@
 package org.semanticweb.HermiT.owl_wg_tests;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+
+import org.coode.owl.rdf.rdfxml.RDFXMLRenderer;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.model.ExistentialConcept;
@@ -14,7 +19,8 @@ import org.semanticweb.owl.model.OWLOntology;
 import junit.framework.TestCase;
 
 public abstract class AbstractTest extends TestCase {
-    public static long TIMEOUT=6000;
+    public static long TIMEOUT=6000L;
+    protected static final File TEMPORARY_DIRECTORY=new File(System.getProperty("java.io.tmpdir"));
 
     protected WGTestDescriptor m_wgTestDescriptor;
     protected OWLOntologyManager m_ontologyManager;
@@ -44,19 +50,35 @@ public abstract class AbstractTest extends TestCase {
         }
         catch (TimeoutException e) {
             fail("Test timed out.");
+            dumpFailureData();
         }
         catch (OutOfMemoryError e) {
-            m_wgTestDescriptor=null;
-            m_ontologyManager=null;
-            m_premiseOntology=null;
             m_reasoner=null;
             Runtime.getRuntime().gc();
             fail("Test ran out of memory.");
+            dumpFailureData();
         }
+        catch (AssertionError e) {
+            dumpFailureData();
+            throw e;
+        }
+    }
+    protected void dumpFailureData() throws Exception {
+        saveOntology(m_ontologyManager,m_premiseOntology,new File(getFailureRoot(),"premise.owl"));
+    }
+    protected File getFailureRoot() { 
+        return new File(TEMPORARY_DIRECTORY,m_wgTestDescriptor.identifier);
     }
     protected Configuration getConfiguration() {
         return new Configuration();
     }
+    protected void saveOntology(OWLOntologyManager manager,OWLOntology ontology,File file) throws Exception {
+        file.mkdirs();
+        BufferedWriter writer=new BufferedWriter(new FileWriter(file));
+        RDFXMLRenderer renderer=new RDFXMLRenderer(manager,ontology,writer);
+        renderer.render();
+        writer.close();
+    }    
     protected abstract void doTest() throws Exception;
     
     @SuppressWarnings("serial")
