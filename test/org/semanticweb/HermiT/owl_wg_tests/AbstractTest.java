@@ -40,7 +40,7 @@ public abstract class AbstractTest extends TestCase {
         m_premiseOntology=null;
         m_reasoner=null;
     }
-    public void runTest() throws Exception {
+    public void runTest() throws Throwable {
         InterruptTimer timer=new InterruptTimer(TIMEOUT,m_reasoner);
         timer.start();
         try {
@@ -64,6 +64,10 @@ public abstract class AbstractTest extends TestCase {
         catch (UnsupportedDatatypeException e) {
             dumpFailureData();
             fail(e.getMessage());
+        }
+        catch (Throwable e) {
+            dumpFailureData();
+            throw e;
         }
         finally {
             timer.stopTiming();
