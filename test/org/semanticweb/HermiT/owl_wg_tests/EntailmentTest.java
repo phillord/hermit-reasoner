@@ -10,7 +10,7 @@ public class EntailmentTest extends AbstractTest {
     protected OWLOntology m_conclusionOntology;
 
     public EntailmentTest(WGTestDescriptor wgTestDescriptor,boolean positive) {
-        super(wgTestDescriptor.identifier+(positive ? "-entailment" : "-nonentailment"),wgTestDescriptor);
+        super(wgTestDescriptor.testID+(positive ? "-entailment" : "-nonentailment"),wgTestDescriptor);
         m_positive=positive;
     }
     protected void setUp() throws Exception {

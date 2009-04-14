@@ -11,6 +11,8 @@ import org.semanticweb.owl.model.OWLConstant;
 import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLDataProperty;
 import org.semanticweb.owl.model.OWLDataPropertyExpression;
+import org.semanticweb.owl.model.OWLDescription;
+import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
 import org.semanticweb.owl.model.OWLOntology;
@@ -18,17 +20,42 @@ import org.semanticweb.owl.model.OWLOntologyCreationException;
 import org.semanticweb.owl.model.OWLOntologyManager;
 
 public class WGTestDescriptor {
+    protected static final URI TEST_CASE_URI=URI.create(WGTestRegistry.URI_BASE+"TestCase");
 
     protected enum Status {
-        APPROVED,REJECTED,PROPOSED
+        APPROVED("Approved"),REJECTED("Rejected"),PROPOSED("Proposed");
+        
+        public final URI uri;
+        
+        private Status(String uriSuffix) {
+            uri=URI.create(WGTestRegistry.URI_BASE+uriSuffix);
+        }
     }
 
     protected enum Semantics {
-        DL,FULL
+        DL("DIRECT","DL"),FULL("RDF-BASED","FULL");
+        
+        public final URI[] uris;
+
+        private Semantics(String... uriSuffixes) {
+            uris=new URI[uriSuffixes.length];
+            for (int index=0;index<uriSuffixes.length;index++)
+                uris[index]=URI.create(WGTestRegistry.URI_BASE+uriSuffixes[index]);
+        }
     }
 
     public enum TestType {
-        CONSISTENCY,INCONSISTENCY,POSITIVE_ENTAILMENT,NEGATIVE_ENTAILMENT
+        CONSISTENCY("ConsistencyTest"),
+        INCONSISTENCY("InconsistencyTest"),
+        POSITIVE_ENTAILMENT("PositiveEntailmentTest"),
+        NEGATIVE_ENTAILMENT("NegativeEntailmentTest"),
+        PROFILE_IDENTIFICATION("ProfileIdentificationTest");
+        
+        public final URI uri;
+        
+        private TestType(String uriSuffix) {
+            uri=URI.create(WGTestRegistry.URI_BASE+uriSuffix);
+        }
     }
 
     public enum SerializationFormat {
@@ -36,9 +63,9 @@ public class WGTestDescriptor {
         OWLXML("OWLXML","owlXmlPremiseOntology","owlXmlConclusionOntology","owlXmlNonConclusionOntology"),
         RDFXML("RDFXML","rdfXmlPremiseOntology","rdfXmlConclusionOntology","rdfXmlNonConclusionOntology");
 
-        protected final OWLDataProperty premise;
-        protected final OWLDataProperty conclusion;
-        protected final OWLDataProperty nonconclusion;
+        public final OWLDataProperty premise;
+        public final OWLDataProperty conclusion;
+        public final OWLDataProperty nonconclusion;
 
         private SerializationFormat(String indURI,String premiseURI,String conclusionURI,String nonconclusionURI) {
             OWLDataFactory df=OWLManager.createOWLOntologyManager().getOWLDataFactory();
@@ -46,27 +73,22 @@ public class WGTestDescriptor {
             conclusion=df.getOWLDataProperty(URI.create(WGTestRegistry.URI_BASE+conclusionURI));
             nonconclusion=df.getOWLDataProperty(URI.create(WGTestRegistry.URI_BASE+nonconclusionURI));
         }
-        public OWLDataProperty getConclusion() {
-            return conclusion;
-        }
-        public OWLDataProperty getNonConclusion() {
-            return nonconclusion;
-        }
-        public OWLDataProperty getPremise() {
-            return premise;
-        }
     }
 
     protected final OWLOntology testContainer;
     protected final OWLIndividual testIndividual;
+    public final String testID;
     public final String identifier;
     public final Status status;
+    public final EnumSet<TestType> testTypes;
     public final EnumSet<Semantics> semantics;
     public final EnumSet<Semantics> notsemantics;
 
     public WGTestDescriptor(OWLOntologyManager m,OWLOntology o,OWLIndividual i) throws InvalidWGTestException {
         testContainer=o;
         testIndividual=i;
+        String testIndividualURI=testIndividual.getURI().toString();
+        testID=testIndividualURI.substring(WGTestRegistry.TEST_ID_PREFIX.length());
         
         OWLDataFactory df=m.getOWLDataFactory();
         Map<OWLDataPropertyExpression,Set<OWLConstant>> dps=i.getDataPropertyValues(o);
@@ -75,6 +97,7 @@ public class WGTestDescriptor {
 
         identifier=getIdentifier(dps,df);
         status=getStatus(ops,df);
+        testTypes=getTestType();
         semantics=getSemantics(ops,df);
         notsemantics=getNotSemantics(nops,df);
     }
@@ -101,47 +124,68 @@ public class WGTestDescriptor {
         if (statuses==null || statuses.isEmpty())
             return null;
         else if (statuses.size()>1)
-            throw new InvalidWGTestException("The test "+identifier+" has more than one status.");
+            throw new InvalidWGTestException("The test "+testID+" has more than one status.");
         else {
-            OWLIndividual s=statuses.iterator().next();
-            if (s.getURI().equals(URI.create(WGTestRegistry.URI_BASE+"Approved")))
-                return Status.APPROVED;
-            else if (s.getURI().equals(URI.create(WGTestRegistry.URI_BASE+"Rejected")))
-                return Status.REJECTED;
-            else if (s.getURI().equals(URI.create(WGTestRegistry.URI_BASE+"Proposed")))
-                return Status.PROPOSED;
-            else
-                throw new InvalidWGTestException("The test "+identifier+"has an invalid status of "+s.getURI().toASCIIString()+".");
+            URI statusURI=statuses.iterator().next().getURI();
+            for (Status status : Status.values())
+                if (statusURI.equals(status.uri))
+                    return status;
+            throw new InvalidWGTestException("The test "+testID+"has an invalid status of "+statusURI.toString()+".");
         }
     }
 
+    protected EnumSet<TestType> getTestType() throws InvalidWGTestException {
+        EnumSet<TestType> testTypes=EnumSet.noneOf(TestType.class);
+        Set<OWLDescription> types=testIndividual.getTypes(testContainer);
+        nextItem: for (OWLDescription type : types) {
+            if (type instanceof OWLClass) {
+                URI testTypeURI=((OWLClass)type).getURI();
+                for (TestType testType : TestType.values()) {
+                    if (testTypeURI.equals(testType.uri)) {
+                        testTypes.add(testType);
+                        continue nextItem;
+                    }
+                }
+                if (!TEST_CASE_URI.equals(testTypeURI))
+                    throw new InvalidWGTestException("The test "+testID+" has an invalid test type "+testTypeURI.toString()+".");
+            }
+        }
+        return testTypes;
+    }
+
     protected EnumSet<Semantics> getSemantics(Map<OWLObjectPropertyExpression,Set<OWLIndividual>> ops,OWLDataFactory df) throws InvalidWGTestException {
-        EnumSet<Semantics> semantics=EnumSet.noneOf(Semantics.class); // empty set with elements of type Semantics
+        EnumSet<Semantics> semantics=EnumSet.noneOf(Semantics.class);
         Set<OWLIndividual> sems=ops.get(df.getOWLObjectProperty(URI.create(WGTestRegistry.URI_BASE+"semantics")));
         if (sems!=null) {
-            for (OWLIndividual s : sems) {
-                if (s.getURI().equals(URI.create(WGTestRegistry.URI_BASE+"RDF-BASED")) || s.getURI().equals(URI.create(WGTestRegistry.URI_BASE+"FULL")))
-                    semantics.add(Semantics.FULL);
-                else if (s.getURI().equals(URI.create(WGTestRegistry.URI_BASE+"DIRECT")) || s.getURI().equals(URI.create(WGTestRegistry.URI_BASE+"DL")))
-                    semantics.add(Semantics.DL);
-                else
-                    throw new InvalidWGTestException("The test "+identifier+" has an invalid semantics: "+s.getURI().toASCIIString()+". Semantics should be FULL or RDF_BASED or DIRECT or DL.");
+            nextItem: for (OWLIndividual s : sems) {
+                URI semanticsURI=s.getURI();
+                for (Semantics sem : Semantics.values()) {
+                    for (URI uri : sem.uris)
+                        if (semanticsURI.equals(uri)) {
+                            semantics.add(sem);
+                            continue nextItem;
+                        }
+                }
+                throw new InvalidWGTestException("The test "+testID+" has an invalid semantics "+semanticsURI.toString()+".");
             }
         }
         return semantics;
     }
 
     protected EnumSet<Semantics> getNotSemantics(Map<OWLObjectPropertyExpression,Set<OWLIndividual>> nops,OWLDataFactory df) throws InvalidWGTestException {
-        EnumSet<Semantics> notSemantics=EnumSet.noneOf(Semantics.class); // empty set with elements of type Semantics
+        EnumSet<Semantics> notSemantics=EnumSet.noneOf(Semantics.class);
         Set<OWLIndividual> nsems=nops.get(df.getOWLObjectProperty(URI.create(WGTestRegistry.URI_BASE+"semantics")));
         if (nsems!=null) {
-            for (OWLIndividual s : nsems) {
-                if (s.getURI().equals(URI.create(WGTestRegistry.URI_BASE+"RDF-BASED")) || s.getURI().equals(URI.create(WGTestRegistry.URI_BASE+"FULL")))
-                    notSemantics.add(Semantics.FULL);
-                else if (s.getURI().equals(URI.create(WGTestRegistry.URI_BASE+"DIRECT")) || s.getURI().equals(URI.create(WGTestRegistry.URI_BASE+"DL")))
-                    notSemantics.add(Semantics.DL);
-                else
-                    throw new InvalidWGTestException("The test "+identifier+" has an invalid not semantics: "+s.getURI().toASCIIString()+". Semantics should be FULL or RDF_BASED or DIRECT or DL.");
+            nextItem: for (OWLIndividual s : nsems) {
+                URI semanticsURI=s.getURI();
+                for (Semantics sem : Semantics.values()) {
+                    for (URI uri : sem.uris)
+                        if (semanticsURI.equals(uri)) {
+                            notSemantics.add(sem);
+                            continue nextItem;
+                        }
+                }
+                throw new InvalidWGTestException("The test "+testID+" has an invalid not semantics "+semanticsURI.toString()+".");
             }
         }
         return notSemantics;
@@ -150,10 +194,10 @@ public class WGTestDescriptor {
     public OWLOntology getPremiseOntology(OWLOntologyManager manager) throws InvalidWGTestException {
         Map<OWLDataPropertyExpression,Set<OWLConstant>> dps=testIndividual.getDataPropertyValues(testContainer);
         for (SerializationFormat f : SerializationFormat.values()) {
-            Set<OWLConstant> premises=dps.get(f.getPremise());
+            Set<OWLConstant> premises=dps.get(f.premise);
             if (premises!=null) {
                 if (premises.size()!=1)
-                    throw new InvalidWGTestException("Test "+identifier+" has an incorrect number of premises.");
+                    throw new InvalidWGTestException("Test "+testID+" has an incorrect number of premises.");
                 StringInputSource source=new StringInputSource(premises.iterator().next().getLiteral());
                 try {
                     return manager.loadOntology(source);
@@ -175,10 +219,10 @@ public class WGTestDescriptor {
     public OWLOntology getConclusionOntology(OWLOntologyManager manager,boolean positive) throws InvalidWGTestException {
         Map<OWLDataPropertyExpression,Set<OWLConstant>> dps=testIndividual.getDataPropertyValues(testContainer);
         for (SerializationFormat f : SerializationFormat.values()) {
-            Set<OWLConstant> conclusions=dps.get(positive ? f.getConclusion() : f.getNonConclusion());
+            Set<OWLConstant> conclusions=dps.get(positive ? f.conclusion : f.nonconclusion);
             if (conclusions!=null) {
                 if (conclusions.size()!=1)
-                    throw new InvalidWGTestException("Test "+identifier+" has an incorrect number of "+(positive ? "" : "non")+"conclusions.");
+                    throw new InvalidWGTestException("Test "+testID+" has an incorrect number of "+(positive ? "" : "non")+"conclusions.");
                 StringInputSource source=new StringInputSource(conclusions.iterator().next().getLiteral());
                 try {
                     return manager.loadOntology(source);
@@ -188,6 +232,6 @@ public class WGTestDescriptor {
                 }
             }
         }
-        throw new InvalidWGTestException("Test "+identifier+" has no conclusion ontology in a parsable format.");
+        throw new InvalidWGTestException("Test "+testID+" has no conclusion ontology in a parsable format.");
     }
 }
