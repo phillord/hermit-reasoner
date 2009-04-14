@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import org.coode.owl.rdf.rdfxml.RDFXMLRenderer;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Reasoner;
+import org.semanticweb.HermiT.datatypes.UnsupportedDatatypeException;
 import org.semanticweb.HermiT.tableau.InterruptException;
 
 import org.semanticweb.owl.apibinding.OWLManager;
@@ -60,6 +61,10 @@ public abstract class AbstractTest extends TestCase {
             dumpFailureData();
             throw e;
         }
+        catch (UnsupportedDatatypeException e) {
+            dumpFailureData();
+            throw e;
+        }
         finally {
             timer.stopTiming();
             timer.join();
@@ -69,7 +74,12 @@ public abstract class AbstractTest extends TestCase {
         saveOntology(m_ontologyManager,m_premiseOntology,new File(getFailureRoot(),"premise.owl"));
     }
     protected File getFailureRoot() { 
-        File directory=new File(TEMPORARY_DIRECTORY,m_wgTestDescriptor.identifier);
+        String testName=getName();
+        testName=testName.replace(':','-');
+        testName=testName.replace('/','-');
+        testName=testName.replace('\\','-');
+        testName=testName.replace('$','-');
+        File directory=new File(TEMPORARY_DIRECTORY,testName);
         directory.mkdirs();
         return directory;
     }
