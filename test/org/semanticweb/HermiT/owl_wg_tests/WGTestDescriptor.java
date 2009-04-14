@@ -5,6 +5,7 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 
+import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.semanticweb.owl.apibinding.OWLManager;
@@ -238,13 +239,26 @@ public class WGTestDescriptor {
     }
     
     public void addTestsToSuite(TestSuite suite) {
-        if (testTypes.contains(WGTestDescriptor.TestType.CONSISTENCY))
-            suite.addTest(new ConsistencyTest(this,true));
-        if (testTypes.contains(WGTestDescriptor.TestType.INCONSISTENCY))
-            suite.addTest(new ConsistencyTest(this,false));
-        if (testTypes.contains(WGTestDescriptor.TestType.POSITIVE_ENTAILMENT))
-            suite.addTest(new EntailmentTest(this,true));
-        if (testTypes.contains(WGTestDescriptor.TestType.NEGATIVE_ENTAILMENT))
-            suite.addTest(new EntailmentTest(this,false));
+        for (TestType testType : TestType.values()) {
+            Test test=getTest(testType);
+            if (test!=null)
+                suite.addTest(test);
+        }
+    }
+    
+    public Test getTest(TestType testType) {
+        if (testTypes.contains(testType)) {
+            switch (testType) {
+            case CONSISTENCY:
+                return new ConsistencyTest(this,true);
+            case INCONSISTENCY:
+                return new ConsistencyTest(this,false);
+            case POSITIVE_ENTAILMENT:
+                return new EntailmentTest(this,true);
+            case NEGATIVE_ENTAILMENT:
+                return new EntailmentTest(this,false);
+            }
+        }
+        return null;
     }
 }
