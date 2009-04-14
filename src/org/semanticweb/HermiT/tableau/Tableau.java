@@ -10,7 +10,6 @@ import java.util.HashMap;
 import org.semanticweb.HermiT.existentials.ExpansionStrategy;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
-import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DLPredicate;
@@ -285,7 +284,7 @@ public final class Tableau implements Serializable {
         m_currentBranchingPoint++;
         m_nonbacktrackableBranchingPoint=m_currentBranchingPoint;
         DependencySet dependencySet=m_dependencySetFactory.addBranchingPoint(m_dependencySetFactory.emptySet(),m_currentBranchingPoint);
-        m_extensionManager.addConceptAssertion(AtomicNegationConcept.create(superconcept),m_checkedNode,dependencySet);
+        m_extensionManager.addConceptAssertion(superconcept.getNegation(),m_checkedNode,dependencySet);
         boolean result=!isSatisfiable();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isSubsumedByFinished(subconcept,superconcept,result);
@@ -327,7 +326,7 @@ public final class Tableau implements Serializable {
         m_checkedNode=aboxMapping.get(individual);
         if (m_checkedNode==null)
             m_checkedNode=createNewNINode(m_dependencySetFactory.emptySet());
-        m_extensionManager.addConceptAssertion(AtomicNegationConcept.create(atomicConcept),m_checkedNode,m_dependencySetFactory.emptySet());
+        m_extensionManager.addConceptAssertion(atomicConcept.getNegation(),m_checkedNode,m_dependencySetFactory.emptySet());
         boolean result=!isSatisfiable();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isInstanceOfFinished(atomicConcept,individual,result);
@@ -352,7 +351,7 @@ public final class Tableau implements Serializable {
             throw new IllegalArgumentException("Unsupported type of negative fact.");
         switch (dlPredicate.getArity()) {
         case 1:
-            m_extensionManager.addConceptAssertion(AtomicNegationConcept.create((AtomicConcept)dlPredicate),getNodeForTerm(termsToNodes,atom.getArgument(0)),m_dependencySetFactory.emptySet());
+            m_extensionManager.addConceptAssertion(((AtomicConcept)dlPredicate).getNegation(),getNodeForTerm(termsToNodes,atom.getArgument(0)),m_dependencySetFactory.emptySet());
             break;
         default:
             throw new IllegalArgumentException("Unsupported arity of negative ground atoms.");

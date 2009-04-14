@@ -83,16 +83,24 @@ public abstract class ExtensionTable implements Serializable {
             Node node=(Node)tuple[1];
             m_tableau.m_existentialsExpansionStrategy.assertionAdded((Concept)dlPredicateObject,node);
             if (dlPredicateObject instanceof AtomicNegationConcept) {
-                node.addToNegativeLabel();
-                if (node.getPositiveLabelSize()>0) {
-                    m_binaryAuxiliaryTuple[0]=((AtomicNegationConcept)dlPredicateObject).getNegatedAtomicConcept();
-                    m_binaryAuxiliaryTuple[1]=node;
-                    if (containsTuple(m_binaryAuxiliaryTuple)) {
-                        m_binaryUnionDependencySet.m_dependencySets[0]=dependencySet;
-                        m_binaryUnionDependencySet.m_dependencySets[1]=getDependencySet(m_binaryAuxiliaryTuple);
-                        m_extensionManager.setClash(m_binaryUnionDependencySet);
-                        if (m_tableauMonitor!=null)
-                            m_tableauMonitor.clashDetected(tuple,m_binaryAuxiliaryTuple);
+                AtomicConcept negatedAtomicConcept=((AtomicNegationConcept)dlPredicateObject).getNegatedAtomicConcept();
+                if (AtomicConcept.THING.equals(negatedAtomicConcept) || AtomicConcept.RDFS_LITERAL.equals(negatedAtomicConcept)) {
+                    m_extensionManager.setClash(dependencySet);
+                    if (m_tableauMonitor!=null)
+                        m_tableauMonitor.clashDetected(tuple);
+                }
+                else {
+                    node.addToNegativeLabel();
+                    if (node.getPositiveLabelSize()>0) {
+                        m_binaryAuxiliaryTuple[0]=negatedAtomicConcept;
+                        m_binaryAuxiliaryTuple[1]=node;
+                        if (containsTuple(m_binaryAuxiliaryTuple)) {
+                            m_binaryUnionDependencySet.m_dependencySets[0]=dependencySet;
+                            m_binaryUnionDependencySet.m_dependencySets[1]=getDependencySet(m_binaryAuxiliaryTuple);
+                            m_extensionManager.setClash(m_binaryUnionDependencySet);
+                            if (m_tableauMonitor!=null)
+                                m_tableauMonitor.clashDetected(tuple,m_binaryAuxiliaryTuple);
+                        }
                     }
                 }
             }
