@@ -77,16 +77,6 @@ public abstract class AbstractTest extends TestCase {
     protected void dumpFailureData() throws Exception {
         saveOntology(m_ontologyManager,m_premiseOntology,new File(getFailureRoot(),"premise.owl"));
     }
-    protected File getFailureRoot() { 
-        String testName=getName();
-        testName=testName.replace(':','-');
-        testName=testName.replace('/','-');
-        testName=testName.replace('\\','-');
-        testName=testName.replace('$','-');
-        File directory=new File(TEMPORARY_DIRECTORY,testName);
-        directory.mkdirs();
-        return directory;
-    }
     protected Configuration getConfiguration() {
         return new Configuration();
     }
@@ -96,7 +86,13 @@ public abstract class AbstractTest extends TestCase {
         renderer.render();
         writer.close();
     }    
+    protected File getFailureRoot() { 
+        File directory=new File(new File(TEMPORARY_DIRECTORY,m_wgTestDescriptor.testID),getTestType());
+        directory.mkdirs();
+        return directory;
+    }
     protected abstract void doTest() throws Exception;
+    protected abstract String getTestType();
     
     protected static class InterruptTimer extends Thread {
         protected final int m_timeout;

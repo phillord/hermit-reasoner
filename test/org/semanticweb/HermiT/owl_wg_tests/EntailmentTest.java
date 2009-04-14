@@ -36,6 +36,9 @@ public class EntailmentTest extends AbstractTest {
         if (!m_positive)
             fail("At least one axiom should not be entailed by the premise ontology.");
     }
+    protected String getTestType() {
+        return m_positive ? "entailment" : "nonentailment";
+    }
     protected void dumpFailureData() throws Exception {
         super.dumpFailureData();
         saveOntology(m_ontologyManager,m_conclusionOntology,new File(getFailureRoot(),m_positive ? "conclusion.owl" : "nonconclusion.owl"));

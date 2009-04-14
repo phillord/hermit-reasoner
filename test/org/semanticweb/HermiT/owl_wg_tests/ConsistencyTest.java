@@ -10,4 +10,7 @@ public class ConsistencyTest extends AbstractTest {
     protected void doTest() {
         assertEquals(m_positive,m_reasoner.isConsistent());
     }
+    protected String getTestType() {
+        return m_positive ? "consistency" : "inconsistency";
+    }
 }
