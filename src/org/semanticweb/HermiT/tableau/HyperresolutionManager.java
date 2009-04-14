@@ -29,6 +29,7 @@ public final class HyperresolutionManager implements Serializable {
 
     public HyperresolutionManager(Tableau tableau) {
         m_tableau=tableau;
+        InterruptFlag interruptFlag=m_tableau.m_interruptFlag;
         m_extensionManager=m_tableau.getExtensionManager();
         m_tupleConsumersByDeltaPredicate=new HashMap<DLPredicate,CompiledDLClauseInfo>();
         Map<Integer,ExtensionTable.Retrieval> retrievalsByArity=new HashMap<Integer,ExtensionTable.Retrieval>();
@@ -41,6 +42,7 @@ public final class HyperresolutionManager implements Serializable {
                 dlClausesByBody.put(key,dlClauses);
             }
             dlClauses.add(dlClause);
+            interruptFlag.checkInterrupt();
         }
         for (Map.Entry<DLClauseBodyKey,List<DLClause>> entry : dlClausesByBody.entrySet()) {
             DLClause bodyDLClause=entry.getKey().m_dlClause;
@@ -55,8 +57,9 @@ public final class HyperresolutionManager implements Serializable {
                     firstTableRetrieval=extensionTable.createRetrieval(new boolean[extensionTable.getArity()],ExtensionTable.View.DELTA_OLD);
                     retrievalsByArity.put(arity,firstTableRetrieval);
                 }
-                CompiledDLClauseInfo nextTupleConsumer=new CompiledDLClauseInfo(m_extensionManager,swappedDLClause,entry.getValue(),firstTableRetrieval,m_tupleConsumersByDeltaPredicate.get(deltaDLPredicate));
+                CompiledDLClauseInfo nextTupleConsumer=new CompiledDLClauseInfo(m_tableau,swappedDLClause,entry.getValue(),firstTableRetrieval,m_tupleConsumersByDeltaPredicate.get(deltaDLPredicate));
                 m_tupleConsumersByDeltaPredicate.put(deltaDLPredicate,nextTupleConsumer);
+                interruptFlag.checkInterrupt();
             }
         }
         m_deltaOldRetrievals=new ExtensionTable.Retrieval[retrievalsByArity.size()];
@@ -84,8 +87,8 @@ public final class HyperresolutionManager implements Serializable {
 
         protected final CompiledDLClauseInfo m_next;
 
-        public CompiledDLClauseInfo(ExtensionManager extensionManager,DLClause bodyDLClause,List<DLClause> headDLClauses,ExtensionTable.Retrieval firstAtomRetrieval,CompiledDLClauseInfo next) {
-            super(extensionManager,bodyDLClause,headDLClauses,firstAtomRetrieval);
+        public CompiledDLClauseInfo(Tableau tableau,DLClause bodyDLClause,List<DLClause> headDLClauses,ExtensionTable.Retrieval firstAtomRetrieval,CompiledDLClauseInfo next) {
+            super(tableau,bodyDLClause,headDLClauses,firstAtomRetrieval);
             m_next=next;
         }
     }

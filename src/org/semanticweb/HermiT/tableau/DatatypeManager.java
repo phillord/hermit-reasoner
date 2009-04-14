@@ -20,6 +20,7 @@ import org.semanticweb.HermiT.monitor.TableauMonitor;
 public class DatatypeManager implements Serializable {
     private static final long serialVersionUID=-5304869484553471737L;
 
+    protected final InterruptFlag m_interruptFlag;
     protected final TableauMonitor m_tableauMonitor;
     protected final ExtensionManager m_extensionManager;
     protected final ExtensionTable.Retrieval m_assertionsDeltaOldRetrieval;
@@ -34,6 +35,7 @@ public class DatatypeManager implements Serializable {
     protected final boolean[] m_newVariableAdded;
 
     public DatatypeManager(Tableau tableau) {
+        m_interruptFlag=tableau.m_interruptFlag;
         m_tableauMonitor=tableau.m_tableauMonitor;
         m_extensionManager=tableau.m_extensionManager;
         m_assertionsDeltaOldRetrieval=m_extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { false,false },ExtensionTable.View.DELTA_OLD);
@@ -129,6 +131,7 @@ public class DatatypeManager implements Serializable {
                         m_auxiliaryNodeList.add(newNode);
                     m_conjunction.addInequality(reachedVariable,newVariable);
                     m_inequality01Retrieval.next();
+                    m_interruptFlag.checkInterrupt();
                 }
                 // Look for all inequalities where reachedNode occurs in the second position.
                 m_inequality02Retrieval.getBindingsBuffer()[2]=reachedNode;
@@ -141,6 +144,7 @@ public class DatatypeManager implements Serializable {
                         m_auxiliaryNodeList.add(newNode);
                     m_conjunction.addInequality(newVariable,reachedVariable);
                     m_inequality02Retrieval.next();
+                    m_interruptFlag.checkInterrupt();
                 }
             }
         }
@@ -156,6 +160,7 @@ public class DatatypeManager implements Serializable {
                 if (potentialDataRange instanceof DataRange)
                     addDataRange(variable,(DataRange)potentialDataRange);
                 m_assertions1Retrieval.next();
+                m_interruptFlag.checkInterrupt();
             }
         }
     }
@@ -347,6 +352,7 @@ public class DatatypeManager implements Serializable {
                     if (findAssignment(nodeIndex+1))
                         return true;
                 }
+                m_interruptFlag.checkInterrupt();
             }
             variable.m_dataValue=null;
             return false;

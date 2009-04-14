@@ -17,6 +17,7 @@ import org.semanticweb.HermiT.tableau.ExistentialExpansionManager;
 import org.semanticweb.HermiT.tableau.ExtensionManager;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
+import org.semanticweb.HermiT.tableau.InterruptFlag;
 
 /**
  * Implements the common bits of an ExistentialsExpansionStrategy, leaving only actual processing of existentials in need of expansion to subclasses.
@@ -28,6 +29,7 @@ public abstract class AbstractExpansionStrategy implements Serializable,Expansio
     protected final boolean m_expandNodeAtATime;
     protected final List<ExistentialConcept> m_processedExistentials;
     protected Tableau m_tableau;
+    protected InterruptFlag m_interruptFlag;
     protected ExtensionManager m_extensionManager;
     protected ExistentialExpansionManager m_existentialExpansionManager;
     protected DescriptionGraphManager m_descriptionGraphManager;
@@ -39,10 +41,11 @@ public abstract class AbstractExpansionStrategy implements Serializable,Expansio
     }
     public void initialize(Tableau tableau) {
         m_tableau=tableau;
-        m_extensionManager=tableau.getExtensionManager();
-        m_existentialExpansionManager=tableau.getExistentialExpansionManager();
-        m_descriptionGraphManager=tableau.getDescriptionGraphManager();
-        m_blockingStrategy.initialize(tableau);
+        m_interruptFlag=m_tableau.getInterruptFlag();
+        m_extensionManager=m_tableau.getExtensionManager();
+        m_existentialExpansionManager=m_tableau.getExistentialExpansionManager();
+        m_descriptionGraphManager=m_tableau.getDescriptionGraphManager();
+        m_blockingStrategy.initialize(m_tableau);
     }
     public void clear() {
         m_blockingStrategy.clear();
@@ -93,9 +96,11 @@ public abstract class AbstractExpansionStrategy implements Serializable,Expansio
                     }
                     else
                         throw new IllegalStateException("Unsupported type of existential.");
+                    m_interruptFlag.checkInterrupt();
                 }
             }
             node=node.getNextTableauNode();
+            m_interruptFlag.checkInterrupt();
         }
         return extensionsChanged;
     }

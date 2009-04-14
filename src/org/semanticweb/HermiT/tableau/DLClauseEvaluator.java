@@ -14,6 +14,7 @@ public class DLClauseEvaluator implements Serializable {
     private static final long serialVersionUID=4639844159658590456L;
     protected static final String CRLF=System.getProperty("line.separator");
 
+    protected final InterruptFlag m_interruptFlag;
     protected final ExtensionManager m_extensionManager;
     protected final Object[] m_valuesBuffer;
     protected final UnionDependencySet m_unionDependencySet;
@@ -22,8 +23,9 @@ public class DLClauseEvaluator implements Serializable {
     protected final DLClause m_bodyDLClause;
     protected final List<DLClause> m_headDLClauses;
     
-    public DLClauseEvaluator(ExtensionManager extensionManager,DLClause bodyDLClause,List<DLClause> headDLClauses,ExtensionTable.Retrieval firstAtomRetrieval) {
-        m_extensionManager=extensionManager;
+    public DLClauseEvaluator(Tableau tableau,DLClause bodyDLClause,List<DLClause> headDLClauses,ExtensionTable.Retrieval firstAtomRetrieval) {
+        m_interruptFlag=tableau.m_interruptFlag;
+        m_extensionManager=tableau.m_extensionManager;
         DLClauseCompiler compiler=new DLClauseCompiler(this,m_extensionManager,bodyDLClause,headDLClauses,firstAtomRetrieval);
         m_valuesBuffer=compiler.m_valuesBuffer;
         m_unionDependencySet=compiler.m_unionDependencySet;
@@ -57,8 +59,10 @@ public class DLClauseEvaluator implements Serializable {
     }
     public void evaluate() {
         int programCounter=0;
-        while (programCounter<m_workers.length && !m_extensionManager.containsClash())
+        while (programCounter<m_workers.length && !m_extensionManager.containsClash()) {
+            m_interruptFlag.checkInterrupt();
             programCounter=m_workers[programCounter].execute(programCounter);
+        }
     }
     public String toString() {
         StringBuffer buffer=new StringBuffer();

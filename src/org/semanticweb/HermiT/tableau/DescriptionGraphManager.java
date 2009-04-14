@@ -18,6 +18,7 @@ public final class DescriptionGraphManager implements Serializable {
     private static final long serialVersionUID=4536271856850424712L;
 
     protected final Tableau m_tableau;
+    protected final InterruptFlag m_interruptFlag;
     protected final TableauMonitor m_tableauMonitor;
     protected final ExtensionManager m_extensionManager;
     protected final MergingManager m_mergingManager;
@@ -34,6 +35,7 @@ public final class DescriptionGraphManager implements Serializable {
     
     public DescriptionGraphManager(Tableau tableau) {
         m_tableau=tableau;
+        m_interruptFlag=m_tableau.m_interruptFlag;
         m_tableauMonitor=m_tableau.m_tableauMonitor;
         m_extensionManager=m_tableau.getExtensionManager();
         m_mergingManager=m_tableau.getMergingManager();
@@ -115,6 +117,7 @@ public final class DescriptionGraphManager implements Serializable {
                                                 }
                                                 hasChange=true;
                                             }
+                                            m_interruptFlag.checkInterrupt();
                                         }
                                     }
                                     else {
@@ -130,11 +133,13 @@ public final class DescriptionGraphManager implements Serializable {
                                     }
                                 }
                                 listNode=m_occurrenceManager.getListNodeComponent(listNode,OccurrenceManager.NEXT_NODE);
+                                m_interruptFlag.checkInterrupt();
                             }
                         }
                     }
                     retrieval.next();
                 }
+                m_interruptFlag.checkInterrupt();
             }
             return hasChange;
         }

@@ -81,6 +81,7 @@ import org.semanticweb.HermiT.structural.OWLHasKeyDummy;
 import org.semanticweb.HermiT.structural.OWLNormalization;
 import org.semanticweb.HermiT.structural.TransitivityManager;
 import org.semanticweb.HermiT.tableau.Tableau;
+import org.semanticweb.HermiT.tableau.InterruptFlag;
 
 /**
  * Answers queries about the logical implications of a particular knowledge base. A Reasoner is associated with a single knowledge base, which is "loaded" when the reasoner is constructed. By default a full classification of all atomic terms in the knowledge base is also performed at this time (which can take quite a while for large or complex ontologies), but this behavior can be disabled as a part of the Reasoner configuration. Internal details of the loading and reasoning algorithms can be configured in the Reasoner constructor and do not change over the lifetime of the Reasoner object---internal data structures and caches are optimized for a particular configuration. By default, HermiT will use the set of options which provide optimal performance.
@@ -89,6 +90,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
     private static final long serialVersionUID=-3511564272739622311L;
 
     protected final Configuration m_configuration;
+    protected final InterruptFlag m_interruptFlag;
     protected DLOntology m_dlOntology;
     protected Prefixes m_prefixes;
     protected Tableau m_tableau;
@@ -101,6 +103,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
 
     public Reasoner(Configuration configuration) {
         m_configuration=configuration;
+        m_interruptFlag=new InterruptFlag();
         clearOntologies();
     }
     
@@ -110,16 +113,19 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
 
     public Reasoner(Configuration configuration,OWLOntologyManager ontologyManager,OWLOntology ontology,Set<DescriptionGraph> descriptionGraphs,Set<OWLHasKeyDummy> keys) {
         m_configuration=configuration;
+        m_interruptFlag=new InterruptFlag();
         loadOntology(ontologyManager,ontology,descriptionGraphs,keys);
     }
     
     public Reasoner(Configuration configuration,Set<OWLOntology> importClosure) {
         m_configuration=configuration;
+        m_interruptFlag=new InterruptFlag();
         loadOntologies(importClosure);
     }
 
     public Reasoner(Configuration configuration,DLOntology dlOntology) {
         m_configuration=configuration;
+        m_interruptFlag=new InterruptFlag();
         loadDLOntology(dlOntology);
     }
 
@@ -137,12 +143,16 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         return m_configuration.clone();
     }
 
+    public void interrupt() {
+        m_interruptFlag.interrupt();
+    }
+    
     // Loading and managing ontologies
 
     public void loadDLOntology(DLOntology dlOntology) {
         m_dlOntology=dlOntology;
         m_prefixes=createPrefixes(m_dlOntology);
-        m_tableau=createTableau(m_configuration,m_dlOntology,m_prefixes);
+        m_tableau=createTableau(m_interruptFlag,m_configuration,m_dlOntology,m_prefixes);
         m_subsumptionChecker=new TableauSubsumptionChecker(m_tableau);
     }
     
@@ -816,11 +826,11 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             return m_tableau;
         else {
             DLOntology newDLOntology=extendDLOntology(m_configuration,m_prefixes,"uri:urn:internal-kb",m_dlOntology,ontologyManager,additionalAxioms);
-            return createTableau(m_configuration,newDLOntology,m_prefixes);
+            return createTableau(m_interruptFlag,m_configuration,newDLOntology,m_prefixes);
         }
     }
     
-    protected static Tableau createTableau(Configuration config,DLOntology dlOntology,Prefixes prefixes) throws IllegalArgumentException {
+    protected static Tableau createTableau(InterruptFlag interruptFlag,Configuration config,DLOntology dlOntology,Prefixes prefixes) throws IllegalArgumentException {
         if (!dlOntology.canUseNIRule() && dlOntology.hasAtMostRestrictions() && dlOntology.hasInverseRoles() && config.existentialStrategyType==Configuration.ExistentialStrategyType.INDIVIDUAL_REUSE)
             throw new IllegalArgumentException("The supplied DL-ontology is not compatible with the individual reuse strategy.");
 
@@ -927,7 +937,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             throw new IllegalArgumentException("Unknown expansion strategy type.");
         }
 
-        return new Tableau(tableauMonitor,existentialsExpansionStrategy,dlOntology,config.parameters);
+        return new Tableau(interruptFlag,tableauMonitor,existentialsExpansionStrategy,dlOntology,config.parameters);
     }
 
     protected static DLOntology extendDLOntology(Configuration config,Prefixes prefixes,String resultingOntologyURI,DLOntology originalDLOntology,OWLOntologyManager ontologyManager,OWLAxiom... additionalAxioms) throws IllegalArgumentException {

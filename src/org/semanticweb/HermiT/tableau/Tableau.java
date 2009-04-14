@@ -33,10 +33,11 @@ import org.semanticweb.HermiT.tableau.Node.NodeState;
 public final class Tableau implements Serializable {
     private static final long serialVersionUID=-28982363158925221L;
 
+    protected final InterruptFlag m_interruptFlag;
+    protected final Map<String,Object> m_parameters;
     protected final TableauMonitor m_tableauMonitor;
     protected final ExpansionStrategy m_existentialsExpansionStrategy;
     protected final DLOntology m_dlOntology;
-    protected final Map<String,Object> m_parameters;
     protected final DependencySetFactory m_dependencySetFactory;
     protected final ExtensionManager m_extensionManager;
     protected final LabelManager m_labelManager;
@@ -66,7 +67,9 @@ public final class Tableau implements Serializable {
     protected GroundDisjunction m_firstUnprocessedGroundDisjunction;
     protected Node m_checkedNode;
 
-    public Tableau(TableauMonitor tableauMonitor,ExpansionStrategy existentialsExpansionStrategy,DLOntology dlOntology,Map<String,Object> parameters) {
+    public Tableau(InterruptFlag interruptFlag,TableauMonitor tableauMonitor,ExpansionStrategy existentialsExpansionStrategy,DLOntology dlOntology,Map<String,Object> parameters) {
+        m_interruptFlag=interruptFlag;
+        m_interruptFlag.startTask();
         m_parameters=parameters;
         m_tableauMonitor=tableauMonitor;
         m_existentialsExpansionStrategy=existentialsExpansionStrategy;
@@ -90,6 +93,10 @@ public final class Tableau implements Serializable {
         m_nonbacktrackableBranchingPoint=-1;
         if (m_tableauMonitor!=null)
             m_tableauMonitor.setTableau(this);
+        m_interruptFlag.endTask();
+    }
+    public InterruptFlag getInterruptFlag() {
+        return m_interruptFlag;
     }
     public DLOntology getDLOntology() {
         return m_dlOntology;
@@ -157,24 +164,30 @@ public final class Tableau implements Serializable {
             m_tableauMonitor.tableauCleared();
     }
     public boolean isSatisfiable() {
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.saturateStarted();
-        boolean hasMoreWork=true;
-        while (hasMoreWork) {
+        m_interruptFlag.startTask();
+        try {
             if (m_tableauMonitor!=null)
-                m_tableauMonitor.iterationStarted();
-            hasMoreWork=doIteration();
+                m_tableauMonitor.saturateStarted();
+            boolean hasMoreWork=true;
+            while (hasMoreWork) {
+                if (m_tableauMonitor!=null)
+                    m_tableauMonitor.iterationStarted();
+                hasMoreWork=doIteration();
+                if (m_tableauMonitor!=null)
+                    m_tableauMonitor.iterationFinished();
+            }
             if (m_tableauMonitor!=null)
-                m_tableauMonitor.iterationFinished();
+                m_tableauMonitor.saturateFinished();
+            if (!m_extensionManager.containsClash()) {
+                m_existentialsExpansionStrategy.modelFound();
+                return true;
+            }
+            else
+                return false;
         }
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.saturateFinished();
-        if (!m_extensionManager.containsClash()) {
-            m_existentialsExpansionStrategy.modelFound();
-            return true;
+        finally {
+            m_interruptFlag.endTask();
         }
-        else
-            return false;
     }
     protected boolean doIteration() {
         if (!m_extensionManager.containsClash()) {
@@ -221,6 +234,7 @@ public final class Tableau implements Serializable {
                     if (m_tableauMonitor!=null)
                         m_tableauMonitor.groundDisjunctionSatisfied(groundDisjunction);
                 }
+                m_interruptFlag.checkInterrupt();
             }
         }
         if (m_extensionManager.containsClash()) {

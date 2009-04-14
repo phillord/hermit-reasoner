@@ -7,10 +7,7 @@ import java.io.FileWriter;
 import org.coode.owl.rdf.rdfxml.RDFXMLRenderer;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Reasoner;
-import org.semanticweb.HermiT.model.ExistentialConcept;
-import org.semanticweb.HermiT.monitor.TableauMonitorAdapter;
-import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
-import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.tableau.InterruptException;
 
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLOntologyManager;
@@ -19,8 +16,8 @@ import org.semanticweb.owl.model.OWLOntology;
 import junit.framework.TestCase;
 
 public abstract class AbstractTest extends TestCase {
-    public static long TIMEOUT=6000L;
-    protected static final File TEMPORARY_DIRECTORY=new File(System.getProperty("java.io.tmpdir"));
+    public static int TIMEOUT=6000;
+    protected static final File TEMPORARY_DIRECTORY=new File(new File(System.getProperty("java.io.tmpdir")),"WG-tests");
 
     protected WGTestDescriptor m_wgTestDescriptor;
     protected OWLOntologyManager m_ontologyManager;
@@ -34,9 +31,7 @@ public abstract class AbstractTest extends TestCase {
     protected void setUp() throws Exception {
         m_ontologyManager=OWLManager.createOWLOntologyManager();
         m_premiseOntology=m_wgTestDescriptor.getPremiseOntology(m_ontologyManager);
-        Configuration configuration=getConfiguration();
-        configuration.monitor=new TimeoutMonitor();
-        m_reasoner=new Reasoner(configuration,m_ontologyManager,m_premiseOntology);
+        m_reasoner=new Reasoner(getConfiguration());
     }
     protected void tearDown() {
         m_wgTestDescriptor=null;
@@ -45,35 +40,43 @@ public abstract class AbstractTest extends TestCase {
         m_reasoner=null;
     }
     public void runTest() throws Exception {
+        InterruptTimer timer=new InterruptTimer(TIMEOUT,m_reasoner);
+        timer.start();
         try {
+            m_reasoner.loadOntology(m_ontologyManager,m_premiseOntology,null,null);
             doTest();
         }
-        catch (TimeoutException e) {
-            fail("Test timed out.");
+        catch (InterruptException e) {
             dumpFailureData();
+            fail("Test timed out.");
         }
         catch (OutOfMemoryError e) {
             m_reasoner=null;
             Runtime.getRuntime().gc();
-            fail("Test ran out of memory.");
             dumpFailureData();
+            fail("Test ran out of memory.");
         }
         catch (AssertionError e) {
             dumpFailureData();
             throw e;
+        }
+        finally {
+            timer.stopTiming();
+            timer.join();
         }
     }
     protected void dumpFailureData() throws Exception {
         saveOntology(m_ontologyManager,m_premiseOntology,new File(getFailureRoot(),"premise.owl"));
     }
     protected File getFailureRoot() { 
-        return new File(TEMPORARY_DIRECTORY,m_wgTestDescriptor.identifier);
+        File directory=new File(TEMPORARY_DIRECTORY,m_wgTestDescriptor.identifier);
+        directory.mkdirs();
+        return directory;
     }
     protected Configuration getConfiguration() {
         return new Configuration();
     }
     protected void saveOntology(OWLOntologyManager manager,OWLOntology ontology,File file) throws Exception {
-        file.mkdirs();
         BufferedWriter writer=new BufferedWriter(new FileWriter(file));
         RDFXMLRenderer renderer=new RDFXMLRenderer(manager,ontology,writer);
         renderer.render();
@@ -81,29 +84,32 @@ public abstract class AbstractTest extends TestCase {
     }    
     protected abstract void doTest() throws Exception;
     
-    @SuppressWarnings("serial")
-    protected static class TimeoutMonitor extends TableauMonitorAdapter {
-        protected long m_timeoutTime;
+    protected static class InterruptTimer extends Thread {
+        protected final int m_timeout;
+        protected final Reasoner m_reasoner;
+        protected boolean m_timingStopped;
         
-        public void saturateStarted() {
-            m_timeoutTime=System.currentTimeMillis()+TIMEOUT;
+        public InterruptTimer(int timeout,Reasoner reasoner) {
+            super("HermiT Interrupt Thread");
+            setDaemon(true);
+            m_timeout=timeout;
+            m_reasoner=reasoner;
+            m_timingStopped=false;
         }
-        public void iterationStarted() {
-            checkTimeout();
+        public synchronized void run() {
+            try {
+                if (!m_timingStopped) {
+                    wait(m_timeout);
+                    if (!m_timingStopped)
+                        m_reasoner.interrupt();
+                }
+            }
+            catch (InterruptedException stopped) {
+            }
         }
-        public void dlClauseMatchedStarted(DLClauseEvaluator dlClauseEvaluator,int dlClauseIndex) {
-            checkTimeout();
+        public synchronized void stopTiming() {
+            m_timingStopped=true;
+            notifyAll();
         }
-        public void existentialExpansionStarted(ExistentialConcept existentialConcept,Node forNode) {
-            checkTimeout();
-        }
-        protected void checkTimeout() {
-            if (System.currentTimeMillis()>m_timeoutTime)
-                throw new TimeoutException();
-        }
-    }
-    
-    @SuppressWarnings("serial")
-    protected static class TimeoutException extends RuntimeException {
     }
 }

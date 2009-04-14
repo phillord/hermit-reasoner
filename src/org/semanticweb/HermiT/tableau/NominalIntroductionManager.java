@@ -21,6 +21,7 @@ public final class NominalIntroductionManager implements Serializable {
     protected static final int AT_MOST_CONCEPT=2;
     
     protected final Tableau m_tableau;
+    protected final InterruptFlag m_interruptFlag;
     protected final ExtensionManager m_extensionManager;
     protected final MergingManager m_mergingManager;
     protected final TupleTable m_targets;
@@ -38,6 +39,7 @@ public final class NominalIntroductionManager implements Serializable {
     
     public NominalIntroductionManager(Tableau tableau) {
         m_tableau=tableau;
+        m_interruptFlag=m_tableau.m_interruptFlag;
         m_extensionManager=m_tableau.getExtensionManager();
         m_mergingManager=m_tableau.getMergingManager();
         m_targets=new TupleTable(3);
@@ -118,6 +120,7 @@ public final class NominalIntroductionManager implements Serializable {
                     m_tableau.m_tableauMonitor.nominalIntorductionFinished(rootNode,niTargetNode,atMostRoleGuard);
                 result=true;
             }
+            m_interruptFlag.checkInterrupt();
         }
         return result;
     }

@@ -66,7 +66,7 @@ public class MergeTest extends AbstractReasonerInternalsTest {
         BlockingSignatureCache blockingSignatureCache=new BlockingSignatureCache(directBlockingChecker);
         BlockingStrategy blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
         ExpansionStrategy ExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
-        m_tableau=new Tableau(null,ExpansionStrategy,TEST_DL_ONTOLOGY,new HashMap<String,Object>());
+        m_tableau=new Tableau(new InterruptFlag(),null,ExpansionStrategy,TEST_DL_ONTOLOGY,new HashMap<String,Object>());
         m_extensionManager=m_tableau.getExtensionManager();
     }
     public void testMergeAndBacktrack() {
