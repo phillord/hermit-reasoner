@@ -8,8 +8,7 @@ public class AllWGTests {
         WGTestRegistry wgTestRegistry=new WGTestRegistry();
         TestSuite suite=new TestSuite("OWL WG All Tests");
         for (WGTestDescriptor wgTestDescriptor : wgTestRegistry.getTestDescriptors())
-            if (wgTestDescriptor.isDLTest())
-                wgTestDescriptor.addTestsToSuite(suite);
+            wgTestDescriptor.addTestsToSuite(suite);
         return suite;
     }
 }

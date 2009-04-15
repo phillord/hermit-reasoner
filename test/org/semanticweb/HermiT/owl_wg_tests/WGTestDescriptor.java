@@ -247,7 +247,7 @@ public class WGTestDescriptor {
     }
     
     public Test getTest(TestType testType) {
-        if (testTypes.contains(testType)) {
+        if (testTypes.contains(testType) && isDLTest()) {
             switch (testType) {
             case CONSISTENCY:
                 return new ConsistencyTest(this,true);
