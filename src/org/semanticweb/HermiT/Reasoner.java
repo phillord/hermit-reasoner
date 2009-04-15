@@ -463,12 +463,16 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
 
     public Set<Set<OWLObjectPropertyExpression>> getAncestorProperties(OWLObjectPropertyExpression propertyExpression) {
         HierarchyNode<Role> node=getHierarchyNode(propertyExpression);
-        return objectPropertyNodesToOWLAPI(node.getAncestorNodes(),OWLManager.createOWLOntologyManager().getOWLDataFactory());
+        Set<HierarchyNode<Role>> ancestorsPlusNode=new HashSet<HierarchyNode<Role>>(node.getAncestorNodes());
+        ancestorsPlusNode.add(node);
+        return objectPropertyNodesToOWLAPI(ancestorsPlusNode,OWLManager.createOWLOntologyManager().getOWLDataFactory());
     }
 
     public Set<Set<OWLObjectPropertyExpression>> getDescendantProperties(OWLObjectPropertyExpression propertyExpression) {
         HierarchyNode<Role> node=getHierarchyNode(propertyExpression);
-        return objectPropertyNodesToOWLAPI(node.getDescendantNodes(),OWLManager.createOWLOntologyManager().getOWLDataFactory());
+        Set<HierarchyNode<Role>> descendantsPlusNode=new HashSet<HierarchyNode<Role>>(node.getDescendantNodes());
+        descendantsPlusNode.add(node);
+        return objectPropertyNodesToOWLAPI(descendantsPlusNode,OWLManager.createOWLOntologyManager().getOWLDataFactory());
     }
 
     public Set<OWLObjectPropertyExpression> getEquivalentProperties(OWLObjectPropertyExpression propertyExpression) {
@@ -625,12 +629,16 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
     
     public Set<Set<OWLDataProperty>> getAncestorProperties(OWLDataProperty property) {
         HierarchyNode<AtomicRole> node=getHierarchyNode(property);
-        return dataPropertyNodesToOWLAPI(node.getAncestorNodes(),OWLManager.createOWLOntologyManager().getOWLDataFactory());
+        Set<HierarchyNode<AtomicRole>> ancestorsPlusNode=new HashSet<HierarchyNode<AtomicRole>>(node.getAncestorNodes());
+        ancestorsPlusNode.add(node);
+        return dataPropertyNodesToOWLAPI(ancestorsPlusNode,OWLManager.createOWLOntologyManager().getOWLDataFactory());
     }
 
     public Set<Set<OWLDataProperty>> getDescendantProperties(OWLDataProperty property) {
         HierarchyNode<AtomicRole> node=getHierarchyNode(property);
-        return dataPropertyNodesToOWLAPI(node.getDescendantNodes(),OWLManager.createOWLOntologyManager().getOWLDataFactory());
+        Set<HierarchyNode<AtomicRole>> descendantsPlusNode=new HashSet<HierarchyNode<AtomicRole>>(node.getDescendantNodes());
+        descendantsPlusNode.add(node);
+        return dataPropertyNodesToOWLAPI(descendantsPlusNode,OWLManager.createOWLOntologyManager().getOWLDataFactory());
     }
     
     public Set<OWLDataProperty> getEquivalentProperties(OWLDataProperty property) {

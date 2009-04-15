@@ -22,12 +22,11 @@ public class EntailmentTest extends AbstractTest {
         m_conclusionOntology=null;
     }
     protected void doTest() throws Exception {
+        EntailmentChecker checker=new EntailmentChecker(m_reasoner,m_ontologyManager.getOWLDataFactory());
         for (OWLAxiom axiom : m_conclusionOntology.getLogicalAxioms()) {
-            EntailmentChecker checker=new EntailmentChecker(m_reasoner,m_ontologyManager.getOWLDataFactory());
             boolean isEntailed=checker.isEntailed(axiom);
-            if (m_positive) {
+            if (m_positive)
                 assertTrue("Axiom "+axiom.toString()+" should be entailed.",isEntailed);
-            }
             else {
                 if (!isEntailed)
                     return;
