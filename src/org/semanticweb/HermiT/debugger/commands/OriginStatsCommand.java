@@ -18,16 +18,16 @@ import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.tableau.Node;
 
 public class OriginStatsCommand extends AbstractCommand implements DebuggerCommand {
-    
+
     /**
-     * Prints origin information for the nodes in the current tableau. 
+     * Prints origin information for the nodes in the current tableau.
      */
     public void execute() {
         Map<Concept,OriginInfo> originInfos=new HashMap<Concept,OriginInfo>();
         Node node=debugger.getTableau().getFirstTableauNode();
         while (node!=null) {
-            NodeCreationInfo nodeCreationInfo = debugger.getNodeCreationInfo(node);
-            ExistentialConcept existentialConcept = nodeCreationInfo.m_createdByExistential;
+            NodeCreationInfo nodeCreationInfo=debugger.getNodeCreationInfo(node);
+            ExistentialConcept existentialConcept=nodeCreationInfo.m_createdByExistential;
             if (existentialConcept instanceof AtLeastConcept) {
                 Concept toConcept=((AtLeastConcept)existentialConcept).getToConcept();
                 OriginInfo originInfo=originInfos.get(toConcept);
@@ -77,19 +77,19 @@ public class OriginStatsCommand extends AbstractCommand implements DebuggerComma
         selectConsoleWindow();
     }
     public String getHelpText() {
-        CharArrayWriter buffer = new CharArrayWriter();
-        PrintWriter writer = new PrintWriter(buffer);
+        CharArrayWriter buffer=new CharArrayWriter();
+        PrintWriter writer=new PrintWriter(buffer);
         writer.println("usage: originStats");
         writer.println("Prints origin information for the nodes in the current tableau. ");
         writer.flush();
         return buffer.toString();
     }
-    
+
     protected static class OriginInfo {
         public final Concept m_concept;
         public final List<Node> m_nodes;
         public int m_numberOfNonactiveOccurrences;
-        
+
         public OriginInfo(Concept concept) {
             m_concept=concept;
             m_nodes=new ArrayList<Node>();

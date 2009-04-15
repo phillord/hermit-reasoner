@@ -38,6 +38,7 @@ import org.semanticweb.HermiT.debugger.commands.DebuggerCommand;
 import org.semanticweb.HermiT.debugger.commands.IsAncestorOfCommand;
 import org.semanticweb.HermiT.debugger.commands.NodesForCommand;
 import org.semanticweb.HermiT.debugger.commands.OriginStatsCommand;
+import org.semanticweb.HermiT.debugger.commands.ModelStatsCommand;
 import org.semanticweb.HermiT.debugger.commands.QueryCommand;
 import org.semanticweb.HermiT.debugger.commands.ReuseNodeForCommand;
 import org.semanticweb.HermiT.debugger.commands.SearchLabelCommand;
@@ -247,6 +248,8 @@ public class Debugger extends TableauMonitorForwarder {
                         commandExecutable=new NodesForCommand();
                     else if ("originstats".equals(command))
                         commandExecutable=new OriginStatsCommand();
+                    else if ("modelstats".equals(command))
+                        commandExecutable=new ModelStatsCommand();
                     else if ("singlestep".equals(command))
                         commandExecutable=new SingleStepCommand();
                     else if ("bptime".equals(command))
@@ -500,6 +503,28 @@ public class Debugger extends TableauMonitorForwarder {
             }
         });
     }
+    protected void printState() {
+        int numberOfNodes=0;
+        int inactiveNodes=0;
+        int blockedNodes=0;
+        int nodesWithExistentials=0;
+        int pendingExistentials=0;
+        Node node=m_tableau.getFirstTableauNode();
+        while (node!=null) {
+            numberOfNodes++;
+            if (!node.isActive())
+                inactiveNodes++;
+            else if (node.isBlocked())
+                blockedNodes++;
+            else {
+                if (node.hasUnprocessedExistentials())
+                    nodesWithExistentials++;
+                pendingExistentials+=node.getUnprocessedExistentials().size();
+            }
+            node=node.getNextTableauNode();
+        }
+        m_output.println("Nodes: "+numberOfNodes+"  Inactive nodes: "+inactiveNodes+"  Blocked nodes: "+blockedNodes+"  Nodes with exists: "+nodesWithExistentials+"  Pending existentials: "+pendingExistentials);
+    }
 
     public void setTableau(Tableau tableau) {
         super.setTableau(tableau);
@@ -633,28 +658,6 @@ public class Debugger extends TableauMonitorForwarder {
             m_output.println("Will check whether the datatype constraints are satisfiable.");
             mainLoop();
         }
-    }
-    protected void printState() {
-        int numberOfNodes=0;
-        int inactiveNodes=0;
-        int blockedNodes=0;
-        int nodesWithExistentials=0;
-        int pendingExistentials=0;
-        Node node=m_tableau.getFirstTableauNode();
-        while (node!=null) {
-            numberOfNodes++;
-            if (!node.isActive())
-                inactiveNodes++;
-            else if (node.isBlocked())
-                blockedNodes++;
-            else {
-                if (node.hasUnprocessedExistentials())
-                    nodesWithExistentials++;
-                pendingExistentials+=node.getUnprocessedExistentials().size();
-            }
-            node=node.getNextTableauNode();
-        }
-        m_output.println("Nodes: "+numberOfNodes+"  Inactive nodes: "+inactiveNodes+"  Blocked nodes: "+blockedNodes+"  Nodes with exists: "+nodesWithExistentials+"  Pending existentials: "+pendingExistentials);
     }
 
     public static class FactComparator implements Comparator<Object[]> {

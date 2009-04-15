@@ -11,12 +11,10 @@ import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
 
-
 public class ShowModelCommand extends AbstractCommand implements DebuggerCommand {
-    
+
     /**
-     * If no predicate is given in args, prints the whole model, otherwise 
-     * prints all assertions containing the given predicate. 
+     * If no predicate is given in args, prints the whole model, otherwise prints all assertions containing the given predicate.
      */
     public void execute() {
         Set<Object[]> facts=new TreeSet<Object[]>(FactComparator.INSTANCE);
@@ -27,8 +25,9 @@ public class ShowModelCommand extends AbstractCommand implements DebuggerCommand
                 loadFacts(facts,retrieval);
             }
             title="Current model";
-        } else {
-            DLPredicate dlPredicate = debugger.getDLPredicate(args[1]);
+        }
+        else {
+            DLPredicate dlPredicate=debugger.getDLPredicate(args[1]);
             if (dlPredicate!=null) {
                 ExtensionTable extensionTable=debugger.getTableau().getExtensionManager().getExtensionTable(dlPredicate.getArity()+1);
                 boolean[] bindings=new boolean[extensionTable.getArity()];
@@ -103,14 +102,12 @@ public class ShowModelCommand extends AbstractCommand implements DebuggerCommand
         writer.print(']');
     }
     public String getHelpText() {
-        CharArrayWriter buffer = new CharArrayWriter();
-        PrintWriter writer = new PrintWriter(buffer);
+        CharArrayWriter buffer=new CharArrayWriter();
+        PrintWriter writer=new PrintWriter(buffer);
         writer.println("usage: showModel");
         writer.println("or");
         writer.println("usage: showModel DLPredicate");
-        writer.println("If no predicate is given, prints the whole model, " +
-        		"otherwise prints all assertions containing the " +
-        		"predicate. ");
+        writer.println("If no predicate is given, prints the whole model, "+"otherwise prints all assertions containing the "+"predicate. ");
         writer.flush();
         return buffer.toString();
     }

@@ -28,7 +28,7 @@ public class SearchPairwiseBlockingCommand extends AbstractCommand implements De
         Node node=debugger.getTableau().getNode(nodeID);
         if (node!=null) {
             if (node.getNodeType()!=NodeType.TREE_NODE)
-                debugger.getOutput().println("Node "+node.getNodeID()+" is not a tree node and does not have a pair-wise "+"blocking signature.");
+                debugger.getOutput().println("Node "+node.getNodeID()+" is not a tree node and does not have a pair-wise blocking signature.");
             else {
                 CharArrayWriter buffer=new CharArrayWriter();
                 PrintWriter writer=new PrintWriter(buffer);
@@ -52,15 +52,14 @@ public class SearchPairwiseBlockingCommand extends AbstractCommand implements De
                 selectConsoleWindow();
             }
         }
-        else {
+        else
             debugger.getOutput().println("Node with ID '"+nodeID+"' not found.");
-        }
     }
     public String getHelpText() {
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter writer=new PrintWriter(buffer);
         writer.println("usage: SearchPWBlock NodeID");
-        writer.println("Prints nodes and their blocking status that have the "+"same pair-wise blocking signature of the node for "+"the given node ID. ");
+        writer.println("Prints nodes and their blocking status that have the same pair-wise blocking signature of the node for the given node ID. ");
         writer.flush();
         return buffer.toString();
     }
