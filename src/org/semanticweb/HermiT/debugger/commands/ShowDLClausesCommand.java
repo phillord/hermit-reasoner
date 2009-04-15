@@ -6,7 +6,7 @@ import java.io.PrintWriter;
 import org.semanticweb.HermiT.model.DLClause;
 
 
-public class ShowDLClausesCommand extends AbstractCommand implements ICommand {
+public class ShowDLClausesCommand extends AbstractCommand implements DebuggerCommand {
     
     /**
      * Prints the clauses from the current DLOntology. 

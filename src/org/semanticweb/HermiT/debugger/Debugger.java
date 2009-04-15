@@ -34,7 +34,7 @@ import org.semanticweb.HermiT.debugger.commands.ExitCommand;
 import org.semanticweb.HermiT.debugger.commands.ForeverCommand;
 import org.semanticweb.HermiT.debugger.commands.HelpCommand;
 import org.semanticweb.HermiT.debugger.commands.HistoryCommand;
-import org.semanticweb.HermiT.debugger.commands.ICommand;
+import org.semanticweb.HermiT.debugger.commands.DebuggerCommand;
 import org.semanticweb.HermiT.debugger.commands.IsAncestorOfCommand;
 import org.semanticweb.HermiT.debugger.commands.NodesForCommand;
 import org.semanticweb.HermiT.debugger.commands.OriginStatsCommand;
@@ -134,6 +134,49 @@ public class Debugger extends TableauMonitorForwarder {
         m_mainFrame.dispose();
         m_tableau=null;
     }
+    public Tableau getTableau() {
+        return m_tableau;
+    }
+    public PrintWriter getOutput() {
+        return m_output;
+    }
+    public JFrame getMainFrame() {
+        return m_mainFrame;
+    }
+    public String getLastCommand() {
+        return m_lastCommand;
+    }
+    public ConsoleTextArea getConsoleTextArea() {
+        return m_consoleTextArea;
+    }
+    public Prefixes getPrefixes() {
+        return m_prefixes;
+    }
+    public DerivationHistory getDerivationHistory() {
+        return m_derivationHistory;
+    }
+    public NodeCreationInfo getNodeCreationInfo(Node node) {
+        NodeCreationInfo nodeCreationInfo=m_nodeCreationInfos.get(node);
+        return nodeCreationInfo;
+    }
+    public void setBreakpointTime(int time) {
+        m_breakpointTime=time;
+    }
+    public void setInMainLoop(boolean inMainLoop) {
+        m_inMainLoop=inMainLoop;
+    }
+    public void setForever(boolean forever) {
+        m_forever=forever;
+    }
+    public void setSinglestep(boolean singlestep) {
+        m_singlestep=singlestep;
+    }
+    public boolean addWaitOption(WaitOption option) {
+        return m_waitOptions.add(option);
+    }
+    public boolean removeWaitOption(WaitOption option) {
+        return m_waitOptions.remove(option);
+    }
     public void mainLoop() {
         try {
             m_inMainLoop=true;
@@ -147,18 +190,16 @@ public class Debugger extends TableauMonitorForwarder {
                         m_output.print("# ");
                         m_output.println(commandLine);
                     }
-                    else {
+                    else
                         m_lastCommand=commandLine;
-                    }
                     String[] parsedCommand=parse(commandLine);
                     String command=parsedCommand[0].toLowerCase();
                     boolean showHelp=false;
-                    ICommand commandExecutable=new DummyCommand();
+                    DebuggerCommand commandExecutable=new DummyCommand();
                     if ("help".equals(command)) {
                         showHelp=true;
-                        if (parsedCommand.length>1) {
+                        if (parsedCommand.length>1)
                             command=parsedCommand[1].toLowerCase();
-                        }
                     }
                     if ("help".equals(command))
                         commandExecutable=new HelpCommand();
@@ -214,9 +255,8 @@ public class Debugger extends TableauMonitorForwarder {
                         commandExecutable=new WaitForCommand();
                     else
                         m_output.println("Unknown command '"+command+"'.");
-                    if (showHelp) {
+                    if (showHelp)
                         m_output.print(commandExecutable.getHelpText());
-                    }
                     else {
                         commandExecutable.setArgs(parsedCommand);
                         commandExecutable.setDebugger(this);
@@ -259,9 +299,8 @@ public class Debugger extends TableauMonitorForwarder {
         writer.print("Depth:      ");
         writer.println(node.getTreeDepth());
         writer.print("Status:     ");
-        if (node.isActive()) {
+        if (node.isActive())
             writer.println("active");
-        }
         else if (node.isMerged()) {
             Node mergeTarget=node.getMergedInto();
             while (mergeTarget!=null) {
@@ -271,28 +310,20 @@ public class Debugger extends TableauMonitorForwarder {
             }
             writer.println();
         }
-        else {
+        else
             writer.println("pruned");
-        }
         writer.print("Blocked:    ");
         writer.println(formatBlockingStatus(node));
         writer.print("Created as: ");
-        NodeCreationInfo nodeCreationInfo=this.getNodeCreationInfo(node);
+        NodeCreationInfo nodeCreationInfo=getNodeCreationInfo(node);
         ExistentialConcept startExistential=nodeCreationInfo.m_createdByExistential;
-        if (!(startExistential instanceof AtLeastConcept)) {
+        if (!(startExistential instanceof AtLeastConcept))
             writer.println("(root)");
-        }
-        else {
+        else
             writer.println(((AtLeastConcept)startExistential).getToConcept().toString(m_prefixes));
-        }
         printConceptLabel(node,writer);
         printEdges(node,writer);
     }
-    /**
-     * @param node
-     *            a node in the tableau
-     * @return "no" if node is not blocked; "directly by" plus "signature in cache" or the ID of the blocking node if the node is directly blocked; "indirectly by" plus "signature in cache" or the ID of the blocking node otherwise
-     */
     protected static String formatBlockingStatus(Node node) {
         if (!node.isBlocked())
             return "no";
@@ -363,7 +394,6 @@ public class Debugger extends TableauMonitorForwarder {
             writer.println("-- Outgoing edges --------------------------------");
             printEdgeMap(outgoingEdges,writer);
         }
-
         Map<Node,Set<AtomicRole>> incomingEdges=new TreeMap<Node,Set<AtomicRole>>(NodeComparator.INSTANCE);
         retrieval=m_tableau.getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,false,true },ExtensionTable.View.TOTAL);
         retrieval.getBindingsBuffer()[2]=node;
@@ -434,13 +464,6 @@ public class Debugger extends TableauMonitorForwarder {
             writer.println();
         }
     }
-    /**
-     * Splits a command by spaces.
-     * 
-     * @param command
-     *            The command line command
-     * @return an array of strings such that each string is a word in the given command
-     */
     protected String[] parse(String command) {
         command=command.trim();
         List<String> arguments=new ArrayList<String>();
@@ -799,50 +822,5 @@ public class Debugger extends TableauMonitorForwarder {
             m_createdByExistential=createdByExistential;
             m_children=new ArrayList<Node>(4);
         }
-    }
-    public Tableau getTableau() {
-        return m_tableau;
-    }
-    public PrintWriter getOutput() {
-        return m_output;
-    }
-    public JFrame getMainFrame() {
-        return m_mainFrame;
-    }
-    public String getLastCommand() {
-        return m_lastCommand;
-    }
-    public ConsoleTextArea getConsoleTextArea() {
-        return m_consoleTextArea;
-    }
-    public Prefixes getPrefixes() {
-        return m_prefixes;
-    }
-    public DerivationHistory getDerivationHistory() {
-        return m_derivationHistory;
-    }
-    public NodeCreationInfo getNodeCreationInfo(Node node) {
-        NodeCreationInfo nodeCreationInfo=m_nodeCreationInfos.get(node);
-        return nodeCreationInfo;
-    }
-
-    public void setBreakpointTime(int time) {
-        m_breakpointTime=time;
-    }
-    public void setInMainLoop(boolean inMainLoop) {
-        m_inMainLoop=inMainLoop;
-    }
-    public void setForever(boolean forever) {
-        this.m_forever=forever;
-    }
-    public void setSinglestep(boolean singlestep) {
-        this.m_singlestep=singlestep;
-    }
-
-    public boolean addWaitOption(WaitOption option) {
-        return this.m_waitOptions.add(option);
-    }
-    public boolean removeWaitOption(WaitOption option) {
-        return this.m_waitOptions.remove(option);
     }
 }

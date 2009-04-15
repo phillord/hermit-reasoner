@@ -4,7 +4,7 @@ import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 
 
-public class HelpCommand extends AbstractCommand implements ICommand {
+public class HelpCommand extends AbstractCommand implements DebuggerCommand {
     public void execute() {
         // do nothing
     }

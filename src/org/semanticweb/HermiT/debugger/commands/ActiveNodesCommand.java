@@ -6,7 +6,7 @@ import java.io.PrintWriter;
 import org.semanticweb.HermiT.tableau.Node;
 
 
-public class ActiveNodesCommand extends AbstractCommand implements ICommand {
+public class ActiveNodesCommand extends AbstractCommand implements DebuggerCommand {
     /**
      * Counts the number of active (non-blocked) nodes in the tableau of the 
      * debugger given to the constructor and prints their number and IDs

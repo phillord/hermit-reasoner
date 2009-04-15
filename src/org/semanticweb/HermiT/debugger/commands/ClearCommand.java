@@ -4,7 +4,7 @@ import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 
 
-public class ClearCommand extends AbstractCommand implements ICommand {
+public class ClearCommand extends AbstractCommand implements DebuggerCommand {
     
     /**
      * Clears the command screen.

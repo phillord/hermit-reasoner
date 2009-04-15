@@ -12,7 +12,7 @@ import org.semanticweb.HermiT.tableau.Node;
 
 
 
-public abstract class AbstractCommand implements ICommand {
+public abstract class AbstractCommand implements DebuggerCommand {
     protected Debugger debugger;
     protected String[] args;
     

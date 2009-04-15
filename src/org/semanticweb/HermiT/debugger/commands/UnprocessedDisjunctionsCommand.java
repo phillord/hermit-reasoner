@@ -7,7 +7,7 @@ import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.tableau.GroundDisjunction;
 
-public class UnprocessedDisjunctionsCommand extends AbstractCommand implements ICommand {
+public class UnprocessedDisjunctionsCommand extends AbstractCommand implements DebuggerCommand {
     
     /**
      * Prints a list of unprocessed ground disjunctions. 

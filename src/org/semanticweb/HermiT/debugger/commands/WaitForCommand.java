@@ -5,7 +5,7 @@ import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.debugger.Debugger.WaitOption;
 
-public class WaitForCommand extends AbstractCommand implements ICommand {
+public class WaitForCommand extends AbstractCommand implements DebuggerCommand {
     
     /**
      * Adds or removes wait options for the debugger. 

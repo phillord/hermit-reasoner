@@ -7,7 +7,7 @@ import org.semanticweb.HermiT.debugger.Printing;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.NodeType;
 
-public class SearchPairwiseBlockingCommand extends AbstractCommand implements ICommand {
+public class SearchPairwiseBlockingCommand extends AbstractCommand implements DebuggerCommand {
 
     /**
      * Tries to fetch a node ID from the arguments given to the constructor and prints nodes and their blocking status that have the same pair-wise blocking signature of the node for the given node ID.

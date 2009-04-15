@@ -17,7 +17,7 @@ import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.tableau.Node;
 
-public class OriginStatsCommand extends AbstractCommand implements ICommand {
+public class OriginStatsCommand extends AbstractCommand implements DebuggerCommand {
     
     /**
      * Prints origin information for the nodes in the current tableau. 

@@ -7,7 +7,7 @@ import org.semanticweb.HermiT.debugger.Printing;
 import org.semanticweb.HermiT.tableau.Node;
 
 
-public class SearchLabelCommand extends AbstractCommand implements ICommand {
+public class SearchLabelCommand extends AbstractCommand implements DebuggerCommand {
    
     /**
      * Tries to fetch a node ID from the arguments given to the constructor and 

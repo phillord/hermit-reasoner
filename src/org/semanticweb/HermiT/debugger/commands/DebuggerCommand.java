@@ -2,8 +2,7 @@ package org.semanticweb.HermiT.debugger.commands;
 
 import org.semanticweb.HermiT.debugger.Debugger;
 
-
-public interface ICommand {
+public interface DebuggerCommand {
     public String getHelpText();
     public void execute();
     public void setDebugger(Debugger debugger);

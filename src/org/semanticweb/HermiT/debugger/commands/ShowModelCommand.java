@@ -12,7 +12,7 @@ import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
 
 
-public class ShowModelCommand extends AbstractCommand implements ICommand {
+public class ShowModelCommand extends AbstractCommand implements DebuggerCommand {
     
     /**
      * If no predicate is given in args, prints the whole model, otherwise 

@@ -3,7 +3,7 @@ package org.semanticweb.HermiT.debugger.commands;
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 
-public class BreakpointTimeCommand extends AbstractCommand implements ICommand {
+public class BreakpointTimeCommand extends AbstractCommand implements DebuggerCommand {
 
     /**
      * Tries to fetch an integer that represents the time to the next breakpoint in seconds from the arguments given to the constructor and prints a list of nodes and their blocking status for nodes with a label equal to the label of the node with the given ID

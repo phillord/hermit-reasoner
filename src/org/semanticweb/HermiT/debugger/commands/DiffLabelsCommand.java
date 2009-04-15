@@ -7,7 +7,7 @@ import org.semanticweb.HermiT.debugger.Printing;
 import org.semanticweb.HermiT.tableau.Node;
 
 
-public class DiffLabelsCommand extends AbstractCommand implements ICommand {
+public class DiffLabelsCommand extends AbstractCommand implements DebuggerCommand {
    
     /**
      * Finds the nodes with the given IDs, then prints for both nodes the 

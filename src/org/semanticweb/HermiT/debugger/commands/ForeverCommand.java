@@ -3,7 +3,7 @@ package org.semanticweb.HermiT.debugger.commands;
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 
-public class ForeverCommand extends AbstractCommand implements ICommand {
+public class ForeverCommand extends AbstractCommand implements DebuggerCommand {
     
     /**
      * Starts expanding the tableau and does not wait for input. 

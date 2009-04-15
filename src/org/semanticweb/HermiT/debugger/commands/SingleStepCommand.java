@@ -3,7 +3,7 @@ package org.semanticweb.HermiT.debugger.commands;
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 
-public class SingleStepCommand extends AbstractCommand implements ICommand {
+public class SingleStepCommand extends AbstractCommand implements DebuggerCommand {
     
     /**
      * Set stepwise expansion to on or off.

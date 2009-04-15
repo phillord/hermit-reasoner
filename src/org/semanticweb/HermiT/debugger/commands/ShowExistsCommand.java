@@ -9,7 +9,7 @@ import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.tableau.Node;
 
 
-public class ShowExistsCommand extends AbstractCommand implements ICommand {
+public class ShowExistsCommand extends AbstractCommand implements DebuggerCommand {
     
     /**
      * Prints nodes with their unprocessed existentials and where these came 

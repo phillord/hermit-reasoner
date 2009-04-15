@@ -12,7 +12,7 @@ import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
 
 
-public class QueryCommand extends AbstractCommand implements ICommand {
+public class QueryCommand extends AbstractCommand implements DebuggerCommand {
    
     /**
      * Prints all facts for the given unary or binary predicate and node IDs. 

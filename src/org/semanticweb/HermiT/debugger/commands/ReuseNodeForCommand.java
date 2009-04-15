@@ -8,7 +8,7 @@ import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.tableau.Node;
 
-public class ReuseNodeForCommand extends AbstractCommand implements ICommand {
+public class ReuseNodeForCommand extends AbstractCommand implements DebuggerCommand {
    
     /**
      * Fetches a node ID from the arguments given to the constructor and tries 

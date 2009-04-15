@@ -6,7 +6,7 @@ import java.io.PrintWriter;
 import org.semanticweb.HermiT.tableau.Node;
 
 
-public class ShowNodeCommand extends AbstractCommand implements ICommand {
+public class ShowNodeCommand extends AbstractCommand implements DebuggerCommand {
     
     /**
      * Prints information about the node for the node ID given in args to the 

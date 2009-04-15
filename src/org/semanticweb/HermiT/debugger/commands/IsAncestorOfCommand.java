@@ -5,7 +5,7 @@ import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.tableau.Node;
 
-public class IsAncestorOfCommand extends AbstractCommand implements ICommand {
+public class IsAncestorOfCommand extends AbstractCommand implements DebuggerCommand {
 
     /**
      * Finds the nodes with the given IDs, then prints whether the node for nodeID1 is an ancestor of the node for nodeID2.

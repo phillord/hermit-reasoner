@@ -10,7 +10,7 @@ import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.tableau.Node;
 
-public class NodesForCommand extends AbstractCommand implements ICommand {
+public class NodesForCommand extends AbstractCommand implements DebuggerCommand {
 
     /**
      * Tries to fetch a concept name \"C\" from the arguments given to the constructor and

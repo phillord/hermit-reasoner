@@ -4,7 +4,7 @@ import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 
 
-public class HistoryCommand extends AbstractCommand implements ICommand {
+public class HistoryCommand extends AbstractCommand implements DebuggerCommand {
    
     /**
      * Switches the derivation history on or off. 

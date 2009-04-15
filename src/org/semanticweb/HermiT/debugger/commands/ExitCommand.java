@@ -4,7 +4,7 @@ import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 
 
-public class ExitCommand extends AbstractCommand implements ICommand {
+public class ExitCommand extends AbstractCommand implements DebuggerCommand {
    
     public ExitCommand() {
     }

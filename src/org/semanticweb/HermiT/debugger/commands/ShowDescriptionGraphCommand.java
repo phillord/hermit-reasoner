@@ -6,7 +6,7 @@ import java.io.PrintWriter;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 
 
-public class ShowDescriptionGraphCommand extends AbstractCommand implements ICommand {
+public class ShowDescriptionGraphCommand extends AbstractCommand implements DebuggerCommand {
    
     /**
      * Prints a text representation for the description graph given as an argument. 

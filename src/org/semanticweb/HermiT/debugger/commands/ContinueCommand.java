@@ -4,7 +4,7 @@ import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 
 
-public class ContinueCommand extends AbstractCommand implements ICommand {
+public class ContinueCommand extends AbstractCommand implements DebuggerCommand {
     
     /**
      * Continues the execution of the current program. 

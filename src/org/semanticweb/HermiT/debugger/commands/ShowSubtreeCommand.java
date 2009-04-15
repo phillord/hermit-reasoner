@@ -6,7 +6,7 @@ import java.io.PrintWriter;
 import org.semanticweb.HermiT.tableau.Node;
 
 
-public class ShowSubtreeCommand extends AbstractCommand implements ICommand {
+public class ShowSubtreeCommand extends AbstractCommand implements DebuggerCommand {
     
     /**
      * Prints the subtree for the node ID given in args or for the last checked 

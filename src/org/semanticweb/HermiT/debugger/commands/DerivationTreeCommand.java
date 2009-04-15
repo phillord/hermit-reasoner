@@ -8,7 +8,7 @@ import org.semanticweb.HermiT.debugger.DerivationViewer;
 import org.semanticweb.HermiT.tableau.Node;
 
 
-public class DerivationTreeCommand extends AbstractCommand implements ICommand {
+public class DerivationTreeCommand extends AbstractCommand implements DebuggerCommand {
    
     /**
      * Tries to extract \"clash\" or \"unaryPredicateURI\" and \"nodeID\" or 
