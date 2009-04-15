@@ -126,8 +126,8 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         assertContainsAll(this.getName(),clauses,
-            S("not({ \"18\"^^xsd:int })(Y) :- :A(X), :dp(X,Y)",
-              "not({ \"19\"^^xsd:int })(Y) :- :A(X), :dp(X,Y)")
+            S("not({ \"18\"^^xsd:int \"19\"^^xsd:int })(Y) :- :A(X), :dp(X,Y)"),
+            S("not({ \"19\"^^xsd:int \"18\"^^xsd:int })(Y) :- :A(X), :dp(X,Y)")
         );
     }
 
@@ -172,7 +172,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         assertContainsAll(this.getName(),clauses,
-            S(":A(X) v not(xsd:string)(Y1) :- :dp(X,Y1)")
+            S(":A(X) v not(xsd:string)(Y) :- :dp(X,Y)")
         );
     }
 
@@ -228,7 +228,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         assertContainsAll(this.getName(),clauses,
-            S(":A(X) v not(xsd:integer)(Y1) v atLeast(2 :dp xsd:integer)(X) :- :dp(X,Y1)")
+            S(":A(X) v not(xsd:integer)(Y) v atLeast(2 :dp xsd:integer)(X) :- :dp(X,Y)")
         );
     }
 

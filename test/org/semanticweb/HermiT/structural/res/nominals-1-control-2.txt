@@ -1,7 +1,0 @@
-X == Y v X == Y1 :- def:0(X), nom:i1(Y), nom:i2(Y1)
-atLeast(1 :s not(def:1))(X) :- :d(X)
-atLeast(1 :r def:0)(X) :- :c(X)
-def:1(:i1)
-def:1(:i2)
-nom:i1(:i1)
-nom:i2(:i2)

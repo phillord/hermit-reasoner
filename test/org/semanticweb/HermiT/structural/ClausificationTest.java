@@ -30,11 +30,11 @@ public class ClausificationTest extends AbstractStructuralTest {
     }
 
     public void testNominals1() throws Exception {
-        assertClausification("res/nominals-1-input.xml","res/nominals-1-control-1.txt","res/nominals-1-control-2.txt");
+        assertClausification("res/nominals-1-input.xml","res/nominals-1-control.txt",null);
     }
 
    public void testNominals2() throws Exception {
-        assertClausification("res/nominals-2-input.xml","res/nominals-2-control-1.txt","res/nominals-2-control-2.txt");
+        assertClausification("res/nominals-2-input.xml","res/nominals-2-control.txt",null);
     }
 
     public void testNominals3() throws Exception {
