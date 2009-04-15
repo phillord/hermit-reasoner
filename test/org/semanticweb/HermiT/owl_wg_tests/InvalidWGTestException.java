@@ -6,4 +6,7 @@ public class InvalidWGTestException extends Exception {
     public InvalidWGTestException(String message) {
         super(message);
     }
+    public InvalidWGTestException(String message,Throwable cause) {
+        super(message,cause);
+    }
 }

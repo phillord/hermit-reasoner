@@ -7,7 +7,6 @@ import java.io.FileWriter;
 import org.coode.owl.rdf.rdfxml.RDFXMLRenderer;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Reasoner;
-import org.semanticweb.HermiT.datatypes.UnsupportedDatatypeException;
 import org.semanticweb.HermiT.tableau.InterruptException;
 
 import org.semanticweb.owl.apibinding.OWLManager;
@@ -56,14 +55,6 @@ public abstract class AbstractTest extends TestCase {
             Runtime.getRuntime().gc();
             dumpFailureData();
             fail("Test ran out of memory.");
-        }
-        catch (AssertionError e) {
-            dumpFailureData();
-            throw e;
-        }
-        catch (UnsupportedDatatypeException e) {
-            dumpFailureData();
-            fail(e.getMessage());
         }
         catch (Throwable e) {
             dumpFailureData();

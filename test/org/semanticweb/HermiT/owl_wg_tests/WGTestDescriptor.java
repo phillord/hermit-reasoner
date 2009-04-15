@@ -196,8 +196,8 @@ public class WGTestDescriptor {
 
     public OWLOntology getPremiseOntology(OWLOntologyManager manager) throws InvalidWGTestException {
         Map<OWLDataPropertyExpression,Set<OWLConstant>> dps=testIndividual.getDataPropertyValues(testContainer);
-        for (SerializationFormat f : SerializationFormat.values()) {
-            Set<OWLConstant> premises=dps.get(f.premise);
+        for (SerializationFormat format : SerializationFormat.values()) {
+            Set<OWLConstant> premises=dps.get(format.premise);
             if (premises!=null) {
                 if (premises.size()!=1)
                     throw new InvalidWGTestException("Test "+testID+" has an incorrect number of premises.");
@@ -206,7 +206,7 @@ public class WGTestDescriptor {
                     return manager.loadOntology(source);
                 }
                 catch (OWLOntologyCreationException e) {
-                    // keep trying, maybe there is another loadable format
+                    throw new InvalidWGTestException("Invalid premise ontology.",e);
                 }
             }
         }
@@ -221,8 +221,8 @@ public class WGTestDescriptor {
 
     public OWLOntology getConclusionOntology(OWLOntologyManager manager,boolean positive) throws InvalidWGTestException {
         Map<OWLDataPropertyExpression,Set<OWLConstant>> dps=testIndividual.getDataPropertyValues(testContainer);
-        for (SerializationFormat f : SerializationFormat.values()) {
-            Set<OWLConstant> conclusions=dps.get(positive ? f.conclusion : f.nonconclusion);
+        for (SerializationFormat format : SerializationFormat.values()) {
+            Set<OWLConstant> conclusions=dps.get(positive ? format.conclusion : format.nonconclusion);
             if (conclusions!=null) {
                 if (conclusions.size()!=1)
                     throw new InvalidWGTestException("Test "+testID+" has an incorrect number of "+(positive ? "" : "non")+"conclusions.");
@@ -231,7 +231,7 @@ public class WGTestDescriptor {
                     return manager.loadOntology(source);
                 }
                 catch (OWLOntologyCreationException e) {
-                    // keep trying, maybe there is another loadable format
+                    throw new InvalidWGTestException("Invalid conclusion ontology.",e);
                 }
             }
         }
