@@ -7,19 +7,15 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
-import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.tableau.Node;
-
-
+import org.semanticweb.HermiT.debugger.Debugger;
 
 public abstract class AbstractCommand implements DebuggerCommand {
-    protected Debugger debugger;
-    protected String[] args;
-    
-    public abstract void execute();
+    protected final Debugger m_debugger;
 
-    public abstract String getHelpText();
-    
+    public AbstractCommand(Debugger debugger) {
+        m_debugger=debugger;
+    }
     protected void showTextInWindow(String string,String title) {
         JTextArea textArea=new JTextArea(string);
         textArea.setFont(Debugger.s_monospacedFont);
@@ -32,21 +28,18 @@ public abstract class AbstractCommand implements DebuggerCommand {
         frame.setLocation(100,100);
         frame.setVisible(true);
     }
-    
     protected void selectConsoleWindow() {
         SwingUtilities.invokeLater(new Runnable() {
-           public void run() {
-               if (debugger != null) debugger.getMainFrame().toFront();
-           }
+            public void run() {
+                if (m_debugger!=null)
+                    m_debugger.getMainFrame().toFront();
+            }
         });
     }
-    
     /**
-     * @param node a node in the tableau
-     * @return "no" if node is not blocked; "directly by" plus "signature in 
-     * cache" or the ID of the blocking node if the node is directly blocked; 
-     * "indirectly by" plus "signature in cache" or the ID of the blocking node 
-     * otherwise
+     * @param node
+     *            a node in the tableau
+     * @return "no" if node is not blocked; "directly by" plus "signature in cache" or the ID of the blocking node if the node is directly blocked; "indirectly by" plus "signature in cache" or the ID of the blocking node otherwise
      */
     protected static String formatBlockingStatus(Node node) {
         if (!node.isBlocked())
@@ -55,21 +48,5 @@ public abstract class AbstractCommand implements DebuggerCommand {
             return "directly by "+(node.getBlocker()==Node.CACHE_BLOCKER ? "signature in cache" : node.getBlocker().getNodeID());
         else
             return "indirectly by "+(node.getBlocker()==Node.CACHE_BLOCKER ? "signature in cache" : node.getBlocker().getNodeID());
-    }
-
-    public Debugger getDebugger() {
-        return debugger;
-    }
-
-    public void setDebugger(Debugger debugger) {
-        this.debugger = debugger;
-    }
-
-    public String[] getArgs() {
-        return args;
-    }
-
-    public void setArgs(String[] args) {
-        this.args = args;
     }
 }

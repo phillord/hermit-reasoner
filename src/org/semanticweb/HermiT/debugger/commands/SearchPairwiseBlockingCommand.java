@@ -3,18 +3,29 @@ package org.semanticweb.HermiT.debugger.commands;
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 
-import org.semanticweb.HermiT.debugger.Printing;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.NodeType;
+import org.semanticweb.HermiT.debugger.Printing;
+import org.semanticweb.HermiT.debugger.Debugger;
 
-public class SearchPairwiseBlockingCommand extends AbstractCommand implements DebuggerCommand {
+public class SearchPairwiseBlockingCommand extends AbstractCommand {
 
-    /**
-     * Tries to fetch a node ID from the arguments given to the constructor and prints nodes and their blocking status that have the same pair-wise blocking signature of the node for the given node ID.
-     */
-    public void execute() {
+    public SearchPairwiseBlockingCommand(Debugger debugger) {
+        super(debugger);
+    }
+    public String getCommandName() {
+        return "searchPWBlock";
+    }
+    public String[] getDescription() {
+        return new String[] { "nodeID","prints nodes with the same blocking signature" };
+    }
+    public void printHelp(PrintWriter writer) {
+        writer.println("usage: searchPWBlock nodeID");
+        writer.println("Prints nodes and their blocking status that have the same pair-wise blocking signature of the node for the given node ID.");
+    }
+    public void execute(String[] args) {
         if (args.length<2) {
-            debugger.getOutput().println("Node ID is missing.");
+            m_debugger.getOutput().println("Node ID is missing.");
             return;
         }
         int nodeID;
@@ -22,13 +33,13 @@ public class SearchPairwiseBlockingCommand extends AbstractCommand implements De
             nodeID=Integer.parseInt(args[1]);
         }
         catch (NumberFormatException e) {
-            debugger.getOutput().println("Invalid node ID.");
+            m_debugger.getOutput().println("Invalid node ID.");
             return;
         }
-        Node node=debugger.getTableau().getNode(nodeID);
+        Node node=m_debugger.getTableau().getNode(nodeID);
         if (node!=null) {
             if (node.getNodeType()!=NodeType.TREE_NODE)
-                debugger.getOutput().println("Node "+node.getNodeID()+" is not a tree node and does not have a pair-wise blocking signature.");
+                m_debugger.getOutput().println("Node "+node.getNodeID()+" is not a tree node and does not have a pair-wise blocking signature.");
             else {
                 CharArrayWriter buffer=new CharArrayWriter();
                 PrintWriter writer=new PrintWriter(buffer);
@@ -36,9 +47,9 @@ public class SearchPairwiseBlockingCommand extends AbstractCommand implements De
                 writer.println("===========================================");
                 writer.println("      ID    Blocked");
                 writer.println("===========================================");
-                Node searchNode=debugger.getTableau().getFirstTableauNode();
+                Node searchNode=m_debugger.getTableau().getFirstTableauNode();
                 while (searchNode!=null) {
-                    if (searchNode.getNodeType()==NodeType.TREE_NODE && node.getPositiveLabel().equals(searchNode.getPositiveLabel()) && node.getParent().getPositiveLabel().equals(searchNode.getParent().getPositiveLabel()) && node.getFromParentLabel().equals(searchNode.getFromParentLabel()) && node.getToParentLabel().equals(searchNode.getToParentLabel())) {
+                    if (searchNode.getNodeType()==NodeType.TREE_NODE&&node.getPositiveLabel().equals(searchNode.getPositiveLabel())&&node.getParent().getPositiveLabel().equals(searchNode.getParent().getPositiveLabel())&&node.getFromParentLabel().equals(searchNode.getFromParentLabel())&&node.getToParentLabel().equals(searchNode.getToParentLabel())) {
                         writer.print("  ");
                         Printing.printPadded(writer,searchNode.getNodeID(),6);
                         writer.print("    ");
@@ -53,15 +64,6 @@ public class SearchPairwiseBlockingCommand extends AbstractCommand implements De
             }
         }
         else
-            debugger.getOutput().println("Node with ID '"+nodeID+"' not found.");
+            m_debugger.getOutput().println("Node with ID '"+nodeID+"' not found.");
     }
-    public String getHelpText() {
-        CharArrayWriter buffer=new CharArrayWriter();
-        PrintWriter writer=new PrintWriter(buffer);
-        writer.println("usage: SearchPWBlock NodeID");
-        writer.println("Prints nodes and their blocking status that have the same pair-wise blocking signature of the node for the given node ID. ");
-        writer.flush();
-        return buffer.toString();
-    }
-
 }

@@ -1,10 +1,10 @@
 package org.semanticweb.HermiT.debugger.commands;
 
-import org.semanticweb.HermiT.debugger.Debugger;
+import java.io.PrintWriter;
 
 public interface DebuggerCommand {
-    public String getHelpText();
-    public void execute();
-    public void setDebugger(Debugger debugger);
-    public void setArgs(String[] args);
+    String getCommandName();
+    String[] getDescription();
+    void printHelp(PrintWriter writer);
+    void execute(String[] args);
 }

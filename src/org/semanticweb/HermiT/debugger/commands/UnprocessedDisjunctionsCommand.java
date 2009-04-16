@@ -6,18 +6,29 @@ import java.io.PrintWriter;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.tableau.GroundDisjunction;
+import org.semanticweb.HermiT.debugger.Debugger;
 
-public class UnprocessedDisjunctionsCommand extends AbstractCommand implements DebuggerCommand {
-    
-    /**
-     * Prints a list of unprocessed ground disjunctions. 
-     */
-    public void execute() {
+public class UnprocessedDisjunctionsCommand extends AbstractCommand {
+
+    public UnprocessedDisjunctionsCommand(Debugger debugger) {
+        super(debugger);
+    }
+    public String getCommandName() {
+        return "uDisjunctions";
+    }
+    public String[] getDescription() {
+        return new String[] { "","prints unprocessed ground disjunctions" };
+    }
+    public void printHelp(PrintWriter writer) {
+        writer.println("usage: uDisjunctions");
+        writer.println("Prints a list of unprocessed ground disjunctions. ");
+    }
+    public void execute(String[] args) {
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter writer=new PrintWriter(buffer);
         writer.println("Unprocessed ground disjunctions");
         writer.println("===========================================");
-        GroundDisjunction groundDisjunction=debugger.getTableau().getFirstUnprocessedGroundDisjunction();
+        GroundDisjunction groundDisjunction=m_debugger.getTableau().getFirstUnprocessedGroundDisjunction();
         while (groundDisjunction!=null) {
             for (int disjunctIndex=0;disjunctIndex<groundDisjunction.getNumberOfDisjuncts();disjunctIndex++) {
                 if (disjunctIndex!=0)
@@ -29,7 +40,7 @@ public class UnprocessedDisjunctionsCommand extends AbstractCommand implements D
                     writer.print(groundDisjunction.getArgument(disjunctIndex,1).getNodeID());
                 }
                 else {
-                    writer.print(dlPredicate.toString(debugger.getPrefixes()));
+                    writer.print(dlPredicate.toString(m_debugger.getPrefixes()));
                     writer.print('(');
                     for (int argumentIndex=0;argumentIndex<dlPredicate.getArity();argumentIndex++) {
                         if (argumentIndex!=0)
@@ -46,13 +57,4 @@ public class UnprocessedDisjunctionsCommand extends AbstractCommand implements D
         showTextInWindow(buffer.toString(),"Unprocessed ground disjunctions");
         selectConsoleWindow();
     }
-    public String getHelpText() {
-        CharArrayWriter buffer = new CharArrayWriter();
-        PrintWriter writer = new PrintWriter(buffer);
-        writer.println("usage: UDisjunctions");
-        writer.println("Prints a list of unprocessed ground disjunctions. ");
-        writer.flush();
-        return buffer.toString();
-    }
-
 }

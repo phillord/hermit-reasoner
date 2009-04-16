@@ -7,14 +7,15 @@ import java.awt.Toolkit;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
-import java.util.Set;
+import java.util.HashMap;
 import java.util.TreeMap;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.TreeSet;
 
 import javax.swing.JFrame;
@@ -24,12 +25,12 @@ import javax.swing.SwingUtilities;
 
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.debugger.commands.ActiveNodesCommand;
+import org.semanticweb.HermiT.debugger.commands.AgainCommand;
 import org.semanticweb.HermiT.debugger.commands.BreakpointTimeCommand;
 import org.semanticweb.HermiT.debugger.commands.ClearCommand;
 import org.semanticweb.HermiT.debugger.commands.ContinueCommand;
 import org.semanticweb.HermiT.debugger.commands.DerivationTreeCommand;
 import org.semanticweb.HermiT.debugger.commands.DiffLabelsCommand;
-import org.semanticweb.HermiT.debugger.commands.DummyCommand;
 import org.semanticweb.HermiT.debugger.commands.ExitCommand;
 import org.semanticweb.HermiT.debugger.commands.ForeverCommand;
 import org.semanticweb.HermiT.debugger.commands.HelpCommand;
@@ -85,6 +86,7 @@ public class Debugger extends TableauMonitorForwarder {
         GRAPH_EXPANSION,EXISTENTIAL_EXPANSION,CLASH,MERGE,DATATYPE_CHECKING
     };
 
+    protected final Map<String,DebuggerCommand> m_commandsByName;
     protected final Prefixes m_prefixes;
     protected final DerivationHistory m_derivationHistory;
     protected final ConsoleTextArea m_consoleTextArea;
@@ -106,6 +108,8 @@ public class Debugger extends TableauMonitorForwarder {
 
     public Debugger(Prefixes prefixes,boolean historyOn) {
         super(new DerivationHistory());
+        m_commandsByName=new TreeMap<String,DebuggerCommand>();
+        registerCommands();
         m_prefixes=prefixes;
         m_derivationHistory=(DerivationHistory)m_forwardingTargetMonitor;
         m_consoleTextArea=new ConsoleTextArea();
@@ -130,6 +134,42 @@ public class Debugger extends TableauMonitorForwarder {
         m_mainFrame.setVisible(true);
         m_output.println("Good morning Dr. Chandra. This is HAL. I'm ready for my first lesson.");
         m_output.println("Derivation history is "+(m_forwardingOn ? "on" : "off")+".");
+    }
+    protected void registerCommands() {
+        registerCommand(new HelpCommand(this));
+        registerCommand(new AgainCommand(this));
+        registerCommand(new ExitCommand(this));
+        registerCommand(new ContinueCommand(this));
+        registerCommand(new ClearCommand(this));
+        registerCommand(new ForeverCommand(this));
+        registerCommand(new HistoryCommand(this));
+        registerCommand(new DerivationTreeCommand(this));
+        registerCommand(new ActiveNodesCommand(this));
+        registerCommand(new IsAncestorOfCommand(this));
+        registerCommand(new UnprocessedDisjunctionsCommand(this));
+        registerCommand(new ShowExistsCommand(this));
+        registerCommand(new ShowModelCommand(this));
+        registerCommand(new ShowDLClausesCommand(this));
+        registerCommand(new ShowNodeCommand(this));
+        registerCommand(new ShowDescriptionGraphCommand(this));
+        registerCommand(new ShowSubtreeCommand(this));
+        registerCommand(new QueryCommand(this));
+        registerCommand(new SearchLabelCommand(this));
+        registerCommand(new DiffLabelsCommand(this));
+        registerCommand(new SearchPairwiseBlockingCommand(this));
+        registerCommand(new ReuseNodeForCommand(this));
+        registerCommand(new NodesForCommand(this));
+        registerCommand(new OriginStatsCommand(this));
+        registerCommand(new ModelStatsCommand(this));
+        registerCommand(new SingleStepCommand(this));
+        registerCommand(new BreakpointTimeCommand(this));
+        registerCommand(new WaitForCommand(this));
+    }
+    protected void registerCommand(DebuggerCommand command) {
+        m_commandsByName.put(command.getCommandName().toLowerCase(),command);
+    }
+    public Map<String,DebuggerCommand> getDebuggerCommands() {
+        return Collections.unmodifiableMap(m_commandsByName);
     }
     public void dispose() {
         m_mainFrame.dispose();
@@ -178,6 +218,9 @@ public class Debugger extends TableauMonitorForwarder {
     public boolean removeWaitOption(WaitOption option) {
         return m_waitOptions.remove(option);
     }
+    public DebuggerCommand getCommand(String commandName) {
+        return m_commandsByName.get(commandName.toLowerCase());
+    }
     public void mainLoop() {
         try {
             m_inMainLoop=true;
@@ -186,85 +229,7 @@ public class Debugger extends TableauMonitorForwarder {
                 String commandLine=m_input.readLine();
                 if (commandLine!=null) {
                     commandLine=commandLine.trim();
-                    if ("a".equals(commandLine)) {
-                        commandLine=m_lastCommand;
-                        m_output.print("# ");
-                        m_output.println(commandLine);
-                    }
-                    else
-                        m_lastCommand=commandLine;
-                    String[] parsedCommand=parse(commandLine);
-                    String command=parsedCommand[0].toLowerCase();
-                    boolean showHelp=false;
-                    DebuggerCommand commandExecutable=new DummyCommand();
-                    if ("help".equals(command)) {
-                        showHelp=true;
-                        if (parsedCommand.length>1)
-                            command=parsedCommand[1].toLowerCase();
-                    }
-                    if ("help".equals(command))
-                        commandExecutable=new HelpCommand();
-                    else if ("exit".equals(command) || "quit".equals(command))
-                        commandExecutable=new ExitCommand();
-                    else if ("c".equals(command) || "cont".equals(command))
-                        commandExecutable=new ContinueCommand();
-                    else if ("clear".equals(command))
-                        commandExecutable=new ClearCommand();
-                    else if ("forever".equals(command))
-                        commandExecutable=new ForeverCommand();
-                    else if ("history".equals(command))
-                        commandExecutable=new HistoryCommand();
-                    else if ("dertree".equals(command))
-                        commandExecutable=new DerivationTreeCommand();
-                    else if ("activenodes".equals(command))
-                        commandExecutable=new ActiveNodesCommand();
-                    else if ("isancof".equals(command))
-                        commandExecutable=new IsAncestorOfCommand();
-                    else if ("udisjunctions".equals(command))
-                        commandExecutable=new UnprocessedDisjunctionsCommand();
-                    else if ("showexists".equals(command))
-                        commandExecutable=new ShowExistsCommand();
-                    else if ("showmodel".equals(command))
-                        commandExecutable=new ShowModelCommand();
-                    else if ("showdlclauses".equals(command))
-                        commandExecutable=new ShowDLClausesCommand();
-                    else if ("shownode".equals(command))
-                        commandExecutable=new ShowNodeCommand();
-                    else if ("showdgraph".equals(command))
-                        commandExecutable=new ShowDescriptionGraphCommand();
-                    else if ("showsubtree".equals(command))
-                        commandExecutable=new ShowSubtreeCommand();
-                    else if ("q".equals(command) || "query".equals(command))
-                        commandExecutable=new QueryCommand();
-                    else if ("searchlabel".equals(command))
-                        commandExecutable=new SearchLabelCommand();
-                    else if ("difflabels".equals(command))
-                        commandExecutable=new DiffLabelsCommand();
-                    else if ("searchpwblock".equals(command))
-                        commandExecutable=new SearchPairwiseBlockingCommand();
-                    else if ("rnodefor".equals(command))
-                        commandExecutable=new ReuseNodeForCommand();
-                    else if ("nodesfor".equals(command))
-                        commandExecutable=new NodesForCommand();
-                    else if ("originstats".equals(command))
-                        commandExecutable=new OriginStatsCommand();
-                    else if ("modelstats".equals(command))
-                        commandExecutable=new ModelStatsCommand();
-                    else if ("singlestep".equals(command))
-                        commandExecutable=new SingleStepCommand();
-                    else if ("bptime".equals(command))
-                        commandExecutable=new BreakpointTimeCommand();
-                    else if ("waitfor".equals(command))
-                        commandExecutable=new WaitForCommand();
-                    else
-                        m_output.println("Unknown command '"+command+"'.");
-                    if (showHelp)
-                        m_output.print(commandExecutable.getHelpText());
-                    else {
-                        commandExecutable.setArgs(parsedCommand);
-                        commandExecutable.setDebugger(this);
-                        commandExecutable.execute();
-                    }
+                    processCommandLine(commandLine);
                 }
             }
             m_output.flush();
@@ -272,6 +237,18 @@ public class Debugger extends TableauMonitorForwarder {
         catch (IOException e) {
         }
         m_lastStatusMark=System.currentTimeMillis();
+    }
+    public void processCommandLine(String commandLine) {
+        String[] parsedCommand=parse(commandLine);
+        String commandName=parsedCommand[0];
+        DebuggerCommand command=getCommand(commandName);
+        if (command==null)
+            m_output.println("Unknown command '"+commandName+"'.");
+        else {
+            command.execute(parsedCommand);
+            if (!(command instanceof AgainCommand))
+                m_lastCommand=commandLine;
+        }
     }
     public DLPredicate getDLPredicate(String predicate) {
         if ("==".equals(predicate))

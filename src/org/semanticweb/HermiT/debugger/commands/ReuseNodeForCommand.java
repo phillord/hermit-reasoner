@@ -1,23 +1,31 @@
 package org.semanticweb.HermiT.debugger.commands;
 
-import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.existentials.ExpansionStrategy;
 import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.debugger.Debugger;
 
-public class ReuseNodeForCommand extends AbstractCommand implements DebuggerCommand {
-   
-    /**
-     * Fetches a node ID from the arguments given to the constructor and tries 
-     * to find the node for this ID in the tableau. If individual reuse strategy 
-     * is used, prints the concepts for which the given node is a reuse node.
-     */
-    public void execute() {
+public class ReuseNodeForCommand extends AbstractCommand {
+
+    public ReuseNodeForCommand(Debugger debugger) {
+        super(debugger);
+    }
+    public String getCommandName() {
+        return "reuseNodeFor";
+    }
+    public String[] getDescription() {
+        return new String[] { "nodeID","prints concepts for which the given node is a reuse node under individual reuse strategy" };
+    }
+    public void printHelp(PrintWriter writer) {
+        writer.println("usage: reuseNodeFor nodeID");
+        writer.println("If individual reuse strategy is used, prints the concepts for which the given node is a reuse node.");
+    }
+    public void execute(String[] args) {
         if (args.length<2) {
-            debugger.getOutput().println("Node ID is missing.");
+            m_debugger.getOutput().println("Node ID is missing.");
             return;
         }
         int nodeID;
@@ -25,40 +33,30 @@ public class ReuseNodeForCommand extends AbstractCommand implements DebuggerComm
             nodeID=Integer.parseInt(args[1]);
         }
         catch (NumberFormatException e) {
-            debugger.getOutput().println("Invalid ID of the node.");
+            m_debugger.getOutput().println("Invalid ID of the node.");
             return;
         }
-        Node node=debugger.getTableau().getNode(nodeID);
+        Node node=m_debugger.getTableau().getNode(nodeID);
         if (node==null) {
-            debugger.getOutput().println("Node with ID '"+nodeID+"' not found.");
+            m_debugger.getOutput().println("Node with ID '"+nodeID+"' not found.");
             return;
         }
-        ExpansionStrategy strategy=debugger.getTableau().getExistentialsExpansionStrategy();
+        ExpansionStrategy strategy=m_debugger.getTableau().getExistentialsExpansionStrategy();
         if (strategy instanceof IndividualReuseStrategy) {
             IndividualReuseStrategy reuseStrategy=(IndividualReuseStrategy)strategy;
             AtomicConcept conceptForNode=reuseStrategy.getConceptForNode(node);
-            debugger.getOutput().print("Node '");
-            debugger.getOutput().print(node.getNodeID());
-            debugger.getOutput().print("' is ");
+            m_debugger.getOutput().print("Node '");
+            m_debugger.getOutput().print(node.getNodeID());
+            m_debugger.getOutput().print("' is ");
             if (conceptForNode==null)
-                debugger.getOutput().println("not a reuse node for any concept.");
+                m_debugger.getOutput().println("not a reuse node for any concept.");
             else {
-                debugger.getOutput().print("a reuse node for the '");
-                debugger.getOutput().print(conceptForNode.toString(debugger.getPrefixes()));
-                debugger.getOutput().println("' concept.");
+                m_debugger.getOutput().print("a reuse node for the '");
+                m_debugger.getOutput().print(conceptForNode.toString(m_debugger.getPrefixes()));
+                m_debugger.getOutput().println("' concept.");
             }
         }
         else
-            debugger.getOutput().println("Node reuse strategy is not currently in effect.");
+            m_debugger.getOutput().println("Node reuse strategy is not currently in effect.");
     }
-    public String getHelpText() {
-        CharArrayWriter buffer = new CharArrayWriter();
-        PrintWriter writer = new PrintWriter(buffer);
-        writer.println("usage: reuseNodeFor nodeID");
-        writer.println("If individual reuse strategy is used, prints the " +
-        		"concepts for which the given node is a reuse node. ");
-        writer.flush();
-        return buffer.toString();
-    }
-
 }

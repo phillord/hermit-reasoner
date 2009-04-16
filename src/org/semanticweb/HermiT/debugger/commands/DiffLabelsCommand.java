@@ -5,18 +5,28 @@ import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.debugger.Printing;
 import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.debugger.Debugger;
 
+public class DiffLabelsCommand extends AbstractCommand {
 
-public class DiffLabelsCommand extends AbstractCommand implements DebuggerCommand {
-   
-    /**
-     * Finds the nodes with the given IDs, then prints for both nodes the 
-     * (positive) concepts that are in the label of one, but not in the label of 
-     * the other node.
-     */
-    public void execute() {
+    public DiffLabelsCommand(Debugger debugger) {
+        super(debugger);
+    }
+    public String getCommandName() {
+        return "diffLabels";
+    }
+    public String[] getDescription() {
+        return new String[] { "nodeID1 nodeID2","compares the node labels" };
+    }
+    public void printHelp(PrintWriter writer) {
+        writer.println("usage: diffLabels nodeID1 nodeID2");
+        writer.print("Finds the nodes with the given IDs, then prints ");
+        writer.print("for both nodes the (positive) concepts that are in ");
+        writer.println("the label of one, but not in the label of the other node.");
+    }
+    public void execute(String[] args) {
         if (args.length<3) {
-            debugger.getOutput().println("Node IDs are missing.");
+            m_debugger.getOutput().println("Node IDs are missing.");
             return;
         }
         int nodeID1;
@@ -24,7 +34,7 @@ public class DiffLabelsCommand extends AbstractCommand implements DebuggerComman
             nodeID1=Integer.parseInt(args[1]);
         }
         catch (NumberFormatException e) {
-            debugger.getOutput().println("Invalid ID of the first node.");
+            m_debugger.getOutput().println("Invalid ID of the first node.");
             return;
         }
         int nodeID2;
@@ -32,49 +42,27 @@ public class DiffLabelsCommand extends AbstractCommand implements DebuggerComman
             nodeID2=Integer.parseInt(args[2]);
         }
         catch (NumberFormatException e) {
-            debugger.getOutput().println("Invalid ID of the second node.");
+            m_debugger.getOutput().println("Invalid ID of the second node.");
             return;
         }
-        Node node1=debugger.getTableau().getNode(nodeID1);
-        Node node2=debugger.getTableau().getNode(nodeID2);
+        Node node1=m_debugger.getTableau().getNode(nodeID1);
+        Node node2=m_debugger.getTableau().getNode(nodeID2);
         if (node1==null) {
-            debugger.getOutput().println("Node with ID '" + nodeID1 + 
-                    "' not found.");
+            m_debugger.getOutput().println("Node with ID '"+nodeID1+"' not found.");
             return;
         }
         if (node2==null) {
-            debugger.getOutput().println("Node with ID '" + nodeID2 + 
-                    "' not found.");
+            m_debugger.getOutput().println("Node with ID '"+nodeID2+"' not found.");
             return;
         }
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter writer=new PrintWriter(buffer);
-        writer.println("Differences in labels of node " + node1.getNodeID() + 
-                " and " + node2.getNodeID());
+        writer.println("Differences in labels of node "+node1.getNodeID()+" and "+node2.getNodeID());
         writer.println("===========================================");
-        Printing.diffCollections(
-            "Concepts in the label of " + node1.getNodeID() + 
-            " but not in the label of " + node2.getNodeID(),
-            "Concepts in the label of " + node2.getNodeID() + 
-            " but not in the label of " + node1.getNodeID(),
-            writer, node1.getPositiveLabel(), node2.getPositiveLabel());
+        Printing.diffCollections("Concepts in the label of "+node1.getNodeID()+" but not in the label of "+node2.getNodeID(),"Concepts in the label of "+node2.getNodeID()+" but not in the label of "+node1.getNodeID(),writer,node1.getPositiveLabel(),node2.getPositiveLabel());
         writer.println("===========================================");
         writer.flush();
-        showTextInWindow(buffer.toString(), 
-                "Differences in labels of node " + node1.getNodeID() + " and " + 
-                node2.getNodeID());
+        showTextInWindow(buffer.toString(),"Differences in labels of node "+node1.getNodeID()+" and "+node2.getNodeID());
         selectConsoleWindow();
     }
-    public String getHelpText() {
-        CharArrayWriter buffer = new CharArrayWriter();
-        PrintWriter writer = new PrintWriter(buffer);
-        writer.println("usage: diffLabels nodeID1 nodeID2");
-        writer.println("Finds the nodes with the given IDs, then prints " +
-        	       "for both nodes the (positive) concepts that are in " +
-        	       "the label of one, but not in the label of the other " +
-        	       "node.");
-        writer.flush();
-        return buffer.toString();
-    }
-
 }

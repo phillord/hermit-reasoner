@@ -4,40 +4,48 @@ import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.debugger.Printing;
-import org.semanticweb.HermiT.debugger.Debugger.NodeCreationInfo;
 import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.debugger.Debugger;
 
-public class NodesForCommand extends AbstractCommand implements DebuggerCommand {
+public class NodesForCommand extends AbstractCommand {
 
-    /**
-     * Tries to fetch a concept name \"C\" from the arguments given to the constructor and
-     * prints a list of nodes and their blocking status for
-     * nodes that have been created by a concept of the form (atleast n r.C)
-     */
-    public void execute() {
+    public NodesForCommand(Debugger debugger) {
+        super(debugger);
+    }
+    public String getCommandName() {
+        return "nodesFor";
+    }
+    public String[] getDescription() {
+        return new String[] { "conceptName","prints nodes that have been created by (atleast n r.conceptName)" };
+    }
+    public void printHelp(PrintWriter writer) {
+        writer.println("usage: nodesFor conceptName");
+        writer.println("Creates a concept \"C\" from conceptName, finds all nodes that have been created by a concept (atleast n r.C) and prints them and whether they are active or not.");
+    }
+    public void execute(String[] args) {
         if (args.length<2) {
-            debugger.getOutput().println("Concept name is missing.");
+            m_debugger.getOutput().println("Concept name is missing.");
             return;
         }
         String conceptName=args[1];
-        AtomicConcept atomicConcept=AtomicConcept.create(debugger.getPrefixes().expandAbbreviatedURI(conceptName));
+        AtomicConcept atomicConcept=AtomicConcept.create(m_debugger.getPrefixes().expandAbbreviatedURI(conceptName));
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter writer=new PrintWriter(buffer);
         writer.println("Nodes for '"+conceptName+"'");
         writer.println("====================================================================");
         int index=0;
-        Node node=debugger.getTableau().getFirstTableauNode();
+        Node node=m_debugger.getTableau().getFirstTableauNode();
         while (node!=null) {
-            NodeCreationInfo nodeCreationInfo=debugger.getNodeCreationInfo(node);
+            Debugger.NodeCreationInfo nodeCreationInfo=m_debugger.getNodeCreationInfo(node);
             ExistentialConcept existentialConcept=nodeCreationInfo.m_createdByExistential;
             if (existentialConcept instanceof AtLeastConcept) {
                 if (((AtLeastConcept)existentialConcept).getToConcept().equals(atomicConcept)) {
                     if (index!=0) {
                         writer.print(",");
-                        if (index % 5==0)
+                        if (index%5==0)
                             writer.println();
                         else
                             writer.print("  ");
@@ -54,13 +62,4 @@ public class NodesForCommand extends AbstractCommand implements DebuggerCommand 
         showTextInWindow(buffer.toString(),"Nodes for '"+conceptName+"'");
         selectConsoleWindow();
     }
-    public String getHelpText() {
-        CharArrayWriter buffer=new CharArrayWriter();
-        PrintWriter writer=new PrintWriter(buffer);
-        writer.println("usage: nodesFor conceptName");
-        writer.println("Creates a concept \"C\" from conceptName, finds all nodes that have been created by a concept (atleast n r.C) and prints them and whether they are active or not.");
-        writer.flush();
-        return buffer.toString();
-    }
-
 }

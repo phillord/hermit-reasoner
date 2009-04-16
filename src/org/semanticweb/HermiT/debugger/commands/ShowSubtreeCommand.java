@@ -1,44 +1,42 @@
 package org.semanticweb.HermiT.debugger.commands;
 
-import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.debugger.Debugger;
 
+public class ShowSubtreeCommand extends AbstractCommand {
 
-public class ShowSubtreeCommand extends AbstractCommand implements DebuggerCommand {
-    
-    /**
-     * Prints the subtree for the node ID given in args or for the last checked 
-     * node if no nodeID is in args[1].  
-     */
-    public void execute() {
-        Node subtreeRoot=debugger.getTableau().getCheckedNode();
+    public ShowSubtreeCommand(Debugger debugger) {
+        super(debugger);
+    }
+    public String getCommandName() {
+        return "showSubtree";
+    }
+    public String[] getDescription() {
+        return new String[] { "[nodeID]","prints the subtree for the last checked node or nodeID if given" };
+    }
+    public void printHelp(PrintWriter writer) {
+        writer.println("usage: showSubtree [nodeID]");
+        writer.println("Prints the subtree for the node with ID nodeID or for the last checked node if no nodeID is given.");
+    }
+    public void execute(String[] args) {
+        Node subtreeRoot=m_debugger.getTableau().getCheckedNode();
         if (args.length>=2) {
             int nodeID;
             try {
                 nodeID=Integer.parseInt(args[1]);
             }
             catch (NumberFormatException e) {
-                debugger.getOutput().println("Invalid ID of the first node.");
+                m_debugger.getOutput().println("Invalid ID of the first node.");
                 return;
             }
-            subtreeRoot=debugger.getTableau().getNode(nodeID);
+            subtreeRoot=m_debugger.getTableau().getNode(nodeID);
             if (subtreeRoot==null) {
-                debugger.getOutput().println("Node with ID '"+nodeID+"' not found.");
+                m_debugger.getOutput().println("Node with ID '"+nodeID+"' not found.");
                 return;
             }
         }
-        new SubtreeViewer(debugger, subtreeRoot);
+        new SubtreeViewer(m_debugger,subtreeRoot);
     }
-    public String getHelpText() {
-        CharArrayWriter buffer = new CharArrayWriter();
-        PrintWriter writer = new PrintWriter(buffer);
-        writer.println("usage: showSubtree [nodeID]");
-        writer.println("Prints the subtree for the node with ID nodeID or for " +
-        		"the last checked node if no nodeID is given.");
-        writer.flush();
-        return buffer.toString();
-    }
-
 }

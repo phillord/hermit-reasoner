@@ -1,18 +1,28 @@
 package org.semanticweb.HermiT.debugger.commands;
 
-import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.debugger.Debugger;
 
-public class IsAncestorOfCommand extends AbstractCommand implements DebuggerCommand {
+public class IsAncestorOfCommand extends AbstractCommand {
 
-    /**
-     * Finds the nodes with the given IDs, then prints whether the node for nodeID1 is an ancestor of the node for nodeID2.
-     */
-    public void execute() {
+    public IsAncestorOfCommand(Debugger debugger) {
+        super(debugger);
+    }
+    public String getCommandName() {
+        return "isAncOf";
+    }
+    public String[] getDescription() {
+        return new String[] { "nodeID1 nodeID2","tests whether nodeID1 is an ancestor of nodeID2" };
+    }
+    public void printHelp(PrintWriter writer) {
+        writer.println("usage: isAncOf nodeID1 nodeID2");
+        writer.println("Finds the nodes with the given IDs, then prints whether the node for nodeID1 is an ancestor of the node for nodeID2.");
+    }
+    public void execute(String[] args) {
         if (args.length<3) {
-            debugger.getOutput().println("Node IDs are missing.");
+            m_debugger.getOutput().println("Node IDs are missing.");
             return;
         }
         int nodeID1;
@@ -20,7 +30,7 @@ public class IsAncestorOfCommand extends AbstractCommand implements DebuggerComm
             nodeID1=Integer.parseInt(args[1]);
         }
         catch (NumberFormatException e) {
-            debugger.getOutput().println("Invalid ID of the first node.");
+            m_debugger.getOutput().println("Invalid ID of the first node.");
             return;
         }
         int nodeID2;
@@ -28,28 +38,20 @@ public class IsAncestorOfCommand extends AbstractCommand implements DebuggerComm
             nodeID2=Integer.parseInt(args[2]);
         }
         catch (NumberFormatException e) {
-            debugger.getOutput().println("Invalid ID of the second node.");
+            m_debugger.getOutput().println("Invalid ID of the second node.");
             return;
         }
-        Node node1=debugger.getTableau().getNode(nodeID1);
-        Node node2=debugger.getTableau().getNode(nodeID2);
+        Node node1=m_debugger.getTableau().getNode(nodeID1);
+        Node node2=m_debugger.getTableau().getNode(nodeID2);
         if (node1==null) {
-            debugger.getOutput().println("Node with ID '"+nodeID1+"' not found.");
+            m_debugger.getOutput().println("Node with ID '"+nodeID1+"' not found.");
             return;
         }
         if (node2==null) {
-            debugger.getOutput().println("Node with ID '"+nodeID2+"' not found.");
+            m_debugger.getOutput().println("Node with ID '"+nodeID2+"' not found.");
             return;
         }
         boolean result=node1.isAncestorOf(node2);
-        debugger.getOutput().print("Node "+node1.getNodeID()+" is "+(result ? "" : "not ")+"an ancestor of node "+node2.getNodeID()+".");
-    }
-    public String getHelpText() {
-        CharArrayWriter buffer=new CharArrayWriter();
-        PrintWriter writer=new PrintWriter(buffer);
-        writer.println("usage: isAncOf nodeID1 nodeID2");
-        writer.println("Finds the nodes with the given IDs, then prints "+"whether the node for nodeID1 is an ancestor of the "+"node for nodeID2. ");
-        writer.flush();
-        return buffer.toString();
+        m_debugger.getOutput().print("Node "+node1.getNodeID()+" is "+(result ? "" : "not ")+"an ancestor of node "+node2.getNodeID()+".");
     }
 }

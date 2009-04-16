@@ -5,36 +5,56 @@ import java.io.PrintWriter;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.semanticweb.HermiT.debugger.Debugger.FactComparator;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.debugger.Debugger;
 
+public class QueryCommand extends AbstractCommand {
 
-public class QueryCommand extends AbstractCommand implements DebuggerCommand {
-   
-    /**
-     * Prints all facts for the given unary or binary predicate and node IDs. 
-     * DLPredicate and nodeID can be replaced with ? for unrestricted querying. 
-     * q can be used instead of query.
-     */
-    public void execute() {
+    public QueryCommand(Debugger debugger) {
+        super(debugger);
+    }
+    public String getCommandName() {
+        return "query";
+    }
+    public String[] getDescription() {
+        return new String[] {
+            "","prints whether there is a clash",
+            "+C|$DG|? nodeID|?","prints facts for C - concept, DG - decr. graph, ? any unary predicate",
+            "==|!=|-R|? nodeID|? nodeID|?","prints facts for R-role, ? any binary predicate"
+        };
+    }
+    public void printHelp(PrintWriter writer) {
+        writer.println("usage: query");
+        writer.println("Prints whether there is a clash or not.");
+        writer.println("or");
+        writer.println("usage: query unaryPredicate nodeID");
+        writer.println("or");
+        writer.println("usage: query binaryPredicate nodeID nodeID");
+        writer.print("Prints all facts for the given unary or binary ");
+        writer.print("predicate and node IDs. DLPredicate and ");
+        writer.print("nodeID can be replaced with ? for unrestricted ");
+        writer.println("querying. q can be used instead of query.");
+    }
+    public void execute(String[] args) {
         Object[] tuple=new Object[args.length-1];
         if (tuple.length==0) {
             // no further argument, so just check for a clash
-            if (debugger.getTableau().getExtensionManager().containsClash())
-                debugger.getOutput().println("Tableau currently contains a clash.");
+            if (m_debugger.getTableau().getExtensionManager().containsClash())
+                m_debugger.getOutput().println("Tableau currently contains a clash.");
             else
-                debugger.getOutput().println("Tableau currently does not contain a clash.");
-        } else {
+                m_debugger.getOutput().println("Tableau currently does not contain a clash.");
+        }
+        else {
             // further query arguments
             if ("?".equals(args[1]))
                 tuple[0]=null;
             else {
-                tuple[0] = debugger.getDLPredicate(args[1]);
+                tuple[0]=m_debugger.getDLPredicate(args[1]);
                 if (tuple[0]==null) {
-                    debugger.getOutput().println("Invalid predicate '"+args[1]+"'.");
+                    m_debugger.getOutput().println("Invalid predicate '"+args[1]+"'.");
                     return;
                 }
             }
@@ -49,12 +69,12 @@ public class QueryCommand extends AbstractCommand implements DebuggerCommand {
                         nodeID=Integer.parseInt(nodeIDString);
                     }
                     catch (NumberFormatException e) {
-                        debugger.getOutput().println("Invalid node ID.");
+                        m_debugger.getOutput().println("Invalid node ID.");
                         return;
                     }
-                    tuple[index]=debugger.getTableau().getNode(nodeID);
+                    tuple[index]=m_debugger.getTableau().getNode(nodeID);
                     if (tuple[index]==null) {
-                        debugger.getOutput().println("Node with ID '"+nodeID+"' not found.");
+                        m_debugger.getOutput().println("Node with ID '"+nodeID+"' not found.");
                         return;
                     }
                 }
@@ -63,11 +83,11 @@ public class QueryCommand extends AbstractCommand implements DebuggerCommand {
             for (int index=0;index<tuple.length;index++)
                 if (tuple[index]!=null)
                     boundPositions[index]=true;
-            ExtensionTable extensionTable=debugger.getTableau().getExtensionManager().getExtensionTable(tuple.length);
+            ExtensionTable extensionTable=m_debugger.getTableau().getExtensionManager().getExtensionTable(tuple.length);
             ExtensionTable.Retrieval retrieval=extensionTable.createRetrieval(boundPositions,ExtensionTable.View.TOTAL);
             System.arraycopy(tuple,0,retrieval.getBindingsBuffer(),0,tuple.length);
             retrieval.open();
-            Set<Object[]> facts=new TreeSet<Object[]>(FactComparator.INSTANCE);
+            Set<Object[]> facts=new TreeSet<Object[]>(Debugger.FactComparator.INSTANCE);
             Object[] tupleBuffer=retrieval.getTupleBuffer();
             while (!retrieval.afterLast()) {
                 facts.add(tupleBuffer.clone());
@@ -76,7 +96,7 @@ public class QueryCommand extends AbstractCommand implements DebuggerCommand {
             CharArrayWriter buffer=new CharArrayWriter();
             PrintWriter writer=new PrintWriter(buffer);
             writer.println("===========================================");
-            StringBuffer queryName=new StringBuffer("Query: ");
+            StringBuffer queryName=new StringBuffer("Query:");
             writer.print("Query:");
             for (int index=1;index<args.length;index++) {
                 writer.print(' ');
@@ -100,9 +120,9 @@ public class QueryCommand extends AbstractCommand implements DebuggerCommand {
     protected void printFact(Object[] fact,PrintWriter writer) {
         Object dlPredicate=fact[0];
         if (dlPredicate instanceof Concept)
-            writer.print(((Concept)dlPredicate).toString(debugger.getPrefixes()));
+            writer.print(((Concept)dlPredicate).toString(m_debugger.getPrefixes()));
         else if (dlPredicate instanceof DLPredicate)
-            writer.print(((DLPredicate)dlPredicate).toString(debugger.getPrefixes()));
+            writer.print(((DLPredicate)dlPredicate).toString(m_debugger.getPrefixes()));
         else
             throw new IllegalStateException("Internal error: invalid predicate.");
         writer.print('[');
@@ -113,22 +133,4 @@ public class QueryCommand extends AbstractCommand implements DebuggerCommand {
         }
         writer.print(']');
     }
-    public String getHelpText() {
-        CharArrayWriter buffer = new CharArrayWriter();
-        PrintWriter writer = new PrintWriter(buffer);
-        writer.println("usage: query");
-        writer.println("Prints whether there is a clash or not. ");
-        writer.println("or");
-        writer.println("usage: query unaryPredicate nodeID");
-        writer.println("or");
-        writer.println("usage: query binaryPredicate nodeID nodeID");
-        writer.println("Prints all facts for the given unary or binary " +
-        		"predicate and node IDs. DLPredicate and " +
-        		"nodeID can be replaced with ? for unrestricted " +
-        		"querying. q can be used instead of query. ");
-        writer.println("");
-        writer.flush();
-        return buffer.toString();
-    }
-
 }

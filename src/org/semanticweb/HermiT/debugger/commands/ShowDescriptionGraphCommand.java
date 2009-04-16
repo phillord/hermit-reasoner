@@ -4,20 +4,30 @@ import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.model.DescriptionGraph;
+import org.semanticweb.HermiT.debugger.Debugger;
 
+public class ShowDescriptionGraphCommand extends AbstractCommand {
 
-public class ShowDescriptionGraphCommand extends AbstractCommand implements DebuggerCommand {
-   
-    /**
-     * Prints a text representation for the description graph given as an argument. 
-     */
-    public void execute() {
+    public ShowDescriptionGraphCommand(Debugger debugger) {
+        super(debugger);
+    }
+    public String getCommandName() {
+        return "showDGraph";
+    }
+    public String[] getDescription() {
+        return new String[] { "graphName","prints a text representation for the description graph graphName" };
+    }
+    public void printHelp(PrintWriter writer) {
+        writer.println("usage: showDGraph graphName");
+        writer.println("Prints a text representation for the description graph named graphName. ");
+    }
+    public void execute(String[] args) {
         if (args.length<2) {
-            debugger.getOutput().println("Graph name is missing.");
+            m_debugger.getOutput().println("Graph name is missing.");
             return;
         }
         String graphName=args[1];
-        for (DescriptionGraph descriptionGraph : debugger.getTableau().getDLOntology().getAllDescriptionGraphs())
+        for (DescriptionGraph descriptionGraph : m_debugger.getTableau().getDLOntology().getAllDescriptionGraphs())
             if (descriptionGraph.getName().equals(graphName)) {
                 CharArrayWriter buffer=new CharArrayWriter();
                 PrintWriter writer=new PrintWriter(buffer);
@@ -30,16 +40,6 @@ public class ShowDescriptionGraphCommand extends AbstractCommand implements Debu
                 selectConsoleWindow();
                 return;
             }
-        debugger.getOutput().println("Graph '"+graphName+"' not found.");
+        m_debugger.getOutput().println("Graph '"+graphName+"' not found.");
     }
-    public String getHelpText() {
-        CharArrayWriter buffer = new CharArrayWriter();
-        PrintWriter writer = new PrintWriter(buffer);
-        writer.println("usage: showDGraph graphName");
-        writer.println("Prints a text representation for the description " +
-        		"graph named graphName. ");
-        writer.flush();
-        return buffer.toString();
-    }
-
 }

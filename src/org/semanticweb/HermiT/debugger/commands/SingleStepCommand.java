@@ -1,38 +1,39 @@
 package org.semanticweb.HermiT.debugger.commands;
 
-import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 
-public class SingleStepCommand extends AbstractCommand implements DebuggerCommand {
-    
-    /**
-     * Set stepwise expansion to on or off.
-     */
-    public void execute() {
+import org.semanticweb.HermiT.debugger.Debugger;
+
+public class SingleStepCommand extends AbstractCommand {
+
+    public SingleStepCommand(Debugger debugger) {
+        super(debugger);
+    }
+    public String getCommandName() {
+        return "singleStep";
+    }
+    public String[] getDescription() {
+        return new String[] { "on|off","step by step mode on or off" };
+    }
+    public void printHelp(PrintWriter writer) {
+        writer.println("usage: singleStep on|off");
+        writer.println("Expands the tableau step by step if on and continuously if off.");
+    }
+    public void execute(String[] args) {
         if (args.length<2) {
-            debugger.getOutput().println("The status is missing.");
+            m_debugger.getOutput().println("The status is missing.");
             return;
         }
         String status=args[1].toLowerCase();
         if ("on".equals(status)) {
-            debugger.setSinglestep(true);
-            debugger.getOutput().println("Single step mode on.");
+            m_debugger.setSinglestep(true);
+            m_debugger.getOutput().println("Single step mode on.");
         }
         else if ("off".equals(status)) {
-            debugger.setSinglestep(false);
-            debugger.getOutput().println("Single step mode off.");
+            m_debugger.setSinglestep(false);
+            m_debugger.getOutput().println("Single step mode off.");
         }
         else
-            debugger.getOutput().println("Incorrect single step mode '"+status+"'.");
+            m_debugger.getOutput().println("Incorrect single step mode '"+status+"'.");
     }
-    public String getHelpText() {
-        CharArrayWriter buffer = new CharArrayWriter();
-        PrintWriter writer = new PrintWriter(buffer);
-        writer.println("usage: singleStep on|off");
-        writer.println("Expands the tableau step by step if on and " +
-        		"continuously if off. ");
-        writer.flush();
-        return buffer.toString();
-    }
-
 }

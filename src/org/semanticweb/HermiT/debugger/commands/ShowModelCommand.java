@@ -10,32 +10,48 @@ import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.debugger.Debugger;
 
-public class ShowModelCommand extends AbstractCommand implements DebuggerCommand {
+public class ShowModelCommand extends AbstractCommand {
 
-    /**
-     * If no predicate is given in args, prints the whole model, otherwise prints all assertions containing the given predicate.
-     */
-    public void execute() {
+    public ShowModelCommand(Debugger debugger) {
+        super(debugger);
+    }
+    public String getCommandName() {
+        return "showModel";
+    }
+    public String[] getDescription() {
+        return new String[] {
+            "","prints all assertions",
+            "predicate","prints all assertions for the given predicate"
+        };
+    }
+    public void printHelp(PrintWriter writer) {
+        writer.println("usage: showModel");
+        writer.println("or");
+        writer.println("usage: showModel DLPredicate");
+        writer.println("If no predicate is given, prints the whole model, otherwise prints all assertions containing the predicate. ");
+    }
+    public void execute(String[] args) {
         Set<Object[]> facts=new TreeSet<Object[]>(FactComparator.INSTANCE);
         String title;
         if (args.length<2) {
-            for (ExtensionTable extensionTable : debugger.getTableau().getExtensionManager().getExtensionTables()) {
+            for (ExtensionTable extensionTable : m_debugger.getTableau().getExtensionManager().getExtensionTables()) {
                 ExtensionTable.Retrieval retrieval=extensionTable.createRetrieval(new boolean[extensionTable.getArity()],ExtensionTable.View.TOTAL);
                 loadFacts(facts,retrieval);
             }
             title="Current model";
         }
         else {
-            DLPredicate dlPredicate=debugger.getDLPredicate(args[1]);
+            DLPredicate dlPredicate=m_debugger.getDLPredicate(args[1]);
             if (dlPredicate!=null) {
-                ExtensionTable extensionTable=debugger.getTableau().getExtensionManager().getExtensionTable(dlPredicate.getArity()+1);
+                ExtensionTable extensionTable=m_debugger.getTableau().getExtensionManager().getExtensionTable(dlPredicate.getArity()+1);
                 boolean[] bindings=new boolean[extensionTable.getArity()];
                 bindings[0]=true;
                 ExtensionTable.Retrieval retrieval=extensionTable.createRetrieval(bindings,ExtensionTable.View.TOTAL);
                 retrieval.getBindingsBuffer()[0]=dlPredicate;
                 loadFacts(facts,retrieval);
-                title="Assertions containing the predicate '"+debugger.getPrefixes().abbreviateURI(dlPredicate.toString())+"'.";
+                title="Assertions containing the predicate '"+m_debugger.getPrefixes().abbreviateURI(dlPredicate.toString())+"'.";
             }
             else {
                 int nodeID;
@@ -43,15 +59,15 @@ public class ShowModelCommand extends AbstractCommand implements DebuggerCommand
                     nodeID=Integer.parseInt(args[1]);
                 }
                 catch (NumberFormatException e) {
-                    debugger.getOutput().println("Invalid ID of the node.");
+                    m_debugger.getOutput().println("Invalid ID of the node.");
                     return;
                 }
-                Node node=debugger.getTableau().getNode(nodeID);
+                Node node=m_debugger.getTableau().getNode(nodeID);
                 if (node==null) {
-                    debugger.getOutput().println("Node with ID '"+nodeID+"' not found.");
+                    m_debugger.getOutput().println("Node with ID '"+nodeID+"' not found.");
                     return;
                 }
-                for (ExtensionTable extensionTable : debugger.getTableau().getExtensionManager().getExtensionTables())
+                for (ExtensionTable extensionTable : m_debugger.getTableau().getExtensionManager().getExtensionTables())
                     for (int position=0;position<extensionTable.getArity();position++) {
                         boolean[] bindings=new boolean[extensionTable.getArity()];
                         bindings[position]=true;
@@ -88,9 +104,9 @@ public class ShowModelCommand extends AbstractCommand implements DebuggerCommand
     protected void printFact(Object[] fact,PrintWriter writer) {
         Object dlPredicate=fact[0];
         if (dlPredicate instanceof Concept)
-            writer.print(((Concept)dlPredicate).toString(debugger.getPrefixes()));
+            writer.print(((Concept)dlPredicate).toString(m_debugger.getPrefixes()));
         else if (dlPredicate instanceof DLPredicate)
-            writer.print(((DLPredicate)dlPredicate).toString(debugger.getPrefixes()));
+            writer.print(((DLPredicate)dlPredicate).toString(m_debugger.getPrefixes()));
         else
             throw new IllegalStateException("Internal error: invalid predicate.");
         writer.print('[');
@@ -101,15 +117,4 @@ public class ShowModelCommand extends AbstractCommand implements DebuggerCommand
         }
         writer.print(']');
     }
-    public String getHelpText() {
-        CharArrayWriter buffer=new CharArrayWriter();
-        PrintWriter writer=new PrintWriter(buffer);
-        writer.println("usage: showModel");
-        writer.println("or");
-        writer.println("usage: showModel DLPredicate");
-        writer.println("If no predicate is given, prints the whole model, "+"otherwise prints all assertions containing the "+"predicate. ");
-        writer.flush();
-        return buffer.toString();
-    }
-
 }

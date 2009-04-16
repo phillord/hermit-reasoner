@@ -4,17 +4,26 @@ import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.debugger.Debugger;
 
+public class ShowNodeCommand extends AbstractCommand {
 
-public class ShowNodeCommand extends AbstractCommand implements DebuggerCommand {
-    
-    /**
-     * Prints information about the node for the node ID given in args to the 
-     * constructor. 
-     */
-    public void execute() {
+    public ShowNodeCommand(Debugger debugger) {
+        super(debugger);
+    }
+    public String getCommandName() {
+        return "showNode";
+    }
+    public String[] getDescription() {
+        return new String[] { "nodeID","prints information about the given node" };
+    }
+    public void printHelp(PrintWriter writer) {
+        writer.println("usage: showNode nodeID");
+        writer.println("Prints information about the node for the given node ID.");
+    }
+    public void execute(String[] args) {
         if (args.length<2) {
-            debugger.getOutput().println("Node ID is missing.");
+            m_debugger.getOutput().println("Node ID is missing.");
             return;
         }
         int nodeID;
@@ -22,29 +31,19 @@ public class ShowNodeCommand extends AbstractCommand implements DebuggerCommand 
             nodeID=Integer.parseInt(args[1]);
         }
         catch (NumberFormatException e) {
-            debugger.getOutput().println("Invalid ID of the first node.");
+            m_debugger.getOutput().println("Invalid ID of the first node.");
             return;
         }
-        Node node=debugger.getTableau().getNode(nodeID);
+        Node node=m_debugger.getTableau().getNode(nodeID);
         if (node==null) {
-            debugger.getOutput().println("Node with ID '"+nodeID+"' not found.");
+            m_debugger.getOutput().println("Node with ID '"+nodeID+"' not found.");
             return;
         }
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter writer=new PrintWriter(buffer);
-        debugger.printNodeData(node,writer);
+        m_debugger.printNodeData(node,writer);
         writer.flush();
         showTextInWindow(buffer.toString(),"Node '"+node.getNodeID()+"'");
         selectConsoleWindow();
     }
-    public String getHelpText() {
-        CharArrayWriter buffer = new CharArrayWriter();
-        PrintWriter writer = new PrintWriter(buffer);
-        writer.println("usage: showNode nodeID");
-        writer.println("Prints information about the node for the given node " +
-        		"ID. ");
-        writer.flush();
-        return buffer.toString();
-    }
-
 }

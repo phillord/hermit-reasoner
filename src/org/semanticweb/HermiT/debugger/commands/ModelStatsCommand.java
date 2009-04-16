@@ -4,18 +4,29 @@ import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.debugger.Debugger;
 
-public class ModelStatsCommand extends AbstractCommand implements DebuggerCommand {
+public class ModelStatsCommand extends AbstractCommand {
 
-    /**
-     * Prints statistics about the current model.
-     */
-    public void execute() {
+    public ModelStatsCommand(Debugger debugger) {
+        super(debugger);
+    }
+    public String getCommandName() {
+        return "modelStats";
+    }
+    public String[] getDescription() {
+        return new String[] { "","prints statistics about a model" };
+    }
+    public void printHelp(PrintWriter writer) {
+        writer.println("usage: modelStats");
+        writer.println("Prints the statistics about the current model.");
+    }
+    public void execute(String[] args) {
         int noNodes=0;
         int noUnblockedNodes=0;
         int noDirectlyBlockedNodes=0;
         int noIndirectlyBlockedNodes=0;
-        Node node=debugger.getTableau().getFirstTableauNode();
+        Node node=m_debugger.getTableau().getFirstTableauNode();
         while (node!=null) {
             noNodes++;
             if (node.isDirectlyBlocked())
@@ -38,13 +49,5 @@ public class ModelStatsCommand extends AbstractCommand implements DebuggerComman
         writer.flush();
         showTextInWindow(buffer.toString(),"Model statistics");
         selectConsoleWindow();
-    }
-    public String getHelpText() {
-        CharArrayWriter buffer=new CharArrayWriter();
-        PrintWriter writer=new PrintWriter(buffer);
-        writer.println("usage: modelStats");
-        writer.println("Prints the statistics about the current model. ");
-        writer.flush();
-        return buffer.toString();
     }
 }

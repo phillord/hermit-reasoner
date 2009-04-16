@@ -9,24 +9,33 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.semanticweb.HermiT.debugger.Debugger;
-import org.semanticweb.HermiT.debugger.Printing;
-import org.semanticweb.HermiT.debugger.Debugger.NodeCreationInfo;
 import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.debugger.Debugger;
+import org.semanticweb.HermiT.debugger.Printing;
 
-public class OriginStatsCommand extends AbstractCommand implements DebuggerCommand {
+public class OriginStatsCommand extends AbstractCommand {
 
-    /**
-     * Prints origin information for the nodes in the current tableau.
-     */
-    public void execute() {
+    public OriginStatsCommand(Debugger debugger) {
+        super(debugger);
+    }
+    public String getCommandName() {
+        return "originStats";
+    }
+    public String[] getDescription() {
+        return new String[] { "","prints origin information for nodes in the tableau" };
+    }
+    public void printHelp(PrintWriter writer) {
+        writer.println("usage: originStats");
+        writer.println("Prints origin information for the nodes in the current tableau. ");
+    }
+    public void execute(String[] args) {
         Map<Concept,OriginInfo> originInfos=new HashMap<Concept,OriginInfo>();
-        Node node=debugger.getTableau().getFirstTableauNode();
+        Node node=m_debugger.getTableau().getFirstTableauNode();
         while (node!=null) {
-            NodeCreationInfo nodeCreationInfo=debugger.getNodeCreationInfo(node);
+            Debugger.NodeCreationInfo nodeCreationInfo=m_debugger.getNodeCreationInfo(node);
             ExistentialConcept existentialConcept=nodeCreationInfo.m_createdByExistential;
             if (existentialConcept instanceof AtLeastConcept) {
                 Concept toConcept=((AtLeastConcept)existentialConcept).getToConcept();
@@ -56,7 +65,7 @@ public class OriginStatsCommand extends AbstractCommand implements DebuggerComma
             writer.print("    ");
             Printing.printPadded(writer,originInfo.m_numberOfNonactiveOccurrences,8);
             writer.print("    ");
-            writer.print(originInfo.m_concept.toString(debugger.getPrefixes()));
+            writer.print(originInfo.m_concept.toString(m_debugger.getPrefixes()));
             if (originInfo.m_nodes.size()<=5) {
                 writer.print("  [ ");
                 for (int index=0;index<originInfo.m_nodes.size();index++) {
@@ -75,14 +84,6 @@ public class OriginStatsCommand extends AbstractCommand implements DebuggerComma
         writer.flush();
         showTextInWindow(buffer.toString(),"Statistics of node origins");
         selectConsoleWindow();
-    }
-    public String getHelpText() {
-        CharArrayWriter buffer=new CharArrayWriter();
-        PrintWriter writer=new PrintWriter(buffer);
-        writer.println("usage: originStats");
-        writer.println("Prints origin information for the nodes in the current tableau. ");
-        writer.flush();
-        return buffer.toString();
     }
 
     protected static class OriginInfo {
