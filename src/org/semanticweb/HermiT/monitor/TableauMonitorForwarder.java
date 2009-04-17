@@ -9,6 +9,7 @@ import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
+import org.semanticweb.HermiT.tableau.DatatypeManager;
 import org.semanticweb.HermiT.tableau.GroundDisjunction;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
@@ -21,6 +22,12 @@ public class TableauMonitorForwarder implements TableauMonitor,Serializable {
 
     public TableauMonitorForwarder(TableauMonitor forwardingTargetMontior) {
         m_forwardingTargetMonitor=forwardingTargetMontior;
+    }
+    public boolean isForwardingOn() {
+        return m_forwardingOn;
+    }
+    public void setForwardingOn(boolean forwardingOn) {
+        m_forwardingOn=forwardingOn;
     }
     public void setTableau(Tableau tableau) {
         m_forwardingTargetMonitor.setTableau(tableau);
@@ -113,17 +120,17 @@ public class TableauMonitorForwarder implements TableauMonitor,Serializable {
         if (m_forwardingOn)
             m_forwardingTargetMonitor.mergeFinished(mergeFrom,mergeInto);
     }
-    public void mergeGraphsStarted(Object[] graph1,Object[] graph2,int position) {
+    public void clashDetectionStarted(Object[]... tuples) {
         if (m_forwardingOn)
-            m_forwardingTargetMonitor.mergeGraphsStarted(graph1,graph2,position);
+            m_forwardingTargetMonitor.clashDetectionStarted(tuples);
     }
-    public void mergeGraphsFinished(Object[] graph1,Object[] graph2,int position) {
+    public void clashDetectionFinished(Object[]... tuples) {
         if (m_forwardingOn)
-            m_forwardingTargetMonitor.mergeGraphsFinished(graph1,graph2,position);
+            m_forwardingTargetMonitor.clashDetectionFinished(tuples);
     }
-    public void clashDetected(Object[]... causes) {
+    public void clashDetected() {
         if (m_forwardingOn)
-            m_forwardingTargetMonitor.clashDetected(causes);
+            m_forwardingTargetMonitor.clashDetected();
     }
     public void backtrackToStarted(BranchingPoint newCurrentBrancingPoint) {
         if (m_forwardingOn)
@@ -197,6 +204,14 @@ public class TableauMonitorForwarder implements TableauMonitor,Serializable {
         if (m_forwardingOn)
             m_forwardingTargetMonitor.nominalIntorductionFinished(rootNode,treeNode,atMostRoleGuard);
     }
+    public void descriptionGraphCheckingStarted(int graphIndex1,int tupleIndex1,int position1,int graphIndex2,int tupleIndex2,int position2) {
+        if (m_forwardingOn)
+            m_forwardingTargetMonitor.descriptionGraphCheckingStarted(graphIndex1,tupleIndex1,position1,graphIndex2,tupleIndex2,position2);
+    }
+    public void descriptionGraphCheckingFinished(int graphIndex1,int tupleIndex1,int position1,int graphIndex2,int tupleIndex2,int position2) {
+        if (m_forwardingOn)
+            m_forwardingTargetMonitor.descriptionGraphCheckingFinished(graphIndex1,tupleIndex1,position1,graphIndex2,tupleIndex2,position2);
+    }
     public void nodeCreated(Node node) {
         if (m_forwardingOn)
             m_forwardingTargetMonitor.nodeCreated(node);
@@ -213,11 +228,12 @@ public class TableauMonitorForwarder implements TableauMonitor,Serializable {
         if (m_forwardingOn)
             m_forwardingTargetMonitor.datatypeCheckingFinished(result);
     }
-    public boolean isForwardingOn() {
-        return m_forwardingOn;
+    public void datatypeConjunctionCheckingStarted(DatatypeManager.DConjunction conjunction) {
+        if (m_forwardingOn)
+            m_forwardingTargetMonitor.datatypeConjunctionCheckingStarted(conjunction);
     }
-    public void setForwardingOn(boolean forwardingOn) {
-        m_forwardingOn = forwardingOn;
+    public void datatypeConjunctionCheckingFinished(DatatypeManager.DConjunction conjunction,boolean result) {
+        if (m_forwardingOn)
+            m_forwardingTargetMonitor.datatypeConjunctionCheckingFinished(conjunction,result);
     }
-    
 }

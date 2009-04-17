@@ -10,6 +10,7 @@ import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.GroundDisjunction;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
+import org.semanticweb.HermiT.tableau.DatatypeManager;
 
 public interface TableauMonitor {
     void setTableau(Tableau tableau);
@@ -35,9 +36,9 @@ public interface TableauMonitor {
     void mergeFactStarted(Node mergeFrom,Node mergeInto,Object[] sourceTuple,Object[] targetTuple);
     void mergeFactFinished(Node mergeFrom,Node mergeInto,Object[] sourceTuple,Object[] targetTuple);
     void mergeFinished(Node mergeFrom,Node mergeInto);
-    void mergeGraphsStarted(Object[] graph1,Object[] graph2,int position);
-    void mergeGraphsFinished(Object[] graph1,Object[] graph2,int position);
-    void clashDetected(Object[]... causes);
+    void clashDetectionStarted(Object[]... tuples);
+    void clashDetectionFinished(Object[]... tuples);
+    void clashDetected();
     void backtrackToStarted(BranchingPoint newCurrentBrancingPoint);
     void tupleRemoved(Object[] tuple);
     void backtrackToFinished(BranchingPoint newCurrentBrancingPoint);
@@ -56,8 +57,12 @@ public interface TableauMonitor {
     void existentialSatisfied(ExistentialConcept existentialConcept,Node forNode);
     void nominalIntorductionStarted(Node rootNode,Node treeNode,AtMostGuard atMostRoleGuard);
     void nominalIntorductionFinished(Node rootNode,Node treeNode,AtMostGuard atMostRoleGuard);
+    void descriptionGraphCheckingStarted(int graphIndex1,int tupleIndex1,int position1,int graphIndex2,int tupleIndex2,int position2);
+    void descriptionGraphCheckingFinished(int graphIndex1,int tupleIndex1,int position1,int graphIndex2,int tupleIndex2,int position2);
     void nodeCreated(Node node);
     void nodeDestroyed(Node node);
     void datatypeCheckingStarted();
     void datatypeCheckingFinished(boolean result);
+    void datatypeConjunctionCheckingStarted(DatatypeManager.DConjunction conjunction);
+    void datatypeConjunctionCheckingFinished(DatatypeManager.DConjunction conjunction,boolean result);
 }

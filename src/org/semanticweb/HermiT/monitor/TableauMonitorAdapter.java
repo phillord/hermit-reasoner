@@ -9,6 +9,7 @@ import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
+import org.semanticweb.HermiT.tableau.DatatypeManager;
 import org.semanticweb.HermiT.tableau.GroundDisjunction;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
@@ -67,11 +68,11 @@ public class TableauMonitorAdapter implements TableauMonitor,Serializable  {
     }
     public void mergeFinished(Node mergeFrom,Node mergeInto) {
     }
-    public void mergeGraphsStarted(Object[] graph1,Object[] graph2,int position) {
+    public void clashDetectionStarted(Object[]... tuples) {
     }
-    public void mergeGraphsFinished(Object[] graph1,Object[] graph2,int position) {
+    public void clashDetectionFinished(Object[]... tuples) {
     }
-    public void clashDetected(Object[]... causes) {
+    public void clashDetected() {
     }
     public void backtrackToStarted(BranchingPoint newCurrentBrancingPoint) {
     }
@@ -109,6 +110,10 @@ public class TableauMonitorAdapter implements TableauMonitor,Serializable  {
     }
     public void nominalIntorductionFinished(Node rootNode,Node treeNode,AtMostGuard atMostRoleGuard) {
     }
+    public void descriptionGraphCheckingStarted(int graphIndex1,int tupleIndex1,int position1,int graphIndex2,int tupleIndex2,int position2) {
+    }
+    public void descriptionGraphCheckingFinished(int graphIndex1,int tupleIndex1,int position1,int graphIndex2,int tupleIndex2,int position2) {
+    }
     public void nodeCreated(Node node) {
     }
     public void nodeDestroyed(Node node) {
@@ -116,5 +121,9 @@ public class TableauMonitorAdapter implements TableauMonitor,Serializable  {
     public void datatypeCheckingStarted() {
     }
     public void datatypeCheckingFinished(boolean result) {
+    }
+    public void datatypeConjunctionCheckingStarted(DatatypeManager.DConjunction conjunction) {
+    }
+    public void datatypeConjunctionCheckingFinished(DatatypeManager.DConjunction conjunction,boolean result) {
     }
 }

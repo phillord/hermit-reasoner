@@ -250,10 +250,8 @@ public final class ExistentialExpansionManager implements Serializable {
                 m_tableau.m_tableauMonitor.existentialExpansionStarted(atLeastConcept,forNode);
             DependencySet existentialDependencySet=m_extensionManager.getConceptAssertionDependencySet(atLeastConcept,forNode);
             m_extensionManager.setClash(existentialDependencySet);
-            if (m_tableau.m_tableauMonitor!=null) {
-                m_tableau.m_tableauMonitor.clashDetected(new Object[] { atLeastConcept,forNode });
+            if (m_tableau.m_tableauMonitor!=null)
                 m_tableau.m_tableauMonitor.existentialExpansionFinished(atLeastConcept,forNode);
-            }
             return true;
         }
         return false;

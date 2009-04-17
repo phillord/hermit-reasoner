@@ -174,11 +174,18 @@ public class DatatypeManager implements Serializable {
                 m_unionDependencySet.clearConstituents();
                 m_unionDependencySet.addConstituent(m_extensionManager.getAssertionDependencySet(variable.m_mostSpecificRestriction,variable.m_node));
                 m_unionDependencySet.addConstituent(m_extensionManager.getAssertionDependencySet(datatypeRestriction,variable.m_node));
+                Object[] tuple1;
+                Object[] tuple2;
+                if (m_tableauMonitor!=null) {
+                    tuple1=new Object[] { variable.m_mostSpecificRestriction,variable.m_node };
+                    tuple2=new Object[] { datatypeRestriction,variable.m_node };
+                    m_tableauMonitor.clashDetectionStarted(tuple1,tuple2);
+                }
                 m_extensionManager.setClash(m_unionDependencySet);
                 if (m_tableauMonitor!=null) {
-                    Object[] tuple1=new Object[] { variable.m_mostSpecificRestriction,variable.m_node };
-                    Object[] tuple2=new Object[] { datatypeRestriction,variable.m_node };
-                    m_tableauMonitor.clashDetected(tuple1,tuple2);
+                    tuple1=new Object[] { variable.m_mostSpecificRestriction,variable.m_node };
+                    tuple2=new Object[] { datatypeRestriction,variable.m_node };
+                    m_tableauMonitor.clashDetectionFinished(tuple1,tuple2);
                 }
             }
             else if (DatatypeRegistry.isSubsetOf(datatypeRestriction.getDatatypeURI(),variable.m_mostSpecificRestriction.getDatatypeURI()))
@@ -203,6 +210,8 @@ public class DatatypeManager implements Serializable {
             throw new IllegalStateException("Internal error: invalid data range.");
     }
     protected void checkConjunctionSatisfiability() {
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.datatypeConjunctionCheckingStarted(m_conjunction);
         List<DVariable> activeNodes=m_conjunction.m_activeVariables;
         for (int index=activeNodes.size()-1;!m_extensionManager.containsClash() && index>=0;--index) {
             DVariable variable=activeNodes.get(index);
@@ -220,6 +229,8 @@ public class DatatypeManager implements Serializable {
                 checkAssignments();
             }
         }
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.datatypeConjunctionCheckingFinished(m_conjunction,!m_extensionManager.containsClash());
     }
     protected void normalizeAsEnumeration(DVariable variable) {
         variable.m_hasExplicitDataValues=true;
@@ -370,8 +381,6 @@ public class DatatypeManager implements Serializable {
         m_unionDependencySet.clearConstituents();
         loadAssertionDependencySets(variable);
         m_extensionManager.setClash(m_unionDependencySet);
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.clashDetected();
     }
     protected void setClashFor(List<DVariable> variables) {
         m_unionDependencySet.clearConstituents();
@@ -385,8 +394,6 @@ public class DatatypeManager implements Serializable {
             }
         }
         m_extensionManager.setClash(m_unionDependencySet);
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.clashDetected();
     }
     protected void loadAssertionDependencySets(DVariable variable) {
         Node node=variable.m_node;
@@ -585,6 +592,9 @@ public class DatatypeManager implements Serializable {
             }
             else
                 return true;
+        }
+        public Node getNode() {
+            return m_node;
         }
         public List<DataValueEnumeration> getPositiveDataValueEnumerations() {
             return Collections.unmodifiableList(m_positiveDataValueEnumerations);

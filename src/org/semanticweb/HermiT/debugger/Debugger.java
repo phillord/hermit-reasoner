@@ -353,8 +353,8 @@ public class Debugger extends TableauMonitorForwarder {
             m_lastStatusMark=System.currentTimeMillis();
         }
     }
-    public void clashDetected(Object[]... causes) {
-        super.clashDetected(causes);
+    public void clashDetected() {
+        super.clashDetected();
         if (m_waitOptions.contains(WaitOption.CLASH)) {
             m_forever=false;
             m_output.println("Clash detected.");

@@ -9,6 +9,7 @@ import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
+import org.semanticweb.HermiT.tableau.DatatypeManager;
 import org.semanticweb.HermiT.tableau.GroundDisjunction;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
@@ -115,17 +116,17 @@ public class TableauMonitorFork implements TableauMonitor,Serializable  {
         m_first.mergeFinished(mergeFrom,mergeInto);
         m_second.mergeFinished(mergeFrom,mergeInto);
     }
-    public void mergeGraphsStarted(Object[] graph1,Object[] graph2,int position) {
-        m_first.mergeGraphsStarted(graph1,graph2,position);
-        m_second.mergeGraphsStarted(graph1,graph2,position);
+    public void clashDetectionStarted(Object[]... tuples) {
+        m_first.clashDetectionStarted(tuples);
+        m_second.clashDetectionStarted(tuples);
     }
-    public void mergeGraphsFinished(Object[] graph1,Object[] graph2,int position) {
-        m_first.mergeGraphsFinished(graph1,graph2,position);
-        m_second.mergeGraphsFinished(graph1,graph2,position);
+    public void clashDetectionFinished(Object[]... tuples) {
+        m_first.clashDetectionFinished(tuples);
+        m_second.clashDetectionFinished(tuples);
     }
-    public void clashDetected(Object[]... causes) {
-        m_first.clashDetected(causes);
-        m_second.clashDetected(causes);
+    public void clashDetected() {
+        m_first.clashDetected();
+        m_second.clashDetected();
     }
     public void backtrackToStarted(BranchingPoint newCurrentBrancingPoint) {
         m_first.backtrackToStarted(newCurrentBrancingPoint);
@@ -199,6 +200,14 @@ public class TableauMonitorFork implements TableauMonitor,Serializable  {
         m_first.nominalIntorductionFinished(rootNode,treeNode,atMostRoleGuard);
         m_second.nominalIntorductionFinished(rootNode,treeNode,atMostRoleGuard);
     }
+    public void descriptionGraphCheckingStarted(int graphIndex1,int tupleIndex1,int position1,int graphIndex2,int tupleIndex2,int position2) {
+        m_first.descriptionGraphCheckingStarted(graphIndex1,tupleIndex1,position1,graphIndex2,tupleIndex2,position2);
+        m_second.descriptionGraphCheckingStarted(graphIndex1,tupleIndex1,position1,graphIndex2,tupleIndex2,position2);
+    }
+    public void descriptionGraphCheckingFinished(int graphIndex1,int tupleIndex1,int position1,int graphIndex2,int tupleIndex2,int position2) {
+        m_first.descriptionGraphCheckingFinished(graphIndex1,tupleIndex1,position1,graphIndex2,tupleIndex2,position2);
+        m_second.descriptionGraphCheckingFinished(graphIndex1,tupleIndex1,position1,graphIndex2,tupleIndex2,position2);
+    }
     public void nodeCreated(Node node) {
         m_first.nodeCreated(node);
         m_second.nodeCreated(node);
@@ -214,5 +223,13 @@ public class TableauMonitorFork implements TableauMonitor,Serializable  {
     public void datatypeCheckingFinished(boolean result) {
         m_first.datatypeCheckingFinished(result);
         m_second.datatypeCheckingFinished(result);
+    }
+    public void datatypeConjunctionCheckingStarted(DatatypeManager.DConjunction conjunction) {
+        m_first.datatypeConjunctionCheckingStarted(conjunction);
+        m_second.datatypeConjunctionCheckingStarted(conjunction);
+    }
+    public void datatypeConjunctionCheckingFinished(DatatypeManager.DConjunction conjunction,boolean result) {
+        m_first.datatypeConjunctionCheckingFinished(conjunction,result);
+        m_second.datatypeConjunctionCheckingFinished(conjunction,result);
     }
 }

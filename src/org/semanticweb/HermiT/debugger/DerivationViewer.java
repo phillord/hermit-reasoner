@@ -159,7 +159,7 @@ public class DerivationViewer extends JFrame {
     protected static final Icon DLCLAUSE_APPLICATION_ICON=new TextIcon(Color.YELLOW,Color.BLACK,"R",s_font);
     protected static final Icon DISJUNCT_APPLICATION_ICON=new TextIcon(Color.CYAN,Color.BLACK,"D",s_font);
     protected static final Icon MERGING_ICON=new TextIcon(Color.BLUE,Color.WHITE,"M",s_font);
-    protected static final Icon GRAPH_MERGING_ICON=new TextIcon(Color.DARK_GRAY,Color.WHITE,"G",s_font);
+    protected static final Icon GRAPH_CHECKING_ICON=new TextIcon(Color.DARK_GRAY,Color.WHITE,"G",s_font);
     protected static final Icon CLASH_DETECTION_ICON=new TextIcon(Color.BLACK,Color.WHITE,"G",s_font);
     protected static final Icon EXISTENTIAL_EXPANSION_ICON=new TextIcon(Color.RED,Color.WHITE,"E",s_font);
     protected static final Icon BASE_FACT_ICON=new TextIcon(Color.MAGENTA,Color.WHITE,"B",s_font);
@@ -179,8 +179,8 @@ public class DerivationViewer extends JFrame {
                 setIcon(DISJUNCT_APPLICATION_ICON);
             else if (derivation instanceof DerivationHistory.Merging)
                 setIcon(MERGING_ICON);
-            else if (derivation instanceof DerivationHistory.GraphMerging)
-                setIcon(GRAPH_MERGING_ICON);
+            else if (derivation instanceof DerivationHistory.GraphChecking)
+                setIcon(GRAPH_CHECKING_ICON);
             else if (derivation instanceof DerivationHistory.ClashDetection)
                 setIcon(CLASH_DETECTION_ICON);
             else if (derivation instanceof DerivationHistory.ExistentialExpansion)

@@ -145,6 +145,8 @@ public final class ExtensionManager implements Serializable {
         m_clashDependencySet=m_dependencySetFactory.getPermanent(clashDependencySet);
         if (m_clashDependencySet!=null)
             m_dependencySetFactory.addUsage(m_clashDependencySet);
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.clashDetected();
     }
     public DependencySet getClashDependencySet() {
         return m_clashDependencySet;

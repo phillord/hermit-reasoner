@@ -77,15 +77,23 @@ public final class DescriptionGraphManager implements Serializable {
         }
         m_occurrenceManager.clear();
     }
+    public Object[] getDescriptionGraphTuple(int graphIndex,int tupleIndex) {
+        DescriptionGraph descriptionGraph=m_descriptionGraphsByIndex[graphIndex];
+        ExtensionTable extensionTable=m_extensionTablesByIndex[graphIndex];
+        Object[] tuple=new Object[descriptionGraph.getNumberOfVertices()+1];
+        extensionTable.retrieveTuple(tuple,tupleIndex);
+        return tuple;
+    }
     public boolean checkGraphConstraints() {
         if (m_hasDescriptionGraphs) {
             boolean hasChange=false;
-            for (ExtensionTable.Retrieval retrieval : m_deltaOldRetrievals) {
+            for (int retrievalIndex=0;retrievalIndex<m_deltaOldRetrievals.length && !m_extensionManager.containsClash();retrievalIndex++) {
+                ExtensionTable.Retrieval retrieval=m_deltaOldRetrievals[retrievalIndex];
                 ExtensionTable extensionTable=retrieval.getExtensionTable();
                 retrieval.open();
                 Object[] tupleBuffer=retrieval.getTupleBuffer();
                 int arity=tupleBuffer.length;
-                while (!retrieval.afterLast()) {
+                while (!retrieval.afterLast() && !m_extensionManager.containsClash()) {
                     if (tupleBuffer[0] instanceof DescriptionGraph) {
                         int thisGraphIndex=m_descriptionGraphIndices.get(tupleBuffer[0]).intValue();
                         int thisTupleIndex=retrieval.getCurrentTupleIndex();
@@ -99,22 +107,14 @@ public final class DescriptionGraphManager implements Serializable {
                                 if (thisGraphIndex==graphIndex && (thisTupleIndex!=tupleIndex || thisPositionInTuple!=positionInTuple) && extensionTable.isTupleActive(tupleIndex)) {
                                     m_binaryUnionDependencySet.m_dependencySets[0]=retrieval.getDependencySet();
                                     m_binaryUnionDependencySet.m_dependencySets[1]=extensionTable.getDependencySet(tupleIndex);
+                                    if (m_tableauMonitor!=null)
+                                        m_tableauMonitor.descriptionGraphCheckingStarted(thisGraphIndex,thisTupleIndex,thisPositionInTuple,graphIndex,tupleIndex,positionInTuple);
                                     if (thisPositionInTuple==positionInTuple) {
                                         for (int mergePosition=arity-1;mergePosition>=1;--mergePosition) {
                                             Node nodeFirst=(Node)extensionTable.getTupleObject(thisTupleIndex,mergePosition);
                                             Node nodeSecond=(Node)extensionTable.getTupleObject(tupleIndex,mergePosition);
                                             if (nodeFirst!=nodeSecond) {
-                                                if (m_tableauMonitor==null)
-                                                    m_mergingManager.mergeNodes(nodeFirst,nodeSecond,m_binaryUnionDependencySet);
-                                                else {
-                                                    Object[] graph1=m_auxiliaryTuples1[thisGraphIndex];
-                                                    extensionTable.retrieveTuple(graph1,thisTupleIndex);
-                                                    Object[] graph2=m_auxiliaryTuples2[graphIndex];
-                                                    extensionTable.retrieveTuple(graph2,tupleIndex);
-                                                    m_tableauMonitor.mergeGraphsStarted(graph1,graph2,mergePosition);
-                                                    m_mergingManager.mergeNodes(nodeFirst,nodeSecond,m_binaryUnionDependencySet);
-                                                    m_tableauMonitor.mergeGraphsFinished(graph1,graph2,mergePosition);
-                                                }
+                                                m_mergingManager.mergeNodes(nodeFirst,nodeSecond,m_binaryUnionDependencySet);
                                                 hasChange=true;
                                             }
                                             m_interruptFlag.checkInterrupt();
@@ -122,15 +122,10 @@ public final class DescriptionGraphManager implements Serializable {
                                     }
                                     else {
                                         m_extensionManager.setClash(m_binaryUnionDependencySet);
-                                        if (m_tableauMonitor!=null) {
-                                            Object[] graph1=m_auxiliaryTuples1[thisGraphIndex];
-                                            extensionTable.retrieveTuple(graph1,thisTupleIndex);
-                                            Object[] graph2=m_auxiliaryTuples2[graphIndex];
-                                            extensionTable.retrieveTuple(graph2,tupleIndex);
-                                            m_tableauMonitor.clashDetected(graph1,graph2);
-                                        }
-                                        return true;
+                                        hasChange=true;
                                     }
+                                    if (m_tableauMonitor!=null)
+                                        m_tableauMonitor.descriptionGraphCheckingFinished(thisGraphIndex,thisTupleIndex,thisPositionInTuple,graphIndex,tupleIndex,positionInTuple);
                                 }
                                 listNode=m_occurrenceManager.getListNodeComponent(listNode,OccurrenceManager.NEXT_NODE);
                                 m_interruptFlag.checkInterrupt();

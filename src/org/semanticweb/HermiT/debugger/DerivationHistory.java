@@ -2,7 +2,8 @@
 package org.semanticweb.HermiT.debugger;
 
 import java.io.Serializable;
-
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Stack;
@@ -61,25 +62,17 @@ public class DerivationHistory extends TableauMonitorAdapter {
     public void mergeFinished(Node nodeFrom,Node nodeInto) {
         m_mergeAtoms.pop();
     }
-    public void mergeGraphsStarted(Object[] graph1,Object[] graph2,int position) {
-        Atom graphAtom1=getAtom(graph1);
-        Atom graphAtom2=getAtom(graph2);
-        m_derivations.add(new GraphMerging(graphAtom1,graphAtom2,position));
+    public void clashDetectionStarted(Object[]... tuples) {
+        DerivationPremise[] atoms=new DerivationPremise[tuples.length];
+        for (int index=0;index<tuples.length;index++)
+            atoms[index]=new DerivationPremise(getAtom(tuples[index]));
+        m_derivations.push(new ClashDetection(atoms));
     }
-    public void mergeGraphsFinished(Object[] graph1,Object[] graph2,int position) {
+    public void clashDetectionFinished(Object[]... tuples) {
         m_derivations.pop();
     }
-    public void clashDetected(Object[]... causes) {
-        if (causes==null)
-            addAtom(EMPTY_TUPLE);
-        else {
-            DerivationPremise[] atoms=new DerivationPremise[causes.length];
-            for (int index=0;index<causes.length;index++)
-                atoms[index]=new DerivationPremise(getAtom(causes[index]));
-            m_derivations.push(new ClashDetection(atoms));
-            addAtom(EMPTY_TUPLE);
-            m_derivations.pop();
-        }
+    public void clashDetected() {
+        addAtom(EMPTY_TUPLE);
     }
     public void tupleRemoved(Object[] tuple) {
         m_derivedAtoms.remove(new AtomKey(tuple));
@@ -103,6 +96,36 @@ public class DerivationHistory extends TableauMonitorAdapter {
         m_derivations.push(new ExistentialExpansion(existentialAtom));
     }
     public void existentialExpansionFinished(ExistentialConcept existentialConcept,Node forNode) {
+        m_derivations.pop();
+    }
+    public void descriptionGraphCheckingStarted(int graphIndex1,int tupleIndex1,int position1,int graphIndex2,int tupleIndex2,int position2) {
+        Atom graph1=getAtom(m_tableau.getDescriptionGraphManager().getDescriptionGraphTuple(graphIndex1,tupleIndex1));
+        Atom graph2=getAtom(m_tableau.getDescriptionGraphManager().getDescriptionGraphTuple(graphIndex2,tupleIndex2));
+        m_derivations.push(new GraphChecking(graph1,position1,graph2,position2));
+    }
+    public void descriptionGraphCheckingFinished(int graphIndex1,int tupleIndex1,int position1,int graphIndex2,int tupleIndex2,int position2) {
+        m_derivations.pop();
+    }
+    public void datatypeConjunctionCheckingStarted(DatatypeManager.DConjunction conjunction) {
+        List<DerivationPremise> atoms=new ArrayList<DerivationPremise>();
+        for (DatatypeManager.DVariable variable : conjunction.getActiveVariables()) {
+            Node node=variable.getNode();
+            for (DatatypeRestriction datatypeRestriction : variable.getPositiveDatatypeRestrictions())
+                atoms.add(new DerivationPremise(getAtom(new Object[] { datatypeRestriction,node })));
+            for (DatatypeRestriction datatypeRestriction : variable.getNegativeDatatypeRestrictions())
+                atoms.add(new DerivationPremise(getAtom(new Object[] { datatypeRestriction.getNegation(),node })));
+            for (DataValueEnumeration dataValueEnumeration : variable.getPositiveDataValueEnumerations())
+                atoms.add(new DerivationPremise(getAtom(new Object[] { dataValueEnumeration,node })));
+            for (DataValueEnumeration dataValueEnumeration : variable.getNegativeDataValueEnumerations())
+                atoms.add(new DerivationPremise(getAtom(new Object[] { dataValueEnumeration.getNegation(),node })));
+            for (DatatypeManager.DVariable neighborVariable : variable.getUnequalToDirect())
+                atoms.add(new DerivationPremise(getAtom(new Object[] { Inequality.INSTANCE,node,neighborVariable.getNode() })));
+        }
+        DerivationPremise[] atomsArray=new DerivationPremise[atoms.size()];
+        atoms.toArray(atomsArray);
+        m_derivations.push(new DatatypeChecking(atomsArray));
+    }
+    public void datatypeConjunctionCheckingFinished(DatatypeManager.DConjunction conjunction,boolean result) {
         m_derivations.pop();
     }
     public Atom getAtom(Object[] tuple) {
@@ -381,27 +404,23 @@ public class DerivationHistory extends TableauMonitorAdapter {
             }
         }
         public String toString(Prefixes prefixes) {
-            return "   <--|   ";
+            return "   <--|";
         }
     }
     
-    public static class GraphMerging extends Derivation {
+    public static class GraphChecking extends Derivation {
         private static final long serialVersionUID=-3671522413313454739L;
 
         protected final DerivationPremise m_graph1;
+        protected final int m_position1;
         protected final DerivationPremise m_graph2;
-        protected final int m_position;
+        protected final int m_position2;
         
-        public GraphMerging(Atom graph1,Atom graph2,int position) {
+        public GraphChecking(Atom graph1,int position1,Atom graph2,int position2) {
             m_graph1=new DerivationPremise(graph1);
+            m_position1=position1;
             m_graph2=new DerivationPremise(graph2);
-            m_position=position;
-        }
-        public Atom getGraph1() {
-            return (Atom)m_graph1.getFact();
-        }
-        public Atom getGraph2() {
-            return (Atom)m_graph2.getFact();
+            m_position2=position2;
         }
         public int getNumberOfPremises() {
             return 2;
@@ -417,7 +436,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
             }
         }
         public String toString(Prefixes prefixes) {
-            return "   <--G--| @ "+m_position;
+            return "   << DGRAPHS @ "+m_position1+" and "+m_position2;
         }
     }
     
@@ -465,7 +484,28 @@ public class DerivationHistory extends TableauMonitorAdapter {
             return (Atom)m_causes[premiseIndex].getFact();
         }
         public String toString(Prefixes prefixes) {
-            return "   << Clash!";
+            return "   << CLASH";
+        }
+    }
+
+    public static class DatatypeChecking extends Derivation {
+        private static final long serialVersionUID=-7833124370362424190L;
+        protected final DerivationPremise[] m_causes;
+        
+        public DatatypeChecking(DerivationPremise[] causes) {
+            m_causes=causes;
+        }
+        public int getNumberOfPremises() {
+            return m_causes.length;
+        }
+        public DerivationPremise getPremise(int premiseIndex) {
+            return m_causes[premiseIndex];
+        }
+        public Atom getPremiseAtom(int premiseIndex) {
+            return (Atom)m_causes[premiseIndex].getFact();
+        }
+        public String toString(Prefixes prefixes) {
+            return "   << DATATYPES";
         }
     }
 

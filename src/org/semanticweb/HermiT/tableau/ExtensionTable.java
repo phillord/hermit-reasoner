@@ -85,9 +85,11 @@ public abstract class ExtensionTable implements Serializable {
             if (dlPredicateObject instanceof AtomicNegationConcept) {
                 AtomicConcept negatedAtomicConcept=((AtomicNegationConcept)dlPredicateObject).getNegatedAtomicConcept();
                 if (AtomicConcept.THING.equals(negatedAtomicConcept) || AtomicConcept.RDFS_LITERAL.equals(negatedAtomicConcept)) {
+                    if (m_tableauMonitor!=null)
+                        m_tableauMonitor.clashDetectionStarted(tuple);
                     m_extensionManager.setClash(dependencySet);
                     if (m_tableauMonitor!=null)
-                        m_tableauMonitor.clashDetected(tuple);
+                        m_tableauMonitor.clashDetectionFinished(tuple);
                 }
                 else {
                     node.addToNegativeLabel();
@@ -97,17 +99,21 @@ public abstract class ExtensionTable implements Serializable {
                         if (containsTuple(m_binaryAuxiliaryTuple)) {
                             m_binaryUnionDependencySet.m_dependencySets[0]=dependencySet;
                             m_binaryUnionDependencySet.m_dependencySets[1]=getDependencySet(m_binaryAuxiliaryTuple);
+                            if (m_tableauMonitor!=null)
+                                m_tableauMonitor.clashDetectionStarted(tuple,m_binaryAuxiliaryTuple);
                             m_extensionManager.setClash(m_binaryUnionDependencySet);
                             if (m_tableauMonitor!=null)
-                                m_tableauMonitor.clashDetected(tuple,m_binaryAuxiliaryTuple);
+                                m_tableauMonitor.clashDetectionFinished(tuple,m_binaryAuxiliaryTuple);
                         }
                     }
                 }
             }
             else if (AtomicConcept.NOTHING.equals(dlPredicateObject)) {
+                if (m_tableauMonitor!=null)
+                    m_tableauMonitor.clashDetectionStarted(tuple);
                 m_extensionManager.setClash(dependencySet);
                 if (m_tableauMonitor!=null)
-                    m_tableauMonitor.clashDetected(tuple);
+                    m_tableauMonitor.clashDetectionFinished(tuple);
             }
             else if (dlPredicateObject instanceof Concept) {
                 if (dlPredicateObject instanceof AtomicConcept) {
@@ -119,9 +125,11 @@ public abstract class ExtensionTable implements Serializable {
                         if (containsTuple(m_binaryAuxiliaryTuple)) {
                             m_binaryUnionDependencySet.m_dependencySets[0]=dependencySet;
                             m_binaryUnionDependencySet.m_dependencySets[1]=getDependencySet(m_binaryAuxiliaryTuple);
+                            if (m_tableauMonitor!=null)
+                                m_tableauMonitor.clashDetectionStarted(tuple,m_binaryAuxiliaryTuple);
                             m_extensionManager.setClash(m_binaryUnionDependencySet);
                             if (m_tableauMonitor!=null)
-                                m_tableauMonitor.clashDetected(tuple,m_binaryAuxiliaryTuple);
+                                m_tableauMonitor.clashDetectionFinished(tuple,m_binaryAuxiliaryTuple);
                         }
                     }
                 }
@@ -143,9 +151,11 @@ public abstract class ExtensionTable implements Serializable {
         }
         else if (Inequality.INSTANCE.equals(dlPredicateObject)) {
             if (tuple[1]==tuple[2]) {
+                if (m_tableauMonitor!=null)
+                    m_tableauMonitor.clashDetectionStarted(tuple);
                 m_extensionManager.setClash(dependencySet);
                 if (m_tableauMonitor!=null)
-                    m_tableauMonitor.clashDetected(tuple);
+                    m_tableauMonitor.clashDetectionFinished(tuple);
             }
         }
         else if (dlPredicateObject instanceof DescriptionGraph)

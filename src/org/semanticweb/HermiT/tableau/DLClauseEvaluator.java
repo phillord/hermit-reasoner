@@ -338,28 +338,6 @@ public class DLClauseEvaluator implements Serializable {
         }
     }
     
-    protected static final class SetClashMonitored implements Worker,Serializable {
-        private static final long serialVersionUID=-4981087765064918953L;
-
-        protected final TableauMonitor m_tableauMonitor;
-        protected final ExtensionManager m_extensionManager;
-        protected final DependencySet m_dependencySet;
-
-        public SetClashMonitored(TableauMonitor tableauMonitor,ExtensionManager extensionManager,DependencySet dependencySet) {
-            m_tableauMonitor=tableauMonitor;
-            m_extensionManager=extensionManager;
-            m_dependencySet=dependencySet;
-        }
-        public int execute(int programCounter) {
-            m_extensionManager.setClash(m_dependencySet);
-            m_tableauMonitor.clashDetected((Object[][])null);
-            return programCounter+1;
-        }
-        public String toString() {
-            return "Set clash and call monitor";
-        }
-    }
-    
     protected static final class DeriveUnaryFact implements Worker,Serializable {
         private static final long serialVersionUID=7883620022252842010L;
 
@@ -597,12 +575,8 @@ public class DLClauseEvaluator implements Serializable {
             for (int dlClauseIndex=0;dlClauseIndex<getNumberOfHeads();dlClauseIndex++) {
                 if (m_extensionManager.m_tableauMonitor!=null)
                     m_workers.add(new CallMatchStartedOnMonitor(m_extensionManager.m_tableauMonitor,m_dlClauseEvalautor,dlClauseIndex));
-                if (getHeadLength(dlClauseIndex)==0) {
-                    if (m_extensionManager.m_tableauMonitor==null)
-                        m_workers.add(new SetClash(m_extensionManager,m_unionDependencySet));
-                    else
-                        m_workers.add(new SetClashMonitored(m_extensionManager.m_tableauMonitor,m_extensionManager,m_unionDependencySet));
-                }
+                if (getHeadLength(dlClauseIndex)==0)
+                    m_workers.add(new SetClash(m_extensionManager,m_unionDependencySet));
                 else if (getHeadLength(dlClauseIndex)==1) {
                     Atom atom=getHeadAtom(dlClauseIndex,0);
                     switch (atom.getArity()) {
