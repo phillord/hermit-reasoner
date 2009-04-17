@@ -11,6 +11,7 @@ import org.semanticweb.HermiT.datatypes.rdftext.RDFTextDatatypeHandler;
 import org.semanticweb.HermiT.datatypes.owlreal.OWLRealDatatypeHandler;
 import org.semanticweb.HermiT.datatypes.doublenum.DoubleDatatypeHandler;
 import org.semanticweb.HermiT.datatypes.floatnum.FloatDatatypeHandler;
+import org.semanticweb.HermiT.datatypes.datetime.DateTimeDatatypeHandler;
 import org.semanticweb.HermiT.datatypes.anyuri.AnyURIDatatypeHandler;
 
 /**
@@ -25,6 +26,7 @@ public class DatatypeRegistry {
         registerDatatypeHandler(new OWLRealDatatypeHandler());
         registerDatatypeHandler(new DoubleDatatypeHandler());
         registerDatatypeHandler(new FloatDatatypeHandler());
+        registerDatatypeHandler(new DateTimeDatatypeHandler());
         registerDatatypeHandler(new AnyURIDatatypeHandler());
     }
     
