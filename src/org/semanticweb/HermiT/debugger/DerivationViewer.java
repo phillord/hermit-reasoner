@@ -66,11 +66,11 @@ public class DerivationViewer extends JFrame {
         private static final long serialVersionUID=9210217812084186766L;
 
         protected final EventListenerList m_eventListeners;
-        protected final DerivationHistory.DerivationPremise m_root;
+        protected final DerivationHistory.Fact m_root;
 
         public DerivationTreeTreeModel(DerivationHistory.Fact root) {
             m_eventListeners=new EventListenerList();
-            m_root=new DerivationHistory.DerivationPremise(root);
+            m_root=root;
         }
         public void addTreeModelListener(TreeModelListener listener) {
             m_eventListeners.add(TreeModelListener.class,listener);
@@ -79,17 +79,17 @@ public class DerivationViewer extends JFrame {
             m_eventListeners.remove(TreeModelListener.class,listener);
         }
         public Object getChild(Object parent,int index) {
-            DerivationHistory.Fact parentFact=((DerivationHistory.DerivationPremise)parent).getFact();
+            DerivationHistory.Fact parentFact=(DerivationHistory.Fact)parent;
             DerivationHistory.Derivation derivation=parentFact.getDerivation();
             return derivation.getPremise(index);
         }
         public int getChildCount(Object parent) {
-            DerivationHistory.Fact parentFact=((DerivationHistory.DerivationPremise)parent).getFact();
+            DerivationHistory.Fact parentFact=(DerivationHistory.Fact)parent;
             DerivationHistory.Derivation derivation=parentFact.getDerivation();
             return derivation.getNumberOfPremises();
         }
         public int getIndexOfChild(Object parent,Object child) {
-            DerivationHistory.Fact parentFact=((DerivationHistory.DerivationPremise)parent).getFact();
+            DerivationHistory.Fact parentFact=(DerivationHistory.Fact)parent;
             DerivationHistory.Derivation derivation=parentFact.getDerivation();
             for (int index=0;index<derivation.getNumberOfPremises();index++)
                 if (child.equals(derivation.getPremise(index)))
@@ -100,7 +100,7 @@ public class DerivationViewer extends JFrame {
             return m_root;
         }
         public boolean isLeaf(Object node) {
-            DerivationHistory.Fact nodeFact=((DerivationHistory.DerivationPremise)node).getFact();
+            DerivationHistory.Fact nodeFact=(DerivationHistory.Fact)node;
             DerivationHistory.Derivation derivation=nodeFact.getDerivation();
             return derivation.getNumberOfPremises()==0;
         }
@@ -167,7 +167,7 @@ public class DerivationViewer extends JFrame {
     protected class DerivationTreeCellRenderer extends DefaultTreeCellRenderer {
 
         public Component getTreeCellRendererComponent(JTree tree,Object value,boolean selected,boolean expanded,boolean leaf,int row,boolean hasFocus) {
-            DerivationHistory.Fact fact=((DerivationHistory.DerivationPremise)value).getFact();
+            DerivationHistory.Fact fact=(DerivationHistory.Fact)value;
             DerivationHistory.Derivation derivation=fact.getDerivation();
             StringBuffer text=new StringBuffer();
             text.append(fact.toString(m_prefixes));

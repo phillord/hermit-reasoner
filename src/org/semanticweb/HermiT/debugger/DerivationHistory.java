@@ -37,9 +37,9 @@ public class DerivationHistory extends TableauMonitorAdapter {
         m_mergeAtoms.clear();
     }
     public void dlClauseMatchedStarted(DLClauseEvaluator dlClauseEvaluator,int dlClauseIndex) {
-        DerivationPremise[] premises=new DerivationPremise[dlClauseEvaluator.getBodyLength()];
+        Atom[] premises=new Atom[dlClauseEvaluator.getBodyLength()];
         for (int index=0;index<premises.length;index++)
-            premises[index]=new DerivationPremise(getAtom(dlClauseEvaluator.getTupleMatchedToBody(index)));
+            premises[index]=getAtom(dlClauseEvaluator.getTupleMatchedToBody(index));
         m_derivations.push(new DLClauseApplication(dlClauseEvaluator.getDLClause(dlClauseIndex),premises));
     }
     public void dlClauseMatchedFinished(DLClauseEvaluator dlClauseEvaluator) {
@@ -63,9 +63,9 @@ public class DerivationHistory extends TableauMonitorAdapter {
         m_mergeAtoms.pop();
     }
     public void clashDetectionStarted(Object[]... tuples) {
-        DerivationPremise[] atoms=new DerivationPremise[tuples.length];
+        Atom[] atoms=new Atom[tuples.length];
         for (int index=0;index<tuples.length;index++)
-            atoms[index]=new DerivationPremise(getAtom(tuples[index]));
+            atoms[index]=getAtom(tuples[index]);
         m_derivations.push(new ClashDetection(atoms));
     }
     public void clashDetectionFinished(Object[]... tuples) {
@@ -107,21 +107,21 @@ public class DerivationHistory extends TableauMonitorAdapter {
         m_derivations.pop();
     }
     public void datatypeConjunctionCheckingStarted(DatatypeManager.DConjunction conjunction) {
-        List<DerivationPremise> atoms=new ArrayList<DerivationPremise>();
+        List<Atom> atoms=new ArrayList<Atom>();
         for (DatatypeManager.DVariable variable : conjunction.getActiveVariables()) {
             Node node=variable.getNode();
             for (DatatypeRestriction datatypeRestriction : variable.getPositiveDatatypeRestrictions())
-                atoms.add(new DerivationPremise(getAtom(new Object[] { datatypeRestriction,node })));
+                atoms.add(getAtom(new Object[] { datatypeRestriction,node }));
             for (DatatypeRestriction datatypeRestriction : variable.getNegativeDatatypeRestrictions())
-                atoms.add(new DerivationPremise(getAtom(new Object[] { datatypeRestriction.getNegation(),node })));
+                atoms.add(getAtom(new Object[] { datatypeRestriction.getNegation(),node }));
             for (DataValueEnumeration dataValueEnumeration : variable.getPositiveDataValueEnumerations())
-                atoms.add(new DerivationPremise(getAtom(new Object[] { dataValueEnumeration,node })));
+                atoms.add(getAtom(new Object[] { dataValueEnumeration,node }));
             for (DataValueEnumeration dataValueEnumeration : variable.getNegativeDataValueEnumerations())
-                atoms.add(new DerivationPremise(getAtom(new Object[] { dataValueEnumeration.getNegation(),node })));
+                atoms.add(getAtom(new Object[] { dataValueEnumeration.getNegation(),node }));
             for (DatatypeManager.DVariable neighborVariable : variable.getUnequalToDirect())
-                atoms.add(new DerivationPremise(getAtom(new Object[] { Inequality.INSTANCE,node,neighborVariable.getNode() })));
+                atoms.add(getAtom(new Object[] { Inequality.INSTANCE,node,neighborVariable.getNode() }));
         }
-        DerivationPremise[] atomsArray=new DerivationPremise[atoms.size()];
+        Atom[] atomsArray=new Atom[atoms.size()];
         atoms.toArray(atomsArray);
         m_derivations.push(new DatatypeChecking(atomsArray));
     }
@@ -299,29 +299,16 @@ public class DerivationHistory extends TableauMonitorAdapter {
             return toString(Prefixes.STANDARD_PREFIXES);
         }
         public abstract int getNumberOfPremises();
-        public abstract DerivationPremise getPremise(int premiseIndex);
+        public abstract Fact getPremise(int premiseIndex);
     }
 
-    public static class DerivationPremise implements Serializable {
-        private static final long serialVersionUID=387225349849122349L;
-
-        protected final Fact m_fact;
-        
-        public DerivationPremise(Fact fact) {
-            m_fact=fact;
-        }
-        public Fact getFact() {
-            return m_fact;
-        }
-    }
-    
     public static class DLClauseApplication extends Derivation {
         private static final long serialVersionUID=5841561027229354512L;
 
         protected final DLClause m_dlClause;
-        protected final DerivationPremise[] m_premises;
+        protected final Atom[] m_premises;
         
-        public DLClauseApplication(DLClause dlClause,DerivationPremise[] premises) {
+        public DLClauseApplication(DLClause dlClause,Atom[] premises) {
             m_dlClause=dlClause;
             m_premises=premises;
         }
@@ -331,11 +318,8 @@ public class DerivationHistory extends TableauMonitorAdapter {
         public int getNumberOfPremises() {
             return m_premises.length;
         }
-        public DerivationPremise getPremise(int premiseIndex) {
+        public Fact getPremise(int premiseIndex) {
             return m_premises[premiseIndex];
-        }
-        public Atom getPremiseAtom(int premiseIndex) {
-            return (Atom)m_premises[premiseIndex].getFact();
         }
         public String toString(Prefixes prefixes) {
             return "  <--  "+m_dlClause.toString(prefixes);
@@ -345,15 +329,12 @@ public class DerivationHistory extends TableauMonitorAdapter {
     public static class DisjunctApplication extends Derivation {
         private static final long serialVersionUID=6657356873675430986L;
 
-        protected final DerivationPremise m_disjunction;
+        protected final Disjunction m_disjunction;
         protected final int m_disjunctIndex;
         
         public DisjunctApplication(Disjunction disjunction,int disjunctIndex) {
-            m_disjunction=new DerivationPremise(disjunction);
+            m_disjunction=disjunction;
             m_disjunctIndex=disjunctIndex;
-        }
-        public Disjunction getDisjunction() {
-            return (Disjunction)m_disjunction.getFact();
         }
         public int getDisjunctIndex() {
             return m_disjunctIndex;
@@ -361,7 +342,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         public int getNumberOfPremises() {
             return 1;
         }
-        public DerivationPremise getPremise(int premiseIndex) {
+        public Fact getPremise(int premiseIndex) {
             switch (premiseIndex) {
             case 0:
                 return m_disjunction;
@@ -377,23 +358,17 @@ public class DerivationHistory extends TableauMonitorAdapter {
     public static class Merging extends Derivation {
         private static final long serialVersionUID=6815119442652251306L;
 
-        protected final DerivationPremise m_equality;
-        protected final DerivationPremise m_fromAtom;
+        protected final Atom m_equality;
+        protected final Atom m_fromAtom;
         
         public Merging(Atom equality,Atom fromAtom) {
-            m_equality=new DerivationPremise(equality);
-            m_fromAtom=new DerivationPremise(fromAtom);
-        }
-        public Atom getEquality() {
-            return (Atom)m_equality.getFact();
-        }
-        public Atom getFromAtom() {
-            return (Atom)m_fromAtom.getFact();
+            m_equality=equality;
+            m_fromAtom=fromAtom;
         }
         public int getNumberOfPremises() {
             return 2;
         }
-        public DerivationPremise getPremise(int premiseIndex) {
+        public Fact getPremise(int premiseIndex) {
             switch (premiseIndex) {
             case 0:
                 return m_equality;
@@ -411,21 +386,21 @@ public class DerivationHistory extends TableauMonitorAdapter {
     public static class GraphChecking extends Derivation {
         private static final long serialVersionUID=-3671522413313454739L;
 
-        protected final DerivationPremise m_graph1;
+        protected final Atom m_graph1;
         protected final int m_position1;
-        protected final DerivationPremise m_graph2;
+        protected final Atom m_graph2;
         protected final int m_position2;
         
         public GraphChecking(Atom graph1,int position1,Atom graph2,int position2) {
-            m_graph1=new DerivationPremise(graph1);
+            m_graph1=graph1;
             m_position1=position1;
-            m_graph2=new DerivationPremise(graph2);
+            m_graph2=graph2;
             m_position2=position2;
         }
         public int getNumberOfPremises() {
             return 2;
         }
-        public DerivationPremise getPremise(int premiseIndex) {
+        public Fact getPremise(int premiseIndex) {
             switch (premiseIndex) {
             case 0:
                 return m_graph1;
@@ -443,18 +418,15 @@ public class DerivationHistory extends TableauMonitorAdapter {
     public static class ExistentialExpansion extends Derivation {
         private static final long serialVersionUID=-1266097745277870260L;
 
-        protected final DerivationPremise m_existentialAtom;
+        protected final Atom m_existentialAtom;
         
         public ExistentialExpansion(Atom existentialAtom) {
-            m_existentialAtom=new DerivationPremise(existentialAtom);
+            m_existentialAtom=existentialAtom;
         }
         public int getNumberOfPremises() {
             return 1;
         }
-        public Atom getExistentialAtom() {
-            return (Atom)m_existentialAtom.getFact();
-        }
-        public DerivationPremise getPremise(int premiseIndex) {
+        public Fact getPremise(int premiseIndex) {
             switch (premiseIndex) {
             case 0:
                 return m_existentialAtom;
@@ -469,19 +441,16 @@ public class DerivationHistory extends TableauMonitorAdapter {
     
     public static class ClashDetection extends Derivation {
         private static final long serialVersionUID=-1046733682276190587L;
-        protected final DerivationPremise[] m_causes;
+        protected final Atom[] m_causes;
         
-        public ClashDetection(DerivationPremise[] causes) {
+        public ClashDetection(Atom[] causes) {
             m_causes=causes;
         }
         public int getNumberOfPremises() {
             return m_causes.length;
         }
-        public DerivationPremise getPremise(int premiseIndex) {
+        public Fact getPremise(int premiseIndex) {
             return m_causes[premiseIndex];
-        }
-        public Atom getPremiseAtom(int premiseIndex) {
-            return (Atom)m_causes[premiseIndex].getFact();
         }
         public String toString(Prefixes prefixes) {
             return "   << CLASH";
@@ -490,19 +459,16 @@ public class DerivationHistory extends TableauMonitorAdapter {
 
     public static class DatatypeChecking extends Derivation {
         private static final long serialVersionUID=-7833124370362424190L;
-        protected final DerivationPremise[] m_causes;
+        protected final Atom[] m_causes;
         
-        public DatatypeChecking(DerivationPremise[] causes) {
+        public DatatypeChecking(Atom[] causes) {
             m_causes=causes;
         }
         public int getNumberOfPremises() {
             return m_causes.length;
         }
-        public DerivationPremise getPremise(int premiseIndex) {
+        public Fact getPremise(int premiseIndex) {
             return m_causes[premiseIndex];
-        }
-        public Atom getPremiseAtom(int premiseIndex) {
-            return (Atom)m_causes[premiseIndex].getFact();
         }
         public String toString(Prefixes prefixes) {
             return "   << DATATYPES";
@@ -517,7 +483,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         public int getNumberOfPremises() {
             return 0;
         }
-        public DerivationPremise getPremise(int premiseIndex) {
+        public Fact getPremise(int premiseIndex) {
             throw new IndexOutOfBoundsException();
         }
         public String toString(Prefixes prefixes) {
