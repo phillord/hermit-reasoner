@@ -1,3 +1,4 @@
+// Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.datatypes.owlreal;
 
 public final class PlusInfinity extends Number {
