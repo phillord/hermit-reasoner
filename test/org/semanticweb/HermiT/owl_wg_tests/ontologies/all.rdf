@@ -5593,7 +5593,7 @@ are a &lt;code&gt;rdfs:Datatype&lt;/code&gt;</test:description>
   &lt;rdfs:Datatype rdf:about="http://www.w3.org/2001/XMLSchema#string"/&gt;
 &lt;/rdf:RDF&gt;</test:rdfXmlConclusionOntology>
 		<test:rdfXmlPremiseOntology rdf:datatype="http://www.w3.org/2001/XMLSchema#string">&lt;rdf:RDF
-    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"&gt;
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     xmlns:owl="http://www.w3.org/2002/07/owl#"&gt;
   &lt;owl:Ontology/&gt;
 &lt;/rdf:RDF&gt;</test:rdfXmlPremiseOntology>
