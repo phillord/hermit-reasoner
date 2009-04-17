@@ -18,11 +18,11 @@ public class ShowExistsCommand extends AbstractCommand {
         return "showExists";
     }
     public String[] getDescription() {
-        return new String[] { "","prints nodes with their unprocessed existentials" };
+        return new String[] { "","prints nodes with unprocessed existentials" };
     }
     public void printHelp(PrintWriter writer) {
         writer.println("usage: showExists");
-        writer.println("Prints nodes with their unprocessed existentials and where these came from. ");
+        writer.println("    Prints a list of nodes that have unprocessed existentials, together with information that generated these nodes.");
     }
     public void execute(String[] args) {
         CharArrayWriter buffer=new CharArrayWriter();

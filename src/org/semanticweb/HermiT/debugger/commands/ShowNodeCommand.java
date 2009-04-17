@@ -20,7 +20,7 @@ public class ShowNodeCommand extends AbstractCommand {
     }
     public void printHelp(PrintWriter writer) {
         writer.println("usage: showNode nodeID");
-        writer.println("Prints information about the node for the given node ID.");
+        writer.println("    Prints information about the node for the given node ID.");
     }
     public void execute(String[] args) {
         if (args.length<2) {

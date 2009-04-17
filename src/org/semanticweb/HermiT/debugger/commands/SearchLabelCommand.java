@@ -20,7 +20,7 @@ public class SearchLabelCommand extends AbstractCommand {
     }
     public void printHelp(PrintWriter writer) {
         writer.println("usage: searchLabel nodeID");
-        writer.println("Finds the node with the given ID, then searches for all nodes with an equal label and prints their IDs and blocking status.");
+        writer.println("    Prints all nodes whose label is equal to the label of the given node.");
     }
     public void execute(String[] args) {
         if (args.length<2) {

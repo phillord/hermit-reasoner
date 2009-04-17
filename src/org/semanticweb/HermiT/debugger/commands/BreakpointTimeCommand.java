@@ -13,11 +13,12 @@ public class BreakpointTimeCommand extends AbstractCommand {
         return "bpTime";
     }
     public String[] getDescription() {
-        return new String[] { "timeInSeconds","set break point after timeInSeconds" };
+        return new String[] { "timeInSeconds","sets the break point time" };
     }
     public void printHelp(PrintWriter writer) {
         writer.println("usage: bpTime timeInSeconds");
-        writer.println("Sets the next breakpoint time to the given time in seconds.");
+        writer.println("    Sets the breakpoint time -- that is, after timeInSeconds,");
+        writer.println("    the debugger will return control to the user.");
     }
     public void execute(String[] args) {
         if (args.length<2) {

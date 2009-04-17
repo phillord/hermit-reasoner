@@ -14,11 +14,16 @@ public class ShowSubtreeCommand extends AbstractCommand {
         return "showSubtree";
     }
     public String[] getDescription() {
-        return new String[] { "[nodeID]","prints the subtree for the last checked node or nodeID if given" };
+        return new String[] {
+            "","shows the subtree for rooted at the main node for the task",
+            "nodeID","shows the subtree rooted at nodeID"
+        };
     }
     public void printHelp(PrintWriter writer) {
-        writer.println("usage: showSubtree [nodeID]");
-        writer.println("Prints the subtree for the node with ID nodeID or for the last checked node if no nodeID is given.");
+        writer.println("usage: showSubtree");
+        writer.println("    Shows the subtree pf the model rooted at the main node for the task.");
+        writer.println("usage: showSubtree nodeID");
+        writer.println("    Shows the subtree of the model rooted at the given node.");
     }
     public void execute(String[] args) {
         Node subtreeRoot=m_debugger.getTableau().getCheckedNode();

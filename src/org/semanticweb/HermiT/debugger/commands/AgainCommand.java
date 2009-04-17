@@ -17,7 +17,7 @@ public class AgainCommand extends AbstractCommand {
     }
     public void printHelp(PrintWriter writer) {
         writer.println("usage: a");
-        writer.println("Again perform the last command");
+        writer.println("    Executes the last command again.");
     }
     public void execute(String[] args) {
         String commandLine=m_debugger.getLastCommand();

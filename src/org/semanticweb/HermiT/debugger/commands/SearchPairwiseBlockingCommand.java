@@ -21,7 +21,7 @@ public class SearchPairwiseBlockingCommand extends AbstractCommand {
     }
     public void printHelp(PrintWriter writer) {
         writer.println("usage: searchPWBlock nodeID");
-        writer.println("Prints nodes and their blocking status that have the same pair-wise blocking signature of the node for the given node ID.");
+        writer.println("    Prints all nodes that have the same pair-wise blocking signature as the given node.");
     }
     public void execute(String[] args) {
         if (args.length<2) {

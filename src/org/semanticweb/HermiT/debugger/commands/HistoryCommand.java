@@ -17,7 +17,7 @@ public class HistoryCommand extends AbstractCommand {
     }
     public void printHelp(PrintWriter writer) {
         writer.println("usage: history on/off");
-        writer.println("Switches the derivation history on or off.");
+        writer.println("    Switches the derivation history on or off.");
     }
     public void execute(String[] args) {
         if (args.length<2) {

@@ -15,11 +15,11 @@ public class ShowDescriptionGraphCommand extends AbstractCommand {
         return "showDGraph";
     }
     public String[] getDescription() {
-        return new String[] { "graphName","prints a text representation for the description graph graphName" };
+        return new String[] { "graphName","prints a text representation of the description graph graphName" };
     }
     public void printHelp(PrintWriter writer) {
         writer.println("usage: showDGraph graphName");
-        writer.println("Prints a text representation for the description graph named graphName. ");
+        writer.println("    Prints information about the description graph with the given name.");
     }
     public void execute(String[] args) {
         if (args.length<2) {

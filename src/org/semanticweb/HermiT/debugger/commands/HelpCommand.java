@@ -15,13 +15,14 @@ public class HelpCommand extends AbstractCommand {
     public String[] getDescription() {
         return new String[] {
             "","prints this list of command",
-            "<command name>","prints help for a command"
+            "commandName","prints help for a command"
         };
     }
     public void printHelp(PrintWriter writer) {
-        writer.println("usage: help [commandName]");
-        writer.println("If commandName is not present, prints the list of all commands.");
-        writer.println("If commandName is present, prints the help for a given command.");
+        writer.println("usage: help");
+        writer.println("    Prints this message.");
+        writer.println("usage: help commandName");
+        writer.println("    Prints help for the command commandName.");
     }
     public void execute(String[] args) {
         if (args.length>1) {
@@ -33,6 +34,7 @@ public class HelpCommand extends AbstractCommand {
                 command.printHelp(m_debugger.getOutput());
         }
         else {
+            m_debugger.getOutput().println("Available commands are:");
             int maxFirstColumnWidth=0;
             for (DebuggerCommand command : m_debugger.getDebuggerCommands().values()) {
                 String[] description=command.getDescription();
@@ -49,6 +51,7 @@ public class HelpCommand extends AbstractCommand {
                     String commandLine=command.getCommandName();
                     if (!description[index].isEmpty())
                         commandLine+=' '+description[index];
+                    m_debugger.getOutput().print("  ");
                     m_debugger.getOutput().print(commandLine);
                     for (int i=commandLine.length();i<maxFirstColumnWidth;i++)
                         m_debugger.getOutput().print(' ');
@@ -56,6 +59,14 @@ public class HelpCommand extends AbstractCommand {
                     m_debugger.getOutput().println(description[index+1]);
                 }
             }
+            m_debugger.getOutput().println();
+            m_debugger.getOutput().println("Nodes in the current model are identified by node IDs.");
+            m_debugger.getOutput().println("Predicates are written as follows, where uri can be abbreviated or full:");
+            m_debugger.getOutput().println("    ==      equality");
+            m_debugger.getOutput().println("    !=      inequality");
+            m_debugger.getOutput().println("    +uri    atomic concept with the URI uri");
+            m_debugger.getOutput().println("    -uri    atomic role with the URI uri");
+            m_debugger.getOutput().println("    $uri    description graph with the URI uri");
         }
     }
 }

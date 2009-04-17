@@ -23,7 +23,8 @@ public class NodesForCommand extends AbstractCommand {
     }
     public void printHelp(PrintWriter writer) {
         writer.println("usage: nodesFor conceptName");
-        writer.println("Creates a concept \"C\" from conceptName, finds all nodes that have been created by a concept (atleast n r.C) and prints them and whether they are active or not.");
+        writer.println("    Prints all nodes that have been created by a concept (atleast n r.conceptName)");
+        writer.println("    together with the information whether the nodes are active or not.");
     }
     public void execute(String[] args) {
         if (args.length<2) {

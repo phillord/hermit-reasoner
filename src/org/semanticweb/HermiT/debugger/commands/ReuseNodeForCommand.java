@@ -21,7 +21,7 @@ public class ReuseNodeForCommand extends AbstractCommand {
     }
     public void printHelp(PrintWriter writer) {
         writer.println("usage: reuseNodeFor nodeID");
-        writer.println("If individual reuse strategy is used, prints the concepts for which the given node is a reuse node.");
+        writer.println("    If individual reuse strategy is used, prints the concepts for which the given node is a reuse node.");
     }
     public void execute(String[] args) {
         if (args.length<2) {

@@ -16,13 +16,11 @@ public class DiffLabelsCommand extends AbstractCommand {
         return "diffLabels";
     }
     public String[] getDescription() {
-        return new String[] { "nodeID1 nodeID2","compares the node labels" };
+        return new String[] { "nodeID1 nodeID2","compares the labels of the given nodes" };
     }
     public void printHelp(PrintWriter writer) {
         writer.println("usage: diffLabels nodeID1 nodeID2");
-        writer.print("Finds the nodes with the given IDs, then prints ");
-        writer.print("for both nodes the (positive) concepts that are in ");
-        writer.println("the label of one, but not in the label of the other node.");
+        writer.println("    Prints all (atomic) concepts that are in the label of one node but not in the other.");
     }
     public void execute(String[] args) {
         if (args.length<3) {

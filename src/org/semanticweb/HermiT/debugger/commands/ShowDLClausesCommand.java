@@ -15,11 +15,11 @@ public class ShowDLClausesCommand extends AbstractCommand {
         return "showDLClauses";
     }
     public String[] getDescription() {
-        return new String[] { "","prints the clauses from the current DL ontology" };
+        return new String[] { "","prints the currently used set of DL-clauses" };
     }
     public void printHelp(PrintWriter writer) {
         writer.println("usage: showDLClauses");
-        writer.println("Prints the clauses from the current DL ontology.");
+        writer.println("    Prints the currently used set of DL-clauses.");
     }
     public void execute(String[] args) {
         CharArrayWriter buffer=new CharArrayWriter();

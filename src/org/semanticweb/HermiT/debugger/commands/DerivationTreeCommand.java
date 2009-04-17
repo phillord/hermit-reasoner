@@ -18,28 +18,21 @@ public class DerivationTreeCommand extends AbstractCommand {
     public String[] getDescription() {
         return new String[] {
             "clash","shows the derivation tree for the clash",
-            "predicateURI nodeID","shows the derivation tree for the given unary atom",
-            "predicateURI nodeID nodeID","shows the derivation tree for the given binary atom"
+            "predicate [nodeID]+","shows the derivation tree for the given atom",
         };
     }
     public void printHelp(PrintWriter writer) {
         writer.println("usage: dertree clash");
-        writer.println("or");
-        writer.println("usage: dertree unaryPredicateURI nodeID");
-        writer.println("or");
-        writer.println("usage: dertree binaryPredicateURI nodeID nodeID");
-        writer.println("Shows the derivation tree for the given atom or the clash.");
+        writer.println("    Shows the derivation tree for the clash.");
+        writer.println("usage: dertree predicate [nodeID]+");
+        writer.println("    Shows the derivation tree for the given atom.");
     }
     public void execute(String[] args) {
-        Object[] tuple;
-        // args should look as follows:
-        // derivationTree clash or
-        // derivationTree unaryPredicateURI nodeID or
-        // derivationTree binaryPredicateURI nodeID nodeID
         if (args.length<2) {
             m_debugger.getOutput().println("The specification of the predicate is missing.");
             return;
         }
+        Object[] tuple;
         String predicate=args[1];
         if ("clash".equals(predicate.toLowerCase()))
             tuple=new Object[0];

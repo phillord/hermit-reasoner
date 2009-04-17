@@ -13,16 +13,17 @@ public class WaitForCommand extends AbstractCommand implements DebuggerCommand {
         return "waitFor";
     }
     public String[] getDescription() {
-        return new String[] { "([+|-]gexists|exists|clash|merge)+","sets (+ default) or removes (-) wait options" };
+        return new String[] { "([+|-]gexists|exists|clash|merge)+","sets (+ default) or removes (-) breakpoint options" };
     }
     public void printHelp(PrintWriter writer) {
         writer.println("usage: waitFor ([+|-]gexists|exists|clash|merge)+");
-        writer.println("usage example: waitFor -clash +gexists");
-        writer.println("Sets (+ default) or removes (-) wait options for the tableau expansion. Possible wait options are:");
-        writer.println("gexists - stop at the next description graph expansion");
-        writer.println("exists  - stop at the next existential expansion");
-        writer.println("clash   - stop at the next clash");
-        writer.println("merge   - stop at the next merging of nodes");
+        writer.println("    Sets (+ default) or removes (-) breakpoint options for the debugger.");
+        writer.println("    Possible options are:");
+        writer.println("        gexists - stop at the next description graph expansion");
+        writer.println("        exists  - stop at the next existential expansion");
+        writer.println("        clash   - stop at the next clash");
+        writer.println("        merge   - stop at the next merging of nodes");
+        writer.println("    Example: waitFor -clash +gexists");
     }
     public void execute(String[] args) {
         boolean add;

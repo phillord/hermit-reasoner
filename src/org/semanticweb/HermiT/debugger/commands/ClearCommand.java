@@ -17,7 +17,7 @@ public class ClearCommand extends AbstractCommand {
     }
     public void printHelp(PrintWriter writer) {
         writer.println("usage: clear");
-        writer.println("Clear the command line screen. ");
+        writer.println("    Clear the command line screen. ");
     }
     public void execute(String[] args) {
         m_debugger.getConsoleTextArea().clear();

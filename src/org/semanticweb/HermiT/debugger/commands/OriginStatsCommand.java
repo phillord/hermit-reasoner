@@ -25,11 +25,11 @@ public class OriginStatsCommand extends AbstractCommand {
         return "originStats";
     }
     public String[] getDescription() {
-        return new String[] { "","prints origin information for nodes in the tableau" };
+        return new String[] { "","prints origin information for nodes in the model" };
     }
     public void printHelp(PrintWriter writer) {
         writer.println("usage: originStats");
-        writer.println("Prints origin information for the nodes in the current tableau. ");
+        writer.println("    Prints origin information for the nodes in the current model.");
     }
     public void execute(String[] args) {
         Map<Concept,OriginInfo> originInfos=new HashMap<Concept,OriginInfo>();

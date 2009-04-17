@@ -13,11 +13,12 @@ public class SingleStepCommand extends AbstractCommand {
         return "singleStep";
     }
     public String[] getDescription() {
-        return new String[] { "on|off","step by step mode on or off" };
+        return new String[] { "on|off","step-by-step mode on or off" };
     }
     public void printHelp(PrintWriter writer) {
         writer.println("usage: singleStep on|off");
-        writer.println("Expands the tableau step by step if on and continuously if off.");
+        writer.println("    If on, the debugger will return control to the user after each step.");
+        writer.println("    If off, the debugger will run until a breakpoint is reached.");
     }
     public void execute(String[] args) {
         if (args.length<2) {

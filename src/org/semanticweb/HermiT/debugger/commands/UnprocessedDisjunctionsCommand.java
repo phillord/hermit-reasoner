@@ -17,11 +17,11 @@ public class UnprocessedDisjunctionsCommand extends AbstractCommand {
         return "uDisjunctions";
     }
     public String[] getDescription() {
-        return new String[] { "","prints unprocessed ground disjunctions" };
+        return new String[] { "","shows unprocessed ground disjunctions" };
     }
     public void printHelp(PrintWriter writer) {
         writer.println("usage: uDisjunctions");
-        writer.println("Prints a list of unprocessed ground disjunctions. ");
+        writer.println("    Prints a list of unprocessed ground disjunctions.");
     }
     public void execute(String[] args) {
         CharArrayWriter buffer=new CharArrayWriter();

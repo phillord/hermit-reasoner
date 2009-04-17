@@ -23,30 +23,24 @@ public class QueryCommand extends AbstractCommand {
     public String[] getDescription() {
         return new String[] {
             "","prints whether there is a clash",
-            "+C|$DG|? nodeID|?","prints facts for C - concept, DG - decr. graph, ? any unary predicate",
-            "==|!=|-R|? nodeID|? nodeID|?","prints facts for R-role, ? any binary predicate"
+            "?|predicate [?|nodeID]+","prints all facts matching the query; ? is a joker",
         };
     }
     public void printHelp(PrintWriter writer) {
         writer.println("usage: query");
-        writer.println("Prints whether there is a clash or not.");
-        writer.println("or");
-        writer.println("usage: query unaryPredicate nodeID");
-        writer.println("or");
-        writer.println("usage: query binaryPredicate nodeID nodeID");
-        writer.print("Prints all facts for the given unary or binary ");
-        writer.print("predicate and node IDs. DLPredicate and ");
-        writer.print("nodeID can be replaced with ? for unrestricted ");
-        writer.println("querying. q can be used instead of query.");
+        writer.println("    Prints whether the model contains a clash.");
+        writer.println("usage: ?|predicate [?|nodeID]+");
+        writer.println("    Prints all facts matching the query, which is a partially specified atom.");
+        writer.println("    Parts of the atom are either specified fully, or by using ? as a joker.");
     }
     public void execute(String[] args) {
         Object[] tuple=new Object[args.length-1];
         if (tuple.length==0) {
             // no further argument, so just check for a clash
             if (m_debugger.getTableau().getExtensionManager().containsClash())
-                m_debugger.getOutput().println("Tableau currently contains a clash.");
+                m_debugger.getOutput().println("The model currently contains a clash.");
             else
-                m_debugger.getOutput().println("Tableau currently does not contain a clash.");
+                m_debugger.getOutput().println("The modelcurrently does not contain a clash.");
         }
         else {
             // further query arguments

@@ -13,11 +13,11 @@ public class ExitCommand extends AbstractCommand {
         return "exit";
     }
     public String[] getDescription() {
-        return new String[] { "","exit the debugger" };
+        return new String[] { "","exits the curtrent process" };
     }
     public void printHelp(PrintWriter writer) {
         writer.println("usage: exit");
-        writer.println("Exits the current program. ");
+        writer.println("    Exits the current process.");
     }
     public void execute(String[] args) {
         System.exit(0);

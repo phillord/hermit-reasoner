@@ -19,7 +19,7 @@ public class ModelStatsCommand extends AbstractCommand {
     }
     public void printHelp(PrintWriter writer) {
         writer.println("usage: modelStats");
-        writer.println("Prints the statistics about the current model.");
+        writer.println("    Prints statistics about the current model.");
     }
     public void execute(String[] args) {
         int noNodes=0;

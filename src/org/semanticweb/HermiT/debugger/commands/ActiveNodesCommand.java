@@ -18,7 +18,7 @@ public class ActiveNodesCommand extends AbstractCommand {
     }
     public void printHelp(PrintWriter writer) {
         writer.println("usage: activeNodes");
-        writer.println("Counts the number of active (non-blocked) nodes in the current tableau and prints their number and IDs. ");
+        writer.println("    Prints list of all active (non-blocked) nodes in the current model.");
     }
     public void execute(String[] args) {
         int numberOfNodes=0;

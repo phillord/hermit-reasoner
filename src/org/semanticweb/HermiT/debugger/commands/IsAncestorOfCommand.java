@@ -18,7 +18,7 @@ public class IsAncestorOfCommand extends AbstractCommand {
     }
     public void printHelp(PrintWriter writer) {
         writer.println("usage: isAncOf nodeID1 nodeID2");
-        writer.println("Finds the nodes with the given IDs, then prints whether the node for nodeID1 is an ancestor of the node for nodeID2.");
+        writer.println("    Prints whether the node for nodeID1 is an ancestor of the node for nodeID2.");
     }
     public void execute(String[] args) {
         if (args.length<3) {

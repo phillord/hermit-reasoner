@@ -13,11 +13,11 @@ public class ContinueCommand extends AbstractCommand {
         return "c";
     }
     public String[] getDescription() {
-        return new String[] { "","continue with the execution" };
+        return new String[] { "","continues with the current reasoning tasks" };
     }
     public void printHelp(PrintWriter writer) {
         writer.println("usage: c");
-        writer.println("Continues the execution of the current program. ");
+        writer.println("    Continues with the current reasoning tasks.");
     }
     public void execute(String[] args) {
           m_debugger.setInMainLoop(false);

@@ -28,9 +28,9 @@ public class ShowModelCommand extends AbstractCommand {
     }
     public void printHelp(PrintWriter writer) {
         writer.println("usage: showModel");
-        writer.println("or");
-        writer.println("usage: showModel DLPredicate");
-        writer.println("If no predicate is given, prints the whole model, otherwise prints all assertions containing the predicate. ");
+        writer.println("    Prints the entire current model.");
+        writer.println("usage: showModel predicate");
+        writer.println("    Prints all assertions containing the supplied predicate.");
     }
     public void execute(String[] args) {
         Set<Object[]> facts=new TreeSet<Object[]>(Printing.FactComparator.INSTANCE);
