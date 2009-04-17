@@ -411,7 +411,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
             }
         }
         public String toString(Prefixes prefixes) {
-            return "   << DGRAPHS @ "+m_position1+" and "+m_position2;
+            return "   << DGRAPHS | "+m_position1+" and "+m_position2;
         }
     }
     

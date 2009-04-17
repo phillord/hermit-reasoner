@@ -847,7 +847,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             if (!nonAdmissibleDLClauses.isEmpty()) {
                 String CRLF=System.getProperty("line.separator");
                 StringBuffer buffer=new StringBuffer();
-                buffer.append("The following DL-clauses in the DL-ontology"+" are not admissible:");
+                buffer.append("The following DL-clauses in the DL-ontology are not admissible:");
                 buffer.append(CRLF);
                 for (DLClause dlClause : nonAdmissibleDLClauses) {
                     buffer.append(dlClause.toString(prefixes));
