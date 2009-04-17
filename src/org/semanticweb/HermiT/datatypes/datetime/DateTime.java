@@ -1,8 +1,6 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.datatypes.datetime;
 
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -51,23 +49,39 @@ public class DateTime {
     public String toString() {
         long timeOnTimeline=m_timeOnTimeline;
         if (m_timeZoneOffset!=NO_TIMEZONE)
-            timeOnTimeline+=m_timeZoneOffset*1000L;
+            timeOnTimeline+=m_timeZoneOffset*60L*1000L;
         int millisecond=(int)(timeOnTimeline % 1000L);
-        timeOnTimeline=timeOnTimeline / 1000L;
+        timeOnTimeline=timeOnTimeline/1000L;
         int second=(int)(timeOnTimeline % 60L);
-        timeOnTimeline=timeOnTimeline / 60L;
+        timeOnTimeline=timeOnTimeline/60L;
         int minute=(int)(timeOnTimeline % 60L);
-        timeOnTimeline=timeOnTimeline / 60L;
+        timeOnTimeline=timeOnTimeline/60L;
         int hour=(int)(timeOnTimeline % 24L);
-        long days=timeOnTimeline / 24L;
-        // I'm not 100% sure that the following conversion is correct; however, this doesn't really matter:
-        // after all, this is just toString() and as such it doesn't affect reasoning.
-        GregorianCalendar calendar=new GregorianCalendar();
-        calendar.setGregorianChange(new Date(Long.MIN_VALUE));
-        calendar.set(0,0,(int)days);
-        int year=calendar.get(GregorianCalendar.YEAR);
-        int month=calendar.get(GregorianCalendar.MONTH);
-        int day=calendar.get(GregorianCalendar.DAY_OF_MONTH)-1;
+        long days=timeOnTimeline/24L;
+        int year=(int)(days/366L);
+        days-=daysToYearStart(year);
+        int daysInYear=daysInYear(year);
+        while (days>daysInYear) {
+            days-=daysInYear;
+            year++;
+            daysInYear=daysInYear(year);
+        }
+        int month=1;
+        int daysInMonth=daysInMonth(year,month);
+        while (days>daysInMonth) {
+            days-=daysInMonth;
+            month++;
+            daysInMonth=daysInMonth(year,month);
+        }
+        int day=((int)days)+1;
+        if (day>daysInMonth(year,month)) {
+            day=1;
+            month++;
+        }
+        if (month>12) {
+            month=1;
+            year++;
+        }
         StringBuffer buffer=new StringBuffer();
         appendPadded(buffer,year,4);
         buffer.append('-');
@@ -105,6 +119,13 @@ public class DateTime {
             }
         return buffer.toString();
     }
+    protected static long daysToYearStart(int year) {
+        long yearMinusOne=year-1;
+        return 365*yearMinusOne+(yearMinusOne/400)-(yearMinusOne/100)+(yearMinusOne/4);
+    }
+    protected static int daysInYear(int year) {
+        return 365+((year % 4)!=0 || ((year % 100)==0 && (year % 400)!=0) ? 0 : 1);
+    }
     public long getTimeOnTimeline() {
         return m_timeOnTimeline;
     }
@@ -131,7 +152,17 @@ public class DateTime {
             int hour=Integer.parseInt(matcher.group(HOUR_GROUP));
             int minute=Integer.parseInt(matcher.group(MINUTE_GROUP));
             int second=Integer.parseInt(matcher.group(SECOND_WHOLE_GROUP));
-            int millisecond=Integer.parseInt(matcher.group(SECOND_FRACTION_GROUP));
+            // Milliseconds must be padded to exactly three characters so
+            // that they can be parsed correctly!
+            String millisecondString=matcher.group(SECOND_FRACTION_GROUP);
+            int millisecond;
+            if (millisecondString!=null) {
+                while (millisecondString.length()<3)
+                    millisecondString+='0';
+                millisecond=Integer.parseInt(millisecondString);
+            }
+            else
+                millisecond=0;
             if (year<-9999 || year>9999 ||
                 month<=0 || month>12 ||
                 day<=0 || day>daysInMonth(year,month) ||
@@ -174,10 +205,13 @@ public class DateTime {
     }
     protected long getTimeOnTimelineRaw(int year,int month,int day,int hour,int minute,int second,int millisecond) {
         long yearMinusOne=year-1;
-        long timeOnTimeline=31536000L*yearMinusOne+86400L*(yearMinusOne/400-yearMinusOne/100+yearMinusOne/4);
+        long timeOnTimeline=31536000L*yearMinusOne;
+        timeOnTimeline+=86400L*(yearMinusOne/400-yearMinusOne/100+yearMinusOne/4);
         for (int monthIndex=1;monthIndex<month;monthIndex++)
             timeOnTimeline+=86400L*daysInMonth(year,monthIndex);
-        timeOnTimeline=(timeOnTimeline+86400L*(day-1)+3600L*hour+60L*minute+second)*1000L+millisecond;
+        timeOnTimeline+=86400L*(day-1);
+        timeOnTimeline+=3600L*hour+60L*minute+second;
+        timeOnTimeline=timeOnTimeline*1000L+millisecond;
         return timeOnTimeline;
     }
     protected static int daysInMonth(int year,int month) {
