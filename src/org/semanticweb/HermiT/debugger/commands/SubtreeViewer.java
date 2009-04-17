@@ -35,6 +35,7 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
 import org.semanticweb.HermiT.debugger.Debugger;
+import org.semanticweb.HermiT.debugger.Printing;
 import org.semanticweb.HermiT.debugger.Debugger.NodeCreationInfo;
 import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
@@ -143,7 +144,7 @@ public class SubtreeViewer extends JFrame {
         else {
             CharArrayWriter buffer=new CharArrayWriter();
             PrintWriter writer=new PrintWriter(buffer);
-            m_debugger.printNodeData(node,writer);
+            Printing.printNodeData(m_debugger,node,writer);
             writer.flush();
             m_nodeInfoTextArea.setText(buffer.toString());
             m_nodeInfoTextArea.select(0,0);
@@ -247,7 +248,7 @@ public class SubtreeViewer extends JFrame {
                 buffer.append("]");
             }
             else {
-                
+                // Do nothing for now.
             }
             super.getTreeCellRendererComponent(tree,buffer.toString(),selected,expanded,leaf,row,hasFocus);
             if (!node.isActive())

@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.debugger.Debugger;
+import org.semanticweb.HermiT.debugger.Printing;
 
 public class ShowNodeCommand extends AbstractCommand {
 
@@ -41,7 +42,7 @@ public class ShowNodeCommand extends AbstractCommand {
         }
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter writer=new PrintWriter(buffer);
-        m_debugger.printNodeData(node,writer);
+        Printing.printNodeData(m_debugger,node,writer);
         writer.flush();
         showTextInWindow(buffer.toString(),"Node '"+node.getNodeID()+"'");
         selectConsoleWindow();

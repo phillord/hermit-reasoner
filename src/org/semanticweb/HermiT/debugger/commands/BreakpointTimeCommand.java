@@ -10,13 +10,13 @@ public class BreakpointTimeCommand extends AbstractCommand {
         super(debugger);
     }
     public String getCommandName() {
-        return "breakpointTime";
+        return "bpTime";
     }
     public String[] getDescription() {
         return new String[] { "timeInSeconds","set break point after timeInSeconds" };
     }
     public void printHelp(PrintWriter writer) {
-        writer.println("usage: breakpointTime timeInSeconds");
+        writer.println("usage: bpTime timeInSeconds");
         writer.println("Sets the next breakpoint time to the given time in seconds.");
     }
     public void execute(String[] args) {

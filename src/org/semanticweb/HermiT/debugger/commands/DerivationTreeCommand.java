@@ -45,7 +45,7 @@ public class DerivationTreeCommand extends AbstractCommand {
             tuple=new Object[0];
         else {
             tuple=new Object[args.length-1];
-            tuple[0]=m_debugger.getDLPredicate(predicate);
+            tuple[0]=getDLPredicate(predicate);
             if (tuple[0]==null) {
                 m_debugger.getOutput().println("Invalid predicate '"+predicate+"'.");
                 return;

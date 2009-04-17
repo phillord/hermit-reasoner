@@ -37,7 +37,7 @@ public class ActiveNodesCommand extends AbstractCommand {
             node=node.getNextTableauNode();
         }
         writer.flush();
-        super.showTextInWindow("Active nodes ("+numberOfNodes+"):"+buffer.toString(),"Active nodes");
-        super.selectConsoleWindow();
+        showTextInWindow("Active nodes ("+numberOfNodes+"):"+buffer.toString(),"Active nodes");
+        selectConsoleWindow();
     }
 }

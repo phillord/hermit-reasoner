@@ -7,6 +7,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
+import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.AtomicRole;
+import org.semanticweb.HermiT.model.DLPredicate;
+import org.semanticweb.HermiT.model.DescriptionGraph;
+import org.semanticweb.HermiT.model.Equality;
+import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.debugger.Debugger;
 
@@ -35,6 +41,25 @@ public abstract class AbstractCommand implements DebuggerCommand {
                     m_debugger.getMainFrame().toFront();
             }
         });
+    }
+    protected DLPredicate getDLPredicate(String predicate) {
+        if ("==".equals(predicate))
+            return Equality.INSTANCE;
+        else if ("!=".equals(predicate))
+            return Inequality.INSTANCE;
+        else if (predicate.startsWith("+"))
+            return AtomicConcept.create(m_debugger.getPrefixes().expandAbbreviatedURI(predicate.substring(1)));
+        else if (predicate.startsWith("-"))
+            return AtomicRole.create(m_debugger.getPrefixes().expandAbbreviatedURI(predicate.substring(1)));
+        else if (predicate.startsWith("$")) {
+            String graphName=m_debugger.getPrefixes().expandAbbreviatedURI(predicate.substring(1));
+            for (DescriptionGraph descriptionGraph : m_debugger.getTableau().getDLOntology().getAllDescriptionGraphs())
+                if (graphName.equals(descriptionGraph.getName()))
+                    return descriptionGraph;
+            return null;
+        }
+        else
+            return null;
     }
     /**
      * @param node

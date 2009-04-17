@@ -3,6 +3,29 @@ package org.semanticweb.HermiT.debugger;
 
 import java.io.PrintWriter;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
+import org.semanticweb.HermiT.model.AtLeastConcept;
+import org.semanticweb.HermiT.model.AtMostGuard;
+import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.AtomicNegationConcept;
+import org.semanticweb.HermiT.model.AtomicRole;
+import org.semanticweb.HermiT.model.Concept;
+import org.semanticweb.HermiT.model.DataRange;
+import org.semanticweb.HermiT.model.DataValueEnumeration;
+import org.semanticweb.HermiT.model.DatatypeRestriction;
+import org.semanticweb.HermiT.model.DescriptionGraph;
+import org.semanticweb.HermiT.model.ExistentialConcept;
+import org.semanticweb.HermiT.model.ExistsDescriptionGraph;
+import org.semanticweb.HermiT.model.InverseRole;
+import org.semanticweb.HermiT.model.NegationDataRange;
+import org.semanticweb.HermiT.model.Role;
+import org.semanticweb.HermiT.tableau.ExtensionTable;
+import org.semanticweb.HermiT.tableau.Node;
 
 public class Printing {
     public static void printPadded(PrintWriter writer,int number,int size) {
@@ -49,5 +72,333 @@ public class Printing {
         }
         if (window1Message)
             writer.println("--------------------------------------------");
+    }
+    public static void printNodeData(Debugger debugger,Node node,PrintWriter writer) {
+        writer.print("Node ID:    ");
+        writer.println(node.getNodeID());
+        writer.print("Node Type:  ");
+        writer.println(node.getNodeType());
+        writer.print("Parent ID:  ");
+        writer.println(node.getParent()==null ? "(root node)" : node.getParent().getNodeID());
+        writer.print("Depth:      ");
+        writer.println(node.getTreeDepth());
+        writer.print("Status:     ");
+        if (node.isActive())
+            writer.println("active");
+        else if (node.isMerged()) {
+            Node mergeTarget=node.getMergedInto();
+            while (mergeTarget!=null) {
+                writer.print(" --> ");
+                writer.print(mergeTarget.getNodeID());
+                mergeTarget=mergeTarget.getMergedInto();
+            }
+            writer.println();
+        }
+        else
+            writer.println("pruned");
+        writer.print("Blocked:    ");
+        writer.println(formatBlockingStatus(node));
+        writer.print("Created as: ");
+        Debugger.NodeCreationInfo nodeCreationInfo=debugger.getNodeCreationInfo(node);
+        ExistentialConcept startExistential=nodeCreationInfo.m_createdByExistential;
+        if (!(startExistential instanceof AtLeastConcept))
+            writer.println("(root)");
+        else
+            writer.println(((AtLeastConcept)startExistential).getToConcept().toString(debugger.getPrefixes()));
+        printConceptLabel(debugger,node,writer);
+        printEdges(debugger,node,writer);
+    }
+    protected static String formatBlockingStatus(Node node) {
+        if (!node.isBlocked())
+            return "no";
+        else if (node.isDirectlyBlocked())
+            return "directly by "+(node.getBlocker()==Node.CACHE_BLOCKER ? "signature in cache" : node.getBlocker().getNodeID());
+        else
+            return "indirectly by "+(node.getBlocker()==Node.CACHE_BLOCKER ? "signature in cache" : node.getBlocker().getNodeID());
+    }
+    protected static void printConceptLabel(Debugger debugger,Node node,PrintWriter writer) {
+        TreeSet<AtomicConcept> atomicConcepts=new TreeSet<AtomicConcept>(ConceptComparator.INSTANCE);
+        TreeSet<ExistentialConcept> existentialConcepts=new TreeSet<ExistentialConcept>(ConceptComparator.INSTANCE);
+        TreeSet<AtomicNegationConcept> negativeConcepts=new TreeSet<AtomicNegationConcept>(ConceptComparator.INSTANCE);
+        TreeSet<DataRange> dataRanges=new TreeSet<DataRange>(ConceptComparator.INSTANCE);
+        ExtensionTable.Retrieval retrieval=debugger.getTableau().getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
+        retrieval.getBindingsBuffer()[1]=node;
+        retrieval.open();
+        while (!retrieval.afterLast()) {
+            Object potentialConcept=retrieval.getTupleBuffer()[0];
+            if (potentialConcept instanceof AtomicNegationConcept)
+                negativeConcepts.add((AtomicNegationConcept)potentialConcept);
+            else if (potentialConcept instanceof AtomicConcept)
+                atomicConcepts.add((AtomicConcept)potentialConcept);
+            else if (potentialConcept instanceof ExistentialConcept)
+                existentialConcepts.add((ExistentialConcept)potentialConcept);
+            else if (potentialConcept instanceof DataRange)
+                dataRanges.add((DataRange)potentialConcept);
+            else if (potentialConcept instanceof DescriptionGraph) {
+                // ignore description graphs here
+            }
+            else
+                throw new IllegalStateException("Found something in the label that is not a known type!");
+            retrieval.next();
+        }
+        if (!atomicConcepts.isEmpty() || !existentialConcepts.isEmpty()) {
+            writer.print("-- Positive concept label ------------------------");
+            printConcepts(debugger,atomicConcepts,writer,3);
+            printConcepts(debugger,existentialConcepts,writer,1);
+        }
+        if (!negativeConcepts.isEmpty()) {
+            writer.print("-- Negative concept label ------------------------");
+            printConcepts(debugger,negativeConcepts,writer,3);
+        }
+        if (!dataRanges.isEmpty()) {
+            writer.print("-- Data ranges label ------------------------");
+            printDataRanges(debugger,dataRanges,writer,1);
+        }
+    }
+    protected static void printEdges(Debugger debugger,Node node,PrintWriter writer) {
+        Map<Node,Set<AtomicRole>> outgoingEdges=new TreeMap<Node,Set<AtomicRole>>(NodeComparator.INSTANCE);
+        ExtensionTable.Retrieval retrieval=debugger.getTableau().getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,false },ExtensionTable.View.TOTAL);
+        retrieval.getBindingsBuffer()[1]=node;
+        retrieval.open();
+        while (!retrieval.afterLast()) {
+            Object atomicRoleObject=retrieval.getTupleBuffer()[0];
+            if (atomicRoleObject instanceof AtomicRole) {
+                AtomicRole atomicRole=(AtomicRole)retrieval.getTupleBuffer()[0];
+                Node toNode=(Node)retrieval.getTupleBuffer()[2];
+                Set<AtomicRole> set=outgoingEdges.get(toNode);
+                if (set==null) {
+                    set=new TreeSet<AtomicRole>(RoleComparator.INSTANCE);
+                    outgoingEdges.put(toNode,set);
+                }
+                set.add(atomicRole);
+            }
+            retrieval.next();
+        }
+        if (!outgoingEdges.isEmpty()) {
+            writer.println("-- Outgoing edges --------------------------------");
+            printEdgeMap(debugger,outgoingEdges,writer);
+        }
+        Map<Node,Set<AtomicRole>> incomingEdges=new TreeMap<Node,Set<AtomicRole>>(NodeComparator.INSTANCE);
+        retrieval=debugger.getTableau().getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,false,true },ExtensionTable.View.TOTAL);
+        retrieval.getBindingsBuffer()[2]=node;
+        retrieval.open();
+        while (!retrieval.afterLast()) {
+            Object atomicRoleObject=retrieval.getTupleBuffer()[0];
+            if (atomicRoleObject instanceof AtomicRole) {
+                AtomicRole atomicRole=(AtomicRole)retrieval.getTupleBuffer()[0];
+                Node fromNode=(Node)retrieval.getTupleBuffer()[1];
+                Set<AtomicRole> set=incomingEdges.get(fromNode);
+                if (set==null) {
+                    set=new TreeSet<AtomicRole>(RoleComparator.INSTANCE);
+                    incomingEdges.put(fromNode,set);
+                }
+                set.add(atomicRole);
+            }
+            retrieval.next();
+        }
+        if (!incomingEdges.isEmpty()) {
+            writer.println("-- Incoming edges --------------------------------");
+            printEdgeMap(debugger,incomingEdges,writer);
+        }
+    }
+    protected static void printConcepts(Debugger debugger,Set<? extends Concept> set,PrintWriter writer,int numberInRow) {
+        int number=0;
+        for (Concept concept : set) {
+            if (number!=0)
+                writer.print(", ");
+            if ((number%numberInRow)==0) {
+                writer.println();
+                writer.print("    ");
+            }
+            writer.print(concept.toString(debugger.getPrefixes()));
+            number++;
+        }
+        writer.println();
+    }
+    protected static void printDataRanges(Debugger debugger,Set<? extends DataRange> set,PrintWriter writer,int numberInRow) {
+        int number=0;
+        for (DataRange range : set) {
+            if (number!=0)
+                writer.print(", ");
+            if ((number%numberInRow)==0) {
+                writer.println();
+                writer.print("    ");
+            }
+            writer.print(range.toString(debugger.getPrefixes()));
+            number++;
+        }
+        writer.println();
+    }
+    protected static void printEdgeMap(Debugger debugger,Map<Node,Set<AtomicRole>> map,PrintWriter writer) {
+        for (Map.Entry<Node,Set<AtomicRole>> entry : map.entrySet()) {
+            writer.print("    ");
+            writer.print(entry.getKey().getNodeID());
+            writer.print(" -->");
+            int number=0;
+            for (AtomicRole atomicRole : entry.getValue()) {
+                if (number!=0)
+                    writer.print(", ");
+                if ((number%3)==0) {
+                    writer.println();
+                    writer.print("        ");
+                }
+                writer.print(atomicRole.toString(debugger.getPrefixes()));
+                number++;
+            }
+            writer.println();
+        }
+    }
+
+    public static class ConceptComparator implements Comparator<Concept> {
+        public static final ConceptComparator INSTANCE=new ConceptComparator();
+
+        public int compare(Concept c1,Concept c2) {
+            int type1=getConceptType(c1);
+            int type2=getConceptType(c2);
+            if (type1!=type2)
+                return type1-type2;
+            switch (type1) {
+            case 0:
+                return ((AtomicConcept)c1).getURI().compareTo(((AtomicConcept)c2).getURI());
+            case 1:
+                {
+                    AtMostGuard g1=(AtMostGuard)c1;
+                    AtMostGuard g2=(AtMostGuard)c2;
+                    int comparison=RoleComparator.INSTANCE.compare(g1.getOnRole(),g2.getOnRole());
+                    if (comparison!=0)
+                        return comparison;
+                    return compare(g1.getToAtomicConcept(),g2.getToAtomicConcept());
+                }
+            case 2:
+                {
+                    AtLeastConcept l1=(AtLeastConcept)c1;
+                    AtLeastConcept l2=(AtLeastConcept)c2;
+                    int comparison=RoleComparator.INSTANCE.compare(l1.getOnRole(),l2.getOnRole());
+                    if (comparison!=0)
+                        return comparison;
+                    return compare(l1.getToConcept(),l2.getToConcept());
+                }
+            case 3:
+                {
+                    ExistsDescriptionGraph g1=(ExistsDescriptionGraph)c1;
+                    ExistsDescriptionGraph g2=(ExistsDescriptionGraph)c2;
+                    return g1.getDescriptionGraph().getName().compareTo(g2.getDescriptionGraph().getName());
+                }
+            case 4:
+                return ((AtomicNegationConcept)c1).getNegatedAtomicConcept().getURI().compareTo(((AtomicNegationConcept)c2).getNegatedAtomicConcept().getURI());
+            case 5:
+                return compareDatatypeRestrictions((DatatypeRestriction)c1,(DatatypeRestriction)c2);
+            case 6:
+                return compareDataValueEnumerations((DataValueEnumeration)c1,(DataValueEnumeration)c2);
+            case 7:
+                {
+                    NegationDataRange ndr1=(NegationDataRange)c1;
+                    NegationDataRange ndr2=(NegationDataRange)c2;
+                    return compare(ndr1.getNegatedDataRange(),ndr2.getNegatedDataRange());
+                }
+            default:
+                throw new IllegalArgumentException();
+            }
+        }
+        protected int getConceptType(Concept c) {
+            if (c instanceof AtMostGuard)
+                return 1;
+            else if (c instanceof AtomicConcept)
+                return 0;
+            else if (c instanceof AtLeastConcept)
+                return 2;
+            else if (c instanceof ExistsDescriptionGraph)
+                return 3;
+            else if (c instanceof AtomicNegationConcept)
+                return 4;
+            else if (c instanceof DatatypeRestriction)
+                return 5;
+            else if (c instanceof DataValueEnumeration)
+                return 6;
+            else if (c instanceof NegationDataRange)
+                return 7;
+            else
+                throw new IllegalArgumentException();
+        }
+        protected int compareDatatypeRestrictions(DatatypeRestriction dr1,DatatypeRestriction dr2) {
+            int comparison=dr1.getDatatypeURI().compareTo(dr2.getDatatypeURI());
+            if (comparison!=0)
+                return comparison;
+            comparison=dr1.getNumberOfFacetRestrictions()-dr2.getNumberOfFacetRestrictions();
+            if (comparison!=0)
+                return comparison;
+            for (int index=0;index<dr1.getNumberOfFacetRestrictions();index++) {
+                comparison=dr1.getFacetURI(index).compareTo(dr2.getFacetURI(index));
+                if (comparison!=0)
+                    return comparison;
+                comparison=compareDataValues(dr1.getFacetValue(index),dr2.getFacetValue(index));
+                if (comparison!=0)
+                    return comparison;
+            }
+            return 0;
+        }
+        protected int compareDataValueEnumerations(DataValueEnumeration dve1,DataValueEnumeration dve2) {
+            int comparison=dve1.getNumberOfDataValues()-dve2.getNumberOfDataValues();
+            if (comparison!=0)
+                return comparison;
+            for (int index=0;index<dve1.getNumberOfDataValues();index++) {
+                comparison=compareDataValues(dve1.getDataValue(index),dve2.getDataValue(index));
+                if (comparison!=0)
+                    return comparison;
+            }
+            return 0;
+            
+        }
+        protected int compareDataValues(Object dv1,Object dv2) {
+            return dv1.toString().compareTo(dv2.toString());
+        }
+    }
+
+    protected static class RoleComparator implements Comparator<Role> {
+        public static final RoleComparator INSTANCE=new RoleComparator();
+
+        public int compare(Role ar1,Role ar2) {
+            int type1=getRoleType(ar1);
+            int type2=getRoleType(ar2);
+            if (type1!=type2)
+                return type1-type2;
+            if (type1==0)
+                return ((AtomicRole)ar1).getURI().compareTo(((AtomicRole)ar2).getURI());
+            else
+                return ((InverseRole)ar1).getInverseOf().getURI().compareTo(((InverseRole)ar2).getInverseOf().getURI());
+        }
+        protected int getRoleType(Role ar) {
+            if (ar instanceof AtomicRole)
+                return 0;
+            else
+                return 1;
+        }
+    }
+
+    protected static class NodeComparator implements Comparator<Node> {
+        public static final NodeComparator INSTANCE=new NodeComparator();
+
+        public int compare(Node o1,Node o2) {
+            return o1.getNodeID()-o2.getNodeID();
+        }
+    }
+
+    public static class FactComparator implements Comparator<Object[]> {
+        public static final FactComparator INSTANCE=new FactComparator();
+
+        public int compare(Object[] o1,Object[] o2) {
+            int compare=o1.length-o2.length;
+            if (compare!=0)
+                return compare;
+            compare=o1[0].toString().compareTo(o2[0].toString());
+            if (compare!=0)
+                return compare;
+            for (int index=1;index<o1.length;index++) {
+                compare=((Node)o1[index]).getNodeID()-((Node)o2[index]).getNodeID();
+                if (compare!=0)
+                    return compare;
+            }
+            return 0;
+        }
     }
 }

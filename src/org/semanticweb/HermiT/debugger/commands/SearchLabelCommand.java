@@ -55,8 +55,8 @@ public class SearchLabelCommand extends AbstractCommand {
                 searchNode=searchNode.getNextTableauNode();
             }
             writer.flush();
-            super.showTextInWindow(buffer.toString(),"Nodes with label equal to the one of "+node.getNodeID());
-            super.selectConsoleWindow();
+            showTextInWindow(buffer.toString(),"Nodes with label equal to the one of "+node.getNodeID());
+            selectConsoleWindow();
         }
         else
             m_debugger.getOutput().println("Node with ID '"+nodeID+"' not found.");

@@ -33,8 +33,6 @@ public class HelpCommand extends AbstractCommand {
                 command.printHelp(m_debugger.getOutput());
         }
         else {
-            m_debugger.getOutput().println("Use \"help commandName\" to get help for a specific command.");
-            m_debugger.getOutput().println();
             int maxFirstColumnWidth=0;
             for (DebuggerCommand command : m_debugger.getDebuggerCommands().values()) {
                 String[] description=command.getDescription();

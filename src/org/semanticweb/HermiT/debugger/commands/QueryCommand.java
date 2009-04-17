@@ -10,6 +10,7 @@ import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.debugger.Debugger;
+import org.semanticweb.HermiT.debugger.Printing;
 
 public class QueryCommand extends AbstractCommand {
 
@@ -52,7 +53,7 @@ public class QueryCommand extends AbstractCommand {
             if ("?".equals(args[1]))
                 tuple[0]=null;
             else {
-                tuple[0]=m_debugger.getDLPredicate(args[1]);
+                tuple[0]=getDLPredicate(args[1]);
                 if (tuple[0]==null) {
                     m_debugger.getOutput().println("Invalid predicate '"+args[1]+"'.");
                     return;
@@ -87,7 +88,7 @@ public class QueryCommand extends AbstractCommand {
             ExtensionTable.Retrieval retrieval=extensionTable.createRetrieval(boundPositions,ExtensionTable.View.TOTAL);
             System.arraycopy(tuple,0,retrieval.getBindingsBuffer(),0,tuple.length);
             retrieval.open();
-            Set<Object[]> facts=new TreeSet<Object[]>(Debugger.FactComparator.INSTANCE);
+            Set<Object[]> facts=new TreeSet<Object[]>(Printing.FactComparator.INSTANCE);
             Object[] tupleBuffer=retrieval.getTupleBuffer();
             while (!retrieval.afterLast()) {
                 facts.add(tupleBuffer.clone());

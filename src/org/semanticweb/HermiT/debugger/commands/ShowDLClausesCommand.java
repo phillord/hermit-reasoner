@@ -27,7 +27,7 @@ public class ShowDLClausesCommand extends AbstractCommand {
         for (DLClause dlClause : m_debugger.getTableau().getDLOntology().getDLClauses())
             writer.println(dlClause.toString(m_debugger.getPrefixes()));
         writer.flush();
-        super.showTextInWindow(buffer.toString(),"DL-clauses");
-        super.selectConsoleWindow();
+        showTextInWindow(buffer.toString(),"DL-clauses");
+        selectConsoleWindow();
     }
 }

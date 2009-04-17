@@ -105,7 +105,7 @@ public class OriginStatsCommand extends AbstractCommand {
             if (comparison==0) {
                 comparison=o1.m_numberOfNonactiveOccurrences-o2.m_numberOfNonactiveOccurrences;
                 if (comparison==0)
-                    comparison=Debugger.ConceptComparator.INSTANCE.compare(o1.m_concept,o2.m_concept);
+                    comparison=Printing.ConceptComparator.INSTANCE.compare(o1.m_concept,o2.m_concept);
             }
             return comparison;
         }

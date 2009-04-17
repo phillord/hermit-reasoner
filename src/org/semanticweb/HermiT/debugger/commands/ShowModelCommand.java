@@ -5,12 +5,12 @@ import java.io.PrintWriter;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.semanticweb.HermiT.debugger.Debugger.FactComparator;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.debugger.Debugger;
+import org.semanticweb.HermiT.debugger.Printing;
 
 public class ShowModelCommand extends AbstractCommand {
 
@@ -33,7 +33,7 @@ public class ShowModelCommand extends AbstractCommand {
         writer.println("If no predicate is given, prints the whole model, otherwise prints all assertions containing the predicate. ");
     }
     public void execute(String[] args) {
-        Set<Object[]> facts=new TreeSet<Object[]>(FactComparator.INSTANCE);
+        Set<Object[]> facts=new TreeSet<Object[]>(Printing.FactComparator.INSTANCE);
         String title;
         if (args.length<2) {
             for (ExtensionTable extensionTable : m_debugger.getTableau().getExtensionManager().getExtensionTables()) {
@@ -43,7 +43,7 @@ public class ShowModelCommand extends AbstractCommand {
             title="Current model";
         }
         else {
-            DLPredicate dlPredicate=m_debugger.getDLPredicate(args[1]);
+            DLPredicate dlPredicate=getDLPredicate(args[1]);
             if (dlPredicate!=null) {
                 ExtensionTable extensionTable=m_debugger.getTableau().getExtensionManager().getExtensionTable(dlPredicate.getArity()+1);
                 boolean[] bindings=new boolean[extensionTable.getArity()];
