@@ -1,6 +1,5 @@
 package org.semanticweb.HermiT.reasoner;
 
-
 public class FloatDoubleTest extends AbstractReasonerTest {
 
     public FloatDoubleTest(String name) {
