@@ -53,26 +53,32 @@ public class DateTime {
         long timeOnTimeline=m_timeOnTimeline;
         if (m_timeZoneOffset!=NO_TIMEZONE)
             timeOnTimeline+=m_timeZoneOffset*60L*1000L;
-        int millisecond=(int)(timeOnTimeline % 1000L);
-        timeOnTimeline=timeOnTimeline/1000L;
-        int second=(int)(timeOnTimeline % 60L);
-        timeOnTimeline=timeOnTimeline/60L;
-        int minute=(int)(timeOnTimeline % 60L);
-        timeOnTimeline=timeOnTimeline/60L;
-        int hour=(int)(timeOnTimeline % 24L);
-        long days=timeOnTimeline/24L;
-        if (m_lastDayInstant) {
-            assert hour==0 && minute==0 && second==0 && millisecond==0;
-            hour=24;
+        int timePart=(int)(timeOnTimeline % (1000*60*60*24));
+        long days=timeOnTimeline/(1000L*60L*60L*24L);
+        if (timePart<0) {
+            timePart+=1000*60*60*24;
             days--;
+            assert timePart>=0;
         }
-        int year=(int)(days/366L);
-        days-=daysToYearStart(year);
-        int daysInYear=daysInYear(year);
-        while (days>daysInYear) {
-            days-=daysInYear;
-            year++;
-            daysInYear=daysInYear(year);
+        int millisecond=timePart % 1000;
+        timePart=timePart/1000;
+        int second=timePart % 60;
+        timePart=timePart/60;
+        int minute=(int)(timePart % 60L);
+        timePart=timePart/60;
+        int hour=(int)(timePart % 24L);
+        int year=(int)(days/370L);
+        if (year>=0) {
+            while (days>=daysToYearStart(year+1))
+                year++;
+            days-=daysToYearStart(year);
+        }
+        else {
+            while (days<daysToYearStart(year-1))
+                year--;
+            if (days<0)
+                year--;
+            days-=daysToYearStart(year);
         }
         int month=1;
         int daysInMonth=daysInMonth(year,month);
@@ -82,13 +88,26 @@ public class DateTime {
             daysInMonth=daysInMonth(year,month);
         }
         int day=((int)days)+1;
-        if (day>daysInMonth(year,month)) {
-            day=1;
-            month++;
+        if (day==0) {
+            month--;
+            if (month==0) {
+                month=12;
+                year--;
+            }
+            day=daysInMonth(year,month);
         }
-        if (month>12) {
-            month=1;
-            year++;
+        if (m_lastDayInstant) {
+            assert hour==0 && minute==0 && second==0 && millisecond==0;
+            hour=24;
+            day--;
+            if (day<=0) {
+                month--;
+                if (month<=0) {
+                    month=12;
+                    year--;
+                }
+                day=daysInMonth(year,month);
+            }
         }
         StringBuffer buffer=new StringBuffer();
         appendPadded(buffer,year,4);
@@ -127,13 +146,6 @@ public class DateTime {
             }
         return buffer.toString();
     }
-    protected static long daysToYearStart(int year) {
-        long yearMinusOne=year-1;
-        return 365*yearMinusOne+(yearMinusOne/400)-(yearMinusOne/100)+(yearMinusOne/4);
-    }
-    protected static int daysInYear(int year) {
-        return 365+((year % 4)!=0 || ((year % 100)==0 && (year % 400)!=0) ? 0 : 1);
-    }
     public long getTimeOnTimeline() {
         return m_timeOnTimeline;
     }
@@ -144,10 +156,12 @@ public class DateTime {
         return m_timeZoneOffset;
     }
     protected void appendPadded(StringBuffer buffer,int value,int digits) {
-        String stringValue=String.valueOf(value);
-        for (int i=digits-stringValue.length();i>0;--i)
+        if (value<0)
+            buffer.append('-');
+        String stringAbsValue=String.valueOf(Math.abs(value));
+        for (int i=digits-stringAbsValue.length();i>0;--i)
             buffer.append('0');
-        buffer.append(stringValue);
+        buffer.append(stringAbsValue);
     }
     public static DateTime parse(String lexicalForm) {
         Matcher matcher=s_dateTimePattern.matcher(lexicalForm);
@@ -221,6 +235,10 @@ public class DateTime {
         timeOnTimeline+=3600L*hour+60L*minute+second;
         timeOnTimeline=timeOnTimeline*1000L+millisecond;
         return timeOnTimeline;
+    }
+    protected static long daysToYearStart(int year) {
+        long yearMinusOne=year-1;
+        return 365*yearMinusOne+(yearMinusOne/400)-(yearMinusOne/100)+(yearMinusOne/4);
     }
     protected static int daysInMonth(int year,int month) {
         if (month==2) {

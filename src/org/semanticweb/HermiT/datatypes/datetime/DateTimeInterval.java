@@ -163,9 +163,9 @@ public class DateTimeInterval {
                         int minutesInDay=DateTime.getMinutesInDay(m_lowerBound);
                         assert -1440<minutesInDay;
                         if (-840<=minutesInDay && minutesInDay<=0)
-                            dateTimes.add(new DateTime(m_lowerBound,true,-minutesInDay));
+                            dateTimes.add(new DateTime(m_lowerBound,true,-1440-minutesInDay));
                         if (minutesInDay<=-1440+840)
-                            dateTimes.add(new DateTime(m_lowerBound,true,minutesInDay+1440));
+                            dateTimes.add(new DateTime(m_lowerBound,true,-minutesInDay));
                     }
                 }
             }

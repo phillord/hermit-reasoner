@@ -10,7 +10,8 @@ public class DateTimeTest extends AbstractReasonerTest {
     public DateTimeTest(String name) {
         super(name);
     }
-/*    public void testParsing() {
+    public void testParsing() {
+        // Test positive dates
         assertParsing("1926-11-26T16:24:10.200Z");
         assertParsing("1926-11-26T24:00:00Z");
         assertParsing("1926-11-26T16:24:10.200+02:00");
@@ -18,6 +19,25 @@ public class DateTimeTest extends AbstractReasonerTest {
         assertParsing("1926-12-21T16:24:10.200+02:00");
         assertParsing("1926-12-31T16:24:10.200+02:00");
         assertParsing("1926-12-31T00:00:00+02:00");
+        // Test year = 0
+        assertParsing("0000-01-01T00:00:00Z");
+        assertParsing("0000-01-01T00:00:00+14:00");
+        assertParsing("0000-01-01T00:00:00-02:00");
+        assertParsing("0000-01-01T00:00:00+02:00");
+        assertParsing("0000-01-01T24:00:00+02:00");
+        // Test year = -1
+        assertParsing("-0001-12-31T24:00:00Z");
+        assertParsing("-0001-12-31T23:59:59Z");
+        assertParsing("-0001-12-31T23:59:59+14:00");
+        assertParsing("-0001-12-31T24:00:00+14:00");
+        // Test negative dates
+        assertParsing("-1926-11-26T16:24:10.200Z");
+        assertParsing("-1926-11-26T24:00:00Z");
+        assertParsing("-1926-11-26T16:24:10.200+02:00");
+        assertParsing("-1926-01-01T16:24:10.200+02:00");
+        assertParsing("-1926-12-21T16:24:10.200+02:00");
+        assertParsing("-1926-12-31T16:24:10.200+02:00");
+        assertParsing("-1926-12-31T00:00:00+02:00");
     }
     public void testExactIntervalsWithoutTZ1() {
         DateTime time1=getTime("1926-11-26T14:00:00");
@@ -48,7 +68,7 @@ public class DateTimeTest extends AbstractReasonerTest {
         assertTrue(interval.containsDateTime(time1));
         assertFalse(interval.containsDateTime(time2));
         assertElements(time1,interval,loadDateTimes("res/datetime-1.txt"));
-    }*/
+    }
     public void testExactIntervalsWithTZ2() throws Exception {
         DateTime time1=getTime("1926-11-26T11:00:00Z");
         DateTime time2=getTime("1926-11-26T11:00:00");
@@ -57,6 +77,15 @@ public class DateTimeTest extends AbstractReasonerTest {
         assertTrue(interval.containsDateTime(time1));
         assertFalse(interval.containsDateTime(time2));
         assertElements(time1,interval,loadDateTimes("res/datetime-2.txt"));
+    }
+    public void testExactIntervalsWithTZ3() throws Exception {
+        DateTime time1=getTime("-1926-11-26T11:00:00Z");
+        DateTime time2=getTime("-1926-11-26T11:00:00");
+        DateTimeInterval interval=wihtTZ(time1);
+        assertEquals(100000,interval.subtractSizeFrom(100000+840+840+1+1+1));
+        assertTrue(interval.containsDateTime(time1));
+        assertFalse(interval.containsDateTime(time2));
+        assertElements(time1,interval,loadDateTimes("res/datetime-3.txt"));
     }
     protected static String getTZO(int offset) {
         int offsetAbs=Math.abs(offset);
