@@ -36,14 +36,17 @@ public class DateTime {
     protected static final int TZ_OFFSET_MINUTE_GROUP=14;
 
     protected final long m_timeOnTimeline;
+    protected final boolean m_lastDayInstant;
     protected final int m_timeZoneOffset;
     
     public DateTime(int year,int month,int day,int hour,int minute,int second,int millisecond,int timeZoneOffset) {
         m_timeOnTimeline=getTimeOnTimelineRaw(year,month,day,hour,minute,second,millisecond)-(timeZoneOffset==NO_TIMEZONE ? 0 : timeZoneOffset*60L*1000L);
+        m_lastDayInstant=(hour==24 && minute==0 && second==0 && millisecond==0);
         m_timeZoneOffset=timeZoneOffset;
     }
-    public DateTime(long timeOnTimeline,int timeZoneOffset) {
+    public DateTime(long timeOnTimeline,boolean lastDayInstant,int timeZoneOffset) {
         m_timeOnTimeline=timeOnTimeline;
+        m_lastDayInstant=lastDayInstant;
         m_timeZoneOffset=timeZoneOffset;
     }
     public String toString() {
@@ -58,6 +61,11 @@ public class DateTime {
         timeOnTimeline=timeOnTimeline/60L;
         int hour=(int)(timeOnTimeline % 24L);
         long days=timeOnTimeline/24L;
+        if (m_lastDayInstant) {
+            assert hour==0 && minute==0 && second==0 && millisecond==0;
+            hour=24;
+            days--;
+        }
         int year=(int)(days/366L);
         days-=daysToYearStart(year);
         int daysInYear=daysInYear(year);
@@ -198,10 +206,10 @@ public class DateTime {
         if (this==that)
             return true;
         DateTime thatObject=(DateTime)that;
-        return m_timeOnTimeline==thatObject.m_timeOnTimeline && m_timeZoneOffset==thatObject.m_timeZoneOffset;
+        return m_timeOnTimeline==thatObject.m_timeOnTimeline && m_lastDayInstant==thatObject.m_lastDayInstant && m_timeZoneOffset==thatObject.m_timeZoneOffset;
     }
     public int hashCode() {
-        return (int)(m_timeOnTimeline+m_timeZoneOffset);
+        return (int)(m_timeOnTimeline*3L+m_timeZoneOffset+(m_lastDayInstant ? 117L : 0L));
     }
     protected long getTimeOnTimelineRaw(int year,int month,int day,int hour,int minute,int second,int millisecond) {
         long yearMinusOne=year-1;
@@ -225,5 +233,14 @@ public class DateTime {
             return 30;
         else
             return 31;
+    }
+    public static boolean isLastDayInstant(long timeOnTimeline) {
+        return (timeOnTimeline % (1000L*60L*60L*24L))==0;
+    }
+    public static boolean secondsAreZero(long timeOnTimeline) {
+        return (timeOnTimeline % (1000L*60L))==0;
+    }
+    public static int getMinutesInDay(long timeOnTimeline) {
+        return (int)((timeOnTimeline/(1000L*60L)) % (24L*60L));
     }
 }

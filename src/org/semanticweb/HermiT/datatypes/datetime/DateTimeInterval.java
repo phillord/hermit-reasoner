@@ -82,15 +82,38 @@ public class DateTimeInterval {
             // Since the interval is not empty, both bounds must be inclusive.
             assert m_lowerBoundType==BoundType.INCLUSIVE;
             assert m_upperBoundType==BoundType.INCLUSIVE;
-            if (m_intervalType==IntervalType.WITH_TIMEZONE) {
-                // There is only one timezoned value that gets mapped to a particular point on the time line.
-                return argument-1;
+            if (m_intervalType==IntervalType.WITHOUT_TIMEZONE) {
+                // There are at most two values without a time zone that gets mapped to a particular point on the time line.
+                int numberOfValues=1;
+                if (DateTime.isLastDayInstant(m_lowerBound))
+                    numberOfValues++;
+                return Math.max(0,argument-numberOfValues);
             }
             else {
-                // There are 840+840-1 different timezoned values that get mapped to a particular point on the time line.
+                // 840+840+1 different timezoned values that get mapped to a particular point on the time line.
                 // This is because the time zone offset has the form hh:mm where 0<=hh<14 and 0<=mm<60 or 14:00,
                 // which gives us 840 values; the other 840 is for the negative time zones, and -1 is so that we don't count 00:00 twice.
-                return Math.max(0,argument-(840+840-1));
+                int numberOfValues=840+840+1;
+                // More values can be added for last day instants.
+                if (DateTime.secondsAreZero(m_lowerBound)) {
+                    if (m_lowerBound>=0) {
+                        int minutesInDay=DateTime.getMinutesInDay(m_lowerBound);
+                        assert minutesInDay<1440;
+                        if (0<=minutesInDay && minutesInDay<=840)
+                            numberOfValues++;
+                        if (1440-840<=minutesInDay)
+                            numberOfValues++;
+                    }
+                    else {
+                        int minutesInDay=DateTime.getMinutesInDay(m_lowerBound);
+                        assert -1440<minutesInDay;
+                        if (-840<=minutesInDay && minutesInDay<=0)
+                            numberOfValues++;
+                        if (minutesInDay<=-1440+840)
+                            numberOfValues++;
+                    }
+                }
+                return Math.max(0,argument-numberOfValues);
             }
         }
     }
@@ -115,14 +138,36 @@ public class DateTimeInterval {
             // Since the interval is not empty, both bounds must be inclusive.
             assert m_lowerBoundType==BoundType.INCLUSIVE;
             assert m_upperBoundType==BoundType.INCLUSIVE;
-            if (m_intervalType==IntervalType.WITH_TIMEZONE) {
-                // There is only one timezoned value that gets mapped to a particular point on the time line.
-                dateTimes.add(new DateTime(m_lowerBound,DateTime.NO_TIMEZONE));
+            if (m_intervalType==IntervalType.WITHOUT_TIMEZONE) {
+                // There are at most two values without a time zone that gets mapped to a particular point on the time line.
+                dateTimes.add(new DateTime(m_lowerBound,false,DateTime.NO_TIMEZONE));
+                if (DateTime.isLastDayInstant(m_lowerBound))
+                    dateTimes.add(new DateTime(m_lowerBound,true,DateTime.NO_TIMEZONE));
             }
             else {
-                // There are 840+840-1 different timezoned values that get mapped to a particular point on the time line.
+                // 840+840-1 different timezoned values that get mapped to a particular point on the time line.
+                // This is because the time zone offset has the form hh:mm where 0<=hh<14 and 0<=mm<60 or 14:00,
+                // which gives us 840 values; the other 840 is for the negative time zones, and -1 is so that we don't count 00:00 twice.
                 for (int timeZoneOffset=-840;timeZoneOffset<=840;timeZoneOffset++)
-                    dateTimes.add(new DateTime(m_lowerBound,timeZoneOffset));
+                    dateTimes.add(new DateTime(m_lowerBound,false,timeZoneOffset));
+                if (DateTime.secondsAreZero(m_lowerBound)) {
+                    if (m_lowerBound>=0) {
+                        int minutesInDay=DateTime.getMinutesInDay(m_lowerBound);
+                        assert minutesInDay<1440;
+                        if (0<=minutesInDay && minutesInDay<=840)
+                            dateTimes.add(new DateTime(m_lowerBound,true,-minutesInDay));
+                        if (1440-840<=minutesInDay)
+                            dateTimes.add(new DateTime(m_lowerBound,true,1440-minutesInDay));
+                    }
+                    else {
+                        int minutesInDay=DateTime.getMinutesInDay(m_lowerBound);
+                        assert -1440<minutesInDay;
+                        if (-840<=minutesInDay && minutesInDay<=0)
+                            dateTimes.add(new DateTime(m_lowerBound,true,-minutesInDay));
+                        if (minutesInDay<=-1440+840)
+                            dateTimes.add(new DateTime(m_lowerBound,true,minutesInDay+1440));
+                    }
+                }
             }
         }
         else
