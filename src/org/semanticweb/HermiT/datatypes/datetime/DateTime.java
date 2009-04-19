@@ -67,7 +67,7 @@ public class DateTime {
         int minute=(int)(timePart % 60L);
         timePart=timePart/60;
         int hour=(int)(timePart % 24L);
-        int year=(int)(days/370L);
+        int year=(int)(days/367L);
         if (year>=0) {
             while (days>=daysToYearStart(year+1))
                 year++;
@@ -76,8 +76,7 @@ public class DateTime {
         else {
             while (days<daysToYearStart(year-1))
                 year--;
-            if (days<0)
-                year--;
+            year--;
             days-=daysToYearStart(year);
         }
         int month=1;

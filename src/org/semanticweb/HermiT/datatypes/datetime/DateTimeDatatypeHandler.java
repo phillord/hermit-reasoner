@@ -55,7 +55,7 @@ public class DateTimeDatatypeHandler implements DatatypeHandler {
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert s_managedDatatypeURIs.contains(datatypeURI);
         DateTime dateTime=DateTime.parse(lexicalForm);
-        if (dateTime==null)
+        if (dateTime==null || (XSD_DATE_TIME_STAMP.equals(datatypeURI) && !dateTime.hasTimeZoneOffset()))
             throw new MalformedLiteralException(lexicalForm,datatypeURI);
         return dateTime;
     }

@@ -392,6 +392,14 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         return '\"'+value+"\"^^xsd:double";
     }
 
+    protected static String DATE(String value) {
+        return '\"'+value+"\"^^xsd:dateTime";
+    }
+
+    protected static String DATES(String value) {
+        return '\"'+value+"\"^^xsd:dateTimeStamp";
+    }
+
     protected static String[] S(String... args) {
         return args;
     }

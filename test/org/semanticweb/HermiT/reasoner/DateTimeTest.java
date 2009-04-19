@@ -87,6 +87,51 @@ public class DateTimeTest extends AbstractReasonerTest {
         assertFalse(interval.containsDateTime(time2));
         assertElements(time1,interval,loadDateTimes("res/datetime-3.txt"));
     }
+    public void testFinite1() throws Exception {
+        assertDRSatisfiable(true,2,
+            DR("xsd:dateTime","xsd:minInclusive",DATE("1965-04-15T00:00:00"),"xsd:maxInclusive",DATE("1965-04-15T00:00:00"))
+        );
+        assertDRSatisfiable(false,3,
+            DR("xsd:dateTime","xsd:minInclusive",DATE("1965-04-15T00:00:00"),"xsd:maxInclusive",DATE("1965-04-15T00:00:00"))
+        );
+    }
+    public void testFinite2() throws Exception {
+        assertDRSatisfiable(true,4,
+            DR("xsd:dateTime","xsd:minInclusive",DATE("1965-04-15T00:00:00"),"xsd:maxInclusive",DATE("1965-05-01T00:00:00")),
+            NOT(DR("xsd:dateTime","xsd:minExclusive",DATE("1965-04-15T00:00:00"),"xsd:maxExclusive",DATE("1965-05-01T00:00:00")))
+        );
+        assertDRSatisfiable(false,5,
+            DR("xsd:dateTime","xsd:minInclusive",DATE("1965-04-15T00:00:00"),"xsd:maxInclusive",DATE("1965-05-01T00:00:00")),
+            NOT(DR("xsd:dateTime","xsd:minExclusive",DATE("1965-04-15T00:00:00"),"xsd:maxExclusive",DATE("1965-05-01T00:00:00")))
+        );
+    }
+    public void testInfinite() throws Exception {
+        assertDRSatisfiable(true,100,
+            DR("xsd:dateTime","xsd:minInclusive",DATE("1965-04-15T00:00:00"),"xsd:maxInclusive",DATE("1965-05-01T00:00:00.001"))
+        );
+        assertDRSatisfiable(true,100,
+            DR("xsd:dateTime","xsd:minInclusive",DATE("1965-04-15T00:00:00Z"),"xsd:maxInclusive",DATE("1965-05-01T00:00:00.001Z"))
+        );
+    }
+    public void testMizedTZs() throws Exception {
+        assertDRSatisfiable(false,
+            DR("xsd:dateTime","xsd:minInclusive",DATE("1965-04-15T00:00:00"),"xsd:maxInclusive",DATE("1965-04-15T00:00:01Z"))
+        );
+        assertDRSatisfiable(false,
+            DR("xsd:dateTime","xsd:minInclusive",DATE("1965-04-15T00:00:00"),"xsd:maxInclusive",DATE("1965-04-15T00:00:00-14:00"))
+        );
+        assertDRSatisfiable(true,100,
+            DR("xsd:dateTime","xsd:minInclusive",DATE("1965-04-15T00:00:00"),"xsd:maxInclusive",DATE("1965-04-15T00:00:00.001-14:00"))
+        );
+    }
+    public void testMember() throws Exception {
+        assertDRSatisfiable(true,
+            DR("xsd:dateTime","xsd:minInclusive",DATE("1965-04-15T00:00:00Z"),"xsd:maxInclusive",DATE("1965-05-01T00:00:00Z")),
+            NOT(DR("xsd:dateTime","xsd:minInclusive",DATE("1965-04-17T00:00:00"),"xsd:maxInclusive",DATE("1965-04-18T00:00:00Z"))),
+            OO(DATE("1965-04-15T00:00:00Z")),
+            NOT(OO(DATE("1965-04-15T00:00:00+00:01")))
+        );
+    }
     protected static String getTZO(int offset) {
         int offsetAbs=Math.abs(offset);
         int min=offsetAbs % 60;

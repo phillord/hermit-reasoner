@@ -528,7 +528,7 @@ public class DatatypeManager implements Serializable {
                 buffer.append(variableIndex);
                 buffer.append(')');
                 for (int neighborIndex=0;neighborIndex<variable.m_unequalToDirect.size();neighborIndex++) {
-                    buffer.append(' ');
+                    buffer.append(" & ");
                     buffer.append(variableIndex);
                     buffer.append(" != ");
                     buffer.append(m_activeVariables.indexOf(variable.m_unequalToDirect.get(neighborIndex)));
