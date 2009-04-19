@@ -7,9 +7,6 @@ import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 
 public class EntireDoubleSubset implements ValueSpaceSubset {
 
-    public String getDatatypeURI() {
-        return DoubleDatatypeHandler.XSD_DOUBLE;
-    }
     public boolean hasCardinalityAtLeast(int number) {
         int leftover=DoubleInterval.subtractIntervalSizeFrom(Double.NEGATIVE_INFINITY,Double.POSITIVE_INFINITY,number);
         // The following check contains 1 because there is one NaN in the value space.

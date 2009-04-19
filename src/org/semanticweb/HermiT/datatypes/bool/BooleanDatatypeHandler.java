@@ -12,12 +12,11 @@ import org.semanticweb.HermiT.datatypes.DatatypeHandler;
 import org.semanticweb.HermiT.datatypes.MalformedLiteralException;
 import org.semanticweb.HermiT.datatypes.UnsupportedFacetException;
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
-import org.semanticweb.HermiT.datatypes.common.EmptyValueSpaceSubset;
 
 public class BooleanDatatypeHandler implements DatatypeHandler {
     protected static final String XSD_BOOLEAN=Prefixes.s_semanticWebPrefixes.get("xsd")+"boolean";
     protected static final ValueSpaceSubset BOOLEAN_ALL=new BooleanAll();
-    protected static final ValueSpaceSubset EMPTY=new EmptyValueSpaceSubset(XSD_BOOLEAN);
+    protected static final ValueSpaceSubset EMPTY=new BooleanNone();
     protected final static Set<String> s_managedDatatypeURIs=Collections.singleton(XSD_BOOLEAN);
     protected final static Set<Class<?>> s_managedDataValueClasses=new HashSet<Class<?>>();
     static {
@@ -76,9 +75,6 @@ public class BooleanDatatypeHandler implements DatatypeHandler {
 
     protected static class BooleanAll implements ValueSpaceSubset {
 
-        public String getDatatypeURI() {
-            return XSD_BOOLEAN;
-        }
         public boolean hasCardinalityAtLeast(int number) {
             return number<=2;
         }
@@ -88,6 +84,18 @@ public class BooleanDatatypeHandler implements DatatypeHandler {
         public void enumerateDataValues(Collection<Object> dataValues) {
             dataValues.add(Boolean.FALSE);
             dataValues.add(Boolean.TRUE);
+        }
+    }
+    
+    protected static class BooleanNone implements ValueSpaceSubset {
+
+        public boolean hasCardinalityAtLeast(int number) {
+            return number<=0;
+        }
+        public boolean containsDataValue(Object dataValue) {
+            return false;
+        }
+        public void enumerateDataValues(Collection<Object> dataValues) {
         }
     }
 }

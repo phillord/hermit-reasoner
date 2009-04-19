@@ -19,9 +19,6 @@ public class NoNaNFloatSubset implements ValueSpaceSubset {
     public NoNaNFloatSubset(List<FloatInterval> intervals) {
         m_intervals=intervals;
     }
-    public String getDatatypeURI() {
-        return FloatDatatypeHandler.XSD_FLOAT;
-    }
     public boolean hasCardinalityAtLeast(int number) {
         int left=number;
         for (int index=m_intervals.size()-1;left>0 && index>=0;--index)

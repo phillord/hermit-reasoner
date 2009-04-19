@@ -10,7 +10,6 @@ import org.semanticweb.HermiT.datatypes.DatatypeHandler;
 import org.semanticweb.HermiT.datatypes.MalformedLiteralException;
 import org.semanticweb.HermiT.datatypes.UnsupportedFacetException;
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
-import org.semanticweb.HermiT.datatypes.common.EmptyValueSpaceSubset;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
 
 public class RDFTextDatatypeHandler implements DatatypeHandler {
@@ -19,7 +18,7 @@ public class RDFTextDatatypeHandler implements DatatypeHandler {
     protected static final ValueSpaceSubset RDF_TEXT_ALL=new RDFTextAll();
     protected static final ValueSpaceSubset XSD_STRING_ALL=new XSDStringAll();
     protected static final ValueSpaceSubset RDF_TEXT_MINUS_XSD_STRING=new RDFTextMinusXSDString();
-    protected static final ValueSpaceSubset EMPTY=new EmptyValueSpaceSubset(RDF_TEXT);
+    protected static final ValueSpaceSubset EMPTY=new RDFTextNone();
     protected static final Set<String> s_managedDatatypeURIs=new HashSet<String>();
     static {
         s_managedDatatypeURIs.add(RDF_TEXT);
@@ -120,9 +119,6 @@ public class RDFTextDatatypeHandler implements DatatypeHandler {
 
     protected static class RDFTextAll implements ValueSpaceSubset {
 
-        public String getDatatypeURI() {
-            return RDFTextDatatypeHandler.RDF_TEXT;
-        }
         public boolean hasCardinalityAtLeast(int number) {
             return true;
         }
@@ -137,9 +133,6 @@ public class RDFTextDatatypeHandler implements DatatypeHandler {
 
     protected static class RDFTextMinusXSDString implements ValueSpaceSubset {
 
-        public String getDatatypeURI() {
-            return RDFTextDatatypeHandler.RDF_TEXT;
-        }
         public boolean hasCardinalityAtLeast(int number) {
             return true;
         }
@@ -153,9 +146,6 @@ public class RDFTextDatatypeHandler implements DatatypeHandler {
 
     protected static class XSDStringAll implements ValueSpaceSubset {
 
-        public String getDatatypeURI() {
-            return RDFTextDatatypeHandler.RDF_TEXT;
-        }
         public boolean hasCardinalityAtLeast(int number) {
             return true;
         }
@@ -164,6 +154,18 @@ public class RDFTextDatatypeHandler implements DatatypeHandler {
         }
         public void enumerateDataValues(Collection<Object> dataValues) {
             throw new UnsupportedOperationException("The value space is infinite.");
+        }
+    }
+
+    protected static class RDFTextNone implements ValueSpaceSubset {
+
+        public boolean hasCardinalityAtLeast(int number) {
+            return number<=0;
+        }
+        public boolean containsDataValue(Object dataValue) {
+            return false;
+        }
+        public void enumerateDataValues(Collection<Object> dataValues) {
         }
     }
 }

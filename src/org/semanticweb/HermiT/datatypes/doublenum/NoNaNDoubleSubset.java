@@ -19,9 +19,6 @@ public class NoNaNDoubleSubset implements ValueSpaceSubset {
     public NoNaNDoubleSubset(List<DoubleInterval> intervals) {
         m_intervals=intervals;
     }
-    public String getDatatypeURI() {
-        return DoubleDatatypeHandler.XSD_DOUBLE;
-    }
     public boolean hasCardinalityAtLeast(int number) {
         int left=number;
         for (int index=m_intervals.size()-1;left>0 && index>=0;--index)

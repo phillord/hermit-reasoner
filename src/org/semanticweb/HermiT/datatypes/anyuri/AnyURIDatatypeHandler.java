@@ -14,12 +14,11 @@ import org.semanticweb.HermiT.datatypes.DatatypeHandler;
 import org.semanticweb.HermiT.datatypes.MalformedLiteralException;
 import org.semanticweb.HermiT.datatypes.UnsupportedFacetException;
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
-import org.semanticweb.HermiT.datatypes.common.EmptyValueSpaceSubset;
 
 public class AnyURIDatatypeHandler implements DatatypeHandler {
     protected static final String XSD_ANY_URI=Prefixes.s_semanticWebPrefixes.get("xsd")+"anyURI";
     protected static final ValueSpaceSubset ANY_URI_ALL=new AnyURIAll();
-    protected static final ValueSpaceSubset EMPTY=new EmptyValueSpaceSubset(XSD_ANY_URI);
+    protected static final ValueSpaceSubset EMPTY=new AnyURINone();
     protected static final Set<String> s_managedDatatypeURIs=Collections.singleton(XSD_ANY_URI);
     protected static final Set<Class<?>> s_managedDataValueClasses=new HashSet<Class<?>>();
     static {
@@ -78,9 +77,6 @@ public class AnyURIDatatypeHandler implements DatatypeHandler {
 
     protected static class AnyURIAll implements ValueSpaceSubset {
 
-        public String getDatatypeURI() {
-            return XSD_ANY_URI;
-        }
         public boolean hasCardinalityAtLeast(int number) {
             return true;
         }
@@ -90,6 +86,18 @@ public class AnyURIDatatypeHandler implements DatatypeHandler {
         }
         public void enumerateDataValues(Collection<Object> dataValues) {
             throw new UnsupportedOperationException("The value space is infinite.");
+        }
+    }
+
+    protected static class AnyURINone implements ValueSpaceSubset {
+
+        public boolean hasCardinalityAtLeast(int number) {
+            return number<=0;
+        }
+        public boolean containsDataValue(Object dataValue) {
+            return false;
+        }
+        public void enumerateDataValues(Collection<Object> dataValues) {
         }
     }
 }

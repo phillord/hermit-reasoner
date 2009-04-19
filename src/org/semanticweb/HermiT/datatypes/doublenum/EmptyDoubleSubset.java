@@ -1,14 +1,11 @@
-// Copyright 2008 by Oxford University; see license.txt for details
-package org.semanticweb.HermiT.datatypes.common;
+package org.semanticweb.HermiT.datatypes.doublenum;
 
 import java.util.Collection;
 
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 
-public class EmptyValueSpaceSubset implements ValueSpaceSubset {
+public class EmptyDoubleSubset implements ValueSpaceSubset {
 
-    public EmptyValueSpaceSubset() {
-    }
     public boolean hasCardinalityAtLeast(int number) {
         return number<=0;
     }

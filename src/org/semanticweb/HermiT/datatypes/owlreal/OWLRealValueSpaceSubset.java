@@ -19,9 +19,6 @@ public class OWLRealValueSpaceSubset implements ValueSpaceSubset {
     public OWLRealValueSpaceSubset(List<NumberInterval> intervals) {
         m_intervals=intervals;
     }
-    public String getDatatypeURI() {
-        return OWLRealDatatypeHandler.OWL_NS+"real";
-    }
     public boolean hasCardinalityAtLeast(int number) {
         int left=number;
         for (int index=m_intervals.size()-1;left>0 && index>=0;--index)

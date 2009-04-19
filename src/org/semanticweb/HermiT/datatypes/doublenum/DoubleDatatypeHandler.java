@@ -13,13 +13,12 @@ import org.semanticweb.HermiT.datatypes.DatatypeHandler;
 import org.semanticweb.HermiT.datatypes.MalformedLiteralException;
 import org.semanticweb.HermiT.datatypes.UnsupportedFacetException;
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
-import org.semanticweb.HermiT.datatypes.common.EmptyValueSpaceSubset;
 
 public class DoubleDatatypeHandler implements DatatypeHandler {
     protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd");
     protected static final String XSD_DOUBLE=XSD_NS+"double";
     protected static final ValueSpaceSubset DOUBLE_ENTIRE=new EntireDoubleSubset();
-    protected static final ValueSpaceSubset EMPTY_SUBSET=new EmptyValueSpaceSubset(XSD_DOUBLE);
+    protected static final ValueSpaceSubset EMPTY_SUBSET=new EmptyDoubleSubset();
     protected static final Set<String> s_managedDatatypeURIs=Collections.singleton(XSD_DOUBLE);
     protected static final Set<Class<?>> s_managedDataValueClasses=new HashSet<Class<?>>();
     static {

@@ -24,9 +24,6 @@ public class DateTimeValueSpaceSubset implements ValueSpaceSubset {
     public DateTimeValueSpaceSubset(List<DateTimeInterval> intervals) {
         m_intervals=intervals;
     }
-    public String getDatatypeURI() {
-        return DateTimeDatatypeHandler.XSD_DATE_TIME;
-    }
     public boolean hasCardinalityAtLeast(int number) {
         int left=number;
         for (int index=m_intervals.size()-1;left>0 && index>=0;--index)
