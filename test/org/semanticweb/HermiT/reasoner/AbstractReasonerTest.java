@@ -404,6 +404,14 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         return '\"'+value+"\"^^rdf:XMLLiteral";
     }
 
+    protected static String HEXB(String value) {
+        return '\"'+value+"\"^^xsd:hexBinary";
+    }
+    
+    protected static String B64B(String value) {
+        return '\"'+value+"\"^^xsd:base64Binary";
+    }
+    
     protected static String[] S(String... args) {
         return args;
     }

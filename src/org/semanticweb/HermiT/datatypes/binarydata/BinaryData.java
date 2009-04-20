@@ -7,7 +7,18 @@ import java.io.ByteArrayOutputStream;
  * Represents a binary data value.
  */
 public class BinaryData {
-    protected static final char[] HEX_DIGITS=new char[] { '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F' };
+    protected static final char[] INT_TO_HEX=new char[] { '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F' };
+    protected static final int[] HEX_TO_INT=new int[127];
+    static {
+        for (int i=0;i<HEX_TO_INT.length;i++)
+            HEX_TO_INT[i]=-1;
+        for (int i='0';i<='9';i++)
+            HEX_TO_INT[i]=i-'0';
+        for (int i='A';i<='F';i++)
+            HEX_TO_INT[i]=i-'A'+10;
+        for (int i='a';i<='f';i++)
+            HEX_TO_INT[i]=i-'a'+10;
+    }
     
     protected final BinaryDataType m_binaryDataType;
     protected final byte[] m_data;
@@ -62,36 +73,33 @@ public class BinaryData {
             int octet=(m_data[index] & 0xFF);
             int high=octet/16;
             int low=octet % 16;
-            buffer.append(HEX_DIGITS[high]);
-            buffer.append(HEX_DIGITS[low]);
+            buffer.append(INT_TO_HEX[high]);
+            buffer.append(INT_TO_HEX[low]);
         }
         return buffer.toString();
     }
     public static BinaryData parseHexBinary(String lexicalForm) {
-        if ((lexicalForm.length() % 2)!=0)
-            return null;
-        ByteArrayOutputStream result=new ByteArrayOutputStream();
-        for (int index=0;index<lexicalForm.length();) {
-            int high;
-            char digit1=Character.toLowerCase(lexicalForm.charAt(index++));
-            if ('0'<=digit1 && digit1<='9')
-                high=digit1-'0';
-            else if ('a'<=digit1 && digit1<='f')
-                high=digit1-'a'+10;
-            else
+        try {
+            if ((lexicalForm.length() % 2)!=0)
                 return null;
-            int low;
-            char digit2=Character.toLowerCase(lexicalForm.charAt(index++));
-            if ('0'<=digit2 && digit2<='9')
-                low=digit2-'0';
-            else if ('a'<=digit2 && digit2<='f')
-                low=digit2-'a'+10;
-            else
-                return null;
-            int octet=(high*16+low);
-            result.write(octet);
+            ByteArrayOutputStream result=new ByteArrayOutputStream();
+            for (int index=0;index<lexicalForm.length();) {
+                char digit1=lexicalForm.charAt(index++);
+                int high=HEX_TO_INT[digit1];
+                if (high<0)
+                    return null;
+                char digit2=lexicalForm.charAt(index++);
+                int low=HEX_TO_INT[digit2];
+                if (low<0)
+                    return null;
+                int octet=(high*16+low);
+                result.write(octet);
+            }
+            return new BinaryData(BinaryDataType.HEX_BINARY,result.toByteArray());
         }
-        return new BinaryData(BinaryDataType.HEX_BINARY,result.toByteArray());
+        catch (IndexOutOfBoundsException e) {
+            return null;
+        }
     }
     public static BinaryData parseBase64Binary(String lexicalForm) {
         lexicalForm=removeWhitespace(lexicalForm);
@@ -102,6 +110,9 @@ public class BinaryData {
         catch (IllegalArgumentException error) {
             return null;
         }
+        catch (IndexOutOfBoundsException error) {
+            return null;
+        }
     }
     protected static String removeWhitespace(String lexicalForm) {
         lexicalForm=lexicalForm.trim();
@@ -110,8 +121,7 @@ public class BinaryData {
                 int upperSpaceIndex=index;
                 while (Character.isWhitespace(lexicalForm.charAt(index)))
                     index--;
-                if (index+1<upperSpaceIndex)
-                    lexicalForm=lexicalForm.substring(0,index+1)+lexicalForm.substring(upperSpaceIndex+1);
+                lexicalForm=lexicalForm.substring(0,index+1)+lexicalForm.substring(upperSpaceIndex+1);
             }
         }
         return lexicalForm;

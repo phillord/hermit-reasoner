@@ -43,7 +43,7 @@ public class BinaryDataLenghInterval {
             return 0;
         // We now compute the actual number of values.
         long size=getNumberOfValuesOfLength(m_maxLength)-getNumberOfValuesOfLength(m_minLength-1);
-        return (int)Math.max(argument-size,0);
+        return (int)Math.max(argument-size,0L);
     }
     protected long getNumberOfValuesOfLength(int length) {
         if (length<0)
@@ -55,7 +55,7 @@ public class BinaryDataLenghInterval {
                 valuesOfLength*=256L;
                 total+=valuesOfLength;
             }
-            return valuesOfLength;
+            return total;
         }
     }
     public boolean contains(BinaryData value) {
@@ -96,6 +96,6 @@ public class BinaryDataLenghInterval {
         return buffer.toString();
     }
     protected static boolean isIntervalEmpty(BinaryDataType binaryDataType,int minLength,int maxLength) {
-        return minLength<=maxLength;
+        return minLength>maxLength;
     }
 }

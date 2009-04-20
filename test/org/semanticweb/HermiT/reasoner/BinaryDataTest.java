@@ -1,41 +1,119 @@
 package org.semanticweb.HermiT.reasoner;
 
+import java.util.*;
+
+import org.semanticweb.HermiT.datatypes.binarydata.*;
+
 public class BinaryDataTest extends AbstractReasonerTest {
 
     public BinaryDataTest(String name) {
         super(name);
     }
-    public void testCanonicalization() throws Exception {
-        assertDRSatisfiable(false,
-            OO(XMLL("abc<a/>")),
-            NOT(OO(XMLL("abc<a></a>")))
-        );
+    public void testParsing() throws Exception {
         assertDRSatisfiable(true,
-            OO(XMLL("abc<a/>d")),
-            NOT(OO(XMLL("abc<a></a>")))
+            DR("xsd:hexBinary"),
+            OO(HEXB("0AFF"))
+        );
+        assertDRSatisfiable(false,
+            DR("xsd:base64Binary"),
+            OO(HEXB("0AFF"))
         );
     }
-    public void testRange() throws Exception {
-        assertDRSatisfiable(true,100,
-            DR("rdf:XMLLiteral")
+    public void testLength() throws Exception {
+        assertDRSatisfiable(true,
+            DR("xsd:hexBinary","xsd:length",INT("2")),
+            OO(HEXB("0AFF"))
         );
         assertDRSatisfiable(false,
-            DR("rdf:XMLLiteral"),
-            NOT(DR("rdf:XMLLiteral"))
+            DR("xsd:hexBinary","xsd:length",INT("3")),
+            OO(HEXB("0AFF"))
+        );
+        assertDRSatisfiable(true,
+            DR("xsd:hexBinary","xsd:minLength",INT("2"),"xsd:maxLength",INT("6")),
+            NOT(DR("xsd:hexBinary","xsd:minLength",INT("3"),"xsd:maxLength",INT("5"))),
+            OO(HEXB("0AFF"))
+        );
+        assertDRSatisfiable(true,
+            DR("xsd:hexBinary","xsd:minLength",INT("2"),"xsd:maxLength",INT("6")),
+            NOT(DR("xsd:hexBinary","xsd:minLength",INT("3"),"xsd:maxLength",INT("5"))),
+            OO(HEXB("0AFF0AFF0AFF"))
         );
         assertDRSatisfiable(false,
-            DR("rdf:XMLLiteral"),
-            DR("xsd:boolean")
+            DR("xsd:hexBinary","xsd:minLength",INT("2"),"xsd:maxLength",INT("6")),
+            NOT(DR("xsd:hexBinary","xsd:minLength",INT("3"),"xsd:maxLength",INT("5"))),
+            OO(HEXB("0AFF0AFF0A"))
         );
     }
-    public void testMembership() throws Exception {
+    public void testSize() throws Exception {
         assertDRSatisfiable(true,
-            DR("rdf:XMLLiteral"),
-            OO(XMLL("<a>bla</a>"))
+            DR("xsd:hexBinary","xsd:length",INT("0"))
+        );
+        assertDRSatisfiable(false,2,
+            DR("xsd:hexBinary","xsd:length",INT("0"))
         );
         assertDRSatisfiable(false,
-            NOT(DR("rdf:XMLLiteral")),
-            OO(XMLL("<a>bla</a>"))
+            DR("xsd:hexBinary","xsd:length",INT("0")),
+            NOT(OO(HEXB("")))
         );
+    }
+    public void testIntersection() throws Exception {
+        assertDRSatisfiable(true,
+            DR("xsd:hexBinary","xsd:minLength",INT("0")),
+            NOT(DR("xsd:hexBinary","xsd:minLength",INT("1")))
+        );
+        assertDRSatisfiable(false,2,
+            DR("xsd:hexBinary","xsd:minLength",INT("0")),
+            NOT(DR("xsd:hexBinary","xsd:minLength",INT("1")))
+        );
+    }
+    public void testExplicitSize() throws Exception {
+        BinaryDataLenghInterval imax2=interval(BinaryDataType.HEX_BINARY,0,2);
+        assertEquals(10000000,imax2.subtractSizeFrom(10000000+1+256+256*256));
+
+        BinaryDataLenghInterval imin1max2=interval(BinaryDataType.HEX_BINARY,1,2);
+        assertEquals(10000000,imin1max2.subtractSizeFrom(10000000+256+256*256));
+    }
+    public void testEnumerate1() throws Exception {
+        BinaryDataLenghInterval imax1=interval(BinaryDataType.HEX_BINARY,0,1);
+        List<Object> values=new ArrayList<Object>();
+        imax1.enumerateValues(values);
+        List<Object> control=new ArrayList<Object>();
+        addAllOfLength(control,BinaryDataType.HEX_BINARY,new byte[0],0);
+        addAllOfLength(control,BinaryDataType.HEX_BINARY,new byte[1],0);
+        assertContainsAll(values,control.toArray());
+    }
+    public void testEnumerate2() throws Exception {
+        BinaryDataLenghInterval iexact1=interval(BinaryDataType.HEX_BINARY,1,1);
+        List<Object> values=new ArrayList<Object>();
+        iexact1.enumerateValues(values);
+        List<Object> control=new ArrayList<Object>();
+        addAllOfLength(control,BinaryDataType.HEX_BINARY,new byte[1],0);
+        assertContainsAll(values,control.toArray());
+    }
+    protected void addAllOfLength(Collection<Object> result,BinaryDataType type,byte[] buffer,int position) {
+        if (position==buffer.length) {
+            BinaryData binaryData=new BinaryData(type,buffer.clone());
+            result.add(binaryData);
+        }
+        else {
+            for (int b=0;b<=255;b++) {
+                buffer[position]=(byte)b;
+                addAllOfLength(result,type,buffer,position+1);
+            }
+        }
+    }
+    protected static BinaryDataLenghInterval interval(BinaryDataType type,int minLength,int maxLength) {
+        return new BinaryDataLenghInterval(type,minLength,maxLength);
+    }
+    public void testBase64Parsing() {
+        BinaryData data1=BinaryData.parseBase64Binary("ZXdyZA==");
+        assertBinaryData(data1,"ewrd");
+        BinaryData data2=BinaryData.parseBase64Binary(" Z  X d y Z A ==  ");
+        assertBinaryData(data2,"ewrd");
+    }
+    protected static void assertBinaryData(BinaryData data,String string) {
+        assertEquals(string.length(),data.getNumberOfBytes());
+        for (int i=0;i<string.length();i++)
+            assertEquals(string.charAt(i),data.getByte(i));
     }
 }
