@@ -36,14 +36,22 @@ public class WGTestDescriptor {
     }
 
     protected enum Semantics {
-        DL("DIRECT","DL"),FULL("RDF-BASED","FULL");
+        DIRECT("DIRECT"),RDF_BASED("RDF-BASED");
         
-        public final URI[] uris;
+        public final URI uri;
 
-        private Semantics(String... uriSuffixes) {
-            uris=new URI[uriSuffixes.length];
-            for (int index=0;index<uriSuffixes.length;index++)
-                uris[index]=URI.create(WGTestRegistry.URI_BASE+uriSuffixes[index]);
+        private Semantics(String uriSuffix) {
+            uri=URI.create(WGTestRegistry.URI_BASE+uriSuffix);
+        }
+    }
+
+    protected enum Species {
+        DL("DL"),FULL("FULL");
+        
+        public final URI uri;
+
+        private Species(String uriSuffix) {
+            uri=URI.create(WGTestRegistry.URI_BASE+uriSuffix);
         }
     }
 
@@ -84,6 +92,7 @@ public class WGTestDescriptor {
     public final String identifier;
     public final Status status;
     public final EnumSet<TestType> testTypes;
+    public final EnumSet<Species> species;
     public final EnumSet<Semantics> semantics;
     public final EnumSet<Semantics> notsemantics;
 
@@ -101,12 +110,13 @@ public class WGTestDescriptor {
         identifier=getIdentifier(dps,df);
         status=getStatus(ops,df);
         testTypes=getTestType();
+        species=getSpecies(ops,df);
         semantics=getSemantics(ops,df);
         notsemantics=getNotSemantics(nops,df);
     }
 
     public boolean isDLTest() {
-        return semantics.contains(Semantics.DL);
+        return semantics.contains(Semantics.DIRECT) && species.contains(Species.DL);
     }
     
     protected String getIdentifier(Map<OWLDataPropertyExpression,Set<OWLConstant>> dps,OWLDataFactory df) throws InvalidWGTestException {
@@ -156,6 +166,24 @@ public class WGTestDescriptor {
         return testTypes;
     }
 
+    protected EnumSet<Species> getSpecies(Map<OWLObjectPropertyExpression,Set<OWLIndividual>> ops,OWLDataFactory df) throws InvalidWGTestException {
+        EnumSet<Species> species=EnumSet.noneOf(Species.class);
+        Set<OWLIndividual> specs=ops.get(df.getOWLObjectProperty(URI.create(WGTestRegistry.URI_BASE+"species")));
+        if (specs!=null) {
+            nextItem: for (OWLIndividual s : specs) {
+                URI speciesURI=s.getURI();
+                for (Species spc : Species.values()) {
+                    if (speciesURI.equals(spc.uri)) {
+                        species.add(spc);
+                        continue nextItem;
+                    }
+                }
+                throw new InvalidWGTestException("The test "+testID+" has an invalid species "+speciesURI.toString()+".");
+            }
+        }
+        return species;
+    }
+
     protected EnumSet<Semantics> getSemantics(Map<OWLObjectPropertyExpression,Set<OWLIndividual>> ops,OWLDataFactory df) throws InvalidWGTestException {
         EnumSet<Semantics> semantics=EnumSet.noneOf(Semantics.class);
         Set<OWLIndividual> sems=ops.get(df.getOWLObjectProperty(URI.create(WGTestRegistry.URI_BASE+"semantics")));
@@ -163,11 +191,10 @@ public class WGTestDescriptor {
             nextItem: for (OWLIndividual s : sems) {
                 URI semanticsURI=s.getURI();
                 for (Semantics sem : Semantics.values()) {
-                    for (URI uri : sem.uris)
-                        if (semanticsURI.equals(uri)) {
-                            semantics.add(sem);
-                            continue nextItem;
-                        }
+                    if (semanticsURI.equals(sem.uri)) {
+                        semantics.add(sem);
+                        continue nextItem;
+                    }
                 }
                 throw new InvalidWGTestException("The test "+testID+" has an invalid semantics "+semanticsURI.toString()+".");
             }
@@ -182,11 +209,10 @@ public class WGTestDescriptor {
             nextItem: for (OWLIndividual s : nsems) {
                 URI semanticsURI=s.getURI();
                 for (Semantics sem : Semantics.values()) {
-                    for (URI uri : sem.uris)
-                        if (semanticsURI.equals(uri)) {
-                            notSemantics.add(sem);
-                            continue nextItem;
-                        }
+                    if (semanticsURI.equals(sem.uri)) {
+                        semantics.add(sem);
+                        continue nextItem;
+                    }
                 }
                 throw new InvalidWGTestException("The test "+testID+" has an invalid not semantics "+semanticsURI.toString()+".");
             }
