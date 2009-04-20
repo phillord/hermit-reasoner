@@ -13,6 +13,8 @@ public class AllQuickTests extends TestCase {
         suite.addTestSuite(NumericsTest.class);
         suite.addTestSuite(FloatDoubleTest.class);
         suite.addTestSuite(DateTimeTest.class);
+        suite.addTestSuite(BinaryDataTest.class);
+        suite.addTestSuite(XMLLiteralTest.class);
         suite.addTestSuite(ReasonerTest.class);
         suite.addTestSuite(ReasonerIndividualReuseTest.class);
         suite.addTestSuite(ComplexConceptTest.class);

@@ -58,14 +58,14 @@ public class BinaryDataLenghInterval {
             return valuesOfLength;
         }
     }
-    public boolean contains(BinaryDataValue value) {
+    public boolean contains(BinaryData value) {
         return m_binaryDataType==value.getBinaryDataType() && m_minLength<=value.getNumberOfBytes() && value.getNumberOfBytes()<=m_maxLength;
     }
     public void enumerateValues(Collection<Object> values) {
         if (m_maxLength==Integer.MAX_VALUE)
             throw new IllegalStateException("Internal error: the data range is finite!");
         if (m_minLength==0)
-            values.add(new BinaryDataValue(m_binaryDataType,new byte[0]));
+            values.add(new BinaryData(m_binaryDataType,new byte[0]));
         byte[] temp=new byte[m_maxLength];
         processPosition(temp,values,0);
     }
@@ -76,7 +76,7 @@ public class BinaryDataLenghInterval {
                 if (m_minLength<=position+1) {
                     byte[] copy=new byte[position+1];
                     System.arraycopy(temp,0,copy,0,copy.length);
-                    values.add(new BinaryDataValue(m_binaryDataType,copy));
+                    values.add(new BinaryData(m_binaryDataType,copy));
                 }
                 processPosition(temp,values,position+1);
             }

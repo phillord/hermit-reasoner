@@ -400,6 +400,10 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         return '\"'+value+"\"^^xsd:dateTimeStamp";
     }
 
+    protected static String XMLL(String value) {
+        return '\"'+value+"\"^^rdf:XMLLiteral";
+    }
+
     protected static String[] S(String... args) {
         return args;
     }

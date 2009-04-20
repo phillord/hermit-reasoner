@@ -163,7 +163,7 @@ public class DateTime {
         buffer.append(stringAbsValue);
     }
     public static DateTime parse(String lexicalForm) {
-        Matcher matcher=s_dateTimePattern.matcher(lexicalForm);
+        Matcher matcher=s_dateTimePattern.matcher(lexicalForm.trim());
         if (!matcher.matches())
             return null;
         try {

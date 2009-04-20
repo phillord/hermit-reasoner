@@ -26,10 +26,10 @@ public class BinaryDataValueSpaceSubset implements ValueSpaceSubset {
         return left==0;
     }
     public boolean containsDataValue(Object dataValue) {
-        if (dataValue instanceof BinaryDataValue) {
-            BinaryDataValue binaryDataValue=(BinaryDataValue)dataValue;
+        if (dataValue instanceof BinaryData) {
+            BinaryData binaryData=(BinaryData)dataValue;
             for (int index=m_intervals.size()-1;index>=0;--index)
-                if (m_intervals.get(index).contains(binaryDataValue))
+                if (m_intervals.get(index).contains(binaryData))
                     return true;
         }
         return false;

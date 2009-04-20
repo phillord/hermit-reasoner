@@ -27,7 +27,7 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
     }
     protected static final Set<Class<?>> s_managedDataValueClasses=new HashSet<Class<?>>();
     static {
-        s_managedDataValueClasses.add(BinaryDataValue.class);
+        s_managedDataValueClasses.add(BinaryData.class);
     }
     protected static final Set<String> s_supportedFacetURIs=new HashSet<String>();
     static {
@@ -43,7 +43,7 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
         return s_managedDataValueClasses;
     }
     public String toString(Prefixes prefixes,Object dataValue) {
-        BinaryDataValue binaryDataValue=(BinaryDataValue)dataValue;
+        BinaryData binaryDataValue=(BinaryData)dataValue;
         String lexicalForm=binaryDataValue.toString();
         if (binaryDataValue.getBinaryDataType()==BinaryDataType.HEX_BINARY)
             return '\"'+lexicalForm+"\"^^"+prefixes.abbreviateURI(XSD_HEX_BINARY);
@@ -52,11 +52,11 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
     }
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert s_managedDatatypeURIs.contains(datatypeURI);
-        BinaryDataValue binaryDataValue;
+        BinaryData binaryDataValue;
         if (XSD_HEX_BINARY.equals(datatypeURI))
-            binaryDataValue=BinaryDataValue.parseHexBinary(lexicalForm);
+            binaryDataValue=BinaryData.parseHexBinary(lexicalForm);
         else
-            binaryDataValue=BinaryDataValue.parseBase64Binary(lexicalForm);
+            binaryDataValue=BinaryData.parseBase64Binary(lexicalForm);
         if (binaryDataValue==null)
             throw new MalformedLiteralException(lexicalForm,datatypeURI);
         else

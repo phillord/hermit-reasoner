@@ -6,14 +6,14 @@ import java.io.ByteArrayOutputStream;
 /**
  * Represents a binary data value.
  */
-public class BinaryDataValue {
+public class BinaryData {
     protected static final char[] HEX_DIGITS=new char[] { '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F' };
     
     protected final BinaryDataType m_binaryDataType;
     protected final byte[] m_data;
     protected final int m_hashCode;
     
-    public BinaryDataValue(BinaryDataType binaryDataType,byte[] data) {
+    public BinaryData(BinaryDataType binaryDataType,byte[] data) {
         m_binaryDataType=binaryDataType;
         m_data=data;
         int hashCode=binaryDataType.hashCode();
@@ -33,9 +33,9 @@ public class BinaryDataValue {
     public boolean equals(Object that) {
         if (this==that)
             return true;
-        if (!(that instanceof BinaryDataValue))
+        if (!(that instanceof BinaryData))
             return false;
-        BinaryDataValue thatData=(BinaryDataValue)that;
+        BinaryData thatData=(BinaryData)that;
         if (m_hashCode!=thatData.m_hashCode || m_data.length!=thatData.m_data.length || m_binaryDataType!=thatData.m_binaryDataType)
             return false;
         for (int index=m_data.length-1;index>=0;--index)
@@ -51,7 +51,7 @@ public class BinaryDataValue {
         case HEX_BINARY:
             return toHexBinary();
         case BASE_64_BINARY:
-            return Base64.encodeBytes(m_data);
+            return Base64.base64Encode(m_data);
         default:
             throw new IllegalStateException("Internal error: invalid binary data type.");
         }
@@ -67,7 +67,7 @@ public class BinaryDataValue {
         }
         return buffer.toString();
     }
-    public static BinaryDataValue parseHexBinary(String lexicalForm) {
+    public static BinaryData parseHexBinary(String lexicalForm) {
         if ((lexicalForm.length() % 2)!=0)
             return null;
         ByteArrayOutputStream result=new ByteArrayOutputStream();
@@ -91,15 +91,29 @@ public class BinaryDataValue {
             int octet=(high*16+low);
             result.write(octet);
         }
-        return new BinaryDataValue(BinaryDataType.HEX_BINARY,result.toByteArray());
+        return new BinaryData(BinaryDataType.HEX_BINARY,result.toByteArray());
     }
-    public static BinaryDataValue parseBase64Binary(String lexicalForm) {
+    public static BinaryData parseBase64Binary(String lexicalForm) {
+        lexicalForm=removeWhitespace(lexicalForm);
         try {
-            byte[] data=Base64.decode(lexicalForm);
-            return new BinaryDataValue(BinaryDataType.HEX_BINARY,data);
+            byte[] data=Base64.decodeBase64(lexicalForm);
+            return new BinaryData(BinaryDataType.HEX_BINARY,data);
         }
-        catch (Base64.DecodeException error) {
+        catch (IllegalArgumentException error) {
             return null;
         }
+    }
+    protected static String removeWhitespace(String lexicalForm) {
+        lexicalForm=lexicalForm.trim();
+        for (int index=lexicalForm.length()-1;index>=0;index--) {
+            if (Character.isWhitespace(lexicalForm.charAt(index))) {
+                int upperSpaceIndex=index;
+                while (Character.isWhitespace(lexicalForm.charAt(index)))
+                    index--;
+                if (index+1<upperSpaceIndex)
+                    lexicalForm=lexicalForm.substring(0,index+1)+lexicalForm.substring(upperSpaceIndex+1);
+            }
+        }
+        return lexicalForm;
     }
 }
