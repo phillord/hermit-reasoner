@@ -8,12 +8,13 @@ import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
 import org.semanticweb.HermiT.datatypes.bool.BooleanDatatypeHandler;
 import org.semanticweb.HermiT.datatypes.rdftext.RDFTextDatatypeHandler;
+import org.semanticweb.HermiT.datatypes.anyuri.AnyURIDatatypeHandler;
 import org.semanticweb.HermiT.datatypes.owlreal.OWLRealDatatypeHandler;
 import org.semanticweb.HermiT.datatypes.doublenum.DoubleDatatypeHandler;
 import org.semanticweb.HermiT.datatypes.floatnum.FloatDatatypeHandler;
 import org.semanticweb.HermiT.datatypes.datetime.DateTimeDatatypeHandler;
 import org.semanticweb.HermiT.datatypes.binarydata.BinaryDataDatatypeHandler;
-import org.semanticweb.HermiT.datatypes.anyuri.AnyURIDatatypeHandler;
+import org.semanticweb.HermiT.datatypes.xmlliteral.XMLLiteralDatatypeHandler;
 
 /**
  * A registry for all available datatype handlers.
@@ -30,6 +31,7 @@ public class DatatypeRegistry {
         registerDatatypeHandler(new DateTimeDatatypeHandler());
         registerDatatypeHandler(new BinaryDataDatatypeHandler());
         registerDatatypeHandler(new AnyURIDatatypeHandler());
+        registerDatatypeHandler(new XMLLiteralDatatypeHandler());
     }
     
     public static void registerDatatypeHandler(DatatypeHandler datatypeHandler) {
