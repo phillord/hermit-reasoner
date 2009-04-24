@@ -27,25 +27,29 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
             size+=m_tupleIndexes[i].sizeInMemoy();
         return size;
     }
-    public boolean addTuple(Object[] tuple,DependencySet dependencySet) {
+    public boolean addTuple(Object[] tuple,DependencySet dependencySet,boolean isCore) {
         if (m_tableauMonitor!=null)
-            m_tableauMonitor.addFactStarted(tuple);
+            m_tableauMonitor.addFactStarted(tuple,isCore);
         if (isTupleActive(tuple) && (m_tableau.m_needsThingExtension || !AtomicConcept.THING.equals(tuple[0])) && !AtomicConcept.RDFS_LITERAL.equals(tuple[0])) {
             int firstFreeTupleIndex=m_tupleTable.getFirstFreeTupleIndex();
-            if (m_tupleIndexes[0].addTuple(tuple,firstFreeTupleIndex)) {
+            int addTupleIndex=m_tupleIndexes[0].addTuple(tuple,firstFreeTupleIndex);
+            if (addTupleIndex==firstFreeTupleIndex) {
                 for (int index=1;index<m_tupleIndexes.length;index++)
-                    m_tupleIndexes[index].addTuple(tuple,firstFreeTupleIndex);
+                    m_tupleIndexes[index].addTuple(tuple,addTupleIndex);
                 m_tupleTable.addTuple(tuple);
-                m_dependencySetManager.setDependencySet(firstFreeTupleIndex,dependencySet);
+                m_dependencySetManager.setDependencySet(addTupleIndex,dependencySet);
+                m_coreManager.setCore(addTupleIndex,isCore);
                 m_afterDeltaNewTupleIndex=m_tupleTable.getFirstFreeTupleIndex();
                 if (m_tableauMonitor!=null)
-                    m_tableauMonitor.addFactFinished(tuple,true);
-                postAdd(tuple,dependencySet,firstFreeTupleIndex);
+                    m_tableauMonitor.addFactFinished(tuple,isCore,true);
+                postAdd(tuple,dependencySet,addTupleIndex);
                 return true;
             }
+            if (isCore)
+                m_coreManager.addCore(addTupleIndex);
         }
         if (m_tableauMonitor!=null)
-            m_tableauMonitor.addFactFinished(tuple,false);
+            m_tableauMonitor.addFactFinished(tuple,isCore,false);
         return false;
     }
     public boolean containsTuple(Object[] tuple) {
@@ -58,6 +62,13 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
             return null;
         else
             return m_dependencySetManager.getDependencySet(tupleIndex);
+    }
+    public boolean isCore(Object[] tuple) {
+        int tupleIndex=m_tupleIndexes[0].getTupleIndex(tuple);
+        if (tupleIndex==-1)
+            return false;
+        else
+            return m_coreManager.isCore(tupleIndex);
     }
     public Retrieval createRetrieval(int[] bindingPositions,Object[] bindingsBuffer,View extensionView) {
         TupleIndex selectedTupleIndex=null;
@@ -100,6 +111,7 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
         protected final boolean m_checkTupleSelection;
         protected final Object[] m_tupleBuffer;
         protected DependencySet m_dependencySet;
+        protected boolean m_isCore;
         protected int m_firstTupleIndex;
         protected int m_afterLastTupleIndex;
 
@@ -132,6 +144,9 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
         public DependencySet getDependencySet() {
             return m_dependencySet;
         }
+        public boolean isCore() {
+            return m_isCore;
+        }
         public void open() {
             switch (m_extensionView) {
             case EXTENSION_THIS:
@@ -158,6 +173,7 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
                     m_tupleTable.retrieveTuple(m_tupleBuffer,tupleIndex);
                     if (isTupleValid()) {
                         m_dependencySet=m_dependencySetManager.getDependencySet(tupleIndex);
+                        m_isCore=m_coreManager.isCore(tupleIndex);
                         return;
                     }
                 }
@@ -172,6 +188,7 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
                     m_tupleTable.retrieveTuple(m_tupleBuffer,tupleIndex);
                     if (isTupleValid()) {
                         m_dependencySet=m_dependencySetManager.getDependencySet(tupleIndex);
+                        m_isCore=m_coreManager.isCore(tupleIndex);
                         return;
                     }
                 }

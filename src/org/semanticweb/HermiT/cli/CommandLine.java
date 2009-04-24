@@ -15,7 +15,6 @@ import java.util.Set;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.Reasoner;
-import org.semanticweb.HermiT.monitor.ReasoningOperations;
 import org.semanticweb.HermiT.monitor.Timer;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLOntologyManager;
@@ -563,13 +562,8 @@ public class CommandLine {
                 }
             } // done processing arguments
             StatusOutput status=new StatusOutput(verbosity);
-            ReasoningOperations opMonitor=null;
             if (verbosity>3)
                 config.monitor=new Timer(new PrintWriter(System.err));
-            else if (verbosity>2) {
-                opMonitor=new ReasoningOperations();
-                config.monitor=opMonitor;
-            }
             for (URI ont : ontologies) {
                 didSomething=true;
                 status.log(2,"Processing "+ont.toString());
@@ -592,11 +586,6 @@ public class CommandLine {
                         action.run(hermit,prefixes,status,output);
                         long actionTime=System.currentTimeMillis()-startTime;
                         status.log(2,"...action completed in "+String.valueOf(actionTime)+" msec.");
-                        if (opMonitor!=null) {
-                            status.log(2,String.valueOf(opMonitor.numSatTests)+" satisfiability tests");
-                            status.log(2,String.valueOf(opMonitor.numSubsumptionTests)+" subsumption tests");
-                            status.log(2,String.valueOf(opMonitor.numConsistencyTests)+" consistency tests");
-                        }
                         output.flush();
                     }
                 }

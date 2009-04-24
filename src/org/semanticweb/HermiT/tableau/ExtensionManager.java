@@ -286,39 +286,45 @@ public final class ExtensionManager implements Serializable {
         else
             return getExtensionTable(tuple.length).getDependencySet(tuple);
     }
-    public boolean addConceptAssertion(Concept concept,Node node,DependencySet dependencySet) {
+    public boolean isCore(Object[] tuple) {
+        if (tuple.length==0)
+            return true;
+        else
+            return getExtensionTable(tuple.length).isCore(tuple);
+    }
+    public boolean addConceptAssertion(Concept concept,Node node,DependencySet dependencySet,boolean isCore) {
         if (m_addActive)
             throw new IllegalStateException("ExtensionManager is not reentrant.");
         m_addActive=true;
         try {
             m_binaryAuxiliaryTupleAdd[0]=concept;
             m_binaryAuxiliaryTupleAdd[1]=node;
-            return m_binaryExtensionTable.addTuple(m_binaryAuxiliaryTupleAdd,dependencySet);
+            return m_binaryExtensionTable.addTuple(m_binaryAuxiliaryTupleAdd,dependencySet,isCore);
         }
         finally {
             m_addActive=false;
         }
     }
-    public boolean addRoleAssertion(Role role,Node nodeFrom,Node nodeTo,DependencySet dependencySet) {
+    public boolean addRoleAssertion(Role role,Node nodeFrom,Node nodeTo,DependencySet dependencySet,boolean isCore) {
         if (role instanceof AtomicRole)
-            return addAssertion((AtomicRole)role,nodeFrom,nodeTo,dependencySet);
+            return addAssertion((AtomicRole)role,nodeFrom,nodeTo,dependencySet,isCore);
         else
-            return addAssertion(((InverseRole)role).getInverseOf(),nodeTo,nodeFrom,dependencySet);
+            return addAssertion(((InverseRole)role).getInverseOf(),nodeTo,nodeFrom,dependencySet,isCore);
     }
-    public boolean addAssertion(DLPredicate dlPredicate,Node node,DependencySet dependencySet) {
+    public boolean addAssertion(DLPredicate dlPredicate,Node node,DependencySet dependencySet,boolean isCore) {
         if (m_addActive)
             throw new IllegalStateException("ExtensionManager is not reentrant.");
         m_addActive=true;
         try {
             m_binaryAuxiliaryTupleAdd[0]=dlPredicate;
             m_binaryAuxiliaryTupleAdd[1]=node;
-            return m_binaryExtensionTable.addTuple(m_binaryAuxiliaryTupleAdd,dependencySet);
+            return m_binaryExtensionTable.addTuple(m_binaryAuxiliaryTupleAdd,dependencySet,isCore);
         }
         finally {
             m_addActive=false;
         }
     }
-    public boolean addAssertion(DLPredicate dlPredicate,Node node0,Node node1,DependencySet dependencySet) {
+    public boolean addAssertion(DLPredicate dlPredicate,Node node0,Node node1,DependencySet dependencySet,boolean isCore) {
         if (Equality.INSTANCE.equals(dlPredicate))
             return m_tableau.m_mergingManager.mergeNodes(node0,node1,dependencySet);
         else {
@@ -329,14 +335,14 @@ public final class ExtensionManager implements Serializable {
                 m_ternaryAuxiliaryTupleAdd[0]=dlPredicate;
                 m_ternaryAuxiliaryTupleAdd[1]=node0;
                 m_ternaryAuxiliaryTupleAdd[2]=node1;
-                return m_ternaryExtensionTable.addTuple(m_ternaryAuxiliaryTupleAdd,dependencySet);
+                return m_ternaryExtensionTable.addTuple(m_ternaryAuxiliaryTupleAdd,dependencySet,isCore);
             }
             finally {
                 m_addActive=false;
             }
         }
     }
-    public boolean addAssertion(DLPredicate dlPredicate,Node[] nodes,DependencySet dependencySet) {
+    public boolean addAssertion(DLPredicate dlPredicate,Node[] nodes,DependencySet dependencySet,boolean isCore) {
         if (Equality.INSTANCE.equals(dlPredicate))
             return m_tableau.m_mergingManager.mergeNodes(nodes[0],nodes[1],dependencySet);
         else {
@@ -359,14 +365,14 @@ public final class ExtensionManager implements Serializable {
                 }
                 auxiliaryTuple[0]=dlPredicate;
                 System.arraycopy(nodes,0,auxiliaryTuple,1,dlPredicate.getArity());
-                return extensionTable.addTuple(auxiliaryTuple,dependencySet);
+                return extensionTable.addTuple(auxiliaryTuple,dependencySet,isCore);
             }
             finally {
                 m_addActive=false;
             }
         }
     }
-    public boolean addTuple(Object[] tuple,DependencySet dependencySet) {
+    public boolean addTuple(Object[] tuple,DependencySet dependencySet,boolean isCore) {
         if (tuple.length==0) {
             boolean result=(m_clashDependencySet==null);
             setClash(dependencySet);
@@ -379,7 +385,7 @@ public final class ExtensionManager implements Serializable {
                 throw new IllegalStateException("ExtensionManager is not reentrant.");
             m_addActive=true;
             try {
-                return getExtensionTable(tuple.length).addTuple(tuple,dependencySet); 
+                return getExtensionTable(tuple.length).addTuple(tuple,dependencySet,isCore); 
             }
             finally {
                 m_addActive=false;

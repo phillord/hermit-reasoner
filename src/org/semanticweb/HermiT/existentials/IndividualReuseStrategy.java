@@ -114,7 +114,7 @@ public class IndividualReuseStrategy extends AbstractExpansionStrategy implement
                     m_tableau.pushBranchingPoint(branchingPoint);
                     dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,branchingPoint.getLevel());
                 }
-                m_extensionManager.addRoleAssertion(atLeastConcept.getOnRole(),node,parent,dependencySet);
+                m_extensionManager.addRoleAssertion(atLeastConcept.getOnRole(),node,parent,dependencySet,true);
                 return true;
             }
         }
@@ -143,7 +143,7 @@ public class IndividualReuseStrategy extends AbstractExpansionStrategy implement
                 existentialNode=m_tableau.createNewNINode(dependencySet);
                 reuseInfo=new NodeBranchingPointPair(existentialNode,m_tableau.getCurrentBranchingPoint().getLevel());
                 m_reusedNodes.put(toConcept,reuseInfo);
-                m_extensionManager.addConceptAssertion(toConcept,existentialNode,dependencySet);
+                m_extensionManager.addConceptAssertion(toConcept,existentialNode,dependencySet,true);
                 m_auxiliaryBuffer[0]=toConcept;
                 m_reuseBacktrackingTable.addTuple(m_auxiliaryBuffer);
             }
@@ -152,7 +152,7 @@ public class IndividualReuseStrategy extends AbstractExpansionStrategy implement
                 existentialNode=reuseInfo.node.getCanonicalNode();
                 dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,reuseInfo.branchingPoint);
             }
-            m_extensionManager.addRoleAssertion(atLeastConcept.getOnRole(),node,existentialNode,dependencySet);
+            m_extensionManager.addRoleAssertion(atLeastConcept.getOnRole(),node,existentialNode,dependencySet,true);
             if (m_tableau.getTableauMonitor()!=null)
                 m_tableau.getTableauMonitor().existentialExpansionFinished(atLeastConcept,node);
             return true;
@@ -180,8 +180,8 @@ public class IndividualReuseStrategy extends AbstractExpansionStrategy implement
             if (tableau.getTableauMonitor()!=null)
                 tableau.getTableauMonitor().existentialExpansionStarted(m_existential,m_node);
             Node existentialNode=tableau.createNewTreeNode(dependencySet,m_node);
-            m_extensionManager.addConceptAssertion(m_existential.getToConcept(),existentialNode,dependencySet);
-            m_extensionManager.addRoleAssertion(m_existential.getOnRole(),m_node,existentialNode,dependencySet);
+            m_extensionManager.addConceptAssertion(m_existential.getToConcept(),existentialNode,dependencySet,true);
+            m_extensionManager.addRoleAssertion(m_existential.getOnRole(),m_node,existentialNode,dependencySet,true);
             if (tableau.getTableauMonitor()!=null)
                 tableau.getTableauMonitor().existentialExpansionFinished(m_existential,m_node);
         }

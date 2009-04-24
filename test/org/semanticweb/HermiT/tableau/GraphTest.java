@@ -53,14 +53,14 @@ public class GraphTest extends AbstractReasonerInternalsTest {
         Node n6=tableau.createNewNINode(emptySet);
         AtomicConcept r=AtomicConcept.create("R");
         AtomicConcept s=AtomicConcept.create("S");
-        extensionManager.addTuple(new Object[] { graph,n1,n2,n3 },emptySet);
-        extensionManager.addTuple(new Object[] { graph,n4,n5,n6 },emptySet);
-        extensionManager.addConceptAssertion(r,n1,emptySet);
-        extensionManager.addConceptAssertion(s,n6,emptySet);
+        extensionManager.addTuple(new Object[] { graph,n1,n2,n3 },emptySet,false);
+        extensionManager.addTuple(new Object[] { graph,n4,n5,n6 },emptySet,false);
+        extensionManager.addConceptAssertion(r,n1,emptySet,false);
+        extensionManager.addConceptAssertion(s,n6,emptySet,false);
 
         // The following tuple should make the existing two tuples to merge
         Node n7=tableau.createNewNINode(emptySet);
-        extensionManager.addTuple(new Object[] { graph,n1,n7,n6 },emptySet);
+        extensionManager.addTuple(new Object[] { graph,n1,n7,n6 },emptySet,false);
 
         // No merging should occur automatically
         assertTrue(extensionManager.containsTuple(new Object[] { graph,n1,n2,n3 }));

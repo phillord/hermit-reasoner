@@ -238,8 +238,8 @@ public final class ExistentialExpansionManager implements Serializable {
                 Node functionalityNode=(Node)m_auxiliaryTuple[0];
                 m_binaryUnionDependencySet.m_dependencySets[0]=m_extensionManager.getConceptAssertionDependencySet(atLeastConcept,forNode);
                 m_binaryUnionDependencySet.m_dependencySets[1]=(DependencySet)m_auxiliaryTuple[1];
-                m_extensionManager.addRoleAssertion(atLeastConcept.getOnRole(),forNode,functionalityNode,m_binaryUnionDependencySet);
-                m_extensionManager.addConceptAssertion(atLeastConcept.getToConcept(),functionalityNode,m_binaryUnionDependencySet);
+                m_extensionManager.addRoleAssertion(atLeastConcept.getOnRole(),forNode,functionalityNode,m_binaryUnionDependencySet,true);
+                m_extensionManager.addConceptAssertion(atLeastConcept.getToConcept(),functionalityNode,m_binaryUnionDependencySet,true);
                 if (m_tableau.m_tableauMonitor!=null)
                     m_tableau.m_tableauMonitor.existentialExpansionFinished(atLeastConcept,forNode);
                 return true;
@@ -295,8 +295,8 @@ public final class ExistentialExpansionManager implements Serializable {
                 newNode=m_tableau.createNewConcreteNode(existentialDependencySet,forNode);
             else
                 newNode=m_tableau.createNewTreeNode(existentialDependencySet,forNode);
-            m_extensionManager.addRoleAssertion(atLeastConcept.getOnRole(),forNode,newNode,existentialDependencySet);
-            m_extensionManager.addConceptAssertion(atLeastConcept.getToConcept(),newNode,existentialDependencySet);
+            m_extensionManager.addRoleAssertion(atLeastConcept.getOnRole(),forNode,newNode,existentialDependencySet,true);
+            m_extensionManager.addConceptAssertion(atLeastConcept.getToConcept(),newNode,existentialDependencySet,true);
         }
         else {
             m_auxiliaryNodes1.clear();
@@ -306,14 +306,14 @@ public final class ExistentialExpansionManager implements Serializable {
                     newNode=m_tableau.createNewConcreteNode(existentialDependencySet,forNode);
                 else
                     newNode=m_tableau.createNewTreeNode(existentialDependencySet,forNode);
-                m_extensionManager.addRoleAssertion(atLeastConcept.getOnRole(),forNode,newNode,existentialDependencySet);
-                m_extensionManager.addConceptAssertion(atLeastConcept.getToConcept(),newNode,existentialDependencySet);
+                m_extensionManager.addRoleAssertion(atLeastConcept.getOnRole(),forNode,newNode,existentialDependencySet,true);
+                m_extensionManager.addConceptAssertion(atLeastConcept.getToConcept(),newNode,existentialDependencySet,true);
                 m_auxiliaryNodes1.add(newNode);
             }
             for (int outerIndex=0;outerIndex<cardinality;outerIndex++) {
                 Node outerNode=m_auxiliaryNodes1.get(outerIndex);
                 for (int innerIndex=outerIndex+1;innerIndex<cardinality;innerIndex++)
-                    m_extensionManager.addAssertion(Inequality.INSTANCE,outerNode,m_auxiliaryNodes1.get(innerIndex),existentialDependencySet);
+                    m_extensionManager.addAssertion(Inequality.INSTANCE,outerNode,m_auxiliaryNodes1.get(innerIndex),existentialDependencySet,true);
             }
             m_auxiliaryNodes1.clear();
         }

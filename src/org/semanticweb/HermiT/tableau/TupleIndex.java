@@ -41,7 +41,7 @@ public final class TupleIndex implements Serializable {
         m_resizeThreshold=(int)(m_buckets.length*LOAD_FACTOR);
         m_numberOfNodes=0;
     }
-    public boolean addTuple(Object[] tuple,int potentialTupleIndex) {
+    public int addTuple(Object[] tuple,int potentialTupleIndex) {
         int trieNode=m_root;
         for (int position=0;position<m_indexingSequence.length;position++) {
             Object object=tuple[m_indexingSequence[position]];
@@ -49,10 +49,10 @@ public final class TupleIndex implements Serializable {
         }
         if (m_trieNodeManager.getTrieNodeComponent(trieNode,TRIE_NODE_TUPLE_INDEX)==-1) {
             m_trieNodeManager.setTrieNodeComponent(trieNode,TRIE_NODE_TUPLE_INDEX,potentialTupleIndex);
-            return true;
+            return potentialTupleIndex;
         }
         else
-            return false;
+            return m_trieNodeManager.getTrieNodeComponent(trieNode,TRIE_NODE_TUPLE_INDEX);
     }
     public int getTupleIndex(Object[] tuple) {
         int trieNode=m_root;

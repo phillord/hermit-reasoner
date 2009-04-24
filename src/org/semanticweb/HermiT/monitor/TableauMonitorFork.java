@@ -88,13 +88,13 @@ public class TableauMonitorFork implements TableauMonitor,Serializable  {
         m_first.dlClauseMatchedFinished(dlClauseEvaluator,dlClauseIndex);
         m_second.dlClauseMatchedFinished(dlClauseEvaluator,dlClauseIndex);
     }
-    public void addFactStarted(Object[] tuple) {
-        m_first.addFactStarted(tuple);
-        m_second.addFactStarted(tuple);
+    public void addFactStarted(Object[] tuple,boolean isCore) {
+        m_first.addFactStarted(tuple,isCore);
+        m_second.addFactStarted(tuple,isCore);
     }
-    public void addFactFinished(Object[] tuple,boolean factAdded) {
-        m_first.addFactFinished(tuple,factAdded);
-        m_second.addFactFinished(tuple,factAdded);
+    public void addFactFinished(Object[] tuple,boolean isCore,boolean factAdded) {
+        m_first.addFactFinished(tuple,isCore,factAdded);
+        m_second.addFactFinished(tuple,isCore,factAdded);
     }
     public void mergeStarted(Node mergeFrom,Node mergeInto) {
         m_first.mergeStarted(mergeFrom,mergeInto);

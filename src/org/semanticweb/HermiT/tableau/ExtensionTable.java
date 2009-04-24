@@ -36,6 +36,7 @@ public abstract class ExtensionTable implements Serializable {
     protected final int m_tupleArity;
     protected final TupleTable m_tupleTable;
     protected final DependencySetManager m_dependencySetManager;
+    protected final CoreManager m_coreManager;
     protected final Object[] m_binaryAuxiliaryTuple;
     protected final UnionDependencySet m_binaryUnionDependencySet;
     protected int m_afterExtensionOldTupleIndex;
@@ -50,6 +51,10 @@ public abstract class ExtensionTable implements Serializable {
         m_tupleArity=tupleArity;
         m_tupleTable=new TupleTable(m_tupleArity+(needsDependencySets ? 1 : 0));
         m_dependencySetManager=needsDependencySets ? new LastObjectDependencySetManager(this) : new DeterministicDependencySetManager(this);
+        if (m_tupleArity==1)
+            m_coreManager=new RealCoreManager();
+        else
+            m_coreManager=new NoCoreManager();
         m_binaryAuxiliaryTuple=new Object[2];
         m_binaryUnionDependencySet=new UnionDependencySet(2);
         m_indicesByBranchingPoint=new int[2*3];
@@ -67,7 +72,10 @@ public abstract class ExtensionTable implements Serializable {
     public DependencySet getDependencySet(int tupleIndex) {
         return m_dependencySetManager.getDependencySet(tupleIndex);
     }
-    public abstract boolean addTuple(Object[] tuple,DependencySet dependencySet);
+    public boolean isCore(int tupleIndex) {
+        return m_coreManager.isCore(tupleIndex);
+    }
+    public abstract boolean addTuple(Object[] tuple,DependencySet dependencySet,boolean isCore);
     
     /**
      * Performs a few tests depending on the type of the added tuple (concept, 
@@ -173,6 +181,7 @@ public abstract class ExtensionTable implements Serializable {
     }
     public abstract Retrieval createRetrieval(int[] bindingPositions,Object[] bindingsBuffer,View extensionView);
     public abstract DependencySet getDependencySet(Object[] tuple);
+    public abstract boolean isCore(Object[] tuple);
     public boolean propagateDeltaNew() {
         boolean deltaNewNotEmpty=(m_afterExtensionThisTupleIndex!=m_afterDeltaNewTupleIndex);
         m_afterExtensionOldTupleIndex=m_afterExtensionThisTupleIndex;
@@ -263,6 +272,7 @@ public abstract class ExtensionTable implements Serializable {
         Object[] getBindingsBuffer();
         Object[] getTupleBuffer();
         DependencySet getDependencySet();
+        boolean isCore();
         void open();
         boolean afterLast();
         int getCurrentTupleIndex();
@@ -308,6 +318,9 @@ public abstract class ExtensionTable implements Serializable {
         }
         public DependencySet getDependencySet() {
             return m_dependencySetManager.getDependencySet(m_currentTupleIndex);
+        }
+        public boolean isCore() {
+            return m_coreManager.isCore(m_currentTupleIndex);
         }
         public void open() {
             switch (m_extensionView) {
@@ -405,6 +418,57 @@ public abstract class ExtensionTable implements Serializable {
         public void forgetDependencySet(int tupleIndex) {
             PermanentDependencySet permanentDependencySet=(PermanentDependencySet)m_tupleTable.getTupleObject(tupleIndex,m_tupleArity);
             m_dependencySetFactory.removeUsage(permanentDependencySet);
+        }
+    }
+    
+    protected static interface CoreManager {
+        boolean isCore(int tupleIndex);
+        void addCore(int tupleIndex);
+        void setCore(int tupleIndex,boolean isCore);
+    }
+    
+    protected static class NoCoreManager implements CoreManager,Serializable {
+        private static final long serialVersionUID=3252994135060928432L;
+
+        public boolean isCore(int tupleIndex) {
+            return true;
+        }
+        public void addCore(int tupleIndex) {
+        }
+        public void setCore(int tupleIndex,boolean isCore) {
+        }
+    }
+
+    protected static class RealCoreManager implements CoreManager,Serializable {
+        private static final long serialVersionUID=3276377301185845284L;
+
+        protected int[] m_bits;
+
+        public boolean isCore(int tupleIndex) {
+            int frameIndex=tupleIndex/32;
+            int mask=1 << (tupleIndex % 32);
+            return (m_bits[frameIndex] & mask)!=0;
+        }
+        public void addCore(int tupleIndex) {
+            int frameIndex=tupleIndex/32;
+            int mask=1 << (tupleIndex % 32);
+            m_bits[frameIndex]|=mask;
+        }
+        public void setCore(int tupleIndex,boolean isCore) {
+            int frameIndex=tupleIndex/32;
+            int mask=1 << (tupleIndex % 32);
+            if (frameIndex>=m_bits.length) {
+                int newSize=3*m_bits.length/2;
+                while (frameIndex>=newSize)
+                    newSize=3*newSize/2;
+                int[] newBits=new int[newSize];
+                System.arraycopy(m_bits,0,newBits,0,m_bits.length);
+                m_bits=newBits;
+            }
+            if (isCore)
+                m_bits[frameIndex]|=mask;
+            else
+                m_bits[frameIndex]&=~mask;
         }
     }
 }

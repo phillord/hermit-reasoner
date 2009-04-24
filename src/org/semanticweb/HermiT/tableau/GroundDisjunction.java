@@ -12,14 +12,16 @@ public class GroundDisjunction implements Serializable {
     protected final DLPredicate[] m_dlPredicates;
     protected final int[] m_disjunctStart;
     protected final Node[] m_arguments;
+    protected final boolean[] m_isCore;
     protected PermanentDependencySet m_dependencySet;
     protected GroundDisjunction m_previousGroundDisjunction;
     protected GroundDisjunction m_nextGroundDisjunction;
 
-    public GroundDisjunction(Tableau tableau,DLPredicate[] dlPredicates,int[] disjunctStart,Node[] arguments,DependencySet dependencySet) {
+    public GroundDisjunction(Tableau tableau,DLPredicate[] dlPredicates,int[] disjunctStart,Node[] arguments,boolean[] isCore,DependencySet dependencySet) {
         m_dlPredicates=dlPredicates;
         m_disjunctStart=disjunctStart;
         m_arguments=arguments;
+        m_isCore=isCore;
         m_dependencySet=tableau.m_dependencySetFactory.getPermanent(dependencySet);
         tableau.m_dependencySetFactory.addUsage(m_dependencySet);
     }
@@ -41,6 +43,9 @@ public class GroundDisjunction implements Serializable {
     }
     public Node getArgument(int disjunctIndex,int argumentIndex) {
         return m_arguments[m_disjunctStart[disjunctIndex]+argumentIndex];
+    }
+    public boolean isCore(int disjunctIndex) {
+        return m_isCore[disjunctIndex];
     }
     public DependencySet getDependencySet() {
         return m_dependencySet;
@@ -70,11 +75,11 @@ public class GroundDisjunction implements Serializable {
         switch (dlPredicate.getArity()) {
         case 1:
             dependencySet=getArgument(disjunctIndex,0).addCacnonicalNodeDependencySet(dependencySet);
-            return tableau.getExtensionManager().addAssertion(dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),dependencySet);
+            return tableau.getExtensionManager().addAssertion(dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),dependencySet,isCore(disjunctIndex));
         case 2:
             dependencySet=getArgument(disjunctIndex,0).addCacnonicalNodeDependencySet(dependencySet);
             dependencySet=getArgument(disjunctIndex,1).addCacnonicalNodeDependencySet(dependencySet);
-            return tableau.getExtensionManager().addAssertion(dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),getArgument(disjunctIndex,1).getCanonicalNode(),dependencySet);
+            return tableau.getExtensionManager().addAssertion(dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),getArgument(disjunctIndex,1).getCanonicalNode(),dependencySet,isCore(disjunctIndex));
         default:
             throw new IllegalStateException("Unsupported predicate arity.");
         }

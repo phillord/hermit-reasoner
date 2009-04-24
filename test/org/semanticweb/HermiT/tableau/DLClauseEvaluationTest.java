@@ -79,13 +79,13 @@ public class DLClauseEvaluationTest extends AbstractReasonerInternalsTest {
         Node d=m_tableau.createNewNINode(emptySet);
         Node e=m_tableau.createNewNINode(emptySet);
         
-        m_extensionManager.addRoleAssertion(R,a,b,emptySet);
-        m_extensionManager.addRoleAssertion(R,a,c,emptySet);
+        m_extensionManager.addRoleAssertion(R,a,b,emptySet,false);
+        m_extensionManager.addRoleAssertion(R,a,c,emptySet,false);
 
-        m_extensionManager.addRoleAssertion(S,b,d,emptySet);
+        m_extensionManager.addRoleAssertion(S,b,d,emptySet,false);
 
-        m_extensionManager.addRoleAssertion(T,e,e,emptySet);
-        m_extensionManager.addRoleAssertion(T,c,d,emptySet);
+        m_extensionManager.addRoleAssertion(T,e,e,emptySet,false);
+        m_extensionManager.addRoleAssertion(T,c,d,emptySet,false);
 
         assertTrue(m_tableau.isSatisfiable());
         

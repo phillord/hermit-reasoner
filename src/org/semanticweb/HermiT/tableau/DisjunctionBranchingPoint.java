@@ -25,9 +25,9 @@ public class DisjunctionBranchingPoint extends BranchingPoint {
         for (int previousDisjunctIndex=0;previousDisjunctIndex<m_currentDisjunctIndex;previousDisjunctIndex++) {
             DLPredicate dlPredicate=m_groundDisjunction.getDLPredicate(previousDisjunctIndex);
             if (Equality.INSTANCE.equals(dlPredicate))
-                tableau.getExtensionManager().addAssertion(Inequality.INSTANCE,m_groundDisjunction.getArgument(previousDisjunctIndex,0),m_groundDisjunction.getArgument(previousDisjunctIndex,1),dependencySet);
+                tableau.getExtensionManager().addAssertion(Inequality.INSTANCE,m_groundDisjunction.getArgument(previousDisjunctIndex,0),m_groundDisjunction.getArgument(previousDisjunctIndex,1),dependencySet,false);
             else if (dlPredicate instanceof AtomicConcept)
-                tableau.getExtensionManager().addConceptAssertion(AtomicNegationConcept.create((AtomicConcept)dlPredicate),m_groundDisjunction.getArgument(previousDisjunctIndex,0),dependencySet);
+                tableau.getExtensionManager().addConceptAssertion(AtomicNegationConcept.create((AtomicConcept)dlPredicate),m_groundDisjunction.getArgument(previousDisjunctIndex,0),dependencySet,false);
         }
         m_groundDisjunction.addDisjunctToTableau(tableau,m_currentDisjunctIndex,dependencySet);
         if (tableau.m_tableauMonitor!=null)

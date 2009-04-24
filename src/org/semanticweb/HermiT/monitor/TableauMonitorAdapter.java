@@ -54,9 +54,9 @@ public class TableauMonitorAdapter implements TableauMonitor,Serializable  {
     }
     public void dlClauseMatchedFinished(DLClauseEvaluator dlClauseEvaluator,int dlClauseIndex) {
     }
-    public void addFactStarted(Object[] tuple) {
+    public void addFactStarted(Object[] tuple,boolean isCore) {
     }
-    public void addFactFinished(Object[] tuple,boolean factAdded) {
+    public void addFactFinished(Object[] tuple,boolean isCore,boolean factAdded) {
     }
     public void mergeStarted(Node mergeFrom,Node mergeInto) {
     }

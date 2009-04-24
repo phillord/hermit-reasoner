@@ -78,30 +78,30 @@ public class MergeTest extends AbstractReasonerInternalsTest {
         Node a11=m_tableau.createNewTreeNode(emptySet,a1);
         Node a12=m_tableau.createNewTreeNode(emptySet,a1);
 
-        m_extensionManager.addAssertion(R,a,a1,emptySet);
-        m_extensionManager.addAssertion(R,a,a2,emptySet);
+        m_extensionManager.addAssertion(R,a,a1,emptySet,false);
+        m_extensionManager.addAssertion(R,a,a2,emptySet,false);
         
-        m_extensionManager.addConceptAssertion(A,a1,emptySet);
-        m_extensionManager.addConceptAssertion(EXISTS_NEG_A,a1,emptySet);
+        m_extensionManager.addConceptAssertion(A,a1,emptySet,false);
+        m_extensionManager.addConceptAssertion(EXISTS_NEG_A,a1,emptySet,false);
 
-        m_extensionManager.addConceptAssertion(NEG_A,a2,emptySet);
-        m_extensionManager.addConceptAssertion(B,a2,emptySet);
-        m_extensionManager.addConceptAssertion(C,a2,emptySet);
-        m_extensionManager.addConceptAssertion(D,a2,emptySet);
+        m_extensionManager.addConceptAssertion(NEG_A,a2,emptySet,false);
+        m_extensionManager.addConceptAssertion(B,a2,emptySet,false);
+        m_extensionManager.addConceptAssertion(C,a2,emptySet,false);
+        m_extensionManager.addConceptAssertion(D,a2,emptySet,false);
 
-        m_extensionManager.addAssertion(R,a1,a11,emptySet);
-        m_extensionManager.addAssertion(R,a1,a12,emptySet);
+        m_extensionManager.addAssertion(R,a1,a11,emptySet,false);
+        m_extensionManager.addAssertion(R,a1,a12,emptySet,false);
 
-        m_extensionManager.addConceptAssertion(A,a11,emptySet);
-        m_extensionManager.addConceptAssertion(A,a12,emptySet);
+        m_extensionManager.addConceptAssertion(A,a11,emptySet,false);
+        m_extensionManager.addConceptAssertion(A,a12,emptySet,false);
 
-        m_extensionManager.addAssertion(R,a1,b,emptySet);
+        m_extensionManager.addAssertion(R,a1,b,emptySet,false);
 
         BranchingPoint bp=new BranchingPoint(m_tableau);
         m_tableau.pushBranchingPoint(bp);
         
         // The label of a2 is larger, so a1 is merged into a2
-        m_extensionManager.addAssertion(Equality.INSTANCE,a1,a2,emptySet);
+        m_extensionManager.addAssertion(Equality.INSTANCE,a1,a2,emptySet,false);
         
         assertTrue(m_extensionManager.containsClash());
         assertLabel(a2,A,B,C,D,NEG_A);
@@ -129,11 +129,11 @@ public class MergeTest extends AbstractReasonerInternalsTest {
         assertRetrieval(m_extensionManager.getBinaryExtensionTable(),T(A,null),ExtensionTable.View.TOTAL,new Object[][] { T(A,a1),T(A,a11),T(A,a12) });
 
         
-        m_extensionManager.addAssertion(Inequality.INSTANCE,a11,a12,emptySet);
+        m_extensionManager.addAssertion(Inequality.INSTANCE,a11,a12,emptySet,false);
         assertRetrieval(m_extensionManager.getTernaryExtensionTable(),T(Inequality.INSTANCE,null,null),ExtensionTable.View.TOTAL,new Object[][] { T(Inequality.INSTANCE,a11,a12) });
         
         
-        m_extensionManager.addAssertion(Equality.INSTANCE,a11,a12,emptySet);
+        m_extensionManager.addAssertion(Equality.INSTANCE,a11,a12,emptySet,false);
         assertTrue(m_extensionManager.containsClash());
         
         

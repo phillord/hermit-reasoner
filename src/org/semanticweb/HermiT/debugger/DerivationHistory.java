@@ -45,7 +45,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
     public void dlClauseMatchedFinished(DLClauseEvaluator dlClauseEvaluator) {
         m_derivations.pop();
     }
-    public void addFactFinished(Object[] tuple,boolean factAdded) {
+    public void addFactFinished(Object[] tuple,boolean isCore,boolean factAdded) {
         if (factAdded)
             addAtom(tuple);
     }

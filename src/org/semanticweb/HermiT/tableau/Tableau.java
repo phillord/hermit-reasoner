@@ -266,7 +266,7 @@ public final class Tableau implements Serializable {
         if (hasNominals())
             loadABox();
         m_checkedNode=createNewNINode(m_dependencySetFactory.emptySet());
-        m_extensionManager.addConceptAssertion(atomicConcept,m_checkedNode,m_dependencySetFactory.emptySet());
+        m_extensionManager.addConceptAssertion(atomicConcept,m_checkedNode,m_dependencySetFactory.emptySet(),true);
         boolean result=isSatisfiable();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isSatisfiableFinished(atomicConcept,result);
@@ -279,12 +279,12 @@ public final class Tableau implements Serializable {
         if (hasNominals())
             loadABox();
         m_checkedNode=createNewNINode(m_dependencySetFactory.emptySet());
-        m_extensionManager.addConceptAssertion(subconcept,m_checkedNode,m_dependencySetFactory.emptySet());
+        m_extensionManager.addConceptAssertion(subconcept,m_checkedNode,m_dependencySetFactory.emptySet(),true);
         m_branchingPoints[0]=new BranchingPoint(this);
         m_currentBranchingPoint++;
         m_nonbacktrackableBranchingPoint=m_currentBranchingPoint;
         DependencySet dependencySet=m_dependencySetFactory.addBranchingPoint(m_dependencySetFactory.emptySet(),m_currentBranchingPoint);
-        m_extensionManager.addConceptAssertion(superconcept.getNegation(),m_checkedNode,dependencySet);
+        m_extensionManager.addConceptAssertion(superconcept.getNegation(),m_checkedNode,dependencySet,true);
         boolean result=!isSatisfiable();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isSubsumedByFinished(subconcept,superconcept,result);
@@ -296,12 +296,12 @@ public final class Tableau implements Serializable {
             loadABox();
         Node a=createNewNINode(m_dependencySetFactory.emptySet());
         Node b=createNewNINode(m_dependencySetFactory.emptySet());
-        m_extensionManager.addRoleAssertion(role,a,b,m_dependencySetFactory.emptySet());
+        m_extensionManager.addRoleAssertion(role,a,b,m_dependencySetFactory.emptySet(),true);
         m_branchingPoints[0]=new BranchingPoint(this);
         m_currentBranchingPoint++;
         m_nonbacktrackableBranchingPoint=m_currentBranchingPoint;
         DependencySet dependencySet=m_dependencySetFactory.addBranchingPoint(m_dependencySetFactory.emptySet(),m_currentBranchingPoint);
-        m_extensionManager.addRoleAssertion(role,b,a,dependencySet);
+        m_extensionManager.addRoleAssertion(role,b,a,dependencySet,true);
         return !isSatisfiable();
     }
     public boolean isABoxSatisfiable() {
@@ -326,7 +326,7 @@ public final class Tableau implements Serializable {
         m_checkedNode=aboxMapping.get(individual);
         if (m_checkedNode==null)
             m_checkedNode=createNewNINode(m_dependencySetFactory.emptySet());
-        m_extensionManager.addConceptAssertion(atomicConcept.getNegation(),m_checkedNode,m_dependencySetFactory.emptySet());
+        m_extensionManager.addConceptAssertion(atomicConcept.getNegation(),m_checkedNode,m_dependencySetFactory.emptySet(),true);
         boolean result=!isSatisfiable();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isInstanceOfFinished(atomicConcept,individual,result);
@@ -336,10 +336,10 @@ public final class Tableau implements Serializable {
         DLPredicate dlPredicate=atom.getDLPredicate();
         switch (dlPredicate.getArity()) {
         case 1:
-            m_extensionManager.addAssertion(dlPredicate,getNodeForTerm(termsToNodes,atom.getArgument(0)),m_dependencySetFactory.emptySet());
+            m_extensionManager.addAssertion(dlPredicate,getNodeForTerm(termsToNodes,atom.getArgument(0)),m_dependencySetFactory.emptySet(),true);
             break;
         case 2:
-            m_extensionManager.addAssertion(dlPredicate,getNodeForTerm(termsToNodes,atom.getArgument(0)),getNodeForTerm(termsToNodes,atom.getArgument(1)),m_dependencySetFactory.emptySet());
+            m_extensionManager.addAssertion(dlPredicate,getNodeForTerm(termsToNodes,atom.getArgument(0)),getNodeForTerm(termsToNodes,atom.getArgument(1)),m_dependencySetFactory.emptySet(),true);
             break;
         default:
             throw new IllegalArgumentException("Unsupported arity of positive ground atoms.");
@@ -351,7 +351,7 @@ public final class Tableau implements Serializable {
             throw new IllegalArgumentException("Unsupported type of negative fact.");
         switch (dlPredicate.getArity()) {
         case 1:
-            m_extensionManager.addConceptAssertion(((AtomicConcept)dlPredicate).getNegation(),getNodeForTerm(termsToNodes,atom.getArgument(0)),m_dependencySetFactory.emptySet());
+            m_extensionManager.addConceptAssertion(((AtomicConcept)dlPredicate).getNegation(),getNodeForTerm(termsToNodes,atom.getArgument(0)),m_dependencySetFactory.emptySet(),true);
             break;
         default:
             throw new IllegalArgumentException("Unsupported arity of negative ground atoms.");
@@ -373,7 +373,7 @@ public final class Tableau implements Serializable {
             else {
                 Constant constant=(Constant)term;
                 node=createNewRootConstantNode(m_dependencySetFactory.emptySet());
-                m_extensionManager.addAssertion(DataValueEnumeration.create(new Object[] { constant.getDataValue() }),node,m_dependencySetFactory.emptySet());
+                m_extensionManager.addAssertion(DataValueEnumeration.create(new Object[] { constant.getDataValue() }),node,m_dependencySetFactory.emptySet(),true);
             }
             termsToNodes.put(term,node);
         }
@@ -559,9 +559,9 @@ public final class Tableau implements Serializable {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.nodeCreated(node);
         if (nodeType!=NodeType.CONCRETE_NODE) {
-            m_extensionManager.addConceptAssertion(AtomicConcept.THING,node,dependencySet);
+            m_extensionManager.addConceptAssertion(AtomicConcept.THING,node,dependencySet,true);
             if (nodeType==NodeType.NAMED_NODE && m_needsNamedExtension)
-                m_extensionManager.addConceptAssertion(AtomicConcept.INTERNAL_NAMED,node,dependencySet);
+                m_extensionManager.addConceptAssertion(AtomicConcept.INTERNAL_NAMED,node,dependencySet,true);
         }
         return node;
     }

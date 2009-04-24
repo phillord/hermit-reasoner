@@ -162,19 +162,19 @@ public final class DescriptionGraphManager implements Serializable {
             Object[] auxiliaryTuple=m_auxiliaryTuples1[graphIndex];
             extensionTable.retrieveTuple(auxiliaryTuple,tupleIndex);
             if (extensionTable.isTupleActive(auxiliaryTuple)) {
+                m_binaryUnionDependencySet.m_dependencySets[0]=extensionTable.getDependencySet(tupleIndex);
+                boolean isCore=extensionTable.isCore(tupleIndex);
                 if (m_tableauMonitor!=null) {
                     Object[] sourceTuple=m_auxiliaryTuples2[graphIndex];
                     System.arraycopy(auxiliaryTuple,0,sourceTuple,0,auxiliaryTuple.length);
                     auxiliaryTuple[positionInTuple]=mergeInto;
                     m_tableauMonitor.mergeFactStarted(mergeFrom,mergeInto,sourceTuple,auxiliaryTuple);
-                    m_binaryUnionDependencySet.m_dependencySets[0]=extensionTable.getDependencySet(tupleIndex);
-                    m_extensionManager.addTuple(auxiliaryTuple,m_binaryUnionDependencySet);
+                    m_extensionManager.addTuple(auxiliaryTuple,m_binaryUnionDependencySet,isCore);
                     m_tableauMonitor.mergeFactFinished(mergeFrom,mergeInto,sourceTuple,auxiliaryTuple);
                 }
                 else {
                     auxiliaryTuple[positionInTuple]=mergeInto;
-                    m_binaryUnionDependencySet.m_dependencySets[0]=extensionTable.getDependencySet(tupleIndex);
-                    m_extensionManager.addTuple(auxiliaryTuple,m_binaryUnionDependencySet);
+                    m_extensionManager.addTuple(auxiliaryTuple,m_binaryUnionDependencySet,isCore);
                 }
             }
             listNode=m_occurrenceManager.getListNodeComponent(listNode,OccurrenceManager.NEXT_NODE);
@@ -217,7 +217,7 @@ public final class DescriptionGraphManager implements Serializable {
             m_newNodes.add(newNode);
             auxiliaryTuple[vertex+1]=newNode;
         }
-        m_extensionManager.addTuple(auxiliaryTuple,dependencySet);
+        m_extensionManager.addTuple(auxiliaryTuple,dependencySet,true);
         // Replace all nodes with the canonical node because the nodes might have been merged
         for (int vertex=0;vertex<descriptionGraph.getNumberOfVertices();vertex++) {
             Node newNode=m_newNodes.get(vertex);
@@ -226,10 +226,10 @@ public final class DescriptionGraphManager implements Serializable {
         }
         // Now add the graph layout
         for (int vertex=0;vertex<descriptionGraph.getNumberOfVertices();vertex++)
-            m_extensionManager.addConceptAssertion(descriptionGraph.getAtomicConceptForVertex(vertex),m_newNodes.get(vertex),dependencySet);
+            m_extensionManager.addConceptAssertion(descriptionGraph.getAtomicConceptForVertex(vertex),m_newNodes.get(vertex),dependencySet,true);
         for (int edgeIndex=0;edgeIndex<descriptionGraph.getNumberOfEdges();edgeIndex++) {
             DescriptionGraph.Edge edge=descriptionGraph.getEdge(edgeIndex);
-            m_extensionManager.addRoleAssertion(edge.getAtomicRole(),m_newNodes.get(edge.getFromVertex()),m_newNodes.get(edge.getToVertex()),dependencySet);
+            m_extensionManager.addRoleAssertion(edge.getAtomicRole(),m_newNodes.get(edge.getFromVertex()),m_newNodes.get(edge.getToVertex()),dependencySet,true);
         }
         m_newNodes.clear();
         if (m_tableau.m_tableauMonitor!=null)

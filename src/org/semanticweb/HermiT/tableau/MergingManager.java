@@ -110,7 +110,7 @@ public final class MergingManager implements Serializable {
                 if (m_tableauMonitor!=null)
                     m_tableauMonitor.mergeFactStarted(mergeFrom,mergeInto,tupleBuffer,m_binaryAuxiliaryTuple);
                 m_binaryUnionDependencySet.m_dependencySets[0]=m_binaryExtensionTableSearch1Bound.getDependencySet();
-                m_extensionManager.addTuple(m_binaryAuxiliaryTuple,m_binaryUnionDependencySet);
+                m_extensionManager.addTuple(m_binaryAuxiliaryTuple,m_binaryUnionDependencySet,m_binaryExtensionTableSearch1Bound.isCore());
                 if (m_tableauMonitor!=null)
                     m_tableauMonitor.mergeFactFinished(mergeFrom,mergeInto,tupleBuffer,m_binaryAuxiliaryTuple);
                 m_binaryExtensionTableSearch1Bound.next();
@@ -126,7 +126,7 @@ public final class MergingManager implements Serializable {
                 if (m_tableauMonitor!=null)
                     m_tableauMonitor.mergeFactStarted(mergeFrom,mergeInto,tupleBuffer,m_ternaryAuxiliaryTuple);
                 m_binaryUnionDependencySet.m_dependencySets[0]=m_ternaryExtensionTableSearch1Bound.getDependencySet();
-                m_extensionManager.addTuple(m_ternaryAuxiliaryTuple,m_binaryUnionDependencySet);
+                m_extensionManager.addTuple(m_ternaryAuxiliaryTuple,m_binaryUnionDependencySet,m_ternaryExtensionTableSearch1Bound.isCore());
                 if (m_tableauMonitor!=null)
                     m_tableauMonitor.mergeFactFinished(mergeFrom,mergeInto,tupleBuffer,m_ternaryAuxiliaryTuple);
                 m_ternaryExtensionTableSearch1Bound.next();
@@ -142,7 +142,7 @@ public final class MergingManager implements Serializable {
                 if (m_tableauMonitor!=null)
                     m_tableauMonitor.mergeFactStarted(mergeFrom,mergeInto,tupleBuffer,m_ternaryAuxiliaryTuple);
                 m_binaryUnionDependencySet.m_dependencySets[0]=m_ternaryExtensionTableSearch2Bound.getDependencySet();
-                m_extensionManager.addTuple(m_ternaryAuxiliaryTuple,m_binaryUnionDependencySet);
+                m_extensionManager.addTuple(m_ternaryAuxiliaryTuple,m_binaryUnionDependencySet,m_ternaryExtensionTableSearch2Bound.isCore());
                 if (m_tableauMonitor!=null)
                     m_tableauMonitor.mergeFactFinished(mergeFrom,mergeInto,tupleBuffer,m_ternaryAuxiliaryTuple);
                 m_ternaryExtensionTableSearch2Bound.next();

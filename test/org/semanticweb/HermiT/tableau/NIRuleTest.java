@@ -77,19 +77,19 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         Node b11=m_tableau.createNewTreeNode(emptySet,b1);
         Node b111=m_tableau.createNewTreeNode(emptySet,b11);
         
-        m_extensionManager.addAssertion(AT_MOST_TWO_R_A,a,emptySet);
-        m_extensionManager.addAssertion(S,b,b1,emptySet);
-        m_extensionManager.addAssertion(S,b1,b11,emptySet);
-        m_extensionManager.addAssertion(S,b11,b111,emptySet);
+        m_extensionManager.addAssertion(AT_MOST_TWO_R_A,a,emptySet,false);
+        m_extensionManager.addAssertion(S,b,b1,emptySet,false);
+        m_extensionManager.addAssertion(S,b1,b11,emptySet,false);
+        m_extensionManager.addAssertion(S,b11,b111,emptySet,false);
 
-        m_extensionManager.addAssertion(R,a,b11,emptySet);
+        m_extensionManager.addAssertion(R,a,b11,emptySet,false);
         assertEquals(0,m_manager.m_targets.getFirstFreeTupleIndex());
         assertEquals(1,a.m_numberOfNIAssertionsFromNode);
         assertEquals(0,a.m_numberOfNIAssertionsToNode);
         assertEquals(0,b11.m_numberOfNIAssertionsFromNode);
         assertEquals(1,b11.m_numberOfNIAssertionsToNode);
         
-        m_extensionManager.addAssertion(A,b11,emptySet);
+        m_extensionManager.addAssertion(A,b11,emptySet,false);
         assertEquals(1,m_manager.m_targets.getFirstFreeTupleIndex());
 
         // The following call should trigger the creation of the first branching point for the NI-rule
@@ -113,7 +113,7 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         assertDependencySet(m_extensionManager.getAssertionDependencySet(R,a,newRoot1),0);
         
         // The following call causes a clash.
-        m_extensionManager.addConceptAssertion(NEG_A,newRoot1,emptySet);
+        m_extensionManager.addConceptAssertion(NEG_A,newRoot1,emptySet,false);
         assertDependencySet(m_extensionManager.getClashDependencySet(),0);
         
         // The following call backtracks the clash and starts a second choice point.
@@ -133,7 +133,7 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         assertDependencySet(m_extensionManager.getAssertionDependencySet(R,a,newRoot2));
 
         // The following call causes a clash.
-        m_extensionManager.addConceptAssertion(NEG_A,newRoot2,emptySet);
+        m_extensionManager.addConceptAssertion(NEG_A,newRoot2,emptySet,false);
         assertDependencySet(m_extensionManager.getClashDependencySet());
         
         // The following call backtracks the clash. Since we are backtracking the root choice point,
@@ -150,10 +150,10 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         Node b=m_tableau.createNewNINode(emptySet);
         Node b1=m_tableau.createNewTreeNode(emptySet,b);
         
-        m_extensionManager.addAssertion(AT_MOST_ONE_R_A,a,emptySet);
-        m_extensionManager.addAssertion(S,b,b1,emptySet);
-        m_extensionManager.addAssertion(R,a,b1,emptySet);
-        m_extensionManager.addAssertion(A,b1,emptySet);
+        m_extensionManager.addAssertion(AT_MOST_ONE_R_A,a,emptySet,false);
+        m_extensionManager.addAssertion(S,b,b1,emptySet,false);
+        m_extensionManager.addAssertion(R,a,b1,emptySet,false);
+        m_extensionManager.addAssertion(A,b1,emptySet,false);
         
         // The following call should trigger the NI-rule, which is deterministic in this case.
         assertTrue(m_tableau.doIteration());
@@ -170,7 +170,7 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         assertDependencySet(m_extensionManager.getAssertionDependencySet(R,a,newRoot1));
         
         // The following causes a clash, which cannot be backtracked.
-        m_extensionManager.addConceptAssertion(NEG_A,newRoot1,emptySet);
+        m_extensionManager.addConceptAssertion(NEG_A,newRoot1,emptySet,false);
         assertFalse(m_tableau.doIteration());
     }
     public void testNIRule3() {
@@ -181,10 +181,10 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         
         // This test is the same as the previous one, with the difference in the order in which the assertions are added to the tableau.
         // This actually exercises different parts of the NominalIntroductionManager code. The net effect, however, should be the same
-        m_extensionManager.addAssertion(AT_MOST_ONE_R_A,a,emptySet);
-        m_extensionManager.addAssertion(S,b,b1,emptySet);
-        m_extensionManager.addAssertion(A,b1,emptySet);
-        m_extensionManager.addAssertion(R,a,b1,emptySet);
+        m_extensionManager.addAssertion(AT_MOST_ONE_R_A,a,emptySet,false);
+        m_extensionManager.addAssertion(S,b,b1,emptySet,false);
+        m_extensionManager.addAssertion(A,b1,emptySet,false);
+        m_extensionManager.addAssertion(R,a,b1,emptySet,false);
         
         // The following call should trigger the NI-rule, which is deterministic in this case.
         assertTrue(m_tableau.doIteration());
@@ -201,7 +201,7 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         assertDependencySet(m_extensionManager.getAssertionDependencySet(R,a,newRoot1));
         
         // The following causes a clash, which cannot be backtracked.
-        m_extensionManager.addConceptAssertion(NEG_A,newRoot1,emptySet);
+        m_extensionManager.addConceptAssertion(NEG_A,newRoot1,emptySet,false);
         assertFalse(m_tableau.doIteration());
     }
     public void testNIRule4() {
@@ -212,11 +212,11 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         
         // The following test puts two at-most guards on a; hence, there are two possible ways in which
         // the NI-rule could be applied.
-        m_extensionManager.addAssertion(AT_MOST_ONE_R_A,a,emptySet);
-        m_extensionManager.addAssertion(AT_MOST_TWO_R_A,a,emptySet);
-        m_extensionManager.addAssertion(S,b,b1,emptySet);
-        m_extensionManager.addAssertion(A,b1,emptySet);
-        m_extensionManager.addAssertion(R,a,b1,emptySet);
+        m_extensionManager.addAssertion(AT_MOST_ONE_R_A,a,emptySet,false);
+        m_extensionManager.addAssertion(AT_MOST_TWO_R_A,a,emptySet,false);
+        m_extensionManager.addAssertion(S,b,b1,emptySet,false);
+        m_extensionManager.addAssertion(A,b1,emptySet,false);
+        m_extensionManager.addAssertion(R,a,b1,emptySet,false);
         
         // The following call should trigger the NI-rule, which is deterministic in this case.
         assertTrue(m_tableau.doIteration());
@@ -240,10 +240,10 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         Node b1=m_tableau.createNewTreeNode(emptySet,b);
         
         // We now test triggering the rule using guards with inverse roles.
-        m_extensionManager.addAssertion(AT_MOST_ONE_INV_R_A,a,emptySet);
-        m_extensionManager.addAssertion(S,b,b1,emptySet);
-        m_extensionManager.addAssertion(A,b1,emptySet);
-        m_extensionManager.addAssertion(R,b1,a,emptySet);
+        m_extensionManager.addAssertion(AT_MOST_ONE_INV_R_A,a,emptySet,false);
+        m_extensionManager.addAssertion(S,b,b1,emptySet,false);
+        m_extensionManager.addAssertion(A,b1,emptySet,false);
+        m_extensionManager.addAssertion(R,b1,a,emptySet,false);
         
         // The following call should trigger the NI-rule, which is deterministic in this case.
         assertTrue(m_tableau.doIteration());
@@ -260,7 +260,7 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         assertDependencySet(m_extensionManager.getAssertionDependencySet(R,newRoot1,a));
         
         // The following causes a clash, which cannot be backtracked.
-        m_extensionManager.addConceptAssertion(NEG_A,newRoot1,emptySet);
+        m_extensionManager.addConceptAssertion(NEG_A,newRoot1,emptySet,false);
         assertFalse(m_tableau.doIteration());
     }
     public void testNIRule6() {
@@ -270,10 +270,10 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         Node b1=m_tableau.createNewTreeNode(emptySet,b);
         
         // This test is the same as the previous one, save for the fact that it triggers the rule in different way.
-        m_extensionManager.addAssertion(AT_MOST_ONE_INV_R_A,a,emptySet);
-        m_extensionManager.addAssertion(S,b,b1,emptySet);
-        m_extensionManager.addAssertion(R,b1,a,emptySet);
-        m_extensionManager.addAssertion(A,b1,emptySet);
+        m_extensionManager.addAssertion(AT_MOST_ONE_INV_R_A,a,emptySet,false);
+        m_extensionManager.addAssertion(S,b,b1,emptySet,false);
+        m_extensionManager.addAssertion(R,b1,a,emptySet,false);
+        m_extensionManager.addAssertion(A,b1,emptySet,false);
         
         // The following call should trigger the NI-rule, which is deterministic in this case.
         assertTrue(m_tableau.doIteration());
@@ -290,7 +290,7 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         assertDependencySet(m_extensionManager.getAssertionDependencySet(R,newRoot1,a));
         
         // The following causes a clash, which cannot be backtracked.
-        m_extensionManager.addConceptAssertion(NEG_A,newRoot1,emptySet);
+        m_extensionManager.addConceptAssertion(NEG_A,newRoot1,emptySet,false);
         assertFalse(m_tableau.doIteration());
     }
     public void testNIRule7() {
@@ -300,10 +300,10 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         Node b1=m_tableau.createNewTreeNode(emptySet,b);
         
         // This test is the same as the previous one, save for the fact that it triggers the rule in different way.
-        m_extensionManager.addAssertion(S,b,b1,emptySet);
-        m_extensionManager.addAssertion(R,b1,a,emptySet);
-        m_extensionManager.addAssertion(A,b1,emptySet);
-        m_extensionManager.addAssertion(AT_MOST_ONE_INV_R_A,a,emptySet);
+        m_extensionManager.addAssertion(S,b,b1,emptySet,false);
+        m_extensionManager.addAssertion(R,b1,a,emptySet,false);
+        m_extensionManager.addAssertion(A,b1,emptySet,false);
+        m_extensionManager.addAssertion(AT_MOST_ONE_INV_R_A,a,emptySet,false);
         
         // The following call should trigger the NI-rule, which is deterministic in this case.
         assertTrue(m_tableau.doIteration());
@@ -320,7 +320,7 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         assertDependencySet(m_extensionManager.getAssertionDependencySet(R,newRoot1,a));
         
         // The following causes a clash, which cannot be backtracked.
-        m_extensionManager.addConceptAssertion(NEG_A,newRoot1,emptySet);
+        m_extensionManager.addConceptAssertion(NEG_A,newRoot1,emptySet,false);
         assertFalse(m_tableau.doIteration());
     }
     public void testNIRule8() {
@@ -336,10 +336,10 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         // This test checks backtracking of the NI-rule and the NominalIntroductionManager.
 
         // The following section starts the first choice point.
-        m_extensionManager.addAssertion(AT_MOST_TWO_R_A,a,emptySet);
-        m_extensionManager.addAssertion(S,b,b1,emptySet);
-        m_extensionManager.addAssertion(R,a,b1,emptySet);
-        m_extensionManager.addAssertion(A,b1,emptySet);
+        m_extensionManager.addAssertion(AT_MOST_TWO_R_A,a,emptySet,false);
+        m_extensionManager.addAssertion(S,b,b1,emptySet,false);
+        m_extensionManager.addAssertion(R,a,b1,emptySet,false);
+        m_extensionManager.addAssertion(A,b1,emptySet,false);
         assertTrue(m_tableau.doIteration());
         Node new1=getRootNodeFor(a,AT_MOST_TWO_R_A,1);
         
@@ -350,10 +350,10 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         assertDependencySet(m_extensionManager.getAssertionDependencySet(R,a,new1),0);
         
         // The following section starts the second choice point.
-        m_extensionManager.addAssertion(AT_MOST_TWO_R_A,c,emptySet);
-        m_extensionManager.addAssertion(S,d,d1,emptySet);
-        m_extensionManager.addAssertion(R,c,d1,emptySet);
-        m_extensionManager.addAssertion(A,d1,emptySet);
+        m_extensionManager.addAssertion(AT_MOST_TWO_R_A,c,emptySet,false);
+        m_extensionManager.addAssertion(S,d,d1,emptySet,false);
+        m_extensionManager.addAssertion(R,c,d1,emptySet,false);
+        m_extensionManager.addAssertion(A,d1,emptySet,false);
         assertTrue(m_tableau.doIteration());
         Node new2=getRootNodeFor(c,AT_MOST_TWO_R_A,1);
 
@@ -364,7 +364,7 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         assertDependencySet(m_extensionManager.getAssertionDependencySet(R,c,new2),1);
         
         // We now backtrack to first choice point. This should correctly backtrack out of the second choice point.
-        m_extensionManager.addConceptAssertion(NEG_A,new1,emptySet);
+        m_extensionManager.addConceptAssertion(NEG_A,new1,emptySet,false);
         assertTrue(m_tableau.doIteration());
         
         assertFalse(new2.isActive());
@@ -382,10 +382,10 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         assertFalse(new2.isActive());
         
         // We now again cause the NI-rule to be applied to c.
-        m_extensionManager.addAssertion(AT_MOST_TWO_R_A,c,emptySet);
-        m_extensionManager.addAssertion(S,d,d1,emptySet);
-        m_extensionManager.addAssertion(R,c,d1,emptySet);
-        m_extensionManager.addAssertion(A,d1,emptySet);
+        m_extensionManager.addAssertion(AT_MOST_TWO_R_A,c,emptySet,false);
+        m_extensionManager.addAssertion(S,d,d1,emptySet,false);
+        m_extensionManager.addAssertion(R,c,d1,emptySet,false);
+        m_extensionManager.addAssertion(A,d1,emptySet,false);
         assertTrue(m_tableau.doIteration());
         Node new2second=getRootNodeFor(c,AT_MOST_TWO_R_A,1);
         
@@ -404,15 +404,15 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         // This test is similar to the previous one, but the order of the events is different.
 
         // The following code creates two individuals that need an application of the NI-rule.
-        m_extensionManager.addAssertion(AT_MOST_TWO_R_A,a,emptySet);
-        m_extensionManager.addAssertion(S,b,b1,emptySet);
-        m_extensionManager.addAssertion(R,a,b1,emptySet);
-        m_extensionManager.addAssertion(A,b1,emptySet);
+        m_extensionManager.addAssertion(AT_MOST_TWO_R_A,a,emptySet,false);
+        m_extensionManager.addAssertion(S,b,b1,emptySet,false);
+        m_extensionManager.addAssertion(R,a,b1,emptySet,false);
+        m_extensionManager.addAssertion(A,b1,emptySet,false);
         
-        m_extensionManager.addAssertion(AT_MOST_TWO_R_A,c,emptySet);
-        m_extensionManager.addAssertion(S,d,d1,emptySet);
-        m_extensionManager.addAssertion(R,c,d1,emptySet);
-        m_extensionManager.addAssertion(A,d1,emptySet);
+        m_extensionManager.addAssertion(AT_MOST_TWO_R_A,c,emptySet,false);
+        m_extensionManager.addAssertion(S,d,d1,emptySet,false);
+        m_extensionManager.addAssertion(R,c,d1,emptySet,false);
+        m_extensionManager.addAssertion(A,d1,emptySet,false);
 
         // New now process both candidates. Due to implementation side-effects, the individuals will be processed
         // in the order in which NI-rule conditions were detected.
@@ -433,7 +433,7 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         assertDependencySet(m_extensionManager.getAssertionDependencySet(R,c,new2),1);
         
         // We now backtrack to first choice point.
-        m_extensionManager.addConceptAssertion(NEG_A,new1,emptySet);
+        m_extensionManager.addConceptAssertion(NEG_A,new1,emptySet,false);
         assertTrue(m_tableau.doIteration());
         
         new1=getRootNodeFor(a,AT_MOST_TWO_R_A,2);
@@ -461,13 +461,13 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         Node c=m_tableau.createNewNINode(emptySet);
         Node c1=m_tableau.createNewTreeNode(emptySet,c);
 
-        m_extensionManager.addAssertion(AT_MOST_TWO_R_A,a,emptySet);
-        m_extensionManager.addAssertion(S,b,b1,emptySet);
-        m_extensionManager.addAssertion(A,b1,emptySet);
-        m_extensionManager.addAssertion(R,a,b1,emptySet);
-        m_extensionManager.addAssertion(S,c,c1,emptySet);
-        m_extensionManager.addAssertion(A,c1,emptySet);
-        m_extensionManager.addAssertion(R,a,c1,emptySet);
+        m_extensionManager.addAssertion(AT_MOST_TWO_R_A,a,emptySet,false);
+        m_extensionManager.addAssertion(S,b,b1,emptySet,false);
+        m_extensionManager.addAssertion(A,b1,emptySet,false);
+        m_extensionManager.addAssertion(R,a,b1,emptySet,false);
+        m_extensionManager.addAssertion(S,c,c1,emptySet,false);
+        m_extensionManager.addAssertion(A,c1,emptySet,false);
+        m_extensionManager.addAssertion(R,a,c1,emptySet,false);
 
         // This now triggers the NI-rule.
         assertTrue(m_tableau.doIteration());
@@ -480,7 +480,7 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         assertNull(new2);
         
         // This will ensure backtracking our of the choice for c1
-        m_extensionManager.addConceptAssertion(NEG_A,new1,m_tableau.getDependencySetFactory().addBranchingPoint(emptySet,m_tableau.getCurrentBranchingPoint().getLevel()));
+        m_extensionManager.addConceptAssertion(NEG_A,new1,m_tableau.getDependencySetFactory().addBranchingPoint(emptySet,m_tableau.getCurrentBranchingPoint().getLevel()),false);
         assertTrue(m_tableau.doIteration());
         
         new1=getRootNodeFor(a,AT_MOST_TWO_R_A,1);

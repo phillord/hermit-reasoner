@@ -343,20 +343,23 @@ public class DLClauseEvaluator implements Serializable {
 
         protected final ExtensionManager m_extensionManager;
         protected final Object[] m_valuesBuffer;
+        protected final boolean[] m_coreVariables;
         protected final DependencySet m_dependencySet;
         protected final DLPredicate m_dlPredicate;
         protected final int m_argumentIndex;
 
-        public DeriveUnaryFact(ExtensionManager extensionManager,Object[] valuesBuffer,DependencySet dependencySet,DLPredicate dlPredicate,int argumentIndex) {
+        public DeriveUnaryFact(ExtensionManager extensionManager,Object[] valuesBuffer,boolean[] coreVariables,DependencySet dependencySet,DLPredicate dlPredicate,int argumentIndex) {
             m_extensionManager=extensionManager;
             m_valuesBuffer=valuesBuffer;
+            m_coreVariables=coreVariables;
             m_dependencySet=dependencySet;
             m_argumentIndex=argumentIndex;
             m_dlPredicate=dlPredicate;
         }
         public int execute(int programCounter) {
             Node argument=(Node)m_valuesBuffer[m_argumentIndex];
-            m_extensionManager.addAssertion(m_dlPredicate,argument,m_dependencySet);
+            boolean isCore=m_coreVariables[m_argumentIndex];
+            m_extensionManager.addAssertion(m_dlPredicate,argument,m_dependencySet,isCore);
             return programCounter+1;
         }
         public String toString() {
@@ -385,7 +388,7 @@ public class DLClauseEvaluator implements Serializable {
         public int execute(int programCounter) {
             Node argument1=(Node)m_valuesBuffer[m_argumentIndex1];
             Node argument2=(Node)m_valuesBuffer[m_argumentIndex2];
-            m_extensionManager.addAssertion(m_dlPredicate,argument1,argument2,m_dependencySet);
+            m_extensionManager.addAssertion(m_dlPredicate,argument1,argument2,m_dependencySet,true);
             return programCounter+1;
         }
         public String toString() {
@@ -398,13 +401,16 @@ public class DLClauseEvaluator implements Serializable {
 
         protected final Tableau m_tableau;
         protected final Object[] m_valuesBuffer;
+        protected final boolean[] m_coreVariables;
         protected final DependencySet m_dependencySet;
         protected final DLPredicate[] m_headDLPredicates;
         protected final int[] m_disjunctStart;
+        protected final int[] m_copyIsCore;
         protected final int[] m_copyValuesToArguments;
         
-        public DeriveDisjunction(Object[] valuesBuffer,DependencySet dependencySet,Tableau tableau,DLPredicate[] headDLPredicates,int[] copyValuesToArguments) {
+        public DeriveDisjunction(Object[] valuesBuffer,boolean[] coreVariables,DependencySet dependencySet,Tableau tableau,DLPredicate[] headDLPredicates,int[] copyIsCore,int[] copyValuesToArguments) {
             m_valuesBuffer=valuesBuffer;
+            m_coreVariables=coreVariables;
             m_dependencySet=dependencySet;
             m_tableau=tableau;
             m_headDLPredicates=headDLPredicates;
@@ -414,13 +420,22 @@ public class DLClauseEvaluator implements Serializable {
                 m_disjunctStart[disjunctIndex]=argumentsSize;
                 argumentsSize+=m_headDLPredicates[disjunctIndex].getArity();
             }
+            m_copyIsCore=copyIsCore;
             m_copyValuesToArguments=copyValuesToArguments;
         }
         public int execute(int programCounter) {
             Node[] arguments=new Node[m_copyValuesToArguments.length];
             for (int argumentIndex=m_copyValuesToArguments.length-1;argumentIndex>=0;--argumentIndex)
                 arguments[argumentIndex]=(Node)m_valuesBuffer[m_copyValuesToArguments[argumentIndex]];
-            GroundDisjunction groundDisjunction=new GroundDisjunction(m_tableau,m_headDLPredicates,m_disjunctStart,arguments,m_tableau.m_dependencySetFactory.getPermanent(m_dependencySet));
+            boolean[] isCore=new boolean[m_copyIsCore.length];
+            for (int copyIndex=m_copyIsCore.length-1;copyIndex>=0;--copyIndex) {
+                int copyFrom=m_copyIsCore[copyIndex];
+                if (copyFrom==-1)
+                    isCore[copyIndex]=true;
+                else
+                    isCore[copyIndex]=m_coreVariables[copyFrom];
+            }
+            GroundDisjunction groundDisjunction=new GroundDisjunction(m_tableau,m_headDLPredicates,m_disjunctStart,arguments,isCore,m_tableau.m_dependencySetFactory.getPermanent(m_dependencySet));
             if (!groundDisjunction.isSatisfied(m_tableau))
                 m_tableau.addGroundDisjunction(groundDisjunction);
             return programCounter+1;
@@ -429,24 +444,63 @@ public class DLClauseEvaluator implements Serializable {
             return "Derive disjunction";
         }
     }
-    
+
+    protected static final class ComputeCoreVariables implements Worker,Serializable {
+        private static final long serialVersionUID=899293772370136783L;
+
+        protected final Object[] m_valuesBuffer;
+        protected final boolean[] m_coreVariables;
+
+        public ComputeCoreVariables(Object[] valuesBuffer,boolean[] coreVariables) {
+            m_valuesBuffer=valuesBuffer;
+            m_coreVariables=coreVariables;
+        }
+        public int execute(int programCounter) {
+            Node potentialNoncore=null;
+            int potentialNoncoreIndex=-1;
+            for (int variableIndex=m_coreVariables.length-1;variableIndex>=0;--variableIndex) {
+                m_coreVariables[variableIndex]=true;
+                Node node=(Node)m_valuesBuffer[variableIndex];
+                if (node.getNodeType()==NodeType.TREE_NODE && (potentialNoncore==null || node.getTreeDepth()<potentialNoncore.getTreeDepth())) {
+                    potentialNoncore=node;
+                    potentialNoncoreIndex=variableIndex;
+                }
+            }
+            if (potentialNoncore!=null) {
+                boolean isNoncore=true;
+                for (int variableIndex=m_coreVariables.length-1;isNoncore && variableIndex>=0;--variableIndex) {
+                    Node node=(Node)m_valuesBuffer[variableIndex];
+                    if (!node.isRootNode() && potentialNoncore!=node && !potentialNoncore.isAncestorOf(node))
+                        isNoncore=false;
+                }
+                if (isNoncore)
+                    m_coreVariables[potentialNoncoreIndex]=false;
+            }
+            return programCounter+1;
+        }
+        public String toString() {
+            return "Compute core variables";
+        }
+    }
+
     protected static final class DLClauseCompiler {
         protected final DLClauseEvaluator m_dlClauseEvalautor;
         protected final ExtensionManager m_extensionManager;
-        protected final DLClause m_bodyDLClauses;
+        protected final DLClause m_bodyDLClause;
         protected final List<DLClause> m_headDLClauses;
         protected final List<Variable> m_variables;
         protected final Set<Variable> m_boundSoFar;
         protected final Object[] m_valuesBuffer;
+        protected final boolean[] m_coreVariables;
         protected final UnionDependencySet m_unionDependencySet;
         protected final List<ExtensionTable.Retrieval> m_retrievals;
         protected final List<Worker> m_workers;
         protected final List<Integer> m_labels;
 
-        public DLClauseCompiler(DLClauseEvaluator dlClauseEvalautor,ExtensionManager extensionManager,DLClause bodyDLClauses,List<DLClause> headDLClauses,ExtensionTable.Retrieval firstAtomRetrieval) {
+        public DLClauseCompiler(DLClauseEvaluator dlClauseEvalautor,ExtensionManager extensionManager,DLClause bodyDLClause,List<DLClause> headDLClauses,ExtensionTable.Retrieval firstAtomRetrieval) {
             m_dlClauseEvalautor=dlClauseEvalautor;
             m_extensionManager=extensionManager;
-            m_bodyDLClauses=bodyDLClauses;
+            m_bodyDLClause=bodyDLClause;
             m_headDLClauses=headDLClauses;
             m_variables=new ArrayList<Variable>();
             int numberOfRealAtoms=0;
@@ -474,6 +528,7 @@ public class DLClauseEvaluator implements Serializable {
             m_valuesBuffer=new Object[m_variables.size()+getBodyLength()];
             for (int bodyIndex=0;bodyIndex<getBodyLength();bodyIndex++)
                 m_valuesBuffer[m_variables.size()+bodyIndex]=getBodyAtom(bodyIndex).getDLPredicate();
+            m_coreVariables=new boolean[m_variables.size()];
             m_unionDependencySet=new UnionDependencySet(numberOfRealAtoms);
             m_retrievals=new ArrayList<ExtensionTable.Retrieval>();
             m_workers=new ArrayList<Worker>();
@@ -500,10 +555,10 @@ public class DLClauseEvaluator implements Serializable {
             return m_headDLClauses.size();
         }
         protected int getBodyLength() {
-            return m_bodyDLClauses.getBodyLength();
+            return m_bodyDLClause.getBodyLength();
         }
         protected Atom getBodyAtom(int atomIndex) {
-            return m_bodyDLClauses.getBodyAtom(atomIndex);
+            return m_bodyDLClause.getBodyAtom(atomIndex);
         }
         protected int getHeadLength(int dlClauseIndex) {
             return m_headDLClauses.get(dlClauseIndex).getHeadLength();
@@ -518,8 +573,10 @@ public class DLClauseEvaluator implements Serializable {
             return false;
         }
         protected void compileBodyAtom(int bodyAtomIndex,int lastAtomNextElement) {
-            if (bodyAtomIndex==getBodyLength())
+            if (bodyAtomIndex==getBodyLength()) {
+                m_workers.add(new ComputeCoreVariables(m_valuesBuffer,m_coreVariables));
                 compileHeads();
+            }
             else if (getBodyAtom(bodyAtomIndex).getDLPredicate().equals(NodeIDLessThan.INSTANCE)) {
                 Atom atom=getBodyAtom(bodyAtomIndex);
                 int variable1Index=m_variables.indexOf(atom.getArgumentVariable(0));
@@ -581,7 +638,7 @@ public class DLClauseEvaluator implements Serializable {
                     Atom atom=getHeadAtom(dlClauseIndex,0);
                     switch (atom.getArity()) {
                     case 1:
-                        m_workers.add(new DeriveUnaryFact(m_extensionManager,m_valuesBuffer,m_unionDependencySet,atom.getDLPredicate(),m_variables.indexOf(atom.getArgumentVariable(0))));
+                        m_workers.add(new DeriveUnaryFact(m_extensionManager,m_valuesBuffer,m_coreVariables,m_unionDependencySet,atom.getDLPredicate(),m_variables.indexOf(atom.getArgumentVariable(0))));
                         break;
                     case 2:
                         m_workers.add(new DeriveBinaryFact(m_extensionManager,m_valuesBuffer,m_unionDependencySet,atom.getDLPredicate(),m_variables.indexOf(atom.getArgumentVariable(0)),m_variables.indexOf(atom.getArgumentVariable(1))));
@@ -595,6 +652,7 @@ public class DLClauseEvaluator implements Serializable {
                     for (int headIndex=0;headIndex<getHeadLength(dlClauseIndex);headIndex++)
                         totalNumberOfArguments+=getHeadAtom(dlClauseIndex,headIndex).getArity();
                     DLPredicate[] headDLPredicates=new DLPredicate[getHeadLength(dlClauseIndex)];
+                    int[] copyIsCore=new int[getHeadLength(dlClauseIndex)];
                     int[] copyValuesToArguments=new int[totalNumberOfArguments];
                     int index=0;
                     for (int headIndex=0;headIndex<getHeadLength(dlClauseIndex);headIndex++) {
@@ -606,8 +664,14 @@ public class DLClauseEvaluator implements Serializable {
                             assert variableIndex!=-1;
                             copyValuesToArguments[index++]=variableIndex;
                         }
+                        if (headDLPredicates[headIndex].getArity()==1) {
+                            Variable variable=atom.getArgumentVariable(0);
+                            copyIsCore[headIndex]=m_variables.indexOf(variable);
+                        }
+                        else
+                            copyIsCore[headIndex]=-1;
                     }
-                    m_workers.add(new DeriveDisjunction(m_valuesBuffer,m_unionDependencySet,m_extensionManager.m_tableau,headDLPredicates,copyValuesToArguments));
+                    m_workers.add(new DeriveDisjunction(m_valuesBuffer,m_coreVariables,m_unionDependencySet,m_extensionManager.m_tableau,headDLPredicates,copyIsCore,copyValuesToArguments));
                 }
                 if (m_extensionManager.m_tableauMonitor!=null)
                     m_workers.add(new CallMatchFinishedOnMonitor(m_extensionManager.m_tableauMonitor,m_dlClauseEvalautor,dlClauseIndex));
