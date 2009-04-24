@@ -46,12 +46,16 @@ public class RDFTextDatatypeHandler implements DatatypeHandler {
     static {
         s_subsetsByDatatype.put(RDF_NS+"text",new RDFTextLengthValueSpaceSubset(new RDFTextLengthInterval(RDFTextLengthInterval.LanguageTagMode.ABSENT,0,Integer.MAX_VALUE),new RDFTextLengthInterval(RDFTextLengthInterval.LanguageTagMode.PRESENT,0,Integer.MAX_VALUE)));
         s_subsetsByDatatype.put(XSD_NS+"string",new RDFTextLengthValueSpaceSubset(new RDFTextLengthInterval(RDFTextLengthInterval.LanguageTagMode.ABSENT,0,Integer.MAX_VALUE)));
-        s_subsetsByDatatype.put(XSD_NS+"normalizedString",null); 
-        s_subsetsByDatatype.put(XSD_NS+"token",null); 
-        s_subsetsByDatatype.put(XSD_NS+"Name",null); 
-        s_subsetsByDatatype.put(XSD_NS+"NCName",null); 
-        s_subsetsByDatatype.put(XSD_NS+"NMTOKEN",null);
-        s_subsetsByDatatype.put(XSD_NS+"language",null); 
+        registerPatternDatatype(XSD_NS+"normalizedString");
+        registerPatternDatatype(XSD_NS+"token");
+        registerPatternDatatype(XSD_NS+"Name");
+        registerPatternDatatype(XSD_NS+"NCName");
+        registerPatternDatatype(XSD_NS+"NMTOKEN");
+        registerPatternDatatype(XSD_NS+"language");
+    }
+    protected static void registerPatternDatatype(String datatypeURI) {
+        Automaton automaton=RDFTextPatternValueSpaceSubset.getDatatypeAutomaton(datatypeURI);
+        s_subsetsByDatatype.put(datatypeURI,new RDFTextPatternValueSpaceSubset(automaton)); 
     }
     protected static final ValueSpaceSubset EMPTY_SUBSET=new RDFTextLengthValueSpaceSubset();
     protected static final Map<String,Set<String>> s_datatypeSupersets=new HashMap<String,Set<String>>();

@@ -9,6 +9,7 @@ import dk.brics.automaton.RegExp;
 import dk.brics.automaton.Automaton;
 import dk.brics.automaton.BasicAutomata;
 import dk.brics.automaton.BasicOperations;
+import dk.brics.automaton.Datatypes;
 
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 
@@ -137,5 +138,11 @@ public class RDFTextPatternValueSpaceSubset implements ValueSpaceSubset {
             result=result.concatenate(languageRangeAutomaton);
         }
         return result.concatenate(s_trailer);
+    }
+    public static Automaton getDatatypeAutomaton(String datatypeURI) {
+        int hashPosition=datatypeURI.lastIndexOf('#');
+        String datatypeName=datatypeURI.substring(hashPosition+1);
+        Automaton automaton=Datatypes.get(datatypeName);
+        return automaton.concatenate(s_anyLangTag);
     }
 }
