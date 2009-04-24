@@ -63,7 +63,7 @@ public class BinaryDataLenghInterval {
     }
     public void enumerateValues(Collection<Object> values) {
         if (m_maxLength==Integer.MAX_VALUE)
-            throw new IllegalStateException("Internal error: the data range is finite!");
+            throw new IllegalStateException("Internal error: the data range is infinite!");
         if (m_minLength==0)
             values.add(new BinaryData(m_binaryDataType,new byte[0]));
         byte[] temp=new byte[m_maxLength];
