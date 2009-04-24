@@ -92,11 +92,11 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertABoxSatisfiable(false);
     }
     
-    public void testDisjointDPsUnsatStringPattern() throws Exception {
+    public void testDisjointDPsUnsatStrings() throws Exception {
         String axioms = "DisjointDataProperties(dp1 dp2) " 
                 + "DataPropertyAssertion(dp1 a \"ab\"^^xsd:string)"
                 + "DataPropertyAssertion(dp1 a \"ac\"^^xsd:string)"
-                + "SubClassOf(A DataSomeValuesFrom(dp2 DatatypeRestriction(xsd:string pattern \"a(b|c)\"^^xsd:string)))"
+                + "SubClassOf(A DataSomeValuesFrom(dp2 DataOneOf(\"ab\"^^xsd:string \"ac\"^^xsd:string)))"
                 + "ClassAssertion(a A)";
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);

@@ -52,8 +52,7 @@ public class RDFTextDatatypeHandler implements DatatypeHandler {
                 throw new MalformedLiteralException(lexicalForm,datatypeURI);
             String string=lexicalForm.substring(0,lastAt);
             String languageTag=lexicalForm.substring(lastAt+1);
-            // if (languageTag.isEmpty())
-            if ("".equals(languageTag)) // Birte: replaced the above so that it compiles
+            if (languageTag.length()==0)
                 return string;
             else
                 return new RDFTextDataValue(string,languageTag);

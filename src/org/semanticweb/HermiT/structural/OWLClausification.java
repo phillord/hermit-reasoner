@@ -14,10 +14,10 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
+import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.datatypes.DatatypeRegistry;
 import org.semanticweb.HermiT.datatypes.UnsupportedDatatypeException;
-import org.semanticweb.HermiT.datatypes.rdftext.RDFTextDataValue;
 import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.AtMostGuard;
 import org.semanticweb.HermiT.model.Atom;
@@ -735,9 +735,9 @@ public class OWLClausification {
         }
         public Object visit(OWLUntypedConstant object) {
             if (object.getLang()==null)
-                return object.getLiteral();
+                return DatatypeRegistry.parseLiteral(object.getLiteral(),Prefixes.s_semanticWebPrefixes.get("xsd")+"string");
             else
-                return new RDFTextDataValue(object.getLiteral(),object.getLang());
+                return DatatypeRegistry.parseLiteral(object.getLiteral()+"@"+object.getLang(),Prefixes.s_semanticWebPrefixes.get("rdf")+"text");
         }
     }
 
