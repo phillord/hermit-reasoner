@@ -10,13 +10,13 @@ import java.io.Serializable;
 public final class TupleTable implements Serializable {
     private static final long serialVersionUID=-7712458276004062803L;
 
-    private static final int PAGE_SIZE=512;   // Must be a power of two!
+    protected static final int PAGE_SIZE=512;   // Must be a power of two!
 
-    private final int m_arity;
-    private Page[] m_pages;
-    private int m_numberOfPages;
-    private int m_tupleCapacity;
-    private int m_firstFreeTupleIndex;
+    protected final int m_arity;
+    protected Page[] m_pages;
+    protected int m_numberOfPages;
+    protected int m_tupleCapacity;
+    protected int m_firstFreeTupleIndex;
     
     public TupleTable(int arity) {
         m_arity=arity;
@@ -75,7 +75,7 @@ public final class TupleTable implements Serializable {
         m_firstFreeTupleIndex=0;
     }
 
-    private final class Page implements Serializable {
+    protected final class Page implements Serializable {
         private static final long serialVersionUID=2239482172592108644L;
 
         public Object[] m_objects;

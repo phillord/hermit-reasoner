@@ -51,7 +51,7 @@ public abstract class ExtensionTable implements Serializable {
         m_tupleArity=tupleArity;
         m_tupleTable=new TupleTable(m_tupleArity+(needsDependencySets ? 1 : 0));
         m_dependencySetManager=needsDependencySets ? new LastObjectDependencySetManager(this) : new DeterministicDependencySetManager(this);
-        if (m_tupleArity==1)
+        if (m_tupleArity==2)
             m_coreManager=new RealCoreManager();
         else
             m_coreManager=new NoCoreManager();
@@ -444,6 +444,9 @@ public abstract class ExtensionTable implements Serializable {
 
         protected int[] m_bits;
 
+        public RealCoreManager() {
+            m_bits=new int[TupleTable.PAGE_SIZE/32];
+        }
         public boolean isCore(int tupleIndex) {
             int frameIndex=tupleIndex/32;
             int mask=1 << (tupleIndex % 32);
