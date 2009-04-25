@@ -62,10 +62,21 @@ public class RDFTextLengthInterval {
         }
     }
     public boolean contains(String value) {
-        return m_languageTagMode==LanguageTagMode.ABSENT && m_minLength<=value.length() && value.length()<=m_maxLength;
+        return
+            m_languageTagMode==LanguageTagMode.ABSENT &&
+            m_minLength<=value.length() &&
+            value.length()<=m_maxLength &&
+            RDFTextPatternValueSpaceSubset.s_anyXSDString.run(value);
     }
     public boolean contains(RDFTextDataValue value) {
-        return m_languageTagMode==LanguageTagMode.PRESENT && m_minLength<=value.getString().length() && value.getString().length()<=m_maxLength;
+        String string=value.getString();
+        String languageTag=value.getLanguageTag();
+        return
+            m_languageTagMode==LanguageTagMode.PRESENT &&
+            m_minLength<=string.length() &&
+            string.length()<=m_maxLength &&
+            RDFTextPatternValueSpaceSubset.s_anyXSDString.run(string) &&
+            RDFTextPatternValueSpaceSubset.s_languageTag.run(languageTag);
     }
     public void enumerateValues(Collection<Object> values) {
         if (m_maxLength==Integer.MAX_VALUE || m_languageTagMode==LanguageTagMode.PRESENT)
@@ -78,7 +89,7 @@ public class RDFTextLengthInterval {
     protected void processPosition(char[] temp,Collection<Object> values,int position) {
         if (position<m_maxLength) {
             for (int c=0;c<=0xFFFF;c++)
-                if (RDFTextDatatypeHandler.isRDFTextCharacter((char)c)) {
+                if (isRDFTextCharacter((char)c)) {
                     temp[position]=(char)c;
                     if (m_minLength<=position+1)
                         values.add(new String(temp,0,position+1));
@@ -100,5 +111,8 @@ public class RDFTextLengthInterval {
     }
     protected static boolean isIntervalEmpty(LanguageTagMode languageTagMode,int minLength,int maxLength) {
         return minLength>maxLength;
+    }
+    protected static boolean isRDFTextCharacter(char c) {
+        return c==0x9 || c==0xA || c==0xD || (0x20<=c && c<=0xD7FF) || (0xE000<=c && c<=0xFFFD);
     }
 }

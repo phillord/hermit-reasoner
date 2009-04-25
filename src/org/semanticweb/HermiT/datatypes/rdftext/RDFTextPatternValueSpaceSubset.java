@@ -4,6 +4,8 @@ package org.semanticweb.HermiT.datatypes.rdftext;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 
 import dk.brics.automaton.RegExp;
 import dk.brics.automaton.Automaton;
@@ -17,26 +19,57 @@ public class RDFTextPatternValueSpaceSubset implements ValueSpaceSubset {
     public static final char SEPARATOR='\u0001';
     public static final char TRAILER='-';
     protected static final Automaton s_separator;
-    protected static final Automaton s_anyChar;
-    protected static final Automaton s_anyString;
-    protected static final Automaton s_nonemptyString;
     protected static final Automaton s_trailer;
-    protected static final Automaton s_anyLangTag;
+    protected static final Automaton s_languageTag;
+    protected static final Automaton s_languageTagOrEmpty;
+    protected static final Automaton s_emptyLangTag;
     protected static final Automaton s_nonemptyLangTag;
-    protected static final Automaton s_noLangTag;
-    protected static final Automaton s_anyRDFText;
+    protected static final Automaton s_anyLangTag;
+    protected static final Map<String,Automaton> s_anyDatatype=new HashMap<String,Automaton>();
     protected static final Automaton s_anyXSDString;
+    protected static final Automaton s_anyString;
+    protected static final Automaton s_anyChar;
+    protected static final Automaton s_anyStringWithNonemptyLangTag;
     static {
         s_separator=BasicAutomata.makeChar(SEPARATOR);
+        s_trailer=BasicAutomata.makeChar(TRAILER);
+        s_languageTag=new RegExp(
+            "("+
+                "([a-z]{2,3}"+
+                    "("+
+                        "(-[a-z]{3}){0,3}"+             // extlang
+                    ")?"+
+                ")|"+
+                "[a-z]{4}|"+                            // 4ALPHA
+                "[a-z]{5,8}"+                           // 5*8ALPHA
+            ")"+                                        // language
+            "(-[a-z]{4})?"+                             // script
+            "(-([a-z]{2}|[0-9]{3}))?"+                  // region
+            "(-([a-z0-9]{5,8}|([0-9][a-z0-9]{3})))*"+   // variant
+            "(-([a-wy-z0-9](-[a-z0-9]{2,8})+))*"+       // extension
+            "(-x(-[a-z0-9]{1,8})+)?"                    // privateuse
+        ).toAutomaton();
+        s_languageTagOrEmpty=s_languageTag.union(BasicAutomata.makeEmptyString());
+        s_emptyLangTag=s_separator.concatenate(s_trailer);
+        s_nonemptyLangTag=s_separator.concatenate(s_languageTag).concatenate(s_trailer);
+        s_anyLangTag=s_separator.concatenate(s_languageTagOrEmpty).concatenate(s_trailer);
+        registerDatatypeAutomaton(RDFTextDatatypeHandler.XSD_NS+"string");
+        registerDatatypeAutomaton(RDFTextDatatypeHandler.XSD_NS+"token");
+        registerDatatypeAutomaton(RDFTextDatatypeHandler.XSD_NS+"Name");
+        registerDatatypeAutomaton(RDFTextDatatypeHandler.XSD_NS+"NCName");
+        registerDatatypeAutomaton(RDFTextDatatypeHandler.XSD_NS+"NMTOKEN");
+        registerDatatypeAutomaton(RDFTextDatatypeHandler.XSD_NS+"language");
+        s_anyXSDString=s_anyDatatype.get(RDFTextDatatypeHandler.XSD_NS+"string");
+        s_anyDatatype.put(RDFTextDatatypeHandler.RDF_NS+"text",s_anyXSDString.concatenate(s_anyLangTag));
         s_anyChar=BasicAutomata.makeAnyChar();
         s_anyString=BasicAutomata.makeAnyString();
-        s_nonemptyString=s_anyString.minus(BasicAutomata.makeEmptyString());
-        s_trailer=BasicAutomata.makeChar(TRAILER);
-        s_anyLangTag=s_separator.concatenate(s_anyString).concatenate(s_trailer);
-        s_nonemptyLangTag=s_separator.concatenate(s_nonemptyString).concatenate(s_trailer);
-        s_noLangTag=s_separator.concatenate(s_trailer);
-        s_anyRDFText=s_anyString.concatenate(s_anyLangTag);
-        s_anyXSDString=s_anyString.concatenate(s_noLangTag);
+        s_anyStringWithNonemptyLangTag=s_anyString.concatenate(s_nonemptyLangTag);
+    }
+    protected static void registerDatatypeAutomaton(String datatypeURI) {
+        String datatypeName=datatypeURI.substring(datatypeURI.lastIndexOf('#')+1);
+        Automaton stringPart=Datatypes.get(datatypeName);
+        Automaton datatypeAutomaton=stringPart.concatenate(s_emptyLangTag);
+        s_anyDatatype.put(datatypeURI,datatypeAutomaton);
     }
     
     protected final Automaton m_automaton;
@@ -52,25 +85,34 @@ public class RDFTextPatternValueSpaceSubset implements ValueSpaceSubset {
             return elements.size()>=number;
     }
     public boolean containsDataValue(Object dataValue) {
-        String lexicalForm;
-        String languageTag;
         if (dataValue instanceof String) {
-            lexicalForm=(String)dataValue;
-            languageTag="";
+            String string=(String)dataValue;
+            return m_automaton.run(string+SEPARATOR+TRAILER);
         }
-        else {
+        else if (dataValue instanceof RDFTextDataValue) {
             RDFTextDataValue value=(RDFTextDataValue)dataValue;
-            lexicalForm=value.getString();
-            languageTag=value.getLanguageTag().toLowerCase();
+            String string=value.getString();
+            String languageTag=value.getLanguageTag().toLowerCase();
+            return m_automaton.run(string+SEPARATOR+languageTag+TRAILER);
         }
-        return m_automaton.run(lexicalForm+SEPARATOR+languageTag+TRAILER);
+        else
+            return false;
     }
     public void enumerateDataValues(Collection<Object> dataValues) {
         Set<String> elements=m_automaton.getFiniteStrings();
         if (elements==null)
             throw new IllegalStateException("The value space range is infinite.");
-        else
-            dataValues.addAll(elements);
+        else {
+            for (String element : elements) {
+                int separatorIndex=element.lastIndexOf(SEPARATOR);
+                String string=element.substring(0,separatorIndex);
+                String languageTag=element.substring(separatorIndex+1,element.length()-1);
+                if (languageTag.length()==0)
+                    dataValues.add(string);
+                else
+                    dataValues.add(new RDFTextDataValue(string,languageTag));
+            }
+        }
     }
     public String toString() {
         StringBuffer buffer=new StringBuffer();
@@ -79,22 +121,23 @@ public class RDFTextPatternValueSpaceSubset implements ValueSpaceSubset {
         buffer.append('}');
         return buffer.toString();
     }
-    public static Automaton toAutomaton(List<RDFTextLengthInterval> intervals) {
+    public static Automaton toAutomaton(RDFTextLengthValueSpaceSubset valueSpaceSubset) {
+        List<RDFTextLengthInterval> intervals=valueSpaceSubset.m_intervals;
         Automaton result=null;
         for (int intervalIndex=intervals.size()-1;intervalIndex>=0;--intervalIndex) {
             RDFTextLengthInterval interval=intervals.get(intervalIndex);
             Automaton stringPart;
             if (interval.m_maxLength==Integer.MAX_VALUE) {
                 if (interval.m_minLength==0)
-                    stringPart=BasicAutomata.makeAnyString();
+                    stringPart=s_anyString;
                 else
-                    stringPart=BasicOperations.repeat(s_anyChar,interval.m_minLength);
+                    stringPart=s_anyString.intersection(BasicOperations.repeat(s_anyChar,interval.m_minLength));
             }
             else
-                stringPart=BasicOperations.repeat(s_anyChar,interval.m_minLength,interval.m_maxLength);
+                stringPart=s_anyString.intersection(BasicOperations.repeat(s_anyChar,interval.m_minLength,interval.m_maxLength));
             Automaton intervalAutomaton;
             if (interval.m_languageTagMode==RDFTextLengthInterval.LanguageTagMode.ABSENT)
-                intervalAutomaton=stringPart.concatenate(s_noLangTag);
+                intervalAutomaton=stringPart.concatenate(s_emptyLangTag);
             else
                 intervalAutomaton=stringPart.concatenate(s_nonemptyLangTag);
             if (result==null)
@@ -105,16 +148,17 @@ public class RDFTextPatternValueSpaceSubset implements ValueSpaceSubset {
         return result;
     }
     public static Automaton toAutomaton(int minLength,int maxLength) {
-        Automaton result;
+        assert minLength<=maxLength;
+        Automaton stringPart;
         if (maxLength==Integer.MAX_VALUE) {
             if (minLength==0)
-                result=BasicAutomata.makeAnyString();
+                stringPart=s_anyString;
             else
-                result=BasicOperations.repeat(s_anyChar,minLength);
+                stringPart=s_anyString.intersection(BasicOperations.repeat(s_anyChar,minLength));
         }
         else
-            result=BasicOperations.repeat(s_anyChar,minLength,maxLength);
-        return result.concatenate(s_anyLangTag);
+            stringPart=s_anyString.intersection(BasicOperations.repeat(s_anyChar,minLength,maxLength));
+        return stringPart.concatenate(s_anyLangTag);
     }
     public static boolean isValidPattern(String pattern) {
         try {
@@ -126,23 +170,18 @@ public class RDFTextPatternValueSpaceSubset implements ValueSpaceSubset {
         }
     }
     public static Automaton getPatternAutomaton(String pattern) {
-        Automaton patternAutomaton=new RegExp(pattern).toAutomaton();
-        return patternAutomaton.concatenate(s_separator).concatenate(s_anyLangTag).concatenate(s_trailer);
+        Automaton stringPart=new RegExp(pattern).toAutomaton();
+        return stringPart.concatenate(s_anyLangTag);
     }
     public static Automaton getLanguageRangeAutomaton(String languageRange) {
-        Automaton result=s_nonemptyString.concatenate(s_separator);
         if ("*".equals(languageRange))
-            result=result.concatenate(s_nonemptyString);
+            return s_anyStringWithNonemptyLangTag;
         else {
-            Automaton languageRangeAutomaton=BasicAutomata.makeString(languageRange.toLowerCase());
-            result=result.concatenate(languageRangeAutomaton);
+            Automaton languageTagPart=BasicAutomata.makeString(languageRange.toLowerCase());
+            return s_anyString.concatenate(s_separator).concatenate(languageTagPart).concatenate(s_trailer);
         }
-        return result.concatenate(s_trailer);
     }
     public static Automaton getDatatypeAutomaton(String datatypeURI) {
-        int hashPosition=datatypeURI.lastIndexOf('#');
-        String datatypeName=datatypeURI.substring(hashPosition+1);
-        Automaton automaton=Datatypes.get(datatypeName);
-        return automaton.concatenate(s_anyLangTag);
+        return s_anyDatatype.get(datatypeURI);
     }
 }
