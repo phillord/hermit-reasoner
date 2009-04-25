@@ -420,6 +420,10 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         return '\"'+value+"\"@"+languageTag;
     }
 
+    protected static String AURI(String value) {
+        return '\"'+value+"\"^^xsd:anyURI";
+    }
+
     protected static String[] S(String... args) {
         return args;
     }

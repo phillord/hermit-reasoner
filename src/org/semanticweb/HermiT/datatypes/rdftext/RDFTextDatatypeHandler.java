@@ -210,11 +210,11 @@ public class RDFTextDatatypeHandler implements DatatypeHandler {
             Automaton valueSpaceSubsetAutomaton=getAutomatonFor(valueSpaceSubset);
             if (valueSpaceSubsetAutomaton==null)
                 return EMPTY_SUBSET;
-            Automaton intersection=valueSpaceSubsetAutomaton.minus(restrictionAutomaton);
-            if (intersection.isEmpty())
+            Automaton difference=valueSpaceSubsetAutomaton.minus(restrictionAutomaton);
+            if (difference.isEmpty())
                 return EMPTY_SUBSET;
             else
-                return new RDFTextPatternValueSpaceSubset(intersection);
+                return new RDFTextPatternValueSpaceSubset(difference);
         }
         else {
             RDFTextLengthInterval[] intervals=getIntervalsFor(datatypeRestriction);
