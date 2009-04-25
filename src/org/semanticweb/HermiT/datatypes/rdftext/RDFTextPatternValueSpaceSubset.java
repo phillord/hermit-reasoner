@@ -17,9 +17,8 @@ import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 
 public class RDFTextPatternValueSpaceSubset implements ValueSpaceSubset {
     public static final char SEPARATOR='\u0001';
-    public static final char TRAILER='-';
     protected static final Automaton s_separator;
-    protected static final Automaton s_trailer;
+    protected static final Automaton s_languagePatternEnd;
     protected static final Automaton s_languageTag;
     protected static final Automaton s_languageTagOrEmpty;
     protected static final Automaton s_emptyLangTag;
@@ -32,12 +31,12 @@ public class RDFTextPatternValueSpaceSubset implements ValueSpaceSubset {
     protected static final Automaton s_anyStringWithNonemptyLangTag;
     static {
         s_separator=BasicAutomata.makeChar(SEPARATOR);
-        s_trailer=BasicAutomata.makeChar(TRAILER);
+        s_languagePatternEnd=BasicOperations.optional(BasicAutomata.makeChar('-').concatenate(BasicAutomata.makeAnyString()));
         s_languageTag=languageTagAutomaton();
         s_languageTagOrEmpty=s_languageTag.union(BasicAutomata.makeEmptyString());
-        s_emptyLangTag=s_separator.concatenate(s_trailer);
-        s_nonemptyLangTag=s_separator.concatenate(s_languageTag).concatenate(s_trailer);
-        s_anyLangTag=s_separator.concatenate(s_languageTagOrEmpty).concatenate(s_trailer);
+        s_emptyLangTag=s_separator;
+        s_nonemptyLangTag=s_separator.concatenate(s_languageTag);
+        s_anyLangTag=s_separator.concatenate(s_languageTagOrEmpty);
         s_xsdString=Datatypes.get("string");
         s_anyDatatype.put(RDFTextDatatypeHandler.XSD_NS+"string",s_xsdString.concatenate(s_emptyLangTag));
         s_anyDatatype.put(RDFTextDatatypeHandler.XSD_NS+"token",tokenAutomaton().concatenate(s_emptyLangTag));
@@ -87,13 +86,13 @@ public class RDFTextPatternValueSpaceSubset implements ValueSpaceSubset {
     public boolean containsDataValue(Object dataValue) {
         if (dataValue instanceof String) {
             String string=(String)dataValue;
-            return m_automaton.run(string+SEPARATOR+TRAILER);
+            return m_automaton.run(string+SEPARATOR);
         }
         else if (dataValue instanceof RDFTextDataValue) {
             RDFTextDataValue value=(RDFTextDataValue)dataValue;
             String string=value.getString();
             String languageTag=value.getLanguageTag().toLowerCase();
-            return m_automaton.run(string+SEPARATOR+languageTag+TRAILER);
+            return m_automaton.run(string+SEPARATOR+languageTag);
         }
         else
             return false;
@@ -106,7 +105,7 @@ public class RDFTextPatternValueSpaceSubset implements ValueSpaceSubset {
             for (String element : elements) {
                 int separatorIndex=element.lastIndexOf(SEPARATOR);
                 String string=element.substring(0,separatorIndex);
-                String languageTag=element.substring(separatorIndex+1,element.length()-1);
+                String languageTag=element.substring(separatorIndex+1,element.length());
                 if (languageTag.length()==0)
                     dataValues.add(string);
                 else
@@ -177,8 +176,8 @@ public class RDFTextPatternValueSpaceSubset implements ValueSpaceSubset {
         if ("*".equals(languageRange))
             return s_anyStringWithNonemptyLangTag;
         else {
-            Automaton languageTagPart=BasicAutomata.makeString(languageRange.toLowerCase());
-            return s_anyString.concatenate(s_separator).concatenate(languageTagPart).concatenate(s_trailer);
+            Automaton languageTagPart=BasicAutomata.makeString(languageRange.toLowerCase()).concatenate(s_languagePatternEnd);
+            return s_anyString.concatenate(s_separator).concatenate(languageTagPart);
         }
     }
     public static Automaton getDatatypeAutomaton(String datatypeURI) {

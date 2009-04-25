@@ -150,7 +150,7 @@ public class RDFTextDatatypeHandler implements DatatypeHandler {
             else if (intervals[0]==null && intervals[1]!=null)
                 return new RDFTextLengthValueSpaceSubset(intervals[1]);
             else
-                throw new IllegalStateException("Internal error: invalid intervals for strings.");
+                return new RDFTextLengthValueSpaceSubset(intervals[0]);
         }
     }
     public ValueSpaceSubset conjoinWithDR(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
@@ -228,12 +228,16 @@ public class RDFTextDatatypeHandler implements DatatypeHandler {
                     if (intervals[0].m_maxLength<Integer.MAX_VALUE)
                         complementedIntervals.add(new RDFTextLengthInterval(RDFTextLengthInterval.LanguageTagMode.PRESENT,intervals[0].m_maxLength+1,Integer.MAX_VALUE));
                 }
+                else
+                    complementedIntervals.add(new RDFTextLengthInterval(RDFTextLengthInterval.LanguageTagMode.PRESENT,0,Integer.MAX_VALUE));
                 if (intervals[1]!=null) {
                     if (intervals[1].m_minLength>0)
                         complementedIntervals.add(new RDFTextLengthInterval(RDFTextLengthInterval.LanguageTagMode.ABSENT,0,intervals[1].m_minLength-1));
                     if (intervals[1].m_maxLength<Integer.MAX_VALUE)
                         complementedIntervals.add(new RDFTextLengthInterval(RDFTextLengthInterval.LanguageTagMode.ABSENT,intervals[1].m_maxLength+1,Integer.MAX_VALUE));
                 }
+                else
+                    complementedIntervals.add(new RDFTextLengthInterval(RDFTextLengthInterval.LanguageTagMode.ABSENT,0,Integer.MAX_VALUE));
                 List<RDFTextLengthInterval> oldIntervals=((RDFTextLengthValueSpaceSubset)valueSpaceSubset).m_intervals;
                 List<RDFTextLengthInterval> newIntervals=new ArrayList<RDFTextLengthInterval>();
                 for (int index=0;index<oldIntervals.size();index++) {

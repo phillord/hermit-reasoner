@@ -42,8 +42,8 @@ public class BinaryDataValueSpaceSubset implements ValueSpaceSubset {
         StringBuffer buffer=new StringBuffer();
         buffer.append("binaryData{");
         for (int index=0;index<m_intervals.size();index++) {
-            if (index==0)
-                buffer.append('+');
+            if (index!=0)
+                buffer.append(" + ");
             buffer.append(m_intervals.get(index).toString());
         }
         buffer.append('}');

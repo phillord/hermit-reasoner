@@ -11,6 +11,7 @@ public class AllQuickTests extends TestCase {
         // $JUnit-BEGIN$
         suite.addTestSuite(DatatypesTest.class);
         suite.addTestSuite(NumericsTest.class);
+        suite.addTestSuite(RDFTextTest.class);
         suite.addTestSuite(FloatDoubleTest.class);
         suite.addTestSuite(DateTimeTest.class);
         suite.addTestSuite(BinaryDataTest.class);

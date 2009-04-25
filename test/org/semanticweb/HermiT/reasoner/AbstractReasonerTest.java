@@ -351,7 +351,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
             buffer.append(datatype);
             for (String restriction : restrictions) {
                 buffer.append(' ');
-                if (restriction.startsWith("xsd:"))
+                if (restriction.startsWith("xsd:") || restriction.startsWith("rdf:"))
                     buffer.append(restriction.substring(4));
                 else
                     buffer.append(restriction);
