@@ -6,10 +6,6 @@
     <!-- Note that on each released build, the ${updatefile} on the web site
          should be replaced, and the new version of the plugin should be
          posted at the (auto-generated) URL in that file. -->
-    <!-- version 0.9.0 build from revision 203 on 2008-10-25 by rob -->
-    <!-- version 0.9.1 build from revision 206 on 2008-10-26 by rob -->
-    <!-- version 0.9.2 build from revision 208 on 2008-10-26 by rob -->
-    <!-- version 0.9.3 build from revision 233 on 2008-12-12 by rob -->
     <property name="version" value="0.9.4"/>
 
     <!-- general info -->
@@ -19,7 +15,6 @@
     <!-- structure of output files -->
     <property name="projectroot" value="."/>
     <property name="builddir" value="${projectroot}/build"/>
-    <property name="flattendir" value="${builddir}/flatten"/>
     <property name="classdir" value="${builddir}/class"/>
     <property name="testclassdir" value="${builddir}/testclass"/>
 
@@ -31,6 +26,7 @@
     <!-- structure of 3rdparty libraries -->
     <property name="3rdpartydir" value="${projectroot}/../ThirdPartyOwlTools"/>
     <property name="owlapi" value="${3rdpartydir}/owlapi/2.2.1/owlapi-bin.jar"/>
+    <property name="automaton" value="${3rdpartydir}/automaton/1.11-1/automaton.jar"/>
     <property name="junit" value="${3rdpartydir}/junit/4.4/junit-4.4.jar"/>
     <property name="protegeapp" value="${3rdpartydir}/protege/4.0/org.protege.editor.core.application.jar"/>
     <property name="protegeowl" value="${3rdpartydir}/protege/4.0/org.protege.editor.owl.jar"/>
@@ -42,7 +38,6 @@
     <path id="sourcepath">
         <pathelement path="${projectroot}/src"/>
         <pathelement path="${projectroot}/getopt"/>
-        <pathelement path="${projectroot}/automaton"/>
     </path>
     <path id="testsourcepath">
         <pathelement path="${projectroot}/test"/>
@@ -51,6 +46,7 @@
     <!-- CLASS PATHS -->
     <path id="classpath">
         <pathelement location="${owlapi}"/>
+        <pathelement location="${automaton}"/>
         <pathelement location="${protegeapp}"/>
         <pathelement location="${protegeowl}"/>
     </path>
@@ -69,12 +65,10 @@
         <mkdir dir="${classdir}"/>
         <javac destdir="${classdir}" deprecation="yes" debug="${debug}">
             <compilerarg value="-Xlint:all"/>
+            <compilerarg value="-Xbootclasspath:${java.home}/lib/rt.jar"/>
             <src refid="sourcepath"/>
             <classpath refid="classpath"/>
         </javac>
-        <copy todir="${classdir}">
-            <fileset dir="${projectroot}/automaton" includes="**/*.aut,**/*.txt"/>
-        </copy>
         <copy todir="${classdir}">
             <fileset dir="${projectroot}/getopt" includes="**/*.properties"/>
         </copy>
@@ -87,16 +81,16 @@
     
     <target name="javadoc">
         <mkdir dir="${javadocdir}"/>
-        <javadoc sourcepathref="sourcepath" destdir="${javadocdir}" access="protected" author="false" version="true" use="true">
+        <javadoc sourcepathref="sourcepath" destdir="${javadocdir}" access="protected" author="false" version="true" use="true" bootclasspath="${java.home}/lib/rt.jar">
             <classpath refid="classpath"/>
             <classpath refid="testclasspath"/>
             <package name="org.semanticweb.HermiT.*"/>
         </javadoc>
     </target>
     
-    <target name="flatten-owlapi">
-        <mkdir dir="${flattendir}"/>
-        <unjar src="${owlapi}" dest="${flattendir}"/>
+    <target name="unpack-libraries">
+        <unjar src="${owlapi}" dest="${classdir}"/>
+        <unjar src="${automaton}" dest="${classdir}"/>
     </target>
 
     <target name="quick" depends="compile">
@@ -124,7 +118,7 @@
                 <attribute name="Bundle-Category" value="protege"/>
                 <attribute name="Bundle-Description" value="A plugin for the Protege OWL Editor which allows reasoning using the HermiT reasoner"/>
                 <attribute name="Bundle-DocURL" value="${homepage}"/>
-                <attribute name="Bundle-Vendor" value="Boris Motik, Birte Glimm, Rob Shearer, and Ian Horrocks"/>
+                <attribute name="Bundle-Vendor" value="Boris Motik, Birte Glimm, and Ian Horrocks"/>
                 <attribute name="Bundle-Version" value="${version}"/>
                 <attribute name="Bundle-Activator" value="org.protege.editor.core.plugin.DefaultPluginActivator"/>
                 <attribute name="Bundle-ClassPath" value="."/>
@@ -132,17 +126,15 @@
                 <attribute name="Update-Url" value="${updatefile}"/>
             </manifest>
             <fileset dir="${classdir}"/>
-            <fileset dir="${flattendir}"/>
             <zipfileset dir="${projectroot}/src" prefix="src"/>
             <zipfileset dir="${projectroot}/getopt" prefix="src"/>
-            <zipfileset dir="${projectroot}/automaton" prefix="src"/>
             <zipfileset dir="${javadocdir}" prefix="javadoc"/>
             <fileset file="${releasedir}/readme.txt"/>
             <fileset file="gpl.txt"/>
         </jar>
     </target>
     
-    <target name="combined" depends="compile,javadoc,flatten-owlapi,quick"/>
+    <target name="combined" depends="compile,javadoc,unpack-libraries,quick"/>
     
     <!-- TEST TARGETS -->
 
@@ -160,7 +152,7 @@
     </target>
 
     <target name="test" depends="compiletest">
-        <java classname="org.semanticweb.HermiT.AllTests" fork="true">
+        <java classname="org.semanticweb.HermiT.AllQuickTests" fork="true">
             <jvmarg value="-enableassertions"/>
             <jvmarg value="-Xmx700M"/>
             <classpath>
@@ -172,15 +164,6 @@
     </target>
 
     <!-- AUXILIARY TARGETS -->
-
-    <target name="build-datatypes-automata" depends="compile">
-        <delete>
-        	<fileset dir="${projectroot}/automaton" includes="*.dat"/>
-       	</delete>
-        <java classname="dk.brics.automaton.Datatypes" classpath="${classdir}">
-            <sysproperty key="dk.brics.automaton.datatypes" value="${projectroot}/automaton"/>
-        </java>
-    </target>
 
     <target name="publish" depends="combined">
         <echo message="Publishing a new version of HermiT"/>
