@@ -67,14 +67,14 @@ public class BinaryDataTest extends AbstractReasonerTest {
         );
     }
     public void testExplicitSize() throws Exception {
-        BinaryDataLenghInterval imax2=interval(BinaryDataType.HEX_BINARY,0,2);
+        BinaryDataLengthInterval imax2=interval(BinaryDataType.HEX_BINARY,0,2);
         assertEquals(10000000,imax2.subtractSizeFrom(10000000+1+256+256*256));
 
-        BinaryDataLenghInterval imin1max2=interval(BinaryDataType.HEX_BINARY,1,2);
+        BinaryDataLengthInterval imin1max2=interval(BinaryDataType.HEX_BINARY,1,2);
         assertEquals(10000000,imin1max2.subtractSizeFrom(10000000+256+256*256));
     }
     public void testEnumerate1() throws Exception {
-        BinaryDataLenghInterval imax1=interval(BinaryDataType.HEX_BINARY,0,1);
+        BinaryDataLengthInterval imax1=interval(BinaryDataType.HEX_BINARY,0,1);
         List<Object> values=new ArrayList<Object>();
         imax1.enumerateValues(values);
         List<Object> control=new ArrayList<Object>();
@@ -83,7 +83,7 @@ public class BinaryDataTest extends AbstractReasonerTest {
         assertContainsAll(values,control.toArray());
     }
     public void testEnumerate2() throws Exception {
-        BinaryDataLenghInterval iexact1=interval(BinaryDataType.HEX_BINARY,1,1);
+        BinaryDataLengthInterval iexact1=interval(BinaryDataType.HEX_BINARY,1,1);
         List<Object> values=new ArrayList<Object>();
         iexact1.enumerateValues(values);
         List<Object> control=new ArrayList<Object>();
@@ -102,8 +102,8 @@ public class BinaryDataTest extends AbstractReasonerTest {
             }
         }
     }
-    protected static BinaryDataLenghInterval interval(BinaryDataType type,int minLength,int maxLength) {
-        return new BinaryDataLenghInterval(type,minLength,maxLength);
+    protected static BinaryDataLengthInterval interval(BinaryDataType type,int minLength,int maxLength) {
+        return new BinaryDataLengthInterval(type,minLength,maxLength);
     }
     public void testBase64Parsing() {
         BinaryData data1=BinaryData.parseBase64Binary("ZXdyZA==");

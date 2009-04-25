@@ -411,7 +411,15 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     protected static String B64B(String value) {
         return '\"'+value+"\"^^xsd:base64Binary";
     }
-    
+
+    protected static String STR(String value) {
+        return '\"'+value+"\"^^xsd:string";
+    }
+
+    protected static String STR(String value,String languageTag) {
+        return '\"'+value+"\"@"+languageTag;
+    }
+
     protected static String[] S(String... args) {
         return args;
     }

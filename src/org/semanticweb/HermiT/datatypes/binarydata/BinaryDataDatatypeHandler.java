@@ -17,8 +17,8 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
     protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd");
     protected static final String XSD_HEX_BINARY=XSD_NS+"hexBinary";
     protected static final String XSD_BASE_64_BINARY=XSD_NS+"base64Binary";
-    protected static final ValueSpaceSubset HEX_BINARY_ALL=new BinaryDataValueSpaceSubset(new BinaryDataLenghInterval(BinaryDataType.HEX_BINARY,0,Integer.MAX_VALUE));
-    protected static final ValueSpaceSubset BASE_64_BINARY_ALL=new BinaryDataValueSpaceSubset(new BinaryDataLenghInterval(BinaryDataType.BASE_64_BINARY,0,Integer.MAX_VALUE));
+    protected static final ValueSpaceSubset HEX_BINARY_ALL=new BinaryDataValueSpaceSubset(new BinaryDataLengthInterval(BinaryDataType.HEX_BINARY,0,Integer.MAX_VALUE));
+    protected static final ValueSpaceSubset BASE_64_BINARY_ALL=new BinaryDataValueSpaceSubset(new BinaryDataLengthInterval(BinaryDataType.BASE_64_BINARY,0,Integer.MAX_VALUE));
     protected static final ValueSpaceSubset EMPTY=new BinaryDataValueSpaceSubset();
     protected static final Set<String> s_managedDatatypeURIs=new HashSet<String>();
     static {
@@ -85,7 +85,7 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
                 return HEX_BINARY_ALL;
             else
                 return BASE_64_BINARY_ALL;
-        BinaryDataLenghInterval interval=getIntervalFor(datatypeRestriction);
+        BinaryDataLengthInterval interval=getIntervalFor(datatypeRestriction);
         if (interval==null)
             return EMPTY;
         else
@@ -96,16 +96,16 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
         if (datatypeRestriction.getNumberOfFacetRestrictions()==0 || valueSpaceSubset==EMPTY)
             return valueSpaceSubset;
         else {
-            BinaryDataLenghInterval interval=getIntervalFor(datatypeRestriction);
+            BinaryDataLengthInterval interval=getIntervalFor(datatypeRestriction);
             if (interval==null)
                 return EMPTY;
             else {
                 BinaryDataValueSpaceSubset doubleSubset=(BinaryDataValueSpaceSubset)valueSpaceSubset;
-                List<BinaryDataLenghInterval> oldIntervals=doubleSubset.m_intervals;
-                List<BinaryDataLenghInterval> newIntervals=new ArrayList<BinaryDataLenghInterval>();
+                List<BinaryDataLengthInterval> oldIntervals=doubleSubset.m_intervals;
+                List<BinaryDataLengthInterval> newIntervals=new ArrayList<BinaryDataLengthInterval>();
                 for (int index=0;index<oldIntervals.size();index++) {
-                    BinaryDataLenghInterval oldInterval=oldIntervals.get(index);
-                    BinaryDataLenghInterval intersection=oldInterval.intersectWith(interval);
+                    BinaryDataLengthInterval oldInterval=oldIntervals.get(index);
+                    BinaryDataLengthInterval intersection=oldInterval.intersectWith(interval);
                     if (intersection!=null)
                         newIntervals.add(intersection);
                 }
@@ -122,29 +122,29 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
         if (datatypeRestriction.getNumberOfFacetRestrictions()==0 || valueSpaceSubset==EMPTY)
             return EMPTY;
         else {
-            BinaryDataLenghInterval interval=getIntervalFor(datatypeRestriction);
+            BinaryDataLengthInterval interval=getIntervalFor(datatypeRestriction);
             if (interval==null)
                 return valueSpaceSubset;
             else {
                 BinaryDataType binaryDataType=(XSD_HEX_BINARY.equals(datatypeURI) ? BinaryDataType.HEX_BINARY : BinaryDataType.BASE_64_BINARY);
                 BinaryDataValueSpaceSubset doubleSubset=(BinaryDataValueSpaceSubset)valueSpaceSubset;
-                BinaryDataLenghInterval complementInterval1=null;
+                BinaryDataLengthInterval complementInterval1=null;
                 if (interval.m_minLength!=0)
-                    complementInterval1=new BinaryDataLenghInterval(binaryDataType,0,interval.m_minLength-1);
-                BinaryDataLenghInterval complementInterval2=null;
+                    complementInterval1=new BinaryDataLengthInterval(binaryDataType,0,interval.m_minLength-1);
+                BinaryDataLengthInterval complementInterval2=null;
                 if (interval.m_maxLength!=Integer.MAX_VALUE)
-                    complementInterval2=new BinaryDataLenghInterval(binaryDataType,interval.m_maxLength+1,Integer.MAX_VALUE);
-                List<BinaryDataLenghInterval> oldIntervals=doubleSubset.m_intervals;
-                List<BinaryDataLenghInterval> newIntervals=new ArrayList<BinaryDataLenghInterval>();
+                    complementInterval2=new BinaryDataLengthInterval(binaryDataType,interval.m_maxLength+1,Integer.MAX_VALUE);
+                List<BinaryDataLengthInterval> oldIntervals=doubleSubset.m_intervals;
+                List<BinaryDataLengthInterval> newIntervals=new ArrayList<BinaryDataLengthInterval>();
                 for (int index=0;index<oldIntervals.size();index++) {
-                    BinaryDataLenghInterval oldInterval=oldIntervals.get(index);
+                    BinaryDataLengthInterval oldInterval=oldIntervals.get(index);
                     if (complementInterval1!=null) {
-                        BinaryDataLenghInterval intersection=oldInterval.intersectWith(complementInterval1);
+                        BinaryDataLengthInterval intersection=oldInterval.intersectWith(complementInterval1);
                         if (intersection!=null)
                             newIntervals.add(intersection);
                     }
                     if (complementInterval2!=null) {
-                        BinaryDataLenghInterval intersection=oldInterval.intersectWith(complementInterval2);
+                        BinaryDataLengthInterval intersection=oldInterval.intersectWith(complementInterval2);
                         if (intersection!=null)
                             newIntervals.add(intersection);
                     }
@@ -156,7 +156,7 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
             }
         }
     }
-    protected BinaryDataLenghInterval getIntervalFor(DatatypeRestriction datatypeRestriction) {
+    protected BinaryDataLengthInterval getIntervalFor(DatatypeRestriction datatypeRestriction) {
         String datatypeURI=datatypeRestriction.getDatatypeURI();
         assert datatypeRestriction.getNumberOfFacetRestrictions()!=0;
         int minLength=0;
@@ -176,10 +176,10 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
                 throw new IllegalStateException("Internal error: facet '"+facetURI+"' is not supported by "+Prefixes.STANDARD_PREFIXES.abbreviateURI(datatypeURI)+".");
         }
         BinaryDataType binaryDataType=(XSD_HEX_BINARY.equals(datatypeURI) ? BinaryDataType.HEX_BINARY : BinaryDataType.BASE_64_BINARY);
-        if (BinaryDataLenghInterval.isIntervalEmpty(binaryDataType,minLength,maxLength))
+        if (BinaryDataLengthInterval.isIntervalEmpty(binaryDataType,minLength,maxLength))
             return null;
         else
-            return new BinaryDataLenghInterval(binaryDataType,minLength,maxLength);
+            return new BinaryDataLengthInterval(binaryDataType,minLength,maxLength);
     }
     public boolean isSubsetOf(String subsetDatatypeURI,String supersetDatatypeURI) {
         return subsetDatatypeURI.equals(supersetDatatypeURI);

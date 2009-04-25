@@ -3,12 +3,12 @@ package org.semanticweb.HermiT.datatypes.binarydata;
 
 import java.util.Collection;
 
-public class BinaryDataLenghInterval {
+public class BinaryDataLengthInterval {
     protected final BinaryDataType m_binaryDataType;
     protected final int m_minLength;
     protected final int m_maxLength;
 
-    public BinaryDataLenghInterval(BinaryDataType binaryDataType,int minLength,int maxLength) {
+    public BinaryDataLengthInterval(BinaryDataType binaryDataType,int minLength,int maxLength) {
         assert !isIntervalEmpty(binaryDataType,minLength,maxLength);
         m_binaryDataType=binaryDataType;
         m_minLength=minLength;
@@ -17,7 +17,7 @@ public class BinaryDataLenghInterval {
     /**
      * Computes the intersection of this interval with the supplied one. If the two intervals do not intersect, the result is null.
      */
-    public BinaryDataLenghInterval intersectWith(BinaryDataLenghInterval that) {
+    public BinaryDataLengthInterval intersectWith(BinaryDataLengthInterval that) {
         if (m_binaryDataType!=that.m_binaryDataType)
             return null;
         int newMinLength=Math.max(m_minLength,that.m_minLength);
@@ -29,7 +29,7 @@ public class BinaryDataLenghInterval {
         else if (that.isEqual(m_binaryDataType,newMinLength,newMaxLength))
             return that;
         else
-            return new BinaryDataLenghInterval(m_binaryDataType,newMinLength,newMaxLength);
+            return new BinaryDataLengthInterval(m_binaryDataType,newMinLength,newMaxLength);
     }
     protected boolean isEqual(BinaryDataType binaryDataType,int minLength,int maxLength) {
         return m_binaryDataType==binaryDataType && m_minLength==minLength && m_maxLength==maxLength;

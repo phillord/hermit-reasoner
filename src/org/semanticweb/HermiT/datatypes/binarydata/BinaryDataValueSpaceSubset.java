@@ -8,15 +8,15 @@ import java.util.List;
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 
 public class BinaryDataValueSpaceSubset implements ValueSpaceSubset {
-    protected final List<BinaryDataLenghInterval> m_intervals;
+    protected final List<BinaryDataLengthInterval> m_intervals;
     
     public BinaryDataValueSpaceSubset() {
         m_intervals=Collections.emptyList();
     }
-    public BinaryDataValueSpaceSubset(BinaryDataLenghInterval interval) {
+    public BinaryDataValueSpaceSubset(BinaryDataLengthInterval interval) {
         m_intervals=Collections.singletonList(interval);
     }
-    public BinaryDataValueSpaceSubset(List<BinaryDataLenghInterval> intervals) {
+    public BinaryDataValueSpaceSubset(List<BinaryDataLengthInterval> intervals) {
         m_intervals=intervals;
     }
     public boolean hasCardinalityAtLeast(int number) {
