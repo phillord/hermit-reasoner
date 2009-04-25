@@ -38,7 +38,7 @@ public class RDFTextLengthInterval {
         return m_languageTagMode==languageTagMode && m_minLength==minLength && m_maxLength==maxLength;
     }
     public int subtractSizeFrom(int argument) {
-        if (argument<=0 || m_maxLength==Integer.MAX_VALUE || m_languageTagMode==LanguageTagMode.ABSENT)
+        if (argument<=0 || m_maxLength==Integer.MAX_VALUE || m_languageTagMode==LanguageTagMode.PRESENT)
             return 0;
         // If m_minLength or m_maxLength is more than 4, then the number of
         // values exceeds the range of long. 
@@ -66,7 +66,7 @@ public class RDFTextLengthInterval {
             m_languageTagMode==LanguageTagMode.ABSENT &&
             m_minLength<=value.length() &&
             value.length()<=m_maxLength &&
-            RDFTextPatternValueSpaceSubset.s_anyXSDString.run(value);
+            RDFTextPatternValueSpaceSubset.s_xsdString.run(value);
     }
     public boolean contains(RDFTextDataValue value) {
         String string=value.getString();
@@ -75,7 +75,7 @@ public class RDFTextLengthInterval {
             m_languageTagMode==LanguageTagMode.PRESENT &&
             m_minLength<=string.length() &&
             string.length()<=m_maxLength &&
-            RDFTextPatternValueSpaceSubset.s_anyXSDString.run(string) &&
+            RDFTextPatternValueSpaceSubset.s_xsdString.run(string) &&
             RDFTextPatternValueSpaceSubset.s_languageTag.run(languageTag);
     }
     public void enumerateValues(Collection<Object> values) {
@@ -107,6 +107,10 @@ public class RDFTextLengthInterval {
         else
             buffer.append(m_maxLength);
         buffer.append(']');
+        if (m_languageTagMode==LanguageTagMode.ABSENT)
+            buffer.append("@<none>");
+        else
+            buffer.append("@<lt>");
         return buffer.toString();
     }
     protected static boolean isIntervalEmpty(LanguageTagMode languageTagMode,int minLength,int maxLength) {

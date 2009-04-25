@@ -25,15 +25,33 @@ public class RDFTextPatternValueSpaceSubset implements ValueSpaceSubset {
     protected static final Automaton s_emptyLangTag;
     protected static final Automaton s_nonemptyLangTag;
     protected static final Automaton s_anyLangTag;
+    protected static final Automaton s_xsdString;
     protected static final Map<String,Automaton> s_anyDatatype=new HashMap<String,Automaton>();
-    protected static final Automaton s_anyXSDString;
     protected static final Automaton s_anyString;
     protected static final Automaton s_anyChar;
     protected static final Automaton s_anyStringWithNonemptyLangTag;
     static {
         s_separator=BasicAutomata.makeChar(SEPARATOR);
         s_trailer=BasicAutomata.makeChar(TRAILER);
-        s_languageTag=new RegExp(
+        s_languageTag=languageTagAutomaton();
+        s_languageTagOrEmpty=s_languageTag.union(BasicAutomata.makeEmptyString());
+        s_emptyLangTag=s_separator.concatenate(s_trailer);
+        s_nonemptyLangTag=s_separator.concatenate(s_languageTag).concatenate(s_trailer);
+        s_anyLangTag=s_separator.concatenate(s_languageTagOrEmpty).concatenate(s_trailer);
+        s_xsdString=Datatypes.get("string");
+        s_anyDatatype.put(RDFTextDatatypeHandler.XSD_NS+"string",s_xsdString.concatenate(s_emptyLangTag));
+        s_anyDatatype.put(RDFTextDatatypeHandler.XSD_NS+"token",tokenAutomaton().concatenate(s_emptyLangTag));
+        s_anyDatatype.put(RDFTextDatatypeHandler.XSD_NS+"Name",Datatypes.get("Name2").concatenate(s_emptyLangTag));
+        s_anyDatatype.put(RDFTextDatatypeHandler.XSD_NS+"NCName",Datatypes.get("NCName").concatenate(s_emptyLangTag));
+        s_anyDatatype.put(RDFTextDatatypeHandler.XSD_NS+"NMTOKEN",Datatypes.get("Nmtoken2").concatenate(s_emptyLangTag));
+        s_anyDatatype.put(RDFTextDatatypeHandler.XSD_NS+"language",Datatypes.get("language").concatenate(s_emptyLangTag));
+        s_anyDatatype.put(RDFTextDatatypeHandler.RDF_NS+"text",s_xsdString.concatenate(s_anyLangTag));
+        s_anyChar=BasicAutomata.makeAnyChar();
+        s_anyString=BasicAutomata.makeAnyString();
+        s_anyStringWithNonemptyLangTag=s_anyString.concatenate(s_nonemptyLangTag);
+    }
+    protected static Automaton languageTagAutomaton() {
+        return new RegExp(
             "("+
                 "([a-z]{2,3}"+
                     "("+
@@ -49,27 +67,9 @@ public class RDFTextPatternValueSpaceSubset implements ValueSpaceSubset {
             "(-([a-wy-z0-9](-[a-z0-9]{2,8})+))*"+       // extension
             "(-x(-[a-z0-9]{1,8})+)?"                    // privateuse
         ).toAutomaton();
-        s_languageTagOrEmpty=s_languageTag.union(BasicAutomata.makeEmptyString());
-        s_emptyLangTag=s_separator.concatenate(s_trailer);
-        s_nonemptyLangTag=s_separator.concatenate(s_languageTag).concatenate(s_trailer);
-        s_anyLangTag=s_separator.concatenate(s_languageTagOrEmpty).concatenate(s_trailer);
-        registerDatatypeAutomaton(RDFTextDatatypeHandler.XSD_NS+"string");
-        registerDatatypeAutomaton(RDFTextDatatypeHandler.XSD_NS+"token");
-        registerDatatypeAutomaton(RDFTextDatatypeHandler.XSD_NS+"Name");
-        registerDatatypeAutomaton(RDFTextDatatypeHandler.XSD_NS+"NCName");
-        registerDatatypeAutomaton(RDFTextDatatypeHandler.XSD_NS+"NMTOKEN");
-        registerDatatypeAutomaton(RDFTextDatatypeHandler.XSD_NS+"language");
-        s_anyXSDString=s_anyDatatype.get(RDFTextDatatypeHandler.XSD_NS+"string");
-        s_anyDatatype.put(RDFTextDatatypeHandler.RDF_NS+"text",s_anyXSDString.concatenate(s_anyLangTag));
-        s_anyChar=BasicAutomata.makeAnyChar();
-        s_anyString=BasicAutomata.makeAnyString();
-        s_anyStringWithNonemptyLangTag=s_anyString.concatenate(s_nonemptyLangTag);
     }
-    protected static void registerDatatypeAutomaton(String datatypeURI) {
-        String datatypeName=datatypeURI.substring(datatypeURI.lastIndexOf('#')+1);
-        Automaton stringPart=Datatypes.get(datatypeName);
-        Automaton datatypeAutomaton=stringPart.concatenate(s_emptyLangTag);
-        s_anyDatatype.put(datatypeURI,datatypeAutomaton);
+    protected static Automaton tokenAutomaton() {
+        return new RegExp("([\u0021-\uD7FF\uE000-\uFFFD]+(\u0020[\u0021-\uD7FF\uE000-\uFFFD]+)*)?").toAutomaton();
     }
     
     protected final Automaton m_automaton;
