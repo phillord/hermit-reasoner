@@ -2,6 +2,7 @@
 package org.semanticweb.HermiT.blocking;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.semanticweb.HermiT.model.*;
 import org.semanticweb.HermiT.tableau.*;
@@ -95,5 +96,7 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
     }
     public boolean isExact() {
         return true;
+    }
+    public void dlClauseBodyCompiled(List<DLClauseEvaluator.Worker> workers,DLClause dlClause,Object[] valuesBuffer,boolean[] coreVariables) {
     }
 }

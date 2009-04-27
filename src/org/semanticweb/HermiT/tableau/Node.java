@@ -11,7 +11,7 @@ import org.semanticweb.HermiT.model.ExistentialConcept;
 /**
  * Represents a node in the tableau. Nodes are initially active, but can be set 
  * to merged or pruned at a later stage, which does not delete, but marks them 
- * as inaktive. 
+ * as inactive. 
  */
 public final class Node implements Serializable {
     private static final long serialVersionUID=-2549229429321484690L;

@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.HashSet;
 
 import org.semanticweb.HermiT.model.*;
+import org.semanticweb.HermiT.existentials.*;
 import org.semanticweb.HermiT.monitor.*;
 
 public class DLClauseEvaluator implements Serializable {
@@ -26,7 +27,7 @@ public class DLClauseEvaluator implements Serializable {
     public DLClauseEvaluator(Tableau tableau,DLClause bodyDLClause,List<DLClause> headDLClauses,ExtensionTable.Retrieval firstAtomRetrieval) {
         m_interruptFlag=tableau.m_interruptFlag;
         m_extensionManager=tableau.m_extensionManager;
-        DLClauseCompiler compiler=new DLClauseCompiler(this,m_extensionManager,bodyDLClause,headDLClauses,firstAtomRetrieval);
+        DLClauseCompiler compiler=new DLClauseCompiler(this,m_extensionManager,tableau.getExistentialsExpansionStrategy(),bodyDLClause,headDLClauses,firstAtomRetrieval);
         m_valuesBuffer=compiler.m_valuesBuffer;
         m_unionDependencySet=compiler.m_unionDependencySet;
         m_retrievals=new ExtensionTable.Retrieval[compiler.m_retrievals.size()];
@@ -79,7 +80,7 @@ public class DLClauseEvaluator implements Serializable {
         return buffer.toString();
     }
 
-    protected static interface Worker {
+    public static interface Worker {
         int execute(int programCounter);
     }
     
@@ -445,47 +446,10 @@ public class DLClauseEvaluator implements Serializable {
         }
     }
 
-    protected static final class ComputeCoreVariables implements Worker,Serializable {
-        private static final long serialVersionUID=899293772370136783L;
-
-        protected final Object[] m_valuesBuffer;
-        protected final boolean[] m_coreVariables;
-
-        public ComputeCoreVariables(Object[] valuesBuffer,boolean[] coreVariables) {
-            m_valuesBuffer=valuesBuffer;
-            m_coreVariables=coreVariables;
-        }
-        public int execute(int programCounter) {
-            Node potentialNoncore=null;
-            int potentialNoncoreIndex=-1;
-            for (int variableIndex=m_coreVariables.length-1;variableIndex>=0;--variableIndex) {
-                m_coreVariables[variableIndex]=true;
-                Node node=(Node)m_valuesBuffer[variableIndex];
-                if (node.getNodeType()==NodeType.TREE_NODE && (potentialNoncore==null || node.getTreeDepth()<potentialNoncore.getTreeDepth())) {
-                    potentialNoncore=node;
-                    potentialNoncoreIndex=variableIndex;
-                }
-            }
-            if (potentialNoncore!=null) {
-                boolean isNoncore=true;
-                for (int variableIndex=m_coreVariables.length-1;isNoncore && variableIndex>=0;--variableIndex) {
-                    Node node=(Node)m_valuesBuffer[variableIndex];
-                    if (!node.isRootNode() && potentialNoncore!=node && !potentialNoncore.isAncestorOf(node))
-                        isNoncore=false;
-                }
-                if (isNoncore)
-                    m_coreVariables[potentialNoncoreIndex]=false;
-            }
-            return programCounter+1;
-        }
-        public String toString() {
-            return "Compute core variables";
-        }
-    }
-
     protected static final class DLClauseCompiler {
         protected final DLClauseEvaluator m_dlClauseEvalautor;
         protected final ExtensionManager m_extensionManager;
+        protected final ExistentialExpansionStrategy m_existentialExpansionStrategy;
         protected final DLClause m_bodyDLClause;
         protected final List<DLClause> m_headDLClauses;
         protected final List<Variable> m_variables;
@@ -497,9 +461,10 @@ public class DLClauseEvaluator implements Serializable {
         protected final List<Worker> m_workers;
         protected final List<Integer> m_labels;
 
-        public DLClauseCompiler(DLClauseEvaluator dlClauseEvalautor,ExtensionManager extensionManager,DLClause bodyDLClause,List<DLClause> headDLClauses,ExtensionTable.Retrieval firstAtomRetrieval) {
+        public DLClauseCompiler(DLClauseEvaluator dlClauseEvalautor,ExtensionManager extensionManager,ExistentialExpansionStrategy existentialExpansionStrategy,DLClause bodyDLClause,List<DLClause> headDLClauses,ExtensionTable.Retrieval firstAtomRetrieval) {
             m_dlClauseEvalautor=dlClauseEvalautor;
             m_extensionManager=extensionManager;
+            m_existentialExpansionStrategy=existentialExpansionStrategy;
             m_bodyDLClause=bodyDLClause;
             m_headDLClauses=headDLClauses;
             m_variables=new ArrayList<Variable>();
@@ -574,7 +539,7 @@ public class DLClauseEvaluator implements Serializable {
         }
         protected void compileBodyAtom(int bodyAtomIndex,int lastAtomNextElement) {
             if (bodyAtomIndex==getBodyLength()) {
-                m_workers.add(new ComputeCoreVariables(m_valuesBuffer,m_coreVariables));
+                m_existentialExpansionStrategy.dlClauseBodyCompiled(m_workers,m_bodyDLClause,m_valuesBuffer,m_coreVariables);
                 compileHeads();
             }
             else if (getBodyAtom(bodyAtomIndex).getDLPredicate().equals(NodeIDLessThan.INSTANCE)) {

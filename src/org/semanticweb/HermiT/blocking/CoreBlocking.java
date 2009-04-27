@@ -116,6 +116,9 @@ public class CoreBlocking implements BlockingStrategy,Serializable {
     public boolean isExact() {
         return false;
     }
+    public void dlClauseBodyCompiled(List<DLClauseEvaluator.Worker> workers,DLClause dlClause,Object[] valuesBuffer,boolean[] coreVariables) {
+        workers.add(new ComputeCoreVariables(valuesBuffer,coreVariables));
+    }
     protected static boolean canBeBlocker(Node node) {
         return node.getNodeType()==NodeType.TREE_NODE;
     }
@@ -195,6 +198,44 @@ public class CoreBlocking implements BlockingStrategy,Serializable {
             }
             m_atomicConceptsLabelHashCode-=atomicConcept.hashCode();
             m_hasChanged=true;
+        }
+    }
+
+    protected static final class ComputeCoreVariables implements DLClauseEvaluator.Worker,Serializable {
+        private static final long serialVersionUID=899293772370136783L;
+
+        protected final Object[] m_valuesBuffer;
+        protected final boolean[] m_coreVariables;
+
+        public ComputeCoreVariables(Object[] valuesBuffer,boolean[] coreVariables) {
+            m_valuesBuffer=valuesBuffer;
+            m_coreVariables=coreVariables;
+        }
+        public int execute(int programCounter) {
+            Node potentialNoncore=null;
+            int potentialNoncoreIndex=-1;
+            for (int variableIndex=m_coreVariables.length-1;variableIndex>=0;--variableIndex) {
+                m_coreVariables[variableIndex]=true;
+                Node node=(Node)m_valuesBuffer[variableIndex];
+                if (node.getNodeType()==NodeType.TREE_NODE && (potentialNoncore==null || node.getTreeDepth()<potentialNoncore.getTreeDepth())) {
+                    potentialNoncore=node;
+                    potentialNoncoreIndex=variableIndex;
+                }
+            }
+            if (potentialNoncore!=null) {
+                boolean isNoncore=true;
+                for (int variableIndex=m_coreVariables.length-1;isNoncore && variableIndex>=0;--variableIndex) {
+                    Node node=(Node)m_valuesBuffer[variableIndex];
+                    if (!node.isRootNode() && potentialNoncore!=node && !potentialNoncore.isAncestorOf(node))
+                        isNoncore=false;
+                }
+                if (isNoncore)
+                    m_coreVariables[potentialNoncoreIndex]=false;
+            }
+            return programCounter+1;
+        }
+        public String toString() {
+            return "Compute core variables";
         }
     }
 }

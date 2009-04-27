@@ -1,6 +1,8 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.existentials;
 
+import java.util.List;
+
 import org.semanticweb.HermiT.model.*;
 import org.semanticweb.HermiT.tableau.*;
 
@@ -29,4 +31,5 @@ public interface ExistentialExpansionStrategy {
     void modelFound();
     boolean isDeterministic();
     boolean isExact();
+    void dlClauseBodyCompiled(List<DLClauseEvaluator.Worker> workers,DLClause dlClause,Object[] valuesBuffer,boolean[] coreVariables);
 }

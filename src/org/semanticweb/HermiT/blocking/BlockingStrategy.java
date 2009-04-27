@@ -1,6 +1,8 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.blocking;
 
+import java.util.List;
+
 import org.semanticweb.HermiT.model.*;
 import org.semanticweb.HermiT.tableau.*;
 
@@ -20,4 +22,5 @@ public interface BlockingStrategy {
     void nodeDestroyed(Node node);
     void modelFound();
     boolean isExact();
+    void dlClauseBodyCompiled(List<DLClauseEvaluator.Worker> workers,DLClause dlClause,Object[] valuesBuffer,boolean[] coreVariables);
 }
