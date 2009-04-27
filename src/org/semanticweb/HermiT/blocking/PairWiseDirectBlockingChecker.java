@@ -2,20 +2,44 @@
 package org.semanticweb.HermiT.blocking;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
+import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.NodeType;
-import org.semanticweb.HermiT.tableau.LabelManager;
+import org.semanticweb.HermiT.tableau.Tableau;
 
 public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Serializable {
     private static final long serialVersionUID=-8296420442452625109L;
 
-    public static final DirectBlockingChecker INSTANCE=new PairWiseDirectBlockingChecker();
+    protected final SetFactory<AtomicConcept> m_atomicConceptsSetFactory;
+    protected final SetFactory<AtomicRole> m_atomicRolesSetFactory;
+    protected final List<AtomicConcept> m_atomicConceptsBuffer;
+    protected final List<AtomicRole> m_atomicRolesBuffer;
+    protected Tableau m_tableau;
+    protected ExtensionTable.Retrieval m_binaryTableSearch1Bound;
+    protected ExtensionTable.Retrieval m_ternaryTableSearch12Bound;
 
+    public PairWiseDirectBlockingChecker() {
+        m_atomicConceptsSetFactory=new SetFactory<AtomicConcept>();
+        m_atomicRolesSetFactory=new SetFactory<AtomicRole>();
+        m_atomicConceptsBuffer=new ArrayList<AtomicConcept>();
+        m_atomicRolesBuffer=new ArrayList<AtomicRole>();
+    }
+    public void initialize(Tableau tableau) {
+        m_tableau=tableau;
+        m_binaryTableSearch1Bound=tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
+        m_ternaryTableSearch12Bound=tableau.getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,true },ExtensionTable.View.TOTAL);
+    }
+    public void clear() {
+        m_atomicConceptsSetFactory.clearNonpermanent();
+        m_atomicRolesSetFactory.clearNonpermanent();
+    }
     public boolean isBlockedBy(Node blocker,Node blocked) {
         PairWiseBlockingObject blockerObject=(PairWiseBlockingObject)blocker.getBlockingObject();
         PairWiseBlockingObject blockedObject=(PairWiseBlockingObject)blocked.getBlockingObject();
@@ -97,10 +121,41 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
             return null;
     }
     public BlockingSignature getBlockingSignatureFor(Node node) {
-        return new PairWiseBlockingSignature(node);
+        return new PairWiseBlockingSignature(this,node);
+    }
+    protected Set<AtomicConcept> getAtomicConceptsLabel(Node node) {
+        m_atomicConceptsBuffer.clear();
+        m_binaryTableSearch1Bound.getBindingsBuffer()[1]=node;
+        m_binaryTableSearch1Bound.open();
+        Object[] tupleBuffer=m_binaryTableSearch1Bound.getTupleBuffer();
+        while (!m_binaryTableSearch1Bound.afterLast()) {
+            Object concept=tupleBuffer[0];
+            if (concept instanceof AtomicConcept)
+                m_atomicConceptsBuffer.add((AtomicConcept)concept);
+            m_binaryTableSearch1Bound.next();
+        }
+        Set<AtomicConcept> result=m_atomicConceptsSetFactory.getSet(m_atomicConceptsBuffer);
+        m_atomicConceptsBuffer.clear();
+        return result;
+    }
+    public Set<AtomicRole> getEdgeLabel(Node nodeFrom,Node nodeTo) {
+        m_atomicRolesBuffer.clear();
+        m_ternaryTableSearch12Bound.getBindingsBuffer()[1]=nodeFrom;
+        m_ternaryTableSearch12Bound.getBindingsBuffer()[2]=nodeTo;
+        m_ternaryTableSearch12Bound.open();
+        Object[] tupleBuffer=m_ternaryTableSearch12Bound.getTupleBuffer();
+        while (!m_ternaryTableSearch12Bound.afterLast()) {
+            Object atomicRole=tupleBuffer[0];
+            if (atomicRole instanceof AtomicRole)
+                m_atomicRolesBuffer.add((AtomicRole)atomicRole);
+            m_ternaryTableSearch12Bound.next();
+        }
+        Set<AtomicRole> result=m_atomicRolesSetFactory.getSet(m_atomicRolesBuffer);
+        m_atomicRolesBuffer.clear();
+        return result;
     }
 
-    protected static final class PairWiseBlockingObject implements Serializable {
+    protected final class PairWiseBlockingObject implements Serializable {
         private static final long serialVersionUID=-5439737072100509531L;
 
         protected final Node m_node;
@@ -126,29 +181,28 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         }
         public void destroy() {
             if (m_atomicConceptsLabel!=null) {
-                m_node.getTableau().getLabelManager().removeAtomicConceptSetReference(m_atomicConceptsLabel);
+                m_atomicConceptsSetFactory.removeReference(m_atomicConceptsLabel);
                 m_atomicConceptsLabel=null;
             }
             if (m_fromParentLabel!=null) {
-                m_node.getTableau().getLabelManager().removeAtomicRoleSetReference(m_fromParentLabel);
+                m_atomicRolesSetFactory.removeReference(m_fromParentLabel);
                 m_fromParentLabel=null;
             }
             if (m_toParentLabel!=null) {
-                m_node.getTableau().getLabelManager().removeAtomicRoleSetReference(m_toParentLabel);
+                m_atomicRolesSetFactory.removeReference(m_toParentLabel);
                 m_toParentLabel=null;
             }
         }
         public Set<AtomicConcept> getAtomicConceptsLabel() {
             if (m_atomicConceptsLabel==null) {
-                LabelManager labelManager=m_node.getTableau().getLabelManager();
-                m_atomicConceptsLabel=labelManager.getPositiveLabel(m_node);
-                labelManager.addAtomicConceptSetReference(m_atomicConceptsLabel);
+                m_atomicConceptsLabel=PairWiseDirectBlockingChecker.this.getAtomicConceptsLabel(m_node);
+                m_atomicConceptsSetFactory.addReference(m_atomicConceptsLabel);
             }
             return m_atomicConceptsLabel;
         }
         public void addAtomicConcept(AtomicConcept atomicConcept) {
             if (m_atomicConceptsLabel!=null) {
-                m_node.getTableau().getLabelManager().removeAtomicConceptSetReference(m_atomicConceptsLabel);
+                m_atomicConceptsSetFactory.removeReference(m_atomicConceptsLabel);
                 m_atomicConceptsLabel=null;
             }
             m_atomicConceptsLabelHashCode+=atomicConcept.hashCode();
@@ -156,7 +210,7 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         }
         public void removeAtomicConcept(AtomicConcept atomicConcept) {
             if (m_atomicConceptsLabel!=null) {
-                m_node.getTableau().getLabelManager().removeAtomicConceptSetReference(m_atomicConceptsLabel);
+                m_atomicConceptsSetFactory.removeReference(m_atomicConceptsLabel);
                 m_atomicConceptsLabel=null;
             }
             m_atomicConceptsLabelHashCode-=atomicConcept.hashCode();
@@ -164,47 +218,49 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         }
         public Set<AtomicRole> getFromParentLabel() {
             if (m_fromParentLabel==null) {
-                LabelManager labelManager=m_node.getTableau().getLabelManager();
-                m_fromParentLabel=labelManager.getEdgeLabel(m_node.getParent(),m_node);
-                labelManager.addAtomicRoleSetReference(m_fromParentLabel);
+                m_fromParentLabel=getEdgeLabel(m_node.getParent(),m_node);
+                m_atomicRolesSetFactory.addReference(m_fromParentLabel);
             }
             return m_fromParentLabel;
         }
         protected void addToFromParentLabel(AtomicRole atomicRole) {
             if (m_fromParentLabel!=null) {
-                m_node.getTableau().getLabelManager().removeAtomicRoleSetReference(m_fromParentLabel);
+                m_atomicRolesSetFactory.removeReference(m_fromParentLabel);
                 m_fromParentLabel=null;
             }
             m_fromParentLabelHashCode+=atomicRole.hashCode();
+            m_hasChanged=true;
         }
         protected void removeFromFromParentLabel(AtomicRole atomicRole) {
             if (m_fromParentLabel!=null) {
-                m_node.getTableau().getLabelManager().removeAtomicRoleSetReference(m_fromParentLabel);
+                m_atomicRolesSetFactory.removeReference(m_fromParentLabel);
                 m_fromParentLabel=null;
             }
             m_fromParentLabelHashCode-=atomicRole.hashCode();
+            m_hasChanged=true;
         }
         public Set<AtomicRole> getToParentLabel() {
             if (m_toParentLabel==null) {
-                LabelManager labelManager=m_node.getTableau().getLabelManager();
-                m_toParentLabel=labelManager.getEdgeLabel(m_node,m_node.getParent());
-                labelManager.addAtomicRoleSetReference(m_toParentLabel);
+                m_toParentLabel=getEdgeLabel(m_node,m_node.getParent());
+                m_atomicRolesSetFactory.addReference(m_toParentLabel);
             }
             return m_toParentLabel;
         }
         protected void addToToParentLabel(AtomicRole atomicRole) {
             if (m_toParentLabel!=null) {
-                m_node.getTableau().getLabelManager().removeAtomicRoleSetReference(m_toParentLabel);
+                m_atomicRolesSetFactory.removeReference(m_toParentLabel);
                 m_toParentLabel=null;
             }
             m_toParentLabelHashCode+=atomicRole.hashCode();
+            m_hasChanged=true;
         }
         protected void removeFromToParentLabel(AtomicRole atomicRole) {
             if (m_toParentLabel!=null) {
-                m_node.getTableau().getLabelManager().removeAtomicRoleSetReference(m_toParentLabel);
+                m_atomicRolesSetFactory.removeReference(m_toParentLabel);
                 m_toParentLabel=null;
             }
             m_toParentLabelHashCode-=atomicRole.hashCode();
+            m_hasChanged=true;
         }
     }
     
@@ -218,7 +274,7 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         protected final Set<AtomicRole> m_toParentLabel;
         protected final int m_hashCode;
 
-        public PairWiseBlockingSignature(Node node) {
+        public PairWiseBlockingSignature(PairWiseDirectBlockingChecker checker,Node node) {
             PairWiseBlockingObject nodeBlockingObject=(PairWiseBlockingObject)node.getBlockingObject();
             m_atomicConceptLabel=nodeBlockingObject.getAtomicConceptsLabel();
             m_parentAtomicConceptLabel=((PairWiseBlockingObject)node.getParent().getBlockingObject()).getAtomicConceptsLabel();
@@ -229,11 +285,10 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
                 m_parentAtomicConceptLabel.hashCode()+
                 m_fromParentLabel.hashCode()+
                 m_toParentLabel.hashCode();
-            LabelManager labelManager=node.getTableau().getLabelManager();
-            labelManager.makePermanentAtomicConceptSet(m_atomicConceptLabel);
-            labelManager.makePermanentAtomicConceptSet(m_parentAtomicConceptLabel);
-            labelManager.makePermanentAtomicRoleSet(m_fromParentLabel);
-            labelManager.makePermanentAtomicRoleSet(m_toParentLabel);
+            checker.m_atomicConceptsSetFactory.makePermanent(m_atomicConceptLabel);
+            checker.m_atomicConceptsSetFactory.makePermanent(m_parentAtomicConceptLabel);
+            checker.m_atomicRolesSetFactory.makePermanent(m_fromParentLabel);
+            checker.m_atomicRolesSetFactory.makePermanent(m_toParentLabel);
         }
         public boolean blocksNode(Node node) {
             PairWiseBlockingObject nodeBlockingObject=(PairWiseBlockingObject)node.getBlockingObject();

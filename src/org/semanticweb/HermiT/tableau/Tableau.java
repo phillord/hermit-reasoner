@@ -39,7 +39,6 @@ public final class Tableau implements Serializable {
     protected final DLOntology m_dlOntology;
     protected final DependencySetFactory m_dependencySetFactory;
     protected final ExtensionManager m_extensionManager;
-    protected final LabelManager m_labelManager;
     protected final HyperresolutionManager m_hyperresolutionManager;
     protected final MergingManager m_mergingManager;
     protected final ExistentialExpansionManager m_existentialExpasionManager;
@@ -75,7 +74,6 @@ public final class Tableau implements Serializable {
         m_dlOntology=dlOntology;
         m_dependencySetFactory=new DependencySetFactory();
         m_extensionManager=new ExtensionManager(this);
-        m_labelManager=new LabelManager(this);
         m_hyperresolutionManager=new HyperresolutionManager(this);
         m_mergingManager=new MergingManager(this);
         m_existentialExpasionManager=new ExistentialExpansionManager(this);
@@ -118,9 +116,6 @@ public final class Tableau implements Serializable {
     public ExtensionManager getExtensionManager() {
         return m_extensionManager;
     }
-    public LabelManager getLabelManager() {
-        return m_labelManager;
-    }
     public HyperresolutionManager getHyperresolutionManager() {
         return m_hyperresolutionManager;
     }
@@ -153,7 +148,6 @@ public final class Tableau implements Serializable {
         m_nonbacktrackableBranchingPoint=-1;
         m_dependencySetFactory.clear();
         m_extensionManager.clear();
-        m_labelManager.clearNonpermanent();
         m_nominalIntroductionManager.clear();
         m_descriptionGraphManager.clear();
         m_isCurrentModelDeterministic=true;

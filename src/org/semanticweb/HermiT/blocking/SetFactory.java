@@ -1,102 +1,19 @@
 // Copyright 2008 by Oxford University; see license.txt for details
-package org.semanticweb.HermiT.tableau;
+package org.semanticweb.HermiT.blocking;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import org.semanticweb.HermiT.model.AtomicConcept;
-import org.semanticweb.HermiT.model.AtomicRole;
-
 /**
- * This class is not used in the normal expansion of the tableau. Only at the 
- * end of a run, it is used to persist blocking signatures to facilitate another 
- * run on the same DLOntology. Uses a custom implementation of Hash sets. 
+ * This class is used to create sets of various types. It ensures that each distinct set exists only once,
+ * thus allowing sets to be compared with ==. Instances of this class are used to create various labels in blocking.
  */
-public final class LabelManager implements Serializable {
-    private static final long serialVersionUID=2628318450352626514L;
-
-    protected final SetFactory<AtomicConcept> m_atomicConceptSetFactory;
-    protected final SetFactory<AtomicRole> m_atomicRoleSetFactory;
-    protected final ExtensionTable.Retrieval m_binaryTableSearch1Bound;
-    protected final ExtensionTable.Retrieval m_ternaryTableSearch12Bound;
-    protected final List<AtomicConcept> m_atomicConceptBuffer;
-    protected final List<AtomicRole> m_atomicRoleBuffer;
-    
-    public LabelManager(Tableau tableau) {
-        m_atomicConceptSetFactory=new SetFactory<AtomicConcept>();
-        m_atomicRoleSetFactory=new SetFactory<AtomicRole>();
-        m_binaryTableSearch1Bound=tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
-        m_ternaryTableSearch12Bound=tableau.getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,true },ExtensionTable.View.TOTAL);
-        m_atomicConceptBuffer=new ArrayList<AtomicConcept>();
-        m_atomicRoleBuffer=new ArrayList<AtomicRole>(); 
-    }
-    public int sizeInMemoryConceptSetFactory() {
-        return m_atomicConceptSetFactory.sizeInMemory();
-    }
-    public int sizeInMemoryAtomicRoleSetFactory() {
-        return m_atomicRoleSetFactory.sizeInMemory();
-    }
-    public Set<AtomicConcept> getPositiveLabel(Node node) {
-        m_atomicConceptBuffer.clear();
-        m_binaryTableSearch1Bound.getBindingsBuffer()[1]=node;
-        m_binaryTableSearch1Bound.open();
-        Object[] tupleBuffer=m_binaryTableSearch1Bound.getTupleBuffer();
-        while (!m_binaryTableSearch1Bound.afterLast()) {
-            Object concept=tupleBuffer[0];
-            if (concept instanceof AtomicConcept)
-                m_atomicConceptBuffer.add((AtomicConcept)concept);
-            m_binaryTableSearch1Bound.next();
-        }
-        Set<AtomicConcept> result=m_atomicConceptSetFactory.getSet(m_atomicConceptBuffer);
-        m_atomicConceptBuffer.clear();
-        return result;
-    }
-    public Set<AtomicRole> getEdgeLabel(Node nodeFrom,Node nodeTo) {
-        m_atomicRoleBuffer.clear();
-        m_ternaryTableSearch12Bound.getBindingsBuffer()[1]=nodeFrom;
-        m_ternaryTableSearch12Bound.getBindingsBuffer()[2]=nodeTo;
-        m_ternaryTableSearch12Bound.open();
-        Object[] tupleBuffer=m_ternaryTableSearch12Bound.getTupleBuffer();
-        while (!m_ternaryTableSearch12Bound.afterLast()) {
-            Object atomicRole=tupleBuffer[0];
-            if (atomicRole instanceof AtomicRole)
-                m_atomicRoleBuffer.add((AtomicRole)atomicRole);
-            m_ternaryTableSearch12Bound.next();
-        }
-        Set<AtomicRole> result=m_atomicRoleSetFactory.getSet(m_atomicRoleBuffer);
-        m_atomicRoleBuffer.clear();
-        return result;
-    }
-    public void addAtomicConceptSetReference(Set<AtomicConcept> set) {
-        m_atomicConceptSetFactory.addReference(set);
-    }
-    public void removeAtomicConceptSetReference(Set<AtomicConcept> set) {
-        m_atomicConceptSetFactory.removeReference(set);
-    }
-    public void addAtomicRoleSetReference(Set<AtomicRole> set) {
-        m_atomicRoleSetFactory.addReference(set);
-    }
-    public void removeAtomicRoleSetReference(Set<AtomicRole> set) {
-        m_atomicRoleSetFactory.removeReference(set);
-    }
-    public void makePermanentAtomicConceptSet(Set<AtomicConcept> set) {
-        m_atomicConceptSetFactory.makePermanent(set);
-    }
-    public void makePermanentAtomicRoleSet(Set<AtomicRole> set) {
-        m_atomicRoleSetFactory.makePermanent(set);
-    }
-    public void clearNonpermanent() {
-        m_atomicConceptSetFactory.clearNonpermanent();
-        m_atomicRoleSetFactory.clearNonpermanent();
-    }
-}
 @SuppressWarnings("unchecked")
-class SetFactory<E> implements Serializable {
+public class SetFactory<E> implements Serializable {
     private static final long serialVersionUID=7071071962187693657L;
 
     protected Entry[] m_unusedEntries;

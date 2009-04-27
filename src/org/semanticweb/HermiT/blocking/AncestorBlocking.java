@@ -19,8 +19,10 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
     }
     public void initialize(Tableau tableau) {
         m_tableau=tableau;
+        m_directBlockingChecker.initialize(tableau);
     }
     public void clear() {
+        m_directBlockingChecker.clear();
     }
     public void computeBlocking() {
         Node node=m_tableau.getFirstTableauNode();

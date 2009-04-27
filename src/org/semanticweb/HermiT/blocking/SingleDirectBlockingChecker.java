@@ -2,20 +2,37 @@
 package org.semanticweb.HermiT.blocking;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
+import org.semanticweb.HermiT.tableau.Tableau;
+import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.NodeType;
-import org.semanticweb.HermiT.tableau.LabelManager;
 
 public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serializable {
     private static final long serialVersionUID=9093753046859877016L;
 
-    public static final DirectBlockingChecker INSTANCE=new SingleDirectBlockingChecker();
+    protected final SetFactory<AtomicConcept> m_atomicConceptsSetFactory;
+    protected final List<AtomicConcept> m_atomicConceptsBuffer;
+    protected Tableau m_tableau;
+    protected ExtensionTable.Retrieval m_binaryTableSearch1Bound;
 
+    public SingleDirectBlockingChecker() {
+        m_atomicConceptsSetFactory=new SetFactory<AtomicConcept>();
+        m_atomicConceptsBuffer=new ArrayList<AtomicConcept>();
+    }
+    public void initialize(Tableau tableau) {
+        m_tableau=tableau;
+        m_binaryTableSearch1Bound=tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
+    }
+    public void clear() {
+        m_atomicConceptsSetFactory.clearNonpermanent();
+    }
     public boolean isBlockedBy(Node blocker,Node blocked) {
         return
             !blocker.isBlocked() &&
@@ -69,10 +86,25 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
         return null;
     }
     public BlockingSignature getBlockingSignatureFor(Node node) {
-        return new SingleBlockingSignature(node);
+        return new SingleBlockingSignature(this,node);
     }
-    
-    protected static final class SingleBlockingObject implements Serializable {
+    protected Set<AtomicConcept> getAtomicConceptsLabel(Node node) {
+        m_atomicConceptsBuffer.clear();
+        m_binaryTableSearch1Bound.getBindingsBuffer()[1]=node;
+        m_binaryTableSearch1Bound.open();
+        Object[] tupleBuffer=m_binaryTableSearch1Bound.getTupleBuffer();
+        while (!m_binaryTableSearch1Bound.afterLast()) {
+            Object concept=tupleBuffer[0];
+            if (concept instanceof AtomicConcept)
+                m_atomicConceptsBuffer.add((AtomicConcept)concept);
+            m_binaryTableSearch1Bound.next();
+        }
+        Set<AtomicConcept> result=m_atomicConceptsSetFactory.getSet(m_atomicConceptsBuffer);
+        m_atomicConceptsBuffer.clear();
+        return result;
+    }
+
+    protected final class SingleBlockingObject implements Serializable {
         private static final long serialVersionUID=-5439737072100509531L;
 
         protected final Node m_node;
@@ -90,21 +122,20 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
         }
         public void destroy() {
             if (m_atomicConceptsLabel!=null) {
-                m_node.getTableau().getLabelManager().removeAtomicConceptSetReference(m_atomicConceptsLabel);
+                m_atomicConceptsSetFactory.removeReference(m_atomicConceptsLabel);
                 m_atomicConceptsLabel=null;
             }
         }
         public Set<AtomicConcept> getAtomicConceptsLabel() {
             if (m_atomicConceptsLabel==null) {
-                LabelManager labelManager=m_node.getTableau().getLabelManager();
-                m_atomicConceptsLabel=labelManager.getPositiveLabel(m_node);
-                labelManager.addAtomicConceptSetReference(m_atomicConceptsLabel);
+                m_atomicConceptsLabel=SingleDirectBlockingChecker.this.getAtomicConceptsLabel(m_node);
+                m_atomicConceptsSetFactory.addReference(m_atomicConceptsLabel);
             }
             return m_atomicConceptsLabel;
         }
         public void addAtomicConcept(AtomicConcept atomicConcept) {
             if (m_atomicConceptsLabel!=null) {
-                m_node.getTableau().getLabelManager().removeAtomicConceptSetReference(m_atomicConceptsLabel);
+                m_atomicConceptsSetFactory.removeReference(m_atomicConceptsLabel);
                 m_atomicConceptsLabel=null;
             }
             m_atomicConceptsLabelHashCode+=atomicConcept.hashCode();
@@ -112,7 +143,7 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
         }
         public void removeAtomicConcept(AtomicConcept atomicConcept) {
             if (m_atomicConceptsLabel!=null) {
-                m_node.getTableau().getLabelManager().removeAtomicConceptSetReference(m_atomicConceptsLabel);
+                m_atomicConceptsSetFactory.removeReference(m_atomicConceptsLabel);
                 m_atomicConceptsLabel=null;
             }
             m_atomicConceptsLabelHashCode-=atomicConcept.hashCode();
@@ -125,11 +156,10 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
 
         protected final Set<AtomicConcept> m_atomicConceptsLabel;
 
-        public SingleBlockingSignature(Node node) {
+        public SingleBlockingSignature(SingleDirectBlockingChecker checker,Node node) {
             m_atomicConceptsLabel=((SingleBlockingObject)node.getBlockingObject()).getAtomicConceptsLabel();
-            LabelManager labelManager=node.getTableau().getLabelManager();
-            labelManager.addAtomicConceptSetReference(m_atomicConceptsLabel);
-            labelManager.makePermanentAtomicConceptSet(m_atomicConceptsLabel);
+            checker.m_atomicConceptsSetFactory.addReference(m_atomicConceptsLabel);
+            checker.m_atomicConceptsSetFactory.makePermanent(m_atomicConceptsLabel);
         }
         public boolean blocksNode(Node node) {
             return ((SingleBlockingObject)node.getBlockingObject()).getAtomicConceptsLabel()==m_atomicConceptsLabel;

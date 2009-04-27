@@ -5,6 +5,8 @@ import org.semanticweb.HermiT.model.*;
 import org.semanticweb.HermiT.tableau.*;
 
 public interface DirectBlockingChecker {
+    void initialize(Tableau tableau);
+    void clear();
     boolean isBlockedBy(Node blocker,Node blocked);
     int blockingHashCode(Node node);
     boolean canBeBlocker(Node node);

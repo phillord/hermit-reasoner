@@ -22,10 +22,12 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
     }
     public void initialize(Tableau tableau) {
         m_tableau=tableau;
+        m_directBlockingChecker.initialize(tableau);
     }
     public void clear() {
         m_currentBlockersCache.clear();
         m_firstChangedNode=null;
+        m_directBlockingChecker.clear();
     }
     public void computeBlocking() {
         if (m_firstChangedNode!=null) {

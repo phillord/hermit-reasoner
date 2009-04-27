@@ -63,8 +63,9 @@ public class DLClauseEvaluationTest extends AbstractReasonerInternalsTest {
     }
     
     protected void setUp() {
-        BlockingSignatureCache blockingSignatureCache=new BlockingSignatureCache(PairWiseDirectBlockingChecker.INSTANCE);
-        BlockingStrategy blockingStrategy=new AnywhereBlocking(PairWiseDirectBlockingChecker.INSTANCE,blockingSignatureCache);
+        PairWiseDirectBlockingChecker directChecker=new PairWiseDirectBlockingChecker();
+        BlockingSignatureCache blockingSignatureCache=new BlockingSignatureCache(directChecker);
+        BlockingStrategy blockingStrategy=new AnywhereBlocking(directChecker,blockingSignatureCache);
         ExistentialExpansionStrategy ExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
         m_tableau=new Tableau(new InterruptFlag(),null,ExpansionStrategy,TEST_DL_ONTOLOGY,new HashMap<String,Object>());
         m_extensionManager=m_tableau.getExtensionManager();
