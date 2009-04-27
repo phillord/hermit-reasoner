@@ -14,7 +14,7 @@ import org.semanticweb.HermiT.tableau.*;
 public interface ExistentialExpansionStrategy {
     void initialize(Tableau tableau);
     void clear();
-    boolean expandExistentials();
+    boolean expandExistentials(boolean finalChance);
     void assertionAdded(Concept concept,Node node,boolean isCore);
     void assertionCoreSet(Concept concept,Node node);
     void assertionRemoved(Concept concept,Node node,boolean isCore);
@@ -28,4 +28,5 @@ public interface ExistentialExpansionStrategy {
     void backtrack();
     void modelFound();
     boolean isDeterministic();
+    boolean isExact();
 }

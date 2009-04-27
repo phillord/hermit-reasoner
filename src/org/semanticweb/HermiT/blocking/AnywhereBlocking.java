@@ -29,7 +29,7 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
         m_firstChangedNode=null;
         m_directBlockingChecker.clear();
     }
-    public void computeBlocking() {
+    public void computeBlocking(boolean finalChance) {
         if (m_firstChangedNode!=null) {
             Node node=m_firstChangedNode;
             while (node!=null) {
@@ -107,7 +107,7 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
     }
     public void modelFound() {
         if (m_blockingSignatureCache!=null) {
-            computeBlocking();
+            computeBlocking(false);
             Node node=m_tableau.getFirstTableauNode();
             while (node!=null) {
                 if (!node.isBlocked() && m_directBlockingChecker.canBeBlocker(node))
@@ -115,6 +115,9 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
                 node=node.getNextTableauNode();
             }
         }
+    }
+    public boolean isExact() {
+        return true;
     }
 }
 class BlockingCache implements Serializable {

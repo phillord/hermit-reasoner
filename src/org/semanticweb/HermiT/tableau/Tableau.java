@@ -159,6 +159,7 @@ public final class Tableau implements Serializable {
     public boolean isSatisfiable() {
         m_interruptFlag.startTask();
         try {
+            boolean existentialsAreExact=m_existentialExpansionStrategy.isExact();
             if (m_tableauMonitor!=null)
                 m_tableauMonitor.saturateStarted();
             boolean hasMoreWork=true;
@@ -168,6 +169,13 @@ public final class Tableau implements Serializable {
                 hasMoreWork=doIteration();
                 if (m_tableauMonitor!=null)
                     m_tableauMonitor.iterationFinished();
+                if (!existentialsAreExact && !hasMoreWork && !m_extensionManager.containsClash()) {
+                    if (m_tableauMonitor!=null)
+                        m_tableauMonitor.iterationStarted();
+                    hasMoreWork=m_existentialExpansionStrategy.expandExistentials(true);
+                    if (m_tableauMonitor!=null)
+                        m_tableauMonitor.iterationFinished();
+                }
             }
             if (m_tableauMonitor!=null)
                 m_tableauMonitor.saturateFinished();
@@ -199,7 +207,7 @@ public final class Tableau implements Serializable {
                 return true;
         }
         if (!m_extensionManager.containsClash())
-            if (m_existentialExpansionStrategy.expandExistentials())
+            if (m_existentialExpansionStrategy.expandExistentials(false))
                 return true;
         if (!m_extensionManager.containsClash()) {
             while (m_firstUnprocessedGroundDisjunction!=null) {

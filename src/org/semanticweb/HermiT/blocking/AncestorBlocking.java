@@ -24,7 +24,7 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
     public void clear() {
         m_directBlockingChecker.clear();
     }
-    public void computeBlocking() {
+    public void computeBlocking(boolean finalChance) {
         Node node=m_tableau.getFirstTableauNode();
         while (node!=null) {
             if (node.isActive()) {
@@ -84,7 +84,7 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
     }
     public void modelFound() {
         if (m_blockingSignatureCache!=null) {
-            computeBlocking();
+            computeBlocking(false);
             Node node=m_tableau.getFirstTableauNode();
             while (node!=null) {
                 if (!node.isBlocked() && m_directBlockingChecker.canBeBlocker(node))
@@ -92,5 +92,8 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
                 node=node.getNextTableauNode();
             }
         }
+    }
+    public boolean isExact() {
+        return true;
     }
 }

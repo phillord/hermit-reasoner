@@ -36,7 +36,7 @@ public class CoreBlocking implements BlockingStrategy,Serializable {
         m_currentBlockersCache.clear();
         m_firstChangedNode=null;
     }
-    public void computeBlocking() {
+    public void computeBlocking(boolean finalChance) {
         if (m_firstChangedNode!=null) {
             Node node=m_firstChangedNode;
             while (node!=null) {
@@ -112,6 +112,9 @@ public class CoreBlocking implements BlockingStrategy,Serializable {
             m_firstChangedNode=null;
     }
     public void modelFound() {
+    }
+    public boolean isExact() {
+        return false;
     }
     protected static boolean canBeBlocker(Node node) {
         return node.getNodeType()==NodeType.TREE_NODE;

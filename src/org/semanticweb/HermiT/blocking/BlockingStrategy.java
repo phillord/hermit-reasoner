@@ -7,7 +7,7 @@ import org.semanticweb.HermiT.tableau.*;
 public interface BlockingStrategy {
     void initialize(Tableau tableau);
     void clear();
-    void computeBlocking();
+    void computeBlocking(boolean finalChance);
     boolean isPermanentAssertion(Concept concept,Node node);
     void assertionAdded(Concept concept,Node node,boolean isCore);
     void assertionCoreSet(Concept concept,Node node);
@@ -19,4 +19,5 @@ public interface BlockingStrategy {
     void nodeInitialized(Node node);
     void nodeDestroyed(Node node);
     void modelFound();
+    boolean isExact();
 }

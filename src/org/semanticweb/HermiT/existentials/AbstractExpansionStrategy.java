@@ -65,9 +65,9 @@ public abstract class AbstractExpansionStrategy implements Serializable,Existent
         m_blockingStrategy.clear();
         m_processedExistentials.clear();
     }
-    public boolean expandExistentials() {
+    public boolean expandExistentials(boolean finalChance) {
         TableauMonitor monitor=m_tableau.getTableauMonitor();
-        m_blockingStrategy.computeBlocking();
+        m_blockingStrategy.computeBlocking(finalChance);
         boolean extensionsChanged=false;
         Node node=m_tableau.getFirstTableauNode();
         while (node!=null && (!extensionsChanged || !m_expandNodeAtATime)) {
@@ -151,6 +151,9 @@ public abstract class AbstractExpansionStrategy implements Serializable,Existent
     }
     public void modelFound() {
         m_blockingStrategy.modelFound();
+    }
+    public boolean isExact() {
+        return m_blockingStrategy.isExact();
     }
     protected SatType isSatisfied(AtLeastConcept atLeastConcept,Node forNode) {
         int cardinality=atLeastConcept.getNumber();
