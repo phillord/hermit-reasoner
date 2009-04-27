@@ -45,6 +45,7 @@ import org.semanticweb.owl.inference.MonitorableOWLReasoner;
 
 import org.semanticweb.HermiT.blocking.AncestorBlocking;
 import org.semanticweb.HermiT.blocking.AnywhereBlocking;
+import org.semanticweb.HermiT.blocking.CoreBlocking;
 import org.semanticweb.HermiT.blocking.BlockingSignatureCache;
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.blocking.DirectBlockingChecker;
@@ -925,6 +926,9 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             break;
         case ANYWHERE:
             blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
+            break;
+        case CORE:
+            blockingStrategy=new CoreBlocking();
             break;
         default:
             throw new IllegalArgumentException("Unknown blocking strategy type.");

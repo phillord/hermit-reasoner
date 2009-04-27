@@ -55,6 +55,9 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
             blocker=blocker.getParent();
         }
     }
+    public boolean isPermanentAssertion(Concept concept,Node node) {
+        return true;
+    }
     public void assertionAdded(Concept concept,Node node,boolean isCore) {
         m_directBlockingChecker.assertionAdded(concept,node);
     }

@@ -8,6 +8,7 @@ public interface BlockingStrategy {
     void initialize(Tableau tableau);
     void clear();
     void computeBlocking();
+    boolean isPermanentAssertion(Concept concept,Node node);
     void assertionAdded(Concept concept,Node node,boolean isCore);
     void assertionCoreSet(Concept concept,Node node);
     void assertionRemoved(Concept concept,Node node,boolean isCore);

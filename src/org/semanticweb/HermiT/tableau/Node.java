@@ -126,14 +126,14 @@ public final class Node implements Serializable {
     public boolean isBlocked() {
         return m_blocker!=null;
     }
-    public Node getBlocker() {
-        return m_blocker;
-    }
     public boolean isDirectlyBlocked() {
         return m_directlyBlocked;
     }
     public boolean isIndirectlyBlocked() {
         return m_blocker!=null && !m_directlyBlocked;
+    }
+    public Node getBlocker() {
+        return m_blocker;
     }
     public void setBlocked(Node blocker,boolean directlyBlocked) {
         m_blocker=blocker;

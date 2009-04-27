@@ -14,14 +14,7 @@ import org.semanticweb.HermiT.tableau.*;
 public interface ExistentialExpansionStrategy {
     void initialize(Tableau tableau);
     void clear();
-
-    /**
-     * The main workhorse of the interface: pick some existential in the current tableau and expand it.
-     * 
-     * @return true if at least one of the extensions changed as the result of the expansion
-     */
     boolean expandExistentials();
-
     void assertionAdded(Concept concept,Node node,boolean isCore);
     void assertionCoreSet(Concept concept,Node node);
     void assertionRemoved(Concept concept,Node node,boolean isCore);

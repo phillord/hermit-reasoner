@@ -69,6 +69,9 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
             m_firstChangedNode=null;
         }
     }
+    public boolean isPermanentAssertion(Concept concept,Node node) {
+        return true;
+    }
     public void assertionAdded(Concept concept,Node node,boolean isCore) {
         updateNodeChange(m_directBlockingChecker.assertionAdded(concept,node));
     }

@@ -12,7 +12,6 @@ import java.util.Set;
 import org.semanticweb.HermiT.graph.Graph;
 import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
-import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Inequality;
@@ -26,27 +25,23 @@ import org.semanticweb.HermiT.model.DLClause;
 public final class ExistentialExpansionManager implements Serializable {
     private static final long serialVersionUID=4794168582297181623L;
 
-    public static enum SatType { NOT_SATISFIED,PERMANENTLY_SATISFIED,CURRENTLY_SATISFIED };
-
-    private final Tableau m_tableau;
-    private final ExtensionManager m_extensionManager;
-    private final TupleTable m_expandedExistentials;
-    private final Object[] m_auxiliaryTuple;
-    private final List<Node> m_auxiliaryNodes1;
-    private final List<Node> m_auxiliaryNodes2;
-    private final ExtensionTable.Retrieval m_ternaryExtensionTableSearch01Bound;
-    private final ExtensionTable.Retrieval m_ternaryExtensionTableSearch02Bound;
-    private final Map<Role,Role[]> m_functionalRoles;
-    private final UnionDependencySet m_binaryUnionDependencySet;
-    private int[] m_indicesByBranchingPoint;
+    protected final Tableau m_tableau;
+    protected final ExtensionManager m_extensionManager;
+    protected final TupleTable m_expandedExistentials;
+    protected final Object[] m_auxiliaryTuple;
+    protected final List<Node> m_auxiliaryNodes;
+    protected final ExtensionTable.Retrieval m_ternaryExtensionTableSearch01Bound;
+    protected final ExtensionTable.Retrieval m_ternaryExtensionTableSearch02Bound;
+    protected final Map<Role,Role[]> m_functionalRoles;
+    protected final UnionDependencySet m_binaryUnionDependencySet;
+    protected int[] m_indicesByBranchingPoint;
 
     public ExistentialExpansionManager(Tableau tableau) {
         m_tableau=tableau;
         m_extensionManager=m_tableau.getExtensionManager();
         m_expandedExistentials=new TupleTable(2);
         m_auxiliaryTuple=new Object[2];
-        m_auxiliaryNodes1=new ArrayList<Node>();
-        m_auxiliaryNodes2=new ArrayList<Node>();
+        m_auxiliaryNodes=new ArrayList<Node>();
         m_ternaryExtensionTableSearch01Bound=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,true,false },ExtensionTable.View.TOTAL);
         m_ternaryExtensionTableSearch02Bound=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,false,true },ExtensionTable.View.TOTAL);
         m_functionalRoles=buildFunctionalRoles();
@@ -141,90 +136,6 @@ public final class ExistentialExpansionManager implements Serializable {
         m_auxiliaryTuple[0]=null;
         m_auxiliaryTuple[1]=null;
     }
-    public SatType isSatisfied(AtLeastConcept atLeastConcept,Node forNode) {
-        int cardinality=atLeastConcept.getNumber();
-        if (cardinality<=0)
-            return SatType.PERMANENTLY_SATISFIED;
-        Role onRole=atLeastConcept.getOnRole();
-        LiteralConcept toConcept=atLeastConcept.getToConcept();
-        ExtensionTable.Retrieval retrieval;
-        int toNodeIndex;
-        if (onRole instanceof AtomicRole) {
-            retrieval=m_ternaryExtensionTableSearch01Bound;
-            retrieval.getBindingsBuffer()[0]=onRole;
-            retrieval.getBindingsBuffer()[1]=forNode;
-            toNodeIndex=2;
-        }
-        else {
-            retrieval=m_ternaryExtensionTableSearch02Bound;
-            retrieval.getBindingsBuffer()[0]=((InverseRole)onRole).getInverseOf();
-            retrieval.getBindingsBuffer()[2]=forNode;
-            toNodeIndex=1;
-        }
-        if (cardinality==1) {
-            retrieval.open();
-            Object[] tupleBuffer=retrieval.getTupleBuffer();
-            while (!retrieval.afterLast()) {
-                Node toNode=(Node)tupleBuffer[toNodeIndex];
-                if (toNode.isIndirectlyBlocked() && m_extensionManager.containsConceptAssertion(toConcept,toNode)) {
-                    if (isPermanentSatisfier(forNode,toNode))
-                        return SatType.PERMANENTLY_SATISFIED;
-                    else
-                        return SatType.CURRENTLY_SATISFIED;
-                }
-                retrieval.next();
-            }
-            return SatType.NOT_SATISFIED;
-        }
-        else {
-            m_auxiliaryNodes1.clear();
-            retrieval.open();
-            Object[] tupleBuffer=retrieval.getTupleBuffer();
-            boolean allSatisfiersArePermanent=true;
-            while (!retrieval.afterLast()) {
-                Node toNode=(Node)tupleBuffer[toNodeIndex];
-                if (!toNode.isIndirectlyBlocked() && m_extensionManager.containsConceptAssertion(toConcept,toNode)) {
-                    if (!isPermanentSatisfier(forNode,toNode))
-                        allSatisfiersArePermanent=false;
-                    m_auxiliaryNodes1.add(toNode);
-                }
-                retrieval.next();
-            }
-            if (m_auxiliaryNodes1.size()>=cardinality) {
-                m_auxiliaryNodes2.clear();
-                if (containsSubsetOfNUnequalNodes(forNode,m_auxiliaryNodes1,0,m_auxiliaryNodes2,cardinality))
-                    return allSatisfiersArePermanent ? SatType.PERMANENTLY_SATISFIED : SatType.CURRENTLY_SATISFIED;
-            }
-            return SatType.NOT_SATISFIED;
-        }
-    }
-    protected boolean isPermanentSatisfier(Node forNode,Node toNode) {
-        return forNode==toNode || forNode.m_parent==toNode || toNode.m_parent==forNode || toNode.isRootNode();
-    }
-    protected boolean containsSubsetOfNUnequalNodes(Node forNode,List<Node> nodes,int startAt,List<Node> selectedNodes,int cardinality) {
-        if (selectedNodes.size()==cardinality) {
-            // Check the condition on safe successors (condition 3.2 of the \geq-rule)
-            for (int index=0;index<selectedNodes.size();index++)
-                if (selectedNodes.get(index).isIndirectlyBlocked())
-                    return false;
-            return true;
-        }
-        else {
-            outer: for (int index=startAt;index<nodes.size();index++) {
-                Node node=nodes.get(index);
-                for (int selectedNodeIndex=0;selectedNodeIndex<selectedNodes.size();selectedNodeIndex++) {
-                    Node selectedNode=selectedNodes.get(selectedNodeIndex);
-                    if (!m_extensionManager.containsAssertion(Inequality.INSTANCE,node,selectedNode) && !m_extensionManager.containsAssertion(Inequality.INSTANCE,selectedNode,node))
-                        continue outer;
-                }
-                selectedNodes.add(node);
-                if (containsSubsetOfNUnequalNodes(forNode,nodes,index+1,selectedNodes,cardinality))
-                    return true;
-                selectedNodes.remove(selectedNodes.size()-1);
-            }
-            return false;
-        }
-    }
     /**
      * Creates a new node in the tableau if at least concept that caused the expansion is for cardinality 1. If it is not of cardinality 1 and the role in the at most concept is a functional role, it sets a clash in the extension manager.
      * 
@@ -299,7 +210,7 @@ public final class ExistentialExpansionManager implements Serializable {
             m_extensionManager.addConceptAssertion(atLeastConcept.getToConcept(),newNode,existentialDependencySet,true);
         }
         else {
-            m_auxiliaryNodes1.clear();
+            m_auxiliaryNodes.clear();
             for (int index=0;index<cardinality;index++) {
                 Node newNode;
                 if (atLeastConcept.getToConcept() instanceof DataRange)
@@ -308,14 +219,14 @@ public final class ExistentialExpansionManager implements Serializable {
                     newNode=m_tableau.createNewTreeNode(existentialDependencySet,forNode);
                 m_extensionManager.addRoleAssertion(atLeastConcept.getOnRole(),forNode,newNode,existentialDependencySet,true);
                 m_extensionManager.addConceptAssertion(atLeastConcept.getToConcept(),newNode,existentialDependencySet,true);
-                m_auxiliaryNodes1.add(newNode);
+                m_auxiliaryNodes.add(newNode);
             }
             for (int outerIndex=0;outerIndex<cardinality;outerIndex++) {
-                Node outerNode=m_auxiliaryNodes1.get(outerIndex);
+                Node outerNode=m_auxiliaryNodes.get(outerIndex);
                 for (int innerIndex=outerIndex+1;innerIndex<cardinality;innerIndex++)
-                    m_extensionManager.addAssertion(Inequality.INSTANCE,outerNode,m_auxiliaryNodes1.get(innerIndex),existentialDependencySet,true);
+                    m_extensionManager.addAssertion(Inequality.INSTANCE,outerNode,m_auxiliaryNodes.get(innerIndex),existentialDependencySet,true);
             }
-            m_auxiliaryNodes1.clear();
+            m_auxiliaryNodes.clear();
         }
         if (m_tableau.m_tableauMonitor!=null)
             m_tableau.m_tableauMonitor.existentialExpansionFinished(atLeastConcept,forNode);
