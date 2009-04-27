@@ -10,39 +10,36 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
     private static final long serialVersionUID=-2959900333817197464L;
 
     protected final DirectBlockingChecker m_directBlockingChecker;
-    protected final BlockingCache m_currentModelCache;
+    protected final BlockingCache m_currentBlockersCache;
     protected final BlockingSignatureCache m_blockingSignatureCache;
     protected Tableau m_tableau;
     protected Node m_firstChangedNode;
 
     public AnywhereBlocking(DirectBlockingChecker directBlockingChecker,BlockingSignatureCache blockingSignatureCache) {
         m_directBlockingChecker=directBlockingChecker;
-        m_currentModelCache=new BlockingCache(m_directBlockingChecker);
+        m_currentBlockersCache=new BlockingCache(m_directBlockingChecker);
         m_blockingSignatureCache=blockingSignatureCache;
     }
     public void initialize(Tableau tableau) {
         m_tableau=tableau;
     }
     public void clear() {
-        m_currentModelCache.clear();
+        m_currentBlockersCache.clear();
         m_firstChangedNode=null;
     }
     public void computeBlocking() {
         if (m_firstChangedNode!=null) {
             Node node=m_firstChangedNode;
             while (node!=null) {
-                BlockingCache.CacheEntry cacheEntry=(BlockingCache.CacheEntry)node.getBlockingObject();
-                if (cacheEntry!=null) {
-                    m_currentModelCache.removeCacheEntry(cacheEntry);
-                    node.setBlockingObject(null);
-                }
+                if (!node.isBlocked() && m_directBlockingChecker.canBeBlocker(node))
+                    m_currentBlockersCache.removeNode(node);
                 node=node.getNextTableauNode();
             }
             node=m_firstChangedNode;
             boolean checkBlockingSignatureCache=(m_blockingSignatureCache!=null && !m_blockingSignatureCache.isEmpty());
             while (node!=null) {
                 if (node.isActive() && (m_directBlockingChecker.canBeBlocked(node) || m_directBlockingChecker.canBeBlocker(node))) {
-                    if (node.getBlockingSignatureChanged() || !node.isDirectlyBlocked() || node.getBlocker().getNodeID()>=m_firstChangedNode.getNodeID()) {
+                    if (m_directBlockingChecker.hasBlockingInfoChanged(node) || !node.isDirectlyBlocked() || node.getBlocker().getNodeID()>=m_firstChangedNode.getNodeID()) {
                         Node parent=node.getParent();
                         if (parent==null)
                             node.setBlocked(null,false);
@@ -52,59 +49,52 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
                             if (m_blockingSignatureCache.containsSignature(node))
                                 node.setBlocked(Node.CACHE_BLOCKER,true);
                             else {
-                                Node blocker=m_currentModelCache.getBlocker(node);
+                                Node blocker=m_currentBlockersCache.getBlocker(node);
                                 node.setBlocked(blocker,blocker!=null);
                             }
                         }
                         else {
-                            Node blocker=m_currentModelCache.getBlocker(node);
+                            Node blocker=m_currentBlockersCache.getBlocker(node);
                             node.setBlocked(blocker,blocker!=null);
                         }
-                        if (!node.isBlocked() && m_directBlockingChecker.canBeBlocker(node)) {
-                            assert node.getBlockingObject()==null;
-                            BlockingCache.CacheEntry updateNodeCacheEntry=m_currentModelCache.addNode(node);
-                            node.setBlockingObject(updateNodeCacheEntry);
-                        }
+                        if (!node.isBlocked() && m_directBlockingChecker.canBeBlocker(node))
+                            m_currentBlockersCache.addNode(node);
                     }
+                    m_directBlockingChecker.clearBlockingInfoChanged(node);
                 }
-                node.setBlockingSignatureChanged(false);
                 node=node.getNextTableauNode();
             }
             m_firstChangedNode=null;
         }
     }
     public void assertionAdded(Concept concept,Node node) {
-        if (concept instanceof AtomicConcept || concept instanceof ExistentialConcept)
+        if (m_directBlockingChecker.assertionAdded(concept,node))
             updateNodeChange(node);
     }
     public void assertionRemoved(Concept concept,Node node) {
-        if (concept instanceof AtomicConcept || concept instanceof ExistentialConcept)
+        if (m_directBlockingChecker.assertionRemoved(concept,node))
             updateNodeChange(node);
     }
     public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
-        if (nodeFrom.isParentOf(nodeTo))
-            updateNodeChange(nodeTo);
-        else if (nodeTo.isParentOf(nodeFrom))
-            updateNodeChange(nodeFrom);
+        updateNodeChange(m_directBlockingChecker.assertionAdded(atomicRole,nodeFrom,nodeTo));
     }
     public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
-        if (nodeFrom.isParentOf(nodeTo))
-            updateNodeChange(nodeTo);
-        else if (nodeTo.isParentOf(nodeFrom))
-            updateNodeChange(nodeFrom);
+        updateNodeChange(m_directBlockingChecker.assertionRemoved(atomicRole,nodeFrom,nodeTo));
     }
     public void nodeStatusChanged(Node node) {
         updateNodeChange(node);
     }
     protected final void updateNodeChange(Node node) {
-        node.setBlockingSignatureChanged(true);
-        if (m_firstChangedNode==null || node.getNodeID()<m_firstChangedNode.getNodeID())
+        if (node!=null && (m_firstChangedNode==null || node.getNodeID()<m_firstChangedNode.getNodeID()))
             m_firstChangedNode=node;
     }
+    public void nodeInitialized(Node node) {
+        m_directBlockingChecker.nodeInitialized(node);
+    }
     public void nodeDestroyed(Node node) {
-        BlockingCache.CacheEntry cacheEntry=(BlockingCache.CacheEntry)node.getBlockingObject();
-        if (cacheEntry!=null)
-            m_currentModelCache.removeCacheEntry(cacheEntry);
+        if (!node.isBlocked() && m_directBlockingChecker.canBeBlocker(node))
+            m_currentBlockersCache.removeNode(node);
+        m_directBlockingChecker.nodeDestroyed(node);
         if (m_firstChangedNode!=null && m_firstChangedNode.getNodeID()>=node.getNodeID())
             m_firstChangedNode=null;
     }
@@ -142,13 +132,13 @@ class BlockingCache implements Serializable {
         m_numberOfElements=0;
         m_emptyEntries=null;
     }
-    public void removeCacheEntry(CacheEntry removeEntry) {
-        assert removeEntry.m_node!=null;
-        int bucketIndex=getIndexFor(removeEntry.m_hashCode,m_buckets.length);
+    public void removeNode(Node node) {
+        int hashCode=m_directBlockingChecker.blockingHashCode(node);
+        int bucketIndex=getIndexFor(hashCode,m_buckets.length);
         CacheEntry lastEntry=null;
         CacheEntry entry=m_buckets[bucketIndex];
         while (entry!=null) {
-            if (entry==removeEntry) {
+            if (entry.m_node==node) {
                 if (lastEntry==null)
                     m_buckets[bucketIndex]=entry.m_nextEntry;
                 else
@@ -163,15 +153,14 @@ class BlockingCache implements Serializable {
             lastEntry=entry;
             entry=entry.m_nextEntry;
         }
-        throw new IllegalStateException("Internal error: node not found in the blocking cache.");
     }
-    public CacheEntry addNode(Node node) {
+    public void addNode(Node node) {
         int hashCode=m_directBlockingChecker.blockingHashCode(node);
         int bucketIndex=getIndexFor(hashCode,m_buckets.length);
         CacheEntry entry=m_buckets[bucketIndex];
         while (entry!=null) {
             if (hashCode==entry.m_hashCode && m_directBlockingChecker.isBlockedBy(entry.m_node,node))
-                return entry;
+                return;
             entry=entry.m_nextEntry;
         }
         if (m_emptyEntries==null)
@@ -185,7 +174,6 @@ class BlockingCache implements Serializable {
         m_numberOfElements++;
         if (m_numberOfElements>=m_threshold)
             resize(m_buckets.length*2);
-        return entry;
     }
     protected void resize(int newCapacity) {
         CacheEntry[] newBuckets=new CacheEntry[newCapacity];

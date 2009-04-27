@@ -13,6 +13,7 @@ public interface BlockingStrategy {
     void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo);
     void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo);
     void nodeStatusChanged(Node node);
+    void nodeInitialized(Node node);
     void nodeDestroyed(Node node);
     void modelFound();
 }

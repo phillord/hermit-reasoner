@@ -5,10 +5,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
-import org.semanticweb.HermiT.model.AtomicRole;
-import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 
 /**
@@ -29,14 +26,8 @@ public final class Node implements Serializable {
     protected Node m_parent;
     protected NodeType m_nodeType;
     protected int m_treeDepth;
-    protected Set<AtomicConcept> m_positiveLabel;
-    protected int m_positiveLabelSize;
-    protected int m_positiveLabelHashCode;
-    protected int m_negativeLabelSize;
-    protected Set<AtomicRole> m_fromParentLabel;
-    protected int m_fromParentLabelHashCode;
-    protected Set<AtomicRole> m_toParentLabel;
-    protected int m_toParentLabelHashCode;
+    protected int m_numberOfPositiveAtomicConcepts;
+    protected int m_numberOfNegatedAtomicConcepts;
     private List<ExistentialConcept> m_unprocessedExistentials;
     protected Node m_previousTableauNode;
     protected Node m_nextTableauNode;
@@ -46,7 +37,6 @@ public final class Node implements Serializable {
     protected Node m_blocker;
     protected boolean m_directlyBlocked;
     protected Object m_blockingObject;
-    protected boolean m_blockingSignatureChanged;
     protected int m_numberOfNIAssertionsFromNode;
     protected int m_numberOfNIAssertionsToNode;
     protected int m_firstGraphOccurrenceNode;
@@ -60,23 +50,14 @@ public final class Node implements Serializable {
     }
     protected void initialize(int nodeID,Node parent,NodeType nodeType,int treeDepth) {
         assert m_nodeID==-1;
-        assert m_positiveLabel==null;
-        assert m_fromParentLabel==null;
-        assert m_toParentLabel==null;
         assert m_unprocessedExistentials==null;
         m_nodeID=nodeID;
         m_nodeState=NodeState.ACTIVE;
         m_parent=parent;
         m_nodeType=nodeType;
         m_treeDepth=treeDepth;
-        m_positiveLabel=null;
-        m_positiveLabelSize=0;
-        m_positiveLabelHashCode=0;
-        m_negativeLabelSize=0;
-        m_fromParentLabel=null;
-        m_fromParentLabelHashCode=0;
-        m_toParentLabel=null;
-        m_toParentLabelHashCode=0;
+        m_numberOfPositiveAtomicConcepts=0;
+        m_numberOfNegatedAtomicConcepts=0;
         m_unprocessedExistentials=NO_EXISTENTIALS;
         m_previousTableauNode=null;
         m_nextTableauNode=null;
@@ -85,8 +66,6 @@ public final class Node implements Serializable {
         m_mergedIntoDependencySet=null;
         m_blocker=null;
         m_directlyBlocked=false;
-        m_blockingObject=null;
-        m_blockingSignatureChanged=false;
         m_numberOfNIAssertionsFromNode=0;
         m_numberOfNIAssertionsToNode=0;
         m_tableau.m_descriptionGraphManager.intializeNode(this);
@@ -96,18 +75,6 @@ public final class Node implements Serializable {
         m_nodeState=null;
         m_parent=null;
         m_nodeType=null;
-        if (m_positiveLabel!=null) {
-            m_tableau.m_labelManager.removeAtomicConceptSetReference(m_positiveLabel);
-            m_positiveLabel=null;
-        }
-        if (m_fromParentLabel!=null) {
-            m_tableau.m_labelManager.removeAtomicRoleSetReference(m_fromParentLabel);
-            m_fromParentLabel=null;
-        }
-        if (m_toParentLabel!=null) {
-            m_tableau.m_labelManager.removeAtomicRoleSetReference(m_toParentLabel);
-            m_toParentLabel=null;
-        }
         if (m_unprocessedExistentials!=NO_EXISTENTIALS) {
             m_unprocessedExistentials.clear();
             m_tableau.putExistentialConceptsBuffer(m_unprocessedExistentials);
@@ -122,7 +89,6 @@ public final class Node implements Serializable {
             m_mergedIntoDependencySet=null;
         }
         m_blocker=null;
-        m_blockingObject=null;
         m_tableau.m_descriptionGraphManager.destroyNode(this);
     }
     public int getNodeID() {
@@ -179,12 +145,6 @@ public final class Node implements Serializable {
     public void setBlockingObject(Object blockingObject) {
         m_blockingObject=blockingObject;
     }
-    public boolean getBlockingSignatureChanged() {
-        return m_blockingSignatureChanged;
-    }
-    public void setBlockingSignatureChanged(boolean blockingSignatureChanged) {
-        m_blockingSignatureChanged=blockingSignatureChanged;
-    }
     public boolean isActive() {
         return m_nodeState==NodeState.ACTIVE;
     }
@@ -217,92 +177,6 @@ public final class Node implements Serializable {
             node=node.m_mergedInto;
         }
         return result;
-    }
-    public Set<AtomicConcept> getPositiveLabel() {
-        if (m_positiveLabel==null) {
-            m_positiveLabel=m_tableau.m_labelManager.getPositiveLabel(this);
-            m_tableau.m_labelManager.addAtomicConceptSetReference(m_positiveLabel);
-        }
-        return m_positiveLabel;
-    }
-    public int getPositiveLabelSize() {
-        return m_positiveLabelSize;
-    }
-    public int getPositiveLabelHashCode() {
-        return m_positiveLabelHashCode;
-    }
-    protected void addToPositiveLabel(AtomicConcept concept) {
-        if (m_positiveLabel!=null) {
-            m_tableau.m_labelManager.removeAtomicConceptSetReference(m_positiveLabel);
-            m_positiveLabel=null;
-        }
-        m_positiveLabelHashCode+=concept.hashCode();
-        m_positiveLabelSize++;
-    }
-    protected void removeFromPositiveLabel(AtomicConcept concept) {
-        if (m_positiveLabel!=null) {
-            m_tableau.m_labelManager.removeAtomicConceptSetReference(m_positiveLabel);
-            m_positiveLabel=null;
-        }
-        m_positiveLabelHashCode-=concept.hashCode();
-        m_positiveLabelSize--;
-    }
-    public int getNegativeLabelSize() {
-        return m_negativeLabelSize;
-    }
-    protected void addToNegativeLabel() {
-        m_negativeLabelSize++;
-    }
-    protected void removeFromNegativeLabel() {
-        m_negativeLabelSize--;
-    }
-    public Set<AtomicRole> getFromParentLabel() {
-        if (m_fromParentLabel==null) {
-            m_fromParentLabel=m_tableau.m_labelManager.getEdgeLabel(m_parent,this);
-            m_tableau.m_labelManager.addAtomicRoleSetReference(m_fromParentLabel);
-        }
-        return m_fromParentLabel;
-    }
-    public int getFromParentLabelHashCode() {
-        return m_fromParentLabelHashCode;
-    }
-    protected void addToFromParentLabel(AtomicRole atomicRole) {
-        if (m_fromParentLabel!=null) {
-            m_tableau.m_labelManager.removeAtomicRoleSetReference(m_fromParentLabel);
-            m_fromParentLabel=null;
-        }
-        m_fromParentLabelHashCode+=atomicRole.hashCode();
-    }
-    protected void removeFromFromParentLabel(AtomicRole atomicRole) {
-        if (m_fromParentLabel!=null) {
-            m_tableau.m_labelManager.removeAtomicRoleSetReference(m_fromParentLabel);
-            m_fromParentLabel=null;
-        }
-        m_fromParentLabelHashCode-=atomicRole.hashCode();
-    }
-    public Set<AtomicRole> getToParentLabel() {
-        if (m_toParentLabel==null) {
-            m_toParentLabel=m_tableau.m_labelManager.getEdgeLabel(this,m_parent);
-            m_tableau.m_labelManager.addAtomicRoleSetReference(m_toParentLabel);
-        }
-        return m_toParentLabel;
-    }
-    public int getToParentLabelHashCode() {
-        return m_toParentLabelHashCode;
-    }
-    protected void addToToParentLabel(AtomicRole atomicRole) {
-        if (m_toParentLabel!=null) {
-            m_tableau.m_labelManager.removeAtomicRoleSetReference(m_toParentLabel);
-            m_toParentLabel=null;
-        }
-        m_toParentLabelHashCode+=atomicRole.hashCode();
-    }
-    protected void removeFromToParentLabel(AtomicRole atomicRole) {
-        if (m_toParentLabel!=null) {
-            m_tableau.m_labelManager.removeAtomicRoleSetReference(m_toParentLabel);
-            m_toParentLabel=null;
-        }
-        m_toParentLabelHashCode-=atomicRole.hashCode();
     }
     protected void addToUnprocessedExistentials(ExistentialConcept existentialConcept) {
         assert NO_EXISTENTIALS.isEmpty();

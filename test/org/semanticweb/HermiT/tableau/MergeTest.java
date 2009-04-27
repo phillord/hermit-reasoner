@@ -104,7 +104,7 @@ public class MergeTest extends AbstractReasonerInternalsTest {
         m_extensionManager.addAssertion(Equality.INSTANCE,a1,a2,emptySet,false);
         
         assertTrue(m_extensionManager.containsClash());
-        assertLabel(a2,A,B,C,D,NEG_A);
+        assertLabel(a2,A,B,C,D,NEG_A,EXISTS_NEG_A);
         
         assertTrue(a1.isMerged());
         assertSame(a1.getCanonicalNode(),a2);
@@ -142,9 +142,7 @@ public class MergeTest extends AbstractReasonerInternalsTest {
         assertFalse(m_extensionManager.containsClash());
         assertRetrieval(m_extensionManager.getTernaryExtensionTable(),T(Inequality.INSTANCE,null,null),ExtensionTable.View.TOTAL,new Node[0][]);
     }
-    protected void assertLabel(Node node,Concept... concepts) {
-        assertEquals(concepts.length,node.getPositiveLabelSize()+node.getNegativeLabelSize());
-        for (Concept concept : concepts)
-            assertTrue(m_tableau.getExtensionManager().containsConceptAssertion(concept,node));
+    protected void assertLabel(Node node,Concept... expected) {
+        assertLabel(m_tableau,node,expected);
     }
 }

@@ -64,7 +64,7 @@ public final class MergingManager implements Serializable {
                 boolean canMerge0Into1=node0.m_parent==node1.m_parent || isDescendantOfAtMostThreeLevels(node0,node1ClusterAnchor);
                 boolean canMerge1Into0=node0.m_parent==node1.m_parent || isDescendantOfAtMostThreeLevels(node1,node0ClusterAnchor);
                 if (canMerge0Into1 && canMerge1Into0) { 
-                    if (node0.getPositiveLabelSize()>node1.getPositiveLabelSize()) {
+                    if (node0.m_numberOfPositiveAtomicConcepts>node1.m_numberOfPositiveAtomicConcepts) {
                         mergeFrom=node1;
                         mergeInto=node0;
                     }

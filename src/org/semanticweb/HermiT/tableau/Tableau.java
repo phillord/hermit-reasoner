@@ -548,6 +548,7 @@ public final class Tableau implements Serializable {
         assert node.m_nodeID==-1;
         assert node.m_nodeState==null;
         node.initialize(++m_numberOfNodesInTableau,parent,nodeType,treeDepth);
+        m_existentialsExpansionStrategy.nodeInitialized(node);
         node.m_previousTableauNode=m_lastTableauNode;
         if (m_lastTableauNode==null)
             m_firstTableauNode=node;

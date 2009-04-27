@@ -119,6 +119,9 @@ public abstract class AbstractExpansionStrategy implements Serializable,Expansio
     public void nodeStatusChanged(Node node) {
         m_blockingStrategy.nodeStatusChanged(node);
     }
+    public void nodeInitialized(Node node) {
+        m_blockingStrategy.nodeInitialized(node);
+    }
     public void nodeDestroyed(Node node) {
         m_blockingStrategy.nodeDestroyed(node);
     }

@@ -100,8 +100,8 @@ public abstract class ExtensionTable implements Serializable {
                         m_tableauMonitor.clashDetectionFinished(tuple);
                 }
                 else {
-                    node.addToNegativeLabel();
-                    if (node.getPositiveLabelSize()>0) {
+                    node.m_numberOfNegatedAtomicConcepts++;
+                    if (node.m_numberOfPositiveAtomicConcepts>0) {
                         m_binaryAuxiliaryTuple[0]=negatedAtomicConcept;
                         m_binaryAuxiliaryTuple[1]=node;
                         if (containsTuple(m_binaryAuxiliaryTuple)) {
@@ -126,8 +126,8 @@ public abstract class ExtensionTable implements Serializable {
             else if (dlPredicateObject instanceof Concept) {
                 if (dlPredicateObject instanceof AtomicConcept) {
                     AtomicConcept atomicConcept=(AtomicConcept)dlPredicateObject;
-                    node.addToPositiveLabel(atomicConcept);
-                    if (node.getNegativeLabelSize()>0) {
+                    node.m_numberOfPositiveAtomicConcepts++;
+                    if (node.m_numberOfNegatedAtomicConcepts>0) {
                         m_binaryAuxiliaryTuple[0]=AtomicNegationConcept.create(atomicConcept);
                         m_binaryAuxiliaryTuple[1]=node;
                         if (containsTuple(m_binaryAuxiliaryTuple)) {
@@ -151,10 +151,6 @@ public abstract class ExtensionTable implements Serializable {
             Node node0=(Node)tuple[1];
             Node node1=(Node)tuple[2];
             m_tableau.m_existentialsExpansionStrategy.assertionAdded(atomicRole,node0,node1);
-            if (node0.isParentOf(node1))
-                node1.addToFromParentLabel(atomicRole);
-            else if (node1.isParentOf(node0))
-                node0.addToToParentLabel(atomicRole);
             m_tableau.m_nominalIntroductionManager.addAtomicRoleAssertion(atomicRole,node0,node1);
         }
         else if (Inequality.INSTANCE.equals(dlPredicateObject)) {
@@ -224,9 +220,9 @@ public abstract class ExtensionTable implements Serializable {
             Node node=(Node)tuple[1];
             m_tableau.m_existentialsExpansionStrategy.assertionRemoved((Concept)dlPredicateObject,node);
             if (dlPredicateObject instanceof AtomicNegationConcept)
-                node.removeFromNegativeLabel();
+                node.m_numberOfNegatedAtomicConcepts--;
             else if (dlPredicateObject instanceof AtomicConcept)
-                node.removeFromPositiveLabel((AtomicConcept)dlPredicateObject);
+                node.m_numberOfPositiveAtomicConcepts--;
             else if (dlPredicateObject instanceof ExistentialConcept)
                 node.removeFromUnprocessedExistentials((ExistentialConcept)dlPredicateObject);
         }
@@ -235,10 +231,6 @@ public abstract class ExtensionTable implements Serializable {
             Node node0=(Node)tuple[1];
             Node node1=(Node)tuple[2];
             m_tableau.m_existentialsExpansionStrategy.assertionRemoved(atomicRole,node0,node1);
-            if (node0.isParentOf(node1))
-                node1.removeFromFromParentLabel(atomicRole);
-            else if (node1.isParentOf(node0))
-                node0.removeFromToParentLabel(atomicRole);
             m_tableau.m_nominalIntroductionManager.removeAtomicRoleAssertion(atomicRole,node0,node1);
         }
         else if (dlPredicateObject instanceof DescriptionGraph)

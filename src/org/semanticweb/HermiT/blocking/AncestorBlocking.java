@@ -54,16 +54,24 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
         }
     }
     public void assertionAdded(Concept concept,Node node) {
+        m_directBlockingChecker.assertionAdded(concept,node);
     }
     public void assertionRemoved(Concept concept,Node node) {
+        m_directBlockingChecker.assertionRemoved(concept,node);
     }
     public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
+        m_directBlockingChecker.assertionAdded(atomicRole,nodeFrom,nodeTo);
     }
     public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
+        m_directBlockingChecker.assertionRemoved(atomicRole,nodeFrom,nodeTo);
     }
     public void nodeStatusChanged(Node node) {
     }
+    public void nodeInitialized(Node node) {
+        m_directBlockingChecker.nodeInitialized(node);
+    }
     public void nodeDestroyed(Node node) {
+        m_directBlockingChecker.nodeDestroyed(node);
     }
     public void modelFound() {
         if (m_blockingSignatureCache!=null) {

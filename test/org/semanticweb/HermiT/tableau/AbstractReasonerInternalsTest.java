@@ -2,6 +2,7 @@ package org.semanticweb.HermiT.tableau;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Configuration;
@@ -12,6 +13,7 @@ import org.semanticweb.HermiT.blocking.DirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
 import org.semanticweb.HermiT.existentials.ExpansionStrategy;
+import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
@@ -20,7 +22,7 @@ import org.semanticweb.HermiT.structural.OWLClausification;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Tableau;
 
-public class AbstractReasonerInternalsTest extends AbstractReasonerTest {
+public abstract class AbstractReasonerInternalsTest extends AbstractReasonerTest {
 
     public AbstractReasonerInternalsTest(String name) {
         super(name);
@@ -109,5 +111,20 @@ public class AbstractReasonerInternalsTest extends AbstractReasonerTest {
 
     protected static Object[] T(Object... nodes) {
         return nodes;
+    }
+
+    protected static void assertLabel(Tableau tableau,Node node,Concept... expected) {
+        Set<Concept> actual=new HashSet<Concept>();
+        ExtensionTable.Retrieval retrieval=tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
+        retrieval.getBindingsBuffer()[1]=node;
+        retrieval.open();
+        Object[] tupleBuffer=retrieval.getTupleBuffer();
+        while (!retrieval.afterLast()) {
+            Object object=tupleBuffer[0];
+            if (object instanceof Concept)
+                actual.add((Concept)object);
+            retrieval.next();
+        }
+        assertContainsAll(actual,expected);
     }
 }

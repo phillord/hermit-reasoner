@@ -78,9 +78,9 @@ public class GraphTest extends AbstractReasonerInternalsTest {
         assertSame(n7,n5.getCanonicalNode());
         assertSame(n6,n6.getCanonicalNode());
         assertSame(n7,n7.getCanonicalNode());
-        assertContainsAll(n1.getPositiveLabel(),r);
-        assertContainsAll(n5.getPositiveLabel());
-        assertContainsAll(n6.getPositiveLabel(),s);
+        assertLabel(tableau,n1,r);
+        assertLabel(tableau,n5);
+        assertLabel(tableau,n6,s);
 
         assertTrue(extensionManager.containsTuple(new Object[] { graph,n1,n7,n6 }));
     }
