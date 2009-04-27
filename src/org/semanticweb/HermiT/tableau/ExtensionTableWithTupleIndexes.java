@@ -3,7 +3,9 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 
+import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.AtomicRole;
 
 /**
  * This extension table is for use with binary and ternary assertions (not 
@@ -42,11 +44,17 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
                 m_afterDeltaNewTupleIndex=m_tupleTable.getFirstFreeTupleIndex();
                 if (m_tableauMonitor!=null)
                     m_tableauMonitor.addFactFinished(tuple,isCore,true);
-                postAdd(tuple,dependencySet,addTupleIndex);
+                postAdd(tuple,dependencySet,addTupleIndex,isCore);
                 return true;
             }
-            if (isCore)
+            if (isCore && !m_coreManager.isCore(addTupleIndex)) {
                 m_coreManager.addCore(addTupleIndex);
+                Object dlPredicateObject=tuple[0];
+                if (dlPredicateObject instanceof Concept)
+                    m_tableau.m_existentialExpansionStrategy.assertionCoreSet((Concept)dlPredicateObject,(Node)tuple[1]);
+                else if (dlPredicateObject instanceof AtomicRole)
+                    m_tableau.m_existentialExpansionStrategy.assertionCoreSet((AtomicRole)dlPredicateObject,(Node)tuple[1],(Node)tuple[2]);
+            }
         }
         if (m_tableauMonitor!=null)
             m_tableauMonitor.addFactFinished(tuple,isCore,false);

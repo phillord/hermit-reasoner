@@ -85,11 +85,11 @@ public abstract class ExtensionTable implements Serializable {
      * @param dependencySet
      * @param tupleIndex
      */
-    protected void postAdd(Object[] tuple,DependencySet dependencySet,int tupleIndex) {
+    protected void postAdd(Object[] tuple,DependencySet dependencySet,int tupleIndex,boolean isCore) {
         Object dlPredicateObject=tuple[0];
         if (dlPredicateObject instanceof Concept) {
             Node node=(Node)tuple[1];
-            m_tableau.m_existentialsExpansionStrategy.assertionAdded((Concept)dlPredicateObject,node);
+            m_tableau.m_existentialExpansionStrategy.assertionAdded((Concept)dlPredicateObject,node,isCore);
             if (dlPredicateObject instanceof AtomicNegationConcept) {
                 AtomicConcept negatedAtomicConcept=((AtomicNegationConcept)dlPredicateObject).getNegatedAtomicConcept();
                 if (AtomicConcept.THING.equals(negatedAtomicConcept) || AtomicConcept.RDFS_LITERAL.equals(negatedAtomicConcept)) {
@@ -150,7 +150,7 @@ public abstract class ExtensionTable implements Serializable {
             AtomicRole atomicRole=(AtomicRole)dlPredicateObject;
             Node node0=(Node)tuple[1];
             Node node1=(Node)tuple[2];
-            m_tableau.m_existentialsExpansionStrategy.assertionAdded(atomicRole,node0,node1);
+            m_tableau.m_existentialExpansionStrategy.assertionAdded(atomicRole,node0,node1,isCore);
             m_tableau.m_nominalIntroductionManager.addAtomicRoleAssertion(atomicRole,node0,node1);
         }
         else if (Inequality.INSTANCE.equals(dlPredicateObject)) {
@@ -218,7 +218,7 @@ public abstract class ExtensionTable implements Serializable {
         Object dlPredicateObject=tuple[0];
         if (dlPredicateObject instanceof Concept) {
             Node node=(Node)tuple[1];
-            m_tableau.m_existentialsExpansionStrategy.assertionRemoved((Concept)dlPredicateObject,node);
+            m_tableau.m_existentialExpansionStrategy.assertionRemoved((Concept)dlPredicateObject,node,m_coreManager.isCore(tupleIndex));
             if (dlPredicateObject instanceof AtomicNegationConcept)
                 node.m_numberOfNegatedAtomicConcepts--;
             else if (dlPredicateObject instanceof AtomicConcept)
@@ -230,7 +230,7 @@ public abstract class ExtensionTable implements Serializable {
             AtomicRole atomicRole=(AtomicRole)dlPredicateObject;
             Node node0=(Node)tuple[1];
             Node node1=(Node)tuple[2];
-            m_tableau.m_existentialsExpansionStrategy.assertionRemoved(atomicRole,node0,node1);
+            m_tableau.m_existentialExpansionStrategy.assertionRemoved(atomicRole,node0,node1,m_coreManager.isCore(tupleIndex));
             m_tableau.m_nominalIntroductionManager.removeAtomicRoleAssertion(atomicRole,node0,node1);
         }
         else if (dlPredicateObject instanceof DescriptionGraph)

@@ -12,7 +12,7 @@ import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.blocking.DirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
-import org.semanticweb.HermiT.existentials.ExpansionStrategy;
+import org.semanticweb.HermiT.existentials.ExistentialExpansionStrategy;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
@@ -46,7 +46,7 @@ public abstract class AbstractReasonerInternalsTest extends AbstractReasonerTest
         DirectBlockingChecker directBlockingChecker=PairWiseDirectBlockingChecker.INSTANCE;
         BlockingSignatureCache blockingSignatureCache=new BlockingSignatureCache(directBlockingChecker);
         BlockingStrategy blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
-        ExpansionStrategy ExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
+        ExistentialExpansionStrategy ExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
 
         return new Tableau(new InterruptFlag(),getTableauMonitor(),ExpansionStrategy,dlOntology,new HashMap<String,Object>());
     }

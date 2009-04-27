@@ -56,21 +56,21 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
     public void nodeDestroyed(Node node) {
         ((PairWiseBlockingObject)node.getBlockingObject()).destroy();
     }
-    public boolean assertionAdded(Concept concept,Node node) {
+    public Node assertionAdded(Concept concept,Node node) {
         if (concept instanceof AtomicConcept) {
             ((PairWiseBlockingObject)node.getBlockingObject()).addAtomicConcept((AtomicConcept)concept);
-            return true;
+            return node;
         }
         else
-            return false;
+            return null;
     }
-    public boolean assertionRemoved(Concept concept,Node node) {
+    public Node assertionRemoved(Concept concept,Node node) {
         if (concept instanceof AtomicConcept) {
             ((PairWiseBlockingObject)node.getBlockingObject()).removeAtomicConcept((AtomicConcept)concept);
-            return true;
+            return node;
         }
         else
-            return false;
+            return null;
     }
     public Node assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
         if (nodeFrom.isParentOf(nodeTo)) {

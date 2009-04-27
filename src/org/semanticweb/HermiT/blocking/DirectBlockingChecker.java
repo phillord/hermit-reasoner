@@ -13,8 +13,8 @@ public interface DirectBlockingChecker {
     void clearBlockingInfoChanged(Node node);
     void nodeInitialized(Node node);
     void nodeDestroyed(Node node);
-    boolean assertionAdded(Concept concept,Node node);
-    boolean assertionRemoved(Concept concept,Node node);
+    Node assertionAdded(Concept concept,Node node);
+    Node assertionRemoved(Concept concept,Node node);
     Node assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo);
     Node assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo);
     BlockingSignature getBlockingSignatureFor(Node node);

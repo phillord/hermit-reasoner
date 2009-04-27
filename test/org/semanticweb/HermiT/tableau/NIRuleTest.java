@@ -9,7 +9,7 @@ import org.semanticweb.HermiT.blocking.BlockingSignatureCache;
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
-import org.semanticweb.HermiT.existentials.ExpansionStrategy;
+import org.semanticweb.HermiT.existentials.ExistentialExpansionStrategy;
 import org.semanticweb.HermiT.model.AtMostGuard;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
@@ -64,7 +64,7 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
     protected void setUp() {
         BlockingSignatureCache blockingSignatureCache=new BlockingSignatureCache(PairWiseDirectBlockingChecker.INSTANCE);
         BlockingStrategy blockingStrategy=new AnywhereBlocking(PairWiseDirectBlockingChecker.INSTANCE,blockingSignatureCache);
-        ExpansionStrategy ExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
+        ExistentialExpansionStrategy ExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
         m_tableau=new Tableau(new InterruptFlag(),null,ExpansionStrategy,TEST_DL_ONTOLOGY,new HashMap<String,Object>());
         m_extensionManager=m_tableau.getExtensionManager();
         m_manager=m_tableau.getNominalIntroductionManager();

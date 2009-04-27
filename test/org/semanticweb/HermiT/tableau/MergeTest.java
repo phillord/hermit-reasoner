@@ -10,7 +10,7 @@ import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.blocking.DirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
-import org.semanticweb.HermiT.existentials.ExpansionStrategy;
+import org.semanticweb.HermiT.existentials.ExistentialExpansionStrategy;
 import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
@@ -65,7 +65,7 @@ public class MergeTest extends AbstractReasonerInternalsTest {
         DirectBlockingChecker directBlockingChecker=new PairWiseDirectBlockingChecker();
         BlockingSignatureCache blockingSignatureCache=new BlockingSignatureCache(directBlockingChecker);
         BlockingStrategy blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
-        ExpansionStrategy ExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
+        ExistentialExpansionStrategy ExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
         m_tableau=new Tableau(new InterruptFlag(),null,ExpansionStrategy,TEST_DL_ONTOLOGY,new HashMap<String,Object>());
         m_extensionManager=m_tableau.getExtensionManager();
     }

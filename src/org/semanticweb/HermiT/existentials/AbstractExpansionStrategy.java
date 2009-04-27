@@ -22,7 +22,7 @@ import org.semanticweb.HermiT.tableau.InterruptFlag;
 /**
  * Implements the common bits of an ExistentialsExpansionStrategy, leaving only actual processing of existentials in need of expansion to subclasses.
  */
-public abstract class AbstractExpansionStrategy implements Serializable,ExpansionStrategy {
+public abstract class AbstractExpansionStrategy implements Serializable,ExistentialExpansionStrategy {
     private static final long serialVersionUID=2831957929321676444L;
 
     protected final BlockingStrategy m_blockingStrategy;
@@ -104,17 +104,23 @@ public abstract class AbstractExpansionStrategy implements Serializable,Expansio
         }
         return extensionsChanged;
     }
-    public void assertionAdded(Concept concept,Node node) {
-        m_blockingStrategy.assertionAdded(concept,node);
+    public void assertionAdded(Concept concept,Node node,boolean isCore) {
+        m_blockingStrategy.assertionAdded(concept,node,isCore);
     }
-    public void assertionRemoved(Concept concept,Node node) {
-        m_blockingStrategy.assertionRemoved(concept,node);
+    public void assertionCoreSet(Concept concept,Node node) {
+        m_blockingStrategy.assertionCoreSet(concept,node);
     }
-    public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
-        m_blockingStrategy.assertionAdded(atomicRole,nodeFrom,nodeTo);
+    public void assertionRemoved(Concept concept,Node node,boolean isCore) {
+        m_blockingStrategy.assertionRemoved(concept,node,isCore);
     }
-    public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
-        m_blockingStrategy.assertionRemoved(atomicRole,nodeFrom,nodeTo);
+    public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
+        m_blockingStrategy.assertionAdded(atomicRole,nodeFrom,nodeTo,isCore);
+    }
+    public void assertionCoreSet(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
+        m_blockingStrategy.assertionCoreSet(atomicRole,nodeFrom,nodeTo);
+    }
+    public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
+        m_blockingStrategy.assertionRemoved(atomicRole,nodeFrom,nodeTo,isCore);
     }
     public void nodeStatusChanged(Node node) {
         m_blockingStrategy.nodeStatusChanged(node);

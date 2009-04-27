@@ -11,7 +11,7 @@ import org.semanticweb.HermiT.tableau.*;
  * are free to provide their own node-introduction implementations
  * (but be careful---it's tough to get right!)
  */
-public interface ExpansionStrategy {
+public interface ExistentialExpansionStrategy {
     void initialize(Tableau tableau);
     void clear();
 
@@ -22,10 +22,12 @@ public interface ExpansionStrategy {
      */
     boolean expandExistentials();
 
-    void assertionAdded(Concept concept,Node node);
-    void assertionRemoved(Concept concept,Node node);
-    void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo);
-    void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo);
+    void assertionAdded(Concept concept,Node node,boolean isCore);
+    void assertionCoreSet(Concept concept,Node node);
+    void assertionRemoved(Concept concept,Node node,boolean isCore);
+    void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore);
+    void assertionCoreSet(AtomicRole atomicRole,Node nodeFrom,Node nodeTo);
+    void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore);
     void nodeStatusChanged(Node node);
     void nodeInitialized(Node node);
     void nodeDestroyed(Node node);

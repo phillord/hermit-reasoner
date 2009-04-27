@@ -52,7 +52,7 @@ import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.SingleDirectBlockingChecker;
 import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
-import org.semanticweb.HermiT.existentials.ExpansionStrategy;
+import org.semanticweb.HermiT.existentials.ExistentialExpansionStrategy;
 import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
 import org.semanticweb.HermiT.hierarchy.Hierarchy;
 import org.semanticweb.HermiT.hierarchy.HierarchyNode;
@@ -930,7 +930,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             throw new IllegalArgumentException("Unknown blocking strategy type.");
         }
 
-        ExpansionStrategy existentialsExpansionStrategy=null;
+        ExistentialExpansionStrategy existentialsExpansionStrategy=null;
         switch (config.existentialStrategyType) {
         case CREATION_ORDER:
             existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);

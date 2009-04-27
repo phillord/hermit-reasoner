@@ -67,18 +67,20 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
             m_firstChangedNode=null;
         }
     }
-    public void assertionAdded(Concept concept,Node node) {
-        if (m_directBlockingChecker.assertionAdded(concept,node))
-            updateNodeChange(node);
+    public void assertionAdded(Concept concept,Node node,boolean isCore) {
+        updateNodeChange(m_directBlockingChecker.assertionAdded(concept,node));
     }
-    public void assertionRemoved(Concept concept,Node node) {
-        if (m_directBlockingChecker.assertionRemoved(concept,node))
-            updateNodeChange(node);
+    public void assertionCoreSet(Concept concept,Node node) {
     }
-    public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
+    public void assertionRemoved(Concept concept,Node node,boolean isCore) {
+        updateNodeChange(m_directBlockingChecker.assertionRemoved(concept,node));
+    }
+    public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         updateNodeChange(m_directBlockingChecker.assertionAdded(atomicRole,nodeFrom,nodeTo));
     }
-    public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
+    public void assertionCoreSet(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
+    }
+    public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         updateNodeChange(m_directBlockingChecker.assertionRemoved(atomicRole,nodeFrom,nodeTo));
     }
     public void nodeStatusChanged(Node node) {

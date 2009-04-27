@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
-import org.semanticweb.HermiT.existentials.ExpansionStrategy;
+import org.semanticweb.HermiT.existentials.ExistentialExpansionStrategy;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
@@ -35,7 +35,7 @@ public final class Tableau implements Serializable {
     protected final InterruptFlag m_interruptFlag;
     protected final Map<String,Object> m_parameters;
     protected final TableauMonitor m_tableauMonitor;
-    protected final ExpansionStrategy m_existentialsExpansionStrategy;
+    protected final ExistentialExpansionStrategy m_existentialExpansionStrategy;
     protected final DLOntology m_dlOntology;
     protected final DependencySetFactory m_dependencySetFactory;
     protected final ExtensionManager m_extensionManager;
@@ -66,12 +66,12 @@ public final class Tableau implements Serializable {
     protected GroundDisjunction m_firstUnprocessedGroundDisjunction;
     protected Node m_checkedNode;
 
-    public Tableau(InterruptFlag interruptFlag,TableauMonitor tableauMonitor,ExpansionStrategy existentialsExpansionStrategy,DLOntology dlOntology,Map<String,Object> parameters) {
+    public Tableau(InterruptFlag interruptFlag,TableauMonitor tableauMonitor,ExistentialExpansionStrategy existentialsExpansionStrategy,DLOntology dlOntology,Map<String,Object> parameters) {
         m_interruptFlag=interruptFlag;
         m_interruptFlag.startTask();
         m_parameters=parameters;
         m_tableauMonitor=tableauMonitor;
-        m_existentialsExpansionStrategy=existentialsExpansionStrategy;
+        m_existentialExpansionStrategy=existentialsExpansionStrategy;
         m_dlOntology=dlOntology;
         m_dependencySetFactory=new DependencySetFactory();
         m_extensionManager=new ExtensionManager(this);
@@ -82,7 +82,7 @@ public final class Tableau implements Serializable {
         m_nominalIntroductionManager=new NominalIntroductionManager(this);
         m_descriptionGraphManager=new DescriptionGraphManager(this);
         m_datatypeManager=new DatatypeManager(this);
-        m_existentialsExpansionStrategy.initialize(this);
+        m_existentialExpansionStrategy.initialize(this);
         m_needsThingExtension=m_hyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING);
         m_needsNamedExtension=m_hyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.INTERNAL_NAMED);
         m_existentialConceptsBuffers=new ArrayList<List<ExistentialConcept>>();
@@ -106,11 +106,11 @@ public final class Tableau implements Serializable {
     public TableauMonitor getTableauMonitor() {
         return m_tableauMonitor;
     }
-    public ExpansionStrategy getExistentialsExpansionStrategy() {
-        return m_existentialsExpansionStrategy;
+    public ExistentialExpansionStrategy getExistentialsExpansionStrategy() {
+        return m_existentialExpansionStrategy;
     }
     public boolean isDeterministic() {
-        return m_dlOntology.isHorn() && m_existentialsExpansionStrategy.isDeterministic();
+        return m_dlOntology.isHorn() && m_existentialExpansionStrategy.isDeterministic();
     }
     public DependencySetFactory getDependencySetFactory() {
         return m_dependencySetFactory;
@@ -157,7 +157,7 @@ public final class Tableau implements Serializable {
         m_nominalIntroductionManager.clear();
         m_descriptionGraphManager.clear();
         m_isCurrentModelDeterministic=true;
-        m_existentialsExpansionStrategy.clear();
+        m_existentialExpansionStrategy.clear();
         m_existentialConceptsBuffers.clear();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.tableauCleared();
@@ -178,7 +178,7 @@ public final class Tableau implements Serializable {
             if (m_tableauMonitor!=null)
                 m_tableauMonitor.saturateFinished();
             if (!m_extensionManager.containsClash()) {
-                m_existentialsExpansionStrategy.modelFound();
+                m_existentialExpansionStrategy.modelFound();
                 return true;
             }
             else
@@ -205,7 +205,7 @@ public final class Tableau implements Serializable {
                 return true;
         }
         if (!m_extensionManager.containsClash())
-            if (m_existentialsExpansionStrategy.expandExistentials())
+            if (m_existentialExpansionStrategy.expandExistentials())
                 return true;
         if (!m_extensionManager.containsClash()) {
             while (m_firstUnprocessedGroundDisjunction!=null) {
@@ -420,7 +420,7 @@ public final class Tableau implements Serializable {
         m_branchingPoints[m_currentBranchingPoint]=branchingPoint;
         m_extensionManager.branchingPointPushed();
         m_existentialExpasionManager.branchingPointPushed();
-        m_existentialsExpansionStrategy.branchingPointPushed();
+        m_existentialExpansionStrategy.branchingPointPushed();
         m_nominalIntroductionManager.branchingPointPushed();
         m_isCurrentModelDeterministic=false;
         if (m_tableauMonitor!=null)
@@ -450,7 +450,7 @@ public final class Tableau implements Serializable {
         if (m_firstGroundDisjunction!=null)
             m_firstGroundDisjunction.m_previousGroundDisjunction=null;
         // backtrack existentials
-        m_existentialsExpansionStrategy.backtrack();
+        m_existentialExpansionStrategy.backtrack();
         m_existentialExpasionManager.backtrack();
         // backtrack nominal introduction
         m_nominalIntroductionManager.backtrack();
@@ -548,14 +548,14 @@ public final class Tableau implements Serializable {
         assert node.m_nodeID==-1;
         assert node.m_nodeState==null;
         node.initialize(++m_numberOfNodesInTableau,parent,nodeType,treeDepth);
-        m_existentialsExpansionStrategy.nodeInitialized(node);
+        m_existentialExpansionStrategy.nodeInitialized(node);
         node.m_previousTableauNode=m_lastTableauNode;
         if (m_lastTableauNode==null)
             m_firstTableauNode=node;
         else
             m_lastTableauNode.m_nextTableauNode=node;
         m_lastTableauNode=node;
-        m_existentialsExpansionStrategy.nodeStatusChanged(node);
+        m_existentialExpansionStrategy.nodeStatusChanged(node);
         m_numberOfNodeCreations++;
         if (m_tableauMonitor!=null)
             m_tableauMonitor.nodeCreated(node);
@@ -580,7 +580,7 @@ public final class Tableau implements Serializable {
         assert node.m_mergedInto==null;
         assert node.m_mergedIntoDependencySet==null;
         assert node.m_previousMergedOrPrunedNode==null;
-        m_existentialsExpansionStrategy.nodeStatusChanged(node);
+        m_existentialExpansionStrategy.nodeStatusChanged(node);
         node.m_mergedInto=mergeInto;
         node.m_mergedIntoDependencySet=m_dependencySetFactory.getPermanent(dependencySet);
         m_dependencySetFactory.addUsage(node.m_mergedIntoDependencySet);
@@ -594,7 +594,7 @@ public final class Tableau implements Serializable {
         assert node.m_mergedInto==null;
         assert node.m_mergedIntoDependencySet==null;
         assert node.m_previousMergedOrPrunedNode==null;
-        m_existentialsExpansionStrategy.nodeStatusChanged(node);
+        m_existentialExpansionStrategy.nodeStatusChanged(node);
         node.m_nodeState=NodeState.PRUNED;
         node.m_previousMergedOrPrunedNode=m_lastMergedOrPrunedNode;
         m_lastMergedOrPrunedNode=node;
@@ -603,7 +603,7 @@ public final class Tableau implements Serializable {
     protected void backtrackLastMergedOrPrunedNode() {
         Node node=m_lastMergedOrPrunedNode;
         assert (node.m_nodeState==Node.NodeState.MERGED && node.m_mergedInto!=null && node.m_mergedInto!=null) || (node.m_nodeState==Node.NodeState.PRUNED && node.m_mergedInto==null && node.m_mergedInto==null);
-        m_existentialsExpansionStrategy.nodeStatusChanged(node);
+        m_existentialExpansionStrategy.nodeStatusChanged(node);
         if (node.m_nodeState==Node.NodeState.MERGED) {
             m_dependencySetFactory.removeUsage(node.m_mergedIntoDependencySet);
             node.m_mergedInto=null;
@@ -620,7 +620,7 @@ public final class Tableau implements Serializable {
         assert node.m_mergedInto==null;
         assert node.m_mergedIntoDependencySet==null;
         assert node.m_previousMergedOrPrunedNode==null;
-        m_existentialsExpansionStrategy.nodeDestroyed(node);
+        m_existentialExpansionStrategy.nodeDestroyed(node);
         if (node.m_previousTableauNode==null)
             m_firstTableauNode=null;
         else

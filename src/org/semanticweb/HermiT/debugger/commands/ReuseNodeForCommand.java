@@ -2,7 +2,7 @@ package org.semanticweb.HermiT.debugger.commands;
 
 import java.io.PrintWriter;
 
-import org.semanticweb.HermiT.existentials.ExpansionStrategy;
+import org.semanticweb.HermiT.existentials.ExistentialExpansionStrategy;
 import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.tableau.Node;
@@ -41,7 +41,7 @@ public class ReuseNodeForCommand extends AbstractCommand {
             m_debugger.getOutput().println("Node with ID '"+nodeID+"' not found.");
             return;
         }
-        ExpansionStrategy strategy=m_debugger.getTableau().getExistentialsExpansionStrategy();
+        ExistentialExpansionStrategy strategy=m_debugger.getTableau().getExistentialsExpansionStrategy();
         if (strategy instanceof IndividualReuseStrategy) {
             IndividualReuseStrategy reuseStrategy=(IndividualReuseStrategy)strategy;
             AtomicConcept conceptForNode=reuseStrategy.getConceptForNode(node);
