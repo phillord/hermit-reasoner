@@ -6,7 +6,7 @@ import junit.framework.TestSuite;
 
 public class AllQuickTests extends TestCase {
 
-    public static Test suite() {
+    public static Test suite() throws Exception {
         TestSuite suite = new TestSuite("All HermiT tests");
         // $JUnit-BEGIN$
         // Tests the normalization and clausification, when loading via the OWLAPI.
@@ -17,6 +17,8 @@ public class AllQuickTests extends TestCase {
         suite.addTest(org.semanticweb.HermiT.tableau.AllTests.suite());
         // Tests the graph library.
         suite.addTest(org.semanticweb.HermiT.graph.AllTests.suite());
+        // Rungs the WG tests.
+        suite.addTest(org.semanticweb.HermiT.owl_wg_tests.AllApprovedWGTests.suite());
         // $JUnit-END$
         return suite;
     }

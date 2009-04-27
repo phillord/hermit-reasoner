@@ -6,7 +6,7 @@ import junit.framework.TestSuite;
 
 public class AllTests extends TestCase {
 
-    public static Test suite() {
+    public static Test suite() throws Exception {
         TestSuite suite = new TestSuite("All HermiT tests");
         // $JUnit-BEGIN$
         // Performs all quick tests.
@@ -16,7 +16,6 @@ public class AllTests extends TestCase {
         // $JUnit-END$
         return suite;
     }
-    
     public static void main(String... args) throws Throwable {
         junit.textui.TestRunner.run(suite());
         System.exit(0);
