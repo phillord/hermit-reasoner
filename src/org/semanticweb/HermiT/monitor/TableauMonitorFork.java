@@ -3,7 +3,7 @@ package org.semanticweb.HermiT.monitor;
 
 import java.io.Serializable;
 
-import org.semanticweb.HermiT.model.AtMostGuard;
+import org.semanticweb.HermiT.model.AnnotatedEquality;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.Individual;
@@ -192,13 +192,13 @@ public class TableauMonitorFork implements TableauMonitor,Serializable  {
         m_first.existentialSatisfied(existentialConcept,forNode);
         m_second.existentialSatisfied(existentialConcept,forNode);
     }
-    public void nominalIntorductionStarted(Node rootNode,Node treeNode,AtMostGuard atMostRoleGuard) {
-        m_first.nominalIntorductionStarted(rootNode,treeNode,atMostRoleGuard);
-        m_second.nominalIntorductionStarted(rootNode,treeNode,atMostRoleGuard);
+    public void nominalIntorductionStarted(Node rootNode,Node treeNode,AnnotatedEquality annotatedEquality,Node argument1,Node argument2) {
+        m_first.nominalIntorductionStarted(rootNode,treeNode,annotatedEquality,argument1,argument2);
+        m_second.nominalIntorductionStarted(rootNode,treeNode,annotatedEquality,argument1,argument2);
     }
-    public void nominalIntorductionFinished(Node rootNode,Node treeNode,AtMostGuard atMostRoleGuard) {
-        m_first.nominalIntorductionFinished(rootNode,treeNode,atMostRoleGuard);
-        m_second.nominalIntorductionFinished(rootNode,treeNode,atMostRoleGuard);
+    public void nominalIntorductionFinished(Node rootNode,Node treeNode,AnnotatedEquality annotatedEquality,Node argument1,Node argument2) {
+        m_first.nominalIntorductionFinished(rootNode,treeNode,annotatedEquality,argument1,argument2);
+        m_second.nominalIntorductionFinished(rootNode,treeNode,annotatedEquality,argument1,argument2);
     }
     public void descriptionGraphCheckingStarted(int graphIndex1,int tupleIndex1,int position1,int graphIndex2,int tupleIndex2,int position2) {
         m_first.descriptionGraphCheckingStarted(graphIndex1,tupleIndex1,position1,graphIndex2,tupleIndex2,position2);

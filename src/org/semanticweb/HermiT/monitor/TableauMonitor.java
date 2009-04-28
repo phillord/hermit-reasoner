@@ -1,7 +1,7 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.monitor;
 
-import org.semanticweb.HermiT.model.AtMostGuard;
+import org.semanticweb.HermiT.model.AnnotatedEquality;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.ExistentialConcept;
@@ -55,8 +55,8 @@ public interface TableauMonitor {
     void existentialExpansionStarted(ExistentialConcept existentialConcept,Node forNode);
     void existentialExpansionFinished(ExistentialConcept existentialConcept,Node forNode);
     void existentialSatisfied(ExistentialConcept existentialConcept,Node forNode);
-    void nominalIntorductionStarted(Node rootNode,Node treeNode,AtMostGuard atMostRoleGuard);
-    void nominalIntorductionFinished(Node rootNode,Node treeNode,AtMostGuard atMostRoleGuard);
+    void nominalIntorductionStarted(Node rootNode,Node treeNode,AnnotatedEquality annotatedEquality,Node argument1,Node argument2);
+    void nominalIntorductionFinished(Node rootNode,Node treeNode,AnnotatedEquality annotatedEquality,Node argument1,Node argument2);
     void descriptionGraphCheckingStarted(int graphIndex1,int tupleIndex1,int position1,int graphIndex2,int tupleIndex2,int position2);
     void descriptionGraphCheckingFinished(int graphIndex1,int tupleIndex1,int position1,int graphIndex2,int tupleIndex2,int position2);
     void nodeCreated(Node node);

@@ -16,7 +16,7 @@ public class Atom implements Serializable {
     static {
         s_infixPredicates.add(Equality.INSTANCE);
         s_infixPredicates.add(Inequality.INSTANCE);
-        s_infixPredicates.add(NodeIDLessThan.INSTANCE);
+        s_infixPredicates.add(NodeIDLessEqualThan.INSTANCE);
     }
 
     protected final DLPredicate m_dlPredicate;
@@ -74,6 +74,24 @@ public class Atom implements Serializable {
             buffer.append(m_dlPredicate.toString(prefixes));
             buffer.append(' ');
             buffer.append(m_arguments[1].toString(prefixes));
+        }
+        else if (m_dlPredicate instanceof AnnotatedEquality) {
+            AnnotatedEquality annotatedEquality=(AnnotatedEquality)m_dlPredicate;
+            buffer.append('[');
+            buffer.append(m_arguments[0].toString(prefixes));
+            buffer.append(' ');
+            buffer.append("==");
+            buffer.append(' ');
+            buffer.append(m_arguments[1].toString(prefixes));
+            buffer.append("]@atMost(");
+            buffer.append(annotatedEquality.getCaridnality());
+            buffer.append(' ');
+            buffer.append(annotatedEquality.getOnRole().toString(prefixes));
+            buffer.append(' ');
+            buffer.append(annotatedEquality.getToConcept().toString(prefixes));
+            buffer.append(")(");
+            buffer.append(m_arguments[2].toString(prefixes));
+            buffer.append(')');
         }
         else {
             buffer.append(m_dlPredicate.toString(prefixes));

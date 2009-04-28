@@ -37,8 +37,6 @@ public final class Node implements Serializable {
     protected Node m_blocker;
     protected boolean m_directlyBlocked;
     protected Object m_blockingObject;
-    protected int m_numberOfNIAssertionsFromNode;
-    protected int m_numberOfNIAssertionsToNode;
     protected int m_firstGraphOccurrenceNode;
     
     public Node(Tableau tableau) {
@@ -66,8 +64,6 @@ public final class Node implements Serializable {
         m_mergedIntoDependencySet=null;
         m_blocker=null;
         m_directlyBlocked=false;
-        m_numberOfNIAssertionsFromNode=0;
-        m_numberOfNIAssertionsToNode=0;
         m_tableau.m_descriptionGraphManager.intializeNode(this);
     }
     protected void destroy() {

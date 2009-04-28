@@ -97,7 +97,7 @@ public class DLClause implements Serializable {
         if (getBodyLength()==2 && getHeadLength()==1) {
             DLPredicate atomicRole=getBodyAtom(0).getDLPredicate();
             if (atomicRole instanceof AtomicRole) {
-                if (getBodyAtom(1).getDLPredicate().equals(atomicRole) && getHeadAtom(0).getDLPredicate().equals(Equality.INSTANCE)) {
+                if (getBodyAtom(1).getDLPredicate().equals(atomicRole) && (getHeadAtom(0).getDLPredicate() instanceof AnnotatedEquality)) {
                     Variable x=getBodyAtom(0).getArgumentVariable(0);
                     if (x!=null && x.equals(getBodyAtom(1).getArgument(0))) {
                         Variable y1=getBodyAtom(0).getArgumentVariable(1);
@@ -112,27 +112,11 @@ public class DLClause implements Serializable {
         }
         return false;
     }
-    public boolean isGuardedFunctionalityAxiom() {
-        if (getBodyLength()==1 && getHeadLength()==1) {
-            DLPredicate headDLPredicate=getHeadAtom(0).getDLPredicate();
-            if (headDLPredicate instanceof AtMostGuard) {
-                AtMostGuard atMostRoleGuard=(AtMostGuard)headDLPredicate;
-                if (atMostRoleGuard.getCaridnality()==1 && atMostRoleGuard.getToAtomicConcept().equals(AtomicConcept.THING) && atMostRoleGuard.getOnRole() instanceof AtomicRole) {
-                    AtomicRole atomicRole=(AtomicRole)atMostRoleGuard.getOnRole();
-                    Variable x=getHeadAtom(0).getArgumentVariable(0);
-                    Atom bodyAtom=getBodyAtom(0);
-                    if (x!=null && bodyAtom.getDLPredicate().equals(atomicRole) && bodyAtom.getArgument(0).equals(x) && bodyAtom.getArgument(1) instanceof Variable && !bodyAtom.getArgument(1).equals(x))
-                        return true;
-                }
-            }
-        }
-        return false;
-    }
     public boolean isInverseFunctionalityAxiom() {
         if (getBodyLength()==2 && getHeadLength()==1) {
             DLPredicate atomicRole=getBodyAtom(0).getDLPredicate();
             if (atomicRole instanceof AtomicRole) {
-                if (getBodyAtom(1).getDLPredicate().equals(atomicRole) && getHeadAtom(0).getDLPredicate().equals(Equality.INSTANCE)) {
+                if (getBodyAtom(1).getDLPredicate().equals(atomicRole) && (getHeadAtom(0).getDLPredicate() instanceof AnnotatedEquality)) {
                     Variable x=getBodyAtom(0).getArgumentVariable(1);
                     if (x!=null && x.equals(getBodyAtom(1).getArgument(1))) {
                         Variable y1=getBodyAtom(0).getArgumentVariable(0);
@@ -142,22 +126,6 @@ public class DLClause implements Serializable {
                         if (y1!=null && y2!=null && !y1.equals(y2) && headY1!=null && headY2!=null && ((y1.equals(headY1) && y2.equals(headY2)) || (y1.equals(headY2) && y2.equals(headY1))))
                             return true;
                     }
-                }
-            }
-        }
-        return false;
-    }
-    public boolean isGuardedInverseFunctionalityAxiom() {
-        if (getBodyLength()==1 && getHeadLength()==1) {
-            DLPredicate headDLPredicate=getHeadAtom(0).getDLPredicate();
-            if (headDLPredicate instanceof AtMostGuard) {
-                AtMostGuard atMostRoleGuard=(AtMostGuard)headDLPredicate;
-                if (atMostRoleGuard.getCaridnality()==1 && atMostRoleGuard.getToAtomicConcept().equals(AtomicConcept.THING) && atMostRoleGuard.getOnRole() instanceof InverseRole) {
-                    AtomicRole atomicRole=((InverseRole)atMostRoleGuard.getOnRole()).getInverseOf();
-                    Variable x=getHeadAtom(0).getArgumentVariable(0);
-                    Atom bodyAtom=getBodyAtom(0);
-                    if (x!=null && bodyAtom.getDLPredicate().equals(atomicRole) && bodyAtom.getArgument(1).equals(x) && bodyAtom.getArgument(0) instanceof Variable && !bodyAtom.getArgument(0).equals(x))
-                        return true;
                 }
             }
         }

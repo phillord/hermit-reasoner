@@ -161,8 +161,6 @@ public class Prefixes implements Serializable {
             containsPrefix=true;
         if (declarePrefixRaw("nnq","internal:nnq#"))
             containsPrefix=true;
-        if (declarePrefixRaw("amq","internal:amq#"))
-            containsPrefix=true;
         if (declarePrefixRaw("all","internal:all#"))
             containsPrefix=true;
         int individualURIsIndex=1;

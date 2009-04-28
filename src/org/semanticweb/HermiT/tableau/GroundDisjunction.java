@@ -50,6 +50,12 @@ public class GroundDisjunction implements Serializable {
     public DependencySet getDependencySet() {
         return m_dependencySet;
     }
+    public boolean isPruned() {
+        for (int argumentIndex=m_arguments.length-1;argumentIndex>=0;--argumentIndex)
+            if (m_arguments[argumentIndex].isPruned())
+                return true;
+        return false;
+    }
     public boolean isSatisfied(Tableau tableau) {
         ExtensionManager extensionManager=tableau.getExtensionManager();
         for (int disjunctIndex=0;disjunctIndex<getNumberOfDisjuncts();disjunctIndex++) {
@@ -63,14 +69,20 @@ public class GroundDisjunction implements Serializable {
                 if (extensionManager.containsAssertion(dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),getArgument(disjunctIndex,1).getCanonicalNode()))
                     return true;
                 break;
+            case 3:
+                if (dlPredicate instanceof AnnotatedEquality) {
+                    if (extensionManager.containsAnnotatedEquality((AnnotatedEquality)dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),getArgument(disjunctIndex,1).getCanonicalNode(),getArgument(disjunctIndex,2).getCanonicalNode()))
+                        return true;
+                    break;
+                }
+                // fall through!
             default:
                 throw new IllegalStateException("Invalid arity of DL-predicate.");
             }
         }
         return false;
     }
-    public boolean addDisjunctToTableau(Tableau tableau,int disjunctIndex,DependencySet choicePointDependencySet) {
-        DependencySet dependencySet=choicePointDependencySet;
+    public boolean addDisjunctToTableau(Tableau tableau,int disjunctIndex,DependencySet dependencySet) {
         DLPredicate dlPredicate=getDLPredicate(disjunctIndex);
         switch (dlPredicate.getArity()) {
         case 1:
@@ -80,6 +92,14 @@ public class GroundDisjunction implements Serializable {
             dependencySet=getArgument(disjunctIndex,0).addCacnonicalNodeDependencySet(dependencySet);
             dependencySet=getArgument(disjunctIndex,1).addCacnonicalNodeDependencySet(dependencySet);
             return tableau.getExtensionManager().addAssertion(dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),getArgument(disjunctIndex,1).getCanonicalNode(),dependencySet,isCore(disjunctIndex));
+        case 3:
+            if (dlPredicate instanceof AnnotatedEquality) {
+                dependencySet=getArgument(disjunctIndex,0).addCacnonicalNodeDependencySet(dependencySet);
+                dependencySet=getArgument(disjunctIndex,1).addCacnonicalNodeDependencySet(dependencySet);
+                dependencySet=getArgument(disjunctIndex,2).addCacnonicalNodeDependencySet(dependencySet);
+                return tableau.getExtensionManager().addAnnotatedEquality((AnnotatedEquality)dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),getArgument(disjunctIndex,1).getCanonicalNode(),getArgument(disjunctIndex,2).getCanonicalNode(),dependencySet);
+            }
+            // fall through!
         default:
             throw new IllegalStateException("Unsupported predicate arity.");
         }
@@ -94,6 +114,22 @@ public class GroundDisjunction implements Serializable {
                 buffer.append(getArgument(disjunctIndex,0).getNodeID());
                 buffer.append(" == ");
                 buffer.append(getArgument(disjunctIndex,1).getNodeID());
+            }
+            else if (dlPredicate instanceof AnnotatedEquality) {
+                AnnotatedEquality annotatedEquality=(AnnotatedEquality)dlPredicate;
+                buffer.append('[');
+                buffer.append(getArgument(disjunctIndex,0).getNodeID());
+                buffer.append(" == ");
+                buffer.append(getArgument(disjunctIndex,1).getNodeID());
+                buffer.append("]@atMost(");
+                buffer.append(annotatedEquality.getCaridnality());
+                buffer.append(' ');
+                buffer.append(annotatedEquality.getOnRole().toString(prefixes));
+                buffer.append(' ');
+                buffer.append(annotatedEquality.getToConcept().toString(prefixes));
+                buffer.append(")(");
+                buffer.append(getArgument(disjunctIndex,2).getNodeID());
+                buffer.append(')');
             }
             else {
                 buffer.append(dlPredicate.toString(prefixes));

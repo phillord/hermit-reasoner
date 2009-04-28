@@ -6,8 +6,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
@@ -19,7 +17,6 @@ import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.datatypes.DatatypeRegistry;
 import org.semanticweb.HermiT.datatypes.UnsupportedDatatypeException;
 import org.semanticweb.HermiT.model.AtLeastConcept;
-import org.semanticweb.HermiT.model.AtMostGuard;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
@@ -31,11 +28,13 @@ import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Equality;
+import org.semanticweb.HermiT.model.AnnotatedEquality;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.LiteralConcept;
-import org.semanticweb.HermiT.model.NodeIDLessThan;
+import org.semanticweb.HermiT.model.NodeIDLessEqualThan;
+import org.semanticweb.HermiT.model.NodeIDsAscendingOrEqual;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.Term;
 import org.semanticweb.HermiT.model.Variable;
@@ -96,11 +95,9 @@ public class OWLClausification {
     protected static final Variable Z=Variable.create("Z");
 
     protected final Configuration m_configuration;
-    protected int m_amqOffset; // the number of negative at-most replacements already performed
 
     public OWLClausification(Configuration configuration) {
         m_configuration=configuration;
-        m_amqOffset=0;
     }
     public DLOntology clausify(OWLOntologyManager ontologyManager,OWLOntology ontology,Collection<DescriptionGraph> descriptionGraphs) throws OWLException {
         Set<OWLHasKeyDummy> noKeys=Collections.emptySet();
@@ -193,18 +190,14 @@ public class OWLClausification {
                     DLClause dlClause=DLClause.create(new Atom[] { atom_ij },new Atom[] { atom_i,atom_j });
                     dlClauses.add(dlClause.getSafeVersion());
                 }
-        boolean shouldUseNIRule=axiomsExpressivity.m_hasAtMostRestrictions && axiomsExpressivity.m_hasInverseRoles && (axiomsExpressivity.m_hasNominals || m_configuration.existentialStrategyType==Configuration.ExistentialStrategyType.INDIVIDUAL_REUSE);
-        if (m_configuration.prepareForExpressiveQueries)
-            shouldUseNIRule=true;
         DataRangeConverter dataRangeConverter=new DataRangeConverter(m_configuration.warningMonitor,m_configuration.ignoreUnsupportedDatatypes);
-        NormalizedAxiomClausifier clausifier=new NormalizedAxiomClausifier(dataRangeConverter,positiveFacts,shouldUseNIRule,factory,m_amqOffset);
+        NormalizedAxiomClausifier clausifier=new NormalizedAxiomClausifier(dataRangeConverter,positiveFacts,factory);
         for (OWLDescription[] inclusion : axioms.m_conceptInclusions) {
             for (OWLDescription description : inclusion)
                 description.accept(clausifier);
             DLClause dlClause=clausifier.getDLClause();
             dlClauses.add(dlClause.getSafeVersion());
         }
-        m_amqOffset+=clausifier.axiomatizeAtMostGuards(dlClauses);
         for (OWLHasKeyDummy hasKey : axioms.m_hasKeys)
             dlClauses.add(clausifyKey(hasKey).getSafeVersion());
         FactClausifier factClausifier=new FactClausifier(dataRangeConverter,positiveFacts,negativeFacts);
@@ -235,7 +228,7 @@ public class OWLClausification {
         }
         for (OWLDataProperty objectProperty : axioms.m_dataProperties)
             dataRoles.add(AtomicRole.create(objectProperty.getURI().toString()));
-        return new DLOntology(ontologyURI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,transitiveObjectRoles,objectRoles,dataRoles,hermitIndividuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,shouldUseNIRule,axiomsExpressivity.m_hasDatatypes);
+        return new DLOntology(ontologyURI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,transitiveObjectRoles,objectRoles,dataRoles,hermitIndividuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes);
     }
     public DLClause clausifyKey(OWLHasKeyDummy object) {
         List<Atom> headAtoms=new ArrayList<Atom>();
@@ -358,25 +351,17 @@ public class OWLClausification {
 
     protected static class NormalizedAxiomClausifier implements OWLDescriptionVisitor {
         protected final DataRangeConverter m_dataRangeConverter;
-        protected final Map<AtomicConcept,AtomicConcept> m_negativeAtMostReplacements;
-        protected final int m_amqOffset;
         protected final List<Atom> m_headAtoms;
         protected final List<Atom> m_bodyAtoms;
-        protected final Set<AtMostGuard> m_atMostRoleGuards;
         protected final Set<Atom> m_positiveFacts;
-        protected final boolean m_renameAtMost;
         protected final OWLDataFactory m_factory;
         protected int m_yIndex;
 
-        public NormalizedAxiomClausifier(DataRangeConverter dataRangeConverter,Set<Atom> positiveFacts,boolean renameAtMost,OWLDataFactory factory,int amqOffset) {
+        public NormalizedAxiomClausifier(DataRangeConverter dataRangeConverter,Set<Atom> positiveFacts,OWLDataFactory factory) {
             m_dataRangeConverter=dataRangeConverter;
-            m_negativeAtMostReplacements=new HashMap<AtomicConcept,AtomicConcept>();
-            m_amqOffset=amqOffset;
             m_headAtoms=new ArrayList<Atom>();
             m_bodyAtoms=new ArrayList<Atom>();
-            m_atMostRoleGuards=new HashSet<AtMostGuard>();
             m_positiveFacts=positiveFacts;
-            m_renameAtMost=renameAtMost;
             m_factory=factory;
         }
         protected DLClause getDLClause() {
@@ -408,74 +393,6 @@ public class OWLClausification {
             AtomicConcept result=AtomicConcept.create("internal:nom#"+individual.getURI().toString());
             m_positiveFacts.add(Atom.create(result,getIndividual(individual)));
             return result;
-        }
-        /**
-         * @return the number of new "negativeAtMostReplacements" introduced
-         */
-        protected int axiomatizeAtMostGuards(Collection<DLClause> dlClauses) {
-            for (AtMostGuard atMostRole : m_atMostRoleGuards) {
-                m_bodyAtoms.add(Atom.create(atMostRole,X));
-                Role onRole=atMostRole.getOnRole();
-                OWLObjectPropertyExpression onObjectProperty;
-                if (onRole instanceof AtomicRole)
-                    onObjectProperty=m_factory.getOWLObjectProperty(URI.create(((AtomicRole)onRole).getURI().toString()));
-                else {
-                    AtomicRole innerRole=((InverseRole)onRole).getInverseOf();
-                    onObjectProperty=m_factory.getOWLObjectPropertyInverse(m_factory.getOWLObjectProperty(URI.create(innerRole.getURI().toString())));
-                }
-                addAtMostAtoms(atMostRole.getCaridnality(),onObjectProperty,m_factory.getOWLClass(URI.create(atMostRole.getToAtomicConcept().getURI().toString())));
-                DLClause dlClause=getDLClause();
-                dlClauses.add(dlClause);
-            }
-            for (Map.Entry<AtomicConcept,AtomicConcept> entry : m_negativeAtMostReplacements.entrySet()) {
-                m_headAtoms.add(Atom.create(entry.getKey(),X));
-                m_headAtoms.add(Atom.create(entry.getValue(),X));
-                DLClause dlClause=getDLClause();
-                dlClauses.add(dlClause);
-            }
-            return m_negativeAtMostReplacements.size();
-        }
-        protected void addAtMostAtoms(int number,OWLObjectPropertyExpression onObjectProperty,OWLDescription filler) {
-            ensureYNotZero();
-            boolean isPositive;
-            AtomicConcept atomicConcept;
-            if (filler instanceof OWLClass) {
-                isPositive=true;
-                atomicConcept=AtomicConcept.create(((OWLClass)filler).getURI().toString());
-                if (atomicConcept.isAlwaysTrue())
-                    atomicConcept=null;
-            }
-            else if (filler instanceof OWLObjectComplementOf) {
-                OWLDescription internal=((OWLObjectComplementOf)filler).getOperand();
-                if (!(internal instanceof OWLClass))
-                    throw new IllegalStateException("Internal error: Invalid ontology normal form.");
-                isPositive=false;
-                atomicConcept=AtomicConcept.create(((OWLClass)internal).getURI().toString());
-                if (atomicConcept.isAlwaysFalse())
-                    atomicConcept=null;
-            }
-            else
-                throw new IllegalStateException("Internal error: Invalid ontology normal form.");
-            Variable[] yVars=new Variable[number+1];
-            for (int i=0;i<yVars.length;i++) {
-                yVars[i]=nextY();
-                m_bodyAtoms.add(getRoleAtom(onObjectProperty,X,yVars[i]));
-                if (atomicConcept!=null) {
-                    Atom atom=Atom.create(atomicConcept,yVars[i]);
-                    if (isPositive)
-                        m_bodyAtoms.add(atom);
-                    else
-                        m_headAtoms.add(atom);
-                }
-            }
-            // Node ID comparisons are not needed in case of functionality axioms,
-            // as the effect of these is simulated by the way in which the rules are applied.
-            if (yVars.length>2)
-                for (int i=0;i<yVars.length-1;i++)
-                    m_bodyAtoms.add(Atom.create(NodeIDLessThan.INSTANCE,yVars[i],yVars[i+1]));
-            for (int i=0;i<yVars.length;i++)
-                for (int j=i+1;j<yVars.length;j++)
-                    m_headAtoms.add(Atom.create(Equality.INSTANCE,yVars[i],yVars[j]));
         }
         
         // Various types of descriptions
@@ -575,36 +492,54 @@ public class OWLClausification {
                 m_headAtoms.add(Atom.create(atLeastConcept,X));
         }
         public void visit(OWLObjectMaxCardinalityRestriction object) {
-            if (m_renameAtMost) {
-                OWLDescription filler=object.getFiller();
-                AtomicConcept toAtomicConcept;
-                if (filler instanceof OWLClass)
-                    toAtomicConcept=AtomicConcept.create(((OWLClass)filler).getURI().toString());
-                else if (filler instanceof OWLObjectComplementOf && ((OWLObjectComplementOf)filler).getOperand() instanceof OWLClass) {
-                    AtomicConcept originalAtomicConcept=AtomicConcept.create(((OWLClass)((OWLObjectComplementOf)filler).getOperand()).getURI().toString());
-                    toAtomicConcept=m_negativeAtMostReplacements.get(originalAtomicConcept);
-                    if (toAtomicConcept==null) {
-                        toAtomicConcept=AtomicConcept.create("internal:amq#"+m_negativeAtMostReplacements.size()+m_amqOffset);
-                        m_negativeAtMostReplacements.put(originalAtomicConcept,toAtomicConcept);
-                    }
-                }
-                else
-                    throw new IllegalStateException("Internal error: invalid normal form.");
-                Role onRole=getRole(object.getProperty());
-                AtMostGuard atMostGuard=AtMostGuard.create(object.getCardinality(),onRole,toAtomicConcept);
-                m_atMostRoleGuards.add(atMostGuard);
-                m_headAtoms.add(Atom.create(atMostGuard,X));
-                // This is an optimization that is described in the SHOIQ+ paper
-                // right after the clausification section.
-                // In order to prevent the application of the rule to the entire
-                // universe in some cases, R(x,y) \wedge C(y) to the body of the rule.
-                Variable Y=nextY();
-                m_bodyAtoms.add(getRoleAtom(object.getProperty(),X,Y));
-                if (!toAtomicConcept.isAlwaysTrue())
-                    m_bodyAtoms.add(Atom.create(toAtomicConcept,Y));
+            int cardinality=object.getCardinality();
+            OWLObjectPropertyExpression onObjectProperty=object.getProperty();
+            OWLDescription filler=object.getFiller();
+            ensureYNotZero();
+            boolean isPositive;
+            AtomicConcept atomicConcept;
+            if (filler instanceof OWLClass) {
+                isPositive=true;
+                atomicConcept=AtomicConcept.create(((OWLClass)filler).getURI().toString());
+                if (atomicConcept.isAlwaysTrue())
+                    atomicConcept=null;
+            }
+            else if (filler instanceof OWLObjectComplementOf) {
+                OWLDescription internal=((OWLObjectComplementOf)filler).getOperand();
+                if (!(internal instanceof OWLClass))
+                    throw new IllegalStateException("Internal error: Invalid ontology normal form.");
+                isPositive=false;
+                atomicConcept=AtomicConcept.create(((OWLClass)internal).getURI().toString());
+                if (atomicConcept.isAlwaysFalse())
+                    atomicConcept=null;
             }
             else
-                addAtMostAtoms(object.getCardinality(),object.getProperty(),object.getFiller());
+                throw new IllegalStateException("Internal error: Invalid ontology normal form.");
+            Role onRole=getRole(onObjectProperty);
+            LiteralConcept toConcept=getLiteralConcept(filler);
+            AnnotatedEquality annotatedEquality=AnnotatedEquality.create(cardinality,onRole,toConcept);
+            Variable[] yVars=new Variable[cardinality+1];
+            for (int i=0;i<yVars.length;i++) {
+                yVars[i]=nextY();
+                m_bodyAtoms.add(getRoleAtom(onObjectProperty,X,yVars[i]));
+                if (atomicConcept!=null) {
+                    Atom atom=Atom.create(atomicConcept,yVars[i]);
+                    if (isPositive)
+                        m_bodyAtoms.add(atom);
+                    else
+                        m_headAtoms.add(atom);
+                }
+            }
+            // Node ID comparisons are not needed in case of functionality axioms,
+            // as the effect of these is simulated by the way in which the rules are applied.
+            if (yVars.length>2) {
+                for (int i=0;i<yVars.length-1;i++)
+                    m_bodyAtoms.add(Atom.create(NodeIDLessEqualThan.INSTANCE,yVars[i],yVars[i+1]));
+                m_bodyAtoms.add(Atom.create(NodeIDsAscendingOrEqual.create(yVars.length),yVars));
+            }
+            for (int i=0;i<yVars.length;i++)
+                for (int j=i+1;j<yVars.length;j++)
+                    m_headAtoms.add(Atom.create(annotatedEquality,yVars[i],yVars[j],X));
         }
         public void visit(OWLObjectExactCardinalityRestriction object) {
             throw new IllegalStateException("Internal error: invalid normal form.");

@@ -7,9 +7,6 @@ import org.semanticweb.HermiT.Prefixes;
  * Represents a DL predicate.
  */
 public interface DLPredicate {
-    /**
-     * @return the arity of the predicate
-     */
     int getArity();
     String toString(Prefixes prefixes);
 }

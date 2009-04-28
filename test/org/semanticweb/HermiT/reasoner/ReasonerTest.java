@@ -1897,4 +1897,32 @@ public class ReasonerTest extends AbstractReasonerTest {
         createReasoner(getConfiguration(),null,keys);
         assertABoxSatisfiable(true);
     }
+
+    public void testNominalMerging() throws Exception {
+        // This is the example from Section 3.2.5 from the SHOIQ+ paper.
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("ObjectPropertyAssertion(S a a)");
+        buffer.append("ClassAssertion(a ObjectSomeValuesFrom(R B))");
+        buffer.append("SubClassOf(B ObjectSomeValuesFrom(R C))");
+        buffer.append("SubClassOf(C ObjectSomeValuesFrom(S D))");
+        buffer.append("SubClassOf(D ObjectOneOf(a))");
+        buffer.append("InverseFunctionalObjectProperty(S)");
+        loadReasonerWithAxioms(buffer.toString());
+        assertABoxSatisfiable(true);
+    }
+    
+    public void testNIRuleBlockingWithUnraveling() throws Exception {
+        // This is the example from Section 3.2.6 from the SHOIQ+ paper.
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("ClassAssertion(a A)");
+        buffer.append("ClassAssertion(a ObjectSomeValuesFrom(R B))");
+        buffer.append("SubClassOf(ObjectSomeValuesFrom(R A) owl:Nothing)");
+        buffer.append("SubClassOf(B ObjectSomeValuesFrom(R B))");
+        buffer.append("SubClassOf(B ObjectHasValue(S a))");
+        buffer.append("InverseFunctionalObjectProperty(R)");
+        buffer.append("InverseObjectProperties(S Si)");
+        buffer.append("SubClassOf( owl:Thing ObjectMaxCardinality(3 Si owl:Thing))");
+        loadReasonerWithAxioms(buffer.toString());
+        assertABoxSatisfiable(false);
+    }
 }

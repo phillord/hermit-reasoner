@@ -24,7 +24,7 @@ public class DisjunctionBranchingPoint extends BranchingPoint {
             dependencySet=tableau.getDependencySetFactory().removeBranchingPoint(dependencySet,m_level);
         for (int previousDisjunctIndex=0;previousDisjunctIndex<m_currentDisjunctIndex;previousDisjunctIndex++) {
             DLPredicate dlPredicate=m_groundDisjunction.getDLPredicate(previousDisjunctIndex);
-            if (Equality.INSTANCE.equals(dlPredicate))
+            if (Equality.INSTANCE.equals(dlPredicate) || (dlPredicate instanceof AnnotatedEquality))
                 tableau.getExtensionManager().addAssertion(Inequality.INSTANCE,m_groundDisjunction.getArgument(previousDisjunctIndex,0),m_groundDisjunction.getArgument(previousDisjunctIndex,1),dependencySet,false);
             else if (dlPredicate instanceof AtomicConcept)
                 tableau.getExtensionManager().addConceptAssertion(AtomicNegationConcept.create((AtomicConcept)dlPredicate),m_groundDisjunction.getArgument(previousDisjunctIndex,0),dependencySet,false);

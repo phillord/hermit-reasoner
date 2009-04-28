@@ -192,7 +192,7 @@ public final class Tableau implements Serializable {
     }
     protected boolean doIteration() {
         if (!m_extensionManager.containsClash()) {
-            m_nominalIntroductionManager.processTargets();
+            m_nominalIntroductionManager.processAnnotatedEqualities();
             boolean hasChange=false;
             while (m_extensionManager.propagateDeltaNew() && !m_extensionManager.containsClash()) {
                 m_descriptionGraphManager.checkGraphConstraints();
@@ -200,7 +200,7 @@ public final class Tableau implements Serializable {
                 if (m_checkDatatypes && !m_extensionManager.containsClash())
                     m_datatypeManager.checkDatatypeConstraints();
                 if (!m_extensionManager.containsClash())
-                    m_nominalIntroductionManager.processTargets();
+                    m_nominalIntroductionManager.processAnnotatedEqualities();
                 hasChange=true;
             }
             if (hasChange)
@@ -215,7 +215,7 @@ public final class Tableau implements Serializable {
                 if (m_tableauMonitor!=null)
                     m_tableauMonitor.processGroundDisjunctionStarted(groundDisjunction);
                 m_firstUnprocessedGroundDisjunction=groundDisjunction.m_previousGroundDisjunction;
-                if (!groundDisjunction.isSatisfied(this)) {
+                if (!groundDisjunction.isPruned() && !groundDisjunction.isSatisfied(this)) {
                     DependencySet dependencySet=groundDisjunction.getDependencySet();
                     if (groundDisjunction.getNumberOfDisjuncts()>1) {
                         BranchingPoint branchingPoint=new DisjunctionBranchingPoint(this,groundDisjunction);

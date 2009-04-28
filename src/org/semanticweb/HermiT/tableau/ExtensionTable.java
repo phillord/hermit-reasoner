@@ -143,7 +143,6 @@ public abstract class ExtensionTable implements Serializable {
                 }
                 else if (dlPredicateObject instanceof ExistentialConcept)
                     node.addToUnprocessedExistentials((ExistentialConcept)dlPredicateObject);
-                m_tableau.m_nominalIntroductionManager.addNonnegativeConceptAssertion((Concept)dlPredicateObject,node);
             }
         }
         else if (dlPredicateObject instanceof AtomicRole) {
@@ -151,7 +150,6 @@ public abstract class ExtensionTable implements Serializable {
             Node node0=(Node)tuple[1];
             Node node1=(Node)tuple[2];
             m_tableau.m_existentialExpansionStrategy.assertionAdded(atomicRole,node0,node1,isCore);
-            m_tableau.m_nominalIntroductionManager.addAtomicRoleAssertion(atomicRole,node0,node1);
         }
         else if (Inequality.INSTANCE.equals(dlPredicateObject)) {
             if (tuple[1]==tuple[2]) {
@@ -231,7 +229,6 @@ public abstract class ExtensionTable implements Serializable {
             Node node0=(Node)tuple[1];
             Node node1=(Node)tuple[2];
             m_tableau.m_existentialExpansionStrategy.assertionRemoved(atomicRole,node0,node1,m_coreManager.isCore(tupleIndex));
-            m_tableau.m_nominalIntroductionManager.removeAtomicRoleAssertion(atomicRole,node0,node1);
         }
         else if (dlPredicateObject instanceof DescriptionGraph)
             m_tableau.m_descriptionGraphManager.descriptionGraphTupleRemoved(tupleIndex,tuple);

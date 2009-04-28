@@ -8,17 +8,17 @@ import org.semanticweb.HermiT.*;
 /**
  * Represents the built-in predicate that is used to enforce ordering on nodes in the translation of at-most concepts.
  */
-public class NodeIDLessThan implements DLPredicate,Serializable {
+public class NodeIDLessEqualThan implements DLPredicate,Serializable {
     private static final long serialVersionUID=5572346926189452451L;
-    public static final NodeIDLessThan INSTANCE=new NodeIDLessThan();
+    public static final NodeIDLessEqualThan INSTANCE=new NodeIDLessEqualThan();
     
-    protected NodeIDLessThan () {
+    protected NodeIDLessEqualThan () {
     }
     public int getArity() {
         return 2;
     }
     public String toString(Prefixes prefixes) {
-        return "<";
+        return "<=";
     }
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
@@ -26,7 +26,7 @@ public class NodeIDLessThan implements DLPredicate,Serializable {
     protected Object readResolve() {
         return INSTANCE;
     }
-    public static NodeIDLessThan create() {
+    public static NodeIDLessEqualThan create() {
         return INSTANCE;
     }
 }

@@ -51,7 +51,6 @@ public class MergeTest extends AbstractReasonerInternalsTest {
                 false, // hasInverseRoles
                 false, // hasAtMostRestrictions
                 false, // hasNominals
-                false, // canUseNIRule
                 false); // hasDatatypes
     }
 

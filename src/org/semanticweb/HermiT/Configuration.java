@@ -45,7 +45,6 @@ public class Configuration implements Serializable,Cloneable {
     public Configuration.BlockingSignatureCacheType blockingSignatureCacheType;
     public Configuration.ExistentialStrategyType existentialStrategyType;
     public boolean checkClauses;
-    public boolean prepareForExpressiveQueries;
     public boolean ignoreUnsupportedDatatypes;
     public TableauMonitor monitor;
     public HashMap<String,Object> parameters;
@@ -59,7 +58,6 @@ public class Configuration implements Serializable,Cloneable {
         existentialStrategyType=Configuration.ExistentialStrategyType.CREATION_ORDER;
         ignoreUnsupportedDatatypes=false;
         checkClauses=true;
-        prepareForExpressiveQueries=false;
         monitor=null;
         parameters=new HashMap<String,Object>();
     }

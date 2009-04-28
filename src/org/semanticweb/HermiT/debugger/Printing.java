@@ -10,7 +10,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.semanticweb.HermiT.model.AtLeastConcept;
-import org.semanticweb.HermiT.model.AtMostGuard;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
@@ -262,15 +261,6 @@ public class Printing {
                 return ((AtomicConcept)c1).getURI().compareTo(((AtomicConcept)c2).getURI());
             case 1:
                 {
-                    AtMostGuard g1=(AtMostGuard)c1;
-                    AtMostGuard g2=(AtMostGuard)c2;
-                    int comparison=RoleComparator.INSTANCE.compare(g1.getOnRole(),g2.getOnRole());
-                    if (comparison!=0)
-                        return comparison;
-                    return compare(g1.getToAtomicConcept(),g2.getToAtomicConcept());
-                }
-            case 2:
-                {
                     AtLeastConcept l1=(AtLeastConcept)c1;
                     AtLeastConcept l2=(AtLeastConcept)c2;
                     int comparison=RoleComparator.INSTANCE.compare(l1.getOnRole(),l2.getOnRole());
@@ -278,19 +268,19 @@ public class Printing {
                         return comparison;
                     return compare(l1.getToConcept(),l2.getToConcept());
                 }
-            case 3:
+            case 2:
                 {
                     ExistsDescriptionGraph g1=(ExistsDescriptionGraph)c1;
                     ExistsDescriptionGraph g2=(ExistsDescriptionGraph)c2;
                     return g1.getDescriptionGraph().getName().compareTo(g2.getDescriptionGraph().getName());
                 }
-            case 4:
+            case 3:
                 return ((AtomicNegationConcept)c1).getNegatedAtomicConcept().getURI().compareTo(((AtomicNegationConcept)c2).getNegatedAtomicConcept().getURI());
-            case 5:
+            case 4:
                 return compareDatatypeRestrictions((DatatypeRestriction)c1,(DatatypeRestriction)c2);
-            case 6:
+            case 5:
                 return compareDataValueEnumerations((DataValueEnumeration)c1,(DataValueEnumeration)c2);
-            case 7:
+            case 6:
                 {
                     NegationDataRange ndr1=(NegationDataRange)c1;
                     NegationDataRange ndr2=(NegationDataRange)c2;
@@ -301,22 +291,20 @@ public class Printing {
             }
         }
         protected int getConceptType(Concept c) {
-            if (c instanceof AtMostGuard)
-                return 1;
-            else if (c instanceof AtomicConcept)
+            if (c instanceof AtomicConcept)
                 return 0;
             else if (c instanceof AtLeastConcept)
-                return 2;
+                return 1;
             else if (c instanceof ExistsDescriptionGraph)
-                return 3;
+                return 2;
             else if (c instanceof AtomicNegationConcept)
-                return 4;
+                return 3;
             else if (c instanceof DatatypeRestriction)
-                return 5;
+                return 4;
             else if (c instanceof DataValueEnumeration)
-                return 6;
+                return 5;
             else if (c instanceof NegationDataRange)
-                return 7;
+                return 6;
             else
                 throw new IllegalArgumentException();
         }

@@ -68,15 +68,7 @@ public final class ExistentialExpansionManager implements Serializable {
                 AtomicRole atomicRole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                 functionalRoles.add(atomicRole);
             }
-            else if (dlClause.isGuardedFunctionalityAxiom()) {
-                AtomicRole atomicRole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
-                functionalRoles.add(atomicRole);
-            }
             else if (dlClause.isInverseFunctionalityAxiom()) {
-                AtomicRole atomicRole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
-                functionalRoles.add(atomicRole.getInverse());
-            }
-            else if (dlClause.isGuardedInverseFunctionalityAxiom()) {
                 AtomicRole atomicRole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                 functionalRoles.add(atomicRole.getInverse());
             }

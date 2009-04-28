@@ -3,7 +3,7 @@ package org.semanticweb.HermiT.monitor;
 
 import java.io.Serializable;
 
-import org.semanticweb.HermiT.model.AtMostGuard;
+import org.semanticweb.HermiT.model.AnnotatedEquality;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.Individual;
@@ -196,13 +196,13 @@ public class TableauMonitorForwarder implements TableauMonitor,Serializable {
         if (m_forwardingOn)
             m_forwardingTargetMonitor.existentialSatisfied(existentialConcept,forNode);
     }
-    public void nominalIntorductionStarted(Node rootNode,Node treeNode,AtMostGuard atMostRoleGuard) {
+    public void nominalIntorductionStarted(Node rootNode,Node treeNode,AnnotatedEquality annotatedEquality,Node argument1,Node argument2) {
         if (m_forwardingOn)
-            m_forwardingTargetMonitor.nominalIntorductionStarted(rootNode,treeNode,atMostRoleGuard);
+            m_forwardingTargetMonitor.nominalIntorductionStarted(rootNode,treeNode,annotatedEquality,argument1,argument2);
     }
-    public void nominalIntorductionFinished(Node rootNode,Node treeNode,AtMostGuard atMostRoleGuard) {
+    public void nominalIntorductionFinished(Node rootNode,Node treeNode,AnnotatedEquality annotatedEquality,Node argument1,Node argument2) {
         if (m_forwardingOn)
-            m_forwardingTargetMonitor.nominalIntorductionFinished(rootNode,treeNode,atMostRoleGuard);
+            m_forwardingTargetMonitor.nominalIntorductionFinished(rootNode,treeNode,annotatedEquality,argument1,argument2);
     }
     public void descriptionGraphCheckingStarted(int graphIndex1,int tupleIndex1,int position1,int graphIndex2,int tupleIndex2,int position2) {
         if (m_forwardingOn)

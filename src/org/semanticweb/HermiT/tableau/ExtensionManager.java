@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.semanticweb.HermiT.model.AnnotatedEquality;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
@@ -195,27 +196,18 @@ public final class ExtensionManager implements Serializable {
             return m_ternaryExtensionTable.containsTuple(m_ternaryAuxiliaryTupleContains);
         }
     }
-    public boolean containsAssertion(DLPredicate dlPredicate,Node[] nodes) {
-        ExtensionTable extensionTable=getExtensionTable(dlPredicate.getArity()+1);
-        Object[] auxiliaryTuple;
-        switch (dlPredicate.getArity()) {
-        case 2:
-            auxiliaryTuple=m_binaryAuxiliaryTupleContains;
-            break;
-        case 3:
-            auxiliaryTuple=m_ternaryAuxiliaryTupleContains;
-            break;
-        default:
-            auxiliaryTuple=m_descriptionGraphTuplesContains.get((DescriptionGraph)dlPredicate);
-            break;
-        }
-        auxiliaryTuple[0]=dlPredicate;
-        System.arraycopy(nodes,0,auxiliaryTuple,1,dlPredicate.getArity());
-        return extensionTable.containsTuple(auxiliaryTuple);
+    public boolean containsAnnotatedEquality(AnnotatedEquality annotatedEquality,Node node0,Node node1,Node node2) {
+        return m_tableau.m_nominalIntroductionManager.canForgetAnnotation(annotatedEquality,node0,node1,node2) && node0==node1;
     }
     public boolean containsTuple(Object[] tuple) {
         if (tuple.length==0)
             return containsClash();
+        else if (AtomicConcept.THING.equals(tuple[0]))
+            return true;
+        else if (Equality.INSTANCE.equals(tuple[0]))
+            return tuple[1]==tuple[2];
+        else if (tuple[0] instanceof AnnotatedEquality)
+            return m_tableau.m_nominalIntroductionManager.canForgetAnnotation((AnnotatedEquality)tuple[0],(Node)tuple[1],(Node)tuple[2],(Node)tuple[3]) && tuple[1]==tuple[2];
         else
             return getExtensionTable(tuple.length).containsTuple(tuple);
     }
@@ -254,30 +246,6 @@ public final class ExtensionManager implements Serializable {
             m_ternaryAuxiliaryTupleContains[1]=node0;
             m_ternaryAuxiliaryTupleContains[2]=node1;
             return m_ternaryExtensionTable.getDependencySet(m_ternaryAuxiliaryTupleContains);
-        }
-    }
-    public DependencySet getAssertionDependencySet(DLPredicate dlPredicate,Node[] nodes) {
-        if (Equality.INSTANCE.equals(dlPredicate))
-            return nodes[0]==nodes[1] ? m_dependencySetFactory.emptySet() : null;
-        else if (AtomicConcept.THING.equals(dlPredicate))
-            return m_dependencySetFactory.emptySet();
-        else {
-            ExtensionTable extensionTable=getExtensionTable(dlPredicate.getArity()+1);
-            Object[] auxiliaryTuple;
-            switch (dlPredicate.getArity()) {
-            case 2:
-                auxiliaryTuple=m_binaryAuxiliaryTupleContains;
-                break;
-            case 3:
-                auxiliaryTuple=m_ternaryAuxiliaryTupleContains;
-                break;
-            default:
-                auxiliaryTuple=m_descriptionGraphTuplesContains.get((DescriptionGraph)dlPredicate);
-                break;
-            }
-            auxiliaryTuple[0]=dlPredicate;
-            System.arraycopy(nodes,0,auxiliaryTuple,1,dlPredicate.getArity());
-            return extensionTable.getDependencySet(auxiliaryTuple);
         }
     }
     public DependencySet getTupleDependencySet(Object[] tuple) {
@@ -342,35 +310,9 @@ public final class ExtensionManager implements Serializable {
             }
         }
     }
-    public boolean addAssertion(DLPredicate dlPredicate,Node[] nodes,DependencySet dependencySet,boolean isCore) {
-        if (Equality.INSTANCE.equals(dlPredicate))
-            return m_tableau.m_mergingManager.mergeNodes(nodes[0],nodes[1],dependencySet);
-        else {
-            if (m_addActive)
-                throw new IllegalStateException("ExtensionManager is not reentrant.");
-            m_addActive=true;
-            try {
-                ExtensionTable extensionTable=getExtensionTable(dlPredicate.getArity()+1);
-                Object[] auxiliaryTuple;
-                switch (dlPredicate.getArity()) {
-                case 2:
-                    auxiliaryTuple=m_binaryAuxiliaryTupleAdd;
-                    break;
-                case 3:
-                    auxiliaryTuple=m_ternaryAuxiliaryTupleAdd;
-                    break;
-                default:
-                    auxiliaryTuple=m_descriptionGraphTuplesAdd.get((DescriptionGraph)dlPredicate);
-                    break;
-                }
-                auxiliaryTuple[0]=dlPredicate;
-                System.arraycopy(nodes,0,auxiliaryTuple,1,dlPredicate.getArity());
-                return extensionTable.addTuple(auxiliaryTuple,dependencySet,isCore);
-            }
-            finally {
-                m_addActive=false;
-            }
-        }
+    public boolean addAnnotatedEquality(AnnotatedEquality annotatedEquality,Node node0,Node node1,Node node2,DependencySet dependencySet) {
+        return m_tableau.m_nominalIntroductionManager.addAnnotatedEquality(annotatedEquality,node0,node1,node2,dependencySet);
+        
     }
     public boolean addTuple(Object[] tuple,DependencySet dependencySet,boolean isCore) {
         if (tuple.length==0) {
@@ -380,6 +322,8 @@ public final class ExtensionManager implements Serializable {
         }
         else if (Equality.INSTANCE.equals(tuple[0]))
             return m_tableau.m_mergingManager.mergeNodes((Node)tuple[1],(Node)tuple[2],dependencySet);
+        else if (tuple[0] instanceof AnnotatedEquality)
+            return m_tableau.m_nominalIntroductionManager.addAnnotatedEquality((AnnotatedEquality)tuple[0],(Node)tuple[1],(Node)tuple[2],(Node)tuple[3],dependencySet);
         else {
             if (m_addActive)
                 throw new IllegalStateException("ExtensionManager is not reentrant.");

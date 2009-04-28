@@ -39,7 +39,6 @@ public class DLOntology implements Serializable {
     protected final boolean m_hasInverseRoles;
     protected final boolean m_hasAtMostRestrictions;
     protected final boolean m_hasNominals;
-    protected final boolean m_canUseNIRule;
     protected final boolean m_hasDatatypes;
     protected final boolean m_isHorn;
     protected final Set<AtomicConcept> m_allAtomicConcepts;
@@ -50,14 +49,13 @@ public class DLOntology implements Serializable {
     protected final Set<Individual> m_allIndividuals;
     protected final Set<DescriptionGraph> m_allDescriptionGraphs;
 
-    public DLOntology(String ontologyURI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts,Set<AtomicConcept> atomicConcepts,Set<Role> transitiveObjectRoles,Set<AtomicRole> atomicObjectRoles,Set<AtomicRole> atomicDataRoles,Set<Individual> individuals,boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,boolean canUseNIRule,boolean hasDatatypes) {
+    public DLOntology(String ontologyURI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts,Set<AtomicConcept> atomicConcepts,Set<Role> transitiveObjectRoles,Set<AtomicRole> atomicObjectRoles,Set<AtomicRole> atomicDataRoles,Set<Individual> individuals,boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,boolean hasDatatypes) {
         m_ontologyURI=ontologyURI;
         m_dlClauses=dlClauses;
         m_positiveFacts=positiveFacts;
         m_negativeFacts=negativeFacts;
         m_hasInverseRoles=hasInverseRoles;
         m_hasAtMostRestrictions=hasAtMostRestrictions;
-        m_canUseNIRule=canUseNIRule;
         m_hasNominals=hasNominals;
         m_hasDatatypes=hasDatatypes;
         if (atomicConcepts==null)
@@ -186,10 +184,6 @@ public class DLOntology implements Serializable {
 
     public boolean hasNominals() {
         return m_hasNominals;
-    }
-
-    public boolean canUseNIRule() {
-        return m_canUseNIRule;
     }
 
     public boolean hasDatatypes() {
@@ -342,14 +336,14 @@ public class DLOntology implements Serializable {
             Atom atom=dlClause.getBodyAtom(atomIndex);
             atom.getVariables(variables);
             DLPredicate dlPredicate=atom.getDLPredicate();
-            if (!(dlPredicate instanceof AtomicRole) && !(dlPredicate instanceof AtomicConcept) && !dlPredicate.equals(NodeIDLessThan.INSTANCE))
+            if (!(dlPredicate instanceof AtomicRole) && !(dlPredicate instanceof AtomicConcept) && !dlPredicate.equals(NodeIDLessEqualThan.INSTANCE) && !(dlPredicate instanceof NodeIDsAscendingOrEqual))
                 return false;
         }
         for (int atomIndex=0;atomIndex<dlClause.getHeadLength();atomIndex++) {
             Atom atom=dlClause.getHeadAtom(atomIndex);
             atom.getVariables(variables);
             DLPredicate dlPredicate=atom.getDLPredicate();
-            if (!(dlPredicate instanceof AtomicRole) && !(dlPredicate instanceof AtomicConcept) && !(dlPredicate instanceof DataRange) && !(dlPredicate instanceof ExistentialConcept) && !Equality.INSTANCE.equals(dlPredicate) && !Inequality.INSTANCE.equals(dlPredicate))
+            if (!(dlPredicate instanceof AtomicRole) && !(dlPredicate instanceof AtomicConcept) && !(dlPredicate instanceof DataRange) && !(dlPredicate instanceof ExistentialConcept) && !Equality.INSTANCE.equals(dlPredicate) && !Inequality.INSTANCE.equals(dlPredicate) && !(dlPredicate instanceof AnnotatedEquality))
                 return false;
             else if (dlPredicate instanceof AtLeastConcept) {
                 AtLeastConcept atLeastConcept=(AtLeastConcept)dlPredicate;
@@ -379,7 +373,9 @@ public class DLOntology implements Serializable {
             Atom atom=dlClause.getHeadAtom(atomIndex);
             if (atom.getDLPredicate() instanceof AtomicRole && !atom.containsVariable(centerVariable))
                 return false;
-            if (Equality.INSTANCE.equals(atom.getDLPredicate())) {
+            if (Equality.INSTANCE.equals(atom.getDLPredicate()) || (atom.getDLPredicate() instanceof AnnotatedEquality)) {
+                if ((atom.getDLPredicate() instanceof AnnotatedEquality) && !centerVariable.equals(atom.getArgumentVariable(2)))
+                    return false;
                 Variable otherVariable=null;
                 if (centerVariable.equals(atom.getArgument(0))) {
                     otherVariable=atom.getArgumentVariable(1);

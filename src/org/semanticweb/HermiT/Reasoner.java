@@ -189,7 +189,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         Set<AtomicRole> noAtomicRoles=Collections.emptySet();
         Set<Role> noRoles=Collections.emptySet();
         Set<Individual> noIndividuals=Collections.emptySet();
-        DLOntology emptyDLOntology=new DLOntology("urn:hermit:kb",noDLClauses,noAtoms,noAtoms,noAtomicConcepts,noRoles,noAtomicRoles,noAtomicRoles,noIndividuals,false,false,false,true,false);
+        DLOntology emptyDLOntology=new DLOntology("urn:hermit:kb",noDLClauses,noAtoms,noAtoms,noAtomicConcepts,noRoles,noAtomicRoles,noAtomicRoles,noIndividuals,false,false,false,false);
         loadDLOntology(emptyDLOntology);
     }
     
@@ -840,9 +840,6 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
     }
     
     protected static Tableau createTableau(InterruptFlag interruptFlag,Configuration config,DLOntology dlOntology,Prefixes prefixes) throws IllegalArgumentException {
-        if (!dlOntology.canUseNIRule() && dlOntology.hasAtMostRestrictions() && dlOntology.hasInverseRoles() && config.existentialStrategyType==Configuration.ExistentialStrategyType.INDIVIDUAL_REUSE)
-            throw new IllegalArgumentException("The supplied DL-ontology is not compatible with the individual reuse strategy.");
-
         if (config.checkClauses) {
             Collection<DLClause> nonAdmissibleDLClauses=dlOntology.getNonadmissibleDLClauses();
             if (!nonAdmissibleDLClauses.isEmpty()) {
@@ -1014,9 +1011,8 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             boolean hasInverseRoles=originalDLOntology.hasInverseRoles() || newDLOntology.hasInverseRoles();
             boolean hasAtMostRestrictions=originalDLOntology.hasAtMostRestrictions() || newDLOntology.hasAtMostRestrictions();
             boolean hasNominals=originalDLOntology.hasNominals() || newDLOntology.hasNominals();
-            boolean canUseNIRule=originalDLOntology.canUseNIRule() || newDLOntology.canUseNIRule();
             boolean hasDatatypes=originalDLOntology.hasDatatypes() || newDLOntology.hasDatatypes();
-            return new DLOntology(resultingOntologyURI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,transitiveObjectRoles,atomicObjectRoles,atomicDataRoles,individuals,hasInverseRoles,hasAtMostRestrictions,hasNominals,canUseNIRule,hasDatatypes);
+            return new DLOntology(resultingOntologyURI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,transitiveObjectRoles,atomicObjectRoles,atomicDataRoles,individuals,hasInverseRoles,hasAtMostRestrictions,hasNominals,hasDatatypes);
         }
         catch (OWLException shouldntHappen) {
             throw new IllegalStateException("Internal error: Unexpected OWLException.",shouldntHappen);

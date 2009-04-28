@@ -164,7 +164,7 @@ public class DLClauseEvaluator implements Serializable {
         }
     }
     
-    protected static final class BranchIfNotNodeIDLessThan implements BranchingWorker,Serializable {
+    protected static final class BranchIfNotNodeIDLessEqualThan implements BranchingWorker,Serializable {
         private static final long serialVersionUID=2484359261424674914L;
 
         protected int m_notLessProgramCounter;
@@ -172,14 +172,14 @@ public class DLClauseEvaluator implements Serializable {
         protected final int m_index1;
         protected final int m_index2;
         
-        public BranchIfNotNodeIDLessThan(int notLessProgramCounter,Object[] buffer,int index1,int index2) {
+        public BranchIfNotNodeIDLessEqualThan(int notLessProgramCounter,Object[] buffer,int index1,int index2) {
             m_notLessProgramCounter=notLessProgramCounter;
             m_buffer=buffer;
             m_index1=index1;
             m_index2=index2;
         }
         public int execute(int programCounter) {
-            if (((Node)m_buffer[m_index1]).getNodeID()<((Node)m_buffer[m_index2]).getNodeID())
+            if (((Node)m_buffer[m_index1]).getNodeID()<=((Node)m_buffer[m_index2]).getNodeID())
                 return programCounter+1;
             else
                 return m_notLessProgramCounter;
@@ -191,7 +191,47 @@ public class DLClauseEvaluator implements Serializable {
             m_notLessProgramCounter=branchingAddress;
         }
         public String toString() {
-            return "Branch to "+m_notLessProgramCounter+" if "+m_index1+".ID >= "+m_index2+".ID";
+            return "Branch to "+m_notLessProgramCounter+" if "+m_index1+".ID > "+m_index2+".ID";
+        }
+    }
+    
+    protected static final class BranchIfNotNodeIDsAscendingOrEqual implements BranchingWorker,Serializable {
+        private static final long serialVersionUID=8053779312249250349L;
+
+        protected int m_branchProgramCounter;
+        protected final Object[] m_buffer;
+        protected final int[] m_nodeIndexes;
+        
+        public BranchIfNotNodeIDsAscendingOrEqual(int branchProgramCounter,Object[] buffer,int[] nodeIndexes) {
+            m_branchProgramCounter=branchProgramCounter;
+            m_buffer=buffer;
+            m_nodeIndexes=nodeIndexes;
+        }
+        public int execute(int programCounter) {
+            boolean strictlyAscending=true;
+            boolean allEqual=true;
+            int lastNodeID=((Node)m_buffer[m_nodeIndexes[0]]).getNodeID();
+            for (int index=1;index<m_nodeIndexes.length;index++) {
+                int nodeID=((Node)m_buffer[m_nodeIndexes[index]]).getNodeID();
+                if (lastNodeID>=nodeID)
+                    strictlyAscending=false;
+                if (nodeID!=lastNodeID)
+                    allEqual=false;
+                lastNodeID=nodeID;
+            }
+            if ((!strictlyAscending && allEqual) || (strictlyAscending && !allEqual))
+                return programCounter+1;
+            else
+                return m_branchProgramCounter;
+        }
+        public int getBranchingAddress() {
+            return m_branchProgramCounter;
+        }
+        public void setBranchingAddress(int branchingAddress) {
+            m_branchProgramCounter=branchingAddress;
+        }
+        public String toString() {
+            return "Branch to "+m_branchProgramCounter+" if node IDs are not ascending or equal";
         }
     }
     
@@ -397,6 +437,39 @@ public class DLClauseEvaluator implements Serializable {
         }
     }
     
+    protected static final class DeriveTernaryFact implements Worker,Serializable {
+        private static final long serialVersionUID=1823363493615682288L;
+
+        protected final ExtensionManager m_extensionManager;
+        protected final Object[] m_valuesBuffer;
+        protected final DependencySet m_dependencySet;
+        protected final Object[] m_tuple;
+        protected final int m_argumentIndex1;
+        protected final int m_argumentIndex2;
+        protected final int m_argumentIndex3;
+
+        public DeriveTernaryFact(ExtensionManager extensionManager,Object[] valuesBuffer,DependencySet dependencySet,DLPredicate dlPredicate,int argumentIndex1,int argumentIndex2,int argumentIndex3) {
+            m_extensionManager=extensionManager;
+            m_valuesBuffer=valuesBuffer;
+            m_dependencySet=dependencySet;
+            m_tuple=new Object[4];
+            m_tuple[0]=dlPredicate;
+            m_argumentIndex1=argumentIndex1;
+            m_argumentIndex2=argumentIndex2;
+            m_argumentIndex3=argumentIndex3;
+        }
+        public int execute(int programCounter) {
+            m_tuple[1]=(Node)m_valuesBuffer[m_argumentIndex1];
+            m_tuple[2]=(Node)m_valuesBuffer[m_argumentIndex2];
+            m_tuple[3]=(Node)m_valuesBuffer[m_argumentIndex3];
+            m_extensionManager.addTuple(m_tuple,m_dependencySet,true);
+            return programCounter+1;
+        }
+        public String toString() {
+            return "Derive ternary fact";
+        }
+    }
+    
     protected static final class DeriveDisjunction implements Worker,Serializable {
         private static final long serialVersionUID=-3546622575743138887L;
 
@@ -476,7 +549,7 @@ public class DLClauseEvaluator implements Serializable {
                     if (variable!=null && !m_variables.contains(variable) && occursInBodyAtomsAfter(variable,bodyIndex+1))
                         m_variables.add(variable);
                 }
-                if (!atom.getDLPredicate().equals(NodeIDLessThan.INSTANCE))
+                if (!atom.getDLPredicate().equals(NodeIDLessEqualThan.INSTANCE) && !(atom.getDLPredicate() instanceof NodeIDsAscendingOrEqual))
                     numberOfRealAtoms++;
             }
             for (int dlClauseIndex=0;dlClauseIndex<getNumberOfHeads();dlClauseIndex++) {
@@ -542,13 +615,23 @@ public class DLClauseEvaluator implements Serializable {
                 m_existentialExpansionStrategy.dlClauseBodyCompiled(m_workers,m_bodyDLClause,m_valuesBuffer,m_coreVariables);
                 compileHeads();
             }
-            else if (getBodyAtom(bodyAtomIndex).getDLPredicate().equals(NodeIDLessThan.INSTANCE)) {
+            else if (getBodyAtom(bodyAtomIndex).getDLPredicate().equals(NodeIDLessEqualThan.INSTANCE)) {
                 Atom atom=getBodyAtom(bodyAtomIndex);
                 int variable1Index=m_variables.indexOf(atom.getArgumentVariable(0));
                 int variable2Index=m_variables.indexOf(atom.getArgumentVariable(1));
                 assert variable1Index!=-1;
                 assert variable2Index!=-1;
-                m_workers.add(new BranchIfNotNodeIDLessThan(lastAtomNextElement,m_valuesBuffer,variable1Index,variable2Index));
+                m_workers.add(new BranchIfNotNodeIDLessEqualThan(lastAtomNextElement,m_valuesBuffer,variable1Index,variable2Index));
+                compileBodyAtom(bodyAtomIndex+1,lastAtomNextElement);
+            }
+            else if (getBodyAtom(bodyAtomIndex).getDLPredicate() instanceof NodeIDsAscendingOrEqual) {
+                Atom atom=getBodyAtom(bodyAtomIndex);
+                int[] nodeIndexes=new int[atom.getArity()];
+                for (int index=0;index<atom.getArity();index++) {
+                    nodeIndexes[index]=m_variables.indexOf(atom.getArgumentVariable(index));
+                    assert nodeIndexes[index]!=-1;
+                }
+                m_workers.add(new BranchIfNotNodeIDsAscendingOrEqual(lastAtomNextElement,m_valuesBuffer,nodeIndexes));
                 compileBodyAtom(bodyAtomIndex+1,lastAtomNextElement);
             }
             else {
@@ -564,7 +647,8 @@ public class DLClauseEvaluator implements Serializable {
                 //              goto loopStart
                 // afterLoop:
                 //
-                // NodeIDLessThan atoms are compiled in a way that makes them immediately jump to the next element of the previous regular atom.
+                // NodeIDLessEqualThan and NodeIDsAscendingOrEqual atoms are compiled such that they
+                // immediately jump to the next element of the previous regular atom.
                 
                 int afterLoop=addLabel();
                 int nextElement=addLabel();
@@ -607,6 +691,9 @@ public class DLClauseEvaluator implements Serializable {
                         break;
                     case 2:
                         m_workers.add(new DeriveBinaryFact(m_extensionManager,m_valuesBuffer,m_unionDependencySet,atom.getDLPredicate(),m_variables.indexOf(atom.getArgumentVariable(0)),m_variables.indexOf(atom.getArgumentVariable(1))));
+                        break;
+                    case 3:
+                        m_workers.add(new DeriveTernaryFact(m_extensionManager,m_valuesBuffer,m_unionDependencySet,atom.getDLPredicate(),m_variables.indexOf(atom.getArgumentVariable(0)),m_variables.indexOf(atom.getArgumentVariable(1)),m_variables.indexOf(atom.getArgumentVariable(2))));
                         break;
                     default:
                         throw new IllegalArgumentException("Unsupported atom arity.");

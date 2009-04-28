@@ -3,12 +3,7 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 
-import org.semanticweb.HermiT.model.AtMostGuard;
-import org.semanticweb.HermiT.model.AtomicConcept;
-import org.semanticweb.HermiT.model.AtomicRole;
-import org.semanticweb.HermiT.model.Concept;
-import org.semanticweb.HermiT.model.InverseRole;
-import org.semanticweb.HermiT.model.Role;
+import org.semanticweb.HermiT.model.AnnotatedEquality;
 
 /**
  * Implements the nominal introduction rule.
@@ -16,54 +11,40 @@ import org.semanticweb.HermiT.model.Role;
 public final class NominalIntroductionManager implements Serializable {
     private static final long serialVersionUID=5863617010809297861L;
 
-    protected static final int ROOT_NODE=0;
-    protected static final int NI_TARGET_NODE=1;
-    protected static final int AT_MOST_CONCEPT=2;
-    
     protected final Tableau m_tableau;
+    protected final DependencySetFactory m_dependencySetFactory;
     protected final InterruptFlag m_interruptFlag;
-    protected final ExtensionManager m_extensionManager;
     protected final MergingManager m_mergingManager;
-    protected final TupleTable m_targets;
-    protected final Object[] m_bufferForTarget;
+    protected final TupleTable m_annotatedEqualities;
+    protected final Object[] m_bufferForAnnotatedEquality;
     protected final TupleTable m_newRootNodesTable;
     protected final TupleTableFullIndex m_newRootNodesIndex;
     protected final Object[] m_bufferForRootNodes;
-    protected final ExtensionTable.Retrieval m_binaryExtensionTableSearch1Bound;
-    protected final ExtensionTable.Retrieval m_ternaryExtensionTableSearch1Bound;
-    protected final ExtensionTable.Retrieval m_ternaryExtensionTableSearch2Bound;
-    protected final ExtensionTable.Retrieval m_ternaryExtensionTableSearch01Bound;
-    protected final ExtensionTable.Retrieval m_ternaryExtensionTableSearch02Bound;
     protected int[] m_indicesByBranchingPoint;
-    protected int m_firstUnprocessedTarget;
+    protected int m_firstUnprocessedAnnotatedEquality;
     
     public NominalIntroductionManager(Tableau tableau) {
         m_tableau=tableau;
+        m_dependencySetFactory=m_tableau.m_dependencySetFactory;
         m_interruptFlag=m_tableau.m_interruptFlag;
-        m_extensionManager=m_tableau.getExtensionManager();
         m_mergingManager=m_tableau.getMergingManager();
-        m_targets=new TupleTable(3);
-        m_bufferForTarget=new Object[3];
+        m_annotatedEqualities=new TupleTable(5);
+        m_bufferForAnnotatedEquality=new Object[5];
         m_newRootNodesTable=new TupleTable(4);
         m_newRootNodesIndex=new TupleTableFullIndex(m_newRootNodesTable,3);
         m_bufferForRootNodes=new Object[4];
-        m_binaryExtensionTableSearch1Bound=m_extensionManager.m_binaryExtensionTable.createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
-        m_ternaryExtensionTableSearch1Bound=m_extensionManager.m_ternaryExtensionTable.createRetrieval(new boolean[] { false,true,false },ExtensionTable.View.TOTAL);
-        m_ternaryExtensionTableSearch2Bound=m_extensionManager.m_ternaryExtensionTable.createRetrieval(new boolean[] { false,false,true },ExtensionTable.View.TOTAL);
-        m_ternaryExtensionTableSearch01Bound=m_extensionManager.m_ternaryExtensionTable.createRetrieval(new boolean[] { true,true,false },ExtensionTable.View.TOTAL);
-        m_ternaryExtensionTableSearch02Bound=m_extensionManager.m_ternaryExtensionTable.createRetrieval(new boolean[] { true,false,true },ExtensionTable.View.TOTAL);
         m_indicesByBranchingPoint=new int[10*2];
-        m_firstUnprocessedTarget=0;
+        m_firstUnprocessedAnnotatedEquality=0;
     }
     public void clear() {
-        m_targets.clear();
-        for (int index=m_bufferForTarget.length-1;index>=0;--index)
-            m_bufferForTarget[index]=null;
+        m_annotatedEqualities.clear();
+        for (int index=m_bufferForAnnotatedEquality.length-1;index>=0;--index)
+            m_bufferForAnnotatedEquality[index]=null;
         m_newRootNodesTable.clear();
         m_newRootNodesIndex.clear();
         for (int index=m_bufferForRootNodes.length-1;index>=0;--index)
             m_bufferForRootNodes[index]=null;
-        m_firstUnprocessedTarget=0;
+        m_firstUnprocessedAnnotatedEquality=0;
     }
     public void branchingPointPushed() {
         int start=m_tableau.getCurrentBranchingPoint().getLevel()*3;
@@ -76,57 +57,107 @@ public final class NominalIntroductionManager implements Serializable {
             System.arraycopy(m_indicesByBranchingPoint,0,newIndicesByBranchingPoint,0,m_indicesByBranchingPoint.length);
             m_indicesByBranchingPoint=newIndicesByBranchingPoint;
         }
-        m_indicesByBranchingPoint[start]=m_firstUnprocessedTarget;
-        m_indicesByBranchingPoint[start+1]=m_targets.getFirstFreeTupleIndex();
+        m_indicesByBranchingPoint[start]=m_firstUnprocessedAnnotatedEquality;
+        m_indicesByBranchingPoint[start+1]=m_annotatedEqualities.getFirstFreeTupleIndex();
         m_indicesByBranchingPoint[start+2]=m_newRootNodesTable.getFirstFreeTupleIndex();
     }
     public void backtrack() {
         int start=m_tableau.getCurrentBranchingPoint().getLevel()*3;
-        m_firstUnprocessedTarget=m_indicesByBranchingPoint[start];
-        m_targets.truncate(m_indicesByBranchingPoint[start+1]);
+        m_firstUnprocessedAnnotatedEquality=m_indicesByBranchingPoint[start];
+        int firstFreeAnnotatedEqualityShouldBe=m_indicesByBranchingPoint[start+1];
+        for (int tupleIndex=m_annotatedEqualities.getFirstFreeTupleIndex()-1;tupleIndex>=firstFreeAnnotatedEqualityShouldBe;--tupleIndex)
+            m_dependencySetFactory.removeUsage((PermanentDependencySet)m_annotatedEqualities.getTupleObject(tupleIndex,4));
+        m_annotatedEqualities.truncate(firstFreeAnnotatedEqualityShouldBe);
         int firstFreeNewRootNodeShouldBe=m_indicesByBranchingPoint[start+2];
         for (int tupleIndex=m_newRootNodesTable.getFirstFreeTupleIndex()-1;tupleIndex>=firstFreeNewRootNodeShouldBe;--tupleIndex)
             m_newRootNodesIndex.removeTuple(tupleIndex);
         m_newRootNodesTable.truncate(firstFreeNewRootNodeShouldBe);
     }
-    public boolean processTargets() {
+    public boolean processAnnotatedEqualities() {
         boolean result=false;
-        while (m_firstUnprocessedTarget<m_targets.getFirstFreeTupleIndex()) {
-            m_targets.retrieveTuple(m_bufferForTarget,m_firstUnprocessedTarget);
-            Node rootNode=(Node)m_bufferForTarget[ROOT_NODE];
-            Node niTargetNode=(Node)m_bufferForTarget[NI_TARGET_NODE];
-            m_firstUnprocessedTarget++;
-            if (rootNode.isActive() && niTargetNode.isActive()) {
-                AtMostGuard atMostRoleGuard=(AtMostGuard)m_bufferForTarget[AT_MOST_CONCEPT];
-                if (m_tableau.m_tableauMonitor!=null)
-                    m_tableau.m_tableauMonitor.nominalIntorductionStarted(rootNode,niTargetNode,atMostRoleGuard);
-                DependencySet dependencySet=m_extensionManager.getConceptAssertionDependencySet(atMostRoleGuard,rootNode);
-                dependencySet=m_tableau.getDependencySetFactory().unionWith(dependencySet,m_extensionManager.getRoleAssertionDependencySet(atMostRoleGuard.getOnRole(),rootNode,niTargetNode));
-                if (!AtomicConcept.THING.equals(atMostRoleGuard.getToAtomicConcept()))
-                    dependencySet=m_tableau.getDependencySetFactory().unionWith(dependencySet,m_extensionManager.getConceptAssertionDependencySet(atMostRoleGuard.getToAtomicConcept(),niTargetNode));
-                if (atMostRoleGuard.getCaridnality()>1) {
-                    BranchingPoint branchingPoint=new NominalIntroductionBranchingPoint(m_tableau,rootNode,niTargetNode,atMostRoleGuard);
-                    m_tableau.pushBranchingPoint(branchingPoint);
-                    dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,branchingPoint.getLevel());
-                }
-                Node newRootNode=getRootNodeFor(dependencySet,rootNode,atMostRoleGuard,1);
-                if (!newRootNode.isActive()) {
-                    assert newRootNode.isMerged();
-                    dependencySet=newRootNode.addCacnonicalNodeDependencySet(dependencySet);
-                    newRootNode=newRootNode.getCanonicalNode();
-                }
-                m_mergingManager.mergeNodes(niTargetNode,newRootNode,dependencySet);
-                if (m_tableau.m_tableauMonitor!=null)
-                    m_tableau.m_tableauMonitor.nominalIntorductionFinished(rootNode,niTargetNode,atMostRoleGuard);
+        while (m_firstUnprocessedAnnotatedEquality<m_annotatedEqualities.getFirstFreeTupleIndex()) {
+            m_annotatedEqualities.retrieveTuple(m_bufferForAnnotatedEquality,m_firstUnprocessedAnnotatedEquality);
+            m_firstUnprocessedAnnotatedEquality++;
+            AnnotatedEquality annotatedEquality=(AnnotatedEquality)m_bufferForAnnotatedEquality[0];
+            Node node0=(Node)m_bufferForAnnotatedEquality[1];
+            Node node1=(Node)m_bufferForAnnotatedEquality[2];
+            Node node2=(Node)m_bufferForAnnotatedEquality[3];
+            DependencySet dependencySet=(DependencySet)m_bufferForAnnotatedEquality[4];
+            if (applyNIRule(annotatedEquality,node0,node1,node2,dependencySet))
                 result=true;
-            }
             m_interruptFlag.checkInterrupt();
         }
         return result;
     }
-    protected Node getRootNodeFor(DependencySet dependencySet,Node rootNode,AtMostGuard atMostRoleGuard,int number) {
+    public boolean canForgetAnnotation(AnnotatedEquality annotatedEquality,Node node0,Node node1,Node node2) {
+        return node0.isRootNode() || node1.isRootNode() || !node2.isRootNode() || (node2.isParentOf(node0) && node2.isParentOf(node1));
+    }
+    public boolean addAnnotatedEquality(AnnotatedEquality annotatedEquality,Node node0,Node node1,Node node2,DependencySet dependencySet) {
+        assert node0.isActive() && node1.isActive() && node2.isActive();
+        if (canForgetAnnotation(annotatedEquality,node0,node1,node2))
+            return m_mergingManager.mergeNodes(node0,node1,dependencySet);
+        else if (annotatedEquality.getCaridnality()==1)
+            return applyNIRule(annotatedEquality,node0,node1,node2,dependencySet);
+        else {
+            PermanentDependencySet permanentDependencySet=m_dependencySetFactory.getPermanent(dependencySet);
+            m_bufferForAnnotatedEquality[0]=annotatedEquality;
+            m_bufferForAnnotatedEquality[1]=node0;
+            m_bufferForAnnotatedEquality[2]=node1;
+            m_bufferForAnnotatedEquality[3]=node2;
+            m_bufferForAnnotatedEquality[4]=permanentDependencySet;
+            m_dependencySetFactory.addUsage(permanentDependencySet);
+            m_annotatedEqualities.addTuple(m_bufferForAnnotatedEquality);
+            return true;
+        }
+    }
+    protected boolean applyNIRule(AnnotatedEquality annotatedEquality,Node node0,Node node1,Node node2,DependencySet dependencySet) {
+        if (node0.isPruned() || node1.isPruned() || node2.isPruned())
+            return false;
+        dependencySet=node0.addCacnonicalNodeDependencySet(dependencySet);
+        dependencySet=node1.addCacnonicalNodeDependencySet(dependencySet);
+        dependencySet=node2.addCacnonicalNodeDependencySet(dependencySet);
+        node0=node0.getCanonicalNode();
+        node1=node1.getCanonicalNode();
+        node2=node2.getCanonicalNode();
+        if (canForgetAnnotation(annotatedEquality,node0,node1,node2))
+            return m_mergingManager.mergeNodes(node0,node1,dependencySet);
+        else {
+            Node niTargetNode;
+            Node otherNode;
+            if (!node0.isRootNode() && !node2.isParentOf(node0)) {
+                niTargetNode=node0;
+                otherNode=node1;
+            }
+            else {
+                niTargetNode=node1;
+                otherNode=node0;
+            }
+            if (m_tableau.m_tableauMonitor!=null)
+                m_tableau.m_tableauMonitor.nominalIntorductionStarted(node2,niTargetNode,annotatedEquality,node0,node1);
+            if (annotatedEquality.getCaridnality()>1) {
+                BranchingPoint branchingPoint=new NominalIntroductionBranchingPoint(m_tableau,node2,niTargetNode,otherNode,annotatedEquality);
+                m_tableau.pushBranchingPoint(branchingPoint);
+                dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,branchingPoint.getLevel());
+            }
+            Node newRootNode=getNIRootFor(dependencySet,node2,annotatedEquality,1);
+            if (!newRootNode.isActive()) {
+                assert newRootNode.isMerged();
+                dependencySet=newRootNode.addCacnonicalNodeDependencySet(dependencySet);
+                newRootNode=newRootNode.getCanonicalNode();
+            }
+            m_mergingManager.mergeNodes(niTargetNode,newRootNode,dependencySet);
+            if (!otherNode.isPruned()) {
+                dependencySet=otherNode.addCacnonicalNodeDependencySet(dependencySet);
+                m_mergingManager.mergeNodes(otherNode.getCanonicalNode(),newRootNode,dependencySet);
+            }
+            if (m_tableau.m_tableauMonitor!=null)
+                m_tableau.m_tableauMonitor.nominalIntorductionFinished(node2,niTargetNode,annotatedEquality,node0,node1);
+            return true;
+        }
+    }
+    protected Node getNIRootFor(DependencySet dependencySet,Node rootNode,AnnotatedEquality annotatedEquality,int number) {
         m_bufferForRootNodes[0]=rootNode;
-        m_bufferForRootNodes[1]=atMostRoleGuard;
+        m_bufferForRootNodes[1]=annotatedEquality;
         m_bufferForRootNodes[2]=number;
         int tupleIndex=m_newRootNodesIndex.getTupleIndex(m_bufferForRootNodes);
         if (tupleIndex==-1) {
@@ -139,167 +170,41 @@ public final class NominalIntroductionManager implements Serializable {
         else
             return (Node)m_newRootNodesTable.getTupleObject(tupleIndex,3);
     }
-    public void addNonnegativeConceptAssertion(Concept concept,Node node) {
-        if (node.isRootNode() && concept instanceof AtMostGuard) {
-            AtMostGuard atMost=(AtMostGuard)concept;
-            Role onRole=atMost.getOnRole();
-            AtomicConcept toAtomicConcept=atMost.getToAtomicConcept();
-            if (onRole instanceof AtomicRole && node.m_numberOfNIAssertionsFromNode>0) {
-                m_ternaryExtensionTableSearch01Bound.getBindingsBuffer()[0]=onRole;
-                m_ternaryExtensionTableSearch01Bound.getBindingsBuffer()[1]=node;
-                m_ternaryExtensionTableSearch01Bound.open();
-                while (!m_ternaryExtensionTableSearch01Bound.afterLast()) {
-                    Node niTargetNode=(Node)m_ternaryExtensionTableSearch01Bound.getTupleBuffer()[2];
-                    if (matchesNIConfiguration(node,niTargetNode) && (AtomicConcept.THING.equals(toAtomicConcept) || m_extensionManager.containsAssertion(toAtomicConcept,niTargetNode)))
-                        addTarget(node,niTargetNode,atMost);
-                    m_ternaryExtensionTableSearch01Bound.next();
-                }
-            }
-            else if (onRole instanceof InverseRole && node.m_numberOfNIAssertionsToNode>0) {
-                m_ternaryExtensionTableSearch02Bound.getBindingsBuffer()[0]=((InverseRole)onRole).getInverseOf();
-                m_ternaryExtensionTableSearch02Bound.getBindingsBuffer()[2]=node;
-                m_ternaryExtensionTableSearch02Bound.open();
-                while (!m_ternaryExtensionTableSearch02Bound.afterLast()) {
-                    Node niTargetNode=(Node)m_ternaryExtensionTableSearch02Bound.getTupleBuffer()[1];
-                    if (matchesNIConfiguration(node,niTargetNode) && (AtomicConcept.THING.equals(toAtomicConcept) || m_extensionManager.containsAssertion(toAtomicConcept,niTargetNode)))
-                        addTarget(node,niTargetNode,atMost);
-                    m_ternaryExtensionTableSearch02Bound.next();
-                }
-            }
-        }
-        else if (node.getNodeType().isNITarget() && concept instanceof AtomicConcept) {
-            if (node.m_numberOfNIAssertionsFromNode>0) {
-                m_ternaryExtensionTableSearch1Bound.getBindingsBuffer()[1]=node;
-                m_ternaryExtensionTableSearch1Bound.open();
-                while (!m_ternaryExtensionTableSearch1Bound.afterLast()) {
-                    Node rootNode=(Node)m_ternaryExtensionTableSearch1Bound.getTupleBuffer()[2];
-                    if (matchesNIConfiguration(rootNode,node)) {
-                        Object atomicRole=m_ternaryExtensionTableSearch1Bound.getTupleBuffer()[0];
-                        if (atomicRole instanceof AtomicRole) {
-                            m_binaryExtensionTableSearch1Bound.getBindingsBuffer()[1]=rootNode;
-                            m_binaryExtensionTableSearch1Bound.open();
-                            while (!m_binaryExtensionTableSearch1Bound.afterLast()) {
-                                Object rootNodeConcept=m_binaryExtensionTableSearch1Bound.getTupleBuffer()[0];
-                                if (rootNodeConcept instanceof AtMostGuard) {
-                                    AtMostGuard atMost=(AtMostGuard)rootNodeConcept;
-                                    if (atMost.getOnRole() instanceof InverseRole && ((InverseRole)atMost.getOnRole()).getInverseOf().equals(atomicRole))
-                                        addTarget(rootNode,node,atMost);
-                                }
-                                m_binaryExtensionTableSearch1Bound.next();
-                            }
-                        }
-                    }
-                    m_ternaryExtensionTableSearch1Bound.next();
-                }
-            }
-            if (node.m_numberOfNIAssertionsToNode>0) {
-                m_ternaryExtensionTableSearch2Bound.getBindingsBuffer()[2]=node;
-                m_ternaryExtensionTableSearch2Bound.open();
-                while (!m_ternaryExtensionTableSearch2Bound.afterLast()) {
-                    Node rootNode=(Node)m_ternaryExtensionTableSearch2Bound.getTupleBuffer()[1];
-                    if (matchesNIConfiguration(rootNode,node)) {
-                        Object atomicRole=m_ternaryExtensionTableSearch2Bound.getTupleBuffer()[0];
-                        if (atomicRole instanceof AtomicRole) {
-                            m_binaryExtensionTableSearch1Bound.getBindingsBuffer()[1]=rootNode;
-                            m_binaryExtensionTableSearch1Bound.open();
-                            while (!m_binaryExtensionTableSearch1Bound.afterLast()) {
-                                Object rootNodeConcept=m_binaryExtensionTableSearch1Bound.getTupleBuffer()[0];
-                                if (rootNodeConcept instanceof AtMostGuard) {
-                                    AtMostGuard atMost=(AtMostGuard)rootNodeConcept;
-                                    if (atMost.getOnRole().equals(atomicRole))
-                                        addTarget(rootNode,node,atMost);
-                                }
-                                m_binaryExtensionTableSearch1Bound.next();
-                            }
-                        }
-                    }
-                    m_ternaryExtensionTableSearch2Bound.next();
-                }
-            }
-        }
-    }
-    public void addAtomicRoleAssertion(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
-        if (matchesNIConfiguration(nodeFrom,nodeTo)) {
-            nodeFrom.m_numberOfNIAssertionsFromNode++;
-            nodeTo.m_numberOfNIAssertionsToNode++;
-            m_binaryExtensionTableSearch1Bound.getBindingsBuffer()[1]=nodeFrom;
-            m_binaryExtensionTableSearch1Bound.open();
-            while (!m_binaryExtensionTableSearch1Bound.afterLast()) {
-                Object concept=m_binaryExtensionTableSearch1Bound.getTupleBuffer()[0];
-                if (concept instanceof AtMostGuard) {
-                    AtMostGuard atMost=(AtMostGuard)concept;
-                    if (atMost.getOnRole().equals(atomicRole)) {
-                        AtomicConcept toAtomicConcept=atMost.getToAtomicConcept();
-                        if (AtomicConcept.THING.equals(toAtomicConcept) || m_extensionManager.containsAssertion(toAtomicConcept,nodeTo))
-                            addTarget(nodeFrom,nodeTo,atMost);
-                    }
-                }
-                m_binaryExtensionTableSearch1Bound.next();
-            }
-        }
-        else if (matchesNIConfiguration(nodeTo,nodeFrom)) {
-            nodeFrom.m_numberOfNIAssertionsFromNode++;
-            nodeTo.m_numberOfNIAssertionsToNode++;
-            m_binaryExtensionTableSearch1Bound.getBindingsBuffer()[1]=nodeTo;
-            m_binaryExtensionTableSearch1Bound.open();
-            while (!m_binaryExtensionTableSearch1Bound.afterLast()) {
-                Object concept=m_binaryExtensionTableSearch1Bound.getTupleBuffer()[0];
-                if (concept instanceof AtMostGuard) {
-                    AtMostGuard atMost=(AtMostGuard)concept;
-                    if (atMost.getOnRole() instanceof InverseRole && ((InverseRole)atMost.getOnRole()).getInverseOf().equals(atomicRole)) {
-                        AtomicConcept toAtomicConcept=atMost.getToAtomicConcept();
-                        if (AtomicConcept.THING.equals(toAtomicConcept) || m_extensionManager.containsAssertion(toAtomicConcept,nodeFrom))
-                            addTarget(nodeTo,nodeFrom,atMost);
-                    }
-                }
-                m_binaryExtensionTableSearch1Bound.next();
-            }
-        }
-    }
-    public void removeAtomicRoleAssertion(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
-        if (matchesNIConfiguration(nodeFrom,nodeTo) || matchesNIConfiguration(nodeTo,nodeFrom)) {
-            nodeFrom.m_numberOfNIAssertionsFromNode--;
-            nodeTo.m_numberOfNIAssertionsToNode--;
-        }
-    }
-    public boolean matchesNIConfiguration(Node rootNode,Node niTargetNode) {
-        return rootNode.isRootNode() && niTargetNode.getNodeType().isNITarget() && !rootNode.isParentOf(niTargetNode);
-    }
-    protected void addTarget(Node rootNode,Node noTargetNode,AtMostGuard atMost) {
-        m_bufferForTarget[ROOT_NODE]=rootNode;
-        m_bufferForTarget[NI_TARGET_NODE]=noTargetNode;
-        m_bufferForTarget[AT_MOST_CONCEPT]=atMost;
-        m_targets.addTuple(m_bufferForTarget);
-    }
     
     protected class NominalIntroductionBranchingPoint extends BranchingPoint {
         private static final long serialVersionUID=6678113479704184263L;
 
         protected final Node m_rootNode;
-        protected final Node m_treeNode;
-        protected final AtMostGuard m_atMostRoleGuard;
+        protected final Node m_niTargetNode;
+        protected final Node m_otherNode;
+        protected final AnnotatedEquality m_annotatedEquality;
         protected int m_currentRootNode;
         
-        public NominalIntroductionBranchingPoint(Tableau tableau,Node rootNode,Node treeNode,AtMostGuard atMostRoleGuard) {
+        public NominalIntroductionBranchingPoint(Tableau tableau,Node rootNode,Node niTargetNode,Node otherNode,AnnotatedEquality annotatedEquality) {
             super(tableau);
             m_rootNode=rootNode;
-            m_treeNode=treeNode;
-            m_atMostRoleGuard=atMostRoleGuard;
+            m_niTargetNode=niTargetNode;
+            m_otherNode=otherNode;
+            m_annotatedEquality=annotatedEquality;
             m_currentRootNode=1; // This reflects the assumption that the first merge is performed from the NominalIntroductionManager
         }
         public void startNextChoice(Tableau tableau,DependencySet clashDepdendencySet) {
             m_currentRootNode++;
-            assert m_currentRootNode<=m_atMostRoleGuard.getCaridnality();
+            assert m_currentRootNode<=m_annotatedEquality.getCaridnality();
             DependencySet dependencySet=clashDepdendencySet;
-            if (m_currentRootNode==m_atMostRoleGuard.getCaridnality())
+            if (m_currentRootNode==m_annotatedEquality.getCaridnality())
                 dependencySet=tableau.getDependencySetFactory().removeBranchingPoint(dependencySet,m_level);
-            Node newRootNode=getRootNodeFor(dependencySet,m_rootNode,m_atMostRoleGuard,m_currentRootNode);
+            Node newRootNode=getNIRootFor(dependencySet,m_rootNode,m_annotatedEquality,m_currentRootNode);
             if (!newRootNode.isActive()) {
                 assert newRootNode.isMerged();
                 dependencySet=newRootNode.addCacnonicalNodeDependencySet(dependencySet);
                 newRootNode=newRootNode.getCanonicalNode();
             }
-            m_tableau.m_mergingManager.mergeNodes(m_treeNode,newRootNode,dependencySet);
+            m_mergingManager.mergeNodes(m_niTargetNode,newRootNode,dependencySet);
+            if (!m_otherNode.isPruned()) {
+                dependencySet=m_otherNode.addCacnonicalNodeDependencySet(dependencySet);
+                m_mergingManager.mergeNodes(m_otherNode.getCanonicalNode(),newRootNode,dependencySet);
+            }
         }
     }
 }
