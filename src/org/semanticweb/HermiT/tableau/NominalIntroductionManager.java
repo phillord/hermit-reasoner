@@ -93,8 +93,9 @@ public final class NominalIntroductionManager implements Serializable {
         return node0.isRootNode() || node1.isRootNode() || !node2.isRootNode() || (node2.isParentOf(node0) && node2.isParentOf(node1));
     }
     public boolean addAnnotatedEquality(AnnotatedEquality annotatedEquality,Node node0,Node node1,Node node2,DependencySet dependencySet) {
-        assert node0.isActive() && node1.isActive() && node2.isActive();
-        if (canForgetAnnotation(annotatedEquality,node0,node1,node2))
+        if (!node0.isActive() || !node1.isActive() || !node2.isActive())
+            return false;
+        else if (canForgetAnnotation(annotatedEquality,node0,node1,node2))
             return m_mergingManager.mergeNodes(node0,node1,dependencySet);
         else if (annotatedEquality.getCaridnality()==1)
             return applyNIRule(annotatedEquality,node0,node1,node2,dependencySet);
