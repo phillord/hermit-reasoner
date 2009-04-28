@@ -201,4 +201,29 @@ public class NumericsTest extends AbstractReasonerTest {
             DR("xsd:int")
         );
     }
+    public void testLargeRange1() throws Exception {
+        assertDRSatisfiable(true,255,
+            DR("xsd:byte")
+        );
+        assertDRSatisfiable(true,256,
+            DR("xsd:byte")
+        );
+        assertDRSatisfiable(false,257,
+            DR("xsd:byte")
+        );
+    }
+    public void testLargeRange2() throws Exception {
+        assertDRSatisfiable(true,127,
+            DR("xsd:byte"),
+            DR("xsd:nonNegativeInteger")
+        );
+        assertDRSatisfiable(true,128,
+            DR("xsd:byte"),
+            DR("xsd:nonNegativeInteger")
+        );
+        assertDRSatisfiable(false,129,
+            DR("xsd:byte"),
+            DR("xsd:nonNegativeInteger")
+        );
+    }
 }

@@ -36,6 +36,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(true);
     }
+    
     public void testDatatypesUnsat1() throws Exception {
         String axioms = "SubClassOf(A DataAllValuesFrom(dp xsd:string)) "
                 + "SubClassOf(A DataSomeValuesFrom(dp xsd:integer)) "

@@ -211,27 +211,40 @@ public class DatatypeManager implements Serializable {
             throw new IllegalStateException("Internal error: invalid data range.");
     }
     protected void checkConjunctionSatisfiability() {
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.datatypeConjunctionCheckingStarted(m_conjunction);
-        List<DVariable> activeNodes=m_conjunction.m_activeVariables;
-        for (int index=activeNodes.size()-1;!m_extensionManager.containsClash() && index>=0;--index) {
-            DVariable variable=activeNodes.get(index);
-            if (!variable.m_positiveDataValueEnumerations.isEmpty())
-                normalizeAsEnumeration(variable);
-            else if (!variable.m_positiveDatatypeRestrictions.isEmpty())
-                normalizeAsValueSpaceSubset(variable);
-        }
         if (!m_extensionManager.containsClash()) {
-            eliminateTrivialInequalities();
-            eliminateTriviallySatisfiableNodes();
-            enumerateValueSpaceSubsets();
-            if (!m_extensionManager.containsClash()) {
-                eliminateTriviallySatisfiableNodes();
-                checkAssignments();
+            if (m_tableauMonitor!=null)
+                m_tableauMonitor.datatypeConjunctionCheckingStarted(m_conjunction);
+            if (m_conjunction.isSymmetricClique()) {
+                DVariable representative=m_conjunction.m_activeVariables.get(0);
+                if (!representative.m_positiveDataValueEnumerations.isEmpty())
+                    normalizeAsEnumeration(representative);
+                else if (!representative.m_positiveDatatypeRestrictions.isEmpty())
+                    normalizeAsValueSpaceSubset(representative);
+                if (!representative.hasCardinalityAtLeast(m_conjunction.m_activeVariables.size()))
+                    setClashFor(m_conjunction.m_activeVariables);
             }
+            else {
+                List<DVariable> activeVariables=m_conjunction.m_activeVariables;
+                for (int index=activeVariables.size()-1;!m_extensionManager.containsClash() && index>=0;--index) {
+                    DVariable variable=activeVariables.get(index);
+                    if (!variable.m_positiveDataValueEnumerations.isEmpty())
+                        normalizeAsEnumeration(variable);
+                    else if (!variable.m_positiveDatatypeRestrictions.isEmpty())
+                        normalizeAsValueSpaceSubset(variable);
+                }
+                if (!m_extensionManager.containsClash()) {
+                    eliminateTrivialInequalities();
+                    eliminateTriviallySatisfiableNodes();
+                    enumerateValueSpaceSubsets();
+                    if (!m_extensionManager.containsClash()) {
+                        eliminateTriviallySatisfiableNodes();
+                        checkAssignments();
+                    }
+                }
+            }
+            if (m_tableauMonitor!=null)
+                m_tableauMonitor.datatypeConjunctionCheckingFinished(m_conjunction,!m_extensionManager.containsClash());
         }
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.datatypeConjunctionCheckingFinished(m_conjunction,!m_extensionManager.containsClash());
     }
     protected void normalizeAsEnumeration(DVariable variable) {
         variable.m_hasExplicitDataValues=true;
@@ -514,6 +527,19 @@ public class DatatypeManager implements Serializable {
                 node1.m_unequalToDirect.add(node2);
             }
         }
+        public boolean isSymmetricClique() {
+            // This method depends on the fact that there are no self-links.
+            int numberOfVariables=m_activeVariables.size();
+            if (numberOfVariables>0) {
+                DVariable first=m_activeVariables.get(0);
+                for (int variableIndex=numberOfVariables-1;variableIndex>=0;--variableIndex) {
+                    DVariable variable=m_activeVariables.get(variableIndex);
+                    if (variable.m_unequalTo.size()+1!=numberOfVariables || !first.hasSameRestrictions(variable))
+                        return false;
+                }
+            }
+            return true;
+        }
         public String toString() {
             return toString(Prefixes.STANDARD_PREFIXES);
         }
@@ -597,6 +623,14 @@ public class DatatypeManager implements Serializable {
             else
                 return true;
         }
+        public boolean hasCardinalityAtLeast(int number) {
+            if (m_hasExplicitDataValues)
+                return m_explicitDataValues.size()>=number;
+            else if (m_valueSpaceSubset!=null)
+                return m_valueSpaceSubset.hasCardinalityAtLeast(number+m_forbiddenDataValues.size());
+            else
+                return true;
+        }
         public Node getNode() {
             return m_node;
         }
@@ -614,6 +648,24 @@ public class DatatypeManager implements Serializable {
         }
         public List<DVariable> getUnequalToDirect() {
             return Collections.unmodifiableList(m_unequalToDirect);
+        }
+        public boolean hasSameRestrictions(DVariable that) {
+            return this==that || (
+                equals(m_positiveDataValueEnumerations,that.m_positiveDataValueEnumerations) &&
+                equals(m_negativeDataValueEnumerations,that.m_negativeDataValueEnumerations) &&
+                equals(m_positiveDatatypeRestrictions,that.m_positiveDatatypeRestrictions) &&
+                equals(m_negativeDatatypeRestrictions,that.m_negativeDatatypeRestrictions)
+            );
+        }
+        protected static <T> boolean equals(List<T> first,List<T> second) {
+            if (first.size()!=second.size())
+                return false;
+            for (int index=first.size()-1;index>=0;--index) {
+                T object=first.get(index);
+                if (!second.contains(object))
+                    return false;
+            }
+            return true;
         }
         public String toString() {
             return toString(Prefixes.STANDARD_PREFIXES);
