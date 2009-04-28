@@ -305,4 +305,16 @@ public class DatatypesTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
+
+    public void testSelfInequality() throws Exception {
+        String axioms =
+                  "DisjointDataProperties(dp1 dp2) " 
+                + "SubDataPropertyOf(dp3 dp1) " 
+                + "SubDataPropertyOf(dp3 dp2) " 
+                + "SubClassOf(A DataSomeValuesFrom(dp3 rdfs:Literal))"
+                + "ClassAssertion(a A)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+    
 }

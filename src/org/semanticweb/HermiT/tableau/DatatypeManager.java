@@ -505,6 +505,9 @@ public class DatatypeManager implements Serializable {
             m_resizeThreshold=(int)(newCapacity*0.75);
         }
         protected void addInequality(DVariable node1,DVariable node2) {
+            // Inequalities between nodes in the tableau are detected by the ExtensionManager.
+            // Consequently, the DConjunction should not contain inequalities between DVariables.
+            assert node1!=node2;
             if (!node1.m_unequalTo.contains(node2)) {
                 node1.m_unequalTo.add(node2);
                 node2.m_unequalTo.add(node1);
