@@ -216,10 +216,7 @@ public class DatatypeManager implements Serializable {
                 m_tableauMonitor.datatypeConjunctionCheckingStarted(m_conjunction);
             if (m_conjunction.isSymmetricClique()) {
                 DVariable representative=m_conjunction.m_activeVariables.get(0);
-                if (!representative.m_positiveDataValueEnumerations.isEmpty())
-                    normalizeAsEnumeration(representative);
-                else if (!representative.m_positiveDatatypeRestrictions.isEmpty())
-                    normalizeAsValueSpaceSubset(representative);
+                normalize(representative);
                 if (!representative.hasCardinalityAtLeast(m_conjunction.m_activeVariables.size()))
                     setClashFor(m_conjunction.m_activeVariables);
             }
@@ -227,10 +224,7 @@ public class DatatypeManager implements Serializable {
                 List<DVariable> activeVariables=m_conjunction.m_activeVariables;
                 for (int index=activeVariables.size()-1;!m_extensionManager.containsClash() && index>=0;--index) {
                     DVariable variable=activeVariables.get(index);
-                    if (!variable.m_positiveDataValueEnumerations.isEmpty())
-                        normalizeAsEnumeration(variable);
-                    else if (!variable.m_positiveDatatypeRestrictions.isEmpty())
-                        normalizeAsValueSpaceSubset(variable);
+                    normalize(variable);
                 }
                 if (!m_extensionManager.containsClash()) {
                     eliminateTrivialInequalities();
@@ -246,6 +240,12 @@ public class DatatypeManager implements Serializable {
                 m_tableauMonitor.datatypeConjunctionCheckingFinished(m_conjunction,!m_extensionManager.containsClash());
         }
     }
+    protected void normalize(DVariable variable) {
+        if (!variable.m_positiveDataValueEnumerations.isEmpty())
+            normalizeAsEnumeration(variable);
+        else if (!variable.m_positiveDatatypeRestrictions.isEmpty())
+            normalizeAsValueSpaceSubset(variable);
+    }
     protected void normalizeAsEnumeration(DVariable variable) {
         variable.m_hasExplicitDataValues=true;
         List<Object> explicitDataValues=variable.m_explicitDataValues;
@@ -260,6 +260,7 @@ public class DatatypeManager implements Serializable {
                 explicitDataValues.add(dataValue);
             }
         }
+        variable.m_forbiddenDataValues.clear();
         List<DatatypeRestriction> positiveDatatypeRestrictions=variable.m_positiveDatatypeRestrictions;
         for (int index=positiveDatatypeRestrictions.size()-1;!explicitDataValues.isEmpty() && index>=0;--index) {
             DatatypeRestriction positiveDatatypeRestriction=positiveDatatypeRestrictions.get(index);
@@ -298,8 +299,17 @@ public class DatatypeManager implements Serializable {
             if (!DatatypeRegistry.isDisjointWith(mostSpecificDatatypeURI,datatypeRestrictionDatatypeURI))
                 variable.m_valueSpaceSubset=DatatypeRegistry.conjoinWithDRNegation(variable.m_valueSpaceSubset,datatypeRestriction);
         }
-        if (!variable.m_valueSpaceSubset.hasCardinalityAtLeast(1))
+        if (!variable.m_valueSpaceSubset.hasCardinalityAtLeast(1)) {
+            variable.m_forbiddenDataValues.clear();
             setClashFor(variable);
+        }
+        else {
+            for (int valueIndex=variable.m_forbiddenDataValues.size()-1;valueIndex>=0;--valueIndex) {
+                Object forbiddenValue=variable.m_forbiddenDataValues.get(valueIndex);
+                if (!variable.m_valueSpaceSubset.containsDataValue(forbiddenValue))
+                    variable.m_forbiddenDataValues.remove(valueIndex);
+            }
+        }
     }
     protected void eliminateTrivialInequalities() {
         for (int index1=m_conjunction.m_activeVariables.size()-1;index1>=0;--index1) {
@@ -324,7 +334,7 @@ public class DatatypeManager implements Serializable {
             m_auxiliaryVariableList.add(m_conjunction.m_activeVariables.get(index));
         while (!m_auxiliaryVariableList.isEmpty()) {
             DVariable variable=m_auxiliaryVariableList.remove(m_auxiliaryVariableList.size()-1);
-            if (variable.isObviouslySatisfiable()) {
+            if (variable.hasCardinalityAtLeast(variable.m_unequalTo.size()+1)) {
                 for (int index=variable.m_unequalTo.size()-1;index>=0;--index) {
                     DVariable neighborVariable=variable.m_unequalTo.get(index);
                     neighborVariable.m_unequalTo.remove(variable);
@@ -352,6 +362,7 @@ public class DatatypeManager implements Serializable {
                     }
                 }
                 variable.m_valueSpaceSubset=null;
+                variable.m_forbiddenDataValues.clear();
                 if (variable.m_explicitDataValues.isEmpty())
                     setClashFor(variable);
             }
@@ -612,16 +623,6 @@ public class DatatypeManager implements Serializable {
         protected void addForbiddenDataValue(Object forbiddenDataValue) {
             if (!m_forbiddenDataValues.contains(forbiddenDataValue))
                 m_forbiddenDataValues.add(forbiddenDataValue);
-        }
-        protected boolean isObviouslySatisfiable() {
-            if (m_hasExplicitDataValues)
-                return m_explicitDataValues.size()>m_unequalTo.size();
-            else if (m_valueSpaceSubset!=null) {
-                int neighborCount=m_unequalTo.size()+m_forbiddenDataValues.size();
-                return m_valueSpaceSubset.hasCardinalityAtLeast(neighborCount+1);
-            }
-            else
-                return true;
         }
         public boolean hasCardinalityAtLeast(int number) {
             if (m_hasExplicitDataValues)

@@ -226,4 +226,10 @@ public class NumericsTest extends AbstractReasonerTest {
             DR("xsd:nonNegativeInteger")
         );
     }
+    public void testClique() throws Exception {
+        assertDRSatisfiable(true,2,
+            DR("xsd:integer","xsd:minInclusive",INT("1"),"xsd:maxInclusive",INT("2")),
+            NOT(OO(INT("3")))
+        );
+    }
 }
