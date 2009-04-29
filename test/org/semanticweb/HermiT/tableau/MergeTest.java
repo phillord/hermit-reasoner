@@ -45,6 +45,7 @@ public class MergeTest extends AbstractReasonerInternalsTest {
                 atoms, // negative facts 
                 null, // atomic concepts
                 null, // transitive roles
+                null, // complex role inclusions
                 null, // object roles
                 null, // data roles
                 null, // individuals

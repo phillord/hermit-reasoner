@@ -215,7 +215,7 @@ public class NormalizationTest extends AbstractStructuralTest {
             }
             axioms.add(m_ontologyManager.getOWLDataFactory().getOWLSubClassAxiom(m_ontologyManager.getOWLDataFactory().getOWLThing(),superDescription));
         }
-        for (OWLObjectPropertyExpression[] inclusion : axiomHolder.m_objectPropertyInclusions)
+        for (OWLObjectPropertyExpression[] inclusion : axiomHolder.m_simpleObjectPropertyInclusions)
             axioms.add(m_ontologyManager.getOWLDataFactory().getOWLSubObjectPropertyAxiom(inclusion[0],inclusion[1]));
         for (OWLHasKeyDummy key : axiomHolder.m_hasKeys)
             axioms.add(key);

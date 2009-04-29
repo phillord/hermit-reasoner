@@ -125,7 +125,12 @@ public class OWLNormalization {
         m_axioms.m_hasKeys.add(axiom);
     }
     protected void addInclusion(OWLObjectPropertyExpression subObjectPropertyExpression,OWLObjectPropertyExpression superObjectPropertyExpression) {
-        m_axioms.m_objectPropertyInclusions.add(new OWLObjectPropertyExpression[] { subObjectPropertyExpression.getSimplified(),superObjectPropertyExpression.getSimplified() });
+        m_axioms.m_simpleObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { subObjectPropertyExpression.getSimplified(),superObjectPropertyExpression.getSimplified() });
+    }
+    protected void addInclusion(OWLObjectPropertyExpression[] subObjectPropertyExpressions,OWLObjectPropertyExpression superObjectPropertyExpression) {
+        for (int index=subObjectPropertyExpressions.length-1;index>=0;--index)
+            subObjectPropertyExpressions[index]=subObjectPropertyExpressions[index].getSimplified();
+        m_axioms.m_complexObjectPropertyInclusions.add(new OWLAxioms.ComplexObjectPropertyInclusion(subObjectPropertyExpressions,superObjectPropertyExpression.getSimplified()));
     }
     protected void addInclusion(OWLDataPropertyExpression subDataPropertyExpression,OWLDataPropertyExpression superDataPropertyExpression) {
         m_axioms.m_dataPropertyInclusions.add(new OWLDataPropertyExpression[] { subDataPropertyExpression,superDataPropertyExpression });
@@ -344,14 +349,17 @@ public class OWLNormalization {
             addInclusion(axiom.getSubProperty(),axiom.getSuperProperty());
         }
         public void visit(OWLObjectPropertyChainSubPropertyAxiom axiom) {
-            List<OWLObjectPropertyExpression> subChain=axiom.getPropertyChain();
+            List<OWLObjectPropertyExpression> subPropertyChain=axiom.getPropertyChain();
             OWLObjectPropertyExpression superObjectPropertyExpression=axiom.getSuperProperty();
-            if (subChain.size()==1)
-                addInclusion(subChain.get(0),superObjectPropertyExpression);
-            else if (subChain.size()==2 && subChain.get(0).equals(superObjectPropertyExpression) && subChain.get(1).equals(superObjectPropertyExpression))
+            if (subPropertyChain.size()==1)
+                addInclusion(subPropertyChain.get(0),superObjectPropertyExpression);
+            else if (subPropertyChain.size()==2 && subPropertyChain.get(0).equals(superObjectPropertyExpression) && subPropertyChain.get(1).equals(superObjectPropertyExpression))
                 makeTransitive(axiom.getSuperProperty());
-            else
-                throw new IllegalArgumentException("General property chains are not supported yet.");
+            else {
+                OWLObjectPropertyExpression[] subObjectProperties=new OWLObjectPropertyExpression[subPropertyChain.size()];
+                subPropertyChain.toArray(subObjectProperties);
+                addInclusion(subObjectProperties,superObjectPropertyExpression);
+            }
         }
         public void visit(OWLEquivalentObjectPropertiesAxiom axiom) {
             if (axiom.getProperties().size()>1) {

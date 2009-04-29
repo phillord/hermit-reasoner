@@ -44,12 +44,13 @@ public class DLOntology implements Serializable {
     protected final Set<AtomicConcept> m_allAtomicConcepts;
     protected final int m_numberOfExternalConcepts;
     protected final Set<Role> m_allTransitiveObjectRoles;
+    protected final Set<ComplexObjectRoleInclusion> m_allComplexObjectRoleInclusions;
     protected final Set<AtomicRole> m_allAtomicObjectRoles;
     protected final Set<AtomicRole> m_allAtomicDataRoles;
     protected final Set<Individual> m_allIndividuals;
     protected final Set<DescriptionGraph> m_allDescriptionGraphs;
 
-    public DLOntology(String ontologyURI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts,Set<AtomicConcept> atomicConcepts,Set<Role> transitiveObjectRoles,Set<AtomicRole> atomicObjectRoles,Set<AtomicRole> atomicDataRoles,Set<Individual> individuals,boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,boolean hasDatatypes) {
+    public DLOntology(String ontologyURI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts,Set<AtomicConcept> atomicConcepts,Set<Role> transitiveObjectRoles,Set<ComplexObjectRoleInclusion> allComplexObjectRoleInclusions,Set<AtomicRole> atomicObjectRoles,Set<AtomicRole> atomicDataRoles,Set<Individual> individuals,boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,boolean hasDatatypes) {
         m_ontologyURI=ontologyURI;
         m_dlClauses=dlClauses;
         m_positiveFacts=positiveFacts;
@@ -71,6 +72,10 @@ public class DLOntology implements Serializable {
             m_allTransitiveObjectRoles=new HashSet<Role>();
         else
             m_allTransitiveObjectRoles=transitiveObjectRoles;
+        if (allComplexObjectRoleInclusions==null)
+            m_allComplexObjectRoleInclusions=new HashSet<ComplexObjectRoleInclusion>();
+        else
+            m_allComplexObjectRoleInclusions=allComplexObjectRoleInclusions;
         if (atomicObjectRoles==null)
             m_allAtomicObjectRoles=new TreeSet<AtomicRole>(AtomicRoleComparator.INSTANCE);
         else
@@ -144,6 +149,10 @@ public class DLOntology implements Serializable {
 
     public Set<Role> getAllTransitiveObjectRoles() {
         return m_allTransitiveObjectRoles;
+    }
+
+    public Set<ComplexObjectRoleInclusion> getAllComplexObjectRoleInclusions() {
+        return m_allComplexObjectRoleInclusions;
     }
 
     public Set<AtomicRole> getAllAtomicObjectRoles() {
@@ -510,6 +519,27 @@ public class DLOntology implements Serializable {
         }
     }
 
+    public static class ComplexObjectRoleInclusion implements Serializable {
+        private static final long serialVersionUID=-8373563413008795874L;
+
+        protected final Role[] m_subRoles;
+        protected final Role m_superRole;
+        
+        public ComplexObjectRoleInclusion(Role[] subRoles,Role superRole) {
+            m_subRoles=subRoles;
+            m_superRole=superRole;
+        }
+        public int getNumberOfSubRoles() {
+            return m_subRoles.length;
+        }
+        public Role getSubRole(int roleIndex) {
+            return m_subRoles[roleIndex];
+        }
+        public Role getSuperRole() {
+            return m_superRole;
+        }
+    }
+    
     public static class AtomicConceptComparator implements Serializable,Comparator<AtomicConcept> {
         private static final long serialVersionUID=2386841732225838685L;
         public static final Comparator<AtomicConcept> INSTANCE=new AtomicConceptComparator();

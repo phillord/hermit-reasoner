@@ -21,7 +21,8 @@ public class OWLAxioms {
     public final Set<OWLDataProperty> m_dataProperties;
     public final Set<OWLIndividual> m_individuals;
     public final Collection<OWLDescription[]> m_conceptInclusions;
-    public final Collection<OWLObjectPropertyExpression[]> m_objectPropertyInclusions;
+    public final Collection<OWLObjectPropertyExpression[]> m_simpleObjectPropertyInclusions;
+    public final Collection<ComplexObjectPropertyInclusion> m_complexObjectPropertyInclusions;
     public final Collection<OWLObjectPropertyExpression[]> m_disjointObjectProperties;
     public final Set<OWLObjectPropertyExpression> m_reflexiveObjectProperties;
     public final Set<OWLObjectPropertyExpression> m_irreflexiveObjectProperties;
@@ -38,7 +39,8 @@ public class OWLAxioms {
         m_dataProperties=new HashSet<OWLDataProperty>();
         m_individuals=new HashSet<OWLIndividual>();
         m_conceptInclusions=new ArrayList<OWLDescription[]>();
-        m_objectPropertyInclusions=new ArrayList<OWLObjectPropertyExpression[]>();
+        m_simpleObjectPropertyInclusions=new ArrayList<OWLObjectPropertyExpression[]>();
+        m_complexObjectPropertyInclusions=new ArrayList<ComplexObjectPropertyInclusion>();
         m_disjointObjectProperties=new ArrayList<OWLObjectPropertyExpression[]>();
         m_reflexiveObjectProperties=new HashSet<OWLObjectPropertyExpression>();
         m_irreflexiveObjectProperties=new HashSet<OWLObjectPropertyExpression>();
@@ -48,5 +50,15 @@ public class OWLAxioms {
         m_dataPropertyInclusions=new ArrayList<OWLDataPropertyExpression[]>();
         m_facts=new HashSet<OWLIndividualAxiom>();
         m_hasKeys=new HashSet<OWLHasKeyDummy>();
+    }
+    
+    public static class ComplexObjectPropertyInclusion {
+        public final OWLObjectPropertyExpression[] m_subObjectProperties;
+        public final OWLObjectPropertyExpression m_superObjectProperties;
+        
+        public ComplexObjectPropertyInclusion(OWLObjectPropertyExpression[] subObjectProperties,OWLObjectPropertyExpression superObjectProperties) {
+            m_subObjectProperties=subObjectProperties;
+            m_superObjectProperties=superObjectProperties;
+        }
     }
 }

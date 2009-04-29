@@ -53,7 +53,7 @@ public class BuiltInPropertyManager {
     public void axiomatizeTopObjectProperty(OWLAxioms axioms) {
         OWLObjectProperty topObjectProperty=m_factory.getOWLObjectProperty(URI.create(AtomicRole.TOP_OBJECT_ROLE.getURI()));
         axioms.m_transitiveObjectProperties.add(topObjectProperty);
-        axioms.m_objectPropertyInclusions.add(new OWLObjectPropertyExpression[] { topObjectProperty,topObjectProperty.getInverseProperty() });
+        axioms.m_simpleObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { topObjectProperty,topObjectProperty.getInverseProperty() });
         OWLIndividual newIndividual=m_factory.getOWLIndividual(URI.create("internal:nam#topIndividual"));
         OWLObjectOneOf oneOfNewIndividual=m_factory.getOWLObjectOneOf(newIndividual);
         OWLObjectSomeRestriction hasTopNewIndividual=m_factory.getOWLObjectSomeRestriction(topObjectProperty,oneOfNewIndividual);
@@ -76,9 +76,14 @@ public class BuiltInPropertyManager {
             for (OWLDescription[] inclusion : axioms.m_conceptInclusions)
                 for (OWLDescription description : inclusion)
                     description.accept(this);
-            for (OWLObjectPropertyExpression[] inclusion : axioms.m_objectPropertyInclusions) {
+            for (OWLObjectPropertyExpression[] inclusion : axioms.m_simpleObjectPropertyInclusions) {
                 visitProperty(inclusion[0]);
                 visitProperty(inclusion[1]);
+            }
+            for (OWLAxioms.ComplexObjectPropertyInclusion inclusion : axioms.m_complexObjectPropertyInclusions) {
+                for (OWLObjectPropertyExpression subObjectProperty : inclusion.m_subObjectProperties)
+                    visitProperty(subObjectProperty);
+                visitProperty(inclusion.m_superObjectProperties);
             }
             for (OWLObjectPropertyExpression[] disjoint : axioms.m_disjointObjectProperties)
                 for (int index=0;index<disjoint.length;index++)
