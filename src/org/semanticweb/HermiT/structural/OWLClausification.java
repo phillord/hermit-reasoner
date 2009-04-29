@@ -206,7 +206,6 @@ public class OWLClausification {
         for (DescriptionGraph descriptionGraph : descriptionGraphs)
             descriptionGraph.produceStartDLClauses(dlClauses);
         Set<AtomicConcept> atomicConcepts=new HashSet<AtomicConcept>();
-        Set<Role> transitiveObjectRoles=new HashSet<Role>();
         Set<DLOntology.ComplexObjectRoleInclusion> complexObjectRoleInclusions=new HashSet<DLOntology.ComplexObjectRoleInclusion>();
         Set<AtomicRole> objectRoles=new HashSet<AtomicRole>();
         Set<AtomicRole> dataRoles=new HashSet<AtomicRole>();
@@ -223,10 +222,6 @@ public class OWLClausification {
         }
         for (OWLObjectProperty objectProperty : axioms.m_objectProperties)
             objectRoles.add(AtomicRole.create(objectProperty.getURI().toString()));
-        for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_transitiveObjectProperties) {
-            Role role=getRole(objectPropertyExpression);
-            transitiveObjectRoles.add(role);
-        }
         for (OWLAxioms.ComplexObjectPropertyInclusion inclusion : axioms.m_complexObjectPropertyInclusions) {
             Role[] subRoles=new Role[inclusion.m_subObjectProperties.length];
             for (int index=inclusion.m_subObjectProperties.length-1;index>=0;--index)
@@ -236,7 +231,7 @@ public class OWLClausification {
         }
         for (OWLDataProperty objectProperty : axioms.m_dataProperties)
             dataRoles.add(AtomicRole.create(objectProperty.getURI().toString()));
-        return new DLOntology(ontologyURI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,transitiveObjectRoles,complexObjectRoleInclusions,objectRoles,dataRoles,hermitIndividuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes);
+        return new DLOntology(ontologyURI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,objectRoles,dataRoles,hermitIndividuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes);
     }
     public DLClause clausifyKey(OWLHasKeyDummy object) {
         List<Atom> headAtoms=new ArrayList<Atom>();

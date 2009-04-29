@@ -58,8 +58,6 @@ public class OWLAxiomsExpressivity extends OWLAxiomVisitorAdapter implements OWL
             visitProperty(property);
         for (OWLObjectPropertyExpression property : axioms.m_asymmetricObjectProperties)
             visitProperty(property);
-        for (OWLObjectPropertyExpression property : axioms.m_transitiveObjectProperties)
-            visitProperty(property);
         if (axioms.m_dataPropertyInclusions.size()>0 || axioms.m_disjointDataProperties.size()>0)
             m_hasDatatypes=true;
         for (OWLIndividualAxiom fact : axioms.m_facts)

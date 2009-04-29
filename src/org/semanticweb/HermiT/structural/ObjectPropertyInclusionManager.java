@@ -28,10 +28,10 @@ public class ObjectPropertyInclusionManager {
         m_replacedDescriptions=new HashMap<OWLObjectAllRestriction,OWLDescription>();
     }
     public void prepareTransformation(OWLAxioms axioms) {
-        for (OWLObjectPropertyExpression transitiveProperty : axioms.m_transitiveObjectProperties)
-            makeTransitive(transitiveProperty);
         for (OWLObjectPropertyExpression[] inclusion : axioms.m_simpleObjectPropertyInclusions)
             addInclusion(inclusion[0],inclusion[1]);
+        for (OWLAxioms.ComplexObjectPropertyInclusion inclusion : axioms.m_complexObjectPropertyInclusions)
+            addInclusion(inclusion.m_subObjectProperties,inclusion.m_superObjectProperties);
     }
     public void addInclusion(OWLObjectPropertyExpression subObjectProperty,OWLObjectPropertyExpression superObjectProperty) {
         subObjectProperty=subObjectProperty.getSimplified();
@@ -42,14 +42,12 @@ public class ObjectPropertyInclusionManager {
     public void addInclusion(OWLObjectPropertyExpression[] subObjectProperties,OWLObjectPropertyExpression superObjectProperty) {
         if (subObjectProperties.length==1)
             addInclusion(subObjectProperties[0],superObjectProperty);
-        else if (subObjectProperties.length==2 && subObjectProperties[0].equals(superObjectProperty) && subObjectProperties[1].equals(superObjectProperty))
-            makeTransitive(superObjectProperty);
+        else if (subObjectProperties.length==2 && subObjectProperties[0].equals(superObjectProperty) && subObjectProperties[1].equals(superObjectProperty)) {
+            m_transitiveObjectProperties.add(superObjectProperty.getSimplified());
+            m_transitiveObjectProperties.add(superObjectProperty.getInverseProperty().getSimplified());
+        }
         else
             throw new IllegalArgumentException("Object property chains not supported yet.");
-    }
-    public void makeTransitive(OWLObjectPropertyExpression objectProperty) {
-        m_transitiveObjectProperties.add(objectProperty.getSimplified());
-        m_transitiveObjectProperties.add(objectProperty.getInverseProperty().getSimplified());
     }
     public void rewriteConceptInclusions(OWLAxioms axioms) {
         m_subObjectProperties.transitivelyClose();

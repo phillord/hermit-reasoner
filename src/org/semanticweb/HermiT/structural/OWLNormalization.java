@@ -136,7 +136,7 @@ public class OWLNormalization {
         m_axioms.m_dataPropertyInclusions.add(new OWLDataPropertyExpression[] { subDataPropertyExpression,superDataPropertyExpression });
     }
     protected void makeTransitive(OWLObjectPropertyExpression objectPropertyExpression) {
-        m_axioms.m_transitiveObjectProperties.add(objectPropertyExpression.getSimplified());
+        m_axioms.m_complexObjectPropertyInclusions.add(new OWLAxioms.ComplexObjectPropertyInclusion(objectPropertyExpression.getSimplified()));
     }
     protected void makeReflexive(OWLObjectPropertyExpression objectPropertyExpression) {
         m_axioms.m_reflexiveObjectProperties.add(objectPropertyExpression.getSimplified());

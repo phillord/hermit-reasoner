@@ -187,10 +187,9 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         Set<Atom> noAtoms=Collections.emptySet();
         Set<AtomicConcept> noAtomicConcepts=Collections.emptySet();
         Set<AtomicRole> noAtomicRoles=Collections.emptySet();
-        Set<Role> noRoles=Collections.emptySet();
         Set<DLOntology.ComplexObjectRoleInclusion> noComplexObjectRoleInclusions=Collections.emptySet();
         Set<Individual> noIndividuals=Collections.emptySet();
-        DLOntology emptyDLOntology=new DLOntology("urn:hermit:kb",noDLClauses,noAtoms,noAtoms,noAtomicConcepts,noRoles,noComplexObjectRoleInclusions,noAtomicRoles,noAtomicRoles,noIndividuals,false,false,false,false);
+        DLOntology emptyDLOntology=new DLOntology("urn:hermit:kb",noDLClauses,noAtoms,noAtoms,noAtomicConcepts,noComplexObjectRoleInclusions,noAtomicRoles,noAtomicRoles,noIndividuals,false,false,false,false);
         loadDLOntology(emptyDLOntology);
     }
     
@@ -964,12 +963,15 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                 BuiltInPropertyManager builtInPropertyManager=new BuiltInPropertyManager(factory);   
                 builtInPropertyManager.axiomatizeTopObjectPropertyIfNeeded(axioms);
             }
-            if (!originalDLOntology.getAllTransitiveObjectRoles().isEmpty() || !axioms.m_transitiveObjectProperties.isEmpty()) {
+            if (!originalDLOntology.getAllComplexObjectRoleInclusions().isEmpty() || !axioms.m_complexObjectPropertyInclusions.isEmpty()) {
                 ObjectPropertyInclusionManager objectPropertyInclusionManager=new ObjectPropertyInclusionManager(factory);
                 objectPropertyInclusionManager.prepareTransformation(axioms);
-                for (Role transitiveRole : originalDLOntology.getAllTransitiveObjectRoles()) {
-                    OWLObjectPropertyExpression objectPropertyExpression=getObjectPropertyExpression(factory,transitiveRole);
-                    objectPropertyInclusionManager.makeTransitive(objectPropertyExpression);
+                for (DLOntology.ComplexObjectRoleInclusion inclusion : originalDLOntology.getAllComplexObjectRoleInclusions()) {
+                    OWLObjectPropertyExpression[] subObjectPropertyExpressions=new OWLObjectPropertyExpression[inclusion.getNumberOfSubRoles()];
+                    for (int index=inclusion.getNumberOfSubRoles()-1;index>=0;--index)
+                        subObjectPropertyExpressions[index]=getObjectPropertyExpression(factory,inclusion.getSubRole(index));
+                    OWLObjectPropertyExpression superObjectPropertyExpression=getObjectPropertyExpression(factory,inclusion.getSuperRole());
+                    objectPropertyInclusionManager.addInclusion(subObjectPropertyExpressions,superObjectPropertyExpression);
                 }
                 for (DLClause dlClause : originalDLOntology.getDLClauses()) {
                     if (dlClause.isRoleInclusion()) {
@@ -1005,7 +1007,6 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             Set<Atom> positiveFacts=createUnion(originalDLOntology.getPositiveFacts(),newDLOntology.getPositiveFacts());
             Set<Atom> negativeFacts=createUnion(originalDLOntology.getNegativeFacts(),newDLOntology.getNegativeFacts());
             Set<AtomicConcept> atomicConcepts=createUnion(originalDLOntology.getAllAtomicConcepts(),newDLOntology.getAllAtomicConcepts());
-            Set<Role> transitiveObjectRoles=createUnion(originalDLOntology.getAllTransitiveObjectRoles(),newDLOntology.getAllTransitiveObjectRoles());
             Set<DLOntology.ComplexObjectRoleInclusion> complexObjectRoleInclusions=createUnion(originalDLOntology.getAllComplexObjectRoleInclusions(),newDLOntology.getAllComplexObjectRoleInclusions());
             Set<AtomicRole> atomicObjectRoles=createUnion(originalDLOntology.getAllAtomicObjectRoles(),newDLOntology.getAllAtomicObjectRoles());
             Set<AtomicRole> atomicDataRoles=createUnion(originalDLOntology.getAllAtomicDataRoles(),newDLOntology.getAllAtomicDataRoles());
@@ -1014,7 +1015,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             boolean hasAtMostRestrictions=originalDLOntology.hasAtMostRestrictions() || newDLOntology.hasAtMostRestrictions();
             boolean hasNominals=originalDLOntology.hasNominals() || newDLOntology.hasNominals();
             boolean hasDatatypes=originalDLOntology.hasDatatypes() || newDLOntology.hasDatatypes();
-            return new DLOntology(resultingOntologyURI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,transitiveObjectRoles,complexObjectRoleInclusions,atomicObjectRoles,atomicDataRoles,individuals,hasInverseRoles,hasAtMostRestrictions,hasNominals,hasDatatypes);
+            return new DLOntology(resultingOntologyURI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,atomicObjectRoles,atomicDataRoles,individuals,hasInverseRoles,hasAtMostRestrictions,hasNominals,hasDatatypes);
         }
         catch (OWLException shouldntHappen) {
             throw new IllegalStateException("Internal error: Unexpected OWLException.",shouldntHappen);

@@ -52,7 +52,7 @@ public class BuiltInPropertyManager {
     }
     public void axiomatizeTopObjectProperty(OWLAxioms axioms) {
         OWLObjectProperty topObjectProperty=m_factory.getOWLObjectProperty(URI.create(AtomicRole.TOP_OBJECT_ROLE.getURI()));
-        axioms.m_transitiveObjectProperties.add(topObjectProperty);
+        axioms.m_complexObjectPropertyInclusions.add(new OWLAxioms.ComplexObjectPropertyInclusion(topObjectProperty));
         axioms.m_simpleObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { topObjectProperty,topObjectProperty.getInverseProperty() });
         OWLIndividual newIndividual=m_factory.getOWLIndividual(URI.create("internal:nam#topIndividual"));
         OWLObjectOneOf oneOfNewIndividual=m_factory.getOWLObjectOneOf(newIndividual);
@@ -93,8 +93,6 @@ public class BuiltInPropertyManager {
             for (OWLObjectPropertyExpression property : axioms.m_irreflexiveObjectProperties)
                 visitProperty(property);
             for (OWLObjectPropertyExpression property : axioms.m_asymmetricObjectProperties)
-                visitProperty(property);
-            for (OWLObjectPropertyExpression property : axioms.m_transitiveObjectProperties)
                 visitProperty(property);
             FactVisitor factVisitor=new FactVisitor();
             for (OWLIndividualAxiom fact : axioms.m_facts)
