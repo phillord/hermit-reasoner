@@ -49,7 +49,7 @@ public class ObjectPropertyInclusionManager {
         else
             throw new IllegalArgumentException("Object property chains not supported yet.");
     }
-    public void rewriteConceptInclusions(OWLAxioms axioms) {
+    public void rewriteAxioms(OWLAxioms axioms) {
         m_subObjectProperties.transitivelyClose();
         for (OWLDescription[] inclusion : axioms.m_conceptInclusions)
             for (int index=0;index<inclusion.length;index++)

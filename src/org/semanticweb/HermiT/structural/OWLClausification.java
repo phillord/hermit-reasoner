@@ -124,7 +124,7 @@ public class OWLClausification {
         builtInPropertyManager.axiomatizeTopObjectPropertyIfNeeded(axioms);
         ObjectPropertyInclusionManager objectPropertyInclusionManager=new ObjectPropertyInclusionManager(factory);
         objectPropertyInclusionManager.prepareTransformation(axioms);
-        objectPropertyInclusionManager.rewriteConceptInclusions(axioms);
+        objectPropertyInclusionManager.rewriteAxioms(axioms);
         if (descriptionGraphs==null)
             descriptionGraphs=Collections.emptySet();
         return clausify(factory,ontologyURI,axioms,descriptionGraphs);
