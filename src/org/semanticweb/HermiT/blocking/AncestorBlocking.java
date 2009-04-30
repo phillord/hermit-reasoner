@@ -36,7 +36,7 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
                     node.setBlocked(parent,false);
                 else if (m_blockingSignatureCache!=null) {
                     if (m_blockingSignatureCache.containsSignature(node))
-                        node.setBlocked(Node.CACHE_BLOCKER,true);
+                        node.setBlocked(Node.SIGNATURE_CACHE_BLOCKER,true);
                     else
                         checkParentBlocking(node);
                 }

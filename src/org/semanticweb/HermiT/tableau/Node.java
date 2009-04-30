@@ -16,7 +16,7 @@ import org.semanticweb.HermiT.model.ExistentialConcept;
 public final class Node implements Serializable {
     private static final long serialVersionUID=-2549229429321484690L;
     private static List<ExistentialConcept> NO_EXISTENTIALS=Collections.emptyList();
-    public static final Node CACHE_BLOCKER=new Node(null);
+    public static final Node SIGNATURE_CACHE_BLOCKER=new Node(null);
 
     public static enum NodeState { ACTIVE,MERGED,PRUNED }
     
@@ -36,7 +36,8 @@ public final class Node implements Serializable {
     protected PermanentDependencySet m_mergedIntoDependencySet;
     protected Node m_blocker;
     protected boolean m_directlyBlocked;
-    protected Object m_blockingObject;
+    protected Object m_blockingSignature;
+    protected Object m_blockingCargo;
     protected int m_firstGraphOccurrenceNode;
     
     public Node(Tableau tableau) {
@@ -135,11 +136,17 @@ public final class Node implements Serializable {
         m_blocker=blocker;
         m_directlyBlocked=directlyBlocked;
     }
-    public Object getBlockingObject() {
-        return m_blockingObject;
+    public Object getBlockingSignature() {
+        return m_blockingSignature;
     }
-    public void setBlockingObject(Object blockingObject) {
-        m_blockingObject=blockingObject;
+    public void setBlockingSignature(Object blockingSignature) {
+        m_blockingSignature=blockingSignature;
+    }
+    public Object getBlockingCargo() {
+        return m_blockingCargo;
+    }
+    public void setBlockingCargo(Object blockingCargo) {
+        m_blockingCargo=blockingCargo;
     }
     public boolean isActive() {
         return m_nodeState==NodeState.ACTIVE;

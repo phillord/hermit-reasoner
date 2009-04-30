@@ -74,7 +74,7 @@ public class CoreBlocking implements BlockingStrategy,Serializable {
     }
     public void assertionAdded(Concept concept,Node node,boolean isCore) {
         if (concept instanceof AtomicConcept) {
-            ((CoreBlockingObject)node.getBlockingObject()).addAtomicConcept((AtomicConcept)concept);
+            ((CoreBlockingObject)node.getBlockingSignature()).addAtomicConcept((AtomicConcept)concept);
             updateNodeChange(node);
         }
     }
@@ -82,7 +82,7 @@ public class CoreBlocking implements BlockingStrategy,Serializable {
     }
     public void assertionRemoved(Concept concept,Node node,boolean isCore) {
         if (concept instanceof AtomicConcept) {
-            ((CoreBlockingObject)node.getBlockingObject()).removeAtomicConcept((AtomicConcept)concept);
+            ((CoreBlockingObject)node.getBlockingSignature()).removeAtomicConcept((AtomicConcept)concept);
             updateNodeChange(node);
         }
     }
@@ -100,14 +100,14 @@ public class CoreBlocking implements BlockingStrategy,Serializable {
             m_firstChangedNode=node;
     }
     public void nodeInitialized(Node node) {
-        if (node.getBlockingObject()==null)
-            node.setBlockingObject(new CoreBlockingObject(node));
-        ((CoreBlockingObject)node.getBlockingObject()).initialize();
+        if (node.getBlockingSignature()==null)
+            node.setBlockingSignature(new CoreBlockingObject(node));
+        ((CoreBlockingObject)node.getBlockingSignature()).initialize();
     }
     public void nodeDestroyed(Node node) {
         if (!node.isBlocked() && canBeBlocker(node))
             m_currentBlockersCache.removeNode(node);
-        ((CoreBlockingObject)node.getBlockingObject()).destroy();
+        ((CoreBlockingObject)node.getBlockingSignature()).destroy();
         if (m_firstChangedNode!=null && m_firstChangedNode.getNodeID()>=node.getNodeID())
             m_firstChangedNode=null;
     }
@@ -130,13 +130,13 @@ public class CoreBlocking implements BlockingStrategy,Serializable {
             !blocker.isBlocked() &&
             blocker.getNodeType()==NodeType.TREE_NODE &&
             blocked.getNodeType()==NodeType.TREE_NODE &&
-            ((CoreBlockingObject)blocker.getBlockingObject()).getAtomicConceptsLabel()==((CoreBlockingObject)blocked.getBlockingObject()).getAtomicConceptsLabel();
+            ((CoreBlockingObject)blocker.getBlockingSignature()).getAtomicConceptsLabel()==((CoreBlockingObject)blocked.getBlockingSignature()).getAtomicConceptsLabel();
     }
     protected static boolean hasBlockingInfoChanged(Node node) {
-        return ((CoreBlockingObject)node.getBlockingObject()).m_hasChanged;
+        return ((CoreBlockingObject)node.getBlockingSignature()).m_hasChanged;
     }
     protected static void clearBlockingInfoChanged(Node node) {
-        ((CoreBlockingObject)node.getBlockingObject()).m_hasChanged=false;
+        ((CoreBlockingObject)node.getBlockingSignature()).m_hasChanged=false;
     }
     protected Set<AtomicConcept> getAtomicConceptsLabel(Node node) {
         m_atomicConceptsBuffer.clear();
@@ -260,7 +260,7 @@ class CoreBlockingCache implements Serializable {
         m_emptyEntries=null;
     }
     public void removeNode(Node node) {
-        int hashCode=((CoreBlocking.CoreBlockingObject)node.getBlockingObject()).m_atomicConceptsLabelHashCode;
+        int hashCode=((CoreBlocking.CoreBlockingObject)node.getBlockingSignature()).m_atomicConceptsLabelHashCode;
         int bucketIndex=getIndexFor(hashCode,m_buckets.length);
         CacheEntry lastEntry=null;
         CacheEntry entry=m_buckets[bucketIndex];
@@ -282,7 +282,7 @@ class CoreBlockingCache implements Serializable {
         }
     }
     public void addNode(Node node) {
-        int hashCode=((CoreBlocking.CoreBlockingObject)node.getBlockingObject()).m_atomicConceptsLabelHashCode;
+        int hashCode=((CoreBlocking.CoreBlockingObject)node.getBlockingSignature()).m_atomicConceptsLabelHashCode;
         int bucketIndex=getIndexFor(hashCode,m_buckets.length);
         CacheEntry entry=m_buckets[bucketIndex];
         while (entry!=null) {
@@ -319,7 +319,7 @@ class CoreBlockingCache implements Serializable {
     }
     public Node getBlocker(Node node) {
         if (CoreBlocking.canBeBlocked(node)) {
-            int hashCode=((CoreBlocking.CoreBlockingObject)node.getBlockingObject()).m_atomicConceptsLabelHashCode;
+            int hashCode=((CoreBlocking.CoreBlockingObject)node.getBlockingSignature()).m_atomicConceptsLabelHashCode;
             int bucketIndex=getIndexFor(hashCode,m_buckets.length);
             CacheEntry entry=m_buckets[bucketIndex];
             while (entry!=null) {

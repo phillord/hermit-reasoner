@@ -34,8 +34,7 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
         if (m_firstChangedNode!=null) {
             Node node=m_firstChangedNode;
             while (node!=null) {
-                if (!node.isBlocked() && m_directBlockingChecker.canBeBlocker(node))
-                    m_currentBlockersCache.removeNode(node);
+                m_currentBlockersCache.removeNode(node);
                 node=node.getNextTableauNode();
             }
             node=m_firstChangedNode;
@@ -50,7 +49,7 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
                             node.setBlocked(parent,false);
                         else if (checkBlockingSignatureCache) {
                             if (m_blockingSignatureCache.containsSignature(node))
-                                node.setBlocked(Node.CACHE_BLOCKER,true);
+                                node.setBlocked(Node.SIGNATURE_CACHE_BLOCKER,true);
                             else {
                                 Node blocker=m_currentBlockersCache.getBlocker(node);
                                 node.setBlocked(blocker,blocker!=null);
@@ -100,15 +99,16 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
         m_directBlockingChecker.nodeInitialized(node);
     }
     public void nodeDestroyed(Node node) {
-        if (!node.isBlocked() && m_directBlockingChecker.canBeBlocker(node))
-            m_currentBlockersCache.removeNode(node);
+        m_currentBlockersCache.removeNode(node);
         m_directBlockingChecker.nodeDestroyed(node);
         if (m_firstChangedNode!=null && m_firstChangedNode.getNodeID()>=node.getNodeID())
             m_firstChangedNode=null;
     }
     public void modelFound() {
         if (m_blockingSignatureCache!=null) {
-            computeBlocking(false);
+            // Since we've found a model, we know what is blocked or not.
+            // Therefore, we don't need to update the blocking status.
+            assert m_firstChangedNode==null;
             Node node=m_tableau.getFirstTableauNode();
             while (node!=null) {
                 if (!node.isBlocked() && m_directBlockingChecker.canBeBlocker(node))
@@ -146,25 +146,30 @@ class BlockingCache implements Serializable {
         m_emptyEntries=null;
     }
     public void removeNode(Node node) {
-        int hashCode=m_directBlockingChecker.blockingHashCode(node);
-        int bucketIndex=getIndexFor(hashCode,m_buckets.length);
-        CacheEntry lastEntry=null;
-        CacheEntry entry=m_buckets[bucketIndex];
-        while (entry!=null) {
-            if (entry.m_node==node) {
-                if (lastEntry==null)
-                    m_buckets[bucketIndex]=entry.m_nextEntry;
-                else
-                    lastEntry.m_nextEntry=entry.m_nextEntry;
-                entry.m_nextEntry=m_emptyEntries;
-                entry.m_node=null;
-                entry.m_hashCode=0;
-                m_emptyEntries=entry;
-                m_numberOfElements--;
-                return;
+        // Check addNode() for an explanation of why we associate the entry with the node.
+        BlockingCache.CacheEntry removeEntry=(BlockingCache.CacheEntry)node.getBlockingCargo();
+        if (removeEntry!=null) {
+            int bucketIndex=getIndexFor(removeEntry.m_hashCode,m_buckets.length);
+            CacheEntry lastEntry=null;
+            CacheEntry entry=m_buckets[bucketIndex];
+            while (entry!=null) {
+                if (entry==removeEntry) {
+                    if (lastEntry==null)
+                        m_buckets[bucketIndex]=entry.m_nextEntry;
+                    else
+                        lastEntry.m_nextEntry=entry.m_nextEntry;
+                    entry.m_nextEntry=m_emptyEntries;
+                    entry.m_node=null;
+                    entry.m_hashCode=0;
+                    m_emptyEntries=entry;
+                    m_numberOfElements--;
+                    node.setBlockingCargo(null);
+                    return;
+                }
+                lastEntry=entry;
+                entry=entry.m_nextEntry;
             }
-            lastEntry=entry;
-            entry=entry.m_nextEntry;
+            throw new IllegalStateException("Internal error: entry not in cache!");
         }
     }
     public void addNode(Node node) {
@@ -173,7 +178,7 @@ class BlockingCache implements Serializable {
         CacheEntry entry=m_buckets[bucketIndex];
         while (entry!=null) {
             if (hashCode==entry.m_hashCode && m_directBlockingChecker.isBlockedBy(entry.m_node,node))
-                return;
+                throw new IllegalStateException("Internal error: node already in the cache!");
             entry=entry.m_nextEntry;
         }
         if (m_emptyEntries==null)
@@ -184,6 +189,12 @@ class BlockingCache implements Serializable {
         }
         entry.initialize(node,hashCode,m_buckets[bucketIndex]);
         m_buckets[bucketIndex]=entry;
+        // When a node is added to the cache, we record with the node the entry.
+        // This is used to remove nodes from the cache. Note that changes to a node
+        // can affect its label. Therefore, we CANNOT remove a node by taking its present
+        // blocking hash-code, as this can be different from the hash-code used at the
+        // time the node has been added to the cache.
+        node.setBlockingCargo(entry);
         m_numberOfElements++;
         if (m_numberOfElements>=m_threshold)
             resize(m_buckets.length*2);

@@ -70,8 +70,8 @@ public abstract class AbstractCommand implements DebuggerCommand {
         if (!node.isBlocked())
             return "no";
         else if (node.isDirectlyBlocked())
-            return "directly by "+(node.getBlocker()==Node.CACHE_BLOCKER ? "signature in cache" : node.getBlocker().getNodeID());
+            return "directly by "+(node.getBlocker()==Node.SIGNATURE_CACHE_BLOCKER ? "signature in cache" : node.getBlocker().getNodeID());
         else
-            return "indirectly by "+(node.getBlocker()==Node.CACHE_BLOCKER ? "signature in cache" : node.getBlocker().getNodeID());
+            return "indirectly by "+(node.getBlocker()==Node.SIGNATURE_CACHE_BLOCKER ? "signature in cache" : node.getBlocker().getNodeID());
     }
 }

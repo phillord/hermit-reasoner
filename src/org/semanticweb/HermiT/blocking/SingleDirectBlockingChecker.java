@@ -38,10 +38,10 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
             !blocker.isBlocked() &&
             blocker.getNodeType()==NodeType.TREE_NODE &&
             blocked.getNodeType()==NodeType.TREE_NODE &&
-            ((SingleBlockingObject)blocker.getBlockingObject()).getAtomicConceptsLabel()==((SingleBlockingObject)blocked.getBlockingObject()).getAtomicConceptsLabel();
+            ((SingleBlockingObject)blocker.getBlockingSignature()).getAtomicConceptsLabel()==((SingleBlockingObject)blocked.getBlockingSignature()).getAtomicConceptsLabel();
     }
     public int blockingHashCode(Node node) {
-        return ((SingleBlockingObject)node.getBlockingObject()).m_atomicConceptsLabelHashCode;
+        return ((SingleBlockingObject)node.getBlockingSignature()).m_atomicConceptsLabelHashCode;
     }
     public boolean canBeBlocker(Node node) {
         return node.getNodeType()==NodeType.TREE_NODE;
@@ -50,22 +50,22 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
         return node.getNodeType()==NodeType.TREE_NODE;
     }
     public boolean hasBlockingInfoChanged(Node node) {
-        return ((SingleBlockingObject)node.getBlockingObject()).m_hasChanged;
+        return ((SingleBlockingObject)node.getBlockingSignature()).m_hasChanged;
     }
     public void clearBlockingInfoChanged(Node node) {
-        ((SingleBlockingObject)node.getBlockingObject()).m_hasChanged=false;
+        ((SingleBlockingObject)node.getBlockingSignature()).m_hasChanged=false;
     }
     public void nodeInitialized(Node node) {
-        if (node.getBlockingObject()==null)
-            node.setBlockingObject(new SingleBlockingObject(node));
-        ((SingleBlockingObject)node.getBlockingObject()).initialize();
+        if (node.getBlockingSignature()==null)
+            node.setBlockingSignature(new SingleBlockingObject(node));
+        ((SingleBlockingObject)node.getBlockingSignature()).initialize();
     }
     public void nodeDestroyed(Node node) {
-        ((SingleBlockingObject)node.getBlockingObject()).destroy();
+        ((SingleBlockingObject)node.getBlockingSignature()).destroy();
     }
     public Node assertionAdded(Concept concept,Node node) {
         if (concept instanceof AtomicConcept) {
-            ((SingleBlockingObject)node.getBlockingObject()).addAtomicConcept((AtomicConcept)concept);
+            ((SingleBlockingObject)node.getBlockingSignature()).addAtomicConcept((AtomicConcept)concept);
             return node;
         }
         else
@@ -73,7 +73,7 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
     }
     public Node assertionRemoved(Concept concept,Node node) {
         if (concept instanceof AtomicConcept) {
-            ((SingleBlockingObject)node.getBlockingObject()).removeAtomicConcept((AtomicConcept)concept);
+            ((SingleBlockingObject)node.getBlockingSignature()).removeAtomicConcept((AtomicConcept)concept);
             return node;
         }
         else
@@ -157,12 +157,12 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
         protected final Set<AtomicConcept> m_atomicConceptsLabel;
 
         public SingleBlockingSignature(SingleDirectBlockingChecker checker,Node node) {
-            m_atomicConceptsLabel=((SingleBlockingObject)node.getBlockingObject()).getAtomicConceptsLabel();
+            m_atomicConceptsLabel=((SingleBlockingObject)node.getBlockingSignature()).getAtomicConceptsLabel();
             checker.m_atomicConceptsSetFactory.addReference(m_atomicConceptsLabel);
             checker.m_atomicConceptsSetFactory.makePermanent(m_atomicConceptsLabel);
         }
         public boolean blocksNode(Node node) {
-            return ((SingleBlockingObject)node.getBlockingObject()).getAtomicConceptsLabel()==m_atomicConceptsLabel;
+            return ((SingleBlockingObject)node.getBlockingSignature()).getAtomicConceptsLabel()==m_atomicConceptsLabel;
         }
         public int hashCode() {
             return m_atomicConceptsLabel.hashCode();
