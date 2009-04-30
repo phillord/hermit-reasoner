@@ -29,7 +29,7 @@ public class DeterministicHierarchyBuilder<T> {
         m_stack=new Stack<GraphNode<T>>();
         m_topologicalOrder=new ArrayList<HierarchyNode<T>>();
     }
-    public Hierarchy<T> buildHierarchyNew() {
+    public Hierarchy<T> buildHierarchy() {
         // Compute SCCs, create hierarchy nodes, and topologically order them
         visit(m_graphNodes.get(m_bottomElement));
         // Process the nodes in the topological order

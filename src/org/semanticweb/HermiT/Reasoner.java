@@ -276,7 +276,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                         }
                     }
                     DeterministicHierarchyBuilder<AtomicConcept> hierarchyBuilder=new DeterministicHierarchyBuilder<AtomicConcept>(allSubsumers,AtomicConcept.THING,AtomicConcept.NOTHING);
-                    m_atomicConceptHierarchy=hierarchyBuilder.buildHierarchyNew();
+                    m_atomicConceptHierarchy=hierarchyBuilder.buildHierarchy();
                 }
                 if (m_atomicConceptHierarchy==null) {
                     HierarchyBuilder.Relation<AtomicConcept> relation=
@@ -448,7 +448,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                 addInclusion(allSubsumers,AtomicRole.BOTTOM_OBJECT_ROLE,atomicRole.getInverse());
             }
             DeterministicHierarchyBuilder<Role> hierarchyBuilder=new DeterministicHierarchyBuilder<Role>(allSubsumers,AtomicRole.TOP_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE);
-            m_objectRoleHierarchy=hierarchyBuilder.buildHierarchyNew();
+            m_objectRoleHierarchy=hierarchyBuilder.buildHierarchy();
         }
     }
     
@@ -614,7 +614,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                 addInclusion(allSubsumers,AtomicRole.BOTTOM_DATA_ROLE,atomicRole);
             }
             DeterministicHierarchyBuilder<AtomicRole> hierarchyBuilder=new DeterministicHierarchyBuilder<AtomicRole>(allSubsumers,AtomicRole.TOP_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE);
-            m_atomicDataRoleHierarchy=hierarchyBuilder.buildHierarchyNew();
+            m_atomicDataRoleHierarchy=hierarchyBuilder.buildHierarchy();
         }
     }
     
