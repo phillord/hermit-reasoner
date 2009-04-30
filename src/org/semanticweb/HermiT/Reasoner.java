@@ -703,7 +703,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             public Set<HierarchyNode<AtomicConcept>> getSuccessorElements(HierarchyNode<AtomicConcept> u) {
                 return u.getChildNodes();
             }
-            public Set<HierarchyNode<AtomicConcept>> getAncestorElements(HierarchyNode<AtomicConcept> u) {
+            public Set<HierarchyNode<AtomicConcept>> getPredecessorElements(HierarchyNode<AtomicConcept> u) {
                 return u.getParentNodes();
             }
             public boolean trueOf(HierarchyNode<AtomicConcept> u) {

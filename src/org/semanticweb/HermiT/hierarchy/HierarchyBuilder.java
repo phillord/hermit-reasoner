@@ -69,7 +69,7 @@ public class HierarchyBuilder<E> {
                 public Set<HierarchyNode<E>> getSuccessorElements(HierarchyNode<E> u) {
                     return u.m_childNodes;
                 }
-                public Set<HierarchyNode<E>> getAncestorElements(HierarchyNode<E> u) {
+                public Set<HierarchyNode<E>> getPredecessorElements(HierarchyNode<E> u) {
                     return u.m_parentNodes;
                 }
                 public boolean trueOf(HierarchyNode<E> u) {
@@ -124,7 +124,7 @@ public class HierarchyBuilder<E> {
                         public Set<HierarchyNode<E>> getSuccessorElements(HierarchyNode<E> u) {
                             return u.m_parentNodes;
                         }
-                        public Set<HierarchyNode<E>> getAncestorElements(HierarchyNode<E> u) {
+                        public Set<HierarchyNode<E>> getPredecessorElements(HierarchyNode<E> u) {
                             return u.m_childNodes;
                         }
                         public boolean trueOf(HierarchyNode<E> u) {
@@ -162,7 +162,7 @@ public class HierarchyBuilder<E> {
 
     public static interface SearchPredicate<U> {
         Set<U> getSuccessorElements(U u);
-        Set<U> getAncestorElements(U u);
+        Set<U> getPredecessorElements(U u);
         boolean trueOf(U u);
     }
 
@@ -188,7 +188,7 @@ public class HierarchyBuilder<E> {
             else if (m_negatives.contains(element) || (m_possibilities!=null && !m_possibilities.contains(element)))
                 return false;
             else {
-                for (U superordinateElement : m_searchPredicate.getAncestorElements(element)) {
+                for (U superordinateElement : m_searchPredicate.getPredecessorElements(element)) {
                     if (!trueOf(superordinateElement)) {
                         m_negatives.add(element);
                         return false;
