@@ -15,7 +15,7 @@ import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
 import org.semanticweb.HermiT.existentials.ExpansionStrategy;
 import org.semanticweb.HermiT.hierarchy.SubsumptionHierarchy;
-import org.semanticweb.HermiT.hierarchy.TableauSubsumptionChecker;
+import org.semanticweb.HermiT.hierarchy.SubsumptionCache;
 import org.semanticweb.HermiT.kaon2.structural.Clausification;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.DLOntology;

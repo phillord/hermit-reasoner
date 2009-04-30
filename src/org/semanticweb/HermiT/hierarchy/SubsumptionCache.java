@@ -11,13 +11,14 @@ import org.semanticweb.HermiT.model.*;
 import org.semanticweb.HermiT.tableau.*;
 
 /**
- * A subsumption checker that uses the tableau to perform the check.
+ * A cache for subsumption and satisfiability tests. This class also maintains the set of known and possible subsumers
+ * for a concept. This information can be used to optimize classification.
  */
-public class TableauSubsumptionChecker {
+public class SubsumptionCache {
     protected final Tableau m_tableau;
     protected final Map<AtomicConcept,AtomicConceptInfo> m_atomicConceptInfos;
 
-    public TableauSubsumptionChecker(Tableau tableau) {
+    public SubsumptionCache(Tableau tableau) {
         m_tableau=tableau;
         m_atomicConceptInfos=new HashMap<AtomicConcept,AtomicConceptInfo>();
     }
