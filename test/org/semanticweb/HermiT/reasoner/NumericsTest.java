@@ -202,32 +202,32 @@ public class NumericsTest extends AbstractReasonerTest {
         );
     }
     public void testLargeRange1() throws Exception {
-        assertDRSatisfiable(true,255,
+        assertDRSatisfiableUseCliqueOptimization(true,255,
             DR("xsd:byte")
         );
-        assertDRSatisfiable(true,256,
+        assertDRSatisfiableUseCliqueOptimization(true,256,
             DR("xsd:byte")
         );
-        assertDRSatisfiable(false,257,
+        assertDRSatisfiableUseCliqueOptimization(false,257,
             DR("xsd:byte")
         );
     }
     public void testLargeRange2() throws Exception {
-        assertDRSatisfiable(true,127,
+        assertDRSatisfiableUseCliqueOptimization(true,127,
             DR("xsd:byte"),
             DR("xsd:nonNegativeInteger")
         );
-        assertDRSatisfiable(true,128,
+        assertDRSatisfiableUseCliqueOptimization(true,128,
             DR("xsd:byte"),
             DR("xsd:nonNegativeInteger")
         );
-        assertDRSatisfiable(false,129,
+        assertDRSatisfiableUseCliqueOptimization(false,129,
             DR("xsd:byte"),
             DR("xsd:nonNegativeInteger")
         );
     }
     public void testClique() throws Exception {
-        assertDRSatisfiable(true,2,
+        assertDRSatisfiableUseCliqueOptimization(true,2,
             DR("xsd:integer","xsd:minInclusive",INT("1"),"xsd:maxInclusive",INT("2")),
             NOT(OO(INT("3")))
         );

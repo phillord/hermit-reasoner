@@ -273,6 +273,15 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     }
 
     protected void assertDRSatisfiable(boolean value,int cardinality,String... parts) throws Exception {
+        // The dummy forbidden value is used to turn off the "symmetric clique" optimization in the DatatypeManager.
+        // This is useful only when value>=1 (otherwise, there is just one individual and the D-conjunction is a clique).
+        // This is so that we test the basic algorithm.
+        assertDRSatisfiableNEQ(value,cardinality,new String[] { STR("$internal$") },parts);
+    }
+
+    protected void assertDRSatisfiableUseCliqueOptimization(boolean value,int cardinality,String... parts) throws Exception {
+        // This version of the method does not introduce any forbidden values, which allows the DatatypeManager
+        // to use the "symmetric clique" optimization if possible.
         assertDRSatisfiableNEQ(value,cardinality,null,parts);
     }
 

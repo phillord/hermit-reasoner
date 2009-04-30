@@ -699,10 +699,10 @@ public class OWLNormalization {
             return Boolean.TRUE;
         }
         public Boolean visit(OWLDataAllRestriction desc) {
-            return Boolean.FALSE;
+            return Boolean.TRUE;
         }
         public Boolean visit(OWLDataValueRestriction desc) {
-            return Boolean.FALSE;
+            return Boolean.TRUE;
         }
         public Boolean visit(OWLDataMinCardinalityRestriction desc) {
             return Boolean.TRUE;
