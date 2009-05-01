@@ -3,6 +3,7 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 
+import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 
 /**
@@ -106,13 +107,16 @@ public final class MergingManager implements Serializable {
             m_binaryExtensionTableSearch1Bound.open();
             Object[] tupleBuffer=m_binaryExtensionTableSearch1Bound.getTupleBuffer();
             while (!m_binaryExtensionTableSearch1Bound.afterLast()) {
-                m_binaryAuxiliaryTuple[0]=tupleBuffer[0];
-                if (m_tableauMonitor!=null)
-                    m_tableauMonitor.mergeFactStarted(mergeFrom,mergeInto,tupleBuffer,m_binaryAuxiliaryTuple);
-                m_binaryUnionDependencySet.m_dependencySets[0]=m_binaryExtensionTableSearch1Bound.getDependencySet();
-                m_extensionManager.addTuple(m_binaryAuxiliaryTuple,m_binaryUnionDependencySet,m_binaryExtensionTableSearch1Bound.isCore());
-                if (m_tableauMonitor!=null)
-                    m_tableauMonitor.mergeFactFinished(mergeFrom,mergeInto,tupleBuffer,m_binaryAuxiliaryTuple);
+                Object predicate=tupleBuffer[0];
+                if (!(predicate instanceof DescriptionGraph)) {
+                    m_binaryAuxiliaryTuple[0]=predicate;
+                    if (m_tableauMonitor!=null)
+                        m_tableauMonitor.mergeFactStarted(mergeFrom,mergeInto,tupleBuffer,m_binaryAuxiliaryTuple);
+                    m_binaryUnionDependencySet.m_dependencySets[0]=m_binaryExtensionTableSearch1Bound.getDependencySet();
+                    m_extensionManager.addTuple(m_binaryAuxiliaryTuple,m_binaryUnionDependencySet,m_binaryExtensionTableSearch1Bound.isCore());
+                    if (m_tableauMonitor!=null)
+                        m_tableauMonitor.mergeFactFinished(mergeFrom,mergeInto,tupleBuffer,m_binaryAuxiliaryTuple);
+                }
                 m_binaryExtensionTableSearch1Bound.next();
             }
             // Copy all binary assertions where mergeFrom occurs in the first position
@@ -121,14 +125,17 @@ public final class MergingManager implements Serializable {
             m_ternaryExtensionTableSearch1Bound.open();
             tupleBuffer=m_ternaryExtensionTableSearch1Bound.getTupleBuffer();
             while (!m_ternaryExtensionTableSearch1Bound.afterLast()) {
-                m_ternaryAuxiliaryTuple[0]=tupleBuffer[0];
-                m_ternaryAuxiliaryTuple[2]=(tupleBuffer[2]==mergeFrom ? mergeInto : tupleBuffer[2]);
-                if (m_tableauMonitor!=null)
-                    m_tableauMonitor.mergeFactStarted(mergeFrom,mergeInto,tupleBuffer,m_ternaryAuxiliaryTuple);
-                m_binaryUnionDependencySet.m_dependencySets[0]=m_ternaryExtensionTableSearch1Bound.getDependencySet();
-                m_extensionManager.addTuple(m_ternaryAuxiliaryTuple,m_binaryUnionDependencySet,m_ternaryExtensionTableSearch1Bound.isCore());
-                if (m_tableauMonitor!=null)
-                    m_tableauMonitor.mergeFactFinished(mergeFrom,mergeInto,tupleBuffer,m_ternaryAuxiliaryTuple);
+                Object predicate=tupleBuffer[0];
+                if (!(predicate instanceof DescriptionGraph)) {
+                    m_ternaryAuxiliaryTuple[0]=predicate;
+                    m_ternaryAuxiliaryTuple[2]=(tupleBuffer[2]==mergeFrom ? mergeInto : tupleBuffer[2]);
+                    if (m_tableauMonitor!=null)
+                        m_tableauMonitor.mergeFactStarted(mergeFrom,mergeInto,tupleBuffer,m_ternaryAuxiliaryTuple);
+                    m_binaryUnionDependencySet.m_dependencySets[0]=m_ternaryExtensionTableSearch1Bound.getDependencySet();
+                    m_extensionManager.addTuple(m_ternaryAuxiliaryTuple,m_binaryUnionDependencySet,m_ternaryExtensionTableSearch1Bound.isCore());
+                    if (m_tableauMonitor!=null)
+                        m_tableauMonitor.mergeFactFinished(mergeFrom,mergeInto,tupleBuffer,m_ternaryAuxiliaryTuple);
+                }
                 m_ternaryExtensionTableSearch1Bound.next();
             }
             // Copy all binary assertions where mergeFrom occurs in the second position
@@ -137,14 +144,17 @@ public final class MergingManager implements Serializable {
             m_ternaryExtensionTableSearch2Bound.open();
             tupleBuffer=m_ternaryExtensionTableSearch2Bound.getTupleBuffer();
             while (!m_ternaryExtensionTableSearch2Bound.afterLast()) {
-                m_ternaryAuxiliaryTuple[0]=tupleBuffer[0];
-                m_ternaryAuxiliaryTuple[1]=(tupleBuffer[1]==mergeFrom ? mergeInto : tupleBuffer[1]);
-                if (m_tableauMonitor!=null)
-                    m_tableauMonitor.mergeFactStarted(mergeFrom,mergeInto,tupleBuffer,m_ternaryAuxiliaryTuple);
-                m_binaryUnionDependencySet.m_dependencySets[0]=m_ternaryExtensionTableSearch2Bound.getDependencySet();
-                m_extensionManager.addTuple(m_ternaryAuxiliaryTuple,m_binaryUnionDependencySet,m_ternaryExtensionTableSearch2Bound.isCore());
-                if (m_tableauMonitor!=null)
-                    m_tableauMonitor.mergeFactFinished(mergeFrom,mergeInto,tupleBuffer,m_ternaryAuxiliaryTuple);
+                Object predicate=tupleBuffer[0];
+                if (!(predicate instanceof DescriptionGraph)) {
+                    m_ternaryAuxiliaryTuple[0]=predicate;
+                    m_ternaryAuxiliaryTuple[1]=(tupleBuffer[1]==mergeFrom ? mergeInto : tupleBuffer[1]);
+                    if (m_tableauMonitor!=null)
+                        m_tableauMonitor.mergeFactStarted(mergeFrom,mergeInto,tupleBuffer,m_ternaryAuxiliaryTuple);
+                    m_binaryUnionDependencySet.m_dependencySets[0]=m_ternaryExtensionTableSearch2Bound.getDependencySet();
+                    m_extensionManager.addTuple(m_ternaryAuxiliaryTuple,m_binaryUnionDependencySet,m_ternaryExtensionTableSearch2Bound.isCore());
+                    if (m_tableauMonitor!=null)
+                        m_tableauMonitor.mergeFactFinished(mergeFrom,mergeInto,tupleBuffer,m_ternaryAuxiliaryTuple);
+                }
                 m_ternaryExtensionTableSearch2Bound.next();
             }
             // Now merge the description graphs
