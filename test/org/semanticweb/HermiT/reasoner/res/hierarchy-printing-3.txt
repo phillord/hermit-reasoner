@@ -4,4 +4,8 @@ Ontology(<file:/c/test.owl#>
 
 EquivalentClasses( owl:Nothing owl:Thing :A :B ) Declaration( Class( :A ) ) Declaration( Class( :B ) )
 
+EquivalentObjectProperties( owl:bottomObjectProperty owl:topObjectProperty )
+
+EquivalentDataProperties( owl:bottomDataProperty owl:topDataProperty )
+
 )

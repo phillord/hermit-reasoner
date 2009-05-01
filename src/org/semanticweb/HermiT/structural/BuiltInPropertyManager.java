@@ -43,14 +43,32 @@ import org.semanticweb.owl.util.OWLAxiomVisitorAdapter;
 public class BuiltInPropertyManager {
     protected final OWLDataFactory m_factory;
     protected final OWLObjectProperty m_topObjectProperty;
+    protected final OWLObjectProperty m_bottomObjectProperty;
     protected final OWLDataProperty m_topDataProperty;
+    protected final OWLDataProperty m_bottomDataProperty;
 
     public BuiltInPropertyManager(OWLDataFactory factory) {
         m_factory=factory;
         m_topObjectProperty=m_factory.getOWLObjectProperty(URI.create(AtomicRole.TOP_OBJECT_ROLE.getURI()));
+        m_bottomObjectProperty=m_factory.getOWLObjectProperty(URI.create(AtomicRole.BOTTOM_OBJECT_ROLE.getURI()));
         m_topDataProperty=m_factory.getOWLDataProperty(URI.create(AtomicRole.TOP_DATA_ROLE.getURI()));
+        m_bottomDataProperty=m_factory.getOWLDataProperty(URI.create(AtomicRole.BOTTOM_DATA_ROLE.getURI()));
     }
-    public void axiomatizeTopObjectProperty(OWLAxioms axioms) {
+    public void axiomatizeBuiltInPropertiesAsNeeded(OWLAxioms axioms,boolean skipTopObjectProperty,boolean skipBottomObjectProperty,boolean skipTopDataProperty,boolean skipBottomDataProperty) {
+        Checker checker=new Checker(axioms);
+        if (checker.m_usesTopObjectProperty && !skipTopObjectProperty)
+            axiomatizeTopObjectProperty(axioms);
+        if (checker.m_usesBottomObjectProperty && !skipBottomObjectProperty)
+            axiomatizeBottomObjectProperty(axioms);
+        if (checker.m_usesTopDataProperty && !skipTopDataProperty)
+            axiomatizeTopDataProperty(axioms);
+        if (checker.m_usesBottomDataProperty && !skipBottomDataProperty)
+            axiomatizeBottomDataProperty(axioms);
+    }
+    public void axiomatizeBuiltInPropertiesAsNeeded(OWLAxioms axioms) {
+        axiomatizeBuiltInPropertiesAsNeeded(axioms,false,false,false,false);
+    }
+    protected void axiomatizeTopObjectProperty(OWLAxioms axioms) {
         OWLObjectProperty topObjectProperty=m_factory.getOWLObjectProperty(URI.create(AtomicRole.TOP_OBJECT_ROLE.getURI()));
         axioms.m_complexObjectPropertyInclusions.add(new OWLAxioms.ComplexObjectPropertyInclusion(topObjectProperty));
         axioms.m_simpleObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { topObjectProperty,topObjectProperty.getInverseProperty() });
@@ -59,18 +77,21 @@ public class BuiltInPropertyManager {
         OWLObjectSomeRestriction hasTopNewIndividual=m_factory.getOWLObjectSomeRestriction(topObjectProperty,oneOfNewIndividual);
         axioms.m_conceptInclusions.add(new OWLDescription[] { hasTopNewIndividual });
     }
-    public void axiomatizeTopObjectPropertyIfNeeded(OWLAxioms axioms) {
-        if (usesTopObjectProperty(axioms))
-            axiomatizeTopObjectProperty(axioms);
+    protected void axiomatizeBottomObjectProperty(OWLAxioms axioms) {
+        axioms.m_unsatisfiableObjectProperties.add(m_bottomObjectProperty);
     }
-    public boolean usesTopObjectProperty(OWLAxioms axioms) {
-        Checker checker=new Checker(axioms);
-        return checker.m_usesTopObjectRole;
+    protected void axiomatizeTopDataProperty(OWLAxioms axioms) {
+        throw new IllegalArgumentException("The axioms use owl:topDataProperty in an inappropriate way.");
+    }
+    protected void axiomatizeBottomDataProperty(OWLAxioms axioms) {
+        axioms.m_unsatisfiableDataProperties.add(m_bottomDataProperty);
     }
     
     protected class Checker implements OWLDescriptionVisitor {
-        public boolean m_usesTopObjectRole;
-        public boolean m_usesTopDataRole;
+        public boolean m_usesTopObjectProperty;
+        public boolean m_usesBottomObjectProperty;
+        public boolean m_usesTopDataProperty;
+        public boolean m_usesBottomDataProperty;
 
         public Checker(OWLAxioms axioms) {
             for (OWLDescription[] inclusion : axioms.m_conceptInclusions)
@@ -94,18 +115,29 @@ public class BuiltInPropertyManager {
                 visitProperty(property);
             for (OWLObjectPropertyExpression property : axioms.m_asymmetricObjectProperties)
                 visitProperty(property);
+            for (OWLDataPropertyExpression[] inclusion : axioms.m_dataPropertyInclusions) {
+                visitProperty(inclusion[0]);
+                visitProperty(inclusion[1]);
+            }
+            for (OWLDataPropertyExpression[] disjoint : axioms.m_disjointDataProperties)
+                for (int index=0;index<disjoint.length;index++)
+                    visitProperty(disjoint[index]);
             FactVisitor factVisitor=new FactVisitor();
             for (OWLIndividualAxiom fact : axioms.m_facts)
                 fact.accept(factVisitor);
         }
         protected void visitProperty(OWLObjectPropertyExpression object) {
             if (object.getNamedProperty().equals(m_topObjectProperty))
-                m_usesTopObjectRole=true;
+                m_usesTopObjectProperty=true;
+            else if (object.getNamedProperty().equals(m_bottomObjectProperty))
+                m_usesBottomObjectProperty=true;
         }
 
         protected void visitProperty(OWLDataPropertyExpression object) {
             if (object.asOWLDataProperty().equals(m_topDataProperty))
-                m_usesTopDataRole=true;
+                m_usesTopDataProperty=true;
+            else if (object.asOWLDataProperty().equals(m_bottomDataProperty))
+                m_usesBottomDataProperty=true;
         }
 
         public void visit(OWLClass object) {

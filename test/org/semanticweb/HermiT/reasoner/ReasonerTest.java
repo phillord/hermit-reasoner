@@ -55,7 +55,6 @@ public class ReasonerTest extends AbstractReasonerTest {
             "SubObjectPropertyOf( op8 op4 ) "+
             "SubObjectPropertyOf( op5 owl:bottomObjectProperty ) "+
 
-            "SubDataPropertyOf( owl:topDataProperty dp7 ) "+
             "SubDataPropertyOf( dp4 dp2 ) "+
             "SubDataPropertyOf( dp4 dp3 ) "+
             "SubDataPropertyOf( dp3 dp5 ) "+
@@ -64,7 +63,7 @@ public class ReasonerTest extends AbstractReasonerTest {
             "SubDataPropertyOf( dp3 dp1 ) "+
             "SubDataPropertyOf( dp4 dp1 ) "+
             "SubDataPropertyOf( dp6 dp2 ) "+
-            "SubDataPropertyOf( dp8 owl:bottomDataProperty ) ";
+            "SubDataPropertyOf( dp7 owl:bottomDataProperty ) ";
         loadReasonerWithAxioms(axioms);
         assertHierarchies("res/hierarchy-printing-1.txt");
     }
@@ -141,7 +140,17 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertSuperObjectProperties("r5",EQ("r1",INV("r1i")));
         assertSuperObjectProperties("r6",EQ("r2",INV("r2i")),EQ("r2i",INV("r2")));
     }
-    
+
+    public void testSemanticObjectPropertyClassification() throws Exception {
+        String axioms =
+            "ObjectPropertyRange( r ObjectOneOf( a ) ) "+
+            "ObjectPropertyRange( s ObjectOneOf( a ) ) "+
+            "EquivalentClasses( ObjectSomeValuesFrom( r owl:Thing ) ObjectSomeValuesFrom( s owl:Thing ) ) ";
+        loadReasonerWithAxioms(axioms);
+        
+        assertTrue(m_reasoner.isEquivalentProperty(m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(URI.create("file:/c/test.owl#r")),m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(URI.create("file:/c/test.owl#s"))));
+    }
+
     @SuppressWarnings("unchecked")
     public void testDataPropertyHierarchy() throws Exception {
         String axioms =
@@ -168,7 +177,19 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertSuperDataProperties("r5",EQ("r1"));
         assertSuperDataProperties("r6",EQ("r2"));
     }
-    
+
+    public void testSemanticDataPropertyClassification() throws Exception {
+        String axioms =
+            "DataPropertyRange( r xsd:nonNegativeInteger ) "+
+            "DataPropertyRange( r xsd:nonPositiveInteger ) "+
+            "DataPropertyRange( s xsd:nonNegativeInteger ) "+
+            "DataPropertyRange( s xsd:nonPositiveInteger ) "+
+            "EquivalentClasses( DataSomeValuesFrom( r rdfs:Literal ) DataSomeValuesFrom( s rdfs:Literal ) ) ";
+        loadReasonerWithAxioms(axioms);
+        
+        assertTrue(m_reasoner.isEquivalentProperty(m_ontologyManager.getOWLDataFactory().getOWLDataProperty(URI.create("file:/c/test.owl#r")),m_ontologyManager.getOWLDataFactory().getOWLDataProperty(URI.create("file:/c/test.owl#s"))));
+    }
+
     public void testComplexConceptInstanceRetrieval() throws Exception {
         String axioms =
             "EquivalentClasses(a ObjectSomeValuesFrom(r b)) " +
@@ -1912,7 +1933,7 @@ public class ReasonerTest extends AbstractReasonerTest {
     }
     
     public void testNIRuleBlockingWithUnraveling() throws Exception {
-        // This is the example from Section 3.2.6 from the SHOIQ+ paper.
+        // This is the example from Section 3.2.6 of the SHOIQ+ paper.
         StringBuffer buffer = new StringBuffer();
         buffer.append("ClassAssertion(a A)");
         buffer.append("ClassAssertion(a ObjectSomeValuesFrom(R B))");

@@ -1,6 +1,8 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.model;
 
+import java.io.Serializable;
+
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.datatypes.DatatypeRegistry;
 
@@ -39,5 +41,31 @@ public class Constant extends Term {
     
     public static Constant create(Object dataValue) {
         return s_interningManager.intern(new Constant(dataValue));
+    }
+    
+    public static class AnonymousConstantValue implements Serializable {
+        private static final long serialVersionUID=-6507581477324043034L;
+
+        protected final String m_name;
+        
+        public AnonymousConstantValue(String name) {
+            m_name=name;
+        }
+        public String getName() {
+            return m_name;
+        }
+        public int hashCode() {
+            return m_name.hashCode();
+        }
+        public boolean equals(Object that) {
+            if (this==that)
+                return true;
+            if (!(that instanceof AnonymousConstantValue))
+                return false;
+            return ((AnonymousConstantValue)that).m_name.equals(m_name);
+        }
+        public static AnonymousConstantValue create(String name) {
+            return new AnonymousConstantValue(name);
+        }
     }
 }

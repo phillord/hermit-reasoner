@@ -27,21 +27,23 @@ public class HierarchyBuilder<E> {
             bottomNode.m_parentNodes.add(topNode);
             Hierarchy<E> hierarchy=new Hierarchy<E>(topNode,bottomNode);
             for (E element : elements) {
-                HierarchyNode<E> node=findPosition(element,topNode,bottomNode);
-                hierarchy.m_nodesByElements.put(element,node);
-                if (!node.m_equivalentElements.contains(element)) {
-                    // Existing node: just add the element to the node label
-                    node.m_equivalentElements.add(element);
-                }
-                else {
-                    // New node: insert it into the hierarchy
-                    for (HierarchyNode<E> parent : node.m_parentNodes) {
-                        parent.m_childNodes.add(node);
-                        parent.m_childNodes.removeAll(node.m_childNodes);
+                if (!element.equals(topElement) && !element.equals(bottomElement)) {
+                    HierarchyNode<E> node=findPosition(element,topNode,bottomNode);
+                    hierarchy.m_nodesByElements.put(element,node);
+                    if (!node.m_equivalentElements.contains(element)) {
+                        // Existing node: just add the element to the node label
+                        node.m_equivalentElements.add(element);
                     }
-                    for (HierarchyNode<E> child : node.m_childNodes) {
-                        child.m_parentNodes.add(node);
-                        child.m_parentNodes.removeAll(node.m_parentNodes);
+                    else {
+                        // New node: insert it into the hierarchy
+                        for (HierarchyNode<E> parent : node.m_parentNodes) {
+                            parent.m_childNodes.add(node);
+                            parent.m_childNodes.removeAll(node.m_childNodes);
+                        }
+                        for (HierarchyNode<E> child : node.m_childNodes) {
+                            child.m_parentNodes.add(node);
+                            child.m_parentNodes.removeAll(node.m_parentNodes);
+                        }
                     }
                 }
                 if (m_progressMonitor!=null)

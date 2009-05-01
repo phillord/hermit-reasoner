@@ -375,7 +375,11 @@ public final class Tableau implements Serializable {
             else {
                 Constant constant=(Constant)term;
                 node=createNewRootConstantNode(m_dependencySetFactory.emptySet());
-                m_extensionManager.addAssertion(DataValueEnumeration.create(new Object[] { constant.getDataValue() }),node,m_dependencySetFactory.emptySet(),true);
+                Object dataValue=constant.getDataValue();
+                // Anonymous constant values are not assigned a particular value.
+                // See the hack in OWLClausification for an explanation.
+                if (!(dataValue instanceof Constant.AnonymousConstantValue))
+                    m_extensionManager.addAssertion(DataValueEnumeration.create(new Object[] { dataValue }),node,m_dependencySetFactory.emptySet(),true);
             }
             termsToNodes.put(term,node);
         }

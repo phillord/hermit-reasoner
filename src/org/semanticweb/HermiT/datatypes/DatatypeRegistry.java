@@ -1,10 +1,14 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.datatypes;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Set;
 
 import org.semanticweb.HermiT.Prefixes;
+import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
 import org.semanticweb.HermiT.datatypes.bool.BooleanDatatypeHandler;
 import org.semanticweb.HermiT.datatypes.rdftext.RDFTextDatatypeHandler;
@@ -23,6 +27,7 @@ public class DatatypeRegistry {
     protected static final Map<String,DatatypeHandler> s_handlersByDatatypeURI=new HashMap<String,DatatypeHandler>();
     protected static final Map<Class<?>,DatatypeHandler> s_handlersByDataValueClass=new HashMap<Class<?>,DatatypeHandler>();
     static {
+        registerDatatypeHandler(new AnonymousConstantsDatatypeHandler());
         registerDatatypeHandler(new BooleanDatatypeHandler());
         registerDatatypeHandler(new RDFTextDatatypeHandler());
         registerDatatypeHandler(new OWLRealDatatypeHandler());
@@ -100,5 +105,47 @@ public class DatatypeRegistry {
             return datatypeHandler.isDisjointWith(datatypeURI1,datatypeURI2);
         else
             return true;
+    }
+
+    protected static class AnonymousConstantsDatatypeHandler implements DatatypeHandler {
+        protected static final String ANONYMOUS_CONSTANTS="internal:anonymous-constants";
+        protected final static Set<String> s_managedDatatypeURIs=Collections.singleton(ANONYMOUS_CONSTANTS);
+        protected final static Set<Class<?>> s_managedDataValueClasses=new HashSet<Class<?>>();
+        static {
+            s_managedDataValueClasses.add(Constant.AnonymousConstantValue.class);
+        }
+
+        public Set<String> getManagedDatatypeURIs() {
+            return s_managedDatatypeURIs;
+        }
+        public Set<Class<?>> getManagedDataValueClasses() {
+            return s_managedDataValueClasses;
+        }
+        public String toString(Prefixes prefixes,Object dataValue) {
+            Constant.AnonymousConstantValue value=(Constant.AnonymousConstantValue)dataValue;
+            return '\"'+value.getName()+"\"^^"+prefixes.abbreviateURI(ANONYMOUS_CONSTANTS);
+        }
+        public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
+            assert ANONYMOUS_CONSTANTS.equals(datatypeURI);
+            return new Constant.AnonymousConstantValue(lexicalForm.trim());
+        }
+        public void validateDatatypeRestriction(DatatypeRestriction datatypeRestriction) throws UnsupportedFacetException {
+            throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
+        }
+        public ValueSpaceSubset createValueSpaceSubset(DatatypeRestriction datatypeRestriction) {
+            throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
+        }
+        public ValueSpaceSubset conjoinWithDR(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
+            throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
+        }
+        public ValueSpaceSubset conjoinWithDRNegation(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
+            throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
+        }
+        public boolean isSubsetOf(String subsetDatatypeURI,String supersetDatatypeURI) {
+            throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
+        }
+        public boolean isDisjointWith(String datatypeURI1,String datatypeURI2) {
+            throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
+        }
     }
 }

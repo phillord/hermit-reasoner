@@ -27,8 +27,10 @@ public class OWLAxioms {
     public final Set<OWLObjectPropertyExpression> m_reflexiveObjectProperties;
     public final Set<OWLObjectPropertyExpression> m_irreflexiveObjectProperties;
     public final Set<OWLObjectPropertyExpression> m_asymmetricObjectProperties;
+    public final Set<OWLObjectPropertyExpression> m_unsatisfiableObjectProperties;
     public final Collection<OWLDataPropertyExpression[]> m_dataPropertyInclusions;
     public final Collection<OWLDataPropertyExpression[]> m_disjointDataProperties;
+    public final Set<OWLDataPropertyExpression> m_unsatisfiableDataProperties;
     public final Collection<OWLIndividualAxiom> m_facts;
     public final Set<OWLHasKeyDummy> m_hasKeys;
 
@@ -44,8 +46,10 @@ public class OWLAxioms {
         m_reflexiveObjectProperties=new HashSet<OWLObjectPropertyExpression>();
         m_irreflexiveObjectProperties=new HashSet<OWLObjectPropertyExpression>();
         m_asymmetricObjectProperties=new HashSet<OWLObjectPropertyExpression>();
+        m_unsatisfiableObjectProperties=new HashSet<OWLObjectPropertyExpression>();
         m_disjointDataProperties=new ArrayList<OWLDataPropertyExpression[]>();
         m_dataPropertyInclusions=new ArrayList<OWLDataPropertyExpression[]>();
+        m_unsatisfiableDataProperties=new HashSet<OWLDataPropertyExpression>();
         m_facts=new HashSet<OWLIndividualAxiom>();
         m_hasKeys=new HashSet<OWLHasKeyDummy>();
     }

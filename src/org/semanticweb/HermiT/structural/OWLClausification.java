@@ -121,7 +121,7 @@ public class OWLClausification {
             normalization.processOntology(m_configuration,ontology);
         normalization.processKeys(m_configuration,keys);
         BuiltInPropertyManager builtInPropertyManager=new BuiltInPropertyManager(factory);
-        builtInPropertyManager.axiomatizeTopObjectPropertyIfNeeded(axioms);
+        builtInPropertyManager.axiomatizeBuiltInPropertiesAsNeeded(axioms);
         ObjectPropertyInclusionManager objectPropertyInclusionManager=new ObjectPropertyInclusionManager(factory);
         objectPropertyInclusionManager.prepareTransformation(axioms);
         objectPropertyInclusionManager.rewriteAxioms(axioms);
@@ -149,19 +149,19 @@ public class OWLClausification {
             DLClause dlClause=DLClause.create(new Atom[] { superProp },new Atom[] { subProp });
             dlClauses.add(dlClause);
         }
-        for (OWLObjectPropertyExpression axiom : axioms.m_asymmetricObjectProperties) {
-            Atom roleAtom=getRoleAtom(axiom,X,Y);
-            Atom inverseRoleAtom=getRoleAtom(axiom,Y,X);
+        for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_asymmetricObjectProperties) {
+            Atom roleAtom=getRoleAtom(objectPropertyExpression,X,Y);
+            Atom inverseRoleAtom=getRoleAtom(objectPropertyExpression,Y,X);
             DLClause dlClause=DLClause.create(new Atom[] {},new Atom[] { roleAtom,inverseRoleAtom });
             dlClauses.add(dlClause.getSafeVersion());
         }
-        for (OWLObjectPropertyExpression axiom : axioms.m_reflexiveObjectProperties) {
-            Atom roleAtom=getRoleAtom(axiom,X,X);
+        for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_reflexiveObjectProperties) {
+            Atom roleAtom=getRoleAtom(objectPropertyExpression,X,X);
             DLClause dlClause=DLClause.create(new Atom[] { roleAtom },new Atom[] {});
             dlClauses.add(dlClause.getSafeVersion());
         }
-        for (OWLObjectPropertyExpression axiom : axioms.m_irreflexiveObjectProperties) {
-            Atom roleAtom=getRoleAtom(axiom,X,X);
+        for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_irreflexiveObjectProperties) {
+            Atom roleAtom=getRoleAtom(objectPropertyExpression,X,X);
             DLClause dlClause=DLClause.create(new Atom[] {},new Atom[] { roleAtom });
             dlClauses.add(dlClause.getSafeVersion());
         }
@@ -173,9 +173,9 @@ public class OWLClausification {
                     DLClause dlClause=DLClause.create(new Atom[] {},new Atom[] { atom_i,atom_j });
                     dlClauses.add(dlClause.getSafeVersion());
                 }
-        if (axioms.m_simpleObjectPropertyInclusions.contains(factory.getOWLObjectProperty(URI.create(AtomicRole.BOTTOM_OBJECT_ROLE.getURI())))) {
-            Atom bodyAtom=Atom.create(AtomicRole.BOTTOM_OBJECT_ROLE,X,Y);
-            dlClauses.add(DLClause.create(new Atom[] {},new Atom[] { bodyAtom }).getSafeVersion());
+        for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_unsatisfiableObjectProperties) {
+            Atom roleAtom=getRoleAtom(objectPropertyExpression,X,Y);
+            dlClauses.add(DLClause.create(new Atom[] {},new Atom[] { roleAtom }).getSafeVersion());
         }
         if (axioms.m_dataPropertyInclusions.contains(factory.getOWLDataProperty(URI.create(AtomicRole.BOTTOM_DATA_ROLE.getURI())))) {
             Atom bodyAtom=Atom.create(AtomicRole.BOTTOM_DATA_ROLE,X,Y);
@@ -190,6 +190,10 @@ public class OWLClausification {
                     DLClause dlClause=DLClause.create(new Atom[] { atom_ij },new Atom[] { atom_i,atom_j });
                     dlClauses.add(dlClause.getSafeVersion());
                 }
+        for (OWLDataPropertyExpression dataPropertyExpression : axioms.m_unsatisfiableDataProperties) {
+            Atom roleAtom=getRoleAtom(dataPropertyExpression,X,Y);
+            dlClauses.add(DLClause.create(new Atom[] {},new Atom[] { roleAtom }).getSafeVersion());
+        }
         DataRangeConverter dataRangeConverter=new DataRangeConverter(m_configuration.warningMonitor,m_configuration.ignoreUnsupportedDatatypes);
         NormalizedAxiomClausifier clausifier=new NormalizedAxiomClausifier(dataRangeConverter,positiveFacts,factory);
         for (OWLDescription[] inclusion : axioms.m_conceptInclusions) {

@@ -24,6 +24,7 @@ import java.util.HashMap;
 import org.protege.editor.owl.model.inference.ProtegeOWLReasonerFactoryAdapter;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLAxiom;
+import org.semanticweb.owl.model.OWLDataType;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLConstant;
 import org.semanticweb.owl.model.OWLDataFactory;
@@ -417,39 +418,54 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
 
     public void classifyObjectProperties() {
         if (m_objectRoleHierarchy==null) {
-            Map<Role,DeterministicHierarchyBuilder.GraphNode<Role>> allSubsumers=new HashMap<Role,DeterministicHierarchyBuilder.GraphNode<Role>>();
-            addInclusion(allSubsumers,AtomicRole.TOP_OBJECT_ROLE,AtomicRole.TOP_OBJECT_ROLE);
-            addInclusion(allSubsumers,AtomicRole.BOTTOM_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE);
-            for (DLClause dlClause : m_dlOntology.getDLClauses()) {
-                if (dlClause.isRoleInclusion()) {
-                    AtomicRole sub=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
-                    AtomicRole sup=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
-                    if (m_dlOntology.getAllAtomicObjectRoles().contains(sub) && m_dlOntology.getAllAtomicObjectRoles().contains(sup)) {
-                        addInclusion(allSubsumers,sub,sup);
-                        addInclusion(allSubsumers,sub.getInverse(),sup.getInverse());
+            HierarchyBuilder.Relation<Role> relation=
+                new HierarchyBuilder.Relation<Role>() {
+                    protected final OWLDataFactory m_factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
+                    public boolean doesSubsume(Role parent,Role child) {
+                        return isSubPropertyOf(getObjectPropertyExpression(m_factory,child),getObjectPropertyExpression(m_factory,parent));
                     }
-                }
-                else if (dlClause.isRoleInverseInclusion()) {
-                    AtomicRole sub=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
-                    AtomicRole sup=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
-                    if (m_dlOntology.getAllAtomicObjectRoles().contains(sub) && m_dlOntology.getAllAtomicObjectRoles().contains(sup)) {
-                        addInclusion(allSubsumers,sub.getInverse(),sup);
-                        addInclusion(allSubsumers,sub,sup.getInverse());
-                    }
-                }
-            }
-            Set<Role> allRoles=new HashSet<Role>();
+                };
+            HierarchyBuilder.ClassificationProgressMonitor<Role> progressMonitor;
+            if (m_progressMonitor==null)
+                progressMonitor=null;
+            else
+                progressMonitor=
+                    new HierarchyBuilder.ClassificationProgressMonitor<Role>() {
+                        protected int m_processedRoles=0;
+                        public void elementClassified(Role element) {
+                            m_processedRoles++;
+                            m_progressMonitor.setProgress(m_processedRoles);
+                        }
+                    };
+            Set<Role> allObjectRoles=new HashSet<Role>();
             for (AtomicRole atomicRole : m_dlOntology.getAllAtomicObjectRoles()) {
-                allRoles.add(atomicRole);
-                allRoles.add(atomicRole.getInverse());
-                addInclusion(allSubsumers,atomicRole,AtomicRole.TOP_OBJECT_ROLE);
-                addInclusion(allSubsumers,atomicRole.getInverse(),AtomicRole.TOP_OBJECT_ROLE);
-                addInclusion(allSubsumers,AtomicRole.BOTTOM_OBJECT_ROLE,atomicRole);
-                addInclusion(allSubsumers,AtomicRole.BOTTOM_OBJECT_ROLE,atomicRole.getInverse());
+                allObjectRoles.add(atomicRole);
+                allObjectRoles.add(atomicRole.getInverse());
             }
-            DeterministicHierarchyBuilder<Role> hierarchyBuilder=new DeterministicHierarchyBuilder<Role>(allSubsumers,AtomicRole.TOP_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE);
-            m_objectRoleHierarchy=hierarchyBuilder.buildHierarchy();
+            HierarchyBuilder<Role> hierarchyBuilder=new HierarchyBuilder<Role>(relation,progressMonitor);
+            m_objectRoleHierarchy=hierarchyBuilder.buildHierarchy(AtomicRole.TOP_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE,allObjectRoles);
         }
+    }
+    
+    public boolean isSubPropertyOf(OWLObjectPropertyExpression subObjectPropertyExpression,OWLObjectPropertyExpression superObjectPropertyExpression) {
+        if (superObjectPropertyExpression.getNamedProperty().getURI().toString().equals(AtomicRole.TOP_OBJECT_ROLE.getURI()))
+            return true;
+        else {
+            OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
+            OWLDataFactory factory=ontologyManager.getOWLDataFactory();
+            OWLIndividual individualA=factory.getOWLIndividual(URI.create("internal:individualA"));
+            OWLObjectProperty negatedSuperProperty=factory.getOWLObjectProperty(URI.create("internal:negated-superproperty"));
+            OWLIndividual individualB=factory.getOWLIndividual(URI.create("internal:individualB"));
+            OWLAxiom subAssertion=factory.getOWLObjectPropertyAssertionAxiom(individualA,subObjectPropertyExpression,individualB);
+            OWLAxiom superAssertion=factory.getOWLObjectPropertyAssertionAxiom(individualA,negatedSuperProperty,individualB);
+            OWLAxiom superDisjoint=factory.getOWLDisjointObjectPropertiesAxiom(superObjectPropertyExpression,negatedSuperProperty);
+            Tableau tableau=getTableau(ontologyManager,subAssertion,superAssertion,superDisjoint);
+            return !tableau.isABoxSatisfiable();
+        }
+    }
+    
+    public boolean isEquivalentProperty(OWLObjectPropertyExpression objectPropertyExpression1,OWLObjectPropertyExpression objectPropertyExpression2) {
+        return isSubPropertyOf(objectPropertyExpression1,objectPropertyExpression2) && isSubPropertyOf(objectPropertyExpression2,objectPropertyExpression1);
     }
     
     public Set<Set<OWLObjectPropertyExpression>> getSuperProperties(OWLObjectPropertyExpression propertyExpression) {
@@ -598,24 +614,52 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
     
     public void classifyDataProperties() {
         if (m_atomicDataRoleHierarchy==null) {
-            Map<AtomicRole,DeterministicHierarchyBuilder.GraphNode<AtomicRole>> allSubsumers=new HashMap<AtomicRole,DeterministicHierarchyBuilder.GraphNode<AtomicRole>>();
-            addInclusion(allSubsumers,AtomicRole.TOP_DATA_ROLE,AtomicRole.TOP_DATA_ROLE);
-            addInclusion(allSubsumers,AtomicRole.BOTTOM_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE);
-            for (DLClause dlClause : m_dlOntology.getDLClauses()) {
-                if (dlClause.isRoleInclusion()) {
-                    AtomicRole sub=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
-                    AtomicRole sup=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
-                    if (m_dlOntology.getAllAtomicDataRoles().contains(sub) && m_dlOntology.getAllAtomicDataRoles().contains(sup))
-                        addInclusion(allSubsumers,sub,sup);
-                }
-            }
-            for (AtomicRole atomicRole : m_dlOntology.getAllAtomicDataRoles()) {
-                addInclusion(allSubsumers,atomicRole,AtomicRole.TOP_DATA_ROLE);
-                addInclusion(allSubsumers,AtomicRole.BOTTOM_DATA_ROLE,atomicRole);
-            }
-            DeterministicHierarchyBuilder<AtomicRole> hierarchyBuilder=new DeterministicHierarchyBuilder<AtomicRole>(allSubsumers,AtomicRole.TOP_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE);
-            m_atomicDataRoleHierarchy=hierarchyBuilder.buildHierarchy();
+            HierarchyBuilder.Relation<AtomicRole> relation=
+                new HierarchyBuilder.Relation<AtomicRole>() {
+                    protected final OWLDataFactory m_factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
+                    public boolean doesSubsume(AtomicRole parent,AtomicRole child) {
+                        return isSubPropertyOf(getDataProperty(m_factory,child),getDataProperty(m_factory,parent));
+                    }
+                };
+            HierarchyBuilder.ClassificationProgressMonitor<AtomicRole> progressMonitor;
+            if (m_progressMonitor==null)
+                progressMonitor=null;
+            else
+                progressMonitor=
+                    new HierarchyBuilder.ClassificationProgressMonitor<AtomicRole>() {
+                        protected int m_processedAtomicRoles=0;
+                        public void elementClassified(AtomicRole element) {
+                            m_processedAtomicRoles++;
+                            m_progressMonitor.setProgress(m_processedAtomicRoles);
+                        }
+                    };
+            HierarchyBuilder<AtomicRole> hierarchyBuilder=new HierarchyBuilder<AtomicRole>(relation,progressMonitor);
+            m_atomicDataRoleHierarchy=hierarchyBuilder.buildHierarchy(AtomicRole.TOP_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE,m_dlOntology.getAllAtomicDataRoles());
         }
+    }
+    
+    public boolean isSubPropertyOf(OWLDataProperty subDataProperty,OWLDataProperty superDataProperty) {
+        if (superDataProperty.getURI().toString().equals(AtomicRole.TOP_DATA_ROLE.getURI()))
+            return true;
+        else if (subDataProperty.getURI().toString().equals(AtomicRole.TOP_DATA_ROLE.getURI()))
+            return !isConsistent();
+        else {
+            OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
+            OWLDataFactory factory=ontologyManager.getOWLDataFactory();
+            OWLIndividual individual=factory.getOWLIndividual(URI.create("internal:individual"));
+            OWLDataProperty negatedSuperProperty=factory.getOWLDataProperty(URI.create("internal:negated-superproperty"));
+            OWLDataType anonymousConstantsDatatype=factory.getOWLDataType(URI.create("internal:anonymous-constants"));
+            OWLConstant constant=factory.getOWLTypedConstant("internal:constant",anonymousConstantsDatatype);
+            OWLAxiom subAssertion=factory.getOWLDataPropertyAssertionAxiom(individual,subDataProperty,constant);
+            OWLAxiom superAssertion=factory.getOWLDataPropertyAssertionAxiom(individual,negatedSuperProperty,constant);
+            OWLAxiom superDisjoint=factory.getOWLDisjointDataPropertiesAxiom(superDataProperty,negatedSuperProperty);
+            Tableau tableau=getTableau(ontologyManager,subAssertion,superAssertion,superDisjoint);
+            return !tableau.isABoxSatisfiable();
+        }
+    }
+    
+    public boolean isEquivalentProperty(OWLDataProperty dataProperty1,OWLDataProperty dataProperty2) {
+        return isSubPropertyOf(dataProperty1,dataProperty2) && isSubPropertyOf(dataProperty2,dataProperty1);
     }
     
     public Set<Set<OWLDataProperty>> getSuperProperties(OWLDataProperty property) {
@@ -959,10 +1003,13 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             OWLAxioms axioms=new OWLAxioms();
             OWLNormalization normalization=new OWLNormalization(factory,axioms);
             normalization.processOntology(config,newOntology);
-            if (!originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.TOP_OBJECT_ROLE)) {
-                BuiltInPropertyManager builtInPropertyManager=new BuiltInPropertyManager(factory);   
-                builtInPropertyManager.axiomatizeTopObjectPropertyIfNeeded(axioms);
-            }
+            BuiltInPropertyManager builtInPropertyManager=new BuiltInPropertyManager(factory);   
+            builtInPropertyManager.axiomatizeBuiltInPropertiesAsNeeded(axioms,
+                originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.TOP_OBJECT_ROLE),
+                originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.BOTTOM_OBJECT_ROLE),
+                originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.TOP_DATA_ROLE),
+                originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.BOTTOM_DATA_ROLE)
+            );
             if (!originalDLOntology.getAllComplexObjectRoleInclusions().isEmpty() || !axioms.m_complexObjectPropertyInclusions.isEmpty()) {
                 ObjectPropertyInclusionManager objectPropertyInclusionManager=new ObjectPropertyInclusionManager(factory);
                 objectPropertyInclusionManager.prepareTransformation(axioms);
@@ -1040,6 +1087,10 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             AtomicRole inverseOf=((InverseRole)role).getInverseOf();
             return factory.getOWLObjectProperty(URI.create(inverseOf.getURI())).getInverseProperty();
         }
+    }
+    
+    protected static OWLDataProperty getDataProperty(OWLDataFactory factory,AtomicRole atomicRole) {
+        return factory.getOWLDataProperty(URI.create(atomicRole.getURI()));
     }
     
     protected static Prefixes createPrefixes(DLOntology dlOntology) {
