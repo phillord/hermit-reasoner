@@ -43,7 +43,7 @@ public abstract class AbstractReasonerInternalsTest extends AbstractReasonerTest
 
         DLOntology dlOntology=getDLOntology(c,dgs);
 
-        DirectBlockingChecker directBlockingChecker=new PairWiseDirectBlockingChecker();
+        DirectBlockingChecker directBlockingChecker=new PairWiseDirectBlockingChecker(false);
         BlockingSignatureCache blockingSignatureCache=new BlockingSignatureCache(directBlockingChecker);
         BlockingStrategy blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
         ExistentialExpansionStrategy ExpansionStrategy=new CreationOrderStrategy(blockingStrategy);

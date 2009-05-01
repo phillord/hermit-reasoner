@@ -62,7 +62,7 @@ public class DLClauseEvaluationTest extends AbstractReasonerInternalsTest {
     }
     
     protected void setUp() {
-        PairWiseDirectBlockingChecker directChecker=new PairWiseDirectBlockingChecker();
+        PairWiseDirectBlockingChecker directChecker=new PairWiseDirectBlockingChecker(false);
         BlockingSignatureCache blockingSignatureCache=new BlockingSignatureCache(directChecker);
         BlockingStrategy blockingStrategy=new AnywhereBlocking(directChecker,blockingSignatureCache);
         ExistentialExpansionStrategy ExpansionStrategy=new CreationOrderStrategy(blockingStrategy);

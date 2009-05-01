@@ -61,7 +61,7 @@ public class MergeTest extends AbstractReasonerInternalsTest {
         super(name);
     }
     protected void setUp() {
-        DirectBlockingChecker directBlockingChecker=new PairWiseDirectBlockingChecker();
+        DirectBlockingChecker directBlockingChecker=new PairWiseDirectBlockingChecker(false);
         BlockingSignatureCache blockingSignatureCache=new BlockingSignatureCache(directBlockingChecker);
         BlockingStrategy blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
         ExistentialExpansionStrategy ExpansionStrategy=new CreationOrderStrategy(blockingStrategy);

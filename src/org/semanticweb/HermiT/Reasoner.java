@@ -14,14 +14,17 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.protege.editor.owl.model.inference.ProtegeOWLReasonerFactoryAdapter;
+import org.semanticweb.HermiT.Configuration.BlockingStrategyType;
 import org.semanticweb.HermiT.blocking.AncestorBlocking;
 import org.semanticweb.HermiT.blocking.AnywhereBlocking;
 import org.semanticweb.HermiT.blocking.AnywhereCoreBlocking;
@@ -197,6 +200,104 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         clearOntologies();
     }
 
+    // -- HACKS ------------------------------------------------
+    
+    public void loadOntologyForCoreBlocking(OWLOntologyManager ontologyManager,OWLOntology ontology,Set<DescriptionGraph> descriptionGraphs,Set<OWLHasKeyDummy> keys) {
+        // Temporary HACK: this is so that we showe the axioms into core blocking
+        if (descriptionGraphs==null)
+            descriptionGraphs=Collections.emptySet();
+        if (keys==null)
+            keys=Collections.emptySet();
+        OWLClausification clausifier=new OWLClausification(m_configuration);
+        m_dlOntology=clausifier.clausifyWithKeys(ontologyManager,ontology,descriptionGraphs,keys);
+        m_prefixes=createPrefixes(m_dlOntology);
+
+        // This part is copied from OWLClausification
+        Set<OWLOntology> importClosure=new HashSet<OWLOntology>();
+        List<OWLOntology> toProcess=new ArrayList<OWLOntology>();
+        toProcess.add(ontology);
+        while (!toProcess.isEmpty()) {
+            OWLOntology anOntology=toProcess.remove(toProcess.size()-1);
+            if (importClosure.add(anOntology))
+                toProcess.addAll(anOntology.getImports(ontologyManager));
+        }
+
+        // This creates an OWLAxioms instance that is then given to the core blocking strategy
+        OWLAxioms axioms=new OWLAxioms();
+        OWLNormalization normalization=new OWLNormalization(ontologyManager.getOWLDataFactory(),axioms);
+        for (OWLOntology ontologyInClosure : importClosure)
+            normalization.processOntology(m_configuration,ontologyInClosure);
+        normalization.processKeys(m_configuration,keys);
+
+        // And now for the Tableau!
+        TableauMonitor wellKnownTableauMonitor=null;
+        switch (m_configuration.tableauMonitorType) {
+        case NONE:
+            wellKnownTableauMonitor=null;
+            break;
+        case TIMING:
+            wellKnownTableauMonitor=new Timer();
+            break;
+        case TIMING_WITH_PAUSE:
+            wellKnownTableauMonitor=new TimerWithPause();
+            break;
+        case DEBUGGER_HISTORY_ON:
+            wellKnownTableauMonitor=new Debugger(m_prefixes,true);
+            break;
+        case DEBUGGER_NO_HISTORY:
+            wellKnownTableauMonitor=new Debugger(m_prefixes,false);
+            break;
+        default:
+            throw new IllegalArgumentException("Unknown monitor type");
+        }
+
+        TableauMonitor tableauMonitor=null;
+        if (m_configuration.monitor==null)
+            tableauMonitor=wellKnownTableauMonitor;
+        else if (wellKnownTableauMonitor==null)
+            tableauMonitor=m_configuration.monitor;
+        else
+            tableauMonitor=new TableauMonitorFork(wellKnownTableauMonitor,m_configuration.monitor);
+
+        DirectBlockingChecker directBlockingChecker=null;
+        switch (m_configuration.directBlockingType) {
+        case OPTIMAL:
+            if (m_dlOntology.hasAtMostRestrictions() && m_dlOntology.hasInverseRoles())
+                directBlockingChecker=new PairWiseDirectBlockingChecker(true);
+            else
+                directBlockingChecker=new SingleDirectBlockingChecker(true);
+            break;
+        case SINGLE:
+            directBlockingChecker=new SingleDirectBlockingChecker(true);
+            break;
+        case PAIR_WISE:
+            directBlockingChecker=new PairWiseDirectBlockingChecker(true);
+            break;
+        default:
+            throw new IllegalArgumentException("Unknown direct blocking type.");
+        }
+
+        BlockingStrategy blockingStrategy=new AnywhereCoreBlocking(directBlockingChecker /*,axioms*/);
+
+        ExistentialExpansionStrategy existentialsExpansionStrategy=null;
+        switch (m_configuration.existentialStrategyType) {
+        case CREATION_ORDER:
+            existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
+            break;
+        case EL:
+            existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,true);
+            break;
+        case INDIVIDUAL_REUSE:
+            existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,false);
+            break;
+        default:
+            throw new IllegalArgumentException("Unknown expansion strategy type.");
+        }
+
+        m_tableau=new Tableau(m_interruptFlag,tableauMonitor,existentialsExpansionStrategy,m_dlOntology,m_configuration.parameters);
+        m_subsumptionCache=new SubsumptionCache(m_tableau);
+    }
+    
     // Monitor interface
 
     public OWLEntity getCurrentEntity() {
@@ -931,15 +1032,15 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         switch (config.directBlockingType) {
         case OPTIMAL:
             if (dlOntology.hasAtMostRestrictions() && dlOntology.hasInverseRoles())
-                directBlockingChecker=new PairWiseDirectBlockingChecker();
+                directBlockingChecker=new PairWiseDirectBlockingChecker(config.blockingStrategyType==BlockingStrategyType.CORE);
             else
-                directBlockingChecker=new SingleDirectBlockingChecker();
+                directBlockingChecker=new SingleDirectBlockingChecker(config.blockingStrategyType==BlockingStrategyType.CORE);
             break;
         case SINGLE:
-            directBlockingChecker=new SingleDirectBlockingChecker();
+            directBlockingChecker=new SingleDirectBlockingChecker(config.blockingStrategyType==BlockingStrategyType.CORE);
             break;
         case PAIR_WISE:
-            directBlockingChecker=new PairWiseDirectBlockingChecker();
+            directBlockingChecker=new PairWiseDirectBlockingChecker(config.blockingStrategyType==BlockingStrategyType.CORE);
             break;
         default:
             throw new IllegalArgumentException("Unknown direct blocking type.");

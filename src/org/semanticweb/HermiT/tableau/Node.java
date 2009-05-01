@@ -28,6 +28,7 @@ public final class Node implements Serializable {
     protected int m_treeDepth;
     protected int m_numberOfPositiveAtomicConcepts;
     protected int m_numberOfNegatedAtomicConcepts;
+    protected int m_numberOfNegatedRoleAssertions;
     private List<ExistentialConcept> m_unprocessedExistentials;
     protected Node m_previousTableauNode;
     protected Node m_nextTableauNode;
@@ -57,6 +58,7 @@ public final class Node implements Serializable {
         m_treeDepth=treeDepth;
         m_numberOfPositiveAtomicConcepts=0;
         m_numberOfNegatedAtomicConcepts=0;
+        m_numberOfNegatedRoleAssertions=0;
         m_unprocessedExistentials=NO_EXISTENTIALS;
         m_previousTableauNode=null;
         m_nextTableauNode=null;

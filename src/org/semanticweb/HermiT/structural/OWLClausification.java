@@ -309,7 +309,7 @@ public class OWLClausification {
             OWLDescription internal=((OWLObjectComplementOf)description).getOperand();
             if (!(internal instanceof OWLClass))
                 throw new IllegalStateException("Internal error: invalid normal form.");
-            return AtomicNegationConcept.create(AtomicConcept.create(((OWLClass)internal).getURI().toString()));
+            return AtomicConcept.create(((OWLClass)internal).getURI().toString()).getNegation();
         }
         else
             throw new IllegalStateException("Internal error: invalid normal form.");
@@ -731,14 +731,15 @@ public class OWLClausification {
             m_positiveFacts.add(getRoleAtom(object.getProperty(),getIndividual(object.getSubject()),getIndividual(object.getObject())));
         }
         public void visit(OWLNegativeObjectPropertyAssertionAxiom object) {
-            throw new IllegalArgumentException("Internal error: invalid normal form.");
+            m_negativeFacts.add(getRoleAtom(object.getProperty(),getIndividual(object.getSubject()),getIndividual(object.getObject())));
         }
         public void visit(OWLDataPropertyAssertionAxiom object) {
             Constant targetValue=Constant.create(object.getObject().accept(m_dataRangeConverter));
             m_positiveFacts.add(getRoleAtom(object.getProperty(),getIndividual(object.getSubject()),targetValue));
         }
         public void visit(OWLNegativeDataPropertyAssertionAxiom object) {
-            throw new IllegalArgumentException("Internal error: invalid normal form.");
+            Constant targetValue=Constant.create(object.getObject().accept(m_dataRangeConverter));
+            m_negativeFacts.add(getRoleAtom(object.getProperty(),getIndividual(object.getSubject()),targetValue));
         }
     }
 

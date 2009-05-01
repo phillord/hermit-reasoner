@@ -9,7 +9,7 @@ import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.ExistentialConcept;
-import org.semanticweb.HermiT.model.Inequality;
+import org.semanticweb.HermiT.model.NegatedAtomicRole;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 
 /**
@@ -31,23 +31,19 @@ public abstract class ExtensionTable implements Serializable {
     public static enum View { EXTENSION_THIS,EXTENSION_OLD,DELTA_OLD,TOTAL };
 
     protected final Tableau m_tableau;
-    protected final ExtensionManager m_extensionManager;
     protected final TableauMonitor m_tableauMonitor;
     protected final int m_tupleArity;
     protected final TupleTable m_tupleTable;
     protected final DependencySetManager m_dependencySetManager;
     protected final CoreManager m_coreManager;
-    protected final Object[] m_binaryAuxiliaryTuple;
-    protected final UnionDependencySet m_binaryUnionDependencySet;
     protected int m_afterExtensionOldTupleIndex;
     protected int m_afterExtensionThisTupleIndex;
     protected int m_afterDeltaNewTupleIndex;
     protected int[] m_indicesByBranchingPoint;
     
-    public ExtensionTable(Tableau tableau,ExtensionManager extensionManager,int tupleArity,boolean needsDependencySets) {
+    public ExtensionTable(Tableau tableau,int tupleArity,boolean needsDependencySets) {
         m_tableau=tableau;
         m_tableauMonitor=m_tableau.m_tableauMonitor;
-        m_extensionManager=extensionManager;
         m_tupleArity=tupleArity;
         m_tupleTable=new TupleTable(m_tupleArity+(needsDependencySets ? 1 : 0));
         m_dependencySetManager=needsDependencySets ? new LastObjectDependencySetManager(this) : new DeterministicDependencySetManager(this);
@@ -55,8 +51,6 @@ public abstract class ExtensionTable implements Serializable {
             m_coreManager=new RealCoreManager();
         else
             m_coreManager=new NoCoreManager();
-        m_binaryAuxiliaryTuple=new Object[2];
-        m_binaryUnionDependencySet=new UnionDependencySet(2);
         m_indicesByBranchingPoint=new int[2*3];
     }
     public abstract int sizeInMemory();
@@ -76,92 +70,30 @@ public abstract class ExtensionTable implements Serializable {
         return m_coreManager.isCore(tupleIndex);
     }
     public abstract boolean addTuple(Object[] tuple,DependencySet dependencySet,boolean isCore);
-    
     /**
-     * Performs a few tests depending on the type of the added tuple (concept, 
-     * role, inequality, description graph) to see whether adding the tuple 
-     * caused a clash.  
-     * @param tuple
-     * @param dependencySet
-     * @param tupleIndex
-     */
+     * This method is called each time a fresh tuple is added. The method is not called if the tuple
+     * was already contained in the extension table. The method updates a couple of relevant data structures
+     * and notifies all relevant parties of the tuple's addition.
+     */  
     protected void postAdd(Object[] tuple,DependencySet dependencySet,int tupleIndex,boolean isCore) {
         Object dlPredicateObject=tuple[0];
         if (dlPredicateObject instanceof Concept) {
             Node node=(Node)tuple[1];
+            if (dlPredicateObject instanceof AtomicConcept)
+                node.m_numberOfPositiveAtomicConcepts++;
+            else if (dlPredicateObject instanceof ExistentialConcept)
+                node.addToUnprocessedExistentials((ExistentialConcept)dlPredicateObject);
+            else if (dlPredicateObject instanceof AtomicNegationConcept)
+                node.m_numberOfNegatedAtomicConcepts++;
             m_tableau.m_existentialExpansionStrategy.assertionAdded((Concept)dlPredicateObject,node,isCore);
-            if (dlPredicateObject instanceof AtomicNegationConcept) {
-                AtomicConcept negatedAtomicConcept=((AtomicNegationConcept)dlPredicateObject).getNegatedAtomicConcept();
-                if (AtomicConcept.THING.equals(negatedAtomicConcept) || AtomicConcept.RDFS_LITERAL.equals(negatedAtomicConcept)) {
-                    if (m_tableauMonitor!=null)
-                        m_tableauMonitor.clashDetectionStarted(tuple);
-                    m_extensionManager.setClash(dependencySet);
-                    if (m_tableauMonitor!=null)
-                        m_tableauMonitor.clashDetectionFinished(tuple);
-                }
-                else {
-                    node.m_numberOfNegatedAtomicConcepts++;
-                    if (node.m_numberOfPositiveAtomicConcepts>0) {
-                        m_binaryAuxiliaryTuple[0]=negatedAtomicConcept;
-                        m_binaryAuxiliaryTuple[1]=node;
-                        if (containsTuple(m_binaryAuxiliaryTuple)) {
-                            m_binaryUnionDependencySet.m_dependencySets[0]=dependencySet;
-                            m_binaryUnionDependencySet.m_dependencySets[1]=getDependencySet(m_binaryAuxiliaryTuple);
-                            if (m_tableauMonitor!=null)
-                                m_tableauMonitor.clashDetectionStarted(tuple,m_binaryAuxiliaryTuple);
-                            m_extensionManager.setClash(m_binaryUnionDependencySet);
-                            if (m_tableauMonitor!=null)
-                                m_tableauMonitor.clashDetectionFinished(tuple,m_binaryAuxiliaryTuple);
-                        }
-                    }
-                }
-            }
-            else if (AtomicConcept.NOTHING.equals(dlPredicateObject)) {
-                if (m_tableauMonitor!=null)
-                    m_tableauMonitor.clashDetectionStarted(tuple);
-                m_extensionManager.setClash(dependencySet);
-                if (m_tableauMonitor!=null)
-                    m_tableauMonitor.clashDetectionFinished(tuple);
-            }
-            else if (dlPredicateObject instanceof Concept) {
-                if (dlPredicateObject instanceof AtomicConcept) {
-                    AtomicConcept atomicConcept=(AtomicConcept)dlPredicateObject;
-                    node.m_numberOfPositiveAtomicConcepts++;
-                    if (node.m_numberOfNegatedAtomicConcepts>0) {
-                        m_binaryAuxiliaryTuple[0]=AtomicNegationConcept.create(atomicConcept);
-                        m_binaryAuxiliaryTuple[1]=node;
-                        if (containsTuple(m_binaryAuxiliaryTuple)) {
-                            m_binaryUnionDependencySet.m_dependencySets[0]=dependencySet;
-                            m_binaryUnionDependencySet.m_dependencySets[1]=getDependencySet(m_binaryAuxiliaryTuple);
-                            if (m_tableauMonitor!=null)
-                                m_tableauMonitor.clashDetectionStarted(tuple,m_binaryAuxiliaryTuple);
-                            m_extensionManager.setClash(m_binaryUnionDependencySet);
-                            if (m_tableauMonitor!=null)
-                                m_tableauMonitor.clashDetectionFinished(tuple,m_binaryAuxiliaryTuple);
-                        }
-                    }
-                }
-                else if (dlPredicateObject instanceof ExistentialConcept)
-                    node.addToUnprocessedExistentials((ExistentialConcept)dlPredicateObject);
-            }
         }
-        else if (dlPredicateObject instanceof AtomicRole) {
-            AtomicRole atomicRole=(AtomicRole)dlPredicateObject;
-            Node node0=(Node)tuple[1];
-            Node node1=(Node)tuple[2];
-            m_tableau.m_existentialExpansionStrategy.assertionAdded(atomicRole,node0,node1,isCore);
-        }
-        else if (Inequality.INSTANCE.equals(dlPredicateObject)) {
-            if (tuple[1]==tuple[2]) {
-                if (m_tableauMonitor!=null)
-                    m_tableauMonitor.clashDetectionStarted(tuple);
-                m_extensionManager.setClash(dependencySet);
-                if (m_tableauMonitor!=null)
-                    m_tableauMonitor.clashDetectionFinished(tuple);
-            }
-        }
+        else if (dlPredicateObject instanceof AtomicRole)
+            m_tableau.m_existentialExpansionStrategy.assertionAdded((AtomicRole)dlPredicateObject,(Node)tuple[1],(Node)tuple[2],isCore);
+        else if (dlPredicateObject instanceof NegatedAtomicRole)
+            ((Node)tuple[1]).m_numberOfNegatedRoleAssertions++;
         else if (dlPredicateObject instanceof DescriptionGraph)
             m_tableau.m_descriptionGraphManager.descriptionGraphTupleAdded(tupleIndex,tuple);
+        m_tableau.m_clashManager.tupleAdded(this,tuple,dependencySet,isCore);
     }
     public abstract boolean containsTuple(Object[] tuple);
     public Retrieval createRetrieval(boolean[] bindingPattern,View extensionView) {
@@ -217,19 +149,17 @@ public abstract class ExtensionTable implements Serializable {
         if (dlPredicateObject instanceof Concept) {
             Node node=(Node)tuple[1];
             m_tableau.m_existentialExpansionStrategy.assertionRemoved((Concept)dlPredicateObject,node,m_coreManager.isCore(tupleIndex));
-            if (dlPredicateObject instanceof AtomicNegationConcept)
-                node.m_numberOfNegatedAtomicConcepts--;
-            else if (dlPredicateObject instanceof AtomicConcept)
+            if (dlPredicateObject instanceof AtomicConcept)
                 node.m_numberOfPositiveAtomicConcepts--;
             else if (dlPredicateObject instanceof ExistentialConcept)
                 node.removeFromUnprocessedExistentials((ExistentialConcept)dlPredicateObject);
+            else if (dlPredicateObject instanceof AtomicNegationConcept)
+                node.m_numberOfNegatedAtomicConcepts--;
         }
-        else if (dlPredicateObject instanceof AtomicRole) {
-            AtomicRole atomicRole=(AtomicRole)dlPredicateObject;
-            Node node0=(Node)tuple[1];
-            Node node1=(Node)tuple[2];
-            m_tableau.m_existentialExpansionStrategy.assertionRemoved(atomicRole,node0,node1,m_coreManager.isCore(tupleIndex));
-        }
+        else if (dlPredicateObject instanceof AtomicRole)
+            m_tableau.m_existentialExpansionStrategy.assertionRemoved((AtomicRole)dlPredicateObject,(Node)tuple[1],(Node)tuple[2],m_coreManager.isCore(tupleIndex));
+        else if (dlPredicateObject instanceof NegatedAtomicRole)
+            ((Node)tuple[1]).m_numberOfNegatedRoleAssertions--;
         else if (dlPredicateObject instanceof DescriptionGraph)
             m_tableau.m_descriptionGraphManager.descriptionGraphTupleRemoved(tupleIndex,tuple);
         if (m_tableauMonitor!=null)

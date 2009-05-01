@@ -42,7 +42,7 @@ public final class ExtensionManager implements Serializable {
         m_dependencySetFactory=m_tableau.m_dependencySetFactory;
         m_extensionTablesByArity=new HashMap<Integer,ExtensionTable>();
         m_binaryExtensionTable=
-            new ExtensionTableWithTupleIndexes(m_tableau,this,2,!m_tableau.isDeterministic(),
+            new ExtensionTableWithTupleIndexes(m_tableau,2,!m_tableau.isDeterministic(),
                 new TupleIndex[] {
                     new TupleIndex(new int[] { 1,0 }),
                     new TupleIndex(new int[] { 0,1 })
@@ -59,7 +59,7 @@ public final class ExtensionManager implements Serializable {
             };
         m_extensionTablesByArity.put(new Integer(2),m_binaryExtensionTable);
         m_ternaryExtensionTable=
-            new ExtensionTableWithTupleIndexes(m_tableau,this,3,!m_tableau.isDeterministic(),
+            new ExtensionTableWithTupleIndexes(m_tableau,3,!m_tableau.isDeterministic(),
                 new TupleIndex[] {
                     new TupleIndex(new int[] { 0,1,2 }),
                     new TupleIndex(new int[] { 1,2,0 }),
@@ -80,7 +80,7 @@ public final class ExtensionManager implements Serializable {
         for (DescriptionGraph descriptionGraph : m_tableau.getDLOntology().getAllDescriptionGraphs()) {
             Integer arityInteger=Integer.valueOf(descriptionGraph.getNumberOfVertices()+1);
             if (!m_extensionTablesByArity.containsKey(arityInteger))
-                m_extensionTablesByArity.put(arityInteger,new ExtensionTableWithFullIndex(m_tableau,this,descriptionGraph.getNumberOfVertices()+1,!m_tableau.isDeterministic()));
+                m_extensionTablesByArity.put(arityInteger,new ExtensionTableWithFullIndex(m_tableau,descriptionGraph.getNumberOfVertices()+1,!m_tableau.isDeterministic()));
         }
         m_allExtensionTablesArray=new ExtensionTable[m_extensionTablesByArity.size()];
         m_extensionTablesByArity.values().toArray(m_allExtensionTablesArray);

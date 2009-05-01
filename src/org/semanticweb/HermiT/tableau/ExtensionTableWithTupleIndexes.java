@@ -18,8 +18,8 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
     protected final TupleIndex[] m_tupleIndexes;
     protected final Object[] m_auxiliaryTuple;
     
-    public ExtensionTableWithTupleIndexes(Tableau tableau,ExtensionManager extensionManager,int tupleArity,boolean needsDependencySets,TupleIndex[] tupleIndexes) {
-        super(tableau,extensionManager,tupleArity,needsDependencySets);
+    public ExtensionTableWithTupleIndexes(Tableau tableau,int tupleArity,boolean needsDependencySets,TupleIndex[] tupleIndexes) {
+        super(tableau,tupleArity,needsDependencySets);
         m_tupleIndexes=tupleIndexes;
         m_auxiliaryTuple=new Object[m_tupleArity];
     }

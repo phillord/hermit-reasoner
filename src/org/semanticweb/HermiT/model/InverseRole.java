@@ -14,10 +14,6 @@ public class InverseRole extends Role {
     public InverseRole(AtomicRole inverseOf) {
         m_inverseOf=inverseOf;
     }
-    public boolean isRestrictedToDatatypes() {
-        return false;
-    }
-
     public AtomicRole getInverseOf() {
         return m_inverseOf;
     }
@@ -25,7 +21,7 @@ public class InverseRole extends Role {
         return m_inverseOf;
     }
     public String toString(Prefixes prefixes) {
-        return "(inv "+m_inverseOf.toString(prefixes)+")";
+        return "inv("+m_inverseOf.toString(prefixes)+")";
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);

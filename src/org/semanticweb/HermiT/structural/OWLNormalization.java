@@ -515,13 +515,7 @@ public class OWLNormalization {
             addFact(axiom);
         }
         public void visit(OWLNegativeDataPropertyAssertionAxiom axiom) {
-            OWLDataRange dataRange=m_factory.getOWLDataOneOf(axiom.getObject());
-            OWLDataRange notDataRange=m_factory.getOWLDataComplementOf(dataRange);
-            OWLDescription allNotDataRange=m_factory.getOWLDataAllRestriction(axiom.getProperty(),notDataRange);
-            OWLDescription definition=getDefinitionFor(allNotDataRange,m_alreadyExists);
-            if (!m_alreadyExists[0])
-                m_inclusionsAsDisjunctions.add(new OWLDescription[] {negative(definition),allNotDataRange });
-            addFact(m_factory.getOWLClassAssertionAxiom(axiom.getSubject(),definition));
+            addFact(axiom);
         }
 
         // Rules
