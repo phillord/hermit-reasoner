@@ -3,21 +3,21 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 import org.semanticweb.HermiT.existentials.ExistentialExpansionStrategy;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
+import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.DataValueEnumeration;
 import org.semanticweb.HermiT.model.ExistentialConcept;
-import org.semanticweb.HermiT.model.Term;
 import org.semanticweb.HermiT.model.Individual;
-import org.semanticweb.HermiT.model.Constant;
+import org.semanticweb.HermiT.model.Term;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.tableau.Node.NodeState;
 

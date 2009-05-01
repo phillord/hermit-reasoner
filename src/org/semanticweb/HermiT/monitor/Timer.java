@@ -3,8 +3,9 @@ package org.semanticweb.HermiT.monitor;
 
 import java.io.PrintWriter;
 
-import org.semanticweb.HermiT.model.*;
-import org.semanticweb.HermiT.tableau.*;
+import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.Individual;
+import org.semanticweb.HermiT.tableau.BranchingPoint;
 
 public class Timer extends TableauMonitorAdapter {
     private static final long serialVersionUID=-8144444618897251350L;

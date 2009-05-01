@@ -2,8 +2,8 @@
 package org.semanticweb.HermiT.existentials;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.model.AtLeastConcept;
@@ -22,9 +22,9 @@ import org.semanticweb.HermiT.tableau.DescriptionGraphManager;
 import org.semanticweb.HermiT.tableau.ExistentialExpansionManager;
 import org.semanticweb.HermiT.tableau.ExtensionManager;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
+import org.semanticweb.HermiT.tableau.InterruptFlag;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
-import org.semanticweb.HermiT.tableau.InterruptFlag;
 
 /**
  * Implements the common bits of an ExistentialsExpansionStrategy, leaving only actual processing of existentials in need of expansion to subclasses.
@@ -86,12 +86,12 @@ public abstract class AbstractExpansionStrategy implements Serializable,Existent
                             expandExistential(atLeastConcept,node);
                             extensionsChanged=true;
                             break;
-                        case PERMANENTLY_SATISFIED:
+                        case PERMANENTLY_SATISFIED: // not satisfied by a nominal so that the NN/NI rule can break the existential 
                             m_existentialExpansionManager.markExistentialProcessed(existentialConcept,node);
                             if (monitor!=null)
                                 monitor.existentialSatisfied(atLeastConcept,node);
                             break;
-                        case CURRENTLY_SATISFIED:
+                        case CURRENTLY_SATISFIED: // satisfied until the NN/NI rule is applied and after which the existential might no longer be satisfied
                             // do nothing
                             if (monitor!=null)
                                 monitor.existentialSatisfied(atLeastConcept,node);

@@ -4,16 +4,20 @@ package org.semanticweb.HermiT.blocking;
 import java.io.Serializable;
 import java.util.List;
 
-import org.semanticweb.HermiT.model.*;
-import org.semanticweb.HermiT.tableau.*;
+import org.semanticweb.HermiT.model.AtomicRole;
+import org.semanticweb.HermiT.model.Concept;
+import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
+import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.tableau.Tableau;
 
 public class AncestorBlocking implements BlockingStrategy,Serializable {
     private static final long serialVersionUID=1075850000309773283L;
-
+    
     protected final DirectBlockingChecker m_directBlockingChecker;
     protected final BlockingSignatureCache m_blockingSignatureCache;
     protected Tableau m_tableau;
-
+    
     public AncestorBlocking(DirectBlockingChecker directBlockingChecker,BlockingSignatureCache blockingSignatureCache) {
         m_directBlockingChecker=directBlockingChecker;
         m_blockingSignatureCache=blockingSignatureCache;
@@ -34,12 +38,8 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
                     node.setBlocked(null,false);
                 else if (parent.isBlocked())
                     node.setBlocked(parent,false);
-                else if (m_blockingSignatureCache!=null) {
-                    if (m_blockingSignatureCache.containsSignature(node))
-                        node.setBlocked(Node.SIGNATURE_CACHE_BLOCKER,true);
-                    else
-                        checkParentBlocking(node);
-                }
+                else if (m_blockingSignatureCache!=null && m_blockingSignatureCache.containsSignature(node))
+                    node.setBlocked(Node.SIGNATURE_CACHE_BLOCKER,true);
                 else
                     checkParentBlocking(node);
             }

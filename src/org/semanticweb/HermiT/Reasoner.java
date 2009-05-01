@@ -14,39 +14,17 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.net.URI;
-import java.util.Collections;
 import java.util.Collection;
-import java.util.Set;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.HashMap;
+import java.util.Set;
 
 import org.protege.editor.owl.model.inference.ProtegeOWLReasonerFactoryAdapter;
-import org.semanticweb.owl.apibinding.OWLManager;
-import org.semanticweb.owl.model.OWLAxiom;
-import org.semanticweb.owl.model.OWLDataType;
-import org.semanticweb.owl.model.OWLClass;
-import org.semanticweb.owl.model.OWLConstant;
-import org.semanticweb.owl.model.OWLDataFactory;
-import org.semanticweb.owl.model.OWLDataProperty;
-import org.semanticweb.owl.model.OWLDataPropertyExpression;
-import org.semanticweb.owl.model.OWLDataRange;
-import org.semanticweb.owl.model.OWLDescription;
-import org.semanticweb.owl.model.OWLEntity;
-import org.semanticweb.owl.model.OWLException;
-import org.semanticweb.owl.model.OWLIndividual;
-import org.semanticweb.owl.model.OWLObjectProperty;
-import org.semanticweb.owl.model.OWLObjectPropertyExpression;
-import org.semanticweb.owl.model.OWLOntology;
-import org.semanticweb.owl.model.OWLOntologyManager;
-import org.semanticweb.owl.util.ProgressMonitor;
-import org.semanticweb.owl.inference.OWLReasoner;
-import org.semanticweb.owl.inference.OWLReasonerFactory;
-import org.semanticweb.owl.inference.MonitorableOWLReasoner;
-
 import org.semanticweb.HermiT.blocking.AncestorBlocking;
 import org.semanticweb.HermiT.blocking.AnywhereBlocking;
-import org.semanticweb.HermiT.blocking.CoreBlocking;
+import org.semanticweb.HermiT.blocking.AnywhereCoreBlocking;
 import org.semanticweb.HermiT.blocking.BlockingSignatureCache;
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.blocking.DirectBlockingChecker;
@@ -56,12 +34,12 @@ import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
 import org.semanticweb.HermiT.existentials.ExistentialExpansionStrategy;
 import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
-import org.semanticweb.HermiT.hierarchy.Hierarchy;
-import org.semanticweb.HermiT.hierarchy.HierarchyNode;
-import org.semanticweb.HermiT.hierarchy.HierarchyBuilder;
-import org.semanticweb.HermiT.hierarchy.SubsumptionCache;
 import org.semanticweb.HermiT.hierarchy.DeterministicHierarchyBuilder;
+import org.semanticweb.HermiT.hierarchy.Hierarchy;
+import org.semanticweb.HermiT.hierarchy.HierarchyBuilder;
+import org.semanticweb.HermiT.hierarchy.HierarchyNode;
 import org.semanticweb.HermiT.hierarchy.HierarchyPrinterFSS;
+import org.semanticweb.HermiT.hierarchy.SubsumptionCache;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
@@ -82,8 +60,29 @@ import org.semanticweb.HermiT.structural.OWLClausification;
 import org.semanticweb.HermiT.structural.OWLHasKeyDummy;
 import org.semanticweb.HermiT.structural.OWLNormalization;
 import org.semanticweb.HermiT.structural.ObjectPropertyInclusionManager;
-import org.semanticweb.HermiT.tableau.Tableau;
 import org.semanticweb.HermiT.tableau.InterruptFlag;
+import org.semanticweb.HermiT.tableau.Tableau;
+import org.semanticweb.owl.apibinding.OWLManager;
+import org.semanticweb.owl.inference.MonitorableOWLReasoner;
+import org.semanticweb.owl.inference.OWLReasoner;
+import org.semanticweb.owl.inference.OWLReasonerFactory;
+import org.semanticweb.owl.model.OWLAxiom;
+import org.semanticweb.owl.model.OWLClass;
+import org.semanticweb.owl.model.OWLConstant;
+import org.semanticweb.owl.model.OWLDataFactory;
+import org.semanticweb.owl.model.OWLDataProperty;
+import org.semanticweb.owl.model.OWLDataPropertyExpression;
+import org.semanticweb.owl.model.OWLDataRange;
+import org.semanticweb.owl.model.OWLDataType;
+import org.semanticweb.owl.model.OWLDescription;
+import org.semanticweb.owl.model.OWLEntity;
+import org.semanticweb.owl.model.OWLException;
+import org.semanticweb.owl.model.OWLIndividual;
+import org.semanticweb.owl.model.OWLObjectProperty;
+import org.semanticweb.owl.model.OWLObjectPropertyExpression;
+import org.semanticweb.owl.model.OWLOntology;
+import org.semanticweb.owl.model.OWLOntologyManager;
+import org.semanticweb.owl.util.ProgressMonitor;
 
 /**
  * Answers queries about the logical implications of a particular knowledge base. A Reasoner is associated with a single knowledge base, which is "loaded" when the reasoner is constructed. By default a full classification of all atomic terms in the knowledge base is also performed at this time (which can take quite a while for large or complex ontologies), but this behavior can be disabled as a part of the Reasoner configuration. Internal details of the loading and reasoning algorithms can be configured in the Reasoner constructor and do not change over the lifetime of the Reasoner object---internal data structures and caches are optimized for a particular configuration. By default, HermiT will use the set of options which provide optimal performance.
@@ -969,7 +968,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
             break;
         case CORE:
-            blockingStrategy=new CoreBlocking();
+            blockingStrategy=new AnywhereCoreBlocking(directBlockingChecker);
             break;
         default:
             throw new IllegalArgumentException("Unknown blocking strategy type.");
@@ -1204,7 +1203,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         }
     }
 
-    public static Reasoner loadRasoner(File file) throws IOException {
+    public static Reasoner loadReasoner(File file) throws IOException {
         InputStream inputStream=new BufferedInputStream(new FileInputStream(file));
         try {
             return loadReasoner(inputStream);

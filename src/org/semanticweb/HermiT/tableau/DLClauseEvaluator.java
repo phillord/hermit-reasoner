@@ -2,14 +2,19 @@
 package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import org.semanticweb.HermiT.model.*;
-import org.semanticweb.HermiT.existentials.*;
-import org.semanticweb.HermiT.monitor.*;
+import org.semanticweb.HermiT.existentials.ExistentialExpansionStrategy;
+import org.semanticweb.HermiT.model.Atom;
+import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.model.DLPredicate;
+import org.semanticweb.HermiT.model.NodeIDLessEqualThan;
+import org.semanticweb.HermiT.model.NodeIDsAscendingOrEqual;
+import org.semanticweb.HermiT.model.Variable;
+import org.semanticweb.HermiT.monitor.TableauMonitor;
 
 public class DLClauseEvaluator implements Serializable {
     private static final long serialVersionUID=4639844159658590456L;

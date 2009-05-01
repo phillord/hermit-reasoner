@@ -3,8 +3,12 @@ package org.semanticweb.HermiT.blocking;
 
 import java.util.List;
 
-import org.semanticweb.HermiT.model.*;
-import org.semanticweb.HermiT.tableau.*;
+import org.semanticweb.HermiT.model.AtomicRole;
+import org.semanticweb.HermiT.model.Concept;
+import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
+import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.tableau.Tableau;
 
 public interface BlockingStrategy {
     void initialize(Tableau tableau);

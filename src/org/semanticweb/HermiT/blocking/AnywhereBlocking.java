@@ -4,21 +4,25 @@ package org.semanticweb.HermiT.blocking;
 import java.io.Serializable;
 import java.util.List;
 
-import org.semanticweb.HermiT.model.*;
-import org.semanticweb.HermiT.tableau.*;
+import org.semanticweb.HermiT.model.AtomicRole;
+import org.semanticweb.HermiT.model.Concept;
+import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
+import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.tableau.Tableau;
 
 public class AnywhereBlocking implements BlockingStrategy,Serializable {
     private static final long serialVersionUID=-2959900333817197464L;
 
     protected final DirectBlockingChecker m_directBlockingChecker;
-    protected final BlockingCache m_currentBlockersCache;
+    protected final BlockersCache m_currentBlockersCache;
     protected final BlockingSignatureCache m_blockingSignatureCache;
     protected Tableau m_tableau;
     protected Node m_firstChangedNode;
 
     public AnywhereBlocking(DirectBlockingChecker directBlockingChecker,BlockingSignatureCache blockingSignatureCache) {
         m_directBlockingChecker=directBlockingChecker;
-        m_currentBlockersCache=new BlockingCache(m_directBlockingChecker);
+        m_currentBlockersCache=new BlockersCache(m_directBlockingChecker);
         m_blockingSignatureCache=blockingSignatureCache;
     }
     public void initialize(Tableau tableau) {
@@ -123,16 +127,17 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
     public void dlClauseBodyCompiled(List<DLClauseEvaluator.Worker> workers,DLClause dlClause,Object[] valuesBuffer,boolean[] coreVariables) {
     }
 }
-class BlockingCache implements Serializable {
+class BlockersCache implements Serializable {
     private static final long serialVersionUID=-7692825443489644667L;
 
+    protected Tableau m_tableau;
     protected final DirectBlockingChecker m_directBlockingChecker;
     protected CacheEntry[] m_buckets;
     protected int m_numberOfElements;
     protected int m_threshold;
     protected CacheEntry m_emptyEntries;
 
-    public BlockingCache(DirectBlockingChecker directBlockingChecker) {
+    public BlockersCache(DirectBlockingChecker directBlockingChecker) {
         m_directBlockingChecker=directBlockingChecker;
         clear();
     }
@@ -147,7 +152,7 @@ class BlockingCache implements Serializable {
     }
     public void removeNode(Node node) {
         // Check addNode() for an explanation of why we associate the entry with the node.
-        BlockingCache.CacheEntry removeEntry=(BlockingCache.CacheEntry)node.getBlockingCargo();
+        BlockersCache.CacheEntry removeEntry=(BlockersCache.CacheEntry)node.getBlockingCargo();
         if (removeEntry!=null) {
             int bucketIndex=getIndexFor(removeEntry.m_hashCode,m_buckets.length);
             CacheEntry lastEntry=null;

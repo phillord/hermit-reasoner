@@ -65,7 +65,7 @@
         <mkdir dir="${classdir}"/>
         <javac destdir="${classdir}" deprecation="yes" debug="${debug}">
             <compilerarg value="-Xlint:all"/>
-            <compilerarg value="-Xbootclasspath:${java.home}/lib/rt.jar"/>
+            <!--<compilerarg value="-Xbootclasspath:${java.home}/lib/rt.jar"/>-->
             <src refid="sourcepath"/>
             <classpath refid="classpath"/>
         </javac>

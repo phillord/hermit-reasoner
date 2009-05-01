@@ -131,14 +131,14 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
     public BlockingSignature getBlockingSignatureFor(Node node) {
         return new PairWiseBlockingSignature(this,node);
     }
-    protected Set<AtomicConcept> getAtomicConceptsLabel(Node node) {
+    protected Set<AtomicConcept> getAtomicConceptsLabel(Node node, boolean coreOnly) {
         m_atomicConceptsBuffer.clear();
         m_binaryTableSearch1Bound.getBindingsBuffer()[1]=node;
         m_binaryTableSearch1Bound.open();
         Object[] tupleBuffer=m_binaryTableSearch1Bound.getTupleBuffer();
         while (!m_binaryTableSearch1Bound.afterLast()) {
             Object concept=tupleBuffer[0];
-            if (concept instanceof AtomicConcept)
+            if (concept instanceof AtomicConcept && (!coreOnly || m_binaryTableSearch1Bound.isCore()))
                 m_atomicConceptsBuffer.add((AtomicConcept)concept);
             m_binaryTableSearch1Bound.next();
         }
@@ -146,7 +146,7 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         m_atomicConceptsBuffer.clear();
         return result;
     }
-    public Set<AtomicRole> getEdgeLabel(Node nodeFrom,Node nodeTo) {
+    public Set<AtomicRole> getEdgeLabel(Node nodeFrom,Node nodeTo, boolean coreOnly) {
         m_atomicRolesBuffer.clear();
         m_ternaryTableSearch12Bound.getBindingsBuffer()[1]=nodeFrom;
         m_ternaryTableSearch12Bound.getBindingsBuffer()[2]=nodeTo;
@@ -154,7 +154,7 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         Object[] tupleBuffer=m_ternaryTableSearch12Bound.getTupleBuffer();
         while (!m_ternaryTableSearch12Bound.afterLast()) {
             Object atomicRole=tupleBuffer[0];
-            if (atomicRole instanceof AtomicRole)
+            if (atomicRole instanceof AtomicRole && (!coreOnly || m_binaryTableSearch1Bound.isCore()))
                 m_atomicRolesBuffer.add((AtomicRole)atomicRole);
             m_ternaryTableSearch12Bound.next();
         }
@@ -166,6 +166,7 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
     protected final class PairWiseBlockingObject implements Serializable {
         private static final long serialVersionUID=-5439737072100509531L;
 
+        protected final boolean m_useOnlyCore;
         protected final Node m_node;
         protected boolean m_hasChanged;
         protected Set<AtomicConcept> m_atomicConceptsLabel;
@@ -176,6 +177,10 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         protected int m_toParentLabelHashCode;
 
         public PairWiseBlockingObject(Node node) {
+            this(node, false);
+        }
+        public PairWiseBlockingObject(Node node,boolean useOnlyCore) {
+            m_useOnlyCore=useOnlyCore;
             m_node=node;
         }
         public void initialize() {
@@ -203,7 +208,7 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         }
         public Set<AtomicConcept> getAtomicConceptsLabel() {
             if (m_atomicConceptsLabel==null) {
-                m_atomicConceptsLabel=PairWiseDirectBlockingChecker.this.getAtomicConceptsLabel(m_node);
+                m_atomicConceptsLabel=PairWiseDirectBlockingChecker.this.getAtomicConceptsLabel(m_node,m_useOnlyCore);
                 m_atomicConceptsSetFactory.addReference(m_atomicConceptsLabel);
             }
             return m_atomicConceptsLabel;
@@ -226,7 +231,7 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         }
         public Set<AtomicRole> getFromParentLabel() {
             if (m_fromParentLabel==null) {
-                m_fromParentLabel=getEdgeLabel(m_node.getParent(),m_node);
+                m_fromParentLabel=getEdgeLabel(m_node.getParent(),m_node,m_useOnlyCore);
                 m_atomicRolesSetFactory.addReference(m_fromParentLabel);
             }
             return m_fromParentLabel;
@@ -249,7 +254,7 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         }
         public Set<AtomicRole> getToParentLabel() {
             if (m_toParentLabel==null) {
-                m_toParentLabel=getEdgeLabel(m_node,m_node.getParent());
+                m_toParentLabel=getEdgeLabel(m_node,m_node.getParent(),m_useOnlyCore);
                 m_atomicRolesSetFactory.addReference(m_toParentLabel);
             }
             return m_toParentLabel;

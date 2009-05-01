@@ -1,8 +1,10 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.blocking;
 
-import org.semanticweb.HermiT.model.*;
-import org.semanticweb.HermiT.tableau.*;
+import org.semanticweb.HermiT.model.AtomicRole;
+import org.semanticweb.HermiT.model.Concept;
+import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.tableau.Tableau;
 
 public interface DirectBlockingChecker {
     void initialize(Tableau tableau);

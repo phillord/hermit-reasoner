@@ -9,10 +9,10 @@ import java.util.Set;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
-import org.semanticweb.HermiT.tableau.Tableau;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.NodeType;
+import org.semanticweb.HermiT.tableau.Tableau;
 
 public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serializable {
     private static final long serialVersionUID=9093753046859877016L;
@@ -88,14 +88,22 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
     public BlockingSignature getBlockingSignatureFor(Node node) {
         return new SingleBlockingSignature(this,node);
     }
-    protected Set<AtomicConcept> getAtomicConceptsLabel(Node node) {
+    protected Set<AtomicConcept> getAtomicConceptsLabel(Node node, boolean coreOnly) {
         m_atomicConceptsBuffer.clear();
+        if (m_binaryTableSearch1Bound == null) {
+            System.out.println("m_binaryTableSearch1Bound == null");
+        } else if (m_binaryTableSearch1Bound.getBindingsBuffer() == null) {
+            System.out.println("m_binaryTableSearch1Bound.getBindingsBuffer() == null");
+        }
+        if (node == null) {
+            System.out.println("node == null");
+        }
         m_binaryTableSearch1Bound.getBindingsBuffer()[1]=node;
         m_binaryTableSearch1Bound.open();
         Object[] tupleBuffer=m_binaryTableSearch1Bound.getTupleBuffer();
         while (!m_binaryTableSearch1Bound.afterLast()) {
             Object concept=tupleBuffer[0];
-            if (concept instanceof AtomicConcept)
+            if (concept instanceof AtomicConcept && (!coreOnly || m_binaryTableSearch1Bound.isCore()))
                 m_atomicConceptsBuffer.add((AtomicConcept)concept);
             m_binaryTableSearch1Bound.next();
         }
@@ -106,13 +114,18 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
 
     protected final class SingleBlockingObject implements Serializable {
         private static final long serialVersionUID=-5439737072100509531L;
-
+        
+        protected final boolean m_useOnlyCore;
         protected final Node m_node;
         protected boolean m_hasChanged;
         protected Set<AtomicConcept> m_atomicConceptsLabel;
         protected int m_atomicConceptsLabelHashCode;
-
+        
         public SingleBlockingObject(Node node) {
+            this(node, false);
+        }
+        public SingleBlockingObject(Node node, boolean useOnlyCore) {
+            m_useOnlyCore=useOnlyCore;
             m_node=node;
         }
         public void initialize() {
@@ -128,13 +141,14 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
         }
         public Set<AtomicConcept> getAtomicConceptsLabel() {
             if (m_atomicConceptsLabel==null) {
-                m_atomicConceptsLabel=SingleDirectBlockingChecker.this.getAtomicConceptsLabel(m_node);
+                m_atomicConceptsLabel=SingleDirectBlockingChecker.this.getAtomicConceptsLabel(m_node, m_useOnlyCore);
                 m_atomicConceptsSetFactory.addReference(m_atomicConceptsLabel);
             }
             return m_atomicConceptsLabel;
         }
         public void addAtomicConcept(AtomicConcept atomicConcept) {
             if (m_atomicConceptsLabel!=null) {
+                // invalidate, recompute real label later if necessary
                 m_atomicConceptsSetFactory.removeReference(m_atomicConceptsLabel);
                 m_atomicConceptsLabel=null;
             }
@@ -143,6 +157,7 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
         }
         public void removeAtomicConcept(AtomicConcept atomicConcept) {
             if (m_atomicConceptsLabel!=null) {
+                // invalidate, recompute real label later if necessary
                 m_atomicConceptsSetFactory.removeReference(m_atomicConceptsLabel);
                 m_atomicConceptsLabel=null;
             }
