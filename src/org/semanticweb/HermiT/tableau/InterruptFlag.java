@@ -1,6 +1,9 @@
 package org.semanticweb.HermiT.tableau;
 
-public final class InterruptFlag {
+import java.io.Serializable;
+
+public final class InterruptFlag implements Serializable {
+    private static final long serialVersionUID = -6983680374511847003L;
     protected boolean m_taskRunning;
     protected volatile boolean m_interrupt;
     
