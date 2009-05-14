@@ -97,8 +97,11 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
         Object[] tupleBuffer=m_binaryTableSearch1Bound.getTupleBuffer();
         while (!m_binaryTableSearch1Bound.afterLast()) {
             Object concept=tupleBuffer[0];
-            if (concept instanceof AtomicConcept && (!m_useOnlyCore || m_binaryTableSearch1Bound.isCore()))
-                m_atomicConceptsBuffer.add((AtomicConcept)concept);
+            if (concept instanceof AtomicConcept) {
+                if (!m_useOnlyCore || m_binaryTableSearch1Bound.isCore()) {
+                    m_atomicConceptsBuffer.add((AtomicConcept)concept);
+                }
+            }
             m_binaryTableSearch1Bound.next();
         }
         Set<AtomicConcept> result=m_atomicConceptsSetFactory.getSet(m_atomicConceptsBuffer);

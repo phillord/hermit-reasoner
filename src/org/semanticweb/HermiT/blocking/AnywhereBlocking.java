@@ -58,8 +58,7 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
                                 Node blocker=m_currentBlockersCache.getBlocker(node);
                                 node.setBlocked(blocker,blocker!=null);
                             }
-                        }
-                        else {
+                        } else {
                             Node blocker=m_currentBlockersCache.getBlocker(node);
                             node.setBlocked(blocker,blocker!=null);
                         }

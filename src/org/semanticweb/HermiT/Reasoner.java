@@ -33,6 +33,7 @@ import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.blocking.DirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.SingleDirectBlockingChecker;
+import org.semanticweb.HermiT.blocking.core.AtMostConcept;
 import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
 import org.semanticweb.HermiT.existentials.ExistentialExpansionStrategy;
@@ -43,14 +44,18 @@ import org.semanticweb.HermiT.hierarchy.HierarchyBuilder;
 import org.semanticweb.HermiT.hierarchy.HierarchyNode;
 import org.semanticweb.HermiT.hierarchy.HierarchyPrinterFSS;
 import org.semanticweb.HermiT.hierarchy.SubsumptionCache;
+import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
+import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.InverseRole;
+import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.monitor.TableauMonitorFork;
@@ -81,8 +86,13 @@ import org.semanticweb.owl.model.OWLDescription;
 import org.semanticweb.owl.model.OWLEntity;
 import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLIndividual;
+import org.semanticweb.owl.model.OWLObjectAllRestriction;
+import org.semanticweb.owl.model.OWLObjectComplementOf;
+import org.semanticweb.owl.model.OWLObjectMaxCardinalityRestriction;
+import org.semanticweb.owl.model.OWLObjectMinCardinalityRestriction;
 import org.semanticweb.owl.model.OWLObjectProperty;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
+import org.semanticweb.owl.model.OWLObjectSomeRestriction;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
 import org.semanticweb.owl.util.ProgressMonitor;
@@ -228,6 +238,83 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         for (OWLOntology ontologyInClosure : importClosure)
             normalization.processOntology(m_configuration,ontologyInClosure);
         normalization.processKeys(m_configuration,keys);
+        
+        boolean foundRelevantConcept;
+        Map<AtomicConcept, Set<Concept>> blockRelUnary = new HashMap<AtomicConcept, Set<Concept>>();
+        Map<Set<AtomicConcept>, Set<Concept>> blockRelNAry= new HashMap<Set<AtomicConcept>, Set<Concept>>();
+        Set<AtomicConcept> premises;
+        Set<Concept> conclusions;
+        for (OWLDescription[] descs : axioms.m_conceptInclusions) {
+            foundRelevantConcept = false;
+            premises = new HashSet<AtomicConcept>();
+            conclusions = new HashSet<Concept>();
+            for (int i = 0; i<descs.length&&!foundRelevantConcept; i++) {
+                OWLDescription desc = descs[i];
+                if (desc instanceof OWLObjectAllRestriction) {
+                    foundRelevantConcept = true;
+                    OWLObjectAllRestriction all = (OWLObjectAllRestriction) desc;
+                    AtomicRole ar = AtomicRole.create(all.getProperty().getNamedProperty().getURI().toString()); 
+                    Role r = all.getProperty().getSimplified().isAnonymous() ? InverseRole.create(ar) : ar;
+                    LiteralConcept c;
+                    // since the axioms are normalised, the filler is a literal
+                    if (all.getFiller() instanceof OWLObjectComplementOf) {
+                        c = AtomicConcept.create(((OWLObjectComplementOf) all.getFiller()).getOperand().asOWLClass().getURI().toString());
+                    } else {
+                        c = AtomicNegationConcept.create(AtomicConcept.create(all.getFiller().asOWLClass().getURI().toString()));
+                    }
+                    conclusions.add(AtMostConcept.create(0, r, c));
+                } else if (desc instanceof OWLObjectSomeRestriction) {
+                    foundRelevantConcept = true;
+                    OWLObjectSomeRestriction some = (OWLObjectSomeRestriction) desc;
+                    AtomicRole ar = AtomicRole.create(some.getProperty().getNamedProperty().getURI().toString()); 
+                    Role r = some.getProperty().getSimplified().isAnonymous() ? InverseRole.create(ar) : ar;
+                    LiteralConcept c;
+                    // since the axioms are normalised, the filler is a literal
+                    if (some.getFiller() instanceof OWLObjectComplementOf) {
+                        c = AtomicConcept.create(((OWLObjectComplementOf) some.getFiller()).getOperand().asOWLClass().getURI().toString());
+                    } else {
+                        c = AtomicNegationConcept.create(AtomicConcept.create(some.getFiller().asOWLClass().getURI().toString()));
+                    }
+                    conclusions.add(AtLeastConcept.create(1, r, c));
+                } else if (desc instanceof OWLObjectMinCardinalityRestriction) {
+                    OWLObjectMinCardinalityRestriction min = (OWLObjectMinCardinalityRestriction) desc;
+                    AtomicRole ar = AtomicRole.create(min.getProperty().getNamedProperty().getURI().toString()); 
+                    Role r = min.getProperty().getSimplified().isAnonymous() ? InverseRole.create(ar) : ar;
+                    LiteralConcept c;
+                    // since the axioms are normalised, the filler is a literal
+                    if (min.getFiller() instanceof OWLObjectComplementOf) {
+                        c = AtomicConcept.create(((OWLObjectComplementOf) min.getFiller()).getOperand().asOWLClass().getURI().toString());
+                    } else {
+                        c = AtomicNegationConcept.create(AtomicConcept.create(min.getFiller().asOWLClass().getURI().toString()));
+                    }
+                    conclusions.add(AtLeastConcept.create(1, r, c));
+                } else if (desc instanceof OWLObjectMaxCardinalityRestriction) {
+                    foundRelevantConcept = true;
+                    OWLObjectMaxCardinalityRestriction max = (OWLObjectMaxCardinalityRestriction) desc;
+                    AtomicRole ar = AtomicRole.create(max.getProperty().getNamedProperty().getURI().toString()); 
+                    Role r = max.getProperty().getSimplified().isAnonymous() ? InverseRole.create(ar) : ar;
+                    LiteralConcept c;
+                    // since the axioms are normalised, the filler is a literal
+                    if (max.getFiller() instanceof OWLObjectComplementOf) {
+                        c = AtomicConcept.create(((OWLObjectComplementOf) max.getFiller()).getOperand().asOWLClass().getURI().toString());
+                    } else {
+                        c = AtomicNegationConcept.create(AtomicConcept.create(max.getFiller().asOWLClass().getURI().toString()));
+                    }
+                    conclusions.add(AtMostConcept.create(max.getCardinality(), r, c));
+                } else if (desc instanceof OWLClass) {
+                    conclusions.add(AtomicConcept.create(desc.asOWLClass().getURI().toString()));
+                } else if (desc instanceof OWLObjectComplementOf) {
+                    premises.add(AtomicConcept.create(((OWLObjectComplementOf) desc).getOperand().asOWLClass().getURI().toString()));
+                }
+            }
+            if (foundRelevantConcept) {
+                if (premises.size() <= 1) {
+                    blockRelUnary.put(premises.iterator().hasNext() ? premises.iterator().next() : AtomicConcept.THING, conclusions);
+                } else {
+                    blockRelNAry.put(premises, conclusions);
+                }
+            }
+        }
 
         // And now for the Tableau!
         TableauMonitor wellKnownTableauMonitor=null;
@@ -277,7 +364,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             throw new IllegalArgumentException("Unknown direct blocking type.");
         }
 
-        BlockingStrategy blockingStrategy=new AnywhereCoreBlocking(directBlockingChecker /*,axioms*/);
+        BlockingStrategy blockingStrategy=new AnywhereCoreBlocking(directBlockingChecker,blockRelUnary,blockRelNAry);
 
         ExistentialExpansionStrategy existentialsExpansionStrategy=null;
         switch (m_configuration.existentialStrategyType) {
@@ -1069,7 +1156,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
             break;
         case CORE:
-            blockingStrategy=new AnywhereCoreBlocking(directBlockingChecker);
+            blockingStrategy=new AnywhereCoreBlocking(directBlockingChecker, new HashMap<AtomicConcept, Set<Concept>>(), new HashMap<Set<AtomicConcept>, Set<Concept>>());
             break;
         default:
             throw new IllegalArgumentException("Unknown blocking strategy type.");

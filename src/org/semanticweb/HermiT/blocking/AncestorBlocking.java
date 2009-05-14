@@ -48,7 +48,7 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
     }
     protected final void checkParentBlocking(Node node) {
         Node blocker=node.getParent();
-        while (blocker!=null) {
+        while (blocker!=null) { 
             if (m_directBlockingChecker.isBlockedBy(blocker,node)) {
                 node.setBlocked(blocker,true);
                 break;

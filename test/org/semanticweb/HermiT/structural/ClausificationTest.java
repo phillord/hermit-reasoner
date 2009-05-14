@@ -13,8 +13,6 @@ import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
-import org.semanticweb.HermiT.structural.OWLClausification;
-import org.semanticweb.HermiT.structural.OWLHasKeyDummy;
 
 public class ClausificationTest extends AbstractStructuralTest {
     static {
@@ -56,7 +54,7 @@ public class ClausificationTest extends AbstractStructuralTest {
     public void testExistsSelf2() throws Exception {
         assertClausification("res/exists-self-2-input.owl","res/exists-self-2-control.txt",null);
     }
-
+    
     public void testHasKeys() throws Exception {
         OWLClausification clausifier=new OWLClausification(new Configuration());
         DLClause clause=clausifier.clausifyKey(OWLHasKeyDummy.getDemoKey());

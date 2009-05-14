@@ -2,20 +2,20 @@
 package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import org.semanticweb.HermiT.Prefixes;
-import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 import org.semanticweb.HermiT.datatypes.DatatypeRegistry;
-import org.semanticweb.HermiT.model.Inequality;
+import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 import org.semanticweb.HermiT.model.DataRange;
-import org.semanticweb.HermiT.model.NegationDataRange;
-import org.semanticweb.HermiT.model.DatatypeRestriction;
 import org.semanticweb.HermiT.model.DataValueEnumeration;
+import org.semanticweb.HermiT.model.DatatypeRestriction;
+import org.semanticweb.HermiT.model.Inequality;
+import org.semanticweb.HermiT.model.NegationDataRange;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 
 public class DatatypeManager implements Serializable {
@@ -444,7 +444,8 @@ public class DatatypeManager implements Serializable {
         }
     }
     
-    public static class DConjunction {
+    public static class DConjunction implements Serializable {
+        private static final long serialVersionUID = 3597740301361593691L;
         protected final List<DVariable> m_unusedVariables;
         protected final List<DVariable> m_usedVariables;
         protected final List<DVariable> m_activeVariables;
@@ -578,7 +579,8 @@ public class DatatypeManager implements Serializable {
         }
     }
     
-    public static class DVariable {
+    public static class DVariable implements Serializable {
+        private static final long serialVersionUID = -2490195841140286089L;
         protected final List<DataValueEnumeration> m_positiveDataValueEnumerations;
         protected final List<DataValueEnumeration> m_negativeDataValueEnumerations;
         protected final List<DatatypeRestriction> m_positiveDatatypeRestrictions;
@@ -716,7 +718,8 @@ public class DatatypeManager implements Serializable {
         return hashCode & (tableLength-1);
     }
     
-    protected static class SmallestEnumerationFirst implements Comparator<DVariable> {
+    protected static class SmallestEnumerationFirst implements Comparator<DVariable>, Serializable {
+        private static final long serialVersionUID = 8838838641444833249L;
         public static final Comparator<DVariable> INSTANCE=new SmallestEnumerationFirst();
 
         public int compare(DVariable o1,DVariable o2) {

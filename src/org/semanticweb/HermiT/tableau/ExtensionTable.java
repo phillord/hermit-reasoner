@@ -3,9 +3,9 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 
-import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
+import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.ExistentialConcept;
@@ -79,9 +79,10 @@ public abstract class ExtensionTable implements Serializable {
         Object dlPredicateObject=tuple[0];
         if (dlPredicateObject instanceof Concept) {
             Node node=(Node)tuple[1];
-            if (dlPredicateObject instanceof AtomicConcept)
+            if (dlPredicateObject instanceof AtomicConcept) {
                 node.m_numberOfPositiveAtomicConcepts++;
-            else if (dlPredicateObject instanceof ExistentialConcept)
+                if (isCore) node.m_numberOfCoreAtoms++;
+            } else if (dlPredicateObject instanceof ExistentialConcept)
                 node.addToUnprocessedExistentials((ExistentialConcept)dlPredicateObject);
             else if (dlPredicateObject instanceof AtomicNegationConcept)
                 node.m_numberOfNegatedAtomicConcepts++;
@@ -149,9 +150,10 @@ public abstract class ExtensionTable implements Serializable {
         if (dlPredicateObject instanceof Concept) {
             Node node=(Node)tuple[1];
             m_tableau.m_existentialExpansionStrategy.assertionRemoved((Concept)dlPredicateObject,node,m_coreManager.isCore(tupleIndex));
-            if (dlPredicateObject instanceof AtomicConcept)
+            if (dlPredicateObject instanceof AtomicConcept) {
                 node.m_numberOfPositiveAtomicConcepts--;
-            else if (dlPredicateObject instanceof ExistentialConcept)
+                if (m_coreManager.isCore(tupleIndex)) node.m_numberOfCoreAtoms--;
+            } else if (dlPredicateObject instanceof ExistentialConcept)
                 node.removeFromUnprocessedExistentials((ExistentialConcept)dlPredicateObject);
             else if (dlPredicateObject instanceof AtomicNegationConcept)
                 node.m_numberOfNegatedAtomicConcepts--;

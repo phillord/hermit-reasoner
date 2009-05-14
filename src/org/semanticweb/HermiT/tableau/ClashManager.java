@@ -1,11 +1,13 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.tableau;
 
+import java.io.Serializable;
+
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
-import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.model.Inequality;
+import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.model.NegatedAtomicRole;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 
@@ -16,7 +18,10 @@ import org.semanticweb.HermiT.monitor.TableauMonitor;
  * This is so for performance reasons: we want to detect a clash ASAP so that we can save
  * ourselves unnecessary work.
  */
-public final class ClashManager {
+public final class ClashManager implements Serializable {
+
+    private static final long serialVersionUID = 3533809151139695892L;
+
     protected static final LiteralConcept NOT_RDFS_LITERAL=AtomicConcept.RDFS_LITERAL.getNegation();
     
     protected final ExtensionManager m_extensionManager;

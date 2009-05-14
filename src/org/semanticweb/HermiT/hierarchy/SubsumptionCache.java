@@ -1,20 +1,24 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.hierarchy;
 
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Map;
+import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
-import org.semanticweb.HermiT.model.*;
-import org.semanticweb.HermiT.tableau.*;
+import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.tableau.ExtensionTable;
+import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.tableau.Tableau;
 
 /**
  * A cache for subsumption and satisfiability tests. This class also maintains the set of known and possible subsumers
  * for a concept. This information can be used to optimize classification.
  */
-public class SubsumptionCache {
+public class SubsumptionCache implements Serializable {
+    private static final long serialVersionUID = 5380180660934814631L;
     protected final Tableau m_tableau;
     protected final Map<AtomicConcept,AtomicConceptInfo> m_atomicConceptInfos;
 
