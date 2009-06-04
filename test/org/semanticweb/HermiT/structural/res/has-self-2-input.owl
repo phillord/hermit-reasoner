@@ -1,0 +1,24 @@
+Prefix(:=<file:/c/test.owl#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+Prefix(owl2xml:=<http://www.w3.org/2006/12/owl2-xml#>)
+Prefix(test:=<file:/c/test.owl#>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+Prefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)
+
+Ontology(<file:/c/test.owl>
+  Declaration(NamedIndividual(:a))
+  Declaration(ObjectProperty(:r))
+  Declaration(Class(:B1))
+  Declaration(Class(:B2))
+  Declaration(Class(:C1))
+  Declaration(Class(:C2))
+  
+  SubClassOf(:B1 ObjectSomeValuesFrom(:r :C2))
+  SubClassOf(:C2 ObjectSomeValuesFrom(:r :B2))
+  SubClassOf(:B2 ObjectSomeValuesFrom(:r :C1))
+  SubClassOf(:C1 ObjectSomeValuesFrom(:r :B1))
+
+  ClassAssertion(:C1 :a)
+  ClassAssertion(ObjectAllValuesFrom(:r ObjectHasSelf(:r)) :a)
+)
