@@ -60,4 +60,26 @@ public class Graph<T> {
         }
         return result;
     }
+    /**
+     * @gstoil addition
+     */
+    public Graph<T> clone() {
+        Graph<T> result=new Graph<T>();
+        for (Map.Entry<T,Set<T>> entry : m_successorsByNodes.entrySet()) {
+            T from=entry.getKey();
+            for (T successor : entry.getValue())
+                result.addEdge(from,successor);
+        }
+        return result;
+    }
+    /**
+     * @gstoil addition
+     */
+	public void removeElements(Set<T> elements) {
+		for(T element : elements){
+			m_elements.remove( element );
+			m_successorsByNodes.remove( element );
+		}
+			
+	}
 }
