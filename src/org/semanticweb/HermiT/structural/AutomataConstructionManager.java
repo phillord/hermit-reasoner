@@ -24,11 +24,14 @@ public class AutomataConstructionManager {
 	}
 
 	public Map<OWLObjectPropertyExpression,Automaton> createAutomata(Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions,Collection<ComplexObjectPropertyInclusion> complexObjectPropertyInclusions) {
-        Graph<OWLObjectPropertyExpression> propertyDependencyGraph = buildPropertyOrdering( simpleObjectPropertyInclusions, complexObjectPropertyInclusions );
+		Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> equivalentPropertiesMap = findEquivalentRoles( simpleObjectPropertyInclusions );
+
+        Graph<OWLObjectPropertyExpression> propertyDependencyGraph = buildPropertyOrdering( simpleObjectPropertyInclusions, complexObjectPropertyInclusions, equivalentPropertiesMap );
         Map<OWLObjectPropertyExpression,Automaton> individualAutomata = buildIndividualAutomata( simpleObjectPropertyInclusions, complexObjectPropertyInclusions );
         Set<OWLObjectPropertyExpression> simpleRoles = findSimpleRoles( propertyDependencyGraph, individualAutomata );
 
         propertyDependencyGraph.removeElements( simpleRoles );
+        checkForRegularity( propertyDependencyGraph );
 //		1) Now the graph contains all nonSimpleRoles. But remember that nevertheless it does not contain 
 //		dependencies between a role and itself. So if a role is just transitive and no other RIAs or dependencies  
 //      with other roles exist, this non-simple role is not in the graph. So we need to add such transitive 
@@ -39,15 +42,46 @@ public class AutomataConstructionManager {
 		for(ComplexObjectPropertyInclusion inclusion : complexObjectPropertyInclusions){
     		OWLObjectPropertyExpression owlSuperProperty = inclusion.m_superObjectProperties;
     		OWLObjectPropertyExpression[] owlSubPropertyExpression = inclusion.m_subObjectProperties;
+//    		TODO: Minimazation caused some problems in the translation of concepts. I need to first fully 
+//    		integrate with HermiT and then look on this again.
+//    		Reducer minimizer = new Reducer();
     		if( owlSubPropertyExpression.length==2 && owlSubPropertyExpression[0].equals(owlSuperProperty) && owlSubPropertyExpression[1].equals(owlSuperProperty)){
     			m_nonSimpleRoles.add( owlSuperProperty );
-    			if( !propertyDependencyGraph.getElements().contains( owlSuperProperty ) )
-    				individualAutomata.put( owlSuperProperty.getInverseProperty().getSimplified(), getMirroredCopy( individualAutomata.get( owlSuperProperty ) ) );
+    			if( !propertyDependencyGraph.getElements().contains( owlSuperProperty ) ){
+    				Automaton autoOfRole = individualAutomata.get( owlSuperProperty );
+//    				autoOfRole = minimizer.transform( autoOfRole );
+    				individualAutomata.put(owlSuperProperty, autoOfRole);
+    				individualAutomata.put( owlSuperProperty.getInverseProperty().getSimplified(), getMirroredCopy( autoOfRole ) );
+    			}
     		}
 		}
 		Map<OWLObjectPropertyExpression,Automaton> connectedAutomata = connectAllAutomata(propertyDependencyGraph,individualAutomata);
 
-        return connectedAutomata;
+		return connectedAutomata;
+	}
+	private Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> findEquivalentRoles(Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions ){
+		Graph<OWLObjectPropertyExpression> propertyDependencyGraph = new Graph<OWLObjectPropertyExpression>();
+		Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> equivalentObjectPropertiesMapping = new HashMap<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>>();
+	  	for (OWLObjectPropertyExpression[] inclusion : simpleObjectPropertyInclusions){
+    		if( !inclusion[0].equals( inclusion[1] ) && !inclusion[0].equals( inclusion[1].getInverseProperty().getSimplified() ))
+    			propertyDependencyGraph.addEdge( inclusion[0], inclusion[1] );
+	  	}
+		
+	  	propertyDependencyGraph.transitivelyClose();
+
+	  	for(OWLObjectPropertyExpression objExpr : propertyDependencyGraph.getElements()){
+	  		if( propertyDependencyGraph.getSuccessors( objExpr ).contains( objExpr ) || 
+	  			propertyDependencyGraph.getSuccessors( objExpr ).contains( objExpr.getInverseProperty().getSimplified() )){
+	  			Set<OWLObjectPropertyExpression> equivPropertiesSet = new HashSet<OWLObjectPropertyExpression>();
+	  			for( OWLObjectPropertyExpression succ : propertyDependencyGraph.getSuccessors( objExpr ) ){
+	  				if( !succ.equals( objExpr ) && (propertyDependencyGraph.getSuccessors( succ ).contains( objExpr ) || 
+	  												propertyDependencyGraph.getSuccessors( succ ).contains( objExpr.getInverseProperty().getSimplified() )) )
+	  					equivPropertiesSet.add( succ );
+	  			}
+	  			equivalentObjectPropertiesMapping.put( objExpr, equivPropertiesSet);
+	  		}
+	  	}
+		return equivalentObjectPropertiesMapping;
 	}
 	private Set<OWLObjectPropertyExpression> findSimpleRoles(Graph<OWLObjectPropertyExpression> propertyDependencyGraph,Map<OWLObjectPropertyExpression, Automaton> individualAutomata) {
 		Set<OWLObjectPropertyExpression> simpleRoles = new HashSet<OWLObjectPropertyExpression>();
@@ -87,6 +121,8 @@ public class AutomataConstructionManager {
 	private Automaton buildCompleteAutomataForRoles(OWLObjectPropertyExpression roleToBuildAutomaton, Map<OWLObjectPropertyExpression, Automaton> individualAutomata,
 			Graph<OWLObjectPropertyExpression> inversedPropertyDependencyGraph) {
 
+//        Reducer minimizer = new Reducer();
+        
 		if( inversedPropertyDependencyGraph.getSuccessors( roleToBuildAutomaton ).isEmpty() ){
 			Automaton autoForLeafProperty = individualAutomata.get( roleToBuildAutomaton );
 			if( autoForLeafProperty == null )
@@ -99,14 +135,17 @@ public class AutomataConstructionManager {
 					} catch (NoSuchStateException e) {
 						throw new IllegalArgumentException( "Could not create automaton for role at the bottom of hierarchy (simple role)");
 					}
+//					autoForLeafProperty = minimizer.transform( autoForLeafProperty );
 					individualAutomata.put( roleToBuildAutomaton , autoForLeafProperty );
 	        		individualAutomata.put( roleToBuildAutomaton.getInverseProperty().getSimplified() , getMirroredCopy( autoForLeafProperty ) );
 				}
 				else{
 					autoForLeafProperty = getMirroredCopy( buildCompleteAutomataForRoles( roleToBuildAutomaton.getInverseProperty().getSimplified(), individualAutomata, inversedPropertyDependencyGraph ) );
+//					autoForLeafProperty = minimizer.transform( autoForLeafProperty );
 					individualAutomata.put( roleToBuildAutomaton , autoForLeafProperty );
 				}
 			else{
+//				autoForLeafProperty = minimizer.transform( autoForLeafProperty );
 				individualAutomata.put( roleToBuildAutomaton , autoForLeafProperty );
         		individualAutomata.put( roleToBuildAutomaton.getInverseProperty().getSimplified() , getMirroredCopy( autoForLeafProperty ) );
 			}
@@ -128,6 +167,7 @@ public class AutomataConstructionManager {
 	        		Automaton autoOfSmallerRole = buildCompleteAutomataForRoles( smallerRole, individualAutomata, inversedPropertyDependencyGraph );
 	        		connectAutomata( autoOfBiggerRole, autoOfSmallerRole, trans );
 		        }
+//        		autoOfBiggerRole = minimizer.transform( autoOfBiggerRole );
         		individualAutomata.put( roleToBuildAutomaton , autoOfBiggerRole );
         		individualAutomata.put( roleToBuildAutomaton.getInverseProperty().getSimplified() , getMirroredCopy( autoOfBiggerRole ) );
 			}
@@ -142,12 +182,12 @@ public class AutomataConstructionManager {
 		        		}
 		        }
 			}
+//			autoOfBiggerRole = minimizer.transform( autoOfBiggerRole );
     		individualAutomata.put( roleToBuildAutomaton.getInverseProperty().getSimplified() , getMirroredCopy( autoOfBiggerRole ) );
 	        individualAutomata.put( roleToBuildAutomaton , autoOfBiggerRole );
 	        return autoOfBiggerRole;
 		}
 	}
-	
 	private void connectAutomata(Automaton autoOfBiggerRole,Automaton autoOfSmallerRole, Transition tr) {
 		Map<State,State> stateMapper = getDisjointUnion( autoOfBiggerRole , autoOfSmallerRole);
 		try {
@@ -158,12 +198,17 @@ public class AutomataConstructionManager {
 		}
 	}
 
-	private Graph<OWLObjectPropertyExpression> buildPropertyOrdering(Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions,Collection<ComplexObjectPropertyInclusion> complexObjectPropertyInclusions){
+	private Graph<OWLObjectPropertyExpression> buildPropertyOrdering(Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions,Collection<ComplexObjectPropertyInclusion> complexObjectPropertyInclusions, Map<OWLObjectPropertyExpression, Set<OWLObjectPropertyExpression>> equivalentPropertiesMap){
     	Graph<OWLObjectPropertyExpression> propertyDependencyGraph = new Graph<OWLObjectPropertyExpression>();
 
-    	for (OWLObjectPropertyExpression[] inclusion : simpleObjectPropertyInclusions)
-    		if( !inclusion[0].equals( inclusion[1] ) && !inclusion[0].equals( inclusion[1].getInverseProperty().getSimplified() ))
+    	for (OWLObjectPropertyExpression[] inclusion : simpleObjectPropertyInclusions){
+    		if( !inclusion[0].equals( inclusion[1] ) && 
+    			!inclusion[0].equals( inclusion[1].getInverseProperty().getSimplified() ) &&
+    			(equivalentPropertiesMap.get( inclusion[0] ) == null ||
+    			!equivalentPropertiesMap.get( inclusion[0] ).contains( inclusion[1] ) ) ){
     			propertyDependencyGraph.addEdge( inclusion[0], inclusion[1] );
+    		}
+    	}
     		
     	for (OWLAxioms.ComplexObjectPropertyInclusion inclusion : complexObjectPropertyInclusions){
     		OWLObjectPropertyExpression owlSuperProperty = inclusion.m_superObjectProperties;
@@ -184,7 +229,10 @@ public class AutomataConstructionManager {
         			propertyDependencyGraph.addEdge( owlSubPropertyInChain, owlSuperProperty );
     		}
     	}
-    	Graph<OWLObjectPropertyExpression> regularityCheckGraph = propertyDependencyGraph.clone();
+     	return propertyDependencyGraph;
+	}
+	private void checkForRegularity(Graph<OWLObjectPropertyExpression> propertyDependencyGraph){
+	   	Graph<OWLObjectPropertyExpression> regularityCheckGraph = propertyDependencyGraph.clone();
     	regularityCheckGraph.transitivelyClose();
 
     	for( OWLObjectPropertyExpression prop : regularityCheckGraph.getElements() ){
@@ -192,7 +240,6 @@ public class AutomataConstructionManager {
     		if( successors.contains( prop ) || successors.contains( prop.getInverseProperty().getSimplified() ) )
     			throw new IllegalArgumentException("The given role hierarchy is not regular.");
     	}
-    	return propertyDependencyGraph;
 	}
     private Map<OWLObjectPropertyExpression,Automaton> buildIndividualAutomata(Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions, Collection<ComplexObjectPropertyInclusion> complexObjectPropertyInclusions){
     	
