@@ -14,12 +14,16 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.TreeSet;
 import java.util.Map;
 
 import org.semanticweb.HermiT.Prefixes;
+import org.semanticweb.owl.model.OWLObjectPropertyExpression;
+
+import rationals.Automaton;
 
 /**
  * Represents a DL ontology as a set of rules.
@@ -48,6 +52,10 @@ public class DLOntology implements Serializable {
     protected final Set<AtomicRole> m_allAtomicDataRoles;
     protected final Set<Individual> m_allIndividuals;
     protected final Set<DescriptionGraph> m_allDescriptionGraphs;
+    /**
+     * @gstoil
+     */
+	protected final Map<OWLObjectPropertyExpression, Automaton> m_automataOfComplexObjectProperties;
 
     public DLOntology(String ontologyURI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts,Set<AtomicConcept> atomicConcepts,Set<ComplexObjectRoleInclusion> allComplexObjectRoleInclusions,Set<AtomicRole> atomicObjectRoles,Set<AtomicRole> atomicDataRoles,Set<Individual> individuals,boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,boolean hasDatatypes) {
         m_ontologyURI=ontologyURI;
@@ -71,6 +79,7 @@ public class DLOntology implements Serializable {
             m_allComplexObjectRoleInclusions=new HashSet<ComplexObjectRoleInclusion>();
         else
             m_allComplexObjectRoleInclusions=allComplexObjectRoleInclusions;
+        m_automataOfComplexObjectProperties = new HashMap<OWLObjectPropertyExpression, Automaton>();
         if (atomicObjectRoles==null)
             m_allAtomicObjectRoles=new TreeSet<AtomicRole>(AtomicRoleComparator.INSTANCE);
         else
@@ -115,8 +124,7 @@ public class DLOntology implements Serializable {
             }
         }
     }
-
-    protected void addDLPredicate(DLPredicate dlPredicate) {
+	protected void addDLPredicate(DLPredicate dlPredicate) {
         if (dlPredicate instanceof AtomicConcept)
             m_allAtomicConcepts.add((AtomicConcept)dlPredicate);
         else if (dlPredicate instanceof AtLeastConcept) {
@@ -569,4 +577,14 @@ public class DLOntology implements Serializable {
             return INSTANCE;
         }
     }
+
+	public void setAutomata(
+			Map<OWLObjectPropertyExpression, Automaton> automataOfComplexRoles) {
+		m_automataOfComplexObjectProperties.putAll(automataOfComplexRoles);
+		
+	}
+    public Map<OWLObjectPropertyExpression, Automaton> getAutomataOfComplexObjectProperties() {
+		return m_automataOfComplexObjectProperties;
+	}
+
 }
