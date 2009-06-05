@@ -7,17 +7,16 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
 
-import org.semanticweb.owl.model.OWLCardinalityRestriction;
 import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLDescription;
 import org.semanticweb.owl.model.OWLObjectComplementOf;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
 import org.semanticweb.owl.model.OWLObjectAllRestriction;
-import org.semanticweb.owl.model.OWLPropertyExpression;
 
 import org.semanticweb.HermiT.graph.Graph;
 
 import rationals.Automaton;
+import rationals.State;
 import rationals.Transition;
 import rationals.transformations.EpsilonTransitionRemover;
 import rationals.transformations.Reducer;
@@ -50,17 +49,15 @@ public class ObjectPropertyInclusionManager {
     public void prepareTransformation(OWLAxioms axioms) {
         for (OWLObjectPropertyExpression[] inclusion : axioms.m_simpleObjectPropertyInclusions)
             addInclusion(inclusion[0],inclusion[1]);
-
-//        /*
-//         * Previous HermiT code follows 
-//        */ 
+        /*
+         * Previous HermiT code
+        */ 
 //        for (OWLAxioms.ComplexObjectPropertyInclusion inclusion : axioms.m_complexObjectPropertyInclusions)
 //           	addInclusion(inclusion.m_subObjectProperties,inclusion.m_superObjectProperties);
-
         AutomataConstructionManager automataBuilder = new AutomataConstructionManager();
         m_automataForComplexRoles.putAll( automataBuilder.createAutomata( axioms.m_simpleObjectPropertyInclusions, axioms.m_complexObjectPropertyInclusions ) );
         m_nonSimpleRoles.addAll( automataBuilder.getM_nonSimpleRoles() );
-
+        
         for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_asymmetricObjectProperties)
         	if( m_nonSimpleRoles.contains( objectPropertyExpression ) )
                 throw new IllegalArgumentException( "Non simple role '" + objectPropertyExpression + "' appears in asymmetricity axiom");
@@ -90,7 +87,7 @@ public class ObjectPropertyInclusionManager {
         else
             throw new IllegalArgumentException("Object property chains not supported yet.");
     }
-    public void rewriteAxioms(OWLAxioms axioms) {
+    public Map<OWLObjectPropertyExpression,Automaton> rewriteAxioms(OWLAxioms axioms) {
     	/**
     	 * @gstoil additions modifications
     	 */
@@ -100,57 +97,69 @@ public class ObjectPropertyInclusionManager {
                 inclusion[index]=replaceDescriptionIfNecessary(inclusion[index]);
 
         for (Map.Entry<OWLObjectAllRestriction,OWLDescription> mapping : m_replacedDescriptions.entrySet()) {
-            OWLObjectAllRestriction replacedConcept=mapping.getKey();
-            OWLDescription conceptForInitialState=mapping.getValue();
-            
-            OWLObjectPropertyExpression objectProperty = replacedConcept.getProperty();
-			OWLDescription owlConcept = replacedConcept.getFiller();
-            
+            OWLObjectAllRestriction replacedAllRestriction=mapping.getKey();
+            OWLDescription indexOfInitialConcept=mapping.getValue();
+
+            OWLObjectPropertyExpression objectProperty = replacedAllRestriction.getProperty();
+			OWLDescription owlConcept = replacedAllRestriction.getFiller();
+
             Automaton automatonOfRole = m_automataForComplexRoles.get( objectProperty );
-//          EpsilonTransitionRemover eRemover = new EpsilonTransitionRemover();
-//          automatonOfRole = eRemover.transform( automatonOfRole );
-//          ToDFA determinizer = new ToDFA();
-//          automatonOfRole = determinizer.transform( automatonOfRole );
+            String initialState = automatonOfRole.initials().toArray()[0].toString();
+            boolean isOfNegativePolarity = false;
+            OWLDescription conceptForInitialState = m_factory.getOWLClass(URI.create("internal:all#"+indexOfInitialConcept+initialState));            
+            if (replacedAllRestriction.getFiller() instanceof OWLObjectComplementOf || replacedAllRestriction.getFiller().equals(m_factory.getOWLNothing())){
+            	conceptForInitialState = m_factory.getOWLClass(URI.create("internal:all#"+indexOfInitialConcept+initialState)).getComplementNNF();
+            	isOfNegativePolarity = true;
+            }
+            Map<State,OWLDescription> mapOfNewConceptNames = new HashMap<State,OWLDescription>();
+            Object[] states = automatonOfRole.states().toArray();
+            for( int i=0 ; i<states.length ; i++ ){
+            	State state = (State)states[i];
+            	if( state.isInitial() )
+            		continue;
+            	else
+            		mapOfNewConceptNames.put( state, m_factory.getOWLClass(URI.create("internal:all#"+indexOfInitialConcept+state)) );
+            }
+            if( isOfNegativePolarity )
+            	for(State state : mapOfNewConceptNames.keySet())
+            		mapOfNewConceptNames.put( state, mapOfNewConceptNames.get( state ).getComplementNNF() );
 
-//			Reducer also calles ToDFA.transform() and ToDFA in turn calls EpsilonTransRemover.transform.            
-            Reducer minimizer = new Reducer();
-            automatonOfRole = minimizer.transform( automatonOfRole );
+        	mapOfNewConceptNames.put( (State)automatonOfRole.initials().toArray()[0], conceptForInitialState);
 
-    		Object[] transitionsIterator = automatonOfRole.delta().toArray();
+        	Object[] transitionsIterator = automatonOfRole.delta().toArray();
     		OWLDescription fromStateConcept = null;
 			OWLDescription toStateConcept = null;
+
     		for( int i =0 ; i<transitionsIterator.length ; i++ ) {
     			Transition trans = (Transition) transitionsIterator[i];
-	    		if( trans.start().isInitial() )
-	    			fromStateConcept = conceptForInitialState.getComplementNNF();
-	    		else
-	    			fromStateConcept = m_factory.getOWLClass(URI.create("internal:all#" + conceptForInitialState + trans.start().toString() )).getComplementNNF();
-	    		
-	    		if( trans.end().isInitial() )
-	    			toStateConcept = conceptForInitialState;
-	    		else
-	    			toStateConcept = m_factory.getOWLClass(URI.create("internal:all#" + conceptForInitialState + trans.end().toString() ));
-	    		
+    			fromStateConcept = mapOfNewConceptNames.get( trans.start() ).getComplementNNF();
+
+    			toStateConcept = mapOfNewConceptNames.get( trans.end() );
+    			
 	    		if( trans.label() == null )
 	    			axioms.m_conceptInclusions.add(new OWLDescription[] { fromStateConcept, toStateConcept });
-
 	    		else{
 	    			OWLObjectAllRestriction consequentAll=m_factory.getOWLObjectAllRestriction(
 	    												(OWLObjectPropertyExpression)trans.label(), toStateConcept );
 	    			axioms.m_conceptInclusions.add(new OWLDescription[] { fromStateConcept, consequentAll });
 	    		}
     		}
-    		fromStateConcept = m_factory.getOWLClass(URI.create("internal:all#" + conceptForInitialState + automatonOfRole.terminals().toArray()[0] )).getComplementNNF();
-    		axioms.m_conceptInclusions.add(new OWLDescription[] { fromStateConcept, owlConcept });
+    		Object[] finalStates = automatonOfRole.terminals().toArray();
+    		for( int i=0 ; i<finalStates.length ; i++ )
+    			axioms.m_conceptInclusions.add(new OWLDescription[] { mapOfNewConceptNames.get( (State)finalStates[i] ).getComplementNNF(), owlConcept });
         }
-        m_automataForComplexRoles.clear();
-        m_nonSimpleRoles.clear();
         m_replacedDescriptions.clear();
-
+        
+        return m_automataForComplexRoles;
+//        m_automataForComplexRoles.clear();
+//        m_nonSimpleRoles.clear();
         /**
          * @previous code simulating an automaton for transitive roles and sub-roles
          */
-//            axioms.m_conceptInclusions.add(new OWLDescription[] { replacement.getComplementNNF(),replacedConcept });
+//      for (Map.Entry<OWLObjectAllRestriction,OWLDescription> mapping : m_replacedDescriptions.entrySet()) {
+//      OWLObjectAllRestriction replacedConcept=mapping.getKey();
+//      OWLDescription replacement=mapping.getValue();
+//        	axioms.m_conceptInclusions.add(new OWLDescription[] { replacement.getComplementNNF(),replacedConcept });
 //            for (OWLObjectPropertyExpression transitiveSubObjectProperty : getTransitiveSubObjectProperties(replacedConcept.getProperty())) {
 //                OWLObjectAllRestriction consequentAll=m_factory.getOWLObjectAllRestriction(transitiveSubObjectProperty,replacedConcept.getFiller());
 //                OWLDescription consequentReplacement=m_replacedDescriptions.get(consequentAll);
@@ -169,8 +178,14 @@ public class ObjectPropertyInclusionManager {
             OWLObjectPropertyExpression objectProperty=objectAll.getProperty();
 //            Set<OWLObjectPropertyExpression> transitiveSubObjectProperties=getTransitiveSubObjectProperties(objectProperty);
 //            if (!transitiveSubObjectProperties.isEmpty()) {
-            if( this.m_automataForComplexRoles.containsKey( objectProperty ) ){
-                OWLDescription replacement=getReplacementFor(objectAll);
+            if( m_automataForComplexRoles.containsKey( objectProperty ) ){
+                OWLDescription indexOfReplacedConcept=getReplacementFor(objectAll);
+                String initial = m_automataForComplexRoles.get( objectProperty ).initials().toArray()[0].toString();
+                OWLDescription replacement = m_factory.getOWLClass(URI.create("internal:all#"+indexOfReplacedConcept+initial));
+                Automaton automaton = m_automataForComplexRoles.get( objectProperty );
+                String initialState = automaton.initials().toArray()[0].toString();
+                if (objectAll.getFiller() instanceof OWLObjectComplementOf || objectAll.getFiller().equals(m_factory.getOWLNothing()))
+                	replacement = m_factory.getOWLClass(URI.create("internal:all#"+indexOfReplacedConcept+initialState)).getComplementNNF();
 //                for (OWLObjectPropertyExpression transitiveSubObjectProperty : transitiveSubObjectProperties) {
 //                    OWLObjectAllRestriction subObjectAll=m_factory.getOWLObjectAllRestriction(transitiveSubObjectProperty,objectAll.getFiller());
 //                    getReplacementFor(subObjectAll);
@@ -184,8 +199,8 @@ public class ObjectPropertyInclusionManager {
         OWLDescription replacement=m_replacedDescriptions.get(objectAll);
         if (replacement==null) {
             replacement=m_factory.getOWLClass(URI.create("internal:all#"+m_replacedDescriptions.size()));
-            if (objectAll.getFiller() instanceof OWLObjectComplementOf || objectAll.getFiller().equals(m_factory.getOWLNothing()))
-                replacement=replacement.getComplementNNF();
+//            if (objectAll.getFiller() instanceof OWLObjectComplementOf || objectAll.getFiller().equals(m_factory.getOWLNothing()))
+//                replacement=replacement.getComplementNNF();
             m_replacedDescriptions.put(objectAll,replacement);
         }
         return replacement;
@@ -200,4 +215,9 @@ public class ObjectPropertyInclusionManager {
                 result.add(subObjectProperty);
         return result;
     }
+
+	public void rewriteAxioms(OWLAxioms axioms, Map<OWLObjectPropertyExpression, Automaton> automataOfComplexObjectProperties) {
+		m_automataForComplexRoles.putAll( automataOfComplexObjectProperties );
+		rewriteAxioms( axioms );
+	}
 }
