@@ -12,6 +12,10 @@ public interface DirectBlockingChecker {
     boolean isBlockedBy(Node blocker,Node blocked);
     int blockingHashCode(Node node);
     boolean canBeBlocker(Node node);
+    /**
+     * @param node
+     * @return true if node is a tree node
+     */
     boolean canBeBlocked(Node node);
     boolean hasBlockingInfoChanged(Node node);
     void clearBlockingInfoChanged(Node node);

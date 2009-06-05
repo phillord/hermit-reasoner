@@ -40,7 +40,7 @@ public class HelpCommand extends AbstractCommand {
                 String[] description=command.getDescription();
                 for (int index=0;index<description.length;index+=2) {
                     int firstColumnWidth=command.getCommandName().length();
-                    if (!description[index].isEmpty())
+                    if (description[index].length() != 0)
                         firstColumnWidth+=1+description[index].length();
                     maxFirstColumnWidth=Math.max(maxFirstColumnWidth,firstColumnWidth);
                 }
@@ -49,7 +49,7 @@ public class HelpCommand extends AbstractCommand {
                 String[] description=command.getDescription();
                 for (int index=0;index<description.length;index+=2) {
                     String commandLine=command.getCommandName();
-                    if (!description[index].isEmpty())
+                    if (description[index].length() != 0)
                         commandLine+=' '+description[index];
                     m_debugger.getOutput().print("  ");
                     m_debugger.getOutput().print(commandLine);

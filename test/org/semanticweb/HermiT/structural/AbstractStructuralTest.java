@@ -1,10 +1,18 @@
 package org.semanticweb.HermiT.structural;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import junit.framework.AssertionFailedError;
 
 import org.semanticweb.HermiT.AbstractOntologyTest;
+import org.semanticweb.HermiT.Configuration;
+import org.semanticweb.HermiT.Prefixes;
+import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.model.DLOntology;
+import org.semanticweb.HermiT.model.DescriptionGraph;
 
 public abstract class AbstractStructuralTest extends AbstractOntologyTest {
 
@@ -24,7 +32,7 @@ public abstract class AbstractStructuralTest extends AbstractOntologyTest {
                     isOKVariant1=actual.contains(controlVariant1[i]);
             }
             boolean isOKVariant2=false;
-            if (controlVariant2!=null) {
+            if (!isOKVariant1 && controlVariant2!=null) {
                 isOKVariant2=true;
                 for (int i=0;isOKVariant2 && i<controlVariant2.length;i++)
                     isOKVariant2=actual.contains(controlVariant2[i]);
@@ -85,5 +93,24 @@ public abstract class AbstractStructuralTest extends AbstractOntologyTest {
     
     protected static String[] S(String... strings) {
         return strings;
+    }
+
+    protected Set<String> getDLClauses() throws Exception {
+        OWLClausification clausifier=new OWLClausification(new Configuration());
+        Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
+        DLOntology dlOntology=clausifier.clausify(m_ontologyManager,m_ontology,noDescriptionGraphs);
+        String ontologyIRI = m_ontology.getOntologyID().getDefaultDocumentIRI() == null ? "urn:hermit:kb" : m_ontology.getOntologyID().getDefaultDocumentIRI().toString();
+        Set<String> actualStrings=new HashSet<String>();
+        Prefixes prefixes=new Prefixes();
+        prefixes.declareSemanticWebPrefixes();
+        prefixes.declareInternalPrefixes(Collections.singleton(ontologyIRI+"#"));
+        prefixes.declareDefaultPrefix(ontologyIRI+"#");
+        for (DLClause dlClause : dlOntology.getDLClauses())
+            actualStrings.add(dlClause.toString(prefixes));
+        for (org.semanticweb.HermiT.model.Atom atom : dlOntology.getPositiveFacts())
+            actualStrings.add(atom.toString(prefixes));
+        for (org.semanticweb.HermiT.model.Atom atom : dlOntology.getNegativeFacts())
+            actualStrings.add("not "+atom.toString(prefixes));
+        return actualStrings;
     }
 }

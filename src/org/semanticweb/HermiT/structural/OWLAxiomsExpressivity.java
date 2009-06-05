@@ -3,42 +3,42 @@ package org.semanticweb.HermiT.structural;
 
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLClassAssertionAxiom;
-import org.semanticweb.owl.model.OWLNegativeObjectPropertyAssertionAxiom;
-import org.semanticweb.owl.model.OWLObjectPropertyAssertionAxiom;
-import org.semanticweb.owl.model.OWLObjectPropertyInverse;
-import org.semanticweb.owl.model.OWLObjectPropertyExpression;
-import org.semanticweb.owl.model.OWLDataAllRestriction;
-import org.semanticweb.owl.model.OWLDataExactCardinalityRestriction;
-import org.semanticweb.owl.model.OWLDataMaxCardinalityRestriction;
-import org.semanticweb.owl.model.OWLDataMinCardinalityRestriction;
-import org.semanticweb.owl.model.OWLDataSomeRestriction;
-import org.semanticweb.owl.model.OWLDataValueRestriction;
+import org.semanticweb.owl.model.OWLClassExpression;
+import org.semanticweb.owl.model.OWLClassExpressionVisitor;
+import org.semanticweb.owl.model.OWLDataAllValuesFrom;
+import org.semanticweb.owl.model.OWLDataExactCardinality;
+import org.semanticweb.owl.model.OWLDataHasValue;
+import org.semanticweb.owl.model.OWLDataMaxCardinality;
+import org.semanticweb.owl.model.OWLDataMinCardinality;
 import org.semanticweb.owl.model.OWLDataPropertyAssertionAxiom;
-import org.semanticweb.owl.model.OWLDescription;
-import org.semanticweb.owl.model.OWLDescriptionVisitor;
-import org.semanticweb.owl.model.OWLObjectAllRestriction;
-import org.semanticweb.owl.model.OWLObjectComplementOf;
-import org.semanticweb.owl.model.OWLObjectExactCardinalityRestriction;
-import org.semanticweb.owl.model.OWLObjectIntersectionOf;
-import org.semanticweb.owl.model.OWLObjectMaxCardinalityRestriction;
-import org.semanticweb.owl.model.OWLObjectMinCardinalityRestriction;
-import org.semanticweb.owl.model.OWLObjectOneOf;
-import org.semanticweb.owl.model.OWLObjectSelfRestriction;
-import org.semanticweb.owl.model.OWLObjectSomeRestriction;
-import org.semanticweb.owl.model.OWLObjectUnionOf;
-import org.semanticweb.owl.model.OWLObjectValueRestriction;
+import org.semanticweb.owl.model.OWLDataSomeValuesFrom;
 import org.semanticweb.owl.model.OWLIndividualAxiom;
+import org.semanticweb.owl.model.OWLNegativeObjectPropertyAssertionAxiom;
+import org.semanticweb.owl.model.OWLObjectAllValuesFrom;
+import org.semanticweb.owl.model.OWLObjectComplementOf;
+import org.semanticweb.owl.model.OWLObjectExactCardinality;
+import org.semanticweb.owl.model.OWLObjectHasSelf;
+import org.semanticweb.owl.model.OWLObjectHasValue;
+import org.semanticweb.owl.model.OWLObjectIntersectionOf;
+import org.semanticweb.owl.model.OWLObjectMaxCardinality;
+import org.semanticweb.owl.model.OWLObjectMinCardinality;
+import org.semanticweb.owl.model.OWLObjectOneOf;
+import org.semanticweb.owl.model.OWLObjectPropertyAssertionAxiom;
+import org.semanticweb.owl.model.OWLObjectPropertyExpression;
+import org.semanticweb.owl.model.OWLObjectPropertyInverse;
+import org.semanticweb.owl.model.OWLObjectSomeValuesFrom;
+import org.semanticweb.owl.model.OWLObjectUnionOf;
 import org.semanticweb.owl.util.OWLAxiomVisitorAdapter;
 
-public class OWLAxiomsExpressivity extends OWLAxiomVisitorAdapter implements OWLDescriptionVisitor {
+public class OWLAxiomsExpressivity extends OWLAxiomVisitorAdapter implements OWLClassExpressionVisitor {
     public boolean m_hasAtMostRestrictions;
     public boolean m_hasInverseRoles;
     public boolean m_hasNominals;
     public boolean m_hasDatatypes;
 
     public OWLAxiomsExpressivity(OWLAxioms axioms) {
-        for (OWLDescription[] inclusion : axioms.m_conceptInclusions)
-            for (OWLDescription description : inclusion)
+        for (OWLClassExpression[] inclusion : axioms.m_conceptInclusions)
+            for (OWLClassExpression description : inclusion)
                 description.accept(this);
         for (OWLObjectPropertyExpression[] inclusion : axioms.m_simpleObjectPropertyInclusions) {
             visitProperty(inclusion[0]);
@@ -77,12 +77,12 @@ public class OWLAxiomsExpressivity extends OWLAxiomVisitorAdapter implements OWL
     }
 
     public void visit(OWLObjectIntersectionOf object) {
-        for (OWLDescription description : object.getOperands())
+        for (OWLClassExpression description : object.getOperands())
             description.accept(this);
     }
 
     public void visit(OWLObjectUnionOf object) {
-        for (OWLDescription description : object.getOperands())
+        for (OWLClassExpression description : object.getOperands())
             description.accept(this);
     }
 
@@ -90,68 +90,68 @@ public class OWLAxiomsExpressivity extends OWLAxiomVisitorAdapter implements OWL
         m_hasNominals=true;
     }
 
-    public void visit(OWLObjectSomeRestriction object) {
+    public void visit(OWLObjectSomeValuesFrom object) {
         visitProperty(object.getProperty());
         object.getFiller().accept(this);
     }
 
-    public void visit(OWLObjectValueRestriction object) {
+    public void visit(OWLObjectHasValue object) {
         m_hasNominals=true;
         visitProperty(object.getProperty());
     }
 
-    public void visit(OWLObjectSelfRestriction object) {
+    public void visit(OWLObjectHasSelf object) {
         visitProperty(object.getProperty());
     }
 
-    public void visit(OWLObjectAllRestriction object) {
-        visitProperty(object.getProperty());
-        object.getFiller().accept(this);
-    }
-
-    public void visit(OWLObjectMinCardinalityRestriction object) {
+    public void visit(OWLObjectAllValuesFrom object) {
         visitProperty(object.getProperty());
         object.getFiller().accept(this);
     }
 
-    public void visit(OWLObjectMaxCardinalityRestriction object) {
+    public void visit(OWLObjectMinCardinality object) {
+        visitProperty(object.getProperty());
+        object.getFiller().accept(this);
+    }
+
+    public void visit(OWLObjectMaxCardinality object) {
         m_hasAtMostRestrictions=true;
         visitProperty(object.getProperty());
         object.getFiller().accept(this);
     }
 
-    public void visit(OWLObjectExactCardinalityRestriction object) {
+    public void visit(OWLObjectExactCardinality object) {
         m_hasAtMostRestrictions=true;
         visitProperty(object.getProperty());
         object.getFiller().accept(this);
     }
 
-    public void visit(OWLDataValueRestriction object) {
+    public void visit(OWLDataHasValue object) {
         m_hasDatatypes=true;
     }
 
-    public void visit(OWLDataSomeRestriction object) {
+    public void visit(OWLDataSomeValuesFrom object) {
         m_hasDatatypes=true;
     }
 
-    public void visit(OWLDataAllRestriction object) {
+    public void visit(OWLDataAllValuesFrom object) {
         m_hasDatatypes=true;
     }
 
-    public void visit(OWLDataMinCardinalityRestriction object) {
+    public void visit(OWLDataMinCardinality object) {
         m_hasDatatypes=true;
     }
 
-    public void visit(OWLDataMaxCardinalityRestriction object) {
+    public void visit(OWLDataMaxCardinality object) {
         m_hasDatatypes=true;
     }
 
-    public void visit(OWLDataExactCardinalityRestriction object) {
+    public void visit(OWLDataExactCardinality object) {
         m_hasDatatypes=true;
     }
 
      public void visit(OWLClassAssertionAxiom object) {
-        object.getDescription().accept(OWLAxiomsExpressivity.this);
+        object.getClassExpression().accept(OWLAxiomsExpressivity.this);
     }
 
     public void visit(OWLObjectPropertyAssertionAxiom object) {

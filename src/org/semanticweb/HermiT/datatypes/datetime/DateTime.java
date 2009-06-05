@@ -1,8 +1,8 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.datatypes.datetime;
 
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DateTime {
     public static final int NO_TIMEZONE=Integer.MAX_VALUE;

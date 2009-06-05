@@ -1,10 +1,10 @@
 package org.semanticweb.HermiT.owl_wg_tests;
 
 import java.net.URI;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLClass;

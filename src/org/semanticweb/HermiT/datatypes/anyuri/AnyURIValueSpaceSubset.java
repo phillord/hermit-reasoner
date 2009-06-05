@@ -1,17 +1,17 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.datatypes.anyuri;
 
+import java.net.URI;
 import java.util.Collection;
 import java.util.Set;
-import java.net.URI;
 
-import dk.brics.automaton.RegExp;
+import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
+
 import dk.brics.automaton.Automaton;
 import dk.brics.automaton.BasicAutomata;
 import dk.brics.automaton.BasicOperations;
 import dk.brics.automaton.Datatypes;
-
-import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
+import dk.brics.automaton.RegExp;
 
 public class AnyURIValueSpaceSubset implements ValueSpaceSubset {
     protected static final Automaton s_anyChar;

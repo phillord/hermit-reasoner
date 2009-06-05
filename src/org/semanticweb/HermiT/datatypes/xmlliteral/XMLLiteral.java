@@ -1,6 +1,7 @@
 package org.semanticweb.HermiT.datatypes.xmlliteral;
 
-import com.sun.org.apache.xml.internal.security.c14n.implementations.Canonicalizer20010315ExclWithComments;
+import org.semanticweb.HermiT.datatypes.xmlliteral.c14n.implementations.Canonicalizer20010315ExclWithComments;
+
 
 public class XMLLiteral {
     protected final String m_xml;

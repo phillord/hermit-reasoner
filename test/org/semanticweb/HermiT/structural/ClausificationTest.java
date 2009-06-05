@@ -2,17 +2,15 @@ package org.semanticweb.HermiT.structural;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Configuration;
-import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.model.DLClause;
-import org.semanticweb.HermiT.model.DLOntology;
-import org.semanticweb.HermiT.model.DescriptionGraph;
+import org.semanticweb.owl.model.OWLHasKeyAxiom;
 
 public class ClausificationTest extends AbstractStructuralTest {
     static {
@@ -22,21 +20,21 @@ public class ClausificationTest extends AbstractStructuralTest {
     public ClausificationTest(String name) {
         super(name);
     }
-
+    // Giorgos will fix this
     public void testBasic() throws Exception {
         assertClausification("res/basic-input.xml","res/basic-control.txt",null);
     }
 
     public void testNominals1() throws Exception {
-        assertClausification("res/nominals-1-input.xml","res/nominals-1-control.txt",null);
+        assertClausification("res/nominals-1-input.xml","res/nominals-1-control.txt","res/nominals-1-control2.txt");
     }
 
    public void testNominals2() throws Exception {
-        assertClausification("res/nominals-2-input.xml","res/nominals-2-control.txt",null);
+        assertClausification("res/nominals-2-input.xml","res/nominals-2-control.txt","res/nominals-2-control2.txt");
     }
 
     public void testNominals3() throws Exception {
-        assertClausification("res/nominals-3-input.xml","res/nominals-3-control.txt",null);
+        assertClausification("res/nominals-3-input.xml","res/nominals-3-control.txt","res/nominals-3-control2.txt");
     }
 
     public void testNominals4() throws Exception {
@@ -44,20 +42,31 @@ public class ClausificationTest extends AbstractStructuralTest {
     }
 
     public void testAsymmetry() throws Exception {
-        assertClausification("res/asymmetry-input.xml","res/asymmetry-control.txt",null);
+        String axioms = "Declaration(ObjectProperty(:as))";
+        axioms += "Declaration(ObjectProperty(:as))";
+        axioms += "Declaration(NamedIndividual(:a))";
+        axioms += "Declaration(NamedIndividual(:b))";
+        axioms += "AsymmetricObjectProperty(:as)";
+        axioms += "SubObjectPropertyOf(:r :as)";
+        axioms += "ObjectPropertyAssertion(:r :a :b)";
+        axioms += "ObjectPropertyAssertion(:as :b :a)";
+        loadOntologyWithAxioms(axioms);
+        assertDLClauses(getControl("res/asymmetry-control.txt"),getControl(null));
     }
 
     public void testExistsSelf1() throws Exception {
-        assertClausification("res/exists-self-1-input.owl","res/exists-self-1-control-1.txt","res/exists-self-1-control-2.txt");
+        assertClausification("res/has-self-1-input.owl","res/has-self-1-control-1.txt","res/has-self-1-control-2.txt");
     }
 
     public void testExistsSelf2() throws Exception {
-        assertClausification("res/exists-self-2-input.owl","res/exists-self-2-control.txt",null);
+        assertClausification("res/has-self-2-input.owl","res/has-self-2-control.txt",null);
     }
     
+    // will be fixed, when keys are being fixed
     public void testHasKeys() throws Exception {
         OWLClausification clausifier=new OWLClausification(new Configuration());
-        DLClause clause=clausifier.clausifyKey(OWLHasKeyDummy.getDemoKey());
+        OWLHasKeyAxiom key = m_dataFactory.getOWLHasKeyAxiom(m_dataFactory.getOWLClass(new URI("int:C_test")), m_dataFactory.getOWLObjectProperty(new URI("int:r_test")), m_dataFactory.getOWLDataProperty(new URI("int:dp_test")));
+        DLClause clause=clausifier.clausifyKey(key);
         Set<String> bAtoms=new HashSet<String>();
         bAtoms.add("<internal:nam#Named>(X)");
         bAtoms.add("<internal:nam#Named>(X2)");
@@ -107,20 +116,7 @@ public class ClausificationTest extends AbstractStructuralTest {
     }
 
     protected void assertDLClauses(String[] control,String[] controlVariant) throws Exception {
-        OWLClausification clausifier=new OWLClausification(new Configuration());
-        Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
-        DLOntology dlOntology=clausifier.clausify(m_ontologyManager,m_ontology,noDescriptionGraphs);
-        Set<String> actualStrings=new HashSet<String>();
-        Prefixes prefixes=new Prefixes();
-        prefixes.declareSemanticWebPrefixes();
-        prefixes.declareInternalPrefixes(Collections.singleton(m_ontology.getURI()+"#"));
-        prefixes.declareDefaultPrefix(m_ontology.getURI()+"#");
-        for (DLClause dlClause : dlOntology.getDLClauses())
-            actualStrings.add(dlClause.toString(prefixes));
-        for (org.semanticweb.HermiT.model.Atom atom : dlOntology.getPositiveFacts())
-            actualStrings.add(atom.toString(prefixes));
-        for (org.semanticweb.HermiT.model.Atom atom : dlOntology.getNegativeFacts())
-            actualStrings.add("not "+atom.toString(prefixes));
+        Set<String> actualStrings = getDLClauses();
         assertContainsAll(this.getName(),actualStrings,control,controlVariant);
     }
 }

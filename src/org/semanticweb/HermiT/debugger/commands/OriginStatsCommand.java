@@ -9,12 +9,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.semanticweb.HermiT.debugger.Debugger;
+import org.semanticweb.HermiT.debugger.Printing;
 import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.tableau.Node;
-import org.semanticweb.HermiT.debugger.Debugger;
-import org.semanticweb.HermiT.debugger.Printing;
 
 public class OriginStatsCommand extends AbstractCommand {
 

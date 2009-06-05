@@ -1,8 +1,8 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.monitor;
 
-import java.io.IOException;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class TimerWithPause extends Timer {

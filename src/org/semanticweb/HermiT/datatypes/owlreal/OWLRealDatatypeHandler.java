@@ -1,21 +1,21 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.datatypes.owlreal;
 
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.semanticweb.HermiT.Prefixes;
-import org.semanticweb.HermiT.model.DatatypeRestriction;
 import org.semanticweb.HermiT.datatypes.DatatypeHandler;
 import org.semanticweb.HermiT.datatypes.MalformedLiteralException;
 import org.semanticweb.HermiT.datatypes.UnsupportedFacetException;
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
+import org.semanticweb.HermiT.model.DatatypeRestriction;
 
 /**
  * Implements a handler for the numeric datatypes derived from owl:real. This class

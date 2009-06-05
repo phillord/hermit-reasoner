@@ -3,11 +3,11 @@ package org.semanticweb.HermiT.debugger.commands;
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 
+import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.debugger.Printing;
 import org.semanticweb.HermiT.debugger.Debugger.NodeCreationInfo;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.tableau.Node;
-import org.semanticweb.HermiT.debugger.Debugger;
 
 public class ShowExistsCommand extends AbstractCommand {
 

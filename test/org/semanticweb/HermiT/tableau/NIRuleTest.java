@@ -1,9 +1,9 @@
 package org.semanticweb.HermiT.tableau;
 
 import java.util.Collections;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.semanticweb.HermiT.blocking.AnywhereBlocking;
 import org.semanticweb.HermiT.blocking.BlockingSignatureCache;

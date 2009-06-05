@@ -3,10 +3,10 @@ package org.semanticweb.HermiT.debugger.commands;
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 
+import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.tableau.GroundDisjunction;
-import org.semanticweb.HermiT.debugger.Debugger;
 
 public class UnprocessedDisjunctionsCommand extends AbstractCommand {
 

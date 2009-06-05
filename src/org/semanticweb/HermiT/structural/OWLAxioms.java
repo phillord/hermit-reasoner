@@ -1,26 +1,32 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.structural;
 
-import java.util.Collection;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.semanticweb.owl.model.OWLClass;
+import org.semanticweb.owl.model.OWLClassExpression;
 import org.semanticweb.owl.model.OWLDataProperty;
-import org.semanticweb.owl.model.OWLDescription;
 import org.semanticweb.owl.model.OWLDataPropertyExpression;
-import org.semanticweb.owl.model.OWLIndividual;
+import org.semanticweb.owl.model.OWLDataRange;
+import org.semanticweb.owl.model.OWLDatatype;
+import org.semanticweb.owl.model.OWLHasKeyAxiom;
+import org.semanticweb.owl.model.OWLIndividualAxiom;
+import org.semanticweb.owl.model.OWLNamedIndividual;
 import org.semanticweb.owl.model.OWLObjectProperty;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
-import org.semanticweb.owl.model.OWLIndividualAxiom;
 
 public class OWLAxioms {
     public final Set<OWLClass> m_classes;
     public final Set<OWLObjectProperty> m_objectProperties;
     public final Set<OWLDataProperty> m_dataProperties;
-    public final Set<OWLIndividual> m_individuals;
-    public final Collection<OWLDescription[]> m_conceptInclusions;
+    public final Set<OWLNamedIndividual> m_individuals;
+    public final Collection<OWLClassExpression[]> m_conceptInclusions;
+    public final Map<OWLDataRange,OWLDatatype> m_dataRangeInclusions;
     public final Collection<OWLObjectPropertyExpression[]> m_simpleObjectPropertyInclusions;
     public final Collection<ComplexObjectPropertyInclusion> m_complexObjectPropertyInclusions;
     public final Collection<OWLObjectPropertyExpression[]> m_disjointObjectProperties;
@@ -32,14 +38,16 @@ public class OWLAxioms {
     public final Collection<OWLDataPropertyExpression[]> m_disjointDataProperties;
     public final Set<OWLDataPropertyExpression> m_unsatisfiableDataProperties;
     public final Collection<OWLIndividualAxiom> m_facts;
-    public final Set<OWLHasKeyDummy> m_hasKeys;
-
+    public final Set<OWLHasKeyAxiom> m_hasKeys;
+    public final Map<OWLDatatype, OWLDataRange> m_datatypeDefs;
+    
     public OWLAxioms() {
         m_classes=new HashSet<OWLClass>();
         m_objectProperties=new HashSet<OWLObjectProperty>();
         m_dataProperties=new HashSet<OWLDataProperty>();
-        m_individuals=new HashSet<OWLIndividual>();
-        m_conceptInclusions=new ArrayList<OWLDescription[]>();
+        m_individuals=new HashSet<OWLNamedIndividual>();
+        m_conceptInclusions=new ArrayList<OWLClassExpression[]>();
+        m_dataRangeInclusions=new HashMap<OWLDataRange,OWLDatatype>();
         m_simpleObjectPropertyInclusions=new ArrayList<OWLObjectPropertyExpression[]>();
         m_complexObjectPropertyInclusions=new ArrayList<ComplexObjectPropertyInclusion>();
         m_disjointObjectProperties=new ArrayList<OWLObjectPropertyExpression[]>();
@@ -51,7 +59,8 @@ public class OWLAxioms {
         m_dataPropertyInclusions=new ArrayList<OWLDataPropertyExpression[]>();
         m_unsatisfiableDataProperties=new HashSet<OWLDataPropertyExpression>();
         m_facts=new HashSet<OWLIndividualAxiom>();
-        m_hasKeys=new HashSet<OWLHasKeyDummy>();
+        m_hasKeys=new HashSet<OWLHasKeyAxiom>();
+        m_datatypeDefs=new HashMap<OWLDatatype, OWLDataRange>();
     }
     
     public static class ComplexObjectPropertyInclusion {

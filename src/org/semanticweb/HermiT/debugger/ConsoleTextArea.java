@@ -1,18 +1,19 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.debugger;
  
-import java.io.IOException;
-import java.io.Writer;
-import java.io.Reader;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import javax.swing.Timer;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
+
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.text.AttributeSet;
-import javax.swing.text.PlainDocument;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.PlainDocument;
 
 @SuppressWarnings("serial")
 public class ConsoleTextArea extends JTextArea {

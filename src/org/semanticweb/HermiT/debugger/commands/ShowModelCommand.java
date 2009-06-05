@@ -5,12 +5,12 @@ import java.io.PrintWriter;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.semanticweb.HermiT.debugger.Debugger;
+import org.semanticweb.HermiT.debugger.Printing;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
-import org.semanticweb.HermiT.debugger.Debugger;
-import org.semanticweb.HermiT.debugger.Printing;
 
 public class ShowModelCommand extends AbstractCommand {
 

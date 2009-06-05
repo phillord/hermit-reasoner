@@ -4,22 +4,19 @@ import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.util.Collections;
-import java.util.Set;
 import java.util.HashSet;
-
-import org.semanticweb.owl.apibinding.OWLManager;
-import org.semanticweb.owl.model.OWLClass;
-import org.semanticweb.owl.model.OWLDescription;
-import org.semanticweb.owl.model.OWLDataProperty;
-import org.semanticweb.owl.model.OWLObjectProperty;
-import org.semanticweb.owl.model.OWLObjectPropertyExpression;
-import org.semanticweb.owl.model.OWLIndividual;
+import java.util.Set;
 
 import org.semanticweb.HermiT.AbstractOntologyTest;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.model.DescriptionGraph;
-import org.semanticweb.HermiT.structural.OWLHasKeyDummy;
+import org.semanticweb.owl.model.OWLClass;
+import org.semanticweb.owl.model.OWLClassExpression;
+import org.semanticweb.owl.model.OWLDataProperty;
+import org.semanticweb.owl.model.OWLIndividual;
+import org.semanticweb.owl.model.OWLObjectProperty;
+import org.semanticweb.owl.model.OWLObjectPropertyExpression;
 
 public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     protected Reasoner m_reasoner;
@@ -35,7 +32,6 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
 
     protected void loadReasonerFromResource(String resourceName) throws Exception {
         URI physicalURI=getClass().getResource(resourceName).toURI();
-        m_ontologyManager=OWLManager.createOWLOntologyManager();
         m_ontology=m_ontologyManager.loadOntologyFromPhysicalURI(physicalURI);
         createReasoner();
     }
@@ -46,15 +42,13 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     }
 
     protected void createReasoner() {
-        createReasoner(getConfiguration(),null,null);
+        createReasoner(getConfiguration(),null);
     }
 
-    protected void createReasoner(Configuration configuration,Set<DescriptionGraph> descriptionGraphs,Set<OWLHasKeyDummy> keys) {
+    protected void createReasoner(Configuration configuration,Set<DescriptionGraph> descriptionGraphs) {
         if (descriptionGraphs==null)
             descriptionGraphs=Collections.emptySet();
-        if (keys==null)
-            keys=Collections.emptySet();
-        m_reasoner=new Reasoner(configuration,m_ontologyManager,m_ontology,descriptionGraphs,keys);
+        m_reasoner=new Reasoner(configuration,m_ontologyManager,m_ontology,descriptionGraphs);
     }
 
     /**
@@ -106,8 +100,8 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
             subAtomicConcept=NS+subAtomicConcept;
         if (!superAtomicConcept.contains("#"))
             superAtomicConcept=NS+superAtomicConcept;
-        OWLClass subClass=m_ontologyManager.getOWLDataFactory().getOWLClass(URI.create(subAtomicConcept));
-        OWLClass superClass=m_ontologyManager.getOWLDataFactory().getOWLClass(URI.create(superAtomicConcept));
+        OWLClass subClass=m_dataFactory.getOWLClass(URI.create(subAtomicConcept));
+        OWLClass superClass=m_dataFactory.getOWLClass(URI.create(superAtomicConcept));
         boolean result=m_reasoner.isSubClassOf(subClass,superClass);
         assertEquals(expectedResult,result);
     }
@@ -115,7 +109,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     /**
      * Tests whether the possibly complex concept subConcept is subsumed by the possibly complex concept superConcept and asserts that this coincides with the expected result.
      */
-    protected void assertSubsumedBy(OWLDescription subConcept,OWLDescription superConcept,boolean expectedResult) {
+    protected void assertSubsumedBy(OWLClassExpression subConcept,OWLClassExpression superConcept,boolean expectedResult) {
         boolean result=m_reasoner.isSubClassOf(subConcept,superConcept);
         assertEquals(expectedResult,result);
     }
@@ -126,7 +120,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     protected void assertSatisfiable(String atomicConcept,boolean expectedResult) {
         if (!atomicConcept.contains("#"))
             atomicConcept=NS+atomicConcept;
-        OWLClass clazz=m_ontologyManager.getOWLDataFactory().getOWLClass(URI.create(atomicConcept));
+        OWLClass clazz=m_dataFactory.getOWLClass(URI.create(atomicConcept));
         boolean result=m_reasoner.isSatisfiable(clazz);
         assertEquals(expectedResult,result);
     }
@@ -134,14 +128,14 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     /**
      * Tests whether the given possibly complex concept is satisfiable and asserts that this coincides with the expected result (satisfiable).
      */
-    protected void assertSatisfiable(OWLDescription concept,boolean satisfiable) throws Exception {
+    protected void assertSatisfiable(OWLClassExpression concept,boolean satisfiable) throws Exception {
         assertEquals(satisfiable,m_reasoner.isSatisfiable(concept));
     }
 
     /**
      * Tests whether the given individual is an instance of the given concept and asserts that this coincides with the expected result.
      */
-    protected void assertInstanceOf(OWLDescription concept,OWLIndividual individual,boolean expectedResult) {
+    protected void assertInstanceOf(OWLClassExpression concept,OWLIndividual individual,boolean expectedResult) {
         boolean result=m_reasoner.hasType(individual,concept,false);
         assertEquals(expectedResult,result);
     }
@@ -149,11 +143,13 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     /**
      * Tests whether the given concept has the specified individuals.
      */
-    protected void assertInstancesOf(OWLDescription concept,boolean direct,String... expectedIndividuals) {
+    protected void assertInstancesOf(OWLClassExpression concept,boolean direct,String... expectedIndividuals) {
         Set<OWLIndividual> actual=m_reasoner.getIndividuals(concept,direct);
         Set<String> actualIndividualURIs=new HashSet<String>();
-        for (OWLIndividual individual : actual)
-            actualIndividualURIs.add(individual.getURI().toString());
+        for (OWLIndividual individual : actual) {
+            if (!individual.isAnonymous()) 
+                actualIndividualURIs.add(individual.asNamedIndividual().getURI().toString());
+        }
         String[] expectedModified=expectedIndividuals.clone();
         assertContainsAll(actualIndividualURIs,expectedModified);
     }
@@ -164,7 +160,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     protected void assertSuperObjectProperties(String objectProperty,Set<String>... control) {
         if (!objectProperty.contains("#"))
             objectProperty=NS+objectProperty;
-        OWLObjectPropertyExpression ope=m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(URI.create(objectProperty));
+        OWLObjectPropertyExpression ope=m_dataFactory.getOWLObjectProperty(URI.create(objectProperty));
         Set<Set<String>> actual=setOfSetsOfOPEsToStrings(m_reasoner.getSuperProperties(ope));
         assertContainsAll(actual,control);
     }
@@ -175,7 +171,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     protected void assertSubObjectProperties(String objectProperty,Set<String>... control) {
         if (!objectProperty.contains("#"))
             objectProperty=NS+objectProperty;
-        OWLObjectPropertyExpression ope=m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(URI.create(objectProperty));
+        OWLObjectPropertyExpression ope=m_dataFactory.getOWLObjectProperty(URI.create(objectProperty));
         Set<Set<String>> actual=setOfSetsOfOPEsToStrings(m_reasoner.getSubProperties(ope));
         assertContainsAll(actual,control);
     }
@@ -186,7 +182,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     protected void assertEquivalentObjectProperties(String objectProperty,String... control) {
         if (!objectProperty.contains("#"))
             objectProperty=NS+objectProperty;
-        OWLObjectPropertyExpression ope=m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(URI.create(objectProperty));
+        OWLObjectPropertyExpression ope=m_dataFactory.getOWLObjectProperty(URI.create(objectProperty));
         Set<String> actual=setOfOPEsToStrings(m_reasoner.getEquivalentProperties(ope));
         assertContainsAll(actual,control);
     }
@@ -197,7 +193,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     protected void assertSuperDataProperties(String dataProperty,Set<String>... control) {
         if (!dataProperty.contains("#"))
             dataProperty=NS+dataProperty;
-        OWLDataProperty dp=m_ontologyManager.getOWLDataFactory().getOWLDataProperty(URI.create(dataProperty));
+        OWLDataProperty dp=m_dataFactory.getOWLDataProperty(URI.create(dataProperty));
         Set<Set<String>> actual=setOfSetsOfDPsToStrings(m_reasoner.getSuperProperties(dp));
         assertContainsAll(actual,control);
     }
@@ -208,7 +204,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     protected void assertSubDataProperties(String dataProperty,Set<String>... control) {
         if (!dataProperty.contains("#"))
             dataProperty=NS+dataProperty;
-        OWLDataProperty dp=m_ontologyManager.getOWLDataFactory().getOWLDataProperty(URI.create(dataProperty));
+        OWLDataProperty dp=m_dataFactory.getOWLDataProperty(URI.create(dataProperty));
         Set<Set<String>> actual=setOfSetsOfDPsToStrings(m_reasoner.getSubProperties(dp));
         assertContainsAll(actual,control);
     }
@@ -219,7 +215,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     protected void assertEquivalentDataProperties(String dataProperty,String... control) {
         if (!dataProperty.contains("#"))
             dataProperty=NS+dataProperty;
-        OWLDataProperty dp=m_ontologyManager.getOWLDataFactory().getOWLDataProperty(URI.create(dataProperty));
+        OWLDataProperty dp=m_dataFactory.getOWLDataProperty(URI.create(dataProperty));
         Set<String> actual=setOfDPsToStrings(m_reasoner.getEquivalentProperties(dp));
         assertContainsAll(actual,control);
     }
@@ -291,7 +287,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     
     protected void assertDRSatisfiableNEQ(boolean value,int cardinality,String[] forbiddenValues,String... parts) throws Exception {
         StringBuffer buffer=new StringBuffer();
-        buffer.append("SubClassOf( test:A DataMinCardinality( ");
+        buffer.append("Declaration(NamedIndividual(test:a)) Declaration(Class(test:A)) Declaration(DataProperty(test:dp)) SubClassOf( test:A DataMinCardinality( ");
         buffer.append(cardinality);
         buffer.append(" test:dp rdfs:Literal ) ) ");
         for (String part : parts) {
@@ -299,7 +295,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
             buffer.append(part);
             buffer.append(" ) ) ");
         }
-        buffer.append("ClassAssertion( test:a test:A ) ");
+        buffer.append("ClassAssertion( test:A test:a ) ");
         if (forbiddenValues!=null) {
             int index=0;
             for (String forbiddenValue : forbiddenValues) {
@@ -360,10 +356,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
             buffer.append(datatype);
             for (String restriction : restrictions) {
                 buffer.append(' ');
-                if (restriction.startsWith("xsd:") || restriction.startsWith("rdf:"))
-                    buffer.append(restriction.substring(4));
-                else
-                    buffer.append(restriction);
+                buffer.append(restriction);
             }
             buffer.append(" )");
         }

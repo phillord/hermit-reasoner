@@ -10,13 +10,14 @@ import junit.framework.TestSuite;
 
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.io.StringInputSource;
-import org.semanticweb.owl.model.OWLConstant;
+import org.semanticweb.owl.model.IRI;
+import org.semanticweb.owl.model.OWLClass;
+import org.semanticweb.owl.model.OWLClassExpression;
 import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLDataProperty;
 import org.semanticweb.owl.model.OWLDataPropertyExpression;
-import org.semanticweb.owl.model.OWLDescription;
-import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLIndividual;
+import org.semanticweb.owl.model.OWLLiteral;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyCreationException;
@@ -99,11 +100,14 @@ public class WGTestDescriptor {
     public WGTestDescriptor(OWLOntologyManager m,OWLOntology o,OWLIndividual i) throws InvalidWGTestException {
         testContainer=o;
         testIndividual=i;
-        String testIndividualURI=testIndividual.getURI().toString();
+        if (i.isAnonymous()) {
+            throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
+        }
+        String testIndividualURI=testIndividual.asNamedIndividual().getURI().toString();
         testID=testIndividualURI.substring(WGTestRegistry.TEST_ID_PREFIX.length());
         
         OWLDataFactory df=m.getOWLDataFactory();
-        Map<OWLDataPropertyExpression,Set<OWLConstant>> dps=i.getDataPropertyValues(o);
+        Map<OWLDataPropertyExpression,Set<OWLLiteral>> dps=i.getDataPropertyValues(o);
         Map<OWLObjectPropertyExpression,Set<OWLIndividual>> ops=i.getObjectPropertyValues(o);
         Map<OWLObjectPropertyExpression,Set<OWLIndividual>> nops=i.getNegativeObjectPropertyValues(o);
 
@@ -119,13 +123,13 @@ public class WGTestDescriptor {
         return semantics.contains(Semantics.DIRECT) && species.contains(Species.DL);
     }
     
-    protected String getIdentifier(Map<OWLDataPropertyExpression,Set<OWLConstant>> dps,OWLDataFactory df) throws InvalidWGTestException {
-        Set<OWLConstant> identifiers=dps.get(df.getOWLDataProperty(URI.create(WGTestRegistry.URI_BASE+"identifier")));
+    protected String getIdentifier(Map<OWLDataPropertyExpression,Set<OWLLiteral>> dps,OWLDataFactory df) throws InvalidWGTestException {
+        Set<OWLLiteral> identifiers=dps.get(df.getOWLDataProperty(URI.create(WGTestRegistry.URI_BASE+"identifier")));
         if (identifiers==null || identifiers.isEmpty())
             throw new InvalidWGTestException("Test does not have an identifier.");
         if (identifiers.size()!=1) {
             String idents="";
-            for (OWLConstant c : identifiers)
+            for (OWLLiteral c : identifiers)
                 idents+=c.getLiteral();
             throw new InvalidWGTestException("Test has more than one identifier.");
         }
@@ -139,7 +143,11 @@ public class WGTestDescriptor {
         else if (statuses.size()>1)
             throw new InvalidWGTestException("The test "+testID+" has more than one status.");
         else {
-            URI statusURI=statuses.iterator().next().getURI();
+            OWLIndividual i = statuses.iterator().next();
+            if (i.isAnonymous()) {
+                throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
+            }
+            URI statusURI=i.asNamedIndividual().getURI();
             for (Status status : Status.values())
                 if (statusURI.equals(status.uri))
                     return status;
@@ -149,8 +157,8 @@ public class WGTestDescriptor {
 
     protected EnumSet<TestType> getTestType() throws InvalidWGTestException {
         EnumSet<TestType> testTypes=EnumSet.noneOf(TestType.class);
-        Set<OWLDescription> types=testIndividual.getTypes(testContainer);
-        nextItem: for (OWLDescription type : types) {
+        Set<OWLClassExpression> types=testIndividual.getTypes(testContainer);
+        nextItem: for (OWLClassExpression type : types) {
             if (type instanceof OWLClass) {
                 URI testTypeURI=((OWLClass)type).getURI();
                 for (TestType testType : TestType.values()) {
@@ -171,7 +179,10 @@ public class WGTestDescriptor {
         Set<OWLIndividual> specs=ops.get(df.getOWLObjectProperty(URI.create(WGTestRegistry.URI_BASE+"species")));
         if (specs!=null) {
             nextItem: for (OWLIndividual s : specs) {
-                URI speciesURI=s.getURI();
+                if (s.isAnonymous()) {
+                    throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
+                }
+                URI speciesURI=s.asNamedIndividual().getURI();
                 for (Species spc : Species.values()) {
                     if (speciesURI.equals(spc.uri)) {
                         species.add(spc);
@@ -189,7 +200,10 @@ public class WGTestDescriptor {
         Set<OWLIndividual> sems=ops.get(df.getOWLObjectProperty(URI.create(WGTestRegistry.URI_BASE+"semantics")));
         if (sems!=null) {
             nextItem: for (OWLIndividual s : sems) {
-                URI semanticsURI=s.getURI();
+                if (s.isAnonymous()) {
+                    throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
+                }
+                URI semanticsURI=s.asNamedIndividual().getURI();
                 for (Semantics sem : Semantics.values()) {
                     if (semanticsURI.equals(sem.uri)) {
                         semantics.add(sem);
@@ -207,7 +221,10 @@ public class WGTestDescriptor {
         Set<OWLIndividual> nsems=nops.get(df.getOWLObjectProperty(URI.create(WGTestRegistry.URI_BASE+"semantics")));
         if (nsems!=null) {
             nextItem: for (OWLIndividual s : nsems) {
-                URI semanticsURI=s.getURI();
+                if (s.isAnonymous()) {
+                    throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
+                }
+                URI semanticsURI=s.asNamedIndividual().getURI();
                 for (Semantics sem : Semantics.values()) {
                     if (semanticsURI.equals(sem.uri)) {
                         semantics.add(sem);
@@ -221,9 +238,9 @@ public class WGTestDescriptor {
     }
 
     public OWLOntology getPremiseOntology(OWLOntologyManager manager) throws InvalidWGTestException {
-        Map<OWLDataPropertyExpression,Set<OWLConstant>> dps=testIndividual.getDataPropertyValues(testContainer);
+        Map<OWLDataPropertyExpression,Set<OWLLiteral>> dps=testIndividual.getDataPropertyValues(testContainer);
         for (SerializationFormat format : SerializationFormat.values()) {
-            Set<OWLConstant> premises=dps.get(format.premise);
+            Set<OWLLiteral> premises=dps.get(format.premise);
             if (premises!=null) {
                 if (premises.size()!=1)
                     throw new InvalidWGTestException("Test "+testID+" has an incorrect number of premises.");
@@ -238,7 +255,7 @@ public class WGTestDescriptor {
         }
         // No premise property means that the premise is the empty ontology.
         try {
-            return manager.createOntology(URI.create("uri:urn:opaque"));
+            return manager.createOntology(IRI.create("uri:urn:opaque"));
         }
         catch (OWLOntologyCreationException e) {
             throw new InvalidWGTestException("Cannot create empty ontology");
@@ -246,9 +263,9 @@ public class WGTestDescriptor {
     }
 
     public OWLOntology getConclusionOntology(OWLOntologyManager manager,boolean positive) throws InvalidWGTestException {
-        Map<OWLDataPropertyExpression,Set<OWLConstant>> dps=testIndividual.getDataPropertyValues(testContainer);
+        Map<OWLDataPropertyExpression,Set<OWLLiteral>> dps=testIndividual.getDataPropertyValues(testContainer);
         for (SerializationFormat format : SerializationFormat.values()) {
-            Set<OWLConstant> conclusions=dps.get(positive ? format.conclusion : format.nonconclusion);
+            Set<OWLLiteral> conclusions=dps.get(positive ? format.conclusion : format.nonconclusion);
             if (conclusions!=null) {
                 if (conclusions.size()!=1)
                     throw new InvalidWGTestException("Test "+testID+" has an incorrect number of "+(positive ? "" : "non")+"conclusions.");

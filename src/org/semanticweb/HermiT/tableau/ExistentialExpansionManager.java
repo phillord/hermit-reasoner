@@ -11,13 +11,13 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.graph.Graph;
 import org.semanticweb.HermiT.model.AtLeastConcept;
-import org.semanticweb.HermiT.model.ExistentialConcept;
-import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.AtomicRole;
+import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.model.DataRange;
+import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Role;
-import org.semanticweb.HermiT.model.DLClause;
 
 /**
  * Manages the expansion of at least restrictions in a tableau.

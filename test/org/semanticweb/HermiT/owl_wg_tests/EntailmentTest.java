@@ -2,6 +2,7 @@ package org.semanticweb.HermiT.owl_wg_tests;
 
 import java.io.File;
 
+import org.semanticweb.HermiT.EntailmentChecker;
 import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLOntology;
 

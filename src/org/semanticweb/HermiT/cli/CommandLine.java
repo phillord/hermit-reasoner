@@ -17,9 +17,9 @@ import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.monitor.Timer;
 import org.semanticweb.owl.apibinding.OWLManager;
-import org.semanticweb.owl.model.OWLOntologyManager;
-import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLClass;
+import org.semanticweb.owl.model.OWLOntology;
+import org.semanticweb.owl.model.OWLOntologyManager;
 
 public class CommandLine {
     

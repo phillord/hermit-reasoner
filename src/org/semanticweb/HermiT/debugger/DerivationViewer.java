@@ -1,30 +1,31 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.debugger;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.BorderLayout;
-import java.awt.Graphics;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.Serializable;
+
 import javax.swing.Icon;
-import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JTree;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTree;
 import javax.swing.event.EventListenerList;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
-import java.io.Serializable;
 
-import org.semanticweb.HermiT.*;
+import org.semanticweb.HermiT.Prefixes;
 
 @SuppressWarnings("serial")
 public class DerivationViewer extends JFrame {

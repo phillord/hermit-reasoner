@@ -2,16 +2,27 @@
 package org.semanticweb.HermiT.debugger;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
-import org.semanticweb.HermiT.*;
-import org.semanticweb.HermiT.model.*;
-import org.semanticweb.HermiT.monitor.*;
-import org.semanticweb.HermiT.tableau.*;
+import org.semanticweb.HermiT.Prefixes;
+import org.semanticweb.HermiT.model.Concept;
+import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.model.DLPredicate;
+import org.semanticweb.HermiT.model.DataValueEnumeration;
+import org.semanticweb.HermiT.model.DatatypeRestriction;
+import org.semanticweb.HermiT.model.Equality;
+import org.semanticweb.HermiT.model.ExistentialConcept;
+import org.semanticweb.HermiT.model.Inequality;
+import org.semanticweb.HermiT.monitor.TableauMonitorAdapter;
+import org.semanticweb.HermiT.tableau.BranchingPoint;
+import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
+import org.semanticweb.HermiT.tableau.DatatypeManager;
+import org.semanticweb.HermiT.tableau.GroundDisjunction;
+import org.semanticweb.HermiT.tableau.Node;
 
 public class DerivationHistory extends TableauMonitorAdapter {
     private static final long serialVersionUID=-3963478091986772947L;

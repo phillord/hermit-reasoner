@@ -4,8 +4,6 @@
 
 package org.semanticweb.HermiT.model;
 
-import org.semanticweb.HermiT.model.LiteralConcept;
-import org.semanticweb.HermiT.model.DLPredicate;
 
 /**
  * Represents a data range in a DL clause.

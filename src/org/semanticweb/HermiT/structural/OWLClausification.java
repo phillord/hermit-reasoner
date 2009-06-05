@@ -2,34 +2,35 @@
 package org.semanticweb.HermiT.structural;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashSet;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
 
-import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.Configuration;
+import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.datatypes.DatatypeRegistry;
 import org.semanticweb.HermiT.datatypes.UnsupportedDatatypeException;
+import org.semanticweb.HermiT.model.AnnotatedEquality;
 import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
-import org.semanticweb.HermiT.model.DatatypeRestriction;
-import org.semanticweb.HermiT.model.DataValueEnumeration;
-import org.semanticweb.HermiT.model.DLPredicate;
+import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
+import org.semanticweb.HermiT.model.DLPredicate;
+import org.semanticweb.HermiT.model.DataValueEnumeration;
+import org.semanticweb.HermiT.model.DatatypeRestriction;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Equality;
-import org.semanticweb.HermiT.model.AnnotatedEquality;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InverseRole;
@@ -39,55 +40,57 @@ import org.semanticweb.HermiT.model.NodeIDsAscendingOrEqual;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.Term;
 import org.semanticweb.HermiT.model.Variable;
-import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLClassAssertionAxiom;
-import org.semanticweb.owl.model.OWLConstant;
-import org.semanticweb.owl.model.OWLDataAllRestriction;
+import org.semanticweb.owl.model.OWLClassExpression;
+import org.semanticweb.owl.model.OWLClassExpressionVisitor;
+import org.semanticweb.owl.model.OWLDataAllValuesFrom;
 import org.semanticweb.owl.model.OWLDataComplementOf;
-import org.semanticweb.owl.model.OWLDataExactCardinalityRestriction;
+import org.semanticweb.owl.model.OWLDataExactCardinality;
 import org.semanticweb.owl.model.OWLDataFactory;
-import org.semanticweb.owl.model.OWLDataMaxCardinalityRestriction;
-import org.semanticweb.owl.model.OWLDataMinCardinalityRestriction;
+import org.semanticweb.owl.model.OWLDataHasValue;
+import org.semanticweb.owl.model.OWLDataIntersectionOf;
+import org.semanticweb.owl.model.OWLDataMaxCardinality;
+import org.semanticweb.owl.model.OWLDataMinCardinality;
 import org.semanticweb.owl.model.OWLDataOneOf;
 import org.semanticweb.owl.model.OWLDataProperty;
 import org.semanticweb.owl.model.OWLDataPropertyAssertionAxiom;
 import org.semanticweb.owl.model.OWLDataPropertyExpression;
 import org.semanticweb.owl.model.OWLDataRange;
-import org.semanticweb.owl.model.OWLDataRangeFacetRestriction;
-import org.semanticweb.owl.model.OWLDataRangeRestriction;
-import org.semanticweb.owl.model.OWLDataSomeRestriction;
-import org.semanticweb.owl.model.OWLDataType;
-import org.semanticweb.owl.model.OWLDataValueRestriction;
+import org.semanticweb.owl.model.OWLDataSomeValuesFrom;
+import org.semanticweb.owl.model.OWLDataUnionOf;
 import org.semanticweb.owl.model.OWLDataVisitorEx;
-import org.semanticweb.owl.model.OWLDescription;
-import org.semanticweb.owl.model.OWLDescriptionVisitor;
+import org.semanticweb.owl.model.OWLDatatype;
+import org.semanticweb.owl.model.OWLDatatypeRestriction;
 import org.semanticweb.owl.model.OWLDifferentIndividualsAxiom;
-import org.semanticweb.owl.model.OWLException;
+import org.semanticweb.owl.model.OWLFacetRestriction;
+import org.semanticweb.owl.model.OWLHasKeyAxiom;
 import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLIndividualAxiom;
+import org.semanticweb.owl.model.OWLLiteral;
+import org.semanticweb.owl.model.OWLNamedIndividual;
 import org.semanticweb.owl.model.OWLNegativeDataPropertyAssertionAxiom;
 import org.semanticweb.owl.model.OWLNegativeObjectPropertyAssertionAxiom;
-import org.semanticweb.owl.model.OWLObjectAllRestriction;
+import org.semanticweb.owl.model.OWLObjectAllValuesFrom;
 import org.semanticweb.owl.model.OWLObjectComplementOf;
-import org.semanticweb.owl.model.OWLObjectExactCardinalityRestriction;
+import org.semanticweb.owl.model.OWLObjectExactCardinality;
+import org.semanticweb.owl.model.OWLObjectHasSelf;
+import org.semanticweb.owl.model.OWLObjectHasValue;
 import org.semanticweb.owl.model.OWLObjectIntersectionOf;
-import org.semanticweb.owl.model.OWLObjectMaxCardinalityRestriction;
-import org.semanticweb.owl.model.OWLObjectMinCardinalityRestriction;
+import org.semanticweb.owl.model.OWLObjectMaxCardinality;
+import org.semanticweb.owl.model.OWLObjectMinCardinality;
 import org.semanticweb.owl.model.OWLObjectOneOf;
 import org.semanticweb.owl.model.OWLObjectProperty;
 import org.semanticweb.owl.model.OWLObjectPropertyAssertionAxiom;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
 import org.semanticweb.owl.model.OWLObjectPropertyInverse;
-import org.semanticweb.owl.model.OWLObjectSelfRestriction;
-import org.semanticweb.owl.model.OWLObjectSomeRestriction;
+import org.semanticweb.owl.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owl.model.OWLObjectUnionOf;
-import org.semanticweb.owl.model.OWLObjectValueRestriction;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
-import org.semanticweb.owl.model.OWLSameIndividualsAxiom;
-import org.semanticweb.owl.model.OWLTypedConstant;
-import org.semanticweb.owl.model.OWLUntypedConstant;
+import org.semanticweb.owl.model.OWLSameIndividualAxiom;
+import org.semanticweb.owl.model.OWLStringLiteral;
+import org.semanticweb.owl.model.OWLTypedLiteral;
 import org.semanticweb.owl.util.OWLAxiomVisitorAdapter;
 
 import rationals.Automaton;
@@ -102,11 +105,7 @@ public class OWLClausification {
     public OWLClausification(Configuration configuration) {
         m_configuration=configuration;
     }
-    public DLOntology clausify(OWLOntologyManager ontologyManager,OWLOntology ontology,Collection<DescriptionGraph> descriptionGraphs) throws OWLException {
-        Set<OWLHasKeyDummy> noKeys=Collections.emptySet();
-        return clausifyWithKeys(ontologyManager,ontology,descriptionGraphs,noKeys);
-    }
-    public DLOntology clausifyWithKeys(OWLOntologyManager ontologyManager,OWLOntology ontology,Collection<DescriptionGraph> descriptionGraphs,Set<OWLHasKeyDummy> keys) {
+    public DLOntology clausify(OWLOntologyManager ontologyManager,OWLOntology ontology,Collection<DescriptionGraph> descriptionGraphs) {
         Set<OWLOntology> importClosure=new HashSet<OWLOntology>();
         List<OWLOntology> toProcess=new ArrayList<OWLOntology>();
         toProcess.add(ontology);
@@ -115,14 +114,13 @@ public class OWLClausification {
             if (importClosure.add(anOntology))
                 toProcess.addAll(anOntology.getImports(ontologyManager));
         }
-        return clausifyImportClosure(ontologyManager.getOWLDataFactory(),ontology.getURI().toString(),importClosure,descriptionGraphs,keys);
+        return clausifyImportClosure(ontologyManager.getOWLDataFactory(),ontology.getOntologyID().getDefaultDocumentIRI() == null ? "urn:hermit:kb" : ontology.getOntologyID().getDefaultDocumentIRI().toString(),importClosure,descriptionGraphs);
     }
-    public DLOntology clausifyImportClosure(OWLDataFactory factory,String ontologyURI,Collection<OWLOntology> importClosure,Collection<DescriptionGraph> descriptionGraphs,Set<OWLHasKeyDummy> keys) {
+    public DLOntology clausifyImportClosure(OWLDataFactory factory,String ontologyURI,Collection<OWLOntology> importClosure,Collection<DescriptionGraph> descriptionGraphs) {
         OWLAxioms axioms=new OWLAxioms();
         OWLNormalization normalization=new OWLNormalization(factory,axioms);
         for (OWLOntology ontology : importClosure)
             normalization.processOntology(m_configuration,ontology);
-        normalization.processKeys(m_configuration,keys);
         BuiltInPropertyManager builtInPropertyManager=new BuiltInPropertyManager(factory);
         builtInPropertyManager.axiomatizeBuiltInPropertiesAsNeeded(axioms);
         ObjectPropertyInclusionManager objectPropertyInclusionManager=new ObjectPropertyInclusionManager(factory);
@@ -202,15 +200,15 @@ public class OWLClausification {
             Atom roleAtom=getRoleAtom(dataPropertyExpression,X,Y);
             dlClauses.add(DLClause.create(new Atom[] {},new Atom[] { roleAtom }).getSafeVersion());
         }
-        DataRangeConverter dataRangeConverter=new DataRangeConverter(m_configuration.warningMonitor,m_configuration.ignoreUnsupportedDatatypes);
+        DataRangeConverter dataRangeConverter=new DataRangeConverter(m_configuration.warningMonitor,axioms.m_datatypeDefs,m_configuration.ignoreUnsupportedDatatypes);
         NormalizedAxiomClausifier clausifier=new NormalizedAxiomClausifier(dataRangeConverter,positiveFacts,factory);
-        for (OWLDescription[] inclusion : axioms.m_conceptInclusions) {
-            for (OWLDescription description : inclusion)
+        for (OWLClassExpression[] inclusion : axioms.m_conceptInclusions) {
+            for (OWLClassExpression description : inclusion)
                 description.accept(clausifier);
             DLClause dlClause=clausifier.getDLClause();
             dlClauses.add(dlClause.getSafeVersion());
         }
-        for (OWLHasKeyDummy hasKey : axioms.m_hasKeys)
+        for (OWLHasKeyAxiom hasKey : axioms.m_hasKeys)
             dlClauses.add(clausifyKey(hasKey).getSafeVersion());
         FactClausifier factClausifier=new FactClausifier(dataRangeConverter,positiveFacts,negativeFacts);
         for (OWLIndividualAxiom fact : axioms.m_facts)
@@ -224,7 +222,7 @@ public class OWLClausification {
         for (OWLClass c : axioms.m_classes)
             atomicConcepts.add(AtomicConcept.create(c.getURI().toString()));
         Set<Individual> hermitIndividuals=new HashSet<Individual>();
-        for (OWLIndividual i : axioms.m_individuals) {
+        for (OWLNamedIndividual i : axioms.m_individuals) {
             Individual ind=Individual.create(i.getURI().toString());
             hermitIndividuals.add(ind);
             // all named individuals are tagged with a concept, so that keys are
@@ -245,7 +243,7 @@ public class OWLClausification {
             dataRoles.add(AtomicRole.create(objectProperty.getURI().toString()));
         return new DLOntology(ontologyURI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,objectRoles,dataRoles,hermitIndividuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes);
     }
-    public DLClause clausifyKey(OWLHasKeyDummy object) {
+    protected DLClause clausifyKey(OWLHasKeyAxiom object) {
         List<Atom> headAtoms=new ArrayList<Atom>();
         List<Atom> bodyAtoms=new ArrayList<Atom>();
         // we have two named individuals (corresponding to X1 and X2) that
@@ -257,30 +255,28 @@ public class OWLClausification {
         bodyAtoms.add(Atom.create(AtomicConcept.INTERNAL_NAMED,X2));
         // the concept expression of a hasKey statement is either a concept
         // name or a negated concept name after normalization
-        OWLDescription description=object.getClassExpression();
+        OWLClassExpression description=object.getClassExpression();
         if (description instanceof OWLClass) {
             OWLClass owlClass=(OWLClass)description;
             if (!owlClass.isOWLThing()) {
                 bodyAtoms.add(Atom.create(AtomicConcept.create(owlClass.getURI().toString()),X));
                 bodyAtoms.add(Atom.create(AtomicConcept.create(owlClass.getURI().toString()),X2));
             }
-        }
-        else if (description instanceof OWLObjectComplementOf) {
-            OWLDescription internal=((OWLObjectComplementOf)description).getOperand();
+        } else if (description instanceof OWLObjectComplementOf) {
+            OWLClassExpression internal=((OWLObjectComplementOf)description).getOperand();
             if (internal instanceof OWLClass) {
                 OWLClass owlClass=(OWLClass)internal;
                 bodyAtoms.add(Atom.create(AtomicConcept.create(owlClass.getURI().toString()),X));
                 bodyAtoms.add(Atom.create(AtomicConcept.create(owlClass.getURI().toString()),X2));
-            }
-            else {
+            } else {
                 throw new IllegalStateException("Internal error: invalid normal form.");
             }
-        }
-        else
+        } else {
             throw new IllegalStateException("Internal error: invalid normal form.");
+        }
         int y_ind=0;
         // object properties always go to the body
-        for (OWLObjectPropertyExpression p : object.getObjectProperties()) {
+        for (OWLObjectPropertyExpression p : object.getObjectPropertyExpressions()) {
             Variable y;
             y=Variable.create("Y"+y_ind);
             y_ind++;
@@ -291,7 +287,7 @@ public class OWLClausification {
         }
         // data properties go to the body, but with different variables
         // the head gets an atom asserting inequality between that data values
-        for (OWLDataPropertyExpression d : object.getDataProperties()) {
+        for (OWLDataPropertyExpression d : object.getDataPropertyExpressions()) {
             Variable y;
             y=Variable.create("Y"+y_ind);
             y_ind++;
@@ -309,12 +305,12 @@ public class OWLClausification {
         DLClause clause=DLClause.createEx(true,hAtoms,bAtoms);
         return clause;
     }
-    protected static LiteralConcept getLiteralConcept(OWLDescription description) {
+    protected static LiteralConcept getLiteralConcept(OWLClassExpression description) {
         if (description instanceof OWLClass) {
             return AtomicConcept.create(((OWLClass)description).getURI().toString());
         }
         else if (description instanceof OWLObjectComplementOf) {
-            OWLDescription internal=((OWLObjectComplementOf)description).getOperand();
+            OWLClassExpression internal=((OWLObjectComplementOf)description).getOperand();
             if (!(internal instanceof OWLClass))
                 throw new IllegalStateException("Internal error: invalid normal form.");
             return AtomicConcept.create(((OWLClass)internal).getURI().toString()).getNegation();
@@ -361,10 +357,14 @@ public class OWLClausification {
             throw new IllegalStateException("Internal error: unsupported type of data property!");
     }
     protected static Individual getIndividual(OWLIndividual individual) {
-        return Individual.create(individual.getURI().toString());
+        if (individual.isAnonymous()) {
+            return Individual.create("internal:anonymousIndividual#" + individual.asAnonymousIndividual().getID().toString());
+        } else {
+            return Individual.create(individual.asNamedIndividual().getURI().toString());
+        }
     }
 
-    protected static class NormalizedAxiomClausifier implements OWLDescriptionVisitor {
+    protected static class NormalizedAxiomClausifier implements OWLClassExpressionVisitor {
         protected final DataRangeConverter m_dataRangeConverter;
         protected final List<Atom> m_headAtoms;
         protected final List<Atom> m_bodyAtoms;
@@ -405,7 +405,10 @@ public class OWLClausification {
             return result;
         }
         protected AtomicConcept getConceptForNominal(OWLIndividual individual) {
-            AtomicConcept result=AtomicConcept.create("internal:nom#"+individual.getURI().toString());
+            if (individual.isAnonymous()) {
+                throw new IllegalStateException("Nominals must be named individuals and cannot be anonymous. ");
+            }
+            AtomicConcept result=AtomicConcept.create("internal:nom#"+individual.asNamedIndividual().getURI().toString());
             m_positiveFacts.add(Atom.create(result,getIndividual(individual)));
             return result;
         }
@@ -422,9 +425,9 @@ public class OWLClausification {
             throw new IllegalStateException("Internal error: invalid normal form.");
         }
         public void visit(OWLObjectComplementOf object) {
-            OWLDescription description=object.getOperand();
-            if (description instanceof OWLObjectSelfRestriction) {
-                OWLObjectPropertyExpression objectProperty=((OWLObjectSelfRestriction)description).getProperty();
+            OWLClassExpression description=object.getOperand();
+            if (description instanceof OWLObjectHasSelf) {
+                OWLObjectPropertyExpression objectProperty=((OWLObjectHasSelf)description).getProperty();
                 Atom roleAtom=getRoleAtom(objectProperty,X,X);
                 m_bodyAtoms.add(roleAtom);
             }
@@ -450,8 +453,8 @@ public class OWLClausification {
                 m_bodyAtoms.add(Atom.create(conceptForNominal,y));
             }
         }
-        public void visit(OWLObjectSomeRestriction object) {
-            OWLDescription filler=object.getFiller();
+        public void visit(OWLObjectSomeValuesFrom object) {
+            OWLClassExpression filler=object.getFiller();
             if (filler instanceof OWLObjectOneOf) {
                 for (OWLIndividual individual : ((OWLObjectOneOf)filler).getIndividuals()) {
                     Variable y=nextY();
@@ -467,10 +470,10 @@ public class OWLClausification {
                     m_headAtoms.add(Atom.create(atLeastConcept,X));
             }
         }
-        public void visit(OWLObjectAllRestriction object) {
+        public void visit(OWLObjectAllValuesFrom object) {
             Variable y=nextY();
             m_bodyAtoms.add(getRoleAtom(object.getProperty(),X,y));
-            OWLDescription filler=object.getFiller();
+            OWLClassExpression filler=object.getFiller();
             if (filler instanceof OWLClass) {
                 AtomicConcept atomicConcept=AtomicConcept.create(((OWLClass)filler).getURI().toString());
                 if (!atomicConcept.isAlwaysFalse())
@@ -484,7 +487,7 @@ public class OWLClausification {
                 }
             }
             else if (filler instanceof OWLObjectComplementOf) {
-                OWLDescription operand=((OWLObjectComplementOf)filler).getOperand();
+                OWLClassExpression operand=((OWLObjectComplementOf)filler).getOperand();
                 if (operand instanceof OWLClass) {
                     AtomicConcept internalAtomicConcept=AtomicConcept.create(((OWLClass)operand).getURI().toString());
                     if (!internalAtomicConcept.isAlwaysTrue())
@@ -500,25 +503,25 @@ public class OWLClausification {
             else
                 throw new IllegalStateException("Internal error: invalid normal form.");
         }
-        public void visit(OWLObjectValueRestriction object) {
+        public void visit(OWLObjectHasValue object) {
             throw new IllegalStateException("Internal error: invalid normal form.");
         }
-        public void visit(OWLObjectSelfRestriction object) {
+        public void visit(OWLObjectHasSelf object) {
             OWLObjectPropertyExpression objectProperty=object.getProperty();
             Atom roleAtom=getRoleAtom(objectProperty,X,X);
             m_headAtoms.add(roleAtom);
         }
-        public void visit(OWLObjectMinCardinalityRestriction object) {
+        public void visit(OWLObjectMinCardinality object) {
             LiteralConcept toConcept=getLiteralConcept(object.getFiller());
             Role onRole=getRole(object.getProperty());
             AtLeastConcept atLeastConcept=AtLeastConcept.create(object.getCardinality(),onRole,toConcept);
             if (!atLeastConcept.isAlwaysFalse())
                 m_headAtoms.add(Atom.create(atLeastConcept,X));
         }
-        public void visit(OWLObjectMaxCardinalityRestriction object) {
+        public void visit(OWLObjectMaxCardinality object) {
             int cardinality=object.getCardinality();
             OWLObjectPropertyExpression onObjectProperty=object.getProperty();
-            OWLDescription filler=object.getFiller();
+            OWLClassExpression filler=object.getFiller();
             ensureYNotZero();
             boolean isPositive;
             AtomicConcept atomicConcept;
@@ -529,7 +532,7 @@ public class OWLClausification {
                     atomicConcept=null;
             }
             else if (filler instanceof OWLObjectComplementOf) {
-                OWLDescription internal=((OWLObjectComplementOf)filler).getOperand();
+                OWLClassExpression internal=((OWLObjectComplementOf)filler).getOperand();
                 if (!(internal instanceof OWLClass))
                     throw new IllegalStateException("Internal error: Invalid ontology normal form.");
                 isPositive=false;
@@ -565,17 +568,17 @@ public class OWLClausification {
                 for (int j=i+1;j<yVars.length;j++)
                     m_headAtoms.add(Atom.create(annotatedEquality,yVars[i],yVars[j],X));
         }
-        public void visit(OWLObjectExactCardinalityRestriction object) {
+        public void visit(OWLObjectExactCardinality object) {
             throw new IllegalStateException("Internal error: invalid normal form.");
         }
-        public void visit(OWLDataSomeRestriction object) {
+        public void visit(OWLDataSomeValuesFrom object) {
             AtomicRole atomicRole=getAtomicRole(object.getProperty());
             LiteralConcept literalConcept=m_dataRangeConverter.convertDataRange(object.getFiller());
             AtLeastConcept atLeastConcept=AtLeastConcept.create(1,atomicRole,literalConcept);
             if (!atLeastConcept.isAlwaysFalse())
                 m_headAtoms.add(Atom.create(atLeastConcept,X));
         }
-        public void visit(OWLDataAllRestriction object) {
+        public void visit(OWLDataAllValuesFrom object) {
             Variable y=nextY();
             m_bodyAtoms.add(getRoleAtom(object.getProperty(),X,y));
             LiteralConcept literalConcept=m_dataRangeConverter.convertDataRange(object.getFiller());
@@ -589,17 +592,17 @@ public class OWLClausification {
                     m_headAtoms.add(Atom.create((DLPredicate)literalConcept,y));
             }
         }
-        public void visit(OWLDataValueRestriction object) {
+        public void visit(OWLDataHasValue object) {
             throw new IllegalStateException("Internal error: Invalid normal form.");
         }
-        public void visit(OWLDataMinCardinalityRestriction object) {
+        public void visit(OWLDataMinCardinality object) {
             AtomicRole atomicRole=getAtomicRole(object.getProperty());
             LiteralConcept literalConcept=m_dataRangeConverter.convertDataRange(object.getFiller());
             AtLeastConcept atLeastConcept=AtLeastConcept.create(object.getCardinality(),atomicRole,literalConcept);
             if (!atLeastConcept.isAlwaysFalse())
                 m_headAtoms.add(Atom.create(atLeastConcept,X));
         }
-        public void visit(OWLDataMaxCardinalityRestriction object) {
+        public void visit(OWLDataMaxCardinality object) {
             int number=object.getCardinality();
             LiteralConcept negatedDataRange=m_dataRangeConverter.convertDataRange(object.getFiller()).getNegation();
             ensureYNotZero();
@@ -621,7 +624,7 @@ public class OWLClausification {
                 for (int j=i+1;j<yVars.length;j++)
                     m_headAtoms.add(Atom.create(Equality.INSTANCE,yVars[i],yVars[j]));
         }
-        public void visit(OWLDataExactCardinalityRestriction object) {
+        public void visit(OWLDataExactCardinality object) {
             throw new IllegalStateException("Internal error: invalid normal form.");
         }
     }
@@ -629,31 +632,41 @@ public class OWLClausification {
     protected static class DataRangeConverter implements OWLDataVisitorEx<Object> {
         protected final Configuration.WarningMonitor m_warningMonitor;
         protected final boolean m_ignoreUnsupportedDatatypes;
+        protected final Map<OWLDatatype, OWLDataRange> m_datatypeDefs;
 
-        public DataRangeConverter(Configuration.WarningMonitor warningMonitor,boolean ignoreUnsupportedDatatypes) {
+        public DataRangeConverter(Configuration.WarningMonitor warningMonitor,Map<OWLDatatype, OWLDataRange> datatypeDefs,boolean ignoreUnsupportedDatatypes) {
             m_warningMonitor=warningMonitor;
+            m_datatypeDefs=datatypeDefs;
             m_ignoreUnsupportedDatatypes=ignoreUnsupportedDatatypes;
         }
         public LiteralConcept convertDataRange(OWLDataRange dataRange) {
             return (LiteralConcept)dataRange.accept(this);
         }
-        public Object visit(OWLDataType object) {
-            String datatypeURI=object.getURI().toString();
-            if (AtomicConcept.RDFS_LITERAL.getURI().equals(datatypeURI))
-                return AtomicConcept.RDFS_LITERAL;
-            DatatypeRestriction datatypeRestriction=DatatypeRestriction.create(datatypeURI,DatatypeRestriction.NO_FACET_URIs,DatatypeRestriction.NO_FACET_VALUES);
-            try {
-                DatatypeRegistry.validateDatatypeRestriction(datatypeRestriction);
-                return datatypeRestriction;
-            }
-            catch (UnsupportedDatatypeException e) {
-                if (m_ignoreUnsupportedDatatypes) {
-                    if (m_warningMonitor!=null)
-                        m_warningMonitor.warning("Ignoring unsupprted datatype '"+object.getURI().toString()+"'.");
-                    return AtomicConcept.create(object.getURI().toString());
+        public Object visit(OWLDatatype object) {
+            if (object.isBuiltIn()) {
+                String datatypeURI=object.getURI().toString();
+                if (AtomicConcept.RDFS_LITERAL.getURI().equals(datatypeURI))
+                    return AtomicConcept.RDFS_LITERAL;
+                DatatypeRestriction datatype=DatatypeRestriction.create(datatypeURI,DatatypeRestriction.NO_FACET_URIs,DatatypeRestriction.NO_FACET_VALUES);
+                try {
+                    DatatypeRegistry.validateDatatypeRestriction(datatype);
+                    return datatype;
                 }
-               else
-                   throw e;
+                catch (UnsupportedDatatypeException e) {
+                    if (m_ignoreUnsupportedDatatypes) {
+                        if (m_warningMonitor!=null)
+                            m_warningMonitor.warning("Ignoring unsupprted datatype '"+object.getURI().toString()+"'.");
+                        return AtomicConcept.create(object.getURI().toString());
+                    }
+                   else
+                       throw e;
+                }
+            } else {
+                // must be a defined datatype
+                if (!m_datatypeDefs.containsKey(object)) {
+                    throw new IllegalArgumentException("A definition is missing for the custom datatype " + object.toString());
+                }
+                return m_datatypeDefs.get(object).accept(this);
             }
         }
         public Object visit(OWLDataComplementOf object) {
@@ -661,14 +674,14 @@ public class OWLClausification {
         }
         public Object visit(OWLDataOneOf object) {
             Set<Object> dataValues=new HashSet<Object>();
-            for (OWLConstant constant : object.getValues())
+            for (OWLLiteral constant : object.getValues())
                 dataValues.add(constant.accept(this));
             return DataValueEnumeration.create(dataValues.toArray());
         }
-        public Object visit(OWLDataRangeRestriction object) {
-            if (!(object.getDataRange() instanceof OWLDataType))
-                throw new IllegalArgumentException("Datatype restrictions are supported only on datatypes.");
-            String datatypeURI=((OWLDataType)object.getDataRange()).getURI().toString();
+        public Object visit(OWLDatatypeRestriction object) {
+            if (!(object.getDatatype().isOWLDatatype()))
+                throw new IllegalArgumentException("Datatype restrictions are supported only on OWL datatypes.");
+            String datatypeURI=object.getDatatype().getURI().toString();
             if (AtomicConcept.RDFS_LITERAL.getURI().equals(datatypeURI)) {
                 if (!object.getFacetRestrictions().isEmpty())
                     throw new IllegalArgumentException("rdfs:Literal does not support any facets.");
@@ -677,26 +690,34 @@ public class OWLClausification {
             String[] facetURIs=new String[object.getFacetRestrictions().size()];
             Object[] facetValues=new Object[object.getFacetRestrictions().size()];
             int index=0;
-            for (OWLDataRangeFacetRestriction facetRestriction : object.getFacetRestrictions()) {
-                facetURIs[index]=facetRestriction.getFacet().getURI().toString();
-                facetValues[index]=facetRestriction.getFacetValue().accept(this);
+            for (OWLFacetRestriction facet : object.getFacetRestrictions()) {
+                facetURIs[index]=facet.getFacet().getIRI().toURI().toString();
+                facetValues[index]=facet.getFacetValue().accept(this);
                 index++;
             }
-            DatatypeRestriction datatypeRestriction=DatatypeRestriction.create(datatypeURI,facetURIs,facetValues);
-            DatatypeRegistry.validateDatatypeRestriction(datatypeRestriction);
-            return datatypeRestriction;
+            DatatypeRestriction datatype=DatatypeRestriction.create(datatypeURI,facetURIs,facetValues);
+            DatatypeRegistry.validateDatatypeRestriction(datatype);
+            return datatype;
         }
-        public Object visit(OWLDataRangeFacetRestriction object) {
+        public Object visit(OWLFacetRestriction object) {
             throw new IllegalStateException("Internal error: should not get in here.");
         }
-        public Object visit(OWLTypedConstant object) {
-            return DatatypeRegistry.parseLiteral(object.getLiteral(),object.getDataType().getURI().toString());
+        public Object visit(OWLTypedLiteral object) {
+            return DatatypeRegistry.parseLiteral(object.getLiteral(),object.getDatatype().getURI().toString());
         }
-        public Object visit(OWLUntypedConstant object) {
+        public Object visit(OWLStringLiteral object) {
             if (object.getLang()==null)
                 return DatatypeRegistry.parseLiteral(object.getLiteral(),Prefixes.s_semanticWebPrefixes.get("xsd")+"string");
             else
-                return DatatypeRegistry.parseLiteral(object.getLiteral()+"@"+object.getLang(),Prefixes.s_semanticWebPrefixes.get("rdf")+"text");
+                return DatatypeRegistry.parseLiteral(object.getLiteral()+"@"+object.getLang(),Prefixes.s_semanticWebPrefixes.get("rdf")+"PlainLiteral");
+        }
+        public Object visit(OWLDataIntersectionOf node) {
+            // TODO Auto-generated method stub
+            return null;
+        }
+        public Object visit(OWLDataUnionOf node) {
+            // TODO Auto-generated method stub
+            return null;
         }
     }
 
@@ -710,7 +731,7 @@ public class OWLClausification {
             m_positiveFacts=positiveFacts;
             m_negativeFacts=negativeFacts;
         }
-        public void visit(OWLSameIndividualsAxiom object) {
+        public void visit(OWLSameIndividualAxiom object) {
             OWLIndividual[] individuals=new OWLIndividual[object.getIndividuals().size()];
             object.getIndividuals().toArray(individuals);
             for (int i=0;i<individuals.length-1;i++)
@@ -724,7 +745,7 @@ public class OWLClausification {
                     m_positiveFacts.add(Atom.create(Inequality.create(),getIndividual(individuals[i]),getIndividual(individuals[j])));
         }
         public void visit(OWLClassAssertionAxiom object) {
-            OWLDescription description=object.getDescription();
+            OWLClassExpression description=object.getClassExpression();
             if (description instanceof OWLClass) {
                 AtomicConcept atomicConcept=AtomicConcept.create(((OWLClass)description).getURI().toString());
                 m_positiveFacts.add(Atom.create(atomicConcept,getIndividual(object.getIndividual())));
@@ -733,13 +754,13 @@ public class OWLClausification {
                 AtomicConcept atomicConcept=AtomicConcept.create(((OWLClass)((OWLObjectComplementOf)description).getOperand()).getURI().toString());
                 m_negativeFacts.add(Atom.create(atomicConcept,getIndividual(object.getIndividual())));
             }
-            else if (description instanceof OWLObjectSelfRestriction) {
-                OWLObjectSelfRestriction selfRestriction=(OWLObjectSelfRestriction)description;
-                m_positiveFacts.add(getRoleAtom(selfRestriction.getProperty(),getIndividual(object.getIndividual()),getIndividual(object.getIndividual())));
+            else if (description instanceof OWLObjectHasSelf) {
+                OWLObjectHasSelf self=(OWLObjectHasSelf)description;
+                m_positiveFacts.add(getRoleAtom(self.getProperty(),getIndividual(object.getIndividual()),getIndividual(object.getIndividual())));
             }
-            else if (description instanceof OWLObjectComplementOf && ((OWLObjectComplementOf)description).getOperand() instanceof OWLObjectSelfRestriction) {
-                OWLObjectSelfRestriction selfRestriction=(OWLObjectSelfRestriction)(((OWLObjectComplementOf)description).getOperand());
-                m_negativeFacts.add(getRoleAtom(selfRestriction.getProperty(),getIndividual(object.getIndividual()),getIndividual(object.getIndividual())));
+            else if (description instanceof OWLObjectComplementOf && ((OWLObjectComplementOf)description).getOperand() instanceof OWLObjectHasSelf) {
+                OWLObjectHasSelf self=(OWLObjectHasSelf)(((OWLObjectComplementOf)description).getOperand());
+                m_negativeFacts.add(getRoleAtom(self.getProperty(),getIndividual(object.getIndividual()),getIndividual(object.getIndividual())));
             }
             else
                 throw new IllegalStateException("Internal error: invalid normal form.");

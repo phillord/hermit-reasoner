@@ -139,7 +139,7 @@ public class GraphTest extends AbstractReasonerInternalsTest {
         
         OWLDataFactory df = m_ontologyManager.getOWLDataFactory();
         Set<org.semanticweb.owl.model.OWLAxiom> axioms = new HashSet<org.semanticweb.owl.model.OWLAxiom>();
-        String base = m_ontology.getURI().toString();
+        String base = m_ontology.getOntologyID().getDefaultDocumentIRI() == null ? "urn:hermit:kb" : m_ontology.getOntologyID().getDefaultDocumentIRI().toString();
         
         OWLClass A = df.getOWLClass(URI.create(base + "#A"));
         OWLClass B = df.getOWLClass(URI.create(base + "#B"));
@@ -147,15 +147,15 @@ public class GraphTest extends AbstractReasonerInternalsTest {
         OWLClass D = df.getOWLClass(URI.create(base + "#D"));
         OWLObjectProperty S = df.getOWLObjectProperty(URI.create(base + "#S"));
         OWLObjectProperty T = df.getOWLObjectProperty(URI.create(base + "#T"));
-        OWLIndividual i = df.getOWLIndividual(URI.create(base + "#i"));
+        OWLIndividual i = df.getOWLNamedIndividual(URI.create(base + "#i"));
         
-        org.semanticweb.owl.model.OWLAxiom axiom = df.getOWLSubClassAxiom(A, df.getOWLObjectSomeRestriction(S, A));
+        org.semanticweb.owl.model.OWLAxiom axiom = df.getOWLSubClassOfAxiom(A, df.getOWLObjectSomeValuesFrom(S, A));
         axioms.add(axiom);
-        axiom = df.getOWLSubClassAxiom(A, df.getOWLObjectSomeRestriction(S, D));
+        axiom = df.getOWLSubClassOfAxiom(A, df.getOWLObjectSomeValuesFrom(S, D));
         axioms.add(axiom);
-        axiom = df.getOWLSubClassAxiom(B, df.getOWLObjectSomeRestriction(T, A));
+        axiom = df.getOWLSubClassOfAxiom(B, df.getOWLObjectSomeValuesFrom(T, A));
         axioms.add(axiom);
-        axiom = df.getOWLSubClassAxiom(C, df.getOWLObjectSomeRestriction(T, A));
+        axiom = df.getOWLSubClassOfAxiom(C, df.getOWLObjectSomeValuesFrom(T, A));
         axioms.add(axiom);
         axiom = df.getOWLFunctionalObjectPropertyAxiom(S);
         axioms.add(axiom);
@@ -167,7 +167,7 @@ public class GraphTest extends AbstractReasonerInternalsTest {
         c.directBlockingType = Configuration.DirectBlockingType.PAIR_WISE;
         c.blockingStrategyType = Configuration.BlockingStrategyType.ANYWHERE;
         c.existentialStrategyType = Configuration.ExistentialStrategyType.CREATION_ORDER;
-        createReasoner(c, m_descriptionGraphs, null);
+        createReasoner(c, m_descriptionGraphs);
         
 //        addAxiom("[subClassOf A [some S A]]");
 //        addAxiom("[subClassOf A [some S D]]");

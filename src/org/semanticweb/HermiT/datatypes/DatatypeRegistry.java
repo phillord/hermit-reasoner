@@ -2,23 +2,23 @@
 package org.semanticweb.HermiT.datatypes;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Prefixes;
-import org.semanticweb.HermiT.model.Constant;
-import org.semanticweb.HermiT.model.DatatypeRestriction;
-import org.semanticweb.HermiT.datatypes.bool.BooleanDatatypeHandler;
-import org.semanticweb.HermiT.datatypes.rdftext.RDFTextDatatypeHandler;
 import org.semanticweb.HermiT.datatypes.anyuri.AnyURIDatatypeHandler;
-import org.semanticweb.HermiT.datatypes.owlreal.OWLRealDatatypeHandler;
+import org.semanticweb.HermiT.datatypes.binarydata.BinaryDataDatatypeHandler;
+import org.semanticweb.HermiT.datatypes.bool.BooleanDatatypeHandler;
+import org.semanticweb.HermiT.datatypes.datetime.DateTimeDatatypeHandler;
 import org.semanticweb.HermiT.datatypes.doublenum.DoubleDatatypeHandler;
 import org.semanticweb.HermiT.datatypes.floatnum.FloatDatatypeHandler;
-import org.semanticweb.HermiT.datatypes.datetime.DateTimeDatatypeHandler;
-import org.semanticweb.HermiT.datatypes.binarydata.BinaryDataDatatypeHandler;
+import org.semanticweb.HermiT.datatypes.owlreal.OWLRealDatatypeHandler;
+import org.semanticweb.HermiT.datatypes.rdfplainliteral.RDFPlainLiteralDatatypeHandler;
 import org.semanticweb.HermiT.datatypes.xmlliteral.XMLLiteralDatatypeHandler;
+import org.semanticweb.HermiT.model.Constant;
+import org.semanticweb.HermiT.model.DatatypeRestriction;
 
 /**
  * A registry for all available datatype handlers.
@@ -29,7 +29,7 @@ public class DatatypeRegistry {
     static {
         registerDatatypeHandler(new AnonymousConstantsDatatypeHandler());
         registerDatatypeHandler(new BooleanDatatypeHandler());
-        registerDatatypeHandler(new RDFTextDatatypeHandler());
+        registerDatatypeHandler(new RDFPlainLiteralDatatypeHandler());
         registerDatatypeHandler(new OWLRealDatatypeHandler());
         registerDatatypeHandler(new DoubleDatatypeHandler());
         registerDatatypeHandler(new FloatDatatypeHandler());

@@ -43,22 +43,22 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         m_atomicRolesSetFactory.clearNonpermanent();
     }
     public boolean isBlockedBy(Node blocker,Node blocked) {
-        PairWiseBlockingObject blockerObject=(PairWiseBlockingObject)blocker.getBlockingSignature();
-        PairWiseBlockingObject blockedObject=(PairWiseBlockingObject)blocked.getBlockingSignature();
+        PairWiseBlockingObject blockerObject=(PairWiseBlockingObject)blocker.getBlockingObject();
+        PairWiseBlockingObject blockedObject=(PairWiseBlockingObject)blocked.getBlockingObject();
         return
             !blocker.isBlocked() &&
             blocker.getNodeType()==NodeType.TREE_NODE &&
             blocked.getNodeType()==NodeType.TREE_NODE &&
             blockerObject.getAtomicConceptsLabel()==blockedObject.getAtomicConceptsLabel() &&
-            ((PairWiseBlockingObject)blocker.getParent().getBlockingSignature()).getAtomicConceptsLabel()==((PairWiseBlockingObject)blocked.getParent().getBlockingSignature()).getAtomicConceptsLabel() &&
+            ((PairWiseBlockingObject)blocker.getParent().getBlockingObject()).getAtomicConceptsLabel()==((PairWiseBlockingObject)blocked.getParent().getBlockingObject()).getAtomicConceptsLabel() &&
             blockerObject.getFromParentLabel()==blockedObject.getFromParentLabel() && 
             blockerObject.getToParentLabel()==blockedObject.getToParentLabel();
     }
     public int blockingHashCode(Node node) {
-        PairWiseBlockingObject nodeObject=(PairWiseBlockingObject)node.getBlockingSignature();
+        PairWiseBlockingObject nodeObject=(PairWiseBlockingObject)node.getBlockingObject();
         return
             nodeObject.m_atomicConceptsLabelHashCode+
-            ((PairWiseBlockingObject)node.getParent().getBlockingSignature()).m_atomicConceptsLabelHashCode+
+            ((PairWiseBlockingObject)node.getParent().getBlockingObject()).m_atomicConceptsLabelHashCode+
             nodeObject.m_fromParentLabelHashCode+
             nodeObject.m_toParentLabelHashCode;
     }
@@ -69,22 +69,22 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         return node.getNodeType()==NodeType.TREE_NODE;
     }
     public boolean hasBlockingInfoChanged(Node node) {
-        return ((PairWiseBlockingObject)node.getBlockingSignature()).m_hasChanged;
+        return ((PairWiseBlockingObject)node.getBlockingObject()).m_hasChanged;
     }
     public void clearBlockingInfoChanged(Node node) {
-        ((PairWiseBlockingObject)node.getBlockingSignature()).m_hasChanged=false;
+        ((PairWiseBlockingObject)node.getBlockingObject()).m_hasChanged=false;
     }
     public void nodeInitialized(Node node) {
-        if (node.getBlockingSignature()==null)
-            node.setBlockingSignature(new PairWiseBlockingObject(node));
-        ((PairWiseBlockingObject)node.getBlockingSignature()).initialize();
+        if (node.getBlockingObject()==null)
+            node.setBlockingObject(new PairWiseBlockingObject(node));
+        ((PairWiseBlockingObject)node.getBlockingObject()).initialize();
     }
     public void nodeDestroyed(Node node) {
-        ((PairWiseBlockingObject)node.getBlockingSignature()).destroy();
+        ((PairWiseBlockingObject)node.getBlockingObject()).destroy();
     }
     public Node assertionAdded(Concept concept,Node node) {
         if (concept instanceof AtomicConcept) {
-            ((PairWiseBlockingObject)node.getBlockingSignature()).addAtomicConcept((AtomicConcept)concept);
+            ((PairWiseBlockingObject)node.getBlockingObject()).addAtomicConcept((AtomicConcept)concept);
             return node;
         }
         else
@@ -92,7 +92,7 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
     }
     public Node assertionRemoved(Concept concept,Node node) {
         if (concept instanceof AtomicConcept) {
-            ((PairWiseBlockingObject)node.getBlockingSignature()).removeAtomicConcept((AtomicConcept)concept);
+            ((PairWiseBlockingObject)node.getBlockingObject()).removeAtomicConcept((AtomicConcept)concept);
             return node;
         }
         else
@@ -100,11 +100,11 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
     }
     public Node assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
         if (nodeFrom.isParentOf(nodeTo)) {
-            ((PairWiseBlockingObject)nodeTo.getBlockingSignature()).addToFromParentLabel(atomicRole);
+            ((PairWiseBlockingObject)nodeTo.getBlockingObject()).addToFromParentLabel(atomicRole);
             return nodeTo;
         }
         else if (nodeTo.isParentOf(nodeFrom)) {
-            ((PairWiseBlockingObject)nodeFrom.getBlockingSignature()).addToToParentLabel(atomicRole);
+            ((PairWiseBlockingObject)nodeFrom.getBlockingObject()).addToToParentLabel(atomicRole);
             return nodeFrom;
         }
         else {
@@ -116,11 +116,11 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
     }
     public Node assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
         if (nodeFrom.isParentOf(nodeTo)) {
-            ((PairWiseBlockingObject)nodeTo.getBlockingSignature()).removeFromFromParentLabel(atomicRole);
+            ((PairWiseBlockingObject)nodeTo.getBlockingObject()).removeFromFromParentLabel(atomicRole);
             return nodeTo;
         }
         else if (nodeTo.isParentOf(nodeFrom)) {
-            ((PairWiseBlockingObject)nodeFrom.getBlockingSignature()).removeFromToParentLabel(atomicRole);
+            ((PairWiseBlockingObject)nodeFrom.getBlockingObject()).removeFromToParentLabel(atomicRole);
             return nodeFrom;
         }
         else {
@@ -285,9 +285,9 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         protected final int m_hashCode;
 
         public PairWiseBlockingSignature(PairWiseDirectBlockingChecker checker,Node node) {
-            PairWiseBlockingObject nodeBlockingObject=(PairWiseBlockingObject)node.getBlockingSignature();
+            PairWiseBlockingObject nodeBlockingObject=(PairWiseBlockingObject)node.getBlockingObject();
             m_atomicConceptLabel=nodeBlockingObject.getAtomicConceptsLabel();
-            m_parentAtomicConceptLabel=((PairWiseBlockingObject)node.getParent().getBlockingSignature()).getAtomicConceptsLabel();
+            m_parentAtomicConceptLabel=((PairWiseBlockingObject)node.getParent().getBlockingObject()).getAtomicConceptsLabel();
             m_fromParentLabel=nodeBlockingObject.getFromParentLabel();
             m_toParentLabel=nodeBlockingObject.getToParentLabel();
             m_hashCode=
@@ -301,10 +301,10 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
             checker.m_atomicRolesSetFactory.makePermanent(m_toParentLabel);
         }
         public boolean blocksNode(Node node) {
-            PairWiseBlockingObject nodeBlockingObject=(PairWiseBlockingObject)node.getBlockingSignature();
+            PairWiseBlockingObject nodeBlockingObject=(PairWiseBlockingObject)node.getBlockingObject();
             return
                 nodeBlockingObject.getAtomicConceptsLabel()==m_atomicConceptLabel &&
-                ((PairWiseBlockingObject)node.getParent().getBlockingSignature()).getAtomicConceptsLabel()==m_parentAtomicConceptLabel &&
+                ((PairWiseBlockingObject)node.getParent().getBlockingObject()).getAtomicConceptsLabel()==m_parentAtomicConceptLabel &&
                 nodeBlockingObject.getFromParentLabel()==m_fromParentLabel &&
                 nodeBlockingObject.getToParentLabel()==m_toParentLabel;
         }

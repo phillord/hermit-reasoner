@@ -3,7 +3,7 @@ package org.semanticweb.HermiT.model;
 
 import java.io.Serializable;
 
-import org.semanticweb.HermiT.*;
+import org.semanticweb.HermiT.Prefixes;
 
 /**
  * Represents the built-in predicate that is used to enforce ordering on nodes in the translation of at-most concepts.

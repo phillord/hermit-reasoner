@@ -1,13 +1,13 @@
 package org.semanticweb.HermiT.hierarchy;
 
-import java.util.Set;
-import java.util.HashSet;
-import java.util.TreeSet;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class Hierarchy<E> {
     protected final HierarchyNode<E> m_topNode;

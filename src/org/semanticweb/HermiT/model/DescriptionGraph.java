@@ -4,7 +4,7 @@ package org.semanticweb.HermiT.model;
 import java.io.Serializable;
 import java.util.Set;
 
-import org.semanticweb.HermiT.*;
+import org.semanticweb.HermiT.Prefixes;
 
 public class DescriptionGraph implements DLPredicate,Serializable {
     private static final long serialVersionUID=-6098910060520673164L;

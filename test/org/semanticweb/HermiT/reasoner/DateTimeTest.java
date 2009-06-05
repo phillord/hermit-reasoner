@@ -1,9 +1,14 @@
 package org.semanticweb.HermiT.reasoner;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.semanticweb.HermiT.datatypes.datetime.*;
+import org.semanticweb.HermiT.datatypes.datetime.BoundType;
+import org.semanticweb.HermiT.datatypes.datetime.DateTime;
+import org.semanticweb.HermiT.datatypes.datetime.DateTimeInterval;
+import org.semanticweb.HermiT.datatypes.datetime.IntervalType;
 
 public class DateTimeTest extends AbstractReasonerTest {
 

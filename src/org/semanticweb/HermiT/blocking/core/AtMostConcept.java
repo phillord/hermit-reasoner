@@ -37,7 +37,7 @@ public class AtMostConcept extends Concept implements DLPredicate {
         return m_toConcept.isAlwaysFalse();
     }
     public String toString(Prefixes prefixes) {
-        return "atLeast("+m_number+' '+m_onRole.toString(prefixes)+' '+m_toConcept.toString(prefixes)+')';
+        return "atMost("+m_number+' '+m_onRole.toString(prefixes)+' '+m_toConcept.toString(prefixes)+')';
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);
@@ -48,7 +48,7 @@ public class AtMostConcept extends Concept implements DLPredicate {
             return object1.m_number==object2.m_number && object1.m_onRole==object2.m_onRole && object1.m_toConcept==object2.m_toConcept;
         }
         protected int getHashCode(AtMostConcept object) {
-            return (object.m_number*7+object.m_onRole.hashCode())*7+object.m_toConcept.hashCode();
+            return (object.m_number*7+object.m_onRole.hashCode())*13+object.m_toConcept.hashCode();
         }
     };
     

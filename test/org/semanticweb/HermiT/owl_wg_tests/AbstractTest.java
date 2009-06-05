@@ -4,16 +4,15 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 
+import junit.framework.TestCase;
+
 import org.coode.owl.rdf.rdfxml.RDFXMLRenderer;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.tableau.InterruptException;
-
 import org.semanticweb.owl.apibinding.OWLManager;
-import org.semanticweb.owl.model.OWLOntologyManager;
 import org.semanticweb.owl.model.OWLOntology;
-
-import junit.framework.TestCase;
+import org.semanticweb.owl.model.OWLOntologyManager;
 
 public abstract class AbstractTest extends TestCase {
     public static int TIMEOUT=6000;
@@ -43,7 +42,7 @@ public abstract class AbstractTest extends TestCase {
         InterruptTimer timer=new InterruptTimer(TIMEOUT,m_reasoner);
         timer.start();
         try {
-            m_reasoner.loadOntology(m_ontologyManager,m_premiseOntology,null,null);
+            m_reasoner.loadOntology(m_ontologyManager,m_premiseOntology,null);
             doTest();
         }
         catch (InterruptException e) {

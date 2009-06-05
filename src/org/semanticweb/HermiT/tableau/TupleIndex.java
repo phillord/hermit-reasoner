@@ -115,7 +115,7 @@ public final class TupleIndex implements Serializable {
     protected int getChildNode(int parent,Object object) {
         int bucketIndex=getIndexFor(object.hashCode()+parent,m_bucketsLengthMinusOne);
         int child=m_buckets[bucketIndex]-BUCKET_OFFSET;
-        while (child!=-1) {            
+        while (child!=-1) {
             if (parent==m_trieNodeManager.getTrieNodeComponent(child,TRIE_NODE_PARENT) && object.equals(m_trieNodeManager.getTrieNodeObject(child)))
                 return child;
             child=m_trieNodeManager.getTrieNodeComponent(child,TRIE_NODE_NEXT_ENTRY);

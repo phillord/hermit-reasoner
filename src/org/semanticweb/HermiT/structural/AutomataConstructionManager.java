@@ -235,11 +235,11 @@ public class AutomataConstructionManager {
 	   	Graph<OWLObjectPropertyExpression> regularityCheckGraph = propertyDependencyGraph.clone();
     	regularityCheckGraph.transitivelyClose();
 
-    	for( OWLObjectPropertyExpression prop : regularityCheckGraph.getElements() ){
-    		Set<OWLObjectPropertyExpression> successors = regularityCheckGraph.getSuccessors( prop );
-    		if( successors.contains( prop ) || successors.contains( prop.getInverseProperty().getSimplified() ) )
-    			throw new IllegalArgumentException("The given role hierarchy is not regular.");
-    	}
+//    	for( OWLObjectPropertyExpression prop : regularityCheckGraph.getElements() ){
+//    		Set<OWLObjectPropertyExpression> successors = regularityCheckGraph.getSuccessors( prop );
+//    		if( successors.contains( prop ) || successors.contains( prop.getInverseProperty().getSimplified() ) )
+//    			throw new IllegalArgumentException("The given role hierarchy is not regular.");
+//    	}
 	}
     private Map<OWLObjectPropertyExpression,Automaton> buildIndividualAutomata(Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions, Collection<ComplexObjectPropertyInclusion> complexObjectPropertyInclusions){
     	

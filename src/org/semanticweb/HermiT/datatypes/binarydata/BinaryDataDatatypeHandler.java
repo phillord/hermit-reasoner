@@ -2,16 +2,16 @@
 package org.semanticweb.HermiT.datatypes.binarydata;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.HashSet;
 
 import org.semanticweb.HermiT.Prefixes;
-import org.semanticweb.HermiT.model.DatatypeRestriction;
 import org.semanticweb.HermiT.datatypes.DatatypeHandler;
 import org.semanticweb.HermiT.datatypes.MalformedLiteralException;
 import org.semanticweb.HermiT.datatypes.UnsupportedFacetException;
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
+import org.semanticweb.HermiT.model.DatatypeRestriction;
 
 public class BinaryDataDatatypeHandler implements DatatypeHandler {
     protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd");

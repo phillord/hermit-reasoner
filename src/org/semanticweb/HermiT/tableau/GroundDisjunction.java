@@ -3,8 +3,10 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 
-import org.semanticweb.HermiT.*;
-import org.semanticweb.HermiT.model.*;
+import org.semanticweb.HermiT.Prefixes;
+import org.semanticweb.HermiT.model.AnnotatedEquality;
+import org.semanticweb.HermiT.model.DLPredicate;
+import org.semanticweb.HermiT.model.Equality;
 
 public class GroundDisjunction implements Serializable {
     private static final long serialVersionUID=6245673952732442673L;

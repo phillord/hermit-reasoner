@@ -6,7 +6,9 @@ import java.util.Set;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.io.OWLOntologyInputSource;
 import org.semanticweb.owl.io.StringInputSource;
+import org.semanticweb.owl.model.IRI;
 import org.semanticweb.owl.model.OWLAxiom;
+import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
 
@@ -15,6 +17,7 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
     protected static final String NS=ONTOLOGY_URI+"#";
 
     protected OWLOntologyManager m_ontologyManager;
+    protected OWLDataFactory m_dataFactory;
     protected OWLOntology m_ontology;
 
     public AbstractOntologyTest() {
@@ -25,11 +28,13 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
     }
     protected void setUp() throws Exception {
         m_ontologyManager=OWLManager.createOWLOntologyManager();
-        m_ontology=m_ontologyManager.createOntology(URI.create(ONTOLOGY_URI));
+        m_dataFactory=m_ontologyManager.getOWLDataFactory();
+        m_ontology=m_ontologyManager.createOntology(IRI.create(ONTOLOGY_URI));
     }
 
     protected void tearDown() {
         m_ontologyManager=null;
+        m_dataFactory=null;
         m_ontology=null;
     }
 
@@ -41,7 +46,6 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
      * @throws Exception
      */
     protected void loadOntology(String physicalURI) throws Exception {
-        m_ontologyManager=OWLManager.createOWLOntologyManager();
         m_ontology=m_ontologyManager.loadOntologyFromPhysicalURI(URI.create(physicalURI));
     }
 
@@ -57,17 +61,17 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
      */
     protected void loadOntologyWithAxioms(String axioms) throws Exception {
         StringBuffer buffer=new StringBuffer();
-        buffer.append("Namespace(=<"+NS+">)");
-        buffer.append("Namespace(rdfs=<http://www.w3.org/2000/01/rdf-schema#>)");
-        buffer.append("Namespace(owl2xml=<http://www.w3.org/2006/12/owl2-xml#>)");
-        buffer.append("Namespace(test=<"+NS+">)");
-        buffer.append("Namespace(owl=<http://www.w3.org/2002/07/owl#>)");
-        buffer.append("Namespace(xsd=<http://www.w3.org/2001/XMLSchema#>)");
-        buffer.append("Namespace(rdf=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)");
+        buffer.append("Prefix(:=<"+NS+">)");
+        buffer.append("Prefix(a:=<"+NS+">)");
+        buffer.append("Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)");
+        buffer.append("Prefix(owl2xml:=<http://www.w3.org/2006/12/owl2-xml#>)");
+        buffer.append("Prefix(test:=<"+NS+">)");
+        buffer.append("Prefix(owl:=<http://www.w3.org/2002/07/owl#>)");
+        buffer.append("Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)");
+        buffer.append("Prefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)");
         buffer.append("Ontology(<"+ONTOLOGY_URI+">");
         buffer.append(axioms);
         buffer.append(")");
-        m_ontologyManager=OWLManager.createOWLOntologyManager();
         OWLOntologyInputSource input=new StringInputSource(buffer.toString());
         m_ontology=m_ontologyManager.loadOntology(input);
     }

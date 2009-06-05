@@ -1,10 +1,10 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.datatypes.datetime;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
 
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 

@@ -12,8 +12,8 @@ import java.util.TreeSet;
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
-import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.InverseRole;
+import org.semanticweb.HermiT.model.Role;
 
 public class HierarchyPrinterFSS {
     protected final PrintWriter m_out;

@@ -15,10 +15,10 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.HashSet;
-import java.util.TreeSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;

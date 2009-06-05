@@ -3,7 +3,7 @@ package org.semanticweb.HermiT.blocking;
 
 import java.io.Serializable;
 
-import org.semanticweb.HermiT.tableau.*;
+import org.semanticweb.HermiT.tableau.Node;
 
 public class BlockingSignatureCache implements Serializable {
     private static final long serialVersionUID=-7692825443489644667L;

@@ -1,0 +1,6 @@
+nom:i1(:i1)
+nom:i2(:i2)
+:r(X,Y) v :r(X,Y1) :- :c(X), nom:i1(Y), nom:i2(Y1)
+atLeast(1 :s not(def:0))(X) :- :d(X)
+def:0(:i1)
+def:0(:i2)

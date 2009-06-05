@@ -1,7 +1,7 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.model;
 
-import org.semanticweb.HermiT.*;
+import org.semanticweb.HermiT.Prefixes;
 
 public class ExistsDescriptionGraph extends ExistentialConcept implements DLPredicate {
     private static final long serialVersionUID=7433430510725260994L;

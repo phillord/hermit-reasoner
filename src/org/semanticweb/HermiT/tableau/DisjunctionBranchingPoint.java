@@ -1,7 +1,11 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.tableau;
 
-import org.semanticweb.HermiT.model.*;
+import org.semanticweb.HermiT.model.AnnotatedEquality;
+import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.DLPredicate;
+import org.semanticweb.HermiT.model.Equality;
+import org.semanticweb.HermiT.model.Inequality;
 
 public class DisjunctionBranchingPoint extends BranchingPoint {
     private static final long serialVersionUID=-8855083430836162354L;

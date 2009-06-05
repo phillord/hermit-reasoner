@@ -5,7 +5,6 @@
 package org.semanticweb.HermiT.model;
 
 import org.semanticweb.HermiT.Prefixes;
-
 import org.semanticweb.HermiT.datatypes.DatatypeRegistry;
 
 /**

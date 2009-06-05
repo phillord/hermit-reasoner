@@ -3,18 +3,18 @@ package org.semanticweb.HermiT.datatypes.anyuri;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Collections;
-
-import dk.brics.automaton.Automaton;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.semanticweb.HermiT.Prefixes;
-import org.semanticweb.HermiT.model.DatatypeRestriction;
 import org.semanticweb.HermiT.datatypes.DatatypeHandler;
 import org.semanticweb.HermiT.datatypes.MalformedLiteralException;
 import org.semanticweb.HermiT.datatypes.UnsupportedFacetException;
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
+import org.semanticweb.HermiT.model.DatatypeRestriction;
+
+import dk.brics.automaton.Automaton;
 
 public class AnyURIDatatypeHandler implements DatatypeHandler {
     protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd");

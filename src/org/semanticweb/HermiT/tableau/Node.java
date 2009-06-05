@@ -38,7 +38,7 @@ public final class Node implements Serializable {
     protected PermanentDependencySet m_mergedIntoDependencySet;
     protected Node m_blocker;
     protected boolean m_directlyBlocked;
-    protected Object m_blockingSignature;
+    protected Object m_blockingObject;
     protected Object m_blockingCargo;
     protected int m_firstGraphOccurrenceNode;
     
@@ -140,15 +140,32 @@ public final class Node implements Serializable {
         m_blocker=blocker;
         m_directlyBlocked=directlyBlocked;
     }
-    public Object getBlockingSignature() {
-        return m_blockingSignature;
+    /**
+     * @return a blocking object (PairwiseBlockingObject or SingleBlockingObject) that stores 
+     * blocking relevant information of a node such as is label. 
+     */
+    public Object getBlockingObject() {
+        return m_blockingObject;
     }
-    public void setBlockingSignature(Object blockingSignature) {
-        m_blockingSignature=blockingSignature;
+    /**
+     * Stores a blocking object (PairwiseBlockingObject or SingleBlockingObject) for this node 
+     * that stores blocking relevant information of a node such as is label. 
+     * @param blockingObject 
+     */
+    public void setBlockingObject(Object blockingObject) {
+        m_blockingObject=blockingObject;
     }
+    /**
+     * @return an object that should be a BlockersCache.CacheEntry and is used to 
+     * remove or add the object to the blockers cache even after the hash code has 
+     * changed due to label modifications
+     */
     public Object getBlockingCargo() {
         return m_blockingCargo;
     }
+    /**
+     * @param blockingCargo should be an object of type BlockersCache.CacheEntry 
+     */
     public void setBlockingCargo(Object blockingCargo) {
         m_blockingCargo=blockingCargo;
     }

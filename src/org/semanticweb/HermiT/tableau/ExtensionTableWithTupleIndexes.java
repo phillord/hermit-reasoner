@@ -3,9 +3,9 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 
-import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
+import org.semanticweb.HermiT.model.Concept;
 
 /**
  * This extension table is for use with binary and ternary assertions (not 

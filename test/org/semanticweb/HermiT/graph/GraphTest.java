@@ -1,7 +1,6 @@
 package org.semanticweb.HermiT.graph;
 
 import org.semanticweb.HermiT.AbstractHermiTTest;
-import org.semanticweb.HermiT.graph.Graph;
 
 public class GraphTest extends AbstractHermiTTest {
 

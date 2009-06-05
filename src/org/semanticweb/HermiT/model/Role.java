@@ -3,7 +3,7 @@ package org.semanticweb.HermiT.model;
 
 import java.io.Serializable;
 
-import org.semanticweb.HermiT.*;
+import org.semanticweb.HermiT.Prefixes;
 
 /**
  * Represents a role.

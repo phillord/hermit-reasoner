@@ -21,10 +21,10 @@
 
 package gnu.getopt;
 
-import java.util.Locale;
-import java.util.ResourceBundle;
-import java.util.PropertyResourceBundle;
 import java.text.MessageFormat;
+import java.util.Locale;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
 
 /**************************************************************************/
 

@@ -7,6 +7,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
+import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLPredicate;
@@ -14,7 +15,6 @@ import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.tableau.Node;
-import org.semanticweb.HermiT.debugger.Debugger;
 
 public abstract class AbstractCommand implements DebuggerCommand {
     protected final Debugger m_debugger;

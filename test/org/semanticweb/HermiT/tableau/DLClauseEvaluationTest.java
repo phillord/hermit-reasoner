@@ -15,11 +15,6 @@ import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.Variable;
-import org.semanticweb.HermiT.tableau.DependencySet;
-import org.semanticweb.HermiT.tableau.ExtensionManager;
-import org.semanticweb.HermiT.tableau.ExtensionTable;
-import org.semanticweb.HermiT.tableau.Node;
-import org.semanticweb.HermiT.tableau.Tableau;
 
 public class DLClauseEvaluationTest extends AbstractReasonerInternalsTest {
     

@@ -3,8 +3,8 @@ package org.semanticweb.HermiT.debugger.commands;
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 
-import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.debugger.Debugger;
+import org.semanticweb.HermiT.model.DescriptionGraph;
 
 public class ShowDescriptionGraphCommand extends AbstractCommand {
 

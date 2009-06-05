@@ -1,11 +1,15 @@
 package org.semanticweb.HermiT.reasoner;
 
-import java.util.*;
-import java.net.*;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
-import org.semanticweb.HermiT.*;
-import org.semanticweb.HermiT.model.*;
-import org.semanticweb.HermiT.datatypes.*;
+import org.semanticweb.HermiT.Prefixes;
+import org.semanticweb.HermiT.datatypes.DatatypeRegistry;
+import org.semanticweb.HermiT.datatypes.MalformedLiteralException;
+import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
+import org.semanticweb.HermiT.model.DatatypeRestriction;
 
 public class AnyURITest extends AbstractReasonerTest {
     protected static final String XSD_ANY_URI=Prefixes.s_semanticWebPrefixes.get("xsd")+"anyURI";

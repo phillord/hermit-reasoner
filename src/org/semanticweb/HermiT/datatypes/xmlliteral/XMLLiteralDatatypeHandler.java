@@ -2,16 +2,16 @@
 package org.semanticweb.HermiT.datatypes.xmlliteral;
 
 import java.util.Collection;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.semanticweb.HermiT.Prefixes;
-import org.semanticweb.HermiT.model.DatatypeRestriction;
 import org.semanticweb.HermiT.datatypes.DatatypeHandler;
 import org.semanticweb.HermiT.datatypes.MalformedLiteralException;
 import org.semanticweb.HermiT.datatypes.UnsupportedFacetException;
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
+import org.semanticweb.HermiT.model.DatatypeRestriction;
 
 public class XMLLiteralDatatypeHandler implements DatatypeHandler {
     protected static final String RDF_XML_LITERAL=Prefixes.s_semanticWebPrefixes.get("rdf")+"XMLLiteral";

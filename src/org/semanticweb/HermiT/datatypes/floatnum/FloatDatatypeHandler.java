@@ -2,17 +2,17 @@
 package org.semanticweb.HermiT.datatypes.floatnum;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.HashSet;
-import java.util.Collections;
 
 import org.semanticweb.HermiT.Prefixes;
-import org.semanticweb.HermiT.model.DatatypeRestriction;
 import org.semanticweb.HermiT.datatypes.DatatypeHandler;
 import org.semanticweb.HermiT.datatypes.MalformedLiteralException;
 import org.semanticweb.HermiT.datatypes.UnsupportedFacetException;
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
+import org.semanticweb.HermiT.model.DatatypeRestriction;
 
 public class FloatDatatypeHandler implements DatatypeHandler {
     protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd");

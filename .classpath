@@ -3,7 +3,7 @@
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="src" path="getopt"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.launching.macosx.MacOSXType/JVM 1.5.0 (MacOS X Default)"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="/ThirdPartyOwlTools/protege/4.0/org.protege.editor.owl.jar" sourcepath="/Users/bglimm/Downloads/Protege_4.0_beta/bundles/org.protege.editor.core.application.jar">
 		<attributes>
@@ -15,15 +15,16 @@
 			<attribute name="javadoc_location" value="http://protege.stanford.edu/protege/4/docs/api"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/ThirdPartyOwlTools/owlapi/2.2.1/owlapi-bin.jar" sourcepath="/ThirdPartyOwlTools/owlapi/2.2.1/owlapi-src.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/ThirdPartyOwlTools/owlapi/2.2.1/owlapi-doc.jar!/"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="lib" path="/ThirdPartyOwlTools/automaton/1.11-1/automaton.jar" sourcepath="/ThirdPartyOwlTools/automaton/1.11-1/automaton-src.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:platform:/resource/ThirdPartyOwlTools/automaton/1.11-1/automaton-doc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="/ThirdPartyOwlTools/owlapi/3.0.0/owlapi-bin.jar" sourcepath="/ThirdPartyOwlTools/owlapi/3.0.0/owlapi-src.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/ThirdPartyOwlTools/owlapi/3.0.0/owlapi-doc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/ThirdPartyOwlTools/jautomaton/jautomata-core-2.0-alpha-1.jar" sourcepath="/ThirdPartyOwlTools/jautomaton/jautomata-src.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

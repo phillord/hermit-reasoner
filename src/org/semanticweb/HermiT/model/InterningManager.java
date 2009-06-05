@@ -1,8 +1,8 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.model;
 
-import java.lang.ref.WeakReference;
 import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 
 /**
  * The manager for the internable objects.
