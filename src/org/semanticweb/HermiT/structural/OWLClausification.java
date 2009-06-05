@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
@@ -89,13 +90,15 @@ import org.semanticweb.owl.model.OWLTypedConstant;
 import org.semanticweb.owl.model.OWLUntypedConstant;
 import org.semanticweb.owl.util.OWLAxiomVisitorAdapter;
 
+import rationals.Automaton;
+
 public class OWLClausification {
     protected static final Variable X=Variable.create("X");
     protected static final Variable Y=Variable.create("Y");
     protected static final Variable Z=Variable.create("Z");
 
     protected final Configuration m_configuration;
-
+    
     public OWLClausification(Configuration configuration) {
         m_configuration=configuration;
     }
@@ -124,10 +127,15 @@ public class OWLClausification {
         builtInPropertyManager.axiomatizeBuiltInPropertiesAsNeeded(axioms);
         ObjectPropertyInclusionManager objectPropertyInclusionManager=new ObjectPropertyInclusionManager(factory);
         objectPropertyInclusionManager.prepareTransformation(axioms);
-        objectPropertyInclusionManager.rewriteAxioms(axioms);
+        Map<OWLObjectPropertyExpression, Automaton> automataOfComplexRoles = objectPropertyInclusionManager.rewriteAxioms(axioms);
         if (descriptionGraphs==null)
             descriptionGraphs=Collections.emptySet();
-        return clausify(factory,ontologyURI,axioms,descriptionGraphs);
+        /**
+         * @gstoil
+         */
+        DLOntology dlOntology = clausify(factory,ontologyURI,axioms,descriptionGraphs);
+        dlOntology.setAutomata( automataOfComplexRoles );
+        return dlOntology;
     }
     public DLOntology clausify(OWLDataFactory factory,String ontologyURI,OWLAxioms axioms,Collection<DescriptionGraph> descriptionGraphs) {
         OWLAxiomsExpressivity axiomsExpressivity=new OWLAxiomsExpressivity(axioms);
@@ -419,6 +427,15 @@ public class OWLClausification {
                 OWLObjectPropertyExpression objectProperty=((OWLObjectSelfRestriction)description).getProperty();
                 Atom roleAtom=getRoleAtom(objectProperty,X,X);
                 m_bodyAtoms.add(roleAtom);
+            }
+            /**
+             * @gstoil modification. This situation is now possible with automata. Since the translation says that
+             * for each final state f add inclusion f -> C. If C is a nominal and comes from a concept with negative
+             * polarity then subsumption is actually f-> \neg {o} which was not a valid HermiT normal form. 
+             */
+            else if (description instanceof OWLObjectOneOf && ((OWLObjectOneOf)description).getIndividuals().size()==1) {
+                OWLIndividual individual=((OWLObjectOneOf)description).getIndividuals().iterator().next();
+                m_bodyAtoms.add(Atom.create(getConceptForNominal(individual),X));
             }
             else if (!(description instanceof OWLClass))
                 throw new IllegalStateException("Internal error: invalid normal form.");
