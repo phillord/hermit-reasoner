@@ -1227,7 +1227,10 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                         }
                     }
                 }
-                objectPropertyInclusionManager.rewriteAxioms(axioms);
+                /**
+                 * @gstoil
+                 */
+                objectPropertyInclusionManager.rewriteAxioms(axioms,originalDLOntology.getAutomataOfComplexObjectProperties());
             }
             OWLAxiomsExpressivity axiomsExpressivity=new OWLAxiomsExpressivity(axioms);
             axiomsExpressivity.m_hasAtMostRestrictions|=originalDLOntology.hasAtMostRestrictions();
