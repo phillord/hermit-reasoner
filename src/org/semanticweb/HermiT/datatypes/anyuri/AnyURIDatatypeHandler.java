@@ -34,7 +34,7 @@ public class AnyURIDatatypeHandler implements DatatypeHandler {
     }
     public String toString(Prefixes prefixes,Object dataValue) {
         String lexicalForm=((URI)dataValue).toString();
-        return '\"'+lexicalForm+"\"^^"+prefixes.abbreviateURI(XSD_NS+"anyURI");
+        return '\"'+lexicalForm+"\"^^"+prefixes.abbreviateIRI(XSD_NS+"anyURI");
     }
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert s_managedDatatypeURIs.contains(datatypeURI);

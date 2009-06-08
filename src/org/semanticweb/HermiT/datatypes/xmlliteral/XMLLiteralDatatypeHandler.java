@@ -36,7 +36,7 @@ public class XMLLiteralDatatypeHandler implements DatatypeHandler {
             if (c=='\\' || c=='\"')
                 value=value.substring(0,index)+'\\'+value.substring(index);
         }
-        return '\"'+value+"\"^^"+prefixes.abbreviateURI(RDF_XML_LITERAL);
+        return '\"'+value+"\"^^"+prefixes.abbreviateIRI(RDF_XML_LITERAL);
     }
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert RDF_XML_LITERAL.equals(datatypeURI);

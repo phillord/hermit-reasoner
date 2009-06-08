@@ -238,7 +238,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         assertContainsAll(this.getName(),clauses,
-            S("def:0(:a)", "<internal:defdata#0>(Y) :- :dp(X,Y)", "atLeast(2 :dp rdfs:Literal)(X) :- def:0(X)", "xsd:nonNegativeInteger(X) :- <internal:defdata#0>(X)", "xsd:nonPositiveInteger(X) :- <internal:defdata#0>(X)")
+            S("def:0(:a)", "xsd:nonNegativeInteger(X) :- defdata:0(X)", "atLeast(2 :dp rdfs:Literal)(X) :- def:0(X)", "defdata:0(Y) :- :dp(X,Y)", "xsd:nonPositiveInteger(X) :- defdata:0(X)")
         );
     }
     
@@ -248,7 +248,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         assertContainsAll(this.getName(),clauses,
-            S("def:0(:a)", "<internal:defdata#0>(Y) :- :dp(X,Y)", "atLeast(2 :dp rdfs:Literal)(X) :- def:0(X)", "xsd:nonNegativeInteger(X) :- <internal:defdata#0>(X)", "xsd:nonPositiveInteger(X) :- <internal:defdata#0>(X)")
+            S("def:0(:a)","xsd:nonNegativeInteger(X) :- defdata:0(X)","atLeast(2 :dp rdfs:Literal)(X) :- def:0(X)","defdata:0(Y) :- :dp(X,Y)","xsd:nonPositiveInteger(X) :- defdata:0(X)")
         );
     }
     
@@ -258,7 +258,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         assertContainsAll(this.getName(),clauses,
-            S("def:0(:a)", "<internal:defdata#0>(Y) :- :dp(X,Y)", "atLeast(2 :dp rdfs:Literal)(X) :- def:0(X)", "xsd:decimal(X) :- <internal:defdata#0>(X)", "xsd:nonNegativeInteger(X) :- <internal:defdata#0>(X)", "xsd:nonPositiveInteger(X) :- <internal:defdata#0>(X)")
+            S("def:0(:a)","xsd:nonNegativeInteger(X) :- defdata:0(X)","xsd:decimal(X) :- defdata:0(X)","atLeast(2 :dp rdfs:Literal)(X) :- def:0(X)","defdata:0(Y) :- :dp(X,Y)","xsd:nonPositiveInteger(X) :- defdata:0(X)")
         );
     }
     
@@ -267,7 +267,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         assertContainsAll(this.getName(),clauses,
-            S("<internal:defdata#0>(Y) :- :dp(X,Y)", "xsd:double(X) v xsd:nonNegativeInteger(X) :- <internal:defdata#0>(X)")
+            S("defdata:0(Y) :- :dp(X,Y)", "xsd:double(X) v xsd:nonNegativeInteger(X) :- defdata:0(X)")
         );
     }
     
@@ -276,7 +276,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         assertContainsAll(this.getName(),clauses,
-            S("<internal:defdata#0>(Y) :- :dp(X,Y)", "not(xsd:double)(X) :- <internal:defdata#0>(X)", "not(xsd:nonNegativeInteger)(X) :- <internal:defdata#0>(X)")
+            S("not(xsd:nonNegativeInteger)(X) :- defdata:0(X)","defdata:0(Y) :- :dp(X,Y)","not(xsd:double)(X) :- defdata:0(X)")
         );
     }
     
@@ -285,7 +285,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         assertContainsAll(this.getName(),clauses,
-            S("<internal:defdata#0>(Y) :- :dp(X,Y)", "not(xsd:double)(X) v not(xsd:nonNegativeInteger)(X) :- <internal:defdata#0>(X)")
+            S("defdata:0(Y) :- :dp(X,Y)", "not(xsd:double)(X) v not(xsd:nonNegativeInteger)(X) :- defdata:0(X)")
         );
     }
     
@@ -294,7 +294,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         assertContainsAll(this.getName(),clauses,
-            S("not({ \"4.3\"^^xsd:double \"5\"^^xsd:int })(X) v not({ \"5\"^^xsd:int })(X) :- <internal:defdata#0>(X)", "<internal:defdata#0>(Y) :- :dp(X,Y)")
+            S("not({ \"4.3\"^^xsd:double \"5\"^^xsd:int })(X) v not({ \"5\"^^xsd:int })(X) :- defdata:0(X)", "defdata:0(Y) :- :dp(X,Y)")
         );
     }
     
@@ -303,7 +303,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<String> clauses=getDLClauses();
         assertContainsAll(this.getName(),clauses,
-            S("{ \"4.3\"^^xsd:double \"5\"^^xsd:int }(X) :- <internal:defdata#0>(X)", "{ \"5\"^^xsd:int }(X) :- <internal:defdata#0>(X)", ":A(X) v atLeast(1 :dp <internal:defdata#0>)(X) :- owl:Thing(X)")
+            S("{ \"4.3\"^^xsd:double \"5\"^^xsd:int }(X) :- defdata:0(X)", "{ \"5\"^^xsd:int }(X) :- defdata:0(X)", ":A(X) v atLeast(1 :dp defdata:0)(X) :- owl:Thing(X)")
         );
     }
 }

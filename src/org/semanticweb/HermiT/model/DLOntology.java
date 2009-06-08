@@ -36,7 +36,7 @@ public class DLOntology implements Serializable {
     protected static final int CONTAINS_ONLY_TREE_ROLES=2;
     protected static final int CONTAINS_GRAPH_AND_TREE_ROLES=3;
 
-    protected final String m_ontologyURI;
+    protected final String m_ontologyIRI;
     protected final Set<DLClause> m_dlClauses;
     protected final Set<Atom> m_positiveFacts;
     protected final Set<Atom> m_negativeFacts;
@@ -57,8 +57,8 @@ public class DLOntology implements Serializable {
      */
 	protected final Map<OWLObjectPropertyExpression, Automaton> m_automataOfComplexObjectProperties;
 
-    public DLOntology(String ontologyURI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts,Set<AtomicConcept> atomicConcepts,Set<ComplexObjectRoleInclusion> allComplexObjectRoleInclusions,Set<AtomicRole> atomicObjectRoles,Set<AtomicRole> atomicDataRoles,Set<Individual> individuals,boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,boolean hasDatatypes) {
-        m_ontologyURI=ontologyURI;
+    public DLOntology(String ontologyIRI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts,Set<AtomicConcept> atomicConcepts,Set<ComplexObjectRoleInclusion> allComplexObjectRoleInclusions,Set<AtomicRole> atomicObjectRoles,Set<AtomicRole> atomicDataRoles,Set<Individual> individuals,boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,boolean hasDatatypes) {
+        m_ontologyIRI=ontologyIRI;
         m_dlClauses=dlClauses;
         m_positiveFacts=positiveFacts;
         m_negativeFacts=negativeFacts;
@@ -72,7 +72,7 @@ public class DLOntology implements Serializable {
             m_allAtomicConcepts=atomicConcepts;
         int numberOfExternalConcepts=0;
         for (AtomicConcept c : m_allAtomicConcepts)
-            if (!Prefixes.isInternalURI(c.getURI()))
+            if (!Prefixes.isInternalIRI(c.getIRI()))
                 numberOfExternalConcepts++;
         m_numberOfExternalConcepts=numberOfExternalConcepts;
         if (allComplexObjectRoleInclusions==null)
@@ -138,8 +138,8 @@ public class DLOntology implements Serializable {
             m_allDescriptionGraphs.add(((ExistsDescriptionGraph)dlPredicate).getDescriptionGraph());
     }
 
-    public String getOntologyURI() {
-        return m_ontologyURI;
+    public String getOntologyIRI() {
+        return m_ontologyIRI;
     }
 
     public Set<AtomicConcept> getAllAtomicConcepts() {
@@ -544,7 +544,7 @@ public class DLOntology implements Serializable {
         public static final Comparator<AtomicConcept> INSTANCE=new AtomicConceptComparator();
 
         public int compare(AtomicConcept o1,AtomicConcept o2) {
-            return o1.getURI().compareTo(o2.getURI());
+            return o1.getIRI().compareTo(o2.getIRI());
         }
 
         protected Object readResolve() {
@@ -557,7 +557,7 @@ public class DLOntology implements Serializable {
         public static final Comparator<AtomicRole> INSTANCE=new AtomicRoleComparator();
 
         public int compare(AtomicRole o1,AtomicRole o2) {
-            return o1.getURI().compareTo(o2.getURI());
+            return o1.getIRI().compareTo(o2.getIRI());
         }
 
         protected Object readResolve() {
@@ -570,7 +570,7 @@ public class DLOntology implements Serializable {
         public static final Comparator<Individual> INSTANCE=new IndividualComparator();
 
         public int compare(Individual o1,Individual o2) {
-            return o1.getURI().compareTo(o2.getURI());
+            return o1.getIRI().compareTo(o2.getIRI());
         }
 
         protected Object readResolve() {

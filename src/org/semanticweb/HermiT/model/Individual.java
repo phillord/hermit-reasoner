@@ -14,7 +14,7 @@ public class Individual extends Term {
     protected Individual(String uri) {
         m_uri=uri;
     }
-    public String getURI() {
+    public String getIRI() {
         return m_uri;
     }
     public String toString() {
@@ -24,7 +24,7 @@ public class Individual extends Term {
         return s_interningManager.intern(this);
     }
     public String toString(Prefixes prefixes) {
-        return prefixes.abbreviateURI(m_uri);
+        return prefixes.abbreviateIRI(m_uri);
     }
 
     protected static InterningManager<Individual> s_interningManager=new InterningManager<Individual>() {

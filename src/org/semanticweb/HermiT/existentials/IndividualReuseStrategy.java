@@ -124,7 +124,7 @@ public class IndividualReuseStrategy extends AbstractExpansionStrategy implement
         if (!(atLeastConcept.getToConcept() instanceof AtomicConcept))
             return false;
         AtomicConcept toConcept=(AtomicConcept)atLeastConcept.getToConcept();
-        if (Prefixes.isInternalURI(toConcept.getURI()))
+        if (Prefixes.isInternalIRI(toConcept.getIRI()))
             return false;
         if (atLeastConcept.getNumber()==1 && (m_doReuseConceptsAlways.contains(toConcept) || !m_dontReuseConceptsThisRun.contains(toConcept))) {
             if (m_tableau.getTableauMonitor()!=null)

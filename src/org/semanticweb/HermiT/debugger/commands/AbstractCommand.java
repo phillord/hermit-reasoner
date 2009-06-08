@@ -48,11 +48,11 @@ public abstract class AbstractCommand implements DebuggerCommand {
         else if ("!=".equals(predicate))
             return Inequality.INSTANCE;
         else if (predicate.startsWith("+"))
-            return AtomicConcept.create(m_debugger.getPrefixes().expandAbbreviatedURI(predicate.substring(1)));
+            return AtomicConcept.create(m_debugger.getPrefixes().expandAbbreviatedIRI(predicate.substring(1)));
         else if (predicate.startsWith("-"))
-            return AtomicRole.create(m_debugger.getPrefixes().expandAbbreviatedURI(predicate.substring(1)));
+            return AtomicRole.create(m_debugger.getPrefixes().expandAbbreviatedIRI(predicate.substring(1)));
         else if (predicate.startsWith("$")) {
-            String graphName=m_debugger.getPrefixes().expandAbbreviatedURI(predicate.substring(1));
+            String graphName=m_debugger.getPrefixes().expandAbbreviatedIRI(predicate.substring(1));
             for (DescriptionGraph descriptionGraph : m_debugger.getTableau().getDLOntology().getAllDescriptionGraphs())
                 if (graphName.equals(descriptionGraph.getName()))
                     return descriptionGraph;

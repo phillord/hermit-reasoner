@@ -29,7 +29,7 @@ public class ExistsDescriptionGraph extends ExistentialConcept implements DLPred
         return false;
     }
     public String toString(Prefixes prefixes) {
-        return "exists("+prefixes.abbreviateURI(m_descriptionGraph.getName())+'|'+m_vertex+')';
+        return "exists("+prefixes.abbreviateIRI(m_descriptionGraph.getName())+'|'+m_vertex+')';
     }
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);

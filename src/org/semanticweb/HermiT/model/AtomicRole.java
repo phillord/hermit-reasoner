@@ -9,13 +9,13 @@ import org.semanticweb.HermiT.Prefixes;
 public class AtomicRole extends Role implements DLPredicate {
     private static final long serialVersionUID=3766087788313643809L;
 
-    protected final String m_uri;
+    protected final String m_iri;
 
-    protected AtomicRole(String uri) {
-        m_uri=uri;
+    protected AtomicRole(String iri) {
+        m_iri=iri;
     }
-    public String getURI() {
-        return m_uri;
+    public String getIRI() {
+        return m_iri;
     }
     public int getArity() {
         return 2;
@@ -27,7 +27,7 @@ public class AtomicRole extends Role implements DLPredicate {
             return InverseRole.create(this);
     }
     public String toString(Prefixes prefixes) {
-        return prefixes.abbreviateURI(m_uri);
+        return prefixes.abbreviateIRI(m_iri);
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);
@@ -35,10 +35,10 @@ public class AtomicRole extends Role implements DLPredicate {
 
     protected static InterningManager<AtomicRole> s_interningManager=new InterningManager<AtomicRole>() {
         protected boolean equal(AtomicRole object1,AtomicRole object2) {
-            return object1.m_uri.equals(object2.m_uri);
+            return object1.m_iri.equals(object2.m_iri);
         }
         protected int getHashCode(AtomicRole object) {
-            return object.m_uri.hashCode();
+            return object.m_iri.hashCode();
         }
     };
 

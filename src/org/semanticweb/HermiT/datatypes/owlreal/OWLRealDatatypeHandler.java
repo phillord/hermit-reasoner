@@ -118,7 +118,7 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
             datatypeURI=XSD_NS+"int";
         else
             throw new IllegalArgumentException("Invalid data value.");
-        return '\"'+dataValue.toString()+"\"^^"+prefixes.abbreviateURI(datatypeURI);
+        return '\"'+dataValue.toString()+"\"^^"+prefixes.abbreviateIRI(datatypeURI);
     }
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert s_intervalsByDatatype.keySet().contains(datatypeURI);

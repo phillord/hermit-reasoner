@@ -258,7 +258,7 @@ public class Printing {
                 return type1-type2;
             switch (type1) {
             case 0:
-                return ((AtomicConcept)c1).getURI().compareTo(((AtomicConcept)c2).getURI());
+                return ((AtomicConcept)c1).getIRI().compareTo(((AtomicConcept)c2).getIRI());
             case 1:
                 {
                     AtLeastConcept l1=(AtLeastConcept)c1;
@@ -275,7 +275,7 @@ public class Printing {
                     return g1.getDescriptionGraph().getName().compareTo(g2.getDescriptionGraph().getName());
                 }
             case 3:
-                return ((AtomicNegationConcept)c1).getNegatedAtomicConcept().getURI().compareTo(((AtomicNegationConcept)c2).getNegatedAtomicConcept().getURI());
+                return ((AtomicNegationConcept)c1).getNegatedAtomicConcept().getIRI().compareTo(((AtomicNegationConcept)c2).getNegatedAtomicConcept().getIRI());
             case 4:
                 return compareDatatypeRestrictions((DatatypeRestriction)c1,(DatatypeRestriction)c2);
             case 5:
@@ -351,9 +351,9 @@ public class Printing {
             if (type1!=type2)
                 return type1-type2;
             if (type1==0)
-                return ((AtomicRole)ar1).getURI().compareTo(((AtomicRole)ar2).getURI());
+                return ((AtomicRole)ar1).getIRI().compareTo(((AtomicRole)ar2).getIRI());
             else
-                return ((InverseRole)ar1).getInverseOf().getURI().compareTo(((InverseRole)ar2).getInverseOf().getURI());
+                return ((InverseRole)ar1).getInverseOf().getIRI().compareTo(((InverseRole)ar2).getInverseOf().getIRI());
         }
         protected int getRoleType(Role ar) {
             if (ar instanceof AtomicRole)

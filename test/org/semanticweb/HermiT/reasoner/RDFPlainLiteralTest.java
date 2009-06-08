@@ -233,10 +233,10 @@ public class RDFPlainLiteralTest extends AbstractReasonerTest {
         String[] facetURIs=new String[arguments.length/2];
         Object[] facetValues=new Object[arguments.length/2];
         for (int index=0;index<arguments.length;index+=2) {
-            facetURIs[index/2]=Prefixes.STANDARD_PREFIXES.expandAbbreviatedURI((String)arguments[index]);
+            facetURIs[index/2]=Prefixes.STANDARD_PREFIXES.expandAbbreviatedIRI((String)arguments[index]);
             facetValues[index/2]=arguments[index+1];
         }
-        return DatatypeRestriction.create(Prefixes.STANDARD_PREFIXES.expandAbbreviatedURI(datatypeURI),facetURIs,facetValues);
+        return DatatypeRestriction.create(Prefixes.STANDARD_PREFIXES.expandAbbreviatedIRI(datatypeURI),facetURIs,facetValues);
     }
     protected static ValueSpaceSubset subset(String datatypeURI,Object... arguments) {
         DatatypeRestriction restriction=restriction(datatypeURI,arguments);

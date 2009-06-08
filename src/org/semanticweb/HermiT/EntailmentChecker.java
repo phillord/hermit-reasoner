@@ -1,6 +1,5 @@
 package org.semanticweb.HermiT;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -9,6 +8,7 @@ import java.util.Set;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.owl.inference.OWLReasonerException;
+import org.semanticweb.owl.model.IRI;
 import org.semanticweb.owl.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owl.model.OWLAnnotationPropertyDomainAxiom;
 import org.semanticweb.owl.model.OWLAnnotationPropertyRangeAxiom;
@@ -162,9 +162,9 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
         OWLDataPropertyExpression[] props=axiom.getProperties().toArray(new OWLDataPropertyExpression[n]);
         for (int i=0;i<n-1;i++) {
             for (int j=i+1;j<n;j++) {
-                OWLDataSomeValuesFrom some_i=factory.getOWLDataSomeValuesFrom(props[i],factory.getOWLDatatype(URI.create(AtomicConcept.RDFS_LITERAL.getURI())));
-                OWLDataSomeValuesFrom some_j=factory.getOWLDataSomeValuesFrom(props[j],factory.getOWLDatatype(URI.create(AtomicConcept.RDFS_LITERAL.getURI())));
-                OWLDataMaxCardinality max1=factory.getOWLDataMaxCardinality(factory.getOWLDataProperty(URI.create(AtomicRole.TOP_DATA_ROLE.getURI())),1);
+                OWLDataSomeValuesFrom some_i=factory.getOWLDataSomeValuesFrom(props[i],factory.getOWLDatatype(IRI.create(AtomicConcept.RDFS_LITERAL.getIRI())));
+                OWLDataSomeValuesFrom some_j=factory.getOWLDataSomeValuesFrom(props[j],factory.getOWLDatatype(IRI.create(AtomicConcept.RDFS_LITERAL.getIRI())));
+                OWLDataMaxCardinality max1=factory.getOWLDataMaxCardinality(factory.getOWLDataProperty(IRI.create(AtomicRole.TOP_DATA_ROLE.getIRI())),1);
                 OWLClassExpression desc=factory.getOWLObjectIntersectionOf(some_i,some_j,max1);
                 if (reasoner.isSatisfiable(desc))
                     return Boolean.FALSE;
@@ -180,7 +180,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
             for (int j=i+1;j<n;j++) {
                 OWLObjectSomeValuesFrom some_i=factory.getOWLObjectSomeValuesFrom(props[i],factory.getOWLThing());
                 OWLObjectSomeValuesFrom some_j=factory.getOWLObjectSomeValuesFrom(props[j],factory.getOWLThing());
-                OWLObjectMaxCardinality max1=factory.getOWLObjectMaxCardinality(factory.getOWLObjectProperty(URI.create(AtomicRole.TOP_OBJECT_ROLE.getURI())),1);
+                OWLObjectMaxCardinality max1=factory.getOWLObjectMaxCardinality(factory.getOWLObjectProperty(IRI.create(AtomicRole.TOP_OBJECT_ROLE.getIRI())),1);
                 OWLClassExpression desc=factory.getOWLObjectIntersectionOf(some_i,some_j,max1);
                 if (reasoner.isSatisfiable(desc))
                     return Boolean.FALSE;

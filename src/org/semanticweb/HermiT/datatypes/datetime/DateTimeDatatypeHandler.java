@@ -50,7 +50,7 @@ public class DateTimeDatatypeHandler implements DatatypeHandler {
     }
     public String toString(Prefixes prefixes,Object dataValue) {
         assert dataValue instanceof DateTime;
-        return '\"'+dataValue.toString()+"\"^^"+prefixes.abbreviateURI(XSD_DATE_TIME);
+        return '\"'+dataValue.toString()+"\"^^"+prefixes.abbreviateIRI(XSD_DATE_TIME);
     }
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert s_managedDatatypeURIs.contains(datatypeURI);

@@ -184,7 +184,7 @@ public class OWLClausification {
             Atom roleAtom=getRoleAtom(objectPropertyExpression,X,Y);
             dlClauses.add(DLClause.create(new Atom[] {},new Atom[] { roleAtom }).getSafeVersion());
         }
-        if (axioms.m_dataPropertyInclusions.contains(factory.getOWLDataProperty(URI.create(AtomicRole.BOTTOM_DATA_ROLE.getURI())))) {
+        if (axioms.m_dataPropertyInclusions.contains(factory.getOWLDataProperty(URI.create(AtomicRole.BOTTOM_DATA_ROLE.getIRI())))) {
             Atom bodyAtom=Atom.create(AtomicRole.BOTTOM_DATA_ROLE,X,Y);
             dlClauses.add(DLClause.create(new Atom[] {},new Atom[] { bodyAtom }).getSafeVersion());
         }
@@ -754,7 +754,7 @@ public class OWLClausification {
         }
         public Object visit(OWLDatatype object) {
             String datatypeURI=object.getURI().toString();
-            if (AtomicConcept.RDFS_LITERAL.getURI().equals(datatypeURI))
+            if (AtomicConcept.RDFS_LITERAL.getIRI().equals(datatypeURI))
                 return AtomicConcept.RDFS_LITERAL;
             DatatypeRestriction datatype=DatatypeRestriction.create(datatypeURI,DatatypeRestriction.NO_FACET_URIs,DatatypeRestriction.NO_FACET_VALUES);
             try {
@@ -786,7 +786,7 @@ public class OWLClausification {
             if (!(object.getDatatype().isOWLDatatype()))
                 throw new IllegalArgumentException("Datatype restrictions are supported only on OWL datatypes.");
             String datatypeURI=object.getDatatype().getURI().toString();
-            if (AtomicConcept.RDFS_LITERAL.getURI().equals(datatypeURI)) {
+            if (AtomicConcept.RDFS_LITERAL.getIRI().equals(datatypeURI)) {
                 if (!object.getFacetRestrictions().isEmpty())
                     throw new IllegalArgumentException("rdfs:Literal does not support any facets.");
                 return AtomicConcept.RDFS_LITERAL;

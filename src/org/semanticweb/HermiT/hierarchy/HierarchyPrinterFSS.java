@@ -17,51 +17,51 @@ import org.semanticweb.HermiT.model.Role;
 
 public class HierarchyPrinterFSS {
     protected final PrintWriter m_out;
-    protected final String m_defaultPrefixURI;
-    protected final Set<String> m_prefixURIs;
+    protected final String m_defaultPrefixIRI;
+    protected final Set<String> m_prefixIRIs;
     protected Prefixes m_prefixes;
     
-    public HierarchyPrinterFSS(PrintWriter out,String defaultPrefixURI) {
+    public HierarchyPrinterFSS(PrintWriter out,String defaultPrefixIRI) {
         m_out=out;
-        m_defaultPrefixURI=defaultPrefixURI;
-        m_prefixURIs=new TreeSet<String>();
-        m_prefixURIs.add(defaultPrefixURI);
-        m_prefixURIs.add(Prefixes.s_semanticWebPrefixes.get("owl"));
+        m_defaultPrefixIRI=defaultPrefixIRI;
+        m_prefixIRIs=new TreeSet<String>();
+        m_prefixIRIs.add(defaultPrefixIRI);
+        m_prefixIRIs.add(Prefixes.s_semanticWebPrefixes.get("owl"));
     }
-    public void loadAtomicConceptPrefixURIs(Collection<AtomicConcept> atomicConcepts) {
+    public void loadAtomicConceptPrefixIRIs(Collection<AtomicConcept> atomicConcepts) {
         for (AtomicConcept atomicConcept : atomicConcepts) {
-            String uri=atomicConcept.getURI();
+            String uri=atomicConcept.getIRI();
             int hashIndex=uri.indexOf('#');
             if (hashIndex!=-1) {
-                String prefixURI=uri.substring(0,hashIndex+1);
+                String prefixIRI=uri.substring(0,hashIndex+1);
                 String localName=uri.substring(hashIndex+1);
                 if (Prefixes.isValidLocalName(localName))
-                    m_prefixURIs.add(prefixURI);
+                    m_prefixIRIs.add(prefixIRI);
             }
         }
     }
-    public void loadAtomicRolePrefixURIs(Collection<AtomicRole> atomicRoles) {
+    public void loadAtomicRolePrefixIRIs(Collection<AtomicRole> atomicRoles) {
         for (AtomicRole atomicRole : atomicRoles) {
-            String uri=atomicRole.getURI();
+            String uri=atomicRole.getIRI();
             int hashIndex=uri.indexOf('#');
             if (hashIndex!=-1) {
-                String prefixURI=uri.substring(0,hashIndex+1);
+                String prefixIRI=uri.substring(0,hashIndex+1);
                 String localName=uri.substring(hashIndex+1);
                 if (Prefixes.isValidLocalName(localName))
-                    m_prefixURIs.add(prefixURI);
+                    m_prefixIRIs.add(prefixIRI);
             }
         }
     }
     public void startPrinting() {
-        String owlPrefixURI=Prefixes.s_semanticWebPrefixes.get("owl");
+        String owlPrefixIRI=Prefixes.s_semanticWebPrefixes.get("owl");
         m_prefixes=new Prefixes();
-        m_prefixes.declareDefaultPrefix(m_defaultPrefixURI);
-        m_prefixes.declarePrefix("owl",owlPrefixURI);
+        m_prefixes.declareDefaultPrefix(m_defaultPrefixIRI);
+        m_prefixes.declarePrefix("owl",owlPrefixIRI);
         int index=1;
-        for (String prefixURI : m_prefixURIs)
-            if (!m_defaultPrefixURI.equals(prefixURI) && !owlPrefixURI.equals(prefixURI)) {
+        for (String prefixIRI : m_prefixIRIs)
+            if (!m_defaultPrefixIRI.equals(prefixIRI) && !owlPrefixIRI.equals(prefixIRI)) {
                 String prefix="a"+(index++);
-                m_prefixes.declarePrefix(prefix,prefixURI);
+                m_prefixes.declarePrefix(prefix,prefixIRI);
             }
         for (Map.Entry<String,String> entry : m_prefixes.getPrefixIRIsByPrefixName().entrySet())
             if (!"owl".equals(entry.getKey()))
@@ -148,7 +148,7 @@ public class HierarchyPrinterFSS {
             }
         }
         protected void print(AtomicConcept atomicConcept) {
-            m_out.print(m_prefixes.abbreviateURI(atomicConcept.getURI()));
+            m_out.print(m_prefixes.abbreviateIRI(atomicConcept.getIRI()));
         }
         protected boolean needsDeclaration(AtomicConcept atomicConcept) {
             return !AtomicConcept.NOTHING.equals(atomicConcept) && !AtomicConcept.THING.equals(atomicConcept);
@@ -243,7 +243,7 @@ public class HierarchyPrinterFSS {
         }
         protected void print(Role role) {
             if (role instanceof AtomicRole)
-                m_out.print(m_prefixes.abbreviateURI(((AtomicRole)role).getURI()));
+                m_out.print(m_prefixes.abbreviateIRI(((AtomicRole)role).getIRI()));
             else {
                 m_out.print("ObjectInverseOf( ");
                 print(((InverseRole)role).getInverseOf());
@@ -251,7 +251,7 @@ public class HierarchyPrinterFSS {
             }
         }
         protected void print(AtomicRole atomicRole) {
-            m_out.print(m_prefixes.abbreviateURI(atomicRole.getURI()));
+            m_out.print(m_prefixes.abbreviateIRI(atomicRole.getIRI()));
         }
         protected boolean needsDeclaration(Role role) {
             return !AtomicRole.BOTTOM_OBJECT_ROLE.equals(role) && !AtomicRole.TOP_OBJECT_ROLE.equals(role) && !AtomicRole.BOTTOM_DATA_ROLE.equals(role) && !AtomicRole.TOP_DATA_ROLE.equals(role) && role instanceof AtomicRole;
@@ -268,7 +268,7 @@ public class HierarchyPrinterFSS {
             comparison=getRoleDirection(role1)-getRoleDirection(role2);
             if (comparison!=0)
                 return comparison;
-            return getInnerAtomicRole(role1).getURI().compareTo(getInnerAtomicRole(role2).getURI());
+            return getInnerAtomicRole(role1).getIRI().compareTo(getInnerAtomicRole(role2).getIRI());
         }
         protected int getRoleClass(Role role) {
             if (AtomicRole.BOTTOM_OBJECT_ROLE.equals(role))
@@ -300,7 +300,7 @@ public class HierarchyPrinterFSS {
             int comparison=getAtomicConceptClass(atomicConcept1)-getAtomicConceptClass(atomicConcept2);
             if (comparison!=0)
                 return comparison;
-            return atomicConcept1.getURI().compareTo(atomicConcept2.getURI());
+            return atomicConcept1.getIRI().compareTo(atomicConcept2.getIRI());
         }
         protected int getAtomicConceptClass(AtomicConcept atomicConcept) {
             if (AtomicConcept.NOTHING.equals(atomicConcept))

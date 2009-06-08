@@ -14,11 +14,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * This class is responsible for abbreviating URIs. The resulting URIs can be either<br>
+ * This class is responsible for abbreviating IRIs. The resulting IRIs can be either<br>
  * 1) &lt;uri&gt; or<br> 
  * 2) prefix-name:local-name where prefix-name can be empty.<br>
  * Forms 1 and 2 are dependent upon a set of prefix declarations that associates prefix names with prefix IRIs.
- * A URI abbreviated using form 2 that uses an unregistered prefix is invalid---expanding it will result in an exception.
+ * A IRI abbreviated using form 2 that uses an unregistered prefix is invalid---expanding it will result in an exception.
  * Neither prefixes nor local names may contain colon characters. The grammar used for various parts of the IRIs is as follows:<br>
  * PN_CHARS_BASE ::= [A-Z] | [a-z] | [#x00C0-#x00D6] | [#x00D8-#x00F6] | [#x00F8-#x02FF] | [#x0370-#x037D] | [#x037F-#x1FFF] |
  *                   [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] | [#x10000-#xEFFFF]<br>
@@ -81,11 +81,11 @@ public class Prefixes implements Serializable {
         else
             m_prefixIRIMathingPattern=null;
     }
-    public String abbreviateURI(String uri) {
+    public String abbreviateIRI(String iri) {
         if (m_prefixIRIMathingPattern!=null) {
-            Matcher matcher=m_prefixIRIMathingPattern.matcher(uri);
+            Matcher matcher=m_prefixIRIMathingPattern.matcher(iri);
             if (matcher.find()) {
-                String localName=uri.substring(matcher.end());
+                String localName=iri.substring(matcher.end());
                 if (isValidLocalName(localName)) {
                     String prefix=m_prefixNamesByPrefixIRI.get(matcher.group(1));
                     if (prefix==null || prefix.length()==0)
@@ -95,17 +95,17 @@ public class Prefixes implements Serializable {
                 }
             }
         }
-        return "<"+uri+">";
+        return "<"+iri+">";
     }
     /**
-     * Expands a full URI from the abbreviated one, which is of one of the following forms:
+     * Expands a full IRI from the abbreviated one, which is of one of the following forms:
      * 'prefix:name', where 'prefix' is a registered prefix name (can be empty), or
-     * '&lt;uri&gt;', where 'uri' is a URI.
+     * '&lt;iri&gt;', where 'iri' is an IRI.
      */
-    public String expandAbbreviatedURI(String abbreviation) {
+    public String expandAbbreviatedIRI(String abbreviation) {
         if (abbreviation.length()>0 && abbreviation.charAt(0)=='<') {
             if (abbreviation.charAt(abbreviation.length()-1)!='>')
-                throw new IllegalArgumentException("The string '"+abbreviation+"' is not a valid abbreviation: URIs must be enclosed in '<' and '>'.");
+                throw new IllegalArgumentException("The string '"+abbreviation+"' is not a valid abbreviation: IRIs must be enclosed in '<' and '>'.");
             return abbreviation.substring(1,abbreviation.length()-1);
         }
         else {
@@ -114,9 +114,9 @@ public class Prefixes implements Serializable {
                 String prefix=abbreviation.substring(0,pos);
                 String ns=m_prefixIRIsByPrefixName.get(prefix);
                 if (ns==null) {
-                    // Catch the common error of not quoting URIs starting with http:
+                    // Catch the common error of not quoting IRIs starting with http:
                     if (prefix=="http")
-                        throw new IllegalArgumentException("The URI '"+abbreviation+"' must be enclosed in '<' and '>' to be used as an abbreviation.");
+                        throw new IllegalArgumentException("The IRI '"+abbreviation+"' must be enclosed in '<' and '>' to be used as an abbreviation.");
                     throw new IllegalArgumentException("The string '"+prefix+"' is not a registered prefix name.");
                 }
                 return ns+abbreviation.substring(pos+1);
@@ -152,22 +152,24 @@ public class Prefixes implements Serializable {
     /**
      * Registers HermiT's internal prefixes with this object.
      * 
-     * @param individualURIs    the collection of URIs used in individuals (used for registering nominal prefix names)
+     * @param individualIRIs    the collection of IRIs used in individuals (used for registering nominal prefix names)
      * @return                  'true' if this object already contained one of the internal prefix names
      */
-    public boolean declareInternalPrefixes(Collection<String> individualURIs) {
+    public boolean declareInternalPrefixes(Collection<String> individualIRIs) {
         boolean containsPrefix=false;
         if (declarePrefixRaw("def","internal:def#"))
+            containsPrefix=true;
+        if (declarePrefixRaw("defdata","internal:defdata#"))
             containsPrefix=true;
         if (declarePrefixRaw("nnq","internal:nnq#"))
             containsPrefix=true;
         if (declarePrefixRaw("all","internal:all#"))
             containsPrefix=true;
-        int individualURIsIndex=1;
-        for (String uri : individualURIs) {
-            if (declarePrefixRaw("nom"+(individualURIsIndex==1 ? "" : String.valueOf(individualURIsIndex)),"internal:nom#"+uri))
+        int individualIRIsIndex=1;
+        for (String uri : individualIRIs) {
+            if (declarePrefixRaw("nom"+(individualIRIsIndex==1 ? "" : String.valueOf(individualIRIsIndex)),"internal:nom#"+uri))
                 containsPrefix=true;
-            individualURIsIndex++;
+            individualIRIsIndex++;
         }
         if (declarePrefixRaw("nam","internal:nam#"))
             containsPrefix=true;
@@ -204,10 +206,10 @@ public class Prefixes implements Serializable {
         return containsPrefix;
     }
     /**
-     * Determines whether the supplied URI is used internally by HermiT.
+     * Determines whether the supplied IRI is used internally by HermiT.
      */
-    public static boolean isInternalURI(String uri) {
-        return uri.startsWith("internal:");
+    public static boolean isInternalIRI(String iri) {
+        return iri.startsWith("internal:");
     }
     /**
      * Determines whether the supplied string is a valid local name.

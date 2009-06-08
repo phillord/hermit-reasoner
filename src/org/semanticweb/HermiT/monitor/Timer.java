@@ -31,7 +31,7 @@ public class Timer extends TableauMonitorAdapter {
         m_lastStatusTime=m_problemStartTime;
     }
     public void isSatisfiableStarted(AtomicConcept atomicConcept) {
-        m_output.print("Testing "+atomicConcept.getURI()+" ...");
+        m_output.print("Testing "+atomicConcept.getIRI()+" ...");
         m_output.flush();
         start();
     }
@@ -40,7 +40,7 @@ public class Timer extends TableauMonitorAdapter {
         doStatistics();
     }
     public void isSubsumedByStarted(AtomicConcept subconcept,AtomicConcept superconcept) {
-        m_output.print("Testing "+subconcept.getURI()+" ==> "+superconcept.getURI()+" ...");
+        m_output.print("Testing "+subconcept.getIRI()+" ==> "+superconcept.getIRI()+" ...");
         m_output.flush();
         start();
     }
@@ -58,7 +58,7 @@ public class Timer extends TableauMonitorAdapter {
         doStatistics();
     }
     public void isInstanceOfStarted(AtomicConcept concept,Individual individual) {
-        m_output.print("Testing "+concept.getURI()+" : "+individual.getURI()+" ...");
+        m_output.print("Testing "+concept.getIRI()+" : "+individual.getIRI()+" ...");
         m_output.flush();
         start();
     }

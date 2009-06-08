@@ -123,7 +123,7 @@ public class DatatypeRegistry {
         }
         public String toString(Prefixes prefixes,Object dataValue) {
             Constant.AnonymousConstantValue value=(Constant.AnonymousConstantValue)dataValue;
-            return '\"'+value.getName()+"\"^^"+prefixes.abbreviateURI(ANONYMOUS_CONSTANTS);
+            return '\"'+value.getName()+"\"^^"+prefixes.abbreviateIRI(ANONYMOUS_CONSTANTS);
         }
         public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
             assert ANONYMOUS_CONSTANTS.equals(datatypeURI);

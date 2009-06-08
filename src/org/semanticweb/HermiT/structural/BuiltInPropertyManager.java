@@ -49,10 +49,10 @@ public class BuiltInPropertyManager {
 
     public BuiltInPropertyManager(OWLDataFactory factory) {
         m_factory=factory;
-        m_topObjectProperty=m_factory.getOWLObjectProperty(URI.create(AtomicRole.TOP_OBJECT_ROLE.getURI()));
-        m_bottomObjectProperty=m_factory.getOWLObjectProperty(URI.create(AtomicRole.BOTTOM_OBJECT_ROLE.getURI()));
-        m_topDataProperty=m_factory.getOWLDataProperty(URI.create(AtomicRole.TOP_DATA_ROLE.getURI()));
-        m_bottomDataProperty=m_factory.getOWLDataProperty(URI.create(AtomicRole.BOTTOM_DATA_ROLE.getURI()));
+        m_topObjectProperty=m_factory.getOWLObjectProperty(URI.create(AtomicRole.TOP_OBJECT_ROLE.getIRI()));
+        m_bottomObjectProperty=m_factory.getOWLObjectProperty(URI.create(AtomicRole.BOTTOM_OBJECT_ROLE.getIRI()));
+        m_topDataProperty=m_factory.getOWLDataProperty(URI.create(AtomicRole.TOP_DATA_ROLE.getIRI()));
+        m_bottomDataProperty=m_factory.getOWLDataProperty(URI.create(AtomicRole.BOTTOM_DATA_ROLE.getIRI()));
     }
     public void axiomatizeBuiltInPropertiesAsNeeded(OWLAxioms axioms,boolean skipTopObjectProperty,boolean skipBottomObjectProperty,boolean skipTopDataProperty,boolean skipBottomDataProperty) {
         Checker checker=new Checker(axioms);
@@ -69,7 +69,7 @@ public class BuiltInPropertyManager {
         axiomatizeBuiltInPropertiesAsNeeded(axioms,false,false,false,false);
     }
     protected void axiomatizeTopObjectProperty(OWLAxioms axioms) {
-        OWLObjectProperty topObjectProperty=m_factory.getOWLObjectProperty(URI.create(AtomicRole.TOP_OBJECT_ROLE.getURI()));
+        OWLObjectProperty topObjectProperty=m_factory.getOWLObjectProperty(URI.create(AtomicRole.TOP_OBJECT_ROLE.getIRI()));
         axioms.m_complexObjectPropertyInclusions.add(new OWLAxioms.ComplexObjectPropertyInclusion(topObjectProperty));
         axioms.m_simpleObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { topObjectProperty,topObjectProperty.getInverseProperty() });
         OWLIndividual newIndividual=m_factory.getOWLNamedIndividual(URI.create("internal:nam#topIndividual"));

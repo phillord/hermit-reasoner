@@ -40,7 +40,7 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
     }
     public String toString(Prefixes prefixes,Object dataValue) {
         String lexicalForm=((Double)dataValue).toString();
-        return '\"'+lexicalForm+"\"^^"+prefixes.abbreviateURI(XSD_DOUBLE);
+        return '\"'+lexicalForm+"\"^^"+prefixes.abbreviateIRI(XSD_DOUBLE);
     }
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert XSD_DOUBLE.equals(datatypeURI);

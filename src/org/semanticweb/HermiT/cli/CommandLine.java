@@ -17,6 +17,7 @@ import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.monitor.Timer;
 import org.semanticweb.owl.apibinding.OWLManager;
+import org.semanticweb.owl.model.IRI;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
@@ -125,8 +126,8 @@ public class CommandLine {
         }
         public void run(Reasoner hermit,Prefixes prefixes,StatusOutput status,PrintWriter output) {
             status.log(2,"Checking satisfiability of '"+conceptName+"'");
-            String conceptUri=prefixes.expandAbbreviatedURI(conceptName);
-            OWLClass owlClass=OWLManager.createOWLOntologyManager().getOWLDataFactory().getOWLClass(URI.create(conceptUri));
+            String conceptUri=prefixes.expandAbbreviatedIRI(conceptName);
+            OWLClass owlClass=OWLManager.createOWLOntologyManager().getOWLDataFactory().getOWLClass(IRI.create(conceptUri));
             if (!hermit.isDefined(owlClass)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
             }
@@ -144,8 +145,8 @@ public class CommandLine {
         }
         public void run(Reasoner hermit,Prefixes prefixes,StatusOutput status,PrintWriter output) {
             status.log(2,"Finding supers of '"+conceptName+"'");
-            String conceptUri=prefixes.expandAbbreviatedURI(conceptName);
-            OWLClass owlClass=OWLManager.createOWLOntologyManager().getOWLDataFactory().getOWLClass(URI.create(conceptUri));
+            String conceptUri=prefixes.expandAbbreviatedIRI(conceptName);
+            OWLClass owlClass=OWLManager.createOWLOntologyManager().getOWLDataFactory().getOWLClass(IRI.create(conceptUri));
             if (!hermit.isDefined(owlClass)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
             }
@@ -160,7 +161,7 @@ public class CommandLine {
             }
             for (Set<OWLClass> set : classes)
                 for (OWLClass classInSet : set)
-                    output.println("\t"+prefixes.abbreviateURI(classInSet.getURI().toString()));
+                    output.println("\t"+prefixes.abbreviateIRI(classInSet.getIRI().toString()));
         }
     }
 
@@ -173,8 +174,8 @@ public class CommandLine {
         }
         public void run(Reasoner hermit,Prefixes prefixes,StatusOutput status,PrintWriter output) {
             status.log(2,"Finding subs of '"+conceptName+"'");
-            String conceptUri=prefixes.expandAbbreviatedURI(conceptName);
-            OWLClass owlClass=OWLManager.createOWLOntologyManager().getOWLDataFactory().getOWLClass(URI.create(conceptUri));
+            String conceptUri=prefixes.expandAbbreviatedIRI(conceptName);
+            OWLClass owlClass=OWLManager.createOWLOntologyManager().getOWLDataFactory().getOWLClass(IRI.create(conceptUri));
             if (!hermit.isDefined(owlClass)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
             }
@@ -189,7 +190,7 @@ public class CommandLine {
             }
             for (Set<OWLClass> set : classes)
                 for (OWLClass classInSet : set)
-                    output.println("\t"+prefixes.abbreviateURI(classInSet.getURI().toString()));
+                    output.println("\t"+prefixes.abbreviateIRI(classInSet.getIRI().toString()));
         }
     }
 
@@ -200,15 +201,15 @@ public class CommandLine {
         }
         public void run(Reasoner hermit,Prefixes prefixes,StatusOutput status,PrintWriter output) {
             status.log(2,"Finding equivalents of '"+conceptName+"'");
-            String conceptUri=prefixes.expandAbbreviatedURI(conceptName);
-            OWLClass owlClass=OWLManager.createOWLOntologyManager().getOWLDataFactory().getOWLClass(URI.create(conceptUri));
+            String conceptUri=prefixes.expandAbbreviatedIRI(conceptName);
+            OWLClass owlClass=OWLManager.createOWLOntologyManager().getOWLDataFactory().getOWLClass(IRI.create(conceptUri));
             if (!hermit.isDefined(owlClass)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
             }
             Set<OWLClass> classes=hermit.getEquivalentClasses(owlClass);
             output.println("Classes equivalent to '"+conceptName+"':");
             for (OWLClass classInSet : classes)
-                output.println("\t"+prefixes.abbreviateURI(classInSet.getURI().toString()));
+                output.println("\t"+prefixes.abbreviateIRI(classInSet.getIRI().toString()));
         }
     }
 
@@ -244,15 +245,15 @@ public class CommandLine {
             version="<no version set>";
         versionString=version;
     }
-    protected static final String usageString="Usage: hermit [OPTION]... URI...";
+    protected static final String usageString="Usage: hermit [OPTION]... IRI...";
     protected static final String[] helpHeader={
-        "Perform reasoning on each OWL ontology URI.",
+        "Perform reasoning on each OWL ontology IRI.",
         "Example: hermit -ds owl:Thing http://hermit-reasoner.org/2008/test.owl",
         "    (prints direct subclasses of owl:Thing within the test ontology)",
         "",
-        "Both relative and absolute ontology URIs can be used. Relative URIs",
+        "Both relative and absolute ontology IRIs can be used. Relative IRIs",
         "are resolved with respect to the current directory (i.e. local file",
-        "names are valid URIs); this behavior can be changed with the '--base'",
+        "names are valid IRIs); this behavior can be changed with the '--base'",
         "option.",
         "",
         "Classes and properties are identified using functional-syntax-style",
@@ -261,7 +262,7 @@ public class CommandLine {
         "preceding the colon is treated as a prefix prefix. Use of",
         "prefixes can be controlled using the -p, -N, and --prefix",
         "options. Alternatively, classes and properties can be identified with",
-        "full URIs by enclosing the URI in <angle brackets>.",
+        "full IRIs by enclosing the IRI in <angle brackets>.",
         "",
         "By default, ontologies are simply retrieved and parsed. For more",
         "interesting reasoning, set one of the -c/-k/-s/-S/-e/-U options."
@@ -298,8 +299,8 @@ public class CommandLine {
         new Option(kDumpPrefixes,"print-prefixes",kActions,"output prefix names available for use in identifiers"),
 
         new Option('N',"no-prefixes",kPrefixes,"do not abbreviate or expand identifiers using prefixes defined in input ontology"),
-        new Option('p',"prefix",kPrefixes,true,"PN=URI","use PN as an abbreviation for URI in identifiers"),
-        new Option(kDefaultPrefix,"prefix",kPrefixes,true,"URI","use URI as the default identifier prefix"),
+        new Option('p',"prefix",kPrefixes,true,"PN=IRI","use PN as an abbreviation for IRI in identifiers"),
+        new Option(kDefaultPrefix,"prefix",kPrefixes,true,"IRI","use IRI as the default identifier prefix"),
 
         // algorithm tweaks:
         new Option(kDirectBlock,"block-match",kAlgorithm,true,"TYPE","identify blocked nodes with TYPE blocking; supported values are 'single', 'pairwise', 'pairwise-reflexive', and 'optimal' (default 'optimal')"),
@@ -324,7 +325,7 @@ public class CommandLine {
                 base=new URI("file",System.getProperty("user.dir")+"/",null);
             }
             catch (java.net.URISyntaxException e) {
-                throw new RuntimeException("unable to create default URI base");
+                throw new RuntimeException("unable to create default IRI base");
             }
             Collection<URI> ontologies=new LinkedList<URI>();
             boolean didSomething=false;
@@ -457,7 +458,7 @@ public class CommandLine {
                         String arg=g.getOptarg();
                         int eqIndex=arg.indexOf('=');
                         if (eqIndex==-1) {
-                            throw new IllegalArgumentException("the prefix declaration '"+arg+"' is not of the form PN=URI.");
+                            throw new IllegalArgumentException("the prefix declaration '"+arg+"' is not of the form PN=IRI.");
                         }
                         prefixes.declarePrefix(arg.substring(0,eqIndex),arg.substring(eqIndex+1));
                     }

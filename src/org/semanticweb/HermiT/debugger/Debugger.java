@@ -271,23 +271,23 @@ public class Debugger extends TableauMonitorForwarder {
     }
     public void isSatisfiableStarted(AtomicConcept atomicConcept) {
         super.isSatisfiableStarted(atomicConcept);
-        m_output.println("Will check whether '"+m_prefixes.abbreviateURI(atomicConcept.getURI())+"' is satisfiable.");
+        m_output.println("Will check whether '"+m_prefixes.abbreviateIRI(atomicConcept.getIRI())+"' is satisfiable.");
         mainLoop();
     }
     public void isSatisfiableFinished(AtomicConcept atomicConcept,boolean result) {
         super.isSatisfiableFinished(atomicConcept,result);
-        m_output.println("'"+m_prefixes.abbreviateURI(atomicConcept.getURI())+"' is "+(result ? "" : "not ")+"satisfiable.");
+        m_output.println("'"+m_prefixes.abbreviateIRI(atomicConcept.getIRI())+"' is "+(result ? "" : "not ")+"satisfiable.");
         mainLoop();
         dispose();
     }
     public void isSubsumedByStarted(AtomicConcept subconcept,AtomicConcept superconcept) {
         super.isSubsumedByStarted(subconcept,superconcept);
-        m_output.println("Will check whether '"+m_prefixes.abbreviateURI(subconcept.getURI())+"' is subsumed by '"+m_prefixes.abbreviateURI(superconcept.getURI())+"'.");
+        m_output.println("Will check whether '"+m_prefixes.abbreviateIRI(subconcept.getIRI())+"' is subsumed by '"+m_prefixes.abbreviateIRI(superconcept.getIRI())+"'.");
         mainLoop();
     }
     public void isSubsumedByFinished(AtomicConcept subconcept,AtomicConcept superconcept,boolean result) {
         super.isSubsumedByFinished(subconcept,superconcept,result);
-        m_output.println("'"+m_prefixes.abbreviateURI(subconcept.getURI())+"' is "+(result ? "" : "not ")+"subsumed by '"+m_prefixes.abbreviateURI(superconcept.getURI())+"'.");
+        m_output.println("'"+m_prefixes.abbreviateIRI(subconcept.getIRI())+"' is "+(result ? "" : "not ")+"subsumed by '"+m_prefixes.abbreviateIRI(superconcept.getIRI())+"'.");
         mainLoop();
         dispose();
     }
@@ -304,12 +304,12 @@ public class Debugger extends TableauMonitorForwarder {
     }
     public void isInstanceOfStarted(AtomicConcept concept,Individual individual) {
         super.isInstanceOfStarted(concept,individual);
-        m_output.println("Will check whether '"+m_prefixes.abbreviateURI(concept.getURI())+"' is an instance of '"+m_prefixes.abbreviateURI(individual.getURI())+"'.");
+        m_output.println("Will check whether '"+m_prefixes.abbreviateIRI(concept.getIRI())+"' is an instance of '"+m_prefixes.abbreviateIRI(individual.getIRI())+"'.");
         mainLoop();
     }
     public void isInstanceOfFinished(AtomicConcept concept,Individual individual,boolean result) {
         super.isInstanceOfFinished(concept,individual,result);
-        m_output.println("'"+m_prefixes.abbreviateURI(concept.getURI())+"' is "+(result ? "" : "not ")+"an instance of '"+m_prefixes.abbreviateURI(individual.getURI())+"'.");
+        m_output.println("'"+m_prefixes.abbreviateIRI(concept.getIRI())+"' is "+(result ? "" : "not ")+"an instance of '"+m_prefixes.abbreviateIRI(individual.getIRI())+"'.");
         mainLoop();
         dispose();
     }

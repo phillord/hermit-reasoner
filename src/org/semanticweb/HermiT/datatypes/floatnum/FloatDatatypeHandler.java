@@ -40,7 +40,7 @@ public class FloatDatatypeHandler implements DatatypeHandler {
     }
     public String toString(Prefixes prefixes,Object dataValue) {
         String lexicalForm=((Float)dataValue).toString();
-        return '\"'+lexicalForm+"\"^^"+prefixes.abbreviateURI(XSD_FLOAT);
+        return '\"'+lexicalForm+"\"^^"+prefixes.abbreviateIRI(XSD_FLOAT);
     }
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert XSD_FLOAT.equals(datatypeURI);

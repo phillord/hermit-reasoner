@@ -5,6 +5,7 @@ import java.net.URI;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.owl.apibinding.OWLManager;
+import org.semanticweb.owl.model.IRI;
 import org.semanticweb.owl.model.OWLClassExpression;
 import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLObjectProperty;
@@ -40,7 +41,7 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
         
         OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
         OWLClassExpression p = df.getOWLClass(URI.create("file:/c/test.owl#p"));
-        OWLObjectProperty invr = df.getOWLObjectProperty(URI.create("file:/c/test.owl#r-"));
+        OWLObjectProperty invr = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#r-"));
 
         OWLClassExpression desc = df.getOWLObjectSomeValuesFrom(invr, df.getOWLObjectComplementOf(p));
         assertSatisfiable(desc,false);
@@ -373,9 +374,9 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner = new Reasoner(new Configuration());
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
-         OWLClassExpression D = df.getOWLClass(URI.create("file:/c/test.owl#D"));
-         OWLClassExpression E = df.getOWLClass(URI.create("file:/c/test.owl#E"));
-         OWLObjectProperty r = df.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
+         OWLClassExpression D = df.getOWLClass(IRI.create("file:/c/test.owl#D"));
+         OWLClassExpression E = df.getOWLClass(IRI.create("file:/c/test.owl#E"));
+         OWLObjectProperty r = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
          OWLClassExpression desc1 = df.getOWLObjectIntersectionOf(df.getOWLObjectAllValuesFrom(r, D), df.getOWLObjectAllValuesFrom(r, df.getOWLObjectUnionOf(df.getOWLObjectComplementOf(D), E)));
          OWLClassExpression desc2 = df.getOWLObjectAllValuesFrom(r, E);
          assertSubsumedBy(desc1,desc2,true);
@@ -389,10 +390,10 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner = new Reasoner(new Configuration());
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
-         OWLClassExpression C = df.getOWLClass(URI.create("file:/c/test.owl#C"));
-         OWLClassExpression D = df.getOWLClass(URI.create("file:/c/test.owl#D"));
-         OWLObjectProperty r = df.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
-         OWLObjectProperty s = df.getOWLObjectProperty(URI.create("file:/c/test.owl#s"));
+         OWLClassExpression C = df.getOWLClass(IRI.create("file:/c/test.owl#C"));
+         OWLClassExpression D = df.getOWLClass(IRI.create("file:/c/test.owl#D"));
+         OWLObjectProperty r = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
+         OWLObjectProperty s = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#s"));
          OWLClassExpression desc1 = df.getOWLObjectIntersectionOf(df.getOWLObjectAllValuesFrom(r, df.getOWLObjectUnionOf(df.getOWLObjectComplementOf(df.getOWLObjectMinCardinality(s, 2)), C)), df.getOWLObjectAllValuesFrom(r, D));
          OWLClassExpression desc2 = df.getOWLObjectAllValuesFrom(r, df.getOWLObjectMaxCardinality(s, 1));
          assertSubsumedBy(desc1,desc2,true);
@@ -404,8 +405,8 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
           m_reasoner = new Reasoner(new Configuration());
           m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
           OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
-          OWLClassExpression A = df.getOWLClass(URI.create("file:/c/test.owl#A"));
-          OWLObjectProperty r = df.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
+          OWLClassExpression A = df.getOWLClass(IRI.create("file:/c/test.owl#A"));
+          OWLObjectProperty r = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
           OWLObjectPropertyExpression invr = df.getOWLObjectPropertyInverse(r);
           OWLClassExpression desc1 = df.getOWLObjectIntersectionOf(df.getOWLObjectAllValuesFrom(r, df.getOWLObjectAllValuesFrom(invr, A)), df.getOWLObjectSomeValuesFrom(r, df.getOWLThing()));
           assertSubsumedBy(desc1,A,true);
@@ -422,10 +423,10 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
-         OWLClassExpression p1 = df.getOWLClass(URI.create("file:/c/test.owl#p1"));
-         OWLClassExpression p2 = df.getOWLClass(URI.create("file:/c/test.owl#p2"));
-         OWLClassExpression p3 = df.getOWLClass(URI.create("file:/c/test.owl#p3"));
-         OWLObjectProperty r = df.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
+         OWLClassExpression p1 = df.getOWLClass(IRI.create("file:/c/test.owl#p1"));
+         OWLClassExpression p2 = df.getOWLClass(IRI.create("file:/c/test.owl#p2"));
+         OWLClassExpression p3 = df.getOWLClass(IRI.create("file:/c/test.owl#p3"));
+         OWLObjectProperty r = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
 
          OWLClassExpression desc1 = df.getOWLObjectIntersectionOf(df.getOWLObjectSomeValuesFrom(r, p1), df.getOWLObjectSomeValuesFrom(r, p2), df.getOWLObjectSomeValuesFrom(r, p3), df.getOWLObjectMaxCardinality(r, 2));
          assertSatisfiable(desc1,false);
@@ -441,8 +442,8 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
-         OWLClassExpression p1 = df.getOWLClass(URI.create("file:/c/test.owl#p1"));
-         OWLObjectProperty r = df.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
+         OWLClassExpression p1 = df.getOWLClass(IRI.create("file:/c/test.owl#p1"));
+         OWLObjectProperty r = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
          OWLObjectPropertyExpression invr = df.getOWLObjectPropertyInverse(r);
          
          OWLClassExpression desc1 = df.getOWLObjectSomeValuesFrom(invr, df.getOWLObjectIntersectionOf(df.getOWLObjectSomeValuesFrom(r, p1), df.getOWLObjectMaxCardinality(r, 1, p1)));
@@ -459,9 +460,9 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
-         OWLClassExpression p1 = df.getOWLClass(URI.create("file:/c/test.owl#p1"));
-         OWLClassExpression p2 = df.getOWLClass(URI.create("file:/c/test.owl#p2"));
-         OWLObjectProperty r = df.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
+         OWLClassExpression p1 = df.getOWLClass(IRI.create("file:/c/test.owl#p1"));
+         OWLClassExpression p2 = df.getOWLClass(IRI.create("file:/c/test.owl#p2"));
+         OWLObjectProperty r = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
          OWLObjectPropertyExpression invr = df.getOWLObjectPropertyInverse(r);
          
          OWLClassExpression desc1 = df.getOWLObjectIntersectionOf(p2, df.getOWLObjectSomeValuesFrom(invr, df.getOWLObjectIntersectionOf(df.getOWLObjectSomeValuesFrom(r, p1), df.getOWLObjectMaxCardinality(r, 1))));
@@ -480,11 +481,11 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
 
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
-         OWLClassExpression p1 = df.getOWLClass(URI.create("file:/c/test.owl#p1"));
-         OWLClassExpression p2 = df.getOWLClass(URI.create("file:/c/test.owl#p2"));
-         OWLObjectProperty r = df.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
-         OWLObjectProperty f1 = df.getOWLObjectProperty(URI.create("file:/c/test.owl#f1"));
-         OWLObjectProperty f2 = df.getOWLObjectProperty(URI.create("file:/c/test.owl#f2"));
+         OWLClassExpression p1 = df.getOWLClass(IRI.create("file:/c/test.owl#p1"));
+         OWLClassExpression p2 = df.getOWLClass(IRI.create("file:/c/test.owl#p2"));
+         OWLObjectProperty r = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
+         OWLObjectProperty f1 = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#f1"));
+         OWLObjectProperty f2 = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#f2"));
          
          OWLClassExpression desc1 = df.getOWLObjectIntersectionOf(df.getOWLObjectSomeValuesFrom(f1, p1), df.getOWLObjectSomeValuesFrom(f2, p2));
          assertSatisfiable(desc1,true);
@@ -504,13 +505,13 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
-         OWLClassExpression p = df.getOWLClass(URI.create("file:/c/test.owl#p"));
-         OWLClassExpression p1 = df.getOWLClass(URI.create("file:/c/test.owl#p1"));
-         OWLClassExpression p2 = df.getOWLClass(URI.create("file:/c/test.owl#p2"));
-         OWLClassExpression p3 = df.getOWLClass(URI.create("file:/c/test.owl#p3"));
-         OWLClassExpression p4 = df.getOWLClass(URI.create("file:/c/test.owl#p4"));
-         OWLClassExpression p5 = df.getOWLClass(URI.create("file:/c/test.owl#p5"));
-         OWLObjectProperty r = df.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
+         OWLClassExpression p = df.getOWLClass(IRI.create("file:/c/test.owl#p"));
+         OWLClassExpression p1 = df.getOWLClass(IRI.create("file:/c/test.owl#p1"));
+         OWLClassExpression p2 = df.getOWLClass(IRI.create("file:/c/test.owl#p2"));
+         OWLClassExpression p3 = df.getOWLClass(IRI.create("file:/c/test.owl#p3"));
+         OWLClassExpression p4 = df.getOWLClass(IRI.create("file:/c/test.owl#p4"));
+         OWLClassExpression p5 = df.getOWLClass(IRI.create("file:/c/test.owl#p5"));
+         OWLObjectProperty r = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
 
          OWLClassExpression desc = df.getOWLObjectIntersectionOf(
                  df.getOWLObjectSomeValuesFrom(r, p1), 
@@ -595,11 +596,11 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
          
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
-         OWLClassExpression a = df.getOWLClass(URI.create("file:/c/test.owl#a"));
-         OWLClassExpression c = df.getOWLClass(URI.create("file:/c/test.owl#c"));
-         OWLObjectProperty r = df.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
-         OWLObjectProperty s = df.getOWLObjectProperty(URI.create("file:/c/test.owl#s"));
-         OWLObjectProperty p = df.getOWLObjectProperty(URI.create("file:/c/test.owl#p"));
+         OWLClassExpression a = df.getOWLClass(IRI.create("file:/c/test.owl#a"));
+         OWLClassExpression c = df.getOWLClass(IRI.create("file:/c/test.owl#c"));
+         OWLObjectProperty r = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
+         OWLObjectProperty s = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#s"));
+         OWLObjectProperty p = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#p"));
          
          OWLClassExpression desc =
              df.getOWLObjectIntersectionOf(a, 
@@ -626,9 +627,9 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
       
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
-         OWLClassExpression a = df.getOWLClass(URI.create("file:/c/test.owl#a"));
-         OWLObjectProperty invr = df.getOWLObjectProperty(URI.create("file:/c/test.owl#r-"));
-         OWLObjectProperty invf = df.getOWLObjectProperty(URI.create("file:/c/test.owl#f-"));
+         OWLClassExpression a = df.getOWLClass(IRI.create("file:/c/test.owl#a"));
+         OWLObjectProperty invr = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#r-"));
+         OWLObjectProperty invf = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#f-"));
       
          OWLClassExpression desc = df.getOWLObjectIntersectionOf(
               df.getOWLObjectComplementOf(a), 
@@ -649,10 +650,10 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner = new Reasoner(new Configuration());
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
          
-         OWLClassExpression c = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c"));
-         OWLClassExpression d = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#d"));
-         OWLObjectProperty invr = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#r-"));
-         OWLObjectProperty invf = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#f-"));
+         OWLClassExpression c = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c"));
+         OWLClassExpression d = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#d"));
+         OWLObjectProperty invr = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r-"));
+         OWLObjectProperty invf = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#f-"));
          
          OWLClassExpression desc = m_dataFactory.getOWLObjectIntersectionOf(
              m_dataFactory.getOWLObjectComplementOf(c), 
@@ -672,9 +673,9 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner = new Reasoner(new Configuration());
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
 
-         OWLClassExpression p1=m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#p1"));
-         OWLObjectProperty r=m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
-         OWLObjectProperty invr=m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#r-"));
+         OWLClassExpression p1=m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#p1"));
+         OWLObjectProperty r=m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
+         OWLObjectProperty invr=m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r-"));
 
          OWLClassExpression desc=
              m_dataFactory.getOWLObjectIntersectionOf(
@@ -704,9 +705,9 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner = new Reasoner(new Configuration());
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
          
-         OWLClassExpression p1 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#p1"));
-         OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
-         OWLObjectProperty invr = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#r-"));
+         OWLClassExpression p1 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#p1"));
+         OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
+         OWLObjectProperty invr = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r-"));
 
          OWLClassExpression desc;
          desc = m_dataFactory.getOWLObjectIntersectionOf(
@@ -740,9 +741,9 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner = new Reasoner(new Configuration());
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
          
-         OWLClassExpression p1 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#p1"));
-         OWLObjectProperty f = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#f"));
-         OWLObjectProperty invf = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#f-"));
+         OWLClassExpression p1 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#p1"));
+         OWLObjectProperty f = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#f"));
+         OWLObjectProperty invf = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#f-"));
          
          OWLClassExpression desc;
          desc = m_dataFactory.getOWLObjectSomeValuesFrom(f, 
@@ -766,10 +767,10 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner = new Reasoner(new Configuration());
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
          
-         OWLClassExpression p = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#p"));
-         OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
-         OWLObjectProperty invr = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#r-"));
-         OWLObjectProperty r1 = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#r1"));
+         OWLClassExpression p = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#p"));
+         OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
+         OWLObjectProperty invr = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r-"));
+         OWLObjectProperty r1 = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r1"));
          
          OWLClassExpression desc;
          desc = m_dataFactory.getOWLObjectIntersectionOf(m_dataFactory.getOWLObjectSomeValuesFrom(r, 
@@ -787,10 +788,10 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner = new Reasoner(new Configuration());
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
          
-         OWLClassExpression p = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#p"));
-         OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
-         OWLObjectProperty invr = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#r-"));
-         OWLObjectProperty r1 = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#r1"));
+         OWLClassExpression p = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#p"));
+         OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
+         OWLObjectProperty invr = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r-"));
+         OWLObjectProperty r1 = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r1"));
          
          OWLClassExpression desc;
          desc = m_dataFactory.getOWLObjectIntersectionOf(
@@ -814,10 +815,10 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
          assertSatisfiable("file:/c/test.owl#Infinite-Tree-Root",true);
          
-         OWLClassExpression itr = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#Infinite-Tree-Root"));
-         OWLClassExpression root = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#root"));
-         OWLObjectProperty descendant = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#descendant"));
-         OWLObjectProperty invsuccessor = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#successor-"));
+         OWLClassExpression itr = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#Infinite-Tree-Root"));
+         OWLClassExpression root = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#root"));
+         OWLObjectProperty descendant = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#descendant"));
+         OWLObjectProperty invsuccessor = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#successor-"));
          
          // [and Infinite-Tree-Root [all descendant [some successor- root]]]
          OWLClassExpression desc =
@@ -842,13 +843,13 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner = new Reasoner(new Configuration());
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
          
-         OWLClassExpression p = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#p"));
-         OWLObjectProperty f = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#f"));
-         OWLObjectProperty invf = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#f-"));
-         OWLObjectProperty f1 = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#f1"));
-         OWLObjectProperty invf1 = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#f1-"));
-         OWLObjectProperty s= m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#s"));
-         OWLObjectProperty invs= m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#s-"));
+         OWLClassExpression p = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#p"));
+         OWLObjectProperty f = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#f"));
+         OWLObjectProperty invf = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#f-"));
+         OWLObjectProperty f1 = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#f1"));
+         OWLObjectProperty invf1 = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#f1-"));
+         OWLObjectProperty s= m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#s"));
+         OWLObjectProperty invs= m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#s-"));
          
          OWLClassExpression desc;
          desc = m_dataFactory.getOWLObjectIntersectionOf(
@@ -911,10 +912,10 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner = new Reasoner(new Configuration());
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
          
-         OWLClassExpression p = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#p"));
-         OWLObjectProperty s= m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#s"));
-         OWLObjectProperty invs = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#s-"));
-         OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
+         OWLClassExpression p = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#p"));
+         OWLObjectProperty s= m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#s"));
+         OWLObjectProperty invs = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#s-"));
+         OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
 
          OWLClassExpression desc;
          desc = m_dataFactory.getOWLObjectIntersectionOf(
@@ -936,11 +937,11 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner = new Reasoner(new Configuration());
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
          
-         OWLClassExpression p = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#p"));
-         OWLClassExpression q = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#q"));
-         OWLObjectProperty s = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#s"));
-         OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
-         OWLObjectProperty invr = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#r-"));
+         OWLClassExpression p = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#p"));
+         OWLClassExpression q = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#q"));
+         OWLObjectProperty s = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#s"));
+         OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
+         OWLObjectProperty invr = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r-"));
          
          OWLClassExpression desc;
          desc = m_dataFactory.getOWLObjectIntersectionOf(
@@ -976,13 +977,13 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner = new Reasoner(new Configuration());
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
                   
-         OWLClassExpression a = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#a"));
-         OWLClassExpression a1 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#a1"));
-         OWLClassExpression a2 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#a2"));
-         OWLClassExpression a3a = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#a3a"));
-         OWLClassExpression a3b = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#a3b"));
-         OWLClassExpression a3c = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#a3c"));
-         OWLClassExpression a3e = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#a3e"));
+         OWLClassExpression a = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#a"));
+         OWLClassExpression a1 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#a1"));
+         OWLClassExpression a2 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#a2"));
+         OWLClassExpression a3a = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#a3a"));
+         OWLClassExpression a3b = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#a3b"));
+         OWLClassExpression a3c = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#a3c"));
+         OWLClassExpression a3e = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#a3e"));
 
          OWLClassExpression desc = m_dataFactory.getOWLObjectIntersectionOf(a3a, a2, a1);
          assertSatisfiable(desc,true);
@@ -1009,9 +1010,9 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner = new Reasoner(new Configuration());
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
          
-         OWLClassExpression a = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#a"));
-         OWLClassExpression b = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#b"));
-         OWLClassExpression c = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c"));
+         OWLClassExpression a = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#a"));
+         OWLClassExpression b = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#b"));
+         OWLClassExpression c = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c"));
 
          OWLClassExpression desc = m_dataFactory.getOWLObjectUnionOf(
                  m_dataFactory.getOWLObjectIntersectionOf(a, b),
@@ -1044,11 +1045,11 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
          
          
-         OWLClassExpression p1 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#p1"));
-         OWLClassExpression p2 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#p2"));
-         OWLObjectProperty f1 = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#f1"));
-         OWLObjectProperty f2 = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#f2"));
-         OWLObjectProperty f3 = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#f3"));
+         OWLClassExpression p1 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#p1"));
+         OWLClassExpression p2 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#p2"));
+         OWLObjectProperty f1 = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#f1"));
+         OWLObjectProperty f2 = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#f2"));
+         OWLObjectProperty f3 = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#f3"));
          
          OWLClassExpression desc = m_dataFactory.getOWLObjectIntersectionOf(
                  m_dataFactory.getOWLObjectSomeValuesFrom(f1, p1),
@@ -1077,12 +1078,12 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
         m_reasoner = new Reasoner(new Configuration());
         m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
 
-        OWLClassExpression c1 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c1"));
-        OWLClassExpression c2 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c2"));
-        OWLObjectProperty rx3 = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#rx3"));
-        OWLObjectProperty rx4 = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#rx4"));
-        OWLObjectProperty rx3a = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#rx3a"));
-        OWLObjectProperty rx4a = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#rx4a"));
+        OWLClassExpression c1 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c1"));
+        OWLClassExpression c2 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c2"));
+        OWLObjectProperty rx3 = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#rx3"));
+        OWLObjectProperty rx4 = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#rx4"));
+        OWLObjectProperty rx3a = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#rx3a"));
+        OWLObjectProperty rx4a = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#rx4a"));
 
         OWLClassExpression desc1 = m_dataFactory.getOWLObjectIntersectionOf(
                 m_dataFactory.getOWLObjectSomeValuesFrom(rx3, c1),
@@ -1105,10 +1106,10 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner = new Reasoner(new Configuration());
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
          
-         OWLClassExpression a = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#a"));
-         OWLClassExpression b = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#b"));
-         OWLClassExpression c = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c"));
-         OWLClassExpression d = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#d"));
+         OWLClassExpression a = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#a"));
+         OWLClassExpression b = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#b"));
+         OWLClassExpression c = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c"));
+         OWLClassExpression d = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#d"));
          
          OWLClassExpression desc = m_dataFactory.getOWLObjectIntersectionOf(m_dataFactory.getOWLObjectComplementOf(c), a, m_dataFactory.getOWLObjectComplementOf(b), d);
          assertSatisfiable(desc,false);
@@ -1119,11 +1120,11 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner = new Reasoner(new Configuration());
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
          
-         OWLClassExpression a = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#a"));
-         OWLClassExpression c = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c"));
-         OWLClassExpression d = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#d"));
-         OWLClassExpression e = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#e"));
-         OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
+         OWLClassExpression a = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#a"));
+         OWLClassExpression c = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c"));
+         OWLClassExpression d = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#d"));
+         OWLClassExpression e = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#e"));
+         OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
          
          OWLClassExpression desc = m_dataFactory.getOWLObjectIntersectionOf(
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, a), 
@@ -1147,8 +1148,8 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner = new Reasoner(new Configuration());
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
          
-         OWLClassExpression c = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c"));
-         OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
+         OWLClassExpression c = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c"));
+         OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
          
          // [and c [some r owl:Thing] [all r [not c]]]
          OWLClassExpression desc =
@@ -1177,9 +1178,9 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner = new Reasoner(new Configuration());
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
          
-         OWLClassExpression p = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#p"));
-         OWLObjectProperty r1 = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#r1"));
-         OWLObjectProperty r2 = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#r2"));
+         OWLClassExpression p = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#p"));
+         OWLObjectProperty r1 = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r1"));
+         OWLObjectProperty r2 = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r2"));
          
          // [and [all r1 p] [some r2 [some r1 [not p]]]]
          OWLClassExpression desc =
@@ -1202,11 +1203,11 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner = new Reasoner(new Configuration());
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
          
-         OWLClassExpression C = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#C"));
-         OWLObjectProperty R = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#R"));
-         OWLObjectProperty P = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#P"));
-         OWLObjectProperty S1 = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#S1"));
-         OWLObjectProperty S2 = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#S2"));
+         OWLClassExpression C = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#C"));
+         OWLObjectProperty R = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#R"));
+         OWLObjectProperty P = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#P"));
+         OWLObjectProperty S1 = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#S1"));
+         OWLObjectProperty S2 = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#S2"));
          
          // [and [all R C] [some P [some S1 [not C]]]]
          OWLClassExpression desc =
@@ -1231,9 +1232,9 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner = new Reasoner(new Configuration());
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
          
-         OWLClassExpression A = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#A"));
-         OWLClassExpression B = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#B"));
-         OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
+         OWLClassExpression A = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#A"));
+         OWLClassExpression B = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#B"));
+         OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
          
          // [and [some r A] [atMost 1 r A] [some r B] [atMost 1 r B]]
          OWLClassExpression desc =
@@ -1264,27 +1265,27 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner = new Reasoner(new Configuration());
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
          
-         OWLClassExpression c = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c"));
-         OWLClassExpression c1 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c1"));
-         OWLClassExpression c2 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c2"));
-         OWLClassExpression c3 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c3"));
-         OWLClassExpression c4 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c4"));
-         OWLClassExpression c5 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c5"));
-         OWLClassExpression c6 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c6"));
-         OWLClassExpression c7 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c7"));
-         OWLClassExpression c8 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c8"));
-         OWLClassExpression c9 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c9"));
-         OWLClassExpression c10 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c10"));
-         OWLClassExpression c11 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c11"));
-         OWLClassExpression c12 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c12"));
-         OWLClassExpression c13 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c13"));
-         OWLClassExpression c14 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c14"));
-         OWLClassExpression c15 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c15"));
-         OWLClassExpression c16 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c16"));
-         OWLClassExpression c17 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c17"));
-         OWLClassExpression c18 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c18"));
-         OWLClassExpression d = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#d"));
-         OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
+         OWLClassExpression c = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c"));
+         OWLClassExpression c1 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c1"));
+         OWLClassExpression c2 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c2"));
+         OWLClassExpression c3 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c3"));
+         OWLClassExpression c4 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c4"));
+         OWLClassExpression c5 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c5"));
+         OWLClassExpression c6 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c6"));
+         OWLClassExpression c7 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c7"));
+         OWLClassExpression c8 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c8"));
+         OWLClassExpression c9 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c9"));
+         OWLClassExpression c10 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c10"));
+         OWLClassExpression c11 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c11"));
+         OWLClassExpression c12 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c12"));
+         OWLClassExpression c13 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c13"));
+         OWLClassExpression c14 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c14"));
+         OWLClassExpression c15 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c15"));
+         OWLClassExpression c16 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c16"));
+         OWLClassExpression c17 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c17"));
+         OWLClassExpression c18 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c18"));
+         OWLClassExpression d = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#d"));
+         OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
          
          OWLClassExpression desc = m_dataFactory.getOWLObjectIntersectionOf(
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, c1), 
@@ -1317,27 +1318,27 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          m_reasoner = new Reasoner(new Configuration());
          m_reasoner.loadOntologyForCoreBlocking(m_ontologyManager, m_ontology, null);
          
-         OWLClassExpression c = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c"));
-         OWLClassExpression c1 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c1"));
-         OWLClassExpression c2 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c2"));
-         OWLClassExpression c3 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c3"));
-         OWLClassExpression c4 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c4"));
-         OWLClassExpression c5 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c5"));
-         OWLClassExpression c6 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c6"));
-         OWLClassExpression c7 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c7"));
-         OWLClassExpression c8 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c8"));
-         OWLClassExpression c9 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c9"));
-         OWLClassExpression c10 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c10"));
-         OWLClassExpression c11 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c11"));
-         OWLClassExpression c12 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c12"));
-         OWLClassExpression c13 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c13"));
-         OWLClassExpression c14 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c14"));
-         OWLClassExpression c15 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c15"));
-         OWLClassExpression c16 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c16"));
-         OWLClassExpression c17 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c17"));
-         OWLClassExpression c18 = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#c18"));
-         OWLClassExpression d = m_dataFactory.getOWLClass(URI.create("file:/c/test.owl#d"));
-         OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(URI.create("file:/c/test.owl#r"));
+         OWLClassExpression c = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c"));
+         OWLClassExpression c1 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c1"));
+         OWLClassExpression c2 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c2"));
+         OWLClassExpression c3 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c3"));
+         OWLClassExpression c4 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c4"));
+         OWLClassExpression c5 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c5"));
+         OWLClassExpression c6 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c6"));
+         OWLClassExpression c7 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c7"));
+         OWLClassExpression c8 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c8"));
+         OWLClassExpression c9 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c9"));
+         OWLClassExpression c10 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c10"));
+         OWLClassExpression c11 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c11"));
+         OWLClassExpression c12 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c12"));
+         OWLClassExpression c13 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c13"));
+         OWLClassExpression c14 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c14"));
+         OWLClassExpression c15 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c15"));
+         OWLClassExpression c16 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c16"));
+         OWLClassExpression c17 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c17"));
+         OWLClassExpression c18 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c18"));
+         OWLClassExpression d = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#d"));
+         OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
          
          OWLClassExpression desc = m_dataFactory.getOWLObjectIntersectionOf(
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, c1), 

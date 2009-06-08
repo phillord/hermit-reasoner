@@ -47,13 +47,13 @@ public class DatatypeRestriction extends DataRange {
     }
     public String toString(Prefixes prefixes) {
         StringBuffer buffer=new StringBuffer();
-        buffer.append(prefixes.abbreviateURI(m_datatypeURI));
+        buffer.append(prefixes.abbreviateIRI(m_datatypeURI));
         if (m_facetURIs.length>0) {
             buffer.append('[');
             for (int index=0;index<m_facetURIs.length;index++) {
                 if (index>0)
                     buffer.append(',');
-                buffer.append(prefixes.abbreviateURI(m_facetURIs[index]));
+                buffer.append(prefixes.abbreviateIRI(m_facetURIs[index]));
                 buffer.append('=');
                 buffer.append(DatatypeRegistry.toString(prefixes,m_facetValues[index]));
             }

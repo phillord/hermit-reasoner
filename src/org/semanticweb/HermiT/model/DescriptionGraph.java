@@ -58,7 +58,7 @@ public class DescriptionGraph implements DLPredicate,Serializable {
         }
     }
     public String toString(Prefixes ns) {
-        return ns.abbreviateURI(m_name);
+        return ns.abbreviateIRI(m_name);
     }
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
@@ -72,7 +72,7 @@ public class DescriptionGraph implements DLPredicate,Serializable {
             buffer.append("   ");
             buffer.append(vertex);
             buffer.append(" --> ");
-            buffer.append(m_atomicConceptsByVertices[vertex].getURI());
+            buffer.append(m_atomicConceptsByVertices[vertex].getIRI());
             buffer.append(CRLF);
         }
         buffer.append(CRLF);
@@ -80,7 +80,7 @@ public class DescriptionGraph implements DLPredicate,Serializable {
             buffer.append("  ");
             buffer.append(edge.getFromVertex());
             buffer.append(" -- ");
-            buffer.append(edge.getAtomicRole().getURI());
+            buffer.append(edge.getAtomicRole().getIRI());
             buffer.append(" --> ");
             buffer.append(edge.getToVertex());
             buffer.append(CRLF);
@@ -88,7 +88,7 @@ public class DescriptionGraph implements DLPredicate,Serializable {
         buffer.append(CRLF);
         for (AtomicConcept atomicConcept : m_startConcepts) {
             buffer.append("  ");
-            buffer.append(atomicConcept.getURI());
+            buffer.append(atomicConcept.getIRI());
             buffer.append(CRLF);
         }
         buffer.append(']');

@@ -31,7 +31,7 @@ public class BooleanDatatypeHandler implements DatatypeHandler {
     }
     public String toString(Prefixes prefixes,Object dataValue) {
         boolean value=((Boolean)dataValue).booleanValue();
-        return '\"'+(value ? "true" : "false")+"\"^^"+prefixes.abbreviateURI(XSD_BOOLEAN);
+        return '\"'+(value ? "true" : "false")+"\"^^"+prefixes.abbreviateIRI(XSD_BOOLEAN);
     }
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert XSD_BOOLEAN.equals(datatypeURI);

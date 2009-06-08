@@ -9,13 +9,13 @@ import org.semanticweb.HermiT.Prefixes;
 public class AtomicConcept extends LiteralConcept implements DLPredicate {
     private static final long serialVersionUID=-1078274072706143620L;
 
-    protected final String m_uri;
+    protected final String m_iri;
     
-    protected AtomicConcept(String uri) {
-        m_uri=uri;
+    protected AtomicConcept(String iri) {
+        m_iri=iri;
     }
-    public String getURI() {
-        return m_uri;
+    public String getIRI() {
+        return m_iri;
     }
     public int getArity() {
         return 1;
@@ -35,7 +35,7 @@ public class AtomicConcept extends LiteralConcept implements DLPredicate {
         return this==NOTHING;
     }
     public String toString(Prefixes prefixes) {
-        return prefixes.abbreviateURI(m_uri);
+        return prefixes.abbreviateIRI(m_iri);
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);
@@ -43,10 +43,10 @@ public class AtomicConcept extends LiteralConcept implements DLPredicate {
 
     protected static InterningManager<AtomicConcept> s_interningManager=new InterningManager<AtomicConcept>() {
         protected boolean equal(AtomicConcept object1,AtomicConcept object2) {
-            return object1.m_uri.equals(object2.m_uri);
+            return object1.m_iri.equals(object2.m_iri);
         }
         protected int getHashCode(AtomicConcept object) {
-            return object.m_uri.hashCode();
+            return object.m_iri.hashCode();
         }
     };
     

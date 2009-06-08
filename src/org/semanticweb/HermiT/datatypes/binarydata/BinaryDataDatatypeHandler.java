@@ -46,9 +46,9 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
         BinaryData binaryDataValue=(BinaryData)dataValue;
         String lexicalForm=binaryDataValue.toString();
         if (binaryDataValue.getBinaryDataType()==BinaryDataType.HEX_BINARY)
-            return '\"'+lexicalForm+"\"^^"+prefixes.abbreviateURI(XSD_HEX_BINARY);
+            return '\"'+lexicalForm+"\"^^"+prefixes.abbreviateIRI(XSD_HEX_BINARY);
         else
-            return '\"'+lexicalForm+"\"^^"+prefixes.abbreviateURI(XSD_BASE_64_BINARY);
+            return '\"'+lexicalForm+"\"^^"+prefixes.abbreviateIRI(XSD_BASE_64_BINARY);
     }
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert s_managedDatatypeURIs.contains(datatypeURI);
@@ -68,7 +68,7 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
             String facetURI=datatypeRestriction.getFacetURI(index);
             if (!s_supportedFacetURIs.contains(facetURI))
-                throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' is not supported on "+Prefixes.STANDARD_PREFIXES.abbreviateURI(datatypeURI)+".");
+                throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' is not supported on "+Prefixes.STANDARD_PREFIXES.abbreviateIRI(datatypeURI)+".");
             Object facetValue=datatypeRestriction.getFacetValue(index);
             if (!(facetValue instanceof Integer))
                 throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' takes only integers as values.");
@@ -173,7 +173,7 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
                 maxLength=Math.min(maxLength,facetValue);
             } 
             else
-                throw new IllegalStateException("Internal error: facet '"+facetURI+"' is not supported by "+Prefixes.STANDARD_PREFIXES.abbreviateURI(datatypeURI)+".");
+                throw new IllegalStateException("Internal error: facet '"+facetURI+"' is not supported by "+Prefixes.STANDARD_PREFIXES.abbreviateIRI(datatypeURI)+".");
         }
         BinaryDataType binaryDataType=(XSD_HEX_BINARY.equals(datatypeURI) ? BinaryDataType.HEX_BINARY : BinaryDataType.BASE_64_BINARY);
         if (BinaryDataLengthInterval.isIntervalEmpty(binaryDataType,minLength,maxLength))

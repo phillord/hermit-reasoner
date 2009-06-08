@@ -34,7 +34,7 @@ public class SubsumptionCache implements Serializable {
         AtomicConceptInfo conceptInfo=m_atomicConceptInfos.get(atomicConcept);
         if (isSatisfiable) {
             if (!conceptInfo.m_allSubsumersKnown)
-                throw new IllegalStateException("Not all subsumers are known for '"+atomicConcept.getURI()+"'.");
+                throw new IllegalStateException("Not all subsumers are known for '"+atomicConcept.getIRI()+"'.");
             return conceptInfo.m_knownSubsumers;
         }
         else
