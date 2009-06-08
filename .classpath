@@ -3,7 +3,6 @@
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="src" path="getopt"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.launching.macosx.MacOSXType/JVM 1.5.0 (MacOS X Default)"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="/ThirdPartyOwlTools/protege/4.0/org.protege.editor.owl.jar" sourcepath="/Users/bglimm/Downloads/Protege_4.0_beta/bundles/org.protege.editor.core.application.jar">
 		<attributes>
@@ -26,5 +25,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="/ThirdPartyOwlTools/jautomaton/jautomata-core-2.0-alpha-1.jar" sourcepath="/ThirdPartyOwlTools/jautomaton/jautomata-src.zip"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
