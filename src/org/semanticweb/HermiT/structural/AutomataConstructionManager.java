@@ -30,8 +30,8 @@ public class AutomataConstructionManager {
         Map<OWLObjectPropertyExpression,Automaton> individualAutomata = buildIndividualAutomata( simpleObjectPropertyInclusions, complexObjectPropertyInclusions );
         Set<OWLObjectPropertyExpression> simpleRoles = findSimpleRoles( propertyDependencyGraph, individualAutomata );
 
-        propertyDependencyGraph.removeElements( simpleRoles );
         checkForRegularity( propertyDependencyGraph );
+        propertyDependencyGraph.removeElements( simpleRoles );
 //		1) Now the graph contains all nonSimpleRoles. But remember that nevertheless it does not contain 
 //		dependencies between a role and itself. So if a role is just transitive and no other RIAs or dependencies  
 //      with other roles exist, this non-simple role is not in the graph. So we need to add such transitive 
@@ -235,11 +235,11 @@ public class AutomataConstructionManager {
 	   	Graph<OWLObjectPropertyExpression> regularityCheckGraph = propertyDependencyGraph.clone();
     	regularityCheckGraph.transitivelyClose();
 
-//    	for( OWLObjectPropertyExpression prop : regularityCheckGraph.getElements() ){
-//    		Set<OWLObjectPropertyExpression> successors = regularityCheckGraph.getSuccessors( prop );
-//    		if( successors.contains( prop ) || successors.contains( prop.getInverseProperty().getSimplified() ) )
-//    			throw new IllegalArgumentException("The given role hierarchy is not regular.");
-//    	}
+    	for( OWLObjectPropertyExpression prop : regularityCheckGraph.getElements() ){
+    		Set<OWLObjectPropertyExpression> successors = regularityCheckGraph.getSuccessors( prop );
+    		if( successors.contains( prop ) || successors.contains( prop.getInverseProperty().getSimplified() ) )
+    			throw new IllegalArgumentException("The given role hierarchy is not regular.");
+    	}
 	}
     private Map<OWLObjectPropertyExpression,Automaton> buildIndividualAutomata(Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions, Collection<ComplexObjectPropertyInclusion> complexObjectPropertyInclusions){
     	
