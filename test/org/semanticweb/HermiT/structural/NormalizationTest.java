@@ -198,7 +198,8 @@ public class NormalizationTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         Set<OWLAxiom> normalizedAxioms=getNormalizedAxioms();
         String expected="[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> ObjectComplementOf(<internal:def#0>))), SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"B> ObjectComplementOf(<internal:def#0>))), HasKey(<internal:def#0> (<"+NS+"r> ) ())]";
-        assertTrue(expected.trim().equals(normalizedAxioms.toString().trim()));
+        String expectedAlt="[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"B> ObjectComplementOf(<internal:def#0>))), HasKey(<internal:def#0> (<"+NS+"r> ) ()), SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> ObjectComplementOf(<internal:def#0>)))]";
+        assertTrue(expected.trim().equals(normalizedAxioms.toString().trim())||expectedAlt.trim().equals(normalizedAxioms.toString().trim()));
     }
 
     protected Set<OWLAxiom> getNormalizedAxioms() throws Exception {
