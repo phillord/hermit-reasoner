@@ -8,12 +8,6 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         super(name);
     }
     
-//    Declaration(NamedIndividual(:a))
-//    Declaration(NamedIndividual(:b))
-//    Declaration(Class(:A))
-//    Declaration(Class(:B))
-//    Declaration(ObjectProperty(:r))
-
     public void testDataPropertiesHasValue1() throws Exception {
         String axioms="Declaration(Class(:Eighteen)) Declaration(DataProperty(:hasAge)) SubClassOf(:Eighteen DataHasValue(:hasAge \"18\"^^xsd:integer))";
         loadOntologyWithAxioms(axioms);
@@ -235,6 +229,81 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         Set<String> clauses=getDLClauses();
         assertContainsAll(this.getName(),clauses,
             S(":A(X) v not(xsd:integer)(Y1) v not(xsd:integer)(Y2) v not(xsd:integer)(Y3) v Y1 == Y2 v Y1 == Y3 v Y2 == Y3 v atLeast(4 :dp xsd:integer)(X) :- :dp(X,Y1), :dp(X,Y2), :dp(X,Y3)")
+        );
+    }
+    
+    public void testDataIntersectionOf() throws Exception {
+        String axioms="SubClassOf(owl:Thing DataAllValuesFrom(:dp DataIntersectionOf(xsd:nonNegativeInteger xsd:nonPositiveInteger)))"
+            + "ClassAssertion(DataMinCardinality(2 :dp rdfs:Literal) :a)";
+        loadOntologyWithAxioms(axioms);
+        Set<String> clauses=getDLClauses();
+        assertContainsAll(this.getName(),clauses,
+            S("def:0(:a)", "<internal:defdata#0>(Y) :- :dp(X,Y)", "atLeast(2 :dp rdfs:Literal)(X) :- def:0(X)", "xsd:nonNegativeInteger(X) :- <internal:defdata#0>(X)", "xsd:nonPositiveInteger(X) :- <internal:defdata#0>(X)")
+        );
+    }
+    
+    public void testDataIntersectionOf2() throws Exception {
+        String axioms="SubClassOf(owl:Thing DataAllValuesFrom(:dp DataIntersectionOf(rdfs:Literal DataIntersectionOf(xsd:nonNegativeInteger xsd:nonPositiveInteger))))"
+            + "ClassAssertion(DataMinCardinality(2 :dp rdfs:Literal) :a)";
+        loadOntologyWithAxioms(axioms);
+        Set<String> clauses=getDLClauses();
+        assertContainsAll(this.getName(),clauses,
+            S("def:0(:a)", "<internal:defdata#0>(Y) :- :dp(X,Y)", "atLeast(2 :dp rdfs:Literal)(X) :- def:0(X)", "xsd:nonNegativeInteger(X) :- <internal:defdata#0>(X)", "xsd:nonPositiveInteger(X) :- <internal:defdata#0>(X)")
+        );
+    }
+    
+    public void testDataIntersectionOf3() throws Exception {
+        String axioms="SubClassOf(owl:Thing DataAllValuesFrom(:dp DataIntersectionOf(xsd:decimal xsd:nonNegativeInteger xsd:nonPositiveInteger)))"
+            + "ClassAssertion(DataMinCardinality(2 :dp rdfs:Literal) :a)";
+        loadOntologyWithAxioms(axioms);
+        Set<String> clauses=getDLClauses();
+        assertContainsAll(this.getName(),clauses,
+            S("def:0(:a)", "<internal:defdata#0>(Y) :- :dp(X,Y)", "atLeast(2 :dp rdfs:Literal)(X) :- def:0(X)", "xsd:decimal(X) :- <internal:defdata#0>(X)", "xsd:nonNegativeInteger(X) :- <internal:defdata#0>(X)", "xsd:nonPositiveInteger(X) :- <internal:defdata#0>(X)")
+        );
+    }
+    
+    public void testDataUnionOf1() throws Exception {
+        String axioms="SubClassOf(owl:Thing DataAllValuesFrom(:dp DataUnionOf(xsd:nonNegativeInteger xsd:double)))";
+        loadOntologyWithAxioms(axioms);
+        Set<String> clauses=getDLClauses();
+        assertContainsAll(this.getName(),clauses,
+            S("<internal:defdata#0>(Y) :- :dp(X,Y)", "xsd:double(X) v xsd:nonNegativeInteger(X) :- <internal:defdata#0>(X)")
+        );
+    }
+    
+    public void testDataComplementOf1() throws Exception {
+        String axioms="SubClassOf(owl:Thing DataAllValuesFrom(:dp DataComplementOf(DataUnionOf(xsd:nonNegativeInteger xsd:double))))";
+        loadOntologyWithAxioms(axioms);
+        Set<String> clauses=getDLClauses();
+        assertContainsAll(this.getName(),clauses,
+            S("<internal:defdata#0>(Y) :- :dp(X,Y)", "not(xsd:double)(X) :- <internal:defdata#0>(X)", "not(xsd:nonNegativeInteger)(X) :- <internal:defdata#0>(X)")
+        );
+    }
+    
+    public void testDataComplementOf2() throws Exception {
+        String axioms="SubClassOf(owl:Thing DataAllValuesFrom(:dp DataComplementOf(DataIntersectionOf(xsd:nonNegativeInteger xsd:double))))";
+        loadOntologyWithAxioms(axioms);
+        Set<String> clauses=getDLClauses();
+        assertContainsAll(this.getName(),clauses,
+            S("<internal:defdata#0>(Y) :- :dp(X,Y)", "not(xsd:double)(X) v not(xsd:nonNegativeInteger)(X) :- <internal:defdata#0>(X)")
+        );
+    }
+    
+    public void testDataComplementOf3() throws Exception {
+        String axioms="SubClassOf(owl:Thing DataAllValuesFrom(:dp DataComplementOf(DataIntersectionOf(DataOneOf(\"5\"^^xsd:nonNegativeInteger \"4.3\"^^xsd:double) DataOneOf(\"5\"^^xsd:integer)))))";
+        loadOntologyWithAxioms(axioms);
+        Set<String> clauses=getDLClauses();
+        assertContainsAll(this.getName(),clauses,
+            S("not({ \"4.3\"^^xsd:double \"5\"^^xsd:int })(X) v not({ \"5\"^^xsd:int })(X) :- <internal:defdata#0>(X)", "<internal:defdata#0>(Y) :- :dp(X,Y)")
+        );
+    }
+    
+    public void testDataComplementOf4() throws Exception {
+        String axioms="SubClassOf(DataAllValuesFrom(:dp DataComplementOf(DataIntersectionOf(DataOneOf(\"5\"^^xsd:nonNegativeInteger \"4.3\"^^xsd:double) DataOneOf(\"5\"^^xsd:integer)))) :A)";
+        loadOntologyWithAxioms(axioms);
+        Set<String> clauses=getDLClauses();
+        assertContainsAll(this.getName(),clauses,
+            S("{ \"4.3\"^^xsd:double \"5\"^^xsd:int }(X) :- <internal:defdata#0>(X)", "{ \"5\"^^xsd:int }(X) :- <internal:defdata#0>(X)", ":A(X) v atLeast(1 :dp <internal:defdata#0>)(X) :- owl:Thing(X)")
         );
     }
 }

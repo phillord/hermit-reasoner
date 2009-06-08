@@ -179,14 +179,18 @@ public class ExpressionManager {
         public OWLDataRange visit(OWLStringLiteral o) {
             return null;
         }
-        public OWLDataRange visit(OWLDataIntersectionOf node) {
-            // TODO Auto-generated method stub
-            return null;
+        public OWLDataRange visit(OWLDataIntersectionOf range) {
+            Set<OWLDataRange> newConjuncts=new HashSet<OWLDataRange>();
+            for (OWLDataRange dr : range.getOperands())
+                newConjuncts.add(getNNF(dr));
+            return m_factory.getOWLDataIntersectionOf(newConjuncts);
         }
-        public OWLDataRange visit(OWLDataUnionOf node) {
-            // TODO Auto-generated method stub
-            return null;
-        }
+        public OWLDataRange visit(OWLDataUnionOf range) {
+            Set<OWLDataRange> newDisjuncts=new HashSet<OWLDataRange>();
+            for (OWLDataRange dr : range.getOperands())
+                newDisjuncts.add(getNNF(dr));
+            return m_factory.getOWLDataUnionOf(newDisjuncts);
+         }
     }
 
     // -----------------------------------------------------------------------------------
@@ -314,14 +318,18 @@ public class ExpressionManager {
         public OWLDataRange visit(OWLStringLiteral o) {
             return null;
         }
-        public OWLDataRange visit(OWLDataIntersectionOf node) {
-            // TODO Auto-generated method stub
-            return null;
+        public OWLDataRange visit(OWLDataIntersectionOf range) {
+            Set<OWLDataRange> newDisjuncts=new HashSet<OWLDataRange>();
+            for (OWLDataRange dr : range.getOperands())
+                newDisjuncts.add(getComplementNNF(dr));
+            return m_factory.getOWLDataUnionOf(newDisjuncts);
         }
-        public OWLDataRange visit(OWLDataUnionOf node) {
-            // TODO Auto-generated method stub
-            return null;
-        }
+        public OWLDataRange visit(OWLDataUnionOf range) {
+            Set<OWLDataRange> newConjuncts=new HashSet<OWLDataRange>();
+            for (OWLDataRange dr : range.getOperands())
+                newConjuncts.add(getComplementNNF(dr));
+            return m_factory.getOWLDataIntersectionOf(newConjuncts);
+         }
     }
 
     // -----------------------------------------------------------------------------------
@@ -514,13 +522,31 @@ public class ExpressionManager {
         public OWLDataRange visit(OWLStringLiteral o) {
             return null;
         }
-        public OWLDataRange visit(OWLDataIntersectionOf node) {
-            // TODO Auto-generated method stub
-            return null;
+        public OWLDataRange visit(OWLDataIntersectionOf range) {
+            Set<OWLDataRange> newConjuncts=new HashSet<OWLDataRange>();
+            for (OWLDataRange dr : range.getOperands()) {
+                OWLDataRange drSimplified=getSimplified(dr);
+                if (drSimplified.isTopDatatype())
+                    continue;
+                else if (drSimplified instanceof OWLDataIntersectionOf)
+                    newConjuncts.addAll(((OWLDataIntersectionOf)drSimplified).getOperands());
+                else
+                    newConjuncts.add(drSimplified);
+            }
+            return m_factory.getOWLDataIntersectionOf(newConjuncts);
         }
-        public OWLDataRange visit(OWLDataUnionOf node) {
-            // TODO Auto-generated method stub
-            return null;
+        public OWLDataRange visit(OWLDataUnionOf range) {
+            Set<OWLDataRange> newDisjuncts=new HashSet<OWLDataRange>();
+            for (OWLDataRange dr : range.getOperands()) {
+                OWLDataRange drSimplified=getSimplified(dr);
+                if (drSimplified.isTopDatatype())
+                    return m_factory.getTopDatatype();
+                else if (drSimplified instanceof OWLDataUnionOf)
+                    newDisjuncts.addAll(((OWLDataUnionOf)drSimplified).getOperands());
+                else
+                    newDisjuncts.add(drSimplified);
+            }
+            return m_factory.getOWLDataUnionOf(newDisjuncts);
         }
     }
 }

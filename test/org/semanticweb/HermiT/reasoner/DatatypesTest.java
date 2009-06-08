@@ -343,4 +343,124 @@ public class DatatypesTest extends AbstractReasonerTest {
         assertABoxSatisfiable(false);
     }
     
+    public void testDatatypeDef1() throws Exception {
+        String axioms = "Declaration(Datatype(:SSN))" 
+            + "DatatypeDefinition(:SSN DatatypeRestriction(xsd:string xsd:pattern \"[0-9]{3}-[0-9]{2}-[0-9]{4}\"))"
+            + "DataPropertyRange(:hasSSN :SSN)"
+            + "DataPropertyAssertion(:hasSSN :Peter \"123-45-6789\")";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(true);
+    } 
+    
+    public void testDatatypeDef2() throws Exception {
+        String axioms = "Declaration(Datatype(:SSN))" 
+            + "DatatypeDefinition(:SSN DatatypeRestriction(xsd:string xsd:pattern \"[0-9]{3}-[0-9]{2}-[0-9]{4}\"))"
+            + "DataPropertyRange(:hasSSN :SSN)"
+            + "DataPropertyAssertion(:hasSSN :Peter \"13-42-64\")";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+    
+    public void testDatatypeDef3() throws Exception {
+        String axioms = "Declaration(Datatype(:newDT))" 
+            + "DatatypeDefinition(:newDT DatatypeRestriction(xsd:integer xsd:minInclusive \"15\"^^xsd:integer))"
+            + "DataPropertyRange(:dp :newDT)"
+            + "DataPropertyAssertion(:dp :a \"13\"^^xsd:integer)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+    
+    public void testDatatypeDef4() throws Exception {
+        String axioms = "Declaration(Datatype(:newDT))" 
+            + "DatatypeDefinition(:newDT DatatypeRestriction(xsd:integer xsd:minInclusive \"15\"^^xsd:integer))"
+            + "DataPropertyRange(:dp DataComplementOf(:newDT))"
+            + "DataPropertyAssertion(:dp :a \"13\"^^xsd:integer)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(true);
+    }
+    
+    public void testDatatypeDef5() throws Exception {
+        String axioms = "Declaration(Datatype(:newDT))" 
+            + "DatatypeDefinition(:newDT DatatypeRestriction(xsd:integer xsd:minInclusive \"15\"^^xsd:integer))"
+            + "DataPropertyRange(:dp DataComplementOf(:newDT))"
+            + "DataPropertyAssertion(:dp :a \"16\"^^xsd:integer)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+    
+    public void testDatatypeDef6() throws Exception {
+        String axioms = "Declaration(Datatype(:newDT))" 
+            + "DatatypeDefinition(:newDT DataComplementOf(DatatypeRestriction(xsd:integer xsd:minInclusive \"15\"^^xsd:integer)))"
+            + "DataPropertyRange(:dp DataComplementOf(:newDT))"
+            + "DataPropertyAssertion(:dp :a \"16\"^^xsd:integer)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(true);
+    }
+    
+    public void testDatatypeUnion1() throws Exception {
+        String axioms = "SubClassOf(owl:Thing DataAllValuesFrom(:dp DataIntersectionOf(xsd:nonNegativeInteger xsd:nonPositiveInteger)))"
+            + "ClassAssertion(DataMinCardinality(2 :dp rdfs:Literal) :a)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+
+    public void testDatatypeUnion2() throws Exception {
+        String axioms = "SubClassOf(owl:Thing DataAllValuesFrom(:dp DataIntersectionOf(xsd:nonNegativeInteger xsd:nonPositiveInteger)))"
+            + "ClassAssertion(DataMinCardinality(1 :dp rdfs:Literal) :a)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(true);
+    }
+    
+    public void testDatatypeUnion3() throws Exception {
+        String axioms = "SubClassOf(owl:Thing DataAllValuesFrom(:dp DataUnionOf(DataOneOf(\"abc\") DataIntersectionOf(xsd:nonNegativeInteger xsd:nonPositiveInteger))))"
+            + "ClassAssertion(DataMinCardinality(2 :dp rdfs:Literal) :a)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(true);
+    }
+    
+    public void testDatatypeUnion4() throws Exception {
+        String axioms = "SubClassOf(owl:Thing DataAllValuesFrom(:dp DataUnionOf(DataOneOf(\"abc\") DataIntersectionOf(xsd:nonNegativeInteger xsd:nonPositiveInteger))))"
+            + "ClassAssertion(DataMinCardinality(3 :dp rdfs:Literal) :a)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+    
+    public void testDatatypeUnionIntersection1() throws Exception {
+        String axioms = "SubClassOf(owl:Thing DataAllValuesFrom(:dp DataComplementOf(DataUnionOf(DataOneOf(\"abc\") DataIntersectionOf(xsd:nonNegativeInteger xsd:nonPositiveInteger)))))"
+            + "ClassAssertion(DataMinCardinality(3 :dp rdfs:Literal) :a)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(true);
+    }
+    
+    public void testDatatypeUnionIntersection2() throws Exception {
+        String axioms = "SubClassOf(DataSomeValuesFrom(:dp DataUnionOf(DataOneOf(\"abc\") DataIntersectionOf(xsd:nonNegativeInteger xsd:nonPositiveInteger))) :A)"
+            + "DataPropertyAssertion(:dp :a \"0\"^^xsd:integer)"
+            + "ClassAssertion(ObjectComplementOf(:A) :a)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+    
+    public void testDatatypeUnionIntersection3() throws Exception {
+        String axioms = "SubClassOf(DataSomeValuesFrom(:dp DataUnionOf(DataOneOf(\"abc\") DataIntersectionOf(xsd:nonNegativeInteger xsd:nonPositiveInteger))) :A)"
+            + "DataPropertyAssertion(:dp :a \"abc\"^^xsd:string)"
+            + "ClassAssertion(ObjectComplementOf(:A) :a)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+    
+    public void testDatatypeUnionIntersection4() throws Exception {
+        String axioms = "SubClassOf(DataSomeValuesFrom(:dp DataUnionOf(DataOneOf(\"abc\") DataIntersectionOf(xsd:nonNegativeInteger xsd:nonPositiveInteger))) :A)"
+            + "DataPropertyAssertion(:dp :a \"5\"^^xsd:integer)"
+            + "ClassAssertion(ObjectComplementOf(:A) :a)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(true);
+    }
+    
+    public void testNegativeDPAssertions() throws Exception {
+        String axioms = "SubClassOf(:A DataSomeValuesFrom(:dp DataOneOf(\"5\"^^xsd:integer)))"
+            + "NegativeDataPropertyAssertion(:dp :a \"5\"^^xsd:integer)"
+            + "ClassAssertion(:A :a)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
 }

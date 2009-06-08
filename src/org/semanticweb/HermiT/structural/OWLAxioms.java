@@ -26,7 +26,7 @@ public class OWLAxioms {
     public final Set<OWLDataProperty> m_dataProperties;
     public final Set<OWLNamedIndividual> m_individuals;
     public final Collection<OWLClassExpression[]> m_conceptInclusions;
-    public final Map<OWLDataRange,OWLDatatype> m_dataRangeInclusions;
+    public final Collection<OWLDataRange[]> m_dataRangeInclusions;
     public final Collection<OWLObjectPropertyExpression[]> m_simpleObjectPropertyInclusions;
     public final Collection<ComplexObjectPropertyInclusion> m_complexObjectPropertyInclusions;
     public final Collection<OWLObjectPropertyExpression[]> m_disjointObjectProperties;
@@ -39,7 +39,7 @@ public class OWLAxioms {
     public final Set<OWLDataPropertyExpression> m_unsatisfiableDataProperties;
     public final Collection<OWLIndividualAxiom> m_facts;
     public final Set<OWLHasKeyAxiom> m_hasKeys;
-    public final Map<OWLDatatype, OWLDataRange> m_datatypeDefs;
+    public final Map<OWLDataRange,OWLDatatype> m_dataRangeDefinitions;
     
     public OWLAxioms() {
         m_classes=new HashSet<OWLClass>();
@@ -47,7 +47,7 @@ public class OWLAxioms {
         m_dataProperties=new HashSet<OWLDataProperty>();
         m_individuals=new HashSet<OWLNamedIndividual>();
         m_conceptInclusions=new ArrayList<OWLClassExpression[]>();
-        m_dataRangeInclusions=new HashMap<OWLDataRange,OWLDatatype>();
+        m_dataRangeInclusions=new ArrayList<OWLDataRange[]>();
         m_simpleObjectPropertyInclusions=new ArrayList<OWLObjectPropertyExpression[]>();
         m_complexObjectPropertyInclusions=new ArrayList<ComplexObjectPropertyInclusion>();
         m_disjointObjectProperties=new ArrayList<OWLObjectPropertyExpression[]>();
@@ -60,7 +60,7 @@ public class OWLAxioms {
         m_unsatisfiableDataProperties=new HashSet<OWLDataPropertyExpression>();
         m_facts=new HashSet<OWLIndividualAxiom>();
         m_hasKeys=new HashSet<OWLHasKeyAxiom>();
-        m_datatypeDefs=new HashMap<OWLDatatype, OWLDataRange>();
+        m_dataRangeDefinitions=new HashMap<OWLDataRange,OWLDatatype>();
     }
     
     public static class ComplexObjectPropertyInclusion {

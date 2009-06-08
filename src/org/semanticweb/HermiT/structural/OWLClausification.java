@@ -59,6 +59,7 @@ import org.semanticweb.owl.model.OWLDataPropertyExpression;
 import org.semanticweb.owl.model.OWLDataRange;
 import org.semanticweb.owl.model.OWLDataSomeValuesFrom;
 import org.semanticweb.owl.model.OWLDataUnionOf;
+import org.semanticweb.owl.model.OWLDataVisitor;
 import org.semanticweb.owl.model.OWLDataVisitorEx;
 import org.semanticweb.owl.model.OWLDatatype;
 import org.semanticweb.owl.model.OWLDatatypeRestriction;
@@ -200,12 +201,19 @@ public class OWLClausification {
             Atom roleAtom=getRoleAtom(dataPropertyExpression,X,Y);
             dlClauses.add(DLClause.create(new Atom[] {},new Atom[] { roleAtom }).getSafeVersion());
         }
-        DataRangeConverter dataRangeConverter=new DataRangeConverter(m_configuration.warningMonitor,axioms.m_datatypeDefs,m_configuration.ignoreUnsupportedDatatypes);
+        DataRangeConverter dataRangeConverter=new DataRangeConverter(m_configuration.warningMonitor,axioms.m_dataRangeDefinitions,m_configuration.ignoreUnsupportedDatatypes);
         NormalizedAxiomClausifier clausifier=new NormalizedAxiomClausifier(dataRangeConverter,positiveFacts,factory);
         for (OWLClassExpression[] inclusion : axioms.m_conceptInclusions) {
             for (OWLClassExpression description : inclusion)
                 description.accept(clausifier);
             DLClause dlClause=clausifier.getDLClause();
+            dlClauses.add(dlClause.getSafeVersion());
+        }
+        NormalizedDataRangeAxiomClausifier drClausifier=new NormalizedDataRangeAxiomClausifier(dataRangeConverter,factory,axioms.m_dataRangeDefinitions);
+        for (OWLDataRange[] inclusion : axioms.m_dataRangeInclusions) {
+            for (OWLDataRange description : inclusion)
+                description.accept(drClausifier);
+            DLClause dlClause=drClausifier.getDLClause();
             dlClauses.add(dlClause.getSafeVersion());
         }
         for (OWLHasKeyAxiom hasKey : axioms.m_hasKeys)
@@ -628,13 +636,115 @@ public class OWLClausification {
             throw new IllegalStateException("Internal error: invalid normal form.");
         }
     }
+    protected static class NormalizedDataRangeAxiomClausifier implements OWLDataVisitor {
+        protected final DataRangeConverter m_dataRangeConverter;
+        protected final Map<OWLDataRange,OWLDatatype> m_dataRangeDefs;
+        protected final List<Atom> m_headAtoms;
+        protected final List<Atom> m_bodyAtoms;
+        protected final OWLDataFactory m_factory;
+        protected int m_yIndex;
+
+        public NormalizedDataRangeAxiomClausifier(DataRangeConverter dataRangeConverter,OWLDataFactory factory,Map<OWLDataRange,OWLDatatype> dataRangeDefinitions) {
+            m_dataRangeConverter=dataRangeConverter;
+            m_dataRangeDefs=dataRangeDefinitions;
+            m_headAtoms=new ArrayList<Atom>();
+            m_bodyAtoms=new ArrayList<Atom>();
+            m_factory=factory;
+        }
+        protected DLClause getDLClause() {
+            Atom[] headAtoms=new Atom[m_headAtoms.size()];
+            m_headAtoms.toArray(headAtoms);
+            Arrays.sort(headAtoms,HeadComparator.INSTANCE);
+            Atom[] bodyAtoms=new Atom[m_bodyAtoms.size()];
+            m_bodyAtoms.toArray(bodyAtoms);
+            DLClause dlClause=DLClause.create(headAtoms,bodyAtoms);
+            m_headAtoms.clear();
+            m_bodyAtoms.clear();
+            m_yIndex=0;
+            return dlClause;
+        }
+        protected void ensureYNotZero() {
+            if (m_yIndex==0)
+                m_yIndex++;
+        }
+        protected Variable nextY() {
+            Variable result;
+            if (m_yIndex==0)
+                result=Y;
+            else
+                result=Variable.create("Y"+m_yIndex);
+            m_yIndex++;
+            return result;
+        }
+        
+        // Various types of descriptions
+        
+        public void visit(OWLDatatype dt) {
+            LiteralConcept literalConcept=m_dataRangeConverter.convertDataRange(dt);
+            if (!literalConcept.isAlwaysFalse())
+                m_headAtoms.add(Atom.create((DLPredicate)literalConcept,X));
+        }
+        public void visit(OWLDataIntersectionOf dr) {
+            throw new IllegalStateException("Internal error: invalid normal form.");
+        }
+        public void visit(OWLDataUnionOf dr) {
+            throw new IllegalStateException("Internal error: invalid normal form.");
+        }
+        public void visit(OWLDataComplementOf dr) {
+            OWLDataRange description=dr.getDataRange();
+            if (description instanceof OWLDatatype && m_dataRangeDefs.containsValue((OWLDatatype)description)) {
+                m_bodyAtoms.add(Atom.create(AtomicConcept.create(((OWLDatatype)description).getURI().toString()),X));
+            } else {
+                LiteralConcept literalConcept=m_dataRangeConverter.convertDataRange(dr);
+                if (literalConcept instanceof AtomicNegationConcept) {
+                    AtomicConcept negatedConcept=((AtomicNegationConcept)literalConcept).getNegatedAtomicConcept();
+                    if (!negatedConcept.isAlwaysTrue())
+                        m_bodyAtoms.add(Atom.create(negatedConcept,X));
+                } else {
+                    if (!literalConcept.isAlwaysFalse())
+                        m_headAtoms.add(Atom.create((DLPredicate)literalConcept,X));
+                }
+            } 
+        }
+        public void visit(OWLDataOneOf object) {
+            LiteralConcept literalConcept=m_dataRangeConverter.convertDataRange(object);
+            if (literalConcept instanceof AtomicNegationConcept) {
+                AtomicConcept negatedConcept=((AtomicNegationConcept)literalConcept).getNegatedAtomicConcept();
+                if (!negatedConcept.isAlwaysTrue())
+                    m_bodyAtoms.add(Atom.create(negatedConcept,X));
+            } else {
+                if (!literalConcept.isAlwaysFalse())
+                    m_headAtoms.add(Atom.create((DLPredicate)literalConcept,X));
+            }
+        }
+        public void visit(OWLTypedLiteral node) {
+            throw new IllegalStateException("Internal error: Invalid normal form. ");
+        }
+        public void visit(OWLStringLiteral node) {
+            throw new IllegalStateException("Internal error: Invalid normal form. ");
+        }
+        public void visit(OWLFacetRestriction node) {
+            throw new IllegalStateException("Internal error: Invalid normal form. ");
+        }
+        public void visit(OWLDatatypeRestriction node) {
+            LiteralConcept literalConcept=m_dataRangeConverter.convertDataRange(node);
+            if (literalConcept instanceof AtomicNegationConcept) {
+                AtomicConcept negatedConcept=((AtomicNegationConcept)literalConcept).getNegatedAtomicConcept();
+                if (!negatedConcept.isAlwaysTrue())
+                    m_bodyAtoms.add(Atom.create(negatedConcept,X));
+            } else {
+                if (!literalConcept.isAlwaysFalse())
+                    m_headAtoms.add(Atom.create((DLPredicate)literalConcept,X));
+            }
+        }
+    }
 
     protected static class DataRangeConverter implements OWLDataVisitorEx<Object> {
         protected final Configuration.WarningMonitor m_warningMonitor;
         protected final boolean m_ignoreUnsupportedDatatypes;
-        protected final Map<OWLDatatype, OWLDataRange> m_datatypeDefs;
+        protected final Map<OWLDataRange,OWLDatatype> m_datatypeDefs; // newly introduced definitions for conjunctions or disjunctions of data ranges
 
-        public DataRangeConverter(Configuration.WarningMonitor warningMonitor,Map<OWLDatatype, OWLDataRange> datatypeDefs,boolean ignoreUnsupportedDatatypes) {
+        public DataRangeConverter(Configuration.WarningMonitor warningMonitor,Map<OWLDataRange,OWLDatatype> datatypeDefs,boolean ignoreUnsupportedDatatypes) {
             m_warningMonitor=warningMonitor;
             m_datatypeDefs=datatypeDefs;
             m_ignoreUnsupportedDatatypes=ignoreUnsupportedDatatypes;
@@ -651,10 +761,9 @@ public class OWLClausification {
                 DatatypeRegistry.validateDatatypeRestriction(datatype);
                 return datatype;
             } catch (UnsupportedDatatypeException e) {
-                // maybe it is a custom defined datatype
-                // must be a defined datatype
-                if (m_datatypeDefs.containsKey(object)) {
-                    return m_datatypeDefs.get(object).accept(this);
+                // maybe it is a newly introduced datatype
+                if (m_datatypeDefs.containsValue(object)) {
+                    return AtomicConcept.create(object.getURI().toString());
                 } else if (m_ignoreUnsupportedDatatypes) {
                     if (m_warningMonitor!=null)
                         m_warningMonitor.warning("Ignoring unsupprted datatype '"+object.getURI().toString()+"'.");
@@ -707,12 +816,10 @@ public class OWLClausification {
                 return DatatypeRegistry.parseLiteral(object.getLiteral()+"@"+object.getLang(),Prefixes.s_semanticWebPrefixes.get("rdf")+"PlainLiteral");
         }
         public Object visit(OWLDataIntersectionOf node) {
-            // TODO Auto-generated method stub
-            return null;
+            throw new IllegalStateException("Internal error: invalid normal form.");
         }
         public Object visit(OWLDataUnionOf node) {
-            // TODO Auto-generated method stub
-            return null;
+            throw new IllegalStateException("Internal error: invalid normal form.");
         }
     }
 

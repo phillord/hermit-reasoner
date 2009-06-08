@@ -1,6 +1,8 @@
 package org.semanticweb.HermiT.reasoner;
 
 
+
+
 public class ReasonerTest extends AbstractReasonerTest {
 
     public ReasonerTest(String name) {
@@ -1840,55 +1842,83 @@ public class ReasonerTest extends AbstractReasonerTest {
 //
 //        assertFalse(m_reasoner.isSatisfiable(desc));
 //    }
-
-    public void testKeys1() throws Exception {
-        String axioms = "DataPropertyAssertion(:hasSSN :Peter \"123-45-6789\") " +
-                        "ClassAssertion(:Person :Peter) " +
-                        "DataPropertyAssertion(:hasSSN :Peter_Griffin \"123-45-6789\") " +
-                        "ClassAssertion(:Person :Peter_Griffin) " +
-                        "DifferentIndividuals(:Peter :Peter_Griffin)" + 
-                        "HasKey(:Person () (:hasSSN))";
-        loadOntologyWithAxioms(axioms);
-        createReasoner(getConfiguration(),null);
-        assertABoxSatisfiable(false);
-    }
-
-    public void testKeys2() throws Exception {
-        String axioms = "DataPropertyAssertion(:hasSSN :Peter \"123-45-6789\") " +
-                "ClassAssertion(:Person :Peter) " +
-                "ClassAssertion(ObjectSomeValuesFrom(:marriedTo ObjectIntersectionOf(:Man DataHasValue(:hasSSN \"123-45-6789\"^^xsd:string))) :Lois) " +
-                "SubClassOf(:Man ObjectComplementOf(:Person))" + 
-                "HasKey(:Person () (:hasSSN))";
-        loadOntologyWithAxioms(axioms);
-        createReasoner(getConfiguration(),null);
-        assertABoxSatisfiable(true);
-    }
-
-    public void testNominalMerging() throws Exception {
-        // This is the example from Section 3.2.5 from the SHOIQ+ paper.
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("ObjectPropertyAssertion(:S :a :a)");
-        buffer.append("ClassAssertion(ObjectSomeValuesFrom(:R :B) :a)");
-        buffer.append("SubClassOf(:B ObjectSomeValuesFrom(:R :C))");
-        buffer.append("SubClassOf(:C ObjectSomeValuesFrom(:S :D))");
-        buffer.append("SubClassOf(:D ObjectOneOf(:a))");
-        buffer.append("InverseFunctionalObjectProperty(:S)");
-        loadReasonerWithAxioms(buffer.toString());
-        assertABoxSatisfiable(true);
-    }
+//
+//    public void testKeys1() throws Exception {
+//        String axioms = "DataPropertyAssertion(:hasSSN :Peter \"123-45-6789\") " +
+//                        "ClassAssertion(:Person :Peter) " +
+//                        "DataPropertyAssertion(:hasSSN :Peter_Griffin \"123-45-6789\") " +
+//                        "ClassAssertion(:Person :Peter_Griffin) " +
+//                        "DifferentIndividuals(:Peter :Peter_Griffin)" + 
+//                        "HasKey(:Person () (:hasSSN))";
+//        loadOntologyWithAxioms(axioms);
+//        createReasoner(getConfiguration(),null);
+//        assertABoxSatisfiable(false);
+//    }
+//
+//    public void testKeys2() throws Exception {
+//        String axioms = "DataPropertyAssertion(:hasSSN :Peter \"123-45-6789\") " +
+//                "ClassAssertion(:Person :Peter) " +
+//                "ClassAssertion(ObjectSomeValuesFrom(:marriedTo ObjectIntersectionOf(:Man DataHasValue(:hasSSN \"123-45-6789\"^^xsd:string))) :Lois) " +
+//                "SubClassOf(:Man ObjectComplementOf(:Person))" + 
+//                "HasKey(:Person () (:hasSSN))";
+//        loadOntologyWithAxioms(axioms);
+//        createReasoner(getConfiguration(),null);
+//        assertABoxSatisfiable(true);
+//    }
+//
+//    public void testNominalMerging() throws Exception {
+//        // This is the example from Section 3.2.5 from the SHOIQ+ paper.
+//        StringBuffer buffer = new StringBuffer();
+//        buffer.append("ObjectPropertyAssertion(:S :a :a)");
+//        buffer.append("ClassAssertion(ObjectSomeValuesFrom(:R :B) :a)");
+//        buffer.append("SubClassOf(:B ObjectSomeValuesFrom(:R :C))");
+//        buffer.append("SubClassOf(:C ObjectSomeValuesFrom(:S :D))");
+//        buffer.append("SubClassOf(:D ObjectOneOf(:a))");
+//        buffer.append("InverseFunctionalObjectProperty(:S)");
+//        loadReasonerWithAxioms(buffer.toString());
+//        assertABoxSatisfiable(true);
+//    }
+//    
+//    public void testNIRuleBlockingWithUnraveling() throws Exception {
+//        // This is the example from Section 3.2.6 of the SHOIQ+ paper.
+//        StringBuffer buffer = new StringBuffer();
+//        buffer.append("ClassAssertion(:A :a)");
+//        buffer.append("ClassAssertion(ObjectSomeValuesFrom(:R :B) :a)");
+//        buffer.append("SubClassOf(ObjectSomeValuesFrom(:R :A) owl:Nothing)");
+//        buffer.append("SubClassOf(:B ObjectSomeValuesFrom(:R :B))");
+//        buffer.append("SubClassOf(:B ObjectHasValue(:S :a))");
+//        buffer.append("InverseFunctionalObjectProperty(:R)");
+//        buffer.append("InverseObjectProperties(:S :Si)");
+//        buffer.append("SubClassOf( owl:Thing ObjectMaxCardinality(3 :Si owl:Thing))");
+//        loadReasonerWithAxioms(buffer.toString());
+//        assertABoxSatisfiable(false);
+//    }
+//    
+//    public void testPunning() throws Exception {
+//        StringBuffer buffer = new StringBuffer();
+//        buffer.append("Declaration(Class(:Person))");
+//        buffer.append("ClassAssertion(:Service :s1)");
+//        buffer.append("ObjectPropertyAssertion(:hasInput :s1 :Person)");
+//        loadReasonerWithAxioms(buffer.toString());
+//        assertABoxSatisfiable(true);
+//    } 
+//    
+//    public void testPunning2() throws Exception {
+//        StringBuffer buffer = new StringBuffer();
+//        buffer.append("Declaration( Class( :Deprecated_Properties ) )");
+//        buffer.append("Declaration( ObjectProperty( :is_located_in ) )");
+//        buffer.append("ClassAssertion( :Deprecated_Properties :is_located_in )");
+//        loadReasonerWithAxioms(buffer.toString());
+//        assertABoxSatisfiable(true);
+//    } 
     
-    public void testNIRuleBlockingWithUnraveling() throws Exception {
-        // This is the example from Section 3.2.6 of the SHOIQ+ paper.
+    public void testPunning3() throws Exception {
         StringBuffer buffer = new StringBuffer();
-        buffer.append("ClassAssertion(:A :a)");
-        buffer.append("ClassAssertion(ObjectSomeValuesFrom(:R :B) :a)");
-        buffer.append("SubClassOf(ObjectSomeValuesFrom(:R :A) owl:Nothing)");
-        buffer.append("SubClassOf(:B ObjectSomeValuesFrom(:R :B))");
-        buffer.append("SubClassOf(:B ObjectHasValue(:S :a))");
-        buffer.append("InverseFunctionalObjectProperty(:R)");
-        buffer.append("InverseObjectProperties(:S :Si)");
-        buffer.append("SubClassOf( owl:Thing ObjectMaxCardinality(3 :Si owl:Thing))");
+        buffer.append("Declaration( Class( :Person ) ) Declaration( Class( :Company ) )");
+        buffer.append("SubClassOf( :PersonCompany :Association )");
+        buffer.append("ObjectPropertyDomain( :PersonCompany :Person ) ObjectPropertyRange( :PersonCompany :Company )");
         loadReasonerWithAxioms(buffer.toString());
-        assertABoxSatisfiable(false);
-    }
+        assertABoxSatisfiable(true);
+    } 
+
 }

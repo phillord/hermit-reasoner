@@ -3,7 +3,6 @@ package org.semanticweb.HermiT.structural;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,7 +10,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.owl.model.OWLAnnotationAssertionAxiom;
@@ -40,6 +38,7 @@ import org.semanticweb.owl.model.OWLDataPropertyRangeAxiom;
 import org.semanticweb.owl.model.OWLDataRange;
 import org.semanticweb.owl.model.OWLDataSomeValuesFrom;
 import org.semanticweb.owl.model.OWLDataUnionOf;
+import org.semanticweb.owl.model.OWLDataVisitorEx;
 import org.semanticweb.owl.model.OWLDatatype;
 import org.semanticweb.owl.model.OWLDatatypeDefinitionAxiom;
 import org.semanticweb.owl.model.OWLDatatypeRestriction;
@@ -52,6 +51,7 @@ import org.semanticweb.owl.model.OWLDisjointUnionAxiom;
 import org.semanticweb.owl.model.OWLEquivalentClassesAxiom;
 import org.semanticweb.owl.model.OWLEquivalentDataPropertiesAxiom;
 import org.semanticweb.owl.model.OWLEquivalentObjectPropertiesAxiom;
+import org.semanticweb.owl.model.OWLFacetRestriction;
 import org.semanticweb.owl.model.OWLFunctionalDataPropertyAxiom;
 import org.semanticweb.owl.model.OWLFunctionalObjectPropertyAxiom;
 import org.semanticweb.owl.model.OWLHasKeyAxiom;
@@ -82,6 +82,7 @@ import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLPropertyExpression;
 import org.semanticweb.owl.model.OWLReflexiveObjectPropertyAxiom;
 import org.semanticweb.owl.model.OWLSameIndividualAxiom;
+import org.semanticweb.owl.model.OWLStringLiteral;
 import org.semanticweb.owl.model.OWLSubAnnotationPropertyOfAxiom;
 import org.semanticweb.owl.model.OWLSubClassOfAxiom;
 import org.semanticweb.owl.model.OWLSubDataPropertyOfAxiom;
@@ -89,6 +90,7 @@ import org.semanticweb.owl.model.OWLSubObjectPropertyOfAxiom;
 import org.semanticweb.owl.model.OWLSubPropertyChainOfAxiom;
 import org.semanticweb.owl.model.OWLSymmetricObjectPropertyAxiom;
 import org.semanticweb.owl.model.OWLTransitiveObjectPropertyAxiom;
+import org.semanticweb.owl.model.OWLTypedLiteral;
 import org.semanticweb.owl.model.SWRLRule;
 
 /**
@@ -97,7 +99,7 @@ import org.semanticweb.owl.model.SWRLRule;
 public class OWLNormalization {
     protected final OWLDataFactory m_factory;
     protected final Map<OWLClassExpression,OWLClassExpression> m_definitions;
-    protected final Map<OWLDataRange,OWLDatatype> m_dataRangeDefinitions;
+    public final Map<OWLDatatype, OWLDataRange> m_customDatatypeDefs; // custom datatype definitions 
     protected final Map<OWLObjectOneOf,OWLClass> m_definitionsForNegativeNominals;
     protected final OWLAxioms m_axioms;
     protected final ExpressionManager m_expressionManager;
@@ -106,7 +108,7 @@ public class OWLNormalization {
     public OWLNormalization(OWLDataFactory factory,OWLAxioms axioms) {
         m_factory=factory;
         m_definitions=new HashMap<OWLClassExpression,OWLClassExpression>();
-        m_dataRangeDefinitions=new HashMap<OWLDataRange,OWLDatatype>();
+        m_customDatatypeDefs=new HashMap<OWLDatatype,OWLDataRange>();
         m_definitionsForNegativeNominals=new HashMap<OWLObjectOneOf,OWLClass>();
         m_axioms=axioms;
         m_expressionManager=new ExpressionManager(m_factory);
@@ -125,7 +127,13 @@ public class OWLNormalization {
         AxiomVisitor axiomVisitor=new AxiomVisitor();
         for (OWLAxiom axiom : ontology.getAxioms())
             axiom.accept(axiomVisitor);
-        normalizeInclusions(axiomVisitor.m_inclusionsAsDisjunctions,m_axioms.m_conceptInclusions,m_axioms.m_facts);
+        // now all axioms are in NNF and converted into disjunctions wherever possible
+        // exact cardinalities are rewritten into at least and at most cardinalities etc
+        // in normalization, we now simplyfy the disjuncts where possible (eliminate 
+        // unnecessary conjuncts/disjuncts) and introduce fresh atomic concepts for complex 
+        // concepts
+        // m_axioms.m_conceptInclusions contains the normalized axioms after the normalization
+        normalizeInclusions(axiomVisitor.m_inclusionsAsDisjunctions);
     }
     protected void addFact(OWLIndividualAxiom axiom) {
         m_axioms.m_facts.add(axiom);
@@ -179,8 +187,12 @@ public class OWLNormalization {
             return false;
         return ((OWLObjectOneOf)operand).getIndividuals().size()==1;
     }
-    protected void normalizeInclusions(List<OWLClassExpression[]> inclusions,Collection<OWLClassExpression[]> normalizedInclusions,Collection<OWLIndividualAxiom> facts) {
-        NormalizationVisitor normalizer=new NormalizationVisitor(inclusions,new HashMap<OWLDataRange,OWLDatatype>());
+    protected void normalizeInclusions(List<OWLClassExpression[]> inclusions) {
+        NormalizationVisitor normalizer=new NormalizationVisitor(inclusions);
+        // simplify data ranges for custom defined datatypes
+        for (OWLDatatype dt : m_customDatatypeDefs.keySet()) {
+            m_customDatatypeDefs.put(dt, m_expressionManager.getSimplified(m_customDatatypeDefs.get(dt)));
+        }
         while (!inclusions.isEmpty()) {
             OWLClassExpression simplifiedDescription=m_expressionManager.getSimplified(m_factory.getOWLObjectUnionOf(inclusions.remove(inclusions.size()-1)));
             if (!simplifiedDescription.isOWLThing()) {
@@ -188,58 +200,45 @@ public class OWLNormalization {
                     OWLObjectUnionOf objectOr=(OWLObjectUnionOf)simplifiedDescription;
                     OWLClassExpression[] descriptions=new OWLClassExpression[objectOr.getOperands().size()];
                     objectOr.getOperands().toArray(descriptions);
-                    if (!distributeUnionOverAnd(descriptions,inclusions) && !optimizedNegativeOneOfTranslation(descriptions,facts)) {
+                    if (!distributeUnionOverAnd(descriptions,inclusions) && !optimizedNegativeOneOfTranslation(descriptions,m_axioms.m_facts)) {
                         for (int index=0;index<descriptions.length;index++)
                             descriptions[index]=descriptions[index].accept(normalizer);
-                        normalizedInclusions.add(descriptions);
+                        m_axioms.m_conceptInclusions.add(descriptions);
                     }
                 }
                 else if (simplifiedDescription instanceof OWLObjectIntersectionOf) {
                     OWLObjectIntersectionOf objectAnd=(OWLObjectIntersectionOf)simplifiedDescription;
                     for (OWLClassExpression conjunct : objectAnd.getOperands())
                         inclusions.add(new OWLClassExpression[] { conjunct });
-                }
-                else {
+                } else {
                     OWLClassExpression normalized=simplifiedDescription.accept(normalizer);
-                    normalizedInclusions.add(new OWLClassExpression[] { normalized });
+                    m_axioms.m_conceptInclusions.add(new OWLClassExpression[] { normalized });
                 }
             }
         }
-        normalizeDataRangeInclusions(normalizer.m_newDatatypeDefinitions, m_axioms.m_dataRangeInclusions);
-    }
-    protected void normalizeDataRangeInclusions(Map<OWLDataRange,OWLDatatype> inclusions, Map<OWLDataRange,OWLDatatype> normalizedInclusions) {
-        while (!inclusions.isEmpty()) {
-            Iterator<Entry<OWLDataRange,OWLDatatype>> it = inclusions.entrySet().iterator();
-            Entry<OWLDataRange,OWLDatatype> entry = it.next();
-            OWLDataRange dr = entry.getKey();
-            OWLDatatype dt = entry.getValue();
-            it.remove();
-            if (dr instanceof OWLDataUnionOf) {
-                OWLDataUnionOf dataOr=(OWLDataUnionOf)dr;
-                OWLDataRange[] descriptions=new OWLDataRange[dataOr.getOperands().size()];
-                dataOr.getOperands().toArray(descriptions);
-                for (int index=0;index<descriptions.length;index++) {
-                    if (!isLiteral(descriptions[index])) {
-                        boolean[] alreadyExists=new boolean[1];
-                        OWLDatatype definition=getDefinitionFor(descriptions[index], alreadyExists);
-                        if (!alreadyExists[0]) {
-                            descriptions[index]=definition;
-                            inclusions.put(descriptions[index], definition);
-                        }
+        // normalize data range inclusions
+        DataRangeNormalizationVisitor drNormalizer=new DataRangeNormalizationVisitor(normalizer.m_newDataRangeInclusions);
+        while (!normalizer.m_newDataRangeInclusions.isEmpty()) {
+            OWLDataRange simplifiedDescription=m_expressionManager.getSimplified(m_factory.getOWLDataUnionOf(normalizer.m_newDataRangeInclusions.remove(normalizer.m_newDataRangeInclusions.size()-1)));
+            if (!simplifiedDescription.isTopDatatype()) {
+                if (simplifiedDescription instanceof OWLDataUnionOf) {
+                    OWLDataUnionOf dataOr=(OWLDataUnionOf)simplifiedDescription;
+                    OWLDataRange[] descriptions=new OWLDataRange[dataOr.getOperands().size()];
+                    dataOr.getOperands().toArray(descriptions);
+                    if (!distributeUnionOverAnd(descriptions,normalizer.m_newDataRangeInclusions)) {
+                        for (int index=0;index<descriptions.length;index++)
+                            descriptions[index]=descriptions[index].accept(drNormalizer);
+                        m_axioms.m_dataRangeInclusions.add(descriptions);
                     }
-                }
-                normalizedInclusions.put(m_factory.getOWLDataUnionOf(new HashSet<OWLDataRange>(Arrays.asList(descriptions))),dt);
-            } else if (dr instanceof OWLDataIntersectionOf) {
-                OWLDataIntersectionOf dataAnd=(OWLDataIntersectionOf)dr;
-                for (OWLDataRange conjunct : dataAnd.getOperands()) {
-                    if (isLiteral(conjunct)) {
-                        normalizedInclusions.put(conjunct,dt);
-                    } else {
-                        inclusions.put(conjunct,dt);
+                } else if (simplifiedDescription instanceof OWLDataIntersectionOf) {
+                    OWLDataIntersectionOf dataAnd=(OWLDataIntersectionOf)simplifiedDescription;
+                    for (OWLDataRange conjunct : dataAnd.getOperands()) {
+                        normalizer.m_newDataRangeInclusions.add(new OWLDataRange[] { conjunct});
                     }
+                } else {
+                    OWLDataRange normalized=simplifiedDescription.accept(drNormalizer);
+                    m_axioms.m_dataRangeInclusions.add(new OWLDataRange[] { normalized });
                 }
-            } else if (isLiteral(dr)) {
-                normalizedInclusions.put(dr,dt);
             }
         }
     }
@@ -262,6 +261,30 @@ public class OWLNormalization {
         OWLObjectIntersectionOf objectAnd=(OWLObjectIntersectionOf)descriptions[andIndex];
         for (OWLClassExpression description : objectAnd.getOperands()) {
             OWLClassExpression[] newDescriptions=descriptions.clone();
+            newDescriptions[andIndex]=description;
+            inclusions.add(newDescriptions);
+        }
+        return true;
+    }
+    protected boolean distributeUnionOverAnd(OWLDataRange[] descriptions,List<OWLDataRange[]> inclusions) {
+        int andIndex=-1;
+        for (int index=0;index<descriptions.length;index++) {
+            OWLDataRange description=descriptions[index];
+            if (!isLiteral(description))
+                if (description instanceof OWLDataIntersectionOf) {
+                    if (andIndex==-1)
+                        andIndex=index;
+                    else
+                        return false;
+                }
+                else
+                    return false;
+        }
+        if (andIndex==-1)
+            return false;
+        OWLDataIntersectionOf dataAnd=(OWLDataIntersectionOf)descriptions[andIndex];
+        for (OWLDataRange description : dataAnd.getOperands()) {
+            OWLDataRange[] newDescriptions=descriptions.clone();
             newDescriptions[andIndex]=description;
             inclusions.add(newDescriptions);
         }
@@ -301,10 +324,10 @@ public class OWLNormalization {
         return definition;
     }
     protected OWLDatatype getDefinitionFor(OWLDataRange dr,boolean[] alreadyExists) {
-        OWLDatatype definition = m_dataRangeDefinitions.get(dr);
+        OWLDatatype definition = m_axioms.m_dataRangeDefinitions.get(dr);
         if (definition==null) {
-            definition=m_factory.getOWLDatatype(URI.create("internal:defdata#"+m_dataRangeDefinitions.size()));
-            m_dataRangeDefinitions.put(dr,definition);
+            definition=m_factory.getOWLDatatype(URI.create("internal:defdata#"+m_axioms.m_dataRangeDefinitions.size()));
+            m_axioms.m_dataRangeDefinitions.put(dr,definition);
             alreadyExists[0]=false;
         } else {
             alreadyExists[0]=true;
@@ -337,7 +360,10 @@ public class OWLNormalization {
     protected OWLDataRange positive(OWLDataRange dataRange) {
         return m_expressionManager.getNNF(m_expressionManager.getSimplified(dataRange));
     }
-
+    protected OWLDataRange negative(OWLDataRange dataRange) {
+        return m_expressionManager.getComplementNNF(m_expressionManager.getSimplified(dataRange));
+    }
+    
     protected class AxiomVisitor implements OWLAxiomVisitor {
         protected final List<OWLClassExpression[]> m_inclusionsAsDisjunctions;
         protected final boolean[] m_alreadyExists;
@@ -488,7 +514,7 @@ public class OWLNormalization {
         // Data property axioms
         
         public void visit(OWLDatatypeDefinitionAxiom axiom) {
-            m_axioms.m_datatypeDefs.put(axiom.getDatatype(), axiom.getDataRange());
+            m_customDatatypeDefs.put(axiom.getDatatype(), axiom.getDataRange());
         }
         
         public void visit(OWLSubDataPropertyOfAxiom axiom) {
@@ -590,6 +616,13 @@ public class OWLNormalization {
         }
         public void visit(OWLNegativeDataPropertyAssertionAxiom axiom) {
             addFact(axiom);
+//            OWLDataOneOf oneOf=m_factory.getOWLDataOneOf(axiom.getObject());
+//            OWLDataRange notOneOf=m_factory.getOWLDataComplementOf(oneOf);
+//            OWLClassExpression allNotOneOf=m_factory.getOWLDataAllValuesFrom(axiom.getProperty(),notOneOf);
+//            OWLClassExpression definition=getDefinitionFor(allNotOneOf,m_alreadyExists);
+//            if (!m_alreadyExists[0])
+//                m_inclusionsAsDisjunctions.add(new OWLClassExpression[] {negative(definition),allNotOneOf });
+//            addFact(m_factory.getOWLClassAssertionAxiom(axiom.getSubject(),definition));
         }
 
         // Rules
@@ -601,12 +634,12 @@ public class OWLNormalization {
 
     protected class NormalizationVisitor implements OWLClassExpressionVisitorEx<OWLClassExpression> {
         protected final Collection<OWLClassExpression[]> m_newInclusions;
-        protected final Map<OWLDataRange,OWLDatatype> m_newDatatypeDefinitions;
+        protected final List<OWLDataRange[]> m_newDataRangeInclusions;
         protected final boolean[] m_alreadyExists;
 
-        public NormalizationVisitor(Collection<OWLClassExpression[]> newInclusions, Map<OWLDataRange,OWLDatatype> newDatatypeDefinitions) {
+        public NormalizationVisitor(Collection<OWLClassExpression[]> newInclusions) {
             m_newInclusions=newInclusions;
-            m_newDatatypeDefinitions=newDatatypeDefinitions;
+            m_newDataRangeInclusions=new ArrayList<OWLDataRange[]>();
             m_alreadyExists=new boolean[1];
         }
         public OWLClassExpression visit(OWLClass object) {
@@ -693,25 +726,36 @@ public class OWLNormalization {
         public OWLClassExpression visit(OWLObjectExactCardinality object) {
             throw new IllegalStateException("Internal error: exact object cardinality restrictions should have been simplified.");
         }
+        protected OWLDataRange replaceCustomDatatype(OWLDataRange range){
+            if (range instanceof OWLDatatype && m_customDatatypeDefs.containsKey((OWLDatatype) range)) {
+                return m_customDatatypeDefs.get(range);
+            } else if (range instanceof OWLDataComplementOf) {
+                OWLDataRange dr = ((OWLDataComplementOf)range).getDataRange();
+                if (dr instanceof OWLDatatype && m_customDatatypeDefs.containsKey((OWLDatatype) dr)) {
+                    return m_expressionManager.getNNF(m_factory.getOWLDataComplementOf(m_customDatatypeDefs.get((OWLDatatype) dr)));
+                }
+            }
+            return range;
+        }
         public OWLClassExpression visit(OWLDataSomeValuesFrom object) {
-            OWLDataRange filler=object.getFiller();
+            OWLDataRange filler=replaceCustomDatatype(object.getFiller());
             if (isLiteral(filler)) {
-                return object;
+                return m_factory.getOWLDataSomeValuesFrom(object.getProperty(),filler);
             } else {
                 OWLDatatype definition=getDefinitionFor(filler,m_alreadyExists);
                 if (!m_alreadyExists[0])
-                    m_newDatatypeDefinitions.put(filler, definition);
+                    m_newDataRangeInclusions.add(new OWLDataRange[] { negative(definition),filler } );
                 return m_factory.getOWLDataSomeValuesFrom(object.getProperty(),definition);
             }
         }
         public OWLClassExpression visit(OWLDataAllValuesFrom object) {
-            OWLDataRange filler=object.getFiller();
+            OWLDataRange filler=replaceCustomDatatype(object.getFiller());
             if (isLiteral(filler)) {
-                return object;
+                return m_factory.getOWLDataAllValuesFrom(object.getProperty(),filler);
             } else {
                 OWLDatatype definition=getDefinitionFor(filler,m_alreadyExists);
                 if (!m_alreadyExists[0])
-                    m_newDatatypeDefinitions.put(filler,definition);
+                    m_newDataRangeInclusions.add(new OWLDataRange[] { negative(definition),filler } );
                 return m_factory.getOWLDataAllValuesFrom(object.getProperty(),definition);
             }
         }
@@ -719,30 +763,73 @@ public class OWLNormalization {
             throw new IllegalStateException("Internal error: data value restrictions should have been simplified.");
         }
         public OWLClassExpression visit(OWLDataMinCardinality object) {
-            OWLDataRange filler=object.getFiller();
+            OWLDataRange filler=replaceCustomDatatype(object.getFiller());
             if (isLiteral(filler))
-                return object;
+                return m_factory.getOWLDataMinCardinality(object.getProperty(),object.getCardinality(),filler);
             else {
                 OWLDatatype definition=getDefinitionFor(filler,m_alreadyExists);
                 if (!m_alreadyExists[0])
-                    m_dataRangeDefinitions.put(filler, definition);
+                    m_newDataRangeInclusions.add(new OWLDataRange[] { negative(definition),filler } );
                 return m_factory.getOWLDataMinCardinality(object.getProperty(),object.getCardinality(),definition);
             }
         }
         public OWLClassExpression visit(OWLDataMaxCardinality object) {
-            OWLDataRange filler=object.getFiller();
+            OWLDataRange filler=replaceCustomDatatype(object.getFiller());
             if (isLiteral(filler))
-                return object;
+                return m_factory.getOWLDataMaxCardinality(object.getProperty(),object.getCardinality(),filler);
             else {
                 OWLDataRange complementDescription=m_expressionManager.getComplementNNF(filler);
                 OWLDatatype definition=getDefinitionFor(complementDescription,m_alreadyExists);
                 if (!m_alreadyExists[0])
-                    m_dataRangeDefinitions.put(complementDescription,definition);
+                    m_newDataRangeInclusions.add(new OWLDataRange[] { negative(definition),filler } );
                 return m_factory.getOWLDataMaxCardinality(object.getProperty(),object.getCardinality(),m_expressionManager.getComplementNNF(definition));
             }
         }
         public OWLClassExpression visit(OWLDataExactCardinality object) {
             throw new IllegalStateException("Internal error: exact data cardinality restrictions should have been simplified.");
+        }
+    }
+    
+    protected class DataRangeNormalizationVisitor implements OWLDataVisitorEx<OWLDataRange> {
+        protected final List<OWLDataRange[]> m_newDataRangeInclusions;
+        protected final boolean[] m_alreadyExists;
+
+        public DataRangeNormalizationVisitor(List<OWLDataRange[]> newInclusions) {
+            m_newDataRangeInclusions=newInclusions;
+            m_alreadyExists=new boolean[1];
+        }
+        public OWLDataRange visit(OWLDatatype node) {
+            return node;
+        }
+        public OWLDataRange visit(OWLDataComplementOf node) {
+            return node;
+        }
+        public OWLDataRange visit(OWLDataOneOf node) {
+            return node;
+        }
+        public OWLDataRange visit(OWLDataIntersectionOf object) {
+            OWLDataRange definition=getDefinitionFor(object,m_alreadyExists);
+            if (!m_alreadyExists[0])
+                for (OWLDataRange description : object.getOperands())
+                    m_newDataRangeInclusions.add(new OWLDataRange[] {negative(definition),description });
+            return definition;
+        }
+        public OWLDataRange visit(OWLDataUnionOf node) {
+            throw new IllegalStateException("OR should be broken down at the outermost level");
+        }
+        public OWLDataRange visit(OWLDatatypeRestriction node) {
+            return node;
+        }
+        public OWLDataRange visit(OWLTypedLiteral node) {
+            throw new IllegalStateException("Internal error: We shouldn't visit typed literals during normalization. ");
+        }
+
+        public OWLDataRange visit(OWLStringLiteral node) {
+            throw new IllegalStateException("Internal error: We shouldn't visit typed literals during normalization. ");
+        }
+
+        public OWLDataRange visit(OWLFacetRestriction node) {
+            throw new IllegalStateException("Internal error: We shouldn't visit facet restrictions during normalization. ");
         }
     }
 
