@@ -94,10 +94,9 @@ public class ObjectPropertyInclusionManager {
 
         for (Map.Entry<OWLObjectAllValuesFrom,OWLClassExpression> mapping : m_replacedDescriptions.entrySet()) {
             OWLObjectAllValuesFrom replacedAllRestriction=mapping.getKey();
-            OWLClassExpression indexOfInitialConcept=mapping.getValue();
-
+            String indexOfInitialConcept = mapping.getValue().asOWLClass().getURI().getFragment(); 
             OWLObjectPropertyExpression objectProperty = replacedAllRestriction.getProperty();
-                        OWLClassExpression owlConcept = replacedAllRestriction.getFiller();
+            OWLClassExpression owlConcept = replacedAllRestriction.getFiller();
 
             Automaton automatonOfRole = m_automataForComplexRoles.get( objectProperty );
             String initialState = automatonOfRole.initials().toArray()[0].toString();
@@ -124,7 +123,7 @@ public class ObjectPropertyInclusionManager {
 
                 Object[] transitionsIterator = automatonOfRole.delta().toArray();
                 OWLClassExpression fromStateConcept = null;
-                        OWLClassExpression toStateConcept = null;
+                OWLClassExpression toStateConcept = null;
 
                 for( int i =0 ; i<transitionsIterator.length ; i++ ) {
                         Transition trans = (Transition) transitionsIterator[i];
@@ -175,17 +174,12 @@ public class ObjectPropertyInclusionManager {
 //            Set<OWLObjectPropertyExpression> transitiveSubObjectProperties=getTransitiveSubObjectProperties(objectProperty);
 //            if (!transitiveSubObjectProperties.isEmpty()) {
             if( m_automataForComplexRoles.containsKey( objectProperty ) ){
-                OWLClassExpression indexOfReplacedConcept=getReplacementFor(objectAll);
-                String initial = m_automataForComplexRoles.get( objectProperty ).initials().toArray()[0].toString();
-                // Birte@Giorgos: The foillowing gives an URI syntax exception because indexOfReplacedConcept is already an OWLClassExpression and 
-                // its string representation is its URI (in case it is an OWLClass and for class expressions it is whatever string representation that class expression has), 
-                // so the URI you attempt to construct is of the form internal:all#<internal:all#0>0 in case indexOfReplacedConcept is an OWLClass with URI internal:all#0 
-                OWLClassExpression replacement = m_factory.getOWLClass(URI.create("internal:all#"+indexOfReplacedConcept+initial));
-                Automaton automaton = m_automataForComplexRoles.get( objectProperty );
-                String initialState = automaton.initials().toArray()[0].toString();
+                OWLClassExpression replacedConcept=getReplacementFor(objectAll);
+                String initialState = m_automataForComplexRoles.get( objectProperty ).initials().toArray()[0].toString();
+                String indexOfReplacedConcept = replacedConcept.asOWLClass().getURI().getFragment();
+                OWLClassExpression replacement = m_factory.getOWLClass(URI.create("internal:all#"+indexOfReplacedConcept+initialState));
                 if (objectAll.getFiller() instanceof OWLObjectComplementOf || objectAll.getFiller().equals(m_factory.getOWLNothing()))
-                    // Birte@Giorgos: as above
-                    replacement = m_factory.getOWLClass(URI.create("internal:all#"+indexOfReplacedConcept+initialState)).getComplementNNF();
+                	replacement = m_factory.getOWLClass(URI.create("internal:all#"+indexOfReplacedConcept+initialState)).getComplementNNF();
 //                for (OWLObjectPropertyExpression transitiveSubObjectProperty : transitiveSubObjectProperties) {
 //                    OWLObjectAllValuesFrom subObjectAll=m_factory.getOWLObjectAllValuesFrom(transitiveSubObjectProperty,objectAll.getFiller());
 //                    getReplacementFor(subObjectAll);
@@ -205,6 +199,9 @@ public class ObjectPropertyInclusionManager {
         }
         return replacement;
     }
+    /**
+     * @gstoil This is not used anymore
+     */
     protected Set<OWLObjectPropertyExpression> getTransitiveSubObjectProperties(OWLObjectPropertyExpression objectProperty) {
         Set<OWLObjectPropertyExpression> result=new HashSet<OWLObjectPropertyExpression>();
         if (m_transitiveObjectProperties.contains(objectProperty))
@@ -216,8 +213,8 @@ public class ObjectPropertyInclusionManager {
         return result;
     }
 
-        public void rewriteAxioms(OWLAxioms axioms, Map<OWLObjectPropertyExpression, Automaton> automataOfComplexObjectProperties) {
-                m_automataForComplexRoles.putAll( automataOfComplexObjectProperties );
-                rewriteAxioms( axioms );
-        }
+    public void rewriteAxioms(OWLAxioms axioms, Map<OWLObjectPropertyExpression, Automaton> automataOfComplexObjectProperties) {
+            m_automataForComplexRoles.putAll( automataOfComplexObjectProperties );
+            rewriteAxioms( axioms );
+    }
 }
