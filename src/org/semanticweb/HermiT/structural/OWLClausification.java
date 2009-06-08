@@ -643,30 +643,25 @@ public class OWLClausification {
             return (LiteralConcept)dataRange.accept(this);
         }
         public Object visit(OWLDatatype object) {
-            if (object.isBuiltIn()) {
-                String datatypeURI=object.getURI().toString();
-                if (AtomicConcept.RDFS_LITERAL.getURI().equals(datatypeURI))
-                    return AtomicConcept.RDFS_LITERAL;
-                DatatypeRestriction datatype=DatatypeRestriction.create(datatypeURI,DatatypeRestriction.NO_FACET_URIs,DatatypeRestriction.NO_FACET_VALUES);
-                try {
-                    DatatypeRegistry.validateDatatypeRestriction(datatype);
-                    return datatype;
-                }
-                catch (UnsupportedDatatypeException e) {
-                    if (m_ignoreUnsupportedDatatypes) {
-                        if (m_warningMonitor!=null)
-                            m_warningMonitor.warning("Ignoring unsupprted datatype '"+object.getURI().toString()+"'.");
-                        return AtomicConcept.create(object.getURI().toString());
-                    }
-                   else
-                       throw e;
-                }
-            } else {
+            String datatypeURI=object.getURI().toString();
+            if (AtomicConcept.RDFS_LITERAL.getURI().equals(datatypeURI))
+                return AtomicConcept.RDFS_LITERAL;
+            DatatypeRestriction datatype=DatatypeRestriction.create(datatypeURI,DatatypeRestriction.NO_FACET_URIs,DatatypeRestriction.NO_FACET_VALUES);
+            try {
+                DatatypeRegistry.validateDatatypeRestriction(datatype);
+                return datatype;
+            } catch (UnsupportedDatatypeException e) {
+                // maybe it is a custom defined datatype
                 // must be a defined datatype
-                if (!m_datatypeDefs.containsKey(object)) {
+                if (m_datatypeDefs.containsKey(object)) {
+                    return m_datatypeDefs.get(object).accept(this);
+                } else if (m_ignoreUnsupportedDatatypes) {
+                    if (m_warningMonitor!=null)
+                        m_warningMonitor.warning("Ignoring unsupprted datatype '"+object.getURI().toString()+"'.");
+                    return AtomicConcept.create(object.getURI().toString());
+                } else {
                     throw new IllegalArgumentException("A definition is missing for the custom datatype " + object.toString());
                 }
-                return m_datatypeDefs.get(object).accept(this);
             }
         }
         public Object visit(OWLDataComplementOf object) {
