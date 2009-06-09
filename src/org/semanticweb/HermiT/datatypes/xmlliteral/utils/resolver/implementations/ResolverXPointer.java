@@ -42,11 +42,6 @@ import org.w3c.dom.Node;
  */
 public class ResolverXPointer extends ResourceResolverSpi {
 
-   /** {@link java.util.logging} logging facility */
-    static java.util.logging.Logger log = 
-        java.util.logging.Logger.getLogger(
-                            ResolverXPointer.class.getName());
-
    /**
     * @inheritDoc
     */
@@ -148,9 +143,6 @@ public class ResolverXPointer extends ResourceResolverSpi {
                  .charAt(idLen) == '"')) || ((idPlusDelim
                  .charAt(0) == '\'') && (idPlusDelim
                  .charAt(idLen) == '\''))) {
-            if (true)
-            	if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "Id="
-                      + idPlusDelim.substring(1, idLen));
 
             return true;
          }

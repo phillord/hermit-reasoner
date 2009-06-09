@@ -35,11 +35,9 @@ import org.w3c.dom.Text;
  *
  * @author $Author: mullan $
  */
+@SuppressWarnings("unchecked")
 public abstract class ElementProxy {
 
-   /** {@link java.util.logging} logging facility */
-    static java.util.logging.Logger log = 
-        java.util.logging.Logger.getLogger(ElementProxy.class.getName());
    //J-
     /** The element has been created by the code **/
    public static final int MODE_CREATE  = 0;
@@ -165,13 +163,6 @@ public abstract class ElementProxy {
       if (element == null) {
          throw new XMLSecurityException("ElementProxy.nullElement");
       }
-      if (true) {
-      }
-      
-      if (true) {
-      	if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "setElement(" + element.getTagName() + ", \"" + BaseURI + "\"");
-      }
-        
       this._doc = element.getOwnerDocument();
       this._state = ElementProxy.MODE_PROCESS;
       this._constructionElement = element;
@@ -193,12 +184,6 @@ public abstract class ElementProxy {
       if (element == null) {
          throw new XMLSecurityException("ElementProxy.nullElement");
       }
-      
-      if (true) {
-      	if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "setElement(\"" + element.getTagName() + "\", \"" + BaseURI
-                + "\")");
-      }
-
       this._doc = element.getOwnerDocument();
       this._state = ElementProxy.MODE_PROCESS;
       this._constructionElement = element;

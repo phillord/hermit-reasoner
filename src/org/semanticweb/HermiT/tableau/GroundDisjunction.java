@@ -58,6 +58,8 @@ public class GroundDisjunction implements Serializable {
                 return true;
         return false;
     }
+    
+    @SuppressWarnings("fallthrough")
     public boolean isSatisfied(Tableau tableau) {
         ExtensionManager extensionManager=tableau.getExtensionManager();
         for (int disjunctIndex=0;disjunctIndex<getNumberOfDisjuncts();disjunctIndex++) {
@@ -84,6 +86,7 @@ public class GroundDisjunction implements Serializable {
         }
         return false;
     }
+    @SuppressWarnings("fallthrough")
     public boolean addDisjunctToTableau(Tableau tableau,int disjunctIndex,DependencySet dependencySet) {
         DLPredicate dlPredicate=getDLPredicate(disjunctIndex);
         switch (dlPredicate.getArity()) {

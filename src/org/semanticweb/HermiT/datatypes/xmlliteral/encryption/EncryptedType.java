@@ -54,11 +54,6 @@ public interface EncryptedType {
      */
     String getId();
 
-    /**
-     * Sets the id.
-     *
-     * @param id.
-     */
     void setId(String id);
 
     /**
@@ -120,12 +115,6 @@ public interface EncryptedType {
      */
     String getEncoding();
 
-    /**
-     * Sets the <code>URI</code> representing the encoding of the
-     * <code>EncryptedType</code>.
-     *
-     * @param encoding.
-     */
     void setEncoding(String encoding);
 
     /**
@@ -181,12 +170,6 @@ public interface EncryptedType {
      */
     EncryptionProperties getEncryptionProperties();
 
-    /**
-     * Sets the <code>EncryptionProperties</code> that supplies additional
-     * information about the generation of the <code>EncryptedType</code>.
-     *
-     * @param properties.
-     */
     void setEncryptionProperties(EncryptionProperties properties);
 }
 

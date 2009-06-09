@@ -76,11 +76,6 @@ import org.w3c.dom.Text;
  */
 public final class XMLSignature extends SignatureElementProxy {
 
-   /** {@link java.util.logging} logging facility */
-   static java.util.logging.Logger log = 
-        java.util.logging.Logger.getLogger(XMLSignature.class.getName());
-   
-   //J-
    /** MAC - Required HMAC-SHA1 */
    public static final String ALGO_ID_MAC_HMAC_SHA1 = Constants.SignatureSpecNS + "hmac-sha1";
 
@@ -589,12 +584,6 @@ public final class XMLSignature extends SignatureElementProxy {
          SignatureAlgorithm sa =
             new SignatureAlgorithm(this.getSignedInfo()
                .getSignatureMethodElement(), this.getBaseURI());
-         if (true) {
-         	if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "SignatureMethodURI = " + sa.getAlgorithmURI());
-         	if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "jceSigAlgorithm    = " + sa.getJCEAlgorithmString());
-         	if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "jceSigProvider     = " + sa.getJCEProviderName());
-         	if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "PublicKey = " + pk);
-         }
          sa.initVerify(pk);
 
          // Get the canonicalized (normalized) SignedInfo

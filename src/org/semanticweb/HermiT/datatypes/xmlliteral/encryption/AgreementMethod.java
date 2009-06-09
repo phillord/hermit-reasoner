@@ -75,11 +75,9 @@ import org.w3c.dom.Element;
  *
  * @author Axl Mattheus
  */
+@SuppressWarnings("unchecked")
 public interface AgreementMethod {
-    /**
-     * Returns an <code>byte</code> array.
-     * @return
-     */
+
     byte[] getKANonce();
 
     /**
@@ -88,10 +86,7 @@ public interface AgreementMethod {
      */
     void setKANonce(byte[] kanonce);
 
-    /**
-     * Returns aditional information regarding the <code>AgreementMethod</code>.
-     * @return
-     */
+
     Iterator getAgreementMethodInformation();
 
     /**

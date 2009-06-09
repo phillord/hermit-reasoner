@@ -28,7 +28,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.semanticweb.HermiT.datatypes.xmlliteral.algorithms.JCEMapper;
 import org.semanticweb.HermiT.datatypes.xmlliteral.algorithms.SignatureAlgorithm;
 import org.semanticweb.HermiT.datatypes.xmlliteral.c14n.Canonicalizer;
-import org.semanticweb.HermiT.datatypes.xmlliteral.keys.KeyInfo;
 import org.semanticweb.HermiT.datatypes.xmlliteral.keys.keyresolver.KeyResolver;
 import org.semanticweb.HermiT.datatypes.xmlliteral.transforms.Transform;
 import org.semanticweb.HermiT.datatypes.xmlliteral.utils.I18n;
@@ -72,7 +71,8 @@ public final class Init {
     * Method init
     *
     */
-   public synchronized static void init() {
+   @SuppressWarnings("unchecked")
+public synchronized static void init() {
 
       if (_alreadyInitialized) {
         return;
@@ -127,19 +127,6 @@ public final class Init {
             Document doc = db.parse(is);
             long XX_parsing_end = System.currentTimeMillis();                       
             long XX_configure_i18n_start = 0;            
-            
-            {
-                XX_configure_reg_keyInfo_start = System.currentTimeMillis();
-               try {
-                  KeyInfo.init();
-               } catch (Exception e) {
-                  e.printStackTrace();
-
-                  throw e;
-               }
-               XX_configure_reg_keyInfo_end = System.currentTimeMillis();
-            }
-            
 			long XX_configure_reg_transforms_start=0;
 			long XX_configure_reg_jcemapper_start=0;
 			long XX_configure_reg_sigalgos_start=0;

@@ -25,7 +25,7 @@
     
     <!-- structure of 3rdparty libraries -->
     <property name="3rdpartydir" value="${projectroot}/../ThirdPartyOwlTools"/>
-    <property name="owlapi" value="${3rdpartydir}/owlapi/2.2.1/owlapi-bin.jar"/>
+    <property name="owlapi" value="${3rdpartydir}/owlapi/3.0.0/owlapi-bin.jar"/>
     <property name="automaton" value="${3rdpartydir}/automaton/1.11-1/automaton.jar"/>
     <property name="jautomaton" value="${3rdpartydir}/jautomaton/jautomata-core-2.0-alpha-1.jar"/>
     <property name="junit" value="${3rdpartydir}/junit/4.4/junit-4.4.jar"/>
@@ -83,7 +83,7 @@
     
     <target name="javadoc">
         <mkdir dir="${javadocdir}"/>
-        <javadoc sourcepathref="sourcepath" destdir="${javadocdir}" access="protected" author="false" version="true" use="true" bootclasspath="${java.home}/lib/rt.jar">
+        <javadoc sourcepathref="sourcepath" excludepackagenames="org.semanticweb.HermiT.datatypes.xmlliteral.*" destdir="${javadocdir}" access="protected" author="false" version="true" use="true" bootclasspath="${java.home}/lib/rt.jar">
             <classpath refid="classpath"/>
             <classpath refid="testclasspath"/>
             <package name="org.semanticweb.HermiT.*"/>

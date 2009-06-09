@@ -32,6 +32,7 @@ import org.w3c.dom.Node;
  * and at the same time in a list so it can be removed when the frame is pop back.
  * @author Raul Benito
  **/
+@SuppressWarnings("unchecked")
 public class NameSpaceSymbTable {
 	
 	/**The map betwen prefix-> entry table. */
@@ -318,7 +319,7 @@ class NameSpaceSymbEntry implements Cloneable {
     /**The attribute to include.*/
     Attr n;        
 };
-
+@SuppressWarnings("unchecked")
 class SymbMap implements Cloneable{	
 	int free=23;
 	NameSpaceSymbEntry[] entries=new NameSpaceSymbEntry[free];
@@ -391,7 +392,6 @@ class SymbMap implements Cloneable{
 	        return  entries[index(key)];
 	    }
 	 protected Object clone()  {
-		// TODO Auto-generated method stub
 		try {
 			SymbMap copy=(SymbMap) super.clone();
 			copy.entries=new NameSpaceSymbEntry[entries.length];
@@ -401,7 +401,6 @@ class SymbMap implements Cloneable{
 			
 			return copy;
 		} catch (CloneNotSupportedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;

@@ -42,11 +42,8 @@ import org.w3c.dom.Node;
  * @author $Author: raul $
  * @see <A HREF="http://www.xml.com/lpt/a/2001/11/07/id.html">"Identity Crisis" on xml.com</A>
  */
+@SuppressWarnings("unchecked")
 public class IdResolver {
-
-   /** {@link java.util.logging} logging facility */
-    static java.util.logging.Logger log =
-        java.util.logging.Logger.getLogger(IdResolver.class.getName());
 
    static WeakHashMap docMap = new WeakHashMap();
     
@@ -99,20 +96,12 @@ public class IdResolver {
       result = IdResolver.getElementByIdType(doc, id);
 
       if (result != null) {
-         if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, 
-            "I could find an Element using the simple getElementByIdType method: "
-            + result.getTagName());
-
          return result;
       }
 
        result = IdResolver.getElementByIdUsingDOM(doc, id);
 
        if (result != null) {
-          if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, 
-             "I could find an Element using the simple getElementByIdUsingDOM method: "
-            + result.getTagName());
-
          return result;
       }
        // this must be done so that Xalan can catch ALL namespaces
@@ -137,8 +126,6 @@ public class IdResolver {
      * @return the element obtained by the Id, or null if it is not found.
      */
     private static Element getElementByIdUsingDOM(Document doc, String id) {
-        if (true)
-        	if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "getElementByIdUsingDOM() Search for ID " + id);
         return doc.getElementById(id);
     }
 
@@ -150,8 +137,6 @@ public class IdResolver {
     * @return the element obtained by the Id, or null if it is not found.
     */
    private static Element getElementByIdType(Document doc, String id) {
-   	  if (true)
-   	  	if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "getElementByIdType() Search for ID " + id);
        WeakHashMap elementMap = (WeakHashMap) docMap.get(doc);
        if (elementMap != null) {
            WeakReference weakReference = (WeakReference) elementMap.get(id);
@@ -217,6 +202,7 @@ public class IdResolver {
 				   els[3]=el;				   
 			   }
 		   }
+		   break;
 	   	case Node.DOCUMENT_NODE:
 			Node sibling=root.getFirstChild();
 			while (sibling!=null) {
@@ -224,6 +210,7 @@ public class IdResolver {
 					return 1;
 				sibling=sibling.getNextSibling();
 			}
+			break;
 	   }
 	   return 0;
    }

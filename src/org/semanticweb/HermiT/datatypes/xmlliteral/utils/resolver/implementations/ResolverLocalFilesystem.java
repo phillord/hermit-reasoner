@@ -33,11 +33,6 @@ import com.sun.org.apache.xml.internal.utils.URI;
  */
 public class ResolverLocalFilesystem extends ResourceResolverSpi {
 
-   /** {@link java.util.logging} logging facility */
-    static java.util.logging.Logger log = 
-        java.util.logging.Logger.getLogger(
-                    ResolverLocalFilesystem.class.getName());
-
    /**
     * @inheritDoc
     */
@@ -121,20 +116,11 @@ public class ResolverLocalFilesystem extends ResourceResolverSpi {
       }
 
       try {
-	         //URI uriNew = new URI(new URI(BaseURI), uri.getNodeValue());
-	         if (true)
-	         	if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "I was asked whether I can resolve " + uriNodeValue/*uriNew.toString()*/);
-
 	         if ( uriNodeValue.startsWith("file:") ||
 					 BaseURI.startsWith("file:")/*uriNew.getScheme().equals("file")*/) {
-	            if (true)
-	            	if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "I state that I can resolve " + uriNodeValue/*uriNew.toString()*/);
-
 	            return true;
 	         }
       } catch (Exception e) {}
-
-      if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "But I can't");
 
       return false;
    }

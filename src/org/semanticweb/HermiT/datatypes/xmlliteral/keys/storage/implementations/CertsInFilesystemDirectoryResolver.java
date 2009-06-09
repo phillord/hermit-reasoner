@@ -43,6 +43,7 @@ import org.semanticweb.HermiT.datatypes.xmlliteral.utils.Base64;
  *
  * @author $Author: raul $
  */
+@SuppressWarnings("unchecked")
 public class CertsInFilesystemDirectoryResolver extends StorageResolverSpi {
 
    /** {@link java.util.logging} logging facility */

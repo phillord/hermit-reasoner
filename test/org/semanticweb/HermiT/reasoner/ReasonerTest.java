@@ -1,5 +1,8 @@
 package org.semanticweb.HermiT.reasoner;
 
+import java.io.CharArrayWriter;
+import java.io.PrintWriter;
+
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.IRI;
 import org.semanticweb.owl.model.OWLClass;
@@ -10,10 +13,6 @@ import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLObjectMaxCardinality;
 import org.semanticweb.owl.model.OWLObjectProperty;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
-
-
-
-
 
 public class ReasonerTest extends AbstractReasonerTest {
 
@@ -1932,13 +1931,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(buffer.toString());
         assertABoxSatisfiable(true);
     }
-    
-//    public void testInverses() throws Exception {
-//        StringBuffer buffer = new StringBuffer();
-//        buffer.append("EquivalentObjectProperties( :hasPart ObjectInverseOf( :partOf ) ) ObjectPropertyAssertion(:hasPart :a :b) NegativeObjectPropertyAssertion(:isPartOf :b :a)");
-//        loadReasonerWithAxioms(buffer.toString());
-//        assertABoxSatisfiable(false);
-//    }
+
     public void testInverses2() throws Exception {
         StringBuffer buffer = new StringBuffer();
         buffer.append("InverseObjectProperties( :hasPart :partOf ) ObjectPropertyAssertion(:hasPart :a :b) NegativeObjectPropertyAssertion(:partOf :b :a)");
@@ -1946,6 +1939,29 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertABoxSatisfiable(false);
     }
     
+    public void testMissingCBug() throws Exception {
+        String axioms = "EquivalentClasses(:C ObjectMinCardinality(0 :p owl:Nothing))";
+        loadReasonerWithAxioms(axioms);
+        m_reasoner.classify();
+        CharArrayWriter buffer=new CharArrayWriter();
+        PrintWriter output=new PrintWriter(buffer);
+        m_reasoner.printHierarchies(output,true,true,true);
+        output.flush();
+        m_reasoner.classify();
+        CharArrayWriter buffer2=new CharArrayWriter();
+        PrintWriter output2=new PrintWriter(buffer2);
+        m_reasoner.printHierarchies(output2,true,true,true);
+        output2.flush();
+        assertTrue(buffer.toString().equals(buffer2.toString()));
+    }
+    
+    // the following tests cause still parsing errors with the OWL API, I reported that to Matthew
+//  public void testInverses() throws Exception {
+//  StringBuffer buffer = new StringBuffer();
+//  buffer.append("EquivalentObjectProperties( :hasPart ObjectInverseOf( :partOf ) ) ObjectPropertyAssertion(:hasPart :a :b) NegativeObjectPropertyAssertion(:isPartOf :b :a)");
+//  loadReasonerWithAxioms(buffer.toString());
+//  assertABoxSatisfiable(false);
+//}
 //    public void testAnonymousIndiviuals() throws Exception {
 //        StringBuffer buffer = new StringBuffer();
 //        buffer.append("Individual(value( :city :Paris ) value( :region :IleDeFrance ))");

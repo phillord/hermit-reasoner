@@ -39,6 +39,7 @@ import org.w3c.dom.Attr;
  * $todo$ Should we implement java.util.Comparator and import java.util.Arrays to use Arrays.sort(intarray);
  * @author Christian Geuer-Pollmann
  */
+@SuppressWarnings("unchecked")
 public class AttrCompare implements java.util.Comparator {
 
    private final int ATTR0_BEFORE_ATTR1 = -1;

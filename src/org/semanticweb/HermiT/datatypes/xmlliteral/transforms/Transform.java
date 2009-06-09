@@ -54,6 +54,7 @@ import org.xml.sax.SAXException;
  * @see TransformSpi
  *
  */
+@SuppressWarnings("unchecked")
 public final class Transform extends SignatureElementProxy {
 
    /** {@link java.util.logging} logging facility */

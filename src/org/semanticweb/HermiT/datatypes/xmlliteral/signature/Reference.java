@@ -96,6 +96,7 @@ import org.w3c.dom.Text;
  * @see ObjectContainer
  * @see Manifest
  */
+@SuppressWarnings("unchecked")
 public class Reference extends SignatureElementProxy {
 
    /** {@link java.util.logging} logging facility */
@@ -123,7 +124,6 @@ public class Reference extends SignatureElementProxy {
     * @param manifest
     * @param transforms {@link Transforms} applied to data
     * @param messageDigestAlgorithm {@link MessageDigestAlgorithm Digest algorithm} which is applied to the data
-    * TODO should we throw XMLSignatureException if MessageDigestAlgoURI is wrong?
     * @throws XMLSignatureException
     */
    protected Reference(Document doc, String BaseURI, String ReferenceURI, Manifest manifest, Transforms transforms, String messageDigestAlgorithm)
@@ -393,30 +393,6 @@ public class Reference extends SignatureElementProxy {
       } catch (XMLSecurityException ex) {
          throw new ReferenceNotInitializedException("empty", ex);
       }
-   }
-
-   /**
-    * Returns the data which is referenced by the URI attribute. This method
-    * only works works after a call to verify.
-    * @return a XMLSignature with a byte array.
-    * @throws ReferenceNotInitializedException
-    *
-    * @deprecated use getContentsBeforeTransformation
-    */
-   public XMLSignatureInput getTransformsInput() throws ReferenceNotInitializedException   
-	{  
-   		XMLSignatureInput input=getContentsBeforeTransformation();
-   		XMLSignatureInput result;
-		try {
-			result = new XMLSignatureInput(input.getBytes());
-		} catch (CanonicalizationException ex) {
-			 throw new ReferenceNotInitializedException("empty", ex);
-		} catch (IOException ex) {
-			 throw new ReferenceNotInitializedException("empty", ex);
-		}
-		result.setSourceURI(input.getSourceURI());   
-		return result;
-	
    }
 
    private XMLSignatureInput getContentsAfterTransformation(XMLSignatureInput input, OutputStream os)

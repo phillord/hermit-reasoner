@@ -70,7 +70,8 @@ public class FuncHereContext extends XPathContext {
     * This constuctor is disabled because if we use the here() function we
     * <I>always</I> need to know in which node the XPath occured.
     */
-   private FuncHereContext() {}
+   @SuppressWarnings("unused")
+private FuncHereContext() {}
 
    /**
     * Constructor FuncHereContext

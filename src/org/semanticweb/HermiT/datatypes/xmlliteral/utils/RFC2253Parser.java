@@ -27,12 +27,6 @@ import java.io.StringReader;
  */
 public class RFC2253Parser {
 
-    
-   /** {@link java.util.logging} logging facility */
-   /* static java.util.logging.Logger log = 
-        java.util.logging.Logger.getLogger(RFC2253Parser.class.getName());
-   */
-    
    static boolean _TOXML = true;
 
    /**

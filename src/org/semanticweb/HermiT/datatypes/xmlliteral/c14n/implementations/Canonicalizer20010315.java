@@ -42,6 +42,7 @@ import org.w3c.dom.Node;
  * @author Christian Geuer-Pollmann <geuerp@apache.org>
  * @version $Revision: 1.37 $
  */
+@SuppressWarnings("unchecked")
 public abstract class Canonicalizer20010315 extends CanonicalizerBase {
 	boolean firstCall=true;
 	final SortedSet result= new TreeSet(COMPARE);

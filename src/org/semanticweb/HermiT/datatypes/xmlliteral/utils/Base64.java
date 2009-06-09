@@ -49,11 +49,6 @@ import org.xml.sax.InputSource;
  */
 public class Base64 {
 
-   /** {@link java.util.logging} logging facility */
-    static java.util.logging.Logger log = 
-        java.util.logging.Logger.getLogger(Base64.class.getName());
-
-
    /** Field BASE64DEFAULTLENGTH */
    public static final int BASE64DEFAULTLENGTH = 76;
 

@@ -46,6 +46,7 @@ import org.w3c.dom.Element;
  *
  * @author Axl Mattheus
  */
+@SuppressWarnings("unchecked")
 public interface EncryptionProperty {
     /**
      * Returns the <code>EncryptedType</code> being described.
@@ -55,11 +56,6 @@ public interface EncryptionProperty {
      */
     String getTarget();
 
-    /**
-     * Sets the target.
-     *
-     * @param target.
-     */
     void setTarget(String target);
 
     /**
@@ -69,11 +65,6 @@ public interface EncryptionProperty {
      */
     String getId();
 
-    /**
-     * Sets the id.
-     *
-     * @param id.
-     */
     void setId(String id);
 
     /**
@@ -92,12 +83,6 @@ public interface EncryptionProperty {
      */
     void setAttribute(String attribute, String value);
 
-    /**
-     * Returns the properties of the <CODE>EncryptionProperty</CODE>.
-     *
-     * @return an <code>Iterator</code> over all the addiitonal encryption
-     *   information contained in this class.
-     */
     Iterator getEncryptionInformation();
 
     /**

@@ -41,6 +41,7 @@ import org.w3c.dom.Element;
  *
  * @author Axl Mattheus
  */
+@SuppressWarnings("unchecked")
 public interface EncryptionMethod {
     /**
      * Returns the algorithm applied to the cipher data.

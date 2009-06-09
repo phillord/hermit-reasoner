@@ -40,6 +40,7 @@ import org.w3c.dom.Element;
  *
  * @author Christian Geuer-Pollmann
  */
+@SuppressWarnings("unchecked")
 public class InclusiveNamespaces extends ElementProxy
         implements TransformParam {
 

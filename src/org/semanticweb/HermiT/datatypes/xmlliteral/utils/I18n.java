@@ -28,6 +28,7 @@ import java.util.ResourceBundle;
  *
  * @author Christian Geuer-Pollmann
  */
+
 public class I18n {
 
    /** Field NOT_INITIALIZED_MSG */
@@ -37,10 +38,12 @@ public class I18n {
       + "before you use any functionality from that library.";
 
    /** Field defaultLanguageCode */
-   private static String defaultLanguageCode;    // will be set in static{} block
+   @SuppressWarnings("unused")
+private static String defaultLanguageCode;    // will be set in static{} block
 
    /** Field defaultCountryCode */
-   private static String defaultCountryCode;    // will be set in static{} block
+   @SuppressWarnings("unused")
+private static String defaultCountryCode;    // will be set in static{} block
 
    /** Field resourceBundle */
    private static ResourceBundle resourceBundle =
@@ -48,13 +51,16 @@ public class I18n {
 	(Constants.exceptionMessagesResourceBundleBase, Locale.US);
 
    /** Field alreadyInitialized */
-   private static boolean alreadyInitialized = false;
+   @SuppressWarnings("unused")
+private static boolean alreadyInitialized = false;
 
    /** Field _languageCode */
-   private static String _languageCode = null;
+   @SuppressWarnings("unused")
+private static String _languageCode = null;
 
    /** Field _countryCode */
-   private static String _countryCode = null;
+   @SuppressWarnings("unused")
+private static String _countryCode = null;
 
    /**
     * Constructor I18n

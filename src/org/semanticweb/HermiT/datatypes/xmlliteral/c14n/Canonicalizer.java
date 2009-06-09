@@ -39,6 +39,7 @@ import org.xml.sax.InputSource;
  *
  * @author Christian Geuer-Pollmann
  */
+@SuppressWarnings("unchecked")
 public class Canonicalizer {
 
    //J-
@@ -79,7 +80,8 @@ public class Canonicalizer {
     * Method init
     *
     */
-   public static void init() {
+   
+public static void init() {
 
       if (!Canonicalizer._alreadyInitialized) {
          Canonicalizer._canonicalizerHash = new HashMap(10);
@@ -93,7 +95,7 @@ public class Canonicalizer {
     * @param algorithmURI
     * @throws InvalidCanonicalizerException
     */
-   private Canonicalizer(String algorithmURI)
+    private Canonicalizer(String algorithmURI)
            throws InvalidCanonicalizerException {
 
       try {
@@ -132,7 +134,7 @@ public class Canonicalizer {
     * @param implementingClass
     * @throws AlgorithmAlreadyRegisteredException
     */
-   public static void register(String algorithmURI, String implementingClass)
+public static void register(String algorithmURI, String implementingClass)
            throws AlgorithmAlreadyRegisteredException {
 
       // check whether URI is already registered
@@ -292,7 +294,7 @@ public class Canonicalizer {
     * @return the result of the c14n.
     * @throws CanonicalizationException
     */
-   public byte[] canonicalizeXPathNodeSet(Set xpathNodeSet)
+public byte[] canonicalizeXPathNodeSet(Set xpathNodeSet)
            throws CanonicalizationException {
        return this.canonicalizerSpi.engineCanonicalizeXPathNodeSet(xpathNodeSet);
    }
@@ -305,7 +307,7 @@ public class Canonicalizer {
     * @return the result of the c14n.
     * @throws CanonicalizationException
     */
-   public byte[] canonicalizeXPathNodeSet(
+public byte[] canonicalizeXPathNodeSet(
            Set xpathNodeSet, String inclusiveNamespaces)
               throws CanonicalizationException {
        return this.canonicalizerSpi.engineCanonicalizeXPathNodeSet(xpathNodeSet,
@@ -336,7 +338,7 @@ public class Canonicalizer {
     * @param URI
     * @return the name of the class that implements the give URI
     */
-   private static Class getImplementingClass(String URI) {
+private static Class getImplementingClass(String URI) {
       return (Class) _canonicalizerHash.get(URI);         
    }
    

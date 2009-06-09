@@ -33,12 +33,7 @@ import org.w3c.dom.Element;
  * @author $Author: raul $
  *
  */
-public class XMLX509CRL extends SignatureElementProxy
-        implements XMLX509DataContent {
-
-   /** {@link java.util.logging} logging facility */
-    static java.util.logging.Logger log = 
-        java.util.logging.Logger.getLogger(XMLX509CRL.class.getName());
+public class XMLX509CRL extends SignatureElementProxy {
 
    /**
     * Constructor XMLX509CRL

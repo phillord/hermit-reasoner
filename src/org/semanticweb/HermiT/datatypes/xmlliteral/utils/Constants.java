@@ -30,10 +30,6 @@ import org.semanticweb.HermiT.datatypes.xmlliteral.exceptions.XMLSecurityExcepti
  */
 public class Constants {
 
-   /** {@link java.util.logging} logging facility */
-   static java.util.logging.Logger log = 
-        java.util.logging.Logger.getLogger(Constants.class.getName());
-
    /** Field configurationFile */
    public static final String configurationFile = "data/websig.conf";
 

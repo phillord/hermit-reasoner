@@ -51,6 +51,7 @@ import com.sun.org.apache.xpath.internal.res.XPATHErrorResources;
  *
  * @see "http://www.w3.org/Signature/Drafts/xmldsig-core/Overview.html#function-here"
  */
+@SuppressWarnings("unchecked")
 public class FuncHere extends Function {
 
    /**

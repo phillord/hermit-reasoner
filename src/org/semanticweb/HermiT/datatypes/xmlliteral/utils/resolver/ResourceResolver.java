@@ -45,11 +45,8 @@ import org.w3c.dom.Attr;
  *
  * @author $Author: raul $
  */
+@SuppressWarnings("unchecked")
 public class ResourceResolver {
-
-   /** {@link java.util.logging} logging facility */
-    static java.util.logging.Logger log = 
-        java.util.logging.Logger.getLogger(ResourceResolver.class.getName());
 
    /** Field _alreadyInitialized */
    static boolean _alreadyInitialized = false;
@@ -102,10 +99,6 @@ public class ResourceResolver {
       for (int i = 0; i < length; i++) {
 		  ResourceResolver resolver =
             (ResourceResolver) ResourceResolver._resolverVector.get(i);
-         
-
-         if (true)
-         	if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "check resolvability by class " + resolver.getClass().getName());
 
          if ((resolver != null) && resolver.canResolve(uri, BaseURI)) {
             return resolver;
@@ -132,10 +125,6 @@ public class ResourceResolver {
    public static final ResourceResolver getInstance(
            Attr uri, String BaseURI, List individualResolvers)
               throws ResourceResolverException {
-      if (true) {
-      	if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "I was asked to create a ResourceResolver and got " + individualResolvers.size());
-      	if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, " extra resolvers to my existing " + ResourceResolver._resolverVector.size() + " system-wide resolvers");
-      }
 
       // first check the individual Resolvers
 	  int size=0;
@@ -145,9 +134,7 @@ public class ResourceResolver {
                (ResourceResolver) individualResolvers.get(i);
 
             if (resolver != null) {
-               String currentClass = resolver._resolverSpi.getClass().getName();
-               if (true)
-               	if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "check resolvability by class " + currentClass);
+//               String currentClass = resolver._resolverSpi.getClass().getName();
 
                if (resolver.canResolve(uri, BaseURI)) {
                   return resolver;
@@ -182,15 +169,7 @@ public class ResourceResolver {
            resolver = new ResourceResolver(className);
 		   ResourceResolver._resolverVector.add(resolver);
         } catch (Exception e) {
-//			Object exArgs[] = { ((uri != null)
-//                    ? uri.getNodeValue()
-//                    : "null"), BaseURI };
-//
-//			throw new ResourceResolverException("utils.resolver.noClass",
-//                                   exArgs, e, uri, BaseURI);
-			log.log(java.util.logging.Level.WARNING, "Error loading resolver " + className +" disabling it");
         } catch (NoClassDefFoundError e) {
-			log.log(java.util.logging.Level.WARNING, "Error loading resolver " + className +" disabling it");
         }
       
    }

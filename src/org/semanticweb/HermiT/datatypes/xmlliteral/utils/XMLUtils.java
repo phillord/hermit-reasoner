@@ -42,6 +42,7 @@ import org.w3c.dom.Text;
  *
  * @author Christian Geuer-Pollmann
  */
+@SuppressWarnings("unchecked")
 public class XMLUtils {
 
    /**
@@ -66,6 +67,8 @@ public class XMLUtils {
       }
       getSetRec(rootNode,result,exclude,com);
    }
+   @SuppressWarnings("fallthrough")
+
    static final void getSetRec(final Node rootNode,final Set result,
         final Node exclude ,final boolean com) {
    	   //Set result = new HashSet();
@@ -441,6 +444,8 @@ public class XMLUtils {
     * @param node
     * @see <A HREF="http://nagoya.apache.org/bugzilla/show_bug.cgi?id=2650">Namespace axis resolution is not XPath compliant </A>
     */
+   @SuppressWarnings("fallthrough")
+
    private static void circumventBug2650internal(Node node) {
 	   Node parent=null;
 	   Node sibling=null;

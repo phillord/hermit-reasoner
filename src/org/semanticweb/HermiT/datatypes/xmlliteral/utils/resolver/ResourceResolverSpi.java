@@ -29,12 +29,8 @@ import org.w3c.dom.Attr;
  *
  * @author $Author: raul $
  */
+@SuppressWarnings("unchecked")
 public abstract class ResourceResolverSpi {
-
-   /** {@link java.util.logging} logging facility */
-    static java.util.logging.Logger log = 
-        java.util.logging.Logger.getLogger(
-                    ResourceResolverSpi.class.getName());
 
    /** Field _properties */
    protected java.util.Map _properties = new java.util.HashMap(10);
@@ -158,22 +154,18 @@ public abstract class ResourceResolverSpi {
       // handle platform dependent strings
       str = str.replace(java.io.File.separatorChar, '/');
 
-      if (str.length() >= 4) {
-
-         // str =~ /^\W:\/([^/])/ # to speak perl ;-))
-         char ch0 = Character.toUpperCase(str.charAt(0));
-         char ch1 = str.charAt(1);
-         char ch2 = str.charAt(2);
-         char ch3 = str.charAt(3);
-         boolean isDosFilename = ((('A' <= ch0) && (ch0 <= 'Z'))
-                                  && (ch1 == ':') && (ch2 == '/')
-                                  && (ch3 != '/'));
-
-         if (isDosFilename) {
-            if (true)
-            	if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "Found DOS filename: " + str);
-         }
-      }
+//      if (str.length() >= 4) {
+//
+//         // str =~ /^\W:\/([^/])/ # to speak perl ;-))
+////         char ch0 = Character.toUpperCase(str.charAt(0));
+////         char ch1 = str.charAt(1);
+////         char ch2 = str.charAt(2);
+////         char ch3 = str.charAt(3);
+////         boolean isDosFilename = ((('A' <= ch0) && (ch0 <= 'Z'))
+////                                  && (ch1 == ':') && (ch2 == '/')
+////                                  && (ch3 != '/'));
+//
+//      }
 
       // Windows fix
       if (str.length() >= 2) {

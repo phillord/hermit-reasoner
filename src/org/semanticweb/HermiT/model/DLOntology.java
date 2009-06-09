@@ -53,7 +53,7 @@ public class DLOntology implements Serializable {
     protected final Set<Individual> m_allIndividuals;
     protected final Set<DescriptionGraph> m_allDescriptionGraphs;
     /**
-     * @gstoil
+     * gstoil
      */
 	protected final Map<OWLObjectPropertyExpression, Automaton> m_automataOfComplexObjectProperties;
 

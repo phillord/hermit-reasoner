@@ -38,11 +38,8 @@ import org.w3c.dom.Node;
  * @author $Author: raul $
  * @version 1.3, 11/14/05
  */
+@SuppressWarnings("unchecked")
 public class KeyResolver {
-
-   /** {@link java.util.logging} logging facility */
-    static java.util.logging.Logger log = 
-        java.util.logging.Logger.getLogger(KeyResolver.class.getName());
 
    /** Field _alreadyInitialized */
    static boolean _alreadyInitialized = false;
@@ -124,9 +121,6 @@ public class KeyResolver {
 
             throw new KeyResolverException("utils.resolver.noClass", exArgs);
          }
-         if (true)
-         	if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "check resolvability by class " + resolver.getClass());
-
          if (resolver.canResolve(element, BaseURI, storage)) {
             return resolver;
          }

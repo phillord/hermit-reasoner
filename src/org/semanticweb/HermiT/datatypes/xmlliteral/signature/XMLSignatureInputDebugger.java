@@ -38,6 +38,7 @@ import org.w3c.dom.ProcessingInstruction;
  * @author $Author: raul $
  * @version $Revision: 1.3 $
  */
+@SuppressWarnings("unchecked")
 public class XMLSignatureInputDebugger {
 
 
@@ -128,10 +129,10 @@ public class XMLSignatureInputDebugger {
 
 	static final AttrCompare ATTR_COMPARE = new AttrCompare();
 
-	// J+
-	private XMLSignatureInputDebugger() {
-		// do nothing
-	}
+//	// J+
+//	private XMLSignatureInputDebugger() {
+//		// do nothing
+//	}
 
 	/**
 	 * Constructor XMLSignatureInputDebugger

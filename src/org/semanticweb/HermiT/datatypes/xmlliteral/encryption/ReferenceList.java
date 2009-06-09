@@ -40,6 +40,7 @@ import java.util.Iterator;
  * @author Axl Mattheus
  * @see Reference
  */
+@SuppressWarnings("unchecked")
 public interface ReferenceList {
 	/** DATA TAG */
     public static final int DATA_REFERENCE = 0x00000001;
@@ -85,19 +86,7 @@ public interface ReferenceList {
      */
     public Iterator getReferences();
 
-    /**
-     * <code>DataReference</code> factory method. Returns a
-     * <code>DataReference</code>.
-     * @param uri
-     * @return
-     */
     public Reference newDataReference(String uri);
 
-    /**
-     * <code>KeyReference</code> factory method. Returns a
-     * <code>KeyReference</code>.
-     * @param uri
-     * @return
-     */
     public Reference newKeyReference(String uri);
 }

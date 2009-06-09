@@ -51,11 +51,8 @@ import org.xml.sax.SAXException;
  * <p> This element holds the <code>Reference</code> elements</p>
  * @author $author: $
  */
+@SuppressWarnings("unchecked")
 public class Manifest extends SignatureElementProxy {
-
-  /** {@link java.util.logging} logging facility */
-  static java.util.logging.Logger log = 
-        java.util.logging.Logger.getLogger(Manifest.class.getName());
 
    /** Field _references */
    List _references;
@@ -290,12 +287,6 @@ public class Manifest extends SignatureElementProxy {
             XMLUtils.selectDsNodes(this._constructionElement.getFirstChild(),
                          Constants._TAG_REFERENCE);
       }
-   	  if (true) {
-   	  	if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "verify " +_referencesEl.length + " References");
-        if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "I am " + (followManifests
-                           ? ""
-                           : "not") + " requested to follow nested Manifests");
-      }
       boolean verify = true;
 
       if (_referencesEl.length==0) {
@@ -321,13 +312,10 @@ public class Manifest extends SignatureElementProxy {
             if (!currentRefVerified) {
                verify = false;
             }
-            if (true)
-            	if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "The Reference has Type " + currentRef.getType());
 
             // was verification successful till now and do we want to verify the Manifest?
             if (verify && followManifests
                     && currentRef.typeIsReferenceToManifest()) {
-               if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "We have to follow a nested Manifest");
 
                 try {
                   XMLSignatureInput signedManifestNodes =
@@ -374,10 +362,6 @@ public class Manifest extends SignatureElementProxy {
 
                   if (!referencedManifestValid) {
                      verify = false;
-
-                     log.log(java.util.logging.Level.WARNING, "The nested Manifest was invalid (bad)");
-                  } else {
-                     if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "The nested Manifest was valid (good)");
                   }
                } catch (IOException ex) {
                   throw new ReferenceNotInitializedException("empty", ex);

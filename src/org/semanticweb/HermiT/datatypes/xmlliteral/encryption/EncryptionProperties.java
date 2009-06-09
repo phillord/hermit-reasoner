@@ -41,6 +41,7 @@ import java.util.Iterator;
  *
  * @author Axl Mattheus
  */
+@SuppressWarnings("unchecked")
 public interface EncryptionProperties {
     /**
      * Returns the <code>EncryptionProperties</code>' id.
@@ -65,18 +66,8 @@ public interface EncryptionProperties {
      */
     Iterator getEncryptionProperties();
 
-    /**
-     * Adds an <code>EncryptionProperty</code>.
-     *
-     * @param property.
-     */
     void addEncryptionProperty(EncryptionProperty property);
 
-    /**
-     * Removes the specified <code>EncryptionProperty</code>.
-     *
-     * @param property.
-     */
     void removeEncryptionProperty(EncryptionProperty property);
 }
 

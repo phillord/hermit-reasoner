@@ -26,6 +26,7 @@ import java.util.Iterator;
  *
  * @author $Author: raul $
  */
+@SuppressWarnings("unchecked")
 public abstract class StorageResolverSpi {
 
    /**

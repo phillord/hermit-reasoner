@@ -40,6 +40,7 @@ import org.w3c.dom.Element;
  * @author Axl Mattheus
  * @see ReferenceList
  */
+@SuppressWarnings("unchecked")
 public interface Reference {
     /**
      * Returns a <code>URI</code> that points to an <code>Element</code> that
@@ -73,17 +74,8 @@ public interface Reference {
      */
     Iterator getElementRetrievalInformation();
 
-    /**
-     * Adds retrieval information.
-     *
-     * @param info.
-     */
+
     void addElementRetrievalInformation(Element info);
 
-    /**
-     * Removes the specified retrieval information.
-     *
-     * @param info.
-     */
     void removeElementRetrievalInformation(Element info);
 }

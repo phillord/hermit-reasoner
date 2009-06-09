@@ -38,6 +38,7 @@ import org.xml.sax.InputSource;
  * $todo$ cange JavaDoc
  * @author Christian Geuer-Pollmann
  */
+@SuppressWarnings("unchecked")
 public abstract class CanonicalizerSpi {
 
    /**

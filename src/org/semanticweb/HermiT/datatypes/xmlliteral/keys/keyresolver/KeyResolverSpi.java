@@ -40,6 +40,7 @@ import org.w3c.dom.Element;
  * @author $Author: raul $
  * @version $Revision: 1.11 $
  */
+@SuppressWarnings("unchecked")
 public abstract class KeyResolverSpi {
 
    /** {@link java.util.logging} logging facility */

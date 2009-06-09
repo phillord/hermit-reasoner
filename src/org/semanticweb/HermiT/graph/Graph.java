@@ -61,7 +61,7 @@ public class Graph<T> {
         return result;
     }
     /**
-     * @gstoil addition
+     * gstoil addition
      */
     public Graph<T> clone() {
         Graph<T> result=new Graph<T>();
@@ -73,7 +73,7 @@ public class Graph<T> {
         return result;
     }
     /**
-     * @gstoil addition
+     * gstoil addition
      */
 	public void removeElements(Set<T> elements) {
 		for(T element : elements){

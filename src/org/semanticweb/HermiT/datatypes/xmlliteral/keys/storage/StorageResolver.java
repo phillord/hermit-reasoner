@@ -34,6 +34,7 @@ import org.semanticweb.HermiT.datatypes.xmlliteral.keys.storage.implementations.
  *
  * @author $Author: raul $
  */
+@SuppressWarnings("unchecked")
 public class StorageResolver {
 
    /** {@link java.util.logging} logging facility */

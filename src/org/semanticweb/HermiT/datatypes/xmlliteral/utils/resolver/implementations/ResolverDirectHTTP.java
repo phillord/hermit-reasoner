@@ -59,11 +59,6 @@ import com.sun.org.apache.xml.internal.utils.URI;
  */
 public class ResolverDirectHTTP extends ResourceResolverSpi {
 
-   /** {@link java.util.logging} logging facility */
-    static java.util.logging.Logger log = 
-        java.util.logging.Logger.getLogger(
-                            ResolverDirectHTTP.class.getName());
-
    /** Field properties[] */
    static final String properties[] = { "http.proxy.host", "http.proxy.port",
                                         "http.proxy.username",
@@ -127,9 +122,6 @@ public class ResolverDirectHTTP extends ResourceResolverSpi {
 
          // switch on proxy usage
          if (useProxy) {
-            if (true)
-            	if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "Use of HTTP proxy enabled: " + proxyHost + ":"
-                      + proxyPort);
             System.getProperties().put("http.proxySet", "true");
             System.getProperties().put("http.proxyHost", proxyHost);
             System.getProperties().put("http.proxyPort", proxyPort);
@@ -210,10 +202,6 @@ public class ResolverDirectHTTP extends ResourceResolverSpi {
 
             summarized += read;
          }
-
-         if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "Fetched " + summarized + " bytes from URI "
-                   + uriNew.toString());
-
          XMLSignatureInput result = new XMLSignatureInput(baos.toByteArray());
 
          // XMLSignatureInput result = new XMLSignatureInput(inputStream);
@@ -246,33 +234,17 @@ public class ResolverDirectHTTP extends ResourceResolverSpi {
     */
    public boolean engineCanResolve(Attr uri, String BaseURI) {
       if (uri == null) {
-         if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "quick fail, uri == null");
-
          return false;
       }
 
       String uriNodeValue = uri.getNodeValue();
 
       if (uriNodeValue.equals("") || (uriNodeValue.charAt(0)=='#')) {
-         if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "quick fail for empty URIs and local ones");
-
          return false;
       }
-
-      if (true)
-      	if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "I was asked whether I can resolve " + uriNodeValue);
-
-      if ( uriNodeValue.startsWith("http:") ||
-				 BaseURI.startsWith("http:")) {
-         if (true)
-         	if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "I state that I can resolve " + uriNodeValue);
-
+      if ( uriNodeValue.startsWith("http:") || BaseURI.startsWith("http:")) {
          return true;
       }
-
-      if (true)
-      	if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "I state that I can't resolve " + uriNodeValue);
-
       return false;
    }
 

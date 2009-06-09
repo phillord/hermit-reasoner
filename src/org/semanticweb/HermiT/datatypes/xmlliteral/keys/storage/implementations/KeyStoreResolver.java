@@ -35,6 +35,7 @@ import org.semanticweb.HermiT.datatypes.xmlliteral.keys.storage.StorageResolverS
  *
  * @author $Author: raul $
  */
+@SuppressWarnings("unchecked")
 public class KeyStoreResolver extends StorageResolverSpi {
 
    /** Field _keyStore */

@@ -31,6 +31,7 @@ import org.semanticweb.HermiT.datatypes.xmlliteral.keys.storage.StorageResolverS
  *
  * @author $Author: raul $
  */
+@SuppressWarnings("unchecked")
 public class SingleCertificateResolver extends StorageResolverSpi {
 
    /** Field _certificate */

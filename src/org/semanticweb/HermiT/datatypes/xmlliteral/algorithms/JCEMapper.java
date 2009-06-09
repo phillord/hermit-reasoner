@@ -32,6 +32,7 @@ import org.w3c.dom.Element;
  *
  * @author $Author: raul $
  */
+@SuppressWarnings("unchecked")
 public class JCEMapper {
 
    /** {@link java.util.logging} logging facility */
@@ -40,9 +41,10 @@ public class JCEMapper {
 
 
    
-   private static Map uriToJCEName = new HashMap();
    
-   private static Map algorithmsMap = new HashMap();
+private static Map uriToJCEName = new HashMap();
+   
+private static Map algorithmsMap = new HashMap();
 
    private static String providerName = null;
    /**
@@ -56,7 +58,7 @@ public class JCEMapper {
       loadAlgorithms((Element)mappingElement.getElementsByTagName("Algorithms").item(0));
    }
 
-   static void loadAlgorithms( Element algorithmsEl) {
+static void loadAlgorithms( Element algorithmsEl) {
        Element[] algorithms = XMLUtils.selectNodes(algorithmsEl.getFirstChild(),Init.CONF_NS,"Algorithm");
        for (int i = 0 ;i < algorithms.length ;i ++) {
            Element el = algorithms[i];

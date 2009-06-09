@@ -24,6 +24,7 @@ import com.sun.org.apache.xpath.internal.CachedXPathAPI;
 /**
  * @author Raul Benito
  */
+@SuppressWarnings("unchecked")
 public class CachedXPathAPIHolder {
 	 static java.util.logging.Logger log = 
 	        java.util.logging.Logger.getLogger(CachedXPathAPIHolder.class.getName());

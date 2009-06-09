@@ -34,8 +34,7 @@ import org.w3c.dom.Element;
  *
  * @author $Author: raul $
  */
-public class XMLX509IssuerSerial extends SignatureElementProxy
-        implements XMLX509DataContent {
+public class XMLX509IssuerSerial extends SignatureElementProxy {
 
    /** {@link java.util.logging} logging facility */
     static java.util.logging.Logger log = 

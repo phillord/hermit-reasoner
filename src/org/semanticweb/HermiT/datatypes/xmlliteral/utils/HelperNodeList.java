@@ -31,11 +31,8 @@ import org.w3c.dom.NodeList;
  * @author Christian Geuer-Pollmann
  *
  */
+@SuppressWarnings("unchecked")
 public class HelperNodeList implements NodeList {
-
-   /** {@link java.util.logging} logging facility */
-    static java.util.logging.Logger log = 
-    java.util.logging.Logger.getLogger(HelperNodeList.class.getName());
 
    /** Field nodes */
    ArrayList nodes = new ArrayList(20);

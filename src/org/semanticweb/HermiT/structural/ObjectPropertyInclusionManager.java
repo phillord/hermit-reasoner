@@ -24,7 +24,7 @@ public class ObjectPropertyInclusionManager {
     protected final Set<OWLObjectPropertyExpression> m_transitiveObjectProperties;
     protected final Map<OWLObjectAllValuesFrom,OWLClassExpression> m_replacedDescriptions;
     /**
-     * @gstoil additions
+     * gstoil additions
      */
     protected final Map<OWLObjectPropertyExpression,Automaton> m_automataForComplexRoles;
     protected final Set<OWLObjectPropertyExpression> m_nonSimpleRoles;                                                                                                                                          
@@ -36,7 +36,7 @@ public class ObjectPropertyInclusionManager {
         m_replacedDescriptions=new HashMap<OWLObjectAllValuesFrom,OWLClassExpression>();
 
         /**
-         * @gstoil additions
+         * gstoil additions
          */
         m_automataForComplexRoles = new HashMap<OWLObjectPropertyExpression,Automaton>();
         m_nonSimpleRoles = new HashSet<OWLObjectPropertyExpression>();
@@ -85,7 +85,7 @@ public class ObjectPropertyInclusionManager {
     }
     public Map<OWLObjectPropertyExpression,Automaton> rewriteAxioms(OWLAxioms axioms) {
         /**
-         * @gstoil additions modifications
+         * gstoil additions modifications
          */
 //        m_subObjectProperties.transitivelyClose();
         for (OWLClassExpression[] inclusion : axioms.m_conceptInclusions)
@@ -166,7 +166,7 @@ public class ObjectPropertyInclusionManager {
     }
     protected OWLClassExpression replaceDescriptionIfNecessary(OWLClassExpression desc) {
         /**
-         * @gstoil modifications/additions
+         * gstoil modifications/additions
          */
         if (desc instanceof OWLObjectAllValuesFrom) {
             OWLObjectAllValuesFrom objectAll=(OWLObjectAllValuesFrom)desc;
@@ -200,7 +200,7 @@ public class ObjectPropertyInclusionManager {
         return replacement;
     }
     /**
-     * @gstoil This is not used anymore
+     * gstoil This is not used anymore
      */
     protected Set<OWLObjectPropertyExpression> getTransitiveSubObjectProperties(OWLObjectPropertyExpression objectProperty) {
         Set<OWLObjectPropertyExpression> result=new HashSet<OWLObjectPropertyExpression>();

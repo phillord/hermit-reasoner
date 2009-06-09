@@ -55,6 +55,7 @@ import org.xml.sax.SAXException;
  * @author Christian Geuer-Pollmann <geuerp@apache.org>
  * @version $Revision: 1.23 $
  */
+@SuppressWarnings("unchecked")
 public abstract class CanonicalizerBase extends CanonicalizerSpi {
    //Constants to be outputed, In char array form, so
    //less garbage is generate when outputed.
@@ -88,7 +89,7 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
         throw new RuntimeException("Unable to create nullNode"/*,*/+e);
     }
    }
-   
+
    List nodeFilter;
    
    boolean _includeComments;
@@ -350,7 +351,7 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
     * @param xpathNodeSet
     * @throws CanonicalizationException
     */
-   public byte[] engineCanonicalizeXPathNodeSet(Set xpathNodeSet)
+public byte[] engineCanonicalizeXPathNodeSet(Set xpathNodeSet)
            throws CanonicalizationException {
 	   this._xpathNodeSet = xpathNodeSet;
 	   return engineCanonicalizeXPathNodeSetInternal(XMLUtils.getOwnerDocument(this._xpathNodeSet));
@@ -385,7 +386,7 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
     * @throws CanonicalizationException
     * @throws IOException
     */
-   final void canonicalizeXPathNodeSet(Node currentNode,Node endnode )
+final void canonicalizeXPathNodeSet(Node currentNode,Node endnode )
            throws CanonicalizationException, IOException {
 	   boolean currentNodeIsVisible = false;	  
 	   NameSpaceSymbTable ns=new  NameSpaceSymbTable();

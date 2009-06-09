@@ -26,7 +26,6 @@ import java.lang.reflect.Method;
 import java.security.cert.X509Certificate;
 
 import org.semanticweb.HermiT.datatypes.xmlliteral.exceptions.XMLSecurityException;
-import org.semanticweb.HermiT.datatypes.xmlliteral.utils.Base64;
 import org.semanticweb.HermiT.datatypes.xmlliteral.utils.Constants;
 import org.semanticweb.HermiT.datatypes.xmlliteral.utils.SignatureElementProxy;
 import org.w3c.dom.Document;
@@ -41,12 +40,8 @@ import sun.security.util.DerValue;
  * @author $Author: raul $
  * @see <A HREF="http://java.sun.com/products/jdk/1.2/docs/api/java/security/cert/X509Extension.html">Interface X509Extension</A>
  */
-public class XMLX509SKI extends SignatureElementProxy
-        implements XMLX509DataContent {
-
-   /** {@link java.util.logging} logging facility */
-    static java.util.logging.Logger log = 
-        java.util.logging.Logger.getLogger(XMLX509SKI.class.getName());
+@SuppressWarnings("unchecked")
+public class XMLX509SKI extends SignatureElementProxy {
 
    /**
     * <CODE>SubjectKeyIdentifier (id-ce-subjectKeyIdentifier) (2.5.29.14)</CODE>:
@@ -185,13 +180,6 @@ public class XMLX509SKI extends SignatureElementProxy
          byte abyte0[] = new byte[extensionValue.length - 2];
 
          System.arraycopy(extensionValue, 2, abyte0, 0, abyte0.length);
-
-         /*
-         byte abyte0[] = new byte[derEncodedValue.length - 4];
-         System.arraycopy(derEncodedValue, 4, abyte0, 0, abyte0.length);
-         */
-         if (true)
-         	if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "Base64 of SKI is " + Base64.encode(abyte0));
 
          return abyte0;
       } catch (IOException ex) {

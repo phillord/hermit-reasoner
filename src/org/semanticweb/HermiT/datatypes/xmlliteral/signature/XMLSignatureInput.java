@@ -24,7 +24,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -50,6 +49,7 @@ import org.xml.sax.SAXException;
  * @author Christian Geuer-Pollmann
  * $todo$ check whether an XMLSignatureInput can be _both_, octet stream _and_ node set?
  */
+@SuppressWarnings("unchecked")
 public class XMLSignatureInput  implements Cloneable {
 	 static java.util.logging.Logger log = 
 	        java.util.logging.Logger.getLogger(XMLSignatureInput.class.getName());
@@ -152,31 +152,31 @@ public class XMLSignatureInput  implements Cloneable {
 
    }
 
-   /**
-    * Construct a XMLSignatureInput from a String.
-    * <p>
-    * This is a comfort method, which internally converts the String into a byte[] array using the {@link java.lang.String#getBytes()} method.
-    * @deprecated
-    * @param inputStr the input String which including XML document or node
-    */
-   public XMLSignatureInput(String inputStr) {
-      this(inputStr.getBytes());
-   }
+//   /**
+//    * Construct a XMLSignatureInput from a String.
+//    * <p>
+//    * This is a comfort method, which internally converts the String into a byte[] array using the {@link java.lang.String#getBytes()} method.
+//    * @deprecated
+//    * @param inputStr the input String which including XML document or node
+//    */
+//   public XMLSignatureInput(String inputStr) {
+//      this(inputStr.getBytes());
+//   }
 
-   /**
-    * Construct a XMLSignatureInput from a String with a given encoding.
-    * <p>
-    * This is a comfort method, which internally converts the String into a byte[] array using the {@link java.lang.String#getBytes()} method.
-    *
-    * @deprecated
-    * @param inputStr the input String with encoding <code>encoding</code>
-    * @param encoding the encoding of <code>inputStr</code>
-    * @throws UnsupportedEncodingException
-    */
-   public XMLSignatureInput(String inputStr, String encoding)
-           throws UnsupportedEncodingException {
-      this(inputStr.getBytes(encoding));
-   }
+//   /**
+//    * Construct a XMLSignatureInput from a String with a given encoding.
+//    * <p>
+//    * This is a comfort method, which internally converts the String into a byte[] array using the {@link java.lang.String#getBytes()} method.
+//    *
+//    * @deprecated
+//    * @param inputStr the input String with encoding <code>encoding</code>
+//    * @param encoding the encoding of <code>inputStr</code>
+//    * @throws UnsupportedEncodingException
+//    */
+//   public XMLSignatureInput(String inputStr, String encoding)
+//           throws UnsupportedEncodingException {
+//      this(inputStr.getBytes(encoding));
+//   }
 
    /**
     * Construct a XMLSignatureInput from a subtree rooted by rootNode. This
@@ -567,7 +567,6 @@ public class XMLSignatureInput  implements Cloneable {
 	 * @return the node filters
 	 */
 	public List getNodeFilters() {
-		// TODO Auto-generated method stub
 		return nodeFilters;
 	}
 
