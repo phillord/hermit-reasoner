@@ -9,4 +9,5 @@ import org.semanticweb.HermiT.Prefixes;
 public interface DLPredicate {
     int getArity();
     String toString(Prefixes prefixes);
+    String toOrderedString(Prefixes prefixes);
 }

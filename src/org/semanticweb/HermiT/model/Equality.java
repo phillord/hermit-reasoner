@@ -21,6 +21,9 @@ public class Equality implements DLPredicate,Serializable {
     public String toString(Prefixes prefixes) {
         return "==";
     }
+    public String toOrderedString(Prefixes prefixes) {
+        return toString(prefixes);
+    }
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }

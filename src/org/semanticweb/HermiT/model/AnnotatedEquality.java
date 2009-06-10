@@ -38,7 +38,9 @@ public class AnnotatedEquality implements DLPredicate,Serializable {
     public String toString(Prefixes prefixes) {
         return "==@atMost("+m_cardinality+" "+m_onRole.toString(prefixes)+" "+m_toConcept.toString(prefixes)+")";
     }
-
+    public String toOrderedString(Prefixes prefixes) {
+        return toString(prefixes);
+    }
     protected static InterningManager<AnnotatedEquality> s_interningManager=new InterningManager<AnnotatedEquality>() {
         protected boolean equal(AnnotatedEquality object1,AnnotatedEquality object2) {
             return object1.m_cardinality==object2.m_cardinality && object1.m_onRole==object2.m_onRole && object1.m_toConcept==object2.m_toConcept;

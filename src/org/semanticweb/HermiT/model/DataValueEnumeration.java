@@ -4,6 +4,9 @@
 
 package org.semanticweb.HermiT.model;
 
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.datatypes.DatatypeRegistry;
 
@@ -38,6 +41,23 @@ public class DataValueEnumeration extends DataRange {
             if (m_dataValues[i].equals(dataValue))
                 return true;
         return false;
+    }
+    public String toOrderedString(Prefixes prefixes) {
+        StringBuffer buffer=new StringBuffer();
+        buffer.append("{ ");
+        SortedSet<String> dataValues = new TreeSet<String>();
+        for (Object dataValue : m_dataValues) {
+            dataValues.add(DatatypeRegistry.toString(prefixes,dataValue));
+        }
+        boolean isFirst = true;
+        for (String s : dataValues) {
+            if (!isFirst)
+                buffer.append(' ');
+            isFirst=false;
+            buffer.append(s);
+        }
+        buffer.append(" }");
+        return buffer.toString();
     }
     public String toString(Prefixes prefixes) {
         StringBuffer buffer=new StringBuffer();

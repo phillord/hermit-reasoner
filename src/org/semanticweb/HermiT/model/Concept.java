@@ -17,4 +17,7 @@ public abstract class Concept implements Serializable {
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
+    public String toOrderedString(Prefixes prefixes) {
+        return toString(prefixes);
+    }
 }

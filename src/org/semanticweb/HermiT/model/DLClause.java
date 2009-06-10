@@ -2,8 +2,12 @@
 package org.semanticweb.HermiT.model;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.semanticweb.HermiT.Prefixes;
 
@@ -172,6 +176,27 @@ public class DLClause implements Serializable {
         }
         return buffer.toString();
     }
+    public String toOrderedString(Prefixes prefixes) {
+        StringBuffer buffer=new StringBuffer();
+        SortedSet<Atom> headAtoms = new TreeSet<Atom>(AtomLexicalComparator.INSTANCE);
+        headAtoms.addAll(Arrays.asList(m_headAtoms));
+        boolean isFirstAtom = true;
+        for (Atom a : headAtoms) {
+            if (isFirstAtom) isFirstAtom = false;
+            else buffer.append(" v ");
+            buffer.append(a.toString(prefixes));
+        }
+        buffer.append(" :- ");
+        SortedSet<Atom> bodyAtoms = new TreeSet<Atom>(AtomLexicalComparator.INSTANCE);
+        bodyAtoms.addAll(Arrays.asList(m_bodyAtoms));
+        isFirstAtom = true;
+        for (Atom a : bodyAtoms) {
+            if (isFirstAtom) isFirstAtom = false;
+            else buffer.append(", ");
+            buffer.append(a.toString(prefixes));
+        }
+        return buffer.toString();
+    }
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
@@ -181,5 +206,13 @@ public class DLClause implements Serializable {
     }
     public static DLClause createEx(boolean isKnownToBeAdmissible,Atom[] headAtoms,Atom[] bodyAtoms) {
         return new DLClause(isKnownToBeAdmissible,headAtoms,bodyAtoms);
+    }
+}
+class AtomLexicalComparator implements Serializable, Comparator<Atom> {
+    private static final long serialVersionUID = 1734767518260417510L;
+    public static final Comparator<Atom> INSTANCE = new AtomLexicalComparator();
+
+    public int compare(Atom a1, Atom a2) {
+        return a1.getDLPredicate().toString().compareTo(a2.getDLPredicate().toString());
     }
 }
