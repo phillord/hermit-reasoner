@@ -213,6 +213,15 @@ class AtomLexicalComparator implements Serializable, Comparator<Atom> {
     public static final Comparator<Atom> INSTANCE = new AtomLexicalComparator();
 
     public int compare(Atom a1, Atom a2) {
-        return a1.getDLPredicate().toString().compareTo(a2.getDLPredicate().toString());
+        if (a1 == a2) return 0;
+        int diff = a1.getDLPredicate().toString().compareTo(a2.getDLPredicate().toString());
+        if (diff != 0) return diff;
+        diff = a1.getArity() - a2.getArity();
+        if (diff != 0) return diff;
+        for (int i=0;i<a1.getArity();i++) {
+            diff = a1.getArgument(i).toString().compareTo(a2.getArgument(i).toString());
+            if (diff != 0) return diff;
+        }
+        return 0;
     }
 }

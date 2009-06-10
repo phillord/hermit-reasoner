@@ -1,8 +1,9 @@
 package org.semanticweb.HermiT.structural;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import junit.framework.AssertionFailedError;
@@ -20,38 +21,22 @@ public abstract class AbstractStructuralTest extends AbstractOntologyTest {
         super(name);
     }
     protected static void assertContainsAll(String testName,Collection<String> actual,String[] control) {
-        assertContainsAll(testName,actual,control,null);
-    }
-    protected static void assertContainsAll(String testName,Collection<String> actual,String[] controlVariant1,String[] controlVariant2) {
         try {
-            assertEquals(controlVariant1.length,actual.size());
-            boolean isOKVariant1=false;
-            if (controlVariant1!=null) {
-                isOKVariant1=true;
-                for (int i=0;isOKVariant1 && i<controlVariant1.length;i++)
-                    isOKVariant1=actual.contains(controlVariant1[i]);
+            assertEquals(control.length,actual.size());
+            boolean isOK=false;
+            if (control!=null) {
+                isOK=true;
+                for (int i=0;isOK && i<control.length;i++)
+                    isOK=actual.contains(control[i]);
             }
-            boolean isOKVariant2=false;
-            if (!isOKVariant1 && controlVariant2!=null) {
-                isOKVariant2=true;
-                for (int i=0;isOKVariant2 && i<controlVariant2.length;i++)
-                    isOKVariant2=actual.contains(controlVariant2[i]);
-            }
-            assertTrue(isOKVariant1 || isOKVariant2);
+            assertTrue(isOK);
         }
         catch (AssertionFailedError e) {
             System.out.println("Test "+testName+" failed!");
-            if (controlVariant1!=null) {
-                System.out.println("Control set 1 ("+controlVariant1.length+" elements):");
+            if (control!=null) {
+                System.out.println("Control set ("+control.length+" elements):");
                 System.out.println("------------------------------------------");
-                for (String object : controlVariant1)
-                    System.out.println(object.toString());
-                System.out.println("------------------------------------------");
-            }
-            if (controlVariant2!=null) {
-                System.out.println("Control set 2 ("+controlVariant2.length+" elements):");
-                System.out.println("------------------------------------------");
-                for (String object : controlVariant2)
+                for (String object : control)
                     System.out.println(object.toString());
                 System.out.println("------------------------------------------");
             }
@@ -95,12 +80,12 @@ public abstract class AbstractStructuralTest extends AbstractOntologyTest {
         return strings;
     }
 
-    protected Set<String> getDLClauses() throws Exception {
+    protected List<String> getDLClauses() throws Exception {
         OWLClausification clausifier=new OWLClausification(new Configuration());
         Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
         DLOntology dlOntology=clausifier.clausify(m_ontologyManager,m_ontology,noDescriptionGraphs);
         String ontologyIRI = m_ontology.getOntologyID().getDefaultDocumentIRI() == null ? "urn:hermit:kb" : m_ontology.getOntologyID().getDefaultDocumentIRI().toString();
-        Set<String> actualStrings=new HashSet<String>();
+        List<String> actualStrings=new ArrayList<String>();
         Prefixes prefixes=new Prefixes();
         prefixes.declareSemanticWebPrefixes();
         prefixes.declareInternalPrefixes(Collections.singleton(ontologyIRI+"#"));

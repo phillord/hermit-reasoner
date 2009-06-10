@@ -22,23 +22,23 @@ public class ClausificationTest extends AbstractStructuralTest {
     }
     // Giorgos will fix this
     public void testBasic() throws Exception {
-        assertClausification("res/basic-input.xml","res/basic-control.txt",null);
+        assertClausification("res/basic-input.xml","res/basic-control.txt");
     }
 
     public void testNominals1() throws Exception {
-        assertClausification("res/nominals-1-input.xml","res/nominals-1-control.txt","res/nominals-1-control2.txt");
+        assertClausification("res/nominals-1-input.xml","res/nominals-1-control.txt");
     }
 
    public void testNominals2() throws Exception {
-        assertClausification("res/nominals-2-input.xml","res/nominals-2-control.txt","res/nominals-2-control2.txt");
+        assertClausification("res/nominals-2-input.xml","res/nominals-2-control.txt");
     }
 
     public void testNominals3() throws Exception {
-        assertClausification("res/nominals-3-input.xml","res/nominals-3-control.txt","res/nominals-3-control2.txt");
+        assertClausification("res/nominals-3-input.xml","res/nominals-3-control.txt");
     }
 
     public void testNominals4() throws Exception {
-        assertClausification("res/nominals-4-input.xml","res/nominals-4-control.txt",null);
+        assertClausification("res/nominals-4-input.xml","res/nominals-4-control.txt");
     }
 
     public void testAsymmetry() throws Exception {
@@ -51,18 +51,17 @@ public class ClausificationTest extends AbstractStructuralTest {
         axioms += "ObjectPropertyAssertion(:r :a :b)";
         axioms += "ObjectPropertyAssertion(:as :b :a)";
         loadOntologyWithAxioms(axioms);
-        assertDLClauses(getControl("res/asymmetry-control.txt"),getControl(null));
+        assertDLClauses(getControl("res/asymmetry-control.txt"));
     }
 
     public void testExistsSelf1() throws Exception {
-        assertClausification("res/has-self-1-input.owl","res/has-self-1-control-1.txt","res/has-self-1-control-2.txt");
+        assertClausification("res/has-self-1-input.owl","res/has-self-1-control.txt");
     }
 
     public void testExistsSelf2() throws Exception {
-        assertClausification("res/has-self-2-input.owl","res/has-self-2-control.txt",null);
+        assertClausification("res/has-self-2-input.owl","res/has-self-2-control.txt");
     }
     
-    // will be fixed, when keys are being fixed
     public void testHasKeys() throws Exception {
         OWLClausification clausifier=new OWLClausification(new Configuration());
         OWLHasKeyAxiom key = m_dataFactory.getOWLHasKeyAxiom(m_dataFactory.getOWLClass(new URI("int:C_test")), m_dataFactory.getOWLObjectProperty(new URI("int:r_test")), m_dataFactory.getOWLDataProperty(new URI("int:dp_test")));
@@ -110,13 +109,13 @@ public class ClausificationTest extends AbstractStructuralTest {
         return controlArray;
     }
 
-    protected void assertClausification(String ontologyResource,String controlResource,String controlResourceVariant) throws Exception {
+    protected void assertClausification(String ontologyResource,String controlResource) throws Exception {
         loadOntologyFromResource(ontologyResource);
-        assertDLClauses(getControl(controlResource),getControl(controlResourceVariant));
+        assertDLClauses(getControl(controlResource));
     }
 
-    protected void assertDLClauses(String[] control,String[] controlVariant) throws Exception {
-        Set<String> actualStrings = getDLClauses();
-        assertContainsAll(this.getName(),actualStrings,control,controlVariant);
+    protected void assertDLClauses(String[] control) throws Exception {
+        List<String> actualStrings = getDLClauses();
+        assertContainsAll(this.getName(),actualStrings,control);
     }
 }

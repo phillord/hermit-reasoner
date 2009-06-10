@@ -1955,32 +1955,30 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertTrue(buffer.toString().equals(buffer2.toString()));
     }
     
-    // the following tests cause still parsing errors with the OWL API, I reported that to Matthew
-//  public void testInverses() throws Exception {
-//  StringBuffer buffer = new StringBuffer();
-//  buffer.append("EquivalentObjectProperties( :hasPart ObjectInverseOf( :partOf ) ) ObjectPropertyAssertion(:hasPart :a :b) NegativeObjectPropertyAssertion(:isPartOf :b :a)");
-//  loadReasonerWithAxioms(buffer.toString());
-//  assertABoxSatisfiable(false);
-//}
+    public void testInverses() throws Exception {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("EquivalentObjectProperties( :hasPart ObjectInverseOf( :partOf ) ) ObjectPropertyAssertion(:hasPart :a :b) NegativeObjectPropertyAssertion(:partOf :b :a)");
+        loadReasonerWithAxioms(buffer.toString());
+        assertABoxSatisfiable(false);
+    }
+    // should be parsable, but isn't, reported to Matthew
 //    public void testAnonymousIndiviuals() throws Exception {
 //        StringBuffer buffer = new StringBuffer();
 //        buffer.append("Individual(value( :city :Paris ) value( :region :IleDeFrance ))");
 //        loadReasonerWithAxioms(buffer.toString());
 //        assertABoxSatisfiable(true);
 //    }
-//    
-//    public void testAnonymousIndiviuals2() throws Exception {
-//        String axioms = "ObjectPropertyAssertion( :city _:a1 :Paris )";
-//        loadReasonerWithAxioms(axioms);
-//        assertABoxSatisfiable(true);
-//    }
-//    
-//  public void testAnonymousIndiviuals3() throws Exception {
-//      String axioms = "ObjectPropertyAssertion( a:livesAt a:Peter _:a1 )"
-//          + "ObjectPropertyAssertion( a:city _:a1 a:Quahog )"
-//          + "ObjectPropertyAssertion( a:state _:a1 a:RI )";
-//      loadReasonerWithAxioms(axioms);
-//      assertABoxSatisfiable(true);
-//  }
+    public void testAnonymousIndiviuals2() throws Exception {
+        String axioms = "ObjectPropertyAssertion( :city _:a1 :Paris )";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(true);
+    }
     
+    public void testAnonymousIndiviuals3() throws Exception {
+        String axioms = "ObjectPropertyAssertion( a:livesAt a:Peter _:a1 )"
+            + "ObjectPropertyAssertion( a:city _:a1 a:Quahog )"
+            + "ObjectPropertyAssertion( a:state _:a1 a:RI )";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(true);
+    }
 }
