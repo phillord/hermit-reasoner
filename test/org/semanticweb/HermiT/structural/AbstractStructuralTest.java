@@ -106,7 +106,7 @@ public abstract class AbstractStructuralTest extends AbstractOntologyTest {
         prefixes.declareInternalPrefixes(Collections.singleton(ontologyIRI+"#"));
         prefixes.declareDefaultPrefix(ontologyIRI+"#");
         for (DLClause dlClause : dlOntology.getDLClauses())
-            actualStrings.add(dlClause.toString(prefixes));
+            actualStrings.add(dlClause.toOrderedString(prefixes));
         for (org.semanticweb.HermiT.model.Atom atom : dlOntology.getPositiveFacts())
             actualStrings.add(atom.toString(prefixes));
         for (org.semanticweb.HermiT.model.Atom atom : dlOntology.getNegativeFacts())
