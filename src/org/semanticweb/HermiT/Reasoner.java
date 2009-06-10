@@ -27,12 +27,14 @@ import org.semanticweb.HermiT.Configuration.BlockingStrategyType;
 import org.semanticweb.HermiT.blocking.AncestorBlocking;
 import org.semanticweb.HermiT.blocking.AnywhereBlocking;
 import org.semanticweb.HermiT.blocking.AnywhereCoreBlocking;
+import org.semanticweb.HermiT.blocking.AnywhereTwoPhaseBlocking;
 import org.semanticweb.HermiT.blocking.BlockingSignatureCache;
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.blocking.CorePreDirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.DirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.SingleDirectBlockingChecker;
+import org.semanticweb.HermiT.blocking.TwoPhaseDirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.core.AtMostConcept;
 import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
@@ -121,7 +123,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
     public Reasoner(Configuration configuration) {
         m_configuration=configuration;
         m_interruptFlag=new InterruptFlag();
-        clearOntologies();
+        if (m_dlOntology != null || m_tableau != null) clearOntologies();
     }
     
     public Reasoner(Configuration configuration,OWLOntologyManager ontologyManger,OWLOntology ontology) {
@@ -247,7 +249,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         OWLClausification clausifier=new OWLClausification(m_configuration);
         m_dlOntology=clausifier.clausify(ontologyManager.getOWLDataFactory(),ontology.getOntologyID().getDefaultDocumentIRI() == null ? "urn:hermit:kb" : ontology.getOntologyID().getDefaultDocumentIRI().toString(),axioms,axiomsExpressivity,descriptionGraphs);
         m_prefixes=createPrefixes(m_dlOntology);
-        
+
         // This creates an OWLAxioms instance that is then given to the core blocking strategy
         boolean foundRelevantConcept;
         // the key is a concept and the values are sets of sets of concepts that are implies by the key, 
@@ -422,9 +424,14 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             tableauMonitor=m_configuration.monitor;
         else
             tableauMonitor=new TableauMonitorFork(wellKnownTableauMonitor,m_configuration.monitor);
-
-        BlockingStrategy blockingStrategy=new AnywhereCoreBlocking(new CorePreDirectBlockingChecker(),blockRelUnary,blockRelNAry,axiomsExpressivity.m_hasInverseRoles);
-
+        
+        BlockingStrategy blockingStrategy;
+        if (m_configuration.blockingStrategyType==Configuration.BlockingStrategyType.TWOPHASE) {
+            blockingStrategy=new AnywhereTwoPhaseBlocking(new TwoPhaseDirectBlockingChecker(),blockRelUnary,blockRelNAry,axiomsExpressivity.m_hasInverseRoles);
+        } else {
+            blockingStrategy=new AnywhereCoreBlocking(new CorePreDirectBlockingChecker(),blockRelUnary,blockRelNAry,axiomsExpressivity.m_hasInverseRoles);
+        }
+        
         ExistentialExpansionStrategy existentialsExpansionStrategy=null;
         switch (m_configuration.existentialStrategyType) {
         case CREATION_ORDER:

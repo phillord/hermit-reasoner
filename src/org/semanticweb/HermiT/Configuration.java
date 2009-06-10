@@ -27,7 +27,7 @@ public class Configuration implements Serializable,Cloneable {
     }
 
     public static enum BlockingStrategyType {
-        ANYWHERE,ANCESTOR,CORE
+        ANYWHERE,ANCESTOR,CORE,TWOPHASE
     }
 
     public static enum BlockingSignatureCacheType {

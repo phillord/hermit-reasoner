@@ -159,7 +159,7 @@ public class GraphTest extends AbstractReasonerInternalsTest {
         axioms.add(axiom);
         axiom = df.getOWLFunctionalObjectPropertyAxiom(S);
         axioms.add(axiom);
-        axiom = df.getOWLClassAssertionAxiom(i, A);
+        axiom = df.getOWLClassAssertionAxiom(A,i);
         axioms.add(axiom);
         
         m_ontologyManager.addAxioms(m_ontology, axioms);

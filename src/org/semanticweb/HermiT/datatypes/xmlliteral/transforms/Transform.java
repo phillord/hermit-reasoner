@@ -282,7 +282,6 @@ public final class Transform extends SignatureElementProxy {
 	     Transform._transformHash.put 
                  (algorithmURI, Class.forName(implementingClass, true, cl)); 
 	 } catch (ClassNotFoundException e) {
-	     // TODO Auto-generated catch block
 	     e.printStackTrace();
 	 }
       }

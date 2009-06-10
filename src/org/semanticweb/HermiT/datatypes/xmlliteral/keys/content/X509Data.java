@@ -467,13 +467,6 @@ public class X509Data extends SignatureElementProxy implements KeyInfoContent {
        return null;
    }
 
-   /**
-    * Method itemUnknownElement
-    *
-    * @param i
-    * @return the Unknown Element at i
-    * TODO implement
-    **/
    public Element itemUnknownElement(int i) {
 	  if (log.isLoggable(java.util.logging.Level.FINE))                                     log.log(java.util.logging.Level.FINE, "itemUnknownElement not implemented:"+i);
       return null;

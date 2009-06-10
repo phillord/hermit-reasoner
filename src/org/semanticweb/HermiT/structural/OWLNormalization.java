@@ -304,7 +304,7 @@ public class OWLNormalization {
             }
             if (nominal!=null && (other instanceof OWLClass || (other instanceof OWLObjectComplementOf && ((OWLObjectComplementOf)other).getOperand() instanceof OWLClass))) {
                 for (OWLIndividual individual : nominal.getIndividuals())
-                    facts.add(m_factory.getOWLClassAssertionAxiom(individual,other));
+                    facts.add(m_factory.getOWLClassAssertionAxiom(other,individual));
                 return true;
             }
         }
@@ -597,7 +597,7 @@ public class OWLNormalization {
             if (description==axiom.getClassExpression())
                 addFact(axiom);
             else
-                addFact(m_factory.getOWLClassAssertionAxiom(axiom.getIndividual(),description));
+                addFact(m_factory.getOWLClassAssertionAxiom(description,axiom.getIndividual()));
         }
         public void visit(OWLObjectPropertyAssertionAxiom axiom) {
             addFact(m_factory.getOWLObjectPropertyAssertionAxiom(axiom.getSubject(),axiom.getProperty().getSimplified(),axiom.getObject()));
@@ -609,7 +609,7 @@ public class OWLNormalization {
             OWLClassExpression definition=getDefinitionFor(allNotNominal,m_alreadyExists);
             if (!m_alreadyExists[0])
                 m_inclusionsAsDisjunctions.add(new OWLClassExpression[] {negative(definition),allNotNominal });
-            addFact(m_factory.getOWLClassAssertionAxiom(axiom.getSubject(),definition));
+            addFact(m_factory.getOWLClassAssertionAxiom(definition,axiom.getSubject()));
         }
         public void visit(OWLDataPropertyAssertionAxiom axiom) {
             addFact(axiom);
@@ -661,7 +661,7 @@ public class OWLNormalization {
                 OWLClass definition=getDefinitionForNegativeNominal(objectOneOf,m_alreadyExists);
                 if (!m_alreadyExists[0])
                     for (OWLIndividual individual : objectOneOf.getIndividuals())
-                        addFact(m_factory.getOWLClassAssertionAxiom(individual,definition));
+                        addFact(m_factory.getOWLClassAssertionAxiom(definition,individual));
                 return m_factory.getOWLObjectComplementOf(definition);
             }
             else

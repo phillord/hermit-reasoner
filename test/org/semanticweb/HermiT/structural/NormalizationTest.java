@@ -20,7 +20,7 @@ public class NormalizationTest extends AbstractStructuralTest {
       String axioms = "Declaration(Class(:Eighteen)) Declaration(DataProperty(:hasAge)) SubClassOf(:Eighteen DataHasValue(:hasAge \"18\"^^xsd:integer))";
       loadOntologyWithAxioms(axioms);
       Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"Eighteen>) DataSomeValuesFrom(<"+NS+"hasAge> DataOneOf(\"18\"^^integer ))))]";
+      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"Eighteen>) DataSomeValuesFrom(<"+NS+"hasAge> DataOneOf(\"18\"^^xsd:integer ))))]";
       assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
   }
 
@@ -29,7 +29,7 @@ public class NormalizationTest extends AbstractStructuralTest {
       //hasValue( a:hasAge "17"^^xsd:integer )
       loadOntologyWithAxioms(axioms);
       Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"Eighteen> DataAllValuesFrom(<"+NS+"hasAge> DataComplementOf(DataOneOf(\"18\"^^integer )))))]";
+      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"Eighteen> DataAllValuesFrom(<"+NS+"hasAge> DataComplementOf(DataOneOf(\"18\"^^xsd:integer )))))]";
       assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
   }
   
@@ -37,7 +37,7 @@ public class NormalizationTest extends AbstractStructuralTest {
       String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataAllValuesFrom(:dp xsd:integer))";
       loadOntologyWithAxioms(axioms);
       Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataAllValuesFrom(<"+NS+"dp> integer)))]";
+      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataAllValuesFrom(<"+NS+"dp> xsd:integer)))]";
       assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
   }
   
@@ -45,7 +45,7 @@ public class NormalizationTest extends AbstractStructuralTest {
       String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(DataAllValuesFrom(:dp xsd:integer) :A)";
       loadOntologyWithAxioms(axioms);
       Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataSomeValuesFrom(<"+NS+"dp> DataComplementOf(integer))))]";
+      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataSomeValuesFrom(<"+NS+"dp> DataComplementOf(xsd:integer))))]";
       assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
   }
   
@@ -53,7 +53,7 @@ public class NormalizationTest extends AbstractStructuralTest {
       String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(DataSomeValuesFrom(:dp xsd:string) :A)";
       loadOntologyWithAxioms(axioms);
       Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataAllValuesFrom(<"+NS+"dp> DataComplementOf(string))))]";
+      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataAllValuesFrom(<"+NS+"dp> DataComplementOf(xsd:string))))]";
       assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
   }
   
@@ -61,7 +61,7 @@ public class NormalizationTest extends AbstractStructuralTest {
       String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataSomeValuesFrom(:dp xsd:string))";
       loadOntologyWithAxioms(axioms);
       Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataSomeValuesFrom(<"+NS+"dp> string)))]";
+      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataSomeValuesFrom(<"+NS+"dp> xsd:string)))]";
       assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
   }
   
@@ -69,7 +69,7 @@ public class NormalizationTest extends AbstractStructuralTest {
       String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataAllValuesFrom(:dp DataOneOf(\"Peter\"^^xsd:string \"19\"^^xsd:integer)))";
       loadOntologyWithAxioms(axioms);
       Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataAllValuesFrom(<"+NS+"dp> DataOneOf(\"19\"^^integer \"Peter\"^^string ))))]";
+      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataAllValuesFrom(<"+NS+"dp> DataOneOf(\"19\"^^xsd:integer \"Peter\"^^xsd:string ))))]";
       assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
   }
   
@@ -77,7 +77,7 @@ public class NormalizationTest extends AbstractStructuralTest {
       String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(DataAllValuesFrom(:dp DataOneOf(\"18\"^^xsd:integer \"19\"^^xsd:integer)) :A)";
       loadOntologyWithAxioms(axioms);
       Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataSomeValuesFrom(<"+NS+"dp> DataComplementOf(DataOneOf(\"18\"^^integer \"19\"^^integer )))))]";
+      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataSomeValuesFrom(<"+NS+"dp> DataComplementOf(DataOneOf(\"18\"^^xsd:integer \"19\"^^xsd:integer )))))]";
       assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
   }
 
@@ -85,7 +85,7 @@ public class NormalizationTest extends AbstractStructuralTest {
       String axioms = "SubClassOf(:A DataAllValuesFrom(:dp DataComplementOf(DataComplementOf(DataOneOf(\"18\"^^xsd:integer \"19\"^^xsd:integer)))))";
       loadOntologyWithAxioms(axioms);
       Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataAllValuesFrom(<"+NS+"dp> DataOneOf(\"18\"^^integer \"19\"^^integer ))))]";
+      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataAllValuesFrom(<"+NS+"dp> DataOneOf(\"18\"^^xsd:integer \"19\"^^xsd:integer ))))]";
       assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
   }
   
@@ -93,7 +93,7 @@ public class NormalizationTest extends AbstractStructuralTest {
       String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataMaxCardinality(1 :dp xsd:string))";
       loadOntologyWithAxioms(axioms);
       Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataMaxCardinality(1 <"+NS+"dp> string)))]";
+      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataMaxCardinality(1 <"+NS+"dp> xsd:string)))]";
       assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
   }
   
@@ -101,7 +101,7 @@ public class NormalizationTest extends AbstractStructuralTest {
       String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(DataMaxCardinality(1 :dp xsd:string) :A)";
       loadOntologyWithAxioms(axioms);
       Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataMinCardinality(2 <"+NS+"dp> string)))]";
+      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataMinCardinality(2 <"+NS+"dp> xsd:string)))]";
       assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
   }
   
@@ -109,7 +109,7 @@ public class NormalizationTest extends AbstractStructuralTest {
       String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataMaxCardinality(5 :dp xsd:integer))";
       loadOntologyWithAxioms(axioms);
       Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataMaxCardinality(5 <"+NS+"dp> integer)))]";
+      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataMaxCardinality(5 <"+NS+"dp> xsd:integer)))]";
       assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
   }
   
@@ -117,7 +117,7 @@ public class NormalizationTest extends AbstractStructuralTest {
       String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(DataMaxCardinality(5 :dp xsd:integer) :A)";
       loadOntologyWithAxioms(axioms);
       Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataMinCardinality(6 <"+NS+"dp> integer)))]";
+      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataMinCardinality(6 <"+NS+"dp> xsd:integer)))]";
       assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
   }
   
@@ -125,7 +125,7 @@ public class NormalizationTest extends AbstractStructuralTest {
       String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(DataMinCardinality(1 :dp xsd:string) :A)";
       loadOntologyWithAxioms(axioms);
       Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataAllValuesFrom(<"+NS+"dp> DataComplementOf(string))))]";
+      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataAllValuesFrom(<"+NS+"dp> DataComplementOf(xsd:string))))]";
       assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
   }
   
@@ -133,7 +133,7 @@ public class NormalizationTest extends AbstractStructuralTest {
       String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(DataMinCardinality(3 :dp xsd:string) :A)";
       loadOntologyWithAxioms(axioms);
       Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataMaxCardinality(2 <"+NS+"dp> string)))]";
+      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataMaxCardinality(2 <"+NS+"dp> xsd:string)))]";
       assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
   }
   
@@ -141,7 +141,7 @@ public class NormalizationTest extends AbstractStructuralTest {
       String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataMinCardinality(1 :dp xsd:string))";
       loadOntologyWithAxioms(axioms);
       Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataSomeValuesFrom(<"+NS+"dp> string)))]";
+      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataSomeValuesFrom(<"+NS+"dp> xsd:string)))]";
       assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
   }
   
@@ -149,7 +149,7 @@ public class NormalizationTest extends AbstractStructuralTest {
       String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataMinCardinality(5 :dp xsd:string))";
       loadOntologyWithAxioms(axioms);
       Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataMinCardinality(5 <"+NS+"dp> string)))]";
+      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataMinCardinality(5 <"+NS+"dp> xsd:string)))]";
       assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
   }
   
@@ -157,7 +157,7 @@ public class NormalizationTest extends AbstractStructuralTest {
       String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataExactCardinality(1 :dp xsd:integer))";
       loadOntologyWithAxioms(axioms);
       Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataMaxCardinality(1 <"+NS+"dp> integer))), SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataSomeValuesFrom(<"+NS+"dp> integer)))]";
+      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataMaxCardinality(1 <"+NS+"dp> xsd:integer))), SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataSomeValuesFrom(<"+NS+"dp> xsd:integer)))]";
       assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
   }
   
@@ -165,7 +165,7 @@ public class NormalizationTest extends AbstractStructuralTest {
       String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataExactCardinality(3 :dp xsd:integer))";
       loadOntologyWithAxioms(axioms);
       Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataMinCardinality(3 <"+NS+"dp> integer))), SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataMaxCardinality(3 <"+NS+"dp> integer)))]";
+      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataMinCardinality(3 <"+NS+"dp> xsd:integer))), SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataMaxCardinality(3 <"+NS+"dp> xsd:integer)))]";
       assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
   }
   
@@ -173,7 +173,7 @@ public class NormalizationTest extends AbstractStructuralTest {
       String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(DataExactCardinality(1 :dp xsd:integer) :A)";
       loadOntologyWithAxioms(axioms);
       Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataAllValuesFrom(<"+NS+"dp> DataComplementOf(integer)) DataMinCardinality(2 <"+NS+"dp> integer)))]";
+      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataAllValuesFrom(<"+NS+"dp> DataComplementOf(xsd:integer)) DataMinCardinality(2 <"+NS+"dp> xsd:integer)))]";
       assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
   }
   
@@ -181,7 +181,7 @@ public class NormalizationTest extends AbstractStructuralTest {
       String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(DataExactCardinality(3 :dp xsd:integer) :A)";
       loadOntologyWithAxioms(axioms);
       Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataMinCardinality(4 <"+NS+"dp> integer) DataMaxCardinality(2 <"+NS+"dp> integer)))]";
+      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataMinCardinality(4 <"+NS+"dp> xsd:integer) DataMaxCardinality(2 <"+NS+"dp> xsd:integer)))]";
       assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
   }
   

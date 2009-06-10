@@ -24,6 +24,7 @@ import java.util.TreeSet;
 
 import org.semanticweb.HermiT.datatypes.xmlliteral.c14n.CanonicalizationException;
 import org.semanticweb.HermiT.datatypes.xmlliteral.c14n.helper.C14nHelper;
+import org.semanticweb.HermiT.datatypes.xmlliteral.signature.XMLSignatureInput;
 import org.semanticweb.HermiT.datatypes.xmlliteral.transforms.params.InclusiveNamespaces;
 import org.semanticweb.HermiT.datatypes.xmlliteral.utils.Constants;
 import org.w3c.dom.Attr;
@@ -72,10 +73,10 @@ public abstract class Canonicalizer20010315Excl extends CanonicalizerBase {
 	 * 
 	 * @throws CanonicalizationException
 	 */
-//	public byte[] engineCanonicalizeSubTree(Node rootNode)
-//			throws CanonicalizationException {
-//		return this.engineCanonicalizeSubTree(rootNode, "",null);
-//	}
+	public byte[] engineCanonicalizeSubTree(Node rootNode)
+			throws CanonicalizationException {
+		return this.engineCanonicalizeSubTree(rootNode, "",null);
+	}
 	/**
 	 * Method engineCanonicalizeSubTree
 	 *  @inheritDoc
@@ -109,12 +110,12 @@ public abstract class Canonicalizer20010315Excl extends CanonicalizerBase {
 	 * @return the rootNode c14n.
 	 * @throws CanonicalizationException
 	 */
-//	public byte[] engineCanonicalize(XMLSignatureInput rootNode,
-//			String inclusiveNamespaces) throws CanonicalizationException {
-//			this._inclusiveNSSet = (TreeSet)InclusiveNamespaces
-//					.prefixStr2Set(inclusiveNamespaces);			
-//			return super.engineCanonicalize(rootNode);
-//	}
+	public byte[] engineCanonicalize(XMLSignatureInput rootNode,
+			String inclusiveNamespaces) throws CanonicalizationException {
+			this._inclusiveNSSet = (TreeSet)InclusiveNamespaces
+					.prefixStr2Set(inclusiveNamespaces);			
+			return super.engineCanonicalize(rootNode);
+	}
  
 	/**
 	 * Method handleAttributesSubtree
@@ -210,10 +211,10 @@ public abstract class Canonicalizer20010315Excl extends CanonicalizerBase {
 	}
 	
     /** @inheritDoc */
-//    public byte[] engineCanonicalizeXPathNodeSet(Set xpathNodeSet
-//            ) throws CanonicalizationException {
-//        return engineCanonicalizeXPathNodeSet(xpathNodeSet,"");
-//    }
+    public byte[] engineCanonicalizeXPathNodeSet(Set xpathNodeSet
+            ) throws CanonicalizationException {
+        return engineCanonicalizeXPathNodeSet(xpathNodeSet,"");
+    }
           	
 	/**
      * @inheritDoc

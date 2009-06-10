@@ -25,7 +25,6 @@ import org.semanticweb.owl.model.OWLObjectMinCardinality;
 import org.semanticweb.owl.model.OWLObjectOneOf;
 import org.semanticweb.owl.model.OWLObjectPropertyAssertionAxiom;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
-import org.semanticweb.owl.model.OWLObjectPropertyInverse;
 import org.semanticweb.owl.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owl.model.OWLObjectUnionOf;
 import org.semanticweb.owl.util.OWLAxiomVisitorAdapter;
@@ -65,7 +64,7 @@ public class OWLAxiomsExpressivity extends OWLAxiomVisitorAdapter implements OWL
     }
     
     protected void visitProperty(OWLObjectPropertyExpression object) {
-        if (object instanceof OWLObjectPropertyInverse)
+        if (object.getSimplified().isAnonymous()) 
             m_hasInverseRoles=true;
     }
 

@@ -82,7 +82,7 @@ public class ComplexConceptTest extends AbstractReasonerTest {
         OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
         OWLIndividual o = df.getOWLNamedIndividual(IRI.create("file:/c/test.owl#o"));
         OWLObjectProperty f2 = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#f2"));
-        OWLObjectPropertyExpression invf2 = df.getOWLObjectPropertyInverse(f2);
+        OWLObjectPropertyExpression invf2 = df.getOWLObjectInverseOf(f2);
         OWLClass A = df.getOWLClass(IRI.create("file:/c/test.owl#A"));
         OWLClass B = df.getOWLClass(IRI.create("file:/c/test.owl#B"));
         

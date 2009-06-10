@@ -4,7 +4,6 @@ package org.semanticweb.HermiT.blocking;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +11,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.semanticweb.HermiT.blocking.CorePreDirectBlockingChecker.SinglePreCoreBlockingObject;
+import org.semanticweb.HermiT.blocking.TwoPhaseDirectBlockingChecker.TwoPhaseBlockingObject;
 import org.semanticweb.HermiT.blocking.core.AtMostConcept;
 import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.AtomicConcept;
@@ -22,17 +21,14 @@ import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.model.Role;
-import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.ExtensionManager;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
-import org.semanticweb.HermiT.tableau.NodeType;
 import org.semanticweb.HermiT.tableau.Tableau;
 
-public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
-    private static final long serialVersionUID=-2959900333817197464L;
-
+public class AnywhereTwoPhaseBlocking implements BlockingStrategy, Serializable {
+    private static final long serialVersionUID = -6999662045751906931L;
     protected Tableau m_tableau;
     protected final DirectBlockingChecker m_directBlockingChecker;
     protected final CoreBlockersCache m_currentBlockersCache;
@@ -51,16 +47,14 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
     protected boolean m_immediatelyValidateBlocks = false;
     // statistics: 
     protected int numBlockingComputed = 0;
-    protected int maxCore = 0;
     protected int maxLabel = 0;
-    protected int avgCore = 0;
     protected int avgLabel = 0;
     protected int maxNodes = 0;
     protected long sumNodes = 0;
     protected int run = 0;
     protected boolean printHeader = true;
     
-    public AnywhereCoreBlocking(DirectBlockingChecker directBlockingChecker, Map<AtomicConcept, Set<Set<Concept>>> blockRelUnary, Map<Set<AtomicConcept>, Set<Set<Concept>>> blockRelNary, boolean hasInverses) {
+    public AnywhereTwoPhaseBlocking(DirectBlockingChecker directBlockingChecker, Map<AtomicConcept, Set<Set<Concept>>> blockRelUnary, Map<Set<AtomicConcept>, Set<Set<Concept>>> blockRelNary, boolean hasInverses) {
         m_directBlockingChecker=directBlockingChecker;
         m_blockRelUnary = blockRelUnary;
         m_blockRelNAry = blockRelNary;
@@ -157,7 +151,7 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
                         if (validBlocker == null) {
                             //System.out.println("Node " + node.getBlocker().getNodeID() + " invalidly blocks " + node.getNodeID() + "!");
                             invalidBlocks++;
-                            //((SinglePreCoreBlockingObject)node.getBlockingObject()).setGreatestInvalidBlocker(m_currentBlockersCache.getPossibleBlockers(node).last());
+                            //((TwoPhaseBlockingObject)node.getBlockingObject()).setGreatestInvalidBlocker(m_currentBlockersCache.getPossibleBlockers(node).last());
                         }
                         node.setBlocked(validBlocker,validBlocker!=null);
                     } else if (!node.getParent().isBlocked()) {
@@ -180,21 +174,21 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
         // that is we can create a model from the block by unravelling
         
         SortedSet<Node> possibleValidBlockers = m_currentBlockersCache.getPossibleBlockers(blocked);
-        Node greatestInvalidBlocker = ((SinglePreCoreBlockingObject)blocked.getBlockingObject()).m_greatestInvalidBlocker;
+        Node greatestInvalidBlocker = ((TwoPhaseBlockingObject)blocked.getBlockingObject()).m_greatestInvalidBlocker;
         if (greatestInvalidBlocker != null) {
             possibleValidBlockers = new TreeSet<Node>(possibleValidBlockers.tailSet(greatestInvalidBlocker));
             possibleValidBlockers.remove(greatestInvalidBlocker);
             if (possibleValidBlockers.isEmpty()) return null;
         }
         
-        Set<AtomicConcept> blockedLabel = ((SinglePreCoreBlockingObject)blocked.getBlockingObject()).getAtomicConceptLabel();
-        Set<AtomicConcept> blockedParentLabel = ((SinglePreCoreBlockingObject)blocked.getParent().getBlockingObject()).getAtomicConceptLabel();
+        Set<AtomicConcept> blockedLabel = ((TwoPhaseBlockingObject)blocked.getBlockingObject()).getAtomicConceptLabel();
+        Set<AtomicConcept> blockedParentLabel = ((TwoPhaseBlockingObject)blocked.getParent().getBlockingObject()).getAtomicConceptLabel();
         
         boolean blockerIsSuitable = true;
         greatestInvalidBlocker = null;
         for (Node possibleBlocker : possibleValidBlockers) {
-            Set<AtomicConcept> blockerLabel = ((SinglePreCoreBlockingObject)possibleBlocker.getBlockingObject()).getAtomicConceptLabel();
-            Set<AtomicConcept> blockerParentLabel = ((SinglePreCoreBlockingObject)possibleBlocker.getParent().getBlockingObject()).getAtomicConceptLabel();
+            Set<AtomicConcept> blockerLabel = ((TwoPhaseBlockingObject)possibleBlocker.getBlockingObject()).getAtomicConceptLabel();
+            Set<AtomicConcept> blockerParentLabel = ((TwoPhaseBlockingObject)possibleBlocker.getParent().getBlockingObject()).getAtomicConceptLabel();
             
             // check whether min/max cardinalities of the parent of the blocked node could be violated
             // universals and existential have been converted to min/max restrictions for convenience
@@ -228,7 +222,7 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
             }
             if (blockerIsSuitable) {
                 if (greatestInvalidBlocker != null) {
-                    ((SinglePreCoreBlockingObject)blocked.getBlockingObject()).m_greatestInvalidBlocker = greatestInvalidBlocker;
+                    ((TwoPhaseBlockingObject)blocked.getBlockingObject()).m_greatestInvalidBlocker = greatestInvalidBlocker;
                 }
                 return possibleBlocker;
             }
@@ -236,7 +230,7 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
             // else try alternative blockers with the same core
         }
         if (greatestInvalidBlocker != null) {
-            ((SinglePreCoreBlockingObject)blocked.getBlockingObject()).m_greatestInvalidBlocker = greatestInvalidBlocker;
+            ((TwoPhaseBlockingObject)blocked.getBlockingObject()).m_greatestInvalidBlocker = greatestInvalidBlocker;
         }
         return null;
     }
@@ -415,32 +409,24 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
     // Assertions can be added directly into the core, but we also have the possibility of setting the core flag later?
     // In that case, assertionCoreSet (below) will be called?
     public void assertionAdded(Concept concept,Node node,boolean isCore) {
-        if (isCore && concept instanceof AtomicConcept) {
+        if (concept instanceof AtomicConcept) {
             updateNodeChange(m_directBlockingChecker.assertionAdded(concept,node));
         }
     }
     public void assertionCoreSet(Concept concept,Node node) {
-        if (concept instanceof AtomicConcept) {
-            updateNodeChange(m_directBlockingChecker.assertionAdded(concept,node));
-        } 
     }
     public void assertionRemoved(Concept concept,Node node,boolean isCore) {
-        if (isCore && concept instanceof AtomicConcept) {
+        if (concept instanceof AtomicConcept) {
             updateNodeChange(m_directBlockingChecker.assertionRemoved(concept,node));
         }
     }
     public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
-        if (isCore) {
-            updateNodeChange(m_directBlockingChecker.assertionAdded(atomicRole, nodeFrom, nodeTo));
-        }
-    }
-    public void assertionCoreSet(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
         updateNodeChange(m_directBlockingChecker.assertionAdded(atomicRole, nodeFrom, nodeTo));
     }
+    public void assertionCoreSet(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
+    }
     public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
-        if (isCore) {
-            updateNodeChange(m_directBlockingChecker.assertionRemoved(atomicRole, nodeFrom, nodeTo));
-        }
+        updateNodeChange(m_directBlockingChecker.assertionRemoved(atomicRole, nodeFrom, nodeTo));
     }
     public void nodeStatusChanged(Node node) {
         updateNodeChange(node);
@@ -470,36 +456,28 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
         int numNodesThisRun = m_tableau.getNumberOfNodesInTableau(); // I hope these are the active ones only, but only Boris knows...
         if (numNodesThisRun > maxNodes) maxNodes = numNodesThisRun;
         sumNodes += numNodesThisRun;
-        int maxCoreSizeThisRun = 0;
         int maxLabelSizeThisRun = 0;
-        double avgCoreSizeThisRun = 0.0;
         double avgLabelSizeThisRun = 0.0;
         long sumLabelSizeThisRun = 0;
-        long sumCoreSizeThisRun = 0;
         Node node = m_tableau.getFirstTableauNode();
         while (node!=null) {
             if (node.isActive()) {
-                if (node.getNumberOfCoreAtoms() > maxCoreSizeThisRun) maxCoreSizeThisRun = node.getNumberOfCoreAtoms();
                 if (node.getNumberOfPositiveAtomicConcepts() > maxLabelSizeThisRun) maxLabelSizeThisRun = node.getNumberOfPositiveAtomicConcepts();
-                sumCoreSizeThisRun += node.getNumberOfCoreAtoms();
                 sumLabelSizeThisRun += node.getNumberOfPositiveAtomicConcepts();
             }
             node=node.getNextTableauNode();
         }
-        if (!intermediate && maxCoreSizeThisRun > maxCore) maxCore = maxCoreSizeThisRun;
         if (!intermediate && maxLabelSizeThisRun > maxLabel) maxLabel = maxLabelSizeThisRun;
-        avgCoreSizeThisRun = (double)sumCoreSizeThisRun / numNodesThisRun;
         avgLabelSizeThisRun = (double)sumLabelSizeThisRun / numNodesThisRun;
-        avgCore += avgCoreSizeThisRun;
         avgLabel += avgLabelSizeThisRun;
         if (printHeader || (run % 20 == 1 && !intermediate)) {
             System.out.printf("%n%-55s %-44s%n", "This run:", "All runs:");
-            System.out.printf("%-8s%-8s%-8s%-8s%-8s%-8s%-3s%-8s%-8s%-8s%-8s%-8s%-8s%-8s%n", "No", "Nodes", "avg", "avg", "max", "max", "|", "sum", "max", "avg", "avg", "avg", "max", "max");
-            System.out.printf("%-8s%-8s%-8s%-8s%-8s%-8s%-3s%-8s%-8s%-8s%-8s%-8s%-8s%-8s%n", "", "", "lab", "core", "lab", "core", "|", "node", "node", "node", "lab", "core", "lab", "core");
+            System.out.printf("%-8s%-8s%-8s%-8s%-3s%-8s%-8s%-8s%-8s%-8s%n", "No", "Nodes", "avg", "max", "|", "sum", "max", "avg", "avg", "max");
+            System.out.printf("%-8s%-8s%-8s%-8s%-3s%-8s%-8s%-8s%-8s%-8s%n", "", "", "lab", "lab", "|", "node", "node", "node", "lab", "lab");
         }
-        System.out.printf("%-8s%-8s%-8s%-8s%-8s%-8s%-3s", run, numNodesThisRun, sd(avgLabelSizeThisRun), sd(avgCoreSizeThisRun), maxLabelSizeThisRun, maxCoreSizeThisRun, "|");
+        System.out.printf("%-8s%-8s%-8s%-8s%-3s", run, numNodesThisRun, sd(avgLabelSizeThisRun), maxLabelSizeThisRun, "|");
         if (!intermediate) {
-            System.out.printf("%-8s%-8s%-8s%-8s%-8s%-8s%-8s", sumNodes, maxNodes, sd(((double)sumNodes/run)), sd(((double)avgLabel/run)), sd(((double)avgCore/run)), maxLabel, maxCore);
+            System.out.printf("%-8s%-8s%-8s%-8s%-8s", sumNodes, maxNodes, sd(((double)sumNodes/run)), sd(((double)avgLabel/run)), maxLabel);
         }
         System.out.printf("%n");
         numBlockingComputed = 0; 
@@ -512,94 +490,12 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
         return false;
     }
     public void dlClauseBodyCompiled(List<DLClauseEvaluator.Worker> workers,DLClause dlClause,Object[] valuesBuffer,boolean[] coreVariables) {
-        //System.out.println(dlClause.toString());
-        if (dlClause.isConceptInclusion() || dlClause.isRoleInclusion() || dlClause.isRoleInverseInclusion()) {
-            for (int i=0;i<coreVariables.length;i++) {
-                coreVariables[i]=false;
-                return;
-            }
-        }
-        if (dlClause.getHeadLength() > 2) {
-            // in case of a disjunction, there is nothing to compute, the choice must go into the core
-            // I assume that disjunctions are always only for the centre variable X and I assume that X is the first
-            // variable in the array ???
-            coreVariables[0] = true;
-            return;
-        } else {
-            workers.add(new ComputeCoreVariables(dlClause,valuesBuffer,coreVariables));
-        }
-    }
-    protected static final class ComputeCoreVariables implements DLClauseEvaluator.Worker,Serializable {
-        private static final long serialVersionUID=899293772370136783L;
-
-        protected final DLClause m_dlClause;
-        protected final Object[] m_valuesBuffer;
-        protected final boolean[] m_coreVariables;
-
-        public ComputeCoreVariables(DLClause dlClause,Object[] valuesBuffer,boolean[] coreVariables) {
-            m_dlClause=dlClause;
-            m_valuesBuffer=valuesBuffer;
-            m_coreVariables=coreVariables;
-        }
-        public int execute(int programCounter) {
-            if (m_dlClause.getHeadAtom(0).getArity() != 1 || !m_dlClause.getHeadAtom(0).containsVariable(Variable.create("X"))) {
-                Node potentialNoncore=null;
-                int potentialNoncoreIndex=-1;
-                for (int variableIndex=m_coreVariables.length-1;variableIndex>=0;--variableIndex) {
-                    m_coreVariables[variableIndex]=true;
-                    Node node=(Node)m_valuesBuffer[variableIndex];
-                    if (node.getNodeType()==NodeType.TREE_NODE && (potentialNoncore==null || node.getTreeDepth()<potentialNoncore.getTreeDepth())) {
-                        potentialNoncore=node;
-                        potentialNoncoreIndex=variableIndex;
-                    }
-                }
-                if (potentialNoncore!=null) {
-                    boolean isNoncore=true;
-                    for (int variableIndex=m_coreVariables.length-1;isNoncore && variableIndex>=0;--variableIndex) {
-                        Node node=(Node)m_valuesBuffer[variableIndex];
-                        if (!node.isRootNode() && potentialNoncore!=node && !potentialNoncore.isAncestorOf(node))
-                            isNoncore=false;
-                    }
-                    if (isNoncore) {
-                        m_coreVariables[potentialNoncoreIndex]=false;
-                    }
-                }
-            }
-            return programCounter+1;
-        }
-//        public int execute(int programCounter) {
-//            Node potentialNoncore=null;
-//            int potentialNoncoreIndex=-1;
-//            for (int variableIndex=m_coreVariables.length-1;variableIndex>=0;--variableIndex) {
-//                m_coreVariables[variableIndex]=true;
-//                Node node=(Node)m_valuesBuffer[variableIndex];
-//                if (node.getNodeType()==NodeType.TREE_NODE && (potentialNoncore==null || node.getTreeDepth()<potentialNoncore.getTreeDepth())) {
-//                    potentialNoncore=node;
-//                    potentialNoncoreIndex=variableIndex;
-//                }
-//            }
-//            if (potentialNoncore!=null) {
-//                boolean isNoncore=true;
-//                for (int variableIndex=m_coreVariables.length-1;isNoncore && variableIndex>=0;--variableIndex) {
-//                    Node node=(Node)m_valuesBuffer[variableIndex];
-//                    if (!node.isRootNode() && potentialNoncore!=node && !potentialNoncore.isAncestorOf(node))
-//                        isNoncore=false;
-//                }
-//                if (isNoncore) {
-//                    m_coreVariables[potentialNoncoreIndex]=false;
-//                }
-//            }
-//            return programCounter+1;
-//        }
-        public String toString() {
-            return "Compute core variables";
-        }
-    }
+    }    
 }
-// The core blockers set is a hash set of sorted sets of nodes. Each set in the cache contains nodes with equal core. In case of non-singleton sets, the nodes in the set cannot block each other since their parents or non-core parts result in a potentially invalid block. 
-class CoreBlockersCache implements Serializable {
-    private static final long serialVersionUID=-7692825443489644667L;
-
+// The blockers set is a hash set of sorted sets of nodes. Each set in the cache contains nodes with equal label. In case of non-singleton sets, 
+// the nodes in the set cannot block each other since their parents cause an invalid block. 
+class TwoPhaseBlockersCache implements Serializable {
+    private static final long serialVersionUID = 6016176408452543089L;
     protected Tableau m_tableau;
     protected final DirectBlockingChecker m_directBlockingChecker;
     protected CacheEntry[] m_buckets;
@@ -607,7 +503,7 @@ class CoreBlockersCache implements Serializable {
     protected int m_threshold;
     protected CacheEntry m_emptyEntries;
 
-    public CoreBlockersCache(DirectBlockingChecker directBlockingChecker) {
+    public TwoPhaseBlockersCache(DirectBlockingChecker directBlockingChecker) {
         m_directBlockingChecker=directBlockingChecker;
         clear();
     }
@@ -622,7 +518,7 @@ class CoreBlockersCache implements Serializable {
     }
     public boolean removeNode(Node node) {
         // Check addNode() for an explanation of why we associate the entry with the node.
-        CoreBlockersCache.CacheEntry removeEntry=(CoreBlockersCache.CacheEntry)node.getBlockingCargo();
+        TwoPhaseBlockersCache.CacheEntry removeEntry=(TwoPhaseBlockersCache.CacheEntry)node.getBlockingCargo();
         if (removeEntry!=null) {
             int bucketIndex=getIndexFor(removeEntry.m_hashCode,m_buckets.length);
             CacheEntry lastEntry=null;
@@ -759,8 +655,7 @@ class CoreBlockersCache implements Serializable {
     }
 
     public static class CacheEntry implements Serializable {
-        private static final long serialVersionUID=-7047487963170250200L;
-
+        private static final long serialVersionUID = 8784206693977395751L;
         protected SortedSet<Node> m_nodes;
         protected int m_hashCode;
         protected CacheEntry m_nextEntry;
@@ -787,13 +682,5 @@ class CoreBlockersCache implements Serializable {
             }
             return nodes;
         }
-    }
-}
-class NodeIDComparator implements Serializable, Comparator<Node> {
-    private static final long serialVersionUID = 2112323818144484750L;
-    public static final Comparator<Node> INSTANCE = new NodeIDComparator();
-
-    public int compare(Node n1, Node n2) {
-        return n1.getNodeID() - n2.getNodeID();
     }
 }

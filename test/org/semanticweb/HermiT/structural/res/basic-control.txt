@@ -1,4 +1,5 @@
-all:0(X) :- :s(X,Y), :c(Y)
+def:0(X) :- all:00(X)
+all:00(X) :- :s(X,Y), all:01(Y)
+all:01(X) :- all:00(X)
+all:01(X) :- :c(X)
 :d(X) :- :r(X,Y), def:0(Y)
-all:0(X) :- :s(X,Y), all:0(Y)
-def:0(X) :- all:0(X)

@@ -407,7 +407,7 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
           OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
           OWLClassExpression A = df.getOWLClass(IRI.create("file:/c/test.owl#A"));
           OWLObjectProperty r = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
-          OWLObjectPropertyExpression invr = df.getOWLObjectPropertyInverse(r);
+          OWLObjectPropertyExpression invr = df.getOWLObjectInverseOf(r);
           OWLClassExpression desc1 = df.getOWLObjectIntersectionOf(df.getOWLObjectAllValuesFrom(r, df.getOWLObjectAllValuesFrom(invr, A)), df.getOWLObjectSomeValuesFrom(r, df.getOWLThing()));
           assertSubsumedBy(desc1,A,true);
      }
@@ -444,7 +444,7 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLClassExpression p1 = df.getOWLClass(IRI.create("file:/c/test.owl#p1"));
          OWLObjectProperty r = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
-         OWLObjectPropertyExpression invr = df.getOWLObjectPropertyInverse(r);
+         OWLObjectPropertyExpression invr = df.getOWLObjectInverseOf(r);
          
          OWLClassExpression desc1 = df.getOWLObjectSomeValuesFrom(invr, df.getOWLObjectIntersectionOf(df.getOWLObjectSomeValuesFrom(r, p1), df.getOWLObjectMaxCardinality(r, 1, p1)));
          assertSatisfiable(desc1,true);
@@ -463,7 +463,7 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          OWLClassExpression p1 = df.getOWLClass(IRI.create("file:/c/test.owl#p1"));
          OWLClassExpression p2 = df.getOWLClass(IRI.create("file:/c/test.owl#p2"));
          OWLObjectProperty r = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
-         OWLObjectPropertyExpression invr = df.getOWLObjectPropertyInverse(r);
+         OWLObjectPropertyExpression invr = df.getOWLObjectInverseOf(r);
          
          OWLClassExpression desc1 = df.getOWLObjectIntersectionOf(p2, df.getOWLObjectSomeValuesFrom(invr, df.getOWLObjectIntersectionOf(df.getOWLObjectSomeValuesFrom(r, p1), df.getOWLObjectMaxCardinality(r, 1))));
          assertSatisfiable(desc1,false);

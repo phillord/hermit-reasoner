@@ -43,6 +43,7 @@ public class Prefixes implements Serializable {
         s_semanticWebPrefixes.put("swrlb","http://www.w3.org/2003/11/swrlb#");
         s_semanticWebPrefixes.put("swrlx","http://www.w3.org/2003/11/swrlx#");
         s_semanticWebPrefixes.put("ruleml","http://www.w3.org/2003/11/ruleml#");
+        s_semanticWebPrefixes.put("g","http://www.co-ode.org/ontologies/galen#");
     }
     public static final Prefixes STANDARD_PREFIXES=new ImmutablePrefixes(s_semanticWebPrefixes);
 
