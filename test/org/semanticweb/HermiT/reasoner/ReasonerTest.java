@@ -19,6 +19,21 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
+
+    public void testKeys() throws Exception {
+        String axioms = "Declaration(Class(:RegisteredPatient))"
+            + "Declaration(DataProperty(:hasWaitingListN))"
+            + "SubDataPropertyOf(:hasWaitingListN owl:topDataProperty)"
+            + "Declaration(NamedIndividual(:TestPatient1))"
+            + "ClassAssertion(:RegisteredPatient :TestPatient1)"
+            + "DataPropertyAssertion(:hasWaitingListN :TestPatient1 \"123-45-6789\")"
+            + "DataPropertyAssertion(:hasWaitingListN :TestPatient2 \"123-45-6789\")"
+            + "Declaration(NamedIndividual(:TestPatient2))"
+            + "ClassAssertion(:RegisteredPatient :TestPatient2)"
+            + "HasKey(:RegisteredPatient () (:hasWaitingListN))";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
     
     public void testHierarchyPrinting1() throws Exception {
         String axioms =
