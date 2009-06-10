@@ -66,7 +66,11 @@ public class BuiltInPropertyManager {
             axiomatizeBottomDataProperty(axioms);
     }
     public void axiomatizeBuiltInPropertiesAsNeeded(OWLAxioms axioms) {
-        axiomatizeBuiltInPropertiesAsNeeded(axioms,false,false,false,false);
+        // Birte: I changed the following to skip axiomatization of TopDataPropertysince this 
+        // means HermiT throws an error, whenever TopDataProperty is used and Protege add an axiom 
+        // dataProperty -> TopDataProperty for every data property 
+        //axiomatizeBuiltInPropertiesAsNeeded(axioms,false,false,false,false);
+        axiomatizeBuiltInPropertiesAsNeeded(axioms,false,false,true,false);
     }
     protected void axiomatizeTopObjectProperty(OWLAxioms axioms) {
         OWLObjectProperty topObjectProperty=m_factory.getOWLObjectProperty(URI.create(AtomicRole.TOP_OBJECT_ROLE.getIRI()));

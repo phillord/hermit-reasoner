@@ -130,7 +130,7 @@ public class OWLClausification {
         if (descriptionGraphs==null)
             descriptionGraphs=Collections.emptySet();
         /**
-         * @gstoil
+         * gstoil
          */
         DLOntology dlOntology = clausify(factory,ontologyIRI,axioms,descriptionGraphs);
         dlOntology.setAutomata( automataOfComplexRoles );

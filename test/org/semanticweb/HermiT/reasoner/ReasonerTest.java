@@ -19,7 +19,7 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
-
+    
     public void testKeys() throws Exception {
         String axioms = "Declaration(Class(:RegisteredPatient))"
             + "Declaration(DataProperty(:hasWaitingListN))"
@@ -30,9 +30,44 @@ public class ReasonerTest extends AbstractReasonerTest {
             + "DataPropertyAssertion(:hasWaitingListN :TestPatient2 \"123-45-6789\")"
             + "Declaration(NamedIndividual(:TestPatient2))"
             + "ClassAssertion(:RegisteredPatient :TestPatient2)"
-            + "HasKey(:RegisteredPatient () (:hasWaitingListN))";
+            + "ClassAssertion(:RegisteredPatient :TestPatient2)"
+            + "HasKey(:RegisteredPatient () (:hasWaitingListN))"
+            + "DifferentIndividuals(:TestPatient1 :TestPatient2)";
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
+    }
+
+    public void testNonUnaryKeys() throws Exception {
+        String axioms = "HasKey(:Car () (:licensePlate :nationality))" 
+            + "ClassAssertion(:Car :myCar1)"
+            + "ClassAssertion(:Car :myCar2)"
+            + "ClassAssertion(:Car :myCar3)"
+            + "DataPropertyAssertion(:licensePlate :myCar1 \"OD-SG-101\")"
+            + "DataPropertyAssertion(:nationality :myCar1 \"German\")"
+            + "DataPropertyAssertion(:licensePlate :myCar2 \"OD-SG-101\")"
+            + "DataPropertyAssertion(:nationality :myCar2 \"German\")"
+            + "DataPropertyAssertion(:licensePlate :myCar3 \"OD-SG-101\")"
+            + "DataPropertyAssertion(:nationality :myCar3 \"British\")"
+            + "DifferentIndividuals(:myCar1 :myCar2)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+    
+    public void testNonUnaryKeys2() throws Exception {
+        String axioms = "HasKey(:Car () (:licensePlate :nationality))" 
+            + "ClassAssertion(:Car :myCar1)"
+            + "ClassAssertion(:Car :myCar2)"
+            + "ClassAssertion(:Car :myCar3)"
+            + "DataPropertyAssertion(:licensePlate :myCar1 \"OD-SG-101\")"
+            + "DataPropertyAssertion(:nationality :myCar1 \"German\")"
+            + "DataPropertyAssertion(:licensePlate :myCar2 \"OD-SG-101\")"
+            + "DataPropertyAssertion(:nationality :myCar2 \"German\")"
+            + "DataPropertyAssertion(:licensePlate :myCar3 \"OD-SG-101\")"
+            + "DataPropertyAssertion(:nationality :myCar3 \"British\")"
+            + "DifferentIndividuals(:myCar1 :myCar3)"
+            + "DifferentIndividuals(:myCar2 :myCar3)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(true);
     }
     
     public void testHierarchyPrinting1() throws Exception {
