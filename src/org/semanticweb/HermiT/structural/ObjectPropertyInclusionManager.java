@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.HermiT.graph.Graph;
+import org.semanticweb.owl.model.OWLCardinalityRestriction;
 import org.semanticweb.owl.model.OWLClassExpression;
 import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLObjectAllValuesFrom;
@@ -89,8 +90,13 @@ public class ObjectPropertyInclusionManager {
          */
 //        m_subObjectProperties.transitivelyClose();
         for (OWLClassExpression[] inclusion : axioms.m_conceptInclusions)
-            for (int index=0;index<inclusion.length;index++)
+            for (int index=0;index<inclusion.length;index++){
+            	if(inclusion[index] instanceof OWLCardinalityRestriction)
+                    if( m_nonSimpleRoles.contains( ((OWLCardinalityRestriction)inclusion[index]).getProperty() ) )
+                        throw new IllegalArgumentException( "Non simple role '" + (OWLCardinalityRestriction)inclusion[index] + "' appears in asymmetricity axiom");
                 inclusion[index]=replaceDescriptionIfNecessary(inclusion[index]);
+            }
+        
 
         for (Map.Entry<OWLObjectAllValuesFrom,OWLClassExpression> mapping : m_replacedDescriptions.entrySet()) {
             OWLObjectAllValuesFrom replacedAllRestriction=mapping.getKey();
