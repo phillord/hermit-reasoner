@@ -315,6 +315,20 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         loadReasonerWithAxioms(buffer.toString());
         assertABoxSatisfiable(value);
     }
+    
+    protected void assertRegular(String axioms, boolean b) throws Exception {
+    	boolean regular = true;
+    	try{
+    		loadReasonerWithAxioms(axioms);
+    	}catch(IllegalArgumentException e){
+    		if( e.getMessage().contains( "The given role hierarchy is not regular" ) )
+    			regular = false;
+    		else{
+    			throw new Exception( e.getMessage() );
+    		}
+    	}
+    	assertEquals(regular,b);
+	}
 
     protected static Set<String> EQ(String... args) {
         Set<String> result=new HashSet<String>();
