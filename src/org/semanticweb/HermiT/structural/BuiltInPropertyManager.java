@@ -66,8 +66,8 @@ public class BuiltInPropertyManager {
             axiomatizeBottomDataProperty(axioms);
     }
     public void axiomatizeBuiltInPropertiesAsNeeded(OWLAxioms axioms) {
-        // Birte: I changed the following to skip axiomatization of TopDataPropertysince this 
-        // means HermiT throws an error, whenever TopDataProperty is used and Protege add an axiom 
+        // Birte: I changed the following to skip axiomatization of TopDataProperty since this 
+        // means HermiT throws an error, whenever TopDataProperty is used and Protege add an axioms 
         // dataProperty -> TopDataProperty for every data property 
         //axiomatizeBuiltInPropertiesAsNeeded(axioms,false,false,false,false);
         axiomatizeBuiltInPropertiesAsNeeded(axioms,false,false,true,false);

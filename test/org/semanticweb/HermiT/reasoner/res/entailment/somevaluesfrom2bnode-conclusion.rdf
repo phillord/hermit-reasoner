@@ -1,0 +1,10 @@
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"  
+          xmlns:ex="http://example.org/"
+          xmlns:owl="http://www.w3.org/2002/07/owl#"
+          xml:base="http://example.org/">
+  <owl:Ontology />
+  <owl:ObjectProperty rdf:about="p"/>
+  <rdf:Description rdf:about="a">
+    <ex:p><rdf:Description/></ex:p> 
+  </rdf:Description>
+</rdf:RDF>

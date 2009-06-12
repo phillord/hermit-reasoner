@@ -39,6 +39,7 @@ public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset 
         s_anyLangTag=s_separator.concatenate(s_languageTagOrEmpty);
         s_xsdString=Datatypes.get("string");
         s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"string",s_xsdString.concatenate(s_emptyLangTag));
+        s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"normalizedString",normalizedStringAutomaton().concatenate(s_emptyLangTag));
         s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"token",tokenAutomaton().concatenate(s_emptyLangTag));
         s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"Name",Datatypes.get("Name2").concatenate(s_emptyLangTag));
         s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"NCName",Datatypes.get("NCName").concatenate(s_emptyLangTag));
@@ -67,10 +68,18 @@ public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset 
             "(-x(-[a-z0-9]{1,8})+)?"                    // privateuse
         ).toAutomaton();
     }
+    protected static Automaton normalizedStringAutomaton() {
+        /* \u0009 \u000D control characters containing Tab, CR, and LF 
+           \u0020 SPACE
+           XML is allowed to contain unicode code points apart from:
+           most of the C0 and C1 control codes: \u0000-\u001F and \u0080Ð\u009F 
+           permanently unassigned: permanently-unassigned code points D800ÐDFFF
+           not allowed: code point ending in FFFE or FFFF  */
+        return new RegExp("([\u0020-\u007F\u00A0-\uD7FF\uE000-\uFFFD])*").toAutomaton();
+    }
     protected static Automaton tokenAutomaton() {
         return new RegExp("([\u0021-\uD7FF\uE000-\uFFFD]+(\u0020[\u0021-\uD7FF\uE000-\uFFFD]+)*)?").toAutomaton();
     }
-    
     protected final Automaton m_automaton;
     
     public RDFPlainLiteralPatternValueSpaceSubset(Automaton automaton) {

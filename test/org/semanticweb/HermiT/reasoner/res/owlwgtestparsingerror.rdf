@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<rdf:RDF
+  xml:base  = "http://example.org/"
+  xmlns     = "http://example.org/"
+  xmlns:owl = "http://www.w3.org/2002/07/owl#"
+  xmlns:rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+
+<owl:Ontology/>
+
+<owl:DatatypeProperty rdf:about="hasAge" />
+
+<owl:NegativePropertyAssertion>
+  <owl:sourceIndividual rdf:resource="Meg" />
+  <owl:assertionProperty rdf:resource="hasAge" />
+  <owl:targetValue rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">5</owl:targetValue>
+</owl:NegativePropertyAssertion>
+
+<rdf:Description rdf:about="Meg">
+  <hasAge rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">5</hasAge>
+</rdf:Description>
+
+</rdf:RDF>

@@ -45,6 +45,9 @@ public class FloatDatatypeHandler implements DatatypeHandler {
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert XSD_FLOAT.equals(datatypeURI);
         try {
+            if (lexicalForm.endsWith("INF")) {
+                lexicalForm=lexicalForm.replaceAll("INF", "Infinity");
+            } 
             return Float.parseFloat(lexicalForm);
         }
         catch (NumberFormatException error) {

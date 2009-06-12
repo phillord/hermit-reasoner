@@ -5,6 +5,14 @@ public class FloatDoubleTest extends AbstractReasonerTest {
     public FloatDoubleTest(String name) {
         super(name);
     }
+    public void testINF() throws Exception {
+        String axioms = "SubClassOf(:A DataAllValuesFrom(:dp owl:real))"
+            + "SubClassOf(:A DataSomeValuesFrom(:dp DataOneOf(\"-INF\"^^xsd:float \"-0\"^^xsd:integer)))"
+            + "ClassAssertion(:A :a)"
+            + "NegativeDataPropertyAssertion(:dp :a \"0\"^^xsd:unsignedInt)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
     public void testFloatRange() throws Exception {
         assertDRSatisfiable(false,
             DR("xsd:float"),

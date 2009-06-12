@@ -22,6 +22,12 @@ public class DateTime {
         "([0-9]{2})([.]([0-9]{1,3}))?"+
         "((Z)|(([+]|-)([0-9]{2}):([0-9]{2})))?"
     );
+    // according to XML Schema 1.1 spec (http://www.w3.org/TR/xmlschema11-2/#dateTime) the reg exp is as follows:
+//    -?([1-9][0-9]{3,}|0[0-9]{3})
+//            -(0[1-9]|1[0-2])
+//            -(0[1-9]|[12][0-9]|3[01])
+//            T(([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\.[0-9]+)?|(24:00:00(\.0+)?))
+//            (Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))?
     protected static final int YEAR_GROUP=1;
     protected static final int MONTH_GROUP=2;
     protected static final int DAY_GROUP=3;

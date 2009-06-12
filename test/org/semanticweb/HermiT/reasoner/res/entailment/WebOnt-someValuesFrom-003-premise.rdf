@@ -1,0 +1,19 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:first="http://www.w3.org/2002/03owlt/someValuesFrom/premises003#"
+    xml:base="http://www.w3.org/2002/03owlt/someValuesFrom/premises003" >
+   <owl:Ontology/>
+   <owl:Class rdf:ID="person">
+     <owl:equivalentClass>
+       <owl:Restriction>
+         <owl:onProperty>
+            <owl:ObjectProperty rdf:ID="parent"/>
+         </owl:onProperty>
+         <owl:someValuesFrom rdf:resource="#person" />
+       </owl:Restriction>
+      </owl:equivalentClass>
+    </owl:Class>
+    <first:person rdf:ID="fred" />
+
+</rdf:RDF>

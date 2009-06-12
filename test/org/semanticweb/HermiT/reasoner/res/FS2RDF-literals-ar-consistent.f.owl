@@ -1,0 +1,55 @@
+Prefix(: = <http://example.org/>)
+  Prefix(xsd: = <http://www.w3.org/2001/XMLSchema#>)
+  Prefix(rdf: = <http://www.w3.org/1999/02/22-rdf-syntax-ns#>)
+  Prefix(rdfs: = <http://www.w3.org/2000/01/rdf-schema#>)
+  Prefix(owl: = <http://www.w3.org/2002/07/owl#>)
+  Ontology(
+   Declaration(Annotation(rdfs:comment "No range so any literal is fine") DataProperty(:dp))
+   Declaration(NamedIndividual(:holder))
+   Declaration(DataProperty(:dp))
+   DataPropertyAssertion(:dp :holder "1")
+   DataPropertyAssertion(:dp :holder "1"^^xsd:integer)
+   DataPropertyAssertion(:dp :holder "6666666666"^^xsd:long)
+   DataPropertyAssertion(:dp :holder "12.25"^^xsd:decimal)
+   DataPropertyAssertion(:dp :holder "1"^^xsd:decimal)
+   DataPropertyAssertion(:dp :holder "No use of rdf:test in old rdf serializations@en"^^rdf:PlainLiteral)
+   DataPropertyAssertion(:dp :holder "1.16"^^xsd:float)
+   DataPropertyAssertion(:dp :holder "1.16"^^xsd:double)
+   DataPropertyAssertion(:dp :holder "string"^^xsd:string)
+   DataPropertyAssertion(:dp :holder "<rdf:RDF
+    xmlns:ex=\"http://example.org/\"
+    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"
+    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"
+    xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\"
+    >
+  <owl:Ontology></owl:Ontology>
+  <rdf:Description rdf:about=\"http://example.org/a\">
+    <owl:differentFrom rdf:resource=\"http://example.org/b\"/>
+  </rdf:Description>
+ </rdf:RDF>
+ "^^rdf:XMLLiteral)
+   DataPropertyAssertion(:dp :holder "1/2"^^owl:rational)
+   DataPropertyAssertion(:dp :holder "0"^^xsd:nonNegativeInteger)
+   DataPropertyAssertion(:dp :holder "0"^^xsd:nonPositiveInteger)
+   DataPropertyAssertion(:dp :holder "12"^^xsd:positiveInteger)
+   DataPropertyAssertion(:dp :holder "-11"^^xsd:negativeInteger)
+   DataPropertyAssertion(:dp :holder "13"^^xsd:int)
+   DataPropertyAssertion(:dp :holder "14"^^xsd:short)
+   DataPropertyAssertion(:dp :holder "15"^^xsd:byte)
+   DataPropertyAssertion(:dp :holder "6666666666"^^xsd:unsignedLong)
+   DataPropertyAssertion(:dp :holder "12"^^xsd:unsignedInt)
+   DataPropertyAssertion(:dp :holder "17"^^xsd:unsignedShort)
+   DataPropertyAssertion(:dp :holder "28"^^xsd:unsignedByte)
+   DataPropertyAssertion(:dp :holder "true"^^xsd:boolean)
+   DataPropertyAssertion(:dp :holder "C010"^^xsd:hexBinary)
+   DataPropertyAssertion(:dp :holder "b3ds"^^xsd:base64Binary)
+   DataPropertyAssertion(:dp :holder "http://www.w3.org/2007/OWL/wiki/Syntax"^^xsd:anyURI)
+   DataPropertyAssertion(:dp :holder "  There are no leading spaces in the value of this property"^^xsd:normalizedString)
+   DataPropertyAssertion(:dp :holder "there is only one space between each word"^^xsd:token)
+   DataPropertyAssertion(:dp :holder "en"^^xsd:language)
+   DataPropertyAssertion(:dp :holder "_12345"^^xsd:Name)
+   DataPropertyAssertion(:dp :holder "non-hyphenated"^^xsd:NCName)
+   DataPropertyAssertion(:dp :holder "token"^^xsd:NMTOKEN)
+   DataPropertyAssertion(:dp :holder "2007-09-01T12:00:01"^^xsd:dateTime)
+   DataPropertyAssertion(:dp :holder "2007-09-01T12:00:01-05:00"^^xsd:dateTimeStamp)
+)

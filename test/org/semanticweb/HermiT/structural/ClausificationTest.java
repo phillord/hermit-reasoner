@@ -20,7 +20,7 @@ public class ClausificationTest extends AbstractStructuralTest {
     public ClausificationTest(String name) {
         super(name);
     }
-    // Giorgos will fix this
+    
     public void testBasic() throws Exception {
         assertClausification("res/basic-input.xml","res/basic-control.txt");
     }

@@ -24,7 +24,7 @@ public class OWLAxioms {
     public final Set<OWLClass> m_classes;
     public final Set<OWLObjectProperty> m_objectProperties;
     public final Set<OWLDataProperty> m_dataProperties;
-    public final Set<OWLNamedIndividual> m_individuals;
+    public final Set<OWLNamedIndividual> m_namedIndividuals;
     public final Collection<OWLClassExpression[]> m_conceptInclusions;
     public final Collection<OWLDataRange[]> m_dataRangeInclusions;
     public final Collection<OWLObjectPropertyExpression[]> m_simpleObjectPropertyInclusions;
@@ -45,7 +45,7 @@ public class OWLAxioms {
         m_classes=new HashSet<OWLClass>();
         m_objectProperties=new HashSet<OWLObjectProperty>();
         m_dataProperties=new HashSet<OWLDataProperty>();
-        m_individuals=new HashSet<OWLNamedIndividual>();
+        m_namedIndividuals=new HashSet<OWLNamedIndividual>();
         m_conceptInclusions=new ArrayList<OWLClassExpression[]>();
         m_dataRangeInclusions=new ArrayList<OWLDataRange[]>();
         m_simpleObjectPropertyInclusions=new ArrayList<OWLObjectPropertyExpression[]>();

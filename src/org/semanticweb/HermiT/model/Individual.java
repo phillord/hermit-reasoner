@@ -10,12 +10,17 @@ public class Individual extends Term {
     private static final long serialVersionUID=2791684055390160959L;
 
     protected final String m_uri;
+    protected final boolean m_isNamed;
     
-    protected Individual(String uri) {
+    protected Individual(String uri, boolean isNamed) {
         m_uri=uri;
+        m_isNamed=isNamed;
     }
     public String getIRI() {
         return m_uri;
+    }
+    public boolean isNamed() {
+        return m_isNamed;
     }
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
@@ -41,7 +46,7 @@ public class Individual extends Term {
         will be returned on each call (allowing for fast equality testing).
         It is the caller's responsibility to normalize the given URI---this
         function treats the argument as a raw string. */
-    public static Individual create(String uri) {
-        return s_interningManager.intern(new Individual(uri));
+    public static Individual create(String uri, boolean isNamed) {
+        return s_interningManager.intern(new Individual(uri, isNamed));
     }
 }

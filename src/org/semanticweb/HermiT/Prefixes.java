@@ -43,7 +43,6 @@ public class Prefixes implements Serializable {
         s_semanticWebPrefixes.put("swrlb","http://www.w3.org/2003/11/swrlb#");
         s_semanticWebPrefixes.put("swrlx","http://www.w3.org/2003/11/swrlx#");
         s_semanticWebPrefixes.put("ruleml","http://www.w3.org/2003/11/ruleml#");
-        s_semanticWebPrefixes.put("g","http://www.co-ode.org/ontologies/galen#");
     }
     public static final Prefixes STANDARD_PREFIXES=new ImmutablePrefixes(s_semanticWebPrefixes);
 
@@ -167,10 +166,16 @@ public class Prefixes implements Serializable {
         if (declarePrefixRaw("all","internal:all#"))
             containsPrefix=true;
         int individualIRIsIndex=1;
-        for (String uri : individualIRIs) {
-            if (declarePrefixRaw("nom"+(individualIRIsIndex==1 ? "" : String.valueOf(individualIRIsIndex)),"internal:nom#"+uri))
+        for (String iri : individualIRIs) {
+            if (declarePrefixRaw("nom"+(individualIRIsIndex==1 ? "" : String.valueOf(individualIRIsIndex)),"internal:nom#"+iri))
                 containsPrefix=true;
             individualIRIsIndex++;
+        }
+        int anonymousIndividualIRIsIndex=1;
+        for (String iri : individualIRIs) {
+            if (declarePrefixRaw("anon"+(anonymousIndividualIRIsIndex==1 ? "" : String.valueOf(anonymousIndividualIRIsIndex)),"internal:anon#"+iri))
+                containsPrefix=true;
+            anonymousIndividualIRIsIndex++;
         }
         if (declarePrefixRaw("nam","internal:nam#"))
             containsPrefix=true;

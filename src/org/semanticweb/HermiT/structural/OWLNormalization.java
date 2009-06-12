@@ -123,7 +123,7 @@ public class OWLNormalization {
         m_axioms.m_classes.addAll(ontology.getReferencedClasses());
         m_axioms.m_objectProperties.addAll(ontology.getReferencedObjectProperties());
         m_axioms.m_dataProperties.addAll(ontology.getReferencedDataProperties());
-        m_axioms.m_individuals.addAll(ontology.getReferencedIndividuals());
+        m_axioms.m_namedIndividuals.addAll(ontology.getReferencedIndividuals());
         AxiomVisitor axiomVisitor=new AxiomVisitor();
         for (OWLAxiom axiom : ontology.getAxioms())
             axiom.accept(axiomVisitor);
@@ -407,6 +407,9 @@ public class OWLNormalization {
             }
         }
         public void visit(OWLDisjointClassesAxiom axiom) {
+            if (axiom.getClassExpressions().size() <= 1) {
+                throw new IllegalArgumentException("Error: Parsed " + axiom.toString() + ". A DisjointClasses axiom in OWL 2 DL must have at least two classes as parameters. ");
+            }
             OWLClassExpression[] descriptions=new OWLClassExpression[axiom.getClassExpressions().size()];
             axiom.getClassExpressions().toArray(descriptions);
             for (int i=0;i<descriptions.length;i++)
@@ -520,7 +523,11 @@ public class OWLNormalization {
         public void visit(OWLSubDataPropertyOfAxiom axiom) {
             OWLDataPropertyExpression subDataProperty=axiom.getSubProperty();
             OWLDataPropertyExpression superDataProperty=axiom.getSuperProperty();
-            addInclusion(subDataProperty,superDataProperty);
+            if (subDataProperty.isOWLTopDataProperty()) {
+                throw new IllegalArgumentException("Error: owl:topDataProperty is only allowed to occur in the super property position of SubDataPropertyOf axioms, but the ontology contains an axiom SubDataPropertyOf(owl:topDataProperty " + subDataProperty.asOWLDataProperty().getIRI() + ").");
+            } else {
+                addInclusion(subDataProperty,superDataProperty);
+            }
         }
         public void visit(OWLEquivalentDataPropertiesAxiom axiom) {
             if (axiom.getProperties().size()>1) {

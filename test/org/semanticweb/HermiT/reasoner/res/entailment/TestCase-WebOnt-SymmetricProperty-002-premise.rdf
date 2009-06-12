@@ -1,0 +1,30 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:first="http://www.w3.org/2002/03owlt/SymmetricProperty/premises002#"
+    xml:base="http://www.w3.org/2002/03owlt/SymmetricProperty/premises002" >
+
+    <owl:Ontology/>
+
+    <owl:InverseFunctionalProperty rdf:about="#equalityOnA">
+      <rdfs:range>
+         <owl:Class rdf:ID="A">
+           <owl:oneOf rdf:parseType="Collection">
+              <owl:Thing rdf:ID="a"/>
+              <owl:Thing rdf:ID="b"/>
+           </owl:oneOf>
+         </owl:Class>
+      </rdfs:range>
+    </owl:InverseFunctionalProperty>
+
+    <owl:Thing rdf:about="#a">
+      <first:equalityOnA rdf:resource="#a"/>
+    </owl:Thing>
+    <owl:Thing rdf:about="#b">
+      <first:equalityOnA rdf:resource="#b"/>
+    </owl:Thing>
+
+    <owl:Thing rdf:ID="c"/>
+
+</rdf:RDF>

@@ -2,6 +2,8 @@ package org.semanticweb.HermiT.reasoner;
 
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.IRI;
@@ -13,11 +15,161 @@ import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLObjectMaxCardinality;
 import org.semanticweb.owl.model.OWLObjectProperty;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
+import org.semanticweb.owl.model.OWLSubPropertyChainOfAxiom;
 
 public class ReasonerTest extends AbstractReasonerTest {
 
     public ReasonerTest(String name) {
         super(name);
+    }
+    // actually this est should cause a parsing error since xsd:minInclusive for restricting byte is supposed to use 
+    // only values from the value space of byte, which \"4.5\"^^xsd:decimal isn't 
+    public void testDataTypeRestriction() throws Exception {
+        String axioms = "SubClassOf(:A DataAllValuesFrom(:dp DatatypeRestriction(xsd:byte xsd:minInclusive \"4.5\"^^xsd:decimal xsd:maxInclusive \"7\"^^xsd:short)))"
+            + "SubClassOf(:A DataAllValuesFrom(:dp DatatypeRestriction(xsd:decimal xsd:minInclusive \"6.0\"^^xsd:decimal xsd:maxInclusive \"6.8\"^^xsd:decimal)))"
+            + "SubClassOf(:A DataSomeValuesFrom(:dp owl:real))"
+            + "ClassAssertion(:A :a)"
+            + "NegativeDataPropertyAssertion(:dp :a \"6\"^^xsd:unsignedInt)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+    public void testDomainRange() throws Exception {
+        String axioms = "Declaration(DataProperty(:p1))"
+            + "Declaration(DataProperty(:p2))"
+            + "Declaration(DataProperty(:p3))"
+            + "Declaration(DataProperty(:p4))"
+            + "Declaration(DataProperty(:p5))"
+            + "Declaration(DataProperty(:p6))"
+            + "Declaration(Class(:c2))"
+            + "Declaration(Class(:c3))"
+            + "Declaration(Class(:c4))"
+            + "Declaration(Class(:c5))"
+            + "Declaration(Class(:c6))"
+            + "DataPropertyRange(:p1 rdf:PlainLiteral)"
+            + "DataPropertyDomain(:p2 :c2)"
+            + "ObjectPropertyRange(:p3 :c3)"
+            + "ObjectPropertyDomain(:p4 :c4)"
+            + "AnnotationPropertyDomain(:p5 :c5)"
+            + "AnnotationPropertyRange(:p6 :c6)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(true);
+    }
+    public void testDateTime2() throws Exception {
+        String axioms = "SubClassOf(:A DataSomeValuesFrom(:dp DatatypeRestriction(xsd:dateTime xsd:minInclusive \"2008-10-08T20:44:11.656+01:00\"^^xsd:dateTime)))" 
+            + "SubClassOf(:A DataAllValuesFrom(:dp DatatypeRestriction(xsd:dateTime xsd:maxInclusive \"2008-10-08T20:44:11.656+01:00\"^^xsd:dateTime)))"
+            + "ClassAssertion(:A :a)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(true);
+    }
+    public void testChains4() throws Exception {
+        String axioms = "SubObjectPropertyOf( ObjectPropertyChain( :t :t ) :t )"
+            + "ObjectPropertyAssertion(:t :a :b)"
+            + "ObjectPropertyAssertion(:t :b :c)"
+            + "ClassAssertion(ObjectAllValuesFrom(:t :A) :a)"
+            + "ClassAssertion(ObjectComplementOf(:A) :c)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+    // UnsupportedOperationException, till we implement this
+    public void testChains3() throws Exception {
+        String axioms = "TransitiveObjectProperty( :p)";
+        loadReasonerWithAxioms(axioms);
+        OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
+        OWLObjectProperty p = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#p"));
+        List<OWLObjectPropertyExpression> chain = new ArrayList<OWLObjectPropertyExpression>();
+        chain.add(p);
+        chain.add(p);
+        OWLSubPropertyChainOfAxiom ax = df.getOWLSubPropertyChainOfAxiom(chain, p);
+        assertTrue(m_reasoner.isEntailed(ax));
+    }
+    public void testChains2() throws Exception {
+        String axioms = "ObjectPropertyAssertion(:p :a :b)"
+            + "ObjectPropertyAssertion(:q :b :c)"
+            + "SubObjectPropertyOf(ObjectPropertyChain(:p :q) :p)"
+            + "ObjectPropertyAssertion(:p :a :b)"
+            + "ObjectPropertyAssertion(:q :b :c)"
+            + "NegativeObjectPropertyAssertion(:p :a :c)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+    public void testAnonymousIndiviuals1() throws Exception {
+        String axioms = "SubClassOf(:r ObjectAllValuesFrom(:p :c))"
+            + "ClassAssertion(:r :i)"
+            + "ClassAssertion(ObjectComplementOf(:c) _:o)"
+            + "ObjectPropertyAssertion( :p :i _:o )";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+    public void testDateTime() throws Exception {
+        String axioms = "SubClassOf(:A DataHasValue(:dp \"2007-10-08T20:44:11.656+01:00\"^^xsd:dateTime))" 
+            + "SubClassOf(:A DataAllValuesFrom(:dp DatatypeRestriction(xsd:dateTime xsd:minInclusive \"2008-07-08T20:44:11.656+01:00\"^^xsd:dateTime xsd:maxInclusive \"2008-10-08T20:44:11.656+01:00\"^^xsd:dateTime)))" 
+            + "ClassAssertion(:A :a)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+    public void testDataRanges() throws Exception {
+        String axioms = "SubClassOf(:A DataAllValuesFrom(:dp owl:real))"
+            + "SubClassOf(:A DataSomeValuesFrom(:dp DataOneOf(\"-INF\"^^xsd:float \"-0\"^^xsd:integer)) )"
+            + "ClassAssertion(:A :a)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(true);
+    }
+    // needs proper implmentation of BottomDataProperty
+    public void testBottomDataProperty() throws Exception {
+        String axioms = "ClassAssertion( ObjectSomeValuesFrom( owl:bottomDataProperty rdfs:Literal ) :i )";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }     
+    public void testChains() throws Exception {
+        String axioms = "SubObjectPropertyOf( ObjectPropertyChain( :hasMother :hasSister ) :hasAunt )"
+            + "ObjectPropertyAssertion( :hasMother :Stewie :Lois )"
+            + "ObjectPropertyAssertion( :hasSister :Lois :Carol )"
+            + "NegativeObjectPropertyAssertion( :hasAunt :Stewie :Carol ) ";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+    public void testDatatypeLiterals() throws Exception {
+        loadReasonerFromResource("res/FS2RDF-literals-ar-consistent.f.owl");
+        assertABoxSatisfiable(true);
+    }
+    public void testHasKeysOnlyNamed() throws Exception {
+        String axioms = "Declaration( Class( :Person ) )"
+            + "Declaration( Class( :Man ) )"
+            + "Declaration( DataProperty( :hasSSN ) )"
+            + "Declaration( ObjectProperty( :marriedTo ) )"
+            + "HasKey( :Person () ( :hasSSN ) )"
+            + "DataPropertyAssertion( :hasSSN :Peter \"123-45-6789\" )"
+            + "ClassAssertion( :Person :Peter )"
+            + "ClassAssertion( ObjectSomeValuesFrom( :marriedTo ObjectIntersectionOf( :Man DataHasValue( :hasSSN \"123-45-6789\"^^xsd:string ) ) ) :Lois )"
+            + "SubClassOf( :Man :Person )"
+            + "ClassAssertion( ObjectComplementOf( :Man ) :Peter )";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(true);
+    }
+    // needs proper implmentation of BottomDataProperty
+    public void testTopDataProperty() throws Exception {
+        String axioms = "ClassAssertion(ObjectComplementOf(DataSomeValuesFrom( owl:topDataProperty rdfs:Literal)) :i)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+    public void testNegativeDataPropertyAssertionXXX() throws Exception {
+        loadReasonerFromResource("res/owlwgtestparsingerror.rdf");
+        assertABoxSatisfiable(false);
+    }
+    public void testNegativeDataPropertyAssertion() throws Exception {
+        String axioms = "Declaration( DataProperty( :hasAge ) )"
+            + "NegativeDataPropertyAssertion( :hasAge :Meg \"5\"^^xsd:integer )"
+            + "DataPropertyAssertion( :hasAge :Meg \"5\"^^xsd:integer )";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+    // here we get DisjointClasses(:A :B) from the OWL API, since it used a set to represent the disjoint classes
+    // reported to Matthew with the suggestion to use a list instead of a set
+    public void testDisjointClasses() throws Exception {
+        String axioms = "ClassAssertion(:A :a)"
+            + "DisjointClasses(:A :B :A) ";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
     }
     
     public void testKeys() throws Exception {
@@ -1723,9 +1875,9 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(:B ObjectSomeValuesFrom(:R :B)) ");
          buffer.append("SubClassOf(:B ObjectSomeValuesFrom(:S ObjectOneOf(:n))) ");
          buffer.append("ClassAssertion(ObjectSomeValuesFrom(:R :B) :b) ");
+         buffer.append("ClassAssertion(ObjectMaxCardinality(1 ObjectInverseOf(:S)) :n)");
          loadOntologyWithAxioms(buffer.toString());
-         
-         
+
          OWLClassExpression A = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#A"));
          OWLClassExpression B = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#B"));
          OWLObjectProperty S = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#S"));
@@ -1733,15 +1885,6 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLObjectProperty R = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#R"));
          OWLIndividual n = m_dataFactory.getOWLNamedIndividual(IRI.create("file:/c/test.owl#n"));
 
-         // OWL API has an error: axiom
-         //     ClassAssertion(n ObjectMaxCardinality(1 InverseObjectProperty(S)))
-         // gets loaded as
-         //     ClassAssertion(n ObjectMaxCardinality(1 S))
-         // Therefore, we add this axiom manually.
-         OWLObjectMaxCardinality atMostOneInvS = m_dataFactory.getOWLObjectMaxCardinality(S.getInverseProperty(), 1);
-         OWLClassAssertionAxiom nOfAtMostOneInvS = m_dataFactory.getOWLClassAssertionAxiom(atMostOneInvS,n);
-         m_ontologyManager.addAxiom(m_ontology, nOfAtMostOneInvS);
-         
          createReasoner();
                            
          // [some [inv S] [and A B [some R [and A B]]]]
@@ -2011,13 +2154,6 @@ public class ReasonerTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(buffer.toString());
         assertABoxSatisfiable(false);
     }
-    // should be parsable, but isn't, reported to Matthew
-//    public void testAnonymousIndiviuals() throws Exception {
-//        StringBuffer buffer = new StringBuffer();
-//        buffer.append("Individual(value( :city :Paris ) value( :region :IleDeFrance ))");
-//        loadReasonerWithAxioms(buffer.toString());
-//        assertABoxSatisfiable(true);
-//    }
     public void testAnonymousIndiviuals2() throws Exception {
         String axioms = "ObjectPropertyAssertion( :city _:a1 :Paris )";
         loadReasonerWithAxioms(axioms);

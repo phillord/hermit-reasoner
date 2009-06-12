@@ -1,0 +1,17 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:first="http://www.w3.org/2002/03owlt/allValuesFrom/premises002#"
+    xmlns:second="http://www.w3.org/2002/03owlt/allValuesFrom/nonconclusions002#"
+    xml:base="http://www.w3.org/2002/03owlt/allValuesFrom/nonconclusions002" >
+    <owl:Ontology/>
+    <owl:Thing rdf:about="premises002#i">
+        <first:p>
+           <first:c rdf:nodeID="o" />
+         </first:p>
+    </owl:Thing>
+    <owl:Thing rdf:nodeID="o" />
+    <owl:ObjectProperty rdf:about="premises002#p"/>
+    <owl:Class rdf:about="premises002#c"/>
+</rdf:RDF>

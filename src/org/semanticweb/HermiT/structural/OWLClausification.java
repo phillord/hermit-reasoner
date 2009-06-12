@@ -230,8 +230,8 @@ public class OWLClausification {
         for (OWLClass c : axioms.m_classes)
             atomicConcepts.add(AtomicConcept.create(c.getIRI().toString()));
         Set<Individual> hermitIndividuals=new HashSet<Individual>();
-        for (OWLNamedIndividual i : axioms.m_individuals) {
-            Individual ind=Individual.create(i.getIRI().toString());
+        for (OWLNamedIndividual i : axioms.m_namedIndividuals) {
+            Individual ind=Individual.create(i.getIRI().toString(),true);
             hermitIndividuals.add(ind);
             // all named individuals are tagged with a concept, so that keys are
             // only applied to them
@@ -365,9 +365,9 @@ public class OWLClausification {
     }
     protected static Individual getIndividual(OWLIndividual individual) {
         if (individual.isAnonymous()) {
-            return Individual.create("internal:anonymousIndividual#" + individual.asAnonymousIndividual().getID().toString());
+            return Individual.create("internal:anon#"+individual.asAnonymousIndividual().getID().toString(),false);
         } else {
-            return Individual.create(individual.asNamedIndividual().getIRI().toString());
+            return Individual.create(individual.asNamedIndividual().getIRI().toString(),true);
         }
     }
 
@@ -412,13 +412,18 @@ public class OWLClausification {
             return result;
         }
         protected AtomicConcept getConceptForNominal(OWLIndividual individual) {
+            AtomicConcept result;
             if (individual.isAnonymous()) {
-                throw new IllegalStateException("Nominals must be named individuals and cannot be anonymous. ");
+                //result=AtomicConcept.create("internal:anon#"+getFragment(individual.asAnonymousIndividual().getID()));
+                result=AtomicConcept.create("internal:anon#"+individual.asAnonymousIndividual().getID().toString());
+            } else {
+                result=AtomicConcept.create("internal:nom#"+individual.asNamedIndividual().getIRI().toString());
+                //result=AtomicConcept.create("internal:nom#"+getFragment(individual.asNamedIndividual().getIRI()));
             }
-            AtomicConcept result=AtomicConcept.create("internal:nom#"+individual.asNamedIndividual().getIRI().toString());
             m_positiveFacts.add(Atom.create(result,getIndividual(individual)));
             return result;
         }
+
         
         // Various types of descriptions
         
