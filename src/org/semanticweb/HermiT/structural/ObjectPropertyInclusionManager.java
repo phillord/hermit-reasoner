@@ -8,10 +8,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.HermiT.graph.Graph;
-import org.semanticweb.owl.model.OWLCardinalityRestriction;
 import org.semanticweb.owl.model.OWLClassExpression;
 import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLObjectAllValuesFrom;
+import org.semanticweb.owl.model.OWLObjectCardinalityRestriction;
 import org.semanticweb.owl.model.OWLObjectComplementOf;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
 
@@ -56,17 +56,20 @@ public class ObjectPropertyInclusionManager {
         m_nonSimpleRoles.addAll( automataBuilder.getM_nonSimpleRoles() );
         
         for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_asymmetricObjectProperties)
-                if( m_nonSimpleRoles.contains( objectPropertyExpression ) )
-                throw new IllegalArgumentException( "Non simple role '" + objectPropertyExpression + "' appears in asymmetricity axiom");
+                if( m_nonSimpleRoles.contains( objectPropertyExpression ) ||
+                    m_nonSimpleRoles.contains( objectPropertyExpression.getInverseProperty().getSimplified() ))
+                throw new IllegalArgumentException( "Non simple role '" + objectPropertyExpression + "' or its inverse appears in asymmetricity axiom");
 
         for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_irreflexiveObjectProperties)
-                if( m_nonSimpleRoles.contains( objectPropertyExpression ) )
-                throw new IllegalArgumentException( "Non simple role '" + objectPropertyExpression + "' appears in asymmetricity axiom");
+                if( m_nonSimpleRoles.contains( objectPropertyExpression ) ||
+                	m_nonSimpleRoles.contains( objectPropertyExpression.getInverseProperty().getSimplified() ))
+                throw new IllegalArgumentException( "Non simple role '" + objectPropertyExpression + "' or its inverse appears in asymmetricity axiom");
 
         for (OWLObjectPropertyExpression[] properties : axioms.m_disjointObjectProperties)
             for (int i=0;i<properties.length;i++)
-                if( m_nonSimpleRoles.contains( properties[i] ) )
-                    throw new IllegalArgumentException( "Non simple role '" + properties[i] + "' appears in disjoint properties axiom");
+                if( m_nonSimpleRoles.contains( properties[i] ) ||
+                    m_nonSimpleRoles.contains( properties[i].getInverseProperty().getSimplified() ))
+                    throw new IllegalArgumentException( "Non simple role '" + properties[i] + "' or its inverse appears in disjoint properties axiom");
     }
         public void addInclusion(OWLObjectPropertyExpression subObjectProperty,OWLObjectPropertyExpression superObjectProperty) {
         subObjectProperty=subObjectProperty.getSimplified();
@@ -91,9 +94,10 @@ public class ObjectPropertyInclusionManager {
 //        m_subObjectProperties.transitivelyClose();
         for (OWLClassExpression[] inclusion : axioms.m_conceptInclusions)
             for (int index=0;index<inclusion.length;index++){
-            	if(inclusion[index] instanceof OWLCardinalityRestriction)
-                    if( m_nonSimpleRoles.contains( ((OWLCardinalityRestriction)inclusion[index]).getProperty() ) )
-                        throw new IllegalArgumentException( "Non simple role '" + (OWLCardinalityRestriction)inclusion[index] + "' appears in asymmetricity axiom");
+            	if(inclusion[index] instanceof OWLObjectCardinalityRestriction)
+                    if( m_nonSimpleRoles.contains( ((OWLObjectCardinalityRestriction)inclusion[index]).getProperty() ) ||
+                    	m_nonSimpleRoles.contains( ((OWLObjectPropertyExpression)((OWLObjectCardinalityRestriction)inclusion[index]).getProperty()).getInverseProperty().getSimplified() ) )
+                        throw new IllegalArgumentException( "Non simple role '" + (OWLObjectCardinalityRestriction)inclusion[index] + "' or its inverse appears in asymmetricity axiom");
                 inclusion[index]=replaceDescriptionIfNecessary(inclusion[index]);
             }
         
