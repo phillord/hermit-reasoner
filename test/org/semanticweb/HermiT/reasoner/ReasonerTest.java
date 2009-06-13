@@ -2167,4 +2167,41 @@ public class ReasonerTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(true);
     }
+    public void testSatisfiabilityWithRIAs1() throws Exception {
+        String axioms = "ObjectPropertyAssertion( :R1 :a :b )" +
+						"ObjectPropertyAssertion( :R1 :b :c )" +
+						"ObjectPropertyAssertion( :R2 :c :d )" +
+						"ObjectPropertyAssertion( :R2 :d :e )" +
+						"ObjectPropertyAssertion( :R3 :e :f )" +
+						"SubObjectPropertyOf(:R1 :dumm) " +
+						"SubObjectPropertyOf(:R2 :dumm) " +
+						"SubObjectPropertyOf(:dumm :R) " +
+        				"ClassAssertion(ObjectAllValuesFrom(:R :C) :f) " +
+        				"ClassAssertion(ObjectComplementOf(:C) :a) " +
+        				"TransitiveObjectProperty(:R1) " +
+        				"TransitiveObjectProperty(:R2) " +
+        				"TransitiveObjectProperty(:dumm) " +
+        				"SubObjectPropertyOf(ObjectPropertyChain(:dumm :R3) ObjectInverseOf(:R)) ";
+                		
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
+    public void testSatisfiabilityWithRIAs2() throws Exception {
+        String axioms = "ObjectPropertyAssertion( :R1 :a :b )" +
+						"ObjectPropertyAssertion( :S3- :b :c )" +
+						"ObjectPropertyAssertion( :S2- :c :d )" +
+						"ObjectPropertyAssertion( :S1- :d :e )" +
+        				"ObjectPropertyAssertion( :R2 :e :f )" +
+        				"InverseObjectProperties(:S :S-) " +
+        				"InverseObjectProperties(:S1 :S1-) " +
+        				"InverseObjectProperties(:S2 :S2-) " +
+        				"InverseObjectProperties(:S3 :S3-) " +
+        				"ClassAssertion(ObjectComplementOf(:C) :a) " +
+        				"ClassAssertion(ObjectAllValuesFrom(:R :C) :f) " +
+        				"SubObjectPropertyOf(ObjectPropertyChain(:S1 :S2 :S3) :S) " +
+        				"SubObjectPropertyOf(ObjectPropertyChain(:R1 :S- :R2) ObjectInverseOf(:R)) ";
+
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
 }
