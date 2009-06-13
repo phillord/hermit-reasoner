@@ -329,6 +329,19 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     	}
     	assertEquals(regular,b);
 	}
+    protected void assertSimple(String axioms, boolean b) throws Exception {
+    	boolean simple = true;
+    	try{
+    		loadReasonerWithAxioms(axioms);
+    	}catch(IllegalArgumentException e){
+    		if( e.getMessage().contains( "Non simple role '" ) )
+    			simple = false;
+    		else{
+    			throw new Exception( e.getMessage() );
+    		}
+    	}
+    	assertEquals(simple,b);
+	}
 
     protected static Set<String> EQ(String... args) {
         Set<String> result=new HashSet<String>();
