@@ -14,6 +14,7 @@ import org.semanticweb.owl.model.OWLObjectAllValuesFrom;
 import org.semanticweb.owl.model.OWLObjectCardinalityRestriction;
 import org.semanticweb.owl.model.OWLObjectComplementOf;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
+import org.semanticweb.owl.model.OWLOntology;
 
 import rationals.Automaton;
 import rationals.State;
@@ -41,6 +42,7 @@ public class ObjectPropertyInclusionManager {
          */
         m_automataForComplexRoles = new HashMap<OWLObjectPropertyExpression,Automaton>();
         m_nonSimpleRoles = new HashSet<OWLObjectPropertyExpression>();
+
     }
     
     public void prepareTransformation(OWLAxioms axioms) {
@@ -55,20 +57,18 @@ public class ObjectPropertyInclusionManager {
         m_automataForComplexRoles.putAll( automataBuilder.createAutomata( axioms.m_simpleObjectPropertyInclusions, axioms.m_complexObjectPropertyInclusions ) );
         m_nonSimpleRoles.addAll( automataBuilder.getM_nonSimpleRoles() );
         
+
         for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_asymmetricObjectProperties)
-                if( m_nonSimpleRoles.contains( objectPropertyExpression ) ||
-                    m_nonSimpleRoles.contains( objectPropertyExpression.getInverseProperty().getSimplified() ))
+                if( m_nonSimpleRoles.contains( objectPropertyExpression ) )
                 throw new IllegalArgumentException( "Non simple role '" + objectPropertyExpression + "' or its inverse appears in asymmetricity axiom");
 
         for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_irreflexiveObjectProperties)
-                if( m_nonSimpleRoles.contains( objectPropertyExpression ) ||
-                	m_nonSimpleRoles.contains( objectPropertyExpression.getInverseProperty().getSimplified() ))
+                if( m_nonSimpleRoles.contains( objectPropertyExpression ) )
                 throw new IllegalArgumentException( "Non simple role '" + objectPropertyExpression + "' or its inverse appears in asymmetricity axiom");
 
         for (OWLObjectPropertyExpression[] properties : axioms.m_disjointObjectProperties)
             for (int i=0;i<properties.length;i++)
-                if( m_nonSimpleRoles.contains( properties[i] ) ||
-                    m_nonSimpleRoles.contains( properties[i].getInverseProperty().getSimplified() ))
+                if( m_nonSimpleRoles.contains( properties[i] ) )
                     throw new IllegalArgumentException( "Non simple role '" + properties[i] + "' or its inverse appears in disjoint properties axiom");
     }
         public void addInclusion(OWLObjectPropertyExpression subObjectProperty,OWLObjectPropertyExpression superObjectProperty) {
@@ -95,19 +95,17 @@ public class ObjectPropertyInclusionManager {
         for (OWLClassExpression[] inclusion : axioms.m_conceptInclusions)
             for (int index=0;index<inclusion.length;index++){
             	if(inclusion[index] instanceof OWLObjectCardinalityRestriction)
-                    if( m_nonSimpleRoles.contains( ((OWLObjectCardinalityRestriction)inclusion[index]).getProperty() ) ||
-                    	m_nonSimpleRoles.contains( ((OWLObjectPropertyExpression)((OWLObjectCardinalityRestriction)inclusion[index]).getProperty()).getInverseProperty().getSimplified() ) )
+                    if( m_nonSimpleRoles.contains( ((OWLObjectCardinalityRestriction)inclusion[index]).getProperty() ) )
                         throw new IllegalArgumentException( "Non simple role '" + (OWLObjectCardinalityRestriction)inclusion[index] + "' or its inverse appears in asymmetricity axiom");
-                inclusion[index]=replaceDescriptionIfNecessary(inclusion[index]);
+            	inclusion[index]=replaceDescriptionIfNecessary(inclusion[index]);
             }
-        
 
         for (Map.Entry<OWLObjectAllValuesFrom,OWLClassExpression> mapping : m_replacedDescriptions.entrySet()) {
+        	
             OWLObjectAllValuesFrom replacedAllRestriction=mapping.getKey();
             String indexOfInitialConcept = mapping.getValue().asOWLClass().getURI().getFragment(); 
             OWLObjectPropertyExpression objectProperty = replacedAllRestriction.getProperty();
             OWLClassExpression owlConcept = replacedAllRestriction.getFiller();
-
             Automaton automatonOfRole = m_automataForComplexRoles.get( objectProperty );
             String initialState = automatonOfRole.initials().toArray()[0].toString();
             boolean isOfNegativePolarity = false;
@@ -121,9 +119,9 @@ public class ObjectPropertyInclusionManager {
             for( int i=0 ; i<states.length ; i++ ){
                 State state = (State)states[i];
                 if( state.isInitial() )
-                        continue;
+                	continue;
                 else
-                        mapOfNewConceptNames.put( state, m_factory.getOWLClass(URI.create("internal:all#"+indexOfInitialConcept+state)) );
+                	mapOfNewConceptNames.put( state, m_factory.getOWLClass(URI.create("internal:all#"+indexOfInitialConcept+state)) );
             }
             if( isOfNegativePolarity )
                 for(State state : mapOfNewConceptNames.keySet())
