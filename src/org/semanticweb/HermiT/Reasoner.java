@@ -99,6 +99,7 @@ import org.semanticweb.owl.model.OWLObjectPropertyExpression;
 import org.semanticweb.owl.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
+import org.semanticweb.owl.model.OWLSubPropertyChainOfAxiom;
 import org.semanticweb.owl.model.OWLTypedLiteral;
 import org.semanticweb.owl.util.ProgressMonitor;
 
@@ -856,7 +857,13 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
     }
 
     public boolean isTransitive(OWLObjectProperty property) {
-        throw new UnsupportedOperationException();
+        OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
+        List<OWLObjectPropertyExpression> chain = new ArrayList<OWLObjectPropertyExpression>();
+        chain.add(property);
+        chain.add(property);
+        OWLSubPropertyChainOfAxiom ax = df.getOWLSubPropertyChainOfAxiom(chain, property);
+        
+        return this.isEntailed(ax);
     }
     
     public boolean isEntailed(OWLAxiom axiom) {
@@ -1347,13 +1354,16 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             if (!originalDLOntology.getAllComplexObjectRoleInclusions().isEmpty() || !axioms.m_complexObjectPropertyInclusions.isEmpty()) {
                 ObjectPropertyInclusionManager objectPropertyInclusionManager=new ObjectPropertyInclusionManager(factory);
                 objectPropertyInclusionManager.prepareTransformation(axioms);
-                for (DLOntology.ComplexObjectRoleInclusion inclusion : originalDLOntology.getAllComplexObjectRoleInclusions()) {
-                    OWLObjectPropertyExpression[] subObjectPropertyExpressions=new OWLObjectPropertyExpression[inclusion.getNumberOfSubRoles()];
-                    for (int index=inclusion.getNumberOfSubRoles()-1;index>=0;--index)
-                        subObjectPropertyExpressions[index]=getObjectPropertyExpression(factory,inclusion.getSubRole(index));
-                    OWLObjectPropertyExpression superObjectPropertyExpression=getObjectPropertyExpression(factory,inclusion.getSuperRole());
-                    objectPropertyInclusionManager.addInclusion(subObjectPropertyExpressions,superObjectPropertyExpression);
-                }
+                /**
+                 * gstoil this is obsolete
+                 */
+//                for (DLOntology.ComplexObjectRoleInclusion inclusion : originalDLOntology.getAllComplexObjectRoleInclusions()) {
+//                    OWLObjectPropertyExpression[] subObjectPropertyExpressions=new OWLObjectPropertyExpression[inclusion.getNumberOfSubRoles()];
+//                    for (int index=inclusion.getNumberOfSubRoles()-1;index>=0;--index)
+//                        subObjectPropertyExpressions[index]=getObjectPropertyExpression(factory,inclusion.getSubRole(index));
+//                    OWLObjectPropertyExpression superObjectPropertyExpression=getObjectPropertyExpression(factory,inclusion.getSuperRole());
+//                    objectPropertyInclusionManager.addInclusion(subObjectPropertyExpressions,superObjectPropertyExpression);
+//                }
                 for (DLClause dlClause : originalDLOntology.getDLClauses()) {
                     if (dlClause.isRoleInclusion()) {
                         AtomicRole subAtomicRole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
@@ -1375,7 +1385,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                     }
                 }
                 /**
-                 * @gstoil
+                 * gstoil
                  */
                 objectPropertyInclusionManager.rewriteAxioms(axioms,originalDLOntology.getAutomataOfComplexObjectProperties());
             }
