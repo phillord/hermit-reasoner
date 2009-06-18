@@ -3,10 +3,12 @@ package org.semanticweb.HermiT;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
+import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.inference.OWLReasonerException;
 import org.semanticweb.owl.model.IRI;
 import org.semanticweb.owl.model.OWLAnnotationAssertionAxiom;
@@ -296,7 +298,19 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
     }
 
     public Boolean visit(OWLSubPropertyChainOfAxiom axiom) {
-        throw new UnsupportedOperationException();
+    	List<OWLObjectPropertyExpression> subPropertyChain=axiom.getPropertyChain();
+    	OWLObjectPropertyExpression[] subObjectProperties=new OWLObjectPropertyExpression[subPropertyChain.size()];
+        subPropertyChain.toArray(subObjectProperties);
+    	OWLObjectPropertyExpression superObjectProperty=axiom.getSuperProperty();
+    	OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
+    	
+    	OWLIndividual randomIndividual = factory.getOWLAnonymousIndividual();
+    	OWLClassExpression owlSubClassExpression = factory.getOWLObjectHasValue( subObjectProperties[subObjectProperties.length-1], randomIndividual);
+    	OWLClassExpression owlSuperClassExpression = factory.getOWLObjectHasValue( superObjectProperty, randomIndividual); 
+    	for( int i=subObjectProperties.length-2 ; i>=0 ; i-- )
+    		owlSubClassExpression = factory.getOWLObjectSomeValuesFrom(subObjectProperties[i], owlSubClassExpression);
+
+    	return reasoner.isSubClassOf( owlSubClassExpression , owlSuperClassExpression);
     }
 
     public Boolean visit(OWLObjectPropertyDomainAxiom axiom) {
