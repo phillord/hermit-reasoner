@@ -70,7 +70,23 @@ public class ReasonerTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
-    // UnsupportedOperationException, till we implement this
+    public void testChains1() throws Exception {
+        String axioms = "TransitiveObjectProperty(:p)" +
+        				"SubObjectPropertyOf(ObjectPropertyChain(:p1 :p :p2) :S) ";
+        loadReasonerWithAxioms(axioms);
+        OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
+        OWLObjectProperty p = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#p"));
+        OWLObjectProperty p1 = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#p1"));
+        OWLObjectProperty p2 = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#p2"));
+        OWLObjectProperty S = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#S"));
+        List<OWLObjectPropertyExpression> chain = new ArrayList<OWLObjectPropertyExpression>();
+        chain.add(p1);
+        chain.add(p);
+        chain.add(p);
+        chain.add(p2);
+        OWLSubPropertyChainOfAxiom ax = df.getOWLSubPropertyChainOfAxiom(chain, S);
+        assertTrue(m_reasoner.isEntailed(ax));
+    }
     public void testChains3() throws Exception {
         String axioms = "TransitiveObjectProperty( :p)";
         loadReasonerWithAxioms(axioms);
