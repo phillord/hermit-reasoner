@@ -39,7 +39,8 @@ public class OWLAxioms {
     public final Set<OWLDataPropertyExpression> m_unsatisfiableDataProperties;
     public final Collection<OWLIndividualAxiom> m_facts;
     public final Set<OWLHasKeyAxiom> m_hasKeys;
-    public final Map<OWLDataRange,OWLDatatype> m_dataRangeDefinitions;
+    public final Map<OWLDataRange,OWLDatatype> m_dataRangeDefinitions; // contains definitions introduced for complex ranges during the normalisation
+    public final Map<OWLDatatype,OWLDataRange> m_customDatatypeDefinitions; // contains custom datatype definitions from DatatypeDefinition axioms
     
     public OWLAxioms() {
         m_classes=new HashSet<OWLClass>();
@@ -61,6 +62,7 @@ public class OWLAxioms {
         m_facts=new HashSet<OWLIndividualAxiom>();
         m_hasKeys=new HashSet<OWLHasKeyAxiom>();
         m_dataRangeDefinitions=new HashMap<OWLDataRange,OWLDatatype>();
+        m_customDatatypeDefinitions=new HashMap<OWLDatatype,OWLDataRange>();
     }
     
     public static class ComplexObjectPropertyInclusion {
@@ -71,9 +73,9 @@ public class OWLAxioms {
             m_subObjectProperties=subObjectProperties;
             m_superObjectProperties=superObjectProperties;
         }
-        public ComplexObjectPropertyInclusion(OWLObjectPropertyExpression trasnitiveObjectProperty) {
-            m_subObjectProperties=new OWLObjectPropertyExpression[] { trasnitiveObjectProperty,trasnitiveObjectProperty };
-            m_superObjectProperties=trasnitiveObjectProperty;
+        public ComplexObjectPropertyInclusion(OWLObjectPropertyExpression transitiveObjectProperty) {
+            m_subObjectProperties=new OWLObjectPropertyExpression[] { transitiveObjectProperty,transitiveObjectProperty };
+            m_superObjectProperties=transitiveObjectProperty;
         }
     }
 }

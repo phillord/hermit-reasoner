@@ -617,7 +617,7 @@ public class DLClauseEvaluator implements Serializable {
         }
         protected void compileBodyAtom(int bodyAtomIndex,int lastAtomNextElement) {
             if (bodyAtomIndex==getBodyLength()) {
-                m_existentialExpansionStrategy.dlClauseBodyCompiled(m_workers,m_bodyDLClause,m_valuesBuffer,m_coreVariables);
+                m_existentialExpansionStrategy.dlClauseBodyCompiled(m_workers,m_bodyDLClause,m_variables,m_valuesBuffer,m_coreVariables);
                 compileHeads();
             }
             else if (getBodyAtom(bodyAtomIndex).getDLPredicate().equals(NodeIDLessEqualThan.INSTANCE)) {

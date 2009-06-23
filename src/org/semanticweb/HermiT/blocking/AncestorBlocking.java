@@ -3,10 +3,12 @@ package org.semanticweb.HermiT.blocking;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
@@ -45,6 +47,12 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
             }
             node=node.getNextTableauNode();
         }
+    }
+    public boolean computeIsBlocked(Node node) {
+        throw new UnsupportedOperationException("Unsupported operation: Ancestor blocking cannot be used with a lazy expansion strategy. ");
+    }
+    public Set<Node> checkAllBlocks() {
+        throw new UnsupportedOperationException("Unsupported operation: Ancestor blocking cannot be used with a lazy expansion strategy. ");
     }
     protected final void checkParentBlocking(Node node) {
         Node blocker=node.getParent();
@@ -97,6 +105,6 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
     public boolean isExact() {
         return true;
     }
-    public void dlClauseBodyCompiled(List<DLClauseEvaluator.Worker> workers,DLClause dlClause,Object[] valuesBuffer,boolean[] coreVariables) {
+    public void dlClauseBodyCompiled(List<DLClauseEvaluator.Worker> workers,DLClause dlClause,List<Variable> variables,Object[] valuesBuffer,boolean[] coreVariables) {
     }
 }

@@ -1,3 +1,4 @@
+// An update for the tests (all.rdf) should regularly be downloaded to the ontologies folder from http://wiki.webont.org/exports/
 package org.semanticweb.HermiT.owl_wg_tests;
 
 import java.net.URI;

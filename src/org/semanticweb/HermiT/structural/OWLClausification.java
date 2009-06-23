@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Prefixes;
+import org.semanticweb.HermiT.blocking.core.AtMostConcept;
 import org.semanticweb.HermiT.datatypes.DatatypeRegistry;
 import org.semanticweb.HermiT.datatypes.UnsupportedDatatypeException;
 import org.semanticweb.HermiT.model.AnnotatedEquality;
@@ -22,6 +24,7 @@ import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
+import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
@@ -134,6 +137,7 @@ public class OWLClausification {
          */
         DLOntology dlOntology = clausify(factory,ontologyIRI,axioms,descriptionGraphs);
         dlOntology.setAutomata( automataOfComplexRoles );
+
         return dlOntology;
     }
     public DLOntology clausify(OWLDataFactory factory,String ontologyIRI,OWLAxioms axioms,Collection<DescriptionGraph> descriptionGraphs) {
@@ -247,8 +251,25 @@ public class OWLClausification {
             Role superRole=getRole(inclusion.m_superObjectProperties);
             complexObjectRoleInclusions.add(new DLOntology.ComplexObjectRoleInclusion(subRoles,superRole));
         }
-        for (OWLDataProperty objectProperty : axioms.m_dataProperties)
-            dataRoles.add(AtomicRole.create(objectProperty.getIRI().toString()));
+        for (OWLDataProperty dataProperty : axioms.m_dataProperties)
+            dataRoles.add(AtomicRole.create(dataProperty.getIRI().toString()));
+        
+        if (m_configuration.blockingStrategyType==Configuration.BlockingStrategyType.CORE || m_configuration.blockingStrategyType==Configuration.BlockingStrategyType.TWOPHASE) {
+            // The following two maps are only used with inexact blocking strategies, i.e., blocking strategies that establish 
+            // blocks that might not be valid and that only in a later validation phase will be checked for validity. In case 
+            // of invalid blocks existential expansion will continue further. 
+            // To validate blocks, we keep the relevant axioms (in an optimised data structure).
+            
+            // The key is a concept and the values are sets of sets of concepts that are implies by the key, 
+            // where each set of concepts is to be interpreted as a disjunction of concepts and the sets of sets of concepts are conjunctions
+            // so the axioms "A -> B or C" and "A -> D", are represented by an entry with key A mapped to the value {{B, C}, {D}}
+            Map<AtomicConcept, Set<Set<Concept>>> unaryValidBlockConditions=new HashMap<AtomicConcept, Set<Set<Concept>>>();
+            // similarly as above, but with several premises, e.g., to represent A and B -> C
+            Map<Set<AtomicConcept>, Set<Set<Concept>>> nAryValidBlockConditions=new HashMap<Set<AtomicConcept>, Set<Set<Concept>>>();
+            collectConditionsForValidBlocks(axioms,unaryValidBlockConditions,nAryValidBlockConditions);
+            return new DLOntology(ontologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,objectRoles,dataRoles,hermitIndividuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes,unaryValidBlockConditions,nAryValidBlockConditions);
+        }
+        
         return new DLOntology(ontologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,objectRoles,dataRoles,hermitIndividuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes);
     }
     protected DLClause clausifyKey(OWLHasKeyAxiom object) {
@@ -312,6 +333,145 @@ public class OWLClausification {
         bodyAtoms.toArray(bAtoms);
         DLClause clause=DLClause.createEx(true,hAtoms,bAtoms);
         return clause;
+    }
+    protected void collectConditionsForValidBlocks(OWLAxioms axioms,Map<AtomicConcept, Set<Set<Concept>>> unaryValidBlockConditions,Map<Set<AtomicConcept>, Set<Set<Concept>>> nAryValidBlockConditions) {
+        boolean foundRelevantConcept;
+        Set<AtomicConcept> premises;
+        Set<Concept> conclusions;
+        for (OWLClassExpression[] descs : axioms.m_conceptInclusions) {
+            foundRelevantConcept = false;
+            premises = new HashSet<AtomicConcept>();
+            conclusions = new HashSet<Concept>();
+            for (int i = 0; i<descs.length&&!foundRelevantConcept; i++) {
+                OWLClassExpression desc = descs[i];
+                if (desc instanceof OWLObjectAllValuesFrom) {
+                    foundRelevantConcept = true;
+                    OWLObjectAllValuesFrom all = (OWLObjectAllValuesFrom) desc;
+                    AtomicRole ar = AtomicRole.create(all.getProperty().getNamedProperty().getIRI().toString()); 
+                    Role r = all.getProperty().getSimplified().isAnonymous() ? InverseRole.create(ar) : ar;
+                    LiteralConcept c;
+                    // since the axioms are normalised, the filler is a literal
+                    if (all.getFiller() instanceof OWLObjectComplementOf) {
+                        OWLClassExpression nonNegated = ((OWLObjectComplementOf) all.getFiller()).getOperand();
+                        if (nonNegated.isAnonymous()) {
+                            // negated nominal concept
+                            throw new IllegalArgumentException("Core blocking is not compatible with nominals. ");
+                        } else {
+                            c = AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString());
+                        }
+                    } else {
+                        if (all.getFiller().isAnonymous()) {
+                            // nominal
+                            throw new IllegalArgumentException("Core blocking is not compatible with nominals. ");
+                        } else {
+                            c = AtomicNegationConcept.create(AtomicConcept.create(all.getFiller().asOWLClass().getIRI().toString()));
+                        }
+                    }
+                    conclusions.add(AtMostConcept.create(0, r, c));
+                } else if (desc instanceof OWLObjectSomeValuesFrom) {
+                    foundRelevantConcept = true;
+                    OWLObjectSomeValuesFrom some = (OWLObjectSomeValuesFrom) desc;
+                    AtomicRole ar = AtomicRole.create(some.getProperty().getNamedProperty().getIRI().toString()); 
+                    Role r = some.getProperty().getSimplified().isAnonymous() ? InverseRole.create(ar) : ar;
+                    LiteralConcept c;
+                    // since the axioms are normalised, the filler is a literal
+                    if (some.getFiller() instanceof OWLObjectComplementOf) {
+                        OWLClassExpression nonNegated = ((OWLObjectComplementOf) some.getFiller()).getOperand();
+                        if (nonNegated.isAnonymous()) {
+                            // negated nominal concept
+                            throw new IllegalArgumentException("Core blocking is not compatible with nominals. ");
+                        } else {
+                            c = AtomicNegationConcept.create(AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString()));
+                        }
+                    } else {
+                        if (some.getFiller().isAnonymous()) {
+                            // nominal
+                            throw new IllegalArgumentException("Core blocking is not compatible with nominals. ");
+                        } else {
+                            c = AtomicConcept.create(some.getFiller().asOWLClass().getIRI().toString());
+                        }
+                    }
+                    conclusions.add(AtLeastConcept.create(1, r, c));
+                } else if (desc instanceof OWLObjectMinCardinality) {
+                    OWLObjectMinCardinality min = (OWLObjectMinCardinality) desc;
+                    AtomicRole ar = AtomicRole.create(min.getProperty().getNamedProperty().getIRI().toString()); 
+                    Role r = min.getProperty().getSimplified().isAnonymous() ? InverseRole.create(ar) : ar;
+                    LiteralConcept c;
+                    // since the axioms are normalised, the filler is a literal
+                    if (min.getFiller() instanceof OWLObjectComplementOf) {
+                        OWLClassExpression nonNegated = ((OWLObjectComplementOf) min.getFiller()).getOperand();
+                        if (nonNegated.isAnonymous()) {
+                            // negated nominal concept
+                            throw new IllegalArgumentException("Core blocking is not compatible with nominals. ");
+                        } else {
+                            c = AtomicNegationConcept.create(AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString()));
+                        }
+                    } else {
+                        if (min.getFiller().isAnonymous()) {
+                            // nominal
+                            throw new IllegalArgumentException("Core blocking is not compatible with nominals. ");
+                        } else {
+                            c = AtomicConcept.create(min.getFiller().asOWLClass().getIRI().toString());
+                        }
+                    }
+                    conclusions.add(AtLeastConcept.create(1, r, c));
+                } else if (desc instanceof OWLObjectMaxCardinality) {
+                    foundRelevantConcept = true;
+                    OWLObjectMaxCardinality max = (OWLObjectMaxCardinality) desc;
+                    AtomicRole ar = AtomicRole.create(max.getProperty().getNamedProperty().getIRI().toString()); 
+                    Role r = max.getProperty().getSimplified().isAnonymous() ? InverseRole.create(ar) : ar;
+                    LiteralConcept c;
+                    // since the axioms are normalised, the filler is a literal
+                    if (max.getFiller() instanceof OWLObjectComplementOf) {
+                        OWLClassExpression nonNegated = ((OWLObjectComplementOf) max.getFiller()).getOperand();
+                        if (nonNegated.isAnonymous()) {
+                            // negated nominal concept
+                            throw new IllegalArgumentException("Core blocking is not compatible with nominals. ");
+                        } else {
+                            c = AtomicNegationConcept.create(AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString()));
+                        }
+                    } else {
+                        if (max.getFiller().isAnonymous()) {
+                            // nominal
+                            throw new IllegalArgumentException("Core blocking is not compatible with nominals. ");
+                        } else {
+                            c = AtomicConcept.create(max.getFiller().asOWLClass().getIRI().toString());
+                        }
+                    }
+                    conclusions.add(AtMostConcept.create(max.getCardinality(), r, c));
+                } else if (desc instanceof OWLClass) {
+                    conclusions.add(AtomicConcept.create(desc.asOWLClass().getIRI().toString()));
+                } else if (desc instanceof OWLObjectComplementOf) {
+                    OWLClassExpression nonNegated = ((OWLObjectComplementOf) desc).getOperand();
+                    if (nonNegated.isAnonymous()) {
+                        // nominal
+                        throw new IllegalArgumentException("Core blocking is not compatible with nominals. ");
+                    } else {
+                        premises.add(AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString()));
+                    }
+                }
+            }
+            if (foundRelevantConcept) {
+                if (premises.size() <= 1) {
+                    AtomicConcept p = premises.iterator().hasNext() ? premises.iterator().next() : AtomicConcept.THING;
+                    if (unaryValidBlockConditions.containsKey(p)) {
+                        unaryValidBlockConditions.get(p).add(conclusions);
+                    } else {
+                        Set<Set<Concept>> conjuncts = new HashSet<Set<Concept>>();
+                        conjuncts.add(conclusions);
+                        unaryValidBlockConditions.put(p, conjuncts);
+                    }
+                } else {
+                    if (nAryValidBlockConditions.containsKey(premises)) {
+                        nAryValidBlockConditions.get(premises).add(conclusions);
+                    } else {
+                        Set<Set<Concept>> conjuncts = new HashSet<Set<Concept>>();
+                        conjuncts.add(conclusions);
+                        nAryValidBlockConditions.put(premises, conjuncts);
+                    }
+                }
+            }
+        }
     }
     protected static LiteralConcept getLiteralConcept(OWLClassExpression description) {
         if (description instanceof OWLClass) {
@@ -584,16 +744,21 @@ public class OWLClausification {
             throw new IllegalStateException("Internal error: invalid normal form.");
         }
         public void visit(OWLDataSomeValuesFrom object) {
-            AtomicRole atomicRole=getAtomicRole(object.getProperty());
-            LiteralConcept literalConcept=m_dataRangeConverter.convertDataRange(object.getFiller());
-            AtLeastConcept atLeastConcept=AtLeastConcept.create(1,atomicRole,literalConcept);
-            if (!atLeastConcept.isAlwaysFalse())
-                m_headAtoms.add(Atom.create(atLeastConcept,X));
+            if (!object.getProperty().isOWLBottomDataProperty()) {
+                AtomicRole atomicRole=getAtomicRole(object.getProperty());
+                LiteralConcept literalConcept=m_dataRangeConverter.convertDataRange(object.getFiller());
+                AtLeastConcept atLeastConcept=AtLeastConcept.create(1,atomicRole,literalConcept);
+                if (!atLeastConcept.isAlwaysFalse())
+                    m_headAtoms.add(Atom.create(atLeastConcept,X));
+            }
         }
         public void visit(OWLDataAllValuesFrom object) {
+            LiteralConcept literalConcept=m_dataRangeConverter.convertDataRange(object.getFiller());
+            if (object.getProperty().isOWLTopDataProperty()) {
+                if (literalConcept.isAlwaysFalse()) return; // bottom
+            }
             Variable y=nextY();
             m_bodyAtoms.add(getRoleAtom(object.getProperty(),X,y));
-            LiteralConcept literalConcept=m_dataRangeConverter.convertDataRange(object.getFiller());
             if (literalConcept instanceof AtomicNegationConcept) {
                 AtomicConcept negatedConcept=((AtomicNegationConcept)literalConcept).getNegatedAtomicConcept();
                 if (!negatedConcept.isAlwaysTrue())
@@ -608,11 +773,13 @@ public class OWLClausification {
             throw new IllegalStateException("Internal error: Invalid normal form.");
         }
         public void visit(OWLDataMinCardinality object) {
-            AtomicRole atomicRole=getAtomicRole(object.getProperty());
-            LiteralConcept literalConcept=m_dataRangeConverter.convertDataRange(object.getFiller());
-            AtLeastConcept atLeastConcept=AtLeastConcept.create(object.getCardinality(),atomicRole,literalConcept);
-            if (!atLeastConcept.isAlwaysFalse())
-                m_headAtoms.add(Atom.create(atLeastConcept,X));
+            if (!object.getProperty().isOWLBottomDataProperty() || object.getCardinality()==0) {
+                AtomicRole atomicRole=getAtomicRole(object.getProperty());
+                LiteralConcept literalConcept=m_dataRangeConverter.convertDataRange(object.getFiller());
+                AtLeastConcept atLeastConcept=AtLeastConcept.create(object.getCardinality(),atomicRole,literalConcept);
+                if (!atLeastConcept.isAlwaysFalse())
+                    m_headAtoms.add(Atom.create(atLeastConcept,X));
+            }
         }
         public void visit(OWLDataMaxCardinality object) {
             int number=object.getCardinality();

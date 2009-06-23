@@ -16,6 +16,7 @@ import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.model.Role;
+import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.DescriptionGraphManager;
@@ -157,8 +158,8 @@ public abstract class AbstractExpansionStrategy implements Serializable,Existent
     public boolean isExact() {
         return m_blockingStrategy.isExact();
     }
-    public void dlClauseBodyCompiled(List<DLClauseEvaluator.Worker> workers,DLClause dlClause,Object[] valuesBuffer,boolean[] coreVariables) {
-        m_blockingStrategy.dlClauseBodyCompiled(workers,dlClause,valuesBuffer,coreVariables);
+    public void dlClauseBodyCompiled(List<DLClauseEvaluator.Worker> workers,DLClause dlClause,List<Variable> variables,Object[] valuesBuffer,boolean[] coreVariables) {
+        m_blockingStrategy.dlClauseBodyCompiled(workers,dlClause,variables,valuesBuffer,coreVariables);
     }
     protected SatType isSatisfied(AtLeastConcept atLeastConcept,Node forNode) {
         int cardinality=atLeastConcept.getNumber();

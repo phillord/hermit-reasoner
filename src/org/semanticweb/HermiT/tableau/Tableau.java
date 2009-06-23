@@ -176,9 +176,13 @@ public final class Tableau implements Serializable {
                 if (m_tableauMonitor!=null)
                     m_tableauMonitor.iterationFinished();
                 if (!existentialsAreExact && !hasMoreWork && !m_extensionManager.containsClash()) {
+                    // no more work to do, but since we use a blocking strategy that does not necessarily 
+                    // establish only valid blocks (existentialsAreExact == false), we tell the blocking 
+                    // strategy to go through the nodes and check whether all blocks are valid and if not, 
+                    // continue with the expansion  
                     if (m_tableauMonitor!=null)
                         m_tableauMonitor.iterationStarted();
-                    hasMoreWork=m_existentialExpansionStrategy.expandExistentials(true);
+                    hasMoreWork=m_existentialExpansionStrategy.expandExistentials(true); // returns true if some blocks were invalid
                     if (m_tableauMonitor!=null)
                         m_tableauMonitor.iterationFinished();
                 }

@@ -1,9 +1,8 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.structural;
 
-import java.net.URI;
-
 import org.semanticweb.HermiT.model.AtomicRole;
+import org.semanticweb.owl.model.IRI;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLClassAssertionAxiom;
 import org.semanticweb.owl.model.OWLClassExpression;
@@ -14,10 +13,12 @@ import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLDataHasValue;
 import org.semanticweb.owl.model.OWLDataMaxCardinality;
 import org.semanticweb.owl.model.OWLDataMinCardinality;
+import org.semanticweb.owl.model.OWLDataOneOf;
 import org.semanticweb.owl.model.OWLDataProperty;
 import org.semanticweb.owl.model.OWLDataPropertyAssertionAxiom;
 import org.semanticweb.owl.model.OWLDataPropertyExpression;
 import org.semanticweb.owl.model.OWLDataSomeValuesFrom;
+import org.semanticweb.owl.model.OWLDatatype;
 import org.semanticweb.owl.model.OWLDifferentIndividualsAxiom;
 import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLIndividualAxiom;
@@ -38,6 +39,7 @@ import org.semanticweb.owl.model.OWLObjectPropertyExpression;
 import org.semanticweb.owl.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owl.model.OWLObjectUnionOf;
 import org.semanticweb.owl.model.OWLSameIndividualAxiom;
+import org.semanticweb.owl.model.OWLTypedLiteral;
 import org.semanticweb.owl.util.OWLAxiomVisitorAdapter;
 
 public class BuiltInPropertyManager {
@@ -49,10 +51,10 @@ public class BuiltInPropertyManager {
 
     public BuiltInPropertyManager(OWLDataFactory factory) {
         m_factory=factory;
-        m_topObjectProperty=m_factory.getOWLObjectProperty(URI.create(AtomicRole.TOP_OBJECT_ROLE.getIRI()));
-        m_bottomObjectProperty=m_factory.getOWLObjectProperty(URI.create(AtomicRole.BOTTOM_OBJECT_ROLE.getIRI()));
-        m_topDataProperty=m_factory.getOWLDataProperty(URI.create(AtomicRole.TOP_DATA_ROLE.getIRI()));
-        m_bottomDataProperty=m_factory.getOWLDataProperty(URI.create(AtomicRole.BOTTOM_DATA_ROLE.getIRI()));
+        m_topObjectProperty=m_factory.getOWLObjectProperty(IRI.create(AtomicRole.TOP_OBJECT_ROLE.getIRI()));
+        m_bottomObjectProperty=m_factory.getOWLObjectProperty(IRI.create(AtomicRole.BOTTOM_OBJECT_ROLE.getIRI()));
+        m_topDataProperty=m_factory.getOWLDataProperty(IRI.create(AtomicRole.TOP_DATA_ROLE.getIRI()));
+        m_bottomDataProperty=m_factory.getOWLDataProperty(IRI.create(AtomicRole.BOTTOM_DATA_ROLE.getIRI()));
     }
     public void axiomatizeBuiltInPropertiesAsNeeded(OWLAxioms axioms,boolean skipTopObjectProperty,boolean skipBottomObjectProperty,boolean skipTopDataProperty,boolean skipBottomDataProperty) {
         Checker checker=new Checker(axioms);
@@ -66,26 +68,27 @@ public class BuiltInPropertyManager {
             axiomatizeBottomDataProperty(axioms);
     }
     public void axiomatizeBuiltInPropertiesAsNeeded(OWLAxioms axioms) {
-        // Birte: I changed the following to skip axiomatization of TopDataProperty since this 
-        // means HermiT throws an error, whenever TopDataProperty is used and Protege add an axioms 
-        // dataProperty -> TopDataProperty for every data property 
-        //axiomatizeBuiltInPropertiesAsNeeded(axioms,false,false,false,false);
-        axiomatizeBuiltInPropertiesAsNeeded(axioms,false,false,true,false);
+        axiomatizeBuiltInPropertiesAsNeeded(axioms,false,false,false,false);
     }
     protected void axiomatizeTopObjectProperty(OWLAxioms axioms) {
-        OWLObjectProperty topObjectProperty=m_factory.getOWLObjectProperty(URI.create(AtomicRole.TOP_OBJECT_ROLE.getIRI()));
-        axioms.m_complexObjectPropertyInclusions.add(new OWLAxioms.ComplexObjectPropertyInclusion(topObjectProperty));
-        axioms.m_simpleObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { topObjectProperty,topObjectProperty.getInverseProperty() });
-        OWLIndividual newIndividual=m_factory.getOWLNamedIndividual(URI.create("internal:nam#topIndividual"));
+        // make top object property transitive
+        axioms.m_complexObjectPropertyInclusions.add(new OWLAxioms.ComplexObjectPropertyInclusion(m_topObjectProperty)); 
+        // make top object property symmetric
+        axioms.m_simpleObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { m_topObjectProperty,m_topObjectProperty.getInverseProperty() }); 
+        OWLIndividual newIndividual=m_factory.getOWLNamedIndividual(IRI.create("internal:nam#topIndividual"));
         OWLObjectOneOf oneOfNewIndividual=m_factory.getOWLObjectOneOf(newIndividual);
-        OWLObjectSomeValuesFrom hasTopNewIndividual=m_factory.getOWLObjectSomeValuesFrom(topObjectProperty,oneOfNewIndividual);
+        OWLObjectSomeValuesFrom hasTopNewIndividual=m_factory.getOWLObjectSomeValuesFrom(m_topObjectProperty,oneOfNewIndividual);
         axioms.m_conceptInclusions.add(new OWLClassExpression[] { hasTopNewIndividual });
     }
     protected void axiomatizeBottomObjectProperty(OWLAxioms axioms) {
         axioms.m_unsatisfiableObjectProperties.add(m_bottomObjectProperty);
     }
     protected void axiomatizeTopDataProperty(OWLAxioms axioms) {
-        throw new IllegalArgumentException("The axioms use owl:topDataProperty in an inappropriate way.");
+        OWLDatatype anonymousConstantsDatatype=m_factory.getOWLDatatype(IRI.create("internal:anonymous-constants"));
+        OWLTypedLiteral newConstant=m_factory.getOWLTypedLiteral("internal:constant",anonymousConstantsDatatype);
+        OWLDataOneOf oneOfNewConstant=m_factory.getOWLDataOneOf(newConstant);
+        OWLDataSomeValuesFrom hasTopNewConstant=m_factory.getOWLDataSomeValuesFrom(m_topDataProperty,oneOfNewConstant);
+        axioms.m_conceptInclusions.add(new OWLClassExpression[] { hasTopNewConstant });
     }
     protected void axiomatizeBottomDataProperty(OWLAxioms axioms) {
         axioms.m_unsatisfiableDataProperties.add(m_bottomDataProperty);

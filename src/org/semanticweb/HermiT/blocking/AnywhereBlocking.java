@@ -3,10 +3,12 @@ package org.semanticweb.HermiT.blocking;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
@@ -72,6 +74,12 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
             m_firstChangedNode=null;
         }
     }
+    public boolean computeIsBlocked(Node node) {
+        throw new UnsupportedOperationException("Unsupported operation: Anywhere blocking cannot be used with a lazy expansion strategy. ");
+    }
+    public Set<Node> checkAllBlocks() {
+        throw new UnsupportedOperationException("Unsupported operation: Anywhere blocking cannot be used with a lazy expansion strategy. ");
+    }
     public boolean isPermanentAssertion(Concept concept,Node node) {
         return true;
     }
@@ -108,6 +116,7 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
             m_firstChangedNode=null;
     }
     public void modelFound() {
+        //System.out.println("Found  model with " + (m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes()));
         if (m_blockingSignatureCache!=null) {
             // Since we've found a model, we know what is blocked or not.
             // Therefore, we don't need to update the blocking status.
@@ -123,7 +132,7 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
     public boolean isExact() {
         return true;
     }
-    public void dlClauseBodyCompiled(List<DLClauseEvaluator.Worker> workers,DLClause dlClause,Object[] valuesBuffer,boolean[] coreVariables) {
+    public void dlClauseBodyCompiled(List<DLClauseEvaluator.Worker> workers,DLClause dlClause,List<Variable> variables,Object[] valuesBuffer,boolean[] coreVariables) {
     }
 }
 class BlockersCache implements Serializable {

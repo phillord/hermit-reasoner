@@ -3,7 +3,6 @@ package org.semanticweb.HermiT.blocking;
 
 import java.io.Serializable;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +20,7 @@ import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.model.Role;
+import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.ExtensionManager;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
@@ -29,43 +29,37 @@ import org.semanticweb.HermiT.tableau.Tableau;
 
 public class AnywhereTwoPhaseBlocking implements BlockingStrategy, Serializable {
     private static final long serialVersionUID = -6999662045751906931L;
+    
     protected Tableau m_tableau;
     protected final DirectBlockingChecker m_directBlockingChecker;
-    protected final CoreBlockersCache m_currentBlockersCache;
-    protected final SetFactory<AtomicConcept> m_atomicConceptsSetFactory;
-    protected final List<AtomicConcept> m_atomicConceptsBuffer;
-    protected final Object[] m_auxiliaryTuple;
+    protected final TwoPhaseBlockersCache m_currentBlockersCache;
     protected final boolean m_hasInverses;
     protected ExtensionManager m_extensionManager;
     protected Node m_firstChangedNode;
-    protected final Map<AtomicConcept, Set<Set<Concept>>> m_blockRelUnary; 
-    protected final Map<Set<AtomicConcept>, Set<Set<Concept>>> m_blockRelNAry;
+    protected final Map<AtomicConcept, Set<Set<Concept>>> m_unaryValidBlockConditions; 
+    protected final Map<Set<AtomicConcept>, Set<Set<Concept>>> m_nAryValidBlockConditions;
     protected ExtensionTable.Retrieval m_ternaryTableSearchAllBound;
     protected ExtensionTable.Retrieval m_ternaryTableSearchZeroOneBound;
     protected ExtensionTable.Retrieval m_ternaryTableSearchZeroTwoBound;
     protected ExtensionTable.Retrieval m_binaryTableAllBound;
     protected boolean m_immediatelyValidateBlocks = false;
     // statistics: 
+    protected final boolean printingOn=false;
     protected int numBlockingComputed = 0;
     protected int maxLabel = 0;
-    protected int avgLabel = 0;
+    protected double avgLabel = 0;
     protected int maxNodes = 0;
     protected long sumNodes = 0;
-    protected int run = 0;
-    protected boolean printHeader = true;
+    protected int run = 1;
     
-    public AnywhereTwoPhaseBlocking(DirectBlockingChecker directBlockingChecker, Map<AtomicConcept, Set<Set<Concept>>> blockRelUnary, Map<Set<AtomicConcept>, Set<Set<Concept>>> blockRelNary, boolean hasInverses) {
+    public AnywhereTwoPhaseBlocking(DirectBlockingChecker directBlockingChecker, Map<AtomicConcept, Set<Set<Concept>>> unaryValidBlockConditions, Map<Set<AtomicConcept>, Set<Set<Concept>>> blockRelNary, boolean hasInverses) {
         m_directBlockingChecker=directBlockingChecker;
-        m_blockRelUnary = blockRelUnary;
-        m_blockRelNAry = blockRelNary;
+        m_unaryValidBlockConditions = unaryValidBlockConditions;
+        m_nAryValidBlockConditions = blockRelNary;
         m_hasInverses = hasInverses;
-        m_currentBlockersCache=new CoreBlockersCache(m_directBlockingChecker); // contains all nodes that block some node
-        m_atomicConceptsSetFactory=new SetFactory<AtomicConcept>();
-        m_atomicConceptsBuffer=new ArrayList<AtomicConcept>();
-        m_auxiliaryTuple=new Object[2];
+        m_currentBlockersCache=new TwoPhaseBlockersCache(m_directBlockingChecker); // contains all nodes that block some node
     }
     public void initialize(Tableau tableau) {
-        numBlockingComputed = 0;
         m_tableau=tableau;
         m_directBlockingChecker.initialize(tableau);
         m_extensionManager=m_tableau.getExtensionManager();
@@ -77,6 +71,16 @@ public class AnywhereTwoPhaseBlocking implements BlockingStrategy, Serializable 
     public void clear() {
         m_currentBlockersCache.clear();
         m_firstChangedNode=null;
+        m_immediatelyValidateBlocks=false;
+        numBlockingComputed=0;
+        run++;
+        if (printingOn) printHeader();
+    }
+    public boolean computeIsBlocked(Node node) {
+        throw new UnsupportedOperationException("Unsupported operation: Two-Phase blocking cannot be used with a lazy expansion strategy. ");
+    }
+    public Set<Node> checkAllBlocks() {
+        throw new UnsupportedOperationException("Unsupported operation: Two-Phase blocking cannot be used with a lazy expansion strategy. ");
     }
     public void computeBlocking(boolean finalChance) {
         computePreBlocking();
@@ -86,12 +90,16 @@ public class AnywhereTwoPhaseBlocking implements BlockingStrategy, Serializable 
     }
     protected void computePreBlocking() {
         numBlockingComputed++;
-//        if (numBlockingComputed > 2000) {
-//            printStatistics(true);
-//        }
+        if (printingOn && numBlockingComputed % 2000 == 0) {
+            if (numBlockingComputed % 20000 == 0) {
+                printHeader();
+            }
+            printStatistics(true);
+        }
         if (m_firstChangedNode!=null) {
             Node node=m_firstChangedNode;
-            while (node!=null) {m_currentBlockersCache.removeNode(node); // it says node, but in fact we just use the node to get to its core hash and use that
+            while (node!=null) {
+                m_currentBlockersCache.removeNode(node); // it says node, but in fact we just use the node to get to its core hash and use that
                 node=node.getNextTableauNode();
             }
             node=m_firstChangedNode;
@@ -132,9 +140,9 @@ public class AnywhereTwoPhaseBlocking implements BlockingStrategy, Serializable 
     protected void validateBlocks() {
         // after first complete validation, we switch to only checking block validity immediately
         m_immediatelyValidateBlocks = true;
-        //System.out.println("Validate blocks...");
+        if (printingOn) System.out.print("Validate blocks...");
         // check if some extra constraints for the parent of the blocked and the blocking node were given
-        if (!m_blockRelUnary.isEmpty() || !m_blockRelNAry.isEmpty()) {
+        if (!m_unaryValidBlockConditions.isEmpty() || !m_nAryValidBlockConditions.isEmpty()) {
             // go through all nodes and not just the ones modified in the last run
             
             // statistics:
@@ -151,7 +159,7 @@ public class AnywhereTwoPhaseBlocking implements BlockingStrategy, Serializable 
                         if (validBlocker == null) {
                             //System.out.println("Node " + node.getBlocker().getNodeID() + " invalidly blocks " + node.getNodeID() + "!");
                             invalidBlocks++;
-                            //((TwoPhaseBlockingObject)node.getBlockingObject()).setGreatestInvalidBlocker(m_currentBlockersCache.getPossibleBlockers(node).last());
+                            ((TwoPhaseBlockingObject)node.getBlockingObject()).setGreatestInvalidBlocker(m_currentBlockersCache.getPossibleBlockers(node).last());
                         }
                         node.setBlocked(validBlocker,validBlocker!=null);
                     } else if (!node.getParent().isBlocked()) {
@@ -166,7 +174,7 @@ public class AnywhereTwoPhaseBlocking implements BlockingStrategy, Serializable 
                 node=node.getNextTableauNode();
             }
             m_firstChangedNode=null;
-            //System.out.println("Checked " + checkedBlocks + " directly blocked nodes of which " + invalidBlocks + " were invalid.");
+            if (printingOn) System.out.println("Checked " + checkedBlocks + " directly blocked nodes of which " + invalidBlocks + " were invalid.");
         }
     }
     protected Node getValidBlocker(Node blocked) {
@@ -195,13 +203,13 @@ public class AnywhereTwoPhaseBlocking implements BlockingStrategy, Serializable 
             AtomicConcept c;
             for (Iterator<AtomicConcept> it = blockedParentLabel.iterator(); it.hasNext() && blockerIsSuitable; ) {
                 c = it.next();
-                if (m_blockRelUnary.containsKey(c) && !isBlockedParentSuitable(m_blockRelUnary.get(c), blocked, blocked.getParent(), blockerLabel, blockerParentLabel, blockedLabel, blockedParentLabel)) 
+                if (m_unaryValidBlockConditions.containsKey(c) && !isBlockedParentSuitable(m_unaryValidBlockConditions.get(c), blocked, blocked.getParent(), blockerLabel, blockerParentLabel, blockedLabel, blockedParentLabel)) 
                     blockerIsSuitable = false;
             }
             // repeat the same checks for non-unary premises (less efficient matching operations)
             if (blockerIsSuitable) {
-                for (Set<AtomicConcept> premises : m_blockRelNAry.keySet()) {
-                    if (blockerIsSuitable && blockedParentLabel.containsAll(premises) && !isBlockedParentSuitable(m_blockRelNAry.get(premises), blocked, blocked.getParent(), blockedLabel, blockedParentLabel, blockerLabel, blockerParentLabel))
+                for (Set<AtomicConcept> premises : m_nAryValidBlockConditions.keySet()) {
+                    if (blockerIsSuitable && blockedParentLabel.containsAll(premises) && !isBlockedParentSuitable(m_nAryValidBlockConditions.get(premises), blocked, blocked.getParent(), blockedLabel, blockedParentLabel, blockerLabel, blockerParentLabel))
                         blockerIsSuitable = false;
                 }
             }
@@ -209,14 +217,14 @@ public class AnywhereTwoPhaseBlocking implements BlockingStrategy, Serializable 
             if (blockerIsSuitable && m_hasInverses) {
                 for (Iterator<AtomicConcept> it = blockerLabel.iterator(); it.hasNext() && blockerIsSuitable; ) {
                     c = it.next();
-                    if (m_blockRelUnary.containsKey(c) && !isBlockerSuitable(m_blockRelUnary.get(c), possibleBlocker, possibleBlocker.getParent(), blocked, blocked.getParent(), blockerLabel, blockerParentLabel, blockedLabel, blockedParentLabel)) 
+                    if (m_unaryValidBlockConditions.containsKey(c) && !isBlockerSuitable(m_unaryValidBlockConditions.get(c), possibleBlocker, possibleBlocker.getParent(), blocked, blocked.getParent(), blockerLabel, blockerParentLabel, blockedLabel, blockedParentLabel)) 
                         blockerIsSuitable = false;
                 }
             }
             // repeat the same checks for non-unary premises (less efficient matching operations)
             if (blockerIsSuitable && m_hasInverses) {
-                for (Set<AtomicConcept> premises : m_blockRelNAry.keySet()) {
-                    if (blockerIsSuitable && blockerLabel.containsAll(premises) && !isBlockerSuitable(m_blockRelNAry.get(premises), possibleBlocker, possibleBlocker.getParent(), blocked, blocked.getParent(), blockerLabel, blockerParentLabel, blockedLabel, blockedParentLabel)) 
+                for (Set<AtomicConcept> premises : m_nAryValidBlockConditions.keySet()) {
+                    if (blockerIsSuitable && blockerLabel.containsAll(premises) && !isBlockerSuitable(m_nAryValidBlockConditions.get(premises), possibleBlocker, possibleBlocker.getParent(), blocked, blocked.getParent(), blockerLabel, blockerParentLabel, blockedLabel, blockedParentLabel)) 
                         blockerIsSuitable = false;
                 }
             }
@@ -402,23 +410,17 @@ public class AnywhereTwoPhaseBlocking implements BlockingStrategy, Serializable 
         return false;
     }
     public boolean isPermanentAssertion(Concept concept,Node node) {
-        m_auxiliaryTuple[0]=concept;
-        m_auxiliaryTuple[1]=node;
-        return m_extensionManager.isCore(m_auxiliaryTuple);
+        return true;
     }
     // Assertions can be added directly into the core, but we also have the possibility of setting the core flag later?
     // In that case, assertionCoreSet (below) will be called?
     public void assertionAdded(Concept concept,Node node,boolean isCore) {
-        if (concept instanceof AtomicConcept) {
-            updateNodeChange(m_directBlockingChecker.assertionAdded(concept,node));
-        }
+        updateNodeChange(m_directBlockingChecker.assertionAdded(concept,node));
     }
     public void assertionCoreSet(Concept concept,Node node) {
     }
     public void assertionRemoved(Concept concept,Node node,boolean isCore) {
-        if (concept instanceof AtomicConcept) {
-            updateNodeChange(m_directBlockingChecker.assertionRemoved(concept,node));
-        }
+        updateNodeChange(m_directBlockingChecker.assertionRemoved(concept,node));
     }
     public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         updateNodeChange(m_directBlockingChecker.assertionAdded(atomicRole, nodeFrom, nodeTo));
@@ -439,6 +441,7 @@ public class AnywhereTwoPhaseBlocking implements BlockingStrategy, Serializable 
         m_directBlockingChecker.nodeInitialized(node);
     }
     public void nodeDestroyed(Node node) {
+        m_currentBlockersCache.removeNode(node);
         boolean hadBlockingCargo = node.getBlockingCargo() != null;
         boolean wasRemoved = m_currentBlockersCache.removeNode(node);
         if (hadBlockingCargo && !wasRemoved) {
@@ -449,39 +452,38 @@ public class AnywhereTwoPhaseBlocking implements BlockingStrategy, Serializable 
             m_firstChangedNode=null;
     }
     public void modelFound() {
-        //printStatistics(false);
+        if (printingOn) printStatistics(false);
+        //System.out.println("Found  model with " + (m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes()));
     }
     protected void printStatistics(boolean intermediate) {
-        if (!intermediate) run++;
-        int numNodesThisRun = m_tableau.getNumberOfNodesInTableau(); // I hope these are the active ones only, but only Boris knows...
-        if (numNodesThisRun > maxNodes) maxNodes = numNodesThisRun;
-        sumNodes += numNodesThisRun;
-        int maxLabelSizeThisRun = 0;
-        double avgLabelSizeThisRun = 0.0;
-        long sumLabelSizeThisRun = 0;
+        int currentNumOfNodes = m_tableau.getNumberOfNodesInTableau(); // These are the active ones plus the merged and pruned ones
+        currentNumOfNodes-=m_tableau.getNumberOfMergedOrPrunedNodes();
+        int currentMaxLabelSize = 0;
+        long currentSumLabelSize = 0;
         Node node = m_tableau.getFirstTableauNode();
         while (node!=null) {
             if (node.isActive()) {
-                if (node.getNumberOfPositiveAtomicConcepts() > maxLabelSizeThisRun) maxLabelSizeThisRun = node.getNumberOfPositiveAtomicConcepts();
-                sumLabelSizeThisRun += node.getNumberOfPositiveAtomicConcepts();
+                int labelSize = node.getNumberOfPositiveAtomicConcepts();
+                if (labelSize > currentMaxLabelSize) currentMaxLabelSize = labelSize;
+                currentSumLabelSize += labelSize;
             }
             node=node.getNextTableauNode();
         }
-        if (!intermediate && maxLabelSizeThisRun > maxLabel) maxLabel = maxLabelSizeThisRun;
-        avgLabelSizeThisRun = (double)sumLabelSizeThisRun / numNodesThisRun;
-        avgLabel += avgLabelSizeThisRun;
-        if (printHeader || (run % 20 == 1 && !intermediate)) {
-            System.out.printf("%n%-55s %-44s%n", "This run:", "All runs:");
-            System.out.printf("%-8s%-8s%-8s%-8s%-3s%-8s%-8s%-8s%-8s%-8s%n", "No", "Nodes", "avg", "max", "|", "sum", "max", "avg", "avg", "max");
-            System.out.printf("%-8s%-8s%-8s%-8s%-3s%-8s%-8s%-8s%-8s%-8s%n", "", "", "lab", "lab", "|", "node", "node", "node", "lab", "lab");
-        }
-        System.out.printf("%-8s%-8s%-8s%-8s%-3s", run, numNodesThisRun, sd(avgLabelSizeThisRun), maxLabelSizeThisRun, "|");
+        double currentAvgLabelSize = (double)currentSumLabelSize / currentNumOfNodes;
+        System.out.printf("%-8s%-8s%-8s%-8s%-3s", run, currentNumOfNodes, sd(currentAvgLabelSize), currentMaxLabelSize, "|");
         if (!intermediate) {
-            System.out.printf("%-8s%-8s%-8s%-8s%-8s", sumNodes, maxNodes, sd(((double)sumNodes/run)), sd(((double)avgLabel/run)), maxLabel);
+            sumNodes += currentNumOfNodes;
+            avgLabel += currentAvgLabelSize;
+            if (currentMaxLabelSize > maxLabel) maxLabel = currentMaxLabelSize;
+            if (currentNumOfNodes > maxNodes) maxNodes = currentNumOfNodes;
+            System.out.printf("%-8s%-8s%-8s%-8s", maxNodes, sd(((double)sumNodes/run)), sd(((double)avgLabel/run)), maxLabel);
         }
         System.out.printf("%n");
-        numBlockingComputed = 0; 
-        printHeader = false;
+    }
+    protected void printHeader() {
+        System.out.printf("%n%-39s %-2s%n", "This run:", "All runs:");
+        System.out.printf("%-8s%-8s%-8s%-8s%-3s%-8s%-8s%-8s%-8s%n", "No", "Nodes", "avg", "max", "|", "max", "avg", "avg", "max");
+        System.out.printf("%-8s%-8s%-8s%-8s%-3s%-8s%-8s%-8s%-8s%n", "", "", "lab", "lab", "|", "node", "node", "lab", "lab");
     }
     protected String sd(double d) {
         return new DecimalFormat("#.##").format(d);
@@ -489,7 +491,7 @@ public class AnywhereTwoPhaseBlocking implements BlockingStrategy, Serializable 
     public boolean isExact() {
         return false;
     }
-    public void dlClauseBodyCompiled(List<DLClauseEvaluator.Worker> workers,DLClause dlClause,Object[] valuesBuffer,boolean[] coreVariables) {
+    public void dlClauseBodyCompiled(List<DLClauseEvaluator.Worker> workers,DLClause dlClause,List<Variable> variables,Object[] valuesBuffer,boolean[] coreVariables) {
     }    
 }
 // The blockers set is a hash set of sorted sets of nodes. Each set in the cache contains nodes with equal label. In case of non-singleton sets, 
@@ -516,6 +518,33 @@ class TwoPhaseBlockersCache implements Serializable {
         m_numberOfElements=0;
         m_emptyEntries=null;
     }
+//    public void removeNode(Node node) {
+//        // Check addNode() for an explanation of why we associate the entry with the node.
+//        CacheEntry removeEntry=(TwoPhaseBlockersCache.CacheEntry)node.getBlockingCargo();
+//        if (removeEntry!=null) {
+//            int bucketIndex=getIndexFor(removeEntry.m_hashCode,m_buckets.length);
+//            CacheEntry lastEntry=null;
+//            CacheEntry entry=m_buckets[bucketIndex];
+//            while (entry!=null) {
+//                if (entry==removeEntry) {
+//                    if (lastEntry==null)
+//                        m_buckets[bucketIndex]=entry.m_nextEntry;
+//                    else
+//                        lastEntry.m_nextEntry=entry.m_nextEntry;
+//                    entry.m_nextEntry=m_emptyEntries;
+//                    entry.m_node=null;
+//                    entry.m_hashCode=0;
+//                    m_emptyEntries=entry;
+//                    m_numberOfElements--;
+//                    node.setBlockingCargo(null);
+//                    return;
+//                }
+//                lastEntry=entry;
+//                entry=entry.m_nextEntry;
+//            }
+//            throw new IllegalStateException("Internal error: entry not in cache!");
+//        }
+//    }
     public boolean removeNode(Node node) {
         // Check addNode() for an explanation of why we associate the entry with the node.
         TwoPhaseBlockersCache.CacheEntry removeEntry=(TwoPhaseBlockersCache.CacheEntry)node.getBlockingCargo();
@@ -556,6 +585,34 @@ class TwoPhaseBlockersCache implements Serializable {
         }
         return false;
     }
+//    public void addNode(Node node) {
+//        int hashCode=m_directBlockingChecker.blockingHashCode(node);
+//        int bucketIndex=getIndexFor(hashCode,m_buckets.length);
+//        CacheEntry entry=m_buckets[bucketIndex];
+//        while (entry!=null) {
+//            //if (hashCode==entry.m_hashCode && m_directBlockingChecker.isBlockedBy(entry.m_node,node))
+//            if (hashCode==entry.m_hashCode && m_directBlockingChecker.isBlockedBy(entry.m_nodes.first(),node))
+//                throw new IllegalStateException("Internal error: node already in the cache!");
+//            entry=entry.m_nextEntry;
+//        }
+//        if (m_emptyEntries==null)
+//            entry=new CacheEntry();
+//        else {
+//            entry=m_emptyEntries;
+//            m_emptyEntries=m_emptyEntries.m_nextEntry;
+//        }
+//        entry.initialize(node,hashCode,m_buckets[bucketIndex]);
+//        m_buckets[bucketIndex]=entry;
+//        // When a node is added to the cache, we record with the node the entry.
+//        // This is used to remove nodes from the cache. Note that changes to a node
+//        // can affect its label. Therefore, we CANNOT remove a node by taking its present
+//        // blocking hash-code, as this can be different from the hash-code used at the
+//        // time the node has been added to the cache.
+//        node.setBlockingCargo(entry);
+//        m_numberOfElements++;
+//        if (m_numberOfElements>=m_threshold)
+//            resize(m_buckets.length*2);
+//    }
     public void addNode(Node node) {
         int hashCode=m_directBlockingChecker.blockingHashCode(node);
         int bucketIndex=getIndexFor(hashCode,m_buckets.length);
@@ -615,12 +672,27 @@ class TwoPhaseBlockersCache implements Serializable {
                 if (hashCode==entry.m_hashCode && m_directBlockingChecker.isBlockedBy(entry.m_nodes.first(),node)) {
                     return entry.m_nodes.first();
                 }
+//                if (hashCode==entry.m_hashCode && m_directBlockingChecker.isBlockedBy(entry.m_node,node)) {
+//                    return entry.m_node;
+//                }
                 entry=entry.m_nextEntry;
             }
         }
         return null;
     }
     public SortedSet<Node> getPossibleBlockers(Node node) {
+//        if (m_directBlockingChecker.canBeBlocked(node)) {
+//            int hashCode=m_directBlockingChecker.blockingHashCode(node);
+//            int bucketIndex=getIndexFor(hashCode,m_buckets.length);
+//            CacheEntry entry=m_buckets[bucketIndex];
+//            while (entry!=null) {
+//                if (hashCode==entry.m_hashCode && m_directBlockingChecker.isBlockedBy(entry.m_node,node)) {
+//                    return entry.m_node;
+//                }
+//                entry=entry.m_nextEntry;
+//            }
+//        }
+//        return null;
         if (m_directBlockingChecker.canBeBlocked(node)) {
             int hashCode=m_directBlockingChecker.blockingHashCode(node);
             int bucketIndex=getIndexFor(hashCode,m_buckets.length);
@@ -657,12 +729,14 @@ class TwoPhaseBlockersCache implements Serializable {
     public static class CacheEntry implements Serializable {
         private static final long serialVersionUID = 8784206693977395751L;
         protected SortedSet<Node> m_nodes;
+//        protected Node m_node;
         protected int m_hashCode;
         protected CacheEntry m_nextEntry;
 
         public void initialize(Node node,int hashCode,CacheEntry nextEntry) {
             m_nodes = new TreeSet<Node>(new NodeIDComparator());
-            add(node);
+            m_nodes.add(node);
+//            m_node=node;
             m_hashCode=hashCode;
             m_nextEntry=nextEntry;
         }
@@ -675,12 +749,12 @@ class TwoPhaseBlockersCache implements Serializable {
         public void removeNodesGreaterThan(Node node) {
             m_nodes = new TreeSet<Node>(m_nodes.headSet(node));
         }
-        public String toString() {
-            String nodes = "HashCode: " + m_hashCode + " Nodes: ";
-            for (Node n : m_nodes) {
-                nodes += n.getNodeID() + " ";
-            }
-            return nodes;
-        }
+//        public String toString() {
+//            String nodes = "HashCode: " + m_hashCode + " Nodes: ";
+//            for (Node n : m_nodes) {
+//                nodes += n.getNodeID() + " ";
+//            }
+//            return nodes;
+//        }
     }
 }

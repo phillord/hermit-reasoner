@@ -35,21 +35,19 @@ import org.semanticweb.HermiT.blocking.DirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.SingleDirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.TwoPhaseDirectBlockingChecker;
-import org.semanticweb.HermiT.blocking.core.AtMostConcept;
 import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
 import org.semanticweb.HermiT.existentials.ExistentialExpansionStrategy;
 import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
+import org.semanticweb.HermiT.existentials.LazyStrategy;
 import org.semanticweb.HermiT.hierarchy.DeterministicHierarchyBuilder;
 import org.semanticweb.HermiT.hierarchy.Hierarchy;
 import org.semanticweb.HermiT.hierarchy.HierarchyBuilder;
 import org.semanticweb.HermiT.hierarchy.HierarchyNode;
 import org.semanticweb.HermiT.hierarchy.HierarchyPrinterFSS;
 import org.semanticweb.HermiT.hierarchy.SubsumptionCache;
-import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
-import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
@@ -57,7 +55,6 @@ import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.InverseRole;
-import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.monitor.TableauMonitorFork;
@@ -79,24 +76,23 @@ import org.semanticweb.owl.inference.OWLReasonerFactory;
 import org.semanticweb.owl.model.IRI;
 import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLClass;
+import org.semanticweb.owl.model.OWLClassAssertionAxiom;
 import org.semanticweb.owl.model.OWLClassExpression;
 import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLDataProperty;
 import org.semanticweb.owl.model.OWLDataPropertyExpression;
 import org.semanticweb.owl.model.OWLDataRange;
 import org.semanticweb.owl.model.OWLDatatype;
+import org.semanticweb.owl.model.OWLDatatypeDefinitionAxiom;
 import org.semanticweb.owl.model.OWLEntity;
 import org.semanticweb.owl.model.OWLException;
+import org.semanticweb.owl.model.OWLHasKeyAxiom;
 import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLLiteral;
 import org.semanticweb.owl.model.OWLNamedIndividual;
 import org.semanticweb.owl.model.OWLObjectAllValuesFrom;
-import org.semanticweb.owl.model.OWLObjectComplementOf;
-import org.semanticweb.owl.model.OWLObjectMaxCardinality;
-import org.semanticweb.owl.model.OWLObjectMinCardinality;
 import org.semanticweb.owl.model.OWLObjectProperty;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
-import org.semanticweb.owl.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
 import org.semanticweb.owl.model.OWLSubPropertyChainOfAxiom;
@@ -217,239 +213,6 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
     
     public void dispose() {
         clearOntologies();
-    }
-
-    // -- HACKS ------------------------------------------------
-    
-    public void loadOntologyForCoreBlocking(OWLOntologyManager ontologyManager,OWLOntology ontology,Set<DescriptionGraph> descriptionGraphs) {
-        // Temporary HACK: this is so that we showe the axioms into core blocking
-        if (descriptionGraphs==null)
-            descriptionGraphs=Collections.emptySet();
-
-        // This part is copied from OWLClausification
-        Set<OWLOntology> importClosure=new HashSet<OWLOntology>();
-        List<OWLOntology> toProcess=new ArrayList<OWLOntology>();
-        toProcess.add(ontology);
-        while (!toProcess.isEmpty()) {
-            OWLOntology anOntology=toProcess.remove(toProcess.size()-1);
-            if (importClosure.add(anOntology))
-                toProcess.addAll(anOntology.getImports(ontologyManager));
-        }
-
-        OWLAxioms axioms=new OWLAxioms();
-        OWLNormalization normalization=new OWLNormalization(ontologyManager.getOWLDataFactory(),axioms);
-        for (OWLOntology o : importClosure)
-            normalization.processOntology(m_configuration,o);
-        ObjectPropertyInclusionManager objectPropertyInclusionManager=new ObjectPropertyInclusionManager(ontologyManager.getOWLDataFactory());
-        objectPropertyInclusionManager.prepareTransformation(axioms);
-        objectPropertyInclusionManager.rewriteAxioms(axioms);
-        if (descriptionGraphs==null)
-            descriptionGraphs=Collections.emptySet();
-        OWLAxiomsExpressivity axiomsExpressivity=new OWLAxiomsExpressivity(axioms);
-        
-        OWLClausification clausifier=new OWLClausification(m_configuration);
-        m_dlOntology=clausifier.clausify(ontologyManager.getOWLDataFactory(),ontology.getOntologyID().getDefaultDocumentIRI() == null ? "urn:hermit:kb" : ontology.getOntologyID().getDefaultDocumentIRI().toString(),axioms,axiomsExpressivity,descriptionGraphs);
-        m_prefixes=createPrefixes(m_dlOntology);
-
-        // This creates an OWLAxioms instance that is then given to the core blocking strategy
-        boolean foundRelevantConcept;
-        // the key is a concept and the values are sets of sets of concepts that are implies by the key, 
-        // where each set of concepts is to be interpreted as a disjunction of concepts and the sets of sets of concepts are conjunctions
-        // so the axioms "A -> B or C" and "A -> D", are represented by an entry with key A mapped to the value {{B, C}, {D}}
-        Map<AtomicConcept, Set<Set<Concept>>> blockRelUnary = new HashMap<AtomicConcept, Set<Set<Concept>>>();
-        // similarly as above, but with several premises, e.g., to represent A and B -> C
-        Map<Set<AtomicConcept>, Set<Set<Concept>>> blockRelNAry= new HashMap<Set<AtomicConcept>, Set<Set<Concept>>>();
-        Set<AtomicConcept> premises;
-        Set<Concept> conclusions;
-        for (OWLClassExpression[] descs : axioms.m_conceptInclusions) {
-            foundRelevantConcept = false;
-            premises = new HashSet<AtomicConcept>();
-            conclusions = new HashSet<Concept>();
-            for (int i = 0; i<descs.length&&!foundRelevantConcept; i++) {
-                OWLClassExpression desc = descs[i];
-                if (desc instanceof OWLObjectAllValuesFrom) {
-                    foundRelevantConcept = true;
-                    OWLObjectAllValuesFrom all = (OWLObjectAllValuesFrom) desc;
-                    AtomicRole ar = AtomicRole.create(all.getProperty().getNamedProperty().getIRI().toString()); 
-                    Role r = all.getProperty().getSimplified().isAnonymous() ? InverseRole.create(ar) : ar;
-                    LiteralConcept c;
-                    // since the axioms are normalised, the filler is a literal
-                    if (all.getFiller() instanceof OWLObjectComplementOf) {
-                        OWLClassExpression nonNegated = ((OWLObjectComplementOf) all.getFiller()).getOperand();
-                        if (nonNegated.isAnonymous()) {
-                            // negated nominal concept
-                            throw new IllegalArgumentException("Core blocking is not compatible with nominals. ");
-                        } else {
-                            c = AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString());
-                        }
-                    } else {
-                        if (all.getFiller().isAnonymous()) {
-                            // nominal
-                            throw new IllegalArgumentException("Core blocking is not compatible with nominals. ");
-                        } else {
-                            c = AtomicNegationConcept.create(AtomicConcept.create(all.getFiller().asOWLClass().getIRI().toString()));
-                        }
-                    }
-                    conclusions.add(AtMostConcept.create(0, r, c));
-                } else if (desc instanceof OWLObjectSomeValuesFrom) {
-                    foundRelevantConcept = true;
-                    OWLObjectSomeValuesFrom some = (OWLObjectSomeValuesFrom) desc;
-                    AtomicRole ar = AtomicRole.create(some.getProperty().getNamedProperty().getIRI().toString()); 
-                    Role r = some.getProperty().getSimplified().isAnonymous() ? InverseRole.create(ar) : ar;
-                    LiteralConcept c;
-                    // since the axioms are normalised, the filler is a literal
-                    if (some.getFiller() instanceof OWLObjectComplementOf) {
-                        OWLClassExpression nonNegated = ((OWLObjectComplementOf) some.getFiller()).getOperand();
-                        if (nonNegated.isAnonymous()) {
-                            // negated nominal concept
-                            throw new IllegalArgumentException("Core blocking is not compatible with nominals. ");
-                        } else {
-                            c = AtomicNegationConcept.create(AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString()));
-                        }
-                    } else {
-                        if (some.getFiller().isAnonymous()) {
-                            // nominal
-                            throw new IllegalArgumentException("Core blocking is not compatible with nominals. ");
-                        } else {
-                            c = AtomicConcept.create(some.getFiller().asOWLClass().getIRI().toString());
-                        }
-                    }
-                    conclusions.add(AtLeastConcept.create(1, r, c));
-                } else if (desc instanceof OWLObjectMinCardinality) {
-                    OWLObjectMinCardinality min = (OWLObjectMinCardinality) desc;
-                    AtomicRole ar = AtomicRole.create(min.getProperty().getNamedProperty().getIRI().toString()); 
-                    Role r = min.getProperty().getSimplified().isAnonymous() ? InverseRole.create(ar) : ar;
-                    LiteralConcept c;
-                    // since the axioms are normalised, the filler is a literal
-                    if (min.getFiller() instanceof OWLObjectComplementOf) {
-                        OWLClassExpression nonNegated = ((OWLObjectComplementOf) min.getFiller()).getOperand();
-                        if (nonNegated.isAnonymous()) {
-                            // negated nominal concept
-                            throw new IllegalArgumentException("Core blocking is not compatible with nominals. ");
-                        } else {
-                            c = AtomicNegationConcept.create(AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString()));
-                        }
-                    } else {
-                        if (min.getFiller().isAnonymous()) {
-                            // nominal
-                            throw new IllegalArgumentException("Core blocking is not compatible with nominals. ");
-                        } else {
-                            c = AtomicConcept.create(min.getFiller().asOWLClass().getIRI().toString());
-                        }
-                    }
-                    conclusions.add(AtLeastConcept.create(1, r, c));
-                } else if (desc instanceof OWLObjectMaxCardinality) {
-                    foundRelevantConcept = true;
-                    OWLObjectMaxCardinality max = (OWLObjectMaxCardinality) desc;
-                    AtomicRole ar = AtomicRole.create(max.getProperty().getNamedProperty().getIRI().toString()); 
-                    Role r = max.getProperty().getSimplified().isAnonymous() ? InverseRole.create(ar) : ar;
-                    LiteralConcept c;
-                    // since the axioms are normalised, the filler is a literal
-                    if (max.getFiller() instanceof OWLObjectComplementOf) {
-                        OWLClassExpression nonNegated = ((OWLObjectComplementOf) max.getFiller()).getOperand();
-                        if (nonNegated.isAnonymous()) {
-                            // negated nominal concept
-                            throw new IllegalArgumentException("Core blocking is not compatible with nominals. ");
-                        } else {
-                            c = AtomicNegationConcept.create(AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString()));
-                        }
-                    } else {
-                        if (max.getFiller().isAnonymous()) {
-                            // nominal
-                            throw new IllegalArgumentException("Core blocking is not compatible with nominals. ");
-                        } else {
-                            c = AtomicConcept.create(max.getFiller().asOWLClass().getIRI().toString());
-                        }
-                    }
-                    conclusions.add(AtMostConcept.create(max.getCardinality(), r, c));
-                } else if (desc instanceof OWLClass) {
-                    conclusions.add(AtomicConcept.create(desc.asOWLClass().getIRI().toString()));
-                } else if (desc instanceof OWLObjectComplementOf) {
-                    OWLClassExpression nonNegated = ((OWLObjectComplementOf) desc).getOperand();
-                    if (nonNegated.isAnonymous()) {
-                        // nominal
-                        throw new IllegalArgumentException("Core blocking is not compatible with nominals. ");
-                    } else {
-                        premises.add(AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString()));
-                    }
-                }
-            }
-            if (foundRelevantConcept) {
-                if (premises.size() <= 1) {
-                    AtomicConcept p = premises.iterator().hasNext() ? premises.iterator().next() : AtomicConcept.THING;
-                    if (blockRelUnary.containsKey(p)) {
-                        blockRelUnary.get(p).add(conclusions);
-                    } else {
-                        Set<Set<Concept>> conjuncts = new HashSet<Set<Concept>>();
-                        conjuncts.add(conclusions);
-                        blockRelUnary.put(p, conjuncts);
-                    }
-                } else {
-                    if (blockRelNAry.containsKey(premises)) {
-                        blockRelNAry.get(premises).add(conclusions);
-                    } else {
-                        Set<Set<Concept>> conjuncts = new HashSet<Set<Concept>>();
-                        conjuncts.add(conclusions);
-                        blockRelNAry.put(premises, conjuncts);
-                    }
-                }
-            }
-        }
-
-        // And now for the Tableau!
-        TableauMonitor wellKnownTableauMonitor=null;
-        switch (m_configuration.tableauMonitorType) {
-        case NONE:
-            wellKnownTableauMonitor=null;
-            break;
-        case TIMING:
-            wellKnownTableauMonitor=new Timer();
-            break;
-        case TIMING_WITH_PAUSE:
-            wellKnownTableauMonitor=new TimerWithPause();
-            break;
-        case DEBUGGER_HISTORY_ON:
-            wellKnownTableauMonitor=new Debugger(m_prefixes,true);
-            break;
-        case DEBUGGER_NO_HISTORY:
-            wellKnownTableauMonitor=new Debugger(m_prefixes,false);
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown monitor type");
-        }
-
-        TableauMonitor tableauMonitor=null;
-        if (m_configuration.monitor==null)
-            tableauMonitor=wellKnownTableauMonitor;
-        else if (wellKnownTableauMonitor==null)
-            tableauMonitor=m_configuration.monitor;
-        else
-            tableauMonitor=new TableauMonitorFork(wellKnownTableauMonitor,m_configuration.monitor);
-        
-        BlockingStrategy blockingStrategy;
-        if (m_configuration.blockingStrategyType==Configuration.BlockingStrategyType.TWOPHASE) {
-            blockingStrategy=new AnywhereTwoPhaseBlocking(new TwoPhaseDirectBlockingChecker(),blockRelUnary,blockRelNAry,axiomsExpressivity.m_hasInverseRoles);
-        } else {
-            blockingStrategy=new AnywhereCoreBlocking(new CorePreDirectBlockingChecker(),blockRelUnary,blockRelNAry,axiomsExpressivity.m_hasInverseRoles);
-        }
-        
-        ExistentialExpansionStrategy existentialsExpansionStrategy=null;
-        switch (m_configuration.existentialStrategyType) {
-        case CREATION_ORDER:
-            existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
-            break;
-        case EL:
-            existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,true);
-            break;
-        case INDIVIDUAL_REUSE:
-            existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,false);
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown expansion strategy type.");
-        }
-
-        m_tableau=new Tableau(m_interruptFlag,tableauMonitor,existentialsExpansionStrategy,m_dlOntology,m_configuration.parameters);
-        m_subsumptionCache=new SubsumptionCache(m_tableau);
     }
     
     // Monitor interface
@@ -645,8 +408,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             if (node==null)
                 node=new HierarchyNode<AtomicConcept>(atomicConcept,Collections.singleton(atomicConcept),Collections.singleton(m_atomicConceptHierarchy.getTopNode()),Collections.singleton(m_atomicConceptHierarchy.getBottomNode()));
             return node;
-        }
-        else {
+        } else {
             OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
             OWLDataFactory factory=ontologyManager.getOWLDataFactory();
             OWLClass newClass=factory.getOWLClass(IRI.create("internal:query-concept"));
@@ -663,6 +425,48 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             );
             return hierarchyBuilder.findPosition(AtomicConcept.create("internal:query-concept"),m_atomicConceptHierarchy.getTopNode(),m_atomicConceptHierarchy.getBottomNode());
         }
+    }
+    
+    public Boolean hasKey(OWLHasKeyAxiom key) {
+        OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
+        OWLDataFactory factory=ontologyManager.getOWLDataFactory();
+        OWLIndividual individualA=factory.getOWLNamedIndividual(IRI.create("internal:individualA"));
+        OWLIndividual individualB=factory.getOWLNamedIndividual(IRI.create("internal:individualB"));
+        Set<OWLAxiom> axioms=new HashSet<OWLAxiom>();
+        axioms.add(factory.getOWLClassAssertionAxiom(key.getClassExpression(), individualA));
+        axioms.add(factory.getOWLClassAssertionAxiom(key.getClassExpression(), individualB));
+        int i=0;
+        for (OWLObjectPropertyExpression p : key.getObjectPropertyExpressions()) {
+            OWLIndividual tmp=factory.getOWLNamedIndividual(IRI.create("internal:individual"+i));
+            axioms.add(factory.getOWLObjectPropertyAssertionAxiom(individualA, p, tmp));
+            axioms.add(factory.getOWLObjectPropertyAssertionAxiom(individualB, p, tmp));
+            i++;
+        }
+        for (OWLDataPropertyExpression p : key.getDataPropertyExpressions()) {
+            OWLDatatype anonymousConstantsDatatype=factory.getOWLDatatype(IRI.create("internal:anonymous-constants"));
+            OWLTypedLiteral constant=factory.getOWLTypedLiteral("internal:constant"+i,anonymousConstantsDatatype);
+            axioms.add(factory.getOWLDataPropertyAssertionAxiom(individualA, p, constant));
+            axioms.add(factory.getOWLDataPropertyAssertionAxiom(individualB, p, constant));
+            i++;
+        }
+        axioms.add(factory.getOWLDifferentIndividualsAxiom(individualA,individualB));
+        Tableau tableau=getTableau(ontologyManager,axioms.toArray(new OWLAxiom[axioms.size()]));
+        return !tableau.isABoxSatisfiable();
+        
+    }
+    
+    public Boolean entailsDatatypeDefinition(OWLDatatypeDefinitionAxiom axiom) {
+        OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
+        OWLDataFactory factory=ontologyManager.getOWLDataFactory();
+        OWLIndividual individualA=factory.getOWLNamedIndividual(IRI.create("internal:individualA"));
+        OWLDataProperty newDP=factory.getOWLDataProperty(IRI.create("internal:internalDP"));
+        OWLDataRange dr=axiom.getDataRange();
+        OWLDatatype dt=axiom.getDatatype();
+        OWLDataRange expression=factory.getOWLDataUnionOf(factory.getOWLDataIntersectionOf(factory.getOWLDataComplementOf(dr), dt), factory.getOWLDataIntersectionOf(factory.getOWLDataComplementOf(dt), dr));
+        OWLClassExpression c=factory.getOWLDataSomeValuesFrom(newDP, expression);
+        OWLClassAssertionAxiom ax=factory.getOWLClassAssertionAxiom(c, individualA);
+        Tableau tableau=getTableau(ontologyManager,ax);
+        return !tableau.isABoxSatisfiable();
     }
 
     // Object property inferences
@@ -853,7 +657,16 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
     }
 
     public boolean isSymmetric(OWLObjectProperty property) {
-        throw new UnsupportedOperationException();
+        if (property.isOWLTopDataProperty()) return true;        
+        OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
+        OWLDataFactory factory=ontologyManager.getOWLDataFactory();
+        OWLIndividual individualA=factory.getOWLNamedIndividual(IRI.create("internal:individualA"));
+        OWLIndividual individualB=factory.getOWLNamedIndividual(IRI.create("internal:individualB"));
+        OWLAxiom assertion=factory.getOWLObjectPropertyAssertionAxiom(individualA,property,individualB);
+        OWLObjectAllValuesFrom all=factory.getOWLObjectAllValuesFrom(property, factory.getOWLObjectComplementOf(factory.getOWLObjectOneOf(individualA)));
+        OWLAxiom assertion2=factory.getOWLClassAssertionAxiom(all, individualB);
+        Tableau tableau=getTableau(ontologyManager,assertion,assertion2);
+        return !tableau.isABoxSatisfiable();
     }
 
     public boolean isTransitive(OWLObjectProperty property) {
@@ -911,6 +724,8 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             return true;
         else if (subDataProperty.getIRI().toString().equals(AtomicRole.TOP_DATA_ROLE.getIRI()))
             return !isConsistent();
+        else if (subDataProperty.getIRI().toString().equals(AtomicRole.BOTTOM_DATA_ROLE.getIRI()))
+            return true;
         else {
             OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
             OWLDataFactory factory=ontologyManager.getOWLDataFactory();
@@ -1303,14 +1118,17 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
 
         BlockingStrategy blockingStrategy=null;
         switch (config.blockingStrategyType) {
+        case CORE:
+            blockingStrategy=new AnywhereCoreBlocking(new CorePreDirectBlockingChecker(),dlOntology.getUnaryValidBlockConditions(),dlOntology.getNAryValidBlockConditions(),dlOntology.hasInverseRoles());
+            break;
+        case TWOPHASE:
+            blockingStrategy=new AnywhereTwoPhaseBlocking(new TwoPhaseDirectBlockingChecker(),dlOntology.getUnaryValidBlockConditions(),dlOntology.getNAryValidBlockConditions(),dlOntology.hasInverseRoles());
+            break;
         case ANCESTOR:
             blockingStrategy=new AncestorBlocking(directBlockingChecker,blockingSignatureCache);
             break;
         case ANYWHERE:
             blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
-            break;
-        case CORE:
-            blockingStrategy=new AnywhereCoreBlocking(new CorePreDirectBlockingChecker(), new HashMap<AtomicConcept, Set<Set<Concept>>>(), new HashMap<Set<AtomicConcept>, Set<Set<Concept>>>(), dlOntology.hasInverseRoles());
             break;
         default:
             throw new IllegalArgumentException("Unknown blocking strategy type.");
@@ -1327,6 +1145,12 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         case INDIVIDUAL_REUSE:
             existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,false);
             break;
+        case LAZY: 
+            if (config.blockingStrategyType!=BlockingStrategyType.CORE) {
+                throw new IllegalArgumentException("Lazy expansion can only be used with core blocking. ");
+            }
+            existentialsExpansionStrategy=new LazyStrategy(blockingStrategy);
+            break;    
         default:
             throw new IllegalArgumentException("Unknown expansion strategy type.");
         }
@@ -1409,6 +1233,11 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             boolean hasAtMostRestrictions=originalDLOntology.hasAtMostRestrictions() || newDLOntology.hasAtMostRestrictions();
             boolean hasNominals=originalDLOntology.hasNominals() || newDLOntology.hasNominals();
             boolean hasDatatypes=originalDLOntology.hasDatatypes() || newDLOntology.hasDatatypes();
+            if (config.blockingStrategyType==Configuration.BlockingStrategyType.CORE || config.blockingStrategyType==Configuration.BlockingStrategyType.TWOPHASE) {
+                Map<AtomicConcept,Set<Set<Concept>>> unaryValidBlockConditions=createUnion(originalDLOntology.getUnaryValidBlockConditions(),newDLOntology.getUnaryValidBlockConditions());
+                Map<Set<AtomicConcept>,Set<Set<Concept>>> nAryValidBlockConditions=createUnion(originalDLOntology.getNAryValidBlockConditions(),newDLOntology.getNAryValidBlockConditions());
+                return new DLOntology(resultingOntologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,atomicObjectRoles,atomicDataRoles,individuals,hasInverseRoles,hasAtMostRestrictions,hasNominals,hasDatatypes,unaryValidBlockConditions,nAryValidBlockConditions);
+            }
             return new DLOntology(resultingOntologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,atomicObjectRoles,atomicDataRoles,individuals,hasInverseRoles,hasAtMostRestrictions,hasNominals,hasDatatypes);
         }
         catch (OWLException shouldntHappen) {
@@ -1422,7 +1251,12 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         result.addAll(set2);
         return result;
     }
-    
+    protected static <K,V> Map<K,V> createUnion(Map<K,V> map1,Map<K,V> map2) {
+        Map<K,V> result=new HashMap<K,V>();
+        if (map1!=null) result.putAll(map1);
+        if (map2!=null)result.putAll(map2);
+        return result;
+    }
     protected static OWLObjectProperty getObjectProperty(OWLDataFactory factory,AtomicRole atomicRole) {
         return factory.getOWLObjectProperty(IRI.create(atomicRole.getIRI()));
     }
@@ -1565,15 +1399,18 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
     
     protected static Set<OWLClass> atomicConceptsToOWLAPI(Collection<AtomicConcept> atomicConcepts,OWLDataFactory factory) {
         Set<OWLClass> result=new HashSet<OWLClass>();
-        for (AtomicConcept concept : atomicConcepts)
-            result.add(factory.getOWLClass(IRI.create(concept.getIRI())));
+        for (AtomicConcept concept : atomicConcepts) {
+            if (!Prefixes.isInternalIRI(concept.getIRI()))
+                result.add(factory.getOWLClass(IRI.create(concept.getIRI())));
+        }
         return result;
     }
 
     protected static Set<Set<OWLClass>> atomicConceptNodesToOWLAPI(Collection<HierarchyNode<AtomicConcept>> nodes,OWLDataFactory factory) {
         Set<Set<OWLClass>> result=new HashSet<Set<OWLClass>>();
-        for (HierarchyNode<AtomicConcept> node : nodes)
+        for (HierarchyNode<AtomicConcept> node : nodes) {
             result.add(atomicConceptsToOWLAPI(node.getEquivalentElements(),factory));
+        }
         return result;
     }
 
@@ -1635,17 +1472,16 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
     public static class ReasonerFactory implements OWLReasonerFactory {
 
         public OWLReasoner createReasoner(OWLOntologyManager manager) {
-            Configuration configuration=new Configuration();
-            configuration.ignoreUnsupportedDatatypes=true;
-            return new Reasoner(configuration);
+            return this.createReasoner(manager, new HashSet<OWLOntology>());
         }
         public String getReasonerName() {
             return getClass().getPackage().getImplementationTitle();
         }
-        public OWLReasoner createReasoner(OWLOntologyManager manager,
-                Set<OWLOntology> ontologies) {
-            // TODO Auto-generated method stub
-            return null;
+        public OWLReasoner createReasoner(OWLOntologyManager manager,Set<OWLOntology> ontologies) {
+            Configuration configuration=new Configuration();
+            configuration.ignoreUnsupportedDatatypes=true;
+            Reasoner hermit=new Reasoner(configuration,manager,ontologies);
+            return hermit;
         }
     }
    
@@ -1654,7 +1490,8 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
     public static class ProtegeReasonerFactory extends ProtegeOWLReasonerFactoryAdapter {
         
         public OWLReasoner createReasoner(OWLOntologyManager ontologyManager) {
-            return this.createReasoner(ontologyManager, new HashSet<OWLOntology>());
+            // ignore the given manager
+            return this.createReasoner(OWLManager.createOWLOntologyManager(),new HashSet<OWLOntology>());
         }
         public void initialise() {
         }
@@ -1665,14 +1502,15 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         }
         @SuppressWarnings("serial")
         public OWLReasoner createReasoner(OWLOntologyManager manager,Set<OWLOntology> ontologies) {
+            // ignore the given manager
             Configuration configuration=new Configuration();
             configuration.ignoreUnsupportedDatatypes=true;
-            return new Reasoner(configuration) {
+            Reasoner hermit=new Reasoner(configuration) {
                 protected Set<OWLOntology> m_loadedOntologies;
                 
-                public void loadOntologies(OWLOntologyManager ontologyManager, Set<OWLOntology> ontologies) {
+                public void loadOntologies(Set<OWLOntology> ontologies) {
                     if (!ontologies.isEmpty()) {
-                        super.loadOntologies(ontologyManager, ontologies);
+                        super.loadOntologies(ontologies);
                     }
                     m_loadedOntologies=ontologies;
                 }
@@ -1699,6 +1537,8 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                     return new HashSet<OWLLiteral>();
                 }
             };
+            if (!ontologies.isEmpty()) hermit.loadOntologies(ontologies);
+            return hermit;
         }
     }
 }

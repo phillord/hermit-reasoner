@@ -30,6 +30,7 @@ import rationals.Automaton;
  */
 public class DLOntology implements Serializable {
     private static final long serialVersionUID=3189937959595369812L;
+    
     protected static final String CRLF=System.getProperty("line.separator");
     protected static final int CONTAINS_NO_ROLES=0;
     protected static final int CONTAINS_ONLY_GRAPH_ROLES=1;
@@ -55,9 +56,24 @@ public class DLOntology implements Serializable {
     /**
      * gstoil
      */
-	protected final Map<OWLObjectPropertyExpression, Automaton> m_automataOfComplexObjectProperties;
-
-    public DLOntology(String ontologyIRI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts,Set<AtomicConcept> atomicConcepts,Set<ComplexObjectRoleInclusion> allComplexObjectRoleInclusions,Set<AtomicRole> atomicObjectRoles,Set<AtomicRole> atomicDataRoles,Set<Individual> individuals,boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,boolean hasDatatypes) {
+    protected final Map<OWLObjectPropertyExpression, Automaton> m_automataOfComplexObjectProperties;
+    protected final Map<AtomicConcept,Set<Set<Concept>>> m_unaryValidBlockConditions;
+    protected final Map<Set<AtomicConcept>,Set<Set<Concept>>> m_nAryValidBlockConditions;
+    
+    public DLOntology(String ontologyIRI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts,
+            Set<AtomicConcept> atomicConcepts,Set<ComplexObjectRoleInclusion> allComplexObjectRoleInclusions,
+            Set<AtomicRole> atomicObjectRoles,Set<AtomicRole> atomicDataRoles,Set<Individual> individuals,
+            boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,boolean hasDatatypes) {
+        this(ontologyIRI, dlClauses, positiveFacts, negativeFacts, atomicConcepts, allComplexObjectRoleInclusions, 
+                atomicObjectRoles, atomicDataRoles, individuals, hasInverseRoles, hasAtMostRestrictions, hasNominals, 
+                hasDatatypes, null, null);
+    }
+    public DLOntology(String ontologyIRI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts,
+            Set<AtomicConcept> atomicConcepts,Set<ComplexObjectRoleInclusion> allComplexObjectRoleInclusions,
+            Set<AtomicRole> atomicObjectRoles,Set<AtomicRole> atomicDataRoles,Set<Individual> individuals,
+            boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,boolean hasDatatypes,
+            Map<AtomicConcept, Set<Set<Concept>>> unaryValidBlockConditions,Map<Set<AtomicConcept>, 
+            Set<Set<Concept>>> nAryValidBlockConditions) {
         m_ontologyIRI=ontologyIRI;
         m_dlClauses=dlClauses;
         m_positiveFacts=positiveFacts;
@@ -123,8 +139,18 @@ public class DLOntology implements Serializable {
                     m_allIndividuals.add((Individual)argument);
             }
         }
+        if (unaryValidBlockConditions==null) {
+            m_unaryValidBlockConditions=new HashMap<AtomicConcept,Set<Set<Concept>>>();
+        } else {
+            m_unaryValidBlockConditions=unaryValidBlockConditions;
+        }
+        if (nAryValidBlockConditions==null) {
+            m_nAryValidBlockConditions=new HashMap<Set<AtomicConcept>,Set<Set<Concept>>>();   
+        } else {
+            m_nAryValidBlockConditions=nAryValidBlockConditions;
+        }
     }
-	protected void addDLPredicate(DLPredicate dlPredicate) {
+    protected void addDLPredicate(DLPredicate dlPredicate) {
         if (dlPredicate instanceof AtomicConcept)
             m_allAtomicConcepts.add((AtomicConcept)dlPredicate);
         else if (dlPredicate instanceof AtLeastConcept) {
@@ -197,7 +223,12 @@ public class DLOntology implements Serializable {
     public boolean hasDatatypes() {
         return m_hasDatatypes;
     }
-
+    public Map<AtomicConcept, Set<Set<Concept>>> getUnaryValidBlockConditions() {
+        return m_unaryValidBlockConditions;
+    }
+    public Map<Set<AtomicConcept>, Set<Set<Concept>>> getNAryValidBlockConditions() {
+        return m_nAryValidBlockConditions;
+    }
     public boolean isHorn() {
         return m_isHorn;
     }

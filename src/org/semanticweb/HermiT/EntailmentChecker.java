@@ -365,11 +365,9 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
 
 
     public Boolean visit(OWLHasKeyAxiom axiom) {
-        // TODO Auto-generated method stub
-        return null;
+        return reasoner.hasKey(axiom);
     }
     public Boolean visit(OWLDatatypeDefinitionAxiom axiom) {
-        // TODO Auto-generated method stub
-        return null;
+        return reasoner.entailsDatatypeDefinition(axiom);
     }    
 }

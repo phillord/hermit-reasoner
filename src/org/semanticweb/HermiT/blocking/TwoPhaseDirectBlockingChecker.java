@@ -16,24 +16,19 @@ import org.semanticweb.HermiT.tableau.Tableau;
 
 public class TwoPhaseDirectBlockingChecker implements DirectBlockingChecker,Serializable {
     private static final long serialVersionUID = -5003606007272321326L;
+    
     protected final SetFactory<AtomicConcept> m_atomicConceptsSetFactory;
     protected final List<AtomicConcept> m_atomicConceptsBuffer;
-    protected final SetFactory<AtomicRole> m_atomicRolesSetFactory;
-    protected final List<AtomicRole> m_atomicRolesBuffer;
     protected Tableau m_tableau;
     protected ExtensionTable.Retrieval m_binaryTableSearch1Bound;
-    protected ExtensionTable.Retrieval m_ternaryTableSearch12Bound;
     
     public TwoPhaseDirectBlockingChecker() {
         m_atomicConceptsSetFactory=new SetFactory<AtomicConcept>();
         m_atomicConceptsBuffer=new ArrayList<AtomicConcept>();
-        m_atomicRolesSetFactory=new SetFactory<AtomicRole>();
-        m_atomicRolesBuffer=new ArrayList<AtomicRole>();
     }
     public void initialize(Tableau tableau) {
         m_tableau=tableau;
         m_binaryTableSearch1Bound=tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
-        m_ternaryTableSearch12Bound=tableau.getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,true },ExtensionTable.View.TOTAL);
     }
     public void clear() {
         m_atomicConceptsSetFactory.clearNonpermanent();
@@ -46,7 +41,7 @@ public class TwoPhaseDirectBlockingChecker implements DirectBlockingChecker,Seri
             ((TwoPhaseBlockingObject)blocker.getBlockingObject()).getAtomicConceptLabel()==((TwoPhaseBlockingObject)blocked.getBlockingObject()).getAtomicConceptLabel();
     }
     public int blockingHashCode(Node node) {
-        return ((TwoPhaseBlockingObject)node.getBlockingObject()).m_coreConceptsHashCode;
+        return ((TwoPhaseBlockingObject)node.getBlockingObject()).m_atomicConceptsHashCode;
     }
     public boolean canBeBlocker(Node node) {
         return node.getNodeType()==NodeType.TREE_NODE;
@@ -109,21 +104,21 @@ public class TwoPhaseDirectBlockingChecker implements DirectBlockingChecker,Seri
         m_atomicConceptsBuffer.clear();
         return result;
     }
-    
     protected final class TwoPhaseBlockingObject implements Serializable {
         private static final long serialVersionUID = -8515134126252287921L;
+        
         protected final Node m_node;
         protected boolean m_hasChanged;
         protected Node m_greatestInvalidBlocker;
         protected Set<AtomicConcept> m_atomicConcepts;
-        protected int m_coreConceptsHashCode;
+        protected int m_atomicConceptsHashCode;
         
         public TwoPhaseBlockingObject(Node node) {
             m_node=node;
         }
         public void initialize() {
             m_atomicConcepts=null;
-            m_coreConceptsHashCode=0;
+            m_atomicConceptsHashCode=0;
             m_hasChanged=true;
         }
         public void destroy() {
@@ -145,7 +140,7 @@ public class TwoPhaseDirectBlockingChecker implements DirectBlockingChecker,Seri
                 m_atomicConceptsSetFactory.removeReference(m_atomicConcepts);
                 m_atomicConcepts=null;
             }
-            m_coreConceptsHashCode+=atomicConcept.hashCode();
+            m_atomicConceptsHashCode+=atomicConcept.hashCode();
             m_hasChanged=true;
         }
         public void removeConcept(AtomicConcept atomicConcept) {
@@ -154,7 +149,7 @@ public class TwoPhaseDirectBlockingChecker implements DirectBlockingChecker,Seri
                 m_atomicConceptsSetFactory.removeReference(m_atomicConcepts);
                 m_atomicConcepts=null;
             }
-            m_coreConceptsHashCode-=atomicConcept.hashCode();
+            m_atomicConceptsHashCode-=atomicConcept.hashCode();
             m_hasChanged=true;
         }
         public void setGreatestInvalidBlocker(Node node) {

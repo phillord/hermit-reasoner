@@ -168,45 +168,13 @@ Ontology(
 	</owl:NegativePropertyAssertion>
 
 
-	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/Consistent-2DdateTime">
-		<rdf:type rdf:resource="&test;ConsistencyTest" />
-		<test:identifier rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Consistent DateTime</test:identifier>
-		<test:creator rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Birte Glimm</test:creator>
-		<test:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The datatype restrictions leave exactly one dateTime value as dp filler for the individual a, so the ontology is consistent.</test:description>
-		<test:normativeSyntax rdf:resource="&test;FUNCTIONAL" />
-		<test:semantics rdf:resource="&test;DIRECT" />
-		<test:semantics rdf:resource="&test;RDF-BASED" />
-		<test:species rdf:resource="&test;FULL" />
-		<test:species rdf:resource="&test;DL" />
-		<test:fsPremiseOntology rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Prefix(:=&lt;http://example.org/&gt;)
-Prefix(xsd:=&lt;http://www.w3.org/2001/XMLSchema#&gt;)
-Ontology(
-  Declaration(NamedIndividual(:a))
-  Declaration(DataProperty(:dp))
-  Declaration(Class(:A))
-  SubClassOf(:A 
-    DataSomeValuesFrom(:dp DatatypeRestriction(
-      xsd:dateTime 
-      xsd:minInclusive "2008-10-08T20:44:11.656+0100"^^xsd:dateTime)
-    )
-  ) 
-  SubClassOf(:A 
-    DataAllValuesFrom(:dp DatatypeRestriction(
-      xsd:dateTime 
-      xsd:maxInclusive "2008-10-08T20:44:11.656+0100"^^xsd:dateTime)
-    )
-  )
-  ClassAssertion(:A :a)
-)</test:fsPremiseOntology>
-	</test:TestCase>
-
-
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/Double-2Dranges">
 		<rdf:type rdf:resource="&test;ConsistencyTest" />
 		<test:identifier rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Consistent Double Ranges</test:identifier>
 		<test:creator rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Birte Glimm</test:creator>
 		<test:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The data property dp has a restriction to doubles &gt;= 5 (given as byte) and &lt;= 7.2 (given as float) and a restriction to decimals &gt;= 6.0 (given as float) and &lt;= 6.8. The individual a is required to have a dp successor, but there are several double values that fulfil the restriction.</test:description>
 		<test:normativeSyntax rdf:resource="&test;FUNCTIONAL" />
+		<test:status rdf:resource="&test;Rejected" />
 		<test:semantics rdf:resource="&test;DIRECT" />
 		<test:semantics rdf:resource="&test;RDF-BASED" />
 		<test:species rdf:resource="&test;FULL" />
@@ -245,6 +213,7 @@ Ontology(
 		<test:creator rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Birte Glimm</test:creator>
 		<test:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The data property dp has a restriction to bytes &gt;= 5 (4.5 needs to be rounded up) and &lt;= 7 and a restriction to decimals &gt;= 6.0 and &lt;= 6.8. The individual a is required to have a dp successor, but 6 is a value that fulfils both restrictions.</test:description>
 		<test:normativeSyntax rdf:resource="&test;FUNCTIONAL" />
+		<test:status rdf:resource="&test;Rejected" />
 		<test:semantics rdf:resource="&test;DIRECT" />
 		<test:semantics rdf:resource="&test;RDF-BASED" />
 		<test:species rdf:resource="&test;FULL" />
@@ -282,6 +251,7 @@ Ontology(
 		<test:creator rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Birte Glimm</test:creator>
 		<test:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The individual a must have dp fillers that are in the sets {3.0 (float), 4 (integer)} and {3.0 (decimal)} (different types are used, but 3.0 has the same value for floats and decimals). Furthermore, the dp filler must be an integer &lt;= 3, but since 3.0 has the same value as 3 the ontology is consistent.</test:description>
 		<test:normativeSyntax rdf:resource="&test;FUNCTIONAL" />
+		<test:status rdf:resource="&test;Rejected" />
 		<test:semantics rdf:resource="&test;DIRECT" />
 		<test:semantics rdf:resource="&test;RDF-BASED" />
 		<test:species rdf:resource="&test;FULL" />
@@ -785,6 +755,56 @@ Ontology(
 	</test:TestCase>
 
 
+	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/Consistent-2DdateTime">
+		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
+		<rdf:type rdf:resource="&test;ConsistencyTest" />
+		<test:identifier rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Consistent-dateTime</test:identifier>
+		<test:creator rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Birte Glimm</test:creator>
+		<test:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The datatype restrictions leave exactly one dateTime value as dp filler for the individual a, so the ontology is consistent.</test:description>
+		<test:normativeSyntax rdf:resource="&test;FUNCTIONAL" />
+		<test:status rdf:resource="&test;Proposed" />
+		<test:semantics rdf:resource="&test;DIRECT" />
+		<test:semantics rdf:resource="&test;RDF-BASED" />
+		<test:species rdf:resource="&test;FULL" />
+		<test:species rdf:resource="&test;DL" />
+		<test:fsPremiseOntology rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Prefix(:=&lt;http://example.org/&gt;)
+Prefix(xsd:=&lt;http://www.w3.org/2001/XMLSchema#&gt;)
+Ontology(
+  Declaration(NamedIndividual(:a))
+  Declaration(DataProperty(:dp))
+  Declaration(Class(:A))
+  SubClassOf(:A 
+    DataSomeValuesFrom(:dp DatatypeRestriction(
+      xsd:dateTime 
+      xsd:minInclusive "2008-10-08T20:44:11.656+01:00"^^xsd:dateTime)
+    )
+  ) 
+  SubClassOf(:A 
+    DataAllValuesFrom(:dp DatatypeRestriction(
+      xsd:dateTime 
+      xsd:maxInclusive "2008-10-08T20:44:11.656+01:00"^^xsd:dateTime)
+    )
+  )
+  ClassAssertion(:A :a)
+)</test:fsPremiseOntology>
+	</test:TestCase>
+	<owl:NegativePropertyAssertion>
+		<owl:sourceIndividual rdf:resource="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/Consistent-2DdateTime" />
+		<owl:assertionProperty rdf:resource="&test;profile" />
+		<owl:targetIndividual rdf:resource="&test;EL" />
+	</owl:NegativePropertyAssertion>
+	<owl:NegativePropertyAssertion>
+		<owl:sourceIndividual rdf:resource="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/Consistent-2DdateTime" />
+		<owl:assertionProperty rdf:resource="&test;profile" />
+		<owl:targetIndividual rdf:resource="&test;QL" />
+	</owl:NegativePropertyAssertion>
+	<owl:NegativePropertyAssertion>
+		<owl:sourceIndividual rdf:resource="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/Consistent-2DdateTime" />
+		<owl:assertionProperty rdf:resource="&test;profile" />
+		<owl:targetIndividual rdf:resource="&test;RL" />
+	</owl:NegativePropertyAssertion>
+
+
 <!-- Processed 10 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/Consistent-2Dinteger-2Dfiller">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
@@ -859,11 +879,13 @@ Ontology(
 
 
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/Contradicting-2DdateTime-2Drestrictions">
+		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;InconsistencyTest" />
-		<test:identifier rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Contradicting dateTime Restrictions</test:identifier>
+		<test:identifier rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Contradicting-dateTime-restrictions</test:identifier>
 		<test:creator rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Birte Glimm</test:creator>
 		<test:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The individual a must have a dp filler that is a date from 2007, but the restrictions on dp allow only values from 2008, which makes the ontology inconsistent.</test:description>
 		<test:normativeSyntax rdf:resource="&test;FUNCTIONAL" />
+		<test:status rdf:resource="&test;Proposed" />
 		<test:semantics rdf:resource="&test;DIRECT" />
 		<test:semantics rdf:resource="&test;RDF-BASED" />
 		<test:species rdf:resource="&test;FULL" />
@@ -875,17 +897,32 @@ Ontology(
   Declaration(DataProperty(:dp))
   Declaration(Class(:A))
   SubClassOf(:A 
-    DataHasValue(:dp "2007-10-08T20:44:11.656+0100"^^xsd:dateTime)) 
+    DataHasValue(:dp "2007-10-08T20:44:11.656+01:00"^^xsd:dateTime)) 
   SubClassOf(:A 
     DataAllValuesFrom(:dp DatatypeRestriction(
       xsd:dateTime 
-      xsd:minInclusive "2008-07-08T20:44:11.656+0100"^^xsd:dateTime 
-      xsd:maxInclusive "2008-10-08T20:44:11.656+0100"^^xsd:dateTime)
+      xsd:minInclusive "2008-07-08T20:44:11.656+01:00"^^xsd:dateTime 
+      xsd:maxInclusive "2008-10-08T20:44:11.656+01:00"^^xsd:dateTime)
     )
   ) 
   ClassAssertion(:A :a)
 )</test:fsPremiseOntology>
 	</test:TestCase>
+	<owl:NegativePropertyAssertion>
+		<owl:sourceIndividual rdf:resource="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/Contradicting-2DdateTime-2Drestrictions" />
+		<owl:assertionProperty rdf:resource="&test;profile" />
+		<owl:targetIndividual rdf:resource="&test;EL" />
+	</owl:NegativePropertyAssertion>
+	<owl:NegativePropertyAssertion>
+		<owl:sourceIndividual rdf:resource="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/Contradicting-2DdateTime-2Drestrictions" />
+		<owl:assertionProperty rdf:resource="&test;profile" />
+		<owl:targetIndividual rdf:resource="&test;QL" />
+	</owl:NegativePropertyAssertion>
+	<owl:NegativePropertyAssertion>
+		<owl:sourceIndividual rdf:resource="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/Contradicting-2DdateTime-2Drestrictions" />
+		<owl:assertionProperty rdf:resource="&test;profile" />
+		<owl:targetIndividual rdf:resource="&test;RL" />
+	</owl:NegativePropertyAssertion>
 
 
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/Datatype-2DDataComplementOf-2D001">
@@ -1781,7 +1818,7 @@ Ontology(
     &lt;rdfs:range&gt;
       &lt;rdfs:Datatype&gt;
         &lt;owl:unionOf rdf:parseType="Collection"&gt;
-          &lt;rdf:Description rdf:about="http://www.w3.org/1999/02/22-rdf-syntax-ns#text"/&gt;
+          &lt;rdf:Description rdf:about="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral"/&gt;
           &lt;rdf:Description rdf:about="http://www.w3.org/2001/XMLSchema#float"/&gt;
         &lt;/owl:unionOf&gt;
       &lt;/rdfs:Datatype&gt;
@@ -1873,7 +1910,7 @@ Ontology(
     Declaration(Class(:u3))
     Declaration(Class(:u5))
     Declaration(Class(:u6))
-    DataPropertyRange(:p1 DataUnionOf(rdf:text xsd:float))
+    DataPropertyRange(:p1 DataUnionOf(rdf:PlainLiteral xsd:float))
     DataPropertyDomain(:p2 ObjectUnionOf(:c1 :u1))
     ObjectPropertyRange(:p3 ObjectUnionOf(:c2 :u2))
     ObjectPropertyDomain(:p4 ObjectUnionOf(:c3 :u3))
@@ -1929,7 +1966,7 @@ Ontology(
   &lt;owl:Class rdf:about="http://example.org/c6"/&gt;
   &lt;owl:Class rdf:about="http://example.org/c4"/&gt;
   &lt;owl:DatatypeProperty rdf:about="http://example.org/p1"&gt;
-    &lt;rdfs:range rdf:resource="http://example.org/text"/&gt;
+    &lt;rdfs:range rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral"/&gt;
   &lt;/owl:DatatypeProperty&gt;
   &lt;owl:DatatypeProperty rdf:about="http://example.org/p5"&gt;
     &lt;rdfs:domain rdf:resource="http://example.org/c5"/&gt;
@@ -1961,7 +1998,7 @@ Ontology(
     Declaration(Class(:c4))
     Declaration(Class(:c5))
     Declaration(Class(:c6))
-    DataPropertyRange(:p1 rdf:text)
+    DataPropertyRange(:p1 rdf:PlainLiteral)
     DataPropertyDomain(:p2 :c2)
     ObjectPropertyRange(:p3 :c3)
     ObjectPropertyDomain(:p4 :c4)
@@ -3052,8 +3089,8 @@ Ontology(
   SubClassOf(:A 
     DataSomeValuesFrom(:dp2 DatatypeRestriction(
       xsd:integer 
-      minInclusive "10"^^xsd:integer 
-      maxInclusive "10"^^xsd:integer)
+      xsd:minInclusive "10"^^xsd:integer 
+      xsd:maxInclusive "10"^^xsd:integer)
     )
   )
   ClassAssertion(:A :a)
@@ -3084,7 +3121,7 @@ Ontology(
 		<test:creator rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Birte Glimm</test:creator>
 		<test:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The data property dp has a restriction to bytes &gt;= 5 (4.5 needs to be rounded up) and &lt;= 7 and a restriction to decimals &gt;= 6.0 and &lt;= 6.8. The individual a is required to have a dp successor not equalt to 6, but 6 is the only value that fulfils both restrictions, which causes an inconsistency.</test:description>
 		<test:normativeSyntax rdf:resource="&test;FUNCTIONAL" />
-		<test:status rdf:resource="&test;Proposed" />
+		<test:status rdf:resource="&test;Rejected" />
 		<test:semantics rdf:resource="&test;DIRECT" />
 		<test:semantics rdf:resource="&test;RDF-BASED" />
 		<test:species rdf:resource="&test;FULL" />
@@ -3157,7 +3194,7 @@ Ontology(
   SubClassOf(:A 
     DataSomeValuesFrom(:dp2 DatatypeRestriction(
       xsd:string 
-      pattern "a(b|c)"^^xsd:string)
+      xsd:pattern "a(b|c)"^^xsd:string)
     )
   )
   ClassAssertion(:A :a)
@@ -3258,6 +3295,52 @@ Ontology(
 		<owl:assertionProperty rdf:resource="&test;profile" />
 		<owl:targetIndividual rdf:resource="&test;RL" />
 	</owl:NegativePropertyAssertion>
+
+
+	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/Michael_jordan">
+		<rdf:type rdf:resource="&test;PositiveEntailmentTest" />
+		<rdf:type rdf:resource="&test;ConsistencyTest" />
+		<test:identifier rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Michael_jordan</test:identifier>
+		<test:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Basketball Superstar</test:description>
+		<test:normativeSyntax rdf:resource="&test;OWLXML" />
+		<test:semantics rdf:resource="&test;DIRECT" />
+		<test:semantics rdf:resource="&test;RDF-BASED" />
+		<test:species rdf:resource="&test;FULL" />
+		<test:owlXmlConclusionOntology rdf:datatype="http://www.w3.org/2001/XMLSchema#string">&lt;?xml version="1.0"?&gt;
+&lt;rdf:RDF  xml:base   = "http://example.org/"
+          xmlns:xsd  = "http://www.w3.org/2001/XMLSchema#"
+          xmlns:rdf  = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+          xmlns:rdfs = "http://www.w3.org/2000/01/rdf-schema#"
+          xmlns:owl  = "http://www.w3.org/2002/07/owl#"
+          xmlns:ex   = "http://example.org/"&gt;
+
+  &lt;owl:Ontology/&gt;
+
+
+  &lt;owl:Class rdf:about="A" /&gt;
+  &lt;owl:DatatypeProperty rdf:about="d" /&gt;
+  &lt;owl:ObjectProperty rdf:about="p" /&gt;
+
+
+&lt;/rdf:RDF&gt;</test:owlXmlConclusionOntology>
+		<test:owlXmlPremiseOntology rdf:datatype="http://www.w3.org/2001/XMLSchema#string">&lt;?xml version="1.0"?&gt;
+&lt;rdf:RDF  xml:base   = "http://example.org/"
+          xmlns:xsd  = "http://www.w3.org/2001/XMLSchema#"
+          xmlns:rdf  = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+          xmlns:rdfs = "http://www.w3.org/2000/01/rdf-schema#"
+          xmlns:owl  = "http://www.w3.org/2002/07/owl#"
+          xmlns:ex   = "http://example.org/"&gt;
+
+  &lt;owl:Ontology/&gt;
+
+
+  &lt;owl:Class rdf:about="A" /&gt;
+  &lt;owl:DatatypeProperty rdf:about="d" /&gt;
+  &lt;owl:ObjectProperty rdf:about="p" /&gt;
+
+
+&lt;/rdf:RDF&gt;</test:owlXmlPremiseOntology>
+	</test:TestCase>
 
 
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/Minus-2Dinf-2Dnot-2Dowlreal">
@@ -3526,6 +3609,7 @@ Ontology(
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 60 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/New-2DFeature-2DBottomObjectProperty-2D001">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;InconsistencyTest" />
@@ -3581,7 +3665,6 @@ Ontology(
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 60 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/New-2DFeature-2DDataQCR-2D001">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;PositiveEntailmentTest" />
@@ -3638,7 +3721,7 @@ Ontology(
 &lt;/rdf:Description&gt;
 
 &lt;/rdf:RDF&gt;</test:rdfXmlPremiseOntology>
-		<test:fsConclusionOntology rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Prefix( xsd = &lt;http://www.w3.org/2001/XMLSchema#&gt; )
+		<test:fsConclusionOntology rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Prefix( xsd: = &lt;http://www.w3.org/2001/XMLSchema#&gt; )
 Prefix( : = &lt;http://example.org/&gt; )
 
 Ontology(
@@ -4307,6 +4390,7 @@ Ontology(
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 70 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/New-2DFeature-2DKeys-2D003">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;PositiveEntailmentTest" />
@@ -4402,7 +4486,6 @@ Ontology(
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 70 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/New-2DFeature-2DKeys-2D004">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;NegativeEntailmentTest" />
@@ -5042,6 +5125,7 @@ Ontology(
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 80 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/New-2DFeature-2DObjectPropertyChain-2DBJP-2D004">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;NegativeEntailmentTest" />
@@ -5101,7 +5185,6 @@ Ontology(
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 80 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/New-2DFeature-2DObjectQCR-2D001">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;PositiveEntailmentTest" />
@@ -5923,6 +6006,7 @@ Unless all the classes have an infinite number of members or are empty this does
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 90 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/Owl2-2Drl-2Dinvalid-2Dleftside-2Dallvaluesfrom">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;ConsistencyTest" />
@@ -5967,7 +6051,6 @@ Unless all the classes have an infinite number of members or are empty this does
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 90 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/Owl2-2Drl-2Dinvalid-2Dleftside-2Dmaxcard">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;ConsistencyTest" />
@@ -6388,6 +6471,7 @@ Unless all the classes have an infinite number of members or are empty this does
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 100 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/Owl2-2Drl-2Dinvalid-2Dmincard">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;ConsistencyTest" />
@@ -6440,7 +6524,6 @@ Unless all the classes have an infinite number of members or are empty this does
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 100 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/Owl2-2Drl-2Dvalid-2Doneof">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;ConsistencyTest" />
@@ -6790,6 +6873,7 @@ Ontology(
 	</test:TestCase>
 
 
+<!-- Processed 110 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/Somevaluesfrom2bnode">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;PositiveEntailmentTest" />
@@ -6841,7 +6925,6 @@ Ontology(
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 110 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/String-2Dinteger-2Dclash">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;InconsistencyTest" />
@@ -7208,6 +7291,7 @@ rdfs:Class is an owl:Class.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 120 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DClass-2D002">
 		<rdf:type rdf:resource="&test;PositiveEntailmentTest" />
 		<rdf:type rdf:resource="&test;ConsistencyTest" />
@@ -7241,7 +7325,6 @@ rdfs:Class is an owl:Class.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 120 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DClass-2D003">
 		<rdf:type rdf:resource="&test;PositiveEntailmentTest" />
 		<rdf:type rdf:resource="&test;ConsistencyTest" />
@@ -7661,6 +7744,7 @@ using one of them can be transferred to the other.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 130 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DFunctionalProperty-2D004">
 		<rdf:type rdf:resource="&test;PositiveEntailmentTest" />
 		<rdf:type rdf:resource="&test;ConsistencyTest" />
@@ -7699,7 +7783,6 @@ has a single value) and so it is an &lt;code&gt;owl:FunctionalProperty&lt;/code&
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 130 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DFunctionalProperty-2D005">
 		<rdf:type rdf:resource="&test;PositiveEntailmentTest" />
 		<rdf:type rdf:resource="&test;ConsistencyTest" />
@@ -8232,6 +8315,7 @@ then an OWL individual has at most one value for prop.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 140 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DI5.2-2D001">
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The input ontology present in that version of the test was marked as an OWL Lite document, but was not OWL Lite because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
@@ -8293,7 +8377,6 @@ then an OWL individual has at most one value for prop.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 140 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DI5.2-2D002">
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The premise ontology present in that version of the test was marked as an OWL Lite document, but was not OWL Lite because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The conclusion ontology present in that version of the test was marked as an OWL Lite document, but was not OWL Lite because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
@@ -9258,6 +9341,7 @@ in RDFS.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 150 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DI5.24-2D002">
 		<rdf:type rdf:resource="&test;PositiveEntailmentTest" />
 		<rdf:type rdf:resource="&test;ConsistencyTest" />
@@ -9307,7 +9391,6 @@ in RDFS.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 150 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DI5.24-2D003">
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The premise ontology present in that version of the test was marked as an OWL Lite document, but was not OWL Lite because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The conclusion ontology present in that version of the test was marked as an OWL Lite document, but was not OWL Lite because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
@@ -9728,6 +9811,7 @@ owl:disjointWith triple, but is permitted in OWL 2 DL.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 160 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DI5.26-2D009">
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The premise ontology present in that version of the test was marked as an OWL Lite document, but was not OWL Lite because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The conclusion ontology present in that version of the test was marked as an OWL DL document, but was not OWL DL because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
@@ -9793,7 +9877,6 @@ This is trivially true given that first:p is an
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 160 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DI5.26-2D010">
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The premise ontology present in that version of the test was marked as an OWL Lite document, but was not OWL Lite because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The conclusion ontology present in that version of the test was marked as an OWL DL document, but was not OWL DL because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
@@ -10098,6 +10181,7 @@ but does under the RDFS Compatible Semantics for OWL.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 170 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DI5.3-2D015">
 		<rdf:type rdf:resource="&test;PositiveEntailmentTest" />
 		<rdf:type rdf:resource="&test;ConsistencyTest" />
@@ -10142,7 +10226,6 @@ but does under the RDFS Compatible Semantics for OWL.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 170 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DI5.5-2D001">
 		<rdf:type rdf:resource="&test;PositiveEntailmentTest" />
 		<rdf:type rdf:resource="&test;ConsistencyTest" />
@@ -10506,6 +10589,7 @@ but does under the RDFS Compatible Semantics for OWL.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 180 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DI5.8-2D003">
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The input ontology present in that version of the test was marked as an OWL DL document, but was not OWL DL because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
@@ -10563,7 +10647,6 @@ that are also &lt;code&gt;xsd:unsignedInt&lt;/code&gt;.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 180 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DI5.8-2D004">
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The premise ontology present in that version of the test was marked as an OWL DL document, but was not OWL DL because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The conclusion ontology present in that version of the test was marked as an OWL Lite document, but was not OWL Lite because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
@@ -11099,6 +11182,7 @@ of this test. (cf. the similar &lt;a xmlns="http://www.w3.org/1999/xhtml" href="
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 190 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DI5.8-2D013">
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The input ontology present in that version of the test was marked as an OWL Lite document, but was not OWL Lite because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
@@ -11155,7 +11239,6 @@ The informal description has no formal semantics.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 190 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DI5.8-2D014">
 		<rdf:type rdf:resource="&test;ConsistencyTest" />
 		<test:identifier rdf:datatype="http://www.w3.org/2001/XMLSchema#string">WebOnt-I5.8-014</test:identifier>
@@ -11535,6 +11618,7 @@ using one of them can be transferred to the other.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 200 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DNothing-2D001">
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The input ontology present in that version of the test was marked as an OWL Lite document, but was not OWL Lite because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
@@ -11564,7 +11648,6 @@ that is the empty class.</test:description>
 	</test:TestCase>
 
 
-<!-- Processed 200 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DNothing-2D002">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;PositiveEntailmentTest" />
@@ -12094,6 +12177,7 @@ It also shows optional type triples on an &lt;code&gt;owl:Restriction&lt;/code&g
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 210 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DRestriction-2D005-2Ddirect">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;PositiveEntailmentTest" />
@@ -12181,7 +12265,6 @@ It also shows optional type triples on an &lt;code&gt;owl:Restriction&lt;/code&g
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 210 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DRestriction-2D006">
 		<rdf:type rdf:resource="&test;PositiveEntailmentTest" />
 		<rdf:type rdf:resource="&test;ConsistencyTest" />
@@ -12688,6 +12771,7 @@ do not replace the obligatory ones.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 220 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DallValuesFrom-2D001">
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The premise ontology present in that version of the test was marked as an OWL Lite document, but was not OWL Lite because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The conclusion ontology present in that version of the test was marked as an OWL Lite document, but was not OWL Lite because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
@@ -12752,7 +12836,6 @@ do not replace the obligatory ones.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 220 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DallValuesFrom-2D002">
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The premise ontology present in that version of the test was marked as an OWL Lite document, but was not OWL Lite because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The conclusion ontology present in that version of the test was marked as an OWL Lite document, but was not OWL Lite because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
@@ -13292,6 +13375,7 @@ do not replace the obligatory ones.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 230 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Ddescription-2Dlogic-2D001">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;InconsistencyTest" />
@@ -13388,7 +13472,6 @@ is unsatisfiable.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 230 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Ddescription-2Dlogic-2D002">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;InconsistencyTest" />
@@ -14310,6 +14393,7 @@ is unsatisfiable.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 240 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Ddescription-2Dlogic-2D011">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;InconsistencyTest" />
@@ -14403,7 +14487,6 @@ is unsatisfiable.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 240 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Ddescription-2Dlogic-2D012">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;InconsistencyTest" />
@@ -15467,6 +15550,7 @@ there are 1,701 possible partitions in the satisfiable case</test:description>
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 250 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Ddescription-2Dlogic-2D021">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;ConsistencyTest" />
@@ -15662,7 +15746,6 @@ There are 7,770 possible partitions in the unsatisfiable case</test:description>
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 250 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Ddescription-2Dlogic-2D022">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;InconsistencyTest" />
@@ -16670,6 +16753,7 @@ The concept should be incoherent but needs double blocking</test:description>
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 260 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Ddescription-2Dlogic-2D031">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;ConsistencyTest" />
@@ -16765,7 +16849,6 @@ The concept should be incoherent but needs double blocking</test:description>
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 260 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Ddescription-2Dlogic-2D032">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;InconsistencyTest" />
@@ -17850,6 +17933,7 @@ Tests incoherency caused by disjoint concept</test:description>
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 270 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Ddescription-2Dlogic-2D105">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;InconsistencyTest" />
@@ -17925,7 +18009,6 @@ Tests incoherency caused by number restrictions</test:description>
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 270 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Ddescription-2Dlogic-2D106">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;InconsistencyTest" />
@@ -21582,6 +21665,7 @@ ABox test from DL98 systems comparison.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 280 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Ddescription-2Dlogic-2D204">
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The conclusion ontology present in that version of the test was marked as an OWL Lite document, but was not OWL Lite because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
@@ -23155,7 +23239,6 @@ ABox test from DL98 systems comparison.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 280 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Ddescription-2Dlogic-2D205">
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The conclusion ontology present in that version of the test was marked as an OWL Lite document, but was not OWL Lite because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
@@ -31783,6 +31866,7 @@ ABox test from DL98 systems comparison.
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 290 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Ddescription-2Dlogic-2D601">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;InconsistencyTest" />
@@ -31994,7 +32078,6 @@ is unsatisfiable.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 290 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Ddescription-2Dlogic-2D602">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;InconsistencyTest" />
@@ -33234,6 +33317,7 @@ is unsatisfiable.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 300 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Ddescription-2Dlogic-2D612">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;InconsistencyTest" />
@@ -33341,7 +33425,6 @@ is unsatisfiable.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 300 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Ddescription-2Dlogic-2D613">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;InconsistencyTest" />
@@ -34463,6 +34546,7 @@ The concept should be incoherent but needs double blocking</test:description>
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 310 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Ddescription-2Dlogic-2D627">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;InconsistencyTest" />
@@ -34580,7 +34664,6 @@ The concept should be incoherent but needs double blocking</test:description>
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 310 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Ddescription-2Dlogic-2D628">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;ConsistencyTest" />
@@ -35692,6 +35775,7 @@ Tests incoherency caused by disjoint concept</test:description>
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 320 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Ddescription-2Dlogic-2D643">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;InconsistencyTest" />
@@ -35802,7 +35886,6 @@ Tests incoherency caused by disjoint concept</test:description>
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 320 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Ddescription-2Dlogic-2D644">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;InconsistencyTest" />
@@ -41747,6 +41830,7 @@ ABox test from DL98 systems comparison.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 330 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Ddescription-2Dlogic-2D901">
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The premise ontology present in that version of the test was marked as an OWL DL document, but was not OWL DL because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The conclusion ontology present in that version of the test was marked as an OWL DL document, but was not OWL DL because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
@@ -41842,7 +41926,6 @@ ABox test from DL98 systems comparison.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 330 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Ddescription-2Dlogic-2D902">
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The premise ontology present in that version of the test was marked as an OWL DL document, but was not OWL DL because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The conclusion ontology present in that version of the test was marked as an OWL DL document, but was not OWL DL because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
@@ -42851,6 +42934,7 @@ N is 20. M is 30. N times M is not 601.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 340 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DdifferentFrom-2D001">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;PositiveEntailmentTest" />
@@ -42898,7 +42982,6 @@ N is 20. M is 30. N times M is not 601.</test:description>
 	</test:TestCase>
 
 
-<!-- Processed 340 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DdifferentFrom-2D002">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;PositiveEntailmentTest" />
@@ -43398,6 +43481,7 @@ for DisjointClasses.</test:description>
 	</test:TestCase>
 
 
+<!-- Processed 350 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DdisjointWith-2D009">
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The input ontology present in that version of the test was marked as an OWL DL document, but was not OWL DL because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
@@ -43445,19 +43529,17 @@ then this may be within OWL DL.</test:description>
 	</test:TestCase>
 
 
-<!-- Processed 350 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DdisjointWith-2D010">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;InconsistencyTest" />
 		<test:identifier rdf:datatype="http://www.w3.org/2001/XMLSchema#string">WebOnt-disjointWith-010</test:identifier>
 		<test:creator rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Jeremy J. Carroll</test:creator>
-		<test:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The &lt;code&gt;owl:disjointWith&lt;/code&gt; loop is not in OWL 1 DL, but is permitted in OWL 2 DL.
+		<test:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The &lt;code&gt;owl:disjointWith&lt;/code&gt; loop is not in OWL 1 DL.  In OWL 2 DL, disjoint classes axioms are required to have more than one argument.
 Classes that are disjoint with themselves are necessarily empty.</test:description>
 		<test:normativeSyntax rdf:resource="&test;RDFXML" />
 		<test:semantics rdf:resource="&test;DIRECT" />
 		<test:semantics rdf:resource="&test;RDF-BASED" />
 		<test:species rdf:resource="&test;FULL" />
-		<test:species rdf:resource="&test;DL" />
 		<test:rdfXmlPremiseOntology rdf:datatype="http://www.w3.org/2001/XMLSchema#string">&lt;rdf:RDF
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     xmlns:owl="http://www.w3.org/2002/07/owl#"
@@ -43481,6 +43563,11 @@ Classes that are disjoint with themselves are necessarily empty.</test:descripti
 
 &lt;/rdf:RDF&gt;</test:rdfXmlPremiseOntology>
 	</test:TestCase>
+	<owl:NegativePropertyAssertion>
+		<owl:sourceIndividual rdf:resource="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DdisjointWith-2D010" />
+		<owl:assertionProperty rdf:resource="&test;species" />
+		<owl:targetIndividual rdf:resource="&test;DL" />
+	</owl:NegativePropertyAssertion>
 	<owl:NegativePropertyAssertion>
 		<owl:sourceIndividual rdf:resource="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DdisjointWith-2D010" />
 		<owl:assertionProperty rdf:resource="&test;profile" />
@@ -43965,6 +44052,7 @@ Classes that are disjoint with themselves are necessarily empty.</test:descripti
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 360 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DequivalentClass-2D008">
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The premise ontology present in that version of the test was marked as an OWL Lite document, but was not OWL Lite because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The conclusion ontology present in that version of the test was marked as an OWL Lite document, but was not OWL Lite because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
@@ -44022,7 +44110,6 @@ Classes that are disjoint with themselves are necessarily empty.</test:descripti
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 360 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DequivalentClass-2D008-2DDirect">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;PositiveEntailmentTest" />
@@ -44568,6 +44655,7 @@ and OWL Full.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 370 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Dextra-2Dcredit-2D003">
 		<rdf:type rdf:resource="&test;PositiveEntailmentTest" />
 		<rdf:type rdf:resource="&test;ConsistencyTest" />
@@ -44689,7 +44777,6 @@ and OWL Full.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 370 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Dextra-2Dcredit-2D004">
 		<rdf:type rdf:resource="&test;PositiveEntailmentTest" />
 		<rdf:type rdf:resource="&test;ConsistencyTest" />
@@ -45214,6 +45301,7 @@ declarations may be needed in the importing document.</test:description>
 	</owl:Thing>
 
 
+<!-- Processed 380 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Dimports-2D010">
 		<rdf:type rdf:resource="&test;PositiveEntailmentTest" />
 		<rdf:type rdf:resource="&test;ConsistencyTest" />
@@ -45243,7 +45331,6 @@ declarations may be needed in the importing document.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 380 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Dimports-2D011">
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The conclusion ontology present in that version of the test was marked as an OWL Lite document, but was not OWL Lite because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
 		<rdf:type rdf:resource="&test;PositiveEntailmentTest" />
@@ -53323,6 +53410,7 @@ three distinct values on some subject node.</test:description>
 	</owl:Thing>
 
 
+<!-- Processed 390 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Dmiscellaneous-2D010">
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The conclusion ontology present in that version of the test was marked as an OWL DL document, but was not OWL DL because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
@@ -57453,7 +57541,6 @@ three distinct values on some subject node.</test:description>
 	</owl:Thing>
 
 
-<!-- Processed 390 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Dmiscellaneous-2D011">
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The conclusion ontology present in that version of the test was marked as an OWL Lite document, but was not OWL Lite because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
@@ -61941,6 +62028,7 @@ but consistent in this test, which excludes such support.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 400 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Dmiscellaneous-2D302-2DDirect">
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
 		<rdf:type rdf:resource="&test;PositiveEntailmentTest" />
@@ -61994,7 +62082,6 @@ but consistent in this test, which excludes such support.</test:description>
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 400 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2Dmiscellaneous-2D303">
 		<rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The version of this test approved by the WebOnt WG was incorrect. The input ontology present in that version of the test was marked as an OWL Lite document, but was not OWL Lite because it did not contain a triple of the form O rdf:type owl:Ontology. The ontology has been revised to contain the necessary triple.</rdfs:comment>
 		<rdf:type rdf:resource="&test;ProfileIdentificationTest" />
@@ -62508,6 +62595,7 @@ xmlns:first="http://www.w3.org/2002/03owlt/sameAs/premises001#"
 	</owl:NegativePropertyAssertion>
 
 
+<!-- Processed 410 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DunionOf-2D001">
 		<rdf:type rdf:resource="&test;PositiveEntailmentTest" />
 		<rdf:type rdf:resource="&test;ConsistencyTest" />
@@ -62555,7 +62643,6 @@ xmlns:first="http://www.w3.org/2002/03owlt/sameAs/premises001#"
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 410 items. -->
 	<test:TestCase rdf:about="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DunionOf-2D002">
 		<rdf:type rdf:resource="&test;PositiveEntailmentTest" />
 		<rdf:type rdf:resource="&test;ConsistencyTest" />
@@ -62763,5 +62850,5 @@ xmlns:first="http://www.w3.org/2002/03owlt/sameAs/premises001#"
 	</owl:NegativePropertyAssertion>
 
 
-<!-- Processed 413 items. -->
+<!-- Processed 414 items. -->
 </rdf:RDF>

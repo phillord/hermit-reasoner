@@ -98,8 +98,7 @@ import org.semanticweb.owl.model.SWRLRule;
  */
 public class OWLNormalization {
     protected final OWLDataFactory m_factory;
-    protected final Map<OWLClassExpression,OWLClassExpression> m_definitions;
-    public final Map<OWLDatatype, OWLDataRange> m_customDatatypeDefs; // custom datatype definitions 
+    protected final Map<OWLClassExpression,OWLClassExpression> m_definitions; 
     protected final Map<OWLObjectOneOf,OWLClass> m_definitionsForNegativeNominals;
     protected final OWLAxioms m_axioms;
     protected final ExpressionManager m_expressionManager;
@@ -108,7 +107,6 @@ public class OWLNormalization {
     public OWLNormalization(OWLDataFactory factory,OWLAxioms axioms) {
         m_factory=factory;
         m_definitions=new HashMap<OWLClassExpression,OWLClassExpression>();
-        m_customDatatypeDefs=new HashMap<OWLDatatype,OWLDataRange>();
         m_definitionsForNegativeNominals=new HashMap<OWLObjectOneOf,OWLClass>();
         m_axioms=axioms;
         m_expressionManager=new ExpressionManager(m_factory);
@@ -190,8 +188,8 @@ public class OWLNormalization {
     protected void normalizeInclusions(List<OWLClassExpression[]> inclusions) {
         NormalizationVisitor normalizer=new NormalizationVisitor(inclusions);
         // simplify data ranges for custom defined datatypes
-        for (OWLDatatype dt : m_customDatatypeDefs.keySet()) {
-            m_customDatatypeDefs.put(dt, m_expressionManager.getSimplified(m_customDatatypeDefs.get(dt)));
+        for (OWLDatatype dt : m_axioms.m_customDatatypeDefinitions.keySet()) {
+            m_axioms.m_customDatatypeDefinitions.put(dt, m_expressionManager.getSimplified(m_axioms.m_customDatatypeDefinitions.get(dt)));
         }
         while (!inclusions.isEmpty()) {
             OWLClassExpression simplifiedDescription=m_expressionManager.getSimplified(m_factory.getOWLObjectUnionOf(inclusions.remove(inclusions.size()-1)));
@@ -517,15 +515,15 @@ public class OWLNormalization {
         // Data property axioms
         
         public void visit(OWLDatatypeDefinitionAxiom axiom) {
-            m_customDatatypeDefs.put(axiom.getDatatype(), axiom.getDataRange());
+            m_axioms.m_customDatatypeDefinitions.put(axiom.getDatatype(), axiom.getDataRange());
         }
         
         public void visit(OWLSubDataPropertyOfAxiom axiom) {
             OWLDataPropertyExpression subDataProperty=axiom.getSubProperty();
             OWLDataPropertyExpression superDataProperty=axiom.getSuperProperty();
             if (subDataProperty.isOWLTopDataProperty()) {
-                throw new IllegalArgumentException("Error: owl:topDataProperty is only allowed to occur in the super property position of SubDataPropertyOf axioms, but the ontology contains an axiom SubDataPropertyOf(owl:topDataProperty " + subDataProperty.asOWLDataProperty().getIRI() + ").");
-            } else {
+                throw new IllegalArgumentException("Error: In OWL 2 DL, owl:topDataProperty is only allowed to occur in the super property position of SubDataPropertyOf axioms, but the ontology contains an axiom SubDataPropertyOf(owl:topDataProperty " + subDataProperty.asOWLDataProperty().getIRI() + ").");
+            } else if (!superDataProperty.isOWLTopDataProperty()) {
                 addInclusion(subDataProperty,superDataProperty);
             }
         }
@@ -734,12 +732,12 @@ public class OWLNormalization {
             throw new IllegalStateException("Internal error: exact object cardinality restrictions should have been simplified.");
         }
         protected OWLDataRange replaceCustomDatatype(OWLDataRange range){
-            if (range instanceof OWLDatatype && m_customDatatypeDefs.containsKey((OWLDatatype) range)) {
-                return m_customDatatypeDefs.get(range);
+            if (range instanceof OWLDatatype && m_axioms.m_customDatatypeDefinitions.containsKey((OWLDatatype) range)) {
+                return m_axioms.m_customDatatypeDefinitions.get(range);
             } else if (range instanceof OWLDataComplementOf) {
                 OWLDataRange dr = ((OWLDataComplementOf)range).getDataRange();
-                if (dr instanceof OWLDatatype && m_customDatatypeDefs.containsKey((OWLDatatype) dr)) {
-                    return m_expressionManager.getNNF(m_factory.getOWLDataComplementOf(m_customDatatypeDefs.get((OWLDatatype) dr)));
+                if (dr instanceof OWLDatatype && m_axioms.m_customDatatypeDefinitions.containsKey((OWLDatatype) dr)) {
+                    return m_expressionManager.getNNF(m_factory.getOWLDataComplementOf(m_axioms.m_customDatatypeDefinitions.get((OWLDatatype) dr)));
                 }
             }
             return range;

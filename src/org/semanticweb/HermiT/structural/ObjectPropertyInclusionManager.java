@@ -14,7 +14,6 @@ import org.semanticweb.owl.model.OWLObjectAllValuesFrom;
 import org.semanticweb.owl.model.OWLObjectCardinalityRestriction;
 import org.semanticweb.owl.model.OWLObjectComplementOf;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
-import org.semanticweb.owl.model.OWLOntology;
 
 import rationals.Automaton;
 import rationals.State;

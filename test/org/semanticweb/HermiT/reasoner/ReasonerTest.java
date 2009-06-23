@@ -22,7 +22,7 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
-    // actually this est should cause a parsing error since xsd:minInclusive for restricting byte is supposed to use 
+    // actually this test should cause a parsing error since xsd:minInclusive for restricting byte is supposed to use 
     // only values from the value space of byte, which \"4.5\"^^xsd:decimal isn't 
     public void testDataTypeRestriction() throws Exception {
         String axioms = "SubClassOf(:A DataAllValuesFrom(:dp DatatypeRestriction(xsd:byte xsd:minInclusive \"4.5\"^^xsd:decimal xsd:maxInclusive \"7\"^^xsd:short)))"
@@ -130,9 +130,9 @@ public class ReasonerTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(true);
     }
-    // needs proper implmentation of BottomDataProperty
+    // needs proper implementation of BottomDataProperty
     public void testBottomDataProperty() throws Exception {
-        String axioms = "ClassAssertion( ObjectSomeValuesFrom( owl:bottomDataProperty rdfs:Literal ) :i )";
+        String axioms = "ClassAssertion( DataSomeValuesFrom( owl:bottomDataProperty rdfs:Literal ) :i )";
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }     
@@ -162,14 +162,9 @@ public class ReasonerTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(true);
     }
-    // needs proper implmentation of BottomDataProperty
     public void testTopDataProperty() throws Exception {
         String axioms = "ClassAssertion(ObjectComplementOf(DataSomeValuesFrom( owl:topDataProperty rdfs:Literal)) :i)";
         loadReasonerWithAxioms(axioms);
-        assertABoxSatisfiable(false);
-    }
-    public void testNegativeDataPropertyAssertionXXX() throws Exception {
-        loadReasonerFromResource("res/owlwgtestparsingerror.rdf");
         assertABoxSatisfiable(false);
     }
     public void testNegativeDataPropertyAssertion() throws Exception {
