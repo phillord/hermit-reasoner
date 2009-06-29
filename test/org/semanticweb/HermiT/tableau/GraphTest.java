@@ -8,10 +8,10 @@ import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DescriptionGraph;
-import org.semanticweb.owl.model.OWLClass;
-import org.semanticweb.owl.model.OWLDataFactory;
-import org.semanticweb.owl.model.OWLIndividual;
-import org.semanticweb.owl.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
 
 public class GraphTest extends AbstractReasonerInternalsTest {
     protected Set<DescriptionGraph> m_descriptionGraphs;
@@ -138,7 +138,7 @@ public class GraphTest extends AbstractReasonerInternalsTest {
         ));
         
         OWLDataFactory df = m_ontologyManager.getOWLDataFactory();
-        Set<org.semanticweb.owl.model.OWLAxiom> axioms = new HashSet<org.semanticweb.owl.model.OWLAxiom>();
+        Set<org.semanticweb.owlapi.model.OWLAxiom> axioms = new HashSet<org.semanticweb.owlapi.model.OWLAxiom>();
         String base = m_ontology.getOntologyID().getDefaultDocumentIRI() == null ? "urn:hermit:kb" : m_ontology.getOntologyID().getDefaultDocumentIRI().toString();
         
         OWLClass A = df.getOWLClass(URI.create(base + "#A"));
@@ -149,7 +149,7 @@ public class GraphTest extends AbstractReasonerInternalsTest {
         OWLObjectProperty T = df.getOWLObjectProperty(URI.create(base + "#T"));
         OWLIndividual i = df.getOWLNamedIndividual(URI.create(base + "#i"));
         
-        org.semanticweb.owl.model.OWLAxiom axiom = df.getOWLSubClassOfAxiom(A, df.getOWLObjectSomeValuesFrom(S, A));
+        org.semanticweb.owlapi.model.OWLAxiom axiom = df.getOWLSubClassOfAxiom(A, df.getOWLObjectSomeValuesFrom(S, A));
         axioms.add(axiom);
         axiom = df.getOWLSubClassOfAxiom(A, df.getOWLObjectSomeValuesFrom(S, D));
         axioms.add(axiom);

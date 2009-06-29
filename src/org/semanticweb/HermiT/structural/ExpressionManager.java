@@ -3,38 +3,38 @@ package org.semanticweb.HermiT.structural;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.semanticweb.owl.model.OWLClass;
-import org.semanticweb.owl.model.OWLClassExpression;
-import org.semanticweb.owl.model.OWLClassExpressionVisitorEx;
-import org.semanticweb.owl.model.OWLDataAllValuesFrom;
-import org.semanticweb.owl.model.OWLDataComplementOf;
-import org.semanticweb.owl.model.OWLDataExactCardinality;
-import org.semanticweb.owl.model.OWLDataFactory;
-import org.semanticweb.owl.model.OWLDataHasValue;
-import org.semanticweb.owl.model.OWLDataIntersectionOf;
-import org.semanticweb.owl.model.OWLDataMaxCardinality;
-import org.semanticweb.owl.model.OWLDataMinCardinality;
-import org.semanticweb.owl.model.OWLDataOneOf;
-import org.semanticweb.owl.model.OWLDataRange;
-import org.semanticweb.owl.model.OWLDataSomeValuesFrom;
-import org.semanticweb.owl.model.OWLDataUnionOf;
-import org.semanticweb.owl.model.OWLDataVisitorEx;
-import org.semanticweb.owl.model.OWLDatatype;
-import org.semanticweb.owl.model.OWLDatatypeRestriction;
-import org.semanticweb.owl.model.OWLFacetRestriction;
-import org.semanticweb.owl.model.OWLObjectAllValuesFrom;
-import org.semanticweb.owl.model.OWLObjectComplementOf;
-import org.semanticweb.owl.model.OWLObjectExactCardinality;
-import org.semanticweb.owl.model.OWLObjectHasSelf;
-import org.semanticweb.owl.model.OWLObjectHasValue;
-import org.semanticweb.owl.model.OWLObjectIntersectionOf;
-import org.semanticweb.owl.model.OWLObjectMaxCardinality;
-import org.semanticweb.owl.model.OWLObjectMinCardinality;
-import org.semanticweb.owl.model.OWLObjectOneOf;
-import org.semanticweb.owl.model.OWLObjectSomeValuesFrom;
-import org.semanticweb.owl.model.OWLObjectUnionOf;
-import org.semanticweb.owl.model.OWLStringLiteral;
-import org.semanticweb.owl.model.OWLTypedLiteral;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassExpression;
+import org.semanticweb.owlapi.model.OWLClassExpressionVisitorEx;
+import org.semanticweb.owlapi.model.OWLDataAllValuesFrom;
+import org.semanticweb.owlapi.model.OWLDataComplementOf;
+import org.semanticweb.owlapi.model.OWLDataExactCardinality;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLDataHasValue;
+import org.semanticweb.owlapi.model.OWLDataIntersectionOf;
+import org.semanticweb.owlapi.model.OWLDataMaxCardinality;
+import org.semanticweb.owlapi.model.OWLDataMinCardinality;
+import org.semanticweb.owlapi.model.OWLDataOneOf;
+import org.semanticweb.owlapi.model.OWLDataRange;
+import org.semanticweb.owlapi.model.OWLDataSomeValuesFrom;
+import org.semanticweb.owlapi.model.OWLDataUnionOf;
+import org.semanticweb.owlapi.model.OWLDataVisitorEx;
+import org.semanticweb.owlapi.model.OWLDatatype;
+import org.semanticweb.owlapi.model.OWLDatatypeRestriction;
+import org.semanticweb.owlapi.model.OWLFacetRestriction;
+import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
+import org.semanticweb.owlapi.model.OWLObjectComplementOf;
+import org.semanticweb.owlapi.model.OWLObjectExactCardinality;
+import org.semanticweb.owlapi.model.OWLObjectHasSelf;
+import org.semanticweb.owlapi.model.OWLObjectHasValue;
+import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
+import org.semanticweb.owlapi.model.OWLObjectMaxCardinality;
+import org.semanticweb.owlapi.model.OWLObjectMinCardinality;
+import org.semanticweb.owlapi.model.OWLObjectOneOf;
+import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
+import org.semanticweb.owlapi.model.OWLObjectUnionOf;
+import org.semanticweb.owlapi.model.OWLStringLiteral;
+import org.semanticweb.owlapi.model.OWLTypedLiteral;
 
 public class ExpressionManager {
     protected final OWLDataFactory m_factory;
@@ -119,15 +119,15 @@ public class ExpressionManager {
         }
         public OWLClassExpression visit(OWLObjectMinCardinality d) {
             OWLClassExpression filler=getNNF(d.getFiller());
-            return m_factory.getOWLObjectMinCardinality(d.getProperty().getSimplified(),d.getCardinality(),filler);
+            return m_factory.getOWLObjectMinCardinality(d.getCardinality(),d.getProperty().getSimplified(),filler);
         }
         public OWLClassExpression visit(OWLObjectMaxCardinality d) {
             OWLClassExpression filler=getNNF(d.getFiller());
-            return m_factory.getOWLObjectMaxCardinality(d.getProperty().getSimplified(),d.getCardinality(),filler);
+            return m_factory.getOWLObjectMaxCardinality(d.getCardinality(),d.getProperty().getSimplified(),filler);
         }
         public OWLClassExpression visit(OWLObjectExactCardinality d) {
             OWLClassExpression filler=getNNF(d.getFiller());
-            return m_factory.getOWLObjectExactCardinality(d.getProperty().getSimplified(),d.getCardinality(),filler);
+            return m_factory.getOWLObjectExactCardinality(d.getCardinality(),d.getProperty().getSimplified(),filler);
         }
         public OWLClassExpression visit(OWLDataSomeValuesFrom d) {
             OWLDataRange filler=getNNF(d.getFiller());
@@ -142,15 +142,15 @@ public class ExpressionManager {
         }
         public OWLClassExpression visit(OWLDataMinCardinality d) {
             OWLDataRange filler=getNNF(d.getFiller());
-            return m_factory.getOWLDataMinCardinality(d.getProperty(),d.getCardinality(),filler);
+            return m_factory.getOWLDataMinCardinality(d.getCardinality(),d.getProperty(),filler);
         }
         public OWLClassExpression visit(OWLDataMaxCardinality d) {
             OWLDataRange filler=getNNF(d.getFiller());
-            return m_factory.getOWLDataMaxCardinality(d.getProperty(),d.getCardinality(),filler);
+            return m_factory.getOWLDataMaxCardinality(d.getCardinality(),d.getProperty(),filler);
         }
         public OWLClassExpression visit(OWLDataExactCardinality d) {
             OWLDataRange filler=getNNF(d.getFiller());
-            return m_factory.getOWLDataExactCardinality(d.getProperty(),d.getCardinality(),filler);
+            return m_factory.getOWLDataExactCardinality(d.getCardinality(),d.getProperty(),filler);
         }
     }
     
@@ -242,21 +242,21 @@ public class ExpressionManager {
                 return m_factory.getOWLNothing();
             else {
                 OWLClassExpression filler=getNNF(d.getFiller());
-                return m_factory.getOWLObjectMaxCardinality(d.getProperty().getSimplified(),d.getCardinality()-1,filler);
+                return m_factory.getOWLObjectMaxCardinality(d.getCardinality()-1,d.getProperty().getSimplified(),filler);
             }
         }
         public OWLClassExpression visit(OWLObjectMaxCardinality d) {
             OWLClassExpression filler=getNNF(d.getFiller());
-            return m_factory.getOWLObjectMinCardinality(d.getProperty().getSimplified(),d.getCardinality()+1,filler);
+            return m_factory.getOWLObjectMinCardinality(d.getCardinality()+1,d.getProperty().getSimplified(),filler);
         }
         public OWLClassExpression visit(OWLObjectExactCardinality d) {
             OWLClassExpression filler=getNNF(d.getFiller());
             if (d.getCardinality()==0)
-                return m_factory.getOWLObjectMinCardinality(d.getProperty().getSimplified(),1,filler);
+                return m_factory.getOWLObjectMinCardinality(1,d.getProperty().getSimplified(),filler);
             else {
                 Set<OWLClassExpression> disjuncts=new HashSet<OWLClassExpression>();
-                disjuncts.add(m_factory.getOWLObjectMaxCardinality(d.getProperty().getSimplified(),d.getCardinality()-1,filler));
-                disjuncts.add(m_factory.getOWLObjectMinCardinality(d.getProperty().getSimplified(),d.getCardinality()+1,filler));
+                disjuncts.add(m_factory.getOWLObjectMaxCardinality(d.getCardinality()-1,d.getProperty().getSimplified(),filler));
+                disjuncts.add(m_factory.getOWLObjectMinCardinality(d.getCardinality()+1,d.getProperty().getSimplified(),filler));
                 return m_factory.getOWLObjectUnionOf(disjuncts);
             }
         }
@@ -276,21 +276,21 @@ public class ExpressionManager {
                 return m_factory.getOWLNothing();
             else {
                 OWLDataRange filler=getNNF(d.getFiller());
-                return m_factory.getOWLDataMaxCardinality(d.getProperty(),d.getCardinality()-1,filler);
+                return m_factory.getOWLDataMaxCardinality(d.getCardinality()-1,d.getProperty(),filler);
             }
         }
         public OWLClassExpression visit(OWLDataMaxCardinality d) {
             OWLDataRange filler=getNNF(d.getFiller());
-            return m_factory.getOWLDataMinCardinality(d.getProperty(),d.getCardinality()+1,filler);
+            return m_factory.getOWLDataMinCardinality(d.getCardinality()+1,d.getProperty(),filler);
         }
         public OWLClassExpression visit(OWLDataExactCardinality d) {
             OWLDataRange filler=getNNF(d.getFiller());
             if (d.getCardinality()==0)
-                return m_factory.getOWLDataMinCardinality(d.getProperty(),1,filler);
+                return m_factory.getOWLDataMinCardinality(1,d.getProperty(),filler);
             else {
                 Set<OWLClassExpression> disjuncts=new HashSet<OWLClassExpression>();
-                disjuncts.add(m_factory.getOWLDataMaxCardinality(d.getProperty(),d.getCardinality()-1,filler));
-                disjuncts.add(m_factory.getOWLDataMinCardinality(d.getProperty(),d.getCardinality()+1,filler));
+                disjuncts.add(m_factory.getOWLDataMaxCardinality(d.getCardinality()-1,d.getProperty(),filler));
+                disjuncts.add(m_factory.getOWLDataMinCardinality(d.getCardinality()+1,d.getProperty(),filler));
                 return m_factory.getOWLObjectUnionOf(disjuncts);
             }
         }
@@ -414,7 +414,7 @@ public class ExpressionManager {
             else if (d.getCardinality()==1)
                 return m_factory.getOWLObjectSomeValuesFrom(d.getProperty().getSimplified(),filler);
             else
-                return m_factory.getOWLObjectMinCardinality(d.getProperty().getSimplified(),d.getCardinality(),filler);
+                return m_factory.getOWLObjectMinCardinality(d.getCardinality(),d.getProperty().getSimplified(),filler);
         }
         public OWLClassExpression visit(OWLObjectMaxCardinality d) {
             OWLClassExpression filler=getSimplified(d.getFiller());
@@ -423,7 +423,7 @@ public class ExpressionManager {
             else if (d.getCardinality()<=0)
                 return m_factory.getOWLObjectAllValuesFrom(d.getProperty().getSimplified(),m_factory.getOWLObjectComplementOf(filler));
             else
-                return m_factory.getOWLObjectMaxCardinality(d.getProperty().getSimplified(),d.getCardinality(),filler);
+                return m_factory.getOWLObjectMaxCardinality(d.getCardinality(),d.getProperty().getSimplified(),filler);
         }
         public OWLClassExpression visit(OWLObjectExactCardinality d) {
             OWLClassExpression filler=getSimplified(d.getFiller());
@@ -434,8 +434,8 @@ public class ExpressionManager {
             else if (filler.isOWLNothing())
                 return m_factory.getOWLNothing();
             else {
-                OWLObjectMinCardinality minCardinality=m_factory.getOWLObjectMinCardinality(d.getProperty().getSimplified(),d.getCardinality(),filler);
-                OWLObjectMaxCardinality maxCardinality=m_factory.getOWLObjectMaxCardinality(d.getProperty().getSimplified(),d.getCardinality(),filler);
+                OWLObjectMinCardinality minCardinality=m_factory.getOWLObjectMinCardinality(d.getCardinality(),d.getProperty().getSimplified(),filler);
+                OWLObjectMaxCardinality maxCardinality=m_factory.getOWLObjectMaxCardinality(d.getCardinality(),d.getProperty().getSimplified(),filler);
                 return m_factory.getOWLObjectIntersectionOf(minCardinality,maxCardinality);
             }
         }
@@ -466,7 +466,7 @@ public class ExpressionManager {
             else if (d.getCardinality()==1)
                 return m_factory.getOWLDataSomeValuesFrom(d.getProperty(),filler);
             else
-                return m_factory.getOWLDataMinCardinality(d.getProperty(),d.getCardinality(),filler);
+                return m_factory.getOWLDataMinCardinality(d.getCardinality(),d.getProperty(),filler);
         }
         public OWLClassExpression visit(OWLDataMaxCardinality d) {
             OWLDataRange filler=getSimplified(d.getFiller());
@@ -475,7 +475,7 @@ public class ExpressionManager {
             else if (d.getCardinality()<=0)
                 return m_factory.getOWLDataAllValuesFrom(d.getProperty(),m_factory.getOWLDataComplementOf(filler));
             else
-                return m_factory.getOWLDataMaxCardinality(d.getProperty(),d.getCardinality(),filler);
+                return m_factory.getOWLDataMaxCardinality(d.getCardinality(),d.getProperty(),filler);
         }
         public OWLClassExpression visit(OWLDataExactCardinality d) {
             OWLDataRange filler=getSimplified(d.getFiller());
@@ -486,8 +486,8 @@ public class ExpressionManager {
             else if (isBottomDataRange(filler))
                 return m_factory.getOWLNothing();
             else {
-                OWLDataMinCardinality minCardinality=m_factory.getOWLDataMinCardinality(d.getProperty(),d.getCardinality(),filler);
-                OWLDataMaxCardinality maxCardinality=m_factory.getOWLDataMaxCardinality(d.getProperty(),d.getCardinality(),filler);
+                OWLDataMinCardinality minCardinality=m_factory.getOWLDataMinCardinality(d.getCardinality(),d.getProperty(),filler);
+                OWLDataMaxCardinality maxCardinality=m_factory.getOWLDataMaxCardinality(d.getCardinality(),d.getProperty(),filler);
                 return m_factory.getOWLObjectIntersectionOf(minCardinality,maxCardinality);
             }
         }

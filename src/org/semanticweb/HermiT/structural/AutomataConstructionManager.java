@@ -8,8 +8,8 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.graph.Graph;
 import org.semanticweb.HermiT.structural.OWLAxioms.ComplexObjectPropertyInclusion;
-import org.semanticweb.owl.model.OWLObjectInverseOf;
-import org.semanticweb.owl.model.OWLObjectPropertyExpression;
+import org.semanticweb.owlapi.model.OWLObjectInverseOf;
+import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 
 import rationals.Automaton;
 import rationals.NoSuchStateException;

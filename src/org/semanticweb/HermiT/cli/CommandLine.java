@@ -16,11 +16,11 @@ import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.monitor.Timer;
-import org.semanticweb.owl.apibinding.OWLManager;
-import org.semanticweb.owl.model.IRI;
-import org.semanticweb.owl.model.OWLClass;
-import org.semanticweb.owl.model.OWLOntology;
-import org.semanticweb.owl.model.OWLOntologyManager;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class CommandLine {
     
@@ -590,7 +590,7 @@ public class CommandLine {
                         output.flush();
                     }
                 }
-                catch (org.semanticweb.owl.model.OWLException e) {
+                catch (org.semanticweb.owlapi.model.OWLException e) {
                     System.err.println("It all went pear-shaped: "+e.getMessage());
                 }
             }

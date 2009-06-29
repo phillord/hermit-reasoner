@@ -3,8 +3,7 @@ package org.semanticweb.HermiT.owl_wg_tests;
 import java.io.File;
 
 import org.semanticweb.HermiT.EntailmentChecker;
-import org.semanticweb.owl.model.OWLAxiom;
-import org.semanticweb.owl.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntology;
 
 public class EntailmentTest extends AbstractTest {
     protected final boolean m_positive;
@@ -24,17 +23,12 @@ public class EntailmentTest extends AbstractTest {
     }
     protected void doTest() throws Exception {
         EntailmentChecker checker=new EntailmentChecker(m_reasoner,m_ontologyManager.getOWLDataFactory());
-        for (OWLAxiom axiom : m_conclusionOntology.getLogicalAxioms()) {
-            boolean isEntailed=checker.isEntailed(axiom);
-            if (m_positive)
-                assertTrue("Axiom "+axiom.toString()+" should be entailed.",isEntailed);
-            else {
-                if (!isEntailed)
-                    return;
-            }
+        boolean isEntailed=checker.entails(m_conclusionOntology.getAxioms());
+        if (m_positive) {
+            assertTrue("Axioms should be entailed.",isEntailed);
+        } else {
+            assertTrue("At least one axiom should not be entailed by the premise ontology.",!isEntailed);
         }
-        if (!m_positive)
-            fail("At least one axiom should not be entailed by the premise ontology.");
     }
     protected String getTestType() {
         return m_positive ? "entailment" : "nonentailment";

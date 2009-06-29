@@ -2,20 +2,27 @@ package org.semanticweb.HermiT.reasoner;
 
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.semanticweb.owl.apibinding.OWLManager;
-import org.semanticweb.owl.model.IRI;
-import org.semanticweb.owl.model.OWLClass;
-import org.semanticweb.owl.model.OWLClassAssertionAxiom;
-import org.semanticweb.owl.model.OWLClassExpression;
-import org.semanticweb.owl.model.OWLDataFactory;
-import org.semanticweb.owl.model.OWLIndividual;
-import org.semanticweb.owl.model.OWLObjectMaxCardinality;
-import org.semanticweb.owl.model.OWLObjectProperty;
-import org.semanticweb.owl.model.OWLObjectPropertyExpression;
-import org.semanticweb.owl.model.OWLSubPropertyChainOfAxiom;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLClassExpression;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLDataRange;
+import org.semanticweb.owlapi.model.OWLDatatype;
+import org.semanticweb.owlapi.model.OWLDatatypeDefinitionAxiom;
+import org.semanticweb.owlapi.model.OWLFacetRestriction;
+import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import org.semanticweb.owlapi.model.OWLObjectMaxCardinality;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
+import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
+import org.semanticweb.owlapi.vocab.OWLFacet;
 
 public class ReasonerTest extends AbstractReasonerTest {
 
@@ -32,6 +39,32 @@ public class ReasonerTest extends AbstractReasonerTest {
             + "NegativeDataPropertyAssertion(:dp :a \"6\"^^xsd:unsignedInt)";
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
+    }
+    public void testHasKeyEntailment() throws Exception {
+        String axioms = "HasKey( :Person () ( :hasSSN ) )"
+            + "SubClassOf( :Man :Person )";
+        loadReasonerWithAxioms(axioms);
+        OWLClass C=m_dataFactory.getOWLClass(IRI.create(ReasonerTest.NS + "Man"));
+        OWLObjectProperty p=m_dataFactory.getOWLObjectProperty(IRI.create(ReasonerTest.NS + "hasSSN"));
+        assertEntails(m_dataFactory.getOWLHasKeyAxiom(C, p), true);
+    }
+    public void testHasKeyNonEntailment() throws Exception {
+        String axioms = "HasKey( :Person () ( :hasSSN ) )"
+            + "SubClassOf( :Man :Person )"
+            + "SubClassOf( :Person :Mammal )";
+        loadReasonerWithAxioms(axioms);
+        OWLClass C=m_dataFactory.getOWLClass(IRI.create(ReasonerTest.NS + "Mammal"));
+        OWLObjectProperty p=m_dataFactory.getOWLObjectProperty(IRI.create(ReasonerTest.NS + "hasSSN"));
+        assertEntails(m_dataFactory.getOWLHasKeyAxiom(C, p), false);
+    }
+    public void testDatatypeDefEntailment() throws Exception {
+        String axioms = "DatatypeDefinition(:SSN DatatypeRestriction(xsd:string xsd:pattern \"[0-9]{3}-[0-9]{2}-[0-9]{4}\"))";
+        loadReasonerWithAxioms(axioms);
+        OWLDatatype dt=m_dataFactory.getOWLDatatype(IRI.create(ReasonerTest.NS + "SSN"));
+        OWLFacetRestriction fr=m_dataFactory.getOWLFacetRestriction(OWLFacet.PATTERN, m_dataFactory.getOWLTypedLiteral("[0-9]{3}-[0-9]{2}-[0-9]{4}"));
+        OWLDataRange dr=m_dataFactory.getOWLDatatypeRestriction(m_dataFactory.getOWLDatatype(URI.create("http://www.w3.org/2001/XMLSchema#string")), fr);
+        OWLDatatypeDefinitionAxiom ddef=m_dataFactory.getOWLDatatypeDefinitionAxiom(dt, dr);
+        assertEntails(ddef, true);
     }
     public void testDomainRange() throws Exception {
         String axioms = "Declaration(DataProperty(:p1))"
@@ -85,7 +118,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         chain.add(p);
         chain.add(p2);
         OWLSubPropertyChainOfAxiom ax = df.getOWLSubPropertyChainOfAxiom(chain, S);
-        assertTrue(m_reasoner.isEntailed(ax));
+        assertEntails(ax, true);
     }
     public void testChains3() throws Exception {
         String axioms = "TransitiveObjectProperty( :p)";
@@ -96,7 +129,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         chain.add(p);
         chain.add(p);
         OWLSubPropertyChainOfAxiom ax = df.getOWLSubPropertyChainOfAxiom(chain, p);
-        assertTrue(m_reasoner.isEntailed(ax));
+        assertEntails(ax, true);
     }
     public void testChains2() throws Exception {
         String axioms = "ObjectPropertyAssertion(:p :a :b)"
@@ -174,15 +207,6 @@ public class ReasonerTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
-    // here we get DisjointClasses(:A :B) from the OWL API, since it used a set to represent the disjoint classes
-    // reported to Matthew with the suggestion to use a list instead of a set
-    public void testDisjointClasses() throws Exception {
-        String axioms = "ClassAssertion(:A :a)"
-            + "DisjointClasses(:A :B :A) ";
-        loadReasonerWithAxioms(axioms);
-        assertABoxSatisfiable(false);
-    }
-    
     public void testKeys() throws Exception {
         String axioms = "Declaration(Class(:RegisteredPatient))"
             + "Declaration(DataProperty(:hasWaitingListN))"
@@ -765,8 +789,8 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLClassExpression D = df.getOWLClass(IRI.create("file:/c/test.owl#D"));
          OWLObjectProperty r = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
          OWLObjectProperty s = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#s"));
-         OWLClassExpression desc1 = df.getOWLObjectIntersectionOf(df.getOWLObjectAllValuesFrom(r, df.getOWLObjectUnionOf(df.getOWLObjectComplementOf(df.getOWLObjectMinCardinality(s, 2)), C)), df.getOWLObjectAllValuesFrom(r, D));
-         OWLClassExpression desc2 = df.getOWLObjectAllValuesFrom(r, df.getOWLObjectMaxCardinality(s, 1));
+         OWLClassExpression desc1 = df.getOWLObjectIntersectionOf(df.getOWLObjectAllValuesFrom(r, df.getOWLObjectUnionOf(df.getOWLObjectComplementOf(df.getOWLObjectMinCardinality(2, s)), C)), df.getOWLObjectAllValuesFrom(r, D));
+         OWLClassExpression desc2 = df.getOWLObjectAllValuesFrom(r, df.getOWLObjectMaxCardinality(1, s));
          assertSubsumedBy(desc1,desc2,true);
      }
      
@@ -795,7 +819,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLClassExpression p3 = df.getOWLClass(IRI.create("file:/c/test.owl#p3"));
          OWLObjectProperty r = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
 
-         OWLClassExpression desc1 = df.getOWLObjectIntersectionOf(df.getOWLObjectSomeValuesFrom(r, p1), df.getOWLObjectSomeValuesFrom(r, p2), df.getOWLObjectSomeValuesFrom(r, p3), df.getOWLObjectMaxCardinality(r, 2));
+         OWLClassExpression desc1 = df.getOWLObjectIntersectionOf(df.getOWLObjectSomeValuesFrom(r, p1), df.getOWLObjectSomeValuesFrom(r, p2), df.getOWLObjectSomeValuesFrom(r, p3), df.getOWLObjectMaxCardinality(2, r));
          assertSatisfiable(desc1,false);
      }
      public void testIanT1b() throws Exception {
@@ -811,7 +835,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLObjectProperty r = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
          OWLObjectPropertyExpression invr = df.getOWLObjectInverseOf(r);
          
-         OWLClassExpression desc1 = df.getOWLObjectSomeValuesFrom(invr, df.getOWLObjectIntersectionOf(df.getOWLObjectSomeValuesFrom(r, p1), df.getOWLObjectMaxCardinality(r, 1, p1)));
+         OWLClassExpression desc1 = df.getOWLObjectSomeValuesFrom(invr, df.getOWLObjectIntersectionOf(df.getOWLObjectSomeValuesFrom(r, p1), df.getOWLObjectMaxCardinality(1, r, p1)));
          assertSatisfiable(desc1,true);
      }
      public void testIanT1c() throws Exception {
@@ -828,7 +852,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLObjectProperty r = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
          OWLObjectPropertyExpression invr = df.getOWLObjectInverseOf(r);
          
-         OWLClassExpression desc1 = df.getOWLObjectIntersectionOf(p2, df.getOWLObjectSomeValuesFrom(invr, df.getOWLObjectIntersectionOf(df.getOWLObjectSomeValuesFrom(r, p1), df.getOWLObjectMaxCardinality(r, 1))));
+         OWLClassExpression desc1 = df.getOWLObjectIntersectionOf(p2, df.getOWLObjectSomeValuesFrom(invr, df.getOWLObjectIntersectionOf(df.getOWLObjectSomeValuesFrom(r, p1), df.getOWLObjectMaxCardinality(1, r))));
          assertSatisfiable(desc1,false);
      }
      
@@ -879,7 +903,7 @@ public class ReasonerTest extends AbstractReasonerTest {
                  df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p1, p)), 
                  df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p2, p)), 
                  df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p3, p)), 
-                 df.getOWLObjectMaxCardinality(r, 3));         
+                 df.getOWLObjectMaxCardinality(3, r));         
          assertSatisfiable(desc,true);
      
          desc = df.getOWLObjectIntersectionOf(
@@ -890,7 +914,7 @@ public class ReasonerTest extends AbstractReasonerTest {
              df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p1, p)), 
              df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p2, p)), 
              df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p3, p)), 
-             df.getOWLObjectMaxCardinality(r, 3)
+             df.getOWLObjectMaxCardinality(3, r)
          );
          assertSatisfiable(desc,false);
      
@@ -899,7 +923,7 @@ public class ReasonerTest extends AbstractReasonerTest {
              df.getOWLObjectSomeValuesFrom(r, p2), 
              df.getOWLObjectSomeValuesFrom(r, p3),
              df.getOWLObjectSomeValuesFrom(r, p4), 
-             df.getOWLObjectMaxCardinality(r, 3)
+             df.getOWLObjectMaxCardinality(3, r)
          );
          assertSatisfiable(desc,false);
      
@@ -912,7 +936,7 @@ public class ReasonerTest extends AbstractReasonerTest {
              df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p2, p)), 
              df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p3, p)),
              df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p4, p)),
-             df.getOWLObjectMaxCardinality(r, 4));
+             df.getOWLObjectMaxCardinality(4, r));
          assertSatisfiable(desc,true);
 
          desc = df.getOWLObjectIntersectionOf(
@@ -925,7 +949,7 @@ public class ReasonerTest extends AbstractReasonerTest {
              df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p2, p)), 
              df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p3, p)),
              df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p4, p)),
-             df.getOWLObjectMaxCardinality(r, 4));
+             df.getOWLObjectMaxCardinality(4, r));
          assertSatisfiable(desc,false);
 
          desc = df.getOWLObjectIntersectionOf(
@@ -939,7 +963,7 @@ public class ReasonerTest extends AbstractReasonerTest {
              df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p3, p)),
              df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p4, p)),
              df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p5, p)),
-             df.getOWLObjectMaxCardinality(r, 5));
+             df.getOWLObjectMaxCardinality(5, r));
          assertSatisfiable(desc,true);
      }
      
@@ -1259,7 +1283,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLClassExpression desc;
          desc = m_dataFactory.getOWLObjectIntersectionOf(
                      m_dataFactory.getOWLObjectComplementOf(p), 
-                     m_dataFactory.getOWLObjectMaxCardinality(r, 1), 
+                     m_dataFactory.getOWLObjectMaxCardinality(1, r), 
                      m_dataFactory.getOWLObjectSomeValuesFrom(r, 
                              m_dataFactory.getOWLObjectAllValuesFrom(invs, p)
                      ), 
@@ -1290,7 +1314,7 @@ public class ReasonerTest extends AbstractReasonerTest {
                  ), 
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, 
                          m_dataFactory.getOWLObjectIntersectionOf(
-                                 m_dataFactory.getOWLObjectMaxCardinality(invr, 1), 
+                                 m_dataFactory.getOWLObjectMaxCardinality(1, invr), 
                                  m_dataFactory.getOWLObjectSomeValuesFrom(invr, 
                                          m_dataFactory.getOWLObjectAllValuesFrom(s, p)
                                  )
@@ -1453,13 +1477,13 @@ public class ReasonerTest extends AbstractReasonerTest {
          
          OWLClassExpression desc = m_dataFactory.getOWLObjectIntersectionOf(
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, a), 
-                 m_dataFactory.getOWLObjectMinCardinality(r, 3, c), 
-                 m_dataFactory.getOWLObjectMinCardinality(r, 3, d),
-                 m_dataFactory.getOWLObjectMinCardinality(r, 2, m_dataFactory.getOWLObjectIntersectionOf(
+                 m_dataFactory.getOWLObjectMinCardinality(3, r, c), 
+                 m_dataFactory.getOWLObjectMinCardinality(3, r, d),
+                 m_dataFactory.getOWLObjectMinCardinality(2, r, m_dataFactory.getOWLObjectIntersectionOf(
                          e, 
                          m_dataFactory.getOWLObjectComplementOf(m_dataFactory.getOWLObjectIntersectionOf(c, d)))), 
-                 m_dataFactory.getOWLObjectMaxCardinality(r, 4), 
-                 m_dataFactory.getOWLObjectMaxCardinality(r, 2, m_dataFactory.getOWLObjectIntersectionOf(c, d)) 
+                 m_dataFactory.getOWLObjectMaxCardinality(4, r), 
+                 m_dataFactory.getOWLObjectMaxCardinality(2, r, m_dataFactory.getOWLObjectIntersectionOf(c, d)) 
          );
          assertSatisfiable(desc,true);
      }
@@ -1560,9 +1584,9 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLClassExpression desc =
              m_dataFactory.getOWLObjectIntersectionOf(
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, A), 
-                 m_dataFactory.getOWLObjectMaxCardinality(r, 1, A),
+                 m_dataFactory.getOWLObjectMaxCardinality(1, r, A),
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, B),
-                 m_dataFactory.getOWLObjectMaxCardinality(r, 1, B)
+                 m_dataFactory.getOWLObjectMaxCardinality(1, r, B)
              );
          assertSatisfiable(desc,true);
      }
@@ -1623,7 +1647,7 @@ public class ReasonerTest extends AbstractReasonerTest {
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, m_dataFactory.getOWLObjectIntersectionOf(c, c16)),
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, m_dataFactory.getOWLObjectIntersectionOf(c, c17)),
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, c18),
-                 m_dataFactory.getOWLObjectMaxCardinality(r, 1, d)
+                 m_dataFactory.getOWLObjectMaxCardinality(1, r, d)
          );
          assertSatisfiable(desc,true);
      }
@@ -1675,7 +1699,7 @@ public class ReasonerTest extends AbstractReasonerTest {
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, m_dataFactory.getOWLObjectIntersectionOf(c, c16)),
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, m_dataFactory.getOWLObjectIntersectionOf(c, c17)),
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, c18),
-                 m_dataFactory.getOWLObjectMaxCardinality(r, 1, d)
+                 m_dataFactory.getOWLObjectMaxCardinality(1, r, d)
          );
          
          assertSatisfiable(desc,true);
@@ -1894,7 +1918,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLObjectProperty S = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#S"));
          OWLObjectPropertyExpression invS = m_dataFactory.getOWLObjectInverseOf(S);
          OWLObjectProperty R = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#R"));
-         OWLIndividual n = m_dataFactory.getOWLNamedIndividual(IRI.create("file:/c/test.owl#n"));
+         OWLNamedIndividual n = m_dataFactory.getOWLNamedIndividual(IRI.create("file:/c/test.owl#n"));
 
          createReasoner();
                            
@@ -1933,14 +1957,14 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLObjectProperty S = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#S"));
          OWLObjectPropertyExpression invS = m_dataFactory.getOWLObjectInverseOf(S);
          OWLObjectProperty R = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#R"));
-         OWLIndividual n = m_dataFactory.getOWLNamedIndividual(IRI.create("file:/c/test.owl#n"));
+         OWLNamedIndividual n = m_dataFactory.getOWLNamedIndividual(IRI.create("file:/c/test.owl#n"));
 
          // OWL API has an error: axiom
          //     ClassAssertion(n ObjectMaxCardinality(2 InverseObjectProperty(S)))
          // gets loaded as
          //     ClassAssertion(n ObjectMaxCardinality(2 S))
          // Therefore, we add this axiom manually.         
-         OWLObjectMaxCardinality atMostTwoInvS = m_dataFactory.getOWLObjectMaxCardinality(S.getInverseProperty(), 2);
+         OWLObjectMaxCardinality atMostTwoInvS = m_dataFactory.getOWLObjectMaxCardinality(2, S.getInverseProperty());
          OWLClassAssertionAxiom nOfAtMostTwoInvS = m_dataFactory.getOWLClassAssertionAxiom(atMostTwoInvS,n);
          m_ontologyManager.addAxiom(m_ontology, nOfAtMostTwoInvS);
          
@@ -1983,21 +2007,21 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLClassExpression B = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#B"));
          OWLObjectProperty S = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#S"));
          OWLObjectPropertyExpression invS = m_dataFactory.getOWLObjectInverseOf(S);
-         OWLIndividual n = m_dataFactory.getOWLNamedIndividual(IRI.create("file:/c/test.owl#n"));
+         OWLNamedIndividual n = m_dataFactory.getOWLNamedIndividual(IRI.create("file:/c/test.owl#n"));
 
          // OWL API has an error: axiom
          //     ClassAssertion(n ObjectMaxCardinality(2 InverseObjectProperty(S)))
          // gets loaded as
          //     ClassAssertion(n ObjectMaxCardinality(2 S))
          // Therefore, we add this axiom manually.         
-         OWLObjectMaxCardinality atMostTwoInvS = m_dataFactory.getOWLObjectMaxCardinality(S.getInverseProperty(), 2);
+         OWLObjectMaxCardinality atMostTwoInvS = m_dataFactory.getOWLObjectMaxCardinality(2, S.getInverseProperty());
          OWLClassAssertionAxiom nOfAtMostTwoInvS = m_dataFactory.getOWLClassAssertionAxiom(atMostTwoInvS, n);
          m_ontologyManager.addAxiom(m_ontology, nOfAtMostTwoInvS);
          
          createReasoner();
 
          // [atLeast 2 [inv S] [or A B]]
-         OWLClassExpression desc = m_dataFactory.getOWLObjectMinCardinality(invS, 2, m_dataFactory.getOWLObjectUnionOf(A, B));
+         OWLClassExpression desc = m_dataFactory.getOWLObjectMinCardinality(2, invS, m_dataFactory.getOWLObjectUnionOf(A, B));
          assertInstanceOf(desc, n, true);
      }
      public void testNominals6() throws Exception {
@@ -2015,25 +2039,25 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLClassExpression A = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#A"));
          OWLObjectProperty S = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#S"));
          OWLObjectPropertyExpression invS = m_dataFactory.getOWLObjectInverseOf(S);
-         OWLIndividual n = m_dataFactory.getOWLNamedIndividual(IRI.create("file:/c/test.owl#n"));
+         OWLNamedIndividual n = m_dataFactory.getOWLNamedIndividual(IRI.create("file:/c/test.owl#n"));
 
          // OWL API has an error: axiom
          //     ClassAssertion(n ObjectMaxCardinality(2 InverseObjectProperty(S)))
          // gets loaded as
          //     ClassAssertion(n ObjectMaxCardinality(2 S))
          // Therefore, we add this axiom manually.         
-         OWLObjectMaxCardinality atMostTwoInvS = m_dataFactory.getOWLObjectMaxCardinality(S.getInverseProperty(), 2);
+         OWLObjectMaxCardinality atMostTwoInvS = m_dataFactory.getOWLObjectMaxCardinality(2, S.getInverseProperty());
          OWLClassAssertionAxiom nOfAtMostTwoInvS = m_dataFactory.getOWLClassAssertionAxiom(atMostTwoInvS, n);
          m_ontologyManager.addAxiom(m_ontology, nOfAtMostTwoInvS);
          
          createReasoner();
 
          // [atLeast 1 [inv S] [not A]]
-         OWLClassExpression desc = m_dataFactory.getOWLObjectMinCardinality(invS, 1, m_dataFactory.getOWLObjectComplementOf(A));
+         OWLClassExpression desc = m_dataFactory.getOWLObjectMinCardinality(1, invS, m_dataFactory.getOWLObjectComplementOf(A));
          assertInstanceOf(desc, n, true);
 
          // [atLeast 2 [inv S] [not A]]
-         desc = m_dataFactory.getOWLObjectMinCardinality(invS, 2, m_dataFactory.getOWLObjectComplementOf(A));
+         desc = m_dataFactory.getOWLObjectMinCardinality(2, invS, m_dataFactory.getOWLObjectComplementOf(A));
          assertInstanceOf(desc, n, false);
      }
      

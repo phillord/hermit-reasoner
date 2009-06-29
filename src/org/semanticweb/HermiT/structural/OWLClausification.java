@@ -42,60 +42,60 @@ import org.semanticweb.HermiT.model.NodeIDsAscendingOrEqual;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.Term;
 import org.semanticweb.HermiT.model.Variable;
-import org.semanticweb.owl.model.IRI;
-import org.semanticweb.owl.model.OWLClass;
-import org.semanticweb.owl.model.OWLClassAssertionAxiom;
-import org.semanticweb.owl.model.OWLClassExpression;
-import org.semanticweb.owl.model.OWLClassExpressionVisitor;
-import org.semanticweb.owl.model.OWLDataAllValuesFrom;
-import org.semanticweb.owl.model.OWLDataComplementOf;
-import org.semanticweb.owl.model.OWLDataExactCardinality;
-import org.semanticweb.owl.model.OWLDataFactory;
-import org.semanticweb.owl.model.OWLDataHasValue;
-import org.semanticweb.owl.model.OWLDataIntersectionOf;
-import org.semanticweb.owl.model.OWLDataMaxCardinality;
-import org.semanticweb.owl.model.OWLDataMinCardinality;
-import org.semanticweb.owl.model.OWLDataOneOf;
-import org.semanticweb.owl.model.OWLDataProperty;
-import org.semanticweb.owl.model.OWLDataPropertyAssertionAxiom;
-import org.semanticweb.owl.model.OWLDataPropertyExpression;
-import org.semanticweb.owl.model.OWLDataRange;
-import org.semanticweb.owl.model.OWLDataSomeValuesFrom;
-import org.semanticweb.owl.model.OWLDataUnionOf;
-import org.semanticweb.owl.model.OWLDataVisitor;
-import org.semanticweb.owl.model.OWLDataVisitorEx;
-import org.semanticweb.owl.model.OWLDatatype;
-import org.semanticweb.owl.model.OWLDatatypeRestriction;
-import org.semanticweb.owl.model.OWLDifferentIndividualsAxiom;
-import org.semanticweb.owl.model.OWLFacetRestriction;
-import org.semanticweb.owl.model.OWLHasKeyAxiom;
-import org.semanticweb.owl.model.OWLIndividual;
-import org.semanticweb.owl.model.OWLIndividualAxiom;
-import org.semanticweb.owl.model.OWLLiteral;
-import org.semanticweb.owl.model.OWLNamedIndividual;
-import org.semanticweb.owl.model.OWLNegativeDataPropertyAssertionAxiom;
-import org.semanticweb.owl.model.OWLNegativeObjectPropertyAssertionAxiom;
-import org.semanticweb.owl.model.OWLObjectAllValuesFrom;
-import org.semanticweb.owl.model.OWLObjectComplementOf;
-import org.semanticweb.owl.model.OWLObjectExactCardinality;
-import org.semanticweb.owl.model.OWLObjectHasSelf;
-import org.semanticweb.owl.model.OWLObjectHasValue;
-import org.semanticweb.owl.model.OWLObjectIntersectionOf;
-import org.semanticweb.owl.model.OWLObjectInverseOf;
-import org.semanticweb.owl.model.OWLObjectMaxCardinality;
-import org.semanticweb.owl.model.OWLObjectMinCardinality;
-import org.semanticweb.owl.model.OWLObjectOneOf;
-import org.semanticweb.owl.model.OWLObjectProperty;
-import org.semanticweb.owl.model.OWLObjectPropertyAssertionAxiom;
-import org.semanticweb.owl.model.OWLObjectPropertyExpression;
-import org.semanticweb.owl.model.OWLObjectSomeValuesFrom;
-import org.semanticweb.owl.model.OWLObjectUnionOf;
-import org.semanticweb.owl.model.OWLOntology;
-import org.semanticweb.owl.model.OWLOntologyManager;
-import org.semanticweb.owl.model.OWLSameIndividualAxiom;
-import org.semanticweb.owl.model.OWLStringLiteral;
-import org.semanticweb.owl.model.OWLTypedLiteral;
-import org.semanticweb.owl.util.OWLAxiomVisitorAdapter;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLClassExpression;
+import org.semanticweb.owlapi.model.OWLClassExpressionVisitor;
+import org.semanticweb.owlapi.model.OWLDataAllValuesFrom;
+import org.semanticweb.owlapi.model.OWLDataComplementOf;
+import org.semanticweb.owlapi.model.OWLDataExactCardinality;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLDataHasValue;
+import org.semanticweb.owlapi.model.OWLDataIntersectionOf;
+import org.semanticweb.owlapi.model.OWLDataMaxCardinality;
+import org.semanticweb.owlapi.model.OWLDataMinCardinality;
+import org.semanticweb.owlapi.model.OWLDataOneOf;
+import org.semanticweb.owlapi.model.OWLDataProperty;
+import org.semanticweb.owlapi.model.OWLDataPropertyAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
+import org.semanticweb.owlapi.model.OWLDataRange;
+import org.semanticweb.owlapi.model.OWLDataSomeValuesFrom;
+import org.semanticweb.owlapi.model.OWLDataUnionOf;
+import org.semanticweb.owlapi.model.OWLDataVisitor;
+import org.semanticweb.owlapi.model.OWLDataVisitorEx;
+import org.semanticweb.owlapi.model.OWLDatatype;
+import org.semanticweb.owlapi.model.OWLDatatypeRestriction;
+import org.semanticweb.owlapi.model.OWLDifferentIndividualsAxiom;
+import org.semanticweb.owlapi.model.OWLFacetRestriction;
+import org.semanticweb.owlapi.model.OWLHasKeyAxiom;
+import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLIndividualAxiom;
+import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import org.semanticweb.owlapi.model.OWLNegativeDataPropertyAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLNegativeObjectPropertyAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
+import org.semanticweb.owlapi.model.OWLObjectComplementOf;
+import org.semanticweb.owlapi.model.OWLObjectExactCardinality;
+import org.semanticweb.owlapi.model.OWLObjectHasSelf;
+import org.semanticweb.owlapi.model.OWLObjectHasValue;
+import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
+import org.semanticweb.owlapi.model.OWLObjectInverseOf;
+import org.semanticweb.owlapi.model.OWLObjectMaxCardinality;
+import org.semanticweb.owlapi.model.OWLObjectMinCardinality;
+import org.semanticweb.owlapi.model.OWLObjectOneOf;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
+import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
+import org.semanticweb.owlapi.model.OWLObjectUnionOf;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.OWLSameIndividualAxiom;
+import org.semanticweb.owlapi.model.OWLStringLiteral;
+import org.semanticweb.owlapi.model.OWLTypedLiteral;
+import org.semanticweb.owlapi.util.OWLAxiomVisitorAdapter;
 
 import rationals.Automaton;
 
@@ -205,7 +205,7 @@ public class OWLClausification {
             Atom roleAtom=getRoleAtom(dataPropertyExpression,X,Y);
             dlClauses.add(DLClause.create(new Atom[] {},new Atom[] { roleAtom }).getSafeVersion());
         }
-        DataRangeConverter dataRangeConverter=new DataRangeConverter(m_configuration.warningMonitor,axioms.m_dataRangeDefinitions,m_configuration.ignoreUnsupportedDatatypes);
+        DataRangeConverter dataRangeConverter=new DataRangeConverter(m_configuration.warningMonitor,axioms.m_definedDatatypesIRIs,m_configuration.ignoreUnsupportedDatatypes);
         NormalizedAxiomClausifier clausifier=new NormalizedAxiomClausifier(dataRangeConverter,positiveFacts,factory);
         for (OWLClassExpression[] inclusion : axioms.m_conceptInclusions) {
             for (OWLClassExpression description : inclusion)
@@ -213,7 +213,7 @@ public class OWLClausification {
             DLClause dlClause=clausifier.getDLClause();
             dlClauses.add(dlClause.getSafeVersion());
         }
-        NormalizedDataRangeAxiomClausifier drClausifier=new NormalizedDataRangeAxiomClausifier(dataRangeConverter,factory,axioms.m_dataRangeDefinitions);
+        NormalizedDataRangeAxiomClausifier drClausifier=new NormalizedDataRangeAxiomClausifier(dataRangeConverter,factory,axioms.m_definedDatatypesIRIs);
         for (OWLDataRange[] inclusion : axioms.m_dataRangeInclusions) {
             for (OWLDataRange description : inclusion)
                 description.accept(drClausifier);
@@ -267,10 +267,10 @@ public class OWLClausification {
             // similarly as above, but with several premises, e.g., to represent A and B -> C
             Map<Set<AtomicConcept>, Set<Set<Concept>>> nAryValidBlockConditions=new HashMap<Set<AtomicConcept>, Set<Set<Concept>>>();
             collectConditionsForValidBlocks(axioms,unaryValidBlockConditions,nAryValidBlockConditions);
-            return new DLOntology(ontologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,objectRoles,dataRoles,hermitIndividuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes,unaryValidBlockConditions,nAryValidBlockConditions);
+            return new DLOntology(ontologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,objectRoles,dataRoles,axioms.m_definedDatatypesIRIs,hermitIndividuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes,unaryValidBlockConditions,nAryValidBlockConditions);
         }
         
-        return new DLOntology(ontologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,objectRoles,dataRoles,hermitIndividuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes);
+        return new DLOntology(ontologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,objectRoles,dataRoles,axioms.m_definedDatatypesIRIs,hermitIndividuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes);
     }
     protected DLClause clausifyKey(OWLHasKeyAxiom object) {
         List<Atom> headAtoms=new ArrayList<Atom>();
@@ -809,15 +809,15 @@ public class OWLClausification {
     }
     protected static class NormalizedDataRangeAxiomClausifier implements OWLDataVisitor {
         protected final DataRangeConverter m_dataRangeConverter;
-        protected final Map<OWLDataRange,OWLDatatype> m_dataRangeDefs;
+        protected final Set<String> m_definedDatatypeIRIs;
         protected final List<Atom> m_headAtoms;
         protected final List<Atom> m_bodyAtoms;
         protected final OWLDataFactory m_factory;
         protected int m_yIndex;
 
-        public NormalizedDataRangeAxiomClausifier(DataRangeConverter dataRangeConverter,OWLDataFactory factory,Map<OWLDataRange,OWLDatatype> dataRangeDefinitions) {
+        public NormalizedDataRangeAxiomClausifier(DataRangeConverter dataRangeConverter,OWLDataFactory factory,Set<String> definedDatatypeIRIs) {
             m_dataRangeConverter=dataRangeConverter;
-            m_dataRangeDefs=dataRangeDefinitions;
+            m_definedDatatypeIRIs=definedDatatypeIRIs;
             m_headAtoms=new ArrayList<Atom>();
             m_bodyAtoms=new ArrayList<Atom>();
             m_factory=factory;
@@ -863,8 +863,8 @@ public class OWLClausification {
         }
         public void visit(OWLDataComplementOf dr) {
             OWLDataRange description=dr.getDataRange();
-            if (description instanceof OWLDatatype && m_dataRangeDefs.containsValue((OWLDatatype)description)) {
-                m_bodyAtoms.add(Atom.create(AtomicConcept.create(((OWLDatatype)description).getIRI().toString()),X));
+            if (description.isDatatype() && (Prefixes.isInternalIRI(description.asOWLDatatype().getIRI().toString()) || m_definedDatatypeIRIs.contains(description.asOWLDatatype()))) {
+                    m_bodyAtoms.add(Atom.create(AtomicConcept.create(description.asOWLDatatype().getIRI().toString()),X));
             } else {
                 LiteralConcept literalConcept=m_dataRangeConverter.convertDataRange(dr);
                 if (literalConcept instanceof AtomicNegationConcept) {
@@ -913,11 +913,11 @@ public class OWLClausification {
     protected static class DataRangeConverter implements OWLDataVisitorEx<Object> {
         protected final Configuration.WarningMonitor m_warningMonitor;
         protected final boolean m_ignoreUnsupportedDatatypes;
-        protected final Map<OWLDataRange,OWLDatatype> m_datatypeDefs; // newly introduced definitions for conjunctions or disjunctions of data ranges
+        protected final Set<String> m_definedDatatypeIRIs; // contains custom datatypes from DatatypeDefinition axioms
 
-        public DataRangeConverter(Configuration.WarningMonitor warningMonitor,Map<OWLDataRange,OWLDatatype> datatypeDefs,boolean ignoreUnsupportedDatatypes) {
+        public DataRangeConverter(Configuration.WarningMonitor warningMonitor,Set<String> definedDatatypeIRIs,boolean ignoreUnsupportedDatatypes) {
             m_warningMonitor=warningMonitor;
-            m_datatypeDefs=datatypeDefs;
+            m_definedDatatypeIRIs=definedDatatypeIRIs;
             m_ignoreUnsupportedDatatypes=ignoreUnsupportedDatatypes;
         }
         public LiteralConcept convertDataRange(OWLDataRange dataRange) {
@@ -927,15 +927,13 @@ public class OWLClausification {
             String datatypeURI=object.getURI().toString();
             if (AtomicConcept.RDFS_LITERAL.getIRI().equals(datatypeURI))
                 return AtomicConcept.RDFS_LITERAL;
+            if (Prefixes.isInternalIRI(datatypeURI) || m_definedDatatypeIRIs.contains(object.getIRI().toString())) return AtomicConcept.create(datatypeURI);
             DatatypeRestriction datatype=DatatypeRestriction.create(datatypeURI,DatatypeRestriction.NO_FACET_URIs,DatatypeRestriction.NO_FACET_VALUES);
             try {
                 DatatypeRegistry.validateDatatypeRestriction(datatype);
                 return datatype;
             } catch (UnsupportedDatatypeException e) {
-                // maybe it is a newly introduced datatype
-                if (m_datatypeDefs.containsValue(object)) {
-                    return AtomicConcept.create(object.getIRI().toString());
-                } else if (m_ignoreUnsupportedDatatypes) {
+                if (m_ignoreUnsupportedDatatypes) {
                     if (m_warningMonitor!=null)
                         m_warningMonitor.warning("Ignoring unsupprted datatype '"+object.getIRI().toString()+"'.");
                     return AtomicConcept.create(object.getIRI().toString());

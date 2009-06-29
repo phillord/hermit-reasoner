@@ -3,14 +3,14 @@ package org.semanticweb.HermiT;
 import java.net.URI;
 import java.util.Set;
 
-import org.semanticweb.owl.apibinding.OWLManager;
-import org.semanticweb.owl.io.OWLOntologyInputSource;
-import org.semanticweb.owl.io.StringInputSource;
-import org.semanticweb.owl.model.IRI;
-import org.semanticweb.owl.model.OWLAxiom;
-import org.semanticweb.owl.model.OWLDataFactory;
-import org.semanticweb.owl.model.OWLOntology;
-import org.semanticweb.owl.model.OWLOntologyManager;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.io.OWLOntologyInputSource;
+import org.semanticweb.owlapi.io.StringInputSource;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public abstract class AbstractOntologyTest extends AbstractHermiTTest {
     protected static final String ONTOLOGY_URI="file:/c/test.owl";

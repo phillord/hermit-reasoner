@@ -1,13 +1,10 @@
 package org.semanticweb.HermiT.reasoner;
 
 import java.net.URI;
-import java.util.Set;
 
-import org.semanticweb.owl.io.OWLOntologyInputSource;
-import org.semanticweb.owl.io.StringInputSource;
-import org.semanticweb.owl.model.OWLAxiom;
-import org.semanticweb.owl.model.OWLLogicalAxiom;
-import org.semanticweb.owl.model.OWLOntology;
+import org.semanticweb.owlapi.io.OWLOntologyInputSource;
+import org.semanticweb.owlapi.io.StringInputSource;
+import org.semanticweb.owlapi.model.OWLOntology;
 
 public class EntailmentTest extends AbstractReasonerTest {
 
@@ -21,7 +18,7 @@ public class EntailmentTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(axioms);
         axioms = "ClassAssertion(ObjectSomeValuesFrom(:p owl:Thing) :a)";
         OWLOntology conlusions=getOntologyWithAxioms(axioms);
-        assertPositiveEntailment(conlusions.getLogicalAxioms());
+        assertEntails(conlusions.getAxioms(), true);
     }
 //    public void testBlankNodes2() throws Exception {
 //        loadReasonerFromResource("res/entailment/somevaluesfrom2bnode-premise.rdf");
@@ -47,11 +44,5 @@ public class EntailmentTest extends AbstractReasonerTest {
         buffer.append(")");
         OWLOntologyInputSource input=new StringInputSource(buffer.toString());
         return m_ontologyManager.loadOntology(input);
-    }
-    protected void assertPositiveEntailment(Set<OWLLogicalAxiom> axioms) {
-        for (OWLAxiom axiom : axioms) {
-            boolean isEntailed=m_reasoner.isEntailed(axiom);
-            assertTrue(isEntailed);
-        }
     }
 }

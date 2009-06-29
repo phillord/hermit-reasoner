@@ -8,12 +8,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.HermiT.graph.Graph;
-import org.semanticweb.owl.model.OWLClassExpression;
-import org.semanticweb.owl.model.OWLDataFactory;
-import org.semanticweb.owl.model.OWLObjectAllValuesFrom;
-import org.semanticweb.owl.model.OWLObjectCardinalityRestriction;
-import org.semanticweb.owl.model.OWLObjectComplementOf;
-import org.semanticweb.owl.model.OWLObjectPropertyExpression;
+import org.semanticweb.owlapi.model.OWLClassExpression;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
+import org.semanticweb.owlapi.model.OWLObjectCardinalityRestriction;
+import org.semanticweb.owlapi.model.OWLObjectComplementOf;
+import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 
 import rationals.Automaton;
 import rationals.State;
@@ -76,16 +76,19 @@ public class ObjectPropertyInclusionManager {
         m_subObjectProperties.addEdge(superObjectProperty,subObjectProperty);
         m_subObjectProperties.addEdge(superObjectProperty.getInverseProperty().getSimplified(),subObjectProperty.getInverseProperty().getSimplified());
     }
-    public void addInclusion(OWLObjectPropertyExpression[] subObjectProperties,OWLObjectPropertyExpression superObjectProperty) {
-        if (subObjectProperties.length==1)
-            addInclusion(subObjectProperties[0],superObjectProperty);
-        else if (subObjectProperties.length==2 && subObjectProperties[0].equals(superObjectProperty) && subObjectProperties[1].equals(superObjectProperty)) {
-            m_transitiveObjectProperties.add(superObjectProperty.getSimplified());
-            m_transitiveObjectProperties.add(superObjectProperty.getInverseProperty().getSimplified());
-        }
-        else
-            throw new IllegalArgumentException("Object property chains not supported yet.");
-    }
+    // *************************************
+    // Birte: I commented this out because it seems we no longer need this and it is not good to accumulated unused old crap. Giorgos can you delete this if you don't need it or do you need it for something?
+    // *************************************
+//    public void addInclusion(OWLObjectPropertyExpression[] subObjectProperties,OWLObjectPropertyExpression superObjectProperty) {
+//        if (subObjectProperties.length==1)
+//            addInclusion(subObjectProperties[0],superObjectProperty);
+//        else if (subObjectProperties.length==2 && subObjectProperties[0].equals(superObjectProperty) && subObjectProperties[1].equals(superObjectProperty)) {
+//            m_transitiveObjectProperties.add(superObjectProperty.getSimplified());
+//            m_transitiveObjectProperties.add(superObjectProperty.getInverseProperty().getSimplified());
+//        }
+//        else
+//            throw new IllegalArgumentException("Object property chains not supported yet.");
+//    }
     public Map<OWLObjectPropertyExpression,Automaton> rewriteAxioms(OWLAxioms axioms) {
         /**
          * gstoil additions modifications

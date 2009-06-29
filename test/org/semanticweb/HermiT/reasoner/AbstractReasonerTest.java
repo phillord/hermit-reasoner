@@ -9,15 +9,18 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.AbstractOntologyTest;
 import org.semanticweb.HermiT.Configuration;
+import org.semanticweb.HermiT.EntailmentChecker;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.model.DescriptionGraph;
-import org.semanticweb.owl.model.IRI;
-import org.semanticweb.owl.model.OWLClass;
-import org.semanticweb.owl.model.OWLClassExpression;
-import org.semanticweb.owl.model.OWLDataProperty;
-import org.semanticweb.owl.model.OWLIndividual;
-import org.semanticweb.owl.model.OWLObjectProperty;
-import org.semanticweb.owl.model.OWLObjectPropertyExpression;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassExpression;
+import org.semanticweb.owlapi.model.OWLDataProperty;
+import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 
 public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     protected Reasoner m_reasoner;
@@ -142,7 +145,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     /**
      * Tests whether the given individual is an instance of the given concept and asserts that this coincides with the expected result.
      */
-    protected void assertInstanceOf(OWLClassExpression concept,OWLIndividual individual,boolean expectedResult) {
+    protected void assertInstanceOf(OWLClassExpression concept,OWLNamedIndividual individual,boolean expectedResult) {
         boolean result=m_reasoner.hasType(individual,concept,false);
         assertEquals(expectedResult,result);
     }
@@ -151,7 +154,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
      * Tests whether the given concept has the specified individuals.
      */
     protected void assertInstancesOf(OWLClassExpression concept,boolean direct,String... expectedIndividuals) {
-        Set<OWLIndividual> actual=m_reasoner.getIndividuals(concept,direct);
+        Set<OWLNamedIndividual> actual=m_reasoner.getIndividuals(concept,direct);
         Set<String> actualIndividualIRIs=new HashSet<String>();
         for (OWLIndividual individual : actual) {
             if (!individual.isAnonymous()) 
@@ -225,6 +228,14 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         OWLDataProperty dp=m_dataFactory.getOWLDataProperty(IRI.create(dataProperty));
         Set<String> actual=setOfDPsToStrings(m_reasoner.getEquivalentProperties(dp));
         assertContainsAll(actual,control);
+    }
+    
+    protected void assertEntails(OWLAxiom axiom, boolean expectedResult) {
+        assertTrue(new EntailmentChecker(m_reasoner, m_dataFactory).entails(axiom)==expectedResult);
+    }
+    
+    protected void assertEntails(Set<OWLAxiom> axioms, boolean expectedResult) {
+        assertTrue(new EntailmentChecker(m_reasoner, m_dataFactory).entails(axioms)==expectedResult);
     }
     
     protected static Set<Set<String>> setOfSetsOfOPEsToStrings(Set<Set<OWLObjectPropertyExpression>> setOfSets) {

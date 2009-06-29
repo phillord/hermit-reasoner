@@ -1,8 +1,8 @@
 package org.semanticweb.HermiT.reasoner;
 
-import org.semanticweb.owl.model.IRI;
-import org.semanticweb.owl.model.OWLClassExpression;
-import org.semanticweb.owl.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLClassExpression;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
 
 
 public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
@@ -769,7 +769,7 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          OWLClassExpression desc;
          desc = m_dataFactory.getOWLObjectIntersectionOf(
                      m_dataFactory.getOWLObjectComplementOf(p), 
-                     m_dataFactory.getOWLObjectMaxCardinality(r, 1), 
+                     m_dataFactory.getOWLObjectMaxCardinality(1, r), 
                      m_dataFactory.getOWLObjectSomeValuesFrom(r, 
                              m_dataFactory.getOWLObjectAllValuesFrom(invs, p)
                      ), 
@@ -802,7 +802,7 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
                  ), 
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, 
                          m_dataFactory.getOWLObjectIntersectionOf(
-                                 m_dataFactory.getOWLObjectMaxCardinality(invr, 1), 
+                                 m_dataFactory.getOWLObjectMaxCardinality(1,invr), 
                                  m_dataFactory.getOWLObjectSomeValuesFrom(invr, 
                                          m_dataFactory.getOWLObjectAllValuesFrom(s, p)
                                  )
@@ -977,13 +977,13 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          
          OWLClassExpression desc = m_dataFactory.getOWLObjectIntersectionOf(
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, a), 
-                 m_dataFactory.getOWLObjectMinCardinality(r, 3, c), 
-                 m_dataFactory.getOWLObjectMinCardinality(r, 3, d),
-                 m_dataFactory.getOWLObjectMinCardinality(r, 2, m_dataFactory.getOWLObjectIntersectionOf(
+                 m_dataFactory.getOWLObjectMinCardinality(3, r, c), 
+                 m_dataFactory.getOWLObjectMinCardinality(3, r, d),
+                 m_dataFactory.getOWLObjectMinCardinality(2, r, m_dataFactory.getOWLObjectIntersectionOf(
                          e, 
                          m_dataFactory.getOWLObjectComplementOf(m_dataFactory.getOWLObjectIntersectionOf(c, d)))), 
-                 m_dataFactory.getOWLObjectMaxCardinality(r, 4), 
-                 m_dataFactory.getOWLObjectMaxCardinality(r, 2, m_dataFactory.getOWLObjectIntersectionOf(c, d)) 
+                 m_dataFactory.getOWLObjectMaxCardinality(4, r), 
+                 m_dataFactory.getOWLObjectMaxCardinality(2, r, m_dataFactory.getOWLObjectIntersectionOf(c, d)) 
          );
          assertSatisfiable(desc,true);
      }
@@ -1089,9 +1089,9 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
          OWLClassExpression desc =
              m_dataFactory.getOWLObjectIntersectionOf(
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, A), 
-                 m_dataFactory.getOWLObjectMaxCardinality(r, 1, A),
+                 m_dataFactory.getOWLObjectMaxCardinality(1, r, A),
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, B),
-                 m_dataFactory.getOWLObjectMaxCardinality(r, 1, B)
+                 m_dataFactory.getOWLObjectMaxCardinality(1, r, B)
              );
          assertSatisfiable(desc,true);
      }
@@ -1155,7 +1155,7 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, m_dataFactory.getOWLObjectIntersectionOf(c, c16)),
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, m_dataFactory.getOWLObjectIntersectionOf(c, c17)),
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, c18),
-                 m_dataFactory.getOWLObjectMaxCardinality(r, 1, d)
+                 m_dataFactory.getOWLObjectMaxCardinality(1, r, d)
          );
          assertSatisfiable(desc,true);
      }
@@ -1208,7 +1208,7 @@ public class ReasonerCoreBlockingTest extends AbstractReasonerTest {
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, m_dataFactory.getOWLObjectIntersectionOf(c, c16)),
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, m_dataFactory.getOWLObjectIntersectionOf(c, c17)),
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, c18),
-                 m_dataFactory.getOWLObjectMaxCardinality(r, 1, d)
+                 m_dataFactory.getOWLObjectMaxCardinality(1, r, d)
          );
          
          assertSatisfiable(desc,true);

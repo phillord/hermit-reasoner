@@ -1,14 +1,15 @@
 package org.semanticweb.HermiT.reasoner;
 
-import org.semanticweb.owl.apibinding.OWLManager;
-import org.semanticweb.owl.model.IRI;
-import org.semanticweb.owl.model.OWLClass;
-import org.semanticweb.owl.model.OWLClassExpression;
-import org.semanticweb.owl.model.OWLDataFactory;
-import org.semanticweb.owl.model.OWLDataProperty;
-import org.semanticweb.owl.model.OWLIndividual;
-import org.semanticweb.owl.model.OWLObjectProperty;
-import org.semanticweb.owl.model.OWLObjectPropertyExpression;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassExpression;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLDataProperty;
+import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 
 public class ComplexConceptTest extends AbstractReasonerTest {
 
@@ -34,7 +35,7 @@ public class ComplexConceptTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(buffer.toString());
         
         OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
-        OWLIndividual a = df.getOWLNamedIndividual(IRI.create("file:/c/test.owl#a"));
+        OWLNamedIndividual a = df.getOWLNamedIndividual(IRI.create("file:/c/test.owl#a"));
         OWLObjectProperty f = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#f"));
         OWLDataProperty dp = df.getOWLDataProperty(IRI.create("file:/c/test.owl#dp"));
         
@@ -53,7 +54,7 @@ public class ComplexConceptTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(buffer.toString());
         
         OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
-        OWLIndividual a = df.getOWLNamedIndividual(IRI.create("file:/c/test.owl#a"));
+        OWLNamedIndividual a = df.getOWLNamedIndividual(IRI.create("file:/c/test.owl#a"));
         OWLDataProperty dp = df.getOWLDataProperty(IRI.create("file:/c/test.owl#dp"));
         
         OWLClassExpression desc = df.getOWLDataSomeValuesFrom(dp, df.getTopDatatype());
@@ -80,7 +81,7 @@ public class ComplexConceptTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(buffer.toString());
         
         OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
-        OWLIndividual o = df.getOWLNamedIndividual(IRI.create("file:/c/test.owl#o"));
+        OWLNamedIndividual o = df.getOWLNamedIndividual(IRI.create("file:/c/test.owl#o"));
         OWLObjectProperty f2 = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#f2"));
         OWLObjectPropertyExpression invf2 = df.getOWLObjectInverseOf(f2);
         OWLClass A = df.getOWLClass(IRI.create("file:/c/test.owl#A"));
@@ -109,8 +110,8 @@ public class ComplexConceptTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(buffer.toString());
         
         OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
-        OWLIndividual a = df.getOWLNamedIndividual(IRI.create("file:/c/test.owl#a"));
-        OWLIndividual b = df.getOWLNamedIndividual(IRI.create("file:/c/test.owl#b"));
+        OWLNamedIndividual a = df.getOWLNamedIndividual(IRI.create("file:/c/test.owl#a"));
+        OWLNamedIndividual b = df.getOWLNamedIndividual(IRI.create("file:/c/test.owl#b"));
         
         OWLClassExpression desc = df.getOWLObjectIntersectionOf(df.getOWLObjectOneOf(a), df.getOWLObjectOneOf(b));
         assertInstanceOf(desc, a, true);

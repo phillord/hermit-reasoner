@@ -21,7 +21,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.semanticweb.HermiT.Prefixes;
-import org.semanticweb.owl.model.OWLObjectPropertyExpression;
+import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 
 import rationals.Automaton;
 
@@ -51,6 +51,7 @@ public class DLOntology implements Serializable {
     protected final Set<ComplexObjectRoleInclusion> m_allComplexObjectRoleInclusions;
     protected final Set<AtomicRole> m_allAtomicObjectRoles;
     protected final Set<AtomicRole> m_allAtomicDataRoles;
+    protected final Set<String> m_definedDatatypeIRIs;
     protected final Set<Individual> m_allIndividuals;
     protected final Set<DescriptionGraph> m_allDescriptionGraphs;
     /**
@@ -62,15 +63,16 @@ public class DLOntology implements Serializable {
     
     public DLOntology(String ontologyIRI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts,
             Set<AtomicConcept> atomicConcepts,Set<ComplexObjectRoleInclusion> allComplexObjectRoleInclusions,
-            Set<AtomicRole> atomicObjectRoles,Set<AtomicRole> atomicDataRoles,Set<Individual> individuals,
-            boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,boolean hasDatatypes) {
+            Set<AtomicRole> atomicObjectRoles,Set<AtomicRole> atomicDataRoles,Set<String> definedDatatypeIRIs, 
+            Set<Individual> individuals,boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,
+            boolean hasDatatypes) {
         this(ontologyIRI, dlClauses, positiveFacts, negativeFacts, atomicConcepts, allComplexObjectRoleInclusions, 
-                atomicObjectRoles, atomicDataRoles, individuals, hasInverseRoles, hasAtMostRestrictions, hasNominals, 
-                hasDatatypes, null, null);
+                atomicObjectRoles, atomicDataRoles, definedDatatypeIRIs, individuals, hasInverseRoles, 
+                hasAtMostRestrictions, hasNominals, hasDatatypes, null, null);
     }
     public DLOntology(String ontologyIRI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts,
             Set<AtomicConcept> atomicConcepts,Set<ComplexObjectRoleInclusion> allComplexObjectRoleInclusions,
-            Set<AtomicRole> atomicObjectRoles,Set<AtomicRole> atomicDataRoles,Set<Individual> individuals,
+            Set<AtomicRole> atomicObjectRoles,Set<AtomicRole> atomicDataRoles,Set<String> definedDatatypeIRIs,Set<Individual> individuals,
             boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,boolean hasDatatypes,
             Map<AtomicConcept, Set<Set<Concept>>> unaryValidBlockConditions,Map<Set<AtomicConcept>, 
             Set<Set<Concept>>> nAryValidBlockConditions) {
@@ -104,6 +106,10 @@ public class DLOntology implements Serializable {
             m_allAtomicDataRoles=new TreeSet<AtomicRole>(AtomicRoleComparator.INSTANCE);
         else
             m_allAtomicDataRoles=atomicDataRoles;
+        if (definedDatatypeIRIs==null) 
+            m_definedDatatypeIRIs=new HashSet<String>();
+        else 
+            m_definedDatatypeIRIs=definedDatatypeIRIs;
         if (individuals==null)
             m_allIndividuals=new TreeSet<Individual>(IndividualComparator.INSTANCE);
         else
@@ -232,7 +238,10 @@ public class DLOntology implements Serializable {
     public boolean isHorn() {
         return m_isHorn;
     }
-
+    public Set<String> getDefinedDatatypeIRIs() {
+        return m_definedDatatypeIRIs;
+    }
+    
     public Collection<DLClause> getNonadmissibleDLClauses() {
         Set<AtomicConcept> bodyOnlyAtomicConcepts=getBodyOnlyAtomicConcepts();
         Collection<DLClause> nonadmissibleDLClauses=new HashSet<DLClause>();

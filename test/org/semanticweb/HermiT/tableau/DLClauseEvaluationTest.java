@@ -42,6 +42,7 @@ public class DLClauseEvaluationTest extends AbstractReasonerInternalsTest {
                     null, // complex role inclusions
                     null, // object roles
                     null, // data roles
+                    null, // custom datatype definitions
                     null, // individuals
                     false, // hasInverseRoles
                     false, // hasAtMostRestrictions

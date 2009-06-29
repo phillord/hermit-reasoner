@@ -10,7 +10,7 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.model.DLClause;
-import org.semanticweb.owl.model.OWLHasKeyAxiom;
+import org.semanticweb.owlapi.model.OWLHasKeyAxiom;
 
 public class ClausificationTest extends AbstractStructuralTest {
     static {

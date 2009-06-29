@@ -3,22 +3,19 @@ package org.semanticweb.HermiT.structural;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
-import org.semanticweb.owl.model.OWLClass;
-import org.semanticweb.owl.model.OWLClassExpression;
-import org.semanticweb.owl.model.OWLDataProperty;
-import org.semanticweb.owl.model.OWLDataPropertyExpression;
-import org.semanticweb.owl.model.OWLDataRange;
-import org.semanticweb.owl.model.OWLDatatype;
-import org.semanticweb.owl.model.OWLHasKeyAxiom;
-import org.semanticweb.owl.model.OWLIndividualAxiom;
-import org.semanticweb.owl.model.OWLNamedIndividual;
-import org.semanticweb.owl.model.OWLObjectProperty;
-import org.semanticweb.owl.model.OWLObjectPropertyExpression;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassExpression;
+import org.semanticweb.owlapi.model.OWLDataProperty;
+import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
+import org.semanticweb.owlapi.model.OWLDataRange;
+import org.semanticweb.owlapi.model.OWLHasKeyAxiom;
+import org.semanticweb.owlapi.model.OWLIndividualAxiom;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 
 public class OWLAxioms {
     public final Set<OWLClass> m_classes;
@@ -39,8 +36,7 @@ public class OWLAxioms {
     public final Set<OWLDataPropertyExpression> m_unsatisfiableDataProperties;
     public final Collection<OWLIndividualAxiom> m_facts;
     public final Set<OWLHasKeyAxiom> m_hasKeys;
-    public final Map<OWLDataRange,OWLDatatype> m_dataRangeDefinitions; // contains definitions introduced for complex ranges during the normalisation
-    public final Map<OWLDatatype,OWLDataRange> m_customDatatypeDefinitions; // contains custom datatype definitions from DatatypeDefinition axioms
+    public final Set<String> m_definedDatatypesIRIs; // contains custom datatypes from DatatypeDefinition axioms
     
     public OWLAxioms() {
         m_classes=new HashSet<OWLClass>();
@@ -61,8 +57,7 @@ public class OWLAxioms {
         m_unsatisfiableDataProperties=new HashSet<OWLDataPropertyExpression>();
         m_facts=new HashSet<OWLIndividualAxiom>();
         m_hasKeys=new HashSet<OWLHasKeyAxiom>();
-        m_dataRangeDefinitions=new HashMap<OWLDataRange,OWLDatatype>();
-        m_customDatatypeDefinitions=new HashMap<OWLDatatype,OWLDataRange>();
+        m_definedDatatypesIRIs=new HashSet<String>();
     }
     
     public static class ComplexObjectPropertyInclusion {
