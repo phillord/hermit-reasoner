@@ -18,7 +18,7 @@ public class AllQuickTests extends TestCase {
         // Tests the graph library.
         suite.addTest(org.semanticweb.HermiT.graph.AllTests.suite());
         // Rungs the WG tests.
-        suite.addTest(org.semanticweb.HermiT.owl_wg_tests.AllApprovedWGTests.suite());
+        suite.addTest(org.semanticweb.HermiT.owl_wg_tests.AllNonRejectedNonExtraCreditWGTests.suite());
         // $JUnit-END$
         return suite;
     }

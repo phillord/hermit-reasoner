@@ -271,7 +271,8 @@ public class WGTestDescriptor {
                     throw new InvalidWGTestException("Test "+testID+" has an incorrect number of "+(positive ? "" : "non")+"conclusions.");
                 StringInputSource source=new StringInputSource(conclusions.iterator().next().getLiteral());
                 try {
-                    return manager.loadOntology(source);
+                    OWLOntology concl=manager.loadOntology(source);
+                    return concl;
                 }
                 catch (OWLOntologyCreationException e) {
                     throw new InvalidWGTestException("Invalid conclusion ontology.",e);
@@ -303,5 +304,9 @@ public class WGTestDescriptor {
             }
         }
         return null;
+    }
+    
+    public String toString() {
+        return "Test: " + identifier + ", status " + status + ", test types: " + testTypes + ", species: " + species + ", semantics: " + semantics + ", not semantics: " + notsemantics;
     }
 }

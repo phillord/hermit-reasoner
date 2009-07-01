@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.protege.editor.owl.model.inference.ProtegeOWLReasonerFactoryAdapter;
 import org.semanticweb.HermiT.Configuration.BlockingStrategyType;
 import org.semanticweb.HermiT.blocking.AncestorBlocking;
 import org.semanticweb.HermiT.blocking.AnywhereBlocking;
@@ -1420,5 +1421,57 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
     }
    
     // The factory for the reasoner from the Protege plug-in
-    // outsourced into a separate file since it cannot be compiled until Protege 4.1 is updated
+    public static class ProtegeReasonerFactory extends ProtegeOWLReasonerFactoryAdapter {
+        public OWLReasoner createReasoner(OWLOntologyManager ontologyManager) {
+            // ignore the given manager
+            return this.createReasoner(OWLManager.createOWLOntologyManager(),new HashSet<OWLOntology>());
+        }
+        public void initialise() {
+        }
+        public void dispose() {
+        }
+        public boolean requiresExplicitClassification() {
+            return false;
+        }
+        @SuppressWarnings("serial")
+        public OWLReasoner createReasoner(OWLOntologyManager manager,Set<OWLOntology> ontologies) {
+            // ignore the given manager
+            Configuration configuration=new Configuration();
+            configuration.ignoreUnsupportedDatatypes=true;
+            Reasoner hermit=new Reasoner(configuration) {
+                protected Set<OWLOntology> m_loadedOntologies;
+                
+                public void loadOntologies(Set<OWLOntology> ontologies) {
+                    if (!ontologies.isEmpty()) {
+                        super.loadOntologies(ontologies);
+                    }
+                    m_loadedOntologies=ontologies;
+                }
+                public Set<OWLOntology> getLoadedOntologies() {
+                    return m_loadedOntologies;
+                }
+                // overwrite so that the methods don't throw errors
+                public boolean isSymmetric(OWLObjectProperty property) {
+                    return false;
+                }
+                public boolean isTransitive(OWLObjectProperty property) {
+                    return false;
+                }
+                public Set<OWLDataRange> getRanges(OWLDataProperty property) {
+                    return new HashSet<OWLDataRange>();
+                }
+                public Map<OWLObjectProperty,Set<OWLNamedIndividual>> getObjectPropertyRelationships(OWLNamedIndividual individual) {
+                    return new HashMap<OWLObjectProperty,Set<OWLNamedIndividual>>();
+                }
+                public Map<OWLDataProperty,Set<OWLLiteral>> getDataPropertyRelationships(OWLNamedIndividual individual) {
+                    return new HashMap<OWLDataProperty,Set<OWLLiteral>>();
+                }
+                public Set<OWLLiteral> getRelatedValues(OWLNamedIndividual subject,OWLDataPropertyExpression property) {
+                    return new HashSet<OWLLiteral>();
+                }
+            };
+            if (!ontologies.isEmpty()) hermit.loadOntologies(ontologies);
+            return hermit;
+        }
+    }
 }

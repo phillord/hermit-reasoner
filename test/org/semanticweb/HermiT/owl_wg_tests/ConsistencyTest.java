@@ -4,7 +4,7 @@ public class ConsistencyTest extends AbstractTest {
     protected final boolean m_positive;
 
     public ConsistencyTest(WGTestDescriptor wgTestDescriptor,boolean positive) {
-        super(wgTestDescriptor.testID+(positive ? "-consistency" : "-inconsistency"),wgTestDescriptor);
+        super(wgTestDescriptor.identifier+(positive ? "-consistency" : "-inconsistency"),wgTestDescriptor);
         m_positive=positive;
     }
     protected void doTest() {
