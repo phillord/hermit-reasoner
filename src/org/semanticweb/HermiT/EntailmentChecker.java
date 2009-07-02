@@ -259,19 +259,19 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
         return reasoner.getInverseProperties(prop1).contains(prop2);
     }
     public Boolean visit(OWLSymmetricObjectPropertyAxiom axiom) {
-        return reasoner.isSymmetric((OWLObjectProperty)axiom.getProperty());
+        return reasoner.isSymmetric(axiom.getProperty());
     }
     public Boolean visit(OWLTransitiveObjectPropertyAxiom axiom) {
-        return reasoner.isTransitive((OWLObjectProperty)axiom.getProperty());
+        return reasoner.isTransitive(axiom.getProperty());
     }
     public Boolean visit(OWLReflexiveObjectPropertyAxiom axiom) {
-        return reasoner.isReflexive((OWLObjectProperty)axiom.getProperty());
+        return reasoner.isReflexive(axiom.getProperty());
     }
     public Boolean visit(OWLIrreflexiveObjectPropertyAxiom axiom) {
-        return reasoner.isIrreflexive((OWLObjectProperty)axiom.getProperty());
+        return reasoner.isIrreflexive(axiom.getProperty());
     }
     public Boolean visit(OWLAsymmetricObjectPropertyAxiom axiom) {
-        return reasoner.isAsymmetric((OWLObjectProperty)axiom.getProperty());
+        return reasoner.isAsymmetric(axiom.getProperty());
     }
     public Boolean visit(OWLEquivalentObjectPropertiesAxiom axiom) {
         Set<OWLObjectPropertyExpression> props=axiom.getProperties();
@@ -308,10 +308,10 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
         return Boolean.TRUE;
     }
     public Boolean visit(OWLFunctionalObjectPropertyAxiom axiom) {
-        return reasoner.isFunctional(axiom.getProperty().asOWLObjectProperty());
+        return reasoner.isFunctional(axiom.getProperty());
     }
     public Boolean visit(OWLInverseFunctionalObjectPropertyAxiom axiom) {
-        return reasoner.isInverseFunctional(axiom.getProperty().asOWLObjectProperty());
+        return reasoner.isInverseFunctional(axiom.getProperty());
     }
 
     

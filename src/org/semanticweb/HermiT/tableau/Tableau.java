@@ -19,8 +19,10 @@ import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.Inequality;
+import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.model.NegatedAtomicRole;
+import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.Term;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.tableau.Node.NodeState;
@@ -302,18 +304,26 @@ public final class Tableau implements Serializable {
             m_tableauMonitor.isSubsumedByFinished(subconcept,superconcept,result);
         return result;
     }
-    public boolean isAsymmetric(AtomicRole role) {
+    public boolean isAsymmetric(Role role) {
         clear();
         if (hasNominals())
             loadABox();
         Node a=createNewNINode(m_dependencySetFactory.emptySet());
         Node b=createNewNINode(m_dependencySetFactory.emptySet());
-        m_extensionManager.addRoleAssertion(role,a,b,m_dependencySetFactory.emptySet(),true);
+        if (role instanceof InverseRole) {
+            m_extensionManager.addRoleAssertion(((InverseRole)role).getInverseOf(),b,a,m_dependencySetFactory.emptySet(),true);
+        } else {
+            m_extensionManager.addRoleAssertion((AtomicRole)role,a,b,m_dependencySetFactory.emptySet(),true);
+        }
         m_branchingPoints[0]=new BranchingPoint(this);
         m_currentBranchingPoint++;
         m_nonbacktrackableBranchingPoint=m_currentBranchingPoint;
         DependencySet dependencySet=m_dependencySetFactory.addBranchingPoint(m_dependencySetFactory.emptySet(),m_currentBranchingPoint);
-        m_extensionManager.addRoleAssertion(role,b,a,dependencySet,true);
+        if (role instanceof InverseRole) {
+            m_extensionManager.addRoleAssertion(((InverseRole)role).getInverseOf(),a,b,dependencySet,true);
+        } else {
+            m_extensionManager.addRoleAssertion((AtomicRole)role,b,a,dependencySet,true);
+        }
         return !isSatisfiable();
     }
     public boolean isABoxSatisfiable() {

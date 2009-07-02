@@ -118,31 +118,88 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
     protected Map<AtomicConcept,Set<Individual>> m_realization;
     protected ProgressMonitor m_progressMonitor;
 
+    /**
+     * Creates a new reasoner instance with the parameters for blocking, expansion strategy etc as specified 
+     * in the given configuration object. A default configuration can be obtained by just passing new Configuration().
+     * @param configuration - a configuration in which parameters can be defined such as the blocking strategy to be used etc
+     */
     public Reasoner(Configuration configuration) {
         m_configuration=configuration;
         m_interruptFlag=new InterruptFlag();
         if (m_dlOntology != null || m_tableau != null) clearOntologies();
     }
     
+    /**
+     * Creates a new reasoner object with the parameters for blocking, expansion strategy etc as specified 
+     * in the given configuration object. A default configuration can be obtained by just passing new Configuration(). 
+     * Then the given manager is used to find all required imports for the given ontology and the ontology with the 
+     * imports is loaded into the reasoner and the data factory of the manager is used to create fresh concepts during 
+     * the preprocessing phase if necessary. 
+     * @param configuration - a configuration in which parameters can be defined such as the blocking strategy to be used etc
+     * @param ontologyManger - the manager that will be used to determine the required imports for the given ontology
+     * @param ontology - the ontology that should be loaded by the reasoner
+     */
     public Reasoner(Configuration configuration,OWLOntologyManager ontologyManger,OWLOntology ontology) {
         this(configuration,ontologyManger,ontology,(Set<DescriptionGraph>)null);
     }
 
+
+    /**
+     * Creates a new reasoner object loaded with the given ontology and the given description graphs. When creating 
+     * the reasoner, the given configuration determines the parameters for blocking, expansion strategy etc. 
+     * A default configuration can be obtained by just passing new Configuration(). 
+     * Then the given manager is used to find all required imports for the given ontology and the ontology with the 
+     * imports and the description graphs are loaded into the reasoner. The data factory of the manager is used to 
+     * create fresh concepts during the preprocessing phase if necessary. 
+     * @param configuration - a configuration in which parameters can be defined such as the blocking strategy to be used etc
+     * @param ontologyManager - the manager that will be used to determine the required imports for the given ontology
+     * @param ontology - the ontology that should be loaded by the reasoner
+     * @param descriptionGraphs - a set of description graphs
+     */
     public Reasoner(Configuration configuration,OWLOntologyManager ontologyManager,OWLOntology ontology,Set<DescriptionGraph> descriptionGraphs) {
         m_configuration=configuration;
         m_interruptFlag=new InterruptFlag();
         loadOntology(ontologyManager,ontology,descriptionGraphs);
     }
     
+    /**
+     * This method is mainly for use of HermiT in Protege. It is assumed that the given set of ontologies contains all the 
+     * required imports. HermiT will NOT load any imports and only the axioms that are in the given ontologies. 
+     * A new reasoner object is created and the given ontologies are loaded. When creating 
+     * the reasoner, the given configuration determines the parameters for blocking, expansion strategy etc. 
+     * A default configuration can be obtained by just passing new Configuration(). 
+     * An arbitrary ontology manager and data factory is used in the preprocessing phase. 
+     * @param configuration - a configuration in which parameters can be defined such as the blocking strategy to be used etc
+     * @param importClosure - a set of ontologies that MUST contain all the imports for the ontologies in the set
+     */
     public Reasoner(Configuration configuration,Set<OWLOntology> importClosure) {
-        this(configuration, OWLManager.createOWLOntologyManager(), importClosure);
+        this(configuration, OWLManager.createOWLOntologyManager().getOWLDataFactory(), importClosure);
     }
-    public Reasoner(Configuration configuration,OWLOntologyManager ontologyManager,Set<OWLOntology> importClosure) {
+    
+    /**
+     * This method is mainly for use of HermiT in Protege. It is assumed that the given set of ontologies contains all the 
+     * required imports. HermiT will NOT load any imports and only the axioms that are in the given ontologies. 
+     * A new reasoner object is created and the given ontologies are loaded. When creating 
+     * the reasoner, the given configuration determines the parameters for blocking, expansion strategy etc. 
+     * The data factory of the given manager is used to create fresh concepts during the preprocessing phase if necessary. 
+     * @param configuration - a configuration in which parameters can be defined such as the blocking strategy to be used etc
+     * @param ontologyManager - the data factory of this manager will be used in the preprocessing phase
+     * @param importClosure - a set of ontologies that MUST contain all the imports for the ontologies in the set
+     */
+    public Reasoner(Configuration configuration,OWLDataFactory dataFactory,Set<OWLOntology> importClosure) {
         m_configuration=configuration;
         m_interruptFlag=new InterruptFlag();
-        loadOntologies(ontologyManager, importClosure);
+        loadOntologies(dataFactory, importClosure);
     }
 
+    /**
+     * This is mainly an internal method. Once an ontology is loaded, normalised and clausified, the resulting DLOntology 
+     * object can be obtained by calling getDLOntology(), saved and reloaded later with this method so that normalisation 
+     * and clausification is not done again. 
+     * A default configuration can be obtained by just passing new Configuration(). 
+     * @param configuration - a configuration in which parameters can be defined such as the blocking strategy to be used etc
+     * @param dlOntology - an ontology in HermiT's internal ontology format
+     */
     public Reasoner(Configuration configuration,DLOntology dlOntology) {
         m_configuration=configuration;
         m_interruptFlag=new InterruptFlag();
@@ -151,24 +208,43 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
 
     // General accessor methods
     
+    /** 
+     * @return A prefix object that is used to maintain the URI/IRI prefixes of classes, properties etc that are used in the reasoner. 
+     */
     public Prefixes getPrefixes() {
         return m_prefixes;
     }
 
+    /**
+     * @return An ontology in HermiT's internal format containing all axioms of the ontologies that are loaded in the reasoner.   
+     */
     public DLOntology getDLOntology() {
         return m_dlOntology;
     }
 
+    /**
+     * @return A copy of the configuration that is used by this Reasoner instance.  
+     */
     public Configuration getConfiguration() {
         return m_configuration.clone();
     }
 
+    /**
+     * Set a flag to tell the reasoner to stop whatever it is doing. All operations check from time to time whether this flag 
+     * is set and if it is, then the current process is aborted.  
+     */
     public void interrupt() {
         m_interruptFlag.interrupt();
     }
     
     // Loading and managing ontologies
 
+    /**
+     * Load an ontology in HermiT's internal format. A DLOntology can be obtained from a Reasoner instance after loading 
+     * an OWLOntology by calling getDLOntology(). The DLOntology contains clauses and facts, obtained after normalisation and clausification on an 
+     * OWLOntology. The DLOntology also contains a configuration.     
+     * @param dlOntology - an ontology in HermiT's internal format
+     */
     public void loadDLOntology(DLOntology dlOntology) {
         m_dlOntology=dlOntology;
         m_prefixes=createPrefixes(m_dlOntology);
@@ -176,6 +252,16 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         m_subsumptionCache=new SubsumptionCache(m_tableau);
     }
     
+    /**
+     * The given ontology and description graphs are loaded into the Reasoner instance. Any previously loaded ontologies are 
+     * overwritten.  
+     * Then the given manager is used to find all required imports for the given ontology and the ontology with the 
+     * imports and the description graphs are loaded into the reasoner. The data factory of the manager is used to 
+     * create fresh concepts during the preprocessing phase if necessary. 
+     * @param ontologyManager - the manager that will be used to determine the required imports for the given ontology
+     * @param ontology - the ontology that should be loaded by the reasoner
+     * @param descriptionGraphs - a set of description graphs or null
+     */
     public void loadOntology(OWLOntologyManager ontologyManager,OWLOntology ontology,Set<DescriptionGraph> descriptionGraphs) {
         if (descriptionGraphs==null)
             descriptionGraphs=Collections.emptySet();
@@ -183,24 +269,47 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         loadDLOntology(clausifier.clausify(ontologyManager,ontology,descriptionGraphs));
     }
 
+    /* (non-Javadoc)
+     * @see org.semanticweb.owlapi.inference.OWLReasonerBase#loadOntologies(java.util.Set)
+     */
     public void loadOntologies(Set<OWLOntology> ontologies) {
-        loadOntologies(OWLManager.createOWLOntologyManager(), ontologies);
+        loadOntologies(OWLManager.createOWLOntologyManager().getOWLDataFactory(), ontologies);
     }
     
-    public void loadOntologies(OWLOntologyManager ontologyManager, Set<OWLOntology> ontologies) {
+    /**
+     * Loads the specified ontologies. The reasoner will then take into consideration the logical axioms in each ontology.
+     * Note that this methods does <b>not<b> load any ontologies in the imports closure - <i>all</i> imports must be loaded
+     * explicitly.
+     * @param dataFactory - the data factory that is used in the preprocessing phase to introduce new concepts if necessary
+     * @param ontologies - the ontologies to be loaded (no imports will be loaded)
+     */
+    public void loadOntologies(OWLDataFactory dataFactory, Set<OWLOntology> ontologies) {
         OWLClausification clausifier=new OWLClausification(m_configuration);
         Set<DescriptionGraph> descriptionGraphs=Collections.emptySet();
-        loadDLOntology(clausifier.clausifyImportClosure(ontologyManager.getOWLDataFactory(),"urn:hermit:kb",ontologies,descriptionGraphs));
+        loadDLOntology(clausifier.clausifyImportClosure(dataFactory,"urn:hermit:kb",ontologies,descriptionGraphs));
     }
     
+    /**
+     * Required for the OWLReasoner interface, but HermiT does not support this method. All loaded ontologies end up in 
+     * one set of clauses and we do not keep track of what came from where, so it will throw an UnsupportedOperation exception. 
+     * {@inheritDoc}
+     */
     public Set<OWLOntology> getLoadedOntologies() {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Required for the OWLReasoner interface, but HermiT does not support this method. All loaded ontologies end up in 
+     * one set of clauses and we do not keep track of what came from where, so it will throw an UnsupportedOperation exception.
+     * {@inheritdoc} 
+     */
     public void unloadOntologies(Set<OWLOntology> inOntologies) {
         throw new UnsupportedOperationException();
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.owlapi.inference.OWLReasonerBase#clearOntologies()
+     */
     public void clearOntologies() {
         Set<DLClause> noDLClauses=Collections.emptySet();
         Set<Atom> noAtoms=Collections.emptySet();
@@ -213,27 +322,46 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         loadDLOntology(emptyDLOntology);
     }
     
+    /**
+     * Same as clearOntologies() in HermiT. 
+     * {@inheritdoc}
+     */
     public void dispose() {
         clearOntologies();
     }
     
     // Monitor interface
 
+    /**
+     * Required for the OWLReasoner interface, but HermiT does not support this method and will throw an 
+     * UnsupportedOperation exception.
+     * {@inheritdoc} 
+     */
     public OWLEntity getCurrentEntity() {
         throw new UnsupportedOperationException();
     }
 
+    /* (non-Javadoc)
+     * @see org.semanticweb.owlapi.inference.MonitorableOWLReasoner#setProgressMonitor(org.semanticweb.owlapi.util.ProgressMonitor)
+     */
     public void setProgressMonitor(ProgressMonitor progressMonitor) {
         m_progressMonitor=progressMonitor;
     }
 
     // Checking the signature of the ontology
     
+
+    /* (non-Javadoc)
+     * @see org.semanticweb.owlapi.inference.OWLReasonerBase#isDefined(org.semanticweb.owlapi.model.OWLClass)
+     */
     public boolean isDefined(OWLClass owlClass) {
         AtomicConcept atomicConcept=AtomicConcept.create(owlClass.getIRI().toString());
         return m_dlOntology.getAllAtomicConcepts().contains(atomicConcept) || AtomicConcept.THING.equals(atomicConcept) || AtomicConcept.NOTHING.equals(atomicConcept);
     }
 
+    /* (non-Javadoc)
+     * @see org.semanticweb.owlapi.inference.OWLReasonerBase#isDefined(org.semanticweb.owlapi.model.OWLIndividual)
+     */
     public boolean isDefined(OWLIndividual owlIndividual) {
         Individual individual;
         if (owlIndividual.isAnonymous()) {
@@ -244,11 +372,17 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         return m_dlOntology.getAllIndividuals().contains(individual);
     }
 
+    /* (non-Javadoc)
+     * @see org.semanticweb.owlapi.inference.OWLReasonerBase#isDefined(org.semanticweb.owlapi.model.OWLObjectProperty)
+     */
     public boolean isDefined(OWLObjectProperty owlObjectProperty) {
         AtomicRole atomicRole=AtomicRole.create(owlObjectProperty.getIRI().toString());
         return m_dlOntology.getAllAtomicObjectRoles().contains(atomicRole);
     }
 
+    /* (non-Javadoc)
+     * @see org.semanticweb.owlapi.inference.OWLReasonerBase#isDefined(org.semanticweb.owlapi.model.OWLDataProperty)
+     */
     public boolean isDefined(OWLDataProperty owlDataProperty) {
         AtomicRole atomicRole=AtomicRole.create(owlDataProperty.getIRI().toString());
         return m_dlOntology.getAllAtomicDataRoles().contains(atomicRole);
@@ -256,21 +390,33 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
 
     // General inferences
     
+    /**
+     * @return true if the loaded ontology (set of axioms) has a model and false otherwise
+     */
     public boolean isConsistent() {
         return m_tableau.isABoxSatisfiable();
     }
 
+    /**
+     * Deprecated, use {@link org.semanticweb.HermiT.Reasoner#isConsistent()}
+     */
     @Deprecated
     public boolean isConsistent(OWLOntology ignored) {
         return isConsistent();
     }
     
     // Concept inferences
-    
+
+    /* (non-Javadoc)
+     * @see org.semanticweb.owlapi.inference.OWLReasonerBase#isClassified()
+     */
     public boolean isClassified() {
         return m_atomicConceptHierarchy!=null;
     }
 
+    /* (non-Javadoc)
+     * @see org.semanticweb.owlapi.inference.OWLReasonerBase#classify()
+     */
     public void classify() {
         if (m_atomicConceptHierarchy==null) {
             try {
@@ -333,6 +479,9 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         }
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.owlapi.inference.OWLSatisfiabilityChecker#isSatisfiable(org.semanticweb.owlapi.model.OWLClassExpression)
+     */
     public boolean isSatisfiable(OWLClassExpression description) {
         if (description instanceof OWLClass) {
             AtomicConcept concept=AtomicConcept.create(((OWLClass)description).getIRI().toString());
@@ -353,6 +502,9 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         }
     }
 
+    /* (non-Javadoc)
+     * @see org.semanticweb.owlapi.inference.OWLClassReasoner#isSubClassOf(org.semanticweb.owlapi.model.OWLClassExpression, org.semanticweb.owlapi.model.OWLClassExpression)
+     */
     public boolean isSubClassOf(OWLClassExpression subDescription,OWLClassExpression superDescription) {
         if (subDescription instanceof OWLClass && superDescription instanceof OWLClass) {
             AtomicConcept subconcept=AtomicConcept.create(((OWLClass)subDescription).getIRI().toString());
@@ -371,38 +523,63 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         }
     }
 
+    /* (non-Javadoc)
+     * @see org.semanticweb.owlapi.inference.OWLClassReasoner#isEquivalentClass(org.semanticweb.owlapi.model.OWLClassExpression, org.semanticweb.owlapi.model.OWLClassExpression)
+     */
     public boolean isEquivalentClass(OWLClassExpression description1,OWLClassExpression description2) {
         return isSubClassOf(description1,description2) && isSubClassOf(description2,description1); 
     }
-    
-    public Set<OWLClass> getEquivalentClasses(OWLClassExpression description) {
-        HierarchyNode<AtomicConcept> node=getHierarchyNode(description);
+
+    /* (non-Javadoc)
+     * @see org.semanticweb.owlapi.inference.OWLClassReasoner#getEquivalentClasses(org.semanticweb.owlapi.model.OWLClassExpression)
+     */
+    public Set<OWLClass> getEquivalentClasses(OWLClassExpression classExpression) {
+        HierarchyNode<AtomicConcept> node=getHierarchyNode(classExpression);
         return atomicConceptsToOWLAPI(node.getEquivalentElements(),OWLManager.createOWLOntologyManager().getOWLDataFactory());
     }
 
-    public Set<Set<OWLClass>> getSubClasses(OWLClassExpression description) {
-        HierarchyNode<AtomicConcept> node=getHierarchyNode(description);
+    /* (non-Javadoc)
+     * @see org.semanticweb.owlapi.inference.OWLClassReasoner#getSubClasses(org.semanticweb.owlapi.model.OWLClassExpression)
+     */
+    public Set<Set<OWLClass>> getSubClasses(OWLClassExpression classExpression) {
+        HierarchyNode<AtomicConcept> node=getHierarchyNode(classExpression);
         return atomicConceptNodesToOWLAPI(node.getChildNodes(),OWLManager.createOWLOntologyManager().getOWLDataFactory());
     }
     
-    public Set<Set<OWLClass>> getSuperClasses(OWLClassExpression description) {
-        HierarchyNode<AtomicConcept> node=getHierarchyNode(description);
+    /* (non-Javadoc)
+     * @see org.semanticweb.owlapi.inference.OWLClassReasoner#getSuperClasses(org.semanticweb.owlapi.model.OWLClassExpression)
+     */
+    public Set<Set<OWLClass>> getSuperClasses(OWLClassExpression classExpression) {
+        HierarchyNode<AtomicConcept> node=getHierarchyNode(classExpression);
         return atomicConceptNodesToOWLAPI(node.getParentNodes(),OWLManager.createOWLOntologyManager().getOWLDataFactory());
     }
     
-    public Set<Set<OWLClass>> getAncestorClasses(OWLClassExpression description) {
-        HierarchyNode<AtomicConcept> node=getHierarchyNode(description);
+    /* (non-Javadoc)
+     * @see org.semanticweb.owlapi.inference.OWLClassReasoner#getAncestorClasses(org.semanticweb.owlapi.model.OWLClassExpression)
+     */
+    public Set<Set<OWLClass>> getAncestorClasses(OWLClassExpression classExpression) {
+        HierarchyNode<AtomicConcept> node=getHierarchyNode(classExpression);
         return atomicConceptNodesToOWLAPI(node.getAncestorNodes(),OWLManager.createOWLOntologyManager().getOWLDataFactory());
     }
     
+    /* (non-Javadoc)
+     * @see org.semanticweb.owlapi.inference.OWLClassReasoner#getDescendantClasses(org.semanticweb.owlapi.model.OWLClassExpression)
+     */
     public Set<Set<OWLClass>> getDescendantClasses(OWLClassExpression description) {
         HierarchyNode<AtomicConcept> node=getHierarchyNode(description);
         return atomicConceptNodesToOWLAPI(node.getDescendantNodes(),OWLManager.createOWLOntologyManager().getOWLDataFactory());
     }
+    /**
+     * Deprecated, use {@link org.semanticweb.HermiT.Reasoner#getUnsatisfiableClasses()}
+     */
     @Deprecated
     public Set<OWLClass> getInconsistentClasses() throws OWLReasonerException {
         return getUnsatisfiableClasses();
     }
+
+    /* (non-Javadoc)
+     * @see org.semanticweb.owlapi.inference.OWLClassReasoner#getUnsatisfiableClasses()
+     */
     public Set<OWLClass> getUnsatisfiableClasses() throws OWLReasonerException {
         classify();
         HierarchyNode<AtomicConcept> node=m_atomicConceptHierarchy.getBottomNode();
@@ -439,10 +616,18 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
 
     // Object property inferences
     
+    /**
+     * @return true if the object property hierarchy has been computed and false otherwise
+     */
     public boolean areObjectPropertiesClassified() {
         return m_objectRoleHierarchy!=null;
     }
 
+    /**
+     * Builds the object property hierarchy. With nominals and cardinality restrictions this 
+     * cannot always been dome by simply building the transitive closure of the asserted object 
+     * property hierarchy.  
+     */
     public void classifyObjectProperties() {
         if (m_objectRoleHierarchy==null) {
             HierarchyBuilder.Relation<Role> relation=
@@ -474,6 +659,14 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         }
     }
     
+    /**
+     * Determines if subObjectPropertyExpression is a sub-property of superObjectPropertyExpression. 
+     * HermiT answers true if subObjectPropertyExpression=superObjectPropertyExpression. 
+     * @param subObjectPropertyExpression - the sub object property expression
+     * @param superObjectPropertyExpression - the super object property expression
+     * @return true if whenever a pair related with the property subObjectPropertyExpression is necessarily 
+     *         related with the property superObjectPropertyExpression and false otherwise
+     */
     public boolean isSubPropertyOf(OWLObjectPropertyExpression subObjectPropertyExpression,OWLObjectPropertyExpression superObjectPropertyExpression) {
         if (superObjectPropertyExpression.getNamedProperty().getIRI().toString().equals(AtomicRole.TOP_OBJECT_ROLE.getIRI()))
             return true;
@@ -491,6 +684,14 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         }
     }
     
+    /**
+     * Determines if the property chain represented by subPropertyChain is a sub-property of superObjectPropertyExpression. 
+     * @param subPropertyChain -  a list that represents a property chain 
+     * @param superObjectPropertyExpression - an object property expression
+     * @return if r1, ..., rn is the given chain and r the given super property, then the answer is true if whenever 
+     *         r1(d0, d1), ..., rn(dn-1, dn) holds in a model for some elements d0, ..., dn, then necessarily r(d0, dn) 
+     *         holds and it is false otherwise
+     */
     public boolean isSubPropertyOf(List<OWLObjectPropertyExpression> subPropertyChain, OWLObjectPropertyExpression superObjectPropertyExpression) {
         if (superObjectPropertyExpression.getNamedProperty().getIRI().toString().equals(AtomicRole.TOP_OBJECT_ROLE.getIRI()))
             return true;
@@ -507,49 +708,102 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         }
     }
     
+    /**
+     * @param objectPropertyExpression1 - an object property expression
+     * @param objectPropertyExpression2 - an object property expression
+     * @return true if the extension of objectPropertyExpression1 is the same as the extension of objectPropertyExpression2 
+     *         in each model of the ontology and false otherwise
+     */
     public boolean isEquivalentProperty(OWLObjectPropertyExpression objectPropertyExpression1,OWLObjectPropertyExpression objectPropertyExpression2) {
         return isSubPropertyOf(objectPropertyExpression1,objectPropertyExpression2) && isSubPropertyOf(objectPropertyExpression2,objectPropertyExpression1);
     }
+    /**
+     * Deprecated, use {@link org.semanticweb.HermiT.Reasoner#getSubProperties(OWLObjectPropertyExpression)}
+     */
     @Deprecated
     public Set<Set<OWLObjectProperty>> getSuperProperties(OWLObjectProperty property) {
         return filterObjectPropertySets(getSuperProperties((OWLObjectPropertyExpression)property));
     }
+    /**
+     * Returns the DIRECT super-properties of propertyExpression. For retrieving also indirect super-properties use getAncestorProperties(OWLObjectPropertyExpression). 
+     * @see org.semanticweb.HermiT.Reasoner#getAncestorProperties(OWLObjectPropertyExpression)
+     * @param propertyExpression - an object property expression
+     * @return a set of sets {S1, ..., Sn} such that all properties in a set Si are equivalent and each set Si 
+     *         contains DIRECT super-properties of propertyExpression
+     */
     public Set<Set<OWLObjectPropertyExpression>> getSuperProperties(OWLObjectPropertyExpression propertyExpression) {
         HierarchyNode<Role> node=getHierarchyNode(propertyExpression);
         return objectPropertyNodesToOWLAPI(node.getParentNodes(),OWLManager.createOWLOntologyManager().getOWLDataFactory());
     }
+    /**
+     * Deprecated, use {@link org.semanticweb.HermiT.Reasoner#getSubProperties(OWLObjectPropertyExpression)}
+     */
     @Deprecated
     public Set<Set<OWLObjectProperty>> getSubProperties(OWLObjectProperty property) {
         return filterObjectPropertySets(getSubProperties((OWLObjectPropertyExpression)property));
     }
+    /**
+     * Returns the DIRECT sub-properties of propertyExpression. For retrieving also indirect sub-properties use getDescendantProperties(OWLObjectPropertyExpression). 
+     * @see org.semanticweb.HermiT.Reasoner#getDescendantProperties(OWLObjectPropertyExpression)
+     * @param propertyExpression - an object property expression
+     * @return a set of sets {S1, ..., Sn} such that all properties in a set Si are equivalent and each set Si 
+     *         contains sub-properties of propertyExpression on a different level of the ancestror hierarchy 
+     */
     public Set<Set<OWLObjectPropertyExpression>> getSubProperties(OWLObjectPropertyExpression propertyExpression) {
         HierarchyNode<Role> node=getHierarchyNode(propertyExpression);
         return objectPropertyNodesToOWLAPI(node.getChildNodes(),OWLManager.createOWLOntologyManager().getOWLDataFactory());
     }
+    /**
+     * Deprecated, use {@link org.semanticweb.HermiT.Reasoner#getAncestorProperties(OWLObjectPropertyExpression)}
+     */
     @Deprecated
     public Set<Set<OWLObjectProperty>> getAncestorProperties(OWLObjectProperty property) {
         return filterObjectPropertySets(getAncestorProperties((OWLObjectPropertyExpression)property));
     }
+    /**
+     * Returns the super-properties of propertyExpression. 
+     * @param propertyExpression - an object property expression
+     * @return a set of sets {S1, ..., Sn} such that all properties in a set Si are equivalent and each set Si 
+     *         contains super-properties of propertyExpression on different levels of the property hierarchy
+     */
     public Set<Set<OWLObjectPropertyExpression>> getAncestorProperties(OWLObjectPropertyExpression propertyExpression) {
         HierarchyNode<Role> node=getHierarchyNode(propertyExpression);
         Set<HierarchyNode<Role>> ancestorsPlusNode=new HashSet<HierarchyNode<Role>>(node.getAncestorNodes());
         ancestorsPlusNode.add(node);
         return objectPropertyNodesToOWLAPI(ancestorsPlusNode,OWLManager.createOWLOntologyManager().getOWLDataFactory());
     }
+    /**
+     * Deprecated, use {@link org.semanticweb.HermiT.Reasoner#getDescendantProperties(OWLObjectPropertyExpression)}
+     */
     @Deprecated
     public Set<Set<OWLObjectProperty>> getDescendantProperties(OWLObjectProperty property) {
         return filterObjectPropertySets(getDescendantProperties((OWLObjectPropertyExpression)property));
     }
+    /**
+     * Returns the sub-properties of propertyExpression. 
+     * @param propertyExpression - an object property expression
+     * @return a set of sets {S1, ..., Sn} such that all properties in a set Si are equivalent and each set Si 
+     *         contains sub-properties of propertyExpression on different levels of the property hierarchy
+     */
     public Set<Set<OWLObjectPropertyExpression>> getDescendantProperties(OWLObjectPropertyExpression propertyExpression) {
         HierarchyNode<Role> node=getHierarchyNode(propertyExpression);
         Set<HierarchyNode<Role>> descendantsPlusNode=new HashSet<HierarchyNode<Role>>(node.getDescendantNodes());
         descendantsPlusNode.add(node);
         return objectPropertyNodesToOWLAPI(descendantsPlusNode,OWLManager.createOWLOntologyManager().getOWLDataFactory());
     }
+    
+    /**
+     * Deprecated, use {@link org.semanticweb.HermiT.Reasoner#getEquivalentProperties(OWLObjectPropertyExpression)}
+     */
     @Deprecated
     public Set<OWLObjectProperty> getEquivalentProperties(OWLObjectProperty property) {
         return filterObjectProperties(getEquivalentProperties((OWLObjectPropertyExpression)property));
     }
+    /**
+     * Returns properties that are equivalent to propertyExpression. 
+     * @param propertyExpression - an object property expression
+     * @return a set of object property expressions such that all properties in the set are equivalent to propertyExpression
+     */
     public Set<OWLObjectPropertyExpression> getEquivalentProperties(OWLObjectPropertyExpression propertyExpression) {
         HierarchyNode<Role> node=getHierarchyNode(propertyExpression);
         return objectPropertiesToOWLAPI(node.getEquivalentElements(),OWLManager.createOWLOntologyManager().getOWLDataFactory());
@@ -568,21 +822,52 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             node=new HierarchyNode<Role>(role,Collections.singleton(role),Collections.singleton(m_objectRoleHierarchy.getTopNode()),Collections.singleton(m_objectRoleHierarchy.getBottomNode()));
         return node;
     }
-    @SuppressWarnings("unchecked")
+
+    /**
+     * use {@link org.semanticweb.HermiT.Reasoner#getDomains(OWLObjectPropertyExpression)}
+     */
+    @Deprecated
     public Set<Set<OWLClassExpression>> getDomains(OWLObjectProperty property) {
+        return getDomains((OWLObjectPropertyExpression)property);
+    }
+    /**
+     * Gets the domains of a particular property.  A domain class, A, of a property, P,
+     * is a named class such that A is an ancestor of \exists p Top ("p some Thing"). 
+     * @param propertyExpression - The property whose domains are to be retrieved.
+     * @return The domains of the property.  A set of sets of (named) equivalence classes.
+     */
+    @SuppressWarnings("unchecked")
+    public Set<Set<OWLClassExpression>> getDomains(OWLObjectPropertyExpression propertyExpression) {
         OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
-        Object object=getAncestorClasses(factory.getOWLObjectSomeValuesFrom(property,factory.getOWLThing()));
+        Object object=getAncestorClasses(factory.getOWLObjectSomeValuesFrom(propertyExpression,factory.getOWLThing()));
         return (Set<Set<OWLClassExpression>>)object;
     }
 
+    /**
+     * use {@link org.semanticweb.HermiT.Reasoner#getRanges(OWLObjectPropertyExpression)}
+     */
+    @Deprecated
     public Set<OWLClassExpression> getRanges(OWLObjectProperty property) {
+        return getRanges((OWLObjectPropertyExpression)property);
+    }
+    /**
+     * Gets the ranges of the given property. A class A is a range of a property P,
+     * if A is a named class such that each P-successor of an individual is necessarily in the extension of A. 
+     * @param propertyExpression - an object property expression
+     * @return A set of (named) classes such that each class in the set is a range for propertyExpression 
+     */
+    public Set<OWLClassExpression> getRanges(OWLObjectPropertyExpression propertyExpression) {
         OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
         Set<OWLClassExpression> result=new HashSet<OWLClassExpression>();
-        Set<Set<OWLClass>> ranges=getAncestorClasses(factory.getOWLObjectSomeValuesFrom(property.getInverseProperty(),factory.getOWLThing()));
+        Set<Set<OWLClass>> ranges=getAncestorClasses(factory.getOWLObjectSomeValuesFrom(propertyExpression.getInverseProperty(),factory.getOWLThing()));
         for (Set<OWLClass> classSet : ranges)
             result.addAll(classSet);
         return result;
     }
+    
+    /**
+     * use {@link org.semanticweb.HermiT.Reasoner#getInverseProperties(OWLObjectPropertyExpression)}
+     */
     @Deprecated
     public Set<Set<OWLObjectProperty>> getInverseProperties(OWLObjectProperty property) {
         Set<OWLObjectProperty> result=new HashSet<OWLObjectProperty>();
@@ -594,40 +879,119 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         setOfSets.add(result);
         return setOfSets;
     }
+    /** 
+     * @param property - an object property expression
+     * @return a set of object property expressions such that each property in th set is equivalent to the inverse of property
+     */
     public Set<OWLObjectPropertyExpression> getInverseProperties(OWLObjectPropertyExpression property) {
         return getEquivalentProperties(property.getInverseProperty());
     }
+    
+    /**
+     * Deprecated, use {@link org.semanticweb.HermiT.Reasoner#isFunctional(OWLObjectPropertyExpression)}
+     */
+    @Deprecated
     public boolean isFunctional(OWLObjectProperty property) {
+        return isFunctional((OWLObjectPropertyExpression)property);
+    }
+    /**
+     * @param propertyExpression - an object property expression
+     * @return true if each individual can have at most one outgoing connection of the specified object property expression  
+     */
+    public boolean isFunctional(OWLObjectPropertyExpression propertyExpression) {
         OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
-        return !isSatisfiable(factory.getOWLObjectMinCardinality(2,property));
+        return !isSatisfiable(factory.getOWLObjectMinCardinality(2,propertyExpression));
     }
 
+    /**
+     * Deprecated, use {@link org.semanticweb.HermiT.Reasoner#isInverseFunctional(OWLObjectPropertyExpression)}
+     */
+    @Deprecated
     public boolean isInverseFunctional(OWLObjectProperty property) {
-        OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
-        return !isSatisfiable(factory.getOWLObjectMinCardinality(2,property.getInverseProperty()));
+        return isInverseFunctional((OWLObjectPropertyExpression)property);
     }
-
+    /**
+     * @param propertyExpression - an object property expression
+     * @return true if each individual can have at most one incoming connection of the specified object property expression  
+     */
+    public boolean isInverseFunctional(OWLObjectPropertyExpression propertyExpression) {
+        OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
+        return !isSatisfiable(factory.getOWLObjectMinCardinality(2,propertyExpression.getInverseProperty()));
+    }
+    
+    /**
+     * Deprecated, use {@link org.semanticweb.HermiT.Reasoner#isIrreflexive(OWLObjectPropertyExpression)}
+     */
+    @Deprecated
     public boolean isIrreflexive(OWLObjectProperty property) {
+        return isIrreflexive((OWLObjectPropertyExpression)property);
+    }
+    /**
+     * @param propertyExpression - an object property expression
+     * @return true if the extension of propertyExpression is an irreflexive relation in each model of the loaded ontology  
+     */
+    public boolean isIrreflexive(OWLObjectPropertyExpression propertyExpression) {
         OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
-        return !isSatisfiable(factory.getOWLObjectHasSelf(property));
+        return !isSatisfiable(factory.getOWLObjectHasSelf(propertyExpression));
     }
 
+    /**
+     * Deprecated, use {@link org.semanticweb.HermiT.Reasoner#isReflexive(OWLObjectPropertyExpression)}
+     */
+    @Deprecated
     public boolean isReflexive(OWLObjectProperty property) {
-        OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
-        return !isSatisfiable(factory.getOWLObjectComplementOf(factory.getOWLObjectHasSelf(property)));
+        return isReflexive((OWLObjectPropertyExpression)property);
     }
+    /**
+     * @param propertyExpression - an object property expression
+     * @return true if the extension of propertyExpression is a reflexive relation in each model of the loaded ontology  
+     */
+    public boolean isReflexive(OWLObjectPropertyExpression propertyExpression) {
+        OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
+        return !isSatisfiable(factory.getOWLObjectComplementOf(factory.getOWLObjectHasSelf(propertyExpression)));
+    }
+    /**
+     * Deprecated, use {@link org.semanticweb.HermiT.Reasoner#isAsymmetric(OWLObjectPropertyExpression)}
+     */
     @Deprecated
     public boolean isAntiSymmetric(OWLObjectProperty property) throws OWLReasonerException {
-        AtomicRole atomicRole=AtomicRole.create(property.getIRI().toString());
-        return m_tableau.isAsymmetric(atomicRole);
+        return isAsymmetric((OWLObjectPropertyExpression)property);
     }
+    /**
+     * Deprecated, use {@link org.semanticweb.HermiT.Reasoner#isAsymmetric(OWLObjectPropertyExpression)}
+     */
+    @Deprecated
     public boolean isAsymmetric(OWLObjectProperty property) {
-        AtomicRole atomicRole=AtomicRole.create(property.getIRI().toString());
-        return m_tableau.isAsymmetric(atomicRole);
+        return isAsymmetric((OWLObjectPropertyExpression)property);
     }
-
+    /**
+     * @param propertyExpression - an object property expression
+     * @return true if the extension of propertyExpression is an asymmetric relation in each model of the loaded ontology 
+     */
+    public boolean isAsymmetric(OWLObjectPropertyExpression propertyExpression) {
+        Role role;
+        if (propertyExpression.getSimplified().isAnonymous()) {
+            AtomicRole atomicRole=AtomicRole.create(propertyExpression.getNamedProperty().getIRI().toString());
+            role=InverseRole.create(atomicRole);
+        } else {
+            role=AtomicRole.create(propertyExpression.getSimplified().asOWLObjectProperty().getIRI().toString());
+        }
+        return m_tableau.isAsymmetric(role);
+    }
+    
+    /**
+     * Deprecated, use {@link org.semanticweb.HermiT.Reasoner#isSymmetric(OWLObjectPropertyExpression)}
+     */
+    @Deprecated
     public boolean isSymmetric(OWLObjectProperty property) {
-        if (property.isOWLTopDataProperty()) return true;        
+        return isSymmetric((OWLObjectPropertyExpression)property);
+    }
+    /**
+     * @param propertyExpression - an object property expression
+     * @return true if the extension of propertyExpression is a symmetric relation in each model of the loaded ontology 
+     */
+    public boolean isSymmetric(OWLObjectPropertyExpression property) {
+        if (property.isOWLTopObjectProperty()) return true;        
         OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
         OWLDataFactory factory=ontologyManager.getOWLDataFactory();
         OWLIndividual individualA=factory.getOWLNamedIndividual(IRI.create("internal:individualA"));
@@ -639,7 +1003,18 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         return !tableau.isABoxSatisfiable();
     }
 
+    /**
+     * Deprecated, use {@link org.semanticweb.HermiT.Reasoner#isTransitive(OWLObjectPropertyExpression)}
+     */
+    @Deprecated
     public boolean isTransitive(OWLObjectProperty property) {
+        return isTransitive((OWLObjectPropertyExpression)property);
+    }
+    /**
+     * @param propertyExpression - an object property expression
+     * @return true if the extension of propertyExpression is a trnsitive relation in each model of the loaded ontology 
+     */
+    public boolean isTransitive(OWLObjectPropertyExpression property) {
         List<OWLObjectPropertyExpression> chain = new ArrayList<OWLObjectPropertyExpression>();
         chain.add(property);
         chain.add(property);
@@ -648,10 +1023,16 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
 
     // Data property inferences
 
+    /**
+     * @return true if the dta property hierarchy has been computed and false otherwise
+     */
     public boolean areDataPropertiesClassified() {
         return m_atomicDataRoleHierarchy!=null;
     }
     
+    /**
+     * Builds the data property hierarchy. 
+     */
     public void classifyDataProperties() {
         if (m_atomicDataRoleHierarchy==null) {
             HierarchyBuilder.Relation<AtomicRole> relation=
@@ -678,6 +1059,13 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         }
     }
     
+    /**
+     * Determines if the property chain represented by subPropertyChain is a sub-property of superObjectPropertyExpression. 
+     * @param subDataProperty - a data property 
+     * @param superDataProperty - a data property
+     * @return true if whenever a pair related with the property subDataProperty is necessarily 
+     *         related with the property superDataProperty and false otherwise
+     */
     public boolean isSubPropertyOf(OWLDataProperty subDataProperty,OWLDataProperty superDataProperty) {
         if (superDataProperty.getIRI().toString().equals(AtomicRole.TOP_DATA_ROLE.getIRI()))
             return true;
@@ -700,20 +1088,41 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         }
     }
     
+    /**
+     * @param dataProperty1 - a data property 
+     * @param dataProperty2 - a data property 
+     * @return true if the extension of dataProperty1 is the same as the extension of dataProperty2 
+     *         in each model of the ontology and false otherwise
+     */
     public boolean isEquivalentProperty(OWLDataProperty dataProperty1,OWLDataProperty dataProperty2) {
         return isSubPropertyOf(dataProperty1,dataProperty2) && isSubPropertyOf(dataProperty2,dataProperty1);
     }
     
+    /**
+     * Returns the most specific direct super-properties of the given property. 
+     * @return a set of sets {S1, ..., Sn} such that the data properties in each set Si are equivalent to each other
+     *         and all returned data properties are direct/most specific super-properties of the given one 
+     */
     public Set<Set<OWLDataProperty>> getSuperProperties(OWLDataProperty property) {
         HierarchyNode<AtomicRole> node=getHierarchyNode(property);
         return dataPropertyNodesToOWLAPI(node.getParentNodes(),OWLManager.createOWLOntologyManager().getOWLDataFactory());
     }
 
+    /**
+     * Returns the most specific direct sub-properties of the given property. 
+     * @return a set of sets {S1, ..., Sn} such that the data properties in each set Si are equivalent to each other
+     *         and all returned data properties are direct/most specific sub-properties of the given one 
+     */
     public Set<Set<OWLDataProperty>> getSubProperties(OWLDataProperty property) {
         HierarchyNode<AtomicRole> node=getHierarchyNode(property);
         return dataPropertyNodesToOWLAPI(node.getChildNodes(),OWLManager.createOWLOntologyManager().getOWLDataFactory());
     }
     
+    /**
+     * Returns the (direct and indirect) super-properties of the given property including the property itself. 
+     * @return a set of sets {S1, ..., Sn} such that the data properties in each set Si are equivalent to each other
+     *         and all returned data properties are super-properties of the given one or equivalent to the given one
+     */
     public Set<Set<OWLDataProperty>> getAncestorProperties(OWLDataProperty property) {
         HierarchyNode<AtomicRole> node=getHierarchyNode(property);
         Set<HierarchyNode<AtomicRole>> ancestorsPlusNode=new HashSet<HierarchyNode<AtomicRole>>(node.getAncestorNodes());
@@ -721,6 +1130,11 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         return dataPropertyNodesToOWLAPI(ancestorsPlusNode,OWLManager.createOWLOntologyManager().getOWLDataFactory());
     }
 
+    /**
+     * Returns the (direct and indirect) sub-properties of the given property including the property itself. 
+     * @return a set of sets {S1, ..., Sn} such that the data properties in each set Si are equivalent to each other
+     *         and all returned data properties are sub-properties of the given one or equivalent to the given one
+     */
     public Set<Set<OWLDataProperty>> getDescendantProperties(OWLDataProperty property) {
         HierarchyNode<AtomicRole> node=getHierarchyNode(property);
         Set<HierarchyNode<AtomicRole>> descendantsPlusNode=new HashSet<HierarchyNode<AtomicRole>>(node.getDescendantNodes());
@@ -728,6 +1142,11 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         return dataPropertyNodesToOWLAPI(descendantsPlusNode,OWLManager.createOWLOntologyManager().getOWLDataFactory());
     }
     
+    /**
+     * Returns properties that are equivalent to the given property. 
+     * @param property - a data property
+     * @return a set of data properties such that all properties in the set are equivalent to the given property
+     */
     public Set<OWLDataProperty> getEquivalentProperties(OWLDataProperty property) {
         HierarchyNode<AtomicRole> node=getHierarchyNode(property);
         return dataPropertiesToOWLAPI(node.getEquivalentElements(),OWLManager.createOWLOntologyManager().getOWLDataFactory());
@@ -742,6 +1161,12 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         return node;
     }
     
+    /**
+     * Gets the domains of the given data property. A class A is the domain of a property P,
+     * if it is a named class such that A is an ancestor of \exists p Top ("p some Thing"). 
+     * @param property - The data property whose domains are to be retrieved.
+     * @return The domains of the property.  A set of sets of (named) equivalence classes.
+     */
     @SuppressWarnings("unchecked")
     public Set<Set<OWLClassExpression>> getDomains(OWLDataProperty property) {
         OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
@@ -749,10 +1174,21 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         return (Set<Set<OWLClassExpression>>)object;
     }
 
+
+    /** 
+     * This method is not supported by HermiT and executing it will result in an UnsupportedOperation error. 
+     * The method is required to implement the OWLReasoner interface.
+     *  
+     * {@inheritDoc}
+     */
     public Set<OWLDataRange> getRanges(OWLDataProperty property) {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * @param property - a data property
+     * @return true if each individual can have at most one outgoing connection of the specified data property
+     */
     public boolean isFunctional(OWLDataProperty property) {
         OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
         return !isSatisfiable(factory.getOWLDataMinCardinality(2,property));
@@ -1412,16 +1848,19 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         public String getReasonerName() {
             return getClass().getPackage().getImplementationTitle();
         }
+        /* (non-Javadoc)
+         * @see org.semanticweb.owlapi.inference.OWLReasonerFactory#createReasoner(org.semanticweb.owlapi.model.OWLOntologyManager, java.util.Set)
+         */
         public OWLReasoner createReasoner(OWLOntologyManager manager,Set<OWLOntology> ontologies) {
             Configuration configuration=new Configuration();
             configuration.ignoreUnsupportedDatatypes=true;
-            Reasoner hermit=new Reasoner(configuration,manager,ontologies);
+            Reasoner hermit=new Reasoner(configuration,manager.getOWLDataFactory(),ontologies);
             return hermit;
         }
     }
    
     // The factory for the reasoner from the Protege plug-in
-    public static class ProtegeReasonerFactory extends ProtegeOWLReasonerFactoryAdapter {
+    public class ProtegeReasonerFactory extends ProtegeOWLReasonerFactoryAdapter {
         public OWLReasoner createReasoner(OWLOntologyManager ontologyManager) {
             // ignore the given manager
             return this.createReasoner(OWLManager.createOWLOntologyManager(),new HashSet<OWLOntology>());

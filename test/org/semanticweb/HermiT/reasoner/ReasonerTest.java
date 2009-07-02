@@ -4,7 +4,9 @@ import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -39,6 +41,104 @@ public class ReasonerTest extends AbstractReasonerTest {
             + "NegativeDataPropertyAssertion(:dp :a \"6\"^^xsd:unsignedInt)";
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
+    }
+    public void testSubAndSuperConcepts() throws Exception {
+        String axioms = "SubClassOf(:C :D)"
+            + "SubClassOf(:D :E)";
+        loadReasonerWithAxioms(axioms);
+        OWLClassExpression c = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#C"));
+        OWLClassExpression d = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#D"));
+        OWLClassExpression e = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#E"));
+        Set<OWLClassExpression> cEquiv=new HashSet<OWLClassExpression>();
+        cEquiv.add(c);
+        Set<OWLClassExpression> dEquiv=new HashSet<OWLClassExpression>();
+        dEquiv.add(d);
+        Set<OWLClassExpression> eEquiv=new HashSet<OWLClassExpression>();
+        eEquiv.add(e);
+        assertTrue(m_reasoner.getAncestorClasses(c).contains(cEquiv));
+        assertTrue(m_reasoner.getAncestorClasses(c).contains(dEquiv));
+        assertTrue(m_reasoner.getAncestorClasses(c).contains(eEquiv));
+        assertTrue(m_reasoner.getAncestorClasses(d).contains(dEquiv));
+        assertTrue(m_reasoner.getAncestorClasses(d).contains(eEquiv));
+        assertTrue(!m_reasoner.getAncestorClasses(d).contains(cEquiv));
+        assertTrue(m_reasoner.getAncestorClasses(e).contains(eEquiv));
+        assertTrue(!m_reasoner.getAncestorClasses(e).contains(cEquiv));
+        assertTrue(!m_reasoner.getAncestorClasses(e).contains(dEquiv));
+        
+        assertTrue(m_reasoner.getDescendantClasses(c).contains(cEquiv));
+        assertTrue(!m_reasoner.getDescendantClasses(c).contains(dEquiv));
+        assertTrue(!m_reasoner.getDescendantClasses(c).contains(eEquiv));
+        assertTrue(m_reasoner.getDescendantClasses(d).contains(cEquiv));
+        assertTrue(m_reasoner.getDescendantClasses(d).contains(dEquiv));
+        assertTrue(!m_reasoner.getDescendantClasses(d).contains(eEquiv));
+        assertTrue(m_reasoner.getDescendantClasses(e).contains(cEquiv));
+        assertTrue(m_reasoner.getDescendantClasses(e).contains(dEquiv));
+        assertTrue(m_reasoner.getDescendantClasses(e).contains(eEquiv));
+        
+        assertTrue(m_reasoner.isSubClassOf(c, c));
+        assertTrue(m_reasoner.isSubClassOf(d, d));
+        assertTrue(m_reasoner.isSubClassOf(e, e));
+        assertTrue(m_reasoner.isSubClassOf(c, d));
+        assertTrue(m_reasoner.isSubClassOf(c, e));
+        assertTrue(m_reasoner.isSubClassOf(d, e));
+        assertTrue(!m_reasoner.isSubClassOf(d, c));
+        assertTrue(!m_reasoner.isSubClassOf(e, c));
+        assertTrue(!m_reasoner.isSubClassOf(e, d));
+    }
+    public void testSubAndSuperRoles() throws Exception {
+        String axioms = "SubObjectPropertyOf(:r :s)"
+            + "SubObjectPropertyOf(:s :t)";
+        loadReasonerWithAxioms(axioms);
+        OWLObjectPropertyExpression r = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
+        OWLObjectPropertyExpression s = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#s"));
+        OWLObjectPropertyExpression t = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#t"));
+        Set<OWLObjectPropertyExpression> rEquiv=new HashSet<OWLObjectPropertyExpression>();
+        rEquiv.add(r);
+        Set<OWLObjectPropertyExpression> sEquiv=new HashSet<OWLObjectPropertyExpression>();
+        sEquiv.add(s);
+        Set<OWLObjectPropertyExpression> tEquiv=new HashSet<OWLObjectPropertyExpression>();
+        tEquiv.add(t);
+        //assertTrue(m_reasoner.getSuperProperties(r).contains(rEquiv));
+        assertTrue(m_reasoner.getSuperProperties(r).contains(sEquiv));
+        assertTrue(m_reasoner.getSuperProperties(r).contains(tEquiv));
+        //assertTrue(m_reasoner.getSuperProperties(s).contains(sEquiv));
+        assertTrue(m_reasoner.getSuperProperties(s).contains(tEquiv));
+        assertTrue(!m_reasoner.getSuperProperties(s).contains(rEquiv));
+        //assertTrue(m_reasoner.getSuperProperties(t).contains(tEquiv));
+        assertTrue(!m_reasoner.getSuperProperties(t).contains(rEquiv));
+        assertTrue(!m_reasoner.getSuperProperties(t).contains(sEquiv));
+        
+        //assertTrue(m_reasoner.getSubProperties(r).contains(rEquiv));
+        assertTrue(!m_reasoner.getSubProperties(r).contains(sEquiv));
+        assertTrue(!m_reasoner.getSubProperties(r).contains(tEquiv));
+        assertTrue(m_reasoner.getSubProperties(s).contains(rEquiv));
+        //assertTrue(m_reasoner.getSubProperties(s).contains(sEquiv));
+        assertTrue(!m_reasoner.getSubProperties(s).contains(tEquiv));
+        assertTrue(m_reasoner.getSubProperties(t).contains(rEquiv));
+        assertTrue(m_reasoner.getSubProperties(t).contains(sEquiv));
+        //assertTrue(m_reasoner.getSubProperties(t).contains(tEquiv));
+        
+        assertTrue(m_reasoner.isSubPropertyOf(r, r));
+        assertTrue(m_reasoner.isSubPropertyOf(s, s));
+        assertTrue(m_reasoner.isSubPropertyOf(t, t));
+        assertTrue(m_reasoner.isSubPropertyOf(r, s));
+        assertTrue(m_reasoner.isSubPropertyOf(r, t));
+        assertTrue(m_reasoner.isSubPropertyOf(s, t));
+        assertTrue(!m_reasoner.isSubPropertyOf(s, r));
+        assertTrue(!m_reasoner.isSubPropertyOf(t, r));
+        assertTrue(!m_reasoner.isSubPropertyOf(t, s));
+    }
+    public void testSubRolesChain() throws Exception {
+        String axioms = "SubObjectPropertyOf(ObjectPropertyChain(:r) :s)";
+        loadReasonerWithAxioms(axioms);
+        OWLObjectPropertyExpression r = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
+        OWLObjectPropertyExpression s = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#s"));
+        Set<OWLObjectPropertyExpression> requiv=new HashSet<OWLObjectPropertyExpression>();
+        requiv.add(r);
+        Set<OWLObjectPropertyExpression> sequiv=new HashSet<OWLObjectPropertyExpression>();
+        sequiv.add(s);
+        assertTrue(!m_reasoner.getSubProperties(s).contains(sequiv));
+        assertTrue(m_reasoner.getSubProperties(s).contains(requiv));
     }
     public void testHasKeyEntailment() throws Exception {
         String axioms = "HasKey( :Person () ( :hasSSN ) )"

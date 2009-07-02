@@ -3,7 +3,7 @@ package org.semanticweb.HermiT.owl_wg_tests;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-public class AllNonRejectedNonExtraCreditWGTests {
+public class AllNonRejectedShouldPassWGTests {
     public static Test suite() throws Exception {
         WGTestRegistry wgTestRegistry=new WGTestRegistry();
         TestSuite suite=new TestSuite("OWL WG Non-Rejected Tests");
@@ -39,8 +39,8 @@ public class AllNonRejectedNonExtraCreditWGTests {
                 ) {
                     wgTestDescriptor.addTestsToSuite(suite);
                 }
-//               if (wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-664") || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-206")  || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-204") || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-663") || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-203") || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-202")) {
-//                   wgTestDescriptor.addTestsToSuite(suite); // timeout consistency, but entailment ok
+//               if (wgTestDescriptor.identifier.startsWith("WebOnt-I5.8-001")) {
+//                   wgTestDescriptor.addTestsToSuite(suite); 
 //               }
             }
         return suite;

@@ -6,7 +6,7 @@
     <!-- Note that on each released build, the ${updatefile} on the web site
          should be replaced, and the new version of the plugin should be
          posted at the (auto-generated) URL in that file. -->
-    <property name="version" value="0.9.4"/>
+    <property name="version" value="0.9.4alpha"/>
 
     <!-- general info -->
     <property name="homepage" value="http://hermit-reasoner.com/"/>
@@ -29,8 +29,8 @@
     <property name="automaton" value="${3rdpartydir}/automaton/1.11-1/automaton.jar"/>
     <property name="jautomaton" value="${3rdpartydir}/jautomaton/jautomata-core-2.0-alpha-1.jar"/>
     <property name="junit" value="${3rdpartydir}/junit/4.4/junit-4.4.jar"/>
-    <property name="protegeapp" value="${3rdpartydir}/protege/4.0/org.protege.editor.core.application.jar"/>
-    <property name="protegeowl" value="${3rdpartydir}/protege/4.0/org.protege.editor.owl.jar"/>
+    <property name="protegeapp" value="${3rdpartydir}/protege/4.1/org.protege.editor.core.application.jar"/>
+    <property name="protegeowl" value="${3rdpartydir}/protege/4.1/org.protege.editor.owl.jar"/>
 
     <!-- to generate a debug version, use -Ddebug=on argument when running ant -->
     <property name="debug" value="off"/>

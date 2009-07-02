@@ -6,7 +6,7 @@ import java.io.FileWriter;
 
 import junit.framework.TestCase;
 
-import org.coode.owl.rdf.rdfxml.RDFXMLRenderer;
+import org.coode.owlapi.rdf.rdfxml.RDFXMLRenderer;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.tableau.InterruptException;
@@ -15,7 +15,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public abstract class AbstractTest extends TestCase {
-    public static int TIMEOUT=6000;
+    public static int TIMEOUT=300000;
     protected static final File TEMPORARY_DIRECTORY=new File(new File(System.getProperty("java.io.tmpdir")),"WG-tests");
 
     protected WGTestDescriptor m_wgTestDescriptor;
