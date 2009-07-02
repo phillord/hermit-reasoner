@@ -64,7 +64,7 @@ public abstract class InterningManager<E> {
             m_resizeThreshold=(int)(newEntriesLength*LOAD_FACTOR);
             objectEntryIndex=getIndexFor(hashCode,m_entries.length);
         }
-        Entry<E> newEntry=new Entry<E>(object,hashCode,m_entries[objectEntryIndex]);
+        Entry<E> newEntry=new Entry<E>(object,m_referenceQueue,hashCode,m_entries[objectEntryIndex]);
         m_entries[objectEntryIndex]=newEntry;
         m_size++;
         return object;
@@ -109,8 +109,8 @@ public abstract class InterningManager<E> {
         public final int m_hashCode;
         public Entry<E> m_next;
         
-        public Entry(E object,int hashCode,Entry<E> next) {
-            super(object);
+        public Entry(E object,ReferenceQueue<E> referenceQueue,int hashCode,Entry<E> next) {
+            super(object,referenceQueue);
             m_hashCode=hashCode;
             m_next=next;
         }
