@@ -34,6 +34,7 @@ public class OWLAxiomsExpressivity extends OWLAxiomVisitorAdapter implements OWL
     public boolean m_hasInverseRoles;
     public boolean m_hasNominals;
     public boolean m_hasDatatypes;
+    public boolean m_hasSWRLRules;
 
     public OWLAxiomsExpressivity(OWLAxioms axioms) {
         for (OWLClassExpression[] inclusion : axioms.m_conceptInclusions)
@@ -61,6 +62,7 @@ public class OWLAxiomsExpressivity extends OWLAxiomVisitorAdapter implements OWL
             m_hasDatatypes=true;
         for (OWLIndividualAxiom fact : axioms.m_facts)
             fact.accept(this);
+        m_hasSWRLRules=!axioms.m_rules.isEmpty();
     }
     
     protected void visitProperty(OWLObjectPropertyExpression object) {

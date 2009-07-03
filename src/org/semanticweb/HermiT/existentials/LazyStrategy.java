@@ -23,6 +23,7 @@ public class LazyStrategy extends AbstractExpansionStrategy implements Serializa
     private static final long serialVersionUID=-64673639237063636L;
     
     protected final Set<Node> m_nodesToExpand=new HashSet<Node>();
+    protected final Set<Node> m_nodesWithFinishedExpansion=new HashSet<Node>();
     protected final Set<Node> m_nodesToCheckBlocking=new HashSet<Node>();
     protected boolean expandOneAtATime=false;
     protected int numExpansions=0;
@@ -64,7 +65,8 @@ public class LazyStrategy extends AbstractExpansionStrategy implements Serializa
             System.out.println("No more extension changes...");
         }
         m_interruptFlag.checkInterrupt();
-        m_nodesToExpand.clear();
+        m_nodesToExpand.removeAll(m_nodesWithFinishedExpansion);
+        m_nodesWithFinishedExpansion.clear();
         return extensionsChanged;
     }
 //    public boolean expandExistentials(boolean finalChance) {
@@ -131,46 +133,42 @@ public class LazyStrategy extends AbstractExpansionStrategy implements Serializa
     protected boolean doExpansion(Node node) {
         boolean extensionsChanged=false;
         TableauMonitor monitor=m_tableau.getTableauMonitor();
-        //if (node.isActive() && !node.isBlocked() && node.hasUnprocessedExistentials()) {
-            // The node's set of unprocessed existentials may be changed during operation, so make a local copy to loop over.
-            m_processedExistentials.clear();
-            m_processedExistentials.addAll(node.getUnprocessedExistentials());
-            for (int index=0;index<m_processedExistentials.size();index++) {
-                ExistentialConcept existentialConcept=m_processedExistentials.get(index);
-                if (existentialConcept instanceof AtLeastConcept) {
-                    AtLeastConcept atLeastConcept=(AtLeastConcept)existentialConcept;
-                    switch (isSatisfied(atLeastConcept,node)) {
-                    case NOT_SATISFIED:
-                        expandExistential(atLeastConcept,node);
-                        extensionsChanged=true;
-                        break;
-                    case PERMANENTLY_SATISFIED: // not satisfied by a nominal so that the NN/NI rule can break the existential 
-                        m_existentialExpansionManager.markExistentialProcessed(existentialConcept,node);
-                        if (monitor!=null)
-                            monitor.existentialSatisfied(atLeastConcept,node);
-                        break;
-                    case CURRENTLY_SATISFIED: // satisfied until the NN/NI rule is applied and after which the existential might no longer be satisfied
-                        // do nothing
-                        if (monitor!=null)
-                            monitor.existentialSatisfied(atLeastConcept,node);
-                        break;
-                    }
-                } else if (existentialConcept instanceof ExistsDescriptionGraph) {
-                    ExistsDescriptionGraph existsDescriptionGraph=(ExistsDescriptionGraph)existentialConcept;
-                    if (!m_descriptionGraphManager.isSatisfied(existsDescriptionGraph,node)) {
-                        m_descriptionGraphManager.expand(existsDescriptionGraph,node);
-                        extensionsChanged=true;
-                    }
-                    else {
-                        if (monitor!=null)
-                            monitor.existentialSatisfied(existsDescriptionGraph,node);
-                    }
-                    m_existentialExpansionManager.markExistentialProcessed(existentialConcept,node);
-                } else
-                    throw new IllegalStateException("Unsupported type of existential.");
-                m_interruptFlag.checkInterrupt();
+        ExistentialConcept existentialConcept=node.getSomeUnprocessedExistential();
+        if (existentialConcept instanceof AtLeastConcept) {
+            AtLeastConcept atLeastConcept=(AtLeastConcept)existentialConcept;
+            switch (isSatisfied(atLeastConcept,node)) {
+            case NOT_SATISFIED:
+                expandExistential(atLeastConcept,node); // this will also mark the existential as processed
+                extensionsChanged=true;
+                break;
+            case PERMANENTLY_SATISFIED: // not satisfied by a nominal so that the NN/NI rule can break the existential 
+                m_existentialExpansionManager.markExistentialProcessed(existentialConcept,node);
+                if (monitor!=null)
+                    monitor.existentialSatisfied(atLeastConcept,node);
+                break;
+            case CURRENTLY_SATISFIED: // satisfied until the NN/NI rule is applied and after which the existential might no longer be satisfied
+                // do nothing
+                if (monitor!=null)
+                    monitor.existentialSatisfied(atLeastConcept,node);
+                break;
             }
-        //}
+        } else if (existentialConcept instanceof ExistsDescriptionGraph) {
+            ExistsDescriptionGraph existsDescriptionGraph=(ExistsDescriptionGraph)existentialConcept;
+            if (!m_descriptionGraphManager.isSatisfied(existsDescriptionGraph,node)) {
+                m_descriptionGraphManager.expand(existsDescriptionGraph,node);
+                extensionsChanged=true;
+            }
+            else {
+                if (monitor!=null)
+                    monitor.existentialSatisfied(existsDescriptionGraph,node);
+            }
+            m_existentialExpansionManager.markExistentialProcessed(existentialConcept,node);
+        } else
+            throw new IllegalStateException("Unsupported type of existential.");
+        if (!node.hasUnprocessedExistentials()) {
+            m_nodesWithFinishedExpansion.add(node);
+        }
+        m_interruptFlag.checkInterrupt();
         return extensionsChanged;
     }
 //    public boolean expandExistentials(boolean finalChance) {

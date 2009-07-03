@@ -4,6 +4,7 @@ package org.semanticweb.HermiT.structural;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -91,7 +92,20 @@ import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 import org.semanticweb.owlapi.model.OWLSymmetricObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLTransitiveObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLTypedLiteral;
+import org.semanticweb.owlapi.model.SWRLAtom;
+import org.semanticweb.owlapi.model.SWRLBuiltInAtom;
+import org.semanticweb.owlapi.model.SWRLClassAtom;
+import org.semanticweb.owlapi.model.SWRLDataRangeAtom;
+import org.semanticweb.owlapi.model.SWRLDataValuedPropertyAtom;
+import org.semanticweb.owlapi.model.SWRLDifferentFromAtom;
+import org.semanticweb.owlapi.model.SWRLIndividualArgument;
+import org.semanticweb.owlapi.model.SWRLIndividualVariable;
+import org.semanticweb.owlapi.model.SWRLLiteralArgument;
+import org.semanticweb.owlapi.model.SWRLLiteralVariable;
+import org.semanticweb.owlapi.model.SWRLObjectPropertyAtom;
+import org.semanticweb.owlapi.model.SWRLObjectVisitor;
 import org.semanticweb.owlapi.model.SWRLRule;
+import org.semanticweb.owlapi.model.SWRLSameAsAtom;
 
 /**
  * This class implements the structural transformation from our new tableau paper. This transformation departs in the following way from the paper: it keeps the concepts of the form \exists R.{ a_1, ..., a_n }, \forall R.{ a_1, ..., a_n }, and \forall R.\neg { a } intact. These concepts are then clausified in a more efficient way.
@@ -133,7 +147,7 @@ public class OWLNormalization {
         // unnecessary conjuncts/disjuncts) and introduce fresh atomic concepts for complex 
         // concepts
         // m_axioms.m_conceptInclusions contains the normalized axioms after the normalization
-        normalizeInclusions(axiomVisitor.m_inclusionsAsDisjunctions, axiomVisitor.m_dataRangeInclusionsAsDisjunctions);
+        normalizeInclusions(axiomVisitor.m_inclusionsAsDisjunctions, axiomVisitor.m_dataRangeInclusionsAsDisjunctions, axiomVisitor.m_rules);
     }
     protected void addFact(OWLIndividualAxiom axiom) {
         m_axioms.m_facts.add(axiom);
@@ -187,12 +201,15 @@ public class OWLNormalization {
             return false;
         return ((OWLObjectOneOf)operand).getIndividuals().size()==1;
     }
-    protected void normalizeInclusions(List<OWLClassExpression[]> inclusions, List<OWLDataRange[]> dataRangeInclusions) {
+    protected void normalizeInclusions(List<OWLClassExpression[]> inclusions, List<OWLDataRange[]> dataRangeInclusions, Collection<SWRLRule> rules) {
         NormalizationVisitor normalizer=new NormalizationVisitor(inclusions, dataRangeInclusions);
-//        // simplify data ranges for custom defined datatypes
-//        for (OWLDatatype dt : m_customDatatypeDefinitions.keySet()) {
-//            m_customDatatypeDefinitions.put(dt, m_expressionManager.getSimplified(m_customDatatypeDefinitions.get(dt)));
-//        }
+        // normalise rules, this might add new concept inclusions in case a rule atom uses a complex concept
+        RuleNormalizer ruleNormalizer=new RuleNormalizer(inclusions,rules);
+        for (SWRLRule rule : rules) {
+            ruleNormalizer.visit(rule);
+        }
+        m_axioms.m_rules.addAll(rules);
+        // normalise all concept inclusions
         while (!inclusions.isEmpty()) {
             OWLClassExpression simplifiedDescription=m_expressionManager.getSimplified(m_factory.getOWLObjectUnionOf(inclusions.remove(inclusions.size()-1)));
             if (!simplifiedDescription.isOWLThing()) {
@@ -366,12 +383,14 @@ public class OWLNormalization {
     
     protected class AxiomVisitor implements OWLAxiomVisitor {
         protected final List<OWLClassExpression[]> m_inclusionsAsDisjunctions;
-        List<OWLDataRange[]> m_dataRangeInclusionsAsDisjunctions;
+        protected final List<OWLDataRange[]> m_dataRangeInclusionsAsDisjunctions;
+        protected final Collection<SWRLRule> m_rules;
         protected final boolean[] m_alreadyExists;
 
         public AxiomVisitor() {
             m_inclusionsAsDisjunctions=new ArrayList<OWLClassExpression[]>();
             m_dataRangeInclusionsAsDisjunctions=new ArrayList<OWLDataRange[]>();
+            m_rules=new HashSet<SWRLRule>();
             m_alreadyExists=new boolean[1];
         }
 
@@ -638,8 +657,11 @@ public class OWLNormalization {
 
         // Rules
         
+        @SuppressWarnings("unchecked")
         public void visit(SWRLRule rule) {
-            throw new IllegalArgumentException("SWRL rules are not supported yet.");
+            for (SWRLAtom headAtom : rule.getHead()) {
+                m_rules.add(m_factory.getSWRLRule(rule.getBody(), Collections.singleton(headAtom)));
+            }
         }
     }
 
@@ -833,6 +855,61 @@ public class OWLNormalization {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    protected class RuleNormalizer implements SWRLObjectVisitor {
+        // As usual, only variables that occur in the antecedent of a rule may occur in the consequent (a condition usually referred to as "safety")
+        protected final Collection<SWRLRule> m_rules;
+        protected final Collection<OWLClassExpression[]> m_newInclusions;
+        protected final boolean[] m_alreadyExists;
+        
+        public RuleNormalizer(Collection<OWLClassExpression[]> newInclusions, Collection<SWRLRule> rules) {
+            m_rules=rules;
+            m_newInclusions=newInclusions;
+            m_alreadyExists=new boolean[1];
+        }
+        
+        public void visit(SWRLRule node) {
+            for(SWRLAtom atom : node.getBody()) {
+                atom.accept(this);
+            }
+            for(SWRLAtom atom : node.getHead()) {
+                atom.accept(this);
+            }
+        }
+        public void visit(SWRLClassAtom node) {
+            OWLClassExpression definition=getDefinitionFor(node.getPredicate(),m_alreadyExists);
+            if (!m_alreadyExists[0]) 
+                m_newInclusions.add(new OWLClassExpression[] {negative(definition),node.getPredicate()});
+            node=m_factory.getSWRLClassAtom(definition, node.getArgument());
+        }
+        public void visit(SWRLDataRangeAtom node) {
+        }
+        public void visit(SWRLObjectPropertyAtom node) {
+            OWLObjectPropertyExpression ope=node.getPredicate();
+            if (ope.getSimplified().isAnonymous()) {
+                node=m_factory.getSWRLObjectPropertyAtom(ope.getNamedProperty(), node.getSecondArgument(), node.getFirstArgument());
+            } else {
+                node=m_factory.getSWRLObjectPropertyAtom(ope.getSimplified(), node.getFirstArgument(), node.getSecondArgument());
+            }
+        }
+        public void visit(SWRLDataValuedPropertyAtom node) {
+        }
+        public void visit(SWRLBuiltInAtom node) {
+        }
+        public void visit(SWRLSameAsAtom node) {
+        }
+        public void visit(SWRLDifferentFromAtom node) {
+        }
+        public void visit(SWRLLiteralVariable node) {
+        }
+        public void visit(SWRLIndividualVariable node) {
+        }
+        public void visit(SWRLIndividualArgument node) {
+        }
+        public void visit(SWRLLiteralArgument node) {
+        }
+    }
+    
     /**
      * checks the polarity
      */

@@ -16,6 +16,7 @@ import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
+import org.semanticweb.owlapi.model.SWRLRule;
 
 public class OWLAxioms {
     public final Set<OWLClass> m_classes;
@@ -37,6 +38,7 @@ public class OWLAxioms {
     public final Collection<OWLIndividualAxiom> m_facts;
     public final Set<OWLHasKeyAxiom> m_hasKeys;
     public final Set<String> m_definedDatatypesIRIs; // contains custom datatypes from DatatypeDefinition axioms
+    public final Collection<SWRLRule> m_rules;
     
     public OWLAxioms() {
         m_classes=new HashSet<OWLClass>();
@@ -58,6 +60,7 @@ public class OWLAxioms {
         m_facts=new HashSet<OWLIndividualAxiom>();
         m_hasKeys=new HashSet<OWLHasKeyAxiom>();
         m_definedDatatypesIRIs=new HashSet<String>();
+        m_rules=new HashSet<SWRLRule>();
     }
     
     public static class ComplexObjectPropertyInclusion {
