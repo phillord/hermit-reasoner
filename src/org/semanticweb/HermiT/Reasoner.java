@@ -183,7 +183,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
      * the reasoner, the given configuration determines the parameters for blocking, expansion strategy etc. 
      * The data factory of the given manager is used to create fresh concepts during the preprocessing phase if necessary. 
      * @param configuration - a configuration in which parameters can be defined such as the blocking strategy to be used etc
-     * @param ontologyManager - the data factory of this manager will be used in the preprocessing phase
+     * @param dataFactory - the data factory to be used in the preprocessing phase
      * @param importClosure - a set of ontologies that MUST contain all the imports for the ontologies in the set
      */
     public Reasoner(Configuration configuration,OWLDataFactory dataFactory,Set<OWLOntology> importClosure) {
@@ -301,7 +301,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
     /**
      * Required for the OWLReasoner interface, but HermiT does not support this method. All loaded ontologies end up in 
      * one set of clauses and we do not keep track of what came from where, so it will throw an UnsupportedOperation exception.
-     * {@inheritdoc} 
+     * {@inheritDoc} 
      */
     public void unloadOntologies(Set<OWLOntology> inOntologies) {
         throw new UnsupportedOperationException();
@@ -324,7 +324,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
     
     /**
      * Same as clearOntologies() in HermiT. 
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public void dispose() {
         clearOntologies();
@@ -335,7 +335,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
     /**
      * Required for the OWLReasoner interface, but HermiT does not support this method and will throw an 
      * UnsupportedOperation exception.
-     * {@inheritdoc} 
+     * {@inheritDoc} 
      */
     public OWLEntity getCurrentEntity() {
         throw new UnsupportedOperationException();
@@ -990,14 +990,14 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
      * @param propertyExpression - an object property expression
      * @return true if the extension of propertyExpression is a symmetric relation in each model of the loaded ontology 
      */
-    public boolean isSymmetric(OWLObjectPropertyExpression property) {
-        if (property.isOWLTopObjectProperty()) return true;        
+    public boolean isSymmetric(OWLObjectPropertyExpression propertyExpression) {
+        if (propertyExpression.isOWLTopObjectProperty()) return true;        
         OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
         OWLDataFactory factory=ontologyManager.getOWLDataFactory();
         OWLIndividual individualA=factory.getOWLNamedIndividual(IRI.create("internal:individualA"));
         OWLIndividual individualB=factory.getOWLNamedIndividual(IRI.create("internal:individualB"));
-        OWLAxiom assertion=factory.getOWLObjectPropertyAssertionAxiom(property,individualA,individualB);
-        OWLObjectAllValuesFrom all=factory.getOWLObjectAllValuesFrom(property, factory.getOWLObjectComplementOf(factory.getOWLObjectOneOf(individualA)));
+        OWLAxiom assertion=factory.getOWLObjectPropertyAssertionAxiom(propertyExpression,individualA,individualB);
+        OWLObjectAllValuesFrom all=factory.getOWLObjectAllValuesFrom(propertyExpression, factory.getOWLObjectComplementOf(factory.getOWLObjectOneOf(individualA)));
         OWLAxiom assertion2=factory.getOWLClassAssertionAxiom(all, individualB);
         Tableau tableau=getTableau(ontologyManager,assertion,assertion2);
         return !tableau.isABoxSatisfiable();
@@ -1014,11 +1014,11 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
      * @param propertyExpression - an object property expression
      * @return true if the extension of propertyExpression is a trnsitive relation in each model of the loaded ontology 
      */
-    public boolean isTransitive(OWLObjectPropertyExpression property) {
+    public boolean isTransitive(OWLObjectPropertyExpression propertyExpression) {
         List<OWLObjectPropertyExpression> chain = new ArrayList<OWLObjectPropertyExpression>();
-        chain.add(property);
-        chain.add(property);
-        return isSubPropertyOf(chain, property);
+        chain.add(propertyExpression);
+        chain.add(propertyExpression);
+        return isSubPropertyOf(chain, propertyExpression);
     }
 
     // Data property inferences

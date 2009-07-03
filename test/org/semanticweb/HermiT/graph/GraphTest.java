@@ -139,7 +139,6 @@ public class GraphTest extends AbstractReasonerTest {
         assertFalse(tableau.isSatisfiable());
     }
     
-    @SuppressWarnings("unchecked")
     public void testGraph1() throws Exception {
         m_descriptionGraphs.add(G(
             new String[] {
