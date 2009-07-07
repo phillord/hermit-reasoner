@@ -1,0 +1,51 @@
+- Matthew added a new version of the OWLReasoner interface to the OWL
+API and we do not yet implement it (we have to talk with Matthew about 
+non-implementable methods and get them removed) 
+task assigned to: Giorgos
+
+- Protege is a bit behind, but the Protege reasoner interface will
+most likely also change soon to reflect the new OWLReasoner interface
+changes. 
+task assigned to: wait until we know more
+
+- We need to check acyclicity of datatype definitions.
+task assigned to:  Rob
+
+- The OWL WG test harness is currently extended to work with both the
+old and the new OWL API. Until that is done, HermiT can not be used
+with the test harness and once that is completed, we have to adapt the
+HermiT test runner to make it work again.
+task assigned to: Birte
+
+- There is still a Java Task: "TODO: Minimazation caused some problems
+in the translation of concepts. I need to first fully integrate with
+HermiT and then look on this again. "
+task assigned to: Girgos
+
+- We throw UnsupportedOperation exceptions for the methods
+getRanges(OWLDataProperty property), getLoadedOntologies(), and
+unloadOntologies(Set<OWLOntology> inOntologies),
+getDataPropertyRelationships(OWLNamedIndividual individual),
+getRelatedValues(OWLNamedIndividual subject,OWLDataPropertyExpression
+property). Some methods might not be implementable. In that case we
+should point this out to Matthew and get rid of them, other can be
+implemented and we should check how or see why we do not want to
+support them.
+task assigned to: Giorgos
+
+- Blank node handling has not been tested much, so tests
+have to be done and bugs should be fixed should they be found.
+task assigned to: Birte
+
+- List datatype map and supported semantics in the documentation.
+task assigned to: Birte
+
+Syntax optimisation to handle concepts = 257 hasDP.byte
+task assigned to: Birte
+
+- Integrate optimised classification code into the main branch
+task assigned to: Rob
+
+- Optimise the rule set/rule application so that HermiT can deal with
+  SNOMED.
+task assigned to: ???
