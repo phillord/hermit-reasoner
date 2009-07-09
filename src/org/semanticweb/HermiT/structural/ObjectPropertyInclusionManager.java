@@ -18,15 +18,15 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import rationals.Automaton;
 import rationals.State;
 import rationals.Transition;
+import rationals.transformations.Normalizer;
+import rationals.transformations.Reducer;
 
 public class ObjectPropertyInclusionManager {
     protected final OWLDataFactory m_factory;
     protected final Graph<OWLObjectPropertyExpression> m_subObjectProperties;
     protected final Set<OWLObjectPropertyExpression> m_transitiveObjectProperties;
     protected final Map<OWLObjectAllValuesFrom,OWLClassExpression> m_replacedDescriptions;
-    /**
-     * gstoil additions
-     */
+    
     protected final Map<OWLObjectPropertyExpression,Automaton> m_automataForComplexRoles;
     protected final Set<OWLObjectPropertyExpression> m_nonSimpleRoles;                                                                                                                                          
 
@@ -35,10 +35,7 @@ public class ObjectPropertyInclusionManager {
         m_subObjectProperties=new Graph<OWLObjectPropertyExpression>();
         m_transitiveObjectProperties=new HashSet<OWLObjectPropertyExpression>();
         m_replacedDescriptions=new HashMap<OWLObjectAllValuesFrom,OWLClassExpression>();
-
-        /**
-         * gstoil additions
-         */
+ 
         m_automataForComplexRoles = new HashMap<OWLObjectPropertyExpression,Automaton>();
         m_nonSimpleRoles = new HashSet<OWLObjectPropertyExpression>();
 
@@ -47,11 +44,7 @@ public class ObjectPropertyInclusionManager {
     public void prepareTransformation(OWLAxioms axioms) {
         for (OWLObjectPropertyExpression[] inclusion : axioms.m_simpleObjectPropertyInclusions)
             addInclusion(inclusion[0],inclusion[1]);
-        /*
-         * Previous HermiT code
-        */ 
-//        for (OWLAxioms.ComplexObjectPropertyInclusion inclusion : axioms.m_complexObjectPropertyInclusions)
-//              addInclusion(inclusion.m_subObjectProperties,inclusion.m_superObjectProperties);
+ 
         AutomataConstructionManager automataBuilder = new AutomataConstructionManager();
         m_automataForComplexRoles.putAll( automataBuilder.createAutomata( axioms.m_simpleObjectPropertyInclusions, axioms.m_complexObjectPropertyInclusions ) );
         m_nonSimpleRoles.addAll( automataBuilder.getM_nonSimpleRoles() );
@@ -76,24 +69,7 @@ public class ObjectPropertyInclusionManager {
         m_subObjectProperties.addEdge(superObjectProperty,subObjectProperty);
         m_subObjectProperties.addEdge(superObjectProperty.getInverseProperty().getSimplified(),subObjectProperty.getInverseProperty().getSimplified());
     }
-    // *************************************
-    // Birte: I commented this out because it seems we no longer need this and it is not good to accumulated unused old crap. Giorgos can you delete this if you don't need it or do you need it for something?
-    // *************************************
-//    public void addInclusion(OWLObjectPropertyExpression[] subObjectProperties,OWLObjectPropertyExpression superObjectProperty) {
-//        if (subObjectProperties.length==1)
-//            addInclusion(subObjectProperties[0],superObjectProperty);
-//        else if (subObjectProperties.length==2 && subObjectProperties[0].equals(superObjectProperty) && subObjectProperties[1].equals(superObjectProperty)) {
-//            m_transitiveObjectProperties.add(superObjectProperty.getSimplified());
-//            m_transitiveObjectProperties.add(superObjectProperty.getInverseProperty().getSimplified());
-//        }
-//        else
-//            throw new IllegalArgumentException("Object property chains not supported yet.");
-//    }
     public Map<OWLObjectPropertyExpression,Automaton> rewriteAxioms(OWLAxioms axioms) {
-        /**
-         * gstoil additions modifications
-         */
-//        m_subObjectProperties.transitivelyClose();
         for (OWLClassExpression[] inclusion : axioms.m_conceptInclusions)
             for (int index=0;index<inclusion.length;index++){
             	if(inclusion[index] instanceof OWLObjectCardinalityRestriction)
@@ -138,7 +114,6 @@ public class ObjectPropertyInclusionManager {
                 for( int i =0 ; i<transitionsIterator.length ; i++ ) {
                         Transition trans = (Transition) transitionsIterator[i];
                         fromStateConcept = mapOfNewConceptNames.get( trans.start() ).getComplementNNF();
-
                         toStateConcept = mapOfNewConceptNames.get( trans.end() );
                         
                         if( trans.label() == null )
@@ -156,33 +131,11 @@ public class ObjectPropertyInclusionManager {
         m_replacedDescriptions.clear();
         
         return m_automataForComplexRoles;
-//        m_automataForComplexRoles.clear();
-//        m_nonSimpleRoles.clear();
-        /**
-         * @previous code simulating an automaton for transitive roles and sub-roles
-         */
-//      for (Map.Entry<OWLObjectAllValuesFrom,OWLClassExpression> mapping : m_replacedDescriptions.entrySet()) {
-//      OWLObjectAllValuesFrom replacedConcept=mapping.getKey();
-//      OWLClassExpression replacement=mapping.getValue();
-//              axioms.m_conceptInclusions.add(new OWLClassExpression[] { replacement.getComplementNNF(),replacedConcept });
-//            for (OWLObjectPropertyExpression transitiveSubObjectProperty : getTransitiveSubObjectProperties(replacedConcept.getProperty())) {
-//                OWLObjectAllValuesFrom consequentAll=m_factory.getOWLObjectAllValuesFrom(transitiveSubObjectProperty,replacedConcept.getFiller());
-//                OWLClassExpression consequentReplacement=m_replacedDescriptions.get(consequentAll);
-//                OWLObjectAllValuesFrom allConsequentReplacement=m_factory.getOWLObjectAllValuesFrom(transitiveSubObjectProperty,consequentReplacement);
-//                axioms.m_conceptInclusions.add(new OWLClassExpression[] { replacement.getComplementNNF(),allConsequentReplacement });
-//            }
-//        }
-//        m_replacedDescriptions.clear();
     }
     protected OWLClassExpression replaceDescriptionIfNecessary(OWLClassExpression desc) {
-        /**
-         * gstoil modifications/additions
-         */
         if (desc instanceof OWLObjectAllValuesFrom) {
             OWLObjectAllValuesFrom objectAll=(OWLObjectAllValuesFrom)desc;
             OWLObjectPropertyExpression objectProperty=objectAll.getProperty();
-//            Set<OWLObjectPropertyExpression> transitiveSubObjectProperties=getTransitiveSubObjectProperties(objectProperty);
-//            if (!transitiveSubObjectProperties.isEmpty()) {
             if( m_automataForComplexRoles.containsKey( objectProperty ) ){
                 OWLClassExpression replacedConcept=getReplacementFor(objectAll);
                 String initialState = m_automataForComplexRoles.get( objectProperty ).initials().toArray()[0].toString();
@@ -190,10 +143,6 @@ public class ObjectPropertyInclusionManager {
                 OWLClassExpression replacement = m_factory.getOWLClass(URI.create("internal:all#"+indexOfReplacedConcept+initialState));
                 if (objectAll.getFiller() instanceof OWLObjectComplementOf || objectAll.getFiller().equals(m_factory.getOWLNothing()))
                 	replacement = m_factory.getOWLClass(URI.create("internal:all#"+indexOfReplacedConcept+initialState)).getComplementNNF();
-//                for (OWLObjectPropertyExpression transitiveSubObjectProperty : transitiveSubObjectProperties) {
-//                    OWLObjectAllValuesFrom subObjectAll=m_factory.getOWLObjectAllValuesFrom(transitiveSubObjectProperty,objectAll.getFiller());
-//                    getReplacementFor(subObjectAll);
-//                }
                 return replacement;
             }
         }
@@ -203,26 +152,10 @@ public class ObjectPropertyInclusionManager {
         OWLClassExpression replacement=m_replacedDescriptions.get(objectAll);
         if (replacement==null) {
             replacement=m_factory.getOWLClass(URI.create("internal:all#"+m_replacedDescriptions.size()));
-//            if (objectAll.getFiller() instanceof OWLObjectComplementOf || objectAll.getFiller().equals(m_factory.getOWLNothing()))
-//                replacement=replacement.getComplementNNF();
             m_replacedDescriptions.put(objectAll,replacement);
         }
         return replacement;
     }
-    /**
-     * gstoil This is not used anymore
-     */
-    protected Set<OWLObjectPropertyExpression> getTransitiveSubObjectProperties(OWLObjectPropertyExpression objectProperty) {
-        Set<OWLObjectPropertyExpression> result=new HashSet<OWLObjectPropertyExpression>();
-        if (m_transitiveObjectProperties.contains(objectProperty))
-            result.add(objectProperty);
-        Set<OWLObjectPropertyExpression> subObjectProperties=m_subObjectProperties.getSuccessors(objectProperty);
-        for (OWLObjectPropertyExpression subObjectProperty : subObjectProperties)
-            if (m_transitiveObjectProperties.contains(subObjectProperty))
-                result.add(subObjectProperty);
-        return result;
-    }
-
     public void rewriteAxioms(OWLAxioms axioms, Map<OWLObjectPropertyExpression, Automaton> automataOfComplexObjectProperties) {
             m_automataForComplexRoles.putAll( automataOfComplexObjectProperties );
             rewriteAxioms( axioms );
