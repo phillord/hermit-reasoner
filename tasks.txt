@@ -20,7 +20,7 @@ task assigned to: Birte
 - There is still a Java Task: "TODO: Minimazation caused some problems
 in the translation of concepts. I need to first fully integrate with
 HermiT and then look on this again. "
-task assigned to: Girgos
+task assigned to: Giorgos 							[DONE]
 
 - We throw UnsupportedOperation exceptions for the methods
 getRanges(OWLDataProperty property), getLoadedOntologies(), and
