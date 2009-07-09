@@ -2,12 +2,15 @@
 package org.semanticweb.HermiT.existentials;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.semanticweb.HermiT.blocking.AnywhereCoreBlocking;
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.model.AtLeastConcept;
+import org.semanticweb.HermiT.model.AtomicRole;
+import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.ExistsDescriptionGraph;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
@@ -24,11 +27,12 @@ public class LazyStrategy extends AbstractExpansionStrategy implements Serializa
     
     protected final Set<Node> m_nodesToExpand=new HashSet<Node>();
     protected final Set<Node> m_nodesWithFinishedExpansion=new HashSet<Node>();
-    protected final Set<Node> m_nodesToCheckBlocking=new HashSet<Node>();
+    //protected final Set<Node> m_nodesToCheckBlocking=new HashSet<Node>();
     protected boolean expandOneAtATime=false;
     protected int numExpansions=0;
+    //protected final boolean currentlySatisfiedIsPermanentlySatisfied;
     
-    protected final boolean printingOn=true;
+    protected final boolean printingOn=false;
     
     public LazyStrategy(BlockingStrategy strategy) {
         super(strategy,false);
@@ -42,28 +46,38 @@ public class LazyStrategy extends AbstractExpansionStrategy implements Serializa
     }
     public void clear() {
         super.clear();
-        m_nodesToCheckBlocking.clear();
+        //m_nodesToCheckBlocking.clear();
         m_nodesToExpand.clear();
     }
     public boolean expandExistentials(boolean finalChance) {
         boolean extensionsChanged=false;
         m_nodesToExpand.addAll(((AnywhereCoreBlocking)m_blockingStrategy).getUnblockedNodesWithUnprocessedExistentials());
-        if (printingOn) System.out.println(m_nodesToExpand.size() + " nodes need expansion. ");
-        if (m_nodesToExpand.size()==0 && finalChance) {
-            m_nodesToExpand.addAll(m_blockingStrategy.checkAllBlocks());
-            System.out.println("Checked all blocks");
-            m_interruptFlag.checkInterrupt();
-            if (m_nodesToExpand.size() > 0) return true;
+        //if (printingOn) System.out.println(m_nodesToExpand.size() + " nodes need expansion. ");
+        if (finalChance) {
+            //if (m_nodesToExpand.size()==0) {
+            m_nodesToExpand.clear(); // now all the nodes with some not permanently satisfied existeantil are gone
+                m_nodesToExpand.addAll(m_blockingStrategy.checkAllBlocks());
+                //System.out.println("Checked all blocks");
+                m_interruptFlag.checkInterrupt();
+                //if (m_nodesToExpand.size() > 0) return true;
+            //}
         }
+        Collection<ExistentialConcept> unprocessedExistentials=new HashSet<ExistentialConcept>();
         for (Node node : m_nodesToExpand) {
             if (node.isActive() && !node.isBlocked() && node.hasUnprocessedExistentials()) {
-                boolean hasChangedForThisNode=doExpansion(node);
+                boolean hasChangedForThisNode=false;
+                unprocessedExistentials.addAll(node.getUnprocessedExistentials());
+                for (ExistentialConcept ec : unprocessedExistentials) {
+                    hasChangedForThisNode=doExpansion(node, ec);
+                    if (hasChangedForThisNode) break;
+                }
+                unprocessedExistentials.clear();
                 extensionsChanged = (extensionsChanged || hasChangedForThisNode);
             }
         }
-        if (!extensionsChanged) {
-            System.out.println("No more extension changes...");
-        }
+//        if (!extensionsChanged) {
+//            System.out.println("No more extension changes...");
+//        }
         m_interruptFlag.checkInterrupt();
         m_nodesToExpand.removeAll(m_nodesWithFinishedExpansion);
         m_nodesWithFinishedExpansion.clear();
@@ -130,10 +144,9 @@ public class LazyStrategy extends AbstractExpansionStrategy implements Serializa
 //        m_nodesToExpand.clear();
 //        return extensionsChanged;
 //    }
-    protected boolean doExpansion(Node node) {
+    protected boolean doExpansion(Node node, ExistentialConcept existentialConcept) {
         boolean extensionsChanged=false;
         TableauMonitor monitor=m_tableau.getTableauMonitor();
-        ExistentialConcept existentialConcept=node.getSomeUnprocessedExistential();
         if (existentialConcept instanceof AtLeastConcept) {
             AtLeastConcept atLeastConcept=(AtLeastConcept)existentialConcept;
             switch (isSatisfied(atLeastConcept,node)) {
@@ -148,6 +161,9 @@ public class LazyStrategy extends AbstractExpansionStrategy implements Serializa
                 break;
             case CURRENTLY_SATISFIED: // satisfied until the NN/NI rule is applied and after which the existential might no longer be satisfied
                 // do nothing
+                //if (currentlySatisfiedIsPermanentlySatisfied) {
+                    m_existentialExpansionManager.markExistentialProcessed(existentialConcept,node);
+                //}
                 if (monitor!=null)
                     monitor.existentialSatisfied(atLeastConcept,node);
                 break;
@@ -207,15 +223,15 @@ public class LazyStrategy extends AbstractExpansionStrategy implements Serializa
 //        m_nodesToExpand.clear();
 //        return extensionsChanged;
 //    }
-//    public void assertionAdded(Concept concept,Node node,boolean isCore) {
-//        super.assertionAdded(concept,node,isCore);
-//        if (concept instanceof AtLeastConcept) {
-//            m_nodesToExpand.add(node);
-//        } 
+    public void assertionAdded(Concept concept,Node node,boolean isCore) {
+        super.assertionAdded(concept,node,isCore);
+        if (concept instanceof AtLeastConcept) {
+            m_nodesToExpand.add(node);
+        } 
 //        else if (isCore) {
 //            m_nodesToCheckBlocking.add(node);
 //        }
-//    }
+    }
 //    public void assertionCoreSet(Concept concept,Node node) {
 //        super.assertionCoreSet(concept,node);
 //        m_nodesToCheckBlocking.add(node);
@@ -223,17 +239,17 @@ public class LazyStrategy extends AbstractExpansionStrategy implements Serializa
 //    public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
 //        super.assertionAdded(atomicRole,nodeFrom,nodeTo,isCore);
 //        if (isCore) {
-//            nodesToCheckBlocking.add(nodeTo);
+//            m_nodesToCheckBlocking.add(nodeTo);
 //        }
 //    }
 //    public void assertionCoreSet(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
 //        super.assertionCoreSet(atomicRole,nodeFrom,nodeTo);
-//        nodesToCheckBlocking.add(nodeTo);
+//        m_nodesToCheckBlocking.add(nodeTo);
 //    }
-//    public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
-//        super.assertionRemoved(atomicRole,nodeFrom,nodeTo,isCore);
+    public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
+        super.assertionRemoved(atomicRole,nodeFrom,nodeTo,isCore);
 //        if (isCore) {
-//            nodesToCheckBlocking.add(nodeTo);
+//            m_nodesToCheckBlocking.add(nodeTo);
 //        }
-//    }
+    }
 }

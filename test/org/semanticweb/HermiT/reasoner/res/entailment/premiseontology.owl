@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<rdf:RDF
+  xml:base  = "http://example.org/"
+  xmlns     = "http://example.org/"
+  xmlns:owl = "http://www.w3.org/2002/07/owl#"
+  xmlns:rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+
+<owl:Ontology/>
+
+<owl:ObjectProperty rdf:about="hasFather" />
+<owl:ObjectProperty rdf:about="hasMother" />
+
+<rdf:Description rdf:about="hasFather">
+  <owl:propertyDisjointWith rdf:resource="hasMother" />
+</rdf:Description>
+
+<rdf:Description rdf:about="Stewie">
+  <hasFather rdf:resource="Peter" />
+</rdf:Description>
+
+<rdf:Description rdf:about="Stewie">
+  <hasMother rdf:resource="Lois" />
+</rdf:Description>
+
+</rdf:RDF>

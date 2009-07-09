@@ -49,6 +49,7 @@ import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLInverseFunctionalObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLInverseObjectPropertiesAxiom;
 import org.semanticweb.owlapi.model.OWLIrreflexiveObjectPropertyAxiom;
+import org.semanticweb.owlapi.model.OWLLogicalAxiom;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLNegativeDataPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLNegativeObjectPropertyAssertionAxiom;
@@ -86,7 +87,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
      * @return true if all axioms follow from the loaded ontology and false otherwise. 
      * @throws OWLReasonerException
      */
-    public boolean entails(Set<OWLAxiom> axioms) {
+    public boolean entails(Set<OWLLogicalAxiom> axioms) {
         anonymousIndividualAxioms.clear();
         for (OWLAxiom axiom : axioms) {
             if (!axiom.accept(this)) return false;

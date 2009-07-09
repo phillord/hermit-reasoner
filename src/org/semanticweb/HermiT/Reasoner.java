@@ -1536,7 +1536,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                 ontologyManager.addAxiom(newOntology,axiom);
             OWLAxioms axioms=new OWLAxioms();
             axioms.m_definedDatatypesIRIs.addAll(originalDLOntology.getDefinedDatatypeIRIs());
-            OWLNormalization normalization=new OWLNormalization(factory,axioms);
+            OWLNormalization normalization=new OWLNormalization(factory,axioms,!originalDLOntology.getAllDescriptionGraphs().isEmpty());
             normalization.processOntology(config,newOntology);
             BuiltInPropertyManager builtInPropertyManager=new BuiltInPropertyManager(factory);   
             builtInPropertyManager.axiomatizeBuiltInPropertiesAsNeeded(axioms,

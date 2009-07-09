@@ -18,13 +18,16 @@ public class EntailmentTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(axioms);
         axioms = "ClassAssertion(ObjectSomeValuesFrom(:p owl:Thing) :a)";
         OWLOntology conlusions=getOntologyWithAxioms(axioms);
-        assertEntails(conlusions.getAxioms(), true);
+        assertEntails(conlusions.getLogicalAxioms(), true);
     }
-//    public void testBlankNodes2() throws Exception {
-//        loadReasonerFromResource("res/entailment/somevaluesfrom2bnode-premise.rdf");
-//        OWLOntology conlusions=getOntologyFromRessource("res/entailment/somevaluesfrom2bnode-conclusion.rdf");
-//        assertPositiveEntailment(conlusions.getLogicalAxioms());
-//    }
+    // this test is from the OWL WG test suite and fails since when parsing RDF XML 
+    // the disjoint object properties axiom is lost
+    // Matthew has been asked to fix this
+    public void testDisjointOPs() throws Exception {
+        loadReasonerFromResource("res/entailment/premiseontology.owl");
+        OWLOntology conlusions = getOntologyFromRessource("res/entailment/conclusionontology.owl");
+        assertEntails(conlusions.getLogicalAxioms(), true);
+    }
     protected OWLOntology getOntologyFromRessource(String resourceName) throws Exception {
         URI physicalURI=getClass().getResource(resourceName).toURI();
         return m_ontologyManager.loadOntologyFromPhysicalURI(physicalURI);

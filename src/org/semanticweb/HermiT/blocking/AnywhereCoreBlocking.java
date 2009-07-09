@@ -52,7 +52,7 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
     protected boolean m_immediatelyValidateBlocks = false;
     protected Node m_lastValidatedUnchangedNode=null;
     // statistics: 
-    protected final boolean printingOn=true;
+    protected final boolean printingOn=false;
     protected int numBlockingComputed = 0;
     protected int maxCore = 0;
     protected int maxLabel = 0;
@@ -206,10 +206,10 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
                                     nodesToExpand.add(node);
                                 }
                                 if (previousBlocker!=null&&blocker==null) {
-                                    System.out.println("Ups, node " + node.getNodeID() + " was blocked by " + previousBlocker.getNodeID() + " but is no longer blocked! ");
+                                    //System.out.println("Ups, node " + node.getNodeID() + " was blocked by " + previousBlocker.getNodeID() + " but is no longer blocked! ");
                                     numBlockersChanged++;
                                 } else if (previousBlocker==null&&blocker!=null) {
-                                    System.out.println("Hej, new block: node " + node.getNodeID() + " is in fact blocked by " + blocker.getNodeID() + "! ");
+                                    //System.out.println("Hej, new block: node " + node.getNodeID() + " is in fact blocked by " + blocker.getNodeID() + "! ");
                                     numBlockersChanged++;
                                 }
                                 //System.out.println("Changed blocker from " + (previousBlocker!=null?previousBlocker.getNodeID():"none") + " to " + (blocker!=null?blocker.getNodeID():"none"));
@@ -288,6 +288,23 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
         m_immediatelyValidateBlocks = true;
         if (printingOn) System.out.print("Validate blocks (model size: "+(m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes())+") ...");
         // check if some extra constraints for the parent of the blocked and the blocking node were given
+        
+//        for (Map.Entry<AtomicConcept, Set<Set<Concept>>> e : m_unaryValidBlockConditions.entrySet()) {
+//            System.out.print(e.getKey() + " -> ");
+//            boolean firstConj=true;
+//            for (Set<Concept> cs : e.getValue()) {
+//                if (!firstConj) System.out.print(" ) /\\ ");
+//                System.out.print("( ");
+//                firstConj=false;
+//                boolean firstDisj=true;
+//                for (Concept c : cs) {
+//                    if (!firstDisj) System.out.print(" V ");
+//                    System.out.print(c);
+//                    firstDisj=false;
+//                }
+//            }
+//            System.out.println(" )");
+//        }
         if (!m_unaryValidBlockConditions.isEmpty() || !m_nAryValidBlockConditions.isEmpty()) {
             // go through all nodes and not just the ones modified in the last run
             
@@ -418,6 +435,10 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
                 if (m_unaryValidBlockConditions.containsKey(c) && !isBlockedParentSuitable(m_unaryValidBlockConditions.get(c), blocked, blocked.getParent(), blockerLabel, blockerParentLabel, blockedLabel, blockedParentLabel)) 
                     blockerIsSuitable = false;
             }
+            // check top, which is not explicitly present in the label, but might be the premise of some constraint
+            if (m_unaryValidBlockConditions.containsKey(AtomicConcept.THING) && !isBlockedParentSuitable(m_unaryValidBlockConditions.get(AtomicConcept.THING), blocked, blocked.getParent(), blockerLabel, blockerParentLabel, blockedLabel, blockedParentLabel)) 
+                blockerIsSuitable = false;
+            
             // repeat the same checks for non-unary premises (less efficient matching operations)
             if (blockerIsSuitable) {
                 for (Set<AtomicConcept> premises : m_nAryValidBlockConditions.keySet()) {
@@ -433,6 +454,10 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
                         blockerIsSuitable = false;
                 }
             }
+            // check top, which is not explicitly present in the label, but might be the premise of some constraint
+            if (m_unaryValidBlockConditions.containsKey(AtomicConcept.THING) && !isBlockerSuitable(m_unaryValidBlockConditions.get(AtomicConcept.THING), possibleBlocker, possibleBlocker.getParent(), blocked, blocked.getParent(), blockerLabel, blockerParentLabel, blockedLabel, blockedParentLabel))    
+                blockerIsSuitable = false;
+            
             // repeat the same checks for non-unary premises (less efficient matching operations)
             if (blockerIsSuitable && m_hasInverses) {
                 for (Set<AtomicConcept> premises : m_nAryValidBlockConditions.keySet()) {
@@ -447,6 +472,7 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
                 return possibleBlocker;
             }
             greatestInvalidBlocker = possibleBlocker;
+            blockerIsSuitable=true;
             // else try alternative blockers with the same core
         }
         if (greatestInvalidBlocker != null) {
@@ -505,7 +531,7 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
                     // (>= n r.B)(blocker) in the ABox, so in the model construction, (>= n r.B) will be copied to blocked, 
                     // so we have to make sure that it will be satisfied at blocked
                     // check B(blockerParent) and ar(r, blocker, blockerParent) in ABox implies B(blockedParent) and ar(r, blocked, blockedParent) in ABox
-                    // or blocker has at least n r-successors bs such that B(bs) holds
+                    // or blocker has at least n unblocked r-successors bs such that B(bs) holds
                     AtLeastConcept atLeast = (AtLeastConcept) disjunct;
                     Role r = atLeast.getOnRole();
                     LiteralConcept filler = atLeast.getToConcept();
@@ -553,22 +579,25 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
             m_ternaryTableSearchZeroOneBound.open();
             Object[] tupleBuffer=m_ternaryTableSearchZeroOneBound.getTupleBuffer();
             while (!m_ternaryTableSearchZeroOneBound.afterLast() && suitableSuccessors < n) {
-                if (filler instanceof AtomicConcept) {
-                    m_binaryTableAllBound.getBindingsBuffer()[0]=filler;
-                    m_binaryTableAllBound.getBindingsBuffer()[1]=tupleBuffer[2];
-                    m_binaryTableAllBound.open();
-                    m_binaryTableAllBound.getTupleBuffer();
-                    if (!m_binaryTableAllBound.afterLast()) {
-                        suitableSuccessors++;
-                    }
-                } else {
-                    // negated atomic concept
-                    m_binaryTableAllBound.getBindingsBuffer()[0]=((AtomicNegationConcept)filler).getNegatedAtomicConcept();
-                    m_binaryTableAllBound.getBindingsBuffer()[1]=tupleBuffer[2];
-                    m_binaryTableAllBound.open();
-                    m_binaryTableAllBound.getTupleBuffer();
-                    if (m_binaryTableAllBound.afterLast()) {
-                        suitableSuccessors++;
+                Node possibleSuccessor=(Node)tupleBuffer[2];
+                if (!possibleSuccessor.isBlocked() && !possibleSuccessor.isAncestorOf(blocker)) {
+                    if (filler instanceof AtomicConcept) {
+                        m_binaryTableAllBound.getBindingsBuffer()[0]=filler;
+                        m_binaryTableAllBound.getBindingsBuffer()[1]=tupleBuffer[2];
+                        m_binaryTableAllBound.open();
+                        m_binaryTableAllBound.getTupleBuffer();
+                        if (!m_binaryTableAllBound.afterLast()) {
+                            suitableSuccessors++;
+                        }
+                    } else {
+                        // negated atomic concept
+                        m_binaryTableAllBound.getBindingsBuffer()[0]=((AtomicNegationConcept)filler).getNegatedAtomicConcept();
+                        m_binaryTableAllBound.getBindingsBuffer()[1]=tupleBuffer[2];
+                        m_binaryTableAllBound.open();
+                        m_binaryTableAllBound.getTupleBuffer();
+                        if (m_binaryTableAllBound.afterLast()) {
+                            suitableSuccessors++;
+                        }
                     }
                 }
                 m_ternaryTableSearchZeroOneBound.next();
@@ -581,22 +610,25 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
             m_ternaryTableSearchZeroTwoBound.open();
             Object[] tupleBuffer=m_ternaryTableSearchZeroTwoBound.getTupleBuffer();
             while (!m_ternaryTableSearchZeroTwoBound.afterLast() && suitableSuccessors < n) {
-                if (filler instanceof AtomicConcept) {
-                    m_binaryTableAllBound.getBindingsBuffer()[0]=filler;
-                    m_binaryTableAllBound.getBindingsBuffer()[1]=tupleBuffer[1];
-                    m_binaryTableAllBound.open();
-                    m_binaryTableAllBound.getTupleBuffer();
-                    if (!m_binaryTableAllBound.afterLast()) {
-                        suitableSuccessors++;
-                    }
-                } else {
-                    // negated atomic concept
-                    m_binaryTableAllBound.getBindingsBuffer()[0]=((AtomicNegationConcept)filler).getNegatedAtomicConcept();
-                    m_binaryTableAllBound.getBindingsBuffer()[1]=tupleBuffer[1];
-                    m_binaryTableAllBound.open();
-                    m_binaryTableAllBound.getTupleBuffer();
-                    if (m_binaryTableAllBound.afterLast()) {
-                        suitableSuccessors++;
+                Node possibleSuccessor=(Node)tupleBuffer[2];
+                if (!possibleSuccessor.isBlocked() && !possibleSuccessor.isAncestorOf(blocker)) {
+                    if (filler instanceof AtomicConcept) {
+                        m_binaryTableAllBound.getBindingsBuffer()[0]=filler;
+                        m_binaryTableAllBound.getBindingsBuffer()[1]=tupleBuffer[1];
+                        m_binaryTableAllBound.open();
+                        m_binaryTableAllBound.getTupleBuffer();
+                        if (!m_binaryTableAllBound.afterLast()) {
+                            suitableSuccessors++;
+                        }
+                    } else {
+                        // negated atomic concept
+                        m_binaryTableAllBound.getBindingsBuffer()[0]=((AtomicNegationConcept)filler).getNegatedAtomicConcept();
+                        m_binaryTableAllBound.getBindingsBuffer()[1]=tupleBuffer[1];
+                        m_binaryTableAllBound.open();
+                        m_binaryTableAllBound.getTupleBuffer();
+                        if (m_binaryTableAllBound.afterLast()) {
+                            suitableSuccessors++;
+                        }
                     }
                 }
                 m_ternaryTableSearchZeroTwoBound.next();
@@ -632,7 +664,7 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
     // Assertions can be added directly into the core, but we also have the possibility of setting the core flag later?
     // In that case, assertionCoreSet (below) will be called?
     public void assertionAdded(Concept concept,Node node,boolean isCore) {
-        if (isCore && concept instanceof AtomicConcept) {
+        if ((isCore && concept instanceof AtomicConcept) || (concept instanceof AtLeastConcept)) {
             updateNodeChange(m_directBlockingChecker.assertionAdded(concept,node));
         }
     }
@@ -681,7 +713,7 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
     }
     public void modelFound() {
         if (printingOn) printStatistics(false);
-        //System.out.println("Found  model with " + (m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes()));
+        System.out.println("Found  model with " + (m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes()) + " nodes. ");
     }
     protected void printStatistics(boolean intermediate) {
         if (!intermediate) run++;

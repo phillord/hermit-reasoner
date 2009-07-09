@@ -18,6 +18,7 @@ import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLLogicalAxiom;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
@@ -47,7 +48,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     
     protected void createCoreBlockingReasoner() {
         Configuration c=new Configuration();
-        c.existentialStrategyType=Configuration.ExistentialStrategyType.LAZY;
+        //c.existentialStrategyType=Configuration.ExistentialStrategyType.LAZY;
         c.blockingStrategyType=Configuration.BlockingStrategyType.CORE;
         m_reasoner = new Reasoner(c,m_ontologyManager,m_ontology);
     }
@@ -234,7 +235,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         assertTrue(new EntailmentChecker(m_reasoner, m_dataFactory).entails(axiom)==expectedResult);
     }
     
-    protected void assertEntails(Set<OWLAxiom> axioms, boolean expectedResult) {
+    protected void assertEntails(Set<OWLLogicalAxiom> axioms, boolean expectedResult) {
         assertTrue(new EntailmentChecker(m_reasoner, m_dataFactory).entails(axioms)==expectedResult);
     }
     

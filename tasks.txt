@@ -11,12 +11,6 @@ task assigned to: wait until we know more
 - We need to check acyclicity of datatype definitions.
 task assigned to:  Rob
 
-- The OWL WG test harness is currently extended to work with both the
-old and the new OWL API. Until that is done, HermiT can not be used
-with the test harness and once that is completed, we have to adapt the
-HermiT test runner to make it work again.
-task assigned to: Birte
-
 - There is still a Java Task: "TODO: Minimazation caused some problems
 in the translation of concepts. I need to first fully integrate with
 HermiT and then look on this again. "
@@ -35,12 +29,6 @@ task assigned to: Giorgos
 
 - Blank node handling has not been tested much, so tests
 have to be done and bugs should be fixed should they be found.
-task assigned to: Birte
-
-- List datatype map and supported semantics in the documentation.
-task assigned to: Birte
-
-Syntax optimisation to handle concepts = 257 hasDP.byte
 task assigned to: Birte
 
 - Integrate optimised classification code into the main branch

@@ -42,6 +42,7 @@ import org.semanticweb.HermiT.model.NodeIDsAscendingOrEqual;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.Term;
 import org.semanticweb.HermiT.model.Variable;
+import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
@@ -98,9 +99,9 @@ import org.semanticweb.owlapi.model.OWLTypedLiteral;
 import org.semanticweb.owlapi.model.SWRLAtom;
 import org.semanticweb.owlapi.model.SWRLBuiltInAtom;
 import org.semanticweb.owlapi.model.SWRLClassAtom;
+import org.semanticweb.owlapi.model.SWRLDataPropertyAtom;
 import org.semanticweb.owlapi.model.SWRLDataRangeAtom;
-import org.semanticweb.owlapi.model.SWRLDataValuedPropertyAtom;
-import org.semanticweb.owlapi.model.SWRLDifferentFromAtom;
+import org.semanticweb.owlapi.model.SWRLDifferentIndividualsAtom;
 import org.semanticweb.owlapi.model.SWRLIndividualArgument;
 import org.semanticweb.owlapi.model.SWRLIndividualVariable;
 import org.semanticweb.owlapi.model.SWRLLiteralArgument;
@@ -108,7 +109,7 @@ import org.semanticweb.owlapi.model.SWRLLiteralVariable;
 import org.semanticweb.owlapi.model.SWRLObjectPropertyAtom;
 import org.semanticweb.owlapi.model.SWRLObjectVisitor;
 import org.semanticweb.owlapi.model.SWRLRule;
-import org.semanticweb.owlapi.model.SWRLSameAsAtom;
+import org.semanticweb.owlapi.model.SWRLSameIndividualAtom;
 import org.semanticweb.owlapi.util.OWLAxiomVisitorAdapter;
 
 import rationals.Automaton;
@@ -136,7 +137,7 @@ public class OWLClausification {
     }
     public DLOntology clausifyImportClosure(OWLDataFactory factory,String ontologyIRI,Collection<OWLOntology> importClosure,Collection<DescriptionGraph> descriptionGraphs) {
         OWLAxioms axioms=new OWLAxioms();
-        OWLNormalization normalization=new OWLNormalization(factory,axioms);
+        OWLNormalization normalization=new OWLNormalization(factory,axioms, !descriptionGraphs.isEmpty());
         for (OWLOntology ontology : importClosure)
             normalization.processOntology(m_configuration,ontology);
         BuiltInPropertyManager builtInPropertyManager=new BuiltInPropertyManager(factory);
@@ -220,11 +221,20 @@ public class OWLClausification {
             dlClauses.add(DLClause.create(new Atom[] {},new Atom[] { roleAtom }).getSafeVersion());
         }
         DataRangeConverter dataRangeConverter=new DataRangeConverter(m_configuration.warningMonitor,axioms.m_definedDatatypesIRIs,m_configuration.ignoreUnsupportedDatatypes);
-        NormalizedAxiomClausifier clausifier=new NormalizedAxiomClausifier(dataRangeConverter,positiveFacts,factory);
+        NormalizedAxiomClausifier clausifier=new NormalizedAxiomClausifier(dataRangeConverter,positiveFacts,factory,axioms.m_dps2ranges);
+        Set<AtomicConcept> easyClashes=new HashSet<AtomicConcept>();
         for (OWLClassExpression[] inclusion : axioms.m_conceptInclusions) {
             for (OWLClassExpression description : inclusion)
                 description.accept(clausifier);
             DLClause dlClause=clausifier.getDLClause();
+            if (dlClause.getHeadLength()==0) {
+                // allow for checking for easy inconsistency
+                if (dlClause.getBodyLength()==1) {
+                    Atom at=dlClause.getBodyAtom(0);
+                    if (at.getArity()==1 && at.getDLPredicate() instanceof AtomicConcept)
+                        easyClashes.add((AtomicConcept)at.getDLPredicate());
+                }
+            }
             dlClauses.add(dlClause.getSafeVersion());
         }
         NormalizedDataRangeAxiomClausifier drClausifier=new NormalizedDataRangeAxiomClausifier(dataRangeConverter,factory,axioms.m_definedDatatypesIRIs);
@@ -236,11 +246,20 @@ public class OWLClausification {
         }
         for (OWLHasKeyAxiom hasKey : axioms.m_hasKeys)
             dlClauses.add(clausifyKey(hasKey).getSafeVersion());
-        FactClausifier factClausifier=new FactClausifier(dataRangeConverter,positiveFacts,negativeFacts);
+        FactClausifier factClausifier=new FactClausifier(dataRangeConverter,positiveFacts,negativeFacts,easyClashes);
         for (OWLIndividualAxiom fact : axioms.m_facts)
             fact.accept(factClausifier);
-        for (DescriptionGraph descriptionGraph : descriptionGraphs)
+        if (factClausifier.isInconsistent) {
+            dlClauses.clear();
+            positiveFacts.clear();
+            negativeFacts.clear();
+            DLClause cl=DLClause.create(new Atom[0],new Atom[0]);
+            dlClauses.add(cl.getSafeVersion());
+            return new DLOntology(ontologyIRI,dlClauses,positiveFacts,negativeFacts,null,null,null,null,null,null,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes);
+        }
+        for (DescriptionGraph descriptionGraph : descriptionGraphs) {
             descriptionGraph.produceStartDLClauses(dlClauses);
+        }
         Set<AtomicConcept> atomicConcepts=new HashSet<AtomicConcept>();
         Set<DLOntology.ComplexObjectRoleInclusion> complexObjectRoleInclusions=new HashSet<DLOntology.ComplexObjectRoleInclusion>();
         Set<AtomicRole> objectRoles=new HashSet<AtomicRole>();
@@ -251,9 +270,9 @@ public class OWLClausification {
         for (OWLNamedIndividual i : axioms.m_namedIndividuals) {
             Individual ind=Individual.create(i.getIRI().toString(),true);
             hermitIndividuals.add(ind);
-            // all named individuals are tagged with a concept, so that keys are
+            // all named individuals are tagged with a concept, so that keys/rules are
             // only applied to them
-            if (!axioms.m_hasKeys.isEmpty())
+            if (!axioms.m_hasKeys.isEmpty() || !axioms.m_rules.isEmpty())
                 positiveFacts.add(Atom.create(AtomicConcept.INTERNAL_NAMED,ind));
         }
         for (OWLObjectProperty objectProperty : axioms.m_objectProperties)
@@ -268,9 +287,46 @@ public class OWLClausification {
         for (OWLDataProperty dataProperty : axioms.m_dataProperties)
             dataRoles.add(AtomicRole.create(dataProperty.getIRI().toString()));
         // clausify SWRL rules
-        NormalizedRuleClausifier ruleClausifier=new NormalizedRuleClausifier(dlClauses,positiveFacts,negativeFacts);
+        NormalizedRuleClausifier ruleClausifier=new NormalizedRuleClausifier(positiveFacts,negativeFacts,descriptionGraphs,axioms.m_objectPropertiesUsedInAxioms);
         for (SWRLRule rule : axioms.m_rules) {
             rule.accept(ruleClausifier);
+        }
+        if (!axioms.m_rules.isEmpty()) {
+            Set<Atom> safenessAtoms=new HashSet<Atom>();
+            boolean isGraphRule=false;
+            for (int clauseIndex=0; clauseIndex<ruleClausifier.m_bodies.size(); clauseIndex++) {
+                List<Atom> bodies=ruleClausifier.m_bodies.get(clauseIndex);
+                List<Atom> heads=ruleClausifier.m_heads.get(clauseIndex);
+                for (Atom at : bodies) {
+                    if (at.getDLPredicate() instanceof AtomicRole && ruleClausifier.m_graphRoles.contains(factory.getOWLObjectProperty(IRI.create(((AtomicRole)at.getDLPredicate()).getIRI())))) {
+                        isGraphRule=true;
+                    }
+                    if (isGraphRule) break;
+                    for (int i=0; i<at.getArity(); i++) {
+                        if (at.getArgument(i)!=null)
+                            safenessAtoms.add(Atom.create(AtomicConcept.INTERNAL_NAMED,at.getArgumentVariable(i)));
+                    }
+                }
+                if (!isGraphRule) {
+                    for (Atom at : heads) {
+                        if (at.getDLPredicate() instanceof AtomicRole && ruleClausifier.m_graphRoles.contains(factory.getOWLObjectProperty(IRI.create(((AtomicRole)at.getDLPredicate()).getIRI())))) {
+                            isGraphRule=true;
+                        }
+                    }
+                }
+                if (!isGraphRule) {
+                    // apply rules only to named individuals
+                    bodies.addAll(safenessAtoms);
+                } 
+                Atom[] headAtoms=new Atom[heads.size()];
+                heads.toArray(headAtoms);
+                Arrays.sort(headAtoms,HeadComparator.INSTANCE);
+                Atom[] bodyAtoms=new Atom[bodies.size()];
+                bodies.toArray(bodyAtoms);
+                dlClauses.add(DLClause.create(headAtoms,bodyAtoms));
+                isGraphRule=false;
+                safenessAtoms.clear();
+            }
         }
         if (m_configuration.blockingStrategyType==Configuration.BlockingStrategyType.CORE || m_configuration.blockingStrategyType==Configuration.BlockingStrategyType.TWOPHASE) {
             // The following two maps are only used with inexact blocking strategies, i.e., blocking strategies that establish 
@@ -550,18 +606,37 @@ public class OWLClausification {
     }
 
     protected static class NormalizedAxiomClausifier implements OWLClassExpressionVisitor {
+        public static Map<String,Long> dt2maxRangeCardinality;
         protected final DataRangeConverter m_dataRangeConverter;
         protected final List<Atom> m_headAtoms;
         protected final List<Atom> m_bodyAtoms;
         protected final Set<Atom> m_positiveFacts;
         protected final OWLDataFactory m_factory;
+        protected final Map<OWLDataProperty, OWLDatatype> m_dps2ranges;
         protected int m_yIndex;
-
-        public NormalizedAxiomClausifier(DataRangeConverter dataRangeConverter,Set<Atom> positiveFacts,OWLDataFactory factory) {
+        static {
+            dt2maxRangeCardinality=new HashMap<String, Long>();
+            dt2maxRangeCardinality.put(Prefixes.s_semanticWebPrefixes.get("xsd")+"int", ((long)(Integer.MAX_VALUE)+(long)(Integer.MAX_VALUE)+1l));
+            dt2maxRangeCardinality.put(Prefixes.s_semanticWebPrefixes.get("xsd")+"short", ((long)(Short.MAX_VALUE)+(long)(Short.MAX_VALUE)+1l));
+            dt2maxRangeCardinality.put(Prefixes.s_semanticWebPrefixes.get("xsd")+"byte", ((long)(Byte.MAX_VALUE)+(long)(Byte.MAX_VALUE)+1l));
+            dt2maxRangeCardinality.put(Prefixes.s_semanticWebPrefixes.get("xsd")+"unsignedInt", new Long("4294967296"));
+            dt2maxRangeCardinality.put(Prefixes.s_semanticWebPrefixes.get("xsd")+"unsignedShort", new Long("65536"));
+            dt2maxRangeCardinality.put(Prefixes.s_semanticWebPrefixes.get("xsd")+"unsignedByte", new Long("256"));
+            //long >= Long.MIN_VALUE - <= Long.MAX_VALUE
+            //int >= Integer.MIN_VALUE - <= Integer.MAX_VALUE
+            //short >= Short.MIN_VALUE - <= Short.MAX_VALUE
+            //byte >= Byte.MIN_VALUE - <= Byte.MAX_VALUE
+            //unsignedLong >= 0 - <= new BigInteger("18446744073709551615")
+            //unsignedInt >= 0 - <= 4294967295L
+            //unsignedShort >= 0 - <= 65535
+            //unsignedByte >= 0 - <= 255
+        }
+        public NormalizedAxiomClausifier(DataRangeConverter dataRangeConverter,Set<Atom> positiveFacts,OWLDataFactory factory,Map<OWLDataProperty, OWLDatatype> dps2ranges) {
             m_dataRangeConverter=dataRangeConverter;
             m_headAtoms=new ArrayList<Atom>();
             m_bodyAtoms=new ArrayList<Atom>();
             m_positiveFacts=positiveFacts;
+            m_dps2ranges=dps2ranges;
             m_factory=factory;
         }
         protected DLClause getDLClause() {
@@ -622,7 +697,7 @@ public class OWLClausification {
                 m_bodyAtoms.add(roleAtom);
             }
             /**
-             * @gstoil modification. This situation is now possible with automata. Since the translation says that
+             * gstoil modification. This situation is now possible with automata. Since the translation says that
              * for each final state f add inclusion f -> C. If C is a nominal and comes from a concept with negative
              * polarity then subsumption is actually f-> \neg {o} which was not a valid HermiT normal form. 
              */
@@ -792,6 +867,19 @@ public class OWLClausification {
         }
         public void visit(OWLDataMinCardinality object) {
             if (!object.getProperty().isOWLBottomDataProperty() || object.getCardinality()==0) {
+                if (m_dps2ranges.containsKey(object.getProperty().asOWLDataProperty())) {
+                    String dtURI=m_dps2ranges.get(object.getProperty().asOWLDataProperty()).getURI().toString();
+                    long max=dt2maxRangeCardinality.get(dtURI);
+                    if (object.getCardinality() > max) {
+                        return;
+                    }
+                } else if (object.getFiller().isDatatype() && dt2maxRangeCardinality.containsKey(object.getFiller().asOWLDatatype().getURI().toString())) {
+                    String dtURI=m_dps2ranges.get(object.getProperty().asOWLDataProperty()).getURI().toString();
+                    long max=dt2maxRangeCardinality.get(dtURI);
+                    if (object.getCardinality() > max) {
+                        return;
+                    }
+                }
                 AtomicRole atomicRole=getAtomicRole(object.getProperty());
                 LiteralConcept literalConcept=m_dataRangeConverter.convertDataRange(object.getFiller());
                 AtLeastConcept atLeastConcept=AtLeastConcept.create(object.getCardinality(),atomicRole,literalConcept);
@@ -1014,11 +1102,14 @@ public class OWLClausification {
         protected final DataRangeConverter m_dataRangeConverter;
         protected final Set<Atom> m_positiveFacts;
         protected final Set<Atom> m_negativeFacts;
-
-        public FactClausifier(DataRangeConverter dataRangeConverter,Set<Atom> positiveFacts,Set<Atom> negativeFacts) {
+        protected final Set<AtomicConcept> m_easyClashes;
+        public boolean isInconsistent=false;
+        
+        public FactClausifier(DataRangeConverter dataRangeConverter,Set<Atom> positiveFacts,Set<Atom> negativeFacts,Set<AtomicConcept> easyClashes) {
             m_dataRangeConverter=dataRangeConverter;
             m_positiveFacts=positiveFacts;
             m_negativeFacts=negativeFacts;
+            m_easyClashes=easyClashes;
         }
         public void visit(OWLSameIndividualAxiom object) {
             OWLIndividual[] individuals=new OWLIndividual[object.getIndividuals().size()];
@@ -1037,6 +1128,9 @@ public class OWLClausification {
             OWLClassExpression description=object.getClassExpression();
             if (description instanceof OWLClass) {
                 AtomicConcept atomicConcept=AtomicConcept.create(((OWLClass)description).getIRI().toString());
+                if (m_easyClashes.contains(atomicConcept)) {
+                    isInconsistent=true;
+                }
                 m_positiveFacts.add(Atom.create(atomicConcept,getIndividual(object.getIndividual())));
             }
             else if (description instanceof OWLObjectComplementOf && ((OWLObjectComplementOf)description).getOperand() instanceof OWLClass) {
@@ -1070,62 +1164,105 @@ public class OWLClausification {
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected class NormalizedRuleClausifier implements SWRLObjectVisitor {
-        // As usual, only variables that occur in the antecedent of a rule may occur in the consequent (a condition usually referred to as "safety")
+        protected final Set<OWLObjectProperty> m_objectPropertiesUsedInAxioms;
         protected final List<Atom> m_headAtoms;
         protected final List<Atom> m_bodyAtoms;
-        protected final Set<DLClause> m_clauses;
+        public final List<List<Atom>> m_heads=new ArrayList<List<Atom>>();
+        public final List<List<Atom>> m_bodies=new ArrayList<List<Atom>>();
         protected final Set<Atom> m_positiveFacts;
         protected final Set<Atom> m_negativeFacts;
         protected Term m_lastTerm;
         protected Atom m_lastAtom;
+        protected final Set<SWRLIndividualVariable> m_headVars=new HashSet<SWRLIndividualVariable>();
+        protected final Set<SWRLIndividualVariable> m_bodyVars=new HashSet<SWRLIndividualVariable>();
+        protected final Set<SWRLIndividualVariable> m_varsOfLastAtom=new HashSet<SWRLIndividualVariable>();
         protected boolean m_containsIndividuals=false;
         protected boolean m_containsVariables=false;
+        public final Set<OWLObjectProperty> m_graphRoles=new HashSet<OWLObjectProperty>();
+        protected final Map<OWLObjectProperty, Set<SWRLRule>> unknownRoleInRule=new HashMap<OWLObjectProperty, Set<SWRLRule>>();
         
-        public NormalizedRuleClausifier(Set<DLClause> clauses, Set<Atom> positiveFacts,Set<Atom> negativeFacts) {
+        public NormalizedRuleClausifier(Set<Atom> positiveFacts,Set<Atom> negativeFacts,Collection<DescriptionGraph> dGraphs, Set<OWLObjectProperty> objectPropertiesUsedInAxioms) {
             m_headAtoms=new ArrayList<Atom>();
             m_bodyAtoms=new ArrayList<Atom>();
-            m_clauses=clauses;
             m_positiveFacts=positiveFacts;
             m_negativeFacts=negativeFacts;
+            m_objectPropertiesUsedInAxioms=objectPropertiesUsedInAxioms;
+            OWLDataFactory df=OWLManager.createOWLOntologyManager().getOWLDataFactory();
+            for (DescriptionGraph dGraph : dGraphs) {
+                for (int i=0; i<dGraph.getNumberOfEdges(); i++) {
+                    m_graphRoles.add(df.getOWLObjectProperty(IRI.create(dGraph.getEdge(i).getAtomicRole().getIRI())));
+                }
+            }
         }
         
-        protected DLClause getDLClause() {
-            Atom[] headAtoms=new Atom[m_headAtoms.size()];
-            m_headAtoms.toArray(headAtoms);
-            Arrays.sort(headAtoms,HeadComparator.INSTANCE);
-            Atom[] bodyAtoms=new Atom[m_bodyAtoms.size()];
-            m_bodyAtoms.toArray(bodyAtoms);
-            DLClause dlClause=DLClause.create(headAtoms,bodyAtoms);
-            m_headAtoms.clear();
-            m_bodyAtoms.clear();
-            m_containsIndividuals=false;
-            m_containsVariables=false;
-            return dlClause;
+        protected void checkStrictSeparation(SWRLRule rule) {
+            boolean hasGraphRoles=false;
+            boolean hasNonGraphRoles=false;
+            Set<OWLObjectProperty> unknownRoles=new HashSet<OWLObjectProperty>();
+            for (OWLObjectProperty op : rule.getObjectPropertiesInSignature()) {
+                if (m_objectPropertiesUsedInAxioms.contains(op)) hasNonGraphRoles=true;
+                if (m_graphRoles.contains(op)) hasGraphRoles=true;
+                if (!m_objectPropertiesUsedInAxioms.contains(op) && !m_graphRoles.contains(op)) unknownRoles.add(op);
+            }
+            if (hasGraphRoles && hasNonGraphRoles) {
+                throw new IllegalArgumentException("Internal error: It seems rules mix graph and non-graph rules, which violates the strict separation condition. ");
+            }
+            if (hasGraphRoles) {
+                // if there is one graph role, then also all unknown roles have to be graph roles
+                m_graphRoles.addAll(rule.getObjectPropertiesInSignature());
+                for (OWLObjectProperty op : unknownRoles) {
+                    if (unknownRoleInRule.containsKey(op)) {
+                        for (SWRLRule r : unknownRoleInRule.get(op)) {
+                            checkStrictSeparation(r);
+                        }
+                    }
+                }
+                unknownRoles.removeAll(rule.getObjectPropertiesInSignature());
+            } else if (!hasGraphRoles && !unknownRoles.isEmpty()) {
+                for (OWLObjectProperty op : unknownRoles) {
+                    if (unknownRoleInRule.containsKey(op)) {
+                        Set<SWRLRule> rules=unknownRoleInRule.get(op);
+                        rules.add(rule);
+                    } else {
+                        Set<SWRLRule> rules=new HashSet<SWRLRule>();
+                        rules.add(rule);
+                        unknownRoleInRule.put(op, rules);
+                    }
+                }
+            }
         }
         
         public void visit(SWRLRule rule) {
+            checkStrictSeparation(rule);
             if (rule.getHead().size() > 1) {
                 throw new IllegalStateException("Internal error: SWRL rules should be normalized to contain only a single head atom, but this rule has more than one head atom: " + rule);
             }
             for(SWRLAtom atom : rule.getBody()) {
                 atom.accept(this);
                 m_bodyAtoms.add(m_lastAtom);
-                // apply rules only to named individuals
-//                for (int i=0; i<m_lastAtom.getArity(); i++) {
-//                    if (m_lastAtom.getArgument(i)!=null)
-//                        m_bodyAtoms.add(Atom.create(AtomicConcept.INTERNAL_NAMED,m_lastAtom.getArgumentVariable(i)));
-//                }
+                m_bodyVars.addAll(m_varsOfLastAtom);
+                m_varsOfLastAtom.clear();
             }
             for(SWRLAtom atom : rule.getHead()) {
                 atom.accept(this);
                 m_headAtoms.add(m_lastAtom);
+                m_headVars.addAll(m_varsOfLastAtom);
+                m_varsOfLastAtom.clear();
+            }
+            // Only variables that occur in the antecedent of a rule may occur in the consequent (safety condition)
+            if (!m_bodyVars.containsAll(m_headVars)) {
+                throw new IllegalArgumentException("Error: The rule " + rule + " contains head variables that do not occur in the body, which violates the safety restrictions. ");
             }
             if (m_containsIndividuals&&m_containsVariables) {
                 throw new UnsupportedOperationException("A given SWRL rule contains both variables and individuals. This is not yet supported. ");
             } else if (m_containsVariables) {
-                m_clauses.add(getDLClause().getSafeVersion());
+                List<Atom> headAtoms=new ArrayList<Atom>();
+                headAtoms.addAll(m_headAtoms);
+                m_heads.add(headAtoms);
+                List<Atom> bodyAtoms=new ArrayList<Atom>();
+                bodyAtoms.addAll(m_bodyAtoms);
+                m_bodies.add(bodyAtoms);
             } else if (m_containsIndividuals) {
                 if (m_bodyAtoms.isEmpty() && m_headAtoms.size()==1) {
                    m_positiveFacts.add(m_headAtoms.get(0));
@@ -1135,6 +1272,8 @@ public class OWLClausification {
                     throw new UnsupportedOperationException("A given SWRL rule contains individuals and is not of the supported form. Supported are only positive and negative facts. ");
                 }
             }
+            m_headAtoms.clear();
+            m_bodyAtoms.clear();
         }
 
         public void visit(SWRLClassAtom node) {
@@ -1158,14 +1297,18 @@ public class OWLClausification {
             Term term2=m_lastTerm;
             m_lastAtom=Atom.create(predicate,term1,term2);
         }
-        public void visit(SWRLDataValuedPropertyAtom node) {
+        public void visit(SWRLDataPropertyAtom node) {
+            throw new UnsupportedOperationException("SWRL rules with data properties are not yet supported. ");
         }
         public void visit(SWRLBuiltInAtom node) {
+            throw new UnsupportedOperationException("SWRL rules with built-in atoms are not yet supported. ");
         }
         public void visit(SWRLLiteralVariable node) {
+            throw new UnsupportedOperationException("SWRL rules with data variables are not yet supported. ");
         }
         public void visit(SWRLIndividualVariable node) {
             m_lastTerm=Variable.create(node.getIRI().toString());
+            m_varsOfLastAtom.add(node);
             m_containsVariables=true;
         }
         public void visit(SWRLIndividualArgument node) {
@@ -1176,16 +1319,16 @@ public class OWLClausification {
             m_containsIndividuals=true;
         }
         public void visit(SWRLLiteralArgument node) {
-            throw new UnsupportedOperationException("SWRL rules with data constans are not yet supported. ");
+            throw new UnsupportedOperationException("SWRL rules with data constants are not yet supported. ");
         }
-        public void visit(SWRLSameAsAtom node) {
+        public void visit(SWRLSameIndividualAtom node) {
             node.getFirstArgument().accept(this);
             Term term1=m_lastTerm;
             node.getSecondArgument().accept(this);
             Term term2=m_lastTerm;
             m_lastAtom=Atom.create(Equality.INSTANCE, term1, term2);
         }
-        public void visit(SWRLDifferentFromAtom node) {
+        public void visit(SWRLDifferentIndividualsAtom node) {
             node.getFirstArgument().accept(this);
             Term term1=m_lastTerm;
             node.getSecondArgument().accept(this);

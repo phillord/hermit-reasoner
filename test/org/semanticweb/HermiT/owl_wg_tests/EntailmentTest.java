@@ -23,7 +23,7 @@ public class EntailmentTest extends AbstractTest {
     }
     protected void doTest() throws Exception {
         EntailmentChecker checker=new EntailmentChecker(m_reasoner,m_ontologyManager.getOWLDataFactory());
-        boolean isEntailed=checker.entails(m_conclusionOntology.getAxioms());
+        boolean isEntailed=checker.entails(m_conclusionOntology.getLogicalAxioms());
         if (m_positive) {
             assertTrue("Axioms should be entailed.",isEntailed);
         } else {
