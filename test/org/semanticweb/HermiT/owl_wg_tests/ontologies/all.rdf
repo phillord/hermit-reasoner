@@ -7113,7 +7113,7 @@ annotations.</test:description>
 		<test:creator rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Jeremy J. Carroll</test:creator>
 		<test:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">In OWL 1, this test was used to expose differences between the RDF Based and Direct semantics.  In OWL 2, the entailment ontology holds under both semantics.  Under the OWL 2 Direct Semantics, annotations in the conclusion ontology are ignored, so the only axiom evaluated in ClassAssertion(owl:Thing _:x).  Under the OWL 2 RDF Based semantics, annotations are relevant, and in this test, the entailment holds.</test:description>
 		<test:normativeSyntax rdf:resource="&test;RDFXML" />
-		<test:status rdf:resource="&test;Proposed" />
+		<test:status rdf:resource="&test;Approved" />
 		<test:semantics rdf:resource="&test;DIRECT" />
 		<test:semantics rdf:resource="&test;RDF-BASED" />
 		<test:species rdf:resource="&test;FULL" />
@@ -7162,7 +7162,7 @@ annotations.</test:description>
 		<test:creator rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Jeremy J. Carroll</test:creator>
 		<test:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">URI references used in annotations don't need to be typed.</test:description>
 		<test:normativeSyntax rdf:resource="&test;RDFXML" />
-		<test:status rdf:resource="&test;Proposed" />
+		<test:status rdf:resource="&test;Approved" />
 		<test:semantics rdf:resource="&test;DIRECT" />
 		<test:semantics rdf:resource="&test;RDF-BASED" />
 		<test:species rdf:resource="&test;FULL" />
@@ -7196,7 +7196,7 @@ annotations.</test:description>
 		<test:creator rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Sean Bechhofer</test:creator>
 		<test:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">AnnotationProperty's in OWL Lite and OWL DL, may not have range constraints.  They are permitted in OWL 2 DL.</test:description>
 		<test:normativeSyntax rdf:resource="&test;RDFXML" />
-		<test:status rdf:resource="&test;Proposed" />
+		<test:status rdf:resource="&test;Approved" />
 		<test:semantics rdf:resource="&test;DIRECT" />
 		<test:semantics rdf:resource="&test;RDF-BASED" />
 		<test:species rdf:resource="&test;FULL" />
@@ -8132,7 +8132,7 @@ then an OWL individual has at most one value for prop.</test:description>
 		<test:creator rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Mike Smith</test:creator>
 		<test:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Under the direct semantics, test WebOnt-I4.6-005 must be treated as a positive entailment test because the direct semantics ignore annotations in the conclusion ontology.</test:description>
 		<test:normativeSyntax rdf:resource="&test;RDFXML" />
-		<test:status rdf:resource="&test;Proposed" />
+		<test:status rdf:resource="&test;Approved" />
 		<test:semantics rdf:resource="&test;DIRECT" />
 		<test:alternativeSemanticsTest rdf:resource="http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/TestCase-3AWebOnt-2DI4.6-2D005" />
 		<test:species rdf:resource="&test;FULL" />
@@ -10044,7 +10044,7 @@ This is trivially true given that first:p is an
 		<test:creator rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Jeremy J. Carroll</test:creator>
 		<test:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Classes could not be the object of regular properties in OWL DL.  This ontology is permissible in OWL 2 DL due to class / individual punning.</test:description>
 		<test:normativeSyntax rdf:resource="&test;RDFXML" />
-		<test:status rdf:resource="&test;Proposed" />
+		<test:status rdf:resource="&test;Approved" />
 		<test:semantics rdf:resource="&test;DIRECT" />
 		<test:semantics rdf:resource="&test;RDF-BASED" />
 		<test:species rdf:resource="&test;FULL" />
@@ -10305,7 +10305,7 @@ but does under the RDFS Compatible Semantics for OWL.</test:description>
 		<test:creator rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Jeremy J. Carroll</test:creator>
 		<test:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This test exhibits the effect of the comprehension principles in OWL Full.  The conclusion ontology only contains a class declaration, ObjectUnionOf class expression does not appear in an axiom.</test:description>
 		<test:normativeSyntax rdf:resource="&test;RDFXML" />
-		<test:status rdf:resource="&test;Proposed" />
+		<test:status rdf:resource="&test;Approved" />
 		<test:semantics rdf:resource="&test;DIRECT" />
 		<test:semantics rdf:resource="&test;RDF-BASED" />
 		<test:species rdf:resource="&test;FULL" />
@@ -10505,7 +10505,7 @@ but does under the RDFS Compatible Semantics for OWL.</test:description>
 		<test:creator rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Peter F. Patel-Schneider</test:creator>
 		<test:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">There are 256 different values for &lt;code&gt;xsd:byte&lt;/code&gt;.</test:description>
 		<test:normativeSyntax rdf:resource="&test;RDFXML" />
-		<test:status rdf:resource="&test;Proposed" />
+		<test:status rdf:resource="&test;Approved" />
 		<test:semantics rdf:resource="&test;DIRECT" />
 		<test:semantics rdf:resource="&test;RDF-BASED" />
 		<test:species rdf:resource="&test;FULL" />
@@ -11589,7 +11589,7 @@ using one of them can be transferred to the other.</test:description>
 		<test:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The triple asserts something of type &lt;code&gt;owl:Nothing&lt;/code&gt;, however
 that is the empty class.</test:description>
 		<test:normativeSyntax rdf:resource="&test;RDFXML" />
-		<test:status rdf:resource="&test;Proposed" />
+		<test:status rdf:resource="&test;Approved" />
 		<test:semantics rdf:resource="&test;DIRECT" />
 		<test:semantics rdf:resource="&test;RDF-BASED" />
 		<test:species rdf:resource="&test;FULL" />
@@ -11669,7 +11669,7 @@ that is the empty class.</test:description>
 		<test:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This is a variation of &lt;a xmlns="http://www.w3.org/1999/xhtml" href="#equivalentClass-001"&gt;equivalentClass-001&lt;/a&gt;,
 showing the use of &lt;code&gt;owl:Ontology&lt;/code&gt; triples in the premises and conclusions.</test:description>
 		<test:normativeSyntax rdf:resource="&test;RDFXML" />
-		<test:status rdf:resource="&test;Proposed" />
+		<test:status rdf:resource="&test;Approved" />
 		<test:semantics rdf:resource="&test;DIRECT" />
 		<test:semantics rdf:resource="&test;RDF-BASED" />
 		<test:species rdf:resource="&test;FULL" />
@@ -11865,7 +11865,7 @@ showing the use of two &lt;code&gt;owl:Ontology&lt;/code&gt; triples in the prem
 		<test:creator rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Jeremy J. Carroll</test:creator>
 		<test:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This test shows the syntax for using the same restriction twice in OWL Lite.</test:description>
 		<test:normativeSyntax rdf:resource="&test;RDFXML" />
-		<test:status rdf:resource="&test;Proposed" />
+		<test:status rdf:resource="&test;Approved" />
 		<test:semantics rdf:resource="&test;DIRECT" />
 		<test:semantics rdf:resource="&test;RDF-BASED" />
 		<test:species rdf:resource="&test;FULL" />
@@ -11921,7 +11921,7 @@ showing the use of two &lt;code&gt;owl:Ontology&lt;/code&gt; triples in the prem
 		<test:creator rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Jeremy J. Carroll</test:creator>
 		<test:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This test shows syntax that was not permitted in OWL Lite or OWL DL for using the same restriction twice, but is permitted in OWL 2 DL.</test:description>
 		<test:normativeSyntax rdf:resource="&test;RDFXML" />
-		<test:status rdf:resource="&test;Proposed" />
+		<test:status rdf:resource="&test;Approved" />
 		<test:semantics rdf:resource="&test;DIRECT" />
 		<test:semantics rdf:resource="&test;RDF-BASED" />
 		<test:species rdf:resource="&test;FULL" />
@@ -11967,7 +11967,7 @@ showing the use of two &lt;code&gt;owl:Ontology&lt;/code&gt; triples in the prem
 		<test:creator rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Jeremy J. Carroll</test:creator>
 		<test:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This test shows syntax that was not permitted in OWL Lite or OWL DL for using the same restriction twice, but is permitted in OWL 2 DL.</test:description>
 		<test:normativeSyntax rdf:resource="&test;RDFXML" />
-		<test:status rdf:resource="&test;Proposed" />
+		<test:status rdf:resource="&test;Approved" />
 		<test:semantics rdf:resource="&test;DIRECT" />
 		<test:semantics rdf:resource="&test;RDF-BASED" />
 		<test:species rdf:resource="&test;FULL" />
@@ -12024,7 +12024,7 @@ showing the use of two &lt;code&gt;owl:Ontology&lt;/code&gt; triples in the prem
 		<test:creator rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Jeremy J. Carroll</test:creator>
 		<test:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This test shows OWL Lite syntax for using two equivalent restrictions.</test:description>
 		<test:normativeSyntax rdf:resource="&test;RDFXML" />
-		<test:status rdf:resource="&test;Proposed" />
+		<test:status rdf:resource="&test;Approved" />
 		<test:semantics rdf:resource="&test;DIRECT" />
 		<test:semantics rdf:resource="&test;RDF-BASED" />
 		<test:species rdf:resource="&test;FULL" />
