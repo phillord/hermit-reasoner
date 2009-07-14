@@ -18,8 +18,6 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import rationals.Automaton;
 import rationals.State;
 import rationals.Transition;
-import rationals.transformations.Normalizer;
-import rationals.transformations.Reducer;
 
 public class ObjectPropertyInclusionManager {
     protected final OWLDataFactory m_factory;

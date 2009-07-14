@@ -15,12 +15,8 @@ import rationals.Automaton;
 import rationals.NoSuchStateException;
 import rationals.State;
 import rationals.Transition;
-import rationals.transformations.EpsilonTransitionRemover;
 import rationals.transformations.Normalizer;
 import rationals.transformations.Reducer;
-import rationals.transformations.ToC;
-import rationals.transformations.ToCanonicalRFSA;
-import rationals.transformations.ToDFA;
 
 public class AutomataConstructionManager {
 	
