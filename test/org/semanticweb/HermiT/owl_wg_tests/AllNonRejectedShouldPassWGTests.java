@@ -23,14 +23,14 @@ public class AllNonRejectedShouldPassWGTests {
                          && !wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-664")
                          && !wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-903")// large cardinalities
                          && !wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-904")// large cardinalities
-                         && !wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-906")// large cardinalities - extra credit
-                         && !wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-910")// large cardinalities - extra credit
-                         && !wgTestDescriptor.identifier.startsWith("WebOnt-miscellaneous-010")
+                         && !wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-906")// extra credit, large cardinalities
+                         && !wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-910")// extra credit, large cardinalitiest
+                         && !wgTestDescriptor.identifier.startsWith("WebOnt-miscellaneous-010") //extra credit
                          && !wgTestDescriptor.identifier.startsWith("WebOnt-miscellaneous-011")
-                         //&& !wgTestDescriptor.identifier.startsWith("WebOnt-I5.8-001") // hacked
+                         //&& !wgTestDescriptor.identifier.startsWith("WebOnt-I5.8-001") // hacked, extra credit
                          && !wgTestDescriptor.identifier.startsWith("WebOnt-I5.8-002")
-                         && !wgTestDescriptor.identifier.startsWith("WebOnt-I5.8-003")
-                         && !wgTestDescriptor.identifier.startsWith("WebOnt-I5.8-004")
+                         && !wgTestDescriptor.identifier.startsWith("WebOnt-I5.8-003") //extra credit
+                         && !wgTestDescriptor.identifier.startsWith("WebOnt-I5.8-004") //extra credit
                          && !wgTestDescriptor.identifier.startsWith("WebOnt-I5.8-005")
                          && !wgTestDescriptor.identifier.startsWith("WebOnt-I5.8-012")
                          // out of memory
@@ -39,31 +39,6 @@ public class AllNonRejectedShouldPassWGTests {
                 ) {
                     wgTestDescriptor.addTestsToSuite(suite);
                 }
-//                if (wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-202")
-//                || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-203")
-//                || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-204")
-//                || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-206")
-//                || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-662")
-//                || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-663")
-//                || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-664")
-//                || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-903")// large cardinalities
-//                || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-904")// large cardinalities
-//                || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-906")// large cardinalities - extra credit
-//                || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-910")// large cardinalities - extra credit
-//                || wgTestDescriptor.identifier.startsWith("WebOnt-miscellaneous-010")
-//                || wgTestDescriptor.identifier.startsWith("WebOnt-miscellaneous-011")
-//                || wgTestDescriptor.identifier.startsWith("WebOnt-I5.8-001")
-//                || wgTestDescriptor.identifier.startsWith("WebOnt-I5.8-002")
-//                || wgTestDescriptor.identifier.startsWith("WebOnt-I5.8-003")
-//                || wgTestDescriptor.identifier.startsWith("WebOnt-I5.8-004")
-//                || wgTestDescriptor.identifier.startsWith("WebOnt-I5.8-005")
-//                || wgTestDescriptor.identifier.startsWith("WebOnt-I5.8-012")
-//                // out of memory
-//                || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-907")
-//                || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-909")
-//               ) {
-//                   wgTestDescriptor.addTestsToSuite(suite);
-//               }
             }
         return suite;
     }
