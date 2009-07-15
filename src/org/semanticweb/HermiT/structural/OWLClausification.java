@@ -618,7 +618,7 @@ public class OWLClausification {
             dt2maxRangeCardinality=new HashMap<String, Long>();
             dt2maxRangeCardinality.put(Prefixes.s_semanticWebPrefixes.get("xsd")+"int", ((long)(Integer.MAX_VALUE)+(long)(Integer.MAX_VALUE)+1l));
             dt2maxRangeCardinality.put(Prefixes.s_semanticWebPrefixes.get("xsd")+"short", ((long)(Short.MAX_VALUE)+(long)(Short.MAX_VALUE)+1l));
-            dt2maxRangeCardinality.put(Prefixes.s_semanticWebPrefixes.get("xsd")+"byte", ((long)(Byte.MAX_VALUE)+(long)(Byte.MAX_VALUE)+1l));
+            dt2maxRangeCardinality.put(Prefixes.s_semanticWebPrefixes.get("xsd")+"byte", ((long)(Byte.MAX_VALUE)+(long)(Byte.MAX_VALUE)+2l));
             dt2maxRangeCardinality.put(Prefixes.s_semanticWebPrefixes.get("xsd")+"unsignedInt", new Long("4294967296"));
             dt2maxRangeCardinality.put(Prefixes.s_semanticWebPrefixes.get("xsd")+"unsignedShort", new Long("65536"));
             dt2maxRangeCardinality.put(Prefixes.s_semanticWebPrefixes.get("xsd")+"unsignedByte", new Long("256"));
