@@ -11,23 +11,24 @@ public class FailingWGTestDebug {
             if (wgTestDescriptor.status==WGTestDescriptor.Status.APPROVED || wgTestDescriptor.status==WGTestDescriptor.Status.PROPOSED || wgTestDescriptor.status==null) {
                 if (wgTestDescriptor.identifier.startsWith("string-integer-clash")
                 ) {
-                    wgTestDescriptor.addTestsToSuite(suite);
+//                    wgTestDescriptor.addTestsToSuite(suite);
                 }
-//                if (wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-202")
-//                || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-203")
+                if (
+//                		wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-202")
+//                wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-203")
 //                || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-204")
 //                || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-206")
 //                || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-662")
 //                || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-663")
 //                || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-664")
-//                || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-903")// large cardinalities
-//                || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-904")// large cardinalities
-//                || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-906")// large cardinalities - extra credit
+//                wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-903")// large cardinalities
+//                 wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-904")// large cardinalities
+//                 wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-906")// large cardinalities - extra credit
 //                || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-910")// large cardinalities - extra credit
-//                || wgTestDescriptor.identifier.startsWith("WebOnt-miscellaneous-010")
+//                 wgTestDescriptor.identifier.startsWith("WebOnt-miscellaneous-010")
 //                || wgTestDescriptor.identifier.startsWith("WebOnt-miscellaneous-011")
-//                || wgTestDescriptor.identifier.startsWith("WebOnt-I5.8-001")
-//                || wgTestDescriptor.identifier.startsWith("WebOnt-I5.8-002")
+//                 wgTestDescriptor.identifier.startsWith("WebOnt-I5.8-001")
+                 wgTestDescriptor.identifier.startsWith("WebOnt-I5.8-002")
 //                || wgTestDescriptor.identifier.startsWith("WebOnt-I5.8-003")
 //                || wgTestDescriptor.identifier.startsWith("WebOnt-I5.8-004")
 //                || wgTestDescriptor.identifier.startsWith("WebOnt-I5.8-005")
@@ -35,9 +36,9 @@ public class FailingWGTestDebug {
 //                // out of memory
 //                || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-907")
 //                || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-909")
-//               ) {
-//                   wgTestDescriptor.addTestsToSuite(suite);
-//               }
+               ) {
+                   wgTestDescriptor.addTestsToSuite(suite);
+               }
             }
         return suite;
     }
