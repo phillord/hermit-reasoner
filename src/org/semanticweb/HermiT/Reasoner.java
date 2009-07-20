@@ -1321,11 +1321,20 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                     result.add(factory.getOWLNamedIndividual(IRI.create(individual.getIRI())));
             }
     }
-    
+
     public Map<OWLObjectProperty,Set<OWLNamedIndividual>> getObjectPropertyRelationships(OWLNamedIndividual individual) {
-        throw new UnsupportedOperationException();
+		Map<OWLObjectProperty, Set<OWLNamedIndividual>> objectPropertyRelationships = new HashMap<OWLObjectProperty, Set<OWLNamedIndividual>>();
+		Set<Role> allAtomicObjectRoles = new HashSet<Role>();
+		allAtomicObjectRoles.addAll( m_dlOntology.getAllAtomicObjectRoles() );
+		Set<OWLObjectPropertyExpression> objProperties = objectPropertiesToOWLAPI( allAtomicObjectRoles, OWLManager.createOWLOntologyManager().getOWLDataFactory() );
+		for( OWLObjectPropertyExpression objProp : objProperties ) {
+			Set<OWLNamedIndividual> relatedIndvs = getRelatedIndividuals( individual, objProp );
+			if( !relatedIndvs.isEmpty() )
+				objectPropertyRelationships.put( objProp.asOWLObjectProperty(), relatedIndvs );
+		}
+		return objectPropertyRelationships;
     }
-    
+
     public Map<OWLDataProperty,Set<OWLLiteral>> getDataPropertyRelationships(OWLNamedIndividual individual) {
         throw new UnsupportedOperationException();
     }
@@ -1334,7 +1343,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
         return getIndividuals(factory.getOWLObjectSomeValuesFrom(property.getInverseProperty(),factory.getOWLObjectOneOf(subject)),false);
     }
-
+    
     public Set<OWLLiteral> getRelatedValues(OWLNamedIndividual subject,OWLDataPropertyExpression property) {
         throw new UnsupportedOperationException();
     }
@@ -1348,9 +1357,8 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         return hasType(subject,factory.getOWLDataHasValue(property,object),false);
     }
 
-    
-    // other inferences 
-    
+    // other inferences
+
     public Boolean hasKey(OWLHasKeyAxiom key) {
         OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
         OWLDataFactory factory=ontologyManager.getOWLDataFactory();
