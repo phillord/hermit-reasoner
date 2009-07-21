@@ -42,6 +42,17 @@ public class ReasonerTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
+    
+    public void testTransitivity() throws Exception {
+        String axioms = "ObjectPropertyRange(:isSiblingOf :Person)"
+            + "DisjointClasses(:Person :Sex)"
+            + "SubClassOf(:Person ObjectSomeValuesFrom(:hasGender :Sex))"
+            + "TransitiveObjectProperty(:isSiblingOf)"
+            + "SymmetricObjectProperty(:isSiblingOf)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(true);
+    }
+    
     public void testSubAndSuperConcepts() throws Exception {
         String axioms = "SubClassOf(:C :D)"
             + "SubClassOf(:D :E)";

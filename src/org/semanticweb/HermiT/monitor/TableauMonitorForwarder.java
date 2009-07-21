@@ -90,7 +90,7 @@ public class TableauMonitorForwarder implements TableauMonitor,Serializable {
     }
     public void dlClauseMatchedFinished(DLClauseEvaluator dlClauseEvaluator,int dlClauseIndex) {
         if (m_forwardingOn)
-            m_forwardingTargetMonitor.dlClauseMatchedStarted(dlClauseEvaluator,dlClauseIndex);
+            m_forwardingTargetMonitor.dlClauseMatchedFinished(dlClauseEvaluator,dlClauseIndex);
     }
     public void addFactStarted(Object[] tuple,boolean isCore) {
         if (m_forwardingOn)

@@ -17,6 +17,8 @@ import org.semanticweb.HermiT.model.DatatypeRestriction;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.Inequality;
+import org.semanticweb.HermiT.model.NodeIDLessEqualThan;
+import org.semanticweb.HermiT.model.NodeIDsAscendingOrEqual;
 import org.semanticweb.HermiT.monitor.TableauMonitorAdapter;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
@@ -49,8 +51,14 @@ public class DerivationHistory extends TableauMonitorAdapter {
     }
     public void dlClauseMatchedStarted(DLClauseEvaluator dlClauseEvaluator,int dlClauseIndex) {
         Atom[] premises=new Atom[dlClauseEvaluator.getBodyLength()];
-        for (int index=0;index<premises.length;index++)
-            premises[index]=getAtom(dlClauseEvaluator.getTupleMatchedToBody(index));
+        // ask Boris whether nonCountingAtoms fix is as intended
+        int nonCountingAtoms=0;
+        for (int index=0;index<premises.length;index++) {
+            if (dlClauseEvaluator.getBodyAtom(index).getDLPredicate() instanceof NodeIDLessEqualThan || dlClauseEvaluator.getBodyAtom(index).getDLPredicate() instanceof NodeIDsAscendingOrEqual) {
+                nonCountingAtoms++;
+            }
+            premises[index-nonCountingAtoms]=getAtom(dlClauseEvaluator.getTupleMatchedToBody(index-nonCountingAtoms));
+        }
         m_derivations.push(new DLClauseApplication(dlClauseEvaluator.getDLClause(dlClauseIndex),premises));
     }
     public void dlClauseMatchedFinished(DLClauseEvaluator dlClauseEvaluator) {

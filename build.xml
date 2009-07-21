@@ -6,11 +6,11 @@
     <!-- Note that on each released build, the ${updatefile} on the web site
          should be replaced, and the new version of the plugin should be
          posted at the (auto-generated) URL in that file. -->
-    <property name="version" value="0.9.4alpha"/>
+    <property name="version" value="0.9.4"/>
 
     <!-- general info -->
     <property name="homepage" value="http://hermit-reasoner.com/"/>
-    <property name="updatefile" value="${homepage}/update.properties"/>
+    <property name="updatefile" value="${homepage}update.properties"/>
     
     <!-- structure of output files -->
     <property name="projectroot" value="."/>
@@ -125,7 +125,7 @@
                 <attribute name="Bundle-Version" value="${version}"/>
                 <attribute name="Bundle-Activator" value="org.protege.editor.core.plugin.DefaultPluginActivator"/>
                 <attribute name="Bundle-ClassPath" value="."/>
-                <attribute name="Require-Bundle" value="org.protege.common,org.protege.editor.core.application,org.protege.editor.owl,org.semanticweb.owl.owlapi"/>
+                <attribute name="Require-Bundle" value="org.protege.common,org.protege.editor.core.application,org.protege.editor.owl"/>
                 <attribute name="Update-Url" value="${updatefile}"/>
             </manifest>
             <fileset dir="${classdir}"/>

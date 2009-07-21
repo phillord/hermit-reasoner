@@ -314,6 +314,8 @@ public class OWLClausification {
                         }
                     }
                 }
+                // we will always apply the DL-safe restriction to rules such as A(x) and B(y) -> C(x) 
+                // because if the rule does not contain roles we don't know whether it is a graph rule or not...
                 if (!isGraphRule) {
                     // apply rules only to named individuals
                     bodies.addAll(safenessAtoms);
