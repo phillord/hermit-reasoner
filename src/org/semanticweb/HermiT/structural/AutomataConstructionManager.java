@@ -135,8 +135,7 @@ public class AutomataConstructionManager {
     	return completeAutomata;
 	}
 	private Automaton buildCompleteAutomataForRoles(OWLObjectPropertyExpression roleToBuildAutomaton, Map<OWLObjectPropertyExpression, Set<OWLObjectPropertyExpression>> inverseRolesMap, Map<OWLObjectPropertyExpression, Automaton> individualAutomata, Map<OWLObjectPropertyExpression, Automaton> completeAutomata, Graph<OWLObjectPropertyExpression> inversedPropertyDependencyGraph) {
-
-        
+   
 		if( completeAutomata.containsKey( roleToBuildAutomaton ) )
 			return completeAutomata.get( roleToBuildAutomaton );
 		else if( completeAutomata.containsKey( roleToBuildAutomaton.getInverseProperty().getSimplified() ) && 
@@ -244,6 +243,7 @@ public class AutomataConstructionManager {
 		}
 	}
 	private Automaton minimizeAndNormalizeAutomaton(Automaton automaton) {
+
 		Reducer minimizerDeterminizer = new Reducer();
 		Normalizer normalizer = new Normalizer();
 		
@@ -335,7 +335,7 @@ public class AutomataConstructionManager {
     		//RR->R
     		if (subObjectProperties.length==2 && subObjectProperties[0].equals(superObjectProperty) && subObjectProperties[1].equals(superObjectProperty)) {
     			try {
-					auto.addTransition( new Transition( finalState, null, initialState ) );
+					auto.addTransition( new Transition( finalState, superObjectProperty, finalState ) );
 				} catch (NoSuchStateException e) {
 					throw new IllegalArgumentException("Could not create automaton");
 				}
@@ -390,26 +390,23 @@ public class AutomataConstructionManager {
     		}
     		automataMap.put( superObjectProperty, auto );
 		}
-    	for( OWLObjectPropertyExpression owlProp : automataMap.keySet() ){
-    		for( OWLObjectPropertyExpression[] inclusion : simpleObjectPropertyInclusions ){
+    	for( OWLObjectPropertyExpression owlProp : automataMap.keySet() )
+    		for( OWLObjectPropertyExpression[] inclusion : simpleObjectPropertyInclusions )
     			if( inclusion[0].equals( owlProp ) && inclusion[1].getInverseProperty().getSimplified().equals( owlProp ) ){
     				Automaton au = automataMap.get( owlProp );
     				buildAutomatonForSymmetricRole( au, getMirroredCopy( au ) );
     				automataMap.put( owlProp , au );
     			}
-    		}
-    	}
 
     	for(ComplexObjectPropertyInclusion inclusion : complexObjectPropertyInclusions){
     		OWLObjectPropertyExpression owlSuperProperty = inclusion.m_superObjectProperties;
     		OWLObjectPropertyExpression[] owlSubPropertyExpression = inclusion.m_subObjectProperties;
-    		if( owlSubPropertyExpression.length==2 && owlSubPropertyExpression[0].equals(owlSuperProperty) && owlSubPropertyExpression[1].equals(owlSuperProperty)){
+    		if( owlSubPropertyExpression.length==2 && owlSubPropertyExpression[0].equals(owlSuperProperty) && owlSubPropertyExpression[1].equals(owlSuperProperty))
     			if( !complexRolesDependencyGraph.getElements().contains( owlSuperProperty ) ){
     				Automaton autoOfRole = automataMap.get( owlSuperProperty );
     				automataMap.put(owlSuperProperty, autoOfRole);
     				automataMap.put( owlSuperProperty.getInverseProperty().getSimplified(), getMirroredCopy( autoOfRole ) );
     			}
-    		}
 		}
     	return automataMap;
     }
