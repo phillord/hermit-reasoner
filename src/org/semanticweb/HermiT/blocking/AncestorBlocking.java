@@ -3,7 +3,6 @@ package org.semanticweb.HermiT.blocking;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Set;
 
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
@@ -49,9 +48,6 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
         }
     }
     public boolean computeIsBlocked(Node node) {
-        throw new UnsupportedOperationException("Unsupported operation: Ancestor blocking cannot be used with a lazy expansion strategy. ");
-    }
-    public Set<Node> checkAllBlocks() {
         throw new UnsupportedOperationException("Unsupported operation: Ancestor blocking cannot be used with a lazy expansion strategy. ");
     }
     protected final void checkParentBlocking(Node node) {

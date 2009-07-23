@@ -27,7 +27,7 @@ public class WGTestDescriptor {
     protected static final URI TEST_CASE_URI=URI.create(WGTestRegistry.URI_BASE+"TestCase");
 
     protected enum Status {
-        APPROVED("Approved"),REJECTED("Rejected"),PROPOSED("Proposed");
+        APPROVED("Approved"),REJECTED("Rejected"),PROPOSED("Proposed"),EXTRACREDIT("Extracredit");
         
         public final URI uri;
         

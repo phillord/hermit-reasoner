@@ -2,7 +2,6 @@
 package org.semanticweb.HermiT.blocking;
 
 import java.util.List;
-import java.util.Set;
 
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
@@ -29,6 +28,5 @@ public interface BlockingStrategy {
     void modelFound();
     boolean isExact();
     void dlClauseBodyCompiled(List<DLClauseEvaluator.Worker> workers,DLClause dlClause,List<Variable> variables,Object[] valuesBuffer,boolean[] coreVariables);
-    boolean computeIsBlocked(Node node);
-    Set<Node> checkAllBlocks();
+    //boolean computeIsBlocked(Node node);
 }

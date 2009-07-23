@@ -670,9 +670,15 @@ public class OWLNormalization {
         // Assertions
         
         public void visit(OWLSameIndividualAxiom axiom) {
+            if (axiom.containsAnonymousIndividuals()) {
+                throw new IllegalArgumentException("The axiom " + axiom + " contains anonymous individuals, which is not allowed in OWL 2. ");
+            }
             addFact(axiom);
         }
         public void visit(OWLDifferentIndividualsAxiom axiom) {
+            if (axiom.containsAnonymousIndividuals()) {
+                throw new IllegalArgumentException("The axiom " + axiom + " contains anonymous individuals, which is not allowed in OWL 2. ");
+            }
             addFact(axiom);
         }
         public void visit(OWLClassAssertionAxiom axiom) {
@@ -695,6 +701,9 @@ public class OWLNormalization {
             }
         }
         public void visit(OWLNegativeObjectPropertyAssertionAxiom axiom) {
+            if (axiom.containsAnonymousIndividuals()) {
+                throw new IllegalArgumentException("The axiom " + axiom + " contains anonymous individuals, which is not allowed in OWL 2. ");
+            }
             OWLObjectOneOf nominal=m_factory.getOWLObjectOneOf(axiom.getObject());
             OWLClassExpression notNominal=m_factory.getOWLObjectComplementOf(nominal);
             OWLClassExpression allNotNominal=m_factory.getOWLObjectAllValuesFrom(axiom.getProperty().getSimplified(),notNominal);
@@ -710,6 +719,9 @@ public class OWLNormalization {
             addFact(axiom);
         }
         public void visit(OWLNegativeDataPropertyAssertionAxiom axiom) {
+            if (axiom.containsAnonymousIndividuals()) {
+                throw new IllegalArgumentException("The axiom " + axiom + " contains anonymous individuals, which is not allowed in OWL 2. ");
+            }
             addFact(axiom);
 //            OWLDataOneOf oneOf=m_factory.getOWLDataOneOf(axiom.getObject());
 //            OWLDataRange notOneOf=m_factory.getOWLDataComplementOf(oneOf);

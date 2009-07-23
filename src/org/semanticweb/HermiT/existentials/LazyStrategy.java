@@ -2,14 +2,12 @@
 package org.semanticweb.HermiT.existentials;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.semanticweb.HermiT.blocking.AnywhereCoreBlocking;
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.model.AtLeastConcept;
-import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.ExistsDescriptionGraph;
@@ -27,12 +25,9 @@ public class LazyStrategy extends AbstractExpansionStrategy implements Serializa
     
     protected final Set<Node> m_nodesToExpand=new HashSet<Node>();
     protected final Set<Node> m_nodesWithFinishedExpansion=new HashSet<Node>();
-    //protected final Set<Node> m_nodesToCheckBlocking=new HashSet<Node>();
     protected boolean expandOneAtATime=false;
     protected int numExpansions=0;
-    //protected final boolean currentlySatisfiedIsPermanentlySatisfied;
-    
-    protected final boolean printingOn=false;
+    protected final boolean printingOn=true;
     
     public LazyStrategy(BlockingStrategy strategy) {
         super(strategy,false);
@@ -46,104 +41,36 @@ public class LazyStrategy extends AbstractExpansionStrategy implements Serializa
     }
     public void clear() {
         super.clear();
-        //m_nodesToCheckBlocking.clear();
         m_nodesToExpand.clear();
     }
     public boolean expandExistentials(boolean finalChance) {
         boolean extensionsChanged=false;
-        m_nodesToExpand.addAll(((AnywhereCoreBlocking)m_blockingStrategy).getUnblockedNodesWithUnprocessedExistentials());
-        //if (printingOn) System.out.println(m_nodesToExpand.size() + " nodes need expansion. ");
-        if (finalChance) {
-            //if (m_nodesToExpand.size()==0) {
-            m_nodesToExpand.clear(); // now all the nodes with some not permanently satisfied existeantil are gone
-                m_nodesToExpand.addAll(m_blockingStrategy.checkAllBlocks());
-                //System.out.println("Checked all blocks");
-                m_interruptFlag.checkInterrupt();
-                //if (m_nodesToExpand.size() > 0) return true;
-            //}
+        // check blocks and collect unblocked nodes that need existential expansion in m_nodesToExpand
+        if (!finalChance) {
+            ((AnywhereCoreBlocking)m_blockingStrategy).computePreBlocking(m_nodesToExpand);
+        } else {
+            m_nodesToExpand.clear(); // now all the nodes with some not permanently satisfied existential are gone
+            ((AnywhereCoreBlocking)m_blockingStrategy).validateBlocks(m_nodesToExpand);
         }
-        Collection<ExistentialConcept> unprocessedExistentials=new HashSet<ExistentialConcept>();
+        if (printingOn) System.out.println(m_nodesToExpand.size() + " nodes need expansion. ");
+        m_interruptFlag.checkInterrupt();
         for (Node node : m_nodesToExpand) {
             if (node.isActive() && !node.isBlocked() && node.hasUnprocessedExistentials()) {
                 boolean hasChangedForThisNode=false;
-                unprocessedExistentials.addAll(node.getUnprocessedExistentials());
-                for (ExistentialConcept ec : unprocessedExistentials) {
+                for (ExistentialConcept ec : new HashSet<ExistentialConcept>(node.getUnprocessedExistentials())) {
                     hasChangedForThisNode=doExpansion(node, ec);
-                    if (hasChangedForThisNode) break;
+                    if (hasChangedForThisNode) break; // expand one existential per node at a time
                 }
-                unprocessedExistentials.clear();
                 extensionsChanged = (extensionsChanged || hasChangedForThisNode);
+            } else {
+                m_nodesWithFinishedExpansion.add(node);
             }
+            m_interruptFlag.checkInterrupt();
         }
-//        if (!extensionsChanged) {
-//            System.out.println("No more extension changes...");
-//        }
-        m_interruptFlag.checkInterrupt();
         m_nodesToExpand.removeAll(m_nodesWithFinishedExpansion);
         m_nodesWithFinishedExpansion.clear();
         return extensionsChanged;
     }
-//    public boolean expandExistentials(boolean finalChance) {
-//        boolean extensionsChanged=false;
-//        if (finalChance && !expandOneAtATime) {
-//            m_nodesToCheckBlocking.clear();
-//            m_nodesToExpand.clear();
-//            //m_nodesToExpand.addAll(m_blockingStrategy.checkAllBlocks());
-//            expandOneAtATime=true;
-//            if (printingOn) System.out.println("After checking all nodes, " + m_nodesToExpand.size() + " might need existential expansion. ");
-//        } else {
-//            m_nodesToCheckBlocking.removeAll(m_nodesToExpand);
-//            if (printingOn) System.out.println("Nodes to be check for blocking: " + m_nodesToCheckBlocking.size() + ", for expansion: " + m_nodesToExpand.size());
-//            Set<Node> newlyUnblockedNodes=new HashSet<Node>();
-//            for (Node node : m_nodesToCheckBlocking) {
-//                boolean wasBlocked=node.isBlocked();
-//                if (wasBlocked && !m_blockingStrategy.computeIsBlocked(node)) {
-//                    newlyUnblockedNodes.add(node);
-//                }
-//            }
-//            m_nodesToCheckBlocking.clear();
-//            Set<Node> newlyBlockedNodes=new HashSet<Node>();
-//            for (Node node : m_nodesToExpand) {
-//                if (m_blockingStrategy.computeIsBlocked(node)) {
-//                    newlyBlockedNodes.add(node);
-//                }
-//            }
-//            m_nodesToExpand.removeAll(newlyBlockedNodes);
-//            m_nodesToExpand.addAll(newlyUnblockedNodes);
-//            if (m_nodesToExpand.isEmpty()) {
-//                Node node=m_tableau.getFirstTableauNode();
-//                while (node!=null) {
-//                    boolean wasBlocked=node.isBlocked();
-//                    if (wasBlocked && !m_blockingStrategy.computeIsBlocked(node)) {
-//                        newlyUnblockedNodes.add(node);
-//                    }
-//                    node=node.getNextTableauNode();
-//                }
-//            }
-//            m_nodesToExpand.addAll(newlyUnblockedNodes);
-//        }
-//        if (expandOneAtATime) {
-//            m_blockingStrategy.computeBlocking(finalChance);
-//            Node node=m_tableau.getFirstTableauNode();
-//            while (node!=null && !extensionsChanged) {
-//                extensionsChanged=doExpansion(node);
-//                node=node.getNextTableauNode();
-//            }
-//        } else {
-//            for (Node node : m_nodesToExpand) {
-//                if (node.isActive() && !node.isBlocked() && node.hasUnprocessedExistentials()) {
-//                    boolean hasChangedForThisNode=doExpansion(node);
-//                    extensionsChanged = (extensionsChanged || hasChangedForThisNode);
-//                }
-//            }
-//            if (!extensionsChanged) {
-//                System.out.println("No more extension changes...");
-//            }
-//        }
-//        m_interruptFlag.checkInterrupt();
-//        m_nodesToExpand.clear();
-//        return extensionsChanged;
-//    }
     protected boolean doExpansion(Node node, ExistentialConcept existentialConcept) {
         boolean extensionsChanged=false;
         TableauMonitor monitor=m_tableau.getTableauMonitor();
@@ -187,69 +114,10 @@ public class LazyStrategy extends AbstractExpansionStrategy implements Serializa
         m_interruptFlag.checkInterrupt();
         return extensionsChanged;
     }
-//    public boolean expandExistentials(boolean finalChance) {
-////        TableauMonitor monitor=m_tableau.getTableauMonitor();
-//        boolean extensionsChanged=false;
-//        if (finalChance) {
-//            m_nodesToCheckBlocking.clear();
-//            m_nodesToExpand.clear();
-//            m_nodesToExpand.addAll(m_blockingStrategy.checkAllBlocks());
-//            if (printingOn) System.out.println("After checking all nodes, " + m_nodesToExpand.size() + " might need existential expansion. ");
-//            expandOneAtATime=true;
-//        } else {
-//            m_nodesToCheckBlocking.removeAll(m_nodesToExpand);
-//            if (printingOn) System.out.println("Nodes to be check for blocking: " + m_nodesToCheckBlocking.size());
-//            if (printingOn) System.out.println("Nodes to be check for expansion: " + m_nodesToExpand.size());
-//            Set<Node> newlyUnblockedNodes=new HashSet<Node>();
-//            for (Node node : m_nodesToCheckBlocking) {
-//                boolean wasBlocked=node.isBlocked();
-//                if (wasBlocked && !m_blockingStrategy.computeIsBlocked(node)) {
-//                    newlyUnblockedNodes.add(node);
-//                }
-//            }
-//            m_nodesToCheckBlocking.clear();
-//            for (Node node : m_nodesToExpand) {
-//                m_blockingStrategy.computeIsBlocked(node);
-//            }
-//            m_nodesToExpand.addAll(newlyUnblockedNodes);
-//        }
-//        for (Node node : m_nodesToExpand) {
-//            if (node.isActive() && !node.isBlocked() && node.hasUnprocessedExistentials()) {
-//                boolean hasChangedForThisNode=doExpansion(node);
-//                extensionsChanged = (extensionsChanged || hasChangedForThisNode);
-//            }
-//            m_interruptFlag.checkInterrupt();
-//        }
-//        m_nodesToExpand.clear();
-//        return extensionsChanged;
-//    }
     public void assertionAdded(Concept concept,Node node,boolean isCore) {
         super.assertionAdded(concept,node,isCore);
         if (concept instanceof AtLeastConcept) {
             m_nodesToExpand.add(node);
         } 
-//        else if (isCore) {
-//            m_nodesToCheckBlocking.add(node);
-//        }
-    }
-//    public void assertionCoreSet(Concept concept,Node node) {
-//        super.assertionCoreSet(concept,node);
-//        m_nodesToCheckBlocking.add(node);
-//    }
-//    public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
-//        super.assertionAdded(atomicRole,nodeFrom,nodeTo,isCore);
-//        if (isCore) {
-//            m_nodesToCheckBlocking.add(nodeTo);
-//        }
-//    }
-//    public void assertionCoreSet(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
-//        super.assertionCoreSet(atomicRole,nodeFrom,nodeTo);
-//        m_nodesToCheckBlocking.add(nodeTo);
-//    }
-    public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
-        super.assertionRemoved(atomicRole,nodeFrom,nodeTo,isCore);
-//        if (isCore) {
-//            m_nodesToCheckBlocking.add(nodeTo);
-//        }
     }
 }

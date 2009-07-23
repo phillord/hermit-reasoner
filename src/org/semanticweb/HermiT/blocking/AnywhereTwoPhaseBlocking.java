@@ -79,9 +79,6 @@ public class AnywhereTwoPhaseBlocking implements BlockingStrategy, Serializable 
     public boolean computeIsBlocked(Node node) {
         throw new UnsupportedOperationException("Unsupported operation: Two-Phase blocking cannot be used with a lazy expansion strategy. ");
     }
-    public Set<Node> checkAllBlocks() {
-        throw new UnsupportedOperationException("Unsupported operation: Two-Phase blocking cannot be used with a lazy expansion strategy. ");
-    }
     public void computeBlocking(boolean finalChance) {
         computePreBlocking();
         if (finalChance) {

@@ -143,7 +143,6 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         this(configuration,ontologyManger,ontology,(Set<DescriptionGraph>)null);
     }
 
-
     /**
      * Creates a new reasoner object loaded with the given ontology and the given description graphs. When creating 
      * the reasoner, the given configuration determines the parameters for blocking, expansion strategy etc. 

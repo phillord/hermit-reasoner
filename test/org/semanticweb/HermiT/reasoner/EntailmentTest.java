@@ -2,6 +2,7 @@ package org.semanticweb.HermiT.reasoner;
 
 import java.net.URI;
 
+import org.semanticweb.HermiT.EntailmentChecker;
 import org.semanticweb.owlapi.io.OWLOntologyInputSource;
 import org.semanticweb.owlapi.io.StringInputSource;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -20,12 +21,71 @@ public class EntailmentTest extends AbstractReasonerTest {
         OWLOntology conlusions=getOntologyWithAxioms(axioms);
         assertEntails(conlusions.getLogicalAxioms(), true);
     }
-    // this test is from the OWL WG test suite and fails since when parsing RDF XML 
-    // the disjoint object properties axiom is lost
-    // Matthew has been asked to fix this
-    public void testDisjointOPs() throws Exception {
-        loadReasonerFromResource("res/entailment/premiseontology.owl");
-        OWLOntology conlusions = getOntologyFromRessource("res/entailment/conclusionontology.owl");
+    public void testInvalidBlankNodes() throws Exception {
+        String axioms = "ClassAssertion(ObjectSomeValuesFrom(:p ObjectSomeValuesFrom(:s owl:Thing)) :a)" 
+            + "SubObjectPropertyOf( :s :r- )"
+            + "InverseObjectProperties( :r- :r ) ";
+        loadReasonerWithAxioms(axioms);
+        axioms = "ObjectPropertyAssertion(:p :a _:anon1)"
+            + "ObjectPropertyAssertion(:s _:anon1 _:anon2)"
+            + "ObjectPropertyAssertion(:r _:anon2 _:anon1)";
+        OWLOntology conlusions=getOntologyWithAxioms(axioms);
+        boolean catchedException=false;
+        try {
+            new EntailmentChecker(m_reasoner, m_dataFactory).entails(conlusions.getLogicalAxioms());
+        } catch (Exception e) {
+            // blank nodes in the conclusion ontology should not contain cycles
+            catchedException=true;
+        }
+        assertTrue(catchedException);
+    }
+    public void testValidBlankNodesWithNominals() throws Exception {
+        String axioms = "ClassAssertion(ObjectSomeValuesFrom(:p ObjectSomeValuesFrom(:s ObjectOneOf(:b))) :a)" 
+            + "SubObjectPropertyOf( :s :r )";
+        loadReasonerWithAxioms(axioms);
+        axioms = "ObjectPropertyAssertion(:p :a _:anon1)"
+            + "ObjectPropertyAssertion(:r _:anon1 :b)";
+        OWLOntology conlusions=getOntologyWithAxioms(axioms);
+        assertEntails(conlusions.getLogicalAxioms(), true);
+    }
+    public void testValidBlankNodesInPremise() throws Exception {
+        String axioms = "ObjectPropertyAssertion(:r :a _:anon1)"
+            + "ObjectPropertyAssertion(:s _:anon1 _:anon2)";
+        loadReasonerWithAxioms(axioms);
+        axioms = "ObjectPropertyAssertion(:r _:anon1 _:anon2)";
+        OWLOntology conlusions=getOntologyWithAxioms(axioms);
+        assertEntails(conlusions.getLogicalAxioms(), true);
+    }
+    public void testValidBlankNodes() throws Exception {
+        String axioms = "ObjectPropertyAssertion(:r :a :b)"
+            + "ObjectPropertyAssertion(:s :b :c)";
+        loadReasonerWithAxioms(axioms);
+        axioms = "ObjectPropertyAssertion(:r _:anon1 _:anon2)";
+        OWLOntology conlusions=getOntologyWithAxioms(axioms);
+        assertEntails(conlusions.getLogicalAxioms(), true);
+    }
+    public void testBlankWithDTs() throws Exception {
+        String axioms = "ObjectPropertyAssertion(:r :a :b)"
+            + "ObjectPropertyAssertion(:s :b :c)";
+        loadReasonerWithAxioms(axioms);
+        axioms = "DataPropertyAssertion(:dp _:anon1 \"test\")";
+        OWLOntology conlusions=getOntologyWithAxioms(axioms);
+        assertEntails(conlusions.getLogicalAxioms(), false);
+    }
+    public void testBlankWithDTs2() throws Exception {
+        String axioms = "DataPropertyAssertion(:dp :a \"test\")"
+            + "ObjectPropertyAssertion(:s :b :c)";
+        loadReasonerWithAxioms(axioms);
+        axioms = "DataPropertyAssertion(:dp _:anon1 \"test\")";
+        OWLOntology conlusions=getOntologyWithAxioms(axioms);
+        assertEntails(conlusions.getLogicalAxioms(), true);
+    }
+    public void testBlankWithDTs3() throws Exception {
+        String axioms = "DataPropertyAssertion(:dp :a \"test\")"
+            + "ObjectPropertyAssertion(:s :b :c)";
+        loadReasonerWithAxioms(axioms);
+        axioms = "DataPropertyAssertion(:dp _:anon1 \"test\"^^xsd:string)";
+        OWLOntology conlusions=getOntologyWithAxioms(axioms);
         assertEntails(conlusions.getLogicalAxioms(), true);
     }
     protected OWLOntology getOntologyFromRessource(String resourceName) throws Exception {

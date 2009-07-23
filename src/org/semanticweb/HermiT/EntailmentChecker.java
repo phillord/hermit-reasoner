@@ -10,6 +10,8 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
+import org.semanticweb.HermiT.tableau.Tableau;
+import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.inference.OWLReasonerException;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
@@ -118,7 +120,11 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
         AnonymousIndividualForestBuilder anonIndChecker=new AnonymousIndividualForestBuilder();
         anonIndChecker.constructConceptsForAnonymousIndividuals(factory, anonymousIndividualAxioms);
         for (OWLAxiom ax : anonIndChecker.getAnonIndAxioms()) {
-            if (!ax.accept(this)) {
+            if (!ax.accept(this)) return false;
+        }
+        for (OWLAxiom ax : anonIndChecker.getAnonNoNamedIndAxioms()) {
+            Tableau t = reasoner.getTableau(OWLManager.createOWLOntologyManager(), ax); 
+            if (t.isABoxSatisfiable()) {
                 return false;
             }
         }
@@ -433,17 +439,18 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
     }
 
     protected class AnonymousIndividualForestBuilder implements OWLAxiomVisitor {        
-        // A forest F over the anonymous individuals in Ax exists such that the following 
-        // conditions are satisfied, for OPE an object property expression, _:x and _:y 
-        // anonymous individuals, and a a named individual:
-        // * for each assertion in Ax of the form ObjectPropertyAssertion( OPE _:x _:y ), 
-        //   either _:x is a child of _:y or _:y is a child of _:x in F;
-        // * for each pair of anonymous individuals _:x and _:y such that _:y is a child of _:x in F, 
-        //   the set Ax contains at most one assertion of the form ObjectPropertyAssertion( OPE _:x _:y ) 
-        //   or ObjectPropertyAssertion( OPE _:y _:x ); and
-        // * for each anonymous individual _:x that is a root in F, the set Ax contains at most one 
-        //   assertion of the form ObjectPropertyAssertion( OPE _:x a ) or 
-        //   ObjectPropertyAssertion( OPE a _:x ). 
+        // No axiom in Ax of the following form contains anonymous individuals:
+        //  - SameIndividual, DifferentIndividuals, NegativeObjectPropertyAssertion, and NegativeDataPropertyAssertion. 
+        // A forest F over the anonymous individuals in Ax exists such that the following conditions are satisfied, 
+        // for OPE an object property expression, _:x and _:y anonymous individuals, and a a named individual:
+        // - for each assertion in Ax of the form ObjectPropertyAssertion( OPE _:x _:y ), either _:x is a child of _:y 
+        //   or _:y is a child of _:x in F;
+        // - for each pair of anonymous individuals _:x and _:y such that _:y is a child of _:x in F, the set Ax contains 
+        //   at most one assertion of the form ObjectPropertyAssertion( OPE _:x _:y ) or 
+        //   ObjectPropertyAssertion( OPE _:y _:x ); and
+        // - for each anonymous individual _:x that is a root in F, the set Ax contains at most one assertion of the 
+        //   form ObjectPropertyAssertion( OPE _:x a ) or ObjectPropertyAssertion( OPE a _:x ). 
+
         
         protected final Set<OWLNamedIndividual> namedNodes=new HashSet<OWLNamedIndividual>();
         protected final Set<OWLAnonymousIndividual> nodes=new HashSet<OWLAnonymousIndividual>();
@@ -458,7 +465,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
         //protected final Map<Edge,OWLDataProperty> edgeDPLabels=new HashMap<OWLAnonymousIndividual[],OWLDataProperty>();
         
         protected final Set<OWLAxiom> anonIndAxioms=new HashSet<OWLAxiom>();
-        //protected final Set<OWLClassExpression> concepts=new HashSet<OWLClassExpression>();
+        protected final Set<OWLAxiom> anonNoNamedIndAxioms=new HashSet<OWLAxiom>();
         
         /**
          * @param factory The data factory to be used when creating new concepts in the elimination of anonymous 
@@ -494,7 +501,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
                     // otherwise findSuitableRoots() had given preference to that root. 
                     // We have to roll-up into a concept.
                     OWLClassExpression c=getClassExpressionFor(factory,root,null);
-                    anonIndAxioms.add(factory.getOWLSubClassOfAxiom(factory.getOWLThing(), c));
+                    anonNoNamedIndAxioms.add(factory.getOWLSubClassOfAxiom(factory.getOWLThing(), factory.getOWLObjectComplementOf(c)));
                 } else {
                     // We can roll-up into a class assertion.
                     Map<OWLNamedIndividual,Set<OWLObjectPropertyExpression>> ind2OP=specialOPEdges.get(root);
@@ -523,6 +530,18 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
          */
         public Set<OWLAxiom> getAnonIndAxioms() {
             return anonIndAxioms;
+        }
+        /**
+         * After calling constructConceptsForAnonymousIndividuals(), the method return a set of subclass axioms that, 
+         * when added to the premise ontology should result in an inconsistency for the entailment to hold.  
+         * E.g., if the conclusion ontology contains axiom ObjectPropertyAssertion(:r _:x _:y), we get the 
+         * axiom SubClassOf(owl:Thing ObjectAllValuesFrom(:r owl:Nothing)) and if the premise ontology plus this 
+         * axioms is inconsistent, then the entailment holds since each model of the premise contains some element that 
+         * is an r-successor of something.
+         * @return a set of axioms without anonymous individuals that have make the premise ontology inconsistent for the entailment to hold
+         */
+        public Set<OWLAxiom> getAnonNoNamedIndAxioms() {
+            return anonNoNamedIndAxioms;
         }
 //        /**
 //         * After calling constructConceptsForAnonymousIndividuals(), the method return a set of concepts that 
@@ -558,7 +577,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
                 } else {
                     pair=new Edge(successor, node);
                     if (!edgeOPLabels.containsKey(pair)) {
-                        throw new RuntimeException("Internal error: some edge in the forest of anonymous individuals has no edge label although it shoul. ");
+                        throw new RuntimeException("Internal error: some edge in the forest of anonymous individuals has no edge label although it should. ");
                     } else {
                         op=edgeOPLabels.get(pair);
                     }
