@@ -280,7 +280,6 @@ public class AutomataConstructionManager {
     		OWLObjectPropertyExpression owlSuperProperty = inclusion.m_superObjectProperties;
     		OWLObjectPropertyExpression owlSubPropertyInChain = null;
     		OWLObjectPropertyExpression[] owlSubProperties = inclusion.m_subObjectProperties;
-
     		if( owlSubProperties.length != 2 && owlSuperProperty.equals( owlSubProperties[0] ) && owlSuperProperty.equals( owlSubProperties[owlSubProperties.length-1] ))
     			throw new IllegalArgumentException("The given role hierarchy is not regular.");
     		
