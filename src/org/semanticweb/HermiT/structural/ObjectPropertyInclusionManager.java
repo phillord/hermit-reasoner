@@ -82,7 +82,7 @@ public class ObjectPropertyInclusionManager {
             OWLObjectPropertyExpression objectProperty = replacedAllRestriction.getProperty();
             OWLClassExpression owlConcept = replacedAllRestriction.getFiller();
             String indexOfInitialConcept = mapping.getValue().asOWLClass().getIRI().getFragment();
-            indexOfInitialConcept += "_" + objectProperty.asOWLObjectProperty().getIRI().getFragment();
+            indexOfInitialConcept += "_" + objectProperty.asOWLObjectProperty().getIRI().getFragment() + "_";
 
             Automaton automatonOfRole = m_automataForComplexRoles.get( objectProperty );
             String initialState = automatonOfRole.initials().toArray()[0].toString();
@@ -140,7 +140,7 @@ public class ObjectPropertyInclusionManager {
                 OWLClassExpression replacedConcept=getReplacementFor(objectAll);
                 String initialState = m_automataForComplexRoles.get( objectProperty ).initials().toArray()[0].toString();
                 String indexOfReplacedConcept = replacedConcept.asOWLClass().getIRI().getFragment();
-                indexOfReplacedConcept += "_" + objectProperty.asOWLObjectProperty().getIRI().getFragment();
+                indexOfReplacedConcept += "_" + objectProperty.asOWLObjectProperty().getIRI().getFragment() + "_";
                 OWLClassExpression replacement = m_factory.getOWLClass(IRI.create("internal:all#"+indexOfReplacedConcept+initialState));
                 if (objectAll.getFiller() instanceof OWLObjectComplementOf || objectAll.getFiller().equals(m_factory.getOWLNothing()))
                 	replacement = m_factory.getOWLClass(IRI.create("internal:all#"+indexOfReplacedConcept+initialState)).getComplementNNF();
