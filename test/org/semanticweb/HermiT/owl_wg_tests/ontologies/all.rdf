@@ -354,7 +354,6 @@ Ontology(
 &lt;rdf:RDF xmlns="http://example.com/"
      xml:base="http://example.com/"
      xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
-     xmlns:example2="&amp;example;2"
      xmlns:example="http://example.com/"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
@@ -428,7 +427,6 @@ Ontology(
 
 &lt;!DOCTYPE rdf:RDF [
     &lt;!ENTITY example "http://example.com/" &gt;
-    &lt;!ENTITY example2 "http://example.com/2" &gt;
     &lt;!ENTITY owl "http://www.w3.org/2002/07/owl#" &gt;
     &lt;!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" &gt;
     &lt;!ENTITY owl2xml "http://www.w3.org/2006/12/owl2-xml#" &gt;
@@ -440,7 +438,6 @@ Ontology(
 &lt;rdf:RDF xmlns="http://example.com/"
      xml:base="http://example.com/"
      xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
-     xmlns:example2="&amp;example;2"
      xmlns:example="http://example.com/"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
@@ -2350,7 +2347,7 @@ Ontology(
    DataPropertyAssertion(:dp :holder "6666666666"^^xsd:long)
    DataPropertyAssertion(:dp :holder "12.25"^^xsd:decimal)
    DataPropertyAssertion(:dp :holder "1"^^xsd:decimal)
-   DataPropertyAssertion(:dp :holder "No use of rdf:plainLiteral in old rdf serializations@en"^^rdf:plainLiteral)
+   DataPropertyAssertion(:dp :holder "No use of rdf:PlainLiteral in old rdf serializations@en"^^rdf:PlainLiteral)
    DataPropertyAssertion(:dp :holder "1.1e6"^^xsd:float)
    DataPropertyAssertion(:dp :holder "1.1e6"^^xsd:double)
    DataPropertyAssertion(:dp :holder "string"^^xsd:string)
@@ -5394,7 +5391,7 @@ Ontology(
 		<test:specRef rdf:resource="http://www.w3.org/TR/owl2-syntax/#Real_Numbers.2C_Decimal_Numbers.2C_and_Integers" />
 		<test:normativeSyntax rdf:resource="&test;FUNCTIONAL" />
 		<test:normativeSyntax rdf:resource="&test;RDFXML" />
-		<test:status rdf:resource="&test;Proposed" />
+		<test:status rdf:resource="&test;Approved" />
 		<test:semantics rdf:resource="&test;DIRECT" />
 		<test:semantics rdf:resource="&test;RDF-BASED" />
 		<test:species rdf:resource="&test;FULL" />
@@ -5465,7 +5462,7 @@ Ontology(
 		<test:specRef rdf:resource="http://www.w3.org/TR/owl2-syntax/#Real_Numbers.2C_Decimal_Numbers.2C_and_Integers" />
 		<test:normativeSyntax rdf:resource="&test;FUNCTIONAL" />
 		<test:normativeSyntax rdf:resource="&test;RDFXML" />
-		<test:status rdf:resource="&test;Proposed" />
+		<test:status rdf:resource="&test;Approved" />
 		<test:semantics rdf:resource="&test;DIRECT" />
 		<test:semantics rdf:resource="&test;RDF-BASED" />
 		<test:species rdf:resource="&test;FULL" />
@@ -5552,7 +5549,7 @@ Ontology(
 		<test:specRef rdf:resource="http://www.w3.org/TR/owl2-syntax/#Real_Numbers.2C_Decimal_Numbers.2C_and_Integers" />
 		<test:normativeSyntax rdf:resource="&test;FUNCTIONAL" />
 		<test:normativeSyntax rdf:resource="&test;RDFXML" />
-		<test:status rdf:resource="&test;Proposed" />
+		<test:status rdf:resource="&test;Approved" />
 		<test:semantics rdf:resource="&test;DIRECT" />
 		<test:semantics rdf:resource="&test;RDF-BASED" />
 		<test:species rdf:resource="&test;FULL" />

@@ -8,7 +8,7 @@ public class AllExtracreditWGTests {
         WGTestRegistry wgTestRegistry=new WGTestRegistry();
         TestSuite suite=new TestSuite("OWL WG Non-Rejected Tests");
         for (WGTestDescriptor wgTestDescriptor : wgTestRegistry.getTestDescriptors())
-            if (wgTestDescriptor.status==WGTestDescriptor.Status.EXTRACREDIT) {
+            if (wgTestDescriptor.isDLTest() && wgTestDescriptor.status==WGTestDescriptor.Status.EXTRACREDIT) {
                     wgTestDescriptor.addTestsToSuite(suite);
             }
         return suite;

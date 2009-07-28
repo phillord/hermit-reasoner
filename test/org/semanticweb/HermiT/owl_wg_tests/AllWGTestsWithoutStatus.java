@@ -8,7 +8,7 @@ public class AllWGTestsWithoutStatus {
         WGTestRegistry wgTestRegistry=new WGTestRegistry();
         TestSuite suite=new TestSuite("OWL WG Tests without Status");
         for (WGTestDescriptor wgTestDescriptor : wgTestRegistry.getTestDescriptors())
-            if (wgTestDescriptor.status==null)
+            if (wgTestDescriptor.isDLTest() && wgTestDescriptor.status==null)
                 wgTestDescriptor.addTestsToSuite(suite);
         return suite;
     }

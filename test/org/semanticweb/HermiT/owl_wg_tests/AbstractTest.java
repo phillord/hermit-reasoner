@@ -3,7 +3,9 @@ package org.semanticweb.HermiT.owl_wg_tests;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.PrintWriter;
 
+import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
 import org.coode.owlapi.rdf.rdfxml.RDFXMLRenderer;
@@ -22,9 +24,11 @@ public abstract class AbstractTest extends TestCase {
     protected OWLOntologyManager m_ontologyManager;
     protected OWLOntology m_premiseOntology;
     protected Reasoner m_reasoner;
+    protected final PrintWriter output;
     
-    public AbstractTest(String name,WGTestDescriptor wgTestDescriptor) {
+    public AbstractTest(String name,WGTestDescriptor wgTestDescriptor,PrintWriter output) {
         super(name);
+        this.output=output;
         m_wgTestDescriptor=wgTestDescriptor;
     }
     protected void setUp() throws Exception {
@@ -39,29 +43,48 @@ public abstract class AbstractTest extends TestCase {
         m_reasoner=null;
     }
     public void runTest() throws Throwable {
+        output.println("[");
+        output.println("  testResultOntology:runner testResultOntology:hermit ;");
+        output.println("  testResultOntology:test [ testOntology:identifier \""+m_wgTestDescriptor.identifier+"\"^^xsd:string ] ;");
+        output.println("  rdf:type testResultOntology:"+this.reportTestType()+" ,");
+        output.println("    testResultOntology:TestRun ,");
         InterruptTimer timer=new InterruptTimer(TIMEOUT,m_reasoner);
         timer.start();
         try {
             m_reasoner.loadOntology(m_ontologyManager,m_premiseOntology,null);
             doTest();
+            output.println("    testResultOntology:PassingRun ;");
+            output.println("  testResultOntology:runtimeMillisecs \"314\"^^xsd:integer");
         }
         catch (InterruptException e) {
+            output.println("    testResultOntology:IncompleteRun ;");
+            output.print("  testResultOntology:details \"Timeout: "+TIMEOUT+" ms\"");
             dumpFailureData();
             fail("Test timed out.");
         }
         catch (OutOfMemoryError e) {
             m_reasoner=null;
             Runtime.getRuntime().gc();
+            output.println("    testResultOntology:IncompleteRun ;");
+            output.print("  testResultOntology:details \"Out of memory. \"");
             dumpFailureData();
             fail("Test ran out of memory.");
-        }
-        catch (Throwable e) {
+        } catch (AssertionFailedError e) {
+            output.println("    testResultOntology:FailingRun ;");
+            output.print("  testResultOntology:details \""+e.getMessage()+"\"");
+            fail("Test failed: " + e.getMessage());
+        } catch (Throwable e) {
+            output.println("    testResultOntology:IncompleteRun ;");
+            output.print("  testResultOntology:details \""+e.getMessage()+"\"");
             dumpFailureData();
             throw e;
         }
         finally {
             timer.stopTiming();
             timer.join();
+            output.println("] .");
+            output.println();
+            output.flush();
         }
     }
     protected void dumpFailureData() throws Exception {
@@ -83,6 +106,7 @@ public abstract class AbstractTest extends TestCase {
     }
     protected abstract void doTest() throws Exception;
     protected abstract String getTestType();
+    protected abstract String reportTestType();
     
     protected static class InterruptTimer extends Thread {
         protected final int m_timeout;

@@ -8,7 +8,7 @@ public class AllApprovedWGTests {
         WGTestRegistry wgTestRegistry=new WGTestRegistry();
         TestSuite suite=new TestSuite("OWL WG Approved Tests");
         for (WGTestDescriptor wgTestDescriptor : wgTestRegistry.getTestDescriptors())
-            if (wgTestDescriptor.status==WGTestDescriptor.Status.APPROVED)
+            if (wgTestDescriptor.isDLTest() && wgTestDescriptor.status==WGTestDescriptor.Status.APPROVED)
                 wgTestDescriptor.addTestsToSuite(suite);
         return suite;
     }

@@ -6,9 +6,9 @@ import junit.framework.TestSuite;
 public class AllWGTests {
     public static Test suite() throws Exception {
         WGTestRegistry wgTestRegistry=new WGTestRegistry();
-        TestSuite suite=new TestSuite("OWL WG All Tests");
+        TestSuite suite=new TestSuite("OWL WG All DL Direct Semantics Tests");
         for (WGTestDescriptor wgTestDescriptor : wgTestRegistry.getTestDescriptors())
-            wgTestDescriptor.addTestsToSuite(suite);
+            if (wgTestDescriptor.isDLTest()) wgTestDescriptor.addTestsToSuite(suite);
         return suite;
     }
 }

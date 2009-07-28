@@ -1,5 +1,6 @@
 package org.semanticweb.HermiT.owl_wg_tests;
 
+import java.io.PrintWriter;
 import java.net.URI;
 import java.util.EnumSet;
 import java.util.Map;
@@ -89,6 +90,7 @@ public class WGTestDescriptor {
 
     protected final OWLOntology testContainer;
     protected final OWLIndividual testIndividual;
+    protected final PrintWriter output;
     public final String testID;
     public final String identifier;
     public final Status status;
@@ -97,9 +99,10 @@ public class WGTestDescriptor {
     public final EnumSet<Semantics> semantics;
     public final EnumSet<Semantics> notsemantics;
 
-    public WGTestDescriptor(OWLOntologyManager m,OWLOntology o,OWLIndividual i) throws InvalidWGTestException {
+    public WGTestDescriptor(OWLOntologyManager m,OWLOntology o,OWLIndividual i,PrintWriter output) throws InvalidWGTestException {
         testContainer=o;
         testIndividual=i;
+        this.output=output;
         if (i.isAnonymous()) {
             throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
         }
@@ -227,7 +230,7 @@ public class WGTestDescriptor {
                 URI semanticsURI=s.asNamedIndividual().getURI();
                 for (Semantics sem : Semantics.values()) {
                     if (semanticsURI.equals(sem.uri)) {
-                        semantics.add(sem);
+                        notSemantics.add(sem);
                         continue nextItem;
                     }
                 }
@@ -294,13 +297,13 @@ public class WGTestDescriptor {
         if (testTypes.contains(testType) && isDLTest()) {
             switch (testType) {
             case CONSISTENCY:
-                return new ConsistencyTest(this,true);
+                return new ConsistencyTest(this,true,output);
             case INCONSISTENCY:
-                return new ConsistencyTest(this,false);
+                return new ConsistencyTest(this,false,output);
             case POSITIVE_ENTAILMENT:
-                return new EntailmentTest(this,true);
+                return new EntailmentTest(this,true,output);
             case NEGATIVE_ENTAILMENT:
-                return new EntailmentTest(this,false);
+                return new EntailmentTest(this,false,output);
             }
         }
         return null;
