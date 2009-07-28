@@ -1,0 +1,3306 @@
+@prefix : <owlapi:ontology:ont1#> .
+@prefix owl2xml: <http://www.w3.org/2006/12/owl2-xml#> .
+@prefix testOntology: <http://www.w3.org/2007/OWL/testOntology#> .
+@prefix p1: <> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix testResultOntology: <http://www.w3.org/2007/OWL/testResultOntology#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@base <owlapi:ontology:ont1> .
+
+<owlapi:ontology:ont1> rdf:type owl:Ontology ;
+  owl:imports <http://www.w3.org/2007/OWL/testResultOntology> .
+
+testResultOntology:details rdf:type owl:AnnotationProperty .
+testResultOntology:runner rdf:type owl:ObjectProperty .
+testResultOntology:test rdf:type owl:ObjectProperty .
+testOntology:identifier rdf:type owl:DatatypeProperty .
+testResultOntology:ConsistencyRun rdf:type owl:Class .
+testResultOntology:FailingRun rdf:type owl:Class .
+testResultOntology:IncompleteRun rdf:type owl:Class .
+testResultOntology:InconsistencyRun rdf:type owl:Class .
+testResultOntology:NegativeEntailmentRun rdf:type owl:Class .
+testResultOntology:PassingRun rdf:type owl:Class .
+testResultOntology:PositiveEntailmentRun rdf:type owl:Class .
+testResultOntology:TestRun rdf:type owl:Class .
+
+testResultOntology:hermit
+  a owl:Thing ;
+  rdfs:label "HermiT Reasoner (Version 1.0)" .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-TopObjectProperty-001"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-624"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-629"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-605"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-040"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.8-008"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.8-008"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-111"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-902"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-902"^^xsd:string ] ;
+  rdf:type testResultOntology:NegativeEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-IrreflexiveProperty-001"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-026"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.3-008"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-108"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-501"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-backwardCompatibleWith-002"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-DisjointUnion-001"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-DisjointUnion-001"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-107"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-miscellaneous-102"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-632"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "chain2trans1"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "chain2trans1"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "Qualified-cardinality-restricted-int"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "Qualified-cardinality-restricted-int"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-Restriction-001"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-Rational-003"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-623"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.2-001"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-miscellaneous-303"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "Inconsistent Disjoint Dataproperties"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-612"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-642"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-maxCardinality-001"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "Qualified-cardinality-boolean"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "Qualified-cardinality-boolean"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "Minus Infinity is not in owl:real"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-SelfRestriction-002"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-SelfRestriction-002"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-032"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-002"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-030"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-Class-005-direct"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-Class-005-direct"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-017"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I4.6-004"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I4.6-004"^^xsd:string ] ;
+  rdf:type testResultOntology:NegativeEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-634"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-667"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-667"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-unionOf-003"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-unionOf-003"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-020"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-034"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.3-011"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.5-005"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.5-005"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "somevaluesfrom2bnode"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "somevaluesfrom2bnode"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-023"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-NegativeDataPropertyAssertion-001"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-013"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-905"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-equivalentClass-006"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-equivalentClass-006"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-Thing-003"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-Keys-005"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-disjointWith-006"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-disjointWith-003"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-908"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-006"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-021"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-Rational-001"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-cardinality-003"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-cardinality-003"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-018"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-equivalentClass-003"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-equivalentClass-003"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-209"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-209"^^xsd:string ] ;
+  rdf:type testResultOntology:NegativeEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-628"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.8-007"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.8-007"^^xsd:string ] ;
+  rdf:type testResultOntology:NegativeEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.2-005"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-617"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.3-006"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.3-010"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "consistent-integer-filler"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-disjointWith-005"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-TransitiveProperty-002"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-TransitiveProperty-002"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "Inconsistent Data Complement with the Restrictions"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-630"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-027"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-110"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-ObjectQCR-001"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-ObjectQCR-001"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.2-006"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.2-006"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-601"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-cardinality-004"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-cardinality-004"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-603"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-disjointWith-008"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-AnnotationProperty-004"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "Datatype-DataComplementOf-001"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "string-integer-clash"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-024"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-646"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.26-005"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-equivalentClass-004"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-equivalentClass-004"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-AnnotationProperty-002"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-AnnotationProperty-002"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.26-009"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.26-009"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-001"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-Ontology-001"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-Ontology-001"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-602"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-miscellaneous-204"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "DisjointClasses-003"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "DisjointClasses-003"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I4.6-005-Direct"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I4.6-005-Direct"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-604"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "owl2-rl-invalid-leftside-allvaluesfrom"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "owl2-rl-invalid-oneof"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.8-010"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.8-010"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.8-006"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.8-006"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "functionality-clash"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-SymmetricProperty-003"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-SymmetricProperty-003"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-DisjointObjectProperties-002"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-DisjointObjectProperties-002"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.24-003"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.24-003"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-007"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-012"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-Keys-003"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-Keys-003"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "FS2RDF-same-individual-2-ar"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "owl2-rl-rules-ifp-differentFrom"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "owl2-rl-rules-ifp-differentFrom"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-205"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-205"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-disjointWith-009"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-miscellaneous-202"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-miscellaneous-002"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-103"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "FS2RDF-no-builtin-prefixes-ar"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-cardinality-001"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-cardinality-001"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-cardinality-002"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-cardinality-002"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-TopDataProperty-001"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-608"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "owl2-rl-invalid-leftside-maxcard"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "bnode2somevaluesfrom"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "bnode2somevaluesfrom"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-equivalentClass-002"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-equivalentClass-002"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-665"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-665"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-ReflexiveProperty-001"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-ReflexiveProperty-001"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "FS2RDF-different-individuals-3-ar"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "owl2-rl-rules-fp-differentFrom"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "owl2-rl-rules-fp-differentFrom"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "Plus and Minus Zero Integer"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "Consistent-but-all-unsat"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "Consistent-but-all-unsat"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:FailingRun ;
+  testResultOntology:details "Axioms should be entailed."] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.2-002"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.2-002"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-sameAs-001"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-sameAs-001"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-Thing-004"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-equivalentClass-009"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-BottomObjectProperty-001"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-equivalentProperty-004"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-equivalentProperty-004"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-033"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-207"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-207"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-022"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.26-003"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.26-002"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "Inconsistent String Pattern with Disjoint Dataproperties"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-631"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-allValuesFrom-001"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-allValuesFrom-001"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-miscellaneous-203"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-031"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-Keys-007"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-Keys-007"^^xsd:string ] ;
+  rdf:type testResultOntology:NegativeEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-DisjointDataProperties-002"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-DisjointDataProperties-002"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-014"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-503"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-613"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-AsymmetricProperty-001"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-equivalentClass-008-Direct"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-equivalentClass-008-Direct"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "inconsistent_datatypes"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.2-003"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "owl2-rl-invalid-unionof"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-625"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-009"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-equivalentProperty-002"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-equivalentProperty-002"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-102"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "owl2-rl-invalid-rightside-somevaluesfrom"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-Restriction-004"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-miscellaneous-001"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-661"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-661"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-105"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.24-004"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.24-004"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-unionOf-004"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-unionOf-004"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-004"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "datatype-restriction-min-max-inconsistency"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I4.5-001"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I4.5-001"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-ObjectPropertyChain-BJP-004"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-ObjectPropertyChain-BJP-004"^^xsd:string ] ;
+  rdf:type testResultOntology:NegativeEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-003"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-504"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.26-010"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.26-010"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-606"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-615"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-DisjointObjectProperties-001"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-DisjointObjectProperties-001"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "FS2RDF-different-individuals-2-ar"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "owl2-rl-invalid-owlreal"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-NegativeObjectPropertyAssertion-001"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-609"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.21-002"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.21-002"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-oneOf-001"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-005"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-Keys-001"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-Keys-001"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-equivalentProperty-003"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-equivalentProperty-003"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-DataQCR-001"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-DataQCR-001"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-disjointWith-001"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-disjointWith-001"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "Different types in Datatype Restrictions and Complement"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-disjointWith-007"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-AnnotationProperty-003"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-104"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-626"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-imports-011"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-imports-011"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "Contradicting datatype Restrictions"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-equivalentClass-001"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-equivalentClass-001"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "owl2-rl-valid-oneof"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-miscellaneous-103"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-equivalentProperty-001"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-equivalentProperty-001"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-025"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-201"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-201"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-641"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-AnnotationAnnotations-001"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-643"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "Inconsistent Byte Filler"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-DisjointDataProperties-001"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-633"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-650"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-008"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-ObjectPropertyChain-001"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-ObjectPropertyChain-001"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-627"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-208"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-208"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-029"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-015"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-BottomDataProperty-001"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "Consistent owl:real range with DataOneOf"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-ObjectQCR-002"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-ObjectQCR-002"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "Contradicting-dateTime-restrictions"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "Consistent Datatype restrictions with Different Types"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-allValuesFrom-002"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-allValuesFrom-002"^^xsd:string ] ;
+  rdf:type testResultOntology:NegativeEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "inconsistent-integer-filler"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-AxiomAnnotations-001"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-InverseFunctionalProperty-001"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-InverseFunctionalProperty-001"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-019"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-disjointWith-004"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-011"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "one=two"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-610"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-ObjectPropertyChain-BJP-003"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-ObjectPropertyChain-BJP-003"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "owl2-rl-valid-mincard"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-016"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-ObjectPropertyChain-BJP-002"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-ObjectPropertyChain-BJP-002"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-028"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-010"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "Plus and Minus Zero are Distinct"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-106"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-SymmetricProperty-002"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-SymmetricProperty-002"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.8-009"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.8-009"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-644"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-611"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-Restriction-002"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "owl2-rl-anonymous-individual"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.26-001"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-101"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-109"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "Consistent-dateTime"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.2-004"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.2-004"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-Restriction-005-direct"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-Restriction-005-direct"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "consistent-dataproperty-disjointness"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-SelfRestriction-001"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-SelfRestriction-001"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "owl2-rl-valid-rightside-allvaluesfrom"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "DisjointClasses-001"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "DisjointClasses-001"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "owl2-rl-invalid-rightside-unionof"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-equivalentClass-005"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-equivalentClass-005"^^xsd:string ] ;
+  rdf:type testResultOntology:NegativeEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-Keys-002"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-Nothing-001"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "DisjointClasses-002"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-Keys-004"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-Keys-004"^^xsd:string ] ;
+  rdf:type testResultOntology:NegativeEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-someValuesFrom-003"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-someValuesFrom-003"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-035"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-502"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-Keys-006"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-differentFrom-001"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-differentFrom-001"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I4.5-002"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.8-011"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.8-011"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-miscellaneous-302-Direct"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-miscellaneous-302-Direct"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-Restriction-003"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-616"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-oneOf-004"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-oneOf-004"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-614"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "Datatype-Float-Discrete-001"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "New-Feature-Rational-002"^^xsd:string ] ;
+  rdf:type testResultOntology:InconsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-I5.26-004"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-901"^^xsd:string ] ;
+  rdf:type testResultOntology:ConsistencyRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
+[
+  testResultOntology:runner testResultOntology:hermit ;
+  testResultOntology:test [ testOntology:identifier "WebOnt-description-logic-901"^^xsd:string ] ;
+  rdf:type testResultOntology:PositiveEntailmentRun ,
+    testResultOntology:TestRun ,
+    testResultOntology:PassingRun ;
+  testResultOntology:runtimeMillisecs "314"^^xsd:integer
+] .
+
