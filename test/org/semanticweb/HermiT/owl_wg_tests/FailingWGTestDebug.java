@@ -9,7 +9,7 @@ public class FailingWGTestDebug {
         TestSuite suite=new TestSuite("OWL WG Non-Rejected Tests");
         for (WGTestDescriptor wgTestDescriptor : wgTestRegistry.getTestDescriptors())
             if (wgTestDescriptor.isDLTest() && (wgTestDescriptor.status==WGTestDescriptor.Status.APPROVED || wgTestDescriptor.status==WGTestDescriptor.Status.PROPOSED || wgTestDescriptor.status==null)) {
-                if (wgTestDescriptor.identifier.startsWith("WebOnt-I4.6-003")
+                if (wgTestDescriptor.identifier.startsWith("WebOnt-someValuesFrom-003")
                 ) {
                     wgTestDescriptor.addTestsToSuite(suite);
                 }

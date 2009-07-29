@@ -375,34 +375,34 @@ Ontology(
     
 
 
-    &lt;!-- http://www.semanticweb.org/ontologies/2009/4/Ontology1242664364013.owl#2a --&gt;
+    &lt;!-- http://www.semanticweb.org/ontologies/2009/4/Ontology1242664364013.owl/2a --&gt;
 
-    &lt;owl:Class rdf:about="#2a"&gt;
+    &lt;owl:Class rdf:about="2a"&gt;
         &lt;rdfs:subClassOf rdf:resource="&amp;owl;Nothing"/&gt;
     &lt;/owl:Class&gt;
     
 
 
-    &lt;!-- http://www.semanticweb.org/ontologies/2009/4/Ontology1242664364013.owl#a --&gt;
+    &lt;!-- http://www.semanticweb.org/ontologies/2009/4/Ontology1242664364013.owl/a --&gt;
 
-    &lt;owl:Class rdf:about="#a"&gt;
+    &lt;owl:Class rdf:about="a"&gt;
         &lt;rdfs:subClassOf rdf:resource="&amp;owl;Nothing"/&gt;
         &lt;rdfs:subClassOf rdf:resource="&amp;owl;Thing"/&gt;
     &lt;/owl:Class&gt;
     
 
 
-    &lt;!-- http://www.semanticweb.org/ontologies/2009/4/Ontology1242664364013.owl#b --&gt;
+    &lt;!-- http://www.semanticweb.org/ontologies/2009/4/Ontology1242664364013.owl/b --&gt;
 
-    &lt;owl:Class rdf:about="#b"&gt;
+    &lt;owl:Class rdf:about="b"&gt;
         &lt;rdfs:subClassOf rdf:resource="&amp;owl;Nothing"/&gt;
     &lt;/owl:Class&gt;
     
 
 
-    &lt;!-- http://www.semanticweb.org/ontologies/2009/4/Ontology1242664364013.owl#c --&gt;
+    &lt;!-- http://www.semanticweb.org/ontologies/2009/4/Ontology1242664364013.owl/c --&gt;
 
-    &lt;owl:Class rdf:about="#c"&gt;
+    &lt;owl:Class rdf:about="c"&gt;
         &lt;rdfs:subClassOf rdf:resource="&amp;owl;Nothing"/&gt;
     &lt;/owl:Class&gt;
     

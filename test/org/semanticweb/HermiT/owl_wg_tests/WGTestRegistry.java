@@ -2,11 +2,8 @@
 package org.semanticweb.HermiT.owl_wg_tests;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.URI;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +18,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 public class WGTestRegistry {
     public static String URI_BASE = "http://www.w3.org/2007/OWL/testOntology#";
     public static String TEST_ID_PREFIX = "http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/";
+    public static final String RESULTS_FILE_PATH = "resultsFilePath";
     
     protected final OWLOntologyManager m_ontologyManager;
     protected final OWLOntology m_testContainer;
@@ -28,12 +26,14 @@ public class WGTestRegistry {
     protected final Map<String, WGTestDescriptor> m_testDescriptorsByID;
 
     public WGTestRegistry() throws Exception {
-        URL resultsFileURL=getClass().getResource("ontologies/results.owl");
-        URI resultsFileURI=resultsFileURL.toURI();
-        File file = new File(resultsFileURI);
-        PrintStream printStream=null;
-        printStream = new PrintStream(new FileOutputStream(file));
-        PrintWriter output = new PrintWriter(printStream);
+        PrintWriter output;
+        String resultsFilePath = System.getProperty(WGTestRegistry.RESULTS_FILE_PATH);
+        if (resultsFilePath != null) {
+            File file=new File(resultsFilePath);
+            output = new PrintWriter(file);
+        } else {
+            output=new PrintWriter(System.out);
+        }
         printResultsHeader(output);
         
         m_ontologyManager = OWLManager.createOWLOntologyManager();

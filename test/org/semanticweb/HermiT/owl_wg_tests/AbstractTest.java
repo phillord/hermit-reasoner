@@ -52,9 +52,10 @@ public abstract class AbstractTest extends TestCase {
         timer.start();
         try {
             m_reasoner.loadOntology(m_ontologyManager,m_premiseOntology,null);
+            long t=System.currentTimeMillis();
             doTest();
             output.println("    testResultOntology:PassingRun ;");
-            output.println("  testResultOntology:runtimeMillisecs \"314\"^^xsd:integer");
+            output.println("  testResultOntology:runtimeMillisecs \""+(System.currentTimeMillis()-t)+"\"^^xsd:integer");
         }
         catch (InterruptException e) {
             output.println("    testResultOntology:IncompleteRun ;");
