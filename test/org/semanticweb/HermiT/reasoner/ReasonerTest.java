@@ -26,6 +26,7 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 import org.semanticweb.owlapi.vocab.OWLFacet;
 
+
 public class ReasonerTest extends AbstractReasonerTest {
 
     public ReasonerTest(String name) {

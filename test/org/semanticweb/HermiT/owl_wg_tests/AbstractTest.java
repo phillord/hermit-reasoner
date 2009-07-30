@@ -1,3 +1,6 @@
+// Copyright 2009 by Oxford University; see license.txt for details
+// An update for the tests (all.rdf) should regularly be downloaded to the 
+// ontologies folder from http://wiki.webont.org/exports/
 package org.semanticweb.HermiT.owl_wg_tests;
 
 import java.io.BufferedWriter;
@@ -43,48 +46,62 @@ public abstract class AbstractTest extends TestCase {
         m_reasoner=null;
     }
     public void runTest() throws Throwable {
-        output.println("[ testResultOntology:runner <http://hermit-reasoner.com/> ;");
-        output.println("  testResultOntology:test [ testOntology:identifier \""+m_wgTestDescriptor.identifier+"\"^^xsd:string ] ;");
-        output.println("  rdf:type testResultOntology:"+this.reportTestType()+" ,");
-        output.println("    testResultOntology:TestRun ,");
+        if (output != null) {
+            output.println("[ testResultOntology:runner <http://hermit-reasoner.com/> ;");
+            output.println("  testResultOntology:test [ testOntology:identifier \""+m_wgTestDescriptor.identifier+"\"^^xsd:string ] ;");
+            output.println("  rdf:type testResultOntology:"+this.reportTestType()+" ,");
+            output.println("    testResultOntology:TestRun ,");
+        }
         InterruptTimer timer=new InterruptTimer(TIMEOUT,m_reasoner);
         timer.start();
         try {
             m_reasoner.loadOntology(m_ontologyManager,m_premiseOntology,null);
             long t=System.currentTimeMillis();
             doTest();
-            output.println("    testResultOntology:PassingRun ;");
-            output.println("  testResultOntology:runtimeMillisecs \""+(System.currentTimeMillis()-t)+"\"^^xsd:integer");
+            if (output != null) {
+                output.println("    testResultOntology:PassingRun ;");
+                output.println("  testResultOntology:runtimeMillisecs \""+(System.currentTimeMillis()-t)+"\"^^xsd:integer");
+            }
         }
         catch (InterruptException e) {
-            output.println("    testResultOntology:IncompleteRun ;");
-            output.print("  testResultOntology:details \"Timeout: "+TIMEOUT+" ms\"");
+            if (output != null) {
+                output.println("    testResultOntology:IncompleteRun ;");
+                output.print("  testResultOntology:details \"Timeout: "+TIMEOUT+" ms\"");
+            }
             dumpFailureData();
             fail("Test timed out.");
         }
         catch (OutOfMemoryError e) {
             m_reasoner=null;
             Runtime.getRuntime().gc();
-            output.println("    testResultOntology:IncompleteRun ;");
-            output.print("  testResultOntology:details \"Out of memory. \"");
+            if (output != null) {
+                output.println("    testResultOntology:IncompleteRun ;");
+                output.print("  testResultOntology:details \"Out of memory. \"");
+            }
             dumpFailureData();
             fail("Test ran out of memory.");
         } catch (AssertionFailedError e) {
-            output.println("    testResultOntology:FailingRun ;");
-            output.print("  testResultOntology:details \""+e.getMessage()+"\"");
+            if (output != null) {
+                output.println("    testResultOntology:FailingRun ;");
+                output.print("  testResultOntology:details \""+e.getMessage()+"\"");
+            }
             fail("Test failed: " + e.getMessage());
         } catch (Throwable e) {
-            output.println("    testResultOntology:IncompleteRun ;");
-            output.print("  testResultOntology:details \""+e.getMessage()+"\"");
+            if (output != null) {
+                output.println("    testResultOntology:IncompleteRun ;");
+                output.print("  testResultOntology:details \""+e.getMessage()+"\"");
+            }
             dumpFailureData();
             throw e;
         }
         finally {
             timer.stopTiming();
             timer.join();
-            output.println("] .");
-            output.println();
-            output.flush();
+            if (output != null) {
+                output.println("] .");
+                output.println();
+                output.flush();
+            }
         }
     }
     protected void dumpFailureData() throws Exception {

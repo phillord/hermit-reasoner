@@ -1,7 +1,10 @@
-// An update for the tests (all.rdf) should regularly be downloaded to the ontologies folder from http://wiki.webont.org/exports/
+// Copyright 2009 by Oxford University; see license.txt for details
+// An update for the tests (all.rdf) should regularly be downloaded to the 
+// ontologies folder from http://wiki.webont.org/exports/
 package org.semanticweb.HermiT.owl_wg_tests;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.util.ArrayList;
@@ -29,12 +32,16 @@ public class WGTestRegistry {
         PrintWriter output;
         String resultsFilePath = System.getProperty(WGTestRegistry.RESULTS_FILE_PATH);
         if (resultsFilePath != null) {
-            File file=new File(resultsFilePath);
-            output = new PrintWriter(file);
+            try {
+                File file=new File(resultsFilePath);
+                output = new PrintWriter(file);
+            } catch (FileNotFoundException e) {
+                output=null;
+            }
         } else {
             output=new PrintWriter(System.out);
         }
-        printResultsHeader(output);
+        if (output != null) printResultsHeader(output);
         
         m_ontologyManager = OWLManager.createOWLOntologyManager();
         m_ontologyManager.loadOntologyFromPhysicalURI(WGTestRegistry.class
