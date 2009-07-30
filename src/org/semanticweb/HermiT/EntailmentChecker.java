@@ -90,7 +90,6 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
      * @throws OWLReasonerException
      */
     public boolean entails(Set<OWLLogicalAxiom> axioms) {
-        boolean isEntailed=false;
         anonymousIndividualAxioms.clear();
         for (OWLAxiom axiom : axioms) {
             if (!axiom.accept(this)) return false;
