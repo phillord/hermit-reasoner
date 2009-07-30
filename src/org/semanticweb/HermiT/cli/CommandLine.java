@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Configuration;
+import org.semanticweb.HermiT.EntailmentChecker;
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.monitor.Timer;
@@ -20,6 +21,7 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class CommandLine {
@@ -212,6 +214,25 @@ public class CommandLine {
                 output.println("\t"+prefixes.abbreviateIRI(classInSet.getIRI().toString()));
         }
     }
+    
+    static protected class EntailsAction implements Action {
+        final IRI conclusionIRI;
+        public EntailsAction(Configuration config,IRI conclusionIRI) {
+            this.conclusionIRI=conclusionIRI;
+        }
+        public void run(Reasoner hermit,Prefixes prefixes,StatusOutput status,PrintWriter output) {
+            status.log(2,"Checking whether the loaded ontology entails the conclusion ontology");
+            OWLOntologyManager m=OWLManager.createOWLOntologyManager();
+            try {
+                OWLOntology conclusions = m.loadOntology(conclusionIRI);
+                EntailmentChecker checker=new EntailmentChecker(hermit, m.getOWLDataFactory());
+                boolean isEntailed=checker.entails(conclusions.getLogicalAxioms());
+                output.println(isEntailed);
+            } catch (OWLOntologyCreationException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     static protected class TaxonomyAction implements Action {
 
@@ -236,7 +257,9 @@ public class CommandLine {
         kDefaultPrefix=1009,
         kDumpPrefixes=1010,
         kTaxonomy=1011,
-        kIgnoreUnsupportedDatatypes=1012;
+        kIgnoreUnsupportedDatatypes=1012,
+        kPremise=1013,
+        kConclusion=1014;
 
     protected static final String versionString;
     static {
@@ -249,6 +272,8 @@ public class CommandLine {
     protected static final String[] helpHeader={
         "Perform reasoning on each OWL ontology IRI.",
         "Example: hermit -ds owl:Thing http://hermit-reasoner.org/2008/test.owl",
+        "    (prints direct subclasses of owl:Thing within the test ontology)",
+        "Example: hermit --premise http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:GetOntology/New-Feature-DisjointObjectProperties-002?m=p --conclusion http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:GetOntology/New-Feature-DisjointObjectProperties-002?m=c --checkEntailment",
         "    (prints direct subclasses of owl:Thing within the test ontology)",
         "",
         "Both relative and absolute ontology IRIs can be used. Relative IRIs",
@@ -286,7 +311,9 @@ public class CommandLine {
         new Option('v',"verbose",kMisc,false,"AMOUNT","increase verbosity by AMOUNT levels (default 1)"),
         new Option('q',"quiet",kMisc,false,"AMOUNT","decrease verbosity by AMOUNT levels (default 1)"),
         new Option('o',"output",kMisc,true,"FILE","write output to FILE"),
-
+        new Option(kPremise,"premise",kMisc,true,"PREMISE","set the premise ontology to PREMISE"),
+        new Option(kConclusion,"conclusion",kMisc,true,"CONCLUSION","set the conclusion ontology to CONCLUSION"),
+        
         // actions:
         new Option('l',"load",kActions,"parse and preprocess ontologies (default action)"),
         new Option('c',"classify",kActions,false,"FILE","classify ontology, optionally writing taxonomy to FILE (use - for standard out)"),
@@ -297,7 +324,8 @@ public class CommandLine {
         new Option('e',"equivalents",kActions,true,"CLASS","output classes equivalent to CLASS"),
         new Option('U',"unsatisfiable",kActions,"output unsatisfiable classes (equivalent to --equivalents=owl:Nothing)"),
         new Option(kDumpPrefixes,"print-prefixes",kActions,"output prefix names available for use in identifiers"),
-
+        new Option('E',"checkEntailment",kActions,"check whether the premise (option premise) ontology entails the conclusion ontology (option conclusion)"),
+        
         new Option('N',"no-prefixes",kPrefixes,"do not abbreviate or expand identifiers using prefixes defined in input ontology"),
         new Option('p',"prefix",kPrefixes,true,"PN=IRI","use PN as an abbreviation for IRI in identifiers"),
         new Option(kDefaultPrefix,"prefix",kPrefixes,true,"IRI","use IRI as the default identifier prefix"),
@@ -319,6 +347,7 @@ public class CommandLine {
             PrintWriter output=new PrintWriter(System.out);
             Collection<Action> actions=new LinkedList<Action>();
             URI base;
+            IRI conclusionIRI=null;
             Configuration config=new Configuration();
             boolean doAll=true;
             try {
@@ -327,7 +356,7 @@ public class CommandLine {
             catch (java.net.URISyntaxException e) {
                 throw new RuntimeException("unable to create default IRI base");
             }
-            Collection<URI> ontologies=new LinkedList<URI>();
+            Collection<IRI> ontologies=new LinkedList<IRI>();
             boolean didSomething=false;
             {
                 Getopt g=new Getopt("hermit",argv,Option.formatOptionsString(options),Option.createLongOpts(options));
@@ -404,6 +433,24 @@ public class CommandLine {
                         }
                     }
                         break;
+                    case kPremise: {
+                        String arg=g.getOptarg();
+                        if (arg==null)
+                            throw new UsageException("--premise requires a IRI as argument");
+                        else {
+                            ontologies.add(IRI.create(arg));
+                        }
+                    }
+                        break;
+                    case kConclusion: {
+                        String arg=g.getOptarg();
+                        if (arg==null)
+                            throw new UsageException("--conclusion requires a IRI as argument");
+                        else {
+                            conclusionIRI=IRI.create(arg);
+                        }
+                    }
+                        break;
                     // actions:
                     case 'l': {
                         // load is a no-op; loading happens no matter what the user asks
@@ -444,6 +491,11 @@ public class CommandLine {
                         break;
                     case 'U': {
                         actions.add(new EquivalentsAction("<http://www.w3.org/2002/07/owl#Nothing>"));
+                    }
+                        break;
+                    case 'E': {
+                        if (conclusionIRI!=null) 
+                            actions.add(new EntailsAction(config, conclusionIRI));
                     }
                         break;
                     case kDumpPrefixes: {
@@ -555,7 +607,7 @@ public class CommandLine {
                 } // end loop over options
                 for (int i=g.getOptind();i<argv.length;++i) {
                     try {
-                        ontologies.add(base.resolve(argv[i]));
+                        ontologies.add(IRI.create(base.resolve(argv[i])));
                     }
                     catch (IllegalArgumentException e) {
                         throw new UsageException(argv[i]+" is not a valid ontology name");
@@ -565,14 +617,14 @@ public class CommandLine {
             StatusOutput status=new StatusOutput(verbosity);
             if (verbosity>3)
                 config.monitor=new Timer(new PrintWriter(System.err));
-            for (URI ont : ontologies) {
+            for (IRI ont : ontologies) {
                 didSomething=true;
                 status.log(2,"Processing "+ont.toString());
                 status.log(2,String.valueOf(actions.size())+" actions");
                 try {
                     long startTime=System.currentTimeMillis();
                     OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
-                    OWLOntology ontology=ontologyManager.loadOntologyFromPhysicalURI(ont);
+                    OWLOntology ontology=ontologyManager.loadOntology(ont);
                     long parseTime=System.currentTimeMillis()-startTime;
                     status.log(2,"Ontology parsed in "+String.valueOf(parseTime)+" msec.");
                     startTime=System.currentTimeMillis();

@@ -61,9 +61,6 @@ public class DLClauseEvaluator implements Serializable {
         return m_headDLClauses.get(dlClauseIndex).getHeadAtom(atomIndex);
     }
     public Object[] getTupleMatchedToBody(int atomIndex) {
-        if (atomIndex==9) {
-            System.out.println("9");
-        }
         return m_retrievals[atomIndex].getTupleBuffer();
     }
     public void evaluate() {

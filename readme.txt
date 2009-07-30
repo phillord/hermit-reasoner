@@ -1,6 +1,6 @@
-HermiT is an OWL 2 DL reasoner that uses the direct semantics. It
+HermiT is a conformant OWL 2 DL reasoner that uses the direct semantics. It
 supports all OWL2 DL constructs and the datatypes required by the OWL
-2 specification. 
+2 specification.  
 
 HermiT is free software: you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
@@ -16,5 +16,5 @@ distribution in the file `license.txt`. An online version is available at
 <http://www.gnu.org/licenses/>.
 
 More information about HermiT and additional licensing information is
-available at <http://hermit-reasoner.com>, or by contacting Boris Motik, Rob
-Shearer, or Ian Horrocks at the Oxford University Computing Laboratory.
+available at <http://hermit-reasoner.com>, or by contacting Boris Motik or 
+Ian Horrocks at the Oxford University Computing Laboratory.

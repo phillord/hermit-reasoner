@@ -90,6 +90,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
      * @throws OWLReasonerException
      */
     public boolean entails(Set<OWLLogicalAxiom> axioms) {
+        boolean isEntailed=false;
         anonymousIndividualAxioms.clear();
         for (OWLAxiom axiom : axioms) {
             if (!axiom.accept(this)) return false;
@@ -462,7 +463,6 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
         protected final Map<OWLAnonymousIndividual,Set<OWLClassExpression>> nodelLabels=new HashMap<OWLAnonymousIndividual,Set<OWLClassExpression>>();
         // edge labels for the anonymous individual forest
         protected final Map<Edge,OWLObjectProperty> edgeOPLabels=new HashMap<Edge,OWLObjectProperty>();
-        //protected final Map<Edge,OWLDataProperty> edgeDPLabels=new HashMap<OWLAnonymousIndividual[],OWLDataProperty>();
         
         protected final Set<OWLAxiom> anonIndAxioms=new HashSet<OWLAxiom>();
         protected final Set<OWLAxiom> anonNoNamedIndAxioms=new HashSet<OWLAxiom>();
@@ -652,6 +652,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
             return components;
         }
         public void visit(OWLClassAssertionAxiom axiom) {
+            if (axiom.getClassExpression().isOWLThing()) return;
             OWLIndividual node=axiom.getIndividual();
             if (!node.isAnonymous()) {
                 namedNodes.add(node.asNamedIndividual());

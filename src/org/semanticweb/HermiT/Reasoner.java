@@ -119,6 +119,13 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
     protected ProgressMonitor m_progressMonitor;
 
     /**
+     * Creates a new reasoner instance with standard parameters for blocking, expansion strategy etc. 
+     */
+    public Reasoner() {
+        this(new Configuration());
+    }
+    
+    /**
      * Creates a new reasoner instance with the parameters for blocking, expansion strategy etc as specified 
      * in the given configuration object. A default configuration can be obtained by just passing new Configuration().
      * @param configuration - a configuration in which parameters can be defined such as the blocking strategy to be used etc
@@ -127,6 +134,18 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         m_configuration=configuration;
         m_interruptFlag=new InterruptFlag();
         if (m_dlOntology != null || m_tableau != null) clearOntologies();
+    }
+    
+    /**
+     * Creates a new reasoner object with standard parameters for blocking, expansion strategy etc.  
+     * Then the given manager is used to find all required imports for the given ontology and the ontology with the 
+     * imports is loaded into the reasoner and the data factory of the manager is used to create fresh concepts during 
+     * the preprocessing phase if necessary. 
+     * @param ontologyManger - the manager that will be used to determine the required imports for the given ontology
+     * @param ontology - the ontology that should be loaded by the reasoner
+     */
+    public Reasoner(OWLOntologyManager ontologyManger,OWLOntology ontology) {
+        this(new Configuration(),ontologyManger,ontology,(Set<DescriptionGraph>)null);
     }
     
     /**
@@ -265,7 +284,8 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         if (descriptionGraphs==null)
             descriptionGraphs=Collections.emptySet();
         OWLClausification clausifier=new OWLClausification(m_configuration);
-        loadDLOntology(clausifier.clausify(ontologyManager,ontology,descriptionGraphs));
+        DLOntology dlo=clausifier.clausify(ontologyManager,ontology,descriptionGraphs);
+        loadDLOntology(dlo);
     }
 
     /* (non-Javadoc)
@@ -1386,7 +1406,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         
     }
     
-    public Boolean entailsDatatypeDefinition(OWLDatatypeDefinitionAxiom axiom) {
+    protected Boolean entailsDatatypeDefinition(OWLDatatypeDefinitionAxiom axiom) {
         OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
         OWLDataFactory factory=ontologyManager.getOWLDataFactory();
         OWLIndividual individualA=factory.getOWLNamedIndividual(IRI.create("internal:individualA"));

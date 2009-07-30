@@ -6,7 +6,7 @@
     <!-- Note that on each released build, the ${updatefile} on the web site
          should be replaced, and the new version of the plugin should be
          posted at the (auto-generated) URL in that file. -->
-    <property name="version" value="0.9.4"/>
+    <property name="version" value="1.0"/>
 
     <!-- general info -->
     <property name="homepage" value="http://hermit-reasoner.com/"/>
@@ -119,9 +119,9 @@
                 <attribute name="Bundle-Name" value="HermiT Reasoner"/>
                 <attribute name="Bundle-SymbolicName" value="org.semanticweb.HermiT;singleton:=true"/>
                 <attribute name="Bundle-Category" value="protege"/>
-                <attribute name="Bundle-Description" value="A plugin for the Protege OWL Editor which allows reasoning using the HermiT reasoner"/>
+                <attribute name="Bundle-Description" value="An OWL 2 reasoner"/>
                 <attribute name="Bundle-DocURL" value="${homepage}"/>
-                <attribute name="Bundle-Vendor" value="Boris Motik, Birte Glimm, and Ian Horrocks"/>
+                <attribute name="Bundle-Vendor" value="Boris Motik, Birte Glimm, Giorgos Stoilos, and Ian Horrocks"/>
                 <attribute name="Bundle-Version" value="${version}"/>
                 <attribute name="Bundle-Activator" value="org.protege.editor.core.plugin.DefaultPluginActivator"/>
                 <attribute name="Bundle-ClassPath" value="."/>
