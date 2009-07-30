@@ -43,8 +43,7 @@ public abstract class AbstractTest extends TestCase {
         m_reasoner=null;
     }
     public void runTest() throws Throwable {
-        output.println("[");
-        output.println("  testResultOntology:runner testResultOntology:hermit ;");
+        output.println("[ testResultOntology:runner <http://hermit-reasoner.com/> ;");
         output.println("  testResultOntology:test [ testOntology:identifier \""+m_wgTestDescriptor.identifier+"\"^^xsd:string ] ;");
         output.println("  rdf:type testResultOntology:"+this.reportTestType()+" ,");
         output.println("    testResultOntology:TestRun ,");

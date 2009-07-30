@@ -85,10 +85,6 @@ public class WGTestRegistry {
         output.println("testResultOntology:PositiveEntailmentRun rdf:type owl:Class .");
         output.println("testResultOntology:TestRun rdf:type owl:Class .");
         output.println("");
-        output.println("testResultOntology:hermit");
-        output.println("  a owl:Thing ;");
-        output.println("  rdfs:label \"HermiT Reasoner (Version 1.0)\" .");
-        output.println("");
         output.flush();
     }
 
