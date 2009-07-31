@@ -5,7 +5,7 @@ public class RIARegularityTest extends AbstractReasonerTest {
 	 public RIARegularityTest(String name) {
 	        super(name);
 	 }
-	 
+ 
 	 public void testRIARegularity1() throws Exception{
 		 String axioms = "SubObjectPropertyOf(:A :B) " +
 		 				 "SubObjectPropertyOf(:B :C) " +
@@ -19,7 +19,7 @@ public class RIARegularityTest extends AbstractReasonerTest {
 		 				 "InverseObjectProperties(:P :Q) ";
 	     assertRegular(axioms,false);
 	 }
-//	 The following is in dissagreement with FaCT++
+//	 The following is in disagreement with FaCT++
 	 public void testRIARegularity3() throws Exception{
 		 String axioms = "SubObjectPropertyOf(ObjectPropertyChain(:R ObjectInverseOf(:Q)) :P) " +
 		 				 "InverseObjectProperties(:P :Q) ";
@@ -46,6 +46,22 @@ public class RIARegularityTest extends AbstractReasonerTest {
 		 String axioms = "InverseObjectProperties(:P :P-) "+
 		 				 "SubObjectPropertyOf(ObjectPropertyChain(:L :P-) :L) " +
 		 				 "SubObjectPropertyOf(ObjectPropertyChain(:R :L) :P) ";
+	     assertRegular(axioms,false);
+	 }
+	 public void testRIARegularity8() throws Exception{
+		 String axioms = "SubObjectPropertyOf(ObjectPropertyChain(:R4 :R1) :R1) " +
+		 				 "SubObjectPropertyOf(ObjectPropertyChain(:R1 :R2) :R2) " +
+		 				 "SubObjectPropertyOf(ObjectPropertyChain(:R2 :R3) :R3) " +
+		 				 "SubObjectPropertyOf(ObjectPropertyChain(:R3 :R4) :R4) " +
+		 				 "EquivalentObjectProperties( :R1 :R2 )" +
+		 				 "EquivalentObjectProperties( :R2 :R3 )" +
+		 				 "EquivalentObjectProperties( :R3 :R4 )" +
+		 				 "EquivalentObjectProperties( :R4 :R1 )";
+	     assertRegular(axioms,true);
+	 }
+	 public void testRIARegularity9() throws Exception{
+		 String axioms = 	"SubObjectPropertyOf(ObjectPropertyChain(:R1 :R2 :R3) :R) " +
+		 					"EquivalentObjectProperties( :R2 :R )";
 	     assertRegular(axioms,false);
 	 }
 }
