@@ -29,14 +29,15 @@ public class AutomataConstructionManager {
 
 	public Map<OWLObjectPropertyExpression,Automaton> createAutomata(Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions,Collection<ComplexObjectPropertyInclusion> complexObjectPropertyInclusions) {
 		Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> equivalentPropertiesMap = findEquivalentRoles( simpleObjectPropertyInclusions );
+
 		Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> inverseRolesMap = buildInverseRolesMap( simpleObjectPropertyInclusions );
         Graph<OWLObjectPropertyExpression> propertyDependencyGraph = buildPropertyOrdering( simpleObjectPropertyInclusions, complexObjectPropertyInclusions, equivalentPropertiesMap );
-        checkForRegularity( propertyDependencyGraph );
-        
+        checkForRegularity( propertyDependencyGraph, equivalentPropertiesMap );
+
         Graph<OWLObjectPropertyExpression> complexRolesDependencyGraph = propertyDependencyGraph.clone();  
-        Map<OWLObjectPropertyExpression,Automaton> individualAutomata = buildIndividualAutomata( complexRolesDependencyGraph, simpleObjectPropertyInclusions, complexObjectPropertyInclusions );
+        Map<OWLObjectPropertyExpression,Automaton> individualAutomata = buildIndividualAutomata( complexRolesDependencyGraph, simpleObjectPropertyInclusions, complexObjectPropertyInclusions, equivalentPropertiesMap );
         Set<OWLObjectPropertyExpression> simpleRoles = findSimpleRoles( complexRolesDependencyGraph, individualAutomata );
-        
+
         propertyDependencyGraph.removeElements( simpleRoles );
         complexRolesDependencyGraph.removeElements( simpleRoles );
 		m_nonSimpleRoles.addAll( complexRolesDependencyGraph.getElements() );
@@ -45,7 +46,7 @@ public class AutomataConstructionManager {
 
 		for( OWLObjectPropertyExpression owlPropExpr : connectedAutomata.keySet() )
 			connectedAutomata.put( owlPropExpr, minimizeAndNormalizeAutomaton( connectedAutomata.get( owlPropExpr ) ));
-		
+
 		return connectedAutomata;
 	}
 	private Map<OWLObjectPropertyExpression, Set<OWLObjectPropertyExpression>> buildInverseRolesMap(
@@ -71,9 +72,7 @@ public class AutomataConstructionManager {
     			propertyDependencyGraph.addEdge( inclusion[0], inclusion[1] );
     		}
 	  	}
-		
 	  	propertyDependencyGraph.transitivelyClose();
-
 	  	for(OWLObjectPropertyExpression objExpr : propertyDependencyGraph.getElements()){
 	  		if( propertyDependencyGraph.getSuccessors( objExpr ).contains( objExpr ) || 
 	  			propertyDependencyGraph.getSuccessors( objExpr ).contains( objExpr.getInverseProperty().getSimplified() )){
@@ -284,7 +283,10 @@ public class AutomataConstructionManager {
     		for( int i=0 ; i<owlSubProperties.length ; i++ ){
     			owlSubPropertyInChain = owlSubProperties[i];
 
-        		if( owlSubPropertyInChain.equals( owlSuperProperty ) && owlSubProperties.length != 2 && i>0 && i<owlSubProperties.length-1 )
+        		if( owlSubProperties.length != 2 && i>0 && i<owlSubProperties.length-1 && 
+        			( owlSubPropertyInChain.equals( owlSuperProperty ) || 
+        			  (equivalentPropertiesMap.containsKey(owlSuperProperty) && equivalentPropertiesMap.get( owlSuperProperty ).contains( owlSubPropertyInChain ))
+        			) )
         			throw new IllegalArgumentException("The given role hierarchy is not regular.");
         		else if( owlSubPropertyInChain.getInverseProperty().getSimplified().equals( owlSuperProperty ) )
         			throw new IllegalArgumentException("The given role hierarchy is not regular.");
@@ -294,17 +296,37 @@ public class AutomataConstructionManager {
     	}
      	return propertyDependencyGraph;
 	}
-	private void checkForRegularity(Graph<OWLObjectPropertyExpression> propertyDependencyGraph){
+	private void checkForRegularity(Graph<OWLObjectPropertyExpression> propertyDependencyGraph, Map<OWLObjectPropertyExpression, Set<OWLObjectPropertyExpression>> equivalentPropertiesMap){
 	   	Graph<OWLObjectPropertyExpression> regularityCheckGraph = propertyDependencyGraph.clone();
-    	regularityCheckGraph.transitivelyClose();
+	   	Graph<OWLObjectPropertyExpression> regularityCheckGraphTemp;
 
+	   	boolean trimmed = false;
+	   	do{
+	   		trimmed = false;
+	   		regularityCheckGraphTemp = regularityCheckGraph.clone();
+		   	for( OWLObjectPropertyExpression prop : regularityCheckGraphTemp.getElements() ){
+		   		for( OWLObjectPropertyExpression succProp : regularityCheckGraphTemp.getSuccessors( prop )){
+		   			if( equivalentPropertiesMap.containsKey( prop ) && equivalentPropertiesMap.get( prop ).contains( succProp ) ){
+		   				for( OWLObjectPropertyExpression succPropSucc : regularityCheckGraphTemp.getSuccessors( succProp )){
+		   					if( !prop.equals( succPropSucc ) )
+		   						regularityCheckGraph.addEdge( prop, succPropSucc);
+		   				}
+		   				trimmed = true;
+		   				regularityCheckGraph.getSuccessors( prop ).remove( succProp );
+		   			}
+		   		}
+		   	}
+	   	}while( trimmed );
+
+	   	regularityCheckGraph.transitivelyClose();
+    	
     	for( OWLObjectPropertyExpression prop : regularityCheckGraph.getElements() ){
     		Set<OWLObjectPropertyExpression> successors = regularityCheckGraph.getSuccessors( prop );
     		if( successors.contains( prop ) || successors.contains( prop.getInverseProperty().getSimplified() ) )
     			throw new IllegalArgumentException("The given role hierarchy is not regular.");
     	}
 	}
-    private Map<OWLObjectPropertyExpression,Automaton> buildIndividualAutomata(Graph<OWLObjectPropertyExpression> complexRolesDependencyGraph, Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions, Collection<ComplexObjectPropertyInclusion> complexObjectPropertyInclusions){
+    private Map<OWLObjectPropertyExpression,Automaton> buildIndividualAutomata(Graph<OWLObjectPropertyExpression> complexRolesDependencyGraph, Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions, Collection<ComplexObjectPropertyInclusion> complexObjectPropertyInclusions, Map<OWLObjectPropertyExpression, Set<OWLObjectPropertyExpression>> equivalentPropertiesMap){
     	
     	Map<OWLObjectPropertyExpression,Automaton> automataMap = new HashMap<OWLObjectPropertyExpression,Automaton>();
     	Automaton auto = null;
@@ -340,15 +362,24 @@ public class AutomataConstructionManager {
     		//R S2...Sn->R
     		else if( subObjectProperties[0].equals(superObjectProperty) ){
     			State fromState = finalState;
+    			OWLObjectPropertyExpression transitionLabel;
     			for( int i=1; i<subObjectProperties.length-1 ; i++ ){
+    				transitionLabel = subObjectProperties[i];
+    				if( equivalentPropertiesMap.containsKey( superObjectProperty ) &&  
+    					equivalentPropertiesMap.get( superObjectProperty ).contains( transitionLabel ) )
+    					transitionLabel = superObjectProperty;
     				try {
-						fromState = addNewTransition( auto, fromState, subObjectProperties[i] );
+						fromState = addNewTransition( auto, fromState, transitionLabel );
 					} catch (NoSuchStateException e) {
 						throw new IllegalArgumentException("Could not create automaton");
 					}
     			}
     			try {
-					auto.addTransition( new Transition( fromState, subObjectProperties[subObjectProperties.length-1], finalState) );
+    				transitionLabel = subObjectProperties[subObjectProperties.length-1];
+    				if( equivalentPropertiesMap.containsKey( superObjectProperty ) &&  
+    					equivalentPropertiesMap.get( superObjectProperty ).contains( transitionLabel ) )
+    					transitionLabel = superObjectProperty;
+					auto.addTransition( new Transition( fromState, transitionLabel , finalState) );
 				} catch (NoSuchStateException e) {
 					throw new IllegalArgumentException("Could not create automaton");
 				}
@@ -356,15 +387,24 @@ public class AutomataConstructionManager {
     		//S1...Sn-1 R->R
     		else if( subObjectProperties[subObjectProperties.length-1].equals(superObjectProperty) ){
     			State fromState = initialState;
+    			OWLObjectPropertyExpression transitionLabel;
     			for( int i=0; i<subObjectProperties.length-2 ; i++ ){
+    				transitionLabel = subObjectProperties[i];
+    				if( equivalentPropertiesMap.containsKey( superObjectProperty ) &&  
+    					equivalentPropertiesMap.get( superObjectProperty ).contains( transitionLabel ) )
+    					transitionLabel = superObjectProperty;
     				try {
-						fromState = addNewTransition( auto, fromState, subObjectProperties[i] );
+						fromState = addNewTransition( auto, fromState, transitionLabel );
 					} catch (NoSuchStateException e) {
 						throw new IllegalArgumentException("Could not create automaton");
 					}
     			}
     			try {
-					auto.addTransition( new Transition( fromState, subObjectProperties[subObjectProperties.length-2], initialState) );
+    				transitionLabel = subObjectProperties[subObjectProperties.length-2];
+    				if( equivalentPropertiesMap.containsKey( superObjectProperty ) &&  
+    					equivalentPropertiesMap.get( superObjectProperty ).contains( transitionLabel ) )
+    					transitionLabel = superObjectProperty;
+					auto.addTransition( new Transition( fromState,transitionLabel , initialState) );
 				} catch (NoSuchStateException e) {
 					throw new IllegalArgumentException("Could not create automaton");
 				}
@@ -372,21 +412,31 @@ public class AutomataConstructionManager {
     		//S1...Sn->R
     		else{
     			State fromState = initialState;
+    			OWLObjectPropertyExpression transitionLabel;
     			for( int i=0; i<subObjectProperties.length-1 ; i++ ){
+    				transitionLabel = subObjectProperties[i];
+    				if( equivalentPropertiesMap.containsKey( superObjectProperty ) &&  
+    					equivalentPropertiesMap.get( superObjectProperty ).contains( transitionLabel ) )
+    					transitionLabel = superObjectProperty;
     				try {
-						fromState = addNewTransition( auto, fromState, subObjectProperties[i] );
+						fromState = addNewTransition( auto, fromState, transitionLabel );
 					} catch (NoSuchStateException e) {
 						throw new IllegalArgumentException("Could not create automaton");
 					}
     			}
     			try {
-					auto.addTransition( new Transition( fromState, subObjectProperties[subObjectProperties.length-1], finalState) );
+    				transitionLabel = subObjectProperties[subObjectProperties.length-1];
+    				if( equivalentPropertiesMap.containsKey( superObjectProperty ) &&  
+    					equivalentPropertiesMap.get( superObjectProperty ).contains( transitionLabel ) )
+    					transitionLabel = superObjectProperty;
+					auto.addTransition( new Transition( fromState, transitionLabel, finalState) );
 				} catch (NoSuchStateException e) {
 					throw new IllegalArgumentException("Could not create automaton");
 				}
     		}
     		automataMap.put( superObjectProperty, auto );
 		}
+     	//For symmetric Roles
     	for( OWLObjectPropertyExpression owlProp : automataMap.keySet() )
     		for( OWLObjectPropertyExpression[] inclusion : simpleObjectPropertyInclusions )
     			if( inclusion[0].equals( owlProp ) && inclusion[1].getInverseProperty().getSimplified().equals( owlProp ) ){
@@ -394,7 +444,8 @@ public class AutomataConstructionManager {
     				buildAutomatonForSymmetricRole( au, getMirroredCopy( au ) );
     				automataMap.put( owlProp , au );
     			}
-
+    	//For those transitive roles that other roles do not depend on the automaton is complete. So we need to
+    	//also build the auto for the inverse of R.
     	for(ComplexObjectPropertyInclusion inclusion : complexObjectPropertyInclusions){
     		OWLObjectPropertyExpression owlSuperProperty = inclusion.m_superObjectProperties;
     		OWLObjectPropertyExpression[] owlSubPropertyExpression = inclusion.m_subObjectProperties;
