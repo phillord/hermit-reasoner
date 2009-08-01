@@ -13,7 +13,6 @@ public class RIARegularityTest extends AbstractReasonerTest {
 		 				 "SubObjectPropertyOf(:D :A) ";
 	     assertRegular(axioms,true);
 	 }
-	 
 	 public void testRIARegularity2() throws Exception{
 		 String axioms = "SubObjectPropertyOf(ObjectPropertyChain(:R :Q) :P) " +
 		 				 "InverseObjectProperties(:P :Q) ";
