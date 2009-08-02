@@ -250,15 +250,6 @@ public class ReasonerTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(true);
     }
-    public void testChains4() throws Exception {
-        String axioms = "SubObjectPropertyOf( ObjectPropertyChain( :t :t ) :t )"
-            + "ObjectPropertyAssertion(:t :a :b)"
-            + "ObjectPropertyAssertion(:t :b :c)"
-            + "ClassAssertion(ObjectAllValuesFrom(:t :A) :a)"
-            + "ClassAssertion(ObjectComplementOf(:A) :c)";
-        loadReasonerWithAxioms(axioms);
-        assertABoxSatisfiable(false);
-    }
     public void testChains1() throws Exception {
         String axioms = "TransitiveObjectProperty(:p)" +
         				"SubObjectPropertyOf(ObjectPropertyChain(:p1 :p :p2) :S) ";
@@ -276,6 +267,16 @@ public class ReasonerTest extends AbstractReasonerTest {
         OWLSubPropertyChainOfAxiom ax = df.getOWLSubPropertyChainOfAxiom(chain, S);
         assertEntails(ax, true);
     }
+    public void testChains2() throws Exception {
+        String axioms = "ObjectPropertyAssertion(:p :a :b)"
+            + "ObjectPropertyAssertion(:q :b :c)"
+            + "SubObjectPropertyOf(ObjectPropertyChain(:p :q) :p)"
+            + "ObjectPropertyAssertion(:p :a :b)"
+            + "ObjectPropertyAssertion(:q :b :c)"
+            + "NegativeObjectPropertyAssertion(:p :a :c)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
     public void testChains3() throws Exception {
         String axioms = "TransitiveObjectProperty( :p)";
         loadReasonerWithAxioms(axioms);
@@ -287,13 +288,12 @@ public class ReasonerTest extends AbstractReasonerTest {
         OWLSubPropertyChainOfAxiom ax = df.getOWLSubPropertyChainOfAxiom(chain, p);
         assertEntails(ax, true);
     }
-    public void testChains2() throws Exception {
-        String axioms = "ObjectPropertyAssertion(:p :a :b)"
-            + "ObjectPropertyAssertion(:q :b :c)"
-            + "SubObjectPropertyOf(ObjectPropertyChain(:p :q) :p)"
-            + "ObjectPropertyAssertion(:p :a :b)"
-            + "ObjectPropertyAssertion(:q :b :c)"
-            + "NegativeObjectPropertyAssertion(:p :a :c)";
+    public void testChains4() throws Exception {
+        String axioms = "SubObjectPropertyOf( ObjectPropertyChain( :t :t ) :t )"
+            + "ObjectPropertyAssertion(:t :a :b)"
+            + "ObjectPropertyAssertion(:t :b :c)"
+            + "ClassAssertion(ObjectAllValuesFrom(:t :A) :a)"
+            + "ClassAssertion(ObjectComplementOf(:A) :c)";
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
@@ -2395,6 +2395,8 @@ public class ReasonerTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
+    //The last axiom is not redundant. It tests the case where both R and some of its inverse have an automaton.
+    //Then the auto for R should be joined with the mirrored copy of the auto for Inv(R). 
     public void testSatisfiabilityWithRIAs3() throws Exception {
         String axioms = "ObjectPropertyAssertion( :R1 :a :b )" +
 						"ObjectPropertyAssertion( :R2 :b :c )" +
@@ -2407,15 +2409,70 @@ public class ReasonerTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
-	 public void testSatisfiabilityWithRIAs4() throws Exception{
-		 String axioms = "SubObjectPropertyOf(ObjectPropertyChain(:R2 :R3) :R) " +
-		 				 "EquivalentObjectProperties( :R :R2 )" +
-		 				 "EquivalentObjectProperties( :R :R3 )" +
-		 				 "ObjectPropertyAssertion( :R2 :a :b )" +
-		 				 "ObjectPropertyAssertion( :R3 :b :c )" +
-		 				 "ClassAssertion(ObjectComplementOf(:C) :c) " +
-		 				 "ClassAssertion(ObjectAllValuesFrom(:R :C) :a) ";
-		 loadReasonerWithAxioms(axioms);
-	     assertABoxSatisfiable(false);
-	 }
+	public void testSatisfiabilityWithRIAs4() throws Exception{
+		String axioms = "SubObjectPropertyOf(ObjectPropertyChain(:R2 :R3) :R) " +
+						"EquivalentObjectProperties( :R :R2 )" +
+		 				"EquivalentObjectProperties( :R :R3 )" +
+		 				"ObjectPropertyAssertion( :R2 :a :b )" +
+		 				"ObjectPropertyAssertion( :R3 :b :c )" +
+		 				"ClassAssertion(ObjectComplementOf(:C) :c) " +
+		 				"ClassAssertion(ObjectAllValuesFrom(:R :C) :a) ";
+		loadReasonerWithAxioms(axioms);
+	    assertABoxSatisfiable(false);
+	}
+	public void testSatisfiabilityWithRIAs5() throws Exception {
+        String axioms = "ObjectPropertyAssertion( :R1 :a :b )" +
+        				"ObjectPropertyAssertion( :R2 :b :c )" +
+        				"ClassAssertion(ObjectComplementOf(:C) :a) " +
+        				"ClassAssertion(ObjectAllValuesFrom(ObjectInverseOf(:R) :C) :c) " +
+        				"SubObjectPropertyOf(ObjectPropertyChain(:R1 :R2) :R) ";
+
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+   }
+	public void testSatisfiabilityWithRIAs6() throws Exception {
+	    String axioms = "ObjectPropertyAssertion( :R1 :a :b )" +
+	    				"ObjectPropertyAssertion( :R2 :b :c )" +
+	    				"ClassAssertion(ObjectComplementOf(:C) :a) " +
+	    				"ClassAssertion(ObjectAllValuesFrom(:R :C) :c) " +
+	    				"SubObjectPropertyOf(ObjectPropertyChain(:R1 :R2) ObjectInverseOf(:R)) ";
+	
+	    loadReasonerWithAxioms(axioms);
+	    assertABoxSatisfiable(false);
+    }
+	public void testSatisfiabilityWithRIAs7() throws Exception {
+        String axioms = "ObjectPropertyAssertion( :R1 :a :b )" +
+        				"ObjectPropertyAssertion( :R2 :b :c )" +
+        				"ClassAssertion(ObjectComplementOf(:C) :a) " +
+        				"ClassAssertion(ObjectAllValuesFrom(:R :C) :c) " +
+        				"SubObjectPropertyOf(ObjectPropertyChain(ObjectInverseOf(:R2) ObjectInverseOf(:R1)) :R) ";
+
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+   }
+	public void testSatisfiabilityWithRIAs8() throws Exception {
+        String axioms = "ObjectPropertyAssertion( :R1 :a :b )" +
+        				"ObjectPropertyAssertion( :S1 :b :c )" +
+        				"ObjectPropertyAssertion( :S2 :c :d )" +
+        				"ObjectPropertyAssertion( :S1 :d :e )" +
+        				"ObjectPropertyAssertion( :S2 :e :f )" +
+        				"TransitiveObjectProperty(:S)" +
+        				"ClassAssertion(ObjectComplementOf(:C) :a) " +
+        				"ClassAssertion(ObjectAllValuesFrom(:R :C) :f) " +
+        				"SubObjectPropertyOf(ObjectPropertyChain(ObjectInverseOf(:S2) ObjectInverseOf(:S1)) :S) " +
+        				"SubObjectPropertyOf(ObjectPropertyChain(:S ObjectInverseOf(:R1)) :R) ";
+
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+   }
+	public void testSatisfiabilityWithRIAs9() throws Exception {
+        String axioms = "ObjectPropertyAssertion( :R :a :b )" +
+        				"TransitiveObjectProperty(:R)" +
+        				"SymmetricObjectProperty(:R)" +
+        				"ClassAssertion(ObjectComplementOf(:C) :a) " +
+        				"ClassAssertion(ObjectAllValuesFrom(:R :C) :a) ";
+
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+   }
 }
