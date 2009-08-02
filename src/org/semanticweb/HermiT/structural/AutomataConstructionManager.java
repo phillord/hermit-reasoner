@@ -134,10 +134,17 @@ public class AutomataConstructionManager {
 
     	for( OWLObjectPropertyExpression owlProp : completeAutomata.keySet() ){
     		Automaton autoOfRole = completeAutomata.get( owlProp );
-    		if( completeAutomata.containsKey( owlProp.getInverseProperty().getSimplified() ) )
+    		if( completeAutomata.containsKey( owlProp.getInverseProperty().getSimplified() ) && 
+    			inversePropertyDependencyGraph.getElements().contains( owlProp.getInverseProperty().getSimplified() ))
     			increaseAutoWithAutoOfInverseRole( autoOfRole, completeAutomata.get( owlProp.getInverseProperty().getSimplified() ) );
     	}
+    	Map<OWLObjectPropertyExpression,Automaton> extraCompleteAutomataForInverseRoles = new HashMap<OWLObjectPropertyExpression,Automaton>();
+    	for( OWLObjectPropertyExpression owlProp : completeAutomata.keySet() )
+    		if( completeAutomata.containsKey( owlProp ) && !completeAutomata.containsKey( owlProp.getInverseProperty().getSimplified() ) )
+    			extraCompleteAutomataForInverseRoles.put( owlProp.getInverseProperty().getSimplified(), getMirroredCopy( completeAutomata.get( owlProp ) ));
 
+    	completeAutomata.putAll( extraCompleteAutomataForInverseRoles );
+    	extraCompleteAutomataForInverseRoles.clear();
     	return completeAutomata;
 	}
 	private void increaseAutoWithAutoOfInverseRole(Automaton autoOfRole,Automaton automatonOfInverse) {
@@ -148,7 +155,6 @@ public class AutomataConstructionManager {
 	}
 
 	private Automaton buildCompleteAutomataForRoles(OWLObjectPropertyExpression roleToBuildAutomaton, Map<OWLObjectPropertyExpression, Set<OWLObjectPropertyExpression>> inverseRolesMap, Map<OWLObjectPropertyExpression, Automaton> individualAutomata, Map<OWLObjectPropertyExpression, Automaton> completeAutomata, Graph<OWLObjectPropertyExpression> inversedPropertyDependencyGraph) {
-
 		if( completeAutomata.containsKey( roleToBuildAutomaton ) )
 			return completeAutomata.get( roleToBuildAutomaton );
 		else if( completeAutomata.containsKey( roleToBuildAutomaton.getInverseProperty().getSimplified() ) && 
@@ -354,7 +360,7 @@ public class AutomataConstructionManager {
     		//RR->R
     		if (subObjectProperties.length==2 && subObjectProperties[0].equals(superObjectProperty) && subObjectProperties[1].equals(superObjectProperty)) {
     			try {
-					auto.addTransition( new Transition( finalState, superObjectProperty, finalState ) );
+					auto.addTransition( new Transition( finalState, null, initialState ) );
 				} catch (NoSuchStateException e) {
 					throw new IllegalArgumentException("Could not create automaton");
 				}
@@ -441,11 +447,16 @@ public class AutomataConstructionManager {
     		for( OWLObjectPropertyExpression[] inclusion : simpleObjectPropertyInclusions )
     			if( inclusion[0].equals( owlProp ) && inclusion[1].getInverseProperty().getSimplified().equals( owlProp ) ){
     				Automaton au = automataMap.get( owlProp );
-    				buildAutomatonForSymmetricRole( au, getMirroredCopy( au ) );
-    				automataMap.put( owlProp , au );
+//    				buildAutomatonForSymmetricRole( au, getMirroredCopy( au ) );
+    				try {
+						au.addTransition( new Transition((State)au.initials().toArray()[0], owlProp.getInverseProperty().getSimplified(), (State)au.terminals().toArray()[0]) );
+	    				automataMap.put( owlProp , au );
+					} catch (NoSuchStateException e) {
+						throw new IllegalArgumentException("Could not create automaton for symmetric role:" + owlProp);
+					}
     			}
-    	//For those transitive roles that other roles do not depend on the automaton is complete. So we need to
-    	//also build the auto for the inverse of R.
+    	//For those transitive roles that other roles do not depend on other roles the automaton is complete. 
+    	//So we also need to build the auto for the inverse of R.
     	for(ComplexObjectPropertyInclusion inclusion : complexObjectPropertyInclusions){
     		OWLObjectPropertyExpression owlSuperProperty = inclusion.m_superObjectProperties;
     		OWLObjectPropertyExpression[] owlSubPropertyExpression = inclusion.m_subObjectProperties;
