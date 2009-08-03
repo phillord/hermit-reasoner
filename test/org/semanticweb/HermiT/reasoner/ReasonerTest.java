@@ -2515,5 +2515,20 @@ public class ReasonerTest extends AbstractReasonerTest {
 
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
+   }
+	public void testSatisfiabilityWithRIAs13() throws Exception {
+        String axioms = "ObjectPropertyAssertion( :R2 :b :a )" +
+						"ObjectPropertyAssertion( :P1 :b :c )" +
+						"ObjectPropertyAssertion( :P2 :c :d )" +
+						"InverseObjectProperties(:R1 :S)" +
+        				"ClassAssertion(ObjectComplementOf(:C) :a) " +
+        				"ClassAssertion(ObjectAllValuesFrom(:R :C) :d) " +
+        				"SubObjectPropertyOf(ObjectPropertyChain(:P1 :P2) :S) " +
+        				"SubObjectPropertyOf(ObjectPropertyChain(:dumm :dumm) :R1) " +
+        				"SubObjectPropertyOf(ObjectPropertyChain(:R1 :R2) :R) ";
+
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
    }  
+
 }
