@@ -2475,4 +2475,45 @@ public class ReasonerTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
    }
+	public void testSatisfiabilityWithRIAs10() throws Exception {
+        String axioms = "ObjectPropertyAssertion( :R1 :a :b )" +
+						"ObjectPropertyAssertion( :R2 :b :c )" +
+						"ObjectPropertyAssertion( :R1 :c :d )" +
+						"ObjectPropertyAssertion( :R2 :d :e )" +
+        				"SymmetricObjectProperty(:R)" +
+        				"TransitiveObjectProperty(ObjectInverseOf(:R))" +
+        				"ClassAssertion(ObjectComplementOf(:C) :e) " +
+        				"ClassAssertion(ObjectAllValuesFrom(:R :C) :a) " +
+        				"SubObjectPropertyOf(ObjectPropertyChain(:R1 :R2) ObjectInverseOf(:R)) ";
+
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+   } 
+	public void testSatisfiabilityWithRIAs11() throws Exception {
+        String axioms = "ObjectPropertyAssertion( :R1 :a :b )" +
+						"ObjectPropertyAssertion( :R2 :b :c )" +
+						"ObjectPropertyAssertion( :R1 :c :d )" +
+						"ObjectPropertyAssertion( :R2 :d :e )" +
+        				"SymmetricObjectProperty(:R)" +
+        				"TransitiveObjectProperty(:R)" +
+        				"ClassAssertion(ObjectComplementOf(:C) :e) " +
+        				"ClassAssertion(ObjectAllValuesFrom(ObjectInverseOf(:R) :C) :a) " +
+        				"SubObjectPropertyOf(ObjectPropertyChain(:R1 :R2) :R) ";
+
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+   }
+	public void testSatisfiabilityWithRIAs12() throws Exception {
+        String axioms = "ObjectPropertyAssertion( :R1 :a :b )" +
+						"ObjectPropertyAssertion( :R2 :b :c )" +
+						"ObjectPropertyAssertion( :R1 :c :d )" +
+						"ObjectPropertyAssertion( :R2 :d :e )" +
+        				"TransitiveObjectProperty(:R)" +
+        				"ClassAssertion(ObjectComplementOf(:C) :e) " +
+        				"ClassAssertion(ObjectAllValuesFrom(ObjectInverseOf(:R) :C) :a) " +
+        				"SubObjectPropertyOf(ObjectPropertyChain(:R1 :R2) ObjectInverseOf(:R)) ";
+
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+   }  
 }
