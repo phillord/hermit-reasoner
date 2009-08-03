@@ -42,7 +42,7 @@ public class AutomataConstructionManager {
         complexRolesDependencyGraph.removeElements( simpleRoles );
 		m_nonSimpleRoles.addAll( complexRolesDependencyGraph.getElements() );
 
-		Map<OWLObjectPropertyExpression,Automaton> connectedAutomata = connectAllAutomata(propertyDependencyGraph,inverseRolesMap,individualAutomata);
+		Map<OWLObjectPropertyExpression,Automaton> connectedAutomata = connectAllAutomata(propertyDependencyGraph,inverseRolesMap,individualAutomata,simpleObjectPropertyInclusions);
 
 		for( OWLObjectPropertyExpression owlPropExpr : connectedAutomata.keySet() )
 			connectedAutomata.put( owlPropExpr, minimizeAndNormalizeAutomaton( connectedAutomata.get( owlPropExpr ) ));
@@ -113,7 +113,7 @@ public class AutomataConstructionManager {
 		}
 		return simpleRoles;
 	}
-	private Map<OWLObjectPropertyExpression, Automaton> connectAllAutomata(Graph<OWLObjectPropertyExpression> propertyDependencyGraph , Map<OWLObjectPropertyExpression, Set<OWLObjectPropertyExpression>> inverseRolesMap, Map<OWLObjectPropertyExpression, Automaton> individualAutomata) {
+	private Map<OWLObjectPropertyExpression, Automaton> connectAllAutomata(Graph<OWLObjectPropertyExpression> propertyDependencyGraph , Map<OWLObjectPropertyExpression, Set<OWLObjectPropertyExpression>> inverseRolesMap, Map<OWLObjectPropertyExpression, Automaton> individualAutomata,Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions) {
     	Graph<OWLObjectPropertyExpression> transClosedGraph = propertyDependencyGraph.clone();
     	transClosedGraph.transitivelyClose();
     	
@@ -132,13 +132,36 @@ public class AutomataConstructionManager {
     		if( !completeAutomata.containsKey( owlProp ) )
     			completeAutomata.put( owlProp, individualAutomata.get( owlProp ) );
 
+    	Map<OWLObjectPropertyExpression,Automaton> extraCompleteAutomataForInverseRoles = new HashMap<OWLObjectPropertyExpression,Automaton>();
+    	for( OWLObjectPropertyExpression owlProp : completeAutomata.keySet() )
+    		if( !completeAutomata.containsKey( owlProp.getInverseProperty().getSimplified() ) )
+    			extraCompleteAutomataForInverseRoles.put( owlProp.getInverseProperty().getSimplified(), getMirroredCopy( completeAutomata.get( owlProp ) ));
+    	completeAutomata.putAll( extraCompleteAutomataForInverseRoles );
+    	extraCompleteAutomataForInverseRoles.clear();
+    	
     	for( OWLObjectPropertyExpression owlProp : completeAutomata.keySet() ){
     		Automaton autoOfRole = completeAutomata.get( owlProp );
-    		if( completeAutomata.containsKey( owlProp.getInverseProperty().getSimplified() ) && 
-    			inversePropertyDependencyGraph.getElements().contains( owlProp.getInverseProperty().getSimplified() ))
-    			increaseAutoWithAutoOfInverseRole( autoOfRole, completeAutomata.get( owlProp.getInverseProperty().getSimplified() ) );
+    		//The role has an inverse that has an automaton. Then the automata need to be joined
+    		if( (completeAutomata.containsKey( owlProp.getInverseProperty().getSimplified() ) &&  
+    			inversePropertyDependencyGraph.getElements().contains( owlProp.getInverseProperty().getSimplified() ) )
+    			|| individualAutomata.containsKey( owlProp.getInverseProperty().getSimplified() ) ){
+    			Automaton autoOfInverseRole = completeAutomata.get( owlProp.getInverseProperty().getSimplified() );
+    			increaseAutoWithAutoOfInverseRole( autoOfRole, autoOfInverseRole );
+    	     	//The role is also a symmetric one.
+    			for( OWLObjectPropertyExpression[] inclusion : simpleObjectPropertyInclusions )
+    				if( inclusion[0].equals( owlProp ) && inclusion[1].getInverseProperty().getSimplified().equals( owlProp ) || 
+    					inclusion[0].getInverseProperty().getSimplified().equals( owlProp ) && inclusion[1].equals( owlProp )){
+						Transition basicTransition = new Transition((State)autoOfRole.initials().toArray()[0], owlProp.getInverseProperty().getSimplified(), (State)autoOfRole.terminals().toArray()[0]);
+						try {
+							autoOfRole.addTransition( basicTransition );
+							connectAutomata(autoOfRole, autoOfInverseRole, basicTransition);
+							completeAutomata.put( owlProp , autoOfRole );
+						} catch (NoSuchStateException e) {
+							throw new IllegalArgumentException( "Could not create automaton for symmetric role: " + owlProp + " from already existing auto of its inverse");
+						}
+    				}
+    		}
     	}
-    	Map<OWLObjectPropertyExpression,Automaton> extraCompleteAutomataForInverseRoles = new HashMap<OWLObjectPropertyExpression,Automaton>();
     	for( OWLObjectPropertyExpression owlProp : completeAutomata.keySet() )
     		if( completeAutomata.containsKey( owlProp ) && !completeAutomata.containsKey( owlProp.getInverseProperty().getSimplified() ) )
     			extraCompleteAutomataForInverseRoles.put( owlProp.getInverseProperty().getSimplified(), getMirroredCopy( completeAutomata.get( owlProp ) ));
@@ -442,12 +465,12 @@ public class AutomataConstructionManager {
     		}
     		automataMap.put( superObjectProperty, auto );
 		}
-     	//For symmetric Roles
+     	//For symmetric roles
     	for( OWLObjectPropertyExpression owlProp : automataMap.keySet() )
     		for( OWLObjectPropertyExpression[] inclusion : simpleObjectPropertyInclusions )
-    			if( inclusion[0].equals( owlProp ) && inclusion[1].getInverseProperty().getSimplified().equals( owlProp ) ){
+    			if( inclusion[0].equals( owlProp ) && inclusion[1].getInverseProperty().getSimplified().equals( owlProp ) || 
+    				inclusion[0].getInverseProperty().getSimplified().equals( owlProp ) && inclusion[1].equals( owlProp )){
     				Automaton au = automataMap.get( owlProp );
-//    				buildAutomatonForSymmetricRole( au, getMirroredCopy( au ) );
     				try {
 						au.addTransition( new Transition((State)au.initials().toArray()[0], owlProp.getInverseProperty().getSimplified(), (State)au.terminals().toArray()[0]) );
 	    				automataMap.put( owlProp , au );
@@ -456,15 +479,15 @@ public class AutomataConstructionManager {
 					}
     			}
     	//For those transitive roles that other roles do not depend on other roles the automaton is complete. 
-    	//So we also need to build the auto for the inverse of R.
+    	//So we also need to build the auto for the inverse of R unless Inv(R) has its own.
     	for(ComplexObjectPropertyInclusion inclusion : complexObjectPropertyInclusions){
     		OWLObjectPropertyExpression owlSuperProperty = inclusion.m_superObjectProperties;
     		OWLObjectPropertyExpression[] owlSubPropertyExpression = inclusion.m_subObjectProperties;
     		if( owlSubPropertyExpression.length==2 && owlSubPropertyExpression[0].equals(owlSuperProperty) && owlSubPropertyExpression[1].equals(owlSuperProperty))
-    			if( !complexRolesDependencyGraph.getElements().contains( owlSuperProperty ) ){
+    			if( !complexRolesDependencyGraph.getElements().contains( owlSuperProperty ) && 
+    				!automataMap.containsKey( owlSuperProperty.getInverseProperty().getSimplified() )){
     				Automaton autoOfRole = automataMap.get( owlSuperProperty );
-    				automataMap.put(owlSuperProperty, autoOfRole);
-    				automataMap.put( owlSuperProperty.getInverseProperty().getSimplified(), getMirroredCopy( autoOfRole ) );
+    				automataMap.put(owlSuperProperty.getInverseProperty().getSimplified(), getMirroredCopy( autoOfRole ) );
     			}
 		}
     	return automataMap;
@@ -487,31 +510,6 @@ public class AutomataConstructionManager {
 	      }
 	    }
 	    return stateMapperUnionInverse;
-    }
-    private void buildAutomatonForSymmetricRole(Automaton autoOfRole, Automaton autoOfInverseRole){
-
-    	Map<State,State> stateMapperUnionInverse = getDisjointUnion(autoOfRole,autoOfInverseRole);
-		
-	    try {
-	    	autoOfRole.addTransition(
-					new Transition( (State)autoOfRole.initials().toArray()[0],
-									null, 
-									(State)stateMapperUnionInverse.get(autoOfInverseRole.terminals().toArray()[0])) );
-	    	autoOfRole.addTransition(
-					new Transition( (State)stateMapperUnionInverse.get(autoOfInverseRole.terminals().toArray()[0]),
-									null, 
-									(State)autoOfRole.initials().toArray()[0] ) );
-	    	autoOfRole.addTransition(
-					new Transition( (State)autoOfRole.terminals().toArray()[0],
-									null, 
-									(State)stateMapperUnionInverse.get(autoOfInverseRole.initials().toArray()[0])) );
-	    	autoOfRole.addTransition(
-					new Transition( (State)stateMapperUnionInverse.get(autoOfInverseRole.initials().toArray()[0]),
-									null, 
-									(State)autoOfRole.terminals().toArray()[0] ) );
-		} catch (NoSuchStateException e) {
-			throw new IllegalArgumentException("Could not create automaton for symmetric role");
-		}
     }
     private Automaton getMirroredCopy(Automaton auto){
     	Automaton mirroredCopy = new Automaton() ;
