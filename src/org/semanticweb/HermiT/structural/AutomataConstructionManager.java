@@ -191,13 +191,14 @@ public class AutomataConstructionManager {
 			if( autoForLeafProperty == null ){
 				Set<OWLObjectPropertyExpression> inverses = inverseRolesMap.get( roleToBuildAutomaton );
 				boolean noInverseRoleWithAutomaton = true;
-				for( OWLObjectPropertyExpression inverse : inverses )
-					if( individualAutomata.containsKey( inverse ) ){
-						autoForLeafProperty = getMirroredCopy( buildCompleteAutomataForRoles( inverse, inverseRolesMap, individualAutomata, completeAutomata, inversedPropertyDependencyGraph ) );
-						completeAutomata.put( roleToBuildAutomaton , autoForLeafProperty );
-						noInverseRoleWithAutomaton = false;
-						break;
-					}
+				if( inverses != null)
+					for( OWLObjectPropertyExpression inverse : inverses )
+						if( individualAutomata.containsKey( inverse ) ){
+							autoForLeafProperty = getMirroredCopy( buildCompleteAutomataForRoles( inverse, inverseRolesMap, individualAutomata, completeAutomata, inversedPropertyDependencyGraph ) );
+							completeAutomata.put( roleToBuildAutomaton , autoForLeafProperty );
+							noInverseRoleWithAutomaton = false;
+							break;
+						}
 				if( noInverseRoleWithAutomaton ){
 					autoForLeafProperty = new Automaton();
 					State initial = autoForLeafProperty.addState(true , false );
