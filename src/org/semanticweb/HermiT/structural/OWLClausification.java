@@ -110,6 +110,7 @@ import org.semanticweb.owlapi.model.SWRLObjectPropertyAtom;
 import org.semanticweb.owlapi.model.SWRLObjectVisitor;
 import org.semanticweb.owlapi.model.SWRLRule;
 import org.semanticweb.owlapi.model.SWRLSameIndividualAtom;
+import org.semanticweb.owlapi.model.SWRLVariable;
 import org.semanticweb.owlapi.util.OWLAxiomVisitorAdapter;
 
 import rationals.Automaton;
@@ -287,7 +288,7 @@ public class OWLClausification {
         for (OWLDataProperty dataProperty : axioms.m_dataProperties)
             dataRoles.add(AtomicRole.create(dataProperty.getIRI().toString()));
         // clausify SWRL rules
-        NormalizedRuleClausifier ruleClausifier=new NormalizedRuleClausifier(positiveFacts,negativeFacts,descriptionGraphs,axioms.m_objectPropertiesUsedInAxioms);
+        NormalizedRuleClausifier ruleClausifier=new NormalizedRuleClausifier(positiveFacts,negativeFacts,descriptionGraphs,axioms.m_objectPropertiesUsedInAxioms,dataRangeConverter);
         for (SWRLRule rule : axioms.m_rules) {
             rule.accept(ruleClausifier);
         }
@@ -330,21 +331,21 @@ public class OWLClausification {
                 safenessAtoms.clear();
             }
         }
-        if (m_configuration.blockingStrategyType==Configuration.BlockingStrategyType.CORE || m_configuration.blockingStrategyType==Configuration.BlockingStrategyType.TWOPHASE) {
-            // The following two maps are only used with inexact blocking strategies, i.e., blocking strategies that establish 
-            // blocks that might not be valid and that only in a later validation phase will be checked for validity. In case 
-            // of invalid blocks existential expansion will continue further. 
-            // To validate blocks, we keep the relevant axioms (in an optimised data structure).
-            
-            // The key is a concept and the values are sets of sets of concepts that are implies by the key, 
-            // where each set of concepts is to be interpreted as a disjunction of concepts and the sets of sets of concepts are conjunctions
-            // so the axioms "A -> B or C" and "A -> D", are represented by an entry with key A mapped to the value {{B, C}, {D}}
-            Map<AtomicConcept, Set<Set<Concept>>> unaryValidBlockConditions=new HashMap<AtomicConcept, Set<Set<Concept>>>();
-            // similarly as above, but with several premises, e.g., to represent A and B -> C
-            Map<Set<AtomicConcept>, Set<Set<Concept>>> nAryValidBlockConditions=new HashMap<Set<AtomicConcept>, Set<Set<Concept>>>();
-            collectConditionsForValidBlocks(axioms,unaryValidBlockConditions,nAryValidBlockConditions);
-            return new DLOntology(ontologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,objectRoles,dataRoles,axioms.m_definedDatatypesIRIs,hermitIndividuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes,unaryValidBlockConditions,nAryValidBlockConditions);
-        }
+//        if (m_configuration.blockingStrategyType==Configuration.BlockingStrategyType.CORE || m_configuration.blockingStrategyType==Configuration.BlockingStrategyType.TWOPHASE) {
+//            // The following two maps are only used with inexact blocking strategies, i.e., blocking strategies that establish 
+//            // blocks that might not be valid and that only in a later validation phase will be checked for validity. In case 
+//            // of invalid blocks existential expansion will continue further. 
+//            // To validate blocks, we keep the relevant axioms (in an optimised data structure).
+//            
+//            // The key is a concept and the values are sets of sets of concepts that are implies by the key, 
+//            // where each set of concepts is to be interpreted as a disjunction of concepts and the sets of sets of concepts are conjunctions
+//            // so the axioms "A -> B or C" and "A -> D", are represented by an entry with key A mapped to the value {{B, C}, {D}}
+//            Map<AtomicConcept, Set<Set<Concept>>> unaryValidBlockConditions=new HashMap<AtomicConcept, Set<Set<Concept>>>();
+//            // similarly as above, but with several premises, e.g., to represent A and B -> C
+//            Map<Set<AtomicConcept>, Set<Set<Concept>>> nAryValidBlockConditions=new HashMap<Set<AtomicConcept>, Set<Set<Concept>>>();
+//            collectConditionsForValidBlocks(axioms,unaryValidBlockConditions,nAryValidBlockConditions);
+//            return new DLOntology(ontologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,objectRoles,dataRoles,axioms.m_definedDatatypesIRIs,hermitIndividuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes,unaryValidBlockConditions,nAryValidBlockConditions);
+//        }
         
         return new DLOntology(ontologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,objectRoles,dataRoles,axioms.m_definedDatatypesIRIs,hermitIndividuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes);
     }
@@ -1167,6 +1168,7 @@ public class OWLClausification {
     }
 
     protected class NormalizedRuleClausifier implements SWRLObjectVisitor {
+        protected final DataRangeConverter m_dataRangeConverter;
         protected final Set<OWLObjectProperty> m_objectPropertiesUsedInAxioms;
         protected final List<Atom> m_headAtoms;
         protected final List<Atom> m_bodyAtoms;
@@ -1176,15 +1178,16 @@ public class OWLClausification {
         protected final Set<Atom> m_negativeFacts;
         protected Term m_lastTerm;
         protected Atom m_lastAtom;
-        protected final Set<SWRLIndividualVariable> m_headVars=new HashSet<SWRLIndividualVariable>();
-        protected final Set<SWRLIndividualVariable> m_bodyVars=new HashSet<SWRLIndividualVariable>();
-        protected final Set<SWRLIndividualVariable> m_varsOfLastAtom=new HashSet<SWRLIndividualVariable>();
+        protected final Set<SWRLVariable> m_headVars=new HashSet<SWRLVariable>();
+        protected final Set<SWRLVariable> m_bodyVars=new HashSet<SWRLVariable>();
+        protected final Set<SWRLVariable> m_varsOfLastAtom=new HashSet<SWRLVariable>();
         protected boolean m_containsIndividuals=false;
         protected boolean m_containsVariables=false;
         public final Set<OWLObjectProperty> m_graphRoles=new HashSet<OWLObjectProperty>();
         protected final Map<OWLObjectProperty, Set<SWRLRule>> unknownRoleInRule=new HashMap<OWLObjectProperty, Set<SWRLRule>>();
         
-        public NormalizedRuleClausifier(Set<Atom> positiveFacts,Set<Atom> negativeFacts,Collection<DescriptionGraph> dGraphs, Set<OWLObjectProperty> objectPropertiesUsedInAxioms) {
+        public NormalizedRuleClausifier(Set<Atom> positiveFacts,Set<Atom> negativeFacts,Collection<DescriptionGraph> dGraphs, Set<OWLObjectProperty> objectPropertiesUsedInAxioms, DataRangeConverter dataRangeConverter) {
+            m_dataRangeConverter=dataRangeConverter;
             m_headAtoms=new ArrayList<Atom>();
             m_bodyAtoms=new ArrayList<Atom>();
             m_positiveFacts=positiveFacts;
@@ -1242,7 +1245,11 @@ public class OWLClausification {
             }
             for(SWRLAtom atom : rule.getBody()) {
                 atom.accept(this);
-                m_bodyAtoms.add(m_lastAtom);
+                if (atom instanceof SWRLDataRangeAtom) {
+                    m_headAtoms.add(m_lastAtom);
+                } else {
+                    m_bodyAtoms.add(m_lastAtom);
+                }
                 m_bodyVars.addAll(m_varsOfLastAtom);
                 m_varsOfLastAtom.clear();
             }
@@ -1256,84 +1263,108 @@ public class OWLClausification {
             if (!m_bodyVars.containsAll(m_headVars)) {
                 throw new IllegalArgumentException("Error: The rule " + rule + " contains head variables that do not occur in the body, which violates the safety restrictions. ");
             }
-            if (m_containsIndividuals&&m_containsVariables) {
-                throw new UnsupportedOperationException("A given SWRL rule contains both variables and individuals. This is not yet supported. ");
-            } else if (m_containsVariables) {
-                List<Atom> headAtoms=new ArrayList<Atom>();
-                headAtoms.addAll(m_headAtoms);
-                m_heads.add(headAtoms);
-                List<Atom> bodyAtoms=new ArrayList<Atom>();
-                bodyAtoms.addAll(m_bodyAtoms);
-                m_bodies.add(bodyAtoms);
-            } else if (m_containsIndividuals) {
-                if (m_bodyAtoms.isEmpty() && m_headAtoms.size()==1) {
-                   m_positiveFacts.add(m_headAtoms.get(0));
-                } else if (m_headAtoms.isEmpty() && m_bodyAtoms.size()==1) {
-                    m_negativeFacts.add(m_bodyAtoms.get(0));
-                } else {
-                    throw new UnsupportedOperationException("A given SWRL rule contains individuals and is not of the supported form. Supported are only positive and negative facts. ");
-                }
-            }
+            if (m_headAtoms.isEmpty() && !m_containsVariables) {
+                m_negativeFacts.add(m_bodyAtoms.get(0));
+            } 
+            List<Atom> headAtoms=new ArrayList<Atom>();
+            headAtoms.addAll(m_headAtoms);
+            m_heads.add(headAtoms);
+            List<Atom> bodyAtoms=new ArrayList<Atom>();
+            bodyAtoms.addAll(m_bodyAtoms);
+            m_bodies.add(bodyAtoms);
+//            if (m_containsIndividuals&&m_containsVariables) {
+//                throw new UnsupportedOperationException("A given SWRL rule contains both variables and individuals. This is not yet supported. ");
+//            } else if (m_containsVariables) {
+//                List<Atom> headAtoms=new ArrayList<Atom>();
+//                headAtoms.addAll(m_headAtoms);
+//                m_heads.add(headAtoms);
+//                List<Atom> bodyAtoms=new ArrayList<Atom>();
+//                bodyAtoms.addAll(m_bodyAtoms);
+//                m_bodies.add(bodyAtoms);
+//            } else if (m_containsIndividuals) {
+//                if (m_bodyAtoms.isEmpty() && m_headAtoms.size()==1) {
+//                   m_positiveFacts.add(m_headAtoms.get(0));
+//                } else if (m_headAtoms.isEmpty() && m_bodyAtoms.size()==1) {
+//                    m_negativeFacts.add(m_bodyAtoms.get(0));
+//                } else {
+//                    throw new UnsupportedOperationException("A given SWRL rule contains individuals and is not of the supported form. Supported are only positive and negative facts. ");
+//                }
+//            }
             m_headAtoms.clear();
             m_bodyAtoms.clear();
         }
 
-        public void visit(SWRLClassAtom node) {
-            if (node.getPredicate().isAnonymous()) {
-                throw new IllegalStateException("Internal error: SWRL rules class atoms should be normalized to contain only named classes, but this class atom has a complex concept: " + node.getPredicate());
+        public void visit(SWRLClassAtom atom) {
+            if (atom.getPredicate().isAnonymous()) {
+                throw new IllegalStateException("Internal error: SWRL rules class atoms should be normalized to contain only named classes, but this class atom has a complex concept: " + atom.getPredicate());
             }
-            node.getArgument().accept(this);  // either SWRLIndividualArgument or SWRLIndividualVariable
-            m_lastAtom=Atom.create(AtomicConcept.create(node.getPredicate().asOWLClass().getIRI().toString()),m_lastTerm);
+            atom.getArgument().accept(this);  // either SWRLIndividualArgument or SWRLIndividualVariable
+            m_lastAtom=Atom.create(AtomicConcept.create(atom.getPredicate().asOWLClass().getIRI().toString()),m_lastTerm);
         }
-        public void visit(SWRLDataRangeAtom node) {
-            throw new UnsupportedOperationException("SWRL rules with data range atoms are not yet supported. ");
-        }
-        public void visit(SWRLObjectPropertyAtom node) {
-            if (node.getPredicate().isAnonymous()) {
-                throw new IllegalStateException("Internal error: object properties in SWRL rule object property atoms should be normalized to contain only named properties, but this atom has an (anonymous) object property expression: " + node.getPredicate());
+        public void visit(SWRLDataRangeAtom atom) {
+            LiteralConcept literalConcept=m_dataRangeConverter.convertDataRange(atom.getPredicate());
+            atom.getArgument().accept(this);  // either SWRLLiteralArgument or SWRLLiteralVariable
+            if (literalConcept instanceof AtomicNegationConcept) {
+                AtomicConcept negatedConcept=((AtomicNegationConcept)literalConcept).getNegatedAtomicConcept();
+                m_lastAtom=Atom.create(AtomicConcept.create(negatedConcept.getIRI().toString()),m_lastTerm);
+            } else {
+                m_lastAtom=Atom.create((AtomicConcept)literalConcept,m_lastTerm);
             }
-            AtomicRole predicate = AtomicRole.create(node.getPredicate().asOWLObjectProperty().getIRI().toString());
-            node.getFirstArgument().accept(this);
+            //throw new UnsupportedOperationException("SWRL rules with data range atoms are not yet supported. ");
+        }
+        public void visit(SWRLObjectPropertyAtom atom) {
+            if (atom.getPredicate().isAnonymous()) {
+                throw new IllegalStateException("Internal error: object properties in SWRL rule object property atoms should be normalized to contain only named properties, but this atom has an (anonymous) object property expression: " + atom.getPredicate());
+            }
+            atom.getFirstArgument().accept(this);
             Term term1=m_lastTerm;
-            node.getSecondArgument().accept(this);
+            atom.getSecondArgument().accept(this);
             Term term2=m_lastTerm;
-            m_lastAtom=Atom.create(predicate,term1,term2);
+            m_lastAtom=getRoleAtom(atom.getPredicate(),term1,term2);
         }
-        public void visit(SWRLDataPropertyAtom node) {
-            throw new UnsupportedOperationException("SWRL rules with data properties are not yet supported. ");
+        public void visit(SWRLDataPropertyAtom atom) {
+            atom.getFirstArgument().accept(this);
+            Term term1=m_lastTerm;
+            atom.getSecondArgument().accept(this);
+            Term term2=m_lastTerm;
+            m_lastAtom=getRoleAtom(atom.getPredicate(), term1, term2);
+            //throw new UnsupportedOperationException("SWRL rules with data properties are not yet supported. ");
         }
         public void visit(SWRLBuiltInAtom node) {
             throw new UnsupportedOperationException("SWRL rules with built-in atoms are not yet supported. ");
         }
         public void visit(SWRLLiteralVariable node) {
-            throw new UnsupportedOperationException("SWRL rules with data variables are not yet supported. ");
+            m_lastTerm=Variable.create(node.getIRI().toString());
+            m_varsOfLastAtom.add(node);
+            m_containsVariables=true;
+            //throw new UnsupportedOperationException("SWRL rules with data variables are not yet supported. ");
         }
         public void visit(SWRLIndividualVariable node) {
             m_lastTerm=Variable.create(node.getIRI().toString());
             m_varsOfLastAtom.add(node);
             m_containsVariables=true;
         }
-        public void visit(SWRLIndividualArgument node) {
-            if (node.getIndividual().isAnonymous()) 
-                m_lastTerm=Individual.create(node.getIndividual().asAnonymousIndividual().toStringID(),false);
+        public void visit(SWRLIndividualArgument atom) {
+            if (atom.getIndividual().isAnonymous()) 
+                throw new IllegalStateException("Anonymous individual are not allowed in SWRL rules. ");
             else
-                m_lastTerm=Individual.create(node.getIndividual().asNamedIndividual().toStringID(),true);
+                m_lastTerm=Individual.create(atom.getIndividual().asNamedIndividual().toStringID(),true);
             m_containsIndividuals=true;
         }
-        public void visit(SWRLLiteralArgument node) {
-            throw new UnsupportedOperationException("SWRL rules with data constants are not yet supported. ");
+        public void visit(SWRLLiteralArgument arg) {
+            throw new UnsupportedOperationException("Data constants in SWRL rules are only supported for facts (rules with empty premise). ");
         }
-        public void visit(SWRLSameIndividualAtom node) {
-            node.getFirstArgument().accept(this);
+        public void visit(SWRLSameIndividualAtom atom) {
+            atom.getFirstArgument().accept(this);
             Term term1=m_lastTerm;
-            node.getSecondArgument().accept(this);
+            atom.getSecondArgument().accept(this);
             Term term2=m_lastTerm;
             m_lastAtom=Atom.create(Equality.INSTANCE, term1, term2);
         }
-        public void visit(SWRLDifferentIndividualsAtom node) {
-            node.getFirstArgument().accept(this);
+        public void visit(SWRLDifferentIndividualsAtom atom) {
+            atom.getFirstArgument().accept(this);
             Term term1=m_lastTerm;
-            node.getSecondArgument().accept(this);
+            atom.getSecondArgument().accept(this);
             Term term2=m_lastTerm;
             m_lastAtom=Atom.create(Inequality.INSTANCE, term1, term2);
         }

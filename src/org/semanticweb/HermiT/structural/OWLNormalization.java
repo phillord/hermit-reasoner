@@ -1,7 +1,6 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.structural;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -13,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Configuration;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationPropertyDomainAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationPropertyRangeAxiom;
@@ -32,6 +32,7 @@ import org.semanticweb.owlapi.model.OWLDataIntersectionOf;
 import org.semanticweb.owlapi.model.OWLDataMaxCardinality;
 import org.semanticweb.owlapi.model.OWLDataMinCardinality;
 import org.semanticweb.owlapi.model.OWLDataOneOf;
+import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDataPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLDataPropertyDomainAxiom;
 import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
@@ -62,6 +63,8 @@ import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLInverseFunctionalObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLInverseObjectPropertiesAxiom;
 import org.semanticweb.owlapi.model.OWLIrreflexiveObjectPropertyAxiom;
+import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLNegativeDataPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLNegativeObjectPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
@@ -92,6 +95,7 @@ import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 import org.semanticweb.owlapi.model.OWLSymmetricObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLTransitiveObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLTypedLiteral;
+import org.semanticweb.owlapi.model.SWRLArgument;
 import org.semanticweb.owlapi.model.SWRLAtom;
 import org.semanticweb.owlapi.model.SWRLBuiltInAtom;
 import org.semanticweb.owlapi.model.SWRLClassAtom;
@@ -205,8 +209,9 @@ public class OWLNormalization {
     }
     protected void normalizeInclusions(List<OWLClassExpression[]> inclusions, List<OWLDataRange[]> dataRangeInclusions, Collection<SWRLRule> rules) {
         NormalizationVisitor normalizer=new NormalizationVisitor(inclusions, dataRangeInclusions);
-        // normalise rules, this might add new concept inclusions in case a rule atom uses a complex concept
-        RuleNormalizer ruleNormalizer=new RuleNormalizer(inclusions,rules);
+        // normalise rules, this might add new concept and data range inclusions 
+        // in case a rule atom uses a complex concept or data range
+        RuleNormalizer ruleNormalizer=new RuleNormalizer(inclusions,dataRangeInclusions,rules);
         for (SWRLRule rule : rules) {
             ruleNormalizer.visit(rule);
         }
@@ -332,7 +337,7 @@ public class OWLNormalization {
     protected OWLClassExpression getDefinitionFor(OWLClassExpression description,boolean[] alreadyExists,boolean forcePositive) {
         OWLClassExpression definition=m_definitions.get(description);
         if (definition==null || (forcePositive && !(definition instanceof OWLClass))) {
-            definition=m_factory.getOWLClass(URI.create("internal:def#"+m_definitions.size()));
+            definition=m_factory.getOWLClass(IRI.create("internal:def#"+m_definitions.size()));
             if (!forcePositive && !description.accept(m_plVisitor))
                 definition=m_factory.getOWLObjectComplementOf(definition);
             m_definitions.put(description,definition);
@@ -345,7 +350,7 @@ public class OWLNormalization {
     protected OWLDatatype getDefinitionFor(OWLDataRange dr,boolean[] alreadyExists) {
         OWLDatatype definition = m_dataRangeDefinitions.get(dr);
         if (definition==null) {
-            definition=m_factory.getOWLDatatype(URI.create("internal:defdata#"+m_dataRangeDefinitions.size()));
+            definition=m_factory.getOWLDatatype(IRI.create("internal:defdata#"+m_dataRangeDefinitions.size()));
             m_dataRangeDefinitions.put(dr,definition);
             alreadyExists[0]=false;
         } else {
@@ -362,7 +367,7 @@ public class OWLNormalization {
     protected OWLClass getDefinitionForNegativeNominal(OWLObjectOneOf nominal,boolean[] alreadyExists) {
         OWLClass definition=m_definitionsForNegativeNominals.get(nominal);
         if (definition==null) {
-            definition=m_factory.getOWLClass(URI.create("internal:nnq#"+m_definitionsForNegativeNominals.size()));
+            definition=m_factory.getOWLClass(IRI.create("internal:nnq#"+m_definitionsForNegativeNominals.size()));
             m_definitionsForNegativeNominals.put(nominal,definition);
             alreadyExists[0]=false;
         }
@@ -734,6 +739,14 @@ public class OWLNormalization {
 
         // Rules
         public void visit(SWRLRule rule) {
+            if (rule.getBody().isEmpty()) {
+                // facts
+                Rule2FactConverter r2fConverter=new Rule2FactConverter(m_inclusionsAsDisjunctions);
+                for (SWRLAtom at : rule.getHead()) {
+                    at.accept(r2fConverter);
+                }
+            }
+            // do Lloyd-Topor transformation
             for (SWRLAtom headAtom : rule.getHead()) {
                 m_rules.add(m_factory.getSWRLRule(rule.getBody(), Collections.singleton(headAtom)));
             }
@@ -941,58 +954,205 @@ public class OWLNormalization {
             throw new IllegalStateException("Internal error: We shouldn't visit facet restrictions during normalization. ");
         }
     }
+    
+    protected class Rule2FactConverter implements SWRLObjectVisitor {
+        
+        protected final boolean[] m_alreadyExists;
+        protected final Collection<OWLClassExpression[]> m_newInclusions;
+        protected int freshDataProperties=0;
+        protected int freshIndividuals=0; 
+
+        public Rule2FactConverter(Collection<OWLClassExpression[]> newInclusions) {
+            m_alreadyExists=new boolean[1];
+            m_newInclusions=newInclusions;
+        }
+        
+        protected OWLNamedIndividual getFreshIndividual() {
+            freshIndividuals++;
+            return m_factory.getOWLNamedIndividual(IRI.create("internal:freshInd#"+freshIndividuals));
+        }
+        
+        protected OWLDataProperty getFreshDataProperty() {
+            freshDataProperties++;
+            return m_factory.getOWLDataProperty(IRI.create("internal:freshDP#"+freshDataProperties));
+        }
+        
+        public void visit(SWRLRule rule) {
+        }
+        public void visit(SWRLClassAtom atom) {
+            if (!(atom.getArgument() instanceof SWRLIndividualArgument)) {
+                throw new IllegalArgumentException("A SWRL rule contains a head atom " + atom + " with a variable that does not occur in the body. ");
+            }
+            OWLIndividual ind = ((SWRLIndividualArgument)atom.getArgument()).getIndividual();
+            if (ind.isAnonymous()) throwAnonIndError(atom);
+            if (!isSimple(atom.getPredicate())) {
+                OWLClassExpression definition=getDefinitionFor(atom.getPredicate(), m_alreadyExists);
+                if (!m_alreadyExists[0])
+                    m_newInclusions.add(new OWLClassExpression[] { negative(definition), atom.getPredicate() } );
+                addFact(m_factory.getOWLClassAssertionAxiom(definition, ind.asNamedIndividual()));
+            } else {
+                addFact(m_factory.getOWLClassAssertionAxiom(atom.getPredicate(), ind.asNamedIndividual()));
+            }
+        }
+        public void visit(SWRLDataRangeAtom atom) {
+            // dr(literal) :-
+            // convert to: ClassAssertion(DataSomeValuesFrom(freshDP DataOneOf(literal)) freshIndividual) 
+            // and top -> \forall freshDP.dr
+            OWLDataRange dr=atom.getPredicate();
+            OWLNamedIndividual freshIndividual=getFreshIndividual();
+            OWLDataProperty freshDP=getFreshDataProperty();
+            addFact(m_factory.getOWLClassAssertionAxiom(m_factory.getOWLDataSomeValuesFrom(freshDP, dr), freshIndividual));
+            m_newInclusions.add(new OWLClassExpression[] { m_factory.getOWLDataAllValuesFrom(freshDP, dr) });
+        }
+        
+        public void visit(SWRLObjectPropertyAtom atom) {
+            if (!(atom.getFirstArgument() instanceof SWRLIndividualArgument) || !(atom.getSecondArgument() instanceof SWRLIndividualArgument)) throwVarError(atom);
+            OWLObjectPropertyExpression ope=atom.getPredicate().getSimplified();
+            OWLIndividual first=((SWRLIndividualArgument)atom.getFirstArgument()).getIndividual();
+            OWLIndividual second=((SWRLIndividualArgument)atom.getSecondArgument()).getIndividual();
+            if (first.isAnonymous()||second.isAnonymous()) throwAnonIndError(atom);
+            if (ope.isAnonymous()) {
+                addFact(m_factory.getOWLObjectPropertyAssertionAxiom(ope.getNamedProperty(), second.asNamedIndividual(), first.asNamedIndividual()));
+            } else {
+                addFact(m_factory.getOWLObjectPropertyAssertionAxiom(ope.asOWLObjectProperty(), first.asNamedIndividual(), second.asNamedIndividual()));
+            }
+        }
+        public void visit(SWRLDataPropertyAtom atom) {
+            if (!(atom.getSecondArgument() instanceof SWRLLiteralArgument)) throwVarError(atom);
+            if (!(atom.getFirstArgument() instanceof SWRLIndividualArgument)) throwVarError(atom);
+            OWLIndividual ind = ((SWRLIndividualArgument)atom.getFirstArgument()).getIndividual();
+            if (ind.isAnonymous()) throwAnonIndError(atom);
+            OWLLiteral lit=((SWRLLiteralArgument)atom.getSecondArgument()).getLiteral();
+            addFact(m_factory.getOWLDataPropertyAssertionAxiom(atom.getPredicate().asOWLDataProperty(), ind.asNamedIndividual(), lit));
+        }
+        public void visit(SWRLBuiltInAtom atom) {
+            throw new UnsupportedOperationException("A SWRL rule uses built-in atom ("+atom+"), but built-in atoms are not suported yet. ");
+        }
+        public void visit(SWRLSameIndividualAtom atom) {
+            Set<OWLNamedIndividual> inds=new HashSet<OWLNamedIndividual>();
+            for (SWRLArgument arg : atom.getAllArguments()) {
+                if (!(arg instanceof SWRLIndividualArgument)) throwVarError(atom);
+                OWLIndividual ind=((SWRLIndividualArgument)arg).getIndividual();
+                if (ind.isAnonymous()) throwAnonIndError(atom);
+                inds.add(ind.asNamedIndividual());
+            }
+            addFact(m_factory.getOWLSameIndividualAxiom(inds));
+        }
+        public void visit(SWRLDifferentIndividualsAtom atom) {
+            Set<OWLNamedIndividual> inds=new HashSet<OWLNamedIndividual>();
+            for (SWRLArgument arg : atom.getAllArguments()) {
+                if (!(arg instanceof SWRLIndividualArgument)) throwVarError(atom);
+                OWLIndividual ind=((SWRLIndividualArgument)arg).getIndividual();
+                if (ind.isAnonymous()) throwAnonIndError(atom);
+                inds.add(ind.asNamedIndividual());
+            }
+            addFact(m_factory.getOWLDifferentIndividualsAxiom(inds));
+        }
+        public void visit(SWRLLiteralVariable variable) {
+        }
+        public void visit(SWRLIndividualVariable nodevariable) {
+        }
+        public void visit(SWRLIndividualArgument argument) {
+        }
+        public void visit(SWRLLiteralArgument argument) {
+        }
+        protected void throwAnonIndError(SWRLAtom atom) {
+            throw new IllegalArgumentException("A SWRL rule contains a fact ("+atom+") with an anonymous individual, which is not allowed. ");
+        }
+        protected void throwVarError(SWRLAtom atom) {
+            throw new IllegalArgumentException("A SWRL rule contains a head atom (" + atom + ") with a variable that does not occur in the body. ");
+        }
+    }
 
     protected class RuleNormalizer implements SWRLObjectVisitor {
-        // As usual, only variables that occur in the antecedent of a rule may occur in the consequent (a condition usually referred to as "safety")
         protected final Collection<SWRLRule> m_rules;
         protected final Collection<OWLClassExpression[]> m_newInclusions;
+        protected final Collection<OWLDataRange[]> m_newDataRangeInclusions;
         protected final boolean[] m_alreadyExists;
+        protected SWRLAtom m_lastAtom;
         
-        public RuleNormalizer(Collection<OWLClassExpression[]> newInclusions, Collection<SWRLRule> rules) {
+        public RuleNormalizer(Collection<OWLClassExpression[]> newInclusions, Collection<OWLDataRange[]> newDataRangeInclusions, Collection<SWRLRule> rules) {
             m_rules=rules;
             m_newInclusions=newInclusions;
+            m_newDataRangeInclusions=newDataRangeInclusions;
             m_alreadyExists=new boolean[1];
         }
         
-        public void visit(SWRLRule node) {
-            for(SWRLAtom atom : node.getBody()) {
+        public void visit(SWRLRule rule) {
+            Set<SWRLAtom> bodyAtoms=new HashSet<SWRLAtom>();
+            Set<SWRLAtom> headAtoms=new HashSet<SWRLAtom>();
+            for(SWRLAtom atom : rule.getBody()) {
                 atom.accept(this);
+                bodyAtoms.add(m_lastAtom);
             }
-            for(SWRLAtom atom : node.getHead()) {
+            for(SWRLAtom atom : rule.getHead()) {
                 atom.accept(this);
+                headAtoms.add(m_lastAtom);
+            }
+            rule=m_factory.getSWRLRule(bodyAtoms, headAtoms);
+        }
+        public void visit(SWRLClassAtom atom) {
+            if (!isSimple(atom.getPredicate())) {
+                OWLClassExpression definition=getDefinitionFor(atom.getPredicate(),m_alreadyExists);
+                if (!m_alreadyExists[0]) 
+                    m_newInclusions.add(new OWLClassExpression[] {negative(definition),atom.getPredicate()});
+                m_lastAtom=m_factory.getSWRLClassAtom(definition, atom.getArgument());
+            } else {
+                m_lastAtom=atom;
             }
         }
-        public void visit(SWRLClassAtom node) {
-            OWLClassExpression definition=getDefinitionFor(node.getPredicate(),m_alreadyExists);
-            if (!m_alreadyExists[0]) 
-                m_newInclusions.add(new OWLClassExpression[] {negative(definition),node.getPredicate()});
-            node=m_factory.getSWRLClassAtom(definition, node.getArgument());
-        }
-        public void visit(SWRLDataRangeAtom node) {
+        public void visit(SWRLDataRangeAtom atom) {
+            OWLDataRange dr=atom.getPredicate();
+            if (!isLiteral(dr)) {
+                OWLDatatype definition=getDefinitionFor(dr,m_alreadyExists);
+                if (!m_alreadyExists[0])
+                    m_newDataRangeInclusions.add(new OWLDataRange[] { negative(definition),dr } );
+                m_lastAtom=m_factory.getSWRLDataRangeAtom(definition, atom.getArgument());
+            } else {
+                m_lastAtom=atom;
+            }
         }
         public void visit(SWRLObjectPropertyAtom node) {
             OWLObjectPropertyExpression ope=node.getPredicate();
             if (ope.getSimplified().isAnonymous()) {
-                node=m_factory.getSWRLObjectPropertyAtom(ope.getNamedProperty(), node.getSecondArgument(), node.getFirstArgument());
+                m_lastAtom=m_factory.getSWRLObjectPropertyAtom(ope.getNamedProperty(), node.getSecondArgument(), node.getFirstArgument());
             } else {
-                node=m_factory.getSWRLObjectPropertyAtom(ope.getSimplified(), node.getFirstArgument(), node.getSecondArgument());
+                m_lastAtom=m_factory.getSWRLObjectPropertyAtom(ope.getSimplified(), node.getFirstArgument(), node.getSecondArgument());
             }
         }
-        public void visit(SWRLDataPropertyAtom node) {
+        public void visit(SWRLDataPropertyAtom atom) {
+            if (atom.getSecondArgument() instanceof SWRLLiteralArgument) {
+                // convert to concept instead
+                OWLLiteral lit=((SWRLLiteralArgument)atom.getSecondArgument()).getLiteral();
+                OWLClassExpression ce=m_factory.getOWLDataSomeValuesFrom(atom.getPredicate(), m_factory.getOWLDataOneOf(lit));
+                OWLClassExpression definition=getDefinitionFor(ce,m_alreadyExists);
+                if (!m_alreadyExists[0])
+                    m_newInclusions.add(new OWLClassExpression[] { negative(definition),ce } );
+                m_lastAtom=m_factory.getSWRLClassAtom(definition, atom.getFirstArgument());
+            } else {
+                m_lastAtom=atom;
+            }
         }
-        public void visit(SWRLBuiltInAtom node) {
+        public void visit(SWRLBuiltInAtom atom) {
+            throw new UnsupportedOperationException("A SWRL rule uses built-in atom, but built-in atoms are not suported yet. ");
         }
-        public void visit(SWRLSameIndividualAtom node) {
+        public void visit(SWRLSameIndividualAtom atom) {
+            // nothing to do
         }
-        public void visit(SWRLDifferentIndividualsAtom node) {
+        public void visit(SWRLDifferentIndividualsAtom atom) {
+            // nothing to do
         }
-        public void visit(SWRLLiteralVariable node) {
+        public void visit(SWRLLiteralVariable variable) {
+            // nothing to do
         }
-        public void visit(SWRLIndividualVariable node) {
+        public void visit(SWRLIndividualVariable nodevariable) {
+            // nothing to do
         }
-        public void visit(SWRLIndividualArgument node) {
+        public void visit(SWRLIndividualArgument argument) {
+            // nothing to do
         }
-        public void visit(SWRLLiteralArgument node) {
+        public void visit(SWRLLiteralArgument argument) {
+            // nothing to do
         }
     }
     

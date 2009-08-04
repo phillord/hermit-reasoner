@@ -9,14 +9,14 @@ import junit.framework.TestSuite;
 public class FailingWGTestDebug {
     public static Test suite() throws Exception {
         WGTestRegistry wgTestRegistry=new WGTestRegistry();
-        TestSuite suite=new TestSuite("OWL WG Non-Rejected Tests");
+        TestSuite suite=new TestSuite("OWL WG Debugging Tests");
         for (WGTestDescriptor wgTestDescriptor : wgTestRegistry.getTestDescriptors())
-            if (wgTestDescriptor.isDLTest() && (wgTestDescriptor.status==WGTestDescriptor.Status.APPROVED || wgTestDescriptor.status==WGTestDescriptor.Status.PROPOSED || wgTestDescriptor.status==null)) {
-                if (wgTestDescriptor.identifier.startsWith("WebOnt-someValuesFrom-003")
+            //if (wgTestDescriptor.isDLTest() && (wgTestDescriptor.status==WGTestDescriptor.Status.APPROVED || wgTestDescriptor.status==WGTestDescriptor.Status.PROPOSED || wgTestDescriptor.status==null)) {
+                if (wgTestDescriptor.identifier.startsWith("WebOnt-allValuesFrom-002")
                 ) {
                     wgTestDescriptor.addTestsToSuite(suite);
                 }
-            }
+            //}
         return suite;
     }
 }

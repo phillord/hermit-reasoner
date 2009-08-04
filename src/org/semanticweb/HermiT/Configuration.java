@@ -27,7 +27,7 @@ public class Configuration implements Serializable,Cloneable {
     }
 
     public static enum BlockingStrategyType {
-        ANYWHERE,ANCESTOR,CORE,TWOPHASE
+        ANYWHERE,ANCESTOR //,CORE,TWOPHASE
     }
 
     public static enum BlockingSignatureCacheType {
@@ -35,7 +35,7 @@ public class Configuration implements Serializable,Cloneable {
     }
 
     public static enum ExistentialStrategyType {
-        CREATION_ORDER,EL,INDIVIDUAL_REUSE,LAZY
+        CREATION_ORDER,EL,INDIVIDUAL_REUSE //,LAZY
     }
 
     public WarningMonitor warningMonitor;

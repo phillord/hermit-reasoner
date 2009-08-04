@@ -2,7 +2,6 @@ package org.semanticweb.HermiT.blocking;
 
 import java.io.Serializable;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -60,6 +59,8 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
     protected int maxNodes = 0;
     protected long sumNodes = 0;
     protected int run = 1;
+    protected int numDirectlyBlocked=0;
+    protected int numIndirectlyBlocked=0;
     
     public AnywhereCoreBlocking(DirectBlockingChecker directBlockingChecker, Map<AtomicConcept, Set<Set<Concept>>> unaryValidBlockConditions, Map<Set<AtomicConcept>, Set<Set<Concept>>> nAryValidBlockConditions, boolean hasInverses) {
         m_directBlockingChecker=directBlockingChecker;
@@ -126,33 +127,33 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
 //        }
 //        return node.isBlocked();
 //    }
-    protected void blockChildren(Node node) {
-        List<Node> children=new ArrayList<Node>();
-        m_ternaryTableSearchOneBound.getBindingsBuffer()[1]=node;
-        m_ternaryTableSearchOneBound.open();
-        Object[] tupleBuffer=m_ternaryTableSearchOneBound.getTupleBuffer();
-        while (!m_ternaryTableSearchOneBound.afterLast()) {
-            Node possibleChild=(Node)tupleBuffer[2];
-            if (possibleChild.getParent()==node) {
-                children.add(possibleChild);
-            }
-            m_ternaryTableSearchOneBound.next();
-        }
-        m_ternaryTableSearchTwoBound.getBindingsBuffer()[2]=node;
-        m_ternaryTableSearchTwoBound.open();
-        tupleBuffer=m_ternaryTableSearchTwoBound.getTupleBuffer();
-        while (!m_ternaryTableSearchTwoBound.afterLast()) {
-            Node possibleChild=(Node)tupleBuffer[1];
-            if (possibleChild.getParent()==node) {
-                children.add(possibleChild);
-            }
-            m_ternaryTableSearchTwoBound.next();
-        }
-        for (Node child : children) {
-            child.setBlocked(node, false);
-            blockChildren(child);
-        }
-    } 
+//    protected void blockChildren(Node node) {
+//        List<Node> children=new ArrayList<Node>();
+//        m_ternaryTableSearchOneBound.getBindingsBuffer()[1]=node;
+//        m_ternaryTableSearchOneBound.open();
+//        Object[] tupleBuffer=m_ternaryTableSearchOneBound.getTupleBuffer();
+//        while (!m_ternaryTableSearchOneBound.afterLast()) {
+//            Node possibleChild=(Node)tupleBuffer[2];
+//            if (possibleChild.getParent()==node) {
+//                children.add(possibleChild);
+//            }
+//            m_ternaryTableSearchOneBound.next();
+//        }
+//        m_ternaryTableSearchTwoBound.getBindingsBuffer()[2]=node;
+//        m_ternaryTableSearchTwoBound.open();
+//        tupleBuffer=m_ternaryTableSearchTwoBound.getTupleBuffer();
+//        while (!m_ternaryTableSearchTwoBound.afterLast()) {
+//            Node possibleChild=(Node)tupleBuffer[1];
+//            if (possibleChild.getParent()==node) {
+//                children.add(possibleChild);
+//            }
+//            m_ternaryTableSearchTwoBound.next();
+//        }
+//        for (Node child : children) {
+//            child.setBlocked(node, false);
+//            blockChildren(child);
+//        }
+//    } 
     public void computeBlocking(boolean finalChance) {
         computePreBlocking(null);
         if (finalChance) {
@@ -184,9 +185,13 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
                         Node parent=node.getParent();
                         if (parent==null)
                             node.setBlocked(null,false); // no parent means it cannot be blocked and cannot be blocker
-                        else if (parent.isBlocked()) // parent is guaranteed not to change it's status in this computation since we process nodes in creation order and parent is smaller
+                        else if (parent.isBlocked()) {// parent is guaranteed not to change it's status in this computation since we process nodes in creation order and parent is smaller
+                            if (node.getBlocker() == null) {
+                                // previously not blocked
+                                numIndirectlyBlocked++;
+                            }
                             node.setBlocked(parent,false);
-                        else {
+                        } else {
                             Node blocker;
                             Node previousBlocker=node.getBlocker();
                             if (m_immediatelyValidateBlocks) {
@@ -194,8 +199,15 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
                             } else {
                                 blocker = m_currentBlockersCache.getSmallestPossibleBlocker(node);
                             }
-                            if (previousBlocker!=null&&blocker==null || previousBlocker==null&&blocker!=null)
+                            if (previousBlocker!=null&&blocker==null) {
                                 numBlockersChanged++;
+                                if (node.isDirectlyBlocked()) numDirectlyBlocked--;
+                                else numIndirectlyBlocked--;
+                            } 
+                            if (previousBlocker==null&&blocker!=null) {
+                                numBlockersChanged++;
+                                numDirectlyBlocked++;
+                            }
                             // get Blocker will always return a node with lower id and that only if all nodes in the cache with this core have a node ID that is smaller than this one  
                             // note that we removed only nodes from the cache that are of order higher than the first changed element
                             // only nodes of lower order than this one can be blockers and all those have already been looked at in this computation or 
@@ -212,6 +224,7 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
                 node=node.getNextTableauNode();
             }
             //if (printingOn) System.out.println("Num of changed blockers: " + numBlockersChanged);
+            if (printingOn) System.out.println("Num nodes/dBlocked/indBlocked: " + (m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes()) + "/" + numDirectlyBlocked + "/" + numIndirectlyBlocked);
             m_firstChangedNode=null;
         }
     }
@@ -226,7 +239,8 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
             Node node = m_lastValidatedUnchangedNode==null?m_tableau.getFirstTableauNode():m_lastValidatedUnchangedNode;
             if (m_firstChangedNode!=null&&m_firstChangedNode.getNodeID()<node.getNodeID()) node=m_firstChangedNode;
             int activeNodes=m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes();
-            if (printingOn) System.out.print("Validate blocks (active nodes: "+activeNodes+", number of node that need validation: "+(m_tableau.getNumberOfNodesInTableau()-node.getNodeID())+") ...");
+            if (printingOn) System.out.println("Validate blocks (active nodes: "+activeNodes+", highest nodeID: " + m_tableau.getNumberOfNodeCreations() + ", smallest node to validate: "+ node.getNodeID()+") ...");
+            if (printingOn && m_tableau.getNumberOfNodesInTableau() >= 1000) System.out.print("Current ID:");
             while (node!=null) {
                 if (node.isActive() && node.isBlocked()) {
                     // check whether the block is a correct one
@@ -260,8 +274,10 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
                         m_currentBlockersCache.addNode(node);
                 }
                 m_lastValidatedUnchangedNode=node;
+                if (printingOn && node.getNodeID() % 1000 == 0) System.out.print(" " + node.getNodeID());
                 node=node.getNextTableauNode();
             }
+            if (printingOn) System.out.println("");
             // if set to some node, then computePreblocking will be asked to check from that node onwards in case of invalid blocks 
             m_firstChangedNode=null;
             if (printingOn) System.out.println("Checked " + checkedBlocks + " blocked nodes of which " + invalidBlocks + " were invalid.");
@@ -273,12 +289,12 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
         // that is we can create a model from the block by unravelling
         
         SortedSet<Node> possibleValidBlockers = m_currentBlockersCache.getPossibleBlockers(blocked);
-        Node greatestInvalidBlocker = ((SinglePreCoreBlockingObject)blocked.getBlockingObject()).m_greatestInvalidBlocker;
-        if (greatestInvalidBlocker != null) {
-            possibleValidBlockers = new TreeSet<Node>(possibleValidBlockers.tailSet(greatestInvalidBlocker));
-            possibleValidBlockers.remove(greatestInvalidBlocker);
-            if (possibleValidBlockers.isEmpty()) return null;
-        }
+//        Node greatestInvalidBlocker = ((SinglePreCoreBlockingObject)blocked.getBlockingObject()).m_greatestInvalidBlocker;
+//        if (greatestInvalidBlocker != null) {
+//            possibleValidBlockers = new TreeSet<Node>(possibleValidBlockers.tailSet(greatestInvalidBlocker));
+//            possibleValidBlockers.remove(greatestInvalidBlocker);
+//            if (possibleValidBlockers.isEmpty()) return null;
+//        }
         
         Set<AtomicConcept> blockedLabel = ((SinglePreCoreBlockingObject)blocked.getBlockingObject()).getAtomicConceptLabel();
         Set<AtomicConcept> blockedParentLabel = ((SinglePreCoreBlockingObject)blocked.getParent().getBlockingObject()).getAtomicConceptLabel();
@@ -298,7 +314,7 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
                     blockerIsSuitable = false;
             }
             // check top, which is not explicitly present in the label, but might be the premise of some constraint
-            if (m_unaryValidBlockConditions.containsKey(AtomicConcept.THING) && !isBlockedParentSuitable(m_unaryValidBlockConditions.get(AtomicConcept.THING), blocked, blocked.getParent(), blockerLabel, blockerParentLabel, blockedLabel, blockedParentLabel)) 
+            if (blockerIsSuitable && m_unaryValidBlockConditions.containsKey(AtomicConcept.THING) && !isBlockedParentSuitable(m_unaryValidBlockConditions.get(AtomicConcept.THING), blocked, blocked.getParent(), blockerLabel, blockerParentLabel, blockedLabel, blockedParentLabel)) 
                 blockerIsSuitable = false;
             
             // repeat the same checks for non-unary premises (less efficient matching operations)
@@ -318,7 +334,7 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
                 }
             }
             // check top, which is not explicitly present in the label, but might be the premise of some constraint
-            if (m_unaryValidBlockConditions.containsKey(AtomicConcept.THING) && !isBlockerSuitable(m_unaryValidBlockConditions.get(AtomicConcept.THING), possibleBlocker, possibleBlocker.getParent(), blocked, blocked.getParent(), blockerLabel, blockerParentLabel, blockedLabel, blockedParentLabel)) {    
+            if (blockerIsSuitable && m_unaryValidBlockConditions.containsKey(AtomicConcept.THING) && !isBlockerSuitable(m_unaryValidBlockConditions.get(AtomicConcept.THING), possibleBlocker, possibleBlocker.getParent(), blocked, blocked.getParent(), blockerLabel, blockerParentLabel, blockedLabel, blockedParentLabel)) {    
                 blockerIsSuitable = false;
             }
             // repeat the same checks for non-unary premises (less efficient matching operations)
@@ -330,9 +346,10 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
             }
             if (blockerIsSuitable) {
                 return possibleBlocker;
-            } else {
-                ((SinglePreCoreBlockingObject)blocked.getBlockingObject()).m_greatestInvalidBlocker=possibleBlocker;
-            }
+            } 
+//            else {
+//                ((SinglePreCoreBlockingObject)blocked.getBlockingObject()).m_greatestInvalidBlocker=possibleBlocker;
+//            }
             blockerIsSuitable=true;
             // else try alternative blockers with the same core
         }
@@ -356,9 +373,9 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
                 } else if (disjunct instanceof AtMostConcept) {
                     // (<= n r.B) must hold at blockedParent, therefore, ar(r, blockedParent, blocked) in ABox and B(blocked) not in ABox implies B(blocker) not in ABox
                     // to avoid table lookup, we check: not B(blocked) and B(blocker) implies not ar(r, blockedParent, blocked)
-                    AtMostConcept atMost = (AtMostConcept)disjunct;
-                    Role r = atMost.getOnRole();
-                    LiteralConcept filler = atMost.getToConcept();
+                    AtMostConcept atMost = (AtMostConcept)disjunct; //<= 0 r.not def:4
+                    Role r = atMost.getOnRole(); // r
+                    LiteralConcept filler = atMost.getToConcept(); //not def:4
                     if (!isInLabel(filler, blockedLabel) && isInLabel(filler, blockerLabel) && isInABox(r, blockedParent, blocked)) {
                         disjunctSatisfied = false;
                     }
@@ -526,8 +543,12 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
         if (c.isAlwaysFalse()) {
             return false;
         }
-        if (c instanceof AtomicConcept && nodeLabel.contains((AtomicConcept) c)) return true;
-        if (c instanceof AtomicNegationConcept && (!nodeLabel.contains(((AtomicNegationConcept) c).getNegatedAtomicConcept()))) return true;
+        if (c instanceof AtomicConcept && nodeLabel.contains((AtomicConcept) c)) {
+            return true;
+        }
+        if (c instanceof AtomicNegationConcept && (!nodeLabel.contains(((AtomicNegationConcept) c).getNegatedAtomicConcept()))) {
+            return true;
+        }
         return false;
     }
     public boolean isPermanentAssertion(Concept concept,Node node) {
@@ -587,7 +608,15 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
     }
     public void modelFound() {
         if (printingOn) printStatistics(false);
-        System.out.println("Found  model with " + (m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes()) + " nodes. ");
+        System.out.println("Found model with " + (m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes()) + " nodes. ");
+        Node node=m_tableau.getFirstTableauNode();
+        while (node!=null) {
+            if (node.isActive() && node.isBlocked()) 
+                System.out.println("Node " + node.getNodeID() + " is " + (node.isDirectlyBlocked()?"directly":"indirectly") + " blocked by node " + node.getBlocker().getNodeID());
+            node=node.getNextTableauNode();
+        }
+        m_lastValidatedUnchangedNode=null;
+        validateBlocks(null);
     }
     protected void printStatistics(boolean intermediate) {
         if (!intermediate) run++;
@@ -878,36 +907,42 @@ class CoreBlockersCache implements Serializable {
                 if (hashCode==entry.m_hashCode && m_directBlockingChecker.isBlockedBy(entry.m_nodes.first(),node)) {
                     // We block only with nodes that have a smaller ID than the node that is to be blocked
                     // so return the head set
-                    if (node.getBlockingObject()!=null) {
-                        Node greatestInvalidBlocker=((SinglePreCoreBlockingObject)node.getBlockingObject()).m_greatestInvalidBlocker;
-                        if (greatestInvalidBlocker != null) {
-                            SortedSet<Node> possibleValidBlockers = new TreeSet<Node>(entry.m_nodes.tailSet(greatestInvalidBlocker));
-                            possibleValidBlockers.remove(greatestInvalidBlocker);
-                            return possibleValidBlockers;
-                        } 
+                    if (entry.m_nodes.contains(node)) {
+                        SortedSet<Node> possibleValidBlockers = new TreeSet<Node>(entry.m_nodes.tailSet(node));
+                        possibleValidBlockers.remove(node);
+                        return possibleValidBlockers;
+                    } else {
+//                    if (node.getBlockingObject()!=null) {
+//                        Node greatestInvalidBlocker=((SinglePreCoreBlockingObject)node.getBlockingObject()).m_greatestInvalidBlocker;
+//                        if (greatestInvalidBlocker != null) {
+//                            SortedSet<Node> possibleValidBlockers = new TreeSet<Node>(entry.m_nodes.tailSet(greatestInvalidBlocker));
+//                            possibleValidBlockers.remove(greatestInvalidBlocker);
+//                            return possibleValidBlockers;
+//                        } 
+//                    }
+                        return entry.m_nodes;
                     }
-                    return entry.m_nodes;
                 }
                 entry=entry.m_nextEntry;
             }
         }
         return new TreeSet<Node>(NodeIDComparator.INSTANCE);
     }
-    public SortedSet<Node> getPossibleBlockersLazy(Node node) {
-        assert m_directBlockingChecker.canBeBlocked(node) == true;
-        int hashCode=m_directBlockingChecker.blockingHashCode(node);
-        int bucketIndex=getIndexFor(hashCode,m_buckets.length);
-        CacheEntry entry=m_buckets[bucketIndex];
-        while (entry!=null) {
-            if (hashCode==entry.m_hashCode && m_directBlockingChecker.isBlockedBy(entry.m_nodes.first(),node)) {
-                // We block only with nodes that have a smaller ID than the node that is to be blocked
-                // so return the head set
-                return new TreeSet<Node>(entry.m_nodes.headSet(node));
-            }
-            entry=entry.m_nextEntry;
-        }
-        return new TreeSet<Node>(NodeIDComparator.INSTANCE);
-    }
+//    public SortedSet<Node> getPossibleBlockersLazy(Node node) {
+//        assert m_directBlockingChecker.canBeBlocked(node) == true;
+//        int hashCode=m_directBlockingChecker.blockingHashCode(node);
+//        int bucketIndex=getIndexFor(hashCode,m_buckets.length);
+//        CacheEntry entry=m_buckets[bucketIndex];
+//        while (entry!=null) {
+//            if (hashCode==entry.m_hashCode && m_directBlockingChecker.isBlockedBy(entry.m_nodes.first(),node)) {
+//                // We block only with nodes that have a smaller ID than the node that is to be blocked
+//                // so return the head set
+//                return new TreeSet<Node>(entry.m_nodes.headSet(node));
+//            }
+//            entry=entry.m_nextEntry;
+//        }
+//        return new TreeSet<Node>(NodeIDComparator.INSTANCE);
+//    }
     protected static int getIndexFor(int hashCode,int tableLength) {
         hashCode+=~(hashCode << 9);
         hashCode^=(hashCode >>> 14);

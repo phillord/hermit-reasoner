@@ -23,23 +23,17 @@ import java.util.Map;
 import java.util.Set;
 
 import org.protege.editor.owl.model.inference.ProtegeOWLReasonerFactoryAdapter;
-import org.semanticweb.HermiT.Configuration.BlockingStrategyType;
 import org.semanticweb.HermiT.blocking.AncestorBlocking;
 import org.semanticweb.HermiT.blocking.AnywhereBlocking;
-import org.semanticweb.HermiT.blocking.AnywhereCoreBlocking;
-import org.semanticweb.HermiT.blocking.AnywhereTwoPhaseBlocking;
 import org.semanticweb.HermiT.blocking.BlockingSignatureCache;
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
-import org.semanticweb.HermiT.blocking.CorePreDirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.DirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.SingleDirectBlockingChecker;
-import org.semanticweb.HermiT.blocking.TwoPhaseDirectBlockingChecker;
 import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
 import org.semanticweb.HermiT.existentials.ExistentialExpansionStrategy;
 import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
-import org.semanticweb.HermiT.existentials.LazyStrategy;
 import org.semanticweb.HermiT.hierarchy.DeterministicHierarchyBuilder;
 import org.semanticweb.HermiT.hierarchy.Hierarchy;
 import org.semanticweb.HermiT.hierarchy.HierarchyBuilder;
@@ -49,7 +43,6 @@ import org.semanticweb.HermiT.hierarchy.SubsumptionCache;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
-import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
@@ -1481,18 +1474,19 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             tableauMonitor=new TableauMonitorFork(wellKnownTableauMonitor,config.monitor);
 
         DirectBlockingChecker directBlockingChecker=null;
+        boolean useOnlyCore=false; //config.blockingStrategyType==BlockingStrategyType.CORE
         switch (config.directBlockingType) {
         case OPTIMAL:
             if (dlOntology.hasAtMostRestrictions() && dlOntology.hasInverseRoles())
-                directBlockingChecker=new PairWiseDirectBlockingChecker(config.blockingStrategyType==BlockingStrategyType.CORE);
+                directBlockingChecker=new PairWiseDirectBlockingChecker(useOnlyCore);
             else
-                directBlockingChecker=new SingleDirectBlockingChecker(config.blockingStrategyType==BlockingStrategyType.CORE);
+                directBlockingChecker=new SingleDirectBlockingChecker(useOnlyCore);
             break;
         case SINGLE:
-            directBlockingChecker=new SingleDirectBlockingChecker(config.blockingStrategyType==BlockingStrategyType.CORE);
+            directBlockingChecker=new SingleDirectBlockingChecker(useOnlyCore);
             break;
         case PAIR_WISE:
-            directBlockingChecker=new PairWiseDirectBlockingChecker(config.blockingStrategyType==BlockingStrategyType.CORE);
+            directBlockingChecker=new PairWiseDirectBlockingChecker(useOnlyCore);
             break;
         default:
             throw new IllegalArgumentException("Unknown direct blocking type.");
@@ -1514,12 +1508,12 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
 
         BlockingStrategy blockingStrategy=null;
         switch (config.blockingStrategyType) {
-        case CORE:
-            blockingStrategy=new AnywhereCoreBlocking(new CorePreDirectBlockingChecker(),dlOntology.getUnaryValidBlockConditions(),dlOntology.getNAryValidBlockConditions(),dlOntology.hasInverseRoles());
-            break;
-        case TWOPHASE:
-            blockingStrategy=new AnywhereTwoPhaseBlocking(new TwoPhaseDirectBlockingChecker(),dlOntology.getUnaryValidBlockConditions(),dlOntology.getNAryValidBlockConditions(),dlOntology.hasInverseRoles());
-            break;
+//        case CORE:
+//            blockingStrategy=new AnywhereCoreBlocking(new CorePreDirectBlockingChecker(),dlOntology.getUnaryValidBlockConditions(),dlOntology.getNAryValidBlockConditions(),dlOntology.hasInverseRoles());
+//            break;
+//        case TWOPHASE:
+//            blockingStrategy=new AnywhereTwoPhaseBlocking(new TwoPhaseDirectBlockingChecker(),dlOntology.getUnaryValidBlockConditions(),dlOntology.getNAryValidBlockConditions(),dlOntology.hasInverseRoles());
+//            break;
         case ANCESTOR:
             blockingStrategy=new AncestorBlocking(directBlockingChecker,blockingSignatureCache);
             break;
@@ -1541,12 +1535,12 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         case INDIVIDUAL_REUSE:
             existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,false);
             break;
-        case LAZY: 
-            if (config.blockingStrategyType!=BlockingStrategyType.CORE) {
-                throw new IllegalArgumentException("Lazy expansion can only be used with core blocking. ");
-            }
-            existentialsExpansionStrategy=new LazyStrategy(blockingStrategy);
-            break;    
+//        case LAZY: 
+//            if (config.blockingStrategyType!=BlockingStrategyType.CORE) {
+//                throw new IllegalArgumentException("Lazy expansion can only be used with core blocking. ");
+//            }
+//            existentialsExpansionStrategy=new LazyStrategy(blockingStrategy);
+//            break;    
         default:
             throw new IllegalArgumentException("Unknown expansion strategy type.");
         }
@@ -1631,11 +1625,11 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             boolean hasAtMostRestrictions=originalDLOntology.hasAtMostRestrictions() || newDLOntology.hasAtMostRestrictions();
             boolean hasNominals=originalDLOntology.hasNominals() || newDLOntology.hasNominals();
             boolean hasDatatypes=originalDLOntology.hasDatatypes() || newDLOntology.hasDatatypes();
-            if (config.blockingStrategyType==Configuration.BlockingStrategyType.CORE || config.blockingStrategyType==Configuration.BlockingStrategyType.TWOPHASE) {
-                Map<AtomicConcept,Set<Set<Concept>>> unaryValidBlockConditions=createUnion(originalDLOntology.getUnaryValidBlockConditions(),newDLOntology.getUnaryValidBlockConditions());
-                Map<Set<AtomicConcept>,Set<Set<Concept>>> nAryValidBlockConditions=createUnion(originalDLOntology.getNAryValidBlockConditions(),newDLOntology.getNAryValidBlockConditions());
-                return new DLOntology(resultingOntologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,atomicObjectRoles,atomicDataRoles,definedDatatypeIRIs,individuals,hasInverseRoles,hasAtMostRestrictions,hasNominals,hasDatatypes,unaryValidBlockConditions,nAryValidBlockConditions);
-            }
+//            if (config.blockingStrategyType==Configuration.BlockingStrategyType.CORE || config.blockingStrategyType==Configuration.BlockingStrategyType.TWOPHASE) {
+//                Map<AtomicConcept,Set<Set<Concept>>> unaryValidBlockConditions=createUnion(originalDLOntology.getUnaryValidBlockConditions(),newDLOntology.getUnaryValidBlockConditions());
+//                Map<Set<AtomicConcept>,Set<Set<Concept>>> nAryValidBlockConditions=createUnion(originalDLOntology.getNAryValidBlockConditions(),newDLOntology.getNAryValidBlockConditions());
+//                return new DLOntology(resultingOntologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,atomicObjectRoles,atomicDataRoles,definedDatatypeIRIs,individuals,hasInverseRoles,hasAtMostRestrictions,hasNominals,hasDatatypes,unaryValidBlockConditions,nAryValidBlockConditions);
+//            }
             return new DLOntology(resultingOntologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,atomicObjectRoles,atomicDataRoles,definedDatatypeIRIs,individuals,hasInverseRoles,hasAtMostRestrictions,hasNominals,hasDatatypes);
         }
         catch (OWLException shouldntHappen) {
