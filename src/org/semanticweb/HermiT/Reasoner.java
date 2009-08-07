@@ -1318,13 +1318,19 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             if (!direct)
                 for (HierarchyNode<AtomicConcept> descendantNode : hierarchyNode.getDescendantNodes())
                     loadIndividualsOfNode(descendantNode,result,factory);
-            for (HierarchyNode<AtomicConcept> parentNode : hierarchyNode.getParentNodes()) {
-                AtomicConcept parentAtomicConcept=parentNode.getEquivalentElements().iterator().next();
-                Set<Individual> realizationForParentConcept=m_realization.get(parentAtomicConcept);
-                if (realizationForParentConcept!=null)
-                    for (Individual individual : realizationForParentConcept)
-                        if (tableau.isInstanceOf(queryConcept,individual))
-                            result.add(factory.getOWLNamedIndividual(IRI.create(individual.getIRI())));
+            Set<HierarchyNode<AtomicConcept>> visitedNodes=new HashSet<HierarchyNode<AtomicConcept>>(hierarchyNode.getChildNodes());
+            List<HierarchyNode<AtomicConcept>> toVisit=new ArrayList<HierarchyNode<AtomicConcept>>(hierarchyNode.getParentNodes());
+            while (!toVisit.isEmpty()) {
+                HierarchyNode<AtomicConcept> node=toVisit.remove(toVisit.size()-1);
+                if (visitedNodes.add(node)) {
+                    AtomicConcept nodeAtomicConcept=node.getEquivalentElements().iterator().next();
+                    Set<Individual> realizationForNodeConcept=m_realization.get(nodeAtomicConcept);
+                    if (realizationForNodeConcept!=null)
+                        for (Individual individual : realizationForNodeConcept)
+                            if (tableau.isInstanceOf(queryConcept,individual))
+                                result.add(factory.getOWLNamedIndividual(IRI.create(individual.getIRI())));
+                    toVisit.addAll(node.getChildNodes());
+                }
             }
             return result;
         }

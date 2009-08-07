@@ -52,12 +52,12 @@ public class DerivationHistory extends TableauMonitorAdapter {
     public void dlClauseMatchedStarted(DLClauseEvaluator dlClauseEvaluator,int dlClauseIndex) {
         Atom[] premises=new Atom[dlClauseEvaluator.getBodyLength()];
         // ask Boris whether nonCountingAtoms fix is as intended
-        int nonCountingAtoms=0;
+        int irregularBodyAtomsNumber=0;
         for (int index=0;index<premises.length;index++) {
-            if (dlClauseEvaluator.getBodyAtom(index).getDLPredicate() instanceof NodeIDLessEqualThan || dlClauseEvaluator.getBodyAtom(index).getDLPredicate() instanceof NodeIDsAscendingOrEqual) {
-                nonCountingAtoms++;
-            }
-            premises[index-nonCountingAtoms]=getAtom(dlClauseEvaluator.getTupleMatchedToBody(index-nonCountingAtoms));
+            DLPredicate dlPredicate=dlClauseEvaluator.getBodyAtom(index).getDLPredicate();
+            if (dlPredicate instanceof NodeIDLessEqualThan || dlPredicate instanceof NodeIDsAscendingOrEqual)
+                irregularBodyAtomsNumber++;
+            premises[index-irregularBodyAtomsNumber]=getAtom(dlClauseEvaluator.getTupleMatchedToBody(index-irregularBodyAtomsNumber));
         }
         m_derivations.push(new DLClauseApplication(dlClauseEvaluator.getDLClause(dlClauseIndex),premises));
     }
