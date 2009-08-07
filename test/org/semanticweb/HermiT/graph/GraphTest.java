@@ -28,75 +28,75 @@ public class GraphTest extends AbstractReasonerTest {
         m_descriptionGraphs = new HashSet<DescriptionGraph>();
     }
 
-    public void testTransClosure() throws Exception {
-        Graph<Integer> g = new Graph<Integer>();
-        add(g, 0, 1);
-        add(g, 1, 2);
-        add(g, 2, 9);
-        add(g, 9, 8);
-        add(g, 8, 7);
-        add(g, 7, 6);
-        g.transitivelyClose();
-
-        assertContainsAll(g.getSuccessors(0), 1, 2, 6, 7, 8, 9);
-        assertContainsAll(g.getSuccessors(1), 2, 6, 7, 8, 9);
-        assertContainsAll(g.getSuccessors(2), 6, 7, 8, 9);
-        assertContainsAll(g.getSuccessors(9), 6, 7, 8);
-        assertContainsAll(g.getSuccessors(8), 6, 7);
-        assertContainsAll(g.getSuccessors(7), 6);
-    }
-
-    public void testGraphMerging() throws Exception {
-        DescriptionGraph graph = G(new String[] { GraphTest.NS+"A", // 0
-                GraphTest.NS+"B", // 1
-                GraphTest.NS+"C", // 2
-        }, new DescriptionGraph.Edge[] { E(GraphTest.NS+"R", 0, 1), E(GraphTest.NS+"R", 1, 2), },
-                new String[] { GraphTest.NS+"A", GraphTest.NS+"B", GraphTest.NS+"C", });
-        m_descriptionGraphs.add(graph);
-        Tableau tableau = getTableau(m_descriptionGraphs);
-        tableau.clear();
-        ExtensionManager extensionManager = tableau.getExtensionManager();
-        DependencySet emptySet = tableau.getDependencySetFactory().emptySet();
-        Node n1 = tableau.createNewNamedNode(emptySet);
-        Node n2 = tableau.createNewNamedNode(emptySet);
-        Node n3 = tableau.createNewNamedNode(emptySet);
-        Node n4 = tableau.createNewNamedNode(emptySet);
-        Node n5 = tableau.createNewNamedNode(emptySet);
-        Node n6 = tableau.createNewNamedNode(emptySet);
-        AtomicConcept r = AtomicConcept.create(GraphTest.NS+"R");
-        AtomicConcept s = AtomicConcept.create(GraphTest.NS+"S");
-        extensionManager.addTuple(new Object[] { graph, n1, n2, n3 }, emptySet, true);
-        extensionManager.addTuple(new Object[] { graph, n4, n5, n6 }, emptySet, true);
-        extensionManager.addConceptAssertion(r, n1, emptySet, true);
-        extensionManager.addConceptAssertion(s, n6, emptySet, true);
-
-        // The following tuple should make the existing two tuples to merge
-        Node n7 = tableau.createNewNamedNode(emptySet);
-        extensionManager.addTuple(new Object[] { graph, n1, n7, n6 }, emptySet, true);
-
-        // No merging should occur automatically
-        assertTrue(extensionManager.containsTuple(new Object[] { graph, n1, n2, n3 }));
-        assertTrue(extensionManager.containsTuple(new Object[] { graph, n4, n5, n6 }));
-        assertTrue(extensionManager.containsTuple(new Object[] { graph, n1, n7, n6 }));
-
-        // Merging occurs only if we start the saturation
-        assertTrue(tableau.isSatisfiable());
-
-        // Now do the checking
-        assertSame(n1, n1.getCanonicalNode());
-        assertSame(n7, n2.getCanonicalNode());
-        assertSame(n6, n3.getCanonicalNode());
-        assertSame(n1, n4.getCanonicalNode());
-        assertSame(n7, n5.getCanonicalNode());
-        assertSame(n6, n6.getCanonicalNode());
-        assertSame(n7, n7.getCanonicalNode());
-//        assertContainsAll(n1.getPositiveLabel(), r);
-//        assertContainsAll(n5.getPositiveLabel());
-//        assertContainsAll(n6.getPositiveLabel(), s);
-
-        assertTrue(extensionManager.containsTuple(new Object[] { graph, n1, n7, n6 }));
-    }
-    
+//    public void testTransClosure() throws Exception {
+//        Graph<Integer> g = new Graph<Integer>();
+//        add(g, 0, 1);
+//        add(g, 1, 2);
+//        add(g, 2, 9);
+//        add(g, 9, 8);
+//        add(g, 8, 7);
+//        add(g, 7, 6);
+//        g.transitivelyClose();
+//
+//        assertContainsAll(g.getSuccessors(0), 1, 2, 6, 7, 8, 9);
+//        assertContainsAll(g.getSuccessors(1), 2, 6, 7, 8, 9);
+//        assertContainsAll(g.getSuccessors(2), 6, 7, 8, 9);
+//        assertContainsAll(g.getSuccessors(9), 6, 7, 8);
+//        assertContainsAll(g.getSuccessors(8), 6, 7);
+//        assertContainsAll(g.getSuccessors(7), 6);
+//    }
+//
+//    public void testGraphMerging() throws Exception {
+//        DescriptionGraph graph = G(new String[] { GraphTest.NS+"A", // 0
+//                GraphTest.NS+"B", // 1
+//                GraphTest.NS+"C", // 2
+//        }, new DescriptionGraph.Edge[] { E(GraphTest.NS+"R", 0, 1), E(GraphTest.NS+"R", 1, 2), },
+//                new String[] { GraphTest.NS+"A", GraphTest.NS+"B", GraphTest.NS+"C", });
+//        m_descriptionGraphs.add(graph);
+//        Tableau tableau = getTableau(m_descriptionGraphs);
+//        tableau.clear();
+//        ExtensionManager extensionManager = tableau.getExtensionManager();
+//        DependencySet emptySet = tableau.getDependencySetFactory().emptySet();
+//        Node n1 = tableau.createNewNamedNode(emptySet);
+//        Node n2 = tableau.createNewNamedNode(emptySet);
+//        Node n3 = tableau.createNewNamedNode(emptySet);
+//        Node n4 = tableau.createNewNamedNode(emptySet);
+//        Node n5 = tableau.createNewNamedNode(emptySet);
+//        Node n6 = tableau.createNewNamedNode(emptySet);
+//        AtomicConcept r = AtomicConcept.create(GraphTest.NS+"R");
+//        AtomicConcept s = AtomicConcept.create(GraphTest.NS+"S");
+//        extensionManager.addTuple(new Object[] { graph, n1, n2, n3 }, emptySet, true);
+//        extensionManager.addTuple(new Object[] { graph, n4, n5, n6 }, emptySet, true);
+//        extensionManager.addConceptAssertion(r, n1, emptySet, true);
+//        extensionManager.addConceptAssertion(s, n6, emptySet, true);
+//
+//        // The following tuple should make the existing two tuples to merge
+//        Node n7 = tableau.createNewNamedNode(emptySet);
+//        extensionManager.addTuple(new Object[] { graph, n1, n7, n6 }, emptySet, true);
+//
+//        // No merging should occur automatically
+//        assertTrue(extensionManager.containsTuple(new Object[] { graph, n1, n2, n3 }));
+//        assertTrue(extensionManager.containsTuple(new Object[] { graph, n4, n5, n6 }));
+//        assertTrue(extensionManager.containsTuple(new Object[] { graph, n1, n7, n6 }));
+//
+//        // Merging occurs only if we start the saturation
+//        assertTrue(tableau.isSatisfiable());
+//
+//        // Now do the checking
+//        assertSame(n1, n1.getCanonicalNode());
+//        assertSame(n7, n2.getCanonicalNode());
+//        assertSame(n6, n3.getCanonicalNode());
+//        assertSame(n1, n4.getCanonicalNode());
+//        assertSame(n7, n5.getCanonicalNode());
+//        assertSame(n6, n6.getCanonicalNode());
+//        assertSame(n7, n7.getCanonicalNode());
+////        assertContainsAll(n1.getPositiveLabel(), r);
+////        assertContainsAll(n5.getPositiveLabel());
+////        assertContainsAll(n6.getPositiveLabel(), s);
+//
+//        assertTrue(extensionManager.containsTuple(new Object[] { graph, n1, n7, n6 }));
+//    }
+//    
     public void testContradictionOnGraph() throws Exception {
         DescriptionGraph graph=G(
             new String[] {

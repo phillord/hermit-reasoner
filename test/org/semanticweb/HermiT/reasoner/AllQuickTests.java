@@ -23,6 +23,7 @@ public class AllQuickTests extends TestCase {
         suite.addTestSuite(EntailmentTest.class);
         suite.addTestSuite(RIARegularityTest.class);
         suite.addTestSuite(SimpleRolesTest.class);
+        suite.addTestSuite(RulesTest.class);
         // $JUnit-END$
         return suite;
     }

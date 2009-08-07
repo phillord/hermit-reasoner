@@ -1041,8 +1041,7 @@ public class OWLNormalization {
             }
             // normalize data range heads atoms (not(DR1 and DR2))(y) to freshDatatype(y) and a datatype def D(x) -> (not(DR1 and DR2))(x) 
             for (SWRLLiteralVariable var : dataRangeAtoms.keySet()) {
-                OWLDataRange negatedDR=m_factory.getOWLDataComplementOf(dataRangeAtoms.get(var));
-                negatedDR=m_expressionManager.getNNF(m_expressionManager.getSimplified(negatedDR));
+                OWLDataRange negatedDR=m_expressionManager.getNNF(m_expressionManager.getSimplified(dataRangeAtoms.get(var)));
                 OWLDatatype definition=getDefinitionFor(negatedDR,m_alreadyExists);
                 if (!m_alreadyExists[0])
                     m_newDataRangeInclusions.add(new OWLDataRange[] { negative(definition),negatedDR } );
@@ -1093,7 +1092,7 @@ public class OWLNormalization {
                     var=(SWRLLiteralVariable)arg;
                     if (dataRangeAtoms.containsKey(var)) {
                         OWLDataRange range=dataRangeAtoms.get(var);
-                        range=m_factory.getOWLDataIntersectionOf(range, dr);
+                        range=m_factory.getOWLDataUnionOf(range, dr);
                     } else {
                         dataRangeAtoms.put(var, dr);
                     }
@@ -1137,9 +1136,9 @@ public class OWLNormalization {
                 // put into the list
                 if (dataRangeAtoms.containsKey(var)) {
                     OWLDataRange range=dataRangeAtoms.get(var);
-                    range=m_factory.getOWLDataIntersectionOf(range, dr);
+                    range=m_factory.getOWLDataUnionOf(range, m_factory.getOWLDataComplementOf(dr));
                 } else {
-                    dataRangeAtoms.put(var, dr);
+                    dataRangeAtoms.put(var, m_factory.getOWLDataComplementOf(dr));
                 }
             }
         }
@@ -1293,9 +1292,9 @@ public class OWLNormalization {
                     }
                     if (dataRangeAtoms.containsKey(var2)) {
                         OWLDataRange range=dataRangeAtoms.get(var2);
-                        range=m_factory.getOWLDataIntersectionOf(range, m_factory.getOWLDataOneOf(lit));
+                        range=m_factory.getOWLDataUnionOf(range, m_factory.getOWLDataComplementOf(m_factory.getOWLDataOneOf(lit)));
                     } else {
-                        dataRangeAtoms.put(var2, m_factory.getOWLDataOneOf(lit));
+                        dataRangeAtoms.put(var2, m_factory.getOWLDataComplementOf(m_factory.getOWLDataOneOf(lit)));
                     }
                 } else {
                     var2=(SWRLLiteralVariable)arg2;
@@ -1327,11 +1326,37 @@ public class OWLNormalization {
         public void visit(SWRLSameIndividualAtom at) {
             if (positive) {
                 // head
+                headAtoms.remove(at);
                 normalizedHeadAtoms.add(m_factory.getSWRLSameAsAtom(indToVar(at.getFirstArgument()), indToVar(at.getSecondArgument())));
             } else {
                 // body
+                bodyAtoms.remove(at);
                 normalizedBodyAtoms.add(m_factory.getSWRLSameAsAtom(indToVar(at.getFirstArgument()), indToVar(at.getSecondArgument())));
             }
+        }
+        public void visit(SWRLDifferentIndividualsAtom at) {
+            if (positive) {
+                // head
+                headAtoms.remove(at);
+                normalizedHeadAtoms.add(m_factory.getSWRLDifferentFromAtom(indToVar(at.getFirstArgument()), indToVar(at.getSecondArgument())));
+            } else {
+                // body
+                bodyAtoms.remove(at);
+                // add to head as disjunctive equality
+                normalizedHeadAtoms.add(m_factory.getSWRLSameAsAtom(indToVar(at.getFirstArgument()), indToVar(at.getSecondArgument())));
+            }
+        }
+        public void visit(SWRLLiteralVariable variable) {
+            // nothing to do
+        }
+        public void visit(SWRLIndividualVariable variable) {
+            // nothing to do
+        }
+        public void visit(SWRLIndividualArgument argument) {
+            // nothing to do
+        }
+        public void visit(SWRLLiteralArgument argument) {
+            // nothing to do
         }
         protected SWRLIndividualVariable indToVar(SWRLIArgument arg) {
             SWRLIndividualVariable var;
@@ -1352,27 +1377,6 @@ public class OWLNormalization {
                 var=(SWRLIndividualVariable)arg;
             }
             return var;
-        }
-        public void visit(SWRLDifferentIndividualsAtom at) {
-            if (positive) {
-                // head
-                normalizedHeadAtoms.add(m_factory.getSWRLDifferentFromAtom(indToVar(at.getFirstArgument()), indToVar(at.getSecondArgument())));
-            } else {
-                // body
-                normalizedBodyAtoms.add(m_factory.getSWRLDifferentFromAtom(indToVar(at.getFirstArgument()), indToVar(at.getSecondArgument())));
-            }
-        }
-        public void visit(SWRLLiteralVariable variable) {
-            // nothing to do
-        }
-        public void visit(SWRLIndividualVariable variable) {
-            // nothing to do
-        }
-        public void visit(SWRLIndividualArgument argument) {
-            // nothing to do
-        }
-        public void visit(SWRLLiteralArgument argument) {
-            // nothing to do
         }
     }
     
