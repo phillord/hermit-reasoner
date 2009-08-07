@@ -1,6 +1,4 @@
-/**
- * 
- */
+// Copyright 2009 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT;
 
 import java.io.BufferedReader;
@@ -27,7 +25,7 @@ public class Configuration implements Serializable,Cloneable {
     }
 
     public static enum BlockingStrategyType {
-        ANYWHERE,ANCESTOR //,CORE,TWOPHASE
+        ANYWHERE,ANCESTOR,CORE,TWOPHASE
     }
 
     public static enum BlockingSignatureCacheType {
@@ -35,7 +33,7 @@ public class Configuration implements Serializable,Cloneable {
     }
 
     public static enum ExistentialStrategyType {
-        CREATION_ORDER,EL,INDIVIDUAL_REUSE //,LAZY
+        CREATION_ORDER,EL,INDIVIDUAL_REUSE,LAZY
     }
 
     public WarningMonitor warningMonitor;

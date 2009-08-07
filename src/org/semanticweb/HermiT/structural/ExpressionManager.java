@@ -1,3 +1,4 @@
+// Copyright 2009 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.structural;
 
 import java.util.HashSet;

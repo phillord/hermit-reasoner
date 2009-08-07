@@ -165,6 +165,8 @@ public class Prefixes implements Serializable {
             containsPrefix=true;
         if (declarePrefixRaw("all","internal:all#"))
             containsPrefix=true;
+        if (declarePrefixRaw("swrl","internal:swrl#"))
+            containsPrefix=true;
         int individualIRIsIndex=1;
         for (String iri : individualIRIs) {
             if (declarePrefixRaw("nom"+(individualIRIsIndex==1 ? "" : String.valueOf(individualIRIsIndex)),"internal:nom#"+iri))

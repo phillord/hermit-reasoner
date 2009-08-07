@@ -32,6 +32,30 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
+    
+    public void testBug() throws Exception {
+        String axioms = "ClassAssertion(:A :d)"
+            + "ObjectPropertyAssertion(:r :c :d)"
+            + "SubClassOf(ObjectSomeValuesFrom(ObjectInverseOf(:r) ObjectOneOf(:c)) :B)"
+            + "ClassAssertion(ObjectComplementOf(:B) :d)";
+        loadOntologyWithAxioms(axioms);
+        createReasoner();
+        assertTrue(!m_reasoner.isConsistent());
+    }
+    
+    public void testBug1() throws Exception {
+        String axioms = "ClassAssertion(:A :d)"
+            + "ObjectPropertyAssertion(:r :c :d)";
+        loadOntologyWithAxioms(axioms);
+
+        OWLNamedIndividual c = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "c"));
+        OWLNamedIndividual d = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "d"));
+        OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(IRI.create(AbstractReasonerTest.NS + "r"));
+        createReasoner();
+        Set<OWLNamedIndividual> result=m_reasoner.getRelatedIndividuals(c, r);
+        assertTrue(result.contains(d));
+    }
+    
     // actually this test should cause a parsing error since xsd:minInclusive for restricting byte is supposed to use 
     // only values from the value space of byte, which \"4.5\"^^xsd:decimal isn't 
     public void testDataTypeRestriction() throws Exception {
