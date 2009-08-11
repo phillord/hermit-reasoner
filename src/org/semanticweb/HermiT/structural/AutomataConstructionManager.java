@@ -147,21 +147,6 @@ public class AutomataConstructionManager {
     	completeAutomata.putAll( extraCompleteAutomataForInverseRoles );
     	extraCompleteAutomataForInverseRoles.clear();
     	
-    	for( OWLObjectPropertyExpression owlProp : completeAutomata.keySet() ){
-    		Automaton autoOfRole = completeAutomata.get( owlProp );
-			for( OWLObjectPropertyExpression[] inclusion : simpleObjectPropertyInclusions )
-				if( inclusion[0].equals( owlProp ) && inclusion[1].equals( owlProp.getInverseProperty().getSimplified() ) || 
-					inclusion[0].equals( owlProp.getInverseProperty().getSimplified() ) && inclusion[1].equals( owlProp )){
-					Transition basicTransition = new Transition((State)autoOfRole.initials().toArray()[0], owlProp.getInverseProperty().getSimplified(), (State)autoOfRole.terminals().toArray()[0]);
-					try {
-						autoOfRole.addTransition( basicTransition );
-						connectAutomata(autoOfRole, this.getMirroredCopy( autoOfRole ), basicTransition);
-						completeAutomata.put( owlProp , autoOfRole );
-					} catch (NoSuchStateException e) {
-						throw new IllegalArgumentException( "Could not create automaton for symmetric role: " + owlProp + " from already existing auto of its inverse");
-					}
-				}
-    	}
     	for( OWLObjectPropertyExpression owlProp : completeAutomata.keySet() )
     		if( completeAutomata.containsKey( owlProp ) && !completeAutomata.containsKey( owlProp.getInverseProperty().getSimplified() ) )
     			extraCompleteAutomataForInverseRoles.put( owlProp.getInverseProperty().getSimplified(), getMirroredCopy( completeAutomata.get( owlProp ) ));
@@ -179,6 +164,7 @@ public class AutomataConstructionManager {
 	}
 
 	private Automaton buildCompleteAutomataForRoles(OWLObjectPropertyExpression roleToBuildAutomaton, Map<OWLObjectPropertyExpression, Set<OWLObjectPropertyExpression>> inverseRolesMap, Map<OWLObjectPropertyExpression, Automaton> individualAutomata, Map<OWLObjectPropertyExpression, Automaton> completeAutomata, Graph<OWLObjectPropertyExpression> inversedPropertyDependencyGraph) {
+
 		if( completeAutomata.containsKey( roleToBuildAutomaton ) ){
 			Automaton auto = completeAutomata.get( roleToBuildAutomaton );
 			return auto;
@@ -302,8 +288,7 @@ public class AutomataConstructionManager {
 		        			Automaton autoOfSmallerRole = buildCompleteAutomataForRoles( smallerRole, inverseRolesMap, individualAutomata, completeAutomata, inversedPropertyDependencyGraph );
 			        		if( autoOfSmallerRole.delta().size() != 1 )
 			        			connectAutomata( autoOfBiggerRole, autoOfSmallerRole, trans );
-
-			        		someInternalTransitionMatched = true;
+		        			someInternalTransitionMatched = true;
 		        		}
 	        		}
 		        	if( !someInternalTransitionMatched ){
@@ -438,13 +423,13 @@ public class AutomataConstructionManager {
     	}
 	}
     private Map<OWLObjectPropertyExpression,Automaton> buildIndividualAutomata(Graph<OWLObjectPropertyExpression> complexRolesDependencyGraph, Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions, Collection<ComplexObjectPropertyInclusion> complexObjectPropertyInclusions, Map<OWLObjectPropertyExpression, Set<OWLObjectPropertyExpression>> equivalentPropertiesMap){
-    	
+    	Set<OWLObjectPropertyExpression> transitiveRoles = new HashSet<OWLObjectPropertyExpression>();
     	Map<OWLObjectPropertyExpression,Automaton> automataMap = new HashMap<OWLObjectPropertyExpression,Automaton>();
     	Automaton auto = null;
-    	State initialState = null;
-    	State finalState = null;
 
-     	for( OWLAxioms.ComplexObjectPropertyInclusion inclusion : complexObjectPropertyInclusions ){
+    	for( OWLAxioms.ComplexObjectPropertyInclusion inclusion : complexObjectPropertyInclusions ){
+        	State initialState = null;
+        	State finalState = null;
     		OWLObjectPropertyExpression[] subObjectProperties = inclusion.m_subObjectProperties;
     		OWLObjectPropertyExpression superObjectProperty = inclusion.m_superObjectProperties;
     		if( !automataMap.containsKey( superObjectProperty )){
@@ -466,6 +451,7 @@ public class AutomataConstructionManager {
     		if (subObjectProperties.length==2 && subObjectProperties[0].equals(superObjectProperty) && subObjectProperties[1].equals(superObjectProperty)) {
     			try {
 					auto.addTransition( new Transition( finalState, null, initialState ) );
+					transitiveRoles.add( superObjectProperty );
 				} catch (NoSuchStateException e) {
 					throw new IllegalArgumentException("Could not create automaton");
 				}
@@ -547,7 +533,22 @@ public class AutomataConstructionManager {
     		}
     		automataMap.put( superObjectProperty, auto );
 		}
-     	//For those transitive roles that other roles do not depend on other roles the automaton is complete. 
+     	//For symmetric roles
+    	for( OWLObjectPropertyExpression owlProp : automataMap.keySet() )
+    		for( OWLObjectPropertyExpression[] inclusion : simpleObjectPropertyInclusions )
+    			if( inclusion[0].equals( owlProp ) && inclusion[1].getInverseProperty().getSimplified().equals( owlProp ) || 
+    				inclusion[0].getInverseProperty().getSimplified().equals( owlProp ) && inclusion[1].equals( owlProp )){
+    				Automaton au = automataMap.get( owlProp );
+					try {
+						if( transitiveRoles.contains( owlProp.getInverseProperty().getSimplified() ))
+							au.addTransition( new Transition( (State)au.terminals().toArray()[0], null, (State)au.initials().toArray()[0]) );
+					} catch (NoSuchStateException e) {
+						throw new IllegalArgumentException( "Could not create automaton for symmetric role: " + owlProp );
+					}
+    				Transition basicTransition = new Transition((State)au.initials().toArray()[0], owlProp.getInverseProperty().getSimplified(), (State)au.terminals().toArray()[0]);
+    				connectAutomata( au, getMirroredCopy( au ), basicTransition);
+    			}
+    	//For those transitive roles that other roles do not depend on other roles the automaton is complete. 
     	//So we also need to build the auto for the inverse of R unless Inv(R) has its own.
     	for(ComplexObjectPropertyInclusion inclusion : complexObjectPropertyInclusions){
     		OWLObjectPropertyExpression owlSuperProperty = inclusion.m_superObjectProperties;
