@@ -44,9 +44,6 @@ public class AutomataConstructionManager {
 
 		Map<OWLObjectPropertyExpression,Automaton> connectedAutomata = connectAllAutomata(propertyDependencyGraph,inverseRolesMap,individualAutomata,simpleObjectPropertyInclusions);
 
-		for( OWLObjectPropertyExpression owlPropExpr : connectedAutomata.keySet() )
-			connectedAutomata.put( owlPropExpr, minimizeAndNormalizeAutomaton( connectedAutomata.get( owlPropExpr ) ));
-
 		return connectedAutomata;
 	}
 	private Map<OWLObjectPropertyExpression, Set<OWLObjectPropertyExpression>> buildInverseRolesMap(
@@ -124,7 +121,7 @@ public class AutomataConstructionManager {
 
     	Graph<OWLObjectPropertyExpression> inversePropertyDependencyGraph = propertyDependencyGraph.getInverse();
 
-    	Map<OWLObjectPropertyExpression,Automaton> completeAutomata = new HashMap<OWLObjectPropertyExpression,Automaton>();
+		Map<OWLObjectPropertyExpression,Automaton> completeAutomata = new HashMap<OWLObjectPropertyExpression,Automaton>();
     	for( OWLObjectPropertyExpression superRole : rolesToStartRecursion )
     		buildCompleteAutomataForRoles( superRole, inverseRolesMap, individualAutomata, completeAutomata, inversePropertyDependencyGraph );
 
@@ -146,28 +143,24 @@ public class AutomataConstructionManager {
     	for( OWLObjectPropertyExpression owlProp : completeAutomata.keySet() )
     		if( !completeAutomata.containsKey( owlProp.getInverseProperty().getSimplified() ) )
     			extraCompleteAutomataForInverseRoles.put( owlProp.getInverseProperty().getSimplified(), getMirroredCopy( completeAutomata.get( owlProp ) ));
+
     	completeAutomata.putAll( extraCompleteAutomataForInverseRoles );
     	extraCompleteAutomataForInverseRoles.clear();
     	
     	for( OWLObjectPropertyExpression owlProp : completeAutomata.keySet() ){
     		Automaton autoOfRole = completeAutomata.get( owlProp );
-    		//The role has an inverse that has an automaton. Then the automata need to be joined
-    		if( (completeAutomata.containsKey( owlProp.getInverseProperty().getSimplified() ))) {
-    			Automaton autoOfInverseRole = completeAutomata.get( owlProp.getInverseProperty().getSimplified() );
-    	     	//The role is also a symmetric one.
-    			for( OWLObjectPropertyExpression[] inclusion : simpleObjectPropertyInclusions )
-    				if( inclusion[0].equals( owlProp ) && inclusion[1].getInverseProperty().getSimplified().equals( owlProp ) || 
-    					inclusion[0].getInverseProperty().getSimplified().equals( owlProp ) && inclusion[1].equals( owlProp )){
-						Transition basicTransition = new Transition((State)autoOfRole.initials().toArray()[0], owlProp.getInverseProperty().getSimplified(), (State)autoOfRole.terminals().toArray()[0]);
-						try {
-							autoOfRole.addTransition( basicTransition );
-							connectAutomata(autoOfRole, autoOfInverseRole, basicTransition);
-							completeAutomata.put( owlProp , autoOfRole );
-						} catch (NoSuchStateException e) {
-							throw new IllegalArgumentException( "Could not create automaton for symmetric role: " + owlProp + " from already existing auto of its inverse");
-						}
-    				}
-    		}
+			for( OWLObjectPropertyExpression[] inclusion : simpleObjectPropertyInclusions )
+				if( inclusion[0].equals( owlProp ) && inclusion[1].equals( owlProp.getInverseProperty().getSimplified() ) || 
+					inclusion[0].equals( owlProp.getInverseProperty().getSimplified() ) && inclusion[1].equals( owlProp )){
+					Transition basicTransition = new Transition((State)autoOfRole.initials().toArray()[0], owlProp.getInverseProperty().getSimplified(), (State)autoOfRole.terminals().toArray()[0]);
+					try {
+						autoOfRole.addTransition( basicTransition );
+						connectAutomata(autoOfRole, this.getMirroredCopy( autoOfRole ), basicTransition);
+						completeAutomata.put( owlProp , autoOfRole );
+					} catch (NoSuchStateException e) {
+						throw new IllegalArgumentException( "Could not create automaton for symmetric role: " + owlProp + " from already existing auto of its inverse");
+					}
+				}
     	}
     	for( OWLObjectPropertyExpression owlProp : completeAutomata.keySet() )
     		if( completeAutomata.containsKey( owlProp ) && !completeAutomata.containsKey( owlProp.getInverseProperty().getSimplified() ) )
@@ -186,9 +179,10 @@ public class AutomataConstructionManager {
 	}
 
 	private Automaton buildCompleteAutomataForRoles(OWLObjectPropertyExpression roleToBuildAutomaton, Map<OWLObjectPropertyExpression, Set<OWLObjectPropertyExpression>> inverseRolesMap, Map<OWLObjectPropertyExpression, Automaton> individualAutomata, Map<OWLObjectPropertyExpression, Automaton> completeAutomata, Graph<OWLObjectPropertyExpression> inversedPropertyDependencyGraph) {
-
-		if( completeAutomata.containsKey( roleToBuildAutomaton ) )
-			return completeAutomata.get( roleToBuildAutomaton );
+		if( completeAutomata.containsKey( roleToBuildAutomaton ) ){
+			Automaton auto = completeAutomata.get( roleToBuildAutomaton );
+			return auto;
+		}
 		else if( completeAutomata.containsKey( roleToBuildAutomaton.getInverseProperty().getSimplified() ) && 
 				 !individualAutomata.containsKey( roleToBuildAutomaton )){
 			Automaton mirroredCopy = getMirroredCopy( completeAutomata.get( roleToBuildAutomaton.getInverseProperty().getSimplified() ));
@@ -202,8 +196,9 @@ public class AutomataConstructionManager {
 				boolean noInverseRoleWithAutomaton = true;
 				if( inverses != null){
 					for( OWLObjectPropertyExpression inverse : inverses )
-						if( individualAutomata.containsKey( inverse ) ){
+						if( individualAutomata.containsKey( inverse ) && !inverse.equals( roleToBuildAutomaton)){
 							autoForLeafProperty = getMirroredCopy( buildCompleteAutomataForRoles( inverse, inverseRolesMap, individualAutomata, completeAutomata, inversedPropertyDependencyGraph ) );
+		    				autoForLeafProperty = minimizeAndNormalizeAutomaton( autoForLeafProperty );
 							completeAutomata.put( roleToBuildAutomaton , autoForLeafProperty );
 							noInverseRoleWithAutomaton = false;
 							break;
@@ -211,7 +206,13 @@ public class AutomataConstructionManager {
 				}
 				else if( individualAutomata.containsKey( roleToBuildAutomaton.getInverseProperty().getSimplified() ) ){
 					autoForLeafProperty = getMirroredCopy( buildCompleteAutomataForRoles( roleToBuildAutomaton.getInverseProperty().getSimplified(), inverseRolesMap, individualAutomata, completeAutomata, inversedPropertyDependencyGraph ) );
-					completeAutomata.put( roleToBuildAutomaton , autoForLeafProperty );
+					if( !completeAutomata.containsKey( roleToBuildAutomaton )){
+						autoForLeafProperty = minimizeAndNormalizeAutomaton( autoForLeafProperty );
+						completeAutomata.put( roleToBuildAutomaton , autoForLeafProperty );
+					}
+					else
+						autoForLeafProperty = completeAutomata.get( roleToBuildAutomaton );
+
 					noInverseRoleWithAutomaton = false;
 				}
 				if( noInverseRoleWithAutomaton ){
@@ -223,16 +224,9 @@ public class AutomataConstructionManager {
 					} catch (NoSuchStateException e) {
 						throw new IllegalArgumentException( "Could not create automaton for role at the bottom of hierarchy (simple role)");
 					}
-					Automaton autoOfInverseRole = null;
-					if( roleToBuildAutomaton.getInverseProperty().getSimplified().isAnonymous() && individualAutomata.containsKey( roleToBuildAutomaton.getInverseProperty().getSimplified() ) ){
-						autoOfInverseRole = buildCompleteAutomataForRoles( roleToBuildAutomaton.getInverseProperty().getSimplified(), inverseRolesMap, individualAutomata, completeAutomata, inversedPropertyDependencyGraph );
-						increaseAutoWithAutoOfInverseRole( autoForLeafProperty, getMirroredCopy( autoOfInverseRole ) );
-						completeAutomata.put( roleToBuildAutomaton , autoForLeafProperty );
-						completeAutomata.put( roleToBuildAutomaton.getInverseProperty().getSimplified() , getMirroredCopy( autoForLeafProperty ) );					
-					}
-					else{
-						completeAutomata.put( roleToBuildAutomaton , autoForLeafProperty );
-					}
+    				autoForLeafProperty = minimizeAndNormalizeAutomaton( autoForLeafProperty );
+    				completeAutomata.put( roleToBuildAutomaton , autoForLeafProperty );
+    				completeAutomata.put( roleToBuildAutomaton.getInverseProperty().getSimplified() , getMirroredCopy( autoForLeafProperty ) );
 				}
 			}
 			else{
@@ -240,12 +234,19 @@ public class AutomataConstructionManager {
 				if( roleToBuildAutomaton.getInverseProperty().getSimplified().isAnonymous() && individualAutomata.containsKey( roleToBuildAutomaton.getInverseProperty().getSimplified() ) ){
 					autoOfInverseRole = buildCompleteAutomataForRoles( roleToBuildAutomaton.getInverseProperty().getSimplified(), inverseRolesMap, individualAutomata, completeAutomata, inversedPropertyDependencyGraph );
 					increaseAutoWithAutoOfInverseRole( autoForLeafProperty, getMirroredCopy( autoOfInverseRole ) );
-					completeAutomata.put( roleToBuildAutomaton , autoForLeafProperty );
-					completeAutomata.put( roleToBuildAutomaton.getInverseProperty().getSimplified() , getMirroredCopy( autoForLeafProperty ) );					
+					if( !completeAutomata.containsKey( roleToBuildAutomaton )){
+						autoForLeafProperty = minimizeAndNormalizeAutomaton( autoForLeafProperty );
+						completeAutomata.put( roleToBuildAutomaton , autoForLeafProperty );
+						completeAutomata.put( roleToBuildAutomaton.getInverseProperty().getSimplified() , getMirroredCopy( autoForLeafProperty ) );
+					}
+					else
+						autoForLeafProperty = completeAutomata.get( roleToBuildAutomaton );
 				}
 				else{
 					increaseWithDefinedInverseIfNecessary(roleToBuildAutomaton,autoForLeafProperty,inverseRolesMap,individualAutomata);
+    				autoForLeafProperty = minimizeAndNormalizeAutomaton( autoForLeafProperty );
 					completeAutomata.put( roleToBuildAutomaton , autoForLeafProperty );
+					completeAutomata.put( roleToBuildAutomaton.getInverseProperty().getSimplified() , getMirroredCopy( autoForLeafProperty ) );
 				}
 			}
 			return autoForLeafProperty;
@@ -270,12 +271,24 @@ public class AutomataConstructionManager {
 				if( roleToBuildAutomaton.getInverseProperty().getSimplified().isAnonymous() && individualAutomata.containsKey( roleToBuildAutomaton.getInverseProperty().getSimplified() ) ){
 					autoOfInverseRole = buildCompleteAutomataForRoles( roleToBuildAutomaton.getInverseProperty().getSimplified(), inverseRolesMap, individualAutomata, completeAutomata, inversedPropertyDependencyGraph );
 					increaseAutoWithAutoOfInverseRole( autoOfBiggerRole, getMirroredCopy( autoOfInverseRole ) );
-					completeAutomata.put( roleToBuildAutomaton , autoOfBiggerRole );
-					completeAutomata.put( roleToBuildAutomaton.getInverseProperty().getSimplified() , getMirroredCopy( autoOfBiggerRole ) );					
+					if( !completeAutomata.containsKey( roleToBuildAutomaton )){
+						autoOfBiggerRole = minimizeAndNormalizeAutomaton( autoOfBiggerRole );
+						completeAutomata.put( roleToBuildAutomaton , autoOfBiggerRole );
+						completeAutomata.put( roleToBuildAutomaton.getInverseProperty().getSimplified() , getMirroredCopy( autoOfBiggerRole ) );
+					}
+					else
+						autoOfBiggerRole = completeAutomata.get( roleToBuildAutomaton );
 				}
 				else{
-					increaseWithDefinedInverseIfNecessary(roleToBuildAutomaton,autoOfBiggerRole,inverseRolesMap,individualAutomata);					
-					completeAutomata.put( roleToBuildAutomaton , autoOfBiggerRole );
+					increaseWithDefinedInverseIfNecessary(roleToBuildAutomaton,autoOfBiggerRole,inverseRolesMap,individualAutomata);
+					if( !completeAutomata.containsKey( roleToBuildAutomaton )){
+	    				autoOfBiggerRole = minimizeAndNormalizeAutomaton( autoOfBiggerRole );
+
+						completeAutomata.put( roleToBuildAutomaton , autoOfBiggerRole );
+						completeAutomata.put( roleToBuildAutomaton.getInverseProperty().getSimplified() , getMirroredCopy( autoOfBiggerRole ) );
+					}
+					else
+						autoOfBiggerRole = completeAutomata.get( roleToBuildAutomaton );
 				}
 			}
 			else{
@@ -287,8 +300,10 @@ public class AutomataConstructionManager {
 	        			
 		        		if( trans.label() != null && trans.label().equals( smallerRole ) ){
 		        			Automaton autoOfSmallerRole = buildCompleteAutomataForRoles( smallerRole, inverseRolesMap, individualAutomata, completeAutomata, inversedPropertyDependencyGraph );
-		        			connectAutomata( autoOfBiggerRole, autoOfSmallerRole, trans );
-		        			someInternalTransitionMatched = true;
+			        		if( autoOfSmallerRole.delta().size() != 1 )
+			        			connectAutomata( autoOfBiggerRole, autoOfSmallerRole, trans );
+
+			        		someInternalTransitionMatched = true;
 		        		}
 	        		}
 		        	if( !someInternalTransitionMatched ){
@@ -302,12 +317,23 @@ public class AutomataConstructionManager {
 			if( roleToBuildAutomaton.getInverseProperty().getSimplified().isAnonymous() && individualAutomata.containsKey( roleToBuildAutomaton.getInverseProperty().getSimplified() ) ){
 				autoOfInverseRole = buildCompleteAutomataForRoles( roleToBuildAutomaton.getInverseProperty().getSimplified(), inverseRolesMap, individualAutomata, completeAutomata, inversedPropertyDependencyGraph );
 				increaseAutoWithAutoOfInverseRole( autoOfBiggerRole, getMirroredCopy( autoOfInverseRole ) );
-				completeAutomata.put( roleToBuildAutomaton , autoOfBiggerRole );
-				completeAutomata.put( roleToBuildAutomaton.getInverseProperty().getSimplified() , getMirroredCopy( autoOfBiggerRole ) );					
+				if( !completeAutomata.containsKey( roleToBuildAutomaton )){
+					autoOfBiggerRole = minimizeAndNormalizeAutomaton( autoOfBiggerRole );
+					completeAutomata.put( roleToBuildAutomaton , autoOfBiggerRole );
+					completeAutomata.put( roleToBuildAutomaton.getInverseProperty().getSimplified() , getMirroredCopy( autoOfBiggerRole ) );
+				}
+				else
+					autoOfBiggerRole = completeAutomata.get( roleToBuildAutomaton );
 			}
 			else{
 				increaseWithDefinedInverseIfNecessary(roleToBuildAutomaton,autoOfBiggerRole,inverseRolesMap,individualAutomata);
-				completeAutomata.put( roleToBuildAutomaton , autoOfBiggerRole );
+				if( !completeAutomata.containsKey( roleToBuildAutomaton )){
+					autoOfBiggerRole = minimizeAndNormalizeAutomaton( autoOfBiggerRole );
+					completeAutomata.put( roleToBuildAutomaton , autoOfBiggerRole );
+					completeAutomata.put( roleToBuildAutomaton.getInverseProperty().getSimplified() , getMirroredCopy( autoOfBiggerRole ) );
+				}
+				else
+					autoOfBiggerRole = completeAutomata.get( roleToBuildAutomaton );
 			}
 	        return autoOfBiggerRole;
 		}
@@ -317,7 +343,7 @@ public class AutomataConstructionManager {
 		if( inverses != null){
 			Automaton autoOfInverseRole = null;
 			for( OWLObjectPropertyExpression inverse : inverses ){
-				if( individualAutomata.containsKey( inverse ) ){
+				if( individualAutomata.containsKey( inverse ) && !inverse.equals( roleToBuildAutomaton )){
 					autoOfInverseRole = individualAutomata.get( inverse );
 					increaseAutoWithAutoOfInverseRole( autoForLeafProperty, autoOfInverseRole );
 				}
@@ -331,7 +357,7 @@ public class AutomataConstructionManager {
 		Normalizer normalizer = new Normalizer();
 		
 		automaton = minimizerDeterminizer.transform( automaton );
-		if( automaton.initials().size() != 1 )
+		if( automaton.initials().size() != 1 || automaton.terminals().size() != 1)
 			automaton = normalizer.transform( automaton );
 		
 		return automaton;
@@ -521,20 +547,7 @@ public class AutomataConstructionManager {
     		}
     		automataMap.put( superObjectProperty, auto );
 		}
-     	//For symmetric roles
-    	for( OWLObjectPropertyExpression owlProp : automataMap.keySet() )
-    		for( OWLObjectPropertyExpression[] inclusion : simpleObjectPropertyInclusions )
-    			if( inclusion[0].equals( owlProp ) && inclusion[1].getInverseProperty().getSimplified().equals( owlProp ) || 
-    				inclusion[0].getInverseProperty().getSimplified().equals( owlProp ) && inclusion[1].equals( owlProp )){
-    				Automaton au = automataMap.get( owlProp );
-    				try {
-						au.addTransition( new Transition((State)au.initials().toArray()[0], owlProp.getInverseProperty().getSimplified(), (State)au.terminals().toArray()[0]) );
-	    				automataMap.put( owlProp , au );
-					} catch (NoSuchStateException e) {
-						throw new IllegalArgumentException("Could not create automaton for symmetric role:" + owlProp);
-					}
-    			}
-    	//For those transitive roles that other roles do not depend on other roles the automaton is complete. 
+     	//For those transitive roles that other roles do not depend on other roles the automaton is complete. 
     	//So we also need to build the auto for the inverse of R unless Inv(R) has its own.
     	for(ComplexObjectPropertyInclusion inclusion : complexObjectPropertyInclusions){
     		OWLObjectPropertyExpression owlSuperProperty = inclusion.m_superObjectProperties;
