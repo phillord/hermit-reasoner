@@ -42,7 +42,9 @@ public class AutomataConstructionManager {
         complexRolesDependencyGraph.removeElements( simpleRoles );
 		m_nonSimpleRoles.addAll( complexRolesDependencyGraph.getElements() );
 
-		return connectAllAutomata(propertyDependencyGraph,inverseRolesMap,individualAutomata,simpleObjectPropertyInclusions);
+		Map<OWLObjectPropertyExpression,Automaton> connectedAutomata = connectAllAutomata(propertyDependencyGraph,inverseRolesMap,individualAutomata,simpleObjectPropertyInclusions);
+
+		return connectedAutomata;
 	}
 	private Map<OWLObjectPropertyExpression, Set<OWLObjectPropertyExpression>> buildInverseRolesMap(
 			Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions) {
@@ -162,7 +164,6 @@ public class AutomataConstructionManager {
 	}
 
 	private Automaton buildCompleteAutomataForRoles(OWLObjectPropertyExpression roleToBuildAutomaton, Map<OWLObjectPropertyExpression, Set<OWLObjectPropertyExpression>> inverseRolesMap, Map<OWLObjectPropertyExpression, Automaton> individualAutomata, Map<OWLObjectPropertyExpression, Automaton> completeAutomata, Graph<OWLObjectPropertyExpression> inversedPropertyDependencyGraph) {
-
 		if( completeAutomata.containsKey( roleToBuildAutomaton ) ){
 			Automaton auto = completeAutomata.get( roleToBuildAutomaton );
 			return auto;
@@ -393,7 +394,7 @@ public class AutomataConstructionManager {
 			extraOnes = autoOfBiggerRole.deltaFrom(oldFinalOfSmaller, oldFinalOfSmaller).toArray();
 			for( int i=0; i< extraOnes.length ; i++ )
 				autoOfBiggerRole.addTransition( new Transition(endState, ((Transition)extraOnes[i]).label(),endState ) );
-
+			
 		} catch (NoSuchStateException e) {
 			throw new IllegalArgumentException( "Could not build the Complete Automata of non-Simple Roles" );
 		}
