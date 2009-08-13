@@ -42,9 +42,7 @@ public class AutomataConstructionManager {
         complexRolesDependencyGraph.removeElements( simpleRoles );
 		m_nonSimpleRoles.addAll( complexRolesDependencyGraph.getElements() );
 
-		Map<OWLObjectPropertyExpression,Automaton> connectedAutomata = connectAllAutomata(propertyDependencyGraph,inverseRolesMap,individualAutomata,simpleObjectPropertyInclusions);
-
-		return connectedAutomata;
+		return connectAllAutomata(propertyDependencyGraph,inverseRolesMap,individualAutomata,simpleObjectPropertyInclusions);
 	}
 	private Map<OWLObjectPropertyExpression, Set<OWLObjectPropertyExpression>> buildInverseRolesMap(
 			Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions) {
@@ -160,7 +158,7 @@ public class AutomataConstructionManager {
 		State initialState = (State)autoOfRole.initials().toArray()[0];
 		State finalState = (State)autoOfRole.terminals().toArray()[0];
 		Transition tr = (Transition)autoOfRole.deltaFrom(initialState, finalState).toArray()[0];
-		connectAutomata(autoOfRole, getMirroredCopy( automatonOfInverse ), tr);
+		optimisedAutomataConnector(autoOfRole, getMirroredCopy( automatonOfInverse ), tr);
 	}
 
 	private Automaton buildCompleteAutomataForRoles(OWLObjectPropertyExpression roleToBuildAutomaton, Map<OWLObjectPropertyExpression, Set<OWLObjectPropertyExpression>> inverseRolesMap, Map<OWLObjectPropertyExpression, Automaton> individualAutomata, Map<OWLObjectPropertyExpression, Automaton> completeAutomata, Graph<OWLObjectPropertyExpression> inversedPropertyDependencyGraph) {
@@ -251,7 +249,12 @@ public class AutomataConstructionManager {
 				}
         		for( OWLObjectPropertyExpression smallerRole : inversedPropertyDependencyGraph.getSuccessors( roleToBuildAutomaton ) ){
 	        		Automaton autoOfSmallerRole = buildCompleteAutomataForRoles( smallerRole, inverseRolesMap, individualAutomata, completeAutomata, inversedPropertyDependencyGraph );
-	        		connectAutomata( autoOfBiggerRole, autoOfSmallerRole, trans );
+	        		optimisedAutomataConnector( autoOfBiggerRole, autoOfSmallerRole, trans );
+	        		try {
+	        			autoOfBiggerRole.addTransition( new Transition(initialState, smallerRole , finalState) );
+	        		} catch (NoSuchStateException e) {
+						throw new IllegalArgumentException("Could not create automaton");
+					}
 		        }
 				Automaton autoOfInverseRole = null;
 				if( roleToBuildAutomaton.getInverseProperty().getSimplified().isAnonymous() && individualAutomata.containsKey( roleToBuildAutomaton.getInverseProperty().getSimplified() ) ){
@@ -287,14 +290,14 @@ public class AutomataConstructionManager {
 		        		if( trans.label() != null && trans.label().equals( smallerRole ) ){
 		        			Automaton autoOfSmallerRole = buildCompleteAutomataForRoles( smallerRole, inverseRolesMap, individualAutomata, completeAutomata, inversedPropertyDependencyGraph );
 			        		if( autoOfSmallerRole.delta().size() != 1 )
-			        			connectAutomata( autoOfBiggerRole, autoOfSmallerRole, trans );
+			        			optimisedAutomataConnector( autoOfBiggerRole, autoOfSmallerRole, trans );
 		        			someInternalTransitionMatched = true;
 		        		}
 	        		}
 		        	if( !someInternalTransitionMatched ){
 	        			Automaton autoOfSmallerRole = buildCompleteAutomataForRoles( smallerRole, inverseRolesMap, individualAutomata, completeAutomata, inversedPropertyDependencyGraph );
 	        			Transition initial2TerminalTransition = (Transition)autoOfBiggerRole.deltaFrom( (State)autoOfBiggerRole.initials().toArray()[0], (State)autoOfBiggerRole.terminals().toArray()[0]).toArray()[0];
-	        			connectAutomata( autoOfBiggerRole, autoOfSmallerRole, initial2TerminalTransition );
+	        			optimisedAutomataConnector( autoOfBiggerRole, autoOfSmallerRole, initial2TerminalTransition );
 		        	}
 	        	}
 			}
@@ -341,21 +344,71 @@ public class AutomataConstructionManager {
 		Reducer minimizerDeterminizer = new Reducer();
 		Normalizer normalizer = new Normalizer();
 		
-		automaton = minimizerDeterminizer.transform( automaton );
-		if( automaton.initials().size() != 1 || automaton.terminals().size() != 1)
-			automaton = normalizer.transform( automaton );
-		
-		return automaton;
-	}
+		Automaton tempMinimizedAuto = minimizerDeterminizer.transform( automaton );
 
-	private void connectAutomata(Automaton autoOfBiggerRole,Automaton autoOfSmallerRole, Transition tr) {
+		if( tempMinimizedAuto.delta().size() >= automaton.delta().size() )
+			return automaton;
+
+		if( tempMinimizedAuto.initials().size() != 1 || tempMinimizedAuto.terminals().size() != 1)
+			tempMinimizedAuto = normalizer.transform( tempMinimizedAuto );
+
+		if( tempMinimizedAuto.delta().size() > automaton.delta().size() )
+			return automaton;
+
+		return tempMinimizedAuto;
+	}
+	
+	private void optimisedAutomataConnector(Automaton autoOfBiggerRole,Automaton autoOfSmallerRole, Transition tr) {
 		Map<State,State> stateMapper = getDisjointUnion( autoOfBiggerRole , autoOfSmallerRole);
+		
 		try {
-			autoOfBiggerRole.addTransition( new Transition ( tr.start(), null, (State)stateMapper.get(autoOfSmallerRole.initials().toArray()[0])));
-			autoOfBiggerRole.addTransition( new Transition ( (State)stateMapper.get( (State)autoOfSmallerRole.terminals().toArray()[0] ), null, tr.end()));
+			State startState = tr.start();
+			State endState = tr.end();
+			
+			State oldInitialOfSmaller = (State)stateMapper.get(autoOfSmallerRole.initials().toArray()[0]);
+			State oldFinalOfSmaller = (State)stateMapper.get(autoOfSmallerRole.terminals().toArray()[0]);
+			
+			Object[] outgoingTransFromInitialOfSmaller = autoOfBiggerRole.delta( oldInitialOfSmaller ).toArray();
+			for( int i=0; i< outgoingTransFromInitialOfSmaller.length ; i++ ){
+				State toState = ((Transition)outgoingTransFromInitialOfSmaller[i]).end(); 
+				if( toState.equals( oldFinalOfSmaller ) )
+					continue;
+			
+				autoOfBiggerRole.addTransition( new Transition(startState, ((Transition)outgoingTransFromInitialOfSmaller[i]).label(), toState ) );
+			}
+
+			Object[] incomingTransToFinalOfSmaller = deltaToState(autoOfBiggerRole, oldFinalOfSmaller).toArray();
+			for( int i=0; i< incomingTransToFinalOfSmaller.length ; i++ ){
+				State fromState = ((Transition)incomingTransToFinalOfSmaller[i]).start(); 
+				if( fromState.equals( oldInitialOfSmaller ) )
+					continue;
+
+				autoOfBiggerRole.addTransition( new Transition(fromState, ((Transition)incomingTransToFinalOfSmaller[i]).label(), endState) );
+			}
+			
+			Object[] extraOnes = autoOfBiggerRole.deltaFrom(oldFinalOfSmaller, oldInitialOfSmaller).toArray();
+			for( int i=0; i< extraOnes.length ; i++ )
+				autoOfBiggerRole.addTransition( new Transition(endState, ((Transition)extraOnes[i]).label(),startState ) );
+
+			extraOnes = autoOfBiggerRole.deltaFrom(oldFinalOfSmaller, oldFinalOfSmaller).toArray();
+			for( int i=0; i< extraOnes.length ; i++ )
+				autoOfBiggerRole.addTransition( new Transition(endState, ((Transition)extraOnes[i]).label(),endState ) );
+
 		} catch (NoSuchStateException e) {
 			throw new IllegalArgumentException( "Could not build the Complete Automata of non-Simple Roles" );
 		}
+	}
+
+	private Set<Transition> deltaToState(Automaton autoOfSmallerRole, State state) {
+		
+		Set<Transition> incommingTrans = new HashSet<Transition>();
+		Object[] transitions = autoOfSmallerRole.delta().toArray();
+		for( int i=0 ; i<transitions.length ; i++ ){
+			Transition trans = (Transition)transitions[i];
+			if( trans.end().equals( state ))
+				incommingTrans.add( trans );
+		}
+		return incommingTrans;
 	}
 
 	private Graph<OWLObjectPropertyExpression> buildPropertyOrdering(Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions,Collection<ComplexObjectPropertyInclusion> complexObjectPropertyInclusions, Map<OWLObjectPropertyExpression, Set<OWLObjectPropertyExpression>> equivalentPropertiesMap){
@@ -424,12 +477,13 @@ public class AutomataConstructionManager {
 	}
     private Map<OWLObjectPropertyExpression,Automaton> buildIndividualAutomata(Graph<OWLObjectPropertyExpression> complexRolesDependencyGraph, Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions, Collection<ComplexObjectPropertyInclusion> complexObjectPropertyInclusions, Map<OWLObjectPropertyExpression, Set<OWLObjectPropertyExpression>> equivalentPropertiesMap){
     	Set<OWLObjectPropertyExpression> transitiveRoles = new HashSet<OWLObjectPropertyExpression>();
+    	
     	Map<OWLObjectPropertyExpression,Automaton> automataMap = new HashMap<OWLObjectPropertyExpression,Automaton>();
     	Automaton auto = null;
+    	State initialState = null;
+    	State finalState = null;
 
-    	for( OWLAxioms.ComplexObjectPropertyInclusion inclusion : complexObjectPropertyInclusions ){
-        	State initialState = null;
-        	State finalState = null;
+     	for( OWLAxioms.ComplexObjectPropertyInclusion inclusion : complexObjectPropertyInclusions ){
     		OWLObjectPropertyExpression[] subObjectProperties = inclusion.m_subObjectProperties;
     		OWLObjectPropertyExpression superObjectProperty = inclusion.m_superObjectProperties;
     		if( !automataMap.containsKey( superObjectProperty )){
@@ -539,14 +593,14 @@ public class AutomataConstructionManager {
     			if( inclusion[0].equals( owlProp ) && inclusion[1].getInverseProperty().getSimplified().equals( owlProp ) || 
     				inclusion[0].getInverseProperty().getSimplified().equals( owlProp ) && inclusion[1].equals( owlProp )){
     				Automaton au = automataMap.get( owlProp );
-					try {
+    				try {
 						if( transitiveRoles.contains( owlProp.getInverseProperty().getSimplified() ))
 							au.addTransition( new Transition( (State)au.terminals().toArray()[0], null, (State)au.initials().toArray()[0]) );
 					} catch (NoSuchStateException e) {
 						throw new IllegalArgumentException( "Could not create automaton for symmetric role: " + owlProp );
 					}
     				Transition basicTransition = new Transition((State)au.initials().toArray()[0], owlProp.getInverseProperty().getSimplified(), (State)au.terminals().toArray()[0]);
-    				connectAutomata( au, getMirroredCopy( au ), basicTransition);
+    				optimisedAutomataConnector( au, getMirroredCopy( au ), basicTransition);
     			}
     	//For those transitive roles that other roles do not depend on other roles the automaton is complete. 
     	//So we also need to build the auto for the inverse of R unless Inv(R) has its own.
