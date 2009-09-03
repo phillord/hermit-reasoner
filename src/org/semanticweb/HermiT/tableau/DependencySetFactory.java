@@ -246,15 +246,9 @@ public final class DependencySetFactory implements Serializable {
             return (PermanentDependencySet)dependencySet;
         m_unprocessedSets.clear();
         m_mergeSets.clear();
-        if (dependencySet==null) {
-            System.out.println("null");
-        }
         m_unprocessedSets.add((UnionDependencySet)dependencySet);
         while (!m_unprocessedSets.isEmpty()) {
             UnionDependencySet unionDependencySet=m_unprocessedSets.remove(m_unprocessedSets.size()-1);
-            if (unionDependencySet==null) {
-                System.out.println("null");
-            }
             for (int index=0;index<unionDependencySet.m_numberOfConstituents;index++) {
                 DependencySet constituent=unionDependencySet.m_dependencySets[index];
                 if (constituent instanceof UnionDependencySet)

@@ -66,6 +66,7 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
     }
     public DependencySet getDependencySet(Object[] tuple) {
         int tupleIndex=m_tupleIndexes[0].getTupleIndex(tuple);
+        // If the tuple is not in the tuple table, we'll get back -1; then, there is no dependency set.
         if (tupleIndex==-1)
             return null;
         else
