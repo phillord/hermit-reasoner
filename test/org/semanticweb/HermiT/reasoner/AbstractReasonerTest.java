@@ -45,18 +45,9 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         loadOntologyWithAxioms(axioms);
         createReasoner();
     }
-    
-    protected void createCoreBlockingReasoner() {
-        Configuration c=new Configuration();
-        c.existentialStrategyType=Configuration.ExistentialStrategyType.LAZY;
-        c.blockingStrategyType=Configuration.BlockingStrategyType.CORE;
-        //c.tableauMonitorType=Configuration.TableauMonitorType.DEBUGGER_HISTORY_ON;
-        m_reasoner = new Reasoner(c,m_ontologyManager,m_ontology);
-    }
     protected void createReasoner() {
         createReasoner(getConfiguration(),null);
     }
-
     protected void createReasoner(Configuration configuration,Set<DescriptionGraph> descriptionGraphs) {
         if (descriptionGraphs==null)
             descriptionGraphs=Collections.emptySet();

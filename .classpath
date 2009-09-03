@@ -4,20 +4,11 @@
 	<classpathentry kind="src" path="getopt"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="/ThirdPartyOwlTools/automaton/1.11-1/automaton.jar" sourcepath="/ThirdPartyOwlTools/automaton/1.11-1/automaton-src.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/ThirdPartyOwlTools/automaton/1.11-1/automaton-doc.jar!/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="/ThirdPartyOwlTools/jautomaton/jautomata-core-2.0-alpha-1.jar" sourcepath="/ThirdPartyOwlTools/jautomaton/jautomata-src.zip"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/ThirdPartyOwlTools/protege/4.1/org.protege.common.jar" sourcepath="/ThirdPartyOwlTools/protege/4.1/org.protege.commonsrc.zip"/>
-	<classpathentry kind="lib" path="/ThirdPartyOwlTools/protege/4.1/org.protege.editor.core.application.jar" sourcepath="/ThirdPartyOwlTools/protege/4.1/org.protege.editor.core.applicationsrc.zip"/>
-	<classpathentry kind="lib" path="/ThirdPartyOwlTools/protege/4.1/org.protege.editor.owl.jar" sourcepath="/ThirdPartyOwlTools/protege/4.1/org.protege.editor.owlsrc.zip"/>
-	<classpathentry kind="lib" path="/ThirdPartyOwlTools/owlapi/3.0.0/owlapi-bin.jar" sourcepath="/ThirdPartyOwlTools/owlapi/3.0.0/owlapi-src.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/ThirdPartyOwlTools/owlapi/3.0.0/owlapi-doc.jar!/"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="lib" path="lib/dk.brics.automaton-1.11-2.jar" sourcepath="lib/dk.brics.automaton-1.11-2-src.jar"/>
+	<classpathentry kind="lib" path="lib/jautomata-core-2.0-alpha-1.jar" sourcepath="lib/jautomata-core-2.0-alpha-1-src.jar"/>
+	<classpathentry kind="lib" path="lib/org.protege.editor.core.application-4.1.jar" sourcepath="lib/org.protege.editor.core.application-4.1-src.jar"/>
+	<classpathentry kind="lib" path="lib/org.protege.editor.owl-4.1.jar" sourcepath="lib/org.protege.editor.owl-4.1-src.jar"/>
+	<classpathentry kind="lib" path="lib/owlapi-3.0.0.jar" sourcepath="lib/owlapi-3.0.0-src.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -69,12 +69,6 @@ public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset 
         ).toAutomaton();
     }
     protected static Automaton normalizedStringAutomaton() {
-        /* \u0009 \u000D control characters containing Tab, CR, and LF 
-           \u0020 SPACE
-           XML is allowed to contain unicode code points apart from:
-           most of the C0 and C1 control codes: \u0000-\u001F and \u0080Ð\u009F 
-           permanently unassigned: permanently-unassigned code points D800ÐDFFF
-           not allowed: code point ending in FFFE or FFFF  */
         return new RegExp("([\u0020-\u007F\u00A0-\uD7FF\uE000-\uFFFD])*").toAutomaton();
     }
     protected static Automaton tokenAutomaton() {

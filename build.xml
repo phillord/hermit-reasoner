@@ -6,7 +6,7 @@
     <!-- Note that on each released build, the ${updatefile} on the web site
          should be replaced, and the new version of the plugin should be
          posted at the (auto-generated) URL in that file. -->
-    <property name="version" value="1.0"/>
+    <property name="version" value="1.1"/>
 
     <!-- general info -->
     <property name="homepage" value="http://hermit-reasoner.com/"/>
@@ -21,16 +21,23 @@
     <!-- structure of the release -->
     <property name="releasedir" value="${builddir}/release"/>
     <property name="HermiTjar" value="${releasedir}/${ant.project.name}.jar"/>
+    <property name="ProtegePlugInJar" value="${releasedir}/org.semanticweb.${ant.project.name}.jar"/>
+    <property name="projectdir" value="${releasedir}/project"/>
     <property name="javadocdir" value="${builddir}/javadoc"/>
     
-    <!-- structure of 3rdparty libraries -->
-    <property name="3rdpartydir" value="${projectroot}/../ThirdPartyOwlTools"/>
-    <property name="owlapi" value="${3rdpartydir}/owlapi/3.0.0/owlapi-bin.jar"/>
-    <property name="automaton" value="${3rdpartydir}/automaton/1.11-1/automaton.jar"/>
-    <property name="jautomaton" value="${3rdpartydir}/jautomaton/jautomata-core-2.0-alpha-1.jar"/>
-    <property name="junit" value="${3rdpartydir}/junit/4.4/junit-4.4.jar"/>
-    <property name="protegeapp" value="${3rdpartydir}/protege/4.1/org.protege.editor.core.application.jar"/>
-    <property name="protegeowl" value="${3rdpartydir}/protege/4.1/org.protege.editor.owl.jar"/>
+    <!-- libraries -->
+    <property name="libdir" value="${projectroot}/lib"/>
+    <property name="owlapi" value="${libdir}/owlapi-3.0.0.jar"/>
+    <property name="owlapisrc" value="${libdir}/owlapi-3.0.0-src.jar"/>
+    <property name="automaton" value="${libdir}/dk.brics.automaton-1.11-2.jar"/>
+    <property name="automatonsrc" value="${libdir}/dk.brics.automaton-1.11-2-src.jar"/>
+    <property name="jautomaton" value="${libdir}/jautomata-core-2.0-alpha-1.jar"/>
+    <property name="jautomatonsrc" value="${libdir}/jautomata-core-2.0-alpha-1-src.jar"/>
+    <property name="junit" value="${libdir}/junit-4.4.jar"/>
+    <property name="protegeapp" value="${libdir}/org.protege.editor.core.application-4.1.jar"/>
+    <property name="protegeappsrc" value="${libdir}/org.protege.editor.core.application-4.1-src.jar"/>
+    <property name="protegeowl" value="${libdir}/org.protege.editor.owl-4.1.jar"/>
+    <property name="protegeowlsrc" value="${libdir}/org.protege.editor.owl-4.1-src.jar"/>
 
     <!-- to generate a debug version, use -Ddebug=on argument when running ant -->
     <property name="debug" value="off"/>
@@ -67,7 +74,6 @@
         <mkdir dir="${classdir}"/>
         <javac destdir="${classdir}" deprecation="yes" debug="${debug}">
             <compilerarg value="-Xlint:all"/>
-            <!--<compilerarg value="-Xbootclasspath:${java.home}/lib/rt.jar"/>-->
             <src refid="sourcepath"/>
             <classpath refid="classpath"/>
         </javac>
@@ -91,19 +97,49 @@
     </target>
     
     <target name="unpack-libraries">
-        <unjar src="${owlapi}" dest="${classdir}"/>
         <unjar src="${automaton}" dest="${classdir}"/>
         <unjar src="${jautomaton}" dest="${classdir}"/>
     </target>
+    
+    <target name="unpack-owlapi">
+        <unjar src="${owlapi}" dest="${classdir}"/>
+    </target>
 
-    <target name="quick" depends="compile">
+    <target name="HermiT-protege-plugin" depends="clean,compile,unpack-libraries">
         <mkdir dir="${releasedir}"/>
-        <copy file="${projectroot}/update.properties" tofile="${releasedir}/update.properties">
+        <copy file="${projectroot}/update.properties" tofile="${builddir}/update.properties">
             <filterset>
                 <filter token="VERSION" value="${version}"/>
                 <filter token="HOMEPAGE" value="${homepage}"/>
             </filterset>
         </copy>
+        <jar jarfile="${ProtegePlugInJar}">
+            <manifest>
+                <attribute name="Implementation-Title" value="HermiT"/>
+                <attribute name="Implementation-Vendor" value="Oxford University"/>
+                <attribute name="Implementation-Version" value="${version}"/>
+                <attribute name="Main-Class" value="org.semanticweb.HermiT.cli.CommandLine"/>
+                <attribute name="Bundle-ManifestVersion" value="2"/>
+                <attribute name="Bundle-Name" value="HermiT Reasoner"/>
+                <attribute name="Bundle-SymbolicName" value="org.semanticweb.HermiT;singleton:=true"/>
+                <attribute name="Bundle-Category" value="protege"/>
+                <attribute name="Bundle-Description" value="An OWL 2 reasoner"/>
+                <attribute name="Bundle-DocURL" value="${homepage}"/>
+                <attribute name="Bundle-Vendor" value="Boris Motik, Birte Glimm, Giorgos Stoilos, and Ian Horrocks"/>
+                <attribute name="Bundle-Version" value="${version}"/>
+                <attribute name="Bundle-Activator" value="org.protege.editor.core.plugin.DefaultPluginActivator"/>
+                <attribute name="Bundle-ClassPath" value="."/>
+                <attribute name="Require-Bundle" value="org.eclipse.equinox.registry,org.eclipse.equinox.common,org.protege.editor.core.application;bundle-version=4.1,org.protege.editor.owl;bundle-version=4.1,org.semanticweb.owl.owlapi;bundle-version=3.0"/>
+                <attribute name="Update-Url" value="${updatefile}"/>
+            </manifest>
+            <fileset dir="${classdir}"/>
+            <fileset file="${releasedir}/readme.txt"/>
+            <fileset file="gpl.txt"/>
+        </jar>
+    </target>
+    
+    <target name="HermiT-standalone" depends="compile,unpack-owlapi">
+        <mkdir dir="${releasedir}"/>
         <copy file="${projectroot}/readme.txt" tofile="${releasedir}/readme.txt">
             <filterset>
                 <filter token="VERSION" value="${version}"/>
@@ -137,7 +173,24 @@
         </jar>
     </target>
     
-    <target name="combined" depends="compile,javadoc,unpack-libraries,quick"/>
+    <target name="HermiT-project">
+        <mkdir dir="${projectdir}"/>
+        <copy todir="${projectdir}">
+            <fileset dir="${projectroot}" includes="src/**/*"/>
+            <fileset dir="${projectroot}" includes="getopt/**/*"/>
+            <fileset dir="${projectroot}" includes="test/**/*"/>
+            <fileset dir="${projectroot}" includes="lib/**/*"/>
+        </copy>
+        <copy file="build.xml" todir="${projectdir}"/>
+        <copy file="gpl.txt" todir="${projectdir}"/>
+        <copy file="readme.txt" todir="${projectdir}"/>
+        <copy file="update.properties" todir="${projectdir}"/>
+        <copy file=".classpath" todir="${projectdir}"/>
+        <copy file=".project" todir="${projectdir}"/>
+        <zip destfile="${builddir}/${ant.project.name}-${version}.zip" basedir="${releasedir}"/>
+    </target>
+    
+    <target name="combined" depends="clean,compile,javadoc,unpack-libraries,HermiT-protege-plugin,HermiT-standalone,HermiT-project"/>
     
     <!-- TEST TARGETS -->
 

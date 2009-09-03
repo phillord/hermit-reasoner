@@ -126,15 +126,15 @@ public class OWLClausification {
         m_configuration=configuration;
     }
     public DLOntology clausify(OWLOntologyManager ontologyManager,OWLOntology ontology,Collection<DescriptionGraph> descriptionGraphs) {
-        Set<OWLOntology> importClosure=new HashSet<OWLOntology>();
-        List<OWLOntology> toProcess=new ArrayList<OWLOntology>();
-        toProcess.add(ontology);
-        while (!toProcess.isEmpty()) {
-            OWLOntology anOntology=toProcess.remove(toProcess.size()-1);
-            if (importClosure.add(anOntology))
-                toProcess.addAll(anOntology.getImports(ontologyManager));
-        }
-        return clausifyImportClosure(ontologyManager.getOWLDataFactory(),ontology.getOntologyID().getDefaultDocumentIRI() == null ? "urn:hermit:kb" : ontology.getOntologyID().getDefaultDocumentIRI().toString(),importClosure,descriptionGraphs);
+//        Set<OWLOntology> importClosure=new HashSet<OWLOntology>();
+//        List<OWLOntology> toProcess=new ArrayList<OWLOntology>();
+//        toProcess.add(ontology);
+//        while (!toProcess.isEmpty()) {
+//            OWLOntology anOntology=toProcess.remove(toProcess.size()-1);
+//            if (importClosure.add(anOntology))
+//                toProcess.addAll(anOntology.getImports(ontologyManager));
+//        }
+        return clausifyImportClosure(ontologyManager.getOWLDataFactory(),ontology.getOntologyID().getDefaultDocumentIRI() == null ? "urn:hermit:kb" : ontology.getOntologyID().getDefaultDocumentIRI().toString(),ontology.getImportsClosure(),descriptionGraphs);
     }
     public DLOntology clausifyImportClosure(OWLDataFactory factory,String ontologyIRI,Collection<OWLOntology> importClosure,Collection<DescriptionGraph> descriptionGraphs) {
         OWLAxioms axioms=new OWLAxioms();
@@ -329,7 +329,7 @@ public class OWLClausification {
                 safenessAtoms.clear();
             }
         }
-        if (m_configuration.blockingStrategyType==Configuration.BlockingStrategyType.CORE || m_configuration.blockingStrategyType==Configuration.BlockingStrategyType.TWOPHASE) {
+        if (m_configuration.blockingStrategyType==Configuration.BlockingStrategyType.CORE) {
             // The following two maps are only used with inexact blocking strategies, i.e., blocking strategies that establish 
             // blocks that might not be valid and that only in a later validation phase will be checked for validity. In case 
             // of invalid blocks existential expansion will continue further. 
@@ -430,16 +430,20 @@ public class OWLClausification {
                         OWLClassExpression nonNegated = ((OWLObjectComplementOf) all.getFiller()).getOperand();
                         if (nonNegated.isAnonymous()) {
                             // negated nominal concept
-                            throw new IllegalArgumentException("Core blocking is not compatible with nominals. ");
+                            OWLObjectOneOf oneOf=(OWLObjectOneOf)nonNegated;
+                            if (oneOf.getIndividuals().size()>1) throw new IllegalArgumentException("Core blocking is not compatible with non-singleton nominal sets. ");
+                            c=getNominalConcept(oneOf.getIndividuals().iterator().next());
                         } else {
-                            c = AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString());
+                            c=AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString());
                         }
                     } else {
                         if (all.getFiller().isAnonymous()) {
                             // nominal
-                            throw new IllegalArgumentException("Core blocking is not compatible with nominals. ");
+                            OWLObjectOneOf oneOf=(OWLObjectOneOf)all.getFiller();
+                            if (oneOf.getIndividuals().size()>1) throw new IllegalArgumentException("Core blocking is not compatible with non-singleton nominal sets. ");
+                            c=AtomicNegationConcept.create(getNominalConcept(oneOf.getIndividuals().iterator().next()));
                         } else {
-                            c = AtomicNegationConcept.create(AtomicConcept.create(all.getFiller().asOWLClass().getIRI().toString()));
+                            c=AtomicNegationConcept.create(AtomicConcept.create(all.getFiller().asOWLClass().getIRI().toString()));
                         }
                     }
                     conclusions.add(AtMostConcept.create(0, r, c));
@@ -454,16 +458,20 @@ public class OWLClausification {
                         OWLClassExpression nonNegated = ((OWLObjectComplementOf) some.getFiller()).getOperand();
                         if (nonNegated.isAnonymous()) {
                             // negated nominal concept
-                            throw new IllegalArgumentException("Core blocking is not compatible with nominals. ");
+                            OWLObjectOneOf oneOf=(OWLObjectOneOf)nonNegated;
+                            if (oneOf.getIndividuals().size()>1) throw new IllegalArgumentException("Core blocking is not compatible with non-singleton nominal sets. ");
+                            c=AtomicNegationConcept.create(getNominalConcept(oneOf.getIndividuals().iterator().next()));
                         } else {
-                            c = AtomicNegationConcept.create(AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString()));
+                            c=AtomicNegationConcept.create(AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString()));
                         }
                     } else {
                         if (some.getFiller().isAnonymous()) {
                             // nominal
-                            throw new IllegalArgumentException("Core blocking is not compatible with nominals. ");
+                            OWLObjectOneOf oneOf=(OWLObjectOneOf)some.getFiller();
+                            if (oneOf.getIndividuals().size()>1) throw new IllegalArgumentException("Core blocking is not compatible with non-singleton nominal sets. ");
+                            c=getNominalConcept(oneOf.getIndividuals().iterator().next());
                         } else {
-                            c = AtomicConcept.create(some.getFiller().asOWLClass().getIRI().toString());
+                            c=AtomicConcept.create(some.getFiller().asOWLClass().getIRI().toString());
                         }
                     }
                     conclusions.add(AtLeastConcept.create(1, r, c));
@@ -477,16 +485,20 @@ public class OWLClausification {
                         OWLClassExpression nonNegated = ((OWLObjectComplementOf) min.getFiller()).getOperand();
                         if (nonNegated.isAnonymous()) {
                             // negated nominal concept
-                            throw new IllegalArgumentException("Core blocking is not compatible with nominals. ");
+                            OWLObjectOneOf oneOf=(OWLObjectOneOf)nonNegated;
+                            if (oneOf.getIndividuals().size()>1) throw new IllegalArgumentException("Core blocking is not compatible with non-singleton nominal sets. ");
+                            c=AtomicNegationConcept.create(getNominalConcept(oneOf.getIndividuals().iterator().next()));
                         } else {
-                            c = AtomicNegationConcept.create(AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString()));
+                            c=AtomicNegationConcept.create(AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString()));
                         }
                     } else {
                         if (min.getFiller().isAnonymous()) {
                             // nominal
-                            throw new IllegalArgumentException("Core blocking is not compatible with nominals. ");
+                            OWLObjectOneOf oneOf=(OWLObjectOneOf)min.getFiller();
+                            if (oneOf.getIndividuals().size()>1) throw new IllegalArgumentException("Core blocking is not compatible with non-singleton nominal sets. ");
+                            c=getNominalConcept(oneOf.getIndividuals().iterator().next());
                         } else {
-                            c = AtomicConcept.create(min.getFiller().asOWLClass().getIRI().toString());
+                            c=AtomicConcept.create(min.getFiller().asOWLClass().getIRI().toString());
                         }
                     }
                     conclusions.add(AtLeastConcept.create(1, r, c));
@@ -501,16 +513,20 @@ public class OWLClausification {
                         OWLClassExpression nonNegated = ((OWLObjectComplementOf) max.getFiller()).getOperand();
                         if (nonNegated.isAnonymous()) {
                             // negated nominal concept
-                            throw new IllegalArgumentException("Core blocking is not compatible with nominals. ");
+                            OWLObjectOneOf oneOf=(OWLObjectOneOf)nonNegated;
+                            if (oneOf.getIndividuals().size()>1) throw new IllegalArgumentException("Core blocking is not compatible with non-singleton nominal sets. ");
+                            c=AtomicNegationConcept.create(getNominalConcept(oneOf.getIndividuals().iterator().next()));
                         } else {
                             c = AtomicNegationConcept.create(AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString()));
                         }
                     } else {
                         if (max.getFiller().isAnonymous()) {
                             // nominal
-                            throw new IllegalArgumentException("Core blocking is not compatible with nominals. ");
+                            OWLObjectOneOf oneOf=(OWLObjectOneOf)max.getFiller();
+                            if (oneOf.getIndividuals().size()>1) throw new IllegalArgumentException("Core blocking is not compatible with non-singleton nominal sets. ");
+                            c=getNominalConcept(oneOf.getIndividuals().iterator().next());
                         } else {
-                            c = AtomicConcept.create(max.getFiller().asOWLClass().getIRI().toString());
+                            c=AtomicConcept.create(max.getFiller().asOWLClass().getIRI().toString());
                         }
                     }
                     conclusions.add(AtMostConcept.create(max.getCardinality(), r, c));
@@ -520,7 +536,9 @@ public class OWLClausification {
                     OWLClassExpression nonNegated = ((OWLObjectComplementOf) desc).getOperand();
                     if (nonNegated.isAnonymous()) {
                         // nominal
-                        throw new IllegalArgumentException("Core blocking is not compatible with nominals. ");
+                        OWLObjectOneOf oneOf=(OWLObjectOneOf)nonNegated;
+                        if (oneOf.getIndividuals().size()>1) throw new IllegalArgumentException("Core blocking is not compatible with non-singleton nominal sets. ");
+                        premises.add(getNominalConcept(oneOf.getIndividuals().iterator().next()));
                     } else {
                         premises.add(AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString()));
                     }
@@ -547,6 +565,15 @@ public class OWLClausification {
                 }
             }
         }
+    }
+    protected static AtomicConcept getNominalConcept(OWLIndividual individual) {
+        AtomicConcept result;
+        if (individual.isAnonymous()) {
+            result=AtomicConcept.create("internal:anon#"+individual.asAnonymousIndividual().getID().toString());
+        } else {
+            result=AtomicConcept.create("internal:nom#"+individual.asNamedIndividual().getIRI().toString());
+        }
+        return result;
     }
     protected static LiteralConcept getLiteralConcept(OWLClassExpression description) {
         if (description instanceof OWLClass) {

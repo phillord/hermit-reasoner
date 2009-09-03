@@ -1,6 +1,7 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.graph;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,7 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class Graph<T> {
+public class Graph<T> implements Serializable {
+    private static final long serialVersionUID = 5372948202031042380L;
+    
     protected final Set<T> m_elements;
     protected final Map<T,Set<T>> m_successorsByNodes;
 

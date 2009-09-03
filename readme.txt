@@ -18,3 +18,25 @@ distribution in the file `license.txt`. An online version is available at
 More information about HermiT and additional licensing information is
 available at <http://hermit-reasoner.com>, or by contacting Boris Motik or 
 Ian Horrocks at the Oxford University Computing Laboratory.
+
+HermiT uses the following libraries in unmodified form:
+
+1) dk.brics.automaton, Copyright (C) 2001-2009 Anders Moeller
+   http://www.brics.dk/automaton/
+   released under BSD license, see dk.brics.automaton.COPYING and 
+   dk.brics.automaton.README in project/lib 
+2) JAutomata, 
+   http://jautomata.sourceforge.net/
+   released under LGPL 2.1, see jautomata.LICENSE in project/lib
+3) The OWL API, 
+   http://owlapi.sourceforge.net
+   released under LGPL 3.0, see owlapi.LICENSE in project/lib
+
+The release is organised as follows:
+HermiT.jar is a stand-alone version of HermiT that can be used from the command 
+line or from within other Java programs. It contains all required libraries.
+org.semanticweb.HermiT.jar is a plugin for Protege version 4.1. It can be copied 
+into the plugins folder of Protege. 
+project/* is the Java Eclipse project for HermiT. It contains all sources 
+(folders src, test, and getopt) and libraries (folder lib) incl. sources and can 
+directly be imported into Eclipse.  

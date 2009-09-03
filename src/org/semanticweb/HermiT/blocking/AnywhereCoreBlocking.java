@@ -92,69 +92,6 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
         run++;
         if (printingOn) printHeader();
     }
-//    public boolean computeIsBlocked(Node node) {
-//        m_currentBlockersCache.removeNode(node);
-//        if (node.isActive() && m_directBlockingChecker.canBeBlocked(node)) {
-//            Node parent=node.getParent();
-//            boolean wasBlockedBefore=false;
-//            if (node.isBlocked()) {
-//                wasBlockedBefore=true;
-//                if (!node.isDirectlyBlocked()) {
-//                    computeIsBlocked(parent); // go upwards to the directly blocked node and check that first
-//                    if (parent.isBlocked()) {
-//                        node.setBlocked(parent,false);
-//                        return true;
-//                    }
-//                }
-//            }
-//            // ok, the node is not indirectly blocked, lets see whether it is directly blocked
-//            Node blocker;
-//            if (m_immediatelyValidateBlocks) {
-//                blocker = getValidBlocker(node);
-//            } else {
-//                blocker = m_currentBlockersCache.getBlockerRepresentativeLazy(node);
-//            }
-//            // get Blocker will always return a node with lower id and that only if all nodes in the cache with this core have a node ID that is smaller than this one  
-//            // note that we removed only nodes from the cache that are of order higher than the first changed element
-//            // only nodes of lower order than this one can be blockers and all those have already been looked at in this computation or 
-//            // were not removed from the cache since they did not change
-//            node.setBlocked(blocker,blocker!=null);
-//            if (!node.isBlocked()) {
-//                m_currentBlockersCache.addNode(node); // adds node either as main or as an alternative for a node with smaller node ID and identical core
-//            } else {
-//                if (!wasBlockedBefore) blockChildren(node);
-//            }
-//            m_directBlockingChecker.clearBlockingInfoChanged(node);
-//        }
-//        return node.isBlocked();
-//    }
-//    protected void blockChildren(Node node) {
-//        List<Node> children=new ArrayList<Node>();
-//        m_ternaryTableSearchOneBound.getBindingsBuffer()[1]=node;
-//        m_ternaryTableSearchOneBound.open();
-//        Object[] tupleBuffer=m_ternaryTableSearchOneBound.getTupleBuffer();
-//        while (!m_ternaryTableSearchOneBound.afterLast()) {
-//            Node possibleChild=(Node)tupleBuffer[2];
-//            if (possibleChild.getParent()==node) {
-//                children.add(possibleChild);
-//            }
-//            m_ternaryTableSearchOneBound.next();
-//        }
-//        m_ternaryTableSearchTwoBound.getBindingsBuffer()[2]=node;
-//        m_ternaryTableSearchTwoBound.open();
-//        tupleBuffer=m_ternaryTableSearchTwoBound.getTupleBuffer();
-//        while (!m_ternaryTableSearchTwoBound.afterLast()) {
-//            Node possibleChild=(Node)tupleBuffer[1];
-//            if (possibleChild.getParent()==node) {
-//                children.add(possibleChild);
-//            }
-//            m_ternaryTableSearchTwoBound.next();
-//        }
-//        for (Node child : children) {
-//            child.setBlocked(node, false);
-//            blockChildren(child);
-//        }
-//    } 
     public void computeBlocking(boolean finalChance) {
         computePreBlocking(null);
         if (finalChance) {
@@ -178,50 +115,61 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
             }
             node=m_firstChangedNode;
             while (node!=null) {
-                if (node.isActive() && (m_directBlockingChecker.canBeBlocked(node) || m_directBlockingChecker.canBeBlocker(node))) {
-                    // otherwise the node is not relevant for blocking since (it is a root node) since it will not be blocked and cannot block
-                    if (m_directBlockingChecker.hasBlockingInfoChanged(node) || !node.isDirectlyBlocked() || node.getBlocker().getNodeID()>=m_firstChangedNode.getNodeID()) {
-                        //m_directBlockingChecker.hasBlockingInfoChanged(node) == true if concepts or relation from/to parent has changed
-                        //node.isDirectlyBlocked() == true only if a blocker is set and while setting the blocker it has been added as direct
-                        Node parent=node.getParent();
-                        if (parent==null)
-                            node.setBlocked(null,false); // no parent means it cannot be blocked and cannot be blocker
-                        else if (parent.isBlocked()) {// parent is guaranteed not to change it's status in this computation since we process nodes in creation order and parent is smaller
-                            if (node.getBlocker() == null) {
-                                // previously not blocked
-                                numIndirectlyBlocked++;
-                            }
-                            node.setBlocked(parent,false);
-                        } else {
-                            Node blocker;
-                            Node previousBlocker=node.getBlocker();
-                            if (m_immediatelyValidateBlocks) {
-                                blocker = getValidBlocker(node);
+                if (node.isActive()) {
+                    if (m_directBlockingChecker.canBeBlocked(node) || m_directBlockingChecker.canBeBlocker(node)) {
+                        // otherwise the node is not relevant for blocking since (it is a root node) since it will not be blocked and cannot block
+                        if (m_directBlockingChecker.hasBlockingInfoChanged(node) || !node.isDirectlyBlocked() || node.getBlocker().getNodeID()>=m_firstChangedNode.getNodeID()) {
+                            //m_directBlockingChecker.hasBlockingInfoChanged(node) == true if concepts or relation from/to parent has changed
+                            //node.isDirectlyBlocked() == true only if a blocker is set and while setting the blocker it has been added as direct
+                            Node parent=node.getParent();
+                            if (parent==null)
+                                node.setBlocked(null,false); // no parent means it cannot be blocked and cannot be blocker
+                            else if (parent.isBlocked()) {// parent is guaranteed not to change it's status in this computation since we process nodes in creation order and parent is smaller
+                                if (node.getBlocker() == null) {
+                                    // previously not blocked
+                                    numIndirectlyBlocked++;
+                                    if (nodesToExpand!=null && nodesToExpand.contains(node))
+                                        nodesToExpand.remove(node);
+                                }
+                                node.setBlocked(parent,false);
                             } else {
-                                blocker = m_currentBlockersCache.getSmallestPossibleBlocker(node);
+                                Node blocker;
+                                Node previousBlocker=node.getBlocker();
+                                if (m_immediatelyValidateBlocks) {
+                                    blocker = getValidBlocker(node);
+                                } else {
+                                    blocker = m_currentBlockersCache.getLargestPossibleBlocker(node);
+                                }
+                                if (previousBlocker!=null&&blocker==null) {
+                                    numBlockersChanged++;
+                                    if (node.isDirectlyBlocked()) numDirectlyBlocked--;
+                                    else numIndirectlyBlocked--;
+                                } 
+                                if (previousBlocker==null&&blocker!=null) {
+                                    numBlockersChanged++;
+                                    numDirectlyBlocked++;
+                                    if (nodesToExpand!=null && nodesToExpand.contains(node))
+                                        nodesToExpand.remove(node);
+                                }
+                                // get Blocker will always return a node with lower id and that only if all nodes in the cache with this core have a node ID that is smaller than this one  
+                                // note that we removed only nodes from the cache that are of order higher than the first changed element
+                                // only nodes of lower order than this one can be blockers and all those have already been looked at in this computation or 
+                                // were not removed from the cache since they did not change
+                                node.setBlocked(blocker,blocker!=null);
                             }
-                            if (previousBlocker!=null&&blocker==null) {
-                                numBlockersChanged++;
-                                if (node.isDirectlyBlocked()) numDirectlyBlocked--;
-                                else numIndirectlyBlocked--;
-                            } 
-                            if (previousBlocker==null&&blocker!=null) {
-                                numBlockersChanged++;
-                                numDirectlyBlocked++;
-                            }
-                            // get Blocker will always return a node with lower id and that only if all nodes in the cache with this core have a node ID that is smaller than this one  
-                            // note that we removed only nodes from the cache that are of order higher than the first changed element
-                            // only nodes of lower order than this one can be blockers and all those have already been looked at in this computation or 
-                            // were not removed from the cache since they did not change
-                            node.setBlocked(blocker,blocker!=null);
+                            if (!node.isBlocked() && m_directBlockingChecker.canBeBlocker(node))
+                                m_currentBlockersCache.addNode(node); // adds node either as main or as an alternative for a node with smaller node ID and identical core
                         }
-                        if (!node.isBlocked() && m_directBlockingChecker.canBeBlocker(node))
-                            m_currentBlockersCache.addNode(node); // adds node either as main or as an alternative for a node with smaller node ID and identical core
-                    }
-                    m_directBlockingChecker.clearBlockingInfoChanged(node);
+                        m_directBlockingChecker.clearBlockingInfoChanged(node);
+                    } 
                 }
-                if (nodesToExpand!=null && !node.isBlocked() && node.getUnprocessedExistentials().size()>0)
-                    nodesToExpand.add(node);
+                if (nodesToExpand!=null) {
+                    if (node.isActive() && !node.isBlocked() && node.getUnprocessedExistentials().size()>0) { 
+                        nodesToExpand.add(node);
+                    } else {
+                        nodesToExpand.remove(node);
+                    }
+                }
                 node=node.getNextTableauNode();
             }
             //if (printingOn) System.out.println("Num of changed blockers: " + numBlockersChanged);
@@ -231,16 +179,14 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
     }
     public void validateBlocks(Set<Node> invalidlyBlockedNodes) {
         // after first complete validation, we switch to only checking block validity immediately
-        //m_immediatelyValidateBlocks = true;
+        m_immediatelyValidateBlocks = true;
         if (!m_unaryValidBlockConditions.isEmpty() || !m_nAryValidBlockConditions.isEmpty()) {
             // statistics:
             int checkedBlocks = 0;
             int invalidBlocks = 0;
             
             Node node = m_lastValidatedUnchangedNode==null?m_tableau.getFirstTableauNode():m_lastValidatedUnchangedNode;
-            if (m_firstChangedNode!=null&&m_firstChangedNode.getNodeID()<node.getNodeID()) node=m_firstChangedNode;
-            int activeNodes=m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes();
-            if (printingOn) System.out.println("Validate blocks (active nodes: "+activeNodes+", highest nodeID: " + m_tableau.getNumberOfNodeCreations() + ", smallest node to validate: "+ node.getNodeID()+") ...");
+            if (printingOn) System.out.println("Validate blocks (active nodes: "+(m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes())+", highest nodeID: " + m_tableau.getNumberOfNodeCreations() + ", smallest node to validate: "+ node.getNodeID()+") ...");
             if (printingOn && m_tableau.getNumberOfNodesInTableau() >= 1000) System.out.print("Current ID:");
             while (node!=null) {
                 if (node.isActive() && node.isBlocked()) {
@@ -251,28 +197,26 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
                         if (validBlocker == null) {
                             //System.out.println("Node " + node.getBlocker().getNodeID() + " invalidly blocks " + node.getNodeID() + "!");
                             invalidBlocks++;
-                            if (invalidlyBlockedNodes!=null && node.getUnprocessedExistentials().size()>0) { 
-                                invalidlyBlockedNodes.add(node);
-                            }
-                            //((SinglePreCoreBlockingObject)node.getBlockingObject()).setGreatestInvalidBlocker(m_currentBlockersCache.getPossibleBlockers(node).last());
                         }
                         node.setBlocked(validBlocker,validBlocker!=null);
                     } else if (!node.getParent().isBlocked()) {
                         checkedBlocks++;
-                        // indirectly blocked since we proceed in creation order, 
-                        // parent has already been checked for proper blocking
-                        // if the parent is no longer blocked, unblock this one too
+                        // still marked as indirectly blocked since we proceed in creation order, 
+                        // but the parent has already been checked for proper blocking and is not 
+                        // really blocked
+                        // if this node cannot be blocked directly, unblock this one too
                         Node validBlocker = getValidBlocker(node); 
-                        if (validBlocker == null) {
+                        if (validBlocker == null) 
                             invalidBlocks++;
-                            if (invalidlyBlockedNodes!=null && node.getUnprocessedExistentials().size()>0) { 
-                                invalidlyBlockedNodes.add(node);
-                            }
-                        }
                         node.setBlocked(validBlocker,validBlocker!=null);
                     }
-                    if (!node.isBlocked() && m_directBlockingChecker.canBeBlocker(node))
-                        m_currentBlockersCache.addNode(node);
+                    if (!node.isBlocked()) {
+                        if (invalidlyBlockedNodes!=null && node.getUnprocessedExistentials().size()>0) { 
+                            invalidlyBlockedNodes.add(node);
+                        }
+                        if (m_directBlockingChecker.canBeBlocker(node))
+                            m_currentBlockersCache.addNode(node);
+                    }
                 }
                 m_lastValidatedUnchangedNode=node;
                 if (printingOn && node.getNodeID() % 1000 == 0) System.out.print(" " + node.getNodeID());
@@ -282,27 +226,20 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
             // if set to some node, then computePreblocking will be asked to check from that node onwards in case of invalid blocks 
             m_firstChangedNode=null;
             if (printingOn) System.out.println("Checked " + checkedBlocks + " blocked nodes of which " + invalidBlocks + " were invalid.");
-            if (printingOn&&invalidlyBlockedNodes!=null) System.out.println("Invalidly blocked nodes that need expansion: " + invalidlyBlockedNodes.size());
+            if (printingOn&&invalidlyBlockedNodes!=null) System.out.println("Nodes with non-permanently satisfied existentials & invalidly blocked nodes that need expansion: " + invalidlyBlockedNodes.size());
         }
     }
     protected Node getValidBlocker(Node blocked) {
-        // we have that blocker (pre-)blocks blocked and we have to validate whether the block is valid 
+        // we have that the node blocked is (pre-)blocked and we have to validate whether the block is valid 
         // that is we can create a model from the block by unravelling
         
-        SortedSet<Node> possibleValidBlockers = m_currentBlockersCache.getPossibleBlockers(blocked);
-//        Node greatestInvalidBlocker = ((SinglePreCoreBlockingObject)blocked.getBlockingObject()).m_greatestInvalidBlocker;
-//        if (greatestInvalidBlocker != null) {
-//            possibleValidBlockers = new TreeSet<Node>(possibleValidBlockers.tailSet(greatestInvalidBlocker));
-//            possibleValidBlockers.remove(greatestInvalidBlocker);
-//            if (possibleValidBlockers.isEmpty()) return null;
-//        }
-        
+        SortedSet<Node> possibleValidBlockers = m_currentBlockersCache.getPossibleBlockers(blocked);        
         Set<AtomicConcept> blockedLabel = ((SinglePreCoreBlockingObject)blocked.getBlockingObject()).getAtomicConceptLabel();
         Set<AtomicConcept> blockedParentLabel = ((SinglePreCoreBlockingObject)blocked.getParent().getBlockingObject()).getAtomicConceptLabel();
         
-        boolean blockerIsSuitable = true;
         for (Iterator<Node> it=possibleValidBlockers.iterator(); it.hasNext(); ) {
             Node possibleBlocker=it.next();
+            boolean blockerIsSuitable = true;
             Set<AtomicConcept> blockerLabel = ((SinglePreCoreBlockingObject)possibleBlocker.getBlockingObject()).getAtomicConceptLabel();
             Set<AtomicConcept> blockerParentLabel = ((SinglePreCoreBlockingObject)possibleBlocker.getParent().getBlockingObject()).getAtomicConceptLabel();
             
@@ -347,12 +284,7 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
             }
             if (blockerIsSuitable) {
                 return possibleBlocker;
-            } 
-//            else {
-//                ((SinglePreCoreBlockingObject)blocked.getBlockingObject()).m_greatestInvalidBlocker=possibleBlocker;
-//            }
-            blockerIsSuitable=true;
-            // else try alternative blockers with the same core
+            }
         }
         return null;
     }
@@ -560,32 +492,31 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
     // Assertions can be added directly into the core, but we also have the possibility of setting the core flag later?
     // In that case, assertionCoreSet (below) will be called?
     public void assertionAdded(Concept concept,Node node,boolean isCore) {
-        if ((isCore && concept instanceof AtomicConcept) || (concept instanceof AtLeastConcept)) {
-            updateNodeChange(m_directBlockingChecker.assertionAdded(concept,node));
-        }
+        m_directBlockingChecker.assertionAdded(concept,node);
+        updateSmallestNodeToValidate(node);
+        if (concept instanceof AtLeastConcept || isCore) updateNodeChange(node);
     }
     public void assertionCoreSet(Concept concept,Node node) {
-        if (concept instanceof AtomicConcept) {
-            updateNodeChange(m_directBlockingChecker.assertionAdded(concept,node));
-        } 
+        m_directBlockingChecker.assertionAdded(concept,node);
+        updateNodeChange(node);
     }
     public void assertionRemoved(Concept concept,Node node,boolean isCore) {
-        if (isCore && concept instanceof AtomicConcept) {
-            updateNodeChange(m_directBlockingChecker.assertionRemoved(concept,node));
-        }
+        m_directBlockingChecker.assertionRemoved(concept,node);
+        updateSmallestNodeToValidate(node);
+        if (isCore) updateNodeChange(node);
     }
     public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
-        if (isCore) {
-            updateNodeChange(m_directBlockingChecker.assertionAdded(atomicRole, nodeFrom, nodeTo));
-        }
+        updateSmallestNodeToValidate(nodeFrom);
+        updateSmallestNodeToValidate(nodeTo);
+        m_directBlockingChecker.assertionAdded(atomicRole, nodeFrom, nodeTo);
     }
     public void assertionCoreSet(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
-        updateNodeChange(m_directBlockingChecker.assertionAdded(atomicRole, nodeFrom, nodeTo));
+        m_directBlockingChecker.assertionAdded(atomicRole, nodeFrom, nodeTo);
     }
     public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
-        if (isCore) {
-            updateNodeChange(m_directBlockingChecker.assertionRemoved(atomicRole, nodeFrom, nodeTo));
-        }
+        updateSmallestNodeToValidate(nodeFrom);
+        updateSmallestNodeToValidate(nodeTo);
+        m_directBlockingChecker.assertionRemoved(atomicRole, nodeFrom, nodeTo);
     }
     public void nodeStatusChanged(Node node) {
         updateNodeChange(node);
@@ -593,6 +524,10 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
     protected final void updateNodeChange(Node node) {
         if (node!=null && (m_firstChangedNode==null || node.getNodeID()<m_firstChangedNode.getNodeID()))
             m_firstChangedNode=node;
+    }
+    protected final void updateSmallestNodeToValidate(Node node) {
+        if (m_lastValidatedUnchangedNode==null || node.getNodeID()<m_lastValidatedUnchangedNode.getNodeID())
+            m_lastValidatedUnchangedNode=node;
     }
     public void nodeInitialized(Node node) {
         m_directBlockingChecker.nodeInitialized(node);
@@ -610,14 +545,14 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
     public void modelFound() {
         if (printingOn) printStatistics(false);
         System.out.println("Found model with " + (m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes()) + " nodes. ");
-        Node node=m_tableau.getFirstTableauNode();
-        while (node!=null) {
-            if (node.isActive() && node.isBlocked()) 
-                System.out.println("Node " + node.getNodeID() + " is " + (node.isDirectlyBlocked()?"directly":"indirectly") + " blocked by node " + node.getBlocker().getNodeID());
-            node=node.getNextTableauNode();
-        }
-        m_lastValidatedUnchangedNode=null;
-        validateBlocks(null);
+//        Node node=m_tableau.getFirstTableauNode();
+//        while (node!=null) {
+//            if (node.isActive() && node.isBlocked()) 
+//                System.out.println("Node " + node.getNodeID() + " is " + (node.isDirectlyBlocked()?"directly":"indirectly") + " blocked by node " + node.getBlocker().getNodeID());
+//            node=node.getNextTableauNode();
+//        }
+//        m_lastValidatedUnchangedNode=null;
+//        validateBlocks(null);
     }
     protected void printStatistics(boolean intermediate) {
         if (!intermediate) run++;
@@ -669,15 +604,14 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
         if (dlClause.isConceptInclusion() || dlClause.isRoleInclusion() || dlClause.isRoleInverseInclusion()) {
             for (int i=0;i<coreVariables.length;i++) {
                 coreVariables[i]=false;
-                return;
             }
+            return;
         }
         if (dlClause.getHeadLength() > 2) {
             // in case of a disjunction, there is nothing to compute, the choice must go into the core
             // I assume that disjunctions are always only for the centre variable X and I assume that X is the first
             // variable in the array ???
             coreVariables[0] = true;
-            return;
         } else {
             workers.add(new ComputeCoreVariables(dlClause,valuesBuffer,coreVariables));
         }
@@ -786,8 +720,9 @@ class CoreBlockersCache implements Serializable {
             CacheEntry entry=m_buckets[bucketIndex];
             while (entry!=null) {
                 if (entry==removeEntry) {
-                    if (node == entry.m_nodes.first()) {
+                    if (node == entry.m_nodes.last()) {
                         // the whole entry needs to be removed
+                        // entry.m_nodes: {13, 7, 5}, node: 5 -> entry.m_nodes should be: {}
                         for (Node n : entry.m_nodes) {
                             n.setBlockingCargo(null);
                         }
@@ -801,10 +736,14 @@ class CoreBlockersCache implements Serializable {
                         m_emptyEntries=entry;
                         m_numberOfElements--;
                     } else if (entry.m_nodes.contains(node)) {
-                        for (Node n : entry.m_nodes.tailSet(node)) {
+                        // entry.m_nodes: {13, 7, 5}, node: 7 -> entry.m_nodes should be: {13}
+                        for (Node n : entry.m_nodes.headSet(node)) {
                             n.setBlockingCargo(null);
                         }
-                        entry.removeNodesGreaterThan(node);
+                        node.setBlockingCargo(null);
+                        SortedSet<Node> newEntry=new TreeSet<Node>(entry.m_nodes.tailSet(node));
+                        newEntry.remove(node);
+                        entry.m_nodes=newEntry;
                     } else {
                         throw new IllegalStateException("Internal error: entry not in cache!");
                     }
@@ -870,9 +809,9 @@ class CoreBlockersCache implements Serializable {
         m_buckets=newBuckets;
         m_threshold=(int)(newCapacity*0.75);
     }
-    public Node getSmallestPossibleBlocker(Node node) {
+    public Node getLargestPossibleBlocker(Node node) {
         SortedSet<Node> possibleValidBlockers=getPossibleBlockers(node);
-        return possibleValidBlockers.isEmpty()?null:possibleValidBlockers.first();
+        return possibleValidBlockers.isEmpty()?null:possibleValidBlockers.last();
     }
 //    public Node getBlockerRepresentativeLazy(Node node) {
 //        assert m_directBlockingChecker.canBeBlocked(node) == true;
@@ -908,7 +847,7 @@ class CoreBlockersCache implements Serializable {
                 if (hashCode==entry.m_hashCode && m_directBlockingChecker.isBlockedBy(entry.m_nodes.first(),node)) {
                     // We block only with nodes that have a smaller ID than the node that is to be blocked
                     // so return the head set
-                    if (entry.m_nodes.contains(node)) {
+                    if (entry.m_nodes.contains(node)) { 
                         SortedSet<Node> possibleValidBlockers = new TreeSet<Node>(entry.m_nodes.tailSet(node));
                         possibleValidBlockers.remove(node);
                         return possibleValidBlockers;
@@ -976,14 +915,11 @@ class CoreBlockersCache implements Serializable {
             m_nextEntry=nextEntry;
         }
         public boolean add(Node node) {
-//            if (!m_nodes.isEmpty() && m_nodes.last().getNodeID() >= node.getNodeID()) {
-//                throw new IllegalStateException("Internal error: Tried to insert a node into the blocking cache which is not greater than the other nodes in the equivalence class. ");
-//            }
             return m_nodes.add(node);
         }
-        public void removeNodesGreaterThan(Node node) {
-            m_nodes = new TreeSet<Node>(m_nodes.headSet(node));
-        }
+//        public void removeNodesGreaterThan(Node node) {
+//            m_nodes = new TreeSet<Node>(m_nodes.headSet(node));
+//        }
         public String toString() {
             String nodes = "HashCode: " + m_hashCode + " Nodes: ";
             for (Node n : m_nodes) {
@@ -998,6 +934,6 @@ class NodeIDComparator implements Serializable, Comparator<Node> {
     public static final Comparator<Node> INSTANCE = new NodeIDComparator();
 
     public int compare(Node n1, Node n2) {
-        return n1.getNodeID() - n2.getNodeID();
+        return n2.getNodeID() - n1.getNodeID();
     }
 }

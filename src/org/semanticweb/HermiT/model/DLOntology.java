@@ -482,8 +482,10 @@ public class DLOntology implements Serializable {
         stringBuffer.append(CRLF);
         stringBuffer.append("Deterministic DL-clauses: [");
         stringBuffer.append(CRLF);
+        int numDeterministicClauses=0;
         for (DLClause dlClause : m_dlClauses)
             if (dlClause.getHeadLength()<=1) {
+                numDeterministicClauses++;
                 stringBuffer.append("  ");
                 stringBuffer.append(dlClause.toString(prefixes));
                 stringBuffer.append(CRLF);
@@ -492,8 +494,12 @@ public class DLOntology implements Serializable {
         stringBuffer.append(CRLF);
         stringBuffer.append("Disjunctive DL-clauses: [");
         stringBuffer.append(CRLF);
+        int numNondeterministicClauses=0;
+        int numDisjunctions=0;
         for (DLClause dlClause : m_dlClauses)
             if (dlClause.getHeadLength()>1) {
+                numNondeterministicClauses++;
+                numDisjunctions+=dlClause.getHeadLength();
                 stringBuffer.append("  ");
                 stringBuffer.append(dlClause.toString(prefixes));
                 stringBuffer.append(CRLF);
@@ -512,6 +518,20 @@ public class DLOntology implements Serializable {
             stringBuffer.append(atom.toString(prefixes));
             stringBuffer.append(CRLF);
         }
+        stringBuffer.append("]");
+        stringBuffer.append(CRLF);
+        stringBuffer.append("Statistics: [");
+        stringBuffer.append(CRLF);
+        stringBuffer.append("  Number of deterministic clauses: " + numDeterministicClauses);
+        stringBuffer.append(CRLF);
+        stringBuffer.append("  Number of nondeterministic clauses: " + numNondeterministicClauses);
+        stringBuffer.append(CRLF);
+        stringBuffer.append("  Number of disjunctions: " + numDisjunctions);
+        stringBuffer.append(CRLF);
+        stringBuffer.append("  Number of positive facts: " + m_positiveFacts.size());
+        stringBuffer.append(CRLF);
+        stringBuffer.append("  Number of negative facts: " + m_negativeFacts.size());
+        stringBuffer.append(CRLF);
         stringBuffer.append("]");
         return stringBuffer.toString();
     }

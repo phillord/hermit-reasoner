@@ -27,10 +27,6 @@ implemented and we should check how or see why we do not want to
 support them.
 task assigned to: Giorgos
 
-- Blank node handling has not been tested much, so tests
-have to be done and bugs should be fixed should they be found.
-task assigned to: Birte
-
 - Integrate optimised classification code into the main branch
 task assigned to: Rob
 

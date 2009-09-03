@@ -27,19 +27,19 @@ import org.semanticweb.HermiT.Configuration.BlockingStrategyType;
 import org.semanticweb.HermiT.blocking.AncestorBlocking;
 import org.semanticweb.HermiT.blocking.AnywhereBlocking;
 import org.semanticweb.HermiT.blocking.AnywhereCoreBlocking;
-import org.semanticweb.HermiT.blocking.AnywhereTwoPhaseBlocking;
 import org.semanticweb.HermiT.blocking.BlockingSignatureCache;
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.blocking.CorePreDirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.DirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.SingleDirectBlockingChecker;
-import org.semanticweb.HermiT.blocking.TwoPhaseDirectBlockingChecker;
+import org.semanticweb.HermiT.blocking.UnvalidatedAnywhereCoreBlocking;
 import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
 import org.semanticweb.HermiT.existentials.ExistentialExpansionStrategy;
 import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
 import org.semanticweb.HermiT.existentials.LazyStrategy;
+import org.semanticweb.HermiT.existentials.LazyStrategyUnvalidated;
 import org.semanticweb.HermiT.hierarchy.DeterministicHierarchyBuilder;
 import org.semanticweb.HermiT.hierarchy.Hierarchy;
 import org.semanticweb.HermiT.hierarchy.HierarchyBuilder;
@@ -445,9 +445,9 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                 for (AtomicConcept atomicConcept : m_dlOntology.getAllAtomicConcepts())
                     if (!Prefixes.isInternalIRI(atomicConcept.getIRI()))
                         relevantAtomicConcepts.add(atomicConcept);
+                final int numRelevantConcepts=relevantAtomicConcepts.size();
                 if (m_progressMonitor!=null) {
-                    m_progressMonitor.setSize(relevantAtomicConcepts.size());
-                    m_progressMonitor.setProgress(0);
+                    m_progressMonitor.setProgress("Classifying...", 0, numRelevantConcepts);
                     m_progressMonitor.setStarted();
                 }
                 if (!m_subsumptionCache.isSatisfiable(AtomicConcept.THING))
@@ -462,7 +462,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                         allSubsumers.put(atomicConcept,new DeterministicHierarchyBuilder.GraphNode<AtomicConcept>(atomicConcept,subsumers));
                         if (m_progressMonitor!=null) {
                             processedConcepts++;
-                            m_progressMonitor.setProgress(processedConcepts);
+                            m_progressMonitor.setProgress("Classifying...", processedConcepts, numRelevantConcepts);
                         }
                     }
                     DeterministicHierarchyBuilder<AtomicConcept> hierarchyBuilder=new DeterministicHierarchyBuilder<AtomicConcept>(allSubsumers,AtomicConcept.THING,AtomicConcept.NOTHING);
@@ -484,7 +484,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                                 protected int m_processedConcepts=0;
                                 public void elementClassified(AtomicConcept element) {
                                     m_processedConcepts++;
-                                    m_progressMonitor.setProgress(m_processedConcepts);
+                                    m_progressMonitor.setProgress("Building the class hierarchy...", m_processedConcepts, numRelevantConcepts);
                                 }
                             };
                     HierarchyBuilder<AtomicConcept> hierarchyBuilder=new HierarchyBuilder<AtomicConcept>(relation,progressMonitor);
@@ -649,6 +649,12 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
      */
     public void classifyObjectProperties() {
         if (m_objectRoleHierarchy==null) {
+            Set<Role> allObjectRoles=new HashSet<Role>();
+            for (AtomicRole atomicRole : m_dlOntology.getAllAtomicObjectRoles()) {
+                allObjectRoles.add(atomicRole);
+                allObjectRoles.add(atomicRole.getInverse());
+            }
+            final int numRoles=allObjectRoles.size();
             HierarchyBuilder.Relation<Role> relation=
                 new HierarchyBuilder.Relation<Role>() {
                     protected final OWLDataFactory m_factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
@@ -665,14 +671,9 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                         protected int m_processedRoles=0;
                         public void elementClassified(Role element) {
                             m_processedRoles++;
-                            m_progressMonitor.setProgress(m_processedRoles);
+                            m_progressMonitor.setProgress("Building the object property hierarchy...", m_processedRoles, numRoles);
                         }
                     };
-            Set<Role> allObjectRoles=new HashSet<Role>();
-            for (AtomicRole atomicRole : m_dlOntology.getAllAtomicObjectRoles()) {
-                allObjectRoles.add(atomicRole);
-                allObjectRoles.add(atomicRole.getInverse());
-            }
             HierarchyBuilder<Role> hierarchyBuilder=new HierarchyBuilder<Role>(relation,progressMonitor);
             m_objectRoleHierarchy=hierarchyBuilder.buildHierarchy(AtomicRole.TOP_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE,allObjectRoles);
         }
@@ -1054,6 +1055,12 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
      */
     public void classifyDataProperties() {
         if (m_atomicDataRoleHierarchy==null) {
+            Set<Role> allDataRoles=new HashSet<Role>();
+            for (AtomicRole atomicRole : m_dlOntology.getAllAtomicDataRoles()) {
+                allDataRoles.add(atomicRole);
+                allDataRoles.add(atomicRole.getInverse());
+            }
+            final int numRoles=allDataRoles.size();
             HierarchyBuilder.Relation<AtomicRole> relation=
                 new HierarchyBuilder.Relation<AtomicRole>() {
                     protected final OWLDataFactory m_factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
@@ -1070,7 +1077,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                         protected int m_processedAtomicRoles=0;
                         public void elementClassified(AtomicRole element) {
                             m_processedAtomicRoles++;
-                            m_progressMonitor.setProgress(m_processedAtomicRoles);
+                            m_progressMonitor.setProgress("Building the data property hierarchy...", m_processedAtomicRoles, numRoles);
                         }
                     };
             HierarchyBuilder<AtomicRole> hierarchyBuilder=new HierarchyBuilder<AtomicRole>(relation,progressMonitor);
@@ -1487,10 +1494,10 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             tableauMonitor=new TableauMonitorFork(wellKnownTableauMonitor,config.monitor);
 
         DirectBlockingChecker directBlockingChecker=null;
-        boolean useOnlyCore=config.blockingStrategyType==Configuration.BlockingStrategyType.CORE;
+        boolean useOnlyCore=(config.blockingStrategyType==Configuration.BlockingStrategyType.CORE || config.blockingStrategyType==Configuration.BlockingStrategyType.UNVALIDATED_CORE);
         switch (config.directBlockingType) {
         case OPTIMAL:
-            if (dlOntology.hasAtMostRestrictions() && dlOntology.hasInverseRoles())
+            if (dlOntology.hasInverseRoles() && (dlOntology.hasAtMostRestrictions() || config.blockingStrategyType==Configuration.BlockingStrategyType.CORE || config.blockingStrategyType==Configuration.BlockingStrategyType.UNVALIDATED_CORE))
                 directBlockingChecker=new PairWiseDirectBlockingChecker(useOnlyCore);
             else
                 directBlockingChecker=new SingleDirectBlockingChecker(useOnlyCore);
@@ -1524,8 +1531,8 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         case CORE:
             blockingStrategy=new AnywhereCoreBlocking(new CorePreDirectBlockingChecker(),dlOntology.getUnaryValidBlockConditions(),dlOntology.getNAryValidBlockConditions(),dlOntology.hasInverseRoles());
             break;
-        case TWOPHASE:
-            blockingStrategy=new AnywhereTwoPhaseBlocking(new TwoPhaseDirectBlockingChecker(),dlOntology.getUnaryValidBlockConditions(),dlOntology.getNAryValidBlockConditions(),dlOntology.hasInverseRoles());
+        case UNVALIDATED_CORE:
+            blockingStrategy=new UnvalidatedAnywhereCoreBlocking(directBlockingChecker,blockingSignatureCache);
             break;
         case ANCESTOR:
             blockingStrategy=new AncestorBlocking(directBlockingChecker,blockingSignatureCache);
@@ -1549,10 +1556,13 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,false);
             break;
         case LAZY: 
-            if (config.blockingStrategyType!=BlockingStrategyType.CORE) {
+            if (config.blockingStrategyType==BlockingStrategyType.CORE) {
+                existentialsExpansionStrategy=new LazyStrategy(blockingStrategy);
+            } else if (config.blockingStrategyType==BlockingStrategyType.UNVALIDATED_CORE) {
+                existentialsExpansionStrategy=new LazyStrategyUnvalidated(blockingStrategy);  
+            } else {
                 throw new IllegalArgumentException("Lazy expansion can only be used with core blocking. ");
             }
-            existentialsExpansionStrategy=new LazyStrategy(blockingStrategy);
             break;    
         default:
             throw new IllegalArgumentException("Unknown expansion strategy type.");
@@ -1638,7 +1648,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             boolean hasAtMostRestrictions=originalDLOntology.hasAtMostRestrictions() || newDLOntology.hasAtMostRestrictions();
             boolean hasNominals=originalDLOntology.hasNominals() || newDLOntology.hasNominals();
             boolean hasDatatypes=originalDLOntology.hasDatatypes() || newDLOntology.hasDatatypes();
-            if (config.blockingStrategyType==Configuration.BlockingStrategyType.CORE || config.blockingStrategyType==Configuration.BlockingStrategyType.TWOPHASE) {
+            if (config.blockingStrategyType==Configuration.BlockingStrategyType.CORE) {
                 Map<AtomicConcept,Set<Set<Concept>>> unaryValidBlockConditions=createUnion(originalDLOntology.getUnaryValidBlockConditions(),newDLOntology.getUnaryValidBlockConditions());
                 Map<Set<AtomicConcept>,Set<Set<Concept>>> nAryValidBlockConditions=createUnion(originalDLOntology.getNAryValidBlockConditions(),newDLOntology.getNAryValidBlockConditions());
                 return new DLOntology(resultingOntologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,atomicObjectRoles,atomicDataRoles,definedDatatypeIRIs,individuals,hasInverseRoles,hasAtMostRestrictions,hasNominals,hasDatatypes,unaryValidBlockConditions,nAryValidBlockConditions);
@@ -1894,7 +1904,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
     }
    
     // The factory for the reasoner from the Protege plug-in
-    public class ProtegeReasonerFactory extends ProtegeOWLReasonerFactoryAdapter {
+    public static class ProtegeReasonerFactory extends ProtegeOWLReasonerFactoryAdapter {
         public OWLReasoner createReasoner(OWLOntologyManager ontologyManager) {
             // ignore the given manager
             return this.createReasoner(OWLManager.createOWLOntologyManager(),new HashSet<OWLOntology>());
