@@ -221,7 +221,7 @@ public final class DescriptionGraphManager implements Serializable {
         // Replace all nodes with the canonical node because the nodes might have been merged
         for (int vertex=0;vertex<descriptionGraph.getNumberOfVertices();vertex++) {
             Node newNode=m_newNodes.get(vertex);
-            dependencySet=newNode.addCacnonicalNodeDependencySet(dependencySet);
+            dependencySet=newNode.addCanonicalNodeDependencySet(dependencySet);
             m_newNodes.set(vertex,newNode.getCanonicalNode());
         }
         // Now add the graph layout

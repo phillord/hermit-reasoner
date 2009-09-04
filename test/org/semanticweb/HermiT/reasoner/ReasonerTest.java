@@ -619,7 +619,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertInstancesOf(some_r_e,false,IRIs("i1","i2","i3"));
         assertInstancesOf(some_r_e,true,IRIs("i3"));
     }
-    
+
     public void testWidmann1() throws Exception {
         String axioms = "SubClassOf(owl:Thing ObjectSomeValuesFrom(:a :p)) "
                 + "SubClassOf(owl:Thing ObjectSomeValuesFrom(:b ObjectAllValuesFrom(:a ObjectSomeValuesFrom(:a ObjectComplementOf(:p))))) "
@@ -2238,9 +2238,8 @@ public class ReasonerTest extends AbstractReasonerTest {
                 "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#FullBodiedWine",
                 false);
     }
-    
+
     public void testNovelNominals() throws Exception {
-        
         String axioms = "ClassAssertion(:C :a)";
         loadReasonerWithAxioms(axioms);
         OWLIndividual a = m_dataFactory.getOWLNamedIndividual(IRI.create("file:/c/test.owl#a"));

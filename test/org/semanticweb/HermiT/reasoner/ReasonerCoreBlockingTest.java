@@ -5,7 +5,7 @@ import org.semanticweb.HermiT.Configuration;
 
 
 
-public class ReasonerCoreBlockingTest  extends ReasonerTest {
+public class ReasonerCoreBlockingTest extends ReasonerTest {
 
     public ReasonerCoreBlockingTest(String name) {
         super(name);
@@ -18,6 +18,17 @@ public class ReasonerCoreBlockingTest  extends ReasonerTest {
         return c;
     }
 
+//    public void testDisjunctions() throws Exception {
+//        String axioms = "ClassAssertion(:A :a) SubClassOf(:A ObjectUnionOf(:Ap :App))"
+//                + "SubClassOf(:Ap ObjectSomeValuesFrom(:r :B))"
+//                + "SubClassOf(:B ObjectAllValuesFrom(ObjectInverseOf(:r) owl:Nothing))"
+//                + "SubClassOf(:App ObjectSomeValuesFrom(:r :Bp))"
+//                + "SubClassOf(:Bp ObjectAllValuesFrom(ObjectInverseOf(:r) owl:Nothing))";
+//        loadReasonerWithAxioms(axioms);
+//        createReasoner();
+//        assertABoxSatisfiable(false);
+//    }
+//    
 //    public void testExpansion() throws Exception {
 //        String axioms = "SubClassOf(:A :B)"
 //            + "SubClassOf(:B ObjectSomeValuesFrom(:r :C))"

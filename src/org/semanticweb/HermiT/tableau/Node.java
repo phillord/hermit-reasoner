@@ -199,7 +199,7 @@ public final class Node implements Serializable {
             result=result.m_mergedInto;
         return result;
     }
-    public PermanentDependencySet addCacnonicalNodeDependencySet(DependencySet dependencySet) {
+    public PermanentDependencySet addCanonicalNodeDependencySet(DependencySet dependencySet) {
         PermanentDependencySet result=m_tableau.m_dependencySetFactory.getPermanent(dependencySet);
         Node node=this;
         while (node.m_mergedInto!=null) {

@@ -29,7 +29,7 @@ public class LazyStrategy extends AbstractExpansionStrategy implements Serializa
     protected final Map<Node, Set<AtLeastConcept>> m_nodesNonPermanentSatExt=new HashMap<Node, Set<AtLeastConcept>>();
     protected boolean expandOneAtATime=false;
     protected int numExpansions=0;
-    protected final boolean printingOn=true;
+    protected final boolean printingOn=false;
     
     public LazyStrategy(BlockingStrategy strategy) {
         super(strategy,false);
@@ -44,6 +44,7 @@ public class LazyStrategy extends AbstractExpansionStrategy implements Serializa
     public void clear() {
         super.clear();
         m_nodesToExpand.clear();
+        m_nodesNonPermanentSatExt.clear();
     }
     public boolean expandExistentials(boolean finalChance) {
         boolean extensionsChanged=false;
@@ -67,7 +68,6 @@ public class LazyStrategy extends AbstractExpansionStrategy implements Serializa
         if (!finalChance) {
             ((AnywhereCoreBlocking)m_blockingStrategy).computePreBlocking(m_nodesToExpand); // goes through all nodes from the smallest modified node and add non-blocked nodes with unprocessed existentials to m_nodestoExpand
         } else {
-            //m_nodesToExpand.clear(); // now all the nodes with some not permanently satisfied existential are gone
             ((AnywhereCoreBlocking)m_blockingStrategy).validateBlocks(m_nodesToExpand);
         }
         if (printingOn) System.out.println(m_nodesToExpand.size() + " nodes need expansion. ");
@@ -138,5 +138,10 @@ public class LazyStrategy extends AbstractExpansionStrategy implements Serializa
             throw new IllegalStateException("Unsupported type of existential.");
         m_interruptFlag.checkInterrupt();
         return extensionsChanged;
+    }
+    public void nodeDestroyed(Node node) {
+        super.nodeDestroyed(node);
+        m_nodesNonPermanentSatExt.remove(node);
+        m_nodesToExpand.remove(node);
     }
 }

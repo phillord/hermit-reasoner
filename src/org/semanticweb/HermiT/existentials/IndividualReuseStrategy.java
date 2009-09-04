@@ -148,7 +148,7 @@ public class IndividualReuseStrategy extends AbstractExpansionStrategy implement
                 m_reuseBacktrackingTable.addTuple(m_auxiliaryBuffer);
             }
             else {
-                dependencySet=reuseInfo.node.addCacnonicalNodeDependencySet(dependencySet);
+                dependencySet=reuseInfo.node.addCanonicalNodeDependencySet(dependencySet);
                 existentialNode=reuseInfo.node.getCanonicalNode();
                 dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,reuseInfo.branchingPoint);
             }

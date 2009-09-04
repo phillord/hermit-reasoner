@@ -114,9 +114,9 @@ public final class NominalIntroductionManager implements Serializable {
     protected boolean applyNIRule(AnnotatedEquality annotatedEquality,Node node0,Node node1,Node node2,DependencySet dependencySet) {
         if (node0.isPruned() || node1.isPruned() || node2.isPruned())
             return false;
-        dependencySet=node0.addCacnonicalNodeDependencySet(dependencySet);
-        dependencySet=node1.addCacnonicalNodeDependencySet(dependencySet);
-        dependencySet=node2.addCacnonicalNodeDependencySet(dependencySet);
+        dependencySet=node0.addCanonicalNodeDependencySet(dependencySet);
+        dependencySet=node1.addCanonicalNodeDependencySet(dependencySet);
+        dependencySet=node2.addCanonicalNodeDependencySet(dependencySet);
         node0=node0.getCanonicalNode();
         node1=node1.getCanonicalNode();
         node2=node2.getCanonicalNode();
@@ -143,12 +143,12 @@ public final class NominalIntroductionManager implements Serializable {
             Node newRootNode=getNIRootFor(dependencySet,node2,annotatedEquality,1);
             if (!newRootNode.isActive()) {
                 assert newRootNode.isMerged();
-                dependencySet=newRootNode.addCacnonicalNodeDependencySet(dependencySet);
+                dependencySet=newRootNode.addCanonicalNodeDependencySet(dependencySet);
                 newRootNode=newRootNode.getCanonicalNode();
             }
             m_mergingManager.mergeNodes(niTargetNode,newRootNode,dependencySet);
             if (!otherNode.isPruned()) {
-                dependencySet=otherNode.addCacnonicalNodeDependencySet(dependencySet);
+                dependencySet=otherNode.addCanonicalNodeDependencySet(dependencySet);
                 m_mergingManager.mergeNodes(otherNode.getCanonicalNode(),newRootNode,dependencySet);
             }
             if (m_tableau.m_tableauMonitor!=null)
@@ -198,12 +198,12 @@ public final class NominalIntroductionManager implements Serializable {
             Node newRootNode=getNIRootFor(dependencySet,m_rootNode,m_annotatedEquality,m_currentRootNode);
             if (!newRootNode.isActive()) {
                 assert newRootNode.isMerged();
-                dependencySet=newRootNode.addCacnonicalNodeDependencySet(dependencySet);
+                dependencySet=newRootNode.addCanonicalNodeDependencySet(dependencySet);
                 newRootNode=newRootNode.getCanonicalNode();
             }
             m_mergingManager.mergeNodes(m_niTargetNode,newRootNode,dependencySet);
             if (!m_otherNode.isPruned()) {
-                dependencySet=m_otherNode.addCacnonicalNodeDependencySet(dependencySet);
+                dependencySet=m_otherNode.addCanonicalNodeDependencySet(dependencySet);
                 m_mergingManager.mergeNodes(m_otherNode.getCanonicalNode(),newRootNode,dependencySet);
             }
         }

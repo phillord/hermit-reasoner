@@ -51,7 +51,7 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
     protected boolean m_immediatelyValidateBlocks = false;
     protected Node m_lastValidatedUnchangedNode=null;
     // statistics: 
-    protected final boolean printingOn=true;
+    protected final boolean printingOn=false;
     protected int numBlockingComputed = 0;
     protected int maxCore = 0;
     protected int maxLabel = 0;
@@ -544,7 +544,7 @@ public class AnywhereCoreBlocking implements BlockingStrategy, Serializable {
     }
     public void modelFound() {
         if (printingOn) printStatistics(false);
-        System.out.println("Found model with " + (m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes()) + " nodes. ");
+        //System.out.println("Found  model with " + (m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes()) + " nodes. ");
 //        Node node=m_tableau.getFirstTableauNode();
 //        while (node!=null) {
 //            if (node.isActive() && node.isBlocked()) 
