@@ -73,7 +73,8 @@ public class ObjectPropertyInclusionManager {
             	if(inclusion[index] instanceof OWLObjectCardinalityRestriction)
                     if( m_nonSimpleRoles.contains( ((OWLObjectCardinalityRestriction)inclusion[index]).getProperty() ) )
                         throw new IllegalArgumentException( "Non simple role '" + (OWLObjectCardinalityRestriction)inclusion[index] + "' or its inverse appears in asymmetricity axiom");
-            	inclusion[index]=replaceDescriptionIfNecessary(inclusion[index]);
+
+                    inclusion[index]=replaceDescriptionIfNecessary(inclusion[index]);
             }
 
         for (Map.Entry<OWLObjectAllValuesFrom,OWLClassExpression> mapping : m_replacedDescriptions.entrySet()) {
@@ -124,8 +125,17 @@ public class ObjectPropertyInclusionManager {
                 }
             }
             Object[] finalStates = automatonOfRole.terminals().toArray();
-            for( int i=0 ; i<finalStates.length ; i++ )
-                axioms.m_conceptInclusions.add(new OWLClassExpression[] { mapOfNewConceptNames.get( (State)finalStates[i] ).getComplementNNF(), owlConcept });
+            for( int i=0 ; i<finalStates.length ; i++ ){
+            	OWLClassExpression[] classExpr; 
+            	if( owlConcept.isOWLNothing() )
+            		classExpr = new OWLClassExpression[] { mapOfNewConceptNames.get( (State)finalStates[i] ).getComplementNNF() };
+            	else if( owlConcept.isOWLThing() )
+            		classExpr = new OWLClassExpression[] { owlConcept };
+            	else
+            		classExpr = new OWLClassExpression[] { mapOfNewConceptNames.get( (State)finalStates[i] ).getComplementNNF(), owlConcept };
+                
+            	axioms.m_conceptInclusions.add(classExpr);
+            }
         }
         m_replacedDescriptions.clear();
 
@@ -142,6 +152,7 @@ public class ObjectPropertyInclusionManager {
                 OWLClassExpression replacement = m_factory.getOWLClass(IRI.create("internal:all#"+indexOfReplacedConcept+initialState));
                 if (objectAll.getFiller() instanceof OWLObjectComplementOf || objectAll.getFiller().equals(m_factory.getOWLNothing()))
                 	replacement = m_factory.getOWLClass(IRI.create("internal:all#"+indexOfReplacedConcept+initialState)).getComplementNNF();
+
                 return replacement;
             }
         }
