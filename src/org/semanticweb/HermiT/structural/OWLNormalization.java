@@ -521,6 +521,9 @@ public class OWLNormalization {
             }
         }
         public void visit(OWLEquivalentDataPropertiesAxiom axiom) {
+            for (OWLDataPropertyExpression dp : axiom.getProperties()) {
+                if (dp.isOWLTopDataProperty()) throwInvalidTopDPUseError(axiom);
+            }
             if (axiom.getProperties().size()>1) {
                 Iterator<OWLDataPropertyExpression> iterator=axiom.getProperties().iterator();
                 OWLDataPropertyExpression first=iterator.next();
@@ -534,25 +537,38 @@ public class OWLNormalization {
             }
         }
         public void visit(OWLDisjointDataPropertiesAxiom axiom) {
+            for (OWLDataPropertyExpression dp : axiom.getProperties()) {
+                if (dp.isOWLTopDataProperty()) throwInvalidTopDPUseError(axiom);
+            }
             OWLDataPropertyExpression[] dataProperties=new OWLDataPropertyExpression[axiom.getProperties().size()];
             axiom.getProperties().toArray(dataProperties);
             m_axioms.m_disjointDataProperties.add(dataProperties);
         }
         public void visit(OWLDataPropertyDomainAxiom axiom) {
+            OWLDataPropertyExpression dp=axiom.getProperty();
+            if (dp.isOWLTopDataProperty()) throwInvalidTopDPUseError(axiom);
             OWLDataRange dataNothing=m_factory.getOWLDataComplementOf(m_factory.getTopDatatype());
-            OWLDataAllValuesFrom allPropertyDataNothing=m_factory.getOWLDataAllValuesFrom(axiom.getProperty(),dataNothing);
+            OWLDataAllValuesFrom allPropertyDataNothing=m_factory.getOWLDataAllValuesFrom(dp,dataNothing);
             m_inclusionsAsDisjunctions.add(new OWLClassExpression[] { positive(axiom.getDomain()),allPropertyDataNothing });
         }
         public void visit(OWLDataPropertyRangeAxiom axiom) {
-            OWLDataAllValuesFrom allPropertyRange=m_factory.getOWLDataAllValuesFrom(axiom.getProperty(),positive(axiom.getRange()));
+            OWLDataPropertyExpression dp=axiom.getProperty();
+            if (dp.isOWLTopDataProperty()) throwInvalidTopDPUseError(axiom); 
+            OWLDataAllValuesFrom allPropertyRange=m_factory.getOWLDataAllValuesFrom(dp,positive(axiom.getRange()));
             m_inclusionsAsDisjunctions.add(new OWLClassExpression[] { allPropertyRange });            
             if (axiom.getRange().isDatatype()) {
                 // used to syntactically check range cardinalities to optimise some cases of large numbers in number restrictions
-                m_axioms.m_dps2ranges.put(axiom.getProperty().asOWLDataProperty(), axiom.getRange().asOWLDatatype());
+                m_axioms.m_dps2ranges.put(dp.asOWLDataProperty(), axiom.getRange().asOWLDatatype());
             }
         }
         public void visit(OWLFunctionalDataPropertyAxiom axiom) {
-            m_inclusionsAsDisjunctions.add(new OWLClassExpression[] { m_factory.getOWLDataMaxCardinality(1,axiom.getProperty()) });
+            OWLDataPropertyExpression dp=axiom.getProperty();
+            if (dp.isOWLTopDataProperty()) throwInvalidTopDPUseError(axiom);
+            m_inclusionsAsDisjunctions.add(new OWLClassExpression[] { m_factory.getOWLDataMaxCardinality(1,dp) });
+        }
+        
+        protected void throwInvalidTopDPUseError(OWLAxiom axiom) {
+            throw new IllegalArgumentException("Error: In OWL 2 DL, owl:topDataProperty is only allowed to occur in the super property position of SubDataPropertyOf axioms, but the ontology contains an axiom " + axiom + " that violates this condition.");
         }
 
         // Keys
@@ -774,6 +790,8 @@ public class OWLNormalization {
         }
         public OWLClassExpression visit(OWLDataSomeValuesFrom object) {
             OWLDataRange filler=object.getFiller();
+            OWLDataPropertyExpression prop=object.getProperty();
+            if (prop.isOWLTopDataProperty()) throwInvalidTopDPUseError(object);
             if (isLiteral(filler)) {
                 return m_factory.getOWLDataSomeValuesFrom(object.getProperty(),filler);
             } else {
@@ -785,39 +803,48 @@ public class OWLNormalization {
         }
         public OWLClassExpression visit(OWLDataAllValuesFrom object) {
             OWLDataRange filler=object.getFiller();
+            OWLDataPropertyExpression prop=object.getProperty();
+            if (prop.isOWLTopDataProperty()) throwInvalidTopDPUseError(object);
             if (isLiteral(filler)) {
-                return m_factory.getOWLDataAllValuesFrom(object.getProperty(),filler);
+                return m_factory.getOWLDataAllValuesFrom(prop,filler);
             } else {
                 OWLDatatype definition=getDefinitionFor(filler,m_alreadyExists);
                 if (!m_alreadyExists[0])
                     m_newDataRangeInclusions.add(new OWLDataRange[] { negative(definition),filler } );
-                return m_factory.getOWLDataAllValuesFrom(object.getProperty(),definition);
+                return m_factory.getOWLDataAllValuesFrom(prop,definition);
             }
+        }
+        protected void throwInvalidTopDPUseError(OWLClassExpression ex) {
+            throw new IllegalArgumentException("Error: In OWL 2 DL, owl:topDataProperty is only allowed to occur in the super property position of SubDataPropertyOf axioms, but the ontology contains an axiom with the class expression "+ex+" that violates this restriction.");
         }
         public OWLClassExpression visit(OWLDataHasValue object) {
             throw new IllegalStateException("Internal error: data value restrictions should have been simplified.");
         }
         public OWLClassExpression visit(OWLDataMinCardinality object) {
             OWLDataRange filler=object.getFiller();
+            OWLDataPropertyExpression prop=object.getProperty();
+            if (prop.isOWLTopDataProperty()) throwInvalidTopDPUseError(object);
             if (isLiteral(filler))
-                return m_factory.getOWLDataMinCardinality(object.getCardinality(),object.getProperty(),filler);
+                return m_factory.getOWLDataMinCardinality(object.getCardinality(),prop,filler);
             else {
                 OWLDatatype definition=getDefinitionFor(filler,m_alreadyExists);
                 if (!m_alreadyExists[0])
                     m_newDataRangeInclusions.add(new OWLDataRange[] { negative(definition),filler } );
-                return m_factory.getOWLDataMinCardinality(object.getCardinality(),object.getProperty(),definition);
+                return m_factory.getOWLDataMinCardinality(object.getCardinality(),prop,definition);
             }
         }
         public OWLClassExpression visit(OWLDataMaxCardinality object) {
             OWLDataRange filler=object.getFiller();
+            OWLDataPropertyExpression prop=object.getProperty();
+            if (prop.isOWLTopDataProperty()) throwInvalidTopDPUseError(object);
             if (isLiteral(filler))
-                return m_factory.getOWLDataMaxCardinality(object.getCardinality(),object.getProperty(),filler);
+                return m_factory.getOWLDataMaxCardinality(object.getCardinality(),prop,filler);
             else {
                 OWLDataRange complementDescription=m_expressionManager.getComplementNNF(filler);
                 OWLDatatype definition=getDefinitionFor(complementDescription,m_alreadyExists);
                 if (!m_alreadyExists[0])
                     m_newDataRangeInclusions.add(new OWLDataRange[] { negative(definition),filler } );
-                return m_factory.getOWLDataMaxCardinality(object.getCardinality(),object.getProperty(),m_expressionManager.getComplementNNF(definition));
+                return m_factory.getOWLDataMaxCardinality(object.getCardinality(),prop,m_expressionManager.getComplementNNF(definition));
             }
         }
         public OWLClassExpression visit(OWLDataExactCardinality object) {
