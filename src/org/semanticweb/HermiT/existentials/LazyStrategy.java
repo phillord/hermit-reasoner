@@ -7,13 +7,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.semanticweb.HermiT.blocking.AnywhereCoreBlocking;
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
+import org.semanticweb.HermiT.blocking.old.AnywhereCoreBlockingOld;
 import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.ExistsDescriptionGraph;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.tableau.Tableau;
 
 /**
  * Strategy for expanding all existentials on the oldest node in the tableau with unexpanded existentials.
@@ -25,11 +26,13 @@ public class LazyStrategy extends AbstractExpansionStrategy implements Serializa
     private static final long serialVersionUID=-64673639237063636L;
     
     protected final Set<Node> m_nodesToExpand=new HashSet<Node>();
-    protected final Set<Node> m_nodesWithFinishedExpansion=new HashSet<Node>();
+    //protected final Set<Node> m_nodesWithFinishedExpansion=new HashSet<Node>();
     protected final Map<Node, Set<AtLeastConcept>> m_nodesNonPermanentSatExt=new HashMap<Node, Set<AtLeastConcept>>();
+    protected Node m_smallestNodeThatNeedsExpansion=null;
     protected boolean expandOneAtATime=false;
     protected int numExpansions=0;
-    protected final boolean printingOn=false;
+    protected final boolean printingOn=true;
+    protected final boolean debuggingMode=false;
     
     public LazyStrategy(BlockingStrategy strategy) {
         super(strategy,false);
@@ -41,59 +44,62 @@ public class LazyStrategy extends AbstractExpansionStrategy implements Serializa
         m_existentialExpansionManager.expand(atLeastConcept,forNode);
         m_existentialExpansionManager.markExistentialProcessed(atLeastConcept,forNode);
     }
+    public void initialize(Tableau tableau) {
+        super.initialize(tableau);
+    }
     public void clear() {
         super.clear();
         m_nodesToExpand.clear();
         m_nodesNonPermanentSatExt.clear();
+        m_smallestNodeThatNeedsExpansion=null;
     }
-    public boolean expandExistentials(boolean finalChance) {
-        boolean extensionsChanged=false;
-        Set<Node> inactive=new HashSet<Node>();
-        for (Node n : m_nodesNonPermanentSatExt.keySet()) {
-            if (n.isActive()) {
-                for (AtLeastConcept c : m_nodesNonPermanentSatExt.get(n)) {
-                    if (isSatisfied(c, n)==SatType.NOT_SATISFIED) {
-                        m_nodesToExpand.add(n);
-                    }
-                }
-            } else {
-                inactive.add(n);
-            }
-        }
-        m_nodesToExpand.removeAll(inactive);
-        for (Node n : inactive) {
-            m_nodesNonPermanentSatExt.remove(n);
-        }
-        // check blocks and collect unblocked nodes that need existential expansion in m_nodesToExpand
-        if (!finalChance) {
-            ((AnywhereCoreBlocking)m_blockingStrategy).computePreBlocking(m_nodesToExpand); // goes through all nodes from the smallest modified node and add non-blocked nodes with unprocessed existentials to m_nodestoExpand
-        } else {
-            ((AnywhereCoreBlocking)m_blockingStrategy).validateBlocks(m_nodesToExpand);
-        }
-        if (printingOn) System.out.println(m_nodesToExpand.size() + " nodes need expansion. ");
-        m_interruptFlag.checkInterrupt();
-        for (Node node : m_nodesToExpand) {
-            if (node.isActive() && !node.isBlocked() && node.hasUnprocessedExistentials()) {
-                boolean hasChangedForThisNode=false;
-                for (ExistentialConcept ec : new HashSet<ExistentialConcept>(node.getUnprocessedExistentials())) {
-                    hasChangedForThisNode=doExpansion(node, ec);
-                    if (hasChangedForThisNode) {
-                        break; // expand one existential per node at a time
-                    }
-                }
-                if (!hasChangedForThisNode) {
-                    m_nodesWithFinishedExpansion.add(node);
-                }
-                extensionsChanged = (extensionsChanged || hasChangedForThisNode);
-            } else {
-                m_nodesWithFinishedExpansion.add(node);
-            }
-            m_interruptFlag.checkInterrupt();
-        }
-        m_nodesToExpand.removeAll(m_nodesWithFinishedExpansion);
-        m_nodesWithFinishedExpansion.clear();
-        return extensionsChanged;
-    }
+//    public boolean expandExistentials(boolean finalChance) {
+//        boolean extensionsChanged=false;
+//        m_nodesToExpand.clear();
+//        // check blocks and collect unblocked nodes that need existential expansion in m_nodesToExpand
+//        if (!finalChance) {
+//            ((AnywhereCoreBlocking)m_blockingStrategy).computePreBlocking(m_smallestNodeThatNeedsExpansion, m_nodesToExpand); // goes through all nodes from the smallest modified node and adds non-blocked nodes with unprocessed existentials to m_nodestoExpand
+//        } else {
+//            ((AnywhereCoreBlocking)m_blockingStrategy).validateBlocks(m_smallestNodeThatNeedsExpansion, m_nodesToExpand);
+//        }
+//        Set<Node> inactive=new HashSet<Node>();
+//        for (Node n : m_nodesNonPermanentSatExt.keySet()) {
+//            if (n.isActive() && !n.isBlocked()) {
+//                for (AtLeastConcept c : m_nodesNonPermanentSatExt.get(n)) {
+//                    if (isSatisfied(c, n)==SatType.NOT_SATISFIED) {
+//                        m_nodesToExpand.add(n);
+//                    }
+//                }
+//            } else {
+//                inactive.add(n);
+//            }
+//        }
+//        for (Node n : inactive) {
+//            m_nodesNonPermanentSatExt.remove(n);
+//        }
+//        if (debuggingMode) doSanityCheck();
+//        if (debuggingMode && printingOn) System.out.println(m_nodesToExpand.size() + " nodes need expansion. ");
+//        m_interruptFlag.checkInterrupt();
+//        Node smallestNodeThatNeedsExpansion=null;
+//        for (Node node : m_nodesToExpand) {
+//            if (node.isActive() && !node.isBlocked() && node.hasUnprocessedExistentials()) {
+//                boolean hasChangedForThisNode=false;
+//                for (ExistentialConcept ec : new HashSet<ExistentialConcept>(node.getUnprocessedExistentials())) {
+//                    hasChangedForThisNode=doExpansion(node, ec);
+//                    if (hasChangedForThisNode) {
+//                        break; // expand one existential per node at a time
+//                    }
+//                }
+//                extensionsChanged = (extensionsChanged || hasChangedForThisNode);
+//            }
+//            if (node.hasUnprocessedExistentials() && (smallestNodeThatNeedsExpansion==null || node.getNodeID()<smallestNodeThatNeedsExpansion.getNodeID())) {
+//                smallestNodeThatNeedsExpansion=node;
+//            }
+//            m_interruptFlag.checkInterrupt();
+//        }
+//        m_smallestNodeThatNeedsExpansion=smallestNodeThatNeedsExpansion;
+//        return extensionsChanged;
+//    }
     protected boolean doExpansion(Node node, ExistentialConcept existentialConcept) {
         boolean extensionsChanged=false;
         TableauMonitor monitor=m_tableau.getTableauMonitor();
@@ -143,5 +149,41 @@ public class LazyStrategy extends AbstractExpansionStrategy implements Serializa
         super.nodeDestroyed(node);
         m_nodesNonPermanentSatExt.remove(node);
         m_nodesToExpand.remove(node);
+    }
+    protected void doSanityCheck() {
+        m_tableau.checkTableauList();
+        for (Node n : m_nodesToExpand) {
+            if (!n.isActive()) throw new IllegalStateException("LE: Node "+n+" is not active but in the set of nodes that need expansion. ");
+            if (n.isBlocked()) throw new IllegalStateException("LE: Node "+n+" is blocked but in the set of nodes that need expansion. ");
+            if (n.isMerged()) throw new IllegalStateException("LE: Node "+n+" is merged but in the set of nodes that need expansion. ");
+            if (n.isPruned()) throw new IllegalStateException("LE: Node "+n+" is pruned but in the set of nodes that need expansion. ");
+        }
+        for (Node n : m_nodesNonPermanentSatExt.keySet()) {
+            if (!n.isActive()) throw new IllegalStateException("LE: Node "+n+" is not active but in the set of nodes that need expansion. ");
+            if (n.isBlocked()) throw new IllegalStateException("LE: Node "+n+" is blocked but in the set of nodes that need expansion. ");
+            if (n.isMerged()) throw new IllegalStateException("LE: Node "+n+" is merged but in the set of nodes that need expansion. ");
+            if (n.isPruned()) throw new IllegalStateException("LE: Node "+n+" is pruned but in the set of nodes that need expansion. ");
+        }
+        ((AnywhereCoreBlockingOld)m_blockingStrategy).doSanityCheck();
+    }
+    public void modelFound() {
+        if (debuggingMode) {
+            System.out.println("Checking all unblocked nodes for unprocessed existentials....");
+            Node node=m_tableau.getFirstTableauNode();
+            while (node!=null) {
+                if (node.isActive() && !node.isBlocked() && node.hasUnprocessedExistentials()) {
+                    for (ExistentialConcept ec : node.getUnprocessedExistentials()) {
+                        if (ec instanceof AtLeastConcept) {
+                            SatType st=isSatisfied((AtLeastConcept)ec, node);
+                            if (st==SatType.NOT_SATISFIED) {
+                                System.err.println("Node "+node+ " has unprocessed existential " + ec);
+                            }
+                        }
+                    }
+                }
+                node=node.getNextTableauNode();
+            }
+        }
+        super.modelFound();
     }
 }

@@ -28,5 +28,4 @@ public interface BlockingStrategy {
     void modelFound();
     boolean isExact();
     void dlClauseBodyCompiled(List<DLClauseEvaluator.Worker> workers,DLClause dlClause,List<Variable> variables,Object[] valuesBuffer,boolean[] coreVariables);
-    //boolean computeIsBlocked(Node node);
 }

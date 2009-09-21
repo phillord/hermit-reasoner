@@ -694,7 +694,7 @@ public final class Tableau implements Serializable {
         assert buffer.isEmpty();
         m_existentialConceptsBuffers.add(buffer);
     }
-    protected void checkTableauList() {
+    public void checkTableauList() {
         Node node=m_firstTableauNode;
         int numberOfNodesInTableau=0;
         while (node!=null) {

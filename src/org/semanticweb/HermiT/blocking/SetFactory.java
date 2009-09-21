@@ -187,10 +187,10 @@ public class SetFactory<E> implements Serializable {
             throw new UnsupportedOperationException();
         }
         public boolean contains(Object o) {
-            for (int index=0;index<m_table.length;index++)
-                if (!m_table[index].equals(o))
-                    return false;
-            return true;
+            for (int index=m_table.length-1;index>=0;--index)
+                if (m_table[index].equals(o))
+                    return true;
+            return false;
         }
         public boolean containsAll(Collection<?> c) {
             for (Object object : c)

@@ -64,20 +64,21 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
         return true;
     }
     public void assertionAdded(Concept concept,Node node,boolean isCore) {
-        m_directBlockingChecker.assertionAdded(concept,node);
+        m_directBlockingChecker.assertionAdded(concept,node,isCore);
     }
     public void assertionCoreSet(Concept concept,Node node) {
     }
     public void assertionRemoved(Concept concept,Node node,boolean isCore) {
-        m_directBlockingChecker.assertionRemoved(concept,node);
+        m_directBlockingChecker.assertionRemoved(concept,node,isCore);
     }
     public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
-        m_directBlockingChecker.assertionAdded(atomicRole,nodeFrom,nodeTo);
+        m_directBlockingChecker.assertionAdded(atomicRole,nodeFrom,nodeTo,isCore);
     }
     public void assertionCoreSet(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
+        m_directBlockingChecker.assertionAdded(atomicRole,nodeFrom,nodeTo,true);
     }
     public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
-        m_directBlockingChecker.assertionRemoved(atomicRole,nodeFrom,nodeTo);
+        m_directBlockingChecker.assertionRemoved(atomicRole,nodeFrom,nodeTo,isCore);
     }
     public void nodeStatusChanged(Node node) {
     }
@@ -102,5 +103,8 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
         return true;
     }
     public void dlClauseBodyCompiled(List<DLClauseEvaluator.Worker> workers,DLClause dlClause,List<Variable> variables,Object[] valuesBuffer,boolean[] coreVariables) {
+        for (int i=0;i<coreVariables.length;i++) {
+            coreVariables[i]=true;
+        }
     }
 }

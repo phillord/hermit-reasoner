@@ -365,11 +365,6 @@ public class ReasonerTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(true);
     }
-    public void testTopDataProperty() throws Exception {
-        String axioms = "ClassAssertion(ObjectComplementOf(DataSomeValuesFrom( owl:topDataProperty rdfs:Literal)) :i)";
-        loadReasonerWithAxioms(axioms);
-        assertABoxSatisfiable(false);
-    }
     public void testNegativeDataPropertyAssertion() throws Exception {
         String axioms = "Declaration( DataProperty( :hasAge ) )"
             + "NegativeDataPropertyAssertion( :hasAge :Meg \"5\"^^xsd:integer )"

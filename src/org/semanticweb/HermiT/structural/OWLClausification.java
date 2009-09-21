@@ -126,14 +126,6 @@ public class OWLClausification {
         m_configuration=configuration;
     }
     public DLOntology clausify(OWLOntologyManager ontologyManager,OWLOntology ontology,Collection<DescriptionGraph> descriptionGraphs) {
-//        Set<OWLOntology> importClosure=new HashSet<OWLOntology>();
-//        List<OWLOntology> toProcess=new ArrayList<OWLOntology>();
-//        toProcess.add(ontology);
-//        while (!toProcess.isEmpty()) {
-//            OWLOntology anOntology=toProcess.remove(toProcess.size()-1);
-//            if (importClosure.add(anOntology))
-//                toProcess.addAll(anOntology.getImports(ontologyManager));
-//        }
         return clausifyImportClosure(ontologyManager.getOWLDataFactory(),ontology.getOntologyID().getDefaultDocumentIRI() == null ? "urn:hermit:kb" : ontology.getOntologyID().getDefaultDocumentIRI().toString(),ontology.getImportsClosure(),descriptionGraphs);
     }
     public DLOntology clausifyImportClosure(OWLDataFactory factory,String ontologyIRI,Collection<OWLOntology> importClosure,Collection<DescriptionGraph> descriptionGraphs) {
@@ -288,11 +280,12 @@ public class OWLClausification {
         for (OWLDataProperty dataProperty : axioms.m_dataProperties)
             dataRoles.add(AtomicRole.create(dataProperty.getIRI().toString()));
         // clausify SWRL rules
-        NormalizedRuleClausifier ruleClausifier=new NormalizedRuleClausifier(positiveFacts,negativeFacts,descriptionGraphs,axioms.m_objectPropertiesUsedInAxioms,dataRangeConverter);
-        for (SWRLRule rule : axioms.m_rules) {
-            rule.accept(ruleClausifier);
-        }
         if (!axioms.m_rules.isEmpty()) {
+            m_configuration.checkClauses=false;
+            NormalizedRuleClausifier ruleClausifier=new NormalizedRuleClausifier(positiveFacts,negativeFacts,descriptionGraphs,axioms.m_objectPropertiesUsedInAxioms,dataRangeConverter);
+            for (SWRLRule rule : axioms.m_rules) {
+                rule.accept(ruleClausifier);
+            }
             Set<Atom> safenessAtoms=new HashSet<Atom>();
             boolean isGraphRule=false;
             for (int clauseIndex=0; clauseIndex<ruleClausifier.m_bodies.size(); clauseIndex++) {
@@ -329,7 +322,7 @@ public class OWLClausification {
                 safenessAtoms.clear();
             }
         }
-        if (m_configuration.blockingStrategyType==Configuration.BlockingStrategyType.CORE) {
+        if (m_configuration.blockingStrategyType==Configuration.BlockingStrategyType.VALIDATED) {
             // The following two maps are only used with inexact blocking strategies, i.e., blocking strategies that establish 
             // blocks that might not be valid and that only in a later validation phase will be checked for validity. In case 
             // of invalid blocks existential expansion will continue further. 
@@ -417,9 +410,10 @@ public class OWLClausification {
             foundRelevantConcept = false;
             premises = new HashSet<AtomicConcept>();
             conclusions = new HashSet<Concept>();
-            for (int i = 0; i<descs.length&&!foundRelevantConcept; i++) {
+            for (int i = 0; i<descs.length; i++) {
                 OWLClassExpression desc = descs[i];
                 if (desc instanceof OWLObjectAllValuesFrom) {
+                    // forall r.C becomes <= 0 r.not C
                     foundRelevantConcept = true;
                     OWLObjectAllValuesFrom all = (OWLObjectAllValuesFrom) desc;
                     AtomicRole ar = AtomicRole.create(all.getProperty().getNamedProperty().getIRI().toString()); 
@@ -448,6 +442,7 @@ public class OWLClausification {
                     }
                     conclusions.add(AtMostConcept.create(0, r, c));
                 } else if (desc instanceof OWLObjectSomeValuesFrom) {
+                    // some r.C becomes >= 1 r.C
                     foundRelevantConcept = true;
                     OWLObjectSomeValuesFrom some = (OWLObjectSomeValuesFrom) desc;
                     AtomicRole ar = AtomicRole.create(some.getProperty().getNamedProperty().getIRI().toString()); 
@@ -501,7 +496,7 @@ public class OWLClausification {
                             c=AtomicConcept.create(min.getFiller().asOWLClass().getIRI().toString());
                         }
                     }
-                    conclusions.add(AtLeastConcept.create(1, r, c));
+                    conclusions.add(AtLeastConcept.create(min.getCardinality(), r, c));
                 } else if (desc instanceof OWLObjectMaxCardinality) {
                     foundRelevantConcept = true;
                     OWLObjectMaxCardinality max = (OWLObjectMaxCardinality) desc;

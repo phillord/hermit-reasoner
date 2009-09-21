@@ -87,7 +87,7 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         super(name);
     }
     protected void setUp() {
-        PairWiseDirectBlockingChecker directChecker=new PairWiseDirectBlockingChecker(false);
+        PairWiseDirectBlockingChecker directChecker=new PairWiseDirectBlockingChecker();
         BlockingSignatureCache blockingSignatureCache=new BlockingSignatureCache(directChecker);
         BlockingStrategy blockingStrategy=new AnywhereBlocking(directChecker,blockingSignatureCache);
         ExistentialExpansionStrategy ExpansionStrategy=new CreationOrderStrategy(blockingStrategy);

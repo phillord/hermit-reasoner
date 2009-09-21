@@ -73,27 +73,24 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
             m_firstChangedNode=null;
         }
     }
-    public boolean computeIsBlocked(Node node) {
-        throw new UnsupportedOperationException("Unsupported operation: Anywhere blocking cannot be used with a lazy expansion strategy. ");
-    }
     public boolean isPermanentAssertion(Concept concept,Node node) {
         return true;
     }
     public void assertionAdded(Concept concept,Node node,boolean isCore) {
-        updateNodeChange(m_directBlockingChecker.assertionAdded(concept,node));
+        updateNodeChange(m_directBlockingChecker.assertionAdded(concept,node,isCore));
     }
     public void assertionCoreSet(Concept concept,Node node) {
     }
     public void assertionRemoved(Concept concept,Node node,boolean isCore) {
-        updateNodeChange(m_directBlockingChecker.assertionRemoved(concept,node));
+        updateNodeChange(m_directBlockingChecker.assertionRemoved(concept,node,isCore));
     }
     public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
-        updateNodeChange(m_directBlockingChecker.assertionAdded(atomicRole,nodeFrom,nodeTo));
+        updateNodeChange(m_directBlockingChecker.assertionAdded(atomicRole,nodeFrom,nodeTo,isCore));
     }
     public void assertionCoreSet(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
     }
     public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
-        updateNodeChange(m_directBlockingChecker.assertionRemoved(atomicRole,nodeFrom,nodeTo));
+        updateNodeChange(m_directBlockingChecker.assertionRemoved(atomicRole,nodeFrom,nodeTo,isCore));
     }
     public void nodeStatusChanged(Node node) {
         updateNodeChange(node);
@@ -112,7 +109,7 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
             m_firstChangedNode=null;
     }
     public void modelFound() {
-        //System.out.println("Found  model with " + (m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes()) + " nodes. ");
+        System.out.println("Found  model with " + (m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes()) + " nodes. ");
         if (m_blockingSignatureCache!=null) {
             // Since we've found a model, we know what is blocked or not.
             // Therefore, we don't need to update the blocking status.
@@ -129,6 +126,9 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
         return true;
     }
     public void dlClauseBodyCompiled(List<DLClauseEvaluator.Worker> workers,DLClause dlClause,List<Variable> variables,Object[] valuesBuffer,boolean[] coreVariables) {
+        for (int i=0;i<coreVariables.length;i++) {
+            coreVariables[i]=true;
+        }
     }
 }
 class BlockersCache implements Serializable {

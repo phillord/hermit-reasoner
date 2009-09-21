@@ -17,14 +17,12 @@ import org.semanticweb.HermiT.tableau.Tableau;
 public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serializable {
     private static final long serialVersionUID=9093753046859877016L;
 
-    protected final boolean m_useOnlyCore;
     protected final SetFactory<AtomicConcept> m_atomicConceptsSetFactory;
     protected final List<AtomicConcept> m_atomicConceptsBuffer;
     protected Tableau m_tableau;
     protected ExtensionTable.Retrieval m_binaryTableSearch1Bound;
 
-    public SingleDirectBlockingChecker(boolean useOnlyCore) {
-        m_useOnlyCore=useOnlyCore;
+    public SingleDirectBlockingChecker() {
         m_atomicConceptsSetFactory=new SetFactory<AtomicConcept>();
         m_atomicConceptsBuffer=new ArrayList<AtomicConcept>();
     }
@@ -65,42 +63,52 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
     public void nodeDestroyed(Node node) {
         ((SingleBlockingObject)node.getBlockingObject()).destroy();
     }
-    public Node assertionAdded(Concept concept,Node node) {
-        if (concept instanceof AtomicConcept) {
+    public Node assertionAdded(Concept concept,Node node,boolean isCore) {
+        if (isCore&&concept instanceof AtomicConcept) {
             ((SingleBlockingObject)node.getBlockingObject()).addAtomicConcept((AtomicConcept)concept);
             return node;
         }
         else
             return null;
     }
-    public Node assertionRemoved(Concept concept,Node node) {
-        if (concept instanceof AtomicConcept) {
+    public Node assertionRemoved(Concept concept,Node node,boolean isCore) {
+        if (isCore&&concept instanceof AtomicConcept) {
             ((SingleBlockingObject)node.getBlockingObject()).removeAtomicConcept((AtomicConcept)concept);
             return node;
         }
         else
             return null;
     }
-    public Node assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
+    public Node assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         return null;
     }
-    public Node assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
+    public Node assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         return null;
     }
     public BlockingSignature getBlockingSignatureFor(Node node) {
         return new SingleBlockingSignature(this,node);
     }
-    protected Set<AtomicConcept> getAtomicConceptsLabel(Node node) {
+    public Set<AtomicConcept> getBlockingRelevantConceptsLabel(Node node) {
+        return ((SingleBlockingObject)node.getBlockingObject()).getAtomicConceptsLabel();
+    }
+    public Set<AtomicConcept> getFullAtomicConceptsLabel(Node node) {
+        return fetchAtomicConceptsLabel(node, false);
+    }
+    public Set<AtomicRole> getFullFromParentLabel(Node node) {
+        return null;
+    }
+    public Set<AtomicRole> getFullToParentLabel(Node node) {
+        return null;
+    }
+    protected Set<AtomicConcept> fetchAtomicConceptsLabel(Node node,boolean onlyCore) {
         m_atomicConceptsBuffer.clear();
         m_binaryTableSearch1Bound.getBindingsBuffer()[1]=node;
         m_binaryTableSearch1Bound.open();
         Object[] tupleBuffer=m_binaryTableSearch1Bound.getTupleBuffer();
         while (!m_binaryTableSearch1Bound.afterLast()) {
             Object concept=tupleBuffer[0];
-            if (concept instanceof AtomicConcept) {
-                if (!m_useOnlyCore || m_binaryTableSearch1Bound.isCore()) {
-                    m_atomicConceptsBuffer.add((AtomicConcept)concept);
-                }
+            if (concept instanceof AtomicConcept && ((!onlyCore || m_binaryTableSearch1Bound.isCore()))) {
+                m_atomicConceptsBuffer.add((AtomicConcept)concept);
             }
             m_binaryTableSearch1Bound.next();
         }
@@ -133,7 +141,7 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
         }
         public Set<AtomicConcept> getAtomicConceptsLabel() {
             if (m_atomicConceptsLabel==null) {
-                m_atomicConceptsLabel=SingleDirectBlockingChecker.this.getAtomicConceptsLabel(m_node);
+                m_atomicConceptsLabel=SingleDirectBlockingChecker.this.fetchAtomicConceptsLabel(m_node,false);
                 m_atomicConceptsSetFactory.addReference(m_atomicConceptsLabel);
             }
             return m_atomicConceptsLabel;
@@ -181,5 +189,12 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
                 return false;
             return m_atomicConceptsLabel==((SingleBlockingSignature)that).m_atomicConceptsLabel;
         }
+    }
+
+    public boolean hasChangedSinceValidation(Node node) {
+        return false;
+    }
+    public void setHasChangedSinceValidation(Node node, boolean hasChanged) {
+        // do nothing
     }
 }

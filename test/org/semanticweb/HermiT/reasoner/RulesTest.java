@@ -38,7 +38,7 @@ public class RulesTest extends AbstractReasonerTest {
     protected Configuration getConfiguration() {
         Configuration c=new Configuration();
 //        c.tableauMonitorType=TableauMonitorType.DEBUGGER_HISTORY_ON;
-        c.checkClauses=false;
+//        c.checkClauses=false;
         return c;
     }
 

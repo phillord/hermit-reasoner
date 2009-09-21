@@ -17,7 +17,6 @@ import org.semanticweb.HermiT.tableau.Tableau;
 public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Serializable {
     private static final long serialVersionUID=-8296420442452625109L;
 
-    protected final boolean m_useOnlyCore;
     protected final SetFactory<AtomicConcept> m_atomicConceptsSetFactory;
     protected final SetFactory<AtomicRole> m_atomicRolesSetFactory;
     protected final List<AtomicConcept> m_atomicConceptsBuffer;
@@ -26,8 +25,7 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
     protected ExtensionTable.Retrieval m_binaryTableSearch1Bound;
     protected ExtensionTable.Retrieval m_ternaryTableSearch12Bound;
 
-    public PairWiseDirectBlockingChecker(boolean useOnlyCore) {
-        m_useOnlyCore=useOnlyCore;
+    public PairWiseDirectBlockingChecker() {
         m_atomicConceptsSetFactory=new SetFactory<AtomicConcept>();
         m_atomicRolesSetFactory=new SetFactory<AtomicRole>();
         m_atomicConceptsBuffer=new ArrayList<AtomicConcept>();
@@ -82,28 +80,28 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
     public void nodeDestroyed(Node node) {
         ((PairWiseBlockingObject)node.getBlockingObject()).destroy();
     }
-    public Node assertionAdded(Concept concept,Node node) {
-        if (concept instanceof AtomicConcept) {
+    public Node assertionAdded(Concept concept,Node node,boolean isCore) {
+        if (isCore&&concept instanceof AtomicConcept) {
             ((PairWiseBlockingObject)node.getBlockingObject()).addAtomicConcept((AtomicConcept)concept);
             return node;
         }
         else
             return null;
     }
-    public Node assertionRemoved(Concept concept,Node node) {
-        if (concept instanceof AtomicConcept) {
+    public Node assertionRemoved(Concept concept,Node node,boolean isCore) {
+        if (isCore&&concept instanceof AtomicConcept) {
             ((PairWiseBlockingObject)node.getBlockingObject()).removeAtomicConcept((AtomicConcept)concept);
             return node;
         }
         else
             return null;
     }
-    public Node assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
-        if (nodeFrom.isParentOf(nodeTo)) {
+    public Node assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
+        if (isCore&&nodeFrom.isParentOf(nodeTo)) {
             ((PairWiseBlockingObject)nodeTo.getBlockingObject()).addToFromParentLabel(atomicRole);
             return nodeTo;
         }
-        else if (nodeTo.isParentOf(nodeFrom)) {
+        else if (isCore&&nodeTo.isParentOf(nodeFrom)) {
             ((PairWiseBlockingObject)nodeFrom.getBlockingObject()).addToToParentLabel(atomicRole);
             return nodeFrom;
         }
@@ -114,12 +112,12 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
             return null;
         }
     }
-    public Node assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
-        if (nodeFrom.isParentOf(nodeTo)) {
+    public Node assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
+        if (isCore&&nodeFrom.isParentOf(nodeTo)) {
             ((PairWiseBlockingObject)nodeTo.getBlockingObject()).removeFromFromParentLabel(atomicRole);
             return nodeTo;
         }
-        else if (nodeTo.isParentOf(nodeFrom)) {
+        else if (isCore&&nodeTo.isParentOf(nodeFrom)) {
             ((PairWiseBlockingObject)nodeFrom.getBlockingObject()).removeFromToParentLabel(atomicRole);
             return nodeFrom;
         }
@@ -133,14 +131,26 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
     public BlockingSignature getBlockingSignatureFor(Node node) {
         return new PairWiseBlockingSignature(this,node);
     }
-    protected Set<AtomicConcept> getAtomicConceptsLabel(Node node) {
+    public Set<AtomicConcept> getBlockingRelevantConceptsLabel(Node node) {
+        return ((PairWiseBlockingObject)node.getBlockingObject()).getAtomicConceptsLabel();
+    }
+    public Set<AtomicConcept> getFullAtomicConceptsLabel(Node node) {
+        return null;
+    }
+    public Set<AtomicRole> getFullFromParentLabel(Node node) {
+        return null;
+    }
+    public Set<AtomicRole> getFullToParentLabel(Node node) {
+        return null;
+    }
+    protected Set<AtomicConcept> fetchAtomicConceptsLabel(Node node,boolean onlyCore) {
         m_atomicConceptsBuffer.clear();
         m_binaryTableSearch1Bound.getBindingsBuffer()[1]=node;
         m_binaryTableSearch1Bound.open();
         Object[] tupleBuffer=m_binaryTableSearch1Bound.getTupleBuffer();
         while (!m_binaryTableSearch1Bound.afterLast()) {
             Object concept=tupleBuffer[0];
-            if (concept instanceof AtomicConcept && (!m_useOnlyCore || m_binaryTableSearch1Bound.isCore()))
+            if (concept instanceof AtomicConcept && (!onlyCore || m_binaryTableSearch1Bound.isCore()))
                 m_atomicConceptsBuffer.add((AtomicConcept)concept);
             m_binaryTableSearch1Bound.next();
         }
@@ -148,7 +158,7 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         m_atomicConceptsBuffer.clear();
         return result;
     }
-    public Set<AtomicRole> getEdgeLabel(Node nodeFrom,Node nodeTo) {
+    public Set<AtomicRole> fetchEdgeLabel(Node nodeFrom,Node nodeTo,boolean onlyCore) {
         m_atomicRolesBuffer.clear();
         m_ternaryTableSearch12Bound.getBindingsBuffer()[1]=nodeFrom;
         m_ternaryTableSearch12Bound.getBindingsBuffer()[2]=nodeTo;
@@ -156,7 +166,7 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         Object[] tupleBuffer=m_ternaryTableSearch12Bound.getTupleBuffer();
         while (!m_ternaryTableSearch12Bound.afterLast()) {
             Object atomicRole=tupleBuffer[0];
-            if (atomicRole instanceof AtomicRole && (!m_useOnlyCore || m_binaryTableSearch1Bound.isCore()))
+            if (atomicRole instanceof AtomicRole && (!onlyCore || m_binaryTableSearch1Bound.isCore()))
                 m_atomicRolesBuffer.add((AtomicRole)atomicRole);
             m_ternaryTableSearch12Bound.next();
         }
@@ -205,7 +215,7 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         }
         public Set<AtomicConcept> getAtomicConceptsLabel() {
             if (m_atomicConceptsLabel==null) {
-                m_atomicConceptsLabel=PairWiseDirectBlockingChecker.this.getAtomicConceptsLabel(m_node);
+                m_atomicConceptsLabel=PairWiseDirectBlockingChecker.this.fetchAtomicConceptsLabel(m_node,false);
                 m_atomicConceptsSetFactory.addReference(m_atomicConceptsLabel);
             }
             return m_atomicConceptsLabel;
@@ -228,7 +238,7 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         }
         public Set<AtomicRole> getFromParentLabel() {
             if (m_fromParentLabel==null) {
-                m_fromParentLabel=getEdgeLabel(m_node.getParent(),m_node);
+                m_fromParentLabel=fetchEdgeLabel(m_node.getParent(),m_node,false);
                 m_atomicRolesSetFactory.addReference(m_fromParentLabel);
             }
             return m_fromParentLabel;
@@ -251,7 +261,7 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         }
         public Set<AtomicRole> getToParentLabel() {
             if (m_toParentLabel==null) {
-                m_toParentLabel=getEdgeLabel(m_node,m_node.getParent());
+                m_toParentLabel=fetchEdgeLabel(m_node,m_node.getParent(),false);
                 m_atomicRolesSetFactory.addReference(m_toParentLabel);
             }
             return m_toParentLabel;
@@ -323,5 +333,11 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
                 m_fromParentLabel==thatSignature.m_fromParentLabel &&
                 m_toParentLabel==thatSignature.m_toParentLabel;
         }
+    }
+    public boolean hasChangedSinceValidation(Node node) {
+        return false;
+    }
+    public void setHasChangedSinceValidation(Node node, boolean hasChanged) {
+        // do nothing
     }
 }

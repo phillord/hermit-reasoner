@@ -129,7 +129,7 @@ public final class ExistentialExpansionManager implements Serializable {
         m_auxiliaryTuple[1]=null;
     }
     /**
-     * Creates a new node in the tableau if at least concept that caused the expansion is for cardinality 1. If it is not of cardinality 1 and the role in the at most concept is a functional role, it sets a clash in the extension manager.
+     * Creates a new node in the tableau if the at least concept that caused the expansion is for cardinality 1. If it is not of cardinality 1 and the role in the at least concept is a functional role, it sets a clash in the extension manager.
      * 
      * @return true if the at least cardinality is 1 (causes an expansion) or it is greater than one but the role is functional (causes a clash) and false otherwise.
      */

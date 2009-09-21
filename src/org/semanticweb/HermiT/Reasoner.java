@@ -26,20 +26,17 @@ import org.protege.editor.owl.model.inference.ProtegeOWLReasonerFactoryAdapter;
 import org.semanticweb.HermiT.Configuration.BlockingStrategyType;
 import org.semanticweb.HermiT.blocking.AncestorBlocking;
 import org.semanticweb.HermiT.blocking.AnywhereBlocking;
-import org.semanticweb.HermiT.blocking.AnywhereCoreBlocking;
+import org.semanticweb.HermiT.blocking.AnywhereValidatedBlocking2;
 import org.semanticweb.HermiT.blocking.BlockingSignatureCache;
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
-import org.semanticweb.HermiT.blocking.CorePreDirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.DirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.SingleDirectBlockingChecker;
-import org.semanticweb.HermiT.blocking.UnvalidatedAnywhereCoreBlocking;
+import org.semanticweb.HermiT.blocking.ValidatedDirectBlockingChecker;
 import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
 import org.semanticweb.HermiT.existentials.ExistentialExpansionStrategy;
 import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
-import org.semanticweb.HermiT.existentials.LazyStrategy;
-import org.semanticweb.HermiT.existentials.LazyStrategyUnvalidated;
 import org.semanticweb.HermiT.hierarchy.DeterministicHierarchyBuilder;
 import org.semanticweb.HermiT.hierarchy.Hierarchy;
 import org.semanticweb.HermiT.hierarchy.HierarchyBuilder;
@@ -49,7 +46,6 @@ import org.semanticweb.HermiT.hierarchy.SubsumptionCache;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
-import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
@@ -284,8 +280,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         if (descriptionGraphs==null)
             descriptionGraphs=Collections.emptySet();
         OWLClausification clausifier=new OWLClausification(m_configuration);
-        DLOntology dlo=clausifier.clausify(ontologyManager,ontology,descriptionGraphs);
-        loadDLOntology(dlo);
+        loadDLOntology(clausifier.clausify(ontologyManager,ontology,descriptionGraphs));
     }
 
     /* (non-Javadoc)
@@ -1494,24 +1489,27 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             tableauMonitor=new TableauMonitorFork(wellKnownTableauMonitor,config.monitor);
 
         DirectBlockingChecker directBlockingChecker=null;
-        boolean useOnlyCore=(config.blockingStrategyType==Configuration.BlockingStrategyType.CORE || config.blockingStrategyType==Configuration.BlockingStrategyType.UNVALIDATED_CORE);
-        switch (config.directBlockingType) {
-        case OPTIMAL:
-            if (dlOntology.hasInverseRoles() && (dlOntology.hasAtMostRestrictions() || config.blockingStrategyType==Configuration.BlockingStrategyType.CORE || config.blockingStrategyType==Configuration.BlockingStrategyType.UNVALIDATED_CORE))
-                directBlockingChecker=new PairWiseDirectBlockingChecker(useOnlyCore);
-            else
-                directBlockingChecker=new SingleDirectBlockingChecker(useOnlyCore);
-            break;
-        case SINGLE:
-            directBlockingChecker=new SingleDirectBlockingChecker(useOnlyCore);
-            break;
-        case PAIR_WISE:
-            directBlockingChecker=new PairWiseDirectBlockingChecker(useOnlyCore);
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown direct blocking type.");
+        if (config.blockingStrategyType==BlockingStrategyType.VALIDATED) {
+            directBlockingChecker=new ValidatedDirectBlockingChecker();
+        } else {
+            switch (config.directBlockingType) {
+            case OPTIMAL:
+                if (dlOntology.hasInverseRoles() && dlOntology.hasAtMostRestrictions())
+                    directBlockingChecker=new PairWiseDirectBlockingChecker();
+                else
+                    directBlockingChecker=new SingleDirectBlockingChecker();
+                break;
+            case SINGLE:
+                directBlockingChecker=new SingleDirectBlockingChecker();
+                break;
+            case PAIR_WISE:
+                directBlockingChecker=new PairWiseDirectBlockingChecker();
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown direct blocking type.");
+            }
         }
-
+        
         BlockingSignatureCache blockingSignatureCache=null;
         if (!dlOntology.hasNominals()) {
             switch (config.blockingSignatureCacheType) {
@@ -1528,11 +1526,9 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
 
         BlockingStrategy blockingStrategy=null;
         switch (config.blockingStrategyType) {
-        case CORE:
-            blockingStrategy=new AnywhereCoreBlocking(new CorePreDirectBlockingChecker(),dlOntology.getUnaryValidBlockConditions(),dlOntology.getNAryValidBlockConditions(),dlOntology.hasInverseRoles());
-            break;
-        case UNVALIDATED_CORE:
-            blockingStrategy=new UnvalidatedAnywhereCoreBlocking(directBlockingChecker,blockingSignatureCache);
+        case VALIDATED:
+            //blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,blockingSignatureCache,dlOntology.getUnaryValidBlockConditions(),dlOntology.getNAryValidBlockConditions(),dlOntology.hasInverseRoles());
+            blockingStrategy=new AnywhereValidatedBlocking2(directBlockingChecker,blockingSignatureCache,dlOntology.getUnaryValidBlockConditions(),dlOntology.getNAryValidBlockConditions(),dlOntology.hasInverseRoles());
             break;
         case ANCESTOR:
             blockingStrategy=new AncestorBlocking(directBlockingChecker,blockingSignatureCache);
@@ -1555,15 +1551,6 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         case INDIVIDUAL_REUSE:
             existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,false);
             break;
-        case LAZY: 
-            if (config.blockingStrategyType==BlockingStrategyType.CORE) {
-                existentialsExpansionStrategy=new LazyStrategy(blockingStrategy);
-            } else if (config.blockingStrategyType==BlockingStrategyType.UNVALIDATED_CORE) {
-                existentialsExpansionStrategy=new LazyStrategyUnvalidated(blockingStrategy);  
-            } else {
-                throw new IllegalArgumentException("Lazy expansion can only be used with core blocking. ");
-            }
-            break;    
         default:
             throw new IllegalArgumentException("Unknown expansion strategy type.");
         }
@@ -1592,16 +1579,6 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             if (!originalDLOntology.getAllComplexObjectRoleInclusions().isEmpty() || !axioms.m_complexObjectPropertyInclusions.isEmpty()) {
                 ObjectPropertyInclusionManager objectPropertyInclusionManager=new ObjectPropertyInclusionManager(factory);
                 objectPropertyInclusionManager.prepareTransformation(axioms);
-                /**
-                 * gstoil this is obsolete
-                 */
-//                for (DLOntology.ComplexObjectRoleInclusion inclusion : originalDLOntology.getAllComplexObjectRoleInclusions()) {
-//                    OWLObjectPropertyExpression[] subObjectPropertyExpressions=new OWLObjectPropertyExpression[inclusion.getNumberOfSubRoles()];
-//                    for (int index=inclusion.getNumberOfSubRoles()-1;index>=0;--index)
-//                        subObjectPropertyExpressions[index]=getObjectPropertyExpression(factory,inclusion.getSubRole(index));
-//                    OWLObjectPropertyExpression superObjectPropertyExpression=getObjectPropertyExpression(factory,inclusion.getSuperRole());
-//                    objectPropertyInclusionManager.addInclusion(subObjectPropertyExpressions,superObjectPropertyExpression);
-//                }
                 for (DLClause dlClause : originalDLOntology.getDLClauses()) {
                     if (dlClause.isRoleInclusion()) {
                         AtomicRole subAtomicRole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
@@ -1648,11 +1625,11 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             boolean hasAtMostRestrictions=originalDLOntology.hasAtMostRestrictions() || newDLOntology.hasAtMostRestrictions();
             boolean hasNominals=originalDLOntology.hasNominals() || newDLOntology.hasNominals();
             boolean hasDatatypes=originalDLOntology.hasDatatypes() || newDLOntology.hasDatatypes();
-            if (config.blockingStrategyType==Configuration.BlockingStrategyType.CORE) {
-                Map<AtomicConcept,Set<Set<Concept>>> unaryValidBlockConditions=createUnion(originalDLOntology.getUnaryValidBlockConditions(),newDLOntology.getUnaryValidBlockConditions());
-                Map<Set<AtomicConcept>,Set<Set<Concept>>> nAryValidBlockConditions=createUnion(originalDLOntology.getNAryValidBlockConditions(),newDLOntology.getNAryValidBlockConditions());
-                return new DLOntology(resultingOntologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,atomicObjectRoles,atomicDataRoles,definedDatatypeIRIs,individuals,hasInverseRoles,hasAtMostRestrictions,hasNominals,hasDatatypes,unaryValidBlockConditions,nAryValidBlockConditions);
-            }
+//            if (config.blockingStrategyType==Configuration.BlockingStrategyType.CORE) {
+//                Map<AtomicConcept,Set<Set<Concept>>> unaryValidBlockConditions=createUnion(originalDLOntology.getUnaryValidBlockConditions(),newDLOntology.getUnaryValidBlockConditions());
+//                Map<Set<AtomicConcept>,Set<Set<Concept>>> nAryValidBlockConditions=createUnion(originalDLOntology.getNAryValidBlockConditions(),newDLOntology.getNAryValidBlockConditions());
+//                return new DLOntology(resultingOntologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,atomicObjectRoles,atomicDataRoles,definedDatatypeIRIs,individuals,hasInverseRoles,hasAtMostRestrictions,hasNominals,hasDatatypes,unaryValidBlockConditions,nAryValidBlockConditions);
+//            }
             return new DLOntology(resultingOntologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,atomicObjectRoles,atomicDataRoles,definedDatatypeIRIs,individuals,hasInverseRoles,hasAtMostRestrictions,hasNominals,hasDatatypes);
         }
         catch (OWLException shouldntHappen) {
