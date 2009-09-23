@@ -236,4 +236,12 @@ public class TableauMonitorForwarder implements TableauMonitor,Serializable {
         if (m_forwardingOn)
             m_forwardingTargetMonitor.datatypeConjunctionCheckingFinished(conjunction,result);
     }
+    public void blockingValidationStarted() {
+        if (m_forwardingOn)
+            m_forwardingTargetMonitor.blockingValidationStarted();
+    }
+    public void blockingValidationFinished() {
+        if (m_forwardingOn)
+            m_forwardingTargetMonitor.blockingValidationFinished();
+    }
 }

@@ -24,6 +24,8 @@ public class WaitForCommand extends AbstractCommand implements DebuggerCommand {
         writer.println("        exists  - stop at the next existential expansion");
         writer.println("        clash   - stop at the next clash");
         writer.println("        merge   - stop at the next merging of nodes");
+        writer.println("        dtcheck - stop before datatype satisfaction checking");
+        writer.println("        blvalid - stop after blocking validation");
         writer.println("    Example: waitFor -clash +gexists");
     }
     public void execute(String[] args) {
@@ -48,6 +50,8 @@ public class WaitForCommand extends AbstractCommand implements DebuggerCommand {
                 waitOption=Debugger.WaitOption.MERGE;
             else if ("dtcheck".equals(argument))
                 waitOption=Debugger.WaitOption.DATATYPE_CHECKING;
+            else if ("blvalid".equals(argument))
+                waitOption=Debugger.WaitOption.BLOCKING_VALIDATION;
             else {
                 m_debugger.getOutput().println("Invalid wait option '"+argument+"'.");
                 return;

@@ -126,4 +126,8 @@ public class TableauMonitorAdapter implements TableauMonitor,Serializable  {
     }
     public void datatypeConjunctionCheckingFinished(DatatypeManager.DConjunction conjunction,boolean result) {
     }
+    public void blockingValidationStarted() {
+    }
+    public void blockingValidationFinished() {
+    }
 }

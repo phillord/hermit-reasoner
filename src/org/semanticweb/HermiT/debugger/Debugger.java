@@ -61,7 +61,7 @@ public class Debugger extends TableauMonitorForwarder {
     public static final Font s_monospacedFont=new Font("Monospaced",Font.PLAIN,12);
 
     public static enum WaitOption {
-        GRAPH_EXPANSION,EXISTENTIAL_EXPANSION,CLASH,MERGE,DATATYPE_CHECKING
+        GRAPH_EXPANSION,EXISTENTIAL_EXPANSION,CLASH,MERGE,DATATYPE_CHECKING,BLOCKING_VALIDATION
     };
 
     protected final Map<String,DebuggerCommand> m_commandsByName;
@@ -395,6 +395,14 @@ public class Debugger extends TableauMonitorForwarder {
         if (m_waitOptions.contains(WaitOption.DATATYPE_CHECKING)) {
             m_forever=false;
             m_output.println("Will check whether the datatype constraints are satisfiable.");
+            mainLoop();
+        }
+    }
+    public void blockingValidationFinished() {
+        super.blockingValidationFinished();
+        if (m_waitOptions.contains(WaitOption.BLOCKING_VALIDATION)) {
+            m_forever=false;
+            m_output.println("Blocking validated.");
             mainLoop();
         }
     }

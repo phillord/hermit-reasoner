@@ -65,4 +65,6 @@ public interface TableauMonitor {
     void datatypeCheckingFinished(boolean result);
     void datatypeConjunctionCheckingStarted(DatatypeManager.DConjunction conjunction);
     void datatypeConjunctionCheckingFinished(DatatypeManager.DConjunction conjunction,boolean result);
+    void blockingValidationStarted();
+    void blockingValidationFinished();
 }

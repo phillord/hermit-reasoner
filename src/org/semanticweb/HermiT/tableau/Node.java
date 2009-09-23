@@ -30,7 +30,7 @@ public final class Node implements Serializable {
     protected int m_numberOfCoreAtoms;
     protected int m_numberOfNegatedAtomicConcepts;
     protected int m_numberOfNegatedRoleAssertions;
-    private List<ExistentialConcept> m_unprocessedExistentials;
+    protected List<ExistentialConcept> m_unprocessedExistentials;
     protected Node m_previousTableauNode;
     protected Node m_nextTableauNode;
     protected Node m_previousMergedOrPrunedNode;

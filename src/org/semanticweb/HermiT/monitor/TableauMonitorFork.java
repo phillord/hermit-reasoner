@@ -232,4 +232,12 @@ public class TableauMonitorFork implements TableauMonitor,Serializable  {
         m_first.datatypeConjunctionCheckingFinished(conjunction,result);
         m_second.datatypeConjunctionCheckingFinished(conjunction,result);
     }
+    public void blockingValidationStarted() {
+        m_first.blockingValidationStarted();
+        m_second.blockingValidationStarted();
+    }
+    public void blockingValidationFinished() {
+        m_first.blockingValidationFinished();
+        m_second.blockingValidationFinished();
+    }
 }

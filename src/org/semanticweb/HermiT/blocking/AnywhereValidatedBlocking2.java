@@ -26,6 +26,7 @@ import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
 
 public class AnywhereValidatedBlocking2 implements BlockingStrategy {
+    protected static final String CRLF=System.getProperty("line.separator");
 
     public static enum BlockingViolationType {
         ATLEASTBLOCKEDPARENT, 
@@ -57,7 +58,7 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
     // statistics: 
     protected int numDirectlyBlocked=0;
     protected int numIndirectlyBlocked=0;
-    protected final boolean debuggingMode=false;
+    protected final boolean debuggingMode=true;
     protected Map<String, Integer> m_violationCount=new HashMap<String, Integer>();
     protected Map<BlockingViolationType, Integer> m_causesCount=new HashMap<BlockingViolationType, Integer>();
     
@@ -94,7 +95,11 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
     }
     public void computeBlocking(boolean finalChance) {
         if (finalChance) {
+            if (m_tableau.getTableauMonitor()!=null)
+                m_tableau.getTableauMonitor().blockingValidationStarted();
             validateBlocks();
+            if (m_tableau.getTableauMonitor()!=null)
+                m_tableau.getTableauMonitor().blockingValidationFinished();
         } else {
             computePreBlocking();
         }
@@ -163,7 +168,7 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
             m_firstChangedNode=null;
         }
     }
-    public void validateBlocks() {
+    protected void validateBlocks() {
         // after first complete validation, we can switch to only checking block validity immediately
         //m_immediatelyValidateBlocks = true;
         if (!m_unaryValidBlockConditions.isEmpty() || !m_nAryValidBlockConditions.isEmpty()) {
@@ -254,7 +259,8 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
                     Map<Set<Concept>,Map<Concept, BlockingViolationType>> violationCauses=getBlockedParentViolations(m_unaryValidBlockConditions.get(c), blocker, blocked);
                     if (violationCauses.size()!=0) { 
                         blockerIsSuitable = false;
-                        //if (debuggingMode) addViolation(new BlockingViolation(blocked, blocker, c, violationCauses));
+                        if (debuggingMode) System.out.println("Node "+blocker+" invalidly blocked node "+blocked+" violation: "+new BlockingViolation(blocked, blocker, c, violationCauses));
+                        // if (debuggingMode) addViolation(new BlockingViolation(blocked, blocker, c, violationCauses));
                     }
                 }
             }
@@ -263,6 +269,7 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
                 Map<Set<Concept>,Map<Concept, BlockingViolationType>> violationCauses=getBlockedParentViolations(m_unaryValidBlockConditions.get(AtomicConcept.THING), blocker, blocked); 
                 if (violationCauses.size()!=0) { 
                     blockerIsSuitable = false;
+                    if (debuggingMode) System.out.println("Node "+blocker+" invalidly blocked node "+blocked+" violation: "+new BlockingViolation(blocked, blocker, AtomicConcept.THING, violationCauses));
                     //if (debuggingMode) addViolation(new BlockingViolation(blocked, blocker, AtomicConcept.THING, violationCauses));
                 }
             }
@@ -273,6 +280,7 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
                         Map<Set<Concept>,Map<Concept, BlockingViolationType>> violationCauses=getBlockedParentViolations(m_nAryValidBlockConditions.get(premises), blocker, blocked);
                         if (violationCauses.size()!=0) { 
                             blockerIsSuitable = false;
+                            if (debuggingMode) System.out.println("Node "+blocker+" invalidly blocked node "+blocked+" violation: "+new BlockingViolation(blocked, blocker, premises, violationCauses));
                             //if (debuggingMode) addViolation(new BlockingViolation(blocked, blocker, premises, violationCauses));
                         }
                     }
@@ -288,6 +296,7 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
                         Map<Set<Concept>,Map<Concept, BlockingViolationType>> violationCauses=getBlockerViolations(m_unaryValidBlockConditions.get(c), blocker, blocked); 
                         if (violationCauses.size()!=0) { 
                             blockerIsSuitable = false;
+                            if (debuggingMode) System.out.println("Node "+blocker+" invalidly blocked node "+blocked+" violation: "+new BlockingViolation(blocked, blocker, c, violationCauses));
                             //if (debuggingMode) addViolation(new BlockingViolation(blocked, blocker, c, violationCauses));
                         }
                     }
@@ -298,6 +307,7 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
                 Map<Set<Concept>,Map<Concept, BlockingViolationType>> violationCauses=getBlockerViolations(m_unaryValidBlockConditions.get(AtomicConcept.THING), blocker, blocked);    
                 if (violationCauses.size()!=0) { 
                     blockerIsSuitable = false;
+                    if (debuggingMode) System.out.println("Node "+blocker+" invalidly blocked node "+blocked+" violation: "+new BlockingViolation(blocked, blocker, AtomicConcept.THING, violationCauses));
                     //if (debuggingMode) addViolation(new BlockingViolation(blocked, blocker, AtomicConcept.THING, violationCauses));
                 }
             }
@@ -308,6 +318,7 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
                         Map<Set<Concept>,Map<Concept, BlockingViolationType>> violationCauses=getBlockerViolations(m_nAryValidBlockConditions.get(premises), blocker, blocked); 
                         if (violationCauses.size()!=0) { 
                             blockerIsSuitable = false;
+                            if (debuggingMode) System.out.println("Node "+blocker+" invalidly blocked node "+blocked+" violation: "+new BlockingViolation(blocked, blocker, premises, violationCauses));
                             //if (debuggingMode) addViolation(new BlockingViolation(blocked, blocker, premises, violationCauses));
                         }
                     }
@@ -328,6 +339,7 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
             for (Iterator<Concept> it = conjunct.iterator(); it.hasNext() && !satisfied; ) {
                 Concept disjunct = it.next();
                 satisfied = true;
+                disjunct2Cause.clear();
                 if (disjunct instanceof AtLeastConcept) {
                     // (>= n r.B) must hold at blockedParent, therefore, ar(r, blockedParent, blocked) and B(blocked) in ABox implies B(blocker) in ABox
                     // to avoid table lookup check: B(blocked) and not B(blocker) implies not ar(r, blockedParent, blocked)
@@ -378,6 +390,7 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
             for (Iterator<Concept> it = conjunct.iterator(); it.hasNext() && !satisfied; ) {
                 Concept disjunct = it.next();
                 satisfied = true;
+                disjunct2Cause.clear();
                 if (disjunct instanceof AtLeastConcept) {
                     // (>= n r.B)(blocker) in the ABox, so in the model construction, (>= n r.B) will be copied to blocked, 
                     // so we have to make sure that it will be satisfied at blocked
@@ -532,9 +545,7 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
 //        return atomicConcetLabel;
 //    }
     public boolean isPermanentAssertion(Concept concept,Node node) {
-        m_auxiliaryTuple[0]=concept;
-        m_auxiliaryTuple[1]=node;
-        return m_extensionManager.isCore(m_auxiliaryTuple);
+        return true;
     }
     protected void validationInfoChanged(Node node) {
         if (m_lastValidatedUnchangedNode!=null && node.getNodeID()<m_lastValidatedUnchangedNode.getNodeID()) {
@@ -599,7 +610,7 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
             m_lastValidatedUnchangedNode=node;
     }
     public void modelFound() {
-        System.out.println("Found  model with " + (m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes()) + " nodes. ");
+        if (debuggingMode) System.out.println("Found  model with " + (m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes()) + " nodes. ");
         if (m_blockingSignatureCache!=null) {
             // Since we've found a model, we know what is blocked or not.
             // Therefore, we don't need to update the blocking status.
@@ -681,13 +692,13 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
         }
         public String toString() {
             StringBuffer b=new StringBuffer();
-            b.append("Violation constraint: "+getViolatedConstraint()+"\n");
+            b.append("Violation constraint: "+getViolatedConstraint()+CRLF);
             b.append("Causes: ");
             for (Concept c : m_causes.keySet()) {
-                b.append(c + " " + m_causes.get(c) + "\n");
+                b.append(c + " " + m_causes.get(c) + CRLF);
             }
-            b.append("\n");
-            b.append("Blocker: "+m_blocker.getNodeID()+", blocked: "+m_blocked.getNodeID()+"\n");
+            b.append(CRLF);
+            b.append("Blocker: "+m_blocker.getNodeID()+", blocked: "+m_blocked.getNodeID()+CRLF);
             return b.toString();
         }
     }

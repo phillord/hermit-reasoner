@@ -3,6 +3,7 @@ package org.semanticweb.HermiT.debugger;
 
 import java.io.PrintWriter;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Set;
@@ -116,7 +117,8 @@ public class Printing {
             return "indirectly by "+(node.getBlocker()==Node.SIGNATURE_CACHE_BLOCKER ? "signature in cache" : node.getBlocker().getNodeID());
     }
     protected static void printConceptLabel(Debugger debugger,Node node,PrintWriter writer) {
-        TreeSet<AtomicConcept> atomicConcepts=new TreeSet<AtomicConcept>(ConceptComparator.INSTANCE);
+        TreeSet<AtomicConcept> atomicConceptsCore=new TreeSet<AtomicConcept>(ConceptComparator.INSTANCE);
+        TreeSet<AtomicConcept> atomicConceptsNoncore=new TreeSet<AtomicConcept>(ConceptComparator.INSTANCE);
         TreeSet<ExistentialConcept> existentialConcepts=new TreeSet<ExistentialConcept>(ConceptComparator.INSTANCE);
         TreeSet<AtomicNegationConcept> negativeConcepts=new TreeSet<AtomicNegationConcept>(ConceptComparator.INSTANCE);
         TreeSet<DataRange> dataRanges=new TreeSet<DataRange>(ConceptComparator.INSTANCE);
@@ -127,8 +129,12 @@ public class Printing {
             Object potentialConcept=retrieval.getTupleBuffer()[0];
             if (potentialConcept instanceof AtomicNegationConcept)
                 negativeConcepts.add((AtomicNegationConcept)potentialConcept);
-            else if (potentialConcept instanceof AtomicConcept)
-                atomicConcepts.add((AtomicConcept)potentialConcept);
+            else if (potentialConcept instanceof AtomicConcept) {
+                if (retrieval.isCore())
+                    atomicConceptsCore.add((AtomicConcept)potentialConcept);
+                else
+                    atomicConceptsNoncore.add((AtomicConcept)potentialConcept);
+            }
             else if (potentialConcept instanceof ExistentialConcept)
                 existentialConcepts.add((ExistentialConcept)potentialConcept);
             else if (potentialConcept instanceof DataRange)
@@ -140,14 +146,19 @@ public class Printing {
                 throw new IllegalStateException("Found something in the label that is not a known type!");
             retrieval.next();
         }
-        if (!atomicConcepts.isEmpty() || !existentialConcepts.isEmpty()) {
-            writer.print("-- Positive concept label ------------------------");
-            printConcepts(debugger,atomicConcepts,writer,3);
-            printConcepts(debugger,existentialConcepts,writer,1);
+        Set<AtomicConcept> noConcepts=Collections.emptySet();
+        if (!atomicConceptsCore.isEmpty()) {
+            writer.print("-- Positive concept label (core part) -------");
+            printConcepts(debugger,atomicConceptsCore,noConcepts,writer,3);
+        }
+        if (!atomicConceptsNoncore.isEmpty() || !existentialConcepts.isEmpty()) {
+            writer.print("-- Positive concept label (noncore part) ----");
+            printConcepts(debugger,atomicConceptsNoncore,noConcepts,writer,3);
+            printConcepts(debugger,existentialConcepts,node.getUnprocessedExistentials(),writer,1);
         }
         if (!negativeConcepts.isEmpty()) {
-            writer.print("-- Negative concept label ------------------------");
-            printConcepts(debugger,negativeConcepts,writer,3);
+            writer.print("-- Negative concept label -------------------");
+            printConcepts(debugger,negativeConcepts,noConcepts,writer,3);
         }
         if (!dataRanges.isEmpty()) {
             writer.print("-- Data ranges label ------------------------");
@@ -200,7 +211,7 @@ public class Printing {
             printEdgeMap(debugger,incomingEdges,writer);
         }
     }
-    protected static void printConcepts(Debugger debugger,Set<? extends Concept> set,PrintWriter writer,int numberInRow) {
+    protected static void printConcepts(Debugger debugger,Set<? extends Concept> set,Collection<? extends Concept> markedElements,PrintWriter writer,int numberInRow) {
         int number=0;
         for (Concept concept : set) {
             if (number!=0)
@@ -210,6 +221,8 @@ public class Printing {
                 writer.print("    ");
             }
             writer.print(concept.toString(debugger.getPrefixes()));
+            if (markedElements.contains(concept))
+                writer.print(" (*)");
             number++;
         }
         writer.println();
