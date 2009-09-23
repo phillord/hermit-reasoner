@@ -186,7 +186,7 @@ public abstract class AbstractExpansionStrategy implements Serializable,Existent
             Object[] tupleBuffer=retrieval.getTupleBuffer();
             while (!retrieval.afterLast()) {
                 Node toNode=(Node)tupleBuffer[toNodeIndex];
-                if (!toNode.isIndirectlyBlocked() && m_extensionManager.containsConceptAssertion(toConcept,toNode)) {
+                if ((!toNode.isBlocked() || forNode.isParentOf(toNode)) && m_extensionManager.containsConceptAssertion(toConcept,toNode)) {
                     if (isPermanentSatisfier(forNode,toNode) && m_blockingStrategy.isPermanentAssertion(toConcept,toNode))
                         return SatType.PERMANENTLY_SATISFIED;
                     else
@@ -203,7 +203,7 @@ public abstract class AbstractExpansionStrategy implements Serializable,Existent
             boolean allSatisfiersArePermanent=true;
             while (!retrieval.afterLast()) {
                 Node toNode=(Node)tupleBuffer[toNodeIndex];
-                if (!toNode.isIndirectlyBlocked() && m_extensionManager.containsConceptAssertion(toConcept,toNode)) {
+                if ((!toNode.isBlocked() || forNode.isParentOf(toNode)) && m_extensionManager.containsConceptAssertion(toConcept,toNode)) {
                     if (!isPermanentSatisfier(forNode,toNode) || !m_blockingStrategy.isPermanentAssertion(toConcept,toNode))
                         allSatisfiersArePermanent=false;
                     m_auxiliaryNodes1.add(toNode);
