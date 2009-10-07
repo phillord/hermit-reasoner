@@ -89,7 +89,7 @@ public class IndividualReuseStrategy extends AbstractExpansionStrategy implement
     }
     public AtomicConcept getConceptForNode(Node node) {
         for (Map.Entry<AtomicConcept,NodeBranchingPointPair> entry : m_reusedNodes.entrySet())
-            if (entry.getValue().node==node)
+            if (entry.getValue().m_node==node)
                 return entry.getKey();
         return null;
     }
@@ -141,16 +141,17 @@ public class IndividualReuseStrategy extends AbstractExpansionStrategy implement
                 }
                 // create a root node so that keys are not applicable
                 existentialNode=m_tableau.createNewNINode(dependencySet);
-                reuseInfo=new NodeBranchingPointPair(existentialNode,m_tableau.getCurrentBranchingPoint().getLevel());
+                reuseInfo=new NodeBranchingPointPair(existentialNode,m_tableau.getCurrentBranchingPointLevel());
                 m_reusedNodes.put(toConcept,reuseInfo);
                 m_extensionManager.addConceptAssertion(toConcept,existentialNode,dependencySet,true);
                 m_auxiliaryBuffer[0]=toConcept;
                 m_reuseBacktrackingTable.addTuple(m_auxiliaryBuffer);
             }
             else {
-                dependencySet=reuseInfo.node.addCanonicalNodeDependencySet(dependencySet);
-                existentialNode=reuseInfo.node.getCanonicalNode();
-                dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,reuseInfo.branchingPoint);
+                dependencySet=reuseInfo.m_node.addCanonicalNodeDependencySet(dependencySet);
+                existentialNode=reuseInfo.m_node.getCanonicalNode();
+                if (!m_isDeterministic)
+                    dependencySet=m_tableau.getDependencySetFactory().addBranchingPoint(dependencySet,reuseInfo.m_branchingPoint);
             }
             m_extensionManager.addRoleAssertion(atLeastConcept.getOnRole(),node,existentialNode,dependencySet,true);
             if (m_tableau.getTableauMonitor()!=null)
@@ -190,12 +191,12 @@ public class IndividualReuseStrategy extends AbstractExpansionStrategy implement
     protected static class NodeBranchingPointPair implements Serializable {
         private static final long serialVersionUID=427963701900451471L;
 
-        protected final Node node;
-        protected final int branchingPoint;
+        protected final Node m_node;
+        protected final int m_branchingPoint;
 
         public NodeBranchingPointPair(Node node,int branchingPoint) {
-            this.node=node;
-            this.branchingPoint=branchingPoint;
+            m_node=node;
+            m_branchingPoint=branchingPoint;
         }
     }
 }
