@@ -580,7 +580,7 @@ public class RulesTest extends AbstractReasonerTest {
         SWRLIndividualVariable y = m_dataFactory.getSWRLIndividualVariable(IRI.create(AbstractReasonerTest.NS + "y"));
         
         SWRLObjectPropertyAtom rxy=m_dataFactory.getSWRLObjectPropertyAtom(r, x, y);
-        SWRLSameIndividualAtom samexy=m_dataFactory.getSWRLSameAsAtom(x, y);
+        SWRLSameIndividualAtom samexy=m_dataFactory.getSWRLSameIndividualAtom(x, y);
         SWRLRule rule=m_dataFactory.getSWRLRule(Collections.singleton(rxy), Collections.singleton(samexy));
         m_ontologyManager.addAxiom(m_ontology, rule);
         
@@ -599,7 +599,7 @@ public class RulesTest extends AbstractReasonerTest {
         
         SWRLObjectPropertyAtom fxy=m_dataFactory.getSWRLObjectPropertyAtom(f, x, y);
         SWRLObjectPropertyAtom fxz=m_dataFactory.getSWRLObjectPropertyAtom(f, x, z);
-        SWRLDifferentIndividualsAtom differentyz=m_dataFactory.getSWRLDifferentFromAtom(y, z);
+        SWRLDifferentIndividualsAtom differentyz=m_dataFactory.getSWRLDifferentIndividualsAtom(y, z);
         
         Set<SWRLAtom> body=new HashSet<SWRLAtom>();
         body.add(fxy);
@@ -619,7 +619,7 @@ public class RulesTest extends AbstractReasonerTest {
         SWRLIndividualVariable x = m_dataFactory.getSWRLIndividualVariable(IRI.create(AbstractReasonerTest.NS + "x"));
         SWRLIndividualVariable y = m_dataFactory.getSWRLIndividualVariable(IRI.create(AbstractReasonerTest.NS + "y"));
         SWRLObjectPropertyAtom rxy=m_dataFactory.getSWRLObjectPropertyAtom(r, x, y);
-        SWRLDifferentIndividualsAtom diffxy=m_dataFactory.getSWRLDifferentFromAtom(x, y);
+        SWRLDifferentIndividualsAtom diffxy=m_dataFactory.getSWRLDifferentIndividualsAtom(x, y);
         OWLClass C = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "C"));
         SWRLAtom Cx =m_dataFactory.getSWRLClassAtom(C, x);
         OWLNamedIndividual a = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "a"));

@@ -37,6 +37,7 @@ import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
 import org.semanticweb.HermiT.existentials.ExistentialExpansionStrategy;
 import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
+import org.semanticweb.HermiT.existentials.LazyCreationOrderStrategy;
 import org.semanticweb.HermiT.hierarchy.DeterministicHierarchyBuilder;
 import org.semanticweb.HermiT.hierarchy.Hierarchy;
 import org.semanticweb.HermiT.hierarchy.HierarchyBuilder;
@@ -442,7 +443,8 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                         relevantAtomicConcepts.add(atomicConcept);
                 final int numRelevantConcepts=relevantAtomicConcepts.size();
                 if (m_progressMonitor!=null) {
-                    m_progressMonitor.setProgress("Classifying...", 0, numRelevantConcepts);
+                    m_progressMonitor.setMessage("Classifying...");
+                    m_progressMonitor.setProgress(0);
                     m_progressMonitor.setStarted();
                 }
                 if (!m_subsumptionCache.isSatisfiable(AtomicConcept.THING))
@@ -457,7 +459,8 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                         allSubsumers.put(atomicConcept,new DeterministicHierarchyBuilder.GraphNode<AtomicConcept>(atomicConcept,subsumers));
                         if (m_progressMonitor!=null) {
                             processedConcepts++;
-                            m_progressMonitor.setProgress("Classifying...", processedConcepts, numRelevantConcepts);
+                            m_progressMonitor.setMessage("Classifying...");
+                            m_progressMonitor.setProgress(processedConcepts/numRelevantConcepts);
                         }
                     }
                     DeterministicHierarchyBuilder<AtomicConcept> hierarchyBuilder=new DeterministicHierarchyBuilder<AtomicConcept>(allSubsumers,AtomicConcept.THING,AtomicConcept.NOTHING);
@@ -479,7 +482,8 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                                 protected int m_processedConcepts=0;
                                 public void elementClassified(AtomicConcept element) {
                                     m_processedConcepts++;
-                                    m_progressMonitor.setProgress("Building the class hierarchy...", m_processedConcepts, numRelevantConcepts);
+                                    m_progressMonitor.setMessage("Building the class hierarchy...");
+                                    m_progressMonitor.setProgress(m_processedConcepts/numRelevantConcepts);
                                 }
                             };
                     HierarchyBuilder<AtomicConcept> hierarchyBuilder=new HierarchyBuilder<AtomicConcept>(relation,progressMonitor);
@@ -666,7 +670,8 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                         protected int m_processedRoles=0;
                         public void elementClassified(Role element) {
                             m_processedRoles++;
-                            m_progressMonitor.setProgress("Building the object property hierarchy...", m_processedRoles, numRoles);
+                            m_progressMonitor.setMessage("Building the object property hierarchy...");
+                            m_progressMonitor.setProgress(m_processedRoles/numRoles);
                         }
                     };
             HierarchyBuilder<Role> hierarchyBuilder=new HierarchyBuilder<Role>(relation,progressMonitor);
@@ -1072,7 +1077,8 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                         protected int m_processedAtomicRoles=0;
                         public void elementClassified(AtomicRole element) {
                             m_processedAtomicRoles++;
-                            m_progressMonitor.setProgress("Building the data property hierarchy...", m_processedAtomicRoles, numRoles);
+                            m_progressMonitor.setMessage("Building the data property hierarchy...");
+                            m_progressMonitor.setProgress(m_processedAtomicRoles/numRoles);
                         }
                     };
             HierarchyBuilder<AtomicRole> hierarchyBuilder=new HierarchyBuilder<AtomicRole>(relation,progressMonitor);
@@ -1542,6 +1548,9 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
 
         ExistentialExpansionStrategy existentialsExpansionStrategy=null;
         switch (config.existentialStrategyType) {
+        case LAZY_CREATION_ORDER:
+            existentialsExpansionStrategy=new LazyCreationOrderStrategy(blockingStrategy);
+            break;
         case CREATION_ORDER:
             existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
             break;

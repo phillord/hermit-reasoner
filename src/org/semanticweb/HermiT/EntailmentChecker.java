@@ -842,7 +842,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
             if (o==this) return true;
             if (o==null || getClass()!=o.getClass()) return false;
             Edge other=(Edge)o;
-            return other.first==this.first&&other.second==this.second;
+            return this.first.equals(other.first)&&this.second.equals(other.second);
         }
         public String toString() {
             return "("+first+", "+second+")";

@@ -20,7 +20,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class WGTestRegistry {
     public static String URI_BASE = "http://www.w3.org/2007/OWL/testOntology#";
-    public static String TEST_ID_PREFIX = "http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/";
+    public static String TEST_ID_PREFIX = "http://owl.semanticweb.org/id/"; //"http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:URIResolver/";
     public static final String RESULTS_FILE_PATH = "resultsFilePath";
     
     protected final OWLOntologyManager m_ontologyManager;

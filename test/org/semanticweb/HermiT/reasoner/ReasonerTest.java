@@ -27,12 +27,16 @@ import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 import org.semanticweb.owlapi.vocab.OWLFacet;
 
 
+
 public class ReasonerTest extends AbstractReasonerTest {
 
     public ReasonerTest(String name) {
         super(name);
     }
-    
+    public void testDatatypeLiterals() throws Exception {
+        loadReasonerFromResource("res/FS2RDF-literals-ar-consistent.f.owl");
+        assertABoxSatisfiable(true);
+    }
     public void testIndividualRetrievalBug() throws Exception {
         String axioms = "ClassAssertion(:A :d)"
             + "ObjectPropertyAssertion(:r :c :d)";
@@ -346,10 +350,6 @@ public class ReasonerTest extends AbstractReasonerTest {
             + "NegativeObjectPropertyAssertion( :hasAunt :Stewie :Carol ) ";
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
-    }
-    public void testDatatypeLiterals() throws Exception {
-        loadReasonerFromResource("res/FS2RDF-literals-ar-consistent.f.owl");
-        assertABoxSatisfiable(true);
     }
     public void testHasKeysOnlyNamed() throws Exception {
         String axioms = "Declaration( Class( :Person ) )"

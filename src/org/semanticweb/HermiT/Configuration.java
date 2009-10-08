@@ -33,7 +33,7 @@ public class Configuration implements Serializable,Cloneable {
     }
 
     public static enum ExistentialStrategyType {
-        CREATION_ORDER,EL,INDIVIDUAL_REUSE
+        CREATION_ORDER,EL,INDIVIDUAL_REUSE,LAZY_CREATION_ORDER
     }
 
     public WarningMonitor warningMonitor;

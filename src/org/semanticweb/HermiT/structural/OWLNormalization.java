@@ -1354,23 +1354,23 @@ public class OWLNormalization {
             if (positive) {
                 // head
                 headAtoms.remove(at);
-                normalizedHeadAtoms.add(m_factory.getSWRLSameAsAtom(indToVar(at.getFirstArgument()), indToVar(at.getSecondArgument())));
+                normalizedHeadAtoms.add(m_factory.getSWRLSameIndividualAtom(indToVar(at.getFirstArgument()), indToVar(at.getSecondArgument())));
             } else {
                 // body
                 bodyAtoms.remove(at);
-                normalizedBodyAtoms.add(m_factory.getSWRLSameAsAtom(indToVar(at.getFirstArgument()), indToVar(at.getSecondArgument())));
+                normalizedBodyAtoms.add(m_factory.getSWRLSameIndividualAtom(indToVar(at.getFirstArgument()), indToVar(at.getSecondArgument())));
             }
         }
         public void visit(SWRLDifferentIndividualsAtom at) {
             if (positive) {
                 // head
                 headAtoms.remove(at);
-                normalizedHeadAtoms.add(m_factory.getSWRLDifferentFromAtom(indToVar(at.getFirstArgument()), indToVar(at.getSecondArgument())));
+                normalizedHeadAtoms.add(m_factory.getSWRLDifferentIndividualsAtom(indToVar(at.getFirstArgument()), indToVar(at.getSecondArgument())));
             } else {
                 // body
                 bodyAtoms.remove(at);
                 // add to head as disjunctive equality
-                normalizedHeadAtoms.add(m_factory.getSWRLSameAsAtom(indToVar(at.getFirstArgument()), indToVar(at.getSecondArgument())));
+                normalizedHeadAtoms.add(m_factory.getSWRLSameIndividualAtom(indToVar(at.getFirstArgument()), indToVar(at.getSecondArgument())));
             }
         }
         public void visit(SWRLLiteralVariable variable) {

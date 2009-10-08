@@ -109,6 +109,7 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
             m_firstChangedNode=null;
     }
     public void modelFound() {
+        //System.out.println("Found  model with " + (m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes()) + " nodes. ");
         if (m_blockingSignatureCache!=null) {
             // Since we've found a model, we know what is blocked or not.
             // Therefore, we don't need to update the blocking status.

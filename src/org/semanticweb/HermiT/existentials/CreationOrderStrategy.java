@@ -25,6 +25,5 @@ public class CreationOrderStrategy extends AbstractExpansionStrategy implements 
     protected void expandExistential(AtLeastConcept atLeastConcept,Node forNode) {
         m_existentialExpansionManager.expand(atLeastConcept,forNode);
         m_existentialExpansionManager.markExistentialProcessed(atLeastConcept,forNode);
-        
     }
 }

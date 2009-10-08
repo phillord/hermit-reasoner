@@ -111,7 +111,7 @@ public class GraphTest extends AbstractReasonerTest {
             }
         );
         m_descriptionGraphs.add(graph);
-        SWRLAtom head=m_dataFactory.getSWRLSameAsAtom(
+        SWRLAtom head=m_dataFactory.getSWRLSameIndividualAtom(
                 m_dataFactory.getSWRLIndividualVariable(IRI.create(GraphTest.NS + "X")), 
                 m_dataFactory.getSWRLIndividualVariable(IRI.create(GraphTest.NS + "Y"))
         );

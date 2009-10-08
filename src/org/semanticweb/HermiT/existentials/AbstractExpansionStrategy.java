@@ -189,7 +189,7 @@ public abstract class AbstractExpansionStrategy implements Serializable,Existent
                 if ((!toNode.isBlocked() || forNode.isParentOf(toNode)) && m_extensionManager.containsConceptAssertion(toConcept,toNode)) {
                     if (isPermanentSatisfier(forNode,toNode) && m_blockingStrategy.isPermanentAssertion(toConcept,toNode))
                         return SatType.PERMANENTLY_SATISFIED;
-                    else
+                    else 
                         return SatType.CURRENTLY_SATISFIED;
                 }
                 retrieval.next();

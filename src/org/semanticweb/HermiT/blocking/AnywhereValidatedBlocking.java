@@ -510,9 +510,7 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
         }
     }
     public boolean isPermanentAssertion(Concept concept,Node node) {
-        m_auxiliaryTuple[0]=concept;
-        m_auxiliaryTuple[1]=node;
-        return m_extensionManager.isCore(m_auxiliaryTuple);
+        return true;
     }
     protected void validationInfoChanged(Node node) {
         if (m_lastValidatedUnchangedNode!=null && node.getNodeID()<m_lastValidatedUnchangedNode.getNodeID()) {
