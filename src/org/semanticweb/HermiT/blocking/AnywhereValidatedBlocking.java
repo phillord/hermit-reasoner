@@ -112,8 +112,7 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
             boolean checkBlockingSignatureCache=(m_blockingSignatureCache!=null && !m_blockingSignatureCache.isEmpty());
             while (node!=null) {
                 if (node.isActive() && (m_directBlockingChecker.canBeBlocked(node) || m_directBlockingChecker.canBeBlocker(node))) {
-                    //if (m_directBlockingChecker.hasBlockingInfoChanged(node) || (m_lastValidatedUnchangedNode!=null&&m_directBlockingChecker.hasChangedSinceValidation(node)) || !node.isDirectlyBlocked() || node.getBlocker().getNodeID()>=m_firstChangedNode.getNodeID()) {
-                    if (m_directBlockingChecker.hasBlockingInfoChanged(node) || !node.isDirectlyBlocked() || node.getBlocker().getNodeID()>=m_firstChangedNode.getNodeID()) {
+                    if (m_directBlockingChecker.hasBlockingInfoChanged(node) || (m_lastValidatedUnchangedNode!=null&&m_directBlockingChecker.hasChangedSinceValidation(node)) || !node.isDirectlyBlocked() || node.getBlocker().getNodeID()>=m_firstChangedNode.getNodeID()) {
                         Node parent=node.getParent();
                         if (parent==null)
                             node.setBlocked(null,false);
@@ -189,8 +188,8 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
                         checkedBlocks++;
                         // check whether the block is a correct one
                         Node validBlocker;
-                        if (node.isDirectlyBlocked()) {
-                            if (m_directBlockingChecker.hasChangedSinceValidation(node) || m_directBlockingChecker.hasChangedSinceValidation(node.getParent()) || m_directBlockingChecker.hasChangedSinceValidation(node.getBlocker()) || m_directBlockingChecker.hasChangedSinceValidation(node.getBlocker().getParent())) {
+                        if (node.isDirectlyBlocked() || !node.getParent().isBlocked()) {
+                            if (!node.getParent().isBlocked() || m_directBlockingChecker.hasChangedSinceValidation(node) || m_directBlockingChecker.hasChangedSinceValidation(node.getParent()) || m_directBlockingChecker.hasChangedSinceValidation(node.getBlocker()) || m_directBlockingChecker.hasChangedSinceValidation(node.getBlocker().getParent())) {
                                 validBlocker=getValidBlocker(node); 
                                 if (validBlocker == null) {
                                     invalidBlocks++;
@@ -198,18 +197,7 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
                                 }
                                 node.setBlocked(validBlocker,validBlocker!=null);
                             } 
-                        } else if (!node.getParent().isBlocked()) {
-                            // still marked as indirectly blocked since we proceed in creation order, 
-                            // but the parent has already been checked for proper blocking and is not 
-                            // really blocked
-                            // if this node cannot be blocked directly, unblock this one too
-                            validBlocker = getValidBlocker(node); 
-                            if (validBlocker == null) {
-                                invalidBlocks++;
-                                if (firstInvalidlyBlockedNode==null) firstInvalidlyBlockedNode=node;
-                            }
-                            node.setBlocked(validBlocker,validBlocker!=null);
-                        }
+                        } 
                     }
                     m_lastValidatedUnchangedNode=node;
                     if (!node.isBlocked() && m_directBlockingChecker.canBeBlocker(node))
@@ -224,7 +212,7 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
             while (node!=null) {
                 if (node.isActive()) {
                     m_directBlockingChecker.setHasChangedSinceValidation(node, false);
-                    //m_directBlockingChecker.clearBlockingInfoChanged(node);
+                    m_directBlockingChecker.clearBlockingInfoChanged(node);
                 }
                 node=node.getNextTableauNode();
             }
@@ -566,7 +554,10 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
             m_lastValidatedUnchangedNode=node;
     }
     public void modelFound() {
-        System.out.println("Found  model with " + (m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes()) + " nodes. ");
+        //System.out.println("Found  model with " + (m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes()) + " nodes. ");
+        m_firstChangedNode=null;
+        m_lastValidatedUnchangedNode=null;
+        validateBlocks();
         if (m_blockingSignatureCache!=null) {
             // Since we've found a model, we know what is blocked or not.
             // Therefore, we don't need to update the blocking status.

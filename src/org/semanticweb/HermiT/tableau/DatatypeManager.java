@@ -34,7 +34,7 @@ public class DatatypeManager implements Serializable {
     protected final List<DVariable> m_auxiliaryVariableList;
     protected final UnionDependencySet m_unionDependencySet;
     protected final boolean[] m_newVariableAdded;
-
+    
     public DatatypeManager(Tableau tableau) {
         m_interruptFlag=tableau.m_interruptFlag;
         m_tableauMonitor=tableau.m_tableauMonitor;

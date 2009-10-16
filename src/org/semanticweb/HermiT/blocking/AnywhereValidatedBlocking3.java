@@ -25,7 +25,7 @@ import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
 
-public class AnywhereValidatedBlocking2 implements BlockingStrategy {
+public class AnywhereValidatedBlocking3 implements BlockingStrategy {
 
     public static enum BlockingViolationType {
         ATLEASTBLOCKEDPARENT, 
@@ -49,6 +49,7 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
     protected ExtensionManager m_extensionManager;
     protected ExtensionTable.Retrieval m_ternaryTableSearchZeroOneBound;
     protected ExtensionTable.Retrieval m_ternaryTableSearchZeroTwoBound;
+    protected ExtensionTable.Retrieval m_binaryTableSearch1Bound;
     protected final Object[] m_auxiliaryTuple;
     
     protected final boolean m_hasInverses;
@@ -57,19 +58,11 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
     // statistics: 
     protected int numDirectlyBlocked=0;
     protected int numIndirectlyBlocked=0;
-    protected final boolean debuggingMode=true;
-    protected Map<String, Integer> m_violationCountBlocker=new HashMap<String, Integer>();
-    protected Map<String, Integer> m_violationCountBlockedParent=new HashMap<String, Integer>();
+    protected final boolean debuggingMode=false;
+    protected Map<String, Integer> m_violationCount=new HashMap<String, Integer>();
     protected Map<BlockingViolationType, Integer> m_causesCount=new HashMap<BlockingViolationType, Integer>();
-    
-    protected int one=0;
-    protected int two=0;
-    protected int three=0;
-    protected int four=0;
-    protected int five=0;
-    protected int six=0;
-    
-    public AnywhereValidatedBlocking2(DirectBlockingChecker directBlockingChecker,BlockingSignatureCache blockingSignatureCache,Map<AtomicConcept, Set<Set<Concept>>> unaryValidBlockConditions, Map<Set<AtomicConcept>, Set<Set<Concept>>> nAryValidBlockConditions, boolean hasInverses) {
+
+    public AnywhereValidatedBlocking3(DirectBlockingChecker directBlockingChecker,BlockingSignatureCache blockingSignatureCache,Map<AtomicConcept, Set<Set<Concept>>> unaryValidBlockConditions, Map<Set<AtomicConcept>, Set<Set<Concept>>> nAryValidBlockConditions, boolean hasInverses) {
         m_directBlockingChecker=directBlockingChecker;
         m_currentBlockersCache=new ValidatedBlockersCache(m_directBlockingChecker);
         m_blockingSignatureCache=blockingSignatureCache;
@@ -84,6 +77,7 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
         m_extensionManager=m_tableau.getExtensionManager();
         m_ternaryTableSearchZeroOneBound=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,true,false },ExtensionTable.View.TOTAL);
         m_ternaryTableSearchZeroTwoBound=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,false,true },ExtensionTable.View.TOTAL);
+        m_binaryTableSearch1Bound=m_extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
         if (debuggingMode) {
             m_causesCount.put(BlockingViolationType.ATLEASTBLOCKEDPARENT, 0);
             m_causesCount.put(BlockingViolationType.ATLEASTBLOCKER, 0);
@@ -118,7 +112,7 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
             boolean checkBlockingSignatureCache=(m_blockingSignatureCache!=null && !m_blockingSignatureCache.isEmpty());
             while (node!=null) {
                 if (node.isActive() && (m_directBlockingChecker.canBeBlocked(node) || m_directBlockingChecker.canBeBlocker(node))) {
-                    if (m_directBlockingChecker.hasBlockingInfoChanged(node) || !node.isDirectlyBlocked() || node.getBlocker().getNodeID()>=m_firstChangedNode.getNodeID()) {
+                    if (m_directBlockingChecker.hasBlockingInfoChanged(node) || (m_lastValidatedUnchangedNode!=null&&m_directBlockingChecker.hasChangedSinceValidation(node)) || !node.isDirectlyBlocked() || node.getBlocker().getNodeID()>=m_firstChangedNode.getNodeID()) {
                         Node parent=node.getParent();
                         if (parent==null)
                             node.setBlocked(null,false);
@@ -193,28 +187,72 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
                     if (node.isBlocked()) {
                         checkedBlocks++;
                         // check whether the block is a correct one
-                        Node validBlocker;
-                        if (node.isDirectlyBlocked()) {
-                            if (m_directBlockingChecker.hasChangedSinceValidation(node) || m_directBlockingChecker.hasChangedSinceValidation(node.getParent()) || m_directBlockingChecker.hasChangedSinceValidation(node.getBlocker()) || m_directBlockingChecker.hasChangedSinceValidation(node.getBlocker().getParent())) {
-                                validBlocker=getValidBlocker(node); 
+                        Node validBlocker=null;
+                        if (node.isDirectlyBlocked() || !node.getParent().isBlocked()) {
+                            if (!node.getParent().isBlocked() || m_directBlockingChecker.hasChangedSinceValidation(node) || m_directBlockingChecker.hasChangedSinceValidation(node.getParent()) || m_directBlockingChecker.hasChangedSinceValidation(node.getBlocker()) || m_directBlockingChecker.hasChangedSinceValidation(node.getBlocker().getParent())) {
+                                List<Node> possibleBlockers = m_currentBlockersCache.getPossibleBlockers(node);
+                                if (!possibleBlockers.isEmpty()) {
+                                    int i=0;
+                                    if (possibleBlockers.contains(node.getBlocker())) {
+                                        // we always assign the smallest node that has been modified since the last validation
+                                        // re-testing smaller (unmodified) ones makes no sense 
+                                        i=possibleBlockers.indexOf(node.getBlocker());
+                                    }
+                                    for (; i<possibleBlockers.size(); i++) {
+                                        Node blocker=possibleBlockers.get(i);
+                                        boolean blockerIsSuitable = true;
+                                        // get all existentials of the parent of the blocked node
+                                        m_binaryTableSearch1Bound.getBindingsBuffer()[1]=node.getParent();
+                                        m_binaryTableSearch1Bound.open();
+                                        Object[] tupleBuffer=m_binaryTableSearch1Bound.getTupleBuffer();
+                                        while (!m_binaryTableSearch1Bound.afterLast() && blockerIsSuitable) {
+                                            Concept c=(Concept)tupleBuffer[0];
+                                            if (c instanceof AtLeastConcept) {
+                                                AtLeastConcept atLeast = (AtLeastConcept) c;
+                                                Role r = atLeast.getOnRole();
+                                                LiteralConcept filler = atLeast.getToConcept();
+                                                if (isInLabel(filler, node) && !isInLabel(filler, blocker) && isInLabelFromParentToNode(r, node)) {
+                                                    blockerIsSuitable=false;
+                                                } 
+                                            }
+                                            m_binaryTableSearch1Bound.next();
+                                        }
+                                        // get all existentials of the blocker and in case they use the parent of the blocker
+                                        // check whether the parent of the blocked is also suitable
+                                        if (m_hasInverses && blockerIsSuitable) {
+                                            m_binaryTableSearch1Bound.getBindingsBuffer()[1]=blocker;
+                                            m_binaryTableSearch1Bound.open();
+                                            tupleBuffer=m_binaryTableSearch1Bound.getTupleBuffer();
+                                            while (!m_binaryTableSearch1Bound.afterLast() && blockerIsSuitable) {
+                                                Concept c=(Concept)tupleBuffer[0];
+                                                if (c instanceof AtLeastConcept) {
+                                                    AtLeastConcept atLeast = (AtLeastConcept) c;
+                                                    Role r = atLeast.getOnRole();
+                                                    LiteralConcept filler = atLeast.getToConcept();
+                                                    if (isInLabel(filler, blocker.getParent()) && isInLabelFromNodeToParent(r, blocker) && (!isInLabel(filler, node.getParent()) || !isInLabelFromNodeToParent(r, node))) {
+                                                        if (!hasAtLeastNSuccessors(blocker, atLeast.getNumber(), r, filler)) {
+                                                            blockerIsSuitable=false;
+                                                        }
+                                                    }
+                                                }
+                                                m_binaryTableSearch1Bound.next();
+                                            }
+                                        }
+                                        if (blockerIsSuitable && constraintsSatisfied(node, blocker)) {
+                                            // so far so good: we have checked all existentials and now we check whether also the forall/atmost 
+                                            // constraints are ok
+                                            validBlocker=blocker;
+                                            break;
+                                        }
+                                    }
+                                }
                                 if (validBlocker == null) {
                                     invalidBlocks++;
                                     if (firstInvalidlyBlockedNode==null) firstInvalidlyBlockedNode=node;
                                 }
                                 node.setBlocked(validBlocker,validBlocker!=null);
                             } 
-                        } else if (!node.getParent().isBlocked()) {
-                            // still marked as indirectly blocked since we proceed in creation order, 
-                            // but the parent has already been checked for proper blocking and is not 
-                            // really blocked
-                            // if this node cannot be blocked directly, unblock this one too
-                            validBlocker = getValidBlocker(node); 
-                            if (validBlocker == null) {
-                                invalidBlocks++;
-                                if (firstInvalidlyBlockedNode==null) firstInvalidlyBlockedNode=node;
-                            }
-                            node.setBlocked(validBlocker,validBlocker!=null);
-                        }
+                        } 
                     }
                     m_lastValidatedUnchangedNode=node;
                     if (!node.isBlocked() && m_directBlockingChecker.canBeBlocker(node))
@@ -223,12 +261,13 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
                 }
                 node=node.getNextTableauNode();
             }
-            // if set to some node, then computePreblocking will be asked to check from that node onwards in case of invalid blocks 
             if (debuggingMode) System.out.println("");
             node=firstValidatedNode;
             while (node!=null) {
-                if (node.isActive())
+                if (node.isActive()) {
                     m_directBlockingChecker.setHasChangedSinceValidation(node, false);
+                    m_directBlockingChecker.clearBlockingInfoChanged(node);
+                }
                 node=node.getNextTableauNode();
             }
             // if set to some node, then computePreblocking will be asked to check from that node onwards in case of invalid blocks 
@@ -238,145 +277,113 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
             if (debuggingMode) System.out.println("Checked " + checkedBlocks + " blocked nodes of which " + invalidBlocks + " were invalid.");
         }
     }
-    protected Node getValidBlocker(Node blocked) {
-        // we have that the node blocked is (pre-)blocked and we have to validate whether the block is valid 
-        // that is we can create a model from the block by unravelling
-        List<Node> possibleBlockers = m_currentBlockersCache.getPossibleBlockers(blocked);
-        if (possibleBlockers.isEmpty()) return null;
-        int i=0;
-        if (blocked.getBlocker()!=null && possibleBlockers.contains(blocked.getBlocker())) {
-            // we always assign the smallest node that has been modified since the last validation
-            // re-testing smaller (unmodified) ones makes no sense 
-            i=possibleBlockers.indexOf(blocked.getBlocker());
-        }
-        AtomicConcept c;
+    protected boolean constraintsSatisfied(Node blocked, Node blocker) {
         Set<AtomicConcept> blockedParentLabel=m_directBlockingChecker.getFullAtomicConceptsLabel(blocked.getParent());
-        for (; i<possibleBlockers.size(); i++) {
-            Node blocker=possibleBlockers.get(i);
-            boolean blockerIsSuitable = true;
-            // check whether min/max cardinalities of the blocker are not violated when copied to the blocked node
-            Set<AtomicConcept> blockerLabel=m_directBlockingChecker.getFullAtomicConceptsLabel(blocker);
-            if (blockerIsSuitable && m_hasInverses) {
-                for (Iterator<AtomicConcept> blIt = blockerLabel.iterator(); blIt.hasNext() && blockerIsSuitable; ) {
-                    c = blIt.next();
-                    if (m_unaryValidBlockConditions.containsKey(c)) {
-                        Map<Set<Concept>,Map<Concept, BlockingViolationType>> violationCauses=getBlockerViolations(m_unaryValidBlockConditions.get(c), blocker, blocked); 
-                        if (violationCauses.size()!=0) { 
-                            blockerIsSuitable = false;
-                            if (debuggingMode) addViolation(new BlockingViolation(blocked, blocker, c, violationCauses),m_violationCountBlocker);
-                            if (debuggingMode) one++;
-                        }
-                    }
-                    if (!blockerIsSuitable) break;
-                }
-            }
-            // check whether min/max cardinalities of the parent of the blocked node could be violated
-            // universals and existential have been converted to min/max restrictions for convenience
-            if (blockerIsSuitable) {
-                for (Iterator<AtomicConcept> bpIt = blockedParentLabel.iterator(); bpIt.hasNext() && blockerIsSuitable; ) {
-                    c = bpIt.next();
-                    if (m_unaryValidBlockConditions.containsKey(c)) {
-                        Map<Set<Concept>,Map<Concept, BlockingViolationType>> violationCauses=getBlockedParentViolations(m_unaryValidBlockConditions.get(c), blocker, blocked);
-                        if (violationCauses.size()!=0) { 
-                            blockerIsSuitable = false;
-                            if (debuggingMode) addViolation(new BlockingViolation(blocked, blocker, c, violationCauses),m_violationCountBlockedParent);
-                            if (debuggingMode) two++;
-                        }
-                    }
-                    if (!blockerIsSuitable) break;
-                }
-            }
-            // check top, which is not explicitly present in the label, but might be the premise of some constraint
-            if (blockerIsSuitable && m_unaryValidBlockConditions.containsKey(AtomicConcept.THING)) {
-                Map<Set<Concept>,Map<Concept, BlockingViolationType>> violationCauses=getBlockerViolations(m_unaryValidBlockConditions.get(AtomicConcept.THING), blocker, blocked);    
+        boolean blockerIsSuitable = true;
+        // check whether max cardinalities of the parent of the blocked node could be violated
+        // universals have been converted to max restrictions for convenience
+        AtomicConcept c;
+        for (Iterator<AtomicConcept> bpIt = blockedParentLabel.iterator(); bpIt.hasNext() && blockerIsSuitable; ) {
+            c = bpIt.next();
+            if (m_unaryValidBlockConditions.containsKey(c)) {
+                Map<Set<Concept>,Map<Concept, BlockingViolationType>> violationCauses=getBlockedParentViolations(m_unaryValidBlockConditions.get(c), blocker, blocked);
                 if (violationCauses.size()!=0) { 
                     blockerIsSuitable = false;
-                    if (debuggingMode) addViolation(new BlockingViolation(blocked, blocker, AtomicConcept.THING, violationCauses),m_violationCountBlocker);
-                    if (debuggingMode) three++;
+                    //if (debuggingMode) addViolation(new BlockingViolation(blocked, blocker, c, violationCauses));
                 }
-            }
-            // check top, which is not explicitly present in the label, but might be the premise of some constraint
-            if (blockerIsSuitable && m_unaryValidBlockConditions.containsKey(AtomicConcept.THING)) {
-                Map<Set<Concept>,Map<Concept, BlockingViolationType>> violationCauses=getBlockedParentViolations(m_unaryValidBlockConditions.get(AtomicConcept.THING), blocker, blocked); 
-                if (violationCauses.size()!=0) { 
-                    blockerIsSuitable = false;
-                    if (debuggingMode) addViolation(new BlockingViolation(blocked, blocker, AtomicConcept.THING, violationCauses),m_violationCountBlockedParent);
-                    if (debuggingMode) four++;
-                }
-            }
-            // repeat the same checks for non-unary premises (less efficient matching operations)
-            if (blockerIsSuitable && m_hasInverses) {
-                for (Set<AtomicConcept> premises : m_nAryValidBlockConditions.keySet()) {
-                    if (blockerLabel.containsAll(premises)) {
-                        Map<Set<Concept>,Map<Concept, BlockingViolationType>> violationCauses=getBlockerViolations(m_nAryValidBlockConditions.get(premises), blocker, blocked); 
-                        if (violationCauses.size()!=0) { 
-                            blockerIsSuitable = false;
-                            if (debuggingMode) addViolation(new BlockingViolation(blocked, blocker, premises, violationCauses),m_violationCountBlocker);
-                            if (debuggingMode) five++;
-                        }
-                    }
-                    if (!blockerIsSuitable) break;
-                }
-            }
-            // repeat the same checks for non-unary premises (less efficient matching operations)
-            if (blockerIsSuitable) {
-                for (Set<AtomicConcept> premises : m_nAryValidBlockConditions.keySet()) {
-                    if (blockedParentLabel.containsAll(premises)) {
-                        Map<Set<Concept>,Map<Concept, BlockingViolationType>> violationCauses=getBlockedParentViolations(m_nAryValidBlockConditions.get(premises), blocker, blocked);
-                        if (violationCauses.size()!=0) { 
-                            blockerIsSuitable = false;
-                            if (debuggingMode) addViolation(new BlockingViolation(blocked, blocker, premises, violationCauses),m_violationCountBlockedParent);
-                            if (debuggingMode) six++;
-                        }
-                    }
-                    if (!blockerIsSuitable) break;
-                }
-            }
-            if (blockerIsSuitable) {
-                return blocker;
             }
         }
-        return null;
+        // check top, which is not explicitly present in the label, but might be the premise of some constraint
+        if (blockerIsSuitable && m_unaryValidBlockConditions.containsKey(AtomicConcept.THING)) {
+            Map<Set<Concept>,Map<Concept, BlockingViolationType>> violationCauses=getBlockedParentViolations(m_unaryValidBlockConditions.get(AtomicConcept.THING), blocker, blocked); 
+            if (violationCauses.size()!=0) { 
+                blockerIsSuitable = false;
+                //if (debuggingMode) addViolation(new BlockingViolation(blocked, blocker, AtomicConcept.THING, violationCauses));
+            }
+        }
+        // repeat the same checks for non-unary premises (less efficient matching operations)
+        if (blockerIsSuitable) {
+            for (Set<AtomicConcept> premises : m_nAryValidBlockConditions.keySet()) {
+                if (blockedParentLabel.containsAll(premises)) {
+                    Map<Set<Concept>,Map<Concept, BlockingViolationType>> violationCauses=getBlockedParentViolations(m_nAryValidBlockConditions.get(premises), blocker, blocked);
+                    if (violationCauses.size()!=0) { 
+                        blockerIsSuitable = false;
+                        //if (debuggingMode) addViolation(new BlockingViolation(blocked, blocker, premises, violationCauses));
+                    }
+                }
+                if (!blockerIsSuitable) break;
+            }
+        }
+        // check whether min/max cardinalities of the blocker are not violated when copied to the blocked node
+        Set<AtomicConcept> blockerLabel=m_directBlockingChecker.getFullAtomicConceptsLabel(blocker);
+        if (blockerIsSuitable && m_hasInverses) {
+            for (Iterator<AtomicConcept> blIt = blockerLabel.iterator(); blIt.hasNext() && blockerIsSuitable; ) {
+                c = blIt.next();
+                if (m_unaryValidBlockConditions.containsKey(c)) {
+                    Map<Set<Concept>,Map<Concept, BlockingViolationType>> violationCauses=getBlockerViolations(m_unaryValidBlockConditions.get(c), blocker, blocked); 
+                    if (violationCauses.size()!=0) { 
+                        blockerIsSuitable = false;
+                        //if (debuggingMode) addViolation(new BlockingViolation(blocked, blocker, c, violationCauses));
+                    }
+                }
+            }
+        }
+        // check top, which is not explicitly present in the label, but might be the premise of some constraint
+        if (blockerIsSuitable && m_unaryValidBlockConditions.containsKey(AtomicConcept.THING)) {
+            Map<Set<Concept>,Map<Concept, BlockingViolationType>> violationCauses=getBlockerViolations(m_unaryValidBlockConditions.get(AtomicConcept.THING), blocker, blocked);    
+            if (violationCauses.size()!=0) { 
+                blockerIsSuitable = false;
+                //if (debuggingMode) addViolation(new BlockingViolation(blocked, blocker, AtomicConcept.THING, violationCauses));
+            }
+        }
+        // repeat the same checks for non-unary premises (less efficient matching operations)
+        if (blockerIsSuitable && m_hasInverses) {
+            for (Set<AtomicConcept> premises : m_nAryValidBlockConditions.keySet()) {
+                if (blockerLabel.containsAll(premises)) {
+                    Map<Set<Concept>,Map<Concept, BlockingViolationType>> violationCauses=getBlockerViolations(m_nAryValidBlockConditions.get(premises), blocker, blocked); 
+                    if (violationCauses.size()!=0) { 
+                        blockerIsSuitable = false;
+                        //if (debuggingMode) addViolation(new BlockingViolation(blocked, blocker, premises, violationCauses));
+                    }
+                }
+                if (!blockerIsSuitable) break;
+            }
+        }
+        return blockerIsSuitable;
     }
     protected Map<Set<Concept>, Map<Concept, BlockingViolationType>> getBlockedParentViolations(Set<Set<Concept>> conclusions, Node blocker, Node blocked) {
         Map<Concept, BlockingViolationType> disjunct2Cause=new HashMap<Concept, BlockingViolationType>();
         Map<Set<Concept>, Map<Concept, BlockingViolationType>> conjunct2violations=new HashMap<Set<Concept>, Map<Concept, BlockingViolationType>>();
         for (Set<Concept> conjunct : conclusions) {
             boolean satisfied = false;
-            disjunct2Cause.clear();
             for (Iterator<Concept> it = conjunct.iterator(); it.hasNext() && !satisfied; ) {
                 Concept disjunct = it.next();
                 satisfied = true;
-                if (disjunct instanceof AtMostConcept) {
+                if (disjunct instanceof AtLeastConcept) {
+                    // we have something like A -> >=1 r.C or <= 0 s.not D for example
+                    // we checked at leasts already, so just check the label
+                    AtLeastConcept atLeast = (AtLeastConcept) disjunct;
+                    if (!m_extensionManager.containsAssertion(atLeast, blocked.getParent())) {
+                        satisfied = false;
+                        disjunct2Cause.put(disjunct, BlockingViolationType.ATLEASTBLOCKEDPARENT);
+                    }
+                } else if (disjunct instanceof AtMostConcept) {
                     // (<= n r.B) must hold at blockedParent, therefore, ar(r, blockedParent, blocked) in ABox and B(blocked) not in ABox implies B(blocker) not in ABox
                     // to avoid table lookup, we check: not B(blocked) and B(blocker) implies not ar(r, blockedParent, blocked)
                     AtMostConcept atMost = (AtMostConcept)disjunct;
                     Role r = atMost.getOnRole(); // r
                     LiteralConcept filler = atMost.getToConcept();
-                    //if (!isInLabel(filler, blockedLabel) && isInLabel(filler, blockerLabel) && isInABox(r, blockedParent, blocked)) {
                     if (!isInLabel(filler, blocked) && isInLabel(filler, blocker) && isInLabelFromParentToNode(r, blocked)) {
                         satisfied = false;
                         disjunct2Cause.put(disjunct, BlockingViolationType.ATMOSTBLOCKEDPARENT);
                     }
                 } else if (disjunct instanceof AtomicConcept) {
-                    // happens if we have something like A -> (>= n r.B) or C. If (>= n r.B) is not guaranteed 
+                    // happens if we have something like A -> (<= 0 r.not B) or C. If (<= 0 r.not B) is not guaranteed 
                     // for the parent of the blocked node, but C is, then we are fine, so only if C does not hold, we have to look further. 
-                    //if(!isInLabel((AtomicConcept) disjunct, blockedParentLabel)) {
                     if(!isInLabel((AtomicConcept)disjunct, blocked.getParent())) {
                         // must be an atomic concept or normal form is violated
                         satisfied = false;
                         disjunct2Cause.put(disjunct, BlockingViolationType.ATOMICBLOCKEDPARENT);
-                    }
-                } else if (disjunct instanceof AtLeastConcept) {
-                    // (>= n r.B) must hold at blockedParent, therefore, ar(r, blockedParent, blocked) and B(blocked) in ABox implies B(blocker) in ABox
-                    // to avoid table lookup check: B(blocked) and not B(blocker) implies not ar(r, blockedParent, blocked)
-                    AtLeastConcept atLeast = (AtLeastConcept) disjunct;
-                    Role r = atLeast.getOnRole();
-                    LiteralConcept filler = atLeast.getToConcept();
-                    //if (isInLabel(filler, blockedLabel) && !isInLabel(filler, blockerLabel) && isInABox(r, blockedParent, blocked)) {
-                    if (isInLabel(filler, blocked) && !isInLabel(filler, blocker) && isInLabelFromParentToNode(r, blocked)) {
-                        satisfied = false;
-                        disjunct2Cause.put(disjunct, BlockingViolationType.ATLEASTBLOCKEDPARENT);
                     }
                 } else {
                     throw new IllegalStateException("Internal error: Concepts in the conclusion of core blocking constraints are supposed to be atomic classes, at least or at most constraints, but this class is an instance of " + disjunct.getClass().getSimpleName());
@@ -394,24 +401,16 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
         Map<Set<Concept>, Map<Concept, BlockingViolationType>> conjunct2violations=new HashMap<Set<Concept>, Map<Concept, BlockingViolationType>>();
         for (Set<Concept> conjunct : conclusions) {
             boolean satisfied = false;
-            disjunct2Cause.clear();
             for (Iterator<Concept> it = conjunct.iterator(); it.hasNext() && !satisfied; ) {
                 Concept disjunct = it.next();
                 satisfied = true;
                 if (disjunct instanceof AtLeastConcept) {
-                    // (>= n r.B)(blocker) in the ABox, so in the model construction, (>= n r.B) will be copied to blocked, 
-                    // so we have to make sure that it will be satisfied at blocked
-                    // check B(blockerParent) and ar(r, blocker, blockerParent) in ABox implies B(blockedParent) and ar(r, blocked, blockedParent) in ABox
-                    // or blocker has at least n r-successors bs such that B(bs) holds
+                    // we checked at leasts already, so only check existence in the label for constraints such as 
+                    // A -> >= 1 r.C or <= 0 s.not B
                     AtLeastConcept atLeast = (AtLeastConcept) disjunct;
-                    Role r = atLeast.getOnRole();
-                    LiteralConcept filler = atLeast.getToConcept();
-                    //if (isInLabel(filler, blockerParentLabel) && isInABox(r, blocker, blockerParent) && (!isInLabel(filler, blockedParentLabel) || !isInABox(r, blocked, blockedParent))) {
-                    if (isInLabel(filler, blocker.getParent()) && isInLabelFromNodeToParent(r, blocker) && (!isInLabel(filler, blocked.getParent()) || !isInLabelFromNodeToParent(r, blocked))) {
-                        if (!hasAtLeastNSuccessors(blocker, atLeast.getNumber(), r, filler)) {
-                            satisfied = false;
-                            disjunct2Cause.put(disjunct, BlockingViolationType.ATLEASTBLOCKER);
-                        }
+                    if (!m_extensionManager.containsAssertion(atLeast, blocker)) {
+                        satisfied = false;
+                        disjunct2Cause.put(disjunct, BlockingViolationType.ATLEASTBLOCKER);
                     }
                 } else if (disjunct instanceof AtMostConcept) {
                     // (<= n r.B)(blocker) is in the ABox and in the model construction (<= n r.B) will be copied to blocked,  
@@ -534,34 +533,29 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
         m_directBlockingChecker.setHasChangedSinceValidation(node, true);
     }
     public void assertionAdded(Concept concept,Node node,boolean isCore) {
-        if (m_directBlockingChecker.assertionAdded(concept,node,isCore)!=null || m_lastValidatedUnchangedNode!=null) updateNodeChange(node);
+        updateNodeChange(m_directBlockingChecker.assertionAdded(concept,node,isCore));
         validationInfoChanged(node);
     }
     public void assertionCoreSet(Concept concept,Node node) {
-        if (m_directBlockingChecker.assertionAdded(concept,node,true)!=null || m_lastValidatedUnchangedNode!=null) updateNodeChange(node);
+        updateNodeChange(m_directBlockingChecker.assertionAdded(concept,node,true));
         validationInfoChanged(node);
     }
     public void assertionRemoved(Concept concept,Node node,boolean isCore) {
-        if (m_directBlockingChecker.assertionRemoved(concept,node,isCore)!=null || m_lastValidatedUnchangedNode!=null) updateNodeChange(node);
+        updateNodeChange(m_directBlockingChecker.assertionRemoved(concept,node,isCore));
         validationInfoChanged(node);
     }
     public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
-        if (isCore || m_lastValidatedUnchangedNode!=null) updateNodeChange(nodeFrom);
-        if (isCore || m_lastValidatedUnchangedNode!=null) updateNodeChange(nodeTo);
+        updateNodeChange(m_directBlockingChecker.assertionAdded(atomicRole,nodeFrom,nodeTo,isCore));
         validationInfoChanged(nodeFrom);
         validationInfoChanged(nodeTo);
     }
     public void assertionCoreSet(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
-        m_directBlockingChecker.assertionAdded(atomicRole,nodeFrom,nodeTo,true);
-        if (m_lastValidatedUnchangedNode!=null) updateNodeChange(nodeFrom);
-        if (m_lastValidatedUnchangedNode!=null) updateNodeChange(nodeTo);
+        updateNodeChange(m_directBlockingChecker.assertionAdded(atomicRole,nodeFrom,nodeTo,true));
         validationInfoChanged(nodeFrom);
         validationInfoChanged(nodeTo);
     }
     public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
-        m_directBlockingChecker.assertionRemoved(atomicRole,nodeFrom,nodeTo,true);
-        if (isCore || m_lastValidatedUnchangedNode!=null) updateNodeChange(nodeFrom);
-        if (isCore || m_lastValidatedUnchangedNode!=null) updateNodeChange(nodeTo);
+        updateNodeChange(m_directBlockingChecker.assertionRemoved(atomicRole,nodeFrom,nodeTo,isCore));
         validationInfoChanged(nodeFrom);
         validationInfoChanged(nodeTo);
     }
@@ -598,39 +592,6 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
                 node=node.getNextTableauNode();
             }
         }
-//        System.out.println("Violations for the blocker:");
-//        SortedSet<ViolationStatistic> counts=new TreeSet<ViolationStatistic>();
-//        for (String key : m_violationCountBlocker.keySet()) {
-//            counts.add(new ViolationStatistic(key,m_violationCountBlocker.get(key)));
-//        }
-//        for (ViolationStatistic vs : counts) {
-//            System.out.println(vs);
-//        }
-//        counts.clear();
-//        System.out.println("Violations for the blocked parent:");
-//        for (String key : m_violationCountBlockedParent.keySet()) {
-//            counts.add(new ViolationStatistic(key,m_violationCountBlockedParent.get(key)));
-//        }
-//        for (ViolationStatistic vs : counts) {
-//            System.out.println(vs);
-//        }
-    }
-    protected final class ViolationStatistic implements Comparable<ViolationStatistic>{
-        public final String m_violatedConstraint;
-        public final Integer m_numberOfViolations;
-        public ViolationStatistic(String violatedConstraint, Integer numberOfViolations) {
-            m_violatedConstraint=violatedConstraint;
-            m_numberOfViolations=numberOfViolations;
-        }
-        public int compareTo(ViolationStatistic that) {
-            if (this==that) return 0;
-            if (that==null) throw new NullPointerException("Comparing to a null object is illegal. ");
-            if (this.m_numberOfViolations==that.m_numberOfViolations) return m_violatedConstraint.compareTo(that.m_violatedConstraint);
-            else return that.m_numberOfViolations-this.m_numberOfViolations;
-        }
-        public String toString() {
-            return m_numberOfViolations + ": "+m_violatedConstraint.replaceAll("http://www.co-ode.org/ontologies/galen#", "");
-        }
     }
     public boolean isExact() {
         return false;
@@ -641,13 +602,13 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
         }
     }
     
-    protected void addViolation(BlockingViolation violation, Map<String, Integer> countMap) {
+    protected void addViolation(BlockingViolation violation) {
         String violatedConstraint=violation.getViolatedConstraint();
-        Integer i=countMap.get(violatedConstraint);
+        Integer i=m_violationCount.get(violatedConstraint);
         if (i!=null) {
-            countMap.put(violatedConstraint, (i+1));
+            m_violationCount.put(violatedConstraint, (i+1));
         } else {
-            countMap.put(violatedConstraint, new Integer(1));
+            m_violationCount.put(violatedConstraint, new Integer(1));
         }
         for (BlockingViolationType t : violation.m_causes.values()) {
             Integer count=m_causesCount.get(t);
