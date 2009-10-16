@@ -1,6 +1,5 @@
 package org.semanticweb.HermiT.graph;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -12,9 +11,6 @@ import org.semanticweb.HermiT.tableau.DependencySet;
 import org.semanticweb.HermiT.tableau.ExtensionManager;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.SWRLAtom;
-import org.semanticweb.owlapi.model.SWRLRule;
 
 public class GraphTest extends AbstractReasonerTest {
 
@@ -111,21 +107,11 @@ public class GraphTest extends AbstractReasonerTest {
             }
         );
         m_descriptionGraphs.add(graph);
-        SWRLAtom head=m_dataFactory.getSWRLSameIndividualAtom(
-                m_dataFactory.getSWRLIndividualVariable(IRI.create(GraphTest.NS + "X")), 
-                m_dataFactory.getSWRLIndividualVariable(IRI.create(GraphTest.NS + "Y"))
-        );
-        SWRLAtom body=m_dataFactory.getSWRLObjectPropertyAtom(
-                m_dataFactory.getOWLObjectProperty(IRI.create(GraphTest.NS + "R")), 
-                m_dataFactory.getSWRLIndividualVariable(IRI.create(GraphTest.NS + "X")), 
-                m_dataFactory.getSWRLIndividualVariable(IRI.create(GraphTest.NS + "Y"))
-        );
-        SWRLRule rule=m_dataFactory.getSWRLRule(Collections.singleton(body), Collections.singleton(head));
-//        addAxiom(
-//            "[rule [[[pred owl:sameAs] X Y]] [[[oprop R] X Y]]]"
-//        );
-        m_ontologyManager.addAxiom(m_ontology, rule);
-        
+        String axioms = "ClassAssertion(:A :a) ClassAssertion(:B :b) DisjointClasses(:A :B) ObjectPropertyAssertion(:r :a :b)"
+            // R(x, y) -> SameIndividual(x, y)
+            + "DLSafeRule(Body(ObjectPropertyAtom(:R IndividualVariable(:x) IndividualVariable(:y))) Head(SameIndividualAtom(IndividualVariable(:x) IndividualVariable(:y))))";
+        loadOntologyWithAxioms(axioms);
+   
         Tableau tableau=getTableau(m_descriptionGraphs);
         tableau.clear();
         ExtensionManager extensionManager=tableau.getExtensionManager();
@@ -186,82 +172,22 @@ public class GraphTest extends AbstractReasonerTest {
         ));
         
         String axioms="SubClassOf(:A ObjectSomeValuesFrom(:T :P))"
-            + "SubClassOf(ObjectSomeValuesFrom(:T :D) :B)";
+            + "SubClassOf(ObjectSomeValuesFrom(:T :D) :B)"
+            //P(v), R(x,v), LP(x), S(x,y), RP(y), R(y,w), P(w) -> conn(v,w)
+            + "DLSafeRule(Body(" 
+                        + "ClassAtom(:P IndividualVariable(:v)) " 
+            		+ "ObjectPropertyAtom(:R IndividualVariable(:x) IndividualVariable(:v))"
+            		+ "ClassAtom(:LP IndividualVariable(:x)) " 
+            		+ "ObjectPropertyAtom(:S IndividualVariable(:x) IndividualVariable(:y))"
+            		+ "ClassAtom(:RP IndividualVariable(:y)) " 
+            		+ "ObjectPropertyAtom(:R IndividualVariable(:y) IndividualVariable(:w))"
+            		+ "ClassAtom(:P IndividualVariable(:w)) " 
+            		+ ") Head(ObjectPropertyAtom(:conn IndividualVariable(:v) IndividualVariable(:w))))"
+             // conn(x,y) -> D(x)
+             + "DLSafeRule(Body(ObjectPropertyAtom(:conn IndividualVariable(:x) IndividualVariable(:y))) Head(ClassAtom(:D IndividualVariable(:x))))"
+             // conn(x,y) -> D(y)
+             + "DLSafeRule(Body(ObjectPropertyAtom(:conn IndividualVariable(:x) IndividualVariable(:y))) Head(ClassAtom(:D IndividualVariable(:y))))";
         loadOntologyWithAxioms(axioms);
-        
-        //P(v), R(x,v), LP(x), s(x,y), RP(y), r(y,w), P(w) -> conn(v,w)
-        //rule [[[oprop conn] V W]] [[[desc P] V] [[oprop R] X V] [[desc LP] X] [[oprop S] X Y] [[desc RP] Y] [[oprop R] Y W] [[desc P] W]]
-        SWRLAtom head=m_dataFactory.getSWRLObjectPropertyAtom(
-                m_dataFactory.getOWLObjectProperty(IRI.create(GraphTest.NS+"conn")), 
-                m_dataFactory.getSWRLIndividualVariable(IRI.create(GraphTest.NS + "V")), 
-                m_dataFactory.getSWRLIndividualVariable(IRI.create(GraphTest.NS + "W"))
-        );
-        Set<SWRLAtom> bodyAtoms=new HashSet<SWRLAtom>();
-        bodyAtoms.add(m_dataFactory.getSWRLClassAtom(
-                m_dataFactory.getOWLClass(IRI.create(GraphTest.NS+"P")), 
-                m_dataFactory.getSWRLIndividualVariable(IRI.create(GraphTest.NS + "V"))
-        ));
-        bodyAtoms.add(m_dataFactory.getSWRLObjectPropertyAtom(
-                m_dataFactory.getOWLObjectProperty(IRI.create(GraphTest.NS + "R")), 
-                m_dataFactory.getSWRLIndividualVariable(IRI.create(GraphTest.NS + "X")), 
-                m_dataFactory.getSWRLIndividualVariable(IRI.create(GraphTest.NS + "V"))
-        ));
-        bodyAtoms.add(m_dataFactory.getSWRLClassAtom(
-                m_dataFactory.getOWLClass(IRI.create(GraphTest.NS+"LP")), 
-                m_dataFactory.getSWRLIndividualVariable(IRI.create(GraphTest.NS + "X"))
-        ));
-        bodyAtoms.add(m_dataFactory.getSWRLObjectPropertyAtom(
-                m_dataFactory.getOWLObjectProperty(IRI.create(GraphTest.NS + "S")), 
-                m_dataFactory.getSWRLIndividualVariable(IRI.create(GraphTest.NS + "X")), 
-                m_dataFactory.getSWRLIndividualVariable(IRI.create(GraphTest.NS + "Y"))
-        ));
-        bodyAtoms.add(m_dataFactory.getSWRLClassAtom(
-                m_dataFactory.getOWLClass(IRI.create(GraphTest.NS+"RP")), 
-                m_dataFactory.getSWRLIndividualVariable(IRI.create(GraphTest.NS + "Y"))
-        ));
-        bodyAtoms.add(m_dataFactory.getSWRLObjectPropertyAtom(
-                m_dataFactory.getOWLObjectProperty(IRI.create(GraphTest.NS + "R")), 
-                m_dataFactory.getSWRLIndividualVariable(IRI.create(GraphTest.NS + "Y")), 
-                m_dataFactory.getSWRLIndividualVariable(IRI.create(GraphTest.NS + "W"))
-        ));
-        bodyAtoms.add(m_dataFactory.getSWRLClassAtom(
-                m_dataFactory.getOWLClass(IRI.create(GraphTest.NS+"P")), 
-                m_dataFactory.getSWRLIndividualVariable(IRI.create(GraphTest.NS + "W"))
-        ));
-        SWRLRule rule=m_dataFactory.getSWRLRule(bodyAtoms, Collections.singleton(head));
-        m_ontologyManager.addAxiom(m_ontology, rule);
-        
-        // conn(x,y) -> D(x)
-        // rule [[[desc D] X]] [[[oprop conn] X Y]]
-        head=m_dataFactory.getSWRLClassAtom(
-                m_dataFactory.getOWLClass(IRI.create(GraphTest.NS+"D")), 
-                m_dataFactory.getSWRLIndividualVariable(IRI.create(GraphTest.NS + "X"))
-        );
-        bodyAtoms=new HashSet<SWRLAtom>();
-        bodyAtoms.add(m_dataFactory.getSWRLObjectPropertyAtom(
-                m_dataFactory.getOWLObjectProperty(IRI.create(GraphTest.NS + "conn")), 
-                m_dataFactory.getSWRLIndividualVariable(IRI.create(GraphTest.NS + "X")), 
-                m_dataFactory.getSWRLIndividualVariable(IRI.create(GraphTest.NS + "Y"))
-        ));
-        rule=m_dataFactory.getSWRLRule(bodyAtoms, Collections.singleton(head));
-        m_ontologyManager.addAxiom(m_ontology, rule);
-
-        
-        // conn(x,y) -> D(y)
-        // rule [[[desc D] Y]] [[[oprop conn] X Y]]
-        head=m_dataFactory.getSWRLClassAtom(
-                m_dataFactory.getOWLClass(IRI.create(GraphTest.NS+"D")), 
-                m_dataFactory.getSWRLIndividualVariable(IRI.create(GraphTest.NS + "Y"))
-        );
-        bodyAtoms=new HashSet<SWRLAtom>();
-        bodyAtoms.add(m_dataFactory.getSWRLObjectPropertyAtom(
-                m_dataFactory.getOWLObjectProperty(IRI.create(GraphTest.NS + "conn")), 
-                m_dataFactory.getSWRLIndividualVariable(IRI.create(GraphTest.NS + "X")), 
-                m_dataFactory.getSWRLIndividualVariable(IRI.create(GraphTest.NS + "Y"))
-        ));
-        rule=m_dataFactory.getSWRLRule(bodyAtoms, Collections.singleton(head));
-        m_ontologyManager.addAxiom(m_ontology, rule);
-        
         Tableau t=getTableau(m_descriptionGraphs);
         assertTrue(t.isSubsumedBy(AtomicConcept.create(GraphTest.NS+"A"), AtomicConcept.create(GraphTest.NS+"B")));
     }
