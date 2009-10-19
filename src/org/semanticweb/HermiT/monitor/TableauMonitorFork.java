@@ -7,6 +7,7 @@ import org.semanticweb.HermiT.model.AnnotatedEquality;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.Individual;
+import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.DatatypeManager;
@@ -35,6 +36,14 @@ public class TableauMonitorFork implements TableauMonitor,Serializable  {
     public void isSatisfiableFinished(AtomicConcept atomicConcept,boolean result) {
         m_first.isSatisfiableFinished(atomicConcept,result);
         m_second.isSatisfiableFinished(atomicConcept,result);
+    }
+    public void isSatisfiableStarted(Role role) {
+        m_first.isSatisfiableStarted(role);
+        m_second.isSatisfiableStarted(role);
+    }
+    public void isSatisfiableFinished(Role role,boolean result) {
+        m_first.isSatisfiableFinished(role,result);
+        m_second.isSatisfiableFinished(role,result);
     }
     public void isSubsumedByStarted(AtomicConcept subconcept,AtomicConcept superconcept) {
         m_first.isSubsumedByStarted(subconcept,superconcept);

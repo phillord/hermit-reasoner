@@ -587,7 +587,7 @@ public class ReasonerTest extends AbstractReasonerTest {
             "EquivalentClasses( DataSomeValuesFrom( :r rdfs:Literal ) DataSomeValuesFrom( :s rdfs:Literal ) ) ";
         loadReasonerWithAxioms(axioms);
         
-        assertTrue(m_reasoner.isEquivalentProperty(m_ontologyManager.getOWLDataFactory().getOWLDataProperty(IRI.create("file:/c/test.owl#r")),m_ontologyManager.getOWLDataFactory().getOWLDataProperty(IRI.create("file:/c/test.owl#s"))));
+        assertTrue(m_reasoner.isEquivalentProperty(m_ontologyManager.getOWLDataFactory().getOWLDataProperty(IRI.create(AbstractReasonerTest.NS+"r")),m_ontologyManager.getOWLDataFactory().getOWLDataProperty(IRI.create(AbstractReasonerTest.NS+"s"))));
     }
 
     public void testComplexConceptInstanceRetrieval() throws Exception {

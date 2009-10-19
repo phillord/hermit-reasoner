@@ -309,17 +309,25 @@ public final class Tableau implements Serializable {
             m_tableauMonitor.isSubsumedByFinished(subconcept,superconcept,result);
         return result;
     }
-    public boolean isSatisfiable(Role role) {
+    public boolean isSatisfiable(Role role, boolean dataProperty) {
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.isSatisfiableStarted(role);
         clear();
         if (hasNominals())
             loadABox();
-        Node a=createNewNINode(m_dependencySetFactory.emptySet());
-        Node b=createNewNINode(m_dependencySetFactory.emptySet());
-        if (role instanceof InverseRole)
-            m_extensionManager.addRoleAssertion(((InverseRole)role).getInverseOf(),b,a,m_dependencySetFactory.emptySet(),true);
+        m_checkedNode0=createNewNINode(m_dependencySetFactory.emptySet());
+        if (dataProperty)
+            m_checkedNode1=createNewConcreteNode(m_dependencySetFactory.emptySet(),m_checkedNode0);
+        else 
+            m_checkedNode1=createNewNINode(m_dependencySetFactory.emptySet());
+        if (role instanceof InverseRole) 
+            m_extensionManager.addRoleAssertion(((InverseRole)role).getInverseOf(),m_checkedNode1,m_checkedNode0,m_dependencySetFactory.emptySet(),true);
         else
-            m_extensionManager.addRoleAssertion((AtomicRole)role,a,b,m_dependencySetFactory.emptySet(),true);
-        return !isSatisfiable();
+            m_extensionManager.addRoleAssertion((AtomicRole)role,m_checkedNode0,m_checkedNode1,m_dependencySetFactory.emptySet(),true);
+        boolean result=isSatisfiable();
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.isSatisfiableFinished(role,result);
+        return result;
     }
     public boolean isAsymmetric(Role role) {
         clear();

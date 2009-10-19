@@ -42,8 +42,8 @@ public class AtomicRole extends Role implements DLPredicate {
         }
     };
 
-    public static AtomicRole create(String uri) {
-        return s_interningManager.intern(new AtomicRole(uri));
+    public static AtomicRole create(String iri) {
+        return s_interningManager.intern(new AtomicRole(iri));
     }
 
     public static final AtomicRole TOP_OBJECT_ROLE=create("http://www.w3.org/2002/07/owl#topObjectProperty");

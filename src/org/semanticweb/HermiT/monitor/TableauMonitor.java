@@ -5,6 +5,7 @@ import org.semanticweb.HermiT.model.AnnotatedEquality;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.Individual;
+import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.DatatypeManager;
@@ -16,6 +17,8 @@ public interface TableauMonitor {
     void setTableau(Tableau tableau);
     void isSatisfiableStarted(AtomicConcept atomicConcept);
     void isSatisfiableFinished(AtomicConcept atomicConcept,boolean result);
+    void isSatisfiableStarted(Role role);
+    void isSatisfiableFinished(Role role,boolean result);
     void isSubsumedByStarted(AtomicConcept subconcept,AtomicConcept superconcept);
     void isSubsumedByFinished(AtomicConcept subconcept,AtomicConcept superconcept,boolean result);
     void isABoxSatisfiableStarted();

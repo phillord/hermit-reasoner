@@ -72,11 +72,13 @@ public class ConceptSubsumptionCache implements Serializable {
             return false;
         // Perform the actual satisfiability test
         if (!m_tableau.isDeterministic()) {
+            // A -> B?
             boolean isSubsumedBy=m_tableau.isSubsumedBy(subconcept,superconcept);
+            // try and built model for A and not B
             if (m_tableau.getExtensionManager().containsClash() && m_tableau.getExtensionManager().getClashDependencySet().isEmpty())
-                subconceptInfo.m_isSatisfiable=Boolean.FALSE;
+                subconceptInfo.m_isSatisfiable=Boolean.FALSE; // subsumption holds, why can we conclude that A is not satisfiable???
             else if (!isSubsumedBy) {
-                subconceptInfo.m_isSatisfiable=Boolean.TRUE;
+                subconceptInfo.m_isSatisfiable=Boolean.TRUE; // A is satisfiable since A and not B has a model 
                 updateKnownSubsumers(subconcept);
                 updatePossibleSubsumers();
             }

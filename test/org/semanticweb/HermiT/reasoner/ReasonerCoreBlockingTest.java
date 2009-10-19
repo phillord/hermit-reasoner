@@ -3,9 +3,6 @@ package org.semanticweb.HermiT.reasoner;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Configuration.BlockingSignatureCacheType;
 
-
-
-
 public class ReasonerCoreBlockingTest extends ReasonerTest {
 
     public ReasonerCoreBlockingTest(String name) {

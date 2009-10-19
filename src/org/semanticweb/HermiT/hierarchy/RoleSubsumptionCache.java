@@ -10,13 +10,24 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.graph.Graph;
-import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.model.Individual;
+import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLDataProperty;
+import org.semanticweb.owlapi.model.OWLDatatype;
+import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.OWLTypedLiteral;
 
 /**
  * A cache for role subsumption and role satisfiability tests. This class also maintains the set of known and possible subsumers
@@ -25,6 +36,7 @@ import org.semanticweb.HermiT.tableau.Tableau;
 public class RoleSubsumptionCache implements Serializable {
     private static final long serialVersionUID = 5380180660934814631L;
     protected final Reasoner m_reasoner;
+    protected Tableau m_tmpTableau;
     protected final Map<Role,RoleInfo> m_roleInfos;
     protected final boolean m_hasInverse;
     protected final Set<Role> m_allRoles;
@@ -69,7 +81,7 @@ public class RoleSubsumptionCache implements Serializable {
         return m_reasoner.getTableau().isDeterministic();
     }
     public Set<Role> getAllKnownSubsumers(Role role) {
-        boolean isSatisfiable=isSatisfiable(role,false);
+        boolean isSatisfiable=isSatisfiable(role,false,m_reasoner.getTableau());
         RoleInfo roleInfo=m_roleInfos.get(role);
         if (isSatisfiable) {
             if (!roleInfo.m_allSubsumersKnown)
@@ -80,19 +92,19 @@ public class RoleSubsumptionCache implements Serializable {
             return null;
     }
     public boolean isSatisfiable(Role role) {
-        return isSatisfiable(role,true);
+        return isSatisfiable(role,true,m_reasoner.getTableau());
     }
-    protected boolean isSatisfiable(Role role,boolean updatePossibleSubsumers) {
-        if (AtomicConcept.NOTHING.equals(role))
+    protected boolean isSatisfiable(Role role,boolean updatePossibleSubsumers,Tableau tableau) {
+        if (m_bottomRole.equals(role))
             return false;
         RoleInfo roleInfo=getRoleInfo(role);
         if (roleInfo.m_isSatisfiable==null) {
-            boolean isSatisfiable=m_reasoner.getTableau().isSatisfiable(role);
+            boolean isSatisfiable=tableau.isSatisfiable(role,m_topRole==AtomicRole.TOP_DATA_ROLE);
             roleInfo.m_isSatisfiable=(isSatisfiable ? Boolean.TRUE : Boolean.FALSE);
             if (isSatisfiable) {
-                updateKnownSubsumers(role);
+                updateKnownSubsumers(role,tableau);
                 if (updatePossibleSubsumers)
-                    updatePossibleSubsumers();
+                    updatePossibleSubsumers(tableau);
             }
         }
         return roleInfo.m_isSatisfiable;
@@ -104,46 +116,91 @@ public class RoleSubsumptionCache implements Serializable {
         if (Boolean.FALSE.equals(subroleInfo.m_isSatisfiable))
             return true;
         else if (m_bottomRole.equals(superrole) || (m_roleInfos.containsKey(superrole) && Boolean.FALSE.equals(m_roleInfos.get(superrole).m_isSatisfiable)))
-            return !isSatisfiable(subrole,true);
+            return !isSatisfiable(subrole,true,m_reasoner.getTableau());
         if (subroleInfo.isKnownSubsumer(superrole))
             return true;
         else if (subroleInfo.isKnownNotSubsumer(superrole))
             return false;
         // Perform the actual satisfiability test
-        if (!m_reasoner.getTableau().isDeterministic()) {
-//            boolean isSubsumedBy=m_reasoner.getTableau().isSubsumedBy(subrole,superrole);
-            // FIX ME!
+        if (!m_reasoner.getTableau().isDeterministic() || m_topRole==AtomicRole.TOP_DATA_ROLE) {
             boolean isSubsumedBy=false;
-            if (m_reasoner.getTableau().getExtensionManager().containsClash() && m_reasoner.getTableau().getExtensionManager().getClashDependencySet().isEmpty())
-                subroleInfo.m_isSatisfiable=Boolean.FALSE;
-            else if (!isSubsumedBy) {
+            if (m_topRole==AtomicRole.TOP_OBJECT_ROLE) {
+                // object properties
+                isSubsumedBy=isSubObjectRoleOf(subrole,superrole);
+            } else {
+                // data properties
+                isSubsumedBy=isSubDataRoleOf(subrole,superrole);
+            }
+//            if (m_tmpTableau.getExtensionManager().containsClash() && m_tmpTableau.getExtensionManager().getClashDependencySet().isEmpty())
+//                subroleInfo.m_isSatisfiable=Boolean.FALSE;
+//            else 
+            if (!isSubsumedBy) {
                 subroleInfo.m_isSatisfiable=Boolean.TRUE;
-                updateKnownSubsumers(subrole);
-                updatePossibleSubsumers();
+                if (m_topRole==AtomicRole.TOP_OBJECT_ROLE) {
+                    updateKnownSubsumers(subrole,m_tmpTableau);
+                    updatePossibleSubsumers(m_tmpTableau);
+                }
             }
             else
                 subroleInfo.addKnownSubsumer(superrole);
             return isSubsumedBy;
         }
         else {
-            isSatisfiable(subrole,true);
+            isSatisfiable(subrole,true,m_reasoner.getTableau());
             assert subroleInfo.m_allSubsumersKnown;
             return subroleInfo.isKnownSubsumer(superrole);
         }
     }
-    protected void updateKnownSubsumers(Role subrole) {
-        Node checkedNode0=m_reasoner.getTableau().getCheckedNode0().getCanonicalNode();
-        Node checkedNode1=m_reasoner.getTableau().getCheckedNode1().getCanonicalNode();
-        RoleInfo subconceptInfo=getRoleInfo(subrole);
-        subconceptInfo.addKnownSubsumer(m_topRole);
-        ExtensionTable.Retrieval retrieval=m_reasoner.getTableau().getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,true },ExtensionTable.View.TOTAL);
+    public boolean isSubObjectRoleOf(Role subRole,Role superRole) {
+        // This code is different from data properties. This is because object properties can be transitive, so
+        // we need to make sure that appropriate DL-clauses are added for negative object property assertions.
+        OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
+        OWLDataFactory factory=ontologyManager.getOWLDataFactory();
+        OWLNamedIndividual individualA=factory.getOWLNamedIndividual(IRI.create("internal:individualA"));
+        OWLNamedIndividual individualB=factory.getOWLNamedIndividual(IRI.create("internal:individualB"));
+        OWLAxiom subAssertion;
+        if (subRole instanceof AtomicRole)
+            subAssertion=factory.getOWLObjectPropertyAssertionAxiom(factory.getOWLObjectProperty(IRI.create(((AtomicRole) subRole).getIRI())),individualA,individualB);
+        else 
+            subAssertion=factory.getOWLObjectPropertyAssertionAxiom(factory.getOWLObjectProperty(IRI.create(((InverseRole) subRole).getInverseOf().getIRI())),individualB,individualA);
+        OWLAxiom superNegatedAssertion;
+        if (superRole instanceof AtomicRole)
+            superNegatedAssertion=factory.getOWLNegativeObjectPropertyAssertionAxiom(factory.getOWLObjectProperty(IRI.create(((AtomicRole) superRole).getIRI())),individualA,individualB);
+        else 
+            superNegatedAssertion=factory.getOWLNegativeObjectPropertyAssertionAxiom(factory.getOWLObjectProperty(IRI.create(((InverseRole) superRole).getInverseOf().getIRI())),individualB,individualA);
+        m_tmpTableau=m_reasoner.getTableau(ontologyManager,subAssertion,superNegatedAssertion);
+        return !m_tmpTableau.isABoxSatisfiable(Individual.create(individualA.getIRI().toString(),true), Individual.create(individualB.getIRI().toString(),true));
+    }
+    public boolean isSubDataRoleOf(Role subRole,Role superRole) {
+        // This is different from object properties! This code is correct because we don't have 
+        // transitive data properties.
+        OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
+        OWLDataFactory factory=ontologyManager.getOWLDataFactory();
+        OWLIndividual individual=factory.getOWLNamedIndividual(IRI.create("internal:individual"));
+        OWLDataProperty negatedSuperProperty=factory.getOWLDataProperty(IRI.create("internal:negated-superproperty"));
+        OWLDataProperty subProperty=factory.getOWLDataProperty(IRI.create(((AtomicRole)subRole).getIRI()));
+        OWLDataProperty superProperty=factory.getOWLDataProperty(IRI.create(((AtomicRole)superRole).getIRI()));
+        OWLDatatype anonymousConstantsDatatype=factory.getOWLDatatype(IRI.create("internal:anonymous-constants"));
+        OWLTypedLiteral constant=factory.getOWLTypedLiteral("internal:constant",anonymousConstantsDatatype);
+        OWLAxiom subAssertion=factory.getOWLDataPropertyAssertionAxiom(subProperty,individual,constant);
+        OWLAxiom superAssertion=factory.getOWLDataPropertyAssertionAxiom(negatedSuperProperty,individual,constant);
+        OWLAxiom superDisjoint=factory.getOWLDisjointDataPropertiesAxiom(superProperty,negatedSuperProperty);
+        m_tmpTableau=m_reasoner.getTableau(ontologyManager,subAssertion,superAssertion,superDisjoint);
+        return !m_tmpTableau.isABoxSatisfiable();
+    }
+    protected void updateKnownSubsumers(Role subrole,Tableau tableau) {
+        Node checkedNode0=tableau.getCheckedNode0().getCanonicalNode();
+        Node checkedNode1=tableau.getCheckedNode1().getCanonicalNode();
+        RoleInfo subroleInfo=getRoleInfo(subrole);
+        subroleInfo.addKnownSubsumer(m_topRole);
+        ExtensionTable.Retrieval retrieval=tableau.getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,true },ExtensionTable.View.TOTAL);
         retrieval.getBindingsBuffer()[1]=checkedNode0;
         retrieval.getBindingsBuffer()[2]=checkedNode1;
         retrieval.open();
         while (!retrieval.afterLast()) {
             Object role=retrieval.getTupleBuffer()[0];
             if (role instanceof AtomicRole && retrieval.getDependencySet().isEmpty())
-                subconceptInfo.addKnownSubsumer((AtomicRole)role);
+                subroleInfo.addKnownSubsumer((AtomicRole)role);
             retrieval.next();
         }
         if (m_hasInverse) {
@@ -153,15 +210,15 @@ public class RoleSubsumptionCache implements Serializable {
             while (!retrieval.afterLast()) {
                 Object role=retrieval.getTupleBuffer()[0];
                 if (role instanceof AtomicRole && retrieval.getDependencySet().isEmpty())
-                    subconceptInfo.addKnownSubsumer(((AtomicRole)role).getInverse());
+                    subroleInfo.addKnownSubsumer(((AtomicRole)role).getInverse());
                 retrieval.next();
             }
         }
-        if (m_reasoner.getTableau().isCurrentModelDeterministic())
-            subconceptInfo.setAllSubsumersKnown();
+        if (tableau.isCurrentModelDeterministic())
+            subroleInfo.setAllSubsumersKnown();
     }
-    protected void updatePossibleSubsumers() {
-        ExtensionTable.Retrieval retrieval=m_reasoner.getTableau().getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,false,false },ExtensionTable.View.TOTAL);
+    protected void updatePossibleSubsumers(Tableau tableau) {
+        ExtensionTable.Retrieval retrieval=tableau.getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,false,false },ExtensionTable.View.TOTAL);
         retrieval.open();
         Object[] tupleBuffer=retrieval.getTupleBuffer();
         while (!retrieval.afterLast()) {
@@ -182,18 +239,22 @@ public class RoleSubsumptionCache implements Serializable {
     protected RoleInfo getRoleInfo(Role role) {
         RoleInfo result=m_roleInfos.get(role);
         if (result==null) {
-            result=new RoleInfo();
+            result=new RoleInfo(role);
             m_roleInfos.put(role,result);
         }
         return result;
     }
     
     protected static final class RoleInfo {
+        protected Role m_forRole; // just for debugging
         protected Boolean m_isSatisfiable;
         protected Set<Role> m_knownSubsumers;
         protected Set<Role> m_possibleSubsumers;
         protected boolean m_allSubsumersKnown;
         
+        public RoleInfo(Role role) {
+            m_forRole=role;
+        }
         public boolean isKnownSubsumer(Role potentialSubsumer) {
             return m_knownSubsumers!=null && m_knownSubsumers.contains(potentialSubsumer);
         }
@@ -246,6 +307,25 @@ public class RoleSubsumptionCache implements Serializable {
                     }
                 }
             }
+        }
+        public String toString() {
+            String CRLF=System.getProperty("line.separator");
+            String result=m_forRole+" ";
+            if (m_isSatisfiable!=null) result+=(m_isSatisfiable?"sat":"unsat");
+            if (m_allSubsumersKnown) result+="(all superroles known)";
+            if (m_knownSubsumers!=null) {
+                result+=(CRLF+"Known superroles: ");
+                for (Role role : m_knownSubsumers) {
+                    result+=(role+" ");
+                }
+            }
+            if (m_possibleSubsumers!=null) {
+                result+=(CRLF+"Possible superroles: ");
+                for (Role role : m_possibleSubsumers) {
+                    result+=(role+" ");
+                }
+            }
+            return result;
         }
     }
 }
