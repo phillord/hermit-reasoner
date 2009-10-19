@@ -690,15 +690,15 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         if (superObjectPropertyExpression.getNamedProperty().getIRI().toString().equals(AtomicRole.TOP_OBJECT_ROLE.getIRI()))
             return true;
         else {
+            // This code is different from data properties. This is because object properties can be transitive, so
+            // we need to make sure that appropriate DL-clauses are added for negative object property assertions.
             OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
             OWLDataFactory factory=ontologyManager.getOWLDataFactory();
             OWLIndividual individualA=factory.getOWLNamedIndividual(IRI.create("internal:individualA"));
-            OWLObjectProperty negatedSuperProperty=factory.getOWLObjectProperty(IRI.create("internal:negated-superproperty"));
             OWLIndividual individualB=factory.getOWLNamedIndividual(IRI.create("internal:individualB"));
             OWLAxiom subAssertion=factory.getOWLObjectPropertyAssertionAxiom(subObjectPropertyExpression,individualA,individualB);
-            OWLAxiom superAssertion=factory.getOWLObjectPropertyAssertionAxiom(negatedSuperProperty,individualA,individualB);
-            OWLAxiom superDisjoint=factory.getOWLDisjointObjectPropertiesAxiom(superObjectPropertyExpression,negatedSuperProperty);
-            Tableau tableau=getTableau(ontologyManager,subAssertion,superAssertion,superDisjoint);
+            OWLAxiom superNegatedAssertion=factory.getOWLNegativeObjectPropertyAssertionAxiom(superObjectPropertyExpression,individualA,individualB);
+            Tableau tableau=getTableau(ontologyManager,subAssertion,superNegatedAssertion);
             return !tableau.isABoxSatisfiable();
         }
     }
@@ -1100,6 +1100,8 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         else if (subDataProperty.getIRI().toString().equals(AtomicRole.BOTTOM_DATA_ROLE.getIRI()))
             return true;
         else {
+            // This is different from object properties! This code is correct because we don't have 
+            // transitive data properties.
             OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
             OWLDataFactory factory=ontologyManager.getOWLDataFactory();
             OWLIndividual individual=factory.getOWLNamedIndividual(IRI.create("internal:individual"));
