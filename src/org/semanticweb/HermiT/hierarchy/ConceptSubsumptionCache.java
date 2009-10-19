@@ -14,15 +14,15 @@ import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
 
 /**
- * A cache for subsumption and satisfiability tests. This class also maintains the set of known and possible subsumers
+ * A cache for concept subsumption and concept satisfiability tests. This class also maintains the set of known and possible subsumers
  * for a concept. This information can be used to optimize classification.
  */
-public class SubsumptionCache implements Serializable {
+public class ConceptSubsumptionCache implements Serializable {
     private static final long serialVersionUID = 5380180660934814631L;
     protected final Tableau m_tableau;
     protected final Map<AtomicConcept,AtomicConceptInfo> m_atomicConceptInfos;
 
-    public SubsumptionCache(Tableau tableau) {
+    public ConceptSubsumptionCache(Tableau tableau) {
         m_tableau=tableau;
         m_atomicConceptInfos=new HashMap<AtomicConcept,AtomicConceptInfo>();
     }
@@ -91,7 +91,7 @@ public class SubsumptionCache implements Serializable {
         }
     }
     protected void updateKnownSubsumers(AtomicConcept subconcept) {
-        Node checkedNode=m_tableau.getCheckedNode().getCanonicalNode();
+        Node checkedNode=m_tableau.getCheckedNode0().getCanonicalNode();
         AtomicConceptInfo subconceptInfo=getAtomicConceptInfo(subconcept);
         subconceptInfo.addKnownSubsumer(AtomicConcept.THING);
         ExtensionTable.Retrieval retrieval=m_tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);

@@ -27,7 +27,7 @@ public class ShowSubtreeCommand extends AbstractCommand {
         writer.println("    Shows the subtree of the model rooted at the given node.");
     }
     public void execute(String[] args) {
-        Node subtreeRoot=m_debugger.getTableau().getCheckedNode();
+        Node subtreeRoot=m_debugger.getTableau().getCheckedNode0();
         if (args.length>=2) {
             int nodeID;
             try {

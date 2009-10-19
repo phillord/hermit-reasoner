@@ -70,7 +70,8 @@ public final class Tableau implements Serializable {
     protected Node m_lastMergedOrPrunedNode;
     protected GroundDisjunction m_firstGroundDisjunction;
     protected GroundDisjunction m_firstUnprocessedGroundDisjunction;
-    protected Node m_checkedNode;
+    protected Node m_checkedNode0;
+    protected Node m_checkedNode1;
 
     public Tableau(InterruptFlag interruptFlag,TableauMonitor tableauMonitor,ExistentialExpansionStrategy existentialsExpansionStrategy,DLOntology dlOntology,Map<String,Object> parameters) {
         m_interruptFlag=interruptFlag;
@@ -150,7 +151,8 @@ public final class Tableau implements Serializable {
         m_lastMergedOrPrunedNode=null;
         m_firstGroundDisjunction=null;
         m_firstUnprocessedGroundDisjunction=null;
-        m_checkedNode=null;
+        m_checkedNode0=null;
+        m_checkedNode1=null;
         m_branchingPoints=new BranchingPoint[2];
         m_currentBranchingPoint=-1;
         m_nonbacktrackableBranchingPoint=-1;
@@ -267,8 +269,11 @@ public final class Tableau implements Serializable {
         }
         return false;
     }
-    public Node getCheckedNode() {
-        return m_checkedNode;
+    public Node getCheckedNode0() {
+        return m_checkedNode0;
+    }
+    public Node getCheckedNode1() {
+        return m_checkedNode1;
     }
     private boolean hasNominals() {
         return m_dlOntology.hasNominals();
@@ -279,8 +284,8 @@ public final class Tableau implements Serializable {
         clear();
         if (hasNominals())
             loadABox();
-        m_checkedNode=createNewNINode(m_dependencySetFactory.emptySet());
-        m_extensionManager.addConceptAssertion(atomicConcept,m_checkedNode,m_dependencySetFactory.emptySet(),true);
+        m_checkedNode0=createNewNINode(m_dependencySetFactory.emptySet());
+        m_extensionManager.addConceptAssertion(atomicConcept,m_checkedNode0,m_dependencySetFactory.emptySet(),true);
         boolean result=isSatisfiable();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isSatisfiableFinished(atomicConcept,result);
@@ -292,17 +297,29 @@ public final class Tableau implements Serializable {
         clear();
         if (hasNominals())
             loadABox();
-        m_checkedNode=createNewNINode(m_dependencySetFactory.emptySet());
-        m_extensionManager.addConceptAssertion(subconcept,m_checkedNode,m_dependencySetFactory.emptySet(),true);
+        m_checkedNode0=createNewNINode(m_dependencySetFactory.emptySet());
+        m_extensionManager.addConceptAssertion(subconcept,m_checkedNode0,m_dependencySetFactory.emptySet(),true);
         m_branchingPoints[0]=new BranchingPoint(this);
         m_currentBranchingPoint++;
         m_nonbacktrackableBranchingPoint=m_currentBranchingPoint;
         DependencySet dependencySet=m_dependencySetFactory.addBranchingPoint(m_dependencySetFactory.emptySet(),m_currentBranchingPoint);
-        m_extensionManager.addConceptAssertion(superconcept.getNegation(),m_checkedNode,dependencySet,true);
+        m_extensionManager.addConceptAssertion(superconcept.getNegation(),m_checkedNode0,dependencySet,true);
         boolean result=!isSatisfiable();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isSubsumedByFinished(subconcept,superconcept,result);
         return result;
+    }
+    public boolean isSatisfiable(Role role) {
+        clear();
+        if (hasNominals())
+            loadABox();
+        Node a=createNewNINode(m_dependencySetFactory.emptySet());
+        Node b=createNewNINode(m_dependencySetFactory.emptySet());
+        if (role instanceof InverseRole)
+            m_extensionManager.addRoleAssertion(((InverseRole)role).getInverseOf(),b,a,m_dependencySetFactory.emptySet(),true);
+        else
+            m_extensionManager.addRoleAssertion((AtomicRole)role,a,b,m_dependencySetFactory.emptySet(),true);
+        return !isSatisfiable();
     }
     public boolean isAsymmetric(Role role) {
         clear();
@@ -310,27 +327,37 @@ public final class Tableau implements Serializable {
             loadABox();
         Node a=createNewNINode(m_dependencySetFactory.emptySet());
         Node b=createNewNINode(m_dependencySetFactory.emptySet());
-        if (role instanceof InverseRole) {
+        if (role instanceof InverseRole)
             m_extensionManager.addRoleAssertion(((InverseRole)role).getInverseOf(),b,a,m_dependencySetFactory.emptySet(),true);
-        } else {
+        else
             m_extensionManager.addRoleAssertion((AtomicRole)role,a,b,m_dependencySetFactory.emptySet(),true);
-        }
+
         m_branchingPoints[0]=new BranchingPoint(this);
         m_currentBranchingPoint++;
         m_nonbacktrackableBranchingPoint=m_currentBranchingPoint;
         DependencySet dependencySet=m_dependencySetFactory.addBranchingPoint(m_dependencySetFactory.emptySet(),m_currentBranchingPoint);
-        if (role instanceof InverseRole) {
+        if (role instanceof InverseRole)
             m_extensionManager.addRoleAssertion(((InverseRole)role).getInverseOf(),a,b,dependencySet,true);
-        } else {
+        else
             m_extensionManager.addRoleAssertion((AtomicRole)role,b,a,dependencySet,true);
-        }
         return !isSatisfiable();
     }
     public boolean isABoxSatisfiable() {
+        return isABoxSatisfiable(null,null);
+    }
+    public boolean isABoxSatisfiable(Individual checkedNode0Name,Individual checkedNode1Name) {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isABoxSatisfiableStarted();
         clear();
-        loadABox();
+        Map<Term,Node> aboxMapping=loadABox();
+        if (checkedNode0Name==null)
+            m_checkedNode0=null;
+        else
+            m_checkedNode0=aboxMapping.get(checkedNode0Name);
+        if (checkedNode1Name==null)
+            m_checkedNode1=null;
+        else
+            m_checkedNode1=aboxMapping.get(checkedNode1Name);
         if (m_firstTableauNode==null) {
             // Ensure that at least one individual exists.
             createNewNINode(m_dependencySetFactory.emptySet());
@@ -345,10 +372,10 @@ public final class Tableau implements Serializable {
             m_tableauMonitor.isInstanceOfStarted(atomicConcept,individual);
         clear();
         Map<Term,Node> aboxMapping=loadABox();
-        m_checkedNode=aboxMapping.get(individual);
-        if (m_checkedNode==null)
-            m_checkedNode=createNewNINode(m_dependencySetFactory.emptySet());
-        m_extensionManager.addConceptAssertion(atomicConcept.getNegation(),m_checkedNode,m_dependencySetFactory.emptySet(),true);
+        m_checkedNode0=aboxMapping.get(individual);
+        if (m_checkedNode0==null)
+            m_checkedNode0=createNewNINode(m_dependencySetFactory.emptySet());
+        m_extensionManager.addConceptAssertion(atomicConcept.getNegation(),m_checkedNode0,m_dependencySetFactory.emptySet(),true);
         boolean result=!isSatisfiable();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isInstanceOfFinished(atomicConcept,individual,result);

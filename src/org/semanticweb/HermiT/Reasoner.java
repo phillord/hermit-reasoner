@@ -42,7 +42,7 @@ import org.semanticweb.HermiT.hierarchy.Hierarchy;
 import org.semanticweb.HermiT.hierarchy.HierarchyBuilder;
 import org.semanticweb.HermiT.hierarchy.HierarchyNode;
 import org.semanticweb.HermiT.hierarchy.HierarchyPrinterFSS;
-import org.semanticweb.HermiT.hierarchy.SubsumptionCache;
+import org.semanticweb.HermiT.hierarchy.ConceptSubsumptionCache;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
@@ -107,7 +107,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
     protected DLOntology m_dlOntology;
     protected Prefixes m_prefixes;
     protected Tableau m_tableau;
-    protected SubsumptionCache m_subsumptionCache;
+    protected ConceptSubsumptionCache m_conceptSubsumptionCache;
     protected Hierarchy<AtomicConcept> m_atomicConceptHierarchy;
     protected Hierarchy<Role> m_objectRoleHierarchy;
     protected Hierarchy<AtomicRole> m_atomicDataRoleHierarchy;
@@ -251,6 +251,13 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         m_interruptFlag.interrupt();
     }
     
+    /**
+     * Returns the tableau of this reasoner.
+     */
+    public Tableau getTableau() {
+        return m_tableau;
+    }
+    
     // Loading and managing ontologies
 
     /**
@@ -263,7 +270,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         m_dlOntology=dlOntology;
         m_prefixes=createPrefixes(m_dlOntology);
         m_tableau=createTableau(m_interruptFlag,m_configuration,m_dlOntology,m_prefixes);
-        m_subsumptionCache=new SubsumptionCache(m_tableau);
+        m_conceptSubsumptionCache=new ConceptSubsumptionCache(m_tableau);
     }
     
     /**
@@ -446,13 +453,13 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                     m_progressMonitor.setProgress(0);
                     m_progressMonitor.setStarted();
                 }
-                if (!m_subsumptionCache.isSatisfiable(AtomicConcept.THING))
+                if (!m_conceptSubsumptionCache.isSatisfiable(AtomicConcept.THING))
                     m_atomicConceptHierarchy=Hierarchy.emptyHierarchy(relevantAtomicConcepts,AtomicConcept.THING,AtomicConcept.NOTHING);
-                else if (m_subsumptionCache.canGetAllSubsumersEasily()) {
+                else if (m_conceptSubsumptionCache.canGetAllSubsumersEasily()) {
                     Map<AtomicConcept,DeterministicHierarchyBuilder.GraphNode<AtomicConcept>> allSubsumers=new HashMap<AtomicConcept,DeterministicHierarchyBuilder.GraphNode<AtomicConcept>>();
                     int processedConcepts=0;
                     for (AtomicConcept atomicConcept : relevantAtomicConcepts) {
-                        Set<AtomicConcept> subsumers=m_subsumptionCache.getAllKnownSubsumers(atomicConcept);
+                        Set<AtomicConcept> subsumers=m_conceptSubsumptionCache.getAllKnownSubsumers(atomicConcept);
                         if (subsumers==null)
                             subsumers=relevantAtomicConcepts;
                         allSubsumers.put(atomicConcept,new DeterministicHierarchyBuilder.GraphNode<AtomicConcept>(atomicConcept,subsumers));
@@ -469,7 +476,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                     HierarchyBuilder.Relation<AtomicConcept> relation=
                         new HierarchyBuilder.Relation<AtomicConcept>() {
                             public boolean doesSubsume(AtomicConcept parent,AtomicConcept child) {
-                                return m_subsumptionCache.isSubsumedBy(child,parent);
+                                return m_conceptSubsumptionCache.isSubsumedBy(child,parent);
                             }
                         };
                     HierarchyBuilder.ClassificationProgressMonitor<AtomicConcept> progressMonitor;
@@ -503,7 +510,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         if (description instanceof OWLClass) {
             AtomicConcept concept=AtomicConcept.create(((OWLClass)description).getIRI().toString());
             if (m_atomicConceptHierarchy==null)
-                return m_subsumptionCache.isSatisfiable(concept);
+                return m_conceptSubsumptionCache.isSatisfiable(concept);
             else {
                 HierarchyNode<AtomicConcept> node=m_atomicConceptHierarchy.getNodeForElement(concept);
                 return node!=m_atomicConceptHierarchy.getBottomNode();
@@ -526,7 +533,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         if (subDescription instanceof OWLClass && superDescription instanceof OWLClass) {
             AtomicConcept subconcept=AtomicConcept.create(((OWLClass)subDescription).getIRI().toString());
             AtomicConcept superconcept=AtomicConcept.create(((OWLClass)superDescription).getIRI().toString());
-            return m_subsumptionCache.isSubsumedBy(subconcept,superconcept);
+            return m_conceptSubsumptionCache.isSubsumedBy(subconcept,superconcept);
         }
         else {
             OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
@@ -617,7 +624,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             OWLClass newClass=factory.getOWLClass(IRI.create("internal:query-concept"));
             OWLAxiom classDefinitionAxiom=factory.getOWLEquivalentClassesAxiom(newClass,description);
             Tableau tableau=getTableau(ontologyManager,classDefinitionAxiom);
-            final SubsumptionCache subsumptionCache=new SubsumptionCache(tableau);
+            final ConceptSubsumptionCache subsumptionCache=new ConceptSubsumptionCache(tableau);
             HierarchyBuilder<AtomicConcept> hierarchyBuilder=new HierarchyBuilder<AtomicConcept>(
                 new HierarchyBuilder.Relation<AtomicConcept>() {
                     public boolean doesSubsume(AtomicConcept parent,AtomicConcept child) {
