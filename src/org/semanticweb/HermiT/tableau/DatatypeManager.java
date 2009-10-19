@@ -40,8 +40,13 @@ public class DatatypeManager implements Serializable {
         m_tableauMonitor=tableau.m_tableauMonitor;
         m_extensionManager=tableau.m_extensionManager;
         m_assertionsDeltaOldRetrieval=m_extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { false,false },ExtensionTable.View.DELTA_OLD);
-        m_inequalityDeltaOldRetrieval=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,false,false },ExtensionTable.View.DELTA_OLD);
-        m_inequalityDeltaOldRetrieval.getBindingsBuffer()[0]=Inequality.INSTANCE;
+        // The following retrieval should actually be created such that it has Inequality.INSTANCE as the first binding.
+        // We don't do this because of the implementation of the ExtensionTable. Namely, each ExtensionTable keeps
+        // only one index for all tuples, and then filters out the assertions that don't fit into the index. As a
+        // side effect of such an implementation, this means that each time we go through the entire index for inequalities,
+        // which can take up a lot of time. The current solution is more efficient: it goes through the actual delta-old
+        // and then filters out inequalities "manually".
+        m_inequalityDeltaOldRetrieval=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { false,false,false },ExtensionTable.View.DELTA_OLD);
         m_inequality01Retrieval=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,true,false },ExtensionTable.View.EXTENSION_THIS);
         m_inequality01Retrieval.getBindingsBuffer()[0]=Inequality.INSTANCE;
         m_inequality02Retrieval=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,false,true },ExtensionTable.View.EXTENSION_THIS);
@@ -77,18 +82,23 @@ public class DatatypeManager implements Serializable {
         tupleBuffer=m_inequalityDeltaOldRetrieval.getTupleBuffer();
         m_inequalityDeltaOldRetrieval.open();
         while (!m_extensionManager.containsClash() && !m_inequalityDeltaOldRetrieval.afterLast()) {
-            Node node1=(Node)tupleBuffer[1];
-            Node node2=(Node)tupleBuffer[2];
-            if (!node1.getNodeType().isAbstract() && !node2.getNodeType().isAbstract()) {
-                // An inequality between concrete was added in the last saturation step, so we check the D-conjunction hanging off of its node.
-                DVariable variable1=m_conjunction.getVariableFor(node1);
-                DVariable variable2=m_conjunction.getVariableFor(node2);
-                // If variable1==null, this means that 'node1' has not been checked in this iteration,
-                // and similarly for variable2==null.
-                if (variable1==null && variable2==null) {
-                    loadNodesReachableByInequality(node1,node2);
-                    loadDataRanges();
-                    checkConjunctionSatisfiability();
+            // This is a part of the hack described in the constructor: m_inequalityDeltaOldRetrieval
+            // iterates through the entire extension (for efficiency) and then we need to filter out
+            // inequalities ourselves.
+            if (Inequality.INSTANCE.equals(tupleBuffer[0])) {
+                Node node1=(Node)tupleBuffer[1];
+                Node node2=(Node)tupleBuffer[2];
+                if (!node1.getNodeType().isAbstract() && !node2.getNodeType().isAbstract()) {
+                    // An inequality between concrete was added in the last saturation step, so we check the D-conjunction hanging off of its node.
+                    DVariable variable1=m_conjunction.getVariableFor(node1);
+                    DVariable variable2=m_conjunction.getVariableFor(node2);
+                    // If variable1==null, this means that 'node1' has not been checked in this iteration,
+                    // and similarly for variable2==null.
+                    if (variable1==null && variable2==null) {
+                        loadNodesReachableByInequality(node1,node2);
+                        loadDataRanges();
+                        checkConjunctionSatisfiability();
+                    }
                 }
             }
             m_inequalityDeltaOldRetrieval.next();
