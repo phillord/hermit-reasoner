@@ -252,7 +252,7 @@ public class ResolverDirectHTTP extends ResourceResolverSpi {
     *  
     */
    public String[] engineGetPropertyKeys() {
-      return (String[]) ResolverDirectHTTP.properties.clone();
+      return ResolverDirectHTTP.properties.clone();
    }
 
    private URI getNewURI(String uri, String BaseURI)

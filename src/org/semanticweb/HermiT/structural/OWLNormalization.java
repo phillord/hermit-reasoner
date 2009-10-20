@@ -1108,13 +1108,12 @@ public class OWLNormalization {
             }
         }
         public void visit(SWRLDataRangeAtom at) {
+            OWLDataRange dr=at.getPredicate();
+            SWRLDArgument arg=at.getArgument();
+            SWRLLiteralVariable var;
             if (positive) {
                 // head
                 headAtoms.remove(at);
-                SWRLDataRangeAtom drAtom=(SWRLDataRangeAtom)at;
-                OWLDataRange dr=drAtom.getPredicate();
-                SWRLDArgument arg=drAtom.getArgument();
-                SWRLLiteralVariable var;
                 if (arg instanceof SWRLLiteralVariable) {
                     var=(SWRLLiteralVariable)arg;
                     if (dataRangeAtoms.containsKey(var)) {
@@ -1143,10 +1142,6 @@ public class OWLNormalization {
                 // dp(x, y) /\ DR1(y) /\ DR2(y) -> A(x) gives dp(x, y) -> A(x) and (y, DR1 and DR2) in the list 
                 // dp(x, "18"^^xsd:int) /\ DR1("18"^^xsd:int) -> A(x) gives dp(x, y) -> A(x) and (y, ({"18"^^xsd:int} and DR1)) in the list
                 // they will go to the head in negated form
-                SWRLDataRangeAtom drAtom=(SWRLDataRangeAtom)at;
-                OWLDataRange dr=drAtom.getPredicate();
-                SWRLDArgument arg=drAtom.getArgument();
-                SWRLLiteralVariable var;
                 if (arg instanceof SWRLLiteralVariable) {
                     var=(SWRLLiteralVariable)arg;
                 } else {

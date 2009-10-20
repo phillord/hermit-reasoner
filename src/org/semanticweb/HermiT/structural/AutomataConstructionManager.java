@@ -366,8 +366,8 @@ public class AutomataConstructionManager {
 			State startState = tr.start();
 			State endState = tr.end();
 			
-			State oldInitialOfSmaller = (State)stateMapper.get(autoOfSmallerRole.initials().toArray()[0]);
-			State oldFinalOfSmaller = (State)stateMapper.get(autoOfSmallerRole.terminals().toArray()[0]);
+			State oldInitialOfSmaller = stateMapper.get(autoOfSmallerRole.initials().toArray()[0]);
+			State oldFinalOfSmaller = stateMapper.get(autoOfSmallerRole.terminals().toArray()[0]);
 			
 			Object[] outgoingTransFromInitialOfSmaller = autoOfBiggerRole.delta( oldInitialOfSmaller ).toArray();
 			for( int i=0; i< outgoingTransFromInitialOfSmaller.length ; i++ ){
@@ -627,9 +627,9 @@ public class AutomataConstructionManager {
 	    for(int i=0 ; i<transitions.length ; i++ ){
 	      Transition t = (Transition) transitions[i];
 	      try {
-	    	  auto1.addTransition(new Transition(	(State) stateMapperUnionInverse.get(t.start()) , 
+	    	  auto1.addTransition(new Transition(stateMapperUnionInverse.get(t.start()) , 
 	    			  									t.label() , 
-	    			  								(State) stateMapperUnionInverse.get(t.end())));
+	    			  								stateMapperUnionInverse.get(t.end())));
 	      }catch(NoSuchStateException x){
 	    	  throw new IllegalArgumentException("Could not create disjoint union of automata");
 	      }
@@ -649,9 +649,9 @@ public class AutomataConstructionManager {
           Transition t = (Transition) objs[i];
           try {
         	  if( t.label() instanceof OWLObjectPropertyExpression)
-        		  mirroredCopy.addTransition(new Transition((State) map.get(t.end()),((OWLObjectPropertyExpression) t.label()).getInverseProperty().getSimplified() ,(State) map.get(t.start())));
+        		  mirroredCopy.addTransition(new Transition(map.get(t.end()),((OWLObjectPropertyExpression) t.label()).getInverseProperty().getSimplified() ,map.get(t.start())));
         	  else
-        		  mirroredCopy.addTransition(new Transition((State) map.get(t.end()) , t.label() ,(State) map.get(t.start())));
+        		  mirroredCopy.addTransition(new Transition(map.get(t.end()) , t.label() ,map.get(t.start())));
           } catch(NoSuchStateException x) {}
         }
         return mirroredCopy;

@@ -119,6 +119,7 @@ public abstract class AbstractTest extends TestCase {
     protected File getFailureRoot() { 
         File directory=new File(new File(TEMPORARY_DIRECTORY,m_wgTestDescriptor.testID),getTestType());
         directory.mkdirs();
+        System.err.println(directory);
         return directory;
     }
     protected abstract void doTest() throws Exception;
