@@ -6,6 +6,7 @@ import java.io.Serializable;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
+import org.semanticweb.HermiT.model.DatatypeRestriction;
 
 /**
  * This extension table is for use with Description Graphs and it supports tuple 
@@ -29,7 +30,7 @@ public class ExtensionTableWithFullIndex extends ExtensionTable {
     public boolean addTuple(Object[] tuple,DependencySet dependencySet,boolean isCore) {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.addFactStarted(tuple,isCore);
-        if (isTupleActive(tuple) && (m_tableau.m_needsThingExtension || !AtomicConcept.THING.equals(tuple[0])) && !AtomicConcept.RDFS_LITERAL.equals(tuple[0])) {
+        if (isTupleActive(tuple) && (m_tableau.m_needsThingExtension || !AtomicConcept.THING.equals(tuple[0])) && !DatatypeRestriction.RDFS_LITERAL.equals(tuple[0])) {
             int firstFreeTupleIndex=m_tupleTable.getFirstFreeTupleIndex();
             int addTupleIndex=m_tupleTableFullIndex.addTuple(tuple,firstFreeTupleIndex);
             if (addTupleIndex==firstFreeTupleIndex) {

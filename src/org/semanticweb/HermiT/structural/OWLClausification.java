@@ -1054,8 +1054,8 @@ public class OWLClausification {
         }
         public Object visit(OWLDatatype object) {
             String datatypeURI=object.getURI().toString();
-            if (AtomicConcept.RDFS_LITERAL.getIRI().equals(datatypeURI))
-                return AtomicConcept.RDFS_LITERAL;
+            if (DatatypeRestriction.RDFS_LITERAL.getDatatypeURI().equals(datatypeURI))
+                return DatatypeRestriction.RDFS_LITERAL;
             if (Prefixes.isInternalIRI(datatypeURI) || m_definedDatatypeIRIs.contains(object.getIRI().toString())) return AtomicConcept.create(datatypeURI);
             DatatypeRestriction datatype=DatatypeRestriction.create(datatypeURI,DatatypeRestriction.NO_FACET_URIs,DatatypeRestriction.NO_FACET_VALUES);
             try {
@@ -1084,10 +1084,10 @@ public class OWLClausification {
             if (!(object.getDatatype().isOWLDatatype()))
                 throw new IllegalArgumentException("Datatype restrictions are supported only on OWL datatypes.");
             String datatypeURI=object.getDatatype().getURI().toString();
-            if (AtomicConcept.RDFS_LITERAL.getIRI().equals(datatypeURI)) {
+            if (DatatypeRestriction.RDFS_LITERAL.getDatatypeURI().equals(datatypeURI)) {
                 if (!object.getFacetRestrictions().isEmpty())
                     throw new IllegalArgumentException("rdfs:Literal does not support any facets.");
-                return AtomicConcept.RDFS_LITERAL;
+                return DatatypeRestriction.RDFS_LITERAL;
             }
             String[] facetURIs=new String[object.getFacetRestrictions().size()];
             Object[] facetValues=new Object[object.getFacetRestrictions().size()];

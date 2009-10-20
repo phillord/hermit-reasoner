@@ -40,7 +40,7 @@ public class DatatypeRestriction extends DataRange {
         return NegationDataRange.create(this);
     }
     public boolean isAlwaysTrue() {
-        return false;
+        return this==RDFS_LITERAL;
     }
     public boolean isAlwaysFalse() {
         return false;
@@ -91,4 +91,6 @@ public class DatatypeRestriction extends DataRange {
     public static DatatypeRestriction create(String datatypeURI,String[] facetURIs,Object[] facetValues) {
         return s_interningManager.intern(new DatatypeRestriction(datatypeURI,facetURIs,facetValues));
     }
+    
+    public static final DatatypeRestriction RDFS_LITERAL=create("http://www.w3.org/2000/01/rdf-schema#Literal",NO_FACET_URIs, NO_FACET_VALUES);
 }

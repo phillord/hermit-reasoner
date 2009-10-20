@@ -40,6 +40,9 @@ public final class MergingManager implements Serializable {
      * the order between node0 and node1 is not important.
      */
     public boolean mergeNodes(Node node0,Node node1,DependencySet dependencySet) {
+        if (node0.getNodeType().isAbstract()!=node1.getNodeType().isAbstract()) {
+            System.out.println("Ups...");
+        }
         assert node0.getNodeType().isAbstract()==node1.getNodeType().isAbstract();
         if (!node0.isActive() || !node1.isActive() || node0==node1)
             return false;

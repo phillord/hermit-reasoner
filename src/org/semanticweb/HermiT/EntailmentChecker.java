@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
+import org.semanticweb.HermiT.model.DatatypeRestriction;
 import org.semanticweb.HermiT.tableau.Tableau;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.inference.OWLReasonerException;
@@ -351,8 +351,8 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
         OWLDataPropertyExpression[] props=axiom.getProperties().toArray(new OWLDataPropertyExpression[n]);
         for (int i=0;i<n-1;i++) {
             for (int j=i+1;j<n;j++) {
-                OWLDataSomeValuesFrom some_i=factory.getOWLDataSomeValuesFrom(props[i],factory.getOWLDatatype(IRI.create(AtomicConcept.RDFS_LITERAL.getIRI())));
-                OWLDataSomeValuesFrom some_j=factory.getOWLDataSomeValuesFrom(props[j],factory.getOWLDatatype(IRI.create(AtomicConcept.RDFS_LITERAL.getIRI())));
+                OWLDataSomeValuesFrom some_i=factory.getOWLDataSomeValuesFrom(props[i],factory.getOWLDatatype(IRI.create(DatatypeRestriction.RDFS_LITERAL.getDatatypeURI())));
+                OWLDataSomeValuesFrom some_j=factory.getOWLDataSomeValuesFrom(props[j],factory.getOWLDatatype(IRI.create(DatatypeRestriction.RDFS_LITERAL.getDatatypeURI())));
                 OWLDataMaxCardinality max1=factory.getOWLDataMaxCardinality(1,factory.getOWLDataProperty(IRI.create(AtomicRole.TOP_DATA_ROLE.getIRI())));
                 OWLClassExpression desc=factory.getOWLObjectIntersectionOf(some_i,some_j,max1);
                 if (reasoner.isSatisfiable(desc))

@@ -29,7 +29,7 @@ public class AtomicConcept extends LiteralConcept implements DLPredicate {
             return AtomicNegationConcept.create(this);
     }
     public boolean isAlwaysTrue() {
-        return this==THING || this==RDFS_LITERAL;
+        return this==THING;
     }
     public boolean isAlwaysFalse() {
         return this==NOTHING;
@@ -56,6 +56,5 @@ public class AtomicConcept extends LiteralConcept implements DLPredicate {
 
     public static final AtomicConcept THING=create("http://www.w3.org/2002/07/owl#Thing");
     public static final AtomicConcept NOTHING=create("http://www.w3.org/2002/07/owl#Nothing");
-    public static final AtomicConcept RDFS_LITERAL=create("http://www.w3.org/2000/01/rdf-schema#Literal");
     public static final AtomicConcept INTERNAL_NAMED=create("internal:nam#Named");
 }
