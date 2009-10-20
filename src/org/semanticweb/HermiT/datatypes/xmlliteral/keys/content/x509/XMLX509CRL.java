@@ -70,7 +70,6 @@ public class XMLX509CRL extends SignatureElementProxy {
       return this.getBytesFromTextChild();
    }
 
-   /** @inheritDoc */
    public String getBaseLocalName() {
       return Constants._TAG_X509CRL;
    }

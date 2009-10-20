@@ -187,7 +187,6 @@ public class XMLX509SKI extends SignatureElementProxy {
       }
    }
 
-   /** @inheritDoc */
    public boolean equals(Object obj) {
 
       if (!obj.getClass().getName().equals(this.getClass().getName())) {
@@ -204,7 +203,6 @@ public class XMLX509SKI extends SignatureElementProxy {
       }
    }
 
-   /** @inheritDoc */
    public String getBaseLocalName() {
       return Constants._TAG_X509SKI;
    }

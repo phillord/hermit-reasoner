@@ -68,7 +68,7 @@ public abstract class Canonicalizer20010315Excl extends CanonicalizerBase {
 
 	/**
 	 * Method engineCanonicalizeSubTree
-	 * @inheritDoc
+	 * 
 	 * @param rootNode
 	 * 
 	 * @throws CanonicalizationException
@@ -79,7 +79,7 @@ public abstract class Canonicalizer20010315Excl extends CanonicalizerBase {
 	}
 	/**
 	 * Method engineCanonicalizeSubTree
-	 *  @inheritDoc
+	 *  
 	 * @param rootNode
 	 * @param inclusiveNamespaces
 	 * 
@@ -119,7 +119,7 @@ public abstract class Canonicalizer20010315Excl extends CanonicalizerBase {
  
 	/**
 	 * Method handleAttributesSubtree
-	 * @inheritDoc
+	 * 
 	 * @param E
 	 * @throws CanonicalizationException
 	 */
@@ -195,7 +195,7 @@ public abstract class Canonicalizer20010315Excl extends CanonicalizerBase {
 
 	/**
 	 * Method engineCanonicalizeXPathNodeSet
-	 * @inheritDoc
+	 * 
 	 * @param xpathNodeSet
 	 * @param inclusiveNamespaces
 	 * @throws CanonicalizationException
@@ -210,14 +210,14 @@ public abstract class Canonicalizer20010315Excl extends CanonicalizerBase {
 		
 	}
 	
-    /** @inheritDoc */
+    /**  */
     public byte[] engineCanonicalizeXPathNodeSet(Set xpathNodeSet
             ) throws CanonicalizationException {
         return engineCanonicalizeXPathNodeSet(xpathNodeSet,"");
     }
           	
 	/**
-     * @inheritDoc
+     * 
 	 * @param E
 	 * @throws CanonicalizationException
 	 */

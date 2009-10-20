@@ -41,7 +41,7 @@ public class ResolverFragment extends ResourceResolverSpi {
     *
     * Wird das gleiche Dokument referenziert?
     * Wird ein anderes Dokument referenziert?
-    * @inheritDoc
+    * 
     * @param uri
     * @param BaseURI
     *
@@ -95,7 +95,7 @@ public class ResolverFragment extends ResourceResolverSpi {
 
    /**
     * Method engineCanResolve
-    * @inheritDoc
+    * 
     * @param uri
     * @param BaseURI
     *

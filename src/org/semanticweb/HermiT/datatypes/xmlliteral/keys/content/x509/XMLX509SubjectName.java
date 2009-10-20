@@ -83,7 +83,6 @@ public class XMLX509SubjectName extends SignatureElementProxy {
       return RFC2253Parser.normalize(this.getTextFromTextChild());
    }
 
-   /** @inheritDoc */
    public boolean equals(Object obj) {
 
       if (!obj.getClass().getName().equals(this.getClass().getName())) {
@@ -102,7 +101,6 @@ public class XMLX509SubjectName extends SignatureElementProxy {
       
    }
    
-   /** @inheritDoc */
    public String getBaseLocalName() {
       return Constants._TAG_X509SUBJECTNAME;
    }

@@ -55,7 +55,7 @@ public class KeyStoreResolver extends StorageResolverSpi {
       this._iterator = new KeyStoreIterator(this._keyStore);
    }
 
-   /** @inheritDoc */
+   /**  */
    public Iterator getIterator() {
       return this._iterator;
    }
@@ -91,12 +91,12 @@ public class KeyStoreResolver extends StorageResolverSpi {
          }
       }
 
-      /** @inheritDoc */
+      /**  */
       public boolean hasNext() {
          return this._aliases.hasMoreElements();
       }
 
-      /** @inheritDoc */
+      /**  */
       public Object next() {
 
          String alias = (String) this._aliases.nextElement();

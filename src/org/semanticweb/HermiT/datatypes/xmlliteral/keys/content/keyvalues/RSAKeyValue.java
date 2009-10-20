@@ -103,7 +103,6 @@ public class RSAKeyValue extends SignatureElementProxy
       }
    }
 
-   /** @inheritDoc */
    public PublicKey getPublicKey() throws XMLSecurityException {
 
       try {
@@ -126,7 +125,6 @@ public class RSAKeyValue extends SignatureElementProxy
       }
    }
 
-   /** @inheritDoc */
    public String getBaseLocalName() {
       return Constants._TAG_RSAKEYVALUE;
    }

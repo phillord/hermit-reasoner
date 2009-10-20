@@ -323,7 +323,6 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
     /**
      * Required for the OWLReasoner interface, but HermiT does not support this method. All loaded ontologies end up in 
      * one set of clauses and we do not keep track of what came from where, so it will throw an UnsupportedOperation exception. 
-     * {@inheritDoc}
      */
     public Set<OWLOntology> getLoadedOntologies() {
         throw new UnsupportedOperationException();
@@ -332,7 +331,6 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
     /**
      * Required for the OWLReasoner interface, but HermiT does not support this method. All loaded ontologies end up in 
      * one set of clauses and we do not keep track of what came from where, so it will throw an UnsupportedOperation exception.
-     * {@inheritDoc} 
      */
     public void unloadOntologies(Set<OWLOntology> inOntologies) {
         throw new UnsupportedOperationException();
@@ -355,7 +353,6 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
     
     /**
      * Same as clearOntologies() in HermiT. 
-     * {@inheritDoc}
      */
     public void dispose() {
         clearOntologies();
@@ -365,8 +362,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
 
     /**
      * Required for the OWLReasoner interface, but HermiT does not support this method and will throw an 
-     * UnsupportedOperation exception.
-     * {@inheritDoc} 
+     * UnsupportedOperation exception. 
      */
     public OWLEntity getCurrentEntity() {
         throw new UnsupportedOperationException();
@@ -1265,8 +1261,6 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
     /** 
      * This method is not supported by HermiT and executing it will result in an UnsupportedOperation error. 
      * The method is required to implement the OWLReasoner interface.
-     *  
-     * {@inheritDoc}
      */
     public Set<OWLDataRange> getRanges(OWLDataProperty property) {
         throw new UnsupportedOperationException();

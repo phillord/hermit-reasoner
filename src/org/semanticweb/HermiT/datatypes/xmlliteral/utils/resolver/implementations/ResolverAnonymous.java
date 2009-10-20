@@ -50,13 +50,13 @@ public class ResolverAnonymous extends ResourceResolverSpi {
       this._input = new XMLSignatureInput(is);
    }
 
-   /** @inheritDoc */
+   /**  */
    public XMLSignatureInput engineResolve(Attr uri, String BaseURI) {
       return this._input;
    }
 
    /**    
-    * @inheritDoc
+    * 
     */
    public boolean engineCanResolve(Attr uri, String BaseURI) {
       if (uri == null) {
@@ -65,7 +65,7 @@ public class ResolverAnonymous extends ResourceResolverSpi {
       return false;
    }
 
-   /** @inheritDoc */
+   /**  */
    public String[] engineGetPropertyKeys() {
       return new String[0];
    }

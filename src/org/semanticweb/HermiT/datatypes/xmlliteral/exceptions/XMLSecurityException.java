@@ -171,7 +171,7 @@ public class XMLSecurityException extends Exception {
       return msgID;      
    }
 
-   /** @inheritDoc */
+   /***/
    public String toString() {
 
       String s = this.getClass().getName();

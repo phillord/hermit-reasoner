@@ -44,7 +44,7 @@ public class X509IssuerSerialResolver extends KeyResolverSpi {
         java.util.logging.Logger.getLogger(
                     X509IssuerSerialResolver.class.getName());
 
-    /** @inheritDoc */
+    /**  */
    public boolean engineCanResolve(Element element, String BaseURI,
                                    StorageResolver storage) {
       if (true)
@@ -76,7 +76,7 @@ public class X509IssuerSerialResolver extends KeyResolverSpi {
       return false;
    }
 
-   /** @inheritDoc */
+   /**  */
    public PublicKey engineResolvePublicKey(
            Element element, String BaseURI, StorageResolver storage)
               throws KeyResolverException {
@@ -91,7 +91,7 @@ public class X509IssuerSerialResolver extends KeyResolverSpi {
       return null;
    }
 
-   /** @inheritDoc */
+   /**  */
    public X509Certificate engineResolveX509Certificate(
            Element element, String BaseURI, StorageResolver storage)
               throws KeyResolverException {
@@ -148,7 +148,7 @@ public class X509IssuerSerialResolver extends KeyResolverSpi {
       }
    }
 
-   /** @inheritDoc */
+   /**  */
    public javax.crypto.SecretKey engineResolveSecretKey(
            Element element, String BaseURI, StorageResolver storage) {
       return null;

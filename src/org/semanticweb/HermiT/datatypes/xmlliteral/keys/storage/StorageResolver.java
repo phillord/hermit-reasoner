@@ -175,12 +175,12 @@ public class StorageResolver {
          this._resolvers = resolvers;
       }
 
-      /** @inheritDoc */
+      /**  */
       public boolean hasNext() {
 		  return _resolvers.hasNext();
       }
 
-      /** @inheritDoc */
+      /**  */
       public Object next() {
 		  return _resolvers.next();
       }

@@ -38,7 +38,7 @@ public class IgnoreAllErrorHandler implements ErrorHandler {
 		"com.sun.org.apache.xml.internal.security.test.throw.exceptions", "false").equals("true");
 
 	
-	/** @inheritDoc */
+	/**  */
 	public void warning(SAXParseException ex) throws SAXException {
 		if (IgnoreAllErrorHandler.throwExceptions) {
 			throw ex;
@@ -46,7 +46,7 @@ public class IgnoreAllErrorHandler implements ErrorHandler {
 	}
 
 
-	/** @inheritDoc */
+	/**  */
 	public void error(SAXParseException ex) throws SAXException {
 		if (IgnoreAllErrorHandler.throwExceptions) {
 			throw ex;
@@ -55,7 +55,7 @@ public class IgnoreAllErrorHandler implements ErrorHandler {
 
 
 
-	/** @inheritDoc */
+	/**  */
 	public void fatalError(SAXParseException ex) throws SAXException {
 		if (IgnoreAllErrorHandler.throwExceptions) {
 			throw ex;

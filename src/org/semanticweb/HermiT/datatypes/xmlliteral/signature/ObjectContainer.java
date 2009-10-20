@@ -143,7 +143,7 @@ public class ObjectContainer extends SignatureElementProxy {
       return result;
    }
 
-   /** @inheritDoc */
+   /**  */
    public String getBaseLocalName() {
       return Constants._TAG_OBJECT;
    }

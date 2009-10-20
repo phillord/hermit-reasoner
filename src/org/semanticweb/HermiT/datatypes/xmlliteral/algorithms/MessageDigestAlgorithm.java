@@ -239,12 +239,10 @@ public class MessageDigestAlgorithm extends Algorithm {
       this.algorithm.update(buf, offset, len);
    }
 
-   /** @inheritDoc */
    public String getBaseNamespace() {
       return Constants.SignatureSpecNS;
    }
 
-   /** @inheritDoc */
    public String getBaseLocalName() {
       return Constants._TAG_DIGESTMETHOD;
    }

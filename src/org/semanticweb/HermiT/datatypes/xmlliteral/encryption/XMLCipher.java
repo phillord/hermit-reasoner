@@ -1761,21 +1761,6 @@ public class XMLCipher {
 
         /**
          * Returns a <code>String</code> representation of the specified
-         * <code>Document</code>.
-         * <p/>
-         * Refer also to comments about setup of format.
-         *
-         * @param document the <code>Document</code> to serialize.
-         * @return the <code>String</code> representation of the serilaized
-         *   <code>Document</code>.
-         * @throws Exception
-         */
-        String serialize(Document document) throws Exception {
-            return canonSerialize(document);
-        }
-
-        /**
-         * Returns a <code>String</code> representation of the specified
          * <code>Element</code>.
          * <p/>
          * Refer also to comments about setup of format.
@@ -1972,13 +1957,6 @@ public class XMLCipher {
         }
 
         /**
-         *
-         
-        CipherValue newCipherValue(byte[] value) {
-            return (new CipherValueImpl(value));
-        }
-                */
-        /**
          * @param data
          * @return
          *
@@ -2047,67 +2025,6 @@ public class XMLCipher {
             return (new TransformsImpl(doc));
         }
 
-        /**
-         * @param element
-         * @return
-         * @throws XMLEncryptionException
-         *
-         */
-        // <element name="AgreementMethod" type="xenc:AgreementMethodType"/>
-        // <complexType name="AgreementMethodType" mixed="true">
-        //     <sequence>
-        //         <element name="KA-Nonce" minOccurs="0" type="base64Binary"/>
-        //         <!-- <element ref="ds:DigestMethod" minOccurs="0"/> -->
-        //         <any namespace="##other" minOccurs="0" maxOccurs="unbounded"/>
-        //         <element name="OriginatorKeyInfo" minOccurs="0" type="ds:KeyInfoType"/>
-        //         <element name="RecipientKeyInfo" minOccurs="0" type="ds:KeyInfoType"/>
-        //     </sequence>
-        //     <attribute name="Algorithm" type="anyURI" use="required"/>
-        // </complexType>
-        AgreementMethod newAgreementMethod(Element element) throws
-                XMLEncryptionException {
-            if (null == element) {
-                //complain
-            }
-
-            String algorithm = element.getAttributeNS(null, 
-                EncryptionConstants._ATT_ALGORITHM);
-            AgreementMethod result = newAgreementMethod(algorithm);
-
-            Element kaNonceElement = (Element) element.getElementsByTagNameNS(
-                EncryptionConstants.EncryptionSpecNS,
-                EncryptionConstants._TAG_KA_NONCE).item(0);
-            if (null != kaNonceElement) {
-                result.setKANonce(kaNonceElement.getNodeValue().getBytes());
-            }
-            Element originatorKeyInfoElement =
-                (Element) element.getElementsByTagNameNS(
-                    EncryptionConstants.EncryptionSpecNS,
-                    EncryptionConstants._TAG_ORIGINATORKEYINFO).item(0);
-            if (null != originatorKeyInfoElement) {
-                try {
-                    result.setOriginatorKeyInfo(
-                        new KeyInfo(originatorKeyInfoElement, null));
-                } catch (XMLSecurityException xse) {
-                    throw new XMLEncryptionException("empty", xse);
-                }
-            }
-
-            Element recipientKeyInfoElement =
-                (Element) element.getElementsByTagNameNS(
-                    EncryptionConstants.EncryptionSpecNS,
-                    EncryptionConstants._TAG_RECIPIENTKEYINFO).item(0);
-            if (null != recipientKeyInfoElement) {
-                try {
-                    result.setRecipientKeyInfo(
-                        new KeyInfo(recipientKeyInfoElement, null));
-                } catch (XMLSecurityException xse) {
-                    throw new XMLEncryptionException("empty", xse);
-                }
-            }
-
-            return (result);
-        }
 
         /**
          * @param element
@@ -2570,51 +2487,6 @@ public class XMLCipher {
         }
 
         /**
-         * @param element
-         * @return
-         *
-         */
-        Transforms newTransforms(Element element) {
-            return (null);
-        }
-
-        /**
-         * @param agreementMethod
-         * @return
-         *
-         */
-        Element toElement(AgreementMethod agreementMethod) {
-            return ((AgreementMethodImpl) agreementMethod).toElement();
-        }
-
-        /**
-         * @param cipherData
-         * @return
-         *
-         */
-        Element toElement(CipherData cipherData) {
-            return ((CipherDataImpl) cipherData).toElement();
-        }
-
-        /**
-         * @param cipherReference
-         * @return
-         *
-         */
-        Element toElement(CipherReference cipherReference) {
-            return ((CipherReferenceImpl) cipherReference).toElement();
-        }
-
-        /**
-         * @param cipherValue
-         * @return
-         *
-         */
-        Element toElement(CipherValue cipherValue) {
-            return ((CipherValueImpl) cipherValue).toElement();
-        }
-
-        /**
          * @param encryptedData
          * @return
          *
@@ -2632,45 +2504,6 @@ public class XMLCipher {
             return ((EncryptedKeyImpl) encryptedKey).toElement();
         }
 
-        /**
-         * @param encryptionMethod
-         * @return
-         *
-         */
-        Element toElement(EncryptionMethod encryptionMethod) {
-            return ((EncryptionMethodImpl) encryptionMethod).toElement();
-        }
-
-        /**
-         * @param encryptionProperties
-         * @return
-         *
-         */
-        Element toElement(EncryptionProperties encryptionProperties) {
-            return ((EncryptionPropertiesImpl) encryptionProperties).toElement();
-        }
-
-        /**
-         * @param encryptionProperty
-         * @return
-         *
-         */
-        Element toElement(EncryptionProperty encryptionProperty) {
-            return ((EncryptionPropertyImpl) encryptionProperty).toElement();
-        }
-
-        Element toElement(ReferenceList referenceList) {
-            return ((ReferenceListImpl) referenceList).toElement();
-        }
-
-        /**
-         * @param transforms
-         * @return
-         *
-         */
-        Element toElement(Transforms transforms) {
-            return ((TransformsImpl) transforms).toElement();
-        }
 
         // <element name="AgreementMethod" type="xenc:AgreementMethodType"/>
         // <complexType name="AgreementMethodType" mixed="true">
@@ -2704,65 +2537,65 @@ public class XMLCipher {
                 algorithmURI = tmpAlgorithm.toString();
             }
 
-            /** @inheritDoc */
+            /**  */
             public byte[] getKANonce() {
                 return (kaNonce);
             }
 
-            /** @inheritDoc */
+            /**  */
             public void setKANonce(byte[] kanonce) {
                 kaNonce = kanonce;
             }
 
-            /** @inheritDoc */
+            /**  */
             public Iterator getAgreementMethodInformation() {
                 return (agreementMethodInformation.iterator());
             }
 
-            /** @inheritDoc */
+            /**  */
             public void addAgreementMethodInformation(Element info) {
                 agreementMethodInformation.add(info);
             }
 
-            /** @inheritDoc */
+            /**  */
             public void revoveAgreementMethodInformation(Element info) {
                 agreementMethodInformation.remove(info);
             }
 
-            /** @inheritDoc */
+            /**  */
             public KeyInfo getOriginatorKeyInfo() {
                 return (originatorKeyInfo);
             }
 
-            /** @inheritDoc */
+            /**  */
             public void setOriginatorKeyInfo(KeyInfo keyInfo) {
                 originatorKeyInfo = keyInfo;
             }
 
-            /** @inheritDoc */
+            /**  */
             public KeyInfo getRecipientKeyInfo() {
                 return (recipientKeyInfo);
             }
 
-            /** @inheritDoc */
+            /**  */
             public void setRecipientKeyInfo(KeyInfo keyInfo) {
                 recipientKeyInfo = keyInfo;
             }
 
-            /** @inheritDoc */
+            /**  */
             public String getAlgorithm() {
                 return (algorithmURI);
             }
 
-            public void setAlgorithm(String algorithm) {
-                URI tmpAlgorithm = null;
-                try {
-                    tmpAlgorithm = new URI(algorithm);
-                } catch (URI.MalformedURIException mfue) {
-                    //complain
-                }
-                algorithm = tmpAlgorithm.toString();
-            }
+//            public void setAlgorithm(String algorithm) {
+//                URI tmpAlgorithm = null;
+//                try {
+//                    tmpAlgorithm = new URI(algorithm);
+//                } catch (URI.MalformedURIException mfue) {
+//                    //complain
+//                }
+//                algorithm = tmpAlgorithm.toString();
+//            }
 
             // <element name="AgreementMethod" type="xenc:AgreementMethodType"/>
             // <complexType name="AgreementMethodType" mixed="true">
@@ -2775,36 +2608,36 @@ public class XMLCipher {
             //     </sequence>
             //     <attribute name="Algorithm" type="anyURI" use="required"/>
             // </complexType>
-            Element toElement() {
-                Element result = ElementProxy.createElementForFamily(
-                    _contextDocument, 
-                    EncryptionConstants.EncryptionSpecNS, 
-                    EncryptionConstants._TAG_AGREEMENTMETHOD);
-                result.setAttributeNS(
-                    null, EncryptionConstants._ATT_ALGORITHM, algorithmURI);
-                if (null != kaNonce) {
-                    result.appendChild(
-                        ElementProxy.createElementForFamily(
-                            _contextDocument, 
-                            EncryptionConstants.EncryptionSpecNS, 
-                            EncryptionConstants._TAG_KA_NONCE)).appendChild(
-                            _contextDocument.createTextNode(new String(kaNonce)));
-                }
-                if (!agreementMethodInformation.isEmpty()) {
-                    Iterator itr = agreementMethodInformation.iterator();
-                    while (itr.hasNext()) {
-                        result.appendChild((Element) itr.next());
-                    }
-                }
-                if (null != originatorKeyInfo) {
-                    result.appendChild(originatorKeyInfo.getElement());
-                }
-                if (null != recipientKeyInfo) {
-                    result.appendChild(recipientKeyInfo.getElement());
-                }
-
-                return (result);
-            }
+//            Element toElement() {
+//                Element result = ElementProxy.createElementForFamily(
+//                    _contextDocument, 
+//                    EncryptionConstants.EncryptionSpecNS, 
+//                    EncryptionConstants._TAG_AGREEMENTMETHOD);
+//                result.setAttributeNS(
+//                    null, EncryptionConstants._ATT_ALGORITHM, algorithmURI);
+//                if (null != kaNonce) {
+//                    result.appendChild(
+//                        ElementProxy.createElementForFamily(
+//                            _contextDocument, 
+//                            EncryptionConstants.EncryptionSpecNS, 
+//                            EncryptionConstants._TAG_KA_NONCE)).appendChild(
+//                            _contextDocument.createTextNode(new String(kaNonce)));
+//                }
+//                if (!agreementMethodInformation.isEmpty()) {
+//                    Iterator itr = agreementMethodInformation.iterator();
+//                    while (itr.hasNext()) {
+//                        result.appendChild((Element) itr.next());
+//                    }
+//                }
+//                if (null != originatorKeyInfo) {
+//                    result.appendChild(originatorKeyInfo.getElement());
+//                }
+//                if (null != recipientKeyInfo) {
+//                    result.appendChild(recipientKeyInfo.getElement());
+//                }
+//
+//                return (result);
+//            }
         }
 
         // <element name='CipherData' type='xenc:CipherDataType'/>
@@ -2830,12 +2663,12 @@ public class XMLCipher {
                 cipherType = type;
             }
 
-            /** @inheritDoc */
+            /**  */
             public CipherValue getCipherValue() {
                 return (cipherValue);
             }
 
-            /** @inheritDoc */
+            /**  */
             public void setCipherValue(CipherValue value) throws
                     XMLEncryptionException {
 
@@ -2847,12 +2680,12 @@ public class XMLCipher {
                 cipherValue = value;
             }
 
-            /** @inheritDoc */
+            /**  */
             public CipherReference getCipherReference() {
                 return (cipherReference);
             }
 
-            /** @inheritDoc */
+            /**  */
             public void setCipherReference(CipherReference reference) throws
                     XMLEncryptionException {
                 if (cipherType == VALUE_TYPE) {
@@ -2863,7 +2696,7 @@ public class XMLCipher {
                 cipherReference = reference;
             }
 
-            /** @inheritDoc */
+            /**  */
             public int getDataType() {
                 return (cipherType);
             }
@@ -2923,22 +2756,22 @@ public class XMLCipher {
                                 referenceNode = uri;
                         }
 
-            /** @inheritDoc */
+            /**  */
             public String getURI() {
                 return (referenceURI);
             }
 
-            /** @inheritDoc */
+            /**  */
                         public Attr getURIAsAttr() {
                                 return (referenceNode);
                         }
 
-            /** @inheritDoc */
+            /**  */
             public Transforms getTransforms() {
                 return (referenceTransforms);
             }
 
-            /** @inheritDoc */
+            /**  */
             public void setTransforms(Transforms transforms) {
                 referenceTransforms = transforms;
             }
@@ -2981,7 +2814,7 @@ public class XMLCipher {
                                 cipherValue = value;
             }
 
-            /** @inheritDoc */
+            /**  */
                         public String getValue() {
                 return (cipherValue);
             }
@@ -2990,7 +2823,7 @@ public class XMLCipher {
                         // public void setValue(String value) {
                // cipherValue = value;
             // }
-                        /** @inheritDoc */
+                        /**  */
             public void setValue(String value) {
                 // cipherValue = value.getBytes();
                                 cipherValue = value;
@@ -3135,32 +2968,32 @@ public class XMLCipher {
                 super(data);
             }
 
-            /** @inheritDoc */
+            /**  */
             public String getRecipient() {
                 return (keyRecipient);
             }
 
-            /** @inheritDoc */
+            /**  */
             public void setRecipient(String recipient) {
                 keyRecipient = recipient;
             }
 
-            /** @inheritDoc */
+            /**  */
             public ReferenceList getReferenceList() {
                 return (referenceList);
             }
 
-            /** @inheritDoc */
+            /**  */
             public void setReferenceList(ReferenceList list) {
                 referenceList = list;
             }
 
-            /** @inheritDoc */
+            /**  */
             public String getCarriedName() {
                 return (carriedName);
             }
 
-            /** @inheritDoc */
+            /**  */
             public void setCarriedName(String name) {
                 carriedName = name;
             }
@@ -3383,35 +3216,35 @@ public class XMLCipher {
                 this.algorithm = tmpAlgorithm.toString();
                 encryptionMethodInformation = new LinkedList();
             }
-            /** @inheritDoc */
+            /**  */
             public String getAlgorithm() {
                 return (algorithm);
             }
-            /** @inheritDoc */
+            /**  */
             public int getKeySize() {
                 return (keySize);
             }
-            /** @inheritDoc */
+            /**  */
             public void setKeySize(int size) {
                 keySize = size;
             }
-            /** @inheritDoc */
+            /**  */
             public byte[] getOAEPparams() {
                 return (oaepParams);
             }
-            /** @inheritDoc */
+            /**  */
             public void setOAEPparams(byte[] params) {
                 oaepParams = params;
             }
-            /** @inheritDoc */
+            /**  */
             public Iterator getEncryptionMethodInformation() {
                 return (encryptionMethodInformation.iterator());
             }
-            /** @inheritDoc */
+            /**  */
             public void addEncryptionMethodInformation(Element info) {
                 encryptionMethodInformation.add(info);
             }
-            /** @inheritDoc */
+            /**  */
             public void removeEncryptionMethodInformation(Element info) {
                 encryptionMethodInformation.remove(info);
             }
@@ -3472,23 +3305,23 @@ public class XMLCipher {
             public EncryptionPropertiesImpl() {
                 encryptionProperties = new LinkedList();
             }
-            /** @inheritDoc */
+            /**  */
             public String getId() {
                 return (id);
             }
-            /** @inheritDoc */
+            /**  */
             public void setId(String id) {
                 this.id = id;
             }
-            /** @inheritDoc */
+            /**  */
             public Iterator getEncryptionProperties() {
                 return (encryptionProperties.iterator());
             }
-            /** @inheritDoc */
+            /**  */
             public void addEncryptionProperty(EncryptionProperty property) {
                 encryptionProperties.add(property);
             }
-            /** @inheritDoc */
+            /**  */
             public void removeEncryptionProperty(EncryptionProperty property) {
                 encryptionProperties.remove(property);
             }
@@ -3529,7 +3362,7 @@ public class XMLCipher {
         private class EncryptionPropertyImpl implements EncryptionProperty {
             private String target = null;
             private String id = null;
-            private String attributeName = null;
+//            private String attributeName = null;
             private String attributeValue = null;
             private List encryptionInformation = null;
 
@@ -3540,11 +3373,11 @@ public class XMLCipher {
             public EncryptionPropertyImpl() {
                 encryptionInformation = new LinkedList();
             }
-            /** @inheritDoc */
+            /**  */
             public String getTarget() {
                 return (target);
             }
-            /** @inheritDoc */
+            /**  */
             public void setTarget(String target) {
                 URI tmpTarget = null;
                 try {
@@ -3554,35 +3387,35 @@ public class XMLCipher {
                 }
                 this.target = tmpTarget.toString();
             }
-            /** @inheritDoc */
+            /**  */
             public String getId() {
                 return (id);
             }
-            /** @inheritDoc */
+            /**  */
             public void setId(String id) {
                 this.id = id;
             }
-            /** @inheritDoc */
+            /**  */
             public String getAttribute(String attribute) {
                 return (attributeValue);
             }
-            public String getAttributeName(String attribute) {
-                return (attributeName);
-            }
-            /** @inheritDoc */
+//            public String getAttributeName(String attribute) {
+//                return (attributeName);
+//            }
+            /**  */
             public void setAttribute(String attribute, String value) {
-                attributeName = attribute;
+                //attributeName = attribute;
                 attributeValue = value;
             }
-            /** @inheritDoc */
+            /**  */
             public Iterator getEncryptionInformation() {
                 return (encryptionInformation.iterator());
             }
-            /** @inheritDoc */
+            /**  */
             public void addEncryptionInformation(Element info) {
                 encryptionInformation.add(info);
             }
-            /** @inheritDoc */
+            /**  */
             public void removeEncryptionInformation(Element info) {
                 encryptionInformation.remove(info);
             }
@@ -3662,14 +3495,14 @@ public class XMLCipher {
                                 return getElement();
                         }
 
-            /** @inheritDoc */
+            /**  */
                         public org.semanticweb.HermiT.datatypes.xmlliteral.transforms.Transforms getDSTransforms() {
                                 return (this);
                         }
 
 
                         // Over-ride the namespace
-            /** @inheritDoc */
+            /**  */
                         public String getBaseNamespace() {
                                 return EncryptionConstants.EncryptionSpecNS;
                         }
@@ -3701,29 +3534,29 @@ public class XMLCipher {
                 }
                 references = new LinkedList();
             }
-            /** @inheritDoc */
+            /**  */
             public void add(Reference reference) {
                 if (!reference.getClass().equals(sentry)) {
                     throw new IllegalArgumentException();     
                 }
                  references.add(reference);                
             }
-            /** @inheritDoc */
+            /**  */
             public void remove(Reference reference) {
                 if (!reference.getClass().equals(sentry)) {
                     throw new IllegalArgumentException();
                 }
                 references.remove(reference);
             }
-            /** @inheritDoc */
+            /**  */
             public int size() {
                 return (references.size());
             }
-            /** @inheritDoc */
+            /**  */
             public boolean isEmpty() {
                 return (references.isEmpty());
             }
-            /** @inheritDoc */
+            /**  */
             public Iterator getReferences() {
                 return (references.iterator());
             }
@@ -3741,11 +3574,11 @@ public class XMLCipher {
                 }
                 return (result);
             }
-            /** @inheritDoc */
+            /**  */
             public Reference newDataReference(String uri) {
                 return (new DataReference(uri));
             }
-            /** @inheritDoc */
+            /**  */
             public Reference newKeyReference(String uri) {
                 return (new KeyReference(uri));
             }
@@ -3764,23 +3597,23 @@ public class XMLCipher {
                     this.uri = _uri;
                     referenceInformation = new LinkedList();
                 }
-                /** @inheritDoc */
+                /**  */
                 public String getURI() {
                     return (uri);
                 }
-                /** @inheritDoc */
+                /**  */
                 public Iterator getElementRetrievalInformation() {
                     return (referenceInformation.iterator());
                 }
-                /** @inheritDoc */
+                /**  */
                 public void setURI(String _uri) {
                         this.uri = _uri;
                 }
-                /** @inheritDoc */
+                /**  */
                 public void removeElementRetrievalInformation(Element node) {
                     referenceInformation.remove(node);
                 }
-                /** @inheritDoc */
+                /**  */
                 public void addElementRetrievalInformation(Element node) {
                     referenceInformation.add(node);
                 }
@@ -3802,7 +3635,7 @@ public class XMLCipher {
                 DataReference(String uri) {
                     super(uri);
                 }
-                /** @inheritDoc */
+                /**  */
                 public Element toElement() {
                     return super.toElement(EncryptionConstants._TAG_DATAREFERENCE);
                 }
@@ -3812,7 +3645,7 @@ public class XMLCipher {
                 KeyReference(String uri) {
                     super (uri);
                 }
-                /** @inheritDoc */
+                /**  */
                 public Element toElement() {
                     return super.toElement(EncryptionConstants._TAG_KEYREFERENCE);
                 }

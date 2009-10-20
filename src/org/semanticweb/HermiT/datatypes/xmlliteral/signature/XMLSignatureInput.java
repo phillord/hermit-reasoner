@@ -392,7 +392,7 @@ public class XMLSignatureInput  implements Cloneable {
    
    /**
     * Method toString
-    * @inheritDoc
+    * 
     *
     */
    public String toString() {

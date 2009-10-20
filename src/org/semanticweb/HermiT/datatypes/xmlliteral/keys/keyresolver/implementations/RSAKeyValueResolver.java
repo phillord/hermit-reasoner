@@ -45,7 +45,6 @@ public class RSAKeyValueResolver extends KeyResolverSpi {
    /** Field _rsaKeyElement */
    private Element _rsaKeyElement = null;
 
-   /** @inheritDoc */
    public boolean engineCanResolve(Element element, String BaseURI,
                                    StorageResolver storage) {
    	  if (true)
@@ -79,7 +78,6 @@ public class RSAKeyValueResolver extends KeyResolverSpi {
       return false;
    }
 
-   /** @inheritDoc */
    public PublicKey engineResolvePublicKey(
            Element element, String BaseURI, StorageResolver storage) {
 
@@ -104,13 +102,11 @@ public class RSAKeyValueResolver extends KeyResolverSpi {
       return null;
    }
 
-   /** @inheritDoc */
    public X509Certificate engineResolveX509Certificate(
            Element element, String BaseURI, StorageResolver storage) {
       return null;
    }
 
-   /** @inheritDoc */
    public javax.crypto.SecretKey engineResolveSecretKey(
            Element element, String BaseURI, StorageResolver storage) {
       return null;

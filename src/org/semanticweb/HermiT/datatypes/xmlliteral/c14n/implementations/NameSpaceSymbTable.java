@@ -300,7 +300,7 @@ class NameSpaceSymbEntry implements Cloneable {
         this.rendered=rendered;
         this.n=n;            
     }
-    /** @inheritDoc */
+    /**  */
     public Object clone() {         
         try {
             return super.clone();

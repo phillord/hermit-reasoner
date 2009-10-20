@@ -146,7 +146,7 @@ public class CertsInFilesystemDirectoryResolver extends StorageResolverSpi {
       }
    }
 
-   /** @inheritDoc */
+   /**  */
    public Iterator getIterator() {
       return this._iterator;
    }
@@ -175,12 +175,12 @@ public class CertsInFilesystemDirectoryResolver extends StorageResolverSpi {
          this._i = 0;
       }
 
-      /** @inheritDoc */
+      /**  */
       public boolean hasNext() {
          return (this._i < this._certs.size());
       }
 
-      /** @inheritDoc */
+      /**  */
       public Object next() {
          return this._certs.get(this._i++);
       }

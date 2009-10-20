@@ -51,7 +51,7 @@ public class X509SKIResolver extends KeyResolverSpi {
 
    /**
     * Method engineCanResolve
-    * @inheritDoc
+    * 
     * @param element
     * @param BaseURI
     * @param storage
@@ -113,7 +113,7 @@ public class X509SKIResolver extends KeyResolverSpi {
 
    /**
     * Method engineResolveX509Certificate
-    * @inheritDoc
+    * 
     * @param element
     * @param BaseURI
     * @param storage
@@ -175,7 +175,7 @@ public class X509SKIResolver extends KeyResolverSpi {
 
    /**
     * Method engineResolveSecretKey
-    * @inheritDoc
+    * 
     * @param element
     * @param BaseURI
     * @param storage

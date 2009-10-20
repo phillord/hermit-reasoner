@@ -150,7 +150,6 @@ public class XMLX509IssuerSerial extends SignatureElementProxy {
                                      Constants.SignatureSpecNS));
    }
 
-   /** @inheritDoc */
    public boolean equals(Object obj) {
 
       if (!obj.getClass().getName().equals(this.getClass().getName())) {
@@ -168,7 +167,6 @@ public class XMLX509IssuerSerial extends SignatureElementProxy {
        return false;      
    }
 
-   /** @inheritDoc */
    public String getBaseLocalName() {
       return Constants._TAG_X509ISSUERSERIAL;
    }

@@ -143,7 +143,6 @@ public class RetrievalMethod extends SignatureElementProxy
       }
    }
    
-   /** @inheritDoc */
    public String getBaseLocalName() {
       return Constants._TAG_RETRIEVALMETHOD;
    }

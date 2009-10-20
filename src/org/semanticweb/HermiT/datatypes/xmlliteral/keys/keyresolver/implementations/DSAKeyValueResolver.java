@@ -39,7 +39,6 @@ public class DSAKeyValueResolver extends KeyResolverSpi {
    /** Field _dsaKeyElement */
    private Element _dsaKeyElement = null;
 
-   /** @inheritDoc */
    public boolean engineCanResolve(Element element, String BaseURI,
                                    StorageResolver storage) {
 
@@ -105,14 +104,11 @@ public class DSAKeyValueResolver extends KeyResolverSpi {
       return null;
    }
 
-   
-   /** @inheritDoc */
    public X509Certificate engineResolveX509Certificate(
            Element element, String BaseURI, StorageResolver storage) {
       return null;
    }
 
-   /** @inheritDoc */
    public javax.crypto.SecretKey engineResolveSecretKey(
            Element element, String BaseURI, StorageResolver storage){
       return null;

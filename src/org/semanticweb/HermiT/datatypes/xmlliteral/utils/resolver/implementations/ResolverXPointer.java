@@ -43,7 +43,7 @@ import org.w3c.dom.Node;
 public class ResolverXPointer extends ResourceResolverSpi {
 
    /**
-    * @inheritDoc
+    * 
     */
    public XMLSignatureInput engineResolve(Attr uri, String BaseURI)
            throws ResourceResolverException {
@@ -88,7 +88,7 @@ public class ResolverXPointer extends ResourceResolverSpi {
    }
 
    /**
-    * @inheritDoc
+    * 
     */
    public boolean engineCanResolve(Attr uri, String BaseURI) {
 

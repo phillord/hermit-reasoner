@@ -1150,7 +1150,6 @@ public class KeyInfo extends SignatureElementProxy {
 
    static boolean _alreadyInitialized = false;
 
-   /** @inheritDoc */
    public String getBaseLocalName() {
       return Constants._TAG_KEYINFO;
    }

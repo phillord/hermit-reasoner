@@ -526,7 +526,6 @@ public class X509Data extends SignatureElementProxy implements KeyInfoContent {
       return this.lengthUnknownElement() > 0;
    }
 
-   /** @inheritDoc */
    public String getBaseLocalName() {
       return Constants._TAG_X509DATA;
    }

@@ -34,7 +34,7 @@ import com.sun.org.apache.xml.internal.utils.URI;
 public class ResolverLocalFilesystem extends ResourceResolverSpi {
 
    /**
-    * @inheritDoc
+    * 
     */
    public XMLSignatureInput engineResolve(Attr uri, String BaseURI)
            throws ResourceResolverException {
@@ -101,7 +101,7 @@ public class ResolverLocalFilesystem extends ResourceResolverSpi {
    }
 
    /**
-    * @inheritDoc
+    * 
     */
    public boolean engineCanResolve(Attr uri, String BaseURI) {
 

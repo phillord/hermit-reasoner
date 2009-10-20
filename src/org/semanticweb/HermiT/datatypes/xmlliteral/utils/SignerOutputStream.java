@@ -35,12 +35,12 @@ public class SignerOutputStream extends ByteArrayOutputStream {
         this.sa=sa;       
     }
 
-    /** @inheritDoc */
+    /**  */
     public byte[] toByteArray() {
         return none;
     }
     
-    /** @inheritDoc */
+    /**  */
     public void write(byte[] arg0)  {
         try {
 			sa.update(arg0);
@@ -49,7 +49,7 @@ public class SignerOutputStream extends ByteArrayOutputStream {
 		}
     }
     
-    /** @inheritDoc */
+    /**  */
     public void write(int arg0) {
         try {
             sa.update((byte)arg0);
@@ -58,7 +58,7 @@ public class SignerOutputStream extends ByteArrayOutputStream {
         }
     }
     
-    /** @inheritDoc */
+    /**  */
     public void write(byte[] arg0, int arg1, int arg2) {
         try {
             sa.update(arg0,arg1,arg2);

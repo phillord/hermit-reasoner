@@ -69,7 +69,6 @@ public class MgmtData extends SignatureElementProxy implements KeyInfoContent {
       return this.getTextFromTextChild();
    }
 
-   /** @inheritDoc */
    public String getBaseLocalName() {
       return Constants._TAG_MGMTDATA;
    }

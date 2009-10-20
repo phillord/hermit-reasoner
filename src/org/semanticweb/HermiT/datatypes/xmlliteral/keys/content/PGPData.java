@@ -46,7 +46,6 @@ public class PGPData extends SignatureElementProxy implements KeyInfoContent {
       super(element, BaseURI);
    }
 
-   /** @inheritDoc */
    public String getBaseLocalName() {
       return Constants._TAG_PGPDATA;
    }

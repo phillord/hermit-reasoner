@@ -132,7 +132,7 @@ public class SignatureProperties extends SignatureElementProxy {
       XMLUtils.addReturnToElement(this._constructionElement);
    }
 
-   /** @inheritDoc */
+   /**  */
    public String getBaseLocalName() {
       return Constants._TAG_SIGNATUREPROPERTIES;
    }

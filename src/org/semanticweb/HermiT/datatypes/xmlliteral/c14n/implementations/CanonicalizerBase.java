@@ -112,7 +112,7 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
 
    /**
     * Method engineCanonicalizeSubTree
-    * @inheritDoc
+    * 
     * @param rootNode
     * @throws CanonicalizationException
     */
@@ -347,7 +347,7 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
      
    /**
     * Method engineCanonicalizeXPathNodeSet
-    * @inheritDoc
+    * 
     * @param xpathNodeSet
     * @throws CanonicalizationException
     */

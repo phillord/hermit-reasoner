@@ -37,12 +37,12 @@ public class UnsyncBufferedOutputStream extends OutputStream {
 		this.out=out;
 	}
 	
-	/** @inheritDoc */
+	/**  */
 	public void write(byte[] arg0) throws IOException {
 		write(arg0,0,arg0.length);
 	}
 	
-	/** @inheritDoc */
+	/**  */
 	public void write(byte[] arg0, int arg1, int len) throws IOException {
 		int newLen=pointer+len;
 		if (newLen> size) {
@@ -64,7 +64,7 @@ public class UnsyncBufferedOutputStream extends OutputStream {
 		
 	}
 	
-	/** @inheritDoc */
+	/**  */
 	public void write(int arg0) throws IOException {		
 		if (pointer>= size) {
 			flushBuffer();
@@ -73,13 +73,13 @@ public class UnsyncBufferedOutputStream extends OutputStream {
 
 	}
 	
-	/** @inheritDoc */	
+	/**  */	
 	public void flush() throws IOException {
 		flushBuffer();
 		out.flush();
 	}
 
-	/** @inheritDoc */
+	/**  */
 	public void close() throws IOException {
 		flush();		
 	}

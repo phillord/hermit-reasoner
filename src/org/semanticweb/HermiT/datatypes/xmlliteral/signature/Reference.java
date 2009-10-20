@@ -717,7 +717,7 @@ public class Reference extends SignatureElementProxy {
 
    /**
     * Method getBaseLocalName
-    * @inheritDoc
+    * 
     *
     */
    public String getBaseLocalName() {

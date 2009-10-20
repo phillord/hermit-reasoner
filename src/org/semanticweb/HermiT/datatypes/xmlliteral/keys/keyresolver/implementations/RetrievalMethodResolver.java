@@ -62,7 +62,7 @@ public class RetrievalMethodResolver extends KeyResolverSpi {
 
    /**
     * Method engineCanResolve
-    * @inheritDoc
+    * 
     * @param element
     * @param BaseURI
     * @param storage
@@ -82,7 +82,7 @@ public class RetrievalMethodResolver extends KeyResolverSpi {
 
    /**
     * Method engineResolvePublicKey
-    * @inheritDoc
+    * 
     * @param element
     * @param BaseURI
     * @param storage
@@ -168,7 +168,7 @@ public class RetrievalMethodResolver extends KeyResolverSpi {
 
    /**
     * Method engineResolveX509Certificate
-    * @inheritDoc
+    * 
     * @param element
     * @param BaseURI
     * @param storage
@@ -286,7 +286,7 @@ public class RetrievalMethodResolver extends KeyResolverSpi {
 
    /**
     * Method engineResolveSecretKey
-    * @inheritDoc
+    * 
     * @param element
     * @param BaseURI
     * @param storage
