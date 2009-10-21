@@ -74,9 +74,13 @@ public class ConceptSubsumptionCache implements Serializable {
         if (!m_tableau.isDeterministic()) {
             // A -> B?
             boolean isSubsumedBy=m_tableau.isSubsumedBy(subconcept,superconcept);
-            // try and built model for A and not B
-            if (m_tableau.getExtensionManager().containsClash() && m_tableau.getExtensionManager().getClashDependencySet().isEmpty())
-                subconceptInfo.m_isSatisfiable=Boolean.FALSE; // subsumption holds, why can we conclude that A is not satisfiable???
+            // try and build a model for A and not B
+            if (m_tableau.getExtensionManager().containsClash() && m_tableau.getExtensionManager().getClashDependencySet().isEmpty()) {
+                // Tableau.isSubsumedBy() adds not B with a dummy nonempty dependency set. Therefore, if not B contributes to the clash,
+                // the clash dependency set will not be empty, and we will not be in this case. In other words, if the clash dependency set
+                // is empty, then we know that the clash does not depend on not B, so A is unsatisfiable.
+                subconceptInfo.m_isSatisfiable=Boolean.FALSE;
+            }
             else if (!isSubsumedBy) {
                 subconceptInfo.m_isSatisfiable=Boolean.TRUE; // A is satisfiable since A and not B has a model 
                 updateKnownSubsumers(subconcept);

@@ -131,9 +131,6 @@ public class RoleSubsumptionCache implements Serializable {
                 // data properties
                 isSubsumedBy=isSubDataRoleOf(subrole,superrole);
             }
-//            if (m_tmpTableau.getExtensionManager().containsClash() && m_tmpTableau.getExtensionManager().getClashDependencySet().isEmpty())
-//                subroleInfo.m_isSatisfiable=Boolean.FALSE;
-//            else 
             if (!isSubsumedBy) {
                 subroleInfo.m_isSatisfiable=Boolean.TRUE;
                 if (m_topRole==AtomicRole.TOP_OBJECT_ROLE) {
