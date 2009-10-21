@@ -309,7 +309,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
     
     /**
      * Loads the specified ontologies. The reasoner will then take into consideration the logical axioms in each ontology.
-     * Note that this methods does <b>not<b> load any ontologies in the imports closure - <i>all</i> imports must be loaded
+     * Note that this methods does <b>NOT<b> load any ontologies in the imports closure - <i>all</i> imports must be loaded
      * explicitly.
      * @param dataFactory - the data factory that is used in the preprocessing phase to introduce new concepts if necessary
      * @param ontologies - the ontologies to be loaded (no imports will be loaded)
@@ -347,6 +347,9 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         Set<DLOntology.ComplexObjectRoleInclusion> noComplexObjectRoleInclusions=Collections.emptySet();
         Set<Individual> noIndividuals=Collections.emptySet();
         Set<String> noDefinedDatatypeIRIs=Collections.emptySet();
+        m_atomicConceptHierarchy=null;
+        m_dataRoleHierarchy=null;
+        m_objectRoleHierarchy=null;
         DLOntology emptyDLOntology=new DLOntology("urn:hermit:kb",noDLClauses,noAtoms,noAtoms,noAtomicConcepts,noComplexObjectRoleInclusions,noAtomicRoles,noAtomicRoles,noDefinedDatatypeIRIs,noIndividuals,false,false,false,false);
         loadDLOntology(emptyDLOntology);
     }
@@ -455,7 +458,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                         relevantAtomicConcepts.add(atomicConcept);
                 final int numRelevantConcepts=relevantAtomicConcepts.size();
                 if (m_progressMonitor!=null) {
-                    m_progressMonitor.setMessage("Classifying...");
+                    m_progressMonitor.setMessage("Building the class hierarchy...");
                     m_progressMonitor.setProgress(0);
                     m_progressMonitor.setStarted();
                 }
@@ -471,8 +474,8 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                         allSubsumers.put(atomicConcept,new DeterministicHierarchyBuilder.GraphNode<AtomicConcept>(atomicConcept,subsumers));
                         if (m_progressMonitor!=null) {
                             processedConcepts++;
-                            m_progressMonitor.setMessage("Classifying...");
-                            m_progressMonitor.setProgress(processedConcepts/numRelevantConcepts);
+                            m_progressMonitor.setMessage("Building the class hierarchy...");
+                            m_progressMonitor.setProgress(((processedConcepts*100)/numRelevantConcepts));
                         }
                     }
                     DeterministicHierarchyBuilder<AtomicConcept> hierarchyBuilder=new DeterministicHierarchyBuilder<AtomicConcept>(allSubsumers,AtomicConcept.THING,AtomicConcept.NOTHING);
@@ -495,7 +498,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                                 public void elementClassified(AtomicConcept element) {
                                     m_processedConcepts++;
                                     m_progressMonitor.setMessage("Building the class hierarchy...");
-                                    m_progressMonitor.setProgress(m_processedConcepts/numRelevantConcepts);
+                                    m_progressMonitor.setProgress(((m_processedConcepts*100)/numRelevantConcepts));
                                 }
                             };
                     HierarchyBuilder<AtomicConcept> hierarchyBuilder=new HierarchyBuilder<AtomicConcept>(relation,progressMonitor);
@@ -688,7 +691,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                         if (m_progressMonitor!=null) {
                             processedRoles++;
                             m_progressMonitor.setMessage("Classifying object properties...");
-                            m_progressMonitor.setProgress(processedRoles/numRoles);
+                            m_progressMonitor.setProgress(((processedRoles*100)/numRoles));
                         }
                     }
                     DeterministicHierarchyBuilder<Role> hierarchyBuilder=new DeterministicHierarchyBuilder<Role>(allSubsumers,AtomicRole.TOP_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE);
@@ -711,7 +714,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                                 public void elementClassified(Role element) {
                                     m_processedRoles++;
                                     m_progressMonitor.setMessage("Building the object property hierarchy...");
-                                    m_progressMonitor.setProgress(m_processedRoles/numRoles);
+                                    m_progressMonitor.setProgress(((m_processedRoles*100)/numRoles));
                                 }
                             };
                     HierarchyBuilder<Role> hierarchyBuilder=new HierarchyBuilder<Role>(relation,progressMonitor);
@@ -1123,7 +1126,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                         if (m_progressMonitor!=null) {
                             processedRoles++;
                             m_progressMonitor.setMessage("Classifying data properties...");
-                            m_progressMonitor.setProgress(processedRoles/numRoles);
+                            m_progressMonitor.setProgress(((processedRoles*100)/numRoles));
                         }
                     }
                     DeterministicHierarchyBuilder<Role> hierarchyBuilder=new DeterministicHierarchyBuilder<Role>(allSubsumers,AtomicRole.TOP_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE);
@@ -1146,7 +1149,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                                 public void elementClassified(Role element) {
                                     m_processedRoles++;
                                     m_progressMonitor.setMessage("Building the data property hierarchy...");
-                                    m_progressMonitor.setProgress(m_processedRoles/numRoles);
+                                    m_progressMonitor.setProgress(((m_processedRoles*100)/numRoles));
                                 }
                             };
                     HierarchyBuilder<Role> hierarchyBuilder=new HierarchyBuilder<Role>(relation,progressMonitor);
@@ -1962,9 +1965,8 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                 protected Set<OWLOntology> m_loadedOntologies;
                 
                 public void loadOntologies(Set<OWLOntology> ontologies) {
-                    if (!ontologies.isEmpty()) {
-                        super.loadOntologies(ontologies);
-                    }
+                    clearOntologies();
+                    super.loadOntologies(ontologies);
                     m_loadedOntologies=ontologies;
                 }
                 public Set<OWLOntology> getLoadedOntologies() {
@@ -1990,8 +1992,10 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                     return new HashSet<OWLLiteral>();
                 }
             };
-            if (!ontologies.isEmpty()) hermit.loadOntologies(ontologies);
+            // even if the set of ontologies is empty we should load that because otherwise our datat structures are only partially initialised
+            hermit.loadOntologies(ontologies);
             return hermit;
         }
     }
 }
+ 
