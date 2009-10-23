@@ -228,8 +228,8 @@
         <sshexec host="edison.comlab.ox.ac.uk" username="${username}" password="${password}" command="mkdir /data/hermit/download/${version}/" trust="yes"/>
         <scp file="${HermiTjar}" todir="${username}:${password}@edison.comlab.ox.ac.uk:/data/hermit/download/${version}/" trust="yes"/>
         <scp file="${updatefile}" todir="${username}:${password}@edison.comlab.ox.ac.uk:/data/hermit/" trust="yes"/>
-        <sshexec host="edison.comlab.ox.ac.uk" username="${username}" password="${password}" command="rm /data/hermit/download/current/HermiT.jar" trust="yes"/>
-        <sshexec host="edison.comlab.ox.ac.uk" username="${username}" password="${password}" command="ln -s  /data/hermit/download/${version}/HermiT.jar /data/hermit/download/current/HermiT.jar" trust="yes"/>
+        <sshexec host="edison.comlab.ox.ac.uk" username="${username}" password="${password}" command="rm /data/hermit/download/current/HermiT.zip" trust="yes"/>
+        <sshexec host="edison.comlab.ox.ac.uk" username="${username}" password="${password}" command="ln -s  /data/hermit/download/${version}/HermiT.zip /data/hermit/download/current/HermiT.zip" trust="yes"/>
     </target>
 
 </project>
