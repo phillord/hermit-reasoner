@@ -14,6 +14,7 @@ public class ReasonerCoreBlockingTest extends ReasonerTest {
 //        c.blockingStrategyType=Configuration.BlockingStrategyType.CORE;
         c.blockingStrategyType=Configuration.BlockingStrategyType.VALIDATED;
         c.blockingSignatureCacheType=BlockingSignatureCacheType.NOT_CACHED;
+        //c.coreType=CoreType.SINGLETON;
         //c.tableauMonitorType=TableauMonitorType.DEBUGGER_HISTORY_ON;
         return c;
     }

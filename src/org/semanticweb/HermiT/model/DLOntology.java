@@ -535,7 +535,57 @@ public class DLOntology implements Serializable {
         stringBuffer.append("]");
         return stringBuffer.toString();
     }
-
+    public String getStatistics() {
+        return getStatistics(null,null,null);
+    }
+    protected String getStatistics(Integer numDeterministicClauses, Integer numNondeterministicClauses, Integer numDisjunctions) {
+        if (numDeterministicClauses==null || numNondeterministicClauses==null || numDisjunctions==null) {
+            numDeterministicClauses=0;
+            numNondeterministicClauses=0;
+            numDisjunctions=0;
+            for (DLClause dlClause : m_dlClauses) {
+                if (dlClause.getHeadLength()<=1) 
+                    numDeterministicClauses++;
+                else {
+                    numNondeterministicClauses++;
+                    numDisjunctions+=dlClause.getHeadLength();
+                }
+            }
+        }
+        StringBuffer stringBuffer=new StringBuffer();
+        stringBuffer.append("DL clauses statistics: [");
+        stringBuffer.append(CRLF);
+        stringBuffer.append("  Number of deterministic clauses: " + numDeterministicClauses);
+        stringBuffer.append(CRLF);
+        stringBuffer.append("  Number of nondeterministic clauses: " + numNondeterministicClauses);
+        stringBuffer.append(CRLF);
+        stringBuffer.append("  Overall number of disjunctions: " + numDisjunctions);
+        stringBuffer.append(CRLF);
+        stringBuffer.append("  Number of positive facts: " + m_positiveFacts.size());
+        stringBuffer.append(CRLF);
+        stringBuffer.append("  Number of negative facts: " + m_negativeFacts.size());
+        stringBuffer.append(CRLF);
+        stringBuffer.append("  Inverses: " + this.hasInverseRoles());
+        stringBuffer.append(CRLF);
+        stringBuffer.append("  At-Mosts: " + this.hasAtMostRestrictions());
+        stringBuffer.append(CRLF);
+        stringBuffer.append("  Datatypes: " + this.hasDatatypes());
+        stringBuffer.append(CRLF);
+        stringBuffer.append("  Nominals: " + this.hasNominals());
+        stringBuffer.append(CRLF);
+        stringBuffer.append("  Number of atomic concepts: " + m_allAtomicConcepts.size());
+        stringBuffer.append(CRLF);
+        stringBuffer.append("  Number of object properties: " + m_allAtomicObjectRoles.size());
+        stringBuffer.append(CRLF);
+        stringBuffer.append("  Number of data properties: " + m_allAtomicDataRoles.size());
+        stringBuffer.append(CRLF);
+        stringBuffer.append("  Number of complex RIAs: " + m_allComplexObjectRoleInclusions.size());
+        stringBuffer.append(CRLF);
+        stringBuffer.append("  Number of individuals: " + m_allIndividuals.size());
+        stringBuffer.append(CRLF);
+        stringBuffer.append("]");
+        return stringBuffer.toString();
+    }
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
