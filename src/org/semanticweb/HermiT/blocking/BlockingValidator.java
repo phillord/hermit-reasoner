@@ -1,16 +1,23 @@
 package org.semanticweb.HermiT.blocking;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLPredicate;
+import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.tableau.ExtensionManager;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
+import org.semanticweb.HermiT.tableau.ExtensionTable.Retrieval;
 
 /**
  * Checks whether the rules from some set are applicable given the current state of the extensions.
@@ -26,7 +33,7 @@ public class BlockingValidator {
         m_dlClauseInfos=new ArrayList<DLClauseInfo>();
         for (DLClause dlClause : tableau.getDLOntology().getDLClauses()) {
             if (!dlClause.isConceptInclusion() && !dlClause.isRoleInclusion() && !dlClause.isRoleInverseInclusion())
-                m_dlClauseInfos.add(new DLClauseInfo(dlClause));
+                m_dlClauseInfos.add(new DLClauseInfo(dlClause,m_extensionManager));
         }
     }
     /**
@@ -66,7 +73,7 @@ public class BlockingValidator {
         // Check whether some of the X concepts can be matched to the blocker
         for (AtomicConcept atomicConcept : dlClauseInfo.m_xConcepts)
             if (!m_extensionManager.containsAssertion(atomicConcept,blocker))
-                return false;
+                return true; // clause not applicable (trivially satisfied)
         // Find one yConstraint that involves a parent of blockedX
         int matchingYConstraintIndex=-1;
         for (int yIndex=0;matchingYConstraintIndex==-1 && yIndex<dlClauseInfo.m_yConstraints.length;yIndex++)
@@ -256,8 +263,10 @@ public class BlockingValidator {
     
     protected static class DLClauseInfo {
         protected final AtomicConcept[] m_xConcepts;
+        protected final AtomicRole[] m_x2xRoles;
         protected final YConstraint[] m_yConstraints;
         protected final AtomicConcept[][] m_zConcepts;
+        protected final ExtensionTable.Retrieval[] m_x2xRetrievals;
         protected final ExtensionTable.Retrieval[] m_x2yRetrievals;
         protected final ExtensionTable.Retrieval[] m_y2xRetrievals;
         protected final ExtensionTable.Retrieval[] m_zRetrievals;
@@ -267,21 +276,113 @@ public class BlockingValidator {
         protected Node[] m_yNodes;
         protected Node[] m_zNodes;
         
-        public DLClauseInfo(DLClause dlClause) {
+        public DLClauseInfo(DLClause dlClause,ExtensionManager extensionManager) {
             // TODO: We'll sort our the variables by names. This introduces a dependency
             // to clausification. That's ugly and should be fixed later.
             // TODO: Initialize these values properly!
-            m_xConcepts=null;
-            m_yConstraints=null;
+            Variable X=Variable.create("X");
+            Set<AtomicConcept> xConcepts=new HashSet<AtomicConcept>();
+            Set<AtomicRole> x2xRoles=new HashSet<AtomicRole>();
+            Set<Variable> ys=new HashSet<Variable>();
+            Map<Variable,Set<AtomicConcept>> y2concepts=new HashMap<Variable, Set<AtomicConcept>>();
+            Map<Variable,Set<AtomicConcept>> z2concepts=new HashMap<Variable, Set<AtomicConcept>>();
+            Map<Variable,Set<AtomicRole>> x2yRoles=new HashMap<Variable, Set<AtomicRole>>();
+            Map<Variable,Set<AtomicRole>> y2xRoles=new HashMap<Variable, Set<AtomicRole>>();
+            // Each atom in the antecedent is of the form A(x), R(x,x), R(x,yi), R(yi,x), A(yi), or A(zj).
+            for (int i=0;i<dlClause.getBodyLength();i++) {
+                Atom atom=dlClause.getBodyAtom(i);
+                DLPredicate predicate=atom.getDLPredicate();
+                Variable var1=atom.getArgumentVariable(0);
+                if (predicate instanceof AtomicConcept) {
+                    if (var1==X) {
+                        xConcepts.add((AtomicConcept)predicate);
+                    } else if (var1.getName().startsWith("Y")) {
+                        ys.add(var1);
+                        if (y2concepts.containsKey(var1)) {
+                            y2concepts.get(var1).add((AtomicConcept)predicate);
+                        } else {
+                            Set<AtomicConcept> concepts=new HashSet<AtomicConcept>();
+                            concepts.add((AtomicConcept)predicate);
+                            y2concepts.put(var1, concepts);
+                        }
+                    } else if (var1.getName().startsWith("Z")) {
+                        if (z2concepts.containsKey(var1)) {
+                            z2concepts.get(var1).add((AtomicConcept)predicate);
+                        } else {
+                            Set<AtomicConcept> concepts=new HashSet<AtomicConcept>();
+                            concepts.add((AtomicConcept)predicate);
+                            z2concepts.put(var1, concepts);
+                        }
+                    } else {
+                        throw new IllegalStateException("Internal error: Clause premise contained variables other than X, Yi, and Zi in a concept atom. ");
+                    }
+                } else if (predicate instanceof AtomicRole) {
+                    Variable var2=atom.getArgumentVariable(1);
+                    if (var1==X) {
+                        if (var2==X) {
+                            x2xRoles.add((AtomicRole)atom.getDLPredicate());
+                        } else if (var2.getName().startsWith("Y")) {
+                            ys.add(var2);
+                            if (x2yRoles.containsKey(var2)) {
+                                x2yRoles.get(var2).add((AtomicRole)predicate);
+                            } else {
+                                Set<AtomicRole> roles=new HashSet<AtomicRole>();
+                                roles.add((AtomicRole)predicate);
+                                x2yRoles.put(var2,roles);
+                            }
+                        } else {
+                            throw new IllegalStateException("Internal error: Clause premise contains a role atom with virales other than X and Yi. ");
+                        }
+                    } else if (var2==X) {
+                        if (var1.getName().startsWith("Y")) {
+                            ys.add(var1);
+                            if (y2xRoles.containsKey(var1)) {
+                                y2xRoles.get(var1).add((AtomicRole)predicate);
+                            } else {
+                                Set<AtomicRole> roles=new HashSet<AtomicRole>();
+                                roles.add((AtomicRole)predicate);
+                                y2xRoles.put(var1,roles);
+                            }
+                        } else {
+                            throw new IllegalStateException("Internal error: Clause premise contains a role atom with virales other than X and Yi. ");
+                        }
+                    } else {
+                        throw new IllegalStateException("Internal error: Clause premise contained variables other than X and Yi in a role atom. ");
+                    }
+                }
+            }
+            AtomicConcept[] noConcepts=new AtomicConcept[0];
+            AtomicRole[] noRoles=new AtomicRole[0];
+            m_xConcepts=xConcepts.toArray(noConcepts);
+            m_x2xRoles=x2xRoles.toArray(noRoles);
+            m_x2xRetrievals=new Retrieval[m_x2xRoles.length];
+            for (int i=0;i<m_x2xRoles.length;i++) {
+                m_x2xRetrievals[i]=extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,false,false },ExtensionTable.View.TOTAL);
+                m_x2xRetrievals[i].getBindingsBuffer()[0]=m_x2xRoles[i];
+            }
+            m_yConstraints=new YConstraint[ys.size()];
+            int i=0;
+            for (Variable y : ys) {
+                m_yConstraints[i]=new YConstraint(y2concepts.get(y).toArray(noConcepts), x2yRoles.get(y).toArray(noRoles), y2xRoles.get(y).toArray(noRoles));
+                i++;
+            }
+            
+            // why is that an array of arrays of concepts?
             m_zConcepts=null;
+            
+            // should hat not go to the YConstraint class?
             m_x2yRetrievals=null;
             m_y2xRetrievals=null;
-            m_zRetrievals=null;
+            
+            m_zRetrievals=new Retrieval[z2concepts.size()];
+            for (i=0;i<z2concepts.size();i++) {
+                m_zRetrievals[i]=extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { true,false },ExtensionTable.View.TOTAL);
+            }
             m_consequencesForBlockedX=null;
             m_consequencesForNonblockedX=null;
             m_xNode=null;
-            m_yNodes=null;
-            m_zNodes=null;
+            m_yNodes=new Node[ys.size()];
+            m_zNodes=new Node[z2concepts.size()];
         }
     }
     
