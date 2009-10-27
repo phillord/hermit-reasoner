@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.semanticweb.HermiT.blocking.AnywhereValidatedBlocking2;
+import org.semanticweb.HermiT.blocking.AnywhereValidatedBlocking;
 import org.semanticweb.HermiT.blocking.BlockingSignatureCache;
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.blocking.BlockingValidator;
@@ -94,7 +94,7 @@ public class BlockingValidatorTest extends AbstractReasonerInternalsTest {
     protected void setUp() {
         DirectBlockingChecker directBlockingChecker=new ValidatedDirectBlockingChecker();
         BlockingSignatureCache blockingSignatureCache=null;
-        m_blockingStrategy=new AnywhereValidatedBlocking2(directBlockingChecker,blockingSignatureCache,null,null,true,true);
+        m_blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,blockingSignatureCache,null,null,true,true);
         ExistentialExpansionStrategy ExpansionStrategy=new CreationOrderStrategy(m_blockingStrategy);
         m_tableau=new Tableau(new InterruptFlag(),null,ExpansionStrategy,TEST_DL_ONTOLOGY,new HashMap<String,Object>());
         m_extensionManager=m_tableau.getExtensionManager();

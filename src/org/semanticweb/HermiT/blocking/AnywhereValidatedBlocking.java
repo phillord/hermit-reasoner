@@ -31,7 +31,7 @@ import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.NodeType;
 import org.semanticweb.HermiT.tableau.Tableau;
 
-public class AnywhereValidatedBlocking2 implements BlockingStrategy {
+public class AnywhereValidatedBlocking implements BlockingStrategy {
 
     public static enum BlockingViolationType {
         ATLEASTBLOCKEDPARENT, 
@@ -76,7 +76,7 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
     protected int five=0;
     protected int six=0;
     
-    public AnywhereValidatedBlocking2(DirectBlockingChecker directBlockingChecker,BlockingSignatureCache blockingSignatureCache,Map<AtomicConcept, Set<Set<Concept>>> unaryValidBlockConditions, Map<Set<AtomicConcept>, Set<Set<Concept>>> nAryValidBlockConditions, boolean hasInverses,boolean useSingletonCore) {
+    public AnywhereValidatedBlocking(DirectBlockingChecker directBlockingChecker,BlockingSignatureCache blockingSignatureCache,Map<AtomicConcept, Set<Set<Concept>>> unaryValidBlockConditions, Map<Set<AtomicConcept>, Set<Set<Concept>>> nAryValidBlockConditions, boolean hasInverses,boolean useSingletonCore) {
         m_directBlockingChecker=directBlockingChecker;
         m_currentBlockersCache=new ValidatedBlockersCache(m_directBlockingChecker);
         m_blockingSignatureCache=blockingSignatureCache;

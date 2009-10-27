@@ -711,7 +711,7 @@ public class OWLClausification {
             if (m_zIndex==0)
                 result=Z;
             else
-                result=Variable.create("Z"+m_yIndex);
+                result=Variable.create("Z"+m_zIndex);
             m_zIndex++;
             return result;
         }

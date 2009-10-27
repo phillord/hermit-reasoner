@@ -27,7 +27,7 @@ import org.semanticweb.HermiT.Configuration.BlockingStrategyType;
 import org.semanticweb.HermiT.Configuration.CoreType;
 import org.semanticweb.HermiT.blocking.AncestorBlocking;
 import org.semanticweb.HermiT.blocking.AnywhereBlocking;
-import org.semanticweb.HermiT.blocking.AnywhereValidatedBlocking2;
+import org.semanticweb.HermiT.blocking.AnywhereValidatedBlocking;
 import org.semanticweb.HermiT.blocking.AnywhereValidatedBlockingRules;
 import org.semanticweb.HermiT.blocking.BlockingSignatureCache;
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
@@ -1593,7 +1593,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         BlockingStrategy blockingStrategy=null;
         switch (config.blockingStrategyType) {
         case VALIDATED:
-            blockingStrategy=new AnywhereValidatedBlocking2(directBlockingChecker,blockingSignatureCache,dlOntology.getUnaryValidBlockConditions(),dlOntology.getNAryValidBlockConditions(),dlOntology.hasInverseRoles(),config.coreType==CoreType.SINGLETON);
+            blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,blockingSignatureCache,dlOntology.getUnaryValidBlockConditions(),dlOntology.getNAryValidBlockConditions(),dlOntology.hasInverseRoles(),config.coreType==CoreType.SINGLETON);
             break;
         case VALIDATED_RULES:
             blockingStrategy=new AnywhereValidatedBlockingRules(directBlockingChecker,blockingSignatureCache,dlOntology.hasInverseRoles(),config.coreType==CoreType.SINGLETON);
