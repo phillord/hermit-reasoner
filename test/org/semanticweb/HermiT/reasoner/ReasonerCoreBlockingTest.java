@@ -12,7 +12,7 @@ public class ReasonerCoreBlockingTest extends ReasonerTest {
         Configuration c=new Configuration();
 //        c.existentialStrategyType=Configuration.ExistentialStrategyType.LAZY;
 //        c.blockingStrategyType=Configuration.BlockingStrategyType.CORE;
-        c.blockingStrategyType=Configuration.BlockingStrategyType.VALIDATED;
+        c.blockingStrategyType=Configuration.BlockingStrategyType.VALIDATED_RULES;
         c.blockingSignatureCacheType=BlockingSignatureCacheType.NOT_CACHED;
         //c.coreType=CoreType.SINGLETON;
         //c.tableauMonitorType=TableauMonitorType.DEBUGGER_HISTORY_ON;

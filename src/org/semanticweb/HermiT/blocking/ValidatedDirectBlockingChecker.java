@@ -152,6 +152,8 @@ public class ValidatedDirectBlockingChecker implements DirectBlockingChecker,Ser
         protected Set<AtomicRole> m_fullFromParentLabel;
         protected Set<AtomicRole> m_fullToParentLabel;
         protected int m_blockingRelevantHashCode;
+        public boolean m_blockViolatesParentConstraints=false;
+        public boolean m_hasAlreadyBeenChecked=false;
         
         public ValidatedBlockingObject(Node node) {
             m_node=node;

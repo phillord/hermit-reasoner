@@ -18,6 +18,7 @@ import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Role;
+import org.semanticweb.HermiT.model.DLClause.ClauseType;
 
 /**
  * Manages the expansion of at least restrictions in a tableau.
@@ -52,13 +53,13 @@ public final class ExistentialExpansionManager implements Serializable {
         Graph<Role> superRoleGraph=new Graph<Role>();
         Set<Role> functionalRoles=new HashSet<Role>();
         for (DLClause dlClause : m_tableau.getDLOntology().getDLClauses()) {
-            if (dlClause.isRoleInclusion()) {
+            if (dlClause.m_clauseType==ClauseType.OBJECT_PROPERTY_INCLUSION || dlClause.m_clauseType==ClauseType.DATA_PROPERTY_INCLUSION) {
                 AtomicRole subrole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                 AtomicRole superrole=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
                 superRoleGraph.addEdge(subrole,superrole);
                 superRoleGraph.addEdge(subrole.getInverse(),superrole.getInverse());
             }
-            else if (dlClause.isRoleInverseInclusion()) {
+            else if (dlClause.m_clauseType==ClauseType.INVERSE_OBJECT_PROPERTY_INCLUSION) {
                 AtomicRole subrole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                 AtomicRole superrole=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
                 superRoleGraph.addEdge(subrole,superrole.getInverse());

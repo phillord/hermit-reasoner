@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Prefixes;
+import org.semanticweb.HermiT.model.DLClause.ClauseType;
 
 public class DescriptionGraph implements DLPredicate,Serializable {
     private static final long serialVersionUID=-6098910060520673164L;
@@ -54,7 +55,7 @@ public class DescriptionGraph implements DLPredicate,Serializable {
             for (int vertex=0;vertex<m_atomicConceptsByVertices.length;vertex++)
                 if (m_atomicConceptsByVertices[vertex].equals(startAtomicConcept))
                     consequent[index++]=Atom.create(ExistsDescriptionGraph.create(this,vertex),X);
-            resultingDLClauses.add(DLClause.create(consequent,antecedent));
+            resultingDLClauses.add(DLClause.create(consequent,antecedent,ClauseType.GRAPH_START_CLAUSE));
         }
     }
     public String toString(Prefixes ns) {

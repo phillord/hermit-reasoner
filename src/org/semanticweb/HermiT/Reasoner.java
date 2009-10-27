@@ -28,6 +28,7 @@ import org.semanticweb.HermiT.Configuration.CoreType;
 import org.semanticweb.HermiT.blocking.AncestorBlocking;
 import org.semanticweb.HermiT.blocking.AnywhereBlocking;
 import org.semanticweb.HermiT.blocking.AnywhereValidatedBlocking2;
+import org.semanticweb.HermiT.blocking.AnywhereValidatedBlockingRules;
 import org.semanticweb.HermiT.blocking.BlockingSignatureCache;
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.blocking.DirectBlockingChecker;
@@ -54,6 +55,7 @@ import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Role;
+import org.semanticweb.HermiT.model.DLClause.ClauseType;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.monitor.TableauMonitorFork;
 import org.semanticweb.HermiT.monitor.Timer;
@@ -1553,7 +1555,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             tableauMonitor=new TableauMonitorFork(wellKnownTableauMonitor,config.monitor);
 
         DirectBlockingChecker directBlockingChecker=null;
-        if (config.blockingStrategyType==BlockingStrategyType.VALIDATED) {
+        if (config.blockingStrategyType==BlockingStrategyType.VALIDATED || config.blockingStrategyType==BlockingStrategyType.VALIDATED_RULES) {
             directBlockingChecker=new ValidatedDirectBlockingChecker();
         } else {
             switch (config.directBlockingType) {
@@ -1591,8 +1593,10 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         BlockingStrategy blockingStrategy=null;
         switch (config.blockingStrategyType) {
         case VALIDATED:
-            //blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,blockingSignatureCache,dlOntology.getUnaryValidBlockConditions(),dlOntology.getNAryValidBlockConditions(),dlOntology.hasInverseRoles());
             blockingStrategy=new AnywhereValidatedBlocking2(directBlockingChecker,blockingSignatureCache,dlOntology.getUnaryValidBlockConditions(),dlOntology.getNAryValidBlockConditions(),dlOntology.hasInverseRoles(),config.coreType==CoreType.SINGLETON);
+            break;
+        case VALIDATED_RULES:
+            blockingStrategy=new AnywhereValidatedBlockingRules(directBlockingChecker,blockingSignatureCache,dlOntology.hasInverseRoles(),config.coreType==CoreType.SINGLETON);
             break;
         case ANCESTOR:
             blockingStrategy=new AncestorBlocking(directBlockingChecker,blockingSignatureCache);
@@ -1644,7 +1648,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                 ObjectPropertyInclusionManager objectPropertyInclusionManager=new ObjectPropertyInclusionManager(factory);
                 objectPropertyInclusionManager.prepareTransformation(axioms);
                 for (DLClause dlClause : originalDLOntology.getDLClauses()) {
-                    if (dlClause.isRoleInclusion()) {
+                    if (dlClause.m_clauseType==ClauseType.OBJECT_PROPERTY_INCLUSION || dlClause.m_clauseType==ClauseType.DATA_PROPERTY_INCLUSION) {
                         AtomicRole subAtomicRole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                         AtomicRole superAtomicRole=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
                         if (originalDLOntology.getAllAtomicObjectRoles().contains(subAtomicRole) && originalDLOntology.getAllAtomicObjectRoles().contains(superAtomicRole)) {
@@ -1653,7 +1657,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
                             objectPropertyInclusionManager.addInclusion(subObjectProperty,superObjectProperty);
                         }
                     }
-                    else if (dlClause.isRoleInverseInclusion()) {
+                    else if (dlClause.m_clauseType==ClauseType.INVERSE_OBJECT_PROPERTY_INCLUSION) {
                         AtomicRole subAtomicRole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                         AtomicRole superAtomicRole=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
                         if (originalDLOntology.getAllAtomicObjectRoles().contains(subAtomicRole) && originalDLOntology.getAllAtomicObjectRoles().contains(superAtomicRole)) {

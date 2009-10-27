@@ -15,6 +15,12 @@ import org.semanticweb.HermiT.Prefixes;
  * Represents a DL clause. The body is a conjunction of atoms and the head is a disjunction of atoms.
  */
 public class DLClause implements Serializable {
+    public static enum ClauseType {
+        CONCEPT_INCLUSION, DATA_RANGE_INCLUSION, INVERSE_OBJECT_PROPERTY_INCLUSION, OBJECT_PROPERTY_INCLUSION, DATA_PROPERTY_INCLUSION, 
+        ASYMMETRY, REFLEXIVITY, IRREFLEXIVITY, DISJOINT_OBJECT_PROPERTIES, DISJOINT_DATA_PROPERTIES, 
+        HAS_KEY, SWRL_RULE, GRAPH_RULE, GRAPH_START_CLAUSE, OTHER
+    }
+    
     private static final long serialVersionUID=-4513910129515151732L;
 
     public static final Atom[][] EMPTY_HEAD=new Atom[0][];
@@ -22,11 +28,13 @@ public class DLClause implements Serializable {
     protected final boolean m_isKnownToBeAdmissible;
     protected final Atom[] m_headAtoms;
     protected final Atom[] m_bodyAtoms;
-
-    protected DLClause(boolean isKnownToBeAdmissible,Atom[] headAtoms,Atom[] bodyAtoms) {
+    public final ClauseType m_clauseType;
+    
+    protected DLClause(boolean isKnownToBeAdmissible,Atom[] headAtoms,Atom[] bodyAtoms, ClauseType clauseType) {
         m_isKnownToBeAdmissible=isKnownToBeAdmissible;
         m_headAtoms=headAtoms;
         m_bodyAtoms=bodyAtoms;
+        m_clauseType=clauseType;
     }
     public boolean isKnownToBeAdmissible() {
         return m_isKnownToBeAdmissible;
@@ -76,7 +84,7 @@ public class DLClause implements Serializable {
             int index=m_bodyAtoms.length;
             for (Variable variable : variables)
                 newBodyAtoms[index++]=Atom.create(AtomicConcept.THING,variable);
-            return DLClause.createEx(m_isKnownToBeAdmissible,m_headAtoms,newBodyAtoms);
+            return DLClause.createEx(m_isKnownToBeAdmissible,m_headAtoms,newBodyAtoms,m_clauseType);
         }
     }
     public DLClause getChangedDLClause(Atom[] headAtoms,Atom[] bodyAtoms) {
@@ -84,19 +92,19 @@ public class DLClause implements Serializable {
             headAtoms=m_headAtoms;
         if (bodyAtoms==null)
             bodyAtoms=m_bodyAtoms;
-        return DLClause.createEx(m_isKnownToBeAdmissible,headAtoms,bodyAtoms);
+        return DLClause.createEx(m_isKnownToBeAdmissible,headAtoms,bodyAtoms,m_clauseType);
     }
-    public boolean isConceptInclusion() {
-        if (getBodyLength()==1 && getHeadLength()==1) {
-            if (getBodyAtom(0).getDLPredicate() instanceof AtomicConcept && getHeadAtom(0).getDLPredicate() instanceof Concept) {
-                Variable x=getBodyAtom(0).getArgumentVariable(0);
-                Variable headX=getHeadAtom(0).getArgumentVariable(0);
-                if (x!=null && x.equals(headX))
-                    return true;
-            }
-        }
-        return false;
-    }
+//    public boolean isConceptInclusion() {
+//        if (getBodyLength()==1 && getHeadLength()==1) {
+//            if (getBodyAtom(0).getDLPredicate() instanceof AtomicConcept && getHeadAtom(0).getDLPredicate() instanceof Concept) {
+//                Variable x=getBodyAtom(0).getArgumentVariable(0);
+//                Variable headX=getHeadAtom(0).getArgumentVariable(0);
+//                if (x!=null && x.equals(headX))
+//                    return true;
+//            }
+//        }
+//        return false;
+//    }
     public boolean isFunctionalityAxiom() {
         if (getBodyLength()==2 && getHeadLength()==1) {
             DLPredicate atomicRole=getBodyAtom(0).getDLPredicate();
@@ -135,32 +143,32 @@ public class DLClause implements Serializable {
         }
         return false;
     }
-    public boolean isRoleInclusion() {
-        if (getBodyLength()==1 && getHeadLength()==1) {
-            if (getBodyAtom(0).getDLPredicate() instanceof AtomicRole && getHeadAtom(0).getDLPredicate() instanceof AtomicRole) {
-                Variable x=getBodyAtom(0).getArgumentVariable(0);
-                Variable y=getBodyAtom(0).getArgumentVariable(1);
-                Variable headX=getHeadAtom(0).getArgumentVariable(0);
-                Variable headY=getHeadAtom(0).getArgumentVariable(1);
-                if (x!=null && y!=null && !x.equals(y) && x.equals(headX) && y.equals(headY))
-                    return true;
-            }
-        }
-        return false;
-    }
-    public boolean isRoleInverseInclusion() {
-        if (getBodyLength()==1 && getHeadLength()==1) {
-            if (getBodyAtom(0).getDLPredicate() instanceof AtomicRole && getHeadAtom(0).getDLPredicate() instanceof AtomicRole) {
-                Variable x=getBodyAtom(0).getArgumentVariable(0);
-                Variable y=getBodyAtom(0).getArgumentVariable(1);
-                Variable headX=getHeadAtom(0).getArgumentVariable(0);
-                Variable headY=getHeadAtom(0).getArgumentVariable(1);
-                if (x!=null && y!=null && !x.equals(y) && x.equals(headY) && y.equals(headX))
-                    return true;
-            }
-        }
-        return false;
-    }
+//    public boolean isRoleInclusion() {
+//        if (getBodyLength()==1 && getHeadLength()==1) {
+//            if (getBodyAtom(0).getDLPredicate() instanceof AtomicRole && getHeadAtom(0).getDLPredicate() instanceof AtomicRole) {
+//                Variable x=getBodyAtom(0).getArgumentVariable(0);
+//                Variable y=getBodyAtom(0).getArgumentVariable(1);
+//                Variable headX=getHeadAtom(0).getArgumentVariable(0);
+//                Variable headY=getHeadAtom(0).getArgumentVariable(1);
+//                if (x!=null && y!=null && !x.equals(y) && x.equals(headX) && y.equals(headY))
+//                    return true;
+//            }
+//        }
+//        return false;
+//    }
+//    public boolean isRoleInverseInclusion() {
+//        if (getBodyLength()==1 && getHeadLength()==1) {
+//            if (getBodyAtom(0).getDLPredicate() instanceof AtomicRole && getHeadAtom(0).getDLPredicate() instanceof AtomicRole) {
+//                Variable x=getBodyAtom(0).getArgumentVariable(0);
+//                Variable y=getBodyAtom(0).getArgumentVariable(1);
+//                Variable headX=getHeadAtom(0).getArgumentVariable(0);
+//                Variable headY=getHeadAtom(0).getArgumentVariable(1);
+//                if (x!=null && y!=null && !x.equals(y) && x.equals(headY) && y.equals(headX))
+//                    return true;
+//            }
+//        }
+//        return false;
+//    }
     public String toString(Prefixes prefixes) {
         StringBuffer buffer=new StringBuffer();
         for (int headIndex=0;headIndex<m_headAtoms.length;headIndex++) {
@@ -201,11 +209,11 @@ public class DLClause implements Serializable {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
 
-    public static DLClause create(Atom[] headAtoms,Atom[] bodyAtoms) {
-        return createEx(false,headAtoms,bodyAtoms);
+    public static DLClause create(Atom[] headAtoms,Atom[] bodyAtoms,ClauseType clauseType) {
+        return createEx(false,headAtoms,bodyAtoms,clauseType);
     }
-    public static DLClause createEx(boolean isKnownToBeAdmissible,Atom[] headAtoms,Atom[] bodyAtoms) {
-        return new DLClause(isKnownToBeAdmissible,headAtoms,bodyAtoms);
+    public static DLClause createEx(boolean isKnownToBeAdmissible,Atom[] headAtoms,Atom[] bodyAtoms, ClauseType clauseType) {
+        return new DLClause(isKnownToBeAdmissible,headAtoms,bodyAtoms,clauseType);
     }
 }
 class AtomLexicalComparator implements Serializable, Comparator<Atom> {

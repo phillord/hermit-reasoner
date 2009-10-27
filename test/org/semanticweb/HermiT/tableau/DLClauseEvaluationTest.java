@@ -15,6 +15,7 @@ import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.Variable;
+import org.semanticweb.HermiT.model.DLClause.ClauseType;
 
 public class DLClauseEvaluationTest extends AbstractReasonerInternalsTest {
     
@@ -30,7 +31,7 @@ public class DLClauseEvaluationTest extends AbstractReasonerInternalsTest {
         Variable Z=Variable.create("Z");
         Variable W=Variable.create("W");
 
-        CL_1=DLClause.create(new Atom[] { Atom.create(U,Z,W) },new Atom[] { Atom.create(R,X,Y),Atom.create(S,Y,Z),Atom.create(T,W,W) });
+        CL_1=DLClause.create(new Atom[] { Atom.create(U,Z,W) },new Atom[] { Atom.create(R,X,Y),Atom.create(S,Y,Z),Atom.create(T,W,W) },ClauseType.OTHER);
         Set<DLClause> dlClauses=Collections.singleton(CL_1);
         Set<Atom> atoms=Collections.emptySet();
         TEST_DL_ONTOLOGY = new DLOntology(

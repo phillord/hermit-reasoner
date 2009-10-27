@@ -15,6 +15,7 @@ import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Role;
+import org.semanticweb.HermiT.model.DLClause.ClauseType;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
@@ -52,7 +53,7 @@ public class RoleSubsumptionCache implements Serializable {
         m_topRole=topRole;
         Graph<Role> roleGraph=new Graph<Role>();
         for (DLClause dlClause : m_reasoner.getDLOntology().getDLClauses()) {
-            if (dlClause.isRoleInclusion()) {
+            if (dlClause.m_clauseType==ClauseType.OBJECT_PROPERTY_INCLUSION || dlClause.m_clauseType==ClauseType.DATA_PROPERTY_INCLUSION) {
                 AtomicRole sub=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                 AtomicRole sup=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
                 if (m_allRoles.contains(sub) && m_allRoles.contains(sup)) {
@@ -61,7 +62,7 @@ public class RoleSubsumptionCache implements Serializable {
                         roleGraph.addEdge(sub.getInverse(),sup.getInverse());
                 }
             }
-            else if (dlClause.isRoleInverseInclusion()) {
+            else if (dlClause.m_clauseType==ClauseType.INVERSE_OBJECT_PROPERTY_INCLUSION) {
                 AtomicRole sub=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                 AtomicRole sup=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
                 if (m_allRoles.contains(sub) && m_allRoles.contains(sup)) {

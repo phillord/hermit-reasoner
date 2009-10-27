@@ -22,6 +22,8 @@ import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.Variable;
+import org.semanticweb.HermiT.model.DLClause.ClauseType;
+import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.ExtensionManager;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
@@ -186,6 +188,9 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
             int invalidBlocks = 0;
             Node firstInvalidlyBlockedNode=null;
             
+            TableauMonitor monitor=m_tableau.getTableauMonitor();
+            if (monitor!=null) monitor.blockingValidationStarted();
+            
             Node node = m_lastValidatedUnchangedNode==null?m_tableau.getFirstTableauNode():m_lastValidatedUnchangedNode;
             Node firstValidatedNode=node;
             while (node!=null) {
@@ -238,6 +243,7 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
             }
             // if set to some node, then computePreblocking will be asked to check from that node onwards in case of invalid blocks 
             m_firstChangedNode=firstInvalidlyBlockedNode;
+            if (monitor!=null) monitor.blockingValidationFinished();
             //m_firstChangedNode=firstValidatedNode;
             //m_firstChangedNode=null;
             if (debuggingMode) System.out.println("Checked " + checkedBlocks + " blocked nodes of which " + invalidBlocks + " were invalid.");
@@ -689,7 +695,7 @@ public class AnywhereValidatedBlocking2 implements BlockingStrategy {
                 coreVariables[i]=false;
             }
         } else {
-            if (dlClause.isConceptInclusion() || dlClause.isRoleInclusion() || dlClause.isRoleInverseInclusion()) {
+            if (dlClause.m_clauseType!=ClauseType.CONCEPT_INCLUSION) {
                 for (int i=0;i<coreVariables.length;i++) {
                     coreVariables[i]=false;
                 }

@@ -22,6 +22,7 @@ import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.Variable;
+import org.semanticweb.HermiT.model.DLClause.ClauseType;
 
 public class MergeTest extends AbstractReasonerInternalsTest {
     protected static final AtomicConcept A=AtomicConcept.create("A");
@@ -35,7 +36,7 @@ public class MergeTest extends AbstractReasonerInternalsTest {
     static {
         Variable X=Variable.create("X");
         Variable Y=Variable.create("Y");
-        DLClause cl=DLClause.create(new Atom[] { Atom.create(EXISTS_NEG_A,X) },new Atom[] { Atom.create(R,X,Y),Atom.create(A,Y) });
+        DLClause cl=DLClause.create(new Atom[] { Atom.create(EXISTS_NEG_A,X) },new Atom[] { Atom.create(R,X,Y),Atom.create(A,Y) },ClauseType.CONCEPT_INCLUSION);
         Set<DLClause> dlClauses=Collections.singleton(cl);
         Set<Atom> atoms=Collections.emptySet();
         TEST_DL_ONTOLOGY = new DLOntology(

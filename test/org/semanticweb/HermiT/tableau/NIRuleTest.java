@@ -22,6 +22,7 @@ import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.NodeIDLessEqualThan;
 import org.semanticweb.HermiT.model.NodeIDsAscendingOrEqual;
 import org.semanticweb.HermiT.model.Variable;
+import org.semanticweb.HermiT.model.DLClause.ClauseType;
 
 public class NIRuleTest extends AbstractReasonerInternalsTest {
     protected static final AtomicConcept A=AtomicConcept.create("A");
@@ -45,11 +46,12 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         Set<DLClause> dlClauses=new HashSet<DLClause>();
         dlClauses.add(DLClause.create(
             new Atom[] { Atom.create(A,X), Atom.create(B,X) },
-            new Atom[] { Atom.create(B,X) }
+            new Atom[] { Atom.create(B,X) },ClauseType.CONCEPT_INCLUSION
         ));
         dlClauses.add(DLClause.create(
             new Atom[] { Atom.create(EQ_ONE_R_A,Y1,Y2,X) },
-            new Atom[] { Atom.create(AT_MOST_ONE_R_A,X),Atom.create(R,X,Y1),Atom.create(A,Y1),Atom.create(R,X,Y2),Atom.create(A,Y2) }
+            new Atom[] { Atom.create(AT_MOST_ONE_R_A,X),Atom.create(R,X,Y1),Atom.create(A,Y1),Atom.create(R,X,Y2),Atom.create(A,Y2) },
+            ClauseType.CONCEPT_INCLUSION
         ));
         dlClauses.add(DLClause.create(
             new Atom[] { Atom.create(EQ_TWO_R_A,Y1,Y2,X),Atom.create(EQ_TWO_R_A,Y2,Y3,X),Atom.create(EQ_TWO_R_A,Y1,Y3,X) },
@@ -59,7 +61,7 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
                          Atom.create(R,X,Y3),Atom.create(A,Y3),
                          Atom.create(NodeIDLessEqualThan.INSTANCE,Y1,Y2),Atom.create(NodeIDLessEqualThan.INSTANCE,Y2,Y3),
                          Atom.create(NodeIDsAscendingOrEqual.create(3),Y1,Y2,Y3)
-            }
+            }, ClauseType.CONCEPT_INCLUSION
         ));
         Set<Atom> atoms=Collections.emptySet();
         TEST_DL_ONTOLOGY = new DLOntology(
