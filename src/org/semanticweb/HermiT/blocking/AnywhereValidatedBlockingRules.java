@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.semanticweb.HermiT.blocking.ValidatedDirectBlockingChecker.ValidatedBlockingObject;
+import org.semanticweb.HermiT.blocking.ValidatedDirectBlockingChecker.ValidatedSingleBlockingObject;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
@@ -37,7 +37,7 @@ public class AnywhereValidatedBlockingRules implements BlockingStrategy {
     protected final DirectBlockingChecker m_directBlockingChecker;
     protected final ValidatedBlockersCache m_currentBlockersCache;
     protected final BlockingSignatureCache m_blockingSignatureCache;
-    protected BlockingValidator m_blockingValidator;
+    protected BlockingValidatorRules m_blockingValidator;
     protected Tableau m_tableau;
     protected Node m_firstChangedNode;
     protected Node m_lastValidatedUnchangedNode=null;
@@ -77,7 +77,7 @@ public class AnywhereValidatedBlockingRules implements BlockingStrategy {
     }
     public void initialize(Tableau tableau) {
         m_tableau=tableau;
-        m_blockingValidator=new BlockingValidator(m_tableau);
+        m_blockingValidator=new BlockingValidatorRules(m_tableau);
         m_directBlockingChecker.initialize(tableau);
         m_extensionManager=m_tableau.getExtensionManager();
         m_ternaryTableSearchZeroOneBound=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,true,false },ExtensionTable.View.TOTAL);
@@ -234,7 +234,7 @@ public class AnywhereValidatedBlockingRules implements BlockingStrategy {
         while (node!=null) {
             if (node.isActive()) {
                 m_directBlockingChecker.setHasChangedSinceValidation(node, false);
-                ValidatedBlockingObject blockingObject=(ValidatedBlockingObject)node.getBlockingObject();
+                ValidatedSingleBlockingObject blockingObject=(ValidatedSingleBlockingObject)node.getBlockingObject();
                 blockingObject.m_blockViolatesParentConstraints=false;
                 blockingObject.m_hasAlreadyBeenChecked=false;
             }
