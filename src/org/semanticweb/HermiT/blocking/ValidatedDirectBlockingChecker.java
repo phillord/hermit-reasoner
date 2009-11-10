@@ -39,11 +39,11 @@ public class ValidatedDirectBlockingChecker implements DirectBlockingChecker,Ser
             !blocker.isBlocked() &&
             blocker.getNodeType()==NodeType.TREE_NODE &&
             blocked.getNodeType()==NodeType.TREE_NODE &&
-            ((ValidatedBlockingObject)blocker.getBlockingObject()).getAtomicConceptsLabel()==((ValidatedBlockingObject)blocked.getBlockingObject()).getAtomicConceptsLabel();
+            ((ValidatedSingleBlockingObject)blocker.getBlockingObject()).getAtomicConceptsLabel()==((ValidatedSingleBlockingObject)blocked.getBlockingObject()).getAtomicConceptsLabel();
         return isBlockedBy;
     }
     public int blockingHashCode(Node node) {
-        return ((ValidatedBlockingObject)node.getBlockingObject()).m_blockingRelevantHashCode;
+        return ((ValidatedSingleBlockingObject)node.getBlockingObject()).m_blockingRelevantHashCode;
     }
     public boolean canBeBlocker(Node node) {
         return node.getNodeType()==NodeType.TREE_NODE;
@@ -52,31 +52,31 @@ public class ValidatedDirectBlockingChecker implements DirectBlockingChecker,Ser
         return node.getNodeType()==NodeType.TREE_NODE;
     }
     public boolean hasBlockingInfoChanged(Node node) {
-        return ((ValidatedBlockingObject)node.getBlockingObject()).m_hasChangedForBlocking;
+        return ((ValidatedSingleBlockingObject)node.getBlockingObject()).m_hasChangedForBlocking;
     }
     public void clearBlockingInfoChanged(Node node) {
-        ((ValidatedBlockingObject)node.getBlockingObject()).m_hasChangedForBlocking=false;
+        ((ValidatedSingleBlockingObject)node.getBlockingObject()).m_hasChangedForBlocking=false;
     }
     public boolean hasChangedSinceValidation(Node node) {
-        return ((ValidatedBlockingObject)node.getBlockingObject()).m_hasChangedForValidation;
+        return ((ValidatedSingleBlockingObject)node.getBlockingObject()).m_hasChangedForValidation;
     }
     public void setHasChangedSinceValidation(Node node, boolean hasChanged) {
-        ((ValidatedBlockingObject)node.getBlockingObject()).m_hasChangedForValidation=hasChanged;
+        ((ValidatedSingleBlockingObject)node.getBlockingObject()).m_hasChangedForValidation=hasChanged;
     }
     public void nodeInitialized(Node node) {
         if (node.getBlockingObject()==null)
-            node.setBlockingObject(new ValidatedBlockingObject(node));
-        ((ValidatedBlockingObject)node.getBlockingObject()).initialize();
+            node.setBlockingObject(new ValidatedSingleBlockingObject(node));
+        ((ValidatedSingleBlockingObject)node.getBlockingObject()).initialize();
     }
     public void nodeDestroyed(Node node) {
-        ((ValidatedBlockingObject)node.getBlockingObject()).destroy();
+        ((ValidatedSingleBlockingObject)node.getBlockingObject()).destroy();
     }
     public Node assertionAdded(Concept concept,Node node,boolean isCore) {
-        ((ValidatedBlockingObject)node.getBlockingObject()).addConcept(concept, isCore);
+        ((ValidatedSingleBlockingObject)node.getBlockingObject()).addConcept(concept, isCore);
         return (concept instanceof AtomicConcept && isCore)?node:null;
     }
     public Node assertionRemoved(Concept concept, Node node, boolean isCore) {
-        ((ValidatedBlockingObject) node.getBlockingObject()).removeConcept(concept, isCore);
+        ((ValidatedSingleBlockingObject) node.getBlockingObject()).removeConcept(concept, isCore);
         return (concept instanceof AtomicConcept && isCore)?node:null;
     }
     public Node assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
@@ -104,19 +104,19 @@ public class ValidatedDirectBlockingChecker implements DirectBlockingChecker,Ser
         return result;
     }
     public Set<AtomicConcept> getFullAtomicConceptsLabel(Node node) {
-        return ((ValidatedBlockingObject) node.getBlockingObject()).getFullAtomicConceptsLabel();
+        return ((ValidatedSingleBlockingObject) node.getBlockingObject()).getFullAtomicConceptsLabel();
     }
 
     public Set<AtomicRole> getFullToParentLabel(Node node) {
-        return ((ValidatedBlockingObject) node.getBlockingObject()).getFullToParentLabel();
+        return ((ValidatedSingleBlockingObject) node.getBlockingObject()).getFullToParentLabel();
     }
 
     public Set<AtomicRole> getFullFromParentLabel(Node node) {
-        return ((ValidatedBlockingObject) node.getBlockingObject()).getFullFromParentLabel();
+        return ((ValidatedSingleBlockingObject) node.getBlockingObject()).getFullFromParentLabel();
     }
 
     public Set<AtomicConcept> getBlockingRelevantConceptsLabel(Node node) {
-        return ((ValidatedBlockingObject) node.getBlockingObject()).getAtomicConceptsLabel();
+        return ((ValidatedSingleBlockingObject) node.getBlockingObject()).getAtomicConceptsLabel();
     }
 
     protected Set<AtomicRole> fetchAtomicRolesLabel(Node nodeFrom,Node nodeTo,boolean onlyCore) {
@@ -140,10 +140,7 @@ public class ValidatedDirectBlockingChecker implements DirectBlockingChecker,Ser
     public BlockingSignature getBlockingSignatureFor(Node node) {
         return new ValidatedBlockingSignature(this,node);
     }
-
-    protected final class ValidatedBlockingObject implements Serializable {
-        private static final long serialVersionUID=-5439737072100509531L;
-        
+    public class ValidatedSingleBlockingObject implements ValidatedBlockingObject {
         protected final Node m_node;
         protected boolean m_hasChangedForBlocking;
         protected boolean m_hasChangedForValidation;
@@ -155,7 +152,7 @@ public class ValidatedDirectBlockingChecker implements DirectBlockingChecker,Ser
         public boolean m_blockViolatesParentConstraints=false;
         public boolean m_hasAlreadyBeenChecked=false;
         
-        public ValidatedBlockingObject(Node node) {
+        public ValidatedSingleBlockingObject(Node node) {
             m_node=node;
         }
         public void initialize() {
@@ -187,6 +184,7 @@ public class ValidatedDirectBlockingChecker implements DirectBlockingChecker,Ser
         }
         public Set<AtomicConcept> getAtomicConceptsLabel() {
             if (m_blockingRelevantLabel==null) {
+                m_blockingRelevantLabel=ValidatedDirectBlockingChecker.this.fetchAtomicConceptsLabel(m_node,true);
                 m_blockingRelevantLabel=ValidatedDirectBlockingChecker.this.fetchAtomicConceptsLabel(m_node,true);
                 m_atomicConceptsSetFactory.addReference(m_blockingRelevantLabel);
             }
@@ -255,6 +253,18 @@ public class ValidatedDirectBlockingChecker implements DirectBlockingChecker,Ser
             }
             return m_fullToParentLabel;
         }
+        public void setBlockViolatesParentConstraints(boolean violates) {
+            m_blockViolatesParentConstraints=violates;
+        }
+        public void setHasAlreadyBeenChecked(boolean hasBeenChecked) {
+            m_hasAlreadyBeenChecked=hasBeenChecked;
+        }
+        public boolean hasAlreadyBeenChecked() {
+            return m_hasAlreadyBeenChecked;
+        }
+        public boolean blockViolatesParentConstraints() {
+            return m_blockViolatesParentConstraints;
+        }
     }
     
     protected static class ValidatedBlockingSignature extends BlockingSignature {
@@ -266,10 +276,10 @@ public class ValidatedDirectBlockingChecker implements DirectBlockingChecker,Ser
         protected final int m_hashCode;
       
         public ValidatedBlockingSignature(ValidatedDirectBlockingChecker checker,Node node) {
-            ValidatedBlockingObject nodeBlockingObject=(ValidatedBlockingObject)node.getBlockingObject();
+            ValidatedSingleBlockingObject nodeBlockingObject=(ValidatedSingleBlockingObject)node.getBlockingObject();
             m_blockingRelevantConceptsLabel=nodeBlockingObject.getAtomicConceptsLabel();
             m_fullAtomicConceptsLabel=nodeBlockingObject.getFullAtomicConceptsLabel();
-            m_parentFullAtomicConceptsLabel=((ValidatedBlockingObject)node.getParent().getBlockingObject()).getFullAtomicConceptsLabel();
+            m_parentFullAtomicConceptsLabel=((ValidatedSingleBlockingObject)node.getParent().getBlockingObject()).getFullAtomicConceptsLabel();
             m_fromParentLabel=nodeBlockingObject.getFullFromParentLabel();
             m_toParentLabel=nodeBlockingObject.getFullToParentLabel();
             m_hashCode=m_blockingRelevantConceptsLabel.hashCode();
@@ -279,7 +289,7 @@ public class ValidatedDirectBlockingChecker implements DirectBlockingChecker,Ser
             checker.m_atomicRolesSetFactory.makePermanent(m_toParentLabel);
         }
         public boolean blocksNode(Node node) {
-            ValidatedBlockingObject nodeBlockingObject = (ValidatedBlockingObject) node.getBlockingObject();
+            ValidatedSingleBlockingObject nodeBlockingObject = (ValidatedSingleBlockingObject) node.getBlockingObject();
             return nodeBlockingObject.getAtomicConceptsLabel() == m_blockingRelevantConceptsLabel;
         }
         public int hashCode() {
@@ -298,5 +308,19 @@ public class ValidatedDirectBlockingChecker implements DirectBlockingChecker,Ser
                 m_fromParentLabel==thatSignature.m_fromParentLabel &&
                 m_toParentLabel==thatSignature.m_toParentLabel;
         }
+    }
+    public static interface ValidatedBlockingObject {
+        public void initialize();
+        public void destroy();
+        public Set<AtomicConcept> getAtomicConceptsLabel();
+        public void addConcept(Concept concept, boolean isCore);
+        public void removeConcept(Concept concept, boolean isCore);
+        public Set<AtomicConcept> getFullAtomicConceptsLabel();
+        public Set<AtomicRole> getFullFromParentLabel();
+        public Set<AtomicRole> getFullToParentLabel();
+        public void setBlockViolatesParentConstraints(boolean violates);
+        public void setHasAlreadyBeenChecked(boolean hasBeenChecked);
+        public boolean hasAlreadyBeenChecked();
+        public boolean blockViolatesParentConstraints();
     }
 }
