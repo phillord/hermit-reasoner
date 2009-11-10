@@ -8,12 +8,12 @@ import org.semanticweb.HermiT.model.InterningManager;
 import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.model.Role;
 
-public class AtMostConjunctionConcept extends Concept implements DLPredicate {
+public class AtMostDisjunctionConcept extends Concept implements DLPredicate {
     private static final long serialVersionUID = 1125030135583676765L;
     protected final Role m_onRole;
     protected final AtomicConcept[] m_toConcepts;
     
-    protected AtMostConjunctionConcept(Role onRole,AtomicConcept[] toConcepts) {
+    protected AtMostDisjunctionConcept(Role onRole,AtomicConcept[] toConcepts) {
         m_onRole=onRole;
         m_toConcepts=toConcepts;
     }
@@ -30,7 +30,7 @@ public class AtMostConjunctionConcept extends Concept implements DLPredicate {
         return false;
     }
     public boolean isAlwaysFalse() {
-        for (AtomicConcept c : m_toConcepts) {
+        for (LiteralConcept c : m_toConcepts) {
             if (!c.isAlwaysFalse()) return false;
         }
         return true;
@@ -39,8 +39,8 @@ public class AtMostConjunctionConcept extends Concept implements DLPredicate {
         String s="atMost 0 ("+m_onRole.toString(prefixes)+' ';
         boolean first=true; 
         for (LiteralConcept c : m_toConcepts) {
-            if (!first) s+=" /\\ ";
-            s+="not("+c.toString(prefixes)+")";
+            if (!first) s+=" \\/ ";
+            s+=c.toString(prefixes);
             first=false;
         }
         s+=')';
@@ -50,8 +50,8 @@ public class AtMostConjunctionConcept extends Concept implements DLPredicate {
         return s_interningManager.intern(this);
     }
 
-    protected static InterningManager<AtMostConjunctionConcept> s_interningManager=new InterningManager<AtMostConjunctionConcept>() {
-        protected boolean equal(AtMostConjunctionConcept object1,AtMostConjunctionConcept object2) {
+    protected static InterningManager<AtMostDisjunctionConcept> s_interningManager=new InterningManager<AtMostDisjunctionConcept>() {
+        protected boolean equal(AtMostDisjunctionConcept object1,AtMostDisjunctionConcept object2) {
             if (object1.m_onRole!=object2.m_onRole || object1.m_toConcepts.length!=object2.m_toConcepts.length) return false;
             if (object1.m_toConcepts.length==1 && object2.m_toConcepts.length==1) 
                 return object1.m_toConcepts[0]==object2.m_toConcepts[0];
@@ -63,12 +63,12 @@ public class AtMostConjunctionConcept extends Concept implements DLPredicate {
             }
             return true;
         }
-        protected int getHashCode(AtMostConjunctionConcept object) {
+        protected int getHashCode(AtMostDisjunctionConcept object) {
             return (object.m_onRole.hashCode())*13+object.m_toConcepts.hashCode();
         }
     };
     
-    public static AtMostConjunctionConcept create(Role onRole,AtomicConcept[] toConcepts) {
-        return s_interningManager.intern(new AtMostConjunctionConcept(onRole,toConcepts));
+    public static AtMostDisjunctionConcept create(Role onRole,AtomicConcept[] toConcepts) {
+        return s_interningManager.intern(new AtMostDisjunctionConcept(onRole,toConcepts));
     }
 }

@@ -17,6 +17,7 @@ import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.blocking.core.AtMostConcept;
 import org.semanticweb.HermiT.blocking.core.AtMostConjunctionConcept;
+import org.semanticweb.HermiT.blocking.core.AtMostDisjunctionConcept;
 import org.semanticweb.HermiT.datatypes.DatatypeRegistry;
 import org.semanticweb.HermiT.datatypes.UnsupportedDatatypeException;
 import org.semanticweb.HermiT.model.AnnotatedEquality;
@@ -434,20 +435,34 @@ public class OWLClausification {
                         if (nonNegated.isAnonymous()) {
                             // negated nominal concept
                             OWLObjectOneOf oneOf=(OWLObjectOneOf)nonNegated;
-                            if (oneOf.getIndividuals().size()>1) throw new IllegalArgumentException("Core blocking is not compatible with non-singleton nominal sets. ");
-                            conclusions.add(AtMostConcept.create(0, r, getNominalConcept(oneOf.getIndividuals().iterator().next())));
+                            if (oneOf.getIndividuals().size()>1) {
+                                AtomicConcept[] nominalConcepts=new AtomicConcept[oneOf.getIndividuals().size()];
+                                int index=0;
+                                for (OWLIndividual o : oneOf.getIndividuals()) {
+                                    // split the one of into several existentials in case it is not a singleton set
+                                    nominalConcepts[i]=getNominalConcept(o);
+                                    index++;
+                                }
+                                foundRelevantConcept=false; // only relevant in conjunction with other relevant concepts since normally nominal nodes are not blocked
+                                conclusions.add(AtMostDisjunctionConcept.create(r, nominalConcepts));
+                            } else {
+                                conclusions.add(AtMostConcept.create(0, r, getNominalConcept(oneOf.getIndividuals().iterator().next())));
+                            }
                         } else {
                             conclusions.add(AtMostConcept.create(0, r, AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString())));
                         }
                     } else {
                         if (all.getFiller().isAnonymous()) {
-                            // nominal
+                            // nominals
                             OWLObjectOneOf oneOf=(OWLObjectOneOf)all.getFiller();
-                            Set<AtomicNegationConcept> nominalConcepts=new HashSet<AtomicNegationConcept>();
+                            AtomicConcept[] nominalConcepts=new AtomicConcept[oneOf.getIndividuals().size()];
+                            int index=0;
                             for (OWLIndividual o : oneOf.getIndividuals()) {
                                 // split the one of into several existentials in case it is not a singleton set
-                                nominalConcepts.add(AtomicNegationConcept.create(getNominalConcept(o)));
+                                nominalConcepts[i]=getNominalConcept(o);
+                                index++;
                             }
+                            foundRelevantConcept=false; // only relevant in conjunction with other relevant concepts since normally nominal nodes are not blocked
                             conclusions.add(AtMostConjunctionConcept.create(r, nominalConcepts));
                         } else {
                             conclusions.add(AtMostConcept.create(0, r, AtomicNegationConcept.create(AtomicConcept.create(all.getFiller().asOWLClass().getIRI().toString()))));
@@ -463,14 +478,8 @@ public class OWLClausification {
                     // since the axioms are normalised, the filler is a literal
                     if (some.getFiller() instanceof OWLObjectComplementOf) {
                         OWLClassExpression nonNegated = ((OWLObjectComplementOf) some.getFiller()).getOperand();
-                        if (nonNegated.isAnonymous()) {
-                            // negated nominal concept
-                            OWLObjectOneOf oneOf=(OWLObjectOneOf)nonNegated;
-                            if (oneOf.getIndividuals().size()>1) throw new IllegalArgumentException("Core blocking is not compatible with non-singleton nominal sets. ");
-                            c=AtomicNegationConcept.create(getNominalConcept(oneOf.getIndividuals().iterator().next()));
-                        } else {
-                            c=AtomicNegationConcept.create(AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString()));
-                        }
+                        assert !nonNegated.isAnonymous();
+                        c=AtomicNegationConcept.create(AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString()));
                     } else {
                         if (some.getFiller().isAnonymous()) {
                             // nominal
@@ -495,23 +504,11 @@ public class OWLClausification {
                     // since the axioms are normalised, the filler is a literal
                     if (min.getFiller() instanceof OWLObjectComplementOf) {
                         OWLClassExpression nonNegated = ((OWLObjectComplementOf) min.getFiller()).getOperand();
-                        if (nonNegated.isAnonymous()) {
-                            // negated nominal concept
-                            OWLObjectOneOf oneOf=(OWLObjectOneOf)nonNegated;
-                            if (oneOf.getIndividuals().size()>1) throw new IllegalArgumentException("Core blocking is not compatible with non-singleton nominal sets. ");
-                            c=AtomicNegationConcept.create(getNominalConcept(oneOf.getIndividuals().iterator().next()));
-                        } else {
-                            c=AtomicNegationConcept.create(AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString()));
-                        }
+                        assert !nonNegated.isAnonymous();
+                        c=AtomicNegationConcept.create(AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString()));
                     } else {
-                        if (min.getFiller().isAnonymous()) {
-                            // nominal
-                            OWLObjectOneOf oneOf=(OWLObjectOneOf)min.getFiller();
-                            if (oneOf.getIndividuals().size()>1) throw new IllegalArgumentException("Core blocking is not compatible with non-singleton nominal sets. ");
-                            c=getNominalConcept(oneOf.getIndividuals().iterator().next());
-                        } else {
-                            c=AtomicConcept.create(min.getFiller().asOWLClass().getIRI().toString());
-                        }
+                        assert !min.getFiller().isAnonymous();
+                        c=AtomicConcept.create(min.getFiller().asOWLClass().getIRI().toString());
                     }
                     conclusions.add(AtLeastConcept.create(min.getCardinality(), r, c));
                 } else if (desc instanceof OWLObjectMaxCardinality) {
