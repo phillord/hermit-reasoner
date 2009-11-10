@@ -25,16 +25,17 @@ import java.util.Set;
 import org.protege.editor.owl.model.inference.ProtegeOWLReasonerFactoryAdapter;
 import org.semanticweb.HermiT.Configuration.BlockingStrategyType;
 import org.semanticweb.HermiT.Configuration.CoreType;
+import org.semanticweb.HermiT.Configuration.DirectBlockingType;
 import org.semanticweb.HermiT.blocking.AncestorBlocking;
 import org.semanticweb.HermiT.blocking.AnywhereBlocking;
 import org.semanticweb.HermiT.blocking.AnywhereValidatedBlocking;
-import org.semanticweb.HermiT.blocking.AnywhereValidatedBlockingRules;
 import org.semanticweb.HermiT.blocking.BlockingSignatureCache;
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.blocking.DirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.SingleDirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.ValidatedDirectBlockingChecker;
+import org.semanticweb.HermiT.blocking.ValidatedPairwiseBlockingChecker;
 import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
 import org.semanticweb.HermiT.existentials.ExistentialExpansionStrategy;
@@ -1556,7 +1557,11 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
 
         DirectBlockingChecker directBlockingChecker=null;
         if (config.blockingStrategyType==BlockingStrategyType.VALIDATED || config.blockingStrategyType==BlockingStrategyType.VALIDATED_RULES) {
-            directBlockingChecker=new ValidatedDirectBlockingChecker();
+            if (config.directBlockingType==DirectBlockingType.PAIR_WISE) {
+                directBlockingChecker=new ValidatedPairwiseBlockingChecker();
+            } else {
+                directBlockingChecker=new ValidatedDirectBlockingChecker();
+            }
         } else {
             switch (config.directBlockingType) {
             case OPTIMAL:
@@ -1593,10 +1598,10 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         BlockingStrategy blockingStrategy=null;
         switch (config.blockingStrategyType) {
         case VALIDATED:
-            blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,blockingSignatureCache,dlOntology.getUnaryValidBlockConditions(),dlOntology.getNAryValidBlockConditions(),dlOntology.hasInverseRoles(),config.coreType==CoreType.SINGLETON);
+            blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,blockingSignatureCache,dlOntology.getUnaryValidBlockConditions(),dlOntology.getNAryValidBlockConditions(),dlOntology.hasInverseRoles(),config.coreType==CoreType.SINGLETON,false);
             break;
         case VALIDATED_RULES:
-            blockingStrategy=new AnywhereValidatedBlockingRules(directBlockingChecker,blockingSignatureCache,dlOntology.hasInverseRoles(),config.coreType==CoreType.SINGLETON);
+            blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,blockingSignatureCache,null,null,dlOntology.hasInverseRoles(),config.coreType==CoreType.SINGLETON,true);
             break;
         case ANCESTOR:
             blockingStrategy=new AncestorBlocking(directBlockingChecker,blockingSignatureCache);
@@ -1966,6 +1971,7 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
             // ignore the given manager
             Configuration configuration=new Configuration();
             configuration.ignoreUnsupportedDatatypes=true;
+            //configuration.tableauMonitorType=TableauMonitorType.TIMING;
             Reasoner hermit=new Reasoner(configuration) {
                 protected Set<OWLOntology> m_loadedOntologies;
                 
