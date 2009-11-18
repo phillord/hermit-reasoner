@@ -2,19 +2,35 @@ package org.semanticweb.HermiT.reasoner;
 
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Configuration.BlockingSignatureCacheType;
+import org.semanticweb.HermiT.Configuration.BlockingStrategyType;
+import org.semanticweb.HermiT.Configuration.CoreType;
+import org.semanticweb.HermiT.Configuration.DirectBlockingType;
+
+
 
 public class ReasonerCoreBlockingTest extends ReasonerTest {
 
     public ReasonerCoreBlockingTest(String name) {
         super(name);
     }
+    public void testExpansion() throws Exception {
+        String axioms = "SubClassOf(:B ObjectSomeValuesFrom(:r :D)) "
+          + "SubClassOf(owl:Thing ObjectMaxCardinality(1 :r :C))"
+          + "SubClassOf(:D :C)"
+          + "SubClassOf(:A ObjectSomeValuesFrom(ObjectInverseOf(:r) :B))"
+          + "ClassAssertion(:C :a)"
+          + "ClassAssertion(:A :a)";
+      loadReasonerWithAxioms(axioms);
+      assertABoxSatisfiable(true);
+    }
     protected Configuration getConfiguration() {
         Configuration c=new Configuration();
 //        c.existentialStrategyType=Configuration.ExistentialStrategyType.LAZY;
 //        c.blockingStrategyType=Configuration.BlockingStrategyType.CORE;
-        c.blockingStrategyType=Configuration.BlockingStrategyType.VALIDATED_RULES;
+        c.blockingStrategyType=BlockingStrategyType.VALIDATED_RULES;
+        c.coreType=CoreType.IGNORE_UPWARDS_PROPAGATED;
+        c.directBlockingType=DirectBlockingType.SINGLE;
         c.blockingSignatureCacheType=BlockingSignatureCacheType.NOT_CACHED;
-        //c.coreType=CoreType.SINGLETON;
         //c.tableauMonitorType=TableauMonitorType.DEBUGGER_HISTORY_ON;
         return c;
     }

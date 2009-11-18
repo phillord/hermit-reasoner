@@ -38,12 +38,24 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
     protected final boolean m_validateViaRuleApplicability;
     
     // statistics: 
-    protected int numDirectlyBlocked=0;
-    protected int numIndirectlyBlocked=0;
     protected final boolean debuggingMode=false;
-    protected int numberOfValidationsForThisModel;
-    protected boolean plotting=false;
+    protected final boolean m_generateValidationStatistics=true;
+    public List<Integer> numNodes=new ArrayList<Integer>();
+    public List<Integer> numBlocked=new ArrayList<Integer>();
+    public List<Integer> numInvalidlyBlocked=new ArrayList<Integer>();
     
+    public int[][] getValidationStatistics() {
+        int[][] validationStatistics=new int[3][];
+        validationStatistics[0]=new int[numNodes.size()];
+        validationStatistics[1]=new int[numNodes.size()];
+        validationStatistics[2]=new int[numNodes.size()];
+        for (int i=0;i<numNodes.size();i++) {
+            validationStatistics[0][i]=numNodes.get(i);
+            validationStatistics[1][i]=numBlocked.get(i);
+            validationStatistics[2][i]=numInvalidlyBlocked.get(i);
+        }
+        return validationStatistics;
+    }
     public AnywhereValidatedBlocking(DirectBlockingChecker directBlockingChecker,BlockingSignatureCache blockingSignatureCache,Map<AtomicConcept, Set<Set<Concept>>> unaryValidBlockConditions, Map<Set<AtomicConcept>, Set<Set<Concept>>> nAryValidBlockConditions, boolean hasInverses,boolean useSingletonCore,boolean validateViaRuleApplicability) {
         m_directBlockingChecker=directBlockingChecker;
         m_currentBlockersCache=new ValidatedBlockersCache(m_directBlockingChecker);
@@ -64,14 +76,15 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
             m_blockingValidator=new BlockingValidatorConstraints(m_tableau,m_directBlockingChecker,m_unaryValidBlockConditions,m_nAryValidBlockConditions,m_hasInverses);
            // m_blockingValidatorRules=new BlockingValidatorRules(m_tableau);
         }
-        numberOfValidationsForThisModel=0;
     }
     public void clear() {
         m_currentBlockersCache.clear();
         m_firstChangedNode=null;
         m_directBlockingChecker.clear();
         m_lastValidatedUnchangedNode=null;
-        numberOfValidationsForThisModel=0;
+        numNodes.clear();
+        numBlocked.clear();
+        numInvalidlyBlocked.clear();
     }
     public void computeBlocking(boolean finalChance) {
         if (finalChance) {
@@ -91,9 +104,8 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
             boolean checkBlockingSignatureCache=(m_blockingSignatureCache!=null && !m_blockingSignatureCache.isEmpty());
             while (node!=null) {
                 if (node.isActive()) {
-                    if (node.hasUnprocessedExistentials() 
-                                && (m_directBlockingChecker.canBeBlocked(node)) 
-                                && (m_directBlockingChecker.hasBlockingInfoChanged(node) || !node.isDirectlyBlocked() || node.getBlocker().getNodeID()>=m_firstChangedNode.getNodeID())) {
+                    if (m_directBlockingChecker.canBeBlocked(node)
+                            && (m_directBlockingChecker.hasBlockingInfoChanged(node) || !node.isDirectlyBlocked() || node.getBlocker().getNodeID()>=m_firstChangedNode.getNodeID())) {
                         Node parent=node.getParent();
                         if (parent==null)
                             node.setBlocked(null,false);
@@ -147,14 +159,11 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
         }
     }
     public void validateBlocks() {
-        // after first complete validation, we can switch to only checking block validity immediately
-
         // statistics:
-        int checkedBlocks = 0;
-        int invalidBlocks = 0;
-        numberOfValidationsForThisModel++;
-        Node firstInvalidlyBlockedNode=null;
+        int checkedBlocks=0;
+        int invalidBlocks=0;
         
+        Node firstInvalidlyBlockedNode=null;
         TableauMonitor monitor=m_tableau.getTableauMonitor();
         if (monitor!=null) monitor.blockingValidationStarted();
         
@@ -171,51 +180,36 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
                 if (node.isBlocked()) {
                     checkedBlocks++;
                     // check whether the block is a correct one
-                    Node validBlocker;
-                    if (node.isDirectlyBlocked() || !node.getParent().isBlocked()) {
-                        if (m_directBlockingChecker.hasChangedSinceValidation(node) || m_directBlockingChecker.hasChangedSinceValidation(node.getParent()) || m_directBlockingChecker.hasChangedSinceValidation(node.getBlocker()) || m_directBlockingChecker.hasChangedSinceValidation(node.getBlocker().getParent())) {
-                            List<Node> possibleBlockers = m_currentBlockersCache.getPossibleBlockers(node);
-                            validBlocker=null;
-                            if (!possibleBlockers.isEmpty()) {
-                                int i=0;
-                                if (node.getBlocker()!=null && possibleBlockers.contains(node.getBlocker())) {
-                                    // we always assign the smallest node that has been modified since the last validation
-                                    // re-testing smaller (unmodified) ones makes no sense 
-                                    i=possibleBlockers.indexOf(node.getBlocker());
-                                } else {
-                                    // we have to try a completely new blocker
+                    if ((node.isDirectlyBlocked()&&(m_directBlockingChecker.hasChangedSinceValidation(node) || m_directBlockingChecker.hasChangedSinceValidation(node.getParent()) || m_directBlockingChecker.hasChangedSinceValidation(node.getBlocker()) || m_directBlockingChecker.hasChangedSinceValidation(node.getBlocker().getParent()))) 
+                            || !node.getParent().isBlocked()) {
+                        Node validBlocker;
+                        List<Node> possibleBlockers = m_currentBlockersCache.getPossibleBlockers(node);
+                        validBlocker=null;
+                        if (!possibleBlockers.isEmpty()) {
+                            int i=0;
+                            if (node.getBlocker()!=null && possibleBlockers.contains(node.getBlocker())) {
+                                // we always assign the smallest node that has been modified since the last validation
+                                // re-testing smaller (unmodified) ones makes no sense 
+                                i=possibleBlockers.indexOf(node.getBlocker());
+                            } else {
+                                // we have to try a completely new blocker
+                                m_blockingValidator.blockerChanged(node);
+                            }
+                            for (; i<possibleBlockers.size(); i++) {
+                                Node blocker=possibleBlockers.get(i);
+                                node.setBlocked(blocker,true);
+                                if (m_blockingValidator.isBlockValid(node)) {
+                                    validBlocker=blocker;
+                                    break;
+                                } else 
                                     m_blockingValidator.blockerChanged(node);
-                                    //m_blockingValidatorRules.blockerChanged(node);
-                                }
-                                for (; i<possibleBlockers.size(); i++) {
-                                    Node blocker=possibleBlockers.get(i);
-                                    node.setBlocked(blocker,true);
-                                    //boolean isValidRules=m_blockingValidatorRules.isBlockValid(node);
-                                    if (m_blockingValidator.isBlockValid(node)) {
-//                                        if (!isValidRules) {
-//                                            System.out.println("rules false, constraints true");
-//                                            ((BlockingValidatorRules)m_blockingValidatorRules).resetChildFlags(node.getParent());
-//                                            ((ValidatedBlockingObject)node.getParent().getBlockingObject()).m_hasAlreadyBeenChecked=false;
-//                                            m_blockingValidatorRules.isBlockValid(node);
-//                                            m_blockingValidator.isBlockValid(node);
-//                                        }
-                                        validBlocker=blocker;
-                                        break;
-                                    } else {
-//                                        if (isValidRules) {
-//                                            System.out.println("rules true, constraints false");
-//                                        }
-                                        m_blockingValidator.blockerChanged(node);
-//                                        m_blockingValidatorRules.blockerChanged(node);
-                                    }
-                                }
                             }
-                            if (validBlocker == null) {
-                                invalidBlocks++;
-                                if (firstInvalidlyBlockedNode==null) firstInvalidlyBlockedNode=node;
-                            }
-                            node.setBlocked(validBlocker,validBlocker!=null);
-                        } 
+                        }
+                        if (validBlocker==null && node.hasUnprocessedExistentials()) {
+                            invalidBlocks++;
+                            if (firstInvalidlyBlockedNode==null) firstInvalidlyBlockedNode=node;
+                        }
+                        node.setBlocked(validBlocker,validBlocker!=null); 
                     }
                 }
                 m_lastValidatedUnchangedNode=node;
@@ -226,9 +220,25 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
             node=node.getNextTableauNode();
         } 
         if (debuggingMode) System.out.println("");
-        if (plotting) {
-            System.out.println(numberOfValidationsForThisModel+" "+invalidBlocks+" i"); 
+        
+        if (m_generateValidationStatistics) {
+            int nodes=0;
+            int blockedNodes=0;
+            node=m_tableau.getFirstTableauNode();
+            while (node!=null) {
+                if (node.isActive()) {
+                    nodes++;
+                    if (node.isBlocked()) {
+                        blockedNodes++;
+                    }
+                }
+                node=node.getNextTableauNode();
+            }
+            numNodes.add(nodes);
+            numBlocked.add(blockedNodes);
+            numInvalidlyBlocked.add(invalidBlocks);
         }
+        
         node=firstValidatedNode;
         while (node!=null) {
             if (node.isActive()) {
@@ -364,19 +374,18 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
                 coreVariables[i]=false;
             }
         } else {
-            if (dlClause.m_clauseType!=ClauseType.CONCEPT_INCLUSION) {
+            if (dlClause.getHeadLength()==0) return;
+            if (dlClause.getHeadLength() > 1) {
+                for (int i=0;i<coreVariables.length;i++) {
+                    coreVariables[i]=true;
+                }
+            } else {
                 for (int i=0;i<coreVariables.length;i++) {
                     coreVariables[i]=false;
                 }
-                return;
-            }
-            if (dlClause.getHeadLength() > 2) {
-                // in case of a disjunction, there is nothing to compute, the choice must go into the core
-                // I assume that disjunctions are always only for the centre variable X and I assume that X is the first
-                // variable in the array ???
-                coreVariables[0] = true;
-            } else {
-                workers.add(new ComputeCoreVariables(dlClause,valuesBuffer,coreVariables));
+                if (dlClause.m_clauseType==ClauseType.CONCEPT_INCLUSION && variables.size() > 1) {
+                    workers.add(new ComputeCoreVariables2(dlClause,variables,valuesBuffer,coreVariables));
+                }
             }
         }
     }
@@ -444,6 +453,42 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
 //            }
 //            return programCounter+1;
 //        }
+        public String toString() {
+            return "Compute core variables";
+        }
+    }
+    protected static final class ComputeCoreVariables2 implements DLClauseEvaluator.Worker,Serializable {
+        private static final long serialVersionUID=899293772370136783L;
+
+        protected final DLClause m_dlClause;
+        protected final List<Variable> m_variables;
+        protected final Object[] m_valuesBuffer;
+        protected final boolean[] m_coreVariables;
+
+        public ComputeCoreVariables2(DLClause dlClause,List<Variable> variables,Object[] valuesBuffer,boolean[] coreVariables) {
+            m_dlClause=dlClause;
+            m_variables=variables;
+            m_valuesBuffer=valuesBuffer;
+            m_coreVariables=coreVariables;
+        }
+        public int execute(int programCounter) {  
+            Node potentialNonCore=null;
+            // find the root of the subtree induced by the mapped nodes that node cannot be core
+            for (int variableIndex=m_coreVariables.length-1;variableIndex>=0;--variableIndex) {
+                Node node=(Node)m_valuesBuffer[variableIndex];
+                if (node.getNodeType()==NodeType.TREE_NODE && (potentialNonCore==null || node.getTreeDepth()<potentialNonCore.getTreeDepth())) {
+                    potentialNonCore=node;
+                }
+            }
+            if (potentialNonCore!=null) {
+                for (int variableIndex=m_coreVariables.length-1;variableIndex>=0;--variableIndex) {
+                    Node node=(Node)m_valuesBuffer[variableIndex];
+                    if (!node.isRootNode() && potentialNonCore!=node && potentialNonCore.getTreeDepth()<node.getTreeDepth())
+                        m_coreVariables[variableIndex]=true;
+                }
+            }
+            return programCounter+1;
+        }
         public String toString() {
             return "Compute core variables";
         }
@@ -587,11 +632,8 @@ class ValidatedBlockersCache {
             CacheEntry entry=m_buckets[bucketIndex];
             while (entry!=null) {
                 if (hashCode==entry.m_hashCode && m_directBlockingChecker.isBlockedBy(entry.m_nodes.get(0),node)) {
-                    if (entry.m_nodes.contains(node)) { 
-                        throw new IllegalStateException("Internal error: We try to block a node that is in the blockers cache. ");
-                    } else {
-                        return entry.m_nodes;
-                    }
+                    assert !entry.m_nodes.contains(node); // we try to block a node that is in the cache
+                    return entry.m_nodes;
                 }
                 entry=entry.m_nextEntry;
             }

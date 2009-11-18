@@ -189,6 +189,8 @@ public class ValidatedPairwiseBlockingChecker implements DirectBlockingChecker,S
                 m_atomicRolesSetFactory.removeReference(m_fullToParentLabel);
                 m_fullToParentLabel=null;
             }
+            m_hasChangedForBlocking=true;
+            m_hasChangedForValidation=true;
         }
         public Set<AtomicConcept> getAtomicConceptsLabel() {
             if (m_blockingRelevantLabel==null) {

@@ -244,4 +244,8 @@ public abstract class AbstractExpansionStrategy implements Serializable,Existent
      * This method performs the actual expansion.
      */
     protected abstract void expandExistential(AtLeastConcept atLeastConcept,Node forNode);
+    
+    public BlockingStrategy getBlockingStrategy() {
+        return m_blockingStrategy;
+    }
 }

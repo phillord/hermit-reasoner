@@ -3,6 +3,7 @@ package org.semanticweb.HermiT.existentials;
 
 import java.util.List;
 
+import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
@@ -37,4 +38,5 @@ public interface ExistentialExpansionStrategy {
     boolean isDeterministic();
     boolean isExact();
     void dlClauseBodyCompiled(List<DLClauseEvaluator.Worker> workers,DLClause dlClause,List<Variable> variables,Object[] valuesBuffer,boolean[] coreVariables);
+    BlockingStrategy getBlockingStrategy();
 }
