@@ -29,6 +29,8 @@ public interface ExistentialExpansionStrategy {
     void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore);
     void assertionCoreSet(AtomicRole atomicRole,Node nodeFrom,Node nodeTo);
     void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore);
+    void nodesMerged(Node mergeFrom,Node mergeInto);
+    void nodesUnmerged(Node mergeFrom,Node mergeInto);
     void nodeStatusChanged(Node node);
     void nodeInitialized(Node node);
     void nodeDestroyed(Node node);

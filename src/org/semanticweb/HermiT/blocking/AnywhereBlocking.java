@@ -87,6 +87,12 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
     public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         updateNodeChange(m_directBlockingChecker.assertionAdded(atomicRole,nodeFrom,nodeTo,isCore));
     }
+    public void nodesMerged(Node mergeFrom,Node mergeInto) {
+        updateNodeChange(m_directBlockingChecker.nodesMerged(mergeFrom,mergeInto));
+    }
+    public void nodesUnmerged(Node mergeFrom,Node mergeInto) {
+        updateNodeChange(m_directBlockingChecker.nodesUnmerged(mergeFrom,mergeInto));
+    }
     public void assertionCoreSet(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
     }
     public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {

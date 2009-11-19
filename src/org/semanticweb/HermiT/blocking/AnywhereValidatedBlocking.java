@@ -296,6 +296,12 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
         validationInfoChanged(nodeFrom);
         validationInfoChanged(nodeTo);
     }
+    public void nodesMerged(Node mergeFrom,Node mergeInto) {
+        // TODO: Implement me!
+    }
+    public void nodesUnmerged(Node mergeFrom,Node mergeInto) {
+        // TODO: Implement me!
+    }
     public void nodeStatusChanged(Node node) {
         updateNodeChange(node);
     }

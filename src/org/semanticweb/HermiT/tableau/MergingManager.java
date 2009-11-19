@@ -161,6 +161,7 @@ public final class MergingManager implements Serializable {
             m_tableau.m_descriptionGraphManager.mergeGraphs(mergeFrom,mergeInto,m_binaryUnionDependencySet);
             // Now finally merge the nodes
             m_tableau.mergeNode(mergeFrom,mergeInto,dependencySet);
+            // Inform the monitor
             if (m_tableauMonitor!=null)
                 m_tableauMonitor.mergeFinished(mergeFrom,mergeInto);
             return true;

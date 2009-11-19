@@ -85,6 +85,12 @@ public class ValidatedDirectBlockingChecker implements DirectBlockingChecker,Ser
     public Node assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         return null;
     }
+    public Node nodesMerged(Node mergeFrom,Node mergeInto) {
+        return null;
+    }
+    public Node nodesUnmerged(Node mergeFrom,Node mergeInto) {
+        return null;
+    }
     protected Set<AtomicConcept> fetchAtomicConceptsLabel(Node node,boolean onlyCore) {
         m_atomicConceptsBuffer.clear();
         m_binaryTableSearch1Bound.getBindingsBuffer()[1]=node;

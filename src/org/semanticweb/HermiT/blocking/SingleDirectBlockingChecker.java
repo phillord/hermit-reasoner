@@ -85,6 +85,12 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
     public Node assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         return null;
     }
+    public Node nodesMerged(Node mergeFrom,Node mergeInto) {
+        return null;
+    }
+    public Node nodesUnmerged(Node mergeFrom,Node mergeInto) {
+        return null;
+    }
     public BlockingSignature getBlockingSignatureFor(Node node) {
         return new SingleBlockingSignature(this,node);
     }

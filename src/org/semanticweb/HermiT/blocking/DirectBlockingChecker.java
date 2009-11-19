@@ -30,6 +30,8 @@ public interface DirectBlockingChecker {
     Node assertionRemoved(Concept concept,Node node,boolean isCore);
     Node assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore);
     Node assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore);
+    Node nodesMerged(Node mergeFrom,Node mergeInto);
+    Node nodesUnmerged(Node mergeFrom,Node mergeInto);
     BlockingSignature getBlockingSignatureFor(Node node);
     Set<AtomicConcept> getBlockingRelevantConceptsLabel(Node node);
     Set<AtomicConcept> getFullAtomicConceptsLabel(Node node);

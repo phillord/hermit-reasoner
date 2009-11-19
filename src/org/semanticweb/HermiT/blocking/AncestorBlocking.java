@@ -80,6 +80,12 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
     public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         m_directBlockingChecker.assertionRemoved(atomicRole,nodeFrom,nodeTo,isCore);
     }
+    public void nodesMerged(Node mergeFrom,Node mergeInto) {
+        m_directBlockingChecker.nodesMerged(mergeFrom,mergeInto);
+    }
+    public void nodesUnmerged(Node mergeFrom,Node mergeInto) {
+        m_directBlockingChecker.nodesUnmerged(mergeFrom,mergeInto);
+    }
     public void nodeStatusChanged(Node node) {
     }
     public void nodeInitialized(Node node) {

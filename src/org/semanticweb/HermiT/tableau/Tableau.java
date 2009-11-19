@@ -639,7 +639,6 @@ public final class Tableau implements Serializable {
         assert node.m_mergedInto==null;
         assert node.m_mergedIntoDependencySet==null;
         assert node.m_previousMergedOrPrunedNode==null;
-        m_existentialExpansionStrategy.nodeStatusChanged(node);
         node.m_mergedInto=mergeInto;
         node.m_mergedIntoDependencySet=m_dependencySetFactory.getPermanent(dependencySet);
         m_dependencySetFactory.addUsage(node.m_mergedIntoDependencySet);
@@ -647,24 +646,27 @@ public final class Tableau implements Serializable {
         node.m_previousMergedOrPrunedNode=m_lastMergedOrPrunedNode;
         m_lastMergedOrPrunedNode=node;
         m_numberOfMergedOrPrunedNodes++;
+        m_existentialExpansionStrategy.nodeStatusChanged(node);
+        m_existentialExpansionStrategy.nodesMerged(node,mergeInto);
     }
     public void pruneNode(Node node) {
         assert node.m_nodeState==Node.NodeState.ACTIVE;
         assert node.m_mergedInto==null;
         assert node.m_mergedIntoDependencySet==null;
         assert node.m_previousMergedOrPrunedNode==null;
-        m_existentialExpansionStrategy.nodeStatusChanged(node);
         node.m_nodeState=NodeState.PRUNED;
         node.m_previousMergedOrPrunedNode=m_lastMergedOrPrunedNode;
         m_lastMergedOrPrunedNode=node;
         m_numberOfMergedOrPrunedNodes++;
+        m_existentialExpansionStrategy.nodeStatusChanged(node);
     }
     protected void backtrackLastMergedOrPrunedNode() {
         Node node=m_lastMergedOrPrunedNode;
         assert (node.m_nodeState==Node.NodeState.MERGED && node.m_mergedInto!=null && node.m_mergedInto!=null) || (node.m_nodeState==Node.NodeState.PRUNED && node.m_mergedInto==null && node.m_mergedInto==null);
-        m_existentialExpansionStrategy.nodeStatusChanged(node);
+        Node savedMergedInfo=null;
         if (node.m_nodeState==Node.NodeState.MERGED) {
             m_dependencySetFactory.removeUsage(node.m_mergedIntoDependencySet);
+            savedMergedInfo=node.m_mergedInto;
             node.m_mergedInto=null;
             node.m_mergedIntoDependencySet=null;
         }
@@ -672,6 +674,9 @@ public final class Tableau implements Serializable {
         m_lastMergedOrPrunedNode=node.m_previousMergedOrPrunedNode;
         node.m_previousMergedOrPrunedNode=null;
         m_numberOfMergedOrPrunedNodes--;
+        m_existentialExpansionStrategy.nodeStatusChanged(node);
+        if (savedMergedInfo!=null)
+            m_existentialExpansionStrategy.nodesUnmerged(node,savedMergedInfo);
     }
     protected void destroyLastTableauNode() {
         Node node=m_lastTableauNode;

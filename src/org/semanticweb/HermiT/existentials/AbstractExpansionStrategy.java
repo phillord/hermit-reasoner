@@ -139,6 +139,12 @@ public abstract class AbstractExpansionStrategy implements Serializable,Existent
     public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         m_blockingStrategy.assertionRemoved(atomicRole,nodeFrom,nodeTo,isCore);
     }
+    public void nodesMerged(Node mergeFrom,Node mergeInto) {
+        m_blockingStrategy.nodesMerged(mergeFrom,mergeInto);
+    }
+    public void nodesUnmerged(Node mergeFrom,Node mergeInto) {
+        m_blockingStrategy.nodesUnmerged(mergeFrom,mergeInto);
+    }
     public void nodeStatusChanged(Node node) {
         m_blockingStrategy.nodeStatusChanged(node);
     }

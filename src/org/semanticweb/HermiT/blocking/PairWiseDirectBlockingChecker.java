@@ -128,6 +128,12 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
             return null;
         }
     }
+    public Node nodesMerged(Node mergeFrom,Node mergeInto) {
+        return null;
+    }
+    public Node nodesUnmerged(Node mergeFrom,Node mergeInto) {
+        return null;
+    }
     public BlockingSignature getBlockingSignatureFor(Node node) {
         return new PairWiseBlockingSignature(this,node);
     }
