@@ -185,7 +185,6 @@ public class ValidatedDirectBlockingChecker implements DirectBlockingChecker,Ser
         public Set<AtomicConcept> getAtomicConceptsLabel() {
             if (m_blockingRelevantLabel==null) {
                 m_blockingRelevantLabel=ValidatedDirectBlockingChecker.this.fetchAtomicConceptsLabel(m_node,true);
-                m_blockingRelevantLabel=ValidatedDirectBlockingChecker.this.fetchAtomicConceptsLabel(m_node,true);
                 m_atomicConceptsSetFactory.addReference(m_blockingRelevantLabel);
             }
             return m_blockingRelevantLabel;
@@ -227,7 +226,7 @@ public class ValidatedDirectBlockingChecker implements DirectBlockingChecker,Ser
                         m_atomicConceptsSetFactory.removeReference(m_blockingRelevantLabel);
                         m_blockingRelevantLabel = null;
                     }
-                    m_blockingRelevantHashCode -= concept.hashCode();
+                    m_blockingRelevantHashCode-=concept.hashCode();
                     m_hasChangedForBlocking=true;
                 }
             }

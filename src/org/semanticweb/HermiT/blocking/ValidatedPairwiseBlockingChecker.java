@@ -236,7 +236,7 @@ public class ValidatedPairwiseBlockingChecker implements DirectBlockingChecker,S
                         m_atomicConceptsSetFactory.removeReference(m_blockingRelevantLabel);
                         m_blockingRelevantLabel = null;
                     }
-                    m_blockingRelevantHashCode -= concept.hashCode();
+                    m_blockingRelevantHashCode-=concept.hashCode();
                     m_hasChangedForBlocking=true;
                 }
             }

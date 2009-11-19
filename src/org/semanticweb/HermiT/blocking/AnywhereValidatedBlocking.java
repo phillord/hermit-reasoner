@@ -26,19 +26,18 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
     protected final ValidatedBlockersCache m_currentBlockersCache;
     protected final BlockingSignatureCache m_blockingSignatureCache;
     protected BlockingValidator m_blockingValidator;
-    //protected BlockingValidator m_blockingValidatorRules;
     protected Tableau m_tableau;
     protected ExtensionManager m_extensionManager;
     protected Node m_firstChangedNode;
     protected Node m_lastValidatedUnchangedNode=null;
     protected boolean m_useSingletonCore;
-    protected Map<AtomicConcept, Set<Set<Concept>>> m_unaryValidBlockConditions;
-    protected Map<Set<AtomicConcept>, Set<Set<Concept>>> m_nAryValidBlockConditions;
+    protected final Map<AtomicConcept, Set<Set<Concept>>> m_unaryValidBlockConditions;
+    protected final Map<Set<AtomicConcept>, Set<Set<Concept>>> m_nAryValidBlockConditions;
     protected final boolean m_hasInverses;
     protected final boolean m_validateViaRuleApplicability;
     
     // statistics: 
-    protected final boolean debuggingMode=false;
+    protected final boolean debuggingMode=true;
     protected final boolean m_generateValidationStatistics=true;
     public List<Integer> numNodes=new ArrayList<Integer>();
     public List<Integer> numBlocked=new ArrayList<Integer>();
@@ -74,7 +73,6 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
             m_blockingValidator=new BlockingValidatorRules(m_tableau);
         } else {
             m_blockingValidator=new BlockingValidatorConstraints(m_tableau,m_directBlockingChecker,m_unaryValidBlockConditions,m_nAryValidBlockConditions,m_hasInverses);
-           // m_blockingValidatorRules=new BlockingValidatorRules(m_tableau);
         }
     }
     public void clear() {
@@ -123,7 +121,7 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
                                     // in the cache were invalid last time we validated, we'll give it another try
                                     blocker=possibleBlockers.get(0);
                                 } else {
-                                    // neither the node nor its parent has not changed since the last validation
+                                    // neither the node nor its parent has changed since the last validation
                                     // if also the possible blockers in the blockers cache and their parents have not changed
                                     // since the last validation, there is no point in blocking again
                                     // the only exception is that the blockers cache contains the node that blocked this node previously 
@@ -180,7 +178,7 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
                 if (node.isBlocked()) {
                     checkedBlocks++;
                     // check whether the block is a correct one
-                    if ((node.isDirectlyBlocked()&&(m_directBlockingChecker.hasChangedSinceValidation(node) || m_directBlockingChecker.hasChangedSinceValidation(node.getParent()) || m_directBlockingChecker.hasChangedSinceValidation(node.getBlocker()) || m_directBlockingChecker.hasChangedSinceValidation(node.getBlocker().getParent()))) 
+                    if ((node.isDirectlyBlocked()&&(m_directBlockingChecker.hasChangedSinceValidation(node) || m_directBlockingChecker.hasChangedSinceValidation(node.getParent()) || m_directBlockingChecker.hasChangedSinceValidation(node.getBlocker()))) 
                             || !node.getParent().isBlocked()) {
                         Node validBlocker;
                         List<Node> possibleBlockers = m_currentBlockersCache.getPossibleBlockers(node);
@@ -211,7 +209,7 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
                         }
                         node.setBlocked(validBlocker,validBlocker!=null); 
                     }
-                }
+                } 
                 m_lastValidatedUnchangedNode=node;
                 if (!node.isBlocked() && m_directBlockingChecker.canBeBlocker(node))
                     m_currentBlockersCache.addNode(node);
@@ -251,9 +249,9 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
         }
         // if set to some node, then computePreblocking will be asked to check from that node onwards in case of invalid blocks 
         m_firstChangedNode=firstInvalidlyBlockedNode;
-        if (monitor!=null) monitor.blockingValidationFinished();
         //m_firstChangedNode=firstValidatedNode;
         //m_firstChangedNode=null;
+        if (monitor!=null) monitor.blockingValidationFinished();
         if (debuggingMode) System.out.println("Checked " + checkedBlocks + " blocked nodes of which " + invalidBlocks + " were invalid.");
     }
 
@@ -319,7 +317,6 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
             m_lastValidatedUnchangedNode=node;
     }
     public void modelFound() {
-        //System.out.println("Found  model with " + (m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes()) + " nodes. ");
         if (m_blockingSignatureCache!=null) {
             // Since we've found a model, we know what is blocked or not.
             // Therefore, we don't need to update the blocking status.
@@ -331,22 +328,6 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
                 node=node.getNextTableauNode();
             }
         }
-//        System.out.println("Violations for the blocker:");
-//        SortedSet<ViolationStatistic> counts=new TreeSet<ViolationStatistic>();
-//        for (String key : m_violationCountBlocker.keySet()) {
-//            counts.add(new ViolationStatistic(key,m_violationCountBlocker.get(key)));
-//        }
-//        for (ViolationStatistic vs : counts) {
-//            System.out.println(vs);
-//        }
-//        counts.clear();
-//        System.out.println("Violations for the blocked parent:");
-//        for (String key : m_violationCountBlockedParent.keySet()) {
-//            counts.add(new ViolationStatistic(key,m_violationCountBlockedParent.get(key)));
-//        }
-//        for (ViolationStatistic vs : counts) {
-//            System.out.println(vs);
-//        }
     }
     protected final class ViolationStatistic implements Comparable<ViolationStatistic>{
         public final String m_violatedConstraint;
@@ -384,7 +365,7 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
                     coreVariables[i]=false;
                 }
                 if (dlClause.m_clauseType==ClauseType.CONCEPT_INCLUSION && variables.size() > 1) {
-                    workers.add(new ComputeCoreVariables2(dlClause,variables,valuesBuffer,coreVariables));
+                    workers.add(new ComputeCoreVariables(dlClause,variables,valuesBuffer,coreVariables));
                 }
             }
         }
@@ -393,79 +374,11 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
         private static final long serialVersionUID=899293772370136783L;
 
         protected final DLClause m_dlClause;
-        protected final Object[] m_valuesBuffer;
-        protected final boolean[] m_coreVariables;
-
-        public ComputeCoreVariables(DLClause dlClause,Object[] valuesBuffer,boolean[] coreVariables) {
-            m_dlClause=dlClause;
-            m_valuesBuffer=valuesBuffer;
-            m_coreVariables=coreVariables;
-        }
-        public int execute(int programCounter) {
-            if (m_dlClause.getHeadLength() > 0 && (m_dlClause.getHeadAtom(0).getArity() != 1 || !m_dlClause.getHeadAtom(0).containsVariable(Variable.create("X")))) {
-                Node potentialNoncore=null;
-                int potentialNoncoreIndex=-1;
-                for (int variableIndex=m_coreVariables.length-1;variableIndex>=0;--variableIndex) {
-                    m_coreVariables[variableIndex]=true;
-                    Node node=(Node)m_valuesBuffer[variableIndex];
-                    if (node.getNodeType()==NodeType.TREE_NODE && (potentialNoncore==null || node.getTreeDepth()>potentialNoncore.getTreeDepth())) {
-                        potentialNoncore=node;
-                        potentialNoncoreIndex=variableIndex;
-                    }
-                }
-                if (potentialNoncore!=null) {
-                    boolean isNoncore=true;
-                    for (int variableIndex=m_coreVariables.length-1;isNoncore && variableIndex>=0;--variableIndex) {
-                        Node node=(Node)m_valuesBuffer[variableIndex];
-                        if (!node.isRootNode() && potentialNoncore!=node && potentialNoncore.isAncestorOf(node))
-                            isNoncore=false;
-                    }
-                    if (isNoncore) {
-                        m_coreVariables[potentialNoncoreIndex]=false;
-                    }
-                }
-            }
-            return programCounter+1;
-        }
-        // What is this doing exactly?
-        // Wht do you not need the DL clase itself?
-//        public int execute(int programCounter) {
-//            Node potentialNoncore=null;
-//            int potentialNoncoreIndex=-1;
-//            for (int variableIndex=m_coreVariables.length-1;variableIndex>=0;--variableIndex) {
-//                m_coreVariables[variableIndex]=true;
-//                Node node=(Node)m_valuesBuffer[variableIndex];
-//                if (node.getNodeType()==NodeType.TREE_NODE && (potentialNoncore==null || node.getTreeDepth()<potentialNoncore.getTreeDepth())) {
-//                    potentialNoncore=node;
-//                    potentialNoncoreIndex=variableIndex;
-//                }
-//            }
-//            if (potentialNoncore!=null) {
-//                boolean isNoncore=true;
-//                for (int variableIndex=m_coreVariables.length-1;isNoncore && variableIndex>=0;--variableIndex) {
-//                    Node node=(Node)m_valuesBuffer[variableIndex];
-//                    if (!node.isRootNode() && potentialNoncore!=node && !potentialNoncore.isAncestorOf(node))
-//                        isNoncore=false;
-//                }
-//                if (isNoncore) {
-//                    m_coreVariables[potentialNoncoreIndex]=false;
-//                }
-//            }
-//            return programCounter+1;
-//        }
-        public String toString() {
-            return "Compute core variables";
-        }
-    }
-    protected static final class ComputeCoreVariables2 implements DLClauseEvaluator.Worker,Serializable {
-        private static final long serialVersionUID=899293772370136783L;
-
-        protected final DLClause m_dlClause;
         protected final List<Variable> m_variables;
         protected final Object[] m_valuesBuffer;
         protected final boolean[] m_coreVariables;
 
-        public ComputeCoreVariables2(DLClause dlClause,List<Variable> variables,Object[] valuesBuffer,boolean[] coreVariables) {
+        public ComputeCoreVariables(DLClause dlClause,List<Variable> variables,Object[] valuesBuffer,boolean[] coreVariables) {
             m_dlClause=dlClause;
             m_variables=variables;
             m_valuesBuffer=valuesBuffer;
@@ -657,19 +570,6 @@ class ValidatedBlockersCache {
         }
         return buckets;
     }
-    public void doSanityCheck(boolean allSingletonSets) {
-        for (int i=0;i<m_buckets.length;i++) {
-            CacheEntry entry=m_buckets[i];
-            while (entry!=null) {
-                if (allSingletonSets && entry.m_nodes.size() > 1) {
-                    throw new IllegalStateException("Internal error: we expect all cache entries to be singleton sets, but the is a set with cardinality greater than one. ");
-                }
-                entry.doSanityCheck(m_directBlockingChecker);
-                CacheEntry nextEntry=entry.m_nextEntry;
-                entry=nextEntry;
-            }
-        }
-    }
     
     public static class CacheEntry implements Serializable {
         private static final long serialVersionUID=-7047487963170250200L;
@@ -686,8 +586,7 @@ class ValidatedBlockersCache {
         }
         public boolean add(Node node) {
             for (Node n : m_nodes) {
-                if (n.getNodeID() >= node.getNodeID()) 
-                    throw new IllegalStateException("Internal error: a node is added to a cache entry that is smaller than other nodes in this cache entry. ");
+                assert n.getNodeID() >= node.getNodeID(); 
             }
             return m_nodes.add(node);
         }
@@ -697,15 +596,6 @@ class ValidatedBlockersCache {
                 nodes += n.getNodeID() + " ";
             }
             return nodes;
-        }
-        public void doSanityCheck(DirectBlockingChecker directBlockingChecker) {
-            for (Node n : m_nodes) {
-                if (m_hashCode!=directBlockingChecker.blockingHashCode(n)) 
-                if (!n.isActive()) throw new IllegalStateException("Internal error: Node "+n+" is not active but in the blocking cache. ");
-                if (n.isBlocked()) throw new IllegalStateException("Internal error: Node "+n+" is blocked but in the blocking cache. ");
-                if (n.isMerged()) throw new IllegalStateException("Internal error: Node "+n+" is merged but in the blocking cache. ");
-                if (n.isPruned()) throw new IllegalStateException("Internal error: Node "+n+" is pruned but in the blocking cache. ");
-            }
         }
     }
 }
