@@ -15,9 +15,6 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Prefixes;
-import org.semanticweb.HermiT.blocking.core.AtMostConcept;
-import org.semanticweb.HermiT.blocking.core.AtMostConjunctionConcept;
-import org.semanticweb.HermiT.blocking.core.AtMostDisjunctionConcept;
 import org.semanticweb.HermiT.datatypes.DatatypeRegistry;
 import org.semanticweb.HermiT.datatypes.UnsupportedDatatypeException;
 import org.semanticweb.HermiT.model.AnnotatedEquality;
@@ -26,7 +23,6 @@ import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
-import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
@@ -106,9 +102,7 @@ import org.semanticweb.owlapi.model.SWRLDataPropertyAtom;
 import org.semanticweb.owlapi.model.SWRLDataRangeAtom;
 import org.semanticweb.owlapi.model.SWRLDifferentIndividualsAtom;
 import org.semanticweb.owlapi.model.SWRLIndividualArgument;
-import org.semanticweb.owlapi.model.SWRLIndividualVariable;
 import org.semanticweb.owlapi.model.SWRLLiteralArgument;
-import org.semanticweb.owlapi.model.SWRLLiteralVariable;
 import org.semanticweb.owlapi.model.SWRLObjectPropertyAtom;
 import org.semanticweb.owlapi.model.SWRLObjectVisitor;
 import org.semanticweb.owlapi.model.SWRLRule;
@@ -140,22 +134,17 @@ public class OWLClausification {
         builtInPropertyManager.axiomatizeBuiltInPropertiesAsNeeded(axioms);
         ObjectPropertyInclusionManager objectPropertyInclusionManager=new ObjectPropertyInclusionManager(factory);
         objectPropertyInclusionManager.prepareTransformation(axioms);
-        Map<OWLObjectPropertyExpression, Automaton> automataOfComplexRoles = objectPropertyInclusionManager.rewriteAxioms(axioms);
+        Map<OWLObjectPropertyExpression,Automaton> automataOfComplexRoles=objectPropertyInclusionManager.rewriteAxioms(axioms);
         if (descriptionGraphs==null)
             descriptionGraphs=Collections.emptySet();
-        /**
-         * gstoil
-         */
-        DLOntology dlOntology = clausify(factory,ontologyIRI,axioms,descriptionGraphs);
-        dlOntology.setAutomata( automataOfComplexRoles );
-
+        DLOntology dlOntology = clausify(factory,ontologyIRI,axioms,descriptionGraphs,automataOfComplexRoles);
         return dlOntology;
     }
-    public DLOntology clausify(OWLDataFactory factory,String ontologyIRI,OWLAxioms axioms,Collection<DescriptionGraph> descriptionGraphs) {
+    public DLOntology clausify(OWLDataFactory factory,String ontologyIRI,OWLAxioms axioms,Collection<DescriptionGraph> descriptionGraphs,Map<OWLObjectPropertyExpression,Automaton> automataOfComplexRoles) {
         OWLAxiomsExpressivity axiomsExpressivity=new OWLAxiomsExpressivity(axioms);
-        return clausify(factory,ontologyIRI,axioms,axiomsExpressivity,descriptionGraphs);
+        return clausify(factory,ontologyIRI,axioms,axiomsExpressivity,descriptionGraphs,automataOfComplexRoles);
     }
-    public DLOntology clausify(OWLDataFactory factory,String ontologyIRI,OWLAxioms axioms,OWLAxiomsExpressivity axiomsExpressivity,Collection<DescriptionGraph> descriptionGraphs) {
+    public DLOntology clausify(OWLDataFactory factory,String ontologyIRI,OWLAxioms axioms,OWLAxiomsExpressivity axiomsExpressivity,Collection<DescriptionGraph> descriptionGraphs,Map<OWLObjectPropertyExpression,Automaton> automataOfComplexRoles) {
         Set<DLClause> dlClauses=new LinkedHashSet<DLClause>();
         Set<Atom> positiveFacts=new HashSet<Atom>();
         Set<Atom> negativeFacts=new HashSet<Atom>();
@@ -258,7 +247,7 @@ public class OWLClausification {
             negativeFacts.clear();
             DLClause cl=DLClause.create(new Atom[0],new Atom[0],ClauseType.CONCEPT_INCLUSION);
             dlClauses.add(cl.getSafeVersion());
-            return new DLOntology(ontologyIRI,dlClauses,positiveFacts,negativeFacts,null,null,null,null,null,null,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes);
+            return new DLOntology(ontologyIRI,dlClauses,positiveFacts,negativeFacts,null,null,null,null,null,null,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes,automataOfComplexRoles);
         }
         for (DescriptionGraph descriptionGraph : descriptionGraphs) {
             descriptionGraph.produceStartDLClauses(dlClauses);
@@ -331,24 +320,8 @@ public class OWLClausification {
                 isGraphRule=false;
                 safenessAtoms.clear();
             }
-        }
-        if (m_configuration.blockingStrategyType==Configuration.BlockingStrategyType.VALIDATED) {
-            // The following two maps are only used with inexact blocking strategies, i.e., blocking strategies that establish 
-            // blocks that might not be valid and that only in a later validation phase will be checked for validity. In case 
-            // of invalid blocks existential expansion will continue further. 
-            // To validate blocks, we keep the relevant axioms (in an optimised data structure).
-            
-            // The key is a concept and the values are sets of sets of concepts that are implies by the key, 
-            // where each set of concepts is to be interpreted as a disjunction of concepts and the sets of sets of concepts are conjunctions
-            // so the axioms "A -> B or C" and "A -> D", are represented by an entry with key A mapped to the value {{B, C}, {D}}
-            Map<AtomicConcept, Set<Set<Concept>>> unaryValidBlockConditions=new HashMap<AtomicConcept, Set<Set<Concept>>>();
-            // similarly as above, but with several premises, e.g., to represent A and B -> C
-            Map<Set<AtomicConcept>, Set<Set<Concept>>> nAryValidBlockConditions=new HashMap<Set<AtomicConcept>, Set<Set<Concept>>>();
-            collectConditionsForValidBlocks(axioms,unaryValidBlockConditions,nAryValidBlockConditions);
-            return new DLOntology(ontologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,objectRoles,dataRoles,axioms.m_definedDatatypesIRIs,hermitIndividuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes,unaryValidBlockConditions,nAryValidBlockConditions);
-        }
-        
-        return new DLOntology(ontologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,objectRoles,dataRoles,axioms.m_definedDatatypesIRIs,hermitIndividuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes);
+        }        
+        return new DLOntology(ontologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,objectRoles,dataRoles,axioms.m_definedDatatypesIRIs,hermitIndividuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes,automataOfComplexRoles);
     }
     protected DLClause clausifyKey(OWLHasKeyAxiom object) {
         List<Atom> headAtoms=new ArrayList<Atom>();
@@ -412,168 +385,6 @@ public class OWLClausification {
         bodyAtoms.toArray(bAtoms);
         DLClause clause=DLClause.createEx(true,hAtoms,bAtoms,ClauseType.HAS_KEY);
         return clause;
-    }
-    protected void collectConditionsForValidBlocks(OWLAxioms axioms,Map<AtomicConcept, Set<Set<Concept>>> unaryValidBlockConditions,Map<Set<AtomicConcept>, Set<Set<Concept>>> nAryValidBlockConditions) {
-        boolean foundRelevantConcept;
-        Set<AtomicConcept> premises;
-        Set<Concept> conclusions;
-        for (OWLClassExpression[] descs : axioms.m_conceptInclusions) {
-            foundRelevantConcept = false;
-            premises = new HashSet<AtomicConcept>();
-            conclusions = new HashSet<Concept>();
-            for (int i = 0; i<descs.length; i++) {
-                OWLClassExpression desc = descs[i];
-                if (desc instanceof OWLObjectAllValuesFrom) {
-                    // forall r.C becomes <= 0 r.not C
-                    foundRelevantConcept = true;
-                    OWLObjectAllValuesFrom all = (OWLObjectAllValuesFrom) desc;
-                    AtomicRole ar = AtomicRole.create(all.getProperty().getNamedProperty().getIRI().toString()); 
-                    Role r = all.getProperty().getSimplified().isAnonymous() ? InverseRole.create(ar) : ar;
-                    // since the axioms are normalised, the filler is a literal
-                    if (all.getFiller() instanceof OWLObjectComplementOf) {
-                        OWLClassExpression nonNegated = ((OWLObjectComplementOf) all.getFiller()).getOperand();
-                        if (nonNegated.isAnonymous()) {
-                            // negated nominal concept
-                            OWLObjectOneOf oneOf=(OWLObjectOneOf)nonNegated;
-                            if (oneOf.getIndividuals().size()>1) {
-                                AtomicConcept[] nominalConcepts=new AtomicConcept[oneOf.getIndividuals().size()];
-                                int index=0;
-                                for (OWLIndividual o : oneOf.getIndividuals()) {
-                                    // split the one of into several existentials in case it is not a singleton set
-                                    nominalConcepts[i]=getNominalConcept(o);
-                                    index++;
-                                }
-                                foundRelevantConcept=false; // only relevant in conjunction with other relevant concepts since normally nominal nodes are not blocked
-                                conclusions.add(AtMostDisjunctionConcept.create(r, nominalConcepts));
-                            } else {
-                                conclusions.add(AtMostConcept.create(0, r, getNominalConcept(oneOf.getIndividuals().iterator().next())));
-                            }
-                        } else {
-                            conclusions.add(AtMostConcept.create(0, r, AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString())));
-                        }
-                    } else {
-                        if (all.getFiller().isAnonymous()) {
-                            // nominals
-                            OWLObjectOneOf oneOf=(OWLObjectOneOf)all.getFiller();
-                            AtomicConcept[] nominalConcepts=new AtomicConcept[oneOf.getIndividuals().size()];
-                            int index=0;
-                            for (OWLIndividual o : oneOf.getIndividuals()) {
-                                // split the one of into several existentials in case it is not a singleton set
-                                nominalConcepts[i]=getNominalConcept(o);
-                                index++;
-                            }
-                            foundRelevantConcept=false; // only relevant in conjunction with other relevant concepts since normally nominal nodes are not blocked
-                            conclusions.add(AtMostConjunctionConcept.create(r, nominalConcepts));
-                        } else {
-                            conclusions.add(AtMostConcept.create(0, r, AtomicNegationConcept.create(AtomicConcept.create(all.getFiller().asOWLClass().getIRI().toString()))));
-                        }
-                    }
-                } else if (desc instanceof OWLObjectSomeValuesFrom) {
-                    // some r.C becomes >= 1 r.C
-                    foundRelevantConcept = true;
-                    OWLObjectSomeValuesFrom some = (OWLObjectSomeValuesFrom) desc;
-                    AtomicRole ar = AtomicRole.create(some.getProperty().getNamedProperty().getIRI().toString()); 
-                    Role r = some.getProperty().getSimplified().isAnonymous() ? InverseRole.create(ar) : ar;
-                    LiteralConcept c;
-                    // since the axioms are normalised, the filler is a literal
-                    if (some.getFiller() instanceof OWLObjectComplementOf) {
-                        OWLClassExpression nonNegated = ((OWLObjectComplementOf) some.getFiller()).getOperand();
-                        assert !nonNegated.isAnonymous();
-                        c=AtomicNegationConcept.create(AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString()));
-                    } else {
-                        if (some.getFiller().isAnonymous()) {
-                            // nominal
-                            OWLObjectOneOf oneOf=(OWLObjectOneOf)some.getFiller();
-                            c=getNominalConcept(oneOf.getIndividuals().iterator().next());
-                            boolean first=true;
-                            for (OWLIndividual o : oneOf.getIndividuals()) {
-                                // split the one of into several existentials in case it is not a singleton set
-                                if (!first) conclusions.add(AtLeastConcept.create(1, r, getNominalConcept(o)));
-                                first=false;
-                            }
-                        } else {
-                            c=AtomicConcept.create(some.getFiller().asOWLClass().getIRI().toString());
-                        }
-                    }
-                    conclusions.add(AtLeastConcept.create(1, r, c));
-                } else if (desc instanceof OWLObjectMinCardinality) {
-                    OWLObjectMinCardinality min = (OWLObjectMinCardinality) desc;
-                    AtomicRole ar = AtomicRole.create(min.getProperty().getNamedProperty().getIRI().toString()); 
-                    Role r = min.getProperty().getSimplified().isAnonymous() ? InverseRole.create(ar) : ar;
-                    LiteralConcept c;
-                    // since the axioms are normalised, the filler is a literal
-                    if (min.getFiller() instanceof OWLObjectComplementOf) {
-                        OWLClassExpression nonNegated = ((OWLObjectComplementOf) min.getFiller()).getOperand();
-                        assert !nonNegated.isAnonymous();
-                        c=AtomicNegationConcept.create(AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString()));
-                    } else {
-                        assert !min.getFiller().isAnonymous();
-                        c=AtomicConcept.create(min.getFiller().asOWLClass().getIRI().toString());
-                    }
-                    conclusions.add(AtLeastConcept.create(min.getCardinality(), r, c));
-                } else if (desc instanceof OWLObjectMaxCardinality) {
-                    foundRelevantConcept = true;
-                    OWLObjectMaxCardinality max = (OWLObjectMaxCardinality) desc;
-                    AtomicRole ar = AtomicRole.create(max.getProperty().getNamedProperty().getIRI().toString()); 
-                    Role r = max.getProperty().getSimplified().isAnonymous() ? InverseRole.create(ar) : ar;
-                    LiteralConcept c;
-                    // since the axioms are normalised, the filler is a literal
-                    if (max.getFiller() instanceof OWLObjectComplementOf) {
-                        OWLClassExpression nonNegated = ((OWLObjectComplementOf) max.getFiller()).getOperand();
-                        if (nonNegated.isAnonymous()) {
-                            // negated nominal concept
-                            OWLObjectOneOf oneOf=(OWLObjectOneOf)nonNegated;
-                            if (oneOf.getIndividuals().size()>1) throw new IllegalArgumentException("Core blocking is not compatible with non-singleton nominal sets. ");
-                            c=AtomicNegationConcept.create(getNominalConcept(oneOf.getIndividuals().iterator().next()));
-                        } else {
-                            c = AtomicNegationConcept.create(AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString()));
-                        }
-                    } else {
-                        if (max.getFiller().isAnonymous()) {
-                            // nominal
-                            OWLObjectOneOf oneOf=(OWLObjectOneOf)max.getFiller();
-                            if (oneOf.getIndividuals().size()>1) throw new IllegalArgumentException("Core blocking is not compatible with non-singleton nominal sets. ");
-                            c=getNominalConcept(oneOf.getIndividuals().iterator().next());
-                        } else {
-                            c=AtomicConcept.create(max.getFiller().asOWLClass().getIRI().toString());
-                        }
-                    }
-                    conclusions.add(AtMostConcept.create(max.getCardinality(), r, c));
-                } else if (desc instanceof OWLClass) {
-                    conclusions.add(AtomicConcept.create(desc.asOWLClass().getIRI().toString()));
-                } else if (desc instanceof OWLObjectComplementOf) {
-                    OWLClassExpression nonNegated = ((OWLObjectComplementOf) desc).getOperand();
-                    if (nonNegated.isAnonymous()) {
-                        // nominal
-                        OWLObjectOneOf oneOf=(OWLObjectOneOf)nonNegated;
-                        if (oneOf.getIndividuals().size()>1) throw new IllegalArgumentException("Core blocking is not compatible with non-singleton nominal sets. ");
-                        premises.add(getNominalConcept(oneOf.getIndividuals().iterator().next()));
-                    } else {
-                        premises.add(AtomicConcept.create(nonNegated.asOWLClass().getIRI().toString()));
-                    }
-                }
-            }
-            if (foundRelevantConcept) {
-                if (premises.size() <= 1) {
-                    AtomicConcept p = premises.iterator().hasNext() ? premises.iterator().next() : AtomicConcept.THING;
-                    if (unaryValidBlockConditions.containsKey(p)) {
-                        unaryValidBlockConditions.get(p).add(conclusions);
-                    } else {
-                        Set<Set<Concept>> conjuncts = new HashSet<Set<Concept>>();
-                        conjuncts.add(conclusions);
-                        unaryValidBlockConditions.put(p, conjuncts);
-                    }
-                } else {
-                    if (nAryValidBlockConditions.containsKey(premises)) {
-                        nAryValidBlockConditions.get(premises).add(conclusions);
-                    } else {
-                        Set<Set<Concept>> conjuncts = new HashSet<Set<Concept>>();
-                        conjuncts.add(conclusions);
-                        nAryValidBlockConditions.put(premises, conjuncts);
-                    }
-                }
-            }
-        }
     }
     protected static AtomicConcept getNominalConcept(OWLIndividual individual) {
         AtomicConcept result;
@@ -916,13 +727,13 @@ public class OWLClausification {
         public void visit(OWLDataMinCardinality object) {
             if (!object.getProperty().isOWLBottomDataProperty() || object.getCardinality()==0) {
                 if (m_dps2ranges.containsKey(object.getProperty().asOWLDataProperty())) {
-                    String dtURI=m_dps2ranges.get(object.getProperty().asOWLDataProperty()).getURI().toString();
+                    String dtURI=m_dps2ranges.get(object.getProperty().asOWLDataProperty()).getIRI().toString();
                     long max=dt2maxRangeCardinality.get(dtURI);
                     if (object.getCardinality() > max) {
                         return;
                     }
-                } else if (object.getFiller().isDatatype() && dt2maxRangeCardinality.containsKey(object.getFiller().asOWLDatatype().getURI().toString())) {
-                    String dtURI=m_dps2ranges.get(object.getProperty().asOWLDataProperty()).getURI().toString();
+                } else if (object.getFiller().isDatatype() && dt2maxRangeCardinality.containsKey(object.getFiller().asOWLDatatype().getIRI().toString())) {
+                    String dtURI=m_dps2ranges.get(object.getProperty().asOWLDataProperty()).getIRI().toString();
                     long max=dt2maxRangeCardinality.get(dtURI);
                     if (object.getCardinality() > max) {
                         return;
@@ -1078,7 +889,7 @@ public class OWLClausification {
             return (LiteralConcept)dataRange.accept(this);
         }
         public Object visit(OWLDatatype object) {
-            String datatypeURI=object.getURI().toString();
+            String datatypeURI=object.getIRI().toString();
             if (DatatypeRestriction.RDFS_LITERAL.getDatatypeURI().equals(datatypeURI))
                 return DatatypeRestriction.RDFS_LITERAL;
             if (Prefixes.isInternalIRI(datatypeURI) || m_definedDatatypeIRIs.contains(object.getIRI().toString())) return AtomicConcept.create(datatypeURI);
@@ -1108,7 +919,7 @@ public class OWLClausification {
         public Object visit(OWLDatatypeRestriction object) {
             if (!(object.getDatatype().isOWLDatatype()))
                 throw new IllegalArgumentException("Datatype restrictions are supported only on OWL datatypes.");
-            String datatypeURI=object.getDatatype().getURI().toString();
+            String datatypeURI=object.getDatatype().getIRI().toString();
             if (DatatypeRestriction.RDFS_LITERAL.getDatatypeURI().equals(datatypeURI)) {
                 if (!object.getFacetRestrictions().isEmpty())
                     throw new IllegalArgumentException("rdfs:Literal does not support any facets.");
@@ -1130,7 +941,7 @@ public class OWLClausification {
             throw new IllegalStateException("Internal error: should not get in here.");
         }
         public Object visit(OWLTypedLiteral object) {
-            return DatatypeRegistry.parseLiteral(object.getLiteral(),object.getDatatype().getURI().toString());
+            return DatatypeRegistry.parseLiteral(object.getLiteral(),object.getDatatype().getIRI().toString());
         }
         public Object visit(OWLStringLiteral object) {
             if (object.getLang()==null)
@@ -1347,13 +1158,16 @@ public class OWLClausification {
             }
             atom.getFirstArgument().accept(this);
             Variable var1=m_lastVariable;
+            m_DLSafeVars.add(var1);
             atom.getSecondArgument().accept(this);
             Variable var2=m_lastVariable;
+            m_DLSafeVars.add(var2);
             m_lastAtom=getRoleAtom(atom.getPredicate().asOWLObjectProperty(),var1,var2);
         }
         public void visit(SWRLDataPropertyAtom atom) {
             atom.getFirstArgument().accept(this);
             Variable var1=m_lastVariable;
+            m_DLSafeVars.add(var1);
             atom.getSecondArgument().accept(this);
             Variable var2=m_lastVariable;
             m_lastAtom=getRoleAtom(atom.getPredicate().asOWLDataProperty(), var1, var2);
@@ -1361,14 +1175,8 @@ public class OWLClausification {
         public void visit(SWRLBuiltInAtom node) {
             throw new UnsupportedOperationException("Rules with SWRL built-in atoms are not yet supported. ");
         }
-        public void visit(SWRLLiteralVariable node) {
+        public void visit(SWRLVariable node) {
             m_lastVariable=Variable.create(node.getIRI().toString());
-            m_varsOfLastAtom.add(node);
-            m_containsVariables=true;
-        }
-        public void visit(SWRLIndividualVariable node) {
-            m_lastVariable=Variable.create(node.getIRI().toString());
-            m_DLSafeVars.add(m_lastVariable);
             m_varsOfLastAtom.add(node);
             m_containsVariables=true;
         }

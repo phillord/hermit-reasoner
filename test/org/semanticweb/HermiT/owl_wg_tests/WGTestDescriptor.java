@@ -2,7 +2,6 @@
 package org.semanticweb.HermiT.owl_wg_tests;
 
 import java.io.PrintWriter;
-import java.net.URI;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
@@ -26,35 +25,35 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class WGTestDescriptor {
-    protected static final URI TEST_CASE_URI=URI.create(WGTestRegistry.URI_BASE+"TestCase");
+    protected static final IRI TEST_CASE_IRI=IRI.create(WGTestRegistry.URI_BASE+"TestCase");
 
     protected enum Status {
         APPROVED("Approved"),REJECTED("Rejected"),PROPOSED("Proposed"),EXTRACREDIT("Extracredit");
         
-        public final URI uri;
+        public final IRI uri;
         
         private Status(String uriSuffix) {
-            uri=URI.create(WGTestRegistry.URI_BASE+uriSuffix);
+            uri=IRI.create(WGTestRegistry.URI_BASE+uriSuffix);
         }
     }
 
     protected enum Semantics {
         DIRECT("DIRECT"),RDF_BASED("RDF-BASED");
         
-        public final URI uri;
+        public final IRI uri;
 
         private Semantics(String uriSuffix) {
-            uri=URI.create(WGTestRegistry.URI_BASE+uriSuffix);
+            uri=IRI.create(WGTestRegistry.URI_BASE+uriSuffix);
         }
     }
 
     protected enum Species {
         DL("DL"),FULL("FULL");
         
-        public final URI uri;
+        public final IRI uri;
 
         private Species(String uriSuffix) {
-            uri=URI.create(WGTestRegistry.URI_BASE+uriSuffix);
+            uri=IRI.create(WGTestRegistry.URI_BASE+uriSuffix);
         }
     }
 
@@ -65,10 +64,10 @@ public class WGTestDescriptor {
         NEGATIVE_ENTAILMENT("NegativeEntailmentTest"),
         PROFILE_IDENTIFICATION("ProfileIdentificationTest");
         
-        public final URI uri;
+        public final IRI uri;
         
         private TestType(String uriSuffix) {
-            uri=URI.create(WGTestRegistry.URI_BASE+uriSuffix);
+            uri=IRI.create(WGTestRegistry.URI_BASE+uriSuffix);
         }
     }
 
@@ -81,11 +80,11 @@ public class WGTestDescriptor {
         public final OWLDataProperty conclusion;
         public final OWLDataProperty nonconclusion;
 
-        private SerializationFormat(String indURI,String premiseURI,String conclusionURI,String nonconclusionURI) {
+        private SerializationFormat(String indIRI,String premiseIRI,String conclusionIRI,String nonconclusionIRI) {
             OWLDataFactory df=OWLManager.createOWLOntologyManager().getOWLDataFactory();
-            premise=df.getOWLDataProperty(URI.create(WGTestRegistry.URI_BASE+premiseURI));
-            conclusion=df.getOWLDataProperty(URI.create(WGTestRegistry.URI_BASE+conclusionURI));
-            nonconclusion=df.getOWLDataProperty(URI.create(WGTestRegistry.URI_BASE+nonconclusionURI));
+            premise=df.getOWLDataProperty(IRI.create(WGTestRegistry.URI_BASE+premiseIRI));
+            conclusion=df.getOWLDataProperty(IRI.create(WGTestRegistry.URI_BASE+conclusionIRI));
+            nonconclusion=df.getOWLDataProperty(IRI.create(WGTestRegistry.URI_BASE+nonconclusionIRI));
         }
     }
 
@@ -107,8 +106,8 @@ public class WGTestDescriptor {
         if (i.isAnonymous()) {
             throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
         }
-        String testIndividualURI=testIndividual.asNamedIndividual().getURI().toString();
-        testID=testIndividualURI.substring(WGTestRegistry.TEST_ID_PREFIX.length());
+        String testIndividualIRI=testIndividual.asNamedIndividual().getIRI().toString();
+        testID=testIndividualIRI.substring(WGTestRegistry.TEST_ID_PREFIX.length());
         
         OWLDataFactory df=m.getOWLDataFactory();
         Map<OWLDataPropertyExpression,Set<OWLLiteral>> dps=i.getDataPropertyValues(o);
@@ -128,7 +127,7 @@ public class WGTestDescriptor {
     }
     
     protected String getIdentifier(Map<OWLDataPropertyExpression,Set<OWLLiteral>> dps,OWLDataFactory df) throws InvalidWGTestException {
-        Set<OWLLiteral> identifiers=dps.get(df.getOWLDataProperty(URI.create(WGTestRegistry.URI_BASE+"identifier")));
+        Set<OWLLiteral> identifiers=dps.get(df.getOWLDataProperty(IRI.create(WGTestRegistry.URI_BASE+"identifier")));
         if (identifiers==null || identifiers.isEmpty())
             throw new InvalidWGTestException("Test does not have an identifier.");
         if (identifiers.size()!=1) {
@@ -141,7 +140,7 @@ public class WGTestDescriptor {
     }
 
     protected Status getStatus(Map<OWLObjectPropertyExpression,Set<OWLIndividual>> ops,OWLDataFactory df) throws InvalidWGTestException {
-        Set<OWLIndividual> statuses=ops.get(df.getOWLObjectProperty(URI.create(WGTestRegistry.URI_BASE+"status")));
+        Set<OWLIndividual> statuses=ops.get(df.getOWLObjectProperty(IRI.create(WGTestRegistry.URI_BASE+"status")));
         if (statuses==null || statuses.isEmpty())
             return null;
         else if (statuses.size()>1)
@@ -151,11 +150,11 @@ public class WGTestDescriptor {
             if (i.isAnonymous()) {
                 throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
             }
-            URI statusURI=i.asNamedIndividual().getURI();
+            IRI statusIRI=i.asNamedIndividual().getIRI();
             for (Status status : Status.values())
-                if (statusURI.equals(status.uri))
+                if (statusIRI.equals(status.uri))
                     return status;
-            throw new InvalidWGTestException("The test "+testID+"has an invalid status of "+statusURI.toString()+".");
+            throw new InvalidWGTestException("The test "+testID+"has an invalid status of "+statusIRI.toString()+".");
         }
     }
 
@@ -164,15 +163,15 @@ public class WGTestDescriptor {
         Set<OWLClassExpression> types=testIndividual.getTypes(testContainer);
         nextItem: for (OWLClassExpression type : types) {
             if (type instanceof OWLClass) {
-                URI testTypeURI=((OWLClass)type).getURI();
+                IRI testTypeIRI=((OWLClass)type).getIRI();
                 for (TestType testType : TestType.values()) {
-                    if (testTypeURI.equals(testType.uri)) {
+                    if (testTypeIRI.equals(testType.uri)) {
                         testTypes.add(testType);
                         continue nextItem;
                     }
                 }
-                if (!TEST_CASE_URI.equals(testTypeURI))
-                    throw new InvalidWGTestException("The test "+testID+" has an invalid test type "+testTypeURI.toString()+".");
+                if (!TEST_CASE_IRI.equals(testTypeIRI))
+                    throw new InvalidWGTestException("The test "+testID+" has an invalid test type "+testTypeIRI.toString()+".");
             }
         }
         return testTypes;
@@ -180,20 +179,20 @@ public class WGTestDescriptor {
 
     protected EnumSet<Species> getSpecies(Map<OWLObjectPropertyExpression,Set<OWLIndividual>> ops,OWLDataFactory df) throws InvalidWGTestException {
         EnumSet<Species> species=EnumSet.noneOf(Species.class);
-        Set<OWLIndividual> specs=ops.get(df.getOWLObjectProperty(URI.create(WGTestRegistry.URI_BASE+"species")));
+        Set<OWLIndividual> specs=ops.get(df.getOWLObjectProperty(IRI.create(WGTestRegistry.URI_BASE+"species")));
         if (specs!=null) {
             nextItem: for (OWLIndividual s : specs) {
                 if (s.isAnonymous()) {
                     throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
                 }
-                URI speciesURI=s.asNamedIndividual().getURI();
+                IRI speciesIRI=s.asNamedIndividual().getIRI();
                 for (Species spc : Species.values()) {
-                    if (speciesURI.equals(spc.uri)) {
+                    if (speciesIRI.equals(spc.uri)) {
                         species.add(spc);
                         continue nextItem;
                     }
                 }
-                throw new InvalidWGTestException("The test "+testID+" has an invalid species "+speciesURI.toString()+".");
+                throw new InvalidWGTestException("The test "+testID+" has an invalid species "+speciesIRI.toString()+".");
             }
         }
         return species;
@@ -201,20 +200,20 @@ public class WGTestDescriptor {
 
     protected EnumSet<Semantics> getSemantics(Map<OWLObjectPropertyExpression,Set<OWLIndividual>> ops,OWLDataFactory df) throws InvalidWGTestException {
         EnumSet<Semantics> semantics=EnumSet.noneOf(Semantics.class);
-        Set<OWLIndividual> sems=ops.get(df.getOWLObjectProperty(URI.create(WGTestRegistry.URI_BASE+"semantics")));
+        Set<OWLIndividual> sems=ops.get(df.getOWLObjectProperty(IRI.create(WGTestRegistry.URI_BASE+"semantics")));
         if (sems!=null) {
             nextItem: for (OWLIndividual s : sems) {
                 if (s.isAnonymous()) {
                     throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
                 }
-                URI semanticsURI=s.asNamedIndividual().getURI();
+                IRI semanticsIRI=s.asNamedIndividual().getIRI();
                 for (Semantics sem : Semantics.values()) {
-                    if (semanticsURI.equals(sem.uri)) {
+                    if (semanticsIRI.equals(sem.uri)) {
                         semantics.add(sem);
                         continue nextItem;
                     }
                 }
-                throw new InvalidWGTestException("The test "+testID+" has an invalid semantics "+semanticsURI.toString()+".");
+                throw new InvalidWGTestException("The test "+testID+" has an invalid semantics "+semanticsIRI.toString()+".");
             }
         }
         return semantics;
@@ -222,20 +221,20 @@ public class WGTestDescriptor {
 
     protected EnumSet<Semantics> getNotSemantics(Map<OWLObjectPropertyExpression,Set<OWLIndividual>> nops,OWLDataFactory df) throws InvalidWGTestException {
         EnumSet<Semantics> notSemantics=EnumSet.noneOf(Semantics.class);
-        Set<OWLIndividual> nsems=nops.get(df.getOWLObjectProperty(URI.create(WGTestRegistry.URI_BASE+"semantics")));
+        Set<OWLIndividual> nsems=nops.get(df.getOWLObjectProperty(IRI.create(WGTestRegistry.URI_BASE+"semantics")));
         if (nsems!=null) {
             nextItem: for (OWLIndividual s : nsems) {
                 if (s.isAnonymous()) {
                     throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
                 }
-                URI semanticsURI=s.asNamedIndividual().getURI();
+                IRI semanticsIRI=s.asNamedIndividual().getIRI();
                 for (Semantics sem : Semantics.values()) {
-                    if (semanticsURI.equals(sem.uri)) {
+                    if (semanticsIRI.equals(sem.uri)) {
                         notSemantics.add(sem);
                         continue nextItem;
                     }
                 }
-                throw new InvalidWGTestException("The test "+testID+" has an invalid not semantics "+semanticsURI.toString()+".");
+                throw new InvalidWGTestException("The test "+testID+" has an invalid not semantics "+semanticsIRI.toString()+".");
             }
         }
         return notSemantics;

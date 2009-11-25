@@ -25,7 +25,7 @@ public class Configuration implements Serializable,Cloneable {
     }
 
     public static enum BlockingStrategyType {
-        ANYWHERE,ANCESTOR,VALIDATED,VALIDATED_RULES
+        ANYWHERE,ANCESTOR,COMPLEX_CORE,SIMPLE_CORE
     }
 
     public static enum BlockingSignatureCacheType {
@@ -35,16 +35,10 @@ public class Configuration implements Serializable,Cloneable {
     public static enum ExistentialStrategyType {
         CREATION_ORDER,EL,INDIVIDUAL_REUSE
     }
-
-    public static enum CoreType {
-        SINGLETON,IGNORE_UPWARDS_PROPAGATED
-    }
-    
     public WarningMonitor warningMonitor;
     public Configuration.TableauMonitorType tableauMonitorType;
     public Configuration.DirectBlockingType directBlockingType;
     public Configuration.BlockingStrategyType blockingStrategyType;
-    public Configuration.CoreType coreType;
     public Configuration.BlockingSignatureCacheType blockingSignatureCacheType;
     public Configuration.ExistentialStrategyType existentialStrategyType;
     public boolean checkClauses;
@@ -57,7 +51,6 @@ public class Configuration implements Serializable,Cloneable {
         tableauMonitorType=Configuration.TableauMonitorType.NONE;
         directBlockingType=Configuration.DirectBlockingType.OPTIMAL;
         blockingStrategyType=Configuration.BlockingStrategyType.ANYWHERE;
-        coreType=CoreType.IGNORE_UPWARDS_PROPAGATED;
         blockingSignatureCacheType=Configuration.BlockingSignatureCacheType.CACHED;
         existentialStrategyType=Configuration.ExistentialStrategyType.CREATION_ORDER;
         ignoreUnsupportedDatatypes=false;

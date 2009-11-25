@@ -3,7 +3,6 @@ package org.semanticweb.HermiT.reasoner;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Configuration.BlockingSignatureCacheType;
 import org.semanticweb.HermiT.Configuration.BlockingStrategyType;
-import org.semanticweb.HermiT.Configuration.CoreType;
 import org.semanticweb.HermiT.Configuration.DirectBlockingType;
 
 
@@ -25,10 +24,7 @@ public class ReasonerCoreBlockingTest extends ReasonerTest {
     }
     protected Configuration getConfiguration() {
         Configuration c=new Configuration();
-//        c.existentialStrategyType=Configuration.ExistentialStrategyType.LAZY;
-//        c.blockingStrategyType=Configuration.BlockingStrategyType.CORE;
-        c.blockingStrategyType=BlockingStrategyType.VALIDATED_RULES;
-        c.coreType=CoreType.IGNORE_UPWARDS_PROPAGATED;
+        c.blockingStrategyType=BlockingStrategyType.COMPLEX_CORE;
         c.directBlockingType=DirectBlockingType.SINGLE;
         c.blockingSignatureCacheType=BlockingSignatureCacheType.NOT_CACHED;
         //c.tableauMonitorType=TableauMonitorType.DEBUGGER_HISTORY_ON;

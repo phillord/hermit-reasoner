@@ -166,8 +166,8 @@ public class ObjectPropertyInclusionManager {
         }
         return replacement;
     }
-    public void rewriteAxioms(OWLAxioms axioms, Map<OWLObjectPropertyExpression, Automaton> automataOfComplexObjectProperties) {
+    public Map<OWLObjectPropertyExpression,Automaton> rewriteAxioms(OWLAxioms axioms, Map<OWLObjectPropertyExpression, Automaton> automataOfComplexObjectProperties) {
             m_automataForComplexRoles.putAll( automataOfComplexObjectProperties );
-            rewriteAxioms( axioms );
+            return rewriteAxioms( axioms );
     }
 }

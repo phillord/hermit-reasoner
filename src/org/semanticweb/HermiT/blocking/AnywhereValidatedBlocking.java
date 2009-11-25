@@ -4,11 +4,8 @@ package org.semanticweb.HermiT.blocking;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.semanticweb.HermiT.blocking.ValidatedDirectBlockingChecker.ValidatedBlockingObject;
-import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
@@ -30,14 +27,11 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
     protected ExtensionManager m_extensionManager;
     protected Node m_firstChangedNode;
     protected Node m_lastValidatedUnchangedNode=null;
-    protected boolean m_useSingletonCore;
-    protected final Map<AtomicConcept, Set<Set<Concept>>> m_unaryValidBlockConditions;
-    protected final Map<Set<AtomicConcept>, Set<Set<Concept>>> m_nAryValidBlockConditions;
+    protected boolean m_useSimpleCore;
     protected final boolean m_hasInverses;
-    protected final boolean m_validateViaRuleApplicability;
     
     // statistics: 
-    protected final boolean debuggingMode=true;
+    protected final boolean debuggingMode=false;
     protected final boolean m_generateValidationStatistics=true;
     public List<Integer> numNodes=new ArrayList<Integer>();
     public List<Integer> numBlocked=new ArrayList<Integer>();
@@ -55,25 +49,18 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
         }
         return validationStatistics;
     }
-    public AnywhereValidatedBlocking(DirectBlockingChecker directBlockingChecker,BlockingSignatureCache blockingSignatureCache,Map<AtomicConcept, Set<Set<Concept>>> unaryValidBlockConditions, Map<Set<AtomicConcept>, Set<Set<Concept>>> nAryValidBlockConditions, boolean hasInverses,boolean useSingletonCore,boolean validateViaRuleApplicability) {
+    public AnywhereValidatedBlocking(DirectBlockingChecker directBlockingChecker,BlockingSignatureCache blockingSignatureCache,boolean hasInverses,boolean useSimpleCore) {
         m_directBlockingChecker=directBlockingChecker;
         m_currentBlockersCache=new ValidatedBlockersCache(m_directBlockingChecker);
         m_blockingSignatureCache=blockingSignatureCache;
-        m_unaryValidBlockConditions=unaryValidBlockConditions;
-        m_nAryValidBlockConditions=nAryValidBlockConditions;
         m_hasInverses=hasInverses;
-        m_useSingletonCore=useSingletonCore;
-        m_validateViaRuleApplicability=validateViaRuleApplicability;
+        m_useSimpleCore=useSimpleCore;
     }
     public void initialize(Tableau tableau) {
         m_tableau=tableau;
         m_directBlockingChecker.initialize(tableau);
         m_extensionManager=m_tableau.getExtensionManager();
-        if (m_validateViaRuleApplicability) {
-            m_blockingValidator=new BlockingValidatorRules(m_tableau);
-        } else {
-            m_blockingValidator=new BlockingValidatorConstraints(m_tableau,m_directBlockingChecker,m_unaryValidBlockConditions,m_nAryValidBlockConditions,m_hasInverses);
-        }
+        m_blockingValidator=new BlockingValidator(m_tableau);
     }
     public void clear() {
         m_currentBlockersCache.clear();
@@ -267,14 +254,18 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
     public void assertionAdded(Concept concept,Node node,boolean isCore) {
         if (m_directBlockingChecker.assertionAdded(concept,node,isCore)!=null || m_lastValidatedUnchangedNode!=null) updateNodeChange(node);
         validationInfoChanged(node);
+        Node parent=node.getParent();
+        if (parent!=null) validationInfoChanged(parent);
     }
     public void assertionCoreSet(Concept concept,Node node) {
         if (m_directBlockingChecker.assertionAdded(concept,node,true)!=null || m_lastValidatedUnchangedNode!=null) updateNodeChange(node);
-        validationInfoChanged(node);
+        //validationInfoChanged(node);
     }
     public void assertionRemoved(Concept concept,Node node,boolean isCore) {
         if (m_directBlockingChecker.assertionRemoved(concept,node,isCore)!=null || m_lastValidatedUnchangedNode!=null) updateNodeChange(node);
         validationInfoChanged(node);
+        Node parent=node.getParent();
+        if (parent!=null) validationInfoChanged(parent);
     }
     public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         if (isCore || m_lastValidatedUnchangedNode!=null) updateNodeChange(nodeFrom);
@@ -286,8 +277,8 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
         m_directBlockingChecker.assertionAdded(atomicRole,nodeFrom,nodeTo,true);
         if (m_lastValidatedUnchangedNode!=null) updateNodeChange(nodeFrom);
         if (m_lastValidatedUnchangedNode!=null) updateNodeChange(nodeTo);
-        validationInfoChanged(nodeFrom);
-        validationInfoChanged(nodeTo);
+        //validationInfoChanged(nodeFrom);
+        //validationInfoChanged(nodeTo);
     }
     public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         m_directBlockingChecker.assertionRemoved(atomicRole,nodeFrom,nodeTo,true);
@@ -297,10 +288,14 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
         validationInfoChanged(nodeTo);
     }
     public void nodesMerged(Node mergeFrom,Node mergeInto) {
-        // TODO: Implement me!
+        Node parent=mergeFrom.getParent();
+        if (parent!=null&&m_directBlockingChecker.canBeBlocker(parent)) 
+            validationInfoChanged(parent);
     }
     public void nodesUnmerged(Node mergeFrom,Node mergeInto) {
-        // TODO: Implement me!
+        Node parent=mergeFrom.getParent();
+        if (parent!=null&&m_directBlockingChecker.canBeBlocker(parent)) 
+            validationInfoChanged(parent);
     }
     public void nodeStatusChanged(Node node) {
         updateNodeChange(node);
@@ -356,7 +351,7 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
         return false;
     }
     public void dlClauseBodyCompiled(List<DLClauseEvaluator.Worker> workers,DLClause dlClause,List<Variable> variables,Object[] valuesBuffer,boolean[] coreVariables) {
-        if (m_useSingletonCore) {
+        if (m_useSimpleCore) {
             for (int i=0;i<coreVariables.length;i++) {
                 coreVariables[i]=false;
             }

@@ -53,7 +53,8 @@ public class MergeTest extends AbstractReasonerInternalsTest {
                 false, // hasInverseRoles
                 false, // hasAtMostRestrictions
                 false, // hasNominals
-                false); // hasDatatypes
+                false, // hasDatatypes
+                null); //automaton for complex roles
     }
 
     protected Tableau m_tableau;

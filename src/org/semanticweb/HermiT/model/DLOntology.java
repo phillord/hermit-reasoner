@@ -54,28 +54,13 @@ public class DLOntology implements Serializable {
     protected final Set<String> m_definedDatatypeIRIs;
     protected final Set<Individual> m_allIndividuals;
     protected final Set<DescriptionGraph> m_allDescriptionGraphs;
-    /**
-     * gstoil
-     */
     protected final Map<OWLObjectPropertyExpression, Automaton> m_automataOfComplexObjectProperties;
-    protected final Map<AtomicConcept,Set<Set<Concept>>> m_unaryValidBlockConditions;
-    protected final Map<Set<AtomicConcept>,Set<Set<Concept>>> m_nAryValidBlockConditions;
     
     public DLOntology(String ontologyIRI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts,
             Set<AtomicConcept> atomicConcepts,Set<ComplexObjectRoleInclusion> allComplexObjectRoleInclusions,
-            Set<AtomicRole> atomicObjectRoles,Set<AtomicRole> atomicDataRoles,Set<String> definedDatatypeIRIs, 
+            Set<AtomicRole> atomicObjectRoles,Set<AtomicRole> atomicDataRoles,Set<String> definedDatatypeIRIs,
             Set<Individual> individuals,boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,
-            boolean hasDatatypes) {
-        this(ontologyIRI, dlClauses, positiveFacts, negativeFacts, atomicConcepts, allComplexObjectRoleInclusions, 
-                atomicObjectRoles, atomicDataRoles, definedDatatypeIRIs, individuals, hasInverseRoles, 
-                hasAtMostRestrictions, hasNominals, hasDatatypes, null, null);
-    }
-    public DLOntology(String ontologyIRI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts,
-            Set<AtomicConcept> atomicConcepts,Set<ComplexObjectRoleInclusion> allComplexObjectRoleInclusions,
-            Set<AtomicRole> atomicObjectRoles,Set<AtomicRole> atomicDataRoles,Set<String> definedDatatypeIRIs,Set<Individual> individuals,
-            boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,boolean hasDatatypes,
-            Map<AtomicConcept, Set<Set<Concept>>> unaryValidBlockConditions,Map<Set<AtomicConcept>, 
-            Set<Set<Concept>>> nAryValidBlockConditions) {
+            boolean hasDatatypes,Map<OWLObjectPropertyExpression, Automaton> automataOfComplexObjectProperties) {
         m_ontologyIRI=ontologyIRI;
         m_dlClauses=dlClauses;
         m_positiveFacts=positiveFacts;
@@ -97,7 +82,10 @@ public class DLOntology implements Serializable {
             m_allComplexObjectRoleInclusions=new HashSet<ComplexObjectRoleInclusion>();
         else
             m_allComplexObjectRoleInclusions=allComplexObjectRoleInclusions;
-        m_automataOfComplexObjectProperties = new HashMap<OWLObjectPropertyExpression, Automaton>();
+        if (automataOfComplexObjectProperties==null)
+            m_automataOfComplexObjectProperties=new HashMap<OWLObjectPropertyExpression, Automaton>();
+        else
+            m_automataOfComplexObjectProperties=automataOfComplexObjectProperties;
         if (atomicObjectRoles==null)
             m_allAtomicObjectRoles=new TreeSet<AtomicRole>(AtomicRoleComparator.INSTANCE);
         else
@@ -144,16 +132,6 @@ public class DLOntology implements Serializable {
                 if (argument instanceof Individual)
                     m_allIndividuals.add((Individual)argument);
             }
-        }
-        if (unaryValidBlockConditions==null) {
-            m_unaryValidBlockConditions=new HashMap<AtomicConcept,Set<Set<Concept>>>();
-        } else {
-            m_unaryValidBlockConditions=unaryValidBlockConditions;
-        }
-        if (nAryValidBlockConditions==null) {
-            m_nAryValidBlockConditions=new HashMap<Set<AtomicConcept>,Set<Set<Concept>>>();   
-        } else {
-            m_nAryValidBlockConditions=nAryValidBlockConditions;
         }
     }
     protected void addDLPredicate(DLPredicate dlPredicate) {
@@ -228,12 +206,6 @@ public class DLOntology implements Serializable {
 
     public boolean hasDatatypes() {
         return m_hasDatatypes;
-    }
-    public Map<AtomicConcept, Set<Set<Concept>>> getUnaryValidBlockConditions() {
-        return m_unaryValidBlockConditions;
-    }
-    public Map<Set<AtomicConcept>, Set<Set<Concept>>> getNAryValidBlockConditions() {
-        return m_nAryValidBlockConditions;
     }
     public boolean isHorn() {
         return m_isHorn;
@@ -687,14 +659,8 @@ public class DLOntology implements Serializable {
             return INSTANCE;
         }
     }
-
-	public void setAutomata(
-			Map<OWLObjectPropertyExpression, Automaton> automataOfComplexRoles) {
-		m_automataOfComplexObjectProperties.putAll(automataOfComplexRoles);
-		
-	}
     public Map<OWLObjectPropertyExpression, Automaton> getAutomataOfComplexObjectProperties() {
-		return m_automataOfComplexObjectProperties;
-	}
+        return m_automataOfComplexObjectProperties;
+    }
 
 }
