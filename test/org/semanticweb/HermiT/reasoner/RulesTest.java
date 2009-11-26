@@ -10,6 +10,8 @@ import org.semanticweb.owlapi.model.OWLObjectProperty;
 
 public class RulesTest extends AbstractReasonerTest {
 
+    public static String LB=System.getProperty("line.separator");
+    
     public RulesTest(String name) {
         super(name);
     }
@@ -20,11 +22,11 @@ public class RulesTest extends AbstractReasonerTest {
 //    }
 
     public void testSimpleRule() throws Exception {
-        String axioms = "SubClassOf(:A :B)"
-            + "ClassAssertion(:A :a)"
-            + "ClassAssertion(:D :b)"
+        String axioms = "SubClassOf(:A :B)"+LB
+            + "ClassAssertion(:A :a)"+LB
+            + "ClassAssertion(:D :b)"+LB
             // B(x) -> C(x)
-            + "DLSafeRule(Body(ClassAtom(:B IndividualVariable(:x))) Head(ClassAtom(:C IndividualVariable(:x))))";
+            + "DLSafeRule(Body(ClassAtom(:B Variable(:x))) Head(ClassAtom(:C Variable(:x))))";
         loadOntologyWithAxioms(axioms);
         
         OWLNamedIndividual a = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "a"));
@@ -41,7 +43,7 @@ public class RulesTest extends AbstractReasonerTest {
             + "ClassAssertion(:A :a)"
             + "ClassAssertion(:D :b)"
             // B(x) -> C(a)
-            + "DLSafeRule(Body(ClassAtom(:B IndividualVariable(:x))) Head(ClassAtom(:C :a)))";
+            + "DLSafeRule(Body(ClassAtom(:B Variable(:x))) Head(ClassAtom(:C :a)))";
         loadOntologyWithAxioms(axioms);
         
         OWLNamedIndividual a = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "a"));
@@ -56,11 +58,11 @@ public class RulesTest extends AbstractReasonerTest {
         String axioms = "ClassAssertion(ObjectSomeValuesFrom(:r owl:Thing) :a)"
             + "ObjectPropertyAssertion(:r :a :b)"
             // r(x, y) -> s(x, y)
-            + "DLSafeRule(Body(ObjectPropertyAtom(:r IndividualVariable(:x) IndividualVariable(:y))) Head(ObjectPropertyAtom(:s IndividualVariable(:x) IndividualVariable(:y))))"
+            + "DLSafeRule(Body(ObjectPropertyAtom(:r Variable(:x) Variable(:y))) Head(ObjectPropertyAtom(:s Variable(:x) Variable(:y))))"
             // r(x, b) -> sb(x, b)
-            + "DLSafeRule(Body(ObjectPropertyAtom(:r IndividualVariable(:x) :b)) Head(ObjectPropertyAtom(:sb IndividualVariable(:x) :b)))"
+            + "DLSafeRule(Body(ObjectPropertyAtom(:r Variable(:x) :b)) Head(ObjectPropertyAtom(:sb Variable(:x) :b)))"
             // s(a, x) -> sa(a, b)
-            + "DLSafeRule(Body(ObjectPropertyAtom(:s :a IndividualVariable(:x))) Head(ObjectPropertyAtom(:sa :a :b)))"
+            + "DLSafeRule(Body(ObjectPropertyAtom(:s :a Variable(:x))) Head(ObjectPropertyAtom(:sa :a :b)))"
             // r(a, b) -> q(a, b)
             + "DLSafeRule(Body(ObjectPropertyAtom(:r :a :b)) Head(ObjectPropertyAtom(:q :a :b)))";
         loadOntologyWithAxioms(axioms);
@@ -88,7 +90,7 @@ public class RulesTest extends AbstractReasonerTest {
         String axioms = "DataPropertyAssertion(:dp :a \"18\"^^xsd:short)"
             + "DataPropertyAssertion(:dp :b \"17\"^^xsd:short)"
             // dp(x, "18"^^xsd:integer) -> C(x)
-            + "DLSafeRule(Body(DataPropertyAtom(:dp IndividualVariable(:x) \"18\"^^xsd:integer)) Head(ClassAtom(:C IndividualVariable(:x))))";
+            + "DLSafeRule(Body(DataPropertyAtom(:dp Variable(:x) \"18\"^^xsd:integer)) Head(ClassAtom(:C Variable(:x))))";
         loadOntologyWithAxioms(axioms);
         OWLNamedIndividual a = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "a"));
         OWLNamedIndividual b = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "b"));
@@ -105,9 +107,9 @@ public class RulesTest extends AbstractReasonerTest {
             + "DataPropertyAssertion(:dp :c \"25\"^^xsd:integer)"
             + "ClassAssertion(ObjectComplementOf(:C) :a)"
             // dp(x, y) /\ DatatypeRestriction(xsd:int xsd:minInclusive "15"^^xsd:int)(y) -> C(x)
-            + "DLSafeRule(Body(DataPropertyAtom(:dp IndividualVariable(:x) LiteralVariable(:y)) DataRangeAtom(DatatypeRestriction(xsd:int xsd:minInclusive \"15\"^^xsd:int) LiteralVariable(:y))) Head(ClassAtom(:C IndividualVariable(:x))))"
+            + "DLSafeRule(Body(DataPropertyAtom(:dp Variable(:x) Variable(:y)) DataRangeAtom(DatatypeRestriction(xsd:int xsd:minInclusive \"15\"^^xsd:int) Variable(:y))) Head(ClassAtom(:C Variable(:x))))"
             // dp(x, y) /\ DataComplementOf(DatatypeRestriction(xsd:int xsd:minInclusive "15"^^xsd:int))(y) -> D(x)
-            + "DLSafeRule(Body(DataPropertyAtom(:dp IndividualVariable(:x) LiteralVariable(:y)) DataRangeAtom(DataComplementOf(DatatypeRestriction(xsd:int xsd:minInclusive \"15\"^^xsd:int)) LiteralVariable(:y))) Head(ClassAtom(:D IndividualVariable(:x))))";
+            + "DLSafeRule(Body(DataPropertyAtom(:dp Variable(:x) Variable(:y)) DataRangeAtom(DataComplementOf(DatatypeRestriction(xsd:int xsd:minInclusive \"15\"^^xsd:int)) Variable(:y))) Head(ClassAtom(:D Variable(:x))))";
         loadOntologyWithAxioms(axioms);
         OWLNamedIndividual a = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "a"));
         OWLNamedIndividual b = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "b"));
@@ -127,9 +129,9 @@ public class RulesTest extends AbstractReasonerTest {
     public void testRuleWithFreshIndividuals() throws Exception {
         String axioms = "ClassAssertion(:A :a)"
             // A(x) -> B(b)
-            + "DLSafeRule(Body(ClassAtom(:A IndividualVariable(:x))) Head(ClassAtom(:B :b)))"
+            + "DLSafeRule(Body(ClassAtom(:A Variable(:x))) Head(ClassAtom(:B :b)))"
             // B(x) -> C(x)
-            + "DLSafeRule(Body(ClassAtom(:B IndividualVariable(:x))) Head(ClassAtom(:C IndividualVariable(:x))))";;
+            + "DLSafeRule(Body(ClassAtom(:B Variable(:x))) Head(ClassAtom(:C Variable(:x))))";;
         loadOntologyWithAxioms(axioms);
         OWLNamedIndividual a = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "a"));
         OWLNamedIndividual b = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "b"));
@@ -149,11 +151,11 @@ public class RulesTest extends AbstractReasonerTest {
             // -> B(b)
             + "DLSafeRule(Body() Head(ClassAtom(:B :b)))"
             // B(x) -> C(x)
-            + "DLSafeRule(Body(ClassAtom(:B IndividualVariable(:x))) Head(ClassAtom(:C IndividualVariable(:x))))"
+            + "DLSafeRule(Body(ClassAtom(:B Variable(:x))) Head(ClassAtom(:C Variable(:x))))"
             // B(x) /\ A(x) -> D(x)
-            + "DLSafeRule(Body(ClassAtom(:B IndividualVariable(:x)) ClassAtom(:A IndividualVariable(:x))) Head(ClassAtom(:D IndividualVariable(:x))))"
+            + "DLSafeRule(Body(ClassAtom(:B Variable(:x)) ClassAtom(:A Variable(:x))) Head(ClassAtom(:D Variable(:x))))"
             // B(x) /\ D(y) -> E(e)
-            + "DLSafeRule(Body(ClassAtom(:B IndividualVariable(:x)) ClassAtom(:D IndividualVariable(:y))) Head(ClassAtom(:E :e)))";
+            + "DLSafeRule(Body(ClassAtom(:B Variable(:x)) ClassAtom(:D Variable(:y))) Head(ClassAtom(:E :e)))";
         loadOntologyWithAxioms(axioms);
         OWLNamedIndividual a = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "a"));
         OWLNamedIndividual b = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "b"));
@@ -184,7 +186,7 @@ public class RulesTest extends AbstractReasonerTest {
         String axioms = "ClassAssertion(:A :a)"
             + "ClassAssertion(:B :b)"
             // A(x) -> B(x) /\ C(x)
-            + "DLSafeRule(Body(ClassAtom(:A IndividualVariable(:x))) Head(ClassAtom(:B IndividualVariable(:x)) ClassAtom(:C IndividualVariable(:x))))";
+            + "DLSafeRule(Body(ClassAtom(:A Variable(:x))) Head(ClassAtom(:B Variable(:x)) ClassAtom(:C Variable(:x))))";
         loadOntologyWithAxioms(axioms);
         OWLNamedIndividual a = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "a"));
         OWLNamedIndividual b = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "b"));
@@ -229,7 +231,7 @@ public class RulesTest extends AbstractReasonerTest {
     public void testDRSafety() throws Exception {
         String axioms = "ClassAssertion(:A :a)"
             // A(x) /\ xsd:integer(y) -> dp(x, y)
-            + "DLSafeRule(Body(ClassAtom(:A IndividualVariable(:x)) DataRangeAtom(xsd:integer LiteralVariable(:y))) Head(DataPropertyAtom(:dp IndividualVariable(:x) LiteralVariable(:y))))";
+            + "DLSafeRule(Body(ClassAtom(:A Variable(:x)) DataRangeAtom(xsd:integer Variable(:y))) Head(DataPropertyAtom(:dp Variable(:x) Variable(:y))))";
         loadOntologyWithAxioms(axioms);
         boolean caught=false;
         try {
@@ -243,7 +245,7 @@ public class RulesTest extends AbstractReasonerTest {
     public void testNormalSafety() throws Exception {
         String axioms = "ClassAssertion(:A :a)"
             // A(x) -> r(x, y)            
-            + "DLSafeRule(Body(ClassAtom(:A IndividualVariable(:x))) Head(ObjectPropertyAtom(:r IndividualVariable(:x) IndividualVariable(:y))))";
+            + "DLSafeRule(Body(ClassAtom(:A Variable(:x))) Head(ObjectPropertyAtom(:r Variable(:x) Variable(:y))))";
         loadOntologyWithAxioms(axioms);
         boolean caught=false;
         try {
@@ -259,19 +261,19 @@ public class RulesTest extends AbstractReasonerTest {
             +"ObjectPropertyAssertion(:rab :a :b) ObjectPropertyAssertion(:rac :a :c) ObjectPropertyAssertion(:rcd :c :d)"
             // A(xa) /\ B(b) /\ rab(xa, xb) /\ rac(xa, xc) /\ rcd(xc, xd) /\ E(xe) -> Ap(xa) /\ Bp(xb) /\ Cp(c) /\ Dp(xd) /\ Ep(xe) /\ rae(xa, xe)
             + "DLSafeRule(Body(" +
-            		"ClassAtom(:A IndividualVariable(:xa)) " +
+            		"ClassAtom(:A Variable(:xa)) " +
             		"ClassAtom(:B :b) " +
-            		"ObjectPropertyAtom(:rab IndividualVariable(:xa) IndividualVariable(:xb))" +
-            		"ObjectPropertyAtom(:rac IndividualVariable(:xa) IndividualVariable(:xc))" +
-            		"ObjectPropertyAtom(:rcd IndividualVariable(:xc) IndividualVariable(:xd))" +
-            		"ClassAtom(:E IndividualVariable(:xe)) " +
+            		"ObjectPropertyAtom(:rab Variable(:xa) Variable(:xb))" +
+            		"ObjectPropertyAtom(:rac Variable(:xa) Variable(:xc))" +
+            		"ObjectPropertyAtom(:rcd Variable(:xc) Variable(:xd))" +
+            		"ClassAtom(:E Variable(:xe)) " +
             		") Head(" +
-            		"ClassAtom(:Ap IndividualVariable(:xa)) " +
-            		"ClassAtom(:Bp IndividualVariable(:xb)) " +
+            		"ClassAtom(:Ap Variable(:xa)) " +
+            		"ClassAtom(:Bp Variable(:xb)) " +
             		"ClassAtom(:Cp :c) " +
-            		"ClassAtom(:Dp IndividualVariable(:xd)) " +
-            		"ClassAtom(:Ep IndividualVariable(:xe)) " +
-            		"ObjectPropertyAtom(:rae IndividualVariable(:xa) IndividualVariable(:xe))" +
+            		"ClassAtom(:Dp Variable(:xd)) " +
+            		"ClassAtom(:Ep Variable(:xe)) " +
+            		"ObjectPropertyAtom(:rae Variable(:xa) Variable(:xe))" +
             		"))";
         loadOntologyWithAxioms(axioms);
         OWLNamedIndividual a = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "a"));
@@ -311,9 +313,9 @@ public class RulesTest extends AbstractReasonerTest {
         String axioms = "ClassAssertion(:A :a) SubClassOf(:A DataSomeValuesFrom(:dp DatatypeRestriction(xsd:integer xsd:minInclusive \"6\"^^xsd:integer xsd:maxInclusive \"9\"^^xsd:integer)))"
             // dp(x, y) /\ ((xsd:integer >= 5) and (xsd:decimal <= 10))(y) /\ (xsd:int <= 9)(y) -> B(x)
             + "DLSafeRule(Body(" +
-            		"DataPropertyAtom(:dp IndividualVariable(:x) LiteralVariable(:y)) " +
-            		"DataRangeAtom(DataIntersectionOf(DatatypeRestriction(xsd:integer xsd:minInclusive \"5\"^^xsd:int) DatatypeRestriction(xsd:decimal xsd:maxInclusive \"10\"^^xsd:int)) LiteralVariable(:y))" +
-            		") Head(ClassAtom(:B IndividualVariable(:x))))";
+            		"DataPropertyAtom(:dp Variable(:x) Variable(:y)) " +
+            		"DataRangeAtom(DataIntersectionOf(DatatypeRestriction(xsd:integer xsd:minInclusive \"5\"^^xsd:int) DatatypeRestriction(xsd:decimal xsd:maxInclusive \"10\"^^xsd:int)) Variable(:y))" +
+            		") Head(ClassAtom(:B Variable(:x))))";
         loadOntologyWithAxioms(axioms);
         OWLClass B = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "B"));
         OWLNamedIndividual a = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "a"));
@@ -327,9 +329,9 @@ public class RulesTest extends AbstractReasonerTest {
             + "SubClassOf(:B DataHasValue(:dp \"abc\"))"
             // dp(x, y) /\ not((xsd:integer >= 5) and (xsd:decimal <= 10))(y) -> C(x)
             + "DLSafeRule(Body(" +
-                    "DataPropertyAtom(:dp IndividualVariable(:x) LiteralVariable(:y)) " +
-                    "DataRangeAtom(DataComplementOf(DataIntersectionOf(DatatypeRestriction(xsd:integer xsd:minInclusive \"5\"^^xsd:int) DatatypeRestriction(xsd:decimal xsd:maxInclusive \"10\"^^xsd:int))) LiteralVariable(:y))" +
-                    ") Head(ClassAtom(:C IndividualVariable(:x))))";
+                    "DataPropertyAtom(:dp Variable(:x) Variable(:y)) " +
+                    "DataRangeAtom(DataComplementOf(DataIntersectionOf(DatatypeRestriction(xsd:integer xsd:minInclusive \"5\"^^xsd:int) DatatypeRestriction(xsd:decimal xsd:maxInclusive \"10\"^^xsd:int))) Variable(:y))" +
+                    ") Head(ClassAtom(:C Variable(:x))))";
         loadOntologyWithAxioms(axioms);
         OWLClass C = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "B"));
         OWLNamedIndividual a = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "a"));
@@ -345,9 +347,9 @@ public class RulesTest extends AbstractReasonerTest {
             + "SubClassOf(:A DataSomeValuesFrom(:dp DatatypeRestriction(xsd:integer xsd:minInclusive \"6\"^^xsd:integer xsd:maxInclusive \"9\"^^xsd:integer)))"
             // dp(x, y) -> not(xsd:short >= 1)(y)
             + "DLSafeRule(Body(" +
-            "DataPropertyAtom(:dp IndividualVariable(:x) LiteralVariable(:y)) " +
+            "DataPropertyAtom(:dp Variable(:x) Variable(:y)) " +
             ") Head(" +
-            "DataRangeAtom(DataComplementOf(DatatypeRestriction(xsd:short xsd:minInclusive \"1\"^^xsd:int)) LiteralVariable(:y))" +
+            "DataRangeAtom(DataComplementOf(DatatypeRestriction(xsd:short xsd:minInclusive \"1\"^^xsd:int)) Variable(:y))" +
             "))";
         loadOntologyWithAxioms(axioms);
         createReasoner();
@@ -360,7 +362,7 @@ public class RulesTest extends AbstractReasonerTest {
 		+ "DisjointClasses(:A :B) " 
 		+ "ObjectPropertyAssertion(:r :a :b)"
 		// r(x, y) -> SameAs(x, y)
-		+ "DLSafeRule(Body(ObjectPropertyAtom(:r IndividualVariable(:x) IndividualVariable(:y))) Head(SameIndividualAtom(IndividualVariable(:x) IndividualVariable(:y))))";
+		+ "DLSafeRule(Body(ObjectPropertyAtom(:r Variable(:x) Variable(:y))) Head(SameIndividualAtom(Variable(:x) Variable(:y))))";
         loadOntologyWithAxioms(axioms);        
         createReasoner();
         assertTrue(!m_reasoner.isConsistent());
@@ -371,7 +373,7 @@ public class RulesTest extends AbstractReasonerTest {
             + "ObjectPropertyAssertion(:f :a :c)" 
             + "FunctionalObjectProperty(:f)"
             // f(x, y) /\ f(x, z) -> DifferentFrom(y, z)
-            + "DLSafeRule(Body(ObjectPropertyAtom(:f IndividualVariable(:x) IndividualVariable(:y)) ObjectPropertyAtom(:f IndividualVariable(:x) IndividualVariable(:z))) Head(DifferentIndividualsAtom(IndividualVariable(:y) IndividualVariable(:z))))";
+            + "DLSafeRule(Body(ObjectPropertyAtom(:f Variable(:x) Variable(:y)) ObjectPropertyAtom(:f Variable(:x) Variable(:z))) Head(DifferentIndividualsAtom(Variable(:y) Variable(:z))))";
         loadOntologyWithAxioms(axioms);
         createReasoner();
         assertTrue(!m_reasoner.isConsistent());
@@ -381,8 +383,8 @@ public class RulesTest extends AbstractReasonerTest {
         String axioms = "ClassAssertion(:A :a) ClassAssertion(:B :b) DisjointClasses(:A :B) ObjectPropertyAssertion(:r :a :b)"
             // r(x, y) /\ DifferentFrom(x, y)-> C(x)
             + "DLSafeRule(Body(" +
-            		"ObjectPropertyAtom(:r IndividualVariable(:x) IndividualVariable(:y)) " +
-            		"DifferentIndividualsAtom(IndividualVariable(:x) IndividualVariable(:y))) Head(ClassAtom(:C IndividualVariable(:x))))";
+            		"ObjectPropertyAtom(:r Variable(:x) Variable(:y)) " +
+            		"DifferentIndividualsAtom(Variable(:x) Variable(:y))) Head(ClassAtom(:C Variable(:x))))";
         loadOntologyWithAxioms(axioms);
 
         OWLClass C = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "C"));

@@ -33,8 +33,8 @@ import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.blocking.DirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.SingleDirectBlockingChecker;
-import org.semanticweb.HermiT.blocking.ValidatedDirectBlockingChecker;
-import org.semanticweb.HermiT.blocking.ValidatedPairwiseBlockingChecker;
+import org.semanticweb.HermiT.blocking.ValidatedSingleDirectBlockingChecker;
+import org.semanticweb.HermiT.blocking.ValidatedPairwiseDirectBlockingChecker;
 import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
 import org.semanticweb.HermiT.existentials.ExistentialExpansionStrategy;
@@ -1557,9 +1557,9 @@ public class Reasoner implements MonitorableOWLReasoner,Serializable {
         DirectBlockingChecker directBlockingChecker=null;
         if (config.blockingStrategyType==BlockingStrategyType.SIMPLE_CORE || config.blockingStrategyType==BlockingStrategyType.COMPLEX_CORE) {
             if (config.directBlockingType==DirectBlockingType.PAIR_WISE) {
-                directBlockingChecker=new ValidatedPairwiseBlockingChecker();
+                directBlockingChecker=new ValidatedPairwiseDirectBlockingChecker();
             } else {
-                directBlockingChecker=new ValidatedDirectBlockingChecker();
+                directBlockingChecker=new ValidatedSingleDirectBlockingChecker();
             }
         } else {
             switch (config.directBlockingType) {

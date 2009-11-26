@@ -5,13 +5,21 @@ import org.semanticweb.HermiT.Configuration.BlockingSignatureCacheType;
 import org.semanticweb.HermiT.Configuration.BlockingStrategyType;
 import org.semanticweb.HermiT.Configuration.DirectBlockingType;
 
-
-
 public class ReasonerCoreBlockingTest extends ReasonerTest {
 
     public ReasonerCoreBlockingTest(String name) {
         super(name);
     }
+    
+    protected Configuration getConfiguration() {
+        Configuration c=new Configuration();
+        c.blockingStrategyType=BlockingStrategyType.SIMPLE_CORE;
+        c.directBlockingType=DirectBlockingType.SINGLE;
+        c.blockingSignatureCacheType=BlockingSignatureCacheType.NOT_CACHED;
+        //c.tableauMonitorType=TableauMonitorType.DEBUGGER_HISTORY_ON;
+        return c;
+    }
+    
     public void testExpansion() throws Exception {
         String axioms = "SubClassOf(:B ObjectSomeValuesFrom(:r :D)) "
           + "SubClassOf(owl:Thing ObjectMaxCardinality(1 :r :C))"
@@ -22,14 +30,7 @@ public class ReasonerCoreBlockingTest extends ReasonerTest {
       loadReasonerWithAxioms(axioms);
       assertABoxSatisfiable(true);
     }
-    protected Configuration getConfiguration() {
-        Configuration c=new Configuration();
-        c.blockingStrategyType=BlockingStrategyType.COMPLEX_CORE;
-        c.directBlockingType=DirectBlockingType.SINGLE;
-        c.blockingSignatureCacheType=BlockingSignatureCacheType.NOT_CACHED;
-        //c.tableauMonitorType=TableauMonitorType.DEBUGGER_HISTORY_ON;
-        return c;
-    }
+
 
     public void testWidmann2() throws Exception {
         // <r>q; 

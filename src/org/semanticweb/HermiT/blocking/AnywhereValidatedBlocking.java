@@ -5,7 +5,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.semanticweb.HermiT.blocking.ValidatedDirectBlockingChecker.ValidatedBlockingObject;
+import org.semanticweb.HermiT.blocking.ValidatedSingleDirectBlockingChecker.ValidatedBlockingObject;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
@@ -52,7 +52,7 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
     public AnywhereValidatedBlocking(DirectBlockingChecker directBlockingChecker,BlockingSignatureCache blockingSignatureCache,boolean hasInverses,boolean useSimpleCore) {
         m_directBlockingChecker=directBlockingChecker;
         m_currentBlockersCache=new ValidatedBlockersCache(m_directBlockingChecker);
-        m_blockingSignatureCache=blockingSignatureCache;
+        m_blockingSignatureCache=null;//blockingSignatureCache; so far cache is not supported
         m_hasInverses=hasInverses;
         m_useSimpleCore=useSimpleCore;
     }
@@ -88,43 +88,37 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
             node=m_firstChangedNode;
             boolean checkBlockingSignatureCache=(m_blockingSignatureCache!=null && !m_blockingSignatureCache.isEmpty());
             while (node!=null) {
-                if (node.isActive()) {
-                    if (m_directBlockingChecker.canBeBlocked(node)
-                            && (m_directBlockingChecker.hasBlockingInfoChanged(node) || !node.isDirectlyBlocked() || node.getBlocker().getNodeID()>=m_firstChangedNode.getNodeID())) {
+                if (node.isActive() && (m_directBlockingChecker.canBeBlocked(node) || m_directBlockingChecker.canBeBlocker(node))) {
+                    if (m_directBlockingChecker.hasBlockingInfoChanged(node) || !node.isDirectlyBlocked() || node.getBlocker().getNodeID()>=m_firstChangedNode.getNodeID()) {
                         Node parent=node.getParent();
                         if (parent==null)
                             node.setBlocked(null,false);
                         else if (parent.isBlocked())
                             node.setBlocked(parent,false);
-                        else if (checkBlockingSignatureCache && m_blockingSignatureCache.containsSignature(node)) {
-                            node.setBlocked(Node.SIGNATURE_CACHE_BLOCKER,true);
-                        } else {
+                        else {
                             Node blocker=null;
-                            Node previousBlocker=node.getBlocker();
-                            List<Node> possibleBlockers=m_currentBlockersCache.getPossibleBlockers(node);
-                            if (!possibleBlockers.isEmpty()) {
-                                if (m_directBlockingChecker.hasChangedSinceValidation(node) || m_directBlockingChecker.hasChangedSinceValidation(node.getParent())) {
-                                    // the node or its parent has changed since we last validated the blocks, so even if all the blockers 
-                                    // in the cache were invalid last time we validated, we'll give it another try
-                                    blocker=possibleBlockers.get(0);
+                            if (m_lastValidatedUnchangedNode==null) {
+                                // before any validation, the cache contains only singleton sets, we can block as soon as we have a blocker with the same core
+                                if (checkBlockingSignatureCache && m_blockingSignatureCache.containsSignature(node)) {
+                                    blocker=Node.SIGNATURE_CACHE_BLOCKER;
                                 } else {
-                                    // neither the node nor its parent has changed since the last validation
-                                    // if also the possible blockers in the blockers cache and their parents have not changed
-                                    // since the last validation, there is no point in blocking again
-                                    // the only exception is that the blockers cache contains the node that blocked this node previously 
-                                    // if that node and its parent is unchanged, then the block is still ok 
-                                    // if its previous blocker is still in the cache then it has also not been modified because 
-                                    // it would have a different hash code after the modification
-                                    // if the previous blocker is no longer there, then it does not make sense to try any node with smaller 
-                                    // node ID again unless it has been modified since the last validation (-> newly added to the cache), 
-                                    if (previousBlocker!=null&&possibleBlockers.contains(previousBlocker)&&!m_directBlockingChecker.hasChangedSinceValidation(previousBlocker)&&!m_directBlockingChecker.hasChangedSinceValidation(previousBlocker.getParent())) {
-                                        // reassign the valid and unchanged blocker
-                                        blocker=previousBlocker;
-                                    } else {
-                                        for (Node n : possibleBlockers) {
-                                            // find he smallest one that has changed since we last validated
-                                            if (m_directBlockingChecker.hasChangedSinceValidation(n) || m_directBlockingChecker.hasChangedSinceValidation(n.getParent())) {
-                                                blocker=n;
+                                    blocker=m_currentBlockersCache.getBlocker(node);
+                                }
+                            } else {
+                                // after a validation has been done, only re-block if something has been modified
+                                Node previousBlocker=node.getBlocker();
+                                boolean nodeModified=m_directBlockingChecker.hasChangedSinceValidation(node);
+                                if (!nodeModified && previousBlocker==Node.SIGNATURE_CACHE_BLOCKER) 
+                                    blocker=Node.SIGNATURE_CACHE_BLOCKER;
+                                else {
+                                    if (nodeModified && checkBlockingSignatureCache && m_blockingSignatureCache.containsSignature(node)) {
+                                        blocker=Node.SIGNATURE_CACHE_BLOCKER;
+                                    } 
+                                    if (blocker==null) {
+                                        // no cache blocker
+                                        for (Node possibleBlocker : m_currentBlockersCache.getPossibleBlockers(node)) {
+                                            if (nodeModified || m_directBlockingChecker.hasChangedSinceValidation(possibleBlocker) || previousBlocker==possibleBlocker) {
+                                                blocker=possibleBlocker;
                                                 break;
                                             }
                                         }
@@ -167,27 +161,23 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
                     // check whether the block is a correct one
                     if ((node.isDirectlyBlocked()&&(m_directBlockingChecker.hasChangedSinceValidation(node) || m_directBlockingChecker.hasChangedSinceValidation(node.getParent()) || m_directBlockingChecker.hasChangedSinceValidation(node.getBlocker()))) 
                             || !node.getParent().isBlocked()) {
-                        Node validBlocker;
-                        List<Node> possibleBlockers = m_currentBlockersCache.getPossibleBlockers(node);
-                        validBlocker=null;
-                        if (!possibleBlockers.isEmpty()) {
-                            int i=0;
-                            if (node.getBlocker()!=null && possibleBlockers.contains(node.getBlocker())) {
-                                // we always assign the smallest node that has been modified since the last validation
-                                // re-testing smaller (unmodified) ones makes no sense 
-                                i=possibleBlockers.indexOf(node.getBlocker());
-                            } else {
-                                // we have to try a completely new blocker
-                                m_blockingValidator.blockerChanged(node);
-                            }
-                            for (; i<possibleBlockers.size(); i++) {
-                                Node blocker=possibleBlockers.get(i);
-                                node.setBlocked(blocker,true);
-                                if (m_blockingValidator.isBlockValid(node)) {
-                                    validBlocker=blocker;
-                                    break;
-                                } else 
-                                    m_blockingValidator.blockerChanged(node);
+                        Node validBlocker=null;
+                        Node currentBlocker=node.getBlocker();
+                        if (node.isDirectlyBlocked()&&currentBlocker!=null) {
+                            // try the old blocker fist
+                            if (m_blockingValidator.isBlockValid(node)) 
+                                validBlocker=currentBlocker;
+                        }
+                        if (validBlocker==null) {
+                            for (Node possibleBlocker : m_currentBlockersCache.getPossibleBlockers(node)) {
+                                if (possibleBlocker!=currentBlocker) {
+                                    node.setBlocked(possibleBlocker,true);
+                                    m_blockingValidator.blockerChanged(node); // invalidate cache
+                                    if (m_blockingValidator.isBlockValid(node)) {
+                                        validBlocker=possibleBlocker;
+                                        break;
+                                    }
+                                }
                             }
                         }
                         if (validBlocker==null && node.hasUnprocessedExistentials()) {
@@ -246,59 +236,57 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
         return true;
     }
     protected void validationInfoChanged(Node node) {
-        if (m_lastValidatedUnchangedNode!=null && node.getNodeID()<m_lastValidatedUnchangedNode.getNodeID()) {
-            m_lastValidatedUnchangedNode=node;
+        if (node !=null) {
+            if (m_lastValidatedUnchangedNode!=null && node.getNodeID()<m_lastValidatedUnchangedNode.getNodeID()) 
+                m_lastValidatedUnchangedNode=node;
+            m_directBlockingChecker.setHasChangedSinceValidation(node, true);
         }
-        m_directBlockingChecker.setHasChangedSinceValidation(node, true);
     }
     public void assertionAdded(Concept concept,Node node,boolean isCore) {
-        if (m_directBlockingChecker.assertionAdded(concept,node,isCore)!=null || m_lastValidatedUnchangedNode!=null) updateNodeChange(node);
+        updateNodeChange(m_directBlockingChecker.assertionAdded(concept,node,isCore));
         validationInfoChanged(node);
-        Node parent=node.getParent();
-        if (parent!=null) validationInfoChanged(parent);
+        validationInfoChanged(node.getParent());
     }
     public void assertionCoreSet(Concept concept,Node node) {
-        if (m_directBlockingChecker.assertionAdded(concept,node,true)!=null || m_lastValidatedUnchangedNode!=null) updateNodeChange(node);
-        //validationInfoChanged(node);
+        updateNodeChange(m_directBlockingChecker.assertionAdded(concept,node,true));
+        validationInfoChanged(node);
+        validationInfoChanged(node.getParent());
     }
     public void assertionRemoved(Concept concept,Node node,boolean isCore) {
-        if (m_directBlockingChecker.assertionRemoved(concept,node,isCore)!=null || m_lastValidatedUnchangedNode!=null) updateNodeChange(node);
+        updateNodeChange(m_directBlockingChecker.assertionRemoved(concept,node,isCore));
         validationInfoChanged(node);
-        Node parent=node.getParent();
-        if (parent!=null) validationInfoChanged(parent);
+        validationInfoChanged(node.getParent());
     }
     public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
-        if (isCore || m_lastValidatedUnchangedNode!=null) updateNodeChange(nodeFrom);
-        if (isCore || m_lastValidatedUnchangedNode!=null) updateNodeChange(nodeTo);
+        if (isCore) updateNodeChange(nodeFrom);
+        if (isCore) updateNodeChange(nodeTo);
         validationInfoChanged(nodeFrom);
         validationInfoChanged(nodeTo);
     }
     public void assertionCoreSet(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
-        m_directBlockingChecker.assertionAdded(atomicRole,nodeFrom,nodeTo,true);
-        if (m_lastValidatedUnchangedNode!=null) updateNodeChange(nodeFrom);
-        if (m_lastValidatedUnchangedNode!=null) updateNodeChange(nodeTo);
-        //validationInfoChanged(nodeFrom);
-        //validationInfoChanged(nodeTo);
+        updateNodeChange(m_directBlockingChecker.assertionAdded(atomicRole,nodeFrom,nodeTo,true));
+        validationInfoChanged(nodeFrom);
+        validationInfoChanged(nodeTo);
     }
     public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
-        m_directBlockingChecker.assertionRemoved(atomicRole,nodeFrom,nodeTo,true);
-        if (isCore || m_lastValidatedUnchangedNode!=null) updateNodeChange(nodeFrom);
-        if (isCore || m_lastValidatedUnchangedNode!=null) updateNodeChange(nodeTo);
+        updateNodeChange(m_directBlockingChecker.assertionRemoved(atomicRole,nodeFrom,nodeTo,true));
         validationInfoChanged(nodeFrom);
         validationInfoChanged(nodeTo);
     }
     public void nodesMerged(Node mergeFrom,Node mergeInto) {
         Node parent=mergeFrom.getParent();
-        if (parent!=null&&m_directBlockingChecker.canBeBlocker(parent)) 
+        if (parent!=null&&(m_directBlockingChecker.canBeBlocker(parent)||m_directBlockingChecker.canBeBlocked(parent))) 
             validationInfoChanged(parent);
     }
     public void nodesUnmerged(Node mergeFrom,Node mergeInto) {
         Node parent=mergeFrom.getParent();
-        if (parent!=null&&m_directBlockingChecker.canBeBlocker(parent)) 
+        if (parent!=null&&(m_directBlockingChecker.canBeBlocker(parent)||m_directBlockingChecker.canBeBlocked(parent))) 
             validationInfoChanged(parent);
     }
     public void nodeStatusChanged(Node node) {
         updateNodeChange(node);
+        validationInfoChanged(node);
+        validationInfoChanged(node.getParent());
     }
     protected final void updateNodeChange(Node node) {
         if (node!=null) {
@@ -587,7 +575,7 @@ class ValidatedBlockersCache {
         }
         public boolean add(Node node) {
             for (Node n : m_nodes) {
-                assert n.getNodeID() >= node.getNodeID(); 
+                assert n.getNodeID() <= node.getNodeID(); 
             }
             return m_nodes.add(node);
         }

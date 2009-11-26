@@ -137,18 +137,6 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
     public BlockingSignature getBlockingSignatureFor(Node node) {
         return new PairWiseBlockingSignature(this,node);
     }
-    public Set<AtomicConcept> getBlockingRelevantConceptsLabel(Node node) {
-        return ((PairWiseBlockingObject)node.getBlockingObject()).getAtomicConceptsLabel();
-    }
-    public Set<AtomicConcept> getFullAtomicConceptsLabel(Node node) {
-        return null;
-    }
-    public Set<AtomicRole> getFullFromParentLabel(Node node) {
-        return null;
-    }
-    public Set<AtomicRole> getFullToParentLabel(Node node) {
-        return null;
-    }
     protected Set<AtomicConcept> fetchAtomicConceptsLabel(Node node,boolean onlyCore) {
         m_atomicConceptsBuffer.clear();
         m_binaryTableSearch1Bound.getBindingsBuffer()[1]=node;

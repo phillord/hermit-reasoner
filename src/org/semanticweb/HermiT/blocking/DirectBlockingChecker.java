@@ -1,9 +1,6 @@
 // Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.blocking;
 
-import java.util.Set;
-
-import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.tableau.Node;
@@ -33,8 +30,4 @@ public interface DirectBlockingChecker {
     Node nodesMerged(Node mergeFrom,Node mergeInto);
     Node nodesUnmerged(Node mergeFrom,Node mergeInto);
     BlockingSignature getBlockingSignatureFor(Node node);
-    Set<AtomicConcept> getBlockingRelevantConceptsLabel(Node node);
-    Set<AtomicConcept> getFullAtomicConceptsLabel(Node node);
-    Set<AtomicRole> getFullToParentLabel(Node node);
-    Set<AtomicRole> getFullFromParentLabel(Node node);
 }

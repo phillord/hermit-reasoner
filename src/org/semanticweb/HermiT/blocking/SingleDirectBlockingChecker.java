@@ -94,18 +94,6 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
     public BlockingSignature getBlockingSignatureFor(Node node) {
         return new SingleBlockingSignature(this,node);
     }
-    public Set<AtomicConcept> getBlockingRelevantConceptsLabel(Node node) {
-        return ((SingleBlockingObject)node.getBlockingObject()).getAtomicConceptsLabel();
-    }
-    public Set<AtomicConcept> getFullAtomicConceptsLabel(Node node) {
-        return fetchAtomicConceptsLabel(node, false);
-    }
-    public Set<AtomicRole> getFullFromParentLabel(Node node) {
-        return null;
-    }
-    public Set<AtomicRole> getFullToParentLabel(Node node) {
-        return null;
-    }
     protected Set<AtomicConcept> fetchAtomicConceptsLabel(Node node,boolean onlyCore) {
         m_atomicConceptsBuffer.clear();
         m_binaryTableSearch1Bound.getBindingsBuffer()[1]=node;

@@ -4,11 +4,11 @@
 	<classpathentry kind="src" path="getopt"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/dk.brics.automaton-1.11-2.jar" sourcepath="lib/dk.brics.automaton-1.11-2-src.jar"/>
 	<classpathentry kind="lib" path="lib/jautomata-core-2.0-alpha-1.jar" sourcepath="lib/jautomata-core-2.0-alpha-1-src.jar"/>
 	<classpathentry kind="lib" path="lib/org.protege.editor.core.application-4.1.jar" sourcepath="lib/org.protege.editor.core.application-4.1-src.jar"/>
 	<classpathentry kind="lib" path="lib/org.protege.editor.owl-4.1.jar" sourcepath="lib/org.protege.editor.owl-4.1-src.jar"/>
 	<classpathentry kind="lib" path="lib/owlapi-3.0.0.jar" sourcepath="lib/owlapi-3.0.0-src.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

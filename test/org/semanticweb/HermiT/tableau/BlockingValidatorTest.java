@@ -10,7 +10,7 @@ import org.semanticweb.HermiT.blocking.BlockingSignatureCache;
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.blocking.BlockingValidator;
 import org.semanticweb.HermiT.blocking.DirectBlockingChecker;
-import org.semanticweb.HermiT.blocking.ValidatedDirectBlockingChecker;
+import org.semanticweb.HermiT.blocking.ValidatedSingleDirectBlockingChecker;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
 import org.semanticweb.HermiT.existentials.ExistentialExpansionStrategy;
 import org.semanticweb.HermiT.model.AnnotatedEquality;
@@ -95,7 +95,7 @@ public class BlockingValidatorTest extends AbstractReasonerInternalsTest {
                 false, // hasDatatypes
                 null); //automaton for complex roles
         
-        DirectBlockingChecker directBlockingChecker=new ValidatedDirectBlockingChecker();
+        DirectBlockingChecker directBlockingChecker=new ValidatedSingleDirectBlockingChecker();
         BlockingSignatureCache blockingSignatureCache=null;
         m_blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,blockingSignatureCache,true,true);
         ExistentialExpansionStrategy ExpansionStrategy=new CreationOrderStrategy(m_blockingStrategy);
@@ -224,7 +224,7 @@ public class BlockingValidatorTest extends AbstractReasonerInternalsTest {
                 false, // hasDatatypes
                 null); //automaton for complex roles
         
-        DirectBlockingChecker directBlockingChecker=new ValidatedDirectBlockingChecker();
+        DirectBlockingChecker directBlockingChecker=new ValidatedSingleDirectBlockingChecker();
         BlockingSignatureCache blockingSignatureCache=null;
         m_blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,blockingSignatureCache,true,true);
         ExistentialExpansionStrategy ExpansionStrategy=new CreationOrderStrategy(m_blockingStrategy);

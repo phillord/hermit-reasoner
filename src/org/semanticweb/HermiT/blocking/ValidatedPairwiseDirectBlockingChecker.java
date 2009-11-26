@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.semanticweb.HermiT.blocking.ValidatedDirectBlockingChecker.ValidatedBlockingObject;
+import org.semanticweb.HermiT.blocking.ValidatedSingleDirectBlockingChecker.ValidatedBlockingObject;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
@@ -15,7 +15,7 @@ import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.NodeType;
 import org.semanticweb.HermiT.tableau.Tableau;
 
-public class ValidatedPairwiseBlockingChecker implements DirectBlockingChecker,Serializable {
+public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChecker,Serializable {
     private static final long serialVersionUID=9093753046859877016L;
 
     protected final SetFactory<AtomicConcept> m_atomicConceptsSetFactory=new SetFactory<AtomicConcept>();
@@ -116,22 +116,6 @@ public class ValidatedPairwiseBlockingChecker implements DirectBlockingChecker,S
         m_atomicConceptsBuffer.clear();
         return result;
     }
-    public Set<AtomicConcept> getFullAtomicConceptsLabel(Node node) {
-        return ((ValidatedPairwiseBlockingObject) node.getBlockingObject()).getFullAtomicConceptsLabel();
-    }
-
-    public Set<AtomicRole> getFullToParentLabel(Node node) {
-        return ((ValidatedPairwiseBlockingObject) node.getBlockingObject()).getFullToParentLabel();
-    }
-
-    public Set<AtomicRole> getFullFromParentLabel(Node node) {
-        return ((ValidatedPairwiseBlockingObject) node.getBlockingObject()).getFullFromParentLabel();
-    }
-
-    public Set<AtomicConcept> getBlockingRelevantConceptsLabel(Node node) {
-        return ((ValidatedPairwiseBlockingObject) node.getBlockingObject()).getAtomicConceptsLabel();
-    }
-
     protected Set<AtomicRole> fetchAtomicRolesLabel(Node nodeFrom,Node nodeTo,boolean onlyCore) {
         m_atomicRolesBuffer.clear();
         m_ternaryTableSearch12Bound.getBindingsBuffer()[1] = nodeFrom;
@@ -149,7 +133,6 @@ public class ValidatedPairwiseBlockingChecker implements DirectBlockingChecker,S
         m_atomicRolesBuffer.clear();
         return result;
     }
-
     public BlockingSignature getBlockingSignatureFor(Node node) {
         return new ValidatedBlockingSignature(this,node);
     }
@@ -200,7 +183,7 @@ public class ValidatedPairwiseBlockingChecker implements DirectBlockingChecker,S
         }
         public Set<AtomicConcept> getAtomicConceptsLabel() {
             if (m_blockingRelevantLabel==null) {
-                m_blockingRelevantLabel=ValidatedPairwiseBlockingChecker.this.fetchAtomicConceptsLabel(m_node,true);
+                m_blockingRelevantLabel=ValidatedPairwiseDirectBlockingChecker.this.fetchAtomicConceptsLabel(m_node,true);
                 m_atomicConceptsSetFactory.addReference(m_blockingRelevantLabel);
             }
             return m_blockingRelevantLabel;
@@ -249,21 +232,21 @@ public class ValidatedPairwiseBlockingChecker implements DirectBlockingChecker,S
         }
         public Set<AtomicConcept> getFullAtomicConceptsLabel() {
             if (m_fullAtomicConceptsLabel==null) {
-                m_fullAtomicConceptsLabel=ValidatedPairwiseBlockingChecker.this.fetchAtomicConceptsLabel(m_node,false);
+                m_fullAtomicConceptsLabel=ValidatedPairwiseDirectBlockingChecker.this.fetchAtomicConceptsLabel(m_node,false);
                 m_atomicConceptsSetFactory.addReference(m_fullAtomicConceptsLabel);
             }
             return m_fullAtomicConceptsLabel;
         }
         public Set<AtomicRole> getFullFromParentLabel() {
             if (m_hasChangedForValidation || m_fullFromParentLabel==null) {
-                m_fullFromParentLabel=ValidatedPairwiseBlockingChecker.this.fetchAtomicRolesLabel(m_node.getParent(),m_node,false);
+                m_fullFromParentLabel=ValidatedPairwiseDirectBlockingChecker.this.fetchAtomicRolesLabel(m_node.getParent(),m_node,false);
                 m_atomicRolesSetFactory.addReference(m_fullFromParentLabel);
             }
             return m_fullFromParentLabel;
         }
         public Set<AtomicRole> getFullToParentLabel() {
             if (m_hasChangedForValidation || m_fullToParentLabel==null) {
-                m_fullToParentLabel=ValidatedPairwiseBlockingChecker.this.fetchAtomicRolesLabel(m_node,m_node.getParent(),false);
+                m_fullToParentLabel=ValidatedPairwiseDirectBlockingChecker.this.fetchAtomicRolesLabel(m_node,m_node.getParent(),false);
                 m_atomicRolesSetFactory.addReference(m_fullToParentLabel);
             }
             return m_fullToParentLabel;
@@ -290,7 +273,7 @@ public class ValidatedPairwiseBlockingChecker implements DirectBlockingChecker,S
         protected final Set<AtomicRole> m_toParentLabel;
         protected final int m_hashCode;
       
-        public ValidatedBlockingSignature(ValidatedPairwiseBlockingChecker checker,Node node) {
+        public ValidatedBlockingSignature(ValidatedPairwiseDirectBlockingChecker checker,Node node) {
             ValidatedPairwiseBlockingObject nodeBlockingObject=(ValidatedPairwiseBlockingObject)node.getBlockingObject();
             m_blockingRelevantConceptsLabel=nodeBlockingObject.getAtomicConceptsLabel();
             m_fullAtomicConceptsLabel=nodeBlockingObject.getFullAtomicConceptsLabel();
@@ -313,15 +296,29 @@ public class ValidatedPairwiseBlockingChecker implements DirectBlockingChecker,S
         public boolean equals(Object that) {
             if (this==that)
                 return true;
-            if (!(that instanceof ValidatedBlockingSignature))
+            if (!(that instanceof ValidatedBlockingSignature || that instanceof Node))
                 return false;
-            ValidatedBlockingSignature thatSignature=(ValidatedBlockingSignature)that;
-            return
-                m_blockingRelevantConceptsLabel==thatSignature.m_blockingRelevantConceptsLabel &&
-                m_fullAtomicConceptsLabel==thatSignature.m_fullAtomicConceptsLabel &&
-                m_parentFullAtomicConceptsLabel==thatSignature.m_parentFullAtomicConceptsLabel &&
-                m_fromParentLabel==thatSignature.m_fromParentLabel &&
-                m_toParentLabel==thatSignature.m_toParentLabel;
+            if (that instanceof Node) {
+                Node thatNode=(Node)that;
+                Node thatParent=(Node)thatNode.getParent();
+                if (thatParent==null) return false;
+                ValidatedPairwiseBlockingObject nodeBlockingObject=(ValidatedPairwiseBlockingObject)thatNode.getBlockingObject();
+                ValidatedPairwiseBlockingObject parentBlockingObject=(ValidatedPairwiseBlockingObject)thatNode.getBlockingObject();
+                return
+                    m_blockingRelevantConceptsLabel==nodeBlockingObject.m_blockingRelevantLabel &&
+                    m_fullAtomicConceptsLabel==nodeBlockingObject.m_fullAtomicConceptsLabel &&
+                    m_parentFullAtomicConceptsLabel==parentBlockingObject.m_fullAtomicConceptsLabel &&
+                    m_fromParentLabel==nodeBlockingObject.m_fullFromParentLabel &&
+                    m_toParentLabel==nodeBlockingObject.m_fullToParentLabel;
+            } else {
+                ValidatedBlockingSignature thatSignature=(ValidatedBlockingSignature)that;
+                return
+                    m_blockingRelevantConceptsLabel==thatSignature.m_blockingRelevantConceptsLabel &&
+                    m_fullAtomicConceptsLabel==thatSignature.m_fullAtomicConceptsLabel &&
+                    m_parentFullAtomicConceptsLabel==thatSignature.m_parentFullAtomicConceptsLabel &&
+                    m_fromParentLabel==thatSignature.m_fromParentLabel &&
+                    m_toParentLabel==thatSignature.m_toParentLabel;
+            }
         }
     }
 }

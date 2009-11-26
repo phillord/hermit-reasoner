@@ -14,7 +14,7 @@ import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.NodeType;
 import org.semanticweb.HermiT.tableau.Tableau;
 
-public class ValidatedDirectBlockingChecker implements DirectBlockingChecker,Serializable {
+public class ValidatedSingleDirectBlockingChecker implements DirectBlockingChecker,Serializable {
     private static final long serialVersionUID=9093753046859877016L;
 
     protected final SetFactory<AtomicConcept> m_atomicConceptsSetFactory=new SetFactory<AtomicConcept>();
@@ -109,22 +109,6 @@ public class ValidatedDirectBlockingChecker implements DirectBlockingChecker,Ser
         m_atomicConceptsBuffer.clear();
         return result;
     }
-    public Set<AtomicConcept> getFullAtomicConceptsLabel(Node node) {
-        return ((ValidatedSingleBlockingObject) node.getBlockingObject()).getFullAtomicConceptsLabel();
-    }
-
-    public Set<AtomicRole> getFullToParentLabel(Node node) {
-        return ((ValidatedSingleBlockingObject) node.getBlockingObject()).getFullToParentLabel();
-    }
-
-    public Set<AtomicRole> getFullFromParentLabel(Node node) {
-        return ((ValidatedSingleBlockingObject) node.getBlockingObject()).getFullFromParentLabel();
-    }
-
-    public Set<AtomicConcept> getBlockingRelevantConceptsLabel(Node node) {
-        return ((ValidatedSingleBlockingObject) node.getBlockingObject()).getAtomicConceptsLabel();
-    }
-
     protected Set<AtomicRole> fetchAtomicRolesLabel(Node nodeFrom,Node nodeTo,boolean onlyCore) {
         m_atomicRolesBuffer.clear();
         m_ternaryTableSearch12Bound.getBindingsBuffer()[1] = nodeFrom;
@@ -142,7 +126,6 @@ public class ValidatedDirectBlockingChecker implements DirectBlockingChecker,Ser
         m_atomicRolesBuffer.clear();
         return result;
     }
-
     public BlockingSignature getBlockingSignatureFor(Node node) {
         return new ValidatedBlockingSignature(this,node);
     }
@@ -190,7 +173,7 @@ public class ValidatedDirectBlockingChecker implements DirectBlockingChecker,Ser
         }
         public Set<AtomicConcept> getAtomicConceptsLabel() {
             if (m_blockingRelevantLabel==null) {
-                m_blockingRelevantLabel=ValidatedDirectBlockingChecker.this.fetchAtomicConceptsLabel(m_node,true);
+                m_blockingRelevantLabel=ValidatedSingleDirectBlockingChecker.this.fetchAtomicConceptsLabel(m_node,true);
                 m_atomicConceptsSetFactory.addReference(m_blockingRelevantLabel);
             }
             return m_blockingRelevantLabel;
@@ -239,21 +222,21 @@ public class ValidatedDirectBlockingChecker implements DirectBlockingChecker,Ser
         }
         public Set<AtomicConcept> getFullAtomicConceptsLabel() {
             if (m_fullAtomicConceptsLabel==null) {
-                m_fullAtomicConceptsLabel=ValidatedDirectBlockingChecker.this.fetchAtomicConceptsLabel(m_node,false);
+                m_fullAtomicConceptsLabel=ValidatedSingleDirectBlockingChecker.this.fetchAtomicConceptsLabel(m_node,false);
                 m_atomicConceptsSetFactory.addReference(m_fullAtomicConceptsLabel);
             }
             return m_fullAtomicConceptsLabel;
         }
         public Set<AtomicRole> getFullFromParentLabel() {
             if (m_hasChangedForValidation || m_fullFromParentLabel==null) {
-                m_fullFromParentLabel=ValidatedDirectBlockingChecker.this.fetchAtomicRolesLabel(m_node.getParent(),m_node,false);
+                m_fullFromParentLabel=ValidatedSingleDirectBlockingChecker.this.fetchAtomicRolesLabel(m_node.getParent(),m_node,false);
                 m_atomicRolesSetFactory.addReference(m_fullFromParentLabel);
             }
             return m_fullFromParentLabel;
         }
         public Set<AtomicRole> getFullToParentLabel() {
             if (m_hasChangedForValidation || m_fullToParentLabel==null) {
-                m_fullToParentLabel=ValidatedDirectBlockingChecker.this.fetchAtomicRolesLabel(m_node,m_node.getParent(),false);
+                m_fullToParentLabel=ValidatedSingleDirectBlockingChecker.this.fetchAtomicRolesLabel(m_node,m_node.getParent(),false);
                 m_atomicRolesSetFactory.addReference(m_fullToParentLabel);
             }
             return m_fullToParentLabel;
@@ -280,7 +263,7 @@ public class ValidatedDirectBlockingChecker implements DirectBlockingChecker,Ser
         protected final Set<AtomicRole> m_toParentLabel;
         protected final int m_hashCode;
       
-        public ValidatedBlockingSignature(ValidatedDirectBlockingChecker checker,Node node) {
+        public ValidatedBlockingSignature(ValidatedSingleDirectBlockingChecker checker,Node node) {
             ValidatedSingleBlockingObject nodeBlockingObject=(ValidatedSingleBlockingObject)node.getBlockingObject();
             m_blockingRelevantConceptsLabel=nodeBlockingObject.getAtomicConceptsLabel();
             m_fullAtomicConceptsLabel=nodeBlockingObject.getFullAtomicConceptsLabel();

@@ -109,7 +109,7 @@ public class GraphTest extends AbstractReasonerTest {
         m_descriptionGraphs.add(graph);
         String axioms = "ClassAssertion(:A :a) ClassAssertion(:B :b) DisjointClasses(:A :B) ObjectPropertyAssertion(:r :a :b)"
             // R(x, y) -> SameIndividual(x, y)
-            + "DLSafeRule(Body(ObjectPropertyAtom(:R IndividualVariable(:x) IndividualVariable(:y))) Head(SameIndividualAtom(IndividualVariable(:x) IndividualVariable(:y))))";
+            + "DLSafeRule(Body(ObjectPropertyAtom(:R Variable(:x) Variable(:y))) Head(SameIndividualAtom(Variable(:x) Variable(:y))))";
         loadOntologyWithAxioms(axioms);
    
         Tableau tableau=getTableau(m_descriptionGraphs);
@@ -175,18 +175,18 @@ public class GraphTest extends AbstractReasonerTest {
             + "SubClassOf(ObjectSomeValuesFrom(:T :D) :B)"
             //P(v), R(x,v), LP(x), S(x,y), RP(y), R(y,w), P(w) -> conn(v,w)
             + "DLSafeRule(Body(" 
-                        + "ClassAtom(:P IndividualVariable(:v)) " 
-            		+ "ObjectPropertyAtom(:R IndividualVariable(:x) IndividualVariable(:v))"
-            		+ "ClassAtom(:LP IndividualVariable(:x)) " 
-            		+ "ObjectPropertyAtom(:S IndividualVariable(:x) IndividualVariable(:y))"
-            		+ "ClassAtom(:RP IndividualVariable(:y)) " 
-            		+ "ObjectPropertyAtom(:R IndividualVariable(:y) IndividualVariable(:w))"
-            		+ "ClassAtom(:P IndividualVariable(:w)) " 
-            		+ ") Head(ObjectPropertyAtom(:conn IndividualVariable(:v) IndividualVariable(:w))))"
+                        + "ClassAtom(:P Variable(:v)) " 
+            		+ "ObjectPropertyAtom(:R Variable(:x) Variable(:v))"
+            		+ "ClassAtom(:LP Variable(:x)) " 
+            		+ "ObjectPropertyAtom(:S Variable(:x) Variable(:y))"
+            		+ "ClassAtom(:RP Variable(:y)) " 
+            		+ "ObjectPropertyAtom(:R Variable(:y) Variable(:w))"
+            		+ "ClassAtom(:P Variable(:w)) " 
+            		+ ") Head(ObjectPropertyAtom(:conn Variable(:v) Variable(:w))))"
              // conn(x,y) -> D(x)
-             + "DLSafeRule(Body(ObjectPropertyAtom(:conn IndividualVariable(:x) IndividualVariable(:y))) Head(ClassAtom(:D IndividualVariable(:x))))"
+             + "DLSafeRule(Body(ObjectPropertyAtom(:conn Variable(:x) Variable(:y))) Head(ClassAtom(:D Variable(:x))))"
              // conn(x,y) -> D(y)
-             + "DLSafeRule(Body(ObjectPropertyAtom(:conn IndividualVariable(:x) IndividualVariable(:y))) Head(ClassAtom(:D IndividualVariable(:y))))";
+             + "DLSafeRule(Body(ObjectPropertyAtom(:conn Variable(:x) Variable(:y))) Head(ClassAtom(:D Variable(:y))))";
         loadOntologyWithAxioms(axioms);
         Tableau t=getTableau(m_descriptionGraphs);
         assertTrue(t.isSubsumedBy(AtomicConcept.create(GraphTest.NS+"A"), AtomicConcept.create(GraphTest.NS+"B")));
