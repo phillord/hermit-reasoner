@@ -131,7 +131,7 @@ public class OWLNormalization {
         NormalizationVisitor normalizer=new NormalizationVisitor(inclusions, dataRangeInclusions);
         // normalise all concept inclusions
         while (!inclusions.isEmpty()) {
-            OWLClassExpression simplifiedDescription=m_expressionManager.getSimplified(m_factory.getOWLObjectUnionOf(inclusions.remove(inclusions.size()-1)));
+            OWLClassExpression simplifiedDescription=m_expressionManager.getNNF(m_expressionManager.getSimplified(m_factory.getOWLObjectUnionOf(inclusions.remove(inclusions.size()-1))));
             if (!simplifiedDescription.isOWLThing()) {
                 if (simplifiedDescription instanceof OWLObjectUnionOf) {
                     OWLObjectUnionOf objectOr=(OWLObjectUnionOf)simplifiedDescription;

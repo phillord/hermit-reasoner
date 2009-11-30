@@ -300,7 +300,7 @@ public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChe
                 return false;
             if (that instanceof Node) {
                 Node thatNode=(Node)that;
-                Node thatParent=(Node)thatNode.getParent();
+                Node thatParent=thatNode.getParent();
                 if (thatParent==null) return false;
                 ValidatedPairwiseBlockingObject nodeBlockingObject=(ValidatedPairwiseBlockingObject)thatNode.getBlockingObject();
                 ValidatedPairwiseBlockingObject parentBlockingObject=(ValidatedPairwiseBlockingObject)thatNode.getBlockingObject();
