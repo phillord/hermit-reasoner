@@ -190,7 +190,6 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
                 m_lastValidatedUnchangedNode=node;
                 if (!node.isBlocked() && m_directBlockingChecker.canBeBlocker(node))
                     m_currentBlockersCache.addNode(node);
-                if (debuggingMode && node.getNodeID() % 1000 == 0) System.out.print(" " + node.getNodeID());
             }
             node=node.getNextTableauNode();
         } 
