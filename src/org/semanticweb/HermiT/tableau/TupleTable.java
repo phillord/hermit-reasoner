@@ -20,12 +20,7 @@ public final class TupleTable implements Serializable {
     
     public TupleTable(int arity) {
         m_arity=arity;
-        m_pages=new Page[10];
-        m_numberOfPages=1;
-        for (int i=0;i<m_numberOfPages;i++)
-            m_pages[i]=new Page();
-        m_tupleCapacity=m_numberOfPages*PAGE_SIZE;
-        m_firstFreeTupleIndex=0;
+        clear();
     }
     public int sizeInMemory() {
         int size=m_pages.length*4;
@@ -45,7 +40,7 @@ public final class TupleTable implements Serializable {
                 System.arraycopy(m_pages,0,newPages,0,m_numberOfPages);
                 m_pages=newPages;
             }
-            m_pages[m_numberOfPages++]=new Page();
+            m_pages[m_numberOfPages++]=new Page(m_arity);
             m_tupleCapacity+=PAGE_SIZE;
         }
         m_pages[newTupleIndex / PAGE_SIZE].storeTuple((newTupleIndex % PAGE_SIZE)*m_arity,tupleBuffer);
@@ -72,15 +67,21 @@ public final class TupleTable implements Serializable {
         m_pages[tupleIndex / PAGE_SIZE].nullifyTuple((tupleIndex % PAGE_SIZE)*m_arity);
     }
     public void clear() {
+        m_pages=new Page[10];
+        m_numberOfPages=1;
+        m_pages[0]=new Page(m_arity);
+        m_tupleCapacity=m_numberOfPages*PAGE_SIZE;
         m_firstFreeTupleIndex=0;
     }
 
-    protected final class Page implements Serializable {
+    protected final static class Page implements Serializable {
         private static final long serialVersionUID=2239482172592108644L;
 
+        public final int m_arity;
         public Object[] m_objects;
         
-        public Page() {
+        public Page(int arity) {
+            m_arity=arity;
             m_objects=new Object[m_arity*PAGE_SIZE];
         }
         public int sizeInMemory() {

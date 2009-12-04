@@ -20,8 +20,7 @@ public class TupleTableFullIndex implements Serializable {
         m_tupleTable=tupleTable;
         m_indexedArity=indexedArity;
         m_entryManager=new EntryManager();
-        m_buckets=new int[16];
-        m_resizeThreshold=(int)(m_buckets.length*LOAD_FACTOR);
+        clear();
     }
     public int sizeInMemory() {
         return m_buckets.length*4+m_entryManager.size();
@@ -127,14 +126,13 @@ public class TupleTableFullIndex implements Serializable {
         protected int m_firstFreeEntry;
         
         public EntryManager() {
-            m_entries=new int[ENTRY_SIZE*ENTRY_PAGE_SIZE];
-            m_firstFreeEntry=0;
-            m_entries[m_firstFreeEntry+ENTRY_NEXT]=-1;
+            clear();
         }
         public int size() {
             return m_entries.length*4;
         }
         public void clear() {
+            m_entries=new int[ENTRY_SIZE*ENTRY_PAGE_SIZE];
             m_firstFreeEntry=0;
             m_entries[m_firstFreeEntry+ENTRY_NEXT]=-1;
         }

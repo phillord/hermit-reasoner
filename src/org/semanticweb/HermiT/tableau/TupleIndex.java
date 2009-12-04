@@ -20,11 +20,7 @@ public final class TupleIndex implements Serializable {
     public TupleIndex(int[] indexingSequence) {
         m_indexingSequence=indexingSequence;
         m_trieNodeManager=new TrieNodeManager();
-        m_root=m_trieNodeManager.newTrieNode();
-        m_trieNodeManager.initializeTrieNode(m_root,-1,-1,-1,-1,-1,null);
-        m_buckets=new int[16];
-        m_bucketsLengthMinusOne=m_buckets.length-1;
-        m_resizeThreshold=(int)(m_buckets.length*LOAD_FACTOR);
+        clear();
     }
     public int sizeInMemoy() {
         return m_buckets.length*4+m_trieNodeManager.size();
@@ -189,13 +185,7 @@ public final class TupleIndex implements Serializable {
         protected int m_numberOfPages;
         
         public TrieNodeManager() {
-           m_indexPages=new int[10][];
-           m_indexPages[0]=new int[TRIE_NODE_SIZE*TRIE_NODE_PAGE_SIZE];
-           m_objectPages=new Object[10][];
-           m_objectPages[0]=new Object[TRIE_NODE_PAGE_SIZE];
-           m_numberOfPages=1;
-           m_firstFreeTrieNode=0;
-           setTrieNodeComponent(m_firstFreeTrieNode,TRIE_NODE_NEXT_SIBLING,-1);
+           clear();
         }
         public int size() {
             int size=m_indexPages.length*4+m_objectPages.length*4;
@@ -208,6 +198,11 @@ public final class TupleIndex implements Serializable {
             return size;
         }
         public void clear() {
+            m_indexPages=new int[10][];
+            m_indexPages[0]=new int[TRIE_NODE_SIZE*TRIE_NODE_PAGE_SIZE];
+            m_objectPages=new Object[10][];
+            m_objectPages[0]=new Object[TRIE_NODE_PAGE_SIZE];
+            m_numberOfPages=1;
             m_firstFreeTrieNode=0;
             setTrieNodeComponent(m_firstFreeTrieNode,TRIE_NODE_NEXT_SIBLING,-1);
         }
