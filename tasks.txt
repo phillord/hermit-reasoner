@@ -1,35 +1,37 @@
+- analyse and fix memory leaks
+task assigned to: Birte, Boris
+
+-Modularise  classification code and integrate Rob's classification 
+task assigned to: Giorgos, Boris
+
 - Matthew added a new version of the OWLReasoner interface to the OWL
-API and we do not yet implement it (we have to talk with Matthew about 
-non-implementable methods and get them removed) 
-task assigned to: Giorgos
+  API and we have to implement it 
+task assigned to: Birte
+
+- We throw UnsupportedOperation exceptions for the methods
+  getDataPropertyRelationships(OWLNamedIndividual individual, OWLDataProperty p). 
+  needs implementation 
+task assigned to: Birte
 
 - Protege is a bit behind, but the Protege reasoner interface will
-most likely also change soon to reflect the new OWLReasoner interface
-changes. 
-task assigned to: wait until we know more
+  also change to reflect the new OWLReasoner interface
+task assigned to: Birte
+
+- Optimise the rule set/rule application so that HermiT can deal with
+  large ontologies such as SNOMED. Move existential into universial: 
+  rule engine should not loop over all assignemnts for y if y does not occur 
+  in the head e.g., as in r(x, y) and B(y) -> A(x)  
+task assigned to: Giorgos, Rob
+
+- cache Aboxes saturated up to non-determinism
+task assigned to: 
 
 - We need to check acyclicity of datatype definitions.
 task assigned to:  Rob
 
-- There is still a Java Task: "TODO: Minimazation caused some problems
-in the translation of concepts. I need to first fully integrate with
-HermiT and then look on this again. "
-task assigned to: Giorgos 							[DONE]
 
-- We throw UnsupportedOperation exceptions for the methods
-getRanges(OWLDataProperty property), getLoadedOntologies(), and
-unloadOntologies(Set<OWLOntology> inOntologies),
-getDataPropertyRelationships(OWLNamedIndividual individual),
-getRelatedValues(OWLNamedIndividual subject,OWLDataPropertyExpression
-property). Some methods might not be implementable. In that case we
-should point this out to Matthew and get rid of them, other can be
-implemented and we should check how or see why we do not want to
-support them.
-task assigned to: Giorgos
+- incremental classification (axioms addition/removal)
 
-- Integrate optimised classification code into the main branch
-task assigned to: Rob
+- optimise number rstrictions (e.g., better clause representation)
 
-- Optimise the rule set/rule application so that HermiT can deal with
-  SNOMED.
-task assigned to: ???
+- learning heuristics for disjunctions
