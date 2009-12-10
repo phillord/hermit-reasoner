@@ -9,7 +9,6 @@
 	<classpathentry kind="lib" path="lib/org.protege.editor.core.application-4.1.jar" sourcepath="lib/org.protege.editor.core.application-4.1-src.jar"/>
 	<classpathentry kind="lib" path="lib/org.protege.editor.owl-4.1.jar" sourcepath="lib/org.protege.editor.owl-4.1-src.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/OWLAPIv3"/>
 	<classpathentry kind="lib" path="lib/owlapi-3.0.0.jar" sourcepath="lib/owlapi-3.0.0-src.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
