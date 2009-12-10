@@ -32,7 +32,7 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
     
     // statistics: 
     protected final boolean debuggingMode=false;
-    protected final boolean m_generateValidationStatistics=true;
+    protected final boolean m_generateValidationStatistics=false;
     public List<Integer> numNodes=new ArrayList<Integer>();
     public List<Integer> numBlocked=new ArrayList<Integer>();
     public List<Integer> numInvalidlyBlocked=new ArrayList<Integer>();

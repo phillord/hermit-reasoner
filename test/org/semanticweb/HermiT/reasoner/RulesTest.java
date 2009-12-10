@@ -1,11 +1,10 @@
 package org.semanticweb.HermiT.reasoner;
 
-import java.util.Set;
-
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.reasoner.NodeSet;
 
 
 public class RulesTest extends AbstractReasonerTest {
@@ -34,8 +33,8 @@ public class RulesTest extends AbstractReasonerTest {
         OWLClass C = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "C"));
 
         createReasoner();
-        assertTrue(m_reasoner.getIndividuals(C, false).contains(a));
-        assertTrue(!m_reasoner.getIndividuals(C, false).contains(b));
+        assertTrue(m_reasoner.getInstances(C, false).containsEntity(a));
+        assertTrue(!m_reasoner.getInstances(C, false).containsEntity(b));
     }
     
     public void testRuleWithConstants() throws Exception {
@@ -50,8 +49,8 @@ public class RulesTest extends AbstractReasonerTest {
         OWLNamedIndividual b = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "b"));
         OWLClass C = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "C"));
         createReasoner();
-        assertTrue(m_reasoner.getIndividuals(C, false).contains(a));
-        assertTrue(!m_reasoner.getIndividuals(C, false).contains(b));
+        assertTrue(m_reasoner.getInstances(C, false).containsEntity(a));
+        assertTrue(!m_reasoner.getInstances(C, false).containsEntity(b));
     }
     
     public void testRuleWithConstants2() throws Exception {
@@ -74,16 +73,16 @@ public class RulesTest extends AbstractReasonerTest {
         OWLObjectProperty sb = m_dataFactory.getOWLObjectProperty(IRI.create(AbstractReasonerTest.NS + "sb"));
         OWLObjectProperty q = m_dataFactory.getOWLObjectProperty(IRI.create(AbstractReasonerTest.NS + "q"));
         createReasoner();
-        Set<OWLNamedIndividual> result=m_reasoner.getRelatedIndividuals(a, r);
-        assertTrue(result.size()==1 && result.contains(b));
-        result=m_reasoner.getRelatedIndividuals(a, s);
-        assertTrue(result.size()==1 && result.contains(b));
-        result=m_reasoner.getRelatedIndividuals(a, sa);
-        assertTrue(result.size()==1 && result.contains(b));
-        result=m_reasoner.getRelatedIndividuals(a, sb);
-        assertTrue(result.size()==1 && result.contains(b));
-        result=m_reasoner.getRelatedIndividuals(a, q);
-        assertTrue(result.size()==1 && result.contains(b));
+        NodeSet<OWLNamedIndividual> result=m_reasoner.getObjectPropertyValues(a, r);
+        assertTrue(result.isSingleton()&&result.containsEntity(b));
+        result=m_reasoner.getObjectPropertyValues(a, s);
+        assertTrue(result.isSingleton()&&result.containsEntity(b));
+        result=m_reasoner.getObjectPropertyValues(a, sa);
+        assertTrue(result.isSingleton()&&result.containsEntity(b));
+        result=m_reasoner.getObjectPropertyValues(a, sb);
+        assertTrue(result.isSingleton()&result.containsEntity(b));
+        result=m_reasoner.getObjectPropertyValues(a, q);
+        assertTrue(result.isSingleton()&&result.containsEntity(b));
     }
     
     public void testRuleWithDatatypes() throws Exception {
@@ -96,8 +95,8 @@ public class RulesTest extends AbstractReasonerTest {
         OWLNamedIndividual b = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "b"));
         OWLClass C = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "C"));
         createReasoner();
-        assertTrue(m_reasoner.getIndividuals(C, false).contains(a));
-        assertTrue(!m_reasoner.getIndividuals(C, false).contains(b));
+        assertTrue(m_reasoner.getInstances(C, false).containsEntity(a));
+        assertTrue(!m_reasoner.getInstances(C, false).containsEntity(b));
     }
     
     
@@ -118,12 +117,12 @@ public class RulesTest extends AbstractReasonerTest {
         OWLClass D = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "D"));
         
         createReasoner();
-        assertTrue(m_reasoner.getIndividuals(C, false).contains(c));
-        assertTrue(!m_reasoner.getIndividuals(C, false).contains(a));
-        assertTrue(!m_reasoner.getIndividuals(C, false).contains(b));
-        assertTrue(m_reasoner.getIndividuals(D, false).contains(b));
-        assertTrue(m_reasoner.getIndividuals(D, false).contains(a));
-        assertTrue(!m_reasoner.getIndividuals(D, false).contains(c));
+        assertTrue(m_reasoner.getInstances(C, false).containsEntity(c));
+        assertTrue(!m_reasoner.getInstances(C, false).containsEntity(a));
+        assertTrue(!m_reasoner.getInstances(C, false).containsEntity(b));
+        assertTrue(m_reasoner.getInstances(D, false).containsEntity(b));
+        assertTrue(m_reasoner.getInstances(D, false).containsEntity(a));
+        assertTrue(!m_reasoner.getInstances(D, false).containsEntity(c));
     }
     
     public void testRuleWithFreshIndividuals() throws Exception {
@@ -138,10 +137,10 @@ public class RulesTest extends AbstractReasonerTest {
         OWLClass B = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "B"));
         OWLClass C = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "C"));
         createReasoner();
-        assertTrue(m_reasoner.getIndividuals(C, false).contains(b));
-        assertTrue(m_reasoner.getIndividuals(B, false).contains(b));
-        assertTrue(!m_reasoner.getIndividuals(C, false).contains(a));
-        assertTrue(!m_reasoner.getIndividuals(B, false).contains(a));
+        assertTrue(m_reasoner.getInstances(C, false).containsEntity(b));
+        assertTrue(m_reasoner.getInstances(B, false).containsEntity(b));
+        assertTrue(!m_reasoner.getInstances(C, false).containsEntity(a));
+        assertTrue(!m_reasoner.getInstances(B, false).containsEntity(a));
     }
     
     public void testAddingFactsByRules() throws Exception {
@@ -166,20 +165,20 @@ public class RulesTest extends AbstractReasonerTest {
         OWLClass D = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "D"));
         OWLClass E = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "E"));
         createReasoner();
-        assertTrue(m_reasoner.getIndividuals(A, false).contains(a));
-        assertTrue(!m_reasoner.getIndividuals(A, false).contains(b));
-        assertTrue(m_reasoner.getIndividuals(B, false).contains(a));
-        assertTrue(m_reasoner.getIndividuals(B, false).contains(b));
-        assertTrue(!m_reasoner.getIndividuals(B, false).contains(e));
-        assertTrue(m_reasoner.getIndividuals(C, false).contains(a));
-        assertTrue(m_reasoner.getIndividuals(C, false).contains(b));
-        assertTrue(!m_reasoner.getIndividuals(C, false).contains(e));
-        assertTrue(m_reasoner.getIndividuals(D, false).contains(a));
-        assertTrue(!m_reasoner.getIndividuals(D, false).contains(b));
-        assertTrue(!m_reasoner.getIndividuals(D, false).contains(e));
-        assertTrue(!m_reasoner.getIndividuals(E, false).contains(a));
-        assertTrue(!m_reasoner.getIndividuals(E, false).contains(b));
-        assertTrue(m_reasoner.getIndividuals(E, false).contains(e));
+        assertTrue(m_reasoner.getInstances(A, false).containsEntity(a));
+        assertTrue(!m_reasoner.getInstances(A, false).containsEntity(b));
+        assertTrue(m_reasoner.getInstances(B, false).containsEntity(a));
+        assertTrue(m_reasoner.getInstances(B, false).containsEntity(b));
+        assertTrue(!m_reasoner.getInstances(B, false).containsEntity(e));
+        assertTrue(m_reasoner.getInstances(C, false).containsEntity(a));
+        assertTrue(m_reasoner.getInstances(C, false).containsEntity(b));
+        assertTrue(!m_reasoner.getInstances(C, false).containsEntity(e));
+        assertTrue(m_reasoner.getInstances(D, false).containsEntity(a));
+        assertTrue(!m_reasoner.getInstances(D, false).containsEntity(b));
+        assertTrue(!m_reasoner.getInstances(D, false).containsEntity(e));
+        assertTrue(!m_reasoner.getInstances(E, false).containsEntity(a));
+        assertTrue(!m_reasoner.getInstances(E, false).containsEntity(b));
+        assertTrue(m_reasoner.getInstances(E, false).containsEntity(e));
     }
     
     public void testLloydTopor() throws Exception {
@@ -195,12 +194,12 @@ public class RulesTest extends AbstractReasonerTest {
         OWLClass C = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "C"));
         
         createReasoner();
-        assertTrue(m_reasoner.getIndividuals(A, false).contains(a));
-        assertTrue(m_reasoner.getIndividuals(B, false).contains(a));
-        assertTrue(m_reasoner.getIndividuals(C, false).contains(a));
-        assertTrue(!m_reasoner.getIndividuals(A, false).contains(b));
-        assertTrue(m_reasoner.getIndividuals(B, false).contains(b));
-        assertTrue(!m_reasoner.getIndividuals(C, false).contains(b));
+        assertTrue(m_reasoner.getInstances(A, false).containsEntity(a));
+        assertTrue(m_reasoner.getInstances(B, false).containsEntity(a));
+        assertTrue(m_reasoner.getInstances(C, false).containsEntity(a));
+        assertTrue(!m_reasoner.getInstances(A, false).containsEntity(b));
+        assertTrue(m_reasoner.getInstances(B, false).containsEntity(b));
+        assertTrue(!m_reasoner.getInstances(C, false).containsEntity(b));
     }
     
     public void testDRInHead() throws Exception {
@@ -293,20 +292,20 @@ public class RulesTest extends AbstractReasonerTest {
         OWLObjectProperty rae = m_dataFactory.getOWLObjectProperty(IRI.create(AbstractReasonerTest.NS + "rae"));
 
         createReasoner();
-        assertTrue(m_reasoner.getIndividuals(Ap, false).contains(a));
-        assertTrue(m_reasoner.getIndividuals(Bp, false).contains(b));
-        assertTrue(m_reasoner.getIndividuals(Cp, false).contains(c));
-        assertTrue(m_reasoner.getIndividuals(Dp, false).contains(d));
-        assertTrue(m_reasoner.getIndividuals(Ep, false).contains(e));
-        assertTrue(m_reasoner.getIndividuals(A, false).contains(a));
-        assertTrue(m_reasoner.getIndividuals(A, false).contains(a));
-        assertTrue(m_reasoner.getIndividuals(B, false).contains(b));
-        assertTrue(m_reasoner.getIndividuals(E, false).contains(e));
-        Set<OWLNamedIndividual> result=m_reasoner.getRelatedIndividuals(c, rcd);
-        assertTrue(result.contains(d));
-        result=m_reasoner.getRelatedIndividuals(a, rae);
-        assertTrue(result.contains(e));
-        assertTrue(result.size()==1);
+        assertTrue(m_reasoner.getInstances(Ap, false).containsEntity(a));
+        assertTrue(m_reasoner.getInstances(Bp, false).containsEntity(b));
+        assertTrue(m_reasoner.getInstances(Cp, false).containsEntity(c));
+        assertTrue(m_reasoner.getInstances(Dp, false).containsEntity(d));
+        assertTrue(m_reasoner.getInstances(Ep, false).containsEntity(e));
+        assertTrue(m_reasoner.getInstances(A, false).containsEntity(a));
+        assertTrue(m_reasoner.getInstances(A, false).containsEntity(a));
+        assertTrue(m_reasoner.getInstances(B, false).containsEntity(b));
+        assertTrue(m_reasoner.getInstances(E, false).containsEntity(e));
+        NodeSet<OWLNamedIndividual> result=m_reasoner.getObjectPropertyValues(c,rcd);
+        assertTrue(result.containsEntity(d));
+        result=m_reasoner.getObjectPropertyValues(a,rae);
+        assertTrue(result.containsEntity(e));
+        assertTrue(result.isSingleton());
     }
     
     public void testPositiveBodyDataRange() throws Exception {
@@ -320,7 +319,7 @@ public class RulesTest extends AbstractReasonerTest {
         OWLClass B = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "B"));
         OWLNamedIndividual a = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "a"));
         createReasoner();
-        assertTrue(m_reasoner.getIndividuals(B, false).contains(a));
+        assertTrue(m_reasoner.getInstances(B, false).containsEntity(a));
     }
     
     public void testNegativeBodyDataRange() throws Exception {
@@ -338,8 +337,8 @@ public class RulesTest extends AbstractReasonerTest {
         OWLNamedIndividual b = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "b"));
 
         createReasoner();
-        assertTrue(!m_reasoner.getIndividuals(C, false).contains(a));
-        assertTrue(m_reasoner.getIndividuals(C, false).contains(b));
+        assertTrue(!m_reasoner.getInstances(C, false).containsEntity(a));
+        assertTrue(m_reasoner.getInstances(C, false).containsEntity(b));
     }
 
     public void testNegDRInHead() throws Exception {
@@ -392,7 +391,7 @@ public class RulesTest extends AbstractReasonerTest {
         OWLNamedIndividual b = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "b"));
         
         createReasoner();
-        assertTrue(m_reasoner.getIndividuals(C, false).contains(a));
-        assertTrue(!m_reasoner.getIndividuals(C, false).contains(b));
+        assertTrue(m_reasoner.getInstances(C, false).containsEntity(a));
+        assertTrue(!m_reasoner.getInstances(C, false).containsEntity(b));
     }
 }

@@ -630,7 +630,7 @@ public class BlockingValidator {
                     m_consequencesForBlockedX[i]=new SimpleConsequenceAtom(predicate,new ArgumentType[] { ArgumentType.XVAR },new int[] { 0 });
                     m_consequencesForNonblockedX[i]=m_consequencesForBlockedX[i];
                 } else if (predicate==Equality.INSTANCE) {
-                    // x==zi or yi===zi
+                    // x==zi or y==zi or yi===yj for datatype assertions
                     if (var1==X || var2==X) {
                         // x==zi
                         if (var2==X) {
@@ -641,26 +641,33 @@ public class BlockingValidator {
                         assert var2.getName().startsWith("Z");
                         int var2Index=getIndexFor(m_zVariables, var2);
                         assert var1==X && var2Index!=-1;
-                        m_consequencesForBlockedX[i]=new SimpleConsequenceAtom(predicate,new ArgumentType[] { ArgumentType.XVAR,ArgumentType.ZVAR },new int[] { 0,getIndexFor(m_zVariables,var2) });
+                        m_consequencesForBlockedX[i]=new SimpleConsequenceAtom(predicate,new ArgumentType[] { ArgumentType.XVAR,ArgumentType.ZVAR },new int[] { 0,var2Index });
                         m_consequencesForNonblockedX[i]=m_consequencesForBlockedX[i];
-                    } else if (var1.getName().startsWith("Y") || var2.getName().startsWith("Y")) {
-                        // yi==zi
+                    } else if (var1.getName().startsWith("Z") || var2.getName().startsWith("Z")) {
+                        // y==zi
                         if (var2.getName().startsWith("Y")) {
                             Variable tmp=var1;
                             var1=var2;
                             var2=tmp;
                         }
                         assert var2.getName().startsWith("Z");
-                        int var1Index=getIndexFor(m_yVariables, var1);
                         int var2Index=getIndexFor(m_zVariables, var2);
+                        int var1Index=getIndexFor(m_yVariables, var1);
                         assert var1Index>-1 && var2Index>-1;
-                        m_consequencesForBlockedX[i]=new SimpleConsequenceAtom(predicate,new ArgumentType[] { ArgumentType.YVAR,ArgumentType.ZVAR },new int[] { getIndexFor(m_yVariables,var1),getIndexFor(m_zVariables,var2) });
+                        m_consequencesForBlockedX[i]=new SimpleConsequenceAtom(predicate,new ArgumentType[] { ArgumentType.YVAR,ArgumentType.ZVAR },new int[] { var1Index,var2Index });
+                        m_consequencesForNonblockedX[i]=m_consequencesForBlockedX[i];
+                    } else if (var1.getName().startsWith("Y") && var2.getName().startsWith("Y")) {
+                        // yi==yj
+                        int var1Index=getIndexFor(m_yVariables, var1);
+                        int var2Index=getIndexFor(m_yVariables, var2);
+                        assert var1Index>-1 && var2Index>-1;
+                        m_consequencesForBlockedX[i]=new SimpleConsequenceAtom(predicate,new ArgumentType[] { ArgumentType.YVAR,ArgumentType.YVAR },new int[] { var1Index,var2Index });
                         m_consequencesForNonblockedX[i]=m_consequencesForBlockedX[i];
                     } else {
                         throw new IllegalArgumentException("Internal error: The clause "+dlClause+" is not an HT clause. ");
                     }
                 } else if (predicate instanceof AnnotatedEquality) {
-                    // (yi==yj @^x_{<=h S.B})(X)
+                    // (yi==yj)@^x_{<=h S.B})(X)
                     // arity 3
                     var1=atom.getArgumentVariable(0);
                     var2=atom.getArgumentVariable(1);

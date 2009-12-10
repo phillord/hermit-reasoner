@@ -2,6 +2,7 @@
 package org.semanticweb.HermiT.model;
 
 import java.io.Serializable;
+import java.net.URI;
 
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.datatypes.DatatypeRegistry;
@@ -13,12 +14,21 @@ public class Constant extends Term {
     private static final long serialVersionUID=-8143911431654640690L;
 
     protected final Object m_dataValue;
+    protected final URI m_datatypeURI;
     
+
     protected Constant(Object dataValue) {
+        this(dataValue,null);
+    }
+    protected Constant(Object dataValue,URI datatypeURI) {
         m_dataValue=dataValue;
+        m_datatypeURI=datatypeURI;
     }
     public Object getDataValue() {
         return m_dataValue;
+    }
+    public URI getDatatypeURI() {
+        return m_datatypeURI;
     }
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
@@ -40,7 +50,10 @@ public class Constant extends Term {
     };
     
     public static Constant create(Object dataValue) {
-        return s_interningManager.intern(new Constant(dataValue));
+        return create(dataValue,null);
+    }
+    public static Constant create(Object dataValue,URI datatypeURI) {
+        return s_interningManager.intern(new Constant(dataValue,datatypeURI));
     }
     
     public static class AnonymousConstantValue implements Serializable {

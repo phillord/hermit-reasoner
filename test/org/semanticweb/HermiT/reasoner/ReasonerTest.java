@@ -4,9 +4,7 @@ import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -24,7 +22,9 @@ import org.semanticweb.owlapi.model.OWLObjectMaxCardinality;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
+import org.semanticweb.owlapi.reasoner.NodeSet;
 import org.semanticweb.owlapi.vocab.OWLFacet;
+
 
 
 
@@ -32,6 +32,26 @@ public class ReasonerTest extends AbstractReasonerTest {
 
     public ReasonerTest(String name) {
         super(name);
+    }
+    
+    public void testObjectPropertDomains() throws Exception {
+        String axioms = "SubClassOf(:A :B)"
+            + "ObjectPropertyDomain(:r :A)";
+        loadOntologyWithAxioms(axioms);
+
+        OWLClass a = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "A"));
+        OWLClass b = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "B"));
+        OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(IRI.create(AbstractReasonerTest.NS + "r"));
+        createReasoner();
+        NodeSet<OWLClass> resultDirect=m_reasoner.getObjectPropertyDomains(r, true);
+        NodeSet<OWLClass> result=m_reasoner.getObjectPropertyDomains(r, false);
+        assertTrue(result.containsEntity(a));
+        assertTrue(result.containsEntity(b));
+        assertTrue(result.containsEntity(m_dataFactory.getOWLThing()));
+        assertTrue(result.getFlattened().size()==3);
+        assertTrue(resultDirect.containsEntity(a));
+        assertTrue(resultDirect.getFlattened().size()==1);
+        assertTrue(m_reasoner.isSubObjectPropertyExpressionOf(r, r));
     }
     public void testDatatypeLiterals() throws Exception {
         loadReasonerFromResource("res/FS2RDF-literals-ar-consistent.f.owl");
@@ -46,8 +66,8 @@ public class ReasonerTest extends AbstractReasonerTest {
         OWLNamedIndividual d = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "d"));
         OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(IRI.create(AbstractReasonerTest.NS + "r"));
         createReasoner();
-        Set<OWLNamedIndividual> result=m_reasoner.getRelatedIndividuals(c, r);
-        assertTrue(result.contains(d));
+        NodeSet<OWLNamedIndividual> result=m_reasoner.getObjectPropertyValues(c, r);
+        assertTrue(result.containsEntity(d));
     }
 
     // actually this test should cause a parsing error since xsd:minInclusive for restricting byte is supposed to use 
@@ -120,34 +140,28 @@ public class ReasonerTest extends AbstractReasonerTest {
         String axioms = "SubClassOf(:C :D)"
             + "SubClassOf(:D :E)";
         loadReasonerWithAxioms(axioms);
-        OWLClassExpression c = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#C"));
-        OWLClassExpression d = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#D"));
-        OWLClassExpression e = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#E"));
-        Set<OWLClassExpression> cEquiv=new HashSet<OWLClassExpression>();
-        cEquiv.add(c);
-        Set<OWLClassExpression> dEquiv=new HashSet<OWLClassExpression>();
-        dEquiv.add(d);
-        Set<OWLClassExpression> eEquiv=new HashSet<OWLClassExpression>();
-        eEquiv.add(e);
-        assertTrue(m_reasoner.getAncestorClasses(c).contains(cEquiv));
-        assertTrue(m_reasoner.getAncestorClasses(c).contains(dEquiv));
-        assertTrue(m_reasoner.getAncestorClasses(c).contains(eEquiv));
-        assertTrue(m_reasoner.getAncestorClasses(d).contains(dEquiv));
-        assertTrue(m_reasoner.getAncestorClasses(d).contains(eEquiv));
-        assertTrue(!m_reasoner.getAncestorClasses(d).contains(cEquiv));
-        assertTrue(m_reasoner.getAncestorClasses(e).contains(eEquiv));
-        assertTrue(!m_reasoner.getAncestorClasses(e).contains(cEquiv));
-        assertTrue(!m_reasoner.getAncestorClasses(e).contains(dEquiv));
+        OWLClass c = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#C"));
+        OWLClass d = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#D"));
+        OWLClass e = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#E"));
+        assertTrue(m_reasoner.getAncestorClasses(c).containsEntity(c));
+        assertTrue(m_reasoner.getAncestorClasses(c).containsEntity(d));
+        assertTrue(m_reasoner.getAncestorClasses(c).containsEntity(e));
+        assertTrue(m_reasoner.getAncestorClasses(d).containsEntity(d));
+        assertTrue(m_reasoner.getAncestorClasses(d).containsEntity(e));
+        assertTrue(!m_reasoner.getAncestorClasses(d).containsEntity(c));
+        assertTrue(m_reasoner.getAncestorClasses(e).containsEntity(e));
+        assertTrue(!m_reasoner.getAncestorClasses(e).containsEntity(c));
+        assertTrue(!m_reasoner.getAncestorClasses(e).containsEntity(d));
         
-        assertTrue(m_reasoner.getDescendantClasses(c).contains(cEquiv));
-        assertTrue(!m_reasoner.getDescendantClasses(c).contains(dEquiv));
-        assertTrue(!m_reasoner.getDescendantClasses(c).contains(eEquiv));
-        assertTrue(m_reasoner.getDescendantClasses(d).contains(cEquiv));
-        assertTrue(m_reasoner.getDescendantClasses(d).contains(dEquiv));
-        assertTrue(!m_reasoner.getDescendantClasses(d).contains(eEquiv));
-        assertTrue(m_reasoner.getDescendantClasses(e).contains(cEquiv));
-        assertTrue(m_reasoner.getDescendantClasses(e).contains(dEquiv));
-        assertTrue(m_reasoner.getDescendantClasses(e).contains(eEquiv));
+        assertTrue(m_reasoner.getDescendantClasses(c).containsEntity(c));
+        assertTrue(!m_reasoner.getDescendantClasses(c).containsEntity(d));
+        assertTrue(!m_reasoner.getDescendantClasses(c).containsEntity(e));
+        assertTrue(m_reasoner.getDescendantClasses(d).containsEntity(c));
+        assertTrue(m_reasoner.getDescendantClasses(d).containsEntity(d));
+        assertTrue(!m_reasoner.getDescendantClasses(d).containsEntity(e));
+        assertTrue(m_reasoner.getDescendantClasses(e).containsEntity(c));
+        assertTrue(m_reasoner.getDescendantClasses(e).containsEntity(d));
+        assertTrue(m_reasoner.getDescendantClasses(e).containsEntity(e));
         
         assertTrue(m_reasoner.isSubClassOf(c, c));
         assertTrue(m_reasoner.isSubClassOf(d, d));
@@ -163,56 +177,46 @@ public class ReasonerTest extends AbstractReasonerTest {
         String axioms = "SubObjectPropertyOf(:r :s)"
             + "SubObjectPropertyOf(:s :t)";
         loadReasonerWithAxioms(axioms);
-        OWLObjectPropertyExpression r = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
-        OWLObjectPropertyExpression s = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#s"));
-        OWLObjectPropertyExpression t = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#t"));
-        Set<OWLObjectPropertyExpression> rEquiv=new HashSet<OWLObjectPropertyExpression>();
-        rEquiv.add(r);
-        Set<OWLObjectPropertyExpression> sEquiv=new HashSet<OWLObjectPropertyExpression>();
-        sEquiv.add(s);
-        Set<OWLObjectPropertyExpression> tEquiv=new HashSet<OWLObjectPropertyExpression>();
-        tEquiv.add(t);
-        assertTrue(m_reasoner.getAncestorProperties(r).contains(rEquiv));
-        assertTrue(m_reasoner.getAncestorProperties(r).contains(sEquiv));
-        assertTrue(m_reasoner.getAncestorProperties(r).contains(tEquiv));
-        assertTrue(m_reasoner.getAncestorProperties(s).contains(sEquiv));
-        assertTrue(m_reasoner.getAncestorProperties(s).contains(tEquiv));
-        assertTrue(!m_reasoner.getAncestorProperties(s).contains(rEquiv));
-        assertTrue(m_reasoner.getAncestorProperties(t).contains(tEquiv));
-        assertTrue(!m_reasoner.getAncestorProperties(t).contains(rEquiv));
-        assertTrue(!m_reasoner.getAncestorProperties(t).contains(sEquiv));
+        OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
+        OWLObjectProperty s = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#s"));
+        OWLObjectProperty t = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#t"));
+        assertTrue(m_reasoner.getAncestorObjectProperties(r).containsEntity(r));
+        assertTrue(m_reasoner.getAncestorObjectProperties(r).containsEntity(s));
+        assertTrue(m_reasoner.getAncestorObjectProperties(r).containsEntity(t));
+        assertTrue(m_reasoner.getAncestorObjectProperties(s).containsEntity(s));
+        assertTrue(m_reasoner.getAncestorObjectProperties(s).containsEntity(t));
+        assertTrue(!m_reasoner.getAncestorObjectProperties(s).containsEntity(r));
+        assertTrue(m_reasoner.getAncestorObjectProperties(t).containsEntity(t));
+        assertTrue(!m_reasoner.getAncestorObjectProperties(t).containsEntity(r));
+        assertTrue(!m_reasoner.getAncestorObjectProperties(t).containsEntity(s));
         
-        assertTrue(m_reasoner.getDescendantProperties(r).contains(rEquiv));
-        assertTrue(!m_reasoner.getDescendantProperties(r).contains(sEquiv));
-        assertTrue(!m_reasoner.getDescendantProperties(r).contains(tEquiv));
-        assertTrue(m_reasoner.getDescendantProperties(s).contains(rEquiv));
-        assertTrue(m_reasoner.getDescendantProperties(s).contains(sEquiv));
-        assertTrue(!m_reasoner.getDescendantProperties(s).contains(tEquiv));
-        assertTrue(m_reasoner.getDescendantProperties(t).contains(rEquiv));
-        assertTrue(m_reasoner.getDescendantProperties(t).contains(sEquiv));
-        assertTrue(m_reasoner.getDescendantProperties(t).contains(tEquiv));
+        assertTrue(m_reasoner.getDescendantObjectProperties(r).containsEntity(r));
+        assertTrue(!m_reasoner.getDescendantObjectProperties(r).containsEntity(s));
+        assertTrue(!m_reasoner.getDescendantObjectProperties(r).containsEntity(t));
+        assertTrue(m_reasoner.getDescendantObjectProperties(s).containsEntity(r));
+        assertTrue(m_reasoner.getDescendantObjectProperties(s).containsEntity(s));
+        assertTrue(!m_reasoner.getDescendantObjectProperties(s).containsEntity(t));
+        assertTrue(m_reasoner.getDescendantObjectProperties(t).containsEntity(r));
+        assertTrue(m_reasoner.getDescendantObjectProperties(t).containsEntity(s));
+        assertTrue(m_reasoner.getDescendantObjectProperties(t).containsEntity(t));
         
-        assertTrue(m_reasoner.isSubPropertyOf(r, r));
-        assertTrue(m_reasoner.isSubPropertyOf(s, s));
-        assertTrue(m_reasoner.isSubPropertyOf(t, t));
-        assertTrue(m_reasoner.isSubPropertyOf(r, s));
-        assertTrue(m_reasoner.isSubPropertyOf(r, t));
-        assertTrue(m_reasoner.isSubPropertyOf(s, t));
-        assertTrue(!m_reasoner.isSubPropertyOf(s, r));
-        assertTrue(!m_reasoner.isSubPropertyOf(t, r));
-        assertTrue(!m_reasoner.isSubPropertyOf(t, s));
+        assertTrue(m_reasoner.isSubObjectPropertyExpressionOf(r, r));
+        assertTrue(m_reasoner.isSubObjectPropertyExpressionOf(s, s));
+        assertTrue(m_reasoner.isSubObjectPropertyExpressionOf(t, t));
+        assertTrue(m_reasoner.isSubObjectPropertyExpressionOf(r, s));
+        assertTrue(m_reasoner.isSubObjectPropertyExpressionOf(r, t));
+        assertTrue(m_reasoner.isSubObjectPropertyExpressionOf(s, t));
+        assertTrue(!m_reasoner.isSubObjectPropertyExpressionOf(s, r));
+        assertTrue(!m_reasoner.isSubObjectPropertyExpressionOf(t, r));
+        assertTrue(!m_reasoner.isSubObjectPropertyExpressionOf(t, s));
     }
     public void testSubRolesChain() throws Exception {
         String axioms = "SubObjectPropertyOf(ObjectPropertyChain(:r) :s)";
         loadReasonerWithAxioms(axioms);
-        OWLObjectPropertyExpression r = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
-        OWLObjectPropertyExpression s = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#s"));
-        Set<OWLObjectPropertyExpression> requiv=new HashSet<OWLObjectPropertyExpression>();
-        requiv.add(r);
-        Set<OWLObjectPropertyExpression> sequiv=new HashSet<OWLObjectPropertyExpression>();
-        sequiv.add(s);
-        assertTrue(!m_reasoner.getSubProperties(s).contains(sequiv));
-        assertTrue(m_reasoner.getSubProperties(s).contains(requiv));
+        OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
+        OWLObjectProperty s = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#s"));
+        assertTrue(!m_reasoner.getSubObjectProperties(s,true).containsEntity(s));
+        assertTrue(m_reasoner.getSubObjectProperties(s,true).containsEntity(r));
     }
     public void testHasKeyEntailment() throws Exception {
         String axioms = "HasKey( :Person () ( :hasSSN ) )"
@@ -548,7 +552,7 @@ public class ReasonerTest extends AbstractReasonerTest {
             "EquivalentClasses( ObjectSomeValuesFrom( :r owl:Thing ) ObjectSomeValuesFrom( :s owl:Thing ) ) ";
         loadReasonerWithAxioms(axioms);
         
-        assertTrue(m_reasoner.isEquivalentProperty(m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(IRI.create("file:/c/test.owl#r")),m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(IRI.create("file:/c/test.owl#s"))));
+        assertTrue(m_reasoner.isEquivalentObjectPropertyExpression(m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(IRI.create("file:/c/test.owl#r")),m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(IRI.create("file:/c/test.owl#s"))));
     }
 
     @SuppressWarnings("unchecked")
@@ -587,7 +591,7 @@ public class ReasonerTest extends AbstractReasonerTest {
             "EquivalentClasses( DataSomeValuesFrom( :r rdfs:Literal ) DataSomeValuesFrom( :s rdfs:Literal ) ) ";
         loadReasonerWithAxioms(axioms);
         
-        assertTrue(m_reasoner.isEquivalentProperty(m_ontologyManager.getOWLDataFactory().getOWLDataProperty(IRI.create(AbstractReasonerTest.NS+"r")),m_ontologyManager.getOWLDataFactory().getOWLDataProperty(IRI.create(AbstractReasonerTest.NS+"s"))));
+        assertTrue(m_reasoner.isEquivalentDataProperty(m_ontologyManager.getOWLDataFactory().getOWLDataProperty(IRI.create(AbstractReasonerTest.NS+"r")),m_ontologyManager.getOWLDataFactory().getOWLDataProperty(IRI.create(AbstractReasonerTest.NS+"s"))));
     }
 
     public void testComplexConceptInstanceRetrieval() throws Exception {

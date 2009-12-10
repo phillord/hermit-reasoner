@@ -1014,7 +1014,12 @@ public class OWLClausification {
             m_negativeFacts.add(getRoleAtom(object.getProperty(),getIndividual(object.getSubject()),getIndividual(object.getObject())));
         }
         public void visit(OWLDataPropertyAssertionAxiom object) {
-            Constant targetValue=Constant.create(object.getObject().accept(m_dataRangeConverter));
+            OWLLiteral lit=object.getObject();
+            Constant targetValue;
+            if (lit instanceof OWLTypedLiteral) 
+                targetValue=Constant.create(lit.accept(m_dataRangeConverter),((OWLTypedLiteral)lit).getDatatype().getIRI().toURI());
+            else 
+                targetValue=Constant.create(lit.accept(m_dataRangeConverter),null);
             m_positiveFacts.add(getRoleAtom(object.getProperty(),getIndividual(object.getSubject()),targetValue));
         }
         public void visit(OWLNegativeDataPropertyAssertionAxiom object) {

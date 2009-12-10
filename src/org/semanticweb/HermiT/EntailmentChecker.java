@@ -13,7 +13,6 @@ import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
 import org.semanticweb.HermiT.tableau.Tableau;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.inference.OWLReasonerException;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationPropertyDomainAxiom;
@@ -52,7 +51,6 @@ import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLInverseFunctionalObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLInverseObjectPropertiesAxiom;
 import org.semanticweb.owlapi.model.OWLIrreflexiveObjectPropertyAxiom;
-import org.semanticweb.owlapi.model.OWLLogicalAxiom;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLNegativeDataPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLNegativeObjectPropertyAssertionAxiom;
@@ -88,14 +86,13 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
      * Checks entailment of a set of axioms (an ontology) against the loaded ontology.  
      * @param axioms the axioms that should be checked for enailment
      * @return true if all axioms follow from the loaded ontology and false otherwise. 
-     * @throws OWLReasonerException
      */
-    public boolean entails(Set<OWLLogicalAxiom> axioms) {
+    public boolean entails(Set<? extends OWLAxiom> axioms) {
         anonymousIndividualAxioms.clear();
         for (OWLAxiom axiom : axioms) {
-            if (!axiom.accept(this)) {
-                return false;
-            }
+            if (axiom.isLogicalAxiom())
+                if (!axiom.accept(this)) 
+                    return false;
         }
         return checkAnonymousIndividuals();
     }
@@ -107,7 +104,6 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
      * concepts for the anonymous individuals can be obtained by rolling-up as required.  
      * @param axiom an axiom for which entailment is to be checked
      * @return true if the loaded ontology entails the axiom and false otherwise
-     * @throws OWLReasonerException
      */
     public boolean entails(OWLAxiom axiom) {
         if (!axiom.accept(this)) return false;
@@ -238,7 +234,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
             anonymousIndividualAxioms.add(axiom);
             return true; // will be checked afterwards by rolling-up
         }
-        return reasoner.hasDataPropertyRelationship(sub.asNamedIndividual(),axiom.getProperty(),axiom.getObject());
+        return reasoner.hasDataPropertyRelationship(sub.asNamedIndividual(),axiom.getProperty().asOWLDataProperty(),axiom.getObject());
     }
     public Boolean visit(OWLNegativeDataPropertyAssertionAxiom axiom) {
         // see OWL 2 Syntax, Sec 11.2 
@@ -266,7 +262,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
     public Boolean visit(OWLInverseObjectPropertiesAxiom axiom) {
         OWLObjectPropertyExpression prop1=axiom.getFirstProperty();
         OWLObjectPropertyExpression prop2=axiom.getSecondProperty();
-        return reasoner.getInverseProperties(prop1).contains(prop2);
+        return reasoner.isEquivalentObjectPropertyExpression(prop1.getInverseProperty(), prop2);
     }
     public Boolean visit(OWLSymmetricObjectPropertyAxiom axiom) {
         return reasoner.isSymmetric(axiom.getProperty());
@@ -290,17 +286,17 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
             OWLObjectPropertyExpression prop1=it.next();
             while (it.hasNext()) {
                 OWLObjectPropertyExpression prop2=it.next();
-                if (!reasoner.getEquivalentProperties(prop1).contains(prop2))
+                if (!reasoner.isEquivalentObjectPropertyExpression(prop1, prop2))
                     return Boolean.FALSE;
             }
         }
         return Boolean.TRUE;
     }
     public Boolean visit(OWLSubObjectPropertyOfAxiom axiom) {
-        return reasoner.isSubPropertyOf(axiom.getSubProperty(), axiom.getSuperProperty());
+        return reasoner.isSubObjectPropertyExpressionOf(axiom.getSubProperty(), axiom.getSuperProperty());
     }
     public Boolean visit(OWLSubPropertyChainOfAxiom axiom) {
-        return reasoner.isSubPropertyOf(axiom.getPropertyChain(), axiom.getSuperProperty());
+        return reasoner.isSubObjectPropertyExpressionOf(axiom.getPropertyChain(), axiom.getSuperProperty());
     }
     public Boolean visit(OWLDisjointObjectPropertiesAxiom axiom) {
         int n=axiom.getProperties().size();
@@ -339,14 +335,14 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
         if (it.hasNext()) {
             OWLDataProperty prop1=it.next().asOWLDataProperty();
             while (it.hasNext()) {
-                if (!reasoner.isEquivalentProperty(prop1.asOWLDataProperty(), it.next().asOWLDataProperty()))
+                if (!reasoner.isEquivalentDataProperty(prop1.asOWLDataProperty(), it.next().asOWLDataProperty()))
                     return Boolean.FALSE;
             }
         }
         return Boolean.TRUE;
     }
     public Boolean visit(OWLSubDataPropertyOfAxiom axiom) {
-        return reasoner.isSubPropertyOf(axiom.getSubProperty().asOWLDataProperty(),axiom.getSuperProperty().asOWLDataProperty());
+        return reasoner.isSubDataPropertyOf(axiom.getSubProperty().asOWLDataProperty(),axiom.getSuperProperty().asOWLDataProperty());
     }
     public Boolean visit(OWLDisjointDataPropertiesAxiom axiom) {
         int n=axiom.getProperties().size();

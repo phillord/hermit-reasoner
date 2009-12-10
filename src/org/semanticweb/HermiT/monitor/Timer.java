@@ -14,7 +14,8 @@ public class Timer extends TableauMonitorAdapter {
     protected long m_problemStartTime;
     protected long m_lastStatusTime;
     protected int m_numberOfBacktrackings;
-
+    protected int m_numberOfSatTests=0;
+    
     public Timer() {
         m_output=new PrintWriter(System.out);
     }
@@ -37,6 +38,7 @@ public class Timer extends TableauMonitorAdapter {
     }
     public void isSatisfiableFinished(AtomicConcept atomicConcept,boolean result) {
         m_output.println(result ? "YES" : "NO");
+        m_numberOfSatTests++;
         doStatistics();
     }
     public void isSubsumedByStarted(AtomicConcept subconcept,AtomicConcept superconcept) {
@@ -46,6 +48,7 @@ public class Timer extends TableauMonitorAdapter {
     }
     public void isSubsumedByFinished(AtomicConcept subconcept,AtomicConcept superconcept,boolean result) {
         m_output.println(result ? "YES" : "NO");
+        m_numberOfSatTests++;
         doStatistics();
     }
     public void isABoxSatisfiableStarted() {
@@ -55,6 +58,7 @@ public class Timer extends TableauMonitorAdapter {
     }
     public void isABoxSatisfiableFinished(boolean result) {
         m_output.println(result ? "YES" : "NO");
+        m_numberOfSatTests++;
         doStatistics();
     }
     public void isInstanceOfStarted(AtomicConcept concept,Individual individual) {
@@ -64,6 +68,7 @@ public class Timer extends TableauMonitorAdapter {
     }
     public void isInstanceOfFinished(AtomicConcept concept,Individual individual,boolean result) {
         m_output.println(result ? "YES" : "NO");
+        m_numberOfSatTests++;
         doStatistics();
     }
     public void iterationStarted() {
@@ -80,7 +85,8 @@ public class Timer extends TableauMonitorAdapter {
     protected void doStatistics() {
         long duartionSoFar=System.currentTimeMillis()-m_problemStartTime;
         m_output.print(duartionSoFar);
-        m_output.print(" ms: allocated nodes: ");
+        m_output.print(" ms   sat test no: "+m_numberOfSatTests);
+        m_output.print("    allocated nodes: ");
         m_output.print(m_tableau.getNumberOfAllocatedNodes());
         m_output.print("    used nodes: ");
         m_output.print(m_tableau.getNumberOfNodeCreations());

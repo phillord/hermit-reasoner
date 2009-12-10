@@ -55,6 +55,7 @@ public class DLOntology implements Serializable {
     protected final Set<Individual> m_allIndividuals;
     protected final Set<DescriptionGraph> m_allDescriptionGraphs;
     protected final Map<OWLObjectPropertyExpression, Automaton> m_automataOfComplexObjectProperties;
+    protected final Map<AtomicRole,Map<Individual,Set<Constant>>> m_dataPropertyAssertions;
     
     public DLOntology(String ontologyIRI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts,
             Set<AtomicConcept> atomicConcepts,Set<ComplexObjectRoleInclusion> allComplexObjectRoleInclusions,
@@ -117,12 +118,37 @@ public class DLOntology implements Serializable {
             }
         }
         m_isHorn=isHorn;
+        m_dataPropertyAssertions=new HashMap<AtomicRole,Map<Individual,Set<Constant>>>();
         for (Atom atom : m_positiveFacts) {
             addDLPredicate(atom.getDLPredicate());
             for (int i=0;i<atom.getArity();++i) {
                 Term argument=atom.getArgument(i);
                 if (argument instanceof Individual)
                     m_allIndividuals.add((Individual)argument);
+            }
+            if (atom.getArity()==2) {
+                Object mayBeConstant=atom.getArgument(1);
+                if (mayBeConstant instanceof Constant) {
+                    // data property assertion
+                    Individual ind=(Individual)atom.getArgument(0);
+                    assert atom.getDLPredicate() instanceof AtomicRole;
+                    AtomicRole dp=(AtomicRole)atom.getDLPredicate();
+                    Map<Individual,Set<Constant>> indToDataValue;
+                    if (m_dataPropertyAssertions.containsKey(dp)) 
+                        indToDataValue=m_dataPropertyAssertions.get(dp);
+                    else { 
+                        indToDataValue=new HashMap<Individual,Set<Constant>>();
+                        m_dataPropertyAssertions.put(dp,indToDataValue);
+                    }
+                    Set<Constant> constants;
+                    if (indToDataValue.containsKey(ind)) 
+                        constants=indToDataValue.get(ind);
+                    else { 
+                        constants=new HashSet<Constant>();
+                        indToDataValue.put(ind,constants);
+                    }
+                    constants.add((Constant)mayBeConstant);
+                }
             }
         }
         for (Atom atom : m_negativeFacts) {
@@ -186,6 +212,10 @@ public class DLOntology implements Serializable {
 
     public Set<Atom> getPositiveFacts() {
         return m_positiveFacts;
+    }
+    
+    public Map<AtomicRole,Map<Individual,Set<Constant>>> getDataPropertyAssertions() {
+        return m_dataPropertyAssertions;
     }
 
     public Set<Atom> getNegativeFacts() {

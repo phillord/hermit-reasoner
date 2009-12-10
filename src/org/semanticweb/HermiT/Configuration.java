@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
+import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 
 public class Configuration implements Serializable,Cloneable {
     private static final long serialVersionUID=7741510316249774519L;
@@ -35,7 +36,10 @@ public class Configuration implements Serializable,Cloneable {
     public static enum ExistentialStrategyType {
         CREATION_ORDER,EL,INDIVIDUAL_REUSE
     }
+    
     public WarningMonitor warningMonitor;
+    public ReasonerProgressMonitor reasonerProgressMonitor;
+    public long timeout;
     public Configuration.TableauMonitorType tableauMonitorType;
     public Configuration.DirectBlockingType directBlockingType;
     public Configuration.BlockingStrategyType blockingStrategyType;
@@ -45,7 +49,8 @@ public class Configuration implements Serializable,Cloneable {
     public boolean ignoreUnsupportedDatatypes;
     public TableauMonitor monitor;
     public HashMap<String,Object> parameters;
-
+    public boolean bufferChanges=true;
+    
     public Configuration() {
         warningMonitor=null;
         tableauMonitorType=Configuration.TableauMonitorType.NONE;
@@ -98,8 +103,10 @@ public class Configuration implements Serializable,Cloneable {
             return null;
         }
     }
-
     public static interface WarningMonitor {
         void warning(String warning);
+    }
+    public long getTimeOut() {
+        return timeout;
     }
 }

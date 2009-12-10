@@ -10,7 +10,6 @@ import java.text.BreakIterator;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Set;
 
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.EntailmentChecker;
@@ -23,6 +22,8 @@ import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.reasoner.Node;
+import org.semanticweb.owlapi.reasoner.NodeSet;
 
 public class CommandLine {
     
@@ -152,16 +153,16 @@ public class CommandLine {
             if (!hermit.isDefined(owlClass)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
             }
-            Set<Set<OWLClass>> classes;
+            NodeSet<OWLClass> classes;
             if (all) {
-                classes=hermit.getAncestorClasses(owlClass);
+                classes=hermit.getSuperClasses(owlClass,false);
                 output.println("All super-classes of '"+conceptName+"':");
             }
             else {
-                classes=hermit.getSuperClasses(owlClass);
+                classes=hermit.getSuperClasses(owlClass,false);
                 output.println("Direct super-classes of '"+conceptName+"':");
             }
-            for (Set<OWLClass> set : classes)
+            for (Node<OWLClass> set : classes)
                 for (OWLClass classInSet : set)
                     output.println("\t"+prefixes.abbreviateIRI(classInSet.getIRI().toString()));
         }
@@ -181,16 +182,16 @@ public class CommandLine {
             if (!hermit.isDefined(owlClass)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
             }
-            Set<Set<OWLClass>> classes;
+            NodeSet<OWLClass> classes;
             if (all) {
-                classes=hermit.getDescendantClasses(owlClass);
+                classes=hermit.getSubClasses(owlClass,false);
                 output.println("All sub-classes of '"+conceptName+"':");
             }
             else {
-                classes=hermit.getSubClasses(owlClass);
+                classes=hermit.getSubClasses(owlClass,true);
                 output.println("Direct sub-classes of '"+conceptName+"':");
             }
-            for (Set<OWLClass> set : classes)
+            for (Node<OWLClass> set : classes)
                 for (OWLClass classInSet : set)
                     output.println("\t"+prefixes.abbreviateIRI(classInSet.getIRI().toString()));
         }
@@ -208,7 +209,7 @@ public class CommandLine {
             if (!hermit.isDefined(owlClass)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
             }
-            Set<OWLClass> classes=hermit.getEquivalentClasses(owlClass);
+            Node<OWLClass> classes=hermit.getEquivalentClasses(owlClass);
             output.println("Classes equivalent to '"+conceptName+"':");
             for (OWLClass classInSet : classes)
                 output.println("\t"+prefixes.abbreviateIRI(classInSet.getIRI().toString()));
