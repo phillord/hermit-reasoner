@@ -397,6 +397,10 @@ public class Reasoner implements OWLReasoner,Serializable {
     
     // Concept inferences
 
+    public boolean isClassified() {
+        return m_atomicConceptHierarchy!=null;
+    }
+    
     public void classify() {
         if (m_atomicConceptHierarchy==null) {
             try {
