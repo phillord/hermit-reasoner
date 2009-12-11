@@ -1,4 +1,20 @@
-// Copyright 2008 by Oxford University; see license.txt for details
+/* Copyright 2008, 2009 by the Oxford University Computing Laboratory
+   
+   This file is part of HermiT.
+
+   HermiT is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Lesser General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+   
+   HermiT is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Lesser General Public License for more details.
+   
+   You should have received a copy of the GNU Lesser General Public License
+   along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
+*/
 package org.semanticweb.HermiT;
 
 import java.io.PrintWriter;
@@ -29,8 +45,8 @@ import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
 import org.semanticweb.HermiT.existentials.ExistentialExpansionStrategy;
 import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
-import org.semanticweb.HermiT.hierarchy.ClassificationManager;
 import org.semanticweb.HermiT.hierarchy.AtomicConceptSubsumptionCache;
+import org.semanticweb.HermiT.hierarchy.ClassificationManager;
 import org.semanticweb.HermiT.hierarchy.DataRoleSubsumptionCache;
 import org.semanticweb.HermiT.hierarchy.DeterministicClassificationManager;
 import org.semanticweb.HermiT.hierarchy.Hierarchy;
@@ -761,9 +777,33 @@ public class Reasoner implements OWLReasoner,Serializable {
     public Node<OWLObjectProperty> getInverseObjectProperties(OWLObjectPropertyExpression property) {
         return getEquivalentObjectProperties(property.getInverseProperty());
     }
-//    public NodeSet<OWLObjectProperty> getDisjointObjectProperties(OWLObjectPropertyExpression propertyExpression, boolean direct) {
-//        
-//    }
+    public NodeSet<OWLObjectProperty> getDisjointObjectProperties(OWLObjectPropertyExpression propertyExpression, boolean direct) {
+        if (propertyExpression.isOWLTopObjectProperty()) return new OWLObjectPropertyNodeSet(m_factory.getOWLBottomObjectProperty());
+        Set<Node<OWLObjectProperty>> result=new HashSet<Node<OWLObjectProperty>>();
+        Set<OWLObjectProperty> tested=new HashSet<OWLObjectProperty>();
+        OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
+        OWLDataFactory factory=ontologyManager.getOWLDataFactory();
+        OWLIndividual individualA=factory.getOWLNamedIndividual(IRI.create("internal:individualA"));
+        OWLIndividual individualB=factory.getOWLNamedIndividual(IRI.create("internal:individualB"));
+        OWLAxiom assertion=factory.getOWLObjectPropertyAssertionAxiom(propertyExpression,individualA,individualB);
+        OWLAxiom assertion2;
+        OWLObjectProperty testedProperty;
+        classifyObjectProperties();
+        for (AtomicRole role : m_dlOntology.getAllAtomicObjectRoles()) {
+            testedProperty=factory.getOWLObjectProperty(IRI.create(role.getIRI()));
+            if (!tested.contains(testedProperty)) {
+                assertion2=factory.getOWLObjectPropertyAssertionAxiom(testedProperty,individualA,individualB);
+                Tableau tableau=getTableau(ontologyManager,assertion,assertion2);
+                if (!tableau.isABoxSatisfiable()) {
+                    for (Node<OWLObjectProperty> n : getDescendantObjectProperties(testedProperty)) {
+                        result.add(n);
+                        tested.addAll(n.getEntities());
+                    }
+                }
+            }
+        }
+        return new OWLObjectPropertyNodeSet(result);
+    }
     /**
      * @param propertyExpression - an object property expression
      * @return true if each individual can have at most one outgoing connection of the specified object property expression  
@@ -976,6 +1016,33 @@ public class Reasoner implements OWLReasoner,Serializable {
         }
         return result;
     }
+//    public NodeSet<OWLDataProperty> getDisjointDataProperties(OWLDataProperty property, boolean direct) {
+//        if (property.isOWLTopDataProperty()) return new OWLDataPropertyNodeSet(m_factory.getOWLBottomDataProperty());
+//        Set<Node<OWLDataProperty>> result=new HashSet<Node<OWLDataProperty>>();
+//        Set<OWLDataProperty> tested=new HashSet<OWLDataProperty>();
+//        OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
+//        OWLDataFactory factory=ontologyManager.getOWLDataFactory();
+//        OWLIndividual individualA=factory.getOWLNamedIndividual(IRI.create("internal:individualA"));
+//        OWLLiteral constant=factory.getOWLTypedLiteral("",factory.getTopDatatype());
+//        OWLAxiom assertion=factory.getOWLDataPropertyAssertionAxiom(property,individualA,individualB);
+//        OWLAxiom assertion2;
+//        OWLDataProperty testedProperty;
+//        classifyDataProperties();
+//        for (AtomicRole role : m_dlOntology.getAllAtomicDataRoles()) {
+//            testedProperty=factory.getOWLDataProperty(IRI.create(role.getIRI()));
+//            if (!tested.contains(testedProperty)) {
+//                assertion2=factory.getOWLDataPropertyAssertionAxiom(testedProperty,individualA,individualB);
+//                Tableau tableau=getTableau(ontologyManager,assertion,assertion2);
+//                if (!tableau.isABoxSatisfiable()) {
+//                    for (Node<OWLDataProperty> n : getDescendantDataProperties(testedProperty)) {
+//                        result.add(n);
+//                        tested.addAll(n.getEntities());
+//                    }
+//                }
+//            }
+//        }
+//        return new OWLDataPropertyNodeSet(result);
+//    }
     /**
      * @param property - a data property
      * @return true if each individual can have at most one outgoing connection of the specified data property
