@@ -67,6 +67,8 @@ public abstract class AbstractExpansionStrategy implements Serializable,Existent
     public void clear() {
         m_blockingStrategy.clear();
         m_processedExistentials.clear();
+        m_ternaryExtensionTableSearch01Bound.clear();
+        m_ternaryExtensionTableSearch02Bound.clear();
     }
     public boolean expandExistentials(boolean finalChance) {
         TableauMonitor monitor=m_tableau.getTableauMonitor();

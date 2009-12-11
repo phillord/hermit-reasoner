@@ -33,6 +33,8 @@ public class ValidatedSingleDirectBlockingChecker implements DirectBlockingCheck
     public void clear() {
         m_atomicConceptsSetFactory.clearNonpermanent();
         m_atomicRolesSetFactory.clearNonpermanent();
+        m_binaryTableSearch1Bound.clear();
+        m_ternaryTableSearch12Bound.clear();
     }
     public boolean isBlockedBy(Node blocker,Node blocked) {
         boolean isBlockedBy=

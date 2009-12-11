@@ -34,6 +34,8 @@ public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChe
     public void clear() {
         m_atomicConceptsSetFactory.clearNonpermanent();
         m_atomicRolesSetFactory.clearNonpermanent();
+        m_binaryTableSearch1Bound.clear();
+        m_ternaryTableSearch12Bound.clear();
     }
     public boolean isBlockedBy(Node blocker,Node blocked) {
         ValidatedPairwiseBlockingObject blockerObject=(ValidatedPairwiseBlockingObject)blocker.getBlockingObject();

@@ -48,15 +48,24 @@ public class DatatypeManager implements Serializable {
         // and then filters out inequalities "manually".
         m_inequalityDeltaOldRetrieval=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { false,false,false },ExtensionTable.View.DELTA_OLD);
         m_inequality01Retrieval=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,true,false },ExtensionTable.View.EXTENSION_THIS);
-        m_inequality01Retrieval.getBindingsBuffer()[0]=Inequality.INSTANCE;
         m_inequality02Retrieval=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,false,true },ExtensionTable.View.EXTENSION_THIS);
-        m_inequality02Retrieval.getBindingsBuffer()[0]=Inequality.INSTANCE;
         m_assertions1Retrieval=m_extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.EXTENSION_THIS);
         m_conjunction=new DConjunction();
         m_auxiliaryNodeList=new ArrayList<Node>();
         m_auxiliaryVariableList=new ArrayList<DVariable>();
         m_unionDependencySet=new UnionDependencySet(16);
         m_newVariableAdded=new boolean[1];
+    }
+    public void clear() {
+        m_assertionsDeltaOldRetrieval.clear();
+        m_inequalityDeltaOldRetrieval.clear();
+        m_inequality01Retrieval.clear();
+        m_inequality02Retrieval.clear();
+        m_assertions1Retrieval.clear();
+        m_conjunction.clear();
+        m_auxiliaryNodeList.clear();
+        m_auxiliaryVariableList.clear();
+        m_unionDependencySet.clearConstituents();
     }
     public boolean checkDatatypeConstraints() {
         if (m_tableauMonitor!=null)
@@ -132,6 +141,7 @@ public class DatatypeManager implements Serializable {
             // the nodes that are unequal to them can be analyzed independently. 
             if (reachedNode.getNodeType()!=NodeType.ROOT_CONSTANT_NODE) {
                 // Look for all inequalities where reachedNode occurs in the first position.
+                m_inequality01Retrieval.getBindingsBuffer()[0]=Inequality.INSTANCE;
                 m_inequality01Retrieval.getBindingsBuffer()[1]=reachedNode;
                 m_inequality01Retrieval.open();
                 Object[] tupleBuffer=m_inequality01Retrieval.getTupleBuffer();
@@ -145,6 +155,7 @@ public class DatatypeManager implements Serializable {
                     m_interruptFlag.checkInterrupt();
                 }
                 // Look for all inequalities where reachedNode occurs in the second position.
+                m_inequality02Retrieval.getBindingsBuffer()[0]=Inequality.INSTANCE;
                 m_inequality02Retrieval.getBindingsBuffer()[2]=reachedNode;
                 m_inequality02Retrieval.open();
                 tupleBuffer=m_inequality02Retrieval.getTupleBuffer();

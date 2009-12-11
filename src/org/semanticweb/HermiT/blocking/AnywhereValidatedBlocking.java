@@ -70,6 +70,7 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
         numNodes.clear();
         numBlocked.clear();
         numInvalidlyBlocked.clear();
+        m_blockingValidator.clear();
     }
     public void computeBlocking(boolean finalChance) {
         if (finalChance) {
@@ -371,6 +372,8 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
             m_variables=variables;
             m_valuesBuffer=valuesBuffer;
             m_coreVariables=coreVariables;
+        }
+        public void clear() {
         }
         public int execute(int programCounter) {  
             Node potentialNonCore=null;

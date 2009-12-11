@@ -32,6 +32,7 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
     }
     public void clear() {
         m_atomicConceptsSetFactory.clearNonpermanent();
+        m_binaryTableSearch1Bound.clear();
     }
     public boolean isBlockedBy(Node blocker,Node blocked) {
         return

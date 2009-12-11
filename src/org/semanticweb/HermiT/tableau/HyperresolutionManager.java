@@ -67,6 +67,16 @@ public final class HyperresolutionManager implements Serializable {
         m_deltaOldRetrievals=new ExtensionTable.Retrieval[retrievalsByArity.size()];
         retrievalsByArity.values().toArray(m_deltaOldRetrievals);
     }
+    public void clear() {
+        for (ExtensionTable.Retrieval retrieval : m_deltaOldRetrievals)
+            retrieval.clear();
+        for (CompiledDLClauseInfo info : m_tupleConsumersByDeltaPredicate.values()) {
+            while (info!=null) {
+                info.clear();
+                info=info.m_next;
+            }
+        }
+    }
     protected boolean isPredicateWithExtension(DLPredicate dlPredicate) {
         return !NodeIDLessEqualThan.INSTANCE.equals(dlPredicate) && !(dlPredicate instanceof NodeIDsAscendingOrEqual);
     }

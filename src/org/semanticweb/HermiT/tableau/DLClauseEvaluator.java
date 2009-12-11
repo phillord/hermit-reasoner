@@ -3,6 +3,7 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,6 +29,7 @@ public class DLClauseEvaluator implements Serializable {
     protected final Worker[] m_workers;
     protected final DLClause m_bodyDLClause;
     protected final List<DLClause> m_headDLClauses;
+    protected final int m_numberOfVariables;
     
     public DLClauseEvaluator(Tableau tableau,DLClause bodyDLClause,List<DLClause> headDLClauses,ExtensionTable.Retrieval firstAtomRetrieval) {
         m_interruptFlag=tableau.m_interruptFlag;
@@ -41,6 +43,15 @@ public class DLClauseEvaluator implements Serializable {
         compiler.m_workers.toArray(m_workers);
         m_bodyDLClause=bodyDLClause;
         m_headDLClauses=headDLClauses;
+        m_numberOfVariables=compiler.m_variables.size();
+    }
+    public void clear() {
+        for (ExtensionTable.Retrieval retrieval : m_retrievals)
+            retrieval.clear();
+        Arrays.fill(m_unionDependencySet.m_dependencySets,null);
+        Arrays.fill(m_valuesBuffer,0,m_numberOfVariables,null);
+        for (Worker worker : m_workers)
+            worker.clear();
     }
     public int getBodyLength() {
         return m_bodyDLClause.getBodyLength();
@@ -87,6 +98,7 @@ public class DLClauseEvaluator implements Serializable {
 
     public static interface Worker {
         int execute(int programCounter);
+        void clear();
     }
     
     protected static interface BranchingWorker extends Worker {
@@ -108,6 +120,8 @@ public class DLClauseEvaluator implements Serializable {
             m_toBuffer=toBuffer;
             m_toIndex=toIndex;
         }
+        public void clear() {
+        }
         public int execute(int programCounter) {
             m_toBuffer[m_toIndex]=m_fromBuffer[m_fromIndex];
             return programCounter+1;
@@ -128,6 +142,8 @@ public class DLClauseEvaluator implements Serializable {
             m_retrieval=retrieval;
             m_targetDependencySets=targetDependencySets;
             m_targetIndex=targetIndex;
+        }
+        public void clear() {
         }
         public int execute(int programCounter) {
             m_targetDependencySets[m_targetIndex]=m_retrieval.getDependencySet();
@@ -151,6 +167,8 @@ public class DLClauseEvaluator implements Serializable {
             m_buffer=buffer;
             m_index1=index1;
             m_index2=index2;
+        }
+        public void clear() {
         }
         public int execute(int programCounter) {
             if (m_buffer[m_index1].equals(m_buffer[m_index2]))
@@ -183,6 +201,8 @@ public class DLClauseEvaluator implements Serializable {
             m_index1=index1;
             m_index2=index2;
         }
+        public void clear() {
+        }
         public int execute(int programCounter) {
             if (((Node)m_buffer[m_index1]).getNodeID()<=((Node)m_buffer[m_index2]).getNodeID())
                 return programCounter+1;
@@ -211,6 +231,8 @@ public class DLClauseEvaluator implements Serializable {
             m_branchProgramCounter=branchProgramCounter;
             m_buffer=buffer;
             m_nodeIndexes=nodeIndexes;
+        }
+        public void clear() {
         }
         public int execute(int programCounter) {
             boolean strictlyAscending=true;
@@ -248,6 +270,8 @@ public class DLClauseEvaluator implements Serializable {
         public OpenRetrieval(ExtensionTable.Retrieval retrieval) {
             m_retrieval=retrieval;
         }
+        public void clear() {
+        }
         public int execute(int programCounter) {
             m_retrieval.open();
             return programCounter+1;
@@ -264,6 +288,8 @@ public class DLClauseEvaluator implements Serializable {
         
         public NextRetrieval(ExtensionTable.Retrieval retrieval) {
             m_retrieval=retrieval;
+        }
+        public void clear() {
         }
         public int execute(int programCounter) {
             m_retrieval.next();
@@ -283,6 +309,8 @@ public class DLClauseEvaluator implements Serializable {
         public HasMoreRetrieval(int eofProgramCounter,ExtensionTable.Retrieval retrieval) {
             m_eofProgramCounter=eofProgramCounter;
             m_retrieval=retrieval;
+        }
+        public void clear() {
         }
         public int execute(int programCounter) {
             if (m_retrieval.afterLast())
@@ -308,6 +336,8 @@ public class DLClauseEvaluator implements Serializable {
         
         public JumpTo(int jumpTo) {
             m_jumpTo=jumpTo;
+        }
+        public void clear() {
         }
         public int execute(int programCounter) {
             return m_jumpTo;
@@ -335,6 +365,8 @@ public class DLClauseEvaluator implements Serializable {
             m_dlClauseEvaluator=dlClauseEvaluator;
             m_dlClauseIndex=dlClauseIndex;
         }
+        public void clear() {
+        }
         public int execute(int programCounter) {
             m_tableauMonitor.dlClauseMatchedStarted(m_dlClauseEvaluator,m_dlClauseIndex);
             return programCounter+1;
@@ -356,6 +388,8 @@ public class DLClauseEvaluator implements Serializable {
             m_dlClauseEvaluator=dlClauseEvaluator;
             m_dlClauseIndex=dlClauseIndex;
         }
+        public void clear() {
+        }
         public int execute(int programCounter) {
             m_tableauMonitor.dlClauseMatchedFinished(m_dlClauseEvaluator,m_dlClauseIndex);
             return programCounter+1;
@@ -374,6 +408,8 @@ public class DLClauseEvaluator implements Serializable {
         public SetClash(ExtensionManager extensionManager,DependencySet dependencySet) {
             m_extensionManager=extensionManager;
             m_dependencySet=dependencySet;
+        }
+        public void clear() {
         }
         public int execute(int programCounter) {
             m_extensionManager.setClash(m_dependencySet);
@@ -401,6 +437,8 @@ public class DLClauseEvaluator implements Serializable {
             m_dependencySet=dependencySet;
             m_argumentIndex=argumentIndex;
             m_dlPredicate=dlPredicate;
+        }
+        public void clear() {
         }
         public int execute(int programCounter) {
             Node argument=(Node)m_valuesBuffer[m_argumentIndex];
@@ -430,6 +468,8 @@ public class DLClauseEvaluator implements Serializable {
             m_dlPredicate=dlPredicate;
             m_argumentIndex1=argumentIndex1;
             m_argumentIndex2=argumentIndex2;
+        }
+        public void clear() {
         }
         public int execute(int programCounter) {
             Node argument1=(Node)m_valuesBuffer[m_argumentIndex1];
@@ -462,6 +502,11 @@ public class DLClauseEvaluator implements Serializable {
             m_argumentIndex1=argumentIndex1;
             m_argumentIndex2=argumentIndex2;
             m_argumentIndex3=argumentIndex3;
+        }
+        public void clear() {
+            m_tuple[1]=null;
+            m_tuple[2]=null;
+            m_tuple[3]=null;
         }
         public int execute(int programCounter) {
             m_tuple[1]=(Node)m_valuesBuffer[m_argumentIndex1];
@@ -501,6 +546,8 @@ public class DLClauseEvaluator implements Serializable {
             }
             m_copyIsCore=copyIsCore;
             m_copyValuesToArguments=copyValuesToArguments;
+        }
+        public void clear() {
         }
         public int execute(int programCounter) {
             Node[] arguments=new Node[m_copyValuesToArguments.length];
@@ -667,7 +714,7 @@ public class DLClauseEvaluator implements Serializable {
                     else
                         bindingPositions[argumentIndex+1]=-1;
                 }
-                ExtensionTable.Retrieval retrieval=m_extensionManager.getExtensionTable(atom.getArity()+1).createRetrieval(bindingPositions,m_valuesBuffer,ExtensionTable.View.EXTENSION_THIS);
+                ExtensionTable.Retrieval retrieval=m_extensionManager.getExtensionTable(atom.getArity()+1).createRetrieval(bindingPositions,m_valuesBuffer,false,ExtensionTable.View.EXTENSION_THIS);
                 m_retrievals.add(retrieval);
                 m_workers.add(new OpenRetrieval(retrieval));
                 int loopStart=m_workers.size();

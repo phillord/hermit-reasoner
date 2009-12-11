@@ -76,6 +76,15 @@ public final class DescriptionGraphManager implements Serializable {
             Arrays.fill(m_auxiliaryTuples2[index],null);
         }
         m_occurrenceManager.clear();
+        for (Object[] tuple : m_auxiliaryTuples1)
+            Arrays.fill(tuple,null);
+        for (Object[] tuple : m_auxiliaryTuples2)
+            Arrays.fill(tuple,null);
+        m_newNodes.clear();
+        m_binaryUnionDependencySet.m_dependencySets[0]=null;
+        m_binaryUnionDependencySet.m_dependencySets[1]=null;
+        for (ExtensionTable.Retrieval retrieval : m_deltaOldRetrievals)
+            retrieval.clear();
     }
     public Object[] getDescriptionGraphTuple(int graphIndex,int tupleIndex) {
         DescriptionGraph descriptionGraph=m_descriptionGraphsByIndex[graphIndex];

@@ -2,6 +2,7 @@
 package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
@@ -80,7 +81,7 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
         else
             return m_coreManager.isCore(tupleIndex);
     }
-    public Retrieval createRetrieval(int[] bindingPositions,Object[] bindingsBuffer,View extensionView) {
+    public Retrieval createRetrieval(int[] bindingPositions,Object[] bindingsBuffer,boolean ownsBindingsBuffer,View extensionView) {
         TupleIndex selectedTupleIndex=null;
         int boundPrefixSizeInSelected=0;
         for (int index=m_tupleIndexes.length-1;index>=0;--index) {
@@ -97,9 +98,9 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
             }
         }
         if (selectedTupleIndex==null)
-            return new UnindexedRetrieval(bindingPositions,bindingsBuffer,extensionView);
+            return new UnindexedRetrieval(bindingPositions,bindingsBuffer,ownsBindingsBuffer,extensionView);
         else
-            return new IndexedRetrieval(selectedTupleIndex,bindingPositions,bindingsBuffer,extensionView);
+            return new IndexedRetrieval(selectedTupleIndex,bindingPositions,bindingsBuffer,ownsBindingsBuffer,extensionView);
     }
     protected void removeTuple(int tupleIndex) {
         m_tupleTable.retrieveTuple(m_auxiliaryTuple,tupleIndex);
@@ -116,6 +117,7 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
     protected class IndexedRetrieval extends TupleIndex.TupleIndexRetrieval implements Retrieval,Serializable {
         private static final long serialVersionUID=2180748099314801734L;
 
+        protected final boolean m_ownsBindingsBuffer;
         protected final int[] m_bindingPositions;
         protected final ExtensionTable.View m_extensionView;
         protected final boolean m_checkTupleSelection;
@@ -125,8 +127,9 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
         protected int m_firstTupleIndex;
         protected int m_afterLastTupleIndex;
 
-        public IndexedRetrieval(TupleIndex tupleIndex,int[] bindingPositions,Object[] bindingsBuffer,View extensionView) {
+        public IndexedRetrieval(TupleIndex tupleIndex,int[] bindingPositions,Object[] bindingsBuffer,boolean ownsBindingsBuffer,View extensionView) {
             super(tupleIndex,bindingsBuffer,createSelectionArray(bindingPositions,tupleIndex.m_indexingSequence));
+            m_ownsBindingsBuffer=ownsBindingsBuffer;
             m_bindingPositions=bindingPositions;
             m_extensionView=extensionView;
             m_tupleBuffer=new Object[m_tupleArity];
@@ -141,6 +144,11 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
         }
         public ExtensionTable.View getExtensionView() {
             return m_extensionView;
+        }
+        public void clear() {
+            if (m_ownsBindingsBuffer)
+                Arrays.fill(m_bindingsBuffer,null);
+            Arrays.fill(m_tupleBuffer,null);
         }
         public int[] getBindingPositions() {
             return m_bindingPositions;

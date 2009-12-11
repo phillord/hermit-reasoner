@@ -63,6 +63,15 @@ public class BlockingValidator {
             }
         }
     }
+    public void clear() {
+        m_binaryRetrieval1Bound.clear();
+        m_ternaryRetrieval01Bound.clear();
+        m_ternaryRetrieval02Bound.clear();
+        m_ternaryRetrieval1Bound.clear();
+        m_ternaryRetrieval2Bound.clear();
+        for (int index=m_dlClauseInfos.size()-1;index>=0;--index)
+            m_dlClauseInfos.get(index).clear();
+    }
     public void clearInvalids() {
         if (debuggingMode) {
             inValidAtleastForBlockedParent.clear();
@@ -712,6 +721,15 @@ public class BlockingValidator {
                     }
                 }
             }
+        }
+        public void clear() {
+            for (ExtensionTable.Retrieval retrieval : m_x2yRetrievals)
+                retrieval.clear();
+            for (ExtensionTable.Retrieval retrieval : m_y2xRetrievals)
+                retrieval.clear();
+            for (ExtensionTable.Retrieval retrieval : m_zRetrievals)
+                retrieval.clear();
+
         }
         protected int getIndexFor(Variable[] variables, Variable variable) {
             for (int index=0;index<variables.length;index++) {

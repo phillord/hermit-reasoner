@@ -158,11 +158,15 @@ public final class Tableau implements Serializable {
         m_nonbacktrackableBranchingPoint=-1;
         m_dependencySetFactory.clear();
         m_extensionManager.clear();
+        m_clashManager.clear();
+        m_hyperresolutionManager.clear();
+        m_mergingManager.clear();
         m_existentialExpasionManager.clear();
         m_nominalIntroductionManager.clear();
         m_descriptionGraphManager.clear();
         m_isCurrentModelDeterministic=true;
         m_existentialExpansionStrategy.clear();
+        m_datatypeManager.clear();
         m_existentialConceptsBuffers.clear();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.tableauCleared();

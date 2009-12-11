@@ -2,6 +2,7 @@
 package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
@@ -104,9 +105,9 @@ public abstract class ExtensionTable implements Serializable {
                 bindingPositions[index]=index;
             else
                 bindingPositions[index]=-1;
-        return createRetrieval(bindingPositions,new Object[bindingPattern.length],extensionView);
+        return createRetrieval(bindingPositions,new Object[bindingPattern.length],true,extensionView);
     }
-    public abstract Retrieval createRetrieval(int[] bindingPositions,Object[] bindingsBuffer,View extensionView);
+    public abstract Retrieval createRetrieval(int[] bindingPositions,Object[] bindingsBuffer,boolean ownsBindingsBuffer,View extensionView);
     public abstract DependencySet getDependencySet(Object[] tuple);
     public abstract boolean isCore(Object[] tuple);
     public boolean propagateDeltaNew() {
@@ -189,6 +190,7 @@ public abstract class ExtensionTable implements Serializable {
     public static interface Retrieval {
         ExtensionTable getExtensionTable();
         View getExtensionView();
+        void clear();
         int[] getBindingPositions();
         Object[] getBindingsBuffer();
         Object[] getTupleBuffer();
@@ -206,15 +208,17 @@ public abstract class ExtensionTable implements Serializable {
         protected final ExtensionTable.View m_extensionView;
         protected final int[] m_bindingPositions;
         protected final Object[] m_bindingsBuffer;
+        protected final boolean m_ownsBindingsBuffer;
         protected final boolean m_checkTupleSelection;
         protected final Object[] m_tupleBuffer;
         protected int m_currentTupleIndex;
         protected int m_afterLastTupleIndex;
 
-        public UnindexedRetrieval(int[] bindingPositions,Object[] bindingsBuffer,ExtensionTable.View extensionView) {
+        public UnindexedRetrieval(int[] bindingPositions,Object[] bindingsBuffer,boolean ownsBindingsBuffer,ExtensionTable.View extensionView) {
             m_bindingPositions=bindingPositions;
             m_extensionView=extensionView;
             m_bindingsBuffer=bindingsBuffer;
+            m_ownsBindingsBuffer=ownsBindingsBuffer;
             int numberOfBoundPositions=0;
             for (int index=m_bindingPositions.length-1;index>=0;--index)
                 if (m_bindingPositions[index]!=-1)
@@ -227,6 +231,11 @@ public abstract class ExtensionTable implements Serializable {
         }
         public ExtensionTable.View getExtensionView() {
             return m_extensionView;
+        }
+        public void clear() {
+            if (m_ownsBindingsBuffer)
+                Arrays.fill(m_bindingsBuffer,null);
+            Arrays.fill(m_tupleBuffer,null);
         }
         public int[] getBindingPositions() {
             return m_bindingPositions;

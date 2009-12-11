@@ -128,6 +128,10 @@ public final class ExistentialExpansionManager implements Serializable {
         m_expandedExistentials.clear();
         m_auxiliaryTuple[0]=null;
         m_auxiliaryTuple[1]=null;
+        m_ternaryExtensionTableSearch01Bound.clear();
+        m_ternaryExtensionTableSearch02Bound.clear();
+        m_binaryUnionDependencySet.m_dependencySets[0]=null;
+        m_binaryUnionDependencySet.m_dependencySets[1]=null;
     }
     /**
      * Creates a new node in the tableau if the at least concept that caused the expansion is for cardinality 1. If it is not of cardinality 1 and the role in the at least concept is a functional role, it sets a clash in the extension manager.

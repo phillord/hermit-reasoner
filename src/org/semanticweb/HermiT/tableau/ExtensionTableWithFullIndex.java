@@ -2,6 +2,7 @@
 package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
@@ -74,15 +75,15 @@ public class ExtensionTableWithFullIndex extends ExtensionTable {
         else
             return m_coreManager.isCore(tupleIndex);
     }
-    public Retrieval createRetrieval(int[] bindingPositions,Object[] bindingsBuffer,View extensionView) {
+    public Retrieval createRetrieval(int[] bindingPositions,Object[] bindingsBuffer,boolean ownsBindingsBuffer,View extensionView) {
         int numberOfBindings=0;
         for (int index=m_tupleArity-1;index>=0;--index)
             if (bindingPositions[index]!=-1)
                 numberOfBindings++;
         if (numberOfBindings==m_tupleArity)
-            return new IndexedRetrieval(bindingPositions,bindingsBuffer,extensionView);
+            return new IndexedRetrieval(bindingPositions,bindingsBuffer,ownsBindingsBuffer,extensionView);
         else
-            return new UnindexedRetrieval(bindingPositions,bindingsBuffer,extensionView);
+            return new UnindexedRetrieval(bindingPositions,bindingsBuffer,ownsBindingsBuffer,extensionView);
     }
     protected void removeTuple(int tupleIndex) {
         m_tupleTableFullIndex.removeTuple(tupleIndex);
@@ -99,14 +100,16 @@ public class ExtensionTableWithFullIndex extends ExtensionTable {
 
         protected final int[] m_bindingPositions;
         protected final Object[] m_bindingsBuffer;
+        protected final boolean m_ownsBindingsBuffer;
         protected final ExtensionTable.View m_extensionView;
         protected final Object[] m_reorderedBindingsBuffer;
         protected final Object[] m_tupleBuffer;
         protected int m_currentTupleIndex;
 
-        public IndexedRetrieval(int[] bindingPositions,Object[] bindingsBuffer,View extensionView) {
+        public IndexedRetrieval(int[] bindingPositions,Object[] bindingsBuffer,boolean ownsBindingsBuffer,View extensionView) {
             m_bindingPositions=bindingPositions;
-            m_bindingsBuffer=new Object[m_tupleArity];
+            m_bindingsBuffer=bindingsBuffer;
+            m_ownsBindingsBuffer=ownsBindingsBuffer;
             m_extensionView=extensionView;
             m_reorderedBindingsBuffer=new Object[m_tupleArity];
             m_tupleBuffer=new Object[m_tupleArity];
@@ -116,6 +119,12 @@ public class ExtensionTableWithFullIndex extends ExtensionTable {
         }
         public ExtensionTable.View getExtensionView() {
             return m_extensionView;
+        }
+        public void clear() {
+            if (m_ownsBindingsBuffer)
+                Arrays.fill(m_bindingsBuffer,null);
+            Arrays.fill(m_reorderedBindingsBuffer,null);
+            Arrays.fill(m_tupleBuffer,null);
         }
         public int[] getBindingPositions() {
             return m_bindingPositions;

@@ -99,6 +99,19 @@ public final class ExtensionManager implements Serializable {
         for (int index=m_allExtensionTablesArray.length-1;index>=0;--index)
             m_allExtensionTablesArray[index].clear();
         m_clashDependencySet=null;
+        m_binaryAuxiliaryTupleContains[0]=null;
+        m_binaryAuxiliaryTupleContains[1]=null;
+        m_binaryAuxiliaryTupleAdd[0]=null;
+        m_binaryAuxiliaryTupleAdd[1]=null;
+        m_ternaryAuxiliaryTupleContains[0]=null;
+        m_ternaryAuxiliaryTupleContains[1]=null;
+        m_ternaryAuxiliaryTupleContains[2]=null;
+        m_ternaryAuxiliaryTupleAdd[0]=null;
+        m_ternaryAuxiliaryTupleAdd[1]=null;
+        m_ternaryAuxiliaryTupleAdd[2]=null;
+        m_descriptionGraphTuplesContains.clear();
+        m_descriptionGraphTuplesAdd.clear();
+
     }
     public void branchingPointPushed() {
         for (int index=m_allExtensionTablesArray.length-1;index>=0;--index)
