@@ -31,11 +31,12 @@ import org.semanticweb.HermiT.existentials.ExistentialExpansionStrategy;
 import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
 import org.semanticweb.HermiT.hierarchy.ClassificationManager;
 import org.semanticweb.HermiT.hierarchy.ConceptSubsumptionCache;
+import org.semanticweb.HermiT.hierarchy.DataRoleSubsumptionCache;
 import org.semanticweb.HermiT.hierarchy.DeterministicClassificationManager;
 import org.semanticweb.HermiT.hierarchy.Hierarchy;
 import org.semanticweb.HermiT.hierarchy.HierarchyNode;
 import org.semanticweb.HermiT.hierarchy.HierarchyPrinterFSS;
-import org.semanticweb.HermiT.hierarchy.RoleSubsumptionCache;
+import org.semanticweb.HermiT.hierarchy.ObjectRoleSubsumptionCache;
 import org.semanticweb.HermiT.hierarchy.StandardClassificationManager;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
@@ -275,7 +276,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         m_dlOntology=dlOntology;
         m_prefixes=createPrefixes(m_dlOntology);
         m_tableau=createTableau(m_interruptFlag,m_configuration,m_dlOntology,m_prefixes);
-        m_atomicConceptClassificationManager=createAtomicConceptClassificationManager(m_tableau);
+        m_atomicConceptClassificationManager=createAtomicConceptClassificationManager(this);
         m_atomicConceptHierarchy=null;
         m_objectRoleClassificationManager=createObjectRoleClassificationManager(this);
         m_objectRoleHierarchy=null;
@@ -540,11 +541,10 @@ public class Reasoner implements OWLReasoner,Serializable {
             OWLDataFactory factory=ontologyManager.getOWLDataFactory();
             OWLClass newClass=factory.getOWLClass(IRI.create("internal:query-concept"));
             OWLAxiom classDefinitionAxiom=factory.getOWLEquivalentClassesAxiom(newClass,description);
-            Tableau tableau=getTableau(ontologyManager,classDefinitionAxiom);
-            final ConceptSubsumptionCache subsumptionCache=new ConceptSubsumptionCache(tableau);
+            final Tableau tableau=getTableau(ontologyManager,classDefinitionAxiom);
             StandardClassificationManager.Relation<AtomicConcept> hierarchyRelation=new StandardClassificationManager.Relation<AtomicConcept>() {
                 public boolean doesSubsume(AtomicConcept parent,AtomicConcept child) {
-                    return subsumptionCache.isSubsumedBy(child,parent);
+                    return tableau.isSubsumedBy(child,parent);
                 }
             };
             return StandardClassificationManager.findPosition(hierarchyRelation,AtomicConcept.create("internal:query-concept"),m_atomicConceptHierarchy.getTopNode(),m_atomicConceptHierarchy.getBottomNode());
@@ -1319,25 +1319,25 @@ public class Reasoner implements OWLReasoner,Serializable {
         return new Tableau(interruptFlag,tableauMonitor,existentialsExpansionStrategy,dlOntology,config.parameters);
     }
     
-    protected static ClassificationManager<AtomicConcept> createAtomicConceptClassificationManager(Tableau tableau) {
-        if (tableau.isDeterministic())
-            return new DeterministicClassificationManager<AtomicConcept>(new ConceptSubsumptionCache(tableau));
+    protected static ClassificationManager<AtomicConcept> createAtomicConceptClassificationManager(Reasoner reasoner) {
+        if (reasoner.getTableau().isDeterministic())
+            return new DeterministicClassificationManager<AtomicConcept>(new ConceptSubsumptionCache(reasoner));
         else
-            return new StandardClassificationManager<AtomicConcept>(new ConceptSubsumptionCache(tableau));
+            return new StandardClassificationManager<AtomicConcept>(new ConceptSubsumptionCache(reasoner));
     }
 
     protected static ClassificationManager<Role> createObjectRoleClassificationManager(Reasoner reasoner) {
         if (reasoner.getTableau().isDeterministic())
-            return new DeterministicClassificationManager<Role>(new RoleSubsumptionCache(reasoner,reasoner.m_dlOntology.hasInverseRoles(),AtomicRole.BOTTOM_OBJECT_ROLE,AtomicRole.TOP_OBJECT_ROLE));
+            return new DeterministicClassificationManager<Role>(new ObjectRoleSubsumptionCache(reasoner));
         else
-            return new StandardClassificationManager<Role>(new RoleSubsumptionCache(reasoner,reasoner.m_dlOntology.hasInverseRoles(),AtomicRole.BOTTOM_OBJECT_ROLE,AtomicRole.TOP_OBJECT_ROLE));
+            return new StandardClassificationManager<Role>(new ObjectRoleSubsumptionCache(reasoner));
     }
 
     protected static ClassificationManager<Role> createDataRoleClassificationManager(Reasoner reasoner) {
         if (reasoner.getTableau().isDeterministic())
-            return new DeterministicClassificationManager<Role>(new RoleSubsumptionCache(reasoner,false,AtomicRole.BOTTOM_DATA_ROLE,AtomicRole.TOP_DATA_ROLE));
+            return new DeterministicClassificationManager<Role>(new DataRoleSubsumptionCache(reasoner));
         else
-            return new StandardClassificationManager<Role>(new RoleSubsumptionCache(reasoner,false,AtomicRole.BOTTOM_DATA_ROLE,AtomicRole.TOP_DATA_ROLE));
+            return new StandardClassificationManager<Role>(new DataRoleSubsumptionCache(reasoner));
     }
 
     protected static DLOntology extendDLOntology(Configuration config,Prefixes prefixes,String resultingOntologyIRI,DLOntology originalDLOntology,OWLOntologyManager ontologyManager,OWLAxiom... additionalAxioms) throws IllegalArgumentException {
@@ -1478,7 +1478,7 @@ public class Reasoner implements OWLReasoner,Serializable {
             boolean hasDatatypes=m_dlOntology.hasDatatypes() || newDLOntology.hasDatatypes();
             m_dlOntology=new DLOntology(m_dlOntology.getOntologyIRI(),dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,atomicObjectRoles,atomicDataRoles,definedDatatypeIRIs,individuals,hasInverseRoles,hasAtMostRestrictions,hasNominals,hasDatatypes,automataOfComplexRoles);
             m_tableau=createTableau(m_interruptFlag,m_configuration,m_dlOntology,m_prefixes);
-            m_atomicConceptClassificationManager=createAtomicConceptClassificationManager(m_tableau);
+            m_atomicConceptClassificationManager=createAtomicConceptClassificationManager(this);
             m_atomicConceptHierarchy=null;
             m_objectRoleClassificationManager=createObjectRoleClassificationManager(this);
             m_objectRoleHierarchy=null;

@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
@@ -22,8 +23,8 @@ public class ConceptSubsumptionCache implements Serializable,SubsumptionCache<At
     protected final Tableau m_tableau;
     protected final Map<AtomicConcept,AtomicConceptInfo> m_atomicConceptInfos;
 
-    public ConceptSubsumptionCache(Tableau tableau) {
-        m_tableau=tableau;
+    public ConceptSubsumptionCache(Reasoner reasoner) {
+        m_tableau=reasoner.getTableau();
         m_atomicConceptInfos=new HashMap<AtomicConcept,AtomicConceptInfo>();
     }
     public Set<AtomicConcept> getAllKnownSubsumers(AtomicConcept atomicConcept) {

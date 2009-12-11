@@ -310,14 +310,14 @@ public final class Tableau implements Serializable {
             m_tableauMonitor.isSubsumedByFinished(subconcept,superconcept,result);
         return result;
     }
-    public boolean isSatisfiable(Role role, boolean dataProperty) {
+    public boolean isSatisfiable(Role role,boolean isDataRole) {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isSatisfiableStarted(role);
         clear();
         if (hasNominals())
             loadABox();
         m_checkedNode0=createNewNINode(m_dependencySetFactory.emptySet());
-        if (dataProperty)
+        if (isDataRole)
             m_checkedNode1=createNewConcreteNode(m_dependencySetFactory.emptySet(),m_checkedNode0);
         else 
             m_checkedNode1=createNewNINode(m_dependencySetFactory.emptySet());
