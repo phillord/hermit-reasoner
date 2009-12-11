@@ -1,4 +1,3 @@
-// Copyright 2008 by Oxford University; see license.txt for details
 package org.semanticweb.HermiT.hierarchy;
 
 import java.util.Collection;
@@ -9,16 +8,30 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
-public class HierarchyBuilder<E> {
-    protected final Relation<E> m_hierarchyRelation;
-    protected final ClassificationProgressMonitor<E> m_progressMonitor;
-
-    public HierarchyBuilder(Relation<E> hierarchyRelation,ClassificationProgressMonitor<E> progressMonitor) {
-        m_hierarchyRelation=hierarchyRelation;
-        m_progressMonitor=progressMonitor;
+public class StandardClassificationManager<E> implements ClassificationManager<E> {
+    protected final SubsumptionCache<E> m_subsumptionCache;
+    
+    public StandardClassificationManager(SubsumptionCache<E> subsumptionCache) {
+        m_subsumptionCache=subsumptionCache;
     }
-    public Hierarchy<E> buildHierarchy(E topElement,E bottomElement,Collection<E> elements) {
-        if (m_hierarchyRelation.doesSubsume(bottomElement,topElement))
+    public boolean isSatisfiable(E element) {
+        return m_subsumptionCache.isSatisfiable(element);
+    }
+    public boolean isSubsumedBy(E subelement,E superelement) {
+        return m_subsumptionCache.isSubsumedBy(subelement,superelement);
+    }
+    public Hierarchy<E> classify(ProgressMonitor<E> progressMonitor,E topElement,E bottomElement,Set<E> elements) {
+        if (!m_subsumptionCache.isSatisfiable(topElement))
+            return Hierarchy.emptyHierarchy(elements,topElement,bottomElement);
+        Relation<E> relation=new Relation<E>() {
+            public boolean doesSubsume(E parent,E child) {
+                return m_subsumptionCache.isSubsumedBy(child,parent);
+            }
+        };
+        return buildHierarchy(progressMonitor,relation,topElement,bottomElement,elements);
+    }
+    public static <E> Hierarchy<E> buildHierarchy(ProgressMonitor<E> progressMonitor,Relation<E> hierarchyRelation,E topElement,E bottomElement,Collection<E> elements) {
+        if (hierarchyRelation.doesSubsume(bottomElement,topElement))
             return Hierarchy.emptyHierarchy(elements,topElement,bottomElement);
         else {
             HierarchyNode<E> topNode=new HierarchyNode<E>(topElement);
@@ -28,7 +41,7 @@ public class HierarchyBuilder<E> {
             Hierarchy<E> hierarchy=new Hierarchy<E>(topNode,bottomNode);
             for (E element : elements) {
                 if (!element.equals(topElement) && !element.equals(bottomElement)) {
-                    HierarchyNode<E> node=findPosition(element,topNode,bottomNode);
+                    HierarchyNode<E> node=findPosition(hierarchyRelation,element,topNode,bottomNode);
                     hierarchy.m_nodesByElements.put(element,node);
                     if (!node.m_equivalentElements.contains(element)) {
                         // Existing node: just add the element to the node label
@@ -46,15 +59,14 @@ public class HierarchyBuilder<E> {
                         }
                     }
                 }
-                if (m_progressMonitor!=null)
-                    m_progressMonitor.elementClassified(element);
+                progressMonitor.elementClassified(element);
             }
             return hierarchy;
         }
     }
-    public HierarchyNode<E> findPosition(E element,HierarchyNode<E> topNode,HierarchyNode<E> bottomNode) {
-        Set<HierarchyNode<E>> parentNodes=findParents(element,topNode);
-        Set<HierarchyNode<E>> childNodes=findChildren(element,bottomNode,parentNodes);
+    public static <E> HierarchyNode<E> findPosition(Relation<E> hierarchyRelation,E element,HierarchyNode<E> topNode,HierarchyNode<E> bottomNode) {
+        Set<HierarchyNode<E>> parentNodes=findParents(hierarchyRelation,element,topNode);
+        Set<HierarchyNode<E>> childNodes=findChildren(hierarchyRelation,element,bottomNode,parentNodes);
         if (parentNodes.equals(childNodes)) {
             assert parentNodes.size()==1 && childNodes.size()==1;
             return parentNodes.iterator().next();
@@ -65,7 +77,7 @@ public class HierarchyBuilder<E> {
             return new HierarchyNode<E>(element,equivalentElements,parentNodes,childNodes);
         }
     }
-    protected Set<HierarchyNode<E>> findParents(final E element,HierarchyNode<E> topNode) {
+    protected static <E> Set<HierarchyNode<E>> findParents(final Relation<E> hierarchyRelation,final E element,HierarchyNode<E> topNode) {
         return search(
             new SearchPredicate<HierarchyNode<E>>() {
                 public Set<HierarchyNode<E>> getSuccessorElements(HierarchyNode<E> u) {
@@ -75,13 +87,13 @@ public class HierarchyBuilder<E> {
                     return u.m_parentNodes;
                 }
                 public boolean trueOf(HierarchyNode<E> u) {
-                    return m_hierarchyRelation.doesSubsume(u.getRepresentative(),element);
+                    return hierarchyRelation.doesSubsume(u.getRepresentative(),element);
                 }
             },Collections.singleton(topNode),null);
     }
 
-    protected Set<HierarchyNode<E>> findChildren(final E element,HierarchyNode<E> bottomNode,Set<HierarchyNode<E>> parentNodes) {
-        if (parentNodes.size()==1 && m_hierarchyRelation.doesSubsume(element,parentNodes.iterator().next().getRepresentative()))
+    protected static <E> Set<HierarchyNode<E>> findChildren(final Relation<E> hierarchyRelation,final E element,HierarchyNode<E> bottomNode,Set<HierarchyNode<E>> parentNodes) {
+        if (parentNodes.size()==1 && hierarchyRelation.doesSubsume(element,parentNodes.iterator().next().getRepresentative()))
             return parentNodes;
         else {
             // We now determine the set of nodes that are descendants of each node in parentNodes
@@ -112,7 +124,7 @@ public class HierarchyBuilder<E> {
             // Determine the subset of marked that is directly above the bottomNode and that is below the current element.
             Set<HierarchyNode<E>> aboveBottomNodes=new HashSet<HierarchyNode<E>>();
             for (HierarchyNode<E> node : marked)
-                if (node.m_childNodes.contains(bottomNode) && m_hierarchyRelation.doesSubsume(element,node.getRepresentative()))
+                if (node.m_childNodes.contains(bottomNode) && hierarchyRelation.doesSubsume(element,node.getRepresentative()))
                     aboveBottomNodes.add(node);
             // If this set is empty, then we omit the bottom search phase.
             if (aboveBottomNodes.isEmpty()) {
@@ -130,7 +142,7 @@ public class HierarchyBuilder<E> {
                             return u.m_childNodes;
                         }
                         public boolean trueOf(HierarchyNode<E> u) {
-                            return m_hierarchyRelation.doesSubsume(element,u.getRepresentative());
+                            return hierarchyRelation.doesSubsume(element,u.getRepresentative());
                         }
                     },aboveBottomNodes,marked);
             }
@@ -168,10 +180,6 @@ public class HierarchyBuilder<E> {
         boolean trueOf(U u);
     }
 
-    public static interface ClassificationProgressMonitor<U> {
-        void elementClassified(U element);
-    }
-    
     protected static final class SearchCache<U> {
         protected final SearchPredicate<U> m_searchPredicate;
         protected final Set<U> m_possibilities;

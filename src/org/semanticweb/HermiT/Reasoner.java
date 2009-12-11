@@ -29,13 +29,14 @@ import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
 import org.semanticweb.HermiT.existentials.ExistentialExpansionStrategy;
 import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
+import org.semanticweb.HermiT.hierarchy.ClassificationManager;
 import org.semanticweb.HermiT.hierarchy.ConceptSubsumptionCache;
-import org.semanticweb.HermiT.hierarchy.DeterministicHierarchyBuilder;
+import org.semanticweb.HermiT.hierarchy.DeterministicClassificationManager;
 import org.semanticweb.HermiT.hierarchy.Hierarchy;
-import org.semanticweb.HermiT.hierarchy.HierarchyBuilder;
 import org.semanticweb.HermiT.hierarchy.HierarchyNode;
 import org.semanticweb.HermiT.hierarchy.HierarchyPrinterFSS;
 import org.semanticweb.HermiT.hierarchy.RoleSubsumptionCache;
+import org.semanticweb.HermiT.hierarchy.StandardClassificationManager;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
@@ -121,11 +122,11 @@ public class Reasoner implements OWLReasoner,Serializable {
     protected DLOntology m_dlOntology;
     protected Prefixes m_prefixes;
     protected Tableau m_tableau;
-    protected ConceptSubsumptionCache m_conceptSubsumptionCache;
+    protected ClassificationManager<AtomicConcept> m_atomicConceptClassificationManager;
     protected Hierarchy<AtomicConcept> m_atomicConceptHierarchy;
-    protected RoleSubsumptionCache m_objectRoleSubsumptionCache;
+    protected ClassificationManager<Role> m_objectRoleClassificationManager;
     protected Hierarchy<Role> m_objectRoleHierarchy;
-    protected RoleSubsumptionCache m_dataRoleSubsumptionCache;
+    protected ClassificationManager<Role> m_dataRoleClassificationManager;
     protected Hierarchy<Role> m_dataRoleHierarchy;
     protected Map<AtomicConcept,Set<Individual>> m_realization;
 
@@ -274,17 +275,12 @@ public class Reasoner implements OWLReasoner,Serializable {
         m_dlOntology=dlOntology;
         m_prefixes=createPrefixes(m_dlOntology);
         m_tableau=createTableau(m_interruptFlag,m_configuration,m_dlOntology,m_prefixes);
+        m_atomicConceptClassificationManager=createAtomicConceptClassificationManager(m_tableau);
         m_atomicConceptHierarchy=null;
-        m_conceptSubsumptionCache=new ConceptSubsumptionCache(m_tableau);
+        m_objectRoleClassificationManager=createObjectRoleClassificationManager(this);
         m_objectRoleHierarchy=null;
-        Set<Role> relevantRoles=new HashSet<Role>();
-        for (AtomicRole atomicRole : m_dlOntology.getAllAtomicObjectRoles()) {
-            relevantRoles.add(atomicRole);
-            relevantRoles.add(atomicRole.getInverse());
-        }
-        m_objectRoleSubsumptionCache=new RoleSubsumptionCache(this,m_dlOntology.hasInverseRoles(),relevantRoles,AtomicRole.BOTTOM_OBJECT_ROLE,AtomicRole.TOP_OBJECT_ROLE);
+        m_dataRoleClassificationManager=createDataRoleClassificationManager(this);
         m_dataRoleHierarchy=null;
-        m_dataRoleSubsumptionCache=new RoleSubsumptionCache(this,m_dlOntology.hasInverseRoles(),new HashSet<Role>(m_dlOntology.getAllAtomicDataRoles()),AtomicRole.BOTTOM_DATA_ROLE,AtomicRole.TOP_DATA_ROLE);
     }
     
     /**
@@ -413,46 +409,15 @@ public class Reasoner implements OWLReasoner,Serializable {
                 final int numRelevantConcepts=relevantAtomicConcepts.size();
                 if (m_progressMonitor!=null) 
                     m_progressMonitor.reasonerTaskStarted("Building the class hierarchy...");
-                if (!m_conceptSubsumptionCache.isSatisfiable(AtomicConcept.THING))
-                    m_atomicConceptHierarchy=Hierarchy.emptyHierarchy(relevantAtomicConcepts,AtomicConcept.THING,AtomicConcept.NOTHING);
-                else if (m_conceptSubsumptionCache.canGetAllSubsumersEasily()) {
-                    Map<AtomicConcept,DeterministicHierarchyBuilder.GraphNode<AtomicConcept>> allSubsumers=new HashMap<AtomicConcept,DeterministicHierarchyBuilder.GraphNode<AtomicConcept>>();
-                    int processedConcepts=0;
-                    for (AtomicConcept atomicConcept : relevantAtomicConcepts) {
-                        Set<AtomicConcept> subsumers=m_conceptSubsumptionCache.getAllKnownSubsumers(atomicConcept);
-                        if (subsumers==null)
-                            subsumers=relevantAtomicConcepts;
-                        allSubsumers.put(atomicConcept,new DeterministicHierarchyBuilder.GraphNode<AtomicConcept>(atomicConcept,subsumers));
-                        if (m_progressMonitor!=null) {
-                            processedConcepts++;
-                            m_progressMonitor.reasonerTaskProgressChanged(processedConcepts,numRelevantConcepts);
-                        }
+                ClassificationManager.ProgressMonitor<AtomicConcept> progressMonitor=new ClassificationManager.ProgressMonitor<AtomicConcept>() {
+                    protected int m_processedConcepts=0;
+                    public void elementClassified(AtomicConcept element) {
+                        m_processedConcepts++;
+                        if (m_progressMonitor!=null)
+                            m_progressMonitor.reasonerTaskProgressChanged(m_processedConcepts,numRelevantConcepts);
                     }
-                    DeterministicHierarchyBuilder<AtomicConcept> hierarchyBuilder=new DeterministicHierarchyBuilder<AtomicConcept>(allSubsumers,AtomicConcept.THING,AtomicConcept.NOTHING);
-                    m_atomicConceptHierarchy=hierarchyBuilder.buildHierarchy();
-                }
-                if (m_atomicConceptHierarchy==null) {
-                    HierarchyBuilder.Relation<AtomicConcept> relation=
-                        new HierarchyBuilder.Relation<AtomicConcept>() {
-                            public boolean doesSubsume(AtomicConcept parent,AtomicConcept child) {
-                                return m_conceptSubsumptionCache.isSubsumedBy(child,parent);
-                            }
-                        };
-                    HierarchyBuilder.ClassificationProgressMonitor<AtomicConcept> progressMonitor;
-                    if (m_progressMonitor==null)
-                        progressMonitor=null;
-                    else
-                        progressMonitor=
-                            new HierarchyBuilder.ClassificationProgressMonitor<AtomicConcept>() {
-                                protected int m_processedConcepts=0;
-                                public void elementClassified(AtomicConcept element) {
-                                    m_processedConcepts++;
-                                    m_progressMonitor.reasonerTaskProgressChanged(m_processedConcepts,numRelevantConcepts);
-                                }
-                            };
-                    HierarchyBuilder<AtomicConcept> hierarchyBuilder=new HierarchyBuilder<AtomicConcept>(relation,progressMonitor);
-                    m_atomicConceptHierarchy=hierarchyBuilder.buildHierarchy(AtomicConcept.THING,AtomicConcept.NOTHING,relevantAtomicConcepts);
-                }
+                };
+                m_atomicConceptHierarchy=m_atomicConceptClassificationManager.classify(progressMonitor,AtomicConcept.THING,AtomicConcept.NOTHING,relevantAtomicConcepts);
             }
             finally {
                 if (m_progressMonitor!=null)
@@ -465,7 +430,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         if (description instanceof OWLClass) {
             AtomicConcept concept=AtomicConcept.create(((OWLClass)description).getIRI().toString());
             if (m_atomicConceptHierarchy==null)
-                return m_conceptSubsumptionCache.isSatisfiable(concept);
+                return m_atomicConceptClassificationManager.isSatisfiable(concept);
             else {
                 HierarchyNode<AtomicConcept> node=m_atomicConceptHierarchy.getNodeForElement(concept);
                 return node!=m_atomicConceptHierarchy.getBottomNode();
@@ -484,7 +449,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         if (subDescription instanceof OWLClass && superDescription instanceof OWLClass) {
             AtomicConcept subconcept=AtomicConcept.create(((OWLClass)subDescription).getIRI().toString());
             AtomicConcept superconcept=AtomicConcept.create(((OWLClass)superDescription).getIRI().toString());
-            return m_conceptSubsumptionCache.isSubsumedBy(subconcept,superconcept);
+            return m_atomicConceptClassificationManager.isSubsumedBy(subconcept,superconcept);
         } else {
             OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
             OWLDataFactory factory=ontologyManager.getOWLDataFactory();
@@ -577,15 +542,12 @@ public class Reasoner implements OWLReasoner,Serializable {
             OWLAxiom classDefinitionAxiom=factory.getOWLEquivalentClassesAxiom(newClass,description);
             Tableau tableau=getTableau(ontologyManager,classDefinitionAxiom);
             final ConceptSubsumptionCache subsumptionCache=new ConceptSubsumptionCache(tableau);
-            HierarchyBuilder<AtomicConcept> hierarchyBuilder=new HierarchyBuilder<AtomicConcept>(
-                new HierarchyBuilder.Relation<AtomicConcept>() {
-                    public boolean doesSubsume(AtomicConcept parent,AtomicConcept child) {
-                        return subsumptionCache.isSubsumedBy(child,parent);
-                    }
-                },
-                null
-            );
-            return hierarchyBuilder.findPosition(AtomicConcept.create("internal:query-concept"),m_atomicConceptHierarchy.getTopNode(),m_atomicConceptHierarchy.getBottomNode());
+            StandardClassificationManager.Relation<AtomicConcept> hierarchyRelation=new StandardClassificationManager.Relation<AtomicConcept>() {
+                public boolean doesSubsume(AtomicConcept parent,AtomicConcept child) {
+                    return subsumptionCache.isSubsumedBy(child,parent);
+                }
+            };
+            return StandardClassificationManager.findPosition(hierarchyRelation,AtomicConcept.create("internal:query-concept"),m_atomicConceptHierarchy.getTopNode(),m_atomicConceptHierarchy.getBottomNode());
         }
     }
     
@@ -610,53 +572,23 @@ public class Reasoner implements OWLReasoner,Serializable {
                 Set<Role> allObjectRoles=new HashSet<Role>();
                 for (AtomicRole atomicRole : m_dlOntology.getAllAtomicObjectRoles()) {
                     allObjectRoles.add(atomicRole);
-                    if (m_dlOntology.hasInverseRoles()) allObjectRoles.add(atomicRole.getInverse());
+                    if (m_dlOntology.hasInverseRoles())
+                        allObjectRoles.add(atomicRole.getInverse());
                 }
                 allObjectRoles.add(AtomicRole.TOP_OBJECT_ROLE);
                 allObjectRoles.add(AtomicRole.BOTTOM_OBJECT_ROLE);
                 final int numRoles=allObjectRoles.size();
                 if (m_progressMonitor!=null) 
                     m_progressMonitor.reasonerTaskStarted("Classifying object propoerties...");
-                if (!m_objectRoleSubsumptionCache.isSatisfiable(AtomicRole.TOP_OBJECT_ROLE))
-                    m_objectRoleHierarchy=Hierarchy.emptyHierarchy(allObjectRoles,AtomicRole.TOP_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE);
-                else if (m_objectRoleSubsumptionCache.canGetAllSubsumersEasily()) {
-                    Map<Role,DeterministicHierarchyBuilder.GraphNode<Role>> allSubsumers=new HashMap<Role,DeterministicHierarchyBuilder.GraphNode<Role>>();
-                    int processedRoles=0;
-                    for (Role role : allObjectRoles) {
-                        Set<Role> subsumers=m_objectRoleSubsumptionCache.getAllKnownSubsumers(role);
-                        if (subsumers==null)
-                            subsumers=allObjectRoles;
-                        allSubsumers.put(role,new DeterministicHierarchyBuilder.GraphNode<Role>(role,subsumers));
-                        if (m_progressMonitor!=null) {
-                            processedRoles++;
-                            m_progressMonitor.reasonerTaskProgressChanged(processedRoles,numRoles);
+                ClassificationManager.ProgressMonitor<Role> progressMonitor=new ClassificationManager.ProgressMonitor<Role>() {
+                        protected int m_processedRoles=0;
+                        public void elementClassified(Role element) {
+                            m_processedRoles++;
+                            if (m_progressMonitor!=null)
+                                m_progressMonitor.reasonerTaskProgressChanged(m_processedRoles,numRoles);
                         }
-                    }
-                    DeterministicHierarchyBuilder<Role> hierarchyBuilder=new DeterministicHierarchyBuilder<Role>(allSubsumers,AtomicRole.TOP_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE);
-                    m_objectRoleHierarchy=hierarchyBuilder.buildHierarchy();
-                }
-                if (m_objectRoleHierarchy==null) {
-                    HierarchyBuilder.Relation<Role> relation=
-                        new HierarchyBuilder.Relation<Role>() {
-                            public boolean doesSubsume(Role sup,Role sub) {
-                                return m_objectRoleSubsumptionCache.isSubsumedBy(sub,sup);
-                            }
-                        };
-                    HierarchyBuilder.ClassificationProgressMonitor<Role> progressMonitor;
-                    if (m_progressMonitor==null)
-                        progressMonitor=null;
-                    else
-                        progressMonitor=
-                            new HierarchyBuilder.ClassificationProgressMonitor<Role>() {
-                                protected int m_processedRoles=0;
-                                public void elementClassified(Role element) {
-                                    m_processedRoles++;
-                                    m_progressMonitor.reasonerTaskProgressChanged(m_processedRoles,numRoles);
-                                }
-                            };
-                    HierarchyBuilder<Role> hierarchyBuilder=new HierarchyBuilder<Role>(relation,progressMonitor);
-                    m_objectRoleHierarchy=hierarchyBuilder.buildHierarchy(AtomicRole.TOP_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE,allObjectRoles);
-                }
+                    };
+                m_objectRoleHierarchy=m_objectRoleClassificationManager.classify(progressMonitor,AtomicRole.TOP_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE,allObjectRoles);
             }
             finally {
                 if (m_progressMonitor!=null)
@@ -675,16 +607,16 @@ public class Reasoner implements OWLReasoner,Serializable {
      */
     public boolean isSubObjectPropertyExpressionOf(OWLObjectPropertyExpression subObjectPropertyExpression,OWLObjectPropertyExpression superObjectPropertyExpression) {
         Role subRole;
-        if (subObjectPropertyExpression.getSimplified().isAnonymous()) {
+        if (subObjectPropertyExpression.getSimplified().isAnonymous())
             subRole=InverseRole.create(AtomicRole.create(subObjectPropertyExpression.getNamedProperty().getIRI().toString()));
-        } else
+        else
             subRole=AtomicRole.create(subObjectPropertyExpression.getNamedProperty().getIRI().toString());
         Role superRole;
-        if (superObjectPropertyExpression.getSimplified().isAnonymous()) {
+        if (superObjectPropertyExpression.getSimplified().isAnonymous())
             superRole=InverseRole.create(AtomicRole.create(superObjectPropertyExpression.getNamedProperty().getIRI().toString()));
-        } else
+        else
             superRole=AtomicRole.create(superObjectPropertyExpression.getNamedProperty().getIRI().toString());
-        return m_objectRoleSubsumptionCache.isSubsumedBy(subRole, superRole);
+        return m_objectRoleClassificationManager.isSubsumedBy(subRole, superRole);
     }
     
     /**
@@ -926,47 +858,16 @@ public class Reasoner implements OWLReasoner,Serializable {
                 allDataRoles.add(AtomicRole.BOTTOM_DATA_ROLE);
                 final int numRoles=allDataRoles.size();
                 if (m_progressMonitor!=null)
-                    m_progressMonitor.reasonerTaskStarted("Classifying data propoerties...");
-                if (!m_dataRoleSubsumptionCache.isSatisfiable(AtomicRole.TOP_DATA_ROLE))
-                    m_dataRoleHierarchy=Hierarchy.emptyHierarchy(allDataRoles,AtomicRole.TOP_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE);
-                else if (m_dataRoleSubsumptionCache.canGetAllSubsumersEasily()) {
-                    Map<Role,DeterministicHierarchyBuilder.GraphNode<Role>> allSubsumers=new HashMap<Role,DeterministicHierarchyBuilder.GraphNode<Role>>();
-                    int processedRoles=0;
-                    for (Role role : allDataRoles) {
-                        Set<Role> subsumers=m_dataRoleSubsumptionCache.getAllKnownSubsumers(role);
-                        if (subsumers==null)
-                            subsumers=allDataRoles;
-                        allSubsumers.put(role,new DeterministicHierarchyBuilder.GraphNode<Role>(role,subsumers));
-                        if (m_progressMonitor!=null) {
-                            processedRoles++;
-                            m_progressMonitor.reasonerTaskProgressChanged(processedRoles,numRoles);
-                        }
+                    m_progressMonitor.reasonerTaskStarted("Classifying data properties...");
+                ClassificationManager.ProgressMonitor<Role> progressMonitor=new ClassificationManager.ProgressMonitor<Role>() {
+                    protected int m_processedRoles=0;
+                    public void elementClassified(Role element) {
+                        m_processedRoles++;
+                        if (m_progressMonitor!=null)
+                            m_progressMonitor.reasonerTaskProgressChanged(m_processedRoles,numRoles);
                     }
-                    DeterministicHierarchyBuilder<Role> hierarchyBuilder=new DeterministicHierarchyBuilder<Role>(allSubsumers,AtomicRole.TOP_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE);
-                    m_dataRoleHierarchy=hierarchyBuilder.buildHierarchy();
-                }
-                if (m_dataRoleHierarchy==null) {
-                    HierarchyBuilder.Relation<Role> relation=
-                        new HierarchyBuilder.Relation<Role>() {
-                            public boolean doesSubsume(Role sup,Role sub) {
-                                return m_dataRoleSubsumptionCache.isSubsumedBy(sub,sup);
-                            }
-                        };
-                    HierarchyBuilder.ClassificationProgressMonitor<Role> progressMonitor;
-                    if (m_progressMonitor==null)
-                        progressMonitor=null;
-                    else
-                        progressMonitor=
-                            new HierarchyBuilder.ClassificationProgressMonitor<Role>() {
-                                protected int m_processedRoles=0;
-                                public void elementClassified(Role element) {
-                                    m_processedRoles++;
-                                    m_progressMonitor.reasonerTaskProgressChanged(m_processedRoles,numRoles);
-                                }
-                            };
-                    HierarchyBuilder<Role> hierarchyBuilder=new HierarchyBuilder<Role>(relation,progressMonitor);
-                    m_dataRoleHierarchy=hierarchyBuilder.buildHierarchy(AtomicRole.TOP_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE,allDataRoles);
-                }
+                };
+                m_dataRoleHierarchy=m_dataRoleClassificationManager.classify(progressMonitor,AtomicRole.TOP_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE,allDataRoles);
             }
             finally {
                 if (m_progressMonitor!=null)
@@ -983,7 +884,7 @@ public class Reasoner implements OWLReasoner,Serializable {
      *         related with the property superDataProperty and false otherwise
      */
     public boolean isSubDataPropertyOf(OWLDataProperty subDataProperty,OWLDataProperty superDataProperty) {
-        return m_dataRoleSubsumptionCache.isSubsumedBy(AtomicRole.create(subDataProperty.getIRI().toString()), AtomicRole.create(superDataProperty.getIRI().toString()));
+        return m_dataRoleClassificationManager.isSubsumedBy(AtomicRole.create(subDataProperty.getIRI().toString()), AtomicRole.create(superDataProperty.getIRI().toString()));
     }
     /**
      * @param dataProperty1 - a data property 
@@ -1116,7 +1017,7 @@ public class Reasoner implements OWLReasoner,Serializable {
     }
     protected Set<HierarchyNode<AtomicConcept>> getDirectSuperConceptNodes(final Individual individual) {
         classify();
-        HierarchyBuilder.SearchPredicate<HierarchyNode<AtomicConcept>> predicate=new HierarchyBuilder.SearchPredicate<HierarchyNode<AtomicConcept>>() {
+        StandardClassificationManager.SearchPredicate<HierarchyNode<AtomicConcept>> predicate=new StandardClassificationManager.SearchPredicate<HierarchyNode<AtomicConcept>>() {
             public Set<HierarchyNode<AtomicConcept>> getSuccessorElements(HierarchyNode<AtomicConcept> u) {
                 return u.getChildNodes();
             }
@@ -1132,7 +1033,7 @@ public class Reasoner implements OWLReasoner,Serializable {
             }
         };
         Set<HierarchyNode<AtomicConcept>> topPositions=Collections.singleton(m_atomicConceptHierarchy.getTopNode());
-        return HierarchyBuilder.search(predicate,topPositions,null);
+        return StandardClassificationManager.search(predicate,topPositions,null);
     }
     public Node<OWLNamedIndividual> getSameIndividuals(OWLNamedIndividual namedIndividual) {
         NodeSet<OWLNamedIndividual> result=getInstances(m_factory.getOWLObjectOneOf(namedIndividual),false);
@@ -1417,6 +1318,27 @@ public class Reasoner implements OWLReasoner,Serializable {
 
         return new Tableau(interruptFlag,tableauMonitor,existentialsExpansionStrategy,dlOntology,config.parameters);
     }
+    
+    protected static ClassificationManager<AtomicConcept> createAtomicConceptClassificationManager(Tableau tableau) {
+        if (tableau.isDeterministic())
+            return new DeterministicClassificationManager<AtomicConcept>(new ConceptSubsumptionCache(tableau));
+        else
+            return new StandardClassificationManager<AtomicConcept>(new ConceptSubsumptionCache(tableau));
+    }
+
+    protected static ClassificationManager<Role> createObjectRoleClassificationManager(Reasoner reasoner) {
+        if (reasoner.getTableau().isDeterministic())
+            return new DeterministicClassificationManager<Role>(new RoleSubsumptionCache(reasoner,reasoner.m_dlOntology.hasInverseRoles(),AtomicRole.BOTTOM_OBJECT_ROLE,AtomicRole.TOP_OBJECT_ROLE));
+        else
+            return new StandardClassificationManager<Role>(new RoleSubsumptionCache(reasoner,reasoner.m_dlOntology.hasInverseRoles(),AtomicRole.BOTTOM_OBJECT_ROLE,AtomicRole.TOP_OBJECT_ROLE));
+    }
+
+    protected static ClassificationManager<Role> createDataRoleClassificationManager(Reasoner reasoner) {
+        if (reasoner.getTableau().isDeterministic())
+            return new DeterministicClassificationManager<Role>(new RoleSubsumptionCache(reasoner,false,AtomicRole.BOTTOM_DATA_ROLE,AtomicRole.TOP_DATA_ROLE));
+        else
+            return new StandardClassificationManager<Role>(new RoleSubsumptionCache(reasoner,false,AtomicRole.BOTTOM_DATA_ROLE,AtomicRole.TOP_DATA_ROLE));
+    }
 
     protected static DLOntology extendDLOntology(Configuration config,Prefixes prefixes,String resultingOntologyIRI,DLOntology originalDLOntology,OWLOntologyManager ontologyManager,OWLAxiom... additionalAxioms) throws IllegalArgumentException {
         try {
@@ -1556,17 +1478,12 @@ public class Reasoner implements OWLReasoner,Serializable {
             boolean hasDatatypes=m_dlOntology.hasDatatypes() || newDLOntology.hasDatatypes();
             m_dlOntology=new DLOntology(m_dlOntology.getOntologyIRI(),dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,atomicObjectRoles,atomicDataRoles,definedDatatypeIRIs,individuals,hasInverseRoles,hasAtMostRestrictions,hasNominals,hasDatatypes,automataOfComplexRoles);
             m_tableau=createTableau(m_interruptFlag,m_configuration,m_dlOntology,m_prefixes);
+            m_atomicConceptClassificationManager=createAtomicConceptClassificationManager(m_tableau);
             m_atomicConceptHierarchy=null;
-            m_conceptSubsumptionCache=new ConceptSubsumptionCache(m_tableau);
+            m_objectRoleClassificationManager=createObjectRoleClassificationManager(this);
             m_objectRoleHierarchy=null;
-            Set<Role> relevantRoles=new HashSet<Role>();
-            for (AtomicRole atomicRole : atomicObjectRoles) {
-                relevantRoles.add(atomicRole);
-                relevantRoles.add(atomicRole.getInverse());
-            }
-            m_objectRoleSubsumptionCache=new RoleSubsumptionCache(this,m_dlOntology.hasInverseRoles(),relevantRoles,AtomicRole.BOTTOM_OBJECT_ROLE,AtomicRole.TOP_OBJECT_ROLE);
+            m_dataRoleClassificationManager=createDataRoleClassificationManager(this);
             m_dataRoleHierarchy=null;
-            m_dataRoleSubsumptionCache=new RoleSubsumptionCache(this,m_dlOntology.hasInverseRoles(),new HashSet<Role>(m_dlOntology.getAllAtomicDataRoles()),AtomicRole.BOTTOM_DATA_ROLE,AtomicRole.TOP_DATA_ROLE);
             m_realization=null;
         }
         catch (OWLException shouldntHappen) {
@@ -1747,15 +1664,6 @@ public class Reasoner implements OWLReasoner,Serializable {
         }
         return result;
     }
-    protected static <T> void addInclusion(Map<T,DeterministicHierarchyBuilder.GraphNode<T>> knownSubsumers,T subElement,T supElement) {
-        DeterministicHierarchyBuilder.GraphNode<T> subGraphNode=knownSubsumers.get(subElement);
-        if (subGraphNode==null) {
-            subGraphNode=new DeterministicHierarchyBuilder.GraphNode<T>(subElement,new HashSet<T>());
-            knownSubsumers.put(subElement,subGraphNode);
-        }
-        subGraphNode.m_successors.add(supElement);
-    }
-
     
     // The factory for OWL API OWL reasoners
     

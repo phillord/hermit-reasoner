@@ -25,9 +25,6 @@ import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 import org.semanticweb.owlapi.reasoner.NodeSet;
 import org.semanticweb.owlapi.vocab.OWLFacet;
 
-
-
-
 public class ReasonerTest extends AbstractReasonerTest {
 
     public ReasonerTest(String name) {
@@ -48,9 +45,9 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertTrue(result.containsEntity(a));
         assertTrue(result.containsEntity(b));
         assertTrue(result.containsEntity(m_dataFactory.getOWLThing()));
-        assertTrue(result.getFlattened().size()==3);
+        assertEquals(3,result.getFlattened().size());
         assertTrue(resultDirect.containsEntity(a));
-        assertTrue(resultDirect.getFlattened().size()==1);
+        assertEquals(1,resultDirect.getFlattened().size());
         assertTrue(m_reasoner.isSubObjectPropertyExpressionOf(r, r));
     }
     public void testDatatypeLiterals() throws Exception {
