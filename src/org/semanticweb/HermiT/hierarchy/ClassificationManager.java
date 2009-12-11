@@ -7,7 +7,7 @@ public interface ClassificationManager<E> {
     boolean isSubsumedBy(E subelement,E superelement);
     Hierarchy<E> classify(ProgressMonitor<E> progressMonitor,E topElement,E bottomElement,Set<E> elements);
 
-    public static interface ProgressMonitor<U> {
-        void elementClassified(U element);
+    interface ProgressMonitor<E> {
+        void elementClassified(E element);
     }
 }

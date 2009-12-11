@@ -18,12 +18,12 @@ import org.semanticweb.HermiT.tableau.Tableau;
  * A cache for concept subsumption and concept satisfiability tests. This class also maintains the set of known and possible subsumers
  * for a concept. This information can be used to optimize classification.
  */
-public class ConceptSubsumptionCache implements Serializable,SubsumptionCache<AtomicConcept> {
+public class AtomicConceptSubsumptionCache implements Serializable,SubsumptionCache<AtomicConcept> {
     private static final long serialVersionUID = 5380180660934814631L;
     protected final Tableau m_tableau;
     protected final Map<AtomicConcept,AtomicConceptInfo> m_atomicConceptInfos;
 
-    public ConceptSubsumptionCache(Reasoner reasoner) {
+    public AtomicConceptSubsumptionCache(Reasoner reasoner) {
         m_tableau=reasoner.getTableau();
         m_atomicConceptInfos=new HashMap<AtomicConcept,AtomicConceptInfo>();
     }

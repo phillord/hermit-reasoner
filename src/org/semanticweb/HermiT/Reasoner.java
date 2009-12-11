@@ -30,7 +30,7 @@ import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
 import org.semanticweb.HermiT.existentials.ExistentialExpansionStrategy;
 import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
 import org.semanticweb.HermiT.hierarchy.ClassificationManager;
-import org.semanticweb.HermiT.hierarchy.ConceptSubsumptionCache;
+import org.semanticweb.HermiT.hierarchy.AtomicConceptSubsumptionCache;
 import org.semanticweb.HermiT.hierarchy.DataRoleSubsumptionCache;
 import org.semanticweb.HermiT.hierarchy.DeterministicClassificationManager;
 import org.semanticweb.HermiT.hierarchy.Hierarchy;
@@ -1321,9 +1321,9 @@ public class Reasoner implements OWLReasoner,Serializable {
     
     protected static ClassificationManager<AtomicConcept> createAtomicConceptClassificationManager(Reasoner reasoner) {
         if (reasoner.getTableau().isDeterministic())
-            return new DeterministicClassificationManager<AtomicConcept>(new ConceptSubsumptionCache(reasoner));
+            return new DeterministicClassificationManager<AtomicConcept>(new AtomicConceptSubsumptionCache(reasoner));
         else
-            return new StandardClassificationManager<AtomicConcept>(new ConceptSubsumptionCache(reasoner));
+            return new StandardClassificationManager<AtomicConcept>(new AtomicConceptSubsumptionCache(reasoner));
     }
 
     protected static ClassificationManager<Role> createObjectRoleClassificationManager(Reasoner reasoner) {
