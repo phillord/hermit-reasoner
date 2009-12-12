@@ -186,8 +186,8 @@ public class BlockingValidator {
         } else {
             retrieval=m_ternaryRetrieval02Bound;
             retrieval.getBindingsBuffer()[0]=((InverseRole)r).getInverseOf();
-            position=1;
             retrieval.getBindingsBuffer()[2]=blocker;
+            position=1;
         }
         retrieval.open();
         Object[] tupleBuffer=retrieval.getTupleBuffer();
@@ -275,13 +275,15 @@ public class BlockingValidator {
             ExtensionTable.Retrieval retrieval;
             if (yConstraint.m_x2yRoles.length!=0) {
                 retrieval=dlClauseInfo.m_x2yRetrievals[toMatchIndex];
+                retrieval.getBindingsBuffer()[0]=dlClauseInfo.m_x2yRoles[toMatchIndex];
                 retrieval.getBindingsBuffer()[1]=blocker;
                 yNodeIndex=2;
             }
             else {
                 retrieval=dlClauseInfo.m_y2xRetrievals[toMatchIndex];
-                yNodeIndex=1;
+                retrieval.getBindingsBuffer()[0]=dlClauseInfo.m_y2xRoles[toMatchIndex];
                 retrieval.getBindingsBuffer()[2]=blocker;
+                yNodeIndex=1;
             }
             retrieval.open();
             Object[] tupleBuffer=retrieval.getTupleBuffer();
@@ -340,8 +342,8 @@ public class BlockingValidator {
         } else {
             retrieval=m_ternaryRetrieval02Bound;
             retrieval.getBindingsBuffer()[0]=((InverseRole)r).getInverseOf();
-            position=1;
             retrieval.getBindingsBuffer()[2]=nonblocked;
+            position=1;
         }
         retrieval.open();
         Object[] tupleBuffer=retrieval.getTupleBuffer();
@@ -418,12 +420,14 @@ public class BlockingValidator {
             ExtensionTable.Retrieval retrieval;
             if (yConstraint.m_x2yRoles.length!=0) {
                 retrieval=dlClauseInfo.m_x2yRetrievals[toMatchIndex];
+                retrieval.getBindingsBuffer()[0]=dlClauseInfo.m_x2yRoles[toMatchIndex];
                 retrieval.getBindingsBuffer()[1]=nonblockedX;
                 yNodeIndex=2;
             } else {
                 retrieval=dlClauseInfo.m_y2xRetrievals[toMatchIndex];
-                yNodeIndex=1;
+                retrieval.getBindingsBuffer()[0]=dlClauseInfo.m_y2xRoles[toMatchIndex];
                 retrieval.getBindingsBuffer()[2]=nonblockedX;
+                yNodeIndex=1;
             }
             retrieval.open();
             Object[] tupleBuffer=retrieval.getTupleBuffer();
@@ -485,7 +489,9 @@ public class BlockingValidator {
         protected final YConstraint[] m_yConstraints;
         protected final AtomicConcept[][] m_zConcepts;
         protected final ExtensionTable.Retrieval[] m_x2yRetrievals;
+        protected final AtomicRole[] m_x2yRoles;
         protected final ExtensionTable.Retrieval[] m_y2xRetrievals;
+        protected final AtomicRole[] m_y2xRoles;
         protected final ExtensionTable.Retrieval[] m_zRetrievals;
         protected final ConsequenceAtom[] m_consequencesForBlockedX;
         protected final ConsequenceAtom[] m_consequencesForNonblockedX;
@@ -587,7 +593,9 @@ public class BlockingValidator {
             m_yNodes=new Node[m_yVariables.length];
             m_yConstraints=new YConstraint[m_yVariables.length];
             m_x2yRetrievals=new Retrieval[x2yRoles.size()];
+            m_x2yRoles=new AtomicRole[x2yRoles.size()];
             m_y2xRetrievals=new Retrieval[y2xRoles.size()];
+            m_y2xRoles=new AtomicRole[y2xRoles.size()];
             int i=0;
             for (i=0;i<m_yVariables.length;i++) {
                 Variable y=m_yVariables[i];
@@ -595,18 +603,14 @@ public class BlockingValidator {
                 Set<AtomicRole> xyRoles=x2yRoles.get(y);
                 if (xyRoles!=null) {
                     assert xyRoles.size()==1;
-                    for (AtomicRole r : xyRoles) {
-                        m_x2yRetrievals[i]=extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,true,false },ExtensionTable.View.TOTAL);
-                        m_x2yRetrievals[i].getBindingsBuffer()[0]=r;
-                    }
+                    m_x2yRetrievals[i]=extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,true,false },ExtensionTable.View.TOTAL);
+                    m_x2yRoles[i]=xyRoles.iterator().next();
                 }
                 Set<AtomicRole> yxRoles=y2xRoles.get(y);
                 if (yxRoles!=null) {
                     assert yxRoles.size()==1;
-                    for (AtomicRole r : yxRoles) {
-                        m_y2xRetrievals[i]=extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,false,true },ExtensionTable.View.TOTAL);
-                        m_y2xRetrievals[i].getBindingsBuffer()[0]=r;
-                    }
+                    m_y2xRetrievals[i]=extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,false,true },ExtensionTable.View.TOTAL);
+                    m_y2xRoles[i]=yxRoles.iterator().next();
                 }
                 m_yConstraints[i]=new YConstraint(yConcepts!=null?yConcepts.toArray(noConcepts):noConcepts, xyRoles!=null?xyRoles.toArray(noRoles):noRoles, yxRoles!=null?yxRoles.toArray(noRoles):noRoles);
             }
