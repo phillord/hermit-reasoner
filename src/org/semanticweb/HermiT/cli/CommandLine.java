@@ -76,6 +76,7 @@ public class CommandLine {
             for (Map.Entry<String,String> e : prefixes.getPrefixIRIsByPrefixName().entrySet()) {
                 output.println("\t"+e.getKey()+"\t"+e.getValue());
             }
+            output.flush();
         }
     }
 
@@ -104,6 +105,7 @@ public class CommandLine {
                 }
             }
             output.println(hermit.getDLOntology().toString(prefixes));
+            output.flush();
         }
     }
 
@@ -134,6 +136,7 @@ public class CommandLine {
                     output=new PrintWriter(f);
                 }
                 hermit.printHierarchies(output,true,false,false);
+                output.flush();
             }
         }
     }
@@ -152,6 +155,7 @@ public class CommandLine {
             }
             boolean result=hermit.isSatisfiable(owlClass);
             output.println(conceptName+(result ? " is satisfiable." : " is not satisfiable."));
+            output.flush();
         }
     }
 
@@ -181,6 +185,7 @@ public class CommandLine {
             for (Node<OWLClass> set : classes)
                 for (OWLClass classInSet : set)
                     output.println("\t"+prefixes.abbreviateIRI(classInSet.getIRI().toString()));
+            output.flush();
         }
     }
 
@@ -210,6 +215,7 @@ public class CommandLine {
             for (Node<OWLClass> set : classes)
                 for (OWLClass classInSet : set)
                     output.println("\t"+prefixes.abbreviateIRI(classInSet.getIRI().toString()));
+            output.flush();
         }
     }
 
@@ -229,6 +235,7 @@ public class CommandLine {
             output.println("Classes equivalent to '"+conceptName+"':");
             for (OWLClass classInSet : classes)
                 output.println("\t"+prefixes.abbreviateIRI(classInSet.getIRI().toString()));
+            output.flush();
         }
     }
     
@@ -248,6 +255,7 @@ public class CommandLine {
             } catch (OWLOntologyCreationException e) {
                 e.printStackTrace();
             }
+            output.flush();
         }
     }
 
@@ -258,6 +266,7 @@ public class CommandLine {
 
         public void run(Reasoner hermit,Prefixes prefixes,StatusOutput status,PrintWriter output) {
             hermit.printHierarchies(output,true,false,false);
+            output.flush();
         }
     }
 
@@ -656,7 +665,6 @@ public class CommandLine {
                         action.run(hermit,prefixes,status,output);
                         long actionTime=System.currentTimeMillis()-startTime;
                         status.log(2,"...action completed in "+String.valueOf(actionTime)+" msec.");
-                        output.flush();
                     }
                 }
                 catch (org.semanticweb.owlapi.model.OWLException e) {

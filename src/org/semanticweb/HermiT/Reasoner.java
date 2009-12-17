@@ -161,7 +161,7 @@ public class Reasoner implements OWLReasoner,Serializable {
      */
     public Reasoner(Configuration configuration) {
         m_configuration=configuration;
-        m_interruptFlag=new InterruptFlag();
+        m_interruptFlag=new InterruptFlag(configuration.individualTaskTimeout);
         m_progressMonitor=null;
         if (m_dlOntology != null || m_tableau != null) dispose();
     }
@@ -222,7 +222,7 @@ public class Reasoner implements OWLReasoner,Serializable {
      */
     public Reasoner(Configuration configuration,OWLOntologyManager ontologyManager,OWLOntology ontology,Set<DescriptionGraph> descriptionGraphs,ReasonerProgressMonitor progressMonitor) {
         m_configuration=configuration;
-        m_interruptFlag=new InterruptFlag();
+        m_interruptFlag=new InterruptFlag(configuration.individualTaskTimeout);
         m_progressMonitor=progressMonitor;
         loadOntology(ontologyManager,ontology,descriptionGraphs);
     }
@@ -237,7 +237,7 @@ public class Reasoner implements OWLReasoner,Serializable {
      */
     public Reasoner(Configuration configuration,DLOntology dlOntology) {
         m_configuration=configuration;
-        m_interruptFlag=new InterruptFlag();
+        m_interruptFlag=new InterruptFlag(configuration.individualTaskTimeout);
         m_progressMonitor=null;
         loadDLOntology(dlOntology);
     }
@@ -264,11 +264,6 @@ public class Reasoner implements OWLReasoner,Serializable {
     public Configuration getConfiguration() {
         return m_configuration.clone();
     }
-
-    /**
-     * Set a flag to tell the reasoner to stop whatever it is doing. All operations check from time to time whether this flag 
-     * is set and if it is, then the current process is aborted.  
-     */
     public void interrupt() {
         m_interruptFlag.interrupt();
     }
@@ -413,7 +408,6 @@ public class Reasoner implements OWLReasoner,Serializable {
     public boolean isClassified() {
         return m_atomicConceptHierarchy!=null;
     }
-    
     public void classify() {
         if (m_atomicConceptHierarchy==null) {
             try {
@@ -442,7 +436,12 @@ public class Reasoner implements OWLReasoner,Serializable {
             }
         }
     }
-
+    public Node<OWLClass> getTopClassNode() {
+        return atomicConceptsToOWLAPI(getHierarchyNode(AtomicConcept.THING).getEquivalentElements());
+    }
+    public Node<OWLClass> getBottomClassNode() {
+        return atomicConceptsToOWLAPI(getHierarchyNode(AtomicConcept.NOTHING).getEquivalentElements());
+    }
     public boolean isSatisfiable(OWLClassExpression description) {
         if (description instanceof OWLClass) {
             AtomicConcept concept=AtomicConcept.create(((OWLClass)description).getIRI().toString());
@@ -541,8 +540,23 @@ public class Reasoner implements OWLReasoner,Serializable {
         return atomicConceptsToOWLAPI(node.getEquivalentElements());
     }
     public NodeSet<OWLClass> getDisjointClasses(OWLClassExpression classExpression, boolean direct) {
-        OWLClassExpression notClassExpression=m_factory.getOWLObjectComplementOf(classExpression);
-        return getSubClasses(notClassExpression, direct);
+        Node<OWLClass> equivToDisjoint=getEquivalentClasses(m_factory.getOWLObjectComplementOf(classExpression));
+        if (direct&&equivToDisjoint.getSize()>0) {
+            return new OWLClassNodeSet(equivToDisjoint);
+        } 
+        NodeSet<OWLClass> subsDisjoint=getSubClasses(m_factory.getOWLObjectComplementOf(classExpression), direct);
+        if (direct) return subsDisjoint;
+        Set<Node<OWLClass>> result=new HashSet<Node<OWLClass>>();
+        result.add(equivToDisjoint);
+        result.addAll(subsDisjoint.getNodes());
+        return new OWLClassNodeSet(result);
+    }
+    protected HierarchyNode<AtomicConcept> getHierarchyNode(AtomicConcept atomicConcept) {
+        classify();
+        HierarchyNode<AtomicConcept> node=m_atomicConceptHierarchy.getNodeForElement(atomicConcept);
+        if (node==null)
+            node=new HierarchyNode<AtomicConcept>(atomicConcept,Collections.singleton(atomicConcept),Collections.singleton(m_atomicConceptHierarchy.getTopNode()),Collections.singleton(m_atomicConceptHierarchy.getBottomNode()));
+        return node;
     }
     protected HierarchyNode<AtomicConcept> getHierarchyNode(OWLClassExpression description) {
         classify();
@@ -576,7 +590,6 @@ public class Reasoner implements OWLReasoner,Serializable {
     public boolean areObjectPropertiesClassified() {
         return m_objectRoleHierarchy!=null;
     }
-
     /**
      * Builds the object property hierarchy. With nominals and cardinality restrictions this 
      * cannot always been dome by simply building the transitive closure of the asserted object 
@@ -612,7 +625,12 @@ public class Reasoner implements OWLReasoner,Serializable {
             }
         }
     }
-    
+    public Node<OWLObjectProperty> getTopObjectPropertyNode() {
+        return objectPropertiesToOWLAPI(getHierarchyNodeObjectRole(AtomicRole.TOP_OBJECT_ROLE).getEquivalentElements());
+    }
+    public Node<OWLObjectProperty> getBottomObjectPropertyNode() {
+        return objectPropertiesToOWLAPI(getHierarchyNodeObjectRole(AtomicRole.BOTTOM_OBJECT_ROLE).getEquivalentElements());
+    }
     /**
      * Determines if subObjectPropertyExpression is a sub-property of superObjectPropertyExpression. 
      * HermiT answers true if subObjectPropertyExpression=superObjectPropertyExpression. 
@@ -748,17 +766,20 @@ public class Reasoner implements OWLReasoner,Serializable {
     public Set<OWLObjectPropertyExpression> getEquivalentObjectPropertyExpressions(OWLObjectPropertyExpression propertyExpression) {
         return objectRolesToObjectPropertyExpressions(getHierarchyNode(propertyExpression).getEquivalentElements());
     }
-    protected HierarchyNode<Role> getHierarchyNode(OWLObjectPropertyExpression propertyExpression) {
+    protected HierarchyNode<Role> getHierarchyNodeObjectRole(Role role) {
         classifyObjectProperties();
+        HierarchyNode<Role> node=m_objectRoleHierarchy.getNodeForElement(role);
+        if (node==null)
+            node=new HierarchyNode<Role>(role,Collections.singleton(role),Collections.singleton(m_objectRoleHierarchy.getTopNode()),Collections.singleton(m_objectRoleHierarchy.getBottomNode()));
+        return node;
+    }
+    protected HierarchyNode<Role> getHierarchyNode(OWLObjectPropertyExpression propertyExpression) {
         Role role;
         if (propertyExpression.getSimplified().isAnonymous()) 
             role=InverseRole.create(AtomicRole.create(propertyExpression.getNamedProperty().getIRI().toString()));
         else 
             role=AtomicRole.create(propertyExpression.getNamedProperty().getIRI().toString());
-        HierarchyNode<Role> node=m_objectRoleHierarchy.getNodeForElement(role);
-        if (node==null)
-            node=new HierarchyNode<Role>(role,Collections.singleton(role),Collections.singleton(m_objectRoleHierarchy.getTopNode()),Collections.singleton(m_objectRoleHierarchy.getBottomNode()));
-        return node;
+        return getHierarchyNodeObjectRole(role);
     }
     public NodeSet<OWLClass> getObjectPropertyDomains(OWLObjectPropertyExpression propertyExpression,boolean direct) {
         HierarchyNode<AtomicConcept> node=getHierarchyNode(m_factory.getOWLObjectSomeValuesFrom(propertyExpression,m_factory.getOWLThing()));
@@ -778,31 +799,40 @@ public class Reasoner implements OWLReasoner,Serializable {
         return getEquivalentObjectProperties(property.getInverseProperty());
     }
     public NodeSet<OWLObjectProperty> getDisjointObjectProperties(OWLObjectPropertyExpression propertyExpression, boolean direct) {
-        if (propertyExpression.isOWLTopObjectProperty()) return new OWLObjectPropertyNodeSet(m_factory.getOWLBottomObjectProperty());
-        Set<Node<OWLObjectProperty>> result=new HashSet<Node<OWLObjectProperty>>();
-        Set<OWLObjectProperty> tested=new HashSet<OWLObjectProperty>();
-        OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
-        OWLDataFactory factory=ontologyManager.getOWLDataFactory();
-        OWLIndividual individualA=factory.getOWLNamedIndividual(IRI.create("internal:individualA"));
-        OWLIndividual individualB=factory.getOWLNamedIndividual(IRI.create("internal:individualB"));
-        OWLAxiom assertion=factory.getOWLObjectPropertyAssertionAxiom(propertyExpression,individualA,individualB);
-        OWLAxiom assertion2;
-        OWLObjectProperty testedProperty;
         classifyObjectProperties();
-        for (AtomicRole role : m_dlOntology.getAllAtomicObjectRoles()) {
-            testedProperty=factory.getOWLObjectProperty(IRI.create(role.getIRI()));
-            if (!tested.contains(testedProperty)) {
-                assertion2=factory.getOWLObjectPropertyAssertionAxiom(testedProperty,individualA,individualB);
-                Tableau tableau=getTableau(ontologyManager,assertion,assertion2);
-                if (!tableau.isABoxSatisfiable()) {
-                    for (Node<OWLObjectProperty> n : getDescendantObjectProperties(testedProperty)) {
-                        result.add(n);
-                        tested.addAll(n.getEntities());
-                    }
-                }
+        Set<HierarchyNode<Role>> result=new HashSet<HierarchyNode<Role>>();
+        if (propertyExpression.isOWLTopObjectProperty()) {
+            result.add(getHierarchyNodeObjectRole(AtomicRole.BOTTOM_OBJECT_ROLE));
+            return objectPropertyNodesToOWLAPI(result);
+        } else if (propertyExpression.isOWLBottomObjectProperty()) {
+            result.add(getHierarchyNodeDataRole(AtomicRole.TOP_OBJECT_ROLE));
+            return objectPropertyNodesToOWLAPI(result);
+        }
+        OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
+        OWLIndividual individualA=m_factory.getOWLNamedIndividual(IRI.create("internal:individualA"));
+        OWLIndividual individualB=m_factory.getOWLNamedIndividual(IRI.create("internal:individualB"));
+        OWLAxiom assertion=m_factory.getOWLObjectPropertyAssertionAxiom(propertyExpression,individualA,individualB);
+        OWLAxiom assertion2;
+        OWLObjectProperty testProperty;
+        Set<HierarchyNode<Role>> nodesToTest=new HashSet<HierarchyNode<Role>>();
+        nodesToTest.addAll(getHierarchyNodeObjectRole(AtomicRole.TOP_OBJECT_ROLE).getChildNodes());
+        while (!nodesToTest.isEmpty()) {
+            HierarchyNode<Role> nodeToTest=nodesToTest.iterator().next();
+            Role roleToTest=nodeToTest.getRepresentative();
+            testProperty=m_factory.getOWLObjectProperty(IRI.create(roleToTest.toString()));
+            assertion2=m_factory.getOWLObjectPropertyAssertionAxiom(testProperty,individualA,individualB);
+            Tableau tableau=getTableau(ontologyManager,assertion,assertion2);
+            if (!tableau.isABoxSatisfiable()) {
+                // disjoint
+                if (direct) result.add(nodeToTest);
+                else result.addAll(nodeToTest.getDescendantNodes());
+            } else {
+                // maybe some children are disjoint
+                nodesToTest.addAll(nodeToTest.getChildNodes());
             }
         }
-        return new OWLObjectPropertyNodeSet(result);
+        if (result.isEmpty()) result.add(getHierarchyNodeObjectRole(AtomicRole.BOTTOM_OBJECT_ROLE));
+        return objectPropertyNodesToOWLAPI(result);
     }
     /**
      * @param propertyExpression - an object property expression
@@ -915,7 +945,12 @@ public class Reasoner implements OWLReasoner,Serializable {
             }
         }
     }
-    
+    public Node<OWLDataProperty> getTopDataPropertyNode() {
+        return dataPropertiesToOWLAPI(getHierarchyNodeObjectRole(AtomicRole.TOP_DATA_ROLE).getEquivalentElements());
+    }
+    public Node<OWLDataProperty> getBottomDataPropertyNode() {
+        return dataPropertiesToOWLAPI(getHierarchyNodeObjectRole(AtomicRole.BOTTOM_DATA_ROLE).getEquivalentElements());
+    }
     /**
      * Determines if the property chain represented by subPropertyChain is a sub-property of superObjectPropertyExpression. 
      * @param subDataProperty - a data property 
@@ -980,13 +1015,15 @@ public class Reasoner implements OWLReasoner,Serializable {
     public Node<OWLDataProperty> getEquivalentDataProperties(OWLDataProperty property) {
         return dataPropertiesToOWLAPI(getHierarchyNode(property).getEquivalentElements());
     }
-    protected HierarchyNode<Role> getHierarchyNode(OWLDataProperty property) {
+    protected HierarchyNode<Role> getHierarchyNodeDataRole(Role role) {
         classifyDataProperties();
-        Role role=AtomicRole.create(property.getIRI().toString());
         HierarchyNode<Role> node=m_dataRoleHierarchy.getNodeForElement(role);
         if (node==null)
             node=new HierarchyNode<Role>(role,Collections.singleton(role),Collections.singleton(m_dataRoleHierarchy.getTopNode()),Collections.singleton(m_dataRoleHierarchy.getBottomNode()));
         return node;
+    }
+    protected HierarchyNode<Role> getHierarchyNode(OWLDataProperty property) {
+        return getHierarchyNodeDataRole(AtomicRole.create(property.getIRI().toString()));
     }
     public NodeSet<OWLClass> getDataPropertyDomains(OWLDataProperty property,boolean direct) {
         HierarchyNode<AtomicConcept> node=getHierarchyNode(m_factory.getOWLDataSomeValuesFrom(property,m_factory.getTopDatatype()));
@@ -1016,33 +1053,44 @@ public class Reasoner implements OWLReasoner,Serializable {
         }
         return result;
     }
-//    public NodeSet<OWLDataProperty> getDisjointDataProperties(OWLDataProperty property, boolean direct) {
-//        if (property.isOWLTopDataProperty()) return new OWLDataPropertyNodeSet(m_factory.getOWLBottomDataProperty());
-//        Set<Node<OWLDataProperty>> result=new HashSet<Node<OWLDataProperty>>();
-//        Set<OWLDataProperty> tested=new HashSet<OWLDataProperty>();
-//        OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
-//        OWLDataFactory factory=ontologyManager.getOWLDataFactory();
-//        OWLIndividual individualA=factory.getOWLNamedIndividual(IRI.create("internal:individualA"));
-//        OWLLiteral constant=factory.getOWLTypedLiteral("",factory.getTopDatatype());
-//        OWLAxiom assertion=factory.getOWLDataPropertyAssertionAxiom(property,individualA,individualB);
-//        OWLAxiom assertion2;
-//        OWLDataProperty testedProperty;
-//        classifyDataProperties();
-//        for (AtomicRole role : m_dlOntology.getAllAtomicDataRoles()) {
-//            testedProperty=factory.getOWLDataProperty(IRI.create(role.getIRI()));
-//            if (!tested.contains(testedProperty)) {
-//                assertion2=factory.getOWLDataPropertyAssertionAxiom(testedProperty,individualA,individualB);
-//                Tableau tableau=getTableau(ontologyManager,assertion,assertion2);
-//                if (!tableau.isABoxSatisfiable()) {
-//                    for (Node<OWLDataProperty> n : getDescendantDataProperties(testedProperty)) {
-//                        result.add(n);
-//                        tested.addAll(n.getEntities());
-//                    }
-//                }
-//            }
-//        }
-//        return new OWLDataPropertyNodeSet(result);
-//    }
+    public NodeSet<OWLDataProperty> getDisjointDataProperties(OWLDataPropertyExpression propertyExpression, boolean direct) {
+        classifyDataProperties();
+        Set<HierarchyNode<Role>> result=new HashSet<HierarchyNode<Role>>();
+        if (propertyExpression.isOWLTopDataProperty()) {
+            result.add(getHierarchyNodeDataRole(AtomicRole.BOTTOM_DATA_ROLE));
+            return dataPropertyNodesToOWLAPI(result);
+        } else if (propertyExpression.isOWLBottomDataProperty()) {
+            result.add(getHierarchyNodeDataRole(AtomicRole.TOP_DATA_ROLE));
+            return dataPropertyNodesToOWLAPI(result);
+        }
+        OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
+        OWLIndividual individual=m_factory.getOWLNamedIndividual(IRI.create("internal:individualA"));
+        OWLDatatype anonymousConstantsDatatype=m_factory.getOWLDatatype(IRI.create("internal:anonymous-constants"));
+        OWLTypedLiteral constant=m_factory.getOWLTypedLiteral("internal:constant",anonymousConstantsDatatype);
+        OWLDataProperty property=propertyExpression.asOWLDataProperty();
+        OWLAxiom assertion=m_factory.getOWLDataPropertyAssertionAxiom(property,individual,constant);
+        OWLAxiom assertion2;
+        OWLDataProperty testProperty;
+        Set<HierarchyNode<Role>> nodesToTest=new HashSet<HierarchyNode<Role>>();
+        nodesToTest.addAll(getHierarchyNodeDataRole(AtomicRole.TOP_DATA_ROLE).getChildNodes());
+        while (!nodesToTest.isEmpty()) {
+            HierarchyNode<Role> nodeToTest=nodesToTest.iterator().next();
+            Role roleToTest=nodeToTest.getRepresentative();
+            testProperty=m_factory.getOWLDataProperty(IRI.create(roleToTest.toString()));
+            assertion2=m_factory.getOWLDataPropertyAssertionAxiom(testProperty,individual,constant);
+            Tableau tableau=getTableau(ontologyManager,assertion,assertion2);
+            if (!tableau.isABoxSatisfiable()) {
+                // disjoint
+                if (direct) result.add(nodeToTest);
+                else result.addAll(nodeToTest.getDescendantNodes());
+            } else {
+                // maybe some children are disjoint
+                nodesToTest.addAll(nodeToTest.getChildNodes());
+            }
+        }
+        if (result.isEmpty()) result.add(getHierarchyNodeDataRole(AtomicRole.BOTTOM_DATA_ROLE));
+        return dataPropertyNodesToOWLAPI(result);
+    }
     /**
      * @param property - a data property
      * @return true if each individual can have at most one outgoing connection of the specified data property
@@ -1106,6 +1154,9 @@ public class Reasoner implements OWLReasoner,Serializable {
         NodeSet<OWLNamedIndividual> result=getInstances(m_factory.getOWLObjectOneOf(namedIndividual),false);
         assert result.isSingleton();
         return result.iterator().next();
+    }
+    public NodeSet<OWLNamedIndividual> getDifferentIndividuals(OWLNamedIndividual namedIndividual) {
+        return getInstances(m_factory.getOWLObjectComplementOf(m_factory.getOWLObjectOneOf(namedIndividual)),false);
     }
     public NodeSet<OWLClass> getTypes(OWLNamedIndividual owlIndividual,boolean direct) {
         Individual individual=Individual.create(owlIndividual.getIRI().toString(),true);
@@ -1836,7 +1887,7 @@ public class Reasoner implements OWLReasoner,Serializable {
     }
 
     public long getTimeOut() {
-        return m_configuration.timeout;
+        return m_configuration.individualTaskTimeout;
     }
     
     // ontology change management -- only available via the OWLReasoner implementation
@@ -1887,6 +1938,9 @@ public class Reasoner implements OWLReasoner,Serializable {
         }
         return new Version(version[0],version[1],version[2],version[3]);
     }
+
+
+
 
 //    // The factory for the reasoner from the Protege plug-in
 //    public static class ProtegeReasonerFactory extends ProtegeOWLReasonerFactoryAdapter {

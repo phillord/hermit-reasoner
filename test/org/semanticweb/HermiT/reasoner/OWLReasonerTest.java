@@ -176,9 +176,6 @@ public class OWLReasonerTest extends AbstractReasonerTest {
         Set<OWLLiteral> adps=m_owlreasoner.getDataPropertyValues(a, dp);
         Set<OWLLiteral> bdps=m_owlreasoner.getDataPropertyValues(b, dp);
         Set<OWLLiteral> cdps=m_owlreasoner.getDataPropertyValues(c, dp);
-        for (OWLLiteral lit : adps) {
-            System.out.println(lit.toString());
-        }
         assertTrue(adps.size()==2);
         assertTrue(bdps.size()==1);
         assertTrue(cdps.size()==1);

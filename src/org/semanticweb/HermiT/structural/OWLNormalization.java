@@ -60,10 +60,10 @@ public class OWLNormalization {
         // concepts -- that is, each OWLClassExpression in an entry contributes a
         // disjunct. It is thus not really inclusions, but rather a disjunction
         // of concepts that represents an inclusion axiom.
-        m_axioms.m_classes.addAll(ontology.getReferencedClasses());
-        m_axioms.m_objectProperties.addAll(ontology.getReferencedObjectProperties());
-        m_axioms.m_dataProperties.addAll(ontology.getReferencedDataProperties());
-        m_axioms.m_namedIndividuals.addAll(ontology.getReferencedIndividuals());
+        m_axioms.m_classes.addAll(ontology.getClassesInSignature(true));
+        m_axioms.m_objectProperties.addAll(ontology.getObjectPropertiesInSignature(true));
+        m_axioms.m_dataProperties.addAll(ontology.getDataPropertiesInSignature(true));
+        m_axioms.m_namedIndividuals.addAll(ontology.getIndividualsInSignature(true));
         AxiomVisitor axiomVisitor=new AxiomVisitor();
         for (OWLAxiom axiom : ontology.getAxioms())
             axiom.accept(axiomVisitor);

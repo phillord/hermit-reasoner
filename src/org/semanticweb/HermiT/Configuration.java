@@ -55,7 +55,7 @@ public class Configuration implements Serializable,Cloneable {
     
     public WarningMonitor warningMonitor;
     public ReasonerProgressMonitor reasonerProgressMonitor;
-    public long timeout;
+    public long individualTaskTimeout;
     public Configuration.TableauMonitorType tableauMonitorType;
     public Configuration.DirectBlockingType directBlockingType;
     public Configuration.BlockingStrategyType blockingStrategyType;
@@ -78,6 +78,7 @@ public class Configuration implements Serializable,Cloneable {
         checkClauses=true;
         monitor=null;
         parameters=new HashMap<String,Object>();
+        individualTaskTimeout=-1;
     }
     protected void setIndividualReuseStrategyReuseAlways(Set<? extends AtomicConcept> concepts) {
         parameters.put("IndividualReuseStrategy.reuseAlways",concepts);
@@ -123,6 +124,6 @@ public class Configuration implements Serializable,Cloneable {
         void warning(String warning);
     }
     public long getTimeOut() {
-        return timeout;
+        return individualTaskTimeout;
     }
 }

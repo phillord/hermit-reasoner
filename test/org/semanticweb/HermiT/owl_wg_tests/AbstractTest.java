@@ -30,10 +30,10 @@ import junit.framework.TestCase;
 import org.coode.owlapi.rdf.rdfxml.RDFXMLRenderer;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Reasoner;
-import org.semanticweb.HermiT.tableau.InterruptException;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.reasoner.ReasonerInterruptedException;
 
 public abstract class AbstractTest extends TestCase {
     public static int TIMEOUT=300000;
@@ -79,7 +79,7 @@ public abstract class AbstractTest extends TestCase {
                 output.println("  testResultOntology:runtimeMillisecs \""+(System.currentTimeMillis()-t)+"\"^^xsd:integer");
             }
         }
-        catch (InterruptException e) {
+        catch (ReasonerInterruptedException e) {
             if (output != null) {
                 output.println("    testResultOntology:IncompleteRun ;");
                 output.print("  testResultOntology:details \"Timeout: "+TIMEOUT+" ms\"");

@@ -542,11 +542,9 @@ public class OWLClausification {
         protected AtomicConcept getConceptForNominal(OWLIndividual individual) {
             AtomicConcept result;
             if (individual.isAnonymous()) {
-                //result=AtomicConcept.create("internal:anon#"+getFragment(individual.asAnonymousIndividual().getID()));
                 result=AtomicConcept.create("internal:anon#"+individual.asAnonymousIndividual().getID().toString());
             } else {
                 result=AtomicConcept.create("internal:nom#"+individual.asNamedIndividual().getIRI().toString());
-                //result=AtomicConcept.create("internal:nom#"+getFragment(individual.asNamedIndividual().getIRI()));
             }
             m_positiveFacts.add(Atom.create(result,getIndividual(individual)));
             return result;
@@ -1059,7 +1057,6 @@ public class OWLClausification {
         protected Atom m_lastAtom;
         protected final Set<SWRLVariable> m_headVars=new HashSet<SWRLVariable>();
         protected final Set<SWRLVariable> m_bodyVars=new HashSet<SWRLVariable>();
-        //protected final Map<>Set<SWRLIndividualVariable> individualVars=new HashSet<SWRLIndividualVariable>();
         protected final Set<SWRLVariable> m_varsOfLastAtom=new HashSet<SWRLVariable>();
         protected boolean m_containsIndividuals=false;
         protected boolean m_containsVariables=false;
@@ -1162,7 +1159,7 @@ public class OWLClausification {
             if (atom.getPredicate().isAnonymous()) {
                 throw new IllegalStateException("Internal error: SWRL rule class atoms should be normalized to contain only named classes, but this class atom has a complex concept: " + atom.getPredicate());
             }
-            atom.getArgument().accept(this);  // SWRLIndividualVariable
+            atom.getArgument().accept(this); 
             m_lastAtom=Atom.create(AtomicConcept.create(atom.getPredicate().asOWLClass().getIRI().toString()),m_lastVariable);
         }
         public void visit(SWRLDataRangeAtom atom) {
@@ -1170,7 +1167,7 @@ public class OWLClausification {
                 throw new IllegalStateException("Internal error: SWRL rule data range atoms should be normalized to contain only datatypes, but this atom has a (complex) data range: " + atom.getPredicate());
             }
             OWLDatatype dt=atom.getPredicate().asOWLDatatype();
-            atom.getArgument().accept(this);  // SWRLLiteralVariable
+            atom.getArgument().accept(this); 
             m_lastAtom=Atom.create(AtomicConcept.create(dt.getIRI().toString()),m_lastVariable);
         }
         public void visit(SWRLObjectPropertyAtom atom) {

@@ -188,7 +188,7 @@ public final class Tableau implements Serializable {
             m_tableauMonitor.tableauCleared();
     }
     public boolean isSatisfiable() {
-        m_interruptFlag.startTask();
+        m_interruptFlag.startTimedTask();
         try {
             boolean existentialsAreExact=m_existentialExpansionStrategy.isExact();
             if (m_tableauMonitor!=null)
@@ -220,8 +220,7 @@ public final class Tableau implements Serializable {
             }
             else
                 return false;
-        }
-        finally {
+        } finally {
             m_interruptFlag.endTask();
         }
     }
@@ -780,5 +779,33 @@ public final class Tableau implements Serializable {
         }
         if (numberOfNodesInTableau!=m_numberOfNodesInTableau)
             throw new IllegalStateException("Invalid number of nodes in the tableau.");
+    }
+    
+    protected static class InterruptTimer extends Thread {
+        protected final int m_timeout;
+        protected final Tableau m_tableau;
+        protected boolean m_timingStopped;
+        
+        public InterruptTimer(int timeout,Tableau tableau) {
+            super("HermiT Interrupt Current Task Thread");
+            setDaemon(true);
+            m_timeout=timeout;
+            m_tableau=tableau;
+            m_timingStopped=false;
+        }
+        public synchronized void run() {
+            try {
+                if (!m_timingStopped) {
+                    wait(m_timeout);
+                    if (!m_timingStopped) 
+                        m_tableau.getInterruptFlag().interruptCurrentTask();
+                }
+            } catch (InterruptedException stopped) {
+            }
+        }
+        public synchronized void stopTiming() {
+            m_timingStopped=true;
+            notifyAll();
+        }
     }
 }
