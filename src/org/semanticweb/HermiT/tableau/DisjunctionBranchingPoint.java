@@ -28,26 +28,38 @@ public class DisjunctionBranchingPoint extends BranchingPoint {
 
     protected final GroundDisjunction m_groundDisjunction;
     protected int m_currentDisjunctIndex;
+    protected int m_numOfDisjuntsTested;
+    protected boolean[] m_disjunctTried;
     
-    public DisjunctionBranchingPoint(Tableau tableau,GroundDisjunction groundDisjunction) {
+    public DisjunctionBranchingPoint(Tableau tableau,GroundDisjunction groundDisjunction,int currentDisjunctIndex) {
         super(tableau);
         m_groundDisjunction=groundDisjunction;
-        m_currentDisjunctIndex=0;
+        m_disjunctTried=new boolean[m_groundDisjunction.getNumberOfDisjuncts()];
+        m_currentDisjunctIndex=currentDisjunctIndex;
+        assert m_disjunctTried[m_currentDisjunctIndex]==false;
+        m_disjunctTried[m_currentDisjunctIndex]=true;
+        m_numOfDisjuntsTested=1;
     }
     public void startNextChoice(Tableau tableau,DependencySet clashDependencySet) {
-        m_currentDisjunctIndex++;
+        m_groundDisjunction.punishDisjunt(m_currentDisjunctIndex);
+        m_currentDisjunctIndex=m_groundDisjunction.getLeastPunishedUntriedIndex(m_disjunctTried);
+        assert m_disjunctTried[m_currentDisjunctIndex]==false;
+        m_disjunctTried[m_currentDisjunctIndex]=true;
+        m_numOfDisjuntsTested++;
         assert m_currentDisjunctIndex<m_groundDisjunction.getNumberOfDisjuncts();
         if (tableau.m_tableauMonitor!=null)
             tableau.m_tableauMonitor.disjunctProcessingStarted(m_groundDisjunction,m_currentDisjunctIndex);
         PermanentDependencySet dependencySet=tableau.getDependencySetFactory().getPermanent(clashDependencySet);
-        if (m_currentDisjunctIndex==m_groundDisjunction.getNumberOfDisjuncts()-1)
+        if (m_numOfDisjuntsTested==m_groundDisjunction.getNumberOfDisjuncts())
             dependencySet=tableau.getDependencySetFactory().removeBranchingPoint(dependencySet,m_level);
-        for (int previousDisjunctIndex=0;previousDisjunctIndex<m_currentDisjunctIndex;previousDisjunctIndex++) {
-            DLPredicate dlPredicate=m_groundDisjunction.getDLPredicate(previousDisjunctIndex);
-            if (Equality.INSTANCE.equals(dlPredicate) || (dlPredicate instanceof AnnotatedEquality))
-                tableau.getExtensionManager().addAssertion(Inequality.INSTANCE,m_groundDisjunction.getArgument(previousDisjunctIndex,0),m_groundDisjunction.getArgument(previousDisjunctIndex,1),dependencySet,false);
-            else if (dlPredicate instanceof AtomicConcept)
-                tableau.getExtensionManager().addConceptAssertion(((AtomicConcept)dlPredicate).getNegation(),m_groundDisjunction.getArgument(previousDisjunctIndex,0),dependencySet,false);
+        for (int disjunctIndex=0;disjunctIndex<m_groundDisjunction.getNumberOfDisjuncts();disjunctIndex++) {
+            if (disjunctIndex!=m_currentDisjunctIndex&&m_disjunctTried[disjunctIndex]) {
+                DLPredicate dlPredicate=m_groundDisjunction.getDLPredicate(disjunctIndex);
+                if (Equality.INSTANCE.equals(dlPredicate) || (dlPredicate instanceof AnnotatedEquality))
+                    tableau.getExtensionManager().addAssertion(Inequality.INSTANCE,m_groundDisjunction.getArgument(disjunctIndex,0),m_groundDisjunction.getArgument(disjunctIndex,1),dependencySet,false);
+                else if (dlPredicate instanceof AtomicConcept)
+                    tableau.getExtensionManager().addConceptAssertion(((AtomicConcept)dlPredicate).getNegation(),m_groundDisjunction.getArgument(disjunctIndex,0),dependencySet,false);
+            }
         }
         m_groundDisjunction.addDisjunctToTableau(tableau,m_currentDisjunctIndex,dependencySet);
         if (tableau.m_tableauMonitor!=null)

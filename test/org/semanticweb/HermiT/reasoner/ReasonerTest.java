@@ -30,7 +30,24 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
-    
+    public void testLearningBackTracking() throws Exception {
+        String axioms = "SubClassOf(owl:Thing ObjectIntersectionOf(ObjectUnionOf(:C :D1) ObjectUnionOf(:C :D2) ObjectUnionOf(:C :D3) ObjectUnionOf(:C :D4) ObjectUnionOf(:C :D5) ObjectSomeValuesFrom(:r ObjectAllValuesFrom(ObjectInverseOf(:r) ObjectComplementOf(:C)))))"
+            + "ClassAssertion(:a1 :A)"
+            + "ClassAssertion(:a2 :A)"
+            + "ClassAssertion(:a3 :A)"
+            + "ClassAssertion(:a4 :A)"
+            + "ClassAssertion(:a5 :A)"
+            + "ClassAssertion(:a6 :B)"
+            + "ClassAssertion(:a7 :B)"
+            + "ClassAssertion(:a8 :B)"
+            + "ClassAssertion(:a9 :B)"
+            + "ClassAssertion(:a10 :A)"
+            + "SubClassOf(:A  ObjectMinCardinality(20 :s :B))"
+            + "SubClassOf(:B  ObjectMinCardinality(20 :s :A))";
+        loadOntologyWithAxioms(axioms);
+        createReasoner();
+        assertTrue(m_reasoner.isConsistent());
+    }
     public void testObjectPropertDomains() throws Exception {
         String axioms = "SubClassOf(:A :B)"
             + "ObjectPropertyDomain(:r :A)";

@@ -23,20 +23,21 @@ import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.model.AnnotatedEquality;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.Equality;
+import org.semanticweb.HermiT.tableau.Disjunction.IndexWithPunishFactor;
 
 public class GroundDisjunction implements Serializable {
     private static final long serialVersionUID=6245673952732442673L;
 
-    protected final DLPredicate[] m_dlPredicates;
+    protected final Disjunction m_disjunction;
     protected final int[] m_disjunctStart;
     protected final Node[] m_arguments;
     protected final boolean[] m_isCore;
     protected PermanentDependencySet m_dependencySet;
     protected GroundDisjunction m_previousGroundDisjunction;
     protected GroundDisjunction m_nextGroundDisjunction;
-
+    
     public GroundDisjunction(Tableau tableau,DLPredicate[] dlPredicates,int[] disjunctStart,Node[] arguments,boolean[] isCore,DependencySet dependencySet) {
-        m_dlPredicates=dlPredicates;
+        m_disjunction=Disjunction.create(dlPredicates);
         m_disjunctStart=disjunctStart;
         m_arguments=arguments;
         m_isCore=isCore;
@@ -54,10 +55,10 @@ public class GroundDisjunction implements Serializable {
         m_dependencySet=null;
     }
     public int getNumberOfDisjuncts() {
-        return m_dlPredicates.length;
+        return m_disjunction.getNumberOfDisjuncts();
     }
     public DLPredicate getDLPredicate(int disjunctIndex) {
-        return m_dlPredicates[disjunctIndex];
+        return m_disjunction.m_dlPredicates[disjunctIndex];
     }
     public Node getArgument(int disjunctIndex,int argumentIndex) {
         return m_arguments[m_disjunctStart[disjunctIndex]+argumentIndex];
@@ -67,6 +68,29 @@ public class GroundDisjunction implements Serializable {
     }
     public DependencySet getDependencySet() {
         return m_dependencySet;
+    }
+    public int getLeastPunishedUntriedIndex() {
+        return m_disjunction.m_indexesWithPunishFactor[0].m_index;
+    }
+    public int getLeastPunishedUntriedIndex(boolean[] m_disjunctTried) {
+        assert m_disjunctTried.length==m_disjunction.m_indexesWithPunishFactor.length;
+        int leastPunishedUntriedIndex;
+        for (int i=0;i<m_disjunction.m_indexesWithPunishFactor.length;i++) {
+            leastPunishedUntriedIndex=m_disjunction.m_indexesWithPunishFactor[i].m_index;
+            if (!m_disjunctTried[leastPunishedUntriedIndex]) 
+                return leastPunishedUntriedIndex;
+        }
+        assert false;
+        return 0;
+    }
+    public void punishDisjunt(int disjunctIndex) {
+        for (IndexWithPunishFactor indexWithPunishFactor : m_disjunction.m_indexesWithPunishFactor) {
+            if (indexWithPunishFactor.m_index==disjunctIndex) {
+                indexWithPunishFactor.increasePunishment();
+                break;
+            }
+        }
+        //Arrays.sort(m_disjunction.m_indexesWithPunishFactor);
     }
     public boolean isPruned() {
         for (int argumentIndex=m_arguments.length-1;argumentIndex>=0;--argumentIndex)

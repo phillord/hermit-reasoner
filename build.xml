@@ -135,6 +135,7 @@
             <fileset dir="${classdir}"/>
             <fileset file="${releasedir}/readme.txt"/>
             <fileset file="gpl.txt"/>
+            <fileset file="lgpl-3.0.txt"/>
         </jar>
     </target>
     
@@ -170,6 +171,7 @@
             <zipfileset dir="${javadocdir}" prefix="javadoc"/>
             <fileset file="${releasedir}/readme.txt"/>
             <fileset file="gpl.txt"/>
+            <fileset file="lgpl-3.0.txt"/>
         </jar>
     </target>
     

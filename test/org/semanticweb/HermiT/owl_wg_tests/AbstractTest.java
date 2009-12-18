@@ -124,7 +124,9 @@ public abstract class AbstractTest extends TestCase {
         saveOntology(m_ontologyManager,m_premiseOntology,new File(getFailureRoot(),"premise.owl"));
     }
     protected Configuration getConfiguration() {
-        return new Configuration();
+        Configuration c=new Configuration();
+        c.tableauMonitorType=Configuration.TableauMonitorType.TIMING;
+        return c;
     }
     protected void saveOntology(OWLOntologyManager manager,OWLOntology ontology,File file) throws Exception {
         BufferedWriter writer=new BufferedWriter(new FileWriter(file));

@@ -54,7 +54,6 @@ public class Timer extends TableauMonitorAdapter {
     }
     public void isSatisfiableFinished(AtomicConcept atomicConcept,boolean result) {
         m_output.println(result ? "YES" : "NO");
-        m_numberOfSatTests++;
         doStatistics();
     }
     public void isSubsumedByStarted(AtomicConcept subconcept,AtomicConcept superconcept) {
@@ -64,7 +63,6 @@ public class Timer extends TableauMonitorAdapter {
     }
     public void isSubsumedByFinished(AtomicConcept subconcept,AtomicConcept superconcept,boolean result) {
         m_output.println(result ? "YES" : "NO");
-        m_numberOfSatTests++;
         doStatistics();
     }
     public void isABoxSatisfiableStarted() {
@@ -74,7 +72,6 @@ public class Timer extends TableauMonitorAdapter {
     }
     public void isABoxSatisfiableFinished(boolean result) {
         m_output.println(result ? "YES" : "NO");
-        m_numberOfSatTests++;
         doStatistics();
     }
     public void isInstanceOfStarted(AtomicConcept concept,Individual individual) {
@@ -84,7 +81,6 @@ public class Timer extends TableauMonitorAdapter {
     }
     public void isInstanceOfFinished(AtomicConcept concept,Individual individual,boolean result) {
         m_output.println(result ? "YES" : "NO");
-        m_numberOfSatTests++;
         doStatistics();
     }
     public void iterationStarted() {
@@ -94,6 +90,9 @@ public class Timer extends TableauMonitorAdapter {
             doStatistics();
             m_lastStatusTime=System.currentTimeMillis();
         }
+    }
+    public void saturateStarted() {
+        m_numberOfSatTests++;
     }
     public void backtrackToFinished(BranchingPoint newCurrentBrancingPoint) {
         m_numberOfBacktrackings++;
