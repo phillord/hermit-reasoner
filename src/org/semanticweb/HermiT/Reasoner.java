@@ -805,7 +805,9 @@ public class Reasoner implements OWLReasoner,Serializable {
             result.add(getHierarchyNodeObjectRole(AtomicRole.BOTTOM_OBJECT_ROLE));
             return objectPropertyNodesToOWLAPI(result);
         } else if (propertyExpression.isOWLBottomObjectProperty()) {
-            result.add(getHierarchyNodeDataRole(AtomicRole.TOP_OBJECT_ROLE));
+            HierarchyNode<Role> node=getHierarchyNodeObjectRole(AtomicRole.TOP_OBJECT_ROLE);
+            result.add(node);
+            if (!direct) result.addAll(node.getDescendantNodes());
             return objectPropertyNodesToOWLAPI(result);
         }
         OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
@@ -1060,7 +1062,9 @@ public class Reasoner implements OWLReasoner,Serializable {
             result.add(getHierarchyNodeDataRole(AtomicRole.BOTTOM_DATA_ROLE));
             return dataPropertyNodesToOWLAPI(result);
         } else if (propertyExpression.isOWLBottomDataProperty()) {
-            result.add(getHierarchyNodeDataRole(AtomicRole.TOP_DATA_ROLE));
+            HierarchyNode<Role> node=getHierarchyNodeDataRole(AtomicRole.TOP_DATA_ROLE);
+            result.add(node);
+            if (!direct) result.addAll(node.getDescendantNodes());
             return dataPropertyNodesToOWLAPI(result);
         }
         OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
