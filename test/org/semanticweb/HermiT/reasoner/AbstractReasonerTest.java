@@ -2,7 +2,6 @@ package org.semanticweb.HermiT.reasoner;
 
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
-import java.net.URI;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -42,8 +41,8 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     }
 
     protected void loadReasonerFromResource(String resourceName) throws Exception {
-        URI physicalURI=getClass().getResource(resourceName).toURI();
-        m_ontology=m_ontologyManager.loadOntologyFromPhysicalURI(physicalURI);
+        IRI physicalIRI=IRI.create(getClass().getResource(resourceName).toURI());
+        m_ontology=m_ontologyManager.loadOntologyFromOntologyDocument(physicalIRI);
         createReasoner();
     }
 
@@ -161,7 +160,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         Set<String> actualIndividualIRIs=new HashSet<String>();
         for (OWLIndividual individual : actual.getFlattened()) {
             if (!individual.isAnonymous()) 
-                actualIndividualIRIs.add(individual.asNamedIndividual().getIRI().toString());
+                actualIndividualIRIs.add(individual.asOWLNamedIndividual().getIRI().toString());
         }
         String[] expectedModified=expectedIndividuals.clone();
         assertContainsAll(actualIndividualIRIs,expectedModified);

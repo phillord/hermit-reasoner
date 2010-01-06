@@ -1,10 +1,9 @@
 package org.semanticweb.HermiT.reasoner;
 
-import java.net.URI;
-
 import org.semanticweb.HermiT.EntailmentChecker;
 import org.semanticweb.owlapi.io.OWLOntologyInputSource;
 import org.semanticweb.owlapi.io.StringInputSource;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 public class EntailmentTest extends AbstractReasonerTest {
@@ -17,6 +16,7 @@ public class EntailmentTest extends AbstractReasonerTest {
             + "ClassAssertion(:a owl:Thing)"
             + "ObjectPropertyAssertion(:p :a _:anon)";
         loadReasonerWithAxioms(axioms);
+        m_ontologyManager.removeOntology(m_ontology);
         axioms = "ClassAssertion(ObjectSomeValuesFrom(:p owl:Thing) :a)";
         OWLOntology conlusions=getOntologyWithAxioms(axioms);
         assertEntails(conlusions.getLogicalAxioms(), true);
@@ -26,6 +26,7 @@ public class EntailmentTest extends AbstractReasonerTest {
             + "SubObjectPropertyOf( :s :r- )"
             + "InverseObjectProperties( :r- :r ) ";
         loadReasonerWithAxioms(axioms);
+        m_ontologyManager.removeOntology(m_ontology);
         axioms = "ObjectPropertyAssertion(:p :a _:anon1)"
             + "ObjectPropertyAssertion(:s _:anon1 _:anon2)"
             + "ObjectPropertyAssertion(:r _:anon2 _:anon1)";
@@ -43,6 +44,7 @@ public class EntailmentTest extends AbstractReasonerTest {
         String axioms = "ClassAssertion(ObjectSomeValuesFrom(:p ObjectSomeValuesFrom(:s ObjectOneOf(:b))) :a)" 
             + "SubObjectPropertyOf( :s :r )";
         loadReasonerWithAxioms(axioms);
+        m_ontologyManager.removeOntology(m_ontology);
         axioms = "ObjectPropertyAssertion(:p :a _:anon1)"
             + "ObjectPropertyAssertion(:r _:anon1 :b)";
         OWLOntology conlusions=getOntologyWithAxioms(axioms);
@@ -52,6 +54,7 @@ public class EntailmentTest extends AbstractReasonerTest {
         String axioms = "ObjectPropertyAssertion(:r :a _:anon1)"
             + "ObjectPropertyAssertion(:s _:anon1 _:anon2)";
         loadReasonerWithAxioms(axioms);
+        m_ontologyManager.removeOntology(m_ontology);
         axioms = "ObjectPropertyAssertion(:r _:anon1 _:anon2)";
         OWLOntology conlusions=getOntologyWithAxioms(axioms);
         assertEntails(conlusions.getLogicalAxioms(), true);
@@ -60,6 +63,7 @@ public class EntailmentTest extends AbstractReasonerTest {
         String axioms = "ObjectPropertyAssertion(:r :a :b)"
             + "ObjectPropertyAssertion(:s :b :c)";
         loadReasonerWithAxioms(axioms);
+        m_ontologyManager.removeOntology(m_ontology);
         axioms = "ObjectPropertyAssertion(:r _:anon1 _:anon2)";
         OWLOntology conlusions=getOntologyWithAxioms(axioms);
         assertEntails(conlusions.getLogicalAxioms(), true);
@@ -68,6 +72,7 @@ public class EntailmentTest extends AbstractReasonerTest {
         String axioms = "ObjectPropertyAssertion(:r :a :b)"
             + "ObjectPropertyAssertion(:s :b :c)";
         loadReasonerWithAxioms(axioms);
+        m_ontologyManager.removeOntology(m_ontology);
         axioms = "DataPropertyAssertion(:dp _:anon1 \"test\")";
         OWLOntology conlusions=getOntologyWithAxioms(axioms);
         assertEntails(conlusions.getLogicalAxioms(), false);
@@ -76,6 +81,7 @@ public class EntailmentTest extends AbstractReasonerTest {
         String axioms = "DataPropertyAssertion(:dp :a \"test\")"
             + "ObjectPropertyAssertion(:s :b :c)";
         loadReasonerWithAxioms(axioms);
+        m_ontologyManager.removeOntology(m_ontology);
         axioms = "DataPropertyAssertion(:dp _:anon1 \"test\")";
         OWLOntology conlusions=getOntologyWithAxioms(axioms);
         assertEntails(conlusions.getLogicalAxioms(), true);
@@ -84,13 +90,14 @@ public class EntailmentTest extends AbstractReasonerTest {
         String axioms = "DataPropertyAssertion(:dp :a \"test\")"
             + "ObjectPropertyAssertion(:s :b :c)";
         loadReasonerWithAxioms(axioms);
+        m_ontologyManager.removeOntology(m_ontology);
         axioms = "DataPropertyAssertion(:dp _:anon1 \"test\"^^xsd:string)";
         OWLOntology conlusions=getOntologyWithAxioms(axioms);
         assertEntails(conlusions.getLogicalAxioms(), true);
     }
     protected OWLOntology getOntologyFromRessource(String resourceName) throws Exception {
-        URI physicalURI=getClass().getResource(resourceName).toURI();
-        return m_ontologyManager.loadOntologyFromPhysicalURI(physicalURI);
+        IRI physicalIRI=IRI.create(getClass().getResource(resourceName).toURI());
+        return m_ontologyManager.loadOntologyFromOntologyDocument(physicalIRI);
     }
     protected OWLOntology getOntologyWithAxioms(String axioms) throws Exception {
         StringBuffer buffer=new StringBuffer();
@@ -102,10 +109,10 @@ public class EntailmentTest extends AbstractReasonerTest {
         buffer.append("Prefix(owl:=<http://www.w3.org/2002/07/owl#>)");
         buffer.append("Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)");
         buffer.append("Prefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)");
-        buffer.append("Ontology(<"+ONTOLOGY_URI+">");
+        buffer.append("Ontology(<"+ONTOLOGY_IRI+">");
         buffer.append(axioms);
         buffer.append(")");
         OWLOntologyInputSource input=new StringInputSource(buffer.toString());
-        return m_ontologyManager.loadOntology(input);
+        return m_ontologyManager.loadOntologyFromOntologyDocument(input);
     }
 }

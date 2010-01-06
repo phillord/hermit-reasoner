@@ -13,58 +13,74 @@ public class BinaryDataTest extends AbstractReasonerTest {
     public BinaryDataTest(String name) {
         super(name);
     }
-    public void testParsing() throws Exception {
+    public void testParsing_1() throws Exception {
         assertDRSatisfiable(true,
             DR("xsd:hexBinary"),
             OO(HEXB("0AFF"))
         );
+    }
+    public void testParsing_2() throws Exception {
         assertDRSatisfiable(false,
             DR("xsd:base64Binary"),
             OO(HEXB("0AFF"))
         );
     }
-    public void testLength() throws Exception {
+    public void testLength_1() throws Exception {
         assertDRSatisfiable(true,
             DR("xsd:hexBinary","xsd:length",INT("2")),
             OO(HEXB("0AFF"))
         );
+    }
+    public void testLength_2() throws Exception {
         assertDRSatisfiable(false,
             DR("xsd:hexBinary","xsd:length",INT("3")),
             OO(HEXB("0AFF"))
         );
+    }
+    public void testLength_3() throws Exception {
         assertDRSatisfiable(true,
             DR("xsd:hexBinary","xsd:minLength",INT("2"),"xsd:maxLength",INT("6")),
             NOT(DR("xsd:hexBinary","xsd:minLength",INT("3"),"xsd:maxLength",INT("5"))),
             OO(HEXB("0AFF"))
         );
+    }
+    public void testLength_4() throws Exception {
         assertDRSatisfiable(true,
             DR("xsd:hexBinary","xsd:minLength",INT("2"),"xsd:maxLength",INT("6")),
             NOT(DR("xsd:hexBinary","xsd:minLength",INT("3"),"xsd:maxLength",INT("5"))),
             OO(HEXB("0AFF0AFF0AFF"))
         );
+    }
+    public void testLength_5() throws Exception {
         assertDRSatisfiable(false,
             DR("xsd:hexBinary","xsd:minLength",INT("2"),"xsd:maxLength",INT("6")),
             NOT(DR("xsd:hexBinary","xsd:minLength",INT("3"),"xsd:maxLength",INT("5"))),
             OO(HEXB("0AFF0AFF0A"))
         );
     }
-    public void testSize() throws Exception {
+    public void testSize_1() throws Exception {
         assertDRSatisfiable(true,
             DR("xsd:hexBinary","xsd:length",INT("0"))
         );
+    }
+    public void testSize_2() throws Exception {
         assertDRSatisfiable(false,2,
             DR("xsd:hexBinary","xsd:length",INT("0"))
         );
+    }
+    public void testSize_3() throws Exception {
         assertDRSatisfiable(false,
             DR("xsd:hexBinary","xsd:length",INT("0")),
             NOT(OO(HEXB("")))
         );
     }
-    public void testIntersection() throws Exception {
+    public void testIntersection_1() throws Exception {
         assertDRSatisfiable(true,
             DR("xsd:hexBinary","xsd:minLength",INT("0")),
             NOT(DR("xsd:hexBinary","xsd:minLength",INT("1")))
         );
+    }
+    public void testIntersection_2() throws Exception {
         assertDRSatisfiable(false,2,
             DR("xsd:hexBinary","xsd:minLength",INT("0")),
             NOT(DR("xsd:hexBinary","xsd:minLength",INT("1")))

@@ -1,6 +1,5 @@
 package org.semanticweb.HermiT.tableau;
 
-import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -8,6 +7,7 @@ import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DescriptionGraph;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLIndividual;
@@ -141,13 +141,13 @@ public class GraphTest extends AbstractReasonerInternalsTest {
         Set<org.semanticweb.owlapi.model.OWLAxiom> axioms = new HashSet<org.semanticweb.owlapi.model.OWLAxiom>();
         String base = m_ontology.getOntologyID().getDefaultDocumentIRI() == null ? "urn:hermit:kb" : m_ontology.getOntologyID().getDefaultDocumentIRI().toString();
         
-        OWLClass A = df.getOWLClass(URI.create(base + "#A"));
-        OWLClass B = df.getOWLClass(URI.create(base + "#B"));
-        OWLClass C = df.getOWLClass(URI.create(base + "#C"));
-        OWLClass D = df.getOWLClass(URI.create(base + "#D"));
-        OWLObjectProperty S = df.getOWLObjectProperty(URI.create(base + "#S"));
-        OWLObjectProperty T = df.getOWLObjectProperty(URI.create(base + "#T"));
-        OWLIndividual i = df.getOWLNamedIndividual(URI.create(base + "#i"));
+        OWLClass A = df.getOWLClass(IRI.create(base + "#A"));
+        OWLClass B = df.getOWLClass(IRI.create(base + "#B"));
+        OWLClass C = df.getOWLClass(IRI.create(base + "#C"));
+        OWLClass D = df.getOWLClass(IRI.create(base + "#D"));
+        OWLObjectProperty S = df.getOWLObjectProperty(IRI.create(base + "#S"));
+        OWLObjectProperty T = df.getOWLObjectProperty(IRI.create(base + "#T"));
+        OWLIndividual i = df.getOWLNamedIndividual(IRI.create(base + "#i"));
         
         org.semanticweb.owlapi.model.OWLAxiom axiom = df.getOWLSubClassOfAxiom(A, df.getOWLObjectSomeValuesFrom(S, A));
         axioms.add(axiom);

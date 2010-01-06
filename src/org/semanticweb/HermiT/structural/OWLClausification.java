@@ -405,9 +405,9 @@ public class OWLClausification {
     protected static AtomicConcept getNominalConcept(OWLIndividual individual) {
         AtomicConcept result;
         if (individual.isAnonymous()) {
-            result=AtomicConcept.create("internal:anon#"+individual.asAnonymousIndividual().getID().toString());
+            result=AtomicConcept.create("internal:anon#"+individual.asOWLAnonymousIndividual().getID().toString());
         } else {
-            result=AtomicConcept.create("internal:nom#"+individual.asNamedIndividual().getIRI().toString());
+            result=AtomicConcept.create("internal:nom#"+individual.asOWLNamedIndividual().getIRI().toString());
         }
         return result;
     }
@@ -463,9 +463,9 @@ public class OWLClausification {
     }
     protected static Individual getIndividual(OWLIndividual individual) {
         if (individual.isAnonymous()) {
-            return Individual.create("internal:anon#"+individual.asAnonymousIndividual().getID().toString(),false);
+            return Individual.create("internal:anon#"+individual.asOWLAnonymousIndividual().getID().toString(),false);
         } else {
-            return Individual.create(individual.asNamedIndividual().getIRI().toString(),true);
+            return Individual.create(individual.asOWLNamedIndividual().getIRI().toString(),true);
         }
     }
 
@@ -542,9 +542,9 @@ public class OWLClausification {
         protected AtomicConcept getConceptForNominal(OWLIndividual individual) {
             AtomicConcept result;
             if (individual.isAnonymous()) {
-                result=AtomicConcept.create("internal:anon#"+individual.asAnonymousIndividual().getID().toString());
+                result=AtomicConcept.create("internal:anon#"+individual.asOWLAnonymousIndividual().getID().toString());
             } else {
-                result=AtomicConcept.create("internal:nom#"+individual.asNamedIndividual().getIRI().toString());
+                result=AtomicConcept.create("internal:nom#"+individual.asOWLNamedIndividual().getIRI().toString());
             }
             m_positiveFacts.add(Atom.create(result,getIndividual(individual)));
             return result;
@@ -1119,7 +1119,7 @@ public class OWLClausification {
         }
         
         protected AtomicConcept getConceptForNominal(OWLNamedIndividual individual) {
-            AtomicConcept result=AtomicConcept.create("internal:nom#"+individual.asNamedIndividual().getIRI().toString());
+            AtomicConcept result=AtomicConcept.create("internal:nom#"+individual.asOWLNamedIndividual().getIRI().toString());
             m_positiveFacts.add(Atom.create(result,getIndividual(individual)));
             return result;
         }

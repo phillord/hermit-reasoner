@@ -2,7 +2,6 @@ package org.semanticweb.HermiT.reasoner;
 
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -254,7 +253,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(axioms);
         OWLDatatype dt=m_dataFactory.getOWLDatatype(IRI.create(ReasonerTest.NS + "SSN"));
         OWLFacetRestriction fr=m_dataFactory.getOWLFacetRestriction(OWLFacet.PATTERN, m_dataFactory.getOWLTypedLiteral("[0-9]{3}-[0-9]{2}-[0-9]{4}"));
-        OWLDataRange dr=m_dataFactory.getOWLDatatypeRestriction(m_dataFactory.getOWLDatatype(URI.create("http://www.w3.org/2001/XMLSchema#string")), fr);
+        OWLDataRange dr=m_dataFactory.getOWLDatatypeRestriction(m_dataFactory.getOWLDatatype(IRI.create("http://www.w3.org/2001/XMLSchema#string")), fr);
         OWLDatatypeDefinitionAxiom ddef=m_dataFactory.getOWLDatatypeDefinitionAxiom(dt, dr);
         assertEntails(ddef, true);
     }
@@ -701,13 +700,15 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertABoxSatisfiable(false);
     }
 
-    public void testRoleDisjointness() throws Exception {
+    public void testRoleDisjointness_1() throws Exception {
         String axioms = "DisjointObjectProperties(:r :s :t) "
                 + "ObjectPropertyAssertion(:r :a :b) "
                 + "ObjectPropertyAssertion(:s :a :b)";
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
-        axioms = "DisjointObjectProperties(:r :s :t) "
+    }
+    public void testRoleDisjointness_2() throws Exception {
+        String axioms = "DisjointObjectProperties(:r :s :t) "
                 + "ObjectPropertyAssertion(:r :a :b) "
                 + "ObjectPropertyAssertion(:t :a :b)";
         loadReasonerWithAxioms(axioms);
@@ -791,10 +792,12 @@ public class ReasonerTest extends AbstractReasonerTest {
         String axioms = "SubClassOf(owl:Thing :C)";
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(true);
+        m_ontologyManager.removeOntology(m_ontology);
         axioms = "SubClassOf(owl:Thing :C) "
                 + "SubClassOf(owl:Thing ObjectComplementOf(:C))";
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
+        m_ontologyManager.removeOntology(m_ontology);
         axioms = "SubClassOf(owl:Thing ObjectComplementOf(:C))";
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(true);

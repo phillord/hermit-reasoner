@@ -2,7 +2,6 @@ package org.semanticweb.HermiT.structural;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -10,6 +9,7 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLHasKeyAxiom;
 
 public class ClausificationTest extends AbstractStructuralTest {
@@ -64,7 +64,7 @@ public class ClausificationTest extends AbstractStructuralTest {
     
     public void testHasKeys() throws Exception {
         OWLClausification clausifier=new OWLClausification(new Configuration());
-        OWLHasKeyAxiom key = m_dataFactory.getOWLHasKeyAxiom(m_dataFactory.getOWLClass(new URI("int:C_test")), m_dataFactory.getOWLObjectProperty(new URI("int:r_test")), m_dataFactory.getOWLDataProperty(new URI("int:dp_test")));
+        OWLHasKeyAxiom key = m_dataFactory.getOWLHasKeyAxiom(m_dataFactory.getOWLClass(IRI.create("int:C_test")), m_dataFactory.getOWLObjectProperty(IRI.create("int:r_test")), m_dataFactory.getOWLDataProperty(IRI.create("int:dp_test")));
         DLClause clause=clausifier.clausifyKey(key);
         Set<String> bAtoms=new HashSet<String>();
         bAtoms.add("<internal:nam#Named>(X)");

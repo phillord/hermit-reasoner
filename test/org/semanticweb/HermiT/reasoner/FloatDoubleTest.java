@@ -19,14 +19,18 @@ public class FloatDoubleTest extends AbstractReasonerTest {
             NOT(DR("xsd:float"))
         );
     }
-    public void testFloatZeroRange() throws Exception {
+    public void testFloatZeroRange_1() throws Exception {
         assertDRSatisfiable(true,
             DR("xsd:float","xsd:minInclusive",FLT("+0"),"xsd:maxInclusive",FLT("+0")),
             OO(FLT("-0"))
         );
+    }
+    public void testFloatZeroRange_2() throws Exception {
         assertDRSatisfiable(true,2,
             DR("xsd:float","xsd:minInclusive",FLT("+0"),"xsd:maxInclusive",FLT("+0"))
         );
+    }
+    public void testFloatZeroRange_3() throws Exception {
         assertDRSatisfiable(false,3,
             DR("xsd:float","xsd:minInclusive",FLT("+0"),"xsd:maxInclusive",FLT("+0"))
         );
@@ -37,27 +41,35 @@ public class FloatDoubleTest extends AbstractReasonerTest {
             DR("xsd:float","xsd:minInclusive",FLT("+0"),"xsd:maxInclusive",FLT("+0"))
         );
     }
-    public void testFloatNaN() throws Exception {
+    public void testFloatNaN_1() throws Exception {
         assertDRSatisfiable(true,
             DR("xsd:float"),
             OO(FLT("NaN"))
         );
+    }
+    public void testFloatNaN_2() throws Exception {
         assertDRSatisfiable(false,
             DR("xsd:float","xsd:minInclusive",FLT("2.0")),
             OO(FLT("NaN"))
         );
+    }
+    public void testFloatNaN_3() throws Exception {
         assertDRSatisfiable(true,
             NOT(DR("xsd:float","xsd:minInclusive",FLT("2.0"))),
             OO(FLT("NaN"))
         );
     }
-    public void testNumberOfFloats() throws Exception {
+    public void testNumberOfFloats_1() throws Exception {
         assertDRSatisfiable(true,5,
             DR("xsd:float")
         );
+    }
+    public void testNumberOfFloats_2() throws Exception {
         assertDRSatisfiable(true,5,
             DR("xsd:float","xsd:minInclusive",FLT("1.0"),"xsd:maxInclusive",FLT("1.0000005"))
         );
+    }
+    public void testNumberOfFloats_3() throws Exception {
         assertDRSatisfiable(false,6,
             DR("xsd:float","xsd:minInclusive",FLT("1.0"),"xsd:maxInclusive",FLT("1.0000005"))
         );
@@ -74,14 +86,18 @@ public class FloatDoubleTest extends AbstractReasonerTest {
             NOT(DR("xsd:double"))
         );
     }
-    public void testDoubleZeroRange() throws Exception {
+    public void testDoubleZeroRange_1() throws Exception {
         assertDRSatisfiable(true,
             DR("xsd:double","xsd:minInclusive",DBL("+0"),"xsd:maxInclusive",DBL("+0")),
             OO(DBL("-0"))
         );
+    }
+    public void testDoubleZeroRange_2() throws Exception {
         assertDRSatisfiable(true,2,
             DR("xsd:double","xsd:minInclusive",DBL("+0"),"xsd:maxInclusive",DBL("+0"))
         );
+    }
+    public void testDoubleZeroRange_3() throws Exception {
         assertDRSatisfiable(false,3,
             DR("xsd:double","xsd:minInclusive",DBL("+0"),"xsd:maxInclusive",DBL("+0"))
         );
@@ -92,27 +108,35 @@ public class FloatDoubleTest extends AbstractReasonerTest {
             DR("xsd:double","xsd:minInclusive",DBL("+0"),"xsd:maxInclusive",DBL("+0"))
         );
     }
-    public void testDoubleNaN() throws Exception {
+    public void testDoubleNaN_1() throws Exception {
         assertDRSatisfiable(true,
             DR("xsd:double"),
             OO(DBL("NaN"))
         );
+    }
+    public void testDoubleNaN_2() throws Exception {
         assertDRSatisfiable(false,
             DR("xsd:double","xsd:minInclusive",DBL("2.0")),
             OO(DBL("NaN"))
         );
+    }
+    public void testDoubleNaN_3() throws Exception {
         assertDRSatisfiable(true,
             NOT(DR("xsd:double","xsd:minInclusive",DBL("2.0"))),
             OO(DBL("NaN"))
         );
     }
-    public void testNumberOfDoubles() throws Exception {
+    public void testNumberOfDoubles_1() throws Exception {
         assertDRSatisfiable(true,5,
             DR("xsd:double")
         );
+    }
+    public void testNumberOfDoubles_2() throws Exception {
         assertDRSatisfiable(true,5,
             DR("xsd:double","xsd:minInclusive",DBL("1.0"),"xsd:maxInclusive",DBL("1.0000000000000009"))
         );
+    }
+    public void testNumberOfDoubles_3() throws Exception {
         assertDRSatisfiable(false,6,
             DR("xsd:double","xsd:minInclusive",DBL("1.0"),"xsd:maxInclusive",DBL("1.0000000000000009"))
         );

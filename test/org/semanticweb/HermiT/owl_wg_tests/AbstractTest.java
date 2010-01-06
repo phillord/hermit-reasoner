@@ -125,7 +125,7 @@ public abstract class AbstractTest extends TestCase {
     }
     protected Configuration getConfiguration() {
         Configuration c=new Configuration();
-        c.tableauMonitorType=Configuration.TableauMonitorType.TIMING;
+        //c.tableauMonitorType=Configuration.TableauMonitorType.TIMING;
         return c;
     }
     protected void saveOntology(OWLOntologyManager manager,OWLOntology ontology,File file) throws Exception {

@@ -26,38 +26,50 @@ public class AnyURITest extends AbstractReasonerTest {
         catch (MalformedLiteralException expected) {
         }
     }
-    public void testLength() throws Exception {
+    public void testLength_1() throws Exception {
         assertDRSatisfiable(true,
             DR("xsd:anyURI","xsd:length",INT("2")),
             OO(AURI("ab"))
         );
+    }
+    public void testLength_2() throws Exception {
         assertDRSatisfiable(false,
             DR("xsd:anyURI","xsd:length",INT("3")),
             OO(AURI("ab"))
         );
+    }
+    public void testLength_3() throws Exception {
         assertDRSatisfiable(true,
             DR("xsd:anyURI","xsd:minLength",INT("2"),"xsd:maxLength",INT("6")),
             NOT(DR("xsd:anyURI","xsd:minLength",INT("3"),"xsd:maxLength",INT("5"))),
             OO(AURI("ab"))
         );
+    }
+    public void testLength_4() throws Exception {
         assertDRSatisfiable(true,
             DR("xsd:anyURI","xsd:minLength",INT("2"),"xsd:maxLength",INT("6")),
             NOT(DR("xsd:anyURI","xsd:minLength",INT("3"),"xsd:maxLength",INT("5"))),
             OO(AURI("abcdef"))
         );
+    }
+    public void testLength_5() throws Exception {
         assertDRSatisfiable(false,
             DR("xsd:anyURI","xsd:minLength",INT("2"),"xsd:maxLength",INT("6")),
             NOT(DR("xsd:anyURI","xsd:minLength",INT("3"),"xsd:maxLength",INT("5"))),
             OO(AURI("abcde"))
         );
     }
-    public void testSize() throws Exception {
+    public void testSize_1() throws Exception {
         assertDRSatisfiable(true,
             DR("xsd:anyURI","xsd:length",INT("0"))
         );
+    }
+    public void testSize_2() throws Exception {
         assertDRSatisfiable(false,2,
             DR("xsd:anyURI","xsd:length",INT("0"))
         );
+    }
+    public void testSize_3() throws Exception {
         assertDRSatisfiable(false,
             DR("xsd:anyURI","xsd:length",INT("0")),
             NOT(OO(AURI("")))
@@ -69,20 +81,24 @@ public class AnyURITest extends AbstractReasonerTest {
             NOT(DR("xsd:anyURI","xsd:minLength",INT("1")))
         );
     }
-    public void testPattern1() throws Exception {
+    public void testPattern1_1() throws Exception {
         assertDRSatisfiable(true,
             DR("xsd:anyURI","xsd:pattern",STR("ab(c+)")),
             OO(AURI("abc"),AURI("abbb"))
         );
+    }
+    public void testPattern1_2() throws Exception {
         assertDRSatisfiable(false,2,
             DR("xsd:anyURI","xsd:pattern",STR("ab(c+)")),
             OO(AURI("abc"),AURI("abbb"))
         );
     }
-    public void testPattern2() throws Exception {
+    public void testPattern2_1() throws Exception {
         assertDRSatisfiable(true,3,
             DR("xsd:anyURI","xsd:pattern",STR("ab(c|d|e)"))
         );
+    }
+    public void testPattern2_2() throws Exception {
         assertDRSatisfiable(false,4,
             DR("xsd:anyURI","xsd:pattern",STR("ab(c|d|e)"))
         );
@@ -93,14 +109,18 @@ public class AnyURITest extends AbstractReasonerTest {
             NOT(OO(AURI("abc"),AURI("abd"),AURI("abe")))
         );
     }
-    public void testPatternAndLength1() throws Exception {
+    public void testPatternAndLength1_1() throws Exception {
         assertDRSatisfiable(true,
             DR("xsd:anyURI","xsd:pattern",STR("ab(c+)"),"xsd:length",INT("5"))
         );
+    }
+    public void testPatternAndLength1_2() throws Exception {
         assertDRSatisfiable(false,
             DR("xsd:anyURI","xsd:pattern",STR("ab(c+)"),"xsd:minLength",INT("4"),"xsd:maxLength",INT("5")),
             NOT(OO(AURI("abcc"),AURI("abccc")))
         );
+    }
+    public void testPatternAndLength1_3() throws Exception {
         assertDRSatisfiable(true,
             DR("xsd:anyURI","xsd:pattern",STR("ab(c+)"),"xsd:minLength",INT("4")),
             NOT(OO(AURI("abcc"),AURI("abccc")))
@@ -133,15 +153,19 @@ public class AnyURITest extends AbstractReasonerTest {
             URI.create("abcccccccc")
         );
     }
-    public void testPatternComplement1() throws Exception {
+    public void testPatternComplement1_1() throws Exception {
         assertDRSatisfiable(true,3,
             DR("xsd:anyURI","xsd:pattern",STR("ab(c*)")),
             NOT(DR("xsd:anyURI","xsd:minLength",INT("5")))
         );
+    }
+    public void testPatternComplement1_2() throws Exception {
         assertDRSatisfiable(false,4,
             DR("xsd:anyURI","xsd:pattern",STR("ab(c*)")),
             NOT(DR("xsd:anyURI","xsd:minLength",INT("5")))
         );
+    }
+    public void testPatternComplement1_3() throws Exception {
         assertDRSatisfiable(false,
             DR("xsd:anyURI","xsd:pattern",STR("ab(c*)")),
             NOT(DR("xsd:anyURI","xsd:minLength",INT("5"))),

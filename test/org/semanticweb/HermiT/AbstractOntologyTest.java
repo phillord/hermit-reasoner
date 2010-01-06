@@ -1,6 +1,5 @@
 package org.semanticweb.HermiT;
 
-import java.net.URI;
 import java.util.Collection;
 import java.util.Set;
 
@@ -18,8 +17,8 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public abstract class AbstractOntologyTest extends AbstractHermiTTest {
-    protected static final String ONTOLOGY_URI="file:/c/test.owl";
-    protected static final String NS=ONTOLOGY_URI+"#";
+    protected static final IRI ONTOLOGY_IRI=IRI.create("file:/c/test.owl");
+    protected static final String NS=ONTOLOGY_IRI+"#";
 
     protected OWLOntologyManager m_ontologyManager;
     protected OWLDataFactory m_dataFactory;
@@ -34,7 +33,7 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
     protected void setUp() throws Exception {
         m_ontologyManager=OWLManager.createOWLOntologyManager();
         m_dataFactory=m_ontologyManager.getOWLDataFactory();
-        m_ontology=m_ontologyManager.createOntology(IRI.create(ONTOLOGY_URI));
+        //m_ontology=m_ontologyManager.createOntology(IRI.create(ONTOLOGY_URI));
     }
 
     protected void tearDown() {
@@ -72,7 +71,7 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
      * @throws Exception
      */
     protected void loadOntology(String physicalURI) throws Exception {
-        m_ontology=m_ontologyManager.loadOntologyFromPhysicalURI(URI.create(physicalURI));
+        m_ontology=m_ontologyManager.loadOntologyFromOntologyDocument(IRI.create(physicalURI));
     }
 
     /**
@@ -95,11 +94,11 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
         buffer.append("Prefix(owl:=<http://www.w3.org/2002/07/owl#>)");
         buffer.append("Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)");
         buffer.append("Prefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)");
-        buffer.append("Ontology(<"+ONTOLOGY_URI+">");
+        buffer.append("Ontology(<"+ONTOLOGY_IRI+">");
         buffer.append(axioms);
         buffer.append(")");
         OWLOntologyInputSource input=new StringInputSource(buffer.toString());
-        m_ontology=m_ontologyManager.loadOntology(input);
+        m_ontology=m_ontologyManager.loadOntologyFromOntologyDocument(input);
     }
 
     /**

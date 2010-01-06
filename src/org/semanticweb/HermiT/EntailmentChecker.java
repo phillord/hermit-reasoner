@@ -182,9 +182,9 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
             }
         }
         for (int i=0;i<list.size()-1;i++) {
-            OWLNamedIndividual head=list.get(i).asNamedIndividual();
+            OWLNamedIndividual head=list.get(i).asOWLNamedIndividual();
             for (int j=i+1;j<list.size();j++) {
-                OWLNamedIndividual next=list.get(j).asNamedIndividual();
+                OWLNamedIndividual next=list.get(j).asOWLNamedIndividual();
                 if (!reasoner.hasType(head,factory.getOWLObjectComplementOf(factory.getOWLObjectOneOf(next)),false))
                     return Boolean.FALSE;
             }
@@ -204,9 +204,9 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
         }
         Iterator<OWLIndividual> i=axiom.getIndividuals().iterator();
         if (i.hasNext()) {
-            OWLNamedIndividual first=i.next().asNamedIndividual();
+            OWLNamedIndividual first=i.next().asOWLNamedIndividual();
             while (i.hasNext()) {
-                OWLNamedIndividual next=i.next().asNamedIndividual();
+                OWLNamedIndividual next=i.next().asOWLNamedIndividual();
                 if (!reasoner.hasType(first,factory.getOWLObjectOneOf(next),false))
                     return Boolean.FALSE;
             }
@@ -220,7 +220,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
             return true; // will be checked afterwards by rolling-up
         }
         OWLClassExpression c=axiom.getClassExpression();
-        return reasoner.hasType(ind.asNamedIndividual(),c,false);
+        return reasoner.hasType(ind.asOWLNamedIndividual(),c,false);
     }
     public Boolean visit(OWLObjectPropertyAssertionAxiom axiom) {
         OWLIndividual sub=axiom.getSubject();
@@ -229,7 +229,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
             anonymousIndividualAxioms.add(axiom);
             return true; // will be checked afterwards by rolling-up
         }
-        return reasoner.hasObjectPropertyRelationship(sub.asNamedIndividual(),axiom.getProperty(),obj.asNamedIndividual());
+        return reasoner.hasObjectPropertyRelationship(sub.asOWLNamedIndividual(),axiom.getProperty(),obj.asOWLNamedIndividual());
     }
     public Boolean visit(OWLNegativeObjectPropertyAssertionAxiom axiom) {
         // see OWL 2 Syntax, Sec 11.2 
@@ -242,7 +242,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
         }
         OWLClassExpression hasValue=factory.getOWLObjectHasValue(axiom.getProperty(),axiom.getObject());
         OWLClassExpression doesNotHaveValue=factory.getOWLObjectComplementOf(hasValue);
-        return reasoner.hasType(axiom.getSubject().asNamedIndividual(),doesNotHaveValue,false);
+        return reasoner.hasType(axiom.getSubject().asOWLNamedIndividual(),doesNotHaveValue,false);
     }
     public Boolean visit(OWLDataPropertyAssertionAxiom axiom) {
         OWLIndividual sub=axiom.getSubject();
@@ -250,7 +250,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
             anonymousIndividualAxioms.add(axiom);
             return true; // will be checked afterwards by rolling-up
         }
-        return reasoner.hasDataPropertyRelationship(sub.asNamedIndividual(),axiom.getProperty().asOWLDataProperty(),axiom.getObject());
+        return reasoner.hasDataPropertyRelationship(sub.asOWLNamedIndividual(),axiom.getProperty().asOWLDataProperty(),axiom.getObject());
     }
     public Boolean visit(OWLNegativeDataPropertyAssertionAxiom axiom) {
         // see OWL 2 Syntax, Sec 11.2 
@@ -263,7 +263,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
         }
         OWLClassExpression hasValue=factory.getOWLDataHasValue(axiom.getProperty(),axiom.getObject());
         OWLClassExpression doesNotHaveValue=factory.getOWLObjectComplementOf(hasValue);
-        return reasoner.hasType(axiom.getSubject().asNamedIndividual(),doesNotHaveValue,false);
+        return reasoner.hasType(axiom.getSubject().asOWLNamedIndividual(),doesNotHaveValue,false);
     }
 
     
@@ -669,15 +669,15 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
             if (axiom.getClassExpression().isOWLThing()) return;
             OWLIndividual node=axiom.getIndividual();
             if (!node.isAnonymous()) {
-                namedNodes.add(node.asNamedIndividual());
+                namedNodes.add(node.asOWLNamedIndividual());
             } else {
-                nodes.add(node.asAnonymousIndividual());
+                nodes.add(node.asOWLAnonymousIndividual());
                 if (nodelLabels.containsKey(node)) {
                     nodelLabels.get(node).add(axiom.getClassExpression());
                 } else {
                     Set<OWLClassExpression> label=new HashSet<OWLClassExpression>();
                     label.add(axiom.getClassExpression());
-                    nodelLabels.put(node.asAnonymousIndividual(), label);
+                    nodelLabels.put(node.asOWLAnonymousIndividual(), label);
                 }
             }
         }
@@ -694,8 +694,8 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
                     obj=tmp;
                     ope=ope.getInverseProperty().getSimplified();
                 }
-                OWLNamedIndividual named=obj.asNamedIndividual();
-                OWLAnonymousIndividual unnamed=sub.asAnonymousIndividual();
+                OWLNamedIndividual named=obj.asOWLNamedIndividual();
+                OWLAnonymousIndividual unnamed=sub.asOWLAnonymousIndividual();
                 namedNodes.add(named);
                 nodes.add(unnamed);
                 if (specialOPEdges.containsKey(unnamed)) {
@@ -728,8 +728,8 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
                 } else {
                     op=ope.asOWLObjectProperty();
                 }
-                OWLAnonymousIndividual subAnon=sub.asAnonymousIndividual();
-                OWLAnonymousIndividual objAnon=obj.asAnonymousIndividual();
+                OWLAnonymousIndividual subAnon=sub.asOWLAnonymousIndividual();
+                OWLAnonymousIndividual objAnon=obj.asOWLAnonymousIndividual();
                 nodes.add(subAnon);
                 nodes.add(objAnon);
                 if ((edges.containsKey(subAnon) && edges.get(subAnon).contains(objAnon)) || ((edges.containsKey(objAnon) && edges.get(objAnon).contains(subAnon)))) {
@@ -757,7 +757,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
             if (!axiom.getSubject().isAnonymous()) {
                 return; // not interesting for the anonymous individual forest
             }
-            OWLAnonymousIndividual sub=axiom.getSubject().asAnonymousIndividual();
+            OWLAnonymousIndividual sub=axiom.getSubject().asOWLAnonymousIndividual();
             nodes.add(sub);
             OWLClassExpression c=factory.getOWLDataHasValue(axiom.getProperty(), axiom.getObject());
             if (nodelLabels.containsKey(sub)) {

@@ -49,48 +49,62 @@ public class RDFPlainLiteralTest extends AbstractReasonerTest {
         catch (MalformedLiteralException expected) {
         }
     }
-    public void testLength() throws Exception {
+    public void testLength_1() throws Exception {
         assertDRSatisfiable(true,
             DR("xsd:string","xsd:length",INT("2")),
             OO(STR("ab"))
         );
+    }
+    public void testLength_2() throws Exception {
         assertDRSatisfiable(false,
             DR("xsd:string","xsd:length",INT("3")),
             OO(STR("ab"))
         );
+    }
+    public void testLength_3() throws Exception {
         assertDRSatisfiable(true,
             DR("xsd:string","xsd:minLength",INT("2"),"xsd:maxLength",INT("6")),
             NOT(DR("xsd:string","xsd:minLength",INT("3"),"xsd:maxLength",INT("5"))),
             OO(STR("ab"))
         );
+    }
+    public void testLength_4() throws Exception {
         assertDRSatisfiable(true,
             DR("xsd:string","xsd:minLength",INT("2"),"xsd:maxLength",INT("6")),
             NOT(DR("xsd:string","xsd:minLength",INT("3"),"xsd:maxLength",INT("5"))),
             OO(STR("abcdef"))
         );
+    }
+    public void testLength_5() throws Exception {
         assertDRSatisfiable(false,
             DR("xsd:string","xsd:minLength",INT("2"),"xsd:maxLength",INT("6")),
             NOT(DR("xsd:string","xsd:minLength",INT("3"),"xsd:maxLength",INT("5"))),
             OO(STR("abcde"))
         );
     }
-    public void testSize() throws Exception {
+    public void testSize_1() throws Exception {
         assertDRSatisfiable(true,
             DR("xsd:string","xsd:length",INT("0"))
         );
+    }
+    public void testSize_2() throws Exception {
         assertDRSatisfiable(false,2,
             DR("xsd:string","xsd:length",INT("0"))
         );
+    }
+    public void testSize_3() throws Exception {
         assertDRSatisfiable(false,
             DR("xsd:string","xsd:length",INT("0")),
             NOT(OO(STR("")))
         );
     }
-    public void testIntersection() throws Exception {
+    public void testIntersection_1() throws Exception {
         assertDRSatisfiable(true,
             DR("xsd:string","xsd:minLength",INT("0")),
             NOT(DR("xsd:string","xsd:minLength",INT("1")))
         );
+    }
+    public void testIntersection_2() throws Exception {
         assertDRSatisfiable(false,2,
             DR("xsd:string","xsd:minLength",INT("0")),
             NOT(DR("xsd:string","xsd:minLength",INT("1")))
@@ -113,20 +127,24 @@ public class RDFPlainLiteralTest extends AbstractReasonerTest {
     protected static RDFPlainLiteralLengthInterval interval(int minLength,int maxLength) {
         return new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode .ABSENT,minLength,maxLength);
     }
-    public void testPattern1() throws Exception {
+    public void testPattern1_1() throws Exception {
         assertDRSatisfiable(true,
             DR("xsd:string","xsd:pattern",STR("ab(c+)")),
             OO(STR("abc"),STR("abbb"))
         );
+    }
+    public void testPattern1_2() throws Exception {
         assertDRSatisfiable(false,2,
             DR("xsd:string","xsd:pattern",STR("ab(c+)")),
             OO(STR("abc"),STR("abbb"))
         );
     }
-    public void testPattern2() throws Exception {
+    public void testPattern2_1() throws Exception {
         assertDRSatisfiable(true,3,
             DR("xsd:string","xsd:pattern",STR("ab(c|d|e)"))
         );
+    }
+    public void testPattern2_2() throws Exception {
         assertDRSatisfiable(false,4,
             DR("xsd:string","xsd:pattern",STR("ab(c|d|e)"))
         );
@@ -137,14 +155,18 @@ public class RDFPlainLiteralTest extends AbstractReasonerTest {
             NOT(OO(STR("abc"),STR("abd"),STR("abe")))
         );
     }
-    public void testPatternAndLength1() throws Exception {
+    public void testPatternAndLength1_1() throws Exception {
         assertDRSatisfiable(true,
             DR("xsd:string","xsd:pattern",STR("ab(c+)"),"xsd:length",INT("5"))
         );
+    }
+    public void testPatternAndLength1_2() throws Exception {
         assertDRSatisfiable(false,
             DR("xsd:string","xsd:pattern",STR("ab(c+)"),"xsd:minLength",INT("4"),"xsd:maxLength",INT("5")),
             NOT(OO(STR("abcc"),STR("abccc")))
         );
+    }
+    public void testPatternAndLength1_3() throws Exception {
         assertDRSatisfiable(true,
             DR("xsd:string","xsd:pattern",STR("ab(c+)"),"xsd:minLength",INT("4")),
             NOT(OO(STR("abcc"),STR("abccc")))
@@ -170,15 +192,19 @@ public class RDFPlainLiteralTest extends AbstractReasonerTest {
         subset.enumerateDataValues(values);
         assertContainsAll(values,"abccc","abcccc","abccccc","abcccccc","abccccccc","abcccccccc");
     }
-    public void testPatternComplement1() throws Exception {
+    public void testPatternComplement1_1() throws Exception {
         assertDRSatisfiable(true,3,
             DR("xsd:string","xsd:pattern",STR("ab(c*)")),
             NOT(DR("xsd:string","xsd:minLength",INT("5")))
         );
+    }
+    public void testPatternComplement1_2() throws Exception {
         assertDRSatisfiable(false,4,
             DR("xsd:string","xsd:pattern",STR("ab(c*)")),
             NOT(DR("xsd:string","xsd:minLength",INT("5")))
         );
+    }
+    public void testPatternComplement1_3() throws Exception {
         assertDRSatisfiable(false,
             DR("xsd:string","xsd:pattern",STR("ab(c*)")),
             NOT(DR("xsd:string","xsd:minLength",INT("5"))),

@@ -344,9 +344,9 @@ public class Reasoner implements OWLReasoner,Serializable {
     public boolean isDefined(OWLIndividual owlIndividual) {
         Individual individual;
         if (owlIndividual.isAnonymous()) {
-            individual=Individual.create(owlIndividual.asAnonymousIndividual().getID().toString(),false);
+            individual=Individual.create(owlIndividual.asOWLAnonymousIndividual().getID().toString(),false);
         } else {
-            individual=Individual.create(owlIndividual.asNamedIndividual().getIRI().toString(),true);
+            individual=Individual.create(owlIndividual.asOWLNamedIndividual().getIRI().toString(),true);
         }
         return m_dlOntology.getAllIndividuals().contains(individual);
     }
@@ -1537,7 +1537,11 @@ public class Reasoner implements OWLReasoner,Serializable {
         try {
             Set<DescriptionGraph> descriptionGraphs=Collections.emptySet();
             OWLDataFactory factory=ontologyManager.getOWLDataFactory();
-            OWLOntology newOntology=ontologyManager.createOntology(IRI.create("uri:urn:internal-kb"));
+            IRI ontologyIRI=IRI.create("uri:urn:internal-kb");
+            if (ontologyManager.contains(ontologyIRI)) {
+                ontologyManager.removeOntology(ontologyManager.getOntology(ontologyIRI));
+            }
+            OWLOntology newOntology=ontologyManager.createOntology(ontologyIRI);
             for (OWLAxiom axiom : additionalAxioms)
                 ontologyManager.addAxiom(newOntology,axiom);
             OWLAxioms axioms=new OWLAxioms();

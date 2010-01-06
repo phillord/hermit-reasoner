@@ -123,7 +123,7 @@ public class WGTestDescriptor {
         if (i.isAnonymous()) {
             throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
         }
-        String testIndividualIRI=testIndividual.asNamedIndividual().getIRI().toString();
+        String testIndividualIRI=testIndividual.asOWLNamedIndividual().getIRI().toString();
         testID=testIndividualIRI.substring(WGTestRegistry.TEST_ID_PREFIX.length());
         
         OWLDataFactory df=m.getOWLDataFactory();
@@ -167,7 +167,7 @@ public class WGTestDescriptor {
             if (i.isAnonymous()) {
                 throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
             }
-            IRI statusIRI=i.asNamedIndividual().getIRI();
+            IRI statusIRI=i.asOWLNamedIndividual().getIRI();
             for (Status status : Status.values())
                 if (statusIRI.equals(status.uri))
                     return status;
@@ -202,7 +202,7 @@ public class WGTestDescriptor {
                 if (s.isAnonymous()) {
                     throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
                 }
-                IRI speciesIRI=s.asNamedIndividual().getIRI();
+                IRI speciesIRI=s.asOWLNamedIndividual().getIRI();
                 for (Species spc : Species.values()) {
                     if (speciesIRI.equals(spc.uri)) {
                         species.add(spc);
@@ -223,7 +223,7 @@ public class WGTestDescriptor {
                 if (s.isAnonymous()) {
                     throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
                 }
-                IRI semanticsIRI=s.asNamedIndividual().getIRI();
+                IRI semanticsIRI=s.asOWLNamedIndividual().getIRI();
                 for (Semantics sem : Semantics.values()) {
                     if (semanticsIRI.equals(sem.uri)) {
                         semantics.add(sem);
@@ -244,7 +244,7 @@ public class WGTestDescriptor {
                 if (s.isAnonymous()) {
                     throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
                 }
-                IRI semanticsIRI=s.asNamedIndividual().getIRI();
+                IRI semanticsIRI=s.asOWLNamedIndividual().getIRI();
                 for (Semantics sem : Semantics.values()) {
                     if (semanticsIRI.equals(sem.uri)) {
                         notSemantics.add(sem);
@@ -266,7 +266,7 @@ public class WGTestDescriptor {
                     throw new InvalidWGTestException("Test "+testID+" has an incorrect number of premises.");
                 StringInputSource source=new StringInputSource(premises.iterator().next().getLiteral());
                 try {
-                    return manager.loadOntology(source);
+                    return manager.loadOntologyFromOntologyDocument(source);
                 }
                 catch (OWLOntologyCreationException e) {
                     throw new InvalidWGTestException("Invalid premise ontology.",e);
@@ -291,7 +291,7 @@ public class WGTestDescriptor {
                     throw new InvalidWGTestException("Test "+testID+" has an incorrect number of "+(positive ? "" : "non")+"conclusions.");
                 StringInputSource source=new StringInputSource(conclusions.iterator().next().getLiteral());
                 try {
-                    OWLOntology concl=manager.loadOntology(source);
+                    OWLOntology concl=manager.loadOntologyFromOntologyDocument(source);
                     return concl;
                 }
                 catch (OWLOntologyCreationException e) {

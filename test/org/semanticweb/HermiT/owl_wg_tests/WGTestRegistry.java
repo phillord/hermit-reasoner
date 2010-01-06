@@ -22,13 +22,13 @@ package org.semanticweb.HermiT.owl_wg_tests;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -60,15 +60,15 @@ public class WGTestRegistry {
         if (output != null) printResultsHeader(output);
         
         m_ontologyManager = OWLManager.createOWLOntologyManager();
-        m_ontologyManager.loadOntologyFromPhysicalURI(WGTestRegistry.class
-                .getResource("ontologies/test-ontology.owl").toURI());
+        m_ontologyManager.loadOntologyFromOntologyDocument(IRI.create(WGTestRegistry.class
+                .getResource("ontologies/test-ontology.owl").toURI()));
         m_testContainer = m_ontologyManager
-                .loadOntologyFromPhysicalURI(WGTestRegistry.class.getResource(
-                        "ontologies/all.rdf").toURI());
+                .loadOntologyFromOntologyDocument(IRI.create(WGTestRegistry.class.getResource(
+                        "ontologies/all.rdf").toURI()));
         m_testDescriptors = new ArrayList<WGTestDescriptor>();
         m_testDescriptorsByID = new HashMap<String, WGTestDescriptor>();
         OWLClass testCaseClass = m_ontologyManager.getOWLDataFactory()
-                .getOWLClass(URI.create(URI_BASE + "TestCase"));
+                .getOWLClass(IRI.create(URI_BASE + "TestCase"));
         for (OWLClassAssertionAxiom ax : m_testContainer
                 .getClassAssertionAxioms(testCaseClass)) {
             WGTestDescriptor wgTestDescriptor = new WGTestDescriptor(
