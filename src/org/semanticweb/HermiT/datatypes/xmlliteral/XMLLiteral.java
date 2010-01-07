@@ -1,6 +1,6 @@
 package org.semanticweb.HermiT.datatypes.xmlliteral;
 
-import org.semanticweb.HermiT.datatypes.xmlliteral.c14n.implementations.Canonicalizer20010315ExclWithComments;
+import org.apache.axiom.c14n.impl.Canonicalizer20010315ExclWithComments;
 
 
 public class XMLLiteral {

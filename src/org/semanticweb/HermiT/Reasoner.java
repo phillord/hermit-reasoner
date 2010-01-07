@@ -15,8 +15,8 @@
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.semanticweb.HermiT;
 
+package org.semanticweb.HermiT;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.net.URI;
@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.protege.editor.owl.model.inference.ProtegeOWLReasonerFactoryAdapter;
 import org.semanticweb.HermiT.Configuration.BlockingStrategyType;
 import org.semanticweb.HermiT.Configuration.DirectBlockingType;
 import org.semanticweb.HermiT.blocking.AncestorBlocking;
@@ -1947,63 +1948,19 @@ public class Reasoner implements OWLReasoner,Serializable {
         return new Version(version[0],version[1],version[2],version[3]);
     }
 
-
-
-
-//    // The factory for the reasoner from the Protege plug-in
-//    public static class ProtegeReasonerFactory extends ProtegeOWLReasonerFactoryAdapter {
-//        public OWLReasoner createReasoner(OWLOntologyManager ontologyManager) {
-//            // ignore the given manager
-//            return this.createReasoner(OWLManager.createOWLOntologyManager(),new HashSet<OWLOntology>());
-//        }
-//        public void initialise() {
-//        }
-//        public void dispose() {
-//        }
-//        public boolean requiresExplicitClassification() {
-//            return false;
-//        }
-//        @SuppressWarnings("serial")
-//        public OWLReasoner createReasoner(OWLOntologyManager manager,Set<OWLOntology> ontologies) {
-//            // ignore the given manager
-//            Configuration configuration=new Configuration();
-//            configuration.ignoreUnsupportedDatatypes=true;
-//            //configuration.tableauMonitorType=TableauMonitorType.TIMING;
-//            Reasoner hermit=new Reasoner(configuration) {
-//                protected Set<OWLOntology> m_loadedOntologies;
-//                
-//                public void loadOntologies(Set<OWLOntology> ontologies) {
-//                    clearOntologies();
-//                    super.loadOntologies(ontologies);
-//                    m_loadedOntologies=ontologies;
-//                }
-//                public Set<OWLOntology> getLoadedOntologies() {
-//                    return m_loadedOntologies;
-//                }
-//                // overwrite so that the methods don't throw errors
-//                public boolean isSymmetric(OWLObjectProperty property) {
-//                    return false;
-//                }
-//                public boolean isTransitive(OWLObjectProperty property) {
-//                    return false;
-//                }
-//                public Set<OWLDataRange> getRanges(OWLDataProperty property) {
-//                    return new HashSet<OWLDataRange>();
-//                }
-//                public Map<OWLObjectProperty,Set<OWLNamedIndividual>> getObjectPropertyRelationships(OWLNamedIndividual individual) {
-//                    return new HashMap<OWLObjectProperty,Set<OWLNamedIndividual>>();
-//                }
-//                public Map<OWLDataProperty,Set<OWLLiteral>> getDataPropertyRelationships(OWLNamedIndividual individual) {
-//                    return new HashMap<OWLDataProperty,Set<OWLLiteral>>();
-//                }
-//                public Set<OWLLiteral> getRelatedValues(OWLNamedIndividual subject,OWLDataPropertyExpression property) {
-//                    return new HashSet<OWLLiteral>();
-//                }
-//            };
-//            // even if the set of ontologies is empty we should load that because otherwise our datat structures are only partially initialised
-//            hermit.loadOntologies(ontologies);
-//            return hermit;
-//        }
-//    }
+    // The factory for the reasoner from the Protege plug-in
+    public static class ProtegeReasonerFactory extends ProtegeOWLReasonerFactoryAdapter {
+		public OWLReasoner createReasoner(OWLOntology ontology,ReasonerProgressMonitor monitor) {
+            ReasonerFactory factory = new ReasonerFactory();
+            Configuration configuration=factory.getProtegeConfiguration();
+            configuration.reasonerProgressMonitor=monitor;
+            OWLReasoner hermit = factory.createHermiTOWLReasoner(ontology, configuration);
+            return hermit;
+		}
+		public void initialise() throws Exception {
+		}
+		public void dispose() throws Exception {
+		}
+    }
 }
  

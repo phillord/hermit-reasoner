@@ -6,7 +6,7 @@
     <!-- Note that on each released build, the ${updatefile} on the web site
          should be replaced, and the new version of the plugin should be
          posted at the (auto-generated) URL in that file. -->
-    <property name="version" value="1.1"/>
+    <property name="version" value="1.2"/>
 
     <!-- general info -->
     <property name="homepage" value="http://hermit-reasoner.com/"/>
@@ -28,17 +28,14 @@
     <!-- libraries -->
     <property name="libdir" value="${projectroot}/lib"/>
     <property name="owlapi" value="${libdir}/owlapi-3.0.0.jar"/>
-    <property name="owlapisrc" value="${libdir}/owlapi-3.0.0-src.jar"/>
     <property name="automaton" value="${libdir}/dk.brics.automaton-1.11-2.jar"/>
-    <property name="automatonsrc" value="${libdir}/dk.brics.automaton-1.11-2-src.jar"/>
     <property name="jautomaton" value="${libdir}/jautomata-core-2.0-alpha-1.jar"/>
-    <property name="jautomatonsrc" value="${libdir}/jautomata-core-2.0-alpha-1-src.jar"/>
     <property name="junit" value="${libdir}/junit-4.4.jar"/>
     <property name="protegeapp" value="${libdir}/org.protege.editor.core.application-4.1.jar"/>
-    <property name="protegeappsrc" value="${libdir}/org.protege.editor.core.application-4.1-src.jar"/>
     <property name="protegeowl" value="${libdir}/org.protege.editor.owl-4.1.jar"/>
-    <property name="protegeowlsrc" value="${libdir}/org.protege.editor.owl-4.1-src.jar"/>
-
+	<property name="xmlcanonicalizer" value="${libdir}/axiom-1.2.8.jar"/>
+	<property name="logging" value="${libdir}/commons-logging-1.1.1.jar"/> <!-- required by canonicalizer -->
+	
     <!-- to generate a debug version, use -Ddebug=on argument when running ant -->
     <property name="debug" value="off"/>
 
@@ -58,6 +55,8 @@
         <pathelement location="${jautomaton}"/>
         <pathelement location="${protegeapp}"/>
         <pathelement location="${protegeowl}"/>
+    	<pathelement location="${xmlcanonicalizer}"/>
+    	<pathelement location="${logging}"/>
     </path>
     <path id="testclasspath">
         <pathelement path="${classdir}"/>
@@ -89,7 +88,7 @@
     
     <target name="javadoc">
         <mkdir dir="${javadocdir}"/>
-        <javadoc sourcepathref="sourcepath" excludepackagenames="org.semanticweb.HermiT.datatypes.xmlliteral.*" destdir="${javadocdir}" access="protected" author="false" version="true" use="true" bootclasspath="${java.home}/lib/rt.jar">
+        <javadoc sourcepathref="sourcepath" destdir="${javadocdir}" access="protected" author="false" version="true" use="true">
             <classpath refid="classpath"/>
             <classpath refid="testclasspath"/>
             <package name="org.semanticweb.HermiT.*"/>
@@ -99,6 +98,8 @@
     <target name="unpack-libraries">
         <unjar src="${automaton}" dest="${classdir}"/>
         <unjar src="${jautomaton}" dest="${classdir}"/>
+        <unjar src="${xmlcanonicalizer}" dest="${classdir}"/>
+        <unjar src="${logging}" dest="${classdir}"/>
     </target>
     
     <target name="unpack-owlapi">
@@ -117,7 +118,8 @@
             <manifest>
                 <attribute name="Implementation-Title" value="HermiT"/>
                 <attribute name="Implementation-Vendor" value="Oxford University"/>
-                <attribute name="Implementation-Version" value="${version}"/>
+                <attribute name="Implementation-Version" value="${version}.${svn.Revision}"/>
+                <attribute name="Built-By" value="${user.name}"/>
                 <attribute name="Main-Class" value="org.semanticweb.HermiT.cli.CommandLine"/>
                 <attribute name="Bundle-ManifestVersion" value="2"/>
                 <attribute name="Bundle-Name" value="HermiT Reasoner"/>
@@ -150,7 +152,8 @@
             <manifest>
                 <attribute name="Implementation-Title" value="HermiT"/>
                 <attribute name="Implementation-Vendor" value="Oxford University"/>
-                <attribute name="Implementation-Version" value="${version}"/>
+                <attribute name="Implementation-Version" value="${version}.${svn.Revision}"/>
+                <attribute name="Built-By" value="${user.name}"/>
                 <attribute name="Main-Class" value="org.semanticweb.HermiT.cli.CommandLine"/>
                 <attribute name="Bundle-ManifestVersion" value="2"/>
                 <attribute name="Bundle-Name" value="HermiT Reasoner"/>
@@ -162,7 +165,7 @@
                 <attribute name="Bundle-Version" value="${version}"/>
                 <attribute name="Bundle-Activator" value="org.protege.editor.core.plugin.DefaultPluginActivator"/>
                 <attribute name="Bundle-ClassPath" value="."/>
-                <attribute name="Require-Bundle" value="org.protege.common,org.protege.editor.core.application,org.protege.editor.owl"/>
+                <attribute name="Require-Bundle" value="org.eclipse.equinox.registry,org.eclipse.equinox.common,org.protege.editor.core.application;bundle-version=4.1,org.protege.editor.owl;bundle-version=4.1,org.semanticweb.owl.owlapi;bundle-version=3.0"/>
                 <attribute name="Update-Url" value="${updatefile}"/>
             </manifest>
             <fileset dir="${classdir}"/>
@@ -185,6 +188,7 @@
         </copy>
         <copy file="build.xml" todir="${projectdir}"/>
         <copy file="gpl.txt" todir="${projectdir}"/>
+        <copy file="lgpl-3.0.txt" todir="${projectdir}"/>
         <copy file="readme.txt" todir="${projectdir}"/>
         <copy file="update.properties" todir="${projectdir}"/>
         <copy file=".classpath" todir="${projectdir}"/>
@@ -228,7 +232,7 @@
         <input message="Enter a user name for edison:" addproperty="username" defaultvalue="${user.name}"/>
         <input message="Enter ${username}'s password on edison: " addproperty="password"/>
         <sshexec host="edison.comlab.ox.ac.uk" username="${username}" password="${password}" command="mkdir /data/hermit/download/${version}/" trust="yes"/>
-        <scp file="${HermiTjar}" todir="${username}:${password}@edison.comlab.ox.ac.uk:/data/hermit/download/${version}/" trust="yes"/>
+        <scp file="${ant.project.name}-${version}.zip" localTofile="${ant.project.name}.zip" todir="${username}:${password}@edison.comlab.ox.ac.uk:/data/hermit/download/${version}/" trust="yes"/>
         <scp file="${updatefile}" todir="${username}:${password}@edison.comlab.ox.ac.uk:/data/hermit/" trust="yes"/>
         <sshexec host="edison.comlab.ox.ac.uk" username="${username}" password="${password}" command="rm /data/hermit/download/current/HermiT.zip" trust="yes"/>
         <sshexec host="edison.comlab.ox.ac.uk" username="${username}" password="${password}" command="ln -s  /data/hermit/download/${version}/HermiT.zip /data/hermit/download/current/HermiT.zip" trust="yes"/>
