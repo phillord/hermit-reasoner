@@ -120,7 +120,7 @@
 	
     <target name="updateManifest" depends="setRevisionNumberProperty">
         <mkdir dir="${releasedir}"/>
-        <manifest file="./META-INF/MANIFEST.MF">
+        <manifest file="./META-INF/MANIFEST.MF" mode="update">
             <attribute name="Implementation-Title" value="HermiT"/>
             <attribute name="Implementation-Vendor" value="Oxford University"/>
             <attribute name="Implementation-Version" value="${version}.${revision.number}"/>
