@@ -12,5 +12,6 @@
 	<classpathentry kind="lib" path="lib/org.protege.editor.core.application-4.1.jar" sourcepath="lib/org.protege.editor.core.application-4.1-src.jar"/>
 	<classpathentry kind="lib" path="lib/org.protege.editor.owl-4.1.jar" sourcepath="lib/org.protege.editor.owl-4.1-src.jar"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar" sourcepath="lib/commons-logging-1.1.1-src.zip"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
