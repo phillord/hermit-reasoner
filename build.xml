@@ -148,11 +148,15 @@
                 <filter token="HOMEPAGE" value="${homepage}"/>
             </filterset>
         </copy>
+    	<copy todir="${builddir}/Licenses">
+			<fileset dir="${libdir}" includes="*.COPYING,*.README,*.LICENSE"/>
+    	</copy>
+    	<copy file="gpl.txt" tofile="${builddir}/Licenses/HermiT-GPL.LICENSE"/>
+    	<copy file="lgpl-3.0.txt" tofile="${builddir}/Licenses/HermiT-LGPL.LICENSE"/>
         <jar jarfile="${ProtegePlugInJar}" manifest="./META-INF/MANIFEST.MF">
-            <fileset dir="${classdir}"/>
+            <fileset dir="${classdir}"/>        	
             <fileset file="readme.txt"/>
-            <fileset file="gpl.txt"/>
-            <fileset file="lgpl-3.0.txt"/>
+            <zipfileset dir="${builddir}/Licenses"  prefix="Licenses"/>
         </jar>
     </target>
     
