@@ -112,6 +112,7 @@
 
     <target name="setRevisionNumberProperty">
         <exec executable="svnversion" outputproperty="revision.number"/>
+        <echo message="Current version number: ${version}.${revision.number}"/>
     </target>
 	
 	<target name="install.ProtegePlugIn" depends="HermiT-protege-plugin">
