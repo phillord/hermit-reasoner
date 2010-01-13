@@ -1365,31 +1365,34 @@ public class Reasoner implements OWLReasoner,Serializable {
             tableauMonitor=config.monitor;
         else
             tableauMonitor=new TableauMonitorFork(wellKnownTableauMonitor,config.monitor);
-
+        
+        
         DirectBlockingChecker directBlockingChecker=null;
-        if (config.blockingStrategyType==BlockingStrategyType.SIMPLE_CORE || config.blockingStrategyType==BlockingStrategyType.COMPLEX_CORE) {
-            if (config.directBlockingType==DirectBlockingType.PAIR_WISE) {
-                directBlockingChecker=new ValidatedPairwiseDirectBlockingChecker();
-            } else {
-                directBlockingChecker=new ValidatedSingleDirectBlockingChecker();
-            }
-        } else {
-            switch (config.directBlockingType) {
-            case OPTIMAL:
-                if (dlOntology.hasInverseRoles())
-                    directBlockingChecker=new PairWiseDirectBlockingChecker();
-                else
-                    directBlockingChecker=new SingleDirectBlockingChecker();
-                break;
-            case SINGLE:
-                directBlockingChecker=new SingleDirectBlockingChecker();
-                break;
-            case PAIR_WISE:
-                directBlockingChecker=new PairWiseDirectBlockingChecker();
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown direct blocking type.");
-            }
+        switch (config.directBlockingType) {
+        case OPTIMAL:
+        	if ((config.blockingStrategyType==BlockingStrategyType.OPTIMAL && dlOntology.hasNominals()) || config.blockingStrategyType==BlockingStrategyType.SIMPLE_CORE || config.blockingStrategyType==BlockingStrategyType.COMPLEX_CORE) {
+        		directBlockingChecker=new ValidatedSingleDirectBlockingChecker();
+        	} else {
+	            if (dlOntology.hasInverseRoles())
+	                directBlockingChecker=new PairWiseDirectBlockingChecker();
+	            else
+	                directBlockingChecker=new SingleDirectBlockingChecker();
+        	}
+            break;
+        case SINGLE:
+        	if (config.blockingStrategyType==BlockingStrategyType.SIMPLE_CORE || config.blockingStrategyType==BlockingStrategyType.COMPLEX_CORE)
+        		directBlockingChecker=new ValidatedSingleDirectBlockingChecker();            		
+        	else 
+        		directBlockingChecker=new SingleDirectBlockingChecker();
+            break;
+        case PAIR_WISE:
+        	if (config.blockingStrategyType==BlockingStrategyType.SIMPLE_CORE || config.blockingStrategyType==BlockingStrategyType.COMPLEX_CORE) 
+        		directBlockingChecker=new ValidatedPairwiseDirectBlockingChecker();            		
+        	else
+        		directBlockingChecker=new PairWiseDirectBlockingChecker();
+            break;
+        default:
+            throw new IllegalArgumentException("Unknown direct blocking type.");
         }
         
         BlockingSignatureCache blockingSignatureCache=null;
@@ -1408,18 +1411,23 @@ public class Reasoner implements OWLReasoner,Serializable {
 
         BlockingStrategy blockingStrategy=null;
         switch (config.blockingStrategyType) {
-        case SIMPLE_CORE:
-            blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,blockingSignatureCache,dlOntology.hasInverseRoles(),true);
-            break;
-        case COMPLEX_CORE:
-            blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,blockingSignatureCache,dlOntology.hasInverseRoles(),false);
-            break;
         case ANCESTOR:
             blockingStrategy=new AncestorBlocking(directBlockingChecker,blockingSignatureCache);
             break;
         case ANYWHERE:
             blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
             break;
+        case SIMPLE_CORE:
+            blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,blockingSignatureCache,dlOntology.hasInverseRoles(),true);
+            break;
+        case COMPLEX_CORE:
+            blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,blockingSignatureCache,dlOntology.hasInverseRoles(),false);
+            break;
+        case OPTIMAL:
+        	if (dlOntology.hasNominals()) 
+        		blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,blockingSignatureCache,dlOntology.hasInverseRoles(),true);
+        	else
+        		blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
         default:
             throw new IllegalArgumentException("Unknown blocking strategy type.");
         }
@@ -1801,28 +1809,34 @@ public class Reasoner implements OWLReasoner,Serializable {
         }
         
         public OWLReasoner createBufferedReasoner(OWLOntology ontology) {
-            return createHermiTOWLReasoner(ontology,getProtegeConfiguration());
+            return createBufferedReasoner(ontology,null);
         }
         public OWLReasoner createBufferedReasoner(OWLOntology ontology,OWLReasonerConfiguration config) {
-            Configuration configuration=getProtegeConfiguration();
-            configuration.reasonerProgressMonitor=config.getProgressMonitor();
-            return createHermiTOWLReasoner(ontology,configuration);
+            return createHermiTOWLReasoner(ontology,getProtegeConfiguration(config));
         }
         public OWLReasoner createReasoner(OWLOntology ontology) {
-            Configuration configuration=getProtegeConfiguration();
-            configuration.bufferChanges=false;
-            return createHermiTOWLReasoner(ontology,getProtegeConfiguration());
+            return createReasoner(ontology,null);
         }
         public OWLReasoner createReasoner(OWLOntology ontology,OWLReasonerConfiguration config) {
-            Configuration configuration=getProtegeConfiguration();
-            configuration.reasonerProgressMonitor=config.getProgressMonitor();
+            Configuration configuration=getProtegeConfiguration(config);
             configuration.bufferChanges=false;
             return createHermiTOWLReasoner(ontology,configuration);
         }
-        protected Configuration getProtegeConfiguration() {
-            Configuration configuration=new Configuration();
-            configuration.ignoreUnsupportedDatatypes=true;
-            return configuration;
+        protected Configuration getProtegeConfiguration(OWLReasonerConfiguration config) {
+        	Configuration configuration;
+        	if (config!=null&&config instanceof Configuration) {
+        		configuration=(Configuration)config;
+        	} else {
+        		configuration=new Configuration();
+                configuration.ignoreUnsupportedDatatypes=true;
+                if (config!=null) {
+	        		configuration.reasonerProgressMonitor=config.getProgressMonitor();
+	        		configuration.individualTaskTimeout=config.getTimeOut();
+	        		configuration.individualNodeSetPolicy=config.getIndividualNodeSetPolicy();
+	        		configuration.undeclaredEntityPolicy=config.getUndeclaredEntityPolicy();
+                }
+        	}
+        	return configuration;
         }
         @SuppressWarnings("serial")
         protected OWLReasoner createHermiTOWLReasoner(OWLOntology ontology, Configuration configuration) {
@@ -1921,10 +1935,10 @@ public class Reasoner implements OWLReasoner,Serializable {
     protected void initOWLAPI(OWLOntology ontology) {
     }
     public IndividualNodeSetPolicy getIndividualNodeSetPolicy() {
-        return IndividualNodeSetPolicy.BY_NAME;
+        return m_configuration.getIndividualNodeSetPolicy();
     }
     public UndeclaredEntityPolicy getUndeclaredEntityPolicy() {
-        return UndeclaredEntityPolicy.ALLOW;
+        return m_configuration.getUndeclaredEntityPolicy();
     }
     public String getReasonerName() {
         return getClass().getPackage().getImplementationTitle();
@@ -1952,10 +1966,9 @@ public class Reasoner implements OWLReasoner,Serializable {
     public static class ProtegeReasonerFactory extends ProtegeOWLReasonerFactoryAdapter {
 		public OWLReasoner createReasoner(OWLOntology ontology,ReasonerProgressMonitor monitor) {
             ReasonerFactory factory = new ReasonerFactory();
-            Configuration configuration=factory.getProtegeConfiguration();
+            Configuration configuration=factory.getProtegeConfiguration(null);
             configuration.reasonerProgressMonitor=monitor;
-            OWLReasoner hermit = factory.createHermiTOWLReasoner(ontology, configuration);
-            return hermit;
+            return factory.createHermiTOWLReasoner(ontology, configuration);
 		}
 		public void initialise() throws Exception {
 		}

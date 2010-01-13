@@ -28,9 +28,12 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
+import org.semanticweb.owlapi.reasoner.IndividualNodeSetPolicy;
+import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
+import org.semanticweb.owlapi.reasoner.UndeclaredEntityPolicy;
 
-public class Configuration implements Serializable,Cloneable {
+public class Configuration implements Serializable,Cloneable,OWLReasonerConfiguration {
     private static final long serialVersionUID=7741510316249774519L;
 
     public static enum TableauMonitorType {
@@ -42,7 +45,7 @@ public class Configuration implements Serializable,Cloneable {
     }
 
     public static enum BlockingStrategyType {
-        ANYWHERE,ANCESTOR,COMPLEX_CORE,SIMPLE_CORE
+        ANYWHERE,ANCESTOR,COMPLEX_CORE,SIMPLE_CORE,OPTIMAL
     }
 
     public static enum BlockingSignatureCacheType {
@@ -55,7 +58,6 @@ public class Configuration implements Serializable,Cloneable {
     
     public WarningMonitor warningMonitor;
     public ReasonerProgressMonitor reasonerProgressMonitor;
-    public long individualTaskTimeout;
     public Configuration.TableauMonitorType tableauMonitorType;
     public Configuration.DirectBlockingType directBlockingType;
     public Configuration.BlockingStrategyType blockingStrategyType;
@@ -65,20 +67,27 @@ public class Configuration implements Serializable,Cloneable {
     public boolean ignoreUnsupportedDatatypes;
     public TableauMonitor monitor;
     public HashMap<String,Object> parameters;
-    public boolean bufferChanges=true;
+    public long individualTaskTimeout;
+    public boolean bufferChanges;
+    public IndividualNodeSetPolicy individualNodeSetPolicy;
+    public UndeclaredEntityPolicy undeclaredEntityPolicy;
     
     public Configuration() {
         warningMonitor=null;
+        reasonerProgressMonitor=null;
         tableauMonitorType=Configuration.TableauMonitorType.NONE;
         directBlockingType=Configuration.DirectBlockingType.OPTIMAL;
         blockingStrategyType=Configuration.BlockingStrategyType.ANYWHERE;
         blockingSignatureCacheType=Configuration.BlockingSignatureCacheType.CACHED;
         existentialStrategyType=Configuration.ExistentialStrategyType.CREATION_ORDER;
-        ignoreUnsupportedDatatypes=false;
         checkClauses=true;
+        ignoreUnsupportedDatatypes=false;
         monitor=null;
         parameters=new HashMap<String,Object>();
         individualTaskTimeout=-1;
+        bufferChanges=true;
+        individualNodeSetPolicy=IndividualNodeSetPolicy.BY_NAME;
+        undeclaredEntityPolicy=UndeclaredEntityPolicy.ALLOW;
     }
     protected void setIndividualReuseStrategyReuseAlways(Set<? extends AtomicConcept> concepts) {
         parameters.put("IndividualReuseStrategy.reuseAlways",concepts);
@@ -126,4 +135,13 @@ public class Configuration implements Serializable,Cloneable {
     public long getTimeOut() {
         return individualTaskTimeout;
     }
+	public IndividualNodeSetPolicy getIndividualNodeSetPolicy() {
+		return individualNodeSetPolicy;
+	}
+	public ReasonerProgressMonitor getProgressMonitor() {
+		return reasonerProgressMonitor;
+	}
+	public UndeclaredEntityPolicy getUndeclaredEntityPolicy() {
+		return undeclaredEntityPolicy;
+	}
 }
