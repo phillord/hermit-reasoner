@@ -31,7 +31,6 @@ import java.util.Set;
 
 import org.protege.editor.owl.model.inference.ProtegeOWLReasonerFactoryAdapter;
 import org.semanticweb.HermiT.Configuration.BlockingStrategyType;
-import org.semanticweb.HermiT.Configuration.DirectBlockingType;
 import org.semanticweb.HermiT.blocking.AncestorBlocking;
 import org.semanticweb.HermiT.blocking.AnywhereBlocking;
 import org.semanticweb.HermiT.blocking.AnywhereValidatedBlocking;
