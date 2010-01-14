@@ -360,7 +360,6 @@ public final class Tableau implements Serializable {
             m_extensionManager.addRoleAssertion(((InverseRole)role).getInverseOf(),b,a,m_dependencySetFactory.emptySet(),true);
         else
             m_extensionManager.addRoleAssertion((AtomicRole)role,a,b,m_dependencySetFactory.emptySet(),true);
-
         m_branchingPoints[0]=new BranchingPoint(this);
         m_currentBranchingPoint++;
         m_nonbacktrackableBranchingPoint=m_currentBranchingPoint;
@@ -378,15 +377,15 @@ public final class Tableau implements Serializable {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isABoxSatisfiableStarted();
         clear();
-        Map<Term,Node> aboxMapping=loadABox();
+        Map<Term,Node> termsToNodes=loadABox();
         if (checkedNode0Name==null)
             m_checkedNode0=null;
         else
-            m_checkedNode0=aboxMapping.get(checkedNode0Name);
+            m_checkedNode0=getNodeForTerm(termsToNodes,checkedNode0Name);
         if (checkedNode1Name==null)
             m_checkedNode1=null;
         else
-            m_checkedNode1=aboxMapping.get(checkedNode1Name);
+            m_checkedNode1=getNodeForTerm(termsToNodes,checkedNode1Name);
         if (m_firstTableauNode==null) {
             // Ensure that at least one individual exists.
             createNewNINode(m_dependencySetFactory.emptySet());
@@ -400,8 +399,8 @@ public final class Tableau implements Serializable {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isInstanceOfStarted(atomicConcept,individual);
         clear();
-        Map<Term,Node> aboxMapping=loadABox();
-        m_checkedNode0=aboxMapping.get(individual);
+        Map<Term,Node> termsToNodes=loadABox();
+        m_checkedNode0=getNodeForTerm(termsToNodes,individual);
         if (m_checkedNode0==null)
             m_checkedNode0=createNewNINode(m_dependencySetFactory.emptySet());
         m_extensionManager.addConceptAssertion(atomicConcept.getNegation(),m_checkedNode0,m_dependencySetFactory.emptySet(),true);
@@ -457,7 +456,7 @@ public final class Tableau implements Serializable {
             }
             termsToNodes.put(term,node);
         }
-        return node;
+        return node.getCanonicalNode();
     }
     public boolean isCurrentModelDeterministic() {
         return m_isCurrentModelDeterministic;
