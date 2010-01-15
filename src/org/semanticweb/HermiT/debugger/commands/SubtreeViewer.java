@@ -15,7 +15,7 @@
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
-/* Copyright 2008, 2009 by the Oxford University Computing Laboratory
+/* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
    
    This file is part of HermiT.
 

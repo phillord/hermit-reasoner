@@ -12,10 +12,7 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU Lesser General Public License for more details.
    
-You should have received a copy of the GNU Lesser General Public License
-along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
-   
-A copies of the GNU General Public License and the GNU Lesser General Public 
+Copies of the GNU General Public License and the GNU Lesser General Public 
 License have been included with this distribution in the file `gpl.txt` and 
 lgpl-3.0.txt, respectively. An online version is available at
 <http://www.gnu.org/licenses/>.
@@ -53,8 +50,8 @@ HermiT uses the following libraries in unmodified form:
 The release is organised as follows:
 HermiT.jar is a stand-alone version of HermiT that can be used from the command 
 line or from within other Java programs. It contains all required libraries.
-org.semanticweb.HermiT.jar is a plugin for Protege version 4.1. It can be copied 
+org.semanticweb.HermiT.jar is a plug-in for Protege version 4.1. It can be copied 
 into the plugins folder of Protege. 
 project/* is the Java Eclipse project for HermiT. It contains all sources 
-(folders src, test, and getopt) and libraries (folder lib) incl. sources and can 
-directly be imported into Eclipse.  
+(folders src, test, examples, and getopt) and libraries (folder lib) incl. sources 
+and can directly be imported into Eclipse.  

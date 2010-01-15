@@ -36,41 +36,187 @@ import org.semanticweb.owlapi.reasoner.UndeclaredEntityPolicy;
 public class Configuration implements Serializable,Cloneable,OWLReasonerConfiguration {
     private static final long serialVersionUID=7741510316249774519L;
 
+    /**
+     * Tableau monitors can be used to be informed about what HermiT does and they can be useful for debugging the reasoner.  
+     */
     public static enum TableauMonitorType {
-        NONE,TIMING,TIMING_WITH_PAUSE,DEBUGGER_NO_HISTORY,DEBUGGER_HISTORY_ON
+        /**
+         * The standard setting is no monitor, i.e., no information is recorded and printed about what the reasoner does. 
+         */
+        NONE,
+        /**
+         * The TIMING tableau monitor print information about the tableau (number of nodes etc) in certain time intervals. 
+         */
+        TIMING,
+        /**
+         * Waits at certain points (e.g., before building a tableau) for a keystroke by the user and is apart from that like 
+         * TIMING. 
+         */
+        TIMING_WITH_PAUSE,
+        /**
+         * This opens a debugging application for HermiT. HermiT can be controlled with special commands from within the 
+         * debugging application. Without history HermiT does not record information about how assertions have been derived, so 
+         * one cannot see the derivation history for an assertion.
+         */
+        DEBUGGER_NO_HISTORY,
+        /**
+         * This opens a debugging application for HermiT. HermiT can be controlled with special commands from within the 
+         * debugging application. HermiT will keep, for each derived fact/assertion, how the assertion was derived. This is 
+         * obviously using a lot more memory than normal, but can be useful when debugging the reasoner.  
+         */
+        DEBUGGER_HISTORY_ON
     }
 
+    /**
+     * Sets the blocking type used by HermiT. This can be combined with settings for the blocking strategy (anywhere or 
+     * ancestor or core blocking). 
+     */
     public static enum DirectBlockingType {
-        SINGLE,PAIR_WISE,OPTIMAL
+        /**
+         * Forces HermiT to use single blocking even if the ontology is not suitable for single blocking (contains inverse roles). 
+         */
+        SINGLE,
+        /**
+         * Forces HermiT to use pairwise blocking even if the ontology does not require that (contains no inverses). 
+         */
+        PAIR_WISE,
+        /**
+         * Chooses the optimal blocking. If the ontology contains nominals HermiT will use single simple core blocking 
+         * (works even with inverses) and otherwise HermiT uses single blocking if the ontology contains no inverses and 
+         * pairwise blocking otherwise.
+         */
+        OPTIMAL
     }
 
+    /**
+     * The blocking strategy determines how which nodes HermiT considers for blockers. 
+     */
     public static enum BlockingStrategyType {
-        ANYWHERE,ANCESTOR,COMPLEX_CORE,SIMPLE_CORE,OPTIMAL
+        /**
+         * Forces HermiT to use anywhere blocking. Anywhere blocking usually creates smaller models than ancestor blocking. 
+         * It might be slower, but seems to work better in average cases.  
+         */
+        ANYWHERE,
+        /**
+         * Forces HermiT to use ancestor blocking. Generates usually the biggest model, but can be faster in some cases than 
+         * the other strategies.  
+         */
+        ANCESTOR,
+        /**
+         * An approximate blocking strategy and HermiT validates whether the block is ok before terminating. Concepts that 
+         * were added nondeterministically and concepts that are propagated from the parent node are considered for
+         * blocking. Produces smaller models (less memory) than ANYWHERE and ANCESTOR, but can be slower in 
+         * particular since caching cannot be used with this blocking strategy. Caching is normally used if the 
+         * ontology does not contain nominals.      
+         */
+        COMPLEX_CORE,
+        /**
+         * An approximate blocking strategy and HermiT validates whether the block is ok before terminating. Only 
+         * concepts that where added when the node was created are considered for blocking (e.g., for 
+         * ClassAssertion(ObjectSomeValuesFrom(r C) a) an r-successor say b is created with C in the label of b and 
+         * C counts for blocking; any concept added later to the label is not considered for blocking. ) This can generate 
+         * very small models, but might increase the time required in particular for classification of ontologies without 
+         * nominals since caching cannot yet be used with this strategy. This is the default for ontologies with nominals 
+         * where caching cannot be used anyway.  
+         */
+        SIMPLE_CORE,
+        /**
+         * If the ontology contains nominals HermiT uses SIMPLE_CORE otherwise ANYWHERE. 
+         */
+        OPTIMAL
     }
 
+    /**
+     * Switches caching on or off (caching can only be used with non-core blocking and if the ontology does not contain nominals). 
+     * With caching HermiT caches blockers. The first satisfiability test can be slow, but in subsequent tests blocking can occur 
+     * much earlier from cached blockers, which saves time and memory.  
+     */
     public static enum BlockingSignatureCacheType {
-        CACHED,NOT_CACHED
+        /**
+         * Forces HermiT to use caching (if compatible with the ontology). 
+         */
+        CACHED,
+        /**
+         * Disables caching. 
+         */
+        NOT_CACHED
     }
 
+    /**
+     * Sets a strategy type that determines how HermiT expands the model. 
+     */
     public static enum ExistentialStrategyType {
-        CREATION_ORDER,EL,INDIVIDUAL_REUSE
+        /**
+         * Strategy for expanding all existentials on the oldest node in the tableau with unexpanded existentials.
+         * This usually closely approximates a breadth-first expansion. (Existentials introduced onto parent nodes
+         * as a result of constraints on their children can produce newer nodes of lower depth than older nodes,
+         * which could result in slight non-breadth-first behavior.)
+         */
+        CREATION_ORDER,
+        /**
+         * Individual reuse tries to reuse existing individuals first before creating a fresh successor. This can 
+         * introduce a lot of non-determinism, but the models can be much smaller (less memory required).  
+         */
+        INDIVIDUAL_REUSE,
+        /**
+         * For EL ontologies this existential strategy can be set to use a deterministic version of individual 
+         * reuse that behaves similar to EL-style algorithms.   
+         */
+        EL
     }
     
+    /**
+     * One can implement an instance of this class and pass it to HermiT. HermiT will then print warning with the 
+     * warning() method of the interface, e.g., if it ignores an unsupported datatype. HeriT does not provide an 
+     * implementation for the interface itself though.  
+     */
     public WarningMonitor warningMonitor;
+    /**
+     * If a progress monitor is set, HermiT will report the progress of a classification task. This is used for 
+     * example by Protege.
+     */
     public ReasonerProgressMonitor reasonerProgressMonitor;
-    public Configuration.TableauMonitorType tableauMonitorType;
-    public Configuration.DirectBlockingType directBlockingType;
-    public Configuration.BlockingStrategyType blockingStrategyType;
-    public Configuration.BlockingSignatureCacheType blockingSignatureCacheType;
-    public Configuration.ExistentialStrategyType existentialStrategyType;
+    public TableauMonitorType tableauMonitorType;
+    public DirectBlockingType directBlockingType;
+    public BlockingStrategyType blockingStrategyType;
+    public BlockingSignatureCacheType blockingSignatureCacheType;
+    public ExistentialStrategyType existentialStrategyType;
+    /**
+     * HermiT checks whether all clauses are safe. Non-safe clauses might cause problems in HermiT (non-termination), but 
+     * sometimes one might want to play with non-safe rules or such like.  
+     */
     public boolean checkClauses;
+    /**
+     * If HermiT encounters a non-OWL2 dataype, it normally throws an error. If set to true, axioms containing unsupported 
+     * datatypes will be ignored.     
+     */
     public boolean ignoreUnsupportedDatatypes;
+    /**
+     * Can be used to set a custom Tableau monitor.
+     */
     public TableauMonitor monitor;
+    /**
+     * The parameters are passed to the Tableau class instance, but currently no parameters are used.  
+     */
     public HashMap<String,Object> parameters;
+    /**
+     * If set to some value, reasoning in HermiT is interrupted as soon as any individual reasoning task takes any longer than 
+     * individualTaskTimeout ms. 
+     */
     public long individualTaskTimeout;
     public IndividualNodeSetPolicy individualNodeSetPolicy;
     public UndeclaredEntityPolicy undeclaredEntityPolicy;
+    /**
+     * If set to true, then each disjunct of a disjunction is associated with a punish factor and whenever a disjunct causes 
+     * a clash, the punish factor is increased. Whenever HermiT has to pick a disjunction, it picks the disjunction with 
+     * the least punish factor that has not yet been tried for that node and disjunction.  
+     */
     public boolean useDisjunctionLearning; 
+    /**
+     * Only applicable if HermiT is instantiated as an OWLReasoner because otherwise HermiT does not support addition and 
+     * removal of axioms. If set to true axioms that are to be added or removed are buffered and the addition and removal 
+     * is only performed when the flush() method of the reasoner is called.    
+     */
     protected boolean bufferChanges;
     
     public Configuration() {
