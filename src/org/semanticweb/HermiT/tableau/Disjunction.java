@@ -46,17 +46,24 @@ public class Disjunction {
     public String toString(Prefixes prefixes) {
         String s="";
         for (int i=0;i<m_dlPredicates.length;i++) {
-            s+=m_dlPredicates[i].toString(prefixes)+" ("+m_indexesWithPunishFactor[i].m_punishFactor+")";
+        	if (i>0) s+=" \\/ ";
+        	if (prefixes==null)
+        		s+=m_dlPredicates[i];
+        	else 
+        		s+=m_dlPredicates[i].toString(prefixes);
+        	s+=" (";
+            for (IndexWithPunishFactor indexWithPunishFactor : m_indexesWithPunishFactor) {
+            	if (indexWithPunishFactor.m_index==i) {
+            		s+=indexWithPunishFactor.m_punishFactor;
+            		break;
+            	}
+            }
+            s+=")";
         }
         return s;
     }
     public String toString() {
-        String s="";
-        for (int i=0;i<m_dlPredicates.length;i++) {
-            s+=m_dlPredicates[i]+" ("+m_indexesWithPunishFactor[i].m_punishFactor+")";
-            if (i<m_dlPredicates.length-1) s+=" \\/ ";
-        }
-        return s;
+        return toString(null);
     }
     protected static InterningManager<Disjunction> s_interningManager=new InterningManager<Disjunction>() {
         protected boolean equal(Disjunction disjunction1,Disjunction disjunction2) {
@@ -97,7 +104,7 @@ public class Disjunction {
             return (this.m_index-indexWithPunishFactor.m_index);
         }
         public String toString() {
-            return m_index+" ("+m_punishFactor+")";
+            return m_index+" (punishFactor "+m_punishFactor+")";
         }
     }  
 }

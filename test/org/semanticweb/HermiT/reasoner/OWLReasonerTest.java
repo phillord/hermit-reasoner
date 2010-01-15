@@ -2,6 +2,7 @@ package org.semanticweb.HermiT.reasoner;
 
 import java.util.Set;
 
+import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -9,6 +10,8 @@ import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.reasoner.IndividualNodeSetPolicy;
+import org.semanticweb.owlapi.reasoner.Node;
 import org.semanticweb.owlapi.reasoner.NodeSet;
 
 
@@ -179,5 +182,123 @@ public class OWLReasonerTest extends AbstractReasonerTest {
         assertTrue(adps.size()==2);
         assertTrue(bdps.size()==1);
         assertTrue(cdps.size()==1);
+    }
+    
+    public void testEquivalenceClasses() throws Exception {
+    	Configuration c=new Configuration();
+        c.individualNodeSetPolicy=IndividualNodeSetPolicy.BY_SAME_AS;
+        loadSameAsTest(c);
+    	
+        OWLNamedIndividual a1=m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "a1"));
+        OWLNamedIndividual a2_1=m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "a2_1"));
+        OWLNamedIndividual a2_2=m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "a2_2"));
+        OWLNamedIndividual b1_1=m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "b1_1"));
+        OWLNamedIndividual b1_2=m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "b1_2"));
+        OWLNamedIndividual b2=m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "b2"));
+        OWLClass A=m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "A"));
+        OWLClass B=m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "B"));
+        OWLClass C=m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "C"));
+        
+        NodeSet<OWLNamedIndividual> As=m_owlreasoner.getInstances(A, false);
+        NodeSet<OWLNamedIndividual> Bs=m_owlreasoner.getInstances(B, false);
+        NodeSet<OWLNamedIndividual> directBs=m_owlreasoner.getInstances(B, true);
+        NodeSet<OWLNamedIndividual> Cs=m_owlreasoner.getInstances(C, false);
+        assertTrue(As.getNodes().size()==2);
+        assertTrue(As.getFlattened().size()==3);
+        assertTrue(Bs.getNodes().size()==2);
+        assertTrue(Bs.getFlattened().size()==3);
+        assertTrue(directBs.getNodes().size()==1);
+        assertTrue(directBs.getFlattened().size()==1);
+        assertTrue(Cs.getNodes().size()==1);
+        assertTrue(Cs.getFlattened().size()==2);
+        for (Node<OWLNamedIndividual> ANode : As.getNodes()) {
+        	if (ANode.getSize()==1) assertTrue(ANode.contains(a1));
+        	else if (ANode.getSize()==2) {
+        		assertTrue(ANode.contains(a2_1));
+        		assertTrue(ANode.contains(a2_2));
+        	} else assertTrue(false);
+        }
+        for (Node<OWLNamedIndividual> BNode : Bs.getNodes()) {
+        	if (BNode.getSize()==1) assertTrue(BNode.contains(b2));
+        	else if (BNode.getSize()==2) {
+        		assertTrue(BNode.contains(b1_1));
+        		assertTrue(BNode.contains(b1_2));
+        	} else assertTrue(false);
+        }
+        for (Node<OWLNamedIndividual> directBNode : directBs.getNodes()) {
+        	if (directBNode.getSize()==1) assertTrue(directBNode.contains(b2));
+        	else assertTrue(false);
+        }
+        for (Node<OWLNamedIndividual> CNode : Cs.getNodes()) {
+        	if (CNode.getSize()==2) {
+        		assertTrue(CNode.contains(b1_1));
+        		assertTrue(CNode.contains(b1_2));
+        	} else assertTrue(false);
+        }
+    }
+    
+    public void testNonEquivalenceClasses() throws Exception {
+    	Configuration c=new Configuration();
+        c.individualNodeSetPolicy=IndividualNodeSetPolicy.BY_NAME;
+        loadSameAsTest(c);
+    	
+        OWLNamedIndividual a1=m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "a1"));
+        OWLNamedIndividual a2_1=m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "a2_1"));
+        OWLNamedIndividual a2_2=m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "a2_2"));
+        OWLNamedIndividual b1_1=m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "b1_1"));
+        OWLNamedIndividual b1_2=m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "b1_2"));
+        OWLNamedIndividual b2=m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "b2"));
+        OWLClass A=m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "A"));
+        OWLClass B=m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "B"));
+        OWLClass C=m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "C"));
+        
+        NodeSet<OWLNamedIndividual> As=m_owlreasoner.getInstances(A, false);
+        NodeSet<OWLNamedIndividual> Bs=m_owlreasoner.getInstances(B, false);
+        NodeSet<OWLNamedIndividual> directBs=m_owlreasoner.getInstances(B, true);
+        NodeSet<OWLNamedIndividual> Cs=m_owlreasoner.getInstances(C, false);
+        assertTrue(As.getNodes().size()==3);
+        assertTrue(As.getFlattened().size()==3);
+        assertTrue(Bs.getNodes().size()==3);
+        assertTrue(Bs.getFlattened().size()==3);
+        assertTrue(directBs.getNodes().size()==1);
+        assertTrue(directBs.getFlattened().size()==1);
+        assertTrue(Cs.getNodes().size()==2);
+        assertTrue(Cs.getFlattened().size()==2);
+        for (Node<OWLNamedIndividual> ANode : As.getNodes()) {
+        	assertTrue(ANode.getSize()==1);
+        }
+        for (Node<OWLNamedIndividual> BNode : Bs.getNodes()) {
+        	assertTrue(BNode.getSize()==1);
+        }
+        for (Node<OWLNamedIndividual> directBNode : directBs.getNodes()) {
+        	assertTrue(directBNode.getSize()==1);
+        }
+        for (Node<OWLNamedIndividual> CNode : Cs.getNodes()) {
+        	assertTrue(CNode.getSize()==1);
+        }
+        assertTrue(As.containsEntity(a1));
+        assertTrue(As.containsEntity(a2_1));
+        assertTrue(As.containsEntity(a2_2));
+        assertTrue(Bs.containsEntity(b1_1));
+        assertTrue(Bs.containsEntity(b1_2));
+        assertTrue(Bs.containsEntity(b2));
+        assertTrue(Cs.containsEntity(b1_1));
+        assertTrue(Cs.containsEntity(b1_2));
+        assertTrue(directBs.containsEntity(b2));
+    }
+    
+    public void loadSameAsTest(Configuration c) throws Exception {
+        String axioms="Declaration(NamedIndividual(:a1)) Declaration(NamedIndividual(:b1_1)) Declaration(NamedIndividual(:b1_2)) Declaration(NamedIndividual(:a2_1)) Declaration(NamedIndividual(:a2_2)) Declaration(NamedIndividual(:b2)) Declaration(ObjectProperty(:f)) " +
+        			  "ObjectPropertyAssertion(:f :a1 :b1_1) " +
+                      "ObjectPropertyAssertion(:f :a1 :b1_2) " +
+                      "SameIndividual(:a2_1 :a2_2) " +
+                      "ClassAssertion(:A :a1) " +
+                      "ClassAssertion(:A :a2_1) " +
+                      "ClassAssertion(:C :b1_1) " +
+                      "ClassAssertion(:B :b2) " +
+                      "SubClassOf(:C :B) " +
+                      "FunctionalObjectProperty(:f) ";
+        loadOntologyWithAxioms(axioms);
+        createOWLReasoner(c);
     }
 }

@@ -72,6 +72,7 @@ public final class Tableau implements Serializable {
     protected final boolean m_needsNamedExtension;
     protected final List<List<ExistentialConcept>> m_existentialConceptsBuffers;
     protected final boolean m_checkDatatypes;
+    protected final boolean m_useDisjunctionLearning;
     protected BranchingPoint[] m_branchingPoints;
     protected int m_currentBranchingPoint;
     protected int m_nonbacktrackableBranchingPoint;
@@ -89,7 +90,7 @@ public final class Tableau implements Serializable {
     protected Node m_checkedNode0;
     protected Node m_checkedNode1;
 
-    public Tableau(InterruptFlag interruptFlag,TableauMonitor tableauMonitor,ExistentialExpansionStrategy existentialsExpansionStrategy,DLOntology dlOntology,Map<String,Object> parameters) {
+    public Tableau(InterruptFlag interruptFlag,TableauMonitor tableauMonitor,ExistentialExpansionStrategy existentialsExpansionStrategy,boolean useDisjunctionLearning,DLOntology dlOntology,Map<String,Object> parameters) {
         m_interruptFlag=interruptFlag;
         m_interruptFlag.startTask();
         m_parameters=parameters;
@@ -110,6 +111,7 @@ public final class Tableau implements Serializable {
         m_needsNamedExtension=m_hyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.INTERNAL_NAMED);
         m_existentialConceptsBuffers=new ArrayList<List<ExistentialConcept>>();
         m_checkDatatypes=m_dlOntology.hasDatatypes();
+        m_useDisjunctionLearning=useDisjunctionLearning;
         m_branchingPoints=new BranchingPoint[2];
         m_currentBranchingPoint=-1;
         m_nonbacktrackableBranchingPoint=-1;

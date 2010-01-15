@@ -68,16 +68,17 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
     public TableauMonitor monitor;
     public HashMap<String,Object> parameters;
     public long individualTaskTimeout;
-    public boolean bufferChanges;
     public IndividualNodeSetPolicy individualNodeSetPolicy;
     public UndeclaredEntityPolicy undeclaredEntityPolicy;
+    public boolean useDisjunctionLearning; 
+    protected boolean bufferChanges;
     
     public Configuration() {
         warningMonitor=null;
         reasonerProgressMonitor=null;
         tableauMonitorType=Configuration.TableauMonitorType.NONE;
         directBlockingType=Configuration.DirectBlockingType.OPTIMAL;
-        blockingStrategyType=Configuration.BlockingStrategyType.ANYWHERE;
+        blockingStrategyType=Configuration.BlockingStrategyType.OPTIMAL;
         blockingSignatureCacheType=Configuration.BlockingSignatureCacheType.CACHED;
         existentialStrategyType=Configuration.ExistentialStrategyType.CREATION_ORDER;
         checkClauses=true;
@@ -88,6 +89,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
         bufferChanges=true;
         individualNodeSetPolicy=IndividualNodeSetPolicy.BY_NAME;
         undeclaredEntityPolicy=UndeclaredEntityPolicy.ALLOW;
+        useDisjunctionLearning=false;
     }
     protected void setIndividualReuseStrategyReuseAlways(Set<? extends AtomicConcept> concepts) {
         parameters.put("IndividualReuseStrategy.reuseAlways",concepts);

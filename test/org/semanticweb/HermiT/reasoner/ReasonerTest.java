@@ -41,26 +41,6 @@ public class ReasonerTest extends AbstractReasonerTest {
         OWLClass A = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "A"));
         assertTrue(m_reasoner.hasType(a2, A, false));
     }
-//    public void testLearningBackTracking() throws Exception {
-//        String axioms = "SubClassOf(owl:Thing ObjectIntersectionOf(ObjectUnionOf(:C :D1) ObjectUnionOf(:C :D2) ObjectUnionOf(:C :D3) ObjectUnionOf(:C :D4) ObjectUnionOf(:C :D5) ObjectSomeValuesFrom(:r ObjectAllValuesFrom(ObjectInverseOf(:r) ObjectComplementOf(:C)))))"
-//            + "ClassAssertion(:A :a1)"
-//            + "ClassAssertion(:A :a2)"
-//            + "ClassAssertion(:A :a3)"
-//            + "ClassAssertion(:A :a4)"
-//            + "ClassAssertion(:A :a5)"
-//            + "ClassAssertion(:B :a6)"
-//            + "ClassAssertion(:B :a7)"
-//            + "ClassAssertion(:B :a8)"
-//            + "ClassAssertion(:B :a9)"
-//            + "ClassAssertion(:A :a10)"
-//            + "SubClassOf(:A  ObjectMinCardinality(20 :s :B))"
-//            + "SubClassOf(:B  ObjectMinCardinality(20 :s :A))";
-//        loadOntologyWithAxioms(axioms);
-//        Configuration c=new Configuration();
-//        c.useDisjunctionLearning=false;
-//        createReasoner(c,null);
-//        assertTrue(m_reasoner.isConsistent());
-//    }
     public void testObjectPropertDomains() throws Exception {
         String axioms = "SubClassOf(:A :B)"
             + "ObjectPropertyDomain(:r :A)";

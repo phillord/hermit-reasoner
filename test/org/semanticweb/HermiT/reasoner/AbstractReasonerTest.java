@@ -62,6 +62,10 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         OWLReasonerFactory factory=new ReasonerFactory();
         m_owlreasoner=factory.createBufferedReasoner(m_ontology);
     }
+    protected void createOWLReasoner(Configuration configuration) {
+        OWLReasonerFactory factory=new ReasonerFactory();
+        m_owlreasoner=factory.createBufferedReasoner(m_ontology,configuration);
+    }
 
     /**
      * Returns the class and the property hierarchies as text.

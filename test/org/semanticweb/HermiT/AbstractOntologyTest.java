@@ -33,7 +33,6 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
     protected void setUp() throws Exception {
         m_ontologyManager=OWLManager.createOWLOntologyManager();
         m_dataFactory=m_ontologyManager.getOWLDataFactory();
-        //m_ontology=m_ontologyManager.createOntology(IRI.create(ONTOLOGY_URI));
     }
 
     protected void tearDown() {

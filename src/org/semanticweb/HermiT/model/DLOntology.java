@@ -193,63 +193,60 @@ public class DLOntology implements Serializable {
     public String getOntologyIRI() {
         return m_ontologyIRI;
     }
-
     public Set<AtomicConcept> getAllAtomicConcepts() {
         return m_allAtomicConcepts;
     }
-
+    public boolean containsAtomicConcept(AtomicConcept concept) {
+    	return m_allAtomicConcepts.contains(concept);
+    }
     public int getNumberOfExternalConcepts() {
         return m_numberOfExternalConcepts;
     }
-
     public Set<ComplexObjectRoleInclusion> getAllComplexObjectRoleInclusions() {
         return m_allComplexObjectRoleInclusions;
     }
-
     public Set<AtomicRole> getAllAtomicObjectRoles() {
         return m_allAtomicObjectRoles;
     }
-
+    public boolean containsObjectRole(AtomicRole role) {
+    	return m_allAtomicObjectRoles.contains(role);
+    }
     public Set<AtomicRole> getAllAtomicDataRoles() {
         return m_allAtomicDataRoles;
     }
-
+    public boolean containsDataRole(AtomicRole role) {
+    	return m_allAtomicDataRoles.contains(role);
+    }
     public Set<Individual> getAllIndividuals() {
         return m_allIndividuals;
     }
-
+    public boolean containsIndividual(Individual individual) {
+    	return m_allIndividuals.contains(individual);
+    }
     public Set<DescriptionGraph> getAllDescriptionGraphs() {
         return m_allDescriptionGraphs;
     }
-
     public Set<DLClause> getDLClauses() {
         return m_dlClauses;
     }
-
     public Set<Atom> getPositiveFacts() {
         return m_positiveFacts;
     }
-    
     public Map<AtomicRole,Map<Individual,Set<Constant>>> getDataPropertyAssertions() {
         return m_dataPropertyAssertions;
     }
-
     public Set<Atom> getNegativeFacts() {
         return m_negativeFacts;
     }
-
     public boolean hasInverseRoles() {
         return m_hasInverseRoles;
     }
-
     public boolean hasAtMostRestrictions() {
         return m_hasAtMostRestrictions;
     }
-
     public boolean hasNominals() {
         return m_hasNominals;
     }
-
     public boolean hasDatatypes() {
         return m_hasDatatypes;
     }
@@ -259,7 +256,6 @@ public class DLOntology implements Serializable {
     public Set<String> getDefinedDatatypeIRIs() {
         return m_definedDatatypeIRIs;
     }
-    
     public Collection<DLClause> getNonadmissibleDLClauses() {
         Set<AtomicConcept> bodyOnlyAtomicConcepts=getBodyOnlyAtomicConcepts();
         Collection<DLClause> nonadmissibleDLClauses=new HashSet<DLClause>();
@@ -287,7 +283,6 @@ public class DLOntology implements Serializable {
         }
         return nonadmissibleDLClauses;
     }
-
     protected Set<AtomicConcept> getBodyOnlyAtomicConcepts() {
         Set<AtomicConcept> bodyOnlyAtomicConcepts=new HashSet<AtomicConcept>(m_allAtomicConcepts);
         for (DLClause dlClause : m_dlClauses)
@@ -299,7 +294,6 @@ public class DLOntology implements Serializable {
             }
         return bodyOnlyAtomicConcepts;
     }
-
     protected Set<AtomicRole> computeGraphAtomicRoles() {
         Set<AtomicRole> graphAtomicRoles=new HashSet<AtomicRole>();
         for (DescriptionGraph descriptionGraph : m_allDescriptionGraphs)
@@ -317,7 +311,6 @@ public class DLOntology implements Serializable {
         }
         return graphAtomicRoles;
     }
-
     protected boolean containsAtomicRoles(DLClause dlClause,Set<AtomicRole> roles) {
         for (int atomIndex=0;atomIndex<dlClause.getBodyLength();atomIndex++) {
             DLPredicate dlPredicate=dlClause.getBodyAtom(atomIndex).getDLPredicate();
@@ -331,7 +324,6 @@ public class DLOntology implements Serializable {
         }
         return false;
     }
-
     protected boolean addAtomicRoles(DLClause dlClause,Set<AtomicRole> roles) {
         boolean change=false;
         for (int atomIndex=0;atomIndex<dlClause.getBodyLength();atomIndex++) {
