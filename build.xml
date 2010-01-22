@@ -47,6 +47,7 @@
     <path id="sourcepath">
         <pathelement path="${projectroot}/src"/>
         <pathelement path="${projectroot}/getopt"/>
+    	<pathelement path="${projectroot}/examples"/>
     </path>
     <path id="testsourcepath">
         <pathelement path="${projectroot}/test"/>
@@ -184,6 +185,7 @@
         <copy todir="${projectdir}">
             <fileset dir="${projectroot}" includes="src/**/*"/>
             <fileset dir="${projectroot}" includes="getopt/**/*"/>
+        	<fileset dir="${projectroot}" includes="examples/**/*" excludes="examples/ontologies/pizza-inferred.owl,examples/ontologies/pizza-prettyPrint.owl,examples/ontologies/catalog.xml"/>
             <fileset dir="${projectroot}" includes="test/**/*"/>
             <fileset dir="${projectroot}" includes="lib/**/*"/>
         </copy>

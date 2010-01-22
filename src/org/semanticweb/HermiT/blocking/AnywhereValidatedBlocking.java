@@ -47,24 +47,13 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
     protected final boolean m_hasInverses;
     
     // statistics: 
-    protected final boolean debuggingMode=false;
-    protected final boolean m_generateValidationStatistics=false;
-    public List<Integer> numNodes=new ArrayList<Integer>();
-    public List<Integer> numBlocked=new ArrayList<Integer>();
-    public List<Integer> numInvalidlyBlocked=new ArrayList<Integer>();
+    protected final boolean debuggingMode=true;
+    protected final boolean m_generateValidationStatistics=true;
+    public int initialModelSize=0;
+    public int initialBlocked=0;
+    public int initialInvalidlyBlocked=0;
+    public int noValidations=0;
     
-    public int[][] getValidationStatistics() {
-        int[][] validationStatistics=new int[3][];
-        validationStatistics[0]=new int[numNodes.size()];
-        validationStatistics[1]=new int[numNodes.size()];
-        validationStatistics[2]=new int[numNodes.size()];
-        for (int i=0;i<numNodes.size();i++) {
-            validationStatistics[0][i]=numNodes.get(i);
-            validationStatistics[1][i]=numBlocked.get(i);
-            validationStatistics[2][i]=numInvalidlyBlocked.get(i);
-        }
-        return validationStatistics;
-    }
     public AnywhereValidatedBlocking(DirectBlockingChecker directBlockingChecker,BlockingSignatureCache blockingSignatureCache,boolean hasInverses,boolean useSimpleCore) {
         m_directBlockingChecker=directBlockingChecker;
         m_currentBlockersCache=new ValidatedBlockersCache(m_directBlockingChecker);
@@ -83,9 +72,6 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
         m_firstChangedNode=null;
         m_directBlockingChecker.clear();
         m_lastValidatedUnchangedNode=null;
-        numNodes.clear();
-        numBlocked.clear();
-        numInvalidlyBlocked.clear();
         m_blockingValidator.clear();
     }
     public void computeBlocking(boolean finalChance) {
@@ -155,6 +141,7 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
         }
     }
     public void validateBlocks() {
+    	noValidations++;
         // statistics:
         int checkedBlocks=0;
         int invalidBlocks=0;
@@ -212,22 +199,18 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
         } 
         if (debuggingMode) System.out.println("");
         
-        if (m_generateValidationStatistics) {
-            int nodes=0;
-            int blockedNodes=0;
+        if (initialModelSize==0) {
             node=m_tableau.getFirstTableauNode();
             while (node!=null) {
                 if (node.isActive()) {
-                    nodes++;
+                	initialModelSize++;
                     if (node.isBlocked()) {
-                        blockedNodes++;
+                    	initialBlocked++;
                     }
                 }
                 node=node.getNextTableauNode();
             }
-            numNodes.add(nodes);
-            numBlocked.add(blockedNodes);
-            numInvalidlyBlocked.add(invalidBlocks);
+            initialInvalidlyBlocked=invalidBlocks;
         }
         
         node=firstValidatedNode;

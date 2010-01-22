@@ -443,14 +443,17 @@ public class BlockingValidator {
         }
     }
     protected void checkDLClauseForNonblockedXAndMatchedNodes(DLClauseInfo dlClauseInfo,Node nonblockedX) {
-        boolean containsAtLestOneBlockedY=false;
+        boolean containsAtLeastOneBlockedY=false;
         for (Node y : dlClauseInfo.m_yNodes) {
             if (y.isBlocked()&&!((ValidatedBlockingObject)y.getBlockingObject()).blockViolatesParentConstraints()) {
-                containsAtLestOneBlockedY=true;
+                containsAtLeastOneBlockedY=true;
                 break;
             }
         }
-        if (!containsAtLestOneBlockedY) return; 
+        // no blocked successors, so all is safe
+        if (!containsAtLeastOneBlockedY) return; 
+        
+        // some successors are blocked, so check whether this can cause problems in the model construction 
         for (ConsequenceAtom consequenceAtom : dlClauseInfo.m_consequencesForNonblockedX) {
             if (consequenceAtom.isSatisfied(m_extensionManager,dlClauseInfo,nonblockedX))
                 return;
@@ -472,7 +475,7 @@ public class BlockingValidator {
         for (ConsequenceAtom consequenceAtom : dlClauseInfo.m_consequencesForNonblockedX) {
             if (consequenceAtom instanceof MirroredYConsequenceAtom) {
                 MirroredYConsequenceAtom atom=(MirroredYConsequenceAtom)consequenceAtom;
-                if (atom.isSatisfiedNonMirrored(m_extensionManager, dlClauseInfo)) {
+                if (atom.isSatisfiedNonMirrored(m_extensionManager,dlClauseInfo)) {
                     Node nodeY=dlClauseInfo.m_yNodes[atom.m_yArgumentIndex];
                     ((ValidatedBlockingObject)nodeY.getBlockingObject()).setBlockViolatesParentConstraints(true);
                     if (debuggingMode) inValidClausesForBlockedParent.put(dlClauseInfo, nodeY);
