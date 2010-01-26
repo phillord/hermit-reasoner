@@ -112,7 +112,8 @@
     </target>
 
     <target name="setRevisionNumberProperty">
-        <exec executable="svnversion" outputproperty="revision.number"/>
+    	<property name="revision.number" value="717"/>
+        <!--<exec executable="svnversion" outputproperty="revision.number"/>-->
         <echo message="Current version number: ${version}.${revision.number}"/>
     </target>
 	
@@ -122,7 +123,7 @@
 	
     <target name="updateManifest" depends="setRevisionNumberProperty">
         <mkdir dir="${releasedir}"/>
-        <manifest file="./META-INF/MANIFEST.MF" mode="update">
+        <manifest>
             <attribute name="Implementation-Title" value="HermiT"/>
             <attribute name="Implementation-Vendor" value="Oxford University"/>
             <attribute name="Implementation-Version" value="${version}.${revision.number}"/>
@@ -143,7 +144,7 @@
         </manifest>
     </target>
 	
-    <target name="HermiT-protege-plugin" depends="clean,compile,unpack-libraries,updateManifest">
+    <target name="HermiT-protege-plugin" depends="clean,compile,unpack-libraries">
         <copy file="${projectroot}/update.properties" tofile="${builddir}/update.properties">
             <filterset>
                 <filter token="VERSION" value="${version}"/>
@@ -155,21 +156,59 @@
     	</copy>
     	<copy file="gpl.txt" tofile="${builddir}/Licenses/HermiT-GPL.LICENSE"/>
     	<copy file="lgpl-3.0.txt" tofile="${builddir}/Licenses/HermiT-LGPL.LICENSE"/>
-        <jar jarfile="${ProtegePlugInJar}" manifest="./META-INF/MANIFEST.MF">
+        <jar jarfile="${ProtegePlugInJar}">
+            <manifest>
+                <attribute name="Implementation-Title" value="HermiT"/>
+                <attribute name="Implementation-Vendor" value="Oxford University"/>
+                <attribute name="Implementation-Version" value="${version}.${revision.number}"/>
+                <attribute name="Built-By" value="${user.name}"/>
+                <attribute name="Main-Class" value="org.semanticweb.HermiT.cli.CommandLine"/>
+                <attribute name="Bundle-ManifestVersion" value="2"/>
+                <attribute name="Bundle-Name" value="HermiT Reasoner"/>
+                <attribute name="Bundle-SymbolicName" value="org.semanticweb.HermiT;singleton:=true"/>
+                <attribute name="Bundle-Category" value="protege"/>
+                <attribute name="Bundle-Description" value="An OWL 2 reasoner"/>
+                <attribute name="Bundle-DocURL" value="${homepage}"/>
+                <attribute name="Bundle-Vendor" value="Boris Motik, Birte Glimm, Giorgos Stoilos, and Ian Horrocks"/>
+                <attribute name="Bundle-Version" value="${version}"/>
+                <attribute name="Bundle-Activator" value="org.protege.editor.core.plugin.DefaultPluginActivator"/>
+                <attribute name="Bundle-ClassPath" value=".,org.semanticweb.${ant.project.name}.jar"/>
+                <attribute name="Require-Bundle" value="org.eclipse.equinox.registry,org.eclipse.equinox.common,org.protege.editor.core.application;bundle-version=4.1,org.protege.editor.owl;bundle-version=4.1,org.semanticweb.owl.owlapi;bundle-version=3.0"/>
+                <attribute name="Update-Url" value="${updatefile}"/>
+            </manifest>
             <fileset dir="${classdir}"/>        	
             <fileset file="readme.txt"/>
             <zipfileset dir="${builddir}/Licenses"  prefix="Licenses"/>
         </jar>
     </target>
     
-    <target name="HermiT-standalone" depends="compile,unpack-owlapi,updateManifest">
+    <target name="HermiT-standalone" depends="compile,unpack-owlapi">
         <mkdir dir="${releasedir}"/>
         <copy file="${projectroot}/readme.txt" tofile="${releasedir}/readme.txt">
             <filterset>
                 <filter token="VERSION" value="${version}"/>
             </filterset>
         </copy>
-        <jar jarfile="${HermiTjar}" manifest="./META-INF/MANIFEST.MF">
+        <jar jarfile="${HermiTjar}">
+            <manifest>
+                <attribute name="Implementation-Title" value="HermiT"/>
+                <attribute name="Implementation-Vendor" value="Oxford University"/>
+                <attribute name="Implementation-Version" value="${version}.${revision.number}"/>
+                <attribute name="Built-By" value="${user.name}"/>
+                <attribute name="Main-Class" value="org.semanticweb.HermiT.cli.CommandLine"/>
+                <attribute name="Bundle-ManifestVersion" value="2"/>
+                <attribute name="Bundle-Name" value="HermiT Reasoner"/>
+                <attribute name="Bundle-SymbolicName" value="org.semanticweb.HermiT;singleton:=true"/>
+                <attribute name="Bundle-Category" value="protege"/>
+                <attribute name="Bundle-Description" value="An OWL 2 reasoner"/>
+                <attribute name="Bundle-DocURL" value="${homepage}"/>
+                <attribute name="Bundle-Vendor" value="Boris Motik, Birte Glimm, Giorgos Stoilos, and Ian Horrocks"/>
+                <attribute name="Bundle-Version" value="${version}"/>
+                <attribute name="Bundle-Activator" value="org.protege.editor.core.plugin.DefaultPluginActivator"/>
+                <attribute name="Bundle-ClassPath" value=".,org.semanticweb.${ant.project.name}.jar"/>
+                <attribute name="Require-Bundle" value="org.eclipse.equinox.registry,org.eclipse.equinox.common,org.protege.editor.core.application;bundle-version=4.1,org.protege.editor.owl;bundle-version=4.1,org.semanticweb.owl.owlapi;bundle-version=3.0"/>
+                <attribute name="Update-Url" value="${updatefile}"/>
+            </manifest>
             <fileset dir="${classdir}"/>
             <zipfileset dir="${projectroot}/src" prefix="src"/>
             <zipfileset dir="${projectroot}/getopt" prefix="src"/>
