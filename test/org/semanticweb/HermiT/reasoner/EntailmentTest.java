@@ -1,8 +1,8 @@
 package org.semanticweb.HermiT.reasoner;
 
 import org.semanticweb.HermiT.EntailmentChecker;
-import org.semanticweb.owlapi.io.OWLOntologyInputSource;
-import org.semanticweb.owlapi.io.StringInputSource;
+import org.semanticweb.owlapi.io.OWLOntologyDocumentSource;
+import org.semanticweb.owlapi.io.StringDocumentSource;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 
@@ -112,7 +112,7 @@ public class EntailmentTest extends AbstractReasonerTest {
         buffer.append("Ontology(<"+ONTOLOGY_IRI+">");
         buffer.append(axioms);
         buffer.append(")");
-        OWLOntologyInputSource input=new StringInputSource(buffer.toString());
+        OWLOntologyDocumentSource input=new StringDocumentSource(buffer.toString());
         return m_ontologyManager.loadOntologyFromOntologyDocument(input);
     }
 }

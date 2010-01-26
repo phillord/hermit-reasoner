@@ -57,11 +57,7 @@ public class MaterialiseInferences {
         // as an OWLReasoner. This is done via a ReasonerFactory object. 
         ReasonerFactory factory = new ReasonerFactory();
         // The factory can now be used to obtain an instance of HermiT as an OWLReasoner. 
-        // Here buffering is switched on (createBufferedReasoner), although for this example  
-        // that is not really required since we do not add any axioms to the ontology that is 
-        // loaded in HermiT. Buffering means that additions are not handled when they occur, but 
-        // only when the flush method is called, which is more efficient. 
-        OWLReasoner reasoner=factory.createBufferedReasoner(ontology);
+        OWLReasoner reasoner=factory.createReasoner(ontology);
         // The call to prepareReasoner() is not required. It causes HermiT to compute the class, object, 
         // and data property hierarchies, which would otherwise been done only if required. 
         reasoner.prepareReasoner();

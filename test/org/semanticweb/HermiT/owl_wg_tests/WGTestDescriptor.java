@@ -27,7 +27,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.io.StringInputSource;
+import org.semanticweb.owlapi.io.StringDocumentSource;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
@@ -264,7 +264,7 @@ public class WGTestDescriptor {
             if (premises!=null) {
                 if (premises.size()!=1)
                     throw new InvalidWGTestException("Test "+testID+" has an incorrect number of premises.");
-                StringInputSource source=new StringInputSource(premises.iterator().next().getLiteral());
+                StringDocumentSource source=new StringDocumentSource(premises.iterator().next().getLiteral());
                 try {
                     return manager.loadOntologyFromOntologyDocument(source);
                 }
@@ -289,7 +289,7 @@ public class WGTestDescriptor {
             if (conclusions!=null) {
                 if (conclusions.size()!=1)
                     throw new InvalidWGTestException("Test "+testID+" has an incorrect number of "+(positive ? "" : "non")+"conclusions.");
-                StringInputSource source=new StringInputSource(conclusions.iterator().next().getLiteral());
+                StringDocumentSource source=new StringDocumentSource(conclusions.iterator().next().getLiteral());
                 try {
                     OWLOntology concl=manager.loadOntologyFromOntologyDocument(source);
                     return concl;

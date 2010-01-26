@@ -28,10 +28,10 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
+import org.semanticweb.owlapi.reasoner.FreshEntityPolicy;
 import org.semanticweb.owlapi.reasoner.IndividualNodeSetPolicy;
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
-import org.semanticweb.owlapi.reasoner.UndeclaredEntityPolicy;
 
 public class Configuration implements Serializable,Cloneable,OWLReasonerConfiguration {
     private static final long serialVersionUID=7741510316249774519L;
@@ -205,7 +205,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
      */
     public long individualTaskTimeout;
     public IndividualNodeSetPolicy individualNodeSetPolicy;
-    public UndeclaredEntityPolicy undeclaredEntityPolicy;
+    public FreshEntityPolicy freshEntityPolicy;
     /**
      * If set to true, then each disjunct of a disjunction is associated with a punish factor and whenever a disjunct causes 
      * a clash, the punish factor is increased. Whenever HermiT has to pick a disjunction, it picks the disjunction with 
@@ -234,7 +234,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
         individualTaskTimeout=-1;
         bufferChanges=true;
         individualNodeSetPolicy=IndividualNodeSetPolicy.BY_NAME;
-        undeclaredEntityPolicy=UndeclaredEntityPolicy.ALLOW;
+        freshEntityPolicy=FreshEntityPolicy.ALLOW;
         useDisjunctionLearning=false;
     }
     protected void setIndividualReuseStrategyReuseAlways(Set<? extends AtomicConcept> concepts) {
@@ -289,7 +289,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
 	public ReasonerProgressMonitor getProgressMonitor() {
 		return reasonerProgressMonitor;
 	}
-	public UndeclaredEntityPolicy getUndeclaredEntityPolicy() {
-		return undeclaredEntityPolicy;
+	public FreshEntityPolicy getFreshEntityPolicy() {
+		return freshEntityPolicy;
 	}
 }

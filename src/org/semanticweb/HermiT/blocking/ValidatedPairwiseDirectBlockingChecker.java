@@ -38,10 +38,14 @@ public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChe
     protected final SetFactory<AtomicRole> m_atomicRolesSetFactory=new SetFactory<AtomicRole>();
     protected final List<AtomicConcept> m_atomicConceptsBuffer=new ArrayList<AtomicConcept>();
     protected final List<AtomicRole> m_atomicRolesBuffer=new ArrayList<AtomicRole>();
+    protected final boolean m_hasInverses;
     protected Tableau m_tableau;
     protected ExtensionTable.Retrieval m_binaryTableSearch1Bound;
     protected ExtensionTable.Retrieval m_ternaryTableSearch12Bound;
 
+    public ValidatedPairwiseDirectBlockingChecker(boolean hasInverses) {
+    	m_hasInverses=hasInverses;
+    }
     public void initialize(Tableau tableau) {
         m_tableau=tableau;
         m_binaryTableSearch1Bound=tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
@@ -71,10 +75,10 @@ public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChe
             ((ValidatedPairwiseBlockingObject)node.getParent().getBlockingObject()).m_blockingRelevantHashCode;
     }
     public boolean canBeBlocker(Node node) {
-        return node.getNodeType()==NodeType.TREE_NODE;
+        return node.getNodeType()==NodeType.TREE_NODE && (!m_hasInverses || node.getParent().getNodeType()==NodeType.TREE_NODE);
     }
     public boolean canBeBlocked(Node node) {
-        return node.getNodeType()==NodeType.TREE_NODE;
+        return node.getNodeType()==NodeType.TREE_NODE && (!m_hasInverses || node.getParent().getNodeType()==NodeType.TREE_NODE);
     }
     public boolean hasBlockingInfoChanged(Node node) {
         return ((ValidatedPairwiseBlockingObject)node.getBlockingObject()).m_hasChangedForBlocking;

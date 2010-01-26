@@ -84,6 +84,12 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
     public boolean canBeBlocked(Node node) {
         return node.getNodeType()==NodeType.TREE_NODE;
     }
+//    public boolean canBeBlocker(Node node) {
+//        return node.getNodeType()==NodeType.TREE_NODE && node.getParent().getNodeType()==NodeType.TREE_NODE;
+//    }
+//    public boolean canBeBlocked(Node node) {
+//        return node.getNodeType()==NodeType.TREE_NODE && node.getParent().getNodeType()==NodeType.TREE_NODE;
+//    }
     public boolean hasBlockingInfoChanged(Node node) {
         return ((PairWiseBlockingObject)node.getBlockingObject()).m_hasChanged;
     }

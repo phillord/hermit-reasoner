@@ -8,8 +8,8 @@ import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.structural.OWLClausification;
 import org.semanticweb.HermiT.tableau.Tableau;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.io.OWLOntologyInputSource;
-import org.semanticweb.owlapi.io.StringInputSource;
+import org.semanticweb.owlapi.io.OWLOntologyDocumentSource;
+import org.semanticweb.owlapi.io.StringDocumentSource;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLDataFactory;
@@ -96,7 +96,7 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
         buffer.append("Ontology(<"+ONTOLOGY_IRI+">");
         buffer.append(axioms);
         buffer.append(")");
-        OWLOntologyInputSource input=new StringInputSource(buffer.toString());
+        OWLOntologyDocumentSource input=new StringDocumentSource(buffer.toString());
         m_ontology=m_ontologyManager.loadOntologyFromOntologyDocument(input);
     }
 

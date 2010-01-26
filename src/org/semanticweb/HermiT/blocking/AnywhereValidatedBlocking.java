@@ -47,19 +47,24 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
     protected final boolean m_hasInverses;
     
     // statistics: 
-    protected final boolean debuggingMode=true;
-    protected final boolean m_generateValidationStatistics=true;
+    protected final boolean debuggingMode;
+    protected final boolean m_generateValidationStatistics;
     public int initialModelSize=0;
     public int initialBlocked=0;
     public int initialInvalidlyBlocked=0;
     public int noValidations=0;
     
     public AnywhereValidatedBlocking(DirectBlockingChecker directBlockingChecker,BlockingSignatureCache blockingSignatureCache,boolean hasInverses,boolean useSimpleCore) {
+    	this(directBlockingChecker,blockingSignatureCache,hasInverses,useSimpleCore,false,false);
+    }
+    public AnywhereValidatedBlocking(DirectBlockingChecker directBlockingChecker,BlockingSignatureCache blockingSignatureCache,boolean hasInverses,boolean useSimpleCore,boolean generateStatistics,boolean printDebugInfo) {
         m_directBlockingChecker=directBlockingChecker;
         m_currentBlockersCache=new ValidatedBlockersCache(m_directBlockingChecker);
         m_blockingSignatureCache=null;//blockingSignatureCache; so far cache is not supported
         m_hasInverses=hasInverses;
         m_useSimpleCore=useSimpleCore;
+        m_generateValidationStatistics=generateStatistics;
+        debuggingMode=printDebugInfo;
     }
     public void initialize(Tableau tableau) {
         m_tableau=tableau;

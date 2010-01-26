@@ -95,7 +95,7 @@ public class BlockingValidatorTest extends AbstractReasonerInternalsTest {
                 false, // hasDatatypes
                 null); //automaton for complex roles
         
-        DirectBlockingChecker directBlockingChecker=new ValidatedSingleDirectBlockingChecker();
+        DirectBlockingChecker directBlockingChecker=new ValidatedSingleDirectBlockingChecker(TEST_DL_ONTOLOGY.hasInverseRoles());
         BlockingSignatureCache blockingSignatureCache=null;
         m_blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,blockingSignatureCache,true,true);
         ExistentialExpansionStrategy ExpansionStrategy=new CreationOrderStrategy(m_blockingStrategy);
@@ -224,7 +224,7 @@ public class BlockingValidatorTest extends AbstractReasonerInternalsTest {
                 false, // hasDatatypes
                 null); //automaton for complex roles
         
-        DirectBlockingChecker directBlockingChecker=new ValidatedSingleDirectBlockingChecker();
+        DirectBlockingChecker directBlockingChecker=new ValidatedSingleDirectBlockingChecker(TEST_DL_ONTOLOGY.hasInverseRoles());
         BlockingSignatureCache blockingSignatureCache=null;
         m_blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,blockingSignatureCache,true,true);
         ExistentialExpansionStrategy ExpansionStrategy=new CreationOrderStrategy(m_blockingStrategy);
