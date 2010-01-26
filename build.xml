@@ -112,11 +112,7 @@
     </target>
 
     <target name="setRevisionNumberProperty">
-        <exec executable="svnversion" outputproperty="revision.numberWithModifier"/>
-    	<propertyregex property="revision.number" input="${revision.numberWithModifier}" select="\1">
-    		   <regexp pattern="[0-9]+[a-zA-Z]"/>
-    	</propertyregex>
-    	<echo>Revision found: ${revision.number}</echo>
+        <exec executable="svnversion" outputproperty="revision.number"/>
         <echo message="Current version number: ${version}.${revision.number}"/>
     </target>
 	
