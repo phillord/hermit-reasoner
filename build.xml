@@ -112,8 +112,8 @@
     </target>
 
     <target name="setRevisionNumberProperty">
-    	<property name="revision.number" value="717"/>
-        <!--<exec executable="svnversion" outputproperty="revision.number"/>-->
+    	<!--<property name="revision.number" value="717"/>-->
+        <exec executable="svnversion" outputproperty="revision.number"/>
         <echo message="Current version number: ${version}.${revision.number}"/>
     </target>
 	
@@ -121,7 +121,7 @@
 	    <copy file="${ProtegePlugInJar}" todir="${protege.plugins}"/>
 	</target>
 	
-    <target name="updateManifest" depends="setRevisionNumberProperty">
+    <!--<target name="updateManifest" depends="setRevisionNumberProperty">
         <mkdir dir="${releasedir}"/>
         <manifest>
             <attribute name="Implementation-Title" value="HermiT"/>
@@ -142,9 +142,10 @@
             <attribute name="Require-Bundle" value="org.eclipse.equinox.registry,org.eclipse.equinox.common,org.protege.editor.core.application;bundle-version=4.1,org.protege.editor.owl;bundle-version=4.1,org.semanticweb.owl.owlapi;bundle-version=3.0"/>
             <attribute name="Update-Url" value="${updatefile}"/>
         </manifest>
-    </target>
+    </target>-->
 	
     <target name="HermiT-protege-plugin" depends="clean,compile,unpack-libraries">
+    	<mkdir dir="${releasedir}"/>
         <copy file="${projectroot}/update.properties" tofile="${builddir}/update.properties">
             <filterset>
                 <filter token="VERSION" value="${version}"/>
