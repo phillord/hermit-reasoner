@@ -112,7 +112,6 @@
     </target>
 
     <target name="setRevisionNumberProperty">
-    	<!--<property name="revision.number" value="717"/>-->
         <exec executable="svnversion" outputproperty="revision.number"/>
         <echo message="Current version number: ${version}.${revision.number}"/>
     </target>
@@ -144,7 +143,7 @@
         </manifest>
     </target>-->
 	
-    <target name="HermiT-protege-plugin" depends="clean,compile,unpack-libraries">
+    <target name="HermiT-protege-plugin" depends="clean,setRevisionNumberProperty,compile,unpack-libraries">
     	<mkdir dir="${releasedir}"/>
         <copy file="${projectroot}/update.properties" tofile="${builddir}/update.properties">
             <filterset>
@@ -183,7 +182,7 @@
         </jar>
     </target>
     
-    <target name="HermiT-standalone" depends="compile,unpack-owlapi">
+    <target name="HermiT-standalone" depends="clean,setRevisionNumberProperty,compile,unpack-libraries,unpack-owlapi">
         <mkdir dir="${releasedir}"/>
         <copy file="${projectroot}/readme.txt" tofile="${releasedir}/readme.txt">
             <filterset>
