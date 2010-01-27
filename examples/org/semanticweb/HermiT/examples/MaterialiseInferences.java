@@ -91,6 +91,6 @@ public class MaterialiseInferences {
         // Now that ontology that contains the inferred axioms should be in the ontologies subfolder 
         // (you Java IDE, e.g., Eclipse, might have to refresh its view of files in the file system) 
         // before the file is visible.  
-        System.out.println("The ontology in examples/ontologies/pizza-inferred.owl should now contain all inferred axioms. ");
+        System.out.println("The ontology in examples/ontologies/pizza-inferred.owl should now contain all inferred axioms (you might need to refresh the IDE file view). ");
     }
 }

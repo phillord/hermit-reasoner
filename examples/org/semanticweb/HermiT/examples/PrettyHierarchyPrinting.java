@@ -56,7 +56,9 @@ public class PrettyHierarchyPrinting {
 	    // Now we create an output stream that HermiT can use to write the axioms. The output stream is 
 	    // a wrapper around the file into which the axioms are written.   
 	    File prettyPrintHierarchyFile=new File("examples/ontologies/pizza-prettyPrint.owl");
-	    OutputStream prettyPrintHierarchyStreamOut=new FileOutputStream(prettyPrintHierarchyFile.getCanonicalFile());
+	    // turn to an absolute file, so that we can write to it
+	    prettyPrintHierarchyFile=prettyPrintHierarchyFile.getAbsoluteFile();
+	    OutputStream prettyPrintHierarchyStreamOut=new FileOutputStream(prettyPrintHierarchyFile);
 	    // The output stream is wrapped into a print write with autoflush. 
 	    PrintWriter output=new PrintWriter(prettyPrintHierarchyStreamOut,true);
 	    // Now we let HermiT print the hierarchies. Since all parameters are set to true, 
@@ -65,5 +67,6 @@ public class PrettyHierarchyPrinting {
 	    // Now that file contain an ontology with the inferred axioms and should be in the ontologies 
 	    // subfolder (you Java IDE, e.g., Eclipse, might have to refresh its view of files in the file system) 
         // before the file is visible.   
+	    System.out.println("The ontology in examples/ontologies/pizza-prettyPrint.owl should now contain all subclass relationships between named classes as SubClassOf axioms pretty printed in functional-style syntax (you might need to refresh the IDE file view). ");
 	}
 }
