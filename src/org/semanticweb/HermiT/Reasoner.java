@@ -384,14 +384,14 @@ public class Reasoner implements OWLReasoner,Serializable {
         return true;
     }
     public boolean isEntailed(OWLAxiom axiom) {
-    	throwUndeclaredEntityExceptionIfNecessary(axiom);
+    	throwFreshEntityExceptionIfNecessary(axiom);
         EntailmentChecker checker=new EntailmentChecker(this, m_factory);
         return checker.entails(axiom);
     }
     public boolean isEntailed(Set<? extends OWLAxiom> axioms) {
     	if (m_configuration.freshEntityPolicy==FreshEntityPolicy.DISALLOW)
 	    	for (OWLAxiom axiom : axioms)
-	    		throwUndeclaredEntityExceptionIfNecessary(axiom);
+	    		throwFreshEntityExceptionIfNecessary(axiom);
         EntailmentChecker checker=new EntailmentChecker(this, m_factory);
         return checker.entails(axioms);
     }
@@ -497,7 +497,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         return isSubClassOf(classExpression1,classExpression2) && isSubClassOf(classExpression2,classExpression1); 
     }
     public Node<OWLClass> getEquivalentClasses(OWLClassExpression classExpression) {
-    	throwUndeclaredEntityExceptionIfNecessary(classExpression);
+    	throwFreshEntityExceptionIfNecessary(classExpression);
         HierarchyNode<AtomicConcept> node=getHierarchyNode(classExpression);
         return atomicConceptsToOWLAPI(node.getEquivalentElements());
     }
@@ -512,7 +512,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         }
     }
     public NodeSet<OWLClass> getSubClasses(OWLClassExpression classExpression,boolean direct) {
-    	throwUndeclaredEntityExceptionIfNecessary(classExpression);
+    	throwFreshEntityExceptionIfNecessary(classExpression);
         return atomicConceptNodesToOWLAPI(getSubClassNodes(classExpression,direct,false));
     }
     /**
@@ -535,7 +535,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         }
     }
     public NodeSet<OWLClass> getSuperClasses(OWLClassExpression classExpression,boolean direct) {
-    	throwUndeclaredEntityExceptionIfNecessary(classExpression);
+    	throwFreshEntityExceptionIfNecessary(classExpression);
         return atomicConceptNodesToOWLAPI(getSuperClassNodes(classExpression,direct,false));
     }
     /**
@@ -553,7 +553,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         return atomicConceptsToOWLAPI(node.getEquivalentElements());
     }
     public NodeSet<OWLClass> getDisjointClasses(OWLClassExpression classExpression, boolean direct) {
-    	throwUndeclaredEntityExceptionIfNecessary(classExpression);
+    	throwFreshEntityExceptionIfNecessary(classExpression);
         Node<OWLClass> equivToDisjoint=getEquivalentClasses(m_factory.getOWLObjectComplementOf(classExpression));
         if (direct&&equivToDisjoint.getSize()>0) {
             return new OWLClassNodeSet(equivToDisjoint);
@@ -622,7 +622,7 @@ public class Reasoner implements OWLReasoner,Serializable {
                 allObjectRoles.add(AtomicRole.BOTTOM_OBJECT_ROLE);
                 final int numRoles=allObjectRoles.size();
                 if (m_progressMonitor!=null) 
-                    m_progressMonitor.reasonerTaskStarted("Classifying object propoerties...");
+                    m_progressMonitor.reasonerTaskStarted("Classifying object properties...");
                 ClassificationManager.ProgressMonitor<Role> progressMonitor=new ClassificationManager.ProgressMonitor<Role>() {
                         protected int m_processedRoles=0;
                         public void elementClassified(Role element) {
@@ -709,7 +709,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         }
     }
     public NodeSet<OWLObjectProperty> getSuperObjectProperties(OWLObjectPropertyExpression propertyExpression,boolean direct) {
-    	throwUndeclaredEntityExceptionIfNecessary(propertyExpression);
+    	throwFreshEntityExceptionIfNecessary(propertyExpression);
         return objectPropertyNodesToOWLAPI(getSuperObjectPropertyNodes(propertyExpression,direct,false));
     }
     /**
@@ -728,7 +728,7 @@ public class Reasoner implements OWLReasoner,Serializable {
      * strict super object properties expressions of propertyExpression, i.e., if propertyExpression is not part of the answer  
      */
     public Set<Set<OWLObjectPropertyExpression>> getSuperObjectPropertyExpressions(OWLObjectPropertyExpression propertyExpression,boolean direct) {
-    	throwUndeclaredEntityExceptionIfNecessary(propertyExpression);
+    	throwFreshEntityExceptionIfNecessary(propertyExpression);
         return objectRoleNodesToSetOfSetsOfObjectPropertyExpressions(getSuperObjectPropertyNodes(propertyExpression,direct,false));
     }
     /**
@@ -750,7 +750,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         }
     }
     public NodeSet<OWLObjectProperty> getSubObjectProperties(OWLObjectPropertyExpression propertyExpression,boolean direct) {
-    	throwUndeclaredEntityExceptionIfNecessary(propertyExpression);
+    	throwFreshEntityExceptionIfNecessary(propertyExpression);
         return objectPropertyNodesToOWLAPI(getSubObjectPropertyNodes(propertyExpression,direct,false));
     }
     /**
@@ -763,7 +763,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         return objectPropertyNodesToOWLAPI(getSubObjectPropertyNodes(propertyExpression,false,true));
     }
     public Set<Set<OWLObjectPropertyExpression>> getSubObjectPropertyExpressions(OWLObjectPropertyExpression propertyExpression,boolean direct) {
-    	throwUndeclaredEntityExceptionIfNecessary(propertyExpression);
+    	throwFreshEntityExceptionIfNecessary(propertyExpression);
         return objectRoleNodesToSetOfSetsOfObjectPropertyExpressions(getSubObjectPropertyNodes(propertyExpression,direct,false));
     }
     /**
@@ -775,7 +775,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         return objectRoleNodesToSetOfSetsOfObjectPropertyExpressions(getSubObjectPropertyNodes(propertyExpression,false,true));
     }
     public Node<OWLObjectProperty> getEquivalentObjectProperties(OWLObjectPropertyExpression propertyExpression) {
-    	throwUndeclaredEntityExceptionIfNecessary(propertyExpression);
+    	throwFreshEntityExceptionIfNecessary(propertyExpression);
         return objectPropertiesToOWLAPI(getHierarchyNode(propertyExpression).getEquivalentElements());
     }
     /**
@@ -783,7 +783,7 @@ public class Reasoner implements OWLReasoner,Serializable {
      * @return a set of object property expressions such that each object property expression ope in the set is equivalent to propertyExpression 
      */
     public Set<OWLObjectPropertyExpression> getEquivalentObjectPropertyExpressions(OWLObjectPropertyExpression propertyExpression) {
-    	throwUndeclaredEntityExceptionIfNecessary(propertyExpression);
+    	throwFreshEntityExceptionIfNecessary(propertyExpression);
         return objectRolesToObjectPropertyExpressions(getHierarchyNode(propertyExpression).getEquivalentElements());
     }
     protected HierarchyNode<Role> getHierarchyNodeObjectRole(Role role) {
@@ -802,7 +802,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         return getHierarchyNodeObjectRole(role);
     }
     public NodeSet<OWLClass> getObjectPropertyDomains(OWLObjectPropertyExpression propertyExpression,boolean direct) {
-    	throwUndeclaredEntityExceptionIfNecessary(propertyExpression);
+    	throwFreshEntityExceptionIfNecessary(propertyExpression);
         HierarchyNode<AtomicConcept> node=getHierarchyNode(m_factory.getOWLObjectSomeValuesFrom(propertyExpression,m_factory.getOWLThing()));
         Set<HierarchyNode<AtomicConcept>> nodes;
         if (direct) nodes=node.getParentNodes();
@@ -810,7 +810,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         return atomicConceptNodesToOWLAPI(nodes);
     }
     public NodeSet<OWLClass> getObjectPropertyRanges(OWLObjectPropertyExpression propertyExpression,boolean direct) {
-    	throwUndeclaredEntityExceptionIfNecessary(propertyExpression);
+    	throwFreshEntityExceptionIfNecessary(propertyExpression);
         HierarchyNode<AtomicConcept> node=getHierarchyNode(m_factory.getOWLObjectSomeValuesFrom(propertyExpression.getInverseProperty(),m_factory.getOWLThing()));
         Set<HierarchyNode<AtomicConcept>> nodes;
         if (direct) nodes=node.getParentNodes();
@@ -818,11 +818,11 @@ public class Reasoner implements OWLReasoner,Serializable {
         return atomicConceptNodesToOWLAPI(nodes);
     }
     public Node<OWLObjectProperty> getInverseObjectProperties(OWLObjectPropertyExpression propertyExpression) {
-    	throwUndeclaredEntityExceptionIfNecessary(propertyExpression);
+    	throwFreshEntityExceptionIfNecessary(propertyExpression);
         return getEquivalentObjectProperties(propertyExpression.getInverseProperty());
     }
     public NodeSet<OWLObjectProperty> getDisjointObjectProperties(OWLObjectPropertyExpression propertyExpression, boolean direct) {
-    	throwUndeclaredEntityExceptionIfNecessary(propertyExpression);
+    	throwFreshEntityExceptionIfNecessary(propertyExpression);
         classifyObjectProperties();
         Set<HierarchyNode<Role>> result=new HashSet<HierarchyNode<Role>>();
         if (propertyExpression.getNamedProperty().isOWLTopObjectProperty()) {
@@ -865,7 +865,7 @@ public class Reasoner implements OWLReasoner,Serializable {
      * @return true if each individual can have at most one outgoing connection of the specified object property expression  
      */
     public boolean isFunctional(OWLObjectPropertyExpression propertyExpression) {
-    	throwUndeclaredEntityExceptionIfNecessary(propertyExpression);
+    	throwFreshEntityExceptionIfNecessary(propertyExpression);
         OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
         return !isSatisfiable(factory.getOWLObjectMinCardinality(2,propertyExpression));
     }
@@ -874,7 +874,7 @@ public class Reasoner implements OWLReasoner,Serializable {
      * @return true if each individual can have at most one incoming connection of the specified object property expression  
      */
     public boolean isInverseFunctional(OWLObjectPropertyExpression propertyExpression) {
-    	throwUndeclaredEntityExceptionIfNecessary(propertyExpression);
+    	throwFreshEntityExceptionIfNecessary(propertyExpression);
         OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
         return !isSatisfiable(factory.getOWLObjectMinCardinality(2,propertyExpression.getInverseProperty()));
     }
@@ -883,7 +883,7 @@ public class Reasoner implements OWLReasoner,Serializable {
      * @return true if the extension of propertyExpression is an irreflexive relation in each model of the loaded ontology  
      */
     public boolean isIrreflexive(OWLObjectPropertyExpression propertyExpression) {
-    	throwUndeclaredEntityExceptionIfNecessary(propertyExpression);
+    	throwFreshEntityExceptionIfNecessary(propertyExpression);
         OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
         return !isSatisfiable(factory.getOWLObjectHasSelf(propertyExpression));
     }
@@ -892,7 +892,7 @@ public class Reasoner implements OWLReasoner,Serializable {
      * @return true if the extension of propertyExpression is a reflexive relation in each model of the loaded ontology  
      */
     public boolean isReflexive(OWLObjectPropertyExpression propertyExpression) {
-    	throwUndeclaredEntityExceptionIfNecessary(propertyExpression);
+    	throwFreshEntityExceptionIfNecessary(propertyExpression);
         OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
         return !isSatisfiable(factory.getOWLObjectComplementOf(factory.getOWLObjectHasSelf(propertyExpression)));
     }
@@ -901,7 +901,7 @@ public class Reasoner implements OWLReasoner,Serializable {
      * @return true if the extension of propertyExpression is an asymmetric relation in each model of the loaded ontology 
      */
     public boolean isAsymmetric(OWLObjectPropertyExpression propertyExpression) {
-    	throwUndeclaredEntityExceptionIfNecessary(propertyExpression);
+    	throwFreshEntityExceptionIfNecessary(propertyExpression);
         Role role;
         if (propertyExpression.getSimplified().isAnonymous()) {
             AtomicRole atomicRole=AtomicRole.create(propertyExpression.getNamedProperty().getIRI().toString());
@@ -916,7 +916,7 @@ public class Reasoner implements OWLReasoner,Serializable {
      * @return true if the extension of propertyExpression is a symmetric relation in each model of the loaded ontology 
      */
     public boolean isSymmetric(OWLObjectPropertyExpression propertyExpression) {
-    	throwUndeclaredEntityExceptionIfNecessary(propertyExpression);
+    	throwFreshEntityExceptionIfNecessary(propertyExpression);
         if (propertyExpression.getNamedProperty().isOWLTopObjectProperty()) return true;        
         OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
         OWLDataFactory factory=ontologyManager.getOWLDataFactory();
@@ -933,7 +933,7 @@ public class Reasoner implements OWLReasoner,Serializable {
      * @return true if the extension of propertyExpression is a transitive relation in each model of the loaded ontology 
      */
     public boolean isTransitive(OWLObjectPropertyExpression propertyExpression) {
-    	throwUndeclaredEntityExceptionIfNecessary(propertyExpression);
+    	throwFreshEntityExceptionIfNecessary(propertyExpression);
         List<OWLObjectPropertyExpression> chain = new ArrayList<OWLObjectPropertyExpression>();
         chain.add(propertyExpression);
         chain.add(propertyExpression);
@@ -992,7 +992,11 @@ public class Reasoner implements OWLReasoner,Serializable {
      *         related with the property superDataProperty and false otherwise
      */
     public boolean isSubDataPropertyOf(OWLDataProperty subDataProperty,OWLDataProperty superDataProperty) {
-        return m_dataRoleClassificationManager.isSubsumedBy(AtomicRole.create(subDataProperty.getIRI().toString()), AtomicRole.create(superDataProperty.getIRI().toString()));
+    	if (m_dlOntology.hasDatatypes()) {
+    		return m_dataRoleClassificationManager.isSubsumedBy(AtomicRole.create(subDataProperty.getIRI().toString()), AtomicRole.create(superDataProperty.getIRI().toString()));
+    	} else {
+    		return subDataProperty.isOWLBottomDataProperty() || superDataProperty.isOWLTopDataProperty();
+    	}
     }
     /**
      * @param dataProperty1 - a data property 
@@ -1014,7 +1018,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         }
     }
     public NodeSet<OWLDataProperty> getSuperDataProperties(OWLDataProperty property,boolean direct) {
-    	throwUndeclaredEntityExceptionIfNecessary(property);
+    	throwFreshEntityExceptionIfNecessary(property);
         return dataPropertyNodesToOWLAPI(getSuperDataPropertyNodes(property,direct,false));
     }
     /**
@@ -1036,7 +1040,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         }
     }
     public NodeSet<OWLDataProperty> getSubDataProperties(OWLDataProperty property,boolean direct) {
-    	throwUndeclaredEntityExceptionIfNecessary(property);
+    	throwFreshEntityExceptionIfNecessary(property);
         return dataPropertyNodesToOWLAPI(getSubDataPropertyNodes(property,direct,false));
     }
     /**
@@ -1048,7 +1052,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         return dataPropertyNodesToOWLAPI(getSubDataPropertyNodes(property,false,true));
     }
     public Node<OWLDataProperty> getEquivalentDataProperties(OWLDataProperty property) {
-    	throwUndeclaredEntityExceptionIfNecessary(property);
+    	throwFreshEntityExceptionIfNecessary(property);
         return dataPropertiesToOWLAPI(getHierarchyNode(property).getEquivalentElements());
     }
     protected HierarchyNode<Role> getHierarchyNodeDataRole(Role role) {
@@ -1061,7 +1065,7 @@ public class Reasoner implements OWLReasoner,Serializable {
     protected HierarchyNode<Role> getHierarchyNode(OWLDataProperty property) {
         return getHierarchyNodeDataRole(AtomicRole.create(property.getIRI().toString()));
     }
-    protected void throwUndeclaredEntityExceptionIfNecessary(OWLObject... objects) {
+    protected void throwFreshEntityExceptionIfNecessary(OWLObject... objects) {
     	if (m_configuration.freshEntityPolicy==FreshEntityPolicy.DISALLOW) {
     		Set<OWLEntity> undeclaredEntities=new HashSet<OWLEntity>();
     		for (OWLObject object : objects) {
@@ -1084,7 +1088,7 @@ public class Reasoner implements OWLReasoner,Serializable {
     	}
     }
     public NodeSet<OWLClass> getDataPropertyDomains(OWLDataProperty property,boolean direct) {
-    	throwUndeclaredEntityExceptionIfNecessary(property);
+    	throwFreshEntityExceptionIfNecessary(property);
     	if (m_dlOntology.hasDatatypes()) {
 	        HierarchyNode<AtomicConcept> node=getHierarchyNode(m_factory.getOWLDataSomeValuesFrom(property,m_factory.getTopDatatype()));
 	        Set<HierarchyNode<AtomicConcept>> nodes;
@@ -1099,7 +1103,7 @@ public class Reasoner implements OWLReasoner,Serializable {
     	}
     }
     public Set<OWLLiteral> getDataPropertyValues(OWLNamedIndividual namedIndividual,OWLDataProperty property) {
-    	throwUndeclaredEntityExceptionIfNecessary(namedIndividual,property);
+    	throwFreshEntityExceptionIfNecessary(namedIndividual,property);
     	if (m_dlOntology.hasDatatypes()) {
 	        Set<OWLLiteral> result=new HashSet<OWLLiteral>();
 	        Individual ind=Individual.create(namedIndividual.getIRI().toString(),true);
@@ -1122,7 +1126,7 @@ public class Reasoner implements OWLReasoner,Serializable {
     	}
     }
     public NodeSet<OWLDataProperty> getDisjointDataProperties(OWLDataPropertyExpression propertyExpression, boolean direct) {
-    	throwUndeclaredEntityExceptionIfNecessary(propertyExpression);
+    	throwFreshEntityExceptionIfNecessary(propertyExpression);
     	if (m_dlOntology.hasDatatypes()) {
 	        classifyDataProperties();
 	        Set<HierarchyNode<Role>> result=new HashSet<HierarchyNode<Role>>();
@@ -1176,7 +1180,7 @@ public class Reasoner implements OWLReasoner,Serializable {
      * @return true if each individual can have at most one outgoing connection of the specified data property
      */
     public boolean isFunctional(OWLDataProperty property) {
-    	throwUndeclaredEntityExceptionIfNecessary(property);
+    	throwFreshEntityExceptionIfNecessary(property);
         OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
         return !isSatisfiable(factory.getOWLDataMinCardinality(2,property));
     }
@@ -1232,17 +1236,17 @@ public class Reasoner implements OWLReasoner,Serializable {
         return StandardClassificationManager.search(predicate,topPositions,null);
     }
     public Node<OWLNamedIndividual> getSameIndividuals(OWLNamedIndividual namedIndividual) {
-    	throwUndeclaredEntityExceptionIfNecessary(namedIndividual);
+    	throwFreshEntityExceptionIfNecessary(namedIndividual);
         NodeSet<OWLNamedIndividual> result=getInstances(m_factory.getOWLObjectOneOf(namedIndividual),false);
         assert result.isSingleton();
         return result.iterator().next();
     }
     public NodeSet<OWLNamedIndividual> getDifferentIndividuals(OWLNamedIndividual namedIndividual) {
-    	throwUndeclaredEntityExceptionIfNecessary(namedIndividual);
+    	throwFreshEntityExceptionIfNecessary(namedIndividual);
         return getInstances(m_factory.getOWLObjectComplementOf(m_factory.getOWLObjectOneOf(namedIndividual)),false);
     }
     public NodeSet<OWLClass> getTypes(OWLNamedIndividual owlIndividual,boolean direct) {
-    	throwUndeclaredEntityExceptionIfNecessary(owlIndividual);
+    	throwFreshEntityExceptionIfNecessary(owlIndividual);
         Individual individual=Individual.create(owlIndividual.getIRI().toString(),true);
         Set<HierarchyNode<AtomicConcept>> directSuperConceptNodes=getDirectSuperConceptNodes(individual);
         Set<HierarchyNode<AtomicConcept>> result=new HashSet<HierarchyNode<AtomicConcept>>(directSuperConceptNodes);
@@ -1258,7 +1262,7 @@ public class Reasoner implements OWLReasoner,Serializable {
      * @return true if owlIndividual is an instance of the class type and either direct is false or there is no class C such that owlIndividual is an instance of C and C is a subclass of type
      */
     public boolean hasType(OWLNamedIndividual owlIndividual,OWLClassExpression type,boolean direct) {
-    	throwUndeclaredEntityExceptionIfNecessary(owlIndividual,type);
+    	throwFreshEntityExceptionIfNecessary(owlIndividual,type);
         if (direct || isRealised()) {
             return getInstances(type,direct).containsEntity(owlIndividual);
         } else {
@@ -1277,7 +1281,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         }
     }
     public NodeSet<OWLNamedIndividual> getInstances(OWLClassExpression classExpression,boolean direct) {
-    	throwUndeclaredEntityExceptionIfNecessary(classExpression);
+    	throwFreshEntityExceptionIfNecessary(classExpression);
         realise();
         Set<Node<OWLNamedIndividual>> result=new HashSet<Node<OWLNamedIndividual>>();
         if (classExpression instanceof OWLClass) {
@@ -1378,7 +1382,7 @@ public class Reasoner implements OWLReasoner,Serializable {
             }
     }
     public NodeSet<OWLNamedIndividual> getObjectPropertyValues(OWLNamedIndividual namedIndividual,OWLObjectPropertyExpression propertyExpression) {
-    	throwUndeclaredEntityExceptionIfNecessary(namedIndividual,propertyExpression);
+    	throwFreshEntityExceptionIfNecessary(namedIndividual,propertyExpression);
         return getInstances(m_factory.getOWLObjectSomeValuesFrom(propertyExpression.getInverseProperty(),m_factory.getOWLObjectOneOf(namedIndividual)),false);
     }
     /**
@@ -1388,7 +1392,7 @@ public class Reasoner implements OWLReasoner,Serializable {
      * @return true if the pair (subject, object) is an instance of property in each model of the loaded ontology
      */
     public boolean hasObjectPropertyRelationship(OWLNamedIndividual subject,OWLObjectPropertyExpression property,OWLNamedIndividual object) {
-    	throwUndeclaredEntityExceptionIfNecessary(subject,property,object);
+    	throwFreshEntityExceptionIfNecessary(subject,property,object);
         return hasType(subject,m_factory.getOWLObjectSomeValuesFrom(property,m_factory.getOWLObjectOneOf(object)),false);
     }
     /**
@@ -1398,7 +1402,7 @@ public class Reasoner implements OWLReasoner,Serializable {
      * @return true if the pair (subject, object) is an instance of property in each model of the loaded ontology
      */
     public boolean hasDataPropertyRelationship(OWLNamedIndividual subject,OWLDataProperty property,OWLLiteral object) {
-    	throwUndeclaredEntityExceptionIfNecessary(subject,property);
+    	throwFreshEntityExceptionIfNecessary(subject,property);
         return hasType(subject,m_factory.getOWLDataHasValue(property,object),false);
     }
 

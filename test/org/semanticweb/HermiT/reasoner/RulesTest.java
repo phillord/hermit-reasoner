@@ -1,10 +1,12 @@
 package org.semanticweb.HermiT.reasoner;
 
+import org.semanticweb.HermiT.Reasoner.ReasonerFactory;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.reasoner.NodeSet;
+import org.semanticweb.owlapi.reasoner.OWLReasoner;
 
 
 public class RulesTest extends AbstractReasonerTest {
@@ -19,6 +21,41 @@ public class RulesTest extends AbstractReasonerTest {
 //        Configuration c=new Configuration();
 //        return c;
 //    }
+    
+    public void testSimpleRule2() throws Exception {
+        String axioms = "Declaration(NamedIndividual(:sensor))"
+        	+ "Declaration(NamedIndividual(:kitchen))"
+        	+ "Declaration(NamedIndividual(:pda))"
+        	+ "Declaration(Class(:BluetoothSensor))"
+        	+ "Declaration(Class(:Location))"
+        	+ "Declaration(Class(:BluetoothDevice))"
+        	+ "Declaration(ObjectProperty(:hasLocation))"
+        	+ "Declaration(ObjectProperty(:detects))"
+        	+ "ClassAssertion(:BluetoothDevice :pda)"+LB
+        	+ "ClassAssertion(:BluetoothSensor :sensor)"+LB
+            + "ClassAssertion(:Location :kitchen)"+LB
+            + "ObjectPropertyAssertion(:detects :sensor :pda)"+LB
+            + "ObjectPropertyAssertion(:hasLocation :sensor :kitchen)"+LB
+            // B(x) -> C(x)
+            + "DLSafeRule(" 
+            + "  Body(" 
+            + "    ClassAtom(:BluetoothDevice Variable(:vbd)) " 
+            + "    ClassAtom(:BluetoothSensor Variable(:vbs)) " 
+            + "    ClassAtom(:Location Variable(:vl)) "
+            + "    ObjectPropertyAtom(:detects Variable(:vbs) Variable(:vbd)) " 
+            + "    ObjectPropertyAtom(:hasLocation Variable(:vbs) Variable(:vl))"
+            + "  )"
+            + "  Head(ObjectPropertyAtom(:hasLocation Variable(:vbd) Variable(:vl)))"
+            + ")";
+        loadOntologyWithAxioms(axioms);
+        
+        OWLNamedIndividual pda = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "pda"));
+        OWLNamedIndividual k = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "kitchen"));
+        OWLObjectProperty hasLocation = m_dataFactory.getOWLObjectProperty(IRI.create(AbstractReasonerTest.NS + "hasLocation"));
+
+        OWLReasoner owlReasoner=new ReasonerFactory().createReasoner(m_ontology);
+        assertTrue(owlReasoner.getObjectPropertyValues(pda, hasLocation).containsEntity(k));
+    }
 
     public void testSimpleRule() throws Exception {
         String axioms = "SubClassOf(:A :B)"+LB

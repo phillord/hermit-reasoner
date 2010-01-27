@@ -19,12 +19,13 @@
 package org.semanticweb.HermiT.examples;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.semanticweb.HermiT.Reasoner.ReasonerFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -72,23 +73,24 @@ public class MaterialiseInferences {
         // We can now create an instance of InferredOntologyGenerator. 
         InferredOntologyGenerator iog=new InferredOntologyGenerator(reasoner,generators);
         // Before we actually generate the axioms into an ontology, we first have to create that ontology. 
-        // First, we create an IRI for the ontology into which the computed axioms will be saved. 
-        // We do this by (virtually) creating a file with a relative path from which we get the absolute IRI. 
-        // Since we cannot write to relative IRIs, we have to resolve the relative path to an absolute one 
-        // in an OS independent form.  
-        File inferredOntologyFile=new File("examples/ontologies/pizza-inferred.owl");
-        // Calling toURI() before calling toURL() ensures that characters are escaped as required for URLs. 
-        IRI inferredAxiomsOntologyIRI=IRI.create(inferredOntologyFile.toURI().toURL().toExternalForm());
         // The manager creates the for now empty ontology for the inferred axioms for us. 
-        OWLOntology inferredAxiomsOntology=manager.createOntology(inferredAxiomsOntologyIRI);
+        OWLOntology inferredAxiomsOntology=manager.createOntology();
         // Now we use the inferred ontology generator to fill the ontology. That might take some 
         // time since it involves possibly a lot of calls to the reasoner.    
         iog.fillOntology(manager, inferredAxiomsOntology);
         // Now the axioms are computed and added to the ontology, but we still have to save 
-        // the ontology into a file. We use the same format as for the input ontology. 
-        manager.saveOntology(inferredAxiomsOntology, manager.getOntologyFormat(ontology));
+        // the ontology into a file. Since we cannot write to relative files, we have to resolve the 
+        // relative path to an absolute one in an OS independent form. We do this by (virtually) creating a 
+        // file with a relative path from which we get the absolute file.  
+        File inferredOntologyFile=new File("examples/ontologies/pizza-inferred.owl");
+        inferredOntologyFile=inferredOntologyFile.getAbsoluteFile();
+        // Now we create a stream since the ontology manager can then write to that stream. 
+        OutputStream outputStream=new FileOutputStream(inferredOntologyFile);
+        // We use the same format as for the input ontology.
+        manager.saveOntology(inferredAxiomsOntology, manager.getOntologyFormat(ontology), outputStream);
         // Now that ontology that contains the inferred axioms should be in the ontologies subfolder 
         // (you Java IDE, e.g., Eclipse, might have to refresh its view of files in the file system) 
         // before the file is visible.  
+        System.out.println("The ontology in examples/ontologies/pizza-inferred.owl should now contain all inferred axioms. ");
     }
 }

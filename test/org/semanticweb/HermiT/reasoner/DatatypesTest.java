@@ -1,10 +1,25 @@
 package org.semanticweb.HermiT.reasoner;
 
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLDataProperty;
+
 
 public class DatatypesTest extends AbstractReasonerTest {
 
     public DatatypesTest(String name) {
         super(name);
+    }
+    
+    public void testFreshEntitiesQuery() throws Exception {
+        String axioms = "Declaration(NamedIndividual(:a)) Declaration(Class(:A))" 
+        	+ "ClassAssertion(:A :a)";
+        loadReasonerWithAxioms(axioms);
+        OWLDataProperty dp=m_dataFactory.getOWLDataProperty(IRI.create(NS+"dp"));
+        OWLDataProperty dp2=m_dataFactory.getOWLDataProperty(IRI.create(NS+"dp2"));
+        assertTrue(m_reasoner.getSubDataProperties(dp, false).containsEntity(m_dataFactory.getOWLBottomDataProperty()));
+        assertTrue(m_reasoner.getSuperDataProperties(dp, false).containsEntity(m_dataFactory.getOWLTopDataProperty()));
+        assertFalse(m_reasoner.getSuperDataProperties(dp, false).containsEntity(dp2));
+        assertFalse(m_reasoner.getSubDataProperties(dp, false).containsEntity(dp2));
     }
     
     public void testParsingError() throws Exception {

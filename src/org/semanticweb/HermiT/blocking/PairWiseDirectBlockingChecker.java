@@ -79,17 +79,13 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
             nodeObject.m_toParentLabelHashCode;
     }
     public boolean canBeBlocker(Node node) {
-        return node.getNodeType()==NodeType.TREE_NODE;
+    	Node parent=node.getParent();
+        return node.getNodeType()==NodeType.TREE_NODE && (parent.getNodeType()==NodeType.TREE_NODE || parent.getNodeType()==NodeType.GRAPH_NODE);
     }
     public boolean canBeBlocked(Node node) {
-        return node.getNodeType()==NodeType.TREE_NODE;
+    	Node parent=node.getParent();
+        return node.getNodeType()==NodeType.TREE_NODE && (parent.getNodeType()==NodeType.TREE_NODE || parent.getNodeType()==NodeType.GRAPH_NODE);
     }
-//    public boolean canBeBlocker(Node node) {
-//        return node.getNodeType()==NodeType.TREE_NODE && node.getParent().getNodeType()==NodeType.TREE_NODE;
-//    }
-//    public boolean canBeBlocked(Node node) {
-//        return node.getNodeType()==NodeType.TREE_NODE && node.getParent().getNodeType()==NodeType.TREE_NODE;
-//    }
     public boolean hasBlockingInfoChanged(Node node) {
         return ((PairWiseBlockingObject)node.getBlockingObject()).m_hasChanged;
     }
