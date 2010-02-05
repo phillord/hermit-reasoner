@@ -68,10 +68,12 @@ public class ValidatedSingleDirectBlockingChecker implements DirectBlockingCheck
         return ((ValidatedSingleBlockingObject)node.getBlockingObject()).m_blockingRelevantHashCode;
     }
     public boolean canBeBlocker(Node node) {
-        return node.getNodeType()==NodeType.TREE_NODE && (!m_hasInverses || node.getParent().getNodeType()==NodeType.TREE_NODE);
+    	Node parent=node.getParent();
+        return node.getNodeType()==NodeType.TREE_NODE && (!m_hasInverses || node.getParent().getNodeType()==NodeType.TREE_NODE || parent.getNodeType()==NodeType.GRAPH_NODE);
     }
     public boolean canBeBlocked(Node node) {
-        return node.getNodeType()==NodeType.TREE_NODE && (!m_hasInverses || node.getParent().getNodeType()==NodeType.TREE_NODE);
+    	Node parent=node.getParent();
+        return node.getNodeType()==NodeType.TREE_NODE && (!m_hasInverses || node.getParent().getNodeType()==NodeType.TREE_NODE || parent.getNodeType()==NodeType.GRAPH_NODE);
     }
     public boolean hasBlockingInfoChanged(Node node) {
         return ((ValidatedSingleBlockingObject)node.getBlockingObject()).m_hasChangedForBlocking;

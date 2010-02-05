@@ -46,25 +46,20 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
     protected boolean m_useSimpleCore;
     protected final boolean m_hasInverses;
     
+    protected final boolean debuggingMode=false;
     // statistics: 
-    protected final boolean debuggingMode;
-    protected final boolean m_generateValidationStatistics;
     public int initialModelSize=0;
     public int initialBlocked=0;
     public int initialInvalidlyBlocked=0;
     public int noValidations=0;
+    public long validationTime=0; 
     
     public AnywhereValidatedBlocking(DirectBlockingChecker directBlockingChecker,BlockingSignatureCache blockingSignatureCache,boolean hasInverses,boolean useSimpleCore) {
-    	this(directBlockingChecker,blockingSignatureCache,hasInverses,useSimpleCore,false,false);
-    }
-    public AnywhereValidatedBlocking(DirectBlockingChecker directBlockingChecker,BlockingSignatureCache blockingSignatureCache,boolean hasInverses,boolean useSimpleCore,boolean generateStatistics,boolean printDebugInfo) {
         m_directBlockingChecker=directBlockingChecker;
         m_currentBlockersCache=new ValidatedBlockersCache(m_directBlockingChecker);
         m_blockingSignatureCache=null;//blockingSignatureCache; so far cache is not supported
         m_hasInverses=hasInverses;
         m_useSimpleCore=useSimpleCore;
-        m_generateValidationStatistics=generateStatistics;
-        debuggingMode=printDebugInfo;
     }
     public void initialize(Tableau tableau) {
         m_tableau=tableau;
@@ -78,6 +73,12 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
         m_directBlockingChecker.clear();
         m_lastValidatedUnchangedNode=null;
         m_blockingValidator.clear();
+        //statistics
+        initialModelSize=0;
+        initialBlocked=0;
+        initialInvalidlyBlocked=0;
+        noValidations=0;
+        validationTime=0; 
     }
     public void computeBlocking(boolean finalChance) {
         if (finalChance) {
@@ -146,16 +147,30 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
         }
     }
     public void validateBlocks() {
+    	// statistics:
     	noValidations++;
-        // statistics:
         int checkedBlocks=0;
         int invalidBlocks=0;
+        Node node;
+        if (noValidations==1) {
+            node=m_tableau.getFirstTableauNode();
+            while (node!=null) {
+                if (node.isActive()) {
+                	initialModelSize++;
+                    if (node.isBlocked()&&node.hasUnprocessedExistentials()) {
+                    	initialBlocked++;
+                    }
+                }
+                node=node.getNextTableauNode();
+            }
+        }
         
         Node firstInvalidlyBlockedNode=null;
         TableauMonitor monitor=m_tableau.getTableauMonitor();
         if (monitor!=null) monitor.blockingValidationStarted();
         
-        Node node = m_lastValidatedUnchangedNode==null?m_tableau.getFirstTableauNode():m_lastValidatedUnchangedNode;
+        long thisValidationTime=System.currentTimeMillis();        
+        node=m_lastValidatedUnchangedNode==null?m_tableau.getFirstTableauNode():m_lastValidatedUnchangedNode;
         Node firstValidatedNode=node;
         while (node!=null) {
             m_currentBlockersCache.removeNode(node);
@@ -165,7 +180,7 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
         if (debuggingMode) System.out.print("Model size: "+(m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes())+" Current ID:");
         while (node!=null) {
             if (node.isActive()) {
-                if (node.isBlocked()) {
+                if (node.isBlocked()&&node.hasUnprocessedExistentials()) {
                     checkedBlocks++;
                     // check whether the block is a correct one
                     if ((node.isDirectlyBlocked()&&(m_directBlockingChecker.hasChangedSinceValidation(node) || m_directBlockingChecker.hasChangedSinceValidation(node.getParent()) || m_directBlockingChecker.hasChangedSinceValidation(node.getBlocker()))) 
@@ -202,22 +217,7 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
             }
             node=node.getNextTableauNode();
         } 
-        if (debuggingMode) System.out.println("");
-        
-        if (initialModelSize==0) {
-            node=m_tableau.getFirstTableauNode();
-            while (node!=null) {
-                if (node.isActive()) {
-                	initialModelSize++;
-                    if (node.isBlocked()) {
-                    	initialBlocked++;
-                    }
-                }
-                node=node.getNextTableauNode();
-            }
-            initialInvalidlyBlocked=invalidBlocks;
-        }
-        
+
         node=firstValidatedNode;
         while (node!=null) {
             if (node.isActive()) {
@@ -233,7 +233,12 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
         //m_firstChangedNode=firstValidatedNode;
         //m_firstChangedNode=null;
         if (monitor!=null) monitor.blockingValidationFinished();
-        if (debuggingMode) System.out.println("Checked " + checkedBlocks + " blocked nodes of which " + invalidBlocks + " were invalid.");
+        
+        thisValidationTime=System.currentTimeMillis()-thisValidationTime;
+        validationTime+=thisValidationTime;
+        if (noValidations==1) initialInvalidlyBlocked=invalidBlocks;
+        if (debuggingMode) System.out.println("");
+        if (debuggingMode) System.out.println("Checked " + checkedBlocks + " blocked nodes of which " + invalidBlocks + " were invalid in "+thisValidationTime+" ms.");
     }
 
     public boolean isPermanentAssertion(Concept concept,Node node) {

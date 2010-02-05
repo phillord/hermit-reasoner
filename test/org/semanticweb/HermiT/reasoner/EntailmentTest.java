@@ -11,9 +11,26 @@ public class EntailmentTest extends AbstractReasonerTest {
     public EntailmentTest(String name) {
         super(name);
     }
+    public void testHasKey() throws Exception {
+        String axioms = "Declaration(DataProperty(:dp))" 
+            + "ClassAssertion(owl:Thing :a)"
+            + "SubClassOf(owl:Thing ObjectIntersectionOf(DataAllValuesFrom(:dp xsd:string) DataAllValuesFrom(:dp xsd:integer)))";
+        loadReasonerWithAxioms(axioms);
+        axioms = "HasKey(owl:Thing () (:dp))";
+        OWLOntology conlusions=getOntologyWithAxioms(axioms);
+        assertEntails(conlusions.getLogicalAxioms(), true);
+    }
+    public void testHasKey2() throws Exception {
+        String axioms = "Declaration(DataProperty(:dp))" 
+            + "SubClassOf(ObjectOneOf(:a1 :a2 :a3) ObjectIntersectionOf(DataAllValuesFrom(:dp xsd:string) DataAllValuesFrom(:dp xsd:integer)))";
+        loadReasonerWithAxioms(axioms);
+        axioms = "HasKey(owl:Thing () (:dp))";
+        OWLOntology conlusions=getOntologyWithAxioms(axioms);
+        assertEntails(conlusions.getLogicalAxioms(), true);
+    }
     public void testBlankNodes1() throws Exception {
         String axioms = "Declaration(ObjectProperty(:p))" 
-            + "ClassAssertion(:a owl:Thing)"
+            + "ClassAssertion(owl:Thing :a )"
             + "ObjectPropertyAssertion(:p :a _:anon)";
         loadReasonerWithAxioms(axioms);
         m_ontologyManager.removeOntology(m_ontology);
@@ -109,7 +126,7 @@ public class EntailmentTest extends AbstractReasonerTest {
         buffer.append("Prefix(owl:=<http://www.w3.org/2002/07/owl#>)");
         buffer.append("Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)");
         buffer.append("Prefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)");
-        buffer.append("Ontology(<"+ONTOLOGY_IRI+">");
+        buffer.append("Ontology(");
         buffer.append(axioms);
         buffer.append(")");
         OWLOntologyDocumentSource input=new StringDocumentSource(buffer.toString());
