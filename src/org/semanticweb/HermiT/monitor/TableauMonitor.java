@@ -43,7 +43,7 @@ public interface TableauMonitor {
     void isInstanceOfFinished(AtomicConcept concept,Individual individual,boolean result);
     void tableauCleared();
     void saturateStarted();
-    void saturateFinished();
+    void saturateFinished(boolean modelFound);
     void iterationStarted();
     void iterationFinished();
     void dlClauseMatchedStarted(DLClauseEvaluator dlClauseEvaluator,int dlClauseIndex);

@@ -97,9 +97,9 @@ public class TableauMonitorForwarder implements TableauMonitor,Serializable {
         if (m_forwardingOn)
             m_forwardingTargetMonitor.saturateStarted();
     }
-    public void saturateFinished() {
+    public void saturateFinished(boolean modelFound) {
         if (m_forwardingOn)
-            m_forwardingTargetMonitor.saturateFinished();
+            m_forwardingTargetMonitor.saturateFinished(modelFound);
     }
     public void iterationStarted() {
         if (m_forwardingOn)

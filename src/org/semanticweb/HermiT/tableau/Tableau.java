@@ -215,7 +215,7 @@ public final class Tableau implements Serializable {
                 }
             }
             if (m_tableauMonitor!=null)
-                m_tableauMonitor.saturateFinished();
+                m_tableauMonitor.saturateFinished(!m_extensionManager.containsClash());
             if (!m_extensionManager.containsClash()) {
                 m_existentialExpansionStrategy.modelFound();
                 return true;

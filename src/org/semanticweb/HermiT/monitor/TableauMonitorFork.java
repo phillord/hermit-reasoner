@@ -93,9 +93,9 @@ public class TableauMonitorFork implements TableauMonitor,Serializable  {
         m_first.saturateStarted();
         m_second.saturateStarted();
     }
-    public void saturateFinished() {
-        m_first.saturateFinished();
-        m_second.saturateFinished();
+    public void saturateFinished(boolean modelFound) {
+        m_first.saturateFinished(modelFound);
+        m_second.saturateFinished(modelFound);
     }
     public void iterationStarted() {
         m_first.iterationStarted();

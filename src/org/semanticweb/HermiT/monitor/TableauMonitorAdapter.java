@@ -65,7 +65,7 @@ public class TableauMonitorAdapter implements TableauMonitor,Serializable  {
     }
     public void saturateStarted() {
     }
-    public void saturateFinished() {
+    public void saturateFinished(boolean modelFound) {
     }
     public void iterationStarted() {
     }

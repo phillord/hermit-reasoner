@@ -83,15 +83,11 @@ public class CountingMonitor extends TableauMonitorAdapter {
     public void isInstanceOfFinished(AtomicConcept concept,Individual individual,boolean result) {
         doStatistics();
     }
-    public void iterationStarted() {
-    }
-    public void saturateStarted() {
+    public void saturateFinished(boolean modelFound) {
+    	if (!modelFound) m_overallNumberOfClashes++;
     }
     public void backtrackToFinished(BranchingPoint newCurrentBrancingPoint) {
         m_numberOfBacktrackings++;
-    }
-    public void clashDetected() {
-    	m_overallNumberOfClashes++;
     }
     public void blockingValidationStarted() {
     	m_numberOfBlockingValidations++;
@@ -106,8 +102,8 @@ public class CountingMonitor extends TableauMonitorAdapter {
         m_overallValidationTime+=m_validationTime;
         m_overallNumberOfBlockingValidations+=m_numberOfBlockingValidations;
         m_overallNumberOfBacktrackings=m_numberOfBacktrackings;
-        m_overallNumberOfNodes+=m_numberOfNodes;
         m_numberOfNodes=m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes();
+        m_overallNumberOfNodes+=m_numberOfNodes;
     }
     
 	public int getNumberOfBacktrackings() {
