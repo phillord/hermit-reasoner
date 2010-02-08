@@ -101,7 +101,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
         m_overallTime+=m_time;
         m_overallValidationTime+=m_validationTime;
         m_overallNumberOfBlockingValidations+=m_numberOfBlockingValidations;
-        m_overallNumberOfBacktrackings=m_numberOfBacktrackings;
+        m_overallNumberOfBacktrackings+=m_numberOfBacktrackings;
         m_numberOfNodes=m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes();
         m_overallNumberOfNodes+=m_numberOfNodes;
     }
