@@ -1,17 +1,17 @@
 /* Copyright 2009 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -43,7 +43,7 @@ public class ShowSubtreeCommand extends AbstractCommand {
         writer.println("    Shows the subtree of the model rooted at the given node.");
     }
     public void execute(String[] args) {
-        Node subtreeRoot=m_debugger.getTableau().getCheckedNode0();
+        Node subtreeRoot=m_debugger.getTableau().getCheckedNode0().getCanonicalNode();
         if (args.length>=2) {
             int nodeID;
             try {

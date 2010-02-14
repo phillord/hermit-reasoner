@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -40,36 +40,36 @@ public class ObjectPropertyInclusionManager {
     protected final Graph<OWLObjectPropertyExpression> m_subObjectProperties;
     protected final Set<OWLObjectPropertyExpression> m_transitiveObjectProperties;
     protected final Map<OWLObjectAllValuesFrom,OWLClassExpression> m_replacedDescriptions;
-    
+
     protected final Map<OWLObjectPropertyExpression,Automaton> m_automataForComplexRoles;
-    protected final Set<OWLObjectPropertyExpression> m_nonSimpleRoles;                                                                                                                                          
+    protected final Set<OWLObjectPropertyExpression> m_nonSimpleRoles;
 
     public ObjectPropertyInclusionManager(OWLDataFactory factory) {
         m_factory=factory;
         m_subObjectProperties=new Graph<OWLObjectPropertyExpression>();
         m_transitiveObjectProperties=new HashSet<OWLObjectPropertyExpression>();
         m_replacedDescriptions=new HashMap<OWLObjectAllValuesFrom,OWLClassExpression>();
- 
+
         m_automataForComplexRoles = new HashMap<OWLObjectPropertyExpression,Automaton>();
         m_nonSimpleRoles = new HashSet<OWLObjectPropertyExpression>();
 
     }
-    
+
     public void prepareTransformation(OWLAxioms axioms) {
         for (OWLObjectPropertyExpression[] inclusion : axioms.m_simpleObjectPropertyInclusions)
             addInclusion(inclusion[0],inclusion[1]);
- 
+
         AutomataConstructionManager automataBuilder = new AutomataConstructionManager();
         m_automataForComplexRoles.putAll( automataBuilder.createAutomata( axioms.m_simpleObjectPropertyInclusions, axioms.m_complexObjectPropertyInclusions ) );
         m_nonSimpleRoles.addAll( automataBuilder.getM_nonSimpleRoles() );
-        
+
 
         for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_asymmetricObjectProperties)
-                if( m_nonSimpleRoles.contains( objectPropertyExpression ) )
+            if( m_nonSimpleRoles.contains( objectPropertyExpression ) )
                 throw new IllegalArgumentException( "Non simple role '" + objectPropertyExpression + "' or its inverse appears in asymmetricity axiom");
 
         for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_irreflexiveObjectProperties)
-                if( m_nonSimpleRoles.contains( objectPropertyExpression ) )
+            if( m_nonSimpleRoles.contains( objectPropertyExpression ) )
                 throw new IllegalArgumentException( "Non simple role '" + objectPropertyExpression + "' or its inverse appears in asymmetricity axiom");
 
         for (OWLObjectPropertyExpression[] properties : axioms.m_disjointObjectProperties)
@@ -88,13 +88,13 @@ public class ObjectPropertyInclusionManager {
             for (int index=0;index<inclusion.length;index++){
             	if(inclusion[index] instanceof OWLObjectCardinalityRestriction)
                     if( m_nonSimpleRoles.contains( ((OWLObjectCardinalityRestriction)inclusion[index]).getProperty() ) )
-                        throw new IllegalArgumentException( "Non simple role '" + (OWLObjectCardinalityRestriction)inclusion[index] + "' or its inverse appears in asymmetricity axiom");
+                        throw new IllegalArgumentException( "Non simple role '" + inclusion[index] + "' or its inverse appears in asymmetricity axiom");
 
                     inclusion[index]=replaceDescriptionIfNecessary(inclusion[index]);
             }
 
         for (Map.Entry<OWLObjectAllValuesFrom,OWLClassExpression> mapping : m_replacedDescriptions.entrySet()) {
-        	
+
             OWLObjectAllValuesFrom replacedAllRestriction=mapping.getKey();
             OWLObjectPropertyExpression objectProperty = replacedAllRestriction.getProperty();
             OWLClassExpression owlConcept = replacedAllRestriction.getFiller();
@@ -103,7 +103,7 @@ public class ObjectPropertyInclusionManager {
             Automaton automatonOfRole = m_automataForComplexRoles.get( objectProperty );
             String initialState = automatonOfRole.initials().toArray()[0].toString();
             boolean isOfNegativePolarity = false;
-            OWLClassExpression conceptForInitialState = m_factory.getOWLClass(IRI.create("internal:all#"+indexOfInitialConcept+initialState));            
+            OWLClassExpression conceptForInitialState = m_factory.getOWLClass(IRI.create("internal:all#"+indexOfInitialConcept+initialState));
             if (replacedAllRestriction.getFiller() instanceof OWLObjectComplementOf || replacedAllRestriction.getFiller().equals(m_factory.getOWLNothing())){
                 conceptForInitialState = m_factory.getOWLClass(IRI.create("internal:all#"+indexOfInitialConcept+initialState)).getComplementNNF();
                 isOfNegativePolarity = true;
@@ -142,14 +142,14 @@ public class ObjectPropertyInclusionManager {
             }
             Object[] finalStates = automatonOfRole.terminals().toArray();
             for( int i=0 ; i<finalStates.length ; i++ ){
-            	OWLClassExpression[] classExpr; 
+            	OWLClassExpression[] classExpr;
             	if( owlConcept.isOWLNothing() )
-            		classExpr = new OWLClassExpression[] { mapOfNewConceptNames.get( (State)finalStates[i] ).getComplementNNF() };
+            		classExpr = new OWLClassExpression[] { mapOfNewConceptNames.get( finalStates[i] ).getComplementNNF() };
             	else if( owlConcept.isOWLThing() )
             		classExpr = new OWLClassExpression[] { owlConcept };
             	else
-            		classExpr = new OWLClassExpression[] { mapOfNewConceptNames.get( (State)finalStates[i] ).getComplementNNF(), owlConcept };
-                
+            		classExpr = new OWLClassExpression[] { mapOfNewConceptNames.get( finalStates[i] ).getComplementNNF(), owlConcept };
+
             	axioms.m_conceptInclusions.add(classExpr);
             }
         }

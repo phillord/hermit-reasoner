@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -25,9 +25,9 @@ import java.util.List;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 
 /**
- * Represents a node in the tableau. Nodes are initially active, but can be set 
- * to merged or pruned at a later stage, which does not delete, but marks them 
- * as inactive. 
+ * Represents a node in the tableau. Nodes are initially active, but can be set
+ * to merged or pruned at a later stage, which does not delete, but marks them
+ * as inactive.
  */
 public final class Node implements Serializable {
     private static final long serialVersionUID=-2549229429321484690L;
@@ -35,7 +35,7 @@ public final class Node implements Serializable {
     public static final Node SIGNATURE_CACHE_BLOCKER=new Node(null);
 
     public static enum NodeState { ACTIVE,MERGED,PRUNED }
-    
+
     protected final Tableau m_tableau;
     protected int m_nodeID;
     protected NodeState m_nodeState;
@@ -57,7 +57,7 @@ public final class Node implements Serializable {
     protected Object m_blockingObject;
     protected Object m_blockingCargo;
     protected int m_firstGraphOccurrenceNode;
-    
+
     public Node(Tableau tableau) {
         m_tableau=tableau;
         m_nodeID=-1;
@@ -157,30 +157,30 @@ public final class Node implements Serializable {
         m_directlyBlocked=directlyBlocked;
     }
     /**
-     * @return a blocking object (PairwiseBlockingObject or SingleBlockingObject) that stores 
-     * blocking relevant information of a node such as is label. 
+     * @return a blocking object (PairwiseBlockingObject or SingleBlockingObject) that stores
+     * blocking relevant information of a node such as is label.
      */
     public Object getBlockingObject() {
         return m_blockingObject;
     }
     /**
-     * Stores a blocking object (PairwiseBlockingObject or SingleBlockingObject) for this node 
-     * that stores blocking relevant information of a node such as is label. 
-     * @param blockingObject 
+     * Stores a blocking object (PairwiseBlockingObject or SingleBlockingObject) for this node
+     * that stores blocking relevant information of a node such as is label.
+     * @param blockingObject
      */
     public void setBlockingObject(Object blockingObject) {
         m_blockingObject=blockingObject;
     }
     /**
-     * @return an object that should be a BlockersCache.CacheEntry and is used to 
-     * remove or add the object to the blockers cache even after the hash code has 
+     * @return an object that should be a BlockersCache.CacheEntry and is used to
+     * remove or add the object to the blockers cache even after the hash code has
      * changed due to label modifications
      */
     public Object getBlockingCargo() {
         return m_blockingCargo;
     }
     /**
-     * @param blockingCargo should be an object of type BlockersCache.CacheEntry 
+     * @param blockingCargo should be an object of type BlockersCache.CacheEntry
      */
     public void setBlockingCargo(Object blockingCargo) {
         m_blockingCargo=blockingCargo;
@@ -214,6 +214,9 @@ public final class Node implements Serializable {
         while (result.m_mergedInto!=null)
             result=result.m_mergedInto;
         return result;
+    }
+    public PermanentDependencySet getCanonicalNodeDependencySet() {
+        return addCanonicalNodeDependencySet(m_tableau.m_dependencySetFactory.m_emptySet);
     }
     public PermanentDependencySet addCanonicalNodeDependencySet(DependencySet dependencySet) {
         PermanentDependencySet result=m_tableau.m_dependencySetFactory.getPermanent(dependencySet);

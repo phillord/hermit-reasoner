@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -203,10 +203,10 @@ public final class Tableau implements Serializable {
                 if (m_tableauMonitor!=null)
                     m_tableauMonitor.iterationFinished();
                 if (!existentialsAreExact && !hasMoreWork && !m_extensionManager.containsClash()) {
-                    // no more work to do, but since we use a blocking strategy that does not necessarily 
-                    // establish only valid blocks (existentialsAreExact == false), we tell the blocking 
-                    // strategy to go through the nodes and check whether all blocks are valid and if not, 
-                    // continue with the expansion  
+                    // no more work to do, but since we use a blocking strategy that does not necessarily
+                    // establish only valid blocks (existentialsAreExact == false), we tell the blocking
+                    // strategy to go through the nodes and check whether all blocks are valid and if not,
+                    // continue with the expansion
                     if (m_tableauMonitor!=null)
                         m_tableauMonitor.iterationStarted();
                     hasMoreWork=m_existentialExpansionStrategy.expandExistentials(true); // returns true if some blocks were invalid
@@ -341,12 +341,12 @@ public final class Tableau implements Serializable {
         m_checkedNode0=createNewNINode(m_dependencySetFactory.emptySet());
         if (isDataRole)
             m_checkedNode1=createNewConcreteNode(m_dependencySetFactory.emptySet(),m_checkedNode0);
-        else 
+        else
             m_checkedNode1=createNewNINode(m_dependencySetFactory.emptySet());
-        if (role instanceof InverseRole) 
+        if (role instanceof InverseRole)
             m_extensionManager.addRoleAssertion(((InverseRole)role).getInverseOf(),m_checkedNode1,m_checkedNode0,m_dependencySetFactory.emptySet(),true);
         else
-            m_extensionManager.addRoleAssertion((AtomicRole)role,m_checkedNode0,m_checkedNode1,m_dependencySetFactory.emptySet(),true);
+            m_extensionManager.addRoleAssertion(role,m_checkedNode0,m_checkedNode1,m_dependencySetFactory.emptySet(),true);
         boolean result=isSatisfiable();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isSatisfiableFinished(role,result);
@@ -361,7 +361,7 @@ public final class Tableau implements Serializable {
         if (role instanceof InverseRole)
             m_extensionManager.addRoleAssertion(((InverseRole)role).getInverseOf(),b,a,m_dependencySetFactory.emptySet(),true);
         else
-            m_extensionManager.addRoleAssertion((AtomicRole)role,a,b,m_dependencySetFactory.emptySet(),true);
+            m_extensionManager.addRoleAssertion(role,a,b,m_dependencySetFactory.emptySet(),true);
         m_branchingPoints[0]=new BranchingPoint(this);
         m_currentBranchingPoint++;
         m_nonbacktrackableBranchingPoint=m_currentBranchingPoint;
@@ -369,7 +369,7 @@ public final class Tableau implements Serializable {
         if (role instanceof InverseRole)
             m_extensionManager.addRoleAssertion(((InverseRole)role).getInverseOf(),a,b,dependencySet,true);
         else
-            m_extensionManager.addRoleAssertion((AtomicRole)role,b,a,dependencySet,true);
+            m_extensionManager.addRoleAssertion(role,b,a,dependencySet,true);
         return !isSatisfiable();
     }
     public boolean isABoxSatisfiable() {
@@ -485,7 +485,7 @@ public final class Tableau implements Serializable {
     }
     /**
      * Add a branching point in case we need to backtrack to this state.
-     * 
+     *
      * @param branchingPoint
      */
     public void pushBranchingPoint(BranchingPoint branchingPoint) {
@@ -509,7 +509,7 @@ public final class Tableau implements Serializable {
     }
     /**
      * Backtrack to a certain branching point in the list of branching points that have been set during the run.
-     * 
+     *
      * @param newCurrentBrancingPoint
      */
     protected void backtrackTo(int newCurrentBrancingPoint) {
@@ -552,7 +552,7 @@ public final class Tableau implements Serializable {
     }
     /**
      * Create a new node that represents an individual named in the input ontology (thus, keys have to be applied to it)
-     * 
+     *
      * @param dependencySet
      *            the dependency set for the node
      * @return the created node
@@ -562,7 +562,7 @@ public final class Tableau implements Serializable {
     }
     /**
      * Create a new node that represents a nominal, but one that is not named in the input ontology (thus, keys are not applicable)
-     * 
+     *
      * @param dependencySet
      *            the dependency set for the node
      * @return the created node
@@ -572,7 +572,7 @@ public final class Tableau implements Serializable {
     }
     /**
      * Create a new tree node.
-     * 
+     *
      * @param dependencySet
      *            the dependency set for the node
      * @param parent
@@ -584,7 +584,7 @@ public final class Tableau implements Serializable {
     }
     /**
      * Create a new concrete node for datatypes.
-     * 
+     *
      * @param dependencySet
      *            the dependency set for the node
      * @param parent
@@ -596,7 +596,7 @@ public final class Tableau implements Serializable {
     }
     /**
      * Create a new root constant node for datatypes.
-     * 
+     *
      * @param dependencySet
      *            the dependency set for the node
      * @return the created node
@@ -606,7 +606,7 @@ public final class Tableau implements Serializable {
     }
     /**
      * Create a new node graph node for description graphs
-     * 
+     *
      * @param parent
      *            the parent of the node that is to be created (may be null)
      * @param dependencySet
@@ -649,7 +649,7 @@ public final class Tableau implements Serializable {
     }
     /**
      * Merges node into mergeInto. We assume that concepts and roles have already been copied from node to mergeInto. After the merge node has state NodeState.MERGED.
-     * 
+     *
      * @param node
      *            the node that is to be merged
      * @param mergeInto
@@ -782,12 +782,12 @@ public final class Tableau implements Serializable {
         if (numberOfNodesInTableau!=m_numberOfNodesInTableau)
             throw new IllegalStateException("Invalid number of nodes in the tableau.");
     }
-    
+
     protected static class InterruptTimer extends Thread {
         protected final int m_timeout;
         protected final Tableau m_tableau;
         protected boolean m_timingStopped;
-        
+
         public InterruptTimer(int timeout,Tableau tableau) {
             super("HermiT Interrupt Current Task Thread");
             setDaemon(true);
@@ -799,7 +799,7 @@ public final class Tableau implements Serializable {
             try {
                 if (!m_timingStopped) {
                     wait(m_timeout);
-                    if (!m_timingStopped) 
+                    if (!m_timingStopped)
                         m_tableau.getInterruptFlag().interruptCurrentTask();
                 }
             } catch (InterruptedException stopped) {

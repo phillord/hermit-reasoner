@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -114,33 +114,37 @@ public abstract class RoleSubsumptionCache implements SubsumptionCache<Role> {
     }
     protected abstract boolean doSubsumptionCheck(RoleInfo subroleInfo,Role superrole);
     protected void updateKnownSubsumers(Role subrole,Tableau tableau) {
-        Node checkedNode0=tableau.getCheckedNode0().getCanonicalNode();
-        Node checkedNode1=tableau.getCheckedNode1().getCanonicalNode();
-        RoleInfo subroleInfo=getRoleInfo(subrole);
-        subroleInfo.addKnownSubsumer(m_topRole);
-        ExtensionTable.Retrieval retrieval=tableau.getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,true },ExtensionTable.View.TOTAL);
-        retrieval.getBindingsBuffer()[1]=checkedNode0;
-        retrieval.getBindingsBuffer()[2]=checkedNode1;
-        retrieval.open();
-        while (!retrieval.afterLast()) {
-            Object role=retrieval.getTupleBuffer()[0];
-            if (role instanceof AtomicRole && retrieval.getDependencySet().isEmpty())
-                subroleInfo.addKnownSubsumer((AtomicRole)role);
-            retrieval.next();
-        }
-        if (m_hasInverse) {
-            retrieval.getBindingsBuffer()[1]=checkedNode1;
-            retrieval.getBindingsBuffer()[2]=checkedNode0;
+        Node checkedNode0=tableau.getCheckedNode0();
+        Node checkedNode1=tableau.getCheckedNode1();
+        if (checkedNode0.getCanonicalNodeDependencySet().isEmpty() && checkedNode1.getCanonicalNodeDependencySet().isEmpty()) {
+            checkedNode0=checkedNode0.getCanonicalNode();
+            checkedNode1=checkedNode1.getCanonicalNode();
+            RoleInfo subroleInfo=getRoleInfo(subrole);
+            subroleInfo.addKnownSubsumer(m_topRole);
+            ExtensionTable.Retrieval retrieval=tableau.getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,true },ExtensionTable.View.TOTAL);
+            retrieval.getBindingsBuffer()[1]=checkedNode0;
+            retrieval.getBindingsBuffer()[2]=checkedNode1;
             retrieval.open();
             while (!retrieval.afterLast()) {
                 Object role=retrieval.getTupleBuffer()[0];
                 if (role instanceof AtomicRole && retrieval.getDependencySet().isEmpty())
-                    subroleInfo.addKnownSubsumer(((AtomicRole)role).getInverse());
+                    subroleInfo.addKnownSubsumer((AtomicRole)role);
                 retrieval.next();
             }
+            if (m_hasInverse) {
+                retrieval.getBindingsBuffer()[1]=checkedNode1;
+                retrieval.getBindingsBuffer()[2]=checkedNode0;
+                retrieval.open();
+                while (!retrieval.afterLast()) {
+                    Object role=retrieval.getTupleBuffer()[0];
+                    if (role instanceof AtomicRole && retrieval.getDependencySet().isEmpty())
+                        subroleInfo.addKnownSubsumer(((AtomicRole)role).getInverse());
+                    retrieval.next();
+                }
+            }
+            if (tableau.isCurrentModelDeterministic())
+                subroleInfo.setAllSubsumersKnown();
         }
-        if (tableau.isCurrentModelDeterministic())
-            subroleInfo.setAllSubsumersKnown();
     }
     protected void updatePossibleSubsumers(Tableau tableau) {
         ExtensionTable.Retrieval retrieval=tableau.getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,false,false },ExtensionTable.View.TOTAL);
@@ -169,14 +173,14 @@ public abstract class RoleSubsumptionCache implements SubsumptionCache<Role> {
         }
         return result;
     }
-    
+
     protected static final class RoleInfo {
         protected final Role m_forRole;
         protected Boolean m_isSatisfiable;
         protected Set<Role> m_knownSubsumers;
         protected Set<Role> m_possibleSubsumers;
         protected boolean m_allSubsumersKnown;
-        
+
         public RoleInfo(Role role) {
             m_forRole=role;
         }

@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -96,7 +96,7 @@ public class AtomicConceptSubsumptionCache implements Serializable,SubsumptionCa
                 subconceptInfo.m_isSatisfiable=Boolean.FALSE;
             }
             else if (!isSubsumedBy) {
-                subconceptInfo.m_isSatisfiable=Boolean.TRUE; // A is satisfiable since A and not B has a model 
+                subconceptInfo.m_isSatisfiable=Boolean.TRUE; // A is satisfiable since A and not B has a model
                 updateKnownSubsumers(subconcept);
                 updatePossibleSubsumers();
             }
@@ -111,20 +111,23 @@ public class AtomicConceptSubsumptionCache implements Serializable,SubsumptionCa
         }
     }
     protected void updateKnownSubsumers(AtomicConcept subconcept) {
-        Node checkedNode=m_tableau.getCheckedNode0().getCanonicalNode();
-        AtomicConceptInfo subconceptInfo=getAtomicConceptInfo(subconcept);
-        subconceptInfo.addKnownSubsumer(AtomicConcept.THING);
-        ExtensionTable.Retrieval retrieval=m_tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
-        retrieval.getBindingsBuffer()[1]=checkedNode;
-        retrieval.open();
-        while (!retrieval.afterLast()) {
-            Object concept=retrieval.getTupleBuffer()[0];
-            if (concept instanceof AtomicConcept && retrieval.getDependencySet().isEmpty())
-                subconceptInfo.addKnownSubsumer((AtomicConcept)concept);
-            retrieval.next();
+        Node checkedNode=m_tableau.getCheckedNode0();
+        if (checkedNode.getCanonicalNodeDependencySet().isEmpty()) {
+            checkedNode=checkedNode.getCanonicalNode();
+            AtomicConceptInfo subconceptInfo=getAtomicConceptInfo(subconcept);
+            subconceptInfo.addKnownSubsumer(AtomicConcept.THING);
+            ExtensionTable.Retrieval retrieval=m_tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
+            retrieval.getBindingsBuffer()[1]=checkedNode;
+            retrieval.open();
+            while (!retrieval.afterLast()) {
+                Object concept=retrieval.getTupleBuffer()[0];
+                if (concept instanceof AtomicConcept && retrieval.getDependencySet().isEmpty())
+                    subconceptInfo.addKnownSubsumer((AtomicConcept)concept);
+                retrieval.next();
+            }
+            if (m_tableau.isCurrentModelDeterministic())
+                subconceptInfo.setAllSubsumersKnown();
         }
-        if (m_tableau.isCurrentModelDeterministic())
-            subconceptInfo.setAllSubsumersKnown();
     }
     protected void updatePossibleSubsumers() {
         ExtensionTable.Retrieval retrieval=m_tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,false },ExtensionTable.View.TOTAL);
@@ -149,13 +152,13 @@ public class AtomicConceptSubsumptionCache implements Serializable,SubsumptionCa
         }
         return result;
     }
-    
+
     protected static final class AtomicConceptInfo {
         protected Boolean m_isSatisfiable;
         protected Set<AtomicConcept> m_knownSubsumers;
         protected Set<AtomicConcept> m_possibleSubsumers;
         protected boolean m_allSubsumersKnown;
-        
+
         public boolean isKnownSubsumer(AtomicConcept potentialSubsumer) {
             return m_knownSubsumers!=null && m_knownSubsumers.contains(potentialSubsumer);
         }

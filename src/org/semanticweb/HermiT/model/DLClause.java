@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -32,11 +32,11 @@ import org.semanticweb.HermiT.Prefixes;
  */
 public class DLClause implements Serializable {
     public static enum ClauseType {
-        CONCEPT_INCLUSION, DATA_RANGE_INCLUSION, INVERSE_OBJECT_PROPERTY_INCLUSION, OBJECT_PROPERTY_INCLUSION, DATA_PROPERTY_INCLUSION, 
-        ASYMMETRY, REFLEXIVITY, IRREFLEXIVITY, DISJOINT_OBJECT_PROPERTIES, DISJOINT_DATA_PROPERTIES, 
+        CONCEPT_INCLUSION, DATA_RANGE_INCLUSION, INVERSE_OBJECT_PROPERTY_INCLUSION, OBJECT_PROPERTY_INCLUSION, DATA_PROPERTY_INCLUSION,
+        ASYMMETRY, REFLEXIVITY, IRREFLEXIVITY, DISJOINT_OBJECT_PROPERTIES, DISJOINT_DATA_PROPERTIES,
         HAS_KEY, SWRL_RULE, GRAPH_RULE, GRAPH_START_CLAUSE, OTHER
     }
-    
+
     private static final long serialVersionUID=-4513910129515151732L;
 
     public static final Atom[][] EMPTY_HEAD=new Atom[0][];
@@ -45,7 +45,7 @@ public class DLClause implements Serializable {
     protected final Atom[] m_headAtoms;
     protected final Atom[] m_bodyAtoms;
     public final ClauseType m_clauseType;
-    
+
     protected DLClause(boolean isKnownToBeAdmissible,Atom[] headAtoms,Atom[] bodyAtoms, ClauseType clauseType) {
         m_isKnownToBeAdmissible=isKnownToBeAdmissible;
         m_headAtoms=headAtoms;
@@ -110,17 +110,6 @@ public class DLClause implements Serializable {
             bodyAtoms=m_bodyAtoms;
         return DLClause.createEx(m_isKnownToBeAdmissible,headAtoms,bodyAtoms,m_clauseType);
     }
-//    public boolean isConceptInclusion() {
-//        if (getBodyLength()==1 && getHeadLength()==1) {
-//            if (getBodyAtom(0).getDLPredicate() instanceof AtomicConcept && getHeadAtom(0).getDLPredicate() instanceof Concept) {
-//                Variable x=getBodyAtom(0).getArgumentVariable(0);
-//                Variable headX=getHeadAtom(0).getArgumentVariable(0);
-//                if (x!=null && x.equals(headX))
-//                    return true;
-//            }
-//        }
-//        return false;
-//    }
     public boolean isFunctionalityAxiom() {
         if (getBodyLength()==2 && getHeadLength()==1) {
             DLPredicate atomicRole=getBodyAtom(0).getDLPredicate();
@@ -159,32 +148,6 @@ public class DLClause implements Serializable {
         }
         return false;
     }
-//    public boolean isRoleInclusion() {
-//        if (getBodyLength()==1 && getHeadLength()==1) {
-//            if (getBodyAtom(0).getDLPredicate() instanceof AtomicRole && getHeadAtom(0).getDLPredicate() instanceof AtomicRole) {
-//                Variable x=getBodyAtom(0).getArgumentVariable(0);
-//                Variable y=getBodyAtom(0).getArgumentVariable(1);
-//                Variable headX=getHeadAtom(0).getArgumentVariable(0);
-//                Variable headY=getHeadAtom(0).getArgumentVariable(1);
-//                if (x!=null && y!=null && !x.equals(y) && x.equals(headX) && y.equals(headY))
-//                    return true;
-//            }
-//        }
-//        return false;
-//    }
-//    public boolean isRoleInverseInclusion() {
-//        if (getBodyLength()==1 && getHeadLength()==1) {
-//            if (getBodyAtom(0).getDLPredicate() instanceof AtomicRole && getHeadAtom(0).getDLPredicate() instanceof AtomicRole) {
-//                Variable x=getBodyAtom(0).getArgumentVariable(0);
-//                Variable y=getBodyAtom(0).getArgumentVariable(1);
-//                Variable headX=getHeadAtom(0).getArgumentVariable(0);
-//                Variable headY=getHeadAtom(0).getArgumentVariable(1);
-//                if (x!=null && y!=null && !x.equals(y) && x.equals(headY) && y.equals(headX))
-//                    return true;
-//            }
-//        }
-//        return false;
-//    }
     public String toString(Prefixes prefixes) {
         StringBuffer buffer=new StringBuffer();
         for (int headIndex=0;headIndex<m_headAtoms.length;headIndex++) {

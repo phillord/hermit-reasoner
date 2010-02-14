@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -77,7 +77,7 @@ public class Debugger extends TableauMonitorForwarder {
     public static final Font s_monospacedFont=new Font("Monospaced",Font.PLAIN,12);
 
     public static enum WaitOption {
-        GRAPH_EXPANSION,EXISTENTIAL_EXPANSION,CLASH,MERGE,DATATYPE_CHECKING,BLOCKING_VALIDATION
+        GRAPH_EXPANSION,EXISTENTIAL_EXPANSION,CLASH,MERGE,DATATYPE_CHECKING,BLOCKING_VALIDATION_STARTED,BLOCKING_VALIDATION_FINISHED
     };
 
     protected final Map<String,DebuggerCommand> m_commandsByName;
@@ -414,9 +414,17 @@ public class Debugger extends TableauMonitorForwarder {
             mainLoop();
         }
     }
+    public void blockingValidationStarted() {
+        super.blockingValidationStarted();
+        if (m_waitOptions.contains(WaitOption.BLOCKING_VALIDATION_STARTED)) {
+            m_forever=false;
+            m_output.println("Will validate blocking.");
+            mainLoop();
+        }
+    }
     public void blockingValidationFinished() {
         super.blockingValidationFinished();
-        if (m_waitOptions.contains(WaitOption.BLOCKING_VALIDATION)) {
+        if (m_waitOptions.contains(WaitOption.BLOCKING_VALIDATION_FINISHED)) {
             m_forever=false;
             m_output.println("Blocking validated.");
             mainLoop();
