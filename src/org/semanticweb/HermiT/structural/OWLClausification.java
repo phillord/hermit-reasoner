@@ -740,18 +740,19 @@ public class OWLClausification {
         }
         public void visit(OWLDataMinCardinality object) {
             if (!object.getProperty().isOWLBottomDataProperty() || object.getCardinality()==0) {
-                if (m_dps2ranges.containsKey(object.getProperty().asOWLDataProperty())) {
-                    String dtURI=m_dps2ranges.get(object.getProperty().asOWLDataProperty()).getIRI().toString();
-                    long max=dt2maxRangeCardinality.get(dtURI);
-                    if (object.getCardinality() > max) {
-                        return;
-                    }
-                } else if (object.getFiller().isDatatype() && dt2maxRangeCardinality.containsKey(object.getFiller().asOWLDatatype().getIRI().toString())) {
-                    String dtURI=m_dps2ranges.get(object.getProperty().asOWLDataProperty()).getIRI().toString();
-                    long max=dt2maxRangeCardinality.get(dtURI);
-                    if (object.getCardinality() > max) {
-                        return;
-                    }
+            	OWLDataProperty dp=object.getProperty().asOWLDataProperty();
+            	OWLDataRange dr=object.getFiller();
+            	int n=object.getCardinality();
+            	
+                if (m_dps2ranges.containsKey(dp)) {
+                	String dt=m_dps2ranges.get(dp).getIRI().toString();
+                    if (dt2maxRangeCardinality.containsKey(dt) && n>dt2maxRangeCardinality.get(dt))
+                    	return;
+                } 
+                if (dr.isDatatype()) {
+                    String dt=dr.asOWLDatatype().getIRI().toString();
+                    if (dt2maxRangeCardinality.containsKey(dt) && n>dt2maxRangeCardinality.get(dt))
+                    	return;
                 }
                 AtomicRole atomicRole=getAtomicRole(object.getProperty());
                 LiteralConcept literalConcept=m_dataRangeConverter.convertDataRange(object.getFiller());
