@@ -55,3 +55,16 @@ into the plugins folder of Protege.
 project/* is the Java Eclipse project for HermiT. It contains all sources 
 (folders src, test, examples, and getopt) and libraries (folder lib) incl. sources 
 and can directly be imported into Eclipse.  
+
+HermiT 1.0 
+- supports all of OWL 2
+HermiT 1.1 
+- supports DL-safe SWRL rules
+HermiT 1.2 
+- contains a novel blocking strategy
+- minor bug fixes (nominals and equality statements in the ABox were not handled 
+  correctly in some case)
+HermiT 1.2.1 
+- minor bug fixes (nominals and equality statements in the ABox were still not 
+  handled correctly if the ontology was nondeterministic, custom data ranges were not 
+  loaded correctly in some case)
