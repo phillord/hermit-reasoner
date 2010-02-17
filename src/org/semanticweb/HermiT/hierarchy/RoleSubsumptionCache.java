@@ -257,4 +257,19 @@ public abstract class RoleSubsumptionCache implements SubsumptionCache<Role> {
             return result;
         }
     }
+	public Set<Role> getKnownSubsumers(Role role,boolean updatePossibleSubsumers) {
+		boolean isSatisfiable=isSatisfiable(role,updatePossibleSubsumers);
+        RoleInfo roleInfo=m_roleInfos.get(role);
+        if (isSatisfiable)
+            return roleInfo.m_knownSubsumers;
+        else
+            return null;
+	}
+	public Set<Role> getCurrentPossibleSubsumers(Role role) {
+        RoleInfo roleInfo=m_roleInfos.get(role);
+        if( (!AtomicRole.BOTTOM_OBJECT_ROLE.equals(role) || !AtomicRole.BOTTOM_DATA_ROLE.equals(role) ) && roleInfo != null )
+        	return roleInfo.m_possibleSubsumers;
+        else
+        	return null;
+	}
 }
