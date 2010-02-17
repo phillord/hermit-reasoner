@@ -1956,17 +1956,19 @@ public class Reasoner implements OWLReasoner,Serializable {
         }
         protected Configuration getProtegeConfiguration(OWLReasonerConfiguration config) {
         	Configuration configuration;
-        	if (config!=null&&config instanceof Configuration) {
-        		configuration=(Configuration)config;
+        	if (config!=null) {
+        		if (config instanceof Configuration) 
+        			configuration=(Configuration)config;
+        		else {
+        			configuration=new Configuration();
+        			configuration.freshEntityPolicy=config.getFreshEntityPolicy();
+        			configuration.individualNodeSetPolicy=config.getIndividualNodeSetPolicy();
+        			configuration.reasonerProgressMonitor=config.getProgressMonitor();
+        			configuration.individualTaskTimeout=config.getTimeOut();
+        		}
         	} else {
         		configuration=new Configuration();
                 configuration.ignoreUnsupportedDatatypes=true;
-                if (config!=null) {
-	        		configuration.reasonerProgressMonitor=config.getProgressMonitor();
-	        		configuration.individualTaskTimeout=config.getTimeOut();
-	        		configuration.individualNodeSetPolicy=config.getIndividualNodeSetPolicy();
-	        		configuration.freshEntityPolicy=config.getFreshEntityPolicy();
-                }
         	}
         	return configuration;
         }
@@ -2053,7 +2055,7 @@ public class Reasoner implements OWLReasoner,Serializable {
     public void flush() {
     }
     public BufferingMode getBufferingMode() {
-        return null;
+        return m_configuration.bufferChanges ? BufferingMode.BUFFERING : BufferingMode.NON_BUFFERING;
     }
     public Set<OWLAxiom> getPendingAxiomAdditions() {
         return null;
