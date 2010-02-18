@@ -352,26 +352,6 @@ public final class Tableau implements Serializable {
             m_tableauMonitor.isSatisfiableFinished(role,result);
         return result;
     }
-    public boolean isAsymmetric(Role role) {
-        clear();
-        if (hasNominals())
-            loadABox();
-        Node a=createNewNINode(m_dependencySetFactory.emptySet());
-        Node b=createNewNINode(m_dependencySetFactory.emptySet());
-        if (role instanceof InverseRole)
-            m_extensionManager.addRoleAssertion(((InverseRole)role).getInverseOf(),b,a,m_dependencySetFactory.emptySet(),true);
-        else
-            m_extensionManager.addRoleAssertion(role,a,b,m_dependencySetFactory.emptySet(),true);
-        m_branchingPoints[0]=new BranchingPoint(this);
-        m_currentBranchingPoint++;
-        m_nonbacktrackableBranchingPoint=m_currentBranchingPoint;
-        DependencySet dependencySet=m_dependencySetFactory.addBranchingPoint(m_dependencySetFactory.emptySet(),m_currentBranchingPoint);
-        if (role instanceof InverseRole)
-            m_extensionManager.addRoleAssertion(((InverseRole)role).getInverseOf(),a,b,dependencySet,true);
-        else
-            m_extensionManager.addRoleAssertion(role,b,a,dependencySet,true);
-        return !isSatisfiable();
-    }
     public boolean isABoxSatisfiable() {
         return isABoxSatisfiable(null,null);
     }
@@ -388,10 +368,9 @@ public final class Tableau implements Serializable {
             m_checkedNode1=null;
         else
             m_checkedNode1=getNodeForTerm(termsToNodes,checkedNode1Name);
-        if (m_firstTableauNode==null) {
-            // Ensure that at least one individual exists.
+        // Ensure that at least one individual exists.
+        if (m_firstTableauNode==null)
             createNewNINode(m_dependencySetFactory.emptySet());
-        }
         boolean result=isSatisfiable();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isABoxSatisfiableFinished(result);

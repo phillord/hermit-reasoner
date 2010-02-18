@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -46,7 +46,7 @@ import rationals.Automaton;
  */
 public class DLOntology implements Serializable {
     private static final long serialVersionUID=3189937959595369812L;
-    
+
     protected static final String CRLF=System.getProperty("line.separator");
     protected static final int CONTAINS_NO_ROLES=0;
     protected static final int CONTAINS_ONLY_GRAPH_ROLES=1;
@@ -72,7 +72,7 @@ public class DLOntology implements Serializable {
     protected final Set<DescriptionGraph> m_allDescriptionGraphs;
     protected final Map<OWLObjectPropertyExpression, Automaton> m_automataOfComplexObjectProperties;
     protected final Map<AtomicRole,Map<Individual,Set<Constant>>> m_dataPropertyAssertions;
-    
+
     public DLOntology(String ontologyIRI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts,
             Set<AtomicConcept> atomicConcepts,Set<ComplexObjectRoleInclusion> allComplexObjectRoleInclusions,
             Set<AtomicRole> atomicObjectRoles,Set<AtomicRole> atomicDataRoles,Set<String> definedDatatypeIRIs,
@@ -111,9 +111,9 @@ public class DLOntology implements Serializable {
             m_allAtomicDataRoles=new TreeSet<AtomicRole>(AtomicRoleComparator.INSTANCE);
         else
             m_allAtomicDataRoles=atomicDataRoles;
-        if (definedDatatypeIRIs==null) 
+        if (definedDatatypeIRIs==null)
             m_definedDatatypeIRIs=new HashSet<String>();
-        else 
+        else
             m_definedDatatypeIRIs=definedDatatypeIRIs;
         if (individuals==null)
             m_allIndividuals=new TreeSet<Individual>(IndividualComparator.INSTANCE);
@@ -150,16 +150,16 @@ public class DLOntology implements Serializable {
                     assert atom.getDLPredicate() instanceof AtomicRole;
                     AtomicRole dp=(AtomicRole)atom.getDLPredicate();
                     Map<Individual,Set<Constant>> indToDataValue;
-                    if (m_dataPropertyAssertions.containsKey(dp)) 
+                    if (m_dataPropertyAssertions.containsKey(dp))
                         indToDataValue=m_dataPropertyAssertions.get(dp);
-                    else { 
+                    else {
                         indToDataValue=new HashMap<Individual,Set<Constant>>();
                         m_dataPropertyAssertions.put(dp,indToDataValue);
                     }
                     Set<Constant> constants;
-                    if (indToDataValue.containsKey(ind)) 
+                    if (indToDataValue.containsKey(ind))
                         constants=indToDataValue.get(ind);
-                    else { 
+                    else {
                         constants=new HashSet<Constant>();
                         indToDataValue.put(ind,constants);
                     }
@@ -213,6 +213,9 @@ public class DLOntology implements Serializable {
     }
     public Set<AtomicRole> getAllAtomicDataRoles() {
         return m_allAtomicDataRoles;
+    }
+    public Map<OWLObjectPropertyExpression,Automaton> getAutomataOfComplexObjectProperties() {
+        return m_automataOfComplexObjectProperties;
     }
     public boolean containsDataRole(AtomicRole role) {
     	return m_allAtomicDataRoles.contains(role);
@@ -340,9 +343,9 @@ public class DLOntology implements Serializable {
         }
         return change;
     }
-
     /**
-     * Takes the set of roles that are for use in Description Graphs and detects whether clause contains no roles, only roles from the given set, only roles not from the given set or both types of roles.
+     * Takes the set of roles that are for use in Description Graphs and detects whether clause contains no roles,
+     * only roles from the given set, only roles not from the given set or both types of roles.
      */
     protected int getUsedRoleTypes(DLClause dlClause,Set<AtomicRole> graphAtomicRoles) {
         int usedRoleTypes=CONTAINS_NO_ROLES;
@@ -382,9 +385,9 @@ public class DLOntology implements Serializable {
         }
         return usedRoleTypes;
     }
-
     /**
-     * Tests whether the clause conforms to the properties of HT clauses, i.e., the variables can be split into a center variable x, a set of branch variables y_i, and a set of nominal variables z_j such that certain conditions hold.
+     * Tests whether the clause conforms to the properties of HT clauses, i.e., the variables can be split into a center variable x,
+     * a set of branch variables y_i, and a set of nominal variables z_j such that certain conditions hold.
      */
     protected boolean isTreeDLClause(DLClause dlClause,Set<AtomicRole> graphAtomicRoles,Set<AtomicConcept> bodyOnlyAtomicConcepts) {
         if (dlClause.getHeadLength()==0 && dlClause.getBodyLength()==0)
@@ -417,7 +420,6 @@ public class DLOntology implements Serializable {
                 return true;
         return false;
     }
-
     /**
      * Tests whether the given center variable is suitable.
      */
@@ -461,7 +463,6 @@ public class DLOntology implements Serializable {
         }
         return true;
     }
-
     protected boolean isGraphDLClause(DLClause dlClause) {
         for (int atomIndex=0;atomIndex<dlClause.getBodyLength();atomIndex++) {
             DLPredicate dlPredicate=dlClause.getBodyAtom(atomIndex).getDLPredicate();
@@ -475,7 +476,6 @@ public class DLOntology implements Serializable {
         }
         return true;
     }
-
     public String toString(Prefixes prefixes) {
         StringBuffer stringBuffer=new StringBuffer();
         stringBuffer.append("Prefixes: [");
@@ -554,7 +554,7 @@ public class DLOntology implements Serializable {
             numNondeterministicClauses=0;
             numDisjunctions=0;
             for (DLClause dlClause : m_dlClauses) {
-                if (dlClause.getHeadLength()<=1) 
+                if (dlClause.getHeadLength()<=1)
                     numDeterministicClauses++;
                 else {
                     numNondeterministicClauses++;
@@ -599,7 +599,6 @@ public class DLOntology implements Serializable {
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
-
     public void save(File file) throws IOException {
         OutputStream outputStream=new BufferedOutputStream(new FileOutputStream(file));
         try {
@@ -609,13 +608,11 @@ public class DLOntology implements Serializable {
             outputStream.close();
         }
     }
-
     public void save(OutputStream outputStream) throws IOException {
         ObjectOutputStream objectOutputStream=new ObjectOutputStream(outputStream);
         objectOutputStream.writeObject(this);
         objectOutputStream.flush();
     }
-
     public static DLOntology load(InputStream inputStream) throws IOException {
         try {
             ObjectInputStream objectInputStream=new ObjectInputStream(inputStream);
@@ -627,7 +624,6 @@ public class DLOntology implements Serializable {
             throw error;
         }
     }
-
     public static DLOntology load(File file) throws IOException {
         InputStream inputStream=new BufferedInputStream(new FileInputStream(file));
         try {
@@ -643,7 +639,7 @@ public class DLOntology implements Serializable {
 
         protected final Role[] m_subRoles;
         protected final Role m_superRole;
-        
+
         public ComplexObjectRoleInclusion(Role[] subRoles,Role superRole) {
             m_subRoles=subRoles;
             m_superRole=superRole;
@@ -658,7 +654,7 @@ public class DLOntology implements Serializable {
             return m_superRole;
         }
     }
-    
+
     public static class AtomicConceptComparator implements Serializable,Comparator<AtomicConcept> {
         private static final long serialVersionUID=2386841732225838685L;
         public static final Comparator<AtomicConcept> INSTANCE=new AtomicConceptComparator();
@@ -697,8 +693,4 @@ public class DLOntology implements Serializable {
             return INSTANCE;
         }
     }
-    public Map<OWLObjectPropertyExpression, Automaton> getAutomataOfComplexObjectProperties() {
-        return m_automataOfComplexObjectProperties;
-    }
-
 }

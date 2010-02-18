@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -90,8 +90,20 @@ public final class MergingManager implements Serializable {
                 // 'null' plays the role of the \triangleright symbol from the graphs paper.
                 boolean canMerge0Into1=node0.m_parent==node1.m_parent || isDescendantOfAtMostThreeLevels(node0,node1ClusterAnchor);
                 boolean canMerge1Into0=node0.m_parent==node1.m_parent || isDescendantOfAtMostThreeLevels(node1,node0ClusterAnchor);
-                if (canMerge0Into1 && canMerge1Into0) { 
-                    if (node0.m_numberOfPositiveAtomicConcepts>node1.m_numberOfPositiveAtomicConcepts) {
+                if (canMerge0Into1 && canMerge1Into0) {
+                    // If one of the nodes is m_checkedNode0, then we merge into it; this is so that
+                    // we can read off as much information from a completed tableau as possible.
+                    // Otherwise, try to minimize the work necessary to perform the merge so
+                    // merge from the node containing more concept assertions.
+                    if (node0==m_tableau.m_checkedNode0) {
+                        mergeFrom=node1;
+                        mergeInto=node0;
+                    }
+                    else if (node1==m_tableau.m_checkedNode0) {
+                        mergeFrom=node0;
+                        mergeInto=node1;
+                    }
+                    else if (node0.m_numberOfPositiveAtomicConcepts>node1.m_numberOfPositiveAtomicConcepts) {
                         mergeFrom=node1;
                         mergeInto=node0;
                     }
