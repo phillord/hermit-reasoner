@@ -348,7 +348,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     	try{
     		loadReasonerWithAxioms(axioms);
     	}catch(IllegalArgumentException e){
-    		if( e.getMessage().contains( "The given role hierarchy is not regular" ) )
+    		if( e.getMessage().contains( "The given property hierarchy is not regular" ) )
     			regular = false;
     		else{
     			throw new Exception( e.getMessage() );
@@ -361,7 +361,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     	try{
     		loadReasonerWithAxioms(axioms);
     	}catch(IllegalArgumentException e){
-    		if( e.getMessage().contains( "Non simple role '" ) )
+    		if( e.getMessage().contains( "Non simple property '" ) )
     			simple = false;
     		else{
     			throw new Exception( e.getMessage() );
