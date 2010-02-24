@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -20,8 +20,8 @@ package org.semanticweb.HermiT.tableau;
 import java.io.Serializable;
 
 /**
- * The actual implementation of the tuple tables used in the ExtensionTable 
- * class. 
+ * The actual implementation of the tuple tables used in the ExtensionTable
+ * class.
  */
 public final class TupleTable implements Serializable {
     private static final long serialVersionUID=-7712458276004062803L;
@@ -33,7 +33,7 @@ public final class TupleTable implements Serializable {
     protected int m_numberOfPages;
     protected int m_tupleCapacity;
     protected int m_firstFreeTupleIndex;
-    
+
     public TupleTable(int arity) {
         m_arity=arity;
         clear();
@@ -66,6 +66,9 @@ public final class TupleTable implements Serializable {
     public boolean tupleEquals(Object[] tupleBuffer,int tupleIndex,int compareLength) {
         return m_pages[tupleIndex / PAGE_SIZE].tupleEquals(tupleBuffer,(tupleIndex % PAGE_SIZE)*m_arity,compareLength);
     }
+    public boolean tupleEquals(Object[] tupleBuffer,int[] positionIndexes,int tupleIndex,int compareLength) {
+        return m_pages[tupleIndex / PAGE_SIZE].tupleEquals(tupleBuffer,positionIndexes,(tupleIndex % PAGE_SIZE)*m_arity,compareLength);
+    }
     public void retrieveTuple(Object[] tupleBuffer,int tupleIndex) {
         m_pages[tupleIndex / PAGE_SIZE].retrieveTuple((tupleIndex % PAGE_SIZE)*m_arity,tupleBuffer);
     }
@@ -95,7 +98,7 @@ public final class TupleTable implements Serializable {
 
         public final int m_arity;
         public Object[] m_objects;
-        
+
         public Page(int arity) {
             m_arity=arity;
             m_objects=new Object[m_arity*PAGE_SIZE];
@@ -118,6 +121,17 @@ public final class TupleTable implements Serializable {
             int targetIndex=tupleStartIndex+sourceIndex;
             while (sourceIndex>=0) {
                 if (!tupleBuffer[sourceIndex].equals(m_objects[targetIndex]))
+                    return false;
+                sourceIndex--;
+                targetIndex--;
+            }
+            return true;
+        }
+        public boolean tupleEquals(Object[] tupleBuffer,int[] positionIndexes,int tupleStartIndex,int compareLength) {
+            int sourceIndex=compareLength-1;
+            int targetIndex=tupleStartIndex+sourceIndex;
+            while (sourceIndex>=0) {
+                if (!tupleBuffer[positionIndexes[sourceIndex]].equals(m_objects[targetIndex]))
                     return false;
                 sourceIndex--;
                 targetIndex--;

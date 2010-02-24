@@ -1,24 +1,23 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
 package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
-import java.util.Arrays;
 
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
@@ -26,7 +25,7 @@ import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
 
 /**
- * This extension table is for use with Description Graphs and it supports tuple 
+ * This extension table is for use with Description Graphs and it supports tuple
  * tables with arity greater than three, but are, as a result, less efficient.
  * @see ExtensionTableWithTupleIndexes
  */
@@ -35,7 +34,7 @@ public class ExtensionTableWithFullIndex extends ExtensionTable {
 
     protected final TupleTableFullIndex m_tupleTableFullIndex;
     protected final Object[] m_auxiliaryTuple;
-    
+
     public ExtensionTableWithFullIndex(Tableau tableau,int tupleArity,boolean needsDependencySets) {
         super(tableau,tupleArity,needsDependencySets);
         m_tupleTableFullIndex=new TupleTableFullIndex(m_tupleTable,m_tupleArity);
@@ -91,15 +90,15 @@ public class ExtensionTableWithFullIndex extends ExtensionTable {
         else
             return m_coreManager.isCore(tupleIndex);
     }
-    public Retrieval createRetrieval(int[] bindingPositions,Object[] bindingsBuffer,boolean ownsBindingsBuffer,View extensionView) {
+    public Retrieval createRetrieval(int[] bindingPositions,Object[] bindingsBuffer,Object[] tupleBuffer,boolean ownsBuffers,View extensionView) {
         int numberOfBindings=0;
         for (int index=m_tupleArity-1;index>=0;--index)
             if (bindingPositions[index]!=-1)
                 numberOfBindings++;
         if (numberOfBindings==m_tupleArity)
-            return new IndexedRetrieval(bindingPositions,bindingsBuffer,ownsBindingsBuffer,extensionView);
+            return new IndexedRetrieval(bindingPositions,bindingsBuffer,tupleBuffer,ownsBuffers,extensionView);
         else
-            return new UnindexedRetrieval(bindingPositions,bindingsBuffer,ownsBindingsBuffer,extensionView);
+            return new UnindexedRetrieval(bindingPositions,bindingsBuffer,tupleBuffer,ownsBuffers,extensionView);
     }
     protected void removeTuple(int tupleIndex) {
         m_tupleTableFullIndex.removeTuple(tupleIndex);
@@ -116,19 +115,17 @@ public class ExtensionTableWithFullIndex extends ExtensionTable {
 
         protected final int[] m_bindingPositions;
         protected final Object[] m_bindingsBuffer;
-        protected final boolean m_ownsBindingsBuffer;
-        protected final ExtensionTable.View m_extensionView;
-        protected final Object[] m_reorderedBindingsBuffer;
         protected final Object[] m_tupleBuffer;
+        protected final boolean m_ownsBuffers;
+        protected final ExtensionTable.View m_extensionView;
         protected int m_currentTupleIndex;
 
-        public IndexedRetrieval(int[] bindingPositions,Object[] bindingsBuffer,boolean ownsBindingsBuffer,View extensionView) {
+        public IndexedRetrieval(int[] bindingPositions,Object[] bindingsBuffer,Object[] tupleBuffer,boolean ownsBuffers,View extensionView) {
             m_bindingPositions=bindingPositions;
             m_bindingsBuffer=bindingsBuffer;
-            m_ownsBindingsBuffer=ownsBindingsBuffer;
+            m_tupleBuffer=tupleBuffer;
+            m_ownsBuffers=ownsBuffers;
             m_extensionView=extensionView;
-            m_reorderedBindingsBuffer=new Object[m_tupleArity];
-            m_tupleBuffer=new Object[m_tupleArity];
         }
         public ExtensionTable getExtensionTable() {
             return ExtensionTableWithFullIndex.this;
@@ -137,10 +134,12 @@ public class ExtensionTableWithFullIndex extends ExtensionTable {
             return m_extensionView;
         }
         public void clear() {
-            if (m_ownsBindingsBuffer)
-                Arrays.fill(m_bindingsBuffer,null);
-            Arrays.fill(m_reorderedBindingsBuffer,null);
-            Arrays.fill(m_tupleBuffer,null);
+            if (m_ownsBuffers) {
+                for (int index=m_bindingsBuffer.length-1;index>=0;--index)
+                    m_bindingsBuffer[index]=null;
+                for (int index=m_tupleBuffer.length-1;index>=0;--index)
+                    m_tupleBuffer[index]=null;
+            }
         }
         public int[] getBindingPositions() {
             return m_bindingPositions;
@@ -164,9 +163,7 @@ public class ExtensionTableWithFullIndex extends ExtensionTable {
                 return m_coreManager.isCore(m_currentTupleIndex);
         }
         public void open() {
-            for (int index=m_bindingPositions.length-1;index>=0;--index)
-                m_reorderedBindingsBuffer[index]=m_bindingsBuffer[m_bindingPositions[index]];
-            m_currentTupleIndex=m_tupleTableFullIndex.getTupleIndex(m_reorderedBindingsBuffer);
+            m_currentTupleIndex=m_tupleTableFullIndex.getTupleIndex(m_bindingsBuffer,m_bindingPositions);
             switch (m_extensionView) {
             case EXTENSION_THIS:
                 if (!(0<=m_currentTupleIndex && m_currentTupleIndex<m_afterExtensionThisTupleIndex))

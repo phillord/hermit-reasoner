@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -43,6 +43,10 @@ public final class HyperresolutionManager implements Serializable {
     protected final ExtensionManager m_extensionManager;
     protected final ExtensionTable.Retrieval[] m_deltaOldRetrievals;
     protected final Map<DLPredicate,CompiledDLClauseInfo> m_tupleConsumersByDeltaPredicate;
+    protected final Object[][] m_buffersToClear;
+    protected final UnionDependencySet[] m_unionDependencySetsToClear;
+    protected final Object[] m_valuesBuffer;
+    protected final int m_maxNumberOfVariables;
 
     public HyperresolutionManager(Tableau tableau) {
         m_tableau=tableau;
@@ -61,6 +65,9 @@ public final class HyperresolutionManager implements Serializable {
             dlClauses.add(dlClause);
             interruptFlag.checkInterrupt();
         }
+        DLClauseEvaluator.BufferSupply bufferSupply=new DLClauseEvaluator.BufferSupply();
+        DLClauseEvaluator.ValuesBufferManager valuesBufferManager=new DLClauseEvaluator.ValuesBufferManager(m_tableau.m_dlOntology.getDLClauses());
+        Map<Integer,UnionDependencySet> unionDependencySetsBySize=new HashMap<Integer,UnionDependencySet>();
         for (Map.Entry<DLClauseBodyKey,List<DLClause>> entry : dlClausesByBody.entrySet()) {
             DLClause bodyDLClause=entry.getKey().m_dlClause;
             BodyAtomsSwapper bodyAtomsSwapper=new BodyAtomsSwapper(bodyDLClause);
@@ -75,23 +82,35 @@ public final class HyperresolutionManager implements Serializable {
                         firstTableRetrieval=extensionTable.createRetrieval(new boolean[extensionTable.getArity()],ExtensionTable.View.DELTA_OLD);
                         retrievalsByArity.put(arity,firstTableRetrieval);
                     }
-                    CompiledDLClauseInfo nextTupleConsumer=new CompiledDLClauseInfo(m_tableau,swappedDLClause,entry.getValue(),firstTableRetrieval,m_tupleConsumersByDeltaPredicate.get(deltaDLPredicate));
+                    CompiledDLClauseInfo nextTupleConsumer=new CompiledDLClauseInfo(m_tableau,swappedDLClause,entry.getValue(),firstTableRetrieval,bufferSupply,valuesBufferManager,unionDependencySetsBySize,m_tupleConsumersByDeltaPredicate.get(deltaDLPredicate));
                     m_tupleConsumersByDeltaPredicate.put(deltaDLPredicate,nextTupleConsumer);
+                    bufferSupply.reuseBuffers();
                     interruptFlag.checkInterrupt();
                 }
         }
         m_deltaOldRetrievals=new ExtensionTable.Retrieval[retrievalsByArity.size()];
         retrievalsByArity.values().toArray(m_deltaOldRetrievals);
+        m_buffersToClear=bufferSupply.getAllBuffers();
+        m_unionDependencySetsToClear=new UnionDependencySet[unionDependencySetsBySize.size()];
+        unionDependencySetsBySize.values().toArray(m_unionDependencySetsToClear);
+        m_valuesBuffer=valuesBufferManager.m_valuesBuffer;
+        m_maxNumberOfVariables=valuesBufferManager.m_maxNumberOfVariables;
     }
     public void clear() {
-        for (ExtensionTable.Retrieval retrieval : m_deltaOldRetrievals)
-            retrieval.clear();
-        for (CompiledDLClauseInfo info : m_tupleConsumersByDeltaPredicate.values()) {
-            while (info!=null) {
-                info.clear();
-                info=info.m_next;
-            }
+        for (int retrievalIndex=m_deltaOldRetrievals.length-1;retrievalIndex>=0;--retrievalIndex)
+            m_deltaOldRetrievals[retrievalIndex].clear();
+        for (int bufferIndex=m_buffersToClear.length-1;bufferIndex>=0;--bufferIndex) {
+            Object[] buffer=m_buffersToClear[bufferIndex];
+            for (int index=buffer.length-1;index>=0;--index)
+                buffer[index]=null;
         }
+        for (int unionDependencySetIndex=m_unionDependencySetsToClear.length-1;unionDependencySetIndex>=0;--unionDependencySetIndex) {
+            DependencySet[] dependencySets=m_unionDependencySetsToClear[unionDependencySetIndex].m_dependencySets;
+            for (int dependencySetIndex=dependencySets.length-1;dependencySetIndex>=0;--dependencySetIndex)
+                dependencySets[dependencySetIndex]=null;
+        }
+        for (int variableIndex=0;variableIndex<m_maxNumberOfVariables;variableIndex++)
+            m_valuesBuffer[variableIndex]=null;
     }
     protected boolean isPredicateWithExtension(DLPredicate dlPredicate) {
         return !NodeIDLessEqualThan.INSTANCE.equals(dlPredicate) && !(dlPredicate instanceof NodeIDsAscendingOrEqual);
@@ -118,8 +137,8 @@ public final class HyperresolutionManager implements Serializable {
 
         protected final CompiledDLClauseInfo m_next;
 
-        public CompiledDLClauseInfo(Tableau tableau,DLClause bodyDLClause,List<DLClause> headDLClauses,ExtensionTable.Retrieval firstAtomRetrieval,CompiledDLClauseInfo next) {
-            super(tableau,bodyDLClause,headDLClauses,firstAtomRetrieval);
+        public CompiledDLClauseInfo(Tableau tableau,DLClause bodyDLClause,List<DLClause> headDLClauses,ExtensionTable.Retrieval firstAtomRetrieval,DLClauseEvaluator.BufferSupply bufferSupply,ValuesBufferManager valuesBufferManager,Map<Integer,UnionDependencySet> unionDependencySetsBySize,CompiledDLClauseInfo next) {
+            super(tableau,bodyDLClause,headDLClauses,firstAtomRetrieval,bufferSupply,valuesBufferManager,unionDependencySetsBySize);
             m_next=next;
         }
     }

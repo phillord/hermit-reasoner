@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -24,14 +24,14 @@ public class TupleTableFullIndex implements Serializable {
 
     protected static final int BUCKET_OFFSET=1;
     protected static final float LOAD_FACTOR=0.75f;
-    
+
     protected final TupleTable m_tupleTable;
     protected final int m_indexedArity;
     protected final EntryManager m_entryManager;
     protected int[] m_buckets;
     protected int m_resizeThreshold;
     protected int m_numberOfTuples;
-    
+
     public TupleTableFullIndex(TupleTable tupleTable,int indexedArity) {
         m_tupleTable=tupleTable;
         m_indexedArity=indexedArity;
@@ -97,6 +97,20 @@ public class TupleTableFullIndex implements Serializable {
         }
         return -1;
     }
+    public int getTupleIndex(Object[] tupleBuffer,int[] positionIndexes) {
+        int hashCode=getTupleHashCode(tupleBuffer,positionIndexes);
+        int entryIndex=getBucketIndex(hashCode,m_buckets.length);
+        int entry=m_buckets[entryIndex]-BUCKET_OFFSET;
+        while (entry!=-1) {
+            if (hashCode==m_entryManager.getEntryComponent(entry,ENTRY_HASH_CODE)) {
+                int tupleIndex=m_entryManager.getEntryComponent(entry,ENTRY_TUPLE_INDEX);
+                if (m_tupleTable.tupleEquals(tupleBuffer,positionIndexes,tupleIndex,m_indexedArity))
+                    return tupleIndex;
+            }
+            entry=m_entryManager.getEntryComponent(entry,ENTRY_NEXT);
+        }
+        return -1;
+    }
     public boolean removeTuple(int tupleIndex) {
         int hashCode=0;
         for (int i = 0; i < m_indexedArity; ++i) {
@@ -125,6 +139,12 @@ public class TupleTableFullIndex implements Serializable {
             hashCode+=tuple[index].hashCode();
         return hashCode;
     }
+    protected int getTupleHashCode(Object[] tupleBuffer,int[] positionIndexes) {
+        int hashCode=0;
+        for (int index=0;index<m_indexedArity;index++)
+            hashCode+=tupleBuffer[positionIndexes[index]].hashCode();
+        return hashCode;
+    }
     protected static int getBucketIndex(int hashCode,int bucketsLength) {
         return hashCode & (bucketsLength-1);
     }
@@ -134,13 +154,13 @@ public class TupleTableFullIndex implements Serializable {
     protected static final int ENTRY_HASH_CODE=1;
     protected static final int ENTRY_TUPLE_INDEX=2;
     protected static final int ENTRY_PAGE_SIZE=512;
-    
+
     protected static final class EntryManager implements Serializable {
         private static final long serialVersionUID=-7562640774004213308L;
 
         protected int[] m_entries;
         protected int m_firstFreeEntry;
-        
+
         public EntryManager() {
             clear();
         }

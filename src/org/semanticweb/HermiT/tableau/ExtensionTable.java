@@ -1,24 +1,23 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
 package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
-import java.util.Arrays;
 
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
@@ -30,17 +29,17 @@ import org.semanticweb.HermiT.model.NegatedAtomicRole;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 
 /**
- * An extension table keeps track of the assertions in the ABox during a run of 
- * the tableau. For this purpose, it holds a binary (concept, node) and a 
- * ternary (role, node, node) tuple table, which represent concept and role 
- * assertions respectively. Since this is one of the most crucial parts 
- * regarding memory usage, reusing already allocated space is the main design 
- * goal. In case of backtracking during the expansion, we just set the pointer 
- * to a previous entry in the table that then becomes the current one. When 
- * merging or pruning, we leave the entries for the merged/pruned nodes in the 
- * table so that we do not have holes in there. The tuple tables are indexed 
- * (tries/prefix trees) to speed-up the search for matching atoms during rule 
- * applications. 
+ * An extension table keeps track of the assertions in the ABox during a run of
+ * the tableau. For this purpose, it holds a binary (concept, node) and a
+ * ternary (role, node, node) tuple table, which represent concept and role
+ * assertions respectively. Since this is one of the most crucial parts
+ * regarding memory usage, reusing already allocated space is the main design
+ * goal. In case of backtracking during the expansion, we just set the pointer
+ * to a previous entry in the table that then becomes the current one. When
+ * merging or pruning, we leave the entries for the merged/pruned nodes in the
+ * table so that we do not have holes in there. The tuple tables are indexed
+ * (tries/prefix trees) to speed-up the search for matching atoms during rule
+ * applications.
  */
 public abstract class ExtensionTable implements Serializable {
     private static final long serialVersionUID=-5029938218056017193L;
@@ -57,7 +56,7 @@ public abstract class ExtensionTable implements Serializable {
     protected int m_afterExtensionThisTupleIndex;
     protected int m_afterDeltaNewTupleIndex;
     protected int[] m_indicesByBranchingPoint;
-    
+
     public ExtensionTable(Tableau tableau,int tupleArity,boolean needsDependencySets) {
         m_tableau=tableau;
         m_tableauMonitor=m_tableau.m_tableauMonitor;
@@ -91,7 +90,7 @@ public abstract class ExtensionTable implements Serializable {
      * This method is called each time a fresh tuple is added. The method is not called if the tuple
      * was already contained in the extension table. The method updates a couple of relevant data structures
      * and notifies all relevant parties of the tuple's addition.
-     */  
+     */
     protected void postAdd(Object[] tuple,DependencySet dependencySet,int tupleIndex,boolean isCore) {
         Object dlPredicateObject=tuple[0];
         if (dlPredicateObject instanceof Concept) {
@@ -121,9 +120,9 @@ public abstract class ExtensionTable implements Serializable {
                 bindingPositions[index]=index;
             else
                 bindingPositions[index]=-1;
-        return createRetrieval(bindingPositions,new Object[bindingPattern.length],true,extensionView);
+        return createRetrieval(bindingPositions,new Object[bindingPattern.length],new Object[bindingPattern.length],true,extensionView);
     }
-    public abstract Retrieval createRetrieval(int[] bindingPositions,Object[] bindingsBuffer,boolean ownsBindingsBuffer,View extensionView);
+    public abstract Retrieval createRetrieval(int[] bindingPositions,Object[] bindingsBuffer,Object[] tupleBuffer,boolean ownsBuffers,View extensionView);
     public abstract DependencySet getDependencySet(Object[] tuple);
     public abstract boolean isCore(Object[] tuple);
     public boolean propagateDeltaNew() {
@@ -224,23 +223,23 @@ public abstract class ExtensionTable implements Serializable {
         protected final ExtensionTable.View m_extensionView;
         protected final int[] m_bindingPositions;
         protected final Object[] m_bindingsBuffer;
-        protected final boolean m_ownsBindingsBuffer;
-        protected final boolean m_checkTupleSelection;
         protected final Object[] m_tupleBuffer;
+        protected final boolean m_ownsBuffers;
+        protected final boolean m_checkTupleSelection;
         protected int m_currentTupleIndex;
         protected int m_afterLastTupleIndex;
 
-        public UnindexedRetrieval(int[] bindingPositions,Object[] bindingsBuffer,boolean ownsBindingsBuffer,ExtensionTable.View extensionView) {
+        public UnindexedRetrieval(int[] bindingPositions,Object[] bindingsBuffer,Object[] tupleBuffer,boolean ownsBuffers,ExtensionTable.View extensionView) {
             m_bindingPositions=bindingPositions;
             m_extensionView=extensionView;
             m_bindingsBuffer=bindingsBuffer;
-            m_ownsBindingsBuffer=ownsBindingsBuffer;
+            m_tupleBuffer=tupleBuffer;
+            m_ownsBuffers=ownsBuffers;
             int numberOfBoundPositions=0;
             for (int index=m_bindingPositions.length-1;index>=0;--index)
                 if (m_bindingPositions[index]!=-1)
                     numberOfBoundPositions++;
             m_checkTupleSelection=(numberOfBoundPositions>0);
-            m_tupleBuffer=new Object[m_tupleArity];
         }
         public ExtensionTable getExtensionTable() {
             return ExtensionTable.this;
@@ -249,9 +248,12 @@ public abstract class ExtensionTable implements Serializable {
             return m_extensionView;
         }
         public void clear() {
-            if (m_ownsBindingsBuffer)
-                Arrays.fill(m_bindingsBuffer,null);
-            Arrays.fill(m_tupleBuffer,null);
+            if (m_ownsBuffers) {
+                for (int index=m_bindingsBuffer.length-1;index>=0;--index)
+                    m_bindingsBuffer[index]=null;
+                for (int index=m_tupleBuffer.length-1;index>=0;--index)
+                    m_tupleBuffer[index]=null;
+            }
         }
         public int[] getBindingPositions() {
             return m_bindingPositions;
@@ -349,7 +351,7 @@ public abstract class ExtensionTable implements Serializable {
         private static final long serialVersionUID=-8097612469749016470L;
 
         protected final DependencySetFactory m_dependencySetFactory;
-        
+
         public LastObjectDependencySetManager(ExtensionTable extensionTable) {
             m_dependencySetFactory=extensionTable.m_tableau.getDependencySetFactory();
         }
@@ -366,13 +368,13 @@ public abstract class ExtensionTable implements Serializable {
             m_dependencySetFactory.removeUsage(permanentDependencySet);
         }
     }
-    
+
     protected static interface CoreManager {
         boolean isCore(int tupleIndex);
         void addCore(int tupleIndex);
         void setCore(int tupleIndex,boolean isCore);
     }
-    
+
     protected static class NoCoreManager implements CoreManager,Serializable {
         private static final long serialVersionUID=3252994135060928432L;
 

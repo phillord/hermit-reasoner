@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -47,6 +47,8 @@ public final class ExtensionManager implements Serializable {
     protected final Object[] m_binaryAuxiliaryTupleAdd;
     protected final Object[] m_ternaryAuxiliaryTupleContains;
     protected final Object[] m_ternaryAuxiliaryTupleAdd;
+    protected final Object[] m_fouraryAuxiliaryTupleContains;
+    protected final Object[] m_fouraryAuxiliaryTupleAdd;
     protected final Map<DescriptionGraph,Object[]> m_descriptionGraphTuplesContains;
     protected final Map<DescriptionGraph,Object[]> m_descriptionGraphTuplesAdd;
     protected PermanentDependencySet m_clashDependencySet;
@@ -65,7 +67,7 @@ public final class ExtensionManager implements Serializable {
                 }
             ) {
                 private static final long serialVersionUID=1462821385000191875L;
-    
+
                 public boolean isTupleActive(Object[] tuple) {
                     return ((Node)tuple[1]).isActive();
                 }
@@ -83,12 +85,12 @@ public final class ExtensionManager implements Serializable {
                 }
             ) {
                 private static final long serialVersionUID=-731201626401421877L;
-    
+
                 public boolean isTupleActive(Object[] tuple) {
                     return ((Node)tuple[1]).isActive() && ((Node)tuple[2]).isActive();
                 }
                 public boolean isTupleActive(int tupleIndex) {
-                    return ((Node)m_tupleTable.getTupleObject(tupleIndex,1)).isActive() 
+                    return ((Node)m_tupleTable.getTupleObject(tupleIndex,1)).isActive()
                         && ((Node)m_tupleTable.getTupleObject(tupleIndex,2)).isActive();
                 }
             };
@@ -104,6 +106,8 @@ public final class ExtensionManager implements Serializable {
         m_binaryAuxiliaryTupleAdd=new Object[2];
         m_ternaryAuxiliaryTupleContains=new Object[3];
         m_ternaryAuxiliaryTupleAdd=new Object[3];
+        m_fouraryAuxiliaryTupleContains=new Object[4];
+        m_fouraryAuxiliaryTupleAdd=new Object[4];
         m_descriptionGraphTuplesContains=new HashMap<DescriptionGraph,Object[]>();
         m_descriptionGraphTuplesAdd=new HashMap<DescriptionGraph,Object[]>();
         for (DescriptionGraph descriptionGraph : m_tableau.getDLOntology().getAllDescriptionGraphs()) {
@@ -125,6 +129,14 @@ public final class ExtensionManager implements Serializable {
         m_ternaryAuxiliaryTupleAdd[0]=null;
         m_ternaryAuxiliaryTupleAdd[1]=null;
         m_ternaryAuxiliaryTupleAdd[2]=null;
+        m_fouraryAuxiliaryTupleContains[0]=null;
+        m_fouraryAuxiliaryTupleContains[1]=null;
+        m_fouraryAuxiliaryTupleContains[2]=null;
+        m_fouraryAuxiliaryTupleContains[3]=null;
+        m_fouraryAuxiliaryTupleAdd[0]=null;
+        m_fouraryAuxiliaryTupleAdd[1]=null;
+        m_fouraryAuxiliaryTupleAdd[2]=null;
+        m_fouraryAuxiliaryTupleAdd[3]=null;
         m_descriptionGraphTuplesContains.clear();
         m_descriptionGraphTuplesAdd.clear();
 
@@ -225,6 +237,13 @@ public final class ExtensionManager implements Serializable {
             return m_ternaryExtensionTable.containsTuple(m_ternaryAuxiliaryTupleContains);
         }
     }
+    public boolean containsAssertion(DLPredicate dlPredicate,Node node0,Node node1,Node node2) {
+        m_fouraryAuxiliaryTupleContains[0]=dlPredicate;
+        m_fouraryAuxiliaryTupleContains[1]=node0;
+        m_fouraryAuxiliaryTupleContains[2]=node1;
+        m_fouraryAuxiliaryTupleContains[3]=node2;
+        return containsTuple(m_fouraryAuxiliaryTupleContains);
+    }
     public boolean containsAnnotatedEquality(AnnotatedEquality annotatedEquality,Node node0,Node node1,Node node2) {
         return m_tableau.m_nominalIntroductionManager.canForgetAnnotation(annotatedEquality,node0,node1,node2) && node0==node1;
     }
@@ -276,6 +295,13 @@ public final class ExtensionManager implements Serializable {
             m_ternaryAuxiliaryTupleContains[2]=node1;
             return m_ternaryExtensionTable.getDependencySet(m_ternaryAuxiliaryTupleContains);
         }
+    }
+    public DependencySet getAssertionDependencySet(DLPredicate dlPredicate,Node node0,Node node1,Node node2) {
+        m_fouraryAuxiliaryTupleContains[0]=dlPredicate;
+        m_fouraryAuxiliaryTupleContains[1]=node0;
+        m_fouraryAuxiliaryTupleContains[2]=node1;
+        m_fouraryAuxiliaryTupleContains[3]=node2;
+        return getTupleDependencySet(m_fouraryAuxiliaryTupleContains);
     }
     public DependencySet getTupleDependencySet(Object[] tuple) {
         if (tuple.length==0)
@@ -339,9 +365,18 @@ public final class ExtensionManager implements Serializable {
             }
         }
     }
+    public boolean addAssertion(DLPredicate dlPredicate,Node node0,Node node1,Node node2,DependencySet dependencySet,boolean isCore) {
+        if (m_addActive)
+            throw new IllegalStateException("ExtensionManager is not reentrant.");
+        m_fouraryAuxiliaryTupleAdd[0]=dlPredicate;
+        m_fouraryAuxiliaryTupleAdd[1]=node0;
+        m_fouraryAuxiliaryTupleAdd[2]=node1;
+        m_fouraryAuxiliaryTupleAdd[3]=node2;
+        return addTuple(m_fouraryAuxiliaryTupleAdd,dependencySet,isCore);
+    }
     public boolean addAnnotatedEquality(AnnotatedEquality annotatedEquality,Node node0,Node node1,Node node2,DependencySet dependencySet) {
         return m_tableau.m_nominalIntroductionManager.addAnnotatedEquality(annotatedEquality,node0,node1,node2,dependencySet);
-        
+
     }
     public boolean addTuple(Object[] tuple,DependencySet dependencySet,boolean isCore) {
         if (tuple.length==0) {
@@ -358,7 +393,7 @@ public final class ExtensionManager implements Serializable {
                 throw new IllegalStateException("ExtensionManager is not reentrant.");
             m_addActive=true;
             try {
-                return getExtensionTable(tuple.length).addTuple(tuple,dependencySet,isCore); 
+                return getExtensionTable(tuple.length).addTuple(tuple,dependencySet,isCore);
             }
             finally {
                 m_addActive=false;
