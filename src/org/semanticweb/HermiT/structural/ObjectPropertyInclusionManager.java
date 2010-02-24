@@ -66,11 +66,11 @@ public class ObjectPropertyInclusionManager {
 
         for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_asymmetricObjectProperties)
             if( m_nonSimpleRoles.contains( objectPropertyExpression ) )
-                throw new IllegalArgumentException( "Non simple role '" + objectPropertyExpression + "' or its inverse appears in asymmetricity axiom");
+                throw new IllegalArgumentException( "Non simple role '" + objectPropertyExpression + "' or its inverse appears in asymmetric object property axiom");
 
         for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_irreflexiveObjectProperties)
             if( m_nonSimpleRoles.contains( objectPropertyExpression ) )
-                throw new IllegalArgumentException( "Non simple role '" + objectPropertyExpression + "' or its inverse appears in asymmetricity axiom");
+                throw new IllegalArgumentException( "Non simple role '" + objectPropertyExpression + "' or its inverse appears in irreflexive object property axiom");
 
         for (OWLObjectPropertyExpression[] properties : axioms.m_disjointObjectProperties)
             for (int i=0;i<properties.length;i++)
