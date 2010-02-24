@@ -412,7 +412,7 @@ public class AutomataConstructionManager {
 				autoOfBiggerRole.addTransition( new Transition(endState, ((Transition)extraOnes[i]).label(),endState ) );
 			
 		} catch (NoSuchStateException e) {
-			throw new IllegalArgumentException( "Could not build the Complete Automata of non-Simple Roles" );
+			throw new IllegalArgumentException( "Could not build the Complete Automata of non-Simple Properties" );
 		}
 	}
 
@@ -444,7 +444,7 @@ public class AutomataConstructionManager {
     		OWLObjectPropertyExpression owlSubPropertyInChain = null;
     		OWLObjectPropertyExpression[] owlSubProperties = inclusion.m_subObjectProperties;
     		if( owlSubProperties.length != 2 && owlSuperProperty.equals( owlSubProperties[0] ) && owlSuperProperty.equals( owlSubProperties[owlSubProperties.length-1] ))
-    			throw new IllegalArgumentException("The given role hierarchy is not regular.");
+    			throw new IllegalArgumentException("The given property hierarchy is not regular.");
     		
     		for( int i=0 ; i<owlSubProperties.length ; i++ ){
     			owlSubPropertyInChain = owlSubProperties[i];
@@ -453,9 +453,9 @@ public class AutomataConstructionManager {
         			( owlSubPropertyInChain.equals( owlSuperProperty ) || 
         			  (equivalentPropertiesMap.containsKey(owlSuperProperty) && equivalentPropertiesMap.get( owlSuperProperty ).contains( owlSubPropertyInChain ))
         			) )
-        			throw new IllegalArgumentException("The given role hierarchy is not regular.");
+        			throw new IllegalArgumentException("The given property hierarchy is not regular.");
         		else if( owlSubPropertyInChain.getInverseProperty().getSimplified().equals( owlSuperProperty ) )
-        			throw new IllegalArgumentException("The given role hierarchy is not regular.");
+        			throw new IllegalArgumentException("The given property hierarchy is not regular.");
         		else if ( !owlSubPropertyInChain.equals( owlSuperProperty ) )
         			propertyDependencyGraph.addEdge( owlSubPropertyInChain, owlSuperProperty );
     		}
@@ -489,7 +489,7 @@ public class AutomataConstructionManager {
     	for( OWLObjectPropertyExpression prop : regularityCheckGraph.getElements() ){
     		Set<OWLObjectPropertyExpression> successors = regularityCheckGraph.getSuccessors( prop );
     		if( successors.contains( prop ) || successors.contains( prop.getInverseProperty().getSimplified() ) )
-    			throw new IllegalArgumentException("The given role hierarchy is not regular.\nThere is a cyclic dependency involving property " + prop );
+    			throw new IllegalArgumentException("The given property hierarchy is not regular.\nThere is a cyclic dependency involving property " + prop );
     	}
 	}
     private Map<OWLObjectPropertyExpression,Automaton> buildIndividualAutomata(Graph<OWLObjectPropertyExpression> complexRolesDependencyGraph, Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions, Collection<ComplexObjectPropertyInclusion> complexObjectPropertyInclusions, Map<OWLObjectPropertyExpression, Set<OWLObjectPropertyExpression>> equivalentPropertiesMap){

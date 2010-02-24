@@ -66,16 +66,16 @@ public class ObjectPropertyInclusionManager {
 
         for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_asymmetricObjectProperties)
             if( m_nonSimpleRoles.contains( objectPropertyExpression ) )
-                throw new IllegalArgumentException( "Non simple role '" + objectPropertyExpression + "' or its inverse appears in asymmetric object property axiom");
+                throw new IllegalArgumentException( "Non simple property '" + objectPropertyExpression + "' or its inverse appears in asymmetric object property axiom");
 
         for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_irreflexiveObjectProperties)
             if( m_nonSimpleRoles.contains( objectPropertyExpression ) )
-                throw new IllegalArgumentException( "Non simple role '" + objectPropertyExpression + "' or its inverse appears in irreflexive object property axiom");
+                throw new IllegalArgumentException( "Non simple property '" + objectPropertyExpression + "' or its inverse appears in irreflexive object property axiom");
 
         for (OWLObjectPropertyExpression[] properties : axioms.m_disjointObjectProperties)
             for (int i=0;i<properties.length;i++)
                 if( m_nonSimpleRoles.contains( properties[i] ) )
-                    throw new IllegalArgumentException( "Non simple role '" + properties[i] + "' or its inverse appears in disjoint properties axiom");
+                    throw new IllegalArgumentException( "Non simple property '" + properties[i] + "' or its inverse appears in disjoint properties axiom");
     }
         public void addInclusion(OWLObjectPropertyExpression subObjectProperty,OWLObjectPropertyExpression superObjectProperty) {
         subObjectProperty=subObjectProperty.getSimplified();
@@ -88,7 +88,7 @@ public class ObjectPropertyInclusionManager {
             for (int index=0;index<inclusion.length;index++){
             	if(inclusion[index] instanceof OWLObjectCardinalityRestriction)
                     if( m_nonSimpleRoles.contains( ((OWLObjectCardinalityRestriction)inclusion[index]).getProperty() ) )
-                        throw new IllegalArgumentException( "Non simple role '" + inclusion[index] + "' or its inverse appears in asymmetricity axiom");
+                        throw new IllegalArgumentException( "Non simple property '" + inclusion[index] + "' or its inverse appears in asymmetricity axiom");
 
                     inclusion[index]=replaceDescriptionIfNecessary(inclusion[index]);
             }
