@@ -50,7 +50,7 @@ public class AutomataConstructionManager {
         Graph<OWLObjectPropertyExpression> propertyDependencyGraph = buildPropertyOrdering( simpleObjectPropertyInclusions, complexObjectPropertyInclusions, equivalentPropertiesMap );
         checkForRegularity( propertyDependencyGraph, equivalentPropertiesMap );
 
-        Graph<OWLObjectPropertyExpression> complexRolesDependencyGraph = propertyDependencyGraph.clone();  
+        Graph<OWLObjectPropertyExpression> complexRolesDependencyGraph = propertyDependencyGraph.clone();
         Map<OWLObjectPropertyExpression,Automaton> individualAutomata = buildIndividualAutomata( complexRolesDependencyGraph, simpleObjectPropertyInclusions, complexObjectPropertyInclusions, equivalentPropertiesMap );
         Set<OWLObjectPropertyExpression> simpleRoles = findSimpleRoles( complexRolesDependencyGraph, individualAutomata );
 
@@ -627,6 +627,7 @@ public class AutomataConstructionManager {
     		if( owlSubPropertyExpression.length==2 && owlSubPropertyExpression[0].equals(owlSuperProperty) && owlSubPropertyExpression[1].equals(owlSuperProperty))
     			if( !complexRolesDependencyGraph.getElements().contains( owlSuperProperty ) && 
     				!automataMap.containsKey( owlSuperProperty.getInverseProperty().getSimplified() )){
+    				complexRolesDependencyGraph.addEdge(owlSuperProperty, owlSuperProperty);
     				Automaton autoOfRole = automataMap.get( owlSuperProperty );
     				automataMap.put(owlSuperProperty.getInverseProperty().getSimplified(), getMirroredCopy( autoOfRole ) );
     			}
