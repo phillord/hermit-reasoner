@@ -1222,6 +1222,8 @@ public class Reasoner implements OWLReasoner,Serializable {
                 if (m_progressMonitor!=null)
                     m_progressMonitor.reasonerTaskProgressChanged(currentIndividual,numIndividuals);
             }
+            if (m_progressMonitor!=null)
+                m_progressMonitor.reasonerTaskStopped();
         }
     }
     protected Set<HierarchyNode<AtomicConcept>> getDirectSuperConceptNodes(final Individual individual) {
