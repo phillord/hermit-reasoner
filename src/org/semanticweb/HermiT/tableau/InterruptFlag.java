@@ -25,9 +25,9 @@ import org.semanticweb.owlapi.reasoner.TimeOutException;
 public final class InterruptFlag implements Serializable {
     private static final long serialVersionUID = -6983680374511847003L;
     protected InterruptTimer m_interruptTimer;
-    protected boolean m_taskRunning;
     protected final long m_individualTaskTimeout;
-    protected boolean m_taskInterrupted;
+    protected volatile boolean m_taskRunning;
+    protected volatile boolean m_taskInterrupted;
     protected volatile boolean m_interrupt;
 
     public InterruptFlag() {

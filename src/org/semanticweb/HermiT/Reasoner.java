@@ -1201,7 +1201,13 @@ public class Reasoner implements OWLReasoner,Serializable {
     public void realise() {
         if (m_realization==null) {
             m_realization=new HashMap<AtomicConcept,Set<Individual>>();
+            int numIndividuals=m_dlOntology.getAllIndividuals().size();
+            if (m_atomicConceptHierarchy==null && numIndividuals>0) classify();            
+            int currentIndividual=0;
+            if (m_progressMonitor!=null)
+                m_progressMonitor.reasonerTaskStarted("Computig instances for all classes...");
             for (Individual individual : m_dlOntology.getAllIndividuals()) {
+            	currentIndividual++;
                 Set<HierarchyNode<AtomicConcept>> directSuperConceptNodes=getDirectSuperConceptNodes(individual);
                 for (HierarchyNode<AtomicConcept> directSuperConceptNode : directSuperConceptNodes) {
                     for (AtomicConcept directSuperConcept : directSuperConceptNode.getEquivalentElements()) {
@@ -1213,6 +1219,8 @@ public class Reasoner implements OWLReasoner,Serializable {
                         individuals.add(individual);
                     }
                 }
+                if (m_progressMonitor!=null)
+                    m_progressMonitor.reasonerTaskProgressChanged(currentIndividual,numIndividuals);
             }
         }
     }

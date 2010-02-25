@@ -28,7 +28,7 @@ public class FailingWGTestDebug {
         TestSuite suite=new TestSuite("OWL WG Debugging Tests");
         for (WGTestDescriptor wgTestDescriptor : wgTestRegistry.getTestDescriptors())
             //if (wgTestDescriptor.isDLTest() && (wgTestDescriptor.status==WGTestDescriptor.Status.APPROVED || wgTestDescriptor.status==WGTestDescriptor.Status.PROPOSED || wgTestDescriptor.status==null)) {
-                if (wgTestDescriptor.identifier.startsWith("chain2trans1")
+                if (wgTestDescriptor.identifier.startsWith("Feature-DataQCR-001")
                 ) {
                     wgTestDescriptor.addTestsToSuite(suite);
                 }
