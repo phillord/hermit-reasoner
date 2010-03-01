@@ -68,3 +68,8 @@ HermiT 1.2.1
 - minor bug fixes (nominals and equality statements in the ABox were still not 
   handled correctly if the ontology was nondeterministic, custom data ranges were not 
   loaded correctly in some case)
+HermiT 1.2.2
+- minor bug fixes (complex concept queries didn't work properly in the 
+  presence of role chains and transitivity), added a progress monitor for realisation
+  that is used by Protege
+  
