@@ -97,15 +97,16 @@ public class ObjectPropertyInclusionManager {
 
             OWLObjectAllValuesFrom replacedAllRestriction=mapping.getKey();
             OWLObjectPropertyExpression objectProperty = replacedAllRestriction.getProperty();
+            String objectPropertyName = objectProperty.getNamedProperty().getIRI().getFragment();
             OWLClassExpression owlConcept = replacedAllRestriction.getFiller();
             String indexOfInitialConcept = mapping.getValue().asOWLClass().getIRI().getFragment() + "_";
 
             Automaton automatonOfRole = m_automataForComplexRoles.get( objectProperty );
             String initialState = automatonOfRole.initials().toArray()[0].toString();
             boolean isOfNegativePolarity = false;
-            OWLClassExpression conceptForInitialState = m_factory.getOWLClass(IRI.create("internal:all#"+indexOfInitialConcept+initialState));
+            OWLClassExpression conceptForInitialState = m_factory.getOWLClass(IRI.create("internal:all#"+indexOfInitialConcept+objectPropertyName+initialState));
             if (replacedAllRestriction.getFiller() instanceof OWLObjectComplementOf || replacedAllRestriction.getFiller().equals(m_factory.getOWLNothing())){
-                conceptForInitialState = m_factory.getOWLClass(IRI.create("internal:all#"+indexOfInitialConcept+initialState)).getComplementNNF();
+                conceptForInitialState = m_factory.getOWLClass(IRI.create("internal:all#"+indexOfInitialConcept+objectPropertyName+initialState)).getComplementNNF();
                 isOfNegativePolarity = true;
             }
             Map<State,OWLClassExpression> mapOfNewConceptNames = new HashMap<State,OWLClassExpression>();
@@ -115,7 +116,7 @@ public class ObjectPropertyInclusionManager {
                 if( state.isInitial() )
                 	continue;
                 else
-                	mapOfNewConceptNames.put( state, m_factory.getOWLClass(IRI.create("internal:all#"+indexOfInitialConcept+state)) );
+                	mapOfNewConceptNames.put( state, m_factory.getOWLClass(IRI.create("internal:all#"+indexOfInitialConcept+objectPropertyName+state)) );
             }
             if( isOfNegativePolarity )
                 for(State state : mapOfNewConceptNames.keySet())
@@ -165,9 +166,9 @@ public class ObjectPropertyInclusionManager {
                 OWLClassExpression replacedConcept=getReplacementFor(objectAll);
                 String initialState = m_automataForComplexRoles.get( objectProperty ).initials().toArray()[0].toString();
                 String indexOfReplacedConcept = replacedConcept.asOWLClass().getIRI().getFragment() + "_";
-                OWLClassExpression replacement = m_factory.getOWLClass(IRI.create("internal:all#"+indexOfReplacedConcept+initialState));
+                OWLClassExpression replacement = m_factory.getOWLClass(IRI.create("internal:all#"+indexOfReplacedConcept+objectProperty.getNamedProperty().getIRI().getFragment()+initialState));
                 if (objectAll.getFiller() instanceof OWLObjectComplementOf || objectAll.getFiller().equals(m_factory.getOWLNothing()))
-                	replacement = m_factory.getOWLClass(IRI.create("internal:all#"+indexOfReplacedConcept+initialState)).getComplementNNF();
+                	replacement = m_factory.getOWLClass(IRI.create("internal:all#"+indexOfReplacedConcept+objectProperty.getNamedProperty().getIRI().getFragment()+initialState)).getComplementNNF();
 
                 return replacement;
             }
