@@ -128,8 +128,6 @@ import org.semanticweb.owlapi.reasoner.impl.OWLObjectPropertyNode;
 import org.semanticweb.owlapi.reasoner.impl.OWLObjectPropertyNodeSet;
 import org.semanticweb.owlapi.util.Version;
 
-import rationals.Automaton;
-
 /**
  * Answers queries about the logical implications of a particular knowledge base. A Reasoner is associated with a single knowledge base, which is "loaded" when the reasoner is constructed. By default a full classification of all atomic terms in the knowledge base is also performed at this time (which can take quite a while for large or complex ontologies), but this behavior can be disabled as a part of the Reasoner configuration. Internal details of the loading and reasoning algorithms can be configured in the Reasoner constructor and do not change over the lifetime of the Reasoner object---internal data structures and caches are optimized for a particular configuration. By default, HermiT will use the set of options which provide optimal performance.
  */
@@ -1686,90 +1684,6 @@ public class Reasoner implements OWLReasoner,Serializable {
             throw new IllegalStateException("Internal error: Unexpected OWLException.",shouldntHappen);
         }
     }
-    protected void permanentlyExtendDLOntology(OWLOntologyManager ontologyManager,OWLAxiom... additionalAxioms) throws IllegalArgumentException {
-        if (additionalAxioms==null || additionalAxioms.length==0) return;
-        try {
-            Set<DescriptionGraph> descriptionGraphs=Collections.emptySet();
-            OWLDataFactory factory=ontologyManager.getOWLDataFactory();
-            IRI ontologyIRI=IRI.create("uri:urn:internal-kb");
-            if (ontologyManager.contains(ontologyIRI)) {
-                ontologyManager.removeOntology(ontologyManager.getOntology(ontologyIRI));
-            }
-            OWLOntology newOntology=ontologyManager.createOntology(ontologyIRI);
-            for (OWLAxiom axiom : additionalAxioms)
-                ontologyManager.addAxiom(newOntology,axiom);
-            OWLAxioms axioms=new OWLAxioms();
-            axioms.m_definedDatatypesIRIs.addAll(m_dlOntology.getDefinedDatatypeIRIs());
-            OWLNormalization normalization=new OWLNormalization(factory,axioms,!m_dlOntology.getAllDescriptionGraphs().isEmpty());
-            normalization.processOntology(m_configuration,newOntology);
-            BuiltInPropertyManager builtInPropertyManager=new BuiltInPropertyManager(factory);
-            builtInPropertyManager.axiomatizeBuiltInPropertiesAsNeeded(axioms,
-                m_dlOntology.getAllAtomicObjectRoles().contains(AtomicRole.TOP_OBJECT_ROLE),
-                m_dlOntology.getAllAtomicObjectRoles().contains(AtomicRole.BOTTOM_OBJECT_ROLE),
-                m_dlOntology.getAllAtomicObjectRoles().contains(AtomicRole.TOP_DATA_ROLE),
-                m_dlOntology.getAllAtomicObjectRoles().contains(AtomicRole.BOTTOM_DATA_ROLE)
-            );
-            Map<OWLObjectPropertyExpression,Automaton> automataOfComplexRoles=null;
-            if (!m_dlOntology.getAllComplexObjectRoleInclusions().isEmpty() || !axioms.m_complexObjectPropertyInclusions.isEmpty()) {
-                ObjectPropertyInclusionManager objectPropertyInclusionManager=new ObjectPropertyInclusionManager(factory);
-                objectPropertyInclusionManager.prepareTransformation(axioms);
-                for (DLClause dlClause : m_dlOntology.getDLClauses()) {
-                    if (dlClause.m_clauseType==ClauseType.OBJECT_PROPERTY_INCLUSION || dlClause.m_clauseType==ClauseType.DATA_PROPERTY_INCLUSION) {
-                        AtomicRole subAtomicRole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
-                        AtomicRole superAtomicRole=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
-                        if (m_dlOntology.getAllAtomicObjectRoles().contains(subAtomicRole) && m_dlOntology.getAllAtomicObjectRoles().contains(superAtomicRole)) {
-                            OWLObjectProperty subObjectProperty=getObjectProperty(factory,subAtomicRole);
-                            OWLObjectProperty superObjectProperty=getObjectProperty(factory,superAtomicRole);
-                            objectPropertyInclusionManager.addInclusion(subObjectProperty,superObjectProperty);
-                        }
-                    }
-                    else if (dlClause.m_clauseType==ClauseType.INVERSE_OBJECT_PROPERTY_INCLUSION) {
-                        AtomicRole subAtomicRole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
-                        AtomicRole superAtomicRole=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
-                        if (m_dlOntology.getAllAtomicObjectRoles().contains(subAtomicRole) && m_dlOntology.getAllAtomicObjectRoles().contains(superAtomicRole)) {
-                            OWLObjectProperty subObjectProperty=getObjectProperty(factory,subAtomicRole);
-                            OWLObjectPropertyExpression superObjectPropertyExpression=getObjectProperty(factory,superAtomicRole).getInverseProperty();
-                            objectPropertyInclusionManager.addInclusion(subObjectProperty,superObjectPropertyExpression);
-                        }
-                    }
-                }
-                automataOfComplexRoles=objectPropertyInclusionManager.rewriteAxioms(axioms,m_dlOntology.getAutomataOfComplexObjectProperties());
-            }
-            OWLAxiomsExpressivity axiomsExpressivity=new OWLAxiomsExpressivity(axioms);
-            axiomsExpressivity.m_hasAtMostRestrictions|=m_dlOntology.hasAtMostRestrictions();
-            axiomsExpressivity.m_hasInverseRoles|=m_dlOntology.hasInverseRoles();
-            axiomsExpressivity.m_hasNominals|=m_dlOntology.hasNominals();
-            axiomsExpressivity.m_hasDatatypes|=m_dlOntology.hasDatatypes();
-            OWLClausification clausifier=new OWLClausification(m_configuration);
-            DLOntology newDLOntology=clausifier.clausify(ontologyManager.getOWLDataFactory(),"uri:urn:internal-kb",axioms,axiomsExpressivity,descriptionGraphs,automataOfComplexRoles);
-
-            Set<DLClause> dlClauses=createUnion(m_dlOntology.getDLClauses(),newDLOntology.getDLClauses());
-            Set<Atom> positiveFacts=createUnion(m_dlOntology.getPositiveFacts(),newDLOntology.getPositiveFacts());
-            Set<Atom> negativeFacts=createUnion(m_dlOntology.getNegativeFacts(),newDLOntology.getNegativeFacts());
-            Set<AtomicConcept> atomicConcepts=createUnion(m_dlOntology.getAllAtomicConcepts(),newDLOntology.getAllAtomicConcepts());
-            Set<DLOntology.ComplexObjectRoleInclusion> complexObjectRoleInclusions=createUnion(m_dlOntology.getAllComplexObjectRoleInclusions(),newDLOntology.getAllComplexObjectRoleInclusions());
-            Set<AtomicRole> atomicObjectRoles=createUnion(m_dlOntology.getAllAtomicObjectRoles(),newDLOntology.getAllAtomicObjectRoles());
-            Set<AtomicRole> atomicDataRoles=createUnion(m_dlOntology.getAllAtomicDataRoles(),newDLOntology.getAllAtomicDataRoles());
-            Set<String> definedDatatypeIRIs=createUnion(m_dlOntology.getDefinedDatatypeIRIs(),newDLOntology.getDefinedDatatypeIRIs());
-            Set<Individual> individuals=createUnion(m_dlOntology.getAllIndividuals(),newDLOntology.getAllIndividuals());
-            boolean hasInverseRoles=m_dlOntology.hasInverseRoles() || newDLOntology.hasInverseRoles();
-            boolean hasAtMostRestrictions=m_dlOntology.hasAtMostRestrictions() || newDLOntology.hasAtMostRestrictions();
-            boolean hasNominals=m_dlOntology.hasNominals() || newDLOntology.hasNominals();
-            boolean hasDatatypes=m_dlOntology.hasDatatypes() || newDLOntology.hasDatatypes();
-            m_dlOntology=new DLOntology(m_dlOntology.getOntologyIRI(),dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,atomicObjectRoles,atomicDataRoles,definedDatatypeIRIs,individuals,hasInverseRoles,hasAtMostRestrictions,hasNominals,hasDatatypes,automataOfComplexRoles);
-            m_tableau=createTableau(m_interruptFlag,m_configuration,m_dlOntology,m_prefixes);
-            m_atomicConceptClassificationManager=createAtomicConceptClassificationManager(this);
-            m_atomicConceptHierarchy=null;
-            m_objectRoleClassificationManager=createObjectRoleClassificationManager(this);
-            m_objectRoleHierarchy=null;
-            m_dataRoleClassificationManager=createDataRoleClassificationManager(this);
-            m_dataRoleHierarchy=null;
-            m_realization=null;
-        }
-        catch (OWLException shouldntHappen) {
-            throw new IllegalStateException("Internal error: Unexpected OWLException.",shouldntHappen);
-        }
-    }
 
     protected static <T> Set<T> createUnion(Set<T> set1,Set<T> set2) {
         Set<T> result=new HashSet<T>();
@@ -1986,66 +1900,30 @@ public class Reasoner implements OWLReasoner,Serializable {
         @SuppressWarnings("serial")
         protected OWLReasoner createHermiTOWLReasoner(OWLOntology ontology, Configuration configuration) {
             Reasoner hermit=new Reasoner(configuration,ontology.getOWLOntologyManager(),ontology,configuration.reasonerProgressMonitor) {
-                protected final List<OWLOntologyChange> m_rawChanges=new ArrayList<OWLOntologyChange>();
-                protected final Set<OWLAxiom> m_reasonerAxioms=new HashSet<OWLAxiom>();
                 protected OWLOntology m_rootOntology=null;
+                protected boolean changed=false;
 
                 private final OWLOntologyChangeListener ontologyChangeListener = new OWLOntologyChangeListener() {
                     public void ontologiesChanged(List<? extends OWLOntologyChange> changes) throws OWLException {
-                        handleRawOntologyChanges(changes);
+                        changed=true;
                     }
                 };
                 protected void initOWLAPI(OWLOntology rootOntology) {
                     m_rootOntology=rootOntology;
                     m_rootOntology.getOWLOntologyManager().addOntologyChangeListener(ontologyChangeListener);
-                    for (OWLOntology ont : m_rootOntology.getImportsClosure()) {
-                        m_reasonerAxioms.addAll(ont.getLogicalAxioms());
-                    }
+                }
+                public void dispose() {
+                	m_rootOntology.getOWLOntologyManager().removeOntologyChangeListener(ontologyChangeListener);
+                	m_rootOntology=null;
+                	super.dispose();
                 }
                 public OWLOntology getRootOntology() {
                     return m_rootOntology;
                 }
-                private void handleRawOntologyChanges(List<? extends OWLOntologyChange> changes) {
-                    m_rawChanges.addAll(changes);
-                    if (!m_configuration.bufferChanges) flush();
-                }
-                public List<OWLOntologyChange> getPendingChanges() {
-                    return m_rawChanges;
-                }
-                public Set<OWLAxiom> getPendingAxiomAdditions() {
-                    Set<OWLAxiom> added = new HashSet<OWLAxiom>();
-                    computeDiff(added, new HashSet<OWLAxiom>());
-                    return added;
-                }
-                public Set<OWLAxiom> getPendingAxiomRemovals() {
-                    Set<OWLAxiom> removed = new HashSet<OWLAxiom>();
-                    computeDiff(new HashSet<OWLAxiom>(), removed);
-                    return removed;
-                }
-                protected void computeDiff(Set<OWLAxiom> added, Set<OWLAxiom> removed) {
-                    if(m_rawChanges.isEmpty()) return;
-                    for (OWLOntology ont : m_rootOntology.getImportsClosure())
-                        for (OWLAxiom ax : ont.getLogicalAxioms())
-                            if (!m_reasonerAxioms.contains(ax)) added.add(ax);
-                    for(OWLAxiom ax : m_reasonerAxioms)
-                        if(!m_rootOntology.containsAxiom(ax, true)) removed.add(ax);
-                }
                 public void flush() {
-                    final Set<OWLAxiom> added = new HashSet<OWLAxiom>();
-                    final Set<OWLAxiom> removed = new HashSet<OWLAxiom>();
-                    computeDiff(added, removed);
-                    m_reasonerAxioms.removeAll(removed);
-                    m_reasonerAxioms.addAll(added);
-                    m_rawChanges.clear();
-                    if (!added.isEmpty() || !removed.isEmpty()) {
-                        handleChanges(added, removed);
-                    }
-                }
-                protected void handleChanges(Set<OWLAxiom> addAxioms, Set<OWLAxiom> removeAxioms) {
-                    if (removeAxioms.isEmpty()) {
-                        permanentlyExtendDLOntology(m_rootOntology.getOWLOntologyManager(),addAxioms.toArray(new OWLAxiom[0]));
-                    } else {
-                        loadOntology(m_rootOntology.getOWLOntologyManager(),m_rootOntology,null);
+                    if (changed) {
+                    	loadOntology(m_rootOntology.getOWLOntologyManager(),m_rootOntology,null);
+                    	changed=false;
                     }
                 }
             };
