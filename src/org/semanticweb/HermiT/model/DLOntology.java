@@ -211,11 +211,11 @@ public class DLOntology implements Serializable {
     public boolean containsObjectRole(AtomicRole role) {
     	return m_allAtomicObjectRoles.contains(role);
     }
-    public Set<AtomicRole> getAllAtomicDataRoles() {
-        return m_allAtomicDataRoles;
-    }
     public Map<OWLObjectPropertyExpression,Automaton> getAutomataOfComplexObjectProperties() {
         return m_automataOfComplexObjectProperties;
+    }
+    public Set<AtomicRole> getAllAtomicDataRoles() {
+        return m_allAtomicDataRoles;
     }
     public boolean containsDataRole(AtomicRole role) {
     	return m_allAtomicDataRoles.contains(role);
