@@ -30,7 +30,7 @@ import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     protected Reasoner m_reasoner;
     protected OWLReasoner m_owlreasoner;
-    
+
     public AbstractReasonerTest(String name) {
         super(name);
     }
@@ -84,7 +84,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
 
     /**
      * Loads the ontology from ontologyResource and the string in controlResource and compares the computed taxonomy for the ontology with the one in the controlResource by comparing the sorted ancestor list.
-     * 
+     *
      * @param ontologyResource
      *            the ontology
      * @param controlResource
@@ -98,7 +98,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
 
     /**
      * Tests whether the loaded ontology is consistent or not and asserts that this coincides with the given parameter satisfiable.
-     * 
+     *
      * @param satisfiable
      *            if the currently loaded ontology is expected to be satisfiable
      */
@@ -108,7 +108,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
 
     /**
      * Tests whether the atomic concept subAtomicConcept is subsumed by the atomic concept superAtomicConcept and asserts that this coincides with the expected result.
-     * 
+     *
      * @param subAtomicConcept
      *            a string that represents an atomic concept. If no prefix is given, NS is used as prefix
      * @param superAtomicConcept
@@ -167,13 +167,13 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         NodeSet<OWLNamedIndividual> actual=m_reasoner.getInstances(concept,direct);
         Set<String> actualIndividualIRIs=new HashSet<String>();
         for (OWLIndividual individual : actual.getFlattened()) {
-            if (!individual.isAnonymous()) 
+            if (!individual.isAnonymous())
                 actualIndividualIRIs.add(individual.asOWLNamedIndividual().getIRI().toString());
         }
         String[] expectedModified=expectedIndividuals.clone();
         assertContainsAll(actualIndividualIRIs,expectedModified);
     }
-    
+
     /**
      * Checks the superproperties of some object property.
      */
@@ -184,7 +184,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         Set<Set<String>> actual=setOfSetsOfOPEsToStrings(m_reasoner.getSuperObjectPropertyExpressions(ope,true));
         assertContainsAll(actual,control);
     }
-    
+
     /**
      * Checks the subproperties of some object property.
      */
@@ -195,7 +195,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         Set<Set<String>> actual=setOfSetsOfOPEsToStrings(m_reasoner.getSubObjectPropertyExpressions(ope,true));
         assertContainsAll(actual,control);
     }
-    
+
     /**
      * Checks the equivalents of some object property.
      */
@@ -206,7 +206,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         Set<String> actual=setOfOPEsToStrings(m_reasoner.getEquivalentObjectPropertyExpressions(ope));
         assertContainsAll(actual,control);
     }
-    
+
     /**
      * Checks the superproperties of some data property.
      */
@@ -217,7 +217,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         Set<Set<String>> actual=setOfSetsOfDPsToStrings(m_reasoner.getSuperDataProperties(dp,true));
         assertContainsAll(actual,control);
     }
-    
+
     /**
      * Checks the subproperties of some data property.
      */
@@ -228,7 +228,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         Set<Set<String>> actual=setOfSetsOfDPsToStrings(m_reasoner.getSubDataProperties(dp,true));
         assertContainsAll(actual,control);
     }
-    
+
     /**
      * Checks the equivalents of some data property.
      */
@@ -239,15 +239,15 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         Set<String> actual=setOfDPsToStrings(m_reasoner.getEquivalentDataProperties(dp));
         assertContainsAll(actual,control);
     }
-    
-    protected void assertEntails(OWLAxiom axiom, boolean expectedResult) {
-        assertTrue(new EntailmentChecker(m_reasoner, m_dataFactory).entails(axiom)==expectedResult);
+
+    protected void assertEntails(OWLAxiom axiom,boolean expectedResult) {
+        assertTrue(new EntailmentChecker(m_reasoner,m_dataFactory).entails(axiom)==expectedResult);
     }
-    
-    protected void assertEntails(Set<OWLLogicalAxiom> axioms, boolean expectedResult) {
-        assertTrue(new EntailmentChecker(m_reasoner, m_dataFactory).entails(axioms)==expectedResult);
+
+    protected void assertEntails(Set<OWLLogicalAxiom> axioms,boolean expectedResult) {
+        assertTrue(new EntailmentChecker(m_reasoner,m_dataFactory).entails(axioms)==expectedResult);
     }
-    
+
     protected static Set<Set<String>> setOfSetsOfOPEsToStrings(Set<Set<OWLObjectPropertyExpression>> setOfSets) {
         Set<Set<String>> result=new HashSet<Set<String>>();
         for (Set<OWLObjectPropertyExpression> set : setOfSets) {
@@ -256,7 +256,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         }
         return result;
     }
-    
+
     protected static Set<String> setOfOPEsToStrings(Set<OWLObjectPropertyExpression> set) {
         Set<String> translatedSet=new HashSet<String>();
         for (OWLObjectPropertyExpression ope : set)
@@ -267,8 +267,8 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
                 translatedSet.add("(inv "+innerOp.getIRI().toString()+")");
             }
         return translatedSet;
-    }    
-    
+    }
+
     protected static Set<Set<String>> setOfSetsOfDPsToStrings(NodeSet<OWLDataProperty> setOfSets) {
         Set<Set<String>> result=new HashSet<Set<String>>();
         for (Node<OWLDataProperty> set : setOfSets) {
@@ -277,14 +277,14 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         }
         return result;
     }
-    
+
     protected static Set<String> setOfDPsToStrings(Node<OWLDataProperty> set) {
         Set<String> translatedSet=new HashSet<String>();
         for (OWLDataProperty dp : set)
             translatedSet.add(dp.getIRI().toString());
         return translatedSet;
-    }    
-    
+    }
+
     /**
      * Can be overridden by the subclass to provide a different configuration for the tests.
      */
@@ -312,7 +312,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     protected void assertDRSatisfiableNEQ(boolean value,String[] forbiddenValues,String... parts) throws Exception {
         assertDRSatisfiableNEQ(value,1,forbiddenValues,parts);
     }
-    
+
     protected void assertDRSatisfiableNEQ(boolean value,int cardinality,String[] forbiddenValues,String... parts) throws Exception {
         StringBuffer buffer=new StringBuffer();
         buffer.append("Declaration(NamedIndividual(test:a)) Declaration(Class(test:A)) Declaration(DataProperty(test:dp)) SubClassOf( test:A DataMinCardinality( ");
@@ -342,33 +342,33 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         loadReasonerWithAxioms(buffer.toString());
         assertABoxSatisfiable(value);
     }
-    
-    protected void assertRegular(String axioms, boolean b) throws Exception {
-    	boolean regular = true;
-    	try{
-    		loadReasonerWithAxioms(axioms);
-    	}catch(IllegalArgumentException e){
-    		if( e.getMessage().contains( "The given property hierarchy is not regular" ) )
-    			regular = false;
-    		else{
-    			throw new Exception( e.getMessage() );
-    		}
-    	}
-    	assertEquals(regular,b);
-	}
-    protected void assertSimple(String axioms, boolean b) throws Exception {
-    	boolean simple = true;
-    	try{
-    		loadReasonerWithAxioms(axioms);
-    	}catch(IllegalArgumentException e){
-    		if( e.getMessage().contains( "Non simple property '" ) )
-    			simple = false;
-    		else{
-    			throw new Exception( e.getMessage() );
-    		}
-    	}
-    	assertEquals(simple,b);
-	}
+
+    protected void assertRegular(String axioms,boolean b) throws Exception {
+        boolean regular=true;
+        try {
+            loadReasonerWithAxioms(axioms);
+        }
+        catch (IllegalArgumentException e) {
+            if (e.getMessage().contains("The given property hierarchy is not regular"))
+                regular=false;
+            else
+                throw new Exception(e.getMessage());
+        }
+        assertEquals(regular,b);
+    }
+    protected void assertSimple(String axioms,boolean b) throws Exception {
+        boolean simple=true;
+        try {
+            loadReasonerWithAxioms(axioms);
+        }
+        catch (IllegalArgumentException e) {
+            if (e.getMessage().contains("Non-simple property '"))
+                simple=false;
+            else
+                throw new Exception(e.getMessage());
+        }
+        assertEquals(simple,b);
+    }
 
     protected static Set<String> EQ(String... args) {
         Set<String> result=new HashSet<String>();
@@ -464,7 +464,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     protected static String HEXB(String value) {
         return '\"'+value+"\"^^xsd:hexBinary";
     }
-    
+
     protected static String B64B(String value) {
         return '\"'+value+"\"^^xsd:base64Binary";
     }

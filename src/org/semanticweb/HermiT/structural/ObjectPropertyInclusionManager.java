@@ -14,7 +14,7 @@
 
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package org.semanticweb.HermiT.structural;
 
 import java.util.HashMap;
@@ -40,7 +40,6 @@ public class ObjectPropertyInclusionManager {
     protected final Graph<OWLObjectPropertyExpression> m_subObjectProperties;
     protected final Set<OWLObjectPropertyExpression> m_transitiveObjectProperties;
     protected final Map<OWLObjectAllValuesFrom,OWLClassExpression> m_replacedDescriptions;
-
     protected final Map<OWLObjectPropertyExpression,Automaton> m_automataForComplexRoles;
     protected final Set<OWLObjectPropertyExpression> m_nonSimpleRoles;
 
@@ -50,8 +49,8 @@ public class ObjectPropertyInclusionManager {
         m_transitiveObjectProperties=new HashSet<OWLObjectPropertyExpression>();
         m_replacedDescriptions=new HashMap<OWLObjectAllValuesFrom,OWLClassExpression>();
 
-        m_automataForComplexRoles = new HashMap<OWLObjectPropertyExpression,Automaton>();
-        m_nonSimpleRoles = new HashSet<OWLObjectPropertyExpression>();
+        m_automataForComplexRoles=new HashMap<OWLObjectPropertyExpression,Automaton>();
+        m_nonSimpleRoles=new HashSet<OWLObjectPropertyExpression>();
 
     }
 
@@ -59,25 +58,24 @@ public class ObjectPropertyInclusionManager {
         for (OWLObjectPropertyExpression[] inclusion : axioms.m_simpleObjectPropertyInclusions)
             addInclusion(inclusion[0],inclusion[1]);
 
-        AutomataConstructionManager automataBuilder = new AutomataConstructionManager();
-        m_automataForComplexRoles.putAll( automataBuilder.createAutomata( axioms.m_simpleObjectPropertyInclusions, axioms.m_complexObjectPropertyInclusions ) );
-        m_nonSimpleRoles.addAll( automataBuilder.getM_nonSimpleRoles() );
-
+        AutomataConstructionManager automataBuilder=new AutomataConstructionManager();
+        m_automataForComplexRoles.putAll(automataBuilder.createAutomata(axioms.m_simpleObjectPropertyInclusions,axioms.m_complexObjectPropertyInclusions));
+        m_nonSimpleRoles.addAll(automataBuilder.getM_nonSimpleRoles());
 
         for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_asymmetricObjectProperties)
-            if( m_nonSimpleRoles.contains( objectPropertyExpression ) )
-                throw new IllegalArgumentException( "Non simple property '" + objectPropertyExpression + "' or its inverse appears in asymmetric object property axiom");
+            if (m_nonSimpleRoles.contains(objectPropertyExpression))
+                throw new IllegalArgumentException("Non-simple property '"+objectPropertyExpression+"' or its inverse appears in asymmetric object property axiom.");
 
         for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_irreflexiveObjectProperties)
-            if( m_nonSimpleRoles.contains( objectPropertyExpression ) )
-                throw new IllegalArgumentException( "Non simple property '" + objectPropertyExpression + "' or its inverse appears in irreflexive object property axiom");
+            if (m_nonSimpleRoles.contains(objectPropertyExpression))
+                throw new IllegalArgumentException("Non-simple property '"+objectPropertyExpression+"' or its inverse appears in irreflexive object property axiom.");
 
         for (OWLObjectPropertyExpression[] properties : axioms.m_disjointObjectProperties)
             for (int i=0;i<properties.length;i++)
-                if( m_nonSimpleRoles.contains( properties[i] ) )
-                    throw new IllegalArgumentException( "Non simple property '" + properties[i] + "' or its inverse appears in disjoint properties axiom");
+                if (m_nonSimpleRoles.contains(properties[i]))
+                    throw new IllegalArgumentException("Non-simple property '"+properties[i]+"' or its inverse appears in disjoint properties axiom.");
     }
-        public void addInclusion(OWLObjectPropertyExpression subObjectProperty,OWLObjectPropertyExpression superObjectProperty) {
+    public void addInclusion(OWLObjectPropertyExpression subObjectProperty,OWLObjectPropertyExpression superObjectProperty) {
         subObjectProperty=subObjectProperty.getSimplified();
         superObjectProperty=superObjectProperty.getSimplified();
         m_subObjectProperties.addEdge(superObjectProperty,subObjectProperty);
@@ -85,73 +83,71 @@ public class ObjectPropertyInclusionManager {
     }
     public Map<OWLObjectPropertyExpression,Automaton> rewriteAxioms(OWLAxioms axioms) {
         for (OWLClassExpression[] inclusion : axioms.m_conceptInclusions)
-            for (int index=0;index<inclusion.length;index++){
-            	if(inclusion[index] instanceof OWLObjectCardinalityRestriction)
-                    if( m_nonSimpleRoles.contains( ((OWLObjectCardinalityRestriction)inclusion[index]).getProperty() ) )
-                        throw new IllegalArgumentException( "Non simple property '" + inclusion[index] + "' or its inverse appears in asymmetricity axiom");
+            for (int index=0;index<inclusion.length;index++) {
+                if (inclusion[index] instanceof OWLObjectCardinalityRestriction)
+                    if (m_nonSimpleRoles.contains(((OWLObjectCardinalityRestriction)inclusion[index]).getProperty()))
+                        throw new IllegalArgumentException("Non-simple property '"+inclusion[index]+"' or its inverse appears in a number restriction.");
 
-                    inclusion[index]=replaceDescriptionIfNecessary(inclusion[index]);
+                inclusion[index]=replaceDescriptionIfNecessary(inclusion[index]);
             }
 
         for (Map.Entry<OWLObjectAllValuesFrom,OWLClassExpression> mapping : m_replacedDescriptions.entrySet()) {
-
             OWLObjectAllValuesFrom replacedAllRestriction=mapping.getKey();
-            OWLObjectPropertyExpression objectProperty = replacedAllRestriction.getProperty();
-            String objectPropertyName = objectProperty.getNamedProperty().getIRI().getFragment();
-            OWLClassExpression owlConcept = replacedAllRestriction.getFiller();
-            String indexOfInitialConcept = mapping.getValue().asOWLClass().getIRI().getFragment() + "_";
+            OWLObjectPropertyExpression objectProperty=replacedAllRestriction.getProperty();
+            String objectPropertyName=objectProperty.getNamedProperty().getIRI().getFragment();
+            OWLClassExpression owlConcept=replacedAllRestriction.getFiller();
+            String indexOfInitialConcept=mapping.getValue().asOWLClass().getIRI().getFragment()+"_";
 
-            Automaton automatonOfRole = m_automataForComplexRoles.get( objectProperty );
-            String initialState = automatonOfRole.initials().toArray()[0].toString();
-            boolean isOfNegativePolarity = false;
-            OWLClassExpression conceptForInitialState = m_factory.getOWLClass(IRI.create("internal:all#"+indexOfInitialConcept+objectPropertyName+initialState));
-            if (replacedAllRestriction.getFiller() instanceof OWLObjectComplementOf || replacedAllRestriction.getFiller().equals(m_factory.getOWLNothing())){
-                conceptForInitialState = m_factory.getOWLClass(IRI.create("internal:all#"+indexOfInitialConcept+objectPropertyName+initialState)).getComplementNNF();
-                isOfNegativePolarity = true;
+            Automaton automatonOfRole=m_automataForComplexRoles.get(objectProperty);
+            String initialState=automatonOfRole.initials().toArray()[0].toString();
+            boolean isOfNegativePolarity=false;
+            OWLClassExpression conceptForInitialState=m_factory.getOWLClass(IRI.create("internal:all#"+indexOfInitialConcept+objectPropertyName+initialState));
+            if (replacedAllRestriction.getFiller() instanceof OWLObjectComplementOf || replacedAllRestriction.getFiller().equals(m_factory.getOWLNothing())) {
+                conceptForInitialState=m_factory.getOWLClass(IRI.create("internal:all#"+indexOfInitialConcept+objectPropertyName+initialState)).getComplementNNF();
+                isOfNegativePolarity=true;
             }
-            Map<State,OWLClassExpression> mapOfNewConceptNames = new HashMap<State,OWLClassExpression>();
-            Object[] states = automatonOfRole.states().toArray();
-            for( int i=0 ; i<states.length ; i++ ){
-                State state = (State)states[i];
-                if( state.isInitial() )
-                	continue;
+            Map<State,OWLClassExpression> mapOfNewConceptNames=new HashMap<State,OWLClassExpression>();
+            Object[] states=automatonOfRole.states().toArray();
+            for (int i=0;i<states.length;i++) {
+                State state=(State)states[i];
+                if (state.isInitial())
+                    continue;
                 else
-                	mapOfNewConceptNames.put( state, m_factory.getOWLClass(IRI.create("internal:all#"+indexOfInitialConcept+objectPropertyName+state)) );
+                    mapOfNewConceptNames.put(state,m_factory.getOWLClass(IRI.create("internal:all#"+indexOfInitialConcept+objectPropertyName+state)));
             }
-            if( isOfNegativePolarity )
-                for(State state : mapOfNewConceptNames.keySet())
-                	mapOfNewConceptNames.put( state, mapOfNewConceptNames.get( state ).getComplementNNF() );
+            if (isOfNegativePolarity)
+                for (State state : mapOfNewConceptNames.keySet())
+                    mapOfNewConceptNames.put(state,mapOfNewConceptNames.get(state).getComplementNNF());
 
-            mapOfNewConceptNames.put( (State)automatonOfRole.initials().toArray()[0], conceptForInitialState);
+            mapOfNewConceptNames.put((State)automatonOfRole.initials().toArray()[0],conceptForInitialState);
 
-            Object[] transitionsIterator = automatonOfRole.delta().toArray();
-            OWLClassExpression fromStateConcept = null;
-            OWLClassExpression toStateConcept = null;
+            Object[] transitionsIterator=automatonOfRole.delta().toArray();
+            OWLClassExpression fromStateConcept=null;
+            OWLClassExpression toStateConcept=null;
 
-            for( int i =0 ; i<transitionsIterator.length ; i++ ) {
-                Transition trans = (Transition) transitionsIterator[i];
-                fromStateConcept = mapOfNewConceptNames.get( trans.start() ).getComplementNNF();
-                toStateConcept = mapOfNewConceptNames.get( trans.end() );
+            for (int i=0;i<transitionsIterator.length;i++) {
+                Transition trans=(Transition)transitionsIterator[i];
+                fromStateConcept=mapOfNewConceptNames.get(trans.start()).getComplementNNF();
+                toStateConcept=mapOfNewConceptNames.get(trans.end());
 
-                if( trans.label() == null )
-                        axioms.m_conceptInclusions.add(new OWLClassExpression[] { fromStateConcept, toStateConcept });
-                else{
-                        OWLObjectAllValuesFrom consequentAll=m_factory.getOWLObjectAllValuesFrom(
-                        					(OWLObjectPropertyExpression)trans.label(), toStateConcept );
-                        axioms.m_conceptInclusions.add(new OWLClassExpression[] { fromStateConcept, consequentAll });
+                if (trans.label()==null)
+                    axioms.m_conceptInclusions.add(new OWLClassExpression[] { fromStateConcept,toStateConcept });
+                else {
+                    OWLObjectAllValuesFrom consequentAll=m_factory.getOWLObjectAllValuesFrom((OWLObjectPropertyExpression)trans.label(),toStateConcept);
+                    axioms.m_conceptInclusions.add(new OWLClassExpression[] { fromStateConcept,consequentAll });
                 }
             }
-            Object[] finalStates = automatonOfRole.terminals().toArray();
-            for( int i=0 ; i<finalStates.length ; i++ ){
-            	OWLClassExpression[] classExpr;
-            	if( owlConcept.isOWLNothing() )
-            		classExpr = new OWLClassExpression[] { mapOfNewConceptNames.get( finalStates[i] ).getComplementNNF() };
-            	else if( owlConcept.isOWLThing() )
-            		classExpr = new OWLClassExpression[] { owlConcept };
-            	else
-            		classExpr = new OWLClassExpression[] { mapOfNewConceptNames.get( finalStates[i] ).getComplementNNF(), owlConcept };
+            Object[] finalStates=automatonOfRole.terminals().toArray();
+            for (int i=0;i<finalStates.length;i++) {
+                OWLClassExpression[] classExpr;
+                if (owlConcept.isOWLNothing())
+                    classExpr=new OWLClassExpression[] { mapOfNewConceptNames.get(finalStates[i]).getComplementNNF() };
+                else if (owlConcept.isOWLThing())
+                    classExpr=new OWLClassExpression[] { owlConcept };
+                else
+                    classExpr=new OWLClassExpression[] { mapOfNewConceptNames.get(finalStates[i]).getComplementNNF(),owlConcept };
 
-            	axioms.m_conceptInclusions.add(classExpr);
+                axioms.m_conceptInclusions.add(classExpr);
             }
         }
         m_replacedDescriptions.clear();
@@ -162,13 +158,13 @@ public class ObjectPropertyInclusionManager {
         if (desc instanceof OWLObjectAllValuesFrom) {
             OWLObjectAllValuesFrom objectAll=(OWLObjectAllValuesFrom)desc;
             OWLObjectPropertyExpression objectProperty=objectAll.getProperty();
-            if( m_automataForComplexRoles.containsKey( objectProperty ) ){
+            if (m_automataForComplexRoles.containsKey(objectProperty)) {
                 OWLClassExpression replacedConcept=getReplacementFor(objectAll);
-                String initialState = m_automataForComplexRoles.get( objectProperty ).initials().toArray()[0].toString();
-                String indexOfReplacedConcept = replacedConcept.asOWLClass().getIRI().getFragment() + "_";
-                OWLClassExpression replacement = m_factory.getOWLClass(IRI.create("internal:all#"+indexOfReplacedConcept+objectProperty.getNamedProperty().getIRI().getFragment()+initialState));
+                String initialState=m_automataForComplexRoles.get(objectProperty).initials().toArray()[0].toString();
+                String indexOfReplacedConcept=replacedConcept.asOWLClass().getIRI().getFragment()+"_";
+                OWLClassExpression replacement=m_factory.getOWLClass(IRI.create("internal:all#"+indexOfReplacedConcept+objectProperty.getNamedProperty().getIRI().getFragment()+initialState));
                 if (objectAll.getFiller() instanceof OWLObjectComplementOf || objectAll.getFiller().equals(m_factory.getOWLNothing()))
-                	replacement = m_factory.getOWLClass(IRI.create("internal:all#"+indexOfReplacedConcept+objectProperty.getNamedProperty().getIRI().getFragment()+initialState)).getComplementNNF();
+                    replacement=m_factory.getOWLClass(IRI.create("internal:all#"+indexOfReplacedConcept+objectProperty.getNamedProperty().getIRI().getFragment()+initialState)).getComplementNNF();
 
                 return replacement;
             }
@@ -183,8 +179,8 @@ public class ObjectPropertyInclusionManager {
         }
         return replacement;
     }
-    public Map<OWLObjectPropertyExpression,Automaton> rewriteAxioms(OWLAxioms axioms, Map<OWLObjectPropertyExpression, Automaton> automataOfComplexObjectProperties) {
-            m_automataForComplexRoles.putAll( automataOfComplexObjectProperties );
-            return rewriteAxioms( axioms );
+    public Map<OWLObjectPropertyExpression,Automaton> rewriteAxioms(OWLAxioms axioms,Map<OWLObjectPropertyExpression,Automaton> automataOfComplexObjectProperties) {
+        m_automataForComplexRoles.putAll(automataOfComplexObjectProperties);
+        return rewriteAxioms(axioms);
     }
 }
