@@ -126,8 +126,6 @@ import org.semanticweb.owlapi.model.SWRLSameIndividualAtom;
 import org.semanticweb.owlapi.model.SWRLVariable;
 import org.semanticweb.owlapi.util.OWLAxiomVisitorAdapter;
 
-import rationals.Automaton;
-
 public class OWLClausification {
     protected static final Variable X=Variable.create("X");
     protected static final Variable Y=Variable.create("Y");
@@ -149,18 +147,16 @@ public class OWLClausification {
         BuiltInPropertyManager builtInPropertyManager=new BuiltInPropertyManager(factory);
         builtInPropertyManager.axiomatizeBuiltInPropertiesAsNeeded(axioms);
         ObjectPropertyInclusionManager objectPropertyInclusionManager=new ObjectPropertyInclusionManager(factory);
-        objectPropertyInclusionManager.prepareTransformation(axioms);
-        Map<OWLObjectPropertyExpression,Automaton> automataOfComplexRoles=objectPropertyInclusionManager.rewriteAxioms(axioms);
+        objectPropertyInclusionManager.rewriteAxioms(axioms,axioms.m_simpleObjectPropertyInclusions,axioms.m_complexObjectPropertyInclusions);
         if (descriptionGraphs==null)
             descriptionGraphs=Collections.emptySet();
-        DLOntology dlOntology=clausify(factory,ontologyIRI,axioms,descriptionGraphs,automataOfComplexRoles);
-        return dlOntology;
+        return clausify(factory,ontologyIRI,axioms,descriptionGraphs);
     }
-    public DLOntology clausify(OWLDataFactory factory,String ontologyIRI,OWLAxioms axioms,Collection<DescriptionGraph> descriptionGraphs,Map<OWLObjectPropertyExpression,Automaton> automataOfComplexRoles) {
+    public DLOntology clausify(OWLDataFactory factory,String ontologyIRI,OWLAxioms axioms,Collection<DescriptionGraph> descriptionGraphs) {
         OWLAxiomsExpressivity axiomsExpressivity=new OWLAxiomsExpressivity(axioms);
-        return clausify(factory,ontologyIRI,axioms,axiomsExpressivity,descriptionGraphs,automataOfComplexRoles);
+        return clausify(factory,ontologyIRI,axioms,axiomsExpressivity,descriptionGraphs);
     }
-    public DLOntology clausify(OWLDataFactory factory,String ontologyIRI,OWLAxioms axioms,OWLAxiomsExpressivity axiomsExpressivity,Collection<DescriptionGraph> descriptionGraphs,Map<OWLObjectPropertyExpression,Automaton> automataOfComplexRoles) {
+    public DLOntology clausify(OWLDataFactory factory,String ontologyIRI,OWLAxioms axioms,OWLAxiomsExpressivity axiomsExpressivity,Collection<DescriptionGraph> descriptionGraphs) {
         Set<DLClause> dlClauses=new LinkedHashSet<DLClause>();
         Set<Atom> positiveFacts=new HashSet<Atom>();
         Set<Atom> negativeFacts=new HashSet<Atom>();
@@ -263,7 +259,7 @@ public class OWLClausification {
             negativeFacts.clear();
             DLClause cl=DLClause.create(new Atom[0],new Atom[0],ClauseType.CONCEPT_INCLUSION);
             dlClauses.add(cl.getSafeVersion());
-            return new DLOntology(ontologyIRI,dlClauses,positiveFacts,negativeFacts,null,null,null,null,null,null,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes,automataOfComplexRoles);
+            return new DLOntology(ontologyIRI,dlClauses,positiveFacts,negativeFacts,null,null,null,null,null,null,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes);
         }
         for (DescriptionGraph descriptionGraph : descriptionGraphs)
             descriptionGraph.produceStartDLClauses(dlClauses);
@@ -288,7 +284,7 @@ public class OWLClausification {
             Role[] subRoles=new Role[inclusion.m_subObjectProperties.length];
             for (int index=inclusion.m_subObjectProperties.length-1;index>=0;--index)
                 subRoles[index]=getRole(inclusion.m_subObjectProperties[index]);
-            Role superRole=getRole(inclusion.m_superObjectProperties);
+            Role superRole=getRole(inclusion.m_superObjectProperty);
             complexObjectRoleInclusions.add(new DLOntology.ComplexObjectRoleInclusion(subRoles,superRole));
         }
         for (OWLDataProperty dataProperty : axioms.m_dataProperties)
@@ -333,7 +329,7 @@ public class OWLClausification {
             }
         }
         // Create the DL ontology
-        return new DLOntology(ontologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,objectRoles,dataRoles,axioms.m_definedDatatypesIRIs,individuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes,automataOfComplexRoles);
+        return new DLOntology(ontologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,objectRoles,complexObjectRoleInclusions,dataRoles,axioms.m_definedDatatypesIRIs,individuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes);
     }
     protected DLClause clausifyKey(OWLHasKeyAxiom object) {
         List<Atom> headAtoms=new ArrayList<Atom>();

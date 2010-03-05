@@ -63,7 +63,7 @@ public class OWLAxiomsExpressivity extends OWLAxiomVisitorAdapter implements OWL
         for (OWLAxioms.ComplexObjectPropertyInclusion inclusion : axioms.m_complexObjectPropertyInclusions) {
             for (OWLObjectPropertyExpression subObjectProperty : inclusion.m_subObjectProperties)
                 visitProperty(subObjectProperty);
-            visitProperty(inclusion.m_superObjectProperties);
+            visitProperty(inclusion.m_superObjectProperty);
         }
         for (OWLObjectPropertyExpression[] disjoint : axioms.m_disjointObjectProperties)
             for (int index=0;index<disjoint.length;index++)

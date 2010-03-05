@@ -37,9 +37,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.semanticweb.HermiT.Prefixes;
-import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
-
-import rationals.Automaton;
 
 /**
  * Represents a DL ontology as a set of rules.
@@ -70,14 +67,12 @@ public class DLOntology implements Serializable {
     protected final Set<String> m_definedDatatypeIRIs;
     protected final Set<Individual> m_allIndividuals;
     protected final Set<DescriptionGraph> m_allDescriptionGraphs;
-    protected final Map<OWLObjectPropertyExpression, Automaton> m_automataOfComplexObjectProperties;
     protected final Map<AtomicRole,Map<Individual,Set<Constant>>> m_dataPropertyAssertions;
 
-    public DLOntology(String ontologyIRI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts,
-            Set<AtomicConcept> atomicConcepts,Set<ComplexObjectRoleInclusion> allComplexObjectRoleInclusions,
-            Set<AtomicRole> atomicObjectRoles,Set<AtomicRole> atomicDataRoles,Set<String> definedDatatypeIRIs,
-            Set<Individual> individuals,boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,
-            boolean hasDatatypes,Map<OWLObjectPropertyExpression, Automaton> automataOfComplexObjectProperties) {
+    public DLOntology(String ontologyIRI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts, Set<AtomicConcept> atomicConcepts,
+            Set<AtomicRole> atomicObjectRoles,Set<ComplexObjectRoleInclusion> allComplexObjectRoleInclusions,Set<AtomicRole> atomicDataRoles,
+            Set<String> definedDatatypeIRIs,Set<Individual> individuals,
+            boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,boolean hasDatatypes) {
         m_ontologyIRI=ontologyIRI;
         m_dlClauses=dlClauses;
         m_positiveFacts=positiveFacts;
@@ -99,10 +94,6 @@ public class DLOntology implements Serializable {
             m_allComplexObjectRoleInclusions=new HashSet<ComplexObjectRoleInclusion>();
         else
             m_allComplexObjectRoleInclusions=allComplexObjectRoleInclusions;
-        if (automataOfComplexObjectProperties==null)
-            m_automataOfComplexObjectProperties=new HashMap<OWLObjectPropertyExpression, Automaton>();
-        else
-            m_automataOfComplexObjectProperties=automataOfComplexObjectProperties;
         if (atomicObjectRoles==null)
             m_allAtomicObjectRoles=new TreeSet<AtomicRole>(AtomicRoleComparator.INSTANCE);
         else
@@ -210,9 +201,6 @@ public class DLOntology implements Serializable {
     }
     public boolean containsObjectRole(AtomicRole role) {
     	return m_allAtomicObjectRoles.contains(role);
-    }
-    public Map<OWLObjectPropertyExpression,Automaton> getAutomataOfComplexObjectProperties() {
-        return m_automataOfComplexObjectProperties;
     }
     public Set<AtomicRole> getAllAtomicDataRoles() {
         return m_allAtomicDataRoles;

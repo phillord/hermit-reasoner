@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -49,7 +49,7 @@ public class ObjectRoleSubsumptionCache extends RoleSubsumptionCache {
             for (AtomicRole atomicRole : m_reasoner.getDLOntology().getAllAtomicObjectRoles())
                 allRoles.add(atomicRole.getInverse());
         for (DLClause dlClause : m_reasoner.getDLOntology().getDLClauses()) {
-            if (dlClause.m_clauseType==ClauseType.OBJECT_PROPERTY_INCLUSION) {
+            if (dlClause.getClauseType()==ClauseType.OBJECT_PROPERTY_INCLUSION) {
                 AtomicRole sub=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                 AtomicRole sup=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
                 if (allRoles.contains(sub) && allRoles.contains(sup)) {
@@ -58,7 +58,7 @@ public class ObjectRoleSubsumptionCache extends RoleSubsumptionCache {
                         roleGraph.addEdge(sub.getInverse(),sup.getInverse());
                 }
             }
-            else if (dlClause.m_clauseType==ClauseType.INVERSE_OBJECT_PROPERTY_INCLUSION) {
+            else if (dlClause.getClauseType()==ClauseType.INVERSE_OBJECT_PROPERTY_INCLUSION) {
                 AtomicRole sub=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                 AtomicRole sup=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
                 if (allRoles.contains(sub) && allRoles.contains(sup)) {
@@ -82,12 +82,12 @@ public class ObjectRoleSubsumptionCache extends RoleSubsumptionCache {
         OWLAxiom subAssertion;
         if (subrole instanceof AtomicRole)
             subAssertion=factory.getOWLObjectPropertyAssertionAxiom(factory.getOWLObjectProperty(IRI.create(((AtomicRole) subrole).getIRI())),individualA,individualB);
-        else 
+        else
             subAssertion=factory.getOWLObjectPropertyAssertionAxiom(factory.getOWLObjectProperty(IRI.create(((InverseRole) subrole).getInverseOf().getIRI())),individualB,individualA);
         OWLAxiom superNegatedAssertion;
         if (superrole instanceof AtomicRole)
             superNegatedAssertion=factory.getOWLNegativeObjectPropertyAssertionAxiom(factory.getOWLObjectProperty(IRI.create(((AtomicRole) superrole).getIRI())),individualA,individualB);
-        else 
+        else
             superNegatedAssertion=factory.getOWLNegativeObjectPropertyAssertionAxiom(factory.getOWLObjectProperty(IRI.create(((InverseRole) superrole).getInverseOf().getIRI())),individualB,individualA);
         Tableau tableau=m_reasoner.getTableau(ontologyManager,subAssertion,superNegatedAssertion);
         boolean isSubsumedBy=!tableau.isABoxSatisfiable(Individual.create(individualA.getIRI().toString(),true), Individual.create(individualB.getIRI().toString(),true));

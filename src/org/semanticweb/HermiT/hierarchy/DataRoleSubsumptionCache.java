@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -47,7 +47,7 @@ public class DataRoleSubsumptionCache extends RoleSubsumptionCache {
     protected void loadRoleGraph(Set<Role> allRoles,Graph<Role> roleGraph) {
         allRoles.addAll(m_reasoner.getDLOntology().getAllAtomicDataRoles());
         for (DLClause dlClause : m_reasoner.getDLOntology().getDLClauses()) {
-            if (dlClause.m_clauseType==ClauseType.DATA_PROPERTY_INCLUSION) {
+            if (dlClause.getClauseType()==ClauseType.DATA_PROPERTY_INCLUSION) {
                 AtomicRole sub=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                 AtomicRole sup=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
                 if (allRoles.contains(sub) && allRoles.contains(sup)) {
@@ -63,7 +63,7 @@ public class DataRoleSubsumptionCache extends RoleSubsumptionCache {
     }
     protected boolean doSubsumptionCheck(RoleInfo subroleInfo,Role superrole) {
         Role subrole=subroleInfo.m_forRole;
-        // This is different from object properties! This code is correct because we don't have 
+        // This is different from object properties! This code is correct because we don't have
         // transitive data properties.
         OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
         OWLDataFactory factory=ontologyManager.getOWLDataFactory();

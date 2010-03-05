@@ -65,21 +65,21 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         ));
         Set<Atom> atoms=Collections.emptySet();
         TEST_DL_ONTOLOGY = new DLOntology(
-                "opaque:test", // ontology_URI
-                dlClauses, // clauses
-                atoms, // positive facts
-                atoms, // negative facts 
-                null, // atomic concepts
-                null, // complex role inclusions
-                null, // object roles
-                null, // data roles
-                null, // custom datatype definitions
-                null, // individuals
-                false, // hasInverseRoles
-                false, // hasAtMostRestrictions
-                false, // hasNominals
-                false, // hasDatatypes;
-                null); //automaton for complex roles
+            "opaque:test", // ontology_URI
+            dlClauses, // clauses
+            atoms, // positive facts
+            atoms, // negative facts
+            null, // atomic concepts
+            null, // object roles
+            null, // complex role inclusions
+            null, // data roles
+            null, // custom datatype definitions
+            null, // individuals
+            false, // hasInverseRoles
+            false, // hasAtMostRestrictions
+            false, // hasNominals
+            false  // hasDatatypes;
+       );
     }
 
     protected Tableau m_tableau;
@@ -110,19 +110,19 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         Node b1=m_tableau.createNewTreeNode(emptySet,b);
         Node b11=m_tableau.createNewTreeNode(emptySet,b1);
         Node b111=m_tableau.createNewTreeNode(emptySet,b11);
-        
+
         m_extensionManager.addAssertion(S,b,b1,emptySet,false);
         m_extensionManager.addAssertion(S,b1,b11,emptySet,false);
         m_extensionManager.addAssertion(S,b11,b111,emptySet,false);
         m_extensionManager.addAssertion(R,a,b11,emptySet,false);
         m_extensionManager.addAssertion(A,b11,emptySet,false);
-        
+
         // No action until now is expected
         assertEquals(0,m_manager.m_annotatedEqualities.getFirstFreeTupleIndex());
-        
+
         // Now add an annotated equality
         m_manager.addAnnotatedEquality(EQ_ONE_R_A,b11,b11,a,emptySet);
-        
+
         // The equality is deterministic, so it should be processed straight away
         assertEquals(0,m_manager.m_annotatedEqualities.getFirstFreeTupleIndex());
 
@@ -148,29 +148,29 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         Node b1=m_tableau.createNewTreeNode(emptySet,b);
         Node b11=m_tableau.createNewTreeNode(emptySet,b1);
         Node b111=m_tableau.createNewTreeNode(emptySet,b11);
-        
+
         m_extensionManager.addAssertion(S,b,b1,emptySet,false);
         m_extensionManager.addAssertion(S,b1,b11,emptySet,false);
         m_extensionManager.addAssertion(S,b11,b111,emptySet,false);
         m_extensionManager.addAssertion(R,a,b11,emptySet,false);
         m_extensionManager.addAssertion(A,b11,emptySet,false);
-        
+
         // No action until now is expected
         assertEquals(0,m_manager.m_annotatedEqualities.getFirstFreeTupleIndex());
-        
+
         // Now add an annotated equality
         m_manager.addAnnotatedEquality(EQ_TWO_R_A,b11,b11,a,emptySet);
-        
+
         // The equality is nondeterministic, so it should not be processed straight away
         assertEquals(1,m_manager.m_annotatedEqualities.getFirstFreeTupleIndex());
         Node newRoot1=getRootNodeFor(a,EQ_TWO_R_A,1);
         assertNull(newRoot1);
         assertTrue(b11.isActive());
         assertTrue(b111.isActive());
-        
+
         // This will now start the first possibility
         assertTrue(m_tableau.doIteration());
-        
+
         newRoot1=getRootNodeFor(a,EQ_TWO_R_A,1);
         assertTrue(newRoot1.isActive());
 
@@ -185,7 +185,7 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
 
         assertTrue(m_extensionManager.containsAssertion(R,a,newRoot1));
         assertDependencySet(m_extensionManager.getAssertionDependencySet(R,a,newRoot1),0);
-        
+
         // The following cause a clash and backtrack it
         m_extensionManager.addConceptAssertion(NEG_A,newRoot1,emptySet,false);
         assertTrue(m_tableau.doIteration());
@@ -193,7 +193,7 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         // The NI rule should have backtracked newRoot1 and merged b11 into newRoot2
         newRoot1=getRootNodeFor(a,EQ_TWO_R_A,1);
         assertNull(newRoot1);
-        
+
         Node newRoot2=getRootNodeFor(a,EQ_TWO_R_A,2);
         assertTrue(newRoot2.isActive());
 
@@ -202,14 +202,14 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
 
         assertFalse(b111.isActive());
         assertFalse(m_extensionManager.containsAssertion(S,b11,b111));
-        
+
         // Dependency sets are empty because this is the last choice
         assertTrue(m_extensionManager.containsAssertion(S,b1,newRoot2));
         assertDependencySet(m_extensionManager.getAssertionDependencySet(S,b1,newRoot2));
 
         assertTrue(m_extensionManager.containsAssertion(R,a,newRoot2));
         assertDependencySet(m_extensionManager.getAssertionDependencySet(R,a,newRoot2));
-        
+
         // We cause a clash again; this time it cannot be backtracked
         m_extensionManager.addConceptAssertion(NEG_A,newRoot2,emptySet,false);
         assertFalse(m_tableau.doIteration());
@@ -221,20 +221,20 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         Node b1=m_tableau.createNewTreeNode(emptySet,b);
         Node b11=m_tableau.createNewTreeNode(emptySet,b1);
         Node b111=m_tableau.createNewTreeNode(emptySet,b11);
-        
+
         m_extensionManager.addAssertion(S,b,b1,emptySet,false);
         m_extensionManager.addAssertion(S,b1,b11,emptySet,false);
         m_extensionManager.addAssertion(S,b11,b111,emptySet,false);
         m_extensionManager.addAssertion(R,a,b1,emptySet,false);
         m_extensionManager.addAssertion(R,a,b11,emptySet,false);
         m_extensionManager.addAssertion(A,b11,emptySet,false);
-        
+
         // No action until now is expected
         assertEquals(0,m_manager.m_annotatedEqualities.getFirstFreeTupleIndex());
-        
+
         // Now add an annotated equality
         m_manager.addAnnotatedEquality(EQ_ONE_R_A,b1,b11,a,emptySet);
-        
+
         // The equality is deterministic, so it should be processed straight away
         assertEquals(0,m_manager.m_annotatedEqualities.getFirstFreeTupleIndex());
 
@@ -242,15 +242,15 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         // As a consequence, newRoot will *not* contain A.
         Node newRoot=getRootNodeFor(a,EQ_ONE_R_A,1);
         assertTrue(newRoot.isActive());
-        
+
         assertTrue(b1.isMerged());
         assertSame(newRoot,b1.getCanonicalNode());
-        
+
         assertTrue(b11.isPruned());
         assertTrue(b111.isPruned());
-        
+
         assertFalse(m_extensionManager.containsAssertion(A,newRoot));
-        
+
         assertTrue(m_extensionManager.containsAssertion(R,a,newRoot));
 
         assertTrue(m_extensionManager.containsAssertion(S,b,newRoot));
@@ -264,7 +264,7 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         Node c=m_tableau.createNewNINode(emptySet);
         Node c1=m_tableau.createNewTreeNode(emptySet,c);
         Node c11=m_tableau.createNewTreeNode(emptySet,c1);
-        
+
         m_extensionManager.addAssertion(S,b,b1,emptySet,false);
         m_extensionManager.addAssertion(S,b1,b11,emptySet,false);
         m_extensionManager.addAssertion(A,b1,emptySet,false);
@@ -274,13 +274,13 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         m_extensionManager.addAssertion(T,c1,c11,emptySet,false);
         m_extensionManager.addAssertion(B,c1,emptySet,false);
         m_extensionManager.addAssertion(R,a,c1,emptySet,false);
-        
+
         // No action until now is expected
         assertEquals(0,m_manager.m_annotatedEqualities.getFirstFreeTupleIndex());
-        
+
         // Now add an annotated equality
         m_manager.addAnnotatedEquality(EQ_ONE_R_A,b1,c1,a,emptySet);
-        
+
         // The equality is deterministic, so it should be processed straight away
         assertEquals(0,m_manager.m_annotatedEqualities.getFirstFreeTupleIndex());
 
@@ -288,16 +288,16 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         // and then c1 is merged into newRoot because of the equality.
         Node newRoot=getRootNodeFor(a,EQ_ONE_R_A,1);
         assertTrue(newRoot.isActive());
-        
+
         assertTrue(b1.isMerged());
         assertSame(newRoot,b1.getCanonicalNode());
-        
+
         assertTrue(b11.isPruned());
         assertTrue(c11.isPruned());
-        
+
         assertTrue(m_extensionManager.containsAssertion(A,newRoot));
         assertTrue(m_extensionManager.containsAssertion(B,newRoot));
-        
+
         assertTrue(m_extensionManager.containsAssertion(R,a,newRoot));
         assertTrue(m_extensionManager.containsAssertion(S,b,newRoot));
         assertTrue(m_extensionManager.containsAssertion(T,c,newRoot));
@@ -308,7 +308,7 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         Node b=m_tableau.createNewNINode(emptySet);
         Node b1=m_tableau.createNewTreeNode(emptySet,b);
 
-        // Add an S-successor of b. 
+        // Add an S-successor of b.
         m_extensionManager.addAssertion(S,b,b1,emptySet,false);
         m_extensionManager.addAssertion(R,a,b1,emptySet,false);
         m_extensionManager.addAssertion(A,b1,emptySet,false);
@@ -317,34 +317,34 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         m_manager.addAnnotatedEquality(EQ_TWO_R_A,b1,b1,a,emptySet);
         assertNull(getRootNodeFor(a,EQ_TWO_R_A,1));
         assertTrue(m_tableau.doIteration());
-        
+
         Node a_n1=getRootNodeFor(a,EQ_TWO_R_A,1);
         assertSame(a_n1,b1.getCanonicalNode());
         assertTrue(m_extensionManager.containsAssertion(A,a_n1));
         assertDependencySet(m_extensionManager.getAssertionDependencySet(A,a_n1),0);
-        
+
         // Add an S-successor of b1_n1.
         Node b11=m_tableau.createNewTreeNode(emptySet,a_n1);
         m_extensionManager.addAssertion(S,a_n1,b11,emptySet,false);
         m_extensionManager.addAssertion(R,a,b11,emptySet,false);
         m_extensionManager.addAssertion(A,b11,emptySet,false);
-        
+
         // This should convert b11 into a root node
         m_manager.addAnnotatedEquality(EQ_TWO_R_A,b11,b11,a,emptySet);
         assertTrue(m_tableau.doIteration());
-        
+
         assertSame(a_n1,b11.getCanonicalNode());
         assertTrue(m_extensionManager.containsAssertion(S,a_n1,a_n1));
         assertDependencySet(m_extensionManager.getAssertionDependencySet(S,a_n1,a_n1),1);
-        
+
         // Now backtrack the second choice.
         m_extensionManager.addConceptAssertion(NEG_A,a_n1,m_extensionManager.getAssertionDependencySet(S,a_n1,a_n1),false);
         assertTrue(m_tableau.doIteration());
-    
+
         // b11 was now rerouted to a_n2.
         Node a_n2=getRootNodeFor(a,EQ_TWO_R_A,2);
         assertNotSame(a_n1,a_n2);
-        
+
         assertSame(a_n2,b11.getCanonicalNode());
         assertFalse(m_extensionManager.containsAssertion(S,a_n1,a_n1));
         assertTrue(m_extensionManager.containsAssertion(S,a_n1,a_n2));
@@ -358,7 +358,7 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         Node c1=m_tableau.createNewTreeNode(emptySet,c);
         Node d=m_tableau.createNewNINode(emptySet);
         Node d1=m_tableau.createNewTreeNode(emptySet,d);
-        
+
         m_extensionManager.addAssertion(T,c,c1,emptySet,false);
         m_extensionManager.addAssertion(A,c1,emptySet,false);
         m_extensionManager.addAssertion(R,c1,a,emptySet,false);
@@ -373,22 +373,22 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         m_manager.addAnnotatedEquality(EQ_TWO_R_A,c1,d1,a,emptySet);
         assertTrue(c1.isActive());
         assertTrue(d1.isActive());
-        
+
         // The following equality is deterministic, so it is processed immediately.
         m_manager.addAnnotatedEquality(EQ_ONE_S_A,d1,d1,b,emptySet);
         Node b_n1=getRootNodeFor(b,EQ_ONE_S_A,1);
         assertSame(b_n1,d1.getCanonicalNode());
-        
+
         // We now apply the nondeterminsitic NI rule.
         assertTrue(m_tableau.doIteration());
-        
+
         // Since d1 was converted to a root node, no new nominal is introduced;
         // rather, c1 is simply merged (deterministically) into b_n1.
         assertNull(getRootNodeFor(a,EQ_TWO_R_A,1));
         assertNull(getRootNodeFor(a,EQ_TWO_R_A,2));
         assertSame(b_n1,c1.getCanonicalNode());
         assertEquals(1,m_manager.m_annotatedEqualities.getFirstFreeTupleIndex());
-        
+
         assertTrue(m_extensionManager.containsAssertion(T,c,b_n1));
         assertDependencySet(m_extensionManager.getAssertionDependencySet(T,c,b_n1));
     }
@@ -406,14 +406,14 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         m_extensionManager.addAssertion(T,b,b1,emptySet,false);
         m_extensionManager.addAssertion(T,b1,b11,emptySet,false);
         m_extensionManager.addAssertion(R,c,b11,emptySet,false);
-        
+
         // The following disjunction is nondeterministic, so nothing is done yet.
         m_manager.addAnnotatedEquality(EQ_TWO_R_A,a1,b11,c,emptySet);
-        
+
         // The following merging prunes b11, which is contained in the previous annotated equality.
         m_extensionManager.addAssertion(Equality.INSTANCE,b1,c,emptySet,false);
         assertTrue(b11.isPruned());
-        
+
         // Since b11 is pruned, applying the NI rule does nothing.
         assertTrue(m_tableau.doIteration());
         assertTrue(a1.isActive());
@@ -434,16 +434,16 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         m_extensionManager.addAssertion(S,b,b1,emptySet,false);
         m_extensionManager.addAssertion(R,c,b1,emptySet,false);
         m_extensionManager.addAssertion(A,b1,emptySet,false);
-        
+
         m_extensionManager.addAssertion(AT_MOST_ONE_R_A,c,emptySet,false);
 
         // The following should trigger the deterministic NI rule on a1 and b1.
         assertTrue(m_tableau.doIteration());
-        
+
         Node c_n1=getRootNodeFor(c,EQ_ONE_R_A,1);
         assertSame(c_n1,a1.getCanonicalNode());
         assertSame(c_n1,b1.getCanonicalNode());
-        
+
         assertTrue(m_extensionManager.containsAssertion(S,a,c_n1));
         assertTrue(m_extensionManager.containsAssertion(S,b,c_n1));
         assertTrue(m_extensionManager.containsAssertion(R,c,c_n1));
@@ -463,33 +463,33 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         m_extensionManager.addAssertion(S,b,b1,emptySet,false);
         m_extensionManager.addAssertion(R,c,b1,emptySet,false);
         m_extensionManager.addAssertion(A,b1,emptySet,false);
-        
+
         m_extensionManager.addAssertion(AT_MOST_TWO_R_A,c,emptySet,false);
-        
+
         // The following should generate disjunctions with annotated equalities.
         assertTrue(m_tableau.doIteration());
-        
+
         assertUnprocessedDisjunctions(false,
             "[2 == 2]@atMost(2 <R> <A>)(5) v [2 == 2]@atMost(2 <R> <A>)(5) v [2 == 2]@atMost(2 <R> <A>)(5)",
             "[4 == 4]@atMost(2 <R> <A>)(5) v [4 == 4]@atMost(2 <R> <A>)(5) v [4 == 4]@atMost(2 <R> <A>)(5)"
         );
-        
+
         // The following just derive the first disjunction.
         assertTrue(m_tableau.doIteration());
-        
+
         // The equality was just stored into the NI manager.
         assertEquals(1,m_manager.m_annotatedEqualities.getFirstFreeTupleIndex());
         assertTrue(a1.isActive());
         assertTrue(b1.isActive());
-        
+
         // The following applies the NI rule.
         assertTrue(m_tableau.doIteration());
-        
+
         // The derivation of this disjunction merged a1 into c_n1.
         Node c_n1=getRootNodeFor(c,EQ_TWO_R_A,1);
         assertSame(c_n1,a1.getCanonicalNode());
         assertFalse(b1.isMerged());
-        
+
         // Now only the other disjunction is not satisfied.
         assertUnprocessedDisjunctions(true,
             "[4 == 4]@atMost(2 <R> <A>)(5) v [4 == 4]@atMost(2 <R> <A>)(5) v [4 == 4]@atMost(2 <R> <A>)(5)"
@@ -497,14 +497,14 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
 
         // The following just derive the first disjunction.
         assertTrue(m_tableau.doIteration());
-        
+
         // The equality was just stored into the NI manager.
         assertEquals(2,m_manager.m_annotatedEqualities.getFirstFreeTupleIndex());
         assertTrue(b1.isActive());
 
         // The following applies the NI rule.
         assertTrue(m_tableau.doIteration());
-        
+
         // The derivation of this disjunction merged b1 into c_n1.
         assertSame(c_n1,a1.getCanonicalNode());
         assertSame(c_n1,b1.getCanonicalNode());
@@ -527,14 +527,14 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
 
         m_extensionManager.addAssertion(R,a1,a12,emptySet,false);
         m_extensionManager.addAssertion(A,a12,emptySet,false);
-        
+
         m_extensionManager.addAssertion(AT_MOST_TWO_R_A,a1,emptySet,false);
-        
+
         // The following should not generate any disjunctions.
         // In the tree part, all annotations can be thrown away,
         // so all disjunctions are tautologies.
         assertTrue(m_tableau.doIteration());
-        
+
         assertUnprocessedDisjunctions(false);
     }
     protected void assertDependencySet(DependencySet dependencySet,int... requiredBranchingPoints) {

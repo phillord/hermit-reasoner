@@ -40,21 +40,21 @@ public class MergeTest extends AbstractReasonerInternalsTest {
         Set<DLClause> dlClauses=Collections.singleton(cl);
         Set<Atom> atoms=Collections.emptySet();
         TEST_DL_ONTOLOGY = new DLOntology(
-                "opaque:test", // ontology_URI
-                dlClauses, // clauses
-                atoms, // positive facts
-                atoms, // negative facts 
-                null, // atomic concepts
-                null, // complex role inclusions
-                null, // object roles
-                null, // data roles
-                null, // custom datatype definitions
-                null, // individuals
-                false, // hasInverseRoles
-                false, // hasAtMostRestrictions
-                false, // hasNominals
-                false, // hasDatatypes
-                null); //automaton for complex roles
+            "opaque:test", // ontology_URI
+            dlClauses, // clauses
+            atoms, // positive facts
+            atoms, // negative facts
+            null, // atomic concepts
+            null, // object roles
+            null, // complex role inclusions
+            null, // data roles
+            null, // custom datatype definitions
+            null, // individuals
+            false, // hasInverseRoles
+            false, // hasAtMostRestrictions
+            false, // hasNominals
+            false  // hasDatatypes
+        );
     }
 
     protected Tableau m_tableau;
@@ -82,7 +82,7 @@ public class MergeTest extends AbstractReasonerInternalsTest {
 
         m_extensionManager.addAssertion(R,a,a1,emptySet,false);
         m_extensionManager.addAssertion(R,a,a2,emptySet,false);
-        
+
         m_extensionManager.addConceptAssertion(A,a1,emptySet,false);
         m_extensionManager.addConceptAssertion(EXISTS_NEG_A,a1,emptySet,false);
 
@@ -101,24 +101,24 @@ public class MergeTest extends AbstractReasonerInternalsTest {
 
         BranchingPoint bp=new BranchingPoint(m_tableau);
         m_tableau.pushBranchingPoint(bp);
-        
+
         // The label of a2 is larger, so a1 is merged into a2
         m_extensionManager.addAssertion(Equality.INSTANCE,a1,a2,emptySet,false);
-        
+
         assertTrue(m_extensionManager.containsClash());
         assertLabel(a2,A,B,C,D,NEG_A,EXISTS_NEG_A);
-        
+
         assertTrue(a1.isMerged());
         assertSame(a1.getCanonicalNode(),a2);
         assertFalse(a11.isActive());
         assertFalse(a12.isActive());
-        
+
         assertRetrieval(m_extensionManager.getTernaryExtensionTable(),T(R,null,null),ExtensionTable.View.TOTAL,new Object[][] { T(R,a,a2),T(R,a2,b) });
         assertRetrieval(m_extensionManager.getBinaryExtensionTable(),T(A,null),ExtensionTable.View.TOTAL,new Object[][] { T(A,a2) });
 
-        
+
         m_tableau.backtrackTo(bp.getLevel());
-        
+
         assertFalse(m_extensionManager.containsClash());
         assertLabel(a2,B,C,D,NEG_A);
 
@@ -126,19 +126,19 @@ public class MergeTest extends AbstractReasonerInternalsTest {
         assertSame(a1.getCanonicalNode(),a1);
         assertTrue(a11.isActive());
         assertTrue(a12.isActive());
-        
+
         assertRetrieval(m_extensionManager.getTernaryExtensionTable(),T(R,null,null),ExtensionTable.View.TOTAL,new Object[][] { T(R,a,a1),T(R,a1,a11),T(R,a1,a12),T(R,a1,b),T(R,a,a2) });
         assertRetrieval(m_extensionManager.getBinaryExtensionTable(),T(A,null),ExtensionTable.View.TOTAL,new Object[][] { T(A,a1),T(A,a11),T(A,a12) });
 
-        
+
         m_extensionManager.addAssertion(Inequality.INSTANCE,a11,a12,emptySet,false);
         assertRetrieval(m_extensionManager.getTernaryExtensionTable(),T(Inequality.INSTANCE,null,null),ExtensionTable.View.TOTAL,new Object[][] { T(Inequality.INSTANCE,a11,a12) });
-        
-        
+
+
         m_extensionManager.addAssertion(Equality.INSTANCE,a11,a12,emptySet,false);
         assertTrue(m_extensionManager.containsClash());
-        
-        
+
+
         m_tableau.backtrackTo(bp.getLevel());
 
         assertFalse(m_extensionManager.containsClash());

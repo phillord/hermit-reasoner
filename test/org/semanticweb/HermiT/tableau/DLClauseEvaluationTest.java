@@ -18,7 +18,7 @@ import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.model.DLClause.ClauseType;
 
 public class DLClauseEvaluationTest extends AbstractReasonerInternalsTest {
-    
+
     protected static final AtomicRole R=AtomicRole.create("R");
     protected static final AtomicRole S=AtomicRole.create("S");
     protected static final AtomicRole T=AtomicRole.create("T");
@@ -35,21 +35,21 @@ public class DLClauseEvaluationTest extends AbstractReasonerInternalsTest {
         Set<DLClause> dlClauses=Collections.singleton(CL_1);
         Set<Atom> atoms=Collections.emptySet();
         TEST_DL_ONTOLOGY = new DLOntology(
-                    "opaque:test", // ontology_URI
-                    dlClauses, // clauses
-                    atoms, // positive facts
-                    atoms, // negative facts 
-                    null, // atomic concepts
-                    null, // complex role inclusions
-                    null, // object roles
-                    null, // data roles
-                    null, // custom datatype definitions
-                    null, // individuals
-                    false, // hasInverseRoles
-                    false, // hasAtMostRestrictions
-                    false, // hasNominals
-                    false, // hasDatatypes
-                    null); //automaton for complex roles
+            "opaque:test", // ontology_URI
+            dlClauses, // clauses
+            atoms, // positive facts
+            atoms, // negative facts
+            null, // atomic concepts
+            null, // object roles
+            null, // complex role inclusions
+            null, // data roles
+            null, // custom datatype definitions
+            null, // individuals
+            false, // hasInverseRoles
+            false, // hasAtMostRestrictions
+            false, // hasNominals
+            false  // hasDatatypes
+        );
     }
 
     protected Tableau m_tableau;
@@ -58,7 +58,7 @@ public class DLClauseEvaluationTest extends AbstractReasonerInternalsTest {
     public DLClauseEvaluationTest(String name) {
         super(name);
     }
-    
+
     protected void setUp() {
         PairWiseDirectBlockingChecker directChecker=new PairWiseDirectBlockingChecker();
         BlockingSignatureCache blockingSignatureCache=new BlockingSignatureCache(directChecker);
@@ -67,16 +67,16 @@ public class DLClauseEvaluationTest extends AbstractReasonerInternalsTest {
         m_tableau=new Tableau(new InterruptFlag(),null,ExpansionStrategy,false,TEST_DL_ONTOLOGY,new HashMap<String,Object>());
         m_extensionManager=m_tableau.getExtensionManager();
     }
-    
+
     public void testEvaluator() {
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
-        
+
         Node a=m_tableau.createNewNINode(emptySet);
         Node b=m_tableau.createNewNINode(emptySet);
         Node c=m_tableau.createNewNINode(emptySet);
         Node d=m_tableau.createNewNINode(emptySet);
         Node e=m_tableau.createNewNINode(emptySet);
-        
+
         m_extensionManager.addRoleAssertion(R,a,b,emptySet,false);
         m_extensionManager.addRoleAssertion(R,a,c,emptySet,false);
 
@@ -86,7 +86,7 @@ public class DLClauseEvaluationTest extends AbstractReasonerInternalsTest {
         m_extensionManager.addRoleAssertion(T,c,d,emptySet,false);
 
         assertTrue(m_tableau.isSatisfiable());
-        
+
         assertRetrieval(m_extensionManager.getTernaryExtensionTable(),T(U,null,null),ExtensionTable.View.EXTENSION_THIS,new Object[][] { T(U,d,e) });
     }
 }

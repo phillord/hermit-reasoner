@@ -44,9 +44,9 @@ public class DLClause implements Serializable {
     protected final boolean m_isKnownToBeAdmissible;
     protected final Atom[] m_headAtoms;
     protected final Atom[] m_bodyAtoms;
-    public final ClauseType m_clauseType;
+    protected final ClauseType m_clauseType;
 
-    protected DLClause(boolean isKnownToBeAdmissible,Atom[] headAtoms,Atom[] bodyAtoms, ClauseType clauseType) {
+    protected DLClause(boolean isKnownToBeAdmissible,Atom[] headAtoms,Atom[] bodyAtoms,ClauseType clauseType) {
         m_isKnownToBeAdmissible=isKnownToBeAdmissible;
         m_headAtoms=headAtoms;
         m_bodyAtoms=bodyAtoms;
@@ -147,6 +147,9 @@ public class DLClause implements Serializable {
             }
         }
         return false;
+    }
+    public ClauseType getClauseType() {
+        return m_clauseType;
     }
     public String toString(Prefixes prefixes) {
         StringBuffer buffer=new StringBuffer();

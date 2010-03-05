@@ -89,15 +89,15 @@ public class OWLAxioms {
     
     public static class ComplexObjectPropertyInclusion {
         public final OWLObjectPropertyExpression[] m_subObjectProperties;
-        public final OWLObjectPropertyExpression m_superObjectProperties;
+        public final OWLObjectPropertyExpression m_superObjectProperty;
         
-        public ComplexObjectPropertyInclusion(OWLObjectPropertyExpression[] subObjectProperties,OWLObjectPropertyExpression superObjectProperties) {
+        public ComplexObjectPropertyInclusion(OWLObjectPropertyExpression[] subObjectProperties,OWLObjectPropertyExpression superObjectPropery) {
             m_subObjectProperties=subObjectProperties;
-            m_superObjectProperties=superObjectProperties;
+            m_superObjectProperty=superObjectPropery;
         }
         public ComplexObjectPropertyInclusion(OWLObjectPropertyExpression transitiveObjectProperty) {
             m_subObjectProperties=new OWLObjectPropertyExpression[] { transitiveObjectProperty,transitiveObjectProperty };
-            m_superObjectProperties=transitiveObjectProperty;
+            m_superObjectProperty=transitiveObjectProperty;
         }
     }
 }

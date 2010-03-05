@@ -79,29 +79,29 @@ public class BlockingValidatorTest extends AbstractReasonerInternalsTest {
         dlClauses.add(cl);
         Set<Atom> atoms=Collections.emptySet();
         TEST_DL_ONTOLOGY = new DLOntology(
-                "opaque:test", // ontology_URI
-                dlClauses, // clauses
-                atoms, // positive facts
-                atoms, // negative facts 
-                null, // atomic concepts
-                null, // complex role inclusions
-                null, // object roles
-                null, // data roles
-                null, // custom datatype definitions
-                null, // individuals
-                true, // hasInverseRoles
-                false, // hasAtMostRestrictions
-                false, // hasNominals
-                false, // hasDatatypes
-                null); //automaton for complex roles
-        
+            "opaque:test", // ontology_URI
+            dlClauses, // clauses
+            atoms, // positive facts
+            atoms, // negative facts
+            null, // atomic concepts
+            null, // object roles
+            null, // complex role inclusions
+            null, // data roles
+            null, // custom datatype definitions
+            null, // individuals
+            true, // hasInverseRoles
+            false, // hasAtMostRestrictions
+            false, // hasNominals
+            false
+        ); //automaton for complex roles
+
         DirectBlockingChecker directBlockingChecker=new ValidatedSingleDirectBlockingChecker(TEST_DL_ONTOLOGY.hasInverseRoles());
         BlockingSignatureCache blockingSignatureCache=null;
         m_blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,blockingSignatureCache,true,true);
         ExistentialExpansionStrategy ExpansionStrategy=new CreationOrderStrategy(m_blockingStrategy);
         m_tableau=new Tableau(new InterruptFlag(),null,ExpansionStrategy,false,TEST_DL_ONTOLOGY,new HashMap<String,Object>());
         m_extensionManager=m_tableau.getExtensionManager();
-        
+
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
         Node a=m_tableau.createNewNINode(emptySet);          // 1
         Node b=m_tableau.createNewNINode(emptySet);          // 2
@@ -114,7 +114,7 @@ public class BlockingValidatorTest extends AbstractReasonerInternalsTest {
         Node b3=m_tableau.createNewTreeNode(emptySet,b);     // 9
         Node a12=m_tableau.createNewTreeNode(emptySet,a1);   //10
         Node a121=m_tableau.createNewTreeNode(emptySet,a12); //11
-        
+
         m_extensionManager.addAssertion(R,a,a1,emptySet,true);
         m_extensionManager.addAssertion(R,a,a2,emptySet,true);
         m_extensionManager.addAssertion(R,a11,a1,emptySet,true);
@@ -124,50 +124,50 @@ public class BlockingValidatorTest extends AbstractReasonerInternalsTest {
         m_extensionManager.addAssertion(R,b,b3,emptySet,true);
         m_extensionManager.addAssertion(R,a12,a1,emptySet,true);
         m_extensionManager.addAssertion(R,a12,a121,emptySet,true);
-        
+
         m_extensionManager.addConceptAssertion(B,a,emptySet,true);
         m_extensionManager.addConceptAssertion(ATLEAST2RA,a,emptySet,false);
-        
+
         m_extensionManager.addConceptAssertion(C,b,emptySet,true);
         m_extensionManager.addConceptAssertion(ATLEAST1SA,b,emptySet,false);
         m_extensionManager.addConceptAssertion(ATLEAST2RA,b,emptySet,false);
-        
+
         m_extensionManager.addConceptAssertion(A,a1,emptySet,true);
         m_extensionManager.addConceptAssertion(ATLEAST2INVRB,a1,emptySet,false);
         m_extensionManager.addConceptAssertion(D,a1,emptySet,false);
         m_extensionManager.addConceptAssertion(ATLEAST1INVRE,a1,emptySet,false);
-        
+
         m_extensionManager.addConceptAssertion(A,a2,emptySet,true);
         m_extensionManager.addConceptAssertion(ATLEAST2INVRB,a2,emptySet,false);
         m_extensionManager.addConceptAssertion(D,a2,emptySet,false);
         m_extensionManager.addConceptAssertion(ATLEAST1INVRE,a2,emptySet,false);
-        
+
         m_extensionManager.addConceptAssertion(B,a11,emptySet,true);
         m_extensionManager.addConceptAssertion(ATLEAST2RA,a11,emptySet,false);
-        
+
         m_extensionManager.addConceptAssertion(A,a111,emptySet,true);
         m_extensionManager.addConceptAssertion(ATLEAST2INVRB,a111,emptySet,false);
         m_extensionManager.addConceptAssertion(D,a111,emptySet,false);
         m_extensionManager.addConceptAssertion(ATLEAST1INVRE,a111,emptySet,false);
-        
+
         m_extensionManager.addConceptAssertion(A,b1,emptySet,true);
         m_extensionManager.addConceptAssertion(ATLEAST2INVRB,b1,emptySet,false);
-        
+
         m_extensionManager.addConceptAssertion(A,b2,emptySet,true);
         m_extensionManager.addConceptAssertion(ATLEAST2INVRB,b2,emptySet,false);
-        
+
         m_extensionManager.addConceptAssertion(A,b3,emptySet,true);
         m_extensionManager.addConceptAssertion(ATLEAST2INVRB,b3,emptySet,false);
-        
+
         m_extensionManager.addConceptAssertion(E,a12,emptySet,true);
         m_extensionManager.addConceptAssertion(B,a12,emptySet,false);
         m_extensionManager.addConceptAssertion(ATLEAST2RA,a12,emptySet,false);
-        
+
         m_extensionManager.addConceptAssertion(A,a121,emptySet,true);
         m_extensionManager.addConceptAssertion(ATLEAST2INVRB,a121,emptySet,false);
         m_extensionManager.addConceptAssertion(D,a121,emptySet,false);
         m_extensionManager.addConceptAssertion(ATLEAST1INVRE,a121,emptySet,false);
-        
+
         assertFalse(m_extensionManager.containsClash());
         m_blockingStrategy.computeBlocking(false);
         assertTrue(a111.isDirectlyBlocked() && a111.getBlocker()==a1);
@@ -208,36 +208,36 @@ public class BlockingValidatorTest extends AbstractReasonerInternalsTest {
         dlClauses.add(cl);
         Set<Atom> atoms=Collections.emptySet();
         TEST_DL_ONTOLOGY = new DLOntology(
-                "opaque:test", // ontology_URI
-                dlClauses, // clauses
-                atoms, // positive facts
-                atoms, // negative facts 
-                null, // atomic concepts
-                null, // complex role inclusions
-                null, // object roles
-                null, // data roles
-                null, // custom datatype definitions
-                null, // individuals
-                true, // hasInverseRoles
-                false, // hasAtMostRestrictions
-                false, // hasNominals
-                false, // hasDatatypes
-                null); //automaton for complex roles
-        
+            "opaque:test", // ontology_URI
+            dlClauses, // clauses
+            atoms, // positive facts
+            atoms, // negative facts
+            null, // atomic concepts
+            null, // object roles
+            null, // complex role inclusions
+            null, // data roles
+            null, // custom datatype definitions
+            null, // individuals
+            true, // hasInverseRoles
+            false, // hasAtMostRestrictions
+            false, // hasNominals
+            false
+        );
+
         DirectBlockingChecker directBlockingChecker=new ValidatedSingleDirectBlockingChecker(TEST_DL_ONTOLOGY.hasInverseRoles());
         BlockingSignatureCache blockingSignatureCache=null;
         m_blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,blockingSignatureCache,true,true);
         ExistentialExpansionStrategy ExpansionStrategy=new CreationOrderStrategy(m_blockingStrategy);
         m_tableau=new Tableau(new InterruptFlag(),null,ExpansionStrategy,false,TEST_DL_ONTOLOGY,new HashMap<String,Object>());
         m_extensionManager=m_tableau.getExtensionManager();
-        
+
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
         Node a=m_tableau.createNewNINode(emptySet);          // 1
         Node a1=m_tableau.createNewTreeNode(emptySet,a);     // 2
         Node a2=m_tableau.createNewTreeNode(emptySet,a);     // 3
         Node a11=m_tableau.createNewTreeNode(emptySet,a1);   // 4
         Node a12=m_tableau.createNewTreeNode(emptySet,a1);   // 5
-        
+
         m_extensionManager.addAssertion(S,a,a1,emptySet,true);
         m_extensionManager.addAssertion(R,a2,a,emptySet,true);
         m_extensionManager.addAssertion(R,a1,a11,emptySet,true);
@@ -247,17 +247,17 @@ public class BlockingValidatorTest extends AbstractReasonerInternalsTest {
         m_extensionManager.addConceptAssertion(C,a,emptySet,false);
         m_extensionManager.addConceptAssertion(ATLEAST1SB,a,emptySet,false);
         m_extensionManager.addConceptAssertion(ATLEAST1INVRB,a,emptySet,false);
-        
+
         m_extensionManager.addConceptAssertion(B,a1,emptySet,true);
         m_extensionManager.addConceptAssertion(ATLEAST1TD,a1,emptySet,false);
-        
+
         m_extensionManager.addConceptAssertion(B,a2,emptySet,true);
         m_extensionManager.addConceptAssertion(ATLEAST1TD,a2,emptySet,false);
-        
+
         m_extensionManager.addConceptAssertion(C,a11,emptySet,true);
-        
+
         m_extensionManager.addConceptAssertion(D,a12,emptySet,true);
-        
+
         assertFalse(m_extensionManager.containsClash());
         m_blockingStrategy.computeBlocking(false);
         assertTrue(a2.isDirectlyBlocked() && a2.getBlocker()==a1);

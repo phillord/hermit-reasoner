@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -69,13 +69,13 @@ public final class ExistentialExpansionManager implements Serializable {
         Graph<Role> superRoleGraph=new Graph<Role>();
         Set<Role> functionalRoles=new HashSet<Role>();
         for (DLClause dlClause : m_tableau.getDLOntology().getDLClauses()) {
-            if (dlClause.m_clauseType==ClauseType.OBJECT_PROPERTY_INCLUSION || dlClause.m_clauseType==ClauseType.DATA_PROPERTY_INCLUSION) {
+            if (dlClause.getClauseType()==ClauseType.OBJECT_PROPERTY_INCLUSION || dlClause.getClauseType()==ClauseType.DATA_PROPERTY_INCLUSION) {
                 AtomicRole subrole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                 AtomicRole superrole=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
                 superRoleGraph.addEdge(subrole,superrole);
                 superRoleGraph.addEdge(subrole.getInverse(),superrole.getInverse());
             }
-            else if (dlClause.m_clauseType==ClauseType.INVERSE_OBJECT_PROPERTY_INCLUSION) {
+            else if (dlClause.getClauseType()==ClauseType.INVERSE_OBJECT_PROPERTY_INCLUSION) {
                 AtomicRole subrole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                 AtomicRole superrole=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
                 superRoleGraph.addEdge(subrole,superrole.getInverse());
@@ -151,7 +151,7 @@ public final class ExistentialExpansionManager implements Serializable {
     }
     /**
      * Creates a new node in the tableau if the at least concept that caused the expansion is for cardinality 1. If it is not of cardinality 1 and the role in the at least concept is a functional role, it sets a clash in the extension manager.
-     * 
+     *
      * @return true if the at least cardinality is 1 (causes an expansion) or it is greater than one but the role is functional (causes a clash) and false otherwise.
      */
     public boolean tryFunctionalExpansion(AtLeastConcept atLeastConcept,Node forNode) {

@@ -65,7 +65,6 @@ import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Role;
-import org.semanticweb.HermiT.model.DLClause.ClauseType;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.monitor.TableauMonitorFork;
 import org.semanticweb.HermiT.monitor.Timer;
@@ -76,6 +75,7 @@ import org.semanticweb.HermiT.structural.OWLAxiomsExpressivity;
 import org.semanticweb.HermiT.structural.OWLClausification;
 import org.semanticweb.HermiT.structural.OWLNormalization;
 import org.semanticweb.HermiT.structural.ObjectPropertyInclusionManager;
+import org.semanticweb.HermiT.structural.OWLAxioms.ComplexObjectPropertyInclusion;
 import org.semanticweb.HermiT.tableau.InterruptFlag;
 import org.semanticweb.HermiT.tableau.Tableau;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -107,6 +107,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLTypedLiteral;
 import org.semanticweb.owlapi.reasoner.BufferingMode;
 import org.semanticweb.owlapi.reasoner.FreshEntitiesException;
@@ -327,7 +328,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         m_atomicConceptHierarchy=null;
         m_dataRoleHierarchy=null;
         m_objectRoleHierarchy=null;
-        DLOntology emptyDLOntology=new DLOntology("urn:hermit:kb",noDLClauses,noAtoms,noAtoms,noAtomicConcepts,noComplexObjectRoleInclusions,noAtomicRoles,noAtomicRoles,noDefinedDatatypeIRIs,noIndividuals,false,false,false,false,null);
+        DLOntology emptyDLOntology=new DLOntology("urn:hermit:kb",noDLClauses,noAtoms,noAtoms,noAtomicConcepts,noAtomicRoles,noComplexObjectRoleInclusions,noAtomicRoles,noDefinedDatatypeIRIs,noIndividuals,false,false,false,false);
         loadDLOntology(emptyDLOntology);
     }
 
@@ -1710,38 +1711,41 @@ public class Reasoner implements OWLReasoner,Serializable {
             Set<DescriptionGraph> descriptionGraphs=Collections.emptySet();
             OWLDataFactory factory=ontologyManager.getOWLDataFactory();
             OWLOntology newOntology=ontologyManager.createOntology(IRI.create("uri:urn:internal-kb"));
-            for (OWLAxiom axiom : additionalAxioms)
+            for (OWLAxiom axiom : additionalAxioms) {
+                if (axiom instanceof OWLSubObjectPropertyOfAxiom)
+                    throw new IllegalArgumentException("It is not possible to extend a DL-ontology with object property inclusions.");
                 ontologyManager.addAxiom(newOntology,axiom);
+            }
             OWLAxioms axioms=new OWLAxioms();
             axioms.m_definedDatatypesIRIs.addAll(originalDLOntology.getDefinedDatatypeIRIs());
             OWLNormalization normalization=new OWLNormalization(factory,axioms,!originalDLOntology.getAllDescriptionGraphs().isEmpty());
             normalization.processOntology(config,newOntology);
             BuiltInPropertyManager builtInPropertyManager=new BuiltInPropertyManager(factory);
             builtInPropertyManager.axiomatizeBuiltInPropertiesAsNeeded(axioms,originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.TOP_OBJECT_ROLE),originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.BOTTOM_OBJECT_ROLE),originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.TOP_DATA_ROLE),originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.BOTTOM_DATA_ROLE));
-            if (!originalDLOntology.getAllComplexObjectRoleInclusions().isEmpty() || !axioms.m_complexObjectPropertyInclusions.isEmpty()) {
-                ObjectPropertyInclusionManager objectPropertyInclusionManager=new ObjectPropertyInclusionManager(factory);
-                objectPropertyInclusionManager.prepareTransformation(axioms);
+            if (!originalDLOntology.getAllComplexObjectRoleInclusions().isEmpty()) {
+                Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions=new HashSet<OWLObjectPropertyExpression[]>(axioms.m_simpleObjectPropertyInclusions);
                 for (DLClause dlClause : originalDLOntology.getDLClauses()) {
-                    if (dlClause.m_clauseType==ClauseType.OBJECT_PROPERTY_INCLUSION || dlClause.m_clauseType==ClauseType.DATA_PROPERTY_INCLUSION) {
-                        AtomicRole subAtomicRole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
-                        AtomicRole superAtomicRole=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
-                        if (originalDLOntology.getAllAtomicObjectRoles().contains(subAtomicRole) && originalDLOntology.getAllAtomicObjectRoles().contains(superAtomicRole)) {
-                            OWLObjectProperty subObjectProperty=getObjectProperty(factory,subAtomicRole);
-                            OWLObjectProperty superObjectProperty=getObjectProperty(factory,superAtomicRole);
-                            objectPropertyInclusionManager.addInclusion(subObjectProperty,superObjectProperty);
-                        }
+                    if (dlClause.getClauseType()==DLClause.ClauseType.OBJECT_PROPERTY_INCLUSION) {
+                        OWLObjectProperty subObjectProperty=getObjectProperty(factory,(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate());
+                        OWLObjectProperty superObjectProperty=getObjectProperty(factory,(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate());
+                        simpleObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { subObjectProperty,superObjectProperty });
                     }
-                    else if (dlClause.m_clauseType==ClauseType.INVERSE_OBJECT_PROPERTY_INCLUSION) {
-                        AtomicRole subAtomicRole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
-                        AtomicRole superAtomicRole=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
-                        if (originalDLOntology.getAllAtomicObjectRoles().contains(subAtomicRole) && originalDLOntology.getAllAtomicObjectRoles().contains(superAtomicRole)) {
-                            OWLObjectProperty subObjectProperty=getObjectProperty(factory,subAtomicRole);
-                            OWLObjectPropertyExpression superObjectPropertyExpression=getObjectProperty(factory,superAtomicRole).getInverseProperty();
-                            objectPropertyInclusionManager.addInclusion(subObjectProperty,superObjectPropertyExpression);
-                        }
+                    else if (dlClause.getClauseType()==DLClause.ClauseType.INVERSE_OBJECT_PROPERTY_INCLUSION) {
+                        OWLObjectProperty subObjectProperty=getObjectProperty(factory,(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate());
+                        OWLObjectProperty superObjectProperty=getObjectProperty(factory,(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate());
+                        simpleObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { subObjectProperty,superObjectProperty.getInverseProperty() });
                     }
                 }
-                objectPropertyInclusionManager.rewriteAxioms(axioms,originalDLOntology.getAutomataOfComplexObjectProperties());
+                Collection<OWLAxioms.ComplexObjectPropertyInclusion> complexObjectPropertyInclusions=new HashSet<ComplexObjectPropertyInclusion>(axioms.m_complexObjectPropertyInclusions);
+                for (DLOntology.ComplexObjectRoleInclusion complexInclusion : originalDLOntology.getAllComplexObjectRoleInclusions()) {
+                    OWLObjectPropertyExpression[] subObjectPropertyExpressions=new OWLObjectPropertyExpression[complexInclusion.getNumberOfSubRoles()];
+                    for (int subRoleIndex=0;subRoleIndex<complexInclusion.getNumberOfSubRoles();subRoleIndex++)
+                        subObjectPropertyExpressions[subRoleIndex]=getObjectPropertyExpression(factory,complexInclusion.getSubRole(subRoleIndex));
+                    OWLObjectPropertyExpression superObjectPropertyExpression=getObjectPropertyExpression(factory,complexInclusion.getSuperRole());
+                    complexObjectPropertyInclusions.add(new OWLAxioms.ComplexObjectPropertyInclusion(subObjectPropertyExpressions,superObjectPropertyExpression));
+                }
+                ObjectPropertyInclusionManager objectPropertyInclusionManager=new ObjectPropertyInclusionManager(factory);
+                objectPropertyInclusionManager.rewriteAxioms(axioms,simpleObjectPropertyInclusions,complexObjectPropertyInclusions);
             }
             OWLAxiomsExpressivity axiomsExpressivity=new OWLAxiomsExpressivity(axioms);
             axiomsExpressivity.m_hasAtMostRestrictions|=originalDLOntology.hasAtMostRestrictions();
@@ -1749,7 +1753,7 @@ public class Reasoner implements OWLReasoner,Serializable {
             axiomsExpressivity.m_hasNominals|=originalDLOntology.hasNominals();
             axiomsExpressivity.m_hasDatatypes|=originalDLOntology.hasDatatypes();
             OWLClausification clausifier=new OWLClausification(config);
-            DLOntology newDLOntology=clausifier.clausify(ontologyManager.getOWLDataFactory(),"uri:urn:internal-kb",axioms,axiomsExpressivity,descriptionGraphs,null);
+            DLOntology newDLOntology=clausifier.clausify(ontologyManager.getOWLDataFactory(),"uri:urn:internal-kb",axioms,axiomsExpressivity,descriptionGraphs);
 
             Set<DLClause> dlClauses=createUnion(originalDLOntology.getDLClauses(),newDLOntology.getDLClauses());
             Set<Atom> positiveFacts=createUnion(originalDLOntology.getPositiveFacts(),newDLOntology.getPositiveFacts());
@@ -1764,7 +1768,7 @@ public class Reasoner implements OWLReasoner,Serializable {
             boolean hasAtMostRestrictions=originalDLOntology.hasAtMostRestrictions() || newDLOntology.hasAtMostRestrictions();
             boolean hasNominals=originalDLOntology.hasNominals() || newDLOntology.hasNominals();
             boolean hasDatatypes=originalDLOntology.hasDatatypes() || newDLOntology.hasDatatypes();
-            return new DLOntology(resultingOntologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,complexObjectRoleInclusions,atomicObjectRoles,atomicDataRoles,definedDatatypeIRIs,individuals,hasInverseRoles,hasAtMostRestrictions,hasNominals,hasDatatypes,null);
+            return new DLOntology(resultingOntologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,atomicObjectRoles,complexObjectRoleInclusions,atomicDataRoles,definedDatatypeIRIs,individuals,hasInverseRoles,hasAtMostRestrictions,hasNominals,hasDatatypes);
         }
         catch (OWLException shouldntHappen) {
             throw new IllegalStateException("Internal error: Unexpected OWLException.",shouldntHappen);
