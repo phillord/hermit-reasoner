@@ -65,7 +65,7 @@ public class OWLNormalization {
         m_axioms.m_dataProperties.addAll(ontology.getDataPropertiesInSignature(true));
         m_axioms.m_namedIndividuals.addAll(ontology.getIndividualsInSignature(true));
         AxiomVisitor axiomVisitor=new AxiomVisitor();
-        for (OWLAxiom axiom : ontology.getAxioms())
+        for (OWLAxiom axiom : ontology.getLogicalAxioms())
             axiom.accept(axiomVisitor);
         // now all axioms are in NNF and converted into disjunctions wherever possible
         // exact cardinalities are rewritten into at least and at most cardinalities etc
@@ -172,7 +172,7 @@ public class OWLNormalization {
         // normalize data range inclusions
         DataRangeNormalizationVisitor drNormalizer=new DataRangeNormalizationVisitor(dataRangeInclusions);
         while (!dataRangeInclusions.isEmpty()) {
-            OWLDataRange simplifiedDescription=m_expressionManager.getSimplified(m_factory.getOWLDataUnionOf(dataRangeInclusions.remove(normalizer.m_newDataRangeInclusions.size()-1)));
+            OWLDataRange simplifiedDescription=m_expressionManager.getNNF(m_expressionManager.getSimplified(m_factory.getOWLDataUnionOf(dataRangeInclusions.remove(normalizer.m_newDataRangeInclusions.size()-1))));
             if (!simplifiedDescription.isTopDatatype()) {
                 if (simplifiedDescription instanceof OWLDataUnionOf) {
                     OWLDataUnionOf dataOr=(OWLDataUnionOf)simplifiedDescription;
@@ -194,6 +194,29 @@ public class OWLNormalization {
                 }
             }
         }
+//        while (!dataRangeInclusions.isEmpty()) {
+//            OWLDataRange simplifiedDescription=m_expressionManager.getSimplified(m_expressionManager.getNNF(m_factory.getOWLDataUnionOf(dataRangeInclusions.remove(dataRangeInclusions.size()-1))));
+//            if (!simplifiedDescription.isTopDatatype()) {
+//                if (simplifiedDescription instanceof OWLDataUnionOf) {
+//                    OWLDataUnionOf dataOr=(OWLDataUnionOf)simplifiedDescription;
+//                    OWLDataRange[] descriptions=new OWLDataRange[dataOr.getOperands().size()];
+//                    dataOr.getOperands().toArray(descriptions);
+//                    if (!distributeUnionOverAnd(descriptions,dataRangeInclusions)) {
+//                        for (int index=0;index<descriptions.length;index++)
+//                            descriptions[index]=descriptions[index].accept(drNormalizer);
+//                        m_axioms.m_dataRangeInclusions.add(descriptions);
+//                    }
+//                } else if (simplifiedDescription instanceof OWLDataIntersectionOf) {
+//                    OWLDataIntersectionOf dataAnd=(OWLDataIntersectionOf)simplifiedDescription;
+//                    for (OWLDataRange conjunct : dataAnd.getOperands()) {
+//                        dataRangeInclusions.add(new OWLDataRange[] { conjunct});
+//                    }
+//                } else {
+//                    OWLDataRange normalized=simplifiedDescription.accept(drNormalizer);
+//                    m_axioms.m_dataRangeInclusions.add(new OWLDataRange[] { normalized });
+//                }
+//            }
+//        }
     }
     protected boolean distributeUnionOverAnd(OWLClassExpression[] descriptions,List<OWLClassExpression[]> inclusions) {
         int andIndex=-1;
@@ -523,8 +546,8 @@ public class OWLNormalization {
         
         public void visit(OWLDatatypeDefinitionAxiom axiom) {
             m_axioms.m_definedDatatypesIRIs.add(axiom.getDatatype().getIRI().toString());
-            m_dataRangeInclusionsAsDisjunctions.add(new OWLDataRange[] { m_factory.getOWLDataComplementOf(axiom.getDatatype()), axiom.getDataRange() });
-            m_dataRangeInclusionsAsDisjunctions.add(new OWLDataRange[] { m_factory.getOWLDataComplementOf(axiom.getDataRange()), axiom.getDatatype() });
+            m_dataRangeInclusionsAsDisjunctions.add(new OWLDataRange[] { negative(axiom.getDatatype()), positive(axiom.getDataRange()) });
+            m_dataRangeInclusionsAsDisjunctions.add(new OWLDataRange[] { negative(axiom.getDataRange()), positive(axiom.getDatatype()) });
         }
         
         public void visit(OWLSubDataPropertyOfAxiom axiom) {
