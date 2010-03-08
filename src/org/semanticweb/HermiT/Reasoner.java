@@ -75,7 +75,6 @@ import org.semanticweb.HermiT.structural.OWLAxiomsExpressivity;
 import org.semanticweb.HermiT.structural.OWLClausification;
 import org.semanticweb.HermiT.structural.OWLNormalization;
 import org.semanticweb.HermiT.structural.ObjectPropertyInclusionManager;
-import org.semanticweb.HermiT.structural.OWLAxioms.ComplexObjectPropertyInclusion;
 import org.semanticweb.HermiT.tableau.InterruptFlag;
 import org.semanticweb.HermiT.tableau.Tableau;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -1723,29 +1722,32 @@ public class Reasoner implements OWLReasoner,Serializable {
             BuiltInPropertyManager builtInPropertyManager=new BuiltInPropertyManager(factory);
             builtInPropertyManager.axiomatizeBuiltInPropertiesAsNeeded(axioms,originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.TOP_OBJECT_ROLE),originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.BOTTOM_OBJECT_ROLE),originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.TOP_DATA_ROLE),originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.BOTTOM_DATA_ROLE));
             if (!originalDLOntology.getAllComplexObjectRoleInclusions().isEmpty()) {
-                Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions=new HashSet<OWLObjectPropertyExpression[]>(axioms.m_simpleObjectPropertyInclusions);
                 for (DLClause dlClause : originalDLOntology.getDLClauses()) {
                     if (dlClause.getClauseType()==DLClause.ClauseType.OBJECT_PROPERTY_INCLUSION) {
                         OWLObjectProperty subObjectProperty=getObjectProperty(factory,(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate());
                         OWLObjectProperty superObjectProperty=getObjectProperty(factory,(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate());
-                        simpleObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { subObjectProperty,superObjectProperty });
+                        axioms.m_simpleObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { subObjectProperty,superObjectProperty });
                     }
                     else if (dlClause.getClauseType()==DLClause.ClauseType.INVERSE_OBJECT_PROPERTY_INCLUSION) {
                         OWLObjectProperty subObjectProperty=getObjectProperty(factory,(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate());
                         OWLObjectProperty superObjectProperty=getObjectProperty(factory,(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate());
-                        simpleObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { subObjectProperty,superObjectProperty.getInverseProperty() });
+                        axioms.m_simpleObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { subObjectProperty,superObjectProperty.getInverseProperty() });
                     }
                 }
-                Collection<OWLAxioms.ComplexObjectPropertyInclusion> complexObjectPropertyInclusions=new HashSet<ComplexObjectPropertyInclusion>(axioms.m_complexObjectPropertyInclusions);
                 for (DLOntology.ComplexObjectRoleInclusion complexInclusion : originalDLOntology.getAllComplexObjectRoleInclusions()) {
                     OWLObjectPropertyExpression[] subObjectPropertyExpressions=new OWLObjectPropertyExpression[complexInclusion.getNumberOfSubRoles()];
                     for (int subRoleIndex=0;subRoleIndex<complexInclusion.getNumberOfSubRoles();subRoleIndex++)
                         subObjectPropertyExpressions[subRoleIndex]=getObjectPropertyExpression(factory,complexInclusion.getSubRole(subRoleIndex));
                     OWLObjectPropertyExpression superObjectPropertyExpression=getObjectPropertyExpression(factory,complexInclusion.getSuperRole());
-                    complexObjectPropertyInclusions.add(new OWLAxioms.ComplexObjectPropertyInclusion(subObjectPropertyExpressions,superObjectPropertyExpression));
+                    axioms.m_complexObjectPropertyInclusions.add(new OWLAxioms.ComplexObjectPropertyInclusion(subObjectPropertyExpressions,superObjectPropertyExpression));
                 }
                 ObjectPropertyInclusionManager objectPropertyInclusionManager=new ObjectPropertyInclusionManager(factory);
-                objectPropertyInclusionManager.rewriteAxioms(axioms,simpleObjectPropertyInclusions,complexObjectPropertyInclusions);
+                objectPropertyInclusionManager.rewriteAxioms(axioms,originalDLOntology.getAllAtomicConcepts().size());
+                // The object property axioms must be cleared or they will be clausified below twice.
+                // Since the subproperty axioms for object properties are not allowed as extending axioms,
+                // this does not cause problems.
+                axioms.m_simpleObjectPropertyInclusions.clear();
+                axioms.m_complexObjectPropertyInclusions.clear();
             }
             OWLAxiomsExpressivity axiomsExpressivity=new OWLAxiomsExpressivity(axioms);
             axiomsExpressivity.m_hasAtMostRestrictions|=originalDLOntology.hasAtMostRestrictions();
