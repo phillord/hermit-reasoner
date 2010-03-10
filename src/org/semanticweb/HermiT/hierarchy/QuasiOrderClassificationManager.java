@@ -150,7 +150,7 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
 
 		Hierarchy<AtomicConcept> hierarchy = buildHierarchy( topElement , bottomElement , m_knownSubsumptions );
 		
-		getKnownSubsumersForConcept( bottomElement, false, false );
+		getKnownSubsumersForConcept( topElement, true, false );
 		
    		Set<HierarchyNode<AtomicConcept>> leafNodes = hierarchy.getBottomNode().getParentNodes();
 		for( HierarchyNode<AtomicConcept> leafNode : leafNodes ){
@@ -226,7 +226,7 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
             Object conceptObject=tupleBuffer[0];
             if (conceptObject instanceof AtomicConcept) {
                 AtomicConcept atomicConcept=(AtomicConcept)conceptObject;
-                if( !Prefixes.isInternalIRI( atomicConcept.getIRI() ) && !atomicConcept.equals( AtomicConcept.NOTHING ) && !atomicConcept.equals( AtomicConcept.THING )){
+                if( !Prefixes.isInternalIRI( atomicConcept.getIRI() ) && !atomicConcept.equals( AtomicConcept.NOTHING ) ){
 	                Node node=(Node)tupleBuffer[1];
 	                if( node.isActive() && !node.isBlocked() )
 	                    readPossibleSubsumersFromNodeLabel(atomicConcept, node, onlyPrunePossible);
