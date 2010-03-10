@@ -21,8 +21,6 @@ import java.util.Set;
 
 public interface SubsumptionCache<E> {
     Set<E> getAllKnownSubsumers(E element);
-    Set<E> getKnownSubsumers(E element,boolean updatePossibleSubsumers);
-    Set<E> getCurrentPossibleSubsumers(E element);
     boolean isSatisfiable(E element);
     boolean isSubsumedBy(E subelement,E superelement);
 }

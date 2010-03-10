@@ -55,27 +55,6 @@ public class AtomicConceptSubsumptionCache implements Serializable,SubsumptionCa
         else
             return null;
     }
-    /**
-     * new method because above one throws an exception if the ontology is not deterministic.
-     */
-    public Set<AtomicConcept> getKnownSubsumers(AtomicConcept atomicConcept, boolean updatePossibleSubsumers) {
-        boolean isSatisfiable=isSatisfiable(atomicConcept,updatePossibleSubsumers);
-        AtomicConceptInfo conceptInfo=m_atomicConceptInfos.get(atomicConcept);
-        if (isSatisfiable)
-            return conceptInfo.m_knownSubsumers;
-        else
-            return null;
-    }
-	/**
-	 * new method because previously we could not get the possible subsumers that have been computed for a concept
-	 */
-    public Set<AtomicConcept> getCurrentPossibleSubsumers(AtomicConcept atomicConcept) {
-        AtomicConceptInfo conceptInfo=m_atomicConceptInfos.get(atomicConcept);
-        if( !AtomicConcept.NOTHING.equals(atomicConcept) && conceptInfo != null )
-        	return conceptInfo.m_possibleSubsumers;
-        else
-        	return null;
-    }
     public boolean isSatisfiable(AtomicConcept concept) {
         return isSatisfiable(concept,true);
     }

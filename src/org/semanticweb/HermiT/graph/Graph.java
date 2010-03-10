@@ -22,8 +22,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 public class Graph<T> implements Serializable {
@@ -45,6 +47,16 @@ public class Graph<T> implements Serializable {
         successors.add(to);
         m_elements.add(from);
         m_elements.add(to);
+    }
+    public void addEdges( T from, Set<T> to){
+        Set<T> successors=m_successorsByNodes.get(from);
+        if (successors==null) {
+            successors=new HashSet<T>();
+            m_successorsByNodes.put(from,successors);
+        }
+        successors.addAll(to);
+        m_elements.add(from);
+        m_elements.addAll(to);
     }
     public Set<T> getElements() {
         return m_elements;
@@ -79,9 +91,6 @@ public class Graph<T> implements Serializable {
         }
         return result;
     }
-    /**
-     * gstoil addition
-     */
     public Graph<T> clone() {
         Graph<T> result=new Graph<T>();
         for (Map.Entry<T,Set<T>> entry : m_successorsByNodes.entrySet()) {
@@ -91,14 +100,37 @@ public class Graph<T> implements Serializable {
         }
         return result;
     }
-    /**
-     * gstoil addition
-     */
 	public void removeElements(Set<T> elements) {
 		for(T element : elements){
 			m_elements.remove( element );
 			m_successorsByNodes.remove( element );
 		}
-			
 	}
+    public boolean isReachableSuccessor(T fromNode,T toNode) {
+    	if( fromNode.equals( toNode ))
+    		return true;
+        Set<T> result = new HashSet<T>();
+        Queue<T> toVisit=new LinkedList<T>();
+        toVisit.add(fromNode);
+        while (!toVisit.isEmpty()) {
+        	T current=toVisit.poll();
+        	Set<T> successors = getSuccessors( current );
+            if( successors.contains( toNode ))
+            	return true;
+            if( result.add(current) )
+                toVisit.addAll( successors );
+        }
+        return false;
+    }
+    public Set<T> getReachableSuccessors(T fromNode) {
+        Set<T> result = new HashSet<T>();
+        Queue<T> toVisit=new LinkedList<T>();
+        toVisit.add(fromNode);
+        while (!toVisit.isEmpty()) {
+            T current=toVisit.poll();
+            if( result.add(current))
+                toVisit.addAll( getSuccessors( current ) );
+        }
+        return result;
+    }
 }

@@ -314,6 +314,25 @@ public final class Tableau implements Serializable {
             m_tableauMonitor.isSatisfiableFinished(atomicConcept,result);
         return result;
     }
+    public boolean isSubsumedByList(AtomicConcept subconcept,ArrayList<AtomicConcept> superconcepts) {
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.isSubsumedByStarted(subconcept,superconcepts.get(0));
+        clear();
+        if (hasNominals())
+            loadABox();
+        m_checkedNode0=createNewNINode(m_dependencySetFactory.emptySet());
+        m_extensionManager.addConceptAssertion(subconcept,m_checkedNode0,m_dependencySetFactory.emptySet(),true);
+        m_branchingPoints[0]=new BranchingPoint(this);
+        m_currentBranchingPoint++;
+        m_nonbacktrackableBranchingPoint=m_currentBranchingPoint;
+        DependencySet dependencySet=m_dependencySetFactory.addBranchingPoint(m_dependencySetFactory.emptySet(),m_currentBranchingPoint);
+        for( int i=0 ; i<superconcepts.size() ; i++ )
+        	m_extensionManager.addConceptAssertion(superconcepts.get(i).getNegation(),m_checkedNode0,dependencySet,true);
+        boolean result=!isSatisfiable();
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.isSubsumedByFinished(subconcept,superconcepts.get(0),result);
+        return result;
+    }
     public boolean isSubsumedBy(AtomicConcept subconcept,AtomicConcept superconcept) {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isSubsumedByStarted(subconcept,superconcept);
