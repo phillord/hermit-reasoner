@@ -4,34 +4,19 @@ task assigned to: Birte, Boris
 -Modularise  classification code and integrate Rob's classification 
 task assigned to: Giorgos, Boris
 
-- Matthew added a new version of the OWLReasoner interface to the OWL
-  API and we have to implement it 
-task assigned to: Birte
-
-- We throw UnsupportedOperation exceptions for the methods
-  getDataPropertyRelationships(OWLNamedIndividual individual, OWLDataProperty p). 
-  needs implementation 
-task assigned to: Birte
-
-- Protege is a bit behind, but the Protege reasoner interface will
-  also change to reflect the new OWLReasoner interface
-task assigned to: Birte
-
 - Optimise the rule set/rule application so that HermiT can deal with
   large ontologies such as SNOMED. Move existential into universial: 
   rule engine should not loop over all assignemnts for y if y does not occur 
   in the head e.g., as in r(x, y) and B(y) -> A(x)  
-task assigned to: Giorgos, Rob
+task assigned to: Giorgos
 
 - cache Aboxes saturated up to non-determinism
 task assigned to: 
 
 - We need to check acyclicity of datatype definitions.
-task assigned to:  Rob
+task assigned to:  Birte
 
 
 - incremental classification (axioms addition/removal)
 
-- optimise number rstrictions (e.g., better clause representation)
-
-- learning heuristics for disjunctions
+- optimise number restrictions (e.g., better clause representation)
