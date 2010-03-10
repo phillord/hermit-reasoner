@@ -20,14 +20,6 @@ public class EntailmentTest extends AbstractReasonerTest {
         OWLOntology conlusions=getOntologyWithAxioms(axioms);
         assertEntails(conlusions.getLogicalAxioms(), true);
     }
-    public void testHasKey2() throws Exception {
-        String axioms = "Declaration(DataProperty(:dp))" 
-            + "SubClassOf(ObjectOneOf(:a1 :a2 :a3) ObjectIntersectionOf(DataAllValuesFrom(:dp xsd:string) DataAllValuesFrom(:dp xsd:integer)))";
-        loadReasonerWithAxioms(axioms);
-        axioms = "HasKey(owl:Thing () (:dp))";
-        OWLOntology conlusions=getOntologyWithAxioms(axioms);
-        assertEntails(conlusions.getLogicalAxioms(), true);
-    }
     public void testBlankNodes1() throws Exception {
         String axioms = "Declaration(ObjectProperty(:p))" 
             + "ClassAssertion(owl:Thing :a )"

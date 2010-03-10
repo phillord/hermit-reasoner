@@ -18,9 +18,9 @@
 
 package org.semanticweb.HermiT.examples;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.Reasoner;
@@ -58,7 +58,7 @@ public class PrettyHierarchyPrinting {
 	    File prettyPrintHierarchyFile=new File("examples/ontologies/pizza-prettyPrint.owl");
 	    // turn to an absolute file, so that we can write to it
 	    prettyPrintHierarchyFile=prettyPrintHierarchyFile.getAbsoluteFile();
-	    OutputStream prettyPrintHierarchyStreamOut=new FileOutputStream(prettyPrintHierarchyFile);
+	    BufferedOutputStream prettyPrintHierarchyStreamOut=new BufferedOutputStream(new FileOutputStream(prettyPrintHierarchyFile));
 	    // The output stream is wrapped into a print write with autoflush. 
 	    PrintWriter output=new PrintWriter(prettyPrintHierarchyStreamOut,true);
 	    // Now we let HermiT print the hierarchies. Since all parameters are set to true, 
