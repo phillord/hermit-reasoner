@@ -1,5 +1,4 @@
 Prefix(:=<http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#>)
-Prefix(a1:=<http://protege.stanford.edu/plugins/owl/protege#>)
 
 Ontology(<http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl#>
 
@@ -179,7 +178,5 @@ EquivalentClasses( owl:Nothing :CheeseyVegetableTopping :IceCream ) Declaration(
   SubObjectPropertyOf( :isIngredientOf owl:topObjectProperty ) EquivalentObjectProperties( :isIngredientOf ObjectInverseOf( :hasIngredient ) ) Declaration( ObjectProperty( :isIngredientOf ) )
     SubObjectPropertyOf( :isBaseOf :isIngredientOf ) EquivalentObjectProperties( :isBaseOf ObjectInverseOf( :hasBase ) ) Declaration( ObjectProperty( :isBaseOf ) )
     SubObjectPropertyOf( :isToppingOf :isIngredientOf ) EquivalentObjectProperties( :isToppingOf ObjectInverseOf( :hasTopping ) ) Declaration( ObjectProperty( :isToppingOf ) )
-
-  SubDataPropertyOf( a1:defaultLanguage owl:topDataProperty ) Declaration( DataProperty( a1:defaultLanguage ) )
 
 )

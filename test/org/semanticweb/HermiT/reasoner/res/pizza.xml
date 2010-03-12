@@ -13,8 +13,6 @@
     <owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
     >version 1.2</owl:versionInfo>
     <rdfs:comment xml:lang="en">A "final stage" that contains all constructs required for the various versions of the Pizza Tutorial run by Manchester</rdfs:comment>
-    <protege:defaultLanguage rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >en</protege:defaultLanguage>
   </owl:Ontology>
   <owl:Class rdf:ID="TomatoTopping">
     <owl:disjointWith>
@@ -4069,7 +4067,6 @@
     <owl:inverseOf rdf:resource="#isIngredientOf"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#TransitiveProperty"/>
   </owl:ObjectProperty>
-  <rdf:Property rdf:about="http://protege.stanford.edu/plugins/owl/protege#defaultLanguage"/>
   <owl:FunctionalProperty rdf:about="#hasSpiciness">
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
     <rdfs:range rdf:resource="#Spiciness"/>
