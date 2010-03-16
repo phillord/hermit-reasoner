@@ -2012,6 +2012,7 @@ public class Reasoner implements OWLReasoner,Serializable {
                 private final OWLOntologyChangeListener ontologyChangeListener=new OWLOntologyChangeListener() {
                     public void ontologiesChanged(List<? extends OWLOntologyChange> changes) throws OWLException {
                         changed=true;
+                        if (!m_configuration.bufferChanges) flush();
                     }
                 };
                 protected void initOWLAPI(OWLOntology rootOntology) {
