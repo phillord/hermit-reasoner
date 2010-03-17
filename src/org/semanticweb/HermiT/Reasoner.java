@@ -1373,7 +1373,6 @@ public class Reasoner implements OWLReasoner,Serializable {
         realise();
         Set<Node<OWLNamedIndividual>> result=new HashSet<Node<OWLNamedIndividual>>();
         if (classExpression instanceof OWLClass) {
-            classify();
             OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
             AtomicConcept concept=AtomicConcept.create(((OWLClass)classExpression).getIRI().toString());
             Set<Individual> instances=m_realization.get(concept);
