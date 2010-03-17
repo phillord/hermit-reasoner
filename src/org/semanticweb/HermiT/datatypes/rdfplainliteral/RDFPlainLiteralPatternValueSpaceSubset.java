@@ -69,19 +69,19 @@ public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset 
     protected static Automaton languageTagAutomaton() {
         return new RegExp(
             "("+
-                "([a-z]{2,3}"+
+                "([a-zA-Z]{2,3}"+
                     "("+
-                        "(-[a-z]{3}){0,3}"+             // extlang
+                        "(-[a-zA-Z]{3}){0,3}"+             // extlang
                     ")?"+
                 ")|"+
-                "[a-z]{4}|"+                            // 4ALPHA
-                "[a-z]{5,8}"+                           // 5*8ALPHA
+                "[a-zA-Z]{4}|"+                            // 4ALPHA
+                "[a-zA-Z]{5,8}"+                           // 5*8ALPHA
             ")"+                                        // language
-            "(-[a-z]{4})?"+                             // script
-            "(-([a-z]{2}|[0-9]{3}))?"+                  // region
-            "(-([a-z0-9]{5,8}|([0-9][a-z0-9]{3})))*"+   // variant
-            "(-([a-wy-z0-9](-[a-z0-9]{2,8})+))*"+       // extension
-            "(-x(-[a-z0-9]{1,8})+)?"                    // privateuse
+            "(-[a-zA-Z]{4})?"+                             // script
+            "(-([a-zA-Z]{2}|[0-9]{3}))?"+                  // region
+            "(-([a-zA-Z0-9]{5,8}|([0-9][a-z0-9]{3})))*"+   // variant
+            "(-([a-wy-zA-WY-Z0-9](-[a-zA-Z0-9]{2,8})+))*"+       // extension
+            "(-x(-[a-zA-Z0-9]{1,8})+)?"                    // privateuse
         ).toAutomaton();
     }
     protected static Automaton normalizedStringAutomaton() {

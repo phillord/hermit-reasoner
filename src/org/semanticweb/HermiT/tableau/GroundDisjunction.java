@@ -87,15 +87,13 @@ public class GroundDisjunction implements Serializable {
         return 0;
     }
     public void punishDisjunt(int disjunctIndex) {
-    	if (m_useDisjunctionLearning) {
-	        for (IndexWithPunishFactor indexWithPunishFactor : m_disjunction.m_indexesWithPunishFactor) {
-	            if (indexWithPunishFactor.m_index==disjunctIndex) {
-	                indexWithPunishFactor.increasePunishment();
-	                break;
-	            }
-	        }
-	        Arrays.sort(m_disjunction.m_indexesWithPunishFactor);
-    	}
+        for (IndexWithPunishFactor indexWithPunishFactor : m_disjunction.m_indexesWithPunishFactor) {
+            if (indexWithPunishFactor.m_index==disjunctIndex) {
+                indexWithPunishFactor.increasePunishment();
+                break;
+            }
+        }
+        Arrays.sort(m_disjunction.m_indexesWithPunishFactor);
     }
     public boolean isPruned() {
         for (int argumentIndex=m_arguments.length-1;argumentIndex>=0;--argumentIndex)
