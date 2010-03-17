@@ -328,6 +328,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         m_atomicConceptHierarchy=null;
         m_dataRoleHierarchy=null;
         m_objectRoleHierarchy=null;
+        m_realization=null;
         DLOntology emptyDLOntology=new DLOntology("urn:hermit:kb",noDLClauses,noAtoms,noAtoms,noAtomicConcepts,noAtomicRoles,noComplexObjectRoleInclusions,noAtomicRoles,noDefinedDatatypeIRIs,noIndividuals,false,false,false,false);
         loadDLOntology(emptyDLOntology);
     }
@@ -1372,12 +1373,13 @@ public class Reasoner implements OWLReasoner,Serializable {
         realise();
         Set<Node<OWLNamedIndividual>> result=new HashSet<Node<OWLNamedIndividual>>();
         if (classExpression instanceof OWLClass) {
+            classify();
             OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
             AtomicConcept concept=AtomicConcept.create(((OWLClass)classExpression).getIRI().toString());
             Set<Individual> instances=m_realization.get(concept);
             if (instances!=null)
                 for (Individual instance : instances)
-                    result.add(new OWLNamedIndividualNode(factory.getOWLNamedIndividual(IRI.create(instance.getIRI()))));
+                    if (instance.isNamed() && !Prefixes.isInternalIRI(instance.getIRI())) result.add(new OWLNamedIndividualNode(factory.getOWLNamedIndividual(IRI.create(instance.getIRI()))));
             if (!direct) {
                 HierarchyNode<AtomicConcept> node=m_atomicConceptHierarchy.getNodeForElement(concept);
                 if (node!=null)
@@ -1406,7 +1408,7 @@ public class Reasoner implements OWLReasoner,Serializable {
                     Set<Individual> realizationForNodeConcept=m_realization.get(nodeAtomicConcept);
                     if (realizationForNodeConcept!=null)
                         for (Individual individual : realizationForNodeConcept)
-                            if (tableau.isInstanceOf(queryConcept,individual))
+                            if (tableau.isInstanceOf(queryConcept,individual) && individual.isNamed() && !Prefixes.isInternalIRI(individual.getIRI()))
                                 result.add(new OWLNamedIndividualNode(factory.getOWLNamedIndividual(IRI.create(individual.getIRI()))));
                     toVisit.addAll(node.getChildNodes());
                 }
@@ -1450,7 +1452,7 @@ public class Reasoner implements OWLReasoner,Serializable {
                 Set<Individual> realizationForNodeConcept=m_realization.get(nodeAtomicConcept);
                 if (realizationForNodeConcept!=null) {
                     for (Individual individual : realizationForNodeConcept) {
-                        if (individual.isNamed() && tableau.isInstanceOf(queryConcept,individual)) {
+                        if (individual.isNamed() && tableau.isInstanceOf(queryConcept,individual) && !Prefixes.isInternalIRI(individual.getIRI())) {
                             OWLNamedIndividual owlIndividual=factory.getOWLNamedIndividual(IRI.create(individual.getIRI()));
                             result.add(new OWLNamedIndividualNode(owlIndividual));
                         }
@@ -1469,7 +1471,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         if (realizationForConcept!=null) {
             OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
             for (Individual individual : realizationForConcept)
-                if (individual.isNamed())
+                if (individual.isNamed() && !Prefixes.isInternalIRI(individual.getIRI()))
                     result.add(new OWLNamedIndividualNode(factory.getOWLNamedIndividual(IRI.create(individual.getIRI()))));
         }
     }
@@ -2029,6 +2031,8 @@ public class Reasoner implements OWLReasoner,Serializable {
                 }
                 public void flush() {
                     if (changed) {
+                        super.dispose(); // clear all data structures in HermiT
+                        // start from scratch
                         loadOntology(m_rootOntology.getOWLOntologyManager(),m_rootOntology,null);
                         changed=false;
                     }
