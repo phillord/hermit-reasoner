@@ -17,8 +17,13 @@
 */
 package org.semanticweb.HermiT.monitor;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.Individual;
+import org.semanticweb.HermiT.monitor.CountingMonitor.TestRecord.TestType;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 
 public class CountingMonitor extends TableauMonitorAdapter {
@@ -33,8 +38,11 @@ public class CountingMonitor extends TableauMonitorAdapter {
     protected int m_numberOfBacktrackings;
     protected int m_numberOfNodes;
     protected int m_numberOfBlockingValidations;
+    protected String m_testDescription;
+    protected boolean m_testResult;
     
     // overall numbers
+    protected final List<TestRecord> m_testsRecords=new ArrayList<TestRecord>();
     protected long m_overallTime=0;
     protected long m_overallValidationTime=0;
     protected int m_overallNumberOfBacktrackings=0;
@@ -57,31 +65,39 @@ public class CountingMonitor extends TableauMonitorAdapter {
     }
     public void isSatisfiableStarted(AtomicConcept atomicConcept) {
     	m_overallNumberOfSatTests++;
+    	m_testDescription=atomicConcept.getIRI();
         start();
     }
     public void isSatisfiableFinished(AtomicConcept atomicConcept,boolean result) {
-        doStatistics();
+        m_testResult=result;
+        doStatistics(TestType.SATISFIABILITY);
     }
     public void isSubsumedByStarted(AtomicConcept subconcept,AtomicConcept superconcept) {
     	m_overallNumberOfSubsumptionTests++;
+    	m_testDescription=subconcept.getIRI()+" -> "+superconcept.getIRI();
         start();
     }
     public void isSubsumedByFinished(AtomicConcept subconcept,AtomicConcept superconcept,boolean result) {
-        doStatistics();
+        m_testResult=result;
+        doStatistics(TestType.SUBSUMPTION);
     }
     public void isABoxSatisfiableStarted() {
     	m_overallNumberOfABoxSatTests++;
+    	m_testDescription="ABox sat test";
         start();
     }
     public void isABoxSatisfiableFinished(boolean result) {
-        doStatistics();
+        m_testResult=result;
+        doStatistics(TestType.ABOXSATISFIABILITY);
     }
     public void isInstanceOfStarted(AtomicConcept concept,Individual individual) {
     	m_overallNumberOfInstanceOfTests++;
+    	m_testDescription=concept.getIRI()+"("+individual.getIRI()+")";
         start();
     }
     public void isInstanceOfFinished(AtomicConcept concept,Individual individual,boolean result) {
-        doStatistics();
+        m_testResult=result;
+        doStatistics(TestType.INSTANCEOF);
     }
     public void saturateFinished(boolean modelFound) {
     	if (!modelFound) m_overallNumberOfClashes++;
@@ -96,8 +112,9 @@ public class CountingMonitor extends TableauMonitorAdapter {
     public void blockingValidationFinished() {
     	m_validationTime+=(System.currentTimeMillis()-m_validationStartTime);
     }
-    public void doStatistics() {
+    public void doStatistics(TestType type) {
         m_time=System.currentTimeMillis()-m_problemStartTime;
+        m_testsRecords.add(new TestRecord(type, m_time, m_testDescription, m_testResult));
         m_overallTime+=m_time;
         m_overallValidationTime+=m_validationTime;
         m_overallNumberOfBlockingValidations+=m_numberOfBlockingValidations;
@@ -105,7 +122,23 @@ public class CountingMonitor extends TableauMonitorAdapter {
         m_numberOfNodes=m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes();
         m_overallNumberOfNodes+=m_numberOfNodes;
     }
-    
+    public List<TestRecord> getTimeSortedTestRecords(int limit) {
+        return getTimeSortedTestRecords(limit,null);
+    }
+    public List<TestRecord> getTimeSortedTestRecords(int limit, TestType typeFilter) {
+        List<TestRecord> filteredRecords;
+        if (typeFilter==null) {
+            filteredRecords=m_testsRecords;
+        } else {
+            filteredRecords=new ArrayList<TestRecord>(); 
+            for (TestRecord tr : m_testsRecords) {
+                if (tr.m_type==typeFilter) filteredRecords.add(tr);
+            }
+        }
+        Collections.sort(filteredRecords);
+        if (limit>filteredRecords.size()) limit=filteredRecords.size();
+        return filteredRecords.subList(0, limit);
+    }
 	public int getNumberOfBacktrackings() {
 		return m_numberOfBacktrackings;
 	}
@@ -120,8 +153,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
 	}
 	public long getValidationTime() {
 		return m_validationTime;
-	}
-	
+	} 
 	public long getOverallTime() {
 		return m_overallTime;
 	}
@@ -154,5 +186,61 @@ public class CountingMonitor extends TableauMonitorAdapter {
 	}
 	public int getOverallNumberOfBlockingValidations() {
 		return m_overallNumberOfBlockingValidations;
+	}
+	public static class TestRecord implements Comparable<TestRecord> {
+	    public static enum TestType {
+	        SATISFIABILITY,
+	        SUBSUMPTION, 
+	        ABOXSATISFIABILITY, 
+	        INSTANCEOF
+	    }
+	    protected final TestType m_type;
+	    protected final long m_testTime;
+	    protected final String m_testDescription;
+	    protected final boolean m_testResult;
+	    
+	    public TestRecord(TestType type, long testTime, String testDescription, boolean result) {
+	        m_type=type;
+	        m_testTime=testTime;
+	        m_testDescription=testDescription;
+	        m_testResult=result;
+	    }
+        public int compareTo(TestRecord that) {
+            if (this==that) return 0;
+            int result=((Long)that.m_testTime).compareTo(m_testTime);
+            if (result!=0) return result;
+            else 
+                result=this.m_type.compareTo(that.m_type);
+            if (result!=0) return result;
+            else return this.m_testDescription.compareToIgnoreCase(that.m_testDescription);
+        }
+        public TestType getTestType() {
+            return m_type;
+        }
+        public long getTestTime() {
+            return m_testTime;
+        }
+        public String getTestDescription() {
+            return m_testDescription;
+        }
+        public boolean getTestResult() {
+            return m_testResult;
+        }
+        public String toString() {
+            return m_testTime+" ms"+(m_testTime>1000?" ("+millisToHoursMinutesSecondsString(m_testTime)+")":"")+" for "+m_testDescription+" (result: "+m_testResult+")";
+        }
+        public String millisToHoursMinutesSecondsString(long millis) {
+            long time=millis/1000;
+            long ms=time%1000;
+            String timeStr=String.format(String.format("%%0%dd", 3), ms)+"ms";
+            String format=String.format("%%0%dd", 2);
+            long secs=time%60;
+            if (secs>0) timeStr=String.format(format, secs)+"s"+timeStr;
+            long mins=(time%3600)/60;
+            if (mins>0) timeStr=String.format(format, mins)+"m"+timeStr;
+            long hours=time/3600;  
+            if (hours>0) timeStr=String.format(format, hours)+"h"+timeStr;
+            return timeStr;  
+        }
 	}
 }
