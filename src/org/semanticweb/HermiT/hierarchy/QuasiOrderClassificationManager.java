@@ -33,7 +33,6 @@ import org.semanticweb.HermiT.graph.Graph;
 import org.semanticweb.HermiT.hierarchy.DeterministicClassificationManager.GraphNode;
 import org.semanticweb.HermiT.hierarchy.StandardClassificationManager.Relation;
 import org.semanticweb.HermiT.model.AtomicConcept;
-import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DLPredicate;
@@ -46,7 +45,7 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
     protected final DLOntology m_dlOntology;
     protected final Graph<AtomicConcept> m_knownSubsumptions = new Graph<AtomicConcept>();
     protected final Graph<AtomicConcept> m_possibleSubsumptions = new Graph<AtomicConcept>();
-    
+
     public QuasiOrderClassificationManager(Reasoner reasoner, DLOntology dlOntology) {
     	m_tableau = reasoner.getTableau();
         m_dlOntology = dlOntology;
@@ -66,7 +65,7 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
     public Hierarchy<AtomicConcept> classify(ProgressMonitor<AtomicConcept> progressMonitor,AtomicConcept topElement,AtomicConcept bottomElement,final Set<AtomicConcept> elements) {
     	if (m_tableau.isSubsumedBy(topElement,bottomElement))
 			return Hierarchy.emptyHierarchy(elements,topElement,bottomElement);
-        
+
         Relation<AtomicConcept> relation = new Relation<AtomicConcept>() {
         	public boolean doesSubsume(AtomicConcept parent,AtomicConcept child) {
         		Set<AtomicConcept> allKnownSubsumers = getKnownSubsumers( child );
@@ -91,7 +90,7 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
 
         updateSubsumptionsUsingLeafNodeStrategy( elements, topElement, bottomElement );
 
-        
+
         //Unlike Rob's paper our set of possible subsumptions P would only keep unknown possible subsumptions and not known subsumptions as well.
         Set<AtomicConcept> unclassifiedElements = new HashSet<AtomicConcept>( );
         for( AtomicConcept element : elements ){
@@ -104,10 +103,10 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
         	}
     		progressMonitor.elementClassified( element );
         }
-        
+
         Set<AtomicConcept> classifiedElements = new HashSet<AtomicConcept>();
         while( !unclassifiedElements.isEmpty() ){
-        	
+
         	AtomicConcept unclassifiedElement = null;
         	for( AtomicConcept element : unclassifiedElements ){
     			m_possibleSubsumptions.getSuccessors( element ).removeAll( getKnownSubsumers( element ) );
@@ -121,11 +120,11 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
         	unclassifiedElements.removeAll( classifiedElements );
         	if( unclassifiedElements.isEmpty() )
         		break;
-        	
+
         	Hierarchy<AtomicConcept> smallHierarchy = buildSmallHierarchy( topElement , bottomElement , m_possibleSubsumptions.getSuccessors( unclassifiedElement ) );
-        	
+
         	checkUnknownSubsumersUsingEnhancedTraversal( hierarchyRelation, smallHierarchy.getTopNode(), unclassifiedElement );
-        	
+
         	m_possibleSubsumptions.getSuccessors( unclassifiedElement ).clear();
         }
  		return buildTransitivelyReducedHierarchy(topElement , bottomElement , m_knownSubsumptions );
@@ -148,11 +147,11 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
 
    		Set<HierarchyNode<AtomicConcept>> leafNodes = hierarchy.getBottomNode().getParentNodes();
 		for( HierarchyNode<AtomicConcept> leafNode : leafNodes ){
-			
+
 			AtomicConcept leafNodeElement = leafNode.getRepresentative();
 			if( !m_possibleSubsumptions.getSuccessors( leafNodeElement ).isEmpty() || isUnsatisfiable( leafNodeElement ) )
 				continue;
-			
+
 			getKnownSubsumersForConcept( leafNodeElement );
 			//If the leaf was unsatisfable go up to find satisfiable parents. Unsatisfiable parent information can be propagated downwards.
 			if( isUnsatisfiable( leafNodeElement ) ){
@@ -274,7 +273,7 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
     private void updateKnownSubsumptionsUsingToldSubsumers(DLOntology dlOntology) {
 		for( DLClause dlClause : dlOntology.getDLClauses() )
 			if (dlClause.getHeadLength() == 1 && dlClause.getBodyLength() == 1 ) {
-				DLPredicate headPredicate = dlClause.getHeadAtom( 0 ).getDLPredicate(); 
+				DLPredicate headPredicate = dlClause.getHeadAtom( 0 ).getDLPredicate();
 				DLPredicate bodyPredicate = dlClause.getBodyAtom( 0 ).getDLPredicate();
 				if( headPredicate instanceof AtomicConcept && bodyPredicate instanceof AtomicConcept){
 					AtomicConcept headConcept = (AtomicConcept)headPredicate;
@@ -320,7 +319,7 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
 	            return true;
 	        }
 		}
-        return false;		
+        return false;
 	}
 	private Set<AtomicConcept> getKnownSubsumers(AtomicConcept child) {
 		return m_knownSubsumptions.getReachableSuccessors( child );
