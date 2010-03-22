@@ -17,6 +17,7 @@
 */
 package org.semanticweb.HermiT.monitor;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -187,8 +188,9 @@ public class CountingMonitor extends TableauMonitorAdapter {
 	public int getOverallNumberOfBlockingValidations() {
 		return m_overallNumberOfBlockingValidations;
 	}
-	public static class TestRecord implements Comparable<TestRecord> {
-	    public static enum TestType {
+	public static class TestRecord implements Comparable<TestRecord>, Serializable {
+        private static final long serialVersionUID = -3815493500625020183L;
+        public static enum TestType {
 	        SATISFIABILITY,
 	        SUBSUMPTION, 
 	        ABOXSATISFIABILITY, 

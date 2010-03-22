@@ -165,7 +165,7 @@ public class Reasoner implements OWLReasoner,Serializable {
     public Reasoner(Configuration configuration) {
         m_configuration=configuration;
         m_interruptFlag=new InterruptFlag(configuration.individualTaskTimeout);
-        m_progressMonitor=null;
+        m_progressMonitor=configuration.reasonerProgressMonitor;
         if (m_dlOntology!=null || m_tableau!=null)
             dispose();
     }
@@ -179,7 +179,7 @@ public class Reasoner implements OWLReasoner,Serializable {
      *            - the ontology that should be loaded by the reasoner
      */
     public Reasoner(OWLOntologyManager ontologyManger,OWLOntology ontology) {
-        this(new Configuration(),ontologyManger,ontology,(Set<DescriptionGraph>)null,null);
+        this(new Configuration(),ontologyManger,ontology,(Set<DescriptionGraph>)null);
     }
 
     /**
@@ -193,23 +193,7 @@ public class Reasoner implements OWLReasoner,Serializable {
      *            - the ontology that should be loaded by the reasoner
      */
     public Reasoner(Configuration configuration,OWLOntologyManager ontologyManger,OWLOntology ontology) {
-        this(configuration,ontologyManger,ontology,(Set<DescriptionGraph>)null,null);
-    }
-
-    /**
-     * Creates a new reasoner object with the parameters for blocking, expansion strategy etc as specified in the given configuration object. A default configuration can be obtained by just passing new Configuration(). Then the given manager is used to find all required imports for the given ontology and the ontology with the imports is loaded into the reasoner and the data factory of the manager is used to create fresh concepts during the preprocessing phase if necessary.
-     *
-     * @param configuration
-     *            - a configuration in which parameters can be defined such as the blocking strategy to be used etc
-     * @param ontologyManger
-     *            - the manager that will be used to determine the required imports for the given ontology
-     * @param ontology
-     *            - the ontology that should be loaded by the reasoner
-     * @param progressMonitor
-     *            - the progress monitor that is attached to the reasoner to display progress of the classification, if null no monitor is used
-     */
-    public Reasoner(Configuration configuration,OWLOntologyManager ontologyManger,OWLOntology ontology,ReasonerProgressMonitor progressMonitor) {
-        this(configuration,ontologyManger,ontology,(Set<DescriptionGraph>)null,progressMonitor);
+        this(configuration,ontologyManger,ontology,(Set<DescriptionGraph>)null);
     }
 
     /**
@@ -223,13 +207,11 @@ public class Reasoner implements OWLReasoner,Serializable {
      *            - the ontology that should be loaded by the reasoner
      * @param descriptionGraphs
      *            - a set of description graphs
-     * @param progressMonitor
-     *            - the progress monitor that is attached to the reasoner to display progress of the classification, if null no monitor is used
      */
-    public Reasoner(Configuration configuration,OWLOntologyManager ontologyManager,OWLOntology ontology,Set<DescriptionGraph> descriptionGraphs,ReasonerProgressMonitor progressMonitor) {
+    public Reasoner(Configuration configuration,OWLOntologyManager ontologyManager,OWLOntology ontology,Set<DescriptionGraph> descriptionGraphs) {
         m_configuration=configuration;
         m_interruptFlag=new InterruptFlag(configuration.individualTaskTimeout);
-        m_progressMonitor=progressMonitor;
+        m_progressMonitor=configuration.reasonerProgressMonitor;
         loadOntology(ontologyManager,ontology,descriptionGraphs);
     }
 
@@ -244,7 +226,7 @@ public class Reasoner implements OWLReasoner,Serializable {
     public Reasoner(Configuration configuration,DLOntology dlOntology) {
         m_configuration=configuration;
         m_interruptFlag=new InterruptFlag(configuration.individualTaskTimeout);
-        m_progressMonitor=null;
+        m_progressMonitor=configuration.reasonerProgressMonitor;
         loadDLOntology(dlOntology);
     }
 
@@ -2006,7 +1988,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         }
         @SuppressWarnings("serial")
         protected OWLReasoner createHermiTOWLReasoner(OWLOntology ontology,Configuration configuration) {
-            Reasoner hermit=new Reasoner(configuration,ontology.getOWLOntologyManager(),ontology,configuration.reasonerProgressMonitor) {
+            Reasoner hermit=new Reasoner(configuration,ontology.getOWLOntologyManager(),ontology) {
                 protected OWLOntology m_rootOntology=null;
                 protected boolean changed=false;
 
