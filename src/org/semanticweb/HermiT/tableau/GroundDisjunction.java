@@ -1,32 +1,30 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
 package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
-import java.util.Arrays;
 
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.model.AnnotatedEquality;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.Equality;
-import org.semanticweb.HermiT.tableau.Disjunction.IndexWithPunishFactor;
 
-public class GroundDisjunction implements Serializable {
+public final class GroundDisjunction implements Serializable {
     private static final long serialVersionUID=6245673952732442673L;
 
     protected final Disjunction m_disjunction;
@@ -37,9 +35,9 @@ public class GroundDisjunction implements Serializable {
     protected PermanentDependencySet m_dependencySet;
     protected GroundDisjunction m_previousGroundDisjunction;
     protected GroundDisjunction m_nextGroundDisjunction;
-    
-    public GroundDisjunction(Tableau tableau,DLPredicate[] dlPredicates,int[] disjunctStart,Node[] arguments,boolean[] isCore,DependencySet dependencySet) {
-        m_disjunction=Disjunction.create(dlPredicates);
+
+    public GroundDisjunction(Tableau tableau,Disjunction disjunction,int[] disjunctStart,Node[] arguments,boolean[] isCore,DependencySet dependencySet) {
+        m_disjunction=disjunction;
         m_disjunctStart=disjunctStart;
         m_arguments=arguments;
         m_isCore=isCore;
@@ -72,28 +70,8 @@ public class GroundDisjunction implements Serializable {
     public DependencySet getDependencySet() {
         return m_dependencySet;
     }
-    public int getLeastPunishedUntriedIndex() {
-        return m_disjunction.m_indexesWithPunishFactor[0].m_index;
-    }
-    public int getLeastPunishedUntriedIndex(boolean[] m_disjunctTried) {
-        assert m_disjunctTried.length==m_disjunction.m_indexesWithPunishFactor.length;
-        int leastPunishedUntriedIndex;
-        for (int i=0;i<m_disjunction.m_indexesWithPunishFactor.length;i++) {
-            leastPunishedUntriedIndex=m_disjunction.m_indexesWithPunishFactor[i].m_index;
-            if (!m_disjunctTried[leastPunishedUntriedIndex]) 
-                return leastPunishedUntriedIndex;
-        }
-        assert false;
-        return 0;
-    }
-    public void punishDisjunt(int disjunctIndex) {
-        for (IndexWithPunishFactor indexWithPunishFactor : m_disjunction.m_indexesWithPunishFactor) {
-            if (indexWithPunishFactor.m_index==disjunctIndex) {
-                indexWithPunishFactor.increasePunishment();
-                break;
-            }
-        }
-        Arrays.sort(m_disjunction.m_indexesWithPunishFactor);
+    public Disjunction getDisjunction() {
+        return m_disjunction;
     }
     public boolean isPruned() {
         for (int argumentIndex=m_arguments.length-1;argumentIndex>=0;--argumentIndex)
@@ -101,7 +79,7 @@ public class GroundDisjunction implements Serializable {
                 return true;
         return false;
     }
-    
+
     @SuppressWarnings("fallthrough")
     public boolean isSatisfied(Tableau tableau) {
         ExtensionManager extensionManager=tableau.getExtensionManager();

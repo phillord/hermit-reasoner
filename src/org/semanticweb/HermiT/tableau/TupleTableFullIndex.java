@@ -19,7 +19,7 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 
-public class TupleTableFullIndex implements Serializable {
+public final class TupleTableFullIndex implements Serializable {
     private static final long serialVersionUID=5006873858554891684L;
 
     protected static final int BUCKET_OFFSET=1;

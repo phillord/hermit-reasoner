@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -19,23 +19,24 @@ package org.semanticweb.HermiT.tableau;
 
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.model.DLPredicate;
-import org.semanticweb.HermiT.model.InterningManager;
 
 /**
  * This class is used to create sets of various types. It ensures that each distinct set exists only once,
- * thus allowing sets to be compared with ==. 
+ * thus allowing sets to be compared with ==.
  */
-public class Disjunction {
-    
+public final class Disjunction {
     protected final DLPredicate[] m_dlPredicates;
-    protected final IndexWithPunishFactor[] m_indexesWithPunishFactor;
-    
-    protected Disjunction(DLPredicate[] dlPredicates) {
+    protected final int m_hashCode;
+    protected final DisjunctIndexWithBacktrackings[] m_disjunctIndexesWithBacktrackings;
+    protected Disjunction m_nextEntry;
+
+    protected Disjunction(DLPredicate[] dlPredicates,int hashCode,Disjunction nextEntry) {
         m_dlPredicates=dlPredicates;
-        m_indexesWithPunishFactor=new IndexWithPunishFactor[dlPredicates.length];
-        for (int i=0;i<dlPredicates.length;i++) {
-            m_indexesWithPunishFactor[i]=new IndexWithPunishFactor(i);
-        }
+        m_hashCode=hashCode;
+        m_nextEntry=nextEntry;
+        m_disjunctIndexesWithBacktrackings=new DisjunctIndexWithBacktrackings[dlPredicates.length];
+        for (int i=0;i<dlPredicates.length;i++)
+            m_disjunctIndexesWithBacktrackings[i]=new DisjunctIndexWithBacktrackings(i);
     }
     public DLPredicate[] getDisjuncts() {
         return m_dlPredicates;
@@ -43,68 +44,74 @@ public class Disjunction {
     public int getNumberOfDisjuncts() {
         return m_dlPredicates.length;
     }
+    public DLPredicate getDisjunct(int disjunctIndex) {
+        return m_dlPredicates[disjunctIndex];
+    }
+    public boolean isEqual(DLPredicate[] dlPredicates) {
+        if (m_dlPredicates.length!=dlPredicates.length)
+            return false;
+        for (int index=m_dlPredicates.length-1;index>=0;--index)
+            if (!m_dlPredicates[index].equals(dlPredicates[index]))
+                return false;
+        return true;
+    }
+    public int getDisjunctIndexWithLeastBacktrackings() {
+        return m_disjunctIndexesWithBacktrackings[0].m_disjunctIndex;
+    }
+    public int getDisjunctIndexWithLeastBacktrackings(boolean[] triedDisjuncts) {
+        assert triedDisjuncts.length==m_disjunctIndexesWithBacktrackings.length;
+        int leastPunishedUntriedIndex;
+        for (int i=0;i<m_disjunctIndexesWithBacktrackings.length;i++) {
+            leastPunishedUntriedIndex=m_disjunctIndexesWithBacktrackings[i].m_disjunctIndex;
+            if (!triedDisjuncts[leastPunishedUntriedIndex])
+                return leastPunishedUntriedIndex;
+        }
+        throw new IllegalStateException("Internal error: invalid untried index.");
+    }
+    public void increaseNumberOfBacktrackings(int disjunctIndex) {
+        for (int index=0;index<m_disjunctIndexesWithBacktrackings.length;index++) {
+            DisjunctIndexWithBacktrackings disjunctIndexWithBacktrackings=m_disjunctIndexesWithBacktrackings[index];
+            if (disjunctIndexWithBacktrackings.m_disjunctIndex==disjunctIndex) {
+                disjunctIndexWithBacktrackings.m_numberOfBacktrackings++;
+                int currentIndex=index;
+                int nextIndex=currentIndex+1;
+                while (nextIndex<m_disjunctIndexesWithBacktrackings.length && disjunctIndexWithBacktrackings.m_numberOfBacktrackings>m_disjunctIndexesWithBacktrackings[nextIndex].m_numberOfBacktrackings) {
+                    m_disjunctIndexesWithBacktrackings[currentIndex]=m_disjunctIndexesWithBacktrackings[nextIndex];
+                    m_disjunctIndexesWithBacktrackings[nextIndex]=disjunctIndexWithBacktrackings;
+                    currentIndex=nextIndex;
+                    nextIndex++;
+                }
+                break;
+            }
+        }
+    }
     public String toString(Prefixes prefixes) {
-        String s="";
-        for (int i=0;i<m_dlPredicates.length;i++) {
-        	if (i>0) s+=" \\/ ";
-        	if (prefixes==null)
-        		s+=m_dlPredicates[i];
-        	else 
-        		s+=m_dlPredicates[i].toString(prefixes);
-        	s+=" (";
-            for (IndexWithPunishFactor indexWithPunishFactor : m_indexesWithPunishFactor) {
-            	if (indexWithPunishFactor.m_index==i) {
-            		s+=indexWithPunishFactor.m_punishFactor;
+        StringBuffer buffer=new StringBuffer();
+        for (int disjunctIndex=0;disjunctIndex<m_dlPredicates.length;disjunctIndex++) {
+        	if (disjunctIndex>0)
+        	    buffer.append(" \\/ ");
+    	    buffer.append(m_dlPredicates[disjunctIndex].toString(prefixes));
+    	    buffer.append(" (");
+            for (DisjunctIndexWithBacktrackings disjunctIndexWithBacktrackings : m_disjunctIndexesWithBacktrackings) {
+            	if (disjunctIndexWithBacktrackings.m_disjunctIndex==disjunctIndex) {
+            	    buffer.append(disjunctIndexWithBacktrackings.m_numberOfBacktrackings);
             		break;
             	}
             }
-            s+=")";
+            buffer.append(")");
         }
-        return s;
+        return buffer.toString();
     }
     public String toString() {
-        return toString(null);
+        return toString(Prefixes.STANDARD_PREFIXES);
     }
-    protected static InterningManager<Disjunction> s_interningManager=new InterningManager<Disjunction>() {
-        protected boolean equal(Disjunction disjunction1,Disjunction disjunction2) {
-            if (disjunction1.m_dlPredicates.length!=disjunction2.m_dlPredicates.length)
-                return false;
-            for (int index=disjunction1.m_dlPredicates.length-1;index>=0;--index)
-                if (disjunction1.m_dlPredicates[index]!=disjunction2.m_dlPredicates[index]) return false;
-            return true;
+
+    protected static class DisjunctIndexWithBacktrackings {
+        protected final int m_disjunctIndex;
+        protected int m_numberOfBacktrackings;
+
+        public DisjunctIndexWithBacktrackings(int index) {
+            m_disjunctIndex=index;
         }
-        protected int getHashCode(Disjunction disjunction) {
-            int hashCode=0;
-            for (int i=0;i<disjunction.m_dlPredicates.length;i++) {
-                hashCode+=disjunction.m_dlPredicates[i].hashCode();
-            }
-            return hashCode;
-        }
-    };
-    
-    public static Disjunction create(DLPredicate[] dlPredicates) {
-        return s_interningManager.intern(new Disjunction(dlPredicates));
     }
-    
-    public static class IndexWithPunishFactor implements Comparable<IndexWithPunishFactor> {
-        protected int m_punishFactor;
-        protected int m_index;
-        
-        public IndexWithPunishFactor(int index) {
-            m_index=index;
-            m_punishFactor=0;
-        }
-        public void increasePunishment() {
-            m_punishFactor++;
-        }
-        public int compareTo(IndexWithPunishFactor indexWithPunishFactor) {
-            if (indexWithPunishFactor==this) return 0;
-            int result=this.m_punishFactor-indexWithPunishFactor.m_punishFactor;
-            if (result!=0) return result;
-            return (this.m_index-indexWithPunishFactor.m_index);
-        }
-        public String toString() {
-            return m_index+" (punishFactor "+m_punishFactor+")";
-        }
-    }  
 }

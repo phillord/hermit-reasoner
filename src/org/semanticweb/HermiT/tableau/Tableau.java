@@ -60,6 +60,7 @@ public final class Tableau implements Serializable {
     protected final ExistentialExpansionStrategy m_existentialExpansionStrategy;
     protected final DLOntology m_dlOntology;
     protected final DependencySetFactory m_dependencySetFactory;
+    protected final DisjunctionManager m_disjunctionManager;
     protected final ExtensionManager m_extensionManager;
     protected final ClashManager m_clashManager;
     protected final HyperresolutionManager m_hyperresolutionManager;
@@ -98,6 +99,7 @@ public final class Tableau implements Serializable {
         m_existentialExpansionStrategy=existentialsExpansionStrategy;
         m_dlOntology=dlOntology;
         m_dependencySetFactory=new DependencySetFactory();
+        m_disjunctionManager=new DisjunctionManager();
         m_extensionManager=new ExtensionManager(this);
         m_clashManager=new ClashManager(this);
         m_hyperresolutionManager=new HyperresolutionManager(this);
@@ -253,17 +255,17 @@ public final class Tableau implements Serializable {
                 m_firstUnprocessedGroundDisjunction=groundDisjunction.m_previousGroundDisjunction;
                 if (!groundDisjunction.isPruned() && !groundDisjunction.isSatisfied(this)) {
                     DependencySet dependencySet=groundDisjunction.getDependencySet();
-                    int leastPunishedDisjunctIndex=groundDisjunction.getLeastPunishedUntriedIndex();
+                    int disjunctIndexWithLeastBacktrackings=groundDisjunction.getDisjunction().getDisjunctIndexWithLeastBacktrackings();
                     if (groundDisjunction.getNumberOfDisjuncts()>1) {
-                        BranchingPoint branchingPoint=new DisjunctionBranchingPoint(this,groundDisjunction,leastPunishedDisjunctIndex);
+                        BranchingPoint branchingPoint=new DisjunctionBranchingPoint(this,groundDisjunction,disjunctIndexWithLeastBacktrackings);
                         pushBranchingPoint(branchingPoint);
                         dependencySet=m_dependencySetFactory.addBranchingPoint(dependencySet,branchingPoint.getLevel());
                     }
                     if (m_tableauMonitor!=null)
-                        m_tableauMonitor.disjunctProcessingStarted(groundDisjunction,leastPunishedDisjunctIndex);
-                    groundDisjunction.addDisjunctToTableau(this,leastPunishedDisjunctIndex,dependencySet);
+                        m_tableauMonitor.disjunctProcessingStarted(groundDisjunction,disjunctIndexWithLeastBacktrackings);
+                    groundDisjunction.addDisjunctToTableau(this,disjunctIndexWithLeastBacktrackings,dependencySet);
                     if (m_tableauMonitor!=null) {
-                        m_tableauMonitor.disjunctProcessingFinished(groundDisjunction,leastPunishedDisjunctIndex);
+                        m_tableauMonitor.disjunctProcessingFinished(groundDisjunction,disjunctIndexWithLeastBacktrackings);
                         m_tableauMonitor.processGroundDisjunctionFinished(groundDisjunction);
                     }
                     return true;

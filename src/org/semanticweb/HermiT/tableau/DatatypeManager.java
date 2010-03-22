@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -34,7 +34,7 @@ import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.NegationDataRange;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 
-public class DatatypeManager implements Serializable {
+public final class DatatypeManager implements Serializable {
     private static final long serialVersionUID=-5304869484553471737L;
 
     protected final InterruptFlag m_interruptFlag;
@@ -50,7 +50,7 @@ public class DatatypeManager implements Serializable {
     protected final List<DVariable> m_auxiliaryVariableList;
     protected final UnionDependencySet m_unionDependencySet;
     protected final boolean[] m_newVariableAdded;
-    
+
     public DatatypeManager(Tableau tableau) {
         m_interruptFlag=tableau.m_interruptFlag;
         m_tableauMonitor=tableau.m_tableauMonitor;
@@ -154,7 +154,7 @@ public class DatatypeManager implements Serializable {
             Node reachedNode=m_auxiliaryNodeList.remove(m_auxiliaryNodeList.size()-1);
             DVariable reachedVariable=m_conjunction.activateVariable(reachedNode,m_newVariableAdded);
             // Concrete root nodes are assigned a particular value, so they act as "breakers" in the conjunction:
-            // the nodes that are unequal to them can be analyzed independently. 
+            // the nodes that are unequal to them can be analyzed independently.
             if (reachedNode.getNodeType()!=NodeType.ROOT_CONSTANT_NODE) {
                 // Look for all inequalities where reachedNode occurs in the first position.
                 m_inequality01Retrieval.getBindingsBuffer()[0]=Inequality.INSTANCE;
@@ -480,7 +480,7 @@ public class DatatypeManager implements Serializable {
             m_unionDependencySet.addConstituent(dependencySet);
         }
     }
-    
+
     public static class DConjunction implements Serializable {
         private static final long serialVersionUID = 3597740301361593691L;
         protected final List<DVariable> m_unusedVariables;
@@ -489,7 +489,7 @@ public class DatatypeManager implements Serializable {
         protected DVariable[] m_buckets;
         protected int m_numberOfEntries;
         protected int m_resizeThreshold;
-        
+
         public DConjunction() {
             m_unusedVariables=new ArrayList<DVariable>();
             m_usedVariables=new ArrayList<DVariable>();
@@ -615,7 +615,7 @@ public class DatatypeManager implements Serializable {
             return buffer.toString();
         }
     }
-    
+
     public static class DVariable implements Serializable {
         private static final long serialVersionUID = -2490195841140286089L;
         protected final List<DataValueEnumeration> m_positiveDataValueEnumerations;
@@ -632,7 +632,7 @@ public class DatatypeManager implements Serializable {
         protected DVariable m_nextEntry;
         protected ValueSpaceSubset m_valueSpaceSubset;
         protected Object m_dataValue;
-        
+
         protected DVariable() {
             m_positiveDataValueEnumerations=new ArrayList<DataValueEnumeration>();
             m_negativeDataValueEnumerations=new ArrayList<DataValueEnumeration>();
@@ -754,7 +754,7 @@ public class DatatypeManager implements Serializable {
         hashCode^=(hashCode >>> 10);
         return hashCode & (tableLength-1);
     }
-    
+
     protected static class SmallestEnumerationFirst implements Comparator<DVariable>, Serializable {
         private static final long serialVersionUID = 8838838641444833249L;
         public static final Comparator<DVariable> INSTANCE=new SmallestEnumerationFirst();
@@ -762,6 +762,6 @@ public class DatatypeManager implements Serializable {
         public int compare(DVariable o1,DVariable o2) {
             return o1.m_explicitDataValues.size()-o2.m_explicitDataValues.size();
         }
-        
+
     }
 }
