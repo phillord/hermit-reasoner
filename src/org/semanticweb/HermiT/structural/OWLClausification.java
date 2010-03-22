@@ -18,10 +18,8 @@
 package org.semanticweb.HermiT.structural;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -320,7 +318,6 @@ public class OWLClausification {
                 }
                 Atom[] headAtoms=new Atom[heads.size()];
                 heads.toArray(headAtoms);
-                Arrays.sort(headAtoms,HeadComparator.INSTANCE);
                 Atom[] bodyAtoms=new Atom[bodies.size()];
                 bodies.toArray(bodyAtoms);
                 dlClauses.add(DLClause.create(headAtoms,bodyAtoms,isGraphRule ? ClauseType.GRAPH_RULE : ClauseType.SWRL_RULE));
@@ -505,7 +502,6 @@ public class OWLClausification {
         protected DLClause getDLClause() {
             Atom[] headAtoms=new Atom[m_headAtoms.size()];
             m_headAtoms.toArray(headAtoms);
-            Arrays.sort(headAtoms,HeadComparator.INSTANCE);
             Atom[] bodyAtoms=new Atom[m_bodyAtoms.size()];
             m_bodyAtoms.toArray(bodyAtoms);
             DLClause dlClause=DLClause.create(headAtoms,bodyAtoms,ClauseType.CONCEPT_INCLUSION);
@@ -803,7 +799,6 @@ public class OWLClausification {
         protected DLClause getDLClause() {
             Atom[] headAtoms=new Atom[m_headAtoms.size()];
             m_headAtoms.toArray(headAtoms);
-            Arrays.sort(headAtoms,HeadComparator.INSTANCE);
             Atom[] bodyAtoms=new Atom[m_bodyAtoms.size()];
             m_bodyAtoms.toArray(bodyAtoms);
             DLClause dlClause=DLClause.create(headAtoms,bodyAtoms,ClauseType.DATA_RANGE_INCLUSION);
@@ -1230,24 +1225,6 @@ public class OWLClausification {
             atom.getSecondArgument().accept(this);
             Variable var2=m_lastVariable;
             m_lastAtom=Atom.create(Inequality.INSTANCE,var1,var2);
-        }
-    }
-
-    protected static class HeadComparator implements Comparator<Atom> {
-        public static final HeadComparator INSTANCE=new HeadComparator();
-
-        public int compare(Atom o1,Atom o2) {
-            int type1;
-            if (o1.getDLPredicate() instanceof AtLeastConcept)
-                type1=2;
-            else
-                type1=1;
-            int type2;
-            if (o2.getDLPredicate() instanceof AtLeastConcept)
-                type2=2;
-            else
-                type2=1;
-            return type1-type2;
         }
     }
 }

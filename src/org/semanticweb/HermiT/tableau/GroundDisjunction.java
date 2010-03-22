@@ -31,7 +31,6 @@ public final class GroundDisjunction implements Serializable {
     protected final int[] m_disjunctStart;
     protected final Node[] m_arguments;
     protected final boolean[] m_isCore;
-    protected final boolean m_useDisjunctionLearning;
     protected PermanentDependencySet m_dependencySet;
     protected GroundDisjunction m_previousGroundDisjunction;
     protected GroundDisjunction m_nextGroundDisjunction;
@@ -43,7 +42,6 @@ public final class GroundDisjunction implements Serializable {
         m_isCore=isCore;
         m_dependencySet=tableau.m_dependencySetFactory.getPermanent(dependencySet);
         tableau.m_dependencySetFactory.addUsage(m_dependencySet);
-        m_useDisjunctionLearning=tableau.m_useDisjunctionLearning;
     }
     public GroundDisjunction getPreviousGroundDisjunction() {
         return m_previousGroundDisjunction;
