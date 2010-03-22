@@ -18,7 +18,7 @@
 package org.semanticweb.HermiT.tableau;
 
 import org.semanticweb.HermiT.Prefixes;
-import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.DLPredicate;
 
 /**
@@ -29,7 +29,7 @@ public final class Disjunction {
     protected final DLPredicate[] m_dlPredicates;
     protected final int m_hashCode;
     protected final DisjunctIndexWithBacktrackings[] m_disjunctIndexesWithBacktrackings;
-    protected final int m_firstNonAtomicIndex;
+    protected final int m_firstAtLeastIndex;
     protected Disjunction m_nextEntry;
 
     protected Disjunction(DLPredicate[] dlPredicates,int hashCode,Disjunction nextEntry) {
@@ -41,18 +41,18 @@ public final class Disjunction {
         // that it is usually better to try atomics first. Therefore, we initialize
         // m_disjunctIndexesWithBacktrackings such that atomic disjuncts are placed first.
         // Later on we will ensure that the disjuncts always remain in that order.
-        int numberOfAtomicDisjuncts=0;
+        int numberOfAtLeastDisjuncts=0;
         for (int index=0;index<dlPredicates.length;index++)
-            if (m_dlPredicates[index] instanceof AtomicConcept)
-                numberOfAtomicDisjuncts++;
-        m_firstNonAtomicIndex=numberOfAtomicDisjuncts;
-        int nextAtomicDisjunct=0;
-        int nextNonAtomicDisjunct=m_firstNonAtomicIndex;
+            if (m_dlPredicates[index] instanceof AtLeastConcept)
+                numberOfAtLeastDisjuncts++;
+        m_firstAtLeastIndex=m_disjunctIndexesWithBacktrackings.length-numberOfAtLeastDisjuncts;
+        int nextNonAtLeastDisjunct=0;
+        int nextAtLeastDisjunct=m_firstAtLeastIndex;
         for (int index=0;index<dlPredicates.length;index++)
-            if (m_dlPredicates[index] instanceof AtomicConcept)
-                m_disjunctIndexesWithBacktrackings[nextAtomicDisjunct++]=new DisjunctIndexWithBacktrackings(index);
+            if (m_dlPredicates[index] instanceof AtLeastConcept)
+                m_disjunctIndexesWithBacktrackings[nextAtLeastDisjunct++]=new DisjunctIndexWithBacktrackings(index);
             else
-                m_disjunctIndexesWithBacktrackings[nextNonAtomicDisjunct++]=new DisjunctIndexWithBacktrackings(index);
+                m_disjunctIndexesWithBacktrackings[nextNonAtLeastDisjunct++]=new DisjunctIndexWithBacktrackings(index);
     }
     public DLPredicate[] getDisjuncts() {
         return m_dlPredicates;
@@ -71,24 +71,18 @@ public final class Disjunction {
                 return false;
         return true;
     }
-    public int getDisjunctIndexWithLeastBacktrackings() {
-        return m_disjunctIndexesWithBacktrackings[0].m_disjunctIndex;
-    }
-    public int getDisjunctIndexWithLeastBacktrackings(boolean[] triedDisjuncts) {
-        assert triedDisjuncts.length==m_disjunctIndexesWithBacktrackings.length;
-        for (int index=0;index<m_disjunctIndexesWithBacktrackings.length;index++) {
-            int disjunctIndex=m_disjunctIndexesWithBacktrackings[index].m_disjunctIndex;
-            if (!triedDisjuncts[disjunctIndex])
-                return disjunctIndex;
-        }
-        throw new IllegalStateException("Internal error: invalid untried index.");
+    public int[] getSortedDisjunctIndexes() {
+        int[] sortedDisjunctIndexes=new int[m_disjunctIndexesWithBacktrackings.length];
+        for (int index=m_disjunctIndexesWithBacktrackings.length-1;index>=0;--index)
+            sortedDisjunctIndexes[index]=m_disjunctIndexesWithBacktrackings[index].m_disjunctIndex;
+        return sortedDisjunctIndexes;
     }
     public void increaseNumberOfBacktrackings(int disjunctIndex) {
         for (int index=0;index<m_disjunctIndexesWithBacktrackings.length;index++) {
             DisjunctIndexWithBacktrackings disjunctIndexWithBacktrackings=m_disjunctIndexesWithBacktrackings[index];
             if (disjunctIndexWithBacktrackings.m_disjunctIndex==disjunctIndex) {
                 disjunctIndexWithBacktrackings.m_numberOfBacktrackings++;
-                int partitionEnd=(index<m_firstNonAtomicIndex ? m_firstNonAtomicIndex : m_disjunctIndexesWithBacktrackings.length);
+                int partitionEnd=(index<m_firstAtLeastIndex ? m_firstAtLeastIndex : m_disjunctIndexesWithBacktrackings.length);
                 int currentIndex=index;
                 int nextIndex=currentIndex+1;
                 while (nextIndex<partitionEnd && disjunctIndexWithBacktrackings.m_numberOfBacktrackings>m_disjunctIndexesWithBacktrackings[nextIndex].m_numberOfBacktrackings) {

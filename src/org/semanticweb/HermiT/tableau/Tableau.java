@@ -254,18 +254,18 @@ public final class Tableau implements Serializable {
                     m_tableauMonitor.processGroundDisjunctionStarted(groundDisjunction);
                 m_firstUnprocessedGroundDisjunction=groundDisjunction.m_previousGroundDisjunction;
                 if (!groundDisjunction.isPruned() && !groundDisjunction.isSatisfied(this)) {
+                    int[] sortedDisjunctIndexes=groundDisjunction.getDisjunction().getSortedDisjunctIndexes();
                     DependencySet dependencySet=groundDisjunction.getDependencySet();
-                    int disjunctIndexWithLeastBacktrackings=groundDisjunction.getDisjunction().getDisjunctIndexWithLeastBacktrackings();
                     if (groundDisjunction.getNumberOfDisjuncts()>1) {
-                        BranchingPoint branchingPoint=new DisjunctionBranchingPoint(this,groundDisjunction,disjunctIndexWithLeastBacktrackings);
+                        BranchingPoint branchingPoint=new DisjunctionBranchingPoint(this,groundDisjunction,sortedDisjunctIndexes);
                         pushBranchingPoint(branchingPoint);
                         dependencySet=m_dependencySetFactory.addBranchingPoint(dependencySet,branchingPoint.getLevel());
                     }
                     if (m_tableauMonitor!=null)
-                        m_tableauMonitor.disjunctProcessingStarted(groundDisjunction,disjunctIndexWithLeastBacktrackings);
-                    groundDisjunction.addDisjunctToTableau(this,disjunctIndexWithLeastBacktrackings,dependencySet);
+                        m_tableauMonitor.disjunctProcessingStarted(groundDisjunction,sortedDisjunctIndexes[0]);
+                    groundDisjunction.addDisjunctToTableau(this,sortedDisjunctIndexes[0],dependencySet);
                     if (m_tableauMonitor!=null) {
-                        m_tableauMonitor.disjunctProcessingFinished(groundDisjunction,disjunctIndexWithLeastBacktrackings);
+                        m_tableauMonitor.disjunctProcessingFinished(groundDisjunction,sortedDisjunctIndexes[0]);
                         m_tableauMonitor.processGroundDisjunctionFinished(groundDisjunction);
                     }
                     return true;

@@ -236,7 +236,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
         bufferChanges=true;
         individualNodeSetPolicy=IndividualNodeSetPolicy.BY_NAME;
         freshEntityPolicy=FreshEntityPolicy.ALLOW;
-        useDisjunctionLearning=true;
+        // useDisjunctionLearning=true;
     }
     protected void setIndividualReuseStrategyReuseAlways(Set<? extends AtomicConcept> concepts) {
         parameters.put("IndividualReuseStrategy.reuseAlways",concepts);
