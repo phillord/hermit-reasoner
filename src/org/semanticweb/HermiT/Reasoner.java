@@ -1233,7 +1233,7 @@ public class Reasoner implements OWLReasoner,Serializable {
                 classify();
             int currentIndividual=0;
             if (m_progressMonitor!=null)
-                m_progressMonitor.reasonerTaskStarted("Computig instances for all classes...");
+                m_progressMonitor.reasonerTaskStarted("Computing instances for all classes...");
             for (Individual individual : m_dlOntology.getAllIndividuals()) {
                 currentIndividual++;
                 Set<HierarchyNode<AtomicConcept>> directSuperConceptNodes=getDirectSuperConceptNodes(individual);

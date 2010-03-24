@@ -78,22 +78,68 @@ public final class Disjunction {
         return sortedDisjunctIndexes;
     }
     public void increaseNumberOfBacktrackings(int disjunctIndex) {
-        for (int index=0;index<m_disjunctIndexesWithBacktrackings.length;index++) {
-            DisjunctIndexWithBacktrackings disjunctIndexWithBacktrackings=m_disjunctIndexesWithBacktrackings[index];
-            if (disjunctIndexWithBacktrackings.m_disjunctIndex==disjunctIndex) {
-                disjunctIndexWithBacktrackings.m_numberOfBacktrackings++;
-                int partitionEnd=(index<m_firstAtLeastIndex ? m_firstAtLeastIndex : m_disjunctIndexesWithBacktrackings.length);
-                int currentIndex=index;
-                int nextIndex=currentIndex+1;
-                while (nextIndex<partitionEnd && disjunctIndexWithBacktrackings.m_numberOfBacktrackings>m_disjunctIndexesWithBacktrackings[nextIndex].m_numberOfBacktrackings) {
-                    m_disjunctIndexesWithBacktrackings[currentIndex]=m_disjunctIndexesWithBacktrackings[nextIndex];
-                    m_disjunctIndexesWithBacktrackings[nextIndex]=disjunctIndexWithBacktrackings;
-                    currentIndex=nextIndex;
-                    nextIndex++;
+        if (!m_disjunctIndexesWithBacktrackings[0].m_stopSwapping) {
+            for (int index=0;index<m_disjunctIndexesWithBacktrackings.length;index++) {
+                DisjunctIndexWithBacktrackings disjunctIndexWithBacktrackings=m_disjunctIndexesWithBacktrackings[index];
+                if (disjunctIndexWithBacktrackings.m_beenBestChoice && disjunctIndexWithBacktrackings.m_beenWorstChoice) {
+                    // freeze - stopSwapping
+                    m_disjunctIndexesWithBacktrackings[0].m_stopSwapping=true;
+                    Prefixes prefixes=new Prefixes();
+                    prefixes.declarePrefix("", "http://oiled.man.example.net/test#");
+                    prefixes.declareSemanticWebPrefixes();
+                    System.out.println("Stopped swapping for: "+this.toString(prefixes));
+                    break;
                 }
-                break;
+                if (disjunctIndexWithBacktrackings.m_disjunctIndex==disjunctIndex) {
+                    disjunctIndexWithBacktrackings.m_numberOfBacktrackings++;
+                    int partitionStart=(index<m_firstAtLeastIndex ? 0 : m_firstAtLeastIndex);
+                    int partitionEnd=(index<m_firstAtLeastIndex ? m_firstAtLeastIndex : m_disjunctIndexesWithBacktrackings.length);
+                    int currentIndex=index;
+                    int nextIndex=currentIndex+1;
+                    while (nextIndex<partitionEnd && disjunctIndexWithBacktrackings.m_numberOfBacktrackings>m_disjunctIndexesWithBacktrackings[nextIndex].m_numberOfBacktrackings) {
+                        m_disjunctIndexesWithBacktrackings[currentIndex]=m_disjunctIndexesWithBacktrackings[nextIndex];
+                        m_disjunctIndexesWithBacktrackings[nextIndex]=disjunctIndexWithBacktrackings;
+                        if (currentIndex==partitionStart)
+                            m_disjunctIndexesWithBacktrackings[currentIndex].m_beenBestChoice=true;
+                        currentIndex=nextIndex;
+                        nextIndex++;
+                    }
+                    if (nextIndex==partitionEnd) 
+                        m_disjunctIndexesWithBacktrackings[currentIndex].m_beenWorstChoice=true;
+                    break;
+                }
             }
         }
+        
+//        Set<String> disjuntStrings=new HashSet<String>();
+//        disjuntStrings.add("<http://oiled.man.example.net/test#C4>");
+//        disjuntStrings.add("<http://oiled.man.example.net/test#C32>");
+//        disjuntStrings.add("<http://oiled.man.example.net/test#C2>");
+//        if (m_dlPredicates.length==3 && disjuntStrings.contains(m_dlPredicates[0].toString()) && disjuntStrings.contains(m_dlPredicates[1].toString()) && disjuntStrings.contains(m_dlPredicates[2].toString())) {
+//            Prefixes prefixes=new Prefixes();
+//            prefixes.declarePrefix("", "http://oiled.man.example.net/test#");
+//            prefixes.declareSemanticWebPrefixes();
+//            try {
+//                for (int i=0;i<m_disjunctIndexesWithBacktrackings.length;i++) {
+//                    if (i > 0) System.out.print(" \\/ ");
+//                    String disjunctStr=m_dlPredicates[m_disjunctIndexesWithBacktrackings[i].m_disjunctIndex].toString(prefixes);
+//                    if (disjunctStr.equals(":C4")) {
+//                        System.err.print(disjunctStr+" ("+m_disjunctIndexesWithBacktrackings[i].m_numberOfBacktrackings+")");
+//                        System.err.flush();
+//                        Thread.sleep(200);
+//                    } else {
+//                        System.out.print(disjunctStr+" ("+m_disjunctIndexesWithBacktrackings[i].m_numberOfBacktrackings+")");
+//                        System.out.flush();
+//                        Thread.sleep(200);
+//                    }
+//                }
+//                System.out.println();
+//                System.out.flush();
+//                Thread.sleep(200);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//        }
     }
     public String toString(Prefixes prefixes) {
         StringBuffer buffer=new StringBuffer();
@@ -117,8 +163,11 @@ public final class Disjunction {
     }
 
     protected static class DisjunctIndexWithBacktrackings {
+        protected boolean m_beenBestChoice;
+        protected boolean m_beenWorstChoice;
         protected final int m_disjunctIndex;
         protected int m_numberOfBacktrackings;
+        protected boolean m_stopSwapping;
 
         public DisjunctIndexWithBacktrackings(int index) {
             m_disjunctIndex=index;

@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.Individual;
+import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.monitor.CountingMonitor.TestRecord.TestType;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 
@@ -72,6 +73,15 @@ public class CountingMonitor extends TableauMonitorAdapter {
     public void isSatisfiableFinished(AtomicConcept atomicConcept,boolean result) {
         m_testResult=result;
         doStatistics(TestType.SATISFIABILITY);
+    }
+    public void isSatisfiableStarted(Role role) {
+        m_overallNumberOfSatTests++;
+        m_testDescription=role.toString();
+        start();
+    }
+    public void isSatisfiableFinished(Role role,boolean result) {
+        m_testResult=result;
+        doStatistics(TestType.PROPERTY_SATISFIABILITY);
     }
     public void isSubsumedByStarted(AtomicConcept subconcept,AtomicConcept superconcept) {
     	m_overallNumberOfSubsumptionTests++;
@@ -188,10 +198,25 @@ public class CountingMonitor extends TableauMonitorAdapter {
 	public int getOverallNumberOfBlockingValidations() {
 		return m_overallNumberOfBlockingValidations;
 	}
+    public static String millisToHoursMinutesSecondsString(long millis) {
+        long time=millis/1000;
+        long ms=time%1000;
+        String timeStr=String.format(String.format("%%0%dd", 3), ms)+"ms";
+        String format=String.format("%%0%dd", 2);
+        long secs=time%60;
+        if (secs>0) timeStr=String.format(format, secs)+"s"+timeStr;
+        long mins=(time%3600)/60;
+        if (mins>0) timeStr=String.format(format, mins)+"m"+timeStr;
+        long hours=time/3600;  
+        if (hours>0) timeStr=String.format(format, hours)+"h"+timeStr;
+        return timeStr;  
+    }
+    
 	public static class TestRecord implements Comparable<TestRecord>, Serializable {
         private static final long serialVersionUID = -3815493500625020183L;
         public static enum TestType {
 	        SATISFIABILITY,
+	        PROPERTY_SATISFIABILITY,
 	        SUBSUMPTION, 
 	        ABOXSATISFIABILITY, 
 	        INSTANCEOF
@@ -229,20 +254,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
             return m_testResult;
         }
         public String toString() {
-            return m_testTime+" ms"+(m_testTime>1000?" ("+millisToHoursMinutesSecondsString(m_testTime)+")":"")+" for "+m_testDescription+" (result: "+m_testResult+")";
-        }
-        public String millisToHoursMinutesSecondsString(long millis) {
-            long time=millis/1000;
-            long ms=time%1000;
-            String timeStr=String.format(String.format("%%0%dd", 3), ms)+"ms";
-            String format=String.format("%%0%dd", 2);
-            long secs=time%60;
-            if (secs>0) timeStr=String.format(format, secs)+"s"+timeStr;
-            long mins=(time%3600)/60;
-            if (mins>0) timeStr=String.format(format, mins)+"m"+timeStr;
-            long hours=time/3600;  
-            if (hours>0) timeStr=String.format(format, hours)+"h"+timeStr;
-            return timeStr;  
+            return m_testTime+" ms"+(m_testTime>1000?" ("+CountingMonitor.millisToHoursMinutesSecondsString(m_testTime)+")":"")+" for "+m_testDescription+" (result: "+m_testResult+")";
         }
 	}
 }

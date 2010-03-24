@@ -21,6 +21,7 @@ import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.Individual;
+import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 
 public class Timer extends TableauMonitorAdapter {
@@ -53,6 +54,15 @@ public class Timer extends TableauMonitorAdapter {
         start();
     }
     public void isSatisfiableFinished(AtomicConcept atomicConcept,boolean result) {
+        m_output.println(result ? "YES" : "NO");
+        doStatistics();
+    }
+    public void isSatisfiableStarted(Role role) {
+        m_output.print("Testing "+role.toString()+" ...");
+        m_output.flush();
+        start();
+    }
+    public void isSatisfiableFinished(Role role,boolean result) {
         m_output.println(result ? "YES" : "NO");
         doStatistics();
     }
