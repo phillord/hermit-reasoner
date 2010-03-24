@@ -105,7 +105,6 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectUnionOf;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLSameIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLStringLiteral;
 import org.semanticweb.owlapi.model.OWLTypedLiteral;
@@ -134,8 +133,8 @@ public class OWLClausification {
     public OWLClausification(Configuration configuration) {
         m_configuration=configuration;
     }
-    public DLOntology clausify(OWLOntologyManager ontologyManager,OWLOntology ontology,Collection<DescriptionGraph> descriptionGraphs) {
-        return clausifyImportClosure(ontologyManager.getOWLDataFactory(),ontology.getOntologyID().getDefaultDocumentIRI()==null ? "urn:hermit:kb" : ontology.getOntologyID().getDefaultDocumentIRI().toString(),ontology.getImportsClosure(),descriptionGraphs);
+    public DLOntology clausify(OWLOntology ontology,Collection<DescriptionGraph> descriptionGraphs) {
+        return clausifyImportClosure(ontology.getOWLOntologyManager().getOWLDataFactory(),ontology.getOntologyID().getDefaultDocumentIRI()==null ? "urn:hermit:kb" : ontology.getOntologyID().getDefaultDocumentIRI().toString(),ontology.getImportsClosure(),descriptionGraphs);
     }
     public DLOntology clausifyImportClosure(OWLDataFactory factory,String ontologyIRI,Collection<OWLOntology> importClosure,Collection<DescriptionGraph> descriptionGraphs) {
         OWLAxioms axioms=new OWLAxioms();

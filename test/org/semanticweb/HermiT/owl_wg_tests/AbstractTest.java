@@ -1,21 +1,21 @@
 /* Copyright 2009 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
-// An update for the tests (all.rdf) should regularly be downloaded to the 
+// An update for the tests (all.rdf) should regularly be downloaded to the
 // ontologies folder from http://wiki.webont.org/exports/
 package org.semanticweb.HermiT.owl_wg_tests;
 
@@ -44,7 +44,7 @@ public abstract class AbstractTest extends TestCase {
     protected OWLOntology m_premiseOntology;
     protected Reasoner m_reasoner;
     protected final PrintWriter output;
-    
+
     public AbstractTest(String name,WGTestDescriptor wgTestDescriptor,PrintWriter output) {
         super(name);
         this.output=output;
@@ -53,7 +53,6 @@ public abstract class AbstractTest extends TestCase {
     protected void setUp() throws Exception {
         m_ontologyManager=OWLManager.createOWLOntologyManager();
         m_premiseOntology=m_wgTestDescriptor.getPremiseOntology(m_ontologyManager);
-        m_reasoner=new Reasoner(getConfiguration());
     }
     protected void tearDown() {
         m_wgTestDescriptor=null;
@@ -71,7 +70,7 @@ public abstract class AbstractTest extends TestCase {
         InterruptTimer timer=new InterruptTimer(TIMEOUT,m_reasoner);
         timer.start();
         try {
-            m_reasoner.loadOntology(m_ontologyManager,m_premiseOntology,null);
+            m_reasoner=new Reasoner(getConfiguration(),m_premiseOntology,null);
             long t=System.currentTimeMillis();
             doTest();
             if (output != null) {
@@ -133,8 +132,8 @@ public abstract class AbstractTest extends TestCase {
         RDFXMLRenderer renderer=new RDFXMLRenderer(manager,ontology,writer);
         renderer.render();
         writer.close();
-    }    
-    protected File getFailureRoot() { 
+    }
+    protected File getFailureRoot() {
         File directory=new File(new File(TEMPORARY_DIRECTORY,m_wgTestDescriptor.testID),getTestType());
         directory.mkdirs();
         System.err.println(directory);
@@ -143,12 +142,12 @@ public abstract class AbstractTest extends TestCase {
     protected abstract void doTest() throws Exception;
     protected abstract String getTestType();
     protected abstract String reportTestType();
-    
+
     protected static class InterruptTimer extends Thread {
         protected final int m_timeout;
         protected final Reasoner m_reasoner;
         protected boolean m_timingStopped;
-        
+
         public InterruptTimer(int timeout,Reasoner reasoner) {
             super("HermiT Interrupt Thread");
             setDaemon(true);

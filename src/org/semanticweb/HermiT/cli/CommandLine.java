@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -42,7 +42,7 @@ import org.semanticweb.owlapi.reasoner.Node;
 import org.semanticweb.owlapi.reasoner.NodeSet;
 
 public class CommandLine {
-    
+
     @SuppressWarnings("serial")
     protected static class UsageException extends IllegalArgumentException {
         public UsageException(String inMessage) {
@@ -238,7 +238,7 @@ public class CommandLine {
             output.flush();
         }
     }
-    
+
     static protected class EntailsAction implements Action {
         final IRI conclusionIRI;
         public EntailsAction(Configuration config,IRI conclusionIRI) {
@@ -339,7 +339,7 @@ public class CommandLine {
         new Option('o',"output",kMisc,true,"FILE","write output to FILE"),
         new Option(kPremise,"premise",kMisc,true,"PREMISE","set the premise ontology to PREMISE"),
         new Option(kConclusion,"conclusion",kMisc,true,"CONCLUSION","set the conclusion ontology to CONCLUSION"),
-        
+
         // actions:
         new Option('l',"load",kActions,"parse and preprocess ontologies (default action)"),
         new Option('c',"classify",kActions,false,"FILE","classify ontology, optionally writing taxonomy to FILE (use - for standard out)"),
@@ -351,7 +351,7 @@ public class CommandLine {
         new Option('U',"unsatisfiable",kActions,"output unsatisfiable classes (equivalent to --equivalents=owl:Nothing)"),
         new Option(kDumpPrefixes,"print-prefixes",kActions,"output prefix names available for use in identifiers"),
         new Option('E',"checkEntailment",kActions,"check whether the premise (option premise) ontology entails the conclusion ontology (option conclusion)"),
-        
+
         new Option('N',"no-prefixes",kPrefixes,"do not abbreviate or expand identifiers using prefixes defined in input ontology"),
         new Option('p',"prefix",kPrefixes,true,"PN=IRI","use PN as an abbreviation for IRI in identifiers"),
         new Option(kDefaultPrefix,"prefix",kPrefixes,true,"IRI","use IRI as the default identifier prefix"),
@@ -520,7 +520,7 @@ public class CommandLine {
                     }
                         break;
                     case 'E': {
-                        if (conclusionIRI!=null) 
+                        if (conclusionIRI!=null)
                             actions.add(new EntailsAction(config, conclusionIRI));
                     }
                         break;
@@ -654,7 +654,7 @@ public class CommandLine {
                     long parseTime=System.currentTimeMillis()-startTime;
                     status.log(2,"Ontology parsed in "+String.valueOf(parseTime)+" msec.");
                     startTime=System.currentTimeMillis();
-                    Reasoner hermit=new Reasoner(config,ontologyManager,ontology);
+                    Reasoner hermit=new Reasoner(config,ontology);
                     long loadTime=System.currentTimeMillis()-startTime;
                     status.log(2,"Reasoner created in "+String.valueOf(loadTime)+" msec.");
                     if (!ignoreOntologyPrefixes)
@@ -691,7 +691,7 @@ class Option {
     protected Arg arg;
     protected String metavar;
     protected String help;
-    
+
     public Option(int inChar,String inLong,String inGroup,String inHelp) {
         optChar=inChar;
         longStr=inLong;
@@ -765,7 +765,7 @@ class Option {
         }
         return out.toString();
     }
-    
+
     public static String formatOptionsString(Option[] opts) {
         StringBuffer out=new StringBuffer();
         for (Option o : opts) {
@@ -785,7 +785,7 @@ class Option {
         }
         return out.toString();
     }
-    
+
     protected static String breakLines(String str,int lineWidth,int indent) {
         StringBuffer out=new StringBuffer();
         BreakIterator i=BreakIterator.getLineInstance();

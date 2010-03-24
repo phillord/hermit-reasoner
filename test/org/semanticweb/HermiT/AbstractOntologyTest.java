@@ -40,16 +40,16 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
         m_dataFactory=null;
         m_ontology=null;
     }
-    
+
     protected DLOntology getDLOntology() {
         return getDLOntology(null);
     }
-    
+
     protected DLOntology getDLOntology(Collection<DescriptionGraph> descriptionGraphs) {
         OWLClausification clausifier=new OWLClausification(new Configuration());
-        return clausifier.clausify(m_ontologyManager,m_ontology,descriptionGraphs);
+        return clausifier.clausify(m_ontology,descriptionGraphs);
     }
-    
+
     protected Tableau getTableau(Collection<DescriptionGraph> descriptionGraphs) throws Exception {
         DLOntology dlOntology = getDLOntology(descriptionGraphs);
         Configuration c=new Configuration();
@@ -57,14 +57,13 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
         c.blockingStrategyType=Configuration.BlockingStrategyType.ANYWHERE;
         c.directBlockingType=Configuration.DirectBlockingType.PAIR_WISE;
         c.existentialStrategyType=Configuration.ExistentialStrategyType.CREATION_ORDER;
-        Reasoner reasoner=new Reasoner(c);
-        reasoner.loadDLOntology(dlOntology);
+        Reasoner reasoner=new Reasoner(c,dlOntology);
         return reasoner.m_tableau;
     }
 
     /**
      * loads an ontology via the OWL API
-     * 
+     *
      * @param physicalURI
      *            the physical location of the ontology
      * @throws Exception

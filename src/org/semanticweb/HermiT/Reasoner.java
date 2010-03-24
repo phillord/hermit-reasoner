@@ -105,7 +105,6 @@ import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
-import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLTypedLiteral;
@@ -150,36 +149,13 @@ public class Reasoner implements OWLReasoner,Serializable {
     protected Map<AtomicConcept,Set<Individual>> m_realization;
 
     /**
-     * Creates a new reasoner instance with standard parameters for blocking, expansion strategy etc.
-     */
-    public Reasoner() {
-        this(new Configuration());
-    }
-
-    /**
-     * Creates a new reasoner instance with the parameters for blocking, expansion strategy etc as specified in the given configuration object. A default configuration can be obtained by just passing new Configuration().
-     *
-     * @param configuration
-     *            - a configuration in which parameters can be defined such as the blocking strategy to be used etc
-     */
-    public Reasoner(Configuration configuration) {
-        m_configuration=configuration;
-        m_interruptFlag=new InterruptFlag(configuration.individualTaskTimeout);
-        m_progressMonitor=configuration.reasonerProgressMonitor;
-        if (m_dlOntology!=null || m_tableau!=null)
-            dispose();
-    }
-
-    /**
      * Creates a new reasoner object with standard parameters for blocking, expansion strategy etc. Then the given manager is used to find all required imports for the given ontology and the ontology with the imports is loaded into the reasoner and the data factory of the manager is used to create fresh concepts during the preprocessing phase if necessary.
      *
-     * @param ontologyManger
-     *            - the manager that will be used to determine the required imports for the given ontology
-     * @param ontology
+     * @param rootOntology
      *            - the ontology that should be loaded by the reasoner
      */
-    public Reasoner(OWLOntologyManager ontologyManger,OWLOntology ontology) {
-        this(new Configuration(),ontologyManger,ontology,(Set<DescriptionGraph>)null);
+    public Reasoner(OWLOntology rootOntology) {
+        this(new Configuration(),rootOntology,(Set<DescriptionGraph>)null);
     }
 
     /**
@@ -187,13 +163,11 @@ public class Reasoner implements OWLReasoner,Serializable {
      *
      * @param configuration
      *            - a configuration in which parameters can be defined such as the blocking strategy to be used etc
-     * @param ontologyManger
-     *            - the manager that will be used to determine the required imports for the given ontology
-     * @param ontology
+     * @param rootOntology
      *            - the ontology that should be loaded by the reasoner
      */
-    public Reasoner(Configuration configuration,OWLOntologyManager ontologyManger,OWLOntology ontology) {
-        this(configuration,ontologyManger,ontology,(Set<DescriptionGraph>)null);
+    public Reasoner(Configuration configuration,OWLOntology rootOntology) {
+        this(configuration,rootOntology,(Set<DescriptionGraph>)null);
     }
 
     /**
@@ -201,18 +175,16 @@ public class Reasoner implements OWLReasoner,Serializable {
      *
      * @param configuration
      *            - a configuration in which parameters can be defined such as the blocking strategy to be used etc
-     * @param ontologyManager
-     *            - the manager that will be used to determine the required imports for the given ontology
-     * @param ontology
+     * @param rootOntology
      *            - the ontology that should be loaded by the reasoner
      * @param descriptionGraphs
      *            - a set of description graphs
      */
-    public Reasoner(Configuration configuration,OWLOntologyManager ontologyManager,OWLOntology ontology,Set<DescriptionGraph> descriptionGraphs) {
+    public Reasoner(Configuration configuration,OWLOntology rootOntology,Set<DescriptionGraph> descriptionGraphs) {
         m_configuration=configuration;
         m_interruptFlag=new InterruptFlag(configuration.individualTaskTimeout);
         m_progressMonitor=configuration.reasonerProgressMonitor;
-        loadOntology(ontologyManager,ontology,descriptionGraphs);
+        loadOntology(rootOntology,descriptionGraphs);
     }
 
     /**
@@ -230,89 +202,109 @@ public class Reasoner implements OWLReasoner,Serializable {
         loadDLOntology(dlOntology);
     }
 
-    // General accessor methods
+    // Life-cycle management methods
 
-    /**
-     * @return A prefix object that is used to maintain the URI/IRI prefixes of classes, properties etc that are used in the reasoner.
-     */
-    public Prefixes getPrefixes() {
-        return m_prefixes;
+    protected void loadOntology(OWLOntology ontology,Set<DescriptionGraph> descriptionGraphs) {
+        if (descriptionGraphs==null)
+            descriptionGraphs=Collections.emptySet();
+        OWLClausification clausifier=new OWLClausification(m_configuration);
+        DLOntology dlOntology=clausifier.clausify(ontology,descriptionGraphs);
+        loadDLOntology(dlOntology);
     }
-
-    /**
-     * @return An ontology in HermiT's internal format containing all axioms of the ontologies that are loaded in the reasoner.
-     */
-    public DLOntology getDLOntology() {
-        return m_dlOntology;
-    }
-
-    /**
-     * @return A copy of the configuration that is used by this Reasoner instance.
-     */
-    public Configuration getConfiguration() {
-        return m_configuration.clone();
-    }
-    public void interrupt() {
-        m_interruptFlag.interrupt();
-    }
-
-    /**
-     * Returns the tableau of this reasoner.
-     */
-    public Tableau getTableau() {
-        return m_tableau;
-    }
-
-    // Loading and managing ontologies
-
-    /**
-     * Load an ontology in HermiT's internal format. A DLOntology can be obtained from a Reasoner instance after loading an OWLOntology by calling getDLOntology(). The DLOntology contains clauses and facts, obtained after normalisation and clausification on an OWLOntology. The DLOntology also contains a configuration.
-     *
-     * @param dlOntology
-     *            - an ontology in HermiT's internal format
-     */
-    public void loadDLOntology(DLOntology dlOntology) {
+    protected void loadDLOntology(DLOntology dlOntology) {
+        clearState();
         m_dlOntology=dlOntology;
         m_prefixes=createPrefixes(m_dlOntology);
         m_tableau=createTableau(m_interruptFlag,m_configuration,m_dlOntology,m_prefixes);
         m_atomicConceptClassificationManager=createAtomicConceptClassificationManager(this);
-        m_atomicConceptHierarchy=null;
         m_objectRoleClassificationManager=createObjectRoleClassificationManager(this);
-        m_objectRoleHierarchy=null;
         m_dataRoleClassificationManager=createDataRoleClassificationManager(this);
-        m_dataRoleHierarchy=null;
     }
-
-    /**
-     * The given ontology and description graphs are loaded into the Reasoner instance. Any previously loaded ontologies are overwritten. Then the given manager is used to find all required imports for the given ontology and the ontology with the imports and the description graphs are loaded into the reasoner. The data factory of the manager is used to create fresh concepts during the preprocessing phase if necessary.
-     *
-     * @param ontologyManager
-     *            - the manager that will be used to determine the required imports for the given ontology
-     * @param ontology
-     *            - the ontology that should be loaded by the reasoner
-     * @param descriptionGraphs
-     *            - a set of description graphs or null
-     */
-    public void loadOntology(OWLOntologyManager ontologyManager,OWLOntology ontology,Set<DescriptionGraph> descriptionGraphs) {
-        if (descriptionGraphs==null)
-            descriptionGraphs=Collections.emptySet();
-        OWLClausification clausifier=new OWLClausification(m_configuration);
-        loadDLOntology(clausifier.clausify(ontologyManager,ontology,descriptionGraphs));
+    public void interrupt() {
+        m_interruptFlag.interrupt();
     }
     public void dispose() {
-        Set<DLClause> noDLClauses=Collections.emptySet();
-        Set<Atom> noAtoms=Collections.emptySet();
-        Set<AtomicConcept> noAtomicConcepts=Collections.emptySet();
-        Set<AtomicRole> noAtomicRoles=Collections.emptySet();
-        Set<DLOntology.ComplexObjectRoleInclusion> noComplexObjectRoleInclusions=Collections.emptySet();
-        Set<Individual> noIndividuals=Collections.emptySet();
-        Set<String> noDefinedDatatypeIRIs=Collections.emptySet();
+        clearState();
+    }
+    protected void clearState() {
+        m_dlOntology=null;
+        m_prefixes=null;
+        m_tableau=null;
+        m_atomicConceptClassificationManager=null;
         m_atomicConceptHierarchy=null;
-        m_dataRoleHierarchy=null;
+        m_objectRoleClassificationManager=null;
         m_objectRoleHierarchy=null;
+        m_dataRoleClassificationManager=null;
+        m_dataRoleHierarchy=null;
         m_realization=null;
-        DLOntology emptyDLOntology=new DLOntology("urn:hermit:kb",noDLClauses,noAtoms,noAtoms,noAtomicConcepts,noAtomicRoles,noComplexObjectRoleInclusions,noAtomicRoles,noDefinedDatatypeIRIs,noIndividuals,false,false,false,false);
-        loadDLOntology(emptyDLOntology);
+    }
+
+    // Accessor methods of the OWL API
+
+    public String getReasonerName() {
+        return getClass().getPackage().getImplementationTitle();
+    }
+    public Version getReasonerVersion() {
+        String versionString=Reasoner.class.getPackage().getImplementationVersion();
+        String[] splitted;
+        int filled=0;
+        int version[]=new int[4];
+        if (versionString!=null) {
+            splitted=versionString.split("\\.");
+            while (filled<splitted.length) {
+                version[filled]=Integer.parseInt(splitted[filled]);
+                filled++;
+            }
+        }
+        while (filled<version.length) {
+            version[filled]=0;
+            filled++;
+        }
+        return new Version(version[0],version[1],version[2],version[3]);
+    }
+    public OWLOntology getRootOntology() {
+        return null;
+    }
+    public long getTimeOut() {
+        return m_configuration.individualTaskTimeout;
+    }
+    public BufferingMode getBufferingMode() {
+        return m_configuration.bufferChanges ? BufferingMode.BUFFERING : BufferingMode.NON_BUFFERING;
+    }
+    public IndividualNodeSetPolicy getIndividualNodeSetPolicy() {
+        return m_configuration.getIndividualNodeSetPolicy();
+    }
+    public FreshEntityPolicy getFreshEntityPolicy() {
+        return m_configuration.getFreshEntityPolicy();
+    }
+
+    // HermiT's accessor methods
+
+    public Prefixes getPrefixes() {
+        return m_prefixes;
+    }
+    public DLOntology getDLOntology() {
+        return m_dlOntology;
+    }
+    public Configuration getConfiguration() {
+        return m_configuration.clone();
+    }
+    public Tableau getTableau() {
+        return m_tableau;
+    }
+
+    // Ontology change management methods
+
+    public Set<OWLAxiom> getPendingAxiomAdditions() {
+        return Collections.emptySet();
+    }
+    public Set<OWLAxiom> getPendingAxiomRemovals() {
+        return Collections.emptySet();
+    }
+    public List<OWLOntologyChange> getPendingChanges() {
+        return Collections.emptyList();
+    }
+    public void flush() {
     }
 
     // General inferences
@@ -446,6 +438,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         return atomicConceptsToOWLAPI(getHierarchyNode(AtomicConcept.NOTHING).getEquivalentElements());
     }
     public boolean isSatisfiable(OWLClassExpression description) {
+        throwFreshEntityExceptionIfNecessary(description);
         if (description instanceof OWLClass) {
             AtomicConcept concept=AtomicConcept.create(((OWLClass)description).getIRI().toString());
             if (m_atomicConceptHierarchy==null)
@@ -466,6 +459,7 @@ public class Reasoner implements OWLReasoner,Serializable {
     }
 
     public boolean isSubClassOf(OWLClassExpression subDescription,OWLClassExpression superDescription) {
+        throwFreshEntityExceptionIfNecessary(subDescription,superDescription);
         if (subDescription instanceof OWLClass && superDescription instanceof OWLClass) {
             AtomicConcept subconcept=AtomicConcept.create(((OWLClass)subDescription).getIRI().toString());
             AtomicConcept superconcept=AtomicConcept.create(((OWLClass)superDescription).getIRI().toString());
@@ -653,6 +647,7 @@ public class Reasoner implements OWLReasoner,Serializable {
      * @return true if whenever a pair related with the property subObjectPropertyExpression is necessarily related with the property superObjectPropertyExpression and false otherwise
      */
     public boolean isSubObjectPropertyExpressionOf(OWLObjectPropertyExpression subObjectPropertyExpression,OWLObjectPropertyExpression superObjectPropertyExpression) {
+        throwFreshEntityExceptionIfNecessary(subObjectPropertyExpression,superObjectPropertyExpression);
         Role subRole;
         if (subObjectPropertyExpression.getSimplified().isAnonymous())
             subRole=InverseRole.create(AtomicRole.create(subObjectPropertyExpression.getNamedProperty().getIRI().toString()));
@@ -676,6 +671,9 @@ public class Reasoner implements OWLReasoner,Serializable {
      * @return if r1, ..., rn is the given chain and r the given super property, then the answer is true if whenever r1(d0, d1), ..., rn(dn-1, dn) holds in a model for some elements d0, ..., dn, then necessarily r(d0, dn) holds and it is false otherwise
      */
     public boolean isSubObjectPropertyExpressionOf(List<OWLObjectPropertyExpression> subPropertyChain,OWLObjectPropertyExpression superObjectPropertyExpression) {
+        throwFreshEntityExceptionIfNecessary(superObjectPropertyExpression);
+        for (OWLObjectPropertyExpression subProperty : subPropertyChain)
+            throwFreshEntityExceptionIfNecessary(subProperty);
         if (superObjectPropertyExpression.getNamedProperty().isOWLTopObjectProperty())
             return true;
         else {
@@ -698,6 +696,7 @@ public class Reasoner implements OWLReasoner,Serializable {
      * @return true if the extension of objectPropertyExpression1 is the same as the extension of objectPropertyExpression2 in each model of the ontology and false otherwise
      */
     public boolean isEquivalentObjectPropertyExpression(OWLObjectPropertyExpression objectPropertyExpression1,OWLObjectPropertyExpression objectPropertyExpression2) {
+        throwFreshEntityExceptionIfNecessary(objectPropertyExpression1,objectPropertyExpression2);
         return isSubObjectPropertyExpressionOf(objectPropertyExpression1,objectPropertyExpression2) && isSubObjectPropertyExpressionOf(objectPropertyExpression2,objectPropertyExpression1);
     }
     protected Set<HierarchyNode<Role>> getSuperObjectPropertyNodes(OWLObjectPropertyExpression propertyExpression,boolean direct,boolean inclusive) {
@@ -804,6 +803,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         return node;
     }
     protected HierarchyNode<Role> getHierarchyNode(OWLObjectPropertyExpression propertyExpression) {
+        throwFreshEntityExceptionIfNecessary(propertyExpression);
         Role role;
         if (propertyExpression.getSimplified().isAnonymous())
             role=InverseRole.create(AtomicRole.create(propertyExpression.getNamedProperty().getIRI().toString()));
@@ -839,7 +839,6 @@ public class Reasoner implements OWLReasoner,Serializable {
     }
     public NodeSet<OWLObjectProperty> getDisjointObjectProperties(OWLObjectPropertyExpression propertyExpression,boolean direct) {
         throwFreshEntityExceptionIfNecessary(propertyExpression);
-        classifyObjectProperties();
         Set<HierarchyNode<Role>> result=new HashSet<HierarchyNode<Role>>();
         if (propertyExpression.getNamedProperty().isOWLTopObjectProperty()) {
             result.add(getHierarchyNodeObjectRole(AtomicRole.BOTTOM_OBJECT_ROLE));
@@ -1009,10 +1008,10 @@ public class Reasoner implements OWLReasoner,Serializable {
         }
     }
     public Node<OWLDataProperty> getTopDataPropertyNode() {
-        return dataPropertiesToOWLAPI(getHierarchyNodeObjectRole(AtomicRole.TOP_DATA_ROLE).getEquivalentElements());
+        return dataPropertiesToOWLAPI(getHierarchyNodeDataRole(AtomicRole.TOP_DATA_ROLE).getEquivalentElements());
     }
     public Node<OWLDataProperty> getBottomDataPropertyNode() {
-        return dataPropertiesToOWLAPI(getHierarchyNodeObjectRole(AtomicRole.BOTTOM_DATA_ROLE).getEquivalentElements());
+        return dataPropertiesToOWLAPI(getHierarchyNodeDataRole(AtomicRole.BOTTOM_DATA_ROLE).getEquivalentElements());
     }
     /**
      * Determines if the property chain represented by subPropertyChain is a sub-property of superObjectPropertyExpression.
@@ -1024,12 +1023,10 @@ public class Reasoner implements OWLReasoner,Serializable {
      * @return true if whenever a pair related with the property subDataProperty is necessarily related with the property superDataProperty and false otherwise
      */
     public boolean isSubDataPropertyOf(OWLDataProperty subDataProperty,OWLDataProperty superDataProperty) {
-        if (m_dlOntology.hasDatatypes()) {
+        if (m_dlOntology.hasDatatypes())
             return m_dataRoleClassificationManager.isSubsumedBy(AtomicRole.create(subDataProperty.getIRI().toString()),AtomicRole.create(superDataProperty.getIRI().toString()));
-        }
-        else {
+        else
             return subDataProperty.isOWLBottomDataProperty() || superDataProperty.isOWLTopDataProperty();
-        }
     }
     /**
      * @param dataProperty1
@@ -1039,6 +1036,7 @@ public class Reasoner implements OWLReasoner,Serializable {
      * @return true if the extension of dataProperty1 is the same as the extension of dataProperty2 in each model of the ontology and false otherwise
      */
     public boolean isEquivalentDataProperty(OWLDataProperty dataProperty1,OWLDataProperty dataProperty2) {
+        throwFreshEntityExceptionIfNecessary(dataProperty1,dataProperty2);
         return isSubDataPropertyOf(dataProperty1,dataProperty2) && isSubDataPropertyOf(dataProperty2,dataProperty1);
     }
     protected Set<HierarchyNode<Role>> getSuperDataPropertyNodes(OWLDataProperty property,boolean direct,boolean inclusive) {
@@ -1106,29 +1104,6 @@ public class Reasoner implements OWLReasoner,Serializable {
     }
     protected HierarchyNode<Role> getHierarchyNode(OWLDataProperty property) {
         return getHierarchyNodeDataRole(AtomicRole.create(property.getIRI().toString()));
-    }
-    protected void throwFreshEntityExceptionIfNecessary(OWLObject... objects) {
-        if (m_configuration.freshEntityPolicy==FreshEntityPolicy.DISALLOW) {
-            Set<OWLEntity> undeclaredEntities=new HashSet<OWLEntity>();
-            for (OWLObject object : objects) {
-                if (!(object instanceof OWLEntity) || !((OWLEntity)object).isBuiltIn()) {
-                    for (OWLDataProperty dp : object.getDataPropertiesInSignature())
-                        if (!isDefined(dp) && !Prefixes.isInternalIRI(dp.getIRI().toString()))
-                            undeclaredEntities.add(dp);
-                    for (OWLObjectProperty op : object.getObjectPropertiesInSignature())
-                        if (!isDefined(op) && !Prefixes.isInternalIRI(op.getIRI().toString()))
-                            undeclaredEntities.add(op);
-                    for (OWLNamedIndividual individual : object.getIndividualsInSignature())
-                        if (!isDefined(individual) && !Prefixes.isInternalIRI(individual.getIRI().toString()))
-                            undeclaredEntities.add(individual);
-                    for (OWLClass owlClass : object.getClassesInSignature())
-                        if (!isDefined(owlClass) && !Prefixes.isInternalIRI(owlClass.getIRI().toString()))
-                            undeclaredEntities.add(owlClass);
-                }
-            }
-            if (!undeclaredEntities.isEmpty())
-                throw new FreshEntitiesException(undeclaredEntities);
-        }
     }
     public NodeSet<OWLClass> getDataPropertyDomains(OWLDataProperty property,boolean direct) {
         throwFreshEntityExceptionIfNecessary(property);
@@ -1790,7 +1765,6 @@ public class Reasoner implements OWLReasoner,Serializable {
     protected static OWLDataProperty getDataProperty(OWLDataFactory factory,AtomicRole atomicRole) {
         return factory.getOWLDataProperty(IRI.create(atomicRole.getIRI()));
     }
-
     protected static Prefixes createPrefixes(DLOntology dlOntology) {
         Set<String> prefixIRIs=new HashSet<String>();
         for (AtomicConcept concept : dlOntology.getAllAtomicConcepts())
@@ -1886,6 +1860,29 @@ public class Reasoner implements OWLReasoner,Serializable {
 
     // Various utility methods
 
+    protected void throwFreshEntityExceptionIfNecessary(OWLObject... objects) {
+        if (m_configuration.freshEntityPolicy==FreshEntityPolicy.DISALLOW) {
+            Set<OWLEntity> undeclaredEntities=new HashSet<OWLEntity>();
+            for (OWLObject object : objects) {
+                if (!(object instanceof OWLEntity) || !((OWLEntity)object).isBuiltIn()) {
+                    for (OWLDataProperty dp : object.getDataPropertiesInSignature())
+                        if (!isDefined(dp) && !Prefixes.isInternalIRI(dp.getIRI().toString()))
+                            undeclaredEntities.add(dp);
+                    for (OWLObjectProperty op : object.getObjectPropertiesInSignature())
+                        if (!isDefined(op) && !Prefixes.isInternalIRI(op.getIRI().toString()))
+                            undeclaredEntities.add(op);
+                    for (OWLNamedIndividual individual : object.getIndividualsInSignature())
+                        if (!isDefined(individual) && !Prefixes.isInternalIRI(individual.getIRI().toString()))
+                            undeclaredEntities.add(individual);
+                    for (OWLClass owlClass : object.getClassesInSignature())
+                        if (!isDefined(owlClass) && !Prefixes.isInternalIRI(owlClass.getIRI().toString()))
+                            undeclaredEntities.add(owlClass);
+                }
+            }
+            if (!undeclaredEntities.isEmpty())
+                throw new FreshEntitiesException(undeclaredEntities);
+        }
+    }
     protected Node<OWLClass> atomicConceptsToOWLAPI(Collection<AtomicConcept> concepts) {
         Set<OWLClass> result=new HashSet<OWLClass>();
         OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
@@ -1947,7 +1944,8 @@ public class Reasoner implements OWLReasoner,Serializable {
         return result;
     }
 
-    // The factory for OWL API OWL reasoners
+
+    // The factory for OWL API reasoners
 
     public static class ReasonerFactory implements OWLReasonerFactory {
         public String getReasonerName() {
@@ -1957,27 +1955,27 @@ public class Reasoner implements OWLReasoner,Serializable {
             return createReasoner(ontology,null);
         }
         public OWLReasoner createReasoner(OWLOntology ontology,OWLReasonerConfiguration config) {
-            return createHermiTOWLReasoner(ontology,getProtegeConfiguration(config));
+            return createHermiTOWLReasoner(getProtegeConfiguration(config),ontology);
         }
         public OWLReasoner createNonBufferingReasoner(OWLOntology ontology) {
             return createNonBufferingReasoner(ontology,null);
         }
-        public OWLReasoner createNonBufferingReasoner(OWLOntology ontology,OWLReasonerConfiguration config) {
-            Configuration configuration=getProtegeConfiguration(config);
+        public OWLReasoner createNonBufferingReasoner(OWLOntology ontology,OWLReasonerConfiguration owlAPIConfiguration) {
+            Configuration configuration=getProtegeConfiguration(owlAPIConfiguration);
             configuration.bufferChanges=false;
-            return createHermiTOWLReasoner(ontology,configuration);
+            return createHermiTOWLReasoner(configuration,ontology);
         }
-        protected Configuration getProtegeConfiguration(OWLReasonerConfiguration config) {
+        protected Configuration getProtegeConfiguration(OWLReasonerConfiguration owlAPIConfiguration) {
             Configuration configuration;
-            if (config!=null) {
-                if (config instanceof Configuration)
-                    configuration=(Configuration)config;
+            if (owlAPIConfiguration!=null) {
+                if (owlAPIConfiguration instanceof Configuration)
+                    configuration=(Configuration)owlAPIConfiguration;
                 else {
                     configuration=new Configuration();
-                    configuration.freshEntityPolicy=config.getFreshEntityPolicy();
-                    configuration.individualNodeSetPolicy=config.getIndividualNodeSetPolicy();
-                    configuration.reasonerProgressMonitor=config.getProgressMonitor();
-                    configuration.individualTaskTimeout=config.getTimeOut();
+                    configuration.freshEntityPolicy=owlAPIConfiguration.getFreshEntityPolicy();
+                    configuration.individualNodeSetPolicy=owlAPIConfiguration.getIndividualNodeSetPolicy();
+                    configuration.reasonerProgressMonitor=owlAPIConfiguration.getProgressMonitor();
+                    configuration.individualTaskTimeout=owlAPIConfiguration.getTimeOut();
                 }
             }
             else {
@@ -1986,104 +1984,19 @@ public class Reasoner implements OWLReasoner,Serializable {
             }
             return configuration;
         }
-        @SuppressWarnings("serial")
-        protected OWLReasoner createHermiTOWLReasoner(OWLOntology ontology,Configuration configuration) {
-            Reasoner hermit=new Reasoner(configuration,ontology.getOWLOntologyManager(),ontology) {
-                protected OWLOntology m_rootOntology=null;
-                protected boolean changed=false;
-
-                private final OWLOntologyChangeListener ontologyChangeListener=new OWLOntologyChangeListener() {
-                    public void ontologiesChanged(List<? extends OWLOntologyChange> changes) throws OWLException {
-                        changed=true;
-                        if (!m_configuration.bufferChanges) flush();
-                    }
-                };
-                protected void initOWLAPI(OWLOntology rootOntology) {
-                    m_rootOntology=rootOntology;
-                    m_rootOntology.getOWLOntologyManager().addOntologyChangeListener(ontologyChangeListener);
-                }
-                public void dispose() {
-                    m_rootOntology.getOWLOntologyManager().removeOntologyChangeListener(ontologyChangeListener);
-                    m_rootOntology=null;
-                    super.dispose();
-                }
-                public OWLOntology getRootOntology() {
-                    return m_rootOntology;
-                }
-                public void flush() {
-                    if (changed) {
-                        super.dispose(); // clear all data structures in HermiT
-                        // start from scratch
-                        loadOntology(m_rootOntology.getOWLOntologyManager(),m_rootOntology,null);
-                        changed=false;
-                    }
-                }
-            };
-            hermit.initOWLAPI(ontology);
-            return hermit;
+        protected OWLReasoner createHermiTOWLReasoner(Configuration configuration,OWLOntology ontology) {
+            return new ChangeTrackingReasoner(configuration,ontology);
         }
     }
 
-    public long getTimeOut() {
-        return m_configuration.individualTaskTimeout;
-    }
+    // The reasoner that tracks changes
 
-    // ontology change management -- only available via the OWLReasoner implementation
-
-    public OWLOntology getRootOntology() {
-        return null;
-    }
-    public void flush() {
-    }
-    public BufferingMode getBufferingMode() {
-        return m_configuration.bufferChanges ? BufferingMode.BUFFERING : BufferingMode.NON_BUFFERING;
-    }
-    public Set<OWLAxiom> getPendingAxiomAdditions() {
-        return null;
-    }
-    public Set<OWLAxiom> getPendingAxiomRemovals() {
-        return null;
-    }
-    public List<OWLOntologyChange> getPendingChanges() {
-        return null;
-    }
-    protected void initOWLAPI(OWLOntology ontology) {
-    }
-    public IndividualNodeSetPolicy getIndividualNodeSetPolicy() {
-        return m_configuration.getIndividualNodeSetPolicy();
-    }
-    public FreshEntityPolicy getFreshEntityPolicy() {
-        return m_configuration.getFreshEntityPolicy();
-    }
-    public String getReasonerName() {
-        return getClass().getPackage().getImplementationTitle();
-    }
-    public Version getReasonerVersion() {
-        String versionString=Reasoner.class.getPackage().getImplementationVersion();
-        String[] splitted;
-        int filled=0;
-        int version[]=new int[4];
-        if (versionString!=null) {
-            splitted=versionString.split("\\.");
-            while (filled<splitted.length) {
-                version[filled]=Integer.parseInt(splitted[filled]);
-                filled++;
-            }
-        }
-        while (filled<version.length) {
-            version[filled]=0;
-            filled++;
-        }
-        return new Version(version[0],version[1],version[2],version[3]);
-    }
-
-    // The factory for the reasoner from the Protege plug-in
     public static class ProtegeReasonerFactory extends ProtegeOWLReasonerFactoryAdapter {
         public OWLReasoner createReasoner(OWLOntology ontology,ReasonerProgressMonitor monitor) {
             ReasonerFactory factory=new ReasonerFactory();
             Configuration configuration=factory.getProtegeConfiguration(null);
             configuration.reasonerProgressMonitor=monitor;
-            return factory.createHermiTOWLReasoner(ontology,configuration);
+            return factory.createHermiTOWLReasoner(configuration,ontology);
         }
         public void initialise() throws Exception {
         }

@@ -75,7 +75,7 @@ public abstract class AbstractStructuralTest extends AbstractOntologyTest {
             throw e;
         }
     }
-    
+
     protected static String[] S(String... strings) {
         return strings;
     }
@@ -83,7 +83,7 @@ public abstract class AbstractStructuralTest extends AbstractOntologyTest {
     protected List<String> getDLClauses() throws Exception {
         OWLClausification clausifier=new OWLClausification(new Configuration());
         Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
-        DLOntology dlOntology=clausifier.clausify(m_ontologyManager,m_ontology,noDescriptionGraphs);
+        DLOntology dlOntology=clausifier.clausify(m_ontology,noDescriptionGraphs);
         String ontologyIRI = m_ontology.getOntologyID().getDefaultDocumentIRI() == null ? "urn:hermit:kb" : m_ontology.getOntologyID().getDefaultDocumentIRI().toString();
         List<String> actualStrings=new ArrayList<String>();
         Prefixes prefixes=new Prefixes();

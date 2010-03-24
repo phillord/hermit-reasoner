@@ -60,7 +60,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     protected void createReasoner(Configuration configuration,Set<DescriptionGraph> descriptionGraphs) {
         if (descriptionGraphs==null)
             descriptionGraphs=Collections.emptySet();
-        m_reasoner=new Reasoner(configuration,m_ontologyManager,m_ontology,descriptionGraphs);
+        m_reasoner=new Reasoner(configuration,m_ontology,descriptionGraphs);
     }
     protected void createOWLReasoner() {
         OWLReasonerFactory factory=new ReasonerFactory();
