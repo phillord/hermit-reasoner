@@ -578,13 +578,7 @@ public class DLClauseEvaluator implements Serializable {
             m_coreVariables=coreVariables;
             m_dependencySet=dependencySet;
             m_tableau=tableau;
-            int[] disjunctStart=new int[headDLPredicates.length];
-            int argumentsSize=0;
-            for (int disjunctIndex=0;disjunctIndex<headDLPredicates.length;disjunctIndex++) {
-                disjunctStart[disjunctIndex]=argumentsSize;
-                argumentsSize+=headDLPredicates[disjunctIndex].getArity();
-            }
-            m_groundDisjunctionHeader=m_tableau.m_groundDisjunctionHeaderManager.getGroundDisjunctionHeader(headDLPredicates,disjunctStart);
+            m_groundDisjunctionHeader=m_tableau.m_groundDisjunctionHeaderManager.getGroundDisjunctionHeader(headDLPredicates);
             m_copyIsCore=copyIsCore;
             m_copyValuesToArguments=copyValuesToArguments;
         }

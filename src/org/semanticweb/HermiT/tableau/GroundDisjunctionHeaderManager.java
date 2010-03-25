@@ -15,18 +15,18 @@ public final class GroundDisjunctionHeaderManager {
         m_threshold=(int)(m_buckets.length*0.75);
         m_numberOfElements=0;
     }
-    public GroundDisjunctionHeader getGroundDisjunctionHeader(DLPredicate[] dlPredicates,int[] disjunctStart) {
+    public GroundDisjunctionHeader getGroundDisjunctionHeader(DLPredicate[] dlPredicates) {
         int hashCode=0;
         for (int disjunctIndex=0;disjunctIndex<dlPredicates.length;disjunctIndex++)
-            hashCode=hashCode*7+dlPredicates[disjunctIndex].hashCode()+disjunctStart[disjunctIndex];
+            hashCode=hashCode*7+dlPredicates[disjunctIndex].hashCode();
         int bucketIndex=getIndexFor(hashCode,m_buckets.length);
         GroundDisjunctionHeader entry=m_buckets[bucketIndex];
         while (entry!=null) {
-            if (hashCode==entry.m_hashCode && entry.isEqual(dlPredicates,disjunctStart))
+            if (hashCode==entry.m_hashCode && entry.isEqual(dlPredicates))
                 return entry;
             entry=entry.m_nextEntry;
         }
-        entry=new GroundDisjunctionHeader(dlPredicates,disjunctStart,hashCode,entry);
+        entry=new GroundDisjunctionHeader(dlPredicates,hashCode,entry);
         m_buckets[bucketIndex]=entry;
         m_numberOfElements++;
         if (m_numberOfElements>=m_threshold)

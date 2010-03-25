@@ -29,9 +29,14 @@ public final class GroundDisjunctionHeader {
     protected final int m_firstAtLeastIndex;
     protected GroundDisjunctionHeader m_nextEntry;
 
-    protected GroundDisjunctionHeader(DLPredicate[] dlPredicates,int[] disjunctStart,int hashCode,GroundDisjunctionHeader nextEntry) {
+    protected GroundDisjunctionHeader(DLPredicate[] dlPredicates,int hashCode,GroundDisjunctionHeader nextEntry) {
         m_dlPredicates=dlPredicates;
-        m_disjunctStart=disjunctStart;
+        m_disjunctStart=new int[m_dlPredicates.length];
+        int argumentsSize=0;
+        for (int disjunctIndex=0;disjunctIndex<m_dlPredicates.length;disjunctIndex++) {
+            m_disjunctStart[disjunctIndex]=argumentsSize;
+            argumentsSize+=m_dlPredicates[disjunctIndex].getArity();
+        }
         m_hashCode=hashCode;
         m_nextEntry=nextEntry;
         m_disjunctIndexesWithBacktrackings=new DisjunctIndexWithBacktrackings[dlPredicates.length];
@@ -52,11 +57,11 @@ public final class GroundDisjunctionHeader {
             else
                 m_disjunctIndexesWithBacktrackings[nextNonAtLeastDisjunct++]=new DisjunctIndexWithBacktrackings(index);
     }
-    public boolean isEqual(DLPredicate[] dlPredicates,int[] disjunctStart) {
+    protected boolean isEqual(DLPredicate[] dlPredicates) {
         if (m_dlPredicates.length!=dlPredicates.length)
             return false;
         for (int index=m_dlPredicates.length-1;index>=0;--index)
-            if (!m_dlPredicates[index].equals(dlPredicates[index]) || m_disjunctStart[index]!=disjunctStart[index])
+            if (!m_dlPredicates[index].equals(dlPredicates[index]))
                 return false;
         return true;
     }
