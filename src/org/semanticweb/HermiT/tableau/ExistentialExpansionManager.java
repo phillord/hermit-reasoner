@@ -55,7 +55,7 @@ public final class ExistentialExpansionManager implements Serializable {
 
     public ExistentialExpansionManager(Tableau tableau) {
         m_tableau=tableau;
-        m_extensionManager=m_tableau.getExtensionManager();
+        m_extensionManager=m_tableau.m_extensionManager;
         m_expandedExistentials=new TupleTable(2);
         m_auxiliaryTuple=new Object[2];
         m_auxiliaryNodes=new ArrayList<Node>();

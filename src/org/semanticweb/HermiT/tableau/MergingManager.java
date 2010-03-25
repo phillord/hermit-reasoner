@@ -42,7 +42,7 @@ public final class MergingManager implements Serializable {
     public MergingManager(Tableau tableau) {
         m_tableau=tableau;
         m_tableauMonitor=m_tableau.m_tableauMonitor;
-        m_extensionManager=m_tableau.getExtensionManager();
+        m_extensionManager=m_tableau.m_extensionManager;
         m_binaryExtensionTableSearch1Bound=m_extensionManager.m_binaryExtensionTable.createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
         m_ternaryExtensionTableSearch1Bound=m_extensionManager.m_ternaryExtensionTable.createRetrieval(new boolean[] { false,true,false },ExtensionTable.View.TOTAL);
         m_ternaryExtensionTableSearch2Bound=m_extensionManager.m_ternaryExtensionTable.createRetrieval(new boolean[] { false,false,true },ExtensionTable.View.TOTAL);

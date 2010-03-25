@@ -22,12 +22,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.semanticweb.HermiT.existentials.ExistentialExpansionStrategy;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Constant;
+import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.DataValueEnumeration;
@@ -63,7 +65,8 @@ public final class Tableau implements Serializable {
     protected final GroundDisjunctionHeaderManager m_groundDisjunctionHeaderManager;
     protected final ExtensionManager m_extensionManager;
     protected final ClashManager m_clashManager;
-    protected final HyperresolutionManager m_hyperresolutionManager;
+    protected final HyperresolutionManager m_permanentHyperresolutionManager;
+    protected HyperresolutionManager m_additionalHyperresolutionManager;
     protected final MergingManager m_mergingManager;
     protected final ExistentialExpansionManager m_existentialExpasionManager;
     protected final NominalIntroductionManager m_nominalIntroductionManager;
@@ -102,15 +105,15 @@ public final class Tableau implements Serializable {
         m_groundDisjunctionHeaderManager=new GroundDisjunctionHeaderManager();
         m_extensionManager=new ExtensionManager(this);
         m_clashManager=new ClashManager(this);
-        m_hyperresolutionManager=new HyperresolutionManager(this);
+        m_permanentHyperresolutionManager=new HyperresolutionManager(this,m_dlOntology.getDLClauses());
         m_mergingManager=new MergingManager(this);
         m_existentialExpasionManager=new ExistentialExpansionManager(this);
         m_nominalIntroductionManager=new NominalIntroductionManager(this);
         m_descriptionGraphManager=new DescriptionGraphManager(this);
         m_datatypeManager=new DatatypeManager(this);
         m_existentialExpansionStrategy.initialize(this);
-        m_needsThingExtension=m_hyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING);
-        m_needsNamedExtension=m_hyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.INTERNAL_NAMED);
+        m_needsThingExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING);
+        m_needsNamedExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.INTERNAL_NAMED);
         m_existentialConceptsBuffers=new ArrayList<List<ExistentialConcept>>();
         m_checkDatatypes=m_dlOntology.hasDatatypes();
         m_useDisjunctionLearning=useDisjunctionLearning;
@@ -145,8 +148,11 @@ public final class Tableau implements Serializable {
     public ExtensionManager getExtensionManager() {
         return m_extensionManager;
     }
-    public HyperresolutionManager getHyperresolutionManager() {
-        return m_hyperresolutionManager;
+    public HyperresolutionManager getPermanentHyperresolutionManager() {
+        return m_permanentHyperresolutionManager;
+    }
+    public HyperresolutionManager getAdditionalHyperresolutionManager() {
+        return m_additionalHyperresolutionManager;
     }
     public MergingManager getMergingManager() {
         return m_mergingManager;
@@ -179,7 +185,9 @@ public final class Tableau implements Serializable {
         m_dependencySetFactory.clear();
         m_extensionManager.clear();
         m_clashManager.clear();
-        m_hyperresolutionManager.clear();
+        m_permanentHyperresolutionManager.clear();
+        if (m_additionalHyperresolutionManager!=null)
+            m_additionalHyperresolutionManager.clear();
         m_mergingManager.clear();
         m_existentialExpasionManager.clear();
         m_nominalIntroductionManager.clear();
@@ -190,6 +198,12 @@ public final class Tableau implements Serializable {
         m_existentialConceptsBuffers.clear();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.tableauCleared();
+    }
+    public void setAdditionalDLClauses(Set<DLClause> dlClauses) {
+        m_additionalHyperresolutionManager=new HyperresolutionManager(this,dlClauses);
+    }
+    public void clearAdditionalDLClauses() {
+        m_additionalHyperresolutionManager=null;
     }
     public boolean isSatisfiable() {
         m_interruptFlag.startTimedTask();
@@ -234,7 +248,9 @@ public final class Tableau implements Serializable {
             boolean hasChange=false;
             while (m_extensionManager.propagateDeltaNew() && !m_extensionManager.containsClash()) {
                 m_descriptionGraphManager.checkGraphConstraints();
-                m_hyperresolutionManager.applyDLClauses();
+                m_permanentHyperresolutionManager.applyDLClauses();
+                if (m_additionalHyperresolutionManager!=null)
+                    m_additionalHyperresolutionManager.applyDLClauses();
                 if (m_checkDatatypes && !m_extensionManager.containsClash())
                     m_datatypeManager.checkDatatypeConstraints();
                 if (!m_extensionManager.containsClash())
@@ -328,8 +344,8 @@ public final class Tableau implements Serializable {
         m_currentBranchingPoint++;
         m_nonbacktrackableBranchingPoint=m_currentBranchingPoint;
         DependencySet dependencySet=m_dependencySetFactory.addBranchingPoint(m_dependencySetFactory.emptySet(),m_currentBranchingPoint);
-        for( int i=0 ; i<superconcepts.size() ; i++ )
-        	m_extensionManager.addConceptAssertion(superconcepts.get(i).getNegation(),m_checkedNode0,dependencySet,true);
+        for (int index=0;index<superconcepts.size();index++)
+        	m_extensionManager.addConceptAssertion(superconcepts.get(index).getNegation(),m_checkedNode0,dependencySet,true);
         boolean result=!isSatisfiable();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isSubsumedByFinished(subconcept,superconcepts.get(0),result);
@@ -411,35 +427,63 @@ public final class Tableau implements Serializable {
             m_tableauMonitor.isInstanceOfFinished(atomicConcept,individual,result);
         return result;
     }
+    public boolean isSatisfiable(boolean loadABox,Set<DLClause> additionalDLClauses,Set<Atom> additionalPositiveFacts,Set<Atom> additionalNegativeFacts,Map<Individual,Node> relevantIndividuals) {
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.isABoxSatisfiableStarted();
+        clear();
+        Map<Term,Node> termsToNodes=new HashMap<Term,Node>();
+        if (loadABox)
+            loadABox(termsToNodes);
+        if (additionalDLClauses!=null && !additionalDLClauses.isEmpty())
+            setAdditionalDLClauses(additionalDLClauses);
+        if (additionalPositiveFacts!=null && !additionalPositiveFacts.isEmpty())
+            for (Atom atom : additionalPositiveFacts)
+                loadPositiveFact(termsToNodes,atom);
+        if (additionalNegativeFacts!=null && !additionalNegativeFacts.isEmpty())
+            for (Atom atom : additionalNegativeFacts)
+                loadNegativeFact(termsToNodes,atom);
+        boolean result=isSatisfiable();
+        clearAdditionalDLClauses();
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.isABoxSatisfiableFinished(result);
+        return result;
+    }
+    protected void loadPositiveFact(Map<Term,Node> termsToNodes,Atom atom) {
+        DLPredicate dlPredicate=atom.getDLPredicate();
+        if (dlPredicate instanceof LiteralConcept)
+            m_extensionManager.addConceptAssertion((LiteralConcept)dlPredicate,getNodeForTerm(termsToNodes,atom.getArgument(0)),m_dependencySetFactory.emptySet(),true);
+        else if (dlPredicate instanceof AtomicRole || Equality.INSTANCE.equals(dlPredicate) || Inequality.INSTANCE.equals(dlPredicate))
+            m_extensionManager.addAssertion(dlPredicate,getNodeForTerm(termsToNodes,atom.getArgument(0)),getNodeForTerm(termsToNodes,atom.getArgument(1)),m_dependencySetFactory.emptySet(),true);
+        else
+            throw new IllegalArgumentException("Unsupported type of positive ground atom.");
+    }
+    protected void loadNegativeFact(Map<Term,Node> termsToNodes,Atom atom) {
+        DLPredicate dlPredicate=atom.getDLPredicate();
+        if (dlPredicate instanceof LiteralConcept)
+            m_extensionManager.addConceptAssertion(((LiteralConcept)dlPredicate).getNegation(),getNodeForTerm(termsToNodes,atom.getArgument(0)),m_dependencySetFactory.emptySet(),true);
+        else if (dlPredicate instanceof AtomicRole) {
+            Object[] ternaryTuple=m_extensionManager.m_ternaryAuxiliaryTupleAdd;
+            ternaryTuple[0]=NegatedAtomicRole.create((AtomicRole)dlPredicate);
+            ternaryTuple[1]=getNodeForTerm(termsToNodes,atom.getArgument(0));
+            ternaryTuple[2]=getNodeForTerm(termsToNodes,atom.getArgument(1));
+            m_extensionManager.addTuple(ternaryTuple,m_dependencySetFactory.emptySet(),true);
+        }
+        else if (Equality.INSTANCE.equals(dlPredicate))
+            m_extensionManager.addAssertion(Inequality.INSTANCE,getNodeForTerm(termsToNodes,atom.getArgument(0)),getNodeForTerm(termsToNodes,atom.getArgument(1)),m_dependencySetFactory.emptySet(),true);
+        else if (Inequality.INSTANCE.equals(dlPredicate))
+            m_extensionManager.addAssertion(Equality.INSTANCE,getNodeForTerm(termsToNodes,atom.getArgument(0)),getNodeForTerm(termsToNodes,atom.getArgument(1)),m_dependencySetFactory.emptySet(),true);
+        else
+            throw new IllegalArgumentException("Unsupported type of negative ground atom.");
+    }
+    protected void loadABox(Map<Term,Node> termsToNodes) {
+        for (Atom atom : m_dlOntology.getPositiveFacts())
+            loadPositiveFact(termsToNodes,atom);
+        for (Atom atom : m_dlOntology.getNegativeFacts())
+            loadNegativeFact(termsToNodes,atom);
+    }
     protected Map<Term,Node> loadABox() {
         Map<Term,Node> termsToNodes=new HashMap<Term,Node>();
-        for (Atom atom : m_dlOntology.getPositiveFacts()) {
-            DLPredicate dlPredicate=atom.getDLPredicate();
-            if (dlPredicate instanceof LiteralConcept)
-                m_extensionManager.addConceptAssertion((LiteralConcept)dlPredicate,getNodeForTerm(termsToNodes,atom.getArgument(0)),m_dependencySetFactory.emptySet(),true);
-            else if (dlPredicate instanceof AtomicRole || Equality.INSTANCE.equals(dlPredicate) || Inequality.INSTANCE.equals(dlPredicate))
-                m_extensionManager.addAssertion(dlPredicate,getNodeForTerm(termsToNodes,atom.getArgument(0)),getNodeForTerm(termsToNodes,atom.getArgument(1)),m_dependencySetFactory.emptySet(),true);
-            else
-                throw new IllegalArgumentException("Unsupported type of positive ground atom.");
-        }
-        Object[] ternaryTuple=new Object[3];
-        for (Atom atom : m_dlOntology.getNegativeFacts()) {
-            DLPredicate dlPredicate=atom.getDLPredicate();
-            if (dlPredicate instanceof LiteralConcept)
-                m_extensionManager.addConceptAssertion(((LiteralConcept)dlPredicate).getNegation(),getNodeForTerm(termsToNodes,atom.getArgument(0)),m_dependencySetFactory.emptySet(),true);
-            else if (dlPredicate instanceof AtomicRole) {
-                ternaryTuple[0]=NegatedAtomicRole.create((AtomicRole)dlPredicate);
-                ternaryTuple[1]=getNodeForTerm(termsToNodes,atom.getArgument(0));
-                ternaryTuple[2]=getNodeForTerm(termsToNodes,atom.getArgument(1));
-                m_extensionManager.addTuple(ternaryTuple,m_dependencySetFactory.emptySet(),true);
-            }
-            else if (Equality.INSTANCE.equals(dlPredicate))
-                m_extensionManager.addAssertion(Inequality.INSTANCE,getNodeForTerm(termsToNodes,atom.getArgument(0)),getNodeForTerm(termsToNodes,atom.getArgument(1)),m_dependencySetFactory.emptySet(),true);
-            else if (Inequality.INSTANCE.equals(dlPredicate))
-                m_extensionManager.addAssertion(Equality.INSTANCE,getNodeForTerm(termsToNodes,atom.getArgument(0)),getNodeForTerm(termsToNodes,atom.getArgument(1)),m_dependencySetFactory.emptySet(),true);
-            else
-                throw new IllegalArgumentException("Unsupported type of negative ground atom.");
-        }
+        loadABox(termsToNodes);
         return termsToNodes;
     }
     protected Node getNodeForTerm(Map<Term,Node> termsToNodes,Term term) {

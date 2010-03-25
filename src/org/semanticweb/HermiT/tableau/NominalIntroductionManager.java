@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -38,12 +38,12 @@ public final class NominalIntroductionManager implements Serializable {
     protected final Object[] m_bufferForRootNodes;
     protected int[] m_indicesByBranchingPoint;
     protected int m_firstUnprocessedAnnotatedEquality;
-    
+
     public NominalIntroductionManager(Tableau tableau) {
         m_tableau=tableau;
         m_dependencySetFactory=m_tableau.m_dependencySetFactory;
         m_interruptFlag=m_tableau.m_interruptFlag;
-        m_mergingManager=m_tableau.getMergingManager();
+        m_mergingManager=m_tableau.m_mergingManager;
         m_annotatedEqualities=new TupleTable(5);
         m_bufferForAnnotatedEquality=new Object[5];
         m_newRootNodesTable=new TupleTable(4);
@@ -187,7 +187,7 @@ public final class NominalIntroductionManager implements Serializable {
         else
             return (Node)m_newRootNodesTable.getTupleObject(tupleIndex,3);
     }
-    
+
     protected class NominalIntroductionBranchingPoint extends BranchingPoint {
         private static final long serialVersionUID=6678113479704184263L;
 
@@ -196,7 +196,7 @@ public final class NominalIntroductionManager implements Serializable {
         protected final Node m_otherNode;
         protected final AnnotatedEquality m_annotatedEquality;
         protected int m_currentRootNode;
-        
+
         public NominalIntroductionBranchingPoint(Tableau tableau,Node rootNode,Node niTargetNode,Node otherNode,AnnotatedEquality annotatedEquality) {
             super(tableau);
             m_rootNode=rootNode;

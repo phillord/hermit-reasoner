@@ -47,13 +47,13 @@ public final class HyperresolutionManager implements Serializable {
     protected final Object[] m_valuesBuffer;
     protected final int m_maxNumberOfVariables;
 
-    public HyperresolutionManager(Tableau tableau) {
+    public HyperresolutionManager(Tableau tableau,Set<DLClause> dlClauses) {
         InterruptFlag interruptFlag=tableau.m_interruptFlag;
-        m_extensionManager=tableau.getExtensionManager();
+        m_extensionManager=tableau.m_extensionManager;
         m_tupleConsumersByDeltaPredicate=new HashMap<DLPredicate,CompiledDLClauseInfo>();
         // Index DL clauses by body
         Map<DLClauseBodyKey,List<DLClause>> dlClausesByBody=new HashMap<DLClauseBodyKey,List<DLClause>>();
-        for (DLClause dlClause : tableau.m_dlOntology.getDLClauses()) {
+        for (DLClause dlClause : dlClauses) {
             DLClauseBodyKey key=new DLClauseBodyKey(dlClause);
             List<DLClause> dlClausesForKey=dlClausesByBody.get(key);
             if (dlClausesForKey==null) {
@@ -66,7 +66,7 @@ public final class HyperresolutionManager implements Serializable {
         // Compile the DL clauses
         Map<Integer,ExtensionTable.Retrieval> retrievalsByArity=new HashMap<Integer,ExtensionTable.Retrieval>();
         DLClauseEvaluator.BufferSupply bufferSupply=new DLClauseEvaluator.BufferSupply();
-        DLClauseEvaluator.ValuesBufferManager valuesBufferManager=new DLClauseEvaluator.ValuesBufferManager(tableau.m_dlOntology.getDLClauses());
+        DLClauseEvaluator.ValuesBufferManager valuesBufferManager=new DLClauseEvaluator.ValuesBufferManager(dlClauses);
         Map<Integer,UnionDependencySet> unionDependencySetsBySize=new HashMap<Integer,UnionDependencySet>();
         for (Map.Entry<DLClauseBodyKey,List<DLClause>> entry : dlClausesByBody.entrySet()) {
             DLClause bodyDLClause=entry.getKey().m_dlClause;
@@ -96,6 +96,9 @@ public final class HyperresolutionManager implements Serializable {
         m_valuesBuffer=valuesBufferManager.m_valuesBuffer;
         m_maxNumberOfVariables=valuesBufferManager.m_maxNumberOfVariables;
     }
+    protected boolean isPredicateWithExtension(DLPredicate dlPredicate) {
+        return !NodeIDLessEqualThan.INSTANCE.equals(dlPredicate) && !(dlPredicate instanceof NodeIDsAscendingOrEqual);
+    }
     public void clear() {
         for (int retrievalIndex=m_deltaOldRetrievals.length-1;retrievalIndex>=0;--retrievalIndex)
             m_deltaOldRetrievals[retrievalIndex].clear();
@@ -112,23 +115,19 @@ public final class HyperresolutionManager implements Serializable {
         for (int variableIndex=0;variableIndex<m_maxNumberOfVariables;variableIndex++)
             m_valuesBuffer[variableIndex]=null;
     }
-    protected boolean isPredicateWithExtension(DLPredicate dlPredicate) {
-        return !NodeIDLessEqualThan.INSTANCE.equals(dlPredicate) && !(dlPredicate instanceof NodeIDsAscendingOrEqual);
-    }
     public void applyDLClauses() {
-        for (int index=0;index<m_deltaOldRetrievals.length;index++)
-            processDeltaOld(m_deltaOldRetrievals[index]);
-    }
-    protected void processDeltaOld(ExtensionTable.Retrieval retrieval) {
-        retrieval.open();
-        Object[] tupleBuffer=retrieval.getTupleBuffer();
-        while (!retrieval.afterLast() && !m_extensionManager.containsClash()) {
-            CompiledDLClauseInfo compiledDLClauseInfo=m_tupleConsumersByDeltaPredicate.get(tupleBuffer[0]);
-            while (compiledDLClauseInfo!=null) {
-                compiledDLClauseInfo.evaluate();
-                compiledDLClauseInfo=compiledDLClauseInfo.m_next;
+        for (int index=0;index<m_deltaOldRetrievals.length;index++) {
+            ExtensionTable.Retrieval retrieval=m_deltaOldRetrievals[index];
+            retrieval.open();
+            Object[] tupleBuffer=retrieval.getTupleBuffer();
+            while (!retrieval.afterLast() && !m_extensionManager.containsClash()) {
+                CompiledDLClauseInfo compiledDLClauseInfo=m_tupleConsumersByDeltaPredicate.get(tupleBuffer[0]);
+                while (compiledDLClauseInfo!=null) {
+                    compiledDLClauseInfo.evaluate();
+                    compiledDLClauseInfo=compiledDLClauseInfo.m_next;
+                }
+                retrieval.next();
             }
-            retrieval.next();
         }
     }
 

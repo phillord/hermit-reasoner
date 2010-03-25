@@ -78,7 +78,7 @@ public final class GroundDisjunction implements Serializable {
 
     @SuppressWarnings("fallthrough")
     public boolean isSatisfied(Tableau tableau) {
-        ExtensionManager extensionManager=tableau.getExtensionManager();
+        ExtensionManager extensionManager=tableau.m_extensionManager;
         for (int disjunctIndex=0;disjunctIndex<getNumberOfDisjuncts();disjunctIndex++) {
             DLPredicate dlPredicate=getDLPredicate(disjunctIndex);
             switch (dlPredicate.getArity()) {
@@ -109,17 +109,17 @@ public final class GroundDisjunction implements Serializable {
         switch (dlPredicate.getArity()) {
         case 1:
             dependencySet=getArgument(disjunctIndex,0).addCanonicalNodeDependencySet(dependencySet);
-            return tableau.getExtensionManager().addAssertion(dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),dependencySet,isCore(disjunctIndex));
+            return tableau.m_extensionManager.addAssertion(dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),dependencySet,isCore(disjunctIndex));
         case 2:
             dependencySet=getArgument(disjunctIndex,0).addCanonicalNodeDependencySet(dependencySet);
             dependencySet=getArgument(disjunctIndex,1).addCanonicalNodeDependencySet(dependencySet);
-            return tableau.getExtensionManager().addAssertion(dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),getArgument(disjunctIndex,1).getCanonicalNode(),dependencySet,isCore(disjunctIndex));
+            return tableau.m_extensionManager.addAssertion(dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),getArgument(disjunctIndex,1).getCanonicalNode(),dependencySet,isCore(disjunctIndex));
         case 3:
             if (dlPredicate instanceof AnnotatedEquality) {
                 dependencySet=getArgument(disjunctIndex,0).addCanonicalNodeDependencySet(dependencySet);
                 dependencySet=getArgument(disjunctIndex,1).addCanonicalNodeDependencySet(dependencySet);
                 dependencySet=getArgument(disjunctIndex,2).addCanonicalNodeDependencySet(dependencySet);
-                return tableau.getExtensionManager().addAnnotatedEquality((AnnotatedEquality)dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),getArgument(disjunctIndex,1).getCanonicalNode(),getArgument(disjunctIndex,2).getCanonicalNode(),dependencySet);
+                return tableau.m_extensionManager.addAnnotatedEquality((AnnotatedEquality)dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),getArgument(disjunctIndex,1).getCanonicalNode(),getArgument(disjunctIndex,2).getCanonicalNode(),dependencySet);
             }
             // fall through!
         default:

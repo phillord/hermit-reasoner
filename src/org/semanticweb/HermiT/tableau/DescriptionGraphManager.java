@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -48,13 +48,13 @@ public final class DescriptionGraphManager implements Serializable {
     protected final List<Node> m_newNodes;
     protected final UnionDependencySet m_binaryUnionDependencySet;
     protected final ExtensionTable.Retrieval[] m_deltaOldRetrievals;
-    
+
     public DescriptionGraphManager(Tableau tableau) {
         m_tableau=tableau;
         m_interruptFlag=m_tableau.m_interruptFlag;
         m_tableauMonitor=m_tableau.m_tableauMonitor;
-        m_extensionManager=m_tableau.getExtensionManager();
-        m_mergingManager=m_tableau.getMergingManager();
+        m_extensionManager=m_tableau.m_extensionManager;
+        m_mergingManager=m_tableau.m_mergingManager;
         m_hasDescriptionGraphs=!m_tableau.m_dlOntology.getAllDescriptionGraphs().isEmpty();
         m_occurrenceManager=new OccurrenceManager();
         m_descriptionGraphIndices=new HashMap<DescriptionGraph,Integer>();
@@ -165,7 +165,7 @@ public final class DescriptionGraphManager implements Serializable {
         }
         else
             return false;
-    }   
+    }
     public boolean isSatisfied(ExistsDescriptionGraph existsDescriptionGraph,Node node) {
         int graphIndex=m_descriptionGraphIndices.get(existsDescriptionGraph.getDescriptionGraph()).intValue();
         int positionInTuple=existsDescriptionGraph.getVertex()+1;
@@ -272,20 +272,20 @@ public final class DescriptionGraphManager implements Serializable {
         }
         node.m_firstGraphOccurrenceNode=-1;
     }
-    
+
     protected static class OccurrenceManager implements Serializable {
         private static final long serialVersionUID = 7594355731105478918L;
-        public static final int GRAPH_INDEX=0; 
-        public static final int TUPLE_INDEX=1; 
+        public static final int GRAPH_INDEX=0;
+        public static final int TUPLE_INDEX=1;
         public static final int POSITION_IN_TUPLE=2;
         public static final int NEXT_NODE=3;
         public static final int LIST_NODE_SIZE=4;
         public static final int LIST_NODE_PAGE_SIZE=LIST_NODE_SIZE*512;
-        
+
         protected int[][] m_nodePages;
         protected int m_firstFreeListNode;
         protected int m_numberOfPages;
-        
+
         public OccurrenceManager() {
             m_nodePages=new int[10][];
             m_nodePages[0]=new int[LIST_NODE_PAGE_SIZE];
