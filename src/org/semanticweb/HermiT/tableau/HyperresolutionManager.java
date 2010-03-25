@@ -39,7 +39,6 @@ import org.semanticweb.HermiT.model.Variable;
 public final class HyperresolutionManager implements Serializable {
     private static final long serialVersionUID=-4880817508962130189L;
 
-    protected final Tableau m_tableau;
     protected final ExtensionManager m_extensionManager;
     protected final ExtensionTable.Retrieval[] m_deltaOldRetrievals;
     protected final Map<DLPredicate,CompiledDLClauseInfo> m_tupleConsumersByDeltaPredicate;
@@ -49,24 +48,25 @@ public final class HyperresolutionManager implements Serializable {
     protected final int m_maxNumberOfVariables;
 
     public HyperresolutionManager(Tableau tableau) {
-        m_tableau=tableau;
-        InterruptFlag interruptFlag=m_tableau.m_interruptFlag;
-        m_extensionManager=m_tableau.getExtensionManager();
+        InterruptFlag interruptFlag=tableau.m_interruptFlag;
+        m_extensionManager=tableau.getExtensionManager();
         m_tupleConsumersByDeltaPredicate=new HashMap<DLPredicate,CompiledDLClauseInfo>();
-        Map<Integer,ExtensionTable.Retrieval> retrievalsByArity=new HashMap<Integer,ExtensionTable.Retrieval>();
+        // Index DL clauses by body
         Map<DLClauseBodyKey,List<DLClause>> dlClausesByBody=new HashMap<DLClauseBodyKey,List<DLClause>>();
-        for (DLClause dlClause : m_tableau.m_dlOntology.getDLClauses()) {
+        for (DLClause dlClause : tableau.m_dlOntology.getDLClauses()) {
             DLClauseBodyKey key=new DLClauseBodyKey(dlClause);
-            List<DLClause> dlClauses=dlClausesByBody.get(key);
-            if (dlClauses==null) {
-                dlClauses=new ArrayList<DLClause>();
-                dlClausesByBody.put(key,dlClauses);
+            List<DLClause> dlClausesForKey=dlClausesByBody.get(key);
+            if (dlClausesForKey==null) {
+                dlClausesForKey=new ArrayList<DLClause>();
+                dlClausesByBody.put(key,dlClausesForKey);
             }
-            dlClauses.add(dlClause);
+            dlClausesForKey.add(dlClause);
             interruptFlag.checkInterrupt();
         }
+        // Compile the DL clauses
+        Map<Integer,ExtensionTable.Retrieval> retrievalsByArity=new HashMap<Integer,ExtensionTable.Retrieval>();
         DLClauseEvaluator.BufferSupply bufferSupply=new DLClauseEvaluator.BufferSupply();
-        DLClauseEvaluator.ValuesBufferManager valuesBufferManager=new DLClauseEvaluator.ValuesBufferManager(m_tableau.m_dlOntology.getDLClauses());
+        DLClauseEvaluator.ValuesBufferManager valuesBufferManager=new DLClauseEvaluator.ValuesBufferManager(tableau.m_dlOntology.getDLClauses());
         Map<Integer,UnionDependencySet> unionDependencySetsBySize=new HashMap<Integer,UnionDependencySet>();
         for (Map.Entry<DLClauseBodyKey,List<DLClause>> entry : dlClausesByBody.entrySet()) {
             DLClause bodyDLClause=entry.getKey().m_dlClause;
@@ -82,7 +82,7 @@ public final class HyperresolutionManager implements Serializable {
                         firstTableRetrieval=extensionTable.createRetrieval(new boolean[extensionTable.getArity()],ExtensionTable.View.DELTA_OLD);
                         retrievalsByArity.put(arity,firstTableRetrieval);
                     }
-                    CompiledDLClauseInfo nextTupleConsumer=new CompiledDLClauseInfo(m_tableau,swappedDLClause,entry.getValue(),firstTableRetrieval,bufferSupply,valuesBufferManager,unionDependencySetsBySize,m_tupleConsumersByDeltaPredicate.get(deltaDLPredicate));
+                    CompiledDLClauseInfo nextTupleConsumer=new CompiledDLClauseInfo(tableau,swappedDLClause,entry.getValue(),firstTableRetrieval,bufferSupply,valuesBufferManager,unionDependencySetsBySize,m_tupleConsumersByDeltaPredicate.get(deltaDLPredicate));
                     m_tupleConsumersByDeltaPredicate.put(deltaDLPredicate,nextTupleConsumer);
                     bufferSupply.reuseBuffers();
                     interruptFlag.checkInterrupt();

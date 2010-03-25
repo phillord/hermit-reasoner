@@ -37,7 +37,7 @@ public final class DisjunctionBranchingPoint extends BranchingPoint {
     }
     public void startNextChoice(Tableau tableau,DependencySet clashDependencySet) {
         if (tableau.m_useDisjunctionLearning)
-            m_groundDisjunction.getDisjunction().increaseNumberOfBacktrackings(m_sortedDisjunctIndexes[m_currentIndex]);
+            m_groundDisjunction.getGroundDisjunctionHeader().increaseNumberOfBacktrackings(m_sortedDisjunctIndexes[m_currentIndex]);
         m_currentIndex++;
         assert m_currentIndex<m_groundDisjunction.getNumberOfDisjuncts();
         int currentDisjunctIndex=m_sortedDisjunctIndexes[m_currentIndex];

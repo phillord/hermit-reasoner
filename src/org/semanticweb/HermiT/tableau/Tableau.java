@@ -60,7 +60,7 @@ public final class Tableau implements Serializable {
     protected final ExistentialExpansionStrategy m_existentialExpansionStrategy;
     protected final DLOntology m_dlOntology;
     protected final DependencySetFactory m_dependencySetFactory;
-    protected final DisjunctionManager m_disjunctionManager;
+    protected final GroundDisjunctionHeaderManager m_groundDisjunctionHeaderManager;
     protected final ExtensionManager m_extensionManager;
     protected final ClashManager m_clashManager;
     protected final HyperresolutionManager m_hyperresolutionManager;
@@ -99,7 +99,7 @@ public final class Tableau implements Serializable {
         m_existentialExpansionStrategy=existentialsExpansionStrategy;
         m_dlOntology=dlOntology;
         m_dependencySetFactory=new DependencySetFactory();
-        m_disjunctionManager=new DisjunctionManager();
+        m_groundDisjunctionHeaderManager=new GroundDisjunctionHeaderManager();
         m_extensionManager=new ExtensionManager(this);
         m_clashManager=new ClashManager(this);
         m_hyperresolutionManager=new HyperresolutionManager(this);
@@ -254,7 +254,7 @@ public final class Tableau implements Serializable {
                     m_tableauMonitor.processGroundDisjunctionStarted(groundDisjunction);
                 m_firstUnprocessedGroundDisjunction=groundDisjunction.m_previousGroundDisjunction;
                 if (!groundDisjunction.isPruned() && !groundDisjunction.isSatisfied(this)) {
-                    int[] sortedDisjunctIndexes=groundDisjunction.getDisjunction().getSortedDisjunctIndexes();
+                    int[] sortedDisjunctIndexes=groundDisjunction.getGroundDisjunctionHeader().getSortedDisjunctIndexes();
                     DependencySet dependencySet=groundDisjunction.getDependencySet();
                     if (groundDisjunction.getNumberOfDisjuncts()>1) {
                         BranchingPoint branchingPoint=new DisjunctionBranchingPoint(this,groundDisjunction,sortedDisjunctIndexes);

@@ -2,31 +2,31 @@ package org.semanticweb.HermiT.tableau;
 
 import org.semanticweb.HermiT.model.DLPredicate;
 
-public final class DisjunctionManager {
-    protected Disjunction[] m_buckets;
+public final class GroundDisjunctionHeaderManager {
+    protected GroundDisjunctionHeader[] m_buckets;
     protected int m_numberOfElements;
     protected int m_threshold;
 
-    public DisjunctionManager() {
+    public GroundDisjunctionHeaderManager() {
         clear();
     }
     public void clear() {
-        m_buckets=new Disjunction[1024];
+        m_buckets=new GroundDisjunctionHeader[1024];
         m_threshold=(int)(m_buckets.length*0.75);
         m_numberOfElements=0;
     }
-    public Disjunction getDisjunction(DLPredicate[] dlPredicates) {
+    public GroundDisjunctionHeader getGroundDisjunctionHeader(DLPredicate[] dlPredicates,int[] disjunctStart) {
         int hashCode=0;
-        for (int i=0;i<dlPredicates.length;i++)
-            hashCode+=dlPredicates[i].hashCode();
+        for (int disjunctIndex=0;disjunctIndex<dlPredicates.length;disjunctIndex++)
+            hashCode=hashCode*7+dlPredicates[disjunctIndex].hashCode()+disjunctStart[disjunctIndex];
         int bucketIndex=getIndexFor(hashCode,m_buckets.length);
-        Disjunction entry=m_buckets[bucketIndex];
+        GroundDisjunctionHeader entry=m_buckets[bucketIndex];
         while (entry!=null) {
-            if (hashCode==entry.m_hashCode && entry.isEqual(dlPredicates))
+            if (hashCode==entry.m_hashCode && entry.isEqual(dlPredicates,disjunctStart))
                 return entry;
             entry=entry.m_nextEntry;
         }
-        entry=new Disjunction(dlPredicates,hashCode,entry);
+        entry=new GroundDisjunctionHeader(dlPredicates,disjunctStart,hashCode,entry);
         m_buckets[bucketIndex]=entry;
         m_numberOfElements++;
         if (m_numberOfElements>=m_threshold)
@@ -34,11 +34,11 @@ public final class DisjunctionManager {
         return entry;
     }
     protected void resize(int newCapacity) {
-        Disjunction[] newBuckets=new Disjunction[newCapacity];
+        GroundDisjunctionHeader[] newBuckets=new GroundDisjunctionHeader[newCapacity];
         for (int i=0;i<m_buckets.length;i++) {
-            Disjunction entry=m_buckets[i];
+            GroundDisjunctionHeader entry=m_buckets[i];
             while (entry!=null) {
-                Disjunction nextEntry=entry.m_nextEntry;
+                GroundDisjunctionHeader nextEntry=entry.m_nextEntry;
                 int newIndex=getIndexFor(entry.hashCode(),newCapacity);
                 entry.m_nextEntry=newBuckets[newIndex];
                 newBuckets[newIndex]=entry;

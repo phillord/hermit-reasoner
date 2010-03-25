@@ -57,7 +57,6 @@ public abstract class RoleSubsumptionCache implements SubsumptionCache<Role> {
             for (Role superrole : superroles)
                 getRoleInfo(subrole).addKnownSubsumer(superrole);
         }
-
     }
     protected abstract void loadRoleGraph(Set<Role> allRoles,Graph<Role> roleGraph);
     public Set<Role> getAllKnownSubsumers(Role role) {

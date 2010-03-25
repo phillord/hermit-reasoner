@@ -569,8 +569,7 @@ public class DLClauseEvaluator implements Serializable {
         protected final Object[] m_valuesBuffer;
         protected final boolean[] m_coreVariables;
         protected final DependencySet m_dependencySet;
-        protected final Disjunction m_disjunction;
-        protected final int[] m_disjunctStart;
+        protected final GroundDisjunctionHeader m_groundDisjunctionHeader;
         protected final int[] m_copyIsCore;
         protected final int[] m_copyValuesToArguments;
 
@@ -579,13 +578,13 @@ public class DLClauseEvaluator implements Serializable {
             m_coreVariables=coreVariables;
             m_dependencySet=dependencySet;
             m_tableau=tableau;
-            m_disjunction=m_tableau.m_disjunctionManager.getDisjunction(headDLPredicates);
-            m_disjunctStart=new int[m_disjunction.getNumberOfDisjuncts()];
+            int[] disjunctStart=new int[headDLPredicates.length];
             int argumentsSize=0;
-            for (int disjunctIndex=0;disjunctIndex<m_disjunction.getNumberOfDisjuncts();disjunctIndex++) {
-                m_disjunctStart[disjunctIndex]=argumentsSize;
-                argumentsSize+=m_disjunction.getDisjunct(disjunctIndex).getArity();
+            for (int disjunctIndex=0;disjunctIndex<headDLPredicates.length;disjunctIndex++) {
+                disjunctStart[disjunctIndex]=argumentsSize;
+                argumentsSize+=headDLPredicates[disjunctIndex].getArity();
             }
+            m_groundDisjunctionHeader=m_tableau.m_groundDisjunctionHeaderManager.getGroundDisjunctionHeader(headDLPredicates,disjunctStart);
             m_copyIsCore=copyIsCore;
             m_copyValuesToArguments=copyValuesToArguments;
         }
@@ -603,7 +602,7 @@ public class DLClauseEvaluator implements Serializable {
                 else
                     isCore[copyIndex]=m_coreVariables[copyFrom];
             }
-            GroundDisjunction groundDisjunction=new GroundDisjunction(m_tableau,m_disjunction,m_disjunctStart,arguments,isCore,m_tableau.m_dependencySetFactory.getPermanent(m_dependencySet));
+            GroundDisjunction groundDisjunction=new GroundDisjunction(m_tableau,m_groundDisjunctionHeader,arguments,isCore,m_tableau.m_dependencySetFactory.getPermanent(m_dependencySet));
             if (!groundDisjunction.isSatisfied(m_tableau))
                 m_tableau.addGroundDisjunction(groundDisjunction);
             return programCounter+1;

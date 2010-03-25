@@ -27,17 +27,15 @@ import org.semanticweb.HermiT.model.Equality;
 public final class GroundDisjunction implements Serializable {
     private static final long serialVersionUID=6245673952732442673L;
 
-    protected final Disjunction m_disjunction;
-    protected final int[] m_disjunctStart;
+    protected final GroundDisjunctionHeader m_groundDisjunctionHeader;
     protected final Node[] m_arguments;
     protected final boolean[] m_isCore;
     protected PermanentDependencySet m_dependencySet;
     protected GroundDisjunction m_previousGroundDisjunction;
     protected GroundDisjunction m_nextGroundDisjunction;
 
-    public GroundDisjunction(Tableau tableau,Disjunction disjunction,int[] disjunctStart,Node[] arguments,boolean[] isCore,DependencySet dependencySet) {
-        m_disjunction=disjunction;
-        m_disjunctStart=disjunctStart;
+    public GroundDisjunction(Tableau tableau,GroundDisjunctionHeader groundDisjunctionHeader,Node[] arguments,boolean[] isCore,DependencySet dependencySet) {
+        m_groundDisjunctionHeader=groundDisjunctionHeader;
         m_arguments=arguments;
         m_isCore=isCore;
         m_dependencySet=tableau.m_dependencySetFactory.getPermanent(dependencySet);
@@ -54,13 +52,13 @@ public final class GroundDisjunction implements Serializable {
         m_dependencySet=null;
     }
     public int getNumberOfDisjuncts() {
-        return m_disjunction.getNumberOfDisjuncts();
+        return m_groundDisjunctionHeader.m_dlPredicates.length;
     }
     public DLPredicate getDLPredicate(int disjunctIndex) {
-        return m_disjunction.m_dlPredicates[disjunctIndex];
+        return m_groundDisjunctionHeader.m_dlPredicates[disjunctIndex];
     }
     public Node getArgument(int disjunctIndex,int argumentIndex) {
-        return m_arguments[m_disjunctStart[disjunctIndex]+argumentIndex];
+        return m_arguments[m_groundDisjunctionHeader.m_disjunctStart[disjunctIndex]+argumentIndex];
     }
     public boolean isCore(int disjunctIndex) {
         return m_isCore[disjunctIndex];
@@ -68,8 +66,8 @@ public final class GroundDisjunction implements Serializable {
     public DependencySet getDependencySet() {
         return m_dependencySet;
     }
-    public Disjunction getDisjunction() {
-        return m_disjunction;
+    public GroundDisjunctionHeader getGroundDisjunctionHeader() {
+        return m_groundDisjunctionHeader;
     }
     public boolean isPruned() {
         for (int argumentIndex=m_arguments.length-1;argumentIndex>=0;--argumentIndex)
