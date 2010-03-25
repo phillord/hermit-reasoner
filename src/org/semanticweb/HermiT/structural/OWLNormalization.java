@@ -402,30 +402,38 @@ public class OWLNormalization {
         // Object property axioms
 
         public void visit(OWLSubObjectPropertyOfAxiom axiom) {
-            addInclusion(axiom.getSubProperty(),axiom.getSuperProperty());
+            if (!axiom.getSubProperty().isOWLBottomObjectProperty() && !axiom.getSuperProperty().isOWLTopObjectProperty())
+                addInclusion(axiom.getSubProperty(),axiom.getSuperProperty());
             if (m_hasDGraphs) {
                 m_axioms.m_objectPropertiesUsedInAxioms.add(axiom.getSubProperty().getNamedProperty());
                 m_axioms.m_objectPropertiesUsedInAxioms.add(axiom.getSuperProperty().getNamedProperty());
             }
         }
         public void visit(OWLSubPropertyChainOfAxiom axiom) {
-            List<OWLObjectPropertyExpression> subPropertyChain=axiom.getPropertyChain();
-            OWLObjectPropertyExpression superObjectPropertyExpression=axiom.getSuperProperty();
-            if (subPropertyChain.size()==1)
-                addInclusion(subPropertyChain.get(0),superObjectPropertyExpression);
-            else if (subPropertyChain.size()==2 && subPropertyChain.get(0).equals(superObjectPropertyExpression) && subPropertyChain.get(1).equals(superObjectPropertyExpression))
-                makeTransitive(axiom.getSuperProperty());
-            else {
-                OWLObjectPropertyExpression[] subObjectProperties=new OWLObjectPropertyExpression[subPropertyChain.size()];
-                subPropertyChain.toArray(subObjectProperties);
-                addInclusion(subObjectProperties,superObjectPropertyExpression);
+            if (!containsBottomObjectProperty(axiom.getPropertyChain()) && !axiom.getSuperProperty().isOWLTopObjectProperty()) {
+                List<OWLObjectPropertyExpression> subPropertyChain=axiom.getPropertyChain();
+                OWLObjectPropertyExpression superObjectPropertyExpression=axiom.getSuperProperty();
+                if (subPropertyChain.size()==1)
+                    addInclusion(subPropertyChain.get(0),superObjectPropertyExpression);
+                else if (subPropertyChain.size()==2 && subPropertyChain.get(0).equals(superObjectPropertyExpression) && subPropertyChain.get(1).equals(superObjectPropertyExpression))
+                    makeTransitive(axiom.getSuperProperty());
+                else {
+                    OWLObjectPropertyExpression[] subObjectProperties=new OWLObjectPropertyExpression[subPropertyChain.size()];
+                    subPropertyChain.toArray(subObjectProperties);
+                    addInclusion(subObjectProperties,superObjectPropertyExpression);
+                }
             }
             if (m_hasDGraphs) {
-                for (OWLObjectPropertyExpression ope : axiom.getPropertyChain()) {
+                for (OWLObjectPropertyExpression ope : axiom.getPropertyChain())
                     m_axioms.m_objectPropertiesUsedInAxioms.add(ope.getNamedProperty());
-                }
                 m_axioms.m_objectPropertiesUsedInAxioms.add(axiom.getSuperProperty().getNamedProperty());
             }
+        }
+        protected boolean containsBottomObjectProperty(List<OWLObjectPropertyExpression> properties) {
+            for (OWLObjectPropertyExpression property : properties)
+                if (property.isOWLBottomObjectProperty())
+                    return true;
+            return false;
         }
         public void visit(OWLEquivalentObjectPropertiesAxiom axiom) {
             if (axiom.getProperties().size()>1) {
@@ -439,11 +447,9 @@ public class OWLNormalization {
                 }
                 addInclusion(last,first);
             }
-            if (m_hasDGraphs) {
-                for (OWLObjectPropertyExpression ope : axiom.getProperties()) {
+            if (m_hasDGraphs)
+                for (OWLObjectPropertyExpression ope : axiom.getProperties())
                     m_axioms.m_objectPropertiesUsedInAxioms.add(ope.getNamedProperty());
-                }
-            }
         }
         public void visit(OWLDisjointObjectPropertiesAxiom axiom) {
             OWLObjectPropertyExpression[] objectProperties=new OWLObjectPropertyExpression[axiom.getProperties().size()];
@@ -451,11 +457,9 @@ public class OWLNormalization {
             for (int i=0;i<objectProperties.length;i++)
                 objectProperties[i]=objectProperties[i].getSimplified();
             m_axioms.m_disjointObjectProperties.add(objectProperties);
-            if (m_hasDGraphs) {
-                for (OWLObjectPropertyExpression ope : axiom.getProperties()) {
+            if (m_hasDGraphs)
+                for (OWLObjectPropertyExpression ope : axiom.getProperties())
                     m_axioms.m_objectPropertiesUsedInAxioms.add(ope.getNamedProperty());
-                }
-            }
         }
         public void visit(OWLInverseObjectPropertiesAxiom axiom) {
             OWLObjectPropertyExpression first=axiom.getFirstProperty();
@@ -470,9 +474,8 @@ public class OWLNormalization {
         public void visit(OWLObjectPropertyDomainAxiom axiom) {
             OWLObjectAllValuesFrom allPropertyNohting=m_factory.getOWLObjectAllValuesFrom(axiom.getProperty().getSimplified(),m_factory.getOWLNothing());
             m_inclusionsAsDisjunctions.add(new OWLClassExpression[] { positive(axiom.getDomain()),allPropertyNohting });
-            if (m_hasDGraphs) {
+            if (m_hasDGraphs)
                 m_axioms.m_objectPropertiesUsedInAxioms.add(axiom.getProperty().getNamedProperty());
-            }
         }
         public void visit(OWLObjectPropertyRangeAxiom axiom) {
             OWLObjectAllValuesFrom allPropertyRange=m_factory.getOWLObjectAllValuesFrom(axiom.getProperty().getSimplified(),positive(axiom.getRange()));
@@ -480,46 +483,39 @@ public class OWLNormalization {
         }
         public void visit(OWLFunctionalObjectPropertyAxiom axiom) {
             m_inclusionsAsDisjunctions.add(new OWLClassExpression[] { m_factory.getOWLObjectMaxCardinality(1,axiom.getProperty().getSimplified()) });
-            if (m_hasDGraphs) {
+            if (m_hasDGraphs)
                 m_axioms.m_objectPropertiesUsedInAxioms.add(axiom.getProperty().getNamedProperty());
-            }
         }
         public void visit(OWLInverseFunctionalObjectPropertyAxiom axiom) {
             m_inclusionsAsDisjunctions.add(new OWLClassExpression[] { m_factory.getOWLObjectMaxCardinality(1,axiom.getProperty().getSimplified().getInverseProperty()) });
-            if (m_hasDGraphs) {
+            if (m_hasDGraphs)
                 m_axioms.m_objectPropertiesUsedInAxioms.add(axiom.getProperty().getNamedProperty());
-            }
         }
         public void visit(OWLReflexiveObjectPropertyAxiom axiom) {
             makeReflexive(axiom.getProperty());
-            if (m_hasDGraphs) {
+            if (m_hasDGraphs)
                 m_axioms.m_objectPropertiesUsedInAxioms.add(axiom.getProperty().getNamedProperty());
-            }
         }
         public void visit(OWLIrreflexiveObjectPropertyAxiom axiom) {
             makeIrreflexive(axiom.getProperty());
-            if (m_hasDGraphs) {
+            if (m_hasDGraphs)
                 m_axioms.m_objectPropertiesUsedInAxioms.add(axiom.getProperty().getNamedProperty());
-            }
         }
         public void visit(OWLSymmetricObjectPropertyAxiom axiom) {
             OWLObjectPropertyExpression objectProperty=axiom.getProperty();
             addInclusion(objectProperty,objectProperty.getInverseProperty());
-            if (m_hasDGraphs) {
+            if (m_hasDGraphs)
                 m_axioms.m_objectPropertiesUsedInAxioms.add(axiom.getProperty().getNamedProperty());
-            }
         }
         public void visit(OWLAsymmetricObjectPropertyAxiom axiom) {
             makeAsymmetric(axiom.getProperty());
-            if (m_hasDGraphs) {
+            if (m_hasDGraphs)
                 m_axioms.m_objectPropertiesUsedInAxioms.add(axiom.getProperty().getNamedProperty());
-            }
         }
         public void visit(OWLTransitiveObjectPropertyAxiom axiom) {
             makeTransitive(axiom.getProperty());
-            if (m_hasDGraphs) {
+            if (m_hasDGraphs)
                 m_axioms.m_objectPropertiesUsedInAxioms.add(axiom.getProperty().getNamedProperty());
-            }
         }
 
         // Data property axioms
@@ -533,12 +529,10 @@ public class OWLNormalization {
         public void visit(OWLSubDataPropertyOfAxiom axiom) {
             OWLDataPropertyExpression subDataProperty=axiom.getSubProperty();
             OWLDataPropertyExpression superDataProperty=axiom.getSuperProperty();
-            if (subDataProperty.isOWLTopDataProperty()) {
+            if (subDataProperty.isOWLTopDataProperty())
                 throw new IllegalArgumentException("Error: In OWL 2 DL, owl:topDataProperty is only allowed to occur in the super property position of SubDataPropertyOf axioms, but the ontology contains an axiom SubDataPropertyOf(owl:topDataProperty "+subDataProperty.asOWLDataProperty().getIRI()+").");
-            }
-            else if (!superDataProperty.isOWLTopDataProperty()) {
+            else if (!subDataProperty.isOWLBottomDataProperty() && !superDataProperty.isOWLTopDataProperty())
                 addInclusion(subDataProperty,superDataProperty);
-            }
         }
         public void visit(OWLEquivalentDataPropertiesAxiom axiom) {
             for (OWLDataPropertyExpression dp : axiom.getProperties()) {
@@ -558,10 +552,9 @@ public class OWLNormalization {
             }
         }
         public void visit(OWLDisjointDataPropertiesAxiom axiom) {
-            for (OWLDataPropertyExpression dp : axiom.getProperties()) {
+            for (OWLDataPropertyExpression dp : axiom.getProperties())
                 if (dp.isOWLTopDataProperty())
                     throwInvalidTopDPUseError(axiom);
-            }
             OWLDataPropertyExpression[] dataProperties=new OWLDataPropertyExpression[axiom.getProperties().size()];
             axiom.getProperties().toArray(dataProperties);
             m_axioms.m_disjointDataProperties.add(dataProperties);

@@ -15,191 +15,180 @@ public class NormalizationTest extends AbstractStructuralTest {
     public NormalizationTest(String name) {
         super(name);
     }
-    
-  public void testDataPropertiesHasValue1() throws Exception {
-      String axioms = "Declaration(Class(:Eighteen)) Declaration(DataProperty(:hasAge)) SubClassOf(:Eighteen DataHasValue(:hasAge \"18\"^^xsd:integer))";
-      loadOntologyWithAxioms(axioms);
-      Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"Eighteen>) DataSomeValuesFrom(<"+NS+"hasAge> DataOneOf(\"18\"^^xsd:integer ))))]";
-      assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
-  }
 
-  public void testDataPropertiesHasValue2() throws Exception {
-      String axioms = "Declaration(Class(:Eighteen)) Declaration(DataProperty(:hasAge)) SubClassOf(DataHasValue(:hasAge \"18\"^^xsd:integer) :Eighteen)";
-      //hasValue( a:hasAge "17"^^xsd:integer )
-      loadOntologyWithAxioms(axioms);
-      Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"Eighteen> DataAllValuesFrom(<"+NS+"hasAge> DataComplementOf(DataOneOf(\"18\"^^xsd:integer )))))]";
-      assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
-  }
-  
-  public void testDataPropertiesAll1() throws Exception {
-      String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataAllValuesFrom(:dp xsd:integer))";
-      loadOntologyWithAxioms(axioms);
-      Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataAllValuesFrom(<"+NS+"dp> xsd:integer)))]";
-      assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
-  }
-  
-  public void testDataPropertiesAll2() throws Exception {
-      String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(DataAllValuesFrom(:dp xsd:integer) :A)";
-      loadOntologyWithAxioms(axioms);
-      Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataSomeValuesFrom(<"+NS+"dp> DataComplementOf(xsd:integer))))]";
-      assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
-  }
-  
-  public void testDataPropertiesSome1() throws Exception {
-      String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(DataSomeValuesFrom(:dp xsd:string) :A)";
-      loadOntologyWithAxioms(axioms);
-      Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataAllValuesFrom(<"+NS+"dp> DataComplementOf(xsd:string))))]";
-      assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
-  }
-  
-  public void testDataPropertiesSome2() throws Exception {
-      String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataSomeValuesFrom(:dp xsd:string))";
-      loadOntologyWithAxioms(axioms);
-      Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataSomeValuesFrom(<"+NS+"dp> xsd:string)))]";
-      assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
-  }
-  
-  public void testDataPropertiesDataOneOf1() throws Exception {
-      String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataAllValuesFrom(:dp DataOneOf(\"Peter\"^^xsd:string \"19\"^^xsd:integer)))";
-      loadOntologyWithAxioms(axioms);
-      Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataAllValuesFrom(<"+NS+"dp> DataOneOf(\"19\"^^xsd:integer \"Peter\"^^xsd:string ))))]";
-      assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
-  }
-  
-  public void testDataPropertiesDataOneOf2() throws Exception {
-      String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(DataAllValuesFrom(:dp DataOneOf(\"18\"^^xsd:integer \"19\"^^xsd:integer)) :A)";
-      loadOntologyWithAxioms(axioms);
-      Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataSomeValuesFrom(<"+NS+"dp> DataComplementOf(DataOneOf(\"18\"^^xsd:integer \"19\"^^xsd:integer )))))]";
-      assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
-  }
-
-  public void testDataPropertiesDataComplementOf1() throws Exception {
-      String axioms = "SubClassOf(:A DataAllValuesFrom(:dp DataComplementOf(DataComplementOf(DataOneOf(\"18\"^^xsd:integer \"19\"^^xsd:integer)))))";
-      loadOntologyWithAxioms(axioms);
-      Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataAllValuesFrom(<"+NS+"dp> DataOneOf(\"18\"^^xsd:integer \"19\"^^xsd:integer ))))]";
-      assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
-  }
-  
-  public void testDataPropertiesMax1() throws Exception {
-      String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataMaxCardinality(1 :dp xsd:string))";
-      loadOntologyWithAxioms(axioms);
-      Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataMaxCardinality(1 <"+NS+"dp> xsd:string)))]";
-      assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
-  }
-  
-  public void testDataPropertiesMax2() throws Exception {
-      String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(DataMaxCardinality(1 :dp xsd:string) :A)";
-      loadOntologyWithAxioms(axioms);
-      Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataMinCardinality(2 <"+NS+"dp> xsd:string)))]";
-      assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
-  }
-  
-  public void testDataPropertiesMax3() throws Exception {
-      String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataMaxCardinality(5 :dp xsd:integer))";
-      loadOntologyWithAxioms(axioms);
-      Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataMaxCardinality(5 <"+NS+"dp> xsd:integer)))]";
-      assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
-  }
-  
-  public void testDataPropertiesMax4() throws Exception {
-      String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(DataMaxCardinality(5 :dp xsd:integer) :A)";
-      loadOntologyWithAxioms(axioms);
-      Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataMinCardinality(6 <"+NS+"dp> xsd:integer)))]";
-      assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
-  }
-  
-  public void testDataPropertiesMin1() throws Exception {
-      String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(DataMinCardinality(1 :dp xsd:string) :A)";
-      loadOntologyWithAxioms(axioms);
-      Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataAllValuesFrom(<"+NS+"dp> DataComplementOf(xsd:string))))]";
-      assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
-  }
-  
-  public void testDataPropertiesMin2() throws Exception {
-      String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(DataMinCardinality(3 :dp xsd:string) :A)";
-      loadOntologyWithAxioms(axioms);
-      Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataMaxCardinality(2 <"+NS+"dp> xsd:string)))]";
-      assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
-  }
-  
-  public void testDataPropertiesMin3() throws Exception {
-      String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataMinCardinality(1 :dp xsd:string))";
-      loadOntologyWithAxioms(axioms);
-      Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataSomeValuesFrom(<"+NS+"dp> xsd:string)))]";
-      assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
-  }
-  
-  public void testDataPropertiesMin4() throws Exception {
-      String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataMinCardinality(5 :dp xsd:string))";
-      loadOntologyWithAxioms(axioms);
-      Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataMinCardinality(5 <"+NS+"dp> xsd:string)))]";
-      assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
-  }
-  
-  public void testDataPropertiesExact1() throws Exception {
-      String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataExactCardinality(1 :dp xsd:integer))";
-      loadOntologyWithAxioms(axioms);
-      Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataMaxCardinality(1 <"+NS+"dp> xsd:integer))), SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataSomeValuesFrom(<"+NS+"dp> xsd:integer)))]";
-      assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
-  }
-  
-  public void testDataPropertiesExact2() throws Exception {
-      String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataExactCardinality(3 :dp xsd:integer))";
-      loadOntologyWithAxioms(axioms);
-      Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataMinCardinality(3 <"+NS+"dp> xsd:integer))), SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataMaxCardinality(3 <"+NS+"dp> xsd:integer)))]";
-      assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
-  }
-  
-  public void testDataPropertiesExact3() throws Exception {
-      String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(DataExactCardinality(1 :dp xsd:integer) :A)";
-      loadOntologyWithAxioms(axioms);
-      Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataAllValuesFrom(<"+NS+"dp> DataComplementOf(xsd:integer)) DataMinCardinality(2 <"+NS+"dp> xsd:integer)))]";
-      assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
-  }
-  
-  public void testDataPropertiesExact4() throws Exception {
-      String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(DataExactCardinality(3 :dp xsd:integer) :A)";
-      loadOntologyWithAxioms(axioms);
-      Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-      String expectedResult = "[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataMinCardinality(4 <"+NS+"dp> xsd:integer) DataMaxCardinality(2 <"+NS+"dp> xsd:integer)))]";
-      assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
-  }
-  
-    public void testKeys() throws Exception {
-        String axioms="HasKey(:C (:r) (:dp))";
-        loadOntologyWithAxioms(axioms);
-        Set<OWLAxiom> normalizedAxioms=getNormalizedAxioms();
-        String expectedResult="[HasKey(<"+NS+"C> (<"+NS+"r> ) (<"+NS+"dp> ))]";
-        assertTrue(expectedResult.trim().equals(normalizedAxioms.toString().trim()));
+    public void testDataPropertiesHasValue1() throws Exception {
+        assertNormalization(
+            "Declaration(Class(:Eighteen)) Declaration(DataProperty(:hasAge)) SubClassOf(:Eighteen DataHasValue(:hasAge \"18\"^^xsd:integer))",
+            "SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"Eighteen>) DataSomeValuesFrom(<"+NS+"hasAge> DataOneOf(\"18\"^^xsd:integer ))))"
+        );
     }
-    
+
+    public void testDataPropertiesHasValue2() throws Exception {
+        assertNormalization(
+            "Declaration(Class(:Eighteen)) Declaration(DataProperty(:hasAge)) SubClassOf(DataHasValue(:hasAge \"18\"^^xsd:integer) :Eighteen)",
+            "SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"Eighteen> DataAllValuesFrom(<"+NS+"hasAge> DataComplementOf(DataOneOf(\"18\"^^xsd:integer )))))"
+        );
+    }
+
+    public void testDataPropertiesAll1() throws Exception {
+        assertNormalization(
+            "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataAllValuesFrom(:dp xsd:integer))",
+            "SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataAllValuesFrom(<"+NS+"dp> xsd:integer)))"
+        );
+    }
+
+    public void testDataPropertiesAll2() throws Exception {
+        assertNormalization(
+            "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(DataAllValuesFrom(:dp xsd:integer) :A)",
+            "SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataSomeValuesFrom(<"+NS+"dp> DataComplementOf(xsd:integer))))"
+        );
+    }
+
+    public void testDataPropertiesSome1() throws Exception {
+        assertNormalization(
+            "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(DataSomeValuesFrom(:dp xsd:string) :A)",
+            "SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataAllValuesFrom(<"+NS+"dp> DataComplementOf(xsd:string))))"
+        );
+    }
+
+    public void testDataPropertiesSome2() throws Exception {
+        assertNormalization(
+            "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataSomeValuesFrom(:dp xsd:string))",
+            "SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataSomeValuesFrom(<"+NS+"dp> xsd:string)))"
+        );
+    }
+
+    public void testDataPropertiesDataOneOf1() throws Exception {
+        assertNormalization(
+            "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataAllValuesFrom(:dp DataOneOf(\"Peter\"^^xsd:string \"19\"^^xsd:integer)))",
+            "SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataAllValuesFrom(<"+NS+"dp> DataOneOf(\"19\"^^xsd:integer \"Peter\"^^xsd:string ))))"
+        );
+    }
+
+    public void testDataPropertiesDataOneOf2() throws Exception {
+        assertNormalization(
+            "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(DataAllValuesFrom(:dp DataOneOf(\"18\"^^xsd:integer \"19\"^^xsd:integer)) :A)",
+            "SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataSomeValuesFrom(<"+NS+"dp> DataComplementOf(DataOneOf(\"18\"^^xsd:integer \"19\"^^xsd:integer )))))"
+        );
+    }
+
+    public void testDataPropertiesDataComplementOf1() throws Exception {
+        assertNormalization(
+            "SubClassOf(:A DataAllValuesFrom(:dp DataComplementOf(DataComplementOf(DataOneOf(\"18\"^^xsd:integer \"19\"^^xsd:integer)))))",
+            "SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataAllValuesFrom(<"+NS+"dp> DataOneOf(\"18\"^^xsd:integer \"19\"^^xsd:integer ))))"
+        );
+    }
+
+    public void testDataPropertiesMax1() throws Exception {
+        assertNormalization(
+            "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataMaxCardinality(1 :dp xsd:string))",
+            "SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataMaxCardinality(1 <"+NS+"dp> xsd:string)))"
+        );
+    }
+
+    public void testDataPropertiesMax2() throws Exception {
+        assertNormalization(
+            "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(DataMaxCardinality(1 :dp xsd:string) :A)",
+            "SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataMinCardinality(2 <"+NS+"dp> xsd:string)))"
+        );
+    }
+
+    public void testDataPropertiesMax3() throws Exception {
+        assertNormalization(
+            "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataMaxCardinality(5 :dp xsd:integer))",
+            "SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataMaxCardinality(5 <"+NS+"dp> xsd:integer)))"
+        );
+    }
+
+    public void testDataPropertiesMax4() throws Exception {
+        assertNormalization(
+            "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(DataMaxCardinality(5 :dp xsd:integer) :A)",
+            "SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataMinCardinality(6 <"+NS+"dp> xsd:integer)))"
+        );
+    }
+
+    public void testDataPropertiesMin1() throws Exception {
+        assertNormalization(
+            "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(DataMinCardinality(1 :dp xsd:string) :A)",
+            "SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataAllValuesFrom(<"+NS+"dp> DataComplementOf(xsd:string))))"
+        );
+    }
+
+    public void testDataPropertiesMin2() throws Exception {
+        assertNormalization(
+            "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(DataMinCardinality(3 :dp xsd:string) :A)",
+            "SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataMaxCardinality(2 <"+NS+"dp> xsd:string)))"
+        );
+    }
+
+    public void testDataPropertiesMin3() throws Exception {
+        assertNormalization(
+            "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataMinCardinality(1 :dp xsd:string))",
+            "SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataSomeValuesFrom(<"+NS+"dp> xsd:string)))"
+        );
+    }
+
+    public void testDataPropertiesMin4() throws Exception {
+        assertNormalization(
+            "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataMinCardinality(5 :dp xsd:string))",
+            "SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataMinCardinality(5 <"+NS+"dp> xsd:string)))"
+        );
+    }
+
+    public void testDataPropertiesExact1() throws Exception {
+        assertNormalization(
+            "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataExactCardinality(1 :dp xsd:integer))",
+            "SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataMaxCardinality(1 <"+NS+"dp> xsd:integer)))",
+            "SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataSomeValuesFrom(<"+NS+"dp> xsd:integer)))"
+        );
+    }
+
+    public void testDataPropertiesExact2() throws Exception {
+        assertNormalization(
+            "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataExactCardinality(3 :dp xsd:integer))",
+            "SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataMinCardinality(3 <"+NS+"dp> xsd:integer)))",
+            "SubClassOf(owl:Thing ObjectUnionOf(ObjectComplementOf(<"+NS+"A>) DataMaxCardinality(3 <"+NS+"dp> xsd:integer)))"
+        );
+    }
+
+    public void testDataPropertiesExact3() throws Exception {
+        assertNormalization(
+            "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(DataExactCardinality(1 :dp xsd:integer) :A)",
+            "SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataAllValuesFrom(<"+NS+"dp> DataComplementOf(xsd:integer)) DataMinCardinality(2 <"+NS+"dp> xsd:integer)))");
+    }
+
+    public void testDataPropertiesExact4() throws Exception {
+        assertNormalization(
+            "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(DataExactCardinality(3 :dp xsd:integer) :A)",
+            "SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> DataMinCardinality(4 <"+NS+"dp> xsd:integer) DataMaxCardinality(2 <"+NS+"dp> xsd:integer)))"
+         );
+    }
+
+    public void testKeys1() throws Exception {
+        assertNormalization(
+            "HasKey(:C (:r) (:dp))",
+            "HasKey(<"+NS+"C> (<"+NS+"r> ) (<"+NS+"dp> ))"
+        );
+    }
+
     public void testKeys2() throws Exception {
-        String axioms="HasKey(ObjectIntersectionOf(:A :B) (:r) (:dp))";
-        loadOntologyWithAxioms(axioms);
-        Set<OWLAxiom> normalizedAxioms=getNormalizedAxioms();
-        String expected="[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> ObjectComplementOf(<internal:def#0>))), SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"B> ObjectComplementOf(<internal:def#0>))), HasKey(<internal:def#0> (<"+NS+"r> ) ())]";
-        String expectedAlt="[SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"B> ObjectComplementOf(<internal:def#0>))), HasKey(<internal:def#0> (<"+NS+"r> ) ()), SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> ObjectComplementOf(<internal:def#0>)))]";
-        assertTrue(expected.trim().equals(normalizedAxioms.toString().trim())||expectedAlt.trim().equals(normalizedAxioms.toString().trim()));
+        Set<String> normalizedAxiomsStrings=getNormalizedAxiomsString("HasKey(ObjectIntersectionOf(:A :B) (:r) (:dp))");
+        Set<String> control1=new HashSet<String>();
+        control1.add("SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> ObjectComplementOf(<internal:def#0>)))");
+        control1.add("SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"B> ObjectComplementOf(<internal:def#0>))))");
+        control1.add("HasKey(<internal:def#0> (<"+NS+"r> ) ())");
+        Set<String> control2=new HashSet<String>();
+        control2.add("SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"B> ObjectComplementOf(<internal:def#0>)))");
+        control2.add("SubClassOf(owl:Thing ObjectUnionOf(<"+NS+"A> ObjectComplementOf(<internal:def#0>)))");
+        control2.add("HasKey(<internal:def#0> (<"+NS+"r> ) ())");
+        if (!normalizedAxiomsStrings.equals(control1) && !normalizedAxiomsStrings.equals(control2))
+            fail();
+    }
+
+    public void testTopObjectPropertyInSuperPosition() throws Exception {
+        assertNormalization(
+            "SubObjectPropertyOf(:A owl:topObjectProperty)"
+        );
     }
 
     protected Set<OWLAxiom> getNormalizedAxioms() throws Exception {
@@ -209,12 +198,10 @@ public class NormalizationTest extends AbstractStructuralTest {
         normalization.processOntology(new Configuration(),m_ontology);
         for (OWLClassExpression[] inclusion : axiomHolder.m_conceptInclusions) {
             OWLClassExpression superDescription;
-            if (inclusion.length==1) {
+            if (inclusion.length==1)
                 superDescription=inclusion[0];
-            }
-            else {
+            else
                 superDescription=m_dataFactory.getOWLObjectUnionOf(inclusion);
-            }
             axioms.add(m_dataFactory.getOWLSubClassOfAxiom(m_ontologyManager.getOWLDataFactory().getOWLThing(),superDescription));
         }
         for (OWLObjectPropertyExpression[] inclusion : axiomHolder.m_simpleObjectPropertyInclusions)
@@ -227,14 +214,17 @@ public class NormalizationTest extends AbstractStructuralTest {
         return axioms;
     }
 
-    protected void assertNormalization(String inputResourceName,String controlResourceName) throws Exception {
-        loadOntologyFromResource(inputResourceName);
-        Set<OWLAxiom> normlizedAxioms=getNormalizedAxioms();
-        assertEquals(normlizedAxioms,controlResourceName);
+    protected Set<String> getNormalizedAxiomsString(String axiomsString) throws Exception {
+        loadOntologyWithAxioms(axiomsString);
+        Set<OWLAxiom> normalizedAxioms=getNormalizedAxioms();
+        Set<String> normalizedAxiomsString=new HashSet<String>();
+        for (OWLAxiom axiom : normalizedAxioms)
+            normalizedAxiomsString.add(axiom.toString());
+        return normalizedAxiomsString;
     }
-    protected void assertNormalization(String inputResourceName,String controlResourceName,String controlResourceNameVariant) throws Exception {
-        loadOntologyFromResource(inputResourceName);
-        Set<OWLAxiom> normlizedAxioms=getNormalizedAxioms();
-        assertEquals(normlizedAxioms,controlResourceName,controlResourceNameVariant);
+
+    protected void assertNormalization(String axiomsString,String... expectedAxiomsString) throws Exception {
+        Set<String> normalizedAxiomsString=getNormalizedAxiomsString(axiomsString);
+        assertContainsAll(normalizedAxiomsString,expectedAxiomsString);
     }
 }
