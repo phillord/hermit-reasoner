@@ -194,7 +194,7 @@ public class NormalizationTest extends AbstractStructuralTest {
     protected Set<OWLAxiom> getNormalizedAxioms() throws Exception {
         Set<OWLAxiom> axioms=new HashSet<OWLAxiom>();
         OWLAxioms axiomHolder=new OWLAxioms();
-        OWLNormalization normalization=new OWLNormalization(m_ontologyManager.getOWLDataFactory(),axiomHolder,false);
+        OWLNormalization normalization=new OWLNormalization(m_ontologyManager.getOWLDataFactory(),axiomHolder);
         normalization.processOntology(new Configuration(),m_ontology);
         for (OWLClassExpression[] inclusion : axiomHolder.m_conceptInclusions) {
             OWLClassExpression superDescription;

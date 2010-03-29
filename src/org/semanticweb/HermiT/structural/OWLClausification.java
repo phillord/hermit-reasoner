@@ -138,7 +138,7 @@ public class OWLClausification {
     }
     public DLOntology clausifyImportClosure(OWLDataFactory factory,String ontologyIRI,Collection<OWLOntology> importClosure,Collection<DescriptionGraph> descriptionGraphs) {
         OWLAxioms axioms=new OWLAxioms();
-        OWLNormalization normalization=new OWLNormalization(factory,axioms,!(descriptionGraphs==null || descriptionGraphs.isEmpty()));
+        OWLNormalization normalization=new OWLNormalization(factory,axioms);
         for (OWLOntology ontology : importClosure)
             normalization.processOntology(m_configuration,ontology);
         BuiltInPropertyManager builtInPropertyManager=new BuiltInPropertyManager(factory);

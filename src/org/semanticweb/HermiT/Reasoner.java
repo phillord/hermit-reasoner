@@ -289,9 +289,6 @@ public class Reasoner implements OWLReasoner,Serializable {
     public Configuration getConfiguration() {
         return m_configuration.clone();
     }
-    public Tableau getTableau() {
-        return m_tableau;
-    }
 
     // Ontology change management methods
 
@@ -359,7 +356,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         realise();
     }
     public boolean isConsistent() {
-        return m_tableau.isABoxSatisfiable();
+        return getTableau().isABoxSatisfiable();
     }
     public boolean isEntailmentCheckingSupported(AxiomType<?> axiomType) {
         return true;
@@ -1268,7 +1265,7 @@ public class Reasoner implements OWLReasoner,Serializable {
                 if (AtomicConcept.THING.equals(atomicConcept))
                     return true;
                 else
-                    return m_tableau.isInstanceOf(atomicConcept,individual);
+                    return getTableau().isInstanceOf(atomicConcept,individual);
             }
         };
         Set<HierarchyNode<AtomicConcept>> topPositions=Collections.singleton(m_atomicConceptHierarchy.getTopNode());
@@ -1313,7 +1310,7 @@ public class Reasoner implements OWLReasoner,Serializable {
             Individual individual=Individual.create(owlIndividual.getIRI().toString(),false);
             if (type instanceof OWLClass) {
                 AtomicConcept concept=AtomicConcept.create(((OWLClass)type).getIRI().toString());
-                return m_tableau.isInstanceOf(concept,individual);
+                return getTableau().isInstanceOf(concept,individual);
             }
             else {
                 OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
@@ -1496,6 +1493,11 @@ public class Reasoner implements OWLReasoner,Serializable {
 
     // Various creation methods
 
+    public Tableau getTableau() {
+        m_tableau.clearAdditionalAxioms();
+        return m_tableau;
+    }
+
     /**
      * A mostly internal method. Can be used to retrieve a tableau for axioms in the given ontology manager plus an additional set of axioms.
      *
@@ -1509,11 +1511,26 @@ public class Reasoner implements OWLReasoner,Serializable {
      */
     public Tableau getTableau(OWLOntologyManager ontologyManager,OWLAxiom... additionalAxioms) throws IllegalArgumentException {
         if (additionalAxioms==null || additionalAxioms.length==0)
-            return m_tableau;
+            return getTableau();
         else {
-            DLOntology newDLOntology=extendDLOntology(m_configuration,m_prefixes,"uri:urn:internal-kb",m_dlOntology,ontologyManager,additionalAxioms);
-            return createTableau(m_interruptFlag,m_configuration,newDLOntology,m_prefixes);
+            DLOntology deltaDLOntology=createDeltaDLOntology(m_configuration,m_dlOntology,ontologyManager,additionalAxioms);
+            if (isSecondStrictlyMoreExpressive(m_dlOntology,deltaDLOntology)) {
+                DLOntology mergedDLOntology=mergeDLOntologies(m_configuration,m_prefixes,"uri:urn:internal-kb",m_dlOntology,deltaDLOntology);
+                return createTableau(m_interruptFlag,m_configuration,mergedDLOntology,m_prefixes);
+            }
+            else {
+                m_tableau.setAdditionalAxioms(deltaDLOntology.getDLClauses(),deltaDLOntology.getPositiveFacts(),deltaDLOntology.getNegativeFacts());
+                return m_tableau;
+            }
         }
+    }
+    protected boolean isSecondStrictlyMoreExpressive(DLOntology first,DLOntology second) {
+        return
+            (!first.hasInverseRoles() && second.hasInverseRoles()) ||
+            (!first.hasAtMostRestrictions() && second.hasAtMostRestrictions()) ||
+            (!first.hasNominals() && second.hasNominals()) ||
+            (!first.hasDatatypes() && second.hasDatatypes()) ||
+            (first.isHorn() && !second.isHorn());
     }
     protected static Tableau createTableau(InterruptFlag interruptFlag,Configuration config,DLOntology dlOntology,Prefixes prefixes) throws IllegalArgumentException {
         if (config.checkClauses) {
@@ -1647,8 +1664,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         if (reasoner.getTableau().isDeterministic())
             return new DeterministicClassificationManager<AtomicConcept>(new AtomicConceptSubsumptionCache(reasoner));
         else
-        	return new QuasiOrderClassificationManager( reasoner , m_dlOntology );
-//        return new StandardClassificationManager<AtomicConcept>(new AtomicConceptSubsumptionCache(reasoner));
+        	return new QuasiOrderClassificationManager(reasoner,m_dlOntology);
     }
 
     protected static ClassificationManager<Role> createObjectRoleClassificationManager(Reasoner reasoner) {
@@ -1665,9 +1681,8 @@ public class Reasoner implements OWLReasoner,Serializable {
             return new StandardClassificationManager<Role>(new DataRoleSubsumptionCache(reasoner));
     }
 
-    protected static DLOntology extendDLOntology(Configuration config,Prefixes prefixes,String resultingOntologyIRI,DLOntology originalDLOntology,OWLOntologyManager ontologyManager,OWLAxiom... additionalAxioms) throws IllegalArgumentException {
+    protected static DLOntology createDeltaDLOntology(Configuration configuration,DLOntology originalDLOntology,OWLOntologyManager ontologyManager,OWLAxiom... additionalAxioms) throws IllegalArgumentException {
         try {
-            Set<DescriptionGraph> descriptionGraphs=Collections.emptySet();
             OWLDataFactory factory=ontologyManager.getOWLDataFactory();
             OWLOntology newOntology=ontologyManager.createOntology(IRI.create("uri:urn:internal-kb"));
             for (OWLAxiom axiom : additionalAxioms) {
@@ -1677,8 +1692,8 @@ public class Reasoner implements OWLReasoner,Serializable {
             }
             OWLAxioms axioms=new OWLAxioms();
             axioms.m_definedDatatypesIRIs.addAll(originalDLOntology.getDefinedDatatypeIRIs());
-            OWLNormalization normalization=new OWLNormalization(factory,axioms,!originalDLOntology.getAllDescriptionGraphs().isEmpty());
-            normalization.processOntology(config,newOntology);
+            OWLNormalization normalization=new OWLNormalization(factory,axioms);
+            normalization.processOntology(configuration,newOntology);
             BuiltInPropertyManager builtInPropertyManager=new BuiltInPropertyManager(factory);
             builtInPropertyManager.axiomatizeBuiltInPropertiesAsNeeded(axioms,originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.TOP_OBJECT_ROLE),originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.BOTTOM_OBJECT_ROLE),originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.TOP_DATA_ROLE),originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.BOTTOM_DATA_ROLE));
             if (!originalDLOntology.getAllComplexObjectRoleInclusions().isEmpty()) {
@@ -1714,27 +1729,30 @@ public class Reasoner implements OWLReasoner,Serializable {
             axiomsExpressivity.m_hasInverseRoles|=originalDLOntology.hasInverseRoles();
             axiomsExpressivity.m_hasNominals|=originalDLOntology.hasNominals();
             axiomsExpressivity.m_hasDatatypes|=originalDLOntology.hasDatatypes();
-            OWLClausification clausifier=new OWLClausification(config);
-            DLOntology newDLOntology=clausifier.clausify(ontologyManager.getOWLDataFactory(),"uri:urn:internal-kb",axioms,axiomsExpressivity,descriptionGraphs);
+            OWLClausification clausifier=new OWLClausification(configuration);
+            Set<DescriptionGraph> descriptionGraphs=Collections.emptySet();
+            return clausifier.clausify(factory,"uri:urn:internal-kb",axioms,axiomsExpressivity,descriptionGraphs);
+        }
+        catch (OWLException e) {
+            throw new IllegalStateException("Internal error: unexpected OWLException",e);
+        }
+    }
 
-            Set<DLClause> dlClauses=createUnion(originalDLOntology.getDLClauses(),newDLOntology.getDLClauses());
-            Set<Atom> positiveFacts=createUnion(originalDLOntology.getPositiveFacts(),newDLOntology.getPositiveFacts());
-            Set<Atom> negativeFacts=createUnion(originalDLOntology.getNegativeFacts(),newDLOntology.getNegativeFacts());
-            Set<AtomicConcept> atomicConcepts=createUnion(originalDLOntology.getAllAtomicConcepts(),newDLOntology.getAllAtomicConcepts());
-            Set<DLOntology.ComplexObjectRoleInclusion> complexObjectRoleInclusions=createUnion(originalDLOntology.getAllComplexObjectRoleInclusions(),newDLOntology.getAllComplexObjectRoleInclusions());
-            Set<AtomicRole> atomicObjectRoles=createUnion(originalDLOntology.getAllAtomicObjectRoles(),newDLOntology.getAllAtomicObjectRoles());
-            Set<AtomicRole> atomicDataRoles=createUnion(originalDLOntology.getAllAtomicDataRoles(),newDLOntology.getAllAtomicDataRoles());
-            Set<String> definedDatatypeIRIs=createUnion(originalDLOntology.getDefinedDatatypeIRIs(),newDLOntology.getDefinedDatatypeIRIs());
-            Set<Individual> individuals=createUnion(originalDLOntology.getAllIndividuals(),newDLOntology.getAllIndividuals());
-            boolean hasInverseRoles=originalDLOntology.hasInverseRoles() || newDLOntology.hasInverseRoles();
-            boolean hasAtMostRestrictions=originalDLOntology.hasAtMostRestrictions() || newDLOntology.hasAtMostRestrictions();
-            boolean hasNominals=originalDLOntology.hasNominals() || newDLOntology.hasNominals();
-            boolean hasDatatypes=originalDLOntology.hasDatatypes() || newDLOntology.hasDatatypes();
-            return new DLOntology(resultingOntologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,atomicObjectRoles,complexObjectRoleInclusions,atomicDataRoles,definedDatatypeIRIs,individuals,hasInverseRoles,hasAtMostRestrictions,hasNominals,hasDatatypes);
-        }
-        catch (OWLException shouldntHappen) {
-            throw new IllegalStateException("Internal error: Unexpected OWLException.",shouldntHappen);
-        }
+    protected static DLOntology mergeDLOntologies(Configuration configuration,Prefixes prefixes,String resultingOntologyIRI,DLOntology dlOntology1,DLOntology dlOntology2) throws IllegalArgumentException {
+        Set<DLClause> dlClauses=createUnion(dlOntology1.getDLClauses(),dlOntology2.getDLClauses());
+        Set<Atom> positiveFacts=createUnion(dlOntology1.getPositiveFacts(),dlOntology2.getPositiveFacts());
+        Set<Atom> negativeFacts=createUnion(dlOntology1.getNegativeFacts(),dlOntology2.getNegativeFacts());
+        Set<AtomicConcept> atomicConcepts=createUnion(dlOntology1.getAllAtomicConcepts(),dlOntology2.getAllAtomicConcepts());
+        Set<DLOntology.ComplexObjectRoleInclusion> complexObjectRoleInclusions=createUnion(dlOntology1.getAllComplexObjectRoleInclusions(),dlOntology2.getAllComplexObjectRoleInclusions());
+        Set<AtomicRole> atomicObjectRoles=createUnion(dlOntology1.getAllAtomicObjectRoles(),dlOntology2.getAllAtomicObjectRoles());
+        Set<AtomicRole> atomicDataRoles=createUnion(dlOntology1.getAllAtomicDataRoles(),dlOntology2.getAllAtomicDataRoles());
+        Set<String> definedDatatypeIRIs=createUnion(dlOntology1.getDefinedDatatypeIRIs(),dlOntology2.getDefinedDatatypeIRIs());
+        Set<Individual> individuals=createUnion(dlOntology1.getAllIndividuals(),dlOntology2.getAllIndividuals());
+        boolean hasInverseRoles=dlOntology1.hasInverseRoles() || dlOntology2.hasInverseRoles();
+        boolean hasAtMostRestrictions=dlOntology1.hasAtMostRestrictions() || dlOntology2.hasAtMostRestrictions();
+        boolean hasNominals=dlOntology1.hasNominals() || dlOntology2.hasNominals();
+        boolean hasDatatypes=dlOntology1.hasDatatypes() || dlOntology2.hasDatatypes();
+        return new DLOntology(resultingOntologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,atomicObjectRoles,complexObjectRoleInclusions,atomicDataRoles,definedDatatypeIRIs,individuals,hasInverseRoles,hasAtMostRestrictions,hasNominals,hasDatatypes);
     }
 
     protected static <T> Set<T> createUnion(Set<T> set1,Set<T> set2) {

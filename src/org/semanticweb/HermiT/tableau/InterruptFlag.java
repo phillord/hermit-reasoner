@@ -44,9 +44,8 @@ public final class InterruptFlag implements Serializable {
     public void checkInterrupt() {
         if (m_interrupt) {
             m_interrupt=false;
-            if (m_taskInterrupted) {
+            if (m_taskInterrupted)
                 throw new TimeOutException();
-            }
             else
                 throw new ReasonerInterruptedException();
         }
