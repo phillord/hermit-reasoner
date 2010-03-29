@@ -10,6 +10,7 @@ public class ReasonerIndividualReuseTest extends ReasonerTest {
     protected Configuration getConfiguration() {
         Configuration configuration=new Configuration();
         configuration.existentialStrategyType=Configuration.ExistentialStrategyType.INDIVIDUAL_REUSE;
+        configuration.throwInconsistentOntologyException=false;
         return configuration;
     }
 }

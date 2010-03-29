@@ -124,6 +124,7 @@ public abstract class AbstractTest extends TestCase {
     }
     protected Configuration getConfiguration() {
         Configuration c=new Configuration();
+        c.throwInconsistentOntologyException=false;
         //c.tableauMonitorType=Configuration.TableauMonitorType.TIMING;
         return c;
     }

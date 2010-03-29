@@ -16,6 +16,7 @@ import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDataRange;
 import org.semanticweb.owlapi.model.OWLDatatype;
 import org.semanticweb.owlapi.model.OWLDatatypeDefinitionAxiom;
@@ -630,8 +631,9 @@ public class ReasonerTest extends AbstractReasonerTest {
             "DataPropertyRange( :s xsd:nonPositiveInteger ) "+
             "EquivalentClasses( DataSomeValuesFrom( :r rdfs:Literal ) DataSomeValuesFrom( :s rdfs:Literal ) ) ";
         loadReasonerWithAxioms(axioms);
-        
-        assertTrue(m_reasoner.isEquivalentDataProperty(m_ontologyManager.getOWLDataFactory().getOWLDataProperty(IRI.create(AbstractReasonerTest.NS+"r")),m_ontologyManager.getOWLDataFactory().getOWLDataProperty(IRI.create(AbstractReasonerTest.NS+"s"))));
+        OWLDataProperty r=m_ontologyManager.getOWLDataFactory().getOWLDataProperty(IRI.create(AbstractReasonerTest.NS+"r"));
+        OWLDataProperty s=m_ontologyManager.getOWLDataFactory().getOWLDataProperty(IRI.create(AbstractReasonerTest.NS+"s"));
+        assertTrue(m_reasoner.isEquivalentDataProperty(r,s));
     }
 
     public void testComplexConceptInstanceRetrieval() throws Exception {

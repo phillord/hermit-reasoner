@@ -34,7 +34,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     public AbstractReasonerTest(String name) {
         super(name);
     }
-
+    
     protected void tearDown() {
         super.tearDown();
         m_reasoner=null;
@@ -63,8 +63,9 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         m_reasoner=new Reasoner(configuration,m_ontology,descriptionGraphs);
     }
     protected void createOWLReasoner() {
-        OWLReasonerFactory factory=new ReasonerFactory();
-        m_owlreasoner=factory.createReasoner(m_ontology);
+        Configuration c=new Configuration();
+        c.throwInconsistentOntologyException=false;
+        createOWLReasoner(c);
     }
     protected void createOWLReasoner(Configuration configuration) {
         OWLReasonerFactory factory=new ReasonerFactory();
@@ -289,7 +290,9 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
      * Can be overridden by the subclass to provide a different configuration for the tests.
      */
     protected Configuration getConfiguration() {
-        return new Configuration();
+        Configuration c=new Configuration();
+        c.throwInconsistentOntologyException=false;
+        return c;
     }
 
     protected void assertDRSatisfiable(boolean value,String... parts) throws Exception {

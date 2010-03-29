@@ -9,7 +9,6 @@ public class DatatypesTest extends AbstractReasonerTest {
     public DatatypesTest(String name) {
         super(name);
     }
-    
     public void testFreshEntitiesQuery() throws Exception {
         String axioms = "Declaration(NamedIndividual(:a)) Declaration(Class(:A))" 
         	+ "ClassAssertion(:A :a)";

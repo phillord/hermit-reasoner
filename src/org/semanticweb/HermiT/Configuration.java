@@ -168,7 +168,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
 
     /**
      * One can implement an instance of this class and pass it to HermiT. HermiT will then print warning with the
-     * warning() method of the interface, e.g., if it ignores an unsupported datatype. HeriT does not provide an
+     * warning() method of the interface, e.g., if it ignores an unsupported datatype. HermiT does not provide an
      * implementation for the interface itself though.
      */
     public WarningMonitor warningMonitor;
@@ -188,7 +188,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
      */
     public boolean checkClauses;
     /**
-     * If HermiT encounters a non-OWL2 dataype, it normally throws an error. If set to true, axioms containing unsupported
+     * If HermiT encounters a non-OWL2 datatype, it normally throws an error. If set to true, axioms containing unsupported
      * datatypes will be ignored.
      */
     public boolean ignoreUnsupportedDatatypes;
@@ -214,11 +214,22 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
      */
     public boolean useDisjunctionLearning;
     /**
-     * Only applicable if HermiT is instantiated as an OWLReasoner because otherwise HermiT does not support addition and
-     * removal of axioms. If set to true axioms that are to be added or removed are buffered and the addition and removal
-     * is only performed when the flush() method of the reasoner is called.
+     * Only applicable if HermiT is instantiated as ChangeTrackingReasoner or as an OWLReasoner via the OWLReasonerFactory because 
+     * otherwise HermiT does not support addition and removal of axioms. If set to true axioms that are to be added or removed are 
+     * buffered and the addition and removal is only performed when the flush() method of the reasoner is called.
      */
     protected boolean bufferChanges;
+    /**
+     * The default value is true and HermiT will throw an exception if it finds the ontology to be inconsistent.
+     * 
+     * If set to false, HermiT will not throw an exception for inconsistent ontologies. The only exception is when asked for data property values for an 
+     * individual and a data property because any of the infinitely many data values would be an answer. Restricting answers to just the data values in the 
+     * signature does not make much sense. If the parameter is set to false and the ontology is inconsistent, all classes occurring in the ontology are, for 
+     * example, returned as subclasses of owl:nothing. Some answers might be unexpected or unintuitive, e.g., a property will be both reflexive and irreflexive 
+     * etc. Use with care, e.g., only when trying to get explanations of inconsistencies, where throwing an error might not be helpful.   
+     */
+    public boolean throwInconsistentOntologyException;
+    
 
     public Configuration() {
         warningMonitor=null;
@@ -237,6 +248,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
         individualNodeSetPolicy=IndividualNodeSetPolicy.BY_NAME;
         freshEntityPolicy=FreshEntityPolicy.ALLOW;
         // useDisjunctionLearning=true;
+        throwInconsistentOntologyException=true;
     }
     protected void setIndividualReuseStrategyReuseAlways(Set<? extends AtomicConcept> concepts) {
         parameters.put("IndividualReuseStrategy.reuseAlways",concepts);

@@ -24,6 +24,7 @@ import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
+import org.semanticweb.owlapi.reasoner.BufferingMode;
 
 public class ChangeTrackingReasoner extends Reasoner {
     private static final long serialVersionUID=-838517681658238457L;
@@ -54,7 +55,10 @@ public class ChangeTrackingReasoner extends Reasoner {
             m_changed=false;
         }
     }
-
+    public BufferingMode getBufferingMode() {
+        return m_configuration.bufferChanges ? BufferingMode.BUFFERING : BufferingMode.NON_BUFFERING;
+    }
+    
     protected class OntologyChangeListener implements OWLOntologyChangeListener {
 
         public void ontologiesChanged(List<? extends OWLOntologyChange> changes) throws OWLException {

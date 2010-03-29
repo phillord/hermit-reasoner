@@ -14,9 +14,6 @@ import org.semanticweb.owlapi.reasoner.IndividualNodeSetPolicy;
 import org.semanticweb.owlapi.reasoner.Node;
 import org.semanticweb.owlapi.reasoner.NodeSet;
 
-
-
-
 public class OWLReasonerTest extends AbstractReasonerTest {
 
     public OWLReasonerTest(String name) {
