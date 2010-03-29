@@ -42,7 +42,7 @@ public class Numbers {
         return new BigInteger(string);
     }
     /**
-     * Parses the given string into a Java Number object representing an integer.
+     * Parses the given string into a Java Number object representing an decimal.
      * The Java object is chosen such that .equals() works correctly across all Number-derived objects.
      */
     public static Number parseDecimal(String string) throws NumberFormatException {
