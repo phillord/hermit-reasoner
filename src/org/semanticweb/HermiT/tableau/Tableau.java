@@ -483,12 +483,15 @@ public final class Tableau implements Serializable {
             m_tableauMonitor.isInstanceOfFinished(atomicConcept,individual,result);
         return result;
     }
-    public boolean isSatisfiable(Set<Atom> perTestPositiveFacts,Set<Atom> perTestNegativeFacts,Map<Individual,Node> relevantIndividuals) {
+    public boolean isSatisfiable(boolean loadABox,boolean loadAdditionalABox,Set<Atom> perTestPositiveFacts,Set<Atom> perTestNegativeFacts,Map<Individual,Node> relevantIndividuals) {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isABoxSatisfiableStarted();
         clear();
         Map<Term,Node> termsToNodes=new HashMap<Term,Node>();
-        loadABox(termsToNodes);
+        if (loadABox)
+            loadABox(termsToNodes);
+        if (loadAdditionalABox)
+            loadAdditionalABox(termsToNodes);
         if (perTestPositiveFacts!=null && !perTestPositiveFacts.isEmpty())
             for (Atom atom : perTestPositiveFacts)
                 loadPositiveFact(termsToNodes,atom);
@@ -496,7 +499,6 @@ public final class Tableau implements Serializable {
             for (Atom atom : perTestNegativeFacts)
                 loadNegativeFact(termsToNodes,atom);
         boolean result=isSatisfiable();
-        clearAdditionalAxioms();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isABoxSatisfiableFinished(result);
         return result;
@@ -534,6 +536,8 @@ public final class Tableau implements Serializable {
             loadPositiveFact(termsToNodes,atom);
         for (Atom atom : m_dlOntology.getNegativeFacts())
             loadNegativeFact(termsToNodes,atom);
+    }
+    protected void loadAdditionalABox(Map<Term,Node> termsToNodes) {
         // Load the additional facts
         if (m_additionalPositiveAtoms!=null && !m_additionalPositiveAtoms.isEmpty())
             for (Atom atom : m_additionalPositiveAtoms)
