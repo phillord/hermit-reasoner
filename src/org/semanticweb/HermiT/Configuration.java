@@ -230,6 +230,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
      */
     public boolean throwInconsistentOntologyException;
     
+    public PrepareReasonerInferences prepareReasonerInferences;
 
     public Configuration() {
         warningMonitor=null;
@@ -249,6 +250,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
         freshEntityPolicy=FreshEntityPolicy.ALLOW;
         // useDisjunctionLearning=true;
         throwInconsistentOntologyException=true;
+        prepareReasonerInferences=null;
     }
     protected void setIndividualReuseStrategyReuseAlways(Set<? extends AtomicConcept> concepts) {
         parameters.put("IndividualReuseStrategy.reuseAlways",concepts);
@@ -303,5 +305,14 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
 	}
 	public FreshEntityPolicy getFreshEntityPolicy() {
 		return freshEntityPolicy;
+	}
+	public static class PrepareReasonerInferences {
+	    public boolean classClassificationRequired=true;
+	    public boolean realisationRequired=true;
+	    public boolean dataPropertyClassificationRequired=true;
+	    public boolean objectPropertyClassificationRequired=true;
+	    public boolean objectPropertyDomainsRequired=true;
+	    public boolean objectPropertyRangesRequired=true;
+	    public boolean objectPropertyRealisationRequired=true;
 	}
 }
