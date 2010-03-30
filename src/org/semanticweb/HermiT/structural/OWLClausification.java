@@ -268,7 +268,7 @@ public class OWLClausification {
             atomicConcepts.add(AtomicConcept.create(owlClass.getIRI().toString()));
         Set<Individual> individuals=new HashSet<Individual>();
         for (OWLNamedIndividual owlIndividual : axioms.m_namedIndividuals) {
-            Individual individual=Individual.create(owlIndividual.getIRI().toString(),true);
+            Individual individual=Individual.create(owlIndividual.getIRI().toString());
             individuals.add(individual);
             // all named individuals are tagged with a concept, so that keys/rules are
             // only applied to them
@@ -455,12 +455,10 @@ public class OWLClausification {
             throw new IllegalStateException("Internal error: unsupported type of data property!");
     }
     protected static Individual getIndividual(OWLIndividual individual) {
-        if (individual.isAnonymous()) {
-            return Individual.create("internal:anon#"+individual.asOWLAnonymousIndividual().getID().toString(),false);
-        }
-        else {
-            return Individual.create(individual.asOWLNamedIndividual().getIRI().toString(),true);
-        }
+        if (individual.isAnonymous())
+            return Individual.createAnonymous(individual.asOWLAnonymousIndividual().getID().toString());
+        else
+            return Individual.create(individual.asOWLNamedIndividual().getIRI().toString());
     }
 
     protected static class NormalizedAxiomClausifier implements OWLClassExpressionVisitor {

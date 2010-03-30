@@ -63,7 +63,7 @@ public class DataRoleSubsumptionCache extends RoleSubsumptionCache {
         }
     }
     protected boolean doSatisfiabilityTest(Role role) {
-        Individual individual=Individual.create("internal:fresh-individual",false);
+        Individual individual=Individual.createAnonymous("fresh-individual");
         Constant constant=Constant.create(new Constant.AnonymousConstantValue("internal:fresh-constant"));
         return m_reasoner.getTableau().isSatisfiable(true,Collections.singleton(Atom.create((AtomicRole)role,individual,constant)),null,null,null,null);
     }
@@ -72,7 +72,7 @@ public class DataRoleSubsumptionCache extends RoleSubsumptionCache {
         // transitive data properties.
         OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
         OWLDataFactory factory=ontologyManager.getOWLDataFactory();
-        OWLIndividual individual=factory.getOWLNamedIndividual(IRI.create("internal:fresh-individual"));
+        OWLIndividual individual=factory.getOWLAnonymousIndividual("fresh-individual");
         OWLDatatype anonymousConstantsDatatype=factory.getOWLDatatype(IRI.create("internal:anonymous-constants"));
         OWLTypedLiteral constant=factory.getOWLTypedLiteral("internal:fresh-constant",anonymousConstantsDatatype);
         OWLDataProperty subproperty=factory.getOWLDataProperty(IRI.create(((AtomicRole)subrole).getIRI()));

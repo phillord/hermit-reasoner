@@ -66,7 +66,7 @@ public class AtomicConceptSubsumptionCache implements Serializable,SubsumptionCa
             return false;
         AtomicConceptInfo conceptInfo=getAtomicConceptInfo(concept);
         if (conceptInfo.m_isSatisfiable==null) {
-            Individual freshIndividual=Individual.create("internal:fresh-individual",true);
+            Individual freshIndividual=Individual.createAnonymous("fresh-individual");
             Map<Individual,Node> checkedNode=new HashMap<Individual,Node>();
             checkedNode.put(freshIndividual,null);
             Tableau tableau=m_reasoner.getTableau();
@@ -96,10 +96,10 @@ public class AtomicConceptSubsumptionCache implements Serializable,SubsumptionCa
         // Perform the actual satisfiability test
         if (!tableau.isDeterministic()) {
             // A -> B?
-            Individual freshIndividual=Individual.create("internal:fresh-individual",true);
+            Individual freshIndividual=Individual.createAnonymous("fresh-individual");
             Map<Individual,Node> checkedNode=new HashMap<Individual,Node>();
             checkedNode.put(freshIndividual,null);
-            boolean isSubsumedBy=tableau.isSatisfiable(false,Collections.singleton(Atom.create(subconcept,freshIndividual)),null,null,Collections.singleton(Atom.create(superconcept,freshIndividual)),checkedNode);
+            boolean isSubsumedBy=!tableau.isSatisfiable(false,Collections.singleton(Atom.create(subconcept,freshIndividual)),null,null,Collections.singleton(Atom.create(superconcept,freshIndividual)),checkedNode);
             // try and build a model for A and not B
             if (tableau.getExtensionManager().containsClash() && tableau.getExtensionManager().getClashDependencySet().isEmpty()) {
                 // (not B) is added a dummy nonempty dependency set. Therefore, if not B contributes to the clash,

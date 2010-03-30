@@ -326,12 +326,10 @@ public class Reasoner implements OWLReasoner,Serializable {
      */
     public boolean isDefined(OWLIndividual owlIndividual) {
         Individual individual;
-        if (owlIndividual.isAnonymous()) {
-            individual=Individual.create(owlIndividual.asOWLAnonymousIndividual().getID().toString(),false);
-        }
-        else {
-            individual=Individual.create(owlIndividual.asOWLNamedIndividual().getIRI().toString(),true);
-        }
+        if (owlIndividual.isAnonymous())
+            individual=Individual.createAnonymous(owlIndividual.asOWLAnonymousIndividual().getID().toString());
+        else
+            individual=Individual.create(owlIndividual.asOWLNamedIndividual().getIRI().toString());
         return m_dlOntology.containsIndividual(individual);
     }
     /**
@@ -399,7 +397,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         if (m_dlOntology.hasDatatypes()) {
             OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
             OWLDataFactory factory=ontologyManager.getOWLDataFactory();
-            OWLIndividual individualA=factory.getOWLNamedIndividual(IRI.create("internal:individualA"));
+            OWLIndividual individualA=factory.getOWLAnonymousIndividual("individualA");
             OWLDataProperty newDP=factory.getOWLDataProperty(IRI.create("internal:internalDP"));
             OWLDataRange dr=axiom.getDataRange();
             OWLDatatype dt=axiom.getDatatype();
@@ -476,7 +474,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         else {
             OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
             OWLDataFactory factory=ontologyManager.getOWLDataFactory();
-            OWLIndividual freshIndividual=factory.getOWLNamedIndividual(IRI.create("internal:fresh-individual"));
+            OWLIndividual freshIndividual=factory.getOWLAnonymousIndividual("fresh-individual");
             OWLClassAssertionAxiom assertClassExpression=factory.getOWLClassAssertionAxiom(classExpression,freshIndividual);
             Tableau tableau=getTableau(ontologyManager,assertClassExpression);
             return tableau.isSatisfiable(true,null,null,null,null,null);
@@ -496,7 +494,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         else {
             OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
             OWLDataFactory factory=ontologyManager.getOWLDataFactory();
-            OWLIndividual freshIndividual=factory.getOWLNamedIndividual(IRI.create("internal:fresh-individual"));
+            OWLIndividual freshIndividual=factory.getOWLAnonymousIndividual("fresh-individual");
             OWLClassAssertionAxiom assertSubClassExpression=factory.getOWLClassAssertionAxiom(subClassExpression,freshIndividual);
             OWLClassAssertionAxiom assertNotSuperClassExpression=factory.getOWLClassAssertionAxiom(superClassExpression.getObjectComplementOf(),freshIndividual);
             Tableau tableau=getTableau(ontologyManager,assertSubClassExpression,assertNotSuperClassExpression);
@@ -613,7 +611,7 @@ public class Reasoner implements OWLReasoner,Serializable {
             final Tableau tableau=getTableau(ontologyManager,classDefinitionAxiom);
             StandardClassificationManager.Relation<AtomicConcept> hierarchyRelation=new StandardClassificationManager.Relation<AtomicConcept>() {
                 public boolean doesSubsume(AtomicConcept parent,AtomicConcept child) {
-                    Individual freshIndividual=Individual.create("internal:fresh-individual",true);
+                    Individual freshIndividual=Individual.createAnonymous("fresh-individual");
                     return !tableau.isSatisfiable(true,Collections.singleton(Atom.create(child,freshIndividual)),null,null,Collections.singleton(Atom.create(parent,freshIndividual)),null);
                 }
             };
@@ -719,7 +717,7 @@ public class Reasoner implements OWLReasoner,Serializable {
             OWLObjectPropertyExpression[] subObjectProperties=new OWLObjectPropertyExpression[subPropertyChain.size()];
             subPropertyChain.toArray(subObjectProperties);
             OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
-            OWLIndividual randomIndividual=factory.getOWLNamedIndividual(IRI.create("internal:randomIndividual"));
+            OWLIndividual randomIndividual=factory.getOWLAnonymousIndividual("fresh-individual");
             OWLClassExpression owlSuperClassExpression=factory.getOWLObjectHasValue(superObjectPropertyExpression,randomIndividual);
             OWLClassExpression owlSubClassExpression=factory.getOWLObjectHasValue(subObjectProperties[subObjectProperties.length-1],randomIndividual);
             for (int i=subObjectProperties.length-2;i>=0;i--)
@@ -896,8 +894,8 @@ public class Reasoner implements OWLReasoner,Serializable {
         }
         OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
         OWLDataFactory factory=ontologyManager.getOWLDataFactory();
-        OWLIndividual individualA=factory.getOWLNamedIndividual(IRI.create("internal:individualA"));
-        OWLIndividual individualB=factory.getOWLNamedIndividual(IRI.create("internal:individualB"));
+        OWLIndividual individualA=factory.getOWLAnonymousIndividual("fresh-individual-A");
+        OWLIndividual individualB=factory.getOWLAnonymousIndividual("fresh-individual-B");
         OWLAxiom assertion=factory.getOWLObjectPropertyAssertionAxiom(propertyExpression,individualA,individualB);
         OWLAxiom assertion2;
         OWLObjectProperty testProperty;
@@ -989,8 +987,8 @@ public class Reasoner implements OWLReasoner,Serializable {
             return true;
         OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
         OWLDataFactory factory=ontologyManager.getOWLDataFactory();
-        OWLIndividual individualA=factory.getOWLNamedIndividual(IRI.create("internal:individualA"));
-        OWLIndividual individualB=factory.getOWLNamedIndividual(IRI.create("internal:individualB"));
+        OWLIndividual individualA=factory.getOWLAnonymousIndividual("fresh-individual-A");
+        OWLIndividual individualB=factory.getOWLAnonymousIndividual("fresh-individual-B");
         OWLAxiom assertion1=factory.getOWLObjectPropertyAssertionAxiom(propertyExpression,individualA,individualB);
         OWLAxiom assertion2=factory.getOWLObjectPropertyAssertionAxiom(propertyExpression.getInverseProperty(),individualA,individualB);
         Tableau tableau=getTableau(ontologyManager,assertion1,assertion2);
@@ -1008,8 +1006,8 @@ public class Reasoner implements OWLReasoner,Serializable {
             return true;
         OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
         OWLDataFactory factory=ontologyManager.getOWLDataFactory();
-        OWLIndividual individualA=factory.getOWLNamedIndividual(IRI.create("internal:individualA"));
-        OWLIndividual individualB=factory.getOWLNamedIndividual(IRI.create("internal:individualB"));
+        OWLIndividual individualA=factory.getOWLAnonymousIndividual("fresh-individual-A");
+        OWLIndividual individualB=factory.getOWLAnonymousIndividual("fresh-individual-B");
         OWLAxiom assertion1=factory.getOWLObjectPropertyAssertionAxiom(propertyExpression.getNamedProperty(),individualA,individualB);
         OWLObjectAllValuesFrom all=factory.getOWLObjectAllValuesFrom(propertyExpression.getNamedProperty(),factory.getOWLObjectComplementOf(factory.getOWLObjectOneOf(individualA)));
         OWLAxiom assertion2=factory.getOWLClassAssertionAxiom(all,individualB);
@@ -1199,7 +1197,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         if (m_dlOntology.hasDatatypes()) {
             OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
             Set<OWLLiteral> result=new HashSet<OWLLiteral>();
-            Individual ind=Individual.create(namedIndividual.getIRI().toString(),true);
+            Individual ind=Individual.create(namedIndividual.getIRI().toString());
             for (OWLDataProperty dp : getDescendantDataProperties(property).getFlattened()) {
                 AtomicRole role=AtomicRole.create(dp.getIRI().toString());
                 Map<Individual,Set<Constant>> dataPropertyAssertions=m_dlOntology.getDataPropertyAssertions().get(role);
@@ -1238,7 +1236,7 @@ public class Reasoner implements OWLReasoner,Serializable {
             }
             OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
             OWLDataFactory factory=ontologyManager.getOWLDataFactory();
-            OWLIndividual individual=factory.getOWLNamedIndividual(IRI.create("internal:individualA"));
+            OWLIndividual individual=factory.getOWLAnonymousIndividual("fresh-individual-A");
             OWLDatatype anonymousConstantsDatatype=factory.getOWLDatatype(IRI.create("internal:anonymous-constants"));
             OWLTypedLiteral constant=factory.getOWLTypedLiteral("internal:constant",anonymousConstantsDatatype);
             OWLDataProperty property=propertyExpression.asOWLDataProperty();
@@ -1399,7 +1397,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         throwInconsistentOntologyExceptionIfNecessary();
         if (!isConsistent())
             return new OWLClassNodeSet(getBottomClassNode());
-        Individual individual=Individual.create(owlIndividual.getIRI().toString(),true);
+        Individual individual=Individual.create(owlIndividual.getIRI().toString());
         Set<HierarchyNode<AtomicConcept>> directSuperConceptNodes=getDirectSuperConceptNodes(individual);
         Set<HierarchyNode<AtomicConcept>> result=new HashSet<HierarchyNode<AtomicConcept>>(directSuperConceptNodes);
         if (!direct)
@@ -1424,7 +1422,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         if (direct || isRealised())
             return getInstances(type,direct).containsEntity(owlIndividual);
         else {
-            Individual individual=Individual.create(owlIndividual.getIRI().toString(),false);
+            Individual individual=Individual.create(owlIndividual.getIRI().toString());
             if (type instanceof OWLClass) {
                 AtomicConcept atomicConcept=AtomicConcept.create(((OWLClass)type).getIRI().toString());
                 return !getTableau().isSatisfiable(true,true,null,Collections.singleton(Atom.create(atomicConcept,individual)),null,null,null);
@@ -1451,7 +1449,7 @@ public class Reasoner implements OWLReasoner,Serializable {
             Set<Individual> instances=m_realization.get(concept);
             if (instances!=null)
                 for (Individual instance : instances)
-                    if (instance.isNamed() && !Prefixes.isInternalIRI(instance.getIRI()))
+                    if (!instance.isAnonymous() && !Prefixes.isInternalIRI(instance.getIRI()))
                         result.add(new OWLNamedIndividualNode(factory.getOWLNamedIndividual(IRI.create(instance.getIRI()))));
             if (!direct) {
                 HierarchyNode<AtomicConcept> node=m_atomicConceptHierarchy.getNodeForElement(concept);
@@ -1481,7 +1479,7 @@ public class Reasoner implements OWLReasoner,Serializable {
                     Set<Individual> realizationForNodeConcept=m_realization.get(nodeAtomicConcept);
                     if (realizationForNodeConcept!=null)
                         for (Individual individual : realizationForNodeConcept)
-                            if (!tableau.isSatisfiable(true,true,null,Collections.singleton(Atom.create(queryConcept,individual)),null,null,null) && individual.isNamed() && !Prefixes.isInternalIRI(individual.getIRI()))
+                            if (!tableau.isSatisfiable(true,true,null,Collections.singleton(Atom.create(queryConcept,individual)),null,null,null) && !individual.isAnonymous() && !Prefixes.isInternalIRI(individual.getIRI()))
                                 result.add(new OWLNamedIndividualNode(factory.getOWLNamedIndividual(IRI.create(individual.getIRI()))));
                     toVisit.addAll(node.getChildNodes());
                 }
@@ -1525,7 +1523,7 @@ public class Reasoner implements OWLReasoner,Serializable {
                 Set<Individual> realizationForNodeConcept=m_realization.get(nodeAtomicConcept);
                 if (realizationForNodeConcept!=null) {
                     for (Individual individual : realizationForNodeConcept) {
-                        if (individual.isNamed() && !tableau.isSatisfiable(true,true,null,Collections.singleton(Atom.create(queryConcept,individual)),null,null,null) && !Prefixes.isInternalIRI(individual.getIRI())) {
+                        if (!individual.isAnonymous() && !tableau.isSatisfiable(true,true,null,Collections.singleton(Atom.create(queryConcept,individual)),null,null,null) && !Prefixes.isInternalIRI(individual.getIRI())) {
                             OWLNamedIndividual owlIndividual=factory.getOWLNamedIndividual(IRI.create(individual.getIRI()));
                             result.add(new OWLNamedIndividualNode(owlIndividual));
                         }
@@ -1544,7 +1542,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         if (realizationForConcept!=null) {
             OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
             for (Individual individual : realizationForConcept)
-                if (individual.isNamed() && !Prefixes.isInternalIRI(individual.getIRI()))
+                if (!individual.isAnonymous() && !Prefixes.isInternalIRI(individual.getIRI()))
                     result.add(new OWLNamedIndividualNode(factory.getOWLNamedIndividual(IRI.create(individual.getIRI()))));
         }
     }
@@ -1600,21 +1598,21 @@ public class Reasoner implements OWLReasoner,Serializable {
             return true;
         OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
         OWLDataFactory factory=ontologyManager.getOWLDataFactory();
-        OWLIndividual individualA=factory.getOWLNamedIndividual(IRI.create("internal:individualA"));
-        OWLIndividual individualB=factory.getOWLNamedIndividual(IRI.create("internal:individualB"));
+        OWLIndividual individualA=factory.getOWLNamedIndividual(IRI.create("internal:named-fresh-individual-A"));
+        OWLIndividual individualB=factory.getOWLNamedIndividual(IRI.create("internal:named-fresh-individual-B"));
         Set<OWLAxiom> axioms=new HashSet<OWLAxiom>();
         axioms.add(factory.getOWLClassAssertionAxiom(key.getClassExpression(),individualA));
         axioms.add(factory.getOWLClassAssertionAxiom(key.getClassExpression(),individualB));
         int i=0;
         for (OWLObjectPropertyExpression p : key.getObjectPropertyExpressions()) {
-            OWLIndividual tmp=factory.getOWLNamedIndividual(IRI.create("internal:individual"+i));
+            OWLIndividual tmp=factory.getOWLNamedIndividual(IRI.create("internal:named-fresh-individual-"+i));
             axioms.add(factory.getOWLObjectPropertyAssertionAxiom(p,individualA,tmp));
             axioms.add(factory.getOWLObjectPropertyAssertionAxiom(p,individualB,tmp));
             i++;
         }
         for (OWLDataPropertyExpression p : key.getDataPropertyExpressions()) {
             OWLDatatype anonymousConstantsDatatype=factory.getOWLDatatype(IRI.create("internal:anonymous-constants"));
-            OWLTypedLiteral constant=factory.getOWLTypedLiteral("internal:constant"+i,anonymousConstantsDatatype);
+            OWLTypedLiteral constant=factory.getOWLTypedLiteral("internal:constant-"+i,anonymousConstantsDatatype);
             axioms.add(factory.getOWLDataPropertyAssertionAxiom(p,individualA,constant));
             axioms.add(factory.getOWLDataPropertyAssertionAxiom(p,individualB,constant));
             i++;
@@ -2106,7 +2104,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         Set<OWLNamedIndividual> result=new HashSet<OWLNamedIndividual>();
         OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
         for (Individual ind : individuals)
-            if (ind.isNamed() && !Prefixes.isInternalIRI(ind.getIRI()))
+            if (!ind.isAnonymous() && !Prefixes.isInternalIRI(ind.getIRI()))
                 result.add(factory.getOWLNamedIndividual(IRI.create(ind.getIRI())));
         return result;
     }

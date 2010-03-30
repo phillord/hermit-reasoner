@@ -36,7 +36,7 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
@@ -74,8 +74,8 @@ public class ObjectRoleSubsumptionCache extends RoleSubsumptionCache {
         }
     }
     protected boolean doSatisfiabilityTest(Role role) {
-        Individual individualA=Individual.create("internal:fresh-individual-A",false);
-        Individual individualB=Individual.create("internal:fresh-individual-B",false);
+        Individual individualA=Individual.createAnonymous("fresh-individual-A");
+        Individual individualB=Individual.createAnonymous("fresh-individual-B");
         Atom roleAssertion;
         if (role instanceof AtomicRole)
             roleAssertion=Atom.create((AtomicRole)role,individualA,individualB);
@@ -88,8 +88,8 @@ public class ObjectRoleSubsumptionCache extends RoleSubsumptionCache {
         // we need to make sure that appropriate DL-clauses are added for negative object property assertions.
         OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
         OWLDataFactory factory=ontologyManager.getOWLDataFactory();
-        OWLNamedIndividual individualA=factory.getOWLNamedIndividual(IRI.create("internal:fresh-individual-A"));
-        OWLNamedIndividual individualB=factory.getOWLNamedIndividual(IRI.create("internal:fresh-individual-B"));
+        OWLIndividual individualA=factory.getOWLAnonymousIndividual("fresh-individual-A");
+        OWLIndividual individualB=factory.getOWLAnonymousIndividual("fresh-individual-B");
         OWLObjectPropertyExpression subpropertyExpression=getObjectPropertyExpression(factory,subrole);
         OWLObjectPropertyExpression superpropertyExpression=getObjectPropertyExpression(factory,superrole);
         OWLClass pseudoNominal=factory.getOWLClass(IRI.create("internal:pseudo-nominal"));

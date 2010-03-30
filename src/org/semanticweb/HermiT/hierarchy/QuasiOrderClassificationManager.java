@@ -54,17 +54,17 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
             return false;
         if (isUnsatisfiable(element))
             return false;
-        Individual freshIndividual=Individual.create("internal:fresh-individual",false);
+        Individual freshIndividual=Individual.createAnonymous("fresh-individual");
         return m_reasoner.getTableau().isSatisfiable(false,Collections.singleton(Atom.create(element,freshIndividual)),null,null,null,null);
     }
     public boolean isSubsumedBy(AtomicConcept subelement,AtomicConcept superelement) {
         if (getKnownSubsumers(subelement).contains(superelement))
             return true;
-        Individual freshIndividual=Individual.create("internal:fresh-individual",true);
+        Individual freshIndividual=Individual.createAnonymous("fresh-individual");
         return !m_reasoner.getTableau().isSatisfiable(false,Collections.singleton(Atom.create(subelement,freshIndividual)),null,null,Collections.singleton(Atom.create(superelement,freshIndividual)),null);
     }
     public Hierarchy<AtomicConcept> classify(ProgressMonitor<AtomicConcept> progressMonitor,AtomicConcept topElement,AtomicConcept bottomElement,final Set<AtomicConcept> elements) {
-        Individual freshIndividual=Individual.create("internal:fresh-individual",true);
+        Individual freshIndividual=Individual.createAnonymous("fresh-individual");
         if (!m_reasoner.getTableau().isSatisfiable(false,Collections.singleton(Atom.create(topElement,freshIndividual)),null,null,Collections.singleton(Atom.create(bottomElement,freshIndividual)),null))
             return Hierarchy.emptyHierarchy(elements,topElement,bottomElement);
         Relation<AtomicConcept> relation=new Relation<AtomicConcept>() {
@@ -74,7 +74,7 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
                     return true;
                 else if (!allKnownSubsumers.contains(parent) && !m_possibleSubsumptions.getSuccessors(child).contains(parent))
                     return false;
-                Individual freshIndividual=Individual.create("internal:fresh-individual",true);
+                Individual freshIndividual=Individual.createAnonymous("fresh-individual");
                 Tableau tableau=m_reasoner.getTableau();
                 boolean isSubsumedBy=!m_reasoner.getTableau().isSatisfiable(false,Collections.singleton(Atom.create(child,freshIndividual)),null,null,Collections.singleton(Atom.create(parent,freshIndividual)),null);;
                 if (!isSubsumedBy)
@@ -180,7 +180,7 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
         }
     }
     private void getKnownSubsumersForConcept(AtomicConcept concept) {
-        Individual freshIndividual=Individual.create("internal:fresh-individual",false);
+        Individual freshIndividual=Individual.createAnonymous("fresh-individual");
         Tableau tableau=m_reasoner.getTableau();
         Map<Individual,Node> checkedNode=new HashMap<Individual,Node>();
         checkedNode.put(freshIndividual,null);
@@ -314,7 +314,7 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
     }
     private boolean isEveryChildANonSubsumer(Set<HierarchyNode<AtomicConcept>> unknownSubsumerNodes,AtomicConcept pickedElement,int childNumberThreshold) {
         if (unknownSubsumerNodes.size()>childNumberThreshold) {
-            Individual freshIndividual=Individual.create("internal:fresh-individual",false);
+            Individual freshIndividual=Individual.createAnonymous("fresh-individual");
             Atom subconceptAssertion=Atom.create(pickedElement,freshIndividual);
             Set<Atom> superconceptAssertions=new HashSet<Atom>();
             for (HierarchyNode<AtomicConcept> unknownSupNode : unknownSubsumerNodes)

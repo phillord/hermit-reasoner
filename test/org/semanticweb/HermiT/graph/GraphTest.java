@@ -113,8 +113,8 @@ public class GraphTest extends AbstractReasonerTest {
         loadOntologyWithAxioms(axioms);
 
         Tableau tableau=getTableau(m_descriptionGraphs);
-        Individual i1=Individual.create("i1",true);
-        Individual i2=Individual.create("i2",true);
+        Individual i1=Individual.create("i1");
+        Individual i2=Individual.create("i2");
         AtomicRole r=AtomicRole.create(GraphTest.NS + "R");
         Set<Atom> positiveFacts=new HashSet<Atom>();
         positiveFacts.add(Atom.create(graph,i1,i2));
@@ -186,7 +186,7 @@ public class GraphTest extends AbstractReasonerTest {
              + "DLSafeRule(Body(ObjectPropertyAtom(:conn Variable(:x) Variable(:y))) Head(ClassAtom(:D Variable(:y))))";
         loadOntologyWithAxioms(axioms);
         Tableau t=getTableau(m_descriptionGraphs);
-        Individual freshNode=Individual.create("internal:fresh-individual",true);
+        Individual freshNode=Individual.create("ind");
         assertTrue(!t.isSatisfiable(false,Collections.singleton(Atom.create(AtomicConcept.create(GraphTest.NS+"A"),freshNode)),null,null,Collections.singleton(Atom.create(AtomicConcept.create(GraphTest.NS+"B"),freshNode)),null));
     }
 

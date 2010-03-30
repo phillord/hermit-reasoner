@@ -325,8 +325,13 @@ public final class Tableau implements Serializable {
     protected Node getNodeForTerm(Map<Term,Node> termsToNodes,Term term,DependencySet dependencySet) {
         Node node=termsToNodes.get(term);
         if (node==null) {
-            if (term instanceof Individual)
-                node=createNewNamedNode(dependencySet);
+            if (term instanceof Individual) {
+                Individual individual=(Individual)term;
+                if (individual.isAnonymous())
+                    node=createNewNINode(dependencySet);
+                else
+                    node=createNewNamedNode(dependencySet);
+            }
             else {
                 Constant constant=(Constant)term;
                 node=createNewRootConstantNode(dependencySet);
