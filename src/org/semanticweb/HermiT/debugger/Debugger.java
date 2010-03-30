@@ -162,10 +162,6 @@ public class Debugger extends TableauMonitorForwarder {
     public Map<String,DebuggerCommand> getDebuggerCommands() {
         return Collections.unmodifiableMap(m_commandsByName);
     }
-    public void dispose() {
-        m_mainFrame.dispose();
-        m_tableau=null;
-    }
     public Tableau getTableau() {
         return m_tableau;
     }

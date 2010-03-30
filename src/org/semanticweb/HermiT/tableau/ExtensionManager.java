@@ -49,8 +49,6 @@ public final class ExtensionManager implements Serializable {
     protected final Object[] m_ternaryAuxiliaryTupleAdd;
     protected final Object[] m_fouraryAuxiliaryTupleContains;
     protected final Object[] m_fouraryAuxiliaryTupleAdd;
-    protected final Map<DescriptionGraph,Object[]> m_descriptionGraphTuplesContains;
-    protected final Map<DescriptionGraph,Object[]> m_descriptionGraphTuplesAdd;
     protected PermanentDependencySet m_clashDependencySet;
     protected boolean m_addActive;
 
@@ -95,7 +93,7 @@ public final class ExtensionManager implements Serializable {
                 }
             };
         m_extensionTablesByArity.put(new Integer(3),m_ternaryExtensionTable);
-        for (DescriptionGraph descriptionGraph : m_tableau.getPermanentDLOntology().getAllDescriptionGraphs()) {
+        for (DescriptionGraph descriptionGraph : m_tableau.m_permanentDLOntology.getAllDescriptionGraphs()) {
             Integer arityInteger=Integer.valueOf(descriptionGraph.getNumberOfVertices()+1);
             if (!m_extensionTablesByArity.containsKey(arityInteger))
                 m_extensionTablesByArity.put(arityInteger,new ExtensionTableWithFullIndex(m_tableau,descriptionGraph.getNumberOfVertices()+1,!m_tableau.isDeterministic()));
@@ -108,12 +106,6 @@ public final class ExtensionManager implements Serializable {
         m_ternaryAuxiliaryTupleAdd=new Object[3];
         m_fouraryAuxiliaryTupleContains=new Object[4];
         m_fouraryAuxiliaryTupleAdd=new Object[4];
-        m_descriptionGraphTuplesContains=new HashMap<DescriptionGraph,Object[]>();
-        m_descriptionGraphTuplesAdd=new HashMap<DescriptionGraph,Object[]>();
-        for (DescriptionGraph descriptionGraph : m_tableau.getPermanentDLOntology().getAllDescriptionGraphs()) {
-            m_descriptionGraphTuplesContains.put(descriptionGraph,new Object[descriptionGraph.getNumberOfVertices()+1]);
-            m_descriptionGraphTuplesAdd.put(descriptionGraph,new Object[descriptionGraph.getNumberOfVertices()+1]);
-        }
     }
     public void clear() {
         for (int index=m_allExtensionTablesArray.length-1;index>=0;--index)
@@ -137,8 +129,6 @@ public final class ExtensionManager implements Serializable {
         m_fouraryAuxiliaryTupleAdd[1]=null;
         m_fouraryAuxiliaryTupleAdd[2]=null;
         m_fouraryAuxiliaryTupleAdd[3]=null;
-        m_descriptionGraphTuplesContains.clear();
-        m_descriptionGraphTuplesAdd.clear();
 
     }
     public void branchingPointPushed() {

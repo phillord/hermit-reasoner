@@ -97,7 +97,7 @@ public class BlockingValidatorTest extends AbstractReasonerInternalsTest {
         DirectBlockingChecker directBlockingChecker=new ValidatedSingleDirectBlockingChecker(TEST_DL_ONTOLOGY.hasInverseRoles());
         m_blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,true,true);
         ExistentialExpansionStrategy ExpansionStrategy=new CreationOrderStrategy(m_blockingStrategy);
-        m_tableau=new Tableau(new InterruptFlag(),null,ExpansionStrategy,false,TEST_DL_ONTOLOGY,new HashMap<String,Object>());
+        m_tableau=new Tableau(new InterruptFlag(),null,ExpansionStrategy,false,TEST_DL_ONTOLOGY,null,new HashMap<String,Object>());
         m_extensionManager=m_tableau.getExtensionManager();
 
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();
@@ -225,7 +225,7 @@ public class BlockingValidatorTest extends AbstractReasonerInternalsTest {
         DirectBlockingChecker directBlockingChecker=new ValidatedSingleDirectBlockingChecker(TEST_DL_ONTOLOGY.hasInverseRoles());
         m_blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,true,true);
         ExistentialExpansionStrategy ExpansionStrategy=new CreationOrderStrategy(m_blockingStrategy);
-        m_tableau=new Tableau(new InterruptFlag(),null,ExpansionStrategy,false,TEST_DL_ONTOLOGY,new HashMap<String,Object>());
+        m_tableau=new Tableau(new InterruptFlag(),null,ExpansionStrategy,false,TEST_DL_ONTOLOGY,null,new HashMap<String,Object>());
         m_extensionManager=m_tableau.getExtensionManager();
 
         DependencySet emptySet=m_tableau.getDependencySetFactory().emptySet();

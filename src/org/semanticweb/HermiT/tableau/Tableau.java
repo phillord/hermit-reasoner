@@ -32,6 +32,7 @@ import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.DataValueEnumeration;
+import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.Individual;
@@ -73,14 +74,15 @@ public final class Tableau implements Serializable {
     protected final DescriptionGraphManager m_descriptionGraphManager;
     protected final DatatypeManager m_datatypeManager;
     protected final List<List<ExistentialConcept>> m_existentialConceptsBuffers;
-    protected final boolean m_checkDatatypes;
     protected final boolean m_useDisjunctionLearning;
+    protected final boolean m_hasDescriptionGraphs;
     protected BranchingPoint[] m_branchingPoints;
     protected int m_currentBranchingPoint;
     protected int m_nonbacktrackableBranchingPoint;
     protected boolean m_isCurrentModelDeterministic;
     protected boolean m_needsThingExtension;
     protected boolean m_needsNamedExtension;
+    protected boolean m_checkDatatypes;
     protected int m_allocatedNodes;
     protected int m_numberOfNodesInTableau;
     protected int m_numberOfMergedOrPrunedNodes;
@@ -94,20 +96,25 @@ public final class Tableau implements Serializable {
     protected Node m_checkedNode0;
     protected Node m_checkedNode1;
 
-    public Tableau(InterruptFlag interruptFlag,TableauMonitor tableauMonitor,ExistentialExpansionStrategy existentialsExpansionStrategy,boolean useDisjunctionLearning,DLOntology dlOntology,Map<String,Object> parameters) {
+    public Tableau(InterruptFlag interruptFlag,TableauMonitor tableauMonitor,ExistentialExpansionStrategy existentialsExpansionStrategy,boolean useDisjunctionLearning,DLOntology permanentDLOntology,DLOntology additionalDLOntology,Map<String,Object> parameters) {
+        if (additionalDLOntology!=null && !additionalDLOntology.getAllDescriptionGraphs().isEmpty())
+            throw new IllegalArgumentException("Additional ontology cannot contain description graphs.");
         m_interruptFlag=interruptFlag;
         m_interruptFlag.startTask();
         m_parameters=parameters;
         m_tableauMonitor=tableauMonitor;
         m_existentialExpansionStrategy=existentialsExpansionStrategy;
-        m_permanentDLOntology=dlOntology;
-        m_additionalDLOntology=null;
+        m_permanentDLOntology=permanentDLOntology;
+        m_additionalDLOntology=additionalDLOntology;
         m_dependencySetFactory=new DependencySetFactory();
         m_groundDisjunctionHeaderManager=new GroundDisjunctionHeaderManager();
         m_extensionManager=new ExtensionManager(this);
         m_clashManager=new ClashManager(this);
         m_permanentHyperresolutionManager=new HyperresolutionManager(this,m_permanentDLOntology.getDLClauses());
-        m_additionalHyperresolutionManager=null;
+        if (m_additionalDLOntology!=null)
+            m_additionalHyperresolutionManager=new HyperresolutionManager(this,m_additionalDLOntology.getDLClauses());
+        else
+            m_additionalHyperresolutionManager=null;
         m_mergingManager=new MergingManager(this);
         m_existentialExpasionManager=new ExistentialExpansionManager(this);
         m_nominalIntroductionManager=new NominalIntroductionManager(this);
@@ -115,12 +122,12 @@ public final class Tableau implements Serializable {
         m_datatypeManager=new DatatypeManager(this);
         m_existentialExpansionStrategy.initialize(this);
         m_existentialConceptsBuffers=new ArrayList<List<ExistentialConcept>>();
-        m_checkDatatypes=m_permanentDLOntology.hasDatatypes();
         m_useDisjunctionLearning=useDisjunctionLearning;
+        m_hasDescriptionGraphs=!m_permanentDLOntology.getAllDescriptionGraphs().isEmpty();
         m_branchingPoints=new BranchingPoint[2];
         m_currentBranchingPoint=-1;
         m_nonbacktrackableBranchingPoint=-1;
-        clearAdditionalDLOntology();
+        updateFlagsDependentOnAdditionalOntology();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.setTableau(this);
         m_interruptFlag.endTask();
@@ -144,7 +151,7 @@ public final class Tableau implements Serializable {
         return m_existentialExpansionStrategy;
     }
     public boolean isDeterministic() {
-        return m_permanentDLOntology.isHorn() && m_existentialExpansionStrategy.isDeterministic();
+        return m_permanentDLOntology.isHorn() && (m_additionalDLOntology==null || m_additionalDLOntology.isHorn()) && m_existentialExpansionStrategy.isDeterministic();
     }
     public DependencySetFactory getDependencySetFactory() {
         return m_dependencySetFactory;
@@ -204,20 +211,273 @@ public final class Tableau implements Serializable {
             m_tableauMonitor.tableauCleared();
     }
     public void setAdditionalDLOntology(DLOntology additionalDLOntology) {
+        if (!additionalDLOntology.getAllDescriptionGraphs().isEmpty())
+            throw new IllegalArgumentException("Additional DL-ontology cannot contain description graphs.");
+        if (m_permanentDLOntology.isHorn() && !additionalDLOntology.isHorn())
+            throw new IllegalArgumentException("Additional DL-ontology is not Horn, but permanent DL-ontology is.");
+        if (m_permanentDLOntology.hasInverseRoles() && !additionalDLOntology.hasInverseRoles())
+            throw new IllegalArgumentException("Additional DL-ontology is has inverse roles, but permanent DL-ontology does not.");
+        if (m_permanentDLOntology.hasNominals() && !additionalDLOntology.hasNominals())
+            throw new IllegalArgumentException("Additional DL-ontology is has nominals, but permanent DL-ontology does not.");
         m_additionalDLOntology=additionalDLOntology;
         m_additionalHyperresolutionManager=new HyperresolutionManager(this,m_additionalDLOntology.getDLClauses());
-        m_needsThingExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING) || m_additionalHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING);
-        m_needsNamedExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.INTERNAL_NAMED) || m_additionalHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.INTERNAL_NAMED);
         m_existentialExpansionStrategy.additionalDLOntologySet(m_additionalDLOntology);
+        m_existentialExpasionManager.additionalDLOntologySet(additionalDLOntology);
+        updateFlagsDependentOnAdditionalOntology();
     }
     public void clearAdditionalDLOntology() {
         m_additionalDLOntology=null;
         m_additionalHyperresolutionManager=null;
         m_needsThingExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING);
         m_needsNamedExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.INTERNAL_NAMED);
-        m_existentialExpansionStrategy.additionalDLOntologyCleared();
+        updateFlagsDependentOnAdditionalOntology();
     }
-    public boolean isSatisfiable() {
+    protected void updateFlagsDependentOnAdditionalOntology() {
+        m_needsThingExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING);
+        m_needsNamedExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.INTERNAL_NAMED);
+        m_checkDatatypes=m_permanentDLOntology.hasDatatypes();
+        if (m_additionalHyperresolutionManager!=null) {
+            m_needsThingExtension|=m_additionalHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING);
+            m_needsNamedExtension|=m_additionalHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.INTERNAL_NAMED);
+        }
+        if (m_additionalDLOntology!=null)
+            m_checkDatatypes|=m_additionalDLOntology.hasDatatypes();
+    }
+    public boolean isSatisfiable(AtomicConcept atomicConcept) {
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.isSatisfiableStarted(atomicConcept);
+        clear();
+        Map<Term,Node> termsToNodes=new HashMap<Term,Node>();
+        if (hasNominals())
+            loadPermanentABox(termsToNodes);
+        if (m_additionalDLOntology!=null) {
+            for (Atom atom : m_additionalDLOntology.getPositiveFacts())
+                loadPositiveFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
+            for (Atom atom : m_additionalDLOntology.getNegativeFacts())
+                loadNegativeFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
+        }
+        m_checkedNode0=createNewNINode(m_dependencySetFactory.emptySet());
+        m_extensionManager.addConceptAssertion(atomicConcept,m_checkedNode0,m_dependencySetFactory.emptySet(),true);
+        boolean result=isSatisfiable();
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.isSatisfiableFinished(atomicConcept,result);
+        return result;
+    }
+    public boolean isSubsumedByList(AtomicConcept subconcept,ArrayList<AtomicConcept> superconcepts) {
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.isSubsumedByStarted(subconcept,superconcepts.get(0));
+        clear();
+        Map<Term,Node> termsToNodes=new HashMap<Term,Node>();
+        if (hasNominals())
+            loadPermanentABox(termsToNodes);
+        if (m_additionalDLOntology!=null) {
+            for (Atom atom : m_additionalDLOntology.getPositiveFacts())
+                loadPositiveFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
+            for (Atom atom : m_additionalDLOntology.getNegativeFacts())
+                loadNegativeFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
+        }
+        m_checkedNode0=createNewNINode(m_dependencySetFactory.emptySet());
+        m_extensionManager.addConceptAssertion(subconcept,m_checkedNode0,m_dependencySetFactory.emptySet(),true);
+        m_branchingPoints[0]=new BranchingPoint(this);
+        m_currentBranchingPoint++;
+        m_nonbacktrackableBranchingPoint=m_currentBranchingPoint;
+        DependencySet dependencySet=m_dependencySetFactory.addBranchingPoint(m_dependencySetFactory.emptySet(),m_currentBranchingPoint);
+        for (int index=0;index<superconcepts.size();index++)
+            m_extensionManager.addConceptAssertion(superconcepts.get(index).getNegation(),m_checkedNode0,dependencySet,true);
+        boolean result=!isSatisfiable();
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.isSubsumedByFinished(subconcept,superconcepts.get(0),result);
+        return result;
+    }
+    public boolean isSatisfiable(Role role,boolean isDataRole) {
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.isSatisfiableStarted(role);
+        clear();
+        Map<Term,Node> termsToNodes=new HashMap<Term,Node>();
+        if (hasNominals())
+            loadPermanentABox(termsToNodes);
+        if (m_additionalDLOntology!=null) {
+            for (Atom atom : m_additionalDLOntology.getPositiveFacts())
+                loadPositiveFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
+            for (Atom atom : m_additionalDLOntology.getNegativeFacts())
+                loadNegativeFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
+        }
+        m_checkedNode0=createNewNINode(m_dependencySetFactory.emptySet());
+        if (isDataRole)
+            m_checkedNode1=createNewConcreteNode(m_dependencySetFactory.emptySet(),m_checkedNode0);
+        else
+            m_checkedNode1=createNewNINode(m_dependencySetFactory.emptySet());
+        if (role instanceof InverseRole)
+            m_extensionManager.addRoleAssertion(((InverseRole)role).getInverseOf(),m_checkedNode1,m_checkedNode0,m_dependencySetFactory.emptySet(),true);
+        else
+            m_extensionManager.addRoleAssertion(role,m_checkedNode0,m_checkedNode1,m_dependencySetFactory.emptySet(),true);
+        boolean result=isSatisfiable();
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.isSatisfiableFinished(role,result);
+        return result;
+    }
+    public boolean isABoxSatisfiable() {
+        return isABoxSatisfiable(null,null);
+    }
+    public boolean isABoxSatisfiable(Individual checkedNode0Name,Individual checkedNode1Name) {
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.isABoxSatisfiableStarted();
+        clear();
+        Map<Term,Node> termsToNodes=loadABox();
+        if (m_additionalDLOntology!=null) {
+            for (Atom atom : m_additionalDLOntology.getPositiveFacts())
+                loadPositiveFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
+            for (Atom atom : m_additionalDLOntology.getNegativeFacts())
+                loadNegativeFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
+        }
+        if (checkedNode0Name==null)
+            m_checkedNode0=null;
+        else
+            m_checkedNode0=getNodeForTerm(termsToNodes,checkedNode0Name,m_dependencySetFactory.emptySet());
+        if (checkedNode1Name==null)
+            m_checkedNode1=null;
+        else
+            m_checkedNode1=getNodeForTerm(termsToNodes,checkedNode1Name,m_dependencySetFactory.emptySet());
+        // Ensure that at least one individual exists.
+        if (m_firstTableauNode==null)
+            createNewNINode(m_dependencySetFactory.emptySet());
+        boolean result=isSatisfiable();
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.isABoxSatisfiableFinished(result);
+        return result;
+    }
+    public boolean isInstanceOf(AtomicConcept atomicConcept,Individual individual) {
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.isInstanceOfStarted(atomicConcept,individual);
+        clear();
+        Map<Term,Node> termsToNodes=loadABox();
+        if (m_additionalDLOntology!=null) {
+            for (Atom atom : m_additionalDLOntology.getPositiveFacts())
+                loadPositiveFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
+            for (Atom atom : m_additionalDLOntology.getNegativeFacts())
+                loadNegativeFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
+        }
+        m_checkedNode0=getNodeForTerm(termsToNodes,individual,m_dependencySetFactory.emptySet());
+        if (m_checkedNode0==null)
+            m_checkedNode0=createNewNINode(m_dependencySetFactory.emptySet());
+        m_extensionManager.addConceptAssertion(atomicConcept.getNegation(),m_checkedNode0,m_dependencySetFactory.emptySet(),true);
+        boolean result=!isSatisfiable();
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.isInstanceOfFinished(atomicConcept,individual,result);
+        return result;
+    }
+    public boolean isSatisfiable(boolean loadAdditionalABox,Set<Atom> perTestPositiveFactsNoDependency,Set<Atom> perTestNegativeFactsNoDependency,Set<Atom> perTestPositiveFactsDummyDependency,Set<Atom> perTestNegativeFactsDummyDependency,Map<Individual,Node> nodesForIndividuals) {
+        boolean loadPermanentABox=m_permanentDLOntology.hasNominals() || (m_additionalDLOntology!=null && m_additionalDLOntology.hasNominals());
+        return isSatisfiable(loadPermanentABox,loadAdditionalABox,perTestPositiveFactsNoDependency,perTestNegativeFactsNoDependency,perTestPositiveFactsDummyDependency,perTestNegativeFactsDummyDependency,nodesForIndividuals);
+    }
+    public boolean isSatisfiable(boolean loadPermanentABox,boolean loadAdditionalABox,Set<Atom> perTestPositiveFactsNoDependency,Set<Atom> perTestNegativeFactsNoDependency,Set<Atom> perTestPositiveFactsDummyDependency,Set<Atom> perTestNegativeFactsDummyDependency,Map<Individual,Node> nodesForIndividuals) {
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.isABoxSatisfiableStarted();
+        clear();
+        Map<Term,Node> termsToNodes=new HashMap<Term,Node>();
+        if (loadPermanentABox) {
+            for (Atom atom : m_permanentDLOntology.getPositiveFacts())
+                loadPositiveFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
+            for (Atom atom : m_permanentDLOntology.getNegativeFacts())
+                loadNegativeFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
+        }
+        if (loadAdditionalABox && m_additionalDLOntology!=null) {
+            for (Atom atom : m_additionalDLOntology.getPositiveFacts())
+                loadPositiveFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
+            for (Atom atom : m_additionalDLOntology.getNegativeFacts())
+                loadNegativeFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
+        }
+        if (perTestPositiveFactsNoDependency!=null && !perTestPositiveFactsNoDependency.isEmpty())
+            for (Atom atom : perTestPositiveFactsNoDependency)
+                loadPositiveFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
+        if (perTestNegativeFactsNoDependency!=null && !perTestNegativeFactsNoDependency.isEmpty())
+            for (Atom atom : perTestNegativeFactsNoDependency)
+                loadNegativeFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
+        if ((perTestPositiveFactsDummyDependency!=null && !perTestPositiveFactsDummyDependency.isEmpty()) || (perTestNegativeFactsDummyDependency!=null && !perTestNegativeFactsDummyDependency.isEmpty())) {
+            m_branchingPoints[0]=new BranchingPoint(this);
+            m_currentBranchingPoint++;
+            m_nonbacktrackableBranchingPoint=m_currentBranchingPoint;
+            DependencySet dependencySet=m_dependencySetFactory.addBranchingPoint(m_dependencySetFactory.emptySet(),m_currentBranchingPoint);
+            if (perTestPositiveFactsDummyDependency!=null && !perTestPositiveFactsDummyDependency.isEmpty())
+                for (Atom atom : perTestPositiveFactsDummyDependency)
+                    loadPositiveFact(termsToNodes,atom,dependencySet);
+            if (perTestNegativeFactsDummyDependency!=null && !perTestNegativeFactsDummyDependency.isEmpty())
+                for (Atom atom : perTestNegativeFactsDummyDependency)
+                    loadNegativeFact(termsToNodes,atom,dependencySet);
+        }
+        if (nodesForIndividuals!=null)
+            for (Map.Entry<Individual,Node> entry : nodesForIndividuals.entrySet())
+                entry.setValue(termsToNodes.get(entry.getKey()));
+        boolean result=isSatisfiable();
+        if (m_tableauMonitor!=null)
+            m_tableauMonitor.isABoxSatisfiableFinished(result);
+        return result;
+    }
+    protected void loadPositiveFact(Map<Term,Node> termsToNodes,Atom atom,DependencySet dependencySet) {
+        DLPredicate dlPredicate=atom.getDLPredicate();
+        if (dlPredicate instanceof LiteralConcept)
+            m_extensionManager.addConceptAssertion((LiteralConcept)dlPredicate,getNodeForTerm(termsToNodes,atom.getArgument(0),dependencySet),dependencySet,true);
+        else if (dlPredicate instanceof AtomicRole || Equality.INSTANCE.equals(dlPredicate) || Inequality.INSTANCE.equals(dlPredicate))
+            m_extensionManager.addAssertion(dlPredicate,getNodeForTerm(termsToNodes,atom.getArgument(0),dependencySet),getNodeForTerm(termsToNodes,atom.getArgument(1),dependencySet),dependencySet,true);
+        else if (dlPredicate instanceof DescriptionGraph) {
+            DescriptionGraph descriptionGraph=(DescriptionGraph)dlPredicate;
+            Object[] tuple=new Object[descriptionGraph.getArity()+1];
+            tuple[0]=descriptionGraph;
+            for (int argumentIndex=0;argumentIndex<descriptionGraph.getArity();argumentIndex++)
+                tuple[argumentIndex+1]=getNodeForTerm(termsToNodes,atom.getArgument(argumentIndex),dependencySet);
+            m_extensionManager.addTuple(tuple,dependencySet,true);
+        }
+        else
+            throw new IllegalArgumentException("Unsupported type of positive ground atom.");
+    }
+    protected void loadNegativeFact(Map<Term,Node> termsToNodes,Atom atom,DependencySet dependencySet) {
+        DLPredicate dlPredicate=atom.getDLPredicate();
+        if (dlPredicate instanceof LiteralConcept)
+            m_extensionManager.addConceptAssertion(((LiteralConcept)dlPredicate).getNegation(),getNodeForTerm(termsToNodes,atom.getArgument(0),dependencySet),dependencySet,true);
+        else if (dlPredicate instanceof AtomicRole) {
+            Object[] ternaryTuple=m_extensionManager.m_ternaryAuxiliaryTupleAdd;
+            ternaryTuple[0]=NegatedAtomicRole.create((AtomicRole)dlPredicate);
+            ternaryTuple[1]=getNodeForTerm(termsToNodes,atom.getArgument(0),dependencySet);
+            ternaryTuple[2]=getNodeForTerm(termsToNodes,atom.getArgument(1),dependencySet);
+            m_extensionManager.addTuple(ternaryTuple,dependencySet,true);
+        }
+        else if (Equality.INSTANCE.equals(dlPredicate))
+            m_extensionManager.addAssertion(Inequality.INSTANCE,getNodeForTerm(termsToNodes,atom.getArgument(0),dependencySet),getNodeForTerm(termsToNodes,atom.getArgument(1),dependencySet),dependencySet,true);
+        else if (Inequality.INSTANCE.equals(dlPredicate))
+            m_extensionManager.addAssertion(Equality.INSTANCE,getNodeForTerm(termsToNodes,atom.getArgument(0),dependencySet),getNodeForTerm(termsToNodes,atom.getArgument(1),dependencySet),dependencySet,true);
+        else
+            throw new IllegalArgumentException("Unsupported type of negative ground atom.");
+    }
+    protected void loadPermanentABox(Map<Term,Node> termsToNodes) {
+        for (Atom atom : m_permanentDLOntology.getPositiveFacts())
+            loadPositiveFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
+        for (Atom atom : m_permanentDLOntology.getNegativeFacts())
+            loadNegativeFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
+    }
+    protected Map<Term,Node> loadABox() {
+        Map<Term,Node> termsToNodes=new HashMap<Term,Node>();
+        loadPermanentABox(termsToNodes);
+        return termsToNodes;
+    }
+    protected Node getNodeForTerm(Map<Term,Node> termsToNodes,Term term,DependencySet dependencySet) {
+        Node node=termsToNodes.get(term);
+        if (node==null) {
+            if (term instanceof Individual)
+                node=createNewNamedNode(dependencySet);
+            else {
+                Constant constant=(Constant)term;
+                node=createNewRootConstantNode(dependencySet);
+                Object dataValue=constant.getDataValue();
+                // Anonymous constant values are not assigned a particular value.
+                // See the hack in OWLClausification for an explanation.
+                if (!(dataValue instanceof Constant.AnonymousConstantValue))
+                    m_extensionManager.addAssertion(DataValueEnumeration.create(new Object[] { dataValue }),node,dependencySet,true);
+            }
+            termsToNodes.put(term,node);
+        }
+        return node.getCanonicalNode();
+    }
+    protected boolean isSatisfiable() {
         m_interruptFlag.startTimedTask();
         try {
             boolean existentialsAreExact=m_existentialExpansionStrategy.isExact();
@@ -260,9 +520,11 @@ public final class Tableau implements Serializable {
             m_nominalIntroductionManager.processAnnotatedEqualities();
             boolean hasChange=false;
             while (m_extensionManager.propagateDeltaNew() && !m_extensionManager.containsClash()) {
-                m_descriptionGraphManager.checkGraphConstraints();
-                m_permanentHyperresolutionManager.applyDLClauses();
-                if (m_additionalHyperresolutionManager!=null)
+                if (m_hasDescriptionGraphs && !m_extensionManager.containsClash())
+                    m_descriptionGraphManager.checkGraphConstraints();
+                if (!m_extensionManager.containsClash())
+                    m_permanentHyperresolutionManager.applyDLClauses();
+                if (m_additionalHyperresolutionManager!=null && !m_extensionManager.containsClash())
                     m_additionalHyperresolutionManager.applyDLClauses();
                 if (m_checkDatatypes && !m_extensionManager.containsClash())
                     m_datatypeManager.checkDatatypeConstraints();
@@ -330,239 +592,7 @@ public final class Tableau implements Serializable {
         return m_checkedNode1;
     }
     private boolean hasNominals() {
-        return m_permanentDLOntology.hasNominals();
-    }
-    public boolean isSatisfiable(AtomicConcept atomicConcept) {
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.isSatisfiableStarted(atomicConcept);
-        clear();
-        Map<Term,Node> termsToNodes=new HashMap<Term,Node>();
-        if (hasNominals())
-            loadPermanentABox(termsToNodes);
-        if (m_additionalDLOntology!=null) {
-            for (Atom atom : m_additionalDLOntology.getPositiveFacts())
-                loadPositiveFact(termsToNodes,atom);
-            for (Atom atom : m_additionalDLOntology.getNegativeFacts())
-                loadNegativeFact(termsToNodes,atom);
-        }
-        m_checkedNode0=createNewNINode(m_dependencySetFactory.emptySet());
-        m_extensionManager.addConceptAssertion(atomicConcept,m_checkedNode0,m_dependencySetFactory.emptySet(),true);
-        boolean result=isSatisfiable();
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.isSatisfiableFinished(atomicConcept,result);
-        return result;
-    }
-    public boolean isSubsumedByList(AtomicConcept subconcept,ArrayList<AtomicConcept> superconcepts) {
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.isSubsumedByStarted(subconcept,superconcepts.get(0));
-        clear();
-        Map<Term,Node> termsToNodes=new HashMap<Term,Node>();
-        if (hasNominals())
-            loadPermanentABox(termsToNodes);
-        if (m_additionalDLOntology!=null) {
-            for (Atom atom : m_additionalDLOntology.getPositiveFacts())
-                loadPositiveFact(termsToNodes,atom);
-            for (Atom atom : m_additionalDLOntology.getNegativeFacts())
-                loadNegativeFact(termsToNodes,atom);
-        }
-        m_checkedNode0=createNewNINode(m_dependencySetFactory.emptySet());
-        m_extensionManager.addConceptAssertion(subconcept,m_checkedNode0,m_dependencySetFactory.emptySet(),true);
-        m_branchingPoints[0]=new BranchingPoint(this);
-        m_currentBranchingPoint++;
-        m_nonbacktrackableBranchingPoint=m_currentBranchingPoint;
-        DependencySet dependencySet=m_dependencySetFactory.addBranchingPoint(m_dependencySetFactory.emptySet(),m_currentBranchingPoint);
-        for (int index=0;index<superconcepts.size();index++)
-        	m_extensionManager.addConceptAssertion(superconcepts.get(index).getNegation(),m_checkedNode0,dependencySet,true);
-        boolean result=!isSatisfiable();
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.isSubsumedByFinished(subconcept,superconcepts.get(0),result);
-        return result;
-    }
-    public boolean isSubsumedBy(AtomicConcept subconcept,AtomicConcept superconcept) {
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.isSubsumedByStarted(subconcept,superconcept);
-        clear();
-        Map<Term,Node> termsToNodes=new HashMap<Term,Node>();
-        if (hasNominals())
-            loadPermanentABox(termsToNodes);
-        if (m_additionalDLOntology!=null) {
-            for (Atom atom : m_additionalDLOntology.getPositiveFacts())
-                loadPositiveFact(termsToNodes,atom);
-            for (Atom atom : m_additionalDLOntology.getNegativeFacts())
-                loadNegativeFact(termsToNodes,atom);
-        }
-        m_checkedNode0=createNewNINode(m_dependencySetFactory.emptySet());
-        m_extensionManager.addConceptAssertion(subconcept,m_checkedNode0,m_dependencySetFactory.emptySet(),true);
-        m_branchingPoints[0]=new BranchingPoint(this);
-        m_currentBranchingPoint++;
-        m_nonbacktrackableBranchingPoint=m_currentBranchingPoint;
-        DependencySet dependencySet=m_dependencySetFactory.addBranchingPoint(m_dependencySetFactory.emptySet(),m_currentBranchingPoint);
-        m_extensionManager.addConceptAssertion(superconcept.getNegation(),m_checkedNode0,dependencySet,true);
-        boolean result=!isSatisfiable();
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.isSubsumedByFinished(subconcept,superconcept,result);
-        return result;
-    }
-    public boolean isSatisfiable(Role role,boolean isDataRole) {
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.isSatisfiableStarted(role);
-        clear();
-        Map<Term,Node> termsToNodes=new HashMap<Term,Node>();
-        if (hasNominals())
-            loadPermanentABox(termsToNodes);
-        if (m_additionalDLOntology!=null) {
-            for (Atom atom : m_additionalDLOntology.getPositiveFacts())
-                loadPositiveFact(termsToNodes,atom);
-            for (Atom atom : m_additionalDLOntology.getNegativeFacts())
-                loadNegativeFact(termsToNodes,atom);
-        }
-        m_checkedNode0=createNewNINode(m_dependencySetFactory.emptySet());
-        if (isDataRole)
-            m_checkedNode1=createNewConcreteNode(m_dependencySetFactory.emptySet(),m_checkedNode0);
-        else
-            m_checkedNode1=createNewNINode(m_dependencySetFactory.emptySet());
-        if (role instanceof InverseRole)
-            m_extensionManager.addRoleAssertion(((InverseRole)role).getInverseOf(),m_checkedNode1,m_checkedNode0,m_dependencySetFactory.emptySet(),true);
-        else
-            m_extensionManager.addRoleAssertion(role,m_checkedNode0,m_checkedNode1,m_dependencySetFactory.emptySet(),true);
-        boolean result=isSatisfiable();
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.isSatisfiableFinished(role,result);
-        return result;
-    }
-    public boolean isABoxSatisfiable() {
-        return isABoxSatisfiable(null,null);
-    }
-    public boolean isABoxSatisfiable(Individual checkedNode0Name,Individual checkedNode1Name) {
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.isABoxSatisfiableStarted();
-        clear();
-        Map<Term,Node> termsToNodes=loadABox();
-        if (m_additionalDLOntology!=null) {
-            for (Atom atom : m_additionalDLOntology.getPositiveFacts())
-                loadPositiveFact(termsToNodes,atom);
-            for (Atom atom : m_additionalDLOntology.getNegativeFacts())
-                loadNegativeFact(termsToNodes,atom);
-        }
-        if (checkedNode0Name==null)
-            m_checkedNode0=null;
-        else
-            m_checkedNode0=getNodeForTerm(termsToNodes,checkedNode0Name);
-        if (checkedNode1Name==null)
-            m_checkedNode1=null;
-        else
-            m_checkedNode1=getNodeForTerm(termsToNodes,checkedNode1Name);
-        // Ensure that at least one individual exists.
-        if (m_firstTableauNode==null)
-            createNewNINode(m_dependencySetFactory.emptySet());
-        boolean result=isSatisfiable();
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.isABoxSatisfiableFinished(result);
-        return result;
-    }
-    public boolean isInstanceOf(AtomicConcept atomicConcept,Individual individual) {
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.isInstanceOfStarted(atomicConcept,individual);
-        clear();
-        Map<Term,Node> termsToNodes=loadABox();
-        if (m_additionalDLOntology!=null) {
-            for (Atom atom : m_additionalDLOntology.getPositiveFacts())
-                loadPositiveFact(termsToNodes,atom);
-            for (Atom atom : m_additionalDLOntology.getNegativeFacts())
-                loadNegativeFact(termsToNodes,atom);
-        }
-        m_checkedNode0=getNodeForTerm(termsToNodes,individual);
-        if (m_checkedNode0==null)
-            m_checkedNode0=createNewNINode(m_dependencySetFactory.emptySet());
-        m_extensionManager.addConceptAssertion(atomicConcept.getNegation(),m_checkedNode0,m_dependencySetFactory.emptySet(),true);
-        boolean result=!isSatisfiable();
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.isInstanceOfFinished(atomicConcept,individual,result);
-        return result;
-    }
-    public boolean isSatisfiable(boolean loadABox,boolean loadAdditionalABox,Set<Atom> perTestPositiveFacts,Set<Atom> perTestNegativeFacts,Map<Individual,Node> relevantIndividuals) {
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.isABoxSatisfiableStarted();
-        clear();
-        Map<Term,Node> termsToNodes=new HashMap<Term,Node>();
-        if (loadABox)
-            loadPermanentABox(termsToNodes);
-        if (loadAdditionalABox)
-            loadAdditionalABox(termsToNodes);
-        if (perTestPositiveFacts!=null && !perTestPositiveFacts.isEmpty())
-            for (Atom atom : perTestPositiveFacts)
-                loadPositiveFact(termsToNodes,atom);
-        if (perTestNegativeFacts!=null && !perTestNegativeFacts.isEmpty())
-            for (Atom atom : perTestNegativeFacts)
-                loadNegativeFact(termsToNodes,atom);
-        boolean result=isSatisfiable();
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.isABoxSatisfiableFinished(result);
-        return result;
-    }
-    protected void loadPositiveFact(Map<Term,Node> termsToNodes,Atom atom) {
-        DLPredicate dlPredicate=atom.getDLPredicate();
-        if (dlPredicate instanceof LiteralConcept)
-            m_extensionManager.addConceptAssertion((LiteralConcept)dlPredicate,getNodeForTerm(termsToNodes,atom.getArgument(0)),m_dependencySetFactory.emptySet(),true);
-        else if (dlPredicate instanceof AtomicRole || Equality.INSTANCE.equals(dlPredicate) || Inequality.INSTANCE.equals(dlPredicate))
-            m_extensionManager.addAssertion(dlPredicate,getNodeForTerm(termsToNodes,atom.getArgument(0)),getNodeForTerm(termsToNodes,atom.getArgument(1)),m_dependencySetFactory.emptySet(),true);
-        else
-            throw new IllegalArgumentException("Unsupported type of positive ground atom.");
-    }
-    protected void loadNegativeFact(Map<Term,Node> termsToNodes,Atom atom) {
-        DLPredicate dlPredicate=atom.getDLPredicate();
-        if (dlPredicate instanceof LiteralConcept)
-            m_extensionManager.addConceptAssertion(((LiteralConcept)dlPredicate).getNegation(),getNodeForTerm(termsToNodes,atom.getArgument(0)),m_dependencySetFactory.emptySet(),true);
-        else if (dlPredicate instanceof AtomicRole) {
-            Object[] ternaryTuple=m_extensionManager.m_ternaryAuxiliaryTupleAdd;
-            ternaryTuple[0]=NegatedAtomicRole.create((AtomicRole)dlPredicate);
-            ternaryTuple[1]=getNodeForTerm(termsToNodes,atom.getArgument(0));
-            ternaryTuple[2]=getNodeForTerm(termsToNodes,atom.getArgument(1));
-            m_extensionManager.addTuple(ternaryTuple,m_dependencySetFactory.emptySet(),true);
-        }
-        else if (Equality.INSTANCE.equals(dlPredicate))
-            m_extensionManager.addAssertion(Inequality.INSTANCE,getNodeForTerm(termsToNodes,atom.getArgument(0)),getNodeForTerm(termsToNodes,atom.getArgument(1)),m_dependencySetFactory.emptySet(),true);
-        else if (Inequality.INSTANCE.equals(dlPredicate))
-            m_extensionManager.addAssertion(Equality.INSTANCE,getNodeForTerm(termsToNodes,atom.getArgument(0)),getNodeForTerm(termsToNodes,atom.getArgument(1)),m_dependencySetFactory.emptySet(),true);
-        else
-            throw new IllegalArgumentException("Unsupported type of negative ground atom.");
-    }
-    protected void loadPermanentABox(Map<Term,Node> termsToNodes) {
-        for (Atom atom : m_permanentDLOntology.getPositiveFacts())
-            loadPositiveFact(termsToNodes,atom);
-        for (Atom atom : m_permanentDLOntology.getNegativeFacts())
-            loadNegativeFact(termsToNodes,atom);
-    }
-    protected void loadAdditionalABox(Map<Term,Node> termsToNodes) {
-        if (m_additionalDLOntology!=null) {
-            for (Atom atom : m_additionalDLOntology.getPositiveFacts())
-                loadPositiveFact(termsToNodes,atom);
-            for (Atom atom : m_additionalDLOntology.getNegativeFacts())
-                loadNegativeFact(termsToNodes,atom);
-        }
-    }
-    protected Map<Term,Node> loadABox() {
-        Map<Term,Node> termsToNodes=new HashMap<Term,Node>();
-        loadPermanentABox(termsToNodes);
-        return termsToNodes;
-    }
-    protected Node getNodeForTerm(Map<Term,Node> termsToNodes,Term term) {
-        Node node=termsToNodes.get(term);
-        if (node==null) {
-            if (term instanceof Individual)
-                node=createNewNamedNode(m_dependencySetFactory.emptySet());
-            else {
-                Constant constant=(Constant)term;
-                node=createNewRootConstantNode(m_dependencySetFactory.emptySet());
-                Object dataValue=constant.getDataValue();
-                // Anonymous constant values are not assigned a particular value.
-                // See the hack in OWLClausification for an explanation.
-                if (!(dataValue instanceof Constant.AnonymousConstantValue))
-                    m_extensionManager.addAssertion(DataValueEnumeration.create(new Object[] { dataValue }),node,m_dependencySetFactory.emptySet(),true);
-            }
-            termsToNodes.put(term,node);
-        }
-        return node.getCanonicalNode();
+        return m_permanentDLOntology.hasNominals() || (m_additionalDLOntology!=null && m_additionalDLOntology.hasNominals());
     }
     public boolean isCurrentModelDeterministic() {
         return m_isCurrentModelDeterministic;

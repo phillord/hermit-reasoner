@@ -29,6 +29,7 @@ import org.semanticweb.HermiT.graph.Graph;
 import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.Inequality;
@@ -61,14 +62,39 @@ public final class ExistentialExpansionManager implements Serializable {
         m_auxiliaryNodes=new ArrayList<Node>();
         m_ternaryExtensionTableSearch01Bound=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,true,false },ExtensionTable.View.TOTAL);
         m_ternaryExtensionTableSearch02Bound=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,false,true },ExtensionTable.View.TOTAL);
-        m_functionalRoles=buildFunctionalRoles();
+        m_functionalRoles=new HashMap<Role,Role[]>();
+        updateFunctionalRoles();
         m_binaryUnionDependencySet=new UnionDependencySet(2);
         m_indicesByBranchingPoint=new int[2];
     }
-    protected Map<Role,Role[]> buildFunctionalRoles() {
+    protected void updateFunctionalRoles() {
         Graph<Role> superRoleGraph=new Graph<Role>();
         Set<Role> functionalRoles=new HashSet<Role>();
-        for (DLClause dlClause : m_tableau.getPermanentDLOntology().getDLClauses()) {
+        loadDLClausesIntoGraph(m_tableau.m_permanentDLOntology.getDLClauses(),superRoleGraph,functionalRoles);
+        if (m_tableau.m_additionalDLOntology!=null)
+            loadDLClausesIntoGraph(m_tableau.m_additionalDLOntology.getDLClauses(),superRoleGraph,functionalRoles);
+        for (Role role : superRoleGraph.getElements()) {
+            superRoleGraph.addEdge(role,role);
+            superRoleGraph.addEdge(role.getInverse(),role.getInverse());
+        }
+        superRoleGraph.transitivelyClose();
+        Graph<Role> subRoleGraph=superRoleGraph.getInverse();
+        m_functionalRoles.clear();
+        for (Role role : superRoleGraph.getElements()) {
+            Set<Role> relevantRoles=new HashSet<Role>();
+            Set<Role> allSuperroles=superRoleGraph.getSuccessors(role);
+            for (Role superrole : allSuperroles)
+                if (functionalRoles.contains(superrole))
+                    relevantRoles.addAll(subRoleGraph.getSuccessors(superrole));
+            if (!relevantRoles.isEmpty()) {
+                Role[] relevantRolesArray=new Role[relevantRoles.size()];
+                relevantRoles.toArray(relevantRolesArray);
+                m_functionalRoles.put(role,relevantRolesArray);
+            }
+        }
+    }
+    protected void loadDLClausesIntoGraph(Set<DLClause> dlClauses,Graph<Role> superRoleGraph,Set<Role> functionalRoles) {
+        for (DLClause dlClause : dlClauses) {
             if (dlClause.getClauseType()==ClauseType.OBJECT_PROPERTY_INCLUSION || dlClause.getClauseType()==ClauseType.DATA_PROPERTY_INCLUSION) {
                 AtomicRole subrole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                 AtomicRole superrole=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
@@ -90,26 +116,12 @@ public final class ExistentialExpansionManager implements Serializable {
                 functionalRoles.add(atomicRole.getInverse());
             }
         }
-        for (Role role : superRoleGraph.getElements()) {
-            superRoleGraph.addEdge(role,role);
-            superRoleGraph.addEdge(role.getInverse(),role.getInverse());
-        }
-        superRoleGraph.transitivelyClose();
-        Graph<Role> subRoleGraph=superRoleGraph.getInverse();
-        Map<Role,Role[]> result=new HashMap<Role,Role[]>();
-        for (Role role : superRoleGraph.getElements()) {
-            Set<Role> relevantRoles=new HashSet<Role>();
-            Set<Role> allSuperroles=superRoleGraph.getSuccessors(role);
-            for (Role superrole : allSuperroles)
-                if (functionalRoles.contains(superrole))
-                    relevantRoles.addAll(subRoleGraph.getSuccessors(superrole));
-            if (!relevantRoles.isEmpty()) {
-                Role[] relevantRolesArray=new Role[relevantRoles.size()];
-                relevantRoles.toArray(relevantRolesArray);
-                result.put(role,relevantRolesArray);
-            }
-        }
-        return result;
+    }
+    public void additionalDLOntologySet(DLOntology additionalDLOntology) {
+        updateFunctionalRoles();
+    }
+    public void additionalDLOntologyCleared() {
+        updateFunctionalRoles();
     }
     public void markExistentialProcessed(ExistentialConcept existentialConcept,Node forNode) {
         m_auxiliaryTuple[0]=existentialConcept;

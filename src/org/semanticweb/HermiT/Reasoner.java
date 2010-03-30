@@ -217,7 +217,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         clearState();
         m_dlOntology=dlOntology;
         m_prefixes=createPrefixes(m_dlOntology);
-        m_tableau=createTableau(m_interruptFlag,m_configuration,m_dlOntology,m_prefixes);
+        m_tableau=createTableau(m_interruptFlag,m_configuration,m_dlOntology,null,m_prefixes);
         m_atomicConceptClassificationManager=createAtomicConceptClassificationManager(this);
         m_objectRoleClassificationManager=createObjectRoleClassificationManager(this);
         m_dataRoleClassificationManager=createDataRoleClassificationManager(this);
@@ -477,25 +477,24 @@ public class Reasoner implements OWLReasoner,Serializable {
         }
     }
 
-    public boolean isSubClassOf(OWLClassExpression subDescription,OWLClassExpression superDescription) {
-        throwFreshEntityExceptionIfNecessary(subDescription,superDescription);
+    public boolean isSubClassOf(OWLClassExpression subClassExpression,OWLClassExpression superClassExpression) {
+        throwFreshEntityExceptionIfNecessary(subClassExpression,superClassExpression);
         throwInconsistentOntologyExceptionIfNecessary();
         if (!isConsistent())
             return true;
-        if (subDescription instanceof OWLClass && superDescription instanceof OWLClass) {
-            AtomicConcept subconcept=AtomicConcept.create(((OWLClass)subDescription).getIRI().toString());
-            AtomicConcept superconcept=AtomicConcept.create(((OWLClass)superDescription).getIRI().toString());
+        if (subClassExpression instanceof OWLClass && superClassExpression instanceof OWLClass) {
+            AtomicConcept subconcept=AtomicConcept.create(((OWLClass)subClassExpression).getIRI().toString());
+            AtomicConcept superconcept=AtomicConcept.create(((OWLClass)superClassExpression).getIRI().toString());
             return m_atomicConceptClassificationManager.isSubsumedBy(subconcept,superconcept);
         }
         else {
             OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
             OWLDataFactory factory=ontologyManager.getOWLDataFactory();
-            OWLClass newSubConcept=factory.getOWLClass(IRI.create("internal:query-subconcept"));
-            OWLAxiom subClassDefinitionAxiom=factory.getOWLSubClassOfAxiom(newSubConcept,subDescription);
-            OWLClass newSuperConcept=factory.getOWLClass(IRI.create("internal:query-superconcept"));
-            OWLAxiom superClassDefinitionAxiom=factory.getOWLSubClassOfAxiom(superDescription,newSuperConcept);
-            Tableau tableau=getTableau(ontologyManager,subClassDefinitionAxiom,superClassDefinitionAxiom);
-            return tableau.isSubsumedBy(AtomicConcept.create("internal:query-subconcept"),AtomicConcept.create("internal:query-superconcept"));
+            OWLIndividual freshIndividual=factory.getOWLNamedIndividual(IRI.create("internal:fresh-individual"));
+            OWLClassAssertionAxiom assertSubClassExpression=factory.getOWLClassAssertionAxiom(subClassExpression,freshIndividual);
+            OWLClassAssertionAxiom assertNotSuperClassExpression=factory.getOWLClassAssertionAxiom(superClassExpression.getObjectComplementOf(),freshIndividual);
+            Tableau tableau=getTableau(ontologyManager,assertSubClassExpression,assertNotSuperClassExpression);
+            return !tableau.isSatisfiable(true,null,null,null,null,null);
         }
     }
 
@@ -608,7 +607,8 @@ public class Reasoner implements OWLReasoner,Serializable {
             final Tableau tableau=getTableau(ontologyManager,classDefinitionAxiom);
             StandardClassificationManager.Relation<AtomicConcept> hierarchyRelation=new StandardClassificationManager.Relation<AtomicConcept>() {
                 public boolean doesSubsume(AtomicConcept parent,AtomicConcept child) {
-                    return tableau.isSubsumedBy(child,parent);
+                    Individual freshIndividual=Individual.create("internal:fresh-individual",true);
+                    return !tableau.isSatisfiable(true,Collections.singleton(Atom.create(child,freshIndividual)),null,null,Collections.singleton(Atom.create(parent,freshIndividual)),null);
                 }
             };
             return StandardClassificationManager.findPosition(hierarchyRelation,AtomicConcept.create("internal:query-concept"),m_atomicConceptHierarchy.getTopNode(),m_atomicConceptHierarchy.getBottomNode());
@@ -1088,10 +1088,8 @@ public class Reasoner implements OWLReasoner,Serializable {
         throwInconsistentOntologyExceptionIfNecessary();
         if (!isConsistent())
             return true;
-        if (m_dlOntology.hasDatatypes()) {
-            // classifyDataProperties();
+        if (m_dlOntology.hasDatatypes())
             return m_dataRoleClassificationManager.isSubsumedBy(AtomicRole.create(subDataProperty.getIRI().toString()),AtomicRole.create(superDataProperty.getIRI().toString()));
-        }
         else
             return subDataProperty.isOWLBottomDataProperty() || superDataProperty.isOWLTopDataProperty();
     }
@@ -1644,10 +1642,8 @@ public class Reasoner implements OWLReasoner,Serializable {
             return getTableau();
         else {
             DLOntology deltaDLOntology=createDeltaDLOntology(m_configuration,m_dlOntology,ontologyManager,additionalAxioms);
-            if (isSecondStrictlyMoreExpressive(m_dlOntology,deltaDLOntology)) {
-                DLOntology mergedDLOntology=mergeDLOntologies(m_configuration,m_prefixes,"uri:urn:internal-kb",m_dlOntology,deltaDLOntology);
-                return createTableau(m_interruptFlag,m_configuration,mergedDLOntology,m_prefixes);
-            }
+            if (isSecondStrictlyMoreExpressive(m_dlOntology,deltaDLOntology))
+                return createTableau(m_interruptFlag,m_configuration,m_dlOntology,deltaDLOntology,m_prefixes);
             else {
                 m_tableau.setAdditionalDLOntology(deltaDLOntology);
                 return m_tableau;
@@ -1662,21 +1658,31 @@ public class Reasoner implements OWLReasoner,Serializable {
             (!first.hasDatatypes() && second.hasDatatypes()) ||
             (first.isHorn() && !second.isHorn());
     }
-    protected static Tableau createTableau(InterruptFlag interruptFlag,Configuration config,DLOntology dlOntology,Prefixes prefixes) throws IllegalArgumentException {
+    protected static Tableau createTableau(InterruptFlag interruptFlag,Configuration config,DLOntology permanentDLOntology,DLOntology additionalDLOntology,Prefixes prefixes) throws IllegalArgumentException {
         if (config.checkClauses) {
-            Collection<DLClause> nonAdmissibleDLClauses=dlOntology.getNonadmissibleDLClauses();
-            if (!nonAdmissibleDLClauses.isEmpty()) {
+            Collection<DLClause> nonAdmissiblePermanentDLClauses=permanentDLOntology.getNonadmissibleDLClauses();
+            Collection<DLClause> nonAdmissibleAdditionalDLClauses=Collections.emptySet();
+            if (additionalDLOntology!=null)
+                nonAdmissibleAdditionalDLClauses=additionalDLOntology.getNonadmissibleDLClauses();
+            if (!nonAdmissiblePermanentDLClauses.isEmpty() || !nonAdmissibleAdditionalDLClauses.isEmpty()) {
                 String CRLF=System.getProperty("line.separator");
                 StringBuffer buffer=new StringBuffer();
                 buffer.append("The following DL-clauses in the DL-ontology are not admissible:");
                 buffer.append(CRLF);
-                for (DLClause dlClause : nonAdmissibleDLClauses) {
+                for (DLClause dlClause : nonAdmissiblePermanentDLClauses) {
+                    buffer.append(dlClause.toString(prefixes));
+                    buffer.append(CRLF);
+                }
+                for (DLClause dlClause : nonAdmissibleAdditionalDLClauses) {
                     buffer.append(dlClause.toString(prefixes));
                     buffer.append(CRLF);
                 }
                 throw new IllegalArgumentException(buffer.toString());
             }
         }
+
+        boolean hasInverseRoles=(permanentDLOntology.hasInverseRoles() || (additionalDLOntology!=null && additionalDLOntology.hasInverseRoles()));
+        boolean hasNominals=(permanentDLOntology.hasNominals() || (additionalDLOntology!=null && additionalDLOntology.hasNominals()));
 
         TableauMonitor wellKnownTableauMonitor=null;
         switch (config.tableauMonitorType) {
@@ -1710,10 +1716,10 @@ public class Reasoner implements OWLReasoner,Serializable {
         DirectBlockingChecker directBlockingChecker=null;
         switch (config.directBlockingType) {
         case OPTIMAL:
-            if ((config.blockingStrategyType==BlockingStrategyType.OPTIMAL && dlOntology.hasNominals()) || config.blockingStrategyType==BlockingStrategyType.SIMPLE_CORE || config.blockingStrategyType==BlockingStrategyType.COMPLEX_CORE)
-                directBlockingChecker=new ValidatedSingleDirectBlockingChecker(dlOntology.hasInverseRoles());
+            if ((config.blockingStrategyType==BlockingStrategyType.OPTIMAL && hasNominals) || config.blockingStrategyType==BlockingStrategyType.SIMPLE_CORE || config.blockingStrategyType==BlockingStrategyType.COMPLEX_CORE)
+                directBlockingChecker=new ValidatedSingleDirectBlockingChecker(hasInverseRoles);
             else {
-                if (dlOntology.hasInverseRoles())
+                if (hasInverseRoles)
                     directBlockingChecker=new PairWiseDirectBlockingChecker();
                 else
                     directBlockingChecker=new SingleDirectBlockingChecker();
@@ -1721,13 +1727,13 @@ public class Reasoner implements OWLReasoner,Serializable {
             break;
         case SINGLE:
             if (config.blockingStrategyType==BlockingStrategyType.SIMPLE_CORE || config.blockingStrategyType==BlockingStrategyType.COMPLEX_CORE)
-                directBlockingChecker=new ValidatedSingleDirectBlockingChecker(dlOntology.hasInverseRoles());
+                directBlockingChecker=new ValidatedSingleDirectBlockingChecker(hasInverseRoles);
             else
                 directBlockingChecker=new SingleDirectBlockingChecker();
             break;
         case PAIR_WISE:
             if (config.blockingStrategyType==BlockingStrategyType.SIMPLE_CORE || config.blockingStrategyType==BlockingStrategyType.COMPLEX_CORE)
-                directBlockingChecker=new ValidatedPairwiseDirectBlockingChecker(dlOntology.hasInverseRoles());
+                directBlockingChecker=new ValidatedPairwiseDirectBlockingChecker(hasInverseRoles);
             else
                 directBlockingChecker=new PairWiseDirectBlockingChecker();
             break;
@@ -1736,7 +1742,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         }
 
         BlockingSignatureCache blockingSignatureCache=null;
-        if (!dlOntology.hasNominals() && !(config.blockingStrategyType==BlockingStrategyType.SIMPLE_CORE || config.blockingStrategyType==BlockingStrategyType.COMPLEX_CORE)) {
+        if (!hasNominals && !(config.blockingStrategyType==BlockingStrategyType.SIMPLE_CORE || config.blockingStrategyType==BlockingStrategyType.COMPLEX_CORE)) {
             switch (config.blockingSignatureCacheType) {
             case CACHED:
                 blockingSignatureCache=new BlockingSignatureCache(directBlockingChecker);
@@ -1758,14 +1764,14 @@ public class Reasoner implements OWLReasoner,Serializable {
             blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
             break;
         case SIMPLE_CORE:
-            blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,dlOntology.hasInverseRoles(),true);
+            blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,hasInverseRoles,true);
             break;
         case COMPLEX_CORE:
-            blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,dlOntology.hasInverseRoles(),false);
+            blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,hasInverseRoles,false);
             break;
         case OPTIMAL:
-            if (dlOntology.hasNominals())
-                blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,dlOntology.hasInverseRoles(),true);
+            if (hasNominals)
+                blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,hasInverseRoles,true);
             else
                 blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
             break;
@@ -1787,7 +1793,8 @@ public class Reasoner implements OWLReasoner,Serializable {
         default:
             throw new IllegalArgumentException("Unknown expansion strategy type.");
         }
-        return new Tableau(interruptFlag,tableauMonitor,existentialsExpansionStrategy,config.useDisjunctionLearning,dlOntology,config.parameters);
+
+        return new Tableau(interruptFlag,tableauMonitor,existentialsExpansionStrategy,config.useDisjunctionLearning,permanentDLOntology,additionalDLOntology,config.parameters);
     }
 
     protected ClassificationManager<AtomicConcept> createAtomicConceptClassificationManager(Reasoner reasoner) {

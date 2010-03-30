@@ -64,7 +64,7 @@ public class DLClauseEvaluationTest extends AbstractReasonerInternalsTest {
         BlockingSignatureCache blockingSignatureCache=new BlockingSignatureCache(directChecker);
         BlockingStrategy blockingStrategy=new AnywhereBlocking(directChecker,blockingSignatureCache);
         ExistentialExpansionStrategy ExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
-        m_tableau=new Tableau(new InterruptFlag(),null,ExpansionStrategy,false,TEST_DL_ONTOLOGY,new HashMap<String,Object>());
+        m_tableau=new Tableau(new InterruptFlag(),null,ExpansionStrategy,false,TEST_DL_ONTOLOGY,null,new HashMap<String,Object>());
         m_extensionManager=m_tableau.getExtensionManager();
     }
 

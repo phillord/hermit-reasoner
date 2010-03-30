@@ -18,6 +18,7 @@
 package org.semanticweb.HermiT.hierarchy;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -26,7 +27,9 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.Reasoner;
+import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
@@ -66,7 +69,7 @@ public class AtomicConceptSubsumptionCache implements Serializable,SubsumptionCa
             boolean isSatisfiable=m_tableau.isSatisfiable(concept);
             conceptInfo.m_isSatisfiable=(isSatisfiable ? Boolean.TRUE : Boolean.FALSE);
             if (isSatisfiable) {
-                updateKnownSubsumers(concept);
+                updateKnownSubsumers(concept,m_tableau.getCheckedNode0());
                 if (updatePossibleSubsumers)
                     updatePossibleSubsumers();
             }
@@ -88,7 +91,10 @@ public class AtomicConceptSubsumptionCache implements Serializable,SubsumptionCa
         // Perform the actual satisfiability test
         if (!m_tableau.isDeterministic()) {
             // A -> B?
-            boolean isSubsumedBy=m_tableau.isSubsumedBy(subconcept,superconcept);
+            Individual freshIndividual=Individual.create("internal:fresh-individual",true);
+            Map<Individual,Node> freshIndividualNode=new HashMap<Individual,Node>();
+            freshIndividualNode.put(freshIndividual,null);
+            boolean isSubsumedBy=m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(subconcept,freshIndividual)),null,null,Collections.singleton(Atom.create(superconcept,freshIndividual)),freshIndividualNode);
             // try and build a model for A and not B
             if (m_tableau.getExtensionManager().containsClash() && m_tableau.getExtensionManager().getClashDependencySet().isEmpty()) {
                 // Tableau.isSubsumedBy() adds not B with a dummy nonempty dependency set. Therefore, if not B contributes to the clash,
@@ -98,7 +104,7 @@ public class AtomicConceptSubsumptionCache implements Serializable,SubsumptionCa
             }
             else if (!isSubsumedBy) {
                 subconceptInfo.m_isSatisfiable=Boolean.TRUE; // A is satisfiable since A and not B has a model
-                updateKnownSubsumers(subconcept);
+                updateKnownSubsumers(subconcept,freshIndividualNode.get(freshIndividual));
                 updatePossibleSubsumers();
             }
             else
@@ -111,8 +117,7 @@ public class AtomicConceptSubsumptionCache implements Serializable,SubsumptionCa
             return subconceptInfo.isKnownSubsumer(superconcept);
         }
     }
-    protected void updateKnownSubsumers(AtomicConcept subconcept) {
-        Node checkedNode=m_tableau.getCheckedNode0();
+    protected void updateKnownSubsumers(AtomicConcept subconcept,Node checkedNode) {
         AtomicConceptInfo subconceptInfo=getAtomicConceptInfo(subconcept);
         if (checkedNode.getCanonicalNodeDependencySet().isEmpty()) {
             checkedNode=checkedNode.getCanonicalNode();

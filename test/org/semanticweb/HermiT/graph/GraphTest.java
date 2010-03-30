@@ -1,15 +1,15 @@
 package org.semanticweb.HermiT.graph;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DescriptionGraph;
+import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.reasoner.AbstractReasonerTest;
-import org.semanticweb.HermiT.tableau.DependencySet;
-import org.semanticweb.HermiT.tableau.ExtensionManager;
-import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
 
 public class GraphTest extends AbstractReasonerTest {
@@ -92,7 +92,7 @@ public class GraphTest extends AbstractReasonerTest {
 //
 //        assertTrue(extensionManager.containsTuple(new Object[] { graph, n1, n7, n6 }));
 //    }
-//    
+//
     public void testContradictionOnGraph() throws Exception {
         DescriptionGraph graph=G(
             new String[] {
@@ -111,20 +111,17 @@ public class GraphTest extends AbstractReasonerTest {
             // R(x, y) -> SameIndividual(x, y)
             + "DLSafeRule(Body(ObjectPropertyAtom(:R Variable(:x) Variable(:y))) Head(SameIndividualAtom(Variable(:x) Variable(:y))))";
         loadOntologyWithAxioms(axioms);
-   
+
         Tableau tableau=getTableau(m_descriptionGraphs);
-        tableau.clear();
-        ExtensionManager extensionManager=tableau.getExtensionManager();
-        DependencySet emptySet=tableau.getDependencySetFactory().emptySet();
-        Node n1=tableau.createNewNamedNode(emptySet);
-        Node n2=tableau.createNewNamedNode(emptySet);
+        Individual i1=Individual.create("i1",true);
+        Individual i2=Individual.create("i2",true);
         AtomicRole r=AtomicRole.create(GraphTest.NS + "R");
-        extensionManager.addTuple(new Object[] { graph,n1,n2 },emptySet, true);
-        extensionManager.addRoleAssertion(r,n1,n2,emptySet, true);
-        
-        assertFalse(tableau.isSatisfiable());
+        Set<Atom> positiveFacts=new HashSet<Atom>();
+        positiveFacts.add(Atom.create(graph,i1,i2));
+        positiveFacts.add(Atom.create(r,i1,i2));
+        assertFalse(tableau.isSatisfiable(false,false,positiveFacts,null,null,null,null));
     }
-    
+
     public void testGraph1() throws Exception {
         m_descriptionGraphs.add(G(
             new String[] {
@@ -141,7 +138,7 @@ public class GraphTest extends AbstractReasonerTest {
                 GraphTest.NS+"A",
             }
         ));
-        
+
         String axioms="SubClassOf(:A ObjectSomeValuesFrom(:S :A))"
             + "SubClassOf(:A ObjectSomeValuesFrom(:S :D))"
             + "SubClassOf(:B ObjectSomeValuesFrom(:T :A))"
@@ -152,7 +149,7 @@ public class GraphTest extends AbstractReasonerTest {
         Tableau tableau=getTableau(m_descriptionGraphs);
         assertTrue(tableau.isABoxSatisfiable());
     }
-    
+
     public void testGraph2() throws Exception {
         m_descriptionGraphs.add(G(
             new String[] {
@@ -170,18 +167,18 @@ public class GraphTest extends AbstractReasonerTest {
                 GraphTest.NS+"P",
             }
         ));
-        
+
         String axioms="SubClassOf(:A ObjectSomeValuesFrom(:T :P))"
             + "SubClassOf(ObjectSomeValuesFrom(:T :D) :B)"
             //P(v), R(x,v), LP(x), S(x,y), RP(y), R(y,w), P(w) -> conn(v,w)
-            + "DLSafeRule(Body(" 
-                        + "ClassAtom(:P Variable(:v)) " 
+            + "DLSafeRule(Body("
+                        + "ClassAtom(:P Variable(:v)) "
             		+ "ObjectPropertyAtom(:R Variable(:x) Variable(:v))"
-            		+ "ClassAtom(:LP Variable(:x)) " 
+            		+ "ClassAtom(:LP Variable(:x)) "
             		+ "ObjectPropertyAtom(:S Variable(:x) Variable(:y))"
-            		+ "ClassAtom(:RP Variable(:y)) " 
+            		+ "ClassAtom(:RP Variable(:y)) "
             		+ "ObjectPropertyAtom(:R Variable(:y) Variable(:w))"
-            		+ "ClassAtom(:P Variable(:w)) " 
+            		+ "ClassAtom(:P Variable(:w)) "
             		+ ") Head(ObjectPropertyAtom(:conn Variable(:v) Variable(:w))))"
              // conn(x,y) -> D(x)
              + "DLSafeRule(Body(ObjectPropertyAtom(:conn Variable(:x) Variable(:y))) Head(ClassAtom(:D Variable(:x))))"
@@ -189,9 +186,10 @@ public class GraphTest extends AbstractReasonerTest {
              + "DLSafeRule(Body(ObjectPropertyAtom(:conn Variable(:x) Variable(:y))) Head(ClassAtom(:D Variable(:y))))";
         loadOntologyWithAxioms(axioms);
         Tableau t=getTableau(m_descriptionGraphs);
-        assertTrue(t.isSubsumedBy(AtomicConcept.create(GraphTest.NS+"A"), AtomicConcept.create(GraphTest.NS+"B")));
+        Individual freshNode=Individual.create("internal:fresh-individual",true);
+        assertTrue(!t.isSatisfiable(false,Collections.singleton(Atom.create(AtomicConcept.create(GraphTest.NS+"A"),freshNode)),null,null,Collections.singleton(Atom.create(AtomicConcept.create(GraphTest.NS+"B"),freshNode)),null));
     }
-    
+
     protected static void add(Graph<Integer> graph, int from, int... successors) {
         for (int successor : successors)
             graph.addEdge(from, successor);

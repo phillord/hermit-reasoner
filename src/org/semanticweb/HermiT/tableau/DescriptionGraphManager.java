@@ -38,7 +38,6 @@ public final class DescriptionGraphManager implements Serializable {
     protected final TableauMonitor m_tableauMonitor;
     protected final ExtensionManager m_extensionManager;
     protected final MergingManager m_mergingManager;
-    protected final boolean m_hasDescriptionGraphs;
     protected final OccurrenceManager m_occurrenceManager;
     protected final Map<DescriptionGraph,Integer> m_descriptionGraphIndices;
     protected final DescriptionGraph[] m_descriptionGraphsByIndex;
@@ -55,13 +54,12 @@ public final class DescriptionGraphManager implements Serializable {
         m_tableauMonitor=m_tableau.m_tableauMonitor;
         m_extensionManager=m_tableau.m_extensionManager;
         m_mergingManager=m_tableau.m_mergingManager;
-        m_hasDescriptionGraphs=!m_tableau.m_permanentDLOntology.getAllDescriptionGraphs().isEmpty();
         m_occurrenceManager=new OccurrenceManager();
         m_descriptionGraphIndices=new HashMap<DescriptionGraph,Integer>();
         Set<ExtensionTable> extensionTables=new HashSet<ExtensionTable>();
         List<DescriptionGraph> descriptionGraphsByIndex=new ArrayList<DescriptionGraph>();
         List<ExtensionTable> extensionTablesByIndex=new ArrayList<ExtensionTable>();
-        for (DescriptionGraph descriptionGraph : m_tableau.getPermanentDLOntology().getAllDescriptionGraphs()) {
+        for (DescriptionGraph descriptionGraph : m_tableau.m_permanentDLOntology.getAllDescriptionGraphs()) {
             m_descriptionGraphIndices.put(descriptionGraph,Integer.valueOf(descriptionGraphsByIndex.size()));
             descriptionGraphsByIndex.add(descriptionGraph);
             ExtensionTable extensionTable=m_extensionManager.getExtensionTable(descriptionGraph.getNumberOfVertices()+1);
@@ -110,61 +108,57 @@ public final class DescriptionGraphManager implements Serializable {
         return tuple;
     }
     public boolean checkGraphConstraints() {
-        if (m_hasDescriptionGraphs) {
-            boolean hasChange=false;
-            for (int retrievalIndex=0;retrievalIndex<m_deltaOldRetrievals.length && !m_extensionManager.containsClash();retrievalIndex++) {
-                ExtensionTable.Retrieval retrieval=m_deltaOldRetrievals[retrievalIndex];
-                ExtensionTable extensionTable=retrieval.getExtensionTable();
-                retrieval.open();
-                Object[] tupleBuffer=retrieval.getTupleBuffer();
-                int arity=tupleBuffer.length;
-                while (!retrieval.afterLast() && !m_extensionManager.containsClash()) {
-                    if (tupleBuffer[0] instanceof DescriptionGraph) {
-                        int thisGraphIndex=m_descriptionGraphIndices.get(tupleBuffer[0]).intValue();
-                        int thisTupleIndex=retrieval.getCurrentTupleIndex();
-                        for (int thisPositionInTuple=1;thisPositionInTuple<arity;thisPositionInTuple++) {
-                            Node node=(Node)tupleBuffer[thisPositionInTuple];
-                            int listNode=node.m_firstGraphOccurrenceNode;
-                            while (listNode!=-1) {
-                                int graphIndex=m_occurrenceManager.getListNodeComponent(listNode,OccurrenceManager.GRAPH_INDEX);
-                                int tupleIndex=m_occurrenceManager.getListNodeComponent(listNode,OccurrenceManager.TUPLE_INDEX);
-                                int positionInTuple=m_occurrenceManager.getListNodeComponent(listNode,OccurrenceManager.POSITION_IN_TUPLE);
-                                if (thisGraphIndex==graphIndex && (thisTupleIndex!=tupleIndex || thisPositionInTuple!=positionInTuple) && extensionTable.isTupleActive(tupleIndex)) {
-                                    m_binaryUnionDependencySet.m_dependencySets[0]=retrieval.getDependencySet();
-                                    m_binaryUnionDependencySet.m_dependencySets[1]=extensionTable.getDependencySet(tupleIndex);
-                                    if (m_tableauMonitor!=null)
-                                        m_tableauMonitor.descriptionGraphCheckingStarted(thisGraphIndex,thisTupleIndex,thisPositionInTuple,graphIndex,tupleIndex,positionInTuple);
-                                    if (thisPositionInTuple==positionInTuple) {
-                                        for (int mergePosition=arity-1;mergePosition>=1;--mergePosition) {
-                                            Node nodeFirst=(Node)extensionTable.getTupleObject(thisTupleIndex,mergePosition);
-                                            Node nodeSecond=(Node)extensionTable.getTupleObject(tupleIndex,mergePosition);
-                                            if (nodeFirst!=nodeSecond) {
-                                                m_mergingManager.mergeNodes(nodeFirst,nodeSecond,m_binaryUnionDependencySet);
-                                                hasChange=true;
-                                            }
-                                            m_interruptFlag.checkInterrupt();
+        boolean hasChange=false;
+        for (int retrievalIndex=0;retrievalIndex<m_deltaOldRetrievals.length && !m_extensionManager.containsClash();retrievalIndex++) {
+            ExtensionTable.Retrieval retrieval=m_deltaOldRetrievals[retrievalIndex];
+            ExtensionTable extensionTable=retrieval.getExtensionTable();
+            retrieval.open();
+            Object[] tupleBuffer=retrieval.getTupleBuffer();
+            int arity=tupleBuffer.length;
+            while (!retrieval.afterLast() && !m_extensionManager.containsClash()) {
+                if (tupleBuffer[0] instanceof DescriptionGraph) {
+                    int thisGraphIndex=m_descriptionGraphIndices.get(tupleBuffer[0]).intValue();
+                    int thisTupleIndex=retrieval.getCurrentTupleIndex();
+                    for (int thisPositionInTuple=1;thisPositionInTuple<arity;thisPositionInTuple++) {
+                        Node node=(Node)tupleBuffer[thisPositionInTuple];
+                        int listNode=node.m_firstGraphOccurrenceNode;
+                        while (listNode!=-1) {
+                            int graphIndex=m_occurrenceManager.getListNodeComponent(listNode,OccurrenceManager.GRAPH_INDEX);
+                            int tupleIndex=m_occurrenceManager.getListNodeComponent(listNode,OccurrenceManager.TUPLE_INDEX);
+                            int positionInTuple=m_occurrenceManager.getListNodeComponent(listNode,OccurrenceManager.POSITION_IN_TUPLE);
+                            if (thisGraphIndex==graphIndex && (thisTupleIndex!=tupleIndex || thisPositionInTuple!=positionInTuple) && extensionTable.isTupleActive(tupleIndex)) {
+                                m_binaryUnionDependencySet.m_dependencySets[0]=retrieval.getDependencySet();
+                                m_binaryUnionDependencySet.m_dependencySets[1]=extensionTable.getDependencySet(tupleIndex);
+                                if (m_tableauMonitor!=null)
+                                    m_tableauMonitor.descriptionGraphCheckingStarted(thisGraphIndex,thisTupleIndex,thisPositionInTuple,graphIndex,tupleIndex,positionInTuple);
+                                if (thisPositionInTuple==positionInTuple) {
+                                    for (int mergePosition=arity-1;mergePosition>=1;--mergePosition) {
+                                        Node nodeFirst=(Node)extensionTable.getTupleObject(thisTupleIndex,mergePosition);
+                                        Node nodeSecond=(Node)extensionTable.getTupleObject(tupleIndex,mergePosition);
+                                        if (nodeFirst!=nodeSecond) {
+                                            m_mergingManager.mergeNodes(nodeFirst,nodeSecond,m_binaryUnionDependencySet);
+                                            hasChange=true;
                                         }
+                                        m_interruptFlag.checkInterrupt();
                                     }
-                                    else {
-                                        m_extensionManager.setClash(m_binaryUnionDependencySet);
-                                        hasChange=true;
-                                    }
-                                    if (m_tableauMonitor!=null)
-                                        m_tableauMonitor.descriptionGraphCheckingFinished(thisGraphIndex,thisTupleIndex,thisPositionInTuple,graphIndex,tupleIndex,positionInTuple);
                                 }
-                                listNode=m_occurrenceManager.getListNodeComponent(listNode,OccurrenceManager.NEXT_NODE);
-                                m_interruptFlag.checkInterrupt();
+                                else {
+                                    m_extensionManager.setClash(m_binaryUnionDependencySet);
+                                    hasChange=true;
+                                }
+                                if (m_tableauMonitor!=null)
+                                    m_tableauMonitor.descriptionGraphCheckingFinished(thisGraphIndex,thisTupleIndex,thisPositionInTuple,graphIndex,tupleIndex,positionInTuple);
                             }
+                            listNode=m_occurrenceManager.getListNodeComponent(listNode,OccurrenceManager.NEXT_NODE);
+                            m_interruptFlag.checkInterrupt();
                         }
                     }
-                    retrieval.next();
                 }
-                m_interruptFlag.checkInterrupt();
+                retrieval.next();
             }
-            return hasChange;
+            m_interruptFlag.checkInterrupt();
         }
-        else
-            return false;
+        return hasChange;
     }
     public boolean isSatisfied(ExistsDescriptionGraph existsDescriptionGraph,Node node) {
         int graphIndex=m_descriptionGraphIndices.get(existsDescriptionGraph.getDescriptionGraph()).intValue();

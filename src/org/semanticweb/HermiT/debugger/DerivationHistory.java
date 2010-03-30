@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -46,7 +46,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
     private static final long serialVersionUID=-3963478091986772947L;
 
     protected static final Object[] EMPTY_TUPLE=new Object[0];
-    
+
     protected final Map<AtomKey,Atom> m_derivedAtoms;
     protected final Map<GroundDisjunction,Disjunction> m_derivedDisjunctions;
     protected final Stack<Derivation> m_derivations;
@@ -66,14 +66,18 @@ public class DerivationHistory extends TableauMonitorAdapter {
         m_mergeAtoms.clear();
     }
     public void dlClauseMatchedStarted(DLClauseEvaluator dlClauseEvaluator,int dlClauseIndex) {
-        Atom[] premises=new Atom[dlClauseEvaluator.getBodyLength()];
-        // ask Boris whether nonCountingAtoms fix is as intended
-        int irregularBodyAtomsNumber=0;
+        int regularBodyAtomsNumber=0;
+        for (int index=0;index<dlClauseEvaluator.getBodyLength();index++) {
+            DLPredicate dlPredicate=dlClauseEvaluator.getBodyAtom(index).getDLPredicate();
+            if (!(dlPredicate instanceof NodeIDLessEqualThan) && !(dlPredicate instanceof NodeIDsAscendingOrEqual))
+                regularBodyAtomsNumber++;
+        }
+        Atom[] premises=new Atom[regularBodyAtomsNumber];
+        int atomIndex=0;
         for (int index=0;index<premises.length;index++) {
             DLPredicate dlPredicate=dlClauseEvaluator.getBodyAtom(index).getDLPredicate();
-            if (dlPredicate instanceof NodeIDLessEqualThan || dlPredicate instanceof NodeIDsAscendingOrEqual)
-                irregularBodyAtomsNumber++;
-            premises[index-irregularBodyAtomsNumber]=getAtom(dlClauseEvaluator.getTupleMatchedToBody(index-irregularBodyAtomsNumber));
+            if (!(dlPredicate instanceof NodeIDLessEqualThan) || !(dlPredicate instanceof NodeIDsAscendingOrEqual))
+                premises[atomIndex++]=getAtom(dlClauseEvaluator.getTupleMatchedToBody(index));
         }
         m_derivations.push(new DLClauseApplication(dlClauseEvaluator.getDLClause(dlClauseIndex),premises));
     }
@@ -175,13 +179,13 @@ public class DerivationHistory extends TableauMonitorAdapter {
         m_derivedAtoms.put(new AtomKey(clonedTuple),newAtom);
         return newAtom;
     }
-    
+
     protected static class AtomKey implements Serializable {
         private static final long serialVersionUID=1409033744982881556L;
 
         protected final Object[] m_tuple;
         protected final int m_hashCode;
-        
+
         public AtomKey(Object[] tuple) {
             m_tuple=tuple;
             int hashCode=0;
@@ -206,18 +210,18 @@ public class DerivationHistory extends TableauMonitorAdapter {
             return true;
         }
     }
-    
+
     protected static interface Fact extends Serializable {
         String toString(Prefixes prefixes);
         Derivation getDerivation();
     }
-    
+
     public static class Atom implements Fact {
         private static final long serialVersionUID=-6136317748590721560L;
 
         protected final Object[] m_tuple;
         protected final Derivation m_derivedBy;
-        
+
         public Atom(Object[] tuple,Derivation derivedBy) {
             m_tuple=tuple;
             m_derivedBy=derivedBy;
@@ -269,13 +273,13 @@ public class DerivationHistory extends TableauMonitorAdapter {
             return toString(Prefixes.STANDARD_PREFIXES);
         }
     }
-    
+
     public static class Disjunction implements Fact {
         private static final long serialVersionUID=-6645342875287836609L;
 
         protected final Object[][] m_atoms;
         protected final Derivation m_derivedBy;
-        
+
         public Disjunction(GroundDisjunction groundDisjunction,Derivation derivedBy) {
             m_atoms=new Object[groundDisjunction.getNumberOfDisjuncts()][];
             for (int disjunctIndex=0;disjunctIndex<groundDisjunction.getNumberOfDisjuncts();disjunctIndex++) {
@@ -326,7 +330,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
             return toString(Prefixes.STANDARD_PREFIXES);
         }
     }
-    
+
     @SuppressWarnings("serial")
     public abstract static class Derivation implements Serializable {
         public abstract String toString(Prefixes prefixes);
@@ -342,7 +346,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
 
         protected final DLClause m_dlClause;
         protected final Atom[] m_premises;
-        
+
         public DLClauseApplication(DLClause dlClause,Atom[] premises) {
             m_dlClause=dlClause;
             m_premises=premises;
@@ -366,7 +370,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
 
         protected final Disjunction m_disjunction;
         protected final int m_disjunctIndex;
-        
+
         public DisjunctApplication(Disjunction disjunction,int disjunctIndex) {
             m_disjunction=disjunction;
             m_disjunctIndex=disjunctIndex;
@@ -389,13 +393,13 @@ public class DerivationHistory extends TableauMonitorAdapter {
             return "  |  "+String.valueOf(m_disjunctIndex);
         }
     }
-    
+
     public static class Merging extends Derivation {
         private static final long serialVersionUID=6815119442652251306L;
 
         protected final Atom m_equality;
         protected final Atom m_fromAtom;
-        
+
         public Merging(Atom equality,Atom fromAtom) {
             m_equality=equality;
             m_fromAtom=fromAtom;
@@ -417,7 +421,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
             return "   <--|";
         }
     }
-    
+
     public static class GraphChecking extends Derivation {
         private static final long serialVersionUID=-3671522413313454739L;
 
@@ -425,7 +429,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         protected final int m_position1;
         protected final Atom m_graph2;
         protected final int m_position2;
-        
+
         public GraphChecking(Atom graph1,int position1,Atom graph2,int position2) {
             m_graph1=graph1;
             m_position1=position1;
@@ -449,12 +453,12 @@ public class DerivationHistory extends TableauMonitorAdapter {
             return "   << DGRAPHS | "+m_position1+" and "+m_position2;
         }
     }
-    
+
     public static class ExistentialExpansion extends Derivation {
         private static final long serialVersionUID=-1266097745277870260L;
 
         protected final Atom m_existentialAtom;
-        
+
         public ExistentialExpansion(Atom existentialAtom) {
             m_existentialAtom=existentialAtom;
         }
@@ -473,11 +477,11 @@ public class DerivationHistory extends TableauMonitorAdapter {
             return " <<  EXISTS";
         }
     }
-    
+
     public static class ClashDetection extends Derivation {
         private static final long serialVersionUID=-1046733682276190587L;
         protected final Atom[] m_causes;
-        
+
         public ClashDetection(Atom[] causes) {
             m_causes=causes;
         }
@@ -495,7 +499,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
     public static class DatatypeChecking extends Derivation {
         private static final long serialVersionUID=-7833124370362424190L;
         protected final Atom[] m_causes;
-        
+
         public DatatypeChecking(Atom[] causes) {
             m_causes=causes;
         }
