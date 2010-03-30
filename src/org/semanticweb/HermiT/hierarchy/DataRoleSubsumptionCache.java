@@ -17,12 +17,16 @@
 */
 package org.semanticweb.HermiT.hierarchy;
 
+import java.util.Collections;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.graph.Graph;
+import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicRole;
+import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.DLClause.ClauseType;
 import org.semanticweb.HermiT.tableau.Tableau;
@@ -59,29 +63,25 @@ public class DataRoleSubsumptionCache extends RoleSubsumptionCache {
         }
     }
     protected boolean doSatisfiabilityTest(Role role) {
-        return m_reasoner.getTableau().isSatisfiable(role,true);
+        Individual individual=Individual.create("internal:fresh-individual",false);
+        Constant constant=Constant.create(new Constant.AnonymousConstantValue("internal:fresh-constant"));
+        return m_reasoner.getTableau().isSatisfiable(true,Collections.singleton(Atom.create((AtomicRole)role,individual,constant)),null,null,null,null);
     }
-    protected boolean doSubsumptionCheck(RoleInfo subroleInfo,Role superrole) {
-        Role subrole=subroleInfo.m_forRole;
+    protected boolean doSubsumptionCheck(Role subrole,Role superrole) {
         // This is different from object properties! This code is correct because we don't have
         // transitive data properties.
         OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
         OWLDataFactory factory=ontologyManager.getOWLDataFactory();
-        OWLIndividual individual=factory.getOWLNamedIndividual(IRI.create("internal:individual"));
-        OWLDataProperty negatedSuperProperty=factory.getOWLDataProperty(IRI.create("internal:negated-superproperty"));
-        OWLDataProperty subProperty=factory.getOWLDataProperty(IRI.create(((AtomicRole)subrole).getIRI()));
-        OWLDataProperty superProperty=factory.getOWLDataProperty(IRI.create(((AtomicRole)superrole).getIRI()));
+        OWLIndividual individual=factory.getOWLNamedIndividual(IRI.create("internal:fresh-individual"));
         OWLDatatype anonymousConstantsDatatype=factory.getOWLDatatype(IRI.create("internal:anonymous-constants"));
-        OWLTypedLiteral constant=factory.getOWLTypedLiteral("internal:constant",anonymousConstantsDatatype);
-        OWLAxiom subAssertion=factory.getOWLDataPropertyAssertionAxiom(subProperty,individual,constant);
-        OWLAxiom superAssertion=factory.getOWLDataPropertyAssertionAxiom(negatedSuperProperty,individual,constant);
-        OWLAxiom superDisjoint=factory.getOWLDisjointDataPropertiesAxiom(superProperty,negatedSuperProperty);
-        Tableau tableau=m_reasoner.getTableau(ontologyManager,subAssertion,superAssertion,superDisjoint);
-        boolean isSubsumedBy=!tableau.isABoxSatisfiable();
-        if (!isSubsumedBy)
-            subroleInfo.m_isSatisfiable=Boolean.TRUE;
-        else
-            subroleInfo.addKnownSubsumer(superrole);
-        return isSubsumedBy;
+        OWLTypedLiteral constant=factory.getOWLTypedLiteral("internal:fresh-constant",anonymousConstantsDatatype);
+        OWLDataProperty subproperty=factory.getOWLDataProperty(IRI.create(((AtomicRole)subrole).getIRI()));
+        OWLDataProperty superproperty=factory.getOWLDataProperty(IRI.create(((AtomicRole)superrole).getIRI()));
+        OWLDataProperty negatedSuperproperty=factory.getOWLDataProperty(IRI.create("internal:negated-superproperty"));
+        OWLAxiom subpropertyAssertion=factory.getOWLDataPropertyAssertionAxiom(subproperty,individual,constant);
+        OWLAxiom negatedSuperpropertyAssertion=factory.getOWLDataPropertyAssertionAxiom(negatedSuperproperty,individual,constant);
+        OWLAxiom superpropertyAxiomatization=factory.getOWLDisjointDataPropertiesAxiom(superproperty,negatedSuperproperty);
+        Tableau tableau=m_reasoner.getTableau(ontologyManager,subpropertyAssertion,negatedSuperpropertyAssertion,superpropertyAxiomatization);
+        return !tableau.isSatisfiable(true,null,null,null,null,null);
     }
 }

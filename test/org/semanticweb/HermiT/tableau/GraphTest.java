@@ -68,7 +68,7 @@ public class GraphTest extends AbstractReasonerInternalsTest {
         assertTrue(extensionManager.containsTuple(new Object[] { graph,n1,n7,n6 }));
         
         // Merging occurs only if we start the saturation
-        assertTrue(tableau.isSatisfiable());
+        assertTrue(tableau.runCalculus());
 
         // Now do the checking
         assertSame(n1,n1.getCanonicalNode());

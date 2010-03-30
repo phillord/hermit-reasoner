@@ -91,19 +91,7 @@ public final class MergingManager implements Serializable {
                 boolean canMerge0Into1=node0.m_parent==node1.m_parent || isDescendantOfAtMostThreeLevels(node0,node1ClusterAnchor);
                 boolean canMerge1Into0=node0.m_parent==node1.m_parent || isDescendantOfAtMostThreeLevels(node1,node0ClusterAnchor);
                 if (canMerge0Into1 && canMerge1Into0) {
-                    // If one of the nodes is m_checkedNode0, then we merge into it; this is so that
-                    // we can read off as much information from a completed tableau as possible.
-                    // Otherwise, try to minimize the work necessary to perform the merge so
-                    // merge from the node containing more concept assertions.
-                    if (node0==m_tableau.m_checkedNode0) {
-                        mergeFrom=node1;
-                        mergeInto=node0;
-                    }
-                    else if (node1==m_tableau.m_checkedNode0) {
-                        mergeFrom=node0;
-                        mergeInto=node1;
-                    }
-                    else if (node0.m_numberOfPositiveAtomicConcepts>node1.m_numberOfPositiveAtomicConcepts) {
+                    if (node0.m_numberOfPositiveAtomicConcepts>node1.m_numberOfPositiveAtomicConcepts) {
                         mergeFrom=node1;
                         mergeInto=node0;
                     }

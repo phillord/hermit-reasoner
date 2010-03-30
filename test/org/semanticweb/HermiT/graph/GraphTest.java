@@ -147,7 +147,7 @@ public class GraphTest extends AbstractReasonerTest {
             + "ClassAssertion(:A :i)";
         loadOntologyWithAxioms(axioms);
         Tableau tableau=getTableau(m_descriptionGraphs);
-        assertTrue(tableau.isABoxSatisfiable());
+        assertTrue(tableau.isSatisfiable(true,true,null,null,null,null,null));
     }
 
     public void testGraph2() throws Exception {

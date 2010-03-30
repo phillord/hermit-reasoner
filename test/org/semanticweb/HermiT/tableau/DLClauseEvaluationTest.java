@@ -85,7 +85,7 @@ public class DLClauseEvaluationTest extends AbstractReasonerInternalsTest {
         m_extensionManager.addRoleAssertion(T,e,e,emptySet,false);
         m_extensionManager.addRoleAssertion(T,c,d,emptySet,false);
 
-        assertTrue(m_tableau.isSatisfiable());
+        assertTrue(m_tableau.runCalculus());
 
         assertRetrieval(m_extensionManager.getTernaryExtensionTable(),T(U,null,null),ExtensionTable.View.EXTENSION_THIS,new Object[][] { T(U,d,e) });
     }

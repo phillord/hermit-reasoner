@@ -17,7 +17,6 @@
  */
 package org.semanticweb.HermiT.hierarchy;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,35 +42,31 @@ import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
 
 public class QuasiOrderClassificationManager implements ClassificationManager<AtomicConcept> {
-    protected final Tableau m_tableau;
-    protected final DLOntology m_dlOntology;
+    protected final Reasoner m_reasoner;
     protected final Graph<AtomicConcept> m_knownSubsumptions=new Graph<AtomicConcept>();
     protected final Graph<AtomicConcept> m_possibleSubsumptions=new Graph<AtomicConcept>();
 
-    public QuasiOrderClassificationManager(Reasoner reasoner,DLOntology dlOntology) {
-        m_tableau=reasoner.getTableau();
-        m_dlOntology=dlOntology;
+    public QuasiOrderClassificationManager(Reasoner reasoner) {
+        m_reasoner=reasoner;
     }
     public boolean isSatisfiable(AtomicConcept element) {
         if (AtomicConcept.NOTHING.equals(element))
             return false;
         if (isUnsatisfiable(element))
             return false;
-        return m_tableau.isSatisfiable(element);
+        Individual freshIndividual=Individual.create("internal:fresh-individual",false);
+        return m_reasoner.getTableau().isSatisfiable(false,Collections.singleton(Atom.create(element,freshIndividual)),null,null,null,null);
     }
     public boolean isSubsumedBy(AtomicConcept subelement,AtomicConcept superelement) {
         if (getKnownSubsumers(subelement).contains(superelement))
             return true;
-        return isSubsumedByTest(subelement,superelement);
-    }
-    protected boolean isSubsumedByTest(AtomicConcept subelement,AtomicConcept superelement) {
         Individual freshIndividual=Individual.create("internal:fresh-individual",true);
-        return !m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(subelement,freshIndividual)),null,null,Collections.singleton(Atom.create(superelement,freshIndividual)),null);
+        return !m_reasoner.getTableau().isSatisfiable(false,Collections.singleton(Atom.create(subelement,freshIndividual)),null,null,Collections.singleton(Atom.create(superelement,freshIndividual)),null);
     }
     public Hierarchy<AtomicConcept> classify(ProgressMonitor<AtomicConcept> progressMonitor,AtomicConcept topElement,AtomicConcept bottomElement,final Set<AtomicConcept> elements) {
-        if (isSubsumedByTest(topElement,bottomElement))
+        Individual freshIndividual=Individual.create("internal:fresh-individual",true);
+        if (!m_reasoner.getTableau().isSatisfiable(false,Collections.singleton(Atom.create(topElement,freshIndividual)),null,null,Collections.singleton(Atom.create(bottomElement,freshIndividual)),null))
             return Hierarchy.emptyHierarchy(elements,topElement,bottomElement);
-
         Relation<AtomicConcept> relation=new Relation<AtomicConcept>() {
             public boolean doesSubsume(AtomicConcept parent,AtomicConcept child) {
                 Set<AtomicConcept> allKnownSubsumers=getKnownSubsumers(child);
@@ -79,10 +74,11 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
                     return true;
                 else if (!allKnownSubsumers.contains(parent) && !m_possibleSubsumptions.getSuccessors(child).contains(parent))
                     return false;
-
-                boolean isSubsumedBy=isSubsumedByTest(child,parent);
+                Individual freshIndividual=Individual.create("internal:fresh-individual",true);
+                Tableau tableau=m_reasoner.getTableau();
+                boolean isSubsumedBy=!m_reasoner.getTableau().isSatisfiable(false,Collections.singleton(Atom.create(child,freshIndividual)),null,null,Collections.singleton(Atom.create(parent,freshIndividual)),null);;
                 if (!isSubsumedBy)
-                    prunePossibleSubsumers();
+                    prunePossibleSubsumers(tableau);
                 return isSubsumedBy;
             }
         };
@@ -92,7 +88,7 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
 
         initializeKnownSubsumptions(elements,topElement,bottomElement);
 
-        updateKnownSubsumptionsUsingToldSubsumers(m_dlOntology);
+        updateKnownSubsumptionsUsingToldSubsumers(m_reasoner.getDLOntology());
 
         updateSubsumptionsUsingLeafNodeStrategy(elements,topElement,bottomElement);
 
@@ -184,9 +180,13 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
         }
     }
     private void getKnownSubsumersForConcept(AtomicConcept concept) {
-        if (m_tableau.isSatisfiable(concept)) {
-            readKnownSubsumersFromRootNode(concept,m_tableau.getCheckedNode0());
-            updatePossibleSubsumers();
+        Individual freshIndividual=Individual.create("internal:fresh-individual",false);
+        Tableau tableau=m_reasoner.getTableau();
+        Map<Individual,Node> checkedNode=new HashMap<Individual,Node>();
+        checkedNode.put(freshIndividual,null);
+        if (tableau.isSatisfiable(false,Collections.singleton(Atom.create(concept,freshIndividual)),null,null,null,checkedNode)) {
+            readKnownSubsumersFromRootNode(tableau,concept,checkedNode.get(freshIndividual));
+            updatePossibleSubsumers(tableau);
         }
         else
             makeConceptUnsatisfiable(concept);
@@ -197,11 +197,11 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
     private boolean isUnsatisfiable(AtomicConcept concept) {
         return m_knownSubsumptions.getSuccessors(concept).contains(AtomicConcept.NOTHING);
     }
-    protected void readKnownSubsumersFromRootNode(AtomicConcept subconcept,Node checkedNode) {
+    protected void readKnownSubsumersFromRootNode(Tableau tableau,AtomicConcept subconcept,Node checkedNode) {
         if (checkedNode.getCanonicalNodeDependencySet().isEmpty()) {
             checkedNode=checkedNode.getCanonicalNode();
             m_knownSubsumptions.addEdge(subconcept,AtomicConcept.THING);
-            ExtensionTable.Retrieval retrieval=m_tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
+            ExtensionTable.Retrieval retrieval=tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
             retrieval.getBindingsBuffer()[1]=checkedNode;
             retrieval.open();
             while (!retrieval.afterLast()) {
@@ -212,8 +212,8 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
             }
         }
     }
-    protected void updatePossibleSubsumers() {
-        ExtensionTable.Retrieval retrieval=m_tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,false },ExtensionTable.View.TOTAL);
+    protected void updatePossibleSubsumers(Tableau tableau) {
+        ExtensionTable.Retrieval retrieval=tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,false },ExtensionTable.View.TOTAL);
         retrieval.open();
         Object[] tupleBuffer=retrieval.getTupleBuffer();
         while (!retrieval.afterLast()) {
@@ -224,17 +224,17 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
                     Node node=(Node)tupleBuffer[1];
                     if (node.isActive() && !node.isBlocked()) {
                         if (m_possibleSubsumptions.getSuccessors(atomicConcept).isEmpty())
-                            readPossibleSubsumersFromNodeLabel(atomicConcept,node);
+                            readPossibleSubsumersFromNodeLabel(tableau,atomicConcept,node);
                         else
-                            prunePossibleSubsumersOfConcept(atomicConcept,node);
+                            prunePossibleSubsumersOfConcept(tableau,atomicConcept,node);
                     }
                 }
             }
             retrieval.next();
         }
     }
-    private void prunePossibleSubsumers() {
-        ExtensionTable.Retrieval retrieval=m_tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,false },ExtensionTable.View.TOTAL);
+    private void prunePossibleSubsumers(Tableau tableau) {
+        ExtensionTable.Retrieval retrieval=tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,false },ExtensionTable.View.TOTAL);
         retrieval.open();
         Object[] tupleBuffer=retrieval.getTupleBuffer();
         while (!retrieval.afterLast()) {
@@ -244,20 +244,20 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
                 if (!Prefixes.isInternalIRI(atomicConcept.getIRI())) {
                     Node node=(Node)tupleBuffer[1];
                     if (node.isActive() && !node.isBlocked())
-                        prunePossibleSubsumersOfConcept(atomicConcept,node);
+                        prunePossibleSubsumersOfConcept(tableau,atomicConcept,node);
                 }
             }
             retrieval.next();
         }
     }
-    private void prunePossibleSubsumersOfConcept(AtomicConcept atomicConcept,Node node) {
+    private void prunePossibleSubsumersOfConcept(Tableau tableau,AtomicConcept atomicConcept,Node node) {
         Set<AtomicConcept> possibleSubsumersOfConcept=new HashSet<AtomicConcept>(m_possibleSubsumptions.getSuccessors(atomicConcept));
         for (AtomicConcept atomicCon : possibleSubsumersOfConcept)
-            if (!m_tableau.getExtensionManager().containsConceptAssertion(atomicCon,node))
+            if (!tableau.getExtensionManager().containsConceptAssertion(atomicCon,node))
                 m_possibleSubsumptions.getSuccessors(atomicConcept).remove(atomicCon);
     }
-    private void readPossibleSubsumersFromNodeLabel(AtomicConcept atomicConcept,Node node) {
-        ExtensionTable.Retrieval retrieval=m_tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
+    private void readPossibleSubsumersFromNodeLabel(Tableau tableau,AtomicConcept atomicConcept,Node node) {
+        ExtensionTable.Retrieval retrieval=tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
         retrieval.getBindingsBuffer()[1]=node;
         retrieval.open();
         while (!retrieval.afterLast()) {
@@ -314,12 +314,14 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
     }
     private boolean isEveryChildANonSubsumer(Set<HierarchyNode<AtomicConcept>> unknownSubsumerNodes,AtomicConcept pickedElement,int childNumberThreshold) {
         if (unknownSubsumerNodes.size()>childNumberThreshold) {
-
-            ArrayList<AtomicConcept> supConcepts=new ArrayList<AtomicConcept>();
+            Individual freshIndividual=Individual.create("internal:fresh-individual",false);
+            Atom subconceptAssertion=Atom.create(pickedElement,freshIndividual);
+            Set<Atom> superconceptAssertions=new HashSet<Atom>();
             for (HierarchyNode<AtomicConcept> unknownSupNode : unknownSubsumerNodes)
-                supConcepts.add(unknownSupNode.getRepresentative());
-            if (!m_tableau.isSubsumedByList(pickedElement,supConcepts)) {
-                prunePossibleSubsumers();
+                superconceptAssertions.add(Atom.create(unknownSupNode.getRepresentative(),freshIndividual));
+            Tableau tableau=m_reasoner.getTableau();
+            if (tableau.isSatisfiable(false,Collections.singleton(subconceptAssertion),null,null,superconceptAssertions,null)) {
+                prunePossibleSubsumers(tableau);
                 return true;
             }
         }

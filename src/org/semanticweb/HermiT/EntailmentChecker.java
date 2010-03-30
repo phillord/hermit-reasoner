@@ -141,7 +141,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
                 return false;
         for (OWLAxiom ax : anonIndChecker.getAnonNoNamedIndAxioms()) {
             Tableau t=reasoner.getTableau(OWLManager.createOWLOntologyManager(),ax);
-            if (t.isABoxSatisfiable())
+            if (t.isSatisfiable(true,true,null,null,null,null,null))
                 return false;
         }
         return true;

@@ -56,7 +56,6 @@ import org.semanticweb.HermiT.hierarchy.Hierarchy;
 import org.semanticweb.HermiT.hierarchy.HierarchyNode;
 import org.semanticweb.HermiT.hierarchy.HierarchyPrinterFSS;
 import org.semanticweb.HermiT.hierarchy.ObjectRoleSubsumptionCache;
-import org.semanticweb.HermiT.hierarchy.QuasiOrderClassificationManager;
 import org.semanticweb.HermiT.hierarchy.StandardClassificationManager;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
@@ -367,7 +366,7 @@ public class Reasoner implements OWLReasoner,Serializable {
     }
     public boolean isConsistent() {
         if (m_isConsistent==null)
-            m_isConsistent=getTableau().isABoxSatisfiable();
+            m_isConsistent=getTableau().isSatisfiable(true,true,null,null,null,null,null);
         return m_isConsistent;
     }
     public boolean isEntailmentCheckingSupported(AxiomType<?> axiomType) {
@@ -410,7 +409,7 @@ public class Reasoner implements OWLReasoner,Serializable {
             OWLClassExpression c=factory.getOWLDataSomeValuesFrom(newDP,union);
             OWLClassAssertionAxiom ax=factory.getOWLClassAssertionAxiom(c,individualA);
             Tableau tableau=getTableau(ontologyManager,ax);
-            return !tableau.isABoxSatisfiable();
+            return !tableau.isSatisfiable(true,true,null,null,null,null,null);
         }
         else
             return false;
@@ -460,13 +459,13 @@ public class Reasoner implements OWLReasoner,Serializable {
     public Node<OWLClass> getBottomClassNode() {
         return atomicConceptsToOWLAPI(getHierarchyNode(AtomicConcept.NOTHING).getEquivalentElements());
     }
-    public boolean isSatisfiable(OWLClassExpression description) {
-        throwFreshEntityExceptionIfNecessary(description);
+    public boolean isSatisfiable(OWLClassExpression classExpression) {
+        throwFreshEntityExceptionIfNecessary(classExpression);
         throwInconsistentOntologyExceptionIfNecessary();
         if (!isConsistent())
             return false;
-        if (description instanceof OWLClass) {
-            AtomicConcept concept=AtomicConcept.create(((OWLClass)description).getIRI().toString());
+        if (classExpression instanceof OWLClass) {
+            AtomicConcept concept=AtomicConcept.create(((OWLClass)classExpression).getIRI().toString());
             if (m_atomicConceptHierarchy==null)
                 return m_atomicConceptClassificationManager.isSatisfiable(concept);
             else {
@@ -477,10 +476,10 @@ public class Reasoner implements OWLReasoner,Serializable {
         else {
             OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
             OWLDataFactory factory=ontologyManager.getOWLDataFactory();
-            OWLClass newClass=factory.getOWLClass(IRI.create("internal:query-concept"));
-            OWLAxiom classDefinitionAxiom=factory.getOWLSubClassOfAxiom(newClass,description);
-            Tableau tableau=getTableau(ontologyManager,classDefinitionAxiom);
-            return tableau.isSatisfiable(AtomicConcept.create("internal:query-concept"));
+            OWLIndividual freshIndividual=factory.getOWLNamedIndividual(IRI.create("internal:fresh-individual"));
+            OWLClassAssertionAxiom assertClassExpression=factory.getOWLClassAssertionAxiom(classExpression,freshIndividual);
+            Tableau tableau=getTableau(ontologyManager,assertClassExpression);
+            return tableau.isSatisfiable(true,null,null,null,null,null);
         }
     }
 
@@ -910,7 +909,7 @@ public class Reasoner implements OWLReasoner,Serializable {
             testProperty=factory.getOWLObjectProperty(IRI.create(roleToTest.toString()));
             assertion2=factory.getOWLObjectPropertyAssertionAxiom(testProperty,individualA,individualB);
             Tableau tableau=getTableau(ontologyManager,assertion,assertion2);
-            if (!tableau.isABoxSatisfiable()) {
+            if (!tableau.isSatisfiable(true,true,null,null,null,null,null)) {
                 // disjoint
                 if (direct)
                     result.add(nodeToTest);
@@ -995,7 +994,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         OWLAxiom assertion1=factory.getOWLObjectPropertyAssertionAxiom(propertyExpression,individualA,individualB);
         OWLAxiom assertion2=factory.getOWLObjectPropertyAssertionAxiom(propertyExpression.getInverseProperty(),individualA,individualB);
         Tableau tableau=getTableau(ontologyManager,assertion1,assertion2);
-        return !tableau.isABoxSatisfiable();
+        return !tableau.isSatisfiable(true,true,null,null,null,null,null);
     }
     /**
      * @param propertyExpression
@@ -1015,7 +1014,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         OWLObjectAllValuesFrom all=factory.getOWLObjectAllValuesFrom(propertyExpression.getNamedProperty(),factory.getOWLObjectComplementOf(factory.getOWLObjectOneOf(individualA)));
         OWLAxiom assertion2=factory.getOWLClassAssertionAxiom(all,individualB);
         Tableau tableau=getTableau(ontologyManager,assertion1,assertion2);
-        return !tableau.isABoxSatisfiable();
+        return !tableau.isSatisfiable(true,true,null,null,null,null,null);
     }
     /**
      * @param propertyExpression
@@ -1254,7 +1253,7 @@ public class Reasoner implements OWLReasoner,Serializable {
                 testProperty=factory.getOWLDataProperty(IRI.create(roleToTest.toString()));
                 assertion2=factory.getOWLDataPropertyAssertionAxiom(testProperty,individual,constant);
                 Tableau tableau=getTableau(ontologyManager,assertion,assertion2);
-                if (!tableau.isABoxSatisfiable()) {
+                if (!tableau.isSatisfiable(true,true,null,null,null,null,null)) {
                     // disjoint
                     if (direct)
                         result.add(nodeToTest);
@@ -1622,7 +1621,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         }
         axioms.add(factory.getOWLDifferentIndividualsAxiom(individualA,individualB));
         Tableau tableau=getTableau(ontologyManager,axioms.toArray(new OWLAxiom[axioms.size()]));
-        return !tableau.isABoxSatisfiable();
+        return !tableau.isSatisfiable(true,true,null,null,null,null,null);
     }
 
     // Various creation methods
@@ -1803,25 +1802,20 @@ public class Reasoner implements OWLReasoner,Serializable {
         return new Tableau(interruptFlag,tableauMonitor,existentialsExpansionStrategy,config.useDisjunctionLearning,permanentDLOntology,additionalDLOntology,config.parameters);
     }
 
-    protected ClassificationManager<AtomicConcept> createAtomicConceptClassificationManager(Reasoner reasoner) {
+    protected static ClassificationManager<AtomicConcept> createAtomicConceptClassificationManager(Reasoner reasoner) {
         if (reasoner.getTableau().isDeterministic())
             return new DeterministicClassificationManager<AtomicConcept>(new AtomicConceptSubsumptionCache(reasoner));
         else
-            return new QuasiOrderClassificationManager(reasoner,m_dlOntology);
+            return new StandardClassificationManager<AtomicConcept>(new AtomicConceptSubsumptionCache(reasoner));
+//            return new QuasiOrderClassificationManager(reasoner);
     }
 
     protected static ClassificationManager<Role> createObjectRoleClassificationManager(Reasoner reasoner) {
-        if (reasoner.getTableau().isDeterministic())
-            return new DeterministicClassificationManager<Role>(new ObjectRoleSubsumptionCache(reasoner));
-        else
-            return new StandardClassificationManager<Role>(new ObjectRoleSubsumptionCache(reasoner));
+        return new StandardClassificationManager<Role>(new ObjectRoleSubsumptionCache(reasoner));
     }
 
     protected static ClassificationManager<Role> createDataRoleClassificationManager(Reasoner reasoner) {
-        if (reasoner.getTableau().isDeterministic())
-            return new DeterministicClassificationManager<Role>(new DataRoleSubsumptionCache(reasoner));
-        else
-            return new StandardClassificationManager<Role>(new DataRoleSubsumptionCache(reasoner));
+        return new StandardClassificationManager<Role>(new DataRoleSubsumptionCache(reasoner));
     }
 
     protected static DLOntology createDeltaDLOntology(Configuration configuration,DLOntology originalDLOntology,OWLOntologyManager ontologyManager,OWLAxiom... additionalAxioms) throws IllegalArgumentException {

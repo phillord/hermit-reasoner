@@ -37,10 +37,8 @@ import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.Inequality;
-import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.model.NegatedAtomicRole;
-import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.Term;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.tableau.Node.NodeState;
@@ -93,8 +91,6 @@ public final class Tableau implements Serializable {
     protected Node m_lastMergedOrPrunedNode;
     protected GroundDisjunction m_firstGroundDisjunction;
     protected GroundDisjunction m_firstUnprocessedGroundDisjunction;
-    protected Node m_checkedNode0;
-    protected Node m_checkedNode1;
 
     public Tableau(InterruptFlag interruptFlag,TableauMonitor tableauMonitor,ExistentialExpansionStrategy existentialsExpansionStrategy,boolean useDisjunctionLearning,DLOntology permanentDLOntology,DLOntology additionalDLOntology,Map<String,Object> parameters) {
         if (additionalDLOntology!=null && !additionalDLOntology.getAllDescriptionGraphs().isEmpty())
@@ -188,8 +184,6 @@ public final class Tableau implements Serializable {
         m_lastMergedOrPrunedNode=null;
         m_firstGroundDisjunction=null;
         m_firstUnprocessedGroundDisjunction=null;
-        m_checkedNode0=null;
-        m_checkedNode1=null;
         m_branchingPoints=new BranchingPoint[2];
         m_currentBranchingPoint=-1;
         m_nonbacktrackableBranchingPoint=-1;
@@ -243,7 +237,7 @@ public final class Tableau implements Serializable {
         if (m_additionalDLOntology!=null)
             m_checkDatatypes|=m_additionalDLOntology.hasDatatypes();
     }
-    public boolean isSatisfiable(AtomicConcept atomicConcept) {
+/*    public boolean isSatisfiable(AtomicConcept atomicConcept) {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isSatisfiableStarted(atomicConcept);
         clear();
@@ -262,90 +256,7 @@ public final class Tableau implements Serializable {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isSatisfiableFinished(atomicConcept,result);
         return result;
-    }
-    public boolean isSubsumedByList(AtomicConcept subconcept,ArrayList<AtomicConcept> superconcepts) {
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.isSubsumedByStarted(subconcept,superconcepts.get(0));
-        clear();
-        Map<Term,Node> termsToNodes=new HashMap<Term,Node>();
-        if (hasNominals())
-            loadPermanentABox(termsToNodes);
-        if (m_additionalDLOntology!=null) {
-            for (Atom atom : m_additionalDLOntology.getPositiveFacts())
-                loadPositiveFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
-            for (Atom atom : m_additionalDLOntology.getNegativeFacts())
-                loadNegativeFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
-        }
-        m_checkedNode0=createNewNINode(m_dependencySetFactory.emptySet());
-        m_extensionManager.addConceptAssertion(subconcept,m_checkedNode0,m_dependencySetFactory.emptySet(),true);
-        m_branchingPoints[0]=new BranchingPoint(this);
-        m_currentBranchingPoint++;
-        m_nonbacktrackableBranchingPoint=m_currentBranchingPoint;
-        DependencySet dependencySet=m_dependencySetFactory.addBranchingPoint(m_dependencySetFactory.emptySet(),m_currentBranchingPoint);
-        for (int index=0;index<superconcepts.size();index++)
-            m_extensionManager.addConceptAssertion(superconcepts.get(index).getNegation(),m_checkedNode0,dependencySet,true);
-        boolean result=!isSatisfiable();
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.isSubsumedByFinished(subconcept,superconcepts.get(0),result);
-        return result;
-    }
-    public boolean isSatisfiable(Role role,boolean isDataRole) {
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.isSatisfiableStarted(role);
-        clear();
-        Map<Term,Node> termsToNodes=new HashMap<Term,Node>();
-        if (hasNominals())
-            loadPermanentABox(termsToNodes);
-        if (m_additionalDLOntology!=null) {
-            for (Atom atom : m_additionalDLOntology.getPositiveFacts())
-                loadPositiveFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
-            for (Atom atom : m_additionalDLOntology.getNegativeFacts())
-                loadNegativeFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
-        }
-        m_checkedNode0=createNewNINode(m_dependencySetFactory.emptySet());
-        if (isDataRole)
-            m_checkedNode1=createNewConcreteNode(m_dependencySetFactory.emptySet(),m_checkedNode0);
-        else
-            m_checkedNode1=createNewNINode(m_dependencySetFactory.emptySet());
-        if (role instanceof InverseRole)
-            m_extensionManager.addRoleAssertion(((InverseRole)role).getInverseOf(),m_checkedNode1,m_checkedNode0,m_dependencySetFactory.emptySet(),true);
-        else
-            m_extensionManager.addRoleAssertion(role,m_checkedNode0,m_checkedNode1,m_dependencySetFactory.emptySet(),true);
-        boolean result=isSatisfiable();
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.isSatisfiableFinished(role,result);
-        return result;
-    }
-    public boolean isABoxSatisfiable() {
-        return isABoxSatisfiable(null,null);
-    }
-    public boolean isABoxSatisfiable(Individual checkedNode0Name,Individual checkedNode1Name) {
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.isABoxSatisfiableStarted();
-        clear();
-        Map<Term,Node> termsToNodes=loadABox();
-        if (m_additionalDLOntology!=null) {
-            for (Atom atom : m_additionalDLOntology.getPositiveFacts())
-                loadPositiveFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
-            for (Atom atom : m_additionalDLOntology.getNegativeFacts())
-                loadNegativeFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
-        }
-        if (checkedNode0Name==null)
-            m_checkedNode0=null;
-        else
-            m_checkedNode0=getNodeForTerm(termsToNodes,checkedNode0Name,m_dependencySetFactory.emptySet());
-        if (checkedNode1Name==null)
-            m_checkedNode1=null;
-        else
-            m_checkedNode1=getNodeForTerm(termsToNodes,checkedNode1Name,m_dependencySetFactory.emptySet());
-        // Ensure that at least one individual exists.
-        if (m_firstTableauNode==null)
-            createNewNINode(m_dependencySetFactory.emptySet());
-        boolean result=isSatisfiable();
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.isABoxSatisfiableFinished(result);
-        return result;
-    }
+    }*/
     public boolean isSatisfiable(boolean loadAdditionalABox,Set<Atom> perTestPositiveFactsNoDependency,Set<Atom> perTestNegativeFactsNoDependency,Set<Atom> perTestPositiveFactsDummyDependency,Set<Atom> perTestNegativeFactsDummyDependency,Map<Individual,Node> nodesForIndividuals) {
         boolean loadPermanentABox=m_permanentDLOntology.hasNominals() || (m_additionalDLOntology!=null && m_additionalDLOntology.hasNominals());
         return isSatisfiable(loadPermanentABox,loadAdditionalABox,perTestPositiveFactsNoDependency,perTestNegativeFactsNoDependency,perTestPositiveFactsDummyDependency,perTestNegativeFactsDummyDependency,nodesForIndividuals);
@@ -388,7 +299,10 @@ public final class Tableau implements Serializable {
         if (nodesForIndividuals!=null)
             for (Map.Entry<Individual,Node> entry : nodesForIndividuals.entrySet())
                 entry.setValue(termsToNodes.get(entry.getKey()));
-        boolean result=isSatisfiable();
+        // Ensure that at least one individual exists.
+        if (m_firstTableauNode==null)
+            createNewNINode(m_dependencySetFactory.emptySet());
+        boolean result=runCalculus();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isABoxSatisfiableFinished(result);
         return result;
@@ -428,17 +342,6 @@ public final class Tableau implements Serializable {
         else
             throw new IllegalArgumentException("Unsupported type of negative ground atom.");
     }
-    protected void loadPermanentABox(Map<Term,Node> termsToNodes) {
-        for (Atom atom : m_permanentDLOntology.getPositiveFacts())
-            loadPositiveFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
-        for (Atom atom : m_permanentDLOntology.getNegativeFacts())
-            loadNegativeFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
-    }
-    protected Map<Term,Node> loadABox() {
-        Map<Term,Node> termsToNodes=new HashMap<Term,Node>();
-        loadPermanentABox(termsToNodes);
-        return termsToNodes;
-    }
     protected Node getNodeForTerm(Map<Term,Node> termsToNodes,Term term,DependencySet dependencySet) {
         Node node=termsToNodes.get(term);
         if (node==null) {
@@ -457,7 +360,7 @@ public final class Tableau implements Serializable {
         }
         return node.getCanonicalNode();
     }
-    protected boolean isSatisfiable() {
+    protected boolean runCalculus() {
         m_interruptFlag.startTimedTask();
         try {
             boolean existentialsAreExact=m_existentialExpansionStrategy.isExact();
@@ -564,15 +467,6 @@ public final class Tableau implements Serializable {
             return true;
         }
         return false;
-    }
-    public Node getCheckedNode0() {
-        return m_checkedNode0;
-    }
-    public Node getCheckedNode1() {
-        return m_checkedNode1;
-    }
-    private boolean hasNominals() {
-        return m_permanentDLOntology.hasNominals() || (m_additionalDLOntology!=null && m_additionalDLOntology.hasNominals());
     }
     public boolean isCurrentModelDeterministic() {
         return m_isCurrentModelDeterministic;

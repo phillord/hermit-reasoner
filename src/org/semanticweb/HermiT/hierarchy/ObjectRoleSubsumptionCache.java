@@ -17,10 +17,12 @@
 */
 package org.semanticweb.HermiT.hierarchy;
 
+import java.util.Collections;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.graph.Graph;
+import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.Individual;
@@ -31,8 +33,11 @@ import org.semanticweb.HermiT.tableau.Tableau;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 /**
@@ -69,35 +74,38 @@ public class ObjectRoleSubsumptionCache extends RoleSubsumptionCache {
         }
     }
     protected boolean doSatisfiabilityTest(Role role) {
-        return m_reasoner.getTableau().isSatisfiable(role,false);
+        Individual individualA=Individual.create("internal:fresh-individual-A",false);
+        Individual individualB=Individual.create("internal:fresh-individual-B",false);
+        Atom roleAssertion;
+        if (role instanceof AtomicRole)
+            roleAssertion=Atom.create((AtomicRole)role,individualA,individualB);
+        else
+            roleAssertion=Atom.create(((InverseRole)role).getInverseOf(),individualB,individualA);
+        return m_reasoner.getTableau().isSatisfiable(true,Collections.singleton(roleAssertion),null,null,null,null);
     }
-    protected boolean doSubsumptionCheck(RoleInfo subroleInfo,Role superrole) {
-        Role subrole=subroleInfo.m_forRole;
+    protected boolean doSubsumptionCheck(Role subrole,Role superrole) {
         // This code is different from data properties. This is because object properties can be transitive, so
         // we need to make sure that appropriate DL-clauses are added for negative object property assertions.
         OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
         OWLDataFactory factory=ontologyManager.getOWLDataFactory();
-        OWLNamedIndividual individualA=factory.getOWLNamedIndividual(IRI.create("internal:individualA"));
-        OWLNamedIndividual individualB=factory.getOWLNamedIndividual(IRI.create("internal:individualB"));
-        OWLAxiom subAssertion;
-        if (subrole instanceof AtomicRole)
-            subAssertion=factory.getOWLObjectPropertyAssertionAxiom(factory.getOWLObjectProperty(IRI.create(((AtomicRole) subrole).getIRI())),individualA,individualB);
-        else
-            subAssertion=factory.getOWLObjectPropertyAssertionAxiom(factory.getOWLObjectProperty(IRI.create(((InverseRole) subrole).getInverseOf().getIRI())),individualB,individualA);
-        OWLAxiom superNegatedAssertion;
-        if (superrole instanceof AtomicRole)
-            superNegatedAssertion=factory.getOWLNegativeObjectPropertyAssertionAxiom(factory.getOWLObjectProperty(IRI.create(((AtomicRole) superrole).getIRI())),individualA,individualB);
-        else
-            superNegatedAssertion=factory.getOWLNegativeObjectPropertyAssertionAxiom(factory.getOWLObjectProperty(IRI.create(((InverseRole) superrole).getInverseOf().getIRI())),individualB,individualA);
-        Tableau tableau=m_reasoner.getTableau(ontologyManager,subAssertion,superNegatedAssertion);
-        boolean isSubsumedBy=!tableau.isABoxSatisfiable(Individual.create(individualA.getIRI().toString(),true), Individual.create(individualB.getIRI().toString(),true));
-        if (!isSubsumedBy) {
-            subroleInfo.m_isSatisfiable=Boolean.TRUE;
-            updateKnownSubsumers(subrole,tableau);
-            updatePossibleSubsumers(tableau);
+        OWLNamedIndividual individualA=factory.getOWLNamedIndividual(IRI.create("internal:fresh-individual-A"));
+        OWLNamedIndividual individualB=factory.getOWLNamedIndividual(IRI.create("internal:fresh-individual-B"));
+        OWLObjectPropertyExpression subpropertyExpression=getObjectPropertyExpression(factory,subrole);
+        OWLObjectPropertyExpression superpropertyExpression=getObjectPropertyExpression(factory,superrole);
+        OWLClass pseudoNominal=factory.getOWLClass(IRI.create("internal:pseudo-nominal"));
+        OWLAxiom subpropertyAssertion=factory.getOWLObjectPropertyAssertionAxiom(subpropertyExpression,individualA,individualB);
+        OWLClassExpression allSuperNotPseudoNominal=factory.getOWLObjectAllValuesFrom(superpropertyExpression,pseudoNominal.getObjectComplementOf());
+        OWLAxiom pseudoNominalAssertion=factory.getOWLClassAssertionAxiom(pseudoNominal,individualB);
+        OWLAxiom superpropertyAssertion=factory.getOWLClassAssertionAxiom(allSuperNotPseudoNominal,individualA);
+        Tableau tableau=m_reasoner.getTableau(ontologyManager,subpropertyAssertion,pseudoNominalAssertion,superpropertyAssertion);
+        return !tableau.isSatisfiable(true,null,null,null,null,null);
+    }
+    protected static OWLObjectPropertyExpression getObjectPropertyExpression(OWLDataFactory factory,Role role) {
+        if (role instanceof AtomicRole)
+            return factory.getOWLObjectProperty(IRI.create(((AtomicRole)role).getIRI()));
+        else {
+            AtomicRole inverseOf=((InverseRole)role).getInverseOf();
+            return factory.getOWLObjectProperty(IRI.create(inverseOf.getIRI())).getInverseProperty();
         }
-        else
-            subroleInfo.addKnownSubsumer(superrole);
-        return isSubsumedBy;
     }
 }
