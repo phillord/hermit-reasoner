@@ -294,7 +294,6 @@ public class Debugger extends TableauMonitorForwarder {
         super.isSatisfiableFinished(atomicConcept,result);
         m_output.println("'"+m_prefixes.abbreviateIRI(atomicConcept.getIRI())+"' is "+(result ? "" : "not ")+"satisfiable.");
         mainLoop();
-        dispose();
     }
     public void isSubsumedByStarted(AtomicConcept subconcept,AtomicConcept superconcept) {
         super.isSubsumedByStarted(subconcept,superconcept);
@@ -305,7 +304,6 @@ public class Debugger extends TableauMonitorForwarder {
         super.isSubsumedByFinished(subconcept,superconcept,result);
         m_output.println("'"+m_prefixes.abbreviateIRI(subconcept.getIRI())+"' is "+(result ? "" : "not ")+"subsumed by '"+m_prefixes.abbreviateIRI(superconcept.getIRI())+"'.");
         mainLoop();
-        dispose();
     }
     public void isABoxSatisfiableStarted() {
         super.isABoxSatisfiableStarted();
@@ -316,7 +314,6 @@ public class Debugger extends TableauMonitorForwarder {
         super.isABoxSatisfiableFinished(result);
         m_output.println("ABox is "+(result ? "" : "not ")+"satisfiable.");
         mainLoop();
-        dispose();
     }
     public void isInstanceOfStarted(AtomicConcept concept,Individual individual) {
         super.isInstanceOfStarted(concept,individual);
@@ -327,7 +324,6 @@ public class Debugger extends TableauMonitorForwarder {
         super.isInstanceOfFinished(concept,individual,result);
         m_output.println("'"+m_prefixes.abbreviateIRI(concept.getIRI())+"' is "+(result ? "" : "not ")+"an instance of '"+m_prefixes.abbreviateIRI(individual.getIRI())+"'.");
         mainLoop();
-        dispose();
     }
     public void tableauCleared() {
         super.tableauCleared();

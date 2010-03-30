@@ -1,24 +1,24 @@
 /* Copyright 2009 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 // An update for the tests (all.rdf) should regularly be downloaded to the ontologies folder from http://wiki.webont.org/exports/
 package org.semanticweb.HermiT.owl_wg_tests;
 
-import java.io.PrintWriter;
+import java.io.File;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
@@ -46,9 +46,9 @@ public class WGTestDescriptor {
 
     protected enum Status {
         APPROVED("Approved"),REJECTED("Rejected"),PROPOSED("Proposed"),EXTRACREDIT("Extracredit");
-        
+
         public final IRI uri;
-        
+
         private Status(String uriSuffix) {
             uri=IRI.create(WGTestRegistry.URI_BASE+uriSuffix);
         }
@@ -56,7 +56,7 @@ public class WGTestDescriptor {
 
     protected enum Semantics {
         DIRECT("DIRECT"),RDF_BASED("RDF-BASED");
-        
+
         public final IRI uri;
 
         private Semantics(String uriSuffix) {
@@ -66,7 +66,7 @@ public class WGTestDescriptor {
 
     protected enum Species {
         DL("DL"),FULL("FULL");
-        
+
         public final IRI uri;
 
         private Species(String uriSuffix) {
@@ -75,23 +75,17 @@ public class WGTestDescriptor {
     }
 
     public enum TestType {
-        CONSISTENCY("ConsistencyTest"),
-        INCONSISTENCY("InconsistencyTest"),
-        POSITIVE_ENTAILMENT("PositiveEntailmentTest"),
-        NEGATIVE_ENTAILMENT("NegativeEntailmentTest"),
-        PROFILE_IDENTIFICATION("ProfileIdentificationTest");
-        
+        CONSISTENCY("ConsistencyTest"),INCONSISTENCY("InconsistencyTest"),POSITIVE_ENTAILMENT("PositiveEntailmentTest"),NEGATIVE_ENTAILMENT("NegativeEntailmentTest"),PROFILE_IDENTIFICATION("ProfileIdentificationTest");
+
         public final IRI uri;
-        
+
         private TestType(String uriSuffix) {
             uri=IRI.create(WGTestRegistry.URI_BASE+uriSuffix);
         }
     }
 
     public enum SerializationFormat {
-        FUNCTIONAL("FUNCTIONAL","fsPremiseOntology","fsConclusionOntology","fsNonConclusionOntology"),
-        OWLXML("OWLXML","owlXmlPremiseOntology","owlXmlConclusionOntology","owlXmlNonConclusionOntology"),
-        RDFXML("RDFXML","rdfXmlPremiseOntology","rdfXmlConclusionOntology","rdfXmlNonConclusionOntology");
+        FUNCTIONAL("FUNCTIONAL","fsPremiseOntology","fsConclusionOntology","fsNonConclusionOntology"),OWLXML("OWLXML","owlXmlPremiseOntology","owlXmlConclusionOntology","owlXmlNonConclusionOntology"),RDFXML("RDFXML","rdfXmlPremiseOntology","rdfXmlConclusionOntology","rdfXmlNonConclusionOntology");
 
         public final OWLDataProperty premise;
         public final OWLDataProperty conclusion;
@@ -107,7 +101,6 @@ public class WGTestDescriptor {
 
     protected final OWLOntology testContainer;
     protected final OWLIndividual testIndividual;
-    protected final PrintWriter output;
     public final String testID;
     public final String identifier;
     public final Status status;
@@ -116,16 +109,14 @@ public class WGTestDescriptor {
     public final EnumSet<Semantics> semantics;
     public final EnumSet<Semantics> notsemantics;
 
-    public WGTestDescriptor(OWLOntologyManager m,OWLOntology o,OWLIndividual i,PrintWriter output) throws InvalidWGTestException {
+    public WGTestDescriptor(OWLOntologyManager m,OWLOntology o,OWLIndividual i) throws InvalidWGTestException {
         testContainer=o;
         testIndividual=i;
-        this.output=output;
-        if (i.isAnonymous()) {
+        if (i.isAnonymous())
             throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
-        }
         String testIndividualIRI=testIndividual.asOWLNamedIndividual().getIRI().toString();
         testID=testIndividualIRI.substring(WGTestRegistry.TEST_ID_PREFIX.length());
-        
+
         OWLDataFactory df=m.getOWLDataFactory();
         Map<OWLDataPropertyExpression,Set<OWLLiteral>> dps=i.getDataPropertyValues(o);
         Map<OWLObjectPropertyExpression,Set<OWLIndividual>> ops=i.getObjectPropertyValues(o);
@@ -142,17 +133,13 @@ public class WGTestDescriptor {
     public boolean isDLTest() {
         return semantics.contains(Semantics.DIRECT) && species.contains(Species.DL);
     }
-    
+
     protected String getIdentifier(Map<OWLDataPropertyExpression,Set<OWLLiteral>> dps,OWLDataFactory df) throws InvalidWGTestException {
         Set<OWLLiteral> identifiers=dps.get(df.getOWLDataProperty(IRI.create(WGTestRegistry.URI_BASE+"identifier")));
         if (identifiers==null || identifiers.isEmpty())
             throw new InvalidWGTestException("Test does not have an identifier.");
-        if (identifiers.size()!=1) {
-            String idents="";
-            for (OWLLiteral c : identifiers)
-                idents+=c.getLiteral();
+        if (identifiers.size()!=1)
             throw new InvalidWGTestException("Test has more than one identifier.");
-        }
         return identifiers.iterator().next().getLiteral();
     }
 
@@ -163,10 +150,9 @@ public class WGTestDescriptor {
         else if (statuses.size()>1)
             throw new InvalidWGTestException("The test "+testID+" has more than one status.");
         else {
-            OWLIndividual i = statuses.iterator().next();
-            if (i.isAnonymous()) {
+            OWLIndividual i=statuses.iterator().next();
+            if (i.isAnonymous())
                 throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
-            }
             IRI statusIRI=i.asOWLNamedIndividual().getIRI();
             for (Status status : Status.values())
                 if (statusIRI.equals(status.uri))
@@ -220,9 +206,8 @@ public class WGTestDescriptor {
         Set<OWLIndividual> sems=ops.get(df.getOWLObjectProperty(IRI.create(WGTestRegistry.URI_BASE+"semantics")));
         if (sems!=null) {
             nextItem: for (OWLIndividual s : sems) {
-                if (s.isAnonymous()) {
+                if (s.isAnonymous())
                     throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
-                }
                 IRI semanticsIRI=s.asOWLNamedIndividual().getIRI();
                 for (Semantics sem : Semantics.values()) {
                     if (semanticsIRI.equals(sem.uri)) {
@@ -241,9 +226,8 @@ public class WGTestDescriptor {
         Set<OWLIndividual> nsems=nops.get(df.getOWLObjectProperty(IRI.create(WGTestRegistry.URI_BASE+"semantics")));
         if (nsems!=null) {
             nextItem: for (OWLIndividual s : nsems) {
-                if (s.isAnonymous()) {
+                if (s.isAnonymous())
                     throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
-                }
                 IRI semanticsIRI=s.asOWLNamedIndividual().getIRI();
                 for (Semantics sem : Semantics.values()) {
                     if (semanticsIRI.equals(sem.uri)) {
@@ -301,32 +285,32 @@ public class WGTestDescriptor {
         }
         throw new InvalidWGTestException("Test "+testID+" has no conclusion ontology in a parsable format.");
     }
-    
+
     public void addTestsToSuite(TestSuite suite) {
         for (TestType testType : TestType.values()) {
-            Test test=getTest(testType);
+            Test test=getTest(testType,null);
             if (test!=null)
                 suite.addTest(test);
         }
     }
-    
-    public Test getTest(TestType testType) {
+
+    public Test getTest(TestType testType,File dumpTestDataDirectory) {
         if (testTypes.contains(testType) && isDLTest()) {
             switch (testType) {
             case CONSISTENCY:
-                return new ConsistencyTest(this,true,output);
+                return new ConsistencyTest(this,true,dumpTestDataDirectory);
             case INCONSISTENCY:
-                return new ConsistencyTest(this,false,output);
+                return new ConsistencyTest(this,false,dumpTestDataDirectory);
             case POSITIVE_ENTAILMENT:
-                return new EntailmentTest(this,true,output);
+                return new EntailmentTest(this,true,dumpTestDataDirectory);
             case NEGATIVE_ENTAILMENT:
-                return new EntailmentTest(this,false,output);
+                return new EntailmentTest(this,false,dumpTestDataDirectory);
             }
         }
         return null;
     }
-    
+
     public String toString() {
-        return "Test: " + identifier + ", status " + status + ", test types: " + testTypes + ", species: " + species + ", semantics: " + semantics + ", not semantics: " + notsemantics;
+        return "Test: "+identifier+", status "+status+", test types: "+testTypes+", species: "+species+", semantics: "+semantics+", not semantics: "+notsemantics;
     }
 }

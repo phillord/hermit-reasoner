@@ -48,7 +48,6 @@ import org.semanticweb.HermiT.tableau.ExtensionTable.Retrieval;
  * Checks whether the rules from some set are applicable given the current state of the extensions.
  */
 public class BlockingValidator {
-    protected final Tableau m_tableau;
     protected final ExtensionManager m_extensionManager;
     protected final ExtensionTable.Retrieval m_binaryRetrieval1Bound;
     protected final ExtensionTable.Retrieval m_ternaryRetrieval01Bound;
@@ -65,8 +64,7 @@ public class BlockingValidator {
     protected final boolean debuggingMode=false;
 
 
-    public BlockingValidator(Tableau tableau) {
-        m_tableau=tableau;
+    public BlockingValidator(Tableau tableau,Set<DLClause> dlClauses) {
         m_extensionManager=tableau.getExtensionManager();
         m_binaryRetrieval1Bound=m_extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { false, true }, ExtensionTable.View.TOTAL);
         m_ternaryRetrieval01Bound=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,true,false }, ExtensionTable.View.TOTAL);
@@ -74,7 +72,7 @@ public class BlockingValidator {
         m_ternaryRetrieval1Bound=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,false }, ExtensionTable.View.TOTAL);
         m_ternaryRetrieval2Bound=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { false,false,true }, ExtensionTable.View.TOTAL);
         m_dlClauseInfos=new ArrayList<DLClauseInfo>();
-        for (DLClause dlClause : tableau.getDLOntology().getDLClauses()) {
+        for (DLClause dlClause : dlClauses) {
             if (dlClause.getClauseType()==ClauseType.CONCEPT_INCLUSION) {
                 DLClauseInfo clauseInfo=new DLClauseInfo(dlClause,m_extensionManager);
                 if (clauseInfo.m_yNodes.length>0 || clauseInfo.m_zConcepts.length>0)

@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.semanticweb.HermiT.blocking.AnywhereValidatedBlocking;
-import org.semanticweb.HermiT.blocking.BlockingSignatureCache;
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.blocking.BlockingValidator;
 import org.semanticweb.HermiT.blocking.DirectBlockingChecker;
@@ -96,8 +95,7 @@ public class BlockingValidatorTest extends AbstractReasonerInternalsTest {
         ); //automaton for complex roles
 
         DirectBlockingChecker directBlockingChecker=new ValidatedSingleDirectBlockingChecker(TEST_DL_ONTOLOGY.hasInverseRoles());
-        BlockingSignatureCache blockingSignatureCache=null;
-        m_blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,blockingSignatureCache,true,true);
+        m_blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,true,true);
         ExistentialExpansionStrategy ExpansionStrategy=new CreationOrderStrategy(m_blockingStrategy);
         m_tableau=new Tableau(new InterruptFlag(),null,ExpansionStrategy,false,TEST_DL_ONTOLOGY,new HashMap<String,Object>());
         m_extensionManager=m_tableau.getExtensionManager();
@@ -181,7 +179,7 @@ public class BlockingValidatorTest extends AbstractReasonerInternalsTest {
         assertFalse(a1.isBlocked());
         assertFalse(a11.isBlocked());
         assertFalse(a12.isBlocked());
-        BlockingValidator validator=new BlockingValidator(m_tableau);
+        BlockingValidator validator=new BlockingValidator(m_tableau,m_tableau.getDLOntology().getDLClauses());
         assertTrue(validator.isBlockValid(a2));
         assertTrue(validator.isBlockValid(a111));
         assertTrue(validator.isBlockValid(b1));
@@ -225,8 +223,7 @@ public class BlockingValidatorTest extends AbstractReasonerInternalsTest {
         );
 
         DirectBlockingChecker directBlockingChecker=new ValidatedSingleDirectBlockingChecker(TEST_DL_ONTOLOGY.hasInverseRoles());
-        BlockingSignatureCache blockingSignatureCache=null;
-        m_blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,blockingSignatureCache,true,true);
+        m_blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,true,true);
         ExistentialExpansionStrategy ExpansionStrategy=new CreationOrderStrategy(m_blockingStrategy);
         m_tableau=new Tableau(new InterruptFlag(),null,ExpansionStrategy,false,TEST_DL_ONTOLOGY,new HashMap<String,Object>());
         m_extensionManager=m_tableau.getExtensionManager();
@@ -265,7 +262,7 @@ public class BlockingValidatorTest extends AbstractReasonerInternalsTest {
         assertFalse(a1.isBlocked());
         assertFalse(a11.isBlocked());
         assertFalse(a12.isBlocked());
-        BlockingValidator validator=new BlockingValidator(m_tableau);
+        BlockingValidator validator=new BlockingValidator(m_tableau,m_tableau.getDLOntology().getDLClauses());
         assertFalse(validator.isBlockValid(a2));
     }
     protected void assertLabel(Node node,Concept... expected) {

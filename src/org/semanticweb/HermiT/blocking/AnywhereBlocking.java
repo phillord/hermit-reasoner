@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -19,7 +19,9 @@ package org.semanticweb.HermiT.blocking;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
+import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
@@ -35,6 +37,7 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
     protected final BlockersCache m_currentBlockersCache;
     protected final BlockingSignatureCache m_blockingSignatureCache;
     protected Tableau m_tableau;
+    protected boolean m_useBlockingSignatureCache;
     protected Node m_firstChangedNode;
 
     public AnywhereBlocking(DirectBlockingChecker directBlockingChecker,BlockingSignatureCache blockingSignatureCache) {
@@ -45,6 +48,15 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
     public void initialize(Tableau tableau) {
         m_tableau=tableau;
         m_directBlockingChecker.initialize(tableau);
+    }
+    public void additionalAxiomsSet(Set<DLClause> additionalDLClauses,Set<Atom> additionalPositiveAtoms,Set<Atom> additionalNegativeAtoms) {
+        updateBlockingSignatureCacheUsage();
+    }
+    public void additionalAxiomsCleared() {
+        updateBlockingSignatureCacheUsage();
+    }
+    protected void updateBlockingSignatureCacheUsage() {
+        m_useBlockingSignatureCache=(m_tableau.getAdditionalHyperresolutionManager()==null);
     }
     public void clear() {
         m_currentBlockersCache.clear();
@@ -59,7 +71,7 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
                 node=node.getNextTableauNode();
             }
             node=m_firstChangedNode;
-            boolean checkBlockingSignatureCache=(m_blockingSignatureCache!=null && !m_blockingSignatureCache.isEmpty());
+            boolean checkBlockingSignatureCache=(m_useBlockingSignatureCache && m_blockingSignatureCache!=null && !m_blockingSignatureCache.isEmpty());
             while (node!=null) {
                 if (node.isActive() && (m_directBlockingChecker.canBeBlocked(node) || m_directBlockingChecker.canBeBlocker(node))) {
                     if (m_directBlockingChecker.hasBlockingInfoChanged(node) || !node.isDirectlyBlocked() || node.getBlocker().getNodeID()>=m_firstChangedNode.getNodeID()) {
@@ -131,8 +143,7 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
             m_firstChangedNode=null;
     }
     public void modelFound() {
-        //System.out.println("Found  model with " + (m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes()) + " nodes. ");
-        if (m_blockingSignatureCache!=null) {
+        if (m_useBlockingSignatureCache && m_blockingSignatureCache!=null) {
             // Since we've found a model, we know what is blocked or not.
             // Therefore, we don't need to update the blocking status.
             assert m_firstChangedNode==null;

@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -20,7 +20,9 @@ package org.semanticweb.HermiT.blocking;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
+import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
@@ -31,11 +33,12 @@ import org.semanticweb.HermiT.tableau.Tableau;
 
 public class AncestorBlocking implements BlockingStrategy,Serializable {
     private static final long serialVersionUID=1075850000309773283L;
-    
+
     protected final DirectBlockingChecker m_directBlockingChecker;
     protected final BlockingSignatureCache m_blockingSignatureCache;
     protected Tableau m_tableau;
-    
+    protected boolean m_useBlockingSignatureCache;
+
     public AncestorBlocking(DirectBlockingChecker directBlockingChecker,BlockingSignatureCache blockingSignatureCache) {
         m_directBlockingChecker=directBlockingChecker;
         m_blockingSignatureCache=blockingSignatureCache;
@@ -43,6 +46,16 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
     public void initialize(Tableau tableau) {
         m_tableau=tableau;
         m_directBlockingChecker.initialize(tableau);
+        updateBlockingSignatureCacheUsage();
+    }
+    public void additionalAxiomsSet(Set<DLClause> additionalDLClauses,Set<Atom> additionalPositiveAtoms,Set<Atom> additionalNegativeAtoms) {
+        updateBlockingSignatureCacheUsage();
+    }
+    public void additionalAxiomsCleared() {
+        updateBlockingSignatureCacheUsage();
+    }
+    protected void updateBlockingSignatureCacheUsage() {
+        m_useBlockingSignatureCache=(m_tableau.getAdditionalHyperresolutionManager()==null);
     }
     public void clear() {
         m_directBlockingChecker.clear();
@@ -56,7 +69,7 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
                     node.setBlocked(null,false);
                 else if (parent.isBlocked())
                     node.setBlocked(parent,false);
-                else if (m_blockingSignatureCache!=null && m_blockingSignatureCache.containsSignature(node))
+                else if (m_useBlockingSignatureCache && m_blockingSignatureCache!=null && m_blockingSignatureCache.containsSignature(node))
                     node.setBlocked(Node.SIGNATURE_CACHE_BLOCKER,true);
                 else
                     checkParentBlocking(node);
@@ -69,7 +82,7 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
     }
     protected final void checkParentBlocking(Node node) {
         Node blocker=node.getParent();
-        while (blocker!=null) { 
+        while (blocker!=null) {
             if (m_directBlockingChecker.isBlockedBy(blocker,node)) {
                 node.setBlocked(blocker,true);
                 break;
@@ -112,7 +125,7 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
         m_directBlockingChecker.nodeDestroyed(node);
     }
     public void modelFound() {
-        if (m_blockingSignatureCache!=null) {
+        if (m_useBlockingSignatureCache && m_blockingSignatureCache!=null) {
             computeBlocking(false);
             Node node=m_tableau.getFirstTableauNode();
             while (node!=null) {

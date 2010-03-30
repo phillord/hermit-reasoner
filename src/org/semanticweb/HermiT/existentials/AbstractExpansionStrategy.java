@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -20,9 +20,11 @@ package org.semanticweb.HermiT.existentials;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.model.AtLeastConcept;
+import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
@@ -46,7 +48,7 @@ import org.semanticweb.HermiT.tableau.Tableau;
 /**
  * Implements the common bits of an ExistentialsExpansionStrategy, leaving only actual processing of existentials in need of expansion to subclasses.
  */
-public abstract class AbstractExpansionStrategy implements Serializable,ExistentialExpansionStrategy {
+public abstract class AbstractExpansionStrategy implements ExistentialExpansionStrategy,Serializable {
     private static final long serialVersionUID=2831957929321676444L;
     protected static enum SatType { NOT_SATISFIED,PERMANENTLY_SATISFIED,CURRENTLY_SATISFIED };
 
@@ -80,6 +82,12 @@ public abstract class AbstractExpansionStrategy implements Serializable,Existent
         m_descriptionGraphManager=m_tableau.getDescriptionGraphManager();
         m_blockingStrategy.initialize(m_tableau);
     }
+    public void additionalAxiomsSet(Set<DLClause> additionalDLClauses,Set<Atom> additionalPositiveAtoms,Set<Atom> additionalNegativeAtoms) {
+        m_blockingStrategy.additionalAxiomsSet(additionalDLClauses,additionalPositiveAtoms,additionalNegativeAtoms);
+    }
+    public void additionalAxiomsCleared() {
+        m_blockingStrategy.additionalAxiomsCleared();
+    }
     public void clear() {
         m_blockingStrategy.clear();
         m_processedExistentials.clear();
@@ -105,7 +113,7 @@ public abstract class AbstractExpansionStrategy implements Serializable,Existent
                             expandExistential(atLeastConcept,node);
                             extensionsChanged=true;
                             break;
-                        case PERMANENTLY_SATISFIED: // not satisfied by a nominal so that the NN/NI rule can break the existential 
+                        case PERMANENTLY_SATISFIED: // not satisfied by a nominal so that the NN/NI rule can break the existential
                             m_existentialExpansionManager.markExistentialProcessed(existentialConcept,node);
                             if (monitor!=null)
                                 monitor.existentialSatisfied(atLeastConcept,node);
@@ -213,7 +221,7 @@ public abstract class AbstractExpansionStrategy implements Serializable,Existent
                 if ((!toNode.isBlocked() || forNode.isParentOf(toNode)) && m_extensionManager.containsConceptAssertion(toConcept,toNode)) {
                     if (isPermanentSatisfier(forNode,toNode) && m_blockingStrategy.isPermanentAssertion(toConcept,toNode))
                         return SatType.PERMANENTLY_SATISFIED;
-                    else 
+                    else
                         return SatType.CURRENTLY_SATISFIED;
                 }
                 retrieval.next();
@@ -268,8 +276,4 @@ public abstract class AbstractExpansionStrategy implements Serializable,Existent
      * This method performs the actual expansion.
      */
     protected abstract void expandExistential(AtLeastConcept atLeastConcept,Node forNode);
-    
-    public BlockingStrategy getBlockingStrategy() {
-        return m_blockingStrategy;
-    }
 }

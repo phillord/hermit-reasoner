@@ -67,6 +67,7 @@ public final class Tableau implements Serializable {
     protected final ClashManager m_clashManager;
     protected final HyperresolutionManager m_permanentHyperresolutionManager;
     protected HyperresolutionManager m_additionalHyperresolutionManager;
+    protected Set<DLClause> m_additionalDLClauses;
     protected Set<Atom> m_additionalPositiveAtoms;
     protected Set<Atom> m_additionalNegativeAtoms;
     protected final MergingManager m_mergingManager;
@@ -130,6 +131,15 @@ public final class Tableau implements Serializable {
     }
     public DLOntology getDLOntology() {
         return m_dlOntology;
+    }
+    public Set<DLClause> getAdditionalDLClauses() {
+        return m_additionalDLClauses;
+    }
+    public Set<Atom> getAdditionalPositiveAtoms() {
+        return m_additionalPositiveAtoms;
+    }
+    public Set<Atom> getAdditionalNegativeAtoms() {
+        return m_additionalNegativeAtoms;
     }
     public Map<String,Object> getParameters() {
         return m_parameters;
@@ -205,6 +215,7 @@ public final class Tableau implements Serializable {
             m_additionalHyperresolutionManager=new HyperresolutionManager(this,additionalDLClauses);
         else
             m_additionalHyperresolutionManager=null;
+        m_additionalDLClauses=additionalDLClauses;
         m_additionalPositiveAtoms=additionalPositiveAtoms;
         m_additionalNegativeAtoms=additionalNegativeAtoms;
         m_needsThingExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING);
@@ -212,13 +223,16 @@ public final class Tableau implements Serializable {
             m_needsThingExtension|=m_additionalHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING);
             m_needsNamedExtension|=m_additionalHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.INTERNAL_NAMED);
         }
+        m_existentialExpansionStrategy.additionalAxiomsSet(additionalDLClauses,additionalPositiveAtoms,additionalNegativeAtoms);
     }
     public void clearAdditionalAxioms() {
         m_additionalHyperresolutionManager=null;
+        m_additionalDLClauses=null;
         m_additionalPositiveAtoms=null;
         m_additionalNegativeAtoms=null;
         m_needsThingExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING);
         m_needsNamedExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.INTERNAL_NAMED);
+        m_existentialExpansionStrategy.additionalAxiomsCleared();
     }
     public boolean isSatisfiable() {
         m_interruptFlag.startTimedTask();
