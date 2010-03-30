@@ -1371,7 +1371,7 @@ public class Reasoner implements OWLReasoner,Serializable {
                 if (AtomicConcept.THING.equals(atomicConcept))
                     return true;
                 else
-                    return getTableau().isInstanceOf(atomicConcept,individual);
+                    return !getTableau().isSatisfiable(true,true,null,Collections.singleton(Atom.create(atomicConcept,individual)),null,null,null);
             }
         };
         Set<HierarchyNode<AtomicConcept>> topPositions=Collections.singleton(m_atomicConceptHierarchy.getTopNode());
@@ -1427,16 +1427,15 @@ public class Reasoner implements OWLReasoner,Serializable {
         else {
             Individual individual=Individual.create(owlIndividual.getIRI().toString(),false);
             if (type instanceof OWLClass) {
-                AtomicConcept concept=AtomicConcept.create(((OWLClass)type).getIRI().toString());
-                return getTableau().isInstanceOf(concept,individual);
+                AtomicConcept atomicConcept=AtomicConcept.create(((OWLClass)type).getIRI().toString());
+                return !getTableau().isSatisfiable(true,true,null,Collections.singleton(Atom.create(atomicConcept,individual)),null,null,null);
             }
             else {
                 OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
                 OWLDataFactory factory=ontologyManager.getOWLDataFactory();
-                OWLClass newClass=factory.getOWLClass(IRI.create("internal:query-concept"));
-                OWLAxiom classDefinitionAxiom=factory.getOWLSubClassOfAxiom(type,newClass);
-                Tableau tableau=getTableau(ontologyManager,classDefinitionAxiom);
-                return tableau.isInstanceOf(AtomicConcept.create("internal:query-concept"),individual);
+                OWLAxiom negatedAssertionAxiom=factory.getOWLClassAssertionAxiom(type.getObjectComplementOf(),owlIndividual);
+                Tableau tableau=getTableau(ontologyManager,negatedAssertionAxiom);
+                return !tableau.isSatisfiable(true,true,null,null,null,null,null);
             }
         }
     }
@@ -1483,7 +1482,7 @@ public class Reasoner implements OWLReasoner,Serializable {
                     Set<Individual> realizationForNodeConcept=m_realization.get(nodeAtomicConcept);
                     if (realizationForNodeConcept!=null)
                         for (Individual individual : realizationForNodeConcept)
-                            if (tableau.isInstanceOf(queryConcept,individual) && individual.isNamed() && !Prefixes.isInternalIRI(individual.getIRI()))
+                            if (!tableau.isSatisfiable(true,true,null,Collections.singleton(Atom.create(queryConcept,individual)),null,null,null) && individual.isNamed() && !Prefixes.isInternalIRI(individual.getIRI()))
                                 result.add(new OWLNamedIndividualNode(factory.getOWLNamedIndividual(IRI.create(individual.getIRI()))));
                     toVisit.addAll(node.getChildNodes());
                 }
@@ -1527,7 +1526,7 @@ public class Reasoner implements OWLReasoner,Serializable {
                 Set<Individual> realizationForNodeConcept=m_realization.get(nodeAtomicConcept);
                 if (realizationForNodeConcept!=null) {
                     for (Individual individual : realizationForNodeConcept) {
-                        if (individual.isNamed() && tableau.isInstanceOf(queryConcept,individual) && !Prefixes.isInternalIRI(individual.getIRI())) {
+                        if (individual.isNamed() && !tableau.isSatisfiable(true,true,null,Collections.singleton(Atom.create(queryConcept,individual)),null,null,null) && !Prefixes.isInternalIRI(individual.getIRI())) {
                             OWLNamedIndividual owlIndividual=factory.getOWLNamedIndividual(IRI.create(individual.getIRI()));
                             result.add(new OWLNamedIndividualNode(owlIndividual));
                         }
@@ -2175,30 +2174,30 @@ public class Reasoner implements OWLReasoner,Serializable {
             prepareReasonerInferences.classClassificationRequired=(preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_CLASS_UNSATISFIABILITY)
                     || preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_EQUIVALENT_CLASSES)
                     || preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_INHERITED_ANONYMOUS_CLASSES)
-                    || preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_CLASSES)); 
-            
+                    || preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_CLASSES));
+
             // realisation
             prepareReasonerInferences.realisationRequired=(preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERED_CLASS_MEMBERS)
                     || preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_TYPES));
-            
+
             // data type classification
             prepareReasonerInferences.dataPropertyClassificationRequired=(preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_DATATYPE_PROPERTY_DOMAINS)
                     || preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_EQUIVALENT_DATATYPE_PROPERTIES)
                     || preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_DATATYPE_PROPERTIES));
-            
-            // object property classification 
+
+            // object property classification
             prepareReasonerInferences.objectPropertyClassificationRequired=(preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_EQUIVALENT_OBJECT_PROPERTIES)
                     || preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_INVERSE_PROPERTIES)
                     || preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_OBJECT_PROPERTIES)
                     || preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_OBJECT_PROPERTY_UNSATISFIABILITY));
-            
-            // object property realisation 
+
+            // object property realisation
             prepareReasonerInferences.objectPropertyRealisationRequired=preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_OBJECT_PROPERTY_ASSERTIONS);
-            
+
             // object property domain & range
             prepareReasonerInferences.objectPropertyDomainsRequired=preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_OBJECT_PROPERTY_DOMAINS);
             prepareReasonerInferences.objectPropertyRangesRequired=preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_OBJECT_PROPERTY_RANGES);
-            
+
             configuration.prepareReasonerInferences=prepareReasonerInferences;
             return factory.createHermiTOWLReasoner(configuration,ontology);
         }
