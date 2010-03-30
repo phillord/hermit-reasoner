@@ -237,26 +237,6 @@ public final class Tableau implements Serializable {
         if (m_additionalDLOntology!=null)
             m_checkDatatypes|=m_additionalDLOntology.hasDatatypes();
     }
-/*    public boolean isSatisfiable(AtomicConcept atomicConcept) {
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.isSatisfiableStarted(atomicConcept);
-        clear();
-        Map<Term,Node> termsToNodes=new HashMap<Term,Node>();
-        if (hasNominals())
-            loadPermanentABox(termsToNodes);
-        if (m_additionalDLOntology!=null) {
-            for (Atom atom : m_additionalDLOntology.getPositiveFacts())
-                loadPositiveFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
-            for (Atom atom : m_additionalDLOntology.getNegativeFacts())
-                loadNegativeFact(termsToNodes,atom,m_dependencySetFactory.emptySet());
-        }
-        m_checkedNode0=createNewNINode(m_dependencySetFactory.emptySet());
-        m_extensionManager.addConceptAssertion(atomicConcept,m_checkedNode0,m_dependencySetFactory.emptySet(),true);
-        boolean result=isSatisfiable();
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.isSatisfiableFinished(atomicConcept,result);
-        return result;
-    }*/
     public boolean isSatisfiable(boolean loadAdditionalABox,Set<Atom> perTestPositiveFactsNoDependency,Set<Atom> perTestNegativeFactsNoDependency,Set<Atom> perTestPositiveFactsDummyDependency,Set<Atom> perTestNegativeFactsDummyDependency,Map<Individual,Node> nodesForIndividuals) {
         boolean loadPermanentABox=m_permanentDLOntology.hasNominals() || (m_additionalDLOntology!=null && m_additionalDLOntology.hasNominals());
         return isSatisfiable(loadPermanentABox,loadAdditionalABox,perTestPositiveFactsNoDependency,perTestNegativeFactsNoDependency,perTestPositiveFactsDummyDependency,perTestNegativeFactsDummyDependency,nodesForIndividuals);
