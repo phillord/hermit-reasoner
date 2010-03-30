@@ -41,7 +41,7 @@ public class ShowDLClausesCommand extends AbstractCommand {
     public void execute(String[] args) {
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter writer=new PrintWriter(buffer);
-        for (DLClause dlClause : m_debugger.getTableau().getDLOntology().getDLClauses())
+        for (DLClause dlClause : m_debugger.getTableau().getPermanentDLOntology().getDLClauses())
             writer.println(dlClause.toString(m_debugger.getPrefixes()));
         writer.flush();
         showTextInWindow(buffer.toString(),"DL-clauses");

@@ -20,14 +20,13 @@ package org.semanticweb.HermiT.existentials;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.model.AtLeastConcept;
-import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.ExistsDescriptionGraph;
 import org.semanticweb.HermiT.model.Inequality;
@@ -82,11 +81,11 @@ public abstract class AbstractExpansionStrategy implements ExistentialExpansionS
         m_descriptionGraphManager=m_tableau.getDescriptionGraphManager();
         m_blockingStrategy.initialize(m_tableau);
     }
-    public void additionalAxiomsSet(Set<DLClause> additionalDLClauses,Set<Atom> additionalPositiveAtoms,Set<Atom> additionalNegativeAtoms) {
-        m_blockingStrategy.additionalAxiomsSet(additionalDLClauses,additionalPositiveAtoms,additionalNegativeAtoms);
+    public void additionalDLOntologySet(DLOntology additionalDLOntology) {
+        m_blockingStrategy.additionalDLOntologySet(additionalDLOntology);
     }
-    public void additionalAxiomsCleared() {
-        m_blockingStrategy.additionalAxiomsCleared();
+    public void additionalDLOntologyCleared() {
+        m_blockingStrategy.additionalDLOntologyCleared();
     }
     public void clear() {
         m_blockingStrategy.clear();

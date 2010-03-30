@@ -55,13 +55,13 @@ public final class DescriptionGraphManager implements Serializable {
         m_tableauMonitor=m_tableau.m_tableauMonitor;
         m_extensionManager=m_tableau.m_extensionManager;
         m_mergingManager=m_tableau.m_mergingManager;
-        m_hasDescriptionGraphs=!m_tableau.m_dlOntology.getAllDescriptionGraphs().isEmpty();
+        m_hasDescriptionGraphs=!m_tableau.m_permanentDLOntology.getAllDescriptionGraphs().isEmpty();
         m_occurrenceManager=new OccurrenceManager();
         m_descriptionGraphIndices=new HashMap<DescriptionGraph,Integer>();
         Set<ExtensionTable> extensionTables=new HashSet<ExtensionTable>();
         List<DescriptionGraph> descriptionGraphsByIndex=new ArrayList<DescriptionGraph>();
         List<ExtensionTable> extensionTablesByIndex=new ArrayList<ExtensionTable>();
-        for (DescriptionGraph descriptionGraph : m_tableau.getDLOntology().getAllDescriptionGraphs()) {
+        for (DescriptionGraph descriptionGraph : m_tableau.getPermanentDLOntology().getAllDescriptionGraphs()) {
             m_descriptionGraphIndices.put(descriptionGraph,Integer.valueOf(descriptionGraphsByIndex.size()));
             descriptionGraphsByIndex.add(descriptionGraph);
             ExtensionTable extensionTable=m_extensionManager.getExtensionTable(descriptionGraph.getNumberOfVertices()+1);

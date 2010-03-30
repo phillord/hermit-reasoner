@@ -20,12 +20,11 @@ package org.semanticweb.HermiT.blocking;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Set;
 
-import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.Node;
@@ -48,10 +47,10 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
         m_directBlockingChecker.initialize(tableau);
         updateBlockingSignatureCacheUsage();
     }
-    public void additionalAxiomsSet(Set<DLClause> additionalDLClauses,Set<Atom> additionalPositiveAtoms,Set<Atom> additionalNegativeAtoms) {
+    public void additionalDLOntologySet(DLOntology additionalDLOntology) {
         updateBlockingSignatureCacheUsage();
     }
-    public void additionalAxiomsCleared() {
+    public void additionalDLOntologyCleared() {
         updateBlockingSignatureCacheUsage();
     }
     protected void updateBlockingSignatureCacheUsage() {

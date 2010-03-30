@@ -70,7 +70,7 @@ public abstract class AbstractCommand implements DebuggerCommand {
             return AtomicRole.create(m_debugger.getPrefixes().expandAbbreviatedIRI(predicate.substring(1)));
         else if (predicate.startsWith("$")) {
             String graphName=m_debugger.getPrefixes().expandAbbreviatedIRI(predicate.substring(1));
-            for (DescriptionGraph descriptionGraph : m_debugger.getTableau().getDLOntology().getAllDescriptionGraphs())
+            for (DescriptionGraph descriptionGraph : m_debugger.getTableau().getPermanentDLOntology().getAllDescriptionGraphs())
                 if (graphName.equals(descriptionGraph.getName()))
                     return descriptionGraph;
             return null;

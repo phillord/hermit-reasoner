@@ -20,13 +20,12 @@ package org.semanticweb.HermiT.blocking;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.semanticweb.HermiT.blocking.ValidatedSingleDirectBlockingChecker.ValidatedBlockingObject;
-import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.model.DLClause.ClauseType;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
@@ -66,21 +65,20 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
         m_tableau=tableau;
         m_directBlockingChecker.initialize(tableau);
         m_extensionManager=m_tableau.getExtensionManager();
-        m_permanentBlockingValidator=new BlockingValidator(m_tableau,m_tableau.getDLOntology().getDLClauses());
+        m_permanentBlockingValidator=new BlockingValidator(m_tableau,m_tableau.getPermanentDLOntology().getDLClauses());
         updateAdditionalBlockingValidator();
     }
-    public void additionalAxiomsSet(Set<DLClause> additionalDLClauses,Set<Atom> additionalPositiveAtoms,Set<Atom> additionalNegativeAtoms) {
+    public void additionalDLOntologySet(DLOntology additionalDLOntology) {
         updateAdditionalBlockingValidator();
     }
-    public void additionalAxiomsCleared() {
+    public void additionalDLOntologyCleared() {
         updateAdditionalBlockingValidator();
     }
     protected void updateAdditionalBlockingValidator() {
-        Set<DLClause> additionalDLClauses=m_tableau.getAdditionalDLClauses();
-        if (additionalDLClauses==null || additionalDLClauses.isEmpty())
+        if (m_tableau.getAdditionalHyperresolutionManager()==null)
             m_additionalBlockingValidator=null;
         else
-            m_additionalBlockingValidator=new BlockingValidator(m_tableau,additionalDLClauses);
+            m_additionalBlockingValidator=new BlockingValidator(m_tableau,m_tableau.getAdditionalDLOntology().getDLClauses());
     }
     public void clear() {
         m_currentBlockersCache.clear();

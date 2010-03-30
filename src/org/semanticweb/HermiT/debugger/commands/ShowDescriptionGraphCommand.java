@@ -44,7 +44,7 @@ public class ShowDescriptionGraphCommand extends AbstractCommand {
             return;
         }
         String graphName=args[1];
-        for (DescriptionGraph descriptionGraph : m_debugger.getTableau().getDLOntology().getAllDescriptionGraphs())
+        for (DescriptionGraph descriptionGraph : m_debugger.getTableau().getPermanentDLOntology().getAllDescriptionGraphs())
             if (descriptionGraph.getName().equals(graphName)) {
                 CharArrayWriter buffer=new CharArrayWriter();
                 PrintWriter writer=new PrintWriter(buffer);

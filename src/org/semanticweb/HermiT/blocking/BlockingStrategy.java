@@ -18,12 +18,11 @@
 package org.semanticweb.HermiT.blocking;
 
 import java.util.List;
-import java.util.Set;
 
-import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.Node;
@@ -31,8 +30,8 @@ import org.semanticweb.HermiT.tableau.Tableau;
 
 public interface BlockingStrategy {
     void initialize(Tableau tableau);
-    void additionalAxiomsSet(Set<DLClause> additionalDLClauses,Set<Atom> additionalPositiveAtoms,Set<Atom> additionalNegativeAtoms);
-    void additionalAxiomsCleared();
+    void additionalDLOntologySet(DLOntology additionalDLOntology);
+    void additionalDLOntologyCleared();
     void clear();
     void computeBlocking(boolean finalChance);
     boolean isPermanentAssertion(Concept concept,Node node);

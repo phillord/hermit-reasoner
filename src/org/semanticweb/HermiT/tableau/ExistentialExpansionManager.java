@@ -68,7 +68,7 @@ public final class ExistentialExpansionManager implements Serializable {
     protected Map<Role,Role[]> buildFunctionalRoles() {
         Graph<Role> superRoleGraph=new Graph<Role>();
         Set<Role> functionalRoles=new HashSet<Role>();
-        for (DLClause dlClause : m_tableau.getDLOntology().getDLClauses()) {
+        for (DLClause dlClause : m_tableau.getPermanentDLOntology().getDLClauses()) {
             if (dlClause.getClauseType()==ClauseType.OBJECT_PROPERTY_INCLUSION || dlClause.getClauseType()==ClauseType.DATA_PROPERTY_INCLUSION) {
                 AtomicRole subrole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                 AtomicRole superrole=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();

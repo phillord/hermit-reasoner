@@ -1624,7 +1624,7 @@ public class Reasoner implements OWLReasoner,Serializable {
     // Various creation methods
 
     public Tableau getTableau() {
-        m_tableau.clearAdditionalAxioms();
+        m_tableau.clearAdditionalDLOntology();
         return m_tableau;
     }
 
@@ -1649,7 +1649,7 @@ public class Reasoner implements OWLReasoner,Serializable {
                 return createTableau(m_interruptFlag,m_configuration,mergedDLOntology,m_prefixes);
             }
             else {
-                m_tableau.setAdditionalAxioms(deltaDLOntology.getDLClauses(),deltaDLOntology.getPositiveFacts(),deltaDLOntology.getNegativeFacts());
+                m_tableau.setAdditionalDLOntology(deltaDLOntology);
                 return m_tableau;
             }
         }

@@ -179,7 +179,7 @@ public class BlockingValidatorTest extends AbstractReasonerInternalsTest {
         assertFalse(a1.isBlocked());
         assertFalse(a11.isBlocked());
         assertFalse(a12.isBlocked());
-        BlockingValidator validator=new BlockingValidator(m_tableau,m_tableau.getDLOntology().getDLClauses());
+        BlockingValidator validator=new BlockingValidator(m_tableau,m_tableau.getPermanentDLOntology().getDLClauses());
         assertTrue(validator.isBlockValid(a2));
         assertTrue(validator.isBlockValid(a111));
         assertTrue(validator.isBlockValid(b1));
@@ -262,7 +262,7 @@ public class BlockingValidatorTest extends AbstractReasonerInternalsTest {
         assertFalse(a1.isBlocked());
         assertFalse(a11.isBlocked());
         assertFalse(a12.isBlocked());
-        BlockingValidator validator=new BlockingValidator(m_tableau,m_tableau.getDLOntology().getDLClauses());
+        BlockingValidator validator=new BlockingValidator(m_tableau,m_tableau.getPermanentDLOntology().getDLClauses());
         assertFalse(validator.isBlockValid(a2));
     }
     protected void assertLabel(Node node,Concept... expected) {

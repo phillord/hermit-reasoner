@@ -29,7 +29,6 @@ import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Constant;
-import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.DataValueEnumeration;
@@ -60,16 +59,14 @@ public final class Tableau implements Serializable {
     protected final Map<String,Object> m_parameters;
     protected final TableauMonitor m_tableauMonitor;
     protected final ExistentialExpansionStrategy m_existentialExpansionStrategy;
-    protected final DLOntology m_dlOntology;
+    protected final DLOntology m_permanentDLOntology;
+    protected DLOntology m_additionalDLOntology;
     protected final DependencySetFactory m_dependencySetFactory;
     protected final GroundDisjunctionHeaderManager m_groundDisjunctionHeaderManager;
     protected final ExtensionManager m_extensionManager;
     protected final ClashManager m_clashManager;
     protected final HyperresolutionManager m_permanentHyperresolutionManager;
     protected HyperresolutionManager m_additionalHyperresolutionManager;
-    protected Set<DLClause> m_additionalDLClauses;
-    protected Set<Atom> m_additionalPositiveAtoms;
-    protected Set<Atom> m_additionalNegativeAtoms;
     protected final MergingManager m_mergingManager;
     protected final ExistentialExpansionManager m_existentialExpasionManager;
     protected final NominalIntroductionManager m_nominalIntroductionManager;
@@ -103,12 +100,14 @@ public final class Tableau implements Serializable {
         m_parameters=parameters;
         m_tableauMonitor=tableauMonitor;
         m_existentialExpansionStrategy=existentialsExpansionStrategy;
-        m_dlOntology=dlOntology;
+        m_permanentDLOntology=dlOntology;
+        m_additionalDLOntology=null;
         m_dependencySetFactory=new DependencySetFactory();
         m_groundDisjunctionHeaderManager=new GroundDisjunctionHeaderManager();
         m_extensionManager=new ExtensionManager(this);
         m_clashManager=new ClashManager(this);
-        m_permanentHyperresolutionManager=new HyperresolutionManager(this,m_dlOntology.getDLClauses());
+        m_permanentHyperresolutionManager=new HyperresolutionManager(this,m_permanentDLOntology.getDLClauses());
+        m_additionalHyperresolutionManager=null;
         m_mergingManager=new MergingManager(this);
         m_existentialExpasionManager=new ExistentialExpansionManager(this);
         m_nominalIntroductionManager=new NominalIntroductionManager(this);
@@ -116,12 +115,12 @@ public final class Tableau implements Serializable {
         m_datatypeManager=new DatatypeManager(this);
         m_existentialExpansionStrategy.initialize(this);
         m_existentialConceptsBuffers=new ArrayList<List<ExistentialConcept>>();
-        m_checkDatatypes=m_dlOntology.hasDatatypes();
+        m_checkDatatypes=m_permanentDLOntology.hasDatatypes();
         m_useDisjunctionLearning=useDisjunctionLearning;
         m_branchingPoints=new BranchingPoint[2];
         m_currentBranchingPoint=-1;
         m_nonbacktrackableBranchingPoint=-1;
-        clearAdditionalAxioms();
+        clearAdditionalDLOntology();
         if (m_tableauMonitor!=null)
             m_tableauMonitor.setTableau(this);
         m_interruptFlag.endTask();
@@ -129,17 +128,11 @@ public final class Tableau implements Serializable {
     public InterruptFlag getInterruptFlag() {
         return m_interruptFlag;
     }
-    public DLOntology getDLOntology() {
-        return m_dlOntology;
+    public DLOntology getPermanentDLOntology() {
+        return m_permanentDLOntology;
     }
-    public Set<DLClause> getAdditionalDLClauses() {
-        return m_additionalDLClauses;
-    }
-    public Set<Atom> getAdditionalPositiveAtoms() {
-        return m_additionalPositiveAtoms;
-    }
-    public Set<Atom> getAdditionalNegativeAtoms() {
-        return m_additionalNegativeAtoms;
+    public DLOntology getAdditionalDLOntology() {
+        return m_additionalDLOntology;
     }
     public Map<String,Object> getParameters() {
         return m_parameters;
@@ -151,7 +144,7 @@ public final class Tableau implements Serializable {
         return m_existentialExpansionStrategy;
     }
     public boolean isDeterministic() {
-        return m_dlOntology.isHorn() && m_existentialExpansionStrategy.isDeterministic();
+        return m_permanentDLOntology.isHorn() && m_existentialExpansionStrategy.isDeterministic();
     }
     public DependencySetFactory getDependencySetFactory() {
         return m_dependencySetFactory;
@@ -210,29 +203,19 @@ public final class Tableau implements Serializable {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.tableauCleared();
     }
-    public void setAdditionalAxioms(Set<DLClause> additionalDLClauses,Set<Atom> additionalPositiveAtoms,Set<Atom> additionalNegativeAtoms) {
-        if (additionalDLClauses!=null && !additionalDLClauses.isEmpty())
-            m_additionalHyperresolutionManager=new HyperresolutionManager(this,additionalDLClauses);
-        else
-            m_additionalHyperresolutionManager=null;
-        m_additionalDLClauses=additionalDLClauses;
-        m_additionalPositiveAtoms=additionalPositiveAtoms;
-        m_additionalNegativeAtoms=additionalNegativeAtoms;
-        m_needsThingExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING);
-        if (m_additionalHyperresolutionManager!=null) {
-            m_needsThingExtension|=m_additionalHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING);
-            m_needsNamedExtension|=m_additionalHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.INTERNAL_NAMED);
-        }
-        m_existentialExpansionStrategy.additionalAxiomsSet(additionalDLClauses,additionalPositiveAtoms,additionalNegativeAtoms);
+    public void setAdditionalDLOntology(DLOntology additionalDLOntology) {
+        m_additionalDLOntology=additionalDLOntology;
+        m_additionalHyperresolutionManager=new HyperresolutionManager(this,m_additionalDLOntology.getDLClauses());
+        m_needsThingExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING) || m_additionalHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING);
+        m_needsNamedExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.INTERNAL_NAMED) || m_additionalHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.INTERNAL_NAMED);
+        m_existentialExpansionStrategy.additionalDLOntologySet(m_additionalDLOntology);
     }
-    public void clearAdditionalAxioms() {
+    public void clearAdditionalDLOntology() {
+        m_additionalDLOntology=null;
         m_additionalHyperresolutionManager=null;
-        m_additionalDLClauses=null;
-        m_additionalPositiveAtoms=null;
-        m_additionalNegativeAtoms=null;
         m_needsThingExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING);
         m_needsNamedExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.INTERNAL_NAMED);
-        m_existentialExpansionStrategy.additionalAxiomsCleared();
+        m_existentialExpansionStrategy.additionalDLOntologyCleared();
     }
     public boolean isSatisfiable() {
         m_interruptFlag.startTimedTask();
@@ -347,7 +330,7 @@ public final class Tableau implements Serializable {
         return m_checkedNode1;
     }
     private boolean hasNominals() {
-        return m_dlOntology.hasNominals();
+        return m_permanentDLOntology.hasNominals();
     }
     public boolean isSatisfiable(AtomicConcept atomicConcept) {
         if (m_tableauMonitor!=null)
@@ -355,13 +338,13 @@ public final class Tableau implements Serializable {
         clear();
         Map<Term,Node> termsToNodes=new HashMap<Term,Node>();
         if (hasNominals())
-            loadABox(termsToNodes);
-        if (m_additionalPositiveAtoms!=null && !m_additionalPositiveAtoms.isEmpty())
-            for (Atom atom : m_additionalPositiveAtoms)
+            loadPermanentABox(termsToNodes);
+        if (m_additionalDLOntology!=null) {
+            for (Atom atom : m_additionalDLOntology.getPositiveFacts())
                 loadPositiveFact(termsToNodes,atom);
-        if (m_additionalNegativeAtoms!=null && !m_additionalNegativeAtoms.isEmpty())
-            for (Atom atom : m_additionalNegativeAtoms)
+            for (Atom atom : m_additionalDLOntology.getNegativeFacts())
                 loadNegativeFact(termsToNodes,atom);
+        }
         m_checkedNode0=createNewNINode(m_dependencySetFactory.emptySet());
         m_extensionManager.addConceptAssertion(atomicConcept,m_checkedNode0,m_dependencySetFactory.emptySet(),true);
         boolean result=isSatisfiable();
@@ -375,13 +358,13 @@ public final class Tableau implements Serializable {
         clear();
         Map<Term,Node> termsToNodes=new HashMap<Term,Node>();
         if (hasNominals())
-            loadABox(termsToNodes);
-        if (m_additionalPositiveAtoms!=null && !m_additionalPositiveAtoms.isEmpty())
-            for (Atom atom : m_additionalPositiveAtoms)
+            loadPermanentABox(termsToNodes);
+        if (m_additionalDLOntology!=null) {
+            for (Atom atom : m_additionalDLOntology.getPositiveFacts())
                 loadPositiveFact(termsToNodes,atom);
-        if (m_additionalNegativeAtoms!=null && !m_additionalNegativeAtoms.isEmpty())
-            for (Atom atom : m_additionalNegativeAtoms)
+            for (Atom atom : m_additionalDLOntology.getNegativeFacts())
                 loadNegativeFact(termsToNodes,atom);
+        }
         m_checkedNode0=createNewNINode(m_dependencySetFactory.emptySet());
         m_extensionManager.addConceptAssertion(subconcept,m_checkedNode0,m_dependencySetFactory.emptySet(),true);
         m_branchingPoints[0]=new BranchingPoint(this);
@@ -401,13 +384,13 @@ public final class Tableau implements Serializable {
         clear();
         Map<Term,Node> termsToNodes=new HashMap<Term,Node>();
         if (hasNominals())
-            loadABox(termsToNodes);
-        if (m_additionalPositiveAtoms!=null && !m_additionalPositiveAtoms.isEmpty())
-            for (Atom atom : m_additionalPositiveAtoms)
+            loadPermanentABox(termsToNodes);
+        if (m_additionalDLOntology!=null) {
+            for (Atom atom : m_additionalDLOntology.getPositiveFacts())
                 loadPositiveFact(termsToNodes,atom);
-        if (m_additionalNegativeAtoms!=null && !m_additionalNegativeAtoms.isEmpty())
-            for (Atom atom : m_additionalNegativeAtoms)
+            for (Atom atom : m_additionalDLOntology.getNegativeFacts())
                 loadNegativeFact(termsToNodes,atom);
+        }
         m_checkedNode0=createNewNINode(m_dependencySetFactory.emptySet());
         m_extensionManager.addConceptAssertion(subconcept,m_checkedNode0,m_dependencySetFactory.emptySet(),true);
         m_branchingPoints[0]=new BranchingPoint(this);
@@ -426,13 +409,13 @@ public final class Tableau implements Serializable {
         clear();
         Map<Term,Node> termsToNodes=new HashMap<Term,Node>();
         if (hasNominals())
-            loadABox(termsToNodes);
-        if (m_additionalPositiveAtoms!=null && !m_additionalPositiveAtoms.isEmpty())
-            for (Atom atom : m_additionalPositiveAtoms)
+            loadPermanentABox(termsToNodes);
+        if (m_additionalDLOntology!=null) {
+            for (Atom atom : m_additionalDLOntology.getPositiveFacts())
                 loadPositiveFact(termsToNodes,atom);
-        if (m_additionalNegativeAtoms!=null && !m_additionalNegativeAtoms.isEmpty())
-            for (Atom atom : m_additionalNegativeAtoms)
+            for (Atom atom : m_additionalDLOntology.getNegativeFacts())
                 loadNegativeFact(termsToNodes,atom);
+        }
         m_checkedNode0=createNewNINode(m_dependencySetFactory.emptySet());
         if (isDataRole)
             m_checkedNode1=createNewConcreteNode(m_dependencySetFactory.emptySet(),m_checkedNode0);
@@ -455,12 +438,12 @@ public final class Tableau implements Serializable {
             m_tableauMonitor.isABoxSatisfiableStarted();
         clear();
         Map<Term,Node> termsToNodes=loadABox();
-        if (m_additionalPositiveAtoms!=null && !m_additionalPositiveAtoms.isEmpty())
-            for (Atom atom : m_additionalPositiveAtoms)
+        if (m_additionalDLOntology!=null) {
+            for (Atom atom : m_additionalDLOntology.getPositiveFacts())
                 loadPositiveFact(termsToNodes,atom);
-        if (m_additionalNegativeAtoms!=null && !m_additionalNegativeAtoms.isEmpty())
-            for (Atom atom : m_additionalNegativeAtoms)
+            for (Atom atom : m_additionalDLOntology.getNegativeFacts())
                 loadNegativeFact(termsToNodes,atom);
+        }
         if (checkedNode0Name==null)
             m_checkedNode0=null;
         else
@@ -482,12 +465,12 @@ public final class Tableau implements Serializable {
             m_tableauMonitor.isInstanceOfStarted(atomicConcept,individual);
         clear();
         Map<Term,Node> termsToNodes=loadABox();
-        if (m_additionalPositiveAtoms!=null && !m_additionalPositiveAtoms.isEmpty())
-            for (Atom atom : m_additionalPositiveAtoms)
+        if (m_additionalDLOntology!=null) {
+            for (Atom atom : m_additionalDLOntology.getPositiveFacts())
                 loadPositiveFact(termsToNodes,atom);
-        if (m_additionalNegativeAtoms!=null && !m_additionalNegativeAtoms.isEmpty())
-            for (Atom atom : m_additionalNegativeAtoms)
+            for (Atom atom : m_additionalDLOntology.getNegativeFacts())
                 loadNegativeFact(termsToNodes,atom);
+        }
         m_checkedNode0=getNodeForTerm(termsToNodes,individual);
         if (m_checkedNode0==null)
             m_checkedNode0=createNewNINode(m_dependencySetFactory.emptySet());
@@ -503,7 +486,7 @@ public final class Tableau implements Serializable {
         clear();
         Map<Term,Node> termsToNodes=new HashMap<Term,Node>();
         if (loadABox)
-            loadABox(termsToNodes);
+            loadPermanentABox(termsToNodes);
         if (loadAdditionalABox)
             loadAdditionalABox(termsToNodes);
         if (perTestPositiveFacts!=null && !perTestPositiveFacts.isEmpty())
@@ -544,25 +527,23 @@ public final class Tableau implements Serializable {
         else
             throw new IllegalArgumentException("Unsupported type of negative ground atom.");
     }
-    protected void loadABox(Map<Term,Node> termsToNodes) {
-        // Load the facts from the DL-ontology
-        for (Atom atom : m_dlOntology.getPositiveFacts())
+    protected void loadPermanentABox(Map<Term,Node> termsToNodes) {
+        for (Atom atom : m_permanentDLOntology.getPositiveFacts())
             loadPositiveFact(termsToNodes,atom);
-        for (Atom atom : m_dlOntology.getNegativeFacts())
+        for (Atom atom : m_permanentDLOntology.getNegativeFacts())
             loadNegativeFact(termsToNodes,atom);
     }
     protected void loadAdditionalABox(Map<Term,Node> termsToNodes) {
-        // Load the additional facts
-        if (m_additionalPositiveAtoms!=null && !m_additionalPositiveAtoms.isEmpty())
-            for (Atom atom : m_additionalPositiveAtoms)
+        if (m_additionalDLOntology!=null) {
+            for (Atom atom : m_additionalDLOntology.getPositiveFacts())
                 loadPositiveFact(termsToNodes,atom);
-        if (m_additionalNegativeAtoms!=null && !m_additionalNegativeAtoms.isEmpty())
-            for (Atom atom : m_additionalNegativeAtoms)
+            for (Atom atom : m_additionalDLOntology.getNegativeFacts())
                 loadNegativeFact(termsToNodes,atom);
+        }
     }
     protected Map<Term,Node> loadABox() {
         Map<Term,Node> termsToNodes=new HashMap<Term,Node>();
-        loadABox(termsToNodes);
+        loadPermanentABox(termsToNodes);
         return termsToNodes;
     }
     protected Node getNodeForTerm(Map<Term,Node> termsToNodes,Term term) {

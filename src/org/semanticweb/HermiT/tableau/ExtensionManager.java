@@ -95,7 +95,7 @@ public final class ExtensionManager implements Serializable {
                 }
             };
         m_extensionTablesByArity.put(new Integer(3),m_ternaryExtensionTable);
-        for (DescriptionGraph descriptionGraph : m_tableau.getDLOntology().getAllDescriptionGraphs()) {
+        for (DescriptionGraph descriptionGraph : m_tableau.getPermanentDLOntology().getAllDescriptionGraphs()) {
             Integer arityInteger=Integer.valueOf(descriptionGraph.getNumberOfVertices()+1);
             if (!m_extensionTablesByArity.containsKey(arityInteger))
                 m_extensionTablesByArity.put(arityInteger,new ExtensionTableWithFullIndex(m_tableau,descriptionGraph.getNumberOfVertices()+1,!m_tableau.isDeterministic()));
@@ -110,7 +110,7 @@ public final class ExtensionManager implements Serializable {
         m_fouraryAuxiliaryTupleAdd=new Object[4];
         m_descriptionGraphTuplesContains=new HashMap<DescriptionGraph,Object[]>();
         m_descriptionGraphTuplesAdd=new HashMap<DescriptionGraph,Object[]>();
-        for (DescriptionGraph descriptionGraph : m_tableau.getDLOntology().getAllDescriptionGraphs()) {
+        for (DescriptionGraph descriptionGraph : m_tableau.getPermanentDLOntology().getAllDescriptionGraphs()) {
             m_descriptionGraphTuplesContains.put(descriptionGraph,new Object[descriptionGraph.getNumberOfVertices()+1]);
             m_descriptionGraphTuplesAdd.put(descriptionGraph,new Object[descriptionGraph.getNumberOfVertices()+1]);
         }
