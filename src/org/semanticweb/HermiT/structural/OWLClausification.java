@@ -140,7 +140,7 @@ public class OWLClausification {
         OWLAxioms axioms=new OWLAxioms();
         OWLNormalization normalization=new OWLNormalization(factory,axioms);
         for (OWLOntology ontology : importClosure)
-            normalization.processOntology(m_configuration,ontology);
+            normalization.processOntology(ontology);
         BuiltInPropertyManager builtInPropertyManager=new BuiltInPropertyManager(factory);
         builtInPropertyManager.axiomatizeBuiltInPropertiesAsNeeded(axioms);
         ObjectPropertyInclusionManager objectPropertyInclusionManager=new ObjectPropertyInclusionManager(factory);

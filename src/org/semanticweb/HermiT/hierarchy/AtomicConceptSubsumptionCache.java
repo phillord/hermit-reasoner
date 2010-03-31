@@ -32,6 +32,7 @@ import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
 
 /**
@@ -70,7 +71,7 @@ public class AtomicConceptSubsumptionCache implements Serializable,SubsumptionCa
             Map<Individual,Node> checkedNode=new HashMap<Individual,Node>();
             checkedNode.put(freshIndividual,null);
             Tableau tableau=m_reasoner.getTableau();
-            boolean isSatisfiable=tableau.isSatisfiable(false,Collections.singleton(Atom.create(concept,freshIndividual)),null,null,null,checkedNode);
+            boolean isSatisfiable=tableau.isSatisfiable(false,Collections.singleton(Atom.create(concept,freshIndividual)),null,null,null,checkedNode,ReasoningTaskDescription.isConceptSatisfiable(concept));
             conceptInfo.m_isSatisfiable=(isSatisfiable ? Boolean.TRUE : Boolean.FALSE);
             if (isSatisfiable) {
                 updateKnownSubsumers(tableau,concept,checkedNode.get(freshIndividual));
@@ -99,7 +100,7 @@ public class AtomicConceptSubsumptionCache implements Serializable,SubsumptionCa
             Individual freshIndividual=Individual.createAnonymous("fresh-individual");
             Map<Individual,Node> checkedNode=new HashMap<Individual,Node>();
             checkedNode.put(freshIndividual,null);
-            boolean isSubsumedBy=!tableau.isSatisfiable(false,Collections.singleton(Atom.create(subconcept,freshIndividual)),null,null,Collections.singleton(Atom.create(superconcept,freshIndividual)),checkedNode);
+            boolean isSubsumedBy=!tableau.isSatisfiable(false,Collections.singleton(Atom.create(subconcept,freshIndividual)),null,null,Collections.singleton(Atom.create(superconcept,freshIndividual)),checkedNode,ReasoningTaskDescription.isConceptSubsumedBy(subconcept,superconcept));
             // try and build a model for A and not B
             if (tableau.getExtensionManager().containsClash() && tableau.getExtensionManager().getClashDependencySet().isEmpty()) {
                 // (not B) is added a dummy nonempty dependency set. Therefore, if not B contributes to the clash,

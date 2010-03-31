@@ -10,6 +10,7 @@ import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.reasoner.AbstractReasonerTest;
+import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
 
 public class GraphTest extends AbstractReasonerTest {
@@ -119,7 +120,7 @@ public class GraphTest extends AbstractReasonerTest {
         Set<Atom> positiveFacts=new HashSet<Atom>();
         positiveFacts.add(Atom.create(graph,i1,i2));
         positiveFacts.add(Atom.create(r,i1,i2));
-        assertFalse(tableau.isSatisfiable(false,false,positiveFacts,null,null,null,null));
+        assertFalse(tableau.isSatisfiable(false,false,positiveFacts,null,null,null,null,ReasoningTaskDescription.isABoxSatisfiable()));
     }
 
     public void testGraph1() throws Exception {
@@ -147,7 +148,7 @@ public class GraphTest extends AbstractReasonerTest {
             + "ClassAssertion(:A :i)";
         loadOntologyWithAxioms(axioms);
         Tableau tableau=getTableau(m_descriptionGraphs);
-        assertTrue(tableau.isSatisfiable(true,true,null,null,null,null,null));
+        assertTrue(tableau.isSatisfiable(true,true,null,null,null,null,null,ReasoningTaskDescription.isABoxSatisfiable()));
     }
 
     public void testGraph2() throws Exception {
@@ -187,7 +188,7 @@ public class GraphTest extends AbstractReasonerTest {
         loadOntologyWithAxioms(axioms);
         Tableau t=getTableau(m_descriptionGraphs);
         Individual freshNode=Individual.create("ind");
-        assertTrue(!t.isSatisfiable(false,Collections.singleton(Atom.create(AtomicConcept.create(GraphTest.NS+"A"),freshNode)),null,null,Collections.singleton(Atom.create(AtomicConcept.create(GraphTest.NS+"B"),freshNode)),null));
+        assertTrue(!t.isSatisfiable(false,Collections.singleton(Atom.create(AtomicConcept.create(GraphTest.NS+"A"),freshNode)),null,null,Collections.singleton(Atom.create(AtomicConcept.create(GraphTest.NS+"B"),freshNode)),null,ReasoningTaskDescription.isABoxSatisfiable()));
     }
 
     protected static void add(Graph<Integer> graph, int from, int... successors) {

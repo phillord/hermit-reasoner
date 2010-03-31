@@ -29,8 +29,8 @@ import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.DLClause.ClauseType;
+import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -38,7 +38,6 @@ import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 /**
  * A cache for object roles.
@@ -81,13 +80,12 @@ public class ObjectRoleSubsumptionCache extends RoleSubsumptionCache {
             roleAssertion=Atom.create((AtomicRole)role,individualA,individualB);
         else
             roleAssertion=Atom.create(((InverseRole)role).getInverseOf(),individualB,individualA);
-        return m_reasoner.getTableau().isSatisfiable(true,Collections.singleton(roleAssertion),null,null,null,null);
+        return m_reasoner.getTableau().isSatisfiable(true,Collections.singleton(roleAssertion),null,null,null,null,ReasoningTaskDescription.isRoleSatisfiable(role,true));
     }
     protected boolean doSubsumptionCheck(Role subrole,Role superrole) {
         // This code is different from data properties. This is because object properties can be transitive, so
         // we need to make sure that appropriate DL-clauses are added for negative object property assertions.
-        OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
-        OWLDataFactory factory=ontologyManager.getOWLDataFactory();
+        OWLDataFactory factory=m_reasoner.getDataFactory();
         OWLIndividual individualA=factory.getOWLAnonymousIndividual("fresh-individual-A");
         OWLIndividual individualB=factory.getOWLAnonymousIndividual("fresh-individual-B");
         OWLObjectPropertyExpression subpropertyExpression=getObjectPropertyExpression(factory,subrole);
@@ -97,8 +95,8 @@ public class ObjectRoleSubsumptionCache extends RoleSubsumptionCache {
         OWLClassExpression allSuperNotPseudoNominal=factory.getOWLObjectAllValuesFrom(superpropertyExpression,pseudoNominal.getObjectComplementOf());
         OWLAxiom pseudoNominalAssertion=factory.getOWLClassAssertionAxiom(pseudoNominal,individualB);
         OWLAxiom superpropertyAssertion=factory.getOWLClassAssertionAxiom(allSuperNotPseudoNominal,individualA);
-        Tableau tableau=m_reasoner.getTableau(ontologyManager,subpropertyAssertion,pseudoNominalAssertion,superpropertyAssertion);
-        return !tableau.isSatisfiable(true,null,null,null,null,null);
+        Tableau tableau=m_reasoner.getTableau(subpropertyAssertion,pseudoNominalAssertion,superpropertyAssertion);
+        return !tableau.isSatisfiable(true,null,null,null,null,null,ReasoningTaskDescription.isRoleSubsumedBy(subrole,superrole,true));
     }
     protected static OWLObjectPropertyExpression getObjectPropertyExpression(OWLDataFactory factory,Role role) {
         if (role instanceof AtomicRole)

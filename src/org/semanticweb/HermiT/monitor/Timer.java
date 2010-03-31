@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -19,10 +19,9 @@ package org.semanticweb.HermiT.monitor;
 
 import java.io.PrintWriter;
 
-import org.semanticweb.HermiT.model.AtomicConcept;
-import org.semanticweb.HermiT.model.Individual;
-import org.semanticweb.HermiT.model.Role;
+import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
+import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 
 public class Timer extends TableauMonitorAdapter {
     private static final long serialVersionUID=-8144444618897251350L;
@@ -32,7 +31,7 @@ public class Timer extends TableauMonitorAdapter {
     protected long m_lastStatusTime;
     protected int m_numberOfBacktrackings;
     protected int m_numberOfSatTests=0;
-    
+
     public Timer() {
         m_output=new PrintWriter(System.out);
     }
@@ -48,48 +47,14 @@ public class Timer extends TableauMonitorAdapter {
         m_problemStartTime=System.currentTimeMillis();
         m_lastStatusTime=m_problemStartTime;
     }
-    public void isSatisfiableStarted(AtomicConcept atomicConcept) {
-        m_output.print("Testing "+atomicConcept.getIRI()+" ...");
+    public void isSatisfiableStarted(ReasoningTaskDescription reasoningTaskDescription) {
+        m_output.print(reasoningTaskDescription.getTaskDescription(Prefixes.STANDARD_PREFIXES)+" ...");
         m_output.flush();
         start();
     }
-    public void isSatisfiableFinished(AtomicConcept atomicConcept,boolean result) {
-        m_output.println(result ? "YES" : "NO");
-        doStatistics();
-    }
-    public void isSatisfiableStarted(Role role) {
-        m_output.print("Testing "+role.toString()+" ...");
-        m_output.flush();
-        start();
-    }
-    public void isSatisfiableFinished(Role role,boolean result) {
-        m_output.println(result ? "YES" : "NO");
-        doStatistics();
-    }
-    public void isSubsumedByStarted(AtomicConcept subconcept,AtomicConcept superconcept) {
-        m_output.print("Testing "+subconcept.getIRI()+" ==> "+superconcept.getIRI()+" ...");
-        m_output.flush();
-        start();
-    }
-    public void isSubsumedByFinished(AtomicConcept subconcept,AtomicConcept superconcept,boolean result) {
-        m_output.println(result ? "YES" : "NO");
-        doStatistics();
-    }
-    public void isABoxSatisfiableStarted() {
-        m_output.print("Testing ABox satisfiability ...");
-        m_output.flush();
-        start();
-    }
-    public void isABoxSatisfiableFinished(boolean result) {
-        m_output.println(result ? "YES" : "NO");
-        doStatistics();
-    }
-    public void isInstanceOfStarted(AtomicConcept concept,Individual individual) {
-        m_output.print("Testing "+concept.getIRI()+" : "+individual.getIRI()+" ...");
-        m_output.flush();
-        start();
-    }
-    public void isInstanceOfFinished(AtomicConcept concept,Individual individual,boolean result) {
+    public void isSatisfiableFinished(ReasoningTaskDescription reasoningTaskDescription,boolean result) {
+        if (reasoningTaskDescription.flipSatisfiabilityResult())
+            result=!result;
         m_output.println(result ? "YES" : "NO");
         doStatistics();
     }

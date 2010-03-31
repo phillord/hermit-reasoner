@@ -27,8 +27,8 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
+import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationPropertyDomainAxiom;
@@ -140,8 +140,8 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
             if (!ax.accept(this))
                 return false;
         for (OWLAxiom ax : anonIndChecker.getAnonNoNamedIndAxioms()) {
-            Tableau t=reasoner.getTableau(OWLManager.createOWLOntologyManager(),ax);
-            if (t.isSatisfiable(true,true,null,null,null,null,null))
+            Tableau t=reasoner.getTableau(ax);
+            if (t.isSatisfiable(true,true,null,null,null,null,null,new ReasoningTaskDescription(false,"Anonymous individual check: "+ax.toString())))
                 return false;
         }
         return true;

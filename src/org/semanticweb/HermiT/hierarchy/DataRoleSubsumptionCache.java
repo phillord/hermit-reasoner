@@ -29,15 +29,14 @@ import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.DLClause.ClauseType;
+import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDatatype;
 import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLTypedLiteral;
 
 /**
@@ -65,13 +64,12 @@ public class DataRoleSubsumptionCache extends RoleSubsumptionCache {
     protected boolean doSatisfiabilityTest(Role role) {
         Individual individual=Individual.createAnonymous("fresh-individual");
         Constant constant=Constant.create(new Constant.AnonymousConstantValue("internal:fresh-constant"));
-        return m_reasoner.getTableau().isSatisfiable(true,Collections.singleton(Atom.create((AtomicRole)role,individual,constant)),null,null,null,null);
+        return m_reasoner.getTableau().isSatisfiable(true,Collections.singleton(Atom.create((AtomicRole)role,individual,constant)),null,null,null,null,ReasoningTaskDescription.isRoleSatisfiable(role,false));
     }
     protected boolean doSubsumptionCheck(Role subrole,Role superrole) {
         // This is different from object properties! This code is correct because we don't have
         // transitive data properties.
-        OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
-        OWLDataFactory factory=ontologyManager.getOWLDataFactory();
+        OWLDataFactory factory=m_reasoner.getDataFactory();
         OWLIndividual individual=factory.getOWLAnonymousIndividual("fresh-individual");
         OWLDatatype anonymousConstantsDatatype=factory.getOWLDatatype(IRI.create("internal:anonymous-constants"));
         OWLTypedLiteral constant=factory.getOWLTypedLiteral("internal:fresh-constant",anonymousConstantsDatatype);
@@ -81,7 +79,7 @@ public class DataRoleSubsumptionCache extends RoleSubsumptionCache {
         OWLAxiom subpropertyAssertion=factory.getOWLDataPropertyAssertionAxiom(subproperty,individual,constant);
         OWLAxiom negatedSuperpropertyAssertion=factory.getOWLDataPropertyAssertionAxiom(negatedSuperproperty,individual,constant);
         OWLAxiom superpropertyAxiomatization=factory.getOWLDisjointDataPropertiesAxiom(superproperty,negatedSuperproperty);
-        Tableau tableau=m_reasoner.getTableau(ontologyManager,subpropertyAssertion,negatedSuperpropertyAssertion,superpropertyAxiomatization);
-        return !tableau.isSatisfiable(true,null,null,null,null,null);
+        Tableau tableau=m_reasoner.getTableau(subpropertyAssertion,negatedSuperpropertyAssertion,superpropertyAxiomatization);
+        return !tableau.isSatisfiable(true,null,null,null,null,null,ReasoningTaskDescription.isRoleSubsumedBy(subrole,superrole,false));
     }
 }

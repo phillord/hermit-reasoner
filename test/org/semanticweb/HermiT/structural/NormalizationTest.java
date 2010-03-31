@@ -3,7 +3,6 @@ package org.semanticweb.HermiT.structural;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
@@ -195,7 +194,7 @@ public class NormalizationTest extends AbstractStructuralTest {
         Set<OWLAxiom> axioms=new HashSet<OWLAxiom>();
         OWLAxioms axiomHolder=new OWLAxioms();
         OWLNormalization normalization=new OWLNormalization(m_ontologyManager.getOWLDataFactory(),axiomHolder);
-        normalization.processOntology(new Configuration(),m_ontology);
+        normalization.processOntology(m_ontology);
         for (OWLClassExpression[] inclusion : axiomHolder.m_conceptInclusions) {
             OWLClassExpression superDescription;
             if (inclusion.length==1)

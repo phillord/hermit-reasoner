@@ -63,12 +63,11 @@ import org.semanticweb.HermiT.debugger.commands.SingleStepCommand;
 import org.semanticweb.HermiT.debugger.commands.UnprocessedDisjunctionsCommand;
 import org.semanticweb.HermiT.debugger.commands.WaitForCommand;
 import org.semanticweb.HermiT.model.AtLeastConcept;
-import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.ExistsDescriptionGraph;
-import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.monitor.TableauMonitorForwarder;
 import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
 
 public class Debugger extends TableauMonitorForwarder {
@@ -281,44 +280,16 @@ public class Debugger extends TableauMonitorForwarder {
         super.setTableau(tableau);
         m_tableau=tableau;
     }
-    public void isSatisfiableStarted(AtomicConcept atomicConcept) {
-        super.isSatisfiableStarted(atomicConcept);
-        m_output.println("Will check whether '"+m_prefixes.abbreviateIRI(atomicConcept.getIRI())+"' is satisfiable.");
+    public void isSatisfiableStarted(ReasoningTaskDescription reasoningTaskDescription) {
+        super.isSatisfiableStarted(reasoningTaskDescription);
+        m_output.println("Reasoning task started: "+reasoningTaskDescription.getTaskDescription(m_prefixes));
         mainLoop();
     }
-    public void isSatisfiableFinished(AtomicConcept atomicConcept,boolean result) {
-        super.isSatisfiableFinished(atomicConcept,result);
-        m_output.println("'"+m_prefixes.abbreviateIRI(atomicConcept.getIRI())+"' is "+(result ? "" : "not ")+"satisfiable.");
-        mainLoop();
-    }
-    public void isSubsumedByStarted(AtomicConcept subconcept,AtomicConcept superconcept) {
-        super.isSubsumedByStarted(subconcept,superconcept);
-        m_output.println("Will check whether '"+m_prefixes.abbreviateIRI(subconcept.getIRI())+"' is subsumed by '"+m_prefixes.abbreviateIRI(superconcept.getIRI())+"'.");
-        mainLoop();
-    }
-    public void isSubsumedByFinished(AtomicConcept subconcept,AtomicConcept superconcept,boolean result) {
-        super.isSubsumedByFinished(subconcept,superconcept,result);
-        m_output.println("'"+m_prefixes.abbreviateIRI(subconcept.getIRI())+"' is "+(result ? "" : "not ")+"subsumed by '"+m_prefixes.abbreviateIRI(superconcept.getIRI())+"'.");
-        mainLoop();
-    }
-    public void isABoxSatisfiableStarted() {
-        super.isABoxSatisfiableStarted();
-        m_output.println("Will check whether ABox is satisfiable.");
-        mainLoop();
-    }
-    public void isABoxSatisfiableFinished(boolean result) {
-        super.isABoxSatisfiableFinished(result);
-        m_output.println("ABox is "+(result ? "" : "not ")+"satisfiable.");
-        mainLoop();
-    }
-    public void isInstanceOfStarted(AtomicConcept concept,Individual individual) {
-        super.isInstanceOfStarted(concept,individual);
-        m_output.println("Will check whether '"+m_prefixes.abbreviateIRI(concept.getIRI())+"' is an instance of '"+m_prefixes.abbreviateIRI(individual.getIRI())+"'.");
-        mainLoop();
-    }
-    public void isInstanceOfFinished(AtomicConcept concept,Individual individual,boolean result) {
-        super.isInstanceOfFinished(concept,individual,result);
-        m_output.println("'"+m_prefixes.abbreviateIRI(concept.getIRI())+"' is "+(result ? "" : "not ")+"an instance of '"+m_prefixes.abbreviateIRI(individual.getIRI())+"'.");
+    public void isSatisfiableFinished(ReasoningTaskDescription reasoningTaskDescription,boolean result) {
+        super.isSatisfiableFinished(reasoningTaskDescription,result);
+        if (reasoningTaskDescription.flipSatisfiabilityResult())
+            result=!result;
+        m_output.println("Reasoning task finished: "+(result ? "true" : "false"));
         mainLoop();
     }
     public void tableauCleared() {

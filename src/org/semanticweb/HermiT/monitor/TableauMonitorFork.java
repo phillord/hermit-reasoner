@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -20,15 +20,13 @@ package org.semanticweb.HermiT.monitor;
 import java.io.Serializable;
 
 import org.semanticweb.HermiT.model.AnnotatedEquality;
-import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
-import org.semanticweb.HermiT.model.Individual;
-import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.DatatypeManager;
 import org.semanticweb.HermiT.tableau.GroundDisjunction;
 import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
 
 public class TableauMonitorFork implements TableauMonitor,Serializable  {
@@ -36,7 +34,7 @@ public class TableauMonitorFork implements TableauMonitor,Serializable  {
 
     protected final TableauMonitor m_first;
     protected final TableauMonitor m_second;
-    
+
     public TableauMonitorFork(TableauMonitor first,TableauMonitor second) {
         m_first=first;
         m_second=second;
@@ -45,45 +43,13 @@ public class TableauMonitorFork implements TableauMonitor,Serializable  {
         m_first.setTableau(tableau);
         m_second.setTableau(tableau);
     }
-    public void isSatisfiableStarted(AtomicConcept atomicConcept) {
-        m_first.isSatisfiableStarted(atomicConcept);
-        m_second.isSatisfiableStarted(atomicConcept);
+    public void isSatisfiableStarted(ReasoningTaskDescription reasoningTaskDescription) {
+        m_first.isSatisfiableStarted(reasoningTaskDescription);
+        m_second.isSatisfiableStarted(reasoningTaskDescription);
     }
-    public void isSatisfiableFinished(AtomicConcept atomicConcept,boolean result) {
-        m_first.isSatisfiableFinished(atomicConcept,result);
-        m_second.isSatisfiableFinished(atomicConcept,result);
-    }
-    public void isSatisfiableStarted(Role role) {
-        m_first.isSatisfiableStarted(role);
-        m_second.isSatisfiableStarted(role);
-    }
-    public void isSatisfiableFinished(Role role,boolean result) {
-        m_first.isSatisfiableFinished(role,result);
-        m_second.isSatisfiableFinished(role,result);
-    }
-    public void isSubsumedByStarted(AtomicConcept subconcept,AtomicConcept superconcept) {
-        m_first.isSubsumedByStarted(subconcept,superconcept);
-        m_second.isSubsumedByStarted(subconcept,superconcept);
-    }
-    public void isSubsumedByFinished(AtomicConcept subconcept,AtomicConcept superconcept,boolean result) {
-        m_first.isSubsumedByFinished(subconcept,superconcept,result);
-        m_second.isSubsumedByFinished(subconcept,superconcept,result);
-    }
-    public void isABoxSatisfiableStarted() {
-        m_first.isABoxSatisfiableStarted();
-        m_second.isABoxSatisfiableStarted();
-    }
-    public void isABoxSatisfiableFinished(boolean result) {
-        m_first.isABoxSatisfiableFinished(result);
-        m_second.isABoxSatisfiableFinished(result);
-    }
-    public void isInstanceOfStarted(AtomicConcept concept,Individual individual) {
-        m_first.isInstanceOfStarted(concept,individual);
-        m_second.isInstanceOfStarted(concept,individual);
-    }
-    public void isInstanceOfFinished(AtomicConcept concept,Individual individual,boolean result) {
-        m_first.isInstanceOfFinished(concept,individual,result);
-        m_second.isInstanceOfFinished(concept,individual,result);
+    public void isSatisfiableFinished(ReasoningTaskDescription reasoningTaskDescription,boolean result) {
+        m_first.isSatisfiableFinished(reasoningTaskDescription,result);
+        m_second.isSatisfiableFinished(reasoningTaskDescription,result);
     }
     public void tableauCleared() {
         m_first.tableauCleared();

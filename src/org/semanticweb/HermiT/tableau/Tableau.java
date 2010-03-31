@@ -237,13 +237,13 @@ public final class Tableau implements Serializable {
         if (m_additionalDLOntology!=null)
             m_checkDatatypes|=m_additionalDLOntology.hasDatatypes();
     }
-    public boolean isSatisfiable(boolean loadAdditionalABox,Set<Atom> perTestPositiveFactsNoDependency,Set<Atom> perTestNegativeFactsNoDependency,Set<Atom> perTestPositiveFactsDummyDependency,Set<Atom> perTestNegativeFactsDummyDependency,Map<Individual,Node> nodesForIndividuals) {
+    public boolean isSatisfiable(boolean loadAdditionalABox,Set<Atom> perTestPositiveFactsNoDependency,Set<Atom> perTestNegativeFactsNoDependency,Set<Atom> perTestPositiveFactsDummyDependency,Set<Atom> perTestNegativeFactsDummyDependency,Map<Individual,Node> nodesForIndividuals,ReasoningTaskDescription reasoningTaskDescription) {
         boolean loadPermanentABox=m_permanentDLOntology.hasNominals() || (m_additionalDLOntology!=null && m_additionalDLOntology.hasNominals());
-        return isSatisfiable(loadPermanentABox,loadAdditionalABox,perTestPositiveFactsNoDependency,perTestNegativeFactsNoDependency,perTestPositiveFactsDummyDependency,perTestNegativeFactsDummyDependency,nodesForIndividuals);
+        return isSatisfiable(loadPermanentABox,loadAdditionalABox,perTestPositiveFactsNoDependency,perTestNegativeFactsNoDependency,perTestPositiveFactsDummyDependency,perTestNegativeFactsDummyDependency,nodesForIndividuals,reasoningTaskDescription);
     }
-    public boolean isSatisfiable(boolean loadPermanentABox,boolean loadAdditionalABox,Set<Atom> perTestPositiveFactsNoDependency,Set<Atom> perTestNegativeFactsNoDependency,Set<Atom> perTestPositiveFactsDummyDependency,Set<Atom> perTestNegativeFactsDummyDependency,Map<Individual,Node> nodesForIndividuals) {
+    public boolean isSatisfiable(boolean loadPermanentABox,boolean loadAdditionalABox,Set<Atom> perTestPositiveFactsNoDependency,Set<Atom> perTestNegativeFactsNoDependency,Set<Atom> perTestPositiveFactsDummyDependency,Set<Atom> perTestNegativeFactsDummyDependency,Map<Individual,Node> nodesForIndividuals,ReasoningTaskDescription reasoningTaskDescription) {
         if (m_tableauMonitor!=null)
-            m_tableauMonitor.isABoxSatisfiableStarted();
+            m_tableauMonitor.isSatisfiableStarted(reasoningTaskDescription);
         clear();
         Map<Term,Node> termsToNodes=new HashMap<Term,Node>();
         if (loadPermanentABox) {
@@ -284,7 +284,7 @@ public final class Tableau implements Serializable {
             createNewNINode(m_dependencySetFactory.emptySet());
         boolean result=runCalculus();
         if (m_tableauMonitor!=null)
-            m_tableauMonitor.isABoxSatisfiableFinished(result);
+            m_tableauMonitor.isSatisfiableFinished(reasoningTaskDescription,result);
         return result;
     }
     protected void loadPositiveFact(Map<Term,Node> termsToNodes,Atom atom,DependencySet dependencySet) {

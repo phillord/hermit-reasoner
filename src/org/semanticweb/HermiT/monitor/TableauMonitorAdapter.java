@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -20,46 +20,28 @@ package org.semanticweb.HermiT.monitor;
 import java.io.Serializable;
 
 import org.semanticweb.HermiT.model.AnnotatedEquality;
-import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
-import org.semanticweb.HermiT.model.Individual;
-import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.DatatypeManager;
 import org.semanticweb.HermiT.tableau.GroundDisjunction;
 import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
 
 public class TableauMonitorAdapter implements TableauMonitor,Serializable  {
     private static final long serialVersionUID=6336033031431260208L;
 
     protected Tableau m_tableau;
-    
+
     public TableauMonitorAdapter() {
     }
     public void setTableau(Tableau tableau) {
         m_tableau=tableau;
     }
-    public void isSatisfiableStarted(AtomicConcept atomicConcept) {
+    public void isSatisfiableStarted(ReasoningTaskDescription reasoningTaskDescription) {
     }
-    public void isSatisfiableFinished(AtomicConcept atomicConcept,boolean result) {
-    }
-    public void isSatisfiableStarted(Role role) {
-    }
-    public void isSatisfiableFinished(Role role,boolean result) {
-    }
-    public void isSubsumedByStarted(AtomicConcept subconcept,AtomicConcept superconcept) {
-    }
-    public void isSubsumedByFinished(AtomicConcept subconcept,AtomicConcept superconcept,boolean result) {
-    }
-    public void isABoxSatisfiableStarted() {
-    }
-    public void isABoxSatisfiableFinished(boolean result) {
-    }
-    public void isInstanceOfStarted(AtomicConcept concept,Individual individual) {
-    }
-    public void isInstanceOfFinished(AtomicConcept concept,Individual individual,boolean result) {
+    public void isSatisfiableFinished(ReasoningTaskDescription reasoningTaskDescription,boolean result) {
     }
     public void tableauCleared() {
     }
