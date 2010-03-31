@@ -34,14 +34,14 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     public AbstractReasonerTest(String name) {
         super(name);
     }
-    
+
     protected void tearDown() {
         super.tearDown();
         m_reasoner=null;
+        m_owlreasoner=null;
         m_dataFactory=null;
         m_ontology=null;
         m_ontologyManager=null;
-        m_owlreasoner=null;
     }
 
     protected void loadReasonerFromResource(String resourceName) throws Exception {

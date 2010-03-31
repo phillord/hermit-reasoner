@@ -47,6 +47,7 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
     public void initialize(Tableau tableau) {
         m_tableau=tableau;
         m_directBlockingChecker.initialize(tableau);
+        updateBlockingSignatureCacheUsage();
     }
     public void additionalDLOntologySet(DLOntology additionalDLOntology) {
         updateBlockingSignatureCacheUsage();

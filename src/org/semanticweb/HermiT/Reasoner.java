@@ -56,6 +56,7 @@ import org.semanticweb.HermiT.hierarchy.Hierarchy;
 import org.semanticweb.HermiT.hierarchy.HierarchyNode;
 import org.semanticweb.HermiT.hierarchy.HierarchyPrinterFSS;
 import org.semanticweb.HermiT.hierarchy.ObjectRoleSubsumptionCache;
+import org.semanticweb.HermiT.hierarchy.QuasiOrderClassificationManager;
 import org.semanticweb.HermiT.hierarchy.StandardClassificationManager;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
@@ -1804,8 +1805,7 @@ public class Reasoner implements OWLReasoner,Serializable {
         if (reasoner.getTableau().isDeterministic())
             return new DeterministicClassificationManager<AtomicConcept>(new AtomicConceptSubsumptionCache(reasoner));
         else
-            return new StandardClassificationManager<AtomicConcept>(new AtomicConceptSubsumptionCache(reasoner));
-//            return new QuasiOrderClassificationManager(reasoner);
+            return new QuasiOrderClassificationManager(reasoner);
     }
 
     protected static ClassificationManager<Role> createObjectRoleClassificationManager(Reasoner reasoner) {
