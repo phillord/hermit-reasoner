@@ -1,17 +1,17 @@
 /* Copyright 2009 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -27,7 +27,7 @@ import java.util.Set;
 
 public class StandardClassificationManager<E> implements ClassificationManager<E> {
     protected final SubsumptionCache<E> m_subsumptionCache;
-    
+
     public StandardClassificationManager(SubsumptionCache<E> subsumptionCache) {
         m_subsumptionCache=subsumptionCache;
     }
@@ -108,7 +108,6 @@ public class StandardClassificationManager<E> implements ClassificationManager<E
                 }
             },Collections.singleton(topNode),null);
     }
-
     protected static <E> Set<HierarchyNode<E>> findChildren(final Relation<E> hierarchyRelation,final E element,HierarchyNode<E> bottomNode,Set<HierarchyNode<E>> parentNodes) {
         if (parentNodes.size()==1 && hierarchyRelation.doesSubsume(element,parentNodes.iterator().next().getRepresentative()))
             return parentNodes;

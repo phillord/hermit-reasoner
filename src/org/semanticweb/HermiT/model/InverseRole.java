@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -26,7 +26,7 @@ public class InverseRole extends Role {
     private static final long serialVersionUID=3351701933728011998L;
 
     protected final AtomicRole m_inverseOf;
-    
+
     public InverseRole(AtomicRole inverseOf) {
         m_inverseOf=inverseOf;
     }
@@ -35,6 +35,9 @@ public class InverseRole extends Role {
     }
     public Role getInverse() {
         return m_inverseOf;
+    }
+    public Atom getRoleAssertion(Term term0,Term term1) {
+        return Atom.create(m_inverseOf,term0,term1);
     }
     public String toString(Prefixes prefixes) {
         return "inv("+m_inverseOf.toString(prefixes)+")";
@@ -51,7 +54,7 @@ public class InverseRole extends Role {
             return -object.m_inverseOf.hashCode();
         }
     };
-    
+
     public static InverseRole create(AtomicRole inverseOf) {
         return s_interningManager.intern(new InverseRole(inverseOf));
     }

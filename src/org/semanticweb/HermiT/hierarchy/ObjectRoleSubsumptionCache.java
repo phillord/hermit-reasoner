@@ -22,7 +22,6 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.graph.Graph;
-import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.Individual;
@@ -73,14 +72,9 @@ public class ObjectRoleSubsumptionCache extends RoleSubsumptionCache {
         }
     }
     protected boolean doSatisfiabilityTest(Role role) {
-        Individual individualA=Individual.createAnonymous("fresh-individual-A");
-        Individual individualB=Individual.createAnonymous("fresh-individual-B");
-        Atom roleAssertion;
-        if (role instanceof AtomicRole)
-            roleAssertion=Atom.create((AtomicRole)role,individualA,individualB);
-        else
-            roleAssertion=Atom.create(((InverseRole)role).getInverseOf(),individualB,individualA);
-        return m_reasoner.getTableau().isSatisfiable(true,Collections.singleton(roleAssertion),null,null,null,null,ReasoningTaskDescription.isRoleSatisfiable(role,true));
+        Individual freshIndividualA=Individual.createAnonymous("fresh-individual-A");
+        Individual freshIndividualB=Individual.createAnonymous("fresh-individual-B");
+        return m_reasoner.getTableau().isSatisfiable(true,Collections.singleton(role.getRoleAssertion(freshIndividualA,freshIndividualB)),null,null,null,null,ReasoningTaskDescription.isRoleSatisfiable(role,true));
     }
     protected boolean doSubsumptionCheck(Role subrole,Role superrole) {
         // This code is different from data properties. This is because object properties can be transitive, so

@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -28,7 +28,7 @@ public class HierarchyNode<E> {
     protected final Set<E> m_equivalentElements;
     protected final Set<HierarchyNode<E>> m_parentNodes;
     protected final Set<HierarchyNode<E>> m_childNodes;
-    
+
     public HierarchyNode(E representative) {
         m_representative=representative;
         m_equivalentElements=new HashSet<E>();
@@ -55,28 +55,32 @@ public class HierarchyNode<E> {
         return Collections.unmodifiableSet(m_childNodes);
     }
     public Set<HierarchyNode<E>> getAncestorNodes() {
-        Set<HierarchyNode<E>> result=new HashSet<HierarchyNode<E>>();
-        Queue<HierarchyNode<E>> toVisit=new LinkedList<HierarchyNode<E>>();
-        toVisit.add(this);
+        return getAncestorNodes(Collections.singleton(this));
+    }
+    public Set<HierarchyNode<E>> getDescendantNodes() {
+        return getDescendantNodes(Collections.singleton(this));
+    }
+    public String toString() {
+        return m_equivalentElements.toString();
+    }
+    public static <T> Set<HierarchyNode<T>> getAncestorNodes(Set<HierarchyNode<T>> inputNodes) {
+        Set<HierarchyNode<T>> result=new HashSet<HierarchyNode<T>>();
+        Queue<HierarchyNode<T>> toVisit=new LinkedList<HierarchyNode<T>>(inputNodes);
         while (!toVisit.isEmpty()) {
-            HierarchyNode<E> current=toVisit.poll();
+            HierarchyNode<T> current=toVisit.poll();
             if (result.add(current))
                 toVisit.addAll(current.getParentNodes());
         }
         return result;
     }
-    public Set<HierarchyNode<E>> getDescendantNodes() {
-        Set<HierarchyNode<E>> result=new HashSet<HierarchyNode<E>>();
-        Queue<HierarchyNode<E>> toVisit=new LinkedList<HierarchyNode<E>>();
-        toVisit.add(this);
+    public static <T> Set<HierarchyNode<T>> getDescendantNodes(Set<HierarchyNode<T>> inputNodes) {
+        Set<HierarchyNode<T>> result=new HashSet<HierarchyNode<T>>();
+        Queue<HierarchyNode<T>> toVisit=new LinkedList<HierarchyNode<T>>(inputNodes);
         while (!toVisit.isEmpty()) {
-            HierarchyNode<E> current=toVisit.poll();
+            HierarchyNode<T> current=toVisit.poll();
             if (result.add(current))
                 toVisit.addAll(current.getChildNodes());
         }
         return result;
-    }
-    public String toString() {
-        return m_equivalentElements.toString();
     }
 }

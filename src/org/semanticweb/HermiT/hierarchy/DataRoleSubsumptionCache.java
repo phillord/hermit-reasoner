@@ -22,7 +22,6 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.graph.Graph;
-import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.HermiT.model.DLClause;
@@ -62,9 +61,9 @@ public class DataRoleSubsumptionCache extends RoleSubsumptionCache {
         }
     }
     protected boolean doSatisfiabilityTest(Role role) {
-        Individual individual=Individual.createAnonymous("fresh-individual");
-        Constant constant=Constant.create(new Constant.AnonymousConstantValue("internal:fresh-constant"));
-        return m_reasoner.getTableau().isSatisfiable(true,Collections.singleton(Atom.create((AtomicRole)role,individual,constant)),null,null,null,null,ReasoningTaskDescription.isRoleSatisfiable(role,false));
+        Individual freshIndividual=Individual.createAnonymous("fresh-individual");
+        Constant freshConstant=Constant.create(new Constant.AnonymousConstantValue("internal:fresh-constant"));
+        return m_reasoner.getTableau().isSatisfiable(true,Collections.singleton(role.getRoleAssertion(freshIndividual,freshConstant)),null,null,null,null,ReasoningTaskDescription.isRoleSatisfiable(role,false));
     }
     protected boolean doSubsumptionCheck(Role subrole,Role superrole) {
         // This is different from object properties! This code is correct because we don't have

@@ -72,6 +72,12 @@ public class ReasoningTaskDescription {
     public static ReasoningTaskDescription isAxiomEntailed(Object axiom) {
         return new ReasoningTaskDescription(true,"entailment of '{0}'",axiom);
     }
+    public static ReasoningTaskDescription isDomainOf(Object domain,Object role) {
+        return new ReasoningTaskDescription(true,"check if {0} is domain of {1}",domain,role);
+    }
+    public static ReasoningTaskDescription isRangeOf(Object range,Object role) {
+        return new ReasoningTaskDescription(true,"check if {0} is rang eof {1}",range,role);
+    }
     public static ReasoningTaskDescription isSameAs(Object individual1,Object individual2) {
         return new ReasoningTaskDescription(true,"is {0} same as {1}",individual1,individual2);
     }
