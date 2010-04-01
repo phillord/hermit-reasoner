@@ -30,7 +30,7 @@ public class Timer extends TableauMonitorAdapter {
     protected long m_problemStartTime;
     protected long m_lastStatusTime;
     protected int m_numberOfBacktrackings;
-    protected int m_numberOfSatTests=0;
+    protected int m_testNumber=0;
 
     public Timer() {
         m_output=new PrintWriter(System.out);
@@ -67,40 +67,61 @@ public class Timer extends TableauMonitorAdapter {
         }
     }
     public void saturateStarted() {
-        m_numberOfSatTests++;
+        m_testNumber++;
     }
     public void backtrackToFinished(BranchingPoint newCurrentBrancingPoint) {
         m_numberOfBacktrackings++;
     }
     protected void doStatistics() {
         long duartionSoFar=System.currentTimeMillis()-m_problemStartTime;
-        m_output.print(duartionSoFar);
-        m_output.print(" ms   sat test no: "+m_numberOfSatTests);
-        m_output.print("    allocated nodes: ");
-        m_output.print(m_tableau.getNumberOfAllocatedNodes());
-        m_output.print("    used nodes: ");
-        m_output.print(m_tableau.getNumberOfNodeCreations());
+        m_output.print("    Test:   ");
+        printPadded(m_testNumber,7);
+        m_output.print("  Duration:  ");
+        printPaddedMS(duartionSoFar,7);
+        m_output.print("   Current branching point: ");
+        printPadded(m_tableau.getCurrentBranchingPointLevel(),7);
+        if (m_numberOfBacktrackings>0) {
+            m_output.print("    Backtrackings: ");
+            m_output.print(m_numberOfBacktrackings);
+        }
+        m_output.println();
+        m_output.print("    Nodes:  allocated:    ");
+        printPadded(m_tableau.getNumberOfAllocatedNodes(),7);
+        m_output.print("    used: ");
+        printPadded(m_tableau.getNumberOfNodeCreations(),7);
         m_output.print("    in tableau: ");
-        m_output.print(m_tableau.getNumberOfNodesInTableau());
+        printPadded(m_tableau.getNumberOfNodesInTableau(),7);
         if (m_tableau.getNumberOfMergedOrPrunedNodes()>0) {
             m_output.print("    merged/pruned: ");
             m_output.print(m_tableau.getNumberOfMergedOrPrunedNodes());
         }
-        m_output.print("    branching point: ");
-        m_output.print(m_tableau.getCurrentBranchingPointLevel());
-        if (m_numberOfBacktrackings>0) {
-            m_output.print("    backtrackings: ");
-            m_output.print(m_numberOfBacktrackings);
-        }
         m_output.println();
-        m_output.print("    Binary table size:   ");
-        m_output.print(m_tableau.getExtensionManager().getBinaryExtensionTable().sizeInMemory()/1000);
-        m_output.print("kb    Ternary table size: ");
-        m_output.print(m_tableau.getExtensionManager().getTernaryExtensionTable().sizeInMemory()/1000);
-        m_output.print("kb    Dependency set factory size: ");
-        m_output.print(m_tableau.getDependencySetFactory().sizeInMemory()/1000);
-        m_output.println("kb");
+        m_output.print("    Sizes:  binary table: ");
+        printPaddedKB(m_tableau.getExtensionManager().getBinaryExtensionTable().sizeInMemory()/1000,7);
+        m_output.print("    ternary table: ");
+        printPaddedKB(m_tableau.getExtensionManager().getTernaryExtensionTable().sizeInMemory()/1000,7);
+        m_output.print("    dependency set factory: ");
+        printPaddedKB(m_tableau.getDependencySetFactory().sizeInMemory()/1000,7);
+        m_output.println();
         m_output.println();
         m_output.flush();
+    }
+    protected void printPadded(int number,int padding) {
+        String numberString=String.valueOf(number);
+        m_output.print(numberString);
+        for (int index=numberString.length();index<padding;index++)
+            m_output.print(' ');
+    }
+    protected void printPaddedMS(long number,int padding) {
+        String numberString=String.valueOf(number)+"kb";
+        m_output.print(numberString);
+        for (int index=numberString.length();index<padding;index++)
+            m_output.print(' ');
+    }
+    protected void printPaddedKB(int number,int padding) {
+        String numberString=String.valueOf(number)+"kb";
+        m_output.print(numberString);
+        for (int index=numberString.length();index<padding;index++)
+            m_output.print(' ');
     }
 }
