@@ -204,6 +204,12 @@ public final class Tableau implements Serializable {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.tableauCleared();
     }
+    public boolean supportsAdditionalDLOntology(DLOntology additionalDLOntology) {
+        boolean hasInverseRoles=(m_permanentDLOntology.hasInverseRoles() || (m_additionalDLOntology!=null && m_additionalDLOntology.hasInverseRoles()));
+        boolean hasNominals=(m_permanentDLOntology.hasNominals() || (m_additionalDLOntology!=null && m_additionalDLOntology.hasNominals()));
+        boolean isHorn=(m_permanentDLOntology.isHorn() || (m_additionalDLOntology!=null && m_additionalDLOntology.isHorn()));
+        return (!additionalDLOntology.hasInverseRoles() || hasInverseRoles) && (!additionalDLOntology.hasNominals() || hasNominals) && (additionalDLOntology.isHorn() || !isHorn);
+    }
     public void setAdditionalDLOntology(DLOntology additionalDLOntology) {
         if (!additionalDLOntology.getAllDescriptionGraphs().isEmpty())
             throw new IllegalArgumentException("Additional DL-ontology cannot contain description graphs.");

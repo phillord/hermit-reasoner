@@ -20,6 +20,7 @@ package org.semanticweb.HermiT;
 
 import java.util.List;
 
+import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
@@ -58,7 +59,10 @@ public class ChangeTrackingReasoner extends Reasoner {
     public BufferingMode getBufferingMode() {
         return m_configuration.bufferChanges ? BufferingMode.BUFFERING : BufferingMode.NON_BUFFERING;
     }
-    
+    public OWLDataFactory getDataFactory() {
+        return m_rootOntology.getOWLOntologyManager().getOWLDataFactory();
+    }
+
     protected class OntologyChangeListener implements OWLOntologyChangeListener {
 
         public void ontologiesChanged(List<? extends OWLOntologyChange> changes) throws OWLException {

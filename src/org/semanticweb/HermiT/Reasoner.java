@@ -1480,21 +1480,13 @@ public class Reasoner implements OWLReasoner,Serializable {
             return getTableau();
         else {
             DLOntology deltaDLOntology=createDeltaDLOntology(m_configuration,m_dlOntology,additionalAxioms);
-            if (isSecondStrictlyMoreExpressive(m_dlOntology,deltaDLOntology))
-                return createTableau(m_interruptFlag,m_configuration,m_dlOntology,deltaDLOntology,m_prefixes);
-            else {
+            if (m_tableau.supportsAdditionalDLOntology(deltaDLOntology)) {
                 m_tableau.setAdditionalDLOntology(deltaDLOntology);
                 return m_tableau;
             }
+            else
+                return createTableau(m_interruptFlag,m_configuration,m_dlOntology,deltaDLOntology,m_prefixes);
         }
-    }
-    protected boolean isSecondStrictlyMoreExpressive(DLOntology first,DLOntology second) {
-        return
-            (!first.hasInverseRoles() && second.hasInverseRoles()) ||
-            (!first.hasAtMostRestrictions() && second.hasAtMostRestrictions()) ||
-            (!first.hasNominals() && second.hasNominals()) ||
-            (!first.hasDatatypes() && second.hasDatatypes()) ||
-            (first.isHorn() && !second.isHorn());
     }
     protected static Tableau createTableau(InterruptFlag interruptFlag,Configuration config,DLOntology permanentDLOntology,DLOntology additionalDLOntology,Prefixes prefixes) throws IllegalArgumentException {
         if (config.checkClauses) {
@@ -1972,25 +1964,29 @@ public class Reasoner implements OWLReasoner,Serializable {
             ReasonerPreferences preferences=this.getOWLModelManager().getReasonerPreferences();
             PrepareReasonerInferences prepareReasonerInferences=new PrepareReasonerInferences();
             // class classification
-            prepareReasonerInferences.classClassificationRequired=(preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_CLASS_UNSATISFIABILITY)
-                    || preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_EQUIVALENT_CLASSES)
-                    || preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_INHERITED_ANONYMOUS_CLASSES)
-                    || preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_CLASSES));
+            prepareReasonerInferences.classClassificationRequired=
+                preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_CLASS_UNSATISFIABILITY) ||
+                preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_EQUIVALENT_CLASSES) ||
+                preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_INHERITED_ANONYMOUS_CLASSES) ||
+                preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_CLASSES);
 
             // realisation
-            prepareReasonerInferences.realisationRequired=(preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERED_CLASS_MEMBERS)
-                    || preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_TYPES));
+            prepareReasonerInferences.realisationRequired=
+                preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERED_CLASS_MEMBERS) ||
+                preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_TYPES);
 
             // data type classification
-            prepareReasonerInferences.dataPropertyClassificationRequired=(preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_DATATYPE_PROPERTY_DOMAINS)
-                    || preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_EQUIVALENT_DATATYPE_PROPERTIES)
-                    || preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_DATATYPE_PROPERTIES));
+            prepareReasonerInferences.dataPropertyClassificationRequired=
+                preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_DATATYPE_PROPERTY_DOMAINS) ||
+                preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_EQUIVALENT_DATATYPE_PROPERTIES) ||
+                preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_DATATYPE_PROPERTIES);
 
             // object property classification
-            prepareReasonerInferences.objectPropertyClassificationRequired=(preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_EQUIVALENT_OBJECT_PROPERTIES)
-                    || preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_INVERSE_PROPERTIES)
-                    || preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_OBJECT_PROPERTIES)
-                    || preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_OBJECT_PROPERTY_UNSATISFIABILITY));
+            prepareReasonerInferences.objectPropertyClassificationRequired=
+                preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_EQUIVALENT_OBJECT_PROPERTIES) ||
+                preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_INVERSE_PROPERTIES) ||
+                preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_OBJECT_PROPERTIES) ||
+                preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_OBJECT_PROPERTY_UNSATISFIABILITY);
 
             // object property realisation
             prepareReasonerInferences.objectPropertyRealisationRequired=preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_OBJECT_PROPERTY_ASSERTIONS);
