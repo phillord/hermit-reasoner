@@ -440,14 +440,29 @@ public class ObjectPropertyInclusionManager {
     protected void optimizedAutomataConnector(Automaton biggerPropertyAutomaton,Automaton smallerPropertyAutomaton,Transition transition) {
         Map<State,State> stateMapper=getDisjointUnion(biggerPropertyAutomaton,smallerPropertyAutomaton);
 
+        State startState=transition.start();
+        State endState=transition.end();
+
+        State oldStartOfSmaller=stateMapper.get(smallerPropertyAutomaton.initials().iterator().next());
+        State oldFinalOfSmaller=stateMapper.get(smallerPropertyAutomaton.terminals().iterator().next());
+
         try {
+            biggerPropertyAutomaton.addTransition(new Transition(startState,null,oldStartOfSmaller));
+            biggerPropertyAutomaton.addTransition(new Transition(oldFinalOfSmaller,null,endState));
+        }
+        catch (NoSuchStateException e) {
+            throw new IllegalArgumentException("Could not build the Complete Automata of non-Simple Properties");
+        }
+
+        // TODO: Ask Giorgos about the code below
+/*        try {
             State startState=transition.start();
             State endState=transition.end();
 
-            State oldInitialOfSmaller=stateMapper.get(smallerPropertyAutomaton.initials().iterator().next());
+            State oldStartOfSmaller=stateMapper.get(smallerPropertyAutomaton.initials().iterator().next());
             State oldFinalOfSmaller=stateMapper.get(smallerPropertyAutomaton.terminals().iterator().next());
 
-            for (Object outgoingTransitionFromInitialOfSmallerObject : biggerPropertyAutomaton.delta(oldInitialOfSmaller)) {
+            for (Object outgoingTransitionFromInitialOfSmallerObject : biggerPropertyAutomaton.delta(oldStartOfSmaller)) {
                 Transition outgoingTransitionFromInitialOfSmaller=(Transition)outgoingTransitionFromInitialOfSmallerObject;
                 State toState=outgoingTransitionFromInitialOfSmaller.end();
                 if (!toState.equals(oldFinalOfSmaller))
@@ -457,11 +472,11 @@ public class ObjectPropertyInclusionManager {
             for (Object incomingTransitionToFinalOfSmallerObject : deltaToState(biggerPropertyAutomaton,oldFinalOfSmaller)) {
                 Transition incomingTransitionToFinalOfSmaller=(Transition)incomingTransitionToFinalOfSmallerObject;
                 State fromState=incomingTransitionToFinalOfSmaller.start();
-                if (!fromState.equals(oldInitialOfSmaller))
+                if (!fromState.equals(oldStartOfSmaller))
                     biggerPropertyAutomaton.addTransition(new Transition(fromState,incomingTransitionToFinalOfSmaller.label(),endState));
             }
 
-            for (Object extraOnesObject : biggerPropertyAutomaton.deltaFrom(oldFinalOfSmaller,oldInitialOfSmaller))
+            for (Object extraOnesObject : biggerPropertyAutomaton.deltaFrom(oldFinalOfSmaller,oldStartOfSmaller))
                 biggerPropertyAutomaton.addTransition(new Transition(endState,((Transition)extraOnesObject).label(),startState));
 
             for (Object extraOnesObject : biggerPropertyAutomaton.deltaFrom(oldFinalOfSmaller,oldFinalOfSmaller))
@@ -470,7 +485,7 @@ public class ObjectPropertyInclusionManager {
         }
         catch (NoSuchStateException e) {
             throw new IllegalArgumentException("Could not build the Complete Automata of non-Simple Properties");
-        }
+        }*/
     }
     protected Set<Transition> deltaToState(Automaton smallerPropertyAutomaton,State state) {
         Set<Transition> incommingTrans=new HashSet<Transition>();

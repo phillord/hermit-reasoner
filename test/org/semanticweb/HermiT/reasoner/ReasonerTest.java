@@ -35,7 +35,121 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
-    public void testLearningBackTracking() throws Exception {
+    public void testIsFunctionalData() throws Exception {
+        loadOntologyWithAxioms("FunctionalDataProperty(:DP) SubDataPropertyOf(:SDP :DP)");
+        createReasoner();
+
+        OWLDataProperty dp=m_dataFactory.getOWLDataProperty(IRI.create(NS+"DP"));
+        OWLDataProperty sdp=m_dataFactory.getOWLDataProperty(IRI.create(NS+"SDP"));
+        OWLDataProperty andp=m_dataFactory.getOWLDataProperty(IRI.create(NS+"ANDP"));
+
+        assertTrue(m_reasoner.isFunctional(dp));
+
+        assertTrue(m_reasoner.isFunctional(sdp));
+
+        assertFalse(m_reasoner.isFunctional(andp));
+    }
+    public void testIsFunctionalObject() throws Exception {
+        loadOntologyWithAxioms("FunctionalObjectProperty(:OP) SubObjectPropertyOf(:SOP :OP)");
+        createReasoner();
+
+        OWLObjectProperty op=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"OP"));
+        OWLObjectProperty sop=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"SOP"));
+        OWLObjectProperty anop=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"ANOP"));
+
+        assertTrue(m_reasoner.isFunctional(op));
+        assertFalse(m_reasoner.isInverseFunctional(op));
+
+        assertTrue(m_reasoner.isFunctional(sop));
+        assertFalse(m_reasoner.isInverseFunctional(sop));
+
+        assertFalse(m_reasoner.isFunctional(anop));
+        assertFalse(m_reasoner.isInverseFunctional(anop));
+    }
+    public void testIsInverseFunctionalObject() throws Exception {
+        loadOntologyWithAxioms("InverseFunctionalObjectProperty(:OP) SubObjectPropertyOf(:SOP :OP)");
+        createReasoner();
+
+        OWLObjectProperty op=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"OP"));
+        OWLObjectProperty sop=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"SOP"));
+        OWLObjectProperty anop=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"ANOP"));
+
+        assertFalse(m_reasoner.isFunctional(op));
+        assertTrue(m_reasoner.isInverseFunctional(op));
+
+        assertFalse(m_reasoner.isFunctional(sop));
+        assertTrue(m_reasoner.isInverseFunctional(sop));
+
+        assertFalse(m_reasoner.isFunctional(anop));
+        assertFalse(m_reasoner.isInverseFunctional(anop));
+    }
+    public void testIsReflexiveObject() throws Exception {
+        loadOntologyWithAxioms("ReflexiveObjectProperty(:OP) SubObjectPropertyOf(:OP :SOP)");
+        createReasoner();
+
+        OWLObjectProperty op=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"OP"));
+        OWLObjectProperty sop=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"SOP"));
+        OWLObjectProperty anop=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"ANOP"));
+
+        assertTrue(m_reasoner.isReflexive(op));
+        assertTrue(m_reasoner.isReflexive(sop));
+        assertFalse(m_reasoner.isReflexive(anop));
+    }
+    public void testIsIrreflexiveObject() throws Exception {
+        loadOntologyWithAxioms("IrreflexiveObjectProperty(:OP) SubObjectPropertyOf(:SOP :OP)");
+        createReasoner();
+
+        OWLObjectProperty op=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"OP"));
+        OWLObjectProperty sop=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"SOP"));
+        OWLObjectProperty anop=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"ANOP"));
+
+        assertTrue(m_reasoner.isIrreflexive(op));
+        assertTrue(m_reasoner.isIrreflexive(sop));
+        assertFalse(m_reasoner.isIrreflexive(anop));
+    }
+    public void testIsSymmetricObject() throws Exception {
+        loadOntologyWithAxioms("SymmetricObjectProperty(:OP) SubObjectPropertyOf(:SOP1 :OP) SubObjectPropertyOf(:OP :SOP2)");
+        createReasoner();
+
+        OWLObjectProperty op=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"OP"));
+        OWLObjectProperty sop1=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"SOP1"));
+        OWLObjectProperty sop2=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"SOP2"));
+        OWLObjectProperty anop=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"ANOP"));
+
+        assertTrue(m_reasoner.isSymmetric(op));
+        assertFalse(m_reasoner.isSymmetric(sop1));
+        assertFalse(m_reasoner.isSymmetric(sop2));
+        assertFalse(m_reasoner.isSymmetric(anop));
+    }
+    public void testIsAsymmetricObject() throws Exception {
+        loadOntologyWithAxioms("AsymmetricObjectProperty(:OP) SubObjectPropertyOf(:SOP1 :OP) SubObjectPropertyOf(:OP :SOP2)");
+        createReasoner();
+
+        OWLObjectProperty op=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"OP"));
+        OWLObjectProperty sop1=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"SOP1"));
+        OWLObjectProperty sop2=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"SOP2"));
+        OWLObjectProperty anop=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"ANOP"));
+
+        assertTrue(m_reasoner.isAsymmetric(op));
+        assertTrue(m_reasoner.isAsymmetric(sop1));
+        assertFalse(m_reasoner.isAsymmetric(sop2));
+        assertFalse(m_reasoner.isAsymmetric(anop));
+    }
+    public void testIsTransitiveObject() throws Exception {
+        loadOntologyWithAxioms("TransitiveObjectProperty(:OP) SubObjectPropertyOf(:SOP1 :OP) SubObjectPropertyOf(:OP :SOP2)");
+        createReasoner();
+
+        OWLObjectProperty op=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"OP"));
+        OWLObjectProperty sop1=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"SOP1"));
+        OWLObjectProperty sop2=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"SOP2"));
+        OWLObjectProperty anop=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"ANOP"));
+
+        assertTrue(m_reasoner.isTransitive(op));
+        assertFalse(m_reasoner.isTransitive(sop1));
+        assertFalse(m_reasoner.isTransitive(sop2));
+        assertFalse(m_reasoner.isTransitive(anop));
+    }
+    public void testLearningBacktracking() throws Exception {
         String axioms = "SubClassOf(owl:Thing ObjectIntersectionOf(ObjectUnionOf(:C :D1) ObjectUnionOf(:C :D2) ObjectUnionOf(:C :D3) ObjectUnionOf(:C :D4) ObjectUnionOf(:C :D5) ObjectSomeValuesFrom(:r ObjectAllValuesFrom(ObjectInverseOf(:r) ObjectComplementOf(:C)))))";
         loadOntologyWithAxioms(axioms);
         Set<OWLAxiom> assertions=new HashSet<OWLAxiom>();
@@ -111,8 +225,8 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertTrue(result.containsEntity(d));
     }
 
-    // actually this test should cause a parsing error since xsd:minInclusive for restricting byte is supposed to use 
-    // only values from the value space of byte, which \"4.5\"^^xsd:decimal isn't 
+    // actually this test should cause a parsing error since xsd:minInclusive for restricting byte is supposed to use
+    // only values from the value space of byte, which \"4.5\"^^xsd:decimal isn't
     public void testDataTypeRestriction() throws Exception {
         String axioms = "SubClassOf(:A DataAllValuesFrom(:dp DatatypeRestriction(xsd:byte xsd:minInclusive \"4.5\"^^xsd:decimal xsd:maxInclusive \"7\"^^xsd:short)))"
             + "SubClassOf(:A DataAllValuesFrom(:dp DatatypeRestriction(xsd:decimal xsd:minInclusive \"6.0\"^^xsd:decimal xsd:maxInclusive \"6.8\"^^xsd:decimal)))"
@@ -122,7 +236,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
-    
+
     public void testAnonymousIndividualConstraints() throws Exception {
         String axioms = "SameIndividual(:a _:anon1)";
         boolean exceptionThrown=false;
@@ -133,7 +247,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         }
         assertTrue(exceptionThrown);
     }
-    
+
     public void testAnonymousIndividualConstraints2() throws Exception {
         String axioms = "DifferentIndividuals(:a _:anon1)";
         boolean exceptionThrown=false;
@@ -144,7 +258,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         }
         assertTrue(exceptionThrown);
     }
-    
+
     public void testAnonymousIndividualConstraints3() throws Exception {
         String axioms = "NegativeObjectPropertyAssertion(:r :a _:anon1)";
         boolean exceptionThrown=false;
@@ -166,7 +280,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         }
         assertTrue(exceptionThrown);
     }
-    
+
     public void testTransitivity() throws Exception {
         String axioms = "ObjectPropertyRange(:isSiblingOf :Person)"
             + "DisjointClasses(:Person :Sex)"
@@ -176,7 +290,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(true);
     }
-    
+
     public void testSubAndSuperConcepts() throws Exception {
         String axioms = "SubClassOf(:C :D)"
             + "SubClassOf(:D :E)";
@@ -193,7 +307,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertTrue(m_reasoner.getAncestorClasses(e).containsEntity(e));
         assertTrue(!m_reasoner.getAncestorClasses(e).containsEntity(c));
         assertTrue(!m_reasoner.getAncestorClasses(e).containsEntity(d));
-        
+
         assertTrue(m_reasoner.getDescendantClasses(c).containsEntity(c));
         assertTrue(!m_reasoner.getDescendantClasses(c).containsEntity(d));
         assertTrue(!m_reasoner.getDescendantClasses(c).containsEntity(e));
@@ -203,7 +317,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertTrue(m_reasoner.getDescendantClasses(e).containsEntity(c));
         assertTrue(m_reasoner.getDescendantClasses(e).containsEntity(d));
         assertTrue(m_reasoner.getDescendantClasses(e).containsEntity(e));
-        
+
         assertTrue(m_reasoner.isSubClassOf(c, c));
         assertTrue(m_reasoner.isSubClassOf(d, d));
         assertTrue(m_reasoner.isSubClassOf(e, e));
@@ -230,7 +344,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertTrue(m_reasoner.getAncestorObjectProperties(t).containsEntity(t));
         assertTrue(!m_reasoner.getAncestorObjectProperties(t).containsEntity(r));
         assertTrue(!m_reasoner.getAncestorObjectProperties(t).containsEntity(s));
-        
+
         assertTrue(m_reasoner.getDescendantObjectProperties(r).containsEntity(r));
         assertTrue(!m_reasoner.getDescendantObjectProperties(r).containsEntity(s));
         assertTrue(!m_reasoner.getDescendantObjectProperties(r).containsEntity(t));
@@ -240,7 +354,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertTrue(m_reasoner.getDescendantObjectProperties(t).containsEntity(r));
         assertTrue(m_reasoner.getDescendantObjectProperties(t).containsEntity(s));
         assertTrue(m_reasoner.getDescendantObjectProperties(t).containsEntity(t));
-        
+
         assertTrue(m_reasoner.isSubObjectPropertyExpressionOf(r, r));
         assertTrue(m_reasoner.isSubObjectPropertyExpressionOf(s, s));
         assertTrue(m_reasoner.isSubObjectPropertyExpressionOf(t, t));
@@ -307,7 +421,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertABoxSatisfiable(true);
     }
     public void testDateTime2() throws Exception {
-        String axioms = "SubClassOf(:A DataSomeValuesFrom(:dp DatatypeRestriction(xsd:dateTime xsd:minInclusive \"2008-10-08T20:44:11.656+01:00\"^^xsd:dateTime)))" 
+        String axioms = "SubClassOf(:A DataSomeValuesFrom(:dp DatatypeRestriction(xsd:dateTime xsd:minInclusive \"2008-10-08T20:44:11.656+01:00\"^^xsd:dateTime)))"
             + "SubClassOf(:A DataAllValuesFrom(:dp DatatypeRestriction(xsd:dateTime xsd:maxInclusive \"2008-10-08T20:44:11.656+01:00\"^^xsd:dateTime)))"
             + "ClassAssertion(:A :a)";
         loadReasonerWithAxioms(axioms);
@@ -369,8 +483,8 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertABoxSatisfiable(false);
     }
     public void testDateTime() throws Exception {
-        String axioms = "SubClassOf(:A DataHasValue(:dp \"2007-10-08T20:44:11.656+01:00\"^^xsd:dateTime))" 
-            + "SubClassOf(:A DataAllValuesFrom(:dp DatatypeRestriction(xsd:dateTime xsd:minInclusive \"2008-07-08T20:44:11.656+01:00\"^^xsd:dateTime xsd:maxInclusive \"2008-10-08T20:44:11.656+01:00\"^^xsd:dateTime)))" 
+        String axioms = "SubClassOf(:A DataHasValue(:dp \"2007-10-08T20:44:11.656+01:00\"^^xsd:dateTime))"
+            + "SubClassOf(:A DataAllValuesFrom(:dp DatatypeRestriction(xsd:dateTime xsd:minInclusive \"2008-07-08T20:44:11.656+01:00\"^^xsd:dateTime xsd:maxInclusive \"2008-10-08T20:44:11.656+01:00\"^^xsd:dateTime)))"
             + "ClassAssertion(:A :a)";
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
@@ -387,7 +501,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         String axioms = "ClassAssertion( DataSomeValuesFrom( owl:bottomDataProperty rdfs:Literal ) :i )";
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
-    }     
+    }
     public void testChains() throws Exception {
         String axioms = "SubObjectPropertyOf( ObjectPropertyChain( :hasMother :hasSister ) :hasAunt )"
             + "ObjectPropertyAssertion( :hasMother :Stewie :Lois )"
@@ -435,7 +549,7 @@ public class ReasonerTest extends AbstractReasonerTest {
     }
 
     public void testNonUnaryKeys() throws Exception {
-        String axioms = "HasKey(:Car () (:licensePlate :nationality))" 
+        String axioms = "HasKey(:Car () (:licensePlate :nationality))"
             + "ClassAssertion(:Car :myCar1)"
             + "ClassAssertion(:Car :myCar2)"
             + "ClassAssertion(:Car :myCar3)"
@@ -449,9 +563,9 @@ public class ReasonerTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
-    
+
     public void testNonUnaryKeys2() throws Exception {
-        String axioms = "HasKey(:Car () (:licensePlate :nationality))" 
+        String axioms = "HasKey(:Car () (:licensePlate :nationality))"
             + "ClassAssertion(:Car :myCar1)"
             + "ClassAssertion(:Car :myCar2)"
             + "ClassAssertion(:Car :myCar3)"
@@ -466,7 +580,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(true);
     }
-    
+
     public void testHierarchyPrinting1() throws Exception {
         String axioms =
             "SubClassOf( :A :B )"+
@@ -483,7 +597,7 @@ public class ReasonerTest extends AbstractReasonerTest {
             "EquivalentClasses( :A <"+NS+"s:local> )"+
             "EquivalentClasses( :C <http://my.com/test1#otherC> )"+
             "EquivalentClasses( :H <http://zzz.com/test3#K> )"+
-            
+
             "InverseObjectProperties( :op3 :op3i ) "+
             "InverseObjectProperties( :op7 :op7i ) "+
             "InverseObjectProperties( :op8 :op8i ) "+
@@ -526,14 +640,14 @@ public class ReasonerTest extends AbstractReasonerTest {
             "EquivalentClasses( :A <"+NS+"Class> )"+
             "EquivalentClasses( :A <"+NS+"s:local> )"+
             "EquivalentClasses( :C <http://my.com/test1#otherC> )"+
-            
+
             "InverseObjectProperties( :op3 :op3i ) "+
             "SubObjectPropertyOf( :op2 :op6 ) "+
             "SubObjectPropertyOf( :op3i :op6 ) "+
             "SubObjectPropertyOf( :op1 :op2 ) "+
             "SubObjectPropertyOf( :op1 :op3i ) "+
             "SubObjectPropertyOf( :op4 :op2 ) "+
-    
+
             "SubDataPropertyOf( :dp4 :dp2 ) "+
             "SubDataPropertyOf( :dp4 :dp3 ) "+
             "SubDataPropertyOf( :dp3 :dp5 ) "+
@@ -549,7 +663,7 @@ public class ReasonerTest extends AbstractReasonerTest {
     public void testHierarchyPrinting3() throws Exception {
         String axioms =
             "SubClassOf( :A :B )"+
-            "SubClassOf( owl:Thing owl:Nothing )";            
+            "SubClassOf( owl:Thing owl:Nothing )";
         loadReasonerWithAxioms(axioms);
         assertHierarchies("res/hierarchy-printing-3.txt");
     }
@@ -571,19 +685,19 @@ public class ReasonerTest extends AbstractReasonerTest {
             "SubObjectPropertyOf( :r6 :r2 ) "+
             "SubObjectPropertyOf( :r6 :r2i ) ";
         loadReasonerWithAxioms(axioms);
-        
-        assertEquivalentObjectProperties("r1",IRIs("r1",INV("r1i")));
-        assertEquivalentObjectProperties("r2",IRIs("r2",INV("r2i")));
-        assertEquivalentObjectProperties("r3",IRIs("r3","r5",INV("r3i")));
-        assertEquivalentObjectProperties("r4",IRIs("r4",INV("r4i")));
-        assertEquivalentObjectProperties("r5",IRIs("r3","r5",INV("r3i")));
+
+        assertEquivalentObjectProperties("r1",IRIs("r1"));
+        assertEquivalentObjectProperties("r2",IRIs("r2"));
+        assertEquivalentObjectProperties("r3",IRIs("r3","r5"));
+        assertEquivalentObjectProperties("r4",IRIs("r4"));
+        assertEquivalentObjectProperties("r5",IRIs("r3","r5"));
         assertEquivalentObjectProperties("r6",IRIs("r6"));
-        
-        assertSuperObjectProperties("r2",EQ("r1",INV("r1i")));
-        assertSuperObjectProperties("r3",EQ("r1",INV("r1i")));
-        assertSuperObjectProperties("r4",EQ("r2",INV("r2i")),EQ("r3","r5",INV("r3i")));
-        assertSuperObjectProperties("r5",EQ("r1",INV("r1i")));
-        assertSuperObjectProperties("r6",EQ("r2",INV("r2i")),EQ("r2i",INV("r2")));
+
+        assertSuperObjectProperties("r2",EQ("r1"));
+        assertSuperObjectProperties("r3",EQ("r1"));
+        assertSuperObjectProperties("r4",EQ("r2"),EQ("r3","r5"));
+        assertSuperObjectProperties("r5",EQ("r1"));
+        assertSuperObjectProperties("r6",EQ("r2"),EQ("r2i"));
     }
 
     public void testSemanticObjectPropertyClassification() throws Exception {
@@ -592,7 +706,7 @@ public class ReasonerTest extends AbstractReasonerTest {
             "ObjectPropertyRange( :s ObjectOneOf( :a ) ) "+
             "EquivalentClasses( ObjectSomeValuesFrom( :r owl:Thing ) ObjectSomeValuesFrom( :s owl:Thing ) ) ";
         loadReasonerWithAxioms(axioms);
-        
+
         assertTrue(m_reasoner.isEquivalentObjectPropertyExpression(m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(IRI.create("file:/c/test.owl#r")),m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(IRI.create("file:/c/test.owl#s"))));
     }
 
@@ -608,14 +722,14 @@ public class ReasonerTest extends AbstractReasonerTest {
             "SubDataPropertyOf( :r4 :r1 ) "+
             "SubDataPropertyOf( :r6 :r2 ) ";
         loadReasonerWithAxioms(axioms);
-        
+
         assertEquivalentDataProperties("r1",IRIs("r1"));
         assertEquivalentDataProperties("r2",IRIs("r2"));
         assertEquivalentDataProperties("r3",IRIs("r3","r5"));
         assertEquivalentDataProperties("r4",IRIs("r4"));
         assertEquivalentDataProperties("r5",IRIs("r3","r5"));
         assertEquivalentDataProperties("r6",IRIs("r6"));
-        
+
         assertSuperDataProperties("r2",EQ("r1"));
         assertSuperDataProperties("r3",EQ("r1"));
         assertSuperDataProperties("r4",EQ("r2"),EQ("r3","r5"));
@@ -670,15 +784,15 @@ public class ReasonerTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
-    
+
     public void testWidmann2() throws Exception {
-        // <r>q; 
-        // <r->[r-][r][r][r]p 
+        // <r>q;
+        // <r->[r-][r][r][r]p
         String axioms = "SubClassOf(owl:Thing ObjectSomeValuesFrom(:r :q)) "
             + "InverseObjectProperties(:r :r-)"
             + "SubClassOf(owl:Thing ObjectSomeValuesFrom(:r- ObjectAllValuesFrom(:r- ObjectAllValuesFrom(:r ObjectAllValuesFrom(:r ObjectAllValuesFrom(:r :p)))))) ";
         loadReasonerWithAxioms(axioms);
-        
+
         OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
         OWLClassExpression p = df.getOWLClass(IRI.create("file:/c/test.owl#p"));
         OWLObjectProperty invr = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#r-"));
@@ -686,19 +800,19 @@ public class ReasonerTest extends AbstractReasonerTest {
         OWLClassExpression desc = df.getOWLObjectSomeValuesFrom(invr, df.getOWLObjectComplementOf(p));
         assertSatisfiable(desc,false);
     }
-    
+
     public void testWidmann3() throws Exception {
-        // <r-><r>[r]<r->~p; 
-        // <r-><r>p; 
-        // <r->[r-]<r-><r->[r][r]p; 
-        // [r]<r>[r-]<r>[r-][r]p  
+        // <r-><r>[r]<r->~p;
+        // <r-><r>p;
+        // <r->[r-]<r-><r->[r][r]p;
+        // [r]<r>[r-]<r>[r-][r]p
         String axioms = "InverseObjectProperties(:r :r-)"
             + "SubClassOf(owl:Thing ObjectSomeValuesFrom(:r- ObjectSomeValuesFrom(:r ObjectAllValuesFrom(:r ObjectSomeValuesFrom(:r- ObjectComplementOf(:p)))))) "
             + "SubClassOf(owl:Thing ObjectSomeValuesFrom(:r- ObjectSomeValuesFrom(:r :p))) "
             + "SubClassOf(owl:Thing ObjectSomeValuesFrom(:r- ObjectAllValuesFrom(:r- ObjectSomeValuesFrom(:r- ObjectSomeValuesFrom(:r- ObjectAllValuesFrom(:r ObjectAllValuesFrom(:r :p))))))) "
             + "SubClassOf(owl:Thing ObjectAllValuesFrom(:r ObjectSomeValuesFrom(:r ObjectAllValuesFrom(:r- ObjectSomeValuesFrom(:r ObjectAllValuesFrom(:r- ObjectAllValuesFrom(:r :p))))))) ";
         loadReasonerWithAxioms(axioms);
-        
+
         assertABoxSatisfiable(false);
         OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
         OWLClassExpression desc = df.getOWLThing();
@@ -1008,7 +1122,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLClassExpression desc2 = df.getOWLObjectAllValuesFrom(r, df.getOWLObjectMaxCardinality(1, s));
          assertSubsumedBy(desc1,desc2,true);
      }
-     
+
       public void testHeinsohnTBox7() throws Exception {
           // Tests inverse roles
           loadReasonerWithAxioms("");
@@ -1019,7 +1133,7 @@ public class ReasonerTest extends AbstractReasonerTest {
           OWLClassExpression desc1 = df.getOWLObjectIntersectionOf(df.getOWLObjectAllValuesFrom(r, df.getOWLObjectAllValuesFrom(invr, A)), df.getOWLObjectSomeValuesFrom(r, df.getOWLThing()));
           assertSubsumedBy(desc1,A,true);
      }
-      
+
      public void testIanT1a() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("SubClassOf(:p1 ObjectComplementOf(ObjectUnionOf(:p2 :p3 :p4 :p5)))");
@@ -1027,7 +1141,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(:p3 ObjectComplementOf(ObjectUnionOf(:p4 :p5)))");
          buffer.append("SubClassOf(:p4 ObjectComplementOf(:p5))");
          loadReasonerWithAxioms(buffer.toString());
-         
+
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLClassExpression p1 = df.getOWLClass(IRI.create("file:/c/test.owl#p1"));
          OWLClassExpression p2 = df.getOWLClass(IRI.create("file:/c/test.owl#p2"));
@@ -1044,12 +1158,12 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(:p3 ObjectComplementOf(ObjectUnionOf(:p4 :p5)))");
          buffer.append("SubClassOf(:p4 ObjectComplementOf(:p5))");
          loadReasonerWithAxioms(buffer.toString());
-         
+
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLClassExpression p1 = df.getOWLClass(IRI.create("file:/c/test.owl#p1"));
          OWLObjectProperty r = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
          OWLObjectPropertyExpression invr = df.getOWLObjectInverseOf(r);
-         
+
          OWLClassExpression desc1 = df.getOWLObjectSomeValuesFrom(invr, df.getOWLObjectIntersectionOf(df.getOWLObjectSomeValuesFrom(r, p1), df.getOWLObjectMaxCardinality(1, r, p1)));
          assertSatisfiable(desc1,true);
      }
@@ -1060,17 +1174,17 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(:p3 ObjectComplementOf(ObjectUnionOf(:p4 :p5)))");
          buffer.append("SubClassOf(:p4 ObjectComplementOf(:p5))");
          loadReasonerWithAxioms(buffer.toString());
-         
+
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLClassExpression p1 = df.getOWLClass(IRI.create("file:/c/test.owl#p1"));
          OWLClassExpression p2 = df.getOWLClass(IRI.create("file:/c/test.owl#p2"));
          OWLObjectProperty r = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
          OWLObjectPropertyExpression invr = df.getOWLObjectInverseOf(r);
-         
+
          OWLClassExpression desc1 = df.getOWLObjectIntersectionOf(p2, df.getOWLObjectSomeValuesFrom(invr, df.getOWLObjectIntersectionOf(df.getOWLObjectSomeValuesFrom(r, p1), df.getOWLObjectMaxCardinality(1, r))));
          assertSatisfiable(desc1,false);
      }
-     
+
      public void testIanT2() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("SubObjectPropertyOf(:r :f1)");
@@ -1086,14 +1200,14 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLObjectProperty r = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
          OWLObjectProperty f1 = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#f1"));
          OWLObjectProperty f2 = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#f2"));
-         
+
          OWLClassExpression desc1 = df.getOWLObjectIntersectionOf(df.getOWLObjectSomeValuesFrom(f1, p1), df.getOWLObjectSomeValuesFrom(f2, p2));
          assertSatisfiable(desc1,true);
-         
+
          desc1 = df.getOWLObjectIntersectionOf(df.getOWLObjectSomeValuesFrom(f1, p1), df.getOWLObjectSomeValuesFrom(f2, p2), df.getOWLObjectSomeValuesFrom(r, df.getOWLThing()));
          assertSatisfiable(desc1, false);
      }
-     
+
      public void testIanT3() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("SubClassOf(:p1 ObjectComplementOf(ObjectUnionOf(:p2 :p3 :p4 :p5)))");
@@ -1101,7 +1215,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(:p3 ObjectComplementOf(ObjectUnionOf(:p4 :p5)))");
          buffer.append("SubClassOf(:p4 ObjectComplementOf(:p5))");
          loadReasonerWithAxioms(buffer.toString());
-         
+
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLClassExpression p = df.getOWLClass(IRI.create("file:/c/test.owl#p"));
          OWLClassExpression p1 = df.getOWLClass(IRI.create("file:/c/test.owl#p1"));
@@ -1112,76 +1226,76 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLObjectProperty r = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
 
          OWLClassExpression desc = df.getOWLObjectIntersectionOf(
-                 df.getOWLObjectSomeValuesFrom(r, p1), 
-                 df.getOWLObjectSomeValuesFrom(r, p2), 
+                 df.getOWLObjectSomeValuesFrom(r, p1),
+                 df.getOWLObjectSomeValuesFrom(r, p2),
                  df.getOWLObjectSomeValuesFrom(r, p3),
-                 df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p1, p)), 
-                 df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p2, p)), 
-                 df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p3, p)), 
-                 df.getOWLObjectMaxCardinality(3, r));         
+                 df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p1, p)),
+                 df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p2, p)),
+                 df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p3, p)),
+                 df.getOWLObjectMaxCardinality(3, r));
          assertSatisfiable(desc,true);
-     
+
          desc = df.getOWLObjectIntersectionOf(
-             df.getOWLObjectSomeValuesFrom(r, p1), 
-             df.getOWLObjectSomeValuesFrom(r, p2), 
+             df.getOWLObjectSomeValuesFrom(r, p1),
+             df.getOWLObjectSomeValuesFrom(r, p2),
              df.getOWLObjectSomeValuesFrom(r, p3),
-             df.getOWLObjectSomeValuesFrom(r, p4), 
-             df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p1, p)), 
-             df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p2, p)), 
-             df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p3, p)), 
+             df.getOWLObjectSomeValuesFrom(r, p4),
+             df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p1, p)),
+             df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p2, p)),
+             df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p3, p)),
              df.getOWLObjectMaxCardinality(3, r)
          );
          assertSatisfiable(desc,false);
-     
+
          desc = df.getOWLObjectIntersectionOf(
-             df.getOWLObjectSomeValuesFrom(r, p1), 
-             df.getOWLObjectSomeValuesFrom(r, p2), 
+             df.getOWLObjectSomeValuesFrom(r, p1),
+             df.getOWLObjectSomeValuesFrom(r, p2),
              df.getOWLObjectSomeValuesFrom(r, p3),
-             df.getOWLObjectSomeValuesFrom(r, p4), 
+             df.getOWLObjectSomeValuesFrom(r, p4),
              df.getOWLObjectMaxCardinality(3, r)
          );
          assertSatisfiable(desc,false);
-     
+
          desc = df.getOWLObjectIntersectionOf(
-             df.getOWLObjectSomeValuesFrom(r, p1), 
-             df.getOWLObjectSomeValuesFrom(r, p2), 
+             df.getOWLObjectSomeValuesFrom(r, p1),
+             df.getOWLObjectSomeValuesFrom(r, p2),
              df.getOWLObjectSomeValuesFrom(r, p3),
-             df.getOWLObjectSomeValuesFrom(r, p4), 
-             df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p1, p)), 
-             df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p2, p)), 
+             df.getOWLObjectSomeValuesFrom(r, p4),
+             df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p1, p)),
+             df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p2, p)),
              df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p3, p)),
              df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p4, p)),
              df.getOWLObjectMaxCardinality(4, r));
          assertSatisfiable(desc,true);
 
          desc = df.getOWLObjectIntersectionOf(
-             df.getOWLObjectSomeValuesFrom(r, p1), 
-             df.getOWLObjectSomeValuesFrom(r, p2), 
+             df.getOWLObjectSomeValuesFrom(r, p1),
+             df.getOWLObjectSomeValuesFrom(r, p2),
              df.getOWLObjectSomeValuesFrom(r, p3),
              df.getOWLObjectSomeValuesFrom(r, p4),
-             df.getOWLObjectSomeValuesFrom(r, p5), 
-             df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p1, p)), 
-             df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p2, p)), 
+             df.getOWLObjectSomeValuesFrom(r, p5),
+             df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p1, p)),
+             df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p2, p)),
              df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p3, p)),
              df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p4, p)),
              df.getOWLObjectMaxCardinality(4, r));
          assertSatisfiable(desc,false);
 
          desc = df.getOWLObjectIntersectionOf(
-             df.getOWLObjectSomeValuesFrom(r, p1), 
-             df.getOWLObjectSomeValuesFrom(r, p2), 
+             df.getOWLObjectSomeValuesFrom(r, p1),
+             df.getOWLObjectSomeValuesFrom(r, p2),
              df.getOWLObjectSomeValuesFrom(r, p3),
              df.getOWLObjectSomeValuesFrom(r, p4),
-             df.getOWLObjectSomeValuesFrom(r, p5), 
-             df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p1, p)), 
-             df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p2, p)), 
+             df.getOWLObjectSomeValuesFrom(r, p5),
+             df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p1, p)),
+             df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p2, p)),
              df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p3, p)),
              df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p4, p)),
              df.getOWLObjectSomeValuesFrom(r, df.getOWLObjectIntersectionOf(p5, p)),
              df.getOWLObjectMaxCardinality(5, r));
          assertSatisfiable(desc,true);
      }
-     
+
      public void testIanT4() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("TransitiveObjectProperty(:p)");
@@ -1190,24 +1304,24 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("InverseObjectProperties(:s :s-)");
          buffer.append("EquivalentClasses(:c ObjectAllValuesFrom(:r- ObjectAllValuesFrom(:p- ObjectAllValuesFrom(:s- ObjectComplementOf(:a)))))");
          loadReasonerWithAxioms(buffer.toString());
-         
+
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLClassExpression a = df.getOWLClass(IRI.create("file:/c/test.owl#a"));
          OWLClassExpression c = df.getOWLClass(IRI.create("file:/c/test.owl#c"));
          OWLObjectProperty r = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
          OWLObjectProperty s = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#s"));
          OWLObjectProperty p = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#p"));
-         
+
          OWLClassExpression desc =
-             df.getOWLObjectIntersectionOf(a, 
-                 df.getOWLObjectSomeValuesFrom(s, 
+             df.getOWLObjectIntersectionOf(a,
+                 df.getOWLObjectSomeValuesFrom(s,
                      df.getOWLObjectIntersectionOf(
-                         df.getOWLObjectSomeValuesFrom(r, df.getOWLThing()), 
-                         df.getOWLObjectSomeValuesFrom(p, df.getOWLThing()), 
-                         df.getOWLObjectAllValuesFrom(r, c), 
-                         df.getOWLObjectAllValuesFrom(p, df.getOWLObjectSomeValuesFrom(r, df.getOWLThing())), 
+                         df.getOWLObjectSomeValuesFrom(r, df.getOWLThing()),
+                         df.getOWLObjectSomeValuesFrom(p, df.getOWLThing()),
+                         df.getOWLObjectAllValuesFrom(r, c),
+                         df.getOWLObjectAllValuesFrom(p, df.getOWLObjectSomeValuesFrom(r, df.getOWLThing())),
                          df.getOWLObjectAllValuesFrom(p, df.getOWLObjectSomeValuesFrom(p, df.getOWLThing())),
-                         df.getOWLObjectAllValuesFrom(p, df.getOWLObjectAllValuesFrom(r, c)))));  
+                         df.getOWLObjectAllValuesFrom(p, df.getOWLObjectAllValuesFrom(r, c)))));
          assertSatisfiable(desc,false);
      }
 
@@ -1219,17 +1333,17 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubObjectPropertyOf(:f :r)");
          buffer.append("FunctionalObjectProperty(:f)");
          loadReasonerWithAxioms(buffer.toString());
-      
+
          OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
          OWLClassExpression a = df.getOWLClass(IRI.create("file:/c/test.owl#a"));
          OWLObjectProperty invr = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#r-"));
          OWLObjectProperty invf = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#f-"));
-      
+
          OWLClassExpression desc = df.getOWLObjectIntersectionOf(
-              df.getOWLObjectComplementOf(a), 
-              df.getOWLObjectSomeValuesFrom(invf, a), 
+              df.getOWLObjectComplementOf(a),
+              df.getOWLObjectSomeValuesFrom(invf, a),
               df.getOWLObjectAllValuesFrom(invr, df.getOWLObjectSomeValuesFrom(invf, a))
-          );  
+          );
          assertSatisfiable(desc,true);
      }
      public void testIanT6() throws Exception {
@@ -1241,20 +1355,20 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("FunctionalObjectProperty(:f)");
          buffer.append("EquivalentClasses(:d ObjectIntersectionOf(:c ObjectSomeValuesFrom(:f ObjectComplementOf(:c))))");
          loadReasonerWithAxioms(buffer.toString());
-         
+
          OWLClassExpression c = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c"));
          OWLClassExpression d = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#d"));
          OWLObjectProperty invr = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r-"));
          OWLObjectProperty invf = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#f-"));
-         
+
          OWLClassExpression desc = m_dataFactory.getOWLObjectIntersectionOf(
-             m_dataFactory.getOWLObjectComplementOf(c), 
-             m_dataFactory.getOWLObjectSomeValuesFrom(invf, d), 
+             m_dataFactory.getOWLObjectComplementOf(c),
+             m_dataFactory.getOWLObjectSomeValuesFrom(invf, d),
              m_dataFactory.getOWLObjectAllValuesFrom(invr, m_dataFactory.getOWLObjectSomeValuesFrom(invf, d))
-         );  
+         );
          assertSatisfiable(desc,false);
      }
-     
+
      public void testIanT7a() throws Exception {
          StringBuffer buffer=new StringBuffer();
          buffer.append("InverseObjectProperties(:r :r-)");
@@ -1284,7 +1398,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          // [and p1 [some r [some r [and p1 [all r- [not p1]]]]]]
          assertSatisfiable(desc,false);
      }
-     
+
      public void testIanT7b() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("InverseObjectProperties(:r :r-)");
@@ -1292,33 +1406,33 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("TransitiveObjectProperty(:r)");
          buffer.append("FunctionalObjectProperty(:f)");
          loadReasonerWithAxioms(buffer.toString());
-         
+
          OWLClassExpression p1 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#p1"));
          OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
          OWLObjectProperty invr = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r-"));
 
          OWLClassExpression desc;
          desc = m_dataFactory.getOWLObjectIntersectionOf(
-                 p1, 
-                 m_dataFactory.getOWLObjectSomeValuesFrom(r, 
+                 p1,
+                 m_dataFactory.getOWLObjectSomeValuesFrom(r,
                          m_dataFactory.getOWLObjectSomeValuesFrom(
-                                 r, 
+                                 r,
                                  m_dataFactory.getOWLObjectIntersectionOf(
-                                         p1, 
-                                         m_dataFactory.getOWLObjectAllValuesFrom(invr, 
+                                         p1,
+                                         m_dataFactory.getOWLObjectAllValuesFrom(invr,
                                                  m_dataFactory.getOWLObjectUnionOf(
-                                                         m_dataFactory.getOWLObjectComplementOf(p1), 
+                                                         m_dataFactory.getOWLObjectComplementOf(p1),
                                                          m_dataFactory.getOWLObjectAllValuesFrom(r, p1)
                                                  )
                                          )
                                  )
                          )
                  )
-             ); 
-         
+             );
+
          assertSatisfiable(desc,true);
      }
-     
+
      public void testIanT7c() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("InverseObjectProperties(:r :r-)");
@@ -1326,64 +1440,64 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("TransitiveObjectProperty(:r)");
          buffer.append("FunctionalObjectProperty(:f)");
          loadReasonerWithAxioms(buffer.toString());
-         
+
          OWLClassExpression p1 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#p1"));
          OWLObjectProperty f = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#f"));
          OWLObjectProperty invf = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#f-"));
-         
+
          OWLClassExpression desc;
-         desc = m_dataFactory.getOWLObjectSomeValuesFrom(f, 
+         desc = m_dataFactory.getOWLObjectSomeValuesFrom(f,
                  m_dataFactory.getOWLObjectIntersectionOf(
                          p1,
-                         m_dataFactory.getOWLObjectAllValuesFrom(invf, 
+                         m_dataFactory.getOWLObjectAllValuesFrom(invf,
                                  m_dataFactory.getOWLObjectSomeValuesFrom(
                                          f,
                                          m_dataFactory.getOWLObjectComplementOf(p1)
                                  )
                          )
                  )
-             ); 
+             );
          assertSatisfiable(desc,false);
      }
-     
+
      public void testIanT8a() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("InverseObjectProperties(:r :r-)");
          loadReasonerWithAxioms(buffer.toString());
-         
-         
+
+
          OWLClassExpression p = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#p"));
          OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
          OWLObjectProperty invr = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r-"));
          OWLObjectProperty r1 = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r1"));
-         
+
          OWLClassExpression desc;
-         desc = m_dataFactory.getOWLObjectIntersectionOf(m_dataFactory.getOWLObjectSomeValuesFrom(r, 
-                 m_dataFactory.getOWLObjectAllValuesFrom(invr, m_dataFactory.getOWLObjectAllValuesFrom(r1, p))), 
-                 m_dataFactory.getOWLObjectSomeValuesFrom(r, m_dataFactory.getOWLObjectAllValuesFrom(invr, 
+         desc = m_dataFactory.getOWLObjectIntersectionOf(m_dataFactory.getOWLObjectSomeValuesFrom(r,
+                 m_dataFactory.getOWLObjectAllValuesFrom(invr, m_dataFactory.getOWLObjectAllValuesFrom(r1, p))),
+                 m_dataFactory.getOWLObjectSomeValuesFrom(r, m_dataFactory.getOWLObjectAllValuesFrom(invr,
                          m_dataFactory.getOWLObjectAllValuesFrom(r1, m_dataFactory.getOWLObjectComplementOf(p)))));
-         
+
          assertSatisfiable(desc,true);
      }
-     
+
      public void testIanT8() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("InverseObjectProperties(:r :r-)");
          loadReasonerWithAxioms(buffer.toString());
-         
+
          OWLClassExpression p = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#p"));
          OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
          OWLObjectProperty invr = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r-"));
          OWLObjectProperty r1 = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r1"));
-         
+
          OWLClassExpression desc;
          desc = m_dataFactory.getOWLObjectIntersectionOf(
-                 m_dataFactory.getOWLObjectSomeValuesFrom(r1, m_dataFactory.getOWLThing()), 
-                 m_dataFactory.getOWLObjectSomeValuesFrom(r, m_dataFactory.getOWLObjectAllValuesFrom(invr, m_dataFactory.getOWLObjectAllValuesFrom(r1, p))), 
+                 m_dataFactory.getOWLObjectSomeValuesFrom(r1, m_dataFactory.getOWLThing()),
+                 m_dataFactory.getOWLObjectSomeValuesFrom(r, m_dataFactory.getOWLObjectAllValuesFrom(invr, m_dataFactory.getOWLObjectAllValuesFrom(r1, p))),
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, m_dataFactory.getOWLObjectAllValuesFrom(invr, m_dataFactory.getOWLObjectAllValuesFrom(r1, m_dataFactory.getOWLObjectComplementOf(p)))));
          assertSatisfiable(desc,false);
      }
-     
+
      public void testIanT9() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("InverseObjectProperties(:successor :successor-)");
@@ -1393,20 +1507,20 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(:root ObjectComplementOf(ObjectSomeValuesFrom(:successor- owl:Thing)))");
          buffer.append("SubClassOf(:Infinite-Tree-Node ObjectIntersectionOf(:node ObjectSomeValuesFrom(:successor :Infinite-Tree-Node)))");
          buffer.append("SubClassOf(:Infinite-Tree-Root ObjectIntersectionOf(:Infinite-Tree-Node :root))");
-         
+
          loadReasonerWithAxioms(buffer.toString());
          assertSatisfiable("file:/c/test.owl#Infinite-Tree-Root",true);
-         
+
          OWLClassExpression itr = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#Infinite-Tree-Root"));
          OWLClassExpression root = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#root"));
          OWLObjectProperty descendant = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#descendant"));
          OWLObjectProperty invsuccessor = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#successor-"));
-         
+
          // [and Infinite-Tree-Root [all descendant [some successor- root]]]
          OWLClassExpression desc =
              m_dataFactory.getOWLObjectIntersectionOf(
-                 itr, 
-                 m_dataFactory.getOWLObjectAllValuesFrom(descendant, 
+                 itr,
+                 m_dataFactory.getOWLObjectAllValuesFrom(descendant,
                      m_dataFactory.getOWLObjectSomeValuesFrom(invsuccessor, root)
                  )
              );
@@ -1422,7 +1536,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubObjectPropertyOf(:s :f)");
          buffer.append("SubObjectPropertyOf(:s :f1)");
          loadReasonerWithAxioms(buffer.toString());
-         
+
          OWLClassExpression p = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#p"));
          OWLObjectProperty f = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#f"));
          OWLObjectProperty invf = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#f-"));
@@ -1430,52 +1544,52 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLObjectProperty invf1 = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#f1-"));
          OWLObjectProperty s= m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#s"));
          OWLObjectProperty invs= m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#s-"));
-         
+
          OWLClassExpression desc;
          desc = m_dataFactory.getOWLObjectIntersectionOf(
-                 m_dataFactory.getOWLObjectComplementOf(p), 
-                 m_dataFactory.getOWLObjectSomeValuesFrom(f, 
+                 m_dataFactory.getOWLObjectComplementOf(p),
+                 m_dataFactory.getOWLObjectSomeValuesFrom(f,
                          m_dataFactory.getOWLObjectIntersectionOf(
-                                 m_dataFactory.getOWLObjectAllValuesFrom(invs, p), 
+                                 m_dataFactory.getOWLObjectAllValuesFrom(invs, p),
                                  m_dataFactory.getOWLObjectAllValuesFrom(invf, m_dataFactory.getOWLObjectSomeValuesFrom(s, p))
                          )
                  )
          );
-         
+
          assertSatisfiable(desc,false);
-         
+
          desc = m_dataFactory.getOWLObjectIntersectionOf(
-                 m_dataFactory.getOWLObjectAllValuesFrom(s, 
+                 m_dataFactory.getOWLObjectAllValuesFrom(s,
                          m_dataFactory.getOWLObjectComplementOf(p)
-                 ), 
-                 m_dataFactory.getOWLObjectSomeValuesFrom(s, 
+                 ),
+                 m_dataFactory.getOWLObjectSomeValuesFrom(s,
                          m_dataFactory.getOWLObjectIntersectionOf(
-                                 p, 
+                                 p,
                                  m_dataFactory.getOWLObjectSomeValuesFrom(invs, p)
                          )
                  )
          );
          assertSatisfiable(desc,false);
-         
+
          desc = m_dataFactory.getOWLObjectIntersectionOf(
-                 m_dataFactory.getOWLObjectSomeValuesFrom(f, p), 
+                 m_dataFactory.getOWLObjectSomeValuesFrom(f, p),
                  m_dataFactory.getOWLObjectSomeValuesFrom(f1, m_dataFactory.getOWLObjectComplementOf(p))
          );
          assertSatisfiable(desc,true);
-         
+
          desc = m_dataFactory.getOWLObjectIntersectionOf(
-                 m_dataFactory.getOWLObjectSomeValuesFrom(f, p), 
+                 m_dataFactory.getOWLObjectSomeValuesFrom(f, p),
                  m_dataFactory.getOWLObjectSomeValuesFrom(s, m_dataFactory.getOWLThing()),
                  m_dataFactory.getOWLObjectSomeValuesFrom(f1, m_dataFactory.getOWLObjectComplementOf(p))
          );
          assertSatisfiable(desc,false);
-         
+
          desc = m_dataFactory.getOWLObjectIntersectionOf(
-                 m_dataFactory.getOWLObjectSomeValuesFrom(f1, p), 
-                 m_dataFactory.getOWLObjectSomeValuesFrom(f1, 
+                 m_dataFactory.getOWLObjectSomeValuesFrom(f1, p),
+                 m_dataFactory.getOWLObjectSomeValuesFrom(f1,
                          m_dataFactory.getOWLObjectIntersectionOf(
                                  m_dataFactory.getOWLObjectComplementOf(p),
-                                 m_dataFactory.getOWLObjectAllValuesFrom(invf1, 
+                                 m_dataFactory.getOWLObjectAllValuesFrom(invf1,
                                          m_dataFactory.getOWLObjectSomeValuesFrom(s, m_dataFactory.getOWLThing())
                                  )
                          )
@@ -1483,13 +1597,13 @@ public class ReasonerTest extends AbstractReasonerTest {
          );
          assertSatisfiable(desc,false);
      }
-     
+
      public void testIanT11() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("InverseObjectProperties(:s :s-)");
          buffer.append("SubObjectPropertyOf(:s :r)");
          loadReasonerWithAxioms(buffer.toString());
-         
+
          OWLClassExpression p = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#p"));
          OWLObjectProperty s= m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#s"));
          OWLObjectProperty invs = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#s-"));
@@ -1497,49 +1611,49 @@ public class ReasonerTest extends AbstractReasonerTest {
 
          OWLClassExpression desc;
          desc = m_dataFactory.getOWLObjectIntersectionOf(
-                     m_dataFactory.getOWLObjectComplementOf(p), 
-                     m_dataFactory.getOWLObjectMaxCardinality(1, r), 
-                     m_dataFactory.getOWLObjectSomeValuesFrom(r, 
+                     m_dataFactory.getOWLObjectComplementOf(p),
+                     m_dataFactory.getOWLObjectMaxCardinality(1, r),
+                     m_dataFactory.getOWLObjectSomeValuesFrom(r,
                              m_dataFactory.getOWLObjectAllValuesFrom(invs, p)
-                     ), 
+                     ),
                      m_dataFactory.getOWLObjectSomeValuesFrom(s, p)
          );
-         
+
          assertSatisfiable(desc,false);
      }
-     
+
      public void testIanT12() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("InverseObjectProperties(:r :r-)");
          loadReasonerWithAxioms(buffer.toString());
-         
+
          OWLClassExpression p = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#p"));
          OWLClassExpression q = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#q"));
          OWLObjectProperty s = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#s"));
          OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
          OWLObjectProperty invr = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r-"));
-         
+
          OWLClassExpression desc;
          desc = m_dataFactory.getOWLObjectIntersectionOf(
-                 m_dataFactory.getOWLObjectSomeValuesFrom(s, 
+                 m_dataFactory.getOWLObjectSomeValuesFrom(s,
                          m_dataFactory.getOWLObjectIntersectionOf(
-                                 m_dataFactory.getOWLObjectComplementOf(p), 
+                                 m_dataFactory.getOWLObjectComplementOf(p),
                                  m_dataFactory.getOWLObjectComplementOf(q)
                          )
-                 ), 
-                 m_dataFactory.getOWLObjectSomeValuesFrom(r, 
+                 ),
+                 m_dataFactory.getOWLObjectSomeValuesFrom(r,
                          m_dataFactory.getOWLObjectIntersectionOf(
-                                 m_dataFactory.getOWLObjectMaxCardinality(1, invr), 
-                                 m_dataFactory.getOWLObjectSomeValuesFrom(invr, 
+                                 m_dataFactory.getOWLObjectMaxCardinality(1, invr),
+                                 m_dataFactory.getOWLObjectSomeValuesFrom(invr,
                                          m_dataFactory.getOWLObjectAllValuesFrom(s, p)
                                  )
                          )
                  )
          );
-         
+
          assertSatisfiable(desc,false);
      }
-     
+
      public void testIanT13() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("InverseObjectProperties(:s :s-)");
@@ -1550,7 +1664,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("EquivalentClasses(:a3c ObjectUnionOf(ObjectSomeValuesFrom(:r :d) :d))");
          buffer.append("EquivalentClasses(:a3e ObjectSomeValuesFrom(:r :d))");
          loadReasonerWithAxioms(buffer.toString());
-                  
+
          OWLClassExpression a = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#a"));
          OWLClassExpression a1 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#a1"));
          OWLClassExpression a2 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#a2"));
@@ -1576,12 +1690,12 @@ public class ReasonerTest extends AbstractReasonerTest {
          desc = m_dataFactory.getOWLObjectIntersectionOf(m_dataFactory.getOWLObjectIntersectionOf(a3c, a2, a1), m_dataFactory.getOWLObjectComplementOf(m_dataFactory.getOWLObjectIntersectionOf(a3c, a2, a1)));
          assertSatisfiable(desc,false);
      }
-     
+
      public void testIanFact1() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("DisjointClasses(:a :b :c)");
          loadReasonerWithAxioms(buffer.toString());
-         
+
          OWLClassExpression a = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#a"));
          OWLClassExpression b = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#b"));
          OWLClassExpression c = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c"));
@@ -1593,16 +1707,16 @@ public class ReasonerTest extends AbstractReasonerTest {
          );
          assertSatisfiable(desc,false);
      }
-     
+
      public void testIanFact2() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("SubClassOf(:c ObjectAllValuesFrom(:r :c))");
          buffer.append("SubClassOf(ObjectAllValuesFrom(:r :c) :d)");
          loadReasonerWithAxioms(buffer.toString());
-         
+
          assertSubsumedBy("c","d",true);
      }
-     
+
      public void testIanFact3() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("FunctionalObjectProperty(:f1)");
@@ -1611,22 +1725,22 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubObjectPropertyOf(:f3 :f1)");
          buffer.append("SubObjectPropertyOf(:f3 :f2)");
          loadReasonerWithAxioms(buffer.toString());
-         
-         
+
+
          OWLClassExpression p1 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#p1"));
          OWLClassExpression p2 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#p2"));
          OWLObjectProperty f1 = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#f1"));
          OWLObjectProperty f2 = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#f2"));
          OWLObjectProperty f3 = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#f3"));
-         
+
          OWLClassExpression desc = m_dataFactory.getOWLObjectIntersectionOf(
                  m_dataFactory.getOWLObjectSomeValuesFrom(f1, p1),
                  m_dataFactory.getOWLObjectSomeValuesFrom(f2, m_dataFactory.getOWLObjectComplementOf(p1)),
-                 m_dataFactory.getOWLObjectSomeValuesFrom(f3, p2) 
+                 m_dataFactory.getOWLObjectSomeValuesFrom(f3, p2)
          );
          assertSatisfiable(desc,false);
      }
-     
+
      public void testIanFact4() throws Exception {
         StringBuffer buffer = new StringBuffer();
         buffer.append("FunctionalObjectProperty(:rx)");
@@ -1670,59 +1784,59 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("EquivalentClasses(:c ObjectIntersectionOf(:a ObjectComplementOf(:b)))");
          buffer.append("SubClassOf(:a ObjectIntersectionOf(:d ObjectComplementOf(:c)))");
          loadReasonerWithAxioms(buffer.toString());
-         
-         
+
+
          OWLClassExpression a = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#a"));
          OWLClassExpression b = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#b"));
          OWLClassExpression c = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c"));
          OWLClassExpression d = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#d"));
-         
+
          OWLClassExpression desc = m_dataFactory.getOWLObjectIntersectionOf(m_dataFactory.getOWLObjectComplementOf(c), a, m_dataFactory.getOWLObjectComplementOf(b), d);
          assertSatisfiable(desc,false);
      }
      public void testIanBug3() throws Exception {
          // slow, but works!
          loadReasonerWithAxioms("");
-         
+
          OWLClassExpression a = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#a"));
          OWLClassExpression c = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c"));
          OWLClassExpression d = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#d"));
          OWLClassExpression e = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#e"));
          OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
-         
+
          OWLClassExpression desc = m_dataFactory.getOWLObjectIntersectionOf(
-                 m_dataFactory.getOWLObjectSomeValuesFrom(r, a), 
-                 m_dataFactory.getOWLObjectMinCardinality(3, r, c), 
+                 m_dataFactory.getOWLObjectSomeValuesFrom(r, a),
+                 m_dataFactory.getOWLObjectMinCardinality(3, r, c),
                  m_dataFactory.getOWLObjectMinCardinality(3, r, d),
                  m_dataFactory.getOWLObjectMinCardinality(2, r, m_dataFactory.getOWLObjectIntersectionOf(
-                         e, 
-                         m_dataFactory.getOWLObjectComplementOf(m_dataFactory.getOWLObjectIntersectionOf(c, d)))), 
-                 m_dataFactory.getOWLObjectMaxCardinality(4, r), 
-                 m_dataFactory.getOWLObjectMaxCardinality(2, r, m_dataFactory.getOWLObjectIntersectionOf(c, d)) 
+                         e,
+                         m_dataFactory.getOWLObjectComplementOf(m_dataFactory.getOWLObjectIntersectionOf(c, d)))),
+                 m_dataFactory.getOWLObjectMaxCardinality(4, r),
+                 m_dataFactory.getOWLObjectMaxCardinality(2, r, m_dataFactory.getOWLObjectIntersectionOf(c, d))
          );
          assertSatisfiable(desc,true);
      }
-     
+
      public void testIanBug4() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("InverseObjectProperties(:r :r-)");
          buffer.append("SubObjectPropertyOf(:r :r-)");
          buffer.append("TransitiveObjectProperty(:r)");
          loadReasonerWithAxioms(buffer.toString());
-         
-         
+
+
          OWLClassExpression c = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c"));
          OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
-         
+
          // [and c [some r owl:Thing] [all r [not c]]]
          OWLClassExpression desc =
              m_dataFactory.getOWLObjectIntersectionOf(
-                 c, 
-                 m_dataFactory.getOWLObjectSomeValuesFrom(r, m_dataFactory.getOWLThing()), 
+                 c,
+                 m_dataFactory.getOWLObjectSomeValuesFrom(r, m_dataFactory.getOWLThing()),
                  m_dataFactory.getOWLObjectAllValuesFrom(r, m_dataFactory.getOWLObjectComplementOf(c))
              );
          assertSatisfiable(desc,false);
-         
+
          // [and c [some r [some r c]] [all r [not c]]]
          desc = m_dataFactory.getOWLObjectIntersectionOf(
              c,
@@ -1731,18 +1845,18 @@ public class ReasonerTest extends AbstractReasonerTest {
          );
          assertSatisfiable(desc,false);
      }
-     
+
      public void testIanBug5() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("TransitiveObjectProperty(:r1)");
          buffer.append("SubObjectPropertyOf(:r2 :r1)");
          buffer.append("TransitiveObjectProperty(:r2)");
          loadReasonerWithAxioms(buffer.toString());
-         
+
          OWLClassExpression p = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#p"));
          OWLObjectProperty r1 = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r1"));
          OWLObjectProperty r2 = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r2"));
-         
+
          // [and [all r1 p] [some r2 [some r1 [not p]]]]
          OWLClassExpression desc =
              m_dataFactory.getOWLObjectIntersectionOf(
@@ -1751,7 +1865,7 @@ public class ReasonerTest extends AbstractReasonerTest {
              );
          assertSatisfiable(desc,false);
      }
-     
+
      public void testIanBug6() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("SubObjectPropertyOf(:S1 :R)");
@@ -1761,44 +1875,44 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubObjectPropertyOf(:P :S1)");
          buffer.append("SubObjectPropertyOf(:P :S2)");
          loadReasonerWithAxioms(buffer.toString());
-         
-         
+
+
          OWLClassExpression C = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#C"));
          OWLObjectProperty R = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#R"));
          OWLObjectProperty P = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#P"));
          OWLObjectProperty S1 = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#S1"));
          OWLObjectProperty S2 = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#S2"));
-         
+
          // [and [all R C] [some P [some S1 [not C]]]]
          OWLClassExpression desc =
              m_dataFactory.getOWLObjectIntersectionOf(
-                 m_dataFactory.getOWLObjectAllValuesFrom(R, C), 
+                 m_dataFactory.getOWLObjectAllValuesFrom(R, C),
                  m_dataFactory.getOWLObjectSomeValuesFrom(P, m_dataFactory.getOWLObjectSomeValuesFrom(S1, m_dataFactory.getOWLObjectComplementOf(C)))
              );
          assertSatisfiable(desc,false);
-         
+
          // [and [all R C] [some P [some S2 [not C]]]]
          desc = m_dataFactory.getOWLObjectIntersectionOf(
-             m_dataFactory.getOWLObjectAllValuesFrom(R, C), 
+             m_dataFactory.getOWLObjectAllValuesFrom(R, C),
              m_dataFactory.getOWLObjectSomeValuesFrom(P, m_dataFactory.getOWLObjectSomeValuesFrom(S2, m_dataFactory.getOWLObjectComplementOf(C)))
          );
          assertSatisfiable(desc,false);
      }
-     
+
      public void testIanBug7() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("SubClassOf(:A ObjectComplementOf(:B))");
          loadReasonerWithAxioms(buffer.toString());
-         
-         
+
+
          OWLClassExpression A = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#A"));
          OWLClassExpression B = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#B"));
          OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
-         
+
          // [and [some r A] [atMost 1 r A] [some r B] [atMost 1 r B]]
          OWLClassExpression desc =
              m_dataFactory.getOWLObjectIntersectionOf(
-                 m_dataFactory.getOWLObjectSomeValuesFrom(r, A), 
+                 m_dataFactory.getOWLObjectSomeValuesFrom(r, A),
                  m_dataFactory.getOWLObjectMaxCardinality(1, r, A),
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, B),
                  m_dataFactory.getOWLObjectMaxCardinality(1, r, B)
@@ -1813,14 +1927,14 @@ public class ReasonerTest extends AbstractReasonerTest {
          loadReasonerWithAxioms(buffer.toString());
          assertSatisfiable("file:/c/test.owl#A",true);
      }
-     
+
      public void testIanMergeTest1() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("InverseObjectProperties(:r :r-)");
          buffer.append("SubClassOf(:c ObjectSomeValuesFrom(:r ObjectAllValuesFrom(:r- ObjectComplementOf(:d))))");
          loadReasonerWithAxioms(buffer.toString());
 
-         
+
          OWLClassExpression c = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c"));
          OWLClassExpression c1 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c1"));
          OWLClassExpression c2 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c2"));
@@ -1842,9 +1956,9 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLClassExpression c18 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c18"));
          OWLClassExpression d = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#d"));
          OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
-         
+
          OWLClassExpression desc = m_dataFactory.getOWLObjectIntersectionOf(
-                 m_dataFactory.getOWLObjectSomeValuesFrom(r, c1), 
+                 m_dataFactory.getOWLObjectSomeValuesFrom(r, c1),
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, m_dataFactory.getOWLObjectIntersectionOf(c, c2)),
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, m_dataFactory.getOWLObjectIntersectionOf(c, c3)),
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, m_dataFactory.getOWLObjectIntersectionOf(c, c4)),
@@ -1871,8 +1985,8 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("InverseObjectProperties(:r :r-)");
          buffer.append("SubClassOf(:c ObjectSomeValuesFrom(:r ObjectAllValuesFrom(:r- :d)))");
          loadReasonerWithAxioms(buffer.toString());
-         
-         
+
+
          OWLClassExpression c = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c"));
          OWLClassExpression c1 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c1"));
          OWLClassExpression c2 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c2"));
@@ -1894,9 +2008,9 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLClassExpression c18 = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#c18"));
          OWLClassExpression d = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#d"));
          OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
-         
+
          OWLClassExpression desc = m_dataFactory.getOWLObjectIntersectionOf(
-                 m_dataFactory.getOWLObjectSomeValuesFrom(r, c1), 
+                 m_dataFactory.getOWLObjectSomeValuesFrom(r, c1),
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, m_dataFactory.getOWLObjectIntersectionOf(c, c2)),
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, m_dataFactory.getOWLObjectIntersectionOf(c, c3)),
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, m_dataFactory.getOWLObjectIntersectionOf(c, c4)),
@@ -1916,10 +2030,10 @@ public class ReasonerTest extends AbstractReasonerTest {
                  m_dataFactory.getOWLObjectSomeValuesFrom(r, c18),
                  m_dataFactory.getOWLObjectMaxCardinality(1, r, d)
          );
-         
+
          assertSatisfiable(desc,true);
      }
-     
+
      public void testIanQNRTest() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("SubObjectPropertyOf(:son :child)");
@@ -1929,7 +2043,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          loadReasonerWithAxioms(buffer.toString());
          assertSubsumedBy("file:/c/test.owl#A","file:/c/test.owl#B",true);
      }
-     
+
      public void testIanRecursiveDefinitionTest1() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("SubClassOf(:A ObjectIntersectionOf(ObjectSomeValuesFrom(:R0 :B) ObjectSomeValuesFrom(:R1 :B) ObjectSomeValuesFrom(:R2 :B) ObjectSomeValuesFrom(:R3 :B) ObjectSomeValuesFrom(:R4 :B) ObjectSomeValuesFrom(:R5 :B) ObjectSomeValuesFrom(:R6 :B) ObjectSomeValuesFrom(:R7 :B) ObjectSomeValuesFrom(:R8 :B) ObjectSomeValuesFrom(:R9 :B)))");
@@ -1999,7 +2113,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          loadReasonerWithAxioms(buffer.toString());
          assertSatisfiable("file:/c/test.owl#test",false);
      }
-     
+
      public void testIanBackjumping2() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("SubClassOf(:C2 ObjectIntersectionOf(ObjectUnionOf(:A :B) ObjectUnionOf(:A ObjectComplementOf(:B))))");
@@ -2088,11 +2202,11 @@ public class ReasonerTest extends AbstractReasonerTest {
                         "ObjectUnionOf(:A31 :B31)" +
                         "ObjectUnionOf(:C4 :C6)" +
                         "ObjectUnionOf(:C5 :C7)" +
-                        "))"); 
+                        "))");
          loadReasonerWithAxioms(buffer.toString());
          assertSatisfiable("file:/c/test.owl#test",false);
      }
-     
+
      public void testNominals1() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("ClassAssertion(:A :a) ");
@@ -2102,7 +2216,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          loadReasonerWithAxioms(buffer.toString());
          assertABoxSatisfiable(true);
      }
-     
+
      public void testNominals2() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("ClassAssertion(:A :a) ");
@@ -2116,7 +2230,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          loadReasonerWithAxioms(buffer.toString());
          assertABoxSatisfiable(true);
      }
-     
+
      public void testNominals3() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("SubClassOf(:A ObjectSomeValuesFrom(:R :A)) ");
@@ -2136,13 +2250,13 @@ public class ReasonerTest extends AbstractReasonerTest {
          OWLNamedIndividual n = m_dataFactory.getOWLNamedIndividual(IRI.create("file:/c/test.owl#n"));
 
          createReasoner();
-                           
+
          // [some [inv S] [and A B [some R [and A B]]]]
          OWLClassExpression desc =
-             m_dataFactory.getOWLObjectSomeValuesFrom(invS, 
+             m_dataFactory.getOWLObjectSomeValuesFrom(invS,
                  m_dataFactory.getOWLObjectIntersectionOf(
                      A,
-                     B, 
+                     B,
                      m_dataFactory.getOWLObjectSomeValuesFrom(R,
                          m_dataFactory.getOWLObjectIntersectionOf(
                              A,
@@ -2151,10 +2265,10 @@ public class ReasonerTest extends AbstractReasonerTest {
                      )
                  )
              );
-         
+
          assertInstanceOf(desc,n,true);
      }
-     
+
      public void testNominals4() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("DisjointClasses(:A :B) ");
@@ -2165,8 +2279,8 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(:B ObjectSomeValuesFrom(:S ObjectOneOf(:n))) ");
          buffer.append("ClassAssertion(ObjectSomeValuesFrom(:R :B) :b) ");
          loadOntologyWithAxioms(buffer.toString());
-     
-         
+
+
          OWLClassExpression A = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#A"));
          OWLClassExpression B = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#B"));
          OWLObjectProperty S = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#S"));
@@ -2178,18 +2292,18 @@ public class ReasonerTest extends AbstractReasonerTest {
          //     ClassAssertion(n ObjectMaxCardinality(2 InverseObjectProperty(S)))
          // gets loaded as
          //     ClassAssertion(n ObjectMaxCardinality(2 S))
-         // Therefore, we add this axiom manually.         
+         // Therefore, we add this axiom manually.
          OWLObjectMaxCardinality atMostTwoInvS = m_dataFactory.getOWLObjectMaxCardinality(2, S.getInverseProperty());
          OWLClassAssertionAxiom nOfAtMostTwoInvS = m_dataFactory.getOWLClassAssertionAxiom(atMostTwoInvS,n);
          m_ontologyManager.addAxiom(m_ontology, nOfAtMostTwoInvS);
-         
+
          createReasoner();
-         
+
          // [some [inv S] [and A [some R A]]]
          OWLClassExpression desc =
-             m_dataFactory.getOWLObjectSomeValuesFrom(invS, 
+             m_dataFactory.getOWLObjectSomeValuesFrom(invS,
                  m_dataFactory.getOWLObjectIntersectionOf(
-                     A, 
+                     A,
                      m_dataFactory.getOWLObjectSomeValuesFrom(R, A)
                  )
               );
@@ -2197,15 +2311,15 @@ public class ReasonerTest extends AbstractReasonerTest {
 
          // [some [inv S] [and B [some R B]]]
          desc =
-             m_dataFactory.getOWLObjectSomeValuesFrom(invS, 
+             m_dataFactory.getOWLObjectSomeValuesFrom(invS,
                  m_dataFactory.getOWLObjectIntersectionOf(
-                     B, 
+                     B,
                      m_dataFactory.getOWLObjectSomeValuesFrom(R, B)
                  )
              );
          assertInstanceOf(desc, n, true);
      }
-     
+
      public void testNominals5() throws Exception {
          StringBuffer buffer = new StringBuffer();
          buffer.append("DisjointClasses(:A :B) ");
@@ -2216,8 +2330,8 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(:B ObjectSomeValuesFrom(:S ObjectOneOf(:n))) ");
          buffer.append("ClassAssertion(ObjectSomeValuesFrom(:R :B) :b) ");
          loadOntologyWithAxioms(buffer.toString());
-         
-         
+
+
          OWLClassExpression A = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#A"));
          OWLClassExpression B = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#B"));
          OWLObjectProperty S = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#S"));
@@ -2228,11 +2342,11 @@ public class ReasonerTest extends AbstractReasonerTest {
          //     ClassAssertion(n ObjectMaxCardinality(2 InverseObjectProperty(S)))
          // gets loaded as
          //     ClassAssertion(n ObjectMaxCardinality(2 S))
-         // Therefore, we add this axiom manually.         
+         // Therefore, we add this axiom manually.
          OWLObjectMaxCardinality atMostTwoInvS = m_dataFactory.getOWLObjectMaxCardinality(2, S.getInverseProperty());
          OWLClassAssertionAxiom nOfAtMostTwoInvS = m_dataFactory.getOWLClassAssertionAxiom(atMostTwoInvS, n);
          m_ontologyManager.addAxiom(m_ontology, nOfAtMostTwoInvS);
-         
+
          createReasoner();
 
          // [atLeast 2 [inv S] [or A B]]
@@ -2249,8 +2363,8 @@ public class ReasonerTest extends AbstractReasonerTest {
          buffer.append("SubClassOf(:B ObjectSomeValuesFrom(:S ObjectOneOf(:n))) ");
          buffer.append("ClassAssertion(ObjectSomeValuesFrom(:R :B) :b) ");
          loadOntologyWithAxioms(buffer.toString());
-         
-         
+
+
          OWLClassExpression A = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#A"));
          OWLObjectProperty S = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#S"));
          OWLObjectPropertyExpression invS = m_dataFactory.getOWLObjectInverseOf(S);
@@ -2260,11 +2374,11 @@ public class ReasonerTest extends AbstractReasonerTest {
          //     ClassAssertion(n ObjectMaxCardinality(2 InverseObjectProperty(S)))
          // gets loaded as
          //     ClassAssertion(n ObjectMaxCardinality(2 S))
-         // Therefore, we add this axiom manually.         
+         // Therefore, we add this axiom manually.
          OWLObjectMaxCardinality atMostTwoInvS = m_dataFactory.getOWLObjectMaxCardinality(2, S.getInverseProperty());
          OWLClassAssertionAxiom nOfAtMostTwoInvS = m_dataFactory.getOWLClassAssertionAxiom(atMostTwoInvS, n);
          m_ontologyManager.addAxiom(m_ontology, nOfAtMostTwoInvS);
-         
+
          createReasoner();
 
          // [atLeast 1 [inv S] [not A]]
@@ -2275,7 +2389,7 @@ public class ReasonerTest extends AbstractReasonerTest {
          desc = m_dataFactory.getOWLObjectMinCardinality(2, invS, m_dataFactory.getOWLObjectComplementOf(A));
          assertInstanceOf(desc, n, false);
      }
-     
+
     public void testDependencyDisjunctionMergingBug() throws Exception {
         loadReasonerFromResource("res/dependency-disjuntion-merging-bug.xml");
         assertSubsumedBy(
@@ -2301,7 +2415,7 @@ public class ReasonerTest extends AbstractReasonerTest {
                         "ClassAssertion(:Person :Peter) " +
                         "DataPropertyAssertion(:hasSSN :Peter_Griffin \"123-45-6789\") " +
                         "ClassAssertion(:Person :Peter_Griffin) " +
-                        "DifferentIndividuals(:Peter :Peter_Griffin)" + 
+                        "DifferentIndividuals(:Peter :Peter_Griffin)" +
                         "HasKey(:Person () (:hasSSN))";
         loadOntologyWithAxioms(axioms);
         createReasoner(getConfiguration(),null);
@@ -2312,7 +2426,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         String axioms = "DataPropertyAssertion(:hasSSN :Peter \"123-45-6789\") " +
                 "ClassAssertion(:Person :Peter) " +
                 "ClassAssertion(ObjectSomeValuesFrom(:marriedTo ObjectIntersectionOf(:Man DataHasValue(:hasSSN \"123-45-6789\"^^xsd:string))) :Lois) " +
-                "SubClassOf(:Man ObjectComplementOf(:Person))" + 
+                "SubClassOf(:Man ObjectComplementOf(:Person))" +
                 "HasKey(:Person () (:hasSSN))";
         loadOntologyWithAxioms(axioms);
         createReasoner(getConfiguration(),null);
@@ -2331,7 +2445,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(buffer.toString());
         assertABoxSatisfiable(true);
     }
-    
+
     public void testNIRuleBlockingWithUnraveling() throws Exception {
         // This is the example from Section 3.2.6 of the SHOIQ+ paper.
         StringBuffer buffer = new StringBuffer();
@@ -2346,7 +2460,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(buffer.toString());
         assertABoxSatisfiable(false);
     }
-    
+
     public void testPunning() throws Exception {
         StringBuffer buffer = new StringBuffer();
         buffer.append("Declaration(Class(:Person))");
@@ -2354,8 +2468,8 @@ public class ReasonerTest extends AbstractReasonerTest {
         buffer.append("ObjectPropertyAssertion(:hasInput :s1 :Person)");
         loadReasonerWithAxioms(buffer.toString());
         assertABoxSatisfiable(true);
-    } 
-    
+    }
+
     public void testPunning2() throws Exception {
         StringBuffer buffer = new StringBuffer();
         buffer.append("Declaration( Class( :Deprecated_Properties ) )");
@@ -2363,8 +2477,8 @@ public class ReasonerTest extends AbstractReasonerTest {
         buffer.append("ClassAssertion( :Deprecated_Properties :is_located_in )");
         loadReasonerWithAxioms(buffer.toString());
         assertABoxSatisfiable(true);
-    } 
-    
+    }
+
     public void testPunning3() throws Exception {
         StringBuffer buffer = new StringBuffer();
         buffer.append("Declaration( Class( :Person ) ) Declaration( Class( :Company ) )");
@@ -2380,7 +2494,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(buffer.toString());
         assertABoxSatisfiable(false);
     }
-    
+
     public void testMissingCBug() throws Exception {
         String axioms = "EquivalentClasses(:C ObjectMinCardinality(0 :p owl:Nothing))";
         loadReasonerWithAxioms(axioms);
@@ -2396,7 +2510,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         output2.flush();
         assertTrue(buffer.toString().equals(buffer2.toString()));
     }
-    
+
     public void testInverses() throws Exception {
         StringBuffer buffer = new StringBuffer();
         buffer.append("EquivalentObjectProperties( :hasPart ObjectInverseOf( :partOf ) ) ObjectPropertyAssertion(:hasPart :a :b) NegativeObjectPropertyAssertion(:partOf :b :a)");
@@ -2408,7 +2522,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(true);
     }
-    
+
     public void testAnonymousIndiviuals3() throws Exception {
         String axioms = "ObjectPropertyAssertion( a:livesAt a:Peter _:a1 )"
             + "ObjectPropertyAssertion( a:city _:a1 a:Quahog )"
@@ -2431,7 +2545,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         				"TransitiveObjectProperty(:R2) " +
         				"TransitiveObjectProperty(:dumm) " +
         				"SubObjectPropertyOf(ObjectPropertyChain(:dumm :R3) ObjectInverseOf(:R)) ";
-                		
+
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
@@ -2454,7 +2568,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertABoxSatisfiable(false);
     }
     //The last axiom is not redundant. It tests the case where both R and some of its inverse have an automaton.
-    //Then the auto for R should be joined with the mirrored copy of the auto for Inv(R). 
+    //Then the auto for R should be joined with the mirrored copy of the auto for Inv(R).
     public void testSatisfiabilityWithRIAs3() throws Exception {
         String axioms = "ObjectPropertyAssertion( :R1 :a :b )" +
 						"ObjectPropertyAssertion( :R2 :b :c )" +
@@ -2494,7 +2608,7 @@ public class ReasonerTest extends AbstractReasonerTest {
 	    				"ClassAssertion(ObjectComplementOf(:C) :a) " +
 	    				"ClassAssertion(ObjectAllValuesFrom(:R :C) :c) " +
 	    				"SubObjectPropertyOf(ObjectPropertyChain(:R1 :R2) ObjectInverseOf(:R)) ";
-	
+
 	    loadReasonerWithAxioms(axioms);
 	    assertABoxSatisfiable(false);
     }
@@ -2546,7 +2660,7 @@ public class ReasonerTest extends AbstractReasonerTest {
 
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
-   } 
+   }
 	public void testSatisfiabilityWithRIAs11() throws Exception {
         String axioms = "ObjectPropertyAssertion( :R1 :a :b )" +
 						"ObjectPropertyAssertion( :R2 :b :c )" +
