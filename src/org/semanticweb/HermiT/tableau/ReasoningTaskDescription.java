@@ -78,7 +78,4 @@ public class ReasoningTaskDescription {
     public static ReasoningTaskDescription isRangeOf(Object range,Object role) {
         return new ReasoningTaskDescription(true,"check if {0} is rang eof {1}",range,role);
     }
-    public static ReasoningTaskDescription isSameAs(Object individual1,Object individual2) {
-        return new ReasoningTaskDescription(true,"is {0} same as {1}",individual1,individual2);
-    }
 }
