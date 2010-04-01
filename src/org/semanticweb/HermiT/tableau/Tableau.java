@@ -208,17 +208,11 @@ public final class Tableau implements Serializable {
         boolean hasInverseRoles=(m_permanentDLOntology.hasInverseRoles() || (m_additionalDLOntology!=null && m_additionalDLOntology.hasInverseRoles()));
         boolean hasNominals=(m_permanentDLOntology.hasNominals() || (m_additionalDLOntology!=null && m_additionalDLOntology.hasNominals()));
         boolean isHorn=(m_permanentDLOntology.isHorn() || (m_additionalDLOntology!=null && m_additionalDLOntology.isHorn()));
-        return (!additionalDLOntology.hasInverseRoles() || hasInverseRoles) && (!additionalDLOntology.hasNominals() || hasNominals) && (additionalDLOntology.isHorn() || !isHorn);
+        return additionalDLOntology.getAllDescriptionGraphs().isEmpty() && (!additionalDLOntology.hasInverseRoles() || hasInverseRoles) && (!additionalDLOntology.hasNominals() || hasNominals) && (additionalDLOntology.isHorn() || !isHorn);
     }
     public void setAdditionalDLOntology(DLOntology additionalDLOntology) {
-        if (!additionalDLOntology.getAllDescriptionGraphs().isEmpty())
-            throw new IllegalArgumentException("Additional DL-ontology cannot contain description graphs.");
-        if (m_permanentDLOntology.isHorn() && !additionalDLOntology.isHorn())
-            throw new IllegalArgumentException("Additional DL-ontology is not Horn, but permanent DL-ontology is.");
-        if (m_permanentDLOntology.hasInverseRoles() && !additionalDLOntology.hasInverseRoles())
-            throw new IllegalArgumentException("Additional DL-ontology is has inverse roles, but permanent DL-ontology does not.");
-        if (m_permanentDLOntology.hasNominals() && !additionalDLOntology.hasNominals())
-            throw new IllegalArgumentException("Additional DL-ontology is has nominals, but permanent DL-ontology does not.");
+        if (!supportsAdditionalDLOntology(additionalDLOntology))
+            throw new IllegalArgumentException("Additional DL-ontology contains features that are incompatible with this tableau.");
         m_additionalDLOntology=additionalDLOntology;
         m_additionalHyperresolutionManager=new HyperresolutionManager(this,m_additionalDLOntology.getDLClauses());
         m_existentialExpansionStrategy.additionalDLOntologySet(m_additionalDLOntology);
