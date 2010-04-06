@@ -91,16 +91,11 @@ import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLDataIntersectionOf;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
-import org.semanticweb.owlapi.model.OWLDataRange;
-import org.semanticweb.owlapi.model.OWLDataUnionOf;
 import org.semanticweb.owlapi.model.OWLDatatype;
-import org.semanticweb.owlapi.model.OWLDatatypeDefinitionAxiom;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLFunctionalObjectPropertyAxiom;
-import org.semanticweb.owlapi.model.OWLHasKeyAxiom;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLInverseFunctionalObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLLiteral;
@@ -110,7 +105,6 @@ import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 import org.semanticweb.owlapi.model.OWLTransitiveObjectPropertyAxiom;
@@ -380,27 +374,6 @@ public class Reasoner implements OWLReasoner {
             return true;
         EntailmentChecker checker=new EntailmentChecker(this,getDataFactory());
         return checker.entails(axioms);
-    }
-    protected Boolean entailsDatatypeDefinition(OWLDatatypeDefinitionAxiom axiom) {
-        throwInconsistentOntologyExceptionIfNecessary();
-        if (!isConsistent())
-            return true;
-        if (m_dlOntology.hasDatatypes()) {
-            OWLDataFactory factory=getDataFactory();
-            OWLIndividual freshIndividual=factory.getOWLAnonymousIndividual("fresh-individual");
-            OWLDataProperty freshDataProperty=factory.getOWLDataProperty(IRI.create("fresh-data-property"));
-            OWLDataRange dataRange=axiom.getDataRange();
-            OWLDatatype dt=axiom.getDatatype();
-            OWLDataIntersectionOf dr1=factory.getOWLDataIntersectionOf(factory.getOWLDataComplementOf(dataRange),dt);
-            OWLDataIntersectionOf dr2=factory.getOWLDataIntersectionOf(factory.getOWLDataComplementOf(dt),dataRange);
-            OWLDataUnionOf union=factory.getOWLDataUnionOf(dr1,dr2);
-            OWLClassExpression c=factory.getOWLDataSomeValuesFrom(freshDataProperty,union);
-            OWLClassAssertionAxiom ax=factory.getOWLClassAssertionAxiom(c,freshIndividual);
-            Tableau tableau=getTableau(ax);
-            return !tableau.isSatisfiable(true,true,null,null,null,null,null,ReasoningTaskDescription.isAxiomEntailed(axiom));
-        }
-        else
-            return false;
     }
 
     // Concept inferences
@@ -1427,39 +1400,6 @@ public class Reasoner implements OWLReasoner {
     }
     protected static boolean isResultRelevantIndividual(Individual individual) {
         return !individual.isAnonymous() && !Prefixes.isInternalIRI(individual.getIRI());
-    }
-
-    // other inferences
-
-    protected Boolean hasKey(OWLHasKeyAxiom key) {
-        throwFreshEntityExceptionIfNecessary(key);
-        throwInconsistentOntologyExceptionIfNecessary();
-        if (!isConsistent())
-            return true;
-        OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
-        OWLDataFactory factory=ontologyManager.getOWLDataFactory();
-        OWLIndividual individualA=factory.getOWLNamedIndividual(IRI.create("internal:named-fresh-individual-A"));
-        OWLIndividual individualB=factory.getOWLNamedIndividual(IRI.create("internal:named-fresh-individual-B"));
-        Set<OWLAxiom> axioms=new HashSet<OWLAxiom>();
-        axioms.add(factory.getOWLClassAssertionAxiom(key.getClassExpression(),individualA));
-        axioms.add(factory.getOWLClassAssertionAxiom(key.getClassExpression(),individualB));
-        int i=0;
-        for (OWLObjectPropertyExpression p : key.getObjectPropertyExpressions()) {
-            OWLIndividual tmp=factory.getOWLNamedIndividual(IRI.create("internal:named-fresh-individual-"+i));
-            axioms.add(factory.getOWLObjectPropertyAssertionAxiom(p,individualA,tmp));
-            axioms.add(factory.getOWLObjectPropertyAssertionAxiom(p,individualB,tmp));
-            i++;
-        }
-        for (OWLDataPropertyExpression p : key.getDataPropertyExpressions()) {
-            OWLDatatype anonymousConstantsDatatype=factory.getOWLDatatype(IRI.create("internal:anonymous-constants"));
-            OWLTypedLiteral constant=factory.getOWLTypedLiteral("internal:constant-"+i,anonymousConstantsDatatype);
-            axioms.add(factory.getOWLDataPropertyAssertionAxiom(p,individualA,constant));
-            axioms.add(factory.getOWLDataPropertyAssertionAxiom(p,individualB,constant));
-            i++;
-        }
-        axioms.add(factory.getOWLDifferentIndividualsAxiom(individualA,individualB));
-        Tableau tableau=getTableau(axioms.toArray(new OWLAxiom[axioms.size()]));
-        return !tableau.isSatisfiable(true,true,null,null,null,null,null,ReasoningTaskDescription.isAxiomEntailed(key));
     }
 
     // Various creation methods
