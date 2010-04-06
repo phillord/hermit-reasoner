@@ -97,36 +97,40 @@ public final class Tableau implements Serializable {
             throw new IllegalArgumentException("Additional ontology cannot contain description graphs.");
         m_interruptFlag=interruptFlag;
         m_interruptFlag.startTask();
-        m_parameters=parameters;
-        m_tableauMonitor=tableauMonitor;
-        m_existentialExpansionStrategy=existentialsExpansionStrategy;
-        m_permanentDLOntology=permanentDLOntology;
-        m_additionalDLOntology=additionalDLOntology;
-        m_dependencySetFactory=new DependencySetFactory();
-        m_groundDisjunctionHeaderManager=new GroundDisjunctionHeaderManager();
-        m_extensionManager=new ExtensionManager(this);
-        m_clashManager=new ClashManager(this);
-        m_permanentHyperresolutionManager=new HyperresolutionManager(this,m_permanentDLOntology.getDLClauses());
-        if (m_additionalDLOntology!=null)
-            m_additionalHyperresolutionManager=new HyperresolutionManager(this,m_additionalDLOntology.getDLClauses());
-        else
-            m_additionalHyperresolutionManager=null;
-        m_mergingManager=new MergingManager(this);
-        m_existentialExpasionManager=new ExistentialExpansionManager(this);
-        m_nominalIntroductionManager=new NominalIntroductionManager(this);
-        m_descriptionGraphManager=new DescriptionGraphManager(this);
-        m_datatypeManager=new DatatypeManager(this);
-        m_existentialExpansionStrategy.initialize(this);
-        m_existentialConceptsBuffers=new ArrayList<List<ExistentialConcept>>();
-        m_useDisjunctionLearning=useDisjunctionLearning;
-        m_hasDescriptionGraphs=!m_permanentDLOntology.getAllDescriptionGraphs().isEmpty();
-        m_branchingPoints=new BranchingPoint[2];
-        m_currentBranchingPoint=-1;
-        m_nonbacktrackableBranchingPoint=-1;
-        updateFlagsDependentOnAdditionalOntology();
-        if (m_tableauMonitor!=null)
-            m_tableauMonitor.setTableau(this);
-        m_interruptFlag.endTask();
+        try {
+            m_parameters=parameters;
+            m_tableauMonitor=tableauMonitor;
+            m_existentialExpansionStrategy=existentialsExpansionStrategy;
+            m_permanentDLOntology=permanentDLOntology;
+            m_additionalDLOntology=additionalDLOntology;
+            m_dependencySetFactory=new DependencySetFactory();
+            m_groundDisjunctionHeaderManager=new GroundDisjunctionHeaderManager();
+            m_extensionManager=new ExtensionManager(this);
+            m_clashManager=new ClashManager(this);
+            m_permanentHyperresolutionManager=new HyperresolutionManager(this,m_permanentDLOntology.getDLClauses());
+            if (m_additionalDLOntology!=null)
+                m_additionalHyperresolutionManager=new HyperresolutionManager(this,m_additionalDLOntology.getDLClauses());
+            else
+                m_additionalHyperresolutionManager=null;
+            m_mergingManager=new MergingManager(this);
+            m_existentialExpasionManager=new ExistentialExpansionManager(this);
+            m_nominalIntroductionManager=new NominalIntroductionManager(this);
+            m_descriptionGraphManager=new DescriptionGraphManager(this);
+            m_datatypeManager=new DatatypeManager(this);
+            m_existentialExpansionStrategy.initialize(this);
+            m_existentialConceptsBuffers=new ArrayList<List<ExistentialConcept>>();
+            m_useDisjunctionLearning=useDisjunctionLearning;
+            m_hasDescriptionGraphs=!m_permanentDLOntology.getAllDescriptionGraphs().isEmpty();
+            m_branchingPoints=new BranchingPoint[2];
+            m_currentBranchingPoint=-1;
+            m_nonbacktrackableBranchingPoint=-1;
+            updateFlagsDependentOnAdditionalOntology();
+            if (m_tableauMonitor!=null)
+                m_tableauMonitor.setTableau(this);
+        }
+        finally {
+            m_interruptFlag.endTask();
+        }
     }
     public InterruptFlag getInterruptFlag() {
         return m_interruptFlag;
@@ -346,7 +350,7 @@ public final class Tableau implements Serializable {
         return node.getCanonicalNode();
     }
     protected boolean runCalculus() {
-        m_interruptFlag.startTimedTask();
+        m_interruptFlag.startTask();
         try {
             boolean existentialsAreExact=m_existentialExpansionStrategy.isExact();
             if (m_tableauMonitor!=null)
@@ -774,33 +778,5 @@ public final class Tableau implements Serializable {
         }
         if (numberOfNodesInTableau!=m_numberOfNodesInTableau)
             throw new IllegalStateException("Invalid number of nodes in the tableau.");
-    }
-
-    protected static class InterruptTimer extends Thread {
-        protected final int m_timeout;
-        protected final Tableau m_tableau;
-        protected boolean m_timingStopped;
-
-        public InterruptTimer(int timeout,Tableau tableau) {
-            super("HermiT Interrupt Current Task Thread");
-            setDaemon(true);
-            m_timeout=timeout;
-            m_tableau=tableau;
-            m_timingStopped=false;
-        }
-        public synchronized void run() {
-            try {
-                if (!m_timingStopped) {
-                    wait(m_timeout);
-                    if (!m_timingStopped)
-                        m_tableau.getInterruptFlag().interruptCurrentTask();
-                }
-            } catch (InterruptedException stopped) {
-            }
-        }
-        public synchronized void stopTiming() {
-            m_timingStopped=true;
-            notifyAll();
-        }
     }
 }

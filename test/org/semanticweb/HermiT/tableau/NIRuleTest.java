@@ -94,7 +94,7 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         BlockingSignatureCache blockingSignatureCache=new BlockingSignatureCache(directChecker);
         BlockingStrategy blockingStrategy=new AnywhereBlocking(directChecker,blockingSignatureCache);
         ExistentialExpansionStrategy expansionStrategy=new CreationOrderStrategy(blockingStrategy);
-        m_tableau=new Tableau(new InterruptFlag(),null,expansionStrategy,false,TEST_DL_ONTOLOGY,null,new HashMap<String,Object>());
+        m_tableau=new Tableau(new InterruptFlag(-1),null,expansionStrategy,false,TEST_DL_ONTOLOGY,null,new HashMap<String,Object>());
         m_extensionManager=m_tableau.getExtensionManager();
         m_manager=m_tableau.getNominalIntroductionManager();
     }

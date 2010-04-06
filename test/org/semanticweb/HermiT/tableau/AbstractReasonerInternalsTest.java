@@ -46,7 +46,7 @@ public abstract class AbstractReasonerInternalsTest extends AbstractReasonerTest
         BlockingStrategy blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
         ExistentialExpansionStrategy expansionStrategy=new CreationOrderStrategy(blockingStrategy);
 
-        return new Tableau(new InterruptFlag(),getTableauMonitor(),expansionStrategy,false,dlOntology,null,new HashMap<String,Object>());
+        return new Tableau(new InterruptFlag(-1),getTableauMonitor(),expansionStrategy,false,dlOntology,null,new HashMap<String,Object>());
     }
 
     protected Tableau getTableau() throws Exception {

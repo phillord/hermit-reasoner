@@ -61,10 +61,10 @@ public abstract class AbstractTest extends TestCase {
     }
     public void runTest() throws Throwable {
         dumpTestData();
+        m_reasoner=new Reasoner(getConfiguration(),m_premiseOntology,null);
         InterruptTimer timer=new InterruptTimer(TIMEOUT,m_reasoner);
         timer.start();
         try {
-            m_reasoner=new Reasoner(getConfiguration(),m_premiseOntology,null);
             doTest();
         }
         catch (ReasonerInterruptedException e) {

@@ -228,11 +228,12 @@ public class Reasoner implements OWLReasoner,Serializable {
         m_objectRoleClassificationManager=createObjectRoleClassificationManager(this);
         m_dataRoleClassificationManager=createDataRoleClassificationManager(this);
     }
-    public void interrupt() {
-        m_interruptFlag.interrupt();
+    protected void finalize() {
+        dispose();
     }
     public void dispose() {
         clearState();
+        m_interruptFlag.dispose();
     }
     protected void clearState() {
         m_dlOntology=null;
@@ -246,6 +247,9 @@ public class Reasoner implements OWLReasoner,Serializable {
         m_dataRoleHierarchy=null;
         m_realization=null;
         m_isConsistent=null;
+    }
+    public void interrupt() {
+        m_interruptFlag.interrupt();
     }
     public OWLDataFactory getDataFactory() {
         return OWLManager.getOWLDataFactory();

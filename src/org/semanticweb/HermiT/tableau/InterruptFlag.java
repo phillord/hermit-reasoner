@@ -24,118 +24,97 @@ import org.semanticweb.owlapi.reasoner.TimeOutException;
 
 public final class InterruptFlag implements Serializable {
     private static final long serialVersionUID=-6983680374511847003L;
-    protected InterruptTimer m_interruptTimer;
-    protected final long m_individualTaskTimeout;
-    protected volatile boolean m_taskRunning;
-    protected volatile boolean m_taskInterrupted;
-    protected volatile boolean m_interrupt;
 
-    public InterruptFlag() {
-        this(-1);
-    }
+    protected static enum InterruptType { INTERRUPTED,TIMEOUT };
+
+    protected final InterruptTimer m_interruptTimer;
+    protected volatile InterruptType m_interruptType;
+
     public InterruptFlag(long individualTaskTimeout) {
-        m_individualTaskTimeout=individualTaskTimeout;
-        m_taskInterrupted=false;
-        if (m_individualTaskTimeout>0)
-            m_interruptTimer=new RealInterruptTimer(m_individualTaskTimeout,this);
+        if (individualTaskTimeout>0)
+            m_interruptTimer=new InterruptTimer(individualTaskTimeout);
         else
-            m_interruptTimer=new DummyInterruptTimer();
+            m_interruptTimer=null;
     }
     public void checkInterrupt() {
-        if (m_interrupt) {
-            m_interrupt=false;
-            if (m_taskInterrupted)
+        if (m_interruptType!=null) {
+            if (m_interruptType==InterruptType.TIMEOUT)
                 throw new TimeOutException();
             else
                 throw new ReasonerInterruptedException();
         }
     }
-    public synchronized void startTask() {
-        m_interrupt=false;
-        m_taskInterrupted=false;
-        m_taskRunning=true;
+    public void interrupt() {
+        m_interruptType=InterruptType.INTERRUPTED;
     }
-    public synchronized void startTimedTask() {
-        m_interruptTimer.start();
-        startTask();
+    public void startTask() {
+        m_interruptType=null;
+        if (m_interruptTimer!=null)
+            m_interruptTimer.startTiming();
     }
-    public synchronized void endTask() {
-        m_interrupt=false;
-        m_taskRunning=false;
-        if (!m_interruptTimer.getTimingStopped()) {
-            m_interruptTimer.interrupt();
+    public void endTask() {
+        if (m_interruptTimer!=null)
             m_interruptTimer.stopTiming();
-        }
-        m_interruptTimer=m_interruptTimer.getNextInterruptTimer();
+        m_interruptType=null;
     }
-    public synchronized void interrupt() {
-        if (m_taskRunning)
-            m_interrupt=true;
-    }
-    public synchronized void interruptCurrentTask() {
-        m_taskInterrupted=true;
-        interrupt();
+    public void dispose() {
+        if (m_interruptTimer!=null)
+            m_interruptTimer.dispose();
     }
 
-    interface InterruptTimer extends Runnable {
-        public InterruptTimer getNextInterruptTimer();
-        public void start();
-        public void stopTiming();
-        public boolean getTimingStopped();
-        public void interrupt();
-    }
+    protected static enum TimerState { WAIT_FOR_TASK,TIMING,DISPOSED };
 
-    protected static class RealInterruptTimer extends Thread implements InterruptTimer {
+    protected class InterruptTimer extends Thread {
         protected final long m_timeout;
-        protected final InterruptFlag m_interruptFlag;
-        protected boolean m_timingStopped;
+        protected TimerState m_timerState;
 
-        public RealInterruptTimer(long timeout,InterruptFlag interruptFlag) {
+        public InterruptTimer(long timeout) {
             super("HermiT Interrupt Current Task Thread");
             setDaemon(true);
             m_timeout=timeout;
-            m_interruptFlag=interruptFlag;
-            m_timingStopped=false;
-        }
-        public InterruptTimer getNextInterruptTimer() {
-            return new RealInterruptTimer(m_timeout,m_interruptFlag);
+            start();
         }
         public synchronized void run() {
-            if (m_timeout>=0) {
-                try {
-                    if (!m_timingStopped) {
-                        wait(m_timeout);
-                        if (!m_timingStopped)
-                            m_interruptFlag.interruptCurrentTask();
+            while (m_timerState!=TimerState.DISPOSED) {
+                m_timerState=TimerState.WAIT_FOR_TASK;
+                while (m_timerState==TimerState.WAIT_FOR_TASK) {
+                    try {
+                        wait();
                     }
+                    catch (InterruptedException stopped) {
+                        m_timerState=TimerState.DISPOSED;
+                    }
+                }
+                if (m_timerState==TimerState.TIMING) {
+                    try {
+                        wait(m_timeout);
+                        if (m_timerState==TimerState.TIMING)
+                            m_interruptType=InterruptType.TIMEOUT;
+                    }
+                    catch (InterruptedException stopped) {
+                        m_timerState=TimerState.DISPOSED;
+                    }
+                }
+            }
+        }
+        public synchronized void startTiming() {
+            while (m_timerState!=TimerState.WAIT_FOR_TASK && m_timerState!=TimerState.DISPOSED) {
+                try {
+                    wait();
                 }
                 catch (InterruptedException stopped) {
                 }
             }
-        }
-        public synchronized void stopTiming() {
-            m_timingStopped=true;
+            m_timerState=TimerState.TIMING;
             notifyAll();
         }
-        public boolean getTimingStopped() {
-            return m_timingStopped;
-        }
-    }
-
-    protected static class DummyInterruptTimer implements InterruptTimer {
-        public InterruptTimer getNextInterruptTimer() {
-            return this;
-        }
-        public synchronized void run() {
-        }
         public synchronized void stopTiming() {
+            m_timerState=TimerState.WAIT_FOR_TASK;
+            notifyAll();
         }
-        public boolean getTimingStopped() {
-            return true;
-        }
-        public void interrupt() {
-        }
-        public void start() {
+        public synchronized void dispose() {
+            m_timerState=TimerState.DISPOSED;
+            notifyAll();
         }
     }
 }
