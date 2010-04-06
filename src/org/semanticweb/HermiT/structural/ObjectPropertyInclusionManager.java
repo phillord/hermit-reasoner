@@ -42,28 +42,25 @@ import rationals.transformations.Normalizer;
 import rationals.transformations.Reducer;
 
 public class ObjectPropertyInclusionManager {
-    protected final OWLDataFactory m_factory;
+    protected final Map<OWLObjectPropertyExpression,Automaton> m_automataByProperty;
 
-    public ObjectPropertyInclusionManager(OWLDataFactory factory) {
-        m_factory=factory;
+    public ObjectPropertyInclusionManager(OWLAxioms axioms) {
+        m_automataByProperty=new HashMap<OWLObjectPropertyExpression,Automaton>();
+        createAutomata(m_automataByProperty,axioms.m_complexObjectPropertyExpressions,axioms.m_simpleObjectPropertyInclusions,axioms.m_complexObjectPropertyInclusions);
     }
-    public void rewriteAxioms(OWLAxioms axioms,int firstReplacementIndex) {
-        Map<OWLObjectPropertyExpression,Automaton> automataByProperty=new HashMap<OWLObjectPropertyExpression,Automaton>();
-        Set<OWLObjectPropertyExpression> nonSimpleProperties=new HashSet<OWLObjectPropertyExpression>();
-        // Construct the automata
-        createAutomata(automataByProperty,nonSimpleProperties,axioms.m_simpleObjectPropertyInclusions,axioms.m_complexObjectPropertyInclusions);
+    public void rewriteAxioms(OWLDataFactory dataFactory,OWLAxioms axioms,int firstReplacementIndex) {
         // Check the asymmetric object properties for simplicity
         for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_asymmetricObjectProperties)
-            if (nonSimpleProperties.contains(objectPropertyExpression))
+            if (axioms.m_complexObjectPropertyExpressions.contains(objectPropertyExpression))
                 throw new IllegalArgumentException("Non-simple property '"+objectPropertyExpression+"' or its inverse appears in asymmetric object property axiom.");
         // Check the irreflexive object properties for simplicity
         for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_irreflexiveObjectProperties)
-            if (nonSimpleProperties.contains(objectPropertyExpression))
+            if (axioms.m_complexObjectPropertyExpressions.contains(objectPropertyExpression))
                 throw new IllegalArgumentException("Non-simple property '"+objectPropertyExpression+"' or its inverse appears in irreflexive object property axiom.");
         // Check the disjoint object properties for simplicity
         for (OWLObjectPropertyExpression[] properties : axioms.m_disjointObjectProperties)
             for (int i=0;i<properties.length;i++)
-                if (nonSimpleProperties.contains(properties[i]))
+                if (axioms.m_complexObjectPropertyExpressions.contains(properties[i]))
                     throw new IllegalArgumentException("Non-simple property '"+properties[i]+"' or its inverse appears in disjoint properties axiom.");
         // Check simple properties in the number restrictions and replace universals
         Map<OWLObjectAllValuesFrom,OWLClassExpression> replacedDescriptions=new HashMap<OWLObjectAllValuesFrom,OWLClassExpression>();
@@ -73,18 +70,18 @@ public class ObjectPropertyInclusionManager {
                 if (classExpression instanceof OWLObjectCardinalityRestriction) {
                     OWLObjectCardinalityRestriction objectCardinalityRestriction=(OWLObjectCardinalityRestriction)inclusion[index];
                     OWLObjectPropertyExpression objectPropertyExpression=objectCardinalityRestriction.getProperty();
-                    if (nonSimpleProperties.contains(objectPropertyExpression))
+                    if (axioms.m_complexObjectPropertyExpressions.contains(objectPropertyExpression))
                         throw new IllegalArgumentException("Non-simple property '"+objectPropertyExpression+"' or its inverse appears in a number restriction '"+objectCardinalityRestriction+"'.");
                 }
                 if (classExpression instanceof OWLObjectAllValuesFrom) {
                     OWLObjectAllValuesFrom objectAll=(OWLObjectAllValuesFrom)classExpression;
-                    if (!objectAll.getFiller().equals(m_factory.getOWLThing())) {
+                    if (!objectAll.getFiller().equals(dataFactory.getOWLThing())) {
                         OWLObjectPropertyExpression objectProperty=objectAll.getProperty();
-                        if (automataByProperty.containsKey(objectProperty)) {
+                        if (m_automataByProperty.containsKey(objectProperty)) {
                             OWLClassExpression replacement=replacedDescriptions.get(objectAll);
                             if (replacement==null) {
-                                replacement=m_factory.getOWLClass(IRI.create("internal:all#"+(firstReplacementIndex++)));
-                                if (objectAll.getFiller() instanceof OWLObjectComplementOf || objectAll.getFiller().equals(m_factory.getOWLNothing()))
+                                replacement=dataFactory.getOWLClass(IRI.create("internal:all#"+(firstReplacementIndex++)));
+                                if (objectAll.getFiller() instanceof OWLObjectComplementOf || objectAll.getFiller().equals(dataFactory.getOWLNothing()))
                                     replacement=replacement.getComplementNNF();
                                 replacedDescriptions.put(objectAll,replacement);
                             }
@@ -96,7 +93,7 @@ public class ObjectPropertyInclusionManager {
         }
         // Generate the automaton for each replacement
         for (Map.Entry<OWLObjectAllValuesFrom,OWLClassExpression> replacement : replacedDescriptions.entrySet()) {
-            Automaton automaton=automataByProperty.get(replacement.getKey().getProperty());
+            Automaton automaton=m_automataByProperty.get(replacement.getKey().getProperty());
             boolean isOfNegativePolarity=(replacement.getValue() instanceof OWLObjectComplementOf);
             // Generate states of the automaton
             Map<State,OWLClassExpression> statesToConcepts=new HashMap<State,OWLClassExpression>();
@@ -105,7 +102,7 @@ public class ObjectPropertyInclusionManager {
                 if (state.isInitial())
                     statesToConcepts.put(state,replacement.getValue());
                 else {
-                    OWLClassExpression stateConcept=m_factory.getOWLClass(IRI.create("internal:all#"+(firstReplacementIndex++)));
+                    OWLClassExpression stateConcept=dataFactory.getOWLClass(IRI.create("internal:all#"+(firstReplacementIndex++)));
                     if (isOfNegativePolarity)
                         stateConcept=stateConcept.getComplementNNF();
                     statesToConcepts.put(state,stateConcept);
@@ -119,7 +116,7 @@ public class ObjectPropertyInclusionManager {
                 if (transition.label()==null)
                     axioms.m_conceptInclusions.add(new OWLClassExpression[] { fromStateConcept,toStateConcept });
                 else {
-                    OWLObjectAllValuesFrom consequentAll=m_factory.getOWLObjectAllValuesFrom((OWLObjectPropertyExpression)transition.label(),toStateConcept);
+                    OWLObjectAllValuesFrom consequentAll=dataFactory.getOWLObjectAllValuesFrom((OWLObjectPropertyExpression)transition.label(),toStateConcept);
                     axioms.m_conceptInclusions.add(new OWLClassExpression[] { fromStateConcept,consequentAll });
                 }
             }
@@ -134,7 +131,7 @@ public class ObjectPropertyInclusionManager {
             }
         }
     }
-    protected void createAutomata(Map<OWLObjectPropertyExpression,Automaton> automataByProperty,Set<OWLObjectPropertyExpression> nonSimpleProperties,Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions,Collection<ComplexObjectPropertyInclusion> complexObjectPropertyInclusions) {
+    protected void createAutomata(Map<OWLObjectPropertyExpression,Automaton> automataByProperty,Set<OWLObjectPropertyExpression> complexObjectPropertyExpressions,Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions,Collection<ComplexObjectPropertyInclusion> complexObjectPropertyInclusions) {
         Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> equivalentPropertiesMap=findEquivalentProperties(simpleObjectPropertyInclusions);
 
         Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> inversePropertiesMap=buildInversePropertiesMap(simpleObjectPropertyInclusions);
@@ -147,7 +144,7 @@ public class ObjectPropertyInclusionManager {
 
         propertyDependencyGraph.removeElements(simpleProperties);
         complexPropertiesDependencyGraph.removeElements(simpleProperties);
-        nonSimpleProperties.addAll(complexPropertiesDependencyGraph.getElements());
+        complexObjectPropertyExpressions.addAll(complexPropertiesDependencyGraph.getElements());
 
         connectAllAutomata(automataByProperty,propertyDependencyGraph,inversePropertiesMap,individualAutomata,simpleObjectPropertyInclusions);
     }

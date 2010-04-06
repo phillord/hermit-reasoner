@@ -61,8 +61,8 @@ public class DLOntology implements Serializable {
     protected final boolean m_isHorn;
     protected final Set<AtomicConcept> m_allAtomicConcepts;
     protected final int m_numberOfExternalConcepts;
-    protected final Set<ComplexObjectRoleInclusion> m_allComplexObjectRoleInclusions;
     protected final Set<AtomicRole> m_allAtomicObjectRoles;
+    protected final Set<Role> m_allComplexObjectRoles;
     protected final Set<AtomicRole> m_allAtomicDataRoles;
     protected final Set<String> m_definedDatatypeIRIs;
     protected final Set<Individual> m_allIndividuals;
@@ -70,7 +70,7 @@ public class DLOntology implements Serializable {
     protected final Map<AtomicRole,Map<Individual,Set<Constant>>> m_dataPropertyAssertions;
 
     public DLOntology(String ontologyIRI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts, Set<AtomicConcept> atomicConcepts,
-            Set<AtomicRole> atomicObjectRoles,Set<ComplexObjectRoleInclusion> allComplexObjectRoleInclusions,Set<AtomicRole> atomicDataRoles,
+            Set<AtomicRole> atomicObjectRoles,Set<Role> allComplexObjectRoles,Set<AtomicRole> atomicDataRoles,
             Set<String> definedDatatypeIRIs,Set<Individual> individuals,
             boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,boolean hasDatatypes) {
         m_ontologyIRI=ontologyIRI;
@@ -90,14 +90,14 @@ public class DLOntology implements Serializable {
             if (!Prefixes.isInternalIRI(c.getIRI()))
                 numberOfExternalConcepts++;
         m_numberOfExternalConcepts=numberOfExternalConcepts;
-        if (allComplexObjectRoleInclusions==null)
-            m_allComplexObjectRoleInclusions=new HashSet<ComplexObjectRoleInclusion>();
-        else
-            m_allComplexObjectRoleInclusions=allComplexObjectRoleInclusions;
         if (atomicObjectRoles==null)
             m_allAtomicObjectRoles=new TreeSet<AtomicRole>(AtomicRoleComparator.INSTANCE);
         else
             m_allAtomicObjectRoles=atomicObjectRoles;
+        if (allComplexObjectRoles==null)
+            m_allComplexObjectRoles=new HashSet<Role>();
+        else
+            m_allComplexObjectRoles=allComplexObjectRoles;
         if (atomicDataRoles==null)
             m_allAtomicDataRoles=new TreeSet<AtomicRole>(AtomicRoleComparator.INSTANCE);
         else
@@ -193,14 +193,17 @@ public class DLOntology implements Serializable {
     public int getNumberOfExternalConcepts() {
         return m_numberOfExternalConcepts;
     }
-    public Set<ComplexObjectRoleInclusion> getAllComplexObjectRoleInclusions() {
-        return m_allComplexObjectRoleInclusions;
-    }
     public Set<AtomicRole> getAllAtomicObjectRoles() {
         return m_allAtomicObjectRoles;
     }
     public boolean containsObjectRole(AtomicRole role) {
     	return m_allAtomicObjectRoles.contains(role);
+    }
+    public Set<Role> getAllComplexObjectRoles() {
+        return m_allComplexObjectRoles;
+    }
+    public boolean isComplexObjectRole(Role role) {
+        return m_allComplexObjectRoles.contains(role);
     }
     public Set<AtomicRole> getAllAtomicDataRoles() {
         return m_allAtomicDataRoles;
@@ -577,8 +580,6 @@ public class DLOntology implements Serializable {
         stringBuffer.append(CRLF);
         stringBuffer.append("  Number of data properties: " + m_allAtomicDataRoles.size());
         stringBuffer.append(CRLF);
-        stringBuffer.append("  Number of complex RIAs: " + m_allComplexObjectRoleInclusions.size());
-        stringBuffer.append(CRLF);
         stringBuffer.append("  Number of individuals: " + m_allIndividuals.size());
         stringBuffer.append(CRLF);
         stringBuffer.append("]");
@@ -619,27 +620,6 @@ public class DLOntology implements Serializable {
         }
         finally {
             inputStream.close();
-        }
-    }
-
-    public static class ComplexObjectRoleInclusion implements Serializable {
-        private static final long serialVersionUID=-8373563413008795874L;
-
-        protected final Role[] m_subRoles;
-        protected final Role m_superRole;
-
-        public ComplexObjectRoleInclusion(Role[] subRoles,Role superRole) {
-            m_subRoles=subRoles;
-            m_superRole=superRole;
-        }
-        public int getNumberOfSubRoles() {
-            return m_subRoles.length;
-        }
-        public Role getSubRole(int roleIndex) {
-            return m_subRoles[roleIndex];
-        }
-        public Role getSuperRole() {
-            return m_superRole;
         }
     }
 

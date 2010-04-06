@@ -29,6 +29,7 @@ import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Constant;
+import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.DataValueEnumeration;
@@ -212,7 +213,14 @@ public final class Tableau implements Serializable {
         boolean hasInverseRoles=(m_permanentDLOntology.hasInverseRoles() || (m_additionalDLOntology!=null && m_additionalDLOntology.hasInverseRoles()));
         boolean hasNominals=(m_permanentDLOntology.hasNominals() || (m_additionalDLOntology!=null && m_additionalDLOntology.hasNominals()));
         boolean isHorn=(m_permanentDLOntology.isHorn() || (m_additionalDLOntology!=null && m_additionalDLOntology.isHorn()));
-        return additionalDLOntology.getAllDescriptionGraphs().isEmpty() && (!additionalDLOntology.hasInverseRoles() || hasInverseRoles) && (!additionalDLOntology.hasNominals() || hasNominals) && (additionalDLOntology.isHorn() || !isHorn);
+        if (!additionalDLOntology.getAllDescriptionGraphs().isEmpty() || (additionalDLOntology.hasInverseRoles() && !hasInverseRoles) || (additionalDLOntology.hasNominals() && !hasNominals) || (!additionalDLOntology.isHorn() && isHorn))
+            return false;
+        for (DLClause dlClause : additionalDLOntology.getDLClauses()) {
+            DLClause.ClauseType clauseType=dlClause.getClauseType();
+            if (clauseType==DLClause.ClauseType.OBJECT_PROPERTY_INCLUSION || clauseType==DLClause.ClauseType.INVERSE_OBJECT_PROPERTY_INCLUSION || dlClause.isFunctionalityAxiom() || dlClause.isInverseFunctionalityAxiom())
+                return false;
+        }
+        return true;
     }
     public void setAdditionalDLOntology(DLOntology additionalDLOntology) {
         if (!supportsAdditionalDLOntology(additionalDLOntology))
@@ -220,12 +228,12 @@ public final class Tableau implements Serializable {
         m_additionalDLOntology=additionalDLOntology;
         m_additionalHyperresolutionManager=new HyperresolutionManager(this,m_additionalDLOntology.getDLClauses());
         m_existentialExpansionStrategy.additionalDLOntologySet(m_additionalDLOntology);
-        m_existentialExpasionManager.additionalDLOntologySet(additionalDLOntology);
         updateFlagsDependentOnAdditionalOntology();
     }
     public void clearAdditionalDLOntology() {
         m_additionalDLOntology=null;
         m_additionalHyperresolutionManager=null;
+        m_existentialExpansionStrategy.additionalDLOntologyCleared();
         m_needsThingExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING);
         m_needsNamedExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.INTERNAL_NAMED);
         updateFlagsDependentOnAdditionalOntology();

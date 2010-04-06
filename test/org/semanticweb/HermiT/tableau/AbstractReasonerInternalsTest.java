@@ -30,7 +30,7 @@ public abstract class AbstractReasonerInternalsTest extends AbstractReasonerTest
         OWLClausification clausification=new OWLClausification(c);
         if (dgs==null)
             dgs=Collections.emptySet();
-        return clausification.clausify(m_ontology,dgs);
+        return (DLOntology)clausification.preprocessAndClausify(m_ontology,dgs)[1];
     }
 
     protected Tableau getTableau(Set<DescriptionGraph> dgs) throws Exception {

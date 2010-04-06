@@ -22,8 +22,10 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.graph.Graph;
+import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Role;
@@ -77,20 +79,32 @@ public class ObjectRoleSubsumptionCache extends RoleSubsumptionCache {
         return m_reasoner.getTableau().isSatisfiable(true,Collections.singleton(role.getRoleAssertion(freshIndividualA,freshIndividualB)),null,null,null,null,ReasoningTaskDescription.isRoleSatisfiable(role,true));
     }
     protected boolean doSubsumptionCheck(Role subrole,Role superrole) {
-        // This code is different from data properties. This is because object properties can be transitive, so
-        // we need to make sure that appropriate DL-clauses are added for negative object property assertions.
-        OWLDataFactory factory=m_reasoner.getDataFactory();
-        OWLIndividual individualA=factory.getOWLAnonymousIndividual("fresh-individual-A");
-        OWLIndividual individualB=factory.getOWLAnonymousIndividual("fresh-individual-B");
-        OWLObjectPropertyExpression subpropertyExpression=getObjectPropertyExpression(factory,subrole);
-        OWLObjectPropertyExpression superpropertyExpression=getObjectPropertyExpression(factory,superrole);
-        OWLClass pseudoNominal=factory.getOWLClass(IRI.create("internal:pseudo-nominal"));
-        OWLAxiom subpropertyAssertion=factory.getOWLObjectPropertyAssertionAxiom(subpropertyExpression,individualA,individualB);
-        OWLClassExpression allSuperNotPseudoNominal=factory.getOWLObjectAllValuesFrom(superpropertyExpression,pseudoNominal.getObjectComplementOf());
-        OWLAxiom pseudoNominalAssertion=factory.getOWLClassAssertionAxiom(pseudoNominal,individualB);
-        OWLAxiom superpropertyAssertion=factory.getOWLClassAssertionAxiom(allSuperNotPseudoNominal,individualA);
-        Tableau tableau=m_reasoner.getTableau(subpropertyAssertion,pseudoNominalAssertion,superpropertyAssertion);
-        return !tableau.isSatisfiable(true,null,null,null,null,null,ReasoningTaskDescription.isRoleSubsumedBy(subrole,superrole,true));
+        // This code is different from data properties. If the superrole is not simple, then
+        // we can use negative role assertions; otherwise, we need to take into account the
+        // complex role inclusions into account.
+        DLOntology dlOntology=m_reasoner.getDLOntology();
+        if (!dlOntology.isComplexObjectRole(superrole)) {
+            Individual freshIndividualA=Individual.createAnonymous("fresh-individual-A");
+            Individual freshIndividualB=Individual.createAnonymous("fresh-individual-B");
+            Atom subroleAtom=subrole.getRoleAssertion(freshIndividualA,freshIndividualB);
+            Atom superroleAtom=superrole.getRoleAssertion(freshIndividualA,freshIndividualB);
+            Tableau tableau=m_reasoner.getTableau();
+            return !tableau.isSatisfiable(false,Collections.singleton(subroleAtom),Collections.singleton(superroleAtom),null,null,null,ReasoningTaskDescription.isRoleSubsumedBy(subrole,superrole,true));
+        }
+        else {
+            OWLDataFactory factory=m_reasoner.getDataFactory();
+            OWLIndividual freshIndividualA=factory.getOWLAnonymousIndividual("fresh-individual-A");
+            OWLIndividual freshIndividualB=factory.getOWLAnonymousIndividual("fresh-individual-B");
+            OWLObjectPropertyExpression subpropertyExpression=getObjectPropertyExpression(factory,subrole);
+            OWLObjectPropertyExpression superpropertyExpression=getObjectPropertyExpression(factory,superrole);
+            OWLClass pseudoNominal=factory.getOWLClass(IRI.create("internal:pseudo-nominal"));
+            OWLAxiom subpropertyAssertion=factory.getOWLObjectPropertyAssertionAxiom(subpropertyExpression,freshIndividualA,freshIndividualB);
+            OWLClassExpression allSuperNotPseudoNominal=factory.getOWLObjectAllValuesFrom(superpropertyExpression,pseudoNominal.getObjectComplementOf());
+            OWLAxiom pseudoNominalAssertion=factory.getOWLClassAssertionAxiom(pseudoNominal,freshIndividualB);
+            OWLAxiom superpropertyAssertion=factory.getOWLClassAssertionAxiom(allSuperNotPseudoNominal,freshIndividualA);
+            Tableau tableau=m_reasoner.getTableau(subpropertyAssertion,pseudoNominalAssertion,superpropertyAssertion);
+            return !tableau.isSatisfiable(true,null,null,null,null,null,ReasoningTaskDescription.isRoleSubsumedBy(subrole,superrole,true));
+        }
     }
     protected static OWLObjectPropertyExpression getObjectPropertyExpression(OWLDataFactory factory,Role role) {
         if (role instanceof AtomicRole)

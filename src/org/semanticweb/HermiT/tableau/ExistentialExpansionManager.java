@@ -29,7 +29,6 @@ import org.semanticweb.HermiT.graph.Graph;
 import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLClause;
-import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.Inequality;
@@ -71,8 +70,6 @@ public final class ExistentialExpansionManager implements Serializable {
         Graph<Role> superRoleGraph=new Graph<Role>();
         Set<Role> functionalRoles=new HashSet<Role>();
         loadDLClausesIntoGraph(m_tableau.m_permanentDLOntology.getDLClauses(),superRoleGraph,functionalRoles);
-        if (m_tableau.m_additionalDLOntology!=null)
-            loadDLClausesIntoGraph(m_tableau.m_additionalDLOntology.getDLClauses(),superRoleGraph,functionalRoles);
         for (Role role : superRoleGraph.getElements()) {
             superRoleGraph.addEdge(role,role);
             superRoleGraph.addEdge(role.getInverse(),role.getInverse());
@@ -116,12 +113,6 @@ public final class ExistentialExpansionManager implements Serializable {
                 functionalRoles.add(atomicRole.getInverse());
             }
         }
-    }
-    public void additionalDLOntologySet(DLOntology additionalDLOntology) {
-        updateFunctionalRoles();
-    }
-    public void additionalDLOntologyCleared() {
-        updateFunctionalRoles();
     }
     public void markExistentialProcessed(ExistentialConcept existentialConcept,Node forNode) {
         m_auxiliaryTuple[0]=existentialConcept;

@@ -43,7 +43,6 @@ public final class Node implements Serializable {
     protected NodeType m_nodeType;
     protected int m_treeDepth;
     protected int m_numberOfPositiveAtomicConcepts;
-    protected int m_numberOfCoreAtoms;
     protected int m_numberOfNegatedAtomicConcepts;
     protected int m_numberOfNegatedRoleAssertions;
     protected List<ExistentialConcept> m_unprocessedExistentials;
@@ -74,7 +73,6 @@ public final class Node implements Serializable {
         m_nodeType=nodeType;
         m_treeDepth=treeDepth;
         m_numberOfPositiveAtomicConcepts=0;
-        m_numberOfCoreAtoms = 0;
         m_numberOfNegatedAtomicConcepts=0;
         m_numberOfNegatedRoleAssertions=0;
         m_unprocessedExistentials=NO_EXISTENTIALS;
@@ -187,9 +185,6 @@ public final class Node implements Serializable {
     }
     public int getNumberOfPositiveAtomicConcepts() {
         return m_numberOfPositiveAtomicConcepts;
-    }
-    public int getNumberOfCoreAtoms() {
-        return m_numberOfCoreAtoms;
     }
     public boolean isActive() {
         return m_nodeState==NodeState.ACTIVE;

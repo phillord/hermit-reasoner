@@ -95,10 +95,9 @@ public abstract class ExtensionTable implements Serializable {
         Object dlPredicateObject=tuple[0];
         if (dlPredicateObject instanceof Concept) {
             Node node=(Node)tuple[1];
-            if (dlPredicateObject instanceof AtomicConcept) {
+            if (dlPredicateObject instanceof AtomicConcept)
                 node.m_numberOfPositiveAtomicConcepts++;
-                if (isCore) node.m_numberOfCoreAtoms++;
-            } else if (dlPredicateObject instanceof ExistentialConcept)
+            else if (dlPredicateObject instanceof ExistentialConcept)
                 node.addToUnprocessedExistentials((ExistentialConcept)dlPredicateObject);
             else if (dlPredicateObject instanceof AtomicNegationConcept)
                 node.m_numberOfNegatedAtomicConcepts++;
@@ -166,10 +165,9 @@ public abstract class ExtensionTable implements Serializable {
         if (dlPredicateObject instanceof Concept) {
             Node node=(Node)tuple[1];
             m_tableau.m_existentialExpansionStrategy.assertionRemoved((Concept)dlPredicateObject,node,m_coreManager.isCore(tupleIndex));
-            if (dlPredicateObject instanceof AtomicConcept) {
+            if (dlPredicateObject instanceof AtomicConcept)
                 node.m_numberOfPositiveAtomicConcepts--;
-                if (m_coreManager.isCore(tupleIndex)) node.m_numberOfCoreAtoms--;
-            } else if (dlPredicateObject instanceof ExistentialConcept)
+            else if (dlPredicateObject instanceof ExistentialConcept)
                 node.removeFromUnprocessedExistentials((ExistentialConcept)dlPredicateObject);
             else if (dlPredicateObject instanceof AtomicNegationConcept)
                 node.m_numberOfNegatedAtomicConcepts--;

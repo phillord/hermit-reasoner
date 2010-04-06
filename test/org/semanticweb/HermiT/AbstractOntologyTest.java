@@ -47,7 +47,7 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
 
     protected DLOntology getDLOntology(Collection<DescriptionGraph> descriptionGraphs) {
         OWLClausification clausifier=new OWLClausification(new Configuration());
-        return clausifier.clausify(m_ontology,descriptionGraphs);
+        return (DLOntology)clausifier.preprocessAndClausify(m_ontology,descriptionGraphs)[1];
     }
 
     protected Tableau getTableau(Collection<DescriptionGraph> descriptionGraphs) throws Exception {

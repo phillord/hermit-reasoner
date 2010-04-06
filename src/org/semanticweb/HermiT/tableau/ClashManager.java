@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -40,7 +40,7 @@ public final class ClashManager implements Serializable {
     private static final long serialVersionUID = 3533809151139695892L;
 
     protected static final LiteralConcept NOT_RDFS_LITERAL=DatatypeRestriction.RDFS_LITERAL.getNegation();
-    
+
     protected final ExtensionManager m_extensionManager;
     protected final ExtensionTable.Retrieval m_ternaryExtensionTableSearch01Bound;
     protected final TableauMonitor m_tableauMonitor;
@@ -89,7 +89,7 @@ public final class ClashManager implements Serializable {
                     m_tableauMonitor.clashDetectionFinished(tuple,m_binaryAuxiliaryTuple);
             }
         }
-        else if ((dlPredicateObject instanceof AtomicRole && ((Node)tuple[1]).m_numberOfNegatedRoleAssertions>0) || (dlPredicateObject instanceof NegatedAtomicRole)) {
+        else if ((dlPredicateObject instanceof AtomicRole && node0.m_numberOfNegatedRoleAssertions>0) || (dlPredicateObject instanceof NegatedAtomicRole)) {
             Object searchPredicate;
             if (dlPredicateObject instanceof AtomicRole)
                 searchPredicate=NegatedAtomicRole.create((AtomicRole)dlPredicateObject);

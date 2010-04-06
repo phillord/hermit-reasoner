@@ -37,7 +37,7 @@ public class InverseRole extends Role {
         return m_inverseOf;
     }
     public Atom getRoleAssertion(Term term0,Term term1) {
-        return Atom.create(m_inverseOf,term0,term1);
+        return Atom.create(m_inverseOf,term1,term0);
     }
     public String toString(Prefixes prefixes) {
         return "inv("+m_inverseOf.toString(prefixes)+")";

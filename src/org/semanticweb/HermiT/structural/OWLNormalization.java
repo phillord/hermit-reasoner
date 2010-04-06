@@ -35,18 +35,20 @@ import org.semanticweb.owlapi.model.*;
  */
 public class OWLNormalization {
     protected final OWLDataFactory m_factory;
+    protected final OWLAxioms m_axioms;
+    protected final int m_firstReplacementIndex;
     protected final Map<OWLClassExpression,OWLClassExpression> m_definitions;
     protected final Map<OWLObjectOneOf,OWLClass> m_definitionsForNegativeNominals;
-    protected final OWLAxioms m_axioms;
     protected final ExpressionManager m_expressionManager;
     protected final PLVisitor m_plVisitor;
     protected final Map<OWLDataRange,OWLDatatype> m_dataRangeDefinitions; // contains custom datatype definitions from DatatypeDefinition axioms
 
-    public OWLNormalization(OWLDataFactory factory,OWLAxioms axioms) {
+    public OWLNormalization(OWLDataFactory factory,OWLAxioms axioms,int firstReplacementIndex) {
         m_factory=factory;
+        m_axioms=axioms;
+        m_firstReplacementIndex=firstReplacementIndex;
         m_definitions=new HashMap<OWLClassExpression,OWLClassExpression>();
         m_definitionsForNegativeNominals=new HashMap<OWLObjectOneOf,OWLClass>();
-        m_axioms=axioms;
         m_expressionManager=new ExpressionManager(m_factory);
         m_plVisitor=new PLVisitor();
         m_dataRangeDefinitions=new HashMap<OWLDataRange,OWLDatatype>();
@@ -267,7 +269,7 @@ public class OWLNormalization {
     protected OWLClassExpression getDefinitionFor(OWLClassExpression description,boolean[] alreadyExists,boolean forcePositive) {
         OWLClassExpression definition=m_definitions.get(description);
         if (definition==null || (forcePositive && !(definition instanceof OWLClass))) {
-            definition=m_factory.getOWLClass(IRI.create("internal:def#"+m_definitions.size()));
+            definition=m_factory.getOWLClass(IRI.create("internal:def#"+(m_definitions.size()+m_firstReplacementIndex)));
             if (!forcePositive && !description.accept(m_plVisitor))
                 definition=m_factory.getOWLObjectComplementOf(definition);
             m_definitions.put(description,definition);

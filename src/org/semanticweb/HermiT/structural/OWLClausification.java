@@ -133,25 +133,23 @@ public class OWLClausification {
     public OWLClausification(Configuration configuration) {
         m_configuration=configuration;
     }
-    public DLOntology clausify(OWLOntology ontology,Collection<DescriptionGraph> descriptionGraphs) {
-        return clausifyImportClosure(ontology.getOWLOntologyManager().getOWLDataFactory(),ontology.getOntologyID().getDefaultDocumentIRI()==null ? "urn:hermit:kb" : ontology.getOntologyID().getDefaultDocumentIRI().toString(),ontology.getImportsClosure(),descriptionGraphs);
-    }
-    public DLOntology clausifyImportClosure(OWLDataFactory factory,String ontologyIRI,Collection<OWLOntology> importClosure,Collection<DescriptionGraph> descriptionGraphs) {
+    public Object[] preprocessAndClausify(OWLOntology rootOntology,Collection<DescriptionGraph> descriptionGraphs) {
+        OWLDataFactory factory=rootOntology.getOWLOntologyManager().getOWLDataFactory();
+        String ontologyIRI=rootOntology.getOntologyID().getDefaultDocumentIRI()==null ? "urn:hermit:kb" : rootOntology.getOntologyID().getDefaultDocumentIRI().toString();
+        Collection<OWLOntology> importClosure=rootOntology.getImportsClosure();
         OWLAxioms axioms=new OWLAxioms();
-        OWLNormalization normalization=new OWLNormalization(factory,axioms);
+        OWLNormalization normalization=new OWLNormalization(factory,axioms,0);
         for (OWLOntology ontology : importClosure)
             normalization.processOntology(ontology);
         BuiltInPropertyManager builtInPropertyManager=new BuiltInPropertyManager(factory);
         builtInPropertyManager.axiomatizeBuiltInPropertiesAsNeeded(axioms);
-        ObjectPropertyInclusionManager objectPropertyInclusionManager=new ObjectPropertyInclusionManager(factory);
-        objectPropertyInclusionManager.rewriteAxioms(axioms,0);
+        ObjectPropertyInclusionManager objectPropertyInclusionManager=new ObjectPropertyInclusionManager(axioms);
+        objectPropertyInclusionManager.rewriteAxioms(factory,axioms,0);
         if (descriptionGraphs==null)
             descriptionGraphs=Collections.emptySet();
-        return clausify(factory,ontologyIRI,axioms,descriptionGraphs);
-    }
-    public DLOntology clausify(OWLDataFactory factory,String ontologyIRI,OWLAxioms axioms,Collection<DescriptionGraph> descriptionGraphs) {
         OWLAxiomsExpressivity axiomsExpressivity=new OWLAxiomsExpressivity(axioms);
-        return clausify(factory,ontologyIRI,axioms,axiomsExpressivity,descriptionGraphs);
+        DLOntology dlOntology=clausify(factory,ontologyIRI,axioms,axiomsExpressivity,descriptionGraphs);
+        return new Object[] { objectPropertyInclusionManager,dlOntology };
     }
     public DLOntology clausify(OWLDataFactory factory,String ontologyIRI,OWLAxioms axioms,OWLAxiomsExpressivity axiomsExpressivity,Collection<DescriptionGraph> descriptionGraphs) {
         Set<DLClause> dlClauses=new LinkedHashSet<DLClause>();
@@ -261,9 +259,9 @@ public class OWLClausification {
         for (DescriptionGraph descriptionGraph : descriptionGraphs)
             descriptionGraph.produceStartDLClauses(dlClauses);
         Set<AtomicConcept> atomicConcepts=new HashSet<AtomicConcept>();
-        Set<DLOntology.ComplexObjectRoleInclusion> complexObjectRoleInclusions=new HashSet<DLOntology.ComplexObjectRoleInclusion>();
-        Set<AtomicRole> objectRoles=new HashSet<AtomicRole>();
-        Set<AtomicRole> dataRoles=new HashSet<AtomicRole>();
+        Set<AtomicRole> atomicObjectRoles=new HashSet<AtomicRole>();
+        Set<Role> complexObjectRoles=new HashSet<Role>();
+        Set<AtomicRole> atomicDataRoles=new HashSet<AtomicRole>();
         for (OWLClass owlClass : axioms.m_classes)
             atomicConcepts.add(AtomicConcept.create(owlClass.getIRI().toString()));
         Set<Individual> individuals=new HashSet<Individual>();
@@ -276,16 +274,11 @@ public class OWLClausification {
                 positiveFacts.add(Atom.create(AtomicConcept.INTERNAL_NAMED,individual));
         }
         for (OWLObjectProperty objectProperty : axioms.m_objectProperties)
-            objectRoles.add(AtomicRole.create(objectProperty.getIRI().toString()));
-        for (OWLAxioms.ComplexObjectPropertyInclusion inclusion : axioms.m_complexObjectPropertyInclusions) {
-            Role[] subRoles=new Role[inclusion.m_subObjectProperties.length];
-            for (int index=inclusion.m_subObjectProperties.length-1;index>=0;--index)
-                subRoles[index]=getRole(inclusion.m_subObjectProperties[index]);
-            Role superRole=getRole(inclusion.m_superObjectProperty);
-            complexObjectRoleInclusions.add(new DLOntology.ComplexObjectRoleInclusion(subRoles,superRole));
-        }
+            atomicObjectRoles.add(AtomicRole.create(objectProperty.getIRI().toString()));
+        for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_complexObjectPropertyExpressions)
+            complexObjectRoles.add(getRole(objectPropertyExpression));
         for (OWLDataProperty dataProperty : axioms.m_dataProperties)
-            dataRoles.add(AtomicRole.create(dataProperty.getIRI().toString()));
+            atomicDataRoles.add(AtomicRole.create(dataProperty.getIRI().toString()));
         // Clausify SWRL rules
         if (!axioms.m_rules.isEmpty()) {
             m_configuration.checkClauses=false;
@@ -325,7 +318,7 @@ public class OWLClausification {
             }
         }
         // Create the DL ontology
-        return new DLOntology(ontologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,objectRoles,complexObjectRoleInclusions,dataRoles,axioms.m_definedDatatypesIRIs,individuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes);
+        return new DLOntology(ontologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,atomicObjectRoles,complexObjectRoles,atomicDataRoles,axioms.m_definedDatatypesIRIs,individuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes);
     }
     protected DLClause clausifyKey(OWLHasKeyAxiom object) {
         List<Atom> headAtoms=new ArrayList<Atom>();
