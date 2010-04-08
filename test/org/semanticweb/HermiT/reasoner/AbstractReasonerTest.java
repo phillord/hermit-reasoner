@@ -24,13 +24,11 @@ import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.reasoner.Node;
 import org.semanticweb.owlapi.reasoner.NodeSet;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
 public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     protected Reasoner m_reasoner;
-    protected OWLReasoner m_owlreasoner;
-
+    
     public AbstractReasonerTest(String name) {
         super(name);
     }
@@ -38,7 +36,6 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     protected void tearDown() {
         super.tearDown();
         m_reasoner=null;
-        m_owlreasoner=null;
         m_dataFactory=null;
         m_ontology=null;
         m_ontologyManager=null;
@@ -62,14 +59,14 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
             descriptionGraphs=Collections.emptySet();
         m_reasoner=new Reasoner(configuration,m_ontology,descriptionGraphs);
     }
-    protected void createOWLReasoner() {
+    protected void createChangeTrackingReasoner() {
         Configuration c=new Configuration();
         c.throwInconsistentOntologyException=false;
         createOWLReasoner(c);
     }
     protected void createOWLReasoner(Configuration configuration) {
         OWLReasonerFactory factory=new ReasonerFactory();
-        m_owlreasoner=factory.createReasoner(m_ontology,configuration);
+        m_reasoner=(Reasoner)factory.createReasoner(m_ontology,configuration);
     }
 
     /**

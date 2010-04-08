@@ -1,0 +1,1382 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY owl2xml "http://www.w3.org/2006/12/owl2-xml#" >
+    <!ENTITY agent-inst "http://www.iyouit.eu/agent-inst.owl#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+]>
+
+
+<rdf:RDF xmlns="http://www.iyouit.eu/agent-inst.owl#"
+     xml:base="http://www.iyouit.eu/agent-inst.owl"
+     xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
+     xmlns:agent-inst="http://www.iyouit.eu/agent-inst.owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#">
+    <owl:Ontology rdf:about=""/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#associate -->
+
+    <owl:ObjectProperty rdf:about="#associate">
+        <owl:inverseOf rdf:resource="#associate"/>
+        <rdfs:subPropertyOf rdf:resource="#contact"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#best_friend -->
+
+    <owl:ObjectProperty rdf:about="#best_friend">
+        <owl:inverseOf rdf:resource="#best_friend"/>
+        <rdfs:subPropertyOf rdf:resource="#friend"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#brother -->
+
+    <owl:ObjectProperty rdf:about="#brother">
+        <rdf:type rdf:resource="&owl;TransitiveProperty"/>
+        <rdfs:domain rdf:resource="#Person"/>
+        <rdfs:subPropertyOf rdf:resource="#sibling"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#business_partner -->
+
+    <owl:ObjectProperty rdf:about="#business_partner">
+        <rdfs:subPropertyOf rdf:resource="#associate"/>
+        <owl:inverseOf rdf:resource="#business_partner"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#classmate -->
+
+    <owl:ObjectProperty rdf:about="#classmate">
+        <rdf:type rdf:resource="&owl;TransitiveProperty"/>
+        <owl:inverseOf rdf:resource="#classmate"/>
+        <rdfs:subPropertyOf rdf:resource="#fellow"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#colleague -->
+
+    <owl:ObjectProperty rdf:about="#colleague">
+        <rdfs:subPropertyOf rdf:resource="#associate"/>
+        <owl:inverseOf rdf:resource="#colleague"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#contact -->
+
+    <owl:ObjectProperty rdf:about="#contact">
+        <owl:inverseOf rdf:resource="#contact"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#coworker -->
+
+    <owl:ObjectProperty rdf:about="#coworker">
+        <rdf:type rdf:resource="&owl;TransitiveProperty"/>
+        <rdfs:subPropertyOf rdf:resource="#colleague"/>
+        <owl:inverseOf rdf:resource="#coworker"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#family_member -->
+
+    <owl:ObjectProperty rdf:about="#family_member">
+        <rdf:type rdf:resource="&owl;TransitiveProperty"/>
+        <rdfs:subPropertyOf rdf:resource="#contact"/>
+        <owl:inverseOf rdf:resource="#family_member"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#fellow -->
+
+    <owl:ObjectProperty rdf:about="#fellow">
+        <rdfs:subPropertyOf rdf:resource="#contact"/>
+        <owl:inverseOf rdf:resource="#fellow"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#fellow_student -->
+
+    <owl:ObjectProperty rdf:about="#fellow_student">
+        <rdf:type rdf:resource="&owl;TransitiveProperty"/>
+        <rdfs:subPropertyOf rdf:resource="#fellow"/>
+        <owl:inverseOf rdf:resource="#fellow_student"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#friend -->
+
+    <owl:ObjectProperty rdf:about="#friend">
+        <rdfs:subPropertyOf rdf:resource="#fellow"/>
+        <owl:inverseOf rdf:resource="#friend"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#husband -->
+
+    <owl:ObjectProperty rdf:about="#husband">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:subPropertyOf rdf:resource="#spouse"/>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="#Man"/>
+                    <rdf:Description rdf:about="#Person"/>
+                </owl:intersectionOf>
+            </owl:Class>
+        </rdfs:domain>
+        <rdfs:range>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="#Person"/>
+                    <rdf:Description rdf:about="#Woman"/>
+                </owl:intersectionOf>
+            </owl:Class>
+        </rdfs:range>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#partner -->
+
+    <owl:ObjectProperty rdf:about="#partner">
+        <rdfs:subPropertyOf rdf:resource="#family_member"/>
+        <owl:inverseOf rdf:resource="#partner"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#sibling -->
+
+    <owl:ObjectProperty rdf:about="#sibling">
+        <rdf:type rdf:resource="&owl;TransitiveProperty"/>
+        <rdfs:subPropertyOf rdf:resource="#family_member"/>
+        <owl:inverseOf rdf:resource="#sibling"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#sister -->
+
+    <owl:ObjectProperty rdf:about="#sister">
+        <rdf:type rdf:resource="&owl;TransitiveProperty"/>
+        <rdfs:domain rdf:resource="#Person"/>
+        <rdfs:subPropertyOf rdf:resource="#sibling"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#spouse -->
+
+    <owl:ObjectProperty rdf:about="#spouse">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:subPropertyOf rdf:resource="#partner"/>
+        <owl:inverseOf rdf:resource="#spouse"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#supervised_by -->
+
+    <owl:ObjectProperty rdf:about="#supervised_by">
+        <rdfs:subPropertyOf rdf:resource="#associate"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#supervisor -->
+
+    <owl:ObjectProperty rdf:about="#supervisor">
+        <rdfs:subPropertyOf rdf:resource="#associate"/>
+        <owl:inverseOf rdf:resource="#supervised_by"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#wife -->
+
+    <owl:ObjectProperty rdf:about="#wife">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <owl:inverseOf rdf:resource="#husband"/>
+        <rdfs:subPropertyOf rdf:resource="#spouse"/>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="#Person"/>
+                    <rdf:Description rdf:about="#Woman"/>
+                </owl:intersectionOf>
+            </owl:Class>
+        </rdfs:domain>
+        <rdfs:range>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="#Man"/>
+                    <rdf:Description rdf:about="#Person"/>
+                </owl:intersectionOf>
+            </owl:Class>
+        </rdfs:range>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#Agent -->
+
+    <owl:Class rdf:about="#Agent"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#Man -->
+
+    <owl:Class rdf:about="#Man">
+        <rdfs:subClassOf rdf:resource="#Person"/>
+        <owl:disjointWith rdf:resource="#Woman"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#Myself -->
+
+    <owl:Class rdf:about="#Myself">
+        <rdfs:subClassOf rdf:resource="#Person"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#Person -->
+
+    <owl:Class rdf:about="#Person">
+        <rdfs:subClassOf rdf:resource="#Agent"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#Woman -->
+
+    <owl:Class rdf:about="#Woman">
+        <rdfs:subClassOf rdf:resource="#Person"/>
+        <rdfs:subClassOf>
+            <owl:Class>
+                <owl:complementOf rdf:resource="#Man"/>
+            </owl:Class>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#Thing -->
+
+    <owl:Class rdf:about="&owl;Thing">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#husband"/>
+                <owl:allValuesFrom rdf:resource="#Woman"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#spouse"/>
+                <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#husband"/>
+                <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#wife"/>
+                <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#wife"/>
+                <owl:allValuesFrom rdf:resource="#Man"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1075 -->
+
+    <rdf:Description rdf:about="#1075"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1079 -->
+
+    <owl:Thing rdf:about="#1079">
+        <contact rdf:resource="#1084"/>
+        <colleague rdf:resource="#1084"/>
+        <brother rdf:resource="#1086"/>
+        <friend rdf:resource="#1086"/>
+        <colleague rdf:resource="#1098"/>
+        <contact rdf:resource="#1121"/>
+        <contact rdf:resource="#1227"/>
+        <contact rdf:resource="#1231"/>
+        <associate rdf:resource="#1239"/>
+        <friend rdf:resource="#1350"/>
+        <contact rdf:resource="#1437"/>
+        <friend rdf:resource="#1488"/>
+        <contact rdf:resource="#1668"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1080 -->
+
+    <owl:Thing rdf:about="#1080">
+        <spouse rdf:resource="#1075"/>
+        <friend rdf:resource="#1079"/>
+        <contact rdf:resource="#1084"/>
+        <friend rdf:resource="#1086"/>
+        <colleague rdf:resource="#1096"/>
+        <supervised_by rdf:resource="#1099"/>
+        <colleague rdf:resource="#1145"/>
+        <contact rdf:resource="#1190"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1084 -->
+
+    <owl:Thing rdf:about="#1084">
+        <coworker rdf:resource="#1080"/>
+        <business_partner rdf:resource="#1086"/>
+        <coworker rdf:resource="#1099"/>
+        <colleague rdf:resource="#1099"/>
+        <coworker rdf:resource="#1600"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1086 -->
+
+    <owl:Thing rdf:about="#1086">
+        <brother rdf:resource="#1079"/>
+        <coworker rdf:resource="#1079"/>
+        <friend rdf:resource="#1089"/>
+        <coworker rdf:resource="#1096"/>
+        <friend rdf:resource="#1125"/>
+        <coworker rdf:resource="#1127"/>
+        <business_partner rdf:resource="#1136"/>
+        <business_partner rdf:resource="#1152"/>
+        <business_partner rdf:resource="#1155"/>
+        <business_partner rdf:resource="#1156"/>
+        <friend rdf:resource="#1188"/>
+        <business_partner rdf:resource="#1207"/>
+        <business_partner rdf:resource="#1224"/>
+        <contact rdf:resource="#1239"/>
+        <business_partner rdf:resource="#1254"/>
+        <contact rdf:resource="#1903"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1089 -->
+
+    <owl:Thing rdf:about="#1089">
+        <friend rdf:resource="#1079"/>
+        <contact rdf:resource="#1080"/>
+        <contact rdf:resource="#1084"/>
+        <colleague rdf:resource="#1098"/>
+        <colleague rdf:resource="#1127"/>
+        <friend rdf:resource="#1136"/>
+        <colleague rdf:resource="#1143"/>
+        <friend rdf:resource="#1147"/>
+        <friend rdf:resource="#1148"/>
+        <friend rdf:resource="#1152"/>
+        <business_partner rdf:resource="#1152"/>
+        <friend rdf:resource="#1156"/>
+        <friend rdf:resource="#1188"/>
+        <business_partner rdf:resource="#1206"/>
+        <contact rdf:resource="#1234"/>
+        <best_friend rdf:resource="#1367"/>
+        <contact rdf:resource="#1432"/>
+        <contact rdf:resource="#1488"/>
+        <friend rdf:resource="#1903"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1093 -->
+
+    <owl:Thing rdf:about="#1093">
+        <contact rdf:resource="#1079"/>
+        <contact rdf:resource="#1080"/>
+        <friend rdf:resource="#1128"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1096 -->
+
+    <owl:Thing rdf:about="#1096">
+        <colleague rdf:resource="#1084"/>
+        <colleague rdf:resource="#1089"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1097 -->
+
+    <rdf:Description rdf:about="#1097"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1098 -->
+
+    <owl:Thing rdf:about="#1098">
+        <coworker rdf:resource="#1080"/>
+        <colleague rdf:resource="#1080"/>
+        <colleague rdf:resource="#1084"/>
+        <coworker rdf:resource="#1099"/>
+        <colleague rdf:resource="#1099"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1099 -->
+
+    <rdf:Description rdf:about="#1099"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1109 -->
+
+    <rdf:Description rdf:about="#1109"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1111 -->
+
+    <owl:Thing rdf:about="#1111">
+        <colleague rdf:resource="#1109"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1112 -->
+
+    <owl:Thing rdf:about="#1112">
+        <colleague rdf:resource="#1097"/>
+        <colleague rdf:resource="#1098"/>
+        <colleague rdf:resource="#1099"/>
+        <contact rdf:resource="#1119"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1115 -->
+
+    <owl:Thing rdf:about="#1115">
+        <colleague rdf:resource="#1080"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1119 -->
+
+    <owl:Thing rdf:about="#1119">
+        <colleague rdf:resource="#1096"/>
+        <associate rdf:resource="#1126"/>
+        <associate rdf:resource="#1163"/>
+        <colleague rdf:resource="#1182"/>
+        <fellow rdf:resource="#1183"/>
+        <fellow rdf:resource="#1225"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1120 -->
+
+    <owl:Thing rdf:about="#1120">
+        <business_partner rdf:resource="#1119"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1121 -->
+
+    <owl:Thing rdf:about="#1121">
+        <contact rdf:resource="#1080"/>
+        <friend rdf:resource="#1086"/>
+        <contact rdf:resource="#1089"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1125 -->
+
+    <owl:Thing rdf:about="#1125">
+        <wife rdf:resource="#1079"/>
+        <friend rdf:resource="#1089"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1126 -->
+
+    <owl:Thing rdf:about="#1126">
+        <coworker rdf:resource="#1079"/>
+        <supervisor rdf:resource="#1086"/>
+        <colleague rdf:resource="#1089"/>
+        <coworker rdf:resource="#1127"/>
+        <colleague rdf:resource="#1136"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1127 -->
+
+    <rdf:Description rdf:about="#1127"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1128 -->
+
+    <rdf:Description rdf:about="#1128"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1132 -->
+
+    <owl:Thing rdf:about="#1132">
+        <friend rdf:resource="#1080"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1136 -->
+
+    <rdf:Description rdf:about="#1136"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1143 -->
+
+    <owl:Thing rdf:about="#1143">
+        <friend rdf:resource="#1080"/>
+        <supervised_by rdf:resource="#1096"/>
+        <friend rdf:resource="#1126"/>
+        <colleague rdf:resource="#1127"/>
+        <friend rdf:resource="#1136"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1145 -->
+
+    <owl:Thing rdf:about="#1145">
+        <colleague rdf:resource="#1098"/>
+        <colleague rdf:resource="#1099"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1147 -->
+
+    <rdf:Description rdf:about="#1147"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1148 -->
+
+    <owl:Thing rdf:about="#1148">
+        <contact rdf:resource="#1084"/>
+        <colleague rdf:resource="#1089"/>
+        <colleague rdf:resource="#1126"/>
+        <associate rdf:resource="#1136"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1152 -->
+
+    <owl:Thing rdf:about="#1152">
+        <associate rdf:resource="#1079"/>
+        <associate rdf:resource="#1086"/>
+        <contact rdf:resource="#1219"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1155 -->
+
+    <owl:Thing rdf:about="#1155">
+        <best_friend rdf:resource="#1152"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1156 -->
+
+    <owl:Thing rdf:about="#1156">
+        <colleague rdf:resource="#1152"/>
+        <colleague rdf:resource="#1155"/>
+        <best_friend rdf:resource="#1158"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1157 -->
+
+    <owl:Thing rdf:about="#1157">
+        <colleague rdf:resource="#1152"/>
+        <colleague rdf:resource="#1155"/>
+        <coworker rdf:resource="#1156"/>
+        <colleague rdf:resource="#1207"/>
+        <colleague rdf:resource="#1230"/>
+        <colleague rdf:resource="#1231"/>
+        <colleague rdf:resource="#1602"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1158 -->
+
+    <owl:Thing rdf:about="#1158">
+        <colleague rdf:resource="#1152"/>
+        <associate rdf:resource="#1155"/>
+        <colleague rdf:resource="#1156"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1159 -->
+
+    <owl:Thing rdf:about="#1159">
+        <colleague rdf:resource="#1152"/>
+        <friend rdf:resource="#1156"/>
+        <colleague rdf:resource="#1207"/>
+        <friend rdf:resource="#1224"/>
+        <colleague rdf:resource="#1231"/>
+        <colleague rdf:resource="#1602"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1162 -->
+
+    <owl:Thing rdf:about="#1162">
+        <colleague rdf:resource="#1080"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1163 -->
+
+    <owl:Thing rdf:about="#1163">
+        <colleague rdf:resource="#1126"/>
+        <colleague rdf:resource="#1127"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1176 -->
+
+    <owl:Thing rdf:about="#1176">
+        <contact rdf:resource="#1080"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1177 -->
+
+    <rdf:Description rdf:about="#1177"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1178 -->
+
+    <owl:Thing rdf:about="#1178">
+        <coworker rdf:resource="#1177"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1182 -->
+
+    <rdf:Description rdf:about="#1182"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1183 -->
+
+    <owl:Thing rdf:about="#1183">
+        <coworker rdf:resource="#1126"/>
+        <coworker rdf:resource="#1127"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1186 -->
+
+    <owl:Thing rdf:about="#1186">
+        <associate rdf:resource="#1152"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1188 -->
+
+    <owl:Thing rdf:about="#1188">
+        <friend rdf:resource="#1079"/>
+        <friend rdf:resource="#1080"/>
+        <friend rdf:resource="#1119"/>
+        <friend rdf:resource="#1143"/>
+        <contact rdf:resource="#1183"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1190 -->
+
+    <rdf:Description rdf:about="#1190"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1196 -->
+
+    <owl:Thing rdf:about="#1196">
+        <colleague rdf:resource="#1084"/>
+        <colleague rdf:resource="#1099"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1206 -->
+
+    <owl:Thing rdf:about="#1206">
+        <colleague rdf:resource="#1152"/>
+        <colleague rdf:resource="#1155"/>
+        <colleague rdf:resource="#1156"/>
+        <colleague rdf:resource="#1157"/>
+        <colleague rdf:resource="#1159"/>
+        <colleague rdf:resource="#1219"/>
+        <colleague rdf:resource="#1224"/>
+        <colleague rdf:resource="#1230"/>
+        <colleague rdf:resource="#1231"/>
+        <associate rdf:resource="#1250"/>
+        <colleague rdf:resource="#1288"/>
+        <colleague rdf:resource="#1602"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1207 -->
+
+    <owl:Thing rdf:about="#1207">
+        <business_partner rdf:resource="#1079"/>
+        <business_partner rdf:resource="#1089"/>
+        <best_friend rdf:resource="#1152"/>
+        <colleague rdf:resource="#1155"/>
+        <colleague rdf:resource="#1156"/>
+        <friend rdf:resource="#1206"/>
+        <colleague rdf:resource="#1219"/>
+        <colleague rdf:resource="#1224"/>
+        <colleague rdf:resource="#1230"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1208 -->
+
+    <owl:Thing rdf:about="#1208">
+        <contact rdf:resource="#1080"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1209 -->
+
+    <owl:Thing rdf:about="#1209">
+        <friend rdf:resource="#1208"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1219 -->
+
+    <owl:Thing rdf:about="#1219">
+        <associate rdf:resource="#1156"/>
+        <colleague rdf:resource="#1156"/>
+        <contact rdf:resource="#1157"/>
+        <associate rdf:resource="#1206"/>
+        <coworker rdf:resource="#1206"/>
+        <colleague rdf:resource="#1224"/>
+        <associate rdf:resource="#1230"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1224 -->
+
+    <owl:Thing rdf:about="#1224">
+        <business_partner rdf:resource="#1089"/>
+        <friend rdf:resource="#1152"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1225 -->
+
+    <owl:Thing rdf:about="#1225">
+        <friend rdf:resource="#1080"/>
+        <associate rdf:resource="#1089"/>
+        <friend rdf:resource="#1119"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1227 -->
+
+    <rdf:Description rdf:about="#1227"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1230 -->
+
+    <owl:Thing rdf:about="#1230">
+        <colleague rdf:resource="#1152"/>
+        <colleague rdf:resource="#1155"/>
+        <colleague rdf:resource="#1156"/>
+        <colleague rdf:resource="#1159"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1231 -->
+
+    <owl:Thing rdf:about="#1231">
+        <colleague rdf:resource="#1152"/>
+        <colleague rdf:resource="#1156"/>
+        <colleague rdf:resource="#1207"/>
+        <colleague rdf:resource="#1219"/>
+        <colleague rdf:resource="#1224"/>
+        <colleague rdf:resource="#1230"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1232 -->
+
+    <owl:Thing rdf:about="#1232">
+        <business_partner rdf:resource="#1086"/>
+        <business_partner rdf:resource="#1089"/>
+        <supervised_by rdf:resource="#1188"/>
+        <coworker rdf:resource="#1764"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1234 -->
+
+    <owl:Thing rdf:about="#1234">
+        <coworker rdf:resource="#1237"/>
+        <colleague rdf:resource="#1237"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1236 -->
+
+    <owl:Thing rdf:about="#1236">
+        <wife rdf:resource="#1252"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1237 -->
+
+    <rdf:Description rdf:about="#1237"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1239 -->
+
+    <rdf:Description rdf:about="#1239"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1249 -->
+
+    <owl:Thing rdf:about="#1249">
+        <colleague rdf:resource="#1206"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1250 -->
+
+    <owl:Thing rdf:about="#1250">
+        <friend rdf:resource="#1152"/>
+        <associate rdf:resource="#1155"/>
+        <associate rdf:resource="#1156"/>
+        <associate rdf:resource="#1157"/>
+        <best_friend rdf:resource="#1159"/>
+        <colleague rdf:resource="#1207"/>
+        <associate rdf:resource="#1230"/>
+        <associate rdf:resource="#1231"/>
+        <colleague rdf:resource="#1602"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1252 -->
+
+    <rdf:Description rdf:about="#1252"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1254 -->
+
+    <owl:Thing rdf:about="#1254">
+        <colleague rdf:resource="#1152"/>
+        <colleague rdf:resource="#1155"/>
+        <colleague rdf:resource="#1156"/>
+        <best_friend rdf:resource="#1157"/>
+        <colleague rdf:resource="#1206"/>
+        <colleague rdf:resource="#1230"/>
+        <colleague rdf:resource="#1231"/>
+        <colleague rdf:resource="#1250"/>
+        <friend rdf:resource="#1250"/>
+        <colleague rdf:resource="#1602"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1288 -->
+
+    <rdf:Description rdf:about="#1288"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1305 -->
+
+    <owl:Thing rdf:about="#1305">
+        <contact rdf:resource="#1080"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1343 -->
+
+    <owl:Thing rdf:about="#1343">
+        <friend rdf:resource="#1208"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1350 -->
+
+    <owl:Thing rdf:about="#1350">
+        <business_partner rdf:resource="#1080"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1353 -->
+
+    <owl:Thing rdf:about="#1353">
+        <friend rdf:resource="#1121"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1367 -->
+
+    <rdf:Description rdf:about="#1367"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1432 -->
+
+    <owl:Thing rdf:about="#1432">
+        <contact rdf:resource="#1437"/>
+        <contact rdf:resource="#1446"/>
+        <associate rdf:resource="#1446"/>
+        <contact rdf:resource="#1448"/>
+        <contact rdf:resource="#1471"/>
+        <contact rdf:resource="#1499"/>
+        <contact rdf:resource="#1506"/>
+        <contact rdf:resource="#1517"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1437 -->
+
+    <owl:Thing rdf:about="#1437">
+        <contact rdf:resource="#1499"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1446 -->
+
+    <owl:Thing rdf:about="#1446">
+        <friend rdf:resource="#1588"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1448 -->
+
+    <rdf:Description rdf:about="#1448"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1471 -->
+
+    <owl:Thing rdf:about="#1471">
+        <contact rdf:resource="#1437"/>
+        <contact rdf:resource="#1479"/>
+        <contact rdf:resource="#1517"/>
+        <associate rdf:resource="#1521"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1479 -->
+
+    <owl:Thing rdf:about="#1479">
+        <friend rdf:resource="#1432"/>
+        <contact rdf:resource="#1437"/>
+        <friend rdf:resource="#1446"/>
+        <best_friend rdf:resource="#1499"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1488 -->
+
+    <rdf:Description rdf:about="#1488"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1499 -->
+
+    <rdf:Description rdf:about="#1499"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1506 -->
+
+    <rdf:Description rdf:about="#1506"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1517 -->
+
+    <rdf:Description rdf:about="#1517"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1519 -->
+
+    <owl:Thing rdf:about="#1519">
+        <colleague rdf:resource="#1528"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1521 -->
+
+    <owl:Thing rdf:about="#1521">
+        <friend rdf:resource="#1432"/>
+        <friend rdf:resource="#1479"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1528 -->
+
+    <rdf:Description rdf:about="#1528"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1531 -->
+
+    <owl:Thing rdf:about="#1531">
+        <fellow rdf:resource="#1528"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1532 -->
+
+    <owl:Thing rdf:about="#1532">
+        <contact rdf:resource="#1528"/>
+        <coworker rdf:resource="#1531"/>
+        <business_partner rdf:resource="#1541"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1533 -->
+
+    <owl:Thing rdf:about="#1533">
+        <business_partner rdf:resource="#1528"/>
+        <business_partner rdf:resource="#1531"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1536 -->
+
+    <owl:Thing rdf:about="#1536">
+        <contact rdf:resource="#1528"/>
+        <contact rdf:resource="#1541"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1541 -->
+
+    <owl:Thing rdf:about="#1541">
+        <colleague rdf:resource="#1528"/>
+        <colleague rdf:resource="#1531"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1552 -->
+
+    <owl:Thing rdf:about="#1552">
+        <contact rdf:resource="#1528"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1574 -->
+
+    <owl:Thing rdf:about="#1574">
+        <colleague rdf:resource="#1080"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1588 -->
+
+    <rdf:Description rdf:about="#1588"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1600 -->
+
+    <owl:Thing rdf:about="#1600">
+        <coworker rdf:resource="#1080"/>
+        <coworker rdf:resource="#1098"/>
+        <coworker rdf:resource="#1099"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1602 -->
+
+    <owl:Thing rdf:about="#1602">
+        <colleague rdf:resource="#1152"/>
+        <colleague rdf:resource="#1230"/>
+        <colleague rdf:resource="#1231"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1605 -->
+
+    <owl:Thing rdf:about="#1605">
+        <contact rdf:resource="#1079"/>
+        <contact rdf:resource="#1086"/>
+        <friend rdf:resource="#1089"/>
+        <friend rdf:resource="#1617"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1612 -->
+
+    <owl:Thing rdf:about="#1612">
+        <contact rdf:resource="#1432"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1617 -->
+
+    <rdf:Description rdf:about="#1617"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1668 -->
+
+    <owl:Thing rdf:about="#1668">
+        <contact rdf:resource="#1080"/>
+        <contact rdf:resource="#1446"/>
+        <colleague rdf:resource="#1670"/>
+        <colleague rdf:resource="#1684"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1670 -->
+
+    <owl:Thing rdf:about="#1670">
+        <business_partner rdf:resource="#1080"/>
+        <business_partner rdf:resource="#1099"/>
+        <colleague rdf:resource="#1686"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1684 -->
+
+    <owl:Thing rdf:about="#1684">
+        <colleague rdf:resource="#1670"/>
+        <colleague rdf:resource="#1686"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1686 -->
+
+    <rdf:Description rdf:about="#1686"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1718 -->
+
+    <owl:Thing rdf:about="#1718">
+        <friend rdf:resource="#1729"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1729 -->
+
+    <owl:Thing rdf:about="#1729">
+        <colleague rdf:resource="#1718"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1761 -->
+
+    <owl:Thing rdf:about="#1761">
+        <friend rdf:resource="#1718"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1764 -->
+
+    <rdf:Description rdf:about="#1764"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1821 -->
+
+    <owl:Thing rdf:about="#1821">
+        <colleague rdf:resource="#1668"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1903 -->
+
+    <rdf:Description rdf:about="#1903"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1936 -->
+
+    <owl:Thing rdf:about="#1936">
+        <fellow_student rdf:resource="#1232"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1955 -->
+
+    <owl:Thing rdf:about="#1955">
+        <friend rdf:resource="#1957"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#1957 -->
+
+    <rdf:Description rdf:about="#1957"/>
+    
+
+
+    <!-- http://www.iyouit.eu/agent-inst.owl#2037 -->
+
+    <owl:Thing rdf:about="#2037">
+        <friend rdf:resource="#1437"/>
+    </owl:Thing>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 2.2.1.962) http://owlapi.sourceforge.net -->
+

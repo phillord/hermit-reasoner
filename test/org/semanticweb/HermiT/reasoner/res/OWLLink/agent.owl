@@ -1,0 +1,2077 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+    xmlns="http://www.iyouit.eu/agent.owl#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+  xml:base="http://www.iyouit.eu/agent.owl">
+  <owl:Ontology rdf:about="">
+    <rdfs:label xml:lang="en">IYOUIT Agent Ontology. Copyright 2008 by DoCoMo Euro-Labs. All rights reserved.</rdfs:label>
+    <owl:versionInfo xml:lang="en">1.4</owl:versionInfo>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Grandparent">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:ID="Person"/>
+          <owl:Class>
+            <owl:unionOf rdf:parseType="Collection">
+              <owl:Restriction>
+                <owl:onProperty>
+                  <owl:ObjectProperty rdf:ID="grandchild"/>
+                </owl:onProperty>
+                <owl:someValuesFrom>
+                  <owl:Class rdf:about="#Person"/>
+                </owl:someValuesFrom>
+              </owl:Restriction>
+              <owl:Restriction>
+                <owl:onProperty>
+                  <owl:ObjectProperty rdf:ID="child"/>
+                </owl:onProperty>
+                <owl:someValuesFrom>
+                  <owl:Class rdf:ID="Parent"/>
+                </owl:someValuesFrom>
+              </owl:Restriction>
+            </owl:unionOf>
+          </owl:Class>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="High_school">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="School"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Middle_school"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Elementary_school"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:ID="Financial_institution">
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Consulting_company"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Lodging_accommodations"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Network_provider"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Private_transportation"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Private_service_sector"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Insurance_company"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:ID="Agent">
+  </owl:Class>
+  <owl:Class rdf:ID="Altaic">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Language"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Austroasatic"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Sino_tibetan"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Afro_asiatic"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Indo_european"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:about="#Person">
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Organization"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Group"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf rdf:resource="#Agent"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Undergraduate_degree">
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Postgraduate_degree"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Degree"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Graduate_degree"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:ID="Student">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Restriction>
+            <owl:onProperty>
+              <owl:TransitiveProperty rdf:ID="fellow_student"/>
+            </owl:onProperty>
+            <owl:someValuesFrom rdf:resource="#Person"/>
+          </owl:Restriction>
+          <owl:Class rdf:about="#Person"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="Higher_education_student">
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Middle_school_student"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Elementary_school_student"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf rdf:resource="#Student"/>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="High_school_student"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:ID="Iranian">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Indo_european"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Latin"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Baltic"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Slavic"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Celtic"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Hellenic"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Germanic"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Indic"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:about="#Private_transportation">
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Consulting_company"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="#Financial_institution"/>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Private_service_sector"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Network_provider"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Insurance_company"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Lodging_accommodations"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:ID="Faculty_member">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Academic_staff"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Father">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:ID="Man"/>
+          <owl:Class rdf:about="#Parent"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="Sports_federation">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Sports_organization"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="My_parent_in_law">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Restriction>
+            <owl:someValuesFrom>
+              <owl:Class rdf:ID="My_spouse"/>
+            </owl:someValuesFrom>
+            <owl:onProperty>
+              <owl:ObjectProperty rdf:about="#child"/>
+            </owl:onProperty>
+          </owl:Restriction>
+          <owl:Class rdf:ID="Anybody_else"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:about="#Academic_staff">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Job_title"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Management"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Research_staff"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Administrative_staff"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Technical_staff"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:ID="My_grandparent">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class>
+            <owl:unionOf rdf:parseType="Collection">
+              <owl:Restriction>
+                <owl:someValuesFrom>
+                  <owl:Class rdf:ID="Myself"/>
+                </owl:someValuesFrom>
+                <owl:onProperty>
+                  <owl:ObjectProperty rdf:about="#grandchild"/>
+                </owl:onProperty>
+              </owl:Restriction>
+              <owl:Restriction>
+                <owl:someValuesFrom>
+                  <owl:Class rdf:ID="My_parent"/>
+                </owl:someValuesFrom>
+                <owl:onProperty>
+                  <owl:ObjectProperty rdf:about="#child"/>
+                </owl:onProperty>
+              </owl:Restriction>
+              <owl:Restriction>
+                <owl:someValuesFrom>
+                  <owl:Class rdf:ID="My_sibling"/>
+                </owl:someValuesFrom>
+                <owl:onProperty>
+                  <owl:ObjectProperty rdf:about="#grandchild"/>
+                </owl:onProperty>
+              </owl:Restriction>
+            </owl:unionOf>
+          </owl:Class>
+          <owl:Class rdf:about="#Anybody_else"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="My_father">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="#My_parent"/>
+          <owl:Class rdf:about="#Man"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:about="#School">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Educational_organization"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Higher_education_institution"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:ID="My_mother_in_law">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:ID="Woman"/>
+          <owl:Class rdf:about="#My_parent_in_law"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="University">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Higher_education_institution"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="College"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:ID="Netherlandic_german">
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Scandinavian"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Anglo_frisian"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Germanic"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Private_service_sector">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Service_sector"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Public_service_sector"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:ID="Husband">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="#Man"/>
+          <owl:Class rdf:ID="Married"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="Ministry">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Governmental_organization"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Military"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Police"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:ID="Grandmother">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="#Grandparent"/>
+          <owl:Class rdf:about="#Woman"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:about="#Network_provider">
+    <owl:disjointWith rdf:resource="#Private_transportation"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Insurance_company"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf rdf:resource="#Private_service_sector"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Consulting_company"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Lodging_accommodations"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="#Financial_institution"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Man">
+    <rdfs:subClassOf rdf:resource="#Person"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Woman"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:about="#Myself">
+    <rdfs:subClassOf rdf:resource="#Person"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Anybody_else"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:about="#Consulting_company">
+    <owl:disjointWith rdf:resource="#Network_provider"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Lodging_accommodations"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="#Private_transportation"/>
+    <rdfs:subClassOf rdf:resource="#Private_service_sector"/>
+    <owl:disjointWith rdf:resource="#Financial_institution"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Insurance_company"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:about="#Educational_organization">
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Political_organization"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Judicial_organization"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Sports_organization"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Religious_organizations"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Governmental_organization"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Business_enterprises"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="International_organization"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Research_organization"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Organization"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Fixed_network_provider">
+    <rdfs:subClassOf rdf:resource="#Network_provider"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Language">
+  </owl:Class>
+  <owl:Class rdf:ID="Preschooler">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Child"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Wife">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="#Woman"/>
+          <owl:Class rdf:about="#Married"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="Toddler">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Child"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Middle_school_student">
+    <owl:disjointWith>
+      <owl:Class rdf:about="#High_school_student"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf rdf:resource="#Student"/>
+    <owl:disjointWith rdf:resource="#Higher_education_student"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Elementary_school_student"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:about="#Research_staff">
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Management"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Technical_staff"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Administrative_staff"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Job_title"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith rdf:resource="#Academic_staff"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Married">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Restriction>
+            <owl:someValuesFrom rdf:resource="#Person"/>
+            <owl:onProperty>
+              <owl:SymmetricProperty rdf:ID="spouse"/>
+            </owl:onProperty>
+          </owl:Restriction>
+          <owl:Class rdf:about="#Person"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="Research_laboratory">
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Research_association"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Research_organization"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Austroasatic">
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Sino_tibetan"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Afro_asiatic"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf rdf:resource="#Language"/>
+    <owl:disjointWith rdf:resource="#Altaic"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Indo_european"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:ID="Software_company">
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Hardware_company"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Handset_manufacturer"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Manufacturer"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Publishing_company"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:ID="My_friend">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Restriction>
+            <owl:onProperty>
+              <owl:SymmetricProperty rdf:ID="friend"/>
+            </owl:onProperty>
+            <owl:someValuesFrom rdf:resource="#Myself"/>
+          </owl:Restriction>
+          <owl:Class rdf:about="#Anybody_else"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:about="#Hardware_company">
+    <owl:disjointWith rdf:resource="#Software_company"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Publishing_company"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Manufacturer"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Handset_manufacturer"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:about="#My_parent">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class>
+            <owl:unionOf rdf:parseType="Collection">
+              <owl:Restriction>
+                <owl:someValuesFrom rdf:resource="#Myself"/>
+                <owl:onProperty>
+                  <owl:ObjectProperty rdf:about="#child"/>
+                </owl:onProperty>
+              </owl:Restriction>
+              <owl:Restriction>
+                <owl:someValuesFrom>
+                  <owl:Class rdf:about="#My_sibling"/>
+                </owl:someValuesFrom>
+                <owl:onProperty>
+                  <owl:ObjectProperty rdf:about="#child"/>
+                </owl:onProperty>
+              </owl:Restriction>
+            </owl:unionOf>
+          </owl:Class>
+          <owl:Class rdf:about="#Anybody_else"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="East_slavic">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Slavic"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="South_slavic"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="West_slavic"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:ID="Graduate">
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Undergraduate"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf rdf:resource="#Higher_education_student"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Mother">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="#Woman"/>
+          <owl:Class rdf:about="#Parent"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:about="#Police">
+    <owl:disjointWith rdf:resource="#Ministry"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Military"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Governmental_organization"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Nephew">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Restriction>
+            <owl:onProperty>
+              <owl:ObjectProperty rdf:ID="nephew_inv"/>
+            </owl:onProperty>
+            <owl:someValuesFrom rdf:resource="#Person"/>
+          </owl:Restriction>
+          <owl:Class rdf:about="#Person"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="My_colleague">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Restriction>
+            <owl:onProperty>
+              <owl:ObjectProperty rdf:ID="colleague"/>
+            </owl:onProperty>
+            <owl:someValuesFrom rdf:resource="#Myself"/>
+          </owl:Restriction>
+          <owl:Class rdf:about="#Anybody_else"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:about="#Governmental_organization">
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Sports_organization"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#International_organization"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="#Educational_organization"/>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Organization"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Religious_organizations"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Business_enterprises"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Political_organization"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Research_organization"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Judicial_organization"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:about="#Indic">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Indo_european"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith rdf:resource="#Iranian"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Germanic"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Latin"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Baltic"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Slavic"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Celtic"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Hellenic"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:about="#Judicial_organization">
+    <owl:disjointWith>
+      <owl:Class rdf:about="#International_organization"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Sports_organization"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Business_enterprises"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="#Governmental_organization"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Political_organization"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Research_organization"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="#Educational_organization"/>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Organization"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Religious_organizations"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:about="#Higher_education_institution">
+    <owl:disjointWith rdf:resource="#School"/>
+    <rdfs:subClassOf rdf:resource="#Educational_organization"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Organization">
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Group"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="#Person"/>
+    <rdfs:subClassOf rdf:resource="#Agent"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Lodging_accommodations">
+    <owl:disjointWith rdf:resource="#Financial_institution"/>
+    <owl:disjointWith rdf:resource="#Network_provider"/>
+    <rdfs:subClassOf rdf:resource="#Private_service_sector"/>
+    <owl:disjointWith rdf:resource="#Private_transportation"/>
+    <owl:disjointWith rdf:resource="#Consulting_company"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Insurance_company"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:ID="My_father_in_law">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="#Man"/>
+          <owl:Class rdf:about="#My_parent_in_law"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="Public_group">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Group"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Private_group"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:ID="Sports_club">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Sports_organization"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Baltic">
+    <owl:disjointWith rdf:resource="#Iranian"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Celtic"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Latin"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="#Indic"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Hellenic"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Indo_european"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Slavic"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Germanic"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:ID="Political_party">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Political_organization"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Primaryschooler">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Child"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Anglo_frisian">
+    <owl:disjointWith rdf:resource="#Netherlandic_german"/>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Germanic"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Scandinavian"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:ID="Niece">
+    <rdfs:subClassOf rdf:resource="#Person"/>
+  </owl:Class>
+  <owl:Class rdf:ID="My_sister">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="#My_sibling"/>
+          <owl:Class rdf:about="#Woman"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="My_son">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="#Man"/>
+          <owl:Class rdf:ID="My_child"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="My_daughter">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="#Woman"/>
+          <owl:Class rdf:about="#My_child"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:about="#Elementary_school">
+    <owl:disjointWith rdf:resource="#High_school"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Middle_school"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf rdf:resource="#School"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Relative">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Restriction>
+            <owl:onProperty>
+              <owl:SymmetricProperty rdf:ID="relative"/>
+            </owl:onProperty>
+            <owl:someValuesFrom rdf:resource="#Myself"/>
+          </owl:Restriction>
+          <owl:Class rdf:about="#Anybody_else"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="Trade_and_commerce">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Business_enterprises"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Manufacturer"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Service_sector"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:about="#Sports_organization">
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Research_organization"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Political_organization"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf rdf:resource="#Organization"/>
+    <owl:disjointWith rdf:resource="#Governmental_organization"/>
+    <owl:disjointWith rdf:resource="#Judicial_organization"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#International_organization"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Business_enterprises"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="#Educational_organization"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Religious_organizations"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:about="#Middle_school">
+    <owl:disjointWith rdf:resource="#High_school"/>
+    <rdfs:subClassOf rdf:resource="#School"/>
+  </owl:Class>
+  <owl:Class rdf:ID="PhD_student">
+    <rdfs:subClassOf rdf:resource="#Graduate"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Political_organization">
+    <owl:disjointWith rdf:resource="#Judicial_organization"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Research_organization"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Business_enterprises"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Religious_organizations"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="#Sports_organization"/>
+    <owl:disjointWith rdf:resource="#Educational_organization"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#International_organization"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="#Governmental_organization"/>
+    <rdfs:subClassOf rdf:resource="#Organization"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Anybody_else">
+    <rdfs:subClassOf rdf:resource="#Person"/>
+    <owl:disjointWith rdf:resource="#Myself"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Private_group">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Group"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith rdf:resource="#Public_group"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Public_service_sector">
+    <owl:disjointWith rdf:resource="#Private_service_sector"/>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Service_sector"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Hellenic">
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Celtic"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Germanic"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Slavic"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Indo_european"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith rdf:resource="#Indic"/>
+    <owl:disjointWith rdf:resource="#Iranian"/>
+    <owl:disjointWith rdf:resource="#Baltic"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Latin"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:about="#My_child">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class>
+            <owl:unionOf rdf:parseType="Collection">
+              <owl:Restriction>
+                <owl:onProperty>
+                  <owl:ObjectProperty rdf:ID="parent"/>
+                </owl:onProperty>
+                <owl:someValuesFrom rdf:resource="#Myself"/>
+              </owl:Restriction>
+              <owl:Restriction>
+                <owl:someValuesFrom>
+                  <owl:Restriction>
+                    <owl:onProperty>
+                      <owl:ObjectProperty rdf:about="#parent"/>
+                    </owl:onProperty>
+                    <owl:someValuesFrom rdf:resource="#Myself"/>
+                  </owl:Restriction>
+                </owl:someValuesFrom>
+                <owl:onProperty>
+                  <owl:SymmetricProperty rdf:ID="sibling"/>
+                </owl:onProperty>
+              </owl:Restriction>
+            </owl:unionOf>
+          </owl:Class>
+          <owl:Class rdf:about="#Anybody_else"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="Mobile_network_provider">
+    <rdfs:subClassOf rdf:resource="#Network_provider"/>
+  </owl:Class>
+  <owl:Class rdf:ID="My_mother">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="#My_parent"/>
+          <owl:Class rdf:about="#Woman"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:about="#Celtic">
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Latin"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Germanic"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="#Hellenic"/>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Indo_european"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Slavic"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="#Indic"/>
+    <owl:disjointWith rdf:resource="#Iranian"/>
+    <owl:disjointWith rdf:resource="#Baltic"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Uncle">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Restriction>
+            <owl:someValuesFrom rdf:resource="#Person"/>
+            <owl:onProperty>
+              <owl:ObjectProperty rdf:ID="uncle_inv"/>
+            </owl:onProperty>
+          </owl:Restriction>
+          <owl:Class rdf:about="#Person"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:about="#College">
+    <rdfs:subClassOf rdf:resource="#Higher_education_institution"/>
+    <owl:disjointWith rdf:resource="#University"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Handset_manufacturer">
+    <owl:disjointWith rdf:resource="#Hardware_company"/>
+    <owl:disjointWith rdf:resource="#Software_company"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Publishing_company"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Manufacturer"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Child">
+    <rdfs:subClassOf rdf:resource="#Person"/>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Adult"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:ID="Junior">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Adult"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Sino_tibetan">
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Indo_european"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Afro_asiatic"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="#Altaic"/>
+    <rdfs:subClassOf rdf:resource="#Language"/>
+    <owl:disjointWith rdf:resource="#Austroasatic"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Slavic">
+    <owl:disjointWith rdf:resource="#Iranian"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Latin"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="#Celtic"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Germanic"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="#Indic"/>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Indo_european"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith rdf:resource="#Baltic"/>
+    <owl:disjointWith rdf:resource="#Hellenic"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Group">
+    <owl:disjointWith rdf:resource="#Person"/>
+    <rdfs:subClassOf rdf:resource="#Agent"/>
+    <owl:disjointWith rdf:resource="#Organization"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Elementary_school_student">
+    <rdfs:subClassOf rdf:resource="#Student"/>
+    <owl:disjointWith rdf:resource="#Middle_school_student"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#High_school_student"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="#Higher_education_student"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Manufacturer">
+    <owl:disjointWith rdf:resource="#Trade_and_commerce"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Service_sector"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Business_enterprises"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Military">
+    <owl:disjointWith rdf:resource="#Police"/>
+    <owl:disjointWith rdf:resource="#Ministry"/>
+    <rdfs:subClassOf rdf:resource="#Governmental_organization"/>
+  </owl:Class>
+  <owl:Class rdf:about="#West_slavic">
+    <rdfs:subClassOf rdf:resource="#Slavic"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#South_slavic"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="#East_slavic"/>
+  </owl:Class>
+  <owl:Class rdf:about="#International_organization">
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Business_enterprises"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="#Political_organization"/>
+    <owl:disjointWith rdf:resource="#Judicial_organization"/>
+    <rdfs:subClassOf rdf:resource="#Organization"/>
+    <owl:disjointWith rdf:resource="#Educational_organization"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Religious_organizations"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Research_organization"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="#Sports_organization"/>
+    <owl:disjointWith rdf:resource="#Governmental_organization"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Parliament">
+    <rdfs:subClassOf rdf:resource="#Political_organization"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Postgraduate_degree">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Degree"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith rdf:resource="#Undergraduate_degree"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Graduate_degree"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:ID="My_brother">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="#My_sibling"/>
+          <owl:Class rdf:about="#Man"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:about="#Administrative_staff">
+    <owl:disjointWith rdf:resource="#Research_staff"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Technical_staff"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Job_title"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith rdf:resource="#Academic_staff"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Management"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:about="#Undergraduate">
+    <owl:disjointWith rdf:resource="#Graduate"/>
+    <rdfs:subClassOf rdf:resource="#Higher_education_student"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Tween">
+    <rdfs:subClassOf rdf:resource="#Child"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Research_association">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Research_organization"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith rdf:resource="#Research_laboratory"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Afro_asiatic">
+    <owl:disjointWith rdf:resource="#Austroasatic"/>
+    <owl:disjointWith rdf:resource="#Altaic"/>
+    <owl:disjointWith rdf:resource="#Sino_tibetan"/>
+    <rdfs:subClassOf rdf:resource="#Language"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Indo_european"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:about="#High_school_student">
+    <owl:disjointWith rdf:resource="#Middle_school_student"/>
+    <owl:disjointWith rdf:resource="#Elementary_school_student"/>
+    <rdfs:subClassOf rdf:resource="#Student"/>
+    <owl:disjointWith rdf:resource="#Higher_education_student"/>
+  </owl:Class>
+  <owl:Class rdf:about="#My_sibling">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="#Anybody_else"/>
+          <owl:Class>
+            <owl:unionOf rdf:parseType="Collection">
+              <owl:Restriction>
+                <owl:onProperty>
+                  <owl:SymmetricProperty rdf:about="#sibling"/>
+                </owl:onProperty>
+                <owl:someValuesFrom rdf:resource="#Myself"/>
+              </owl:Restriction>
+              <owl:Restriction>
+                <owl:someValuesFrom>
+                  <owl:Restriction>
+                    <owl:someValuesFrom rdf:resource="#Myself"/>
+                    <owl:onProperty>
+                      <owl:ObjectProperty rdf:about="#child"/>
+                    </owl:onProperty>
+                  </owl:Restriction>
+                </owl:someValuesFrom>
+                <owl:onProperty>
+                  <owl:ObjectProperty rdf:about="#parent"/>
+                </owl:onProperty>
+              </owl:Restriction>
+            </owl:unionOf>
+          </owl:Class>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:about="#Woman">
+    <rdfs:subClassOf rdf:resource="#Person"/>
+    <owl:disjointWith rdf:resource="#Man"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Aunt">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Restriction>
+            <owl:someValuesFrom rdf:resource="#Person"/>
+            <owl:onProperty>
+              <owl:ObjectProperty rdf:ID="aunt_inv"/>
+            </owl:onProperty>
+          </owl:Restriction>
+          <owl:Class rdf:about="#Person"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="Elderly">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Adult"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Acquaintance">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Restriction>
+            <owl:onProperty>
+              <owl:TransitiveProperty rdf:ID="relation"/>
+            </owl:onProperty>
+            <owl:someValuesFrom rdf:resource="#Myself"/>
+          </owl:Restriction>
+          <owl:Class rdf:about="#Anybody_else"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:about="#Latin">
+    <owl:disjointWith rdf:resource="#Hellenic"/>
+    <owl:disjointWith rdf:resource="#Celtic"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Germanic"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Indo_european"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith rdf:resource="#Indic"/>
+    <owl:disjointWith rdf:resource="#Iranian"/>
+    <owl:disjointWith rdf:resource="#Baltic"/>
+    <owl:disjointWith rdf:resource="#Slavic"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Germanic">
+    <owl:disjointWith rdf:resource="#Hellenic"/>
+    <owl:disjointWith rdf:resource="#Celtic"/>
+    <owl:disjointWith rdf:resource="#Indic"/>
+    <owl:disjointWith rdf:resource="#Latin"/>
+    <owl:disjointWith rdf:resource="#Iranian"/>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Indo_european"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith rdf:resource="#Baltic"/>
+    <owl:disjointWith rdf:resource="#Slavic"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Job_title">
+  </owl:Class>
+  <owl:Class rdf:ID="My_business_partner">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Restriction>
+            <owl:someValuesFrom rdf:resource="#Myself"/>
+            <owl:onProperty>
+              <owl:SymmetricProperty rdf:ID="business_partner"/>
+            </owl:onProperty>
+          </owl:Restriction>
+          <owl:Class rdf:about="#Anybody_else"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:about="#My_spouse">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Restriction>
+            <owl:onProperty>
+              <owl:SymmetricProperty rdf:about="#spouse"/>
+            </owl:onProperty>
+            <owl:someValuesFrom rdf:resource="#Myself"/>
+          </owl:Restriction>
+          <owl:Class rdf:about="#Anybody_else"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="Grandfather">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="#Grandparent"/>
+          <owl:Class rdf:about="#Man"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:about="#Service_sector">
+    <owl:disjointWith rdf:resource="#Trade_and_commerce"/>
+    <owl:disjointWith rdf:resource="#Manufacturer"/>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Business_enterprises"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="My_grandmother">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="#My_grandparent"/>
+          <owl:Class rdf:about="#Woman"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:about="#Indo_european">
+    <rdfs:subClassOf rdf:resource="#Language"/>
+    <owl:disjointWith rdf:resource="#Austroasatic"/>
+    <owl:disjointWith rdf:resource="#Altaic"/>
+    <owl:disjointWith rdf:resource="#Sino_tibetan"/>
+    <owl:disjointWith rdf:resource="#Afro_asiatic"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Adult">
+    <owl:disjointWith rdf:resource="#Child"/>
+    <rdfs:subClassOf rdf:resource="#Person"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Infant">
+    <rdfs:subClassOf rdf:resource="#Child"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Research_organization">
+    <owl:disjointWith rdf:resource="#Educational_organization"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Business_enterprises"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf rdf:resource="#Organization"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Religious_organizations"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="#Governmental_organization"/>
+    <owl:disjointWith rdf:resource="#International_organization"/>
+    <owl:disjointWith rdf:resource="#Political_organization"/>
+    <owl:disjointWith rdf:resource="#Sports_organization"/>
+    <owl:disjointWith rdf:resource="#Judicial_organization"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Publishing_company">
+    <owl:disjointWith rdf:resource="#Hardware_company"/>
+    <owl:disjointWith rdf:resource="#Handset_manufacturer"/>
+    <owl:disjointWith rdf:resource="#Software_company"/>
+    <rdfs:subClassOf rdf:resource="#Manufacturer"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Mood">
+  </owl:Class>
+  <owl:Class rdf:ID="Teenager">
+    <rdfs:subClassOf rdf:resource="#Child"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Activity">
+  </owl:Class>
+  <owl:Class rdf:ID="My_grandfather">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="#Man"/>
+          <owl:Class rdf:about="#My_grandparent"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="East_scandinavian">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Scandinavian"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="West_scandinavian"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:about="#Insurance_company">
+    <owl:disjointWith rdf:resource="#Financial_institution"/>
+    <owl:disjointWith rdf:resource="#Network_provider"/>
+    <owl:disjointWith rdf:resource="#Consulting_company"/>
+    <owl:disjointWith rdf:resource="#Private_transportation"/>
+    <rdfs:subClassOf rdf:resource="#Private_service_sector"/>
+    <owl:disjointWith rdf:resource="#Lodging_accommodations"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Technical_staff">
+    <rdfs:subClassOf rdf:resource="#Job_title"/>
+    <owl:disjointWith rdf:resource="#Research_staff"/>
+    <owl:disjointWith rdf:resource="#Academic_staff"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Management"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="#Administrative_staff"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Scandinavian">
+    <owl:disjointWith rdf:resource="#Anglo_frisian"/>
+    <owl:disjointWith rdf:resource="#Netherlandic_german"/>
+    <rdfs:subClassOf rdf:resource="#Germanic"/>
+  </owl:Class>
+  <owl:Class rdf:about="#West_scandinavian">
+    <owl:disjointWith rdf:resource="#East_scandinavian"/>
+    <rdfs:subClassOf rdf:resource="#Scandinavian"/>
+  </owl:Class>
+  <owl:Class rdf:ID="My_supervisor">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Restriction>
+            <owl:someValuesFrom rdf:resource="#Myself"/>
+            <owl:onProperty>
+              <owl:ObjectProperty rdf:ID="supervises"/>
+            </owl:onProperty>
+          </owl:Restriction>
+          <owl:Class rdf:about="#Anybody_else"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:about="#Business_enterprises">
+    <owl:disjointWith rdf:resource="#Research_organization"/>
+    <owl:disjointWith rdf:resource="#Sports_organization"/>
+    <owl:disjointWith rdf:resource="#Judicial_organization"/>
+    <owl:disjointWith rdf:resource="#Educational_organization"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Religious_organizations"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="#Governmental_organization"/>
+    <owl:disjointWith rdf:resource="#International_organization"/>
+    <owl:disjointWith rdf:resource="#Political_organization"/>
+    <rdfs:subClassOf rdf:resource="#Organization"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Senior">
+    <rdfs:subClassOf rdf:resource="#Adult"/>
+  </owl:Class>
+  <owl:Class rdf:about="#South_slavic">
+    <owl:disjointWith rdf:resource="#West_slavic"/>
+    <rdfs:subClassOf rdf:resource="#Slavic"/>
+    <owl:disjointWith rdf:resource="#East_slavic"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Religious_organizations">
+    <owl:disjointWith rdf:resource="#Business_enterprises"/>
+    <owl:disjointWith rdf:resource="#Judicial_organization"/>
+    <owl:disjointWith rdf:resource="#Political_organization"/>
+    <rdfs:subClassOf rdf:resource="#Organization"/>
+    <owl:disjointWith rdf:resource="#Sports_organization"/>
+    <owl:disjointWith rdf:resource="#Research_organization"/>
+    <owl:disjointWith rdf:resource="#International_organization"/>
+    <owl:disjointWith rdf:resource="#Educational_organization"/>
+    <owl:disjointWith rdf:resource="#Governmental_organization"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Graduate_degree">
+    <owl:disjointWith rdf:resource="#Undergraduate_degree"/>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Degree"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith rdf:resource="#Postgraduate_degree"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Parent">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class>
+            <owl:unionOf rdf:parseType="Collection">
+              <owl:Restriction>
+                <owl:onProperty>
+                  <owl:ObjectProperty rdf:about="#child"/>
+                </owl:onProperty>
+                <owl:someValuesFrom rdf:resource="#Person"/>
+              </owl:Restriction>
+              <owl:Restriction>
+                <owl:onProperty>
+                  <owl:ObjectProperty rdf:about="#grandchild"/>
+                </owl:onProperty>
+                <owl:someValuesFrom rdf:resource="#Person"/>
+              </owl:Restriction>
+            </owl:unionOf>
+          </owl:Class>
+          <owl:Class rdf:about="#Person"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:about="#Degree">
+  </owl:Class>
+  <owl:Class rdf:about="#Management">
+    <owl:disjointWith rdf:resource="#Technical_staff"/>
+    <owl:disjointWith rdf:resource="#Administrative_staff"/>
+    <owl:disjointWith rdf:resource="#Research_staff"/>
+    <rdfs:subClassOf rdf:resource="#Job_title"/>
+    <owl:disjointWith rdf:resource="#Academic_staff"/>
+  </owl:Class>
+  <owl:ObjectProperty rdf:about="#parent">
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:about="#child"/>
+    </owl:inverseOf>
+    <rdfs:subPropertyOf>
+      <owl:ObjectProperty rdf:ID="ancestor"/>
+    </rdfs:subPropertyOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="supervisor">
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:about="#supervises"/>
+    </owl:inverseOf>
+    <rdfs:subPropertyOf>
+      <owl:ObjectProperty rdf:ID="knows"/>
+    </rdfs:subPropertyOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="brother">
+    <rdfs:subPropertyOf>
+      <owl:SymmetricProperty rdf:about="#sibling"/>
+    </rdfs:subPropertyOf>
+    <rdfs:range rdf:resource="#Man"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#TransitiveProperty"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="met">
+    <owl:inverseOf rdf:resource="#met"/>
+    <rdfs:subPropertyOf>
+      <owl:ObjectProperty rdf:about="#knows"/>
+    </rdfs:subPropertyOf>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#SymmetricProperty"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="registered">
+    <rdfs:subPropertyOf>
+      <owl:ObjectProperty rdf:ID="affiliation"/>
+    </rdfs:subPropertyOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="owns">
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#ancestor">
+    <rdfs:subPropertyOf>
+      <owl:SymmetricProperty rdf:about="#relative"/>
+    </rdfs:subPropertyOf>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#TransitiveProperty"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="home_city">
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="wants_to_know">
+    <rdfs:subPropertyOf>
+      <owl:TransitiveProperty rdf:about="#relation"/>
+    </rdfs:subPropertyOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="grandfather">
+    <rdfs:subPropertyOf>
+      <owl:ObjectProperty rdf:ID="grandparent"/>
+    </rdfs:subPropertyOf>
+    <rdfs:range>
+      <owl:Class>
+        <owl:unionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="#Grandfather"/>
+          <owl:Class rdf:about="#Father"/>
+        </owl:unionOf>
+      </owl:Class>
+    </rdfs:range>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="awarding_institution">
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#child">
+    <rdfs:subPropertyOf>
+      <owl:TransitiveProperty rdf:ID="descendant"/>
+    </rdfs:subPropertyOf>
+    <owl:inverseOf rdf:resource="#parent"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#colleague">
+    <rdfs:subPropertyOf>
+      <owl:SymmetricProperty rdf:ID="associate"/>
+    </rdfs:subPropertyOf>
+    <owl:inverseOf rdf:resource="#colleague"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#SymmetricProperty"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#TransitiveProperty"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="degree">
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="mentor">
+    <rdfs:subPropertyOf>
+      <owl:ObjectProperty rdf:about="#knows"/>
+    </rdfs:subPropertyOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="mother">
+    <rdfs:subPropertyOf rdf:resource="#parent"/>
+    <rdfs:range rdf:resource="#Mother"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="fiancee">
+    <rdfs:domain rdf:resource="#Man"/>
+    <rdfs:range rdf:resource="#Woman"/>
+    <rdfs:subPropertyOf>
+      <owl:SymmetricProperty rdf:ID="engaged"/>
+    </rdfs:subPropertyOf>
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:ID="fiance"/>
+    </owl:inverseOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="carry">
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="nationality">
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#grandchild">
+    <rdfs:subPropertyOf>
+      <owl:TransitiveProperty rdf:about="#descendant"/>
+    </rdfs:subPropertyOf>
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:about="#grandparent"/>
+    </owl:inverseOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="native_language">
+    <rdfs:subPropertyOf>
+      <owl:ObjectProperty rdf:ID="language"/>
+    </rdfs:subPropertyOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#uncle_inv">
+    <rdfs:domain rdf:resource="#Man"/>
+    <rdfs:subPropertyOf>
+      <owl:SymmetricProperty rdf:about="#relative"/>
+    </rdfs:subPropertyOf>
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:ID="uncle"/>
+    </owl:inverseOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="aunt">
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:about="#aunt_inv"/>
+    </owl:inverseOf>
+    <rdfs:subPropertyOf>
+      <owl:SymmetricProperty rdf:about="#relative"/>
+    </rdfs:subPropertyOf>
+    <rdfs:range rdf:resource="#Woman"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="job_title">
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="home_country">
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="foreign_language">
+    <rdfs:subPropertyOf>
+      <owl:ObjectProperty rdf:about="#language"/>
+    </rdfs:subPropertyOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#grandparent">
+    <rdfs:subPropertyOf rdf:resource="#ancestor"/>
+    <owl:inverseOf rdf:resource="#grandchild"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#nephew_inv">
+    <rdfs:domain rdf:resource="#Man"/>
+    <rdfs:subPropertyOf>
+      <owl:SymmetricProperty rdf:about="#relative"/>
+    </rdfs:subPropertyOf>
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:ID="nephew"/>
+    </owl:inverseOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#nephew">
+    <rdfs:subPropertyOf>
+      <owl:SymmetricProperty rdf:about="#relative"/>
+    </rdfs:subPropertyOf>
+    <owl:inverseOf rdf:resource="#nephew_inv"/>
+    <rdfs:range rdf:resource="#Man"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="work_country">
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="birth_place">
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#knows">
+    <owl:inverseOf rdf:resource="#knows"/>
+    <rdfs:subPropertyOf>
+      <owl:TransitiveProperty rdf:about="#relation"/>
+    </rdfs:subPropertyOf>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#TransitiveProperty"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#SymmetricProperty"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#fiance">
+    <rdfs:domain rdf:resource="#Woman"/>
+    <owl:inverseOf rdf:resource="#fiancee"/>
+    <rdfs:subPropertyOf>
+      <owl:SymmetricProperty rdf:about="#engaged"/>
+    </rdfs:subPropertyOf>
+    <rdfs:range rdf:resource="#Man"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="wife">
+    <rdfs:domain rdf:resource="#Husband"/>
+    <rdfs:range rdf:resource="#Wife"/>
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:ID="husband"/>
+    </owl:inverseOf>
+    <rdfs:subPropertyOf>
+      <owl:SymmetricProperty rdf:about="#spouse"/>
+    </rdfs:subPropertyOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="work_city">
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#language">
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="native_country">
+    <rdfs:subPropertyOf rdf:resource="#birth_place"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#supervises">
+    <owl:inverseOf rdf:resource="#supervisor"/>
+    <rdfs:subPropertyOf rdf:resource="#knows"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="daughter">
+    <rdfs:range rdf:resource="#Woman"/>
+    <rdfs:subPropertyOf rdf:resource="#child"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="group">
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="niece">
+    <rdfs:subPropertyOf>
+      <owl:SymmetricProperty rdf:about="#relative"/>
+    </rdfs:subPropertyOf>
+    <rdfs:range rdf:resource="#Woman"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="flatmate">
+    <rdfs:subPropertyOf>
+      <owl:SymmetricProperty rdf:about="#associate"/>
+    </rdfs:subPropertyOf>
+    <owl:inverseOf rdf:resource="#flatmate"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#SymmetricProperty"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#TransitiveProperty"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#uncle">
+    <rdfs:range rdf:resource="#Man"/>
+    <rdfs:subPropertyOf>
+      <owl:SymmetricProperty rdf:about="#relative"/>
+    </rdfs:subPropertyOf>
+    <owl:inverseOf rdf:resource="#uncle_inv"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="granddaughter">
+    <rdfs:subPropertyOf rdf:resource="#grandchild"/>
+    <rdfs:range rdf:resource="#Woman"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="cousin">
+    <rdfs:subPropertyOf>
+      <owl:SymmetricProperty rdf:about="#relative"/>
+    </rdfs:subPropertyOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="grandson">
+    <rdfs:subPropertyOf rdf:resource="#grandchild"/>
+    <rdfs:range rdf:resource="#Man"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#aunt_inv">
+    <owl:inverseOf rdf:resource="#aunt"/>
+    <rdfs:subPropertyOf>
+      <owl:SymmetricProperty rdf:about="#relative"/>
+    </rdfs:subPropertyOf>
+    <rdfs:domain rdf:resource="#Woman"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="former_affiliation">
+    <rdfs:subPropertyOf rdf:resource="#knows"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="head">
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="employer">
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:ID="employee"/>
+    </owl:inverseOf>
+    <rdfs:subPropertyOf>
+      <owl:ObjectProperty rdf:about="#affiliation"/>
+    </rdfs:subPropertyOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#affiliation">
+    <rdfs:range rdf:resource="#Agent"/>
+    <rdfs:subPropertyOf rdf:resource="#knows"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="son">
+    <rdfs:subPropertyOf rdf:resource="#child"/>
+    <rdfs:range rdf:resource="#Man"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="grandmother">
+    <rdfs:range>
+      <owl:Class>
+        <owl:unionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="#Grandmother"/>
+          <owl:Class rdf:about="#Mother"/>
+        </owl:unionOf>
+      </owl:Class>
+    </rdfs:range>
+    <rdfs:subPropertyOf rdf:resource="#grandparent"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#husband">
+    <rdfs:range rdf:resource="#Husband"/>
+    <rdfs:domain rdf:resource="#Wife"/>
+    <owl:inverseOf rdf:resource="#wife"/>
+    <rdfs:subPropertyOf>
+      <owl:SymmetricProperty rdf:about="#spouse"/>
+    </rdfs:subPropertyOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="activity">
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#employee">
+    <rdfs:subPropertyOf rdf:resource="#affiliation"/>
+    <owl:inverseOf rdf:resource="#employer"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="father">
+    <rdfs:range rdf:resource="#Father"/>
+    <rdfs:subPropertyOf rdf:resource="#parent"/>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:ID="id">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="jabber_chat">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:subPropertyOf>
+      <owl:DatatypeProperty rdf:ID="messaging"/>
+    </rdfs:subPropertyOf>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="home_postal_code">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="department">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="imei">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="pager">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="icq_chat">
+    <rdfs:subPropertyOf>
+      <owl:DatatypeProperty rdf:about="#messaging"/>
+    </rdfs:subPropertyOf>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="first_name">
+    <rdfs:subPropertyOf>
+      <owl:DatatypeProperty rdf:ID="name"/>
+    </rdfs:subPropertyOf>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="fax">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="birthday">
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="home_phone">
+    <rdfs:subPropertyOf>
+      <owl:DatatypeProperty rdf:ID="phone"/>
+    </rdfs:subPropertyOf>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="degree_abbrev">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="name_suffix">
+    <rdfs:subPropertyOf>
+      <owl:DatatypeProperty rdf:about="#name"/>
+    </rdfs:subPropertyOf>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="email">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="work_postal_code">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="last_name">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:subPropertyOf>
+      <owl:DatatypeProperty rdf:about="#name"/>
+    </rdfs:subPropertyOf>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="ab_id">
+    <rdfs:subPropertyOf rdf:resource="#id"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="#messaging">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="work_fax">
+    <rdfs:subPropertyOf rdf:resource="#fax"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="home_street">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="uid">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:subPropertyOf rdf:resource="#id"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="name_prefix">
+    <rdfs:subPropertyOf>
+      <owl:DatatypeProperty rdf:about="#name"/>
+    </rdfs:subPropertyOf>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="work_email">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:subPropertyOf rdf:resource="#email"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="yahoo_chat">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:subPropertyOf rdf:resource="#messaging"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="aim_chat">
+    <rdfs:subPropertyOf rdf:resource="#messaging"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="age">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="image">
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="home_fax">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:subPropertyOf rdf:resource="#fax"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="homepage">
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="work_street">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="msn_chat">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:subPropertyOf rdf:resource="#messaging"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="home_email">
+    <rdfs:subPropertyOf rdf:resource="#email"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="#name">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="mobile_phone">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:subPropertyOf>
+      <owl:DatatypeProperty rdf:about="#phone"/>
+    </rdfs:subPropertyOf>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="middle_name">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:subPropertyOf rdf:resource="#name"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="nickname">
+    <rdfs:subPropertyOf rdf:resource="#name"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="work_phone">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:subPropertyOf>
+      <owl:DatatypeProperty rdf:about="#phone"/>
+    </rdfs:subPropertyOf>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="#phone">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="maiden_name">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:subPropertyOf rdf:resource="#name"/>
+  </owl:DatatypeProperty>
+  <owl:TransitiveProperty rdf:about="#descendant">
+    <rdfs:subPropertyOf>
+      <owl:SymmetricProperty rdf:about="#relative"/>
+    </rdfs:subPropertyOf>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </owl:TransitiveProperty>
+  <owl:TransitiveProperty rdf:ID="sister">
+    <rdfs:subPropertyOf>
+      <owl:SymmetricProperty rdf:about="#sibling"/>
+    </rdfs:subPropertyOf>
+    <rdfs:range rdf:resource="#Woman"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </owl:TransitiveProperty>
+  <owl:TransitiveProperty rdf:about="#fellow_student">
+    <rdfs:subPropertyOf>
+      <owl:SymmetricProperty rdf:about="#associate"/>
+    </rdfs:subPropertyOf>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#SymmetricProperty"/>
+    <owl:inverseOf rdf:resource="#fellow_student"/>
+  </owl:TransitiveProperty>
+  <owl:TransitiveProperty rdf:about="#relation">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#SymmetricProperty"/>
+    <owl:inverseOf rdf:resource="#relation"/>
+  </owl:TransitiveProperty>
+  <owl:SymmetricProperty rdf:about="#relative">
+    <rdfs:subPropertyOf rdf:resource="#knows"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <owl:inverseOf rdf:resource="#relative"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#TransitiveProperty"/>
+  </owl:SymmetricProperty>
+  <owl:SymmetricProperty rdf:about="#friend">
+    <rdfs:subPropertyOf rdf:resource="#knows"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <owl:inverseOf rdf:resource="#friend"/>
+  </owl:SymmetricProperty>
+  <owl:SymmetricProperty rdf:about="#spouse">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:subPropertyOf rdf:resource="#relative"/>
+  </owl:SymmetricProperty>
+  <owl:SymmetricProperty rdf:about="#business_partner">
+    <owl:inverseOf rdf:resource="#business_partner"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:subPropertyOf>
+      <owl:SymmetricProperty rdf:about="#associate"/>
+    </rdfs:subPropertyOf>
+  </owl:SymmetricProperty>
+  <owl:SymmetricProperty rdf:about="#sibling">
+    <rdfs:subPropertyOf rdf:resource="#relative"/>
+    <owl:inverseOf rdf:resource="#sibling"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#TransitiveProperty"/>
+  </owl:SymmetricProperty>
+  <owl:SymmetricProperty rdf:ID="best_friend">
+    <owl:inverseOf rdf:resource="#best_friend"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:subPropertyOf>
+      <owl:SymmetricProperty rdf:ID="close_friend"/>
+    </rdfs:subPropertyOf>
+  </owl:SymmetricProperty>
+  <owl:SymmetricProperty rdf:ID="neighbor">
+    <owl:inverseOf rdf:resource="#neighbor"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:subPropertyOf rdf:resource="#knows"/>
+  </owl:SymmetricProperty>
+  <owl:SymmetricProperty rdf:about="#engaged">
+    <rdfs:subPropertyOf rdf:resource="#relative"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </owl:SymmetricProperty>
+  <owl:SymmetricProperty rdf:about="#associate">
+    <owl:inverseOf rdf:resource="#associate"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:subPropertyOf rdf:resource="#knows"/>
+  </owl:SymmetricProperty>
+  <owl:SymmetricProperty rdf:about="#close_friend">
+    <rdfs:subPropertyOf rdf:resource="#friend"/>
+    <owl:inverseOf rdf:resource="#close_friend"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </owl:SymmetricProperty>
+  <owl:FunctionalProperty rdf:ID="respiration_rate">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:ID="pulse_rate">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:ID="native_city">
+    <rdfs:subPropertyOf rdf:resource="#birth_place"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </owl:FunctionalProperty>
+</rdf:RDF>

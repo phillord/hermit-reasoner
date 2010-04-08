@@ -1,0 +1,163 @@
+<?xml version="1.0"?>
+<rdf:RDF
+    xmlns:time="http://www.iyouit.eu/time.owl#"
+    xmlns="http://www.iyouit.eu/situation.owl#"
+    xmlns:space="http://www.iyouit.eu/space.owl#"
+    xmlns:agent="http://www.iyouit.eu/agent.owl#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+  xml:base="http://www.iyouit.eu/situation.owl">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="http://www.iyouit.eu/space.owl"/>
+    <owl:versionInfo xml:lang="en"
+    >1.0</owl:versionInfo>
+    <owl:imports rdf:resource="http://www.iyouit.eu/agent.owl"/>
+    <owl:imports rdf:resource="http://www.iyouit.eu/time.owl"/>
+    <rdfs:comment xml:lang="en">OWL ontology providing situational concept, property and individual descriptions.</rdfs:comment>
+    <rdfs:label xml:lang="en">IYOUIT Situation Ontology. Copyright 2008 by DoCoMo Euro-Labs. All rights reserved.</rdfs:label>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Private_meeting">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Restriction>
+            <owl:onProperty>
+              <owl:ObjectProperty rdf:ID="company"/>
+            </owl:onProperty>
+            <owl:someValuesFrom>
+              <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                  <rdf:Description rdf:about="http://www.iyouit.eu/agent.owl#Relative"/>
+                  <rdf:Description rdf:about="http://www.iyouit.eu/agent.owl#My_friend"/>
+                </owl:unionOf>
+              </owl:Class>
+            </owl:someValuesFrom>
+          </owl:Restriction>
+          <owl:Class rdf:ID="Meeting"/>
+          <owl:Class rdf:ID="Private"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="Business">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class>
+            <owl:unionOf rdf:parseType="Collection">
+              <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.iyouit.eu/space.owl#location"/>
+                <owl:someValuesFrom rdf:resource="http://www.iyouit.eu/space.owl#Business_place"/>
+              </owl:Restriction>
+              <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                  <owl:Restriction>
+                    <owl:someValuesFrom rdf:resource="http://www.iyouit.eu/space.owl#Public_place"/>
+                    <owl:onProperty rdf:resource="http://www.iyouit.eu/space.owl#location"/>
+                  </owl:Restriction>
+                  <owl:Restriction>
+                    <owl:onProperty rdf:resource="http://www.iyouit.eu/time.owl#time"/>
+                    <owl:someValuesFrom rdf:resource="http://www.iyouit.eu/time.owl#Office_hour"/>
+                  </owl:Restriction>
+                </owl:intersectionOf>
+              </owl:Class>
+            </owl:unionOf>
+          </owl:Class>
+          <owl:Class rdf:ID="Situation"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:about="#Private">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class>
+            <owl:unionOf rdf:parseType="Collection">
+              <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.iyouit.eu/space.owl#location"/>
+                <owl:someValuesFrom rdf:resource="http://www.iyouit.eu/space.owl#Private_place"/>
+              </owl:Restriction>
+              <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                  <owl:Restriction>
+                    <owl:someValuesFrom rdf:resource="http://www.iyouit.eu/space.owl#Public_place"/>
+                    <owl:onProperty rdf:resource="http://www.iyouit.eu/space.owl#location"/>
+                  </owl:Restriction>
+                  <owl:Restriction>
+                    <owl:onProperty rdf:resource="http://www.iyouit.eu/time.owl#time"/>
+                    <owl:someValuesFrom rdf:resource="http://www.iyouit.eu/time.owl#Leisure_time"/>
+                  </owl:Restriction>
+                </owl:intersectionOf>
+              </owl:Class>
+            </owl:unionOf>
+          </owl:Class>
+          <owl:Class rdf:about="#Situation"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="Family_meeting">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Restriction>
+            <owl:allValuesFrom rdf:resource="http://www.iyouit.eu/agent.owl#Relative"/>
+            <owl:onProperty rdf:resource="#company"/>
+          </owl:Restriction>
+          <owl:Class rdf:about="#Private_meeting"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="Business_meeting">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="#Business"/>
+          <owl:Class rdf:about="#Meeting"/>
+          <owl:Restriction>
+            <owl:someValuesFrom>
+              <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                  <rdf:Description rdf:about="http://www.iyouit.eu/agent.owl#My_colleague"/>
+                  <rdf:Description rdf:about="http://www.iyouit.eu/agent.owl#My_business_partner"/>
+                </owl:unionOf>
+              </owl:Class>
+            </owl:someValuesFrom>
+            <owl:onProperty rdf:resource="#company"/>
+          </owl:Restriction>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="Important_meeting">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="#Business_meeting"/>
+          <owl:Restriction>
+            <owl:someValuesFrom rdf:resource="http://www.iyouit.eu/agent.owl#My_supervisor"/>
+            <owl:onProperty rdf:resource="#company"/>
+          </owl:Restriction>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:about="#Meeting">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Restriction>
+            <owl:onProperty rdf:resource="#company"/>
+            <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+            >1</owl:minCardinality>
+          </owl:Restriction>
+          <owl:Class rdf:about="#Situation"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+</rdf:RDF>

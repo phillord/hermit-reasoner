@@ -68,6 +68,7 @@ import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.Inequality;
+import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.monitor.TableauMonitorFork;
@@ -730,9 +731,9 @@ public class Reasoner implements OWLReasoner {
     }
     public NodeSet<OWLObjectProperty> getDisjointObjectProperties(OWLObjectPropertyExpression propertyExpression,boolean direct) {
         throwFreshEntityExceptionIfNecessary(propertyExpression);
-        classifyObjectProperties();
         if (!isConsistent())
             return new OWLObjectPropertyNodeSet();
+        classifyObjectProperties();
         Set<HierarchyNode<Role>> result=new HashSet<HierarchyNode<Role>>();
         if (propertyExpression.getNamedProperty().isOWLTopObjectProperty()) {
             result.add(m_objectRoleHierarchy.getBottomNode());
@@ -754,8 +755,15 @@ public class Reasoner implements OWLReasoner {
         while (!nodesToTest.isEmpty()) {
             HierarchyNode<Role> nodeToTest=nodesToTest.iterator().next();
             Role roleToTest=nodeToTest.getRepresentative();
-            OWLObjectProperty testProperty=factory.getOWLObjectProperty(IRI.create(roleToTest.toString()));
-            OWLAxiom assertion2=factory.getOWLObjectPropertyAssertionAxiom(testProperty,freshIndividualA,freshIndividualB);
+            OWLObjectProperty testProperty;
+            OWLAxiom assertion2;
+            if (roleToTest instanceof AtomicRole) {
+                testProperty=factory.getOWLObjectProperty(IRI.create(((AtomicRole) roleToTest).getIRI()));
+                assertion2=factory.getOWLObjectPropertyAssertionAxiom(testProperty,freshIndividualA,freshIndividualB);
+            } else {
+                testProperty=factory.getOWLObjectProperty(IRI.create(((InverseRole)roleToTest).getInverseOf().getIRI()));
+                assertion2=factory.getOWLObjectPropertyAssertionAxiom(testProperty,freshIndividualB,freshIndividualA);
+            }
             Tableau tableau=getTableau(assertion,assertion2);
             if (!tableau.isSatisfiable(true,true,null,null,null,null,null,new ReasoningTaskDescription(true,"disjointness of {0} and {1}",propertyExpression,testProperty))) {
                 // disjoint
@@ -1742,7 +1750,8 @@ public class Reasoner implements OWLReasoner {
         }
     }
 
-    // Methocs for converstion from OWL API to HermiT's API
+    // Methods for conversion from OWL API to HermiT's API
+    
     protected static AtomicConcept H(OWLClass owlClass) {
         return AtomicConcept.create(owlClass.getIRI().toString());
     }

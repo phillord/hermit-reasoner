@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<rdf:RDF
+    xmlns:time="http://www.iyouit.eu/time.owl#"
+    xmlns="http://www.iyouit.eu/situation-inst.owl#"
+    xmlns:situation="http://www.iyouit.eu/situation.owl#"
+    xmlns:space="http://www.iyouit.eu/space.owl#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:agent="http://www.iyouit.eu/agent.owl#"
+  xml:base="http://www.iyouit.eu/situation-inst.owl">
+  <owl:Ontology rdf:about="">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >IYOUIT Situation Ontology Instances</rdfs:label>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Ontology providing situation related individual descriptions. Copyright 2008 by DoCoMo Euro-Labs. All rights reserved.</rdfs:comment>
+    <owl:imports rdf:resource="http://www.iyouit.eu/situation.owl"/>
+    <owl:versionInfo xml:lang="en"
+    >1.0</owl:versionInfo>
+  </owl:Ontology>
+  <agent:Anybody_else rdf:ID="keith_allan">
+    <agent:colleague>
+      <agent:Anybody_else rdf:ID="davidson_fiona">
+        <agent:colleague>
+          <agent:Anybody_else rdf:ID="robertson_davie">
+            <agent:colleague rdf:resource="#davidson_fiona"/>
+            <agent:colleague rdf:resource="#keith_allan"/>
+          </agent:Anybody_else>
+        </agent:colleague>
+      </agent:Anybody_else>
+    </agent:colleague>
+  </agent:Anybody_else>
+  <agent:Anybody_else rdf:ID="campbell_madeleine">
+    <agent:father>
+      <agent:Anybody_else rdf:ID="buchanan_mark"/>
+    </agent:father>
+    <agent:husband>
+      <agent:Myself rdf:ID="campbell_dawson">
+        <agent:daughter>
+          <agent:Anybody_else rdf:ID="campbell_laurie"/>
+        </agent:daughter>
+        <agent:business_partner>
+          <agent:Anybody_else rdf:ID="green_gordon">
+            <agent:friend rdf:resource="#campbell_dawson"/>
+            <agent:business_partner rdf:resource="#campbell_dawson"/>
+          </agent:Anybody_else>
+        </agent:business_partner>
+        <agent:supervisor rdf:resource="#robertson_davie"/>
+        <agent:spouse rdf:resource="#campbell_madeleine"/>
+        <agent:friend rdf:resource="#green_gordon"/>
+      </agent:Myself>
+    </agent:husband>
+  </agent:Anybody_else>
+  <space:Railway_station rdf:ID="tokyo_station"/>
+  <space:Home rdf:ID="dawsons_home"/>
+  <time:Meal_time rdf:ID="lunch"/>
+  <time:Meal_time rdf:ID="breakfast"/>
+  <time:Meal_time rdf:ID="dinner"/>
+  <time:Leisure_time rdf:ID="early_evening"/>
+  <time:Leisure_time rdf:ID="early_night"/>
+  <time:Leisure_time rdf:ID="evening"/>
+  <time:Leisure_time rdf:ID="late_evening"/>
+  <time:Leisure_time rdf:ID="late_night"/>
+  <time:Leisure_time rdf:ID="night"/>
+  <time:Office_hour rdf:ID="afternoon"/>
+  <time:Office_hour rdf:ID="late_afternoon"/>
+  <time:Office_hour rdf:ID="early_afternoon"/>
+  <time:Office_hour rdf:ID="early_morning"/>
+  <time:Office_hour rdf:ID="morning"/>
+  <time:Office_hour rdf:ID="late_morning"/>
+</rdf:RDF>

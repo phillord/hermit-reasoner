@@ -1,0 +1,1006 @@
+<?xml version="1.0"?>
+<rdf:RDF
+    xmlns="http://www.iyouit.eu/space.owl#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+  xml:base="http://www.iyouit.eu/space.owl">
+  <owl:Ontology rdf:about="">
+    <rdfs:comment xml:lang="en">Ontology providing spatial concept and property descriptions.</rdfs:comment>
+    <owl:versionInfo xml:lang="en">1.0</owl:versionInfo>
+    <rdfs:label xml:lang="en">IYOUIT Space Ontology. Copyright 2008 by DoCoMo Euro-Labs. All rights reserved.</rdfs:label>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Meetinghouse">
+    <rdfs:comment xml:lang="en">A building for religious assembly</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Religious_structure"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Medical_structure">
+    <rdfs:comment xml:lang="en">A health facility where patients receive treatment</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Public_place"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Railway_station">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Travel_point"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A place comprised of ticket offices, platforms, and  other facilities for loading and unloading train passengers and freight</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Plain">
+    <rdfs:comment xml:lang="en">An extensive area of comparatively level to gently undulating land, lacking surface irregularities</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Terrain_feature"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Jazz_club">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Club"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A club were Jazz music is played</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Higher_education_facility">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Educational_structure"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A place where students receive advanced or  specialized education, such as a college or university</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Crater">
+    <rdfs:comment xml:lang="en">A generally circular saucer or bowl-shaped depression caused by 
+volcanic or meteorite explosive action</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Terrain_feature"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Accommodation">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Public_place"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">Lodging in a dwelling or similar living quarters afforded to travellers in hotels or on cruise ships, etc.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Gym">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Recreational_structure"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">Athletic facility equipped for sports or physical training</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Park_and_ride">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Travel_point"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A parking lot reserved for mass transit commuters</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Bay">
+    <rdfs:comment xml:lang="en">An area of water partially enclosed by an indentation of shoreline</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Water_feature"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Port">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Travel_point"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A structure and associated facilities where a boat docks and takes on passengers, automobiles, and/or cargo </rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Dune">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Terrain_feature"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A wave form, ridge, or star shaped feature composed of sand</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Geopolitical_entity">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Spatial_entity"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Place"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Geographical_feature"/>
+    </owl:disjointWith>
+    <rdfs:comment xml:lang="en">An entity of or relating to geopolitics</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Parking">
+    <rdfs:comment xml:lang="en">A place where automobiles can be parked</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Transportation_structure"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Discotheque">
+    <rdfs:comment xml:lang="en">A public dance hall for dancing to recorded popular music</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Club"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Shrine">
+    <rdfs:comment xml:lang="en">A structure or place memorializing a person or religious  concept</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Religious_structure"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Clinic">
+    <rdfs:comment xml:lang="en">A small medical facility that provides health care for ambulatory patients</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Medical_structure"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Recreational_structure">
+    <rdfs:comment xml:lang="en">A structure used for watching or  participating in sports or other athletic activity</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Public_place"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Cathedral">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Church"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">Large and important church.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="#Spatial_entity">
+    <rdfs:comment xml:lang="en">Entities pertaining to or involving or having the nature of space</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Stadium">
+    <rdfs:comment xml:lang="en">A structure with an enclosure for athletic games with tiers of  seats for spectators</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Entertainment"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Information_center">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Tourist_structure"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A place where tourists and citizens can obtain information</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Cliff">
+    <rdfs:comment xml:lang="en">A high, steep to perpendicular slope overlooking a lower area or water body</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Terrain_feature"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Ferry_route">
+    <rdfs:comment xml:lang="en">A route used by a boat or other floating conveyance regularly used to transport people and vehicles across a water feature</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Transportation_structure"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Railway">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Transportation_structure"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A permanent twin steel-rail track on which trains move</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Bistro">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Eating_and_drinking"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A small informal restaurant</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Playing_field">
+    <rdfs:subClassOf rdf:resource="#Recreational_structure"/>
+    <rdfs:comment xml:lang="en">a piece of land prepared for playing a game</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="#Water_feature">
+    <rdfs:comment xml:lang="en">A geographic feature that has water on its surface</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Geographical_feature"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Landmass"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Terrain_feature"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:ID="Market">
+    <rdfs:comment xml:lang="en">A place where goods are bought and sold</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Shopping_facility"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Butcher">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Food_store"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A retailer of meat</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Tunnel">
+    <rdfs:comment xml:lang="en">A subterranean passageway for transportation</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Transportation_structure"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Shopping_facility">
+    <rdfs:comment xml:lang="en">A mercantile establishment for the retail sale of goods or services</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Public_place"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Travel_point">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Transportation_structure"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A place where buses pick up and discharge passengers</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Trail">
+    <rdfs:comment xml:lang="en">A path or track roughly blazed through wild or hilly country</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Transportation_structure"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Food_store">
+    <rdfs:subClassOf rdf:resource="#Shopping_facility"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Concert_hall">
+    <rdfs:comment xml:lang="en">A hall where concerts are given</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Entertainment"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Business_center">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Business_place"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en"> A place where a number of businesses are located</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Department_store">
+    <rdfs:subClassOf rdf:resource="#Shopping_facility"/>
+    <rdfs:comment xml:lang="en">A large retail store organized into departments offering a variety of merchandise; commonly part of a retail chain</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Drainage_basin">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Basin"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A land region where all surface water drains into one specific water feature</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Spring">
+    <rdfs:comment xml:lang="en">A place where water emerges from the ground</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Water_feature"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Highway">
+    <rdfs:comment xml:lang="en">A major road for any form of motor transport</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Road"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Mosque">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Religious_structure"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A building for public Islamic worship</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Ice">
+    <rdfs:subClassOf rdf:resource="#Water_feature"/>
+    <rdfs:comment xml:lang="en">A large area covered with frozen water</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Continent">
+    <rdfs:comment xml:lang="en">Large continuous mass of land on the planet Earth</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Landmass"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Island"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:ID="Courthouse">
+    <rdfs:comment xml:lang="en">A building in which courts of law are held</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Government_structure"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Residential_structure">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Private_place"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A house, hut, apartment building, or other structure where people reside</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Aquarium">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Entertainment"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A place where marine life is displayed to the public</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="#Government_structure">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Public_place"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A structure typically owned and operated by a  governmental entity</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Hostel">
+    <rdfs:subClassOf rdf:resource="#Accommodation"/>
+    <rdfs:comment xml:lang="en">An inexpensive supervised lodging</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Amusement_park">
+    <rdfs:comment xml:lang="en">A facility containing rides and other attractions</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Entertainment"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Cemetery">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Religious_structure"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A tract of land used for burials</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="#Eating_and_drinking">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Public_place"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A place where food and/or drinks are served</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Pass">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Terrain_feature"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A break in a mountain range used for transportation from one side to the other</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Cave">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Terrain_feature"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">An underground enclosure with access from the surface of the ground or from the sea</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Hotel">
+    <rdfs:comment xml:lang="en">A building where travelers can pay for lodging and meals and other services</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Accommodation"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Entertainment">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Public_place"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A place where entertaining activities happen</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Isthmus">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Terrain_feature"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A narrow strip of land connecting two larger landmasses and bordered by water on two sides</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="General_practitioner">
+    <rdfs:subClassOf rdf:resource="#Clinic"/>
+    <rdfs:comment xml:lang="en">A clinic where physicians who are not a specialist but treats all illnesses can be found</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Private_outdoor">
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Home"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Private_place"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A private location in the open air</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="#Church">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Religious_structure"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A building for public Christian worship</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Public_swimming_pool">
+    <rdfs:comment xml:lang="en">A pulic place that provides a facility for swimming</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Recreational_structure"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Camping">
+    <rdfs:subClassOf rdf:resource="#Accommodation"/>
+    <rdfs:comment xml:lang="en">A site occupied by tents, huts, or other shelters</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Laundry">
+    <rdfs:subClassOf rdf:resource="#Shopping_facility"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Peninsula">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Terrain_feature"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">An elongated area of land projecting into a body of water and 
+surrounded by water on three sides</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="River">
+    <rdfs:comment xml:lang="en">A stream of running water</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Water_feature"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Coast">
+    <rdfs:comment xml:lang="en">The shore of a sea or ocean</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Terrain_feature"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Public_place">
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Business_place"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Place"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Private_place"/>
+    </owl:disjointWith>
+    <rdfs:comment xml:lang="en">A place that is not private and open to or concerning the people as a whole</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Fast_food_restaurant">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Restaurant"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Garden">
+    <rdfs:subClassOf rdf:resource="#Private_outdoor"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Home">
+    <rdfs:subClassOf rdf:resource="#Residential_structure"/>
+    <owl:disjointWith rdf:resource="#Private_outdoor"/>
+    <rdfs:comment xml:lang="en">The residential structure where you live</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Lake">
+    <rdfs:comment xml:lang="en">An inland water body, usually fresh water</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Water_feature"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Community_center">
+    <rdfs:subClassOf rdf:resource="#Government_structure"/>
+    <rdfs:comment xml:lang="en">A facility for community recreation and meetings</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Motel">
+    <rdfs:subClassOf rdf:resource="#Accommodation"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Geographical_feature">
+    <rdfs:subClassOf rdf:resource="#Spatial_entity"/>
+    <rdfs:comment xml:lang="en">A landform comprises a geomorphological unit</rdfs:comment>
+    <owl:disjointWith rdf:resource="#Geopolitical_entity"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Shopping_center">
+    <rdfs:subClassOf rdf:resource="#Shopping_facility"/>
+    <rdfs:comment xml:lang="en">A collection of linked retail establishments</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Beach">
+    <rdfs:subClassOf rdf:resource="#Coast"/>
+    <rdfs:comment xml:lang="en">An area of sand or fine rock sloping down to the water of a sea or lake</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Arena">
+    <rdfs:subClassOf rdf:resource="#Recreational_structure"/>
+    <rdfs:comment xml:lang="en">A large structure for open-air sports or entertainments</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Monument">
+    <rdfs:comment xml:lang="en">A commemorative structure or statue</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Tourist_structure"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Island">
+    <owl:disjointWith rdf:resource="#Continent"/>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Landmass"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">Land mass (smaller than a continent) that is surrounded by water</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Shop">
+    <rdfs:subClassOf rdf:resource="#Shopping_facility"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Mountain">
+    <rdfs:comment xml:lang="en">An elevated landform that rises, often steeply, above surrounding land on most sides</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Terrain_feature"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Bridge">
+    <rdfs:comment xml:lang="en">A structure erected across an obstacle such as a stream or road used by vehicles and pedestrians</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Transportation_structure"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Sea">
+    <rdfs:subClassOf rdf:resource="#Water_feature"/>
+    <rdfs:comment xml:lang="en">A large area of salt water</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="#Place">
+    <rdfs:subClassOf rdf:resource="#Spatial_entity"/>
+    <owl:disjointWith rdf:resource="#Geopolitical_entity"/>
+    <rdfs:comment xml:lang="en">Any area set aside for a particular purpose</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Ocean">
+    <rdfs:subClassOf rdf:resource="#Sea"/>
+    <rdfs:comment xml:lang="en">A vast expanse of salt water, one of the major seas covering part of 
+the earth</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Mission">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Religious_structure"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A place characterized by dwellings, school, church, hospital  and other facilities operated by a religious group for the purpose of  providing charitable services and to propagate religion</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Volcano">
+    <rdfs:subClassOf rdf:resource="#Mountain"/>
+    <rdfs:comment xml:lang="en">A mountain formed by volcanic action and composed of volcanic rock</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Junction">
+    <rdfs:comment xml:lang="en">A place where two or more roads join</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Transportation_structure"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Historical_site">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Tourist_structure"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A place where archeological remains, old structures, or cultural artifacts are located</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Channel">
+    <rdfs:comment xml:lang="en">A body of water between two landmasses</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Water_feature"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Dentist">
+    <rdfs:subClassOf rdf:resource="#Clinic"/>
+    <rdfs:comment xml:lang="en">A clinic where persons qualified to practice dentistry work</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Tram_station">
+    <rdfs:comment xml:lang="en">A terminal where trams load and unload passengers</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Travel_point"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Glacier">
+    <rdfs:comment xml:lang="en">A mass of ice, usually at high latitudes or high elevations, with sufficient thickness to flow away from the source area</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Ice"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Thermal_spring">
+    <rdfs:subClassOf rdf:resource="#Spring"/>
+    <rdfs:comment xml:lang="en">A place where hot water emerges from the ground</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Airport">
+    <rdfs:subClassOf rdf:resource="#Travel_point"/>
+    <rdfs:comment xml:lang="en">A place where aircraft regularly land and take off, with  runways, navigational aids, and facilities for handling passengers  and/or cargo</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="#Educational_structure">
+    <rdfs:subClassOf rdf:resource="#Public_place"/>
+    <rdfs:comment xml:lang="en">A place for providing instruction</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="#Tourist_structure">
+    <rdfs:subClassOf rdf:resource="#Public_place"/>
+    <rdfs:comment xml:lang="en">A structure typically used by tourists</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Subdivision">
+    <owl:disjointWith>
+      <owl:Class rdf:ID="City"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Country"/>
+    </owl:disjointWith>
+    <rdfs:comment xml:lang="en">A primary political unit</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Geopolitical_entity"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Archipelago">
+    <rdfs:comment xml:lang="en">A logical grouping of islands</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Terrain_feature"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Bed_and_breakfast">
+    <rdfs:comment xml:lang="en">An overnight boardinghouse with breakfast</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Accommodation"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Waterfall">
+    <rdfs:subClassOf rdf:resource="#Water_feature"/>
+    <rdfs:comment xml:lang="en">A vertical or very steep section of a river</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Library">
+    <rdfs:comment xml:lang="en">A place where books and other media are stored and loaned out  to the public or others</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Government_structure"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Convenience_store">
+    <rdfs:subClassOf rdf:resource="#Food_store"/>
+    <rdfs:comment xml:lang="en">A store selling a limited variety of food and pharmaceutical items; open long hours for the convenience of customers</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Mountain_range">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Terrain_feature"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A group of connected mountains</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Wetland">
+    <rdfs:subClassOf rdf:resource="#Water_feature"/>
+    <rdfs:comment xml:lang="en">An area of high soil moisture, partially or intermittently covered with shallow water</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Bar">
+    <rdfs:subClassOf rdf:resource="#Eating_and_drinking"/>
+    <rdfs:comment xml:lang="en">An establishment where alcoholic drinks are served over a counter</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Desert">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Terrain_feature"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A large area with low rainfall and little or no vegetation</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Subway_station">
+    <rdfs:comment xml:lang="en">A terminal where subways load and unload passengers</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Travel_point"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Forest">
+    <rdfs:comment xml:lang="en">Land that is covered with trees and shrubs</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Terrain_feature"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Zoo">
+    <rdfs:subClassOf rdf:resource="#Tourist_structure"/>
+    <rdfs:comment xml:lang="en">A zoological garden or park where wild animals are kept for Exhibition</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Night_club">
+    <rdfs:comment xml:lang="en">A club that is open late at night</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Club"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Current">
+    <rdfs:subClassOf rdf:resource="#Water_feature"/>
+    <rdfs:comment xml:lang="en">A large area of ocean where surface water flows in a certain constant general direction</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Park">
+    <rdfs:comment xml:lang="en">A large area of land preserved in its natural state as public property</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Recreational_structure"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Kindergarten">
+    <rdfs:subClassOf rdf:resource="#Educational_structure"/>
+    <rdfs:comment xml:lang="en">A preschool for children age 4 to 6 to prepare them for primary school</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Geyser">
+    <rdfs:subClassOf rdf:resource="#Thermal_spring"/>
+    <rdfs:comment xml:lang="en">A thermal spring that intermittently shoots water into the air</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="#Religious_structure">
+    <rdfs:subClassOf rdf:resource="#Public_place"/>
+    <rdfs:comment xml:lang="en">A structure where organized, public religious  services are held</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Promontory">
+    <rdfs:comment xml:lang="en">A small, usually pointed peninsula that often marks the terminus of a landmass</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Peninsula"/>
+  </owl:Class>
+  <owl:Class rdf:about="#City">
+    <rdfs:comment xml:lang="en">Large and densely populated urban area.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Geopolitical_entity"/>
+    <owl:disjointWith rdf:resource="#Subdivision"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Country"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:ID="Convention_center">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Business_place"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A large meeting hall for conventions and other  meetings and shows</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Supermarket">
+    <rdfs:subClassOf rdf:resource="#Food_store"/>
+    <rdfs:comment xml:lang="en">A large self-service grocery store selling groceries and dairy products and household goods</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Synagogue">
+    <rdfs:comment xml:lang="en">The place of worship for a Jewish congregation</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Religious_structure"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Cinema">
+    <rdfs:subClassOf rdf:resource="#Entertainment"/>
+    <rdfs:comment xml:lang="en">A theater where films are shown</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Prison">
+    <rdfs:subClassOf rdf:resource="#Government_structure"/>
+    <rdfs:comment xml:lang="en">A place where persons are confined while on trial or for punishment</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Racetrack">
+    <rdfs:subClassOf rdf:resource="#Recreational_structure"/>
+    <rdfs:comment xml:lang="en">A track where races are held</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="#Private_place">
+    <rdfs:subClassOf rdf:resource="#Place"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Business_place"/>
+    </owl:disjointWith>
+    <rdfs:comment xml:lang="en">A place confined to particular persons or groups or providing privacy</rdfs:comment>
+    <owl:disjointWith rdf:resource="#Public_place"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Factory">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Business_place"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A building or set of buildings where goods are manufactured, 
+processed or fabricated</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="University">
+    <rdfs:subClassOf rdf:resource="#Higher_education_facility"/>
+    <rdfs:comment xml:lang="en">A large and diverse institution of higher learning created to educate for life and for a profession and to grant degrees</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Rest_area">
+    <rdfs:comment xml:lang="en">A designated area, usually along a major highway, where  motorists can pause to relax</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Travel_point"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Administrative_building">
+    <rdfs:comment xml:lang="en">A building housing governmental offices or  facilities</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Government_structure"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Bus_station">
+    <rdfs:comment xml:lang="en">A place where buses pick up and discharge passengers </rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Travel_point"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Metro_station">
+    <rdfs:comment xml:lang="en">A place where urban rapid transit trains pick up and  drop off passengers, often underground or elevated</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Travel_point"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Road">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Transportation_structure"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">An open way with improved surface for efficient transportation of vehicles</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="College">
+    <rdfs:subClassOf rdf:resource="#Higher_education_facility"/>
+    <rdfs:comment xml:lang="en">An institution of higher education created to educate and grant degrees; often a part of a university</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Viewpoint">
+    <rdfs:subClassOf rdf:resource="#Tourist_structure"/>
+    <rdfs:comment xml:lang="en">A place from which something can be viewed</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Ski_area">
+    <rdfs:subClassOf rdf:resource="#Recreational_structure"/>
+    <rdfs:comment xml:lang="en">A place developed for recreational alpine or nordic skiing</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Cafe">
+    <rdfs:comment xml:lang="en">A small restaurant where drinks and snacks are sold</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Eating_and_drinking"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Bakery">
+    <rdfs:subClassOf rdf:resource="#Food_store"/>
+    <rdfs:comment xml:lang="en">A place where baked goods (breads and cakes and pastries) are produced or sold</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="#Transportation_structure">
+    <rdfs:subClassOf rdf:resource="#Public_place"/>
+    <rdfs:comment xml:lang="en">A structure used for transportation purposes</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Basilica">
+    <rdfs:comment xml:lang="en">Roman catholic church of special historical and religious importance.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Church"/>
+  </owl:Class>
+  <owl:Class rdf:ID="School">
+    <rdfs:comment xml:lang="en">A place where people, usually children, receive a basic  education</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Educational_structure"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Post_office">
+    <rdfs:comment xml:lang="en">A public building in which mail is received, sorted and  distributed</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Government_structure"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Hospital">
+    <rdfs:subClassOf rdf:resource="#Medical_structure"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Basin">
+    <rdfs:comment xml:lang="en">A low-lying area mostly or wholly surrounded by higher ground</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Terrain_feature"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Business_place">
+    <owl:disjointWith rdf:resource="#Private_place"/>
+    <owl:disjointWith rdf:resource="#Public_place"/>
+    <rdfs:subClassOf rdf:resource="#Place"/>
+    <rdfs:comment xml:lang="en">A place used for commercial purposes </rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Dam">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Terrain_feature"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A barrier constructed across a stream to impound water</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="City_hall">
+    <rdfs:subClassOf rdf:resource="#Government_structure"/>
+    <rdfs:comment xml:lang="en">A building hosing the administrative offices of a  municipal government</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Plateau">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Terrain_feature"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">An elevated plain with steep slopes on one or more sides</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Land_area">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Terrain_feature"/>
+    </rdfs:subClassOf>
+    <rdfs:comment xml:lang="en">A relatively small area of land exhibiting a common characteristic that distinguishes it from surrounding land</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="#Terrain_feature">
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Landmass"/>
+    </owl:disjointWith>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >A geographic feature that has terrain on its surface</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Geographical_feature"/>
+    <owl:disjointWith rdf:resource="#Water_feature"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Theater">
+    <rdfs:subClassOf rdf:resource="#Entertainment"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Valley">
+    <rdfs:subClassOf rdf:resource="#Terrain_feature"/>
+    <rdfs:comment xml:lang="en">A low area surrounded by higher ground on two or more sides</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Reef">
+    <rdfs:subClassOf rdf:resource="#Terrain_feature"/>
+    <rdfs:comment xml:lang="en">A reef is a rock, sandbar, or other feature beneath the surface of the water, but shallow enough to be a hazard to ships</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="#Country">
+    <owl:disjointWith rdf:resource="#Subdivision"/>
+    <rdfs:subClassOf rdf:resource="#Geopolitical_entity"/>
+    <owl:disjointWith rdf:resource="#City"/>
+    <rdfs:comment xml:lang="en">Territory occupied by a nation (state).</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Office">
+    <rdfs:subClassOf rdf:resource="#Business_place"/>
+    <rdfs:comment xml:lang="en">A place of business where professional or clerical duties are performed</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Golf_course">
+    <rdfs:subClassOf rdf:resource="#Recreational_structure"/>
+    <rdfs:comment xml:lang="en">A recreational field where golf is played</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Chapel">
+    <rdfs:subClassOf rdf:resource="#Religious_structure"/>
+    <rdfs:comment xml:lang="en">A place of worship that has its own altar</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Museum">
+    <rdfs:subClassOf rdf:resource="#Tourist_structure"/>
+    <rdfs:comment xml:lang="en">A building where objects of permanent interest in one or more  of the arts and sciences are preserved and exhibited</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="#Restaurant">
+    <rdfs:subClassOf rdf:resource="#Eating_and_drinking"/>
+    <rdfs:comment xml:lang="en">An establishment that serves prepared food and beverages to be consumed on the premises</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Ferry_terminal">
+    <rdfs:comment xml:lang="en">A Ferry Terminal is a place where passengers and vehicles can board and disembark from a Ferry</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Travel_point"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Office_building">
+    <rdfs:subClassOf rdf:resource="#Business_place"/>
+    <rdfs:comment xml:lang="en">A building housing offices</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="#Landmass">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >A landmass is a large extent of land</rdfs:comment>
+    <owl:disjointWith rdf:resource="#Terrain_feature"/>
+    <rdfs:subClassOf rdf:resource="#Geographical_feature"/>
+    <owl:disjointWith rdf:resource="#Water_feature"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Police_station">
+    <rdfs:comment xml:lang="en">A building in which police are stationed or posted</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Government_structure"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Canal">
+    <rdfs:comment xml:lang="en">An artificially constructed watercourse</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Water_feature"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Oasis">
+    <rdfs:subClassOf rdf:resource="#Terrain_feature"/>
+    <rdfs:comment xml:lang="en">An area in a desert made productive by the availability of water</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="#Club">
+    <rdfs:subClassOf rdf:resource="#Entertainment"/>
+    <rdfs:comment xml:lang="en">A spot that provides entertainment (as singers or dancers) as well as dancing and food and drink</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Temple">
+    <rdfs:subClassOf rdf:resource="#Religious_structure"/>
+    <rdfs:comment xml:lang="en">An edifice dedicated to religious worship</rdfs:comment>
+  </owl:Class>
+  <owl:ObjectProperty rdf:ID="equal">
+    <rdfs:subPropertyOf>
+      <owl:ObjectProperty rdf:ID="overlapping"/>
+    </rdfs:subPropertyOf>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >RCC3/RCC5/RCC8 EQ</rdfs:comment>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="country"/>
+  <owl:ObjectProperty rdf:ID="capital"/>
+  <owl:ObjectProperty rdf:ID="location"/>
+  <owl:ObjectProperty rdf:ID="externally_connected">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >RCC8 EC</rdfs:comment>
+    <rdfs:subPropertyOf>
+      <owl:ObjectProperty rdf:ID="discrete_region"/>
+    </rdfs:subPropertyOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="disconnected">
+    <rdfs:subPropertyOf>
+      <owl:ObjectProperty rdf:about="#discrete_region"/>
+    </rdfs:subPropertyOf>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >RCC8 DC</rdfs:comment>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="continent"/>
+  <owl:ObjectProperty rdf:ID="nontangential_proper_part_inv">
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:ID="nontangential_proper_part"/>
+    </owl:inverseOf>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >RCC8 NTTPI</rdfs:comment>
+    <rdfs:subPropertyOf>
+      <owl:ObjectProperty rdf:ID="proper_part_inv"/>
+    </rdfs:subPropertyOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#proper_part_inv">
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:ID="proper_part"/>
+    </owl:inverseOf>
+    <rdfs:subPropertyOf>
+      <owl:ObjectProperty rdf:ID="overlapping_but_not_equal"/>
+    </rdfs:subPropertyOf>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >RCC5 PPI</rdfs:comment>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="partially_overlaps">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >RCC8 PO</rdfs:comment>
+    <rdfs:subPropertyOf>
+      <owl:ObjectProperty rdf:about="#overlapping_but_not_equal"/>
+    </rdfs:subPropertyOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="tangential_proper_part">
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:ID="tangential_proper_part_inv"/>
+    </owl:inverseOf>
+    <rdfs:subPropertyOf>
+      <owl:ObjectProperty rdf:about="#proper_part"/>
+    </rdfs:subPropertyOf>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >RCC8 TPP</rdfs:comment>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#overlapping_but_not_equal">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >RCC3 ONE</rdfs:comment>
+    <rdfs:subPropertyOf>
+      <owl:ObjectProperty rdf:about="#overlapping"/>
+    </rdfs:subPropertyOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#overlapping">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >RCC2 O</rdfs:comment>
+    <rdfs:subPropertyOf>
+      <owl:ObjectProperty rdf:ID="spatially_related"/>
+    </rdfs:subPropertyOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#nontangential_proper_part">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >RCC8 NTTP</rdfs:comment>
+    <rdfs:subPropertyOf>
+      <owl:ObjectProperty rdf:about="#proper_part"/>
+    </rdfs:subPropertyOf>
+    <owl:inverseOf rdf:resource="#nontangential_proper_part_inv"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="actor">
+    <rdfs:comment xml:lang="en">Associated person or group</rdfs:comment>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="activity"/>
+  <owl:ObjectProperty rdf:about="#discrete_region">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >RCC2/RCC3/RCC5 DR</rdfs:comment>
+    <rdfs:subPropertyOf>
+      <owl:ObjectProperty rdf:about="#spatially_related"/>
+    </rdfs:subPropertyOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#tangential_proper_part_inv">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >RCC8 TTPI</rdfs:comment>
+    <owl:inverseOf rdf:resource="#tangential_proper_part"/>
+    <rdfs:subPropertyOf rdf:resource="#proper_part_inv"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#proper_part">
+    <owl:inverseOf rdf:resource="#proper_part_inv"/>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >RCC5 PP</rdfs:comment>
+    <rdfs:subPropertyOf rdf:resource="#overlapping_but_not_equal"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#spatially_related">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >RCC1 SR</rdfs:comment>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:ID="longitude">
+    <rdfs:comment xml:lang="en">GPS longitude</rdfs:comment>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="altitude">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="mcc">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    <rdfs:comment xml:lang="en">Mobile Country Code (MCC)</rdfs:comment>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="latitude">
+    <rdfs:comment xml:lang="en">GPS latitude</rdfs:comment>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+</rdf:RDF>
+

@@ -1,0 +1,143 @@
+<?xml version="1.0"?>
+<rdf:RDF
+    xmlns="http://www.iyouit.eu/time.owl#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+  xml:base="http://www.iyouit.eu/time.owl">
+  <owl:Ontology rdf:about="">
+    <rdfs:label xml:lang="en">IYOUIT Time Ontology. Copyright 2008 by DoCoMo Euro-Labs. All rights reserved.</rdfs:label>
+    <rdfs:comment xml:lang="en">OWL ontology providing temporal concept and property descriptions.</rdfs:comment>
+    <owl:versionInfo xml:lang="en"
+    >1.0</owl:versionInfo>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Office_hour">
+    <owl:disjointWith>
+      <owl:Class rdf:ID="Leisure_time"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Interval_thing"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Temporal_thing">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >TemporalThing</rdfs:label>
+  </owl:Class>
+  <owl:Class rdf:ID="Meal_time">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Leisure_time"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Instant_thing">
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Interval_thing"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf rdf:resource="#Temporal_thing"/>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >InstantThing</rdfs:label>
+  </owl:Class>
+  <owl:Class rdf:ID="Temporal_unit"/>
+  <owl:Class rdf:about="#Interval_thing">
+    <rdfs:subClassOf rdf:resource="#Temporal_thing"/>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >IntervalThing</rdfs:label>
+    <owl:disjointWith rdf:resource="#Instant_thing"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Leisure_time">
+    <rdfs:subClassOf rdf:resource="#Interval_thing"/>
+    <owl:disjointWith rdf:resource="#Office_hour"/>
+  </owl:Class>
+  <owl:ObjectProperty rdf:ID="int_contains">
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:ID="int_during"/>
+    </owl:inverseOf>
+    <rdfs:subPropertyOf>
+      <owl:ObjectProperty rdf:ID="started_or_contains"/>
+    </rdfs:subPropertyOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="int_overlapped">
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:ID="int_overlaps"/>
+    </owl:inverseOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="int_starts">
+    <rdfs:subPropertyOf>
+      <owl:ObjectProperty rdf:ID="starts_or_during"/>
+    </rdfs:subPropertyOf>
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:ID="int_started"/>
+    </owl:inverseOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#int_started">
+    <owl:inverseOf rdf:resource="#int_starts"/>
+    <rdfs:subPropertyOf rdf:resource="#started_or_contains"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="int_finishes">
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:ID="int_finished"/>
+    </owl:inverseOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="int_equals"/>
+  <owl:ObjectProperty rdf:about="#int_during">
+    <rdfs:subPropertyOf rdf:resource="#starts_or_during"/>
+    <owl:inverseOf rdf:resource="#int_contains"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="int_before">
+    <rdfs:subPropertyOf>
+      <owl:TransitiveProperty rdf:ID="before"/>
+    </rdfs:subPropertyOf>
+    <rdfs:subPropertyOf>
+      <owl:ObjectProperty rdf:ID="nonoverlap"/>
+    </rdfs:subPropertyOf>
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:ID="int_after"/>
+    </owl:inverseOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#nonoverlap">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#SymmetricProperty"/>
+    <owl:inverseOf rdf:resource="#nonoverlap"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="to">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >to</rdfs:label>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#int_finished">
+    <owl:inverseOf rdf:resource="#int_finishes"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="int_meets">
+    <rdfs:subPropertyOf rdf:resource="#nonoverlap"/>
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:ID="int_met"/>
+    </owl:inverseOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="from">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >from</rdfs:label>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#int_overlaps">
+    <owl:inverseOf rdf:resource="#int_overlapped"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#int_met">
+    <owl:inverseOf rdf:resource="#int_meets"/>
+    <rdfs:subPropertyOf rdf:resource="#nonoverlap"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#int_after">
+    <rdfs:subPropertyOf rdf:resource="#nonoverlap"/>
+    <rdfs:subPropertyOf>
+      <owl:TransitiveProperty rdf:ID="after"/>
+    </rdfs:subPropertyOf>
+    <owl:inverseOf rdf:resource="#int_before"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="time"/>
+  <owl:TransitiveProperty rdf:about="#before">
+    <owl:inverseOf>
+      <owl:TransitiveProperty rdf:about="#after"/>
+    </owl:inverseOf>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </owl:TransitiveProperty>
+  <owl:TransitiveProperty rdf:about="#after">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <owl:inverseOf rdf:resource="#before"/>
+  </owl:TransitiveProperty>
+</rdf:RDF>
