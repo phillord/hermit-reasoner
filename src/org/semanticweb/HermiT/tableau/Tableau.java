@@ -62,7 +62,6 @@ public final class Tableau implements Serializable {
     protected final DLOntology m_permanentDLOntology;
     protected DLOntology m_additionalDLOntology;
     protected final DependencySetFactory m_dependencySetFactory;
-    protected final GroundDisjunctionHeaderManager m_groundDisjunctionHeaderManager;
     protected final ExtensionManager m_extensionManager;
     protected final ClashManager m_clashManager;
     protected final HyperresolutionManager m_permanentHyperresolutionManager;
@@ -105,7 +104,6 @@ public final class Tableau implements Serializable {
             m_permanentDLOntology=permanentDLOntology;
             m_additionalDLOntology=additionalDLOntology;
             m_dependencySetFactory=new DependencySetFactory();
-            m_groundDisjunctionHeaderManager=new GroundDisjunctionHeaderManager();
             m_extensionManager=new ExtensionManager(this);
             m_clashManager=new ClashManager(this);
             m_permanentHyperresolutionManager=new HyperresolutionManager(this,m_permanentDLOntology.getDLClauses());

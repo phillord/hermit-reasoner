@@ -67,6 +67,7 @@ public final class HyperresolutionManager implements Serializable {
         Map<Integer,ExtensionTable.Retrieval> retrievalsByArity=new HashMap<Integer,ExtensionTable.Retrieval>();
         DLClauseEvaluator.BufferSupply bufferSupply=new DLClauseEvaluator.BufferSupply();
         DLClauseEvaluator.ValuesBufferManager valuesBufferManager=new DLClauseEvaluator.ValuesBufferManager(dlClauses);
+        DLClauseEvaluator.GroundDisjunctionHeaderManager groundDisjunctionHeaderManager=new DLClauseEvaluator.GroundDisjunctionHeaderManager();
         Map<Integer,UnionDependencySet> unionDependencySetsBySize=new HashMap<Integer,UnionDependencySet>();
         for (Map.Entry<DLClauseBodyKey,List<DLClause>> entry : dlClausesByBody.entrySet()) {
             DLClause bodyDLClause=entry.getKey().m_dlClause;
@@ -82,7 +83,7 @@ public final class HyperresolutionManager implements Serializable {
                         firstTableRetrieval=extensionTable.createRetrieval(new boolean[extensionTable.getArity()],ExtensionTable.View.DELTA_OLD);
                         retrievalsByArity.put(arity,firstTableRetrieval);
                     }
-                    CompiledDLClauseInfo nextTupleConsumer=new CompiledDLClauseInfo(tableau,swappedDLClause,entry.getValue(),firstTableRetrieval,bufferSupply,valuesBufferManager,unionDependencySetsBySize,m_tupleConsumersByDeltaPredicate.get(deltaDLPredicate));
+                    CompiledDLClauseInfo nextTupleConsumer=new CompiledDLClauseInfo(tableau,swappedDLClause,entry.getValue(),firstTableRetrieval,bufferSupply,valuesBufferManager,groundDisjunctionHeaderManager,unionDependencySetsBySize,m_tupleConsumersByDeltaPredicate.get(deltaDLPredicate));
                     m_tupleConsumersByDeltaPredicate.put(deltaDLPredicate,nextTupleConsumer);
                     bufferSupply.reuseBuffers();
                     interruptFlag.checkInterrupt();
@@ -136,8 +137,8 @@ public final class HyperresolutionManager implements Serializable {
 
         protected final CompiledDLClauseInfo m_next;
 
-        public CompiledDLClauseInfo(Tableau tableau,DLClause bodyDLClause,List<DLClause> headDLClauses,ExtensionTable.Retrieval firstAtomRetrieval,DLClauseEvaluator.BufferSupply bufferSupply,ValuesBufferManager valuesBufferManager,Map<Integer,UnionDependencySet> unionDependencySetsBySize,CompiledDLClauseInfo next) {
-            super(tableau,bodyDLClause,headDLClauses,firstAtomRetrieval,bufferSupply,valuesBufferManager,unionDependencySetsBySize);
+        public CompiledDLClauseInfo(Tableau tableau,DLClause bodyDLClause,List<DLClause> headDLClauses,ExtensionTable.Retrieval firstAtomRetrieval,DLClauseEvaluator.BufferSupply bufferSupply,ValuesBufferManager valuesBufferManager,DLClauseEvaluator.GroundDisjunctionHeaderManager groundDisjunctionHeaderManager,Map<Integer,UnionDependencySet> unionDependencySetsBySize,CompiledDLClauseInfo next) {
+            super(tableau,bodyDLClause,headDLClauses,firstAtomRetrieval,bufferSupply,valuesBufferManager,groundDisjunctionHeaderManager,unionDependencySetsBySize);
             m_next=next;
         }
     }

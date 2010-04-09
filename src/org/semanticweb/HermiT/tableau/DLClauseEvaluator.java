@@ -45,10 +45,10 @@ public class DLClauseEvaluator implements Serializable {
     protected final DLClause m_bodyDLClause;
     protected final List<DLClause> m_headDLClauses;
 
-    public DLClauseEvaluator(Tableau tableau,DLClause bodyDLClause,List<DLClause> headDLClauses,ExtensionTable.Retrieval firstAtomRetrieval,BufferSupply bufferSupply,ValuesBufferManager valuesBufferManager,Map<Integer,UnionDependencySet> unionDependencySetsBySize) {
+    public DLClauseEvaluator(Tableau tableau,DLClause bodyDLClause,List<DLClause> headDLClauses,ExtensionTable.Retrieval firstAtomRetrieval,BufferSupply bufferSupply,ValuesBufferManager valuesBufferManager,GroundDisjunctionHeaderManager groundDisjunctionHeaderManager,Map<Integer,UnionDependencySet> unionDependencySetsBySize) {
         m_interruptFlag=tableau.m_interruptFlag;
         m_extensionManager=tableau.m_extensionManager;
-        DLClauseCompiler compiler=new DLClauseCompiler(bufferSupply,valuesBufferManager,unionDependencySetsBySize,this,m_extensionManager,tableau.getExistentialsExpansionStrategy(),bodyDLClause,headDLClauses,firstAtomRetrieval);
+        DLClauseCompiler compiler=new DLClauseCompiler(bufferSupply,valuesBufferManager,groundDisjunctionHeaderManager,unionDependencySetsBySize,this,m_extensionManager,tableau.getExistentialsExpansionStrategy(),bodyDLClause,headDLClauses,firstAtomRetrieval);
         m_retrievals=new ExtensionTable.Retrieval[compiler.m_retrievals.size()];
         compiler.m_retrievals.toArray(m_retrievals);
         m_workers=new Worker[compiler.m_workers.size()];
@@ -170,6 +170,58 @@ public class DLClauseEvaluator implements Serializable {
                 predicateIndex++;
             }
             m_maxNumberOfVariables=maxNumberOfVariables;
+        }
+    }
+
+    public static class GroundDisjunctionHeaderManager {
+        protected GroundDisjunctionHeader[] m_buckets;
+        protected int m_numberOfElements;
+        protected int m_threshold;
+
+        public GroundDisjunctionHeaderManager() {
+            m_buckets=new GroundDisjunctionHeader[1024];
+            m_threshold=(int)(m_buckets.length*0.75);
+            m_numberOfElements=0;
+        }
+        public GroundDisjunctionHeader get(DLPredicate[] dlPredicates) {
+            int hashCode=0;
+            for (int disjunctIndex=0;disjunctIndex<dlPredicates.length;disjunctIndex++)
+                hashCode=hashCode*7+dlPredicates[disjunctIndex].hashCode();
+            int bucketIndex=getIndexFor(hashCode,m_buckets.length);
+            GroundDisjunctionHeader entry=m_buckets[bucketIndex];
+            while (entry!=null) {
+                if (hashCode==entry.m_hashCode && entry.isEqual(dlPredicates))
+                    return entry;
+                entry=entry.m_nextEntry;
+            }
+            entry=new GroundDisjunctionHeader(dlPredicates,hashCode,entry);
+            m_buckets[bucketIndex]=entry;
+            m_numberOfElements++;
+            if (m_numberOfElements>=m_threshold)
+                resize(m_buckets.length*2);
+            return entry;
+        }
+        protected void resize(int newCapacity) {
+            GroundDisjunctionHeader[] newBuckets=new GroundDisjunctionHeader[newCapacity];
+            for (int i=0;i<m_buckets.length;i++) {
+                GroundDisjunctionHeader entry=m_buckets[i];
+                while (entry!=null) {
+                    GroundDisjunctionHeader nextEntry=entry.m_nextEntry;
+                    int newIndex=getIndexFor(entry.hashCode(),newCapacity);
+                    entry.m_nextEntry=newBuckets[newIndex];
+                    newBuckets[newIndex]=entry;
+                    entry=nextEntry;
+                }
+            }
+            m_buckets=newBuckets;
+            m_threshold=(int)(newCapacity*0.75);
+        }
+        protected static int getIndexFor(int hashCode,int tableLength) {
+            hashCode+=~(hashCode << 9);
+            hashCode^=(hashCode >>> 14);
+            hashCode+=(hashCode << 4);
+            hashCode^=(hashCode >>> 10);
+            return hashCode & (tableLength-1);
         }
     }
 
@@ -573,12 +625,12 @@ public class DLClauseEvaluator implements Serializable {
         protected final int[] m_copyIsCore;
         protected final int[] m_copyValuesToArguments;
 
-        public DeriveDisjunction(Object[] valuesBuffer,boolean[] coreVariables,DependencySet dependencySet,Tableau tableau,DLPredicate[] headDLPredicates,int[] copyIsCore,int[] copyValuesToArguments) {
+        public DeriveDisjunction(Object[] valuesBuffer,boolean[] coreVariables,DependencySet dependencySet,Tableau tableau,GroundDisjunctionHeader groundDisjunctionHeader,int[] copyIsCore,int[] copyValuesToArguments) {
             m_valuesBuffer=valuesBuffer;
             m_coreVariables=coreVariables;
             m_dependencySet=dependencySet;
             m_tableau=tableau;
-            m_groundDisjunctionHeader=m_tableau.m_groundDisjunctionHeaderManager.getGroundDisjunctionHeader(headDLPredicates);
+            m_groundDisjunctionHeader=groundDisjunctionHeader;
             m_copyIsCore=copyIsCore;
             m_copyValuesToArguments=copyValuesToArguments;
         }
@@ -610,6 +662,7 @@ public class DLClauseEvaluator implements Serializable {
         protected final DLClauseEvaluator m_dlClauseEvalautor;
         protected final BufferSupply m_bufferSupply;
         protected final ValuesBufferManager m_valuesBufferManager;
+        protected final GroundDisjunctionHeaderManager m_groundDisjunctionHeaderManager;
         protected final ExtensionManager m_extensionManager;
         protected final ExistentialExpansionStrategy m_existentialExpansionStrategy;
         protected final DLClause m_bodyDLClause;
@@ -622,9 +675,10 @@ public class DLClauseEvaluator implements Serializable {
         protected final List<Worker> m_workers;
         protected final List<Integer> m_labels;
 
-        public DLClauseCompiler(BufferSupply bufferSupply,ValuesBufferManager valuesBufferManager,Map<Integer,UnionDependencySet> unionDependencySetsBySize,DLClauseEvaluator dlClauseEvalautor,ExtensionManager extensionManager,ExistentialExpansionStrategy existentialExpansionStrategy,DLClause bodyDLClause,List<DLClause> headDLClauses,ExtensionTable.Retrieval firstAtomRetrieval) {
+        public DLClauseCompiler(BufferSupply bufferSupply,ValuesBufferManager valuesBufferManager,GroundDisjunctionHeaderManager groundDisjunctionHeaderManager,Map<Integer,UnionDependencySet> unionDependencySetsBySize,DLClauseEvaluator dlClauseEvalautor,ExtensionManager extensionManager,ExistentialExpansionStrategy existentialExpansionStrategy,DLClause bodyDLClause,List<DLClause> headDLClauses,ExtensionTable.Retrieval firstAtomRetrieval) {
             m_bufferSupply=bufferSupply;
             m_valuesBufferManager=valuesBufferManager;
+            m_groundDisjunctionHeaderManager=groundDisjunctionHeaderManager;
             m_dlClauseEvalautor=dlClauseEvalautor;
             m_extensionManager=extensionManager;
             m_existentialExpansionStrategy=existentialExpansionStrategy;
@@ -816,7 +870,8 @@ public class DLClauseEvaluator implements Serializable {
                         else
                             copyIsCore[headIndex]=-1;
                     }
-                    m_workers.add(new DeriveDisjunction(m_valuesBufferManager.m_valuesBuffer,m_coreVariables,m_unionDependencySet,m_extensionManager.m_tableau,headDLPredicates,copyIsCore,copyValuesToArguments));
+                    GroundDisjunctionHeader groundDisjunctionHeader=m_groundDisjunctionHeaderManager.get(headDLPredicates);
+                    m_workers.add(new DeriveDisjunction(m_valuesBufferManager.m_valuesBuffer,m_coreVariables,m_unionDependencySet,m_extensionManager.m_tableau,groundDisjunctionHeader,copyIsCore,copyValuesToArguments));
                 }
                 if (m_extensionManager.m_tableauMonitor!=null)
                     m_workers.add(new CallMatchFinishedOnMonitor(m_extensionManager.m_tableauMonitor,m_dlClauseEvalautor,dlClauseIndex));
