@@ -68,7 +68,6 @@ import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.Inequality;
-import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.monitor.TableauMonitorFork;
@@ -93,7 +92,6 @@ import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
-import org.semanticweb.owlapi.model.OWLDatatype;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLFunctionalObjectPropertyAxiom;
@@ -110,7 +108,6 @@ import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
 import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 import org.semanticweb.owlapi.model.OWLTransitiveObjectPropertyAxiom;
-import org.semanticweb.owlapi.model.OWLTypedLiteral;
 import org.semanticweb.owlapi.reasoner.BufferingMode;
 import org.semanticweb.owlapi.reasoner.FreshEntitiesException;
 import org.semanticweb.owlapi.reasoner.FreshEntityPolicy;
@@ -752,26 +749,21 @@ public class Reasoner implements OWLReasoner {
                 result.addAll(node.getDescendantNodes());
             return objectPropertyHierarchyNodesToNodeSet(result);
         }
-        OWLDataFactory factory=getDataFactory();
-        OWLIndividual freshIndividualA=factory.getOWLAnonymousIndividual("fresh-individual-A");
-        OWLIndividual freshIndividualB=factory.getOWLAnonymousIndividual("fresh-individual-B");
-        OWLAxiom assertion=factory.getOWLObjectPropertyAssertionAxiom(propertyExpression,freshIndividualA,freshIndividualB);
+        Role role=H(propertyExpression);
+        Individual freshIndividualA=Individual.createAnonymous("fresh-individual-A");
+        Individual freshIndividualB=Individual.createAnonymous("fresh-individual-B");
+        Atom roleAssertion=role.getRoleAssertion(freshIndividualA,freshIndividualB);
+        Tableau tableau=getTableau();
         Set<HierarchyNode<Role>> nodesToTest=new HashSet<HierarchyNode<Role>>();
         nodesToTest.addAll(m_objectRoleHierarchy.getTopNode().getChildNodes());
         while (!nodesToTest.isEmpty()) {
             HierarchyNode<Role> nodeToTest=nodesToTest.iterator().next();
             Role roleToTest=nodeToTest.getRepresentative();
-            OWLObjectProperty testProperty;
-            OWLAxiom assertion2;
-            if (roleToTest instanceof AtomicRole) {
-                testProperty=factory.getOWLObjectProperty(IRI.create(((AtomicRole) roleToTest).getIRI()));
-                assertion2=factory.getOWLObjectPropertyAssertionAxiom(testProperty,freshIndividualA,freshIndividualB);
-            } else {
-                testProperty=factory.getOWLObjectProperty(IRI.create(((InverseRole)roleToTest).getInverseOf().getIRI()));
-                assertion2=factory.getOWLObjectPropertyAssertionAxiom(testProperty,freshIndividualB,freshIndividualA);
-            }
-            Tableau tableau=getTableau(assertion,assertion2);
-            if (!tableau.isSatisfiable(true,true,null,null,null,null,null,new ReasoningTaskDescription(true,"disjointness of {0} and {1}",propertyExpression,testProperty))) {
+            Atom roleToTestAssertion=roleToTest.getRoleAssertion(freshIndividualA,freshIndividualB);
+            Set<Atom> perTestAtoms=new HashSet<Atom>(2);
+            perTestAtoms.add(roleAssertion);
+            perTestAtoms.add(roleToTestAssertion);
+            if (!tableau.isSatisfiable(false,perTestAtoms,null,null,null,null,new ReasoningTaskDescription(true,"disjointness of {0} and {1}",role,roleToTest))) {
                 // disjoint
                 if (direct)
                     result.add(nodeToTest);
@@ -1043,23 +1035,21 @@ public class Reasoner implements OWLReasoner {
                     result.addAll(node.getDescendantNodes());
                 return dataPropertyHierarchyNodesToNodeSet(result);
             }
-            OWLDataFactory factory=getDataFactory();
-            OWLIndividual individual=factory.getOWLAnonymousIndividual("fresh-individual-A");
-            OWLDatatype anonymousConstantsDatatype=factory.getOWLDatatype(IRI.create("internal:anonymous-constants"));
-            OWLTypedLiteral constant=factory.getOWLTypedLiteral("internal:constant",anonymousConstantsDatatype);
-            OWLDataProperty property=propertyExpression.asOWLDataProperty();
-            OWLAxiom assertion=factory.getOWLDataPropertyAssertionAxiom(property,individual,constant);
-            OWLAxiom assertion2;
-            OWLDataProperty testProperty;
+            AtomicRole atomicRole=H(propertyExpression.asOWLDataProperty());
+            Individual freshIndividual=Individual.create("fresh-individual");
+            Constant freshConstant=Constant.create(new Constant.AnonymousConstantValue("fresh-constant"));
+            Atom atomicRoleAssertion=atomicRole.getRoleAssertion(freshIndividual,freshConstant);
+            Tableau tableau=getTableau();
             Set<HierarchyNode<AtomicRole>> nodesToTest=new HashSet<HierarchyNode<AtomicRole>>();
             nodesToTest.addAll(m_dataRoleHierarchy.getTopNode().getChildNodes());
             while (!nodesToTest.isEmpty()) {
                 HierarchyNode<AtomicRole> nodeToTest=nodesToTest.iterator().next();
-                Role roleToTest=nodeToTest.getRepresentative();
-                testProperty=factory.getOWLDataProperty(IRI.create(roleToTest.toString()));
-                assertion2=factory.getOWLDataPropertyAssertionAxiom(testProperty,individual,constant);
-                Tableau tableau=getTableau(assertion,assertion2);
-                if (!tableau.isSatisfiable(true,true,null,null,null,null,null,new ReasoningTaskDescription(true,"disjointness of {0} and {1}",propertyExpression,testProperty))) {
+                AtomicRole atomicRoleToTest=nodeToTest.getRepresentative();
+                Atom atomicRoleToTestAssertion=atomicRoleToTest.getRoleAssertion(freshIndividual,freshConstant);
+                Set<Atom> perTestAtoms=new HashSet<Atom>(2);
+                perTestAtoms.add(atomicRoleAssertion);
+                perTestAtoms.add(atomicRoleToTestAssertion);
+                if (!tableau.isSatisfiable(false,perTestAtoms,null,null,null,null,new ReasoningTaskDescription(true,"disjointness of {0} and {1}",atomicRole,atomicRoleToTest))) {
                     // disjoint
                     if (direct)
                         result.add(nodeToTest);
