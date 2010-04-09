@@ -25,56 +25,55 @@ import java.util.Set;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.graph.Graph;
 import org.semanticweb.HermiT.model.AtomicRole;
-import org.semanticweb.HermiT.model.Role;
 
 /**
  * A cache for role subsumption and role satisfiability tests. This class also maintains the set of known and possible subsumers for a role. This information can be used to optimize classification.
  */
-public abstract class RoleSubsumptionCache implements SubsumptionCache<Role> {
+public abstract class RoleSubsumptionCache<E> implements SubsumptionCache<E> {
     protected final Reasoner m_reasoner;
-    protected final Map<Role,RoleInfo> m_roleInfos;
+    protected final Map<E,RoleInfo<E>> m_roleInfos;
     protected final boolean m_hasInverse;
     protected final AtomicRole m_bottomRole;
     protected final AtomicRole m_topRole;
 
     public RoleSubsumptionCache(Reasoner reasoner,boolean hasInverse,AtomicRole bottomRole,AtomicRole topRole) {
         m_reasoner=reasoner;
-        m_roleInfos=new HashMap<Role,RoleInfo>();
+        m_roleInfos=new HashMap<E,RoleInfo<E>>();
         m_hasInverse=hasInverse;
         m_bottomRole=bottomRole;
         m_topRole=topRole;
-        Set<Role> allRoles=new HashSet<Role>();
-        Graph<Role> roleGraph=new Graph<Role>();
+        Set<E> allRoles=new HashSet<E>();
+        Graph<E> roleGraph=new Graph<E>();
         loadRoleGraph(allRoles,roleGraph);
         roleGraph.transitivelyClose();
-        for (Role subrole : allRoles) {
-            Set<Role> superroles=roleGraph.getSuccessors(subrole);
-            for (Role superrole : superroles)
+        for (E subrole : allRoles) {
+            Set<E> superroles=roleGraph.getSuccessors(subrole);
+            for (E superrole : superroles)
                 getRoleInfo(subrole).addKnownSubsumer(superrole);
         }
     }
-    protected abstract void loadRoleGraph(Set<Role> allRoles,Graph<Role> roleGraph);
-    public Set<Role> getAllKnownSubsumers(Role role) {
+    protected abstract void loadRoleGraph(Set<E> allRoles,Graph<E> roleGraph);
+    public Set<E> getAllKnownSubsumers(E role) {
         return null;
     }
-    public boolean isSatisfiable(Role role) {
+    public boolean isSatisfiable(E role) {
         return isSatisfiable(role,true);
     }
-    protected boolean isSatisfiable(Role role,boolean updatePossibleSubsumers) {
+    protected boolean isSatisfiable(E role,boolean updatePossibleSubsumers) {
         if (m_bottomRole.equals(role))
             return false;
-        RoleInfo roleInfo=getRoleInfo(role);
+        RoleInfo<E> roleInfo=getRoleInfo(role);
         if (roleInfo.m_isSatisfiable==null) {
             boolean isSatisfiable=doSatisfiabilityTest(role);
             roleInfo.m_isSatisfiable=(isSatisfiable ? Boolean.TRUE : Boolean.FALSE);
         }
         return roleInfo.m_isSatisfiable;
     }
-    protected abstract boolean doSatisfiabilityTest(Role role);
-    public boolean isSubsumedBy(Role subrole,Role superrole) {
+    protected abstract boolean doSatisfiabilityTest(E role);
+    public boolean isSubsumedBy(E subrole,E superrole) {
         if (m_topRole.equals(superrole) || m_bottomRole.equals(subrole))
             return true;
-        RoleInfo subroleInfo=getRoleInfo(subrole);
+        RoleInfo<E> subroleInfo=getRoleInfo(subrole);
         if (Boolean.FALSE.equals(subroleInfo.m_isSatisfiable))
             return true;
         else if (m_bottomRole.equals(superrole) || (m_roleInfos.containsKey(superrole) && Boolean.FALSE.equals(m_roleInfos.get(superrole).m_isSatisfiable)))
@@ -92,39 +91,39 @@ public abstract class RoleSubsumptionCache implements SubsumptionCache<Role> {
             return isSubsumedBy;
         }
     }
-    protected abstract boolean doSubsumptionCheck(Role subrole,Role superrole);
-    protected RoleInfo getRoleInfo(Role role) {
-        RoleInfo result=m_roleInfos.get(role);
+    protected abstract boolean doSubsumptionCheck(E subrole,E superrole);
+    protected RoleInfo<E> getRoleInfo(E role) {
+        RoleInfo<E> result=m_roleInfos.get(role);
         if (result==null) {
-            result=new RoleInfo(role);
+            result=new RoleInfo<E>(role);
             m_roleInfos.put(role,result);
         }
         return result;
     }
 
-    protected static final class RoleInfo {
-        protected final Role m_forRole;
+    protected static final class RoleInfo<E> {
+        protected final E m_forRole;
         protected Boolean m_isSatisfiable;
-        protected Set<Role> m_knownSubsumers;
-        protected Set<Role> m_knownNonsubsumers;
+        protected Set<E> m_knownSubsumers;
+        protected Set<E> m_knownNonsubsumers;
 
-        public RoleInfo(Role role) {
+        public RoleInfo(E role) {
             m_forRole=role;
         }
-        public boolean isKnownSubsumer(Role potentialSubsumer) {
+        public boolean isKnownSubsumer(E potentialSubsumer) {
             return m_knownSubsumers!=null && m_knownSubsumers.contains(potentialSubsumer);
         }
-        public void addKnownSubsumer(Role role) {
+        public void addKnownSubsumer(E role) {
             if (m_knownSubsumers==null)
-                m_knownSubsumers=new HashSet<Role>();
+                m_knownSubsumers=new HashSet<E>();
             m_knownSubsumers.add(role);
         }
-        public boolean isKnownNonsubsumer(Role potentialSubsumer) {
+        public boolean isKnownNonsubsumer(E potentialSubsumer) {
             return m_knownNonsubsumers!=null && m_knownNonsubsumers.contains(potentialSubsumer);
         }
-        public void addKnownNonsubsumer(Role role) {
+        public void addKnownNonsubsumer(E role) {
             if (m_knownNonsubsumers==null)
-                m_knownNonsubsumers=new HashSet<Role>();
+                m_knownNonsubsumers=new HashSet<E>();
             m_knownNonsubsumers.add(role);
         }
     }

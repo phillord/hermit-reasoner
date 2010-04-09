@@ -26,7 +26,6 @@ import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.Individual;
-import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.DLClause.ClauseType;
 import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
@@ -41,39 +40,36 @@ import org.semanticweb.owlapi.model.OWLTypedLiteral;
 /**
  * A cache for data roles.
  */
-public class DataRoleSubsumptionCache extends RoleSubsumptionCache {
+public class DataRoleSubsumptionCache extends RoleSubsumptionCache<AtomicRole> {
 
     public DataRoleSubsumptionCache(Reasoner reasoner) {
         super(reasoner,false,AtomicRole.BOTTOM_DATA_ROLE,AtomicRole.TOP_DATA_ROLE);
     }
-    protected void loadRoleGraph(Set<Role> allRoles,Graph<Role> roleGraph) {
+    protected void loadRoleGraph(Set<AtomicRole> allRoles,Graph<AtomicRole> roleGraph) {
         allRoles.addAll(m_reasoner.getDLOntology().getAllAtomicDataRoles());
         for (DLClause dlClause : m_reasoner.getDLOntology().getDLClauses()) {
             if (dlClause.getClauseType()==ClauseType.DATA_PROPERTY_INCLUSION) {
                 AtomicRole sub=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                 AtomicRole sup=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
-                if (allRoles.contains(sub) && allRoles.contains(sup)) {
+                if (allRoles.contains(sub) && allRoles.contains(sup))
                     roleGraph.addEdge(sub,sup);
-                    if (m_hasInverse)
-                        roleGraph.addEdge(sub.getInverse(),sup.getInverse());
-                }
             }
         }
     }
-    protected boolean doSatisfiabilityTest(Role role) {
+    protected boolean doSatisfiabilityTest(AtomicRole role) {
         Individual freshIndividual=Individual.createAnonymous("fresh-individual");
         Constant freshConstant=Constant.create(new Constant.AnonymousConstantValue("internal:fresh-constant"));
         return m_reasoner.getTableau().isSatisfiable(true,Collections.singleton(role.getRoleAssertion(freshIndividual,freshConstant)),null,null,null,null,ReasoningTaskDescription.isRoleSatisfiable(role,false));
     }
-    protected boolean doSubsumptionCheck(Role subrole,Role superrole) {
+    protected boolean doSubsumptionCheck(AtomicRole subrole,AtomicRole superrole) {
         // This is different from object properties! This code is correct because we don't have
         // transitive data properties.
         OWLDataFactory factory=m_reasoner.getDataFactory();
         OWLIndividual individual=factory.getOWLAnonymousIndividual("fresh-individual");
         OWLDatatype anonymousConstantsDatatype=factory.getOWLDatatype(IRI.create("internal:anonymous-constants"));
         OWLTypedLiteral constant=factory.getOWLTypedLiteral("internal:fresh-constant",anonymousConstantsDatatype);
-        OWLDataProperty subproperty=factory.getOWLDataProperty(IRI.create(((AtomicRole)subrole).getIRI()));
-        OWLDataProperty superproperty=factory.getOWLDataProperty(IRI.create(((AtomicRole)superrole).getIRI()));
+        OWLDataProperty subproperty=factory.getOWLDataProperty(IRI.create((subrole).getIRI()));
+        OWLDataProperty superproperty=factory.getOWLDataProperty(IRI.create((superrole).getIRI()));
         OWLDataProperty negatedSuperproperty=factory.getOWLDataProperty(IRI.create("internal:negated-superproperty"));
         OWLAxiom subpropertyAssertion=factory.getOWLDataPropertyAssertionAxiom(subproperty,individual,constant);
         OWLAxiom negatedSuperpropertyAssertion=factory.getOWLDataPropertyAssertionAxiom(negatedSuperproperty,individual,constant);

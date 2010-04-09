@@ -43,7 +43,7 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 /**
  * A cache for object roles.
  */
-public class ObjectRoleSubsumptionCache extends RoleSubsumptionCache {
+public class ObjectRoleSubsumptionCache extends RoleSubsumptionCache<Role> {
 
     public ObjectRoleSubsumptionCache(Reasoner reasoner) {
         super(reasoner,reasoner.getDLOntology().hasInverseRoles(),AtomicRole.BOTTOM_OBJECT_ROLE,AtomicRole.TOP_OBJECT_ROLE);
