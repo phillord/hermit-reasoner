@@ -1,18 +1,11 @@
 package org.semanticweb.HermiT.reasoner;
 
-import org.semanticweb.HermiT.Configuration;
-import org.semanticweb.HermiT.Configuration.TableauMonitorType;
 
 
 public class ClassificationTest extends AbstractReasonerTest {
 
     public ClassificationTest(String name) {
         super(name);
-    }
-    protected Configuration getConfiguration() {
-        Configuration c=super.getConfiguration();
-        c.tableauMonitorType=TableauMonitorType.TIMING;
-        return c;
     }
     public void testWine() throws Exception {
         loadReasonerFromResource("res/wine.xml");
@@ -30,8 +23,4 @@ public class ClassificationTest extends AbstractReasonerTest {
         loadReasonerFromResource("res/propreo.xml");
         assertHierarchies("res/propreo.xml.txt");
     }
-//    public void testDolce() throws Exception {
-//        loadReasonerFromResource("res/dolce_all.xml");
-//        assertHierarchies("res/dolce_all.xml.txt");
-//    }
 }

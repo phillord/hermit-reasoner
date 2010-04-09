@@ -1,3 +1,4 @@
+Prefix(:=<http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#>)
 Prefix(a1:=<http://www.w3.org/TR/2003/PR-owl-guide-20031209/food#>)
 
 Ontology(<http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#>
