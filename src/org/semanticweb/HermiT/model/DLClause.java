@@ -61,11 +61,17 @@ public class DLClause implements Serializable {
     public Atom getHeadAtom(int atomIndex) {
         return m_headAtoms[atomIndex];
     }
+    public Atom[] getHeadAtoms() {
+        return m_headAtoms.clone();
+    }
     public int getBodyLength() {
         return m_bodyAtoms.length;
     }
     public Atom getBodyAtom(int atomIndex) {
         return m_bodyAtoms[atomIndex];
+    }
+    public Atom[] getBodyAtoms() {
+        return m_bodyAtoms.clone();
     }
     public DLClause getSafeVersion() {
         Set<Variable> variables=new HashSet<Variable>();

@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 
 /**
  * This class is responsible for abbreviating IRIs. The resulting IRIs can be either<br>
- * 1) &lt;uri&gt; or<br> 
+ * 1) &lt;uri&gt; or<br>
  * 2) prefix-name:local-name where prefix-name can be empty.<br>
  * Forms 1 and 2 are dependent upon a set of prefix declarations that associates prefix names with prefix IRIs.
  * A IRI abbreviated using form 2 that uses an unregistered prefix is invalid---expanding it will result in an exception.
@@ -44,7 +44,7 @@ import java.util.regex.Pattern;
  */
 public class Prefixes implements Serializable {
     private static final long serialVersionUID=-158185482289831766L;
-    
+
     protected static final String PN_CHARS_BASE="[A-Za-z\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFFD]";
     protected static final String PN_CHARS="[A-Za-z0-9_\\u002D\\u00B7\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u02FF\\u0300-\\u036F\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D\\u203F-\\u2040\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFFD]";
     protected static final Pattern s_localNameChecker=Pattern.compile("("+PN_CHARS_BASE+"|_|[0-9])(("+PN_CHARS+"|[.])*("+PN_CHARS+"))?");
@@ -167,7 +167,7 @@ public class Prefixes implements Serializable {
     }
     /**
      * Registers HermiT's internal prefixes with this object.
-     * 
+     *
      * @param individualIRIs    the collection of IRIs used in individuals (used for registering nominal prefix names)
      * @return                  'true' if this object already contained one of the internal prefix names
      */
@@ -197,14 +197,12 @@ public class Prefixes implements Serializable {
         }
         if (declarePrefixRaw("nam","internal:nam#"))
             containsPrefix=true;
-        if (declarePrefixRaw("grd","internal:grd#"))
-            containsPrefix=true;
         buildPrefixIRIMatchingPattern();
         return containsPrefix;
     }
     /**
      * Registers the well-known Semantic Web prefixes.
-     * 
+     *
      * @return                  'true' if this object already contained one of the well-known prefixes
      */
     public boolean declareSemanticWebPrefixes() {
@@ -217,7 +215,7 @@ public class Prefixes implements Serializable {
     }
     /**
      * Registers all the prefixes from the supplied object.
-     * 
+     *
      * @param prefixes          the object from which the prefixes are taken
      * @return                  'true' if this object already contained one of the prefixes from the supplied object
      */
@@ -241,7 +239,7 @@ public class Prefixes implements Serializable {
     public static boolean isValidLocalName(String localName) {
         return s_localNameChecker.matcher(localName).matches();
     }
-    
+
     public static class ImmutablePrefixes extends Prefixes {
         private static final long serialVersionUID=8517988865445255837L;
 
