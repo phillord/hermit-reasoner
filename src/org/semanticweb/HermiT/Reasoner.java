@@ -83,7 +83,6 @@ import org.semanticweb.HermiT.structural.ObjectPropertyInclusionManager;
 import org.semanticweb.HermiT.tableau.InterruptFlag;
 import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
@@ -96,6 +95,7 @@ import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
 import org.semanticweb.owlapi.model.OWLDatatype;
 import org.semanticweb.owlapi.model.OWLEntity;
+import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLFunctionalObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLInverseFunctionalObjectPropertyAxiom;
@@ -106,6 +106,7 @@ import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
 import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 import org.semanticweb.owlapi.model.OWLTransitiveObjectPropertyAxiom;
@@ -135,11 +136,14 @@ import org.semanticweb.owlapi.util.Version;
  * Answers queries about the logical implications of a particular knowledge base. A Reasoner is associated with a single knowledge base, which is "loaded" when the reasoner is constructed. By default a full classification of all atomic terms in the knowledge base is also performed at this time (which can take quite a while for large or complex ontologies), but this behavior can be disabled as a part of the Reasoner configuration. Internal details of the loading and reasoning algorithms can be configured in the Reasoner constructor and do not change over the lifetime of the Reasoner object---internal data structures and caches are optimized for a particular configuration. By default, HermiT will use the set of options which provide optimal performance.
  */
 public class Reasoner implements OWLReasoner {
+    protected final OntologyChangeListener m_ontologyChangeListener;
     protected final Configuration m_configuration;
+    protected final OWLOntology m_rootOntology;
+    protected final Collection<DescriptionGraph> m_descriptionGraphs;
     protected final InterruptFlag m_interruptFlag;
-    protected final ReasonerProgressMonitor m_progressMonitor;
-    protected DLOntology m_dlOntology;
+    protected boolean m_ontologyChanged;
     protected ObjectPropertyInclusionManager m_objectPropertyInclusionManager;
+    protected DLOntology m_dlOntology;
     protected Prefixes m_prefixes;
     protected Tableau m_tableau;
     protected ClassificationManager<AtomicConcept> m_atomicConceptClassificationManager;
@@ -183,41 +187,30 @@ public class Reasoner implements OWLReasoner {
      * @param descriptionGraphs
      *            - a set of description graphs
      */
-    public Reasoner(Configuration configuration,OWLOntology rootOntology,Set<DescriptionGraph> descriptionGraphs) {
+    public Reasoner(Configuration configuration,OWLOntology rootOntology,Collection<DescriptionGraph> descriptionGraphs) {
+        m_ontologyChangeListener=new OntologyChangeListener();
         m_configuration=configuration;
+        m_rootOntology=rootOntology;
+        m_rootOntology.getOWLOntologyManager().addOntologyChangeListener(m_ontologyChangeListener);
+        if (descriptionGraphs==null)
+            m_descriptionGraphs=Collections.emptySet();
+        else
+            m_descriptionGraphs=descriptionGraphs;
         m_interruptFlag=new InterruptFlag(configuration.individualTaskTimeout);
-        m_progressMonitor=configuration.reasonerProgressMonitor;
-        loadOntology(rootOntology,descriptionGraphs);
-    }
-
-    /**
-     * This is mainly an internal method. Once an ontology is loaded, normalised and clausified, the resulting DLOntology object can be obtained by calling getDLOntology(), saved and reloaded later with this method so that normalisation and clausification is not done again. A default configuration can be obtained by just passing new Configuration().
-     *
-     * @param configuration
-     *            - a configuration in which parameters can be defined such as the blocking strategy to be used etc
-     * @param dlOntology
-     *            - an ontology in HermiT's internal ontology format
-     */
-    public Reasoner(Configuration configuration,DLOntology dlOntology) {
-        m_configuration=configuration;
-        m_interruptFlag=new InterruptFlag(configuration.individualTaskTimeout);
-        m_progressMonitor=configuration.reasonerProgressMonitor;
-        loadDLOntology(dlOntology);
+        m_ontologyChanged=false;
+        loadOntology();
     }
 
     // Life-cycle management methods
 
-    protected void loadOntology(OWLOntology ontology,Set<DescriptionGraph> descriptionGraphs) {
-        if (descriptionGraphs==null)
-            descriptionGraphs=Collections.emptySet();
-        OWLClausification clausifier=new OWLClausification(m_configuration);
-        Object[] result=clausifier.preprocessAndClausify(ontology,descriptionGraphs);
-        m_objectPropertyInclusionManager=(ObjectPropertyInclusionManager)result[0];
-        loadDLOntology((DLOntology)result[1]);
-    }
-    protected void loadDLOntology(DLOntology dlOntology) {
+    protected void loadOntology() {
         clearState();
-        m_dlOntology=dlOntology;
+        // Convert OWLOntology into DLOntology
+        OWLClausification clausifier=new OWLClausification(m_configuration);
+        Object[] result=clausifier.preprocessAndClausify(m_rootOntology,m_descriptionGraphs);
+        m_objectPropertyInclusionManager=(ObjectPropertyInclusionManager)result[0];
+        m_dlOntology=(DLOntology)result[1];
+        // Load the DLOntology
         m_prefixes=createPrefixes(m_dlOntology);
         m_tableau=createTableau(m_interruptFlag,m_configuration,m_dlOntology,null,m_prefixes);
         m_atomicConceptClassificationManager=createAtomicConceptClassificationManager(this);
@@ -228,6 +221,7 @@ public class Reasoner implements OWLReasoner {
         dispose();
     }
     public void dispose() {
+        m_rootOntology.getOWLOntologyManager().removeOntologyChangeListener(m_ontologyChangeListener);
         clearState();
         m_interruptFlag.dispose();
     }
@@ -248,7 +242,7 @@ public class Reasoner implements OWLReasoner {
         m_interruptFlag.interrupt();
     }
     public OWLDataFactory getDataFactory() {
-        return OWLManager.getOWLDataFactory();
+        return m_rootOntology.getOWLOntologyManager().getOWLDataFactory();
     }
 
     // Accessor methods of the OWL API
@@ -302,7 +296,7 @@ public class Reasoner implements OWLReasoner {
     // Ontology change management methods, only implemented in ChangeTrackingReasoner
 
     public BufferingMode getBufferingMode() {
-        return null;
+        return m_configuration.bufferChanges ? BufferingMode.BUFFERING : BufferingMode.NON_BUFFERING;
     }
     public Set<OWLAxiom> getPendingAxiomAdditions() {
         return Collections.emptySet();
@@ -314,6 +308,10 @@ public class Reasoner implements OWLReasoner {
         return Collections.emptyList();
     }
     public void flush() {
+        if (m_ontologyChanged) {
+            loadOntology();
+            m_ontologyChanged=false;
+        }
     }
 
     // General inferences
@@ -396,21 +394,21 @@ public class Reasoner implements OWLReasoner {
             else {
                 try {
                     final int numRelevantConcepts=relevantAtomicConcepts.size();
-                    if (m_progressMonitor!=null)
-                        m_progressMonitor.reasonerTaskStarted("Building the class hierarchy...");
+                    if (m_configuration.reasonerProgressMonitor!=null)
+                        m_configuration.reasonerProgressMonitor.reasonerTaskStarted("Building the class hierarchy...");
                     ClassificationManager.ProgressMonitor<AtomicConcept> progressMonitor=new ClassificationManager.ProgressMonitor<AtomicConcept>() {
                         protected int m_processedConcepts=0;
                         public void elementClassified(AtomicConcept element) {
                             m_processedConcepts++;
-                            if (m_progressMonitor!=null)
-                                m_progressMonitor.reasonerTaskProgressChanged(m_processedConcepts,numRelevantConcepts);
+                            if (m_configuration.reasonerProgressMonitor!=null)
+                                m_configuration.reasonerProgressMonitor.reasonerTaskProgressChanged(m_processedConcepts,numRelevantConcepts);
                         }
                     };
                     m_atomicConceptHierarchy=m_atomicConceptClassificationManager.classify(progressMonitor,AtomicConcept.THING,AtomicConcept.NOTHING,relevantAtomicConcepts);
                 }
                 finally {
-                    if (m_progressMonitor!=null)
-                        m_progressMonitor.reasonerTaskStopped();
+                    if (m_configuration.reasonerProgressMonitor!=null)
+                        m_configuration.reasonerProgressMonitor.reasonerTaskStopped();
                 }
             }
         }
@@ -566,21 +564,21 @@ public class Reasoner implements OWLReasoner {
             else {
                 try {
                     final int numRoles=allObjectRoles.size();
-                    if (m_progressMonitor!=null)
-                        m_progressMonitor.reasonerTaskStarted("Classifying object properties...");
+                    if (m_configuration.reasonerProgressMonitor!=null)
+                        m_configuration.reasonerProgressMonitor.reasonerTaskStarted("Classifying object properties...");
                     ClassificationManager.ProgressMonitor<Role> progressMonitor=new ClassificationManager.ProgressMonitor<Role>() {
                         protected int m_processedRoles=0;
                         public void elementClassified(Role element) {
                             m_processedRoles++;
-                            if (m_progressMonitor!=null)
-                                m_progressMonitor.reasonerTaskProgressChanged(m_processedRoles,numRoles);
+                            if (m_configuration.reasonerProgressMonitor!=null)
+                                m_configuration.reasonerProgressMonitor.reasonerTaskProgressChanged(m_processedRoles,numRoles);
                         }
                     };
                     m_objectRoleHierarchy=m_objectRoleClassificationManager.classify(progressMonitor,AtomicRole.TOP_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE,allObjectRoles);
                 }
                 finally {
-                    if (m_progressMonitor!=null)
-                        m_progressMonitor.reasonerTaskStopped();
+                    if (m_configuration.reasonerProgressMonitor!=null)
+                        m_configuration.reasonerProgressMonitor.reasonerTaskStopped();
                 }
             }
         }
@@ -911,21 +909,21 @@ public class Reasoner implements OWLReasoner {
             else {
                 try {
                     final int numRoles=allDataRoles.size();
-                    if (m_progressMonitor!=null)
-                        m_progressMonitor.reasonerTaskStarted("Classifying data properties...");
+                    if (m_configuration.reasonerProgressMonitor!=null)
+                        m_configuration.reasonerProgressMonitor.reasonerTaskStarted("Classifying data properties...");
                     ClassificationManager.ProgressMonitor<Role> progressMonitor=new ClassificationManager.ProgressMonitor<Role>() {
                         protected int m_processedRoles=0;
                         public void elementClassified(Role element) {
                             m_processedRoles++;
-                            if (m_progressMonitor!=null)
-                                m_progressMonitor.reasonerTaskProgressChanged(m_processedRoles,numRoles);
+                            if (m_configuration.reasonerProgressMonitor!=null)
+                                m_configuration.reasonerProgressMonitor.reasonerTaskProgressChanged(m_processedRoles,numRoles);
                         }
                     };
                     m_dataRoleHierarchy=m_dataRoleClassificationManager.classify(progressMonitor,AtomicRole.TOP_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE,allDataRoles);
                 }
                 finally {
-                    if (m_progressMonitor!=null)
-                        m_progressMonitor.reasonerTaskStopped();
+                    if (m_configuration.reasonerProgressMonitor!=null)
+                        m_configuration.reasonerProgressMonitor.reasonerTaskStopped();
                 }
             }
         }
@@ -1125,8 +1123,8 @@ public class Reasoner implements OWLReasoner {
                         m_realization.put(directSuperConcept,individuals);
             }
             else {
-                if (m_progressMonitor!=null)
-                    m_progressMonitor.reasonerTaskStarted("Computing instances for all classes...");
+                if (m_configuration.reasonerProgressMonitor!=null)
+                    m_configuration.reasonerProgressMonitor.reasonerTaskStarted("Computing instances for all classes...");
                 int numIndividuals=m_dlOntology.getAllIndividuals().size();
                 int currentIndividual=0;
                 for (Individual individual : m_dlOntology.getAllIndividuals()) {
@@ -1142,11 +1140,11 @@ public class Reasoner implements OWLReasoner {
                             individuals.add(individual);
                         }
                     }
-                    if (m_progressMonitor!=null)
-                        m_progressMonitor.reasonerTaskProgressChanged(currentIndividual,numIndividuals);
+                    if (m_configuration.reasonerProgressMonitor!=null)
+                        m_configuration.reasonerProgressMonitor.reasonerTaskProgressChanged(currentIndividual,numIndividuals);
                 }
-                if (m_progressMonitor!=null)
-                    m_progressMonitor.reasonerTaskStopped();
+                if (m_configuration.reasonerProgressMonitor!=null)
+                    m_configuration.reasonerProgressMonitor.reasonerTaskStopped();
             }
         }
     }
@@ -1751,7 +1749,7 @@ public class Reasoner implements OWLReasoner {
     }
 
     // Methods for conversion from OWL API to HermiT's API
-    
+
     protected static AtomicConcept H(OWLClass owlClass) {
         return AtomicConcept.create(owlClass.getIRI().toString());
     }
@@ -1831,6 +1829,17 @@ public class Reasoner implements OWLReasoner {
         return new OWLDataPropertyNodeSet(result);
     }
 
+    // Change tracking
+
+    protected class OntologyChangeListener implements OWLOntologyChangeListener {
+
+        public void ontologiesChanged(List<? extends OWLOntologyChange> changes) throws OWLException {
+            m_ontologyChanged=true;
+            if (!m_configuration.bufferChanges)
+                flush();
+        }
+    }
+
     // The factory for OWL API reasoners
 
     public static class ReasonerFactory implements OWLReasonerFactory {
@@ -1871,7 +1880,7 @@ public class Reasoner implements OWLReasoner {
             return configuration;
         }
         protected OWLReasoner createHermiTOWLReasoner(Configuration configuration,OWLOntology ontology) {
-            return new ChangeTrackingReasoner(configuration,ontology);
+            return new Reasoner(configuration,ontology);
         }
     }
 

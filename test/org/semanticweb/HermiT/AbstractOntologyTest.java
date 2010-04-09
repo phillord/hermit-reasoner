@@ -3,9 +3,7 @@ package org.semanticweb.HermiT;
 import java.util.Collection;
 import java.util.Set;
 
-import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
-import org.semanticweb.HermiT.structural.OWLClausification;
 import org.semanticweb.HermiT.tableau.Tableau;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.OWLOntologyDocumentSource;
@@ -41,24 +39,14 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
         m_ontology=null;
     }
 
-    protected DLOntology getDLOntology() {
-        return getDLOntology(null);
-    }
-
-    protected DLOntology getDLOntology(Collection<DescriptionGraph> descriptionGraphs) {
-        OWLClausification clausifier=new OWLClausification(new Configuration());
-        return (DLOntology)clausifier.preprocessAndClausify(m_ontology,descriptionGraphs)[1];
-    }
-
     protected Tableau getTableau(Collection<DescriptionGraph> descriptionGraphs) throws Exception {
-        DLOntology dlOntology = getDLOntology(descriptionGraphs);
         Configuration c=new Configuration();
         c.blockingSignatureCacheType=Configuration.BlockingSignatureCacheType.CACHED;
         c.blockingStrategyType=Configuration.BlockingStrategyType.ANYWHERE;
         c.directBlockingType=Configuration.DirectBlockingType.PAIR_WISE;
         c.existentialStrategyType=Configuration.ExistentialStrategyType.CREATION_ORDER;
-        Reasoner reasoner=new Reasoner(c,dlOntology);
-        return reasoner.m_tableau;
+        Reasoner reasoner=new Reasoner(c,m_ontology,descriptionGraphs);
+        return reasoner.getTableau();
     }
 
     /**
