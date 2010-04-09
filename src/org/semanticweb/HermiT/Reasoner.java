@@ -1419,8 +1419,6 @@ public class Reasoner implements OWLReasoner {
     /**
      * A mostly internal method. Can be used to retrieve a tableau for axioms in the given ontology manager plus an additional set of axioms.
      *
-     * @param ontologyManager
-     *            - the manager is assumed to contain the axioms to which the given additional axioms are to be added
      * @param additionalAxioms
      *            - a list of additional axioms that should be included in the tableau
      * @return a tableau containing rules for the normalised axioms, this tableau is not permanent in the reasoner, i.e., it does not overwrite the originally created tableau
