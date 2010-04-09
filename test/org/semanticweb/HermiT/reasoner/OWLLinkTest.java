@@ -3,6 +3,8 @@ package org.semanticweb.HermiT.reasoner;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.semanticweb.HermiT.Configuration;
+import org.semanticweb.HermiT.Configuration.TableauMonitorType;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
@@ -13,6 +15,13 @@ import org.semanticweb.owlapi.util.SimpleIRIMapper;
 public class OWLLinkTest extends AbstractReasonerTest {
 
     public static final String NS="http://example.com/owl/families/";
+    
+    protected Configuration getConfiguration() {
+        Configuration c=new Configuration();
+        c.throwInconsistentOntologyException=false;
+        c.tableauMonitorType=TableauMonitorType.TIMING;
+        return c;
+    }
 
     public OWLLinkTest(String name) {
         super(name);
@@ -24,6 +33,7 @@ public class OWLLinkTest extends AbstractReasonerTest {
     }
 
     public void testObjectProperties() throws Exception {
+        m_ontology=m_ontologyManager.createOntology();
         m_ontologyManager.addAxiom(m_ontology,m_dataFactory.getOWLDeclarationAxiom(m_dataFactory.getOWLObjectProperty(IRI.create(NS+"hasParent"))));
         createReasoner();
         m_reasoner.getDisjointObjectProperties(m_dataFactory.getOWLObjectProperty(IRI.create(NS+"hasParent")),false);
