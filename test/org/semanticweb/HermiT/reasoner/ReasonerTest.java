@@ -35,6 +35,16 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
+    public void testRoleSubsumption() throws Exception {
+        loadOntologyWithAxioms("ObjectPropertyDomain(:r ObjectOneOf(:a)) ObjectPropertyRange(:r ObjectOneOf(:b)) " 
+            + " ObjectPropertyAssertion(:r :a :b) ObjectPropertyAssertion(:t :a :c) ObjectPropertyAssertion(:t :c :b) "
+            + " TransitiveObjectProperty(:t)");
+        createReasoner();
+
+        OWLObjectProperty r=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"r"));
+        OWLObjectProperty t=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"t"));
+        assertTrue(m_reasoner.isSubObjectPropertyExpressionOf(r, t));
+    }
     public void testIsFunctionalData() throws Exception {
         loadOntologyWithAxioms("FunctionalDataProperty(:DP) SubDataPropertyOf(:SDP :DP)");
         createReasoner();

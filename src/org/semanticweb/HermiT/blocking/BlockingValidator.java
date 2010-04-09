@@ -624,20 +624,25 @@ public class BlockingValidator {
             m_y2xRetrievals=new Retrieval[y2xRoles.size()];
             m_y2xRoles=new AtomicRole[y2xRoles.size()];
             int i=0;
+            int num_xyRoles=0;
             for (i=0;i<m_yVariables.length;i++) {
                 Variable y=m_yVariables[i];
                 Set<AtomicConcept> yConcepts=y2concepts.get(y);
                 Set<AtomicRole> xyRoles=x2yRoles.get(y);
                 if (xyRoles!=null) {
                     assert xyRoles.size()==1;
-                    m_x2yRetrievals[i]=extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,true,false },ExtensionTable.View.TOTAL);
-                    m_x2yRoles[i]=xyRoles.iterator().next();
+                    assert m_y2xRetrievals.length<m_x2yRetrievals.length;
+                    m_x2yRetrievals[num_xyRoles]=extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,true,false },ExtensionTable.View.TOTAL);
+                    m_x2yRoles[num_xyRoles]=xyRoles.iterator().next();
+                    num_xyRoles++;
                 }
                 Set<AtomicRole> yxRoles=y2xRoles.get(y);
                 if (yxRoles!=null) {
                     assert yxRoles.size()==1;
-                    m_y2xRetrievals[i]=extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,false,true },ExtensionTable.View.TOTAL);
-                    m_y2xRoles[i]=yxRoles.iterator().next();
+                    assert i-num_xyRoles>=0;
+                    assert i-num_xyRoles<m_y2xRetrievals.length;
+                    m_y2xRetrievals[i-num_xyRoles]=extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,false,true },ExtensionTable.View.TOTAL);
+                    m_y2xRoles[i-num_xyRoles]=yxRoles.iterator().next();
                 }
                 m_yConstraints[i]=new YConstraint(yConcepts!=null?yConcepts.toArray(noConcepts):noConcepts, xyRoles!=null?xyRoles.toArray(noRoles):noRoles, yxRoles!=null?yxRoles.toArray(noRoles):noRoles);
             }

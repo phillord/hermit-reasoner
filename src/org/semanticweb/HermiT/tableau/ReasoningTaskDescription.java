@@ -64,7 +64,7 @@ public class ReasoningTaskDescription {
         return new ReasoningTaskDescription(false,"satisfiability of "+(isObjectRole ? "object" : "data")+" role '{0}'",role);
     }
     public static ReasoningTaskDescription isRoleSubsumedBy(Object subrole,Object superrole,boolean isObjectRole) {
-        return new ReasoningTaskDescription(true,(isObjectRole ? "object" : "data")+" role subsumptioin '{0}' => '{1}'",subrole,superrole);
+        return new ReasoningTaskDescription(true,(isObjectRole ? "object" : "data")+" role subsumption '{0}' => '{1}'",subrole,superrole);
     }
     public static ReasoningTaskDescription isInstanceOf(Object individual,Object atomicConcept) {
         return new ReasoningTaskDescription(true,"instantiation '{0}' => '{1}'",individual,atomicConcept);
