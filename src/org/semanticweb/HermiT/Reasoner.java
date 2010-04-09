@@ -1045,6 +1045,7 @@ public class Reasoner implements OWLReasoner {
             nodesToTest.addAll(m_dataRoleHierarchy.getTopNode().getChildNodes());
             while (!nodesToTest.isEmpty()) {
                 HierarchyNode<AtomicRole> nodeToTest=nodesToTest.iterator().next();
+                nodesToTest.remove(nodeToTest);
                 AtomicRole atomicRoleToTest=nodeToTest.getRepresentative();
                 Atom atomicRoleToTestAssertion=atomicRoleToTest.getRoleAssertion(freshIndividual,freshConstant);
                 Set<Atom> perTestAtoms=new HashSet<Atom>(2);
