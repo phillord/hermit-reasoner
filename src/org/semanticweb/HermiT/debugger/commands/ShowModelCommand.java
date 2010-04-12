@@ -60,7 +60,12 @@ public class ShowModelCommand extends AbstractCommand {
             title="Current model";
         }
         else {
-            DLPredicate dlPredicate=getDLPredicate(args[1]);
+            DLPredicate dlPredicate=null;
+            try {
+                dlPredicate = getDLPredicate(args[1]);
+            } catch (Exception e) {
+                m_debugger.getOutput().println(args[1]+" is invalid: "+e.getMessage());
+            }
             if (dlPredicate!=null) {
                 ExtensionTable extensionTable=m_debugger.getTableau().getExtensionManager().getExtensionTable(dlPredicate.getArity()+1);
                 boolean[] bindings=new boolean[extensionTable.getArity()];

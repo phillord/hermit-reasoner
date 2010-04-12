@@ -59,12 +59,12 @@ public abstract class AbstractCommand implements DebuggerCommand {
             }
         });
     }
-    protected DLPredicate getDLPredicate(String predicate) {
+    protected DLPredicate getDLPredicate(String predicate) throws Exception {
         if ("==".equals(predicate))
             return Equality.INSTANCE;
         else if ("!=".equals(predicate))
             return Inequality.INSTANCE;
-        else if (predicate.startsWith("+"))
+        else if (predicate.startsWith("+")) 
             return AtomicConcept.create(m_debugger.getPrefixes().expandAbbreviatedIRI(predicate.substring(1)));
         else if (predicate.startsWith("-"))
             return AtomicRole.create(m_debugger.getPrefixes().expandAbbreviatedIRI(predicate.substring(1)));

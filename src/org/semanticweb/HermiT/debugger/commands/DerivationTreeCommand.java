@@ -43,6 +43,13 @@ public class DerivationTreeCommand extends AbstractCommand {
         writer.println("    Shows the derivation tree for the clash.");
         writer.println("usage: dertree predicate [nodeID]+");
         writer.println("    Shows the derivation tree for the given atom.");
+        writer.println("    yellow: DL clause application");
+        writer.println("    cyan: disjunct application (choose and apply a disjunct)");
+        writer.println("    blue: merged two nodes");
+        writer.println("    dark grey: description graph checking");
+        writer.println("    black: clash");
+        writer.println("    red: existential expansion");
+        writer.println("    magenta: base/given fact");
     }
     public void execute(String[] args) {
         if (args.length<2) {
@@ -55,7 +62,11 @@ public class DerivationTreeCommand extends AbstractCommand {
             tuple=new Object[0];
         else {
             tuple=new Object[args.length-1];
-            tuple[0]=getDLPredicate(predicate);
+            try {
+                tuple[0]=getDLPredicate(predicate);
+            } catch (Exception e) {
+                m_debugger.getOutput().println("Invalid predicate '"+predicate+"':"+e.getMessage());
+            }
             if (tuple[0]==null) {
                 m_debugger.getOutput().println("Invalid predicate '"+predicate+"'.");
                 return;

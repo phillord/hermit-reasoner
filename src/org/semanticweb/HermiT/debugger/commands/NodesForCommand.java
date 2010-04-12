@@ -49,33 +49,38 @@ public class NodesForCommand extends AbstractCommand {
             return;
         }
         String conceptName=args[1];
-        AtomicConcept atomicConcept=AtomicConcept.create(m_debugger.getPrefixes().expandAbbreviatedIRI(conceptName));
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter writer=new PrintWriter(buffer);
-        writer.println("Nodes for '"+conceptName+"'");
-        writer.println("====================================================================");
-        int index=0;
-        Node node=m_debugger.getTableau().getFirstTableauNode();
-        while (node!=null) {
-            Debugger.NodeCreationInfo nodeCreationInfo=m_debugger.getNodeCreationInfo(node);
-            ExistentialConcept existentialConcept=nodeCreationInfo.m_createdByExistential;
-            if (existentialConcept instanceof AtLeastConcept) {
-                if (((AtLeastConcept)existentialConcept).getToConcept().equals(atomicConcept)) {
-                    if (index!=0) {
-                        writer.print(",");
-                        if (index%5==0)
-                            writer.println();
-                        else
-                            writer.print("  ");
+        AtomicConcept atomicConcept=null;
+        try {
+            atomicConcept=AtomicConcept.create(m_debugger.getPrefixes().expandAbbreviatedIRI(conceptName));
+            writer.println("Nodes for '"+conceptName+"'");
+            writer.println("====================================================================");
+            int index=0;
+            Node node=m_debugger.getTableau().getFirstTableauNode();
+            while (node!=null) {
+                Debugger.NodeCreationInfo nodeCreationInfo=m_debugger.getNodeCreationInfo(node);
+                ExistentialConcept existentialConcept=nodeCreationInfo.m_createdByExistential;
+                if (existentialConcept instanceof AtLeastConcept) {
+                    if (((AtLeastConcept)existentialConcept).getToConcept().equals(atomicConcept)) {
+                        if (index!=0) {
+                            writer.print(",");
+                            if (index%5==0)
+                                writer.println();
+                            else
+                                writer.print("  ");
+                        }
+                        Printing.printPadded(writer,node.getNodeID()+(node.isActive() ? "" : "*"),8);
+                        index++;
                     }
-                    Printing.printPadded(writer,node.getNodeID()+(node.isActive() ? "" : "*"),8);
-                    index++;
                 }
+                node=node.getNextTableauNode();
             }
-            node=node.getNextTableauNode();
+            writer.println();
+            writer.println("====================================================================");
+        } catch (IllegalArgumentException e) {
+            writer.println(conceptName+" is invalid: "+e.getMessage());
         }
-        writer.println();
-        writer.println("====================================================================");
         writer.flush();
         showTextInWindow(buffer.toString(),"Nodes for '"+conceptName+"'");
         selectConsoleWindow();

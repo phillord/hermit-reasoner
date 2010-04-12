@@ -64,7 +64,11 @@ public class QueryCommand extends AbstractCommand {
             if ("?".equals(args[1]))
                 tuple[0]=null;
             else {
-                tuple[0]=getDLPredicate(args[1]);
+                try {
+                    tuple[0]=getDLPredicate(args[1]);
+                } catch (Exception e) {
+                    m_debugger.getOutput().println("Invalid predicate '"+args[1]+"':"+e.getMessage());
+                }
                 if (tuple[0]==null) {
                     m_debugger.getOutput().println("Invalid predicate '"+args[1]+"'.");
                     return;
