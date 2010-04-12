@@ -385,8 +385,8 @@ public class Debugger extends TableauMonitorForwarder {
             mainLoop();
         }
     }
-    public void blockingValidationFinished() {
-        super.blockingValidationFinished();
+    public void blockingValidationFinished(int noInvalidlyBlocked) {
+        super.blockingValidationFinished(noInvalidlyBlocked);
         if (m_waitOptions.contains(WaitOption.BLOCKING_VALIDATION_FINISHED)) {
             m_forever=false;
             m_output.println("Blocking validated.");

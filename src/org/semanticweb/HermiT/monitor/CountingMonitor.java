@@ -27,6 +27,7 @@ import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.monitor.CountingMonitor.TestRecord.TestType;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
+import org.semanticweb.HermiT.tableau.Node;
 
 public class CountingMonitor extends TableauMonitorAdapter {
     private static final long serialVersionUID=-8144444618897251350L;
@@ -36,34 +37,48 @@ public class CountingMonitor extends TableauMonitorAdapter {
     
     // current test
     protected long m_time;
-    protected long m_validationTime;
     protected int m_numberOfBacktrackings;
     protected int m_numberOfNodes;
-    protected int m_numberOfBlockingValidations;
+    protected int m_numberOfBlockedNodes;
     protected String m_testDescription;
     protected boolean m_testResult;
+    // validated blocking
+    protected int m_initialModelSize;
+    protected int m_initiallyBlocked;
+    protected int m_initiallyInvalid;
+    protected int m_noValidations;
+    protected long m_validationTime;
     
     // overall numbers
     protected final List<TestRecord> m_testsRecords=new ArrayList<TestRecord>();
     protected long m_overallTime=0;
-    protected long m_overallValidationTime=0;
     protected int m_overallNumberOfBacktrackings=0;
     protected int m_overallNumberOfNodes=0;
+    protected int m_overallNumberOfBlockedNodes=0;
     protected int m_overallNumberOfTests=0;
     protected int m_overallNumberOfSatTests=0;
     protected int m_overallNumberOfSubsumptionTests=0;
     protected int m_overallNumberOfABoxSatTests=0;
     protected int m_overallNumberOfInstanceOfTests=0;
     protected int m_overallNumberOfClashes=0;
-    protected int m_overallNumberOfBlockingValidations=0;
+    // validated blocking
+    protected int m_overallInitialModelSize=0;
+    protected int m_overallInitiallyBlocked=0;
+    protected int m_overallInitiallyInvalid=0;
+    protected int m_overallNoValidations=0;
+    protected long m_overallValidationTime=0;
     
     protected void start() {
     	m_overallNumberOfTests++;
+    	m_problemStartTime=System.currentTimeMillis();
         m_numberOfBacktrackings=0;
-        m_problemStartTime=System.currentTimeMillis();
-        m_validationTime=0;
         m_numberOfNodes=0;
-        m_numberOfBlockingValidations=0;
+        m_numberOfBlockedNodes=0;
+        m_initialModelSize=0;
+        m_initiallyBlocked=0;
+        m_initiallyInvalid=0;
+        m_noValidations=0;
+        m_validationTime=0;
     }
     public void isSatisfiableStarted(AtomicConcept atomicConcept) {
     	m_overallNumberOfSatTests++;
@@ -117,21 +132,47 @@ public class CountingMonitor extends TableauMonitorAdapter {
         m_numberOfBacktrackings++;
     }
     public void blockingValidationStarted() {
-    	m_numberOfBlockingValidations++;
+    	m_noValidations++;
+    	Node node;
+    	if (m_noValidations==1) {
+            node=m_tableau.getFirstTableauNode();
+            while (node!=null) {
+                if (node.isActive()) {
+                    m_initialModelSize++;
+                    if (node.isBlocked() && node.hasUnprocessedExistentials()) {
+                        m_initiallyBlocked++;
+                    }
+                }
+                node=node.getNextTableauNode();
+            }
+    	}
     	m_validationStartTime=System.currentTimeMillis();
     }
-    public void blockingValidationFinished() {
+    public void blockingValidationFinished(int noInvalidlyBlocked) {
     	m_validationTime+=(System.currentTimeMillis()-m_validationStartTime);
+    	if (m_noValidations==1) 
+    	    m_initiallyInvalid=noInvalidlyBlocked;
     }
     public void doStatistics(TestType type) {
         m_time=System.currentTimeMillis()-m_problemStartTime;
         m_testsRecords.add(new TestRecord(type, m_time, m_testDescription, m_testResult));
         m_overallTime+=m_time;
-        m_overallValidationTime+=m_validationTime;
-        m_overallNumberOfBlockingValidations+=m_numberOfBlockingValidations;
         m_overallNumberOfBacktrackings+=m_numberOfBacktrackings;
         m_numberOfNodes=m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes();
+        Node node;
+        node=m_tableau.getFirstTableauNode();
+        while (node!=null) {
+            if (node.isActive() && node.isBlocked() && node.hasUnprocessedExistentials())
+                m_numberOfBlockedNodes++;
+            node=node.getNextTableauNode();
+        }
         m_overallNumberOfNodes+=m_numberOfNodes;
+        m_overallNumberOfBlockedNodes+=m_numberOfBlockedNodes;
+        m_overallInitialModelSize+=m_initialModelSize;
+        m_overallInitiallyBlocked+=m_initiallyBlocked;
+        m_overallInitiallyInvalid+=m_initiallyInvalid;
+        m_overallNoValidations+=m_noValidations;
+        m_overallValidationTime+=m_validationTime;
     }
     public List<TestRecord> getTimeSortedTestRecords(int limit) {
         return getTimeSortedTestRecords(limit,null);
@@ -150,26 +191,45 @@ public class CountingMonitor extends TableauMonitorAdapter {
         if (limit>filteredRecords.size()) limit=filteredRecords.size();
         return filteredRecords.subList(0, limit);
     }
+    // getters for current test measurements    
+    public long getTime() {
+        return m_time;
+    }
 	public int getNumberOfBacktrackings() {
 		return m_numberOfBacktrackings;
 	}
 	public int getNumberOfNodes() {
 		return m_numberOfNodes;
 	}
-	public int getNumberOfBlockingValidations() {
-		return m_numberOfBlockingValidations;
+	public int getNumberOfBlockedNodes() {
+        return m_numberOfBlockedNodes;
+    }
+	public String getTestDescription() {
+	    return m_testDescription;
 	}
-	public long getTime() {
-		return m_time;
-	}
+	public boolean getTestResult() {
+        return m_testResult;
+    }
+	// getters for current test blocking validation measurements
+	public int getInitialModelSize() {
+        return m_initialModelSize;
+    }
+    public int getInitiallyBlocked() {
+        return m_initiallyBlocked;
+    }
+    public int getInitiallyInvalid() {
+        return m_initiallyInvalid;
+    }
+    public int getNoValidations() {
+        return m_noValidations;
+    }
 	public long getValidationTime() {
 		return m_validationTime;
-	} 
+	}
+	
+	// getters for overall measurements
 	public long getOverallTime() {
 		return m_overallTime;
-	}
-	public long getOverallValidationTime() {
-		return m_overallValidationTime;
 	}
 	public int getOverallNumberOfBacktrackings() {
 		return m_overallNumberOfBacktrackings;
@@ -177,6 +237,9 @@ public class CountingMonitor extends TableauMonitorAdapter {
 	public int getOverallNumberOfNodes() {
 		return m_overallNumberOfNodes;
 	}
+	public int getOverallNumberOfBlockedNodes() {
+        return m_overallNumberOfBlockedNodes;
+    }
 	public int getOverallNumberOfTests() {
 		return m_overallNumberOfTests;
 	}
@@ -195,9 +258,22 @@ public class CountingMonitor extends TableauMonitorAdapter {
 	public int getOverallNumberOfClashes() {
 		return m_overallNumberOfClashes;
 	}
-	public int getOverallNumberOfBlockingValidations() {
-		return m_overallNumberOfBlockingValidations;
+	// getters for overall blocking validation measurements
+    public int getOverallInitialModelSize() {
+        return m_overallInitialModelSize;
+    }
+    public int getOverallInitiallyBlocked() {
+        return m_overallInitiallyBlocked;
+    }
+    public int getOverallInitiallyInvalid() {
+        return m_overallInitiallyInvalid;
+    }
+	public int getOverallNoValidations() {
+		return m_overallNoValidations;
 	}
+    public long getOverallValidationTime() {
+        return m_overallValidationTime;
+    }
     public static String millisToHoursMinutesSecondsString(long millis) {
         long time=millis/1000;
         long ms=time%1000;

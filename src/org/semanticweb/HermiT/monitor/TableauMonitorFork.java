@@ -227,8 +227,8 @@ public class TableauMonitorFork implements TableauMonitor,Serializable  {
         m_first.blockingValidationStarted();
         m_second.blockingValidationStarted();
     }
-    public void blockingValidationFinished() {
-        m_first.blockingValidationFinished();
-        m_second.blockingValidationFinished();
+    public void blockingValidationFinished(int noInvalidlyBlocked) {
+        m_first.blockingValidationFinished(noInvalidlyBlocked);
+        m_second.blockingValidationFinished(noInvalidlyBlocked);
     }
 }
