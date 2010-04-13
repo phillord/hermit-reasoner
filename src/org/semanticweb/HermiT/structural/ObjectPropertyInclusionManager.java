@@ -249,7 +249,7 @@ public class ObjectPropertyInclusionManager {
         State initialState=(State)propertyAutomaton.initials().iterator().next();
         State finalState=(State)propertyAutomaton.terminals().iterator().next();
         Transition transition=(Transition)propertyAutomaton.deltaFrom(initialState,finalState).iterator().next();
-        optimizedAutomataConnector(propertyAutomaton,getMirroredCopy(inversePropertyAutomaton),transition);
+        automataConnector(propertyAutomaton,getMirroredCopy(inversePropertyAutomaton),transition);
     }
     protected Automaton buildCompleteAutomataForProperties(OWLObjectPropertyExpression propertyToBuildAutomatonFor,Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> inversePropertiesMap,Map<OWLObjectPropertyExpression,Automaton> individualAutomata,Map<OWLObjectPropertyExpression,Automaton> completeAutomata,Graph<OWLObjectPropertyExpression> inversedPropertyDependencyGraph) {
         if (completeAutomata.containsKey(propertyToBuildAutomatonFor))
@@ -336,7 +336,7 @@ public class ObjectPropertyInclusionManager {
                 }
                 for (OWLObjectPropertyExpression smallerProperty : inversedPropertyDependencyGraph.getSuccessors(propertyToBuildAutomatonFor)) {
                     Automaton smallerPropertyAutomaton=buildCompleteAutomataForProperties(smallerProperty,inversePropertiesMap,individualAutomata,completeAutomata,inversedPropertyDependencyGraph);
-                    optimizedAutomataConnector(biggerPropertyAutomaton,smallerPropertyAutomaton,transition);
+                    automataConnector(biggerPropertyAutomaton,smallerPropertyAutomaton,transition);
                     try {
                         biggerPropertyAutomaton.addTransition(new Transition(initialState,smallerProperty,finalState));
                     }
@@ -375,14 +375,14 @@ public class ObjectPropertyInclusionManager {
                         if (transition.label()!=null && transition.label().equals(smallerProperty)) {
                             Automaton smallerPropertyAutomaton=buildCompleteAutomataForProperties(smallerProperty,inversePropertiesMap,individualAutomata,completeAutomata,inversedPropertyDependencyGraph);
                             if (smallerPropertyAutomaton.delta().size()!=1)
-                                optimizedAutomataConnector(biggerPropertyAutomaton,smallerPropertyAutomaton,transition);
+                                automataConnector(biggerPropertyAutomaton,smallerPropertyAutomaton,transition);
                             someInternalTransitionMatched=true;
                         }
                     }
                     if (!someInternalTransitionMatched) {
                         Automaton smallerPropertyAutomaton=buildCompleteAutomataForProperties(smallerProperty,inversePropertiesMap,individualAutomata,completeAutomata,inversedPropertyDependencyGraph);
                         Transition initial2TerminalTransition=(Transition)biggerPropertyAutomaton.deltaFrom((State)biggerPropertyAutomaton.initials().iterator().next(),(State)biggerPropertyAutomaton.terminals().iterator().next()).iterator().next();
-                        optimizedAutomataConnector(biggerPropertyAutomaton,smallerPropertyAutomaton,initial2TerminalTransition);
+                        automataConnector(biggerPropertyAutomaton,smallerPropertyAutomaton,initial2TerminalTransition);
                     }
                 }
             }
@@ -434,57 +434,58 @@ public class ObjectPropertyInclusionManager {
             return automaton;
         return tempMinimizedAuto;
     }
-    protected void optimizedAutomataConnector(Automaton biggerPropertyAutomaton,Automaton smallerPropertyAutomaton,Transition transition) {
+    protected void useStandardAutomataConnector(Automaton biggerPropertyAutomaton,Automaton smallerPropertyAutomaton,Transition transition) {
+        Map<State,State> stateMapper=getDisjointUnion(biggerPropertyAutomaton,smallerPropertyAutomaton);
+        
+        State initialState=transition.start();
+	    State finalState=transition.end();
+	
+	    State oldStartOfSmaller=stateMapper.get(smallerPropertyAutomaton.initials().iterator().next());
+	    State oldFinalOfSmaller=stateMapper.get(smallerPropertyAutomaton.terminals().iterator().next());
+	
+	    try {
+	    	biggerPropertyAutomaton.addTransition(new Transition(initialState,null,oldStartOfSmaller));
+	        biggerPropertyAutomaton.addTransition(new Transition(oldFinalOfSmaller,null,finalState));
+	    }
+	    catch (NoSuchStateException e) {
+	    	throw new IllegalArgumentException("Could not build the Complete Automata of non-Simple Properties");
+	    }
+    }
+    protected void automataConnector(Automaton biggerPropertyAutomaton,Automaton smallerPropertyAutomaton,Transition transition) {
+        if( !smallerPropertyAutomaton.delta( (State)smallerPropertyAutomaton.terminals().iterator().next() ).isEmpty() )
+        	useStandardAutomataConnector(biggerPropertyAutomaton,smallerPropertyAutomaton,transition);
+        else
+        	useOptimizedAutomataConnector(biggerPropertyAutomaton,smallerPropertyAutomaton,transition);
+    }
+    private void useOptimizedAutomataConnector(Automaton biggerPropertyAutomaton,Automaton smallerPropertyAutomaton,Transition transition) {
         Map<State,State> stateMapper=getDisjointUnion(biggerPropertyAutomaton,smallerPropertyAutomaton);
 
-        State startState=transition.start();
-        State endState=transition.end();
+        State initialState=transition.start();
+        State finalState=transition.end();
 
-        State oldStartOfSmaller=stateMapper.get(smallerPropertyAutomaton.initials().iterator().next());
+        State oldInitialOfSmaller=stateMapper.get(smallerPropertyAutomaton.initials().iterator().next());
         State oldFinalOfSmaller=stateMapper.get(smallerPropertyAutomaton.terminals().iterator().next());
 
         try {
-            biggerPropertyAutomaton.addTransition(new Transition(startState,null,oldStartOfSmaller));
-            biggerPropertyAutomaton.addTransition(new Transition(oldFinalOfSmaller,null,endState));
-        }
-        catch (NoSuchStateException e) {
-            throw new IllegalArgumentException("Could not build the Complete Automata of non-Simple Properties");
-        }
-
-        // TODO: Ask Giorgos about the code below
-/*        try {
-            State startState=transition.start();
-            State endState=transition.end();
-
-            State oldStartOfSmaller=stateMapper.get(smallerPropertyAutomaton.initials().iterator().next());
-            State oldFinalOfSmaller=stateMapper.get(smallerPropertyAutomaton.terminals().iterator().next());
-
-            for (Object outgoingTransitionFromInitialOfSmallerObject : biggerPropertyAutomaton.delta(oldStartOfSmaller)) {
+            for (Object outgoingTransitionFromInitialOfSmallerObject : biggerPropertyAutomaton.delta(oldInitialOfSmaller)) {
                 Transition outgoingTransitionFromInitialOfSmaller=(Transition)outgoingTransitionFromInitialOfSmallerObject;
                 State toState=outgoingTransitionFromInitialOfSmaller.end();
                 if (!toState.equals(oldFinalOfSmaller))
-                    biggerPropertyAutomaton.addTransition(new Transition(startState,outgoingTransitionFromInitialOfSmaller.label(),toState));
+                    biggerPropertyAutomaton.addTransition(new Transition(initialState,outgoingTransitionFromInitialOfSmaller.label(),toState));
             }
 
             for (Object incomingTransitionToFinalOfSmallerObject : deltaToState(biggerPropertyAutomaton,oldFinalOfSmaller)) {
                 Transition incomingTransitionToFinalOfSmaller=(Transition)incomingTransitionToFinalOfSmallerObject;
                 State fromState=incomingTransitionToFinalOfSmaller.start();
-                if (!fromState.equals(oldStartOfSmaller))
-                    biggerPropertyAutomaton.addTransition(new Transition(fromState,incomingTransitionToFinalOfSmaller.label(),endState));
+                if (!fromState.equals(oldInitialOfSmaller))
+                    biggerPropertyAutomaton.addTransition(new Transition(fromState,incomingTransitionToFinalOfSmaller.label(),finalState));
             }
-
-            for (Object extraOnesObject : biggerPropertyAutomaton.deltaFrom(oldFinalOfSmaller,oldStartOfSmaller))
-                biggerPropertyAutomaton.addTransition(new Transition(endState,((Transition)extraOnesObject).label(),startState));
-
-            for (Object extraOnesObject : biggerPropertyAutomaton.deltaFrom(oldFinalOfSmaller,oldFinalOfSmaller))
-                biggerPropertyAutomaton.addTransition(new Transition(endState,((Transition)extraOnesObject).label(),endState));
-
         }
         catch (NoSuchStateException e) {
             throw new IllegalArgumentException("Could not build the Complete Automata of non-Simple Properties");
-        }*/
-    }
-    protected Set<Transition> deltaToState(Automaton smallerPropertyAutomaton,State state) {
+        }
+	}
+	protected Set<Transition> deltaToState(Automaton smallerPropertyAutomaton,State state) {
         Set<Transition> incommingTrans=new HashSet<Transition>();
         for (Object transitionObject : smallerPropertyAutomaton.delta()) {
             Transition transition=(Transition)transitionObject;
@@ -673,7 +674,7 @@ public class ObjectPropertyInclusionManager {
                         throw new IllegalArgumentException("Could not create automaton for symmetric property: "+property);
                     }
                     Transition basicTransition=new Transition((State)au.initials().iterator().next(),property.getInverseProperty().getSimplified(),(State)au.terminals().iterator().next());
-                    optimizedAutomataConnector(au,getMirroredCopy(au),basicTransition);
+                    automataConnector(au,getMirroredCopy(au),basicTransition);
                 }
         // For those transitive properties that other properties do not depend on other properties the automaton is complete.
         // So we also need to build the auto for the inverse of R unless Inv(R) has its own.
