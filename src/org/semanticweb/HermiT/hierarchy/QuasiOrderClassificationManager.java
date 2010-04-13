@@ -29,6 +29,7 @@ import java.util.Stack;
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.graph.Graph;
+import org.semanticweb.HermiT.hierarchy.ClassificationManager.ProgressMonitor;
 import org.semanticweb.HermiT.hierarchy.DeterministicClassificationManager.GraphNode;
 import org.semanticweb.HermiT.hierarchy.StandardClassificationManager.Relation;
 import org.semanticweb.HermiT.model.Atom;
@@ -91,7 +92,7 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
 
         updateKnownSubsumptionsUsingToldSubsumers(m_reasoner.getDLOntology());
 
-        updateSubsumptionsUsingLeafNodeStrategy(elements,topElement,bottomElement);
+        Set<AtomicConcept> processedConcepts = updateSubsumptionsUsingLeafNodeStrategy(progressMonitor,elements,topElement,bottomElement);
 
         // Unlike Rob's paper our set of possible subsumptions P would only keep unknown possible subsumptions and not known subsumptions as well.
         Set<AtomicConcept> unclassifiedElements=new HashSet<AtomicConcept>();
@@ -103,7 +104,8 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
                     continue;
                 }
             }
-            progressMonitor.elementClassified(element);
+            if( !processedConcepts.contains( element ) )
+            	progressMonitor.elementClassified(element);
         }
 
         Set<AtomicConcept> classifiedElements=new HashSet<AtomicConcept>();
@@ -117,7 +119,8 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
                     break;
                 }
                 classifiedElements.add(element);
-                progressMonitor.elementClassified(element);
+                if( !processedConcepts.contains( element ) )
+                	progressMonitor.elementClassified(element);
             }
             unclassifiedElements.removeAll(classifiedElements);
             if (unclassifiedElements.isEmpty())
@@ -143,14 +146,17 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
         }
         return buildTransitivelyReducedHierarchy(topElement,bottomElement,smallKnownSubsumptions);
     }
-    private void updateSubsumptionsUsingLeafNodeStrategy(Set<AtomicConcept> elements,AtomicConcept topElement,AtomicConcept bottomElement) {
+    private Set<AtomicConcept> updateSubsumptionsUsingLeafNodeStrategy(ProgressMonitor<AtomicConcept> progressMonitor, Set<AtomicConcept> elements,AtomicConcept topElement,AtomicConcept bottomElement) {
 
         Hierarchy<AtomicConcept> hierarchy=buildTransitivelyReducedHierarchy(topElement,bottomElement,m_knownSubsumptions);
 
         Set<HierarchyNode<AtomicConcept>> leafNodes=hierarchy.getBottomNode().getParentNodes();
+        Set<AtomicConcept> processedConcepts = new HashSet<AtomicConcept>( );
         for (HierarchyNode<AtomicConcept> leafNode : leafNodes) {
 
             AtomicConcept leafNodeElement=leafNode.getRepresentative();
+        	processedConcepts.add( leafNodeElement );
+        	progressMonitor.elementClassified( leafNodeElement );
             if (!m_possibleSubsumptions.getSuccessors(leafNodeElement).isEmpty() || isUnsatisfiable(leafNodeElement))
                 continue;
 
@@ -179,6 +185,7 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
                 }
             }
         }
+        return processedConcepts;
     }
     private void getKnownSubsumersForConcept(AtomicConcept concept) {
         Individual freshIndividual=Individual.createAnonymous("fresh-individual");
