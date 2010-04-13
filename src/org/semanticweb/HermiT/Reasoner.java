@@ -1890,41 +1890,50 @@ public class Reasoner implements OWLReasoner {
             ReasonerFactory factory=new ReasonerFactory();
             Configuration configuration=factory.getProtegeConfiguration(null);
             configuration.reasonerProgressMonitor=monitor;
-            ReasonerPreferences preferences=this.getOWLModelManager().getReasonerPreferences();
-            PrepareReasonerInferences prepareReasonerInferences=new PrepareReasonerInferences();
-            // class classification
-            prepareReasonerInferences.classClassificationRequired=
-                preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_CLASS_UNSATISFIABILITY) ||
-                preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_EQUIVALENT_CLASSES) ||
-                preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_INHERITED_ANONYMOUS_CLASSES) ||
-                preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_CLASSES);
-
-            // realisation
-            prepareReasonerInferences.realisationRequired=
-                preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERED_CLASS_MEMBERS) ||
-                preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_TYPES);
-
-            // data type classification
-            prepareReasonerInferences.dataPropertyClassificationRequired=
-                preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_DATATYPE_PROPERTY_DOMAINS) ||
-                preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_EQUIVALENT_DATATYPE_PROPERTIES) ||
-                preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_DATATYPE_PROPERTIES);
-
-            // object property classification
-            prepareReasonerInferences.objectPropertyClassificationRequired=
-                preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_EQUIVALENT_OBJECT_PROPERTIES) ||
-                preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_INVERSE_PROPERTIES) ||
-                preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_OBJECT_PROPERTIES) ||
-                preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_OBJECT_PROPERTY_UNSATISFIABILITY);
-
-            // object property realisation
-            prepareReasonerInferences.objectPropertyRealisationRequired=preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_OBJECT_PROPERTY_ASSERTIONS);
-
-            // object property domain & range
-            prepareReasonerInferences.objectPropertyDomainsRequired=preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_OBJECT_PROPERTY_DOMAINS);
-            prepareReasonerInferences.objectPropertyRangesRequired=preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_OBJECT_PROPERTY_RANGES);
-
-            configuration.prepareReasonerInferences=prepareReasonerInferences;
+            try {
+                // see whether the Protege version of the user already has the reasoner preferences tab 
+                ProtegeOWLReasonerFactoryAdapter.class.getMethod("getOWLModelManager", (Class<?>[])null);
+                // if we are not thrown into the catch block, we can initialise the reasoner preferences
+                ReasonerPreferences preferences=this.getOWLModelManager().getReasonerPreferences();
+                PrepareReasonerInferences prepareReasonerInferences=new PrepareReasonerInferences();
+                // class classification
+                prepareReasonerInferences.classClassificationRequired=
+                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_CLASS_UNSATISFIABILITY) ||
+                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_EQUIVALENT_CLASSES) ||
+                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_INHERITED_ANONYMOUS_CLASSES) ||
+                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_CLASSES);
+    
+                // realisation
+                prepareReasonerInferences.realisationRequired=
+                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERED_CLASS_MEMBERS) ||
+                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_TYPES);
+    
+                // data type classification
+                prepareReasonerInferences.dataPropertyClassificationRequired=
+                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_DATATYPE_PROPERTY_DOMAINS) ||
+                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_EQUIVALENT_DATATYPE_PROPERTIES) ||
+                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_DATATYPE_PROPERTIES);
+    
+                // object property classification
+                prepareReasonerInferences.objectPropertyClassificationRequired=
+                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_EQUIVALENT_OBJECT_PROPERTIES) ||
+                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_INVERSE_PROPERTIES) ||
+                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_OBJECT_PROPERTIES) ||
+                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_OBJECT_PROPERTY_UNSATISFIABILITY);
+    
+                // object property realisation
+                prepareReasonerInferences.objectPropertyRealisationRequired=preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_OBJECT_PROPERTY_ASSERTIONS);
+    
+                // object property domain & range
+                prepareReasonerInferences.objectPropertyDomainsRequired=preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_OBJECT_PROPERTY_DOMAINS);
+                prepareReasonerInferences.objectPropertyRangesRequired=preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_OBJECT_PROPERTY_RANGES);
+    
+                configuration.prepareReasonerInferences=prepareReasonerInferences;
+            } catch (java.lang.NoSuchMethodException e) {
+                // do nothing, prepareReasoner() will just execute all methods because the user's Protege 
+                // version does not yet have the reasoner preferences tab that we can use to customize 
+                // prepareReasoner() 
+            }
             return factory.createHermiTOWLReasoner(configuration,ontology);
         }
         public void initialise() throws Exception {
