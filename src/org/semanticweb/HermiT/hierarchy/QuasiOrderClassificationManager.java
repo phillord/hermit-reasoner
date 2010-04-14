@@ -29,7 +29,6 @@ import java.util.Stack;
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.graph.Graph;
-import org.semanticweb.HermiT.hierarchy.ClassificationManager.ProgressMonitor;
 import org.semanticweb.HermiT.hierarchy.DeterministicClassificationManager.GraphNode;
 import org.semanticweb.HermiT.hierarchy.StandardClassificationManager.Relation;
 import org.semanticweb.HermiT.model.Atom;
