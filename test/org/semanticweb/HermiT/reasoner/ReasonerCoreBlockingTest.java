@@ -12,7 +12,7 @@ public class ReasonerCoreBlockingTest extends ReasonerTest {
     }
     
     protected Configuration getConfiguration() {
-        Configuration c=new Configuration();
+        Configuration c=super.getConfiguration();
         c.blockingStrategyType=BlockingStrategyType.SIMPLE_CORE;
         c.directBlockingType=DirectBlockingType.SINGLE;
         c.blockingSignatureCacheType=BlockingSignatureCacheType.NOT_CACHED;

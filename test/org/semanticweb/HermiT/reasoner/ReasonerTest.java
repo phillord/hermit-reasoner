@@ -35,6 +35,44 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
+    public void testRoleChainsWithTransitiveSymmetric() throws Exception {
+        loadOntologyWithAxioms("Declaration(ObjectProperty(:r))"
+            +"Declaration(ObjectProperty(:p))"
+            +"Declaration(ObjectProperty(:s))"
+            +"Declaration(ObjectProperty(:t))"
+
+            +"SubClassOf(ObjectSomeValuesFrom(:r owl:Thing) ObjectSomeValuesFrom(:s owl:Thing))"
+            +"SubObjectPropertyOf(ObjectPropertyChain(ObjectInverseOf(:r) :s) :s)"
+            +"SubObjectPropertyOf(:s :t)"
+            +"SubObjectPropertyOf(:r :p)"
+            +"TransitiveObjectProperty(:t)"
+            +"SymmetricObjectProperty(:t)"
+
+            +"ObjectPropertyDomain(:r :A)"
+            +"ObjectPropertyRange(:r :B)"
+            +"SubClassOf(:A ObjectAllValuesFrom(:t ObjectComplementOf(:B)))"
+            +"ObjectPropertyAssertion(:r :a :b)");
+        createReasoner();
+        assertFalse(m_reasoner.isConsistent());
+    } 
+    public void testRoleSubsumptionWithChainsTransitiveSymmetric() throws Exception {
+        loadOntologyWithAxioms("Declaration(ObjectProperty(:r))"
+                +"Declaration(ObjectProperty(:p))"
+                +"Declaration(ObjectProperty(:s))"
+                +"Declaration(ObjectProperty(:t))"
+
+                +"SubClassOf(ObjectSomeValuesFrom(:r owl:Thing) ObjectSomeValuesFrom(:s owl:Thing))"
+                +"SubObjectPropertyOf(ObjectPropertyChain(ObjectInverseOf(:r) :s) :s)"
+                +"SubObjectPropertyOf(:s :t)"
+                +"SubObjectPropertyOf(:r :p)"
+                +"TransitiveObjectProperty(:t)"
+                +"SymmetricObjectProperty(:t)");
+        createReasoner();
+        OWLObjectProperty r=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"r"));
+        OWLObjectProperty t=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"t"));
+            
+        assertTrue(m_reasoner.isSubObjectPropertyExpressionOf(r, t));
+    } 
     public void testRoleSubsumption() throws Exception {
         loadOntologyWithAxioms("ObjectPropertyDomain(:r ObjectOneOf(:a)) ObjectPropertyRange(:r ObjectOneOf(:b)) " 
             + " ObjectPropertyAssertion(:r :a :b) ObjectPropertyAssertion(:t :a :c) ObjectPropertyAssertion(:t :c :b) "
