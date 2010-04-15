@@ -93,6 +93,7 @@ public class Graph<T> implements Serializable {
     }
     public Graph<T> clone() {
         Graph<T> result=new Graph<T>();
+        result.m_elements.addAll( m_elements );
         for (Map.Entry<T,Set<T>> entry : m_successorsByNodes.entrySet()) {
             T from=entry.getKey();
             for (T successor : entry.getValue())
