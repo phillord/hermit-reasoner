@@ -145,9 +145,14 @@ public class ObjectPropertyInclusionManager {
         Set<OWLObjectPropertyExpression> simpleProperties=findSimpleProperties(complexPropertiesDependencyGraph,individualAutomata);
 
         propertyDependencyGraph.removeElements(simpleProperties);
+        
         complexPropertiesDependencyGraph.removeElements(simpleProperties);
         complexObjectPropertyExpressions.addAll(complexPropertiesDependencyGraph.getElements());
-
+        Set<OWLObjectPropertyExpression> inverseOfComplexProperties = new HashSet<OWLObjectPropertyExpression>();
+        for( OWLObjectPropertyExpression complexProp : complexObjectPropertyExpressions )
+        	inverseOfComplexProperties.add( complexProp.getInverseProperty().getSimplified() );
+        complexObjectPropertyExpressions.addAll(inverseOfComplexProperties);
+        
         connectAllAutomata(automataByProperty,propertyDependencyGraph,inversePropertiesMap,individualAutomata,simpleObjectPropertyInclusions,symmetricObjectProperties,transitiveProperties);
     }
     private Set<OWLObjectPropertyExpression> findSymmetricProperties(Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions) {
