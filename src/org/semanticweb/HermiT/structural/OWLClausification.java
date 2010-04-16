@@ -906,10 +906,7 @@ public class OWLClausification {
                     if (m_warningMonitor!=null)
                         m_warningMonitor.warning("Ignoring unsupported datatype '"+object.getIRI().toString()+"'.");
                     return AtomicConcept.create(object.getIRI().toString());
-                }
-                else {
-                    throw e;
-                }
+                } else throw e;
             }
         }
         public Object visit(OWLDataComplementOf object) {
@@ -946,13 +943,31 @@ public class OWLClausification {
             throw new IllegalStateException("Internal error: should not get in here.");
         }
         public Object visit(OWLTypedLiteral object) {
-            return DatatypeRegistry.parseLiteral(object.getLiteral(),object.getDatatype().getIRI().toString());
+            try {
+                return DatatypeRegistry.parseLiteral(object.getLiteral(),object.getDatatype().getIRI().toString());
+            }
+            catch (UnsupportedDatatypeException e) {
+                if (m_ignoreUnsupportedDatatypes) {
+                    if (m_warningMonitor!=null)
+                        m_warningMonitor.warning("Ignoring unsupported datatype '"+object.toString()+"'.");
+                    return AtomicConcept.create(object.toString());
+                } else throw e;
+            }
         }
         public Object visit(OWLStringLiteral object) {
-            if (object.getLang()==null)
-                return DatatypeRegistry.parseLiteral(object.getLiteral(),Prefixes.s_semanticWebPrefixes.get("xsd")+"string");
-            else
-                return DatatypeRegistry.parseLiteral(object.getLiteral()+"@"+object.getLang(),Prefixes.s_semanticWebPrefixes.get("rdf")+"PlainLiteral");
+            try {
+                if (object.getLang()==null)
+                    return DatatypeRegistry.parseLiteral(object.getLiteral(),Prefixes.s_semanticWebPrefixes.get("xsd")+"string");
+                else
+                    return DatatypeRegistry.parseLiteral(object.getLiteral()+"@"+object.getLang(),Prefixes.s_semanticWebPrefixes.get("rdf")+"PlainLiteral");
+            }
+            catch (UnsupportedDatatypeException e) {
+                if (m_ignoreUnsupportedDatatypes) {
+                    if (m_warningMonitor!=null)
+                        m_warningMonitor.warning("Ignoring unsupported datatype '"+object.toString()+"'.");
+                    return AtomicConcept.create(object.toString());
+                } else throw e;
+            }
         }
         public Object visit(OWLDataIntersectionOf node) {
             throw new IllegalStateException("Internal error: invalid normal form.");
