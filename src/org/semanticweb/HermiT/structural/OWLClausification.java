@@ -904,11 +904,11 @@ public class OWLClausification {
             catch (UnsupportedDatatypeException e) {
                 if (m_ignoreUnsupportedDatatypes) {
                     if (m_warningMonitor!=null)
-                        m_warningMonitor.warning("Ignoring unsupprted datatype '"+object.getIRI().toString()+"'.");
+                        m_warningMonitor.warning("Ignoring unsupported datatype '"+object.getIRI().toString()+"'.");
                     return AtomicConcept.create(object.getIRI().toString());
                 }
                 else {
-                    throw new IllegalArgumentException("A definition is missing for the custom datatype "+object.toString());
+                    throw e;
                 }
             }
         }

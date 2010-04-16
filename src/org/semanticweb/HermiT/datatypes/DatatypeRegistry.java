@@ -74,9 +74,15 @@ public class DatatypeRegistry {
         synchronized (s_handlersByDatatypeURI) {
             datatypeHandler=s_handlersByDatatypeURI.get(datatypeURI);
         }
-        if (datatypeHandler==null)
-            throw new UnsupportedDatatypeException("Datatype handler for datatype '"+datatypeURI+"' has not been registed.");
-        else
+        if (datatypeHandler==null) {
+            String LB=System.getProperty("line.separator");
+            String message="HermiT supports all and only the datatypes of the OWL 2 datatype map, see "+LB
+                + "http://www.w3.org/TR/owl2-syntax/#Datatype_Maps"+LB
+                + "The datatype "+datatypeURI+" is not part of the OWL 2 datatype map and "+LB
+                + "no custom datatype definition is given."+LB
+                + "This means that HermiT cannot handle the datatype. ";
+            throw new UnsupportedDatatypeException(message);
+        } else
             return datatypeHandler;
     }
     protected static DatatypeHandler getDatatypeHandlerFor(DatatypeRestriction datatypeRestriction) throws UnsupportedDatatypeException {
