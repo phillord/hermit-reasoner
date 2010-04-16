@@ -11,6 +11,7 @@ public class AllHeavyTests extends TestCase {
         // $JUnit-BEGIN$
         suite.addTestSuite(ClassificationTest.class);
         suite.addTestSuite(ClassificationIndividualReuseTest.class);
+        suite.addTestSuite(OWLLinkTest.class);
         // $JUnit-END$
         return suite;
     }

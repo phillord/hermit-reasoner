@@ -58,14 +58,6 @@ public class CountingMonitor extends TableauMonitorAdapter {
     protected int m_overallNumberOfNodes=0;
     protected int m_overallNumberOfBlockedNodes=0;
     protected int m_overallNumberOfTests=0;
-    protected int m_overallNumberOfSatTests=0;
-    protected int m_overallNumberOfSubsumptionTests=0;
-    protected int m_overallNumberOfABoxSatTests=0;
-    protected int m_overallNumberOfInstanceOfTests=0;
-    protected int m_overallNumberOfEntailmentTests=0;
-    protected int m_overallNumberOfDomainTests=0;
-    protected int m_overallNumberOfRangeTests=0;
-    protected int m_overallNumberOfOtherTests=0;
     protected int m_overallNumberOfClashes=0;
     // validated blocking
     protected int m_overallInitialModelSize=0;
@@ -218,17 +210,8 @@ public class CountingMonitor extends TableauMonitorAdapter {
 	public int getOverallNumberOfTests() {
 		return m_overallNumberOfTests;
 	}
-	public int getOverallNumberOfSatTests() {
-		return m_overallNumberOfSatTests;
-	}
-	public int getOverallNumberOfSubsumptionTests() {
-		return m_overallNumberOfSubsumptionTests;
-	}
-	public int getOverallNumberOfABoxSatTests() {
-		return m_overallNumberOfABoxSatTests;
-	}
-	public int getOverallNumberOfInstanceOfTests() {
-		return m_overallNumberOfInstanceOfTests;
+	public int getOverallNumberOfTests(StandardTestType testType) {
+		return m_testRecords.containsKey(testType.messagePattern) ? m_testRecords.get(testType.messagePattern).size() : 0;
 	}
 	public int getOverallNumberOfClashes() {
 		return m_overallNumberOfClashes;

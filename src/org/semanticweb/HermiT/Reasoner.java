@@ -1117,8 +1117,12 @@ public class Reasoner implements OWLReasoner {
             throwInconsistentOntologyExceptionIfNecessary();
             classify();
             m_realization=new HashMap<AtomicConcept,Set<Individual>>();
+            Set<Individual> individuals=new HashSet<Individual>();
+            for (Individual ind : m_dlOntology.getAllIndividuals()) {
+                if (!Prefixes.isInternalIRI(ind.getIRI()))
+                    individuals.add(ind);
+            }
             if (!isConsistent()) {
-                Set<Individual> individuals=m_dlOntology.getAllIndividuals();
                 for (AtomicConcept directSuperConcept : m_dlOntology.getAllAtomicConcepts())
                     if (!Prefixes.isInternalIRI(directSuperConcept.getIRI()))
                         m_realization.put(directSuperConcept,individuals);
@@ -1126,19 +1130,19 @@ public class Reasoner implements OWLReasoner {
             else {
                 if (m_configuration.reasonerProgressMonitor!=null)
                     m_configuration.reasonerProgressMonitor.reasonerTaskStarted("Computing instances for all classes...");
-                int numIndividuals=m_dlOntology.getAllIndividuals().size();
+                int numIndividuals=individuals.size();
                 int currentIndividual=0;
-                for (Individual individual : m_dlOntology.getAllIndividuals()) {
+                for (Individual individual : individuals) {
                     currentIndividual++;
                     Set<HierarchyNode<AtomicConcept>> directSuperConceptNodes=getDirectSuperConceptNodes(individual);
                     for (HierarchyNode<AtomicConcept> directSuperConceptNode : directSuperConceptNodes) {
                         for (AtomicConcept directSuperConcept : directSuperConceptNode.getEquivalentElements()) {
-                            Set<Individual> individuals=m_realization.get(directSuperConcept);
-                            if (individuals==null) {
-                                individuals=new HashSet<Individual>();
-                                m_realization.put(directSuperConcept,individuals);
+                            Set<Individual> instances=m_realization.get(directSuperConcept);
+                            if (instances==null) {
+                                instances=new HashSet<Individual>();
+                                m_realization.put(directSuperConcept,instances);
                             }
-                            individuals.add(individual);
+                            instances.add(individual);
                         }
                     }
                     if (m_configuration.reasonerProgressMonitor!=null)
