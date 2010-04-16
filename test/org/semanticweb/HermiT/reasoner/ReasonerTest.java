@@ -35,6 +35,20 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
+    public void testRoleChains() throws Exception {
+        loadOntologyWithAxioms("Declaration(ObjectProperty(:s1))"
+            +"Declaration(ObjectProperty(:r))"
+            +"Declaration(ObjectProperty(:s2))"
+
+            +"SubClassOf(owl:Thing ObjectSomeValuesFrom(:r owl:Thing))"
+            +"SubObjectPropertyOf(ObjectPropertyChain(:s1 :r ObjectInverseOf(:r)) :s2)");
+        
+        createReasoner();
+        OWLObjectProperty s1=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"s1"));
+        OWLObjectProperty s2=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"s2"));
+            
+        assertTrue(m_reasoner.isSubObjectPropertyExpressionOf(s1, s2));
+    } 
     public void testRoleChainsWithTransitiveSymmetric() throws Exception {
         loadOntologyWithAxioms("Declaration(ObjectProperty(:r))"
             +"Declaration(ObjectProperty(:p))"
