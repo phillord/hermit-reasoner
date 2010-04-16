@@ -7,20 +7,41 @@ import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.Term;
 
 public class ReasoningTaskDescription {
+    public static enum StandardTestType {
+        CONCEPT_SATISFIABILITY("satisfiability of concept '{0}'"),
+        CONSISTENCY("ABox satisfiability"),
+        CONCEPT_SUBSUMPTION("concept subsumption '{0}' => '{1}'"),
+        OBJECT_ROLE_SATISFIABILITY("satisfiability of object role '{0}'"),
+        DATA_ROLE_SATISFIABILITY("satisfiability of data role '{0}'"),
+        OBJECT_ROLE_SUBSUMPTION("object role subsumption '{0}' => '{1}'"),
+        DATA_ROLE_SUBSUMPTION("data role subsumption '{0}' => '{1}'"),
+        INSTANCE_OF("instantiation '{0}' => '{1}'"),
+        ENTAILMENT("entailment of '{0}'"),
+        DOMAIN("check if {0} is domain of {1}"),
+        RANGE("check if {0} is range of {1}");
+        
+        public final String messagePattern; 
+        StandardTestType(String messagePattern) {
+            this.messagePattern=messagePattern;
+        } 
+    }
     protected final boolean m_flipSatisfiabilityResult;
-    protected final String m_message;
+    protected final String m_messagePattern;
     protected final Object[] m_arguments;
 
+    public ReasoningTaskDescription(boolean flipSatisfiabilityResult,StandardTestType testType,Object... arguments) {
+        this(flipSatisfiabilityResult,testType.messagePattern,arguments);
+    }
     public ReasoningTaskDescription(boolean flipSatisfiabilityResult,String message,Object... arguments) {
         m_flipSatisfiabilityResult=flipSatisfiabilityResult;
-        m_message=message;
+        m_messagePattern=message;
         m_arguments=arguments;
     }
     public boolean flipSatisfiabilityResult() {
         return m_flipSatisfiabilityResult;
     }
     public String getTaskDescription(Prefixes prefixes) {
-        String result=m_message;
+        String result=m_messagePattern;
         for (int argumentIndex=0;argumentIndex<m_arguments.length;argumentIndex++) {
             Object argument=m_arguments[argumentIndex];
             String argumentString;
@@ -38,14 +59,17 @@ public class ReasoningTaskDescription {
         }
         return result;
     }
+    public String getMessagePattern() {
+        return m_messagePattern;
+    }
     public static ReasoningTaskDescription isABoxSatisfiable() {
-        return new ReasoningTaskDescription(false,"ABox satisfiability");
+        return new ReasoningTaskDescription(false,StandardTestType.CONSISTENCY);
     }
     public static ReasoningTaskDescription isConceptSatisfiable(Object atomicConcept) {
-        return new ReasoningTaskDescription(false,"satisfiability of concept '{0}'",atomicConcept);
+        return new ReasoningTaskDescription(false,StandardTestType.CONCEPT_SATISFIABILITY,atomicConcept);
     }
     public static ReasoningTaskDescription isConceptSubsumedBy(Object atomicSubconcept,Object atomicSuperconcept) {
-        return new ReasoningTaskDescription(true,"concept subsumption '{0}' => '{1}'",atomicSubconcept,atomicSuperconcept);
+        return new ReasoningTaskDescription(true,StandardTestType.CONCEPT_SUBSUMPTION,atomicSubconcept,atomicSuperconcept);
     }
     public static ReasoningTaskDescription isConceptSubsumedByList(Object atomicSubconcept,Object... atomicSuperconcepts) {
         StringBuffer message=new StringBuffer();
@@ -61,21 +85,21 @@ public class ReasoningTaskDescription {
         return new ReasoningTaskDescription(false,message.toString(),arguments);
     }
     public static ReasoningTaskDescription isRoleSatisfiable(Object role,boolean isObjectRole) {
-        return new ReasoningTaskDescription(false,"satisfiability of "+(isObjectRole ? "object" : "data")+" role '{0}'",role);
+        return new ReasoningTaskDescription(false,(isObjectRole ? StandardTestType.OBJECT_ROLE_SATISFIABILITY : StandardTestType.DATA_ROLE_SATISFIABILITY),role);
     }
     public static ReasoningTaskDescription isRoleSubsumedBy(Object subrole,Object superrole,boolean isObjectRole) {
-        return new ReasoningTaskDescription(true,(isObjectRole ? "object" : "data")+" role subsumption '{0}' => '{1}'",subrole,superrole);
+        return new ReasoningTaskDescription(true,(isObjectRole ? StandardTestType.OBJECT_ROLE_SUBSUMPTION : StandardTestType.DATA_ROLE_SUBSUMPTION),subrole,superrole);
     }
     public static ReasoningTaskDescription isInstanceOf(Object individual,Object atomicConcept) {
-        return new ReasoningTaskDescription(true,"instantiation '{0}' => '{1}'",individual,atomicConcept);
+        return new ReasoningTaskDescription(true,StandardTestType.INSTANCE_OF,individual,atomicConcept);
     }
     public static ReasoningTaskDescription isAxiomEntailed(Object axiom) {
-        return new ReasoningTaskDescription(true,"entailment of '{0}'",axiom);
+        return new ReasoningTaskDescription(true,StandardTestType.ENTAILMENT,axiom);
     }
     public static ReasoningTaskDescription isDomainOf(Object domain,Object role) {
-        return new ReasoningTaskDescription(true,"check if {0} is domain of {1}",domain,role);
+        return new ReasoningTaskDescription(true,StandardTestType.DOMAIN,domain,role);
     }
     public static ReasoningTaskDescription isRangeOf(Object range,Object role) {
-        return new ReasoningTaskDescription(true,"check if {0} is rang eof {1}",range,role);
+        return new ReasoningTaskDescription(true,StandardTestType.RANGE,range,role);
     }
 }
