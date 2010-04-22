@@ -686,6 +686,7 @@ public class ReasonerTest extends AbstractReasonerTest {
             "SubDataPropertyOf( :dp6 :dp2 ) "+
             "SubDataPropertyOf( :dp7 owl:bottomDataProperty ) ";
         loadReasonerWithAxioms(axioms);
+        //System.out.println(m_reasoner.isSubClassOf(m_dataFactory.getOWLClass(IRI.create("internal:prop#6")), m_dataFactory.getOWLClass(IRI.create("internal:prop#5"))));
         assertHierarchies("res/hierarchy-printing-1.txt");
     }
 
@@ -769,7 +770,7 @@ public class ReasonerTest extends AbstractReasonerTest {
             "EquivalentClasses( ObjectSomeValuesFrom( :r owl:Thing ) ObjectSomeValuesFrom( :s owl:Thing ) ) ";
         loadReasonerWithAxioms(axioms);
 
-        assertTrue(m_reasoner.isEquivalentObjectPropertyExpression(m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(IRI.create("file:/c/test.owl#r")),m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(IRI.create("file:/c/test.owl#s"))));
+        assertTrue(m_reasoner.isEquivalentObjectPropertyExpression(m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(IRI.create(NS+"r")),m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(IRI.create(NS+"s"))));
     }
 
     @SuppressWarnings("unchecked")

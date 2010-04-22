@@ -131,7 +131,7 @@ public class Hierarchy<E> {
         void visit(int level,HierarchyNode<E> node,HierarchyNode<E> parentNode,boolean firstVisit);
     }
 
-    protected static interface Transformer<E,T> {
+    public static interface Transformer<E,T> {
         T transform(E element);
         T determineRepresentative(E oldRepresentative,Set<T> newEquivalentElements);
     }

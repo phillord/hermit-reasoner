@@ -38,23 +38,7 @@ public class MergeTest extends AbstractReasonerInternalsTest {
         Variable Y=Variable.create("Y");
         DLClause cl=DLClause.create(new Atom[] { Atom.create(EXISTS_NEG_A,X) },new Atom[] { Atom.create(R,X,Y),Atom.create(A,Y) },ClauseType.CONCEPT_INCLUSION);
         Set<DLClause> dlClauses=Collections.singleton(cl);
-        Set<Atom> atoms=Collections.emptySet();
-        TEST_DL_ONTOLOGY = new DLOntology(
-            "opaque:test", // ontology_URI
-            dlClauses, // clauses
-            atoms, // positive facts
-            atoms, // negative facts
-            null, // atomic concepts
-            null, // object roles
-            null, // complex role inclusions
-            null, // data roles
-            null, // custom datatype definitions
-            null, // individuals
-            false, // hasInverseRoles
-            false, // hasAtMostRestrictions
-            false, // hasNominals
-            false  // hasDatatypes
-        );
+        TEST_DL_ONTOLOGY=getTestDLOntology(dlClauses);
     }
 
     protected Tableau m_tableau;

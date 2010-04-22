@@ -1,6 +1,5 @@
 package org.semanticweb.HermiT.tableau;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -63,23 +62,7 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
                          Atom.create(NodeIDsAscendingOrEqual.create(3),Y1,Y2,Y3)
             }, ClauseType.CONCEPT_INCLUSION
         ));
-        Set<Atom> atoms=Collections.emptySet();
-        TEST_DL_ONTOLOGY = new DLOntology(
-            "opaque:test", // ontology_URI
-            dlClauses, // clauses
-            atoms, // positive facts
-            atoms, // negative facts
-            null, // atomic concepts
-            null, // object roles
-            null, // complex role inclusions
-            null, // data roles
-            null, // custom datatype definitions
-            null, // individuals
-            false, // hasInverseRoles
-            false, // hasAtMostRestrictions
-            false, // hasNominals
-            false  // hasDatatypes;
-       );
+        TEST_DL_ONTOLOGY=getTestDLOntology(dlClauses);
     }
 
     protected Tableau m_tableau;

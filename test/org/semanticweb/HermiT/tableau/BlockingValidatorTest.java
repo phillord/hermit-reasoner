@@ -1,6 +1,5 @@
 package org.semanticweb.HermiT.tableau;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -76,23 +75,7 @@ public class BlockingValidatorTest extends AbstractReasonerInternalsTest {
         //  [Y1 == Y2]@atMost(1 <r> <D>)(X) :- <r>(X,Y1), <D>(Y1), <r>(X,Y2), <D>(Y2), <C>(X)
         cl=DLClause.create(new Atom[] { Atom.create(AnnotatedEquality.create(1, R, D),Y1,Y2,X) }, new Atom[] { Atom.create(C,X),Atom.create(R,X,Y1),Atom.create(D,Y1),Atom.create(R,X,Y2),Atom.create(D,Y2) },ClauseType.CONCEPT_INCLUSION);
         dlClauses.add(cl);
-        Set<Atom> atoms=Collections.emptySet();
-        TEST_DL_ONTOLOGY = new DLOntology(
-            "opaque:test", // ontology_URI
-            dlClauses, // clauses
-            atoms, // positive facts
-            atoms, // negative facts
-            null, // atomic concepts
-            null, // object roles
-            null, // complex role inclusions
-            null, // data roles
-            null, // custom datatype definitions
-            null, // individuals
-            true, // hasInverseRoles
-            false, // hasAtMostRestrictions
-            false, // hasNominals
-            false
-        ); //automaton for complex roles
+        TEST_DL_ONTOLOGY=getTestDLOntology(dlClauses);
 
         DirectBlockingChecker directBlockingChecker=new ValidatedSingleDirectBlockingChecker(TEST_DL_ONTOLOGY.hasInverseRoles());
         m_blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,true,true);
@@ -204,23 +187,7 @@ public class BlockingValidatorTest extends AbstractReasonerInternalsTest {
         //  [Y1 == Y2]@atMost(1 <r> <C>)(X) :- <r>(X,Y1), <C>(Y1), <r>(X,Y2), <C>(Y2), <B>(X)
         cl=DLClause.create(new Atom[] { Atom.create(AnnotatedEquality.create(1, R, C),Y1,Y2,X) }, new Atom[] { Atom.create(B,X),Atom.create(R,X,Y1),Atom.create(C,Y1),Atom.create(R,X,Y2),Atom.create(C,Y2) },ClauseType.CONCEPT_INCLUSION);
         dlClauses.add(cl);
-        Set<Atom> atoms=Collections.emptySet();
-        TEST_DL_ONTOLOGY = new DLOntology(
-            "opaque:test", // ontology_URI
-            dlClauses, // clauses
-            atoms, // positive facts
-            atoms, // negative facts
-            null, // atomic concepts
-            null, // object roles
-            null, // complex role inclusions
-            null, // data roles
-            null, // custom datatype definitions
-            null, // individuals
-            true, // hasInverseRoles
-            false, // hasAtMostRestrictions
-            false, // hasNominals
-            false
-        );
+        TEST_DL_ONTOLOGY=getTestDLOntology(dlClauses);
 
         DirectBlockingChecker directBlockingChecker=new ValidatedSingleDirectBlockingChecker(TEST_DL_ONTOLOGY.hasInverseRoles());
         m_blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,true,true);

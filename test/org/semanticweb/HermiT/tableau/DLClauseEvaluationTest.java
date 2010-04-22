@@ -33,23 +33,7 @@ public class DLClauseEvaluationTest extends AbstractReasonerInternalsTest {
 
         CL_1=DLClause.create(new Atom[] { Atom.create(U,Z,W) },new Atom[] { Atom.create(R,X,Y),Atom.create(S,Y,Z),Atom.create(T,W,W) },ClauseType.OTHER);
         Set<DLClause> dlClauses=Collections.singleton(CL_1);
-        Set<Atom> atoms=Collections.emptySet();
-        TEST_DL_ONTOLOGY = new DLOntology(
-            "opaque:test", // ontology_URI
-            dlClauses, // clauses
-            atoms, // positive facts
-            atoms, // negative facts
-            null, // atomic concepts
-            null, // object roles
-            null, // complex role inclusions
-            null, // data roles
-            null, // custom datatype definitions
-            null, // individuals
-            false, // hasInverseRoles
-            false, // hasAtMostRestrictions
-            false, // hasNominals
-            false  // hasDatatypes
-        );
+        TEST_DL_ONTOLOGY=getTestDLOntology(dlClauses);
     }
 
     protected Tableau m_tableau;

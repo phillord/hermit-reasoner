@@ -13,7 +13,9 @@ import org.semanticweb.HermiT.blocking.DirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
 import org.semanticweb.HermiT.existentials.ExistentialExpansionStrategy;
+import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.Concept;
+import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
@@ -124,5 +126,25 @@ public abstract class AbstractReasonerInternalsTest extends AbstractReasonerTest
             retrieval.next();
         }
         assertContainsAll(actual,expected);
+    }
+    
+    protected static DLOntology getTestDLOntology(Set<DLClause> dlClauses) {
+        Set<Atom> atoms=Collections.emptySet();
+        return new DLOntology(
+                "opaque:test", // ontology_URI
+                dlClauses, // clauses
+                atoms, // positive facts
+                atoms, // negative facts
+                null, // atomic concepts
+                null, // object roles
+                null, // complex role inclusions
+                null, // data roles
+                null, // custom datatype definitions
+                null, // individuals
+                true, // hasInverseRoles
+                false, // hasAtMostRestrictions
+                false, // hasNominals
+                false // hasDatatypes
+            ); 
     }
 }
