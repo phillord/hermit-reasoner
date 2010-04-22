@@ -84,6 +84,19 @@ public class ReasoningTaskDescription {
         System.arraycopy(atomicSuperconcepts,0,arguments,1,atomicSuperconcepts.length);
         return new ReasoningTaskDescription(false,message.toString(),arguments);
     }
+    public static ReasoningTaskDescription isRoleSubsumedByList(Object subrole,Object... superroles) {
+        StringBuffer message=new StringBuffer();
+        message.append("satisiability of role '{0}' ");
+        for (int index=0;index<superroles.length;index++) {
+            message.append(" and not({");
+            message.append(index+1);
+            message.append("})");
+        }
+        Object[] arguments=new Object[superroles.length+1];
+        arguments[0]=subrole;
+        System.arraycopy(superroles,0,arguments,1,superroles.length);
+        return new ReasoningTaskDescription(false,message.toString(),arguments);
+    }
     public static ReasoningTaskDescription isRoleSatisfiable(Object role,boolean isObjectRole) {
         return new ReasoningTaskDescription(false,(isObjectRole ? StandardTestType.OBJECT_ROLE_SATISFIABILITY : StandardTestType.DATA_ROLE_SATISFIABILITY),role);
     }

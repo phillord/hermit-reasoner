@@ -26,6 +26,7 @@ import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.Role;
+import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
 
 public class QuasiOrderRoleClassificationManager extends QuasiOrderClassificationManager {
@@ -96,5 +97,19 @@ public class QuasiOrderRoleClassificationManager extends QuasiOrderClassificatio
     protected boolean isRelevantConcept(AtomicConcept atomicConcept) {
         String iri=atomicConcept.getIRI();
         return atomicConcept.equals(AtomicConcept.THING) || atomicConcept.equals(AtomicConcept.NOTHING) || (Prefixes.isInternalIRI(iri) && iri.startsWith("internal:prop#") && !iri.equals("internal:prop#dummyConcept"));
+    }
+    protected ReasoningTaskDescription getSatTestDescription(AtomicConcept atomicConcept) {
+        return ReasoningTaskDescription.isRoleSatisfiable(m_rolesForConcepts.get(atomicConcept),true);
+    }
+    protected ReasoningTaskDescription getSubsumptionTestDescription(AtomicConcept subConcept, AtomicConcept superConcept) {;
+        return ReasoningTaskDescription.isRoleSubsumedBy(m_rolesForConcepts.get(subConcept),m_rolesForConcepts.get(superConcept),true);
+    }
+    protected ReasoningTaskDescription getSubsumedByListTestDescription(AtomicConcept subConcept, Object[] superconcepts) {
+        Object[] roles=new Object[superconcepts.length];
+        for (int i=0; i<roles.length; i++) {
+            assert superconcepts[i] instanceof AtomicConcept;
+            roles[i]=m_rolesForConcepts.get((AtomicConcept)superconcepts[i]);
+        }
+        return ReasoningTaskDescription.isRoleSubsumedByList(m_rolesForConcepts.get(subConcept),roles,true);
     }
 }

@@ -54,17 +54,17 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
         if (isUnsatisfiable(element))
             return false;
         Individual freshIndividual=Individual.createAnonymous("fresh-individual");
-        return m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(element,freshIndividual)),null,null,null,null,ReasoningTaskDescription.isConceptSatisfiable(element));
+        return m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(element,freshIndividual)),null,null,null,null,getSatTestDescription(element));
     }
     public boolean isSubsumedBy(AtomicConcept subelement,AtomicConcept superelement) {
         if (getKnownSubsumers(subelement).contains(superelement))
             return true;
         Individual freshIndividual=Individual.createAnonymous("fresh-individual");
-        return !m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(subelement,freshIndividual)),null,null,Collections.singleton(Atom.create(superelement,freshIndividual)),null,ReasoningTaskDescription.isConceptSubsumedBy(subelement,superelement));
+        return !m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(subelement,freshIndividual)),null,null,Collections.singleton(Atom.create(superelement,freshIndividual)),null,getSubsumptionTestDescription(subelement, superelement));
     }
     public Hierarchy<AtomicConcept> classify(ProgressMonitor<AtomicConcept> progressMonitor,AtomicConcept topElement,AtomicConcept bottomElement,final Set<AtomicConcept> elements) {
         Individual freshIndividual=Individual.createAnonymous("fresh-individual");
-        if (!m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(topElement,freshIndividual)),null,null,Collections.singleton(Atom.create(bottomElement,freshIndividual)),null,ReasoningTaskDescription.isConceptSubsumedBy(topElement,bottomElement)))
+        if (!m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(topElement,freshIndividual)),null,null,Collections.singleton(Atom.create(bottomElement,freshIndividual)),null,getSubsumptionTestDescription(topElement, bottomElement)))
             return Hierarchy.emptyHierarchy(elements,topElement,bottomElement);
         Relation<AtomicConcept> relation=new Relation<AtomicConcept>() {
             public boolean doesSubsume(AtomicConcept parent,AtomicConcept child) {
@@ -74,7 +74,7 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
                 else if (!allKnownSubsumers.contains(parent) && !m_possibleSubsumptions.getSuccessors(child).contains(parent))
                     return false;
                 Individual freshIndividual=Individual.createAnonymous("fresh-individual");
-                boolean isSubsumedBy=!m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(child,freshIndividual)),null,null,Collections.singleton(Atom.create(parent,freshIndividual)),null,ReasoningTaskDescription.isConceptSubsumedBy(child,parent));
+                boolean isSubsumedBy=!m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(child,freshIndividual)),null,null,Collections.singleton(Atom.create(parent,freshIndividual)),null,getSubsumptionTestDescription(child, parent));
                 if (!isSubsumedBy)
                     prunePossibleSubsumers();
                 return isSubsumedBy;
@@ -187,7 +187,7 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
         Individual freshIndividual=Individual.createAnonymous("fresh-individual");
         Map<Individual,Node> checkedNode=new HashMap<Individual,Node>();
         checkedNode.put(freshIndividual,null);
-        if (m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(concept,freshIndividual)),null,null,null,checkedNode,ReasoningTaskDescription.isConceptSatisfiable(concept))) {
+        if (m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(concept,freshIndividual)),null,null,null,checkedNode,getSatTestDescription(concept))) {
             readKnownSubsumersFromRootNode(concept,checkedNode.get(freshIndividual));
             updatePossibleSubsumers();
         }
@@ -331,7 +331,7 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
             int index=0;
             for (Atom atom : superconceptAssertions)
                 superconcepts[index++]=atom.getDLPredicate();
-            if (m_tableau.isSatisfiable(false,Collections.singleton(subconceptAssertion),null,null,superconceptAssertions,null,ReasoningTaskDescription.isConceptSubsumedByList(pickedElement,superconcepts))) {
+            if (m_tableau.isSatisfiable(false,Collections.singleton(subconceptAssertion),null,null,superconceptAssertions,null,getSubsumedByListTestDescription(pickedElement,superconcepts))) {
                 prunePossibleSubsumers();
                 return true;
             }
@@ -360,5 +360,14 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
     }
     protected boolean isRelevantConcept(AtomicConcept atomicConcept) {
         return !Prefixes.isInternalIRI(atomicConcept.getIRI());
+    }
+    protected ReasoningTaskDescription getSatTestDescription(AtomicConcept atomicConcept) {
+        return ReasoningTaskDescription.isConceptSatisfiable(atomicConcept);
+    }
+    protected ReasoningTaskDescription getSubsumptionTestDescription(AtomicConcept subConcept, AtomicConcept superConcept) {
+        return ReasoningTaskDescription.isConceptSubsumedBy(subConcept,superConcept);
+    }
+    protected ReasoningTaskDescription getSubsumedByListTestDescription(AtomicConcept subConcept, Object[] superconcepts) {
+        return ReasoningTaskDescription.isConceptSubsumedByList(subConcept,superconcepts);
     }
 }
