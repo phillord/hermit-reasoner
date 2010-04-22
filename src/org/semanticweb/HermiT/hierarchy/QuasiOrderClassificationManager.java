@@ -279,11 +279,10 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
     }
     protected void updateKnownSubsumptionsUsingToldSubsumers() {
         updateKnownSubsumptionsUsingToldSubsumers(m_tableau.getPermanentDLOntology().getDLClauses());
-        if (m_tableau.getAdditionalDLOntology()!=null)
-            updateKnownSubsumptionsUsingToldSubsumers(m_tableau.getAdditionalDLOntology().getDLClauses());
+        m_knownSubsumptions.transitivelyClose();
     }
     protected void updateKnownSubsumptionsUsingToldSubsumers(Set<DLClause> dlClauses) {
-        for (DLClause dlClause : dlClauses)
+        for (DLClause dlClause : dlClauses) {
             if (dlClause.getHeadLength()==1 && dlClause.getBodyLength()==1) {
                 DLPredicate headPredicate=dlClause.getHeadAtom(0).getDLPredicate();
                 DLPredicate bodyPredicate=dlClause.getBodyAtom(0).getDLPredicate();
@@ -294,6 +293,7 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
                         addKnownSubsumption(bodyConcept,headConcept);
                 }
             }
+        }
     }
     protected void checkUnknownSubsumersUsingEnhancedTraversal(Relation<AtomicConcept> hierarchyRelation,HierarchyNode<AtomicConcept> startNode,AtomicConcept pickedElement) {
         Set<HierarchyNode<AtomicConcept>> startSearch=Collections.singleton(startNode);

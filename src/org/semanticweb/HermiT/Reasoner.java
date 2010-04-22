@@ -422,10 +422,8 @@ public class Reasoner implements OWLReasoner {
         throwInconsistentOntologyExceptionIfNecessary();
         if (!isConsistent())
             return false;
-        if (classExpression instanceof OWLClass) {
-            // TODO: Should we really classify to check satisfiability, that's now required because we don't save the classification manager
+        if (classExpression instanceof OWLClass && m_atomicConceptHierarchy!=null) {
             AtomicConcept concept=H((OWLClass)classExpression);
-            if (m_atomicConceptHierarchy==null) classify();
             HierarchyNode<AtomicConcept> node=m_atomicConceptHierarchy.getNodeForElement(concept);
             return node!=m_atomicConceptHierarchy.getBottomNode();
         }
@@ -442,16 +440,14 @@ public class Reasoner implements OWLReasoner {
         throwInconsistentOntologyExceptionIfNecessary();
         if (!isConsistent())
             return true;
-        if (m_atomicConceptHierarchy==null) classify();
-        if (subClassExpression instanceof OWLClass && superClassExpression instanceof OWLClass) {
-//          AtomicConcept subconcept=H((OWLClass)subClassExpression);
-          AtomicConcept superconcept=H((OWLClass)superClassExpression);
+        if (m_atomicConceptHierarchy!=null && subClassExpression instanceof OWLClass && superClassExpression instanceof OWLClass) {
+            // TODO: do I really have to iterate over all ancestor nodes or is there a faster way?
+            AtomicConcept superconcept=H((OWLClass)superClassExpression);
             Set<HierarchyNode<AtomicConcept>> ancestors=getHierarchyNode((OWLClass)subClassExpression).getAncestorNodes();
             for (HierarchyNode<AtomicConcept> node : ancestors) {
                 if (node.getEquivalentElements().contains(superconcept)) return true;
             }
             return false;
-//            return m_atomicConceptClassificationManager.isSubsumedBy(subconcept,superconcept);
         }
         else {
             OWLDataFactory factory=getDataFactory();
@@ -646,14 +642,12 @@ public class Reasoner implements OWLReasoner {
         throwInconsistentOntologyExceptionIfNecessary();
         if (!isConsistent() || superObjectPropertyExpression.getNamedProperty().isOWLTopObjectProperty())
             return true;
-//        Role subrole=H(subObjectPropertyExpression);
         Role superrole=H(superObjectPropertyExpression);
         Set<HierarchyNode<Role>> ancestors=getHierarchyNode((OWLObjectPropertyExpression)subObjectPropertyExpression).getAncestorNodes();
         for (HierarchyNode<Role> node : ancestors) {
             if (node.getEquivalentElements().contains(superrole)) return true;
         }
         return false;
-//        return m_objectRoleClassificationManager.isSubsumedBy(subrole,superrole);
     }
     public boolean isSubObjectPropertyExpressionOf(List<OWLObjectPropertyExpression> subPropertyChain,OWLObjectPropertyExpression superObjectPropertyExpression) {
         for (OWLObjectPropertyExpression subProperty : subPropertyChain)

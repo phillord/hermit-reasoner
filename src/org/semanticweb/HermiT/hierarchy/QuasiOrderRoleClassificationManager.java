@@ -72,8 +72,6 @@ public class QuasiOrderRoleClassificationManager extends QuasiOrderClassificatio
                 }
             }
         }
-        // TODO: check why we do that for roles and not for concepts
-        m_knownSubsumptions.transitivelyClose();
     }
     protected void addKnownSubsumption(AtomicConcept subConcept, AtomicConcept superConcept) {
         super.addKnownSubsumption(subConcept, superConcept);
