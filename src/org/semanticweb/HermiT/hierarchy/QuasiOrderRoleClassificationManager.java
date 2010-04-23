@@ -29,13 +29,13 @@ import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
 
-public class QuasiOrderRoleClassificationManager extends QuasiOrderClassificationManager {
+public class QuasiOrderRoleClassificationManager<E extends Role> extends QuasiOrderClassificationManager {
     
     protected final boolean m_hasInverses;
-    protected final Map<Role,AtomicConcept> m_conceptsForRoles;
-    protected final Map<AtomicConcept,Role> m_rolesForConcepts;
+    protected final Map<E,AtomicConcept> m_conceptsForRoles;
+    protected final Map<AtomicConcept,E> m_rolesForConcepts;
 
-    public QuasiOrderRoleClassificationManager(Tableau tableau,boolean hasInverses,Map<Role,AtomicConcept> conceptsForRoles,Map<AtomicConcept,Role> rolesForConcepts) {
+    public QuasiOrderRoleClassificationManager(Tableau tableau,boolean hasInverses,Map<E,AtomicConcept> conceptsForRoles,Map<AtomicConcept,E> rolesForConcepts) {
         super(tableau);
         m_hasInverses=hasInverses;
         m_conceptsForRoles=conceptsForRoles;
@@ -50,25 +50,16 @@ public class QuasiOrderRoleClassificationManager extends QuasiOrderClassificatio
                     AtomicRole headRole=(AtomicRole)headPredicate;
                     AtomicRole bodyRole=(AtomicRole)bodyPredicate;
                     AtomicConcept conceptForHeadRole=m_conceptsForRoles.get(headRole);
-                    AtomicConcept conceptForHeadInvRole=m_conceptsForRoles.get(headRole.getInverse());
                     AtomicConcept conceptForBodyRole=m_conceptsForRoles.get(bodyRole);
-                    AtomicConcept conceptForBodyInvRole=m_conceptsForRoles.get(bodyRole.getInverse());
                     assert conceptForBodyRole!=null;
                     assert conceptForHeadRole!=null;
-                    if (dlClause.getBodyAtom(0).getArgument(0)!=dlClause.getHeadAtom(0).getArgument(0) || m_hasInverses) {
-                        assert conceptForBodyInvRole!=null;
-                        assert conceptForHeadInvRole!=null;
-                    }
                     if (dlClause.getBodyAtom(0).getArgument(0)!=dlClause.getHeadAtom(0).getArgument(0)) {
                         // r -> s^- and r^- -> s
-                        addKnownSubsumption(conceptForBodyRole, conceptForHeadInvRole);
+                        AtomicConcept conceptForBodyInvRole=m_conceptsForRoles.get(bodyRole.getInverse());
                         addKnownSubsumption(conceptForBodyInvRole, conceptForHeadRole);
                     } else {
                         // r-> s and r^- -> s^-
                         addKnownSubsumption(conceptForBodyRole,conceptForHeadRole);
-                        if (m_hasInverses) {
-                            addKnownSubsumption(conceptForBodyInvRole,conceptForHeadInvRole); 
-                        }
                     }
                 }
             }
@@ -77,8 +68,8 @@ public class QuasiOrderRoleClassificationManager extends QuasiOrderClassificatio
     protected void addKnownSubsumption(AtomicConcept subConcept, AtomicConcept superConcept) {
         super.addKnownSubsumption(subConcept, superConcept);
         if (m_hasInverses) {
-            AtomicConcept subConceptForInverse = subConcept.equals(AtomicConcept.THING) || subConcept.equals(AtomicConcept.NOTHING) ? subConcept : m_conceptsForRoles.get(m_rolesForConcepts.get(subConcept).getInverse());
-            AtomicConcept superConceptForInverse = superConcept.equals(AtomicConcept.THING) || superConcept.equals(AtomicConcept.NOTHING) ? superConcept : m_conceptsForRoles.get(m_rolesForConcepts.get(superConcept).getInverse());
+            AtomicConcept subConceptForInverse=m_conceptsForRoles.get(((Role)m_rolesForConcepts.get(subConcept)).getInverse());
+            AtomicConcept superConceptForInverse=m_conceptsForRoles.get(((Role)m_rolesForConcepts.get(superConcept)).getInverse());
             super.addKnownSubsumption(subConceptForInverse,superConceptForInverse);
         }
     }
@@ -89,14 +80,13 @@ public class QuasiOrderRoleClassificationManager extends QuasiOrderClassificatio
     protected void addPossibleSubsumption(AtomicConcept subConcept, AtomicConcept superConcept) {
         super.addPossibleSubsumption(subConcept,superConcept);
         if (m_hasInverses) {
-            AtomicConcept subConceptForInverse = subConcept.equals(AtomicConcept.THING) || subConcept.equals(AtomicConcept.NOTHING) ? subConcept : m_conceptsForRoles.get(m_rolesForConcepts.get(subConcept).getInverse());
-            AtomicConcept superConceptForInverse = superConcept.equals(AtomicConcept.THING) || superConcept.equals(AtomicConcept.NOTHING) ? superConcept : m_conceptsForRoles.get(m_rolesForConcepts.get(superConcept).getInverse());
+            AtomicConcept subConceptForInverse=m_conceptsForRoles.get(((Role)m_rolesForConcepts.get(subConcept)).getInverse());
+            AtomicConcept superConceptForInverse=m_conceptsForRoles.get(((Role)m_rolesForConcepts.get(superConcept)).getInverse());
             super.addPossibleSubsumption(subConceptForInverse,superConceptForInverse);
         }
     }
     protected boolean isRelevantConcept(AtomicConcept atomicConcept) {
-        String iri=atomicConcept.getIRI();
-        return atomicConcept.equals(AtomicConcept.THING) || atomicConcept.equals(AtomicConcept.NOTHING) || (Prefixes.isInternalIRI(iri) && iri.startsWith("internal:prop#") && !iri.equals("internal:prop#dummyConcept"));
+        return atomicConcept.equals(AtomicConcept.THING) || atomicConcept.equals(AtomicConcept.NOTHING) || (Prefixes.isInternalIRIForPropertyClassification(atomicConcept.getIRI()));
     }
     protected ReasoningTaskDescription getSatTestDescription(AtomicConcept atomicConcept) {
         return ReasoningTaskDescription.isRoleSatisfiable(m_rolesForConcepts.get(atomicConcept),true);

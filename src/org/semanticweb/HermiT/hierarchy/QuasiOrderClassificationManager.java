@@ -279,7 +279,6 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
     }
     protected void updateKnownSubsumptionsUsingToldSubsumers() {
         updateKnownSubsumptionsUsingToldSubsumers(m_tableau.getPermanentDLOntology().getDLClauses());
-        m_knownSubsumptions.transitivelyClose();
     }
     protected void updateKnownSubsumptionsUsingToldSubsumers(Set<DLClause> dlClauses) {
         for (DLClause dlClause : dlClauses) {

@@ -26,8 +26,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Prefixes;
+import org.semanticweb.HermiT.graph.Graph;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
@@ -46,6 +49,53 @@ public class AtomicConceptSubsumptionCache implements Serializable,SubsumptionCa
     public AtomicConceptSubsumptionCache(Tableau tableau) {
         m_tableau=tableau;
         m_atomicConceptInfos=new HashMap<AtomicConcept,AtomicConceptInfo>();
+    }
+    public void initialize() {
+        Set<AtomicConcept> allRelevantElements=new HashSet<AtomicConcept>();
+        Graph<AtomicConcept> knownSubsumptions=new Graph<AtomicConcept>();
+        initializeKnownSubsumptions(knownSubsumptions,allRelevantElements,AtomicConcept.THING,AtomicConcept.NOTHING);
+        updateKnownSubsumptionsUsingToldSubsumers(knownSubsumptions,m_tableau.getPermanentDLOntology().getDLClauses());
+        knownSubsumptions.transitivelyClose();
+        for (AtomicConcept subconcept : allRelevantElements) {
+            Set<AtomicConcept> superconcepts=knownSubsumptions.getSuccessors(subconcept);
+            for (AtomicConcept superconcept : superconcepts)
+                getAtomicConceptInfo(subconcept).addKnownSubsumer(superconcept);
+        }
+    }
+    protected void initializeKnownSubsumptions(Graph<AtomicConcept> knownSubsumptions,Set<AtomicConcept> allRelevantElements,AtomicConcept topElement,AtomicConcept bottomElement) {
+        Set<AtomicConcept> concepts=m_tableau.getPermanentDLOntology().getAllAtomicConcepts();
+        if (m_tableau.getAdditionalDLOntology()!=null)
+            concepts.addAll(m_tableau.getAdditionalDLOntology().getAllAtomicConcepts());
+        for (AtomicConcept element : concepts) {
+            if (isRelevantConcept(element)) {
+                allRelevantElements.add(element);
+                addKnownSubsumption(knownSubsumptions,element,element);
+                addKnownSubsumption(knownSubsumptions,element,topElement);
+                addKnownSubsumption(knownSubsumptions,bottomElement,element);
+            }
+        }
+        allRelevantElements.add(topElement);
+        allRelevantElements.add(bottomElement);
+        addKnownSubsumption(knownSubsumptions,bottomElement,bottomElement);
+        addKnownSubsumption(knownSubsumptions,topElement,topElement);
+        addKnownSubsumption(knownSubsumptions,bottomElement,topElement);
+    }
+    protected void updateKnownSubsumptionsUsingToldSubsumers(Graph<AtomicConcept> knownSubsumptions,Set<DLClause> dlClauses) {
+        for (DLClause dlClause : dlClauses) {
+            if (dlClause.getHeadLength()==1 && dlClause.getBodyLength()==1) {
+                DLPredicate headPredicate=dlClause.getHeadAtom(0).getDLPredicate();
+                DLPredicate bodyPredicate=dlClause.getBodyAtom(0).getDLPredicate();
+                if (headPredicate instanceof AtomicConcept && bodyPredicate instanceof AtomicConcept) {
+                    AtomicConcept headConcept=(AtomicConcept)headPredicate;
+                    AtomicConcept bodyConcept=(AtomicConcept)bodyPredicate;
+                    if (isRelevantConcept(headConcept) && isRelevantConcept(bodyConcept))
+                        addKnownSubsumption(knownSubsumptions,bodyConcept, headConcept);
+                }
+            }
+        }
+    }
+    protected void addKnownSubsumption(Graph<AtomicConcept> knownSubsumptions,AtomicConcept subConcept, AtomicConcept superConcept) {
+        knownSubsumptions.addEdge(subConcept, superConcept);
     }
     public Set<AtomicConcept> getAllKnownSubsumers(AtomicConcept atomicConcept) {
         boolean isSatisfiable=isSatisfiable(atomicConcept,false);
@@ -69,7 +119,7 @@ public class AtomicConceptSubsumptionCache implements Serializable,SubsumptionCa
             Individual freshIndividual=Individual.createAnonymous("fresh-individual");
             Map<Individual,Node> checkedNode=new HashMap<Individual,Node>();
             checkedNode.put(freshIndividual,null);
-            boolean isSatisfiable=m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(concept,freshIndividual)),null,null,null,checkedNode,ReasoningTaskDescription.isConceptSatisfiable(concept));
+            boolean isSatisfiable=m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(concept,freshIndividual)),null,null,null,checkedNode,getSatTestDescription(concept));
             conceptInfo.m_isSatisfiable=(isSatisfiable ? Boolean.TRUE : Boolean.FALSE);
             if (isSatisfiable) {
                 updateKnownSubsumers(concept,checkedNode.get(freshIndividual));
@@ -97,7 +147,7 @@ public class AtomicConceptSubsumptionCache implements Serializable,SubsumptionCa
             Individual freshIndividual=Individual.createAnonymous("fresh-individual");
             Map<Individual,Node> checkedNode=new HashMap<Individual,Node>();
             checkedNode.put(freshIndividual,null);
-            boolean isSubsumedBy=!m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(subconcept,freshIndividual)),null,null,Collections.singleton(Atom.create(superconcept,freshIndividual)),checkedNode,ReasoningTaskDescription.isConceptSubsumedBy(subconcept,superconcept));
+            boolean isSubsumedBy=!m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(subconcept,freshIndividual)),null,null,Collections.singleton(Atom.create(superconcept,freshIndividual)),checkedNode,getSubsumptionTestDescription(subconcept,superconcept));
             // try and build a model for A and not B
             if (m_tableau.getExtensionManager().containsClash() && m_tableau.getExtensionManager().getClashDependencySet().isEmpty()) {
                 // (not B) is added a dummy nonempty dependency set. Therefore, if not B contributes to the clash,
@@ -131,7 +181,7 @@ public class AtomicConceptSubsumptionCache implements Serializable,SubsumptionCa
             retrieval.open();
             while (!retrieval.afterLast()) {
                 Object concept=retrieval.getTupleBuffer()[0];
-                if (concept instanceof AtomicConcept && retrieval.getDependencySet().isEmpty() && !Prefixes.isInternalIRI( ((AtomicConcept)concept).getIRI()))
+                if (concept instanceof AtomicConcept && retrieval.getDependencySet().isEmpty() && isRelevantConcept((AtomicConcept)concept))
                     subconceptInfo.addKnownSubsumer((AtomicConcept)concept);
                 retrieval.next();
             }
@@ -149,13 +199,37 @@ public class AtomicConceptSubsumptionCache implements Serializable,SubsumptionCa
             Object conceptObject=tupleBuffer[0];
             if (conceptObject instanceof AtomicConcept) {
                 AtomicConcept atomicConcept=(AtomicConcept)conceptObject;
-                if( !Prefixes.isInternalIRI( atomicConcept.getIRI() ) ){
+                if (isRelevantConcept(atomicConcept)) {
 	                Node node=(Node)tupleBuffer[1];
 	                if (node.isActive() && !node.isBlocked())
-	                    getAtomicConceptInfo(atomicConcept).updatePossibleSubsumers(m_tableau,node);
+	                    updatePossibleSubsumers(getAtomicConceptInfo(atomicConcept),m_tableau,node);
                 }
             }
             retrieval.next();
+        }
+    }
+    public void updatePossibleSubsumers(AtomicConceptInfo atomicConceptInfo,Tableau tableau,Node node) {
+        if (!atomicConceptInfo.m_allSubsumersKnown) {
+            if (atomicConceptInfo.m_possibleSubsumers==null) {
+                atomicConceptInfo.m_possibleSubsumers=new HashSet<AtomicConcept>();
+                ExtensionTable.Retrieval retrieval=tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
+                retrieval.getBindingsBuffer()[1]=node;
+                retrieval.open();
+                while (!retrieval.afterLast()) {
+                    Object concept=retrieval.getTupleBuffer()[0];
+                    if (concept instanceof AtomicConcept  && isRelevantConcept((AtomicConcept)concept))
+                        atomicConceptInfo.m_possibleSubsumers.add((AtomicConcept)concept);
+                    retrieval.next();
+                }
+            }
+            else {
+                Iterator<AtomicConcept> iterator=atomicConceptInfo.m_possibleSubsumers.iterator();
+                while (iterator.hasNext()) {
+                    AtomicConcept atomicConcept=iterator.next();
+                    if (!tableau.getExtensionManager().containsConceptAssertion(atomicConcept,node))
+                        iterator.remove();
+                }
+            }
         }
     }
     protected AtomicConceptInfo getAtomicConceptInfo(AtomicConcept atomicConcept) {
@@ -166,7 +240,16 @@ public class AtomicConceptSubsumptionCache implements Serializable,SubsumptionCa
         }
         return result;
     }
-
+    protected boolean isRelevantConcept(AtomicConcept atomicConcept) {
+        return !Prefixes.isInternalIRI(atomicConcept.getIRI());
+    }
+    protected ReasoningTaskDescription getSatTestDescription(AtomicConcept atomicConcept) {
+        return ReasoningTaskDescription.isConceptSatisfiable(atomicConcept);
+    }
+    protected ReasoningTaskDescription getSubsumptionTestDescription(AtomicConcept subConcept,AtomicConcept superConcept) {;
+        return ReasoningTaskDescription.isConceptSubsumedBy(subConcept,superConcept);
+    }
+    
     protected static final class AtomicConceptInfo {
         protected Boolean m_isSatisfiable;
         protected Set<AtomicConcept> m_knownSubsumers;
@@ -175,6 +258,20 @@ public class AtomicConceptSubsumptionCache implements Serializable,SubsumptionCa
 
         public boolean isKnownSubsumer(AtomicConcept potentialSubsumer) {
             return m_knownSubsumers!=null && m_knownSubsumers.contains(potentialSubsumer);
+        }
+        public String toString() {
+            StringBuffer buffer=new StringBuffer();
+            buffer.append("sat:");
+            buffer.append(m_isSatisfiable);
+            buffer.append(" all known: ");
+            buffer.append(m_allSubsumersKnown);
+            buffer.append(" (");
+            for (AtomicConcept c : m_knownSubsumers) {
+                buffer.append(c.toString(Prefixes.STANDARD_PREFIXES));
+                buffer.append(" ");
+            }
+            buffer.append(" )");
+            return buffer.toString();
         }
         public void addKnownSubsumer(AtomicConcept atomicConcept) {
             if (m_knownSubsumers==null)
@@ -187,30 +284,6 @@ public class AtomicConceptSubsumptionCache implements Serializable,SubsumptionCa
         }
         public boolean isKnownNotSubsumer(AtomicConcept potentialSubsumer) {
             return (!isKnownSubsumer(potentialSubsumer) && m_allSubsumersKnown) || (m_possibleSubsumers!=null && !m_possibleSubsumers.contains(potentialSubsumer));
-        }
-        public void updatePossibleSubsumers(Tableau tableau,Node node) {
-            if (!m_allSubsumersKnown) {
-                if (m_possibleSubsumers==null) {
-                    m_possibleSubsumers=new HashSet<AtomicConcept>();
-                    ExtensionTable.Retrieval retrieval=tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
-                    retrieval.getBindingsBuffer()[1]=node;
-                    retrieval.open();
-                    while (!retrieval.afterLast()) {
-                        Object concept=retrieval.getTupleBuffer()[0];
-                        if (concept instanceof AtomicConcept  && !Prefixes.isInternalIRI(((AtomicConcept)concept).getIRI()))
-                            m_possibleSubsumers.add((AtomicConcept)concept);
-                        retrieval.next();
-                    }
-                }
-                else {
-                    Iterator<AtomicConcept> iterator=m_possibleSubsumers.iterator();
-                    while (iterator.hasNext()) {
-                        AtomicConcept atomicConcept=iterator.next();
-                        if (!tableau.getExtensionManager().containsConceptAssertion(atomicConcept,node))
-                            iterator.remove();
-                    }
-                }
-            }
         }
     }
 }

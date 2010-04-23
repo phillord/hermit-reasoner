@@ -55,6 +55,7 @@ import org.semanticweb.HermiT.hierarchy.DeterministicClassificationManager;
 import org.semanticweb.HermiT.hierarchy.Hierarchy;
 import org.semanticweb.HermiT.hierarchy.HierarchyNode;
 import org.semanticweb.HermiT.hierarchy.HierarchyPrinterFSS;
+import org.semanticweb.HermiT.hierarchy.ObjectRoleByConceptSubsumptionCache;
 import org.semanticweb.HermiT.hierarchy.QuasiOrderClassificationManager;
 import org.semanticweb.HermiT.hierarchy.QuasiOrderRoleClassificationManager;
 import org.semanticweb.HermiT.hierarchy.StandardClassificationManager;
@@ -554,18 +555,18 @@ public class Reasoner implements OWLReasoner {
                         allObjectRoles.add(atomicRole.getInverse());
                 }
             }
-            Map<Role,AtomicConcept> conceptsForRoles=new HashMap<Role,AtomicConcept>();
-            Map<AtomicConcept,Role> rolesForConcepts=new HashMap<AtomicConcept,Role>();
-            OWLAxiom[] additionalAxioms=getAxiomsForPropertyClassification(allObjectRoles,conceptsForRoles,rolesForConcepts);
-            Tableau tableau=getTableau(additionalAxioms);
-            conceptsForRoles.put(AtomicRole.TOP_OBJECT_ROLE, AtomicConcept.THING);
-            conceptsForRoles.put(AtomicRole.BOTTOM_OBJECT_ROLE, AtomicConcept.NOTHING);
-            rolesForConcepts.put(AtomicConcept.THING,AtomicRole.TOP_OBJECT_ROLE);
-            rolesForConcepts.put(AtomicConcept.NOTHING,AtomicRole.BOTTOM_OBJECT_ROLE);
-            ClassificationManager<AtomicConcept> objectRoleClassificationManager=new QuasiOrderRoleClassificationManager(tableau,m_dlOntology.hasInverseRoles(),conceptsForRoles,rolesForConcepts);
             if (!isConsistent())
                 m_objectRoleHierarchy=Hierarchy.emptyHierarchy(allObjectRoles,AtomicRole.TOP_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE);
             else {
+                Map<Role,AtomicConcept> conceptsForRoles=new HashMap<Role,AtomicConcept>();
+                Map<AtomicConcept,Role> rolesForConcepts=new HashMap<AtomicConcept,Role>();
+                OWLAxiom[] additionalAxioms=getAxiomsForObjectPropertyClassification(allObjectRoles,conceptsForRoles,rolesForConcepts);
+                Tableau tableau=getTableau(additionalAxioms);
+                conceptsForRoles.put(AtomicRole.TOP_OBJECT_ROLE, AtomicConcept.THING);
+                conceptsForRoles.put(AtomicRole.BOTTOM_OBJECT_ROLE, AtomicConcept.NOTHING);
+                rolesForConcepts.put(AtomicConcept.THING,AtomicRole.TOP_OBJECT_ROLE);
+                rolesForConcepts.put(AtomicConcept.NOTHING,AtomicRole.BOTTOM_OBJECT_ROLE);
+                ClassificationManager<AtomicConcept> objectRoleClassificationManager=createObjectRoleClassificationManager(tableau,m_dlOntology.hasInverseRoles(),conceptsForRoles,rolesForConcepts);
                 try {
                     final int numRoles=allObjectRoles.size()+2;
                     if (m_configuration.reasonerProgressMonitor!=null)
@@ -582,7 +583,7 @@ public class Reasoner implements OWLReasoner {
                     relevantAtomicConcepts.add(AtomicConcept.THING);
                     relevantAtomicConcepts.add(AtomicConcept.NOTHING);
                     Hierarchy<AtomicConcept> atomicConceptHierarchyForRoles=objectRoleClassificationManager.classify(progressMonitor,AtomicConcept.THING,AtomicConcept.NOTHING,relevantAtomicConcepts);
-                    m_objectRoleHierarchy=atomicConceptHierarchyForRoles.transform(new ConceptToRoleTransformer(rolesForConcepts),null);
+                    m_objectRoleHierarchy=atomicConceptHierarchyForRoles.transform(new ConceptToRoleTransformer<Role>(rolesForConcepts),null);
                 }
                 finally {
                     if (m_configuration.reasonerProgressMonitor!=null)
@@ -591,12 +592,12 @@ public class Reasoner implements OWLReasoner {
             }
         }
     }
-    protected OWLAxiom[] getAxiomsForPropertyClassification(Set<Role> allObjectRoles,Map<Role,AtomicConcept> conceptsForRoles,Map<AtomicConcept,Role> rolesForConcepts) {
+    protected OWLAxiom[] getAxiomsForObjectPropertyClassification(Set<Role> allObjectRoles,Map<Role,AtomicConcept> conceptsForRoles,Map<AtomicConcept,Role> rolesForConcepts) {
         // for each object property r in the axiom closure O, we add 
         // A_r = \exists r.A for A_r and A fresh in O
         OWLAxiom[] additionalAxioms=new OWLAxiom[allObjectRoles.size()];
         OWLDataFactory factory=getDataFactory();
-        OWLClass dummyClass=factory.getOWLClass(IRI.create("internal:prop#dummyConcept"));
+        OWLClass dummyClass=factory.getOWLClass(IRI.create("internal:propertyDummyConcept"));
         int i=0;
         for (Role r : allObjectRoles) {
             AtomicConcept conceptForRole=AtomicConcept.create(Prefixes.s_propertyToClassPrefix+i);
@@ -614,18 +615,16 @@ public class Reasoner implements OWLReasoner {
         }
         return additionalAxioms;
     }
-    protected class ConceptToRoleTransformer implements Hierarchy.Transformer<AtomicConcept,Role> {
-        protected final Map<AtomicConcept,Role> m_rolesForConcepts;
+    protected class ConceptToRoleTransformer<E> implements Hierarchy.Transformer<AtomicConcept,E> {
+        protected final Map<AtomicConcept,E> m_rolesForConcepts;
         
-        public ConceptToRoleTransformer(Map<AtomicConcept,Role> rolesForConcepts) {
+        public ConceptToRoleTransformer(Map<AtomicConcept,E> rolesForConcepts) {
             m_rolesForConcepts=rolesForConcepts;
         }
-        public Role transform(AtomicConcept atomicConcept) {
-            if (atomicConcept.equals(AtomicConcept.THING)) return AtomicRole.TOP_OBJECT_ROLE;
-            if (atomicConcept.equals(AtomicConcept.NOTHING)) return AtomicRole.BOTTOM_OBJECT_ROLE;
+        public E transform(AtomicConcept atomicConcept) {
             return m_rolesForConcepts.get(atomicConcept);
         }
-        public Role determineRepresentative(AtomicConcept oldRepresentative,Set<Role> newEquivalentElements) {
+        public E determineRepresentative(AtomicConcept oldRepresentative,Set<E> newEquivalentElements) {
             return transform(oldRepresentative);
         }
     }
@@ -1638,6 +1637,12 @@ public class Reasoner implements OWLReasoner {
             return new DeterministicClassificationManager<AtomicConcept>(new AtomicConceptSubsumptionCache(tableau));
         else
             return new QuasiOrderClassificationManager(tableau);
+    }
+    protected static ClassificationManager<AtomicConcept> createObjectRoleClassificationManager(Tableau tableau,boolean hasInverses,Map<Role,AtomicConcept> conceptsForRoles,Map<AtomicConcept,Role> rolesForConcepts) {
+        if (tableau.isDeterministic())
+            return new DeterministicClassificationManager<AtomicConcept>(new ObjectRoleByConceptSubsumptionCache<Role>(tableau,true,hasInverses,AtomicRole.BOTTOM_OBJECT_ROLE,AtomicRole.TOP_OBJECT_ROLE,conceptsForRoles,rolesForConcepts));
+        else 
+            return new QuasiOrderRoleClassificationManager<Role>(tableau,hasInverses,conceptsForRoles,rolesForConcepts);
     }
     protected static ClassificationManager<AtomicRole> createDataRoleClassificationManager(Reasoner reasoner) {
         return new StandardClassificationManager<AtomicRole>(new DataRoleSubsumptionCache(reasoner));

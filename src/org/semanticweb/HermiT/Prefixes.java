@@ -237,6 +237,12 @@ public class Prefixes implements Serializable {
         return iri.startsWith("internal:");
     }
     /**
+     * Determines whether the supplied IRI is used internally by HermiT.
+     */
+    public static boolean isInternalIRIForPropertyClassification(String iri) {
+        return iri.startsWith(s_propertyToClassPrefix);
+    }
+    /**
      * Determines whether the supplied string is a valid local name.
      */
     public static boolean isValidLocalName(String localName) {

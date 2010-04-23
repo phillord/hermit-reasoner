@@ -32,6 +32,7 @@ public class DeterministicClassificationManager<E> implements ClassificationMana
     
     public DeterministicClassificationManager(SubsumptionCache<E> subsumptionCache) {
         m_subsumptionCache=subsumptionCache;
+        m_subsumptionCache.initialize();
     }
     public boolean isSatisfiable(E element) {
         return m_subsumptionCache.isSatisfiable(element);

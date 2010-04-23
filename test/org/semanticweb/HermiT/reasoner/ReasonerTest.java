@@ -800,6 +800,19 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertSuperDataProperties("r6",EQ("r2"));
     }
 
+    public void testDataPropertySemantics() throws Exception {
+        String axioms =
+            "DataPropertyRange( :r xsd:nonNegativeInteger ) "+
+            "DataPropertyRange( :r xsd:nonPositiveInteger ) "+
+            "DataPropertyRange( :s xsd:nonNegativeInteger ) "+
+            "DataPropertyRange( :s xsd:nonPositiveInteger ) "+
+            "SubClassOf( :A DataSomeValuesFrom( :r DataOneOf(\"true\"^^xsd:boolean) )) "+
+            "SubClassOf( :A DataSomeValuesFrom( :s DataOneOf(\"false\"^^xsd:boolean) )) "+
+            "ClassAssertion( :A :a )";
+        loadReasonerWithAxioms(axioms);
+        assertFalse(m_reasoner.isConsistent());
+    }
+
     public void testSemanticDataPropertyClassification() throws Exception {
         String axioms =
             "DataPropertyRange( :r xsd:nonNegativeInteger ) "+
