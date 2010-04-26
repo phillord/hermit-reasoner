@@ -8,9 +8,8 @@ public class ReasonerIndividualReuseTest extends ReasonerTest {
         super(name);
     }
     protected Configuration getConfiguration() {
-        Configuration configuration=new Configuration();
+        Configuration configuration=super.getConfiguration();
         configuration.existentialStrategyType=Configuration.ExistentialStrategyType.INDIVIDUAL_REUSE;
-        configuration.throwInconsistentOntologyException=false;
         return configuration;
     }
 }
