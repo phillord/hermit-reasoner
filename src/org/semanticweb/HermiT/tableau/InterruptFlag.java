@@ -37,8 +37,9 @@ public final class InterruptFlag implements Serializable {
             m_interruptTimer=null;
     }
     public void checkInterrupt() {
-        if (m_interruptType!=null) {
-            if (m_interruptType==InterruptType.TIMEOUT)
+        InterruptType interruptType=m_interruptType;
+        if (interruptType!=null) {
+            if (interruptType==InterruptType.TIMEOUT)
                 throw new TimeOutException();
             else
                 throw new ReasonerInterruptedException();
