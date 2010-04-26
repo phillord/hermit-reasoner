@@ -63,7 +63,7 @@ public final class InterruptFlag implements Serializable {
             m_interruptTimer.dispose();
     }
 
-    protected static enum TimerState { WAIT_FOR_TASK,TIMING,DISPOSED };
+    protected static enum TimerState { WAIT_FOR_TASK,TIMING,TIMING_STOPPED,DISPOSED };
 
     protected class InterruptTimer extends Thread {
         protected final long m_timeout;
@@ -78,6 +78,7 @@ public final class InterruptFlag implements Serializable {
         public synchronized void run() {
             while (m_timerState!=TimerState.DISPOSED) {
                 m_timerState=TimerState.WAIT_FOR_TASK;
+                notifyAll();
                 while (m_timerState==TimerState.WAIT_FOR_TASK) {
                     try {
                         wait();
@@ -106,16 +107,33 @@ public final class InterruptFlag implements Serializable {
                 catch (InterruptedException stopped) {
                 }
             }
-            m_timerState=TimerState.TIMING;
-            notifyAll();
+            if (m_timerState==TimerState.WAIT_FOR_TASK) {
+                m_timerState=TimerState.TIMING;
+                notifyAll();
+            }
         }
         public synchronized void stopTiming() {
-            m_timerState=TimerState.WAIT_FOR_TASK;
-            notifyAll();
+            if (m_timerState==TimerState.TIMING) {
+                m_timerState=TimerState.TIMING_STOPPED;
+                notifyAll();
+                while (m_timerState!=TimerState.WAIT_FOR_TASK && m_timerState!=TimerState.DISPOSED) {
+                    try {
+                        wait();
+                    }
+                    catch (InterruptedException stopped) {
+                        return;
+                    }
+                }
+            }
         }
         public synchronized void dispose() {
             m_timerState=TimerState.DISPOSED;
             notifyAll();
+            try {
+                join();
+            }
+            catch (InterruptedException e) {
+            }
         }
     }
 }
