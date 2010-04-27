@@ -94,6 +94,7 @@ import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
+import org.semanticweb.owlapi.model.OWLDatatype;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLFunctionalObjectPropertyAxiom;
@@ -265,7 +266,7 @@ public class Reasoner implements OWLReasoner {
         return new Version(version[0],version[1],version[2],version[3]);
     }
     public OWLOntology getRootOntology() {
-        return null;
+        return m_rootOntology;
     }
     public long getTimeOut() {
         return m_configuration.individualTaskTimeout;
@@ -944,35 +945,111 @@ public class Reasoner implements OWLReasoner {
     public boolean areDataPropertiesClassified() {
         return m_dataRoleHierarchy!=null;
     }
-    public void classifyDataProperties() {
-        ClassificationManager<AtomicRole> dataRoleClassificationManager=createDataRoleClassificationManager(this);
-        if (m_dataRoleHierarchy==null) {
-            throwInconsistentOntologyExceptionIfNecessary();
-            Set<AtomicRole> allAtomicDataRoles=new HashSet<AtomicRole>(m_dlOntology.getAllAtomicDataRoles());
-            allAtomicDataRoles.add(AtomicRole.TOP_DATA_ROLE);
-            allAtomicDataRoles.add(AtomicRole.BOTTOM_DATA_ROLE);
-            if (!isConsistent())
-                m_dataRoleHierarchy=Hierarchy.emptyHierarchy(allAtomicDataRoles,AtomicRole.TOP_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE);
-            else {
-                try {
-                    final int numAtomicRoles=allAtomicDataRoles.size();
-                    if (m_configuration.reasonerProgressMonitor!=null)
-                        m_configuration.reasonerProgressMonitor.reasonerTaskStarted("Classifying data properties...");
-                    ClassificationManager.ProgressMonitor<AtomicRole> progressMonitor=new ClassificationManager.ProgressMonitor<AtomicRole>() {
-                        protected int m_processedRoles=0;
-                        public void elementClassified(AtomicRole element) {
-                            m_processedRoles++;
-                            if (m_configuration.reasonerProgressMonitor!=null)
-                                m_configuration.reasonerProgressMonitor.reasonerTaskProgressChanged(m_processedRoles,numAtomicRoles);
-                        }
-                    };
-                    m_dataRoleHierarchy=dataRoleClassificationManager.classify(progressMonitor,AtomicRole.TOP_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE,allAtomicDataRoles);
-                }
-                finally {
-                    if (m_configuration.reasonerProgressMonitor!=null)
-                        m_configuration.reasonerProgressMonitor.reasonerTaskStopped();
+    public void classifyDataProperties() { 
+//        if (m_configuration.useNewDataPropertyClassification) {
+//            if (m_dataRoleHierarchy==null) {
+//                Set<AtomicRole> allDataRoles=new HashSet<AtomicRole>();
+//                for (AtomicRole atomicRole : m_dlOntology.getAllAtomicDataRoles()) {
+//                    if (!(atomicRole.equals(AtomicRole.TOP_DATA_ROLE) || atomicRole.equals(AtomicRole.BOTTOM_DATA_ROLE)))
+//                        allDataRoles.add(atomicRole);
+//                }
+//                if (!isConsistent())
+//                    m_dataRoleHierarchy=Hierarchy.emptyHierarchy(allDataRoles,AtomicRole.TOP_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE);
+//                else {
+//                    Map<Role,AtomicConcept> conceptsForRoles=new HashMap<Role,AtomicConcept>();
+//                    Map<AtomicConcept,Role> rolesForConcepts=new HashMap<AtomicConcept,Role>();
+//                    OWLAxiom[] additionalAxioms=getAxiomsForDataPropertyClassification(allDataRoles,conceptsForRoles,rolesForConcepts);
+//                    Tableau tableau=getTableau(additionalAxioms);
+//                    conceptsForRoles.put(AtomicRole.TOP_DATA_ROLE, AtomicConcept.THING);
+//                    conceptsForRoles.put(AtomicRole.BOTTOM_DATA_ROLE, AtomicConcept.NOTHING);
+//                    rolesForConcepts.put(AtomicConcept.THING,AtomicRole.TOP_DATA_ROLE);
+//                    rolesForConcepts.put(AtomicConcept.NOTHING,AtomicRole.BOTTOM_DATA_ROLE);
+//                    ClassificationManager<AtomicConcept> dataRoleClassificationManager=createNewDataRoleClassificationManager(tableau,conceptsForRoles,rolesForConcepts);
+//                    try {
+//                        final int numRoles=allDataRoles.size()+2;
+//                        if (m_configuration.reasonerProgressMonitor!=null)
+//                            m_configuration.reasonerProgressMonitor.reasonerTaskStarted("Classifying data properties...");
+//                            ClassificationManager.ProgressMonitor<AtomicConcept> progressMonitor=new ClassificationManager.ProgressMonitor<AtomicConcept>() {
+//                            protected int m_processedRoles=0;
+//                            public void elementClassified(AtomicConcept element) {
+//                                m_processedRoles++;
+//                                if (m_configuration.reasonerProgressMonitor!=null)
+//                                    m_configuration.reasonerProgressMonitor.reasonerTaskProgressChanged(m_processedRoles,numRoles);
+//                            }
+//                        };
+//                        Set<AtomicConcept> relevantAtomicConcepts=new HashSet<AtomicConcept>(rolesForConcepts.keySet());
+//                        relevantAtomicConcepts.add(AtomicConcept.THING);
+//                        relevantAtomicConcepts.add(AtomicConcept.NOTHING);
+//                        Hierarchy<AtomicConcept> atomicConceptHierarchyForRoles=dataRoleClassificationManager.classify(progressMonitor,AtomicConcept.THING,AtomicConcept.NOTHING,relevantAtomicConcepts);
+//                        m_dataRoleHierarchy=atomicConceptHierarchyForRoles.transform(new ConceptToAtomicRoleTransformer(rolesForConcepts),null);
+//                    }
+//                    finally {
+//                        if (m_configuration.reasonerProgressMonitor!=null)
+//                            m_configuration.reasonerProgressMonitor.reasonerTaskStopped();
+//                    }
+//                }
+//            }
+//        } else {
+            ClassificationManager<AtomicRole> dataRoleClassificationManager=createDataRoleClassificationManager(this);
+            if (m_dataRoleHierarchy==null) {
+                throwInconsistentOntologyExceptionIfNecessary();
+                Set<AtomicRole> allAtomicDataRoles=new HashSet<AtomicRole>(m_dlOntology.getAllAtomicDataRoles());
+                allAtomicDataRoles.add(AtomicRole.TOP_DATA_ROLE);
+                allAtomicDataRoles.add(AtomicRole.BOTTOM_DATA_ROLE);
+                if (!isConsistent())
+                    m_dataRoleHierarchy=Hierarchy.emptyHierarchy(allAtomicDataRoles,AtomicRole.TOP_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE);
+                else {
+                    try {
+                        final int numAtomicRoles=allAtomicDataRoles.size();
+                        if (m_configuration.reasonerProgressMonitor!=null)
+                            m_configuration.reasonerProgressMonitor.reasonerTaskStarted("Classifying data properties...");
+                        ClassificationManager.ProgressMonitor<AtomicRole> progressMonitor=new ClassificationManager.ProgressMonitor<AtomicRole>() {
+                            protected int m_processedRoles=0;
+                            public void elementClassified(AtomicRole element) {
+                                m_processedRoles++;
+                                if (m_configuration.reasonerProgressMonitor!=null)
+                                    m_configuration.reasonerProgressMonitor.reasonerTaskProgressChanged(m_processedRoles,numAtomicRoles);
+                            }
+                        };
+                        m_dataRoleHierarchy=dataRoleClassificationManager.classify(progressMonitor,AtomicRole.TOP_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE,allAtomicDataRoles);
+                    }
+                    finally {
+                        if (m_configuration.reasonerProgressMonitor!=null)
+                            m_configuration.reasonerProgressMonitor.reasonerTaskStopped();
+                    }
                 }
             }
+//        }
+    }
+    protected OWLAxiom[] getAxiomsForDataPropertyClassification(Set<AtomicRole> allDataRoles,Map<Role,AtomicConcept> conceptsForRoles,Map<AtomicConcept,Role> rolesForConcepts) {
+        // for each data property r in the axiom closure O, we add 
+        // A_r = \exists r.A for A_r fresh in O and A a special datatype
+        OWLAxiom[] additionalAxioms=new OWLAxiom[allDataRoles.size()];
+        OWLDataFactory factory=getDataFactory();
+        OWLDatatype anonymousConstantsDatatype=factory.getOWLDatatype(IRI.create("internal:anonymous-constants"));
+        int i=0;
+        for (AtomicRole r : allDataRoles) {
+            AtomicConcept conceptForRole=AtomicConcept.create(Prefixes.s_propertyToClassPrefix+i);
+            conceptsForRoles.put(r,conceptForRole);
+            rolesForConcepts.put(conceptForRole,r);
+            OWLClass classForRole=factory.getOWLClass(IRI.create(conceptForRole.getIRI()));
+            OWLDataProperty dp=factory.getOWLDataProperty(IRI.create(r.getIRI()));
+            additionalAxioms[i]=factory.getOWLEquivalentClassesAxiom(classForRole, factory.getOWLDataSomeValuesFrom(dp,anonymousConstantsDatatype));
+            i++;
+        }
+        return additionalAxioms;
+    }
+    protected class ConceptToAtomicRoleTransformer implements Hierarchy.Transformer<AtomicConcept,AtomicRole> {
+        protected final Map<AtomicConcept,Role> m_rolesForConcepts;
+        
+        public ConceptToAtomicRoleTransformer(Map<AtomicConcept,Role> rolesForConcepts) {
+            m_rolesForConcepts=rolesForConcepts;
+        }
+        public AtomicRole transform(AtomicConcept atomicConcept) {
+            return (AtomicRole)m_rolesForConcepts.get(atomicConcept);
+        }
+        public AtomicRole determineRepresentative(AtomicConcept oldRepresentative,Set<AtomicRole> newEquivalentElements) {
+            return transform(oldRepresentative);
         }
     }
     public Node<OWLDataProperty> getTopDataPropertyNode() {
@@ -1342,26 +1419,28 @@ public class Reasoner implements OWLReasoner {
                 AtomicRole atomicRole=H(dataProperty);
                 Map<Individual,Set<Constant>> dataPropertyAssertions=m_dlOntology.getDataPropertyAssertions().get(atomicRole);
                 if (dataPropertyAssertions!=null) {
-                    for (Constant constant : dataPropertyAssertions.get(individual)) {
-                        Object dataValue=constant.getDataValue();
-                        OWLLiteral literal;
-                        if (dataValue instanceof String)
-                            literal=factory.getOWLStringLiteral((String)dataValue);
-                        else if (dataValue instanceof RDFPlainLiteralDataValue) {
-                            RDFPlainLiteralDataValue rdfPlainLiteralDataValue=(RDFPlainLiteralDataValue)dataValue;
-                            literal=factory.getOWLStringLiteral(rdfPlainLiteralDataValue.getString(),rdfPlainLiteralDataValue.getLanguageTag());
+                    if (dataPropertyAssertions.containsKey(individual)) {
+                        for (Constant constant : dataPropertyAssertions.get(individual)) {
+                            Object dataValue=constant.getDataValue();
+                            OWLLiteral literal;
+                            if (dataValue instanceof String)
+                                literal=factory.getOWLStringLiteral((String)dataValue);
+                            else if (dataValue instanceof RDFPlainLiteralDataValue) {
+                                RDFPlainLiteralDataValue rdfPlainLiteralDataValue=(RDFPlainLiteralDataValue)dataValue;
+                                literal=factory.getOWLStringLiteral(rdfPlainLiteralDataValue.getString(),rdfPlainLiteralDataValue.getLanguageTag());
+                            }
+                            else {
+                                String stringValue=DatatypeRegistry.toString(noPrefixes,dataValue);
+                                int indexOfLastQuote=stringValue.lastIndexOf('"');
+                                String lexicalForm=stringValue.substring(1,indexOfLastQuote);
+                                String datatypeIRI=stringValue.substring(indexOfLastQuote+3);
+                                int datatypeIRILastChar=datatypeIRI.length()-1;
+                                if (datatypeIRILastChar>=1 && datatypeIRI.charAt(0)=='<' && datatypeIRI.charAt(datatypeIRILastChar)=='>')
+                                    datatypeIRI=datatypeIRI.substring(1,datatypeIRILastChar);
+                                literal=factory.getOWLTypedLiteral(lexicalForm,factory.getOWLDatatype(IRI.create(datatypeIRI)));
+                            }
+                            result.add(literal);
                         }
-                        else {
-                            String stringValue=DatatypeRegistry.toString(noPrefixes,dataValue);
-                            int indexOfLastQuote=stringValue.lastIndexOf('"');
-                            String lexicalForm=stringValue.substring(1,indexOfLastQuote);
-                            String datatypeIRI=stringValue.substring(indexOfLastQuote+3);
-                            int datatypeIRILastChar=datatypeIRI.length()-1;
-                            if (datatypeIRILastChar>=1 && datatypeIRI.charAt(0)=='<' && datatypeIRI.charAt(datatypeIRILastChar)=='>')
-                                datatypeIRI=datatypeIRI.substring(1,datatypeIRILastChar);
-                            literal=factory.getOWLTypedLiteral(lexicalForm,factory.getOWLDatatype(IRI.create(datatypeIRI)));
-                        }
-                        result.add(literal);
                     }
                 }
             }
@@ -1647,7 +1726,13 @@ public class Reasoner implements OWLReasoner {
     protected static ClassificationManager<AtomicRole> createDataRoleClassificationManager(Reasoner reasoner) {
         return new StandardClassificationManager<AtomicRole>(new DataRoleSubsumptionCache(reasoner));
     }
-
+//    protected static ClassificationManager<AtomicConcept> createNewDataRoleClassificationManager(Tableau tableau,Map<Role,AtomicConcept> conceptsForRoles,Map<AtomicConcept,Role> rolesForConcepts) {
+//        if (tableau.isDeterministic())
+//            return new DeterministicClassificationManager<AtomicConcept>(new ObjectRoleByConceptSubsumptionCache<Role>(tableau,false,false,AtomicRole.BOTTOM_DATA_ROLE,AtomicRole.TOP_DATA_ROLE,conceptsForRoles,rolesForConcepts));
+//        else 
+//            return new QuasiOrderRoleClassificationManager<Role>(tableau,false,conceptsForRoles,rolesForConcepts);
+//    }
+    
     protected DLOntology createDeltaDLOntology(Configuration configuration,DLOntology originalDLOntology,OWLAxiom... additionalAxioms) throws IllegalArgumentException {
         Set<OWLAxiom> additionalAxiomsSet=new HashSet<OWLAxiom>();
         for (OWLAxiom axiom : additionalAxioms) {
