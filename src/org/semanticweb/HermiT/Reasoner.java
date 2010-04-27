@@ -442,14 +442,26 @@ public class Reasoner implements OWLReasoner {
         throwInconsistentOntologyExceptionIfNecessary();
         if (!isConsistent())
             return true;
-        if (m_atomicConceptHierarchy!=null && subClassExpression instanceof OWLClass && superClassExpression instanceof OWLClass) {
-            // TODO: do I really have to iterate over all ancestor nodes or is there a faster way?
+        if (subClassExpression instanceof OWLClass && superClassExpression instanceof OWLClass) {
+            AtomicConcept subconcept=H((OWLClass)subClassExpression);
             AtomicConcept superconcept=H((OWLClass)superClassExpression);
-            Set<HierarchyNode<AtomicConcept>> ancestors=getHierarchyNode((OWLClass)subClassExpression).getAncestorNodes();
-            for (HierarchyNode<AtomicConcept> node : ancestors) {
-                if (node.getEquivalentElements().contains(superconcept)) return true;
+            if (m_atomicConceptHierarchy!=null && !containsFreshEntities(subClassExpression,superClassExpression)) {
+                HierarchyNode<AtomicConcept> subconceptNode=m_atomicConceptHierarchy.getNodeForElement(subconcept);
+                if (subconceptNode.getEquivalentElements().contains(superconcept))
+                    return true;
+                Set<HierarchyNode<AtomicConcept>> ancestors=subconceptNode.getAncestorNodes();
+                for (HierarchyNode<AtomicConcept> node : ancestors)
+                    if (node.getEquivalentElements().contains(superconcept))
+                        return true;
+                return false;
             }
-            return false;
+            else {
+                Tableau tableau=getTableau();
+                Individual freshIndividual=Individual.createAnonymous("fresh-individual");
+                Atom subconceptAssertion=Atom.create(subconcept,freshIndividual);
+                Atom superconceptAssertion=Atom.create(superconcept,freshIndividual);
+                return !tableau.isSatisfiable(true,Collections.singleton(subconceptAssertion),Collections.singleton(superconceptAssertion),null,null,null,ReasoningTaskDescription.isConceptSubsumedBy(subconcept,superconcept));
+            }
         }
         else {
             OWLDataFactory factory=getDataFactory();
@@ -519,11 +531,9 @@ public class Reasoner implements OWLReasoner {
         classify();
         if (!isConsistent())
             return m_atomicConceptHierarchy.getBottomNode();
-        else if (classExpression instanceof OWLClass) {
+        else if (classExpression instanceof OWLClass && !containsFreshEntities(classExpression)) {
             AtomicConcept atomicConcept=H((OWLClass)classExpression);
             HierarchyNode<AtomicConcept> node=m_atomicConceptHierarchy.getNodeForElement(atomicConcept);
-            if (node==null)
-                node=new HierarchyNode<AtomicConcept>(atomicConcept,Collections.singleton(atomicConcept),Collections.singleton(m_atomicConceptHierarchy.getTopNode()),Collections.singleton(m_atomicConceptHierarchy.getBottomNode()));
             return node;
         }
         else {
@@ -594,7 +604,7 @@ public class Reasoner implements OWLReasoner {
         }
     }
     protected OWLAxiom[] getAxiomsForObjectPropertyClassification(Set<Role> allObjectRoles,Map<Role,AtomicConcept> conceptsForRoles,Map<AtomicConcept,Role> rolesForConcepts) {
-        // for each object property r in the axiom closure O, we add 
+        // for each object property r in the axiom closure O, we add
         // A_r = \exists r.A for A_r and A fresh in O
         OWLAxiom[] additionalAxioms=new OWLAxiom[allObjectRoles.size()];
         OWLDataFactory factory=getDataFactory();
@@ -618,7 +628,7 @@ public class Reasoner implements OWLReasoner {
     }
     protected class ConceptToRoleTransformer<E> implements Hierarchy.Transformer<AtomicConcept,E> {
         protected final Map<AtomicConcept,E> m_rolesForConcepts;
-        
+
         public ConceptToRoleTransformer(Map<AtomicConcept,E> rolesForConcepts) {
             m_rolesForConcepts=rolesForConcepts;
         }
@@ -643,7 +653,7 @@ public class Reasoner implements OWLReasoner {
         if (!isConsistent() || superObjectPropertyExpression.getNamedProperty().isOWLTopObjectProperty())
             return true;
         Role superrole=H(superObjectPropertyExpression);
-        Set<HierarchyNode<Role>> ancestors=getHierarchyNode((OWLObjectPropertyExpression)subObjectPropertyExpression).getAncestorNodes();
+        Set<HierarchyNode<Role>> ancestors=getHierarchyNode(subObjectPropertyExpression).getAncestorNodes();
         for (HierarchyNode<Role> node : ancestors) {
             if (node.getEquivalentElements().contains(superrole)) return true;
         }
@@ -945,7 +955,7 @@ public class Reasoner implements OWLReasoner {
     public boolean areDataPropertiesClassified() {
         return m_dataRoleHierarchy!=null;
     }
-    public void classifyDataProperties() { 
+    public void classifyDataProperties() {
 //        if (m_configuration.useNewDataPropertyClassification) {
 //            if (m_dataRoleHierarchy==null) {
 //                Set<AtomicRole> allDataRoles=new HashSet<AtomicRole>();
@@ -1022,7 +1032,7 @@ public class Reasoner implements OWLReasoner {
 //        }
     }
     protected OWLAxiom[] getAxiomsForDataPropertyClassification(Set<AtomicRole> allDataRoles,Map<Role,AtomicConcept> conceptsForRoles,Map<AtomicConcept,Role> rolesForConcepts) {
-        // for each data property r in the axiom closure O, we add 
+        // for each data property r in the axiom closure O, we add
         // A_r = \exists r.A for A_r fresh in O and A a special datatype
         OWLAxiom[] additionalAxioms=new OWLAxiom[allDataRoles.size()];
         OWLDataFactory factory=getDataFactory();
@@ -1041,7 +1051,7 @@ public class Reasoner implements OWLReasoner {
     }
     protected class ConceptToAtomicRoleTransformer implements Hierarchy.Transformer<AtomicConcept,AtomicRole> {
         protected final Map<AtomicConcept,Role> m_rolesForConcepts;
-        
+
         public ConceptToAtomicRoleTransformer(Map<AtomicConcept,Role> rolesForConcepts) {
             m_rolesForConcepts=rolesForConcepts;
         }
@@ -1068,7 +1078,7 @@ public class Reasoner implements OWLReasoner {
         if (m_dlOntology.hasDatatypes()) {
 //            AtomicRole subrole=H(subDataProperty);
             AtomicRole superrole=H(superDataProperty);
-            Set<HierarchyNode<AtomicRole>> ancestors=getHierarchyNode((OWLDataProperty)subDataProperty).getAncestorNodes();
+            Set<HierarchyNode<AtomicRole>> ancestors=getHierarchyNode(subDataProperty).getAncestorNodes();
             for (HierarchyNode<AtomicRole> node : ancestors) {
                 if (node.getEquivalentElements().contains(superrole)) return true;
             }
@@ -1720,7 +1730,7 @@ public class Reasoner implements OWLReasoner {
     protected static ClassificationManager<AtomicConcept> createObjectRoleClassificationManager(Tableau tableau,boolean hasInverses,Map<Role,AtomicConcept> conceptsForRoles,Map<AtomicConcept,Role> rolesForConcepts) {
         if (tableau.isDeterministic())
             return new DeterministicClassificationManager<AtomicConcept>(new ObjectRoleByConceptSubsumptionCache<Role>(tableau,true,hasInverses,AtomicRole.BOTTOM_OBJECT_ROLE,AtomicRole.TOP_OBJECT_ROLE,conceptsForRoles,rolesForConcepts));
-        else 
+        else
             return new QuasiOrderRoleClassificationManager<Role>(tableau,hasInverses,conceptsForRoles,rolesForConcepts);
     }
     protected static ClassificationManager<AtomicRole> createDataRoleClassificationManager(Reasoner reasoner) {
@@ -1729,10 +1739,10 @@ public class Reasoner implements OWLReasoner {
 //    protected static ClassificationManager<AtomicConcept> createNewDataRoleClassificationManager(Tableau tableau,Map<Role,AtomicConcept> conceptsForRoles,Map<AtomicConcept,Role> rolesForConcepts) {
 //        if (tableau.isDeterministic())
 //            return new DeterministicClassificationManager<AtomicConcept>(new ObjectRoleByConceptSubsumptionCache<Role>(tableau,false,false,AtomicRole.BOTTOM_DATA_ROLE,AtomicRole.TOP_DATA_ROLE,conceptsForRoles,rolesForConcepts));
-//        else 
+//        else
 //            return new QuasiOrderRoleClassificationManager<Role>(tableau,false,conceptsForRoles,rolesForConcepts);
 //    }
-    
+
     protected DLOntology createDeltaDLOntology(Configuration configuration,DLOntology originalDLOntology,OWLAxiom... additionalAxioms) throws IllegalArgumentException {
         Set<OWLAxiom> additionalAxiomsSet=new HashSet<OWLAxiom>();
         for (OWLAxiom axiom : additionalAxioms) {
@@ -1887,6 +1897,25 @@ public class Reasoner implements OWLReasoner {
                 throw new FreshEntitiesException(undeclaredEntities);
         }
     }
+    protected boolean containsFreshEntities(OWLObject... objects) {
+        for (OWLObject object : objects) {
+            if (!(object instanceof OWLEntity) || !((OWLEntity)object).isBuiltIn()) {
+                for (OWLDataProperty dp : object.getDataPropertiesInSignature())
+                    if (!isDefined(dp) && !Prefixes.isInternalIRI(dp.getIRI().toString()))
+                        return true;
+                for (OWLObjectProperty op : object.getObjectPropertiesInSignature())
+                    if (!isDefined(op) && !Prefixes.isInternalIRI(op.getIRI().toString()))
+                        return true;
+                for (OWLNamedIndividual individual : object.getIndividualsInSignature())
+                    if (!isDefined(individual) && !Prefixes.isInternalIRI(individual.getIRI().toString()))
+                        return true;
+                for (OWLClass owlClass : object.getClassesInSignature())
+                    if (!isDefined(owlClass) && !Prefixes.isInternalIRI(owlClass.getIRI().toString()))
+                        return true;
+            }
+        }
+        return false;
+    }
 
     // Methods for conversion from OWL API to HermiT's API
 
@@ -2032,7 +2061,7 @@ public class Reasoner implements OWLReasoner {
             Configuration configuration=factory.getProtegeConfiguration(null);
             configuration.reasonerProgressMonitor=monitor;
             try {
-                // see whether the Protege version of the user already has the reasoner preferences tab 
+                // see whether the Protege version of the user already has the reasoner preferences tab
                 ProtegeOWLReasonerFactoryAdapter.class.getMethod("getOWLModelManager", (Class<?>[])null);
                 // if we are not thrown into the catch block, we can initialise the reasoner preferences
                 ReasonerPreferences preferences=this.getOWLModelManager().getReasonerPreferences();
@@ -2043,37 +2072,37 @@ public class Reasoner implements OWLReasoner {
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_EQUIVALENT_CLASSES) ||
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_INHERITED_ANONYMOUS_CLASSES) ||
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_CLASSES);
-    
+
                 // realisation
                 prepareReasonerInferences.realisationRequired=
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERED_CLASS_MEMBERS) ||
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_TYPES);
-    
+
                 // data type classification
                 prepareReasonerInferences.dataPropertyClassificationRequired=
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_DATATYPE_PROPERTY_DOMAINS) ||
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_EQUIVALENT_DATATYPE_PROPERTIES) ||
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_DATATYPE_PROPERTIES);
-    
+
                 // object property classification
                 prepareReasonerInferences.objectPropertyClassificationRequired=
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_EQUIVALENT_OBJECT_PROPERTIES) ||
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_INVERSE_PROPERTIES) ||
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_OBJECT_PROPERTIES) ||
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_OBJECT_PROPERTY_UNSATISFIABILITY);
-    
+
                 // object property realisation
                 prepareReasonerInferences.objectPropertyRealisationRequired=preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_OBJECT_PROPERTY_ASSERTIONS);
-    
+
                 // object property domain & range
                 prepareReasonerInferences.objectPropertyDomainsRequired=preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_OBJECT_PROPERTY_DOMAINS);
                 prepareReasonerInferences.objectPropertyRangesRequired=preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_OBJECT_PROPERTY_RANGES);
-    
+
                 configuration.prepareReasonerInferences=prepareReasonerInferences;
             } catch (java.lang.NoSuchMethodException e) {
-                // do nothing, prepareReasoner() will just execute all methods because the user's Protege 
-                // version does not yet have the reasoner preferences tab that we can use to customize 
-                // prepareReasoner() 
+                // do nothing, prepareReasoner() will just execute all methods because the user's Protege
+                // version does not yet have the reasoner preferences tab that we can use to customize
+                // prepareReasoner()
             }
             return factory.createHermiTOWLReasoner(configuration,ontology);
         }
