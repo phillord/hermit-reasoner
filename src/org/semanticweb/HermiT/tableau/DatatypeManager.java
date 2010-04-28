@@ -46,7 +46,6 @@ public final class DatatypeManager implements Serializable {
     protected final ExtensionTable.Retrieval m_inequality02Retrieval;
     protected final ExtensionTable.Retrieval m_assertions1Retrieval;
     protected final DConjunction m_conjunction;
-    protected final List<Node> m_auxiliaryNodeList;
     protected final List<DVariable> m_auxiliaryVariableList;
     protected final UnionDependencySet m_unionDependencySet;
     protected final boolean[] m_newVariableAdded;
@@ -67,7 +66,6 @@ public final class DatatypeManager implements Serializable {
         m_inequality02Retrieval=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,false,true },ExtensionTable.View.EXTENSION_THIS);
         m_assertions1Retrieval=m_extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.EXTENSION_THIS);
         m_conjunction=new DConjunction();
-        m_auxiliaryNodeList=new ArrayList<Node>();
         m_auxiliaryVariableList=new ArrayList<DVariable>();
         m_unionDependencySet=new UnionDependencySet(16);
         m_newVariableAdded=new boolean[1];
@@ -79,7 +77,6 @@ public final class DatatypeManager implements Serializable {
         m_inequality02Retrieval.clear();
         m_assertions1Retrieval.clear();
         m_conjunction.clear();
-        m_auxiliaryNodeList.clear();
         m_auxiliaryVariableList.clear();
         m_unionDependencySet.clearConstituents();
     }
@@ -92,13 +89,12 @@ public final class DatatypeManager implements Serializable {
         while (!m_extensionManager.containsClash() && !m_assertionsDeltaOldRetrieval.afterLast()) {
             if (tupleBuffer[0] instanceof DataRange) {
                 // A data range was added in the last saturation step, so we check the D-conjunction hanging off of its node.
-                m_conjunction.clearActiveVariables();
                 Node node=(Node)tupleBuffer[1];
-                DVariable variable=m_conjunction.getVariableFor(node);
-                // If variable==null, this means that 'variable' has not been checked in this iteration.
-                if (variable==null) {
-                    loadNodesReachableByInequality(node);
-                    loadDataRanges();
+                DVariable variable=getAndInitializeVariableFor(node,m_newVariableAdded);
+                // m_newVariableAdded[0]==false means that 'variable' has already been checked in this iteration.
+                if (m_newVariableAdded[0]) {
+                    m_conjunction.clearActiveVariables();
+                    loadConjunctionFrom(variable);
                     checkConjunctionSatisfiability();
                 }
             }
@@ -114,16 +110,18 @@ public final class DatatypeManager implements Serializable {
                 Node node1=(Node)tupleBuffer[1];
                 Node node2=(Node)tupleBuffer[2];
                 if (!node1.getNodeType().isAbstract() && !node2.getNodeType().isAbstract()) {
+                    m_conjunction.clearActiveVariables();
                     // An inequality between concrete was added in the last saturation step, so we check the D-conjunction hanging off of its node.
-                    DVariable variable1=m_conjunction.getVariableFor(node1);
-                    DVariable variable2=m_conjunction.getVariableFor(node2);
-                    // If variable1==null, this means that 'node1' has not been checked in this iteration,
-                    // and similarly for variable2==null.
-                    if (variable1==null && variable2==null) {
-                        loadNodesReachableByInequality(node1,node2);
-                        loadDataRanges();
-                        checkConjunctionSatisfiability();
-                    }
+                    DVariable variable1=getAndInitializeVariableFor(node1,m_newVariableAdded);
+                    // m_newVariableAdded[0]==false means that 'variable1' has already been checked in this iteration.
+                    if (m_newVariableAdded[0])
+                        loadConjunctionFrom(variable1);
+                    DVariable variable2=getAndInitializeVariableFor(node2,m_newVariableAdded);
+                    // m_newVariableAdded[0]==false means that 'variable1' has already been checked in this iteration.
+                    if (m_newVariableAdded[0])
+                        loadConjunctionFrom(variable2);
+                    m_conjunction.addInequality(variable1,variable2);
+                    checkConjunctionSatisfiability();
                 }
             }
             m_inequalityDeltaOldRetrieval.next();
@@ -132,75 +130,66 @@ public final class DatatypeManager implements Serializable {
             m_tableauMonitor.datatypeCheckingFinished(!m_extensionManager.containsClash());
         m_unionDependencySet.clearConstituents();
         m_conjunction.clear();
-        m_auxiliaryNodeList.clear();
         m_auxiliaryVariableList.clear();
         return true;
     }
-    protected void loadNodesReachableByInequality(Node node1,Node node2) {
-        if (node1.getNodeType()==NodeType.ROOT_CONSTANT_NODE) {
-            DVariable variable1=m_conjunction.activateVariable(node1,m_newVariableAdded);
-            DVariable variable2=m_conjunction.activateVariable(node2,m_newVariableAdded);
-            m_conjunction.addInequality(variable1,variable2);
-            if (node2.getNodeType()!=NodeType.ROOT_CONSTANT_NODE)
-                loadNodesReachableByInequality(node2);
-        }
-        else
-            loadNodesReachableByInequality(node1);
-    }
-    protected void loadNodesReachableByInequality(Node node) {
-        m_auxiliaryNodeList.clear();
-        m_auxiliaryNodeList.add(node);
-        while (!m_auxiliaryNodeList.isEmpty()) {
-            Node reachedNode=m_auxiliaryNodeList.remove(m_auxiliaryNodeList.size()-1);
-            DVariable reachedVariable=m_conjunction.activateVariable(reachedNode,m_newVariableAdded);
-            // Concrete root nodes are assigned a particular value, so they act as "breakers" in the conjunction:
-            // the nodes that are unequal to them can be analyzed independently.
-            if (reachedNode.getNodeType()!=NodeType.ROOT_CONSTANT_NODE) {
-                // Look for all inequalities where reachedNode occurs in the first position.
-                m_inequality01Retrieval.getBindingsBuffer()[0]=Inequality.INSTANCE;
-                m_inequality01Retrieval.getBindingsBuffer()[1]=reachedNode;
-                m_inequality01Retrieval.open();
-                Object[] tupleBuffer=m_inequality01Retrieval.getTupleBuffer();
-                while (!m_inequality01Retrieval.afterLast()) {
-                    Node newNode=(Node)tupleBuffer[2];
-                    DVariable newVariable=m_conjunction.activateVariable(newNode,m_newVariableAdded);
-                    if (m_newVariableAdded[0])
-                        m_auxiliaryNodeList.add(newNode);
-                    m_conjunction.addInequality(reachedVariable,newVariable);
-                    m_inequality01Retrieval.next();
-                    m_interruptFlag.checkInterrupt();
-                }
-                // Look for all inequalities where reachedNode occurs in the second position.
-                m_inequality02Retrieval.getBindingsBuffer()[0]=Inequality.INSTANCE;
-                m_inequality02Retrieval.getBindingsBuffer()[2]=reachedNode;
-                m_inequality02Retrieval.open();
-                tupleBuffer=m_inequality02Retrieval.getTupleBuffer();
-                while (!m_inequality02Retrieval.afterLast()) {
-                    Node newNode=(Node)tupleBuffer[1];
-                    DVariable newVariable=m_conjunction.activateVariable(newNode,m_newVariableAdded);
-                    if (m_newVariableAdded[0])
-                        m_auxiliaryNodeList.add(newNode);
-                    m_conjunction.addInequality(newVariable,reachedVariable);
-                    m_inequality02Retrieval.next();
-                    m_interruptFlag.checkInterrupt();
+    protected void loadConjunctionFrom(DVariable startVariable) {
+        m_auxiliaryVariableList.clear();
+        m_auxiliaryVariableList.add(startVariable);
+        while (!m_extensionManager.containsClash() && !m_auxiliaryVariableList.isEmpty()) {
+            DVariable reachedVariable=m_auxiliaryVariableList.remove(m_auxiliaryVariableList.size()-1);
+            if (!m_conjunction.m_activeVariables.contains(reachedVariable)) {
+                m_conjunction.m_activeVariables.add(reachedVariable);
+                // Concrete root nodes are assigned a particular value, so they act as "breakers" in the conjunction:
+                // the nodes that are unequal to them can be analyzed independently.
+                if (reachedVariable.m_node.getNodeType()!=NodeType.ROOT_CONSTANT_NODE) {
+                    // Look for all inequalities where reachedNode occurs in the first position.
+                    m_inequality01Retrieval.getBindingsBuffer()[0]=Inequality.INSTANCE;
+                    m_inequality01Retrieval.getBindingsBuffer()[1]=reachedVariable.m_node;
+                    m_inequality01Retrieval.open();
+                    Object[] tupleBuffer=m_inequality01Retrieval.getTupleBuffer();
+                    while (!m_extensionManager.containsClash() && !m_inequality01Retrieval.afterLast()) {
+                        Node newNode=(Node)tupleBuffer[2];
+                        DVariable newVariable=getAndInitializeVariableFor(newNode,m_newVariableAdded);
+                        m_auxiliaryVariableList.add(newVariable);
+                        m_conjunction.addInequality(reachedVariable,newVariable);
+                        m_inequality01Retrieval.next();
+                        m_interruptFlag.checkInterrupt();
+                    }
+                    // Look for all inequalities where reachedNode occurs in the second position.
+                    m_inequality02Retrieval.getBindingsBuffer()[0]=Inequality.INSTANCE;
+                    m_inequality02Retrieval.getBindingsBuffer()[2]=reachedVariable.m_node;
+                    m_inequality02Retrieval.open();
+                    tupleBuffer=m_inequality02Retrieval.getTupleBuffer();
+                    while (!m_extensionManager.containsClash() && !m_inequality02Retrieval.afterLast()) {
+                        Node newNode=(Node)tupleBuffer[1];
+                        DVariable newVariable=getAndInitializeVariableFor(newNode,m_newVariableAdded);
+                        m_auxiliaryVariableList.add(newVariable);
+                        m_conjunction.addInequality(newVariable,reachedVariable);
+                        m_inequality02Retrieval.next();
+                        m_interruptFlag.checkInterrupt();
+                    }
                 }
             }
         }
     }
-    protected void loadDataRanges() {
-        for (int index=m_conjunction.m_activeVariables.size()-1;index>=0;--index) {
-            DVariable variable=m_conjunction.m_activeVariables.get(index);
+    protected DVariable getAndInitializeVariableFor(Node node,boolean[] newVariableAdded) {
+        DVariable variable=m_conjunction.getVariableForEx(node,newVariableAdded);
+        if (m_newVariableAdded[0]) {
             m_assertions1Retrieval.getBindingsBuffer()[1]=variable.m_node;
             m_assertions1Retrieval.open();
             Object[] tupleBuffer=m_assertions1Retrieval.getTupleBuffer();
-            while (!m_assertions1Retrieval.afterLast()) {
+            while (!m_extensionManager.containsClash() && !m_assertions1Retrieval.afterLast()) {
                 Object potentialDataRange=tupleBuffer[0];
                 if (potentialDataRange instanceof DataRange)
                     addDataRange(variable,(DataRange)potentialDataRange);
                 m_assertions1Retrieval.next();
                 m_interruptFlag.checkInterrupt();
             }
+            if (!m_extensionManager.containsClash())
+                normalize(variable);
         }
+        return variable;
     }
     public void addDataRange(DVariable variable,DataRange dataRange) {
         if (dataRange instanceof DatatypeRestriction) {
@@ -248,29 +237,21 @@ public final class DatatypeManager implements Serializable {
             throw new IllegalStateException("Internal error: invalid data range.");
     }
     protected void checkConjunctionSatisfiability() {
-        if (!m_extensionManager.containsClash()) {
+        if (!m_extensionManager.containsClash() && !m_conjunction.m_activeVariables.isEmpty()) {
             if (m_tableauMonitor!=null)
                 m_tableauMonitor.datatypeConjunctionCheckingStarted(m_conjunction);
             if (m_conjunction.isSymmetricClique()) {
                 DVariable representative=m_conjunction.m_activeVariables.get(0);
-                normalize(representative);
-                if (!representative.hasCardinalityAtLeast(m_conjunction.m_activeVariables.size()))
+                if (!m_extensionManager.containsClash() && !representative.hasCardinalityAtLeast(m_conjunction.m_activeVariables.size()))
                     setClashFor(m_conjunction.m_activeVariables);
             }
-            else {
-                List<DVariable> activeVariables=m_conjunction.m_activeVariables;
-                for (int index=activeVariables.size()-1;!m_extensionManager.containsClash() && index>=0;--index) {
-                    DVariable variable=activeVariables.get(index);
-                    normalize(variable);
-                }
+            else if (!m_extensionManager.containsClash()) {
+                eliminateTrivialInequalities();
+                eliminateTriviallySatisfiableNodes();
+                enumerateValueSpaceSubsets();
                 if (!m_extensionManager.containsClash()) {
-                    eliminateTrivialInequalities();
                     eliminateTriviallySatisfiableNodes();
-                    enumerateValueSpaceSubsets();
-                    if (!m_extensionManager.containsClash()) {
-                        eliminateTriviallySatisfiableNodes();
-                        checkAssignments();
-                    }
+                    checkAssignments();
                 }
             }
             if (m_tableauMonitor!=null)
@@ -379,8 +360,7 @@ public final class DatatypeManager implements Serializable {
                     if (!m_auxiliaryVariableList.contains(neighborVariable))
                         m_auxiliaryVariableList.add(neighborVariable);
                 }
-                variable.m_unequalTo.clear();
-                variable.m_unequalToDirect.clear();
+                variable.clearEqualities();
                 m_conjunction.m_activeVariables.remove(variable);
             }
         }
@@ -510,6 +490,8 @@ public final class DatatypeManager implements Serializable {
             m_numberOfEntries=0;
         }
         protected void clearActiveVariables() {
+            for (int index=m_activeVariables.size()-1;index>=0;--index)
+                m_activeVariables.get(index).clearEqualities();
             m_activeVariables.clear();
         }
         public List<DVariable> getActiveVariables() {
@@ -525,7 +507,7 @@ public final class DatatypeManager implements Serializable {
             }
             return null;
         }
-        protected DVariable activateVariable(Node node,boolean[] newVariableAdded) {
+        protected DVariable getVariableForEx(Node node,boolean[] newVariableAdded) {
             int index=getIndexFor(node.hashCode(),m_buckets.length);
             DVariable entry=m_buckets[index];
             while (entry!=null) {
@@ -548,7 +530,6 @@ public final class DatatypeManager implements Serializable {
                 resize(m_buckets.length*2);
             newVariableAdded[0]=true;
             m_usedVariables.add(newVariable);
-            m_activeVariables.add(newVariable);
             return newVariable;
         }
         protected void resize(int newCapacity) {
@@ -658,6 +639,10 @@ public final class DatatypeManager implements Serializable {
             m_nextEntry=null;
             m_valueSpaceSubset=null;
             m_dataValue=null;
+        }
+        protected void clearEqualities() {
+            m_unequalTo.clear();
+            m_unequalToDirect.clear();
         }
         protected void addForbiddenDataValue(Object forbiddenDataValue) {
             if (!m_forbiddenDataValues.contains(forbiddenDataValue))
