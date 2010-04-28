@@ -265,7 +265,7 @@
         <input message="Enter ${username}'s password on edison: " addproperty="password"/>
         <sshexec host="edison.comlab.ox.ac.uk" username="${username}" password="${password}" command="mkdir /data/hermit/download/${version}/" trust="yes"/>
         <scp file="${builddir}/${ant.project.name}-${version}.zip" localTofile="${ant.project.name}.zip" todir="${username}:${password}@edison.comlab.ox.ac.uk:/data/hermit/download/${version}/" trust="yes"/>
-    	<scp file="${releasedir}/org.semanticweb.${ant.project.name}-${version}.jar" todir="${username}:${password}@edison.comlab.ox.ac.uk:/data/hermit/download/${version}/" trust="yes"/>
+    	<scp file="${releasedir}/org.semanticweb.${ant.project.name}.jar" todir="${username}:${password}@edison.comlab.ox.ac.uk:/data/hermit/download/${version}/" trust="yes"/>
     	<scp file="${releasedir}/readme.txt" todir="${username}:${password}@edison.comlab.ox.ac.uk:/data/hermit/download/${version}/" trust="yes"/>
         <scp file="${builddir}/${updatefile}" todir="${username}:${password}@edison.comlab.ox.ac.uk:/data/hermit/" trust="yes"/>
         <sshexec host="edison.comlab.ox.ac.uk" username="${username}" password="${password}" command="rm /data/hermit/download/current/HermiT.zip" trust="yes"/>
