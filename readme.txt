@@ -72,4 +72,11 @@ HermiT 1.2.2
 - minor bug fixes (complex concept queries didn't work properly in the 
   presence of role chains and transitivity), added a progress monitor for realisation
   that is used by Protege
-  
+HermiT 1.2.3
+- several bug fixes (getDisjointObjectProperties(...) and 
+  getDisjointDataProperties(...) we not terminating, a null pointer exception in 
+  getDataPropertyValues(), language tags were case sensitive, ontology change listener 
+  was not removed on dispose), new concept classification algorithm for 
+  non-deterministic ontologies, new object property classification, HermiT will now 
+  always track changes even when not instantiated as an OWLReasoner, Protege reasoner 
+  preferences will be taken into account for the next Protege release   
