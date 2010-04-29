@@ -18,6 +18,7 @@
 package org.semanticweb.HermiT.monitor;
 
 import org.semanticweb.HermiT.model.AnnotatedEquality;
+import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
@@ -70,6 +71,8 @@ public interface TableauMonitor {
     void descriptionGraphCheckingFinished(int graphIndex1,int tupleIndex1,int position1,int graphIndex2,int tupleIndex2,int position2);
     void nodeCreated(Node node);
     void nodeDestroyed(Node node);
+    void unknownDatatypeRestrictionDetectionStarted(DataRange dataRange1,Node node1,DataRange dataRange2,Node node2);
+    void unknownDatatypeRestrictionDetectionFinished(DataRange dataRange1,Node node1,DataRange dataRange2,Node node2);
     void datatypeCheckingStarted();
     void datatypeCheckingFinished(boolean result);
     void datatypeConjunctionCheckingStarted(DatatypeManager.DConjunction conjunction);

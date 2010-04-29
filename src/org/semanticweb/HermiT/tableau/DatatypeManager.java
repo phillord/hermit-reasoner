@@ -23,10 +23,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.datatypes.DatatypeRegistry;
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
+import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.DataValueEnumeration;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
@@ -44,11 +46,14 @@ public final class DatatypeManager implements Serializable {
     protected final ExtensionTable.Retrieval m_inequalityDeltaOldRetrieval;
     protected final ExtensionTable.Retrieval m_inequality01Retrieval;
     protected final ExtensionTable.Retrieval m_inequality02Retrieval;
+    protected final ExtensionTable.Retrieval m_assertions0Retrieval;
     protected final ExtensionTable.Retrieval m_assertions1Retrieval;
     protected final DConjunction m_conjunction;
     protected final List<DVariable> m_auxiliaryVariableList;
     protected final UnionDependencySet m_unionDependencySet;
     protected final boolean[] m_newVariableAdded;
+    protected final Set<DatatypeRestriction> m_unknownDatatypeRestrictionsPermanent;
+    protected Set<DatatypeRestriction> m_unknownDatatypeRestrictionsAdditional;
 
     public DatatypeManager(Tableau tableau) {
         m_interruptFlag=tableau.m_interruptFlag;
@@ -64,23 +69,72 @@ public final class DatatypeManager implements Serializable {
         m_inequalityDeltaOldRetrieval=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { false,false,false },ExtensionTable.View.DELTA_OLD);
         m_inequality01Retrieval=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,true,false },ExtensionTable.View.EXTENSION_THIS);
         m_inequality02Retrieval=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,false,true },ExtensionTable.View.EXTENSION_THIS);
+        m_assertions0Retrieval=m_extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { true,false },ExtensionTable.View.EXTENSION_THIS);
         m_assertions1Retrieval=m_extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.EXTENSION_THIS);
         m_conjunction=new DConjunction();
         m_auxiliaryVariableList=new ArrayList<DVariable>();
         m_unionDependencySet=new UnionDependencySet(16);
         m_newVariableAdded=new boolean[1];
+        m_unknownDatatypeRestrictionsPermanent=tableau.m_permanentDLOntology.getAllUnknownDatatypeRestrictions();
+    }
+    public void additionalDLOntologySet(DLOntology additionalDLOntology) {
+        m_unknownDatatypeRestrictionsAdditional=additionalDLOntology.getAllUnknownDatatypeRestrictions();
+    }
+    public void additionalDLOntologyCleared() {
+        m_unknownDatatypeRestrictionsAdditional=null;
     }
     public void clear() {
         m_assertionsDeltaOldRetrieval.clear();
         m_inequalityDeltaOldRetrieval.clear();
         m_inequality01Retrieval.clear();
         m_inequality02Retrieval.clear();
+        m_assertions0Retrieval.clear();
         m_assertions1Retrieval.clear();
         m_conjunction.clear();
         m_auxiliaryVariableList.clear();
         m_unionDependencySet.clearConstituents();
     }
-    public boolean checkDatatypeConstraints() {
+    public void applyUnknownDatatypeRestrctionSemantics() {
+        Object[] tupleBuffer=m_assertionsDeltaOldRetrieval.getTupleBuffer();
+        m_assertionsDeltaOldRetrieval.open();
+        while (!m_extensionManager.containsClash() && !m_assertionsDeltaOldRetrieval.afterLast()) {
+            Object dataRangeObject=tupleBuffer[0];
+            if (dataRangeObject instanceof DatatypeRestriction) {
+                DatatypeRestriction datatypeRestriction=(DatatypeRestriction)dataRangeObject;
+                if (m_unknownDatatypeRestrictionsPermanent.contains(datatypeRestriction) || (m_unknownDatatypeRestrictionsAdditional!=null && m_unknownDatatypeRestrictionsAdditional.contains(datatypeRestriction)))
+                    generateInequalitiesFor(datatypeRestriction,(Node)tupleBuffer[1],m_assertionsDeltaOldRetrieval.getDependencySet(),NegationDataRange.create(datatypeRestriction));
+            }
+            else if (dataRangeObject instanceof NegationDataRange) {
+                NegationDataRange negationDataRange=(NegationDataRange)dataRangeObject;
+                DataRange negatedDataRange=negationDataRange.getNegatedDataRange();
+                if (negatedDataRange instanceof DatatypeRestriction) {
+                    DatatypeRestriction datatypeRestriction=(DatatypeRestriction)negatedDataRange;
+                    if (m_unknownDatatypeRestrictionsPermanent.contains(datatypeRestriction) || (m_unknownDatatypeRestrictionsAdditional!=null && m_unknownDatatypeRestrictionsAdditional.contains(datatypeRestriction)))
+                        generateInequalitiesFor(negationDataRange,(Node)tupleBuffer[1],m_assertionsDeltaOldRetrieval.getDependencySet(),datatypeRestriction);
+                }
+            }
+            m_assertionsDeltaOldRetrieval.next();
+        }
+    }
+    protected void generateInequalitiesFor(DataRange dataRange1,Node node1,DependencySet dependencySet1,DataRange dataRange2) {
+        m_unionDependencySet.clearConstituents();
+        m_unionDependencySet.addConstituent(dependencySet1);
+        m_unionDependencySet.addConstituent(null);
+        m_assertions0Retrieval.getBindingsBuffer()[0]=dataRange2;
+        Object[] tupleBuffer=m_assertions0Retrieval.getTupleBuffer();
+        m_assertions0Retrieval.open();
+        while (!m_assertions0Retrieval.afterLast()) {
+            Node node2=(Node)tupleBuffer[1];
+            m_unionDependencySet.m_dependencySets[1]=m_assertions0Retrieval.getDependencySet();
+            if (m_tableauMonitor!=null)
+                m_tableauMonitor.unknownDatatypeRestrictionDetectionStarted(dataRange1,node1,dataRange2,node2);
+            m_extensionManager.addAssertion(Inequality.INSTANCE,node1,node2,m_unionDependencySet,false);
+            if (m_tableauMonitor!=null)
+                m_tableauMonitor.unknownDatatypeRestrictionDetectionFinished(dataRange1,node1,dataRange2,node2);
+            m_assertions0Retrieval.next();
+        }
+    }
+    public void checkDatatypeConstraints() {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.datatypeCheckingStarted();
         m_conjunction.clear();
@@ -131,7 +185,6 @@ public final class DatatypeManager implements Serializable {
         m_unionDependencySet.clearConstituents();
         m_conjunction.clear();
         m_auxiliaryVariableList.clear();
-        return true;
     }
     protected void loadConjunctionFrom(DVariable startVariable) {
         m_auxiliaryVariableList.clear();
@@ -191,39 +244,44 @@ public final class DatatypeManager implements Serializable {
         }
         return variable;
     }
-    public void addDataRange(DVariable variable,DataRange dataRange) {
+    protected void addDataRange(DVariable variable,DataRange dataRange) {
         if (dataRange instanceof DatatypeRestriction) {
             DatatypeRestriction datatypeRestriction=(DatatypeRestriction)dataRange;
-            variable.m_positiveDatatypeRestrictions.add(datatypeRestriction);
-            if (variable.m_mostSpecificRestriction==null)
-                variable.m_mostSpecificRestriction=datatypeRestriction;
-            else if (DatatypeRegistry.isDisjointWith(variable.m_mostSpecificRestriction.getDatatypeURI(),datatypeRestriction.getDatatypeURI())) {
-                m_unionDependencySet.clearConstituents();
-                m_unionDependencySet.addConstituent(m_extensionManager.getAssertionDependencySet(variable.m_mostSpecificRestriction,variable.m_node));
-                m_unionDependencySet.addConstituent(m_extensionManager.getAssertionDependencySet(datatypeRestriction,variable.m_node));
-                Object[] tuple1;
-                Object[] tuple2;
-                if (m_tableauMonitor!=null) {
-                    tuple1=new Object[] { variable.m_mostSpecificRestriction,variable.m_node };
-                    tuple2=new Object[] { datatypeRestriction,variable.m_node };
-                    m_tableauMonitor.clashDetectionStarted(tuple1,tuple2);
+            if (!m_unknownDatatypeRestrictionsPermanent.contains(datatypeRestriction) && (m_unknownDatatypeRestrictionsAdditional==null || !m_unknownDatatypeRestrictionsAdditional.contains(datatypeRestriction))) {
+                variable.m_positiveDatatypeRestrictions.add(datatypeRestriction);
+                if (variable.m_mostSpecificRestriction==null)
+                    variable.m_mostSpecificRestriction=datatypeRestriction;
+                else if (DatatypeRegistry.isDisjointWith(variable.m_mostSpecificRestriction.getDatatypeURI(),datatypeRestriction.getDatatypeURI())) {
+                    m_unionDependencySet.clearConstituents();
+                    m_unionDependencySet.addConstituent(m_extensionManager.getAssertionDependencySet(variable.m_mostSpecificRestriction,variable.m_node));
+                    m_unionDependencySet.addConstituent(m_extensionManager.getAssertionDependencySet(datatypeRestriction,variable.m_node));
+                    Object[] tuple1;
+                    Object[] tuple2;
+                    if (m_tableauMonitor!=null) {
+                        tuple1=new Object[] { variable.m_mostSpecificRestriction,variable.m_node };
+                        tuple2=new Object[] { datatypeRestriction,variable.m_node };
+                        m_tableauMonitor.clashDetectionStarted(tuple1,tuple2);
+                    }
+                    m_extensionManager.setClash(m_unionDependencySet);
+                    if (m_tableauMonitor!=null) {
+                        tuple1=new Object[] { variable.m_mostSpecificRestriction,variable.m_node };
+                        tuple2=new Object[] { datatypeRestriction,variable.m_node };
+                        m_tableauMonitor.clashDetectionFinished(tuple1,tuple2);
+                    }
                 }
-                m_extensionManager.setClash(m_unionDependencySet);
-                if (m_tableauMonitor!=null) {
-                    tuple1=new Object[] { variable.m_mostSpecificRestriction,variable.m_node };
-                    tuple2=new Object[] { datatypeRestriction,variable.m_node };
-                    m_tableauMonitor.clashDetectionFinished(tuple1,tuple2);
-                }
+                else if (DatatypeRegistry.isSubsetOf(datatypeRestriction.getDatatypeURI(),variable.m_mostSpecificRestriction.getDatatypeURI()))
+                    variable.m_mostSpecificRestriction=datatypeRestriction;
             }
-            else if (DatatypeRegistry.isSubsetOf(datatypeRestriction.getDatatypeURI(),variable.m_mostSpecificRestriction.getDatatypeURI()))
-                variable.m_mostSpecificRestriction=datatypeRestriction;
         }
         else if (dataRange instanceof DataValueEnumeration)
             variable.m_positiveDataValueEnumerations.add((DataValueEnumeration)dataRange);
         else if (dataRange instanceof NegationDataRange) {
             DataRange negatedDataRange=((NegationDataRange)dataRange).getNegatedDataRange();
-            if (negatedDataRange instanceof DatatypeRestriction)
-                variable.m_negativeDatatypeRestrictions.add((DatatypeRestriction)negatedDataRange);
+            if (negatedDataRange instanceof DatatypeRestriction) {
+                DatatypeRestriction datatypeRestriction=(DatatypeRestriction)negatedDataRange;
+                if (!m_unknownDatatypeRestrictionsPermanent.contains(datatypeRestriction) && (m_unknownDatatypeRestrictionsAdditional==null || !m_unknownDatatypeRestrictionsAdditional.contains(datatypeRestriction)))
+                    variable.m_negativeDatatypeRestrictions.add(datatypeRestriction);
+            }
             else if (negatedDataRange instanceof DataValueEnumeration) {
                 DataValueEnumeration negatedDataValueEnumeration=(DataValueEnumeration)negatedDataRange;
                 variable.m_negativeDataValueEnumerations.add(negatedDataValueEnumeration);

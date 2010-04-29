@@ -28,6 +28,7 @@ import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLPredicate;
+import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.DataValueEnumeration;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
 import org.semanticweb.HermiT.model.Equality;
@@ -143,6 +144,14 @@ public class DerivationHistory extends TableauMonitorAdapter {
         m_derivations.push(new GraphChecking(graph1,position1,graph2,position2));
     }
     public void descriptionGraphCheckingFinished(int graphIndex1,int tupleIndex1,int position1,int graphIndex2,int tupleIndex2,int position2) {
+        m_derivations.pop();
+    }
+    public void unknownDatatypeRestrictionDetectionStarted(DataRange dataRange1,Node node1,DataRange dataRange2,Node node2) {
+        Atom atom1=getAtom(new Object[] { dataRange1,node1 });
+        Atom atom2=getAtom(new Object[] { dataRange2,node2 });
+        m_derivations.push(new UnknownDatatypeRestrictionDetection(new Atom[] { atom1,atom2 }));
+    }
+    public void unknownDatatypeRestrictionDetectionFinished(DataRange dataRange1,Node node1, DataRange dataRange2,Node node2) {
         m_derivations.pop();
     }
     public void datatypeConjunctionCheckingStarted(DatatypeManager.DConjunction conjunction) {
@@ -511,6 +520,24 @@ public class DerivationHistory extends TableauMonitorAdapter {
         }
         public String toString(Prefixes prefixes) {
             return "   << DATATYPES";
+        }
+    }
+
+    public static class UnknownDatatypeRestrictionDetection extends Derivation {
+        private static final long serialVersionUID=-7824360133765453948L;
+        protected final Atom[] m_causes;
+
+        public UnknownDatatypeRestrictionDetection(Atom[] causes) {
+            m_causes=causes;
+        }
+        public int getNumberOfPremises() {
+            return m_causes.length;
+        }
+        public Fact getPremise(int premiseIndex) {
+            return m_causes[premiseIndex];
+        }
+        public String toString(Prefixes prefixes) {
+            return "   << UNKNOWN DATATYPE";
         }
     }
 

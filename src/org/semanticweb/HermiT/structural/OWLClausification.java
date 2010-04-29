@@ -155,6 +155,7 @@ public class OWLClausification {
         Set<DLClause> dlClauses=new LinkedHashSet<DLClause>();
         Set<Atom> positiveFacts=new HashSet<Atom>();
         Set<Atom> negativeFacts=new HashSet<Atom>();
+        Set<DatatypeRestriction> allUnknownDatatypeRestrictions=new HashSet<DatatypeRestriction>();
         for (OWLObjectPropertyExpression[] inclusion : axioms.m_simpleObjectPropertyInclusions) {
             OWLObjectPropertyExpression sub=inclusion[0];
             OWLObjectPropertyExpression sup=inclusion[1];
@@ -219,21 +220,12 @@ public class OWLClausification {
             Atom roleAtom=getRoleAtom(dataPropertyExpression,X,Y);
             dlClauses.add(DLClause.create(new Atom[] {},new Atom[] { roleAtom },ClauseType.OTHER).getSafeVersion());
         }
-        DataRangeConverter dataRangeConverter=new DataRangeConverter(m_configuration.warningMonitor,axioms.m_definedDatatypesIRIs,m_configuration.ignoreUnsupportedDatatypes);
+        DataRangeConverter dataRangeConverter=new DataRangeConverter(m_configuration.warningMonitor,axioms.m_definedDatatypesIRIs,allUnknownDatatypeRestrictions,m_configuration.ignoreUnsupportedDatatypes);
         NormalizedAxiomClausifier clausifier=new NormalizedAxiomClausifier(dataRangeConverter,positiveFacts,factory,axioms.m_dps2ranges);
-        Set<AtomicConcept> easyClashes=new HashSet<AtomicConcept>();
         for (OWLClassExpression[] inclusion : axioms.m_conceptInclusions) {
             for (OWLClassExpression description : inclusion)
                 description.accept(clausifier);
             DLClause dlClause=clausifier.getDLClause();
-            if (dlClause.getHeadLength()==0) {
-                // allow for checking for easy inconsistency
-                if (dlClause.getBodyLength()==1) {
-                    Atom at=dlClause.getBodyAtom(0);
-                    if (at.getArity()==1 && at.getDLPredicate() instanceof AtomicConcept)
-                        easyClashes.add((AtomicConcept)at.getDLPredicate());
-                }
-            }
             dlClauses.add(dlClause.getSafeVersion());
         }
         NormalizedDataRangeAxiomClausifier normalizedDataTangeAxiomClausifier=new NormalizedDataRangeAxiomClausifier(dataRangeConverter,factory,axioms.m_definedDatatypesIRIs);
@@ -245,17 +237,9 @@ public class OWLClausification {
         }
         for (OWLHasKeyAxiom hasKey : axioms.m_hasKeys)
             dlClauses.add(clausifyKey(hasKey).getSafeVersion());
-        FactClausifier factClausifier=new FactClausifier(dataRangeConverter,positiveFacts,negativeFacts,easyClashes);
+        FactClausifier factClausifier=new FactClausifier(dataRangeConverter,positiveFacts,negativeFacts);
         for (OWLIndividualAxiom fact : axioms.m_facts)
             fact.accept(factClausifier);
-        if (factClausifier.isInconsistent) {
-            dlClauses.clear();
-            positiveFacts.clear();
-            negativeFacts.clear();
-            DLClause cl=DLClause.create(new Atom[0],new Atom[0],ClauseType.CONCEPT_INCLUSION);
-            dlClauses.add(cl.getSafeVersion());
-            return new DLOntology(ontologyIRI,dlClauses,positiveFacts,negativeFacts,null,null,null,null,null,null,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes);
-        }
         for (DescriptionGraph descriptionGraph : descriptionGraphs)
             descriptionGraph.produceStartDLClauses(dlClauses);
         Set<AtomicConcept> atomicConcepts=new HashSet<AtomicConcept>();
@@ -318,7 +302,7 @@ public class OWLClausification {
             }
         }
         // Create the DL ontology
-        return new DLOntology(ontologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,atomicObjectRoles,complexObjectRoles,atomicDataRoles,axioms.m_definedDatatypesIRIs,individuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes);
+        return new DLOntology(ontologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,atomicObjectRoles,complexObjectRoles,atomicDataRoles,allUnknownDatatypeRestrictions,axioms.m_definedDatatypesIRIs,individuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes);
     }
     protected DLClause clausifyKey(OWLHasKeyAxiom object) {
         List<Atom> headAtoms=new ArrayList<Atom>();
@@ -881,11 +865,13 @@ public class OWLClausification {
         protected final Configuration.WarningMonitor m_warningMonitor;
         protected final boolean m_ignoreUnsupportedDatatypes;
         protected final Set<String> m_definedDatatypeIRIs; // contains custom datatypes from DatatypeDefinition axioms
+        protected final Set<DatatypeRestriction> m_allUnknownDatatypeRestrictions;
 
-        public DataRangeConverter(Configuration.WarningMonitor warningMonitor,Set<String> definedDatatypeIRIs,boolean ignoreUnsupportedDatatypes) {
+        public DataRangeConverter(Configuration.WarningMonitor warningMonitor,Set<String> definedDatatypeIRIs,Set<DatatypeRestriction> allUnknownDatatypeRestrictions,boolean ignoreUnsupportedDatatypes) {
             m_warningMonitor=warningMonitor;
             m_definedDatatypeIRIs=definedDatatypeIRIs;
             m_ignoreUnsupportedDatatypes=ignoreUnsupportedDatatypes;
+            m_allUnknownDatatypeRestrictions=allUnknownDatatypeRestrictions;
         }
         public LiteralConcept convertDataRange(OWLDataRange dataRange) {
             return (LiteralConcept)dataRange.accept(this);
@@ -894,20 +880,26 @@ public class OWLClausification {
             String datatypeURI=object.getIRI().toString();
             if (DatatypeRestriction.RDFS_LITERAL.getDatatypeURI().equals(datatypeURI))
                 return DatatypeRestriction.RDFS_LITERAL;
-            if (Prefixes.isInternalIRI(datatypeURI) || m_definedDatatypeIRIs.contains(object.getIRI().toString()))
+            if (datatypeURI.startsWith("internal:defdata#") || m_definedDatatypeIRIs.contains(object.getIRI().toString()))
                 return AtomicConcept.create(datatypeURI);
             DatatypeRestriction datatype=DatatypeRestriction.create(datatypeURI,DatatypeRestriction.NO_FACET_URIs,DatatypeRestriction.NO_FACET_VALUES);
-            try {
-                DatatypeRegistry.validateDatatypeRestriction(datatype);
-                return datatype;
+            if (datatypeURI.startsWith("internal:unknown-datatype#"))
+                m_allUnknownDatatypeRestrictions.add(datatype);
+            else {
+                try {
+                    DatatypeRegistry.validateDatatypeRestriction(datatype);
+                }
+                catch (UnsupportedDatatypeException e) {
+                    if (m_ignoreUnsupportedDatatypes) {
+                        if (m_warningMonitor!=null)
+                            m_warningMonitor.warning("Ignoring unsupported datatype '"+object.getIRI().toString()+"'.");
+                        m_allUnknownDatatypeRestrictions.add(datatype);
+                    }
+                    else
+                        throw e;
+                }
             }
-            catch (UnsupportedDatatypeException e) {
-                if (m_ignoreUnsupportedDatatypes) {
-                    if (m_warningMonitor!=null)
-                        m_warningMonitor.warning("Ignoring unsupported datatype '"+object.getIRI().toString()+"'.");
-                    return AtomicConcept.create(object.getIRI().toString());
-                } else throw e;
-            }
+            return datatype;
         }
         public Object visit(OWLDataComplementOf object) {
             return convertDataRange(object.getDataRange()).getNegation();
@@ -981,14 +973,11 @@ public class OWLClausification {
         protected final DataRangeConverter m_dataRangeConverter;
         protected final Set<Atom> m_positiveFacts;
         protected final Set<Atom> m_negativeFacts;
-        protected final Set<AtomicConcept> m_easyClashes;
-        public boolean isInconsistent=false;
 
-        public FactClausifier(DataRangeConverter dataRangeConverter,Set<Atom> positiveFacts,Set<Atom> negativeFacts,Set<AtomicConcept> easyClashes) {
+        public FactClausifier(DataRangeConverter dataRangeConverter,Set<Atom> positiveFacts,Set<Atom> negativeFacts) {
             m_dataRangeConverter=dataRangeConverter;
             m_positiveFacts=positiveFacts;
             m_negativeFacts=negativeFacts;
-            m_easyClashes=easyClashes;
         }
         public void visit(OWLSameIndividualAxiom object) {
             OWLIndividual[] individuals=new OWLIndividual[object.getIndividuals().size()];
@@ -1007,9 +996,6 @@ public class OWLClausification {
             OWLClassExpression description=object.getClassExpression();
             if (description instanceof OWLClass) {
                 AtomicConcept atomicConcept=AtomicConcept.create(((OWLClass)description).getIRI().toString());
-                if (m_easyClashes.contains(atomicConcept)) {
-                    isInconsistent=true;
-                }
                 m_positiveFacts.add(Atom.create(atomicConcept,getIndividual(object.getIndividual())));
             }
             else if (description instanceof OWLObjectComplementOf && ((OWLObjectComplementOf)description).getOperand() instanceof OWLClass) {

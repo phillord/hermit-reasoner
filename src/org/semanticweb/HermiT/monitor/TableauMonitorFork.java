@@ -20,6 +20,7 @@ package org.semanticweb.HermiT.monitor;
 import java.io.Serializable;
 
 import org.semanticweb.HermiT.model.AnnotatedEquality;
+import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
@@ -206,6 +207,14 @@ public class TableauMonitorFork implements TableauMonitor,Serializable  {
     public void nodeDestroyed(Node node) {
         m_first.nodeDestroyed(node);
         m_second.nodeDestroyed(node);
+    }
+    public void unknownDatatypeRestrictionDetectionStarted(DataRange dataRange1,Node node1,DataRange dataRange2,Node node2) {
+        m_first.unknownDatatypeRestrictionDetectionStarted(dataRange1,node1,dataRange2,node2);
+        m_second.unknownDatatypeRestrictionDetectionStarted(dataRange1,node1,dataRange2,node2);
+    }
+    public void unknownDatatypeRestrictionDetectionFinished(DataRange dataRange1,Node node1, DataRange dataRange2,Node node2) {
+        m_first.unknownDatatypeRestrictionDetectionFinished(dataRange1,node1,dataRange2,node2);
+        m_second.unknownDatatypeRestrictionDetectionFinished(dataRange1,node1,dataRange2,node2);
     }
     public void datatypeCheckingStarted() {
         m_first.datatypeCheckingStarted();

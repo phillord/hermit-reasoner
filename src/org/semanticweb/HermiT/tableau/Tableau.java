@@ -81,6 +81,7 @@ public final class Tableau implements Serializable {
     protected boolean m_needsThingExtension;
     protected boolean m_needsNamedExtension;
     protected boolean m_checkDatatypes;
+    protected boolean m_checkUnknownDatatypeRestrictions;
     protected int m_allocatedNodes;
     protected int m_numberOfNodesInTableau;
     protected int m_numberOfMergedOrPrunedNodes;
@@ -226,26 +227,29 @@ public final class Tableau implements Serializable {
         m_additionalDLOntology=additionalDLOntology;
         m_additionalHyperresolutionManager=new HyperresolutionManager(this,m_additionalDLOntology.getDLClauses());
         m_existentialExpansionStrategy.additionalDLOntologySet(m_additionalDLOntology);
+        m_datatypeManager.additionalDLOntologySet(m_additionalDLOntology);
         updateFlagsDependentOnAdditionalOntology();
     }
     public void clearAdditionalDLOntology() {
         m_additionalDLOntology=null;
         m_additionalHyperresolutionManager=null;
         m_existentialExpansionStrategy.additionalDLOntologyCleared();
-        m_needsThingExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING);
-        m_needsNamedExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.INTERNAL_NAMED);
+        m_datatypeManager.additionalDLOntologyCleared();
         updateFlagsDependentOnAdditionalOntology();
     }
     protected void updateFlagsDependentOnAdditionalOntology() {
         m_needsThingExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING);
         m_needsNamedExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.INTERNAL_NAMED);
         m_checkDatatypes=m_permanentDLOntology.hasDatatypes();
+        m_checkUnknownDatatypeRestrictions=m_permanentDLOntology.hasUnknownDatatypeRestrictions();
         if (m_additionalHyperresolutionManager!=null) {
             m_needsThingExtension|=m_additionalHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING);
             m_needsNamedExtension|=m_additionalHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.INTERNAL_NAMED);
         }
-        if (m_additionalDLOntology!=null)
+        if (m_additionalDLOntology!=null) {
             m_checkDatatypes|=m_additionalDLOntology.hasDatatypes();
+            m_checkUnknownDatatypeRestrictions|=m_additionalDLOntology.hasUnknownDatatypeRestrictions();
+        }
     }
     public boolean isSatisfiable(boolean loadAdditionalABox,Set<Atom> perTestPositiveFactsNoDependency,Set<Atom> perTestNegativeFactsNoDependency,Set<Atom> perTestPositiveFactsDummyDependency,Set<Atom> perTestNegativeFactsDummyDependency,Map<Individual,Node> nodesForIndividuals,ReasoningTaskDescription reasoningTaskDescription) {
         boolean loadPermanentABox=m_permanentDLOntology.hasNominals() || (m_additionalDLOntology!=null && m_additionalDLOntology.hasNominals());
@@ -404,6 +408,8 @@ public final class Tableau implements Serializable {
                     m_permanentHyperresolutionManager.applyDLClauses();
                 if (m_additionalHyperresolutionManager!=null && !m_extensionManager.containsClash())
                     m_additionalHyperresolutionManager.applyDLClauses();
+                if (m_checkUnknownDatatypeRestrictions && !m_extensionManager.containsClash())
+                    m_datatypeManager.applyUnknownDatatypeRestrctionSemantics();
                 if (m_checkDatatypes && !m_extensionManager.containsClash())
                     m_datatypeManager.checkDatatypeConstraints();
                 if (!m_extensionManager.containsClash())

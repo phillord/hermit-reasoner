@@ -127,7 +127,7 @@ public abstract class AbstractReasonerInternalsTest extends AbstractReasonerTest
         }
         assertContainsAll(actual,expected);
     }
-    
+
     protected static DLOntology getTestDLOntology(Set<DLClause> dlClauses) {
         Set<Atom> atoms=Collections.emptySet();
         return new DLOntology(
@@ -139,12 +139,13 @@ public abstract class AbstractReasonerInternalsTest extends AbstractReasonerTest
                 null, // object roles
                 null, // complex role inclusions
                 null, // data roles
+                null, // unknown datatype restrictions
                 null, // custom datatype definitions
                 null, // individuals
                 true, // hasInverseRoles
                 false, // hasAtMostRestrictions
                 false, // hasNominals
                 false // hasDatatypes
-            ); 
+            );
     }
 }

@@ -64,6 +64,7 @@ public class DLOntology implements Serializable {
     protected final Set<AtomicRole> m_allAtomicObjectRoles;
     protected final Set<Role> m_allComplexObjectRoles;
     protected final Set<AtomicRole> m_allAtomicDataRoles;
+    protected final Set<DatatypeRestriction> m_allUnknownDatatypeRestrictions;
     protected final Set<String> m_definedDatatypeIRIs;
     protected final Set<Individual> m_allIndividuals;
     protected final Set<DescriptionGraph> m_allDescriptionGraphs;
@@ -71,7 +72,7 @@ public class DLOntology implements Serializable {
 
     public DLOntology(String ontologyIRI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts, Set<AtomicConcept> atomicConcepts,
             Set<AtomicRole> atomicObjectRoles,Set<Role> allComplexObjectRoles,Set<AtomicRole> atomicDataRoles,
-            Set<String> definedDatatypeIRIs,Set<Individual> individuals,
+            Set<DatatypeRestriction> allUnknownDatatypeRestrictions,Set<String> definedDatatypeIRIs,Set<Individual> individuals,
             boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,boolean hasDatatypes) {
         m_ontologyIRI=ontologyIRI;
         m_dlClauses=dlClauses;
@@ -102,6 +103,10 @@ public class DLOntology implements Serializable {
             m_allAtomicDataRoles=new TreeSet<AtomicRole>(AtomicRoleComparator.INSTANCE);
         else
             m_allAtomicDataRoles=atomicDataRoles;
+        if (allUnknownDatatypeRestrictions==null)
+            m_allUnknownDatatypeRestrictions=new HashSet<DatatypeRestriction>();
+        else
+            m_allUnknownDatatypeRestrictions=allUnknownDatatypeRestrictions;
         if (definedDatatypeIRIs==null)
             m_definedDatatypeIRIs=new HashSet<String>();
         else
@@ -211,6 +216,9 @@ public class DLOntology implements Serializable {
     public boolean containsDataRole(AtomicRole role) {
     	return m_allAtomicDataRoles.contains(role);
     }
+    public Set<DatatypeRestriction> getAllUnknownDatatypeRestrictions() {
+        return m_allUnknownDatatypeRestrictions;
+    }
     public Set<Individual> getAllIndividuals() {
         return m_allIndividuals;
     }
@@ -243,6 +251,9 @@ public class DLOntology implements Serializable {
     }
     public boolean hasDatatypes() {
         return m_hasDatatypes;
+    }
+    public boolean hasUnknownDatatypeRestrictions() {
+        return !m_allUnknownDatatypeRestrictions.isEmpty();
     }
     public boolean isHorn() {
         return m_isHorn;

@@ -35,6 +35,22 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
+    public void testUnknownDatatypes() throws Exception {
+        loadOntologyWithAxioms(
+            "Declaration(DataProperty(:dp1))"+
+            "Declaration(DataProperty(:dp2))"+
+            "Declaration(Datatype(<internal:unknown-datatype#A>))"+
+            "Declaration(Class(:A))"+
+            "DataPropertyRange(:dp1 DataOneOf( \"1\"^^xsd:integer ) )"+
+            "DataPropertyRange(:dp2 DataOneOf( \"1\"^^xsd:integer ) )"+
+            "SubClassOf(:A DataSomeValuesFrom(:dp1 <internal:unknown-datatype#A>))"+
+            "SubClassOf(:A DataSomeValuesFrom(:dp2 DataComplementOf(<internal:unknown-datatype#A>)))"+
+            "ClassAssertion(:A :i)"
+        );
+
+        createReasoner();
+        assertFalse(m_reasoner.isConsistent());
+    }
     public void testRoleChains() throws Exception {
         loadOntologyWithAxioms("Declaration(ObjectProperty(:s1))"
             +"Declaration(ObjectProperty(:r))"
@@ -42,13 +58,13 @@ public class ReasonerTest extends AbstractReasonerTest {
 
             +"SubClassOf(owl:Thing ObjectSomeValuesFrom(:r owl:Thing))"
             +"SubObjectPropertyOf(ObjectPropertyChain(:s1 :r ObjectInverseOf(:r)) :s2)");
-        
+
         createReasoner();
         OWLObjectProperty s1=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"s1"));
         OWLObjectProperty s2=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"s2"));
-            
+
         assertTrue(m_reasoner.isSubObjectPropertyExpressionOf(s1, s2));
-    } 
+    }
     public void testRoleChainsWithTransitiveSymmetric() throws Exception {
         loadOntologyWithAxioms("Declaration(ObjectProperty(:r))"
             +"Declaration(ObjectProperty(:p))"
@@ -68,7 +84,7 @@ public class ReasonerTest extends AbstractReasonerTest {
             +"ObjectPropertyAssertion(:r :a :b)");
         createReasoner();
         assertFalse(m_reasoner.isConsistent());
-    } 
+    }
     public void testRoleSubsumptionWithChainsTransitiveSymmetric() throws Exception {
         loadOntologyWithAxioms("Declaration(ObjectProperty(:r))"
                 +"Declaration(ObjectProperty(:p))"
@@ -84,11 +100,11 @@ public class ReasonerTest extends AbstractReasonerTest {
         createReasoner();
         OWLObjectProperty r=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"r"));
         OWLObjectProperty t=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"t"));
-            
+
         assertTrue(m_reasoner.isSubObjectPropertyExpressionOf(r, t));
-    } 
+    }
     public void testRoleSubsumption() throws Exception {
-        loadOntologyWithAxioms("ObjectPropertyDomain(:r ObjectOneOf(:a)) ObjectPropertyRange(:r ObjectOneOf(:b)) " 
+        loadOntologyWithAxioms("ObjectPropertyDomain(:r ObjectOneOf(:a)) ObjectPropertyRange(:r ObjectOneOf(:b)) "
             + " ObjectPropertyAssertion(:r :a :b) ObjectPropertyAssertion(:t :a :c) ObjectPropertyAssertion(:t :c :b) "
             + " TransitiveObjectProperty(:t)");
         createReasoner();

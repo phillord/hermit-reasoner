@@ -1736,12 +1736,6 @@ public class Reasoner implements OWLReasoner {
     protected static ClassificationManager<AtomicRole> createDataRoleClassificationManager(Reasoner reasoner) {
         return new StandardClassificationManager<AtomicRole>(new DataRoleSubsumptionCache(reasoner));
     }
-//    protected static ClassificationManager<AtomicConcept> createNewDataRoleClassificationManager(Tableau tableau,Map<Role,AtomicConcept> conceptsForRoles,Map<AtomicConcept,Role> rolesForConcepts) {
-//        if (tableau.isDeterministic())
-//            return new DeterministicClassificationManager<AtomicConcept>(new ObjectRoleByConceptSubsumptionCache<Role>(tableau,false,false,AtomicRole.BOTTOM_DATA_ROLE,AtomicRole.TOP_DATA_ROLE,conceptsForRoles,rolesForConcepts));
-//        else
-//            return new QuasiOrderRoleClassificationManager<Role>(tableau,false,conceptsForRoles,rolesForConcepts);
-//    }
 
     protected DLOntology createDeltaDLOntology(Configuration configuration,DLOntology originalDLOntology,OWLAxiom... additionalAxioms) throws IllegalArgumentException {
         Set<OWLAxiom> additionalAxiomsSet=new HashSet<OWLAxiom>();
