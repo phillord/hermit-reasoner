@@ -1,17 +1,17 @@
 /* Copyright 2009 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -27,31 +27,58 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
-public class DeterministicClassificationManager<E> implements ClassificationManager<E> {
-    protected final SubsumptionCache<E> m_subsumptionCache;
-    
-    public DeterministicClassificationManager(SubsumptionCache<E> subsumptionCache) {
-        m_subsumptionCache=subsumptionCache;
-        m_subsumptionCache.initialize();
+import org.semanticweb.HermiT.model.Atom;
+import org.semanticweb.HermiT.model.AtomicConcept;
+import org.semanticweb.HermiT.model.Individual;
+import org.semanticweb.HermiT.tableau.ExtensionTable;
+import org.semanticweb.HermiT.tableau.Node;
+import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
+import org.semanticweb.HermiT.tableau.Tableau;
+
+public class DeterministicClassification {
+    protected final Tableau m_tableau;
+    protected final ClassificationProgressMonitor m_progressMonitor;
+    protected final AtomicConcept m_topElement;
+    protected final AtomicConcept m_bottomElement;
+    protected final Set<AtomicConcept> m_elements;
+
+    public DeterministicClassification(Tableau tableau,ClassificationProgressMonitor progressMonitor,AtomicConcept topElement,AtomicConcept bottomElement,Set<AtomicConcept> elements) {
+        m_tableau=tableau;
+        m_progressMonitor=progressMonitor;
+        m_topElement=topElement;
+        m_bottomElement=bottomElement;
+        m_elements=elements;
     }
-    public boolean isSatisfiable(E element) {
-        return m_subsumptionCache.isSatisfiable(element);
-    }
-    public boolean isSubsumedBy(E subelement,E superelement) {
-        return m_subsumptionCache.isSubsumedBy(subelement,superelement);
-    }
-    public Hierarchy<E> classify(ProgressMonitor<E> progressMonitor,E topElement,E bottomElement,Set<E> elements) {
-        if (!m_subsumptionCache.isSatisfiable(topElement))
-            return Hierarchy.emptyHierarchy(elements,topElement,bottomElement);
-        Map<E,GraphNode<E>> allSubsumers=new HashMap<E,GraphNode<E>>();
-        for (E element : elements) {
-            Set<E> subsumers=m_subsumptionCache.getAllKnownSubsumers(element);
-            if (subsumers==null)
-                subsumers=elements;
-            allSubsumers.put(element,new GraphNode<E>(element,subsumers));
-            progressMonitor.elementClassified(element);
+    public Hierarchy<AtomicConcept> classify() {
+        if (!m_tableau.isDeterministic())
+            throw new IllegalStateException("Internal error: DeterministicClassificationManager can be used only with a deterministic tableau.");
+        Individual freshIndividual=Individual.createAnonymous("fresh-individual");
+        if (!m_tableau.isSatisfiable(true,Collections.singleton(Atom.create(m_topElement,freshIndividual)),null,null,null,null,ReasoningTaskDescription.isConceptSatisfiable(m_topElement)))
+            return Hierarchy.emptyHierarchy(m_elements,m_topElement,m_bottomElement);
+        Map<AtomicConcept,GraphNode<AtomicConcept>> allSubsumers=new HashMap<AtomicConcept,GraphNode<AtomicConcept>>();
+        for (AtomicConcept element : m_elements) {
+            Set<AtomicConcept> subsumers;
+            Map<Individual,Node> nodesForIndividuals=new HashMap<Individual,Node>();
+            nodesForIndividuals.put(freshIndividual,null);
+            if (!m_tableau.isSatisfiable(true,Collections.singleton(Atom.create(element,freshIndividual)),null,null,null,nodesForIndividuals,ReasoningTaskDescription.isConceptSatisfiable(element)))
+                subsumers=m_elements;
+            else {
+                subsumers=new HashSet<AtomicConcept>();
+                subsumers.add(m_topElement);
+                ExtensionTable.Retrieval retrieval=m_tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
+                retrieval.getBindingsBuffer()[1]=nodesForIndividuals.get(freshIndividual).getCanonicalNode();
+                retrieval.open();
+                while (!retrieval.afterLast()) {
+                    Object subsumer=retrieval.getTupleBuffer()[0];
+                    if (subsumer instanceof AtomicConcept && m_elements.contains(subsumer))
+                        subsumers.add((AtomicConcept)subsumer);
+                    retrieval.next();
+                }
+            }
+            allSubsumers.put(element,new GraphNode<AtomicConcept>(element,subsumers));
+            m_progressMonitor.elementClassified(element);
         }
-        return buildHierarchy(topElement,bottomElement,allSubsumers);
+        return buildHierarchy(m_topElement,m_bottomElement,allSubsumers);
     }
     public static <T> Hierarchy<T> buildHierarchy(T topElement,T bottomElement,Map<T,GraphNode<T>> graphNodes) {
         HierarchyNode<T> topNode=new HierarchyNode<T>(topElement);
@@ -112,7 +139,7 @@ public class DeterministicClassificationManager<E> implements ClassificationMana
                 poppedNode=stack.pop();
                 poppedNode.m_topologicalOrderIndex=nextTopologicalOrderIndex;
                 equivalentElements.add(poppedNode.m_element);
-                
+
             } while (poppedNode!=graphNode);
             HierarchyNode<T> hierarchyNode;
             if (equivalentElements.contains(hierarchy.getTopNode().m_representative))
@@ -128,14 +155,14 @@ public class DeterministicClassificationManager<E> implements ClassificationMana
             topologicalOrder.add(hierarchyNode);
         }
     }
-    
+
     public static class GraphNode<T> {
         public final T m_element;
         public final Set<T> m_successors;
         public int m_dfsIndex;
         public GraphNode<T> m_SCChead;
         public int m_topologicalOrderIndex;
-        
+
         public GraphNode(T element,Set<T> successors) {
             m_element=element;
             m_successors=successors;
@@ -157,7 +184,7 @@ public class DeterministicClassificationManager<E> implements ClassificationMana
         public int compare(GraphNode<?> o1,GraphNode<?> o2) {
             return o1.m_topologicalOrderIndex-o2.m_topologicalOrderIndex;
         }
-        
+
     }
 
     protected static class DFSIndex {

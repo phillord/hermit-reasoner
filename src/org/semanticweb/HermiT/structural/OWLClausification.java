@@ -47,7 +47,6 @@ import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.Inequality;
-import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.model.NodeIDLessEqualThan;
 import org.semanticweb.HermiT.model.NodeIDsAscendingOrEqual;
@@ -401,7 +400,7 @@ public class OWLClausification {
             OWLObjectPropertyExpression internal=((OWLObjectInverseOf)objectPropertyExpression).getInverse();
             if (!(internal instanceof OWLObjectProperty))
                 throw new IllegalStateException("Internal error: invalid normal form.");
-            return InverseRole.create(AtomicRole.create(((OWLObjectProperty)internal).getIRI().toString()));
+            return AtomicRole.create(((OWLObjectProperty)internal).getIRI().toString()).getInverse();
         }
         else
             throw new IllegalStateException("Internal error: invalid normal form.");

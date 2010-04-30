@@ -25,62 +25,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
-public class StandardClassificationManager<E> implements ClassificationManager<E> {
-    protected final SubsumptionCache<E> m_subsumptionCache;
-
-    public StandardClassificationManager(SubsumptionCache<E> subsumptionCache) {
-        m_subsumptionCache=subsumptionCache;
-    }
-    public boolean isSatisfiable(E element) {
-        return m_subsumptionCache.isSatisfiable(element);
-    }
-    public boolean isSubsumedBy(E subelement,E superelement) {
-        return m_subsumptionCache.isSubsumedBy(subelement,superelement);
-    }
-    public Hierarchy<E> classify(ProgressMonitor<E> progressMonitor,E topElement,E bottomElement,Set<E> elements) {
-        if (!m_subsumptionCache.isSatisfiable(topElement))
-            return Hierarchy.emptyHierarchy(elements,topElement,bottomElement);
-        Relation<E> relation=new Relation<E>() {
-            public boolean doesSubsume(E parent,E child) {
-                return m_subsumptionCache.isSubsumedBy(child,parent);
-            }
-        };
-        return buildHierarchy(progressMonitor,relation,topElement,bottomElement,elements);
-    }
-    public static <E> Hierarchy<E> buildHierarchy(ProgressMonitor<E> progressMonitor,Relation<E> hierarchyRelation,E topElement,E bottomElement,Collection<E> elements) {
-        if (hierarchyRelation.doesSubsume(bottomElement,topElement))
-            return Hierarchy.emptyHierarchy(elements,topElement,bottomElement);
-        else {
-            HierarchyNode<E> topNode=new HierarchyNode<E>(topElement);
-            HierarchyNode<E> bottomNode=new HierarchyNode<E>(bottomElement);
-            topNode.m_childNodes.add(bottomNode);
-            bottomNode.m_parentNodes.add(topNode);
-            Hierarchy<E> hierarchy=new Hierarchy<E>(topNode,bottomNode);
-            for (E element : elements) {
-                if (!element.equals(topElement) && !element.equals(bottomElement)) {
-                    HierarchyNode<E> node=findPosition(hierarchyRelation,element,topNode,bottomNode);
-                    hierarchy.m_nodesByElements.put(element,node);
-                    if (!node.m_equivalentElements.contains(element)) {
-                        // Existing node: just add the element to the node label
-                        node.m_equivalentElements.add(element);
-                    }
-                    else {
-                        // New node: insert it into the hierarchy
-                        for (HierarchyNode<E> parent : node.m_parentNodes) {
-                            parent.m_childNodes.add(node);
-                            parent.m_childNodes.removeAll(node.m_childNodes);
-                        }
-                        for (HierarchyNode<E> child : node.m_childNodes) {
-                            child.m_parentNodes.add(node);
-                            child.m_parentNodes.removeAll(node.m_parentNodes);
-                        }
-                    }
-                }
-                progressMonitor.elementClassified(element);
-            }
-            return hierarchy;
-        }
-    }
+public class HierarchySearch {
     public static <E> HierarchyNode<E> findPosition(Relation<E> hierarchyRelation,E element,HierarchyNode<E> topNode,HierarchyNode<E> bottomNode) {
         Set<HierarchyNode<E>> parentNodes=findParents(hierarchyRelation,element,topNode);
         Set<HierarchyNode<E>> childNodes=findChildren(hierarchyRelation,element,bottomNode,parentNodes);

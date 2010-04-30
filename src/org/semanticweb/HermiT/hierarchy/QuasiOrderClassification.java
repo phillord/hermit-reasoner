@@ -26,10 +26,9 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
 
-import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.graph.Graph;
-import org.semanticweb.HermiT.hierarchy.DeterministicClassificationManager.GraphNode;
-import org.semanticweb.HermiT.hierarchy.StandardClassificationManager.Relation;
+import org.semanticweb.HermiT.hierarchy.DeterministicClassification.GraphNode;
+import org.semanticweb.HermiT.hierarchy.HierarchySearch.Relation;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.DLClause;
@@ -40,32 +39,28 @@ import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
 
-public class QuasiOrderClassificationManager implements ClassificationManager<AtomicConcept> {
+public class QuasiOrderClassification {
     protected final Tableau m_tableau;
-    protected final Graph<AtomicConcept> m_knownSubsumptions=new Graph<AtomicConcept>();
-    protected final Graph<AtomicConcept> m_possibleSubsumptions=new Graph<AtomicConcept>();
+    protected final ClassificationProgressMonitor m_progressMonitor;
+    protected final AtomicConcept m_topElement;
+    protected final AtomicConcept m_bottomElement;
+    protected final Set<AtomicConcept> m_elements;
+    protected final Graph<AtomicConcept> m_knownSubsumptions;
+    protected final Graph<AtomicConcept> m_possibleSubsumptions;
 
-    public QuasiOrderClassificationManager(Tableau tableau) {
+    public QuasiOrderClassification(Tableau tableau,ClassificationProgressMonitor progressMonitor,AtomicConcept topElement,AtomicConcept bottomElement,Set<AtomicConcept> elements) {
         m_tableau=tableau;
+        m_progressMonitor=progressMonitor;
+        m_topElement=topElement;
+        m_bottomElement=bottomElement;
+        m_elements=elements;
+        m_knownSubsumptions=new Graph<AtomicConcept>();
+        m_possibleSubsumptions=new Graph<AtomicConcept>();
     }
-    public boolean isSatisfiable(AtomicConcept element) {
-        if (AtomicConcept.NOTHING.equals(element))
-            return false;
-        if (isUnsatisfiable(element))
-            return false;
+    public Hierarchy<AtomicConcept> classify() {
         Individual freshIndividual=Individual.createAnonymous("fresh-individual");
-        return m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(element,freshIndividual)),null,null,null,null,getSatTestDescription(element));
-    }
-    public boolean isSubsumedBy(AtomicConcept subelement,AtomicConcept superelement) {
-        if (getKnownSubsumers(subelement).contains(superelement))
-            return true;
-        Individual freshIndividual=Individual.createAnonymous("fresh-individual");
-        return !m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(subelement,freshIndividual)),null,null,Collections.singleton(Atom.create(superelement,freshIndividual)),null,getSubsumptionTestDescription(subelement, superelement));
-    }
-    public Hierarchy<AtomicConcept> classify(ProgressMonitor<AtomicConcept> progressMonitor,AtomicConcept topElement,AtomicConcept bottomElement,final Set<AtomicConcept> elements) {
-        Individual freshIndividual=Individual.createAnonymous("fresh-individual");
-        if (!m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(topElement,freshIndividual)),null,null,Collections.singleton(Atom.create(bottomElement,freshIndividual)),null,getSubsumptionTestDescription(topElement, bottomElement)))
-            return Hierarchy.emptyHierarchy(elements,topElement,bottomElement);
+        if (!m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(m_topElement,freshIndividual)),null,null,Collections.singleton(Atom.create(m_bottomElement,freshIndividual)),null,getSubsumptionTestDescription(m_topElement,m_bottomElement)))
+            return Hierarchy.emptyHierarchy(m_elements,m_topElement,m_bottomElement);
         Relation<AtomicConcept> relation=new Relation<AtomicConcept>() {
             public boolean doesSubsume(AtomicConcept parent,AtomicConcept child) {
                 Set<AtomicConcept> allKnownSubsumers=getKnownSubsumers(child);
@@ -74,25 +69,21 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
                 else if (!allKnownSubsumers.contains(parent) && !m_possibleSubsumptions.getSuccessors(child).contains(parent))
                     return false;
                 Individual freshIndividual=Individual.createAnonymous("fresh-individual");
-                boolean isSubsumedBy=!m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(child,freshIndividual)),null,null,Collections.singleton(Atom.create(parent,freshIndividual)),null,getSubsumptionTestDescription(child, parent));
+                boolean isSubsumedBy=!m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(child,freshIndividual)),null,null,Collections.singleton(Atom.create(parent,freshIndividual)),null,getSubsumptionTestDescription(child,parent));
                 if (!isSubsumedBy)
                     prunePossibleSubsumers();
                 return isSubsumedBy;
             }
         };
-        return buildHierarchy(progressMonitor,relation,topElement,bottomElement,elements);
+        return buildHierarchy(relation);
     }
-    protected Hierarchy<AtomicConcept> buildHierarchy(ProgressMonitor<AtomicConcept> progressMonitor,Relation<AtomicConcept> hierarchyRelation,AtomicConcept topElement,AtomicConcept bottomElement,Set<AtomicConcept> elements) {
-
-        initializeKnownSubsumptions(elements,topElement,bottomElement);
-
+    protected Hierarchy<AtomicConcept> buildHierarchy(Relation<AtomicConcept> hierarchyRelation) {
+        initializeKnownSubsumptions();
         updateKnownSubsumptionsUsingToldSubsumers();
-
-        Set<AtomicConcept> processedConcepts = updateSubsumptionsUsingLeafNodeStrategy(progressMonitor,elements,topElement,bottomElement);
-
+        Set<AtomicConcept> processedConcepts=updateSubsumptionsUsingLeafNodeStrategy();
         // Unlike Rob's paper our set of possible subsumptions P would only keep unknown possible subsumptions and not known subsumptions as well.
         Set<AtomicConcept> unclassifiedElements=new HashSet<AtomicConcept>();
-        for (AtomicConcept element : elements) {
+        for (AtomicConcept element : m_elements) {
             if (!isUnsatisfiable(element)) {
                 m_possibleSubsumptions.getSuccessors(element).removeAll(getKnownSubsumers(element));
                 if (!m_possibleSubsumptions.getSuccessors(element).isEmpty()) {
@@ -100,13 +91,11 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
                     continue;
                 }
             }
-            if( !processedConcepts.contains( element ) )
-            	progressMonitor.elementClassified(element);
+            if (!processedConcepts.contains(element))
+                m_progressMonitor.elementClassified(element);
         }
-
         Set<AtomicConcept> classifiedElements=new HashSet<AtomicConcept>();
         while (!unclassifiedElements.isEmpty()) {
-
             AtomicConcept unclassifiedElement=null;
             for (AtomicConcept element : unclassifiedElements) {
                 m_possibleSubsumptions.getSuccessors(element).removeAll(getKnownSubsumers(element));
@@ -115,47 +104,40 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
                     break;
                 }
                 classifiedElements.add(element);
-                if( !processedConcepts.contains( element ) )
-                	progressMonitor.elementClassified(element);
+                if (!processedConcepts.contains(element))
+                    m_progressMonitor.elementClassified(element);
             }
             unclassifiedElements.removeAll(classifiedElements);
             if (unclassifiedElements.isEmpty())
                 break;
-
-            Hierarchy<AtomicConcept> smallHierarchy=buildSmallHierarchy(topElement,bottomElement,m_possibleSubsumptions.getSuccessors(unclassifiedElement));
-
+            Hierarchy<AtomicConcept> smallHierarchy=buildSmallHierarchy(m_possibleSubsumptions.getSuccessors(unclassifiedElement));
             checkUnknownSubsumersUsingEnhancedTraversal(hierarchyRelation,smallHierarchy.getTopNode(),unclassifiedElement);
-
             m_possibleSubsumptions.getSuccessors(unclassifiedElement).clear();
         }
-        return buildTransitivelyReducedHierarchy(topElement,bottomElement,m_knownSubsumptions);
+        return buildTransitivelyReducedHierarchy(m_knownSubsumptions);
     }
-    protected Hierarchy<AtomicConcept> buildSmallHierarchy(AtomicConcept topElement,AtomicConcept bottomElement,Set<AtomicConcept> unknownSubsumers) {
+    protected Hierarchy<AtomicConcept> buildSmallHierarchy(Set<AtomicConcept> unknownSubsumers) {
         Graph<AtomicConcept> smallKnownSubsumptions=new Graph<AtomicConcept>();
         for (AtomicConcept unknownSubsumer0 : unknownSubsumers) {
-            smallKnownSubsumptions.addEdge(bottomElement,unknownSubsumer0);
-            smallKnownSubsumptions.addEdge(unknownSubsumer0,topElement);
+            smallKnownSubsumptions.addEdge(m_bottomElement,unknownSubsumer0);
+            smallKnownSubsumptions.addEdge(unknownSubsumer0,m_topElement);
             Set<AtomicConcept> knownSubsumersOfElement=getKnownSubsumers(unknownSubsumer0);
             for (AtomicConcept unknownSubsumer1 : unknownSubsumers)
                 if (knownSubsumersOfElement.contains(unknownSubsumer1))
                     smallKnownSubsumptions.addEdge(unknownSubsumer0,unknownSubsumer1);
         }
-        return buildTransitivelyReducedHierarchy(topElement,bottomElement,smallKnownSubsumptions);
+        return buildTransitivelyReducedHierarchy(smallKnownSubsumptions);
     }
-    protected Set<AtomicConcept> updateSubsumptionsUsingLeafNodeStrategy(ProgressMonitor<AtomicConcept> progressMonitor, Set<AtomicConcept> elements,AtomicConcept topElement,AtomicConcept bottomElement) {
-
-        Hierarchy<AtomicConcept> hierarchy=buildTransitivelyReducedHierarchy(topElement,bottomElement,m_knownSubsumptions);
-
+    protected Set<AtomicConcept> updateSubsumptionsUsingLeafNodeStrategy() {
+        Hierarchy<AtomicConcept> hierarchy=buildTransitivelyReducedHierarchy(m_knownSubsumptions);
         Set<HierarchyNode<AtomicConcept>> leafNodes=hierarchy.getBottomNode().getParentNodes();
-        Set<AtomicConcept> processedConcepts = new HashSet<AtomicConcept>( );
+        Set<AtomicConcept> processedConcepts=new HashSet<AtomicConcept>();
         for (HierarchyNode<AtomicConcept> leafNode : leafNodes) {
-
             AtomicConcept leafNodeElement=leafNode.getRepresentative();
-        	processedConcepts.add( leafNodeElement );
-        	progressMonitor.elementClassified( leafNodeElement );
+            processedConcepts.add(leafNodeElement);
+            m_progressMonitor.elementClassified(leafNodeElement);
             if (!m_possibleSubsumptions.getSuccessors(leafNodeElement).isEmpty() || isUnsatisfiable(leafNodeElement))
                 continue;
-
             getKnownSubsumersForConcept(leafNodeElement);
             // If the leaf was unsatisfable go up to find satisfiable parents. Unsatisfiable parent information can be propagated downwards.
             if (isUnsatisfiable(leafNodeElement)) {
@@ -195,22 +177,22 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
             makeConceptUnsatisfiable(concept);
     }
     protected void makeConceptUnsatisfiable(AtomicConcept concept) {
-        addKnownSubsumption(concept,AtomicConcept.NOTHING);
+        addKnownSubsumption(concept,m_bottomElement);
     }
     protected boolean isUnsatisfiable(AtomicConcept concept) {
-        return m_knownSubsumptions.getSuccessors(concept).contains(AtomicConcept.NOTHING);
+        return m_knownSubsumptions.getSuccessors(concept).contains(m_bottomElement);
     }
     protected void readKnownSubsumersFromRootNode(AtomicConcept subconcept,Node checkedNode) {
         if (checkedNode.getCanonicalNodeDependencySet().isEmpty()) {
             checkedNode=checkedNode.getCanonicalNode();
-            addKnownSubsumption(subconcept,AtomicConcept.THING);
+            addKnownSubsumption(subconcept,m_topElement);
             ExtensionTable.Retrieval retrieval=m_tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
             retrieval.getBindingsBuffer()[1]=checkedNode;
             retrieval.open();
             while (!retrieval.afterLast()) {
-                Object concept=retrieval.getTupleBuffer()[0];
-                if (concept instanceof AtomicConcept && retrieval.getDependencySet().isEmpty() && isRelevantConcept((AtomicConcept)concept))
-                    addKnownSubsumption(subconcept,(AtomicConcept)concept);
+                Object conceptObject=retrieval.getTupleBuffer()[0];
+                if (conceptObject instanceof AtomicConcept && retrieval.getDependencySet().isEmpty() && m_elements.contains(conceptObject))
+                    addKnownSubsumption(subconcept,(AtomicConcept)conceptObject);
                 retrieval.next();
             }
         }
@@ -221,16 +203,14 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
         Object[] tupleBuffer=retrieval.getTupleBuffer();
         while (!retrieval.afterLast()) {
             Object conceptObject=tupleBuffer[0];
-            if (conceptObject instanceof AtomicConcept) {
+            if (conceptObject instanceof AtomicConcept && m_elements.contains(conceptObject)) {
                 AtomicConcept atomicConcept=(AtomicConcept)conceptObject;
-                if (isRelevantConcept(atomicConcept)) {
-                    Node node=(Node)tupleBuffer[1];
-                    if (node.isActive() && !node.isBlocked()) {
-                        if (m_possibleSubsumptions.getSuccessors(atomicConcept).isEmpty())
-                            readPossibleSubsumersFromNodeLabel(atomicConcept,node);
-                        else
-                            prunePossibleSubsumersOfConcept(atomicConcept,node);
-                    }
+                Node node=(Node)tupleBuffer[1];
+                if (node.isActive() && !node.isBlocked()) {
+                    if (m_possibleSubsumptions.getSuccessors(atomicConcept).isEmpty())
+                        readPossibleSubsumersFromNodeLabel(atomicConcept,node);
+                    else
+                        prunePossibleSubsumersOfConcept(atomicConcept,node);
                 }
             }
             retrieval.next();
@@ -242,13 +222,10 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
         Object[] tupleBuffer=retrieval.getTupleBuffer();
         while (!retrieval.afterLast()) {
             Object conceptObject=tupleBuffer[0];
-            if (conceptObject instanceof AtomicConcept) {
-                AtomicConcept atomicConcept=(AtomicConcept)conceptObject;
-                if (isRelevantConcept(atomicConcept)) {
-                    Node node=(Node)tupleBuffer[1];
-                    if (node.isActive() && !node.isBlocked())
-                        prunePossibleSubsumersOfConcept(atomicConcept,node);
-                }
+            if (conceptObject instanceof AtomicConcept && m_elements.contains(conceptObject)) {
+                Node node=(Node)tupleBuffer[1];
+                if (node.isActive() && !node.isBlocked())
+                    prunePossibleSubsumersOfConcept((AtomicConcept)conceptObject,node);
             }
             retrieval.next();
         }
@@ -265,17 +242,16 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
         retrieval.open();
         while (!retrieval.afterLast()) {
             Object concept=retrieval.getTupleBuffer()[0];
-            if (concept instanceof AtomicConcept && isRelevantConcept((AtomicConcept)concept))
+            if (concept instanceof AtomicConcept && m_elements.contains(concept))
                 addPossibleSubsumption(atomicConcept,(AtomicConcept)concept);
             retrieval.next();
         }
     }
-    protected Hierarchy<AtomicConcept> buildTransitivelyReducedHierarchy(AtomicConcept topElement,AtomicConcept bottomElement,Graph<AtomicConcept> knownSubsumptions) {
+    protected Hierarchy<AtomicConcept> buildTransitivelyReducedHierarchy(Graph<AtomicConcept> knownSubsumptions) {
         final Map<AtomicConcept,GraphNode<AtomicConcept>> allSubsumers=new HashMap<AtomicConcept,GraphNode<AtomicConcept>>();
         for (AtomicConcept element : knownSubsumptions.getElements())
             allSubsumers.put(element,new GraphNode<AtomicConcept>(element,knownSubsumptions.getSuccessors(element)));
-
-        return DeterministicClassificationManager.buildHierarchy(topElement,bottomElement,allSubsumers);
+        return DeterministicClassification.buildHierarchy(m_topElement,m_bottomElement,allSubsumers);
     }
     protected void updateKnownSubsumptionsUsingToldSubsumers() {
         updateKnownSubsumptionsUsingToldSubsumers(m_tableau.getPermanentDLOntology().getDLClauses());
@@ -288,7 +264,7 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
                 if (headPredicate instanceof AtomicConcept && bodyPredicate instanceof AtomicConcept) {
                     AtomicConcept headConcept=(AtomicConcept)headPredicate;
                     AtomicConcept bodyConcept=(AtomicConcept)bodyPredicate;
-                    if (isRelevantConcept(headConcept) && isRelevantConcept(bodyConcept))
+                    if (m_elements.contains(headConcept) && m_elements.contains(bodyConcept))
                         addKnownSubsumption(bodyConcept,headConcept);
                 }
             }
@@ -340,33 +316,30 @@ public class QuasiOrderClassificationManager implements ClassificationManager<At
     protected Set<AtomicConcept> getKnownSubsumers(AtomicConcept child) {
         return m_knownSubsumptions.getReachableSuccessors(child);
     }
-    protected void initializeKnownSubsumptions(Set<AtomicConcept> elements,AtomicConcept topElement,AtomicConcept bottomElement) {
-        for (AtomicConcept element : elements) {
+    protected void initializeKnownSubsumptions() {
+        for (AtomicConcept element : m_elements) {
             addKnownSubsumption(element,element);
-            addKnownSubsumption(element,topElement);
-            addKnownSubsumption(bottomElement,element);
+            addKnownSubsumption(element,m_topElement);
+            addKnownSubsumption(m_bottomElement,element);
         }
-        makeConceptUnsatisfiable(bottomElement);
+        makeConceptUnsatisfiable(m_bottomElement);
     }
-    protected void addKnownSubsumption(AtomicConcept subConcept, AtomicConcept superConcept) {
+    protected void addKnownSubsumption(AtomicConcept subConcept,AtomicConcept superConcept) {
         m_knownSubsumptions.addEdge(subConcept,superConcept);
     }
-    protected void addKnownSubsumptions(AtomicConcept subConcept, Set<AtomicConcept> superConcepts) {
+    protected void addKnownSubsumptions(AtomicConcept subConcept,Set<AtomicConcept> superConcepts) {
         m_knownSubsumptions.addEdges(subConcept,superConcepts);
     }
-    protected void addPossibleSubsumption(AtomicConcept subConcept, AtomicConcept superConcept) {
+    protected void addPossibleSubsumption(AtomicConcept subConcept,AtomicConcept superConcept) {
         m_possibleSubsumptions.addEdge(subConcept,superConcept);
-    }
-    protected boolean isRelevantConcept(AtomicConcept atomicConcept) {
-        return !Prefixes.isInternalIRI(atomicConcept.getIRI());
     }
     protected ReasoningTaskDescription getSatTestDescription(AtomicConcept atomicConcept) {
         return ReasoningTaskDescription.isConceptSatisfiable(atomicConcept);
     }
-    protected ReasoningTaskDescription getSubsumptionTestDescription(AtomicConcept subConcept, AtomicConcept superConcept) {
+    protected ReasoningTaskDescription getSubsumptionTestDescription(AtomicConcept subConcept,AtomicConcept superConcept) {
         return ReasoningTaskDescription.isConceptSubsumedBy(subConcept,superConcept);
     }
-    protected ReasoningTaskDescription getSubsumedByListTestDescription(AtomicConcept subConcept, Object[] superconcepts) {
+    protected ReasoningTaskDescription getSubsumedByListTestDescription(AtomicConcept subConcept,Object[] superconcepts) {
         return ReasoningTaskDescription.isConceptSubsumedByList(subConcept,superconcepts);
     }
 }
