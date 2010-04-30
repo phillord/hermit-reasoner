@@ -9,8 +9,21 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.OWLOntologyDocumentSource;
 import org.semanticweb.owlapi.io.StringDocumentSource;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassExpression;
+import org.semanticweb.owlapi.model.OWLDataAllValuesFrom;
 import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLDataProperty;
+import org.semanticweb.owlapi.model.OWLDataRange;
+import org.semanticweb.owlapi.model.OWLDataSomeValuesFrom;
+import org.semanticweb.owlapi.model.OWLDatatype;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
+import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
@@ -32,13 +45,11 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
         m_ontologyManager=OWLManager.createOWLOntologyManager();
         m_dataFactory=m_ontologyManager.getOWLDataFactory();
     }
-
     protected void tearDown() {
         m_ontologyManager=null;
         m_dataFactory=null;
         m_ontology=null;
     }
-
     protected Tableau getTableau(Collection<DescriptionGraph> descriptionGraphs) throws Exception {
         Configuration c=new Configuration();
         c.blockingSignatureCacheType=Configuration.BlockingSignatureCacheType.CACHED;
@@ -48,7 +59,6 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
         Reasoner reasoner=new Reasoner(c,m_ontology,descriptionGraphs);
         return reasoner.getTableau();
     }
-
     /**
      * loads an ontology via the OWL API
      *
@@ -59,14 +69,12 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
     protected void loadOntology(String physicalURI) throws Exception {
         m_ontology=m_ontologyManager.loadOntologyFromOntologyDocument(IRI.create(physicalURI));
     }
-
     /**
      * Loads an ontology from a relative path.
      */
     protected void loadOntologyFromResource(String resourceName) throws Exception {
         loadOntology(getClass().getResource(resourceName).toString());
     }
-
     /**
      * loads an OWL ontology that contains the given axioms
      */
@@ -86,7 +94,6 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
         OWLOntologyDocumentSource input=new StringDocumentSource(buffer.toString());
         m_ontology=m_ontologyManager.loadOntologyFromOntologyDocument(input);
     }
-
     /**
      * Converts the axioms to a string via the toString method and compares it with the given string.
      */
@@ -108,7 +115,6 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
         }
         assertTrue(isOK);
     }
-
     /**
      * converts the axioms to a string via the toString method and compares it with the given string
      */
@@ -148,7 +154,6 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
         }
         assertTrue(isOK);
     }
-
     /**
      * prints the content of control set and the actual set in case they are different and causes a JUnit test failure
      */
@@ -168,5 +173,50 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
             System.out.flush();
             assertTrue(false);
         }
+    }
+    protected OWLClass C(String uri) {
+        return m_dataFactory.getOWLClass(IRI.create(uri));
+    }
+    protected OWLClass NS_C(String suffix) {
+        return C(NS+suffix);
+    }
+    protected OWLDatatype DT(String uri) {
+        return m_dataFactory.getOWLDatatype(IRI.create(uri));
+    }
+    protected OWLDatatype NS_DT(String suffix) {
+        return DT(NS+suffix);
+    }
+    protected OWLObjectProperty OP(String uri) {
+        return m_dataFactory.getOWLObjectProperty(IRI.create(uri));
+    }
+    protected OWLObjectProperty NS_OP(String suffix) {
+        return OP(NS+suffix);
+    }
+    protected OWLDataProperty DP(String uri) {
+        return m_dataFactory.getOWLDataProperty(IRI.create(NS+uri));
+    }
+    protected OWLDataProperty NS_DP(String suffix) {
+        return NS_DP(NS+suffix);
+    }
+    protected OWLNamedIndividual NI(String uri) {
+        return m_dataFactory.getOWLNamedIndividual(IRI.create(uri));
+    }
+    protected OWLNamedIndividual NS_NI(String suffix) {
+        return NI(NS+suffix);
+    }
+    protected OWLAnonymousIndividual AI(String id) {
+        return m_dataFactory.getOWLAnonymousIndividual(id);
+    }
+    protected OWLObjectSomeValuesFrom SVF(OWLObjectPropertyExpression objectPropertyExpression,OWLClassExpression classExpression) {
+        return m_dataFactory.getOWLObjectSomeValuesFrom(objectPropertyExpression,classExpression);
+    }
+    protected OWLObjectAllValuesFrom AVF(OWLObjectPropertyExpression objectPropertyExpression,OWLClassExpression classExpression) {
+        return m_dataFactory.getOWLObjectAllValuesFrom(objectPropertyExpression,classExpression);
+    }
+    protected OWLDataSomeValuesFrom SVF(OWLDataProperty dataProperty,OWLDataRange dataRange) {
+        return m_dataFactory.getOWLDataSomeValuesFrom(dataProperty,dataRange);
+    }
+    protected OWLDataAllValuesFrom AVF(OWLDataProperty dataProperty,OWLDataRange dataRange) {
+        return m_dataFactory.getOWLDataAllValuesFrom(dataProperty,dataRange);
     }
 }

@@ -525,9 +525,11 @@ public class Reasoner implements OWLReasoner {
         classify();
         if (!isConsistent())
             return m_atomicConceptHierarchy.getBottomNode();
-        else if (classExpression instanceof OWLClass && !containsFreshEntities(classExpression)) {
+        else if (classExpression instanceof OWLClass) {
             AtomicConcept atomicConcept=H((OWLClass)classExpression);
             HierarchyNode<AtomicConcept> node=m_atomicConceptHierarchy.getNodeForElement(atomicConcept);
+            if (node==null)
+                node=new HierarchyNode<AtomicConcept>(atomicConcept,Collections.singleton(atomicConcept),Collections.singleton(m_atomicConceptHierarchy.getTopNode()),Collections.singleton(m_atomicConceptHierarchy.getBottomNode()));
             return node;
         }
         else {

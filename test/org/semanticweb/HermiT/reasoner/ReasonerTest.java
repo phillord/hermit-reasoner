@@ -35,6 +35,16 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
+    public void testUnknownClassHierarcyPosition() throws Exception {
+        loadOntologyWithAxioms(
+            "SubClassOf( owl:Thing ObjectOneOf( :ind ) )"+
+            "ClassAssertion(:A :i)"
+        );
+        createReasoner();
+
+        assertFalse(m_reasoner.getEquivalentClasses(NS_C("D")).contains(NS_C("A")));
+        assertTrue(m_reasoner.getSuperClasses(NS_C("D"),true).containsEntity(NS_C("A")));
+    }
     public void testUnknownDatatypes() throws Exception {
         loadOntologyWithAxioms(
             "Declaration(DataProperty(:dp1))"+
@@ -2578,14 +2588,12 @@ public class ReasonerTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(buffer.toString());
         assertABoxSatisfiable(true);
     }
-
     public void testInverses2() throws Exception {
         StringBuffer buffer = new StringBuffer();
         buffer.append("InverseObjectProperties( :hasPart :partOf ) ObjectPropertyAssertion(:hasPart :a :b) NegativeObjectPropertyAssertion(:partOf :b :a)");
         loadReasonerWithAxioms(buffer.toString());
         assertABoxSatisfiable(false);
     }
-
     public void testMissingCBug() throws Exception {
         String axioms = "EquivalentClasses(:C ObjectMinCardinality(0 :p owl:Nothing))";
         loadReasonerWithAxioms(axioms);
@@ -2601,7 +2609,6 @@ public class ReasonerTest extends AbstractReasonerTest {
         output2.flush();
         assertTrue(buffer.toString().equals(buffer2.toString()));
     }
-
     public void testInverses() throws Exception {
         StringBuffer buffer = new StringBuffer();
         buffer.append("EquivalentObjectProperties( :hasPart ObjectInverseOf( :partOf ) ) ObjectPropertyAssertion(:hasPart :a :b) NegativeObjectPropertyAssertion(:partOf :b :a)");
@@ -2613,7 +2620,6 @@ public class ReasonerTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(true);
     }
-
     public void testAnonymousIndiviuals3() throws Exception {
         String axioms = "ObjectPropertyAssertion( a:livesAt a:Peter _:a1 )"
             + "ObjectPropertyAssertion( a:city _:a1 a:Quahog )"
