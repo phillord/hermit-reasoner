@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -30,7 +30,7 @@ import java.util.Set;
 
 public class Graph<T> implements Serializable {
     private static final long serialVersionUID = 5372948202031042380L;
-    
+
     protected final Set<T> m_elements;
     protected final Map<T,Set<T>> m_successorsByNodes;
 
@@ -48,7 +48,7 @@ public class Graph<T> implements Serializable {
         m_elements.add(from);
         m_elements.add(to);
     }
-    public void addEdges( T from, Set<T> to){
+    public void addEdges(T from,Set<T> to) {
         Set<T> successors=m_successorsByNodes.get(from);
         if (successors==null) {
             successors=new HashSet<T>();

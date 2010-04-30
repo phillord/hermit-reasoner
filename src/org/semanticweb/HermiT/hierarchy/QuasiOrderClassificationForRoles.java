@@ -72,10 +72,6 @@ public class QuasiOrderClassificationForRoles extends QuasiOrderClassification {
             super.addKnownSubsumption(subConceptForInverse,superConceptForInverse);
         }
     }
-    protected void addEdges(AtomicConcept subConcept,Set<AtomicConcept> superConcepts) {
-        for (AtomicConcept superConcept : superConcepts)
-            this.addKnownSubsumption(subConcept,superConcept);
-    }
     protected void addPossibleSubsumption(AtomicConcept subConcept,AtomicConcept superConcept) {
         super.addPossibleSubsumption(subConcept,superConcept);
         if (m_hasInverses) {
