@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -54,7 +54,7 @@ public class DatatypeRegistry {
         registerDatatypeHandler(new AnyURIDatatypeHandler());
         registerDatatypeHandler(new XMLLiteralDatatypeHandler());
     }
-    
+
     public static void registerDatatypeHandler(DatatypeHandler datatypeHandler) {
         synchronized (s_handlersByDatatypeURI) {
             for (String datatypeURI : datatypeHandler.getManagedDatatypeURIs())
@@ -75,14 +75,16 @@ public class DatatypeRegistry {
             datatypeHandler=s_handlersByDatatypeURI.get(datatypeURI);
         }
         if (datatypeHandler==null) {
-            String LB=System.getProperty("line.separator");
-            String message="HermiT supports all and only the datatypes of the OWL 2 datatype map, see "+LB
-                + "http://www.w3.org/TR/owl2-syntax/#Datatype_Maps"+LB
-                + "The datatype "+datatypeURI+" is not part of the OWL 2 datatype map and "+LB
-                + "no custom datatype definition is given."+LB
-                + "This means that HermiT cannot handle the datatype. ";
+            String CRLF=System.getProperty("line.separator");
+            String message=
+                "HermiT supports all and only the datatypes of the OWL 2 datatype map, see "+CRLF+
+                "http://www.w3.org/TR/owl2-syntax/#Datatype_Maps. "+CRLF+
+                "The datatype '"+datatypeURI+"' is not part of the OWL 2 datatype map and "+CRLF+
+                "no custom datatype definition is given; "+CRLF+
+                "therefore, HermiT cannot handle this datatype.";
             throw new UnsupportedDatatypeException(message);
-        } else
+        }
+        else
             return datatypeHandler;
     }
     protected static DatatypeHandler getDatatypeHandlerFor(DatatypeRestriction datatypeRestriction) throws UnsupportedDatatypeException {

@@ -20,7 +20,6 @@ package org.semanticweb.HermiT.hierarchy;
 import java.util.Map;
 import java.util.Set;
 
-import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLClause;
@@ -30,7 +29,7 @@ import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
 
 public class QuasiOrderRoleClassificationManager<E extends Role> extends QuasiOrderClassificationManager {
-    
+
     protected final boolean m_hasInverses;
     protected final Map<E,AtomicConcept> m_conceptsForRoles;
     protected final Map<AtomicConcept,E> m_rolesForConcepts;
@@ -86,7 +85,7 @@ public class QuasiOrderRoleClassificationManager<E extends Role> extends QuasiOr
         }
     }
     protected boolean isRelevantConcept(AtomicConcept atomicConcept) {
-        return atomicConcept.equals(AtomicConcept.THING) || atomicConcept.equals(AtomicConcept.NOTHING) || (Prefixes.isInternalIRIForPropertyClassification(atomicConcept.getIRI()));
+        return atomicConcept.equals(AtomicConcept.THING) || atomicConcept.equals(AtomicConcept.NOTHING) || atomicConcept.getIRI().startsWith("internal:prop#");
     }
     protected ReasoningTaskDescription getSatTestDescription(AtomicConcept atomicConcept) {
         return ReasoningTaskDescription.isRoleSatisfiable(m_rolesForConcepts.get(atomicConcept),true);
@@ -98,7 +97,7 @@ public class QuasiOrderRoleClassificationManager<E extends Role> extends QuasiOr
         Object[] roles=new Object[superconcepts.length];
         for (int i=0; i<roles.length; i++) {
             assert superconcepts[i] instanceof AtomicConcept;
-            roles[i]=m_rolesForConcepts.get((AtomicConcept)superconcepts[i]);
+            roles[i]=m_rolesForConcepts.get(superconcepts[i]);
         }
         return ReasoningTaskDescription.isRoleSubsumedByList(m_rolesForConcepts.get(subConcept),roles,true);
     }

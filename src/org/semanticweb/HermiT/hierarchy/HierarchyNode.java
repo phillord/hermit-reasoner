@@ -45,6 +45,21 @@ public class HierarchyNode<E> {
     public E getRepresentative() {
         return m_representative;
     }
+    public boolean isEquivalentElement(E element) {
+        return m_equivalentElements.contains(element);
+    }
+    public boolean isAncestorElement(E ancestor) {
+        for (HierarchyNode<E> node : getAncestorNodes())
+            if (node.isEquivalentElement(ancestor))
+                return true;
+        return false;
+    }
+    public boolean isDescendantElement(E descendant) {
+        for (HierarchyNode<E> node : getDescendantNodes())
+            if (node.isEquivalentElement(descendant))
+                return true;
+        return false;
+    }
     public Set<E> getEquivalentElements() {
         return Collections.unmodifiableSet(m_equivalentElements);
     }

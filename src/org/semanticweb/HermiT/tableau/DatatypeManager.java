@@ -76,6 +76,8 @@ public final class DatatypeManager implements Serializable {
         m_unionDependencySet=new UnionDependencySet(16);
         m_newVariableAdded=new boolean[1];
         m_unknownDatatypeRestrictionsPermanent=tableau.m_permanentDLOntology.getAllUnknownDatatypeRestrictions();
+        if (tableau.m_additionalDLOntology!=null)
+            additionalDLOntologySet(tableau.m_additionalDLOntology);
     }
     public void additionalDLOntologySet(DLOntology additionalDLOntology) {
         m_unknownDatatypeRestrictionsAdditional=additionalDLOntology.getAllUnknownDatatypeRestrictions();

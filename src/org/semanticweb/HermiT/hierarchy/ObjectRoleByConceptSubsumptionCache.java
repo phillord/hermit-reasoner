@@ -21,7 +21,6 @@ package org.semanticweb.HermiT.hierarchy;
  import java.util.Map;
 import java.util.Set;
 
-import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.graph.Graph;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
@@ -91,6 +90,6 @@ import org.semanticweb.HermiT.tableau.Tableau;
          return ReasoningTaskDescription.isRoleSubsumedBy(m_rolesForConcepts.get(subConcept),m_rolesForConcepts.get(superConcept),m_isForObjectProperties);
      }
      protected boolean isRelevantConcept(AtomicConcept atomicConcept) {
-         return atomicConcept.equals(AtomicConcept.THING) || atomicConcept.equals(AtomicConcept.NOTHING) || (Prefixes.isInternalIRIForPropertyClassification(atomicConcept.getIRI()));
+         return atomicConcept.equals(AtomicConcept.THING) || atomicConcept.equals(AtomicConcept.NOTHING) || atomicConcept.getIRI().startsWith("internal:prop#");
      }
  }
