@@ -59,14 +59,12 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
             descriptionGraphs=Collections.emptySet();
         m_reasoner=new Reasoner(configuration,m_ontology,descriptionGraphs);
     }
-    protected void createChangeTrackingReasoner() {
-        Configuration c=new Configuration();
-        c.throwInconsistentOntologyException=false;
-        createOWLReasoner(c);
-    }
-    protected void createOWLReasoner(Configuration configuration) {
+    protected void createOWLReasoner(Configuration c) {
         OWLReasonerFactory factory=new ReasonerFactory();
-        m_reasoner=(Reasoner)factory.createReasoner(m_ontology,configuration);
+        m_reasoner=(Reasoner)factory.createReasoner(m_ontology,c);
+    }
+    protected void createOWLReasoner() {
+        createOWLReasoner(getConfiguration());
     }
 
     /**

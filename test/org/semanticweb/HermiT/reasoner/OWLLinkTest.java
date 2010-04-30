@@ -1,12 +1,7 @@
 package org.semanticweb.HermiT.reasoner;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.reasoner.Node;
 import org.semanticweb.owlapi.reasoner.NodeSet;
 import org.semanticweb.owlapi.util.SimpleIRIMapper;
 
@@ -40,8 +35,25 @@ public class OWLLinkTest extends AbstractReasonerTest {
         }
         m_reasoner.getDisjointObjectProperties(m_dataFactory.getOWLObjectProperty(IRI.create(NS+"hasParent")),false);
     }
-
-    public void testTooManyProperties() throws Exception {
+    public void testBobTestAandB() throws Exception {
+        String[] ontologies=new String[] { "agent-inst.owl","test.owl","situation-inst.owl","situation.owl","space.owl","agent.owl","time.owl" };
+        String base="http://www.iyouit.eu/";
+        String mainOntology=base+"agent.owl";
+        for (String ont : ontologies) {
+            IRI physicalIRI=IRI.create(getClass().getResource("res/OWLLink/"+ont).toURI());
+            IRI logicalIRI=IRI.create(base+ont);
+            m_ontologyManager.addIRIMapper(new SimpleIRIMapper(logicalIRI,physicalIRI));
+        }
+        m_ontology=m_ontologyManager.loadOntology(IRI.create(mainOntology));
+        createReasoner();
+        OWLObjectProperty knows=m_dataFactory.getOWLObjectProperty(IRI.create(mainOntology+"#knows"));
+        NodeSet<OWLObjectProperty> peers=m_reasoner.getSubObjectProperties(knows, true);
+        assertTrue(peers.getFlattened().size()==10); // Test A from the Bob paper
+        peers=m_reasoner.getSubObjectProperties(knows, false);
+        assertTrue(peers.getFlattened().size()==51); // Test B from the Bob paper
+    }
+    /*
+    public void testBobTestC() throws Exception {
         String[] ontologies=new String[] { "agent-inst.owl","test.owl","situation-inst.owl","situation.owl","space.owl","agent.owl","time.owl" };
         String base="http://www.iyouit.eu/";
         String mainOntology=base+"agent-inst.owl";
@@ -67,4 +79,69 @@ public class OWLLinkTest extends AbstractReasonerTest {
                 assertTrue(expectedValues.contains(ni));
             }
     }
+    public void testBobTests() throws Exception {
+        // Tests 1a to 3b check for cardinality merging abilities within different expressive language fragments. 
+        // Tests 4 to 6 focus on blocking abilities with or without inverse properties.
+        // Test 7 is for nominals. 
+        // Test 8 tests the open world assumption., <rdf:Description about="&prem;I"> should have rdf:about (fixed locally)
+        // Tests 9 to 10b test property filler merging. 
+        // Test 11 is a combined syntax/special test case. It checks whether the systems handle empty 
+        // unions, intersections, or enumerations logically correctly. 
+        // Test 12 not tested in the Bob paper, I can't see why the entailment should follow 
+        // Test 13 tests individual merging.  
+        // Tests 14 is a nominal test with merging. 
+        // Test 15 tests reasoning with inverse roles.
+        // Test 16 is a nominal test. 
+        // Test 18 tests A or not A equiv top.
+        // Test 19 is a syntax check whether there are complex properties which are not allowed 
+        // within at-most cardinality restrictions and a transitive property which cannot be a 
+        // sub-property of a functional property.
+        // Test 20 tests an infinite model. 
+        // Test 21 is a datatype property test and builds up a datatype property hierarchy, 
+        // assigns some fillers and checks whether the system assume that datatype properties are 
+        // functional per se (which they are not). 
+        // <rdf:Description about="&prem;i1"> should have rdf:about (fixed locally)
+        // Test 22 defines an unsatisfiable class due to conflicting range restrictions of a datatype (>= 0 <= 1).
+        // Test 23 is a simple partitioning test.
+        // Test 25 is an open world nominal test, <rdf:Description about="&prem;a">  should have rdf:about (fixed locally)
+        // Test 26 is a kind of nominal merging test.
+        // Test 27 aims at an sub-property entailment with help of nominals. 
+        // Test 28 is an and-branching test and checks efficient propagation of filler restrictions and non-determinism. 
+        // The test 29a/b is again a cardinality merging problem (with non-determinism).
+        
+        // "1b", "2b" removed because HermiT has timeouts
+        
+        String[] tests=new String[] { "1a", "2a", "2c", "3a", "3b", "4", "5", "6", "7", "8", "9", 
+              "10a", "10b", "11", "13", "14", "15", "16", "17", "18", 
+              "20", "21", "22", "23", "24", "25", "26", "27", "28", "29a"};
+
+        for (String testName : tests) {
+            boolean testInconsistency=(testName.equals("17") ? true : false );
+            IRI physicalIRI=IRI.create(getClass().getResource("res/OWLLink/"+testName+".owl").toURI());
+            m_ontology=m_ontologyManager.loadOntology(physicalIRI);
+            createReasoner();
+            OWLOntology c=null;
+            if (!testInconsistency) { 
+                physicalIRI=IRI.create(getClass().getResource("res/OWLLink/"+testName+"-conclusion.owl").toURI());
+                c=m_ontologyManager.loadOntology(physicalIRI); 
+            }
+            boolean result=testInconsistency ? !m_reasoner.isConsistent() : m_reasoner.isEntailed(c.getLogicalAxioms());
+            assertTrue("Test "+testName+" failed! ",result);
+        }
+        
+        // Test 19 is for non-simple properties in number restrictions
+        IRI physicalIRI=IRI.create(getClass().getResource("res/OWLLink/19.owl").toURI());
+        m_ontology=m_ontologyManager.loadOntology(physicalIRI);
+        boolean errorSpotted=false;
+        try {
+            createReasoner();
+        } catch (IllegalArgumentException e) {
+            if (e.getMessage().contains("Non-simple property"))
+                errorSpotted=true;
+            else
+                throw new Exception(e.getMessage());
+        }
+        assertTrue(errorSpotted);
+    }
+    */
 }

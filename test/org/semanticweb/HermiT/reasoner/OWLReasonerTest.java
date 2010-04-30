@@ -26,7 +26,7 @@ public class OWLReasonerTest extends AbstractReasonerTest {
 
         OWLClass a = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "A"));
         OWLClass b = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "B"));
-        createChangeTrackingReasoner();
+        createOWLReasoner();
         NodeSet<OWLClass> aSuper=m_reasoner.getSuperClasses(a,false);
         NodeSet<OWLClass> bSuper=m_reasoner.getSuperClasses(b,false);
         NodeSet<OWLClass> aDirect=m_reasoner.getSuperClasses(a,true);
@@ -133,7 +133,7 @@ public class OWLReasonerTest extends AbstractReasonerTest {
         String axioms = "ObjectPropertyAssertion(:f :a :b) FunctionalObjectProperty(:f)";
         loadOntologyWithAxioms(axioms);
 
-        createChangeTrackingReasoner();
+        createOWLReasoner();
         assertTrue(m_reasoner.isConsistent());
 
         OWLObjectProperty f = m_dataFactory.getOWLObjectProperty(IRI.create(AbstractReasonerTest.NS + "f"));
@@ -166,7 +166,7 @@ public class OWLReasonerTest extends AbstractReasonerTest {
                       "DataPropertyAssertion(:dp :c \"1\"^^xsd:short)";
         loadOntologyWithAxioms(axioms);
 
-        createChangeTrackingReasoner();
+        createOWLReasoner();
         assertTrue(m_reasoner.isConsistent());
 
         OWLDataProperty dp = m_dataFactory.getOWLDataProperty(IRI.create(AbstractReasonerTest.NS + "dp"));

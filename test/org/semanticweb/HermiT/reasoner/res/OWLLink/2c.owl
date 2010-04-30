@@ -1,0 +1,120 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY xsd  "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#"> ]>
+
+<rdf:RDF
+  xmlns:rdf  = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:rdfs ="http://www.w3.org/2000/01/rdf-schema#"
+  xmlns:owl  ="http://www.w3.org/2002/07/owl#"
+  xmlns:owl11="http://www.w3.org/2006/12/owl11#"
+  xmlns:xsd  ="&xsd;"
+  xmlns      ="http://www.informatik.uni-ulm.de/ki/Liebig/reasoner-eval/2c.owl#"
+  xml:base   ="http://www.informatik.uni-ulm.de/ki/Liebig/reasoner-eval/2c.owl#"
+>
+
+<owl:Ontology rdf:about="">
+ <owl:versionInfo>7.11.2008, version 0.1</owl:versionInfo>
+ <rdfs:comment>unsatisfiability test (SHN), from Volker Haarslev</rdfs:comment>
+</owl:Ontology>
+
+    <owl:Class rdf:about="#B" />
+
+    <owl:Class rdf:about="#C" />
+    
+    <owl:Class rdf:about="#D" />
+
+    <owl:ObjectProperty rdf:about="#R" /> 
+     
+    <owl:ObjectProperty rdf:about="#S" />
+
+   <owl:ObjectProperty rdf:about="#RS">
+        <rdfs:subPropertyOf rdf:resource="#S"/>
+        <rdfs:subPropertyOf rdf:resource="#R"/>
+    </owl:ObjectProperty>
+
+    <owl:Class rdf:about="#A">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#R"/>
+                <owl11:onClass>
+                    <owl:Class>
+                        <owl:unionOf rdf:parseType="Collection">
+                            <rdf:Description rdf:about="#D"/>
+                            <rdf:Description rdf:about="#B"/>
+                        </owl:unionOf>
+                    </owl:Class>
+                </owl11:onClass>
+                <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">5</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#R"/>
+                <owl:allValuesFrom>
+                    <owl:Class>
+                        <owl:unionOf rdf:parseType="Collection">
+                            <rdf:Description rdf:about="#C"/>
+                            <rdf:Description rdf:about="#B"/>
+                        </owl:unionOf>
+                    </owl:Class>
+                </owl:allValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#S"/>
+                <owl11:onClass>
+                    <owl:Class>
+                        <owl:unionOf rdf:parseType="Collection">
+                            <rdf:Description rdf:about="#C"/>
+                            <rdf:Description rdf:about="#D"/>
+                        </owl:unionOf>
+                    </owl:Class>
+                </owl11:onClass>
+                <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">5</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#RS"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">10</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#S"/>
+                <owl:allValuesFrom>
+                    <owl:Class>
+                        <owl:unionOf rdf:parseType="Collection">
+                            <owl:Class>
+                                <owl:complementOf rdf:resource="#B"/>
+                            </owl:Class>
+                            <owl:Class>
+                                <owl:complementOf rdf:resource="#C"/>
+                            </owl:Class>
+                        </owl:unionOf>
+                    </owl:Class>
+                </owl:allValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+
+
+<!--
+(define-primitive-role r)
+(define-primitive-role s)
+(define-primitive-role rs :parents (r s))
+(define-primitive-concept B)
+(define-primitive-concept C)
+(define-primitive-concept D)
+(define-primitive-concept A (and (at-most 5 s (or C D)) (at-most 5 r (or D B))
+                                 (all s (or (not B) (not C))) (all r (or B C))
+                                 (at-least 10 rs)))
+
+conclusion: A is satisfiable
+-->
+    
+
+</rdf:RDF>
