@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -87,10 +87,11 @@ public class BuiltInPropertyManager {
         axiomatizeBuiltInPropertiesAsNeeded(axioms,false,false,false,false);
     }
     protected void axiomatizeTopObjectProperty(OWLAxioms axioms) {
-        // make top object property transitive
-        axioms.m_complexObjectPropertyInclusions.add(new OWLAxioms.ComplexObjectPropertyInclusion(m_topObjectProperty)); 
-        // make top object property symmetric
-        axioms.m_simpleObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { m_topObjectProperty,m_topObjectProperty.getInverseProperty() }); 
+        // TransitiveObjectProperty( owl:topObjectProperty )
+        axioms.m_complexObjectPropertyInclusions.add(new OWLAxioms.ComplexObjectPropertyInclusion(m_topObjectProperty));
+        // SymmetricObjectProperty( owl:topObjectProperty )
+        axioms.m_simpleObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { m_topObjectProperty,m_topObjectProperty.getInverseProperty() });
+        // SubClassOf( owl:Thing ObjectSomeValuesFrom( owl:topObjectProperty ObjectOneOf( <internal:nam#topIndividual> ) ) )
         OWLIndividual newIndividual=m_factory.getOWLNamedIndividual(IRI.create("internal:nam#topIndividual"));
         OWLObjectOneOf oneOfNewIndividual=m_factory.getOWLObjectOneOf(newIndividual);
         OWLObjectSomeValuesFrom hasTopNewIndividual=m_factory.getOWLObjectSomeValuesFrom(m_topObjectProperty,oneOfNewIndividual);
@@ -109,7 +110,7 @@ public class BuiltInPropertyManager {
     protected void axiomatizeBottomDataProperty(OWLAxioms axioms) {
         axioms.m_unsatisfiableDataProperties.add(m_bottomDataProperty);
     }
-    
+
     protected class Checker implements OWLClassExpressionVisitor {
         public boolean m_usesTopObjectProperty;
         public boolean m_usesBottomObjectProperty;
@@ -239,31 +240,31 @@ public class BuiltInPropertyManager {
         public void visit(OWLDataExactCardinality object) {
             visitProperty(object.getProperty());
         }
-    
+
         protected class FactVisitor extends OWLAxiomVisitorAdapter {
-    
+
             public void visit(OWLSameIndividualAxiom object) {
             }
-    
+
             public void visit(OWLDifferentIndividualsAxiom object) {
             }
-    
+
             public void visit(OWLClassAssertionAxiom object) {
                 object.getClassExpression().accept(Checker.this);
             }
-    
+
             public void visit(OWLObjectPropertyAssertionAxiom object) {
                 visitProperty(object.getProperty());
             }
-    
+
             public void visit(OWLNegativeObjectPropertyAssertionAxiom object) {
                 visitProperty(object.getProperty());
             }
-    
+
             public void visit(OWLDataPropertyAssertionAxiom object) {
                 visitProperty(object.getProperty());
             }
-    
+
             public void visit(OWLNegativeDataPropertyAssertionAxiom object) {
                 visitProperty(object.getProperty());
             }

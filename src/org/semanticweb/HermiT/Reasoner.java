@@ -384,6 +384,7 @@ public class Reasoner implements OWLReasoner {
             relevantAtomicConcepts.add(AtomicConcept.THING);
             relevantAtomicConcepts.add(AtomicConcept.NOTHING);
             for (AtomicConcept atomicConcept : m_dlOntology.getAllAtomicConcepts())
+                if (!Prefixes.isInternalIRI(atomicConcept.getIRI()))
                     relevantAtomicConcepts.add(atomicConcept);
             if (!isConsistent())
                 m_atomicConceptHierarchy=Hierarchy.emptyHierarchy(relevantAtomicConcepts,AtomicConcept.THING,AtomicConcept.NOTHING);

@@ -702,7 +702,6 @@ public class ReasonerTest extends AbstractReasonerTest {
             "SubDataPropertyOf( :dp6 :dp2 ) "+
             "SubDataPropertyOf( :dp7 owl:bottomDataProperty ) ";
         loadReasonerWithAxioms(axioms);
-        //System.out.println(m_reasoner.isSubClassOf(m_dataFactory.getOWLClass(IRI.create("internal:prop#6")), m_dataFactory.getOWLClass(IRI.create("internal:prop#5"))));
         assertHierarchies("res/hierarchy-printing-1.txt");
     }
 
