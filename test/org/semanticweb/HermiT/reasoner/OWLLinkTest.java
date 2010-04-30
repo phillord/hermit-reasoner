@@ -35,6 +35,8 @@ public class OWLLinkTest extends AbstractReasonerTest {
         }
         m_reasoner.getDisjointObjectProperties(m_dataFactory.getOWLObjectProperty(IRI.create(NS+"hasParent")),false);
     }
+    // below are all the tests from the paper
+    // "Who the heck is the father of Bob"
     public void testBobTestAandB() throws Exception {
         String[] ontologies=new String[] { "agent-inst.owl","test.owl","situation-inst.owl","situation.owl","space.owl","agent.owl","time.owl" };
         String base="http://www.iyouit.eu/";
