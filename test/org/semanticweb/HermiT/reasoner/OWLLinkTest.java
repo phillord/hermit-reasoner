@@ -1,7 +1,13 @@
 package org.semanticweb.HermiT.reasoner;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.reasoner.Node;
 import org.semanticweb.owlapi.reasoner.NodeSet;
 import org.semanticweb.owlapi.util.SimpleIRIMapper;
 
@@ -54,7 +60,7 @@ public class OWLLinkTest extends AbstractReasonerTest {
         peers=m_reasoner.getSubObjectProperties(knows, false);
         assertTrue(peers.getFlattened().size()==51); // Test B from the Bob paper
     }
-    /*
+    
     public void testBobTestC() throws Exception {
         String[] ontologies=new String[] { "agent-inst.owl","test.owl","situation-inst.owl","situation.owl","space.owl","agent.owl","time.owl" };
         String base="http://www.iyouit.eu/";
@@ -145,5 +151,4 @@ public class OWLLinkTest extends AbstractReasonerTest {
         }
         assertTrue(errorSpotted);
     }
-    */
 }
