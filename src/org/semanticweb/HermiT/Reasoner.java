@@ -513,7 +513,7 @@ public class Reasoner implements OWLReasoner {
         if (direct)
             return subsDisjoint;
         Set<Node<OWLClass>> result=new HashSet<Node<OWLClass>>();
-        result.add(equivalentToComplement);
+        if (equivalentToComplement.getSize() > 0) result.add(equivalentToComplement);
         result.addAll(subsDisjoint.getNodes());
         return new OWLClassNodeSet(result);
     }
@@ -682,14 +682,35 @@ public class Reasoner implements OWLReasoner {
     }
     public NodeSet<OWLObjectProperty> getSuperObjectProperties(OWLObjectPropertyExpression propertyExpression,boolean direct) {
         HierarchyNode<Role> node=getHierarchyNode(propertyExpression);
-        Set<HierarchyNode<Role>> result;
-        if (direct)
-            result=node.getParentNodes();
-        else {
+        Set<HierarchyNode<Role>> result=new HashSet<HierarchyNode<Role>>();
+        if (direct) {
+            // if the node contains only inverses, we have to add the successor nodes instead
+            for (HierarchyNode<Role> n : node.getParentNodes()) {
+                result.addAll(findClosestAtomicRoleContainingAntecedants(n));
+            }
+        } else {
             result=node.getAncestorNodes();
             result.remove(node);
         }
         return objectPropertyHierarchyNodesToNodeSet(result);
+    }
+    protected Set<HierarchyNode<Role>> findClosestAtomicRoleContainingAntecedants(HierarchyNode<Role> node) {
+        Set<HierarchyNode<Role>> result=new HashSet<HierarchyNode<Role>>();
+        boolean hasAtomicRole=false;
+        for (Role r : node.getEquivalentElements()) {
+            if (r instanceof AtomicRole) {
+                hasAtomicRole=true;
+                break;
+            }
+        }
+        if (hasAtomicRole) {
+            result.add(node);
+        } else {
+            for (HierarchyNode<Role> parent : node.getParentNodes()) {
+                result.addAll(findClosestAtomicRoleContainingAntecedants(parent));
+            }
+        }
+        return result;
     }
     public NodeSet<OWLObjectProperty> getAncestorObjectProperties(OWLObjectPropertyExpression propertyExpression) {
         HierarchyNode<Role> node=getHierarchyNode(propertyExpression);
@@ -697,14 +718,35 @@ public class Reasoner implements OWLReasoner {
     }
     public NodeSet<OWLObjectProperty> getSubObjectProperties(OWLObjectPropertyExpression propertyExpression,boolean direct) {
         HierarchyNode<Role> node=getHierarchyNode(propertyExpression);
-        Set<HierarchyNode<Role>> result;
-        if (direct)
-            result=node.getChildNodes();
-        else {
+        Set<HierarchyNode<Role>> result=new HashSet<HierarchyNode<Role>>();
+        if (direct) {
+            // if the node contains only inverses, we have to add the successor nodes instead
+            for (HierarchyNode<Role> n : node.getChildNodes()) {
+                result.addAll(findClosestAtomicRoleContainingDescendants(n));
+            }
+        } else {
             result=node.getDescendantNodes();
             result.remove(node);
         }
         return objectPropertyHierarchyNodesToNodeSet(result);
+    }
+    protected Set<HierarchyNode<Role>> findClosestAtomicRoleContainingDescendants(HierarchyNode<Role> node) {
+        Set<HierarchyNode<Role>> result=new HashSet<HierarchyNode<Role>>();
+        boolean hasAtomicRole=false;
+        for (Role r : node.getEquivalentElements()) {
+            if (r instanceof AtomicRole) {
+                hasAtomicRole=true;
+                break;
+            }
+        }
+        if (hasAtomicRole) {
+            result.add(node);
+        } else {
+            for (HierarchyNode<Role> child : node.getChildNodes()) {
+                result.addAll(findClosestAtomicRoleContainingDescendants(child));
+            }
+        }
+        return result;
     }
     public NodeSet<OWLObjectProperty> getDescendantObjectProperties(OWLObjectPropertyExpression propertyExpression) {
         HierarchyNode<Role> node=getHierarchyNode(propertyExpression);
@@ -1940,8 +1982,11 @@ public class Reasoner implements OWLReasoner {
     }
     protected NodeSet<OWLObjectProperty> objectPropertyHierarchyNodesToNodeSet(Collection<HierarchyNode<Role>> hierarchyNodes) {
         Set<Node<OWLObjectProperty>> result=new HashSet<Node<OWLObjectProperty>>();
-        for (HierarchyNode<Role> hierarchyNode : hierarchyNodes)
-            result.add(objectPropertyHierarchyNodeToNode(hierarchyNode));
+        for (HierarchyNode<Role> hierarchyNode : hierarchyNodes) {
+            // inverses are thrown out, so the node might then be empty
+            Node<OWLObjectProperty> opNode=objectPropertyHierarchyNodeToNode(hierarchyNode);
+            if (opNode.getSize()>0) result.add(opNode);
+        }
         return new OWLObjectPropertyNodeSet(result);
     }
     protected Node<OWLDataProperty> dataPropertyHierarchyNodeToNode(HierarchyNode<AtomicRole> hierarchyNode) {

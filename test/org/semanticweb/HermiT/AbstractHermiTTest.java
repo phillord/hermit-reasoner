@@ -74,4 +74,45 @@ public abstract class AbstractHermiTTest extends TestCase {
             throw e;
         }
     }
+//    protected static <T> void assertContainsAllSets(Set<Set<T>> actual,Set<T>... control) {
+//        try {
+//            assertEquals(control.length,actual.size());
+//            for (int i=0;i<control.length;i++) {
+//                // find the set that contains exactly the members of the String set from control
+//                boolean containsSet=false;
+//                for (Set<T> actualMember : actual) {
+//                    if (actualMember.size()==control[i].length) {
+//                        boolean containsAll=true;
+//                        for (int j=0;j<control[i].length;j++) {
+//                            if (!actualMember.contains(control[i][j])) {
+//                                containsAll=false;
+//                                break;
+//                            }
+//                        }
+//                        if (containsAll) {
+//                            containsSet=true;
+//                            break;
+//                        }
+//                    }
+//                }
+//                assertTrue(containsSet);
+//            }
+//        }
+//        catch (AssertionFailedError e) {
+//            System.out.println("Control set ("+control.length+" elements):");
+//            System.out.println("------------------------------------------");
+//            for (T[] object : control)
+//                for (T member : object)
+//                    System.out.println(member.toString());
+//            System.out.println("------------------------------------------");
+//            System.out.println("Actual set ("+actual.size()+" elements):");
+//            System.out.println("------------------------------------------");
+//            for (Collection<T> object : actual)
+//                for (T member : object)
+//                    System.out.println(member.toString());
+//            System.out.println("------------------------------------------");
+//            System.out.flush();
+//            throw e;
+//        }
+//    }
 }

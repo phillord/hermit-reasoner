@@ -35,6 +35,85 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
+    @SuppressWarnings("unchecked")
+    public void testSubProperties() throws Exception {
+        loadOntologyWithAxioms(
+                "Declaration(ObjectProperty(:r1))"+
+                "Declaration(ObjectProperty(:r2))"+
+                "Declaration(ObjectProperty(:r3))"+
+                "Declaration(ObjectProperty(:s1))"+
+                "Declaration(ObjectProperty(:s2))"+
+                "Declaration(ObjectProperty(:s3))"+
+                "Declaration(ObjectProperty(:s4))"+
+                "Declaration(ObjectProperty(:t1))"+
+                "Declaration(ObjectProperty(:t2))"+
+                "Declaration(ObjectProperty(:u))"+
+                "SubObjectPropertyOf(:r1 ObjectInverseOf(:s1))"+
+                "SubObjectPropertyOf(:r1 ObjectInverseOf(:s3))"+
+                "SubObjectPropertyOf(:r2 ObjectInverseOf(:s2))"+
+                "SubObjectPropertyOf(:r3 ObjectInverseOf(:s2))"+
+                "SubObjectPropertyOf(:r3 ObjectInverseOf(:s4))"+
+                "SubObjectPropertyOf(ObjectInverseOf(:s1) :t1)"+
+                "SubObjectPropertyOf(ObjectInverseOf(:s2) :t1)"+
+                "SubObjectPropertyOf(ObjectInverseOf(:s3) :t2)"+
+                "SubObjectPropertyOf(ObjectInverseOf(:s4) :t2)"+
+                "SubObjectPropertyOf(:t1 ObjectInverseOf(:u))"+
+                "SubObjectPropertyOf(:t2 ObjectInverseOf(:u))"
+        );
+        createReasoner();
+
+        assertSubObjectProperties("http://www.w3.org/2002/07/owl#bottomObjectProperty");
+        assertSubObjectProperties("r1", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
+        assertSubObjectProperties("r2", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
+        assertSubObjectProperties("r3", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
+        assertSubObjectProperties("s1", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
+        assertSubObjectProperties("s2", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
+        assertSubObjectProperties("s3", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
+        assertSubObjectProperties("s4", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
+        assertSubObjectProperties("t1", EQ("r1"), EQ("r2"), EQ("r3"));
+        assertSubObjectProperties("t2", EQ("r1"), EQ("r3"));
+        assertSubObjectProperties("u", EQ("s1"), EQ("s2"), EQ("s3"), EQ("s4"));
+        assertSubObjectProperties("http://www.w3.org/2002/07/owl#topObjectProperty", EQ("u"), EQ("t1"), EQ("t2"));
+        
+        assertSubObjectPropertiesOfInverse("http://www.w3.org/2002/07/owl#bottomObjectProperty");
+        assertSubObjectPropertiesOfInverse("r1", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
+        assertSubObjectPropertiesOfInverse("r2", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
+        assertSubObjectPropertiesOfInverse("r3", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
+        assertSubObjectPropertiesOfInverse("s1", EQ("r1"));
+        assertSubObjectPropertiesOfInverse("s2", EQ("r2"), EQ("r3"));
+        assertSubObjectPropertiesOfInverse("s3", EQ("r1"));
+        assertSubObjectPropertiesOfInverse("s4", EQ("r3"));
+        assertSubObjectPropertiesOfInverse("t1", EQ("s1"), EQ("s2"));
+        assertSubObjectPropertiesOfInverse("t2", EQ("s3"), EQ("s4"));
+        assertSubObjectPropertiesOfInverse("u", EQ("t1"), EQ("t2"));
+        assertSubObjectPropertiesOfInverse("http://www.w3.org/2002/07/owl#topObjectProperty", EQ("u"), EQ("t1"), EQ("t2"));
+        
+        assertSuperObjectProperties("http://www.w3.org/2002/07/owl#bottomObjectProperty", EQ("s1"), EQ("s2"), EQ("s3"), EQ("s4"), EQ("r1"), EQ("r2"), EQ("r3"));
+        assertSuperObjectProperties("r1", EQ("t1"), EQ("t2"));
+        assertSuperObjectProperties("r2", EQ("t1"));
+        assertSuperObjectProperties("r3", EQ("t1"), EQ("t2"));
+        assertSuperObjectProperties("s1", EQ("u"));
+        assertSuperObjectProperties("s2", EQ("u"));
+        assertSuperObjectProperties("s3", EQ("u"));
+        assertSuperObjectProperties("s4", EQ("u"));
+        assertSuperObjectProperties("t1", EQ("http://www.w3.org/2002/07/owl#topObjectProperty"));
+        assertSuperObjectProperties("t2", EQ("http://www.w3.org/2002/07/owl#topObjectProperty"));
+        assertSuperObjectProperties("u", EQ("http://www.w3.org/2002/07/owl#topObjectProperty"));
+        assertSuperObjectProperties("http://www.w3.org/2002/07/owl#topObjectProperty");
+        
+        assertSuperObjectPropertiesOfInverse("http://www.w3.org/2002/07/owl#bottomObjectProperty", EQ("s1"), EQ("s2"), EQ("s3"), EQ("s4"), EQ("r1"), EQ("r2"), EQ("r3"));
+        assertSuperObjectPropertiesOfInverse("r1", EQ("s1"), EQ("s3"));
+        assertSuperObjectPropertiesOfInverse("r2", EQ("s2"));
+        assertSuperObjectPropertiesOfInverse("r3", EQ("s2"), EQ("s4"));
+        assertSuperObjectPropertiesOfInverse("s1", EQ("t1"));
+        assertSuperObjectPropertiesOfInverse("s2", EQ("t1"));
+        assertSuperObjectPropertiesOfInverse("s3", EQ("t2"));
+        assertSuperObjectPropertiesOfInverse("s4", EQ("t2"));
+        assertSuperObjectPropertiesOfInverse("t1", EQ("u"));
+        assertSuperObjectPropertiesOfInverse("t2", EQ("u"));
+        assertSuperObjectPropertiesOfInverse("u", EQ("http://www.w3.org/2002/07/owl#topObjectProperty"));
+        assertSuperObjectPropertiesOfInverse("http://www.w3.org/2002/07/owl#topObjectProperty");
+    }
     public void testUnknownClassHierarcyPosition() throws Exception {
         loadOntologyWithAxioms(
             "SubClassOf( owl:Thing ObjectOneOf( :ind ) )"+
@@ -781,7 +860,6 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertEquivalentObjectProperties("r5",IRIs("r3","r5"));
         assertEquivalentObjectProperties("r6",IRIs("r6"));
 
-        assertSuperObjectProperties("r2",EQ("r1"));
         assertSuperObjectProperties("r3",EQ("r1"));
         assertSuperObjectProperties("r4",EQ("r2"),EQ("r3","r5"));
         assertSuperObjectProperties("r5",EQ("r1"));

@@ -180,6 +180,18 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSuperObjectProperties(ope,true));
         assertContainsAll(actual,control);
     }
+    
+    /**
+     * Checks the superproperties of some object property.
+     */
+    protected void assertSuperObjectPropertiesOfInverse(String objectProperty,Set<String>... control) {
+        if (!objectProperty.contains("#"))
+            objectProperty=NS+objectProperty;
+        OWLObjectProperty op=m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
+        OWLObjectPropertyExpression ope=m_dataFactory.getOWLObjectInverseOf(op);
+        Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSuperObjectProperties(ope,true));
+        assertContainsAll(actual,control);
+    }
 
     /**
      * Checks the subproperties of some object property.
@@ -188,6 +200,18 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         if (!objectProperty.contains("#"))
             objectProperty=NS+objectProperty;
         OWLObjectPropertyExpression ope=m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
+        Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSubObjectProperties(ope,true));
+        assertContainsAll(actual,control);
+    }
+    
+    /**
+     * Checks the subproperties of the inverse of the given object property.
+     */
+    protected void assertSubObjectPropertiesOfInverse(String objectProperty,Set<String>... control) {
+        if (!objectProperty.contains("#"))
+            objectProperty=NS+objectProperty;
+        OWLObjectProperty op=m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
+        OWLObjectPropertyExpression ope=m_dataFactory.getOWLObjectInverseOf(op);
         Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSubObjectProperties(ope,true));
         assertContainsAll(actual,control);
     }
@@ -247,16 +271,16 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     protected static Set<Set<String>> nodeSetOfOPEsToStrings(NodeSet<OWLObjectProperty> nodeSet) {
         Set<Set<String>> result=new HashSet<Set<String>>();
         for (Node<OWLObjectProperty> node : nodeSet.getNodes()) {
-            Set<String> translatedSet=nodeOfOPEs(node);
-            result.add(translatedSet);
+            result.add(nodeOfOPEs(node));
         }
         return result;
     }
 
     protected static Set<String> nodeOfOPEs(Node<OWLObjectProperty> node) {
         Set<String> translatedSet=new HashSet<String>();
-        for (OWLObjectProperty ope : node.getEntities())
+        for (OWLObjectProperty ope : node.getEntities()) {
             translatedSet.add((ope).getIRI().toString());
+        }
         return translatedSet;
     }
 
