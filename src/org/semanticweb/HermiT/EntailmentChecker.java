@@ -75,13 +75,11 @@ import org.semanticweb.owlapi.model.OWLIrreflexiveObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLNegativeDataPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLNegativeObjectPropertyAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLObjectMaxCardinality;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLObjectPropertyDomainAxiom;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLObjectPropertyRangeAxiom;
-import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLReflexiveObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLSameIndividualAxiom;
@@ -318,12 +316,13 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
         OWLObjectPropertyExpression[] props=axiom.getProperties().toArray(new OWLObjectPropertyExpression[n]);
         for (int i=0;i<n-1;i++) {
             for (int j=i+1;j<n;j++) {
-                OWLObjectSomeValuesFrom some_i=factory.getOWLObjectSomeValuesFrom(props[i],factory.getOWLThing());
-                OWLObjectSomeValuesFrom some_j=factory.getOWLObjectSomeValuesFrom(props[j],factory.getOWLThing());
-                OWLObjectMaxCardinality max1=factory.getOWLObjectMaxCardinality(1,factory.getOWLObjectProperty(IRI.create(AtomicRole.TOP_OBJECT_ROLE.getIRI())));
-                OWLClassExpression desc=factory.getOWLObjectIntersectionOf(some_i,some_j,max1);
-                if (reasoner.isSatisfiable(desc))
-                    return Boolean.FALSE;
+                if (!reasoner.isDisjointObjectProperty(props[i],props[j])) return Boolean.FALSE;
+//                OWLObjectSomeValuesFrom some_i=factory.getOWLObjectSomeValuesFrom(props[i],factory.getOWLThing());
+//                OWLObjectSomeValuesFrom some_j=factory.getOWLObjectSomeValuesFrom(props[j],factory.getOWLThing());
+//                OWLObjectMaxCardinality max1=factory.getOWLObjectMaxCardinality(1,factory.getOWLObjectProperty(IRI.create(AtomicRole.TOP_OBJECT_ROLE.getIRI())));
+//                OWLClassExpression desc=factory.getOWLObjectIntersectionOf(some_i,some_j,max1);
+//                if (reasoner.isSatisfiable(desc))
+//                    return Boolean.FALSE;
             }
         }
         return Boolean.TRUE;

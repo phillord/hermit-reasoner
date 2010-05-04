@@ -828,6 +828,20 @@ public class Reasoner implements OWLReasoner {
             result.add(m_objectRoleHierarchy.getBottomNode());
         return objectPropertyHierarchyNodesToNodeSet(result);
     }
+    public boolean isDisjointObjectProperty(OWLObjectPropertyExpression propertyExpression1,OWLObjectPropertyExpression propertyExpression2) {
+        Role role1=H(propertyExpression1);
+        Role role2=H(propertyExpression2);
+        Individual freshIndividualA=Individual.createAnonymous("fresh-individual-A");
+        Individual freshIndividualB=Individual.createAnonymous("fresh-individual-B");
+        Atom roleAssertion1=role1.getRoleAssertion(freshIndividualA,freshIndividualB);
+        Atom roleAssertion2=role2.getRoleAssertion(freshIndividualA,freshIndividualB);
+        Set<Atom> perTestAtoms=new HashSet<Atom>(2);
+        perTestAtoms.add(roleAssertion1);
+        perTestAtoms.add(roleAssertion2);
+        Tableau tableau=getTableau();
+        boolean disjoint=!tableau.isSatisfiable(false,perTestAtoms,null,null,null,null,new ReasoningTaskDescription(true,"disjointness of {0} and {1}",role1,role2));
+        return disjoint;
+    }
     public boolean isFunctional(OWLObjectPropertyExpression propertyExpression) {
         throwFreshEntityExceptionIfNecessary(propertyExpression);
         throwInconsistentOntologyExceptionIfNecessary();
