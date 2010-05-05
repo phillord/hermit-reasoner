@@ -1,23 +1,22 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
 package org.semanticweb.HermiT.datatypes.owlreal;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +30,7 @@ import org.semanticweb.HermiT.datatypes.DatatypeHandler;
 import org.semanticweb.HermiT.datatypes.MalformedLiteralException;
 import org.semanticweb.HermiT.datatypes.UnsupportedFacetException;
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
+import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
 
 /**
@@ -45,14 +45,6 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
     protected static final String OWL_NS=Prefixes.s_semanticWebPrefixes.get("owl");
     protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd");
 
-    protected static final Set<Class<?>> s_managedDataValueClasses=new HashSet<Class<?>>();
-    static {
-        s_managedDataValueClasses.add(Integer.class);
-        s_managedDataValueClasses.add(Long.class);
-        s_managedDataValueClasses.add(BigInteger.class);
-        s_managedDataValueClasses.add(BigDecimal.class);
-        s_managedDataValueClasses.add(BigRational.class);
-    }
     protected static final Map<String,NumberInterval> s_intervalsByDatatype=new HashMap<String,NumberInterval>();
     protected static final Map<String,ValueSpaceSubset> s_subsetsByDatatype=new HashMap<String,ValueSpaceSubset>();
     static {
@@ -117,25 +109,6 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
     public Set<String> getManagedDatatypeURIs() {
         return s_intervalsByDatatype.keySet();
     }
-    public Set<Class<?>> getManagedDataValueClasses() {
-        return s_managedDataValueClasses;
-    }
-    public String toString(Prefixes prefixes,Object dataValue) {
-        String datatypeURI;
-        if (dataValue instanceof BigRational)
-            datatypeURI=OWL_NS+"rational";
-        else if (dataValue instanceof BigDecimal)
-            datatypeURI=XSD_NS+"decimal";
-        else if (dataValue instanceof BigInteger)
-            datatypeURI=XSD_NS+"integer";
-        else if (dataValue instanceof Long)
-            datatypeURI=XSD_NS+"long";
-        else if (dataValue instanceof Integer)
-            datatypeURI=XSD_NS+"int";
-        else
-            throw new IllegalArgumentException("Invalid data value.");
-        return '\"'+dataValue.toString()+"\"^^"+prefixes.abbreviateIRI(datatypeURI);
-    }
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert s_intervalsByDatatype.keySet().contains(datatypeURI);
         try {
@@ -158,11 +131,12 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
             String facetURI=datatypeRestriction.getFacetURI(index);
             if (!s_supportedFacetURIs.contains(facetURI))
                 throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' is not supported on datatypes derived from owl:real.");
-            Object facetValue=datatypeRestriction.getFacetValue(index);
-            if (!(facetValue instanceof Number))
+            Constant facetValue=datatypeRestriction.getFacetValue(index);
+            Object facetDataValue=facetValue.getDataValue();
+            if (!(facetDataValue instanceof Number))
                 throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' takes only numbers as values.");
-            if (!Numbers.isValidNumber((Number)facetValue))
-                throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' does not support the number "+facetValue.toString()+" of class "+facetValue.getClass()+" as a value.");
+            if (!Numbers.isValidNumber((Number)facetDataValue))
+                throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' does not support '"+facetValue.toString()+"' as value.");
         }
     }
     public ValueSpaceSubset createValueSpaceSubset(DatatypeRestriction datatypeRestriction) {
@@ -250,40 +224,40 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
         BoundType upperBoundType=baseInterval.m_upperBoundType;
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
             String facetURI=datatypeRestriction.getFacetURI(index);
-            Number facetValue=(Number)datatypeRestriction.getFacetValue(index);
+            Number facetDataValue=(Number)datatypeRestriction.getFacetValue(index).getDataValue();
             if ((XSD_NS+"minInclusive").equals(facetURI)) {
-                int comparison=Numbers.compare(facetValue,lowerBound);
+                int comparison=Numbers.compare(facetDataValue,lowerBound);
                 if (comparison>0) {
-                    lowerBound=facetValue;
+                    lowerBound=facetDataValue;
                     lowerBoundType=BoundType.INCLUSIVE;
                 }
                 // If the numbers are equal, nothing needs to be done to the bound type because
                 // the existing one is at least as restrictive as INCLUSIVE.
             }
             else if ((XSD_NS+"minExclusive").equals(facetURI)) {
-                int comparison=Numbers.compare(facetValue,lowerBound);
+                int comparison=Numbers.compare(facetDataValue,lowerBound);
                 if (comparison>0) {
-                    lowerBound=facetValue;
+                    lowerBound=facetDataValue;
                     lowerBoundType=BoundType.EXCLUSIVE;
                 }
                 else if (comparison==0) {
                     // EXCLUSIVE is guaranteed to be the more restrictive bound.
                     lowerBoundType=BoundType.EXCLUSIVE;
                 }
-            } 
+            }
             else if ((XSD_NS+"maxInclusive").equals(facetURI)) {
-                int comparison=Numbers.compare(facetValue,upperBound);
+                int comparison=Numbers.compare(facetDataValue,upperBound);
                 if (comparison<0) {
-                    upperBound=facetValue;
+                    upperBound=facetDataValue;
                     upperBoundType=BoundType.INCLUSIVE;
                 }
                 // If the numbers are equal, nothing needs to be done to the bound type because
                 // the existing one is at least as restrictive as INCLUSIVE.
-            } 
+            }
             else if ((XSD_NS+"maxExclusive").equals(facetURI)) {
-                int comparison=Numbers.compare(facetValue,upperBound);
+                int comparison=Numbers.compare(facetDataValue,upperBound);
                 if (comparison<0) {
-                    upperBound=facetValue;
+                    upperBound=facetDataValue;
                     upperBoundType=BoundType.EXCLUSIVE;
                 }
                 else if (comparison==0) {

@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -31,8 +31,9 @@ import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
+import org.semanticweb.HermiT.model.Constant;
+import org.semanticweb.HermiT.model.ConstantEnumeration;
 import org.semanticweb.HermiT.model.DataRange;
-import org.semanticweb.HermiT.model.DataValueEnumeration;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.ExistentialConcept;
@@ -308,7 +309,7 @@ public class Printing {
             case 4:
                 return compareDatatypeRestrictions((DatatypeRestriction)c1,(DatatypeRestriction)c2);
             case 5:
-                return compareDataValueEnumerations((DataValueEnumeration)c1,(DataValueEnumeration)c2);
+                return compareConstantEnumerations((ConstantEnumeration)c1,(ConstantEnumeration)c2);
             case 6:
                 {
                     NegationDataRange ndr1=(NegationDataRange)c1;
@@ -330,7 +331,7 @@ public class Printing {
                 return 3;
             else if (c instanceof DatatypeRestriction)
                 return 4;
-            else if (c instanceof DataValueEnumeration)
+            else if (c instanceof ConstantEnumeration)
                 return 5;
             else if (c instanceof NegationDataRange)
                 return 6;
@@ -348,26 +349,29 @@ public class Printing {
                 comparison=dr1.getFacetURI(index).compareTo(dr2.getFacetURI(index));
                 if (comparison!=0)
                     return comparison;
-                comparison=compareDataValues(dr1.getFacetValue(index),dr2.getFacetValue(index));
+                comparison=compareConstants(dr1.getFacetValue(index),dr2.getFacetValue(index));
                 if (comparison!=0)
                     return comparison;
             }
             return 0;
         }
-        protected int compareDataValueEnumerations(DataValueEnumeration dve1,DataValueEnumeration dve2) {
-            int comparison=dve1.getNumberOfDataValues()-dve2.getNumberOfDataValues();
+        protected int compareConstantEnumerations(ConstantEnumeration dve1,ConstantEnumeration dve2) {
+            int comparison=dve1.getNumberOfConstants()-dve2.getNumberOfConstants();
             if (comparison!=0)
                 return comparison;
-            for (int index=0;index<dve1.getNumberOfDataValues();index++) {
-                comparison=compareDataValues(dve1.getDataValue(index),dve2.getDataValue(index));
+            for (int index=0;index<dve1.getNumberOfConstants();index++) {
+                comparison=compareConstants(dve1.getConstant(index),dve2.getConstant(index));
                 if (comparison!=0)
                     return comparison;
             }
             return 0;
-            
+
         }
-        protected int compareDataValues(Object dv1,Object dv2) {
-            return dv1.toString().compareTo(dv2.toString());
+        protected int compareConstants(Constant c1,Constant c2) {
+            int comparison=c1.getDatatypeURI().compareTo(c2.getDatatypeURI());
+            if (comparison!=0)
+                return comparison;
+            return c1.getLexicalForm().compareTo(c2.getLexicalForm());
         }
     }
 

@@ -29,7 +29,7 @@ import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.DataRange;
-import org.semanticweb.HermiT.model.DataValueEnumeration;
+import org.semanticweb.HermiT.model.ConstantEnumeration;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.ExistentialConcept;
@@ -162,9 +162,9 @@ public class DerivationHistory extends TableauMonitorAdapter {
                 atoms.add(getAtom(new Object[] { datatypeRestriction,node }));
             for (DatatypeRestriction datatypeRestriction : variable.getNegativeDatatypeRestrictions())
                 atoms.add(getAtom(new Object[] { datatypeRestriction.getNegation(),node }));
-            for (DataValueEnumeration dataValueEnumeration : variable.getPositiveDataValueEnumerations())
+            for (ConstantEnumeration dataValueEnumeration : variable.getPositiveDataValueEnumerations())
                 atoms.add(getAtom(new Object[] { dataValueEnumeration,node }));
-            for (DataValueEnumeration dataValueEnumeration : variable.getNegativeDataValueEnumerations())
+            for (ConstantEnumeration dataValueEnumeration : variable.getNegativeDataValueEnumerations())
                 atoms.add(getAtom(new Object[] { dataValueEnumeration.getNegation(),node }));
             for (DatatypeManager.DVariable neighborVariable : variable.getUnequalToDirect())
                 atoms.add(getAtom(new Object[] { Inequality.INSTANCE,node,neighborVariable.getNode() }));

@@ -38,10 +38,10 @@ import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Constant;
+import org.semanticweb.HermiT.model.ConstantEnumeration;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DLPredicate;
-import org.semanticweb.HermiT.model.DataValueEnumeration;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Equality;
@@ -904,10 +904,12 @@ public class OWLClausification {
             return convertDataRange(object.getDataRange()).getNegation();
         }
         public Object visit(OWLDataOneOf object) {
-            Set<Object> dataValues=new HashSet<Object>();
-            for (OWLLiteral constant : object.getValues())
-                dataValues.add(constant.accept(this));
-            return DataValueEnumeration.create(dataValues.toArray());
+            Set<Constant> constants=new HashSet<Constant>();
+            for (OWLLiteral literal : object.getValues())
+                constants.add((Constant)literal.accept(this));
+            Constant[] constantsArray=new Constant[constants.size()];
+            constants.toArray(constantsArray);
+            return ConstantEnumeration.create(constantsArray);
         }
         public Object visit(OWLDatatypeRestriction object) {
             if (!(object.getDatatype().isOWLDatatype()))
@@ -919,11 +921,11 @@ public class OWLClausification {
                 return DatatypeRestriction.RDFS_LITERAL;
             }
             String[] facetURIs=new String[object.getFacetRestrictions().size()];
-            Object[] facetValues=new Object[object.getFacetRestrictions().size()];
+            Constant[] facetValues=new Constant[object.getFacetRestrictions().size()];
             int index=0;
             for (OWLFacetRestriction facet : object.getFacetRestrictions()) {
                 facetURIs[index]=facet.getFacet().getIRI().toURI().toString();
-                facetValues[index]=facet.getFacetValue().accept(this);
+                facetValues[index]=(Constant)facet.getFacetValue().accept(this);
                 index++;
             }
             DatatypeRestriction datatype=DatatypeRestriction.create(datatypeURI,facetURIs,facetValues);
@@ -935,29 +937,33 @@ public class OWLClausification {
         }
         public Object visit(OWLTypedLiteral object) {
             try {
-                return DatatypeRegistry.parseLiteral(object.getLiteral(),object.getDatatype().getIRI().toString());
+                return Constant.create(object.getLiteral(),object.getDatatype().getIRI().toString());
             }
             catch (UnsupportedDatatypeException e) {
                 if (m_ignoreUnsupportedDatatypes) {
                     if (m_warningMonitor!=null)
                         m_warningMonitor.warning("Ignoring unsupported datatype '"+object.toString()+"'.");
                     return AtomicConcept.create(object.toString());
-                } else throw e;
+                }
+                else
+                    throw e;
             }
         }
         public Object visit(OWLStringLiteral object) {
             try {
                 if (object.getLang()==null)
-                    return DatatypeRegistry.parseLiteral(object.getLiteral(),Prefixes.s_semanticWebPrefixes.get("xsd")+"string");
+                    return Constant.create(object.getLiteral(),Prefixes.s_semanticWebPrefixes.get("xsd")+"string");
                 else
-                    return DatatypeRegistry.parseLiteral(object.getLiteral()+"@"+object.getLang(),Prefixes.s_semanticWebPrefixes.get("rdf")+"PlainLiteral");
+                    return Constant.create(object.getLiteral()+"@"+object.getLang(),Prefixes.s_semanticWebPrefixes.get("rdf")+"PlainLiteral");
             }
             catch (UnsupportedDatatypeException e) {
                 if (m_ignoreUnsupportedDatatypes) {
                     if (m_warningMonitor!=null)
                         m_warningMonitor.warning("Ignoring unsupported datatype '"+object.toString()+"'.");
                     return AtomicConcept.create(object.toString());
-                } else throw e;
+                }
+                else
+                    throw e;
             }
         }
         public Object visit(OWLDataIntersectionOf node) {
@@ -1019,16 +1025,11 @@ public class OWLClausification {
             m_negativeFacts.add(getRoleAtom(object.getProperty(),getIndividual(object.getSubject()),getIndividual(object.getObject())));
         }
         public void visit(OWLDataPropertyAssertionAxiom object) {
-            OWLLiteral lit=object.getObject();
-            Constant targetValue;
-            if (lit instanceof OWLTypedLiteral)
-                targetValue=Constant.create(lit.accept(m_dataRangeConverter));
-            else
-                targetValue=Constant.create(lit.accept(m_dataRangeConverter));
+            Constant targetValue=(Constant)object.getObject().accept(m_dataRangeConverter);
             m_positiveFacts.add(getRoleAtom(object.getProperty(),getIndividual(object.getSubject()),targetValue));
         }
         public void visit(OWLNegativeDataPropertyAssertionAxiom object) {
-            Constant targetValue=Constant.create(object.getObject().accept(m_dataRangeConverter));
+            Constant targetValue=(Constant)object.getObject().accept(m_dataRangeConverter);
             m_negativeFacts.add(getRoleAtom(object.getProperty(),getIndividual(object.getSubject()),targetValue));
         }
     }

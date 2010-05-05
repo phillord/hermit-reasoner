@@ -17,10 +17,9 @@
 */
 package org.semanticweb.HermiT.model;
 
-import java.io.Serializable;
-
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.datatypes.DatatypeRegistry;
+import org.semanticweb.HermiT.datatypes.MalformedLiteralException;
 
 /**
  * Represents a constants.
@@ -28,20 +27,50 @@ import org.semanticweb.HermiT.datatypes.DatatypeRegistry;
 public class Constant extends Term {
     private static final long serialVersionUID=-8143911431654640690L;
 
+    protected final String m_lexicalForm;
+    protected final String m_datatypeURI;
     protected final Object m_dataValue;
 
-
-    protected Constant(Object dataValue) {
+    protected Constant(String lexicalForm,String datatypeURI,Object dataValue) {
+        m_lexicalForm=lexicalForm;
+        m_datatypeURI=datatypeURI;
         m_dataValue=dataValue;
+    }
+    public String getLexicalForm() {
+        return m_lexicalForm;
+    }
+    public String getDatatypeURI() {
+        return m_datatypeURI;
     }
     public Object getDataValue() {
         return m_dataValue;
+    }
+    public boolean isAnonymous() {
+        return "internal:anonymous-constants".equals(m_datatypeURI);
     }
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
     public String toString(Prefixes prefixes) {
-        return DatatypeRegistry.toString(prefixes,m_dataValue);
+        StringBuffer buffer=new StringBuffer();
+        buffer.append('"');
+        for (int index=0;index<m_lexicalForm.length();index++) {
+            char c=m_lexicalForm.charAt(index);
+            switch (c) {
+            case '"':
+                buffer.append("\\\"");
+                break;
+            case '\\':
+                buffer.append("\\\\");
+                break;
+            default:
+                buffer.append(c);
+                break;
+            }
+        }
+        buffer.append("\"^^");
+        buffer.append(prefixes.abbreviateIRI(m_datatypeURI));
+        return buffer.toString();
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);
@@ -49,40 +78,18 @@ public class Constant extends Term {
 
     protected static InterningManager<Constant> s_interningManager=new InterningManager<Constant>() {
         protected boolean equal(Constant object1,Constant object2) {
-            return object1.m_dataValue.equals(object2.m_dataValue);
+            return object1.m_lexicalForm.equals(object2.m_lexicalForm) && object1.m_datatypeURI.equals(object2.m_datatypeURI);
         }
         protected int getHashCode(Constant object) {
-            return object.m_dataValue.hashCode();
+            return object.m_lexicalForm.hashCode()+object.m_datatypeURI.hashCode();
         }
     };
 
-    public static Constant create(Object dataValue) {
-        return s_interningManager.intern(new Constant(dataValue));
+    public static Constant create(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
+        Object dataValue=DatatypeRegistry.parseLiteral(lexicalForm,datatypeURI);
+        return s_interningManager.intern(new Constant(lexicalForm,datatypeURI,dataValue));
     }
-
-    public static class AnonymousConstantValue implements Serializable {
-        private static final long serialVersionUID=-6507581477324043034L;
-
-        protected final String m_name;
-
-        public AnonymousConstantValue(String name) {
-            m_name=name;
-        }
-        public String getName() {
-            return m_name;
-        }
-        public int hashCode() {
-            return m_name.hashCode();
-        }
-        public boolean equals(Object that) {
-            if (this==that)
-                return true;
-            if (!(that instanceof AnonymousConstantValue))
-                return false;
-            return ((AnonymousConstantValue)that).m_name.equals(m_name);
-        }
-        public static AnonymousConstantValue create(String name) {
-            return new AnonymousConstantValue(name);
-        }
+    public static Constant createAnonymous(String id) {
+        return create(id,"internal:anonymous-constants");
     }
 }

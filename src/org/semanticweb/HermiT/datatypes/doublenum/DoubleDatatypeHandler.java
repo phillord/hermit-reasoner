@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -36,10 +36,6 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
     protected static final ValueSpaceSubset DOUBLE_ENTIRE=new EntireDoubleSubset();
     protected static final ValueSpaceSubset EMPTY_SUBSET=new EmptyDoubleSubset();
     protected static final Set<String> s_managedDatatypeURIs=Collections.singleton(XSD_DOUBLE);
-    protected static final Set<Class<?>> s_managedDataValueClasses=new HashSet<Class<?>>();
-    static {
-        s_managedDataValueClasses.add(Double.class);
-    }
     protected static final Set<String> s_supportedFacetURIs=new HashSet<String>();
     static {
         s_supportedFacetURIs.add(XSD_NS+"minInclusive");
@@ -50,13 +46,6 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
 
     public Set<String> getManagedDatatypeURIs() {
         return s_managedDatatypeURIs;
-    }
-    public Set<Class<?>> getManagedDataValueClasses() {
-        return s_managedDataValueClasses;
-    }
-    public String toString(Prefixes prefixes,Object dataValue) {
-        String lexicalForm=((Double)dataValue).toString();
-        return '\"'+lexicalForm+"\"^^"+prefixes.abbreviateIRI(XSD_DOUBLE);
     }
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert XSD_DOUBLE.equals(datatypeURI);
@@ -73,8 +62,8 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
             String facetURI=datatypeRestriction.getFacetURI(index);
             if (!s_supportedFacetURIs.contains(facetURI))
                 throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' is not supported on xsd:double.");
-            Object facetValue=datatypeRestriction.getFacetValue(index);
-            if (!(facetValue instanceof Double))
+            Object facetDataValue=datatypeRestriction.getFacetValue(index).getDataValue();
+            if (!(facetDataValue instanceof Double))
                 throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' takes only doubles as values.");
         }
     }
@@ -172,32 +161,32 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
         double upperBoundInclusive=Double.POSITIVE_INFINITY;
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
             String facetURI=datatypeRestriction.getFacetURI(index);
-            double facetValue=(Double)datatypeRestriction.getFacetValue(index);
+            double facetDataValue=(Double)datatypeRestriction.getFacetValue(index).getDataValue();
             if ((XSD_NS+"minInclusive").equals(facetURI)) {
-                if (DoubleInterval.areIdentical(facetValue,+0.0))
-                    facetValue=-0.0;
-                if (DoubleInterval.isSmallerEqual(lowerBoundInclusive,facetValue))
-                    lowerBoundInclusive=facetValue;
+                if (DoubleInterval.areIdentical(facetDataValue,+0.0))
+                    facetDataValue=-0.0;
+                if (DoubleInterval.isSmallerEqual(lowerBoundInclusive,facetDataValue))
+                    lowerBoundInclusive=facetDataValue;
             }
             else if ((XSD_NS+"minExclusive").equals(facetURI)) {
-                if (DoubleInterval.areIdentical(facetValue,-0.0))
-                    facetValue=+0.0;
-                facetValue=DoubleInterval.nextDouble(facetValue);
-                if (DoubleInterval.isSmallerEqual(lowerBoundInclusive,facetValue))
-                    lowerBoundInclusive=facetValue;
-            } 
+                if (DoubleInterval.areIdentical(facetDataValue,-0.0))
+                    facetDataValue=+0.0;
+                facetDataValue=DoubleInterval.nextDouble(facetDataValue);
+                if (DoubleInterval.isSmallerEqual(lowerBoundInclusive,facetDataValue))
+                    lowerBoundInclusive=facetDataValue;
+            }
             else if ((XSD_NS+"maxInclusive").equals(facetURI)) {
-                if (DoubleInterval.areIdentical(facetValue,-0.0))
-                    facetValue=+0.0;
-                if (DoubleInterval.isSmallerEqual(facetValue,upperBoundInclusive))
-                    upperBoundInclusive=facetValue;
-            } 
+                if (DoubleInterval.areIdentical(facetDataValue,-0.0))
+                    facetDataValue=+0.0;
+                if (DoubleInterval.isSmallerEqual(facetDataValue,upperBoundInclusive))
+                    upperBoundInclusive=facetDataValue;
+            }
             else if ((XSD_NS+"maxExclusive").equals(facetURI)) {
-                if (DoubleInterval.areIdentical(facetValue,+0.0))
-                    facetValue=-0.0;
-                facetValue=DoubleInterval.previousDouble(facetValue);
-                if (DoubleInterval.isSmallerEqual(facetValue,upperBoundInclusive))
-                    upperBoundInclusive=facetValue;
+                if (DoubleInterval.areIdentical(facetDataValue,+0.0))
+                    facetDataValue=-0.0;
+                facetDataValue=DoubleInterval.previousDouble(facetDataValue);
+                if (DoubleInterval.isSmallerEqual(facetDataValue,upperBoundInclusive))
+                    upperBoundInclusive=facetDataValue;
             }
             else
                 throw new IllegalStateException("Internal error: facet '"+facetURI+"' is not supported by xsd:double.");

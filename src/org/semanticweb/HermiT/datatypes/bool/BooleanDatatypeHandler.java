@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -19,7 +19,6 @@ package org.semanticweb.HermiT.datatypes.bool;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Prefixes;
@@ -34,20 +33,9 @@ public class BooleanDatatypeHandler implements DatatypeHandler {
     protected static final ValueSpaceSubset BOOLEAN_ALL=new BooleanAll();
     protected static final ValueSpaceSubset EMPTY=new BooleanNone();
     protected final static Set<String> s_managedDatatypeURIs=Collections.singleton(XSD_BOOLEAN);
-    protected final static Set<Class<?>> s_managedDataValueClasses=new HashSet<Class<?>>();
-    static {
-        s_managedDataValueClasses.add(Boolean.class);
-    }
 
     public Set<String> getManagedDatatypeURIs() {
         return s_managedDatatypeURIs;
-    }
-    public Set<Class<?>> getManagedDataValueClasses() {
-        return s_managedDataValueClasses;
-    }
-    public String toString(Prefixes prefixes,Object dataValue) {
-        boolean value=((Boolean)dataValue).booleanValue();
-        return '\"'+(value ? "true" : "false")+"\"^^"+prefixes.abbreviateIRI(XSD_BOOLEAN);
     }
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert XSD_BOOLEAN.equals(datatypeURI);
@@ -103,7 +91,7 @@ public class BooleanDatatypeHandler implements DatatypeHandler {
             dataValues.add(Boolean.TRUE);
         }
     }
-    
+
     protected static class BooleanNone implements ValueSpaceSubset {
 
         public boolean hasCardinalityAtLeast(int number) {

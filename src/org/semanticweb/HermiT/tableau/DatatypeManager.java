@@ -28,9 +28,9 @@ import java.util.Set;
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.datatypes.DatatypeRegistry;
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
+import org.semanticweb.HermiT.model.ConstantEnumeration;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DataRange;
-import org.semanticweb.HermiT.model.DataValueEnumeration;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.NegationDataRange;
@@ -275,8 +275,8 @@ public final class DatatypeManager implements Serializable {
                     variable.m_mostSpecificRestriction=datatypeRestriction;
             }
         }
-        else if (dataRange instanceof DataValueEnumeration)
-            variable.m_positiveDataValueEnumerations.add((DataValueEnumeration)dataRange);
+        else if (dataRange instanceof ConstantEnumeration)
+            variable.m_positiveConstantEnumerations.add((ConstantEnumeration)dataRange);
         else if (dataRange instanceof NegationDataRange) {
             DataRange negatedDataRange=((NegationDataRange)dataRange).getNegatedDataRange();
             if (negatedDataRange instanceof DatatypeRestriction) {
@@ -284,11 +284,11 @@ public final class DatatypeManager implements Serializable {
                 if (!m_unknownDatatypeRestrictionsPermanent.contains(datatypeRestriction) && (m_unknownDatatypeRestrictionsAdditional==null || !m_unknownDatatypeRestrictionsAdditional.contains(datatypeRestriction)))
                     variable.m_negativeDatatypeRestrictions.add(datatypeRestriction);
             }
-            else if (negatedDataRange instanceof DataValueEnumeration) {
-                DataValueEnumeration negatedDataValueEnumeration=(DataValueEnumeration)negatedDataRange;
-                variable.m_negativeDataValueEnumerations.add(negatedDataValueEnumeration);
-                for (int index=negatedDataValueEnumeration.getNumberOfDataValues()-1;index>=0;--index)
-                    variable.addForbiddenDataValue(negatedDataValueEnumeration.getDataValue(index));
+            else if (negatedDataRange instanceof ConstantEnumeration) {
+                ConstantEnumeration negatedConstantEnumeration=(ConstantEnumeration)negatedDataRange;
+                variable.m_negativeConstantEnumerations.add(negatedConstantEnumeration);
+                for (int index=negatedConstantEnumeration.getNumberOfConstants()-1;index>=0;--index)
+                    variable.addForbiddenDataValue(negatedConstantEnumeration.getConstant(index).getDataValue());
             }
             else
                 throw new IllegalStateException("Internal error: invalid data range.");
@@ -319,7 +319,7 @@ public final class DatatypeManager implements Serializable {
         }
     }
     protected void normalize(DVariable variable) {
-        if (!variable.m_positiveDataValueEnumerations.isEmpty())
+        if (!variable.m_positiveConstantEnumerations.isEmpty())
             normalizeAsEnumeration(variable);
         else if (!variable.m_positiveDatatypeRestrictions.isEmpty())
             normalizeAsValueSpaceSubset(variable);
@@ -327,13 +327,13 @@ public final class DatatypeManager implements Serializable {
     protected void normalizeAsEnumeration(DVariable variable) {
         variable.m_hasExplicitDataValues=true;
         List<Object> explicitDataValues=variable.m_explicitDataValues;
-        List<DataValueEnumeration> positiveDataValueEnumerations=variable.m_positiveDataValueEnumerations;
-        DataValueEnumeration firstDataValueEnumeration=positiveDataValueEnumerations.get(0);
-        nextValue: for (int index=firstDataValueEnumeration.getNumberOfDataValues()-1;index>=0;--index) {
-            Object dataValue=firstDataValueEnumeration.getDataValue(index);
-            if (!variable.m_forbiddenDataValues.contains(dataValue)) {
-                for (int enumerationIndex=positiveDataValueEnumerations.size()-1;enumerationIndex>=1;--enumerationIndex)
-                    if (!positiveDataValueEnumerations.get(enumerationIndex).containsDataValue(dataValue))
+        List<ConstantEnumeration> positiveConstantEnumerations=variable.m_positiveConstantEnumerations;
+        ConstantEnumeration firstDataValueEnumeration=positiveConstantEnumerations.get(0);
+        nextValue: for (int index=firstDataValueEnumeration.getNumberOfConstants()-1;index>=0;--index) {
+            Object dataValue=firstDataValueEnumeration.getConstant(index).getDataValue();
+            if (!explicitDataValues.contains(dataValue) && !variable.m_forbiddenDataValues.contains(dataValue)) {
+                for (int enumerationIndex=positiveConstantEnumerations.size()-1;enumerationIndex>=1;--enumerationIndex)
+                    if (!containsDataValue(positiveConstantEnumerations.get(enumerationIndex),dataValue))
                         continue nextValue;
                 explicitDataValues.add(dataValue);
             }
@@ -353,6 +353,12 @@ public final class DatatypeManager implements Serializable {
         }
         if (explicitDataValues.isEmpty())
             setClashFor(variable);
+    }
+    protected boolean containsDataValue(ConstantEnumeration constantEnumeration,Object dataValue) {
+        for (int index=constantEnumeration.getNumberOfConstants()-1;index>=0;--index)
+            if (constantEnumeration.getConstant(index).getDataValue().equals(dataValue))
+                return true;
+        return false;
     }
     protected void eliminateDataValuesUsingValueSpaceSubset(ValueSpaceSubset valueSpaceSubset,List<Object> explicitDataValues,boolean eliminateWhenValue) {
         for (int valueIndex=explicitDataValues.size()-1;valueIndex>=0;--valueIndex) {
@@ -509,13 +515,13 @@ public final class DatatypeManager implements Serializable {
             DependencySet dependencySet=m_extensionManager.getAssertionDependencySet(dataRange,node);
             m_unionDependencySet.addConstituent(dependencySet);
         }
-        for (int index=variable.m_positiveDataValueEnumerations.size()-1;index>=0;--index) {
-            DataRange dataRange=variable.m_positiveDataValueEnumerations.get(index);
+        for (int index=variable.m_positiveConstantEnumerations.size()-1;index>=0;--index) {
+            DataRange dataRange=variable.m_positiveConstantEnumerations.get(index);
             DependencySet dependencySet=m_extensionManager.getAssertionDependencySet(dataRange,node);
             m_unionDependencySet.addConstituent(dependencySet);
         }
-        for (int index=variable.m_negativeDataValueEnumerations.size()-1;index>=0;--index) {
-            DataRange dataRange=(DataRange)variable.m_negativeDataValueEnumerations.get(index).getNegation();
+        for (int index=variable.m_negativeConstantEnumerations.size()-1;index>=0;--index) {
+            DataRange dataRange=(DataRange)variable.m_negativeConstantEnumerations.get(index).getNegation();
             DependencySet dependencySet=m_extensionManager.getAssertionDependencySet(dataRange,node);
             m_unionDependencySet.addConstituent(dependencySet);
         }
@@ -659,8 +665,8 @@ public final class DatatypeManager implements Serializable {
 
     public static class DVariable implements Serializable {
         private static final long serialVersionUID = -2490195841140286089L;
-        protected final List<DataValueEnumeration> m_positiveDataValueEnumerations;
-        protected final List<DataValueEnumeration> m_negativeDataValueEnumerations;
+        protected final List<ConstantEnumeration> m_positiveConstantEnumerations;
+        protected final List<ConstantEnumeration> m_negativeConstantEnumerations;
         protected final List<DatatypeRestriction> m_positiveDatatypeRestrictions;
         protected final List<DatatypeRestriction> m_negativeDatatypeRestrictions;
         protected final List<DVariable> m_unequalTo;
@@ -675,8 +681,8 @@ public final class DatatypeManager implements Serializable {
         protected Object m_dataValue;
 
         protected DVariable() {
-            m_positiveDataValueEnumerations=new ArrayList<DataValueEnumeration>();
-            m_negativeDataValueEnumerations=new ArrayList<DataValueEnumeration>();
+            m_positiveConstantEnumerations=new ArrayList<ConstantEnumeration>();
+            m_negativeConstantEnumerations=new ArrayList<ConstantEnumeration>();
             m_positiveDatatypeRestrictions=new ArrayList<DatatypeRestriction>();
             m_negativeDatatypeRestrictions=new ArrayList<DatatypeRestriction>();
             m_unequalTo=new ArrayList<DVariable>();
@@ -685,8 +691,8 @@ public final class DatatypeManager implements Serializable {
             m_explicitDataValues=new ArrayList<Object>();
         }
         protected void dispose() {
-            m_positiveDataValueEnumerations.clear();
-            m_negativeDataValueEnumerations.clear();
+            m_positiveConstantEnumerations.clear();
+            m_negativeConstantEnumerations.clear();
             m_positiveDatatypeRestrictions.clear();
             m_negativeDatatypeRestrictions.clear();
             m_unequalTo.clear();
@@ -719,11 +725,11 @@ public final class DatatypeManager implements Serializable {
         public Node getNode() {
             return m_node;
         }
-        public List<DataValueEnumeration> getPositiveDataValueEnumerations() {
-            return Collections.unmodifiableList(m_positiveDataValueEnumerations);
+        public List<ConstantEnumeration> getPositiveDataValueEnumerations() {
+            return Collections.unmodifiableList(m_positiveConstantEnumerations);
         }
-        public List<DataValueEnumeration> getNegativeDataValueEnumerations() {
-            return Collections.unmodifiableList(m_negativeDataValueEnumerations);
+        public List<ConstantEnumeration> getNegativeDataValueEnumerations() {
+            return Collections.unmodifiableList(m_negativeConstantEnumerations);
         }
         public List<DatatypeRestriction> getPositiveDatatypeRestrictions() {
             return Collections.unmodifiableList(m_positiveDatatypeRestrictions);
@@ -736,8 +742,8 @@ public final class DatatypeManager implements Serializable {
         }
         public boolean hasSameRestrictions(DVariable that) {
             return this==that || (
-                equals(m_positiveDataValueEnumerations,that.m_positiveDataValueEnumerations) &&
-                equals(m_negativeDataValueEnumerations,that.m_negativeDataValueEnumerations) &&
+                equals(m_positiveConstantEnumerations,that.m_positiveConstantEnumerations) &&
+                equals(m_negativeConstantEnumerations,that.m_negativeConstantEnumerations) &&
                 equals(m_positiveDatatypeRestrictions,that.m_positiveDatatypeRestrictions) &&
                 equals(m_negativeDatatypeRestrictions,that.m_negativeDatatypeRestrictions)
             );
@@ -759,19 +765,19 @@ public final class DatatypeManager implements Serializable {
             StringBuffer buffer=new StringBuffer();
             boolean first=true;
             buffer.append('[');
-            for (int index=0;index<m_positiveDataValueEnumerations.size();index++) {
+            for (int index=0;index<m_positiveConstantEnumerations.size();index++) {
                 if (first)
                     first=false;
                 else
                     buffer.append(", ");
-                buffer.append(m_positiveDataValueEnumerations.get(index).toString(prefixes));
+                buffer.append(m_positiveConstantEnumerations.get(index).toString(prefixes));
             }
-            for (int index=0;index<m_negativeDataValueEnumerations.size();index++) {
+            for (int index=0;index<m_negativeConstantEnumerations.size();index++) {
                 if (first)
                     first=false;
                 else
                     buffer.append(", ");
-                buffer.append(m_negativeDataValueEnumerations.get(index).getNegation().toString(prefixes));
+                buffer.append(m_negativeConstantEnumerations.get(index).getNegation().toString(prefixes));
             }
             for (int index=0;index<m_positiveDatatypeRestrictions.size();index++) {
                 if (first)

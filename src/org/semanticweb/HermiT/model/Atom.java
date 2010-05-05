@@ -117,59 +117,6 @@ public class Atom implements Serializable {
         }
         return buffer.toString();
     }
-    public String toOrderedString(Prefixes prefixes) {
-        StringBuffer buffer=new StringBuffer();
-        if (s_infixPredicates.contains(m_dlPredicate)) {
-            String a=m_arguments[0].toString(prefixes);
-            String b=m_arguments[1].toString(prefixes);
-            if (a.compareTo(b)>0) {
-                String tmp=a;
-                a=b;
-                b=tmp;
-            }
-            buffer.append(a);
-            buffer.append(' ');
-            buffer.append(m_dlPredicate.toString(prefixes));
-            buffer.append(' ');
-            buffer.append(b);
-        }
-        else if (m_dlPredicate instanceof AnnotatedEquality) {
-            String a=m_arguments[0].toString(prefixes);
-            String b=m_arguments[1].toString(prefixes);
-            if (a.compareTo(b)>0) {
-                String tmp=a;
-                a=b;
-                b=tmp;
-            }
-            AnnotatedEquality annotatedEquality=(AnnotatedEquality)m_dlPredicate;
-            buffer.append('[');
-            buffer.append(a);
-            buffer.append(' ');
-            buffer.append("==");
-            buffer.append(' ');
-            buffer.append(b);
-            buffer.append("]@atMost(");
-            buffer.append(annotatedEquality.getCaridnality());
-            buffer.append(' ');
-            buffer.append(annotatedEquality.getOnRole().toString(prefixes));
-            buffer.append(' ');
-            buffer.append(annotatedEquality.getToConcept().toString(prefixes));
-            buffer.append(")(");
-            buffer.append(m_arguments[2].toString(prefixes));
-            buffer.append(')');
-        }
-        else {
-            buffer.append(m_dlPredicate.toOrderedString(prefixes));
-            buffer.append('(');
-            for (int i=0;i<m_arguments.length;i++) {
-                if (i!=0)
-                    buffer.append(',');
-                buffer.append(m_arguments[i].toString(prefixes));
-            }
-            buffer.append(')');
-        }
-        return buffer.toString();
-    }
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }

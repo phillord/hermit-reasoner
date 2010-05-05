@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -41,10 +41,6 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
         s_managedDatatypeURIs.add(XSD_HEX_BINARY);
         s_managedDatatypeURIs.add(XSD_BASE_64_BINARY);
     }
-    protected static final Set<Class<?>> s_managedDataValueClasses=new HashSet<Class<?>>();
-    static {
-        s_managedDataValueClasses.add(BinaryData.class);
-    }
     protected static final Set<String> s_supportedFacetURIs=new HashSet<String>();
     static {
         s_supportedFacetURIs.add(XSD_NS+"minLength");
@@ -54,17 +50,6 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
 
     public Set<String> getManagedDatatypeURIs() {
         return s_managedDatatypeURIs;
-    }
-    public Set<Class<?>> getManagedDataValueClasses() {
-        return s_managedDataValueClasses;
-    }
-    public String toString(Prefixes prefixes,Object dataValue) {
-        BinaryData binaryDataValue=(BinaryData)dataValue;
-        String lexicalForm=binaryDataValue.toString();
-        if (binaryDataValue.getBinaryDataType()==BinaryDataType.HEX_BINARY)
-            return '\"'+lexicalForm+"\"^^"+prefixes.abbreviateIRI(XSD_HEX_BINARY);
-        else
-            return '\"'+lexicalForm+"\"^^"+prefixes.abbreviateIRI(XSD_BASE_64_BINARY);
     }
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert s_managedDatatypeURIs.contains(datatypeURI);
@@ -85,10 +70,10 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
             String facetURI=datatypeRestriction.getFacetURI(index);
             if (!s_supportedFacetURIs.contains(facetURI))
                 throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' is not supported on "+Prefixes.STANDARD_PREFIXES.abbreviateIRI(datatypeURI)+".");
-            Object facetValue=datatypeRestriction.getFacetValue(index);
-            if (!(facetValue instanceof Integer))
+            Object facetDataValue=datatypeRestriction.getFacetValue(index).getDataValue();
+            if (!(facetDataValue instanceof Integer))
                 throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' takes only integers as values.");
-            int value=(Integer)facetValue;
+            int value=(Integer)facetDataValue;
             if (value<0 || value==Integer.MAX_VALUE)
                 throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' does not support integer "+value+" as value.");
         }
@@ -179,15 +164,15 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
         int maxLength=Integer.MAX_VALUE;
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
             String facetURI=datatypeRestriction.getFacetURI(index);
-            int facetValue=(Integer)datatypeRestriction.getFacetValue(index);
+            int facetDataValue=(Integer)datatypeRestriction.getFacetValue(index).getDataValue();
             if ((XSD_NS+"minLength").equals(facetURI))
-                minLength=Math.max(minLength,facetValue);
+                minLength=Math.max(minLength,facetDataValue);
             else if ((XSD_NS+"maxLength").equals(facetURI))
-                maxLength=Math.min(maxLength,facetValue);
+                maxLength=Math.min(maxLength,facetDataValue);
             else if ((XSD_NS+"length").equals(facetURI)) {
-                minLength=Math.max(minLength,facetValue);
-                maxLength=Math.min(maxLength,facetValue);
-            } 
+                minLength=Math.max(minLength,facetDataValue);
+                maxLength=Math.min(maxLength,facetDataValue);
+            }
             else
                 throw new IllegalStateException("Internal error: facet '"+facetURI+"' is not supported by "+Prefixes.STANDARD_PREFIXES.abbreviateIRI(datatypeURI)+".");
         }

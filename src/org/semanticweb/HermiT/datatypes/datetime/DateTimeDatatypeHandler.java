@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -46,10 +46,6 @@ public class DateTimeDatatypeHandler implements DatatypeHandler {
         s_managedDatatypeURIs.add(XSD_DATE_TIME);
         s_managedDatatypeURIs.add(XSD_DATE_TIME_STAMP);
     }
-    protected static final Set<Class<?>> s_managedDataValueClasses=new HashSet<Class<?>>();
-    static {
-        s_managedDataValueClasses.add(DateTime.class);
-    }
     protected static final Set<String> s_supportedFacetURIs=new HashSet<String>();
     static {
         s_supportedFacetURIs.add(XSD_NS+"minInclusive");
@@ -60,13 +56,6 @@ public class DateTimeDatatypeHandler implements DatatypeHandler {
 
     public Set<String> getManagedDatatypeURIs() {
         return s_managedDatatypeURIs;
-    }
-    public Set<Class<?>> getManagedDataValueClasses() {
-        return s_managedDataValueClasses;
-    }
-    public String toString(Prefixes prefixes,Object dataValue) {
-        assert dataValue instanceof DateTime;
-        return '\"'+dataValue.toString()+"\"^^"+prefixes.abbreviateIRI(XSD_DATE_TIME);
     }
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert s_managedDatatypeURIs.contains(datatypeURI);
@@ -81,8 +70,8 @@ public class DateTimeDatatypeHandler implements DatatypeHandler {
             String facetURI=datatypeRestriction.getFacetURI(index);
             if (!s_supportedFacetURIs.contains(facetURI))
                 throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' is not supported on datatypes derived from xsd:dateTime.");
-            Object facetValue=datatypeRestriction.getFacetValue(index);
-            if (!(facetValue instanceof DateTime))
+            Object facetDataValue=datatypeRestriction.getFacetValue(index).getDataValue();
+            if (!(facetDataValue instanceof DateTime))
                 throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' supports only date/time values.");
         }
     }
@@ -178,35 +167,35 @@ public class DateTimeDatatypeHandler implements DatatypeHandler {
             return intervals;
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
             String facetURI=datatypeRestriction.getFacetURI(index);
-            DateTime facetValue=(DateTime)datatypeRestriction.getFacetValue(index);
+            DateTime facetDataValue=(DateTime)datatypeRestriction.getFacetValue(index).getDataValue();
             if ((XSD_NS+"minInclusive").equals(facetURI) || (XSD_NS+"minExclusive").equals(facetURI)) {
                 BoundType boundType=(XSD_NS+"minInclusive").equals(facetURI) ? BoundType.INCLUSIVE : BoundType.EXCLUSIVE;
-                if (facetValue.hasTimeZoneOffset()) {
+                if (facetDataValue.hasTimeZoneOffset()) {
                     if (intervals[0]!=null)
-                        intervals[0]=intervals[0].intersectWith(new DateTimeInterval(IntervalType.WITH_TIMEZONE,facetValue.getTimeOnTimeline(),boundType,Long.MAX_VALUE,BoundType.EXCLUSIVE));
+                        intervals[0]=intervals[0].intersectWith(new DateTimeInterval(IntervalType.WITH_TIMEZONE,facetDataValue.getTimeOnTimeline(),boundType,Long.MAX_VALUE,BoundType.EXCLUSIVE));
                     if (intervals[1]!=null)
-                        intervals[1]=intervals[1].intersectWith(new DateTimeInterval(IntervalType.WITHOUT_TIMEZONE,facetValue.getTimeOnTimeline()+DateTime.MAX_TIME_ZONE_CORRECTION,BoundType.EXCLUSIVE,Long.MAX_VALUE,BoundType.EXCLUSIVE));
+                        intervals[1]=intervals[1].intersectWith(new DateTimeInterval(IntervalType.WITHOUT_TIMEZONE,facetDataValue.getTimeOnTimeline()+DateTime.MAX_TIME_ZONE_CORRECTION,BoundType.EXCLUSIVE,Long.MAX_VALUE,BoundType.EXCLUSIVE));
                 }
                 else {
                     if (intervals[0]!=null)
-                        intervals[0]=intervals[0].intersectWith(new DateTimeInterval(IntervalType.WITH_TIMEZONE,facetValue.getTimeOnTimeline()+DateTime.MAX_TIME_ZONE_CORRECTION,BoundType.EXCLUSIVE,Long.MAX_VALUE,BoundType.EXCLUSIVE));
+                        intervals[0]=intervals[0].intersectWith(new DateTimeInterval(IntervalType.WITH_TIMEZONE,facetDataValue.getTimeOnTimeline()+DateTime.MAX_TIME_ZONE_CORRECTION,BoundType.EXCLUSIVE,Long.MAX_VALUE,BoundType.EXCLUSIVE));
                     if (intervals[1]!=null)
-                        intervals[1]=intervals[1].intersectWith(new DateTimeInterval(IntervalType.WITHOUT_TIMEZONE,facetValue.getTimeOnTimeline(),boundType,Long.MAX_VALUE,BoundType.EXCLUSIVE));
+                        intervals[1]=intervals[1].intersectWith(new DateTimeInterval(IntervalType.WITHOUT_TIMEZONE,facetDataValue.getTimeOnTimeline(),boundType,Long.MAX_VALUE,BoundType.EXCLUSIVE));
                 }
             }
             else if ((XSD_NS+"maxInclusive").equals(facetURI) || (XSD_NS+"maxExclusive").equals(facetURI)) {
                 BoundType boundType=(XSD_NS+"maxInclusive").equals(facetURI) ? BoundType.INCLUSIVE : BoundType.EXCLUSIVE;
-                if (facetValue.hasTimeZoneOffset()) {
+                if (facetDataValue.hasTimeZoneOffset()) {
                     if (intervals[0]!=null)
-                        intervals[0]=intervals[0].intersectWith(new DateTimeInterval(IntervalType.WITH_TIMEZONE,Long.MIN_VALUE,BoundType.EXCLUSIVE,facetValue.getTimeOnTimeline(),boundType));
+                        intervals[0]=intervals[0].intersectWith(new DateTimeInterval(IntervalType.WITH_TIMEZONE,Long.MIN_VALUE,BoundType.EXCLUSIVE,facetDataValue.getTimeOnTimeline(),boundType));
                     if (intervals[1]!=null)
-                        intervals[1]=intervals[1].intersectWith(new DateTimeInterval(IntervalType.WITHOUT_TIMEZONE,Long.MIN_VALUE,BoundType.EXCLUSIVE,facetValue.getTimeOnTimeline()-DateTime.MAX_TIME_ZONE_CORRECTION,BoundType.EXCLUSIVE));
+                        intervals[1]=intervals[1].intersectWith(new DateTimeInterval(IntervalType.WITHOUT_TIMEZONE,Long.MIN_VALUE,BoundType.EXCLUSIVE,facetDataValue.getTimeOnTimeline()-DateTime.MAX_TIME_ZONE_CORRECTION,BoundType.EXCLUSIVE));
                 }
                 else {
                     if (intervals[0]!=null)
-                        intervals[0]=intervals[0].intersectWith(new DateTimeInterval(IntervalType.WITH_TIMEZONE,Long.MIN_VALUE,BoundType.EXCLUSIVE,facetValue.getTimeOnTimeline()-DateTime.MAX_TIME_ZONE_CORRECTION,BoundType.EXCLUSIVE));
+                        intervals[0]=intervals[0].intersectWith(new DateTimeInterval(IntervalType.WITH_TIMEZONE,Long.MIN_VALUE,BoundType.EXCLUSIVE,facetDataValue.getTimeOnTimeline()-DateTime.MAX_TIME_ZONE_CORRECTION,BoundType.EXCLUSIVE));
                     if (intervals[1]!=null)
-                        intervals[1]=intervals[1].intersectWith(new DateTimeInterval(IntervalType.WITHOUT_TIMEZONE,Long.MIN_VALUE,BoundType.EXCLUSIVE,facetValue.getTimeOnTimeline(),boundType));
+                        intervals[1]=intervals[1].intersectWith(new DateTimeInterval(IntervalType.WITHOUT_TIMEZONE,Long.MIN_VALUE,BoundType.EXCLUSIVE,facetDataValue.getTimeOnTimeline(),boundType));
                 }
             }
             else

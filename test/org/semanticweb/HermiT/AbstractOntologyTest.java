@@ -19,6 +19,7 @@ import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDataRange;
 import org.semanticweb.owlapi.model.OWLDataSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLDatatype;
+import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
@@ -193,16 +194,25 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
         return OP(NS+suffix);
     }
     protected OWLDataProperty DP(String uri) {
-        return m_dataFactory.getOWLDataProperty(IRI.create(NS+uri));
+        return m_dataFactory.getOWLDataProperty(IRI.create(uri));
     }
     protected OWLDataProperty NS_DP(String suffix) {
-        return NS_DP(NS+suffix);
+        return DP(NS+suffix);
     }
     protected OWLNamedIndividual NI(String uri) {
         return m_dataFactory.getOWLNamedIndividual(IRI.create(uri));
     }
     protected OWLNamedIndividual NS_NI(String suffix) {
         return NI(NS+suffix);
+    }
+    protected OWLLiteral SL(String lexicalForm) {
+        return m_dataFactory.getOWLStringLiteral(lexicalForm);
+    }
+    protected OWLLiteral SL(String lexicalForm,String languageTag) {
+        return m_dataFactory.getOWLStringLiteral(lexicalForm,languageTag);
+    }
+    protected OWLLiteral TL(String lexicalForm,String datatypeURI) {
+        return m_dataFactory.getOWLTypedLiteral(lexicalForm,m_dataFactory.getOWLDatatype(IRI.create(Prefixes.STANDARD_PREFIXES.expandAbbreviatedIRI(datatypeURI))));
     }
     protected OWLAnonymousIndividual AI(String id) {
         return m_dataFactory.getOWLAnonymousIndividual(id);

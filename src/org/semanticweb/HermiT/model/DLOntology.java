@@ -139,27 +139,27 @@ public class DLOntology implements Serializable {
                     m_allIndividuals.add((Individual)argument);
             }
             if (atom.getArity()==2) {
-                Object mayBeConstant=atom.getArgument(1);
-                if (mayBeConstant instanceof Constant) {
-                    // data property assertion
-                    Individual ind=(Individual)atom.getArgument(0);
+                Object possibleConstant=atom.getArgument(1);
+                if (possibleConstant instanceof Constant) {
+                    // We have a data role assertion, so we store it into the approrpiate arrays
+                    Individual sourceIndividual=(Individual)atom.getArgument(0);
                     assert atom.getDLPredicate() instanceof AtomicRole;
-                    AtomicRole dp=(AtomicRole)atom.getDLPredicate();
-                    Map<Individual,Set<Constant>> indToDataValue;
-                    if (m_dataPropertyAssertions.containsKey(dp))
-                        indToDataValue=m_dataPropertyAssertions.get(dp);
+                    AtomicRole atomicRole=(AtomicRole)atom.getDLPredicate();
+                    Map<Individual,Set<Constant>> individualsToConstants;
+                    if (m_dataPropertyAssertions.containsKey(atomicRole))
+                        individualsToConstants=m_dataPropertyAssertions.get(atomicRole);
                     else {
-                        indToDataValue=new HashMap<Individual,Set<Constant>>();
-                        m_dataPropertyAssertions.put(dp,indToDataValue);
+                        individualsToConstants=new HashMap<Individual,Set<Constant>>();
+                        m_dataPropertyAssertions.put(atomicRole,individualsToConstants);
                     }
                     Set<Constant> constants;
-                    if (indToDataValue.containsKey(ind))
-                        constants=indToDataValue.get(ind);
+                    if (individualsToConstants.containsKey(sourceIndividual))
+                        constants=individualsToConstants.get(sourceIndividual);
                     else {
                         constants=new HashSet<Constant>();
-                        indToDataValue.put(ind,constants);
+                        individualsToConstants.put(sourceIndividual,constants);
                     }
-                    constants.add((Constant)mayBeConstant);
+                    constants.add((Constant)possibleConstant);
                 }
             }
         }

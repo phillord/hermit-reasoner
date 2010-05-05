@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -19,7 +19,6 @@ package org.semanticweb.HermiT.datatypes.xmlliteral;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Prefixes;
@@ -34,25 +33,9 @@ public class XMLLiteralDatatypeHandler implements DatatypeHandler {
     protected static final ValueSpaceSubset XML_LITERAL_ALL=new XMLLiteralAll();
     protected static final ValueSpaceSubset EMPTY=new XMLLiteralNone();
     protected final static Set<String> s_managedDatatypeURIs=Collections.singleton(RDF_XML_LITERAL);
-    protected final static Set<Class<?>> s_managedDataValueClasses=new HashSet<Class<?>>();
-    static {
-        s_managedDataValueClasses.add(XMLLiteral.class);
-    }
 
     public Set<String> getManagedDatatypeURIs() {
         return s_managedDatatypeURIs;
-    }
-    public Set<Class<?>> getManagedDataValueClasses() {
-        return s_managedDataValueClasses;
-    }
-    public String toString(Prefixes prefixes,Object dataValue) {
-        String value=((XMLLiteral)dataValue).getXML();
-        for (int index=value.length()-1;index>=0;--index) {
-            char c=value.charAt(index);
-            if (c=='\\' || c=='\"')
-                value=value.substring(0,index)+'\\'+value.substring(index);
-        }
-        return '\"'+value+"\"^^"+prefixes.abbreviateIRI(RDF_XML_LITERAL);
     }
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert RDF_XML_LITERAL.equals(datatypeURI);
@@ -106,7 +89,7 @@ public class XMLLiteralDatatypeHandler implements DatatypeHandler {
             throw new IllegalStateException("Internal errir: the value space is infinite!");
         }
     }
-    
+
     protected static class XMLLiteralNone implements ValueSpaceSubset {
 
         public boolean hasCardinalityAtLeast(int number) {

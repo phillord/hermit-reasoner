@@ -42,8 +42,6 @@ import org.semanticweb.HermiT.blocking.PairWiseDirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.SingleDirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.ValidatedPairwiseDirectBlockingChecker;
 import org.semanticweb.HermiT.blocking.ValidatedSingleDirectBlockingChecker;
-import org.semanticweb.HermiT.datatypes.DatatypeRegistry;
-import org.semanticweb.HermiT.datatypes.rdfplainliteral.RDFPlainLiteralDataValue;
 import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.existentials.CreationOrderStrategy;
 import org.semanticweb.HermiT.existentials.ExistentialExpansionStrategy;
@@ -1090,11 +1088,10 @@ public class Reasoner implements OWLReasoner {
         else {
             OWLDataFactory factory=getDataFactory();
             OWLIndividual individual=factory.getOWLAnonymousIndividual("fresh-individual");
-            OWLDatatype anonymousConstantsDatatype=factory.getOWLDatatype(IRI.create("internal:anonymous-constants"));
-            OWLTypedLiteral constant=factory.getOWLTypedLiteral("internal:fresh-constant",anonymousConstantsDatatype);
+            OWLTypedLiteral freshConstant=factory.getOWLTypedLiteral("internal:fresh-constant",factory.getOWLDatatype(IRI.create("internal:anonymous-constants")));
             OWLDataProperty negatedSuperDataProperty=factory.getOWLDataProperty(IRI.create("internal:negated-superproperty"));
-            OWLAxiom subpropertyAssertion=factory.getOWLDataPropertyAssertionAxiom(subDataProperty,individual,constant);
-            OWLAxiom negatedSuperpropertyAssertion=factory.getOWLDataPropertyAssertionAxiom(negatedSuperDataProperty,individual,constant);
+            OWLAxiom subpropertyAssertion=factory.getOWLDataPropertyAssertionAxiom(subDataProperty,individual,freshConstant);
+            OWLAxiom negatedSuperpropertyAssertion=factory.getOWLDataPropertyAssertionAxiom(negatedSuperDataProperty,individual,freshConstant);
             OWLAxiom superpropertyAxiomatization=factory.getOWLDisjointDataPropertiesAxiom(superDataProperty,negatedSuperDataProperty);
             Tableau tableau=getTableau(subpropertyAssertion,negatedSuperpropertyAssertion,superpropertyAxiomatization);
             return !tableau.isSatisfiable(true,null,null,null,null,null,ReasoningTaskDescription.isRoleSubsumedBy(subrole,superrole,false));
@@ -1146,7 +1143,7 @@ public class Reasoner implements OWLReasoner {
         Set<HierarchyNode<AtomicConcept>> nodes=m_directDataRoleDomains.get(atomicRole);
         if (nodes==null) {
             final Individual freshIndividual=Individual.createAnonymous("fresh-individual");
-            final Constant freshConstant=Constant.create(new Constant.AnonymousConstantValue("anonymous-constant"));
+            final Constant freshConstant=Constant.createAnonymous("fresh-constant");
             final Set<Atom> roleAssertion=Collections.singleton(atomicRole.getRoleAssertion(freshIndividual,freshConstant));
             final Tableau tableau=getTableau();
             HierarchySearch.SearchPredicate<HierarchyNode<AtomicConcept>> searchPredicate=new HierarchySearch.SearchPredicate<HierarchyNode<AtomicConcept>>() {
@@ -1188,7 +1185,7 @@ public class Reasoner implements OWLReasoner {
             }
             AtomicRole atomicRole=H(propertyExpression.asOWLDataProperty());
             Individual freshIndividual=Individual.create("fresh-individual");
-            Constant freshConstant=Constant.create(new Constant.AnonymousConstantValue("fresh-constant"));
+            Constant freshConstant=Constant.createAnonymous("fresh-constant");
             Atom atomicRoleAssertion=atomicRole.getRoleAssertion(freshIndividual,freshConstant);
             Tableau tableau=getTableau();
             Set<HierarchyNode<AtomicRole>> nodesToTest=new HashSet<HierarchyNode<AtomicRole>>();
@@ -1235,8 +1232,8 @@ public class Reasoner implements OWLReasoner {
             return true;
         AtomicRole atomicRole=H(property);
         Individual freshIndividual=Individual.createAnonymous("fresh-individual");
-        Constant freshConstantA=Constant.create(new Constant.AnonymousConstantValue("fresh-constant-A"));
-        Constant freshConstantB=Constant.create(new Constant.AnonymousConstantValue("fresh-constant-B"));
+        Constant freshConstantA=Constant.createAnonymous("fresh-constant-A");
+        Constant freshConstantB=Constant.createAnonymous("fresh-constant-B");
         Set<Atom> assertions=new HashSet<Atom>();
         assertions.add(atomicRole.getRoleAssertion(freshIndividual,freshConstantA));
         assertions.add(atomicRole.getRoleAssertion(freshIndividual,freshConstantB));
@@ -1435,7 +1432,6 @@ public class Reasoner implements OWLReasoner {
         Set<OWLLiteral> result=new HashSet<OWLLiteral>();
         if (m_dlOntology.hasDatatypes()) {
             OWLDataFactory factory=getDataFactory();
-            Prefixes noPrefixes=new Prefixes();
             Individual individual=H(namedIndividual);
             for (OWLDataProperty dataProperty : getDescendantDataProperties(property).getFlattened()) {
                 AtomicRole atomicRole=H(dataProperty);
@@ -1443,24 +1439,17 @@ public class Reasoner implements OWLReasoner {
                 if (dataPropertyAssertions!=null) {
                     if (dataPropertyAssertions.containsKey(individual)) {
                         for (Constant constant : dataPropertyAssertions.get(individual)) {
-                            Object dataValue=constant.getDataValue();
+                            String lexicalForm=constant.getLexicalForm();
+                            String datatypeURI=constant.getDatatypeURI();
                             OWLLiteral literal;
-                            if (dataValue instanceof String)
-                                literal=factory.getOWLStringLiteral((String)dataValue);
-                            else if (dataValue instanceof RDFPlainLiteralDataValue) {
-                                RDFPlainLiteralDataValue rdfPlainLiteralDataValue=(RDFPlainLiteralDataValue)dataValue;
-                                literal=factory.getOWLStringLiteral(rdfPlainLiteralDataValue.getString(),rdfPlainLiteralDataValue.getLanguageTag());
+                            if ((Prefixes.s_semanticWebPrefixes.get("xsd")+"string").equals(datatypeURI))
+                                literal=factory.getOWLStringLiteral(lexicalForm);
+                            else if ((Prefixes.s_semanticWebPrefixes.get("rdf")+"PlainLiteral").equals(datatypeURI)) {
+                                int atPosition=lexicalForm.lastIndexOf('@');
+                                literal=factory.getOWLStringLiteral(lexicalForm.substring(0,atPosition),lexicalForm.substring(atPosition+1));
                             }
-                            else {
-                                String stringValue=DatatypeRegistry.toString(noPrefixes,dataValue);
-                                int indexOfLastQuote=stringValue.lastIndexOf('"');
-                                String lexicalForm=stringValue.substring(1,indexOfLastQuote);
-                                String datatypeIRI=stringValue.substring(indexOfLastQuote+3);
-                                int datatypeIRILastChar=datatypeIRI.length()-1;
-                                if (datatypeIRILastChar>=1 && datatypeIRI.charAt(0)=='<' && datatypeIRI.charAt(datatypeIRILastChar)=='>')
-                                    datatypeIRI=datatypeIRI.substring(1,datatypeIRILastChar);
-                                literal=factory.getOWLTypedLiteral(lexicalForm,factory.getOWLDatatype(IRI.create(datatypeIRI)));
-                            }
+                            else
+                                literal=factory.getOWLTypedLiteral(lexicalForm,factory.getOWLDatatype(IRI.create(datatypeURI)));
                             result.add(literal);
                         }
                     }

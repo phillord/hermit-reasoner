@@ -32,7 +32,7 @@ import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DLPredicate;
-import org.semanticweb.HermiT.model.DataValueEnumeration;
+import org.semanticweb.HermiT.model.ConstantEnumeration;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.ExistentialConcept;
@@ -349,11 +349,10 @@ public final class Tableau implements Serializable {
             else {
                 Constant constant=(Constant)term;
                 node=createNewRootConstantNode(dependencySet);
-                Object dataValue=constant.getDataValue();
                 // Anonymous constant values are not assigned a particular value.
                 // See the hack in OWLClausification for an explanation.
-                if (!(dataValue instanceof Constant.AnonymousConstantValue))
-                    m_extensionManager.addAssertion(DataValueEnumeration.create(new Object[] { dataValue }),node,dependencySet,true);
+                if (!constant.isAnonymous())
+                    m_extensionManager.addAssertion(ConstantEnumeration.create(new Constant[] { constant }),node,dependencySet,true);
             }
             termsToNodes.put(term,node);
         }

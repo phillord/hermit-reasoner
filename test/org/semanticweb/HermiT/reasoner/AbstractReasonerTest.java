@@ -9,8 +9,10 @@ import java.util.Set;
 import org.semanticweb.HermiT.AbstractOntologyTest;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.EntailmentChecker;
+import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.Reasoner.ReasonerFactory;
+import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -28,7 +30,7 @@ import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
 public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     protected Reasoner m_reasoner;
-    
+
     public AbstractReasonerTest(String name) {
         super(name);
     }
@@ -180,7 +182,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSuperObjectProperties(ope,true));
         assertContainsAll(actual,control);
     }
-    
+
     /**
      * Checks the superproperties of some object property.
      */
@@ -203,7 +205,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSubObjectProperties(ope,true));
         assertContainsAll(actual,control);
     }
-    
+
     /**
      * Checks the subproperties of the inverse of the given object property.
      */
@@ -444,52 +446,104 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         return '\"'+value+"\"^^xsd:integer";
     }
 
+    protected static Constant INT_C(String value) {
+        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd")+"integer");
+    }
+
     protected static String DEC(String value) {
         return '\"'+value+"\"^^xsd:decimal";
+    }
+
+    protected static Constant DEC_C(String value) {
+        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd")+"decimal");
     }
 
     protected static String RAT(String num,String denom) {
         return '\"'+num+"/"+denom+"\"^^owl:rational";
     }
 
+    protected static Constant RAT_C(String value) {
+        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd")+"rational");
+    }
+
     protected static String FLT(String value) {
         return '\"'+value+"\"^^xsd:float";
+    }
+
+    protected static Constant FLT_C(String value) {
+        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd")+"float");
     }
 
     protected static String DBL(String value) {
         return '\"'+value+"\"^^xsd:double";
     }
 
+    protected static Constant DBL_C(String value) {
+        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd")+"double");
+    }
+
     protected static String DATE(String value) {
         return '\"'+value+"\"^^xsd:dateTime";
+    }
+
+    protected static Constant DATE_C(String value) {
+        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd")+"dateTime");
     }
 
     protected static String DATES(String value) {
         return '\"'+value+"\"^^xsd:dateTimeStamp";
     }
 
+    protected static Constant DATES_C(String value) {
+        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd")+"dateTimeStamp");
+    }
+
     protected static String XMLL(String value) {
         return '\"'+value+"\"^^rdf:XMLLiteral";
+    }
+
+    protected static Constant XMLL_C(String value) {
+        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("rdf")+"XMLLiteral");
     }
 
     protected static String HEXB(String value) {
         return '\"'+value+"\"^^xsd:hexBinary";
     }
 
+    protected static Constant HEXB_C(String value) {
+        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd")+"hexBinary");
+    }
+
     protected static String B64B(String value) {
         return '\"'+value+"\"^^xsd:base64Binary";
+    }
+
+    protected static Constant B64B_C(String value) {
+        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd")+"has64Binary");
     }
 
     protected static String STR(String value) {
         return '\"'+value+"\"^^xsd:string";
     }
 
+    protected static Constant STR_C(String value) {
+        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd")+"string");
+    }
+
     protected static String STR(String value,String languageTag) {
         return '\"'+value+"\"@"+languageTag;
     }
 
+    protected static Constant STR_C(String value,String languageTag) {
+        return Constant.create(value+"\"@"+languageTag,Prefixes.s_semanticWebPrefixes.get("xsd")+"string");
+    }
+
     protected static String AURI(String value) {
         return '\"'+value+"\"^^xsd:anyURI";
+    }
+
+    protected static Constant AURI_C(String value) {
+        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd")+"anyURI");
     }
 
     protected static String[] S(String... args) {

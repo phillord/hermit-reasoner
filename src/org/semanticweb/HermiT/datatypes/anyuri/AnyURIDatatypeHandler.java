@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -20,7 +20,6 @@ package org.semanticweb.HermiT.datatypes.anyuri;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Prefixes;
@@ -28,6 +27,7 @@ import org.semanticweb.HermiT.datatypes.DatatypeHandler;
 import org.semanticweb.HermiT.datatypes.MalformedLiteralException;
 import org.semanticweb.HermiT.datatypes.UnsupportedFacetException;
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
+import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
 
 import dk.brics.automaton.Automaton;
@@ -37,20 +37,9 @@ public class AnyURIDatatypeHandler implements DatatypeHandler {
     protected static final ValueSpaceSubset ANY_URI_ALL=new AnyURIValueSpaceSubset(AnyURIValueSpaceSubset.s_anyURI);
     protected static final ValueSpaceSubset EMPTY_SUBSET=new AnyURIValueSpaceSubset(AnyURIValueSpaceSubset.s_empty);
     protected static final Set<String> s_managedDatatypeURIs=Collections.singleton(XSD_NS+"anyURI");
-    protected static final Set<Class<?>> s_managedDataValueClasses=new HashSet<Class<?>>();
-    static {
-        s_managedDataValueClasses.add(URI.class);
-    }
 
     public Set<String> getManagedDatatypeURIs() {
         return s_managedDatatypeURIs;
-    }
-    public Set<Class<?>> getManagedDataValueClasses() {
-        return s_managedDataValueClasses;
-    }
-    public String toString(Prefixes prefixes,Object dataValue) {
-        String lexicalForm=((URI)dataValue).toString();
-        return '\"'+lexicalForm+"\"^^"+prefixes.abbreviateIRI(XSD_NS+"anyURI");
     }
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert s_managedDatatypeURIs.contains(datatypeURI);
@@ -67,24 +56,25 @@ public class AnyURIDatatypeHandler implements DatatypeHandler {
         assert s_managedDatatypeURIs.contains(datatypeRestriction.getDatatypeURI());
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
             String facetURI=datatypeRestriction.getFacetURI(index);
-            Object facetValue=datatypeRestriction.getFacetValue(index);
+            Constant facetValue=datatypeRestriction.getFacetValue(index);
+            Object facetDataValue=facetValue.getDataValue();
             if ((XSD_NS+"minLength").equals(facetURI) || (XSD_NS+"maxLength").equals(facetURI) || (XSD_NS+"length").equals(facetURI)) {
-                if (facetValue instanceof Integer) {
-                    int value=(Integer)facetValue;
+                if (facetDataValue instanceof Integer) {
+                    int value=(Integer)facetDataValue;
                     if (value<0 || value==Integer.MAX_VALUE)
                         throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' does not support integer "+value+" as value.");
                 }
                 else
-                    throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' does not support value of type "+facetValue.getClass()+" as value.");
+                    throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' does not support '"+facetValue.toString()+"' as value.");
             }
             else if ((XSD_NS+"pattern").equals(facetURI)) {
-                if (facetValue instanceof String) {
-                    String pattern=(String)facetValue;
+                if (facetDataValue instanceof String) {
+                    String pattern=(String)facetDataValue;
                     if (!AnyURIValueSpaceSubset.isValidPattern(pattern))
                         throw new UnsupportedFacetException("String '"+pattern+"' is not a valid regular expression.");
                 }
                 else
-                    throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' does not support value of type "+facetValue.getClass()+" as value.");
+                    throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' does not support '"+facetValue.toString()+"' as value.");
             }
             else
                 throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' is not supported on xsd:anyURI.");
@@ -134,17 +124,17 @@ public class AnyURIDatatypeHandler implements DatatypeHandler {
         int maxLength=Integer.MAX_VALUE;
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
             String facetURI=datatypeRestriction.getFacetURI(index);
-            Object facetValue=datatypeRestriction.getFacetValue(index);
+            Object facetDataValue=datatypeRestriction.getFacetValue(index).getDataValue();
             if ((XSD_NS+"minLength").equals(facetURI))
-                minLength=Math.max(minLength,(Integer)facetValue);
+                minLength=Math.max(minLength,(Integer)facetDataValue);
             else if ((XSD_NS+"maxLength").equals(facetURI))
-                maxLength=Math.min(maxLength,(Integer)facetValue);
+                maxLength=Math.min(maxLength,(Integer)facetDataValue);
             else if ((XSD_NS+"length").equals(facetURI)) {
-                minLength=Math.max(minLength,(Integer)facetValue);
-                maxLength=Math.min(maxLength,(Integer)facetValue);
+                minLength=Math.max(minLength,(Integer)facetDataValue);
+                maxLength=Math.min(maxLength,(Integer)facetDataValue);
             }
             else if ((XSD_NS+"pattern").equals(facetURI)) {
-                String pattern=(String)facetValue;
+                String pattern=(String)facetDataValue;
                 Automaton facetAutomaton=AnyURIValueSpaceSubset.getPatternAutomaton(pattern);
                 automaton=automaton.intersection(facetAutomaton);
             }

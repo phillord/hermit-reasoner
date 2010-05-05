@@ -11,6 +11,7 @@ import org.semanticweb.HermiT.datatypes.MalformedLiteralException;
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 import org.semanticweb.HermiT.datatypes.rdfplainliteral.RDFPlainLiteralDataValue;
 import org.semanticweb.HermiT.datatypes.rdfplainliteral.RDFPlainLiteralLengthInterval;
+import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
 
 public class RDFPlainLiteralTest extends AbstractReasonerTest {
@@ -173,7 +174,7 @@ public class RDFPlainLiteralTest extends AbstractReasonerTest {
         );
     }
     public void testPatternAndLength2() throws Exception {
-        ValueSpaceSubset subset=subset("xsd:string","xsd:pattern","ab(c+)","xsd:minLength",5);
+        ValueSpaceSubset subset=subset("xsd:string","xsd:pattern",STR_C("ab(c+)"),"xsd:minLength",INT_C("5"));
         assertTrue(subset.hasCardinalityAtLeast(5000));
         try {
             subset.enumerateDataValues(new ArrayList<Object>());
@@ -185,7 +186,7 @@ public class RDFPlainLiteralTest extends AbstractReasonerTest {
         assertTrue(subset.containsDataValue("abccccccccccc"));
     }
     public void testPatternAndLength3() throws Exception {
-        ValueSpaceSubset subset=subset("xsd:string","xsd:pattern","ab(c+)","xsd:minLength",5,"xsd:maxLength",10);
+        ValueSpaceSubset subset=subset("xsd:string","xsd:pattern",STR_C("ab(c+)"),"xsd:minLength",INT_C("5"),"xsd:maxLength",INT_C("10"));
         assertTrue(subset.hasCardinalityAtLeast(6));
         assertFalse(subset.hasCardinalityAtLeast(7));
         Set<Object> values=new HashSet<Object>();
@@ -212,8 +213,8 @@ public class RDFPlainLiteralTest extends AbstractReasonerTest {
         );
     }
     public void testComplement2() throws Exception {
-        ValueSpaceSubset main=subset("xsd:string","xsd:pattern","ab(c*)");
-        DatatypeRestriction restriction=restriction("xsd:string","xsd:minLength",5);
+        ValueSpaceSubset main=subset("xsd:string","xsd:pattern",STR_C("ab(c*)"));
+        DatatypeRestriction restriction=restriction("xsd:string","xsd:minLength",INT_C("5"));
         ValueSpaceSubset intersection=DatatypeRegistry.conjoinWithDRNegation(main,restriction);
         assertTrue(intersection.hasCardinalityAtLeast(3));
         assertFalse(intersection.hasCardinalityAtLeast(4));
@@ -223,7 +224,7 @@ public class RDFPlainLiteralTest extends AbstractReasonerTest {
     }
     public void testComplement3() throws Exception {
         ValueSpaceSubset main=subset("rdf:PlainLiteral");
-        DatatypeRestriction restriction=restriction("xsd:string","xsd:minLength",5);
+        DatatypeRestriction restriction=restriction("xsd:string","xsd:minLength",INT_C("5"));
         ValueSpaceSubset intersection=DatatypeRegistry.conjoinWithDRNegation(main,restriction);
         assertFalse(intersection.containsDataValue("abcde"));
         assertTrue(intersection.containsDataValue("abcd"));
@@ -231,8 +232,8 @@ public class RDFPlainLiteralTest extends AbstractReasonerTest {
         assertFalse(intersection.containsDataValue(new RDFPlainLiteralDataValue("abcdefgh","123")));
     }
     public void testComplement4() throws Exception {
-        ValueSpaceSubset main=subset("rdf:PlainLiteral","xsd:pattern","a+");
-        DatatypeRestriction restriction=restriction("xsd:string","xsd:minLength",5);
+        ValueSpaceSubset main=subset("rdf:PlainLiteral","xsd:pattern",STR_C("a+"));
+        DatatypeRestriction restriction=restriction("xsd:string","xsd:minLength",INT_C("5"));
         ValueSpaceSubset intersection=DatatypeRegistry.conjoinWithDRNegation(main,restriction);
         assertFalse(intersection.containsDataValue("aaaaa"));
         assertTrue(intersection.containsDataValue("aaaa"));
@@ -240,7 +241,7 @@ public class RDFPlainLiteralTest extends AbstractReasonerTest {
         assertFalse(intersection.containsDataValue(new RDFPlainLiteralDataValue("aaaaaaaa","123")));
     }
     public void testLangRange1() throws Exception {
-        ValueSpaceSubset main=subset("rdf:PlainLiteral","rdf:langRange","en");
+        ValueSpaceSubset main=subset("rdf:PlainLiteral","rdf:langRange",STR_C("en"));
         assertFalse(main.containsDataValue("abc"));
         assertFalse(main.containsDataValue(new RDFPlainLiteralDataValue("abc","de")));
         assertTrue(main.containsDataValue(new RDFPlainLiteralDataValue("abc","en")));
@@ -248,7 +249,7 @@ public class RDFPlainLiteralTest extends AbstractReasonerTest {
         assertTrue(main.containsDataValue(new RDFPlainLiteralDataValue("abc","en-us")));
     }
     public void testLangRange2() throws Exception {
-        ValueSpaceSubset main=subset("rdf:PlainLiteral","rdf:langRange","*");
+        ValueSpaceSubset main=subset("rdf:PlainLiteral","rdf:langRange",STR_C("*"));
         assertFalse(main.containsDataValue("abc"));
         assertTrue(main.containsDataValue(new RDFPlainLiteralDataValue("abc","de")));
         assertTrue(main.containsDataValue(new RDFPlainLiteralDataValue("abc","en")));
@@ -257,10 +258,10 @@ public class RDFPlainLiteralTest extends AbstractReasonerTest {
     }
     protected static DatatypeRestriction restriction(String datatypeURI,Object... arguments) {
         String[] facetURIs=new String[arguments.length/2];
-        Object[] facetValues=new Object[arguments.length/2];
+        Constant[] facetValues=new Constant[arguments.length/2];
         for (int index=0;index<arguments.length;index+=2) {
             facetURIs[index/2]=Prefixes.STANDARD_PREFIXES.expandAbbreviatedIRI((String)arguments[index]);
-            facetValues[index/2]=arguments[index+1];
+            facetValues[index/2]=(Constant)arguments[index+1];
         }
         return DatatypeRestriction.create(Prefixes.STANDARD_PREFIXES.expandAbbreviatedIRI(datatypeURI),facetURIs,facetValues);
     }

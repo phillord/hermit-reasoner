@@ -9,6 +9,7 @@ import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.datatypes.DatatypeRegistry;
 import org.semanticweb.HermiT.datatypes.MalformedLiteralException;
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
+import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
 
 public class AnyURITest extends AbstractReasonerTest {
@@ -127,7 +128,7 @@ public class AnyURITest extends AbstractReasonerTest {
         );
     }
     public void testPatternAndLength2() throws Exception {
-        ValueSpaceSubset subset=subset("xsd:pattern","ab(c+)","xsd:minLength",5);
+        ValueSpaceSubset subset=subset("xsd:pattern",STR_C("ab(c+)"),"xsd:minLength",INT_C("5"));
         assertTrue(subset.hasCardinalityAtLeast(5000));
         try {
             subset.enumerateDataValues(new ArrayList<Object>());
@@ -139,7 +140,7 @@ public class AnyURITest extends AbstractReasonerTest {
         assertTrue(subset.containsDataValue(URI.create("abccccccccccc")));
     }
     public void testPatternAndLength3() throws Exception {
-        ValueSpaceSubset subset=subset("xsd:pattern","ab(c+)","xsd:minLength",5,"xsd:maxLength",10);
+        ValueSpaceSubset subset=subset("xsd:pattern",STR_C("ab(c+)"),"xsd:minLength",INT_C("5"),"xsd:maxLength",INT_C("10"));
         assertTrue(subset.hasCardinalityAtLeast(6));
         assertFalse(subset.hasCardinalityAtLeast(7));
         Set<Object> values=new HashSet<Object>();
@@ -173,8 +174,8 @@ public class AnyURITest extends AbstractReasonerTest {
         );
     }
     public void testComplement2() throws Exception {
-        ValueSpaceSubset main=subset("xsd:pattern","ab(c*)");
-        DatatypeRestriction restriction=restriction("xsd:minLength",5);
+        ValueSpaceSubset main=subset("xsd:pattern",STR_C("ab(c*)"));
+        DatatypeRestriction restriction=restriction("xsd:minLength",INT_C("5"));
         ValueSpaceSubset intersection=DatatypeRegistry.conjoinWithDRNegation(main,restriction);
         assertTrue(intersection.hasCardinalityAtLeast(3));
         assertFalse(intersection.hasCardinalityAtLeast(4));
@@ -184,24 +185,24 @@ public class AnyURITest extends AbstractReasonerTest {
     }
     public void testComplement3() throws Exception {
         ValueSpaceSubset main=subset();
-        DatatypeRestriction restriction=restriction("xsd:minLength",5);
+        DatatypeRestriction restriction=restriction("xsd:minLength",INT_C("5"));
         ValueSpaceSubset intersection=DatatypeRegistry.conjoinWithDRNegation(main,restriction);
         assertFalse(intersection.containsDataValue(URI.create("abcde")));
         assertTrue(intersection.containsDataValue(URI.create("abcd")));
     }
     public void testComplement4() throws Exception {
-        ValueSpaceSubset main=subset("xsd:pattern","a+");
-        DatatypeRestriction restriction=restriction("xsd:minLength",5);
+        ValueSpaceSubset main=subset("xsd:pattern",STR_C("a+"));
+        DatatypeRestriction restriction=restriction("xsd:minLength",INT_C("5"));
         ValueSpaceSubset intersection=DatatypeRegistry.conjoinWithDRNegation(main,restriction);
         assertFalse(intersection.containsDataValue(URI.create("aaaaa")));
         assertTrue(intersection.containsDataValue(URI.create("aaaa")));
     }
     protected static DatatypeRestriction restriction(Object... arguments) {
         String[] facetURIs=new String[arguments.length/2];
-        Object[] facetValues=new Object[arguments.length/2];
+        Constant[] facetValues=new Constant[arguments.length/2];
         for (int index=0;index<arguments.length;index+=2) {
             facetURIs[index/2]=Prefixes.STANDARD_PREFIXES.expandAbbreviatedIRI((String)arguments[index]);
-            facetValues[index/2]=arguments[index+1];
+            facetValues[index/2]=(Constant)arguments[index+1];
         }
         return DatatypeRestriction.create(XSD_ANY_URI,facetURIs,facetValues);
     }

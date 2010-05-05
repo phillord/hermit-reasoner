@@ -18,7 +18,6 @@
 package org.semanticweb.HermiT.model;
 
 import org.semanticweb.HermiT.Prefixes;
-import org.semanticweb.HermiT.datatypes.DatatypeRegistry;
 
 /**
  * A data range consisting of a datatype URI and a number of facet restrictions.
@@ -26,13 +25,13 @@ import org.semanticweb.HermiT.datatypes.DatatypeRegistry;
 public class DatatypeRestriction extends DataRange {
     private static final long serialVersionUID=524235536504588458L;
     public static final String[] NO_FACET_URIs=new String[0];
-    public static final Object[] NO_FACET_VALUES=new Object[0];
+    public static final Constant[] NO_FACET_VALUES=new Constant[0];
 
     protected final String m_datatypeURI;
     protected final String[] m_facetURIs;
-    protected final Object[] m_facetValues;
+    protected final Constant[] m_facetValues;
 
-    public DatatypeRestriction(String datatypeURI,String[] facetURIs,Object[] facetValues) {
+    public DatatypeRestriction(String datatypeURI,String[] facetURIs,Constant[] facetValues) {
         m_datatypeURI=datatypeURI;
         m_facetURIs=facetURIs;
         m_facetValues=facetValues;
@@ -46,7 +45,7 @@ public class DatatypeRestriction extends DataRange {
     public String getFacetURI(int index) {
         return m_facetURIs[index];
     }
-    public Object getFacetValue(int index) {
+    public Constant getFacetValue(int index) {
         return m_facetValues[index];
     }
     public LiteralConcept getNegation() {
@@ -68,7 +67,7 @@ public class DatatypeRestriction extends DataRange {
                     buffer.append(',');
                 buffer.append(prefixes.abbreviateIRI(m_facetURIs[index]));
                 buffer.append('=');
-                buffer.append(DatatypeRegistry.toString(prefixes,m_facetValues[index]));
+                buffer.append(m_facetValues[index].toString(prefixes));
             }
             buffer.append(']');
         }
@@ -101,7 +100,7 @@ public class DatatypeRestriction extends DataRange {
         }
     };
 
-    public static DatatypeRestriction create(String datatypeURI,String[] facetURIs,Object[] facetValues) {
+    public static DatatypeRestriction create(String datatypeURI,String[] facetURIs,Constant[] facetValues) {
         return s_interningManager.intern(new DatatypeRestriction(datatypeURI,facetURIs,facetValues));
     }
 
