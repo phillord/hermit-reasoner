@@ -35,6 +35,24 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
+    
+    public void testPropertyEnailmentFromAlan() throws Exception {
+        loadOntologyWithAxioms(
+                "Declaration(Class(:a))"+
+                "Declaration(NamedIndividual(:a1))"+
+                "Declaration(ObjectProperty(:p1))"+
+                "Declaration(ObjectProperty(:p2))"+
+                "EquivalentClasses(:a ObjectOneOf(:a1))"+
+                "ObjectPropertyDomain(:p1 :a)"+
+                "ObjectPropertyRange(:p1 :a)"+
+                "ObjectPropertyDomain(:p2 :a)"+
+                "ObjectPropertyRange(:p2 :a)"+
+                "ObjectPropertyAssertion(:p1 :a1 :a1)"+
+                "ObjectPropertyAssertion(:p2 :a1 :a1)");
+        createReasoner();
+        assertEquivalentObjectProperties("p1", IRIs("p2", "p1"));
+        assertEquivalentObjectProperties("p2", IRIs("p2", "p1"));
+    }
     @SuppressWarnings("unchecked")
     public void testSubProperties() throws Exception {
         loadOntologyWithAxioms(
