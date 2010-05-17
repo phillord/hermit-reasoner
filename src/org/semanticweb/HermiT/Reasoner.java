@@ -79,6 +79,8 @@ import org.semanticweb.HermiT.structural.ObjectPropertyInclusionManager;
 import org.semanticweb.HermiT.tableau.InterruptFlag;
 import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
+import org.semanticweb.owlapi.model.AddAxiom;
+import org.semanticweb.owlapi.model.AddOntologyAnnotation;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
@@ -107,6 +109,8 @@ import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 import org.semanticweb.owlapi.model.OWLTransitiveObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLTypedLiteral;
+import org.semanticweb.owlapi.model.RemoveAxiom;
+import org.semanticweb.owlapi.model.RemoveOntologyAnnotation;
 import org.semanticweb.owlapi.reasoner.BufferingMode;
 import org.semanticweb.owlapi.reasoner.FreshEntitiesException;
 import org.semanticweb.owlapi.reasoner.FreshEntityPolicy;
@@ -135,9 +139,9 @@ public class Reasoner implements OWLReasoner {
     protected final OntologyChangeListener m_ontologyChangeListener;
     protected final Configuration m_configuration;
     protected final OWLOntology m_rootOntology;
+    protected final List<OWLOntologyChange> m_pendingChanges;
     protected final Collection<DescriptionGraph> m_descriptionGraphs;
     protected final InterruptFlag m_interruptFlag;
-    protected boolean m_ontologyChanged;
     protected ObjectPropertyInclusionManager m_objectPropertyInclusionManager;
     protected DLOntology m_dlOntology;
     protected Prefixes m_prefixes;
@@ -187,13 +191,13 @@ public class Reasoner implements OWLReasoner {
         m_ontologyChangeListener=new OntologyChangeListener();
         m_configuration=configuration;
         m_rootOntology=rootOntology;
+        m_pendingChanges=new ArrayList<OWLOntologyChange>();
         m_rootOntology.getOWLOntologyManager().addOntologyChangeListener(m_ontologyChangeListener);
         if (descriptionGraphs==null)
             m_descriptionGraphs=Collections.emptySet();
         else
             m_descriptionGraphs=descriptionGraphs;
         m_interruptFlag=new InterruptFlag(configuration.individualTaskTimeout);
-        m_ontologyChanged=false;
         loadOntology();
     }
 
@@ -219,6 +223,7 @@ public class Reasoner implements OWLReasoner {
         m_interruptFlag.dispose();
     }
     protected void clearState() {
+        m_pendingChanges.clear();
         m_dlOntology=null;
         m_prefixes=null;
         m_tableau=null;
@@ -286,24 +291,39 @@ public class Reasoner implements OWLReasoner {
         return m_configuration.clone();
     }
 
-    // Ontology change management methods, only implemented in ChangeTrackingReasoner
-
+    // Ontology change management methods
+    
     public BufferingMode getBufferingMode() {
         return m_configuration.bufferChanges ? BufferingMode.BUFFERING : BufferingMode.NON_BUFFERING;
     }
+    protected class OntologyChangeListener implements OWLOntologyChangeListener {
+        public void ontologiesChanged(List<? extends OWLOntologyChange> changes) throws OWLException {
+            for (OWLOntologyChange change : changes)
+                if (!(change instanceof RemoveOntologyAnnotation || change instanceof AddOntologyAnnotation))
+                    m_pendingChanges.add(change);
+        }
+    }
     public Set<OWLAxiom> getPendingAxiomAdditions() {
-        return Collections.emptySet();
+        Set<OWLAxiom> added=new HashSet<OWLAxiom>();
+        for (OWLOntologyChange change : m_pendingChanges)
+            if (change instanceof AddAxiom)
+                added.add(change.getAxiom());
+        return added;
     }
     public Set<OWLAxiom> getPendingAxiomRemovals() {
-        return Collections.emptySet();
+        Set<OWLAxiom> removed=new HashSet<OWLAxiom>();
+        for (OWLOntologyChange change : m_pendingChanges)
+            if (change instanceof RemoveAxiom)
+                removed.add(change.getAxiom());
+        return removed;
     }
     public List<OWLOntologyChange> getPendingChanges() {
-        return Collections.emptyList();
+        return m_pendingChanges;
     }
     public void flush() {
-        if (m_ontologyChanged) {
+        if (!m_pendingChanges.isEmpty()) {
             loadOntology();
-            m_ontologyChanged=false;
+            m_pendingChanges.clear();
         }
     }
 
@@ -330,7 +350,7 @@ public class Reasoner implements OWLReasoner {
         return m_dlOntology.containsDataRole(atomicRole) || AtomicRole.TOP_DATA_ROLE.equals(atomicRole) || AtomicRole.BOTTOM_DATA_ROLE.equals(atomicRole);
     }
     public void prepareReasoner() {
-        throwInconsistentOntologyExceptionIfNecessary();
+        checkPreConditions();
         boolean doAll=m_configuration.prepareReasonerInferences==null;
         if (doAll || m_configuration.prepareReasonerInferences.classClassificationRequired)
             classify();
@@ -342,6 +362,7 @@ public class Reasoner implements OWLReasoner {
             realise();
     }
     public boolean isConsistent() {
+        flushChangesIfRequired();
         if (m_isConsistent==null)
             m_isConsistent=getTableau().isSatisfiable(true,true,null,null,null,null,null,ReasoningTaskDescription.isABoxSatisfiable());
         return m_isConsistent;
@@ -350,20 +371,15 @@ public class Reasoner implements OWLReasoner {
         return true;
     }
     public boolean isEntailed(OWLAxiom axiom) {
-        throwFreshEntityExceptionIfNecessary(axiom);
-        throwInconsistentOntologyExceptionIfNecessary();
+        checkPreConditions(axiom);
         if (!isConsistent())
             return true;
         EntailmentChecker checker=new EntailmentChecker(this,getDataFactory());
         return checker.entails(axiom);
     }
     public boolean isEntailed(Set<? extends OWLAxiom> axioms) {
-        if (m_configuration.freshEntityPolicy==FreshEntityPolicy.DISALLOW)
-            for (OWLAxiom axiom : axioms)
-                throwFreshEntityExceptionIfNecessary(axiom);
-        throwInconsistentOntologyExceptionIfNecessary();
-        if (!isConsistent())
-            return true;
+        checkPreConditions(axioms.toArray(new OWLObject[0]));
+        if (!m_isConsistent) return true;
         EntailmentChecker checker=new EntailmentChecker(this,getDataFactory());
         return checker.entails(axioms);
     }
@@ -374,15 +390,15 @@ public class Reasoner implements OWLReasoner {
         return m_atomicConceptHierarchy!=null;
     }
     public void classify() {
+        checkPreConditions();
         if (m_atomicConceptHierarchy==null) {
-            throwInconsistentOntologyExceptionIfNecessary();
             Set<AtomicConcept> relevantAtomicConcepts=new HashSet<AtomicConcept>();
             relevantAtomicConcepts.add(AtomicConcept.THING);
             relevantAtomicConcepts.add(AtomicConcept.NOTHING);
             for (AtomicConcept atomicConcept : m_dlOntology.getAllAtomicConcepts())
                 if (!Prefixes.isInternalIRI(atomicConcept.getIRI()))
                     relevantAtomicConcepts.add(atomicConcept);
-            if (!isConsistent())
+            if (!m_isConsistent)
                 m_atomicConceptHierarchy=Hierarchy.emptyHierarchy(relevantAtomicConcepts,AtomicConcept.THING,AtomicConcept.NOTHING);
             else {
                 try {
@@ -415,8 +431,7 @@ public class Reasoner implements OWLReasoner {
         return atomicConceptHierarchyNodeToNode(m_atomicConceptHierarchy.getBottomNode());
     }
     public boolean isSatisfiable(OWLClassExpression classExpression) {
-        throwFreshEntityExceptionIfNecessary(classExpression);
-        throwInconsistentOntologyExceptionIfNecessary();
+        checkPreConditions(classExpression);
         if (!isConsistent())
             return false;
         if (classExpression instanceof OWLClass && m_atomicConceptHierarchy!=null) {
@@ -433,8 +448,7 @@ public class Reasoner implements OWLReasoner {
         }
     }
     public boolean isSubClassOf(OWLClassExpression subClassExpression,OWLClassExpression superClassExpression) {
-        throwFreshEntityExceptionIfNecessary(subClassExpression,superClassExpression);
-        throwInconsistentOntologyExceptionIfNecessary();
+        checkPreConditions(subClassExpression,superClassExpression);
         if (!isConsistent() || subClassExpression.isOWLNothing() || superClassExpression.isOWLThing())
             return true;
         if (subClassExpression instanceof OWLClass && superClassExpression instanceof OWLClass) {
@@ -516,7 +530,7 @@ public class Reasoner implements OWLReasoner {
         return new OWLClassNodeSet(result);
     }
     protected HierarchyNode<AtomicConcept> getHierarchyNode(OWLClassExpression classExpression) {
-        throwFreshEntityExceptionIfNecessary(classExpression);
+        checkPreConditions(classExpression);
         classify();
         if (!isConsistent())
             return m_atomicConceptHierarchy.getBottomNode();
@@ -548,6 +562,7 @@ public class Reasoner implements OWLReasoner {
         return m_objectRoleHierarchy!=null;
     }
     public void classifyObjectProperties() {
+        checkPreConditions();
         if (m_objectRoleHierarchy==null) {
             Set<Role> relevantObjectRoles=new HashSet<Role>();
             relevantObjectRoles.add(AtomicRole.TOP_OBJECT_ROLE);
@@ -557,7 +572,7 @@ public class Reasoner implements OWLReasoner {
                 if (m_dlOntology.hasInverseRoles())
                     relevantObjectRoles.add(atomicRole.getInverse());
             }
-            if (!isConsistent())
+            if (!m_isConsistent)
                 m_objectRoleHierarchy=Hierarchy.emptyHierarchy(relevantObjectRoles,AtomicRole.TOP_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE);
             else {
                 Map<Role,AtomicConcept> conceptsForRoles=new HashMap<Role,AtomicConcept>();
@@ -626,9 +641,8 @@ public class Reasoner implements OWLReasoner {
         return objectPropertyHierarchyNodeToNode(m_objectRoleHierarchy.getBottomNode());
     }
     public boolean isSubObjectPropertyExpressionOf(OWLObjectPropertyExpression subObjectPropertyExpression,OWLObjectPropertyExpression superObjectPropertyExpression) {
-        throwFreshEntityExceptionIfNecessary(subObjectPropertyExpression,superObjectPropertyExpression);
-        throwInconsistentOntologyExceptionIfNecessary();
-        if (!isConsistent() || subObjectPropertyExpression.getNamedProperty().isOWLBottomObjectProperty() || superObjectPropertyExpression.getNamedProperty().isOWLTopObjectProperty())
+        checkPreConditions(subObjectPropertyExpression,superObjectPropertyExpression);
+        if (!m_isConsistent || subObjectPropertyExpression.getNamedProperty().isOWLBottomObjectProperty() || superObjectPropertyExpression.getNamedProperty().isOWLTopObjectProperty())
             return true;
         Role subrole=H(subObjectPropertyExpression);
         Role superrole=H(superObjectPropertyExpression);
@@ -650,11 +664,12 @@ public class Reasoner implements OWLReasoner {
         }
     }
     public boolean isSubObjectPropertyExpressionOf(List<OWLObjectPropertyExpression> subPropertyChain,OWLObjectPropertyExpression superObjectPropertyExpression) {
-        for (OWLObjectPropertyExpression subProperty : subPropertyChain)
-            throwFreshEntityExceptionIfNecessary(subProperty);
-        throwFreshEntityExceptionIfNecessary(superObjectPropertyExpression);
-        throwInconsistentOntologyExceptionIfNecessary();
-        if (!isConsistent() || superObjectPropertyExpression.getNamedProperty().isOWLTopObjectProperty())
+        OWLObject[] objects=new OWLObject[subPropertyChain.size()+1];
+        for (int i=0;i<subPropertyChain.size();i++)
+            objects[i]=subPropertyChain.get(i);
+        objects[subPropertyChain.size()]=superObjectPropertyExpression;
+        checkPreConditions(objects);
+        if (!m_isConsistent || superObjectPropertyExpression.getNamedProperty().isOWLTopObjectProperty())
             return true;
         else {
             OWLDataFactory factory=getDataFactory();
@@ -754,8 +769,7 @@ public class Reasoner implements OWLReasoner {
         return objectPropertyHierarchyNodeToNode(getHierarchyNode(propertyExpression));
     }
     public NodeSet<OWLClass> getObjectPropertyDomains(OWLObjectPropertyExpression propertyExpression,boolean direct) {
-        throwFreshEntityExceptionIfNecessary(propertyExpression);
-        throwInconsistentOntologyExceptionIfNecessary();
+        checkPreConditions(propertyExpression);
         classify();
         if (!isConsistent())
             return new OWLClassNodeSet(getBottomClassNode());
@@ -786,8 +800,7 @@ public class Reasoner implements OWLReasoner {
         return atomicConceptHierarchyNodesToNodeSet(nodes);
     }
     public NodeSet<OWLClass> getObjectPropertyRanges(OWLObjectPropertyExpression propertyExpression,boolean direct) {
-        throwFreshEntityExceptionIfNecessary(propertyExpression);
-        throwInconsistentOntologyExceptionIfNecessary();
+        checkPreConditions(propertyExpression);
         classify();
         if (!isConsistent())
             return new OWLClassNodeSet(getBottomClassNode());
@@ -821,8 +834,8 @@ public class Reasoner implements OWLReasoner {
         return getEquivalentObjectProperties(propertyExpression.getInverseProperty());
     }
     public NodeSet<OWLObjectProperty> getDisjointObjectProperties(OWLObjectPropertyExpression propertyExpression,boolean direct) {
-        throwFreshEntityExceptionIfNecessary(propertyExpression);
-        if (!isConsistent())
+        checkPreConditions(propertyExpression);
+        if (!m_isConsistent)
             return new OWLObjectPropertyNodeSet();
         classifyObjectProperties();
         Set<HierarchyNode<Role>> result=new HashSet<HierarchyNode<Role>>();
@@ -869,6 +882,8 @@ public class Reasoner implements OWLReasoner {
         return objectPropertyHierarchyNodesToNodeSet(result);
     }
     public boolean isDisjointObjectProperty(OWLObjectPropertyExpression propertyExpression1,OWLObjectPropertyExpression propertyExpression2) {
+        checkPreConditions(propertyExpression1,propertyExpression2);
+        if (!m_isConsistent) return true;
         Role role1=H(propertyExpression1);
         Role role2=H(propertyExpression2);
         Individual freshIndividualA=Individual.createAnonymous("fresh-individual-A");
@@ -883,10 +898,8 @@ public class Reasoner implements OWLReasoner {
         return disjoint;
     }
     public boolean isFunctional(OWLObjectPropertyExpression propertyExpression) {
-        throwFreshEntityExceptionIfNecessary(propertyExpression);
-        throwInconsistentOntologyExceptionIfNecessary();
-        if (!isConsistent())
-            return true;
+        checkPreConditions(propertyExpression);
+        if (!m_isConsistent) return true;
         Role role=H(propertyExpression);
         Individual freshIndividual=Individual.createAnonymous("fresh-individual");
         Individual freshIndividualA=Individual.createAnonymous("fresh-individual-A");
@@ -898,10 +911,8 @@ public class Reasoner implements OWLReasoner {
         return !getTableau().isSatisfiable(false,assertions,null,null,null,null,new ReasoningTaskDescription(true,"functionality of {0}",role));
     }
     public boolean isInverseFunctional(OWLObjectPropertyExpression propertyExpression) {
-        throwFreshEntityExceptionIfNecessary(propertyExpression);
-        throwInconsistentOntologyExceptionIfNecessary();
-        if (!isConsistent())
-            return true;
+        checkPreConditions(propertyExpression);
+        if (!m_isConsistent) return true;
         Role role=H(propertyExpression);
         Individual freshIndividual=Individual.createAnonymous("fresh-individual");
         Individual freshIndividualA=Individual.createAnonymous("fresh-individual-A");
@@ -913,19 +924,15 @@ public class Reasoner implements OWLReasoner {
         return !getTableau().isSatisfiable(false,assertions,null,null,null,null,new ReasoningTaskDescription(true,"inverse-functionality of {0}",role));
     }
     public boolean isIrreflexive(OWLObjectPropertyExpression propertyExpression) {
-        throwFreshEntityExceptionIfNecessary(propertyExpression);
-        throwInconsistentOntologyExceptionIfNecessary();
-        if (!isConsistent())
-            return true;
+        checkPreConditions(propertyExpression);
+        if (!m_isConsistent) return true;
         Role role=H(propertyExpression);
         Individual freshIndividual=Individual.createAnonymous("fresh-individual");
         return !getTableau().isSatisfiable(false,Collections.singleton(role.getRoleAssertion(freshIndividual,freshIndividual)),null,null,null,null,new ReasoningTaskDescription(true,"irreflexivity of {0}",role));
     }
     public boolean isReflexive(OWLObjectPropertyExpression propertyExpression) {
-        throwFreshEntityExceptionIfNecessary(propertyExpression);
-        throwInconsistentOntologyExceptionIfNecessary();
-        if (!isConsistent())
-            return true;
+        checkPreConditions(propertyExpression);
+        if (!m_isConsistent) return true;
         OWLDataFactory factory=getDataFactory();
         OWLClass pseudoNominal=factory.getOWLClass(IRI.create("internal:pseudo-nominal"));
         OWLClassExpression allNotPseudoNominal=factory.getOWLObjectAllValuesFrom(propertyExpression,pseudoNominal.getObjectComplementOf());
@@ -936,10 +943,8 @@ public class Reasoner implements OWLReasoner {
         return !tableau.isSatisfiable(true,null,null,null,null,null,new ReasoningTaskDescription(true,"symmetry of {0}",H(propertyExpression)));
     }
     public boolean isAsymmetric(OWLObjectPropertyExpression propertyExpression) {
-        throwFreshEntityExceptionIfNecessary(propertyExpression);
-        throwInconsistentOntologyExceptionIfNecessary();
-        if (!isConsistent())
-            return true;
+        checkPreConditions(propertyExpression);
+        if (!m_isConsistent) return true;
         OWLDataFactory factory=getDataFactory();
         OWLIndividual freshIndividualA=factory.getOWLAnonymousIndividual("fresh-individual-A");
         OWLIndividual freshIndividualB=factory.getOWLAnonymousIndividual("fresh-individual-B");
@@ -949,10 +954,8 @@ public class Reasoner implements OWLReasoner {
         return !tableau.isSatisfiable(true,null,null,null,null,null,new ReasoningTaskDescription(true,"asymmetry of {0}",H(propertyExpression)));
     }
     public boolean isSymmetric(OWLObjectPropertyExpression propertyExpression) {
-        throwFreshEntityExceptionIfNecessary(propertyExpression);
-        throwInconsistentOntologyExceptionIfNecessary();
-        if (!isConsistent() || propertyExpression.getNamedProperty().isOWLTopObjectProperty())
-            return true;
+        checkPreConditions(propertyExpression);
+        if (!m_isConsistent || propertyExpression.getNamedProperty().isOWLTopObjectProperty()) return true;
         OWLDataFactory factory=getDataFactory();
         OWLClass pseudoNominal=factory.getOWLClass(IRI.create("internal:pseudo-nominal"));
         OWLClassExpression allNotPseudoNominal=factory.getOWLObjectAllValuesFrom(propertyExpression,pseudoNominal.getObjectComplementOf());
@@ -965,10 +968,8 @@ public class Reasoner implements OWLReasoner {
         return !tableau.isSatisfiable(true,null,null,null,null,null,new ReasoningTaskDescription(true,"symmetry of {0}",propertyExpression));
     }
     public boolean isTransitive(OWLObjectPropertyExpression propertyExpression) {
-        throwFreshEntityExceptionIfNecessary(propertyExpression);
-        throwInconsistentOntologyExceptionIfNecessary();
-        if (!isConsistent())
-            return true;
+        checkPreConditions(propertyExpression);
+        if (!m_isConsistent) return true;
         OWLDataFactory factory=getDataFactory();
         OWLClass pseudoNominal=factory.getOWLClass(IRI.create("internal:pseudo-nominal"));
         OWLClassExpression allNotPseudoNominal=factory.getOWLObjectAllValuesFrom(propertyExpression,pseudoNominal.getObjectComplementOf());
@@ -983,10 +984,9 @@ public class Reasoner implements OWLReasoner {
         return !tableau.isSatisfiable(true,null,null,null,null,null,new ReasoningTaskDescription(true,"transitivity of {0}",H(propertyExpression)));
     }
     protected HierarchyNode<Role> getHierarchyNode(OWLObjectPropertyExpression propertyExpression) {
-        throwFreshEntityExceptionIfNecessary(propertyExpression);
+        checkPreConditions(propertyExpression);
         classifyObjectProperties();
-        if (!isConsistent())
-            return m_objectRoleHierarchy.getBottomNode();
+        if (!m_isConsistent) return m_objectRoleHierarchy.getBottomNode();
         else {
             Role role=H(propertyExpression);
             HierarchyNode<Role> node=m_objectRoleHierarchy.getNodeForElement(role);
@@ -1002,12 +1002,13 @@ public class Reasoner implements OWLReasoner {
         return m_dataRoleHierarchy!=null;
     }
     public void classifyDataProperties() {
+        checkPreConditions();
         if (m_dataRoleHierarchy==null) {
             Set<AtomicRole> relevantDataRoles=new HashSet<AtomicRole>();
             relevantDataRoles.add(AtomicRole.TOP_DATA_ROLE);
             relevantDataRoles.add(AtomicRole.BOTTOM_DATA_ROLE);
             relevantDataRoles.addAll(m_dlOntology.getAllAtomicDataRoles());
-            if (!isConsistent())
+            if (!m_isConsistent)
                 m_dataRoleHierarchy=Hierarchy.emptyHierarchy(relevantDataRoles,AtomicRole.TOP_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE);
             else {
                 Map<AtomicRole,AtomicConcept> conceptsForRoles=new HashMap<AtomicRole,AtomicConcept>();
@@ -1075,9 +1076,8 @@ public class Reasoner implements OWLReasoner {
         return dataPropertyHierarchyNodeToNode(m_dataRoleHierarchy.getBottomNode());
     }
     public boolean isSubDataPropertyOf(OWLDataProperty subDataProperty,OWLDataProperty superDataProperty) {
-        throwFreshEntityExceptionIfNecessary(subDataProperty,superDataProperty);
-        throwInconsistentOntologyExceptionIfNecessary();
-        if (!isConsistent() || subDataProperty.isOWLBottomDataProperty() || superDataProperty.isOWLTopDataProperty())
+        checkPreConditions(subDataProperty,superDataProperty);
+        if (!m_isConsistent || subDataProperty.isOWLBottomDataProperty() || superDataProperty.isOWLTopDataProperty())
             return true;
         AtomicRole subrole=H(subDataProperty);
         AtomicRole superrole=H(superDataProperty);
@@ -1134,11 +1134,9 @@ public class Reasoner implements OWLReasoner {
         return dataPropertyHierarchyNodeToNode(getHierarchyNode(property));
     }
     public NodeSet<OWLClass> getDataPropertyDomains(OWLDataProperty property,boolean direct) {
-        throwFreshEntityExceptionIfNecessary(property);
-        throwInconsistentOntologyExceptionIfNecessary();
+        checkPreConditions(property);
         classify();
-        if (!isConsistent())
-            return new OWLClassNodeSet(getBottomClassNode());
+        if (!m_isConsistent) return new OWLClassNodeSet(getBottomClassNode());
         final AtomicRole atomicRole=H(property);
         Set<HierarchyNode<AtomicConcept>> nodes=m_directDataRoleDomains.get(atomicRole);
         if (nodes==null) {
@@ -1166,11 +1164,10 @@ public class Reasoner implements OWLReasoner {
         return atomicConceptHierarchyNodesToNodeSet(nodes);
     }
     public NodeSet<OWLDataProperty> getDisjointDataProperties(OWLDataPropertyExpression propertyExpression,boolean direct) {
-        throwFreshEntityExceptionIfNecessary(propertyExpression);
+        checkPreConditions(propertyExpression);
         if (m_dlOntology.hasDatatypes()) {
             classifyDataProperties();
-            if (!isConsistent())
-                return new OWLDataPropertyNodeSet();
+            if (!m_isConsistent) return new OWLDataPropertyNodeSet();
             Set<HierarchyNode<AtomicRole>> result=new HashSet<HierarchyNode<AtomicRole>>();
             if (propertyExpression.isOWLTopDataProperty()) {
                 result.add(m_dataRoleHierarchy.getBottomNode());
@@ -1215,7 +1212,6 @@ public class Reasoner implements OWLReasoner {
             return dataPropertyHierarchyNodesToNodeSet(result);
         }
         else {
-            throwInconsistentOntologyExceptionIfNecessary();
             OWLDataFactory factory=getDataFactory();
             if (propertyExpression.isOWLTopDataProperty() && isConsistent())
                 return new OWLDataPropertyNodeSet(new OWLDataPropertyNode(factory.getOWLBottomDataProperty()));
@@ -1226,10 +1222,8 @@ public class Reasoner implements OWLReasoner {
         }
     }
     public boolean isFunctional(OWLDataProperty property) {
-        throwFreshEntityExceptionIfNecessary(property);
-        throwInconsistentOntologyExceptionIfNecessary();
-        if (!isConsistent())
-            return true;
+        checkPreConditions(property);
+        if (!m_isConsistent) return true;
         AtomicRole atomicRole=H(property);
         Individual freshIndividual=Individual.createAnonymous("fresh-individual");
         Constant freshConstantA=Constant.createAnonymous("fresh-constant-A");
@@ -1241,10 +1235,9 @@ public class Reasoner implements OWLReasoner {
         return !getTableau().isSatisfiable(false,assertions,null,null,null,null,new ReasoningTaskDescription(true,"functionality of {0}",atomicRole));
     }
     protected HierarchyNode<AtomicRole> getHierarchyNode(OWLDataProperty property) {
-        throwFreshEntityExceptionIfNecessary(property);
+        checkPreConditions(property);
         classifyDataProperties();
-        if (!isConsistent())
-            return m_dataRoleHierarchy.getBottomNode();
+        if (!m_isConsistent) return m_dataRoleHierarchy.getBottomNode();
         else {
             AtomicRole atomicRole=H(property);
             HierarchyNode<AtomicRole> node=m_dataRoleHierarchy.getNodeForElement(atomicRole);
@@ -1260,8 +1253,8 @@ public class Reasoner implements OWLReasoner {
         return m_realization!=null;
     }
     public void realise() {
+        checkPreConditions();
         if (m_realization==null) {
-            throwInconsistentOntologyExceptionIfNecessary();
             classify();
             m_realization=new HashMap<AtomicConcept,Set<Individual>>();
             Set<Individual> individuals=new HashSet<Individual>();
@@ -1301,10 +1294,9 @@ public class Reasoner implements OWLReasoner {
         }
     }
     public NodeSet<OWLClass> getTypes(OWLNamedIndividual namedIndividual,boolean direct) {
-        throwFreshEntityExceptionIfNecessary(namedIndividual);
+        checkPreConditions(namedIndividual);
         classify();
-        if (!isConsistent())
-            return new OWLClassNodeSet(getBottomClassNode());
+        if (!m_isConsistent) return new OWLClassNodeSet(getBottomClassNode());
         Individual individual=H(namedIndividual);
         Set<HierarchyNode<AtomicConcept>> directSuperConceptNodes=getDirectSuperConceptNodes(individual);
         Set<HierarchyNode<AtomicConcept>> result=new HashSet<HierarchyNode<AtomicConcept>>(directSuperConceptNodes);
@@ -1314,10 +1306,8 @@ public class Reasoner implements OWLReasoner {
         return atomicConceptHierarchyNodesToNodeSet(result);
     }
     public boolean hasType(OWLNamedIndividual namedIndividual,OWLClassExpression type,boolean direct) {
-        throwFreshEntityExceptionIfNecessary(namedIndividual,type);
-        throwInconsistentOntologyExceptionIfNecessary();
-        if (!isConsistent())
-            return true;
+        checkPreConditions(namedIndividual,type);
+        if (!m_isConsistent) return true;
         else if (direct && isRealised() && type instanceof OWLClass) {
             Individual individual=H(namedIndividual);
             AtomicConcept atomicConcept=H((OWLClass)type);
@@ -1337,9 +1327,8 @@ public class Reasoner implements OWLReasoner {
         }
     }
     public NodeSet<OWLNamedIndividual> getInstances(OWLClassExpression classExpression,boolean direct) {
-        throwFreshEntityExceptionIfNecessary(classExpression);
-        throwInconsistentOntologyExceptionIfNecessary();
-        if (!isConsistent()) {
+        checkPreConditions(classExpression);
+        if (!m_isConsistent) {
             Node<OWLNamedIndividual> node=new OWLNamedIndividualNode(getAllNamedIndividuals());
             return new OWLNamedIndividualNodeSet(Collections.singleton(node));
         }
@@ -1389,10 +1378,8 @@ public class Reasoner implements OWLReasoner {
         return sortBySameAsIfNecessary(result);
     }
     public Node<OWLNamedIndividual> getSameIndividuals(OWLNamedIndividual namedIndividual) {
-        throwFreshEntityExceptionIfNecessary(namedIndividual);
-        throwInconsistentOntologyExceptionIfNecessary();
-        if (!isConsistent())
-            return new OWLNamedIndividualNode(getAllNamedIndividuals());
+        checkPreConditions(namedIndividual);
+        if (!m_isConsistent) return new OWLNamedIndividualNode(getAllNamedIndividuals());
         Set<Individual> sameIndividuals=getSameAsIndividuals(H(namedIndividual));
         OWLDataFactory factory=getDataFactory();
         Set<OWLNamedIndividual> result=new HashSet<OWLNamedIndividual>();
@@ -1401,9 +1388,8 @@ public class Reasoner implements OWLReasoner {
         return new OWLNamedIndividualNode(result);
     }
     public NodeSet<OWLNamedIndividual> getDifferentIndividuals(OWLNamedIndividual namedIndividual) {
-        throwFreshEntityExceptionIfNecessary(namedIndividual);
-        throwInconsistentOntologyExceptionIfNecessary();
-        if (!isConsistent()) {
+        checkPreConditions(namedIndividual);
+        if (!m_isConsistent) {
             Node<OWLNamedIndividual> node=new OWLNamedIndividualNode(getAllNamedIndividuals());
             return new OWLNamedIndividualNodeSet(Collections.singleton(node));
         }
@@ -1417,9 +1403,8 @@ public class Reasoner implements OWLReasoner {
         return sortBySameAsIfNecessary(result);
     }
     public NodeSet<OWLNamedIndividual> getObjectPropertyValues(OWLNamedIndividual namedIndividual,OWLObjectPropertyExpression propertyExpression) {
-        throwFreshEntityExceptionIfNecessary(namedIndividual,propertyExpression);
-        throwInconsistentOntologyExceptionIfNecessary();
-        if (!isConsistent()) {
+        checkPreConditions(namedIndividual,propertyExpression);
+        if (!m_isConsistent) {
             Node<OWLNamedIndividual> node=new OWLNamedIndividualNode(getAllNamedIndividuals());
             return new OWLNamedIndividualNodeSet(Collections.singleton(node));
         }
@@ -1427,8 +1412,7 @@ public class Reasoner implements OWLReasoner {
         return getInstances(factory.getOWLObjectHasValue(propertyExpression.getInverseProperty(),namedIndividual),false);
     }
     public Set<OWLLiteral> getDataPropertyValues(OWLNamedIndividual namedIndividual,OWLDataProperty property) {
-        throwFreshEntityExceptionIfNecessary(namedIndividual,property);
-        throwInconsistentOntologyExceptionIfNecessary();
+        checkPreConditions(namedIndividual,property);
         Set<OWLLiteral> result=new HashSet<OWLLiteral>();
         if (m_dlOntology.hasDatatypes()) {
             OWLDataFactory factory=getDataFactory();
@@ -1459,10 +1443,8 @@ public class Reasoner implements OWLReasoner {
         return result;
     }
     public boolean hasObjectPropertyRelationship(OWLNamedIndividual subject,OWLObjectPropertyExpression propertyExpression,OWLNamedIndividual object) {
-        throwFreshEntityExceptionIfNecessary(subject,propertyExpression,object);
-        throwInconsistentOntologyExceptionIfNecessary();
-        if (!isConsistent())
-            return true;
+        checkPreConditions(subject,propertyExpression,object);
+        if (!m_isConsistent) return true;
         OWLDataFactory factory=getDataFactory();
         OWLClass pseudoNominal=factory.getOWLClass(IRI.create("internal:pseudo-nominal"));
         OWLClassExpression allNotPseudoNominal=factory.getOWLObjectAllValuesFrom(propertyExpression,pseudoNominal.getObjectComplementOf());
@@ -1472,10 +1454,8 @@ public class Reasoner implements OWLReasoner {
         return !tableau.isSatisfiable(true,true,null,null,null,null,null,new ReasoningTaskDescription(true,"is {0} connected to {1} via {2}",H(subject),H(object),H(propertyExpression)));
     }
     public boolean hasDataPropertyRelationship(OWLNamedIndividual subject,OWLDataProperty property,OWLLiteral object) {
-        throwFreshEntityExceptionIfNecessary(subject,property);
-        throwInconsistentOntologyExceptionIfNecessary();
-        if (!isConsistent())
-            return true;
+        checkPreConditions(subject,property);
+        if (!m_isConsistent) return true;
         OWLDataFactory factory=getDataFactory();
         OWLAxiom notAssertion=factory.getOWLNegativeDataPropertyAssertionAxiom(property,subject,object);
         Tableau tableau=getTableau(notAssertion);
@@ -1859,8 +1839,17 @@ public class Reasoner implements OWLReasoner {
 
     // Various utility methods
 
+    protected void checkPreConditions(OWLObject... objects) {
+        flushChangesIfRequired();
+        if (objects!=null && objects.length>0) throwFreshEntityExceptionIfNecessary(objects);
+        throwInconsistentOntologyExceptionIfNecessary();
+    }
+    protected void flushChangesIfRequired() {
+        if (!m_configuration.bufferChanges && !m_pendingChanges.isEmpty())
+            flush();
+    }
     protected void throwInconsistentOntologyExceptionIfNecessary() {
-        if (m_configuration.throwInconsistentOntologyException && !isConsistent())
+        if (!isConsistent() && m_configuration.throwInconsistentOntologyException)
             throw new InconsistentOntologyException();
     }
     protected void throwFreshEntityExceptionIfNecessary(OWLObject... objects) {
@@ -1988,17 +1977,6 @@ public class Reasoner implements OWLReasoner {
         for (HierarchyNode<AtomicRole> hierarchyNode : hierarchyNodes)
             result.add(dataPropertyHierarchyNodeToNode(hierarchyNode));
         return new OWLDataPropertyNodeSet(result);
-    }
-
-    // Change tracking
-
-    protected class OntologyChangeListener implements OWLOntologyChangeListener {
-
-        public void ontologiesChanged(List<? extends OWLOntologyChange> changes) throws OWLException {
-            m_ontologyChanged=true;
-            if (!m_configuration.bufferChanges)
-                flush();
-        }
     }
 
     // The factory for OWL API reasoners
