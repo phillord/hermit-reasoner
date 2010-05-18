@@ -1,0 +1,9 @@
+Prefix(:=<file:/c/test.owl#>)
+
+Ontology(<file:/c/test.owl#>
+
+  SubClassOf( :C owl:Thing ) Declaration( Class( :C ) )
+    SubClassOf( :B :C ) Declaration( Class( :B ) )
+      SubClassOf( :A :B ) Declaration( Class( :A ) )
+
+)

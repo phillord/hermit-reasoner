@@ -221,11 +221,10 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
      */
     public boolean useDisjunctionLearning;
     /**
-     * Only applicable if HermiT is instantiated as ChangeTrackingReasoner or as an OWLReasoner via the OWLReasonerFactory because 
-     * otherwise HermiT does not support addition and removal of axioms. If set to true axioms that are to be added or removed are 
-     * buffered and the addition and removal is only performed when the flush() method of the reasoner is called.
+     * If set to true axioms that are to be added or removed are buffered and the addition and removal is only performed when 
+     * the flush() method of the reasoner is called.
      */
-    protected boolean bufferChanges;
+    public boolean bufferChanges;
     /**
      * The default value is true and HermiT will throw an exception if it finds the ontology to be inconsistent.
      * 
