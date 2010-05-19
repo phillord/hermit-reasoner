@@ -35,7 +35,21 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
-    
+    public void testNegativeObjectPropertyAssertionWithNonSimple() throws Exception {
+        loadOntologyWithAxioms(
+                "Declaration(Class(:A))"+
+                "Declaration(NamedIndividual(:a))"+
+                "Declaration(NamedIndividual(:a))"+
+                "Declaration(ObjectProperty(:r))"+
+                "Declaration(ObjectProperty(:t))"+
+                "SubClassOf(:A ObjectSomeValuesFrom(:t ObjectSomeValuesFrom(:t ObjectOneOf(:b))))"+
+                "TransitiveObjectProperty(:t)"+
+                "SubObjectPropertyOf(:t ObjectInverseOf(:r))"+
+                "ClassAssertion(:A :a)"+
+                "NegativeObjectPropertyAssertion(:r :b :a)");
+        createReasoner();
+        assertFalse(m_reasoner.isConsistent());
+    }
     public void testPropertyEnailmentFromAlan() throws Exception {
         loadOntologyWithAxioms(
                 "Declaration(Class(:a))"+

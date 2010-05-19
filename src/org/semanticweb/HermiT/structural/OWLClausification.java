@@ -143,6 +143,10 @@ public class OWLClausification {
         BuiltInPropertyManager builtInPropertyManager=new BuiltInPropertyManager(factory);
         builtInPropertyManager.axiomatizeBuiltInPropertiesAsNeeded(axioms);
         ObjectPropertyInclusionManager objectPropertyInclusionManager=new ObjectPropertyInclusionManager(axioms);
+        // now object property inclusion manager added all non-simple properties to axioms.m_complexObjectPropertyExpressions
+        // now that we know which roles are non-simple, we can decide which negative object property assertions have to be 
+        // expressed as concept assertions so that transitivity rewriting applies properly.   
+        objectPropertyInclusionManager.rewriteNegativeObjectPropertyAssertions(factory, axioms, normalization.m_definitions.size());
         objectPropertyInclusionManager.rewriteAxioms(factory,axioms,0);
         if (descriptionGraphs==null)
             descriptionGraphs=Collections.emptySet();

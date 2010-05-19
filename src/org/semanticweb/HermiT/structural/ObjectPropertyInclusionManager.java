@@ -28,10 +28,13 @@ import org.semanticweb.HermiT.structural.OWLAxioms.ComplexObjectPropertyInclusio
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLIndividualAxiom;
+import org.semanticweb.owlapi.model.OWLNegativeObjectPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectCardinalityRestriction;
 import org.semanticweb.owlapi.model.OWLObjectComplementOf;
 import org.semanticweb.owlapi.model.OWLObjectInverseOf;
+import org.semanticweb.owlapi.model.OWLObjectOneOf;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 
 import rationals.Automaton;
@@ -47,6 +50,34 @@ public class ObjectPropertyInclusionManager {
     public ObjectPropertyInclusionManager(OWLAxioms axioms) {
         m_automataByProperty=new HashMap<OWLObjectPropertyExpression,Automaton>();
         createAutomata(m_automataByProperty,axioms.m_complexObjectPropertyExpressions,axioms.m_simpleObjectPropertyInclusions,axioms.m_complexObjectPropertyInclusions);
+    }
+    public int rewriteNegativeObjectPropertyAssertions(OWLDataFactory factory,OWLAxioms axioms,int replacementIndex) {
+        // now object property inclusion manager added all non-simple properties to axioms.m_complexObjectPropertyExpressions
+        // now that we know which roles are non-simple, we can decide which negative object property assertions have to be 
+        // expressed as concept assertions so that transitivity rewriting applies properly. All new concepts for the concept 
+        // assertions must be normalised, because we are done with the normal normalisation phase.  
+        Set<OWLIndividualAxiom> redundantFacts=new HashSet<OWLIndividualAxiom>();
+        Set<OWLIndividualAxiom> additionalFacts=new HashSet<OWLIndividualAxiom>();
+        for (OWLIndividualAxiom axiom : axioms.m_facts) {
+            if (axiom instanceof OWLNegativeObjectPropertyAssertionAxiom) {
+                OWLNegativeObjectPropertyAssertionAxiom negAssertion=(OWLNegativeObjectPropertyAssertionAxiom)axiom;
+                OWLObjectPropertyExpression prop=negAssertion.getProperty().getSimplified();
+                if (axioms.m_complexObjectPropertyExpressions.contains(prop)) {
+                    // turn not op(a b) into 
+                    // C(a) and not C or forall op not{b}
+                    OWLObjectOneOf nominal=factory.getOWLObjectOneOf(negAssertion.getObject());
+                    OWLClassExpression notNominal=factory.getOWLObjectComplementOf(nominal);
+                    OWLClassExpression allNotNominal=factory.getOWLObjectAllValuesFrom(prop,notNominal);
+                    OWLClassExpression definition=factory.getOWLClass(IRI.create("internal:def#"+(replacementIndex++)));
+                    axioms.m_conceptInclusions.add(new OWLClassExpression[] { factory.getOWLObjectComplementOf(definition), allNotNominal });
+                    additionalFacts.add(factory.getOWLClassAssertionAxiom(definition,negAssertion.getSubject()));
+                    redundantFacts.add(negAssertion);
+                }
+            }
+        }
+        axioms.m_facts.addAll(additionalFacts);
+        axioms.m_facts.removeAll(redundantFacts);
+        return replacementIndex;
     }
     public void rewriteAxioms(OWLDataFactory dataFactory,OWLAxioms axioms,int firstReplacementIndex) {
         // Check the asymmetric object properties for simplicity

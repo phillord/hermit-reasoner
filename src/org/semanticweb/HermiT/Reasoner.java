@@ -1726,7 +1726,9 @@ public class Reasoner implements OWLReasoner {
         normalization.processAxioms(additionalAxiomsSet);
         BuiltInPropertyManager builtInPropertyManager=new BuiltInPropertyManager(dataFactory);
         builtInPropertyManager.axiomatizeBuiltInPropertiesAsNeeded(axioms,originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.TOP_OBJECT_ROLE),originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.BOTTOM_OBJECT_ROLE),originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.TOP_DATA_ROLE),originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.BOTTOM_DATA_ROLE));
-        m_objectPropertyInclusionManager.rewriteAxioms(dataFactory,axioms,originalDLOntology.getAllAtomicConcepts().size());
+        
+        int currentReplacementIndex=m_objectPropertyInclusionManager.rewriteNegativeObjectPropertyAssertions(dataFactory, axioms, originalDLOntology.getAllAtomicConcepts().size());
+        m_objectPropertyInclusionManager.rewriteAxioms(dataFactory,axioms,currentReplacementIndex);
         OWLAxiomsExpressivity axiomsExpressivity=new OWLAxiomsExpressivity(axioms);
         axiomsExpressivity.m_hasAtMostRestrictions|=originalDLOntology.hasAtMostRestrictions();
         axiomsExpressivity.m_hasInverseRoles|=originalDLOntology.hasInverseRoles();
