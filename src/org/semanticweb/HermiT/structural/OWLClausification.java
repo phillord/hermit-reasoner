@@ -1119,12 +1119,6 @@ public class OWLClausification {
             }
         }
 
-        protected AtomicConcept getConceptForNominal(OWLNamedIndividual individual) {
-            AtomicConcept result=AtomicConcept.create("internal:nom#"+individual.asOWLNamedIndividual().getIRI().toString());
-            m_positiveFacts.add(Atom.create(result,getIndividual(individual)));
-            return result;
-        }
-
         public void visit(SWRLRule rule) {
             checkStrictSeparation(rule);
             freshVarIndex=0;

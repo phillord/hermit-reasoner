@@ -26,15 +26,16 @@ import java.util.Set;
 import org.semanticweb.HermiT.graph.Graph;
 import org.semanticweb.HermiT.structural.OWLAxioms.ComplexObjectPropertyInclusion;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLNegativeObjectPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectCardinalityRestriction;
 import org.semanticweb.owlapi.model.OWLObjectComplementOf;
 import org.semanticweb.owlapi.model.OWLObjectInverseOf;
-import org.semanticweb.owlapi.model.OWLObjectOneOf;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 
 import rationals.Automaton;
@@ -65,12 +66,16 @@ public class ObjectPropertyInclusionManager {
                 if (axioms.m_complexObjectPropertyExpressions.contains(prop)) {
                     // turn not op(a b) into 
                     // C(a) and not C or forall op not{b}
-                    OWLObjectOneOf nominal=factory.getOWLObjectOneOf(negAssertion.getObject());
-                    OWLClassExpression notNominal=factory.getOWLObjectComplementOf(nominal);
-                    OWLClassExpression allNotNominal=factory.getOWLObjectAllValuesFrom(prop,notNominal);
+                    OWLIndividual individual=negAssertion.getObject();
+                    OWLClass individualConcept;
+                    if (individual.isAnonymous()) individualConcept=factory.getOWLClass(IRI.create("internal:anon#"+individual.asOWLAnonymousIndividual().getID().toString()));
+                    else individualConcept=factory.getOWLClass(IRI.create("internal:nom#"+individual.asOWLNamedIndividual().getIRI().toString()));
+                    OWLClassExpression notIndividualConcept=factory.getOWLObjectComplementOf(individualConcept);
+                    OWLClassExpression allNotIndividualConcept=factory.getOWLObjectAllValuesFrom(prop,notIndividualConcept);
                     OWLClassExpression definition=factory.getOWLClass(IRI.create("internal:def#"+(replacementIndex++)));
-                    axioms.m_conceptInclusions.add(new OWLClassExpression[] { factory.getOWLObjectComplementOf(definition), allNotNominal });
+                    axioms.m_conceptInclusions.add(new OWLClassExpression[] { factory.getOWLObjectComplementOf(definition), allNotIndividualConcept });
                     additionalFacts.add(factory.getOWLClassAssertionAxiom(definition,negAssertion.getSubject()));
+                    additionalFacts.add(factory.getOWLClassAssertionAxiom(individualConcept,individual));
                     redundantFacts.add(negAssertion);
                 }
             }
