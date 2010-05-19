@@ -30,6 +30,27 @@ public class OWLLinkTest extends AbstractReasonerTest {
     public OWLLinkTest(String name) {
         super(name);
     }
+    
+    // below are all the tests from the paper
+    // "Who the heck is the father of Bob"
+    public void testBobTestAandB() throws Exception {
+        String[] ontologies=new String[] { "agent-inst.owl","test.owl","situation-inst.owl","situation.owl","space.owl","agent.owl","time.owl" };
+        String base="http://www.iyouit.eu/";
+        String mainOntology=base+"agent.owl";
+        for (String ont : ontologies) {
+            IRI physicalIRI=IRI.create(getClass().getResource("res/OWLLink/"+ont).toURI());
+            IRI logicalIRI=IRI.create(base+ont);
+            m_ontologyManager.addIRIMapper(new SimpleIRIMapper(logicalIRI,physicalIRI));
+        }
+        m_ontology=m_ontologyManager.loadOntology(IRI.create(mainOntology));
+        createReasoner();
+        OWLObjectProperty knows=m_dataFactory.getOWLObjectProperty(IRI.create(mainOntology+"#knows"));
+        NodeSet<OWLObjectProperty> peers=m_reasoner.getSubObjectProperties(knows, true);
+        assertTrue(peers.getFlattened().size()==13); // Test A from the Bob paper
+        peers=m_reasoner.getSubObjectProperties(knows, false);
+        assertTrue(peers.getFlattened().size()==51); // Test B from the Bob paper
+    }
+    
     public void testUpdatesBuffered() throws Exception {
         String axioms="SubClassOf(:A :B)"+
             "SubClassOf(:B :C)";
@@ -112,25 +133,6 @@ public class OWLLinkTest extends AbstractReasonerTest {
             e.printStackTrace();
         }
         m_reasoner.getDisjointObjectProperties(m_dataFactory.getOWLObjectProperty(IRI.create(NS+"hasParent")),false);
-    }
-    // below are all the tests from the paper
-    // "Who the heck is the father of Bob"
-    public void testBobTestAandB() throws Exception {
-        String[] ontologies=new String[] { "agent-inst.owl","test.owl","situation-inst.owl","situation.owl","space.owl","agent.owl","time.owl" };
-        String base="http://www.iyouit.eu/";
-        String mainOntology=base+"agent.owl";
-        for (String ont : ontologies) {
-            IRI physicalIRI=IRI.create(getClass().getResource("res/OWLLink/"+ont).toURI());
-            IRI logicalIRI=IRI.create(base+ont);
-            m_ontologyManager.addIRIMapper(new SimpleIRIMapper(logicalIRI,physicalIRI));
-        }
-        m_ontology=m_ontologyManager.loadOntology(IRI.create(mainOntology));
-        createReasoner();
-        OWLObjectProperty knows=m_dataFactory.getOWLObjectProperty(IRI.create(mainOntology+"#knows"));
-        NodeSet<OWLObjectProperty> peers=m_reasoner.getSubObjectProperties(knows, true);
-        assertTrue(peers.getFlattened().size()==10); // Test A from the Bob paper
-        peers=m_reasoner.getSubObjectProperties(knows, false);
-        assertTrue(peers.getFlattened().size()==51); // Test B from the Bob paper
     }
     
     public void testBobTestC() throws Exception {

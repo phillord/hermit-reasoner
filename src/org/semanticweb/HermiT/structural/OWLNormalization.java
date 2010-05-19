@@ -633,6 +633,7 @@ public class OWLNormalization {
             m_axioms.m_objectPropertiesUsedInAxioms.add(axiom.getProperty().getNamedProperty());
         }
         public void visit(OWLNegativeObjectPropertyAssertionAxiom axiom) {
+            // TODO use pseudo nominals and add facts directly for simple roles
             if (axiom.containsAnonymousIndividuals())
                 throw new IllegalArgumentException("The axiom "+axiom+" contains anonymous individuals, which is not allowed in OWL 2. ");
             OWLObjectOneOf nominal=m_factory.getOWLObjectOneOf(axiom.getObject());

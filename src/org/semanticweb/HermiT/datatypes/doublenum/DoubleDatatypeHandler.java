@@ -53,6 +53,8 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
             return Double.parseDouble(lexicalForm);
         }
         catch (NumberFormatException error) {
+            if (lexicalForm.equals("INF")) return Double.POSITIVE_INFINITY;
+            if (lexicalForm.equals("-INF")) return Double.NEGATIVE_INFINITY;
             throw new MalformedLiteralException(lexicalForm,datatypeURI);
         }
     }

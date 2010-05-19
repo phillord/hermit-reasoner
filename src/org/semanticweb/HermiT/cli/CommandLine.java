@@ -234,7 +234,7 @@ public class CommandLine {
             Node<OWLClass> classes=hermit.getEquivalentClasses(owlClass);
             output.println("Classes equivalent to '"+conceptName+"':");
             for (OWLClass classInSet : classes)
-                output.println("\t"+prefixes.abbreviateIRI(classInSet.getIRI().toString()));
+                output.println("\t"+Prefixes.STANDARD_PREFIXES.abbreviateIRI(classInSet.getIRI().toString()));
             output.flush();
         }
     }

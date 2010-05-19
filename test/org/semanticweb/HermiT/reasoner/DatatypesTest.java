@@ -9,6 +9,15 @@ public class DatatypesTest extends AbstractReasonerTest {
     public DatatypesTest(String name) {
         super(name);
     }
+    public void testINF() throws Exception {
+        String axioms = "Declaration(NamedIndividual(:a)) Declaration(Class(:A)) Declaration(DataProperty(:dp)) "
+                + "SubClassOf(:A DataAllValuesFrom(:dp DataOneOf(\"Infinity\"^^xsd:double)))"
+                + "SubClassOf(:A DataSomeValuesFrom(:dp rdfs:Literal))"
+                + "ClassAssertion(:A :a)"
+                + "NegativeDataPropertyAssertion(:dp :a \"Infinity\"^^xsd:double)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
     public void testFreshEntitiesQuery() throws Exception {
         String axioms = "Declaration(NamedIndividual(:a)) Declaration(Class(:A))" 
         	+ "ClassAssertion(:A :a)";
