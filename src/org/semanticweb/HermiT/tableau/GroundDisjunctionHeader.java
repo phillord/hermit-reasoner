@@ -19,6 +19,7 @@ package org.semanticweb.HermiT.tableau;
 
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.model.AtLeastConcept;
+import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.DLPredicate;
 
 public final class GroundDisjunctionHeader {
@@ -26,7 +27,8 @@ public final class GroundDisjunctionHeader {
     protected final int[] m_disjunctStart;
     protected final int m_hashCode;
     protected final DisjunctIndexWithBacktrackings[] m_disjunctIndexesWithBacktrackings;
-    protected final int m_firstAtLeastIndex;
+    protected final int m_firstAtLeastPositiveIndex;
+    protected final int m_firstAtomicIndex;
     protected GroundDisjunctionHeader m_nextEntry;
 
     protected GroundDisjunctionHeader(DLPredicate[] dlPredicates,int hashCode,GroundDisjunctionHeader nextEntry) {
@@ -40,22 +42,37 @@ public final class GroundDisjunctionHeader {
         m_hashCode=hashCode;
         m_nextEntry=nextEntry;
         m_disjunctIndexesWithBacktrackings=new DisjunctIndexWithBacktrackings[dlPredicates.length];
-        // We want that all existential concepts come after the atomics: experience shows
-        // that it is usually better to try atomics first. Therefore, we initialize
-        // m_disjunctIndexesWithBacktrackings such that atomic disjuncts are placed first.
-        // Later on we will ensure that the disjuncts always remain in that order.
-        int numberOfAtLeastDisjuncts=0;
+        // The disjuncts are arranged in a particular order that seems to work well in practice
+        // Thus we initialize m_disjunctIndexesWithBacktrackings in the following order: 
+        // First, we have the disjuncts that are at least concepts but over a negated atomic concept
+        // Next, we have the atomic concept disjuncts
+        // Finally, we have the at least concepts that are not over a negated atomic concept
+        // Later on we will ensure that disjunction learning (if enabled) does not move the disjuncts 
+        // out of their partition.
+        int numberOfAtLeastPositiveDisjuncts=0;
+        int numberOfAtLeastNegativeDisjuncts=0;
         for (int index=0;index<dlPredicates.length;index++)
-            if (m_dlPredicates[index] instanceof AtLeastConcept)
-                numberOfAtLeastDisjuncts++;
-        m_firstAtLeastIndex=m_disjunctIndexesWithBacktrackings.length-numberOfAtLeastDisjuncts;
-        int nextNonAtLeastDisjunct=0;
-        int nextAtLeastDisjunct=m_firstAtLeastIndex;
+            if (m_dlPredicates[index] instanceof AtLeastConcept) {
+                AtLeastConcept atLeast=(AtLeastConcept)m_dlPredicates[index];
+                if (atLeast.getToConcept() instanceof AtomicNegationConcept)
+                    numberOfAtLeastNegativeDisjuncts++;
+                else 
+                    numberOfAtLeastPositiveDisjuncts++;
+            }
+        m_firstAtomicIndex=numberOfAtLeastNegativeDisjuncts;
+        m_firstAtLeastPositiveIndex=m_disjunctIndexesWithBacktrackings.length-numberOfAtLeastPositiveDisjuncts;
+        int nextAtLeastNegativeDisjunct=0;
+        int nextAtomicDisjunct=m_firstAtomicIndex;
+        int nextAtLeastPositiveDisjunct=m_firstAtLeastPositiveIndex;
         for (int index=0;index<dlPredicates.length;index++)
-            if (m_dlPredicates[index] instanceof AtLeastConcept)
-                m_disjunctIndexesWithBacktrackings[nextAtLeastDisjunct++]=new DisjunctIndexWithBacktrackings(index);
-            else
-                m_disjunctIndexesWithBacktrackings[nextNonAtLeastDisjunct++]=new DisjunctIndexWithBacktrackings(index);
+            if (m_dlPredicates[index] instanceof AtLeastConcept) {
+                AtLeastConcept atLeast=(AtLeastConcept)m_dlPredicates[index];
+                if (atLeast.getToConcept() instanceof AtomicNegationConcept)
+                    m_disjunctIndexesWithBacktrackings[nextAtLeastNegativeDisjunct++]=new DisjunctIndexWithBacktrackings(index);
+                else 
+                    m_disjunctIndexesWithBacktrackings[nextAtLeastPositiveDisjunct++]=new DisjunctIndexWithBacktrackings(index);
+            } else
+                m_disjunctIndexesWithBacktrackings[nextAtomicDisjunct++]=new DisjunctIndexWithBacktrackings(index);
     }
     protected boolean isEqual(DLPredicate[] dlPredicates) {
         if (m_dlPredicates.length!=dlPredicates.length)
@@ -76,7 +93,12 @@ public final class GroundDisjunctionHeader {
             DisjunctIndexWithBacktrackings disjunctIndexWithBacktrackings=m_disjunctIndexesWithBacktrackings[index];
             if (disjunctIndexWithBacktrackings.m_disjunctIndex==disjunctIndex) {
                 disjunctIndexWithBacktrackings.m_numberOfBacktrackings++;
-                int partitionEnd=(index<m_firstAtLeastIndex ? m_firstAtLeastIndex : m_disjunctIndexesWithBacktrackings.length);
+                // find the partition end, swapping of disjuncts stops when the number of backtrackings for the 
+                // current disjunct is lower than the one for the next disjunct or when the partition end is reached
+                int partitionEnd;
+                if (index<m_firstAtomicIndex) partitionEnd=m_firstAtomicIndex;
+                else if (index>=m_firstAtomicIndex && index<m_firstAtLeastPositiveIndex) partitionEnd=m_firstAtLeastPositiveIndex;
+                else partitionEnd=m_disjunctIndexesWithBacktrackings.length;
                 int currentIndex=index;
                 int nextIndex=currentIndex+1;
                 while (nextIndex<partitionEnd && disjunctIndexWithBacktrackings.m_numberOfBacktrackings>m_disjunctIndexesWithBacktrackings[nextIndex].m_numberOfBacktrackings) {
