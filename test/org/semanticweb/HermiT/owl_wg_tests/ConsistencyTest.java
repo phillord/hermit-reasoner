@@ -23,8 +23,8 @@ import java.io.File;
 public class ConsistencyTest extends AbstractTest {
     protected final boolean m_positive;
 
-    public ConsistencyTest(WGTestDescriptor wgTestDescriptor,boolean positive,File dumpTestDataDirectory) {
-        super(wgTestDescriptor.identifier+(positive ? "-consistency" : "-inconsistency"),wgTestDescriptor,dumpTestDataDirectory);
+    public ConsistencyTest(WGTestDescriptor wgTestDescriptor,boolean positive,File dumpTestDataDirectory,boolean useDisjunctionLearning) {
+        super(wgTestDescriptor.identifier+(positive ? "-consistency" : "-inconsistency"),wgTestDescriptor,dumpTestDataDirectory,useDisjunctionLearning);
         m_positive=positive;
     }
     protected void doTest() {

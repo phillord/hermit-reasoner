@@ -26,8 +26,8 @@ public class EntailmentTest extends AbstractTest {
     protected final boolean m_positive;
     protected OWLOntology m_conclusionOntology;
 
-    public EntailmentTest(WGTestDescriptor wgTestDescriptor,boolean positive,File dumpTestDataDirectory) {
-        super(wgTestDescriptor.identifier+(positive ? "-entailment" : "-nonentailment"),wgTestDescriptor,dumpTestDataDirectory);
+    public EntailmentTest(WGTestDescriptor wgTestDescriptor,boolean positive,File dumpTestDataDirectory,boolean useDisjunctionLearning) {
+        super(wgTestDescriptor.identifier+(positive ? "-entailment" : "-nonentailment"),wgTestDescriptor,dumpTestDataDirectory,useDisjunctionLearning);
         m_positive=positive;
     }
     protected void setUp() throws Exception {

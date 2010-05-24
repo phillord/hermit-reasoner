@@ -287,24 +287,27 @@ public class WGTestDescriptor {
     }
 
     public void addTestsToSuite(TestSuite suite) {
+        addTestsToSuite(suite,true);
+    }
+    public void addTestsToSuite(TestSuite suite,boolean useDisjunctionLearning) {
         for (TestType testType : TestType.values()) {
-            Test test=getTest(testType,null);
+            Test test=getTest(testType,null,useDisjunctionLearning);
             if (test!=null)
                 suite.addTest(test);
         }
     }
 
-    public Test getTest(TestType testType,File dumpTestDataDirectory) {
+    public Test getTest(TestType testType,File dumpTestDataDirectory,boolean useDisjunctionLearning) {
         if (testTypes.contains(testType) && isDLTest()) {
             switch (testType) {
             case CONSISTENCY:
-                return new ConsistencyTest(this,true,dumpTestDataDirectory);
+                return new ConsistencyTest(this,true,dumpTestDataDirectory,useDisjunctionLearning);
             case INCONSISTENCY:
-                return new ConsistencyTest(this,false,dumpTestDataDirectory);
+                return new ConsistencyTest(this,false,dumpTestDataDirectory,useDisjunctionLearning);
             case POSITIVE_ENTAILMENT:
-                return new EntailmentTest(this,true,dumpTestDataDirectory);
+                return new EntailmentTest(this,true,dumpTestDataDirectory,useDisjunctionLearning);
             case NEGATIVE_ENTAILMENT:
-                return new EntailmentTest(this,false,dumpTestDataDirectory);
+                return new EntailmentTest(this,false,dumpTestDataDirectory,useDisjunctionLearning);
             }
         }
         return null;

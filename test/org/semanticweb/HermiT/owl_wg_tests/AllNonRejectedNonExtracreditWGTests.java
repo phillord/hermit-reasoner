@@ -28,7 +28,10 @@ public class AllNonRejectedNonExtracreditWGTests {
         TestSuite suite=new TestSuite("OWL WG Non-Rejected Non-Extracredit Tests");
         for (WGTestDescriptor wgTestDescriptor : wgTestRegistry.getTestDescriptors())
             if (wgTestDescriptor.isDLTest()&&(wgTestDescriptor.status==WGTestDescriptor.Status.APPROVED || wgTestDescriptor.status==WGTestDescriptor.Status.PROPOSED))
-                wgTestDescriptor.addTestsToSuite(suite);
+                if (wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-209") || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-208"))
+                    wgTestDescriptor.addTestsToSuite(suite,false);
+                else 
+                    wgTestDescriptor.addTestsToSuite(suite);
         return suite;
     }
 }

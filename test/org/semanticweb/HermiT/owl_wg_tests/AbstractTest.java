@@ -42,11 +42,16 @@ public abstract class AbstractTest extends TestCase {
     protected OWLOntologyManager m_ontologyManager;
     protected OWLOntology m_premiseOntology;
     protected Reasoner m_reasoner;
-
+    protected boolean m_useDisjunctionLearning;
+    
     public AbstractTest(String name,WGTestDescriptor wgTestDescriptor,File dumpTestDataDirectory) {
+        this(name,wgTestDescriptor,dumpTestDataDirectory,true);
+    }
+    public AbstractTest(String name,WGTestDescriptor wgTestDescriptor,File dumpTestDataDirectory,boolean useDisjunctionLearning) {
         super(name);
         m_wgTestDescriptor=wgTestDescriptor;
         m_dumpTestDataDirectory=dumpTestDataDirectory;
+        m_useDisjunctionLearning=useDisjunctionLearning;
     }
     protected void setUp() throws Exception {
         m_ontologyManager=OWLManager.createOWLOntologyManager();
@@ -93,6 +98,7 @@ public abstract class AbstractTest extends TestCase {
     protected Configuration getConfiguration() {
         Configuration c=new Configuration();
         c.throwInconsistentOntologyException=false;
+        c.useDisjunctionLearning=m_useDisjunctionLearning;
         return c;
     }
     protected void saveOntology(OWLOntologyManager manager,OWLOntology ontology,File file) throws Exception {
