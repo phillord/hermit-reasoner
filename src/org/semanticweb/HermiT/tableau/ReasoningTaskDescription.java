@@ -62,6 +62,10 @@ public class ReasoningTaskDescription {
     public String getMessagePattern() {
         return m_messagePattern;
     }
+    public String toString() {
+        return getTaskDescription(Prefixes.STANDARD_PREFIXES);
+    }
+    
     public static ReasoningTaskDescription isABoxSatisfiable() {
         return new ReasoningTaskDescription(false,StandardTestType.CONSISTENCY);
     }
