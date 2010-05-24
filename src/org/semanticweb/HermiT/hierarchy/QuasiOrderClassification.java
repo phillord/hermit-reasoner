@@ -69,7 +69,7 @@ public class QuasiOrderClassification {
                 else if (!allKnownSubsumers.contains(parent) && !m_possibleSubsumptions.getSuccessors(child).contains(parent))
                     return false;
                 Individual freshIndividual=Individual.createAnonymous("fresh-individual");
-                boolean isSubsumedBy=!m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(child,freshIndividual)),null,null,Collections.singleton(Atom.create(parent,freshIndividual)),null,getSubsumptionTestDescription(child,parent));
+                boolean isSubsumedBy=!m_tableau.isSatisfiable(true,Collections.singleton(Atom.create(child,freshIndividual)),null,null,Collections.singleton(Atom.create(parent,freshIndividual)),null,getSubsumptionTestDescription(child,parent));
                 if (!isSubsumedBy)
                     prunePossibleSubsumers();
                 return isSubsumedBy;

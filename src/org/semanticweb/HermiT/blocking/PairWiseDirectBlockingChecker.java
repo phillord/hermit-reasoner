@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -67,7 +67,7 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
             blocked.getNodeType()==NodeType.TREE_NODE &&
             blockerObject.getAtomicConceptsLabel()==blockedObject.getAtomicConceptsLabel() &&
             ((PairWiseBlockingObject)blocker.getParent().getBlockingObject()).getAtomicConceptsLabel()==((PairWiseBlockingObject)blocked.getParent().getBlockingObject()).getAtomicConceptsLabel() &&
-            blockerObject.getFromParentLabel()==blockedObject.getFromParentLabel() && 
+            blockerObject.getFromParentLabel()==blockedObject.getFromParentLabel() &&
             blockerObject.getToParentLabel()==blockedObject.getToParentLabel();
     }
     public int blockingHashCode(Node node) {
@@ -101,7 +101,7 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         ((PairWiseBlockingObject)node.getBlockingObject()).destroy();
     }
     public Node assertionAdded(Concept concept,Node node,boolean isCore) {
-        if (isCore&&concept instanceof AtomicConcept) {
+        if (concept instanceof AtomicConcept) {
             ((PairWiseBlockingObject)node.getBlockingObject()).addAtomicConcept((AtomicConcept)concept);
             return node;
         }
@@ -109,7 +109,7 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
             return null;
     }
     public Node assertionRemoved(Concept concept,Node node,boolean isCore) {
-        if (isCore&&concept instanceof AtomicConcept) {
+        if (concept instanceof AtomicConcept) {
             ((PairWiseBlockingObject)node.getBlockingObject()).removeAtomicConcept((AtomicConcept)concept);
             return node;
         }
@@ -117,11 +117,11 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
             return null;
     }
     public Node assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
-        if (isCore&&nodeFrom.isParentOf(nodeTo)) {
+        if (nodeFrom.isParentOf(nodeTo)) {
             ((PairWiseBlockingObject)nodeTo.getBlockingObject()).addToFromParentLabel(atomicRole);
             return nodeTo;
         }
-        else if (isCore&&nodeTo.isParentOf(nodeFrom)) {
+        else if (nodeTo.isParentOf(nodeFrom)) {
             ((PairWiseBlockingObject)nodeFrom.getBlockingObject()).addToToParentLabel(atomicRole);
             return nodeFrom;
         }
@@ -133,11 +133,11 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         }
     }
     public Node assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
-        if (isCore&&nodeFrom.isParentOf(nodeTo)) {
+        if (nodeFrom.isParentOf(nodeTo)) {
             ((PairWiseBlockingObject)nodeTo.getBlockingObject()).removeFromFromParentLabel(atomicRole);
             return nodeTo;
         }
-        else if (isCore&&nodeTo.isParentOf(nodeFrom)) {
+        else if (nodeTo.isParentOf(nodeFrom)) {
             ((PairWiseBlockingObject)nodeFrom.getBlockingObject()).removeFromToParentLabel(atomicRole);
             return nodeFrom;
         }
@@ -157,14 +157,14 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
     public BlockingSignature getBlockingSignatureFor(Node node) {
         return new PairWiseBlockingSignature(this,node);
     }
-    protected Set<AtomicConcept> fetchAtomicConceptsLabel(Node node,boolean onlyCore) {
+    protected Set<AtomicConcept> fetchAtomicConceptsLabel(Node node) {
         m_atomicConceptsBuffer.clear();
         m_binaryTableSearch1Bound.getBindingsBuffer()[1]=node;
         m_binaryTableSearch1Bound.open();
         Object[] tupleBuffer=m_binaryTableSearch1Bound.getTupleBuffer();
         while (!m_binaryTableSearch1Bound.afterLast()) {
             Object concept=tupleBuffer[0];
-            if (concept instanceof AtomicConcept && (!onlyCore || m_binaryTableSearch1Bound.isCore()))
+            if (concept instanceof AtomicConcept)
                 m_atomicConceptsBuffer.add((AtomicConcept)concept);
             m_binaryTableSearch1Bound.next();
         }
@@ -172,7 +172,7 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         m_atomicConceptsBuffer.clear();
         return result;
     }
-    public Set<AtomicRole> fetchEdgeLabel(Node nodeFrom,Node nodeTo,boolean onlyCore) {
+    public Set<AtomicRole> fetchEdgeLabel(Node nodeFrom,Node nodeTo) {
         m_atomicRolesBuffer.clear();
         m_ternaryTableSearch12Bound.getBindingsBuffer()[1]=nodeFrom;
         m_ternaryTableSearch12Bound.getBindingsBuffer()[2]=nodeTo;
@@ -180,13 +180,19 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         Object[] tupleBuffer=m_ternaryTableSearch12Bound.getTupleBuffer();
         while (!m_ternaryTableSearch12Bound.afterLast()) {
             Object atomicRole=tupleBuffer[0];
-            if (atomicRole instanceof AtomicRole && (!onlyCore || m_binaryTableSearch1Bound.isCore()))
+            if (atomicRole instanceof AtomicRole)
                 m_atomicRolesBuffer.add((AtomicRole)atomicRole);
             m_ternaryTableSearch12Bound.next();
         }
         Set<AtomicRole> result=m_atomicRolesSetFactory.getSet(m_atomicRolesBuffer);
         m_atomicRolesBuffer.clear();
         return result;
+    }
+    public boolean hasChangedSinceValidation(Node node) {
+        return false;
+    }
+    public void setHasChangedSinceValidation(Node node,boolean hasChanged) {
+        // do nothing
     }
 
     protected final class PairWiseBlockingObject implements Serializable {
@@ -229,7 +235,7 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         }
         public Set<AtomicConcept> getAtomicConceptsLabel() {
             if (m_atomicConceptsLabel==null) {
-                m_atomicConceptsLabel=PairWiseDirectBlockingChecker.this.fetchAtomicConceptsLabel(m_node,false);
+                m_atomicConceptsLabel=PairWiseDirectBlockingChecker.this.fetchAtomicConceptsLabel(m_node);
                 m_atomicConceptsSetFactory.addReference(m_atomicConceptsLabel);
             }
             return m_atomicConceptsLabel;
@@ -252,7 +258,7 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         }
         public Set<AtomicRole> getFromParentLabel() {
             if (m_fromParentLabel==null) {
-                m_fromParentLabel=fetchEdgeLabel(m_node.getParent(),m_node,false);
+                m_fromParentLabel=fetchEdgeLabel(m_node.getParent(),m_node);
                 m_atomicRolesSetFactory.addReference(m_fromParentLabel);
             }
             return m_fromParentLabel;
@@ -275,7 +281,7 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         }
         public Set<AtomicRole> getToParentLabel() {
             if (m_toParentLabel==null) {
-                m_toParentLabel=fetchEdgeLabel(m_node,m_node.getParent(),false);
+                m_toParentLabel=fetchEdgeLabel(m_node,m_node.getParent());
                 m_atomicRolesSetFactory.addReference(m_toParentLabel);
             }
             return m_toParentLabel;
@@ -297,7 +303,7 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
             m_hasChanged=true;
         }
     }
-    
+
 
     protected static class PairWiseBlockingSignature extends BlockingSignature implements Serializable {
         private static final long serialVersionUID=4697990424058632618L;
@@ -347,11 +353,5 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
                 m_fromParentLabel==thatSignature.m_fromParentLabel &&
                 m_toParentLabel==thatSignature.m_toParentLabel;
         }
-    }
-    public boolean hasChangedSinceValidation(Node node) {
-        return false;
-    }
-    public void setHasChangedSinceValidation(Node node, boolean hasChanged) {
-        // do nothing
     }
 }

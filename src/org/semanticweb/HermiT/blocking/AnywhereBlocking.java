@@ -144,12 +144,11 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
     }
     public void modelFound() {
         if (m_useBlockingSignatureCache && m_blockingSignatureCache!=null) {
-            // Since we've found a model, we know what is blocked or not.
-            // Therefore, we don't need to update the blocking status.
+            // Since we've found a model, we know what is blocked and what is not, so we don't need to update the blocking status.
             assert m_firstChangedNode==null;
             Node node=m_tableau.getFirstTableauNode();
             while (node!=null) {
-                if (!node.isBlocked() && m_directBlockingChecker.canBeBlocker(node))
+                if (node.isActive() && !node.isBlocked() && m_directBlockingChecker.canBeBlocker(node))
                     m_blockingSignatureCache.addNode(node);
                 node=node.getNextTableauNode();
             }

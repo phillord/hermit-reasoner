@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -81,7 +81,7 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
         ((SingleBlockingObject)node.getBlockingObject()).destroy();
     }
     public Node assertionAdded(Concept concept,Node node,boolean isCore) {
-        if (isCore&&concept instanceof AtomicConcept) {
+        if (concept instanceof AtomicConcept) {
             ((SingleBlockingObject)node.getBlockingObject()).addAtomicConcept((AtomicConcept)concept);
             return node;
         }
@@ -89,7 +89,7 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
             return null;
     }
     public Node assertionRemoved(Concept concept,Node node,boolean isCore) {
-        if (isCore&&concept instanceof AtomicConcept) {
+        if (concept instanceof AtomicConcept) {
             ((SingleBlockingObject)node.getBlockingObject()).removeAtomicConcept((AtomicConcept)concept);
             return node;
         }
@@ -111,31 +111,36 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
     public BlockingSignature getBlockingSignatureFor(Node node) {
         return new SingleBlockingSignature(this,node);
     }
-    protected Set<AtomicConcept> fetchAtomicConceptsLabel(Node node,boolean onlyCore) {
+    protected Set<AtomicConcept> fetchAtomicConceptsLabel(Node node) {
         m_atomicConceptsBuffer.clear();
         m_binaryTableSearch1Bound.getBindingsBuffer()[1]=node;
         m_binaryTableSearch1Bound.open();
         Object[] tupleBuffer=m_binaryTableSearch1Bound.getTupleBuffer();
         while (!m_binaryTableSearch1Bound.afterLast()) {
             Object concept=tupleBuffer[0];
-            if (concept instanceof AtomicConcept && ((!onlyCore || m_binaryTableSearch1Bound.isCore()))) {
+            if (concept instanceof AtomicConcept)
                 m_atomicConceptsBuffer.add((AtomicConcept)concept);
-            }
             m_binaryTableSearch1Bound.next();
         }
         Set<AtomicConcept> result=m_atomicConceptsSetFactory.getSet(m_atomicConceptsBuffer);
         m_atomicConceptsBuffer.clear();
         return result;
     }
+    public boolean hasChangedSinceValidation(Node node) {
+        return false;
+    }
+    public void setHasChangedSinceValidation(Node node,boolean hasChanged) {
+        // do nothing
+    }
 
     protected final class SingleBlockingObject implements Serializable {
         private static final long serialVersionUID=-5439737072100509531L;
-        
+
         protected final Node m_node;
         protected boolean m_hasChanged;
         protected Set<AtomicConcept> m_atomicConceptsLabel;
         protected int m_atomicConceptsLabelHashCode;
-        
+
         public SingleBlockingObject(Node node) {
             m_node=node;
         }
@@ -152,7 +157,7 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
         }
         public Set<AtomicConcept> getAtomicConceptsLabel() {
             if (m_atomicConceptsLabel==null) {
-                m_atomicConceptsLabel=SingleDirectBlockingChecker.this.fetchAtomicConceptsLabel(m_node,false);
+                m_atomicConceptsLabel=SingleDirectBlockingChecker.this.fetchAtomicConceptsLabel(m_node);
                 m_atomicConceptsSetFactory.addReference(m_atomicConceptsLabel);
             }
             return m_atomicConceptsLabel;
@@ -176,7 +181,7 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
             m_hasChanged=true;
         }
     }
-    
+
     protected static class SingleBlockingSignature extends BlockingSignature implements Serializable {
         private static final long serialVersionUID=-7349489846772132258L;
 
@@ -184,7 +189,6 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
 
         public SingleBlockingSignature(SingleDirectBlockingChecker checker,Node node) {
             m_atomicConceptsLabel=((SingleBlockingObject)node.getBlockingObject()).getAtomicConceptsLabel();
-            checker.m_atomicConceptsSetFactory.addReference(m_atomicConceptsLabel);
             checker.m_atomicConceptsSetFactory.makePermanent(m_atomicConceptsLabel);
         }
         public boolean blocksNode(Node node) {
@@ -200,12 +204,5 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
                 return false;
             return m_atomicConceptsLabel==((SingleBlockingSignature)that).m_atomicConceptsLabel;
         }
-    }
-
-    public boolean hasChangedSinceValidation(Node node) {
-        return false;
-    }
-    public void setHasChangedSinceValidation(Node node, boolean hasChanged) {
-        // do nothing
     }
 }

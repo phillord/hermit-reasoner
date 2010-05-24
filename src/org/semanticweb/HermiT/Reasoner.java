@@ -292,7 +292,7 @@ public class Reasoner implements OWLReasoner {
     }
 
     // Ontology change management methods
-    
+
     public BufferingMode getBufferingMode() {
         return m_configuration.bufferChanges ? BufferingMode.BUFFERING : BufferingMode.NON_BUFFERING;
     }
@@ -1680,9 +1680,9 @@ public class Reasoner implements OWLReasoner {
         ExistentialExpansionStrategy existentialsExpansionStrategy=null;
         switch (config.existentialStrategyType) {
         case OPTIMAL:
-            if (hasNominals) 
+            if (hasNominals)
                 existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,false);
-            else 
+            else
                 existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
         case CREATION_ORDER:
             existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
@@ -1726,7 +1726,7 @@ public class Reasoner implements OWLReasoner {
         normalization.processAxioms(additionalAxiomsSet);
         BuiltInPropertyManager builtInPropertyManager=new BuiltInPropertyManager(dataFactory);
         builtInPropertyManager.axiomatizeBuiltInPropertiesAsNeeded(axioms,originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.TOP_OBJECT_ROLE),originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.BOTTOM_OBJECT_ROLE),originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.TOP_DATA_ROLE),originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.BOTTOM_DATA_ROLE));
-        
+
         int currentReplacementIndex=m_objectPropertyInclusionManager.rewriteNegativeObjectPropertyAssertions(dataFactory, axioms, originalDLOntology.getAllAtomicConcepts().size());
         m_objectPropertyInclusionManager.rewriteAxioms(dataFactory,axioms,currentReplacementIndex);
         OWLAxiomsExpressivity axiomsExpressivity=new OWLAxiomsExpressivity(axioms);
