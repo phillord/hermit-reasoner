@@ -31,6 +31,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 public abstract class AbstractOntologyTest extends AbstractHermiTTest {
     protected static final IRI ONTOLOGY_IRI=IRI.create("file:/c/test.owl");
     protected static final String NS=ONTOLOGY_IRI+"#";
+    public static String LB=System.getProperty("line.separator");
 
     protected OWLOntologyManager m_ontologyManager;
     protected OWLDataFactory m_dataFactory;
@@ -81,16 +82,16 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
      */
     protected void loadOntologyWithAxioms(String axioms) throws Exception {
         StringBuffer buffer=new StringBuffer();
-        buffer.append("Prefix(:=<"+NS+">)");
-        buffer.append("Prefix(a:=<"+NS+">)");
-        buffer.append("Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)");
-        buffer.append("Prefix(owl2xml:=<http://www.w3.org/2006/12/owl2-xml#>)");
-        buffer.append("Prefix(test:=<"+NS+">)");
-        buffer.append("Prefix(owl:=<http://www.w3.org/2002/07/owl#>)");
-        buffer.append("Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)");
-        buffer.append("Prefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)");
-        buffer.append("Ontology(<"+ONTOLOGY_IRI+">");
-        buffer.append(axioms);
+        buffer.append("Prefix(:=<"+NS+">)"+LB);
+        buffer.append("Prefix(a:=<"+NS+">)"+LB);
+        buffer.append("Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)"+LB);
+        buffer.append("Prefix(owl2xml:=<http://www.w3.org/2006/12/owl2-xml#>)"+LB);
+        buffer.append("Prefix(test:=<"+NS+">)"+LB);
+        buffer.append("Prefix(owl:=<http://www.w3.org/2002/07/owl#>)"+LB);
+        buffer.append("Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)"+LB);
+        buffer.append("Prefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)"+LB);
+        buffer.append("Ontology(<"+ONTOLOGY_IRI+">"+LB);
+        buffer.append(axioms+LB);
         buffer.append(")");
         OWLOntologyDocumentSource input=new StringDocumentSource(buffer.toString());
         m_ontology=m_ontologyManager.loadOntologyFromOntologyDocument(input);

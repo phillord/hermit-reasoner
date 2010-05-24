@@ -35,6 +35,40 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
+    public void testClassificationSubClassBug() throws Exception {
+        loadOntologyWithAxioms(
+                "Declaration(Class(:c1)) "+LB+
+                "Declaration(Class(:ps1)) "+LB+
+                "Declaration(Class(:DomainEntity)) "+LB+
+                "Declaration(Class(:ps3)) "+LB+
+                "Declaration(Class(:c4)) "+LB+
+                "Declaration(Class(:PetalShape)) "+LB+
+                "Declaration(Class(:Petal)) "+LB+
+                "Declaration(Class(:ps2)) "+LB+
+                "Declaration(Class(:Corolla)) "+LB+
+                "Declaration(Class(:c2)) "+LB+
+                "Declaration(ObjectProperty(:hasPart)) "+LB+
+                "Declaration(ObjectProperty(:hasShape)) "+LB+
+                "SubClassOf(:Petal ObjectIntersectionOf(:DomainEntity ObjectSomeValuesFrom(:hasShape :PetalShape))) "+LB+
+                "SubClassOf(:ps2 :PetalShape) "+LB+
+                "SubClassOf(:PetalShape :DomainEntity) "+LB+
+                "SubClassOf(:Corolla :DomainEntity) "+LB+
+                "SubClassOf(:c1 ObjectIntersectionOf(:Corolla ObjectExactCardinality(4 :hasPart :Petal))) "+LB+
+                "SubClassOf(:ps3 :PetalShape) "+LB+
+                "SubClassOf(:c2 ObjectIntersectionOf(:Corolla "+LB+ 
+                "ObjectAllValuesFrom(:hasPart ObjectUnionOf(ObjectComplementOf(:Petal) ObjectAllValuesFrom(:hasShape ObjectUnionOf(:ps1 :ps2)))) "+LB+
+                "ObjectExactCardinality(1 :hasPart ObjectIntersectionOf(:Petal ObjectSomeValuesFrom(:hasShape :ps1))) "+LB+
+                "ObjectExactCardinality(3 :hasPart ObjectIntersectionOf(:Petal ObjectSomeValuesFrom(:hasShape :ps2))))) "+LB+
+                "SubClassOf(:ps1 :PetalShape) "+LB+
+                "EquivalentClasses(:c4 ObjectIntersectionOf(:Corolla ObjectExactCardinality(4 :hasPart :Petal))) "+LB+
+                "DisjointClasses(:ps1 :ps2 :ps3) "+LB+
+                "DisjointClasses(:Corolla :Petal :PetalShape) "+LB+
+                "FunctionalObjectProperty(:hasShape)");
+        createReasoner();
+        assertSubsumedBy("c2", "c4", true);
+        m_reasoner.classify();
+        assertSubsumedBy("c2", "c4", true);
+    }
     public void testNegativeObjectPropertyAssertionWithNonSimple() throws Exception {
         loadOntologyWithAxioms(
                 "Declaration(Class(:A))"+
