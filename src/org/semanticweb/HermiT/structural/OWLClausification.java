@@ -947,7 +947,9 @@ public class OWLClausification {
                 if (m_ignoreUnsupportedDatatypes) {
                     if (m_warningMonitor!=null)
                         m_warningMonitor.warning("Ignoring unsupported datatype '"+object.toString()+"'.");
-                    return AtomicConcept.create(object.toString());
+                    return Constant.createAnonymous(object.getLiteral());
+                    // TODO: Check what happens to constants of non OWL 2 dtatypes 
+                    //return AtomicConcept.create(object.toString());
                 }
                 else
                     throw e;
