@@ -1046,7 +1046,7 @@ public class OWLClausification {
         protected final Set<Variable> m_DLSafeVars;
         public final List<List<Atom>> m_heads=new ArrayList<List<Atom>>(); // contains the clause atoms for all heads after clausification
         public final List<List<Atom>> m_bodies=new ArrayList<List<Atom>>(); // contains the clause atoms for all bodies after clausification
-        public final List<Set<Variable>> m_DLSafeVarSets=new ArrayList<Set<Variable>>(); // contains the variables to which the DL SAfe restriction can be applied (no literal variables) after clausification
+        public final List<Set<Variable>> m_DLSafeVarSets=new ArrayList<Set<Variable>>(); // contains the variables to which the DL Safe restriction can be applied (no literal variables) after clausification
         protected final Set<Atom> m_positiveFacts;
         protected final Set<Atom> m_negativeFacts;
         protected Variable m_lastVariable;
@@ -1157,6 +1157,8 @@ public class OWLClausification {
                 throw new IllegalStateException("Internal error: SWRL rule class atoms should be normalized to contain only named classes, but this class atom has a complex concept: "+atom.getPredicate());
             }
             atom.getArgument().accept(this);
+            Variable var=m_lastVariable;
+            m_DLSafeVars.add(var);
             m_lastAtom=Atom.create(AtomicConcept.create(atom.getPredicate().asOWLClass().getIRI().toString()),m_lastVariable);
         }
         public void visit(SWRLDataRangeAtom atom) {

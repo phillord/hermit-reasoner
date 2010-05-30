@@ -52,6 +52,7 @@ import org.semanticweb.HermiT.hierarchy.Hierarchy;
 import org.semanticweb.HermiT.hierarchy.HierarchyNode;
 import org.semanticweb.HermiT.hierarchy.HierarchyPrinterFSS;
 import org.semanticweb.HermiT.hierarchy.HierarchySearch;
+import org.semanticweb.HermiT.hierarchy.PropertyRelationFinder;
 import org.semanticweb.HermiT.hierarchy.QuasiOrderClassification;
 import org.semanticweb.HermiT.hierarchy.QuasiOrderClassificationForRoles;
 import org.semanticweb.HermiT.model.Atom;
@@ -154,6 +155,8 @@ public class Reasoner implements OWLReasoner {
     protected Map<Role,Set<HierarchyNode<AtomicConcept>>> m_directObjectRoleDomains;
     protected Map<Role,Set<HierarchyNode<AtomicConcept>>> m_directObjectRoleRanges;
     protected Map<AtomicRole,Set<HierarchyNode<AtomicConcept>>> m_directDataRoleDomains;
+    protected Map<AtomicRole,Map<Individual,Set<Individual>>> m_knownObjectPropertyRelations;
+    protected Map<AtomicRole,Map<Individual,Set<Individual>>> m_possibleObjectPropertyRelations;
 
     /**
      * Creates a new reasoner object with standard parameters for blocking, expansion strategy etc. Then the given manager is used to find all required imports for the given ontology and the ontology with the imports is loaded into the reasoner and the data factory of the manager is used to create fresh concepts during the preprocessing phase if necessary.
@@ -235,6 +238,8 @@ public class Reasoner implements OWLReasoner {
         m_directObjectRoleDomains=new HashMap<Role,Set<HierarchyNode<AtomicConcept>>>();
         m_directObjectRoleRanges=new HashMap<Role,Set<HierarchyNode<AtomicConcept>>>();
         m_directDataRoleDomains=new HashMap<AtomicRole,Set<HierarchyNode<AtomicConcept>>>();
+        m_knownObjectPropertyRelations=null;
+        m_possibleObjectPropertyRelations=null;
     }
     public void interrupt() {
         m_interruptFlag.interrupt();
@@ -363,8 +368,9 @@ public class Reasoner implements OWLReasoner {
     }
     public boolean isConsistent() {
         flushChangesIfRequired();
-        if (m_isConsistent==null)
+        if (m_isConsistent==null) {
             m_isConsistent=getTableau().isSatisfiable(true,true,null,null,null,null,null,ReasoningTaskDescription.isABoxSatisfiable());
+        }
         return m_isConsistent;
     }
     public boolean isEntailmentCheckingSupported(AxiomType<?> axiomType) {
@@ -1442,16 +1448,132 @@ public class Reasoner implements OWLReasoner {
         }
         return result;
     }
+    protected void initializeKnownAndPossibleRelations() {
+        if (m_knownObjectPropertyRelations==null || m_possibleObjectPropertyRelations==null) {
+            m_knownObjectPropertyRelations=new HashMap<AtomicRole, Map<Individual,Set<Individual>>>();
+            m_possibleObjectPropertyRelations=new HashMap<AtomicRole, Map<Individual,Set<Individual>>>();
+            PropertyRelationFinder propertyRealationshipFinder=new PropertyRelationFinder();
+            OWLAxiom[] additionalAxioms=propertyRealationshipFinder.getAxiomsForReadingOffCompexProperties(m_dlOntology.getAllComplexObjectRoles(), m_dlOntology.getAllIndividuals(), getDataFactory());
+            Tableau tableau=getTableau(additionalAxioms);
+            m_isConsistent=tableau.isSatisfiable(true,true,null,null,null,null,propertyRealationshipFinder.getNodesForIndividuals(),new ReasoningTaskDescription(false,"Precomputing known and possible property relations."));
+            propertyRealationshipFinder.readOfPossibleAndKnowRelations(tableau,m_dlOntology.getAllComplexObjectRoles(),m_dlOntology.getAllAtomicObjectRoles(),m_dlOntology.getAllIndividuals(),m_knownObjectPropertyRelations, m_possibleObjectPropertyRelations);
+        }
+    }
+    public Map<OWLNamedIndividual,Set<OWLNamedIndividual>> getObjectPropertyInstances(OWLObjectProperty property) {
+        checkPreConditions(property);
+        Map<OWLNamedIndividual,Set<OWLNamedIndividual>> result=new HashMap<OWLNamedIndividual, Set<OWLNamedIndividual>>();
+        if (!m_isConsistent) {
+            for (OWLNamedIndividual ind : getAllNamedIndividuals()) {
+                result.put(ind, getAllNamedIndividuals());
+            }
+            return result;
+        }
+        OWLDataFactory factory=getDataFactory();
+        AtomicRole role=H(property);
+        initializeKnownAndPossibleRelations();
+        // If an individual is declared, but not used in a logical axiom, it can still be related
+        // e.g., {ReflexiveObjectProperty(r)} entails r(a,a) even if a if not used in a logical axiom
+        Map<Individual,Set<Individual>> relations=m_possibleObjectPropertyRelations.get(role);
+        if (relations!=null) {
+            Set<Individual> toTest=relations.keySet();
+            for (Individual individual : toTest) {
+                Set<Individual> toTestSuccessors=relations.get(individual);
+                for (Individual successorIndividual : toTestSuccessors) {                
+                    OWLClass pseudoNominal=factory.getOWLClass(IRI.create("internal:pseudo-nominal"));
+                    OWLClassExpression allNotPseudoNominal=factory.getOWLObjectAllValuesFrom(property,pseudoNominal.getObjectComplementOf());
+                    OWLAxiom allNotPseudoNominalAssertion=factory.getOWLClassAssertionAxiom(allNotPseudoNominal,factory.getOWLNamedIndividual(IRI.create(individual.getIRI())));
+                    OWLAxiom pseudoNominalAssertion=factory.getOWLClassAssertionAxiom(pseudoNominal,factory.getOWLNamedIndividual(IRI.create(successorIndividual.getIRI())));
+                    Tableau tableau=getTableau(allNotPseudoNominalAssertion,pseudoNominalAssertion);
+                    if (!tableau.isSatisfiable(true,true,null,null,null,null,null,new ReasoningTaskDescription(true,"is {0} connected to {1} via {2}",individual,successorIndividual,property))) {
+                        Map<Individual,Set<Individual>> newKnownRelations=m_knownObjectPropertyRelations.get(role);
+                        if (newKnownRelations==null) {
+                            newKnownRelations=new HashMap<Individual, Set<Individual>>();
+                            m_knownObjectPropertyRelations.put(role,newKnownRelations);
+                        }
+                        Set<Individual> successors=newKnownRelations.get(individual);
+                        if (successors==null) {
+                            successors=new HashSet<Individual>();
+                            newKnownRelations.put(individual,successors);
+                        }
+                        successors.add(successorIndividual);
+                    }
+                }
+            }
+            // remove from possibles, all tested now
+            m_possibleObjectPropertyRelations.remove(role);
+        }
+        relations=m_knownObjectPropertyRelations.get(role);
+        if (relations!=null) {
+            for (Individual individual : relations.keySet()) {
+                Set<OWLNamedIndividual> successors=new HashSet<OWLNamedIndividual>();
+                result.put(factory.getOWLNamedIndividual(IRI.create(individual.getIRI())), successors);
+                for (Individual successorIndividual : relations.get(individual)) {
+                    successors.add(factory.getOWLNamedIndividual(IRI.create(successorIndividual.getIRI())));
+                }
+            }
+        }
+        return result;
+    }
     public boolean hasObjectPropertyRelationship(OWLNamedIndividual subject,OWLObjectPropertyExpression propertyExpression,OWLNamedIndividual object) {
         checkPreConditions(subject,propertyExpression,object);
         if (!m_isConsistent) return true;
+        OWLObjectProperty property=propertyExpression.getNamedProperty();
+        if (propertyExpression.getSimplified().isAnonymous()) {
+            OWLNamedIndividual tmp=subject;
+            subject=object;
+            object=tmp;
+        }
         OWLDataFactory factory=getDataFactory();
-        OWLClass pseudoNominal=factory.getOWLClass(IRI.create("internal:pseudo-nominal"));
-        OWLClassExpression allNotPseudoNominal=factory.getOWLObjectAllValuesFrom(propertyExpression,pseudoNominal.getObjectComplementOf());
-        OWLAxiom allNotPseudoNominalAssertion=factory.getOWLClassAssertionAxiom(allNotPseudoNominal,subject);
-        OWLAxiom pseudoNominalAssertion=factory.getOWLClassAssertionAxiom(pseudoNominal,object);
-        Tableau tableau=getTableau(allNotPseudoNominalAssertion,pseudoNominalAssertion);
-        return !tableau.isSatisfiable(true,true,null,null,null,null,null,new ReasoningTaskDescription(true,"is {0} connected to {1} via {2}",H(subject),H(object),H(propertyExpression)));
+        AtomicRole role=H(property);
+        Individual subj=H(subject);
+        Individual obj=H(object);
+        boolean testEvenIfNotPossible=false;
+        Map<Individual,Set<Individual>> relations=null;
+        if (!getAllNamedIndividuals().contains(subject) || !getAllNamedIndividuals().contains(object)) {
+            // e.g. {ReflexiveObjectProperty(r)} entails {r(a,a)} even for unknown a 
+            testEvenIfNotPossible=true;
+        } else {
+            initializeKnownAndPossibleRelations();
+            relations=m_possibleObjectPropertyRelations.get(role);
+        }
+        if (testEvenIfNotPossible || relations!=null) {
+            if (testEvenIfNotPossible || relations.containsKey(subj)) {
+                Set<Individual> possibleSuccessors=relations.get(subj);
+                if (testEvenIfNotPossible || possibleSuccessors.contains(obj)) {
+                    OWLClass pseudoNominal=factory.getOWLClass(IRI.create("internal:pseudo-nominal"));
+                    OWLClassExpression allNotPseudoNominal=factory.getOWLObjectAllValuesFrom(property,pseudoNominal.getObjectComplementOf());
+                    OWLAxiom allNotPseudoNominalAssertion=factory.getOWLClassAssertionAxiom(allNotPseudoNominal,subject);
+                    OWLAxiom pseudoNominalAssertion=factory.getOWLClassAssertionAxiom(pseudoNominal,object);
+                    Tableau tableau=getTableau(allNotPseudoNominalAssertion,pseudoNominalAssertion);
+                    if (!tableau.isSatisfiable(true,true,null,null,null,null,null,new ReasoningTaskDescription(true,"is {0} connected to {1} via {2}",subj,obj,property))) {
+                        if (testEvenIfNotPossible) {
+                            return true;
+                        } else {
+                            Map<Individual,Set<Individual>> newKnownRelations=m_knownObjectPropertyRelations.get(role);
+                            if (newKnownRelations==null) {
+                                newKnownRelations=new HashMap<Individual, Set<Individual>>();
+                                m_knownObjectPropertyRelations.put(role,newKnownRelations);
+                            }
+                            Set<Individual> knownSuccessors=newKnownRelations.get(subj);
+                            if (knownSuccessors==null) {
+                                knownSuccessors=new HashSet<Individual>();
+                                newKnownRelations.put(subj,knownSuccessors);
+                            }
+                            knownSuccessors.add(obj);
+                            possibleSuccessors.remove(obj);
+                            if (possibleSuccessors.isEmpty())
+                                relations.remove(subj);
+                            if (relations.isEmpty())
+                                m_possibleObjectPropertyRelations.remove(role);
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        relations=m_knownObjectPropertyRelations.get(role);
+        if (relations!=null && relations.containsKey(subj) && relations.get(subj).contains(obj)) return true;
+        else return false;
     }
     public boolean hasDataPropertyRelationship(OWLNamedIndividual subject,OWLDataProperty property,OWLLiteral object) {
         checkPreConditions(subject,property);

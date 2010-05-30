@@ -103,7 +103,7 @@ public abstract class AbstractExpansionStrategy implements ExistentialExpansionS
                 // The node's set of unprocessed existentials may be changed during operation, so make a local copy to loop over.
                 m_processedExistentials.clear();
                 m_processedExistentials.addAll(node.getUnprocessedExistentials());
-                for (int index=0;index<m_processedExistentials.size();index++) {
+                for (int index=m_processedExistentials.size()-1;index>=0;index--) {
                     ExistentialConcept existentialConcept=m_processedExistentials.get(index);
                     if (existentialConcept instanceof AtLeastConcept) {
                         AtLeastConcept atLeastConcept=(AtLeastConcept)existentialConcept;

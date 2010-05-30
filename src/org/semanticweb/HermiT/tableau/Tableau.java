@@ -29,10 +29,10 @@ import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Constant;
+import org.semanticweb.HermiT.model.ConstantEnumeration;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DLPredicate;
-import org.semanticweb.HermiT.model.ConstantEnumeration;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.ExistentialConcept;
@@ -291,8 +291,13 @@ public final class Tableau implements Serializable {
                     loadNegativeFact(termsToNodes,atom,dependencySet);
         }
         if (nodesForIndividuals!=null)
-            for (Map.Entry<Individual,Node> entry : nodesForIndividuals.entrySet())
+            for (Map.Entry<Individual,Node> entry : nodesForIndividuals.entrySet()) {
+                if (termsToNodes.get(entry.getValue())==null) {
+                    Atom topAssertion=Atom.create(AtomicConcept.THING, entry.getKey());
+                    loadPositiveFact(termsToNodes,topAssertion,m_dependencySetFactory.emptySet());
+                }
                 entry.setValue(termsToNodes.get(entry.getKey()));
+            }
         // Ensure that at least one individual exists.
         if (m_firstTableauNode==null)
             createNewNINode(m_dependencySetFactory.emptySet());

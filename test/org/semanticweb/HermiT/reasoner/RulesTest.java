@@ -21,7 +21,32 @@ public class RulesTest extends AbstractReasonerTest {
 //        Configuration c=new Configuration();
 //        return c;
 //    }
-    
+    public void testRuleNotAxiom() throws Exception {
+        String axioms = "Declaration(NamedIndividual(:a))"+LB
+            + "Declaration(NamedIndividual(:b))"+LB
+            + "Declaration(Class(:A))"+LB
+            + "Declaration(Class(:B))"+LB
+            + "ClassAssertion(:A :a)"+LB
+            + "ClassAssertion(:A :b)"+LB
+            // A(x) -> B(x)
+            + "DLSafeRule("+LB
+            + "  Body(ClassAtom(:A Variable(:x)))"+LB
+            + "  Head(ClassAtom(:B Variable(:x)))"+LB
+            + ")";
+        loadOntologyWithAxioms(axioms);
+        createReasoner();
+        
+        OWLNamedIndividual a=m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "a"));
+        OWLNamedIndividual b=m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "b"));
+        OWLClass A=m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "A"));
+        OWLClass B=m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "B"));
+        assertFalse(m_reasoner.isSubClassOf(A, B));
+        assertTrue(m_reasoner.getInstances(A, false).containsEntity(a));
+        assertTrue(m_reasoner.getInstances(A, false).containsEntity(b));
+        assertTrue(m_reasoner.getInstances(B, false).containsEntity(a));
+        assertTrue(m_reasoner.getInstances(B, false).containsEntity(b));
+        assertTrue(m_reasoner.getInstances(A, false).containsEntity(a));
+    }
     public void testSimpleRule2() throws Exception {
         String axioms = "Declaration(NamedIndividual(:sensor))"
         	+ "Declaration(NamedIndividual(:kitchen))"

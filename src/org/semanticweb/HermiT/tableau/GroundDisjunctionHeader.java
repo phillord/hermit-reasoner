@@ -28,7 +28,7 @@ public final class GroundDisjunctionHeader {
     protected final int m_hashCode;
     protected final DisjunctIndexWithBacktrackings[] m_disjunctIndexesWithBacktrackings;
     protected final int m_firstAtLeastPositiveIndex;
-    protected final int m_firstAtomicIndex;
+    protected final int m_firstAtLeastNegativeIndex;
     protected GroundDisjunctionHeader m_nextEntry;
 
     protected GroundDisjunctionHeader(DLPredicate[] dlPredicates,int hashCode,GroundDisjunctionHeader nextEntry) {
@@ -59,10 +59,10 @@ public final class GroundDisjunctionHeader {
                 else 
                     numberOfAtLeastPositiveDisjuncts++;
             }
-        m_firstAtomicIndex=numberOfAtLeastNegativeDisjuncts;
+        m_firstAtLeastNegativeIndex=m_disjunctIndexesWithBacktrackings.length-numberOfAtLeastPositiveDisjuncts-numberOfAtLeastNegativeDisjuncts;
         m_firstAtLeastPositiveIndex=m_disjunctIndexesWithBacktrackings.length-numberOfAtLeastPositiveDisjuncts;
-        int nextAtLeastNegativeDisjunct=0;
-        int nextAtomicDisjunct=m_firstAtomicIndex;
+        int nextAtomicDisjunct=0;
+        int nextAtLeastNegativeDisjunct=m_firstAtLeastNegativeIndex;
         int nextAtLeastPositiveDisjunct=m_firstAtLeastPositiveIndex;
         for (int index=0;index<dlPredicates.length;index++)
             if (m_dlPredicates[index] instanceof AtLeastConcept) {
@@ -96,8 +96,8 @@ public final class GroundDisjunctionHeader {
                 // find the partition end, swapping of disjuncts stops when the number of backtrackings for the 
                 // current disjunct is lower than the one for the next disjunct or when the partition end is reached
                 int partitionEnd;
-                if (index<m_firstAtomicIndex) partitionEnd=m_firstAtomicIndex;
-                else if (index>=m_firstAtomicIndex && index<m_firstAtLeastPositiveIndex) partitionEnd=m_firstAtLeastPositiveIndex;
+                if (index<m_firstAtLeastNegativeIndex) partitionEnd=m_firstAtLeastNegativeIndex;
+                else if (index>=m_firstAtLeastNegativeIndex && index<m_firstAtLeastPositiveIndex) partitionEnd=m_firstAtLeastPositiveIndex;
                 else partitionEnd=m_disjunctIndexesWithBacktrackings.length;
                 int currentIndex=index;
                 int nextIndex=currentIndex+1;

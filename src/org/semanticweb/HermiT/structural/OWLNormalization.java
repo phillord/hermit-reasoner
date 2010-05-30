@@ -633,16 +633,8 @@ public class OWLNormalization {
             m_axioms.m_objectPropertiesUsedInAxioms.add(axiom.getProperty().getNamedProperty());
         }
         public void visit(OWLNegativeObjectPropertyAssertionAxiom axiom) {
-            // TODO use pseudo nominals and add facts directly for simple roles
             if (axiom.containsAnonymousIndividuals())
                 throw new IllegalArgumentException("The axiom "+axiom+" contains anonymous individuals, which is not allowed in OWL 2 DL. ");
-//            OWLObjectOneOf nominal=m_factory.getOWLObjectOneOf(axiom.getObject());
-//            OWLClassExpression notNominal=m_factory.getOWLObjectComplementOf(nominal);
-//            OWLClassExpression allNotNominal=m_factory.getOWLObjectAllValuesFrom(axiom.getProperty().getSimplified(),notNominal);
-//            OWLClassExpression definition=getDefinitionFor(allNotNominal,m_alreadyExists);
-//            if (!m_alreadyExists[0])
-//                m_inclusionsAsDisjunctions.add(new OWLClassExpression[] { negative(definition),allNotNominal });
-//            addFact(m_factory.getOWLClassAssertionAxiom(definition,axiom.getSubject()));
             addFact(m_factory.getOWLNegativeObjectPropertyAssertionAxiom(axiom.getProperty().getSimplified(),axiom.getSubject(),axiom.getObject()));
             m_axioms.m_objectPropertiesUsedInAxioms.add(axiom.getProperty().getNamedProperty());
         }

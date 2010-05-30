@@ -170,7 +170,8 @@ public class QuasiOrderClassification {
         Map<Individual,Node> checkedNode=new HashMap<Individual,Node>();
         checkedNode.put(freshIndividual,null);
         if (m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(concept,freshIndividual)),null,null,null,checkedNode,getSatTestDescription(concept))) {
-            readKnownSubsumersFromRootNode(concept,checkedNode.get(freshIndividual));
+            // TODO: changed to getCanonicalNode(), right?
+            readKnownSubsumersFromRootNode(concept,checkedNode.get(freshIndividual).getCanonicalNode());
             updatePossibleSubsumers();
         }
         else

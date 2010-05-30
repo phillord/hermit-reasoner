@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Configuration;
@@ -34,6 +35,53 @@ public class ReasonerTest extends AbstractReasonerTest {
 
     public ReasonerTest(String name) {
         super(name);
+    }
+    public void testPropertyInstanceRetrieval() throws Exception {
+        loadOntologyWithAxioms(
+                "Declaration(ObjectProperty(:r))"+
+                "Declaration(ObjectProperty(:rp))"+
+                "Declaration(ObjectProperty(:s1))"+
+                "Declaration(ObjectProperty(:s2))"+
+                "Declaration(ObjectProperty(:s))"+
+                "Declaration(ObjectProperty(:t))"+
+                "Declaration(ObjectProperty(:tp))"+
+                "Declaration(NamedIndividual(:a))"+
+                "Declaration(NamedIndividual(:b))"+
+                "Declaration(NamedIndividual(:c))"+
+                "Declaration(NamedIndividual(:d))"+
+                "ObjectPropertyAssertion(:t :b :a)"+
+                "ObjectPropertyAssertion(:r :b :c)"+
+                "ObjectPropertyAssertion(:r :a :a)"+
+                "ObjectPropertyAssertion(:s :c :d)"+
+                "SubObjectPropertyOf(:r :s)"+
+                "SubObjectPropertyOf(:s1 ObjectInverseOf(:s2))"+
+                "SubObjectPropertyOf(ObjectPropertyChain(:r :s1 :s2) :rp)"+
+                "TransitiveObjectProperty(:t)"+
+                "SubObjectPropertyOf(:t :tp)"+
+                "ClassAssertion(ObjectSomeValuesFrom(:s1 owl:Thing) :c)"+
+                "ClassAssertion(ObjectSomeValuesFrom(:t ObjectSomeValuesFrom(:t ObjectSomeValuesFrom(:t ObjectOneOf(:d)))) :b)");
+        createReasoner();
+        Map<OWLNamedIndividual,Set<OWLNamedIndividual>> result=m_reasoner.getObjectPropertyInstances(NS_OP("r"));
+        assertTrue(result.keySet().size()==2);
+        assertTrue(result.containsKey(NS_NI("a"))&&result.get(NS_NI("a")).contains(NS_NI("a"))&&result.get(NS_NI("a")).size()==1);
+        assertTrue(result.containsKey(NS_NI("b"))&&result.get(NS_NI("b")).contains(NS_NI("c"))&&result.get(NS_NI("b")).size()==1);
+        result=m_reasoner.getObjectPropertyInstances(NS_OP("rp"));
+        assertTrue(result.containsKey(NS_NI("b"))&&result.get(NS_NI("b")).contains(NS_NI("c"))&&result.keySet().size()==1&&result.get(NS_NI("b")).size()==1);
+        result=m_reasoner.getObjectPropertyInstances(NS_OP("s1"));
+        assertTrue(result.isEmpty());
+        result=m_reasoner.getObjectPropertyInstances(NS_OP("s2"));
+        assertTrue(result.isEmpty());
+        result=m_reasoner.getObjectPropertyInstances(NS_OP("s"));
+        assertTrue(result.keySet().size()==3);
+        assertTrue(result.containsKey(NS_NI("a"))&&result.get(NS_NI("a")).contains(NS_NI("a"))&&result.get(NS_NI("a")).size()==1);
+        assertTrue(result.containsKey(NS_NI("b"))&&result.get(NS_NI("b")).contains(NS_NI("c"))&&result.get(NS_NI("b")).size()==1);
+        assertTrue(result.containsKey(NS_NI("c"))&&result.get(NS_NI("c")).contains(NS_NI("d"))&&result.get(NS_NI("c")).size()==1);
+        result=m_reasoner.getObjectPropertyInstances(NS_OP("t"));
+        assertTrue(result.keySet().size()==1);
+        assertTrue(result.containsKey(NS_NI("b"))&&result.get(NS_NI("b")).contains(NS_NI("d"))&&result.get(NS_NI("b")).contains(NS_NI("a"))&&result.get(NS_NI("b")).size()==2);
+        result=m_reasoner.getObjectPropertyInstances(NS_OP("tp"));
+        assertTrue(result.keySet().size()==1);
+        assertTrue(result.containsKey(NS_NI("b"))&&result.get(NS_NI("b")).contains(NS_NI("d"))&&result.get(NS_NI("b")).contains(NS_NI("a"))&&result.get(NS_NI("b")).size()==2);
     }
     public void testClassificationSubClassBug() throws Exception {
         loadOntologyWithAxioms(
