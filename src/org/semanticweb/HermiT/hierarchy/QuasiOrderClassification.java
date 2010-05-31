@@ -170,8 +170,8 @@ public class QuasiOrderClassification {
         Map<Individual,Node> checkedNode=new HashMap<Individual,Node>();
         checkedNode.put(freshIndividual,null);
         if (m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(concept,freshIndividual)),null,null,null,checkedNode,getSatTestDescription(concept))) {
-            // TODO: changed to getCanonicalNode(), right?
-            readKnownSubsumersFromRootNode(concept,checkedNode.get(freshIndividual).getCanonicalNode());
+            // TODO: Why does a change to .getCanonicalNode() below give incorrect results with ind. reuse? 
+            readKnownSubsumersFromRootNode(concept,checkedNode.get(freshIndividual));
             updatePossibleSubsumers();
         }
         else
