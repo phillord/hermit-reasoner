@@ -21,7 +21,7 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
 
 public class PropertyRelationFinder {
     
@@ -37,33 +37,25 @@ public class PropertyRelationFinder {
     
     public OWLAxiom[] getAxiomsForReadingOffCompexProperties(Set<Role> complexObjectRoles, Set<Individual> individuals, OWLDataFactory factory) {
         List<OWLAxiom> additionalAxioms=new ArrayList<OWLAxiom>();
-        for (Individual ind : individuals) {
-            if (!ind.isAnonymous()) {
-                String indIRI=ind.getIRI();
-                m_nodesForIndividuals.put(ind,null);
-//                OWLAxiom axiom=factory.getOWLClassAssertionAxiom(factory.getOWLThing(),factory.getOWLNamedIndividual(IRI.create(indIRI)));
-//                additionalAxioms.add(axiom);
-                if (!complexObjectRoles.isEmpty()) {
-                    OWLClass classForIndividual=factory.getOWLClass(IRI.create("internal:individual-concept#"+indIRI));
-                    OWLAxiom axiom=factory.getOWLClassAssertionAxiom(classForIndividual,factory.getOWLNamedIndividual(IRI.create(indIRI)));
-                    additionalAxioms.add(axiom);
-                    AtomicConcept conceptForRole;
-                    OWLObjectPropertyExpression objectPropertyExpression;
-                    for (Role objectRole : complexObjectRoles) {
-                        if (objectRole instanceof AtomicRole) {
-                            conceptForRole=AtomicConcept.create("internal:individual-concept#"+((AtomicRole)objectRole).getIRI()+"#"+indIRI);
-                            objectPropertyExpression=factory.getOWLObjectProperty(IRI.create(((AtomicRole)objectRole).getIRI()));
-                        }
-                        else {
-                            conceptForRole=AtomicConcept.create("internal:individual-concept#inv#"+((InverseRole)objectRole).getInverseOf().getIRI()+"#"+indIRI);
-                            objectPropertyExpression=factory.getOWLObjectInverseOf(factory.getOWLObjectProperty(IRI.create(((InverseRole)objectRole).getInverseOf().getIRI())));
-                        }
+        for (Individual ind : individuals)
+            if (!ind.isAnonymous()) m_nodesForIndividuals.put(ind,null);
+        
+        for (Role objectRole : complexObjectRoles) {
+            if (objectRole instanceof AtomicRole) {
+                OWLObjectProperty objectProperty=factory.getOWLObjectProperty(IRI.create(((AtomicRole)objectRole).getIRI()));
+                for (Individual ind : individuals) {
+                    if (!ind.isAnonymous()) {
+                        String indIRI=ind.getIRI();
+                        OWLClass classForIndividual=factory.getOWLClass(IRI.create("internal:individual-concept#"+indIRI));
+                        OWLAxiom axiom=factory.getOWLClassAssertionAxiom(classForIndividual,factory.getOWLNamedIndividual(IRI.create(indIRI)));
+                        additionalAxioms.add(axiom);
+                        AtomicConcept conceptForRole=AtomicConcept.create("internal:individual-concept#"+((AtomicRole)objectRole).getIRI()+"#"+indIRI);
                         OWLClass classForRoleAndIndividual=factory.getOWLClass(IRI.create(conceptForRole.getIRI()));
                         // A_a implies forall r.A_a^r
-                        axiom=factory.getOWLSubClassOfAxiom(classForIndividual,factory.getOWLObjectAllValuesFrom(objectPropertyExpression,classForRoleAndIndividual));
+                        axiom=factory.getOWLSubClassOfAxiom(classForIndividual,factory.getOWLObjectAllValuesFrom(objectProperty,classForRoleAndIndividual));
                         additionalAxioms.add(axiom);
                         // A_a^r implies forall r.A_a^r
-                        axiom=factory.getOWLSubClassOfAxiom(classForRoleAndIndividual,factory.getOWLObjectAllValuesFrom(objectPropertyExpression,classForRoleAndIndividual));
+                        axiom=factory.getOWLSubClassOfAxiom(classForRoleAndIndividual,factory.getOWLObjectAllValuesFrom(objectProperty,classForRoleAndIndividual));
                         additionalAxioms.add(axiom);
                     }
                 }
