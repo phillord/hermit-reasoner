@@ -64,7 +64,7 @@ public class Prefixes implements Serializable {
 
     protected final Map<String,String> m_prefixIRIsByPrefixName;
     protected final Map<String,String> m_prefixNamesByPrefixIRI;
-    protected Pattern m_prefixIRIMathingPattern;
+    protected Pattern m_prefixIRIMatchingPattern;
 
     public Prefixes() {
         m_prefixIRIsByPrefixName=new TreeMap<String,String>();
@@ -93,13 +93,13 @@ public class Prefixes implements Serializable {
         }
         pattern.append(")");
         if (didOne)
-            m_prefixIRIMathingPattern=Pattern.compile(pattern.toString());
+            m_prefixIRIMatchingPattern=Pattern.compile(pattern.toString());
         else
-            m_prefixIRIMathingPattern=null;
+            m_prefixIRIMatchingPattern=null;
     }
     public String abbreviateIRI(String iri) {
-        if (m_prefixIRIMathingPattern!=null) {
-            Matcher matcher=m_prefixIRIMathingPattern.matcher(iri);
+        if (m_prefixIRIMatchingPattern!=null) {
+            Matcher matcher=m_prefixIRIMatchingPattern.matcher(iri);
             if (matcher.find()) {
                 String localName=iri.substring(matcher.end());
                 if (isValidLocalName(localName)) {
