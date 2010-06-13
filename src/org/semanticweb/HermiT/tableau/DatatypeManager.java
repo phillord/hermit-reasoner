@@ -96,7 +96,7 @@ public final class DatatypeManager implements Serializable {
         m_auxiliaryVariableList.clear();
         m_unionDependencySet.clearConstituents();
     }
-    public void applyUnknownDatatypeRestrctionSemantics() {
+    public void applyUnknownDatatypeRestrictionSemantics() {
         Object[] tupleBuffer=m_assertionsDeltaOldRetrieval.getTupleBuffer();
         m_assertionsDeltaOldRetrieval.open();
         while (!m_extensionManager.containsClash() && !m_assertionsDeltaOldRetrieval.afterLast()) {

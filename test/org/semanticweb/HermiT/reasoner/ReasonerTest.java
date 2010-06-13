@@ -36,6 +36,17 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
+    @SuppressWarnings("unchecked")
+    public void testDataPropertyEntailment() throws Exception {
+        loadOntologyWithAxioms(
+                "Declaration(DataProperty(:d1))"+
+                "Declaration(DataProperty(:d2))"+
+                "SubClassOf(owl:Thing DataSomeValuesFrom(:d1 xsd:int))"+
+                "SubClassOf(owl:Thing DataAllValuesFrom(:d1 DatatypeRestriction(xsd:int xsd:minInclusive \"1\"^^xsd:int xsd:maxInclusive \"1\"^^xsd:int)))"+
+                "SubClassOf(owl:Thing DataSomeValuesFrom(:d2 DataOneOf(\"1\"^^xsd:int)))");
+        createReasoner();
+        assertSuperDataProperties("d1", EQ("d2"));
+    }
     public void testPropertyInstanceRetrieval() throws Exception {
         loadOntologyWithAxioms(
                 "Declaration(ObjectProperty(:r))"+

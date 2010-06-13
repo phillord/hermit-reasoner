@@ -413,7 +413,7 @@ public final class Tableau implements Serializable {
                 if (m_additionalHyperresolutionManager!=null && !m_extensionManager.containsClash())
                     m_additionalHyperresolutionManager.applyDLClauses();
                 if (m_checkUnknownDatatypeRestrictions && !m_extensionManager.containsClash())
-                    m_datatypeManager.applyUnknownDatatypeRestrctionSemantics();
+                    m_datatypeManager.applyUnknownDatatypeRestrictionSemantics();
                 if (m_checkDatatypes && !m_extensionManager.containsClash())
                     m_datatypeManager.checkDatatypeConstraints();
                 if (!m_extensionManager.containsClash())
