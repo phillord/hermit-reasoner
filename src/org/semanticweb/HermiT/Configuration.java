@@ -237,6 +237,12 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
     public boolean throwInconsistentOntologyException;
     
     public PrepareReasonerInferences prepareReasonerInferences;
+    
+    /**
+     * The default value is false and HermiT will use a specialiased classification strategy for deterministic ontologies, which often is faster, but not always.
+     * If the value is set to true, then HermiT will use the Quasi Ordering Classification method even for deterministic ontologies. 
+     */
+    public boolean forceQuasiOrderClassification;
 
     public Configuration() {
         warningMonitor=null;
@@ -254,9 +260,10 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
         bufferChanges=true;
         individualNodeSetPolicy=IndividualNodeSetPolicy.BY_NAME;
         freshEntityPolicy=FreshEntityPolicy.ALLOW;
-        useDisjunctionLearning=true;
+        useDisjunctionLearning=false;
         throwInconsistentOntologyException=true;
         prepareReasonerInferences=null;
+        forceQuasiOrderClassification=false;
     }
     protected void setIndividualReuseStrategyReuseAlways(Set<? extends AtomicConcept> concepts) {
         parameters.put("IndividualReuseStrategy.reuseAlways",concepts);
