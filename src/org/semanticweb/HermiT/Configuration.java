@@ -260,7 +260,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
         bufferChanges=true;
         individualNodeSetPolicy=IndividualNodeSetPolicy.BY_NAME;
         freshEntityPolicy=FreshEntityPolicy.ALLOW;
-        useDisjunctionLearning=false;
+        useDisjunctionLearning=true;
         throwInconsistentOntologyException=true;
         prepareReasonerInferences=null;
         forceQuasiOrderClassification=false;

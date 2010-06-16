@@ -1743,10 +1743,14 @@ public class Reasoner implements OWLReasoner {
         DirectBlockingChecker directBlockingChecker=null;
         switch (config.directBlockingType) {
         case OPTIMAL:
-            if (hasInverseRoles)
-                directBlockingChecker=new PairWiseDirectBlockingChecker();
-            else
-                directBlockingChecker=new SingleDirectBlockingChecker();
+            if ((config.blockingStrategyType==BlockingStrategyType.OPTIMAL && hasNominals) || config.blockingStrategyType==BlockingStrategyType.SIMPLE_CORE || config.blockingStrategyType==BlockingStrategyType.COMPLEX_CORE)
+                directBlockingChecker=new ValidatedSingleDirectBlockingChecker(hasInverseRoles);
+            else {
+                if (hasInverseRoles)
+                    directBlockingChecker=new PairWiseDirectBlockingChecker();
+                else
+                    directBlockingChecker=new SingleDirectBlockingChecker();
+            }
             break;
         case SINGLE:
             if (config.blockingStrategyType==BlockingStrategyType.SIMPLE_CORE || config.blockingStrategyType==BlockingStrategyType.COMPLEX_CORE)
@@ -1793,7 +1797,10 @@ public class Reasoner implements OWLReasoner {
             blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,hasInverseRoles,false);
             break;
         case OPTIMAL:
-            blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
+            if (hasNominals)
+                blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,hasInverseRoles,true);
+            else
+                blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
             break;
         default:
             throw new IllegalArgumentException("Unknown blocking strategy type.");
@@ -1802,10 +1809,7 @@ public class Reasoner implements OWLReasoner {
         ExistentialExpansionStrategy existentialsExpansionStrategy=null;
         switch (config.existentialStrategyType) {
         case OPTIMAL:
-            if (hasNominals)
-                existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,false);
-            else
-                existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
+            existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
         case CREATION_ORDER:
             existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
             break;
