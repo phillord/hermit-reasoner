@@ -620,7 +620,7 @@ public class Reasoner implements OWLReasoner {
                                 m_configuration.reasonerProgressMonitor.reasonerTaskProgressChanged(m_processedRoles,numberOfRoles);
                         }
                     };
-                    Hierarchy<AtomicConcept> atomicConceptHierarchyForRoles=classifyAtomicConceptsForRoles(tableau,progressMonitor,conceptsForRoles.get(AtomicRole.TOP_OBJECT_ROLE),conceptsForRoles.get(AtomicRole.BOTTOM_OBJECT_ROLE),rolesForConcepts.keySet(),m_dlOntology.hasInverseRoles(),m_configuration.forceQuasiOrderClassification,conceptsForRoles,rolesForConcepts);
+                    Hierarchy<AtomicConcept> atomicConceptHierarchyForRoles=classifyAtomicConceptsForRoles(tableau,progressMonitor,conceptsForRoles.get(AtomicRole.TOP_OBJECT_ROLE),conceptsForRoles.get(AtomicRole.BOTTOM_OBJECT_ROLE),rolesForConcepts.keySet(),m_dlOntology.hasInverseRoles(),conceptsForRoles,rolesForConcepts,m_configuration.forceQuasiOrderClassification);
                     Hierarchy.Transformer<AtomicConcept,Role> transformer=new Hierarchy.Transformer<AtomicConcept,Role>() {
                         public Role transform(AtomicConcept atomicConcept) {
                             return rolesForConcepts.get(atomicConcept);
@@ -1014,7 +1014,7 @@ public class Reasoner implements OWLReasoner {
             relevantDataRoles.add(AtomicRole.TOP_DATA_ROLE);
             relevantDataRoles.add(AtomicRole.BOTTOM_DATA_ROLE);
             relevantDataRoles.addAll(m_dlOntology.getAllAtomicDataRoles());
-            if (!m_isConsistent||!m_dlOntology.hasDatatypes())
+            if (!m_isConsistent)
                 m_dataRoleHierarchy=Hierarchy.emptyHierarchy(relevantDataRoles,AtomicRole.TOP_DATA_ROLE,AtomicRole.BOTTOM_DATA_ROLE);
             else {
                 Map<AtomicRole,AtomicConcept> conceptsForRoles=new HashMap<AtomicRole,AtomicConcept>();
@@ -1743,9 +1743,9 @@ public class Reasoner implements OWLReasoner {
         DirectBlockingChecker directBlockingChecker=null;
         switch (config.directBlockingType) {
         case OPTIMAL:
-            if ((config.blockingStrategyType==BlockingStrategyType.OPTIMAL && hasNominals) || config.blockingStrategyType==BlockingStrategyType.SIMPLE_CORE || config.blockingStrategyType==BlockingStrategyType.COMPLEX_CORE)
+            if ((config.blockingStrategyType==BlockingStrategyType.OPTIMAL && hasNominals) || config.blockingStrategyType==BlockingStrategyType.SIMPLE_CORE || config.blockingStrategyType==BlockingStrategyType.COMPLEX_CORE) {
                 directBlockingChecker=new ValidatedSingleDirectBlockingChecker(hasInverseRoles);
-            else {
+            } else {
                 if (hasInverseRoles)
                     directBlockingChecker=new PairWiseDirectBlockingChecker();
                 else
@@ -1809,7 +1809,10 @@ public class Reasoner implements OWLReasoner {
         ExistentialExpansionStrategy existentialsExpansionStrategy=null;
         switch (config.existentialStrategyType) {
         case OPTIMAL:
-            existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
+//            if (hasNominals)
+//                existentialsExpansionStrategy=new IndividualReuseStrategy(blockingStrategy,false);
+//            else
+                existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
         case CREATION_ORDER:
             existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
             break;
@@ -1831,7 +1834,7 @@ public class Reasoner implements OWLReasoner {
         else
             return new QuasiOrderClassification(tableau,progressMonitor,topElement,bottomElement,elements).classify();
     }
-    protected static Hierarchy<AtomicConcept> classifyAtomicConceptsForRoles(Tableau tableau,ClassificationProgressMonitor progressMonitor,AtomicConcept topElement,AtomicConcept bottomElement,Set<AtomicConcept> elements,boolean hasInverses,boolean forceQuasiOrder,Map<Role,AtomicConcept> conceptsForRoles,Map<AtomicConcept,Role> rolesForConcepts) {
+    protected static Hierarchy<AtomicConcept> classifyAtomicConceptsForRoles(Tableau tableau,ClassificationProgressMonitor progressMonitor,AtomicConcept topElement,AtomicConcept bottomElement,Set<AtomicConcept> elements,boolean hasInverses,Map<Role,AtomicConcept> conceptsForRoles,Map<AtomicConcept,Role> rolesForConcepts,boolean forceQuasiOrder) {
         if (tableau.isDeterministic()&&!forceQuasiOrder)
             return new DeterministicClassification(tableau,progressMonitor,topElement,bottomElement,elements).classify();
         else
