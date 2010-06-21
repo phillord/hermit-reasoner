@@ -98,7 +98,7 @@ public class BuiltInPropertyManager {
         axioms.m_conceptInclusions.add(new OWLClassExpression[] { hasTopNewIndividual });
     }
     protected void axiomatizeBottomObjectProperty(OWLAxioms axioms) {
-        axioms.m_unsatisfiableObjectProperties.add(m_bottomObjectProperty);
+        axioms.m_conceptInclusions.add(new OWLClassExpression[] { m_factory.getOWLObjectAllValuesFrom(m_bottomObjectProperty,m_factory.getOWLNothing()) });
     }
     protected void axiomatizeTopDataProperty(OWLAxioms axioms) {
         OWLDatatype anonymousConstantsDatatype=m_factory.getOWLDatatype(IRI.create("internal:anonymous-constants"));
@@ -108,7 +108,7 @@ public class BuiltInPropertyManager {
         axioms.m_conceptInclusions.add(new OWLClassExpression[] { hasTopNewConstant });
     }
     protected void axiomatizeBottomDataProperty(OWLAxioms axioms) {
-        axioms.m_unsatisfiableDataProperties.add(m_bottomDataProperty);
+        axioms.m_conceptInclusions.add(new OWLClassExpression[] { m_factory.getOWLDataAllValuesFrom(m_bottomDataProperty,m_factory.getOWLDataComplementOf(m_factory.getTopDatatype())) });
     }
 
     protected class Checker implements OWLClassExpressionVisitor {

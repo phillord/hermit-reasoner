@@ -144,8 +144,8 @@ public class OWLClausification {
         builtInPropertyManager.axiomatizeBuiltInPropertiesAsNeeded(axioms);
         ObjectPropertyInclusionManager objectPropertyInclusionManager=new ObjectPropertyInclusionManager(axioms);
         // now object property inclusion manager added all non-simple properties to axioms.m_complexObjectPropertyExpressions
-        // now that we know which roles are non-simple, we can decide which negative object property assertions have to be 
-        // expressed as concept assertions so that transitivity rewriting applies properly.   
+        // now that we know which roles are non-simple, we can decide which negative object property assertions have to be
+        // expressed as concept assertions so that transitivity rewriting applies properly.
         objectPropertyInclusionManager.rewriteNegativeObjectPropertyAssertions(factory, axioms, normalization.m_definitions.size());
         objectPropertyInclusionManager.rewriteAxioms(factory,axioms,0);
         if (descriptionGraphs==null)
@@ -202,10 +202,6 @@ public class OWLClausification {
                     DLClause dlClause=DLClause.create(new Atom[] {},new Atom[] { atom_i,atom_j },ClauseType.DISJOINT_OBJECT_PROPERTIES);
                     dlClauses.add(dlClause.getSafeVersion());
                 }
-        for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_unsatisfiableObjectProperties) {
-            Atom roleAtom=getRoleAtom(objectPropertyExpression,X,Y);
-            dlClauses.add(DLClause.create(new Atom[] {},new Atom[] { roleAtom },ClauseType.OTHER).getSafeVersion());
-        }
         if (axioms.m_dataPropertyInclusions.contains(factory.getOWLDataProperty(IRI.create(AtomicRole.BOTTOM_DATA_ROLE.getIRI())))) {
             Atom bodyAtom=Atom.create(AtomicRole.BOTTOM_DATA_ROLE,X,Y);
             dlClauses.add(DLClause.create(new Atom[] {},new Atom[] { bodyAtom },ClauseType.OTHER).getSafeVersion());
@@ -219,10 +215,6 @@ public class OWLClausification {
                     DLClause dlClause=DLClause.create(new Atom[] { atom_ij },new Atom[] { atom_i,atom_j },ClauseType.DISJOINT_DATA_PROPERTIES);
                     dlClauses.add(dlClause.getSafeVersion());
                 }
-        for (OWLDataPropertyExpression dataPropertyExpression : axioms.m_unsatisfiableDataProperties) {
-            Atom roleAtom=getRoleAtom(dataPropertyExpression,X,Y);
-            dlClauses.add(DLClause.create(new Atom[] {},new Atom[] { roleAtom },ClauseType.OTHER).getSafeVersion());
-        }
         DataRangeConverter dataRangeConverter=new DataRangeConverter(m_configuration.warningMonitor,axioms.m_definedDatatypesIRIs,allUnknownDatatypeRestrictions,m_configuration.ignoreUnsupportedDatatypes);
         NormalizedAxiomClausifier clausifier=new NormalizedAxiomClausifier(dataRangeConverter,positiveFacts,factory,axioms.m_dps2ranges);
         for (OWLClassExpression[] inclusion : axioms.m_conceptInclusions) {
