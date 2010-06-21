@@ -36,6 +36,19 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
+    public void testBottomObjectPropertyAssertion() throws Exception {
+        loadOntologyWithAxioms(
+                "Declaration(NamedIndividual(:a))"+
+                "Declaration(NamedIndividual(:b))"+
+                "Declaration(NamedIndividual(:c))"+
+                "Declaration(ObjectProperty(:r))"+
+                "Declaration(ObjectProperty(:s))"+
+                "SubObjectPropertyOf(ObjectPropertyChain(:r :s) owl:bottomObjectProperty)"+
+                "ObjectPropertyAssertion(:r :a :b)"+
+                "ObjectPropertyAssertion(:s :b :c)");
+        createReasoner();
+        assertFalse(m_reasoner.isConsistent());
+    }
     @SuppressWarnings("unchecked")
     public void testDataPropertyEntailment() throws Exception {
         loadOntologyWithAxioms(
@@ -132,7 +145,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         loadOntologyWithAxioms(
                 "Declaration(Class(:A))"+
                 "Declaration(NamedIndividual(:a))"+
-                "Declaration(NamedIndividual(:a))"+
+                "Declaration(NamedIndividual(:b))"+
                 "Declaration(ObjectProperty(:r))"+
                 "Declaration(ObjectProperty(:t))"+
                 "SubClassOf(:A ObjectSomeValuesFrom(:t ObjectSomeValuesFrom(:t ObjectOneOf(:b))))"+

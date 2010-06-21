@@ -212,7 +212,9 @@ public final class Tableau implements Serializable {
         boolean hasInverseRoles=(m_permanentDLOntology.hasInverseRoles() || (m_additionalDLOntology!=null && m_additionalDLOntology.hasInverseRoles()));
         boolean hasNominals=(m_permanentDLOntology.hasNominals() || (m_additionalDLOntology!=null && m_additionalDLOntology.hasNominals()));
         boolean isHorn=(m_permanentDLOntology.isHorn() || (m_additionalDLOntology!=null && m_additionalDLOntology.isHorn()));
-        if (!additionalDLOntology.getAllDescriptionGraphs().isEmpty() || (additionalDLOntology.hasInverseRoles() && !hasInverseRoles) || (additionalDLOntology.hasNominals() && !hasNominals) || (!additionalDLOntology.isHorn() && isHorn))
+        boolean permanentHasBottomObjectProperty=m_permanentDLOntology.containsObjectRole(AtomicRole.BOTTOM_OBJECT_ROLE);
+        boolean hasBottomObjectProperty=(permanentHasBottomObjectProperty || (m_additionalDLOntology!=null && m_additionalDLOntology.containsObjectRole(AtomicRole.BOTTOM_OBJECT_ROLE)));
+        if (!additionalDLOntology.getAllDescriptionGraphs().isEmpty() || (additionalDLOntology.hasInverseRoles() && !hasInverseRoles) || (additionalDLOntology.hasNominals() && !hasNominals) || (!additionalDLOntology.isHorn() && isHorn) || (hasBottomObjectProperty && !permanentHasBottomObjectProperty))
             return false;
         for (DLClause dlClause : additionalDLOntology.getDLClauses()) {
             DLClause.ClauseType clauseType=dlClause.getClauseType();
